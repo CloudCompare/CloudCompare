@@ -150,8 +150,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	unsigned coloredDTMVerticesCount = 1000000;
 	float scaleFactor = 1.0f;
 	bool keepImagesInMemory = false;
+	bool applyOptMatrix = false;
 	ccGLMatrix orthoOptMatrix;
-	bool applyOptMatrix;
+	orthoOptMatrix.toIdentity();
+	BundlerImportDlg::OrthoRectMethod orthoRectMethod = BundlerImportDlg::OPTIMIZED;
 
 	//default paths
 	QString imageListFilename = QFileInfo(f).dir().absoluteFilePath("list.txt");
@@ -184,6 +186,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		keepImagesInMemory = biDlg.keepImagesInMemory();
 		imageListFilename = biDlg.getImageListFilename();
 		applyOptMatrix = biDlg.getOptionalTransfoMatrix(orthoOptMatrix);
+		orthoRectMethod = biDlg.getOrthorectificationMethod();
 	}
 	else
 	{
@@ -211,7 +214,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	typedef std::pair<unsigned,ccCameraSensor::KeyPoint> KeypointAndCamIndex;
 	std::vector<KeypointAndCamIndex> keypointsDescriptors;
 
-	//Read Bundler's 'out' file
+	//Read Bundler '.out' file
 	{
 		//progress dialog
 		ccProgressDialog pdlg(true); //cancel available
@@ -268,6 +271,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				ccLog::Warning("[BundlerFilter::loadFile] Camera #%i is invalid!",camIndex+1);
 				it->isValid = false;
 			}
+
 			//Translation
 			currentLine = stream.readLine();
 			if (currentLine.isEmpty())
@@ -309,10 +313,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					keypointsCloud->showColors(true);
 			}
 			
-			bool storeKeypoints = orthoRectifyImages && !useAltKeypoints;
+			bool storeKeypoints = orthoRectifyImages/* && !useAltKeypoints*/;
 			//we'll check if all cameras are used or not!
 			std::vector<bool> camUsage;
-			if (!useAltKeypoints)
+			//if (!useAltKeypoints)
 			{
 				try
 				{
@@ -700,11 +704,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		ccCameraSensor* sensor = 0;
 		{
 			ccCameraSensor::IntrinsicParameters params;
-			//we use an arbitray 'pixel size'
-			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f;
 			params.arrayWidth = static_cast<int>(image->getW());
 			params.arrayHeight = static_cast<int>(image->getH());
-			params.focal_mm = ccCameraSensor::convertFocalPixToMM(cam.f_pix,params.pixelSize_mm[1],params.arrayHeight) * scaleFactor;
+			//we use an arbitray 'pixel size'
+			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f / std::max(params.arrayWidth,params.arrayHeight);
+			params.focal_pix = cam.f_pix * scaleFactor;
 			params.vFOV_rad = ccCameraSensor::ComputeFovRadFromFocalPix(cam.f_pix,params.arrayHeight);
 
 			//camera position/orientation
@@ -729,6 +733,13 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				distParams->k1 = cameras[i].k1;
 				distParams->k2 = cameras[i].k2;
 				sensor->setDistortionParameters(ccCameraSensor::LensDistortionParameters::Shared(distParams));
+			}
+
+			//apply optional matrix (if any)
+			if (applyOptMatrix)
+			{
+				sensor->applyGLTransformation_recursive(&orthoOptMatrix);
+				//ccLog::Print("[BundlerFilter::loadFile] Camera cloud has been transformed with input matrix!");
 			}
 		}
 		//the image is a child of the sensor!
@@ -795,13 +806,39 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					//for ortho-rectification log
 					ORImageInfo info;
 					double corners[8];
-					ccImage* orthoImage = sensor->orthoRectifyAsImage(	image,
-																		_keypointsCloud,
-																		keypointsImage,
+					ccImage* orthoImage = 0;
+					
+					//"standard" ortho-rectification method
+					if (orthoRectMethod == BundlerImportDlg::OPTIMIZED)
+					{
+						orthoImage = sensor->orthoRectifyAsImage(	image,
+																	_keypointsCloud,
+																	keypointsImage,
+																	OR_pixelSize,
+																	info.minC,
+																	info.maxC,
+																	corners);
+					}
+					//"direct" ortho-rectification method
+					else
+					{
+						assert(	orthoRectMethod == BundlerImportDlg::DIRECT
+							||	orthoRectMethod == BundlerImportDlg::DIRECT_UNDISTORTED );
+
+						//we take the keypoints 'middle altitude' by default
+						CCVector3 bbMin,bbMax;
+						_keypointsCloud->getBoundingBox(bbMin.u,bbMax.u);
+						PointCoordinateType Z0 = (bbMin.z + bbMax.z)/2;
+
+						orthoImage = sensor->orthoRectifyAsImageDirect(	image,
+																		Z0,
 																		OR_pixelSize,
+																		orthoRectMethod == BundlerImportDlg::DIRECT_UNDISTORTED,
 																		info.minC,
 																		info.maxC,
 																		corners);
+					}
+
 					if (orthoImage)
 					{
 						assert(!orthoImage->data().isNull());

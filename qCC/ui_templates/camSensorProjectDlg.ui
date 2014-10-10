@@ -177,6 +177,12 @@
        </item>
        <item row="0" column="1">
         <widget class="QDoubleSpinBox" name="focalDoubleSpinBox">
+         <property name="toolTip">
+          <string>Focal (in pixels)</string>
+         </property>
+         <property name="suffix">
+          <string> pix</string>
+         </property>
          <property name="decimals">
           <number>6</number>
          </property>
@@ -197,6 +203,12 @@
        </item>
        <item row="1" column="1">
         <widget class="QDoubleSpinBox" name="fovDoubleSpinBox">
+         <property name="toolTip">
+          <string>Vertical field of view (degrees)</string>
+         </property>
+         <property name="suffix">
+          <string> deg.</string>
+         </property>
          <property name="maximum">
           <double>180.000000000000000</double>
          </property>
@@ -216,6 +228,9 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QSpinBox" name="arrayWSpinBox">
+           <property name="toolTip">
+            <string>CCD array width (pixels)</string>
+           </property>
            <property name="maximum">
             <number>65536</number>
            </property>
@@ -236,6 +251,9 @@
          </item>
          <item>
           <widget class="QSpinBox" name="arrayHSpinBox">
+           <property name="toolTip">
+            <string>CCD array height (pixels)</string>
+           </property>
            <property name="maximum">
             <number>65536</number>
            </property>
@@ -264,6 +282,9 @@
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_3">
+         <property name="toolTip">
+          <string>Pixel size (metric units)</string>
+         </property>
          <property name="text">
           <string>pixel size</string>
          </property>
@@ -273,6 +294,9 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QDoubleSpinBox" name="pixWDoubleSpinBox">
+           <property name="toolTip">
+            <string>CCD pixel width (metric units)</string>
+           </property>
            <property name="decimals">
             <number>6</number>
            </property>
@@ -293,6 +317,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="pixHDoubleSpinBox">
+           <property name="toolTip">
+            <string>CCD pixel height (metric units)</string>
+           </property>
            <property name="decimals">
             <number>6</number>
            </property>
@@ -328,6 +355,9 @@
        </item>
        <item row="4" column="1">
         <widget class="QDoubleSpinBox" name="zNearDoubleSpinBox">
+         <property name="toolTip">
+          <string>Near cutting plane (CCD pixel width (metric units - for display)</string>
+         </property>
          <property name="decimals">
           <number>6</number>
          </property>
@@ -345,6 +375,9 @@
        </item>
        <item row="5" column="1">
         <widget class="QDoubleSpinBox" name="zFarDoubleSpinBox">
+         <property name="toolTip">
+          <string>Far cutting plane (CCD pixel width (metric units - for display)</string>
+         </property>
          <property name="decimals">
           <number>6</number>
          </property>
@@ -365,6 +398,9 @@
        </item>
        <item row="6" column="1">
         <widget class="QDoubleSpinBox" name="skewDoubleSpinBox">
+         <property name="toolTip">
+          <string>Skew parameter</string>
+         </property>
          <property name="maximum">
           <double>1000000000.000000000000000</double>
          </property>

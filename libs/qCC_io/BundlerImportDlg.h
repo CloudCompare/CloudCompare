@@ -57,6 +57,11 @@ public:
 	//! Returns images should be kept in memory or not
 	bool keepImagesInMemory() const;
 
+	//! Image ortho-rectification methods
+	enum OrthoRectMethod { OPTIMIZED, DIRECT_UNDISTORTED, DIRECT };
+	//! Returns the ortho-rectification method (for images)
+	OrthoRectMethod getOrthorectificationMethod() const;
+
 	//! Sets keypoints count on initialization
 	void setKeypointsCount(unsigned count);
 	//! Sets cameras count on initialization

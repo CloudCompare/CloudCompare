@@ -39,9 +39,9 @@ BundlerImportDlg::BundlerImportDlg(QWidget* parent)
 
 	initFromPersistentSettings();
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptAndSaveSettings()));
-	connect(browseImageListFileToolButton, SIGNAL(clicked()), this, SLOT(browseImageListFilename()));
-	connect(browseAltKeypointsFileToolButton, SIGNAL(clicked()), this, SLOT(browseAltKeypointsFilename	()));
+	connect(buttonBox,							SIGNAL(accepted()),	this, SLOT(acceptAndSaveSettings()));
+	connect(browseImageListFileToolButton,		SIGNAL(clicked()),	this, SLOT(browseImageListFilename()));
+	connect(browseAltKeypointsFileToolButton,	SIGNAL(clicked()),	this, SLOT(browseAltKeypointsFilename()));
 }
 
 BundlerImportDlg::~BundlerImportDlg()
@@ -54,28 +54,30 @@ void BundlerImportDlg::initFromPersistentSettings()
 	settings.beginGroup("BundlerImport");
 
 	//read parameters
-	double scaleFactor		= settings.value("scaleFactor", imageScaleDoubleSpinBox->value()).toDouble();
-	bool orthoRectifyAsCloud= settings.value("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked()).toBool();
-	bool orthoRectifyAsImage= settings.value("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked()).toBool();
-	bool undistortImages	= settings.value("undistortImages", undistortImagesCheckBox->isChecked()).toBool();
-	bool generateColoredDTM	= settings.value("generateColoredDTM", generateColoredDTMCheckBox->isChecked()).toBool();
-	bool keepImagesInMemory	= settings.value("keepImagesInMemory", keepImagesInMemoryCheckBox->isChecked()).toBool();
-	bool importImages		= settings.value("importImages", imagesGroupBox->isChecked()).toBool();
-	bool useAltKeypoints	= /*settings.value("useAltKeypoints", altKeypointsGroupBox->isChecked()).toBool()*/false; //DGM: if we don't handle the filename, it's too dangerous
-	bool importKeypoints	= settings.value("importKeypoints", importKeypointsCheckBox->isChecked()).toBool();
-	int dtmVerticesCount	= settings.value("dtmVerticesCount", dtmVerticesSpinBox->value()).toInt();
+	double scaleFactor			= settings.value("scaleFactor", imageScaleDoubleSpinBox->value()).toDouble();
+	bool orthoRectifyAsCloud	= settings.value("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked()).toBool();
+	bool orthoRectifyAsImage	= settings.value("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked()).toBool();
+	bool undistortImages		= settings.value("undistortImages", undistortImagesCheckBox->isChecked()).toBool();
+	bool generateColoredDTM		= settings.value("generateColoredDTM", generateColoredDTMGroupBox->isChecked()).toBool();
+	bool keepImagesInMemory		= settings.value("keepImagesInMemory", keepImagesInMemoryCheckBox->isChecked()).toBool();
+	bool importImages			= settings.value("importImages", imagesGroupBox->isChecked()).toBool();
+	bool useAltKeypoints		= /*settings.value("useAltKeypoints", altKeypointsCheckBox->isChecked()).toBool()*/false; //DGM: if we don't handle the filename, it's too dangerous
+	bool importKeypoints		= settings.value("importKeypoints", importKeypointsGroupBox->isChecked()).toBool();
+	int dtmVerticesCount		= settings.value("dtmVerticesCount", dtmVerticesSpinBox->value()).toInt();
+	int orthoRectMethod			= settings.value("orthoRectMethod", orthoRectMethodComboBox->currentIndex()).toInt();
 
 	//apply parameters
 	imageScaleDoubleSpinBox->setValue(scaleFactor);
 	orthoRectifyAsCloudCheckBox->setChecked(orthoRectifyAsCloud);
 	orthoRectifyAsImageCheckBox->setChecked(orthoRectifyAsImage);
 	undistortImagesCheckBox->setChecked(undistortImages);
-	generateColoredDTMCheckBox->setChecked(generateColoredDTM);
+	generateColoredDTMGroupBox->setChecked(generateColoredDTM);
 	imagesGroupBox->setChecked(importImages);
-	altKeypointsGroupBox->setChecked(useAltKeypoints);
-	importKeypointsCheckBox->setChecked(importKeypoints);
+	altKeypointsCheckBox->setChecked(useAltKeypoints);
+	importKeypointsGroupBox->setChecked(importKeypoints);
 	dtmVerticesSpinBox->setValue(dtmVerticesCount);
 	keepImagesInMemoryCheckBox->setChecked(keepImagesInMemory);
+	orthoRectMethodComboBox->setCurrentIndex(orthoRectMethod);
 
 	settings.endGroup();
 }
@@ -102,12 +104,13 @@ void BundlerImportDlg::acceptAndSaveSettings()
 	settings.setValue("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked());
 	settings.setValue("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked());
 	settings.setValue("undistortImages", undistortImagesCheckBox->isChecked());
-	settings.setValue("generateColoredDTM", generateColoredDTMCheckBox->isChecked());
+	settings.setValue("generateColoredDTM", generateColoredDTMGroupBox->isChecked());
 	settings.setValue("keepImagesInMemory", keepImagesInMemoryCheckBox->isChecked());
 	settings.setValue("importImages", imagesGroupBox->isChecked());
-	settings.setValue("useAltKeypoints", altKeypointsGroupBox->isChecked());
-	settings.setValue("importKeypoints", importKeypointsCheckBox->isChecked());
+	settings.setValue("useAltKeypoints", altKeypointsCheckBox->isChecked());
+	settings.setValue("importKeypoints", importKeypointsGroupBox->isChecked());
 	settings.setValue("dtmVerticesCount", dtmVerticesSpinBox->value());
+	settings.setValue("orthoRectMethod", orthoRectMethodComboBox->currentIndex());
 
 	settings.endGroup();
 
@@ -116,12 +119,12 @@ void BundlerImportDlg::acceptAndSaveSettings()
 
 bool BundlerImportDlg::useAlternativeKeypoints() const
 {
-	return altKeypointsGroupBox->isChecked();
+	return altKeypointsCheckBox->isChecked();
 }
 
 bool BundlerImportDlg::importKeypoints() const
 {
-	return importKeypointsCheckBox->isEnabled() && importKeypointsCheckBox->isChecked();
+	return importKeypointsGroupBox->isEnabled() && importKeypointsGroupBox->isChecked();
 }
 
 bool BundlerImportDlg::importImages() const
@@ -146,7 +149,7 @@ bool BundlerImportDlg::orthoRectifyImagesAsImages() const
 
 bool BundlerImportDlg::generateColoredDTM() const
 {
-	return imagesGroupBox->isEnabled() && generateColoredDTMCheckBox->isChecked();
+	return imagesGroupBox->isEnabled() && generateColoredDTMGroupBox->isChecked();
 }
 
 bool BundlerImportDlg::keepImagesInMemory() const
@@ -154,11 +157,29 @@ bool BundlerImportDlg::keepImagesInMemory() const
 	return imagesGroupBox->isEnabled() && keepImagesInMemoryCheckBox->isChecked();
 }
 
+BundlerImportDlg::OrthoRectMethod BundlerImportDlg::getOrthorectificationMethod() const
+{
+	switch (orthoRectMethodComboBox->currentIndex())
+	{
+	case 0:
+		return OPTIMIZED;
+	case 1:
+		return DIRECT_UNDISTORTED;
+	case 2:
+		return DIRECT;
+	default:
+		assert(false);
+		break;
+	}
+
+	return OPTIMIZED;
+}
+
 void BundlerImportDlg::setKeypointsCount(unsigned count)
 {
 	keyPointsCountLabel->setText(QString::number(count));
-	importKeypointsCheckBox->setEnabled(count>0);
-	if (count==0) //can't ortho-rectify without keypoints!
+	importKeypointsGroupBox->setEnabled(count != 0);
+	if (count == 0) //can't ortho-rectify without keypoints!
 	{
 		orthoRectifyAsImageCheckBox->setChecked(false);
 		orthoRectifyAsImageCheckBox->setEnabled(false);
@@ -170,13 +191,12 @@ void BundlerImportDlg::setKeypointsCount(unsigned count)
 void BundlerImportDlg::setCamerasCount(unsigned count)
 {
 	cameraCountLabel->setText(QString::number(count));
-	imagesGroupBox->setEnabled(count>0);
+	imagesGroupBox->setEnabled(count != 0);
 }
 
 void BundlerImportDlg::setVer(unsigned majorVer, unsigned minorVer)
 {
-	majorVerLabel->setText(QString("v%1").arg(majorVer));
-	minorVerLabel->setText(QString(".%1").arg(minorVer));
+	versionLabel->setText(QString("v%1.%2").arg(majorVer).arg(minorVer));
 }
 
 void BundlerImportDlg::setImageListFilename(const QString& filename)
@@ -201,10 +221,11 @@ QString BundlerImportDlg::getAltKeypointsFilename() const
 
 void BundlerImportDlg::browseImageListFilename()
 {
-	QString imageListFilename = QFileDialog::getOpenFileName(this,
-															"Open image list file",
-															imageListFilePathLineEdit->text(),
-															"Image list (*.txt)");
+	QString imageListFilename =
+		QFileDialog::getOpenFileName(	this,
+										"Open image list file",
+										imageListFilePathLineEdit->text(),
+										"Image list (*.txt)");
 
 	if (!imageListFilename.isEmpty())
 		imageListFilePathLineEdit->setText(imageListFilename);
@@ -212,10 +233,11 @@ void BundlerImportDlg::browseImageListFilename()
 
 void BundlerImportDlg::browseAltKeypointsFilename()
 {
-	QString altKeypointsFilename = QFileDialog::getOpenFileName(this,
-															"Open alternative keypoints file",
-															altKeypointsFilePathLineEdit->text(),
-															"Cloud/mesh (*.*)");
+	QString altKeypointsFilename =
+		QFileDialog::getOpenFileName(	this,
+										"Open alternative keypoints file",
+										altKeypointsFilePathLineEdit->text(),
+										"Cloud/mesh (*.*)");
 
 	if (!altKeypointsFilename.isEmpty())
 		altKeypointsFilePathLineEdit->setText(altKeypointsFilename);

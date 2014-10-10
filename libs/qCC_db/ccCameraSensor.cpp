@@ -31,7 +31,7 @@
 #include <QTextStream>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
-	: focal_mm(1.0f)
+	: focal_pix(1.0f)
 	, skew(0)
 	, vFOV_rad(0)
 	, zNear_mm(0.001f)
@@ -48,9 +48,11 @@ void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters&
 	//default Kinect parameters from:
 	// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
 	// Kourosh Khoshelham and Sander Oude Elberink
-	params.focal_mm        = static_cast<float>(5.45 * 1.0e-3);				// focal length (real distance in meter)
-	params.pixelSize_mm[0] = static_cast<float>(9.3 * 1.0e-6);				// pixel size in x (real distance in meter)
-	params.pixelSize_mm[1] = static_cast<float>(9.3 * 1.0e-6);				// pixel size in y (real distance in meter)
+	float focal_mm         = static_cast<float>(5.45 * 1.0e-3);				// focal length (real distance in meter)
+	float pixelSize_mm     = static_cast<float>(9.3 * 1.0e-6);				// pixel size (real distance in meter)
+	params.focal_pix       = ConvertFocalMMToPix(focal_mm,pixelSize_mm);
+	params.pixelSize_mm[0] = pixelSize_mm;
+	params.pixelSize_mm[1] = pixelSize_mm;
 	params.skew            = static_cast<float>(0.0);						// skew in image
 	params.vFOV_rad        = static_cast<float>(43.0 * M_PI / 180.0);		// vertical field of view (in rad)
 	params.zNear_mm        = static_cast<float>(0.5);						// distance to the closest recordable depth
@@ -256,10 +258,10 @@ ccBBox ccCameraSensor::getFitBB(ccGLMatrix& trans)
 	return ccBBox( -upperLeftPoint, CCVector3(upperLeftPoint.x,upperLeftPoint.x,0) );
 }
 
-void ccCameraSensor::setFocal_mm(float f_mm)
+void ccCameraSensor::setFocal_pix(float f_pix)
 {
-	assert(f_mm > 0);
-	m_intrinsicParams.focal_mm = f_mm;
+	assert(f_pix > 0);
+	m_intrinsicParams.focal_pix = f_pix;
 
 	//old frustrum is not valid anymore!
 	m_frustrumInfos.isComputed = false;
@@ -329,26 +331,23 @@ bool ccCameraSensor::getProjectionMatrix(ccGLMatrix& matrix)
 
 void ccCameraSensor::computeProjectionMatrix()
 {
-	if (	m_intrinsicParams.pixelSize_mm[0] != 0
-		&&	m_intrinsicParams.pixelSize_mm[1] != 0)
-	{
-		m_projectionMatrix.toZero();
-		float* mat = m_projectionMatrix.data();
-		mat[0]  = m_intrinsicParams.focal_mm / m_intrinsicParams.pixelSize_mm[0];
-		mat[4]  = m_intrinsicParams.skew;
-		mat[5]  = m_intrinsicParams.focal_mm / m_intrinsicParams.pixelSize_mm[1];
-		mat[8]  = static_cast<float>(m_intrinsicParams.arrayWidth) / 2;
-		mat[9]  = static_cast<float>(m_intrinsicParams.arrayHeight) / 2;
-		mat[10] = 1.0f;
+	m_projectionMatrix.toZero();
+	float* mat = m_projectionMatrix.data();
 
-		m_projectionMatrixIsValid = true;
-	}
-	else
-	{
-		m_projectionMatrix.toIdentity();
-		m_projectionMatrixIsValid = false;
-		//ccLog::Warning("[ccCameraSensor] Projection matrix can't be computed (pixel size is null!)");
-	}
+	//diagonal
+	mat[0]  = m_intrinsicParams.focal_pix;
+	mat[5]  = m_intrinsicParams.focal_pix;
+	mat[10] = 1.0f;
+	mat[15] = 1.0f;
+
+	//skew
+	mat[4]  = m_intrinsicParams.skew;
+
+	//translation from image (0,0)
+	mat[12] = static_cast<float>(m_intrinsicParams.arrayWidth) / 2;
+	mat[13] = static_cast<float>(m_intrinsicParams.arrayHeight) / 2;
+
+	m_projectionMatrixIsValid = true;
 }
 
 bool ccCameraSensor::toFile_MeOnly(QFile& out) const
@@ -364,7 +363,7 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 
 	//IntrinsicParameters
 	QDataStream outStream(&out);
-	outStream << m_intrinsicParams.focal_mm;
+	outStream << m_intrinsicParams.focal_pix;
 	outStream << m_intrinsicParams.arrayWidth;
 	outStream << m_intrinsicParams.arrayHeight;
 	outStream << m_intrinsicParams.pixelSize_mm[0];
@@ -443,7 +442,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//IntrinsicParameters
 	QDataStream inStream(&in);
-	inStream >> m_intrinsicParams.focal_mm;
+	inStream >> m_intrinsicParams.focal_pix;
 	inStream >> m_intrinsicParams.arrayWidth;
 	inStream >> m_intrinsicParams.arrayHeight;
 	inStream >> m_intrinsicParams.pixelSize_mm[0];
@@ -528,46 +527,49 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const
 {
-	ccGLMatrix rotation;
-	CCVector3 center;
-
-	if (!getActiveAbsoluteRotation(rotation) || !getActiveAbsoluteCenter(center))
+	ccIndexedTransformation trans;
+	
+	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
-	globalCoord = rotation * localCoord + center;
+	globalCoord = localCoord;
+	trans.apply(globalCoord);
+
 	return true;
 }
 
 bool ccCameraSensor::fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, CCVector3& localCoord) const
 {
-	ccGLMatrix rotation;
-	CCVector3 center;
-
-	if (!getActiveAbsoluteRotation(rotation) || !getActiveAbsoluteCenter(center))
+	ccIndexedTransformation trans;
+	
+	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
-	rotation = rotation.inverse();
-	localCoord = rotation * (globalCoord - center);
+	localCoord = globalCoord;
+	trans.inverse().apply(localCoord);
+
 	return true;
 }
 
-bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/)
+bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2& imageCoord, bool withLensError/*=true*/) const
 {
+#ifdef CHECK_THIS_AFTERWARDS
+	
 	// Change in 3D image coordinates system for good projection
 	CCVector3 imageCoordSystem(localCoord.x, localCoord.y, -localCoord.z); 
 	
-	// We test if the point is in front or behind the sensor ? If it is behind (or in the center of the sensor i.e. z=0.0), projection has no sense ! 
+	// We test if the point is in front or behind the sensor ? If it is behind (or in the center of the sensor i.e. z=0.0), we can't project!
 	if (imageCoordSystem.z < FLT_EPSILON)
 		return false;
-	
+
 	// projection
 	ccGLMatrix mat;
 	if (!getProjectionMatrix(mat))
 		return false;
 	CCVector3 projCoord = mat * imageCoordSystem; // at this stage, coordinates are homogeneous
 	projCoord = projCoord/projCoord.z; // coordinates are now in pixels
-	CCVector2i initial(static_cast<int>(projCoord.x), static_cast<int>(projCoord.y)); 
-	CCVector2i coord = initial;
+	CCVector2 initial(projCoord.x, projCoord.y); 
+	CCVector2 coord = initial;
 	
 	//apply lens correction if necessary
 	//if (withLensError)
@@ -583,57 +585,113 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	// Change in 3D image coordinates system
 	imageCoord = coord;
 
-	return true;
-}
+#else
 
-bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, bool withLensCorrection, float depth/*=0*/) const
-{
-	CCVector2i coord = imageCoord;
-
-	// applies lens correction if needed
-	if (withLensCorrection)
-		fromRealImCoordToIdealImCoord(imageCoord, coord);
-
-	// If specified depth is 0.0, it means that we want unprojection to be made in the focal plane
-	float focal = m_intrinsicParams.focal_mm;
-	float newDepth = depth;
-	
-	if (abs(depth) < FLT_EPSILON)
-		newDepth = focal;
-
-	// We test if the pixel is into the image boundaries (width*height) and if input depth is positive
-	if (	coord.x < 0 || coord.x >= m_intrinsicParams.arrayWidth
-		||	coord.y < 0 || coord.y >= m_intrinsicParams.arrayHeight
-		||	newDepth < focal)
-	{
+	// We test if the point is in front or behind the sensor ? If it is behind (or in the center of the sensor i.e. depth = 0), we can't project!
+	double depth = -static_cast<double>(localCoord.z); //warning: the camera looks backward!
+#define BACK_POINTS_CULLING
+#ifdef BACK_POINTS_CULLING
+	if (depth < FLT_EPSILON)
 		return false;
-	}
+#endif
 
-	// Compute local 3D coordinates
-	PointCoordinateType x = (coord.x - m_intrinsicParams.arrayWidth/2) * m_intrinsicParams.pixelSize_mm[0] / focal;
-	PointCoordinateType y = (coord.y - m_intrinsicParams.arrayHeight/2) * m_intrinsicParams.pixelSize_mm[1] / focal;
-	localCoord = CCVector3(x, y, -PC_ONE) * newDepth;
+	//perspective division
+	Vector2Tpl<double> p(localCoord.x/depth, localCoord.y/depth);
+
+	//conversion to pixel coordinates
+	double factor = static_cast<double>(m_intrinsicParams.focal_pix);
+	
+	//apply radial distortion (if any)
+	if (withLensError && m_distortionParams && m_distortionParams->getModel() == SIMPLE_RADIAL_DISTORTION)
+	{
+		const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
+		double norm2 = p.norm2();
+		PointCoordinateType rp = 1.0 + norm2  * (params->k1 + norm2 * params->k2); //scaling factor to undo the radial distortion
+
+		factor *= rp;
+	}
+	//*/
+
+	Vector2Tpl<double> p2 = p * factor;
+
+	p2.x += m_intrinsicParams.arrayWidth / 2.0;
+	p2.y = m_intrinsicParams.arrayHeight / 2.0 - p2.y;
+
+	imageCoord.x = static_cast<PointCoordinateType>(p2.x);
+	imageCoord.y = static_cast<PointCoordinateType>(p2.y);
+
+#endif
+
+	return true;
+}
+
+bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3& localCoord, PointCoordinateType depth, bool withLensCorrection/*=true*/) const
+{
+	CCVector3d p2(imageCoord.x, imageCoord.y, 0.0);
+
+	p2.x -= m_intrinsicParams.arrayWidth / 2.0;
+	p2.y = m_intrinsicParams.arrayHeight / 2.0 - p2.y;
+
+	//apply inverse radial distortion (if any)
+	//TODO
+
+	double factor = static_cast<double>(m_intrinsicParams.focal_pix);
+	CCVector3d p = p2 / factor;
+
+	//perspective
+	localCoord = CCVector3(	static_cast<PointCoordinateType>(p.x * depth),
+							static_cast<PointCoordinateType>(p.y * depth),
+							-depth);
 	
 	return true;
 }
 
-bool ccCameraSensor::fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/)
+bool ccCameraSensor::fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector2& imageCoord, bool withLensError/*=true*/) const
 {
+	CCVector3 localCoord;
 	if (!fromGlobalCoordToLocalCoord(globalCoord,localCoord))
 		return false;
 	
-	return fromLocalCoordToImageCoord(localCoord, imageCoord/*, withLensError*/);
+	return fromLocalCoordToImageCoord(localCoord, imageCoord, withLensError);
 }
 
-bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, CCVector3& globalCoord, bool withLensCorrection, float depth/*=0*/) const
+bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3& globalCoord, PointCoordinateType z0, bool withLensCorrection/*=true*/) const
 {	
-	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, withLensCorrection, depth))
+	ccIndexedTransformation trans;
+	
+	if (!getActiveAbsoluteTransformation(trans))
+		return false;
+
+	CCVector3 localCoord;
+	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, PC_ONE, withLensCorrection))
 		return false;
 	
-	return fromLocalCoordToGlobalCoord(localCoord, globalCoord);
+	//update altitude: we must compute the intersection between the plane Z = Z0 (world) and the camera (input pixel) viewing direction
+	CCVector3 viewDir = localCoord;
+	trans.applyRotation(viewDir);
+	viewDir.normalize();
+	
+	if (fabs(viewDir.z) < ZERO_TOLERANCE)
+	{
+		//viewing dir is parallel to the plane Z = Z0!
+		return false;
+	}
+
+	CCVector3 camC = trans.getTranslationAsVec3D();
+	PointCoordinateType dZ = z0 - camC.z;
+
+	PointCoordinateType u = dZ / viewDir.z;
+#ifdef BACK_POINTS_CULLING
+	if (u < 0)
+		return false; //wrong direction!
+#endif
+	
+	globalCoord = camC + u * viewDir;
+	
+	return true;
 }
 
-bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVector2i& ideal) const
+bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2& real, CCVector2& ideal) const
 {
 	//no distortion parameters?
 	if (!m_distortionParams)
@@ -669,21 +727,24 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVec
 			float r2 = r*r;
 			float r4 = r2*r2;
 			float r6 = r4*r2;
-			float K1 = distParams->K_BrownParams[0];
-			float K2 = distParams->K_BrownParams[1];
-			float K3 = distParams->K_BrownParams[2];
-			float P1 = distParams->P_BrownParams[0];
-			float P2 = distParams->P_BrownParams[1];
+			const float& K1 = distParams->K_BrownParams[0];
+			const float& K2 = distParams->K_BrownParams[1];
+			const float& K3 = distParams->K_BrownParams[2];
+			const float& P1 = distParams->P_BrownParams[0];
+			const float& P2 = distParams->P_BrownParams[1];
 
 			// compute new value
 			float correctedX = (dx * (1 + K1*r2 + K2*r4 + K3*r6)  +  P1 * (r2 + 2*dx2)  +  2*P2*dx*dy);
 			float correctedY = (dy * (1 + K1*r2 + K2*r4 + K3*r6)  +  P2 * (r2 + 2*dy2)  +  2*P1*dx*dy);
-			ideal.x = static_cast<int>(correctedX / sX);
-			ideal.y = static_cast<int>(correctedY / sY);
+			ideal.x = static_cast<PointCoordinateType>(correctedX / sX);
+			ideal.y = static_cast<PointCoordinateType>(correctedY / sY);
 
-			// We test if the new pixel is into the image boundaries
-			return (	ideal.x >= 0 && ideal.x < m_intrinsicParams.arrayWidth
+			// We test if the new pixel falls inside the image boundaries
+			/*return (	ideal.x >= 0 && ideal.x < m_intrinsicParams.arrayWidth
 					&&	ideal.y >= 0 && ideal.y < m_intrinsicParams.arrayHeight );
+			//*/
+			//DGM: the ideal pixel can be out of the original of course!!!
+			return true;
 		}
 
 	default:
@@ -696,12 +757,12 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVec
 }
 
 //TODO
-//bool ccCameraSensor::fromIdealImCoordToRealImCoord(const CCVector2i& ideal, CCVector2i& real) const
+//bool ccCameraSensor::fromIdealImCoordToRealImCoord(const CCVector2& ideal, CCVector2& real) const
 //{
 //	return true;
 //}
 
-bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const
+bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const
 {
 	//no distortion parameters?
 	if (!m_distortionParams)
@@ -712,7 +773,10 @@ bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float dep
 	switch (m_distortionParams->getModel())
 	{
 	case SIMPLE_RADIAL_DISTORTION:
-		//TODO
+		{
+			//TODO
+			return false;
+		}
 		break;
 
 	case BROWN_DISTORTION:
@@ -720,33 +784,37 @@ bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float dep
 			const BrownDistortionParameters* distParams = static_cast<BrownDistortionParameters*>(m_distortionParams.data());
 			//TODO ==> check if the input pixel coordinate must be the real or ideal projection
 
-			const int& u = pixel.x;
-			const int& v = pixel.y;
 			const int& width = m_intrinsicParams.arrayWidth;
 			const int& height = m_intrinsicParams.arrayHeight;
 
 			// check validity 
-			if (u < 0 || u > width || v < 0 || v > height || depth < FLT_EPSILON)
+			if (	pixel.x < 0 || pixel.x > width
+				||	pixel.y < 0 || pixel.y > height
+				||	depth < FLT_EPSILON )
 				return false;
 
 			// init parameters
-			const float& mu = m_intrinsicParams.pixelSize_mm[0];
 			const float& A = distParams->linearDisparityParams[0];
-			const float& f = m_intrinsicParams.focal_mm;
-			float sigmaD = mu / 8;
 			float z2 = depth*depth;
+			float invSigmaD = 8.0f;
+			float factor = A * z2 / invSigmaD;
+
+			const float& mu = m_intrinsicParams.pixelSize_mm[0];
+			const float& f_pix = m_intrinsicParams.focal_pix;
 
 			// computes uncertainty
-			sigma.x = static_cast<ScalarType>(abs(A * (u-width/2) / f * z2 * sigmaD));
-			sigma.y = static_cast<ScalarType>(abs(A * (v-height/2) / f * z2 * sigmaD));
-			sigma.z = static_cast<ScalarType>(abs(A * z2 * sigmaD));
+			sigma.x = static_cast<ScalarType>(abs(factor * (pixel.x - width/2.0f) / f_pix));
+			sigma.y = static_cast<ScalarType>(abs(factor * (pixel.y - height/2.0f) / f_pix));
+			sigma.z = static_cast<ScalarType>(abs(factor * mu));
 
 			return true;
 		}
 
 	default:
-		//not handled?
-		assert(false);
+		{
+			//not handled?
+			assert(false);
+		}
 		break;
 	}
 
@@ -783,9 +851,10 @@ bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vect
 	{
 		const CCVector3* coordGlobal = points->getPoint(i);
 		CCVector3 coordLocal;
-		CCVector2i coordImage;
+		CCVector2 coordImage;
 
-		if (fromGlobalCoordToImageCoord(*coordGlobal, coordLocal, coordImage/*, lensCorrection*/))
+		if (	fromGlobalCoordToLocalCoord(*coordGlobal,coordLocal)
+			&&	fromLocalCoordToImageCoord(coordLocal, coordImage) )
 		{
 			computeUncertainty(coordImage, abs(coordLocal.z), accuracy[i]);
 		}
@@ -840,7 +909,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 			}
 			newImage.fill(0);
 
-			float focal_pix = convertFocalMMToPix(m_intrinsicParams.focal_mm,m_intrinsicParams.pixelSize_mm[1],m_intrinsicParams.arrayHeight);
+			float focal_pix = m_intrinsicParams.focal_pix;
 			float f2 = focal_pix * focal_pix;
 			float cx = width / 2.0f;
 			float cy = height / 2.0f;
@@ -924,10 +993,9 @@ ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace/*=true*/) const
 bool ccCameraSensor::isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, bool withLensCorrection*/)
 {
 	CCVector3 localCoord;
-	CCVector2i imageCoord;
 
 	// Tests if the projection is in the field of view
-	if (!fromGlobalCoordToImageCoord(globalCoord, localCoord, imageCoord/*, withLensCorrection*/))
+	if (!fromGlobalCoordToLocalCoord(globalCoord, localCoord/*, withLensCorrection*/))
 		return false;
 
 	// Tests if the projected point is between zNear and zFar
@@ -947,7 +1015,7 @@ CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
 
 	CCVector3 upperLeftPoint;
-	upperLeftPoint.z = m_scale * m_intrinsicParams.focal_mm;
+	upperLeftPoint.z = m_scale * ConvertFocalPixToMM(m_intrinsicParams.focal_pix,m_intrinsicParams.pixelSize_mm[1]);
 	upperLeftPoint.y = upperLeftPoint.z * tan(halfFov);
 	upperLeftPoint.x = upperLeftPoint.z * tan(halfFov * ar);
 
@@ -1324,26 +1392,26 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-float ccCameraSensor::convertFocalPixToMM(float focal_pix, float cddHeight_mm, int imageHeight_pix)
+float ccCameraSensor::ConvertFocalPixToMM(float focal_pix, float ccdPixelHeight_mm)
 {
-	if (imageHeight_pix <= 0 || cddHeight_mm < FLT_EPSILON)
+	if (ccdPixelHeight_mm < FLT_EPSILON)
 	{
-		//invalid image or CDD size
+		ccLog::Warning("[ccCameraSensor::convertFocalPixToMM] Invalid CCD pixel height! (<= 0)");
 		return -1.0f;
 	}
 
-	return focal_pix * cddHeight_mm / imageHeight_pix;
+	return focal_pix * ccdPixelHeight_mm;
 }
 
-float ccCameraSensor::convertFocalMMToPix(float focal_mm, float cddHeight_mm, int imageHeight_pix)
+float ccCameraSensor::ConvertFocalMMToPix(float focal_mm, float ccdPixelHeight_mm)
 {
-	if (imageHeight_pix <= 0 || cddHeight_mm < FLT_EPSILON)
+	if (ccdPixelHeight_mm < FLT_EPSILON)
 	{
-		//invalid image or CDD size
+		ccLog::Warning("[ccCameraSensor::convertFocalMMToPix] Invalid CCD pixel height! (<= 0)");
 		return -1.0f;
 	}
 
-	return focal_mm * imageHeight_pix / cddHeight_mm;
+	return focal_mm / ccdPixelHeight_mm;
 }
 
 float ccCameraSensor::ComputeFovRadFromFocalPix(float focal_pix, int imageHeight_pix)
@@ -1357,15 +1425,15 @@ float ccCameraSensor::ComputeFovRadFromFocalPix(float focal_pix, int imageHeight
 	return 2 * atan( static_cast<float>(imageHeight_pix) / (2*focal_pix) );
 }
 
-float ccCameraSensor::ComputeFovRadFromFocalMm(float focal_mm, float cddHeight_mm)
+float ccCameraSensor::ComputeFovRadFromFocalMm(float focal_mm, float ccdHeight_mm)
 {
-	if (cddHeight_mm < FLT_EPSILON)
+	if (ccdHeight_mm < FLT_EPSILON)
 	{
 		//invalid CDD size
 		return -1.0f;
 	}
 	
-	return 2 * atan( static_cast<float>(cddHeight_mm) / (2 * focal_mm) );
+	return 2 * atan( static_cast<float>(ccdHeight_mm) / (2 * focal_mm) );
 }
 
 bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
@@ -1517,6 +1585,168 @@ bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
 	return true;
 }
 
+ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
+													PointCoordinateType Z0,
+													double& pixelSize,
+													bool undistortImages/*=true*/,
+													double* minCorner/*=0*/,
+													double* maxCorner/*=0*/,
+													double* realCorners/*=0*/) const
+{
+	//first, we compute the ortho-rectified image corners
+	double corners[8];
+
+	int width = static_cast<int>(image->getW());
+	int height = static_cast<int>(image->getH());
+
+	//top-left
+	{
+		CCVector2 xTopLeft(0,0);
+		CCVector3 P3D;
+		if (!fromImageCoordToGlobalCoord(xTopLeft,P3D,Z0))
+			return 0;
+#ifdef _DEBUG
+		//internal check
+		CCVector2 check(0,0);
+		fromGlobalCoordToImageCoord(P3D,check,false);
+		assert((xTopLeft-check).norm2() < std::max(width,height)*FLT_EPSILON);
+#endif
+		corners[0] = P3D.x;
+		corners[1] = P3D.y;
+	}
+
+	//top-right
+	{
+		CCVector2 xTopRight(width,0);
+		CCVector3 P3D;
+		if (!fromImageCoordToGlobalCoord(xTopRight,P3D,Z0))
+			return 0;
+#ifdef _DEBUG
+		//internal check
+		CCVector2 check(0,0);
+		fromGlobalCoordToImageCoord(P3D,check,false);
+		assert((xTopRight-check).norm2() < std::max(width,height)*FLT_EPSILON);
+#endif
+		corners[2] = P3D.x;
+		corners[3] = P3D.y;
+	}
+
+	//bottom-right
+	{
+		CCVector2 xBottomRight(width,height);
+		CCVector3 P3D;
+		if (!fromImageCoordToGlobalCoord(xBottomRight,P3D,Z0))
+			return 0;
+#ifdef _DEBUG
+		//internal check
+		CCVector2 check(0,0);
+		fromGlobalCoordToImageCoord(P3D,check,false);
+		assert((xBottomRight-check).norm2() < std::max(width,height)*FLT_EPSILON);
+#endif
+		corners[4] = P3D.x;
+		corners[5] = P3D.y;
+	}
+
+	//bottom-left
+	{
+		CCVector2 xBottomLeft(0,height);
+		CCVector3 P3D;
+		if (!fromImageCoordToGlobalCoord(xBottomLeft,P3D,Z0))
+			return 0;
+#ifdef _DEBUG
+		//internal check
+		CCVector2 check(0,0);
+		fromGlobalCoordToImageCoord(P3D,check,false);
+		assert((xBottomLeft-check).norm2() < std::max(width,height)*FLT_EPSILON);
+#endif
+		corners[6] = P3D.x;
+		corners[7] = P3D.y;
+	}
+
+	if (realCorners)
+		memcpy(realCorners,corners,8*sizeof(double));
+
+	//we look for min and max bounding box
+	double minC[2] = {corners[0],corners[1]};
+	double maxC[2] = {corners[0],corners[1]};
+
+	for (unsigned k=1; k<4; ++k)
+	{
+		const double* C = corners+2*k;
+		if (minC[0] > C[0])
+			minC[0] = C[0];
+		else if (maxC[0] < C[0])
+			maxC[0] = C[0];
+
+		if (minC[1] > C[1])
+			minC[1] = C[1];
+		else if (maxC[1] < C[1])
+			maxC[1] = C[1];
+	}
+
+	//output 3D boundaries (optional)
+	if (minCorner)
+	{
+		minCorner[0] = minC[0];
+		minCorner[1] = minC[1];
+	}
+	if (maxCorner)
+	{
+		maxCorner[0] = maxC[0];
+		maxCorner[1] = maxC[1];
+	}
+
+	double dx = maxC[0]-minC[0];
+	double dy = maxC[1]-minC[1];
+
+	double _pixelSize = pixelSize;
+	if (_pixelSize <= 0)
+	{
+		int maxSize = std::max(width,height);
+		_pixelSize = std::max(dx,dy)/maxSize;
+	}
+	unsigned w = static_cast<unsigned>(dx/_pixelSize);
+	unsigned h = static_cast<unsigned>(dy/_pixelSize);
+
+	QImage orthoImage(w,h,QImage::Format_ARGB32);
+	if (orthoImage.isNull()) //not enough memory!
+		return 0;
+
+	const QRgb blackValue = QColor( Qt::black ).rgb();
+	const QRgb blackAlphaZero = qRgba(qRed(blackValue),qGreen(blackValue),qBlue(blackValue),0);
+
+	for (unsigned i=0; i<w; ++i)
+	{
+		PointCoordinateType xip = minC[0] + static_cast<PointCoordinateType>(i*_pixelSize);
+		for (unsigned j=0; j<h; ++j)
+		{
+			PointCoordinateType yip = minC[1] + static_cast<PointCoordinateType>(j*_pixelSize);
+
+			QRgb rgb = blackValue; //output pixel is (transparent) black by default
+
+			CCVector3 P3D(xip,yip,Z0);
+			CCVector2 imageCoord;
+			if (fromGlobalCoordToImageCoord(P3D,imageCoord,undistortImages))
+			{
+				int x = static_cast<int>(imageCoord.x);
+				int y = static_cast<int>(imageCoord.y);
+				if (x >= 0 && x < width && y >= 0 && y < height)
+				{
+					rgb = image->data().pixel(x,y);
+				}
+			}
+
+			//pure black pixels are treated as transparent ones!
+			orthoImage.setPixel(i,h-1-j,rgb != blackValue ? rgb : blackAlphaZero);
+		}
+	}
+
+	//output pixel size (auto)
+	pixelSize = _pixelSize;
+
+	return new ccImage(orthoImage,getName());
+}
+
 ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 												CCLib::GenericIndexedCloud* keypoints3D,
 												std::vector<KeyPoint>& keypointsImage,
@@ -1627,12 +1857,15 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 		return 0;
 
 	const QRgb blackValue = QColor( Qt::black ).rgb();
+	const QRgb blackAlphaZero = qRgba(qRed(blackValue),qGreen(blackValue),qBlue(blackValue),0);
 
 	for (unsigned i=0; i<w; ++i)
 	{
 		double xip = minC[0] + static_cast<double>(i)*_pixelSize;
 		for (unsigned j=0; j<h; ++j)
 		{
+			QRgb rgb = blackValue; //output pixel is (transparent) black by default
+
 			double yip = minC[1] + static_cast<double>(j)*_pixelSize;
 			double q = (c2*xip-a2)*(c1*yip-b1)-(c2*yip-b2)*(c1*xip-a1);
 			double p = (a0-xip)*(c1*yip-b1)-(b0-yip)*(c1*xip-a1);
@@ -1650,22 +1883,12 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 
 				if (x >= 0 && x < width)
 				{
-					QRgb rgb = image->data().pixel(x,y);
-					//pure black pixels are treated as transparent ones!
-					if (rgb != blackValue)
-						orthoImage.setPixel(i,h-1-j,rgb);
-					else
-						orthoImage.setPixel(i,h-1-j,qRgba(qRed(rgb),qGreen(rgb),qBlue(rgb),0));
-				}
-				else
-				{
-					orthoImage.setPixel(i,h-1-j,qRgba(0,0,0,0)); //black by default
+					rgb = image->data().pixel(x,y);
 				}
 			}
-			else
-			{
-				orthoImage.setPixel(i,h-1-j,qRgba(0,0,0,0)); //black by default
-			}
+
+			//pure black pixels are treated as transparent ones!
+			orthoImage.setPixel(i,h-1-j,rgb != blackValue ? rgb : blackAlphaZero);
 		}
 	}
 

@@ -53,8 +53,8 @@ public: //general
 		//! Helper: initializes a IntrinsicParameters structure with the default Kinect parameters
 		static void GetKinectDefaults(IntrinsicParameters& params);
 
-		float focal_mm;				/**< focal length (in real dimension, e.g. mm)**/
-		float pixelSize_mm[2];		/**< pixel size (in real dimension, e.g. mm) **/
+		float focal_pix;			/**< focal length (in pixels)**/
+		float pixelSize_mm[2];		/**< sensor pixel size (in real dimension, e.g. mm) **/
 		float skew;					/**< skew **/
 		float vFOV_rad;				/**< vertical field of view (in Radians) **/
 		float zNear_mm;				/**< Near plane position **/
@@ -165,10 +165,10 @@ public: //general
 
 public: //getters and setters
 
-	//! Sets focal (in mm)
-	void setFocal_mm(float f_mm);
-	//! Returns focal (in mm)
-	inline float getFocal_mm() const { return m_intrinsicParams.focal_mm; }
+	//! Sets focal (in pixels)
+	void setFocal_pix(float f_pix);
+	//! Returns focal (in pixels)
+	inline float getFocal_pix() const { return m_intrinsicParams.focal_pix; }
 
 	//! Sets the (vertical) field of view in radians
 	void setVerticalFov_rad(float fov_rad);
@@ -222,45 +222,43 @@ public: //coordinate systems conversion methods
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
 	/** \param localCoord local coordinates of the 3D point (input)
 		\param imageCoord image coordinates of the projected point on the image (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
-		//TODO: withLensError if we want to simulate what the projection would be with an imperfect lens
+		\param withLensError to take lens distortion into account
 		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/
-	bool fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/);
+	bool fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2& imageCoord, bool withLensError = true) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param localCoord local coordinates of the corresponding 3D point (output)
+		\param depth depth of the output pixel relatively to the camera center
 		\param withLensCorrection if we want to correct the initial pixel coordinates with the lens correction formula
-		\param depth if known, depth of the input pixel in meters, in order to recover third coordinates (must be positive) ; if depth is 0.0, then the reprojection is made in the focal plane 
 		\return if operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
-	bool fromImageCoordToLocalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, bool withLensCorrection, float depth = 0) const;
+	bool fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3& localCoord, PointCoordinateType depth, bool withLensCorrection = true) const;
 
 	//! Computes the coordinates of a 3D point in the image knowing its coordinates in the global coordinate system.
 	/** \param globalCoord global coordinates of the 3D point
-		\param localCoord to get back the local coordinates of the 3D point
 		\param imageCoord to get back the image coordinates of the projected 3D point --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
-		//TODO withLensError if we want to simulate what the projection would be with an imperfect lens
+		\param withLensError to take lens distortion into account
 		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/ 
-	bool fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/);
+	bool fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector2& imageCoord, bool withLensError = true) const;
 	
 	//! Computes the global coordinates of a 3D points from its 3D coordinates (pixel position in the image)
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
-		\param localCoord local coordinates of the corresponding 3D point (output)
 		\param globalCoord global coordinates of the corresponding 3D point (output)
+		\param z0 altitude of the output pixel
 		\param withLensCorrection if we want to correct the initial pixel coordinates with the lens correction formula
-		\param depth if known, depth of the input pixel, in order to recover third coordinates (must be positive) ; if depth is 0.0, then the reprojection is made in the focal plane
 		\return if operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
-	bool fromImageCoordToGlobalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, CCVector3& globalCoord, bool withLensCorrection, float depth = 0) const;
+	bool fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3& globalCoord, PointCoordinateType z0, bool withLensCorrection = true) const;
 
 	//! Apply the Brown's lens correction to the real projection (through a lens) of a 3D point in the image
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
 		\param real real 2D coordinates of a pixel (asumming that this pixel coordinate is obtained after projection through a lens) (input) !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param ideal after applying lens correction (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 	**/
-	bool fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVector2i& ideal) const;
+	bool fromRealImCoordToIdealImCoord(const CCVector2& real, CCVector2& ideal) const;
 
 	//! Knowing the ideal projection of a 3D point, computes what would be the real projection (through a lens)
 	/** \warning The first pixel is (0,0) and the last (width-1,height-1)
@@ -268,7 +266,7 @@ public: //coordinate systems conversion methods
 		\param[out] real what would be the real 2D coordinates of the projection trough a lens
 	**/
 	//TODO
-	//bool fromIdealImCoordToRealImCoord(const CCVector2i& ideal, CCVector2i& real) const;
+	//bool fromIdealImCoordToRealImCoord(const CCVector2& ideal, CCVector2& real) const;
 
 public: //orthorectification tools
 
@@ -327,6 +325,27 @@ public: //orthorectification tools
 									double* maxCorner = 0,
 									double* realCorners = 0) const;
 
+	//! Direct ortho-rectification of an image (as image)
+	/** No keypoint is required. The user must specify however the
+		orthorectification 'altitude'.
+		\param image input image
+		\param altitude orthorectification altitude
+		\param keypointsImage corresponding keypoints in image
+		\param pixelSize pixel size (auto if -1)
+		\param undistortImages whether images should be undistorted or not
+		\param minCorner (optional) outputs 3D min corner (2 values)
+		\param maxCorner (optional) outputs 3D max corner (2 values)
+		\param realCorners (optional) image real 3D corners (4*2 values)
+		\return ortho-rectified image
+	**/
+	ccImage* orthoRectifyAsImageDirect(	const ccImage* image,
+										PointCoordinateType altitude,
+										double& pixelSize,
+										bool undistortImages = true,
+										double* minCorner = 0,
+										double* maxCorner = 0,
+										double* realCorners = 0) const;
+
 	//! Projective ortho-rectification of multiple images (as image files)
 	/** \param images set of N calibrated images (i.e. images with their associated sensor)
 		\param a {a0, a1, a2} triplets for all images (size: 3*N)
@@ -373,7 +392,7 @@ public: //misc
 		\param sigma uncertainty vector (along X, Y and Z) 
 		\return operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries, or when the depth of the 3D point is negative)
 	**/
-	bool computeUncertainty(const CCVector2i& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const;
+	bool computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const;
 	
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
@@ -424,16 +443,16 @@ public: //misc
 public: //helpers
 
 	//! Helper: converts camera focal from pixels to mm
-	static float convertFocalPixToMM(float focal_pix, float cddHeight_mm, int imageHeight_pix);
+	static float ConvertFocalPixToMM(float focal_pix, float ccdPixelHeight_mm);
 
 	//! Helper: converts camera focal from mm to pixels
-	static float convertFocalMMToPix(float focal_mm, float cddHeight_mm, int imageHeight_pix);
+	static float ConvertFocalMMToPix(float focal_mm, float ccdPixelHeight_mm);
 
 	//! Helper: deduces camera f.o.v. (in radians) from focal (in pixels)
 	static float ComputeFovRadFromFocalPix(float focal_pix, int imageHeight_pix);
 
 	//! Helper: deduces camera f.o.v. (in radians) from focal (in mm)
-	static float ComputeFovRadFromFocalMm(float focal_mm, float cddHeight_mm);
+	static float ComputeFovRadFromFocalMm(float focal_mm, float ccdHeight_mm);
 	
 protected:
 

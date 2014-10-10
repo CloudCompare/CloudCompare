@@ -2013,15 +2013,18 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	case E57_PINHOLE:
 		{
 			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
-			ccImage* calibImage = new ccImage();
+			float focal_mm        = static_cast<float>(pinhole->focalLength);
+			float pixelWidth_mm   = static_cast<float>(pinhole->pixelWidth);    //FIXME: pixelWidth is in radians?!
+			float pixelHeight_mm  = static_cast<float>(pinhole->pixelHeight);   //FIXME: pixelHeight is in radians?!
+			float ccdHeight_mm    = static_cast<float>(pinhole->imageHeight * pixelHeight_mm);
+			
 			ccCameraSensor::IntrinsicParameters params;
-			params.focal_mm = pinhole->focalLength;
-			params.arrayWidth = pinhole->imageSize;
-			params.arrayHeight = pinhole->imageHeight;
-			params.pixelSize_mm[0] = pinhole->pixelWidth; //pixelWidth is in radians!
-			params.pixelSize_mm[1] = pinhole->pixelHeight; //pixelHeight is in radians!
-			double dx = pinhole->pixelHeight * pinhole->imageHeight;
-			params.vFOV_rad = ccCameraSensor::ComputeFovRadFromFocalMm(params.focal_mm,static_cast<float>(dx));
+			params.focal_pix       = ccCameraSensor::ConvertFocalMMToPix(focal_mm,pixelHeight_mm);
+			params.arrayWidth      = pinhole->imageSize;
+			params.arrayHeight     = pinhole->imageHeight;
+			params.pixelSize_mm[0] = pixelWidth_mm;
+			params.pixelSize_mm[1] = pixelHeight_mm;
+			params.vFOV_rad         = ccCameraSensor::ComputeFovRadFromFocalMm(pinhole->focalLength,ccdHeight_mm);
 			
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 			if (validPoseMat)
@@ -2029,6 +2032,8 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 
 			sensor->setEnabled(false);
 			sensor->setVisible(true);
+
+			ccImage* calibImage = new ccImage();
 			calibImage->addChild(sensor);
 			calibImage->setAssociatedSensor(sensor);
 

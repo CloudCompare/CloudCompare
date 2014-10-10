@@ -59,6 +59,9 @@ v2.5.6 ??/??/2014
 		- Materials and texture are now supported (input/output)
 	* New options in the Bundler import dialog:
 		- Choose the keyponts/orthophotos vertical axis with radio buttons (X, Y, Z and Custom)
+		- Choose the ortho-rectification method:
+			* Optimized: the 'classic' method based on CC's own parameter optimization process
+			* Direct: an alternate method based only on Bundler's output parameters
 	* qSRA (Surface of Revolution Analysis) plugin:
 		- the triangles of the exported meshes (surface of revolution textured with the displacement map)
 			are now in the right order (right hand rule)

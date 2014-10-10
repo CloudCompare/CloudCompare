@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>620</height>
+    <height>518</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,109 +25,90 @@
      <property name="title">
       <string>Information</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>File version:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="majorVerLabel">
-          <property name="text">
-           <string>v0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="minorVerLabel">
-          <property name="text">
-           <string>.0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>File version:</string>
+        </property>
+       </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>keypoints:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="keyPointsCountLabel">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <widget class="QLabel" name="versionLabel">
+        <property name="text">
+         <string>v0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Cameras:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="cameraCountLabel">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>56</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>keypoints:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="keyPointsCountLabel">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>55</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Cameras:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cameraCountLabel">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>56</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
@@ -158,6 +139,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="imageListFilePathLineEdit">
+          <property name="toolTip">
+           <string>List of the images corresponding to each camera</string>
+          </property>
           <property name="text">
            <string>list.txt</string>
           </property>
@@ -165,6 +149,9 @@
         </item>
         <item>
          <widget class="QToolButton" name="browseImageListFileToolButton">
+          <property name="toolTip">
+           <string>Browse</string>
+          </property>
           <property name="text">
            <string>...</string>
           </property>
@@ -174,29 +161,6 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Image scale factor</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="imageScaleDoubleSpinBox">
-          <property name="toolTip">
-           <string>Image scale factor relatively to keypoints</string>
-          </property>
-          <property name="whatsThis">
-           <string>Image scale factor relatively to keypoints</string>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
         <item>
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
@@ -210,153 +174,103 @@
           </property>
          </spacer>
         </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="orthoRectifyAsImageCheckBox">
-        <property name="text">
-         <string>generate 2D orthophotos</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="undistortImagesCheckBox">
-        <property name="text">
-         <string>undistort images</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="keepImagesInMemoryCheckBox">
-        <property name="text">
-         <string>keep images (and sensors) in memory</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="orthoRectifyAsCloudCheckBox">
-        <property name="text">
-         <string>generate 2D &quot;orthoclouds&quot;</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="QCheckBox" name="generateColoredDTMCheckBox">
+         <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>generate colored DTM </string>
+           <string>Image scale factor</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="dtmDensityFrame">
-          <property name="enabled">
-           <bool>false</bool>
+         <widget class="QDoubleSpinBox" name="imageScaleDoubleSpinBox">
+          <property name="toolTip">
+           <string>Image scale factor (relatively to the keypoints). Useful if you want to use images bigger than the ones you used to generate the Bundler .out file and the keypoints.</string>
           </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+          <property name="whatsThis">
+           <string>Image scale factor relatively to keypoints</string>
           </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+          <property name="minimum">
+           <double>0.010000000000000</double>
           </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
+          <property name="value">
+           <double>1.000000000000000</double>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_5">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>vertices: </string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="dtmVerticesSpinBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximum">
-              <number>100000000</number>
-             </property>
-             <property name="singleStep">
-              <number>1000000</number>
-             </property>
-             <property name="value">
-              <number>10000000</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
+       <widget class="QGroupBox" name="orthoRectGroupBox">
         <property name="title">
-         <string>Vertical dimension</string>
+         <string>Orthorectification</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <widget class="QCheckBox" name="orthoRectifyAsImageCheckBox">
+             <property name="toolTip">
+              <string>To orthorectify images (as new images saved next to the original ones)</string>
+             </property>
+             <property name="text">
+              <string>generate 2D orthophotos</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="orthoRectMethodComboBox">
+             <property name="toolTip">
+              <string>Ortho-rectification method:
+- Optimized = CC will use the keypoints to optimize the parameters of the 'collinearity equation'
+  that make the image and the keypoints match as best as possible. The equation parameters are then
+  used to project the image on the horizontal plane (by default). This method compensate for the
+  image distortion in its own way (i.e. whithout using the distortion model provided by Bundler)
+- Direct = CC will only use Bundler's output information (camera extrinsic and intrinsic parameters).
+  The camera distortion parameters can be applied or not. Pay attention that those parameters are
+  sometimes very poorly estimated by Bundler.</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Optimized</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Direct with undistortion</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Direct</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="orthoRectifyAsCloudCheckBox">
+           <property name="toolTip">
+            <string>To generate orthorectified versions of the images as clouds (warning: result mught be huge!).
+Warning: the 'Optimized' method is used by default.</string>
+           </property>
+           <property name="text">
+            <string>generate 2D &quot;orthoclouds&quot;</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Vertical dimension:</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QRadioButton" name="xVertAxisRadioButton">
              <property name="toolTip">
@@ -420,60 +334,201 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="altKeypointsGroupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Alternative keypoints</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <widget class="QGroupBox" name="generateColoredDTMGroupBox">
+        <property name="toolTip">
+         <string>To generate a 3D model (mesh) colored with the input images.
+By default the keypoints are meshed, and points are sampled on this first mesh.
+The sampled points are then colored with the images and a final mesh is built on top of those points.</string>
+        </property>
+        <property name="title">
+         <string>Colored model generation</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <item>
+            <widget class="QFrame" name="dtmDensityFrame">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Plain</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>vertices: </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="dtmVerticesSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Approximate number of vertices for the final mesh</string>
+                </property>
+                <property name="maximum">
+                 <number>100000000</number>
+                </property>
+                <property name="singleStep">
+                 <number>1000000</number>
+                </property>
+                <property name="value">
+                 <number>10000000</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QCheckBox" name="altKeypointsCheckBox">
+             <property name="toolTip">
+              <string>To use a cloud (or mesh) instead of the keypoints as base for the model generation</string>
+             </property>
+             <property name="text">
+              <string>Use alternative keypoints</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="altKeypointsFrame">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="altKeypointsFilePathLineEdit">
+                <property name="text">
+                 <string>pmvs.ply</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="browseAltKeypointsFileToolButton">
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
-         <widget class="QLabel" name="label_6">
+         <widget class="QCheckBox" name="keepImagesInMemoryCheckBox">
+          <property name="toolTip">
+           <string>To keep images and their corresponding sensors in memory (i.e. as entities in the DB tree)</string>
+          </property>
           <property name="text">
-           <string>Point cloud / mesh</string>
+           <string>keep images (and sensors) loaded</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="altKeypointsFilePathLineEdit">
-          <property name="text">
-           <string>pmvs.ply</string>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-         </widget>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
-         <widget class="QToolButton" name="browseAltKeypointsFileToolButton">
+         <widget class="QCheckBox" name="undistortImagesCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>To undistort loaded images</string>
+          </property>
           <property name="text">
-           <string>...</string>
+           <string>undistort images</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="importKeypointsCheckBox">
-     <property name="text">
-      <string>Import keypoints as cloud</string>
-     </property>
     </widget>
    </item>
    <item>
@@ -488,6 +543,16 @@ p, li { white-space: pre-wrap; }
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="importKeypointsGroupBox">
+     <property name="title">
+      <string>Import keypoints</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -520,22 +585,6 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>generateColoredDTMCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>dtmDensityFrame</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>93</x>
-     <y>238</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>275</x>
-     <y>238</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>customVertAxisRadioButton</sender>
    <signal>toggled(bool)</signal>
    <receiver>applyTransfoMatrixTextEdit</receiver>
@@ -548,6 +597,54 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>153</x>
      <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>orthoRectifyAsImageCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>orthoRectMethodComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>120</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>328</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>altKeypointsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>altKeypointsFrame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>317</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>300</x>
+     <y>317</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>keepImagesInMemoryCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>undistortImagesCheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>112</x>
+     <y>439</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>439</y>
     </hint>
    </hints>
   </connection>

@@ -221,9 +221,9 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			
 			ccCameraSensor::IntrinsicParameters params;
 			params.vFOV_rad = fov_rad;
-			params.focal_mm = 1.0f; //default focal (for the 3D symbol)
 			params.arrayWidth = CI->getW();
 			params.arrayHeight = CI->getH();
+			params.focal_pix = 1.0f; //default focal (for the 3D symbol)
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 
 			ccGLMatrix mat;

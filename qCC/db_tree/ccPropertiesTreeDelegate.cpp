@@ -799,7 +799,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
 	const ccCameraSensor::IntrinsicParameters& params = _obj->getIntrinsicParameters();
 
 	//Focal
-	appendRow( ITEM("Focal"), ITEM(QString::number(params.focal_mm)) );
+	appendRow( ITEM("Focal (pix)"), ITEM(QString::number(params.focal_pix)) );
 
 	//Array size
 	appendRow( ITEM("Array size"), ITEM(QString("%1 x %2").arg(params.arrayWidth).arg(params.arrayHeight)) );

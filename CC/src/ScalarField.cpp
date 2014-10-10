@@ -39,29 +39,29 @@ void ScalarField::setName(const char* name)
 
 void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance) const
 {
-	double _mean=0.0, _std2=0.0;
-	unsigned count=0;
+	double _mean = 0.0, _std2 = 0.0;
+	unsigned count = 0;
 
-	for (unsigned i=0;i<m_maxCount;++i)
+	for (unsigned i=0; i<m_maxCount; ++i)
 	{
 		const ScalarType& val = getValue(i);
 		if (ValidValue(val))
 		{
-			_mean += (double)val;
-			_std2 += (double)val * (double)val;
+			_mean += val;
+			_std2 += static_cast<double>(val) * val;
 			++count;
 		}
 	}
 
 	if (count)
 	{
-		_mean /= (double)count;
-		mean = (ScalarType)_mean;
+		_mean /= count;
+		mean = static_cast<ScalarType>(_mean);
 
 		if (variance)
 		{
-			_std2 = fabs(_std2/(double)count - _mean*_mean);
-			*variance = (ScalarType)_std2;
+			_std2 = fabs(_std2/count - _mean*_mean);
+			*variance = static_cast<ScalarType>(_std2);
 		}
 	}
 	else
@@ -74,20 +74,20 @@ void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance)
 
 void ScalarField::computeMinAndMax()
 {
-	if (m_maxCount!=0)
+	if (m_maxCount != 0)
 	{
 		bool minMaxInitialized = false;
-		for (unsigned i=0;i<m_maxCount;++i)
+		for (unsigned i=0; i<m_maxCount; ++i)
 		{
 			const ScalarType& val = getValue(i);
 			if (ValidValue(val))
 			{
 				if (minMaxInitialized)
 				{
-					if (val<m_minVal)
-						m_minVal=val;
-					else if (val>m_maxVal)
-						m_maxVal=val;
+					if (val < m_minVal)
+						m_minVal = val;
+					else if (val > m_maxVal)
+						m_maxVal = val;
 				}
 				else
 				{

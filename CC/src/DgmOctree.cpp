@@ -3694,7 +3694,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 		if (functionTitle)
 			progressCb->setMethodTitle(functionTitle);
 		char buffer[1024];
-		sprintf(buffer,"Octree levels %i - %i\nCells: %i - %i\nMean population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %i - %i",
+		sprintf(buffer,"Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %i - %i",
 				startingLevel,MAX_OCTREE_LEVEL,
 				getCellNumber(startingLevel),getCellNumber(MAX_OCTREE_LEVEL),
 				m_averageCellPopulation[startingLevel],m_stdDevCellPopulation[startingLevel],
@@ -4058,7 +4058,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[512];
-		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+		sprintf(buffer,"Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %d",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
         progressCb->setInfo(buffer);
 		s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
         progressCb->start();
@@ -4328,7 +4328,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[1024];
-		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %llu",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
+		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %llu",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
         progressCb->setInfo(buffer);
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;

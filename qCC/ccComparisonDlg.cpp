@@ -360,7 +360,7 @@ int ccComparisonDlg::computeApproxResults()
 		approxStats->setItem(curRow++, 1, item);
 
 		//mean dist
-		item = new QTableWidgetItem("Mean dist.");
+		item = new QTableWidgetItem("Avg dist.");
 		approxStats->setItem(curRow, 0, item);
 		item = new QTableWidgetItem(QString("%1").arg(mean));
 		approxStats->setItem(curRow++, 1, item);

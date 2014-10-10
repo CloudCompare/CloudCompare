@@ -2361,7 +2361,7 @@ void MainWindow::doActionMeasureMeshSurface()
 				forceConsoleDisplay();
 				ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
 				if (mesh->size())
-					ccConsole::Print(QString("[Mesh Surface Measurer] Mean triangle surface: %1 (square units)").arg(S/double(mesh->size())));
+					ccConsole::Print(QString("[Mesh Surface Measurer] Average triangle surface: %1 (square units)").arg(S/double(mesh->size())));
 			}
 			else
 			{

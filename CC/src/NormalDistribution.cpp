@@ -147,18 +147,18 @@ bool NormalDistribution::computeParameters(const ScalarContainer& values)
 	}
 
 	if (counter == 0)
-        return false;
+		return false;
 
-    mean /= static_cast<double>(counter);
-    stddev2 = fabs(stddev2/static_cast<double>(counter) - mean*mean);
+	mean /= static_cast<double>(counter);
+	stddev2 = fabs(stddev2/static_cast<double>(counter) - mean*mean);
 
-    return setParameters(static_cast<ScalarType>(mean),static_cast<ScalarType>(stddev2));
+	return setParameters(static_cast<ScalarType>(mean),static_cast<ScalarType>(stddev2));
 }
 
 bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, double nSigma)
 {
 	if (!computeParameters(values))
-        return false;
+		return false;
 
 	//max std. deviation
 	const double maxStddev = sqrt(static_cast<double>(m_sigma2))*nSigma;
@@ -177,12 +177,12 @@ bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, 
 	}
 
 	if (counter == 0)
-        return false;
+		return false;
 
-    mean /= static_cast<double>(counter);
-    stddev2 = fabs(stddev2/static_cast<double>(counter) - mean*mean);
+	mean /= static_cast<double>(counter);
+	stddev2 = fabs(stddev2/static_cast<double>(counter) - mean*mean);
 
-    return setParameters(static_cast<ScalarType>(mean),static_cast<ScalarType>(stddev2));
+	return setParameters(static_cast<ScalarType>(mean),static_cast<ScalarType>(stddev2));
 }
 
 double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo)
@@ -191,11 +191,11 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 
 	unsigned n = cloud->size();
 
-    //we must refine the real number of elements
+	//we must refine the real number of elements
 	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud);
 
-    if (numberOfElements == 0)
-        return -1.0;
+	if (numberOfElements == 0)
+		return -1.0;
 
 	if (numberOfClasses < 1 || numberOfClasses*numberOfClasses > numberOfElements)
 		return -1.0;
@@ -203,15 +203,15 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 		return 0.0;
 
 	if (!setChi2ClassesPositions(numberOfClasses))
-        return -1.0;
+		return -1.0;
 
 	assert(m_Pi.size() == numberOfClasses);
 
-    int* _histo = histo;
+	int* _histo = histo;
 	if (!_histo)
-        _histo = new int[numberOfClasses];
+		_histo = new int[numberOfClasses];
 	if (!_histo)
-        return -1.0; //probleme d'allocation
+		return -1.0; //probleme d'allocation
 
 	memset(_histo,0,numberOfClasses*sizeof(int));
 
@@ -222,11 +222,11 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 		if (ScalarField::ValidValue(V))
 		{
 			unsigned j = 0;
-            for (; j<numberOfClasses-1; ++j)
-                if (V < m_chi2ClassesPositions[j])
-                    break;
+			for (; j<numberOfClasses-1; ++j)
+				if (V < m_chi2ClassesPositions[j])
+					break;
 
-            ++_histo[j];
+			++_histo[j];
 		}
 	}
 
@@ -242,8 +242,8 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 	}
 
 	if (_histo && !histo)
-        delete[] _histo;
-    _histo = 0;
+		delete[] _histo;
+	_histo = 0;
 
 	return dk;
 }

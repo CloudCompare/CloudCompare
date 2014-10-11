@@ -557,7 +557,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 				if (!dm->build(the2DPoints,0,false,errorStr))
 				{
 					if (app)
-						app->dispToConsole(QString("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. saied '%1'").arg(errorStr),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+						app->dispToConsole(QString("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. said '%1'").arg(errorStr),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				}
 				else
 				{

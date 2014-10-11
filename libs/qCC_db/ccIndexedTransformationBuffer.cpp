@@ -20,10 +20,10 @@
 
 ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
 	: ccHObject(name)
+	, m_bBoxValidSize(0)
 	, m_showAsPolyline(false)
 	, m_showTrihedrons(true)
 	, m_trihedronsScale(1.0f)
-	, m_bBoxValidSize(0)
 {
 	lockVisibility(false);
 }

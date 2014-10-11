@@ -383,7 +383,7 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				break;
 			}
 			
-			unsigned totalElements = parts[2].toUInt(&ok);
+//			unsigned totalElements = parts[2].toUInt(&ok);
 			if (!ok)
 			{
 				error = CC_FERR_MALFORMED_FILE;

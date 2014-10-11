@@ -40,11 +40,11 @@
 
 ccSSAOFilter::ccSSAOFilter()
 	: ccGlFilter("Screen Space Ambient Occlusion")
+	, texReflect(0)
 	, w(0)
 	, h(0)
 	, fbo(0)
 	, shader(0)
-	, texReflect(0)
 {
 	setParameters(/*N=*/32,/*Kz=*/500.0f,/*R=*/0.05f,/*F=*/50.0f);
 

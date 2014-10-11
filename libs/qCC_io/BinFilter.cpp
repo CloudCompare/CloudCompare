@@ -45,6 +45,7 @@
 //system
 #include <set>
 #include <assert.h>
+#include <string.h>
 #if defined(CC_WINDOWS)
 #include <Windows.h>
 #else

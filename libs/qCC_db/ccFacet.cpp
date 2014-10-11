@@ -284,7 +284,6 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		}
 
 		//we create the corresponding (2D) mesh
-		CCLib::Delaunay2dMesh dm;
 		std::vector<CCVector2> hullPointsVector;
 		try
 		{
@@ -300,52 +299,61 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		//if we have computed a concave hull, we must remove triangles falling outside!
 		bool removePointsOutsideHull = (m_maxEdgeLength > 0);
 
-		if (!hullPointsVector.empty() && dm.build(hullPointsVector,0,removePointsOutsideHull))
+		if (!hullPointsVector.empty())
 		{
-			unsigned triCount = dm.size();
-			assert(triCount != 0);
-
-			m_polygonMesh = new ccMesh(m_contourVertices);
-			if (m_polygonMesh->reserve(triCount))
+			CCLib::Delaunay2dMesh dm;
+			char errorStr[1024];
+			if (dm.build(hullPointsVector,0,removePointsOutsideHull,errorStr))
 			{
-				//import faces
-				for (unsigned i=0; i<triCount; ++i)
-				{
-					const CCLib::TriangleSummitsIndexes* tsi = dm.getTriangleIndexes(i);
-					m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
-				}
-				m_polygonMesh->setVisible(true);
-				m_polygonMesh->enableStippling(true);
+				unsigned triCount = dm.size();
+				assert(triCount != 0);
 
-				//unique normal for facets
-				if (m_polygonMesh->reservePerTriangleNormalIndexes())
+				m_polygonMesh = new ccMesh(m_contourVertices);
+				if (m_polygonMesh->reserve(triCount))
 				{
-					NormsIndexesTableType* normsTable = new NormsIndexesTableType();
-					normsTable->reserve(1);
-					CCVector3 N(m_planeEquation);
-					normsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
-					m_polygonMesh->setTriNormsTable(normsTable);
+					//import faces
 					for (unsigned i=0; i<triCount; ++i)
-						m_polygonMesh->addTriangleNormalIndexes(0,0,0); //all triangles will have the same normal!
-					m_polygonMesh->showNormals(true);
-					m_polygonMesh->addChild(normsTable);
-					m_polygonMesh->setLocked(true);
-					m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
-					m_contourVertices->addChild(m_polygonMesh);
+					{
+						const CCLib::TriangleSummitsIndexes* tsi = dm.getTriangleIndexes(i);
+						m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
+					}
+					m_polygonMesh->setVisible(true);
+					m_polygonMesh->enableStippling(true);
+
+					//unique normal for facets
+					if (m_polygonMesh->reservePerTriangleNormalIndexes())
+					{
+						NormsIndexesTableType* normsTable = new NormsIndexesTableType();
+						normsTable->reserve(1);
+						CCVector3 N(m_planeEquation);
+						normsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
+						m_polygonMesh->setTriNormsTable(normsTable);
+						for (unsigned i=0; i<triCount; ++i)
+							m_polygonMesh->addTriangleNormalIndexes(0,0,0); //all triangles will have the same normal!
+						m_polygonMesh->showNormals(true);
+						m_polygonMesh->addChild(normsTable);
+						m_polygonMesh->setLocked(true);
+						m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
+						m_contourVertices->addChild(m_polygonMesh);
+					}
+					else
+					{
+						ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh's normals!");
+					}
+
+					//update facet surface
+					m_surface = CCLib::MeshSamplingTools::computeMeshArea(m_polygonMesh);
 				}
 				else
 				{
-					ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh's normals!");
+					delete m_polygonMesh;
+					m_polygonMesh = 0;
+					ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh!");
 				}
-
-				//update facet surface
-				m_surface = CCLib::MeshSamplingTools::computeMeshArea(m_polygonMesh);
 			}
 			else
 			{
-				delete m_polygonMesh;
-				m_polygonMesh = 0;
-				ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh!");
+				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create polygon mesh (Triangle lib. said '%1'").arg(errorStr));
 			}
 		}
 	}

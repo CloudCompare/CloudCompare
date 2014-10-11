@@ -20,10 +20,11 @@
 
 #include "PdmsTools.h"
 
-using namespace PdmsTools;
-
+//system
 #include <string>
 #include <map>
+
+using namespace PdmsTools;
 
 //! PDMS Lexer
 /** PDMS sessions are made to provide an input stream to the parser (file, keyboard, pipe, ...)
@@ -119,4 +120,4 @@ protected:
 	PdmsObjects::GenericItem *currentItem, *root;
 };
 
-#endif
+#endif //PDMS_PARSER_HEADER

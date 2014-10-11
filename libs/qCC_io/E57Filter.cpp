@@ -45,6 +45,10 @@
 #include <QUuid>
 #include <QBuffer>
 
+//system
+#include <string.h>
+#include <assert.h>
+
 typedef double colorFieldType;
 //typedef boost::uint16_t colorFieldType;
 

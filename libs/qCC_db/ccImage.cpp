@@ -31,6 +31,9 @@
 
 //System
 #include <assert.h>
+#ifdef INCLUDE_IMAGE_FILENAME
+#include <string.h>
+#endif
 
 ccImage::ccImage()
 	: ccHObject("Not loaded")

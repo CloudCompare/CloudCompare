@@ -50,6 +50,7 @@
 //system
 #include <assert.h>
 #include <algorithm>
+#include <string.h>
 
 //Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;

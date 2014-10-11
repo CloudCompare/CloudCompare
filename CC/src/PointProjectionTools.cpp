@@ -27,6 +27,7 @@
 
 //system
 #include <assert.h>
+#include <string.h>
 
 using namespace CCLib;
 
@@ -235,21 +236,23 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* theCloud, T
 		}
 	}
 
-    if (progressCb)
-        progressCb->stop();
+	if (progressCb)
+		progressCb->stop();
 
-    return transformedCloud;
+	return transformedCloud;
 }
 
 GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCloudPersist* theCloud,
 																CC_TRIANGULATION_TYPES type/*=GENERIC*/,
-																PointCoordinateType maxEdgeLength/*=0*/)
+																PointCoordinateType maxEdgeLength/*=0*/,
+																char* errorStr/*=0*/)
 {
 	if (!theCloud)
+	{
+		if (errorStr)
+			strcpy(errorStr, "Invalid input cloud");
 		return 0;
-
-	//output mesh
-	GenericIndexedMesh* theMesh = 0;
+	}
 
 	switch(type)
 	{
@@ -263,6 +266,8 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 			}
 			catch (.../*const std::bad_alloc&*/) //out of memory
 			{
+				if (errorStr)
+					strcpy(errorStr, "Not enough memory");
 				break;
 			}
 
@@ -276,8 +281,11 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 			}
 
 			Delaunay2dMesh* dm = new Delaunay2dMesh();
-			if (!dm->build(the2DPoints,0))
+			char triLibErrorStr[1024];
+			if (!dm->build(the2DPoints,0,false,triLibErrorStr))
 			{
+				if (errorStr)
+					strcpy(errorStr, triLibErrorStr);
 				delete dm;
 				return 0;
 			}
@@ -290,26 +298,30 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 				if (dm->size() == 0)
 				{
 					//no more triangles?
+					if (errorStr)
+						strcpy(errorStr, "No triangle left after pruning");
 					delete dm;
-					dm = 0;
+					return 0;
 				}
 			}
 
-			theMesh = static_cast<GenericIndexedMesh*>(dm);
+			return static_cast<GenericIndexedMesh*>(dm);
 		}
 		break;
 	case GENERIC_BEST_LS_PLANE:
 		{
 			Neighbourhood Yk(theCloud);
-			theMesh = Yk.triangulateOnPlane(false,maxEdgeLength);
+			GenericIndexedMesh* mesh = Yk.triangulateOnPlane(false,maxEdgeLength,errorStr);
+			return mesh;
 		}
 		break;
-	case GENERIC_EMPTY:
-		theMesh = new SimpleMesh(theCloud);
+	default:
+		//shouldn't happen
+		assert(false);
 		break;
 	}
 
-	return theMesh;
+	return 0;
 }
 
 // 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.

@@ -31,7 +31,6 @@
 //! Triangulation types
 enum CC_TRIANGULATION_TYPES {	GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
 								GENERIC_BEST_LS_PLANE			=		2,		/**< Delaunay 2D in best least square fitting plane **/
-								GENERIC_EMPTY					=		3		/**<Empty triangulation (to be filled by user) **/
 };
 
 namespace CCLib
@@ -107,11 +106,13 @@ public:
 		\param theCloud a point cloud
 		\param type the triangulation strategy
 		\param maxEdgeLength max edge length for output triangles (0 = ignored)
+		\param errorStr error (if any) [optional]
 		\return a mesh
 	**/
 	static GenericIndexedMesh* computeTriangulation(GenericIndexedCloudPersist* theCloud,
 													CC_TRIANGULATION_TYPES type = GENERIC,
-													PointCoordinateType maxEdgeLength = 0);
+													PointCoordinateType maxEdgeLength = 0,
+													char* errorStr = 0);
 
 	//! Indexed 2D vector
 	/** Used for convex and concave hull computation

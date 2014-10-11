@@ -343,7 +343,10 @@
 #ifndef TRILIBRARY
 char *readline();
 char *findfield();
-#endif /* not TRILIBRARY */
+#else /* not TRILIBRARY */
+//DGM: to replace calls to 'exit'
+#include <exception>
+#endif
 
 /* Labels that signify the result of point location.  The result of a        */
 /*   search indicates that the point falls in the interior of a triangle, on */
@@ -1380,10 +1383,14 @@ int triunsuitable(vertex triorg, vertex tridest, vertex triapex, REAL area)
 /**                                                                         **/
 /**                                                                         **/
 
+#ifndef TRILIBRARY
+
 void triexit(int status)
 {
   exit(status);
 }
+
+#endif
 
 VOID *trimalloc(int size)
 {
@@ -1391,9 +1398,14 @@ VOID *trimalloc(int size)
 
   memptr = (VOID *) malloc((unsigned int) size);
   if (memptr == (VOID *) NULL) {
+#ifndef TRILIBRARY
     printf("Error:  Out of memory (failed to allocate %i bytes)\n",size);
-    //triexit(1);
-	 throw "Memory allocation failure!";
+    triexit(1);
+#else
+    char buffer[256];
+    sprintf(buffer,"Error:  Out of memory (failed to allocate %i bytes)",size);
+    throw std::exception(buffer);
+#endif
   }
   return(memptr);
 }
@@ -3225,7 +3237,11 @@ void internalerror()
   printf("  Please report this bug to jrs@cs.berkeley.edu\n");
   printf("  Include the message above, your input data set, and the exact\n");
   printf("    command line you used to run Triangle.\n");
+#ifndef TRILIBRARY
   triexit(1);
+#else
+  throw std::exception("Internal error");
+#endif
 }
 
 /*****************************************************************************/
@@ -3317,8 +3333,12 @@ void parsecommandline(int argc, const char **argv, struct behavior *b) //DGM 08/
             workstring[k] = '\0';
             b->maxarea = (REAL) strtod(workstring, (char **) NULL);
             if (b->maxarea <= 0.0) {
+#ifndef TRILIBRARY
               printf("Error:  Maximum area must be greater than zero.\n");
               triexit(1);
+#else
+              throw std::exception("Error:  Maximum area must be greater than zero");
+#endif
 	    }
 	  } else {
             b->vararea = 1;
@@ -3478,9 +3498,13 @@ void parsecommandline(int argc, const char **argv, struct behavior *b) //DGM 08/
   }
   b->goodangle *= b->goodangle;
   if (b->refine && b->noiterationnum) {
+#ifndef TRILIBRARY
     printf(
       "Error:  You cannot use the -I switch when refining a triangulation.\n");
     triexit(1);
+#else
+    throw std::exception("Error:  You cannot use the -I switch when refining a triangulation");
+#endif
   }
   /* Be careful not to allocate space for element area constraints that */
   /*   will never be assigned any value (other than the default -1.0).  */
@@ -10153,8 +10177,12 @@ long sweeplinedelaunay(struct mesh *m, struct behavior *b)
   heapsize--;
   do {
     if (heapsize == 0) {
+#ifndef TRILIBRARY
       printf("Error:  Input vertices are all identical.\n");
       triexit(1);
+#else
+    throw std::exception("Error:  Input vertices are all identical");
+#endif
     }
     secondvertex = (vertex) eventheap[0]->eventptr;
     eventheap[0]->eventptr = (VOID *) freeevents;
@@ -10447,8 +10475,12 @@ long reconstruct(struct mesh *m, struct behavior *b, char *elefilename,
   m->inelements = elements;
   incorners = corners;
   if (incorners < 3) {
+#ifndef TRILIBRARY
     printf("Error:  Triangles must have at least 3 vertices.\n");
     triexit(1);
+#else
+  throw std::exception("Error:  Triangles must have at least 3 vertices");
+#endif
   }
   m->eextras = attribs;
 #else /* not TRILIBRARY */
@@ -10458,8 +10490,14 @@ long reconstruct(struct mesh *m, struct behavior *b, char *elefilename,
   }
   elefile = fopen(elefilename, "r");
   if (elefile == (FILE *) NULL) {
+#ifndef TRILIBRARY
     printf("  Error:  Cannot access file %s.\n", elefilename);
     triexit(1);
+#else
+    char buffer[1024];
+    sprintf(buffer,"Error:  Cannot access file %s",elefilename);
+    throw std::exception(buffer);
+#endif
   }
   /* Read number of triangles, number of vertices per triangle, and */
   /*   number of triangle attributes from .ele file.                */
@@ -10471,9 +10509,15 @@ long reconstruct(struct mesh *m, struct behavior *b, char *elefilename,
   } else {
     incorners = (int) strtol(stringptr, &stringptr, 0);
     if (incorners < 3) {
+#ifndef TRILIBRARY
       printf("Error:  Triangles in %s must have at least 3 vertices.\n",
              elefilename);
       triexit(1);
+#else
+    char buffer[1024];
+    sprintf(buffer,"Error:  Triangles in %s must have at least 3 vertices",elefilename);
+    throw std::exception(buffer);
+#endif
     }
   }
   stringptr = findfield(stringptr);
@@ -10528,15 +10572,28 @@ long reconstruct(struct mesh *m, struct behavior *b, char *elefilename,
     }
     areafile = fopen(areafilename, "r");
     if (areafile == (FILE *) NULL) {
-      printf("  Error:  Cannot access file %s.\n", areafilename);
+#ifndef TRILIBRARY
+      printf("  Error:  Cannot access file %s.\n", elefilename);
       triexit(1);
+#else
+      char buffer[1024];
+      sprintf(buffer,"Error:  Cannot access file %s",elefilename);
+      throw std::exception(buffer);
+#endif
     }
     stringptr = readline(inputline, areafile, areafilename);
     areaelements = (int) strtol(stringptr, &stringptr, 0);
     if (areaelements != m->inelements) {
+#ifndef TRILIBRARY
       printf("Error:  %s and %s disagree on number of triangles.\n",
              elefilename, areafilename);
       triexit(1);
+#else
+    char buffer[2048];
+    sprintf(buffer,"Error:  %s and %s disagree on number of triangles",
+             elefilename, areafilename);
+    throw std::exception(buffer);
+#endif
     }
   }
 #endif /* not TRILIBRARY */
@@ -10569,9 +10626,12 @@ long reconstruct(struct mesh *m, struct behavior *b, char *elefilename,
       corner[j] = trianglelist[vertexindex++];
       if ((corner[j] < b->firstnumber) ||
           (corner[j] >= b->firstnumber + m->invertices)) {
-        printf("Error:  Triangle %ld has an invalid vertex index.\n",
-               elementnumber);
-        triexit(1);
+        //printf("Error:  Triangle %ld has an invalid vertex index.\n",
+        //       elementnumber);
+        //triexit(1);
+        char buffer[1024];
+        sprintf(buffer,"Error:  Triangle %ld has an invalid vertex index",elementnumber);
+        throw std::exception(buffer);
       }
     }
 #else /* not TRILIBRARY */
@@ -12549,6 +12609,7 @@ void splitencsegs(struct mesh *m, struct behavior *b, int triflaws)
         /* Check whether the new vertex lies on an endpoint. */
         if (((newvertex[0] == eorg[0]) && (newvertex[1] == eorg[1])) ||
             ((newvertex[0] == edest[0]) && (newvertex[1] == edest[1]))) {
+#ifndef TRILIBRARY
           printf("Error:  Ran out of precision at (%.12g, %.12g).\n",
                  newvertex[0], newvertex[1]);
           printf("I attempted to split a segment to a smaller size than\n");
@@ -12556,6 +12617,9 @@ void splitencsegs(struct mesh *m, struct behavior *b, int triflaws)
           printf("  floating point arithmetic.\n");
           precisionerror();
           triexit(1);
+#else
+          throw std::exception("Precision error");
+#endif
         }
         /* Insert the splitting vertex.  This should always succeed. */
         success = insertvertex(m, b, newvertex, &enctri, &currentenc,
@@ -13189,8 +13253,9 @@ void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist,
   m->nextras = numberofpointattribs;
   m->readnodefile = 0;
   if (m->invertices < 3) {
-    printf("Error:  Input must have at least three input vertices.\n");
-    triexit(1);
+    //printf("Error:  Input must have at least three input vertices.\n");
+    //triexit(1);
+    throw std::exception("Error:  Input must have at least three input vertices");
   }
   if (m->nextras == 0) {
     b->weighted = 0;

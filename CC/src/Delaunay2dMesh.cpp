@@ -69,7 +69,7 @@ Delaunay2dMesh::~Delaunay2dMesh()
 	linkMeshWith(0);
 
 	if (m_triIndexes)
-        delete[] m_triIndexes;
+		delete[] m_triIndexes;
 }
 
 void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnership)
@@ -87,7 +87,8 @@ void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnershi
 
 bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
 							size_t pointCountToUse/*=0*/,
-							bool forceInputPointsAsBorder/*=false*/)
+							bool forceInputPointsAsBorder/*=false*/,
+							char* outputErrorStr/*=0*/)
 {
 	size_t pointCount = the2dPoints.size();
 	//we will use at most 'pointCountToUse' points (if not 0)
@@ -118,8 +119,16 @@ bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
 	{ 
 		triangulate ( "zQN", &in, &in, 0 );
 	}
+	catch (std::exception& e) 
+	{
+		if (outputErrorStr)
+			strcpy(outputErrorStr,e.what());
+		return false;
+	} 
 	catch (...) 
 	{
+		if (outputErrorStr)
+			strcpy(outputErrorStr,"Unknown error");
 		return false;
 	} 
 
@@ -142,7 +151,7 @@ bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
 			const CCVector2& C = the2dPoints[_triIndexes[2]];
 			CCVector2 G = CCVector2((A.x+B.x+C.x),(A.y+B.y+C.y))/static_cast<PointCoordinateType>(3.0);
 
-			//if G is oustide the 'polygon'
+			//if G is outside the 'polygon'
 			if (CCLib::ManualSegmentationTools::isPointInsidePoly(G,the2dPoints))
 			{
 				//we remove the corresponding triangle
@@ -162,6 +171,8 @@ bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
 		else
 		{
 			//no triangle left?!
+			if (outputErrorStr)
+				strcpy(outputErrorStr,"No triangle in the output?!");
 			delete[] m_triIndexes;
 			m_triIndexes = 0;
 			return false;

@@ -565,11 +565,15 @@ bool Neighbourhood::compute3DQuadric()
 	return true;
 }
 
-GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=false*/, PointCoordinateType maxEdgeLength/*=0*/)
+GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=false*/,
+														PointCoordinateType maxEdgeLength/*=0*/,
+														char* errorStr/*=0*/)
 {
-	if (m_associatedCloud->size()<CC_LOCAL_MODEL_MIN_SIZE[TRI])
+	if (m_associatedCloud->size() < CC_LOCAL_MODEL_MIN_SIZE[TRI])
 	{
 		//can't compute LSF plane with less than 3 points!
+		if (errorStr)
+			strcpy(errorStr,"Not enough points");
 		return 0;
 	}
 
@@ -582,7 +586,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 		Delaunay2dMesh* dm = new Delaunay2dMesh();
 
 		//triangulate the projected points
-		if (!dm->build(points2D,0))
+		if (!dm->build(points2D,0,false,errorStr))
 		{
 			delete dm;
 			return 0;
@@ -595,6 +599,8 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 			unsigned count = m_associatedCloud->size();
 			if (!cloud->reserve(count))
 			{
+				if (errorStr)
+					strcpy(errorStr,"Not enough memory");
 				delete dm;
 				delete cloud;
 				return 0;
@@ -615,6 +621,8 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 			if (dm->size() == 0)
 			{
 				//no more triangles?
+				if (errorStr)
+					strcpy(errorStr,"Not triangle left after pruning");
 				delete dm;
 				dm = 0;
 			}

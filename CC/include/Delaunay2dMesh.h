@@ -55,11 +55,13 @@ public:
 	/** \param the2dPoints a set of 2D points
 		\param pointCountToUse number of points to use from the input set (0 = all)
 		\param forceInputPointsAsBorder if true, the input points are considered as ordered polyon vertices and 'outside' triangles will be removed
+		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
 		\return success
 	**/
 	virtual bool build(	const std::vector<CCVector2>& the2dPoints,
 						size_t pointCountToUse = 0,
-						bool forceInputPointsAsBorder = false);
+						bool forceInputPointsAsBorder = false,
+						char* outputErrorStr = 0);
 
 	//inherited methods (see GenericMesh)
 	virtual unsigned size() const { return m_numberOfTriangles; }

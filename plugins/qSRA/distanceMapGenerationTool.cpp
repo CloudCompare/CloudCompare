@@ -553,10 +553,11 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 
 				//mesh the '2D' points
 				CCLib::Delaunay2dMesh* dm = new CCLib::Delaunay2dMesh();
-				if (!dm->build(the2DPoints))
+				char errorStr[1024];
+				if (!dm->build(the2DPoints,0,false,errorStr))
 				{
 					if (app)
-						app->dispToConsole(QString("[DistanceMapGenerationTool] Not enough memory to interpolate!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+						app->dispToConsole(QString("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. saied '%1'").arg(errorStr),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				}
 				else
 				{

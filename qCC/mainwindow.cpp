@@ -6250,10 +6250,6 @@ void MainWindow::doActionFilterNoise()
 			continue;
 		}
 
-		//parameters
-		PointCoordinateType kernerRadius = GetDefaultCloudKernelSize(cloud);
-		double nSigma = 1.0;
-
 		//computation
 		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
 																				kernelRadius,

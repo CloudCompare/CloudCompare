@@ -118,7 +118,7 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 			distInfo += QString("\tK3 = %1\n").arg(bParams->K_BrownParams[2]);
 			distInfo = "* Tangential distortion:\n";
 			distInfo += QString("\tP1 = %1\n").arg(bParams->P_BrownParams[0]);
-			distInfo += QString("\tP2 = %1\n").arg(bParams->P_BrownParams[2]);
+			distInfo += QString("\tP2 = %1\n").arg(bParams->P_BrownParams[1]);
 			distInfo = "* Linear disparity:\n";
 			distInfo += QString("\tA = %1\n").arg(bParams->linearDisparityParams[0]);
 			distInfo += QString("\tB = %1\n").arg(bParams->linearDisparityParams[1]);

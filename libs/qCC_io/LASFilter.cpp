@@ -543,7 +543,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					if (!evlrs.empty())
 					{
 						//we'll handle this one separately!
-						const liblas::Dimension& extra = *it;
 						extraDimension = &(*it);
 					}
 				}

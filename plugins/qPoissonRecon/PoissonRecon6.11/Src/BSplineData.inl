@@ -603,7 +603,7 @@ template< int Degree >
 BSplineElements< Degree >::BSplineElements( int res , int offset , int boundary , int inset )
 {
 	denominator = 1;
-	resize( res , BSplineElementCoefficients< Degree >() );
+	std::vector< BSplineElementCoefficients< Degree > >::resize( res , BSplineElementCoefficients< Degree >() );
 
 	for( int i=0 ; i<=Degree ; i++ )
 	{

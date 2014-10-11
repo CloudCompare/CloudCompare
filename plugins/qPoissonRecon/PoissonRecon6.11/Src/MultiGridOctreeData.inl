@@ -27,7 +27,7 @@ DAMAGE.
 */
 
 #include "Octree.h"
-#include "time.h"
+#include "poissonTime.h"
 #include "MemoryUsage.h"
 #include "PointStream.h"
 #include "CmdLineParser.h"

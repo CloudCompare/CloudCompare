@@ -345,7 +345,7 @@ char *readline();
 char *findfield();
 #else /* not TRILIBRARY */
 //DGM: to replace calls to 'exit'
-#include <exception>
+#include <stdexcept>
 #endif
 
 /* Labels that signify the result of point location.  The result of a        */
@@ -1404,7 +1404,7 @@ VOID *trimalloc(int size)
 #else
     char buffer[256];
     sprintf(buffer,"Error:  Out of memory (failed to allocate %i bytes)",size);
-    throw std::exception(buffer);
+    throw std::runtime_error(buffer); 
 #endif
   }
   return(memptr);
@@ -3240,7 +3240,7 @@ void internalerror()
 #ifndef TRILIBRARY
   triexit(1);
 #else
-  throw std::exception("Internal error");
+  throw std::runtime_error("Internal error");
 #endif
 }
 
@@ -3503,7 +3503,7 @@ void parsecommandline(int argc, const char **argv, struct behavior *b) //DGM 08/
       "Error:  You cannot use the -I switch when refining a triangulation.\n");
     triexit(1);
 #else
-    throw std::exception("Error:  You cannot use the -I switch when refining a triangulation");
+    throw std::runtime_error("Error:  You cannot use the -I switch when refining a triangulation");
 #endif
   }
   /* Be careful not to allocate space for element area constraints that */
@@ -13255,7 +13255,7 @@ void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist,
   if (m->invertices < 3) {
     //printf("Error:  Input must have at least three input vertices.\n");
     //triexit(1);
-    throw std::exception("Error:  Input must have at least three input vertices");
+    throw std::runtime_error("Error:  Input must have at least three input vertices");
   }
   if (m->nextras == 0) {
     b->weighted = 0;

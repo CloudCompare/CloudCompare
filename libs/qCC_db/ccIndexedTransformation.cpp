@@ -17,6 +17,10 @@
 
 #include "ccIndexedTransformation.h"
 
+//Qt
+#include <QFile>
+#include <QTextStream>
+
 //System
 #include <math.h>
 #include <string.h>
@@ -46,59 +50,46 @@ ccIndexedTransformation::ccIndexedTransformation(const ccIndexedTransformation& 
 {
 }
 
-bool ccIndexedTransformation::toAsciiFile(const char* filename) const
+bool ccIndexedTransformation::toAsciiFile(QString filename, int precision/*=12*/) const
 {
-	FILE* fp = fopen(filename,"wt");
-	if (!fp)
+	QFile fp(filename);
+	if (!fp.open(QFile::WriteOnly | QFile::Text))
 		return false;
 
-	//save index first
-	if (fprintf(fp,"%.12f\n",m_index) < 1)
-	{
-		fclose(fp);
-		return false;
-	}
-	
+	QTextStream stream(&fp);
+	stream.setRealNumberPrecision(precision);
+
+	//save transformation first (so that it can be loaded as a ccGLMatrix!)
 	for (unsigned i=0; i<4; ++i)
 	{
-		if (fprintf(fp,"%f %f %f %f\n",m_mat[i],m_mat[i+4],m_mat[i+8],m_mat[i+12]) < 4)
-		{
-			fclose(fp);
-			return false;
-		}
+		stream << m_mat[i] << " " << m_mat[i+4] << " " << m_mat[i+8] << " " << m_mat[i+12] << endl;
 	}
+	//save index next
+	stream << m_index;
 
-	fclose(fp);
-
-	return true;
+	return (fp.error() == QFile::NoError);
 }
 
-bool ccIndexedTransformation::fomAsciiFile(const char* filename)
+bool ccIndexedTransformation::fromAsciiFile(QString filename)
 {
-	FILE* fp = fopen(filename,"rt");
-	if (!fp)
+	QFile fp(filename);
+	if (!fp.open(QFile::ReadOnly | QFile::Text))
 		return false;
 
-	//read index
-	if (fscanf(fp,"%lf\n",&m_index) < 1)
-	{
-		fclose(fp);
-		return false;
-	}
-	
-	float* mat = m_mat;
+	QTextStream stream(&fp);
+
+	//read the transformation first
 	for (unsigned i=0; i<4; ++i)
 	{
-		if (fscanf(fp,"%f %f %f %f\n",mat,mat+4,mat+8,mat+12) < 4)
-		{
-			fclose(fp);
-			return false;
-		}
-		++mat;
+		stream >> m_mat[i];
+		stream >> m_mat[i+4];
+		stream >> m_mat[i+8];
+		stream >> m_mat[i+12];
 	}
-	fclose(fp);
+	//read index
+	stream >> m_index;
 
-	return true;
+	return (fp.error() == QFile::NoError);
 }
 
 ccIndexedTransformation ccIndexedTransformation::operator * (const ccGLMatrix& M) const

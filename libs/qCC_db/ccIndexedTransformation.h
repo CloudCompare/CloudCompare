@@ -97,11 +97,9 @@ public:
 	**/
 	ccIndexedTransformation inverse() const;
 
-	//! Saves transformation to an ASCII file
-	virtual bool toAsciiFile(const char* filename) const;
-
-	//! Loads transformation from an ASCII file
-	virtual bool fomAsciiFile(const char* filename);
+	//inherited from ccGLMatrix
+	virtual bool toAsciiFile(QString filename, int precision = 12) const;
+	virtual bool fromAsciiFile(QString filename);
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }

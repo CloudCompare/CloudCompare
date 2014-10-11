@@ -366,7 +366,7 @@ public:
 	//! Loads matrix from an ASCII file
 	/** \param filename input file name
 	***/
-	virtual bool fomAsciiFile(QString filename)
+	virtual bool fromAsciiFile(QString filename)
 	{
 		QFile fp(filename);
 		if (!fp.open(QFile::ReadOnly | QFile::Text))

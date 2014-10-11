@@ -241,7 +241,7 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 		return;
 
 	ccGLMatrixd mat;
-	if (mat.fomAsciiFile(inputFilename))
+	if (mat.fromAsciiFile(inputFilename))
 	{
 		matrixTextEdit->setPlainText(mat.toString());
 	}

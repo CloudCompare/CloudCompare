@@ -79,6 +79,7 @@
 #include <ccPluginInterface.h>
 #include <ccStdPluginInterface.h>
 #include <ccGLFilterPluginInterface.h>
+#include <ccIOFilterPluginInterface.h>
 #include "ccPluginDlg.h"
 
 //shaders & Filters
@@ -360,9 +361,15 @@ ccPluginInterface* MainWindow::getValidPlugin(QObject* plugin)
 		if (ccStdPlugin)
 			return static_cast<ccPluginInterface*>(ccStdPlugin);
 
+		//GL (shader) plugin
 		ccGLFilterPluginInterface* ccGLPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
 		if (ccGLPlugin)
 			return static_cast<ccPluginInterface*>(ccGLPlugin);
+
+		//I/O filter plugin
+		ccIOFilterPluginInterface* ccIOPlugin = qobject_cast<ccIOFilterPluginInterface*>(plugin);
+		if (ccIOPlugin)
+			return static_cast<ccPluginInterface*>(ccIOPlugin);
 	}
 
 	return 0;
@@ -477,8 +484,8 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
 			stdPlugin->setMainAppInterface(this);
 
-			QMenu* destMenu=0;
-			QToolBar* destToolBar=0;
+			QMenu* destMenu = 0;
+			QToolBar* destToolBar = 0;
 
 			QActionGroup actions(this);
 			stdPlugin->getActions(actions);
@@ -549,6 +556,15 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 			//add to GL filter (actions) list
 			m_glFilterActions.addAction(action);
 
+		}
+		break;
+
+	case CC_IO_FILTER_PLUGIN: //I/O filter
+		{
+			ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(ccPlugin);
+			FileIOFilter::Shared filter = ioPlugin->getFilter(this);
+			if (filter)
+				FileIOFilter::Register(filter);
 		}
 		break;
 

@@ -28,6 +28,7 @@
 #include <ccHObjectCaster.h>
 
 //Local
+#include "qCC_io.h"
 #include "ccGlobalShiftManager.h"
 
 //! Typical I/O filter errors
@@ -158,7 +159,7 @@ public: //static methods
 		\param filter input filter
 		\return loaded entities (or 0 if an error occurred)
 	**/
-	static ccHObject* LoadFromFile(	const QString& filename,
+	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
 									LoadParameters& parameters,
 									Shared filter);
 
@@ -168,7 +169,7 @@ public: //static methods
 		\param fileFilter input filter 'file filter' (if empty, the best I/O filter will be guessed from the file extension)
 		\return loaded entities (or 0 if an error occurred)
 	**/
-	static ccHObject* LoadFromFile(	const QString& filename,
+	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
 									LoadParameters& parameters,
 									QString fileFilter = QString());
 
@@ -179,7 +180,7 @@ public: //static methods
 		\param filter output filter
 		\return error type (if any)
 	**/
-	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
+	QCC_IO_LIB_API static CC_FILE_ERROR SaveToFile(ccHObject* entities,
 									const QString& filename,
 									Shared filter);
 
@@ -190,7 +191,7 @@ public: //static methods
 		\param fileFilter output filter 'file filter'
 		\return error type (if any)
 	**/
-	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
+	QCC_IO_LIB_API static CC_FILE_ERROR SaveToFile(ccHObject* entities,
 									const QString& filename,
 									QString fileFilter);
 
@@ -200,36 +201,36 @@ public: //static methods
 		\param loadParameters loading parameters
 		\return whether global shift has been defined/enabled
 	**/
-	static bool HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters);
+	QCC_IO_LIB_API static bool HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters);
 
 	//! Displays (to console) the message corresponding to a given error code
 	/** \param err error code
 		\param action "saving", "reading", etc.
 		\param filename corresponding file
 	**/
-	static void DisplayErrorMessage(CC_FILE_ERROR err,
+	QCC_IO_LIB_API static void DisplayErrorMessage(CC_FILE_ERROR err,
 									const QString& action,
 									const QString& filename);
 
 public: //global filters registration mechanism
 
 	//! Init internal filters (should be called once)
-	static void InitInternalFilters();
+	QCC_IO_LIB_API static void InitInternalFilters();
 
 	//! Registers a new filter
-	static void Register(Shared filter);
+	QCC_IO_LIB_API static void Register(Shared filter);
 
 	//! Returns the filter corresponding to the given 'file filter'
-	static Shared GetFilter(QString fileFilter, bool onImport);
+	QCC_IO_LIB_API static Shared GetFilter(QString fileFilter, bool onImport);
 
 	//! Returns the best filter (presumably) to open a given file extension
-	static Shared FindBestFilterForExtension(QString ext);
+	QCC_IO_LIB_API static Shared FindBestFilterForExtension(QString ext);
 
 	//! Type of a I/O filters container
 	typedef std::vector< FileIOFilter::Shared > FilterContainer;
 
 	//! Returns the set of all registered filters
-	static const FilterContainer& GetFilters();
+	QCC_IO_LIB_API static const FilterContainer& GetFilters();
 
 };
 

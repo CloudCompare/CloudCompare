@@ -24,7 +24,7 @@
 #include <QFile>
 
 //! CloudCompare dedicated binary point cloud I/O filter
-class BinFilter : public FileIOFilter
+class QCC_IO_LIB_API BinFilter : public FileIOFilter
 {
 public:
 

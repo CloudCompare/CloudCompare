@@ -23,7 +23,7 @@
 //! OFF file I/O filter
 /** See http://people.sc.fsu.edu/~jburkardt/data/off/off.html
 **/
-class OFFFilter : public FileIOFilter
+class QCC_IO_LIB_API OFFFilter : public FileIOFilter
 {
 public:
 

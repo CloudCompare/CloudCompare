@@ -21,10 +21,13 @@
 //CCLib
 #include <CCGeom.h>
 
+//local
+#include "qCC_io.h"
+
 class ccHObject;
 
 //! Helper class to handle big coordinates shift/scale (typically while loading entities)
-class ccGlobalShiftManager
+class QCC_IO_LIB_API ccGlobalShiftManager
 {
 public:
 

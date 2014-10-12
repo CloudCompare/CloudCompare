@@ -24,7 +24,7 @@
 class ccPointCloud;
 
 //! PCD point cloud I/O filter
-class PCDFilter : public FileIOFilter
+class QCC_IO_LIB_API PCDFilter : public FileIOFilter
 {
 public:
 

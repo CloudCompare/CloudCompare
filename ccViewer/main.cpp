@@ -31,6 +31,9 @@
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 
+//qCC_io
+#include <FileIOFilter.h>
+
 #ifdef USE_VLD
 //VLD
 #include <vld.h>
@@ -100,6 +103,7 @@ int main(int argc, char *argv[])
 
 	//common data initialization
 	ccTimer::Init();
+	FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 

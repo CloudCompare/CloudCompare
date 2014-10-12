@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Point+Normal binary point cloud file I/O filter
-class PNFilter : public FileIOFilter
+class QCC_IO_LIB_API PNFilter : public FileIOFilter
 {
 public:
 

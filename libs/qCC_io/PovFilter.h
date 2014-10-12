@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! P.O.V. meta-file I/O filter
-class PovFilter : public FileIOFilter
+class QCC_IO_LIB_API PovFilter : public FileIOFilter
 {
 public:
 

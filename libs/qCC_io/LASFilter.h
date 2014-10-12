@@ -23,7 +23,7 @@
 #ifdef CC_LAS_SUPPORT
 
 //! ASPRS LAS point cloud file I/O filter
-class LASFilter : public FileIOFilter
+class QCC_IO_LIB_API LASFilter : public FileIOFilter
 {
 public:
 

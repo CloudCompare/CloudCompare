@@ -25,7 +25,7 @@
 //! Autodesk FBX format I/O filter
 /** http://www.autodesk.com/products/fbx/overview
 **/
-class FBXFilter : public FileIOFilter
+class QCC_IO_LIB_API FBXFilter : public FileIOFilter
 {
 public:
 

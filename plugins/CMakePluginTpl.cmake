@@ -6,6 +6,7 @@ include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
+include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
@@ -52,7 +53,7 @@ set_default_cc_preproc( ${PROJECT_NAME} )
 # Add custom default prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if( WIN32 )
-    set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
+    set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
 endif()
 
 # Plugins need the QT_NO_DEBUG preprocessor in release!

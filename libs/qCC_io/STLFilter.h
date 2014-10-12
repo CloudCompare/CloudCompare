@@ -30,7 +30,7 @@ class ccPointCloud;
 //! StereoLithography file I/O filter
 /** See http://www.ennex.com/~fabbers/StL.asp
 **/
-class STLFilter : public FileIOFilter
+class QCC_IO_LIB_API STLFilter : public FileIOFilter
 {
 public:
 

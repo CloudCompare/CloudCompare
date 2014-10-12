@@ -23,7 +23,7 @@
 class ccGBLSensor;
 
 //! Depth map I/O filter
-class DepthMapFileFilter : public FileIOFilter
+class QCC_IO_LIB_API DepthMapFileFilter : public FileIOFilter
 {
 public:
 

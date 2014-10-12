@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                               QCC_DB                                   #
+//#                               QCC_IO                                   #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifdef QCC_DB_USE_AS_DLL
+#ifdef QCC_IO_USE_AS_DLL
 
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the QCC_DB_DLL_EXPORTS
@@ -23,12 +23,12 @@
 // that uses this DLL. This way any other project whose source files include this file see
 // QCC_DB_LIB_API functions as being imported from a DLL, wheras this DLL sees symbols
 // defined with this macro as being exported.
-#ifdef QCC_DB_LIB_EXPORTS
-#define QCC_DB_LIB_API __declspec(dllexport)
+#ifdef QCC_IO_LIB_EXPORTS
+#define QCC_IO_LIB_API __declspec(dllexport)
 #else
-#define QCC_DB_LIB_API __declspec(dllimport)
+#define QCC_IO_LIB_API __declspec(dllimport)
 #endif
 #else
-#define QCC_DB_LIB_API
+#define QCC_IO_LIB_API
 
-#endif
+#endif //QCC_IO_USE_AS_DLL

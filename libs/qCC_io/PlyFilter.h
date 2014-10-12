@@ -57,7 +57,7 @@ struct plyElement
 };
 
 //! Stanfod PLY file I/O filter
-class PlyFilter : public FileIOFilter
+class QCC_IO_LIB_API PlyFilter : public FileIOFilter
 {
 public:
 

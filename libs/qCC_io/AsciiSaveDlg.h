@@ -18,13 +18,16 @@
 #ifndef CC_ASCII_SAVE_DIALOG_HEADER
 #define CC_ASCII_SAVE_DIALOG_HEADER
 
+//local
+#include "qCC_io.h"
+
 //Qt
 #include <QDialog>
 
 class Ui_AsciiSaveDialog;
 
 //! Dialog for configuration of ASCII files saving sequence
-class AsciiSaveDlg : public QDialog
+class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 {
 	Q_OBJECT
 

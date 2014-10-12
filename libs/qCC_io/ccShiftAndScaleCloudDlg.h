@@ -1,6 +1,10 @@
 #ifndef CC_RECENTER_CLOUD_DIALOG
 #define CC_RECENTER_CLOUD_DIALOG
 
+//local
+#include "qCC_io.h"
+
+//Qt
 #include <QDialog>
 
 //CCLib
@@ -10,7 +14,7 @@ class Ui_GlobalShiftAndScaleDlg;
 class QAbstractButton;
 
 //! Dialog for selection of cloud center
-class ccShiftAndScaleCloudDlg : public QDialog
+class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 {
 	Q_OBJECT
 

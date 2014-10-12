@@ -23,7 +23,7 @@
 #ifdef CC_E57_SUPPORT
 
 //! E57 filter (based on libE57)
-class E57Filter : public FileIOFilter
+class QCC_IO_LIB_API E57Filter : public FileIOFilter
 {
 public:
 

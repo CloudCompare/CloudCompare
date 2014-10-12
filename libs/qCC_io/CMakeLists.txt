@@ -43,7 +43,7 @@ else()
 	qt4_wrap_ui( generated_ui_list ${ui_list} )
 endif()	
 
-add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
+add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
@@ -62,5 +62,14 @@ set_default_cc_preproc( ${PROJECT_NAME} )
 
 # Add custom prepocessor definitions
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_IO_USE_AS_DLL )
+endif()
+
+# install (shared) lib to specified destinations
+if( UNIX )
+	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
+else()
+foreach( dest ${INSTALL_DESTINATIONS} )
+	install_shared( ${PROJECT_NAME} ${dest} 1 )
+endforeach()
 endif()

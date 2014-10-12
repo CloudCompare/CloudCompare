@@ -23,7 +23,7 @@
 #ifdef CC_X3D_SUPPORT
 
 //! X3D filter (based on XIOT)
-class X3DFilter : public FileIOFilter
+class QCC_IO_LIB_API X3DFilter : public FileIOFilter
 {
 public:
 

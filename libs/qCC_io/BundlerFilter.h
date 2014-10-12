@@ -23,7 +23,7 @@
 //! Noah Snavely's Bundler output file filter
 /** See http://phototour.cs.washington.edu/
 **/
-class BundlerFilter : public FileIOFilter
+class QCC_IO_LIB_API BundlerFilter : public FileIOFilter
 {
 public:
 

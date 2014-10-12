@@ -28,7 +28,7 @@
 #include <QSharedPointer>
 
 //! ASCII point cloud I/O filter
-class AsciiFilter : public FileIOFilter
+class QCC_IO_LIB_API AsciiFilter : public FileIOFilter
 {
 public:
 

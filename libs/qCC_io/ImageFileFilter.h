@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Filter to load or save an image (all types supported by Qt)
-class ImageFileFilter : public FileIOFilter
+class QCC_IO_LIB_API ImageFileFilter : public FileIOFilter
 {
 public:
 

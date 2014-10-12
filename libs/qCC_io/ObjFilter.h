@@ -23,7 +23,7 @@
 class ccGenericMesh;
 
 //! Wavefront meshes file I/O filter
-class ObjFilter : public FileIOFilter
+class QCC_IO_LIB_API ObjFilter : public FileIOFilter
 {
 public:
 

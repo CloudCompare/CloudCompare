@@ -25,7 +25,7 @@
 //! Raster grid format file I/O filter
 /** Multiple formats are handled: see GDAL (http://www.gdal.org/)
 **/
-class RasterGridFilter : public FileIOFilter
+class QCC_IO_LIB_API RasterGridFilter : public FileIOFilter
 {
 public:
 

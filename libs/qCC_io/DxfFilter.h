@@ -21,7 +21,7 @@
 #include "FileIOFilter.h"
 
 //! Autocad DXF file I/O filter
-class DxfFilter : public FileIOFilter
+class QCC_IO_LIB_API DxfFilter : public FileIOFilter
 {
 public:
 

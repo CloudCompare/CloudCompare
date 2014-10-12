@@ -18,7 +18,8 @@
 #ifndef CC_ASCII_OPEN_DIALOG_HEADER
 #define CC_ASCII_OPEN_DIALOG_HEADER
 
-#include <algorithm>
+//local
+#include "qCC_io.h"
 
 //Qt
 #include <QString>
@@ -26,6 +27,7 @@
 
 //system
 #include <vector>
+#include <algorithm>
 
 enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_X			= 1,
@@ -94,7 +96,7 @@ class QPushButton;
 class Ui_AsciiOpenDialog;
 
 //! Dialog for configuration of ASCII files opening sequence
-class AsciiOpenDlg : public QDialog
+class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 {
 	Q_OBJECT
 

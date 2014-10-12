@@ -49,6 +49,23 @@
 
 using namespace CCLib;
 
+bool PlyFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "PLY");
+}
+
+bool PlyFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (	type == CC_TYPES::MESH
+		||	type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	//ask for output format

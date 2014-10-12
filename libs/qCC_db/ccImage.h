@@ -73,14 +73,6 @@ public:
 	//! Returns image texture transparency
 	inline float getAlpha() const { return m_texAlpha; }
 
-#ifdef INCLUDE_IMAGE_FILENAME
-	//! Returns complete filename
-	inline QString getCompleteFileName() const { return m_completeFileName; }
-
-	//! Sets complete filename
-	void setCompleteFileName(const QString& name) {m_completeFileName = name;}
-#endif
-
 	//! Manually sets aspect ratio
 	void setAspectRatio(float ar) { m_aspectRatio = ar; }
 
@@ -114,6 +106,9 @@ protected:
 	**/
 	virtual bool bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture = false);
 
+	//! Updates aspect ratio
+	void updateAspectRatio();
+
 	//! Image width (in pixels)
 	unsigned m_width;
 	//! Image height (in pixels)
@@ -144,11 +139,6 @@ protected:
 
 	//! Associated sensor
 	ccCameraSensor* m_associatedSensor;
-
-#ifdef INCLUDE_IMAGE_FILENAME
-	//! Complete filename
-	QString m_completeFileName;
-#endif
 };
 
 #endif //CC_IMAGE_HEADER

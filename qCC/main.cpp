@@ -34,6 +34,10 @@
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 
+//qCC_io
+#include <FileIOFilter.h>
+
+//local
 #include "mainwindow.h"
 #include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
@@ -119,6 +123,7 @@ int main(int argc, char **argv)
 
 	//global structures initialization
 	ccTimer::Init();
+	FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
@@ -151,7 +156,7 @@ int main(int argc, char **argv)
 			for (int i=1; i<argc; ++i)
 				filenames << QString(argv[i]);
 
-			mainWindow->addToDB(filenames,UNKNOWN_FILE);
+			mainWindow->addToDB(filenames);
 		}
 		
 		if (splash)

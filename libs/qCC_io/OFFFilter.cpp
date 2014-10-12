@@ -40,25 +40,44 @@
 //System
 #include <string.h>
 
+bool OFFFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "OFF");
+}
+
+bool OFFFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::MESH)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
 	if (!entity->isKindOf(CC_TYPES::MESH))
+	{
+		ccLog::Warning("[OBJ] This filter can only save one mesh at a time!");
 		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-	if (mesh->size() == 0)
+	if (!mesh || mesh->size() == 0)
 	{
-		ccLog::Warning(QString("[OFF] No facet in mesh '%1'!").arg(mesh->getName()));
-		return CC_FERR_NO_ERROR;
+		ccLog::Warning("[OFF] Input mesh is empty!");
+		return CC_FERR_NO_SAVE;
 	}
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 	if (!vertices || vertices->size() == 0)
 	{
-		ccLog::Warning(QString("[OFF] No vertices in mesh '%1'?!").arg(mesh->getName()));
-		return CC_FERR_NO_ERROR;
+		ccLog::Warning("[OFF] Input mesh has no vertices?!");
+		return CC_FERR_NO_SAVE;
 	}
 
 	//try to open file for saving

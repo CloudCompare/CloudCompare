@@ -20,6 +20,7 @@
 #include <AsciiFilter.h>
 #include <FBXFilter.h>
 #include <PTXFilter.h>
+#include <BinFilter.h>
 
 //qCC
 #include "ccCommon.h"
@@ -97,13 +98,13 @@ static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 static const char COMMAND_PTX_COMPUTE_NORMALS[]				= "COMPUTE_PTX_NORMALS";
 
 //Current cloud(s) export format (can be modified with the 'COMMAND_CLOUD_EXPORT_FORMAT' option)
-static CC_FILE_TYPES s_CloudExportFormat = BIN;
+static QString s_CloudExportFormat(BinFilter::GetFileFilter());
 //Current cloud(s) export extension (warning: can be anything)
-static QString s_CloudExportExt(CC_FILE_TYPE_DEFAULT_EXTENSION[s_CloudExportFormat]);
+static QString s_CloudExportExt(BinFilter::GetDefaultExtension());
 //Current mesh(es) export format (can be modified with the 'COMMAND_MESH_EXPORT_FORMAT' option)
-static CC_FILE_TYPES s_MeshExportFormat = BIN;
+static QString s_MeshExportFormat(BinFilter::GetFileFilter());
 //Current mesh(es) export extension (warning: can be anything)
-static QString s_MeshExportExt(CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat]);
+static QString s_MeshExportExt(BinFilter::GetDefaultExtension());
 //Default numerical precision for ASCII output
 static int s_precision = 12;
 //Whether a timestamp should be automatically added to output files or not
@@ -146,10 +147,8 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 
 	//reset default behavior(s)
 	PTXFilter::SetNormalsComputationBehavior(PTXFilter::NEVER);
-	s_CloudExportFormat = BIN;
-	s_CloudExportExt = CC_FILE_TYPE_DEFAULT_EXTENSION[s_CloudExportFormat];
-	s_MeshExportFormat = BIN;
-	s_MeshExportExt = CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat];
+	s_MeshExportFormat = s_CloudExportFormat = BinFilter::GetFileFilter();
+	s_MeshExportExt = s_CloudExportExt = BinFilter::GetDefaultExtension();
 	s_precision = 12;
 	s_addTimestamp = true;
 	s_silentMode = false;
@@ -430,7 +429,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	QString filename(arguments.takeFirst());
 	Print(QString("Opening file: '%1'").arg(filename));
 
-	ccHObject* db = FileIOFilter::LoadFromFile(filename,s_loadParameters,UNKNOWN_FILE);
+	ccHObject* db = FileIOFilter::LoadFromFile(filename,s_loadParameters,QString());
 	if (!db)
 		return Error(QString("Failed to open file '%1'").arg(filename));
 
@@ -2105,30 +2104,33 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	return true;
 }
 
-CC_FILE_TYPES ccCommandLineParser::getFileFormat(QStringList& arguments)
+QString ccCommandLineParser::GetFileFormatFilter(QStringList& arguments, QString& defaultExt)
 {
-	CC_FILE_TYPES type = FILE_TYPES_COUNT;
+	QString fileFilter;
+	defaultExt = QString();
 
 	if (!arguments.isEmpty())
 	{
-		//test if the specified format corresponds to a valid file type
+		//test if the specified format corresponds to a known file type
 		QString argument = arguments.front().toUpper();
 		arguments.pop_front();
 
-		for (int i=0; i<FILE_TYPES_COUNT; ++i)
+		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
+		for (size_t i=0; i<filters.size(); ++i)
 		{
-			if (argument == QString(CC_FILE_TYPE_DEFAULT_EXTENSION[i]).toUpper())
+			if (argument == QString(filters[i]->getDefaultExtension()).toUpper())
 			{
 				//found
-				type = static_cast<CC_FILE_TYPES>(i);
+				fileFilter = filters[i]->getFileFilters(false).first(); //Take the first 'output' file filter by default (could we be smarter?)
+				defaultExt = filters[i]->getDefaultExtension();
 				break;
 			}
 		}
 
-		//didn't found anything?
-		if (type == FILE_TYPES_COUNT)
+		//haven't found anything?
+		if (fileFilter.isEmpty())
 		{
-			ccConsole::Error(QString("Unknown format specifier (%1)").arg(argument));
+			ccConsole::Error(QString("Unhandled format specifier (%1)").arg(argument));
 		}
 	}
 	else
@@ -2136,20 +2138,21 @@ CC_FILE_TYPES ccCommandLineParser::getFileFormat(QStringList& arguments)
 		ccConsole::Error("Missing file format specifier!");
 	}
 
-	return type;
+	return fileFilter;
 }
 
 bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 {
-	CC_FILE_TYPES type = getFileFormat(arguments);
-	if (type == FILE_TYPES_COUNT)
+	QString defaultExt;
+	QString fileFilter = GetFileFormatFilter(arguments,defaultExt);
+	if (fileFilter.isEmpty())
 		return false;
 
-	s_CloudExportFormat = type;
-	s_CloudExportExt = QString(CC_FILE_TYPE_DEFAULT_EXTENSION[s_CloudExportFormat]);
+	s_CloudExportFormat = fileFilter;
+	s_CloudExportExt = defaultExt;
 
 	//default options for ASCII output
-	if (s_CloudExportFormat == ASCII)
+	if (fileFilter == AsciiFilter::GetFileFilter())
 	{
 		QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 		assert(saveDialog);
@@ -2191,7 +2194,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (!ok || precision < 0)
 				return Error(QString("Invalid value for precision! (%1)").arg(COMMAND_ASCII_EXPORT_PRECISION));
 
-			if (type != ASCII)
+			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
@@ -2211,7 +2214,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR)));
 
-			if (type != ASCII)
+			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 			QString separatorStr = arguments.takeFirst().toUpper();
@@ -2247,12 +2250,13 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 
 bool ccCommandLineParser::commandChangeMeshOutputFormat(QStringList& arguments)
 {
-	CC_FILE_TYPES type = getFileFormat(arguments);
-	if (type == FILE_TYPES_COUNT)
+	QString defaultExt;
+	QString fileFilter = GetFileFormatFilter(arguments,defaultExt);
+	if (fileFilter.isEmpty())
 		return false;
 
-	s_MeshExportFormat = type;
-	s_MeshExportExt = QString(CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat]);
+	s_MeshExportFormat = fileFilter;
+	s_MeshExportExt = defaultExt;
 
 	//look for additional parameters
 	while (!arguments.empty())

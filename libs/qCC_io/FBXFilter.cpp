@@ -39,6 +39,22 @@
 #include <vector>
 #include <assert.h>
 
+bool FBXFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "FBX");
+}
+
+bool FBXFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::MESH)
+	{
+		multiple = true;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 // Converts a CC mesh to an FBX mesh
 static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filename, size_t meshIndex)
 {

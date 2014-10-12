@@ -40,10 +40,15 @@
 
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
-CC_FILE_ERROR PTXFilter::saveToFile(ccHObject* entity, QString filename)
+bool PTXFilter::canLoadExtension(QString upperCaseExt) const
 {
-	//not supported
-	return CC_FERR_WRONG_FILE_TYPE;
+	return (upperCaseExt == "PTX");
+}
+
+bool PTXFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//not supported yet
+	return false;
 }
 
 //! Association of an angle and the corresponding number of rows/columns

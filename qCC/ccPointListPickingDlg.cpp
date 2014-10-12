@@ -35,7 +35,7 @@
 #include <ccPolyline.h>
 
 //qCC_io
-#include <FileIOFilter.h>
+#include <AsciiFilter.h>
 
 //local
 #include "ccGLWindow.h"
@@ -375,7 +375,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	filename = QFileDialog::getSaveFileName(this,
 											"Export to ASCII",
 											filename,
-											CC_FILE_TYPE_FILTERS[ASCII]);
+											AsciiFilter::GetFileFilter());
 
 	if (filename.isEmpty())
 		return;

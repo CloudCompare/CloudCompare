@@ -29,12 +29,20 @@ class RasterGridFilter : public FileIOFilter
 {
 public:
 
+	//static accessors
+	static inline QString GetFileFilter() { return "RASTER grid (*.*)"; }
+	static inline QString GetDefaultExtension() { return "tif"; }
+
 	//inherited from FileIOFilter
+	virtual bool importSupported() const { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
 };
 
-#endif //CC_RASTER_FILTER_HEADER
+#endif //CC_GDAL_SUPPORT
 
-#endif
+#endif //CC_RASTER_FILTER_HEADER

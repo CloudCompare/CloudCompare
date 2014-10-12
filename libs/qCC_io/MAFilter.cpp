@@ -30,6 +30,23 @@
 #include <string.h>
 #include <assert.h>
 
+bool MAFilter::canLoadExtension(QString upperCaseExt) const
+{
+	//import not supported
+	return false;
+}
+
+bool MAFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::MESH)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 struct edge
 {
 	int edgeIndex;
@@ -49,35 +66,20 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	ccHObject::Container meshes;
-	if (entity->isKindOf(CC_TYPES::MESH))
-		meshes.push_back(entity);
-	else
-		entity->filterChildren(meshes, true, CC_TYPES::MESH);
-
-	if (meshes.empty())
-	{
-		ccLog::Error("No mesh in input selection!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-	else if (meshes.size()>1)
-	{
-		ccLog::Error("Can't save more than one mesh per MA file!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-
-	//we extract the (short) filename from the whole path
-	QString baseFilename = QFileInfo(filename).fileName();
-
 	//the mesh to save
-	ccGenericMesh* theMesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
+	ccGenericMesh* theMesh = ccHObjectCaster::ToGenericMesh(entity);
+	if (!theMesh)
+	{
+		ccLog::Error("[MA] This filter can only save one mesh at a time!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 	//and its vertices
 	ccGenericPointCloud* theCloud = theMesh->getAssociatedCloud();
 
 	unsigned numberOfTriangles = theMesh->size();
 	unsigned numberOfVertexes = theCloud->size();
 
-	if (numberOfTriangles==0 || numberOfVertexes==0)
+	if (numberOfTriangles == 0 || numberOfVertexes == 0)
 	{
 		ccLog::Error("Mesh is empty!");
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -113,6 +115,9 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
+	//we extract the (short) filename from the whole path
+	QString baseFilename = QFileInfo(filename).fileName();
+
 	//header
 	if (fprintf(fp,"//Maya ASCII 7.0 scene\n") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
@@ -125,15 +130,14 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 	if (fprintf(fp,"currentUnit -l %s -a degree -t film;\n","centimeter") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
-
 	//for multiple meshes handling (does not work yet)
 	unsigned char currentMesh = 0;
 
-	//NOEUD DE TRANSFORMATION
+	//transformation node
 	if (fprintf(fp,"createNode transform -n \"Mesh%i\";\n",currentMesh+1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
-	//NOEUD "PRINCIPAL"
+	//main node
 	if (fprintf(fp,"createNode mesh -n \"MeshShape%i\" -p \"Mesh%i\";\n",currentMesh+1,currentMesh+1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
@@ -162,7 +166,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		if (fprintf(fp,"\tsetAttr \".tgsp\" 1;\n") < 0)
 			{fclose(fp);return CC_FERR_WRITING;}
 
-		//ON INSERE UN NOEUD "SECONDAIRE"
+		//insert a secondary nodes
 		if (fprintf(fp,"createNode mesh -n \"polySurfaceShape%i\" -p \"Mesh%i\";\n",currentMesh+1,currentMesh+1) < 0)
 			{fclose(fp);return CC_FERR_WRITING;}
 
@@ -208,14 +212,13 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 	}
 
-	//ectitures des "edges"
-	//structure permettant la gestion des indexs uniques des edges
+	//save "edges"
 	edge** theEdges = new edge*[numberOfVertexes];
 	memset(theEdges,0,sizeof(edge*)*numberOfVertexes);
 	unsigned ind[3],a,b;
 	int currentEdgeIndex=0,lastEdgeIndexPushed=-1;
 
-	int hard=0; //les arrêtes dans Maya peuvent être "hard" ou "soft" ...
+	int hard=0; //Maya edges cab be "hard" or "soft" ...
 	{
 		theMesh->placeIteratorAtBegining();
 		for (unsigned i=0;i<numberOfTriangles;++i)
@@ -227,7 +230,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 			ind[2] = tsi->i3;
 
 			uchar k,l;
-			for (k=0;k<3;++k)
+			for (k=0; k<3; ++k)
 			{
 				l=(k<2 ? k+1 : 0);
 				a = (ind[k]<ind[l] ? ind[k] : ind[l]);
@@ -245,18 +248,18 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 					e = e->nextEdge;
 				}
 
-				if (currentEdgeIndex<0) //on cree une nouvelle "edge"
+				if (currentEdgeIndex < 0) //create a new edge
 				{
 					edge* newEdge = new edge;
 					newEdge->nextEdge = NULL;
 					newEdge->theOtherPoint = b;
 					newEdge->positif = (a==ind[k]);
-					//newEdge->edgeIndex = ++lastEdgeIndexPushed; //non ! On n'ecrit pas l'arrête maintenant, donc ce n'est plus vrai
+					//newEdge->edgeIndex = ++lastEdgeIndexPushed; //don't write the edge right now
 					newEdge->edgeIndex = 0;
 					++lastEdgeIndexPushed;
 					//currentEdgeIndex = lastEdgeIndexPushed;
 
-					//on doit rajoute le noeud a la fin !!!
+					//don't forget the node!
 					if (theEdges[a])
 					{
 						e = theEdges[a];
@@ -274,7 +277,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 	}
 
-	//ecriture effective des edges
+	//now write the edges
 	{
 		unsigned numberOfEdges = unsigned(lastEdgeIndexPushed+1);
 		if (fprintf(fp,"\tsetAttr -s %u \".ed[0:%u]\"",numberOfEdges,numberOfEdges-1) < 0)
@@ -308,7 +311,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		return CC_FERR_WRITING;
 	}
 
-	//ectitures des "faces"
+	//write faces
 	if (fprintf(fp,"\tsetAttr -s %u \".fc[0:%u]\" -type \"polyFaces\"\n",numberOfTriangles,numberOfTriangles-1) < 0)
 	{
 		fclose(fp);
@@ -357,7 +360,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 	}
 
-	//on libere la memoire
+	//free memory
 	{
 		for (unsigned i=0; i<numberOfVertexes; ++i)
 		{
@@ -377,7 +380,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 	}
 
-	//cadeaux bonux 2
+	//bonus track
 	if (	fprintf(fp,"\tsetAttr \".cd\" -type \"dataPolyComponent\" Index_Data Edge 0 ;\n") < 0
 		||	fprintf(fp,"\tsetAttr \".ndt\" 0;\n") < 0
 		||	fprintf(fp,"\tsetAttr \".tgsp\" 1;\n") < 0 )
@@ -386,7 +389,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		return CC_FERR_WRITING;
 	}
 
-	//NOEUD DES VERTEX COLORS
+	//vertex colors
 	if (hasColors)
 	{
 		assert(theCloud->isA(CC_TYPES::POINT_CLOUD));
@@ -401,7 +404,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		if (fprintf(fp,"\tsetAttr -s %u \".vclr\";\n",numberOfVertexes) < 0)
 			{fclose(fp);return CC_FERR_WRITING;}
 
-		//on construit une structure qui associe chaque vertex aux faces auxquelles elle appartient
+		//association of each vertex with the faces it belongs to
 		faceIndexes** theFacesIndexes = new faceIndexes*[numberOfVertexes];
 		memset(theFacesIndexes,0,sizeof(faceIndexes*)*numberOfVertexes);
 		theMesh->placeIteratorAtBegining();
@@ -437,7 +440,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 			}
 		}
 
-		//pour chaque vertex
+		//for each vertex
 		{
 			float col[3];
 			float coef = 1.0f/static_cast<float>(MAX_COLOR_COMP);
@@ -507,7 +510,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 		return CC_FERR_WRITING;
 	}
 
-	//fin du fichier
+	//end of file
 	if (fprintf(fp,"//End of %s\n",qPrintable(baseFilename)) < 0)
 	{
 		fclose(fp);
@@ -515,13 +518,6 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 	}
 
 	fclose(fp);
-
-	return CC_FERR_NO_ERROR;
-}
-
-CC_FILE_ERROR MAFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
-{
-	ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }

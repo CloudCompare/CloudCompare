@@ -28,36 +28,40 @@
 //default normal value
 static const PointCoordinateType s_defaultNorm[3] = {0,0,1};
 
+bool PNFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "PN");
+}
+
+bool PNFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	ccHObject::Container clouds;
-	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-		clouds.push_back(entity);
-	else
-		entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-
-	if (clouds.empty())
-	{
-		ccLog::Error("No point cloud in input selection!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-	else if (clouds.size()>1)
-	{
-		ccLog::Error("Can't save more than one cloud per PN file!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-
 	//the cloud to save
-	ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
+	ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+	if (!theCloud)
+	{
+		ccLog::Warning("[PN] This filter can only save one cloud at a time!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 	unsigned numberOfPoints = theCloud->size();
 
 	if (numberOfPoints == 0)
 	{
-		ccLog::Error("Cloud is empty!");
-		return CC_FERR_BAD_ENTITY_TYPE;
+		ccLog::Warning("[PN] Input cloud is empty!");
+		return CC_FERR_NO_SAVE;
 	}
 
 	//open binary file for writing

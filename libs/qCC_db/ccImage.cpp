@@ -31,9 +31,6 @@
 
 //System
 #include <assert.h>
-#ifdef INCLUDE_IMAGE_FILENAME
-#include <string.h>
-#endif
 
 ccImage::ccImage()
 	: ccHObject("Not loaded")
@@ -46,9 +43,6 @@ ccImage::ccImage()
 	, m_textureID(0)
 	, m_boundWin(0)
 	, m_associatedSensor(0)
-#ifdef INCLUDE_IMAGE_FILENAME
-	, m_completeFileName("")
-#endif
 {
 	setVisible(true);
 	lockVisibility(false);
@@ -59,6 +53,7 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	: ccHObject(name)
 	, m_width(image.width())
 	, m_height(image.height())
+	, m_aspectRatio(1.0f)
 	, m_texU(1.0f)
 	, m_texV(1.0f)
 	, m_texAlpha(1.0f)
@@ -66,10 +61,8 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	, m_boundWin(0)
 	, m_image(image)
 	, m_associatedSensor(0)
-#ifdef INCLUDE_IMAGE_FILENAME
-	, m_completeFileName("")
-#endif
 {
+	updateAspectRatio();
 	setVisible(true);
 	lockVisibility(false);
 	setEnabled(true);
@@ -91,10 +84,6 @@ bool ccImage::load(const QString& filename, QString& error)
 	setName(QFileInfo(filename).fileName());
 	setEnabled(true);
 
-#ifdef INCLUDE_IMAGE_FILENAME
-	setCompleteFileName(filename);
-#endif
-
 	return true;
 }
 
@@ -107,12 +96,17 @@ void ccImage::setData(const QImage& image)
 	m_image = image;
 	m_width = m_image.width();
 	m_height = m_image.height();
-	setAspectRatio(m_height>0 ? (float)m_width/(float)m_height : 1.0f);
+	updateAspectRatio();
 
 	//default behavior (this will be updated later, depending
 	//on the OpenGL version of the bound QGLWidget)
 	m_texU = 1.0;
 	m_texV = 1.0;
+}
+
+void ccImage::updateAspectRatio()
+{
+	setAspectRatio(m_height != 0 ? static_cast<float>(m_width)/m_height : 1.0f);
 }
 
 bool ccImage::unbindTexture()
@@ -220,13 +214,6 @@ void ccImage::setAlpha(float value)
 		m_texAlpha = value;
 }
 
-#ifdef INCLUDE_IMAGE_FILENAME
-void ccImage::setCompleteFileName(const char* name)
-{
-	strcpy(completeFileName,name);
-}
-#endif
-
 void ccImage::setAssociatedSensor(ccCameraSensor* sensor)
 {
 	m_associatedSensor = sensor;
@@ -263,12 +250,8 @@ bool ccImage::toFile_MeOnly(QFile& out) const
 	outStream << m_texV;
 	outStream << m_texAlpha;
 	outStream << m_image;
-#ifdef INCLUDE_IMAGE_FILENAME
-	outStream << m_completeFileName;
-#else
 	QString fakeString;
-	outStream << fakeString;
-#endif
+	outStream << fakeString; //formerly: 'complete filename'
 
 	return true;
 }
@@ -295,12 +278,8 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	inStream >> m_texV;
 	inStream >> m_texAlpha;
 	inStream >> m_image;
-#ifdef INCLUDE_IMAGE_FILENAME
-	inStream >> m_completeFileName;
-#else
 	QString fakeString;
-	inStream >> fakeString;
-#endif
+	inStream >> fakeString; //formerly: 'complete filename'
 
 	return true;
 }

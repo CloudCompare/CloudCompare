@@ -19,7 +19,7 @@ include( contrib/FBXSupport.cmake )
 
 function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export base folder (optional - '_debug' will be appended for debug configuration)
 
-	# libraries with dynamic link can automatically 'install' their DLLs
+	# libraries with dynamic linkage can automatically 'install' their DLLs
 
 	# liblas support
 	target_link_liblas( ${ARGV0} ${ARGV1} )

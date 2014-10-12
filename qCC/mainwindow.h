@@ -116,7 +116,7 @@ public:
 		\param destWin destination window (0 = active one)
 	**/
 	virtual void addToDB(	const QStringList& filenames,
-							CC_FILE_TYPES fType = UNKNOWN_FILE,
+							QString fileFilter = QString(),
 							ccGLWindow* destWin = 0);
 
 	//inherited from ccMainAppInterface
@@ -194,15 +194,15 @@ protected slots:
 	ccGLWindow* new3DView();
 
 	//! Displays 'about' dialog
-	void about();
+	void doActionShawAboutDialog();
 	//! Displays 'help' dialog
-	void help();
+	void doActionShowHelpDialog();
 	//! Displays 'about plugins' dialog
-	void aboutPlugins();
+	void doActionShowAboutPluginsDialog();
 	//! Displays file open dialog
-	void loadFile();
+	void doActionLoadFile();
 	//! Displays file save dialog
-	void saveFile();
+	void doActionSaveFile();
 
 	//! Clones currently selected entities
 	void doActionClone();

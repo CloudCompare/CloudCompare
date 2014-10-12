@@ -39,10 +39,16 @@
 #include <QFile>
 #include <QTextStream>
 
-CC_FILE_ERROR X3DFilter::saveToFile(ccHObject* entity, QString filename)
+bool X3DFilter::canLoadExtension(QString upperCaseExt) const
 {
-	//TODO
-	return CC_FERR_NO_SAVE;
+	return (	upperCaseExt == "X3D"
+			||	upperCaseExt == "WRL" );
+}
+
+bool X3DFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//not supported
+	return false;
 }
 
 CC_FILE_ERROR X3DFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
@@ -60,7 +66,7 @@ CC_FILE_ERROR X3DFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		return CC_FERR_READING;
 	}
 
-	if (container.getChildrenNumber()==0)
+	if (container.getChildrenNumber() == 0)
 		return CC_FERR_NO_LOAD;
 
 	return CC_FERR_NO_ERROR;

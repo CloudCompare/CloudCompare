@@ -492,7 +492,7 @@ void ccViewer::addToDB(const QStringList& filenames)
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i],parameters,UNKNOWN_FILE);
+		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i],parameters);
 
 		if (newEntities)
 		{

@@ -27,12 +27,21 @@ class DepthMapFileFilter : public FileIOFilter
 {
 public:
 
-	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	//static accessors
+	static inline QString GetFileFilter() { return "Depth Map [ascii] (*.txt *.asc)"; }
+	static inline QString GetDefaultExtension() { return "txt"; }
 
-protected:
-	CC_FILE_ERROR saveToOpenedFile(FILE* fp, ccGBLSensor* sensor);
+	//inherited from FileIOFilter
+	virtual bool exportSupported() const { return true; }
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
+
+	//direct method to save a sensor (depth map)
+	CC_FILE_ERROR saveToFile(QString filename, ccGBLSensor* sensor);
+
 };
 
-#endif
+#endif //CC_DEPTH_MAP_FILE_FILTER_HEADER

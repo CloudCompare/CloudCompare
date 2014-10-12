@@ -40,19 +40,38 @@
 //System
 #include <string.h>
 
+bool ObjFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "OBJ");
+}
+
+bool ObjFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::MESH)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
 	if (!entity->isKindOf(CC_TYPES::MESH))
+	{
+		ccLog::Warning("[OBJ] This filter can only save one mesh at a time!");
 		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (!mesh || mesh->size() == 0)
 	{
-		ccLog::Warning(QString("[OBJ] No facet in mesh '%1'!").arg(mesh->getName()));
-		return CC_FERR_NO_ERROR;
+		ccLog::Warning("[OBJ] Input mesh is empty!");
+		return CC_FERR_NO_SAVE;
 	}
 
 	//try to open file for saving
@@ -69,7 +88,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename)
 
 CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, QString filename)
 {
-	assert(theFile && mesh && mesh->size()!=0);
+	assert(theFile && mesh && mesh->size() != 0);
 	unsigned numberOfTriangles = mesh->size();
 
 	//progress
@@ -84,6 +103,11 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, QString 
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+	if (!vertices || vertices->size() == 0)
+	{
+		ccLog::Warning("[OBJ] Input mesh has no vertices?!");
+		return CC_FERR_NO_SAVE;
+	}
 	unsigned nbPoints = vertices->size();
 
 	for (unsigned i=0; i<nbPoints; ++i)

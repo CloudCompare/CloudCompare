@@ -13,7 +13,7 @@
 #include <QString>
 #include <QStringList>
 
-//STL
+//system
 #include <vector>
 
 class ccProgressDialog;
@@ -134,7 +134,7 @@ protected:
 	static QString Export(EntityDesc& cloudDesc, QString suffix = QString(), QString* outputFilename = 0);
 
 	//! Reads out file format
-	static CC_FILE_TYPES getFileFormat(QStringList& arguments);
+	static QString GetFileFormatFilter(QStringList& arguments, QString& defaultExt);
 
 	//! Saves all clouds
 	/** \param suffix optional suffix

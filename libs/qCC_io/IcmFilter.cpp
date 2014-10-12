@@ -29,6 +29,20 @@
 #include <stdio.h>
 #include <assert.h>
 
+//Max number of characters per line in an ASCII file
+//TODO: use QFile instead!
+const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
+
+bool IcmFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "ICM");
+}
+
+bool IcmFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//export not supported
+	return false;
+}
 
 CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
@@ -82,10 +96,15 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 	sscanf(line,"FILE_TYPE=%s",subFileType);
 
-	CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
+	FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
+	if (!filter)
+	{
+		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName).arg(subFileType));
+		return CC_FERR_UNKNOWN_FILE;
+	}
 
 	//load the corresponding file (potentially containing several clouds)
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),parameters,fType);
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),parameters,filter);
 	if (!entities)
 	{
 		fclose(fp);
@@ -97,7 +116,7 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	//chargement des images
 	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 	{
-		ccLog::Error("[IcmFilter::loadModelFromIcmFile] Read error (IMAGES_DESCRIPTOR)! No image loaded");
+		ccLog::Error("[ICM] Read error (IMAGES_DESCRIPTOR)! No image loaded");
 		fclose(fp);
 		return CC_FERR_READING;
 	}
@@ -112,7 +131,7 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		sscanf(line,"IMAGES_DESCRIPTOR=%s",imagesDescriptorFileName);
 		
 		int n = LoadCalibratedImages(entities,path,imagesDescriptorFileName,entities->getBB());
-		ccLog::Print("[IcmFilter::loadModelFromIcmFile] %i image(s) loaded ...",n);
+		ccLog::Print("[ICM] %i image(s) loaded ...",n);
 	}
 
 	fclose(fp);
@@ -246,10 +265,3 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 	return loadedImages;
 }
 //*/
-
-CC_FILE_ERROR IcmFilter::saveToFile(ccHObject* entity, QString filename)
-{
-	ccLog::Error("Not available yet!");
-
-	return CC_FERR_NO_ERROR;
-}

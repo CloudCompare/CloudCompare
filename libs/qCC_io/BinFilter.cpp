@@ -53,6 +53,41 @@
 #include <unistd.h>
 #endif
 
+bool BinFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "BIN");
+}
+
+bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//we list the entities that CANT be saved as BIN file (easier ;)
+	switch (type)
+	{
+	//these entities can't be serialized
+	case CC_TYPES::POINT_OCTREE:
+	case CC_TYPES::POINT_KDTREE:
+	case CC_TYPES::CLIPPING_BOX:
+	//these entities can't be saved alone
+	case CC_TYPES::MATERIAL_SET:
+	case CC_TYPES::CHUNKED_ARRAY:
+	case CC_TYPES::NORMALS_ARRAY:
+	case CC_TYPES::NORMAL_INDEXES_ARRAY:
+	case CC_TYPES::RGB_COLOR_ARRAY:
+	case CC_TYPES::TEX_COORDS_ARRAY:
+	case CC_TYPES::LABEL_2D:
+	case CC_TYPES::TRANS_BUFFER:
+		return false;
+	
+	default:
+		//nothing to do
+		break;
+	}
+
+	multiple = true;
+	exclusive = false;
+	return true;
+}
+
 //! Per-cloud header flags (old style)
 union HeaderFlags
 {

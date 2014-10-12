@@ -29,6 +29,23 @@
 //system
 #include <assert.h>
 
+bool DepthMapFileFilter::canLoadExtension(QString upperCaseExt) const
+{
+	//import not supported
+	return false;
+}
+
+bool DepthMapFileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::GBL_SENSOR)
+	{
+		multiple = true;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity || filename.isEmpty())
@@ -49,10 +66,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, QString filename
 	//multiple filenames handling
 	QFileInfo fi(filename);
 	QString baseName = fi.baseName();
-	baseName.append("_");
 	QString extension = fi.suffix();
-	if (!extension.isNull())
-		extension.prepend("_");
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -60,52 +74,63 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, QString filename
 	for (size_t i=0; i < sensorCount && result == CC_FERR_NO_ERROR; ++i)
 	{
 		//more than one sensor? we must generate auto filename
-		QString thisFilename = (sensorCount < 2 ? filename : baseName + QString::number(i) + extension);
+		QString sensorFilename = (sensorCount > 1 ? QString("%1_%2.%3").arg(baseName).arg(i).arg(extension) : filename);
 
-		//opening file
-		FILE* fp = fopen(qPrintable(thisFilename),"wt");
-		if (!fp)
+		ccGBLSensor* sensor = static_cast<ccGBLSensor*>(sensors[i]);
+		if (sensor)
 		{
-			ccLog::Error(QString("[ccGBLSensor::saveASCII] Can't open file '%1' for writing!").arg(thisFilename));
-			result = CC_FERR_WRITING;
-		}
-		else
-		{
-			ccGBLSensor* sensor = static_cast<ccGBLSensor*>(sensors[i]);
-			result = saveToOpenedFile(fp,sensor);
-			fclose(fp);
+			result = saveToFile(sensorFilename,sensor);
+			//we stop at the first severe error
+			if (result != CC_FERR_NO_SAVE && result != CC_FERR_NO_ERROR)
+				break;
 		}
 	}
 
 	return result;
 }
 
-CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor)
+CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sensor)
 {
-	assert(fp && sensor);
-
-	if (!sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
+	assert(sensor);
+	if (!sensor)
 	{
-		ccLog::Warning(QString("[DepthMap] sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
-		return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
+		return CC_FERR_BAD_ARGUMENT;
 	}
-
-	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(sensor->getParent());
 
 	//the depth map associated to this sensor
 	const ccGBLSensor::DepthBuffer& db = sensor->getDepthBuffer();
+	if (!db.zBuff)
+	{
+		ccLog::Warning(QString("[DepthMap] sensor '%1' has no associated depth map (you must compute it first)").arg(sensor->getName()));
+		return CC_FERR_NO_SAVE; //this is not a severe error (the process can go on)
+	}
 
-	fprintf(fp,"// CLOUDCOMPARE DEPTH MAP\n");
-	fprintf(fp,"// Associated cloud: %s\n",qPrintable(cloud->getName()));
-	fprintf(fp,"// dPhi   = %f [ %f : %f ]\n",
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(sensor->getParent());
+	if (!cloud)
+	{
+		ccLog::Warning(QString("[DepthMap] sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
+		//this is not a severe error (the process can go on)
+	}
+
+	//opening file
+	FILE* fp = fopen(qPrintable(filename),"wt");
+	if (!fp)
+	{
+		ccLog::Error(QString("[DepthMap] Can't open file '%1' for writing!").arg(filename));
+		return CC_FERR_WRITING;
+	}
+
+	fprintf(fp,"// SENSOR DEPTH MAP\n");
+	fprintf(fp,"// Associated cloud: %s\n",qPrintable(cloud ? cloud->getName() : "none"));
+	fprintf(fp,"// Pitch  = %f [ %f : %f ]\n",
 		sensor->getPitchStep(),
 		sensor->getMinPitch(),
 		sensor->getMaxPitch());
-	fprintf(fp,"// dTheta = %f [ %f : %f ]\n",
+	fprintf(fp,"// Yaw   = %f [ %f : %f ]\n",
 		sensor->getYawStep(),
 		sensor->getMinYaw(),
 		sensor->getMaxYaw());
-	fprintf(fp,"// pMax   = %f\n",sensor->getSensorRange());
+	fprintf(fp,"// Range  = %f\n",sensor->getSensorRange());
 	fprintf(fp,"// L      = %i\n",db.width);
 	fprintf(fp,"// H      = %i\n",db.height);
 	fprintf(fp,"/////////////////////////\n");
@@ -117,15 +142,15 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
 	//if the sensor is associated to a "ccPointCloud", we may also extract
 	//normals and color!
-	if (cloud->isA(CC_TYPES::POINT_CLOUD))
+	if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
 		unsigned nbPoints = cloud->size();
 		if (nbPoints == 0)
 		{
-			ccLog::Warning(QString("[DepthMap] sensor '%1' is associated to an empty cloud!").arg(sensor->getName()));
-			return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
+			ccLog::Warning(QString("[DepthMap] sensor '%1' is associated to an empty cloud?!").arg(sensor->getName()));
+			//this is not a severe error (the process can go on)
 		}
 		else
 		{
@@ -177,10 +202,10 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 		theColors->placeIteratorAtBegining();
 	for (unsigned k=0; k<db.height; ++k)
 	{
-		for (unsigned j=0; j<db.width; ++j)
+		for (unsigned j=0; j<db.width; ++j, ++_zBuff)
 		{
 			//grid index and depth
-			fprintf(fp,"%i %i %.12f",j,k,*_zBuff++);
+			fprintf(fp,"%i %i %.12f",j,k,*_zBuff);
 
 			//color
 			if (theColors)
@@ -202,17 +227,19 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 		}
 	}
 
+	fclose(fp);
+	fp = 0;
+
 	if (theNorms)
+	{
 		theNorms->release();
+		theNorms = 0;
+	}
 	if (theColors)
+	{
 		theColors->release();
+		theColors = 0;
+	}
 
-	return CC_FERR_NO_ERROR;
-}
-
-CC_FILE_ERROR DepthMapFileFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
-{
-	ccLog::Error("Not available yet!");
-	
 	return CC_FERR_NO_ERROR;
 }

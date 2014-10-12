@@ -55,6 +55,22 @@ typedef double colorFieldType;
 const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 
+bool E57Filter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "E57");
+}
+
+bool E57Filter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = true;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 //Array chunks for reading/writing out information from E57 files
 struct TempArrays
 {
@@ -656,7 +672,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename)
 	}
 	else
 	{
-		for (unsigned i=0;i<entity->getChildrenNumber();++i)
+		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
 			if (entity->getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 				scans.push_back(static_cast<ccPointCloud*>(entity->getChild(i)));
 	}

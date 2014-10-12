@@ -57,6 +57,29 @@ QSharedPointer<AsciiOpenDlg> AsciiFilter::GetOpenDialog()
 	return s_openDialog;
 }
 
+bool AsciiFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (	upperCaseExt == "ASC"
+			||	upperCaseExt == "TXT"
+			||	upperCaseExt == "XYZ"
+			||	upperCaseExt == "NEU"
+			||	upperCaseExt == "PTS"
+			||	upperCaseExt == "CSV");
+}
+
+bool AsciiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//only one cloud per file
+	if (type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+
+	return false;
+}
+
 CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	assert(entity && !filename.isEmpty());

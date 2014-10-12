@@ -27,9 +27,17 @@ class BundlerFilter : public FileIOFilter
 {
 public:
 
+	//static accessors
+	static inline QString GetFileFilter() { return "Snavely's Bundler output (*.out)"; }
+	static inline QString GetDefaultExtension() { return "out"; }
+
 	//inherited from FileIOFilter
+	virtual bool importSupported() const { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename) {/*NOT IMPLEMENTED*/return CC_FERR_NO_SAVE;}
+	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
 	//! Specific load method
 	CC_FILE_ERROR loadFileExtended(	const QString& filename,
@@ -43,4 +51,4 @@ public:
 
 };
 
-#endif
+#endif //CC_BUNDLER_FILTER_HEADER

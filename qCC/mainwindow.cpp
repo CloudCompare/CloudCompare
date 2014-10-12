@@ -59,6 +59,8 @@
 //qCC_io
 #include <ccGlobalShiftManager.h>
 #include <ccShiftAndScaleCloudDlg.h>
+#include <BinFilter.h>
+#include <DepthMapFileFilter.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"
@@ -163,16 +165,23 @@
 static MainWindow* s_instance = 0;
 
 //persistent settings key (to be used with QSettings)
-static const QString s_psLoadFile				("LoadFile");
-static const QString s_psSaveFile				("SaveFile");
-static const QString s_psMainWinGeom			("mainWindowGeometry");
-static const QString s_psMainWinState			("mainWindowState");
-static const QString s_psCurrentPath			("currentPath");
-static const QString s_psSelectedFilter			("selectedFilter");
-static const QString s_psSelectedFilterCloud	("selectedFilterCloud");
-static const QString s_psSelectedFilterMesh		("selectedFilterMesh");
-static const QString s_psDuplicatePointsGroup	("duplicatePoints");
-static const QString s_psDuplicatePointsMinDist	("minDist");
+static const QString s_psLoadFile					("LoadFile");
+static const QString s_psSaveFile					("SaveFile");
+static const QString s_psMainWinGeom				("mainWindowGeometry");
+static const QString s_psMainWinState				("mainWindowState");
+static const QString s_psCurrentPath				("currentPath");
+static const QString s_psSelectedInputFilter		("selectedInputFilter");
+static const QString s_psSelectedOutputFilterCloud	("selectedOutputFilterCloud");
+static const QString s_psSelectedOutputFilterMesh	("selectedOutputFilterMesh");
+static const QString s_psSelectedOutputFilterImage	("selectedOutputFilterImage");
+static const QString s_psSelectedOutputFilterPoly	("selectedOutputFilterPoly");
+static const QString s_psDuplicatePointsGroup		("duplicatePoints");
+static const QString s_psDuplicatePointsMinDist		("minDist");
+
+//default 'All files' file filter
+static const QString s_allFilesFilter("All (*.*)");
+//default file filter separator
+static const QString s_fileFilterSeparator(";;");
 
 //standard message in case of locked vertices
 void DisplayLockedVerticesWarning(QString meshName, bool displayAsError)
@@ -552,7 +561,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 	return true;
 }
 
-void MainWindow::aboutPlugins()
+void MainWindow::doActionShowAboutPluginsDialog()
 {
 	ccPluginDlg ccpDlg(m_pluginsPath, m_pluginFileNames, this);
 	ccpDlg.exec();
@@ -784,8 +793,8 @@ void MainWindow::connectActions()
 	/*** MAIN MENU ***/
 
 	//"File" menu
-	connect(actionOpen,							SIGNAL(triggered()),	this,		SLOT(loadFile()));
-	connect(actionSave,							SIGNAL(triggered()),	this,		SLOT(saveFile()));
+	connect(actionOpen,							SIGNAL(triggered()),	this,		SLOT(doActionLoadFile()));
+	connect(actionSave,							SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
 	connect(actionPrimitiveFactory,				SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
 	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
 	connect(actionCloseAll,						SIGNAL(triggered()),	this,		SLOT(closeAll()));
@@ -951,9 +960,9 @@ void MainWindow::connectActions()
 	connect(actionPrevious3DView,				SIGNAL(triggered()),	m_mdiArea,	SLOT(activatePreviousSubWindow()));
 
 	//"About" menu entry
-	connect(actionHelp,							SIGNAL(triggered()),	this,		SLOT(help()));
-	connect(actionAbout,						SIGNAL(triggered()),	this,		SLOT(about()));
-	connect(actionAboutPlugins,					SIGNAL(triggered()),	this,		SLOT(aboutPlugins()));
+	connect(actionHelp,							SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
+	connect(actionAbout,						SIGNAL(triggered()),	this,		SLOT(doActionShawAboutDialog()));
+	connect(actionAboutPlugins,					SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
 
 	/*** Toolbars ***/
 
@@ -3061,73 +3070,56 @@ void MainWindow::doActionShowDepthBuffer()
 	}
 }
 
-static CC_FILE_TYPES currentDBSaveDlgFilter = DM_ASCII;
 void MainWindow::doActionExportDepthBuffer()
 {
 	if (m_selectedEntities.empty())
 		return;
 
-	//we set up file filters
-	QStringList filters;
-	filters << CC_FILE_TYPE_FILTERS[DM_ASCII];
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(s_psSaveFile);
+	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
 
-	QFileDialog dialog(this);
-	dialog.setNameFilters(filters);
-	dialog.setViewMode(QFileDialog::Detail);
-	dialog.setConfirmOverwrite(true);
-	dialog.setAcceptMode(QFileDialog::AcceptSave);
-
-	dialog.selectNameFilter(CC_FILE_TYPE_FILTERS[currentDBSaveDlgFilter]);
-
-	QString filename = m_selectedEntities[0]->getName()+QString(".")+QString(CC_FILE_TYPE_DEFAULT_EXTENSION[currentDBSaveDlgFilter]);
-	dialog.selectFile(filename);
-
-	if (dialog.exec())
+	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,DepthMapFileFilter::GetFileFilter());
+	if (filename.isEmpty())
 	{
-		QStringList fileNames = dialog.selectedFiles();
-		if (fileNames.empty())
-			return;
+		//process cancelled by user
+		return;
+	}
 
-		assert(fileNames.size() == 1);
+	//save last saving location
+	settings.setValue(s_psCurrentPath,QFileInfo(filename).absolutePath());
+	settings.endGroup();
 
-		//we try to find the selected file format
-		QString filter = dialog.selectedNameFilter();
-		CC_FILE_TYPES fType = UNKNOWN_FILE;
-		for (unsigned i=0; i<static_cast<unsigned>(FILE_TYPES_COUNT); ++i)
-		{
-			if (filter == QString(CC_FILE_TYPE_FILTERS[i]))
-			{
-				fType = CC_FILE_TYPES_ENUMS[i];
-				break;
-			}
-		}
-		currentDBSaveDlgFilter = fType;
+	ccHObject* toSave = 0;
+	bool multEntities = false;
+	if (m_selectedEntities.size() == 1)
+	{
+		toSave = m_selectedEntities.front();
+	}
+	else
+	{
+		toSave = new ccHObject("Temp Group");
+		for (size_t i=0; i<m_selectedEntities.size(); ++i)
+			toSave->addChild(m_selectedEntities[i],ccHObject::DP_NONE);
+		multEntities = true;
+	}
 
-		ccHObject* toSave = 0;
-		bool multEntities = false;
-		if (m_selectedEntities.size() > 1)
-		{
-			toSave = new ccHObject("Temp Group");
-			for (size_t i=0; i<m_selectedEntities.size(); ++i)
-				toSave->addChild(m_selectedEntities[i],ccHObject::DP_NONE);
-			multEntities = true;
-		}
-		else
-		{
-			toSave = m_selectedEntities[0];
-		}
+	CC_FILE_ERROR result = DepthMapFileFilter().saveToFile(toSave,filename);
 
-		CC_FILE_ERROR result = FileIOFilter::SaveToFile(toSave,
-														qPrintable(fileNames.at(0)),
-														fType);
+	if (result != CC_FERR_NO_ERROR)
+	{
+		FileIOFilter::DisplayErrorMessage(result,"saving",filename);
+	}
+	else
+	{
+		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
+	}
 
-		if (result!=CC_FERR_NO_ERROR)
-			FileIOFilter::DisplayErrorMessage(result,"saving depth buffer",fileNames.at(0));
-		else
-			ccLog::Print(QString("[doActionExportDepthBuffer] File '%1' successfully exported").arg(fileNames.at(0)));
-
-		if (multEntities)
-			delete toSave;
+	if (multEntities)
+	{
+		delete toSave;
+		toSave = 0;
 	}
 }
 
@@ -6592,7 +6584,7 @@ void MainWindow::toggleFullScreen(bool state)
 		showNormal();
 }
 
-void MainWindow::about()
+void MainWindow::doActionShawAboutDialog()
 {
 	QDialog* aboutDialog = new QDialog(this);
 
@@ -6613,7 +6605,7 @@ void MainWindow::about()
 	//delete aboutDialog; //Qt will take care of it? Anyway CC crash if we try to delete it now!
 }
 
-void MainWindow::help()
+void MainWindow::doActionShowHelpDialog()
 {
 	QFile doc(QApplication::applicationDirPath()+QString("/user_guide_CloudCompare.pdf"));
 	if (!doc.open(QIODevice::ReadOnly))
@@ -7687,37 +7679,38 @@ void MainWindow::toggleSelectedEntities3DName()
 
 void MainWindow::toggleSelectedEntitiesProp(int prop)
 {
-	ccHObject::Container baseEntities;
-	RemoveSiblings(m_selectedEntities,baseEntities);
-	for (size_t i=0; i<baseEntities.size(); ++i)
+	ccHObject baseEntities;
+	ConvertToGroup(m_selectedEntities,baseEntities,ccHObject::DP_NONE);
+	for (unsigned i=0; i<baseEntities.getChildrenNumber(); ++i)
 	{
+		ccHObject* child = baseEntities.getChild(i);
 		switch(prop)
 		{
 		case TOGGLE_ENT_ACTIVATION:
-			baseEntities[i]->toggleActivation/*_recursive*/();
+			child->toggleActivation/*_recursive*/();
 			break;
 		case TOGGLE_ENT_VISIBILITY:
-			baseEntities[i]->toggleVisibility_recursive();
+			child->toggleVisibility_recursive();
 			break;
 		case TOGGLE_ENT_COLORS:
-			baseEntities[i]->toggleColors_recursive();
+			child->toggleColors_recursive();
 			break;
 		case TOGGLE_ENT_NORMALS:
-			baseEntities[i]->toggleNormals_recursive();
+			child->toggleNormals_recursive();
 			break;
 		case TOGGLE_ENT_SF:
-			baseEntities[i]->toggleSF_recursive();
+			child->toggleSF_recursive();
 			break;
 		case TOGGLE_ENT_MAT:
-			baseEntities[i]->toggleMaterials_recursive();
+			child->toggleMaterials_recursive();
 			break;
 		case TOGGLE_ENT_3D_NAME:
-			baseEntities[i]->toggleShowName_recursive();
+			child->toggleShowName_recursive();
 			break;
 		default:
 			assert(false);
 		}
-		baseEntities[i]->prepareDisplayForRefresh_recursive();
+		child->prepareDisplayForRefresh_recursive();
 	}
 
 	refreshAll();
@@ -9262,10 +9255,12 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
 
-	addToDB(filenames, UNKNOWN_FILE, win);
+	addToDB(filenames, QString(), win);
 }
 
-void MainWindow::addToDB(const QStringList& filenames, CC_FILE_TYPES fType, ccGLWindow* destWin/*=0*/)
+void MainWindow::addToDB(	const QStringList& filenames,
+							QString fileFilter/*=QString()*/,
+							ccGLWindow* destWin/*=0*/)
 {
 	//to handle same 'shift on load' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
@@ -9282,7 +9277,7 @@ void MainWindow::addToDB(const QStringList& filenames, CC_FILE_TYPES fType, ccGL
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],parameters,fType);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],parameters,fileFilter);
 
 		if (newGroup)
 		{
@@ -9334,64 +9329,47 @@ void MainWindow::closeAll()
 	redrawAll();
 }
 
-void MainWindow::loadFile()
+void MainWindow::doActionLoadFile()
 {
 	QSettings settings;
 	settings.beginGroup(s_psLoadFile);
 	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
-	int currentOpenDlgFilter = settings.value(s_psSelectedFilter,BIN).toInt();
+	QString currentOpenDlgFilter = settings.value(s_psSelectedInputFilter,BinFilter::GetFileFilter()).toString();
 
-	// Add all available file extension filters to a single QString.
-	// Each filter entry is separated by double semicolon ";;".
-	QString filters;
-	filters.append(QString(CC_FILE_TYPE_FILTERS[UNKNOWN_FILE]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[BIN]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[ASCII]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[PTX]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[STL]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[OFF]) + ";;");
-#ifdef CC_FBX_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[FBX]) + ";;");
-#endif
-	filters.append(QString(CC_FILE_TYPE_FILTERS[PCD]) + ";;");
-#ifdef CC_X3D_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[X3D]) + ";;");
-#endif
+	// Add all available file I/O filters (with import capabilities)
+	QStringList fileFilters;
+	fileFilters.append(s_allFilesFilter);
+	bool defaultFilterFound = false;
+	{
+		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
+		for (size_t i=0; i<filters.size(); ++i)
+		{
+			if (filters[i]->importSupported())
+			{
+				QStringList ff = filters[i]->getFileFilters(true);
+				for (int j=0; j<ff.size(); ++j)
+				{
+					fileFilters.append(ff[j]);
+					//is it the (last) default filter?
+					if (!defaultFilterFound && currentOpenDlgFilter == ff[j])
+					{
+						defaultFilterFound = true;
+					}
+				}
+			}
+		}
+	}
 
-#ifdef CC_LAS_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[LAS]) + ";;");
-#endif
-#ifdef CC_E57_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[E57]) + ";;");
-#endif
-#ifdef CC_DXF_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[DXF]) + ";;");
-#endif
-#ifdef CC_PDMS_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[PDMS]) + ";;");
-#endif
-#ifdef CC_GDAL_SUPPORT
-	filters.append(QString(CC_FILE_TYPE_FILTERS[RASTER]) + ";;");
-#endif
-	filters.append(QString(CC_FILE_TYPE_FILTERS[SOI]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[PN]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[PV]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[POV]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[ICM]) + ";;");
-	filters.append(QString(CC_FILE_TYPE_FILTERS[BUNDLER])/*+ ";;"*/);
-
-	//currently selected filter
-	QString selectedFilter = CC_FILE_TYPE_FILTERS[currentOpenDlgFilter];
+	//default filter is still valid?
+	if (!defaultFilterFound)
+		currentOpenDlgFilter = s_allFilesFilter;
 
 	//file choosing dialog
 	QStringList selectedFiles = QFileDialog::getOpenFileNames(	this,
-																tr("Open file(s)"),
+																"Open file(s)",
 																currentPath,
-																filters,
-																&selectedFilter
+																fileFilters.join(s_fileFilterSeparator),
+																&currentOpenDlgFilter
 #ifdef _DEBUG
 																,QFileDialog::DontUseNativeDialog
 #endif
@@ -9399,27 +9377,17 @@ void MainWindow::loadFile()
 	if (selectedFiles.isEmpty())
 		return;
 
-	CC_FILE_TYPES fType = UNKNOWN_FILE;
-	for (unsigned i=0;i<static_cast<unsigned>(FILE_TYPES_COUNT);++i)
-	{
-		if (selectedFilter == QString(CC_FILE_TYPE_FILTERS[i]))
-		{
-			fType = CC_FILE_TYPES_ENUMS[i];
-			break;
-		}
-	}
+	//save last loading parameters
+	currentPath = QFileInfo(selectedFiles[0]).absolutePath();
+	settings.setValue(s_psCurrentPath,currentPath);
+	settings.setValue(s_psSelectedInputFilter,currentOpenDlgFilter);
+	settings.endGroup();
+
+	if (currentOpenDlgFilter == s_allFilesFilter)
+		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 
 	//load files
-	addToDB(selectedFiles,fType);
-
-	//we update current file path
-	currentPath = QFileInfo(selectedFiles[0]).absolutePath();
-	currentOpenDlgFilter = fType;
-
-	//save last loading location
-	settings.setValue(s_psCurrentPath,currentPath);
-	settings.setValue(s_psSelectedFilter,currentOpenDlgFilter);
-	settings.endGroup();
+	addToDB(selectedFiles,currentOpenDlgFilter);
 }
 
 //Helper: check for a filename validity
@@ -9434,18 +9402,11 @@ static bool IsValidFileName(QString filename)
 	return QRegExp(sPattern).exactMatch(filename);
 }
 
-void MainWindow::saveFile()
+void MainWindow::doActionSaveFile()
 {
 	size_t selNum = m_selectedEntities.size();
 	if (selNum == 0)
 		return;
-
-	//persistent settings
-	QSettings settings;
-	settings.beginGroup(s_psSaveFile);
-	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
-	int currentCloudSaveDlgFilter = settings.value(s_psSelectedFilterCloud,BIN).toInt();
-	int currentMeshSaveDlgFilter = settings.value(s_psSelectedFilterMesh,PLY).toInt();
 
 	ccHObject clouds("clouds");
 	ccHObject meshes("meshes");
@@ -9453,21 +9414,22 @@ void MainWindow::saveFile()
 	ccHObject polylines("polylines");
 	ccHObject other("other");
 	ccHObject otherSerializable("serializable");
-	ccHObject::Container entitiesToSave;
-	entitiesToSave.insert(entitiesToSave.begin(),m_selectedEntities.begin(),m_selectedEntities.end());
-	while (!entitiesToSave.empty())
+	ccHObject::Container entitiesToDispatch;
+	entitiesToDispatch.insert(entitiesToDispatch.begin(),m_selectedEntities.begin(),m_selectedEntities.end());
+	ccHObject entitiesToSave;
+	while (!entitiesToDispatch.empty())
 	{
-		ccHObject* child = entitiesToSave.back();
-		entitiesToSave.pop_back();
+		ccHObject* child = entitiesToDispatch.back();
+		entitiesToDispatch.pop_back();
 
 		if (child->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			for (unsigned j=0;j<child->getChildrenNumber();++j)
-				entitiesToSave.push_back(child->getChild(j));
+			for (unsigned j=0; j<child->getChildrenNumber(); ++j)
+				entitiesToDispatch.push_back(child->getChild(j));
 		}
 		else
 		{
-			//we put entity in the container corresponding to its type
+			//we put the entity in the container corresponding to its type
 			ccHObject* dest = 0;
 			if (child->isA(CC_TYPES::POINT_CLOUD))
 				dest = &clouds;
@@ -9486,20 +9448,23 @@ void MainWindow::saveFile()
 
 			//we don't want double insertions if the user has clicked both the father and child
 			if (!dest->find(child->getUniqueID()))
+			{
 				dest->addChild(child,ccHObject::DP_NONE);
+				entitiesToSave.addChild(child,ccHObject::DP_NONE);
+			}
 		}
 	}
 
 	bool hasCloud = (clouds.getChildrenNumber() != 0);
 	bool hasMesh = (meshes.getChildrenNumber() != 0);
-	bool hasImage = (images.getChildrenNumber() != 0);
+	bool hasImages = (images.getChildrenNumber() != 0);
 	bool hasPolylines = (polylines.getChildrenNumber() != 0);
 	bool hasSerializable = (otherSerializable.getChildrenNumber() != 0);
 	bool hasOther = (other.getChildrenNumber() != 0);
 
 	int stdSaveTypes =		static_cast<int>(hasCloud)
 						+	static_cast<int>(hasMesh)
-						+	static_cast<int>(hasImage)
+						+	static_cast<int>(hasImages)
 						+	static_cast<int>(hasPolylines)
 						+	static_cast<int>(hasSerializable);
 	if (stdSaveTypes == 0)
@@ -9509,212 +9474,222 @@ void MainWindow::saveFile()
 	}
 
 	//we set up the right file filters, depending on the selected
-	//entities shared type (cloud, mesh, etc.).
-	QString filters;
-
-	//From now on, BIN format handles about anyhting!
-	filters.append(QString(CC_FILE_TYPE_FILTERS[BIN]) + ";;");
-
-	ccHObject* toSave = 0;
-	QString selectedFilter = CC_FILE_TYPE_FILTERS[BIN];
-
-	//if we only have one type of entity selected, then we can let the user choose specific formats
-	if (stdSaveTypes == 1)
+	//entities type (cloud, mesh, etc.).
+	QStringList fileFilters;
 	{
-		if (hasCloud)
+		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
+		for (size_t i=0; i<filters.size(); ++i)
 		{
-			toSave = &clouds;
-			selectedFilter = CC_FILE_TYPE_FILTERS[currentCloudSaveDlgFilter];
+			bool atLeastOneExclusive = false;
+			bool multiple = false;
 
-			//add cloud output file filters
-			filters.append(QString(CC_FILE_TYPE_FILTERS[ASCII]) + ";;");
-#ifdef CC_E57_SUPPORT
-			filters.append(QString(CC_FILE_TYPE_FILTERS[E57]) + ";;");
-#endif
-			if (clouds.getChildrenNumber() == 1)
-			{
-				filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
-#ifdef CC_LAS_SUPPORT
-				filters.append(QString(CC_FILE_TYPE_FILTERS[LAS]) + ";;");
-#endif
-				filters.append(QString(CC_FILE_TYPE_FILTERS[PN]) + ";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[PV]) + ";;");
-			}
-			//TODO: POV files handling!
-			//filters.append(CC_FILE_TYPE_FILTERS[POV]);
-			//filters.append("\n");
-		}
-		else if (hasMesh)
-		{
-			if (meshes.getChildrenNumber() == 1)
-			{
-				toSave = &meshes;
-				selectedFilter = CC_FILE_TYPE_FILTERS[currentMeshSaveDlgFilter];
+			//current I/O filter
+			const FileIOFilter::Shared filter = filters[i];
 
-				//add meshes output file filters
-				filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ]) + ";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[STL]) + ";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[OFF]) + ";;");
-#ifdef CC_DXF_SUPPORT											  
-				filters.append(QString(CC_FILE_TYPE_FILTERS[DXF]) + ";;");
-#endif
-#ifdef CC_X3D_SUPPORT
-				filters.append(QString(CC_FILE_TYPE_FILTERS[X3D]) + ";;");
-#endif
-				filters.append(QString(CC_FILE_TYPE_FILTERS[MA]) + ";;");
-			}
-#ifdef CC_FBX_SUPPORT
-			filters.append(QString(CC_FILE_TYPE_FILTERS[FBX]) + ";;");
-#endif
-		}
-		else if (hasPolylines)
-		{
-#ifdef CC_DXF_SUPPORT
-			filters.append(QString(CC_FILE_TYPE_FILTERS[DXF])+";;");
-#endif
-			toSave = &polylines;
-		}
-		else if (hasImage)
-		{
-			if (images.getChildrenNumber()>1)
+			//does this filter can export one or several clouds?
+			bool canExportClouds = true;
+			if (hasCloud)
 			{
-				ccConsole::Warning("[MainWindow::saveFile] Only BIN format is able to store multiple images at once");
+				bool isExclusive = true;
+				canExportClouds = (		filter->canSave(CC_TYPES::POINT_CLOUD,multiple,isExclusive)
+									&&	(multiple || clouds.getChildrenNumber() == 1) );
+				atLeastOneExclusive |= isExclusive;
 			}
-			else
-			{
-				toSave = &images;
 
-				//add images output file filters
-				//we grab the list of supported image file formats (writing)
-				QList<QByteArray> formats = QImageWriter::supportedImageFormats();
-				//we convert this list into a proper "filters" string
-				for (int i=0; i<formats.size(); ++i)
-					filters.append(QString("%1 image (*.%2);;").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
+			//does this filter can export one or several clouds?
+			bool canExportMeshes = true;
+			if (hasMesh)
+			{
+				bool isExclusive = true;
+				canExportMeshes = (		filter->canSave(CC_TYPES::MESH,multiple,isExclusive)
+									&&	(multiple || meshes.getChildrenNumber() == 1) );
+				atLeastOneExclusive |= isExclusive;
+			}
+
+			//does this filter can export one or several polylines?
+			bool canExportPolylines = true;
+			if (hasPolylines)
+			{
+				bool isExclusive = true;
+				canExportPolylines = (	filter->canSave(CC_TYPES::POLY_LINE,multiple,isExclusive)
+									&&	(multiple || polylines.getChildrenNumber() == 1) );
+				atLeastOneExclusive |= isExclusive;
+			}
+
+			//does this filter can export one or several images?
+			bool canExportImages = true;
+			if (hasImages)
+			{
+				bool isExclusive = true;
+				canExportImages = (		filter->canSave(CC_TYPES::IMAGE,multiple,isExclusive)
+									&&	(multiple || images.getChildrenNumber() == 1) );
+				atLeastOneExclusive |= isExclusive;
+			}
+
+			//does this filter can export one or several other serializable entities?
+			bool canExportSerializables = true;
+			if (hasSerializable)
+			{
+				//check if all entities have the same type
+				{
+					CC_CLASS_ENUM firstClassID = otherSerializable.getChild(0)->getUniqueID();
+					for (unsigned j=1; j<otherSerializable.getChildrenNumber(); ++j)
+					{
+						if (otherSerializable.getChild(j)->getUniqueID() != firstClassID)
+						{
+							//we add a virtual second 'stdSaveType' so as to properly handle exlusivity
+							++stdSaveTypes;
+							break;
+						}
+					}
+				}
+
+				for (unsigned j=0; j<otherSerializable.getChildrenNumber(); ++j)
+				{
+					ccHObject* child = otherSerializable.getChild(j);
+					bool isExclusive = true;
+					canExportSerializables &= (		filter->canSave(child->getUniqueID(),multiple,isExclusive)
+												&&	(multiple || otherSerializable.getChildrenNumber() == 1) );
+					atLeastOneExclusive |= isExclusive;
+				}
+			}
+
+			bool useThisFilter =	canExportClouds
+								&&	canExportMeshes
+								&&	canExportImages
+								&&	canExportPolylines
+								&&	canExportSerializables
+								&&	(!atLeastOneExclusive || stdSaveTypes == 1);
+
+			if (useThisFilter)
+			{
+				QStringList ff = filter->getFileFilters(false);
+				for (int j=0; j<ff.size(); ++j)
+					fileFilters.append(ff[j]);
 			}
 		}
 	}
 
-	QString dir = currentPath+QString("/");
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(s_psSaveFile);
+
+	//default filter
+	QString selectedFilter = fileFilters.first();
+	if (hasCloud)
+		selectedFilter = settings.value(s_psSelectedOutputFilterCloud,selectedFilter).toString();
+	else if (hasMesh)
+		selectedFilter = settings.value(s_psSelectedOutputFilterMesh, selectedFilter).toString();
+	else if (hasImages)
+		selectedFilter = settings.value(s_psSelectedOutputFilterImage, selectedFilter).toString();
+	else if (hasPolylines)
+		selectedFilter = settings.value(s_psSelectedOutputFilterPoly, selectedFilter).toString();
+	
+	//default output path (+ filename)
+	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+	QString fullPathName = currentPath;
 	if (selNum == 1)
 	{
 		//hierarchy objects have generally as name: 'filename.ext (fullpath)'
 		//so we must only take the first part! (otherwise this type of name
 		//with a path inside perturbs the QFileDialog a lot ;))
-		QString defaultFileName(m_selectedEntities[0]->getName());
-		if (m_selectedEntities[0]->isA(CC_TYPES::HIERARCHY_OBJECT))
+		QString defaultFileName(m_selectedEntities.front()->getName());
+		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			QStringList parts = defaultFileName.split(' ',QString::SkipEmptyParts);
 			if (parts.size() > 0)
 				defaultFileName = parts[0];
 		}
 
-		if (!QFileInfo(defaultFileName).suffix().isEmpty()) //we remove extension
-			defaultFileName = QFileInfo(defaultFileName).baseName();
+		//we remove the extension
+		defaultFileName = QFileInfo(defaultFileName).baseName();
 
 		if (!IsValidFileName(defaultFileName))
 		{
-			ccLog::Warning("[MainWindow::saveFile] First entity's name would make an invalid filename! Can't use it...");
+			ccLog::Warning("[SAVE] First entity's name would make an invalid filename! Can't use it...");
 			defaultFileName = "project";
 		}
-
-		dir += defaultFileName;
+		
+		fullPathName += QString("/") + defaultFileName;
 	}
 
+	//ask the user for the output filename
 	QString selectedFilename = QFileDialog::getSaveFileName(this,
-															tr("Save file"),
-															dir,
-															filters,
+															"Save file",
+															fullPathName,
+															fileFilters.join(s_fileFilterSeparator),
 															&selectedFilter);
 
 	if (selectedFilename.isEmpty())
+	{
+		//process cancelled by the user
 		return;
+	}
 
 	//ignored items
 	if (hasOther)
 	{
-		ccConsole::Warning("[MainWindow::saveFile] The following selected entites won't be saved:");
-		for (unsigned i=0;i<other.getChildrenNumber();++i)
+		ccConsole::Warning("[SAVE] The following selected entites won't be saved:");
+		for (unsigned i=0; i<other.getChildrenNumber(); ++i)
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	//bin format
-	if (selectedFilter == QString(CC_FILE_TYPE_FILTERS[BIN]))
+	
+	//specific case: BIN format
+	if (selectedFilter == BinFilter::GetFileFilter())
 	{
 		if (selNum == 1)
-			result = FileIOFilter::SaveToFile(m_selectedEntities[0],qPrintable(selectedFilename),BIN);
+		{
+			result = FileIOFilter::SaveToFile(m_selectedEntities.front(),selectedFilename,selectedFilter);
+		}
 		else
 		{
-			ccHObject::Container tempContainer;
-			RemoveSiblings(m_selectedEntities,tempContainer);
-
-			if (tempContainer.size())
+			//we'll regroup all selected entities in a temporary group
+			ccHObject tempContainer;
+			ConvertToGroup(m_selectedEntities,tempContainer,ccHObject::DP_NONE);
+			if (tempContainer.getChildrenNumber())
 			{
-				ccHObject root;
-				for (size_t i=0; i<tempContainer.size(); ++i)
-					root.addChild(tempContainer[i],ccHObject::DP_NONE);
-				result = FileIOFilter::SaveToFile(&root,qPrintable(selectedFilename),BIN);
+				result = FileIOFilter::SaveToFile(&tempContainer,selectedFilename,selectedFilter);
 			}
 			else
 			{
-				ccLog::Warning("[MainWindow::saveFile] No selected entity could be saved!");
+				ccLog::Warning("[SAVE] No selected entity could be saved!");
 				result = CC_FERR_NO_SAVE;
 			}
 		}
-
-		currentCloudSaveDlgFilter = BIN;
 	}
-	else if (toSave)
+	else if (entitiesToSave.getChildrenNumber() != 0)
 	{
 		//ignored items
-		if (hasSerializable)
+		/*if (hasSerializable)
 		{
 			if (!hasOther)
-				ccConsole::Warning("[MainWindow::saveFile] The following selected entites won't be saved:"); //display this warning only if not already done
+				ccConsole::Warning("[SAVE] The following selected entites won't be saved:"); //display this warning only if not already done
 			for (unsigned i=0; i<otherSerializable.getChildrenNumber(); ++i)
 				ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
 		}
+		//*/
 
-		if (hasCloud || hasMesh)
-		{
-			CC_FILE_TYPES fType = UNKNOWN_FILE;
-			for (unsigned i=0; i<static_cast<unsigned>(FILE_TYPES_COUNT); ++i)
-			{
-				if (selectedFilter == QString(CC_FILE_TYPE_FILTERS[i]))
-				{
-					fType = CC_FILE_TYPES_ENUMS[i];
-					break;
-				}
-			}
-
-			if (hasCloud)
-				currentCloudSaveDlgFilter = fType;
-			else if (hasMesh)
-				currentMeshSaveDlgFilter = fType;
-
-			result = FileIOFilter::SaveToFile(	toSave->getChildrenNumber() > 1 ? toSave : toSave->getChild(0),
-												qPrintable(selectedFilename),
-												fType);
-		}
-		else if (hasPolylines)
-		{
-#ifdef CC_DXF_SUPPORT
-			result = FileIOFilter::SaveToFile(	toSave,
-												qPrintable(selectedFilename),
-												DXF);
-#endif
-		}
-		else if (hasImage)
-		{
-			assert(images.getChildrenNumber() == 1);
-			ccImage* image = static_cast<ccImage*>(images.getChild(0));
-			if (!image->data().save(selectedFilename))
-				result = CC_FERR_WRITING;
-		}
+		result = FileIOFilter::SaveToFile(	entitiesToSave.getChildrenNumber() > 1 ? &entitiesToSave : entitiesToSave.getChild(0),
+											selectedFilename,
+											selectedFilter);
 	}
+
+	//update default filters
+	if (hasCloud)
+		settings.setValue(s_psSelectedOutputFilterCloud,selectedFilter);
+	if (hasMesh)
+		settings.setValue(s_psSelectedOutputFilterMesh, selectedFilter);
+	if (hasImages)
+		settings.setValue(s_psSelectedOutputFilterImage,selectedFilter);
+	if (hasPolylines)
+		settings.setValue(s_psSelectedOutputFilterPoly, selectedFilter);
+
+	//we update current file path
+	currentPath = QFileInfo(selectedFilename).absolutePath();
+	settings.setValue(s_psCurrentPath,currentPath);
+	settings.endGroup();
 
 	if (result != CC_FERR_NO_ERROR)
 	{
@@ -9724,14 +9699,6 @@ void MainWindow::saveFile()
 	{
 		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(selectedFilename));
 	}
-
-	//we update current file path
-	currentPath = QFileInfo(selectedFilename).absolutePath();
-
-	settings.setValue(s_psCurrentPath,currentPath);
-	settings.setValue(s_psSelectedFilterCloud,static_cast<int>(currentCloudSaveDlgFilter));
-	settings.setValue(s_psSelectedFilterMesh,static_cast<int>(currentMeshSaveDlgFilter));
-	settings.endGroup();
 }
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)

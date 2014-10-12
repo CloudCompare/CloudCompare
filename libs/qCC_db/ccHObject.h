@@ -388,8 +388,13 @@ protected:
 
 /*** Helpers ***/
 
-//! standard ccHObject container (for children, etc.)
-inline void RemoveSiblings(const ccHObject::Container& origin, ccHObject::Container& dest)
+//! Puts all entities inside a container in a group
+/** Automatically removes siblings so as to get a valid hierarchy object.
+	\param origin origin container
+	\param dest destination group
+	\param dependencyFlags default dependency link for the children added to the group
+**/
+inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, int dependencyFlags = ccHObject::DP_NONE)
 {
 	size_t count = origin.size();
 	for (size_t i=0; i<count; ++i)
@@ -406,7 +411,9 @@ inline void RemoveSiblings(const ccHObject::Container& origin, ccHObject::Contai
 		}
 
 		if (!isSiblingOfAnotherOne)
-			dest.push_back(origin[i]);
+		{
+			dest.addChild(origin[i],dependencyFlags);
+		}
 	}
 }
 

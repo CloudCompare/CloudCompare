@@ -33,11 +33,15 @@
 #include <assert.h>
 #include <stdint.h> //for uint fixed-sized types
 
-CC_FILE_ERROR PCDFilter::saveToFile(ccHObject* entity, QString filename)
+bool PCDFilter::canLoadExtension(QString upperCaseExt) const
 {
-	ccLog::Error("Not available yet!");
+	return (upperCaseExt == "PCD");
+}
 
-	return CC_FERR_NO_ERROR;
+bool PCDFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//export not supported
+	return false;
 }
 
 CC_FILE_ERROR PCDFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)

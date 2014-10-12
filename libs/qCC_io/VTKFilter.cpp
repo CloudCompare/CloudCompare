@@ -32,65 +32,59 @@
 //System
 #include <string.h>
 
+bool VTKFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "VTK");
+}
+
+bool VTKFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (	type == CC_TYPES::MESH
+		||	type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	//look for either a cloud or a mesh
-	ccHObject::Container clouds,meshes;
-	if (entity->isA(CC_TYPES::POINT_CLOUD))
-		clouds.push_back(entity);
-	else if (entity->isKindOf(CC_TYPES::MESH))
-		meshes.push_back(entity);
-	else //group?
-	{
-		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
-		{
-			ccHObject* child = entity->getChild(i);
-			if (child->isKindOf(CC_TYPES::POINT_CLOUD))
-				clouds.push_back(child);
-			else if (child->isKindOf(CC_TYPES::MESH))
-				meshes.push_back(child);
-		}
-	}
-
-	if (clouds.empty() && meshes.empty())
-	{
-		ccLog::Error("No point cloud nor mesh in input selection!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-	else if (clouds.size()+meshes.size()>1)
-	{
-		ccLog::Error("Can't save more than one entity per VTK file!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-
-	//the cloud to save
-	ccGenericPointCloud* vertices = 0;
-	ccMesh* mesh = 0;
+	ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
 	unsigned triCount = 0;
-	if (!clouds.empty()) //1 cloud, no mesh
+	ccGenericPointCloud* vertices = 0;
+	if (mesh)
 	{
-		vertices = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
-	}
-	else //1 mesh, with vertices as cloud
-	{
-		mesh = static_cast<ccMesh*>(meshes[0]);
+		//input entity is a mesh
 		triCount = mesh->size();
 		if (triCount == 0)
 		{
-			ccLog::Error("Mesh has no triangle?!");
+			ccLog::Warning("[VTK] Input mesh has no triangle?!");
 			return CC_FERR_NO_SAVE;
 		}
 		vertices = mesh->getAssociatedCloud();
 	}
+	else
+	{
+		//no mesh? maybe the input entity is a cloud?
+		vertices = ccHObjectCaster::ToGenericPointCloud(entity);
+	}
 
-	assert(vertices);
+	//in any case, we must have a valid 'vertices' entity now
+	if (!vertices)
+	{
+		ccLog::Warning("[VTK] No point cloud nor mesh in input selection!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 	unsigned ptsCount = vertices->size();
 	if (!ptsCount)
 	{
-		ccLog::Error("No point/vertex to save?!");
+		ccLog::Warning("[VTK] No point/vertex to save?!");
 		return CC_FERR_NO_SAVE;
 	}
 

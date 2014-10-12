@@ -22,10 +22,19 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, QString filename)
+//Max number of characters per line in an ASCII file
+//TODO: use QFile instead!
+const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
+
+bool SoiFilter::canLoadExtension(QString upperCaseExt) const
 {
-	ccLog::Print("Function is not implemented yet !");
-	return CC_FERR_NO_SAVE;
+	return (upperCaseExt == "SOI");
+}
+
+bool SoiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//not supported
+	return false;
 }
 
 CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)

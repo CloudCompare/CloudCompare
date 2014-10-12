@@ -17,6 +17,9 @@
 
 #include "PovFilter.h"
 
+//Local
+#include "BinFilter.h"
+
 //CCLib
 #include <SimpleCloud.h>
 
@@ -31,6 +34,10 @@
 //System
 #include <assert.h>
 
+//Max number of characters per line in an ASCII file
+//TODO: use QFile instead!
+const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
+
 //Ground based LiDAR sensor mirror and body rotation order
 //Refer to ccGBLSensor::ROTATION_ORDER
 const char CC_SENSOR_ROTATION_ORDER_NAMES[][15] = {	"YAW_THEN_PITCH",		//Rotation: body then mirror
@@ -41,6 +48,22 @@ const char CC_SENSOR_ROTATION_ORDER_NAMES[][15] = {	"YAW_THEN_PITCH",		//Rotatio
 const char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {	"THETA_PHI",		//Rotation: body then mirror
 														"PHI_THETA"			//Rotation: mirror then body
 };
+
+bool PovFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "POV");
+}
+
+bool PovFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = true;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
 
 CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 {
@@ -63,8 +86,8 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 			if (!cloudSensors.empty())
 			{
 				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
-				if (cloudSensors.size()>1)
-					ccLog::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
+				if (cloudSensors.size() > 1)
+					ccLog::Warning(QString("Found more than one GBL sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
 
 				sensors.push_back(static_cast<ccGBLSensor*>(cloudSensors[0]));
 			}
@@ -105,7 +128,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 		{
 			QString thisFilename = fullBaseName + QString("_%1.bin").arg(i);
 
-			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],thisFilename,BIN);
+			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],thisFilename,BinFilter::GetFileFilter());
 			if (error != CC_FERR_NO_ERROR)
 			{
 				fclose(mainFile);
@@ -245,10 +268,14 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			}
 
 			//chargement du fichier (potentiellement plusieurs listes) correspondant au point de vue en cours
-			CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
-			ccHObject* loadedLists = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(subFileName)),parameters,fType);
-
-			if (loadedLists)
+			FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
+			if (!filter)
+			{
+				ccLog::Warning(QString("[POV] No I/O filter found for loading file '%1' (type = '%2')").arg(subFileName).arg(subFileType));
+				return CC_FERR_UNKNOWN_FILE;
+			}
+			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(subFileName),parameters,filter);
+			if (entities)
 			{
 				ccGLMatrix rot;
 				rot.toIdentity();
@@ -283,17 +310,17 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				}
 
 				ccHObject::Container clouds;
-				if (loadedLists->isKindOf(CC_TYPES::POINT_CLOUD))
+				if (entities->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
-					clouds.push_back(loadedLists);
+					clouds.push_back(entities);
 				}
 				else
 				{
-					loadedLists->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
-					loadedLists->detatchAllChildren();
-					delete loadedLists;
+					entities->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
+					entities->detatchAllChildren();
+					delete entities;
 				}
-				loadedLists = 0;
+				entities = 0;
 
 				for (size_t i=0; i<clouds.size(); ++i)
 				{

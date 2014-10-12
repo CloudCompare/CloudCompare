@@ -78,6 +78,17 @@ struct BundlerCamera
 	bool isValid;
 };
 
+bool BundlerFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (upperCaseExt == "OUT");
+}
+
+bool BundlerFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	//no output yet
+	return false;
+}
+
 CC_FILE_ERROR BundlerFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	return loadFileExtended(filename,container,parameters);

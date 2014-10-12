@@ -15,38 +15,39 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_FBX_FILTER_HEADER
-#define CC_FBX_FILTER_HEADER
+#ifndef CC_IMAGE_FILE_FILTER_HEADER
+#define CC_IMAGE_FILE_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-#ifdef CC_FBX_SUPPORT
-
-//! Autodesk FBX format I/O filter
-/** http://www.autodesk.com/products/fbx/overview
-**/
-class FBXFilter : public FileIOFilter
+//! Filter to load or save an image (all types supported by Qt)
+class ImageFileFilter : public FileIOFilter
 {
 public:
 
+	//! Default constructor
+	ImageFileFilter();
+
 	//static accessors
-	static inline QString GetFileFilter() { return "FBX mesh (*.fbx)"; }
-	static inline QString GetDefaultExtension() { return "fbx"; }
+	static inline QString GetDefaultExtension() { return "png"; }
 
 	//inherited from FileIOFilter
 	virtual bool importSupported() const { return true; }
 	virtual bool exportSupported() const { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
-	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
+	virtual QStringList getFileFilters(bool onImport) const;
 	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
 	virtual bool canLoadExtension(QString upperCaseExt) const;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
-	//! Sets default output format (will prevent the dialog to appear when saving FBX files)
-	static void SetDefaultOutputFormat(QString format);
+protected:
+
+	//! Supported (output) filters
+	QStringList m_outputFilters;
+	//! Supported (input) filters
+	QString m_inputFilter;
+
 };
 
-#endif //CC_FBX_FILTER_HEADER
-
-#endif //CC_FBX_FILTER_HEADER
+#endif //CC_IMAGE_FILE_FILTER_HEADER

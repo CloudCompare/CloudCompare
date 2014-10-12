@@ -45,6 +45,23 @@
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
 
+bool LASFilter::canLoadExtension(QString upperCaseExt) const
+{
+	return (	upperCaseExt == "LAS"
+			||	upperCaseExt == "LAZ");
+}
+
+bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
+{
+	if (type == CC_TYPES::POINT_CLOUD)
+	{
+		multiple = false;
+		exclusive = true;
+		return true;
+	}
+	return false;
+}
+
 //! LAS field descriptor
 struct LasField
 {
@@ -146,31 +163,18 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	ccHObject::Container clouds;
-	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-		clouds.push_back(entity);
-	else
-		entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-
-	if (clouds.empty())
+	ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+	if (!theCloud)
 	{
-		ccLog::Error("No point cloud in input selection!");
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
-	else if (clouds.size()>1)
-	{
-		ccLog::Error("Can't save more than one cloud per LAS file!");
+		ccLog::Warning("[LAS] This filter can only save one cloud at a time!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	//the cloud to save
-	ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
 	unsigned numberOfPoints = theCloud->size();
-
 	if (numberOfPoints == 0)
 	{
-		ccLog::Error("Cloud is empty!");
-		return CC_FERR_BAD_ENTITY_TYPE;
+		ccLog::Warning("[LAS] Cloud is empty!");
+		return CC_FERR_NO_SAVE;
 	}
 
 	//colors

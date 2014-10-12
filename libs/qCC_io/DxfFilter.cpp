@@ -40,8 +40,6 @@
 //system
 #include <assert.h>
 
-#ifdef CC_DXF_SUPPORT
-
 bool DxfFilter::canLoadExtension(QString upperCaseExt) const
 {
 	return (upperCaseExt == "DXF");
@@ -58,6 +56,8 @@ bool DxfFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	}
 	return false;
 }
+
+#ifdef CC_DXF_SUPPORT
 
 //! dxflib-to-CC custom mapper
 class DxfImporter : public DL_CreationAdapter

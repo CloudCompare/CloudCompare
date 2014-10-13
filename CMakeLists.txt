@@ -9,6 +9,15 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
 endif()
 
+# Set a consistent MACOSX_RPATH default across all CMake versions.
+# When CMake 2.8.12 is required, change this default to 1.
+# When CMake 3.0.0 is required, remove this block (see CMP0042).
+if ( APPLE )
+    if ( NOT DEFINED CMAKE_MACOSX_RPATH )
+        set( CMAKE_MACOSX_RPATH 0 )
+    endif()
+endif()
+
 project( CloudCompareProjects )
 
 # One shouldn't generate the BUILD project directly in the SOURCES folder!

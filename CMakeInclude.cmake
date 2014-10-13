@@ -201,6 +201,7 @@ if( APPLE )
       #  we need this to install them properly when we are bundling the app
       list( APPEND SUPPORT_LIB_NAMES libCC_CORE_LIB )
       list( APPEND SUPPORT_LIB_NAMES libQCC_DB_LIB )
+      list( APPEND SUPPORT_LIB_NAMES libQCC_IO_LIB )
 
       if( ${OPTION_USE_XIOT} )
          list( APPEND SUPPORT_LIB_NAMES libxiot )

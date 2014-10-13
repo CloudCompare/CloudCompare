@@ -74,7 +74,7 @@ protected:
 				if ( mainWindow == NULL )
 					return false;
 
-				mainWindow->addToDB( QStringList(static_cast<QFileOpenEvent *>(inEvent)->file()), UNKNOWN_FILE );
+				mainWindow->addToDB( QStringList(static_cast<QFileOpenEvent *>(inEvent)->file()) );
 				return true;
 			}
 

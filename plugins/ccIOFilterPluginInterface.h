@@ -26,7 +26,6 @@
 //qCC
 #include "ccMainAppInterface.h"
 
-
 //! I/O filter plugin interface
 /** Version 1.0
 **/

@@ -413,6 +413,8 @@
      <addaction name="separator"/>
      <addaction name="actionExportCloudsInfo"/>
      <addaction name="actionCreateCloudFromEntCenters"/>
+     <addaction name="separator"/>
+     <addaction name="actionComputeBestICPRmsMatrix"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -2655,6 +2657,14 @@
   <action name="actionCreateCloudFromEntCenters">
    <property name="text">
     <string>Create cloud from selected entities centers</string>
+   </property>
+  </action>
+  <action name="actionComputeBestICPRmsMatrix">
+   <property name="text">
+    <string>Compute best registration RMS matrix</string>
+   </property>
+   <property name="toolTip">
+    <string>Computes the best registration between all couples among multiple entities and save the resulting RMS in a matrix (CSV) file</string>
    </property>
   </action>
  </widget>

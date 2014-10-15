@@ -936,6 +936,7 @@ void MainWindow::connectActions()
 	connect(actionFindBiggestInnerRectangle,	SIGNAL(triggered()),	this,		SLOT(doActionFindBiggestInnerRectangle()));
 	connect(actionExportCloudsInfo,				SIGNAL(triggered()),	this,		SLOT(doActionExportCloudsInfo()));
 	connect(actionCreateCloudFromEntCenters,	SIGNAL(triggered()),	this,		SLOT(doActionCreateCloudFromEntCenters()));
+	connect(actionComputeBestICPRmsMatrix,		SIGNAL(triggered()),	this,		SLOT(doActionComputeBestICPRmsMatrix()));
 
 	//"Display" menu
 	connect(actionFullScreen,					SIGNAL(toggled(bool)),	this,		SLOT(toggleFullScreen(bool)));
@@ -8456,7 +8457,6 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 	}
 
 	//look for clouds
-	std::vector<ccPointCloud*> clouds;
 	{
 		for (size_t i=0; i<selNum; ++i)
 		{
@@ -8484,6 +8484,249 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 		centers->setPointSize(10);
 		centers->setVisible(true);
 		addToDB(centers);
+	}
+}
+
+void MainWindow::doActionComputeBestICPRmsMatrix()
+{
+	size_t selNum = m_selectedEntities.size();
+
+	//look for clouds
+	std::vector<ccPointCloud*> clouds;
+	try
+	{
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = m_selectedEntities[i];
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+			if (cloud)
+			{
+				clouds.push_back(cloud);
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory!");
+		return;
+	}
+
+	size_t cloudCount = clouds.size();
+	if (cloudCount < 2)
+	{
+		ccLog::Error("Need at least two clouds!");
+		return;
+	}
+
+	//init matrices
+	std::vector<double> rmsMatrix;
+	std::vector<ccGLMatrix> matrices;
+	std::vector< std::pair<double,double> > matrixAngles;
+	try
+	{
+		rmsMatrix.resize(cloudCount*cloudCount,0);
+
+		//init all possible transformations
+		static const double angularStep_deg = 45.0;
+		unsigned phiSteps = static_cast<unsigned>(360.0/angularStep_deg);
+		assert(fabs(360.0 - phiSteps * angularStep_deg) < ZERO_TOLERANCE);
+		unsigned thetaSteps = static_cast<unsigned>(180.0/angularStep_deg);
+		assert(fabs(180.0 - thetaSteps * angularStep_deg) < ZERO_TOLERANCE);
+		unsigned rotCount = phiSteps * (thetaSteps-1) + 2;
+		matrices.reserve(rotCount);
+		matrixAngles.reserve(rotCount);
+
+		for (unsigned j=0; j<=thetaSteps; ++j)
+		{
+			//we want to cover the full [0-180] interval! ([-90;90] in fact)
+			double theta_deg = j * angularStep_deg - 90.0;
+			for (unsigned i=0; i<phiSteps; ++i)
+			{
+				double phi_deg = i * angularStep_deg;
+				ccGLMatrix trans;
+				trans.initFromParameters(	static_cast<float>(phi_deg * CC_DEG_TO_RAD),
+											static_cast<float>(theta_deg * CC_DEG_TO_RAD),
+											0,
+											CCVector3(0,0,0) );
+				matrices.push_back(trans);
+				matrixAngles.push_back( std::pair<double,double>(phi_deg,theta_deg) );
+
+				//for poles, no need to rotate!
+				if (j == 0 || j == thetaSteps)
+					break;
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory!");
+		return;
+	}
+
+	//let's start!
+	{
+		ccProgressDialog pDlg(true,this);
+		pDlg.setMethodTitle("Testing all possible positions");
+		pDlg.setInfo(qPrintable(QString("%1 clouds and %2 positions").arg(cloudCount).arg(matrices.size())));
+		CCLib::NormalizedProgress nProgress(&pDlg,static_cast<unsigned>(((cloudCount*(cloudCount-1))/2)*matrices.size()));
+		pDlg.start();
+		QApplication::processEvents();
+
+//#define TEST_GENERATION
+#ifdef TEST_GENERATION
+		ccPointCloud* testSphere = new ccPointCloud();
+		testSphere->reserve(matrices.size());
+#endif
+
+		for (size_t i=0; i<cloudCount-1; ++i)
+		{
+			ccPointCloud* A = clouds[i];
+			A->computeOctree();
+
+			for (size_t j=i+1; j<cloudCount; ++j)
+			{
+				ccGLMatrix transBToZero;
+				transBToZero.toIdentity();
+				transBToZero.setTranslation(-clouds[j]->getBBCenter());
+				
+				ccGLMatrix transFromZeroToA;
+				transFromZeroToA.toIdentity();
+				transFromZeroToA.setTranslation(A->getBBCenter());
+
+#ifndef TEST_GENERATION
+				double minRMS = -1.0;
+				int bestMatrixIndex = -1;
+				ccPointCloud* bestB = 0;
+#endif
+				for (size_t k=0; k<matrices.size(); ++k)
+				{
+					ccPointCloud* B = clouds[j]->cloneThis();
+					if (!B)
+					{
+						ccLog::Error("Not enough memory!");
+						return;
+					}
+
+					ccGLMatrix BtoA = transFromZeroToA * matrices[k] * transBToZero;
+					B->applyRigidTransformation(BtoA);
+
+#ifndef TEST_GENERATION
+					double finalRMS = 0;
+					CCLib::ICPRegistrationTools::RESULT_TYPE result;
+					CCLib::ICPRegistrationTools::ScaledTransformation registerTrans;
+					result = CCLib::ICPRegistrationTools::RegisterClouds(A,B,registerTrans,CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,1.0e-6,0,finalRMS);
+
+					if (result == CCLib::ICPRegistrationTools::ICP_ERROR)
+					{
+						delete B;
+						if (bestB)
+							delete bestB;
+						ccLog::Error("An error occurred while performing ICP!");
+						return;
+					}
+
+					if (minRMS < 0 || finalRMS < minRMS)
+					{
+						minRMS = finalRMS;
+						bestMatrixIndex = static_cast<int>(k);
+						std::swap(bestB,B);
+					}
+
+					if (B)
+					{
+						delete B;
+						B = 0;
+					}
+#else
+					addToDB(B);
+
+					//Test sphere
+					CCVector3 Y(0,1,0);
+					matrices[k].apply(Y);
+					testSphere->addPoint(Y);
+#endif
+
+					if (!nProgress.oneStep())
+					{
+						//process cancelled by user
+						return;
+					}
+				}
+
+#ifndef TEST_GENERATION
+				if (bestMatrixIndex >= 0)
+				{
+					assert(bestB);
+					ccHObject* group = new ccHObject(QString("Best case #%1 / #%2 - RMS = %3").arg(i+1).arg(j+1).arg(minRMS));
+					group->addChild(bestB);
+					group->setDisplay_recursive(A->getDisplay());
+					addToDB(group);
+					ccLog::Print(QString("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)").arg(i+1).arg(j+1).arg(minRMS).arg(matrixAngles[bestMatrixIndex].first).arg(matrixAngles[bestMatrixIndex].second));
+				}
+				else
+				{
+					assert(!bestB);
+					ccLog::Warning(QString("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID").arg(i+1).arg(j+1));
+				}
+
+				rmsMatrix[i*cloudCount + j] = minRMS;
+#else
+				addToDB(testSphere);
+				i = cloudCount;
+				break;
+#endif
+			}
+		}
+	}
+
+	//export result as a CSV file
+#ifdef TEST_GENERATION
+	if (false)
+#endif
+	{
+		//persistent settings
+		QSettings settings;
+		settings.beginGroup(s_psSaveFile);
+		QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+
+		QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+		if (outputFilename.isEmpty())
+			return;
+
+		QFile fp(outputFilename);
+		if (fp.open(QFile::Text | QFile::WriteOnly))
+		{
+			QTextStream stream(&fp);
+			//header
+			{
+				stream << "RMS";
+				for (size_t i=0; i<cloudCount; ++i)
+				{
+					stream << ";";
+					stream << clouds[i]->getName();
+				}
+				stream << endl;
+			}
+
+			//rows
+			for (size_t j=0; j<cloudCount; ++j)
+			{
+				stream << clouds[j]->getName();
+				stream << ";";
+				for (size_t i=0; i<cloudCount; ++i)
+				{
+					stream << rmsMatrix[j*cloudCount+i];
+					stream << ";";
+				}
+				stream << endl;
+			}
+			
+			ccLog::Print("[doActionComputeBestICPRmsMatrix] Job done");
+		}
+		else
+		{
+			ccLog::Error("Failed to save output file?!");
+		}
 	}
 }
 

@@ -434,6 +434,9 @@ protected slots:
 	//! Batch export some pieces of info from a set of selected clouds
 	void doActionExportCloudsInfo();
 
+	//! Generates a matrix with the best (registration) RMS for all possible couple among the selected entities
+	void doActionComputeBestICPRmsMatrix();
+
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 

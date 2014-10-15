@@ -434,7 +434,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 			//compute (new) distances to model
 			params.CPSet = CPSet;
-			if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params)<0)
+			if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params) < 0)
 			{
 				//an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;
@@ -765,7 +765,7 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 		int result = FindCongruentBases(dataTree, beta, referenceBasePoints, candidates);
 		if (result == 0)
 			continue;
-		else if (result<0) //something bad happened!
+		else if (result < 0) //something bad happened!
 		{
 			delete dataTree;
 			delete modelTree;

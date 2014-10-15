@@ -107,7 +107,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 	if (!theCloud)
 		return 0;
 
-	unsigned count=theCloud->size();
+	unsigned count = theCloud->size();
 
 	SimpleCloud* cloud = new SimpleCloud();
 	if (!cloud->reserve(count)) //not enough memory
@@ -116,7 +116,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 	uchar dim1 = (dim>0 ? dim-1 : 2);
 	uchar dim2 = (dim<2 ? dim+1 : 0);
 
-	float tan_alpha = tan(alpha*(float)(CC_DEG_TO_RAD));
+	float tan_alpha = tan(alpha*static_cast<float>(CC_DEG_TO_RAD));
 	//float cos_alpha = cos(alpha*CC_DEG_TO_RAD);
 	//float sin_alpha = sin(alpha*CC_DEG_TO_RAD);
 	float q = 1.0f/(1.0f+tan_alpha*tan_alpha);
@@ -139,7 +139,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 		progressCb->start();
 	}
 
-	for (unsigned i=0;i<count;i++)
+	for (unsigned i=0; i<count; i++)
 	{
 		const CCVector3 *Q = theCloud->getNextPoint();
 		P = *Q-center;
@@ -154,7 +154,8 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 		//#define ORTHO_CONIC_PROJECTION
 		#ifdef ORTHO_CONIC_PROJECTION
 		lat = sqrt(x2*x2+z2*z2)*cos_alpha;
-		if (lat*z2<0.0) lat=-lat;
+		if (lat*z2 < 0.0)
+			lat=-lat;
 		#else
 		lat = P.u[dim];
 		#endif
@@ -163,21 +164,22 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 		dZ = P.u[dim]-z2;
 		alt = sqrt(dX*dX+dZ*dZ);
 		//on regarde de quel cote de la surface du cone le resultat tombe par p.v.
-		if (x2*P.u[dim] - z2*u<0.0)
+		if (x2*P.u[dim] - z2*u < 0)
 			alt=-alt;
 
 		cloud->addPoint(CCVector3(lon*baseRadius,lat+center[dim],alt));
 
-		if (progressCb)
-		{
-			if (!nprogress->oneStep())
-				break;
-		}
+		if (nprogress && !nprogress->oneStep())
+			break;
 	}
 
-	if (progressCb)
+	if (nprogress)
 	{
 		delete nprogress;
+		nprogress = 0;
+	}
+	if (progressCb)
+	{
 		progressCb->stop();
 	}
 

@@ -112,7 +112,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	else
 	{
 		split3DCheckBox->setEnabled(true);
-		lmRadiusDoubleSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm())/200.0);
+		lmRadiusDoubleSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm())/200);
 	}
 
 	//compute approximate results and unlock GUI
@@ -323,8 +323,8 @@ int ccComparisonDlg::computeApproxResults()
 
 	int guessedBestOctreeLevel = -1;
 
-	//si le calcul de distances approx a echoue ...
-	if (approxResult<0)
+	//if the approximate distances comptation failed...
+	if (approxResult < 0)
 	{
 		ccLog::Warning("Approx. results computation failed (error code %i)",approxResult);
 		m_compCloud->deleteScalarField(sfIdx);
@@ -335,7 +335,7 @@ int ccComparisonDlg::computeApproxResults()
 	{
 		ccLog::Print("[ComputeApproxDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
-		//affichage des infos sur le champ scalaire approx.
+		//display approx. dist. statistics
 		ScalarType mean,variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean,&variance);
@@ -383,21 +383,21 @@ int ccComparisonDlg::computeApproxResults()
 		for (int i=0;i<curRow;++i)
 			approxStats->setRowHeight(i,20);
 
-		//on active les elements d'interface correspondant
+		//enable the corresponding UI items
 		preciseResultsTabWidget->widget(2)->setEnabled(true);
 		histoButton->setEnabled(true);
 
-		//m.a.j. affichage
+		//update display
 		m_compCloud->setCurrentDisplayedScalarField(sfIdx);
-		m_compCloud->showSF(sfIdx>=0);
+		m_compCloud->showSF(sfIdx >= 0);
 
 		m_currentSFIsDistance = true;
 
-		//il faut determiner ici le niveau d'octree optimal pour le calcul precis
+		//now find the best octree level for real dist. computation
 		guessedBestOctreeLevel = determineBestOctreeLevel(-1.0);
 	}
 
-	if (guessedBestOctreeLevel<0)
+	if (guessedBestOctreeLevel < 0)
 	{
 		ccLog::Warning("Can't evaluate best computation level! Try to set it manually ...");
 		octreeLevelCheckBox->setCheckState(Qt::Checked);
@@ -408,7 +408,7 @@ int ccComparisonDlg::computeApproxResults()
 
 	computeButton->setEnabled(true);
 
-	//We set the button color to red, and the text to white
+	//we set the button color to red and the text to white
 	QColor qRed(255,0,0);
 	ccDisplayOptionsDlg::SetButtonColor(computeButton,qRed);
 	QColor qWhite(255,255,255);
@@ -416,7 +416,7 @@ int ccComparisonDlg::computeApproxResults()
 
 	preciseGroupBox->setEnabled(true);
 
-	updateDisplay(sfIdx>=0, false);
+	updateDisplay(sfIdx >= 0, false);
 
 	return guessedBestOctreeLevel;
 }
@@ -427,18 +427,18 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		return -1;
 
 	//make sure a valid SF is activated
-	if (!m_currentSFIsDistance || m_compCloud->getCurrentOutScalarFieldIndex()<0)
+	if (!m_currentSFIsDistance || m_compCloud->getCurrentOutScalarFieldIndex() < 0)
 	{
 		//we must compute approx. results again
 		//(this method will be called again)
 		return computeApproxResults();
 	}
 
-	//Evaluation du "temps" de calcul pour chaque niveau d'octree
+	//evalutate the theoretical time for each octree level
 	double timings[CCLib::DgmOctree::MAX_OCTREE_LEVEL];
 	memset(timings,0,sizeof(double)*CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-	//Pour le cas où la reference est un maillage
+	//if the reference is a mesh
 	double meanTriangleSurface = 1.0;
 	CCLib::GenericIndexedMesh* mesh = 0;
 	if (!m_refOctree)
@@ -454,89 +454,86 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			ccLog::Warning("Mesh is empty! Can't go further...");
 			return -1;
 		}
-		//Surface totale du maillage
+		//total mesh surface
 		double meshSurface = CCLib::MeshSamplingTools::computeMeshArea(mesh);
-		//Surface moyenne d'un triangle
-		if (meshSurface>0.0)
-			meanTriangleSurface = meshSurface/double(mesh->size());
+		//average triangle surface
+		if (meshSurface > 0)
+			meanTriangleSurface = meshSurface / mesh->size();
 	}
 
-	//On saute les niveaux les plus faibles, car il sont "inutiles" et font foirer les calculs suivants ;)
+	//we skip the lowest subdivision levels (useless + incompatible with below formulas ;)
 	int theBestOctreeLevel = 2;
 
-	//Pour chaque niveau ...
+	//for each level
 	for (int level=2; level<CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++level)
 	{
-		//Structures utiles pour le parcours de la structure octree
 		const int bitDec = GET_BIT_SHIFT(level);
 		unsigned numberOfPointsInCell = 0;
 		unsigned index = 0;
 		double cellDist = -1;
 
-		//on calcule un facteur de correction qui va nous donner a partir de la distance
-		//approximative une approximation (reelle) de la taille du voisinage necessaire
-		//a inspecter au niveau courant
+		//we compute a 'correction factor' that converts an approximate distance into an
+		//approximate size of the neighborhood (in terms of cells)
 		PointCoordinateType cellSize = m_compOctree->getCellSize(static_cast<uchar>(level));
 
-		//densite du nuage de reference (en points/cellule) s'il existe
+		//we also use the reference cloud density (points/cell) if we have the info
 		double refListDensity = 1.0;
 		if (m_refOctree)
 			refListDensity = m_refOctree->computeMeanOctreeDensity(static_cast<uchar>(level));
 
 		CCLib::DgmOctree::OctreeCellCodeType tempCode = 0xFFFFFFFF;
 
-		//On parcours la structure octree
+		//scan the octree structure
 		const CCLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
 		for (CCLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin();c!=compCodes.end();++c)
 		{
 			CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
 
-			//nouvelle cellule
+			//new cell?
 			if (truncatedCode != tempCode)
 			{
-				//si on a affaire a une vraie cellule
+				//if it's a real cell
 				if (numberOfPointsInCell != 0)
 				{
-					//si maxSearchDist est defini par l'utilisateur, il faut le prendre en compte !
-					//(dans ce cas, on saute la cellule si sa distance approx. est superieure)
+					//if 'maxSearchDist' has been defined by the user, we must take it into account!
+					//(in this case we skipthe cell if its approx. distance is superior)
 					if (maxSearchDist < 0 || cellDist <= maxSearchDist)
 					{
-						//approximation (flotante) de la taille du voisinage
-						cellDist /= static_cast<double>(cellSize);
+						//approx. neighborhood radius
+						cellDist /= cellSize;
 
-						//largeur (flotante) du voisinage (en nombre de cellules)
-						double neighbourSize = 2.0*cellDist + 1.0;
+						//approx. neighborhood width (in terms of cells)
+						double neighbourSize = 2.0*cellDist+1.0;
 
-						//si la reference est un maillage
+						//if the reference is a mesh
 						if (mesh)
 						{
-							//approximation (entiere) de la taille du voisinage
-							//en nombre de cellules au niveau courant
+							//(integer) approximation of the neighborhood size (in terms of cells)
 							int nCell = static_cast<int>(ceil(cellDist));
 
-							//surface probable de maillage rencontree dans ce
-							//voisinage : largeur du voisinage au carre
-							double crossingMeshSurface = (2.0*nCell+1.0) * static_cast<double>(cellSize);
-							crossingMeshSurface*=crossingMeshSurface;
+							//Probable mesh surface in this neighborhood
+							double crossingMeshSurface = (2.0*nCell+1.0) * cellSize;
+							//squared surface!
+							crossingMeshSurface *= crossingMeshSurface;
 
-							//"volume" du voisinage (en nombre de cellules)
+							//neighborhood "volume" (in terms of cells)
 							double neighbourSize3 = neighbourSize*neighbourSize*neighbourSize;
 
-							//TEMPS = RECHERCHE DES VOISINS + facteur_proportion * COMPARAISONS POINTS/TRIANGLES
-							timings[level] += neighbourSize3 + 0.5 * static_cast<double>(numberOfPointsInCell) * crossingMeshSurface/meanTriangleSurface;
+							//TIME = NEIGHBORS SEARCH + proportional factor * POINTS/TRIANGLES COMPARISONS
+							timings[level] += neighbourSize3 + 0.5 * numberOfPointsInCell * crossingMeshSurface/meanTriangleSurface;
 						}
 						else
 						{
-							//on ignore la cellule "centrale"
+							//we ignore the "central" cell
 							neighbourSize -= 1.0;
-							//volume du voisinage (en nombre de cellules)
+							//neighborhood "volume" (in terms of cells)
 							double neighbourSize3 = neighbourSize*neighbourSize*neighbourSize;
-							//volume de la derniere tranche (en nombre de cellules)
+							//volume of the last "slice" (in terms of cells)
 							//=V(n)-V(n-1) = (2*n+1)^3 - (2*n-1)^3 = 24 * n^2 + 2 (si n>0)
-							double lastSliceCellNumber = (cellDist > 0 ? cellDist*cellDist*24.0+2.0 : 1.0);
-							//TEMPS = RECHERCHE DES VOISINS + facteur_proportion * COMPARAISONS POINTS/TRIANGLES
-							//(on estime que les cellules remplies representent la racine du total)
-							timings[level] += neighbourSize3 + 0.1 * static_cast<double>(numberOfPointsInCell)*sqrt(lastSliceCellNumber)*refListDensity;
+							double lastSliceCellNumber = (cellDist > 0 ? cellDist*cellDist * 24.0 + 2.0 : 1.0);
+							//TIME = NEIGHBORS SEARCH + proportional factor * POINTS/TRIANGLES COMPARISONS
+							//(we admit that the filled cells roughly correspond to the sqrt of the total number of cells)
+							timings[level] += neighbourSize3 + 0.1 * numberOfPointsInCell * sqrt(lastSliceCellNumber)  *refListDensity;
 						}
 					}
 				}
@@ -552,7 +549,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
 
-		if (timings[level]<timings[theBestOctreeLevel])
+		if (timings[level] < timings[theBestOctreeLevel])
 			theBestOctreeLevel = level;
 	}
 
@@ -675,16 +672,16 @@ bool ccComparisonDlg::compute()
 	{
 		ccLog::Print("[ComputeDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
-		//affichage des infos sur le champ scalaire
+		//display some statics about the computed distances
 		ScalarType mean,variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean,&variance);
 		ccLog::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));
 
 		m_compCloud->setCurrentDisplayedScalarField(sfIdx);
-		m_compCloud->showSF(sfIdx>=0);
+		m_compCloud->showSF(sfIdx >= 0);
 
-		//on retablit l'apparence du bouton
+		//restore UI items
 		okButton->setEnabled(true);
 
 		m_sfName = QString();
@@ -783,8 +780,10 @@ bool ccComparisonDlg::compute()
 	updateDisplay(sfIdx >= 0, false);
 
 	if (CPSet)
+	{
 		delete CPSet;
-	CPSet = 0;
+		CPSet = 0;
+	}
 
 	return result >= 0;
 }
@@ -819,7 +818,7 @@ void ccComparisonDlg::applyAndExit()
 
 		//this SF shouldn't be here, but in any case, we get rid of it!
 		int tmpSfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
-		if (tmpSfIdx>=0)
+		if (tmpSfIdx >= 0)
 		{
 			m_compCloud->deleteScalarField(tmpSfIdx);
 			tmpSfIdx=-1;
@@ -828,7 +827,7 @@ void ccComparisonDlg::applyAndExit()
 		//now, if we have a temp distance scalar field (the 'real' distances computed by the user)
 		//we should rename it properly
 		int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
-		if (sfIdx>=0)
+		if (sfIdx >= 0)
 		{
 			if (m_sfName.isEmpty()) //hum,hum
 			{
@@ -841,7 +840,7 @@ void ccComparisonDlg::applyAndExit()
 			{
 				//we delete any existing scalar field with the exact same name
 				int _sfIdx = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName));
-				if (_sfIdx>=0)
+				if (_sfIdx >= 0)
 				{
 					m_compCloud->deleteScalarField(_sfIdx);
 					//we update sfIdx because indexes are all messed up after deletion
@@ -850,7 +849,7 @@ void ccComparisonDlg::applyAndExit()
 
 				m_compCloud->renameScalarField(sfIdx,qPrintable(m_sfName));
 				m_compCloud->setCurrentDisplayedScalarField(sfIdx);
-				m_compCloud->showSF(sfIdx>=0);
+				m_compCloud->showSF(sfIdx >= 0);
 			}
 		}
 
@@ -875,14 +874,14 @@ void ccComparisonDlg::cancelAndExit()
 
 		//we get rid of any temporary scalar field
 		int tmpSfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
-		if (tmpSfIdx>=0)
+		if (tmpSfIdx >= 0)
 		{
 			m_compCloud->deleteScalarField(tmpSfIdx);
 			tmpSfIdx=-1;
 		}
 
 		int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
-		if (sfIdx>=0)
+		if (sfIdx >= 0)
 		{
 			m_compCloud->deleteScalarField(sfIdx);
 			sfIdx=-1;
@@ -894,7 +893,7 @@ void ccComparisonDlg::cancelAndExit()
 			if (oldSfIdx)
 			{
 				m_compCloud->setCurrentDisplayedScalarField(oldSfIdx);
-				m_compCloud->showSF(oldSfIdx>=0);
+				m_compCloud->showSF(oldSfIdx >= 0);
 			}
 		}
 	}

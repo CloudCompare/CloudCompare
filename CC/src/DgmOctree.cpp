@@ -1669,11 +1669,11 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 				//distance to min border of octree along each axis
 				distToBorder = *_fillIndexes-nNSS.cellPos[dim];
 				//if its negative, lets look the other side
-				if (distToBorder<0)
+				if (distToBorder < 0)
 					//distance to max border of octree along each axis
 						distToBorder = nNSS.cellPos[dim]-_fillIndexes[3];
 
-				if (distToBorder>0)
+				if (distToBorder > 0)
 				{
 					visitedCellDistance = std::max(distToBorder,visitedCellDistance);
 					diagonalDistance += distToBorder*distToBorder;

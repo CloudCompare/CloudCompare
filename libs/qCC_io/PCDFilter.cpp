@@ -252,7 +252,7 @@ int PCDFilter::ReadScalarFieldMemMap(const QString& fieldName,
 									 size_t count)
 {
 	int fieldID = GetIDOfField(fieldName, header);
-	if (fieldID<0)
+	if (fieldID < 0)
 		return -1;
 	size_t offset = GetOffsetOfField(fieldID, header);
 	size_t field_element_size = header.size[fieldID];

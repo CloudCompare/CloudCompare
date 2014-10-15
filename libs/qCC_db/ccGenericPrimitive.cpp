@@ -135,7 +135,7 @@ bool ccGenericPrimitive::toFile_MeOnly(QFile& out) const
 		return false;
 
 	//'drawing precision' (dataVersion>=21))
-	if (out.write((const char*)&m_drawPrecision,sizeof(unsigned))<0)
+	if (out.write((const char*)&m_drawPrecision,sizeof(unsigned)) < 0)
 		return WriteError();
 
 	return true;
@@ -157,7 +157,7 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 		return false;
 
 	//'drawing precision' (dataVersion>=21))
-	if (in.read((char*)&m_drawPrecision,sizeof(unsigned))<0)
+	if (in.read((char*)&m_drawPrecision,sizeof(unsigned)) < 0)
 		return ReadError();
 
 	return true;
@@ -167,17 +167,23 @@ bool ccGenericPrimitive::setDrawingPrecision(unsigned steps)
 {
 	if (m_drawPrecision == steps)
 		return true;
-	if (steps < 4)
+	if (steps < MIN_DRAWING_PRECISION)
 		return false;
 
 	m_drawPrecision = steps;
 
-	if (!buildUp())
-		return false;
+	return updateRepresentation();
+}
 
-	applyTransformationToVertices();
+bool ccGenericPrimitive::updateRepresentation()
+{
+	bool success = buildUp();
+	if (success)
+	{
+		applyTransformationToVertices();
+	}
 
-	return true;
+	return success;
 }
 
 void ccGenericPrimitive::applyGLTransformation(const ccGLMatrix& trans)
@@ -211,7 +217,16 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	/*** clear existing structures ***/
 
 	//clear vertices & normals
-	verts->clear(); //takes care of vertices normals
+	bool keepOtherProps = (vertCount ==  verts->size());
+	if (keepOtherProps)
+	{
+		verts->unalloactePoints();
+		verts->unallocateNorms();
+	}
+	else
+	{
+		verts->clear();
+	}
 
 	//clear triangles indexes
 	assert(m_triVertIndexes);

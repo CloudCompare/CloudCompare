@@ -356,7 +356,7 @@ void ccColorScaleEditorDialog::deletecSelectedStep()
 void ccColorScaleEditorDialog::changeSelectedStepColor()
 {
 	int selectedIndex = m_scaleWidget->getSelectedStepIndex();
-	if (selectedIndex<0)
+	if (selectedIndex < 0)
 		return;
 
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(selectedIndex);
@@ -376,7 +376,7 @@ void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 		return;
 
 	int selectedIndex = m_scaleWidget->getSelectedStepIndex();
-	if (selectedIndex<0)
+	if (selectedIndex < 0)
 		return;
 
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(selectedIndex);

@@ -32,6 +32,9 @@ class QCC_DB_LIB_API ccQuadric : public ccGenericPrimitive
 {
 public:
 
+	//! Default drawing precision
+	static const unsigned DEFAULT_DRAWING_PRECISION = 24;
+
 	//! Default constructor
 	/** Quadric orthogonal dimension is 'Z' by default
 		\param minCorner min corner of the 'representation' base area
@@ -48,7 +51,7 @@ public:
 				const unsigned char* hfDims = 0,
 				const ccGLMatrix* transMat = 0,
 				QString name = QString("Plane"),
-				unsigned precision = 24);
+				unsigned precision = DEFAULT_DRAWING_PRECISION);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!

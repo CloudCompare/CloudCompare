@@ -290,7 +290,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	//perspective mode
 	int perspectiveMode = parameters.perspectiveMode ? 1 : 0;
 	//light-balancing based on the current zoom (for ortho. mode only)
-	float lightMod = perspectiveMode ? 3.0f : sqrt(2.0f*std::max<float>(parameters.zoom,0.7f)); //1.41 ~ sqrt(2)
+	float lightMod = perspectiveMode ? 3.0f : static_cast<float>(sqrt(2.0*std::max<double>(parameters.zoom,0.7))); //1.41 ~ sqrt(2)
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 

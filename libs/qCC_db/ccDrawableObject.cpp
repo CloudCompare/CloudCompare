@@ -110,10 +110,10 @@ void ccDrawableObject::prepareDisplayForRefresh()
 
 void ccDrawableObject::setDisplay(ccGenericGLDisplay* win)
 {
-	if (win && m_currentDisplay!=win)
+	if (win && m_currentDisplay != win)
 		win->invalidateViewport();
 
-	m_currentDisplay=win;
+	m_currentDisplay = win;
 }
 
 void ccDrawableObject::removeFromDisplay(const ccGenericGLDisplay* win)
@@ -259,9 +259,9 @@ void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 	//color override
 	if (isColorOverriden())
 	{
-		params.showColors=true;
-		params.showNorms=hasNormals() && normalsShown()/*false*/;
-		params.showSF=false;
+		params.showColors = true;
+		params.showNorms = hasNormals() && normalsShown()/*false*/;
+		params.showSF = false;
 	}
 	else
 	{

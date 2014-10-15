@@ -119,13 +119,13 @@ static int ReadEntityHeader(QFile& in, unsigned &numberOfPoints, HeaderFlags& he
 
 	//number of points
 	uint32_t ptsCount;
-	if (in.read((char*)&ptsCount,4)<0)
+	if (in.read((char*)&ptsCount,4) < 0)
 		return -1;
 	numberOfPoints = (unsigned)ptsCount;
 
 	//flags (colors, etc.)
 	uint8_t flag;
-	if (in.read((char*)&flag,1)<0)
+	if (in.read((char*)&flag,1) < 0)
 		return -1;
 
 	header.flags.fromByte((unsigned char)flag);
@@ -210,12 +210,12 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		firstBytes[3] = 48+flags; //48 = ASCII("0")
 	}
 
-	if (out.write(firstBytes,4)<0)
+	if (out.write(firstBytes,4) < 0)
 		return CC_FERR_WRITING;
 
 	// Current BIN file version
 	uint32_t binVersion_u32 = static_cast<uint32_t>(ccObject::GetCurrentDBVersion());
-	if (out.write((char*)&binVersion_u32,4)<0)
+	if (out.write((char*)&binVersion_u32,4) < 0)
 		return CC_FERR_WRITING;
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -325,7 +325,7 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		return CC_FERR_READING;
 
 	uint32_t firstBytes = 0;
-	if (in.read((char*)&firstBytes,4)<0)
+	if (in.read((char*)&firstBytes,4) < 0)
 		return CC_FERR_READING;
 	bool v1 = (strncmp((char*)&firstBytes,"CCB",3) != 0);
 
@@ -1053,7 +1053,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		{
 			for (int i=0; i<256; ++i)
 			{
-				if (in.read(cloudName+i,1)<0)
+				if (in.read(cloudName+i,1) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the cloud name!\n");
 					return CC_FERR_READING;
@@ -1075,7 +1075,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		{
 			for (int i=0; i<1024; ++i)
 			{
-				if (in.read(sfName+i,1)<0)
+				if (in.read(sfName+i,1) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the cloud name!\n");
 					return CC_FERR_READING;
@@ -1150,7 +1150,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			}
 
 			float Pf[3];
-			if (in.read((char*)Pf,sizeof(float)*3)<0)
+			if (in.read((char*)Pf,sizeof(float)*3) < 0)
 			{
 				//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity point !\n",k);
 				return CC_FERR_READING;
@@ -1160,7 +1160,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			if (header.colors)
 			{
 				unsigned char C[3];
-				if (in.read((char*)C,sizeof(colorType)*3)<0)
+				if (in.read((char*)C,sizeof(colorType)*3) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity colors !\n",k);
 					return CC_FERR_READING;
@@ -1171,7 +1171,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			if (header.normals)
 			{
 				CCVector3 N;
-				if (in.read((char*)N.u,sizeof(float)*3)<0)
+				if (in.read((char*)N.u,sizeof(float)*3) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity norms !\n",k);
 					return CC_FERR_READING;
@@ -1182,7 +1182,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			if (header.scalarField)
 			{
 				double D;
-				if (in.read((char*)&D,sizeof(double))<0)
+				if (in.read((char*)&D,sizeof(double)) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity distance!\n",k);
 					return CC_FERR_READING;

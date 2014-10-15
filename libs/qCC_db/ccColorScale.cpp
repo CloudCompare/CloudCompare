@@ -167,25 +167,25 @@ bool ccColorScale::toFile(QFile& out) const
 	outStream << m_uuid;
 
 	//relative state (dataVersion>=27)
-	if (out.write((const char*)&m_relative,sizeof(bool))<0)
+	if (out.write((const char*)&m_relative,sizeof(bool)) < 0)
 		return WriteError();
 
 	//Absolute min value (dataVersion>=27)
-	if (out.write((const char*)&m_absoluteMinValue,sizeof(double))<0)
+	if (out.write((const char*)&m_absoluteMinValue,sizeof(double)) < 0)
 		return WriteError();
 	//Absolute range (dataVersion>=27)
-	if (out.write((const char*)&m_absoluteRange,sizeof(double))<0)
+	if (out.write((const char*)&m_absoluteRange,sizeof(double)) < 0)
 		return WriteError();
 
 	//locked state (dataVersion>=27)
-	if (out.write((const char*)&m_locked,sizeof(bool))<0)
+	if (out.write((const char*)&m_locked,sizeof(bool)) < 0)
 		return WriteError();
 
 	//steps list (dataVersion>=27)
 	{
 		//steps count
 		uint32_t stepCount = (uint32_t)m_steps.size();
-		if (out.write((const char*)&stepCount,4)<0)
+		if (out.write((const char*)&stepCount,4) < 0)
 			return WriteError();
 
 		//write each step
@@ -213,25 +213,25 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags)
 	inStream >> m_uuid;
 
 	//relative state (dataVersion>=27)
-	if (in.read((char*)&m_relative,sizeof(bool))<0)
+	if (in.read((char*)&m_relative,sizeof(bool)) < 0)
 		return ReadError();
 
 	//Absolute min value (dataVersion>=27)
-	if (in.read((char*)&m_absoluteMinValue,sizeof(double))<0)
+	if (in.read((char*)&m_absoluteMinValue,sizeof(double)) < 0)
 		return ReadError();
 	//Absolute range (dataVersion>=27)
-	if (in.read((char*)&m_absoluteRange,sizeof(double))<0)
+	if (in.read((char*)&m_absoluteRange,sizeof(double)) < 0)
 		return ReadError();
 
 	//locked state (dataVersion>=27)
-	if (in.read((char*)&m_locked,sizeof(bool))<0)
+	if (in.read((char*)&m_locked,sizeof(bool)) < 0)
 		return ReadError();
 
 	//steps list (dataVersion>=27)
 	{
 		//steps count
 		uint32_t stepCount = 0;
-		if (in.read((char*)&stepCount,4)<0)
+		if (in.read((char*)&stepCount,4) < 0)
 			return ReadError();
 
 		//read each step

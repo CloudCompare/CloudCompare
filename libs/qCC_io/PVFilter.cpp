@@ -102,7 +102,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename)
 			
 			//conversion to float
 			float wBuff[3] = {(float)P->x, (float)P->y, (float)P->z};
-			if (out.write((const char*)wBuff,3*sizeof(float))<0)
+			if (out.write((const char*)wBuff,3*sizeof(float)) < 0)
 			{
 				result = CC_FERR_WRITING;
 				break;
@@ -112,7 +112,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename)
 		//write scalar value
 		if (hasSF)
 			val = static_cast<float>(theCloud->getPointScalarValue(i));
-		if (out.write((const char*)&val,sizeof(float))<0)
+		if (out.write((const char*)&val,sizeof(float)) < 0)
 		{
 			result = CC_FERR_WRITING;
 			break;

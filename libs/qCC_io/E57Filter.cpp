@@ -249,7 +249,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	int maxReturnIndex = 0;
 	{
 		int returnIndexSFIndex = cloud->getScalarFieldIndexByName(CC_E57_RETURN_INDEX_FIELD_NAME);
-		if (returnIndexSFIndex>=0)
+		if (returnIndexSFIndex >= 0)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(returnIndexSFIndex));
 			assert(sf);
@@ -295,13 +295,13 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	bool hasInvalidIntensities = false;
 	{
 		int intensitySFIndex = cloud->getScalarFieldIndexByName(CC_E57_INTENSITY_FIELD_NAME);
-		if (intensitySFIndex<0)
+		if (intensitySFIndex < 0)
 		{
 			intensitySFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
-			if (intensitySFIndex>=0)
+			if (intensitySFIndex >= 0)
 				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)",cloud->getScalarFieldName(intensitySFIndex));
 		}
-		if (intensitySFIndex>=0)
+		if (intensitySFIndex >= 0)
 		{
 			intensitySF = static_cast<ccScalarField*>(cloud->getScalarField(intensitySFIndex));
 			assert(intensitySF);

@@ -482,7 +482,7 @@ bool ccSubMesh::toFile_MeOnly(QFile& out) const
 	//so instead we save it's unique ID (dataVersion>=29)
 	//WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t meshUniqueID = (m_associatedMesh ? (uint32_t)m_associatedMesh->getUniqueID() : 0);
-	if (out.write((const char*)&meshUniqueID,4)<0)
+	if (out.write((const char*)&meshUniqueID,4) < 0)
 		return WriteError();
 
 	//references (dataVersion>=29)
@@ -501,7 +501,7 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//we only store its unique ID (dataVersion>=29) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t meshUniqueID = 0;
-	if (in.read((char*)&meshUniqueID,4)<0)
+	if (in.read((char*)&meshUniqueID,4) < 0)
 		return ReadError();
 	//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'm_associatedMesh' pointer!!!
 	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;

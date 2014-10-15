@@ -219,19 +219,19 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 		return false;
 	}
 	uint32_t vertUniqueID = (m_theAssociatedCloud ? (uint32_t)vertices->getUniqueID() : 0);
-	if (out.write((const char*)&vertUniqueID,4)<0)
+	if (out.write((const char*)&vertUniqueID,4) < 0)
 		return WriteError();
 
 	//number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = size();
-	if (out.write((const char*)&pointCount,4)<0)
+	if (out.write((const char*)&pointCount,4) < 0)
 		return WriteError();
 
 	//points (references to) (dataVersion>=28)
 	for (uint32_t i=0; i<pointCount; ++i)
 	{
 		uint32_t pointIndex = getPointGlobalIndex(i);
-		if (out.write((const char*)&pointIndex,4)<0)
+		if (out.write((const char*)&pointIndex,4) < 0)
 			return WriteError();
 	}
 
@@ -269,14 +269,14 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t vertUniqueID = 0;
-	if (in.read((char*)&vertUniqueID,4)<0)
+	if (in.read((char*)&vertUniqueID,4) < 0)
 		return ReadError();
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
 	*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
 
 	//number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = 0;
-	if (in.read((char*)&pointCount,4)<0)
+	if (in.read((char*)&pointCount,4) < 0)
 		return ReadError();
 	if (!reserve(pointCount))
 		return false;
@@ -285,7 +285,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	for (uint32_t i=0; i<pointCount; ++i)
 	{
 		uint32_t pointIndex = 0;
-		if (in.read((char*)&pointIndex,4)<0)
+		if (in.read((char*)&pointIndex,4) < 0)
 			return ReadError();
 		addPointIndex(pointIndex);
 	}

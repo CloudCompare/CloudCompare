@@ -156,6 +156,12 @@ public:
 	**/
 	virtual void clear();
 
+	//! Erases the cloud points
+	/** Prefer ccPointCloud::clear by default.
+		\warning DANGEROUS
+	**/
+	void unalloactePoints();
+
 	//! Erases the cloud colors
 	void unallocateColors();
 

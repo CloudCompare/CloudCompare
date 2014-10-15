@@ -95,7 +95,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename)
 			
 			//conversion to float
 			Vector3Tpl<float> Pfloat = Vector3Tpl<float>::fromArray(P->u);
-			if (out.write(reinterpret_cast<const char*>(Pfloat.u),3*sizeof(float))<0)
+			if (out.write(reinterpret_cast<const char*>(Pfloat.u),3*sizeof(float)) < 0)
 			{
 				result = CC_FERR_WRITING;
 				break;

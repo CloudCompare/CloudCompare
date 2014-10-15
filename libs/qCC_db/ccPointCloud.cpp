@@ -305,13 +305,17 @@ void ccPointCloud::init() throw()
 
 void ccPointCloud::clear()
 {
-	ChunkedPointCloud::clear();
-	ccGenericPointCloud::clear();
-
-	showSFColorsScale(false);
+	unalloactePoints();
 	unallocateColors();
 	unallocateNorms();
-	enableTempColor(false);
+	//enableTempColor(false); //DGM: why?
+}
+
+void ccPointCloud::unalloactePoints()
+{
+	showSFColorsScale(false); //SFs will be destroyed
+	ChunkedPointCloud::clear();
+	ccGenericPointCloud::clear();
 
 	notifyGeometryUpdate(); //calls releaseVBOs()
 }
@@ -348,6 +352,7 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignore
 	result->setEnabled(isEnabled());
 
 	result->setCurrentDisplayedScalarField(getCurrentDisplayedScalarFieldIndex());
+	result->setPointSize(getPointSize());
 
 	//original shift
 	result->setGlobalShift(getGlobalShift());

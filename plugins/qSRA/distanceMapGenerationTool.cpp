@@ -114,9 +114,9 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 
 	//reserve a new scalar field (or take the old one if it already exists)
 	int sfIdx = cloud->getScalarFieldIndexByName(RADIAL_DIST_SF_NAME);
-	if (sfIdx<0)
+	if (sfIdx < 0)
 		sfIdx = cloud->addScalarField(RADIAL_DIST_SF_NAME);
-	if (sfIdx<0)
+	if (sfIdx < 0)
 	{
 		if (app)
 			app->dispToConsole(QString("Failed to allocate a new scalar field for computing distances! Try to free some memory ..."),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -130,9 +130,9 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 	if (storeRadiiAsSF)
 	{
 		int sfIdxRadii = cloud->getScalarFieldIndexByName(RADII_SF_NAME);
-		if (sfIdxRadii<0)
+		if (sfIdxRadii < 0)
 			sfIdxRadii = cloud->addScalarField(RADII_SF_NAME);
-		if (sfIdxRadii<0)
+		if (sfIdxRadii < 0)
 		{
 			if (app)
 				app->dispToConsole(QString("Failed to allocate a new scalar field for storing radii! You should try to free some memory ..."),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -445,13 +445,14 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		int j = static_cast<int>((y-grid->yMin)/grid->yStep);
 
 		//if we fall exactly on the max corner of the grid box
-		if (i == (int)grid->xSteps)
+		if (i == static_cast<int>(grid->xSteps))
 			--i;
-		if (j == (int)grid->ySteps)
+		if (j == static_cast<int>(grid->ySteps))
 			--j;
 
 		//we skip points outside the box!
-		if (i<0 || i>=(int)grid->xSteps || j<0 || j>=(int)grid->ySteps)
+		if (	i < 0 || i >= static_cast<int>(grid->xSteps)
+			||	j < 0 || j >= static_cast<int>(grid->ySteps) )
 		{
 			continue;
 		}

@@ -606,7 +606,7 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	{
 		const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
 		double norm2 = p.norm2();
-		PointCoordinateType rp = 1.0 + norm2  * (params->k1 + norm2 * params->k2); //scaling factor to undo the radial distortion
+		double rp = 1.0 + norm2  * (params->k1 + norm2 * params->k2); //scaling factor to undo the radial distortion
 
 		factor *= rp;
 	}
@@ -1617,7 +1617,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 
 	//top-right
 	{
-		CCVector2 xTopRight(width,0);
+		CCVector2 xTopRight(static_cast<PointCoordinateType>(width),0);
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xTopRight,P3D,Z0))
 			return 0;
@@ -1633,7 +1633,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 
 	//bottom-right
 	{
-		CCVector2 xBottomRight(width,height);
+		CCVector2 xBottomRight(static_cast<PointCoordinateType>(width),static_cast<PointCoordinateType>(height));
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xBottomRight,P3D,Z0))
 			return 0;
@@ -1649,7 +1649,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 
 	//bottom-left
 	{
-		CCVector2 xBottomLeft(0,height);
+		CCVector2 xBottomLeft(0,static_cast<PointCoordinateType>(height));
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xBottomLeft,P3D,Z0))
 			return 0;
@@ -1717,10 +1717,10 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 
 	for (unsigned i=0; i<w; ++i)
 	{
-		PointCoordinateType xip = minC[0] + static_cast<PointCoordinateType>(i*_pixelSize);
+		PointCoordinateType xip = static_cast<PointCoordinateType>(minC[0] + i*_pixelSize);
 		for (unsigned j=0; j<h; ++j)
 		{
-			PointCoordinateType yip = minC[1] + static_cast<PointCoordinateType>(j*_pixelSize);
+			PointCoordinateType yip = static_cast<PointCoordinateType>(minC[1] + j*_pixelSize);
 
 			QRgb rgb = blackValue; //output pixel is (transparent) black by default
 

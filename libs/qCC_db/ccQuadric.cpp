@@ -36,7 +36,7 @@ ccQuadric::ccQuadric(	CCVector2 minCorner,
 						const unsigned char* hfDims/*=0*/,
 						const ccGLMatrix* transMat/*=0*/,
 						QString name/*=QString("Plane")*/,
-						unsigned precision/*=24*/)
+						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_minCorner(minCorner)
 	, m_maxCorner(maxCorner)
@@ -55,7 +55,7 @@ ccQuadric::ccQuadric(	CCVector2 minCorner,
 		m_hfDims[2] = 2;
 	}
 	
-	setDrawingPrecision(std::max<unsigned>(precision,4));  //automatically calls buildUp + 	applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION));  //automatically calls updateRepresentation
 }
 
 ccQuadric::ccQuadric(QString name /*=QString("Plane")*/)
@@ -69,8 +69,7 @@ ccQuadric::ccQuadric(QString name /*=QString("Plane")*/)
 
 bool ccQuadric::buildUp()
 {
-	assert(m_drawPrecision >= 4);
-	if (m_drawPrecision == 0)
+	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
 	unsigned vertCount = m_drawPrecision*m_drawPrecision;

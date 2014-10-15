@@ -244,9 +244,9 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		if (!glParams.showColors)
 			glColor3ubv(ccColor::white);
 
-		if (updateOctreeGLDisplay || octreeGLListID<0)
+		if (updateOctreeGLDisplay || octreeGLListID < 0)
 		{
-			if (octreeGLListID<0)
+			if (octreeGLListID < 0)
 				octreeGLListID = glGenLists(1);
 			else if (glIsList(octreeGLListID))
 				glDeleteLists(octreeGLListID,1);

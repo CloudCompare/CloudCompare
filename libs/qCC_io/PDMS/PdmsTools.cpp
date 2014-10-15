@@ -273,7 +273,7 @@ bool Coordinates::handle(Token t)
 
 bool Coordinates::handle(PointCoordinateType numvalue)
 {
-	if (current<0 || current>=3)
+	if (current < 0 || current >= 3)
 		return false;
 	
 	//Only coordinates can handle numerical values
@@ -454,7 +454,7 @@ bool Orientation::handle(Token t)
 	//PDMS_IS activates last specified component
 	if (t == PDMS_IS)
 	{
-		if (component<0 || component>=3)
+		if (component < 0 || component >= 3)
 			return false;
 		if (current)
 			return false;
@@ -464,7 +464,7 @@ bool Orientation::handle(Token t)
 	//Handle PDMS_WRT (and check it has not been handled yet)
 	if (t == PDMS_WRT)
 	{
-		if (component<0 || component>=3)
+		if (component < 0 || component >= 3)
 			return false;
 		current = &refs[component];
 		if (current->command)

@@ -176,7 +176,7 @@ bool ccIndexedTransformation::toFile(QFile& out) const
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//index (dataVersion>=34)
-	if (out.write((const char*)&m_index,sizeof(double))<0)
+	if (out.write((const char*)&m_index,sizeof(double)) < 0)
 		return WriteError();
 
 	return true;
@@ -193,7 +193,7 @@ bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags)
 		return CorruptError();
 
 	//index (dataVersion>=34)
-	if (in.read((char*)&m_index,sizeof(double))<0)
+	if (in.read((char*)&m_index,sizeof(double)) < 0)
 		return ReadError();
 
 	return true;

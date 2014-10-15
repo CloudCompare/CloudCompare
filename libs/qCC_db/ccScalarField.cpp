@@ -301,7 +301,7 @@ bool ccScalarField::toFile(QFile& out) const
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//name (dataVersion>=20)
-	if (out.write(m_name,256)<0)
+	if (out.write(m_name,256) < 0)
 		return WriteError();
 
 	//data (dataVersion>=20)
@@ -310,44 +310,44 @@ bool ccScalarField::toFile(QFile& out) const
 
 	//displayed values & saturation boundaries (dataVersion>=20)
 	double dValue = (double)m_displayRange.start();
-	if (out.write((const char*)&dValue,sizeof(double))<0)
+	if (out.write((const char*)&dValue,sizeof(double)) < 0)
 		return WriteError();
 	dValue = (double)m_displayRange.stop();
-	if (out.write((const char*)&dValue,sizeof(double))<0)
+	if (out.write((const char*)&dValue,sizeof(double)) < 0)
 		return WriteError();
 	dValue = (double)m_saturationRange.start();
-	if (out.write((const char*)&dValue,sizeof(double))<0)
+	if (out.write((const char*)&dValue,sizeof(double)) < 0)
 		return WriteError();
 	dValue = (double)m_saturationRange.stop();
-	if (out.write((const char*)&dValue,sizeof(double))<0)
+	if (out.write((const char*)&dValue,sizeof(double)) < 0)
 		return WriteError();
 	dValue = (double)m_logSaturationRange.start();
-	if (out.write((const char*)&dValue,sizeof(double))<0)
+	if (out.write((const char*)&dValue,sizeof(double)) < 0)
 		return WriteError();
 	dValue = (double)m_logSaturationRange.stop();
-	if (out.write((const char*)&dValue,sizeof(double))<0)
+	if (out.write((const char*)&dValue,sizeof(double)) < 0)
 		return WriteError();
 
 	//'logarithmic scale' state (dataVersion>=20)
-	if (out.write((const char*)&m_logScale,sizeof(bool))<0)
+	if (out.write((const char*)&m_logScale,sizeof(bool)) < 0)
 		return WriteError();
 
 	//'symmetrical scale' state (dataVersion>=27)
-	if (out.write((const char*)&m_symmetricalScale,sizeof(bool))<0)
+	if (out.write((const char*)&m_symmetricalScale,sizeof(bool)) < 0)
 		return WriteError();
 
 	//'NaN values in grey' state (dataVersion>=27)
-	if (out.write((const char*)&m_showNaNValuesInGrey,sizeof(bool))<0)
+	if (out.write((const char*)&m_showNaNValuesInGrey,sizeof(bool)) < 0)
 		return WriteError();
 
 	//'always show 0' state (dataVersion>=27)
-	if (out.write((const char*)&m_alwaysShowZero,sizeof(bool))<0)
+	if (out.write((const char*)&m_alwaysShowZero,sizeof(bool)) < 0)
 		return WriteError();
 
 	//color scale (dataVersion>=27)
 	{
 		bool hasColorScale = (m_colorScale != 0);
-		if (out.write((const char*)&hasColorScale,sizeof(bool))<0)
+		if (out.write((const char*)&hasColorScale,sizeof(bool)) < 0)
 			return WriteError();
 
 		if (m_colorScale)
@@ -357,7 +357,7 @@ bool ccScalarField::toFile(QFile& out) const
 
 	//color ramp steps (dataVersion>=20)
 	uint32_t colorRampSteps = (uint32_t)m_colorRampSteps;
-	if (out.write((const char*)&colorRampSteps,4)<0)
+	if (out.write((const char*)&colorRampSteps,4) < 0)
 		return WriteError();
 
 	return true;
@@ -378,7 +378,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 	bool onlyPositiveValues = false;
 	if (dataVersion < 26)
 	{
-		if (in.read((char*)&onlyPositiveValues,sizeof(bool))<0)
+		if (in.read((char*)&onlyPositiveValues,sizeof(bool)) < 0)
 			return ReadError();
 	}
 
@@ -418,43 +418,43 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 
 	//displayed values & saturation boundaries (dataVersion>=20)
 	double minDisplayed = 0;
-	if (in.read((char*)&minDisplayed,sizeof(double))<0)
+	if (in.read((char*)&minDisplayed,sizeof(double)) < 0)
 		return ReadError();
 	double maxDisplayed = 0;
-	if (in.read((char*)&maxDisplayed,sizeof(double))<0)
+	if (in.read((char*)&maxDisplayed,sizeof(double)) < 0)
 		return ReadError();
 	double minSaturation = 0;
-	if (in.read((char*)&minSaturation,sizeof(double))<0)
+	if (in.read((char*)&minSaturation,sizeof(double)) < 0)
 		return ReadError();
 	double maxSaturation = 0;
-	if (in.read((char*)&maxSaturation,sizeof(double))<0)
+	if (in.read((char*)&maxSaturation,sizeof(double)) < 0)
 		return ReadError();
 	double minLogSaturation = 0;
-	if (in.read((char*)&minLogSaturation,sizeof(double))<0)
+	if (in.read((char*)&minLogSaturation,sizeof(double)) < 0)
 		return ReadError();
 	double maxLogSaturation = 0;
-	if (in.read((char*)&maxLogSaturation,sizeof(double))<0)
+	if (in.read((char*)&maxLogSaturation,sizeof(double)) < 0)
 		return ReadError();
 
 	if (dataVersion < 27)
 	{
 		//'absolute saturation' state (27>dataVersion>=20)
 		bool absSaturation = false;
-		if (in.read((char*)&absSaturation,sizeof(bool))<0)
+		if (in.read((char*)&absSaturation,sizeof(bool)) < 0)
 			return ReadError();
 		//quite equivalent to 'symmetrical mode' now...
 		m_symmetricalScale = absSaturation;
 	}
 
 	//'logarithmic scale' state (dataVersion>=20)
-	if (in.read((char*)&m_logScale,sizeof(bool))<0)
+	if (in.read((char*)&m_logScale,sizeof(bool)) < 0)
 		return ReadError();
 
 	if (dataVersion < 27)
 	{
 		bool autoBoundaries = false;
 		//'automatic boundaries update' state (dataVersion>=20)
-		if (in.read((char*)&autoBoundaries,sizeof(bool))<0)
+		if (in.read((char*)&autoBoundaries,sizeof(bool)) < 0)
 			return ReadError();
 		//warn the user that this option is deprecated
 		if (!autoBoundaries)
@@ -468,15 +468,15 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 	if (dataVersion >= 27)
 	{
 		//'symmetrical scale' state (27<=dataVersion)
-		if (in.read((char*)&m_symmetricalScale,sizeof(bool))<0)
+		if (in.read((char*)&m_symmetricalScale,sizeof(bool)) < 0)
 			return ReadError();
 
 		//'NaN values in grey' state (dataVersion>=27)
-		if (in.read((char*)&m_showNaNValuesInGrey,sizeof(bool))<0)
+		if (in.read((char*)&m_showNaNValuesInGrey,sizeof(bool)) < 0)
 			return ReadError();
 
 		//'always show 0' state (27<=dataVersion)
-		if (in.read((char*)&m_alwaysShowZero,sizeof(bool))<0)
+		if (in.read((char*)&m_alwaysShowZero,sizeof(bool)) < 0)
 			return ReadError();
 	}
 
@@ -493,7 +493,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 		if (dataVersion<27)
 		{
 			uint32_t activeColorScale = 0;
-			if (in.read((char*)&activeColorScale,4)<0)
+			if (in.read((char*)&activeColorScale,4) < 0)
 				return ReadError();
 
 			//Retrieve equivalent default scale
@@ -524,7 +524,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 		else //(dataVersion>=27)
 		{
 			bool hasColorScale = false;
-			if (in.read((char*)&hasColorScale,sizeof(bool))<0)
+			if (in.read((char*)&hasColorScale,sizeof(bool)) < 0)
 				return ReadError();
 
 			if (hasColorScale)
@@ -556,7 +556,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 
 		//color ramp steps (dataVersion>=20)
 		uint32_t colorRampSteps = 0;
-		if (in.read((char*)&colorRampSteps,4)<0)
+		if (in.read((char*)&colorRampSteps,4) < 0)
 			return ReadError();
 		setColorRampSteps((unsigned)colorRampSteps);
 	}

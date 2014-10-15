@@ -169,7 +169,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	int result = fm->init(theCloud,theOctree,octreeLevel);
 	int octreeLength = OCTREE_LENGTH(octreeLevel)-1;
 
-	if (result<0)
+	if (result < 0)
 	{
 		if (!inputOctree)
             delete theOctree;

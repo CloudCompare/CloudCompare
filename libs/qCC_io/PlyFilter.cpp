@@ -643,12 +643,12 @@ static int face_cb(p_ply_argument argument)
 		s_unsupportedPolygonType = true;
 		return 1;
 	}
-	if (value_index<0 || value_index>2)
+	if (value_index < 0 || value_index > 2)
 		return 1;
 
-	s_tri[value_index] = (unsigned)ply_get_argument_value(argument);
+	s_tri[value_index] = static_cast<unsigned>(ply_get_argument_value(argument));
 
-	if (value_index==2)
+	if (value_index == 2)
 	{
 		mesh->addTriangle(s_tri[0],s_tri[1],s_tri[2]);
 		++s_triCount;
@@ -665,7 +665,7 @@ static unsigned s_texCoordCount = 0;
 static bool s_invalidTexCoordinates = false;
 static int texCoords_cb(p_ply_argument argument)
 {
-	TextureCoordsContainer* texCoords=0;
+	TextureCoordsContainer* texCoords = 0;
 	ply_get_argument_user_data(argument, (void**)(&texCoords), NULL);
 	assert(texCoords);
 	if (!texCoords)
@@ -679,12 +679,12 @@ static int texCoords_cb(p_ply_argument argument)
 		s_invalidTexCoordinates = true;
 		return 1;
 	}
-	if (value_index<0 || value_index>5)
+	if (value_index < 0 || value_index > 5)
 		return 1;
 
-	s_texCoord[value_index] = (float)ply_get_argument_value(argument);
+	s_texCoord[value_index] = static_cast<float>(ply_get_argument_value(argument));
 
-	if (((value_index+1)%2)==0)
+	if (((value_index+1) % 2) == 0)
 	{
 		texCoords->addElement(s_texCoord+value_index-1);
 		++s_texCoordCount;

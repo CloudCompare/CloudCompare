@@ -31,7 +31,7 @@ double ccCurvatureDlg::getKernelSize() const
 
 void ccCurvatureDlg::setKernelSize(double size)
 {
-	kernelDoubleSpinBox->setValue(size<0.0 ? 0.0 : size);
+	kernelDoubleSpinBox->setValue(size < 0 ? 0 : size);
 }
 
 CCLib::Neighbourhood::CC_CURVATURE_TYPE ccCurvatureDlg::getCurvatureType() const

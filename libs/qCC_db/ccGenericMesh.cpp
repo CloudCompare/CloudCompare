@@ -655,19 +655,19 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 		return false;
 
 	//'show wired' state (dataVersion>=20)
-	if (out.write((const char*)&m_showWired,sizeof(bool))<0)
+	if (out.write((const char*)&m_showWired,sizeof(bool)) < 0)
 		return WriteError();
 
 	//'per-triangle normals shown' state (dataVersion>=29))
-	if (out.write((const char*)&m_triNormsShown,sizeof(bool))<0)
+	if (out.write((const char*)&m_triNormsShown,sizeof(bool)) < 0)
 		return WriteError();
 
 	//'materials shown' state (dataVersion>=29))
-	if (out.write((const char*)&m_materialsShown,sizeof(bool))<0)
+	if (out.write((const char*)&m_materialsShown,sizeof(bool)) < 0)
 		return WriteError();
 
 	//'polygon stippling' state (dataVersion>=29))
-	if (out.write((const char*)&m_stippling,sizeof(bool))<0)
+	if (out.write((const char*)&m_stippling,sizeof(bool)) < 0)
 		return WriteError();
 
 	return true;
@@ -679,21 +679,21 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return false;
 
 	//'show wired' state (dataVersion>=20)
-	if (in.read((char*)&m_showWired,sizeof(bool))<0)
+	if (in.read((char*)&m_showWired,sizeof(bool)) < 0)
 		return ReadError();
 
 	//'per-triangle normals shown' state (dataVersion>=29))
 	if (dataVersion >= 29)
 	{
-		if (in.read((char*)&m_triNormsShown,sizeof(bool))<0)
+		if (in.read((char*)&m_triNormsShown,sizeof(bool)) < 0)
 			return ReadError();
 
 		//'materials shown' state (dataVersion>=29))
-		if (in.read((char*)&m_materialsShown,sizeof(bool))<0)
+		if (in.read((char*)&m_materialsShown,sizeof(bool)) < 0)
 			return ReadError();
 
 		//'polygon stippling' state (dataVersion>=29))
-		if (in.read((char*)&m_stippling,sizeof(bool))<0)
+		if (in.read((char*)&m_stippling,sizeof(bool)) < 0)
 			return ReadError();
 	}
 

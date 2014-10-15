@@ -300,8 +300,8 @@ int ChunkedPointCloud::addScalarField(const char* uniqueName)
 
 void ChunkedPointCloud::deleteScalarField(int index)
 {
-    int sfCount = (int)m_scalarFields.size();
-    if (index<0 || index>=sfCount)
+    int sfCount = static_cast<int>(m_scalarFields.size());
+    if (index < 0 || index >= sfCount)
         return;
 
     //we update SF roles if they point to the deleted scalar field
@@ -353,7 +353,7 @@ int ChunkedPointCloud::getScalarFieldIndexByName(const char* name) const
 
 bool ChunkedPointCloud::renameScalarField(int index, const char* newName)
 {
-	if (getScalarFieldIndexByName(newName)<0)
+	if (getScalarFieldIndexByName(newName) < 0)
 	{
 		ScalarField* sf = getScalarField(index);
 		if (sf)

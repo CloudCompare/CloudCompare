@@ -106,7 +106,7 @@ void ColorScaleElementSliders::clear()
 
 void ColorScaleElementSliders::removeAt(int i)
 {
-	if (i<0 || i>=size())
+	if (i < 0 || i >= size())
 	{
 		assert(false);
 		return;
@@ -627,7 +627,7 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 
 void ccColorScaleEditorWidget::onSliderModified(int sliderIndex)
 {
-	if (sliderIndex<0)
+	if (sliderIndex < 0)
 	{
 		assert(false);
 		return;

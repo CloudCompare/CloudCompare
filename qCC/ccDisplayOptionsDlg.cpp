@@ -377,38 +377,38 @@ void ccDisplayOptionsDlg::changeColorScaleUseShader()
 
 void ccDisplayOptionsDlg::changeColorScaleRampWidth(int val)
 {
-	if (val<2)
+	if (val < 2)
 		return;
-	parameters.colorScaleRampWidth = (unsigned)val;
+	parameters.colorScaleRampWidth = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeDefaultFontSize(int val)
 {
-	if (val<0)
+	if (val < 0)
 		return;
-	parameters.defaultFontSize = (unsigned)val;
+	parameters.defaultFontSize = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeNumberPrecision(int val)
 {
-	if (val<0)
+	if (val < 0)
 		return;
-	parameters.displayedNumPrecision = (unsigned)val;
+	parameters.displayedNumPrecision = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeLabelsTransparency(int val)
 {
-	if (val<0 || val>100)
+	if (val < 0 || val > 100)
 		return;
-	parameters.labelsTransparency = (unsigned)val;
+	parameters.labelsTransparency = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeLabelsMarkerSize(int val)
 {
-	if (val<=0)
+	if (val <= 0)
 		return;
 
-	parameters.pickedPointsSize = (unsigned)val;
+	parameters.pickedPointsSize = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::doReject()

@@ -147,6 +147,7 @@ v2.5.6 ??/??/2014
 	* The global shift information was not applied to the cameras when importing Bundler files with large coordinates
 	* Saving E57 files could make CC crash sometimes (due to an internal inconsistency in libE57)
 		+ CC is now more robust to this kind of errors!
+	* 3D names now follow the entity when they are interactively translated (scissors tool)
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

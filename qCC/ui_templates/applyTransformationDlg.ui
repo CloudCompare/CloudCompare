@@ -382,7 +382,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="ePhiDoubleSpinBox">
             <property name="prefix">
-             <string>X:</string>
+             <string>Phi:</string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -398,7 +398,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="eThetaDoubleSpinBox">
             <property name="prefix">
-             <string>Y:</string>
+             <string>Theta:</string>
             </property>
             <property name="decimals">
              <number>8</number>
@@ -414,7 +414,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
           <item>
            <widget class="QDoubleSpinBox" name="ePsiDoubleSpinBox">
             <property name="prefix">
-             <string>Z:</string>
+             <string>Psi:</string>
             </property>
             <property name="decimals">
              <number>8</number>

@@ -36,23 +36,23 @@ bool ccBox::buildUp()
 	*this += ccPlane(m_dims.x,m_dims.y,&upperMat);
 	//lower plane
 	ccGLMatrix lowerMat;
-	lowerMat.initFromParameters(-(PointCoordinateType)M_PI,CCVector3(1,0,0),CCVector3(0,0,-m_dims.z/2));
+	lowerMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI),CCVector3(1,0,0),CCVector3(0,0,-m_dims.z/2));
 	*this += ccPlane(m_dims.x,m_dims.y,&lowerMat);
 	//left plane
 	ccGLMatrix leftMat;
-	leftMat.initFromParameters(-(PointCoordinateType)(M_PI/2.0),CCVector3(0,1,0),CCVector3(-m_dims.x/2,0,0));
+	leftMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI/2.0),CCVector3(0,1,0),CCVector3(-m_dims.x/2,0,0));
 	*this += ccPlane(m_dims.z,m_dims.y,&leftMat);
 	//right plane
 	ccGLMatrix rightMat;
-	rightMat.initFromParameters((PointCoordinateType)(M_PI/2.0),CCVector3(0,1,0),CCVector3(m_dims.x/2,0,0));
+	rightMat.initFromParameters(static_cast<PointCoordinateType>(M_PI/2.0),CCVector3(0,1,0),CCVector3(m_dims.x/2,0,0));
 	*this += ccPlane(m_dims.z,m_dims.y,&rightMat);
 	//front plane
 	ccGLMatrix frontMat;
-	frontMat.initFromParameters((PointCoordinateType)(M_PI/2.0),CCVector3(1,0,0),CCVector3(0,-m_dims.y/2,0));
+	frontMat.initFromParameters(static_cast<PointCoordinateType>(M_PI/2.0),CCVector3(1,0,0),CCVector3(0,-m_dims.y/2,0));
 	*this += ccPlane(m_dims.x,m_dims.z,&frontMat);
 	//back plane
 	ccGLMatrix backMat;
-	backMat.initFromParameters(-(PointCoordinateType)(M_PI/2.0),CCVector3(1,0,0),CCVector3(0,m_dims.y/2,0));
+	backMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI/2.0),CCVector3(1,0,0),CCVector3(0,m_dims.y/2,0));
 	*this += ccPlane(m_dims.x,m_dims.z,&backMat);
 
 	return (vertices() && vertices()->size() == 24 && vertices()->hasNormals() && this->size() == 12);

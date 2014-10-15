@@ -112,9 +112,9 @@ protected:
 	ScalarType sigma2;
 
 	//! internal function for parameters evaluation from sample points
-	ScalarType computeG(const GenericCloud* Yk, ScalarType a) const;
-	//! internal function for parameters evaluation from sample points (overflow-safe version)
-	ScalarType computeG(const GenericCloud* Yk, ScalarType a, ScalarType inverseVmax) const;
+	/** inverseVmax can be optionnaly specified for overflow-safe version
+	**/
+	ScalarType computeG(const GenericCloud* Yk, ScalarType a, ScalarType* inverseVmax = 0) const;
 	//! internal function for parameters evaluation from sample points
 	ScalarType findGRoot(const GenericCloud* Yk, ScalarType inverseMaxValue) const;
 };

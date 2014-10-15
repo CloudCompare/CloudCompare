@@ -32,6 +32,9 @@ class QCC_DB_LIB_API ccCone : public ccGenericPrimitive
 {
 public:
 
+	//! Default drawing precision
+	static const unsigned DEFAULT_DRAWING_PRECISION = 24;
+
 	//! Default constructor
 	/** Cone axis corresponds to the 'Z' dimension by default
 		\param bottomRadius cone bottom radius
@@ -50,7 +53,7 @@ public:
 				PointCoordinateType yOff = 0,
 				const ccGLMatrix* transMat = 0,
 				QString name = QString("Cone"),
-				unsigned precision = 24);
+				unsigned precision = DEFAULT_DRAWING_PRECISION);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -59,6 +62,27 @@ public:
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CONE; }
+
+	//! Returns height
+	inline PointCoordinateType getHeight() const { return m_height; }
+	//! Sets height
+	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
+	**/
+	void setHeight(PointCoordinateType height);
+
+	//! Returns bottom radius
+	inline PointCoordinateType getBottomRadius() const { return m_bottomRadius; }
+	//! Sets bottom radius
+	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
+	**/
+	virtual void setBottomRadius(PointCoordinateType radius);
+
+	//! Returns top radius
+	inline PointCoordinateType getTopRadius() const { return m_topRadius; }
+	//! Sets top radius
+	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
+	**/
+	virtual void setTopRadius(PointCoordinateType radius);
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Cone"; }

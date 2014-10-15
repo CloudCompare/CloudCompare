@@ -28,7 +28,7 @@ ccTorus::ccTorus(PointCoordinateType insideRadius,
 				 PointCoordinateType rectSectionHeight/*=0*/,
 				 const ccGLMatrix* transMat/*=0*/,
 				 QString name/*=QString("Torus")*/,
-				 unsigned precision/*=24*/)
+				 unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_insideRadius(fabs(insideRadius))
 	, m_outsideRadius(fabs(outsideRadius))
@@ -36,7 +36,7 @@ ccTorus::ccTorus(PointCoordinateType insideRadius,
 	, m_rectSectionHeight(fabs(rectSectionHeight))
 	, m_angle_rad(fabs(angle_rad))
 {
-	setDrawingPrecision(std::max<unsigned>(precision,4)); //automatically calls buildUp + 	applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION)); //automatically calls updateRepresentation
 }
 
 ccTorus::ccTorus(QString name/*=QString("Torus")*/)
@@ -56,7 +56,7 @@ ccGenericPrimitive* ccTorus::clone() const
 
 bool ccTorus::buildUp()
 {
-	if (m_drawPrecision<4)
+	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
 	//invalid parameters?

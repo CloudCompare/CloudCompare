@@ -127,6 +127,11 @@ v2.5.6 ??/??/2014
 		- parameters have been updated so as to be (much) clearer
 	* CC now detects points with NaN coordinates and will automatically replace them by (0,0,0)
 		to avoid (big) issues later
+	* Primitive parameters can now be interactively changed:
+		- Sphere (radius), Cone (height, bottom radius, top radius) or Cylinder (height, radius) can now be
+			modified directly via the 'Properties' dialog
+	* New 'sand-box' method:
+		Tools > Sand box > Create cloud from selected entities centers
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized
@@ -148,6 +153,7 @@ v2.5.6 ??/??/2014
 	* Saving E57 files could make CC crash sometimes (due to an internal inconsistency in libE57)
 		+ CC is now more robust to this kind of errors!
 	* 3D names now follow the entity when they are interactively translated (scissors tool)
+	* Cloud cloning was not preserving the point size
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

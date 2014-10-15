@@ -37,8 +37,7 @@ ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 	m_profile = profile;
 	assert(m_profile.size()>2);
 
-	buildUp();
-	applyTransformationToVertices();
+	updateRepresentation();
 }
 
 ccExtru::ccExtru(QString name/*="Plane"*/)
@@ -54,7 +53,7 @@ ccGenericPrimitive* ccExtru::clone() const
 
 bool ccExtru::buildUp()
 {
-	unsigned count = (unsigned)m_profile.size();
+	unsigned count = static_cast<unsigned>(m_profile.size());
 	if (count < 3)
 		return false;
 

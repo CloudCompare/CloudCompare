@@ -54,7 +54,7 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 public:
 
 	//! Delegate items roles
-	enum CC_PROPERTY_ROLE { OBJECT_NO_PROPERTY		= 0				,
+	enum CC_PROPERTY_ROLE { OBJECT_NO_PROPERTY					= 0	,
 							OBJECT_NAME								,
 							OBJECT_VISIBILITY						,
 							OBJECT_CURRENT_DISPLAY					,
@@ -82,6 +82,10 @@ public:
 							OBJECT_LABEL_DISP_2D					,
 							OBJECT_LABEL_DISP_3D					,
 							OBJECT_PRIMITIVE_PRECISION				,
+							OBJECT_SPHERE_RADIUS					,
+							OBJECT_CONE_HEIGHT						,
+							OBJECT_CONE_BOTTOM_RADIUS				,
+							OBJECT_CONE_TOP_RADIUS					,
 							OBJECT_CLOUD_POINT_SIZE					,
 							OBJECT_NAME_IN_3D						,
 							OBJECT_FACET_CONTOUR					,
@@ -128,6 +132,10 @@ protected slots:
 	void octreeDisplayTypeChanged(int);
 	void octreeDisplayedLevelChanged(int);
 	void primitivePrecisionChanged(int);
+	void sphereRadiusChanged(double);
+	void coneHeightChanged(double);
+	void coneBottomRadiusChanged(double);
+	void coneTopRadiusChanged(double);
 	void imageAlphaChanged(int);
 	void applyImageViewport();
 	void applySensorViewport();

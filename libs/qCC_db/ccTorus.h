@@ -32,6 +32,9 @@ class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
 {
 public:
 
+	//! Default drawing precision
+	static const unsigned DEFAULT_DRAWING_PRECISION = 24;
+
 	//! Default constructor
 	/** Torus is defined in the XY plane by default
 		\param insideRadius inside radius
@@ -50,7 +53,7 @@ public:
 			PointCoordinateType rectSectionHeight = 0,
 			const ccGLMatrix* transMat = 0,
 			QString name = QString("Torus"),
-			unsigned precision = 24);
+			unsigned precision = DEFAULT_DRAWING_PRECISION);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!

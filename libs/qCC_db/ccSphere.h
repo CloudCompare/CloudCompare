@@ -57,7 +57,11 @@ public:
 	virtual ccGenericPrimitive* clone() const;
 
 	//! Returns radius
-	PointCoordinateType getRadius() const { return m_radius; }
+	inline PointCoordinateType getRadius() const { return m_radius; }
+	//! Sets radius
+	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
+	**/
+	inline void setRadius(PointCoordinateType radius);
 
 protected:
 

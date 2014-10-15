@@ -28,7 +28,7 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				PointCoordinateType yOff/*=0*/,
 				const ccGLMatrix* transMat/*=0*/,
 				QString name/*="Cylinder"*/,
-				unsigned precision/*=24*/)
+				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_bottomRadius(fabs(bottomRadius))
 	, m_topRadius(fabs(topRadius))
@@ -36,7 +36,7 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 	, m_yOff(yOff)
 	, m_height(fabs(height))
 {
-	setDrawingPrecision(std::max<unsigned>(precision,4)); //automatically calls buildUp & applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION)); //automatically calls buildUp & applyTransformationToVertices
 }
 
 ccCone::ccCone(QString name/*="Cylinder"*/)
@@ -56,7 +56,7 @@ ccGenericPrimitive* ccCone::clone() const
 
 bool ccCone::buildUp()
 {
-	if (m_drawPrecision<4)
+	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
 	//invalid dimensions?
@@ -216,6 +216,42 @@ bool ccCone::buildUp()
 	showTriNorms(true);
 
 	return true;
+}
+
+void ccCone::setHeight(PointCoordinateType height)
+{
+	if (m_height == height)
+		return;
+
+	assert(height > 0);
+	m_height = height;
+	
+	buildUp();
+	applyTransformationToVertices();
+}
+
+void ccCone::setBottomRadius(PointCoordinateType radius)
+{
+	if (m_bottomRadius == radius)
+		return;
+
+	assert(radius > 0);
+	m_bottomRadius = radius;
+	
+	buildUp();
+	applyTransformationToVertices();
+}
+
+void ccCone::setTopRadius(PointCoordinateType radius)
+{
+	if (m_topRadius == radius)
+		return;
+
+	assert(radius > 0);
+	m_topRadius = radius;
+	
+	buildUp();
+	applyTransformationToVertices();
 }
 
 bool ccCone::toFile_MeOnly(QFile& out) const

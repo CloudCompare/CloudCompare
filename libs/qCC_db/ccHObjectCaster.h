@@ -40,70 +40,92 @@ class cc2DViewportLabel;
 class ccFacet;
 class ccPolyline;
 class ccIndexedTransformationBuffer;
+class ccSphere;
+class ccCylinder;
+class ccCone;
+class ccPlane;
+class ccDish;
+class ccExtru;
+class ccTorus;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 class QCC_DB_LIB_API ccHObjectCaster
 {
 public:
 
-	//! converts current object to 'equivalent' ccPointCloud
+	//! Converts current object to 'equivalent' ccPointCloud
 	/** Waring: if a mesh is passed, this method returns its vertices.
 		\param obj ccHObject to dynamically cast to a ccPointCloud object
 		\param isLockedVertices the caller can be warned if the returned cloud corresponds to locked vertices
 	**/
 	static ccPointCloud* ToPointCloud(ccHObject* obj, bool* isLockedVertices = 0);
 
-	//! converts current object to 'equivalent' ccGenericPointCloud
+	//! Converts current object to 'equivalent' ccGenericPointCloud
 	/** Waring: if a mesh is passed, this method returns its vertices.
 	**/
 	static ccGenericPointCloud* ToGenericPointCloud(ccHObject* obj, bool* isLockedVertices = 0);
 
-	//! converts current object to ccGenericMesh (if possible)
+	//! Converts current object to ccGenericMesh (if possible)
 	static ccGenericMesh* ToGenericMesh(ccHObject* obj);
 
-	//! converts current object to ccMesh (if possible)
+	//! Converts current object to ccMesh (if possible)
 	static ccMesh* ToMesh(ccHObject* obj);
 
-	//! converts current object to ccSubMesh (if possible)
+	//! Converts current object to ccSubMesh (if possible)
 	static ccSubMesh* ToSubMesh(ccHObject* obj);
 
-	//! converts current object to ccPolyline (if possible)
+	//! Converts current object to ccPolyline (if possible)
 	static ccPolyline* ToPolyline(ccHObject* obj);
 
-	//! converts current object to ccFacet (if possible)
+	//! Converts current object to ccFacet (if possible)
 	static ccFacet* ToFacet(ccHObject* obj);
 
-	//! converts current object to ccGenericPrimitive (if possible)
+	//! Converts current object to ccGenericPrimitive (if possible)
 	static ccGenericPrimitive* ToPrimitive(ccHObject* obj);
 
-	//! converts current object to ccOctree (if possible)
+	//! Converts current object to ccSphere (if possible)
+	static ccSphere* ToSphere(ccHObject* obj);
+	//! Converts current object to ccCylinder (if possible)
+	static ccCylinder* ToCylinder(ccHObject* obj);
+	//! Converts current object to ccCone (if possible)
+	static ccCone* ToCone(ccHObject* obj);
+	//! Converts current object to ccPlane (if possible)
+	static ccPlane* ToPlane(ccHObject* obj);
+	//! Converts current object to ccDish (if possible)
+	static ccDish* ToDish(ccHObject* obj);
+	//! Converts current object to ccExtru (if possible)
+	static ccExtru* ToExtru(ccHObject* obj);
+	//! Converts current object to ccTorus (if possible)
+	static ccTorus* ToTorus(ccHObject* obj);
+
+	//! Converts current object to ccOctree (if possible)
 	static ccOctree* ToOctree(ccHObject* obj);
 
-	//! converts current object to ccKdTree (if possible)
+	//! Converts current object to ccKdTree (if possible)
 	static ccKdTree* ToKdTree(ccHObject* obj);
 
-	//! converts current object to ccSensor (if possible)
+	//! Converts current object to ccSensor (if possible)
 	static ccSensor* ToSensor(ccHObject* obj);
 
-	//! converts current object to ccGBLSensor (if possible)
+	//! Converts current object to ccGBLSensor (if possible)
 	static ccGBLSensor* ToGBLSensor(ccHObject* obj);
 
-	//! converts current object to ccCameraSensor (if possible)
+	//! Converts current object to ccCameraSensor (if possible)
 	static ccCameraSensor* ToCameraSensor(ccHObject* obj);
 
-	//! converts current object to ccImage (if possible)
+	//! Converts current object to ccImage (if possible)
 	static ccImage* ToImage(ccHObject* obj);
 
-	//! converts current object to cc2DLabel (if possible)
+	//! Converts current object to cc2DLabel (if possible)
 	static cc2DLabel* To2DLabel(ccHObject* obj);
 
-	//! converts current object to cc2DViewportLabel (if possible)
+	//! Converts current object to cc2DViewportLabel (if possible)
 	static cc2DViewportLabel* To2DViewportLabel(ccHObject* obj);
 
-	//! converts current object to cc2DViewportObject (if possible)
+	//! Converts current object to cc2DViewportObject (if possible)
 	static cc2DViewportObject* To2DViewportObject(ccHObject* obj);
 
-	//! converts current object to ccIndexedTransformationBuffer (if possible)
+	//! Converts current object to ccIndexedTransformationBuffer (if possible)
 	static ccIndexedTransformationBuffer* ToTransBuffer(ccHObject* obj);
 
 };

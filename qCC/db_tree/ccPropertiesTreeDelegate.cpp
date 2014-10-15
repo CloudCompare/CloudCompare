@@ -46,6 +46,8 @@
 #include <ccMaterialSet.h>
 #include <ccAdvancedTypes.h>
 #include <ccGenericPrimitive.h>
+#include <ccSphere.h>
+#include <ccCone.h>
 #include <ccFacet.h>
 #include <ccSensor.h>
 #include <ccIndexedTransformationBuffer.h>
@@ -507,6 +509,24 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(ccGenericPrimitive* _obj)
 	//drawing steps
 	if (_obj->hasDrawingPrecision())
 		appendRow( ITEM("Drawing precision"), PERSISTENT_EDITOR(OBJECT_PRIMITIVE_PRECISION), true );
+
+	if (_obj->isA(CC_TYPES::SPHERE))
+	{
+		appendRow( ITEM("Radius"), PERSISTENT_EDITOR(OBJECT_SPHERE_RADIUS), true );
+	}
+	else if (_obj->isKindOf(CC_TYPES::CONE)) //cylinders are also cones!
+	{
+		appendRow( ITEM("Height"), PERSISTENT_EDITOR(OBJECT_CONE_HEIGHT), true );
+		if (_obj->isA(CC_TYPES::CYLINDER))
+		{
+			appendRow( ITEM("Radius"), PERSISTENT_EDITOR(OBJECT_CONE_BOTTOM_RADIUS), true );
+		}
+		else
+		{
+			appendRow( ITEM("Bottom radius"), PERSISTENT_EDITOR(OBJECT_CONE_BOTTOM_RADIUS), true );
+			appendRow( ITEM("Top radius"), PERSISTENT_EDITOR(OBJECT_CONE_TOP_RADIUS), true );
+		}
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithFacet(ccFacet* _obj)
@@ -904,6 +924,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		return NULL;
 	}
 
+	QWidget* outputWidget = 0;
+
 	switch (itemData)
 	{
 	case OBJECT_CURRENT_DISPLAY:
@@ -920,9 +942,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(objectDisplayChanged(const QString&)));
 
-			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return comboBox;
+			outputWidget = comboBox;
 		}
+		break;
 	case OBJECT_CURRENT_SCALAR_FIELD:
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
@@ -931,15 +953,15 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			QComboBox *comboBox = new QComboBox(parent);
 
 			comboBox->addItem(QString("None"));
-			int i,nsf = cloud->getNumberOfScalarFields();
-			for (i=0;i<nsf;++i)
+			int nsf = cloud->getNumberOfScalarFields();
+			for (int i=0; i<nsf; ++i)
 				comboBox->addItem(QString(cloud->getScalarFieldName(i)));
 
 			connect(comboBox, SIGNAL(activated(int)), this, SLOT(scalarFieldChanged(int)));
 
-			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return comboBox;
+			outputWidget = comboBox;
 		}
+		break;
 	case OBJECT_CURRENT_COLOR_RAMP:
 		{
 			ccColorScaleSelector* selector = new ccColorScaleSelector(ccColorScalesManager::GetUniqueInstance(),parent,QString::fromUtf8(":/CC/images/ccGear.png"));
@@ -948,9 +970,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			connect(selector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
 			connect(selector, SIGNAL(colorScaleEditorSummoned()), this, SLOT(spawnColorRampEditor()));
 
-			selector->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return selector;
+			outputWidget = selector;
 		}
+		break;
 	case OBJECT_COLOR_RAMP_STEPS:
 		{
 			QSpinBox *spinBox = new QSpinBox(parent);
@@ -959,9 +981,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(colorRampStepsChanged(int)));
 
-			spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return spinBox;
+			outputWidget = spinBox;
 		}
+		break;
 	case OBJECT_CLOUD_SF_EDITOR:
 		{
 			sfEditDlg* sfd = new sfEditDlg(parent);
@@ -974,16 +996,19 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(sfd, SIGNAL(entitySFHasChanged()), this, SLOT(updateDisplay()));
 
-			sfd->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return sfd;
+			outputWidget = sfd;
 		}
+		break;
 	case OBJECT_HISTORY_MATRIX_EDITOR:
 	case OBJECT_SENSOR_MATRIX_EDITOR:
 		{
-			MatrixDisplayDlg* sfd = new MatrixDisplayDlg(parent);
-			sfd->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return sfd;
+			MatrixDisplayDlg* mdd = new MatrixDisplayDlg(parent);
+
+			//no signal connection, it's a display-only widget
+
+			outputWidget = mdd;
 		}
+		break;
 	case OBJECT_OCTREE_TYPE:
 		{
 			QComboBox *comboBox = new QComboBox(parent);
@@ -993,9 +1018,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(comboBox, SIGNAL(activated(int)), this, SLOT(octreeDisplayTypeChanged(int)));
 
-			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return comboBox;
+			outputWidget = comboBox;
 		}
+		break;
 	case OBJECT_OCTREE_LEVEL:
 		{
 			QSpinBox *spinBox = new QSpinBox(parent);
@@ -1003,9 +1028,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(octreeDisplayedLevelChanged(int)));
 
-			spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return spinBox;
+			outputWidget = spinBox;
 		}
+		break;
 	case OBJECT_PRIMITIVE_PRECISION:
 		{
 			QSpinBox *spinBox = new QSpinBox(parent);
@@ -1014,9 +1039,57 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(primitivePrecisionChanged(int)));
 
-			spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return spinBox;
+			outputWidget = spinBox;
 		}
+		break;
+	case OBJECT_SPHERE_RADIUS:
+		{
+			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			spinBox->setDecimals(6);
+			spinBox->setRange(0,1.0e6);
+			spinBox->setSingleStep(1.0);
+
+			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sphereRadiusChanged(double)));
+
+			outputWidget = spinBox;
+		}
+		break;
+	case OBJECT_CONE_HEIGHT:
+		{
+			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			spinBox->setDecimals(6);
+			spinBox->setRange(0,1.0e6);
+			spinBox->setSingleStep(1.0);
+
+			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(coneHeightChanged(double)));
+
+			outputWidget = spinBox;
+		}
+		break;
+	case OBJECT_CONE_BOTTOM_RADIUS:
+		{
+			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			spinBox->setDecimals(6);
+			spinBox->setRange(0,1.0e6);
+			spinBox->setSingleStep(1.0);
+
+			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(coneBottomRadiusChanged(double)));
+
+			outputWidget = spinBox;
+		}
+		break;
+	case OBJECT_CONE_TOP_RADIUS:
+		{
+			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			spinBox->setDecimals(6);
+			spinBox->setRange(0,1.0e6);
+			spinBox->setSingleStep(1.0);
+
+			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(coneTopRadiusChanged(double)));
+
+			outputWidget = spinBox;
+		}
+		break;
 	case OBJECT_IMAGE_ALPHA:
 		{
 			QSlider* slider = new QSlider(Qt::Horizontal,parent);
@@ -1026,9 +1099,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			slider->setTickPosition(QSlider::NoTicks);
 			connect(slider, SIGNAL(valueChanged(int)), this, SLOT(imageAlphaChanged(int)));
 
-			slider->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return slider;
+			outputWidget = slider;
 		}
+		break;
 	case OBJECT_SENSOR_INDEX:
 		{
 			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
@@ -1043,9 +1116,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorIndexChanged(double)));
 
-			spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return spinBox;
+			outputWidget = spinBox;
 		}
+		break;
 	case OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE:
 		{
 			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
@@ -1055,36 +1128,38 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(trihedronsScaleChanged(double)));
 
-			spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return spinBox;
+			outputWidget = spinBox;
 		}
+		break;
 	case OBJECT_APPLY_IMAGE_VIEWPORT:
 		{
 			QPushButton* button = new QPushButton("Apply",parent);
 			connect(button, SIGNAL(clicked()), this, SLOT(applyImageViewport()));
 
-			button->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			button->setMinimumHeight(30);
-			return button;
+			
+			outputWidget = button;
 		}
+		break;
 	case OBJECT_APPLY_SENSOR_VIEWPORT:
 		{
 			QPushButton* button = new QPushButton("Apply",parent);
 			connect(button, SIGNAL(clicked()), this, SLOT(applySensorViewport()));
 
-			button->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			button->setMinimumHeight(30);
-			return button;
+
+			outputWidget = button;
 		}
+		break;
 	case OBJECT_APPLY_LABEL_VIEWPORT:
 		{
 			QPushButton* button = new QPushButton("Apply",parent);
 			connect(button, SIGNAL(clicked()), this, SLOT(applyLabelViewport()));
 
-			button->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			button->setMinimumHeight(30);
-			return button;
+			outputWidget = button;
 		}
+		break;
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 		{
 			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
@@ -1094,9 +1169,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorScaleChanged(double)));
 
-			spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return spinBox;
+			outputWidget = spinBox;
 		}
+		break;
 	case OBJECT_CLOUD_POINT_SIZE:
 		{
 			QComboBox *comboBox = new QComboBox(parent);
@@ -1107,9 +1182,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cloudPointSizeChanged(int)));
 
-			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return comboBox;
+			outputWidget = comboBox;
 		}
+		break;
 	case OBJECT_POLYLINE_WIDTH:
 		{
 			QComboBox *comboBox = new QComboBox(parent);
@@ -1120,9 +1195,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(polyineWidthChanged(int)));
 
-			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return comboBox;
+			outputWidget = comboBox;
 		}
+		break;
 	case OBJECT_COLOR_SOURCE:
 		{
 			QComboBox *comboBox = new QComboBox(parent);
@@ -1137,14 +1212,24 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 				connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(colorSourceChanged(const QString&)));
 			}
 
-			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-			return comboBox;
+			outputWidget = comboBox;
 		}
+		break;
 	default:
 		return QStyledItemDelegate::createEditor(parent, option, index);
 	}
 
-	return NULL;
+	if (outputWidget)
+	{
+		outputWidget->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+	}
+	else
+	{
+		//shouldn't happen
+		assert(false);
+	}
+
+	return outputWidget;
 }
 
 void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -1170,6 +1255,42 @@ void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyl
 	}
 }
 
+void SetDoubleSpinBoxValue(QWidget *editor, double value, bool keyboardTracking = false)
+{
+	QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+	if (!spinBox)
+	{
+		assert(false);
+		return;
+	}
+	spinBox->setKeyboardTracking(keyboardTracking);
+	spinBox->setValue(value);
+}
+
+void SetSpinBoxValue(QWidget *editor, int value, bool keyboardTracking = false)
+{
+	QSpinBox* spinBox = qobject_cast<QSpinBox*>(editor);
+	if (!spinBox)
+	{
+		assert(false);
+		return;
+	}
+	spinBox->setKeyboardTracking(keyboardTracking);
+	spinBox->setValue(value);
+}
+
+void SetComboBoxIndex(QWidget *editor, int index)
+{
+	QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
+	if (!comboBox)
+	{
+		assert(false);
+		return;
+	}
+	assert(index < 0 || index < comboBox->maxCount());
+	comboBox->setCurrentIndex(index);
+}
+
 void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
 	if (!m_model || !m_currentObject)
@@ -1186,7 +1307,10 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		{
 			QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
 			if (!comboBox)
+			{
+				assert(false);
 				return;
+			}
 
 			ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
 			int pos = (win ? comboBox->findText(win->windowTitle()) : 0);
@@ -1196,15 +1320,11 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		}
 	case OBJECT_CURRENT_SCALAR_FIELD:
 		{
-			QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-			if (!comboBox)
-				return;
-
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 			assert(cloud);
 
 			int pos = cloud->getCurrentDisplayedScalarFieldIndex();
-			comboBox->setCurrentIndex(pos+1);
+			SetComboBoxIndex(editor,pos+1);
 			break;
 		}
 	case OBJECT_CURRENT_COLOR_RAMP:
@@ -1229,16 +1349,11 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		}
 	case OBJECT_COLOR_RAMP_STEPS:
 		{
-			QSpinBox *spinBox = qobject_cast<QSpinBox*>(editor);
-			if (!spinBox)
-				return;
-
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 			assert(cloud);
-
-			ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
+			ccScalarField* sf = cloud ? cloud->getCurrentDisplayedScalarField() : 0;
 			if (sf)
-				spinBox->setValue(sf->getColorRampSteps());
+				SetSpinBoxValue(editor,sf->getColorRampSteps(),true);
 			break;
 		}
 	case OBJECT_CLOUD_SF_EDITOR:
@@ -1275,7 +1390,9 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
 			ccIndexedTransformation trans;
 			if (sensor->getActiveAbsoluteTransformation(trans))
+			{
 				mdd->fillDialogWith(trans);
+			}
 			else
 			{
 				mdd->clear();
@@ -1285,35 +1402,51 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		}
 	case OBJECT_OCTREE_TYPE:
 		{
-			QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-			if (!comboBox)
-				return;
-
 			ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 			assert(octree);
-			comboBox->setCurrentIndex(int(octree->getDisplayType()));
+			SetComboBoxIndex(editor,static_cast<int>(octree->getDisplayType()));
 			break;
 		}
 	case OBJECT_OCTREE_LEVEL:
 		{
-			QSpinBox *spinBox = qobject_cast<QSpinBox*>(editor);
-			if (!spinBox)
-				return;
-
 			ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 			assert(octree);
-			spinBox->setValue(octree->getDisplayedLevel());
+			SetSpinBoxValue(editor,octree ? octree->getDisplayedLevel() : 0);
 			break;
 		}
 	case OBJECT_PRIMITIVE_PRECISION:
 		{
-			QSpinBox *spinBox = qobject_cast<QSpinBox*>(editor);
-			if (!spinBox)
-				return;
-
 			ccGenericPrimitive* primitive = ccHObjectCaster::ToPrimitive(m_currentObject);
 			assert(primitive);
-			spinBox->setValue(primitive->getDrawingPrecision());
+			SetSpinBoxValue(editor,primitive ? primitive->getDrawingPrecision() : 0);
+			break;
+		}
+	case OBJECT_SPHERE_RADIUS:
+		{
+			ccSphere* sphere = ccHObjectCaster::ToSphere(m_currentObject);
+			assert(sphere);
+			SetDoubleSpinBoxValue(editor,sphere ? sphere->getRadius() : 0.0);
+			break;
+		}
+	case OBJECT_CONE_HEIGHT:
+		{
+			ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
+			assert(cone);
+			SetDoubleSpinBoxValue(editor,cone ? cone->getHeight() : 0.0);
+			break;
+		}
+	case OBJECT_CONE_BOTTOM_RADIUS:
+		{
+			ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
+			assert(cone);
+			SetDoubleSpinBoxValue(editor,cone ? cone->getBottomRadius() : 0.0);
+			break;
+		}
+	case OBJECT_CONE_TOP_RADIUS:
+		{
+			ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
+			assert(cone);
+			SetDoubleSpinBoxValue(editor,cone ? cone->getTopRadius() : 0.0);
 			break;
 		}
 	case OBJECT_IMAGE_ALPHA:
@@ -1330,54 +1463,34 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		}
 	case OBJECT_SENSOR_INDEX:
 		{
-			QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
-			if (!spinBox)
-				return;
-
 			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 			assert(sensor);
-			spinBox->setValue(sensor->getActiveIndex());
+			SetDoubleSpinBoxValue(editor,sensor ? sensor->getActiveIndex() : 0.0);
 			break;
 		}
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 		{
-			QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
-			if (!spinBox)
-				return;
-
 			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 			assert(sensor);
-			spinBox->setValue(sensor->getGraphicScale());
+			SetDoubleSpinBoxValue(editor,sensor ? sensor->getGraphicScale() : 0.0);
 			break;
 		}
 	case OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE:
 		{
-			QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
-			if (!spinBox)
-				return;
-
 			ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 			assert(buffer);
-			spinBox->setValue(buffer->triherdonsDisplayScale());
+			SetDoubleSpinBoxValue(editor,buffer ? buffer->triherdonsDisplayScale() : 0.0);
 			break;
 		}
 	case OBJECT_CLOUD_POINT_SIZE:
 		{
-			QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-			if (!comboBox)
-				return;
-
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
 			assert(cloud);
-			comboBox->setCurrentIndex(cloud->getPointSize());
+			SetComboBoxIndex(editor,static_cast<int>(cloud->getPointSize()));
 			break;
 		}
 	case OBJECT_COLOR_SOURCE:
 		{
-			QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-			if (!comboBox)
-				return;
-
 			int currentIndex = 0; //no color
 			int lastIndex = currentIndex;
 			if (m_currentObject->hasColors())
@@ -1392,7 +1505,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 				if (m_currentObject->sfShown())
 					currentIndex = lastIndex;
 			}
-			comboBox->setCurrentIndex(currentIndex);
+			SetComboBoxIndex(editor,currentIndex);
 			break;
 		}
 	default:
@@ -1403,7 +1516,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
 void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 {
-	if (!m_currentObject || item->column()==0 || !item->data().isValid())
+	if (!m_currentObject || item->column() == 0 || !item->data().isValid())
 		return;
 
     bool redraw = false;
@@ -1429,7 +1542,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		break;
 	case OBJECT_NORMALS_SHOWN:
 		m_currentObject->showNormals(item->checkState() == Qt::Checked);
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_MATERIALS:
 		{
@@ -1437,7 +1550,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(mesh);
 			mesh->showMaterials(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_SF_SHOW_SCALE:
 		{
@@ -1445,7 +1558,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(cloud);
 			cloud->showSFColorsScale(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_FACET_CONTOUR:
 		{
@@ -1454,7 +1567,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			if (facet && facet->getContour())
 				facet->getContour()->setVisible(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_FACET_MESH:
 		{
@@ -1463,7 +1576,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			if (facet && facet->getPolygon())
 				facet->getPolygon()->setVisible(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_FACET_NORMAL_VECTOR:
 		{
@@ -1472,7 +1585,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			if (facet)
 				facet->showNormalVector(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_MESH_WIRE:
 		{
@@ -1480,7 +1593,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(mesh);
 			mesh->showWired(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_MESH_STIPPLING:
 		{
@@ -1488,7 +1601,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(mesh);
 			mesh->enableStippling(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_LABEL_DISP_2D:
 		{
@@ -1496,7 +1609,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(label);
 			label->setDisplayedIn2D(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_LABEL_DISP_3D:
 		{
@@ -1504,11 +1617,11 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(label);
 			label->setDisplayedIn3D(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_NAME_IN_3D:
 		m_currentObject->showNameIn3D(item->checkState() == Qt::Checked);
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_SHOW_TRANS_BUFFER_PATH:
 		{
@@ -1516,7 +1629,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(buffer);
 			buffer->showPathAsPolyline(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS:
 		{
@@ -1524,21 +1637,21 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(buffer);
 			buffer->showTriherdons(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_SENSOR_DRAW_FRUSTRUM:
 		{
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
 			sensor->drawFrustrum(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	case OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES:
 		{
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
 			sensor->drawFrustrumPlanes(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
+		redraw = true;
 		break;
 	}
 
@@ -1719,6 +1832,90 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 	bool wasVisible = primitive->isVisible();
 	primitive->setDrawingPrecision(val);
 	primitive->setVisible(wasVisible);
+
+	updateDisplay();
+	//we must also reset the properties display!
+	updateModel();
+}
+
+void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
+{
+	if (!m_currentObject)
+		return;
+
+	ccSphere* sphere = ccHObjectCaster::ToSphere(m_currentObject);
+	assert(sphere);
+
+	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
+	if (radius == sphere->getRadius())
+		return;
+
+	bool wasVisible = sphere->isVisible();
+	sphere->setRadius(radius);
+	sphere->setVisible(wasVisible);
+
+	updateDisplay();
+	//we must also reset the properties display!
+	updateModel();
+}
+
+void ccPropertiesTreeDelegate::coneHeightChanged(double val)
+{
+	if (!m_currentObject)
+		return;
+
+	ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
+	assert(cone);
+
+	PointCoordinateType height = static_cast<PointCoordinateType>(val);
+	if (height == cone->getHeight())
+		return;
+
+	bool wasVisible = cone->isVisible();
+	cone->setHeight(height);
+	cone->setVisible(wasVisible);
+
+	updateDisplay();
+	//we must also reset the properties display!
+	updateModel();
+}
+
+void ccPropertiesTreeDelegate::coneBottomRadiusChanged(double val)
+{
+	if (!m_currentObject)
+		return;
+
+	ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
+	assert(cone);
+
+	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
+	if (radius == cone->getBottomRadius())
+		return;
+
+	bool wasVisible = cone->isVisible();
+	cone->setBottomRadius(radius); //works for both the bottom and top radii for cylinders!
+	cone->setVisible(wasVisible);
+
+	updateDisplay();
+	//we must also reset the properties display!
+	updateModel();
+}
+
+void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
+{
+	if (!m_currentObject)
+		return;
+
+	ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
+	assert(cone);
+
+	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
+	if (radius == cone->getTopRadius())
+		return;
+
+	bool wasVisible = cone->isVisible();
+	cone->setTopRadius(radius); //works for both the bottom and top radii for cylinders!
+	cone->setVisible(wasVisible);
 
 	updateDisplay();
 	//we must also reset the properties display!

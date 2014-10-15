@@ -32,8 +32,7 @@ ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const c
 	, m_xWidth(xWidth)
 	, m_yWidth(yWidth)
 {
-	buildUp();
-	applyTransformationToVertices();
+	updateRepresentation();
 }
 
 ccPlane::ccPlane(QString name /*=QString("Plane")*/)

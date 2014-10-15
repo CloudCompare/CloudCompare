@@ -59,11 +59,16 @@ public:
 	//! Whether drawing is dependent on 'precision' parameter
 	virtual bool hasDrawingPrecision() const { return false; }
 
+	//! Minimum drawing precision
+	static const unsigned MIN_DRAWING_PRECISION = 4;
+
 	//! Sets drawing precision
 	/** Warnings:
-		- steps should always be >4
-		- changes primitive content (call buildUp)
+		- steps should always be >= ccGenericPrimitive::MIN_DRAWING_PRECISION
+		- changes primitive content (calls ccGenericPrimitive::updateRepresentation)
 		- may fail if not enough memory!
+		\param steps drawing precision
+		\return success (false if not enough memory)
 	**/
 	virtual bool setDrawingPrecision(unsigned steps);
 
@@ -90,6 +95,12 @@ protected:
 		\return success
 	**/
 	virtual bool buildUp() = 0;
+
+	//! Updates internal representation (as a mesh)
+	/** Calls buildUp then applyTransformationToVertices.
+		\return success of buildUp
+	**/
+	virtual bool updateRepresentation();
 
 	//! Inits internal structures
 	/** Warning: resets all!

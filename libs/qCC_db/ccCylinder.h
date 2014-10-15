@@ -29,6 +29,9 @@ class QCC_DB_LIB_API ccCylinder : public ccCone
 {
 public:
 
+	//! Default drawing precision
+	static const unsigned DEFAULT_DRAWING_PRECISION = 24;
+
 	//! Default constructor
 	/** Cylinder axis corresponds to the 'Z' dimension.
 		Internally represented by a cone with the same top and bottom radius.
@@ -38,11 +41,11 @@ public:
 		\param name name
 		\param precision drawing precision (angular step = 360/precision)
 	**/
-	ccCylinder(PointCoordinateType radius,
+	ccCylinder(	PointCoordinateType radius,
 				PointCoordinateType height,
 				const ccGLMatrix* transMat = 0,
 				QString name = QString("Cylinder"),
-				unsigned precision = 24);
+				unsigned precision = DEFAULT_DRAWING_PRECISION);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -55,6 +58,10 @@ public:
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Cylinder"; }
 	virtual ccGenericPrimitive* clone() const;
+
+	//inherited from ccCone
+	virtual void setBottomRadius(PointCoordinateType radius);
+	inline virtual void setTopRadius(PointCoordinateType radius) { return setBottomRadius(radius); }
 
 };
 

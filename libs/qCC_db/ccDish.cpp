@@ -26,7 +26,7 @@ ccDish::ccDish(	PointCoordinateType radius,
 				PointCoordinateType radius2/*=0*/,
 				const ccGLMatrix* transMat/*=0*/,
 				QString name/*="Dish"*/,
-				unsigned precision/*=24*/)
+				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_baseRadius(radius)
 	, m_secondRadius(radius2)
@@ -34,7 +34,7 @@ ccDish::ccDish(	PointCoordinateType radius,
 {
 	if (radius2 == 0)
 		m_height = std::min(height,radius); //in spherical mode, the height can't be superior to the radius! (dishes are at most hemispheres)
-	setDrawingPrecision(std::max<unsigned>(precision,4));  //automatically calls buildUp + 	applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION));  //automatically calls buildUp + 	applyTransformationToVertices
 }
 
 ccDish::ccDish(QString name/*="Sphere"*/)
@@ -52,10 +52,10 @@ ccGenericPrimitive* ccDish::clone() const
 
 bool ccDish::buildUp()
 {
-	if (m_drawPrecision<4)
+	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
-	if (m_height<=0 || m_baseRadius<=0 || m_secondRadius<0) //invalid parameters
+	if (m_height <= 0 || m_baseRadius <= 0 || m_secondRadius < 0) //invalid parameters
 		return false;
 
 	//section angular span
@@ -71,9 +71,9 @@ bool ccDish::buildUp()
 	}
 
 	const unsigned steps = m_drawPrecision;
-	double angleStep_rad = 2.0*M_PI/(double)steps;
-	unsigned sectionSteps = (unsigned)ceil((endAngle_rad-startAngle_rad)*(double)m_drawPrecision/(2.0*M_PI));
-	double sectionAngleStep_rad = (endAngle_rad-startAngle_rad)/(double)sectionSteps;
+	double angleStep_rad = 2.0*M_PI/steps;
+	unsigned sectionSteps = static_cast<unsigned>(ceil((endAngle_rad-startAngle_rad)*m_drawPrecision/(2.0*M_PI)));
+	double sectionAngleStep_rad = (endAngle_rad-startAngle_rad)/sectionSteps;
 
 	//vertices
 	unsigned vertCount = steps*sectionSteps+1; //+1 for noth pole
@@ -96,17 +96,17 @@ bool ccDish::buildUp()
 
 	//then, angular sweep
 	{
-		for (unsigned j=1;j<=sectionSteps;++j)
+		for (unsigned j=1; j<=sectionSteps; ++j)
 		{
-			PointCoordinateType theta = static_cast<PointCoordinateType>(endAngle_rad - static_cast<double>(j) * sectionAngleStep_rad); //we start from north pole!
+			PointCoordinateType theta = static_cast<PointCoordinateType>(endAngle_rad - j * sectionAngleStep_rad); //we start from north pole!
 			PointCoordinateType cos_theta = cos(theta);
 			PointCoordinateType sin_theta = sin(theta);
 
 			CCVector3 N0(cos_theta, 0, sin_theta);
 		
-			for (unsigned i=0;i<steps;++i) //then we make a full revolution
+			for (unsigned i=0; i<steps; ++i) //then we make a full revolution
 			{
-				PointCoordinateType phi = static_cast<PointCoordinateType>(static_cast<double>(i) * angleStep_rad);
+				PointCoordinateType phi = static_cast<PointCoordinateType>(i * angleStep_rad);
 				PointCoordinateType cos_phi = cos(phi);
 				PointCoordinateType sin_phi = sin(phi);
 
@@ -135,7 +135,7 @@ bool ccDish::buildUp()
 	{
 		//north pole
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
 				unsigned A = 1+i;
 				unsigned B = (i+1<steps ? A+1 : 1);
@@ -144,14 +144,14 @@ bool ccDish::buildUp()
 		}
 
 		//slices
-		for (unsigned j=1;j<sectionSteps;++j)
+		for (unsigned j=1; j<sectionSteps; ++j)
 		{
 			unsigned shift = 1+(j-1)*steps;		
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
 				unsigned A = shift+i;
 				unsigned B = (i+1<steps ? A+1 : shift);
-				assert(B<vertCount);
+				assert(B < vertCount);
 				addTriangle(A,A+steps,B);
 				addTriangle(B+steps,B,A+steps);
 			}

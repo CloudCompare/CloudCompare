@@ -25,11 +25,11 @@
 ccSphere::ccSphere(	PointCoordinateType radius,
 					const ccGLMatrix* transMat/*=0*/,
 					QString name/*=QString("Sphere")*/,
-					unsigned precision/*=24*/)
+					unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_radius(radius)
 {
-	setDrawingPrecision(std::max<unsigned>(precision,4));  //automatically calls buildUp + 	applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION));  //automatically calls updateRepresentation
 }
 
 ccSphere::ccSphere(QString name/*=QString("Sphere")*/)
@@ -45,7 +45,7 @@ ccGenericPrimitive* ccSphere::clone() const
 
 bool ccSphere::buildUp()
 {
-	if (m_drawPrecision<4)
+	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
 	const unsigned steps = m_drawPrecision;
@@ -127,7 +127,7 @@ bool ccSphere::buildUp()
 			{
 				unsigned A = shift+i;
 				unsigned B = (i+1<steps ? A+1 : shift);
-				assert(B<count);
+				assert(B < count);
 				addTriangle(A,A+steps,B);
 				addTriangle(B+steps,B,A+steps);
 			}
@@ -140,7 +140,7 @@ bool ccSphere::buildUp()
 			{
 				unsigned A = shift+i;
 				unsigned B = (i+1<steps ? A+1 : shift);
-				assert(B<count);
+				assert(B < count);
 				addTriangle(A,1,B);
 			}
 		}
@@ -152,12 +152,24 @@ bool ccSphere::buildUp()
 	return true;
 }
 
+void ccSphere::setRadius(PointCoordinateType radius)
+{
+	if (m_radius == radius)
+		return;
+
+	assert(radius > 0);
+	m_radius = radius;
+	
+	buildUp();
+	applyTransformationToVertices();
+}
+
 bool ccSphere::toFile_MeOnly(QFile& out) const
 {
 	if (!ccGenericPrimitive::toFile_MeOnly(out))
 		return false;
 
-	//parameters (dataVersion>=21)
+	//parameters (dataVersion >= 21)
 	QDataStream outStream(&out);
 	outStream << m_radius;
 
@@ -169,7 +181,7 @@ bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	//parameters (dataVersion>=21)
+	//parameters (dataVersion >= 21)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_radius,1);
 
@@ -196,7 +208,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 
 		//we want to display this name next to the sphere, and not above it!
 		const ccViewportParameters& params = context._win->getViewportParameters();
-		int dPix = (int)ceil(params.zoom * m_radius/params.pixelSize);
+		int dPix = static_cast<int>(ceil(params.zoom * m_radius/params.pixelSize));
 
 		int bkgBorder = QFontMetrics(context._win->getTextDisplayFont()).height()/4+4;
 		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!

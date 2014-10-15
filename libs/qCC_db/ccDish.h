@@ -32,6 +32,9 @@ class QCC_DB_LIB_API ccDish : public ccGenericPrimitive
 {
 public:
 
+	//! Default drawing precision
+	static const unsigned DEFAULT_DRAWING_PRECISION = 24;
+
 	//! Default constructor
 	/** The origin of the Dish is at the centre of the base, and the Z-axis lies along the normal to the base.
 		\param radius base radius
@@ -46,7 +49,7 @@ public:
 		PointCoordinateType radius2 = 0,
 		const ccGLMatrix* transMat = 0,
 		QString name = QString("Dish"),
-		unsigned precision = 24);
+		unsigned precision = DEFAULT_DRAWING_PRECISION);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!

@@ -2183,6 +2183,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 				{
 					ccPointCloud* vertices = new ccPointCloud("rect.vertices");
 					m_rectPickingPoly = new ccPolyline(vertices);
+					m_rectPickingPoly->addChild(vertices);
 					if (vertices->reserve(4) && m_rectPickingPoly->addPointIndex(0,4))
 					{
 						m_rectPickingPoly->setForeground(true);
@@ -2199,17 +2200,15 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						vertices->addPoint(A);
 						vertices->addPoint(A);
 						vertices->addPoint(A);
-						m_rectPickingPoly->addChild(vertices);
 						m_rectPickingPoly->setClosed(true);
-						addToOwnDB(m_rectPickingPoly);
+						addToOwnDB(m_rectPickingPoly,false);
 					}
 					else
 					{
 						ccLog::Warning("[ccGLWindow] Failed to create seleciton polyline! Not enough memory!");
 						delete m_rectPickingPoly;
-						m_rectPickingPoly=0;
-						delete vertices;
-						vertices=0;
+						m_rectPickingPoly = 0;
+						vertices = 0;
 					}
 				}
 
@@ -2330,7 +2329,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				int pickH = (int)fabs(C->y-A->y);
 
 				removeFromOwnDB(m_rectPickingPoly);
-				m_rectPickingPoly=0;
+				m_rectPickingPoly = 0;
 				delete vertices;
 				vertices=0;
 
@@ -2566,7 +2565,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	ccGLUtils::CatchGLError("ccGLWindow::startPicking.render");
 
 	ccLog::PrintDebug("Picking hits: %i",hits);
-	if (hits<0)
+	if (hits < 0)
 	{
 		ccLog::Warning("Too many items inside picking zone! Try to zoom in...");
 		return -1;

@@ -226,10 +226,16 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 		result = -2;
 	}
 
-	if (!compOctree)
+	if (comparedOctree && !compOctree)
+	{
 		delete comparedOctree;
-	if (!refOctree)
+		comparedOctree = 0;
+	}
+	if (referenceOctree && !refOctree)
+	{
 		delete referenceOctree;
+		referenceOctree = 0;
+	}
 
 	return result;
 }
@@ -241,7 +247,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	unsigned nA = comparedCloud->size();
 	unsigned nB = referenceCloud->size();
 
-	if (nA==0 || nB==0)
+	if (nA == 0 || nB == 0)
 		return false;
 
 	//we compute the bounding box of BOTH clouds
@@ -251,7 +257,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 
 	CCVector3 maxD,minD,minPoints,maxPoints;
 	{
-		for (uchar k=0;k<3;k++)
+		for (uchar k=0; k<3; k++)
 		{
 			maxPoints.u[k] = maxD.u[k] = std::max(maxsA.u[k],maxsB.u[k]);
 			minPoints.u[k] = minD.u[k] = std::min(minsA.u[k],minsB.u[k]);
@@ -266,9 +272,10 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	if (comparedOctree)
 	{
 		needToRecalculateOctreeA = false;
-		for (uchar k=0;k<3;k++)
+		for (uchar k=0; k<3; k++)
 		{
-			if ((maxD.u[k]!=comparedOctree->getOctreeMaxs().u[k])||(minD.u[k]!=comparedOctree->getOctreeMins().u[k]))
+			if (	maxD.u[k] != comparedOctree->getOctreeMaxs().u[k]
+				||	minD.u[k] != comparedOctree->getOctreeMins().u[k] )
 			{
 				needToRecalculateOctreeA = true;
 				break;
@@ -276,16 +283,26 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 		}
 	}
 
+	bool octreeACreated = false;
 	if (needToRecalculateOctreeA)
 	{
 		if (comparedOctree)
-			comparedOctree->clear();
-		else
-			comparedOctree = new DgmOctree(comparedCloud);
-
-		if (comparedOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb)<1)
 		{
 			comparedOctree->clear();
+		}
+		else
+		{
+			comparedOctree = new DgmOctree(comparedCloud);
+			octreeACreated = true;
+		}
+
+		if (comparedOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb) < 1)
+		{
+			if (octreeACreated)
+			{
+				delete comparedOctree;
+				comparedOctree = 0;
+			}
 			return false;
 		}
 	}
@@ -295,9 +312,10 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	if (referenceOctree)
 	{
 		needToRecalculateOctreeB = false;
-		for (uchar k=0;k<3;k++)
+		for (uchar k=0; k<3; k++)
 		{
-			if ((maxD.u[k]!=referenceOctree->getOctreeMaxs().u[k])||(minD.u[k]!=referenceOctree->getOctreeMins().u[k]))
+			if (	maxD.u[k] != referenceOctree->getOctreeMaxs().u[k]
+				||	minD.u[k] != referenceOctree->getOctreeMins().u[k] )
 			{
 				needToRecalculateOctreeB = true;
 				break;
@@ -307,16 +325,29 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 
 	if (needToRecalculateOctreeB)
 	{
+		bool octreeBCreated = false;
 		if (referenceOctree)
-			referenceOctree->clear();
-		else
-			referenceOctree = new DgmOctree(referenceCloud);
-
-		if (referenceOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb)<1)
 		{
-			if (needToRecalculateOctreeA)
-				comparedOctree->clear();
 			referenceOctree->clear();
+		}
+		else
+		{
+			referenceOctree = new DgmOctree(referenceCloud);
+			octreeBCreated = true;
+		}
+
+		if (referenceOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb) < 1)
+		{
+			if (octreeACreated)
+			{
+				delete comparedOctree;
+				comparedOctree = 0;
+			}
+			if (octreeBCreated)
+			{
+				delete referenceOctree;
+				referenceOctree = 0;
+			}
 			return false;
 		}
 	}
@@ -2432,11 +2463,11 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 {
 	if (!comparedCloud || !referenceCloud)
 		return -1;
-	if (octreeLevel<1 || octreeLevel>DgmOctree::MAX_OCTREE_LEVEL)
+	if (octreeLevel < 1 || octreeLevel > DgmOctree::MAX_OCTREE_LEVEL)
 		return -2;
 
 	//on calcul les octree synchro (m\EAme bounding-box)
-	DgmOctree *octreeA=compOctree,*octreeB=refOctree;
+	DgmOctree *octreeA = compOctree, *octreeB = refOctree;
 	if (!synchronizeOctrees(comparedCloud,referenceCloud,octreeA,octreeB,progressCb))
 		return -3;
 
@@ -2445,26 +2476,29 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 	const int* minIndexesB = octreeB->getMinFillIndexes(octreeLevel);
 	const int* maxIndexesB = octreeB->getMaxFillIndexes(octreeLevel);
 
-	int minIndexes[3],maxIndexes[3];
-	minIndexes[0] = std::min(minIndexesA[0],minIndexesB[0]);
-	minIndexes[1] = std::min(minIndexesA[1],minIndexesB[1]);
-	minIndexes[2] = std::min(minIndexesA[2],minIndexesB[2]);
-	maxIndexes[0] = std::max(maxIndexesA[0],maxIndexesB[0]);
-	maxIndexes[1] = std::max(maxIndexesA[1],maxIndexesB[1]);
-	maxIndexes[2] = std::max(maxIndexesA[2],maxIndexesB[2]);
-
-	unsigned short boxSize[3];
-	boxSize[0] = (unsigned short)(maxIndexes[0] - minIndexes[0]+1);
-	boxSize[1] = (unsigned short)(maxIndexes[1] - minIndexes[1]+1);
-	boxSize[2] = (unsigned short)(maxIndexes[2] - minIndexes[2]+1);
-
-	//Console::print("BoxSize = (%i,%i,%i)\n",boxSize[0],boxSize[1],boxSize[2]);
+	int minIndexes[3] =
+	{
+		std::min(minIndexesA[0],minIndexesB[0]),
+		std::min(minIndexesA[1],minIndexesB[1]),
+		std::min(minIndexesA[2],minIndexesB[2])
+	};
+	int maxIndexes[3] =
+	{
+		std::max(maxIndexesA[0],maxIndexesB[0]),
+		std::max(maxIndexesA[1],maxIndexesB[1]),
+		std::max(maxIndexesA[2],maxIndexesB[2])
+	};
+	unsigned short boxSize[3] =
+	{
+		static_cast<unsigned short>(maxIndexes[0] - minIndexes[0]+1),
+		static_cast<unsigned short>(maxIndexes[1] - minIndexes[1]+1),
+		static_cast<unsigned short>(maxIndexes[2] - minIndexes[2]+1)
+	};
 
 	//puis on projette les cellules de l'octree B dans un grille 3D (DistanceGrid)
-	ChamferDistanceTransform* dg = new ChamferDistanceTransform(boxSize[0],boxSize[1],boxSize[2]);
-	if (!dg->init())
+	ChamferDistanceTransform dg(boxSize[0],boxSize[1],boxSize[2]);
+	if (!dg.init())
 	{
-		delete dg;
 		if (!compOctree)
 			delete octreeA;
 		if (!refOctree)
@@ -2485,11 +2519,11 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 		pos[0] -= minIndexes[0];
 		pos[1] -= minIndexes[1];
 		pos[2] -= minIndexes[2];
-		dg->setZero(pos);
+		dg.setZero(pos);
 	}
 
 	//propagation de la transformee de distance
-	dg->propagateDistance(cType,progressCb);
+	dg.propagateDistance(cType,progressCb);
 
 	//maintenant on recupere les cellules de l'octree A, et on assigne
 	//aux points la distance de Chanfrein
@@ -2501,7 +2535,6 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 	if (!octreeA->getCellIndexes(octreeLevel,theIndexes))
 	{
 		//not enough memory
-		delete dg;
 		if (!compOctree)
 			delete octreeA;
 		if (!refOctree)
@@ -2524,7 +2557,7 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 		pos[0] -= minIndexes[0];
 		pos[1] -= minIndexes[1];
 		pos[2] -= minIndexes[2];
-		unsigned di = dg->getValue(pos);
+		unsigned di = dg.getValue(pos);
 		if (di > maxDi)
 			maxDi = di;
 		ScalarType d = static_cast<ScalarType>(di) * cellSize;
@@ -2534,22 +2567,19 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 			Yk.setPointScalarValue(j,d);
 	}
 
-	delete dg;
-	dg = 0;
-
 	if (!compOctree)
 	{
 		delete octreeA;
-		octreeA=0;
+		octreeA = 0;
 	}
 	if (!refOctree)
 	{
 		delete octreeB;
-		octreeB=0;
+		octreeB = 0;
 	}
 
-	if (cType==CHAMFER_345)
-		maxDi/=3;
+	if (cType == CHAMFER_345)
+		maxDi /= 3;
 
 	return maxDi;
 }

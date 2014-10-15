@@ -515,7 +515,7 @@ public:
 
 
 	//! Inits transformation from 3 rotation angles and a translation
-	/** See http://en.wikipedia.org/wiki/Euler_angles
+	/** See http://en.wikipedia.org/wiki/Euler_angles (Tait-Bryan Z1Y2X3)
 		\param[in] phi_rad Phi angle (in radians)
 		\param[in] theta_rad Theta angle (in radians)
 		\param[in] psi_rad Psi angle (in radians)
@@ -526,37 +526,37 @@ public:
 								T psi_rad,
 								const Vector3Tpl<T>& t3D)
 	{
-		T cos_phi	= cos(phi_rad);
-		T cos_theta = cos(theta_rad);
-		T cos_psi	= cos(psi_rad);
+		T c1 = cos(phi_rad);
+		T c2 = cos(theta_rad);
+		T c3 = cos(psi_rad);
 
-		T sin_phi	= sin(phi_rad);
-		T sin_theta	= sin(theta_rad);
-		T sin_psi	= sin(psi_rad);
+		T s1 = sin(phi_rad);
+		T s2 = sin(theta_rad);
+		T s3 = sin(psi_rad);
 
 		//1st column
-		CC_MAT_R11 = cos_theta*cos_phi;
-		CC_MAT_R21 = cos_theta*sin_phi;
-		CC_MAT_R31 = -sin_theta;
+		CC_MAT_R11 = c2*c1;
+		CC_MAT_R21 = c2*s1;
+		CC_MAT_R31 = -s2;
 		CC_MAT_R41 = 0;
 
 		//2nd column
-		CC_MAT_R12 = sin_psi*sin_theta*cos_phi-cos_psi*sin_phi;
-		CC_MAT_R22 = sin_psi*sin_theta*sin_phi+cos_psi*cos_phi;
-		CC_MAT_R32 = sin_psi*cos_theta;
+		CC_MAT_R12 = s3*s2*c1-c3*s1;
+		CC_MAT_R22 = s3*s2*s1+c3*c1;
+		CC_MAT_R32 = s3*c2;
 		CC_MAT_R42 = 0;
 
 		//3rd column
-		CC_MAT_R13 = cos_psi*sin_theta*cos_phi+sin_psi*sin_phi;
-		CC_MAT_R23 = cos_psi*sin_theta*sin_phi-sin_psi*cos_phi;
-		CC_MAT_R33 = cos_psi*cos_theta;
+		CC_MAT_R13 = c3*s2*c1+s3*s1;
+		CC_MAT_R23 = c3*s2*s1-s3*c1;
+		CC_MAT_R33 = c3*c2;
 		CC_MAT_R43 = 0;
 
 		//4th column
 		CC_MAT_R14 = t3D.x;
 		CC_MAT_R24 = t3D.y;
 		CC_MAT_R34 = t3D.z;
-		CC_MAT_R44 = 1.0;
+		CC_MAT_R44 = static_cast<T>(1.0);
 	}
 
 	//! Returns equivalent parameters: a rotation axis, an angle and a translation
@@ -601,7 +601,7 @@ public:
 	}
 
 	//! Returns equivalent parameters: 3 rotation angles and a translation
-	/** See http://en.wikipedia.org/wiki/Euler_angles
+	/** See http://en.wikipedia.org/wiki/Euler_angles (Tait-Bryan Z1Y2X3)
 		\param[out] phi_rad Phi angle (in radians)
 		\param[out] theta_rad Theta angle (in radians)
 		\param[out] psi_rad Psi angle (in radians)

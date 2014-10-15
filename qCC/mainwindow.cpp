@@ -935,6 +935,7 @@ void MainWindow::connectActions()
 	connect(actionCNETest,						SIGNAL(triggered()),	this,		SLOT(doCylindricalNeighbourhoodExtractionTest()));
 	connect(actionFindBiggestInnerRectangle,	SIGNAL(triggered()),	this,		SLOT(doActionFindBiggestInnerRectangle()));
 	connect(actionExportCloudsInfo,				SIGNAL(triggered()),	this,		SLOT(doActionExportCloudsInfo()));
+	connect(actionCreateCloudFromEntCenters,	SIGNAL(triggered()),	this,		SLOT(doActionCreateCloudFromEntCenters()));
 
 	//"Display" menu
 	connect(actionFullScreen,					SIGNAL(toggled(bool)),	this,		SLOT(toggleFullScreen(bool)));
@@ -2937,7 +2938,7 @@ void MainWindow::doActionProjectUncertainty()
 		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
 		if (sfIdx < 0)
 			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
-		if (sfIdx <0)
+		if (sfIdx < 0)
 		{
 			ccLog::Error("An error occured! (see console)");
 			return;
@@ -8439,6 +8440,51 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 
 	refreshAll();
 	updateUI();
+}
+
+void MainWindow::doActionCreateCloudFromEntCenters()
+{
+	size_t selNum = m_selectedEntities.size();
+
+	ccPointCloud* centers = new ccPointCloud("centers");
+	if (!centers->reserve(static_cast<unsigned>(selNum)))
+	{
+		ccLog::Error("Not enough memory!");
+		delete centers;
+		centers = 0;
+		return;
+	}
+
+	//look for clouds
+	std::vector<ccPointCloud*> clouds;
+	{
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = m_selectedEntities[i];
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+			if (cloud)
+			{
+				centers->addPoint(cloud->getBBCenter());
+				//we display the cloud in the same window as the first (selected) cloud we encounter
+				if (!centers->getDisplay())
+					centers->setDisplay(cloud->getDisplay());
+			}
+		}
+	}
+
+	if (centers->size() == 0)
+	{
+		ccLog::Error("Not cloud in selection?!");
+		delete centers;
+		centers = 0;
+	}
+	else
+	{
+		centers->resize(centers->size());
+		centers->setPointSize(10);
+		centers->setVisible(true);
+		addToDB(centers);
+	}
 }
 
 void MainWindow::doActionExportCloudsInfo()

@@ -412,6 +412,7 @@
      <addaction name="actionFindBiggestInnerRectangle"/>
      <addaction name="separator"/>
      <addaction name="actionExportCloudsInfo"/>
+     <addaction name="actionCreateCloudFromEntCenters"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -2649,6 +2650,11 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionCreateCloudFromEntCenters">
+   <property name="text">
+    <string>Create cloud from selected entities centers</string>
    </property>
   </action>
  </widget>

@@ -101,6 +101,10 @@ ccHObject::~ccHObject()
 
 void ccHObject::notifyGeometryUpdate()
 {
+	//the associated display bounding-box is (potentially) deprecated!!!
+	if (m_currentDisplay)
+		m_currentDisplay->invalidateViewport();
+
 	//process dependencies
 	for (std::map<ccHObject*,int>::const_iterator it=m_dependencies.begin(); it!=m_dependencies.end(); ++it)
 	{
@@ -797,7 +801,7 @@ bool ccHObject::toFile(QFile& out) const
 	for (unsigned i=0;i<m_children.size();++i)
 		if (m_children[i]->isSerializable())
 			++serializableCount;
-	if (out.write((const char*)&serializableCount,sizeof(uint32_t))<0)
+	if (out.write((const char*)&serializableCount,sizeof(uint32_t)) < 0)
 		return WriteError();
 
 	//write serializable children (if any)
@@ -811,7 +815,7 @@ bool ccHObject::toFile(QFile& out) const
 	}
 
 	//write current selection behavior (dataVersion>=23)
-	if (out.write((const char*)&m_selectionBehavior,sizeof(SelectionBehavior))<0)
+	if (out.write((const char*)&m_selectionBehavior,sizeof(SelectionBehavior)) < 0)
 		return WriteError();
 
 	return true;
@@ -920,38 +924,38 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	/*** ccHObject takes in charge the ccDrawableObject properties (which is not a ccSerializableObject) ***/
 
 	//'visible' state (dataVersion>=20)
-	if (out.write((const char*)&m_visible,sizeof(bool))<0)
+	if (out.write((const char*)&m_visible,sizeof(bool)) < 0)
 		return WriteError();
 	//'lockedVisibility' state (dataVersion>=20)
-	if (out.write((const char*)&m_lockedVisibility,sizeof(bool))<0)
+	if (out.write((const char*)&m_lockedVisibility,sizeof(bool)) < 0)
 		return WriteError();
 	//'colorsDisplayed' state (dataVersion>=20)
-	if (out.write((const char*)&m_colorsDisplayed,sizeof(bool))<0)
+	if (out.write((const char*)&m_colorsDisplayed,sizeof(bool)) < 0)
 		return WriteError();
 	//'normalsDisplayed' state (dataVersion>=20)
-	if (out.write((const char*)&m_normalsDisplayed,sizeof(bool))<0)
+	if (out.write((const char*)&m_normalsDisplayed,sizeof(bool)) < 0)
 		return WriteError();
 	//'sfDisplayed' state (dataVersion>=20)
-	if (out.write((const char*)&m_sfDisplayed,sizeof(bool))<0)
+	if (out.write((const char*)&m_sfDisplayed,sizeof(bool)) < 0)
 		return WriteError();
 	//'colorIsOverriden' state (dataVersion>=20)
-	if (out.write((const char*)&m_colorIsOverriden,sizeof(bool))<0)
+	if (out.write((const char*)&m_colorIsOverriden,sizeof(bool)) < 0)
 		return WriteError();
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (out.write((const char*)m_tempColor,sizeof(colorType)*3)<0)
+		if (out.write((const char*)m_tempColor,sizeof(colorType)*3) < 0)
 			return WriteError();
 	}
 	//'glTransEnabled' state (dataVersion>=20)
-	if (out.write((const char*)&m_glTransEnabled,sizeof(bool))<0)
+	if (out.write((const char*)&m_glTransEnabled,sizeof(bool)) < 0)
 		return WriteError();
 	if (m_glTransEnabled)
 		if (!m_glTrans.toFile(out))
 			return false;
 
 	//'showNameIn3D' state (dataVersion>=24)
-	if (out.write((const char*)&m_showNameIn3D,sizeof(bool))<0)
+	if (out.write((const char*)&m_showNameIn3D,sizeof(bool)) < 0)
 		return WriteError();
 
 	return true;
@@ -964,31 +968,31 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	/*** ccHObject takes in charge the ccDrawableObject properties (which is not a ccSerializableObject) ***/
 
 	//'visible' state (dataVersion>=20)
-	if (in.read((char*)&m_visible,sizeof(bool))<0)
+	if (in.read((char*)&m_visible,sizeof(bool)) < 0)
 		return ReadError();
 	//'lockedVisibility' state (dataVersion>=20)
-	if (in.read((char*)&m_lockedVisibility,sizeof(bool))<0)
+	if (in.read((char*)&m_lockedVisibility,sizeof(bool)) < 0)
 		return ReadError();
 	//'colorsDisplayed' state (dataVersion>=20)
-	if (in.read((char*)&m_colorsDisplayed,sizeof(bool))<0)
+	if (in.read((char*)&m_colorsDisplayed,sizeof(bool)) < 0)
 		return ReadError();
 	//'normalsDisplayed' state (dataVersion>=20)
-	if (in.read((char*)&m_normalsDisplayed,sizeof(bool))<0)
+	if (in.read((char*)&m_normalsDisplayed,sizeof(bool)) < 0)
 		return ReadError();
 	//'sfDisplayed' state (dataVersion>=20)
-	if (in.read((char*)&m_sfDisplayed,sizeof(bool))<0)
+	if (in.read((char*)&m_sfDisplayed,sizeof(bool)) < 0)
 		return ReadError();
 	//'colorIsOverriden' state (dataVersion>=20)
-	if (in.read((char*)&m_colorIsOverriden,sizeof(bool))<0)
+	if (in.read((char*)&m_colorIsOverriden,sizeof(bool)) < 0)
 		return ReadError();
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (in.read((char*)m_tempColor,sizeof(colorType)*3)<0)
+		if (in.read((char*)m_tempColor,sizeof(colorType)*3) < 0)
 			return ReadError();
 	}
 	//'glTransEnabled' state (dataVersion>=20)
-	if (in.read((char*)&m_glTransEnabled,sizeof(bool))<0)
+	if (in.read((char*)&m_glTransEnabled,sizeof(bool)) < 0)
 		return ReadError();
 	if (m_glTransEnabled)
 		if (!m_glTrans.fromFile(in, dataVersion, flags))
@@ -997,7 +1001,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//'showNameIn3D' state (dataVersion>=24)
 	if (dataVersion >= 24)
 	{
-		if (in.read((char*)&m_showNameIn3D,sizeof(bool))<0)
+		if (in.read((char*)&m_showNameIn3D,sizeof(bool)) < 0)
 			return WriteError();
 	}
 	else

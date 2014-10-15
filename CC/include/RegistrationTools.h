@@ -160,8 +160,8 @@ public:
 	//! Registers two point clouds
 	/** This method implements the ICP algorithm (Besl et al.).
 		Warning: be sure to activate an INPUT/OUTPUT scalar field on the data cloud
-		\param modelList the reference cloud (won't move)
-		\param dataList the cloud to register (will move)
+		\param modelCloud the reference cloud (won't move)
+		\param dataCloud the cloud to register (will move)
 		\param totalTrans the resulting transformation (once the algorithm has converged)
 		\param convType convergence type
 		\param minErrorDecrease the minimum (mean square) error decrease between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
@@ -176,8 +176,8 @@ public:
 		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see RegistrationTools::TRANSFORMATION_FILTERS flags
 		\return algorithm result
 	**/
-	static RESULT_TYPE RegisterClouds(	GenericIndexedCloudPersist* modelList,
-										GenericIndexedCloudPersist* dataList,
+	static RESULT_TYPE RegisterClouds(	GenericIndexedCloudPersist* modelCloud,
+										GenericIndexedCloudPersist* dataCloud,
 										ScaledTransformation& totalTrans,
 										CONVERGENCE_TYPE convType,
 										double minErrorDecrease,

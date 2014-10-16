@@ -47,7 +47,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
 	: Polyline(0)
-	, ccHObject(poly.getName())
+	, ccHObject(poly)
 {
 	ccPointCloud* cloud = dynamic_cast<ccPointCloud*>(poly.m_theAssociatedCloud);
 	ccPointCloud* clone = cloud ? cloud->partialClone(&poly) : ccPointCloud::From(&poly);

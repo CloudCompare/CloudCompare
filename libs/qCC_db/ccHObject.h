@@ -37,6 +37,8 @@ public:
 	/** \param name object name (optional)
 	**/
 	ccHObject(QString name = QString());
+	//! Copy constructor
+	ccHObject(const ccHObject& object);
 
 	//! Default destructor
 	virtual ~ccHObject();

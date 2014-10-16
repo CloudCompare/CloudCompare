@@ -147,7 +147,10 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 	assert(count == m_pointsVisibility->currentSize());
 
 	if (!m_pointsVisibility || m_pointsVisibility->currentSize() != count)
+	{
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No visibility table instantiated!");
 		return 0;
+	}
 
 	//count the number of points to copy
 	unsigned pointCount = 0;
@@ -159,7 +162,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 
 	if (pointCount == 0)
 	{
-		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] No point in selection!");
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No point in selection");
 		return 0;
 	}
 

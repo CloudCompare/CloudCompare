@@ -6817,16 +6817,18 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
 			{
-				//Special case: labels (do this before temporarily removing 'entity' from DB!)
 				bool lockedVertices;
 				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity,&lockedVertices);
 				if (cloud)
 				{
 					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
+					
+					//Special case: labels (do this before temporarily removing 'entity' from DB!)
 					ccHObject::Container labels;
 					if (m_ccRoot)
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_TYPES::LABEL_2D);
 					for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
+					{
 						if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 						{
 							//we must check all dependent labels and remove them!!!
@@ -6846,11 +6848,12 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								ccHObject* labelParent = label->getParent();
 								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);
-								label=0;
+								label = 0;
 								putObjectBackIntoDBTree(labelParent,objContext);
 							}
 						}
-				}
+					} //for each label
+				} // if (cloud)
 
 				//we temporarily detach entity, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
@@ -6860,16 +6863,13 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				ccGenericGLDisplay* display = entity->getDisplay();
 
 				ccHObject* segmentationResult = 0;
+				bool deleteOriginalEntity = deleteHiddenParts;
 				if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
-					ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
-					segmentationResult = cloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+					segmentationResult = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
 
-					if (!deleteHiddenParts && cloud->size() == 0) //if 'deleteHiddenParts' it will be done afterwards anyway
-					{
-						delete entity;
-						entity = 0;
-					}
+					deleteOriginalEntity |= (genCloud->size() == 0);
 				}
 				else if (entity->isKindOf(CC_TYPES::MESH)/*|| entity->isA(CC_TYPES::PRIMITIVE)*/) //TODO
 				{
@@ -6878,48 +6878,58 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					else if (entity->isA(CC_TYPES::SUB_MESH))
 						segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(!deleteHiddenParts);
 
-					if (!deleteHiddenParts && ccHObjectCaster::ToGenericMesh(entity)->size() == 0) //if 'deleteHiddenParts' it will be done afterwards anyway
-					{
-						delete entity;
-						entity = 0;
-					}
+					deleteOriginalEntity |=  (ccHObjectCaster::ToGenericMesh(entity)->size() == 0);
 				}
 
 				if (segmentationResult)
 				{
-					if (!deleteHiddenParts) //no need to put it back if we delete it afterwards!
+					//another specific case: sensors (on clouds)
+					if (cloud)
 					{
-						if (entity)
+						for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
 						{
-							entity->setName(entity->getName()+QString(".remaining"));
-
-							//we also need to check if there is a childrent that is a GBLsensor
-							unsigned n = entity->getChildrenNumber();
-
-							//we put a new sensor here if we find one
-							ccGBLSensor* sensor = 0;
-							for (unsigned i=0; i<n; ++i)
+							ccHObject* child = entity->getChild(i);
+							assert(child);
+							if (child && child->isKindOf(CC_TYPES::SENSOR))
 							{
-								if (entity->getChild(i)->isA(CC_TYPES::GBL_SENSOR))
+								if (child->isA(CC_TYPES::GBL_SENSOR))
 								{
-									sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
-									break;
+									ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
+									//remove the associated depth buffer of the original sensor (derpecated)
+									sensor->clearDepthBuffer();
+									if (deleteOriginalEntity)
+										//either transfer
+											entity->transferChild(sensor,*segmentationResult);
+									else
+										//or copy
+										segmentationResult->addChild(new ccGBLSensor(*sensor));
+								}
+								else if (child->isA(CC_TYPES::CAMERA_SENSOR))
+								{
+									ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(entity->getChild(i));
+									if (deleteOriginalEntity)
+										//either transfer
+											entity->transferChild(sensor,*segmentationResult);
+									else
+										//or copy
+										segmentationResult->addChild(new ccCameraSensor(*sensor));
+								}
+								else
+								{
+									//unhandled sensor?!
+									assert(false);
 								}
 							}
+						}
+					}
 
-							if (sensor)
-							{
-								ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(segmentationResult);
-								if (cloud)
-								{
-									//we create a copy of that
-									ccGBLSensor* clonedSensor = new ccGBLSensor(*sensor);
-									cloud->addChild(clonedSensor);
-									clonedSensor->computeAutoParameters(cloud);
-								}
-								//remove the associated depth buffer (may have been changed)
-								sensor->clearDepthBuffer();
-							}
+					//we must take care of the remaining part
+					if (!deleteHiddenParts)
+					{
+						//no need to put back the entity if we delete it afterwards!
+						if (!deleteOriginalEntity)
+						{
+							entity->setName(entity->getName() + QString(".remaining"));
 							putObjectBackIntoDBTree(entity,objContext);
 						}
 					}
@@ -6937,9 +6947,8 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							if (deleteHiddenParts && meshEntity->isA(CC_TYPES::SUB_MESH))
 								verticesToReset.insert(meshEntity->getAssociatedCloud());
 						}
-
-						delete entity;
-						entity = 0;
+						assert(deleteOriginalEntity);
+						//deleteOriginalEntity = true;
 					}
 
 					if (segmentationResult->isA(CC_TYPES::SUB_MESH))
@@ -6965,10 +6974,16 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (!firstResult)
 						firstResult = segmentationResult;
 				}
-				else if (entity)
+				else if (!deleteOriginalEntity)
 				{
 					//ccConsole::Error("An error occurred! (not enough memory?)");
 					putObjectBackIntoDBTree(entity,objContext);
+				}
+				
+				if (deleteOriginalEntity)
+				{
+					delete entity;
+					entity = 0;
 				}
 			}
 		}

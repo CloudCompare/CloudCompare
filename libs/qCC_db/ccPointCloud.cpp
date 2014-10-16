@@ -698,6 +698,7 @@ bool ccPointCloud::reserveThePointsTable(unsigned newNumberOfPoints)
 
 bool ccPointCloud::reserveTheRGBTable()
 {
+	//ccLog::Warning(QString("[ccPointCloud::reserveTheRGBTable] Cloud is %1 and its capacity is '%2'").arg(m_points->isAllocated() ? "allocated" : "not allocated").arg(m_points->capacity()));
 	assert(m_points);
 	if (!m_points->isAllocated())
 	{
@@ -830,7 +831,7 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 		return false;
 	}
 
-	ccLog::Print(QString("Cloud is %1 and its capacity is '%2'").arg(m_points->isAllocated() ? "allocated" : "not allocated").arg(m_points->capacity()));
+	//ccLog::Warning(QString("[ccPointCloud::reserve] Cloud is %1 and its capacity is '%2'").arg(m_points->isAllocated() ? "allocated" : "not allocated").arg(m_points->capacity()));
 
 	//double check
 	return	                   m_points->capacity()    >= newNumberOfPoints
@@ -2282,7 +2283,8 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		CCLib::ReferenceCloud* rc = getTheVisiblePoints();
 		if (!rc)
 		{
-			ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during points selection!");
+			//a warning message has already been issued by getTheVisiblePoints!
+			//ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during points selection!");
 			return 0;
 		}
 		assert(rc->size() != 0);
@@ -2297,7 +2299,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 	if (!result)
 	{
-		ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during points duplication!");
+		ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during segmentation!");
 		return 0;
 	}
 
@@ -2306,6 +2308,9 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints && !isLocked())
 	{
+		//we drop the octree before modifying this cloud's contents
+		deleteOctree();
+
 		//we remove all visible points
 		unsigned lastPoint = 0;
 		unsigned count = size();
@@ -2319,28 +2324,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 			}
 		}
 
-		//we disable octree
-		deleteOctree();
-
-		//TODO
-		//ccMesh* mesh = getMesh();
-		/*if (theMeshes)
-		{
-		CCLib::ReferenceCloud* invrc = new CCLib::ReferenceCloud(this);
-		unsigned i,count=size();
-		invrc->reserve(count-result->size());
-
-		for (i=0; i<count; ++i)
-		if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
-		invrc->addPointIndex(i); //can't fail see above
-
-		//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
-		CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMeshes,invrc,true,NULL,this);
-		setMesh(newTri);
-
-		delete invrc;
-		}
-		//*/
+		//TODO: handle associated meshes
 
 		resize(lastPoint);
 		

@@ -96,8 +96,13 @@ ccObject::ccObject(QString name)
 	: m_name(name.isEmpty() ? "unnamed" : name)
 	, m_flags(CC_ENABLED)
 	, m_uniqueID(GetNextUniqueID())
-{
-}
+{}
+
+ccObject::ccObject(const ccObject& object)
+	: m_name(object.m_name)
+	, m_flags(object.m_flags)
+	, m_uniqueID(GetNextUniqueID())
+{}
 
 void ccObject::setUniqueID(unsigned ID)
 {

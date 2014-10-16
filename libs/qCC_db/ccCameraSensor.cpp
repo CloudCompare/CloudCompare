@@ -199,6 +199,45 @@ ccCameraSensor::ccCameraSensor(const IntrinsicParameters& iParams)
 	setIntrinsicParameters(iParams);
 }
 
+ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
+	: ccSensor(sensor)
+	, m_projectionMatrixIsValid(false)
+{
+	setIntrinsicParameters(m_intrinsicParams);
+
+	//distortion params
+	if (m_distortionParams)
+	{
+		LensDistortionParameters::Shared clonedDistParams;
+		switch (m_distortionParams->getModel())
+		{
+		case SIMPLE_RADIAL_DISTORTION:
+			{
+				//simply duplicate the struct
+				RadialDistortionParameters* clone = new RadialDistortionParameters;
+				*clone = *static_cast<const RadialDistortionParameters*>(m_distortionParams.data());
+				clonedDistParams = LensDistortionParameters::Shared(clone);
+			}
+			break;
+
+		case BROWN_DISTORTION:
+			{
+				//simply duplicate the struct
+				BrownDistortionParameters* clone = new BrownDistortionParameters;
+				*clone = *static_cast<const BrownDistortionParameters*>(m_distortionParams.data());
+				clonedDistParams = LensDistortionParameters::Shared(clone);
+			}
+			break;
+		
+		default:
+			//unhandled type?!
+			assert(false);
+			break;
+		}
+		setDistortionParameters(clonedDistParams);
+	}
+}
+
 ccCameraSensor::~ccCameraSensor()
 {
 }

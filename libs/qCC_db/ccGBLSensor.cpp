@@ -51,27 +51,21 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=YAW_THEN_PITCH*/)
 	setSelectionBehavior(SELECTION_FIT_BBOX);
 }
 
-ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor): ccSensor(sensor)
+ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor)
+	: ccSensor(sensor)
+	, m_phiMin(sensor.m_phiMin)
+	, m_phiMax(sensor.m_phiMax)
+	, m_deltaPhi(sensor.m_deltaPhi)
+	, m_pitchAnglesAreShifted(sensor.m_pitchAnglesAreShifted)
+	, m_thetaMin(sensor.m_thetaMin)
+	, m_thetaMax(sensor.m_thetaMax)
+	, m_deltaTheta(sensor.m_deltaTheta)
+	, m_yawAnglesAreShifted(sensor.m_yawAnglesAreShifted)
+	, m_rotationOrder(sensor.m_rotationOrder)
+	, m_sensorRange(sensor.m_sensorRange)
+	, m_uncertainty(sensor.m_uncertainty)
+	, m_depthBuffer() //we cannot simply copy the depth buffer (it must be recomputed)
 {
-	//graphic representation
-	lockVisibility(false);
-	setSelectionBehavior(SELECTION_FIT_BBOX);
-
-	this->m_phiMin = sensor.m_phiMin;
-	this->m_phiMax = sensor.m_phiMax;
-	this->m_deltaPhi = sensor.m_deltaPhi;
-	this->m_pitchAnglesAreShifted = sensor.m_pitchAnglesAreShifted;
-	this->m_thetaMin = sensor.m_thetaMin;
-	this->m_thetaMax = sensor.m_thetaMax;
-	this->m_deltaTheta = sensor.m_deltaTheta;
-	this->m_yawAnglesAreShifted = sensor.m_yawAnglesAreShifted;
-	this->m_rotationOrder = sensor.m_rotationOrder;
-
-	this->m_sensorRange = sensor.m_sensorRange;
-	this->m_uncertainty = sensor.m_uncertainty;
-
-	//we cannot simply copy the depth buffer (it must be recomputed)
-	this->m_depthBuffer = DepthBuffer();
 }
 
 void ccGBLSensor::clearDepthBuffer()

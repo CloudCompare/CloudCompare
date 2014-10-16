@@ -15,8 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
-//Local
 #include "ccIndexedTransformationBuffer.h"
+
+//Local
+#include "ccLog.h";
 
 ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
 	: ccHObject(name)
@@ -26,6 +28,24 @@ ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
 	, m_trihedronsScale(1.0f)
 {
 	lockVisibility(false);
+}
+
+ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(const ccIndexedTransformationBuffer& buffer)
+	: ccHObject(buffer)
+	, m_bBox(buffer.m_bBox)
+	, m_bBoxValidSize(buffer.m_bBoxValidSize)
+	, m_showAsPolyline(buffer.m_showAsPolyline)
+	, m_showTrihedrons(buffer.m_showTrihedrons)
+	, m_trihedronsScale(buffer.m_trihedronsScale)
+{
+	try
+	{
+		this->std::vector< ccIndexedTransformation >::operator = (buffer);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[ccIndexedTransformationBuffer] Failed to copy original content (not enough memory)");
+	}
 }
 
 static bool IndexedSortOperator(const ccIndexedTransformation& a, const ccIndexedTransformation& b)

@@ -163,6 +163,8 @@ public:
 
 	//! Default constructor
 	ccDrawableObject();
+	//! Copy constructor
+	ccDrawableObject(const ccDrawableObject& object);
 
 	//! Draws entity and its children
 	virtual void draw(CC_DRAW_CONTEXT& context) = 0;

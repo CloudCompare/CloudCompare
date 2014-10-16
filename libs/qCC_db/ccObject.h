@@ -126,7 +126,7 @@ public:
 	static const CC_CLASS_ENUM TRANS_BUFFER			=	HIERARCHY_OBJECT	| CC_TRANS_BUFFER_BIT		| CC_LEAF_BIT;
 
 	//  Custom types
-	/**	Custom objects are typically defined by plugins. They can be inserted in an object
+	/** Custom objects are typically defined by plugins. They can be inserted in an object
 		hierarchy or displayed in an OpenGL context like any other ccHObject.
 		To differentiate custom objects, use the meta-data mechanism (see ccOBject::getMetaData
 		and ccOBject::setMetaData). You can also define a custom icon (see ccHObject::getIcon).
@@ -180,6 +180,9 @@ public:
 	/** \param name object name (optional)
 	**/
 	ccObject(QString name = QString());
+
+	//! Copy constructor
+	ccObject(const ccObject& object);
 
 	//! Returns current database version
 	static unsigned GetCurrentDBVersion();

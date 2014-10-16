@@ -71,6 +71,15 @@ ccHObject::ccHObject(QString name/*=QString()*/)
 	m_glTransHistory.toIdentity();
 }
 
+ccHObject::ccHObject(const ccHObject& object)
+	: ccObject(object)
+	, ccDrawableObject(object)
+	, m_parent(0)
+	, m_selectionBehavior(object.m_selectionBehavior)
+{
+	m_glTransHistory.toIdentity();
+}
+
 ccHObject::~ccHObject()
 {
 	//process dependencies
@@ -311,7 +320,10 @@ void ccHObject::onDeletionOf(const ccHObject* obj)
 bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OTHER*/, int insertIndex/*=-1*/)
 {
 	if (!child)
+	{
+		assert(false);
 		return false;
+	}
 
 	if (isLeaf())
 	{
@@ -337,12 +349,18 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	child->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
 
 	if (dependencyFlags != 0)
+	{
 		addDependency(child,dependencyFlags);
+	}
+
+	//the strongest link: between a parent and a child ;)
 	if ((dependencyFlags & DP_PARENT_OF_OTHER) == DP_PARENT_OF_OTHER)
 	{
 		child->setParent(this);
 		if (child->isShareable())
 			dynamic_cast<CCShareable*>(child)->link();
+		if (!child->getDisplay())
+			child->setDisplay(getDisplay());
 	}
 
 	return true;

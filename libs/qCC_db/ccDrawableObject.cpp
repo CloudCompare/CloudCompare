@@ -43,6 +43,24 @@ ccDrawableObject::ccDrawableObject()
 	resetGLTransformation();
 }
 
+ccDrawableObject::ccDrawableObject(const ccDrawableObject& object)
+	: m_visible(object.m_visible)
+	, m_selected(object.m_selected)
+	, m_lockedVisibility(object.m_lockedVisibility)
+	, m_colorsDisplayed(object.m_colorsDisplayed)
+	, m_normalsDisplayed(object.m_normalsDisplayed)
+	, m_sfDisplayed(object.m_sfDisplayed)
+	, m_colorIsOverriden(object.m_colorIsOverriden)
+	, m_glTrans(object.m_glTrans)
+	, m_glTransEnabled(object.m_glTransEnabled)
+	, m_showNameIn3D(object.m_showNameIn3D)
+	, m_currentDisplay(object.m_currentDisplay)
+{
+	m_tempColor[0] = object.m_tempColor[0];
+	m_tempColor[1] = object.m_tempColor[1];
+	m_tempColor[2] = object.m_tempColor[2];
+}
+
 bool ccDrawableObject::isVisible() const
 {
 	return m_visible;

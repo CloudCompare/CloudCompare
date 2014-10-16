@@ -34,6 +34,8 @@ public:
 
 	//! Default constructor
 	ccIndexedTransformationBuffer(QString name = QString("Trans. buffer"));
+	//! Copy constructor
+	ccIndexedTransformationBuffer(const ccIndexedTransformationBuffer& buffer);
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TRANS_BUFFER; }

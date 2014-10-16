@@ -146,7 +146,8 @@ public: //general
 
 	//! Default constructor
 	ccCameraSensor();
-
+	//! Copy constructor
+	ccCameraSensor(const ccCameraSensor& sensor);
 	//! Constructor with given intrinsic parameters (and optional uncertainty parameters)
 	ccCameraSensor(const IntrinsicParameters& iParams);
 

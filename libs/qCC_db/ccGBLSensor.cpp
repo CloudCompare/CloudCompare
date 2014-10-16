@@ -927,7 +927,7 @@ bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 	viewMat.invert();
 	viewMat.setTranslation(sensorCenterd);
 	//TODO: can we set the right FOV?
-	win->setupProjectiveViewport(viewMat);
+	win->setupProjectiveViewport(viewMat,0,1.0f,true,true);
 
 	return true;
 }

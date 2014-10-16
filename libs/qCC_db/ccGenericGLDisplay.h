@@ -196,8 +196,13 @@ public:
 		\param fov_deg vertical field of view (in degrees). Optional (ignored if 0).
 		\param ar aspect ratio (width/height)
 		\param viewerBasedPerspective whether the perspective view should be object-centered (false) or camera-centered (true)
+		\param bubbleViewMode set whether bubble-view mode should be enabled or not (in which case viewerBasedPerspective is forced by default)
 	**/
-	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true) = 0;
+	virtual void setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
+											float fov_deg = 0.0f,
+											float ar = 1.0f,
+											bool viewerBasedPerspective = true,
+											bool bubbleViewMode = false) = 0;
 
 };
 

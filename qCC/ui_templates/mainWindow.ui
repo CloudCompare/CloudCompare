@@ -118,6 +118,7 @@
     <addaction name="actionToggleCenteredPerspective"/>
     <addaction name="actionToggleViewerBasedPerspective"/>
     <addaction name="actionLockRotationVertAxis"/>
+    <addaction name="actionEnterBubbleViewMode"/>
     <addaction name="separator"/>
     <addaction name="actionRenderToFile"/>
     <addaction name="actionDisplayOptions"/>
@@ -2665,6 +2666,14 @@
    </property>
    <property name="toolTip">
     <string>Computes the best registration between all couples among multiple entities and save the resulting RMS in a matrix (CSV) file</string>
+   </property>
+  </action>
+  <action name="actionEnterBubbleViewMode">
+   <property name="text">
+    <string>Enter bubble-view mode</string>
+   </property>
+   <property name="shortcut">
+    <string>B</string>
    </property>
   </action>
  </widget>

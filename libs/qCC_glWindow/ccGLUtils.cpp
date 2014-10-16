@@ -32,13 +32,13 @@ void ccGLUtils::DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h,
 
 	glColor4ub(255, 255, 255, alpha);
 	glBegin(GL_QUADS);
-	glTexCoord2f(0.0,0.0);
-	glVertex2i(x, y+h);
 	glTexCoord2f(0.0,1.0);
+	glVertex2i(x, y+h);
+	glTexCoord2f(0.0,0.0);
 	glVertex2i(x, y);
-	glTexCoord2f(1.0,1.0);
-	glVertex2i(x+w, y);
 	glTexCoord2f(1.0,0.0);
+	glVertex2i(x+w, y);
+	glTexCoord2f(1.0,1.0);
 	glVertex2i(x+w, y+h);
 	glEnd();
 

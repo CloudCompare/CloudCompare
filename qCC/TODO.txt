@@ -29,8 +29,6 @@ Big ones:
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 
 Various:
-[*] Add an option to command line mode: 'SAVE_ALL_AT_ONCE' (CLOUDS/MESHES) if multiple entities are loaded and should be saved in the same file
-[*] Add a 'bubble view' mode (a kind of constrained viewer-based perspective mode with high F.O.V.)
 [*] Change Triangle lib by a GPL-compatible library
 [*] Save primitives in DXF files (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)

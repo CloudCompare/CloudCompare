@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccExit.png</file>
     <file>images/ccFullScreen.png</file>
     <file>images/ccSunLight.png</file>
     <file>images/ccClippingBox.png</file>

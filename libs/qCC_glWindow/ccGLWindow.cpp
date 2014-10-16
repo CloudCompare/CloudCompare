@@ -46,12 +46,13 @@
 #include <ccFrameBufferObject.h>
 #include <ccFBOUtils.h>
 
-//QT
+//Qt
 #include <QtGui>
 #include <QWheelEvent>
 #include <QElapsedTimer>
 #include <QSettings>
 #include <QApplication>
+#include <QSharedPointer>
 
 #ifdef USE_VLD
 //VLD
@@ -85,12 +86,6 @@ const GLuint GL_INVALID_LIST_ID = (~0);
 
 //GL filter banner margin (height = 2*margin + current font height)
 const int CC_GL_FILTER_BANNER_MARGIN = 5;
-
-//'hot zone' display parameters
-static const char c_psi_title[] = "default point size";
-static const int c_psi_margin = 16;
-static const int c_psi_iconSize = 16;
-static const unsigned char c_psi_color[3] = { 133, 193, 39 }; //"greenish"
 
 /*** Persistent settings ***/
 
@@ -170,6 +165,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_displayOverlayEntities(true)
 	, m_silentInitialization(silentInitialization)
 	, m_verticalRotationLocked(false)
+	, m_bubbleViewModeEnabled(false)
+	, m_bubbleViewFov_deg(90.0f)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -212,7 +209,9 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 		
 		//load parameters
 		bool perspectiveView	= settings.value(c_ps_perspectiveView,	false				).toBool();
-		bool objectCenteredView	= settings.value(c_ps_objectMode,		true				).toBool();
+		//DGM: we force object-centered view by default now, as the viewer-based perspective is too dependent
+		//on what is displayed (so restoring this parameter at next startup is rarely a good idea)
+		bool objectCenteredView	= /*settings.value(c_ps_objectMode,		true				).toBool()*/true;
 		m_sunLightEnabled		= settings.value(c_ps_sunLight,			true				).toBool();
 		m_customLightEnabled	= settings.value(c_ps_customLight,		false				).toBool();
 		int pivotVisibility		= settings.value(c_ps_pivotVisibility,	PIVOT_SHOW_ON_MOVE	).toInt();
@@ -554,7 +553,7 @@ void ccGLWindow::stopFrameRateTest()
 		s_frameRateTimer.stop();
 		s_frameRateTimer.disconnect();
 	}
-	s_frameRateTestInProgress=false;
+	s_frameRateTestInProgress = false;
 
 	//we restore the original view mat
 	m_viewportParams.viewMat = s_frameRateBackupMat;
@@ -577,6 +576,173 @@ void ccGLWindow::stopFrameRateTest()
 	redraw();
 }
 
+//! Precomputed stuff for the 'hot zone'
+struct HotZone
+{
+	//display font
+	QFont font;
+	//text height
+	int textHeight;
+	//text shift
+	int yTextBottomLineShift;
+	//default color
+	unsigned char color[3];
+	//bubble-view label rect.
+	QString bbv_label;
+	//bubble-view label rect.
+	QRect bbv_labelRect;
+	//point size label
+	QString psi_label;
+	//point size label rect.
+	QRect psi_labelRect;
+
+	//! Default margin
+	static const int margin = 16;
+	//! Default icon size
+	static const int iconSize = 16;
+
+	HotZone(ccGLWindow* win)
+		: textHeight(0)
+		, yTextBottomLineShift(0)
+		, bbv_label("bubble-view mode")
+		, psi_label("default point size")
+	{
+		//default color ("greenish")
+		color[0] = 133;
+		color[1] = 193;
+		color[2] = 39;
+
+		if (win)
+			font = win->font();
+		font.setPointSize(12);
+		font.setBold(true);
+
+		QFontMetrics metrics(font);
+		bbv_labelRect = metrics.boundingRect(bbv_label);
+		psi_labelRect = metrics.boundingRect(psi_label);
+
+		textHeight = std::max(psi_labelRect.height(),bbv_labelRect.height()) * 3/4; // --> factor: to recenter the baseline a little
+		yTextBottomLineShift = (iconSize/2) + (textHeight/2);
+	}
+};
+QSharedPointer<HotZone> s_hotZone(0);
+
+void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
+{
+	if (	!m_hotZoneActivated
+		&&	!m_bubbleViewModeEnabled )
+	{
+		//nothing to do
+		return;
+	}
+
+	//we init the necessary parameters the first time we need them
+	if (!s_hotZone)
+		s_hotZone = QSharedPointer<HotZone>(new HotZone(this));
+
+	int halfW = m_glWidth/2;
+	int halfH = m_glHeight/2;
+
+	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glEnable(GL_BLEND);
+
+	//draw semi-transparent background
+	{
+		//total hot zone area size (without margin)
+		int psi_totalWidth = 0;
+		if (m_hotZoneActivated)
+			psi_totalWidth = /*HotZone::margin + */s_hotZone->psi_labelRect.width() + HotZone::margin + HotZone::iconSize + HotZone::margin + HotZone::iconSize/* + HotZone::margin*/;
+		int bbv_totalWidth = 0;
+		if (m_bubbleViewModeEnabled)
+			bbv_totalWidth = /*HotZone::margin + */s_hotZone->bbv_labelRect.width() + HotZone::margin + HotZone::iconSize/* + HotZone::margin*/;
+
+		int totalWidth = std::max(psi_totalWidth, bbv_totalWidth);
+
+		QPoint minAreaCorner(xStart0 + HotZone::margin,              yStart + HotZone::margin + std::min(0, s_hotZone->yTextBottomLineShift - s_hotZone->textHeight));
+		QPoint maxAreaCorner(xStart0 + HotZone::margin + totalWidth, yStart + HotZone::margin + std::max(HotZone::iconSize, s_hotZone->yTextBottomLineShift));
+		if (m_hotZoneActivated && m_bubbleViewModeEnabled)
+			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize + HotZone::margin);
+
+		QRect areaRect(	minAreaCorner - QPoint(HotZone::margin,HotZone::margin)/2,
+						maxAreaCorner + QPoint(HotZone::margin,HotZone::margin)/2 );
+
+		//draw rectangle
+		glColor4ub(ccColor::darkGrey[0], ccColor::darkGrey[1], ccColor::darkGrey[2], 210);
+		glBegin(GL_QUADS);
+		glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y())					);
+		glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y())					);
+		glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y()+areaRect.height())	);
+		glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y()+areaRect.height())	);
+		glEnd();
+	}
+
+	if (m_hotZoneActivated)
+	{
+		yStart += HotZone::margin;
+		int xStart = xStart0 + HotZone::margin;
+		
+		//label
+		glColor3ubv_safe(s_hotZone->color);
+		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift,s_hotZone->psi_label,s_hotZone->font);
+
+		//icons
+		xStart += s_hotZone->psi_labelRect.width() + HotZone::margin;
+
+		//"minus" icon
+		{
+			static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize),HotZone::iconSize,HotZone::iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE,QRect(xStart,yStart,HotZone::iconSize,HotZone::iconSize)));
+			xStart += HotZone::iconSize;
+		}
+
+		//separator
+		{
+			glColor3ubv(s_hotZone->color);
+			glBegin(GL_POINTS);
+			glVertex2i(-halfW+xStart+HotZone::margin/2,halfH-(yStart+HotZone::iconSize/2));
+			glEnd();
+			xStart += HotZone::margin;
+		}
+
+		//"plus" icon
+		{
+			static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize),HotZone::iconSize,HotZone::iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE,QRect(xStart,yStart,HotZone::iconSize,HotZone::iconSize)));
+			xStart += HotZone::iconSize;
+		}
+
+		yStart += HotZone::iconSize;
+	}
+
+	if (m_bubbleViewModeEnabled)
+	{
+		yStart += HotZone::margin;
+		int xStart = xStart0 + HotZone::margin;
+		
+		//label
+		glColor3ubv_safe(s_hotZone->color);
+		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift,s_hotZone->bbv_label,s_hotZone->font);
+		
+		//icon
+		xStart += s_hotZone->bbv_labelRect.width() + HotZone::margin;
+
+		//"exit" icon
+		{
+			static const QPixmap c_bbv_exitPix(":/CC/images/ccExit.png");
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_bbv_exitPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize),HotZone::iconSize,HotZone::iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE,QRect(xStart,yStart,HotZone::iconSize,HotZone::iconSize)));
+			xStart += HotZone::iconSize;
+		}
+
+		yStart += HotZone::iconSize;
+	}
+
+	glDisable(GL_BLEND);
+	glPopAttrib();
+}
+
 void ccGLWindow::paintGL()
 {
 	//context initialization
@@ -587,7 +753,10 @@ void ccGLWindow::paintGL()
 
 	if (doDraw3D)
 	{
-		bool doDrawCross = (!m_captureMode.enabled && !m_viewportParams.perspectiveView && !(m_fbo && m_activeGLFilter) && getDisplayParameters().displayCross);
+		bool doDrawCross = (	!m_captureMode.enabled
+							&&	!m_viewportParams.perspectiveView
+							&&	!(m_fbo && m_activeGLFilter)
+							&&	getDisplayParameters().displayCross );
 		draw3D(context,doDrawCross,m_fbo);
 		m_updateFBO = false;
 	}
@@ -648,6 +817,8 @@ void ccGLWindow::paintGL()
 	//current displayed scalar field color ramp (if any)
 	ccRenderingTools::DrawColorRamp(context);
 
+	m_clickableItems.clear();
+
 	/*** overlay entities ***/
 	if (m_displayOverlayEntities)
 	{
@@ -666,31 +837,35 @@ void ccGLWindow::paintGL()
 
 		if (!m_captureMode.enabled)
 		{
+			int yStart = 0;
+
 			//transparent border at the top of the screen
 			if (m_activeGLFilter)
 			{
 				float w = static_cast<float>(m_glWidth)/2;
 				float h = static_cast<float>(m_glHeight)/2;
-				int borderWidth = getGlFilterBannerHeight();
+				int borderHeight = getGlFilterBannerHeight();
 
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 
 				glColor4f(1.0f,1.0f,0.0f,0.6f);
 				glBegin(GL_QUADS);
-				glVertex2f(w,h);
+				glVertex2f( w,h);
 				glVertex2f(-w,h);
-				glVertex2f(-w,h-static_cast<float>(borderWidth));
-				glVertex2f(w,h-static_cast<float>(borderWidth));
+				glVertex2f(-w,h-static_cast<float>(borderHeight));
+				glVertex2f( w,h-static_cast<float>(borderHeight));
 				glEnd();
 
 				glPopAttrib();
 
 				glColor3ubv_safe(ccColor::black);
 				renderText(	10,
-							borderWidth-CC_GL_FILTER_BANNER_MARGIN-CC_GL_FILTER_BANNER_MARGIN/2,
+							borderHeight-CC_GL_FILTER_BANNER_MARGIN-CC_GL_FILTER_BANNER_MARGIN/2,
 							QString("[GL filter] ")+m_activeGLFilter->getDescription()
 							/*,m_font*/ ); //we ignore the custom font size
+
+				yStart += borderHeight;
 			}
 
 			//current messages (if valid)
@@ -750,85 +925,7 @@ void ccGLWindow::paintGL()
 				}
 			}
 
-			if (m_hotZoneActivated)
-			{
-				//+/- icons
-				static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
-				static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
-
-				QFont newFont(m_font); //no need to take zoom into account!
-				newFont.setPointSize(12);
-				newFont.setBold(true);
-
-				glPushAttrib(GL_COLOR_BUFFER_BIT);
-				glEnable(GL_BLEND);
-
-				int halfW = m_glWidth/2;
-				int halfH = m_glHeight/2;
-
-				//label ('Default point size')
-				QString label(c_psi_title);
-				QRect labelRect = QFontMetrics(newFont).boundingRect(label);
-
-				int xStart = c_psi_margin;
-				int yStart = c_psi_margin;
-				if (m_activeGLFilter)
-					yStart += getGlFilterBannerHeight();
-				int yTextHeight = labelRect.height() * 3/4; // --> factor: to recenter the baseline a little
-				int yTextBottomLine = (yStart+c_psi_iconSize/2)+(yTextHeight/2);
-
-				//total hot zone area size (without margin)
-				if (true)
-				{
-					int totalWidth = /*c_psi_margin + */labelRect.width() + c_psi_margin + c_psi_iconSize + c_psi_margin + c_psi_iconSize/* + c_psi_margin*/;
-					QPoint minAreaCorner(xStart, std::min(yStart, yTextBottomLine - yTextHeight));
-					QPoint maxAreaCorner(xStart+totalWidth, std::max(yStart + c_psi_iconSize, yTextBottomLine));
-					QRect areaRect(	minAreaCorner - QPoint(c_psi_margin,c_psi_margin)/2,
-									maxAreaCorner + QPoint(c_psi_margin,c_psi_margin)/2);
-
-					//draw semi-transparent background
-					glColor4ub(ccColor::darkGrey[0], ccColor::darkGrey[1], ccColor::darkGrey[2], 210);
-					glBegin(GL_QUADS);
-					glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y())					);
-					glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y())					);
-					glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y()+areaRect.height())	);
-					glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y()+areaRect.height())	);
-					glEnd();
-				}
-
-				//label
-				glColor3ubv_safe(c_psi_color);
-				renderText(xStart,yTextBottomLine,label,newFont);
-
-				//icons
-				xStart += labelRect.width() + c_psi_margin;
-
-				//"minus"
-				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize);
-				m_hotZoneMinusIconROI[0] = xStart;
-				m_hotZoneMinusIconROI[1] = yStart;
-				m_hotZoneMinusIconROI[2] = xStart+c_psi_iconSize;
-				m_hotZoneMinusIconROI[3] = yStart+c_psi_iconSize;
-				xStart += c_psi_iconSize;
-
-				//separator
-				glColor3ub(133,193,39);
-				glBegin(GL_POINTS);
-				glVertex2i(-halfW+xStart+c_psi_margin/2,halfH-(yStart+c_psi_iconSize/2));
-				glEnd();
-				xStart += c_psi_margin;
-
-				//"plus"
-				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize);
-				m_hotZonePlusIconROI[0] = xStart;
-				m_hotZonePlusIconROI[1] = m_hotZoneMinusIconROI[1];
-				m_hotZonePlusIconROI[2] = xStart+c_psi_iconSize;
-				m_hotZonePlusIconROI[3] = m_hotZoneMinusIconROI[3];
-				xStart += c_psi_iconSize;
-
-				glDisable(GL_BLEND);
-				glPopAttrib();
-			}
+			drawClickableItems(0,yStart);
 		}
 	}
 
@@ -848,7 +945,7 @@ void ccGLWindow::paintGL()
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadMatrixd(m_viewportParams.viewMat.data());
-			glRotated(360.0/static_cast<double>(FRAMERATE_TEST_MIN_FRAMES),0.0,1.0,0.0);
+			glRotated(360.0/FRAMERATE_TEST_MIN_FRAMES,0.0,1.0,0.0);
 			glGetDoublev(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
 			m_validModelviewMatrix = false;
 			glPopMatrix();
@@ -1128,6 +1225,12 @@ void ccGLWindow::zoomGlobal()
 
 void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 {
+	if (m_bubbleViewModeEnabled)
+	{
+		ccLog::Warning("[updateConstellationCenterAndZoom] Not when bubble-view is enabled!");
+		return;
+	}
+
 	setZoom(1.0f);
 
 	ccBBox zoomedBox;
@@ -1168,8 +1271,9 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	if (m_viewportParams.perspectiveView) //camera is on the pivot in ortho mode
 	{
 		//we must go backward so as to see the object!
-		assert(m_viewportParams.fov > ZERO_TOLERANCE);
-		double d = bbDiag / tan(m_viewportParams.fov * CC_DEG_TO_RAD);
+		float currentFov_deg = getFov();
+		assert(currentFov_deg > ZERO_TOLERANCE);
+		double d = bbDiag / tan(currentFov_deg * CC_DEG_TO_RAD);
 
 		CCVector3d cameraDir(0,0,-1);
 		if (!m_viewportParams.objectCenteredView)
@@ -1243,6 +1347,10 @@ void ccGLWindow::setGlFilter(ccGlFilter* filter)
 
 void ccGLWindow::setZoom(float value)
 {
+	//zoom is ignored in bubble-view mode
+	if (m_bubbleViewModeEnabled)
+		return;
+
 	if (value < CC_GL_MIN_ZOOM_RATIO)
 		value = CC_GL_MIN_ZOOM_RATIO;
 	else if (value > CC_GL_MAX_ZOOM_RATIO)
@@ -1456,12 +1564,6 @@ void ccGLWindow::drawTrihedron()
 	glPopMatrix();
 }
 
-void ccGLWindow::invalidateViewport()
-{
-	m_validProjectionMatrix = false;
-	m_updateFBO = true;
-}
-
 CCVector3d ccGLWindow::getRealCameraCenter() const
 {
 	if (m_viewportParams.perspectiveView)
@@ -1499,6 +1601,12 @@ ccBBox ccGLWindow::getVisibleObjectsBB() const
 	}
 
 	return box;
+}
+
+void ccGLWindow::invalidateViewport()
+{
+	m_validProjectionMatrix = false;
+	m_updateFBO = true;
 }
 
 void ccGLWindow::recalcProjectionMatrix()
@@ -1574,9 +1682,10 @@ void ccGLWindow::recalcProjectionMatrix()
 		m_viewportParams.zFar = zFar;
 
 		//and aspect ratio
-		double ar = static_cast<double>(m_glWidth)/static_cast<double>(m_glHeight);
+		double ar = static_cast<double>(m_glWidth)/m_glHeight;
 
-		gluPerspective(m_viewportParams.fov,ar,zNear,zFar);
+		float currentFov_deg = getFov();
+		gluPerspective(currentFov_deg,ar,zNear,zFar);
 	}
 	else
 	{
@@ -1618,7 +1727,7 @@ void ccGLWindow::recalcModelViewMatrix()
 	if (m_viewportParams.perspectiveView) //perspective mode
 	{
 		//for proper aspect ratio handling
-		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_viewportParams.perspectiveAspectRatio) : 0.0f);
+		float ar = (m_glHeight != 0 ? float(m_glWidth)/(m_glHeight*m_viewportParams.perspectiveAspectRatio) : 0.0f);
 		if (ar < 1.0)
 			glScalef(ar,ar,1.0);
 	}
@@ -1932,8 +2041,10 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	v.x = std::max<double>(std::min<double>(v.x/xc,1),-1);
 	v.y = std::max<double>(std::min<double>(v.y/yc,1),-1);
 
-	if (m_verticalRotationLocked)
+	if (m_verticalRotationLocked || m_bubbleViewModeEnabled)
+	{
 		v.y = 0;
+	}
 
 	//square 'radius'
 	double d2 = v.x*v.x + v.y*v.y;
@@ -1965,7 +2076,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 
 	int subID=-1;
 	int itemID = startPicking(FAST_PICKING,x,y,2,2,&subID);
-	if (itemID<1)
+	if (itemID < 1)
 		return;
 
 	//items can be in local or global DB
@@ -1995,6 +2106,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 					m_winDBRoot->filterChildren(labels,true,CC_TYPES::LABEL_2D);
 
 				for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
+				{
 					if ((*it)->isA(CC_TYPES::LABEL_2D) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 					{
 						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
@@ -2003,6 +2115,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 							m_activeItems.push_back(label);
 						}
 					}
+				}
 			}
 		}
 		else if (pickedObj->isA(CC_TYPES::CLIPPING_BOX))
@@ -2077,25 +2190,15 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	const int y = event->y();
 
 	//no button pressed
-	if (event->buttons()==Qt::NoButton)
+	if (event->buttons() == Qt::NoButton)
 	{
 		if (m_embeddedIconsEnabled)
 		{
-			if (x < CC_HOT_ZONE_WIDTH && y < CC_HOT_ZONE_HEIGHT)
+			bool inZone = (x < CC_HOT_ZONE_WIDTH && y < CC_HOT_ZONE_HEIGHT);
+			if (inZone != m_hotZoneActivated)
 			{
-				if (!m_hotZoneActivated)
-				{
-					m_hotZoneActivated = true;
-					updateGL();
-				}
-			}
-			else
-			{
-				if (m_hotZoneActivated)
-				{
-					m_hotZoneActivated = false;
-					updateGL();
-				}
+				m_hotZoneActivated = inZone;
+				updateGL();
 			}
 			event->accept();
 		}
@@ -2261,6 +2364,52 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		updateGL();
 }
 
+bool ccGLWindow::processClickableItems(int x, int y)
+{
+	ClickableItem::Role clickedItem = ClickableItem::NO_ROLE;
+	for (std::vector<ClickableItem>::const_iterator it = m_clickableItems.begin(); it != m_clickableItems.end(); ++it)
+	{
+		if (it->area.contains(x,y))
+		{
+			clickedItem = it->role;
+			break;
+		}
+	}
+
+	switch (clickedItem)
+	{
+	case ClickableItem::NO_ROLE:
+		//nothing to do
+		break;
+	case ClickableItem::INCREASE_POINT_SIZE:
+		if (m_viewportParams.defaultPointSize < MAX_POINT_SIZE)
+		{
+			setPointSize(m_viewportParams.defaultPointSize+1);
+			updateGL();
+		}
+		return true;
+	case ClickableItem::DECREASE_POINT_SIZE:
+		if (m_viewportParams.defaultPointSize > MIN_POINT_SIZE)
+		{
+			setPointSize(m_viewportParams.defaultPointSize-1);
+			updateGL();
+		}
+		return true;
+	case ClickableItem::LEAVE_BUBBLE_VIEW_MODE:
+		{
+			setBubbleViewMode(false);
+			updateGL();
+		}
+		return true;
+	default:
+		//unhandled item?!
+		assert(false);
+		break;
+	}
+
+	return false;
+}
+
 void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool cursorHasMoved = m_cursorMoved;
@@ -2342,13 +2491,13 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		else
 		{
 			//picking?
-			if (ccTimer::Msec()-m_lastClickTime_ticks < CC_MAX_PICKING_CLICK_DURATION_MS)
+			if (ccTimer::Msec() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS)
 			{
 				int x = event->x();
 				int y = event->y();
 
-				//specific case: interaction with item(s)
-				//DGM TODO: to activate if some items take left clicks into account!
+				//specific case: interaction with item(s) such as labels, etc.
+				//DGM TODO: to activate only if some items take left clicks into account!
 				/*if (!m_activeItems.empty())
 				{
 					for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
@@ -2361,42 +2510,23 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				}
 				//*/
 
-				bool hotZoneClick = false;
-				if (m_hotZoneActivated)
+				//first test if the user has clicked on a particular item on the screen
+				if (processClickableItems(x,y))
 				{
-					if (y >= m_hotZoneMinusIconROI[1] && y <= m_hotZoneMinusIconROI[3])
-					{
-						if (x >= m_hotZoneMinusIconROI[0] && x <= m_hotZoneMinusIconROI[2])
-						{
-							if (m_viewportParams.defaultPointSize>1)
-							{
-								setPointSize(m_viewportParams.defaultPointSize-1);
-								updateGL();
-							}
-							hotZoneClick=true;
-						}
-						else if (x >= m_hotZonePlusIconROI[0] && x <= m_hotZonePlusIconROI[2])
-						{
-							if (m_viewportParams.defaultPointSize<10)
-							{
-								setPointSize(m_viewportParams.defaultPointSize+1);
-								updateGL();
-							}
-							hotZoneClick=true;
-						}
-					}
-
 					acceptEvent = true;
 				}
-
-				if (!hotZoneClick && m_pickingMode != NO_PICKING && m_interactionMode != TRANSFORM_ENTITY)
+				//otheriwse perform OpenGL picking
+				else if (m_pickingMode != NO_PICKING && m_interactionMode != TRANSFORM_ENTITY)
 				{
 					PICKING_MODE pickingMode = m_pickingMode;
+
+					//shift+click = point/triangle picking
 					if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
-						pickingMode = AUTO_POINT_PICKING; //shift+click = point/triangle picking
+						pickingMode = AUTO_POINT_PICKING;
 
 					startPicking(pickingMode,event->x(),event->y());
 
+					//we also spread the new (if anyone is interested ;)
 					emit leftButtonClicked(event->x(), event->y());
 
 					acceptEvent = true;
@@ -2436,9 +2566,17 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	//in perspective mode, wheel event corresponds to 'walking'
 	if (m_viewportParams.perspectiveView)
 	{
-		//convert degrees in 'constant' walking speed in ... pixels ;)
-		static const float c_deg2PixConversion = 1.0f;
-		moveCamera(0,0,-(c_deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
+		//we change the fov if in bubble-view mode!
+		if (m_bubbleViewModeEnabled)
+		{
+			setBubbleViewFov(m_bubbleViewFov_deg - wheelDelta_deg / 3.6); //1 turn = 100 degrees
+		}
+		else
+		{
+			//convert degrees in 'constant' walking speed in ... pixels ;)
+			static const float c_deg2PixConversion = 1.0f;
+			moveCamera(0,0,-(c_deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
+		}
 	}
 	else //ortho. mode
 	{
@@ -2749,8 +2887,11 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 
 void ccGLWindow::setPointSize(float size)
 {
-	m_viewportParams.defaultPointSize = size;
-	m_updateFBO = true;
+	if (size >= static_cast<float>(MIN_POINT_SIZE) && size <= static_cast<float>(MAX_POINT_SIZE))
+	{
+		m_viewportParams.defaultPointSize = size;
+		m_updateFBO = true;
+	}
 }
 
 void ccGLWindow::setLineWidth(float width)
@@ -3020,7 +3161,8 @@ double ccGLWindow::computeActualPixelSize() const
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	return static_cast<double>(zoomEquivalentDist) * tan(m_viewportParams.fov * static_cast<float>(CC_DEG_TO_RAD)) / static_cast<double>(minScreenDim);
+	float currentFov_deg = getFov();
+	return static_cast<double>(zoomEquivalentDist) * tan(currentFov_deg * static_cast<float>(CC_DEG_TO_RAD)) / static_cast<double>(minScreenDim);
 }
 
 float ccGLWindow::computePerspectiveZoom() const
@@ -3030,7 +3172,8 @@ float ccGLWindow::computePerspectiveZoom() const
 	//	return m_viewportParams.zoom;
 
 	//we compute the zoom equivalent to the corresponding camera position (inverse of above calculus)
-	if (m_viewportParams.fov < ZERO_TOLERANCE)
+	float currentFov_deg = getFov();
+	if (currentFov_deg < ZERO_TOLERANCE)
 		return 1.0f;
 
 	//Camera center to pivot vector
@@ -3039,7 +3182,37 @@ float ccGLWindow::computePerspectiveZoom() const
 		return 1.0f;
 	
 	float screenSize = static_cast<float>(std::min(m_glWidth,m_glHeight)) * m_viewportParams.pixelSize; //see how pixelSize is computed!
-	return screenSize / (static_cast<float>(zoomEquivalentDist) * tan(m_viewportParams.fov * static_cast<float>(CC_DEG_TO_RAD)));
+	return screenSize / static_cast<float>(zoomEquivalentDist * tan(currentFov_deg * CC_DEG_TO_RAD));
+}
+
+void ccGLWindow::setBubbleViewMode(bool state)
+{
+	//Backup the camera center before entering this mode!
+	bool bubbleViewModeWasEnabled = m_bubbleViewModeEnabled;
+	if (!m_bubbleViewModeEnabled && state)
+		m_preBubbleViewParameters = m_viewportParams;
+
+	if (state)
+	{
+		//bubble-view mode = viewer-based perspective mode
+		//setPerspectiveState must be called first as it
+		//automatically deactivates bubble-view mode!
+		setPerspectiveState(true,true);
+
+		m_bubbleViewModeEnabled = true;
+
+		//when entering this mode, we reset the f.o.v.
+		m_bubbleViewFov_deg = 0; //to trick the signal emission mechanism
+		setBubbleViewFov(90.0f);
+	}
+	else if (bubbleViewModeWasEnabled)
+	{
+		setPerspectiveState(m_preBubbleViewParameters.perspectiveView,m_preBubbleViewParameters.objectCenteredView);
+		m_bubbleViewModeEnabled = false;
+
+		//when leaving this mode, we restore the original camera center
+		setViewportParameters(m_preBubbleViewParameters);
+	}
 }
 
 void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
@@ -3062,17 +3235,18 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//we compute the camera position that gives 'quite' the same view as the ortho one
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
-			assert(m_viewportParams.fov > ZERO_TOLERANCE);
+			float currentFov_deg = getFov();
+			assert(currentFov_deg > ZERO_TOLERANCE);
 			double screenSize = static_cast<double>(std::min(m_glWidth,m_glHeight))*m_viewportParams.pixelSize; //see how pixelSize is computed!
-			PC.z = static_cast<double>( screenSize/(m_viewportParams.zoom*tan(m_viewportParams.fov*CC_DEG_TO_RAD)) );
+			PC.z = screenSize / (m_viewportParams.zoom*tan(currentFov_deg*CC_DEG_TO_RAD));
 		}
 
 		//display message
-		displayNewMessage(objectCenteredView ? "Centered perspective ON" : "Viewer-based perspective ON",
-														ccGLWindow::LOWER_LEFT_MESSAGE,
-														false,
-														2,
-														PERSPECTIVE_STATE_MESSAGE);
+		displayNewMessage(objectCenteredView ?	"Centered perspective ON" : "Viewer-based perspective ON",
+												ccGLWindow::LOWER_LEFT_MESSAGE,
+												false,
+												2,
+												PERSPECTIVE_STATE_MESSAGE);
 	}
 	else
 	{
@@ -3113,6 +3287,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 		settings.endGroup();
 	}
 
+	m_bubbleViewModeEnabled = false;
 	invalidateViewport();
 	invalidateVisualization();
 }
@@ -3147,6 +3322,13 @@ void ccGLWindow::setFov(float fov)
 		return;
 	}
 
+	//derivation if we are in bubble-view mode
+	if (m_bubbleViewModeEnabled)
+	{
+		setBubbleViewFov(fov);
+		return;
+	}
+
 	if (m_viewportParams.fov != fov)
 	{
 		//update param
@@ -3156,6 +3338,30 @@ void ccGLWindow::setFov(float fov)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+		}
+
+		emit fovChanged(m_viewportParams.fov);
+	}
+}
+
+float ccGLWindow::getFov() const
+{
+	return (m_bubbleViewModeEnabled ? m_bubbleViewFov_deg : m_viewportParams.fov);
+}
+
+void ccGLWindow::setBubbleViewFov(float fov_deg)
+{
+	if (fov_deg < 1.0f || fov_deg > 180.0f)
+		return;
+
+	if (fov_deg != m_bubbleViewFov_deg)
+	{
+		m_bubbleViewFov_deg = fov_deg;
+
+		if (m_bubbleViewModeEnabled)
+		{
+			invalidateViewport();
+			emit fovChanged(m_bubbleViewFov_deg);
 		}
 	}
 }
@@ -3192,6 +3398,7 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 	emit pivotPointChanged(m_viewportParams.pivotPoint);
 	emit cameraPosChanged(m_viewportParams.cameraCenter);
+	emit fovChanged(m_viewportParams.fov);
 }
 
 void ccGLWindow::getViewportArray(int vpArray[])
@@ -3219,10 +3426,17 @@ void ccGLWindow::updateZoom(float zoomFactor)
 		setZoom(m_viewportParams.zoom*zoomFactor);
 }
 
-void ccGLWindow::setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg/*=0.0f*/, float ar/*=1.0f*/, bool viewerBasedPerspective/*=true*/)
+void ccGLWindow::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
+											float fov_deg/*=0.0f*/,
+											float ar/*=1.0f*/,
+											bool viewerBasedPerspective/*=true*/,
+											bool bubbleViewMode/*=false*/)
 {
 	//perspective (viewer-based by default)
-	setPerspectiveState(true,!viewerBasedPerspective);
+	if (bubbleViewMode)
+		setBubbleViewMode(true);
+	else
+		setPerspectiveState(true,!viewerBasedPerspective);
 
 	//field of view (= OpenGL 'fovy' but in degrees)
 	if (fov_deg > 0)

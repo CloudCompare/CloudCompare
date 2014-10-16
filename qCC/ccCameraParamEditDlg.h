@@ -69,12 +69,12 @@ public slots:
 
 	//! Updates dialog values with pivot point
 	void updatePivotPoint(const CCVector3d& P);
-
 	//! Updates dialog values with camera center
 	void updateCameraCenter(const CCVector3d& P);
-
 	//! Updates current view mode
 	void updateViewMode();
+	//! Updates view f.o.v.
+	void updateWinFov(float fov_deg);
 
 	void setFrontView();
 	void setBottomView();
@@ -93,10 +93,10 @@ public slots:
 	void dPsiValueChanged(double);
 	void dPhiValueChanged(double);
 
+	void zNearSliderMoved(int);
 	void pivotChanged();
 	void cameraCenterChanged();
 	void fovChanged(double);
-	void zNearSliderMoved(int);
 
 	void pickPointAsPivot();
 	void processPickedPoint(int, unsigned, int, int);

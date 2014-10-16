@@ -19,10 +19,13 @@ v2.5.6 ??/??/2014
 		- the result is only valid if the mesh is closed (CloudCompare will warn you if it's not the case
 			and you can check that yourself with the new 'Flag vertices by type' method (see above).
 	* Meshes can now be exported in DXF (Autocad) files
-	* New 'Display' option:
-		- Display > Lock rotation around vert. axis' (to lock the manual rotation around the screen
-			vertical axis)
-		- Shortcut: 'L'
+	* New 'Display' options:
+		- 'Display > Lock rotation around vert. axis' to lock the manual rotation around the screen
+			vertical axis (shortcut: 'L')
+		- 'Display > Enter bubble-view mode' to enable 'bubble view' mode, a viewer-based perspective
+			blocked on the current camera position, with Z axis locked and a high field of view by
+			default (shortcut: 'B'). This is the new default mode enabled when clicking on the 'Apply'
+			button of a TLS/GBL sensor (typically opened with a PTX or Faro file for instance)
 	* New feature: "Transformation history"
 		- All rigid transformations applied to any 3D object are now 'tracked'. In practice it is
 			accumulated	in a 'history' transformation matrix for each entity. For instance this allows

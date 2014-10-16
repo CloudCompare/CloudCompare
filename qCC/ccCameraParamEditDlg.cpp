@@ -350,6 +350,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 		connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,	SLOT(updatePivotPoint(const CCVector3d&)));
 		connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),					this,	SLOT(updateViewMode()));
 		connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),						this,	SLOT(hide()));
+		connect(m_associatedWin,	SIGNAL(fovChanged(float)),							this,	SLOT(updateWinFov(float)));
 
 		PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 		buttonsFrame->setEnabled(it != pushedMatrices.end());
@@ -385,7 +386,7 @@ void ccCameraParamEditDlg::updateViewMode()
 		if (!perspective)
 			currentModeLabel->setText("parallel projection");
 		else
-			currentModeLabel->setText(QString(objectBased ? "Object" : "Viewer")+QString("-based perspective"));
+			currentModeLabel->setText(QString(objectBased ? "object" : "viewer") + QString("-based perspective"));
 
 		rotationCenterFrame->setEnabled(objectBased);
 		pivotPickingToolButton->setEnabled(objectBased);
@@ -444,16 +445,13 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 	updateCameraCenter(params.cameraCenter);
 
 	//update FOV
-	fovDoubleSpinBox->blockSignals(true);
-	fovDoubleSpinBox->setValue(params.fov);
-	fovDoubleSpinBox->blockSignals(false);
+	updateWinFov(win->getFov());
 
 	//update zNearCoef
 	zNearHorizontalSlider->blockSignals(true);
 	zNearHorizontalSlider->setValue(ZNearCoefToSliderPos(params.zNearCoef,zNearHorizontalSlider->maximum()));
 	zNearHorizontalSlider->blockSignals(false);
 }
-
 
 void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
 {
@@ -482,6 +480,16 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 	rcxDoubleSpinBox->blockSignals(false);
 	rcyDoubleSpinBox->blockSignals(false);
 	rczDoubleSpinBox->blockSignals(false);
+}
+
+void ccCameraParamEditDlg::updateWinFov(float fov_deg)
+{
+	if (!m_associatedWin)
+		return;
+
+	fovDoubleSpinBox->blockSignals(true);
+	fovDoubleSpinBox->setValue(fov_deg);
+	fovDoubleSpinBox->blockSignals(false);
 }
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()

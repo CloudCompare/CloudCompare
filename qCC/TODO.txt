@@ -26,12 +26,12 @@ Big ones:
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
+[*] Update qKinect with the Kinect for Windows SDK (1.8)
 
 Various:
-[*] Add a checkbox to display the global coordinates in the point list picking dialog (http://www.danielgm.net/cc/forum/viewtopic.php?t=1009)
 [*] Add an option to command line mode: 'SAVE_ALL_AT_ONCE' (CLOUDS/MESHES) if multiple entities are loaded and should be saved in the same file
+[*] Add a 'bubble view' mode (a kind of constrained viewer-based perspective mode with high F.O.V.)
 [*] Change Triangle lib by a GPL-compatible library
-[*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Save primitives in DXF files (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)

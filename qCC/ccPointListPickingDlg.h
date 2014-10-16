@@ -66,6 +66,8 @@ protected slots:
 	void markerSizeChanged(int);
 	//! Redraw window when starting index changes
 	void startIndexChanged(int);
+	//! Updates point list widget
+	void updateList();
 
 protected:
 
@@ -84,9 +86,6 @@ protected:
 
 	//! Exports list to an ASCII file
 	void exportToASCII(ExportFormat format);
-
-	//! Updates point list widget
-	void updateList();
 
 	//! Associated cloud
 	ccPointCloud* m_associatedCloud;

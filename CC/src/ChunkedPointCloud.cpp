@@ -105,23 +105,23 @@ bool ChunkedPointCloud::resize(unsigned newNumberOfPoints)
 
 	//we try to enlarge the 3D points array
 	if (!m_points->resize(newNumberOfPoints))
-        return false;
+		return false;
 
-	//then the scalarfields
+	//then the scalar fields
 	for (size_t i=0; i<m_scalarFields.size(); ++i)
 	{
 		if (!m_scalarFields[i]->resize(newNumberOfPoints))
-        {
+		{
 			//if something fails, we restore the previous size for already processed SFs!
 			for (size_t j=0; j<i; ++j)
 			{
-                m_scalarFields[j]->resize(oldNumberOfPoints);
+				m_scalarFields[j]->resize(oldNumberOfPoints);
 				m_scalarFields[j]->computeMinAndMax();
 			}
 			//we can assume that newNumberOfPoints > oldNumberOfPoints, so it should always be ok
 			m_points->resize(oldNumberOfPoints);
 			return false;
-        }
+		}
 		m_scalarFields[i]->computeMinAndMax();
 	}
 
@@ -134,14 +134,15 @@ bool ChunkedPointCloud::reserve(unsigned newNumberOfPoints)
 	if (!m_points->reserve(newNumberOfPoints))
 		return false;
 
-	//then the scalarfields
+	//then the scalar fields
 	for (size_t i=0; i<m_scalarFields.size(); ++i)
 	{
 		if (!m_scalarFields[i]->reserve(newNumberOfPoints))
 			return false;
 	}
 
-	return true;
+	//double check
+	return m_points->capacity() >= newNumberOfPoints;
 }
 
 void ChunkedPointCloud::addPoint(const CCVector3 &P)
@@ -164,29 +165,29 @@ void ChunkedPointCloud::addPoint(const CCVector3 &P)
 
 void ChunkedPointCloud::applyTransformation(PointProjectionTools::Transformation& trans)
 {
-    unsigned count = size();
+	unsigned count = size();
 
 	//always apply the scale before everything (applying before or after rotation does not changes anything)
-    if (fabs(static_cast<double>(trans.s) - 1.0) > ZERO_TOLERANCE)
-    {
-        for (unsigned i=0; i<count; ++i)
-            *point(i) *= trans.s;
-        m_validBB = false; //invalidate bb
-    }
+	if (fabs(static_cast<double>(trans.s) - 1.0) > ZERO_TOLERANCE)
+	{
+		for (unsigned i=0; i<count; ++i)
+			*point(i) *= trans.s;
+		m_validBB = false; //invalidate bb
+	}
 
-    if (trans.R.isValid())
-    {
-        for (unsigned i=0; i<count; ++i)
-            trans.R.apply(point(i)->u);
-        m_validBB = false;
-    }
+	if (trans.R.isValid())
+	{
+		for (unsigned i=0; i<count; ++i)
+			trans.R.apply(point(i)->u);
+		m_validBB = false;
+	}
 
-    if (trans.T.norm() > ZERO_TOLERANCE) //T applied only if it makes sense
-    {
-        for (unsigned i=0; i<count; ++i)
-            *point(i) += trans.T;
-        m_validBB = false;
-    }
+	if (trans.T.norm() > ZERO_TOLERANCE) //T applied only if it makes sense
+	{
+		for (unsigned i=0; i<count; ++i)
+			*point(i) += trans.T;
+		m_validBB = false;
+	}
 }
 
 /***********************/

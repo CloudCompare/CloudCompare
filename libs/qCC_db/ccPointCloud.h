@@ -525,9 +525,9 @@ public:
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-    virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual void notifyGeometryUpdate();
@@ -542,7 +542,7 @@ protected:
 	NormsIndexesTableType* m_normals;
 
 	//! Specifies whether current scalar field color scale should be displayed or not
-    bool m_sfColorScaleDisplayed;
+	bool m_sfColorScaleDisplayed;
 
 	//! Currently displayed scalar field
 	ccScalarField* m_currentDisplayedScalarField;
@@ -557,7 +557,7 @@ protected: // VBO
 	//! Release VBOs
 	void releaseVBOs();
 
-    class VBO : public QGLBuffer
+	class VBO : public QGLBuffer
 	{
 	public:
 		int rgbShift;
@@ -576,7 +576,7 @@ protected: // VBO
 	};
 
 	//! VBO set
-    struct vboSet : std::vector<VBO*>
+	struct vboSet
 	{
 		//! States of th VBO(s)
 		enum STATES { NEW, INITIALIZED, FAILED };
@@ -590,6 +590,7 @@ protected: // VBO
 			, state(NEW)
 		{}
 
+		std::vector<VBO*> vbos;
 		bool hasColors;
 		bool colorIsSF;
 		ccScalarField* sourceSF;
@@ -600,18 +601,13 @@ protected: // VBO
 		STATES state;
 	};
 
-	//! VBOs attached to this cloud
-	vboSet m_vbos;
+	//! Set of VBOs attached to this cloud
+	vboSet m_vboManager;
 
 	void glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-
-private:
-
-    //! Inits default parameters
-	void init() throw();
 
 };
 

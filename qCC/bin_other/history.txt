@@ -109,10 +109,16 @@ v2.5.6 ??/??/2014
 			* ability to choose either the precise or approximate methods
 			* ability to choose how the density should be computed (number of neighbors, surface or volume)
 	* Command line:
-		- New option '-FBX_EXPORT_FMT' to specify the format when exporting meshes to FBX. Available formats
-			are currently (FBX_binary, FBX_ascii, FBX_encrypted, FBX_6.0_binary, FBX_6.0_ascii, FBX_6.0_encrypted).
-			If not set CC will display a message box to let the user select the output format (even in
-			command line mode ;) 
+		- New options:
+			* '-FBX_EXPORT_FMT' to specify the format when exporting meshes to FBX. Available formats
+				are currently (FBX_binary, FBX_ascii, FBX_encrypted, FBX_6.0_binary, FBX_6.0_ascii, FBX_6.0_encrypted).
+				If not set CC will display a message box to let the user select the output format (even in
+				command line mode ;) 
+			* '-AUTO_SAVE' + ON/OFF: to set whether output clouds or meshes should be saved after each
+				applied algorithm (currently ON by default)
+			* new option after 'SAVE_CLOUDS' or 'SAVE_MESHES': 'ALL_AT_ONCE' to tell CC to (try to)
+				save all loaded clouds (resp. meshes) in a single file. The format must support this
+				features (i.e. BIN or E57 for clouds, BIN or FBX for meshes)
 		- Global Shift can now be configured when opening a file in command line mode:
 			After '-O' (open file) use the '-GLOBAL_SHIFT' option and:
 				* either 'AUTO' to let CC handle the big coordinates automatically

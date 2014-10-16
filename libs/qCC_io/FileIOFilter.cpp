@@ -319,6 +319,11 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 		result = CC_FERR_CONSOLE_ERROR;
 	}
 
+	if (result == CC_FERR_NO_ERROR)
+	{
+		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
+	}
+
 	return result;
 }
 

@@ -138,16 +138,16 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	QStringList list = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
 	if (list.size() != 2)
 	{
-		ccLog::Error("[BundlerFilter::loadFile] Second line should be <num_cameras> <num_points>!");
+		ccLog::Error("[Bundler] Second line should be <num_cameras> <num_points>!");
 		return CC_FERR_MALFORMED_FILE;
 	}
 	unsigned camCount = list[0].toInt();
 	if (camCount == 0)
-		ccLog::Warning("[BundlerFilter::loadFile] No camera defined in Bundler file!");
+		ccLog::Warning("[Bundler] No camera defined in Bundler file!");
 
 	unsigned ptsCount = list[1].toInt();
 	if (ptsCount == 0)
-		ccLog::Warning("[BundlerFilter::loadFile] No keypoints defined in Bundler file!");
+		ccLog::Warning("[Bundler] No keypoints defined in Bundler file!");
 
 	//parameters
 	bool importKeypoints = false;
@@ -279,7 +279,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			}
 			if (importImages && sum < ZERO_TOLERANCE)
 			{
-				ccLog::Warning("[BundlerFilter::loadFile] Camera #%i is invalid!",camIndex+1);
+				ccLog::Warning("[Bundler] Camera #%i is invalid!",camIndex+1);
 				it->isValid = false;
 			}
 
@@ -319,7 +319,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				hasColors = keypointsCloud->reserveTheRGBTable();
 				if (!hasColors)
-					ccLog::Warning("[BundlerFilter::loadFile] Not enough memory to load colors!");
+					ccLog::Warning("[Bundler] Not enough memory to load colors!");
 				else
 					keypointsCloud->showColors(true);
 			}
@@ -387,7 +387,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 							trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
 							trans.invert();
 						}
-						ccLog::Warning("[BundlerFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 					}
 				}
 				keypointsCloud->addPoint(CCVector3::fromArray((Pd+Pshift).u));
@@ -424,7 +424,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				{
 					//sometimes, it appears that keypoints has no associated color!
 					//so we skip the line and assume it's in fact the keypoint description...
-					ccLog::Warning("[BundlerFilter::loadFile] Keypoint #%i has no associated color!",i);
+					ccLog::Warning("[Bundler] Keypoint #%i has no associated color!",i);
 					if (hasColors)
 						keypointsCloud->addRGBColor(0,0,0); //black by default
 				}
@@ -450,7 +450,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						unsigned nviews = parts[0].toInt(&ok);
 						if (!ok || nviews*4+1 > static_cast<unsigned>(parts.size()))
 						{
-							ccLog::Warning("[BundlerFilter::loadFile] View list for point #%i is invalid!",i);
+							ccLog::Warning("[Bundler] View list for point #%i is invalid!",i);
 						}
 						else
 						{
@@ -515,7 +515,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			if (applyOptMatrix)
 			{
 				keypointsCloud->applyGLTransformation_recursive(&orthoOptMatrix);
-				ccLog::Print("[BundlerFilter::loadFile] Keypoints cloud has been transformed with input matrix!");
+				ccLog::Print("[Bundler] Keypoints cloud has been transformed with input matrix!");
 			}
 
 			if (importKeypoints)
@@ -536,9 +536,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			||	(!altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::MESH)))
 		{
 			if (!altKeypointsContainer)
-				ccLog::Error(QString("[BundlerFilter::loadFile] Failed to load alternative keypoints file:\n'%1'").arg(altKeypointsFilename));
+				ccLog::Error(QString("[Bundler] Failed to load alternative keypoints file:\n'%1'").arg(altKeypointsFilename));
 			else
-				ccLog::Error("[BundlerFilter::loadFile] Can't use this kind of entities as keypoints (need one and only one cloud or mesh)");
+				ccLog::Error("[Bundler] Can't use this kind of entities as keypoints (need one and only one cloud or mesh)");
 
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
@@ -565,7 +565,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		QFile imageListFile(imageListFilename);
 		if (!imageListFile.exists() || !imageListFile.open(QIODevice::ReadOnly))
 		{
-			ccLog::Error(QString("[BundlerFilter::loadFile] Failed to open image list file! (%1)").arg(imageListFilename));
+			ccLog::Error(QString("[Bundler] Failed to open image list file! (%1)").arg(imageListFilename));
 			if (!importKeypoints && keypointsCloud)
 				delete keypointsCloud;
 			if (!importKeypoints && altEntity)
@@ -588,7 +588,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				imageFilenames << parts[0];
 			else
 			{
-				ccLog::Error(QString("[BundlerFilter::loadFile] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
+				ccLog::Error(QString("[Bundler] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
 				break;
 			}
 		}
@@ -597,9 +597,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	if (imageFilenames.size() < static_cast<int>(camCount)) //not enough images!
 	{
 		if (imageFilenames.isEmpty())
-			ccLog::Error(QString("[BundlerFilter::loadFile] No filename could be extracted from file '%1'!").arg(imageListFilename));
+			ccLog::Error(QString("[Bundler] No filename could be extracted from file '%1'!").arg(imageListFilename));
 		else
-			ccLog::Error(QString("[BundlerFilter::loadFile] Only %1 filenames (out of %2) could be extracted\nfrom file '%3'!").arg(imageFilenames.size()).arg(camCount).arg(imageListFilename));
+			ccLog::Error(QString("[Bundler] Only %1 filenames (out of %2) could be extracted\nfrom file '%3'!").arg(imageFilenames.size()).arg(camCount).arg(imageListFilename));
 		if (!importKeypoints && keypointsCloud)
 			delete keypointsCloud;
 		if (!importKeypoints && altEntity)
@@ -639,7 +639,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			dummyMesh = CCLib::PointProjectionTools::computeTriangulation(altKeypoints ? altKeypoints : keypointsCloud,GENERIC_BEST_LS_PLANE);
 			if (!dummyMesh)
 			{
-				ccLog::Warning("[BundlerFilter::loadFile] Failed to generate DTM! (not enough memory?)");
+				ccLog::Warning("[Bundler] Failed to generate DTM! (not enough memory?)");
 			}
 		}
 		else
@@ -701,7 +701,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		QString errorStr;
 		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]),errorStr))
 		{
-			ccLog::Error(QString("[BundlerFilter::loadFile] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
+			ccLog::Error(QString("[Bundler] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
 			delete image;
 			image = 0;
 			break;
@@ -750,7 +750,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			if (applyOptMatrix)
 			{
 				sensor->applyGLTransformation_recursive(&orthoOptMatrix);
-				//ccLog::Print("[BundlerFilter::loadFile] Camera cloud has been transformed with input matrix!");
+				//ccLog::Print("[Bundler] Camera cloud has been transformed with input matrix!");
 			}
 		}
 		//the image is a child of the sensor!
@@ -804,11 +804,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 			if (keypointsImage.size() < 4)
 			{
-				ccLog::Warning(QString("[BundlerFilter::loadFile] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
+				ccLog::Warning(QString("[Bundler] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
 			}
 			else if (!keypointsImageBB.isValid() || keypointsImageBB.getDiagNorm() < PC_ONE)
 			{
-				ccLog::Warning(QString("[BundlerFilter::loadFile] Keypoints descriptors for image '%1' are invalid (= all the same)").arg(image->getName()));
+				ccLog::Warning(QString("[Bundler] Keypoints descriptors for image '%1' are invalid (= all the same)").arg(image->getName()));
 			}
 			else
 			{
@@ -857,7 +857,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						info.w = orthoImage->getW();
 						info.h = orthoImage->getH();
 						orthoImage->data().save(imageDir.absoluteFilePath(info.name));
-						ccLog::Print(QString("[BundlerFilter] Ortho-rectified version of image '%1' (%2 x %3) saved to '%4'").arg(imageFilenames[i]).arg(info.w).arg(info.h).arg(imageDir.absoluteFilePath(info.name)));
+						ccLog::Print(QString("[Bundler] Ortho-rectified version of image '%1' (%2 x %3) saved to '%4'").arg(imageFilenames[i]).arg(info.w).arg(info.h).arg(imageDir.absoluteFilePath(info.name)));
 
 #ifdef TEST_TEXTURED_BUNDLER_IMPORT
 
@@ -987,7 +987,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					}
 					else
 					{
-						ccLog::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1'!").arg(image->getName()));
+						ccLog::Warning(QString("[Bundler] Failed to ortho-rectify image '%1'!").arg(image->getName()));
 					}
 				}
 
@@ -1002,7 +1002,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					}
 					else
 					{
-						ccLog::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1' as a cloud!").arg(image->getName()));
+						ccLog::Warning(QString("[Bundler] Failed to ortho-rectify image '%1' as a cloud!").arg(image->getName()));
 					}
 				}
 			}
@@ -1011,7 +1011,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		//undistortion
 		if (sensor && undistortImages)
 			if (!sensor->undistort(image,true))
-				ccLog::Warning(QString("[BundlerFilter::loadFile] Failed to undistort image '%1'!").arg(image->getName()));
+				ccLog::Warning(QString("[Bundler] Failed to undistort image '%1'!").arg(image->getName()));
 
 		//DTM color 'blending'
 		if (sensor && generateColoredDTM)
@@ -1152,7 +1152,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 					mntCloud->showColors(true);
 					container.addChild(mntCloud);
-					ccLog::Warning("[BundlerFilter::loadFile] DTM vertices sucessfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
+					ccLog::Warning("[Bundler] DTM vertices sucessfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
 
 					if (!parameters.alwaysDisplayLoadDialog)
 					{
@@ -1160,19 +1160,19 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						BinFilter bf;
 						QString outputFile = imageDir.absoluteFilePath("colored_dtm_vertices.bin");
 						if (bf.saveToFile(mntCloud,outputFile) == CC_FERR_NO_ERROR)
-							ccLog::Print(QString("[BundlerFilter] Color DTM vertices automatically saved to '%2'").arg(outputFile));
+							ccLog::Print(QString("[Bundler] Color DTM vertices automatically saved to '%2'").arg(outputFile));
 						else
-							ccLog::Warning(QString("[BundlerFilter] Failed to save DTM vertices to '%2'").arg(outputFile));
+							ccLog::Warning(QString("[Bundler] Failed to save DTM vertices to '%2'").arg(outputFile));
 					}
 				}
 				else
 				{
-					ccLog::Warning("[BundlerFilter::loadFile] Failed to generate DTM! (no point viewed in images?)");
+					ccLog::Warning("[Bundler] Failed to generate DTM! (no point viewed in images?)");
 				}
 			}
 			else
 			{
-				ccLog::Warning("[BundlerFilter::loadFile] Failed to generate DTM vertices cloud! (not enough memory?)");
+				ccLog::Warning("[Bundler] Failed to generate DTM vertices cloud! (not enough memory?)");
 				delete mntCloud;
 				mntCloud = 0;
 			}

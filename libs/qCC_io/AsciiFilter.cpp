@@ -122,21 +122,24 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 						QString subFilename = path+QString("/");
 						subFilename += QString(baseName).replace("cloudname",child->getName(),Qt::CaseInsensitive);
 						counter++;
-						assert(counter<=cloudCount);
+						assert(counter <= cloudCount);
 						subFilename += QString("_%1").arg(cloudCount-counter,6,10,QChar('0'));
 						if (!extension.isEmpty())
-							subFilename += QString(".")+extension;
+							subFilename += QString(".") + extension;
+						
 						CC_FILE_ERROR result = saveToFile(entity->getChild(i),subFilename);
 						if (result != CC_FERR_NO_ERROR)
 						{
 							return result;
 						}
 						else
-							ccLog::Print(QString("[AsciiFilter::saveToFile] Cloud '%1' saved in: %2").arg(child->getName()).arg(subFilename));
+						{
+							ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName()).arg(subFilename));
+						}
 					}
 					else
 					{
-						ccLog::Warning(QString("[AsciiFilter::saveToFile] Entity '%1' can't be saved this way!").arg(child->getName()));
+						ccLog::Warning(QString("[ASCII] Entity '%1' can't be saved this way!").arg(child->getName()));
 					}
 				}
 

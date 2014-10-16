@@ -67,7 +67,9 @@ bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	case CC_TYPES::POINT_OCTREE:
 	case CC_TYPES::POINT_KDTREE:
 	case CC_TYPES::CLIPPING_BOX:
-	//these entities can't be saved alone
+		return false;
+
+	//these entities shouldn't be saved alone (but it's possible!)
 	case CC_TYPES::MATERIAL_SET:
 	case CC_TYPES::CHUNKED_ARRAY:
 	case CC_TYPES::NORMALS_ARRAY:
@@ -76,8 +78,8 @@ bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	case CC_TYPES::TEX_COORDS_ARRAY:
 	case CC_TYPES::LABEL_2D:
 	case CC_TYPES::TRANS_BUFFER:
-		return false;
-	
+		break;
+
 	default:
 		//nothing to do
 		break;

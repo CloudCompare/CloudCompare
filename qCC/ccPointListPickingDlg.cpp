@@ -440,7 +440,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 
 	fclose(fp);
 
-	ccLog::Print(QString("File '%1' successfully saved!").arg(filename));
+	ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
 }
 
 void ccPointListPickingDlg::updateList()

@@ -8852,7 +8852,7 @@ void MainWindow::doActionExportCloudsInfo()
 		}
 	}
 
-	ccConsole::Print(QString("File '%1' successfully saved (%2 cloud(s))").arg(outputFilename).arg(clouds.size()));
+	ccConsole::Print(QString("[I/O] File '%1' successfully saved (%2 cloud(s))").arg(outputFilename).arg(clouds.size()));
 	csvFile.close();
 }
 
@@ -9926,7 +9926,7 @@ void MainWindow::doActionSaveFile()
 
 		if (!IsValidFileName(defaultFileName))
 		{
-			ccLog::Warning("[SAVE] First entity's name would make an invalid filename! Can't use it...");
+			ccLog::Warning("[I/O] First entity's name would make an invalid filename! Can't use it...");
 			defaultFileName = "project";
 		}
 		
@@ -9949,7 +9949,7 @@ void MainWindow::doActionSaveFile()
 	//ignored items
 	if (hasOther)
 	{
-		ccConsole::Warning("[SAVE] The following selected entites won't be saved:");
+		ccConsole::Warning("[I/O] The following selected entites won't be saved:");
 		for (unsigned i=0; i<other.getChildrenNumber(); ++i)
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
 	}
@@ -9974,7 +9974,7 @@ void MainWindow::doActionSaveFile()
 			}
 			else
 			{
-				ccLog::Warning("[SAVE] No selected entity could be saved!");
+				ccLog::Warning("[I/O] None of the selected entities can be saved this way...");
 				result = CC_FERR_NO_SAVE;
 			}
 		}
@@ -9985,7 +9985,7 @@ void MainWindow::doActionSaveFile()
 		/*if (hasSerializable)
 		{
 			if (!hasOther)
-				ccConsole::Warning("[SAVE] The following selected entites won't be saved:"); //display this warning only if not already done
+				ccConsole::Warning("[I/O] The following selected entites won't be saved:"); //display this warning only if not already done
 			for (unsigned i=0; i<otherSerializable.getChildrenNumber(); ++i)
 				ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
 		}

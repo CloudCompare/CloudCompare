@@ -111,7 +111,7 @@ void MatrixDisplayDlg::exportToASCII()
 
 	if (m_mat.toAsciiFile(outputFilename))
 	{
-		ccLog::Print(QString("Matrix saved as '%1'").arg(outputFilename));
+		ccLog::Print(QString("[I/O] Matrix saved as '%1'").arg(outputFilename));
 	}
 	else
 	{

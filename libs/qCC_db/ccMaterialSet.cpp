@@ -259,7 +259,7 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 		{
 			QString absFilename = it->getAbsoluteFilename();
 
-			//file has not been already saved?
+			//file has not already been saved?
 			if (!filenamesSaved.contains(absFilename))
 			{
 				QFileInfo fileInfo(absFilename);

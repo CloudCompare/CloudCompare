@@ -476,7 +476,6 @@ protected:
 	void closeEvent(QCloseEvent* event);
 	void moveEvent(QMoveEvent* event);
 	void resizeEvent(QResizeEvent* event);
-	//void keyPressEvent(QKeyEvent* event);
 
 	void loadPlugins();
 	bool dispatchPlugin(QObject* plugin);

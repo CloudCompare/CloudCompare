@@ -439,6 +439,9 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 
 	const ccViewportParameters& params = m_associatedWin->getViewportParameters();
 
+	//update view mode
+	updateViewMode();
+
 	//update pivot point
 	updatePivotPoint(params.pivotPoint);
 	//update camera center

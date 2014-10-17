@@ -61,7 +61,7 @@ public:
 	//! Sets radius
 	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
 	**/
-	inline void setRadius(PointCoordinateType radius);
+	void setRadius(PointCoordinateType radius);
 
 protected:
 

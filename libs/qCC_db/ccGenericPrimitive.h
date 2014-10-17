@@ -60,7 +60,7 @@ public:
 	virtual bool hasDrawingPrecision() const { return false; }
 
 	//! Minimum drawing precision
-	static const unsigned MIN_DRAWING_PRECISION = 4;
+	static const int MIN_DRAWING_PRECISION = 4;
 
 	//! Sets drawing precision
 	/** Warnings:

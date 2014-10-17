@@ -597,9 +597,9 @@ struct HotZone
 	QRect psi_labelRect;
 
 	//! Default margin
-	static const int margin = 16;
+	static inline int margin() { return 16; }
 	//! Default icon size
-	static const int iconSize = 16;
+	static inline int iconSize() { return 16; }
 
 	HotZone(ccGLWindow* win)
 		: textHeight(0)
@@ -622,7 +622,7 @@ struct HotZone
 		psi_labelRect = metrics.boundingRect(psi_label);
 
 		textHeight = std::max(psi_labelRect.height(),bbv_labelRect.height()) * 3/4; // --> factor: to recenter the baseline a little
-		yTextBottomLineShift = (iconSize/2) + (textHeight/2);
+		yTextBottomLineShift = (iconSize()/2) + (textHeight/2);
 	}
 };
 QSharedPointer<HotZone> s_hotZone(0);
@@ -651,20 +651,20 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		//total hot zone area size (without margin)
 		int psi_totalWidth = 0;
 		if (m_hotZoneActivated)
-			psi_totalWidth = /*HotZone::margin + */s_hotZone->psi_labelRect.width() + HotZone::margin + HotZone::iconSize + HotZone::margin + HotZone::iconSize/* + HotZone::margin*/;
+			psi_totalWidth = /*HotZone::margin() + */s_hotZone->psi_labelRect.width() + HotZone::margin() + HotZone::iconSize() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
 		int bbv_totalWidth = 0;
 		if (m_bubbleViewModeEnabled)
-			bbv_totalWidth = /*HotZone::margin + */s_hotZone->bbv_labelRect.width() + HotZone::margin + HotZone::iconSize/* + HotZone::margin*/;
+			bbv_totalWidth = /*HotZone::margin() + */s_hotZone->bbv_labelRect.width() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
 
 		int totalWidth = std::max(psi_totalWidth, bbv_totalWidth);
 
-		QPoint minAreaCorner(xStart0 + HotZone::margin,              yStart + HotZone::margin + std::min(0, s_hotZone->yTextBottomLineShift - s_hotZone->textHeight));
-		QPoint maxAreaCorner(xStart0 + HotZone::margin + totalWidth, yStart + HotZone::margin + std::max(HotZone::iconSize, s_hotZone->yTextBottomLineShift));
+		QPoint minAreaCorner(xStart0 + HotZone::margin(),              yStart + HotZone::margin() + std::min(0, s_hotZone->yTextBottomLineShift - s_hotZone->textHeight));
+		QPoint maxAreaCorner(xStart0 + HotZone::margin() + totalWidth, yStart + HotZone::margin() + std::max(HotZone::iconSize(), s_hotZone->yTextBottomLineShift));
 		if (m_hotZoneActivated && m_bubbleViewModeEnabled)
-			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize + HotZone::margin);
+			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
 
-		QRect areaRect(	minAreaCorner - QPoint(HotZone::margin,HotZone::margin)/2,
-						maxAreaCorner + QPoint(HotZone::margin,HotZone::margin)/2 );
+		QRect areaRect(	minAreaCorner - QPoint(HotZone::margin(),HotZone::margin())/2,
+						maxAreaCorner + QPoint(HotZone::margin(),HotZone::margin())/2 );
 
 		//draw rectangle
 		glColor4ub(ccColor::darkGrey[0], ccColor::darkGrey[1], ccColor::darkGrey[2], 210);
@@ -678,65 +678,65 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 	if (m_hotZoneActivated)
 	{
-		yStart += HotZone::margin;
-		int xStart = xStart0 + HotZone::margin;
+		yStart += HotZone::margin();
+		int xStart = xStart0 + HotZone::margin();
 		
 		//label
 		glColor3ubv_safe(s_hotZone->color);
 		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift,s_hotZone->psi_label,s_hotZone->font);
 
 		//icons
-		xStart += s_hotZone->psi_labelRect.width() + HotZone::margin;
+		xStart += s_hotZone->psi_labelRect.width() + HotZone::margin();
 
 		//"minus" icon
 		{
 			static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
-			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize),HotZone::iconSize,HotZone::iconSize);
-			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE,QRect(xStart,yStart,HotZone::iconSize,HotZone::iconSize)));
-			xStart += HotZone::iconSize;
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize()),HotZone::iconSize(),HotZone::iconSize());
+			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE,QRect(xStart,yStart,HotZone::iconSize(),HotZone::iconSize())));
+			xStart += HotZone::iconSize();
 		}
 
 		//separator
 		{
 			glColor3ubv(s_hotZone->color);
 			glBegin(GL_POINTS);
-			glVertex2i(-halfW+xStart+HotZone::margin/2,halfH-(yStart+HotZone::iconSize/2));
+			glVertex2i(-halfW+xStart+HotZone::margin()/2,halfH-(yStart+HotZone::iconSize()/2));
 			glEnd();
-			xStart += HotZone::margin;
+			xStart += HotZone::margin();
 		}
 
 		//"plus" icon
 		{
 			static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
-			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize),HotZone::iconSize,HotZone::iconSize);
-			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE,QRect(xStart,yStart,HotZone::iconSize,HotZone::iconSize)));
-			xStart += HotZone::iconSize;
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize()),HotZone::iconSize(),HotZone::iconSize());
+			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE,QRect(xStart,yStart,HotZone::iconSize(),HotZone::iconSize())));
+			xStart += HotZone::iconSize();
 		}
 
-		yStart += HotZone::iconSize;
+		yStart += HotZone::iconSize();
 	}
 
 	if (m_bubbleViewModeEnabled)
 	{
-		yStart += HotZone::margin;
-		int xStart = xStart0 + HotZone::margin;
+		yStart += HotZone::margin();
+		int xStart = xStart0 + HotZone::margin();
 		
 		//label
 		glColor3ubv_safe(s_hotZone->color);
 		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift,s_hotZone->bbv_label,s_hotZone->font);
 		
 		//icon
-		xStart += s_hotZone->bbv_labelRect.width() + HotZone::margin;
+		xStart += s_hotZone->bbv_labelRect.width() + HotZone::margin();
 
 		//"exit" icon
 		{
 			static const QPixmap c_bbv_exitPix(":/CC/images/ccExit.png");
-			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_bbv_exitPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize),HotZone::iconSize,HotZone::iconSize);
-			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE,QRect(xStart,yStart,HotZone::iconSize,HotZone::iconSize)));
-			xStart += HotZone::iconSize;
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_bbv_exitPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize()),HotZone::iconSize(),HotZone::iconSize());
+			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE,QRect(xStart,yStart,HotZone::iconSize(),HotZone::iconSize())));
+			xStart += HotZone::iconSize();
 		}
 
-		yStart += HotZone::iconSize;
+		yStart += HotZone::iconSize();
 	}
 
 	glDisable(GL_BLEND);

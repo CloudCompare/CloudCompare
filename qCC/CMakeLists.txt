@@ -12,8 +12,8 @@ endif()
 project( CloudCompare )
 
 set( VERSION_MAJOR 2 )
-set( VERSION_MINOR 5 )
-set( VERSION_PATCH 6 )
+set( VERSION_MINOR 6 )
+set( VERSION_PATCH 0 )
 
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )

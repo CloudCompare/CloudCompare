@@ -18,7 +18,7 @@
 #include "ccIndexedTransformationBuffer.h"
 
 //Local
-#include "ccLog.h";
+#include "ccLog.h"
 
 ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
 	: ccHObject(name)

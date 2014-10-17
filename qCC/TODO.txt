@@ -30,7 +30,7 @@ Big ones:
 
 Various:
 [*] Change Triangle lib by a GPL-compatible library
-[*] Save primitives in DXF files (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
+[*] Export primitives to a (simple, free) CAD format (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)
 [*] Enhance qCork so as to keep the mesh(es) properties (color, normals, etc.)

@@ -67,6 +67,7 @@ target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
 

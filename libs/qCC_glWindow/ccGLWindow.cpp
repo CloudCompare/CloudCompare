@@ -69,14 +69,14 @@ const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
 const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT	= 0.8; //percentage of the smallest screen dimension
-const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH	= 10.0;
-const float CC_DISPLAYED_TRIHEDRON_AXES_LENGTH	= 25.0f;
-const float CC_DISPLAYED_CENTER_CROSS_LENGTH	= 10.0f;
+const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT  = 0.8; //percentage of the smallest screen dimension
+const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH   = 10.0;
+const float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+const float  CC_DISPLAYED_CENTER_CROSS_LENGTH   = 10.0f;
 
-//Hot zone (interactors) dimensions
-const int CC_HOT_ZONE_WIDTH = 270;
-const int CC_HOT_ZONE_HEIGHT = 100;
+//Hot zone (interactors) triggering area
+const int CC_HOT_ZONE_TRIGGER_WIDTH  = 270;
+const int CC_HOT_ZONE_TRIGGER_HEIGHT = 100;
 
 //Max click duration for enabling picking mode (in ms)
 const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
@@ -104,17 +104,17 @@ static int s_GlWindowNumber = 0;
 inline static void glColor3ubv_safe(const unsigned char* rgb)
 {
 	//glColor3ubv(rgb);
-	glColor3f(	static_cast<float>(rgb[0])/255.0f,
-				static_cast<float>(rgb[1])/255.0f,
-				static_cast<float>(rgb[2])/255.0f );
+	glColor3f(	rgb[0] / 255.0f,
+				rgb[1] / 255.0f,
+				rgb[2] / 255.0f );
 }
 inline static void glColor4ubv_safe(const unsigned char* rgb)
 {
 	//glColor4ubv(rgb);
-	glColor4f(	static_cast<float>(rgb[0])/255.0f,
-				static_cast<float>(rgb[1])/255.0f,
-				static_cast<float>(rgb[2])/255.0f,
-				static_cast<float>(rgb[3])/255.0f );
+	glColor4f(	rgb[0] / 255.0f,
+				rgb[1] / 255.0f,
+				rgb[2] / 255.0f,
+				rgb[3] / 255.0f );
 }
 
 ccGLWindow::ccGLWindow(	QWidget *parent,
@@ -1093,7 +1093,7 @@ void ccGLWindow::dragEnterEvent(QDragEnterEvent *event)
 	const QMimeData* mimeData = event->mimeData();
 
 	/*//Display all MIME info
-	for (unsigned i=0;i<mimeData->formats().size();++i)
+	for (unsigned i=0; i<mimeData->formats().size(); ++i)
 	{
 	QString format = mimeData->formats().at(i);
 	ccLog::Print(QString("Drop format: %1").arg(format));
@@ -1122,7 +1122,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 		QByteArray data = mimeData->data("text/uri-list");
 		QStringList fileNames = QUrl::fromPercentEncoding(data).split(QRegExp("\\n+"),QString::SkipEmptyParts);
 
-		for (int i=0;i<fileNames.size();++i)
+		for (int i=0; i<fileNames.size(); ++i)
 		{
 			fileNames[i] = fileNames[i].trimmed();
 #if defined(CC_WINDOWS)
@@ -1347,9 +1347,8 @@ void ccGLWindow::setGlFilter(ccGlFilter* filter)
 
 void ccGLWindow::setZoom(float value)
 {
-	//zoom is ignored in bubble-view mode
-	if (m_bubbleViewModeEnabled)
-		return;
+	//zoom should be avoided in bubble-view mode
+	assert(!m_bubbleViewModeEnabled);
 
 	if (value < CC_GL_MIN_ZOOM_RATIO)
 		value = CC_GL_MIN_ZOOM_RATIO;
@@ -1616,7 +1615,7 @@ void ccGLWindow::recalcProjectionMatrix()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	double bbHalfDiag = 1;
+	double bbHalfDiag = 1.0;
 	CCVector3d bbCenter(0,0,0);
 
 	//compute center of visible objects constellation
@@ -2194,7 +2193,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	{
 		if (m_embeddedIconsEnabled)
 		{
-			bool inZone = (x < CC_HOT_ZONE_WIDTH && y < CC_HOT_ZONE_HEIGHT);
+			bool inZone = (x < CC_HOT_ZONE_TRIGGER_WIDTH && y < CC_HOT_ZONE_TRIGGER_HEIGHT);
 			if (inZone != m_hotZoneActivated)
 			{
 				m_hotZoneActivated = inZone;
@@ -2472,15 +2471,15 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				const CCVector3* A = vertices->getPointPersistentPtr(0);
 				const CCVector3* C = vertices->getPointPersistentPtr(2);
 
-				int pickX = (int)(A->x+C->x)/2;
-				int pickY = (int)(A->y+C->y)/2;
-				int pickW = (int)fabs(C->x-A->x);
-				int pickH = (int)fabs(C->y-A->y);
+				int pickX = static_cast<int>(A->x+C->x)/2;
+				int pickY = static_cast<int>(A->y+C->y)/2;
+				int pickW = static_cast<int>(fabs(C->x-A->x));
+				int pickH = static_cast<int>(fabs(C->y-A->y));
 
 				removeFromOwnDB(m_rectPickingPoly);
 				m_rectPickingPoly = 0;
 				delete vertices;
-				vertices=0;
+				vertices = 0;
 
 				startPicking(ENTITY_RECT_PICKING, pickX+width()/2, height()/2-pickY, pickW, pickH);
 			}
@@ -2526,7 +2525,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 					startPicking(pickingMode,event->x(),event->y());
 
-					//we also spread the new (if anyone is interested ;)
+					//we also spread the news (if anyone is interested ;)
 					emit leftButtonClicked(event->x(), event->y());
 
 					acceptEvent = true;
@@ -2566,7 +2565,7 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	//in perspective mode, wheel event corresponds to 'walking'
 	if (m_viewportParams.perspectiveView)
 	{
-		//we change the fov if in bubble-view mode!
+		//to zoom in and out we simply change the fov in bubble-view mode!
 		if (m_bubbleViewModeEnabled)
 		{
 			setBubbleViewFov(m_bubbleViewFov_deg - wheelDelta_deg / 3.6); //1 turn = 100 degrees
@@ -2715,7 +2714,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	{
 		GLuint minMinDepth = (~0);
 		const GLuint* _selectBuf = m_pickingBuffer;
-		for (int i=0;i<hits;++i)
+		for (int i=0; i<hits; ++i)
 		{
 			const GLuint& n = _selectBuf[0]; //number of names on stack
 			if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
@@ -2763,14 +2762,14 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	//"3D point" picking
 	else if (pickingMode == POINT_PICKING)
 	{
-		if (selectedID>=0 && subSelectedID>=0)
+		if (selectedID >= 0 && subSelectedID >= 0)
 		{
 			emit pointPicked(selectedID,(unsigned)subSelectedID,centerX,centerY);
 		}
 	}
 	else if (pickingMode == AUTO_POINT_PICKING)
 	{
-		if (m_globalDBRoot && selectedID>=0 && subSelectedID>=0)
+		if (m_globalDBRoot && selectedID >= 0 && subSelectedID >= 0)
 		{
 			ccHObject* obj = m_globalDBRoot->find(selectedID);
 			if (obj)
@@ -3197,7 +3196,7 @@ void ccGLWindow::setBubbleViewMode(bool state)
 		//bubble-view mode = viewer-based perspective mode
 		//setPerspectiveState must be called first as it
 		//automatically deactivates bubble-view mode!
-		setPerspectiveState(true,true);
+		setPerspectiveState(true,false);
 
 		m_bubbleViewModeEnabled = true;
 
@@ -3314,9 +3313,9 @@ void ccGLWindow::setAspectRatio(float ar)
 	}
 }
 
-void ccGLWindow::setFov(float fov)
+void ccGLWindow::setFov(float fov_deg)
 {
-	if (fov < ZERO_TOLERANCE)
+	if (fov_deg < ZERO_TOLERANCE || fov_deg > 180.0f)
 	{
 		ccLog::Warning("[ccGLWindow::setFov] Invalid FOV value!");
 		return;
@@ -3325,14 +3324,14 @@ void ccGLWindow::setFov(float fov)
 	//derivation if we are in bubble-view mode
 	if (m_bubbleViewModeEnabled)
 	{
-		setBubbleViewFov(fov);
+		setBubbleViewFov(fov_deg);
 		return;
 	}
 
-	if (m_viewportParams.fov != fov)
+	if (m_viewportParams.fov != fov_deg)
 	{
 		//update param
-		m_viewportParams.fov = fov;
+		m_viewportParams.fov = fov_deg;
 		//and camera state (if perspective view is 'on')
 		if (m_viewportParams.perspectiveView)
 		{
@@ -3351,7 +3350,7 @@ float ccGLWindow::getFov() const
 
 void ccGLWindow::setBubbleViewFov(float fov_deg)
 {
-	if (fov_deg < 1.0f || fov_deg > 180.0f)
+	if (fov_deg < ZERO_TOLERANCE || fov_deg > 180.0f)
 		return;
 
 	if (fov_deg != m_bubbleViewFov_deg)
@@ -3361,6 +3360,7 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 		if (m_bubbleViewModeEnabled)
 		{
 			invalidateViewport();
+			invalidateVisualization();
 			emit fovChanged(m_bubbleViewFov_deg);
 		}
 	}
@@ -3571,7 +3571,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			{
 				ccLog::Error("[FBO] Initialization failed! (not enough memory?)");
 				delete fbo;
-				fbo=0;
+				fbo = 0;
 			}
 		}
 
@@ -3762,7 +3762,7 @@ void ccGLWindow::removeFBO()
 	//we "disconnect" current FBO, to avoid wrong display/errors
 	//if QT tries to redraw window during object destruction
 	ccFrameBufferObject* _fbo = m_fbo;
-	m_fbo=0;
+	m_fbo = 0;
 
 	if (_fbo)
 		delete _fbo;
@@ -3856,7 +3856,13 @@ void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, cons
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
-void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=ALIGN_HLEFT|ALIGN_VTOP*/, float bkgAlpha/*=0*/, const unsigned char* rgbColor/*=0*/, const QFont* font/*=0*/)
+void ccGLWindow::displayText(	QString text,
+								int x,
+								int y,
+								unsigned char align/*=ALIGN_HLEFT|ALIGN_VTOP*/,
+								float bkgAlpha/*=0*/,
+								const unsigned char* rgbColor/*=0*/,
+								const QFont* font/*=0*/)
 {
 	makeCurrent();
 

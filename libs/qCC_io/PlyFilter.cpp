@@ -961,7 +961,8 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	//we need at least 2 coordinates!
 	if (stdPropsCount < 2)
 	{
-		return CC_FERR_BAD_ENTITY_TYPE;
+		ccLog::Warning("[PLY] This ply file has less than 2 properties defined! (not even X and Y ;)");
+		return CC_FERR_MALFORMED_FILE;
 	}
 	else if (stdPropsCount < 4 && !parameters.alwaysDisplayLoadDialog)
 	{
@@ -993,6 +994,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			||	listPropsCount > assignedListProperties+1 )	//+1 because of the first item in the combo box ('none')
 		{
 			PlyOpenDlg pod/*(MainWindow::TheInstance())*/;
+
 			pod.plyTypeEdit->setText(e_ply_storage_mode_names[storage_mode]);
 			pod.elementsEdit->setText(QString::number(pointElements.size()));
 			pod.propertiesEdit->setText(QString::number(listProperties.size()+stdProperties.size()));
@@ -1001,30 +1003,50 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pod.setDefaultComboItems(stdPropsText);
 			pod.setListComboItems(listPropsText);
 
-			//Set default/guessed element
-			pod.xComboBox->setCurrentIndex(xIndex);
-			pod.yComboBox->setCurrentIndex(yIndex);
-			pod.zComboBox->setCurrentIndex(zIndex);
+			//try to restore previous context (if any)
+			int missingProps = pod.restorePreviousContext();
+			if (missingProps != 0)
+			{
+				if (missingProps == 1)
+				{
+					//only one property is missing, we keep the old configuration and ask the user
+					//to fix this
+					ccLog::Warning("[PLY] Compared to the previous file, it seems a property is missing.");
+				}
+				else
+				{
+					if (missingProps > 1)
+					{
+						ccLog::Warning("[PLY] Too many differences with the previous file, we reset the dialog.");
+					}
+					//Set default/guessed element
+					pod.xComboBox->setCurrentIndex(xIndex);
+					pod.yComboBox->setCurrentIndex(yIndex);
+					pod.zComboBox->setCurrentIndex(zIndex);
 
-			pod.rComboBox->setCurrentIndex(rIndex);
-			pod.gComboBox->setCurrentIndex(gIndex);
-			pod.bComboBox->setCurrentIndex(bIndex);
+					pod.rComboBox->setCurrentIndex(rIndex);
+					pod.gComboBox->setCurrentIndex(gIndex);
+					pod.bComboBox->setCurrentIndex(bIndex);
 
-			pod.iComboBox->setCurrentIndex(iIndex);
+					pod.iComboBox->setCurrentIndex(iIndex);
 
-			pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
-			for (size_t j=1; j<sfPropIndexes.size(); ++j)
-				pod.addSFComboBox(sfPropIndexes[j]);
+					pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
+					for (size_t j=1; j<sfPropIndexes.size(); ++j)
+						pod.addSFComboBox(sfPropIndexes[j]);
 			
-			pod.nxComboBox->setCurrentIndex(nxIndex);
-			pod.nyComboBox->setCurrentIndex(nyIndex);
-			pod.nzComboBox->setCurrentIndex(nzIndex);
+					pod.nxComboBox->setCurrentIndex(nxIndex);
+					pod.nyComboBox->setCurrentIndex(nyIndex);
+					pod.nzComboBox->setCurrentIndex(nzIndex);
 
-			pod.facesComboBox->setCurrentIndex(facesIndex);
-			pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
+					pod.facesComboBox->setCurrentIndex(facesIndex);
+					pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
+				}
+			}
 
-			//We execute dialog
-			if (parameters.alwaysDisplayLoadDialog && !pod.exec())
+			//We show the dialog (or we try to skip it ;)
+			if (parameters.alwaysDisplayLoadDialog
+				&& !pod.canBeSkipped()
+				&& !pod.exec())
 			{
 				ply_close(ply);
 				return CC_FERR_CANCELED_BY_USER;

@@ -28,6 +28,7 @@
 #include <vector>
 
 class QComboBox;
+struct PlyLoadingContext;
 
 //! Dialog for configuration of PLY files opening sequence
 class PlyOpenDlg : public QDialog, public Ui::PlyOpenDlg
@@ -47,16 +48,36 @@ public:
 	//! SF comboboxes
 	std::vector<QComboBox*> m_sfCombos;
 
+	//! Returns whether the current configuration is valid or not
+	bool isValid(bool displayErrors = true) const;
+	
+	//! Restores the previously saved configuration (if any)
+	/** \return the number of missing properties (or -1 if no previous context is available)
+	**/
+	int restorePreviousContext();
+
+	//! Returns whether the dialog can be 'skipped'
+	/** i.e. 'Apply all' button has been previously clicked
+		and the configuration is valid.
+	**/
+	bool canBeSkipped() const;
+
 public slots:
 	void addSFComboBox(int selectedIndex = 0);
 
 protected slots:
-	void testBeforeAccept();
+	void apply();
+	void applyAll();
 
 signals:
 	void fullyAccepted();
 
 protected:
+
+	//! Saves current configuration (for internal use)
+	void saveContext(PlyLoadingContext* context);
+	//! Restore a previously saved configuration (for internal use)
+	unsigned restoreContext(PlyLoadingContext* context);
 
 	//! Standard comboboxes elements
 	QStringList m_stdPropsText;

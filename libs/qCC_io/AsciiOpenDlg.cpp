@@ -99,26 +99,15 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	, m_averageLineSize(-1.0)
 	//, m_filename()
 	, m_columnsCount(0)
-	, m_applyButton(0)
-	, m_applyAllButton(0)
-	, m_cancelButton(0)
 {
 	m_ui->setupUi(this);
 
 	//spinBoxSkipLines->setValue(0);
 	m_ui->commentLinesSkippedLabel->hide();
 
-	//"Apply" and "Apply all" buttons
-	m_applyButton = new QPushButton("Apply");
-	m_applyAllButton = new QPushButton("Apply all");
-	m_cancelButton = new QPushButton("Cancel");
-
-	m_ui->buttonBox->addButton(m_applyButton,QDialogButtonBox::ApplyRole);
-	m_ui->buttonBox->addButton(m_applyAllButton,QDialogButtonBox::ApplyRole);
-	m_ui->buttonBox->addButton(m_cancelButton,QDialogButtonBox::RejectRole);
-
-	connect(m_applyButton,				SIGNAL(clicked()),						this, SLOT(apply()));
-	connect(m_applyAllButton,			SIGNAL(clicked()),						this, SLOT(applyAll()));
+	connect(m_ui->applyButton,			SIGNAL(clicked()),						this, SLOT(apply()));
+	connect(m_ui->applyAllButton,		SIGNAL(clicked()),						this, SLOT(applyAll()));
+	connect(m_ui->cancelButton,			SIGNAL(clicked()),						this, SLOT(reject()));
 	connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(onSeparatorChange(const QString &)));
 	connect(m_ui->spinBoxSkipLines,		SIGNAL(valueChanged(int)),				this, SLOT(setSkippedLines(int)));
 
@@ -220,7 +209,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 	if (separator.length() < 1)
 	{
 		m_ui->asciiCodeLabel->setText("Enter a valid character!");
-		m_ui->buttonBox->setEnabled(false);
+		m_ui->buttonFrame->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnsValidty.clear();
 		return;
@@ -738,7 +727,7 @@ void AsciiOpenDlg::updateTable()
 	m_columnsCount = columnsCount;
 
 	m_ui->tableWidget->setEnabled(true);
-	m_ui->buttonBox->setEnabled(true);
+	m_ui->buttonFrame->setEnabled(true);
 
 	//check for invalid columns
 	checkSelectedColumnsValidity(); //will eventually enable of disable the "OK" button
@@ -760,8 +749,8 @@ void AsciiOpenDlg::checkSelectedColumnsValidity()
 		}
 	}
 
-	m_applyAllButton->setEnabled(!m_selectedInvalidColumns);
-	m_applyButton->setEnabled(!m_selectedInvalidColumns);
+	m_ui->applyAllButton->setEnabled(!m_selectedInvalidColumns);
+	m_ui->applyButton->setEnabled(!m_selectedInvalidColumns);
 }
 
 bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QString& errorMessage)

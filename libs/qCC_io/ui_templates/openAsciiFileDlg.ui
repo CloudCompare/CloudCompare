@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>704</width>
+    <width>700</width>
     <height>600</height>
    </rect>
   </property>
@@ -230,74 +230,91 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Max number of points per cloud</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="maxCloudSizeDoubleSpinBox">
-       <property name="suffix">
-        <string> Million</string>
-       </property>
-       <property name="decimals">
-        <number>2</number>
-       </property>
-       <property name="minimum">
-        <double>0.010000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>1000000.000000000000000</double>
-       </property>
-       <property name="value">
-        <double>128.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QFrame" name="buttonFrame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Max number of points per cloud</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="maxCloudSizeDoubleSpinBox">
+        <property name="suffix">
+         <string> Million</string>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>128.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>157</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="applyButton">
+        <property name="text">
+         <string>Apply</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="applyAllButton">
+        <property name="text">
+         <string>Apply all</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cancelButton">
+        <property name="text">
+         <string>Cancel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>AsciiOpenDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

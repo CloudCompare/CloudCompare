@@ -206,10 +206,6 @@ protected:
 	std::vector<bool> m_columnsValidty;
 
 	unsigned m_columnsCount;
-
-	QPushButton* m_applyButton;
-	QPushButton* m_applyAllButton;
-	QPushButton* m_cancelButton;
 };
 
 #endif //CC_ASCII_OPEN_DIALOG_HEADER

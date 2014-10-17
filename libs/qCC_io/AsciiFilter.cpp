@@ -655,7 +655,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	unsigned chunkRank = 1;
 
 	//we initialize the loading accelerator structure and point cloud
-	int maxPartIndex=-1;
+	int maxPartIndex = -1;
 	cloudAttributesDescriptor cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, chunkRank);
 
 	if (!cloudDesc.cloud)

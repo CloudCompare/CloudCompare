@@ -20,11 +20,30 @@
 //Qt
 #include <QMessageBox>
 
+//qCC_db
+#include <ccLog.h>
+
 //System
 #include <string.h>
 #include <assert.h>
 
-PlyOpenDlg::PlyOpenDlg(QWidget* parent) : QDialog(parent), Ui::PlyOpenDlg()
+//! Ply dialog loading context
+struct PlyLoadingContext
+{
+	PlyLoadingContext() : valid(false), applyAll(false) {}
+	
+	std::vector<QString> standardCombosProperties;
+	std::vector<QString> sfCombosProperties;
+	std::vector<QString> listCombosProperties;
+	bool valid;
+	bool applyAll;
+};
+//! Last loading context
+static PlyLoadingContext s_lastContext;
+
+PlyOpenDlg::PlyOpenDlg(QWidget* parent)
+	: QDialog(parent)
+	, Ui::PlyOpenDlg()
 {
 	setupUi(this);
 
@@ -48,10 +67,13 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent) : QDialog(parent), Ui::PlyOpenDlg()
 	}
 	catch(std::bad_alloc)
 	{
+		//not enough memory?! What can we do...
 	}
 
 	connect(addSFToolButton,	SIGNAL(clicked()),			this,	SLOT(addSFComboBox()));
-	connect(buttonBox,			SIGNAL(accepted()),			this,	SLOT(testBeforeAccept()));
+	connect(applyButton,		SIGNAL(clicked()),			this,	SLOT(apply()));
+	connect(applyAllButton,		SIGNAL(clicked()),			this,	SLOT(applyAll()));
+	connect(cancelButton,		SIGNAL(clicked()),			this,	SLOT(reject()));
 	connect(this,				SIGNAL(fullyAccepted()),	this,	SLOT(accept()));
 }
 
@@ -88,7 +110,161 @@ void PlyOpenDlg::setListComboItems(const QStringList& listPropsText)
 	}
 }
 
-void PlyOpenDlg::testBeforeAccept()
+int PlyOpenDlg::restorePreviousContext()
+{
+	if (!s_lastContext.valid)
+		return -1;
+
+	unsigned missingProps = restoreContext(&s_lastContext);
+
+	//auto-stop: we can't keep 'apply all' if something has changed
+	if (missingProps != 0)
+		s_lastContext.applyAll = false;
+
+	return static_cast<int>(missingProps);
+}
+
+void PlyOpenDlg::saveContext(PlyLoadingContext* context)
+{
+	if (!context)
+	{
+		assert(false);
+		return;
+	}
+	context->valid = false;
+
+	//currentIndex == 0 means 'NONE'!!!
+	try
+	{
+		//standard combos
+		{
+			context->standardCombosProperties.resize(m_standardCombos.size());
+			for (size_t i=0; i<m_standardCombos.size(); ++i)
+				context->standardCombosProperties[i] = (m_standardCombos[i] && m_standardCombos[i]->currentIndex() > 0 ? m_standardCombos[i]->currentText() : QString());
+		}
+		//list combos
+		{
+			context->listCombosProperties.resize(m_listCombos.size());
+			for (size_t i=0; i<m_listCombos.size(); ++i)
+				context->listCombosProperties[i] = (m_listCombos[i] && m_listCombos[i]->currentIndex() > 0 ? m_listCombos[i]->currentText() : QString());
+		}
+		//additional SF combos
+		{
+			context->sfCombosProperties.clear();
+			for (size_t i=0; i<m_sfCombos.size(); ++i)
+			{
+				//we only copy the valid ones!
+				if (m_sfCombos[i] && m_sfCombos[i]->currentIndex() > 0)
+					context->sfCombosProperties.push_back(m_sfCombos[i]->currentText());
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return;
+	}
+
+	context->valid = true;
+}
+
+unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
+{
+	if (!context || !context->valid)
+	{
+		assert(false);
+		return false;
+	}
+
+	//currentIndex == 0 means 'NONE'!!!
+	unsigned missingEntries = 0;
+
+	//standard combos
+	assert(m_standardCombos.size() == context->standardCombosProperties.size());
+	{
+		for (size_t i=0; i<m_standardCombos.size(); ++i)
+			if (m_standardCombos[i])
+			{
+				m_standardCombos[i]->setCurrentIndex(0);
+				//if a specific property was defined for this field
+				if (!context->standardCombosProperties[i].isNull())
+				{
+					//try to find it in the new property list!
+					int idx = m_standardCombos[i]->findText(context->standardCombosProperties[i]);
+					if (idx < 0)
+						++missingEntries;
+					m_standardCombos[i]->setCurrentIndex(idx);
+				}
+			}
+	}
+	
+	//list combos
+	assert(m_listCombos.size() == context->listCombosProperties.size());
+	{
+		for (size_t i=0; i<m_listCombos.size(); ++i)
+			if (m_listCombos[i])
+			{
+				m_listCombos[i]->setCurrentIndex(0);
+				//if a specific property was defined for this field
+				if (!context->listCombosProperties[i].isNull())
+				{
+					//try to find it in the new property list!
+					int idx = m_listCombos[i]->findText(context->listCombosProperties[i]);
+					if (idx < 0)
+						++missingEntries;
+					m_listCombos[i]->setCurrentIndex(idx);
+				}
+			}
+
+	}
+	
+	//additional SF combos
+	assert(m_sfCombos.size() == 1);
+	{
+		m_sfCombos.front()->setCurrentIndex(0);
+		bool firstSF = true;
+		for (size_t i=0; i<context->sfCombosProperties.size(); ++i)
+		{
+			//try to find it in the new property list!
+			int idx = m_sfCombos.front()->findText(context->sfCombosProperties[i]);
+			if (idx < 0)
+				++missingEntries;
+			else
+			{
+				//we use the default sf combo-box by default
+				if (firstSF)
+					m_sfCombos.front()->setCurrentIndex(idx);
+				else
+					addSFComboBox(idx);
+				firstSF = false;
+			}
+		}
+	}
+
+	return missingEntries;
+}
+
+void PlyOpenDlg::apply()
+{
+	if (isValid())
+	{
+		saveContext(&s_lastContext);
+		s_lastContext.applyAll = false;
+		emit fullyAccepted();
+	}
+}
+
+void PlyOpenDlg::applyAll()
+{
+	if (isValid())
+	{
+		saveContext(&s_lastContext);
+		s_lastContext.applyAll = true;
+		emit fullyAccepted();
+	}
+}
+
+bool PlyOpenDlg::isValid(bool displayErrors/*=true*/) const
 {
 	//we need at least two coordinates per point (i.e. 2D)
 	int zeroCoord = 0;
@@ -98,8 +274,9 @@ void PlyOpenDlg::testBeforeAccept()
 
 	if (zeroCoord > 1)
 	{
-		QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
-		return;
+		if (displayErrors)
+			QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
+		return false;
 	}
 
 	//we must ensure that no property is assigned to more than one field
@@ -116,21 +293,22 @@ void PlyOpenDlg::testBeforeAccept()
 	for (size_t k=0; k<m_sfCombos.size(); ++k)
 		++assignedIndexCount[m_sfCombos[k]->currentIndex()];
 
-	bool isValid = true;
+	for (int i=1; i<n+p; ++i)
 	{
-		for (int i=1; i<n+p; ++i)
+		if (assignedIndexCount[i] > 1)
 		{
-			if (assignedIndexCount[i] > 1)
-			{
-				isValid = false;
+			if (displayErrors)
 				QMessageBox::warning(0, "Error", QString("Can't assign same property to multiple fields! (%1)").arg(xComboBox->itemText(i)));
-				break;
-			}
+			return false;
 		}
 	}
 
-	if (isValid)
-		emit fullyAccepted();
+	return true;
+}
+
+bool PlyOpenDlg::canBeSkipped() const
+{
+	return s_lastContext.valid && s_lastContext.applyAll && isValid(false);
 }
 
 void PlyOpenDlg::addSFComboBox(int selectedIndex/*=0*/)

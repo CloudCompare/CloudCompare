@@ -822,7 +822,7 @@ namespace GfxTL
 			//typename BaseType::CellCenterType center;
 			//CellCenter(cell, ti, &center);
 			size_t childIdx = 0;
-			for(unsigned int i = 0; i < DimT; ++i)
+			for(size_t i = 0; i < static_cast<size_t>(DimT); ++i)
 			{
 				if(point[i] > cell.Center()[i])//center[i])
 					childIdx |= 1 << (DimT - i - 1);

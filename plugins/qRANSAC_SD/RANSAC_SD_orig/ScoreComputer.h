@@ -33,7 +33,7 @@ public:
 		{
 			float d = shape.DistanceAndNormal(pc[begin[iter]].pos, &n);
 			float nd = n.dot(pc[begin[iter]].normal);
-			if(d < epsilon && abs(nd) > normalThresh)
+			if(d < epsilon && fabs(nd) > normalThresh)
 			{
 				++score->first;
 				score->second += weigh(d,epsilon);

@@ -63,7 +63,7 @@ int dmat_solve ( int n, int rhs_num, double a[] )
 
     for ( i = j; i < n; i++ )
     {
-      if ( abs ( apivot ) < abs ( a[i+j*n] ) )
+      if ( fabs ( apivot ) < fabs ( a[i+j*n] ) )
       {
         apivot = a[i+j*n];
         ipivot = i;

@@ -256,7 +256,7 @@ void PointCloud::calcNormals ( float radius, unsigned int kNN, unsigned int maxT
 			{
 				if ( tries > maxTries/2 ) {
 					// let us see how good the first half of candidates are...
-					int index = std::floor(180/M_PI*std::acos(std::min(1.f, abs(plane.getNormal().dot(at(i).normal)))));
+					int index = std::floor(180/M_PI*std::acos(std::min(1.f, fabs(plane.getNormal().dot(at(i).normal)))));
 					stats[index]++;
 				}
 				at(i).normal = plane.getNormal();

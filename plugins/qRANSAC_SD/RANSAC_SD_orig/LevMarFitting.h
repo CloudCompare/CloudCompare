@@ -225,16 +225,16 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 						v[i] += F0[k * paramDim + i] * d[k];
 					v[i] *= -1;
 #ifndef DOPARALLEL
-					vmag = std::max((ScalarType)abs(v[i]), vmag);
+					vmag = std::max((ScalarType)fabs(v[i]), vmag);
 #endif
 				}
 #ifdef DOPARALLEL
 				for(unsigned int i = 0; i < paramDim; ++i)
-					vmag = std::max(abs(v[i]), vmag);
+					vmag = std::max(fabs(v[i]), vmag);
 #endif
 				// and check for convergence with magnitude of v
 #ifndef PRECISIONLEVMAR
-				if(vmag < ScalarType(1e-6))
+				if(vmag < ScalarType(1.0e-6))
 #else
 				if(vmag < ScalarType(1e-8))
 #endif
@@ -247,10 +247,10 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 				if(outerIter == 1)
 				{
 					// compute magnitue of F0
-					ScalarType fmag = abs(F0[0]);
+					ScalarType fmag = fabs(F0[0]);
 					for(size_t i = 1; i < paramDim * size; ++i)
-						if(fmag < abs(F0[i]))
-							fmag = abs(F0[i]);
+						if(fmag < fabs(F0[i]))
+							fmag = fabs(F0[i]);
 					lambda = 1e-3f * fmag;
 				}
 				else
@@ -272,7 +272,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 				xNorm += x[i] * x[i];
 			xNorm = std::sqrt(xNorm);
 #ifndef PRECISIONLEVMAR
-			if(xNorm <= ScalarType(1e-6) * (paramNorm + ScalarType(1e-6)))
+			if(xNorm <= ScalarType(1.0e-6) * (paramNorm + ScalarType(1.0e-6)))
 #else
 			if(xNorm <= ScalarType(1e-8) * (paramNorm + ScalarType(1e-8)))
 #endif
@@ -418,13 +418,13 @@ ScalarT LevMar(unsigned int paramDim, unsigned int imgDim,
 				//float c = param[i] - paramNew[i];
 				cvgTest += x[i] * x[i];
 			}
-			if(std::sqrt(cvgTest) < 1e-6)
+			if(std::sqrt(cvgTest) < 1.0e-6)
 			{
 				for(size_t i = 0; i < paramDim; ++i)
 					param[i] = paramNew[i];
 				goto cleanup;
 			}*/
-			if(/*newChi <= chi &&*/ abs(chi - newChi)
+			if(/*newChi <= chi &&*/ fabs(chi - newChi)
 				/ chi < ScalarT(1e-4))
 			{
 				for(size_t i = 0; i < paramDim; ++i)

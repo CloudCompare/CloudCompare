@@ -53,7 +53,7 @@ bool Cylinder::Init(const MiscLib::Vector< Vec3f > &samples)
 	ydir.normalize();
 	// xdir is the x axis in the plane (y = 0) samples[0] is the origin
 	float lineBnx = ydir.dot(samples[1 + c]);
-	if(abs(lineBnx) < 1e-6)
+	if(fabs(lineBnx) < 1.0e-6)
 		return false;
 	float lineBny = -xdir.dot(samples[1 + c]);
 	// origin of lineB
@@ -65,7 +65,7 @@ bool Cylinder::Init(const MiscLib::Vector< Vec3f > &samples)
 	// point of intersection is y = 0 and x = lineBd / lineBnx
 	float radius = lineBd / lineBnx;
 	m_axisPos += samples[0] + radius * xdir;
-	m_radius += abs(radius);
+	m_radius += fabs(radius);
 	m_radius += std::sqrt((radius - lineBOx) * (radius - lineBOx) + lineBOy * lineBOy);
 	m_radius /= 2;
 	if(m_radius > 1e6)
@@ -123,7 +123,7 @@ bool Cylinder::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 			ydir.normalize();
 			// xdir is the x axis in the plane (y = 0) samples[i] is the origin
 			float lineBnx = ydir.dot(samples[j + c]);
-			if(abs(lineBnx) < .05f)
+			if(fabs(lineBnx) < .05f)
 				continue;
 			float lineBny = -xdir.dot(samples[j + c]);
 			// origin of lineB
@@ -135,7 +135,7 @@ bool Cylinder::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 			// point of intersection is y = 0 and x = lineBd / lineBnx
 			float radius = lineBd / lineBnx;
 			m_axisPos += samples[i] + radius * xdir;
-			m_radius += abs(radius);
+			m_radius += fabs(radius);
 			m_radius += std::sqrt((radius - lineBOx) * (radius - lineBOx) + lineBOy * lineBOy);
 			++pointCount;
 		}
@@ -171,7 +171,7 @@ bool Cylinder::Init(const Vec3f &pointA, const Vec3f &pointB,
 	if(normalA.dot(normalB) > 0.9998477)
 		return false;
 	m_axisDir = normalA.cross(normalB);
-	if(m_axisDir.normalize() < 1e-6)
+	if(m_axisDir.normalize() < 1.0e-6)
 		return false;
 	// normalA is the x axis in the plane (y = 0) pointA is the origin
 	Vec3f planeY = normalA.cross(m_axisDir); // planeX = normalA
@@ -187,7 +187,7 @@ bool Cylinder::Init(const Vec3f &pointA, const Vec3f &pointB,
 	// point of intersection is y = 0 and x = lineBd / lineBnx
 	m_radius = lineBd / lineBnx;
 	m_axisPos = pointA + m_radius * normalA;
-	m_radius = abs(m_radius);
+	m_radius = fabs(m_radius);
 	if(m_radius > 1e6)
 		return false;
 	m_hcs.FromNormal(m_axisDir);
@@ -349,7 +349,7 @@ void CylinderDistanceDerivatives(const float *param, const float *x,
 	v = param[4] * s[0] - param[3] * s[1];
 	f += v * v;
 	f = std::sqrt(f);
-	if(f < 1e-6)
+	if(f < 1.0e-6)
 	{
 		gradient[0] = std::sqrt(1 - param[3] * param[3]);
 		gradient[1] = std::sqrt(1 - param[4] * param[4]);

@@ -57,7 +57,7 @@ void LowStretchTorusParametrization::Parameters(const Vec3f &p,
 	param->second = std::atan2(minorL[1], minorL[0]); // minor angle
 	if(m_torus->IsAppleShaped())
 	{
-		if(abs(param->second) > m_torus->AppleCutOffAngle())
+		if(fabs(param->second) > m_torus->AppleCutOffAngle())
 			param->second = GfxTL::Math< float >::Sign(param->second)
 				* m_torus->AppleCutOffAngle();
 	}
@@ -138,7 +138,7 @@ void LowStretchTorusParametrization::Optimize(IteratorT begin, IteratorT end,
 		vangles[j] = std::atan2(minorVec[1], minorVec[0]); // minor angle
 		if(m_torus->IsAppleShaped())
 		{
-			if(abs(uangles[j]) > m_torus->AppleCutOffAngle())
+			if(fabs(uangles[j]) > m_torus->AppleCutOffAngle())
 				uangles[j] = GfxTL::Math< float >::Sign(uangles[j])
 					* m_torus->AppleCutOffAngle();
 		}

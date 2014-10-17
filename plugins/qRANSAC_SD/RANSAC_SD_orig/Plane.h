@@ -27,8 +27,8 @@ public:
 	bool Init(bool binary, std::istream *i);
 	void Init(FILE *i);
 	void Init(float* array);
-	float getDistance (const Vec3f &pos) const {return abs(m_dist - m_normal.dot(pos));}
-	float Distance(const Vec3f &pos) const { return abs(m_dist - m_normal.dot(pos)); }
+	float getDistance (const Vec3f &pos) const {return fabs(m_dist - m_normal.dot(pos));}
+	float Distance(const Vec3f &pos) const { return fabs(m_dist - m_normal.dot(pos)); }
 	float SignedDistance(const Vec3f &pos) const { return m_normal.dot(pos) - m_dist; }
 	void Normal(const Vec3f &, Vec3f *n) const { *n = m_normal; }
 	float DistanceAndNormal(const Vec3f &pos, Vec3f *n) const { *n = m_normal; return Distance(pos); }

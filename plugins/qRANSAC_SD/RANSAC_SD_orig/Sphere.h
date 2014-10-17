@@ -210,7 +210,7 @@ private:
 
 inline float Sphere::Distance(const Vec3f &p) const
 {
-	return abs((m_center - p).length() - m_radius);
+	return fabs((m_center - p).length() - m_radius);
 }
 
 inline void Sphere::Normal(const Vec3f &p, Vec3f *normal) const
@@ -225,7 +225,7 @@ inline float Sphere::DistanceAndNormal(const Vec3f &p, Vec3f *normal) const
 	float l = normal->length();
 	if(l > 0)
 		*normal /= l;
-	return abs(l - m_radius);
+	return fabs(l - m_radius);
 }
 
 inline float Sphere::SignedDistance(const Vec3f &p) const

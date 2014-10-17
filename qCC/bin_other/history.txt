@@ -74,7 +74,7 @@ v2.5.6 ??/??/2014
 			instead of unsigned bytes (0-255)
 		- New 'Apply' button (replaces 'Ok')
 		- New 'Apply all' button to attempt to load all the files with the same column assignation
-	* Ply import:
+	* PLY import:
 		- New 'Apply' button (replaces 'Ok'): the dialog will remember the previous configuration and will try
 			to restore it the next time
 		- New 'Apply all' button : the dialog is skipped whenever CC can sucessfully restore the previous configuration

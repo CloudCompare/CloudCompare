@@ -106,7 +106,7 @@ bool Candidate::IsEquivalent(const Candidate &c, const PointCloud &pc,
 		c.m_shape->DistanceAndNormalDeviation(
 			pc[m_indices->at(idx)].pos,
 			pc[m_indices->at(idx)].normal, &dn);
-		if(dn.first < epsilon && abs(dn.second) > normalThresh)
+		if(dn.first < epsilon && fabs(dn.second) > normalThresh)
 			++correct;
 	}
 	size_t tested = size;
@@ -118,7 +118,7 @@ bool Candidate::IsEquivalent(const Candidate &c, const PointCloud &pc,
 		m_shape->DistanceAndNormalDeviation(
 			pc[c.m_indices->at(idx)].pos,
 			pc[c.m_indices->at(idx)].normal, &dn);
-		if(dn.first < epsilon && abs(dn.second) > normalThresh)
+		if(dn.first < epsilon && fabs(dn.second) > normalThresh)
 			++correct;
 	}
 	tested += size;
@@ -135,14 +135,14 @@ float Candidate::GetVariance( const PointCloud &pc )
 		// first pass - get expectancy
 		float expectancy = 0.0f;
 		for( int i = 0; i < m_indices->size(); ++i )
-			expectancy += abs( m_shape->NormalDeviation( pc[(*m_indices)[i]].pos, pc[(*m_indices)[i]].normal));
+			expectancy += fabs( m_shape->NormalDeviation( pc[(*m_indices)[i]].pos, pc[(*m_indices)[i]].normal));
 
 		expectancy /= static_cast<float>( m_indices->size());
 
 		// second pass - get real variance
 		for( int i = 0; i < m_indices->size(); ++i )
 		{
-			dev = abs( m_shape->NormalDeviation( pc[(*m_indices)[i]].pos, pc[(*m_indices)[i]].normal)) - expectancy;
+			dev = fabs( m_shape->NormalDeviation( pc[(*m_indices)[i]].pos, pc[(*m_indices)[i]].normal)) - expectancy;
 			variance += dev * dev;
 		}
 
@@ -161,7 +161,7 @@ float Candidate::GetPseudoVariance( const PointCloud &pc )
 
 	for( int i = 0; i < m_indices->size(); ++i )
 	{
-		dev = abs( m_shape->NormalDeviation( pc[(*m_indices)[i]].pos, pc[(*m_indices)[i]].normal)) - 1.0f;
+		dev = fabs( m_shape->NormalDeviation( pc[(*m_indices)[i]].pos, pc[(*m_indices)[i]].normal)) - 1.0f;
 		variance += dev * dev;
 	}
 	variance /= static_cast<float>( m_indices->size());

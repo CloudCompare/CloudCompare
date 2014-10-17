@@ -18,13 +18,13 @@ public:
 		Vec3f n;
 		float distance = shape.DistanceAndNormal(oct.at(i), &n);
 		if(distance < m_distThresh)
-			return abs(n.dot(oct.at(i).normal)) >= m_normalThresh;
+			return fabs(n.dot(oct.at(i).normal)) >= m_normalThresh;
 		return false;
 	}
 	bool operator()(float distance, float normalDeviation) const
 	{
 		return distance < m_distThresh
-			&& abs(normalDeviation) >= m_normalThresh;
+			&& fabs(normalDeviation) >= m_normalThresh;
 	}
 	float DistanceThresh() const { return m_distThresh; }
 	float NormalThresh() const { return m_normalThresh; }

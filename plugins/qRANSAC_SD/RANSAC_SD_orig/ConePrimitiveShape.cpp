@@ -350,7 +350,7 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 		// try to find cut in the outer regions
 		MiscLib::Vector< float > angularParams;//(params->size());
 		angularParams.reserve(params->size());
-		float outer = 3.f * std::max(abs(bbox->Min()[0]), abs(bbox->Max()[0])) / 4.f;
+		float outer = 3.f * std::max(fabs(bbox->Min()[0]), fabs(bbox->Max()[0])) / 4.f;
 		for(size_t i = 0; i < params->size(); ++i)
 			if((*params)[i].first > outer)
 				angularParams.push_back(((*params)[i].second
@@ -537,7 +537,7 @@ bool ConePrimitiveShape::InSpace(float length, float arcLength, Vec3f *p,
 		m_cone.AxisDirection()[1], m_cone.AxisDirection()[2]);
 	Vec3f vvec;
 	q.Rotate(m_cone.AngularDirection(), &vvec);
-	*p = std::sin(m_cone.Angle()) * abs(length) * vvec +
+	*p = std::sin(m_cone.Angle()) * fabs(length) * vvec +
 		std::cos(m_cone.Angle()) * length * m_cone.AxisDirection() +
 		m_cone.Center();
 	m_cone.Normal(*p, n);
@@ -566,14 +566,14 @@ bool ConePrimitiveShape::InSpace(size_t u, size_t v, float epsilon,
 	}
 	if(angle > 2 * float(M_PI))
 		return false;
-	//float angle = ((v * epsilon) / m_cone.RadiusAtLength(std::max(abs(bbox.Min()[0]), abs(bbox.Max()[0])))
+	//float angle = ((v * epsilon) / m_cone.RadiusAtLength(std::max(fabs(bbox.Min()[0]), fabs(bbox.Max()[0])))
 	//	+ bbox.Min()[1]);
 	GfxTL::Quaternion< float > q;
 	q.RotationRad(angle, m_cone.AxisDirection()[0],
 		m_cone.AxisDirection()[1], m_cone.AxisDirection()[2]);
 	Vec3f vvec;
 	q.Rotate(m_cone.AngularDirection(), &vvec);
-	*p = std::sin(m_cone.Angle()) * abs(length) * vvec +
+	*p = std::sin(m_cone.Angle()) * fabs(length) * vvec +
 		std::cos(m_cone.Angle()) * length * m_cone.AxisDirection() +
 		m_cone.Center();
 	// TODO: this is very lazy and should be optimized!

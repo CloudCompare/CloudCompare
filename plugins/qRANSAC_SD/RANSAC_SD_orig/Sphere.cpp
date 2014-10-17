@@ -130,7 +130,7 @@ bool Midpoint(const Vec3f &p1, const Vec3f &n1, const Vec3f &p2, const Vec3f &n2
 	d2121 = n1[0] * n1[0] + n1[1] * n1[1] + n1[2] * n1[2];
 
 	denom = d2121 * d4343 - d4321 * d4321;
-	if(abs(denom) < 1e-6)
+	if(fabs(denom) < 1.0e-6)
 		return false;
 	numer = d1343 * d4321 - d1321 * d4343;
 
@@ -240,7 +240,7 @@ bool Sphere::Init2(const Vec3f &p1, const Vec3f &p2, const Vec3f &n1,
 	d2121 = n1[0] * n1[0] + n1[1] * n1[1] + n1[2] * n1[2];
 
 	denom = d2121 * d4343 - d4321 * d4321;
-	if(abs(denom) < 1e-6)
+	if(fabs(denom) < 1.0e-6)
 		return false;
 	numer = d1343 * d4321 - d1321 * d4343;
 
@@ -450,7 +450,7 @@ float SphereAsSquaresParametrization::Parameters(const Vec3f &p,
 	hs[1] = s.dot(m_hcs[1].Data());
 	hs[2] = s.dot(m_planeNormal);
 	float ret = hs[2];
-	hs[2] = abs(hs[2]);
+	hs[2] = fabs(hs[2]);
 	std::pair< float, float > inDisk;
 	Hemisphere2Disk(hs, &inDisk);
 	Disk2Square(inDisk, param);

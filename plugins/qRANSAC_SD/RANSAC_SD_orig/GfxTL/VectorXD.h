@@ -231,7 +231,7 @@ namespace GfxTL
 			{
 				ScalarType s = 0;
 				for(unsigned int i = 0; i < D; ++i)
-					s += abs(SuperType::_m[i]);
+					s += fabs(SuperType::_m[i]);
 				return s;
 			}
 

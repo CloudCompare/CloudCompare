@@ -64,7 +64,7 @@ protected:
 				if(d > epsilon)
 					continue;
 				float dn = n.dot(pc[indices[i]].normal);
-				if(abs(dn) > normalThresh)
+				if(fabs(dn) > normalThresh)
 					++scores[j];
 			}
 		}
@@ -72,7 +72,7 @@ protected:
 		for(size_t i = 0; i < /*sse.size()*/scores.size(); ++i)
 		{
 			if(scores[i] < .9f * indices.size())
-			//if(abs(std::sqrt(sse[i] / indices.size()) - rms) > 1e-2)
+			//if(fabs(std::sqrt(sse[i] / indices.size()) - rms) > 1e-2)
 				++numFailures;
 		}
 

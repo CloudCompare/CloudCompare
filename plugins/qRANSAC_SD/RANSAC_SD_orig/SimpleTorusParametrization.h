@@ -47,7 +47,7 @@ void SimpleTorusParametrization::Parameters(const Vec3f &p,
 	param->second = std::atan2(minory, minorx); // minor angle
 	if(m_torus->IsAppleShaped())
 	{
-		if(abs(param->second) > m_torus->AppleCutOffAngle())
+		if(fabs(param->second) > m_torus->AppleCutOffAngle())
 			param->second = GfxTL::Math< float >::Sign(param->second)
 				* m_torus->AppleCutOffAngle();
 	}

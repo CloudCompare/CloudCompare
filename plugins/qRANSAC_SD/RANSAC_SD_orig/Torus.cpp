@@ -202,8 +202,8 @@ bool Torus::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 				{
 					double a01 = n0xn1 * dsamples[k + y];
 					double b01 = n0xn1 * dsamples[k + z];
-					if(GfxTL::Math< double >::Abs(a01) < 1e-6
-						|| GfxTL::Math< double >::Abs(b01) < 1e-6)
+					if(GfxTL::Math< double >::Abs(a01) < 1.0e-6
+						|| GfxTL::Math< double >::Abs(b01) < 1.0e-6)
 							continue;
 					double a0 = ((dsamples[y] - dsamples[x])
 						% dsamples[k + w]) * dsamples[k + y];
@@ -584,7 +584,7 @@ void Torus::ComputeAppleParams()
 {
 	if(!m_appleShaped)
 	{
-		m_cutOffAngle = M_PI;
+		m_cutOffAngle = static_cast<float>(M_PI);
 		m_appleHeight = 0;
 		return;
 	}

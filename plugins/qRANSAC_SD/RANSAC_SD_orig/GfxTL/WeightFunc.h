@@ -155,7 +155,7 @@ namespace GfxTL
 				PointType *derivative)
 			{
 				ScalarType sqrDist = _scale * _center.SqrDistance(x);
-				if(sqrDist < 1e-6)
+				if(sqrDist < 1.0e-6)
 					return false;
 				*weight = std::exp(-sqrDist) / sqrDist;
 				for(unsigned int i = 0; i < PointType::Dim; ++i)

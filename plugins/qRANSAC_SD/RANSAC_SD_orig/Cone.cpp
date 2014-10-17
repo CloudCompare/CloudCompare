@@ -93,7 +93,7 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	size_t c = samples.size() / 2;
 	MiscLib::Vector< GfxTL::Vector4Df > planes(c);
 	#pragma omp parallel for schedule(static)
-	for(intptr_t i = 0; i < c; ++i)
+	for(size_t i = 0; i < c; ++i)
 	{
 		for(unsigned int j = 0; j < 3; ++j)
 			planes[i][j] = samples[i][j];
@@ -131,7 +131,7 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 
 	MiscLib::Vector< GfxTL::Vector3Df > spoints(c);
 	#pragma omp parallel for schedule(static)
-	for(intptr_t i = 0; i < c; ++i)
+	for(size_t i = 0; i < c; ++i)
 	{
 		spoints[i] = GfxTL::Vector3Df(samples[i] - m_center);
 		spoints[i].Normalize();
@@ -144,14 +144,14 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	// the axis is defined to point into the interior of the cone
 	float heightSum = 0;
 	#pragma omp parallel for schedule(static) reduction(+:heightSum)
-	for(intptr_t i = 0; i < c; ++i)
+	for(size_t i = 0; i < c; ++i)
 		heightSum += Height(samples[i]);
 	if(heightSum < 0)
 		m_axisDir *= -1;
 
 	float angleReduction = 0;
 	#pragma omp parallel for schedule(static) reduction(+:angleReduction)
-	for(intptr_t i = 0; i < c; ++i)
+	for(size_t i = 0; i < c; ++i)
 	{
 		float angle = m_axisDir.dot(samples[i + c]);
 		if(angle < -1) // clamp angle to [-1, 1]
@@ -168,7 +168,7 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	}
 	angleReduction /= c;
 	m_angle = angleReduction;
-	if(m_angle < 1e-6 || m_angle > float(M_PI) / 2 - 1e-6)
+	if(m_angle < 1.0e-6 || m_angle > float(M_PI) / 2 - 1.0e-6)
 		return false;
 	//if(m_angle > 1.3962634015954636615389526147909) // 80 degrees
 	if(m_angle > 1.4835298641951801403851371532153f) // 85 degrees
@@ -281,7 +281,7 @@ bool Cone::Init(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		angle = float(M_PI) / 2 - std::acos(angle);
 	m_angle += angle;
 	m_angle /= 3;
-	if(m_angle < 1e-6 || m_angle > float(M_PI) / 2 - 1e-6)
+	if(m_angle < 1.0e-6 || m_angle > float(M_PI) / 2 - 1.0e-6)
 		return false;
 	//if(m_angle > 1.3962634015954636615389526147909) // 80 degrees
 	if(m_angle > 1.4835298641951801403851371532153f) // 85 degrees
@@ -429,7 +429,7 @@ void Cone::Parameters(const Vec3f &p, std::pair< float, float > *param) const
 		f = 0;
 	else
 		f = std::sqrt(f);
-	float sdist = abs(m_n2d[0] * f + ((height < 0)? -1 : 1) * m_n2d[1] * height);
+	float sdist = fabs(m_n2d[0] * f + ((height < 0)? -1 : 1) * m_n2d[1] * height);
 	float length = std::sqrt(sqrS + sdist * sdist);
 	param->first = /*(height < 0)? -length :*/ length;
 	param->second = angle;
@@ -437,7 +437,7 @@ void Cone::Parameters(const Vec3f &p, std::pair< float, float > *param) const
 	Vec3f pln = s.cross(m_axisDir);
 	Vec3f plx = m_axisDir.cross(pln);
 	Vec3f n;
-	if(plx.normalize() < 1e-6)
+	if(plx.normalize() < 1.0e-6)
 	{
 		*param = std::make_pair(0.0f, angle);
 		return height;
@@ -468,7 +468,7 @@ void Cone::Parameters(const Vec3f &p, std::pair< float, float > *param) const
 		*param = std::make_pair(s.length(), angle);
 		return height;
 	}
-	*param = std::make_pair(*abs(lambda), angle);*/
+	*param = std::make_pair(*fabs(lambda), angle);*/
 }
 
 void Cone::RotateAngularDirection(float radians)
@@ -493,7 +493,7 @@ float ConeDistance(const float *param, const float *x)
 	Vec3f s;
 	for(unsigned int i = 0; i < 3; ++i)
 		s[i] = x[i] - param[i];
-	float g = abs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
+	float g = fabs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
 	float f = s.sqrLength() - (g * g);
 	if(f <= 0)
 		f = 0;
@@ -509,7 +509,7 @@ void ConeDistanceDerivatives(const float *param, const float *x,
 	Vec3f s;
 	for(unsigned int i = 0; i < 3; ++i)
 		s[i] = x[i] - param[i];
-	float g = abs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
+	float g = fabs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
 	float f = s.sqrLength() - (g * g);
 	if(f <= 0)
 		f = 0;
@@ -521,7 +521,7 @@ void ConeDistanceDerivatives(const float *param, const float *x,
 	for(unsigned int i = 0; i < 3; ++i)
 		ggradient[i + 3] = s[i] - param[i + 3] * g;
 	float fgradient[6];
-	if(f < 1e-6)
+	if(f < 1.0e-6)
 	{
 		fgradient[0] = std::sqrt(1 - param[3] * param[3]);
 		fgradient[1] = std::sqrt(1 - param[4] * param[4]);

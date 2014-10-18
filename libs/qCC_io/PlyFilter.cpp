@@ -1004,43 +1004,32 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pod.setListComboItems(listPropsText);
 
 			//try to restore previous context (if any)
-			int missingProps = pod.restorePreviousContext();
-			if (missingProps != 0)
+			bool hasAPreviousContext = false;
+			if (!pod.restorePreviousContext(hasAPreviousContext))
 			{
-				if (missingProps == 1)
-				{
-					//only one property is missing, we keep the old configuration and ask the user
-					//to fix this
-					ccLog::Warning("[PLY] Compared to the previous file, it seems a property is missing.");
-				}
-				else
-				{
-					if (missingProps > 1)
-					{
-						ccLog::Warning("[PLY] Too many differences with the previous file, we reset the dialog.");
-					}
-					//Set default/guessed element
-					pod.xComboBox->setCurrentIndex(xIndex);
-					pod.yComboBox->setCurrentIndex(yIndex);
-					pod.zComboBox->setCurrentIndex(zIndex);
+				if (hasAPreviousContext)
+					ccLog::Warning("[PLY] Too many differences with the previous file, we reset the dialog.");
+				//Set default/guessed element
+				pod.xComboBox->setCurrentIndex(xIndex);
+				pod.yComboBox->setCurrentIndex(yIndex);
+				pod.zComboBox->setCurrentIndex(zIndex);
 
-					pod.rComboBox->setCurrentIndex(rIndex);
-					pod.gComboBox->setCurrentIndex(gIndex);
-					pod.bComboBox->setCurrentIndex(bIndex);
+				pod.rComboBox->setCurrentIndex(rIndex);
+				pod.gComboBox->setCurrentIndex(gIndex);
+				pod.bComboBox->setCurrentIndex(bIndex);
 
-					pod.iComboBox->setCurrentIndex(iIndex);
+				pod.iComboBox->setCurrentIndex(iIndex);
 
-					pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
-					for (size_t j=1; j<sfPropIndexes.size(); ++j)
-						pod.addSFComboBox(sfPropIndexes[j]);
-			
-					pod.nxComboBox->setCurrentIndex(nxIndex);
-					pod.nyComboBox->setCurrentIndex(nyIndex);
-					pod.nzComboBox->setCurrentIndex(nzIndex);
+				pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
+				for (size_t j=1; j<sfPropIndexes.size(); ++j)
+					pod.addSFComboBox(sfPropIndexes[j]);
 
-					pod.facesComboBox->setCurrentIndex(facesIndex);
-					pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
-				}
+				pod.nxComboBox->setCurrentIndex(nxIndex);
+				pod.nyComboBox->setCurrentIndex(nyIndex);
+				pod.nzComboBox->setCurrentIndex(nzIndex);
+
+				pod.facesComboBox->setCurrentIndex(facesIndex);
+				pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
 			}
 
 			//We show the dialog (or we try to skip it ;)

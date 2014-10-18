@@ -52,9 +52,10 @@ public:
 	bool isValid(bool displayErrors = true) const;
 	
 	//! Restores the previously saved configuration (if any)
-	/** \return the number of missing properties (or -1 if no previous context is available)
+	/** \param hasAPreviousContext returns whether a previous context is stored
+		\return whether the previous context can be restored or not
 	**/
-	int restorePreviousContext();
+	bool restorePreviousContext(bool& hasAPreviousContext);
 
 	//! Returns whether the dialog can be 'skipped'
 	/** i.e. 'Apply all' button has been previously clicked
@@ -77,7 +78,7 @@ protected:
 	//! Saves current configuration (for internal use)
 	void saveContext(PlyLoadingContext* context);
 	//! Restore a previously saved configuration (for internal use)
-	unsigned restoreContext(PlyLoadingContext* context);
+	bool restoreContext(PlyLoadingContext* context, int& unassignedProps, int& mismatchProps);
 
 	//! Standard comboboxes elements
 	QStringList m_stdPropsText;

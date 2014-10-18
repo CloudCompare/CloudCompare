@@ -19,6 +19,7 @@
 
 //Qt
 #include <QMessageBox>
+#include <QStringList>
 
 //qCC_db
 #include <ccLog.h>
@@ -30,11 +31,17 @@
 //! Ply dialog loading context
 struct PlyLoadingContext
 {
-	PlyLoadingContext() : valid(false), applyAll(false) {}
+	PlyLoadingContext()
+		: valid(false)
+		, applyAll(false)
+		, ignoredProps(0)
+	{}
 	
+	QStringList allProperties;
 	std::vector<QString> standardCombosProperties;
 	std::vector<QString> sfCombosProperties;
 	std::vector<QString> listCombosProperties;
+	int ignoredProps;
 	bool valid;
 	bool applyAll;
 };
@@ -110,18 +117,25 @@ void PlyOpenDlg::setListComboItems(const QStringList& listPropsText)
 	}
 }
 
-int PlyOpenDlg::restorePreviousContext()
+bool PlyOpenDlg::restorePreviousContext(bool& hasAPreviousContext)
 {
-	if (!s_lastContext.valid)
-		return -1;
+	hasAPreviousContext = s_lastContext.valid;
+	if (!hasAPreviousContext)
+		return false;
 
-	unsigned missingProps = restoreContext(&s_lastContext);
+
+	int unassignedProps = 0;
+	int mismatchProps = 0;
+	bool restored = restoreContext(&s_lastContext, unassignedProps, mismatchProps);
 
 	//auto-stop: we can't keep 'apply all' if something has changed
-	if (missingProps != 0)
+	if (!restored || mismatchProps != 0/* || unassignedProps > 0*/)
+	{
 		s_lastContext.applyAll = false;
+		return false;
+	}
 
-	return static_cast<int>(missingProps);
+	return true;
 }
 
 void PlyOpenDlg::saveContext(PlyLoadingContext* context)
@@ -133,20 +147,46 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 	}
 	context->valid = false;
 
-	//currentIndex == 0 means 'NONE'!!!
+	//create the list of all properties
+	context->allProperties.clear();
+	assert(m_standardCombos.front());
+	if (m_standardCombos.front())
+		for (int i=1; i<m_standardCombos.front()->count(); ++i) //the first item is always 'NONE'
+			context->allProperties.append(m_standardCombos.front()->itemText(i));
+	assert(m_listCombos.front());
+	if (m_listCombos.front())
+		for (int i=1; i<m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
+			context->allProperties.append(m_listCombos.front()->itemText(i));
+
+	//now remember how each combo-box is mapped
+	int assignedProps = 0;
 	try
 	{
 		//standard combos
 		{
 			context->standardCombosProperties.resize(m_standardCombos.size());
+			std::fill(context->standardCombosProperties.begin(),context->standardCombosProperties.end(),QString());
 			for (size_t i=0; i<m_standardCombos.size(); ++i)
-				context->standardCombosProperties[i] = (m_standardCombos[i] && m_standardCombos[i]->currentIndex() > 0 ? m_standardCombos[i]->currentText() : QString());
+			{
+				if (m_standardCombos[i] && m_standardCombos[i]->currentIndex() > 0) //currentIndex == 0 means 'NONE'!!!
+				{
+					context->standardCombosProperties[i] = m_standardCombos[i]->currentText();
+					++assignedProps;
+				}
+			}
 		}
 		//list combos
 		{
 			context->listCombosProperties.resize(m_listCombos.size());
+			std::fill(context->listCombosProperties.begin(),context->listCombosProperties.end(),QString());
 			for (size_t i=0; i<m_listCombos.size(); ++i)
-				context->listCombosProperties[i] = (m_listCombos[i] && m_listCombos[i]->currentIndex() > 0 ? m_listCombos[i]->currentText() : QString());
+			{
+				if (m_listCombos[i] && m_listCombos[i]->currentIndex() > 0)
+				{
+					context->listCombosProperties[i] = m_listCombos[i]->currentText();
+					++assignedProps;
+				}
+			}
 		}
 		//additional SF combos
 		{
@@ -155,7 +195,10 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 			{
 				//we only copy the valid ones!
 				if (m_sfCombos[i] && m_sfCombos[i]->currentIndex() > 0)
+				{
 					context->sfCombosProperties.push_back(m_sfCombos[i]->currentText());
+					++assignedProps;
+				}
 			}
 		}
 	}
@@ -165,10 +208,11 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		return;
 	}
 
+	context->ignoredProps = context->allProperties.size() - assignedProps;
 	context->valid = true;
 }
 
-unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
+bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps, int& mismatchProps)
 {
 	if (!context || !context->valid)
 	{
@@ -176,8 +220,29 @@ unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
 		return false;
 	}
 
-	//currentIndex == 0 means 'NONE'!!!
-	unsigned missingEntries = 0;
+	//first check if all new properties are in the old properties set
+	mismatchProps = 0;
+	int totalProps = 0;
+	{
+		assert(m_standardCombos.front());
+		if (m_standardCombos.front())
+			for (int i=1; i<m_standardCombos.front()->count(); ++i) //the first item is always 'NONE'
+			{
+				++totalProps;
+				if (!context->allProperties.contains(m_standardCombos.front()->itemText(i)))
+					++mismatchProps;
+			}
+		assert(m_listCombos.front());
+		if (m_listCombos.front())
+			for (int i=1; i<m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
+			{
+				++totalProps;
+				if (!context->allProperties.contains(m_standardCombos.front()->itemText(i)))
+					++mismatchProps;
+			}
+	}
+
+	int assignedEntries = 0;
 
 	//standard combos
 	assert(m_standardCombos.size() == context->standardCombosProperties.size());
@@ -191,9 +256,11 @@ unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
 				{
 					//try to find it in the new property list!
 					int idx = m_standardCombos[i]->findText(context->standardCombosProperties[i]);
-					if (idx < 0)
-						++missingEntries;
-					m_standardCombos[i]->setCurrentIndex(idx);
+					if (idx >= 0)
+					{
+						++assignedEntries;
+						m_standardCombos[i]->setCurrentIndex(idx);
+					}
 				}
 			}
 	}
@@ -210,9 +277,11 @@ unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
 				{
 					//try to find it in the new property list!
 					int idx = m_listCombos[i]->findText(context->listCombosProperties[i]);
-					if (idx < 0)
-						++missingEntries;
-					m_listCombos[i]->setCurrentIndex(idx);
+					if (idx >= 0)
+					{
+						++assignedEntries;
+						m_listCombos[i]->setCurrentIndex(idx);
+					}
 				}
 			}
 
@@ -227,10 +296,9 @@ unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
 		{
 			//try to find it in the new property list!
 			int idx = m_sfCombos.front()->findText(context->sfCombosProperties[i]);
-			if (idx < 0)
-				++missingEntries;
-			else
+			if (idx >= 0)
 			{
+				++assignedEntries;
 				//we use the default sf combo-box by default
 				if (firstSF)
 					m_sfCombos.front()->setCurrentIndex(idx);
@@ -241,7 +309,10 @@ unsigned PlyOpenDlg::restoreContext(PlyLoadingContext* context)
 		}
 	}
 
-	return missingEntries;
+	assert(assignedEntries <= totalProps);
+	unassignedProps = totalProps - assignedEntries;
+
+	return true;
 }
 
 void PlyOpenDlg::apply()

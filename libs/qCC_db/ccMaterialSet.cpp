@@ -81,12 +81,17 @@ bool ccMaterialSet::addMaterial(const ccMaterial& mat)
 bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSet &materials, QStringList& errors)
 {
 	//open mtl file
-	QFile file(path+QString('/')+filename);
+	QString fullPathFilename = path + QString('/') + filename;
+	QFile file(fullPathFilename);
 	if (!file.open(QFile::ReadOnly))
 	{
 		errors << QString("Error reading file: %1").arg(filename);
 		return false;
 	}
+
+	//update path (if the input filename has already a relative path)
+	path = QFileInfo(fullPathFilename).absolutePath();
+	
 	QTextStream stream(&file);
 
 	QString currentLine = stream.readLine();
@@ -120,7 +125,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			currentMaterial.name = (tokens.size()>1 ? tokens[1] : "undefined");
 
 		}
-		else if (currentMatIndex>=0) //we already have a "current" material
+		else if (currentMatIndex >= 0) //we already have a "current" material
 		{
 			//ambient
 			if (tokens.front() == "Ka")
@@ -202,7 +207,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 				//DGM: in case there's hidden or space characters at the beginning of the line...
 				int shift = currentLine.indexOf("map_K",0);
 				QString textureFilename = (shift + 7 < currentLine.size() ? currentLine.mid(shift+7).trimmed() : QString());
-				QString fullTexName = path+QString('/') + textureFilename;
+				QString fullTexName = path + QString('/') + textureFilename;
 				if (!currentMaterial.setTexture(fullTexName))
 				{
 					errors << QString("Failed to load texture file: %1").arg(fullTexName);

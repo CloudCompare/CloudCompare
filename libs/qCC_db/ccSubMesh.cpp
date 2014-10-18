@@ -82,7 +82,7 @@ void ccSubMesh::forEach(genericTriangleAction& anAction)
 		return;
 
 	m_triIndexes->placeIteratorAtBegining();
-	for (unsigned i=0;i<m_triIndexes->currentSize();++i)
+	for (unsigned i=0; i<m_triIndexes->currentSize(); ++i)
 	{
 		CCLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(m_triIndexes->getCurrentValue());
 		anAction(*tri);
@@ -102,7 +102,7 @@ CCLib::GenericTriangle* ccSubMesh::_getNextTriangle() //temporary object
 
 CCLib::TriangleSummitsIndexes* ccSubMesh::getNextTriangleIndexes()
 {
-	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->getTriangleIndexes(m_globalIterator++) : 0;
+	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->getTriangleIndexes(m_triIndexes->getValue(m_globalIterator++)) : 0;
 }
 
 bool ccSubMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)

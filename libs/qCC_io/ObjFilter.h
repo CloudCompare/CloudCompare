@@ -20,8 +20,6 @@
 
 #include "FileIOFilter.h"
 
-class ccGenericMesh;
-
 //! Wavefront meshes file I/O filter
 class QCC_IO_LIB_API ObjFilter : public FileIOFilter
 {
@@ -41,10 +39,6 @@ public:
 	virtual bool canLoadExtension(QString upperCaseExt) const;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
-protected:
-
-	//! Custom save method
-	CC_FILE_ERROR saveToFile(ccGenericMesh* mesh, FILE *theFile, QString filename);
 };
 
 #endif //CC_OBJ_FILTER_HEADER

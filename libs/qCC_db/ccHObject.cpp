@@ -64,6 +64,7 @@ ccHObject::ccHObject(QString name/*=QString()*/)
 	, ccDrawableObject()
 	, m_parent(0)
 	, m_selectionBehavior(SELECTION_AA_BBOX)
+	, m_isDeleting(false)
 {
 	setVisible(false);
 	lockVisibility(true);
@@ -76,12 +77,15 @@ ccHObject::ccHObject(const ccHObject& object)
 	, ccDrawableObject(object)
 	, m_parent(0)
 	, m_selectionBehavior(object.m_selectionBehavior)
+	, m_isDeleting(false)
 {
 	m_glTransHistory.toIdentity();
 }
 
 ccHObject::~ccHObject()
 {
+	m_isDeleting = true;
+
 	//process dependencies
 	for (std::map<ccHObject*,int>::const_iterator it=m_dependencies.begin(); it!=m_dependencies.end(); ++it)
 	{
@@ -281,9 +285,11 @@ int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject)
 	return (it != m_dependencies.end() ? it->second : 0);
 }
 
-void ccHObject::removeDependencyWith(const ccHObject* otherObject)
+void ccHObject::removeDependencyWith(ccHObject* otherObject)
 {
 	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
+	if (!otherObject->m_isDeleting)
+		otherObject->removeDependencyFlag(this,DP_NOTIFY_OTHER_ON_DELETE);
 }
 
 void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS flag)
@@ -302,12 +308,12 @@ void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS fl
 
 void ccHObject::onDeletionOf(const ccHObject* obj)
 {
-	//remove any dependency declated with this object
+	//remove any dependency declarated with this object
 	//and remove it from the children list as well (in case of)
 	//DGM: we can't call 'detachChild' as this method will try to
 	//modify the child's content!
 	//remove any dependency (bilateral)
-	removeDependencyWith(obj);
+	removeDependencyWith(const_cast<ccHObject*>(obj)); //this method will only modify the dependency flags of obj
 
 	int pos = getChildIndex(obj);
 	if (pos >= 0)

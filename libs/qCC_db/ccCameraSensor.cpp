@@ -1600,7 +1600,7 @@ bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
 			double lastError = cg.iterConjugateGradient(X0);
 			if (lastError < convergenceThreshold) //converged
 			{
-				ccLog::PrintDebug(QString("[computeOrthoRectificationParams] Convergence reached in %i iteration(s) (error: %g)").arg(i+1).arg(lastError));
+				ccLog::PrintDebug(QString("[computeOrthoRectificationParams] Convergence reached in %1 iteration(s) (error: %2)").arg(i+1).arg(lastError));
 				break;
 			}
 		}

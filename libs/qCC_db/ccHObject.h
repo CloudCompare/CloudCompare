@@ -102,7 +102,7 @@ public:
 	//! Removes any dependency flags with a given object
 	/** \param otherObject other object
 	**/
-	void removeDependencyWith(const ccHObject* otherObject);
+	void removeDependencyWith(ccHObject* otherObject);
 
 	//! Removes a given dependency flag
 	/** \param otherObject other object
@@ -386,6 +386,9 @@ protected:
 		as a single transformation.
 	**/
 	ccGLMatrix m_glTransHistory;
+
+	//! Flag to safely handle dependencies when the object is being deleted
+	bool m_isDeleting;
 };
 
 /*** Helpers ***/

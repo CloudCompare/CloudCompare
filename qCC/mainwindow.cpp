@@ -6875,9 +6875,13 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				else if (entity->isKindOf(CC_TYPES::MESH)/*|| entity->isA(CC_TYPES::PRIMITIVE)*/) //TODO
 				{
 					if (entity->isA(CC_TYPES::MESH))
+					{
 						segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(!deleteHiddenParts);
+					}
 					else if (entity->isA(CC_TYPES::SUB_MESH))
+					{
 						segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(!deleteHiddenParts);
+					}
 
 					deleteOriginalEntity |=  (ccHObjectCaster::ToGenericMesh(entity)->size() == 0);
 				}

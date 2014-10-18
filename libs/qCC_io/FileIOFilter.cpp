@@ -226,7 +226,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	if (result != CC_FERR_NO_ERROR)
 		DisplayErrorMessage(result,"loading",fi.baseName());
 	else
-		ccLog::Print(QString("[I/O] File '%1' loaded successfully").arg(fi.baseName()));
+		ccLog::Print(QString("[I/O] File '%1' loaded successfully").arg(filename));
 
 	unsigned childrenCount = container->getChildrenNumber();
 	if (childrenCount != 0)

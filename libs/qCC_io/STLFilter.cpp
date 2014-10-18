@@ -588,7 +588,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 
 	unsigned pointCount = 0;
 	unsigned faceCount = 0;
-	bool normalWarningAlreadyDisplayed = true;
+	bool normalWarningAlreadyDisplayed = false;
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -624,7 +624,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 				break;
 			}
 
-			if (normals && tokens.size()>=5)
+			if (normals && tokens.size() >= 5)
 			{
 				//let's try to read normal
 				if (tokens[1].toUpper() == "NORMAL")
@@ -641,19 +641,19 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 					if (!normalIsOk && !normalWarningAlreadyDisplayed)
 					{
 						ccLog::Warning("[STL] Error on line #%i: failed to read 'normal' values!",lineCount);
-						normalWarningAlreadyDisplayed=true;
+						normalWarningAlreadyDisplayed = true;
 					}
 				}
 				else if (!normalWarningAlreadyDisplayed)
 				{
 					ccLog::Warning("[STL] Error on line #%i: expecting 'normal' after 'facet'!",lineCount);
-					normalWarningAlreadyDisplayed=true;
+					normalWarningAlreadyDisplayed = true;
 				}
 			}
 			else if (tokens.size() > 1 && !normalWarningAlreadyDisplayed)
 			{
 				ccLog::Warning("[STL] Error on line #%i: incomplete 'normal' description!",lineCount);
-				normalWarningAlreadyDisplayed=true;
+				normalWarningAlreadyDisplayed = true;
 			}
 		}
 

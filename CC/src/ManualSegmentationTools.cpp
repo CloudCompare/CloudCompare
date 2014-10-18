@@ -189,7 +189,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		for (unsigned i=0; i<numberOfIndexes; ++i)
 		{
 			assert(pointIndexes->getPointGlobalIndex(i) < numberOfPoints);
-			newPointIndexes[pointIndexes->getPointGlobalIndex(i)]=i+1;
+			newPointIndexes[pointIndexes->getPointGlobalIndex(i)] = i+1;
 		}
 	}
 
@@ -220,10 +220,10 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		}
 
 		newMesh = new SimpleMesh(destCloud ? destCloud : pointIndexes->getAssociatedCloud());
-		unsigned count=0;
+		unsigned count = 0;
 
 		theMesh->placeIteratorAtBegining();
-		for (unsigned i=0;i<numberOfTriangles;++i)
+		for (unsigned i=0; i<numberOfTriangles; ++i)
 		{
 			bool triangleIsOnTheRightSide = true;
 
@@ -231,23 +231,23 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 			int newVertexIndexes[3];
 
 			//VERSION: WE KEEP THE TRIANGLE ONLY IF ITS 3 VERTICES ARE INSIDE
-			for (uchar j=0;j<3;++j)
+			for (uchar j=0;j <3; ++j)
 			{
 				const unsigned& currentVertexFlag = newPointIndexes[tsi->i[j]];
 
 				//if the vertex is rejected, we discard this triangle
-				if (currentVertexFlag==0)
+				if (currentVertexFlag == 0)
 				{
 					triangleIsOnTheRightSide = false;
 					break;
 				}
-				newVertexIndexes[j]=currentVertexFlag-1;
+				newVertexIndexes[j] = currentVertexFlag-1;
 			}
 
 			//if we keep the triangle
 			if (triangleIsOnTheRightSide)
 			{
-				if (count == newMesh->size() && !newMesh->reserve(newMesh->size()+1000)) //auto expand mesh size
+				if (count == newMesh->size() && !newMesh->reserve(newMesh->size() + 1000)) //auto expand mesh size
 				{
 					//stop process
 					delete newMesh;
@@ -256,9 +256,9 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 				}
 				++count;
 
-				newMesh->addTriangle(indexShift + newVertexIndexes[0],
-									indexShift + newVertexIndexes[1],
-									indexShift + newVertexIndexes[2]);
+				newMesh->addTriangle(	indexShift + newVertexIndexes[0],
+										indexShift + newVertexIndexes[1],
+										indexShift + newVertexIndexes[2] );
 			}
 
 			if (nprogress && !nprogress->oneStep())
@@ -269,14 +269,17 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		}
 
 		if (nprogress)
+		{
 			delete nprogress;
+			nprogress = 0;
+		}
 
 		if (newMesh)
 		{
-			if (newMesh->size()==0)
+			if (newMesh->size() == 0)
 			{
 				delete newMesh;
-				newMesh=0;
+				newMesh = 0;
 			}
 			else if (count < newMesh->size())
 			{

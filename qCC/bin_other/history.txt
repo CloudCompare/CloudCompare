@@ -172,6 +172,8 @@ v2.5.6 ??/??/2014
 		+ CC is now more robust to this kind of errors!
 	* 3D names now follow the entity when they are interactively translated (scissors tool)
 	* Cloud cloning was not preserving the point size
+	* When manually segmenting a mesh, its textures could be wrongly released from the OpenGL context
+		(causing display errors in the best case)
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

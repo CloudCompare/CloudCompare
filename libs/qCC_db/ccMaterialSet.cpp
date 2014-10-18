@@ -50,11 +50,10 @@ ccMaterialSet::~ccMaterialSet()
 
 int ccMaterialSet::findMaterial(QString mtlName)
 {
-	unsigned i=0;
-	ccMaterialSet::const_iterator it = begin();
-	for (; it != end(); ++it,++i)
+	unsigned i = 0;
+	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it,++i)
 		if (it->name == mtlName)
-			return (int)i;
+			return static_cast<int>(i);
 
 	return -1;
 }
@@ -297,6 +296,13 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 	return true;
 }
 
+//Number of times a texture is 'used'
+typedef QMap< /*key=*/unsigned, /*usageCount=*/unsigned > TextureUsageMap;
+//Shared version of TextureUsageMap
+typedef QSharedPointer<TextureUsageMap> _TextureUsageMap;
+//Association between a display and a 'texture usage map'
+static QMap< ccGenericGLDisplay*, _TextureUsageMap > s_textureToDisplayAssociation;
+
 void ccMaterialSet::associateTo(ccGenericGLDisplay* display)
 {
 	if (m_display == display)
@@ -308,10 +314,50 @@ void ccMaterialSet::associateTo(ccGenericGLDisplay* display)
 		{
 			//we release texture from old display (if any)
 			if (it->texID != 0 && m_display)
-				m_display->releaseTexture(it->texID);
+			{
+				//check if the texture is declared in the 'texture usage map'
+				//of the former display
+				bool releaseTexture = false;
+				_TextureUsageMap& usageMap = s_textureToDisplayAssociation[m_display];
+				assert(usageMap); //should already exist!
+				if (usageMap)
+				{
+					unsigned usageCount = usageMap->value(it->texID);
+					assert(usageCount != 0);
+					if (usageCount < 2)
+					{
+						//we can release it!
+						usageMap->remove(it->texID);
+						releaseTexture = true;
+
+						//shall we clean everything or leave empty shells?
+						if (usageMap->size() == 0)
+							s_textureToDisplayAssociation.remove(m_display);
+					}
+					else
+					{
+						//we only decrease its usage count
+						(*usageMap)[it->texID]--;
+					}
+				}
+
+				if (releaseTexture)
+					m_display->releaseTexture(it->texID);
+			}
+
 			//we register texture in the new one (if any)
-			//it->texID = 0;
 			it->texID = (display ? display->getTexture(it->getTexture()) : 0);
+
+			//Register new texID
+			if (it->texID)
+			{
+				_TextureUsageMap& usageMap = s_textureToDisplayAssociation[display];
+				//Create map for the new display if necessary
+				if (!usageMap)
+					usageMap = _TextureUsageMap(new TextureUsageMap);
+				//increase this texture ID usage count
+				(*usageMap)[it->texID]++;
+			}
 		}
 	}
 
@@ -327,7 +373,7 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 {
 	try
 	{
-		reserve(size()+source.size());
+		reserve(size() + source.size());
 	}
 	catch(.../*const std::bad_alloc&*/) //out of memory
 	{

@@ -34,7 +34,7 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial>, public CCSh
 public:
 
 	//! Default constructor
-	ccMaterialSet(QString name=QString());
+	ccMaterialSet(QString name = QString());
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MATERIAL_SET; }

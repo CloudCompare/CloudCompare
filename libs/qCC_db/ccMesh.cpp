@@ -440,8 +440,8 @@ void ccMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMater
 	{
 		int childIndex = getChildIndex(m_materials);
 		m_materials->release();
-		m_materials=0;
-		if (childIndex>=0)
+		m_materials = 0;
+		if (childIndex >= 0)
 			removeChild(childIndex);
 	}
 
@@ -1991,7 +1991,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				NormsIndexesTableType* newTriNormals = 0;
 				if (m_triNormals && m_triNormalIndexes)
 				{
-					assert(m_triNormalIndexes->currentSize()==m_triVertIndexes->currentSize());
+					assert(m_triNormalIndexes->currentSize() == m_triVertIndexes->currentSize());
 					//create new 'minimal' subset
 					newTriNormals = new NormsIndexesTableType();
 					newTriNormals->link();
@@ -2013,7 +2013,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				TextureCoordsContainer* newTriTexIndexes = 0;
 				if (m_texCoords && m_texCoordIndexes)
 				{
-					assert(m_texCoordIndexes->currentSize()==m_triVertIndexes->currentSize());
+					assert(m_texCoordIndexes->currentSize() == m_triVertIndexes->currentSize());
 					//create new 'minimal' subset
 					newTriTexIndexes = new TextureCoordsContainer();
 					newTriTexIndexes->link();
@@ -2037,7 +2037,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				{
 					assert(m_triMtlIndexes->currentSize() == m_triVertIndexes->currentSize());
 					//create new 'minimal' subset
-					newMaterials = new ccMaterialSet(m_materials->getName()+QString(".subset"));
+					newMaterials = new ccMaterialSet(m_materials->getName() + QString(".subset"));
 					newMaterials->link();
 					try
 					{
@@ -2086,7 +2086,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 								if (triNormIndexes[j] >=0 && newNormIndexes[triNormIndexes[j]] < 0)
 								{
 									if (newTriNormals->currentSize() == newTriNormals->capacity() 
-										&& !newTriNormals->reserve(newTriNormals->currentSize()+1000)) //auto expand
+										&& !newTriNormals->reserve(newTriNormals->currentSize() + 1000)) //auto expand
 									{
 										ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 										newMesh->removePerTriangleNormalIndexes();
@@ -2119,12 +2119,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 							//for each triangle of this mesh, try to determine if its textures coordinates are already in use
 							//(otherwise add them to the new container and increase its index)
-							for (unsigned j=0;j<3;++j)
+							for (unsigned j=0; j<3; ++j)
 							{
 								if (triTexIndexes[j] >=0 && newTexIndexes[triTexIndexes[j]] < 0)
 								{
 									if (newTriTexIndexes->currentSize() == newTriTexIndexes->capacity() 
-										&& !newTriTexIndexes->reserve(newTriTexIndexes->currentSize()+500)) //auto expand
+										&& !newTriTexIndexes->reserve(newTriTexIndexes->currentSize() + 500)) //auto expand
 									{
 										ccLog::Error("Failed to create new texture coordinates subset! (not enough memory)");
 										newMesh->removePerTriangleTexCoordIndexes();
@@ -2133,7 +2133,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 										break;
 									}
 									//import old texture coordinate to new subset (create new index)
-									newTexIndexes[triTexIndexes[j]] = (int)newTriTexIndexes->currentSize(); //new element index = new size - 1 = old size!
+									newTexIndexes[triTexIndexes[j]] = static_cast<int>(newTriTexIndexes->currentSize()); //new element index = new size - 1 = old size!
 									newTriTexIndexes->addElement(m_texCoords->getValue(triTexIndexes[j]));
 								}
 							}
@@ -2159,7 +2159,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 							if (triMatIndex >=0 && newMatIndexes[triMatIndex] < 0)
 							{
 								//import old material to new subset (create new index)
-								newMatIndexes[triMatIndex] = (int)newMaterials->size(); //new element index = new size - 1 = old size!
+								newMatIndexes[triMatIndex] = static_cast<int>(newMaterials->size()); //new element index = new size - 1 = old size!
 								try
 								{
 									newMaterials->push_back(m_materials->at(triMatIndex));
@@ -2188,7 +2188,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newMesh->setTriNormsTable(newTriNormals);
 					newMesh->addChild(newTriNormals);
 					newTriNormals->release();
-					newTriNormals=0;
+					newTriNormals = 0;
 				}
 
 				if (newTriTexIndexes)
@@ -2196,7 +2196,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newMesh->setTexCoordinatesTable(newTriTexIndexes);
 					newMesh->addChild(newTriTexIndexes);
 					newTriTexIndexes->release();
-					newTriTexIndexes=0;
+					newTriTexIndexes = 0;
 				}
 
 				if (newMaterials)
@@ -2204,7 +2204,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newMesh->setMaterialSet(newMaterials);
 					newMesh->addChild(newMaterials);
 					newMaterials->release();
-					newMaterials=0;
+					newMaterials = 0;
 				}
 			}
 

@@ -6818,13 +6818,15 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
 			{
-				bool lockedVertices;
-				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity,&lockedVertices);
+				//first, do the things that must absolutely done BEFORE removing the entity from DB (even temporarily)
+				//bool lockedVertices;
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity/*,&lockedVertices*/);
+				assert(cloud);
 				if (cloud)
 				{
 					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
 					
-					//Special case: labels (do this before temporarily removing 'entity' from DB!)
+					//specific case: labels (do this before temporarily removing 'entity' from DB!)
 					ccHObject::Container labels;
 					if (m_ccRoot)
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_TYPES::LABEL_2D);
@@ -6860,9 +6862,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
 				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 
-				//save origin entity display (for later)
-				ccGenericGLDisplay* display = entity->getDisplay();
-
+				//apply segmentation
 				ccHObject* segmentationResult = 0;
 				bool deleteOriginalEntity = deleteHiddenParts;
 				if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -6884,9 +6884,10 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 				if (segmentationResult)
 				{
-					//another specific case: sensors (on clouds)
+					assert(cloud);
 					if (cloud)
 					{
+						//another specific case: sensors (on clouds)
 						for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
 						{
 							ccHObject* child = entity->getChild(i);
@@ -6921,13 +6922,13 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									assert(false);
 								}
 							}
-						}
+						} //for each child
 					}
 
 					//we must take care of the remaining part
 					if (!deleteHiddenParts)
 					{
-						//no need to put back the entity if we delete it afterwards!
+						//no need to put back the entity in DB if we delete it afterwards!
 						if (!deleteOriginalEntity)
 						{
 							entity->setName(entity->getName() + QString(".remaining"));
@@ -6967,7 +6968,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (objContext.parent)
 						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
 
-					segmentationResult->setDisplay(display);
+					segmentationResult->setDisplay_recursive(entity->getDisplay());
 					segmentationResult->prepareDisplayForRefresh_recursive();
 
 					addToDB(segmentationResult);

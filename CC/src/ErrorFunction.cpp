@@ -68,7 +68,7 @@ double ErrorFunction::erfc(double x)
 //expression inside [] is a continued fraction so '+' means add to denominator only
 {
 	if (fabs(x) < 2.2)
-		return 1.0 - erf(x); //use series when fabs(x) < 2.2
+		return erfc(x); //use series when fabs(x) < 2.2
 
 	if (x < 1.0e-12) //continued fraction only valid for x>0
 		return 2.0 - erfc(-x);

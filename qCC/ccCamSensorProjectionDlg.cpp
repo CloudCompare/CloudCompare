@@ -112,17 +112,17 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 		{
 			const ccCameraSensor::BrownDistortionParameters* bParams = static_cast<ccCameraSensor::BrownDistortionParameters*>(distParams.data());
 			distInfo = "Brown distortion / uncertainty model:\n";
-			distInfo = "* Radial distortion:\n";
+			distInfo += "* Radial distortion:\n";
 			distInfo += QString("\tK1 = %1\n").arg(bParams->K_BrownParams[0]);
 			distInfo += QString("\tK2 = %1\n").arg(bParams->K_BrownParams[1]);
 			distInfo += QString("\tK3 = %1\n").arg(bParams->K_BrownParams[2]);
-			distInfo = "* Tangential distortion:\n";
+			distInfo += "* Tangential distortion:\n";
 			distInfo += QString("\tP1 = %1\n").arg(bParams->P_BrownParams[0]);
 			distInfo += QString("\tP2 = %1\n").arg(bParams->P_BrownParams[1]);
-			distInfo = "* Linear disparity:\n";
+			distInfo += "* Linear disparity:\n";
 			distInfo += QString("\tA = %1\n").arg(bParams->linearDisparityParams[0]);
 			distInfo += QString("\tB = %1\n").arg(bParams->linearDisparityParams[1]);
-			distInfo = "* Principal point offset:\n";
+			distInfo += "* Principal point offset:\n";
 			distInfo += QString("\tX = %1\n").arg(bParams->principalPointOffset[0]);
 			distInfo += QString("\tY = %1\n").arg(bParams->principalPointOffset[1]);
 		}

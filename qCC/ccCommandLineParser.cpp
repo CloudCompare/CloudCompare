@@ -2441,8 +2441,6 @@ bool ccCommandLineParser::commandSaveMeshes(QStringList& arguments)
 
 bool ccCommandLineParser::commandAutoSave(QStringList& arguments)
 {
-	bool autoSave = true;
-
 	if (arguments.empty())
 		return Error(QString(QString("Missing parameter: option after '%1' (%2/%2)").arg(COMMAND_AUTO_SAVE).arg(OPTION_ON).arg(OPTION_OFF)));
 

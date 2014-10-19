@@ -4624,7 +4624,7 @@ void MainWindow::doAction4pcsRegister()
 	if (!aDlg.exec())
 		return;
 
-	model = aDlg.getModelObject();
+	// model = aDlg.getModelObject();
 	data = aDlg.getDataObject();
 
 	//Take the correct number of points among the clouds

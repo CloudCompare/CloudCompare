@@ -796,7 +796,6 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 					setMinSatValue(newValue);
 				}
 				break;
-				break;
 			case RIGHT_ARROW:
 				if (m_arrowRight)
 				{

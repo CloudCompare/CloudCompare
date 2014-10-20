@@ -215,7 +215,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
 				QString sfName((*it)->getName());
-				sfName.replace(" ","_");
+				sfName.replace(separator,'_');
 				header.append(separator);
 				header.append(sfName);
 			}
@@ -461,6 +461,7 @@ void clearStructure(cloudAttributesDescriptor &cloudDesc)
 cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequence,
 										unsigned numberOfPoints,
 										int& maxIndex,
+										char separator,
 										unsigned step = 1)
 {
 	ccPointCloud* cloud = new ccPointCloud();
@@ -542,6 +543,10 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 						sfName += QString(" #%1").arg(sfIndex);
 					//if (isPositive)
 					//	sfName += QString(" (positive)");
+				}
+				else
+				{
+					sfName.replace('_',separator);
 				}
 
 				ccScalarField* sf = new ccScalarField(qPrintable(sfName));
@@ -656,7 +661,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 	//we initialize the loading accelerator structure and point cloud
 	int maxPartIndex = -1;
-	cloudAttributesDescriptor cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, chunkRank);
+	cloudAttributesDescriptor cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, separator, chunkRank);
 
 	if (!cloudDesc.cloud)
 		return CC_FERR_NOT_ENOUGH_MEMORY;
@@ -773,7 +778,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 				//and create new one
 				cloudChunkPos = pointsRead;
 				cloudChunkSize = std::min(maxCloudSize,approximateNumberOfLines-cloudChunkPos);
-				cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, ++chunkRank);
+				cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, separator, ++chunkRank);
 				if (!cloudDesc.cloud)
 				{
 					ccLog::Error("Not enough memory! Process stopped ...");

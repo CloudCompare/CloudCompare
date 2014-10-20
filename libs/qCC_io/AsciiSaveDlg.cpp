@@ -43,6 +43,8 @@ AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
 
 AsciiSaveDlg::~AsciiSaveDlg()
 {
+	if (m_ui)
+		delete m_ui;
 }
 
 bool AsciiSaveDlg::saveColumnsNamesHeader() const

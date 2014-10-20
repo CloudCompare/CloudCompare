@@ -666,6 +666,10 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							field->sf->computeMinAndMax();
 
 							if (	field->type == LAS_CLASSIFICATION
+								||	field->type == LAS_CLASSIF_VALUE
+								||	field->type == LAS_CLASSIF_SYNTHETIC
+								||	field->type == LAS_CLASSIF_KEYPOINT
+								||	field->type == LAS_CLASSIF_WITHHELD
 								||	field->type == LAS_RETURN_NUMBER
 								||	field->type == LAS_NUMBER_OF_RETURNS)
 							{

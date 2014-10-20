@@ -26,10 +26,10 @@ if( MSVC )
   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
 endif()
 
-include_directories(${PCL_INCLUDE_DIRS})
-include_directories(filters)
-include_directories(filters/dialogs)
-include_directories(utils)
+include_directories( ${PCL_INCLUDE_DIRS} )
+include_directories( filters )
+include_directories( filters/dialogs )
+include_directories( utils )
 
 project( QPCL_PLUGIN_UTILS_LIB )
 

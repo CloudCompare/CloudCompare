@@ -31,7 +31,6 @@
 #include "STLFilter.h"
 #include "LASFilter.h"
 #include "E57Filter.h"
-#include "PCDFilter.h"
 #include "PTXFilter.h"
 //MESHES
 #include "X3DFilter.h"
@@ -79,7 +78,6 @@ void FileIOFilter::InitInternalFilters()
 	Register(Shared(new E57Filter()));
 #endif
 	Register(Shared(new PTXFilter()));
-	Register(Shared(new PCDFilter()));
 	Register(Shared(new PlyFilter()));
 	Register(Shared(new ObjFilter()));
 	Register(Shared(new VTKFilter()));
@@ -323,6 +321,12 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 	{
 		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
 	}
+	else
+	{
+	{
+		DisplayErrorMessage(result,"saving",filename);
+	}
+	}
 
 	return result;
 }
@@ -393,7 +397,10 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 	case CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN:
 		errorStr = "the file was written by a plugin but none of the loaded plugins can deserialize it";
 		break;
-	case CC_FERR_THIRD_PARTY_LIB:
+	case CC_FERR_THIRD_PARTY_LIB_FAILURE:
+		errorStr = "the third-party library in charge of saving/loading the file has failed to perform the operation";
+		break;
+	case CC_FERR_THIRD_PARTY_LIB_EXCEPTION:
 		errorStr = "the third-party library in charge of saving/loading the file has thrown an exception";
 		break;
 	case CC_FERR_NOT_IMPLEMENTED:

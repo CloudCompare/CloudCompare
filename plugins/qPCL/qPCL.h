@@ -25,8 +25,6 @@
 #include <QtGui>
 
 class BaseFilter;
-class QToolBar;
-class QMenu;
 
 //! PCL bridge plugin
 class qPCL : public QObject, public ccStdPluginInterface
@@ -39,15 +37,12 @@ class qPCL : public QObject, public ccStdPluginInterface
 
 public:
 
-	//! Default constructor
-	qPCL();
-
 	//! Destructor
 	virtual ~qPCL();
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Point Cloud Library"; }
-	virtual QString getDescription() const { return "PCL (Point Cloud Library) bridge"; }
+	virtual QString getName() const { return "PCL wrapper"; }
+	virtual QString getDescription() const { return "PCL (Point Cloud Library) wrapper"; }
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
@@ -68,9 +63,6 @@ public slots:
 	void handleErrorMessage(QString);
 
 protected:
-
-	//! Menu
-	QMenu* m_menu;
 
 	//! Loaded filters
 	std::vector<BaseFilter*> m_filters;

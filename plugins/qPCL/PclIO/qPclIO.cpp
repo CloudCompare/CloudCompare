@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qPCL                        #
+//#                     CLOUDCOMPARE PLUGIN: qPclIO                       #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,45 +11,20 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef Q_PCL_PLUGIN_LOADPCD_HEADER
-#define Q_PCL_PLUGIN_LOADPCD_HEADER
 
-#include "BaseFilter.h"
+#include "qPclIO.h"
 
-//Qt
-#include <QStringList>
+//Local
+#include "PcdFilter.h"
 
-//! LoadPCD filter
-/** \author Luca Penasa
-	Enables loading of some of the types defined in PCL.
-	This class is an implementation of the PCLFilter base class.
-	Overridden methods are init(), openDialog() and compute().
-	\note conversion is made using the function sensorToCC()
-**/
-class LoadPCD: public BaseFilter
+FileIOFilter::Shared qPclIO::getFilter(ccMainAppInterface* app)
 {
-	Q_OBJECT
+	return FileIOFilter::Shared(new PcdFilter);
+}
 
-public:
-
-	//! Default constructor
-	LoadPCD();
-
-protected:
-
-	//inherited from BaseFilter
-	int checkSelected();
-	int openInputDialog();
-	int compute();
-	QString getErrorMessage(int errorCode);
-
-	//! Filename(s) to open
-	QStringList m_filenames;
-
-};
-
-#endif //Q_PCL_PLUGIN_LOADPCD_HEADER
+#ifndef CC_QT5
+Q_EXPORT_PLUGIN2(qPclIO,qPclIO);
+#endif

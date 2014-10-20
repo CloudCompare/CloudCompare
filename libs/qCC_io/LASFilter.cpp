@@ -309,8 +309,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 	}
 	catch (...)
 	{
-		ccLog::Warning("[LAS] Liblas has thrown an unknown exception!");
-		return CC_FERR_THIRD_PARTY_LIB;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
 	//progress dialog
@@ -422,8 +421,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 		catch (...)
 		{
-			ccLog::Warning("[LAS] Liblas has thrown an unknown exception!");
-			result = CC_FERR_THIRD_PARTY_LIB;
+			result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 			break;
 		}
 
@@ -642,8 +640,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 		catch (...)
 		{
-			ccLog::Warning("[LAS] Liblas has thrown an unknown exception!");
-			result = CC_FERR_THIRD_PARTY_LIB;
+			result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 			break;
 		}
 

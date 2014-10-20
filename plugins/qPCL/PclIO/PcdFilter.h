@@ -15,46 +15,30 @@
 //#                                                                        #
 //##########################################################################
 
-// Source: http://en.wikibooks.org/wiki/Optimizing_C%2B%2B/General_optimization_techniques/Input/Output
+#ifndef CC_PCD_FILTER_HEADER
+#define CC_PCD_FILTER_HEADER
 
-#ifndef INPUT_MEMORY_FILE_HEADER
-#define INPUT_MEMORY_FILE_HEADER
+//qCC_io
+#include <FileIOFilter.h>
 
-//system
-#include <cstring> // for size_t
-
-//! Read-only memory-mapped file wrapper.
-/** It handles only files that can be wholly loaded
-	into the address space of the process.
-	The constructor opens the file, the destructor closes it.
-	The "data" function returns a pointer to the beginning of the file,
-	if the file has been successfully opened, otherwise it returns 0.
-	The "size" function returns the length of the file in bytes,
-	if the file has been successfully opened, otherwise it returns 0.
-**/
-class InputMemoryFile
+//! PCD point cloud I/O filter
+class PcdFilter : public FileIOFilter
 {
 public:
 
-	InputMemoryFile(const char *pathname);
-	~InputMemoryFile();
-	const char* data() const { return data_; }
-	size_t size() const { return size_; }
+	//static accessors
+	static inline QString GetFileFilter() { return "Point Cloud Library cloud (*.pcd)"; }
+	static inline QString GetDefaultExtension() { return "pcd"; }
 
-private:
-
-	const char* data_;
-	size_t size_;
-#if defined(__unix__) || defined(__APPLE__)
-	int file_handle_;
-#elif defined(_WIN32)
-	typedef void* HANDLE;
-	HANDLE file_handle_;
-	HANDLE file_mapping_handle_;
-#else
-#error Only Posix or Windows systems can use memory-mapped files.
-#endif
+	//inherited from FileIOFilter
+	virtual bool importSupported() const { return true; }
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
 };
 
-#endif //INPUT_MEMORY_FILE_HEADER
+#endif //CC_PCD_FILTER_HEADER

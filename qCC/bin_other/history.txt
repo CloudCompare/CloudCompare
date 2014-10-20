@@ -91,6 +91,10 @@ v2.5.6 ??/??/2014
 			custom fields defined in the LAS file 'extra bytes' section 
 	* VTK import:
 		- VTK I/O filter is now smarter and can read Paraview VTK files with multiple elements per line
+	* PCL import/export:
+		- now fully integrated in the main application if the qPCL (I/O) plugin is present
+			(i.e. all PCD files can be loaded and saved  via the standard 'File > Open' and 'File > Save' menus)
+		- the equivalent icons of the qPCL plugin has been removed
 	* 'Edit > Sensors' meny has been reorganized
 	* Camera sensor management enhanced:
 		- Camera sensors are now created automatically when clouds are loaded from Bundler or ICM files (TODO: from E57)

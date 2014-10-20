@@ -13,49 +13,48 @@ option( INSTALL_QPCL_PLUGIN "Check to install qPCL plugin" OFF )
 
 if (INSTALL_QPCL_PLUGIN)
 
+#requires PCL
+find_package(PCL REQUIRED)
+
+#PCL bridge library
+add_subdirectory(PclUtils)
+
+#CloudCompare 'qPCLIO' I/O plugin (to load PCD files)
+add_subdirectory(PclIO)
+
 #CloudCompare 'PCL' bridge plugin
 project( QPCL_PLUGIN )
 
-add_subdirectory(PclUtils)
+#documentation
 add_subdirectory(doc)
 
-#include_directories(pcl)
-#include_directories(filters)
-#include_directories(filters/dialogs)
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/filters )
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_BINARY_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../) #the plugin dir
-
-
-
-#requires PCL
-find_package(PCL REQUIRED)
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../ ) #the plugin dir
+include_directories( ${PCL_INCLUDE_DIRS} )
 
 include( ../CMakePluginTpl.cmake )
 
 target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
 
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+link_directories( ${PCL_LIBRARY_DIRS} )
+add_definitions( ${PCL_DEFINITIONS} )
 
 
 #import PCL dlls (if any)
 if (WIN32 AND PCL_DIR)
 
-# first of all check if is setted as "${PCL_DIR}" or "${PCL_DIR}/cmake". Not sure way but it happen on my win7 system
+	# first of all check if files are in ${PCL_DIR} or ${PCL_DIR}/cmake
+	# (not sure why but it happens on my win7 system)
+	get_filename_component(last_dir ${PCL_DIR} NAME) # get the last line of ${PCL_DIR}
+	if (last_dir STREQUAL "cmake")
+		get_filename_component(PCL_DIR ${PCL_DIR} PATH) #trim PCL_DIR path if needed
+	endif()
 
-get_filename_component(last_dir ${PCL_DIR} NAME) # get the last line of ${PCL_DIR}
-if(last_dir STREQUAL "cmake")
-	get_filename_component(PCL_DIR ${PCL_DIR} PATH) #trim PCL_DIR path if needed
-endif()
-
-# now find pcl libs we need
-file( GLOB pcl_release_dlls ${PCL_DIR}/bin/*${PCL_RELEASE_SUFFIX}.dll  )
-file( GLOB pcl_debug_dlls ${PCL_DIR}/bin/*${PCL_DEBUG_SUFFIX}.dll  )
+	# now find pcl libs we need
+	file( GLOB pcl_release_dlls ${PCL_DIR}/bin/*${PCL_RELEASE_SUFFIX}.dll  )
+	file( GLOB pcl_debug_dlls ${PCL_DIR}/bin/*${PCL_DEBUG_SUFFIX}.dll  )
 	
-
-
 	#release DLLs
 	file( GLOB pcl_release_dlls ${PCL_DIR}/bin/*${PCL_RELEASE_SUFFIX}.dll  )
 	foreach( filename ${pcl_release_dlls} )

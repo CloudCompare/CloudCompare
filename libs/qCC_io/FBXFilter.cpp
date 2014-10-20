@@ -622,7 +622,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 	catch(...)
 	{
 		ccLog::Warning("[FBX] FBX SDK has thrown an unknown exception!");
-		return CC_FERR_THIRD_PARTY_LIB;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 }
 
@@ -1377,7 +1377,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	catch(...)
 	{
 		ccLog::Warning("[FBX] FBX SDK has thrown an unknown exception!");
-		result = CC_FERR_THIRD_PARTY_LIB;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
 	return result;

@@ -737,7 +737,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 	catch(...)
 	{
 		ccLog::Warning("[DXF] DxfLib has thrown an unknown exception!");
-		result = CC_FERR_THIRD_PARTY_LIB;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
 	delete dw;
@@ -769,7 +769,7 @@ CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	catch(...)
 	{
 		ccLog::Warning("[DXF] DxfLib has thrown an unknown exception!");
-		result = CC_FERR_THIRD_PARTY_LIB;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 #else
 	

@@ -758,12 +758,12 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename)
 	catch(e57::E57Exception e)
 	{
 		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
-		result = CC_FERR_THIRD_PARTY_LIB;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch(...)
 	{
 		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
-		result = CC_FERR_THIRD_PARTY_LIB;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
 	return result;
@@ -2232,12 +2232,12 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 	catch(e57::E57Exception e)
 	{
 		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
-		return CC_FERR_THIRD_PARTY_LIB;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch(...)
 	{
 		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
-		return CC_FERR_THIRD_PARTY_LIB;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
 	return s_cancelRequestedByUser ? CC_FERR_CANCELED_BY_USER : CC_FERR_NO_ERROR;

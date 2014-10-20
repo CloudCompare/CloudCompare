@@ -416,7 +416,7 @@ void MainWindow::loadPlugins()
 		QObject* plugin = loader.instance();
 		if (plugin)
 		{
-			ccConsole::Print(QString("Found new plugin! ('%1')").arg(filename));
+			ccConsole::Print(QString("Found new plugin: '%1'").arg(filename));
 			if (dispatchPlugin(plugin))
 			{
 				m_pluginFileNames += filename;
@@ -425,7 +425,7 @@ void MainWindow::loadPlugins()
 			{
 				delete plugin;
 				plugin = 0;
-				ccConsole::Warning("Unsupported or invalid plugin type");
+				ccConsole::Warning("\tUnsupported or invalid plugin type");
 			}
 		}
 		else
@@ -469,10 +469,10 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 	QString pluginName = ccPlugin->getName();
 	if (pluginName.isEmpty())
 	{
-		ccLog::Warning("Plugin has an invalid (empty) name!");
+		ccLog::Warning("\tplugin has an invalid (empty) name!");
 		return false;
 	}
-	ccConsole::Print("Plugin name: [%s]",qPrintable(pluginName));
+	ccConsole::Print(QString("\tplugin name: [%1]").arg(pluginName));
 
 	CC_PLUGIN_TYPE type = ccPlugin->getType();
 
@@ -564,13 +564,16 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 			ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(ccPlugin);
 			FileIOFilter::Shared filter = ioPlugin->getFilter(this);
 			if (filter)
+			{
 				FileIOFilter::Register(filter);
+				ccConsole::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
+			}
 		}
 		break;
 
 	default:
 		assert(false);
-		ccLog::Print("Unhandled plugin type!");
+		ccLog::Warning("\tunhandled plugin type!");
 		return false;
 	}
 
@@ -10026,15 +10029,6 @@ void MainWindow::doActionSaveFile()
 	currentPath = QFileInfo(selectedFilename).absolutePath();
 	settings.setValue(s_psCurrentPath,currentPath);
 	settings.endGroup();
-
-	if (result != CC_FERR_NO_ERROR)
-	{
-		FileIOFilter::DisplayErrorMessage(result,"saving",selectedFilename);
-	}
-	else
-	{
-		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(selectedFilename));
-	}
 }
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)

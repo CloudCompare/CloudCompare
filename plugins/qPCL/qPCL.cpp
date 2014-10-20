@@ -24,17 +24,12 @@
 #include <BaseFilter.h>
 
 //FILTERS
-#include <LoadPCD.h>
-#include <SavePCD.h>
+//#include <LoadPCD.h>
+//#include <SavePCD.h>
 #include <ExtractSIFT.h>
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 #include <StatisticalOutliersRemover.h>
-
-qPCL::qPCL()
-	: m_menu(0)
-{
-}
 
 qPCL::~qPCL()
 {
@@ -70,8 +65,8 @@ void qPCL::getActions(QActionGroup& group)
 	if (m_filters.empty())
 	{
 		//ADD FILTERS
-		addFilter( new LoadPCD() );
-		addFilter( new SavePCD() );
+		//addFilter( new LoadPCD() );
+		//addFilter( new SavePCD() );
 		addFilter( new NormalEstimation());
 		addFilter( new StatisticalOutliersRemover() );
 		addFilter( new MLSSmoothingUpsampling() );
@@ -86,7 +81,7 @@ int qPCL::addFilter(BaseFilter* filter)
 	assert(filter);
 	filter->setMainAppInterface(m_app);
 
-	QAction *action = filter->getAction();
+	QAction* action = filter->getAction();
 	if (!action)
 		return 0;
 

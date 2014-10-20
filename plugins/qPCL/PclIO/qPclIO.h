@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qPCL                        #
+//#                       CLOUDCOMPARE PLUGIN: qEDL                        #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,31 +11,34 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef Q_PCL_PLUGIN_SAVEPCD_HEADER
-#define Q_PCL_PLUGIN_SAVEPCD_HEADER
 
-#include <BaseFilter.h>
+#ifndef Q_PCL_IO_PLUGIN_HEADER
+#define Q_PCL_IO_PLUGIN_HEADER
 
-class SavePCD: public BaseFilter
+//Qt
+#include <QObject>
+
+#include "../../ccIOFilterPluginInterface.h"
+
+class qPclIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
+	Q_INTERFACES(ccIOFilterPluginInterface)
+#ifdef CC_QT5
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPclIO")
+#endif
 
 public:
-	SavePCD();
 
-	//inherited from BaseFilter
-	virtual int compute();
+	//inherited from ccPluginInterface
+	virtual QString getName() const { return "PCL I/O filter"; }
+	virtual QString getDescription() const { return "Interface to open PCL clouds (*.pcd)"; }
 
-protected:
-
-	//inherited from BaseFilter
-	virtual int openInputDialog();
-
-	QString m_filename;
+	//inherited from ccIOFilterPluginInterface
+	FileIOFilter::Shared getFilter(ccMainAppInterface* app);
 };
 
-#endif
+#endif //Q_PCL_IO_PLUGIN_HEADER

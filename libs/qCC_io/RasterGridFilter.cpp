@@ -429,7 +429,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 	}
 	catch(...)
 	{
-		return CC_FERR_THIRD_PARTY_LIB;
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
 	return CC_FERR_NO_ERROR;

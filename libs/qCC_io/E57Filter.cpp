@@ -75,78 +75,27 @@ bool E57Filter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 struct TempArrays
 {
 	//points
-	double* xData;
-	double* yData;
-	double* zData;
-	boost::int8_t* isInvalidData;
+	std::vector<double> xData;
+	std::vector<double> yData;
+	std::vector<double> zData;
+	std::vector<boost::int8_t> isInvalidData;
 
 	//normals
-	double* xNormData;
-	double* yNormData;
-	double* zNormData;
+	std::vector<double> xNormData;
+	std::vector<double> yNormData;
+	std::vector<double> zNormData;
 
 	//scalar field
-	double*	intData;
-	boost::int8_t* isInvalidIntData;
+	std::vector<double>	intData;
+	std::vector<boost::int8_t> isInvalidIntData;
 
 	//scan index field
-	boost::int8_t* scanIndexData;
+	std::vector<boost::int8_t> scanIndexData;
 
 	//color
-	colorFieldType* redData;
-	colorFieldType* greenData;
-	colorFieldType* blueData;
-
-	TempArrays()
-		: xData(0)
-		, yData(0)
-		, zData(0)
-		, isInvalidData(0)
-		, xNormData(0)
-		, yNormData(0)
-		, zNormData(0)
-		, intData(0)
-		, isInvalidIntData(0)
-		, scanIndexData(0)
-		, redData(0)
-		, greenData(0)
-		, blueData(0)
-	{
-	}
-
-	~TempArrays()
-	{
-		if (xData)
-			delete[] xData;
-		if (yData)
-			delete[] yData;
-		if (zData)
-			delete[] zData;
-		if (isInvalidData)
-			delete[] isInvalidData;
-
-		if (xNormData)
-			delete[] xNormData;
-		if (yNormData)
-			delete[] yNormData;
-		if (zNormData)
-			delete[] zNormData;
-
-		if (intData)
-			delete[] intData;
-		if (isInvalidIntData)
-			delete[] isInvalidIntData;
-
-		if (scanIndexData)
-			delete[] scanIndexData;
-
-		if (redData)
-			delete[] redData;
-		if (greenData)
-			delete[] greenData;
-		if (blueData)
-			delete[] blueData;
-	}
+	std::vector<colorFieldType> redData;
+	std::vector<colorFieldType> greenData;
+	std::vector<colorFieldType> blueData;
 };
 
 QString GetNewGuid()
@@ -395,24 +344,24 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 												precision,
 												bbMin.x,
 												bbMax.x ) );
-		arrays.xData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianX",  arrays.xData,  nSize, true, true));
+		arrays.xData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianX",  &(arrays.xData.front()),  nSize, true, true));
 
 		proto.set("cartesianY", e57::FloatNode(	imf,
 												bbCenter.y,
 												precision,
 												bbMin.y,
 												bbMax.y ) );
-		arrays.yData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianY",  arrays.yData,  nSize, true, true));
+		arrays.yData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianY",  &(arrays.yData.front()),  nSize, true, true));
 
 		proto.set("cartesianZ", e57::FloatNode(	imf,
 												bbCenter.z,
 												precision,
 												bbMin.z,
 												bbMax.z ) );
-		arrays.zData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianZ",  arrays.zData,  nSize, true, true));
+		arrays.zData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianZ",  &(arrays.zData.front()),  nSize, true, true));
 	}
 
 	//Normals
@@ -421,16 +370,16 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		e57::FloatPrecision precision = sizeof(PointCoordinateType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
 
 		proto.set("nor:normalX", e57::FloatNode(imf, 0.0, precision, -1.0, 1.0));
-		arrays.xNormData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "nor:normalX",  arrays.xNormData,  nSize, true, true));
+		arrays.xNormData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "nor:normalX",  &(arrays.xNormData.front()),  nSize, true, true));
 
 		proto.set("nor:normalY", e57::FloatNode(imf, 0.0, precision, -1.0, 1.0));
-		arrays.yNormData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "nor:normalY",  arrays.yNormData,  nSize, true, true));
+		arrays.yNormData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "nor:normalY",  &(arrays.yNormData.front()),  nSize, true, true));
 
 		proto.set("nor:normalZ", e57::FloatNode(imf, 0.0, precision, -1.0, 1.0));
-		arrays.zNormData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "nor:normalZ",  arrays.zNormData,  nSize, true, true));
+		arrays.zNormData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "nor:normalZ",  &(arrays.zNormData.front()),  nSize, true, true));
 	}
 
 	//Return index
@@ -438,21 +387,21 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	{
 		assert(maxReturnIndex>minReturnIndex);
 		proto.set("returnIndex", e57::IntegerNode(imf, minReturnIndex, minReturnIndex, maxReturnIndex));
-		arrays.scanIndexData = new boost::int8_t[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "returnIndex",  arrays.scanIndexData,  nSize, true, true));
+		arrays.scanIndexData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "returnIndex",  &(arrays.scanIndexData.front()),  nSize, true, true));
 	}
 	//Intensity field
 	if (intensitySF)
 	{
 		proto.set("intensity", e57::FloatNode(imf, intensitySF->getMin(), sizeof(ScalarType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE, intensitySF->getMin(), intensitySF->getMax()));
-		arrays.intData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "intensity",  arrays.intData,  nSize, true, true));
+		arrays.intData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "intensity",  &(arrays.intData.front()),  nSize, true, true));
 
 		if (hasInvalidIntensities)
 		{
 			proto.set("isIntensityInvalid", e57::IntegerNode(imf, 0, 0, 1));
-			arrays.isInvalidIntData = new boost::int8_t[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(imf, "isIntensityInvalid",  arrays.isInvalidIntData,  nSize, true, true));
+			arrays.isInvalidIntData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(imf, "isIntensityInvalid",  &(arrays.isInvalidIntData.front()),  nSize, true, true));
 		}
 	}
 
@@ -460,14 +409,14 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	if (hasColors)
 	{
 		proto.set("colorRed",	e57::FloatNode(imf, 0., e57::E57_DOUBLE, 0., 255.));
-		arrays.redData = new colorFieldType[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "colorRed",  arrays.redData,  nSize, true, true));
+		arrays.redData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "colorRed",  &(arrays.redData.front()),  nSize, true, true));
 		proto.set("colorGreen",	e57::FloatNode(imf, 0., e57::E57_DOUBLE, 0., 255.));
-		arrays.greenData = new colorFieldType[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "colorGreen",  arrays.greenData,  nSize, true, true));
+		arrays.greenData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "colorGreen",  &(arrays.greenData.front()),  nSize, true, true));
 		proto.set("colorBlue",	e57::FloatNode(imf, 0., e57::E57_DOUBLE, 0., 255.));
-		arrays.blueData = new colorFieldType[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(imf, "colorBlue",  arrays.blueData,  nSize, true, true));
+		arrays.blueData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(imf, "colorBlue",  &(arrays.blueData.front()),  nSize, true, true));
 	}
 
 	//ignored fields
@@ -502,8 +451,8 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	pdlg.start();
 	QApplication::processEvents();
 
-	unsigned indexShift=0;
-	while (pointCount>0)
+	unsigned indexShift = 0;
+	while (pointCount != 0)
 	{
 		unsigned size = std::min(pointCount,nSize);
 
@@ -518,10 +467,10 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 
 			if(intensitySF)
 			{
-				assert(arrays.intData);
+				assert(!arrays.intData.empty());
 				ScalarType sfVal = intensitySF->getValue(indexShift+i);
 				arrays.intData[i] = static_cast<double>(sfVal);
-				if (arrays.isInvalidIntData)
+				if (!arrays.isInvalidIntData.empty())
 					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? 0 : 1;
 			}
 
@@ -544,8 +493,8 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 
 			if (returnIndexSF)
 			{
-				assert(arrays.scanIndexData);
-				arrays.scanIndexData[i]=(boost::int8_t)returnIndexSF->getValue(indexShift+i);
+				assert(!arrays.scanIndexData.empty());
+				arrays.scanIndexData[i] = (boost::int8_t)returnIndexSF->getValue(indexShift+i);
 			}
 		}
 
@@ -1420,7 +1369,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			ccLog::Warning(QString("[E57Filter] No readable point in scan '%1'! (only cartesian and spherical coordinates are supported right now)").arg(scanNode.elementName().c_str()));
 			return 0;
 		}
-		sphericalMode=true;
+		sphericalMode = true;
 	}
 
 	ccPointCloud* cloud = new ccPointCloud();
@@ -1454,14 +1403,14 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	bool validPoseMat = GetPoseInformation(scanNode, poseMat);
 
 	//if (validPoseMat)
-		//cloud->setGLTransformation(poseMat); //TODO-> apply it at the end instead! We will loose original coordinates!
+		//cloud->setGLTransformation(poseMat); //TODO-> apply it at the end instead! Otherwise we will loose original coordinates!
 
 	//prepare temporary structures
 	const unsigned nSize = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK; //=GenericChunkedArray chunks size
 	TempArrays arrays;
 	std::vector<e57::SourceDestBuffer> dbufs;
 
-	if (!cloud->reserve((unsigned)pointCount))
+	if (!cloud->reserve(static_cast<unsigned>(pointCount)))
 	{
 		ccLog::Error("[E57] Not enough memory!");
 		delete cloud;
@@ -1473,25 +1422,25 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		//spherical coordinates
 		if(header.pointFields.sphericalRangeField)
 		{
-			arrays.xData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalRange", arrays.xData, nSize, true, (prototype.get("sphericalRange").type() == e57::E57_SCALED_INTEGER)));
+			arrays.xData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalRange", &(arrays.xData.front()), nSize, true, (prototype.get("sphericalRange").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if(header.pointFields.sphericalAzimuthField)
 		{
-			arrays.yData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalAzimuth", arrays.yData, nSize, true, (prototype.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER)));
+			arrays.yData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalAzimuth", &(arrays.yData.front()), nSize, true, (prototype.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if(header.pointFields.sphericalElevationField)
 		{
-			arrays.zData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalElevation", arrays.zData, nSize, true, (prototype.get("sphericalElevation").type() == e57::E57_SCALED_INTEGER)));
+			arrays.zData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalElevation", &(arrays.zData.front()), nSize, true, (prototype.get("sphericalElevation").type() == e57::E57_SCALED_INTEGER)));
 		}
 
 		//data validity
 		if( header.pointFields.sphericalInvalidStateField)
 		{
-			arrays.isInvalidData = new boost::int8_t[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalInvalidState", arrays.isInvalidData, nSize, true, (prototype.get("sphericalInvalidState").type() == e57::E57_SCALED_INTEGER)));
+			arrays.isInvalidData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalInvalidState", &(arrays.isInvalidData.front()), nSize, true, (prototype.get("sphericalInvalidState").type() == e57::E57_SCALED_INTEGER)));
 		}
 	}
 	else
@@ -1499,25 +1448,25 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		//cartesian coordinates
 		if(header.pointFields.cartesianXField)
 		{
-			arrays.xData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianX", arrays.xData, nSize, true, (prototype.get("cartesianX").type() == e57::E57_SCALED_INTEGER)));
+			arrays.xData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianX", &(arrays.xData.front()), nSize, true, (prototype.get("cartesianX").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if(header.pointFields.cartesianYField)
 		{
-			arrays.yData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianY", arrays.yData, nSize, true, (prototype.get("cartesianY").type() == e57::E57_SCALED_INTEGER)));
+			arrays.yData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianY", &(arrays.yData.front()), nSize, true, (prototype.get("cartesianY").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if(header.pointFields.cartesianZField)
 		{
-			arrays.zData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianZ", arrays.zData, nSize, true, (prototype.get("cartesianZ").type() == e57::E57_SCALED_INTEGER)));
+			arrays.zData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianZ", &(arrays.zData.front()), nSize, true, (prototype.get("cartesianZ").type() == e57::E57_SCALED_INTEGER)));
 		}
 
 		//data validity
 		if( header.pointFields.cartesianInvalidStateField)
 		{
-			arrays.isInvalidData = new boost::int8_t[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianInvalidState", arrays.isInvalidData, nSize, true, (prototype.get("cartesianInvalidState").type() == e57::E57_SCALED_INTEGER)));
+			arrays.isInvalidData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianInvalidState", &(arrays.isInvalidData.front()), nSize, true, (prototype.get("cartesianInvalidState").type() == e57::E57_SCALED_INTEGER)));
 		}
 	}
 
@@ -1536,18 +1485,18 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		cloud->showNormals(true);
 		if(header.pointFields.normXField)
 		{
-			arrays.xNormData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalX", arrays.xNormData, nSize, true, (prototype.get("nor:normalX").type() == e57::E57_SCALED_INTEGER)));
+			arrays.xNormData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalX", &(arrays.xNormData.front()), nSize, true, (prototype.get("nor:normalX").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if(header.pointFields.normYField)
 		{
-			arrays.yNormData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalY", arrays.yNormData, nSize, true, (prototype.get("nor:normalY").type() == e57::E57_SCALED_INTEGER)));
+			arrays.yNormData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalY", &(arrays.yNormData.front()), nSize, true, (prototype.get("nor:normalY").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if(header.pointFields.normZField)
 		{
-			arrays.zNormData = new double[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalZ", arrays.zNormData, nSize, true, (prototype.get("nor:normalZ").type() == e57::E57_SCALED_INTEGER)));
+			arrays.zNormData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalZ", &(arrays.zNormData.front()), nSize, true, (prototype.get("nor:normalZ").type() == e57::E57_SCALED_INTEGER)));
 		}
 	}
 
@@ -1569,15 +1518,15 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		}
 		cloud->addScalarField(intensitySF);
 
-		arrays.intData = new double[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "intensity", arrays.intData, nSize, true, (prototype.get("intensity").type() == e57::E57_SCALED_INTEGER)));
+		arrays.intData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "intensity", &(arrays.intData.front()), nSize, true, (prototype.get("intensity").type() == e57::E57_SCALED_INTEGER)));
 		//intRange = header.intensityLimits.intensityMaximum - header.intensityLimits.intensityMinimum;
 		//intOffset = header.intensityLimits.intensityMinimum;
 
 		if (header.pointFields.isIntensityInvalidField)
 		{
-			arrays.isInvalidIntData = new boost::int8_t[nSize];
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "isIntensityInvalid", arrays.isInvalidIntData, nSize, true, (prototype.get("isIntensityInvalid").type() == e57::E57_SCALED_INTEGER)));
+			arrays.isInvalidIntData.resize(nSize);
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "isIntensityInvalid", &(arrays.isInvalidIntData.front()), nSize, true, (prototype.get("isIntensityInvalid").type() == e57::E57_SCALED_INTEGER)));
 		}
 
 	}
@@ -1602,30 +1551,30 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		}
 		if (header.pointFields.colorRedField)
 		{
-			arrays.redData = new colorFieldType[nSize];
+			arrays.redData.resize(nSize);
 			colorRedOffset = header.colorLimits.colorRedMinimum;
 			colorRedRange = header.colorLimits.colorRedMaximum - header.colorLimits.colorRedMinimum;
 			if (colorRedRange<=0.0)
 				colorRedRange=1.0;
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "colorRed", arrays.redData, nSize, true, (prototype.get("colorRed").type() == e57::E57_SCALED_INTEGER)));
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "colorRed", &(arrays.redData.front()), nSize, true, (prototype.get("colorRed").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if (header.pointFields.colorGreenField)
 		{
-			arrays.greenData = new colorFieldType[nSize];
+			arrays.greenData.resize(nSize);
 			colorGreenOffset = header.colorLimits.colorGreenMinimum;
 			colorGreenRange = header.colorLimits.colorGreenMaximum - header.colorLimits.colorGreenMinimum;
 			if (colorGreenRange<=0.0)
 				colorGreenRange=1.0;
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "colorGreen", arrays.greenData, nSize, true, (prototype.get("colorGreen").type() == e57::E57_SCALED_INTEGER)));
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "colorGreen", &(arrays.greenData.front()), nSize, true, (prototype.get("colorGreen").type() == e57::E57_SCALED_INTEGER)));
 		}
 		if (header.pointFields.colorBlueField)
 		{
-			arrays.blueData = new colorFieldType[nSize];
+			arrays.blueData.resize(nSize);
 			colorBlueOffset = header.colorLimits.colorBlueMinimum;
 			colorBlueRange = header.colorLimits.colorBlueMaximum - header.colorLimits.colorBlueMinimum;
 			if (colorBlueRange<=0.0)
 				colorBlueRange=1.0;
-			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "colorBlue", arrays.blueData, nSize, true, (prototype.get("colorBlue").type() == e57::E57_SCALED_INTEGER)));
+			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "colorBlue", &(arrays.blueData.front()), nSize, true, (prototype.get("colorBlue").type() == e57::E57_SCALED_INTEGER)));
 		}
 	}
 
@@ -1643,8 +1592,8 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			return 0;
 		}
 		cloud->addScalarField(returnIndexSF);
-		arrays.scanIndexData = new boost::int8_t[nSize];
-		dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "returnIndex", arrays.scanIndexData, nSize, true, (prototype.get("returnIndex").type() == e57::E57_SCALED_INTEGER)));
+		arrays.scanIndexData.resize(nSize);
+		dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "returnIndex", &(arrays.scanIndexData.front()), nSize, true, (prototype.get("returnIndex").type() == e57::E57_SCALED_INTEGER)));
 	}
 
 	//Read the point data
@@ -1652,7 +1601,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 
 	//local progress bar
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress* nprogress=0;
+	CCLib::NormalizedProgress* nprogress = 0;
 	if (showProgressBar)
 	{
 		nprogress = new CCLib::NormalizedProgress(&pdlg,static_cast<unsigned>(pointCount)/nSize);
@@ -1665,20 +1614,20 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	CCVector3d Pshift(0,0,0);
 	unsigned size = 0;
 	boost::int64_t realCount = 0;
-	while(size = dataReader.read())
+	while (size = dataReader.read())
 	{
-		for(unsigned i=0; i<size; i++)
+		for (unsigned i=0; i<size; i++)
 		{
 			//we skip invalid points!
-			if(arrays.isInvalidData && arrays.isInvalidData[i] != 0)
+			if (!arrays.isInvalidData.empty() && arrays.isInvalidData[i] != 0)
 				continue;
 
 			CCVector3d Pd(0,0,0);
 			if (sphericalMode)
 			{
-				double r = (arrays.xData ? arrays.xData[i] : 0);
-				double theta = (arrays.yData ? arrays.yData[i] : 0);	//Azimuth
-				double phi = (arrays.zData ? arrays.zData[i] : 0);		//Elevation
+				double r = (arrays.xData.empty() ? 0 : arrays.xData[i]);
+				double theta = (arrays.yData.empty() ? 0 : arrays.yData[i]);	//Azimuth
+				double phi = (arrays.zData.empty() ? 0 : arrays.zData[i]);		//Elevation
 
 				double cos_phi = cos(phi);
 				Pd.x = r * cos_phi * cos(theta);
@@ -1699,11 +1648,11 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			//*/
 			else //cartesian
 			{
-				if (arrays.xData)
+				if (!arrays.xData.empty())
 					Pd.x = arrays.xData[i];
-				if (arrays.yData)
+				if (!arrays.yData.empty())
 					Pd.y = arrays.yData[i];
-				if (arrays.zData)
+				if (!arrays.zData.empty())
 					Pd.z = arrays.zData[i];
 			}
 
@@ -1723,17 +1672,17 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			if (hasNormals)
 			{
 				CCVector3 N(0,0,0);
-				if (arrays.xNormData)
-					N.x = (PointCoordinateType)arrays.xNormData[i];
-				if (arrays.yNormData)
-					N.y = (PointCoordinateType)arrays.yNormData[i];
-				if (arrays.zNormData)
-					N.z = (PointCoordinateType)arrays.zNormData[i];
+				if (!arrays.xNormData.empty())
+					N.x = static_cast<PointCoordinateType>(arrays.xNormData[i]);
+				if (!arrays.yNormData.empty())
+					N.y = static_cast<PointCoordinateType>(arrays.yNormData[i]);
+				if (!arrays.zNormData.empty())
+					N.z = static_cast<PointCoordinateType>(arrays.zNormData[i]);
 				N.normalize();
 				cloud->addNorm(N);
 			}
 
-			if(arrays.intData)
+			if (!arrays.intData.empty())
 			{
 				assert(intensitySF);
 				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != 0)
@@ -1743,7 +1692,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 					intensitySF->setValue(static_cast<unsigned>(realCount),intensity);
 
 					//track max intensity (for proper visualization)
-					if (s_absoluteScanIndex!=0 || realCount!=0)
+					if (s_absoluteScanIndex != 0 || realCount != 0)
 					{
 						if (s_maxIntensity<intensity)
 							s_maxIntensity=intensity;
@@ -1764,18 +1713,18 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			if (hasColors)
 			{
 				//Normalize color to 0 - 255
-				colorType C[3]={0,0,0};
-				if (arrays.redData)
-					C[0] = (colorType) (((arrays.redData[i] - colorRedOffset) * 255) / colorRedRange);
-				if (arrays.greenData)
-					C[1] = (colorType) (((arrays.greenData[i] - colorGreenOffset) * 255) / colorGreenRange);
-				if (arrays.blueData)
-					C[2] = (colorType) (((arrays.blueData[i] - colorBlueOffset) * 255) / colorBlueRange);
+				colorType C[3] = { 0, 0, 0 };
+				if (!arrays.redData.empty())
+					C[0] = static_cast<colorType>(((arrays.redData[i] - colorRedOffset) * 255) / colorRedRange);
+				if (!arrays.greenData.empty())
+					C[1] = static_cast<colorType>(((arrays.greenData[i] - colorGreenOffset) * 255) / colorGreenRange);
+				if (!arrays.blueData.empty())
+					C[2] = static_cast<colorType>(((arrays.blueData[i] - colorBlueOffset) * 255) / colorBlueRange);
 				
 				cloud->addRGBColor(C);
 			}
 
-			if (arrays.scanIndexData)
+			if (!arrays.scanIndexData.empty())
 			{
 				assert(returnIndexSF);
 				ScalarType s = static_cast<ScalarType>(arrays.scanIndexData[i]);
@@ -1796,12 +1745,12 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	if (nprogress)
 	{
 		delete nprogress;
-		nprogress=0;
+		nprogress = 0;
 	}
 
 	dataReader.close();
 
-	if (realCount==0)
+	if (realCount == 0)
 	{
 		ccLog::Warning(QString("[E57] No valid point in scan '%1'!").arg(scanNode.elementName().c_str()));
 		delete cloud;

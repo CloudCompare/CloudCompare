@@ -96,6 +96,7 @@ public:
 							OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS		,
 							OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE	,
 							OBJECT_HISTORY_MATRIX_EDITOR			,
+							TREE_VIEW_HEADER						,
 	};
 
 	//! Default constructor

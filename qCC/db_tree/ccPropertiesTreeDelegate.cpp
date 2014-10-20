@@ -82,8 +82,38 @@ static const QString c_defaultPointSizeString = QString("Default");
 static const QString c_defaultPolyWidthSizeString = QString("Default Width");
 
 // Default separator colors
-static const QBrush SEPARATOR_BACKGROUND_BRUSH(Qt::darkGray);
-static const QBrush SEPARATOR_TEXT_BRUSH(Qt::white);
+static QString SEPARATOR_STYLESHEET("QLabel { background-color : darkGray; color : white; }");
+
+//Shortcut to create a delegate item
+QStandardItem* ITEM(QString name,
+					Qt::ItemFlag additionalFlags = Qt::NoItemFlags,
+					ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role = ccPropertiesTreeDelegate::OBJECT_NO_PROPERTY)
+{
+	QStandardItem* item = new QStandardItem(name);
+	//flags
+	item->setFlags(Qt::ItemIsEnabled | additionalFlags);
+	//role (if any)
+	if (role != ccPropertiesTreeDelegate::OBJECT_NO_PROPERTY)
+		item->setData(role);
+
+	return item;
+}
+
+//Shortcut to create a checkable delegate item
+QStandardItem* CHECKABLE_ITEM(bool checkState, ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
+{
+	QStandardItem* item = ITEM("",Qt::ItemIsUserCheckable,role);
+	//check state
+	item->setCheckState(checkState ? Qt::Checked : Qt::Unchecked);
+
+	return item;
+}
+
+//Shortcut to create a persistent editor item
+QStandardItem* PERSISTENT_EDITOR(ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
+{
+	return ITEM(QString(),Qt::ItemIsEditable,role);
+}
 
 ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(	QStandardItemModel* model,
 													QAbstractItemView* view,
@@ -240,10 +270,20 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		fillWithTransBuffer(static_cast<ccIndexedTransformationBuffer*>(m_currentObject));
 	}
 
-	fillWithMetaData(m_currentObject);
+	//transformation history
+	if (	m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD)
+		||	m_currentObject->isKindOf(CC_TYPES::MESH)
+		||	m_currentObject->isKindOf(CC_TYPES::FACET)
+		||	m_currentObject->isKindOf(CC_TYPES::POLY_LINE)
+		||	m_currentObject->isKindOf(CC_TYPES::SENSOR))
+	{
+		addSeparator("Transformation history");
+		appendWideRow(PERSISTENT_EDITOR(OBJECT_HISTORY_MATRIX_EDITOR));
+		fillWithMetaData(m_currentObject);
+	}
 	
 	//go back to original position
-	if (scrollPos>0)
+	if (scrollPos > 0)
 		m_view->verticalScrollBar()->setSliderPosition(scrollPos);
 
 	if (m_model)
@@ -287,49 +327,16 @@ void ccPropertiesTreeDelegate::appendWideRow(QStandardItem* item, bool openPersi
 
 void ccPropertiesTreeDelegate::addSeparator(QString title)
 {
-	//name
-	QStandardItem* leftItem = new QStandardItem(title);
-	leftItem->setForeground(SEPARATOR_TEXT_BRUSH);
-	leftItem->setBackground(SEPARATOR_BACKGROUND_BRUSH);
-
-	//empty
-	QStandardItem* rightItem = new QStandardItem();
-	rightItem->setForeground(SEPARATOR_TEXT_BRUSH);
-	rightItem->setBackground(SEPARATOR_BACKGROUND_BRUSH);
-
-	//append row
-	appendRow(leftItem,rightItem);
-}
-
-//Shortcut to create a delegate item
-QStandardItem* ITEM(QString name,
-					Qt::ItemFlag additionalFlags = Qt::NoItemFlags,
-					ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role = ccPropertiesTreeDelegate::OBJECT_NO_PROPERTY)
-{
-	QStandardItem* item = new QStandardItem(name);
-	//flags
-	item->setFlags(Qt::ItemIsEnabled | additionalFlags);
-	//role (if any)
-	if (role != ccPropertiesTreeDelegate::OBJECT_NO_PROPERTY)
-		item->setData(role);
-
-	return item;
-}
-
-//Shortcut to create a checkable delegate item
-QStandardItem* CHECKABLE_ITEM(bool checkState, ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
-{
-	QStandardItem* item = ITEM("",Qt::ItemIsUserCheckable,role);
-	//check state
-	item->setCheckState(checkState ? Qt::Checked : Qt::Unchecked);
-
-	return item;
-}
-
-//Shortcut to create a persistent editor item
-QStandardItem* PERSISTENT_EDITOR(ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
-{
-	return ITEM(QString(),Qt::ItemIsEditable,role);
+	if (m_model)
+	{
+		//DGM: we can't use the 'text' of the item as it will be displayed under the associated editor (label)!
+		//So we simply use the 'accessible description' field
+		QStandardItem* leftItem = new QStandardItem(/*title*/);
+		leftItem->setData(TREE_VIEW_HEADER);
+		leftItem->setAccessibleDescription(title);
+		m_model->appendRow(leftItem);
+		m_view->openPersistentEditor(m_model->index(m_model->rowCount()-1,0));
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithMetaData(ccObject* _obj)
@@ -423,10 +430,6 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 	//display window
 	if (!_obj->isLocked())
 		appendRow( ITEM("Current Display"), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true );
-
-	//transformation history
-	addSeparator("Transformation history");
-	appendWideRow(PERSISTENT_EDITOR(OBJECT_HISTORY_MATRIX_EDITOR));
 }
 
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
@@ -897,6 +900,7 @@ bool ccPropertiesTreeDelegate::isWideEditor(int itemData) const
 	case OBJECT_CLOUD_SF_EDITOR:
 	case OBJECT_SENSOR_MATRIX_EDITOR:
 	case OBJECT_HISTORY_MATRIX_EDITOR:
+	case TREE_VIEW_HEADER:
 		return true;
 	default:
 		break;
@@ -1007,6 +1011,16 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			//no signal connection, it's a display-only widget
 
 			outputWidget = mdd;
+		}
+		break;
+	case TREE_VIEW_HEADER:
+		{
+			QLabel* headerLabel = new QLabel(parent);
+			headerLabel->setStyleSheet(SEPARATOR_STYLESHEET);
+
+			//no signal connection, it's a display-only widget
+
+			outputWidget = headerLabel;
 		}
 		break;
 	case OBJECT_OCTREE_TYPE:
@@ -1381,7 +1395,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		}
 	case OBJECT_SENSOR_MATRIX_EDITOR:
 		{
-			MatrixDisplayDlg *mdd = qobject_cast<MatrixDisplayDlg*>(editor);
+			MatrixDisplayDlg* mdd = qobject_cast<MatrixDisplayDlg*>(editor);
 			if (!mdd)
 				return;
 
@@ -1398,6 +1412,13 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 				mdd->clear();
 				mdd->setEnabled(false);
 			}
+			break;
+		}
+	case TREE_VIEW_HEADER:
+		{
+			QLabel* label = qobject_cast<QLabel*>(editor);
+			if (label)
+				label->setText(item->accessibleDescription());
 			break;
 		}
 	case OBJECT_OCTREE_TYPE:

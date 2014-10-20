@@ -18,6 +18,8 @@
 #ifndef CC_PDMS_FILTER_HEADER
 #define CC_PDMS_FILTER_HEADER
 
+#ifdef CC_PDMS_SUPPORT
+
 #include "../FileIOFilter.h"
 
 //! PDMS .mac file I/O filter
@@ -38,5 +40,7 @@ public:
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
 };
+
+#endif //CC_PDMS_SUPPORT
 
 #endif //CC_PDMS_FILTER_HEADER

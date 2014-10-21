@@ -544,6 +544,7 @@ bool PdmsParser::processCurrentToken()
 			if(!currentCommand->execute(&item))
 			{
 				session->printWarning("Unable to resolve previous command (this token may be unexpected in current command)");
+				delete currentCommand;
 				return false;
 			}
 			delete currentCommand;

@@ -193,6 +193,10 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 
 		}
 	}
+	else
+	{
+		return CC_FERR_MALFORMED_FILE;
+	}
 
 	container.applyGLTransformation_recursive();
 

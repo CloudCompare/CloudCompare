@@ -39,8 +39,8 @@ ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
 	, arrayWidth(0)
 	, arrayHeight(0)
 {
-	pixelSize_mm[0] = 0;
-	pixelSize_mm[1] = 0;
+	pixelSize_mm[0] = 1.0f;
+	pixelSize_mm[1] = 1.0f;
 }
 
 void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters& params)

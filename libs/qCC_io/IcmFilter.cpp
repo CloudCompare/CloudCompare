@@ -243,6 +243,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			params.arrayWidth = CI->getW();
 			params.arrayHeight = CI->getH();
 			params.focal_pix = 1.0f; //default focal (for the 3D symbol)
+			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f;
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 
 			ccGLMatrix mat;

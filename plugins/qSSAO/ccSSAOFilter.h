@@ -41,8 +41,6 @@ class ccShader;
 class ccBilateralFilter;
 class ccFrameBufferObject;
 
-const unsigned SSAO_MAX_N = 256;
-
 class ccSSAOFilter : public ccGlFilter
 {
 public:
@@ -71,27 +69,31 @@ public:
 protected:
 
 	void initReflectTexture();
-	GLuint texReflect;
-
-	int w;
-	int	h;
-
-	ccFrameBufferObject*	fbo;
-	ccShader*				shader;
-
-	int			N;		// nb of neighbours
-	float		Kz;		// attenuation with distance
-	float		R;		// radius in image of neighbour sphere
-	float		F;		// amplification
-
 	void sampleSphere();
-	float ssao_neighbours[3*SSAO_MAX_N];	//	full sphere sampling
 
-	ccBilateralFilter*	bilateralFilter;
-	bool				bilateralFilterEnabled;
-	unsigned			bilateralGHalfSize;
-	float				bilateralGSigma;
-	float				bilateralGSigmaZ;
+	GLuint m_texReflect;
+
+	int m_w;
+	int m_h;
+
+	ccFrameBufferObject* m_fbo;
+	ccShader* m_shader;
+
+	int   m_N;								// nb of neighbours
+	float m_Kz;								// attenuation with distance
+	float m_R;								// radius in image of neighbour sphere
+	float m_F;								// amplification
+
+	//! Maximum number of sampling directions
+	static const int MAX_N = 256;
+
+	float m_ssao_neighbours[3*MAX_N];	//	full sphere sampling
+
+	ccBilateralFilter* m_bilateralFilter;
+	bool               m_bilateralFilterEnabled;
+	unsigned           m_bilateralGHalfSize;
+	float              m_bilateralGSigma;
+	float              m_bilateralGSigmaZ;
 };
 
 #endif

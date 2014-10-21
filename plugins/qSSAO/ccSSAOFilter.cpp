@@ -40,21 +40,22 @@
 
 ccSSAOFilter::ccSSAOFilter()
 	: ccGlFilter("Screen Space Ambient Occlusion")
-	, texReflect(0)
-	, w(0)
-	, h(0)
-	, fbo(0)
-	, shader(0)
+	, m_texReflect(0)
+	, m_w(0)
+	, m_h(0)
+	, m_fbo(0)
+	, m_shader(0)
 {
 	setParameters(/*N=*/32,/*Kz=*/500.0f,/*R=*/0.05f,/*F=*/50.0f);
 
-	bilateralFilterEnabled	=	false;
-	bilateralFilter			=	0;
-	bilateralGHalfSize		=	2;
-	bilateralGSigma			=	1.0f;
-	bilateralGSigmaZ		=	0.4f;
+	m_bilateralFilterEnabled = false;
+	m_bilateralFilter        = 0;
+	m_bilateralGHalfSize     = 2;
+	m_bilateralGSigma        = 1.0f;
+	m_bilateralGSigmaZ       = 0.4f;
 
-	memset(ssao_neighbours, 0, sizeof(float) * 3*SSAO_MAX_N);
+	memset(m_ssao_neighbours, 0, sizeof(float) * 3*MAX_N);
+	sampleSphere();
 }
 
 ccSSAOFilter::~ccSSAOFilter()
@@ -67,28 +68,28 @@ ccGlFilter* ccSSAOFilter::clone() const
 	ccSSAOFilter* filter = new ccSSAOFilter();
 
 	//copy parameters
-	filter->setParameters(N, Kz, R, F);
+	filter->setParameters(m_N, m_Kz, m_R, m_F);
 
 	return filter;
 }
 
 void ccSSAOFilter::reset()
 {
-	if (glIsTexture(texReflect))
-		glDeleteTextures(1,&texReflect);
-	texReflect = 0;
+	if (glIsTexture(m_texReflect))
+		glDeleteTextures(1,&m_texReflect);
+	m_texReflect = 0;
 
-	if (fbo)
-		delete fbo;
-	fbo = 0;
+	if (m_fbo)
+		delete m_fbo;
+	m_fbo = 0;
 
-	if (shader)
-		delete shader;
-	shader = 0;
+	if (m_shader)
+		delete m_shader;
+	m_shader = 0;
 
-	if (bilateralFilter)
-		delete bilateralFilter;
-	bilateralFilter = 0;
+	if (m_bilateralFilter)
+		delete m_bilateralFilter;
+	m_bilateralFilter = 0;
 }
 
 bool ccSSAOFilter::init(int width, int height, QString shadersPath, QString& error)
@@ -105,52 +106,50 @@ bool ccSSAOFilter::init(int width,
 						GLenum textureMinMagFilter /*= GL_LINEAR*/)
 {
 	//in case of reinit
-	if (!fbo)
-		fbo	= new ccFrameBufferObject();
-	if (!fbo->init(width,height))
+	if (!m_fbo)
+		m_fbo = new ccFrameBufferObject();
+	if (!m_fbo->init(width,height))
 	{
 		error = "[SSAO] FrameBufferObject initialization failed!";
 		reset();
 		return false;
 	}
-	fbo->initTexture(0,GL_RGBA32F,GL_RGBA,GL_FLOAT,textureMinMagFilter);
+	m_fbo->initTexture(0,GL_RGBA32F,GL_RGBA,GL_FLOAT,textureMinMagFilter);
 
-	if (!shader)
+	if (!m_shader)
 	{
-		shader = new ccShader();
-		if (!shader->fromFile(shadersPath,"SSAO/ssao",error))
+		m_shader = new ccShader();
+		if (!m_shader->fromFile(shadersPath,"SSAO/ssao",error))
 		{
 			reset();
 			return false;
 		}
 	}
 
-	bilateralFilterEnabled = enableBilateralFilter;
-	if (bilateralFilterEnabled)
+	m_bilateralFilterEnabled = enableBilateralFilter;
+	if (m_bilateralFilterEnabled)
 	{
-		if (!bilateralFilter)
-			bilateralFilter	= new ccBilateralFilter();
-		if (!bilateralFilter->init(width,height,shadersPath,error))
+		if (!m_bilateralFilter)
+			m_bilateralFilter = new ccBilateralFilter();
+		if (!m_bilateralFilter->init(width,height,shadersPath,error))
 		{
-			delete bilateralFilter;
-			bilateralFilter = 0;
-			bilateralFilterEnabled = false;
+			delete m_bilateralFilter;
+			m_bilateralFilter = 0;
+			m_bilateralFilterEnabled = false;
 		}
 		else
 		{
-			bilateralFilter->useExistingViewport(true);
+			m_bilateralFilter->useExistingViewport(true);
 		}
 	}
-	else if (bilateralFilter)
+	else if (m_bilateralFilter)
 	{
-		delete bilateralFilter;
-		bilateralFilter = 0;
+		delete m_bilateralFilter;
+		m_bilateralFilter = 0;
 	}
 
-	w = width;
-	h = height;
-
-	sampleSphere();
+	m_w = width;
+	m_h = height;
 
 	if (useReflectTexture)
 	{
@@ -158,9 +157,9 @@ bool ccSSAOFilter::init(int width,
 	}
 	else
 	{
-		if (texReflect>0)
-			glDeleteTextures(1,&texReflect);
-		texReflect = 0;
+		if (m_texReflect != 0)
+			glDeleteTextures(1,&m_texReflect);
+		m_texReflect = 0;
 	}
 
 	return true;
@@ -168,42 +167,42 @@ bool ccSSAOFilter::init(int width,
 
 void ccSSAOFilter::sampleSphere()
 {
-	rk_sobol_state	s;
-	rk_sobol_error	rc;
-	double x[5];
-
 	// Initialize the sobol QRNG
-	if ((rc = rk_sobol_init(3, &s, NULL, rk_sobol_Ldirections, NULL)))
+	rk_sobol_state s;
+	if (rk_sobol_init(3, &s, NULL, rk_sobol_Ldirections, NULL) != RK_SOBOL_OK)
 	{
-		//ccLog::Error("RandomKit (Sobol) initialization error: %s\n", rk_sobol_strerror[rc]);
 		return;
 	}
 	rk_sobol_randomshift(&s, NULL);
 
 	//	draw in sphere
-	unsigned int	n_in_sphere = 0;
-	float* _ssao_neighbours = ssao_neighbours;
+	float* ssao_neighbours = m_ssao_neighbours;
 
-	while (n_in_sphere<SSAO_MAX_N)
+	for (unsigned n_in_sphere = 0; n_in_sphere < MAX_N; )
 	{
+		double x[5];
 		rk_sobol_double(&s, x);
+		
 		double px = x[0]*2.0-1.0;
 		double py = x[1]*2.0-1.0;
 		double pz = x[2]*2.0-1.0;
-		if ( px*px+py*py+pz*pz < 1.0 )
+		
+		if ( px*px + py*py + pz*pz < 1.0 )
 		{
-			*_ssao_neighbours++ =	(float)px;
-			*_ssao_neighbours++ =	(float)py;
-			*_ssao_neighbours++ =	(float)pz;
+			*ssao_neighbours++ = static_cast<float>(px);
+			*ssao_neighbours++ = static_cast<float>(py);
+			*ssao_neighbours++ = static_cast<float>(pz);
 
 			++n_in_sphere;
 		}
 	}
+
+	rk_sobol_free(&s);
 }
 
 void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
-	if (!fbo || !shader)
+	if (!m_fbo || !m_shader)
 	{
 		//ccLog::Warning("[ccSSAOFilter::shade] Internal error: structures not initialized!");
 		return;
@@ -215,44 +214,40 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0.0,(GLdouble)w,0.0,(GLdouble)h,0.0,1.0);
+	glOrtho(0.0,(GLdouble)m_w,0.0,(GLdouble)m_h,0.0,1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 
-	fbo->start();
-	fbo->setDrawBuffers1();
+	m_fbo->start();
+	m_fbo->setDrawBuffers1();
 
-	shader->start();
-	shader->setUniform1i("s2_Z",0);
-	shader->setUniform1i("s2_R",1);
-	shader->setUniform1i("s2_C",2);
-	shader->setUniform1f("R",R);
-	shader->setUniform1f("F",F);
-	shader->setUniform1f("Kz",Kz);
-	//shader->setUniform1i("N",N);
-	shader->setUniform1i("B_REF",texReflect == 0 ? 0 : 1);
-	shader->setTabUniform3fv("P",SSAO_MAX_N,ssao_neighbours);
+	m_shader->start();
+	m_shader->setUniform1i("s2_Z",0);
+	m_shader->setUniform1i("s2_R",1);
+	m_shader->setUniform1i("s2_C",2);
+	m_shader->setUniform1f("R",m_R);
+	m_shader->setUniform1f("F",m_F);
+	m_shader->setUniform1f("Kz",m_Kz);
+	//m_shader->setUniform1i("N",N);
+	m_shader->setUniform1i("B_REF",m_texReflect == 0 ? 0 : 1);
+	m_shader->setTabUniform3fv("P",MAX_N,m_ssao_neighbours);
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,texColor);
 
-	if (glIsTexture(texReflect))
+	if (glIsTexture(m_texReflect))
 	{
 		glActiveTexture(GL_TEXTURE1);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D,texReflect);
+		glBindTexture(GL_TEXTURE_2D,m_texReflect);
 	}
 	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D,texDepth);
 
-	ccFBOUtils::DisplayTexture2DCorner(texDepth,w,h);
+	ccFBOUtils::DisplayTexture2DCorner(texDepth,m_w,m_h);
 
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D,0);
-
-	if (glIsTexture(texReflect))
+	if (glIsTexture(m_texReflect))
 	{
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D,0);
@@ -263,13 +258,13 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
 
-	shader->stop();
-	fbo->stop();
+	m_shader->stop();
+	m_fbo->stop();
 
-	if (bilateralFilter)
+	if (m_bilateralFilter)
 	{
-		bilateralFilter->setParams(bilateralGHalfSize,bilateralGSigma,bilateralGSigmaZ);
-		bilateralFilter->shade(texDepth,fbo->getColorTexture(0),parameters);
+		m_bilateralFilter->setParams(m_bilateralGHalfSize,m_bilateralGSigma,m_bilateralGSigmaZ);
+		m_bilateralFilter->shade(texDepth,m_fbo->getColorTexture(0),parameters);
 	}
 
 	glMatrixMode(GL_PROJECTION);
@@ -282,23 +277,23 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 
 GLuint ccSSAOFilter::getTexture()
 {
-	if (bilateralFilter)
-		return bilateralFilter->getTexture();
+	if (m_bilateralFilter)
+		return m_bilateralFilter->getTexture();
 
-	return (fbo ? fbo->getColorTexture(0) : 0);
+	return (m_fbo ? m_fbo->getColorTexture(0) : 0);
 }
 
 void ccSSAOFilter::setParameters(int _N, float _Kz, float _R, float _F)
 {
-	N	=	_N;
-	Kz	=	_Kz;
-	R	=	_R;
-	F	=	_F;
+	m_N  = _N;
+	m_Kz = _Kz;
+	m_R  = _R;
+	m_F  = _F;
 }
 
-double frand()
+inline double frand()
 {
-	return static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+	return static_cast<double>(rand()) / RAND_MAX;
 }
 
 void randomPointInSphere(double& vx, double& vy, double& vz)
@@ -316,7 +311,7 @@ void ccSSAOFilter::initReflectTexture()
 {
 	/***	INIT TEXTURE OF RELFECT VECTORS		***/
 	/**		Fully random texture	**/
-	int texSize = w*h;
+	int texSize = m_w*m_h;
 	std::vector<float> reflectTex;
 	try
 	{
@@ -343,20 +338,19 @@ void ccSSAOFilter::initReflectTexture()
 
 	glEnable(GL_TEXTURE_2D);
 
-	if (glIsTexture(texReflect))
-		glDeleteTextures(1,&texReflect);
+	if (glIsTexture(m_texReflect))
+		glDeleteTextures(1,&m_texReflect);
 
-	glGenTextures(1,&texReflect);
-	glBindTexture(GL_TEXTURE_2D,texReflect);
+	glGenTextures(1,&m_texReflect);
+	glBindTexture(GL_TEXTURE_2D,m_texReflect);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB16F,w,h,0,GL_RGB,GL_FLOAT,&reflectTex[0]);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB16F,m_w,m_h,0,GL_RGB,GL_FLOAT,&reflectTex[0]);
 
 	glDisable(GL_TEXTURE_2D);
 
-	// According to Wikipedia, noise is made of 4*4 repeated tiles	to have only high frequency	**/
+	// According to Wikipedia, noise is made of 4*4 repeated tiles	to have only high frequency
 }
-

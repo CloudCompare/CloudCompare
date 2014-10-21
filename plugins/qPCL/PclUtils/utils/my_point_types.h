@@ -19,15 +19,8 @@
 #define Q_PCL_PLUGIN_MY_POINT_TYPES_H
 
 //PCL
-#include <pcl/pcl_base.h>
 #include <pcl/ros/register_point_struct.h>
 #include <pcl/point_types.h>
-
-#include <pcl/kdtree/impl/kdtree_flann.hpp>
-#include <pcl/search/impl/organized.hpp>
-#include <pcl/filters/impl/voxel_grid.hpp>
-
-#include <pcl/features/impl/normal_3d_omp.hpp>
 
 //! PCL custom point type used for reading RGB data
 struct OnlyRGB
@@ -82,7 +75,6 @@ struct OnlyNormals
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 } EIGEN_ALIGN16;
-
 
 struct OnlyNormalsCurvature
 {

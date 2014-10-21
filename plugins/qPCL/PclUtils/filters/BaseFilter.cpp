@@ -157,7 +157,7 @@ static void doCompute()
 {
 	if (!s_filter)
 	{
-		s_computeStatus=-1;
+		s_computeStatus = -1;
 		return;
 	}
 

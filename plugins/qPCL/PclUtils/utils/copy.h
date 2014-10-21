@@ -15,68 +15,38 @@
 //#                                                                        #
 //##########################################################################
 //
-#ifndef TESTFILTER_H
-#define TESTFILTER_H
+//#ifdef LP_PCL_PATCH_ENABLED
 
-#include "BaseFilter.h"
+#ifndef qPCL_COPY_H
+#define qPCL_COPY_H
 
-//qCC_db
-#include <ccPlatform.h>
+//Local
+#include "PCLCloud.h"
 
-//Qt
-#include <QThreadPool>
+//PCL
+#include <pcl/PointIndices.h>
 
-//System
-#include <iostream>
+class ccPointCloud;
 
-#if !defined(CC_WINDOWS)
-#include <time.h>
-#include <unistd.h>
-#endif
+//! Makes a copy of all scalar fields from one cloud to another
+/**	This algorithm simply copy the scalar fields from a cloud
+	to another using the the mapping contained in a pcl::PointIndicesPtr.
+	\param inCloud the input cloud from which to copy scalars
+	\param outCloud the output cloud in which to copy the scalar fields
+	\param in2outMapping indices of the input cloud for each point in the output
+	\param overwrite you can chose to not overwrite existing fields
+**/
+void copyScalarFields(	const ccPointCloud *inCloud,
+						ccPointCloud *outCloud,
+						pcl::PointIndicesPtr &in2outMapping,
+						bool overwrite = true);
 
-class Test:  public QObject
-{
-private:
-	Q_OBJECT
-public:
-	Test()	{}
+//! Makes a copy of RGB colors from one cloud to another
+void copyRGBColors(		const ccPointCloud *inCloud,
+						ccPointCloud *outCloud,
+						pcl::PointIndicesPtr &in2outMapping,
+						bool overwrite = true);
 
-	void run()
-	{
-		for (int i = 0; i < 10; i++)
-		{
-#ifndef WIN32
-			usleep(1);
-#endif
-			std::cout << "echo: " << i << std::endl;
-		}
-	}
+#endif // qPCL_COPY_H
 
-public slots:
-
-	void hasfinised()
-	{
-		std::cout << "thread finished" << std::endl;
-	}
-};
-
-class Testfilter: public BaseFilter
-{
-	Q_OBJECT
-
-public:
-	Testfilter();
-
-	//inherited from BaseFilter
-	virtual int compute();
-protected:
-
-	//inherited from BaseFilter
-	virtual int openInputDialog();
-
-	Test* m_app;
-	QThreadPool* m_thread_pool;
-
-};
-
-#endif // TESTFILTER_H
+//#endif // LP_PCL_PATCH_ENABLED

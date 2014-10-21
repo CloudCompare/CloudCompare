@@ -11,39 +11,24 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#                        COPYRIGHT: Luca Penasa                          #
 //#                                                                        #
 //##########################################################################
 //
-#include "testfilter.h"
+#ifndef PCL_CLOUD_H
+#define PCL_CLOUD_H
 
-//Qt
-#include <QRunnable>
-#include <QObject>
-#include <QThreadPool>
-#include <QFuture>
-#include <QtConcurrentRun>
-#include <QApplication>
-#include <QThread>
+//PCL V1.6 or older
+#ifdef PCL_VER_1_6_OR_OLDER
 
-Testfilter::Testfilter()
-	: BaseFilter(FilterDescription(	"Test Filter",
-									"Test Filter",
-									"TEST!",
-									":/toolbar/PclUtils/icons/pcl.png") )
-	, m_app()
-{
-	m_thread_pool = QThreadPool::globalInstance();
-}
+#include <sensor_msgs/PointCloud2.h>
+typedef sensor_msgs::PointCloud2 PCLCloud;
 
-int Testfilter::openInputDialog()
-{
-	return 1;
-}
+#else //Version 1.7 or newer
 
-int Testfilter::compute()
-{
-	QFuture<void> future = QtConcurrent::run(&(*this->m_app), &Test::run);
+#include <pcl/PCLPointCloud2.h>
+typedef pcl::PCLPointCloud2 PCLCloud;
 
-	return 1;
-}
+#endif
+
+#endif // PCL_CLOUD_H

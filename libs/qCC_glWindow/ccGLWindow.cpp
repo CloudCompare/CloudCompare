@@ -3206,8 +3206,8 @@ void ccGLWindow::setBubbleViewMode(bool state)
 	}
 	else if (bubbleViewModeWasEnabled)
 	{
-		setPerspectiveState(m_preBubbleViewParameters.perspectiveView,m_preBubbleViewParameters.objectCenteredView);
 		m_bubbleViewModeEnabled = false;
+		setPerspectiveState(m_preBubbleViewParameters.perspectiveView,m_preBubbleViewParameters.objectCenteredView);
 
 		//when leaving this mode, we restore the original camera center
 		setViewportParameters(m_preBubbleViewParameters);

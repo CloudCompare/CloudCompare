@@ -18,11 +18,12 @@
 #ifndef Q_PCL_IO_PLUGIN_HEADER
 #define Q_PCL_IO_PLUGIN_HEADER
 
+#include "../../ccIOFilterPluginInterface.h"
+
 //Qt
 #include <QObject>
 
-#include "../../ccIOFilterPluginInterface.h"
-
+//! PCL IO plugin (PCD format)
 class qPclIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT
@@ -32,6 +33,10 @@ class qPclIO : public QObject, public ccIOFilterPluginInterface
 #endif
 
 public:
+
+	qPclIO() {}
+	virtual ~qPclIO() {}
+
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "PCL I/O filter"; }

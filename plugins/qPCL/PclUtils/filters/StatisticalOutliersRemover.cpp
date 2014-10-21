@@ -18,20 +18,34 @@
 #include "StatisticalOutliersRemover.h"
 
 //Local
-#include "StatisticalOutliersRemoverDlg.h"
-#include "ccPointCloud.h"
-#include "cc2sm.h"
-#include "sm2cc.h"
-#include "filtering.h"
+#include "dialogs/StatisticalOutliersRemoverDlg.h"
+#include "../utils/cc2sm.h"
+#include "../utils/sm2cc.h"
+
+//PCL
+#include <pcl/filters/statistical_outlier_removal.h>
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
+
+//qCC_db
+#include <ccPointCloud.h>
 
 //Qt
 #include <QMainWindow>
 
 //Boost
 #include <boost/make_shared.hpp>
+
+int	removeOutliersStatistical(const PCLCloud::ConstPtr incloud, const int &k, const float &nStds, PCLCloud::Ptr outcloud)
+{
+	pcl::StatisticalOutlierRemoval<PCLCloud> remover;
+	remover.setInputCloud(incloud);
+	remover.setMeanK(k);
+	remover.setStddevMulThresh(nStds);
+	remover.filter(*outcloud);
+	return 1;
+}
 
 StatisticalOutliersRemover::StatisticalOutliersRemover()
 	: BaseFilter(FilterDescription("Statistical Outliers Remover",
@@ -54,20 +68,23 @@ StatisticalOutliersRemover::~StatisticalOutliersRemover()
 int StatisticalOutliersRemover::compute()
 {
 	//get selected as pointcloud
-	ccPointCloud * cloud = this->getSelectedEntityAsCCPointCloud();
-	PCLCloud::Ptr  tmp_cloud (new PCLCloud);
+	ccPointCloud* cloud = this->getSelectedEntityAsCCPointCloud();
+	if (!cloud)
+		return -1;
 
 	//now as sensor message
-	cc2smReader converter;
-	converter.setInputCloud(cloud);
-	converter.getAsSM(*tmp_cloud);
+	PCLCloud::Ptr tmp_cloud = cc2smReader(cloud).getAsSM();
+	if (!tmp_cloud)
+		return -1;
 
 	PCLCloud::Ptr outcloud ( new PCLCloud);
-	removeOutliersStatistical(tmp_cloud, m_k, m_std, outcloud);
+	int result = removeOutliersStatistical(tmp_cloud, m_k, m_std, outcloud);
+	if (result < 0)
+		return -1;
 
 	//get back outcloud as a ccPointCloud
 	ccPointCloud* final_cloud = sm2ccConverter(outcloud).getCloud();
-	if(!final_cloud)
+	if (!final_cloud)
 		return -1;
 
 	//create a suitable name for the entity

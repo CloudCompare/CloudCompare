@@ -20,14 +20,43 @@
 
 #include "BaseFilter.h"
 
-
 class MLSDialog;
-struct MLSParameters;
+
+struct MLSParameters
+{
+	///NOTE: DISTINCT CLOUD METHOD NOT IMPLEMENTED
+	enum UpsamplingMethod { NONE, SAMPLE_LOCAL_PLANE, RANDOM_UNIFORM_DENSITY, VOXEL_GRID_DILATION };
+
+	MLSParameters()
+		: order_ (0)
+		, polynomial_fit_(false)
+		, search_radius_(0)
+		, sqr_gauss_param_(0)
+		, compute_normals_(false)
+		, upsample_method_(NONE)
+		, upsampling_radius_(0)
+		, upsampling_step_(0)
+		, step_point_density_(0)
+		, dilation_voxel_size_(0)
+		, dilation_iterations_(0)
+	{
+	}
+
+	int order_;
+	bool polynomial_fit_;
+	double search_radius_;
+	double sqr_gauss_param_;
+	bool compute_normals_;
+	UpsamplingMethod upsample_method_;
+	double upsampling_radius_;
+	double upsampling_step_;
+	int step_point_density_;
+	double dilation_voxel_size_;
+	int dilation_iterations_;
+};
 
 class MLSSmoothingUpsampling : public BaseFilter
 {
-	Q_OBJECT
-
 public:
 	MLSSmoothingUpsampling();
 	virtual ~MLSSmoothingUpsampling();

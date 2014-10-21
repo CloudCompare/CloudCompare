@@ -23,11 +23,6 @@
 //Qt
 #include <QDialog>
 
-//PCL
-#ifndef Q_MOC_RUN
-#include <pcl/surface/mls.h>
-#endif
-
 class MLSDialog : public QDialog, public Ui::MLSDialog
 {
 	Q_OBJECT
@@ -35,17 +30,14 @@ class MLSDialog : public QDialog, public Ui::MLSDialog
 public:
 	MLSDialog(QWidget *parent = 0);
 
-private:
-
-
-	void updateCombo();
-	void deactivateAllMethods();
-
-
-private slots:
+protected slots:
 	void activateMenu(QString name);
 	void toggleMethods(bool status);
 	void updateSquaredGaussian(double radius);
+
+protected:
+	void updateCombo();
+	void deactivateAllMethods();
 
 };
 

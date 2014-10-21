@@ -17,27 +17,20 @@
 //
 
 //PCL
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
+#include <pcl/keypoints/sift_keypoint.h>
 
-#include <ccIncludeGL.h> //Always first normally, but imports 'min' and 'max' definitions that clash with PCL ones (DGM: from where?)
+#include <ccIncludeGL.h> //Always first normally, but it imports 'min' and 'max' definitions that clash with PCL ones (DGM: from where?)
+
+#include "ExtractSIFT.h"
 
 //Local
-#include "ExtractSIFT.h"
 #include "dialogs/SIFTExtractDlg.h"
-
-#include <cc2sm.h>
-#include <sm2cc.h>
-#include <filtering.h>
-#include <filtering.hpp>
+#include "../utils/PCLConv.h"
+#include "../utils/cc2sm.h"
+#include "../utils/sm2cc.h"
 
 //qCC_db
-#include <ccPolyline.h>
 #include <ccPointCloud.h>
-#include <ccHObject.h>
-
-//CCLib
-#include <GenericIndexedCloudPersist.h>
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
@@ -48,6 +41,39 @@
 //System
 #include <iostream>
 #include <sstream>
+
+//! Extract SIFT keypoints
+/** if only the point cloud is given PCL default parameters are used (that are not really good, so please give parameters)
+	\note Different types can be passed as input for this function:
+		- PointXYZI
+		- PointNormal
+		- PointXYZRGB
+	\note If a PointType with a scale field is passed as output type, scales will be returned together with the return cloud
+**/
+template <typename PointInT, typename PointOutT>
+int estimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
+					typename pcl::PointCloud<PointOutT>::Ptr out_cloud,
+					int nr_octaves = 0,
+					float min_scale = 0,
+					int nr_scales_per_octave = 0,
+					float min_contrast = 0)
+{
+	pcl::SIFTKeypoint< PointInT, PointOutT > keypoint_detector ;
+	keypoint_detector.setInputCloud(in_cloud);
+
+	if ( nr_octaves != 0 && min_scale != 0 && nr_scales_per_octave != 0 )
+	{
+		keypoint_detector.setScales (min_scale, nr_octaves, nr_scales_per_octave);
+	}
+
+	if (min_contrast != 0)
+	{
+		keypoint_detector.setMinimumContrast(min_contrast);
+	}
+
+	keypoint_detector.compute(*out_cloud);
+	return 1;
+}
 
 ExtractSIFT::ExtractSIFT()
 	: BaseFilter(FilterDescription(	"Extract SIFT",
@@ -171,24 +197,32 @@ int ExtractSIFT::compute()
 	if (!cloud)
 		return -1;
 
-	PCLCloud::Ptr sm_cloud (new PCLCloud);
-
-	std::vector<std::string> req_fields;
-	req_fields.resize(2);
-	req_fields[0] = "xyz"; // always needed
-	switch (m_mode)
+	std::list<std::string> req_fields;
+	try
 	{
-	case RGB:
-		req_fields[1] = "rgb";
-		break;
-	case SCALAR_FIELD:
-		req_fields[1] = m_field_to_use;
-		break;
+		req_fields.push_back("xyz"); // always needed
+		switch (m_mode)
+		{
+		case RGB:
+			req_fields.push_back("rgb");
+			break;
+		case SCALAR_FIELD:
+			req_fields.push_back(m_field_to_use);
+			break;
+		default:
+			assert(false);
+			break;
+		}
 	}
-
-	cc2smReader converter;
-	converter.setInputCloud(cloud);
-	converter.getAsSM(req_fields, *sm_cloud);
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return -1;
+	}
+	
+	PCLCloud::Ptr sm_cloud = cc2smReader(cloud).getAsSM(req_fields);
+	if (!sm_cloud)
+		return -1;
 
 	//Now change the name of the field to use to a standard name, only if in OTHER_FIELD mode
 	if (m_mode == SCALAR_FIELD)
@@ -217,7 +251,7 @@ int ExtractSIFT::compute()
 	PCLCloud::Ptr out_cloud_sm (new PCLCloud);
 	TO_PCL_CLOUD(*out_cloud, *out_cloud_sm);
 
-	if ( (out_cloud_sm->height * out_cloud_sm->width) == 0)
+	if ( out_cloud_sm->height * out_cloud_sm->width == 0)
 	{
 		//cloud is empty
 		return -53;

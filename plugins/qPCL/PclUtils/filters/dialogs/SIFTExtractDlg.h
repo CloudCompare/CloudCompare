@@ -15,26 +15,24 @@
 //#                                                                        #
 //##########################################################################
 //
-#ifndef CC_SIFT_DLG_HEADER
-#define CC_SIFT_DLG_HEADER
+#ifndef Q_PCL_PLUGIN_SIFT_DLG_HEADER
+#define Q_PCL_PLUGIN_SIFT_DLG_HEADER
 
 #include <ui_SIFTExtractDlg.h>
 
 //Qt
-#include <QObject>
+#include <QDialog>
+
+//system
+#include <vector>
 
 class SIFTExtractDlg : public QDialog, public Ui::SIFTExtractDlg
 {
-	Q_OBJECT
-
 public:
 	SIFTExtractDlg(QWidget* parent = 0);
 
-	void updateComboBox(std::vector<std::string> fields);
-
-//public slots:
-//	void disableCombo();
+	void updateComboBox(const std::vector<std::string>& fields);
 
 };
 
-#endif
+#endif //Q_PCL_PLUGIN_SIFT_DLG_HEADER

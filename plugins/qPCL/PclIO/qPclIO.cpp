@@ -20,6 +20,9 @@
 //Local
 #include "PcdFilter.h"
 
+//Qt
+#include <QtPlugin>
+
 FileIOFilter::Shared qPclIO::getFilter(ccMainAppInterface* app)
 {
 	return FileIOFilter::Shared(new PcdFilter);

@@ -16,18 +16,48 @@
 //##########################################################################
 //
 #include "sm2cc.h"
+
+//Local
+#include "PCLConv.h"
 #include "my_point_types.h"
+
+//PCL
+#include <pcl/common/io.h>
 
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-//PCL
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
+//PCL V1.6 or older
+#ifdef PCL_VER_1_6_OR_OLDER
+
+#include <sensor_msgs/PointField.h>
+typedef sensor_msgs::PointField PCLScalarField;
+
+#else //Version 1.7 or newer
+
+#include <pcl/PCLPointField.h>
+typedef pcl::PCLPointField PCLScalarField;
+
+#endif
 
 //system
 #include <assert.h>
+
+size_t GetNumberOfPoints(PCLCloud::Ptr sm_cloud)
+{
+	return static_cast<size_t>(sm_cloud ? sm_cloud->width * sm_cloud->height : 0);
+}
+
+bool ExistField(PCLCloud::Ptr sm_cloud, std::string name)
+{
+	if (sm_cloud)
+		for (std::vector< PCLScalarField >::const_iterator it = sm_cloud->fields.begin(); it != sm_cloud->fields.end(); ++it)
+			if (it->name == name)
+				return true;
+
+	return false;
+}
 
 sm2ccConverter::sm2ccConverter(PCLCloud::Ptr sm_cloud)
 	: m_sm_cloud(sm_cloud)
@@ -51,7 +81,7 @@ ccPointCloud* sm2ccConverter::getCloud()
 
 	//begin with checks and conversions
 	//be sure we have x, y, and z fields
-	if (!existField("x") || !existField("y") || !existField("z"))
+	if (!ExistField(m_sm_cloud,"x") || !ExistField(m_sm_cloud,"y") || !ExistField(m_sm_cloud,"z"))
 		return 0;
 
 	//create cloud
@@ -65,28 +95,28 @@ ccPointCloud* sm2ccConverter::getCloud()
 	}
 
 	//remove x,y,z fields from the vector of field names
-	eraseString(fields, "x");
-	eraseString(fields, "y");
-	eraseString(fields, "z");
+	fields.remove("x");
+	fields.remove("y");
+	fields.remove("z");
 
 	//do we have normals?
-	if (existField("normal_x") || existField("normal_y") || existField("normal_z"))
+	if (ExistField(m_sm_cloud,"normal_x") || ExistField(m_sm_cloud,"normal_y") || ExistField(m_sm_cloud,"normal_z"))
 	{
 		addNormals(cloud);
 		
 		//remove the corresponding fields
-		eraseString(fields, "normal_x");
-		eraseString(fields, "normal_y");
-		eraseString(fields, "normal_z");
+		fields.remove("normal_x");
+		fields.remove("normal_y");
+		fields.remove("normal_z");
 	}
 
 	//The same for colors
-	if (existField("rgb"))
+	if (ExistField(m_sm_cloud,"rgb"))
 	{
 		addRGB(cloud);
 		
 		//remove the corresponding field
-		eraseString(fields, "rgb");
+		fields.remove("rgb");
 	}
 
 	//All the remaining fields will be stored as scalar fields
@@ -104,7 +134,7 @@ bool sm2ccConverter::addXYZ(ccPointCloud *cloud)
 	if (!m_sm_cloud || !cloud)
 		return false;
 
-	size_t pointCount = getNumberOfPoints();
+	size_t pointCount = GetNumberOfPoints(m_sm_cloud);
 
 	if (!cloud->reserve(static_cast<unsigned>(pointCount)))
 		return false;
@@ -138,7 +168,7 @@ bool sm2ccConverter::addNormals(ccPointCloud *cloud)
 	if (!cloud->reserveTheNormsTable())
 		return false;
 
-	size_t pointCount = getNumberOfPoints();
+	size_t pointCount = GetNumberOfPoints(m_sm_cloud);
 
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
@@ -167,7 +197,7 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 	if (!cloud->reserveTheRGBTable())
 		return false;
 
-	size_t pointCount = getNumberOfPoints();
+	size_t pointCount = GetNumberOfPoints(m_sm_cloud);
 
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
@@ -202,7 +232,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 			return false;
 	}
 
-	size_t pointCount = getNumberOfPoints();
+	size_t pointCount = GetNumberOfPoints(m_sm_cloud);
 
 	//create new scalar field
 	ccScalarField* cc_scalar_field = new ccScalarField(name.c_str());
@@ -255,35 +285,3 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 
 	return true;
 }
-
-size_t sm2ccConverter::getNumberOfPoints()
-{
-	return (size_t) (m_sm_cloud->width * m_sm_cloud->height);
-}
-
-bool sm2ccConverter::existField(std::string name) const
-{
-	if (m_sm_cloud)
-		for (std::vector< PCLScalarField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
-			if (it->name == name)
-				return true;
-
-	return false;
-}
-
-void sm2ccConverter::eraseString(std::list<std::string> &fields, std::string name)
-{
-	fields.remove(name);
-}
-
-std::vector<std::string> getFieldList(const PCLCloud &cloud)
-{
-	std::vector<std::string> field_list;
-	for (size_t d = 0; d < cloud.fields.size (); ++d)
-	{
-		field_list.push_back (cloud.fields[d].name);
-	}
-
-	return field_list;
-}
-

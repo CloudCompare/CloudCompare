@@ -15,19 +15,18 @@
 //#                                                                        #
 //##########################################################################
 //
-#ifndef Q_PCL_PLUGIN_STATISTICALOUTLIERSREMOVERDIALOG_HEADER
-#define Q_PCL_PLUGIN_STATISTICALOUTLIERSREMOVERDIALOG_HEADER
+#ifndef Q_PCL_PLUGIN_STATISTICAL_OUTLIERS_REMOVER_DIALOG_HEADER
+#define Q_PCL_PLUGIN_STATISTICAL_OUTLIERS_REMOVER_DIALOG_HEADER
 
 #include <ui_StatisticalOutliersRemoverDlg.h>
 
+//Qt
+#include <QDialog>
+
 class SORDialog : public QDialog, public Ui::StatisticalOutliersRemoverDlg
 {
-	Q_OBJECT
-
 public:
-
 	SORDialog(QWidget* parent = 0);
-
 };
 
-#endif // Q_PCL_PLUGIN_STATISTICALOUTLIERSREMOVER_HEADER
+#endif // Q_PCL_PLUGIN_STATISTICAL_OUTLIERS_REMOVER_DIALOG_HEADER

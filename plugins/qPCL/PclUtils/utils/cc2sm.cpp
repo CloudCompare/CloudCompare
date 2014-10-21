@@ -17,260 +17,325 @@
 //
 #include "cc2sm.h"
 
+//Local
 #include "my_point_types.h"
+#include "PCLConv.h"
 
 //PCL
-#include <pcl/pcl_base.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
+#include <pcl/common/io.h>
 
 //CCLib
-#include <ChunkedPointCloud.h>
 #include <ScalarField.h>
+
+//qCC_db
+#include <ccPointCloud.h>
+
+//system
+#include <assert.h>
 
 using namespace pcl;
 
-cc2smReader::cc2smReader() : m_cc_cloud(NULL)
+cc2smReader::cc2smReader(const ccPointCloud * cc_cloud)
+	: m_cc_cloud(cc_cloud)
 {
-
+	assert(m_cc_cloud);
 }
 
-
-PCLCloud cc2smReader::getGenericField(std::string field_name)
+PCLCloud::Ptr cc2smReader::getGenericField(std::string field_name) const
 {
-	PCLCloud sm_cloud;
+	PCLCloud::Ptr sm_cloud;
 
 	if (field_name == "x")
 	{
-		sm_cloud = getOneOfXYZ(0);
-		return sm_cloud;
+		sm_cloud = getOneOf(COORD_X);
 	}
-
 	else if (field_name == "y")
 	{
-		sm_cloud = getOneOfXYZ(1);
-		return sm_cloud;
+		sm_cloud = getOneOf(COORD_Y);
 	}
-
 	else if (field_name == "z")
 	{
-		sm_cloud = getOneOfXYZ(2);
-		return sm_cloud;
+		sm_cloud = getOneOf(COORD_Y);
 	}
-
+	else if (field_name == "normal_x")
+	{
+		sm_cloud = getOneOf(NORM_X);
+	}
+	else if (field_name == "normal_y")
+	{
+		sm_cloud = getOneOf(NORM_Y);
+	}
+	else if (field_name == "normal_z")
+	{
+		sm_cloud = getOneOf(NORM_Z);
+	}
 	else if (field_name == "xyz")
 	{
 		sm_cloud = getXYZ();
-		return sm_cloud;
 	}
-
-	else if (field_name == "normal_x")
-	{
-		sm_cloud = getOneOfNormal(0);
-		return sm_cloud;
-	}
-
-	else if (field_name == "normal_y")
-	{
-		sm_cloud = getOneOfNormal(1);
-		return sm_cloud;
-	}
-
-	else if (field_name == "normal_z")
-	{
-		sm_cloud = getOneOfNormal(2);
-		return sm_cloud;
-	}
-
 	else if (field_name == "normal_xyz")
 	{
 		sm_cloud = getNormals();
-		return sm_cloud;
 	}
-
 	else if (field_name == "rgb")
 	{
 		sm_cloud = getColors();
-		return sm_cloud;
 	}
-	else //load the field from the scalar fields
+	else //try to load the field from the scalar fields
 	{
 		sm_cloud = getFloatScalarField(field_name);
-		return sm_cloud;
 	}
+
+	return sm_cloud;
 }
 
-
-PCLCloud cc2smReader::getOneOfXYZ(const int coord_ids)
+PCLCloud::Ptr cc2smReader::getOneOf(Fields field) const
 {
+	assert(m_cc_cloud);
+
+	PCLCloud::Ptr sm_cloud;
+
 	std::string name;
-	if (coord_ids == 0)
+	unsigned char dim = 0;
+	switch (field)
+	{
+	case COORD_X:
 		name = "x";
-	else if (coord_ids == 1)
+		dim = 0;
+		break;
+	case COORD_Y:
 		name = "y";
-	else if (coord_ids == 2)
+		dim = 1;
+		break;
+	case COORD_Z:
 		name = "z";
-
-
-	PCLCloud::Ptr sm_cloud (new PCLCloud);
-	PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
-
-
-	int pnumber = m_cc_cloud->size();
-	pcl_cloud->resize(pnumber);
-
-
-	CCVector3 this_point;
-	for (int i = 0; i < pnumber; ++i)
-	{
-		m_cc_cloud->getPoint(i, this_point);
-		pcl_cloud->at(i).S5c4laR = (float) this_point[coord_ids];
-	}
-
-	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
-	sm_cloud->fields[0].name = name.c_str();
-	return *sm_cloud;
-}
-
-PCLCloud cc2smReader::getOneOfNormal(const int coord_ids)
-{
-	std::string name;
-	if (coord_ids == 0)
+		dim = 2;
+		break;
+	case NORM_X:
+		if (!m_cc_cloud->hasNormals())
+			return sm_cloud;
 		name = "normal_x";
-	else if (coord_ids == 1)
+		dim = 0;
+		break;
+	case NORM_Y:
+		if (!m_cc_cloud->hasNormals())
+			return sm_cloud;
 		name = "normal_y";
-	else if (coord_ids == 2)
+		dim = 1;
+		break;
+	case NORM_Z:
+		if (!m_cc_cloud->hasNormals())
+			return sm_cloud;
 		name = "normal_z";
+		dim = 2;
+		break;
+	default:
+		//unhandled field?!
+		assert(false);
+		return sm_cloud;
+	};
 
+	assert(dim >= 0 && dim <= 2);
 
-	PCLCloud::Ptr sm_cloud (new PCLCloud);
-	PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
-
-
-	int pnumber = m_cc_cloud->size();
-	pcl_cloud->resize(pnumber);
-
-
-	CCVector3 normal;
-	for (int i = 0; i < pnumber; ++i)
+	try
 	{
-		normal = m_cc_cloud->getPointNormal(i);
-		pcl_cloud->at(i).S5c4laR = (float) normal[coord_ids];
-	}
+		PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
 
-	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
-	sm_cloud->fields[0].name = name.c_str();
-	return *sm_cloud;
+		unsigned pointCloud = m_cc_cloud->size();
+		pcl_cloud->resize(pointCloud);
+
+		for (unsigned i = 0; i < pointCloud; ++i)
+		{
+			switch(field)
+			{
+			case COORD_X:
+			case COORD_Y:
+			case COORD_Z:
+				{
+					const CCVector3* P = m_cc_cloud->getPoint(i);
+					pcl_cloud->at(i).S5c4laR = static_cast<float>(P->u[dim]);
+				}
+				break;
+			case NORM_X:
+			case NORM_Y:
+			case NORM_Z:
+				{
+					const CCVector3& N = m_cc_cloud->getPointNormal(i);
+					pcl_cloud->at(i).S5c4laR = static_cast<float>(N.u[dim]);
+				}
+				break;
+			default:
+				//unhandled field?!
+				assert(false);
+				break;
+			};
+		}
+
+		sm_cloud = PCLCloud::Ptr(new PCLCloud);
+		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
+		sm_cloud->fields[0].name = name;
+	}
+	catch(...)
+	{
+		//any error (memory, etc.)
+		sm_cloud.reset();
+	}
+	return sm_cloud;
 }
 
-PCLCloud cc2smReader::getXYZ()
+PointCloud<PointXYZ>::Ptr cc2smReader::getXYZ2() const
 {
-	PCLCloud::Ptr sm_cloud (new PCLCloud);
+	assert(m_cc_cloud);
+
 	PointCloud<PointXYZ>::Ptr pcl_cloud (new PointCloud<PointXYZ>);
-
-
-	int pnumber = m_cc_cloud->size();
-	pcl_cloud->resize(pnumber);
-
-
-	CCVector3 this_point;
-	for (int i = 0; i < pnumber; ++i)
+	try
 	{
-		m_cc_cloud->getPoint(i, this_point);
-		pcl_cloud->at(i).x =(float) this_point[0];
-		pcl_cloud->at(i).y = (float) this_point[1];
-		pcl_cloud->at(i).z = (float) this_point[2];
+		unsigned pointCount = m_cc_cloud->size();
+		pcl_cloud->resize(pointCount);
+
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			const CCVector3* P = m_cc_cloud->getPoint(i);
+			pcl_cloud->at(i).x = static_cast<float>(P->x);
+			pcl_cloud->at(i).y = static_cast<float>(P->y);
+			pcl_cloud->at(i).z = static_cast<float>(P->z);
+		}
+	}
+	catch(...)
+	{
+		//any error (memory, etc.)
+		pcl_cloud.reset();
+	}
+	
+	return pcl_cloud;
+}
+
+PCLCloud::Ptr cc2smReader::getXYZ() const
+{
+	PCLCloud::Ptr sm_cloud;
+	
+	PointCloud<PointXYZ>::Ptr pcl_cloud = getXYZ2();
+	if (pcl_cloud)
+	{
+		sm_cloud = PCLCloud::Ptr(new PCLCloud);
+		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 	}
 
-	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
-	return *sm_cloud;
+	return sm_cloud;
 }
 
-
-void cc2smReader::getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud)
+PCLCloud::Ptr cc2smReader::getNormals() const
 {
-	PCLCloud sm = getXYZ();
-	FROM_PCL_CLOUD(sm, cloud);
-}
+	if (!m_cc_cloud || !m_cc_cloud->hasNormals())
+		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));
 
-PCLCloud cc2smReader::getNormals()
-{
 	PCLCloud::Ptr sm_cloud (new PCLCloud);
-	PointCloud<OnlyNormals>::Ptr pcl_cloud (new PointCloud<OnlyNormals>);
-
-	int pnumber = m_cc_cloud->size();
-	pcl_cloud->resize(pnumber);
-	CCVector3 normal;
-
-	for (int i = 0; i < pnumber; ++i)
+	try
 	{
-		normal = m_cc_cloud->getPointNormal(i);
-		pcl_cloud->at(i).normal_x = normal[0];
-		pcl_cloud->at(i).normal_y = normal[1];
-		pcl_cloud->at(i).normal_z = normal[2];
-	}
+		PointCloud<OnlyNormals>::Ptr pcl_cloud (new PointCloud<OnlyNormals>);
 
-	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
-	return *sm_cloud;
+		unsigned pointCount = m_cc_cloud->size();
+		pcl_cloud->resize(pointCount);
+
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			const CCVector3& N = m_cc_cloud->getPointNormal(i);
+			pcl_cloud->at(i).normal_x = N.x;
+			pcl_cloud->at(i).normal_y = N.y;
+			pcl_cloud->at(i).normal_z = N.z;
+		}
+
+		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
+	}
+	catch(...)
+	{
+		//any error (memory, etc.)
+		sm_cloud.reset();
+	}
+	
+	return sm_cloud;
 }
 
-PCLCloud cc2smReader::getFloatScalarField(const std::string field_name)
+PCLCloud::Ptr cc2smReader::getColors() const
 {
+	if (!m_cc_cloud || !m_cc_cloud->hasColors())
+		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));
+
 	PCLCloud::Ptr sm_cloud (new PCLCloud);
-	PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
-
-	CCLib::ScalarField * scalar_field = m_cc_cloud->getScalarField(m_cc_cloud->getScalarFieldIndexByName(field_name.c_str()));
-	int pnumber = m_cc_cloud->size();
-	pcl_cloud->resize(pnumber);
-	float scalar;
-	for (int i = 0; i < pnumber; ++i)
+	try
 	{
-		scalar = scalar_field->getValue(i);
-		pcl_cloud->at(i).S5c4laR = scalar;
+		PointCloud<OnlyRGB>::Ptr pcl_cloud (new PointCloud<OnlyRGB>);
+
+		unsigned pointCount = m_cc_cloud->size();
+		pcl_cloud->resize(pointCount);
+
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			const colorType* rgb = m_cc_cloud->getPointColor(i);
+			pcl_cloud->at(i).r = rgb[0];
+			pcl_cloud->at(i).g = rgb[1];
+			pcl_cloud->at(i).b = rgb[2];
+		}
+
+		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
+	}
+	catch(...)
+	{
+		//any error (memory, etc.)
+		sm_cloud.reset();
 	}
 
-	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
-
-	//Now change the name of the scalar field -> we cannot have any space into the field name
-	//NOTE this is a little trick for put any number of scalar fields in a message PointCloud2 object
-	//We use a pointtype with a generic scalar field named scalar. we load here scalar field and
-	//then we change the name to the needed one
-
-	QString qfield_name = QString(field_name.c_str());
-	qfield_name.simplified();
-	qfield_name.replace(' ', '_');
-	sm_cloud->fields[0].name = qfield_name.toStdString().c_str() ;
-
-
-	return *sm_cloud;
+	return sm_cloud;
 }
 
-PCLCloud cc2smReader::getColors()
+std::string cc2smReader::GetSimplifiedSFName(const std::string& ccSfName)
 {
+	QString simplified = QString::fromStdString(ccSfName).simplified();
+	simplified.replace(' ', '_');
+	return simplified.toStdString();
+}
+
+PCLCloud::Ptr cc2smReader::getFloatScalarField(const std::string field_name) const
+{
+	assert(m_cc_cloud);
+
+	int sfIdx = m_cc_cloud->getScalarFieldIndexByName(field_name.c_str());
+	if (sfIdx < 0)
+		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));
+	CCLib::ScalarField* scalar_field = m_cc_cloud->getScalarField(sfIdx);
+	assert(scalar_field);
+
 	PCLCloud::Ptr sm_cloud (new PCLCloud);
-	PointCloud<OnlyRGB>::Ptr pcl_cloud (new PointCloud<OnlyRGB>);
-
-	int pnumber = m_cc_cloud->size();
-	pcl_cloud->resize(pnumber);
-
-
-	for (int i = 0; i < pnumber; ++i)
+	try
 	{
-		pcl_cloud->at(i).r = m_cc_cloud->getPointColor(i)[0];
-		pcl_cloud->at(i).g = m_cc_cloud->getPointColor(i)[1];
-		pcl_cloud->at(i).b = m_cc_cloud->getPointColor(i)[2];
+		unsigned pointCount = m_cc_cloud->size();
+
+		PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
+		pcl_cloud->resize(pointCount);
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = scalar_field->getValue(i);
+			pcl_cloud->at(i).S5c4laR = static_cast<float>(scalar);
+		}
+
+		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
+
+		//Now change the name of the scalar field -> we cannot have any space into the field name
+		//NOTE this is a little trick to put any number of scalar fields in a message PointCloud2 object
+		//We use a point type with a generic scalar field named scalar. we load the scalar field and
+		//then we change the name to the needed one
+		sm_cloud->fields[0].name = GetSimplifiedSFName(field_name);
+	}
+	catch(...)
+	{
+		//any error (memory, etc.)
+		sm_cloud.reset();
 	}
 
-	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
-	return *sm_cloud;
+	return sm_cloud;
 }
 
-void cc2smReader::setInputCloud(const ccPointCloud * cc_cloud)
-{
-	m_cc_cloud = cc_cloud;
-}
-
-int cc2smReader::checkIfFieldExist(const std::string field_name)
+bool cc2smReader::checkIfFieldExists(const std::string field_name) const
 {
 	if ( (field_name == "x") || (field_name == "y") || (field_name == "z") || (field_name == "xyz") )
 		return (m_cc_cloud->size() != 0);
@@ -285,23 +350,20 @@ int cc2smReader::checkIfFieldExist(const std::string field_name)
 		return (m_cc_cloud->getScalarFieldIndexByName(field_name.c_str()) >= 0);
 }
 
-int cc2smReader::getAsSM(std::vector<std::string> requested_fields, PCLCloud &sm_cloud )
+PCLCloud::Ptr cc2smReader::getAsSM(std::list<std::string> requested_fields) const
 {
-	//sort requested_fields, needed by binary_search
-	std::sort(requested_fields.begin(), requested_fields.end());
-
-	//do some checks
-	for (unsigned i = 0; i < requested_fields.size(); ++i)
+	//preliminary check
 	{
-		std::string field_name = requested_fields[i];
-		bool exists = checkIfFieldExist(field_name);
-
-		if (!exists) //all check results must be true
-			return -1;
+		for (std::list<std::string>::const_iterator it = requested_fields.begin(); it != requested_fields.end(); ++it)
+		{
+			bool exists = checkIfFieldExists(*it);
+			if (!exists) //all check results must be true
+				return PCLCloud::Ptr(static_cast<PCLCloud*>(0));
+		}
 	}
 
 	//are we asking for x, y, and z all togheters?
-	bool got_xyz = std::binary_search(requested_fields.begin(), requested_fields.end(), "xyz");
+	bool got_xyz = (std::find(requested_fields.begin(), requested_fields.end(), "xyz") != requested_fields.end());
 	if (got_xyz)
 	{
 		//remove from the requested fields lists x y and z as single occurrencies
@@ -310,9 +372,8 @@ int cc2smReader::getAsSM(std::vector<std::string> requested_fields, PCLCloud &sm
 		requested_fields.erase(std::remove(requested_fields.begin(), requested_fields.end(), std::string("z")), requested_fields.end());
 	}
 
-
 	//same for normals
-	bool got_normal_xyz = std::binary_search(requested_fields.begin(), requested_fields.end(), "normal_xyz");
+	bool got_normal_xyz = (std::find(requested_fields.begin(), requested_fields.end(), "normal_xyz") != requested_fields.end());
 	if (got_normal_xyz)
 	{
 		requested_fields.erase(std::remove(requested_fields.begin(), requested_fields.end(), std::string("normal_x")), requested_fields.end());
@@ -321,79 +382,58 @@ int cc2smReader::getAsSM(std::vector<std::string> requested_fields, PCLCloud &sm
 	}
 
 	//a vector for PointCloud2 clouds
-	std::vector<PCLCloud> clouds;
+	PCLCloud::Ptr firstCloud;
 
-
-	//TODO we should load and merge one-by-one, so to free some memory
-	//load all fields
-	for (unsigned i = 0; i < requested_fields.size(); ++i)
+	//load and merge fields/clouds one-by-one
 	{
-		clouds.push_back(getGenericField(requested_fields[i]) );
+		for (std::list<std::string>::const_iterator it = requested_fields.begin(); it != requested_fields.end(); ++it)
+		{
+			if (!firstCloud)
+			{
+				firstCloud = getGenericField(*it);
+			}
+			else
+			{
+				PCLCloud::Ptr otherCloud = getGenericField(*it);
+				if (otherCloud)
+				{
+					PCLCloud::Ptr sm_tmp (new PCLCloud); //temporary cloud
+					pcl::concatenateFields(*firstCloud, *otherCloud, *sm_tmp);
+					firstCloud = sm_tmp;
+				}
+			}
+		}
 	}
 
-	//merge all these clouds in one
-	sm_cloud = mergeVectorOfClouds(clouds);
-
-
-	return 1;
+	return firstCloud;
 }
 
-int cc2smReader::getAsSM(PCLCloud &sm_cloud)
+PCLCloud::Ptr cc2smReader::getAsSM() const
 {
 	//does the cloud have some points?
-	if (m_cc_cloud->size() == 0)
-		return -1;
+	if (!m_cc_cloud || m_cc_cloud->size() == 0)
+	{
+		assert(false);
+		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));
+	}
 
 	//container
-	std::vector<PCLCloud> clouds;
-
-
-	//load the geometry
-	clouds.push_back(getXYZ());
-
-
-	//does we have normals?
-	if (m_cc_cloud->hasNormals())
+	std::list<std::string> fields;
+	try
 	{
-		clouds.push_back(getNormals());
+		fields.push_back("xyz");
+		if (m_cc_cloud->hasNormals())
+			fields.push_back("normal_xyz");
+		if (m_cc_cloud->hasColors())
+			fields.push_back("rgb");
+		for (unsigned i=0; i<m_cc_cloud->getNumberOfScalarFields(); ++i)
+			fields.push_back(m_cc_cloud->getScalarField(static_cast<int>(i))->getName());
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));
 	}
 
-
-	//colors?
-	if (m_cc_cloud->hasColors())
-
-	{
-		clouds.push_back(getColors());
-	}
-
-	//how many fields does we have?
-	int n_fields = m_cc_cloud->getNumberOfScalarFields();
-
-	//declare some vectors
-	std::vector<CCLib::ScalarField *> cc_scalar_fields;
-	std::vector<std::string> cc_scalar_fields_names;
-
-	//pcl_scalar_fields.resize(n_fields);
-
-
-	if (n_fields != 0) // DO THIS ONLY IF WE HAVE FIELDS
-	{
-		for (int i = 0; i < n_fields; ++i)
-		{
-			cc_scalar_fields.push_back(m_cc_cloud->getScalarField(i));
-			cc_scalar_fields_names.push_back(m_cc_cloud->getScalarFieldName(i));
-		}
-
-
-		for (int i = 0; i < n_fields; ++i)
-		{
-
-			clouds.push_back(getFloatScalarField(cc_scalar_fields_names[i]));
-		}
-	}
-
-
-	//merge all togheter
-	sm_cloud = mergeVectorOfClouds(clouds);
-	return 1;
+	return getAsSM(fields);
 }

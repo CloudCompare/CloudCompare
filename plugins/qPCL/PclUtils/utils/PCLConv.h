@@ -15,46 +15,22 @@
 //#                                                                        #
 //##########################################################################
 //
-#ifndef PCL_UTILITIES_H
-#define PCL_UTILITIES_H
+#ifndef PCL_CONVERSIONS_H
+#define PCL_CONVERSIONS_H
 
-//PCL
+//PCL V1.6 or older
 #ifdef PCL_VER_1_6_OR_OLDER
 
 #include <pcl/ros/conversions.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/PointField.h>
-typedef sensor_msgs::PointCloud2 PCLCloud;
-typedef sensor_msgs::PointField PCLScalarField;
 #define FROM_PCL_CLOUD pcl::fromROSMsg
 #define TO_PCL_CLOUD pcl::toROSMsg
 
-#else //Version 1.7.0 or newer
+#else //Version 1.7 or newer
 
 #include <pcl/PCLPointCloud2.h>
-#include <pcl/PCLPointField.h>
-typedef pcl::PCLPointCloud2 PCLCloud;
-typedef pcl::PCLPointField PCLScalarField;
 #define FROM_PCL_CLOUD pcl::fromPCLPointCloud2
 #define TO_PCL_CLOUD pcl::toPCLPointCloud2
 
 #endif
 
-#include <Eigen/Dense>
-
-//Qt
-#include <QString>
-
-PCLCloud mergeVectorOfClouds(std::vector<PCLCloud> &clouds);
-
-//! Utility function that loads a given PCD file in a PointCloud2
-/** \param[in] filename
-	\param[out] origin the position (center) of the sensor as vector
-	\param[out] orientation a quaternion with orientation os sensor
-	\return a shared pointer to a PCL cloud
-**/
-PCLCloud::Ptr loadSensorMessage(const QString &filename,
-								Eigen::Vector4f &origin,
-								Eigen::Quaternionf &orientation);
-
-#endif // PCL_UTILITIES_H
+#endif // PCL_CONVERSIONS_H

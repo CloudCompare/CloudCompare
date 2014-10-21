@@ -15,19 +15,19 @@
 //#                                                                        #
 //##########################################################################
 //
-#ifndef Q_PCL_PLUGIN_NORMALESTIMATIONDIALOG_HEADER
-#define Q_PCL_PLUGIN_NORMALESTIMATIONDIALOG_HEADER
+#ifndef Q_PCL_PLUGIN_NORMAL_ESTIMATION_DIALOG_HEADER
+#define Q_PCL_PLUGIN_NORMAL_ESTIMATION_DIALOG_HEADER
 
 #include <ui_NormalEstimationDlg.h>
 
+//Qt
+#include <QDialog>
+
 class NormalEstimationDialog : public QDialog, public Ui::NormalEstimationDialog
 {
-	Q_OBJECT
-
 public:
-
 	NormalEstimationDialog(QWidget* parent = 0);
 
 };
 
-#endif // Q_PCL_PLUGIN_NORMALESTIMATIONDIALOG_HEADER
+#endif // Q_PCL_PLUGIN_NORMAL_ESTIMATION_DIALOG_HEADER

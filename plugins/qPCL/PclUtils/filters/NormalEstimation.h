@@ -24,8 +24,6 @@ class NormalEstimationDialog;
 
 class NormalEstimation : public BaseFilter
 {
-	Q_OBJECT
-
 public:
 	NormalEstimation();
 	virtual ~NormalEstimation();

@@ -16,24 +16,50 @@
 //##########################################################################
 //
 #include "NormalEstimation.h"
-#include "dialogs/NormalEstimationDlg.h"
 
-#include <cc2sm.h>
-#include <filtering.h>
-#include <filtering.hpp>
-#include <my_point_types.h>
-#include <sm2cc.h>
+//Local
+#include "dialogs/NormalEstimationDlg.h"
+#include "../utils/PCLConv.h"
+#include "../utils/cc2sm.h"
+#include "../utils/sm2cc.h"
 
 //PCL
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
+#include <pcl/features/impl/normal_3d_omp.hpp>
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
 
+//qCC_db
+#include <ccPointCloud.h>
+
 //Qt
 #include <QMainWindow>
+
+template <typename PointInT, typename PointOutT>
+int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
+					const float radius,
+					const bool useKnn, //true if use knn, false if radius search
+					typename pcl::PointCloud<PointOutT>::Ptr outcloud)
+{
+	typename pcl::NormalEstimationOMP<PointInT, PointOutT> normal_estimator;
+	//typename pcl::PointCloud<PointOutT>::Ptr normals (new pcl::PointCloud<PointOutT>);
+
+	if (useKnn) //use knn
+	{
+		int knn_radius = (int) radius; //cast to int
+		normal_estimator.setKSearch(knn_radius);
+	}
+	else //use radius search
+	{
+		normal_estimator.setRadiusSearch(radius);
+	}
+
+	normal_estimator.setInputCloud (incloud);
+	//normal_estimator.setNumberOfThreads(4);
+	normal_estimator.compute (*outcloud);
+
+	return 1;
+}
 
 NormalEstimation::NormalEstimation()
 	: BaseFilter(FilterDescription(	"Estimate Normals",
@@ -102,20 +128,18 @@ int NormalEstimation::compute()
 	if (cloud->hasNormals())
 		cloud->unallocateNorms();
 
-	//get xyz in PCL format
-	cc2smReader converter;
-	converter.setInputCloud(cloud);
-	PCLCloud sm_cloud = converter.getXYZ();
-
-	//get as pcl point cloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-	FROM_PCL_CLOUD(sm_cloud, *pcl_cloud);
+	//get xyz as pcl point cloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud = cc2smReader(cloud).getXYZ2();
+	if (!pcl_cloud)
+		return -1;
 
 	//create storage for normals
 	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
 
 	//now compute
 	int result = compute_normals<pcl::PointXYZ, pcl::PointNormal>(pcl_cloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, normals);
+	if (result < 0)
+		return -1;
 
 	PCLCloud::Ptr sm_normals (new PCLCloud);
 	TO_PCL_CLOUD(*normals, *sm_normals);

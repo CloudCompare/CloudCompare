@@ -16,18 +16,25 @@
 //##########################################################################
 //
 #include "MLSDialog.h"
-#include "ui_MLSDialog.h"
+#include "../MLSSmoothingUpsampling.h"
+
+//PCL
+//#include <pcl/surface/mls.h>
+
+//Qt
 #include <QVariant>
-#include "filtering.h"
 
 MLSDialog::MLSDialog(QWidget *parent)
 	: QDialog(parent)
 	, Ui::MLSDialog()
 {
 	setupUi(this);
+
 	updateCombo();
-	connect (this->upsampling_method, SIGNAL(currentIndexChanged(QString)), this, SLOT(activateMenu(QString)));
-	connect (this->search_radius, SIGNAL(valueChanged(double)), this, SLOT(updateSquaredGaussian(double)) );
+
+	connect (this->upsampling_method, SIGNAL(currentIndexChanged(QString)), this, SLOT(activateMenu(QString)) );
+	connect (this->search_radius,     SIGNAL(valueChanged(double)),         this, SLOT(updateSquaredGaussian(double)) );
+
 	deactivateAllMethods();
 }
 

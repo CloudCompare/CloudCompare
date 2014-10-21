@@ -19,20 +19,99 @@
 
 //Local
 #include "dialogs/MLSDialog.h"
-#include "filtering.h"
-#include "filtering.hpp"
-#include "cc2sm.h"
-#include "sm2cc.h"
-#include "my_point_types.h"
+#include "../utils/PCLConv.h"
+#include "../utils/cc2sm.h"
+#include "../utils/sm2cc.h"
+
+//PCL
+#include <pcl/surface/mls.h>
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
 
 //qCC_db
 #include <ccScalarField.h>
+#include <ccPointCloud.h>
 
 //Qt
 #include <QMainWindow>
+
+#ifdef LP_PCL_PATCH_ENABLED
+#include "../utils/copy.h"
+#endif
+
+template <typename PointInT, typename PointOutT>
+int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
+				const MLSParameters &params,
+				typename pcl::PointCloud<PointOutT>::Ptr &outcloud
+#ifdef LP_PCL_PATCH_ENABLED
+				, pcl::PointIndicesPtr &mapping_ids
+#endif
+	)
+{
+	typename pcl::search::KdTree<PointInT>::Ptr tree (new pcl::search::KdTree<PointInT>);
+
+#ifdef _OPENMP
+	//create the smoothing object
+	pcl::MovingLeastSquaresOMP< PointInT, PointOutT > smoother;
+	int n_threads = omp_get_max_threads();
+	smoother.setNumberOfThreads(n_threads);
+#else
+	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
+#endif
+	smoother.setInputCloud(incloud);
+	smoother.setSearchMethod(tree);	
+	smoother.setSearchRadius(params.search_radius_);
+	smoother.setComputeNormals(params.compute_normals_);
+	smoother.setPolynomialFit(params.polynomial_fit_);
+
+	if (params.polynomial_fit_)
+	{
+		smoother.setPolynomialOrder(params.order_);
+		smoother.setSqrGaussParam(params.sqr_gauss_param_);
+	}
+
+	switch (params.upsample_method_)
+	{
+	case (MLSParameters::NONE):
+		{
+			smoother.setUpsamplingMethod( pcl::MovingLeastSquares<PointInT, PointOutT>::NONE );
+			//no need to set other parameters here!
+			break;
+		}
+
+	case (MLSParameters::SAMPLE_LOCAL_PLANE):
+		{
+			smoother.setUpsamplingMethod( pcl::MovingLeastSquares<PointInT, PointOutT>::SAMPLE_LOCAL_PLANE);
+			smoother.setUpsamplingRadius(params.upsampling_radius_);
+			smoother.setUpsamplingStepSize(params.upsampling_step_);
+			break;
+		}
+
+	case (MLSParameters::RANDOM_UNIFORM_DENSITY):
+		{
+			smoother.setUpsamplingMethod( pcl::MovingLeastSquares<PointInT, PointOutT>::RANDOM_UNIFORM_DENSITY );
+			smoother.setPointDensity(params.step_point_density_);
+			break;
+		}
+
+	case (MLSParameters::VOXEL_GRID_DILATION):
+		{
+			smoother.setUpsamplingMethod(pcl::MovingLeastSquares<PointInT, PointOutT>::VOXEL_GRID_DILATION);
+			smoother.setDilationVoxelSize(static_cast<float>(params.dilation_voxel_size_));
+			smoother.setDilationIterations(params.dilation_iterations_);
+			break;
+		}
+	}
+
+	smoother.process(*outcloud);
+
+#ifdef LP_PCL_PATCH_ENABLED
+	mapping_ids = smoother.getCorrespondingIndices();
+#endif
+
+	return 1;
+}
 
 MLSSmoothingUpsampling::MLSSmoothingUpsampling()
 	: BaseFilter(FilterDescription(	"MLS smoothing",
@@ -62,33 +141,39 @@ int MLSSmoothingUpsampling::compute()
 		return -1;
 
 	//get xyz in PCL format
-	cc2smReader converter;
-	converter.setInputCloud(cloud);
+
+	std::list<std::string> req_fields;
+	try
+	{
+		req_fields.push_back("xyz"); // always needed
+		if (cloud->getCurrentDisplayedScalarField())
+		{
+			//keep the current scalar field (if any)
+			req_fields.push_back(cloud->getCurrentDisplayedScalarField()->getName());
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return -1;
+	}
 
 	//take out the xyz info
-	PCLCloud sm_xyz = converter.getXYZ();
-	PCLCloud sm_cloud;
+	PCLCloud::Ptr sm_cloud = cc2smReader(cloud).getAsSM(req_fields);
+	if (!sm_cloud)
+		return -1;
 
-	//take out the current scalar field (if any)
+	//Now change the name of the field to use to a standard name, only if in OTHER_FIELD mode
 	if (cloud->getCurrentDisplayedScalarField())
 	{
-		const char* current_sf_name = cloud->getCurrentDisplayedScalarField()->getName();
-
-		PCLCloud sm_field = converter.getFloatScalarField(current_sf_name);
-		//change its name
-		std::string new_name = "scalar";
-		sm_field.fields[0].name = new_name.c_str();
-		//put everithing together
-		pcl::concatenateFields(sm_xyz, sm_field, sm_cloud);
-	}
-	else
-	{
-		sm_cloud = sm_xyz;
+		int field_index = pcl::getFieldIndex(*sm_cloud, cc2smReader::GetSimplifiedSFName(cloud->getCurrentDisplayedScalarField()->getName()));
+		if (field_index >= 0)
+			sm_cloud->fields.at(field_index).name = "scalar";
 	}
 
 	//get as pcl point cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-	FROM_PCL_CLOUD(sm_cloud, *pcl_cloud);
+	FROM_PCL_CLOUD(*sm_cloud, *pcl_cloud);
 
 	//create storage for outcloud
 	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);

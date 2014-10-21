@@ -15,24 +15,13 @@
 //#                                                                        #
 //##########################################################################
 //
+//#ifdef LP_PCL_PATCH_ENABLED
 
-#include <filtering.h>
-
-//PCL
-#include <pcl/filters/statistical_outlier_removal.h>
+#include "copy.h"
 
 //qCC_db
 #include <ccScalarField.h>
-
-int	removeOutliersStatistical(const PCLCloud::ConstPtr incloud, const int &k, const float &nStds, PCLCloud::Ptr outcloud)
-{
-	pcl::StatisticalOutlierRemoval<PCLCloud> remover;
-	remover.setInputCloud(incloud);
-	remover.setMeanK(k);
-	remover.setStddevMulThresh(nStds);
-	remover.filter(*outcloud);
-	return 1;
-}
+#include <ccPointCloud.h>
 
 void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::PointIndicesPtr &in2outMapping, bool overwrite)
 {
@@ -121,3 +110,5 @@ void copyRGBColors(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::Poi
 
 	outCloud->showColors(outCloud->colorsShown() || inCloud->colorsShown());
 }
+
+//#endif // LP_PCL_PATCH_ENABLED

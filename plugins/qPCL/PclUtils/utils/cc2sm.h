@@ -18,55 +18,56 @@
 #ifndef Q_PCL_PLUGIN_CC2SM_H
 #define Q_PCL_PLUGIN_CC2SM_H
 
-#include "pcl_utilities.h"
+//Local
+#include "PCLCloud.h"
 
 //PCL
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-//qCC_db
-#include <ccPointCloud.h>
+//system
+#include <list>
+#include <string>
 
+class ccPointCloud;
+
+//! CC to PCL cloud converter
 class cc2smReader
 {
 public:
-	cc2smReader();
+	cc2smReader(const ccPointCloud* cc_cloud);
 
-	PCLCloud getGenericField(std::string field_name);
+	PCLCloud::Ptr getGenericField(std::string field_name) const;
 
-	PCLCloud getOneOfXYZ(const int coord_ids);
+	PCLCloud::Ptr getXYZ() const;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr getXYZ2() const;
 
-	PCLCloud getOneOfNormal(const int coord_ids);
+	PCLCloud::Ptr getNormals() const;
 
-	PCLCloud getXYZ();
+	PCLCloud::Ptr getColors() const;
 
-	void getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud);
+	enum Fields { COORD_X, COORD_Y, COORD_Z, NORM_X, NORM_Y, NORM_Z };
+	PCLCloud::Ptr getOneOf(Fields field) const;
 
-	PCLCloud getNormals();
+	PCLCloud::Ptr getFloatScalarField(const std::string field_name) const;
 
-	PCLCloud getFloatScalarField(const std::string field_name);
+	PCLCloud::Ptr getAsSM(std::list<std::string> requested_fields) const;
 
-	PCLCloud getColors();
+	//! Converts all the data in a ccPointCloud to a sesor_msgs::PointCloud2
+	/** This is useful for saving a ccPointCloud into a PCD file.
+		For pcl filters other methods are suggested (to get only the necessary bits of data)
+	**/
+	PCLCloud::Ptr getAsSM() const;
 
-	int checkIfFieldExist(const std::string field_name);
-
-	void setInputCloud(const ccPointCloud * cc_cloud);
-
-	int getAsSM(std::vector<std::string> requested_fields, PCLCloud &sm_cloud );
-
-	/** \brief this convert all the data in a ccPointCloud to a sesor_msgs::PointCloud2
-	* this is useful for saving all the data in a ccPointCloud into a PCD file
-	* Is suggested to use other methods for get a cloud for pcl filters (so to get only needed data)
-	*/
-	int getAsSM(PCLCloud &sm_cloud);
+	static std::string GetSimplifiedSFName(const std::string& ccSfName);
 
 protected:
+	
+	bool checkIfFieldExists(const std::string field_name) const;
+
+	//! Associated cloud
 	const ccPointCloud* m_cc_cloud;
 
 };
-
-
-
-
 
 #endif // Q_PCL_PLUGIN_CC2SM_H

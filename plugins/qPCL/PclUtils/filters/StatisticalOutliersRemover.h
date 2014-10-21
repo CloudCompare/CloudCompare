@@ -18,14 +18,12 @@
 #ifndef STATISTICALOUTLIERSREMOVER_H
 #define STATISTICALOUTLIERSREMOVER_H
 
-#include <BaseFilter.h>
+#include "BaseFilter.h"
 
 class SORDialog;
 
 class StatisticalOutliersRemover : public BaseFilter
 {
-	Q_OBJECT
-
 public:
 	StatisticalOutliersRemover();
 	virtual ~StatisticalOutliersRemover();

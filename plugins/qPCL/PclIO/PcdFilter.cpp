@@ -85,11 +85,8 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 	}
 
-	PCLCloud::Ptr pclCloud(new PCLCloud);
-
-	cc2smReader converter;
-	converter.setInputCloud(ccCloud);
-	if (converter.getAsSM(*pclCloud) != 1)
+	PCLCloud::Ptr pclCloud = cc2smReader(ccCloud).getAsSM();
+	if (!pclCloud)
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
@@ -134,7 +131,12 @@ CC_FILE_ERROR PcdFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	Eigen::Vector4f origin;
 	Eigen::Quaternionf orientation;
 
-	boost::shared_ptr<PCLCloud> cloud_ptr_in = loadSensorMessage(filename, origin, orientation);
+	PCLCloud::Ptr cloud_ptr_in(new PCLCloud);
+	//Load the given file
+	if (pcl::io::loadPCDFile(filename.toStdString(), *cloud_ptr_in, origin, orientation) < 0)
+	{
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
 
 	if (!cloud_ptr_in) //loading failed?
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
@@ -142,7 +144,7 @@ CC_FILE_ERROR PcdFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	PCLCloud::Ptr cloud_ptr;
 	if (!cloud_ptr_in->is_dense) //data may contain NaNs --> remove them
 	{
-		//now we need to remove nans
+		//now we need to remove NaNs
 		pcl::PassThrough<PCLCloud> passFilter;
 		passFilter.setInputCloud(cloud_ptr_in);
 

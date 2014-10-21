@@ -22,10 +22,9 @@
 
 class SIFTExtractDlg;
 
+//! SIFT keypoints extraction
 class ExtractSIFT: public BaseFilter
 {
-	Q_OBJECT
-
 public:
 	ExtractSIFT();
 	virtual ~ExtractSIFT();

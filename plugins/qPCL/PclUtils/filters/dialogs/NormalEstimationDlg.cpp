@@ -17,9 +17,9 @@
 //
 #include "NormalEstimationDlg.h"
 
-NormalEstimationDialog::NormalEstimationDialog(QWidget* parent) : QDialog(parent), Ui::NormalEstimationDialog()
+NormalEstimationDialog::NormalEstimationDialog(QWidget* parent)
+	: QDialog(parent)
+	, Ui::NormalEstimationDialog()
 {
 	setupUi(this);
 }
-
-

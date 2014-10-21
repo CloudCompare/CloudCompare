@@ -17,13 +17,15 @@
 //
 #include "SIFTExtractDlg.h"
 
-SIFTExtractDlg::SIFTExtractDlg(QWidget* parent) : QDialog(parent), Ui::SIFTExtractDlg()
+SIFTExtractDlg::SIFTExtractDlg(QWidget* parent)
+	: QDialog(parent)
+	, Ui::SIFTExtractDlg()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool/* Qt::Dialog /* | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool);
 }
 
-void SIFTExtractDlg::updateComboBox(std::vector<std::string> fields)
+void SIFTExtractDlg::updateComboBox(const std::vector<std::string>& fields)
 {
 	intensityCombo->clear();
 	for (size_t i = 0; i < fields.size(); i++)

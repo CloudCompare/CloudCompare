@@ -170,9 +170,13 @@ CC_FILE_ERROR PcdFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		ccGLMatrix ccRot;
 		{
 			Eigen::Matrix3f eigrot = orientation.toRotationMatrix();
-			for (int i = 0; i < 3; ++i)
-				for (int j = 0; j < 3; ++j)
-					ccRot.getColumn(j)[i] = eigrot(i,j);
+			float* X = ccRot.getColumn(0);
+			float* Y = ccRot.getColumn(1);
+			float* Z = ccRot.getColumn(2);
+			//Warning: Y and Z are inverted
+			X[0] =  eigrot(0,0); X[1] =  eigrot(1,0); X[2] =  eigrot(2,0);
+			Y[0] = -eigrot(0,2); Y[1] = -eigrot(1,2); Y[2] = -eigrot(2,2);
+			Z[0] =  eigrot(0,1); Z[1] =  eigrot(1,1); Z[2] =  eigrot(2,1);
 
 			ccRot.getColumn(3)[3] = 1.0f;
 			ccRot.setTranslation(origin.data());

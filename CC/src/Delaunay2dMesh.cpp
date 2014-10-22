@@ -200,8 +200,8 @@ bool Delaunay2dMesh::removeTrianglesLongerThan(PointCoordinateType maxEdgeLength
 		const CCVector3* B = m_associatedCloud->getPoint(_triIndexes[1]);
 		const CCVector3* C = m_associatedCloud->getPoint(_triIndexes[2]);
 
-		if ((*B-*A).norm2() <= squareMaxEdgeLength &&
-			(*C-*A).norm2() <= squareMaxEdgeLength &&
+		if ((*B-*A).norm2() <= squareMaxEdgeLength ||
+			(*C-*A).norm2() <= squareMaxEdgeLength ||
 			(*C-*B).norm2() <= squareMaxEdgeLength)
 		{
 			if (lastValidIndex != i)

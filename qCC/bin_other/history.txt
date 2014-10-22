@@ -185,6 +185,7 @@ v2.5.6 ??/??/2014
 		(causing display errors in the best case)
 	* To trim the big triangles off the 2D1/2 triangulation output, CC was testing that ALL the edges
 		of the triangle were bigger than the 'max edge length' defined by user (instead of AT LEAST ONE)
+	* Funny things (crash, etc.) could happen when choosing another option than 'leave empty' to fill empty cells...
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

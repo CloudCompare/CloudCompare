@@ -156,6 +156,9 @@ v2.5.6 ??/??/2014
 		- Tools > Sand box > Compute best registration RMS matrix
 	* Point list picking tool:
 		- new checkbox to display the global coordinates (instead of shifted ones) for shifted clouds
+	* 2D Labels:
+		- For points with an associated scalar value, the scalar field name is used instead of 'Scalar'
+			(e.g. 'Density = 1.23' instead of 'Scalar = 1.23') 
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

@@ -21,8 +21,10 @@
 #include "cc2DLabel.h"
 #include "ccBasicTypes.h"
 #include "ccGenericPointCloud.h"
+#include "ccPointCloud.h"
 #include "ccSphere.h"
 #include "ccGenericGLDisplay.h"
+#include "ccScalarField.h"
 
 //Qt
 #include <QSharedPointer>
@@ -382,7 +384,15 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			if (cloud->hasDisplayedScalarField())
 			{
 				ScalarType D = cloud->getPointScalarValue(pointIndex);
-				QString sfStr = QString("Scalar: %1").arg(D,0,'f',precision);
+				QString source("Scalar");
+				//fetch the real scalar field name if possible
+				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+				{
+					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+					if (pc->getCurrentDisplayedScalarField())
+						source = QString(pc->getCurrentDisplayedScalarField()->getName());
+				}
+				QString sfStr = QString("%1 = %2").arg(source).arg(D,0,'f',precision);
 				body << sfStr;
 			}
 		}

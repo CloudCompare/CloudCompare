@@ -886,7 +886,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t polyID = (intptr_t)facet->getPolygon();
 				if (polyID > 0)
 				{
-					ccHObject* poly = FindRobust(root,facet,static_cast<unsigned>(polyID),CC_TYPES::POLY_LINE);
+					ccHObject* poly = FindRobust(root,facet,static_cast<unsigned>(polyID),CC_TYPES::MESH);
 					if (poly)
 					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
@@ -894,7 +894,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					else
 					{
 						//we have a problem here ;)
-						facet->setContourVertices(0);
+						facet->setPolygon(0);
 						ccLog::Warning(QString("[BIN] Couldn't find polygon mesh (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
 					}
 				}

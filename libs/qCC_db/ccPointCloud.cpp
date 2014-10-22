@@ -337,6 +337,8 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignore
 	ccPointCloud* result = destCloud ? destCloud : new ccPointCloud();
 
 	result->setVisible(isVisible());
+	if (!destCloud)
+		result->setDisplay(getDisplay());
 
 	result->append(this,0,ignoreChildren); //there was (virtually) no point before
 

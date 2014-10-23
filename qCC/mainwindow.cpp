@@ -650,7 +650,6 @@ void MainWindow::enable3DMouse(bool state, bool silent)
 		m_3dMouseInput = new Mouse3DInput(this);
 		if (m_3dMouseInput->connect(this,"CloudCompare"))
 		{
-			//ccLog::Warning("[3D Mouse] Device has been detected!");
 			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)),	this,	SLOT(on3DMouseMove(std::vector<float>&)));
 			QObject::connect(m_3dMouseInput, SIGNAL(sigReleased()),						this,	SLOT(on3DMouseReleased()));
 			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)),			this,	SLOT(on3DMouseKeyDown(int)));
@@ -661,10 +660,8 @@ void MainWindow::enable3DMouse(bool state, bool silent)
 			delete m_3dMouseInput;
 			m_3dMouseInput = 0;
 			
-			if (silent)
-				ccLog::Warning("[3D Mouse] No device found");
-			else
-				ccLog::Error("[3D Mouse] No device found");
+			if (!silent)
+				ccLog::Error("[3D Mouse] No device found"); //warning message has already been issued by Mouse3DInput::connect
 			state = false;
 		}
 	}

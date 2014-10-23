@@ -30,21 +30,31 @@ function( install_Qt_Dlls ) # 2 arguments: ARGV0 = release destination / ARGV1 =
 if( WIN32 )
 	if( ${ARGC} EQUAL 1 )
 		
+		#All Qt Dlls (release mode)
+		set(QT_RELEASE_DLLS)
+		
 		if ( NOT USE_QT5 )
-			set( QT_RELEASE_DLLS QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
+			set( QT_RELEASE_DLLS_BASE_NAME QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
 		else()
-			set( QT_RELEASE_DLLS Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport icuin51 icuuc51 icudt51 )
 			set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
-		endif()
-		#specific case for the MinGW version of Qts
-		if( MINGW )
-			list( APPEND QT_RELEASE_DLLS libgcc )
-			list( APPEND QT_RELEASE_DLLS mingwm )
+			#standard DLLs
+			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
+			#ICU DLLs
+			file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
 		endif()
 
-		#release version
-		foreach( element ${QT_RELEASE_DLLS} )
-			set( qtDLL ${QT_BINARY_DIR}/${element}.dll )
+		#specific case for the MinGW version of Qts
+		if( MINGW )
+			list( APPEND QT_RELEASE_DLLS_BASE_NAME libgcc )
+			list( APPEND QT_RELEASE_DLLS_BASE_NAME mingwm )
+		endif()
+
+		#generate full path of release Dlls
+		foreach( element ${QT_RELEASE_DLLS_BASE_NAME} )
+			list( APPEND QT_RELEASE_DLLS ${QT_BINARY_DIR}/${element}.dll)
+		endforeach()
+
+		foreach( qtDLL ${QT_RELEASE_DLLS} )
 			if( NOT CMAKE_CONFIGURATION_TYPES )
 				install( FILES ${qtDLL} DESTINATION ${ARGV0} )
 			else()
@@ -56,26 +66,34 @@ if( WIN32 )
 		if( CMAKE_CONFIGURATION_TYPES )
 		
 			#release with debug info version
-			foreach( element ${QT_RELEASE_DLLS} )
-				set( qtDLL ${QT_BINARY_DIR}/${element}.dll )
+			foreach( qtDLL ${QT_RELEASE_DLLS} )
 				install( FILES ${qtDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
 			endforeach()
-
+			
 			#debug version
+			set( QT_DEBUG_DLLS )
+			
 			if ( NOT USE_QT5 )
-				set( QT_DEBUG_DLLS QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
+				set( QT_DEBUG_DLLS_BASE_NAME QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
 			else()
-				set( QT_DEBUG_DLLS Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd icuin51 icuuc51 icudt51 )
 				#set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
+				#standard DLLs
+				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
+				#ICU DLLs
+				file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
 			endif()
 			#specific case for the MinGW version of Qts
 			if( MINGW )
-				list( APPEND QT_DEBUG_DLLS libgcc )
-				list( APPEND QT_DEBUG_DLLS mingwm )
+				list( APPEND QT_DEBUG_DLLS_BASE_NAME libgcc )
+				list( APPEND QT_DEBUG_DLLS_BASE_NAME mingwm )
 			endif()
 		
-			foreach( element ${QT_DEBUG_DLLS} )
-				set( qtDLL ${QT_BINARY_DIR}/${element}.dll )
+			#generate full path of release Dlls
+			foreach( element ${QT_DEBUG_DLLS_BASE_NAME} )
+				list( APPEND QT_DEBUG_DLLS ${QT_BINARY_DIR}/${element}.dll)
+			endforeach()
+
+			foreach( qtDLL ${QT_DEBUG_DLLS} )
 				install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
 			endforeach()
 

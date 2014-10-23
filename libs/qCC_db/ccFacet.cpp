@@ -303,8 +303,10 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		{
 			CCLib::Delaunay2dMesh dm;
 			char errorStr[1024];
-			if (dm.build(hullPointsVector,0,removePointsOutsideHull,errorStr))
+			if (dm.buildMesh(hullPointsVector,0,errorStr))
 			{
+				if (removePointsOutsideHull)
+					dm.removeOuterTriangles(hullPointsVector,hullPointsVector);
 				unsigned triCount = dm.size();
 				assert(triCount != 0);
 

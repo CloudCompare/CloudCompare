@@ -58,10 +58,17 @@ public:
 		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
 		\return success
 	**/
-	virtual bool build(	const std::vector<CCVector2>& the2dPoints,
-						size_t pointCountToUse = 0,
-						bool forceInputPointsAsBorder = false,
-						char* outputErrorStr = 0);
+	virtual bool buildMesh(	const std::vector<CCVector2>& the2dPoints,
+								size_t pointCountToUse = 0,
+								char* outputErrorStr = 0);
+
+	//! Removes the triangles falling outside of a given (2D) polygon
+	/** \param vertices2D vertices of the mesh as 2D points (typically the one used to triangulate the mesh!)
+		\param polygon2D vertices of the 2D boundary polygon (ordered)
+		\return success
+	**/
+	virtual bool removeOuterTriangles(	const std::vector<CCVector2>& vertices2D,
+										const std::vector<CCVector2>& polygon2D);
 
 	//inherited methods (see GenericMesh)
 	virtual unsigned size() const { return m_numberOfTriangles; }
@@ -83,7 +90,7 @@ public:
 	/** Warning: may remove ALL triangles!
 		Check the resulting size afterwards.
 	**/
-	bool removeTrianglesLongerThan(PointCoordinateType maxEdgeLength);
+	bool removeTrianglesWithEdgesLongerThan(PointCoordinateType maxEdgeLength);
 
 protected:
 

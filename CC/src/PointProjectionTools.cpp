@@ -284,7 +284,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 
 			Delaunay2dMesh* dm = new Delaunay2dMesh();
 			char triLibErrorStr[1024];
-			if (!dm->build(the2DPoints,0,false,triLibErrorStr))
+			if (!dm->buildMesh(the2DPoints,0,triLibErrorStr))
 			{
 				if (errorStr)
 					strcpy(errorStr, triLibErrorStr);
@@ -296,7 +296,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 			//remove triangles with too long edges
 			if (maxEdgeLength > 0)
 			{
-				dm->removeTrianglesLongerThan(maxEdgeLength);
+				dm->removeTrianglesWithEdgesLongerThan(maxEdgeLength);
 				if (dm->size() == 0)
 				{
 					//no more triangles?

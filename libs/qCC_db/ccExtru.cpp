@@ -65,9 +65,9 @@ bool ccExtru::buildUp()
 		--count;
 
 	char errorStr[1024];
-	if (!mesh.build(m_profile,count,true,errorStr))
+	if (!mesh.buildMesh(m_profile,count,errorStr))
 	{
-		ccLog::Error(QString("[ccPlane::buildUp] Profile triangulation failed (Triangle lib. saide: '%1'").arg(errorStr));
+		ccLog::Warning(QString("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'").arg(errorStr));
 		return false;
 	}
 

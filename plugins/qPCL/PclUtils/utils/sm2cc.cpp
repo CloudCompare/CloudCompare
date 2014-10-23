@@ -76,8 +76,10 @@ ccPointCloud* sm2ccConverter::getCloud()
 	//get the fields list
 	std::list<std::string> fields;
 	for (std::vector< PCLScalarField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
+	{
 		if (it->name != "_") //PCL padding fields
 			fields.push_back(it->name);
+	}
 
 	//begin with checks and conversions
 	//be sure we have x, y, and z fields

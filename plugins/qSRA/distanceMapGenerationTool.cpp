@@ -555,7 +555,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 				//mesh the '2D' points
 				CCLib::Delaunay2dMesh* dm = new CCLib::Delaunay2dMesh();
 				char errorStr[1024];
-				if (!dm->build(the2DPoints,0,false,errorStr))
+				if (!dm->buildMesh(the2DPoints,0,errorStr))
 				{
 					if (app)
 						app->dispToConsole(QString("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. said '%1'").arg(errorStr),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -587,10 +587,10 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 						//now scan the cells
 						{
 							//pre-computation for barycentric coordinates
-							const double& valA = cells[P[0][0]+P[0][1]*grid->xSteps].value;
-							const double& valB = cells[P[1][0]+P[1][1]*grid->xSteps].value;
-							const double& valC = cells[P[2][0]+P[2][1]*grid->xSteps].value;
-							int det = ((P[1][1]-P[2][1])*(P[0][0]-P[2][0])+(P[2][0]-P[1][0])*(P[0][1]-P[2][1]));
+							const double& valA = cells[P[0][0] + P[0][1] * grid->xSteps].value;
+							const double& valB = cells[P[1][0] + P[1][1] * grid->xSteps].value;
+							const double& valC = cells[P[2][0] + P[2][1] * grid->xSteps].value;
+							int det = (P[1][1]-P[2][1])*(P[0][0]-P[2][0]) + (P[2][0]-P[1][0])*(P[0][1]-P[2][1]);
 
 							for (int j=yMin; j<=yMax; ++j)
 							{

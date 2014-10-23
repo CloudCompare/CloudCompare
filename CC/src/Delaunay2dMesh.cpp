@@ -28,30 +28,6 @@
 #include <assert.h>
 #include <string.h>
 
-//! Externally defined triangle test method (when calling 'Triangle' with the -u option)
-//static float s_maxSquareEdgeLength = 0;
-//int triunsuitable(float* triorg, float* tridest, float* triapex, float area)
-//{
-//	float dxoa = triorg[0] - triapex[0];
-//	float dyoa = triorg[1] - triapex[1];
-//	float dxda = tridest[0] - triapex[0];
-//	float dyda = tridest[1] - triapex[1];
-//	float dxod = triorg[0] - tridest[0];
-//	float dyod = triorg[1] - tridest[1];
-//
-//	//Find the squares of the lengths of the triangle's three edges
-//	float oalen = dxoa * dxoa + dyoa * dyoa;
-//	float dalen = dxda * dxda + dyda * dyda;
-//	float odlen = dxod * dxod + dyod * dyod;
-//
-//	//Find the square of the length of the longest edge
-//	float maxSquarelength = std::max(std::max(dalen,oalen),oalen);
-//
-//	//This procedure returns 1 if the triangle is too large and should be
-//	//refined; 0 otherwise.
-//	return (maxSquarelength > s_maxSquareEdgeLength ? 1 : 0);
-//}
-
 using namespace CCLib;
 
 Delaunay2dMesh::Delaunay2dMesh()
@@ -85,10 +61,9 @@ void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnershi
 	m_cloudIsOwnedByMesh = passOwnership;
 }
 
-bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
-							size_t pointCountToUse/*=0*/,
-							bool forceInputPointsAsBorder/*=false*/,
-							char* outputErrorStr/*=0*/)
+bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& the2dPoints,
+								size_t pointCountToUse/*=0*/,
+								char* outputErrorStr/*=0*/)
 {
 	size_t pointCount = the2dPoints.size();
 	//we will use at most 'pointCountToUse' points (if not 0)
@@ -136,56 +111,70 @@ bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
 	if (m_numberOfTriangles > 0)
 		m_triIndexes = in.trianglelist;
 
-	//we must first remove triangles out of the (input) border!
-	//('Triangle' lib triangulates the convex hull)
-	if (forceInputPointsAsBorder)
+	m_globalIterator = m_triIndexes;
+	m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
+	
+
+	return true;
+}
+
+bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertices2D,
+											const std::vector<CCVector2>& polygon2D)
+{
+	if (!m_triIndexes || m_numberOfTriangles == 0)
+		return false;
+
+	//we expect the same number of 2D points as the actual number of points in the associated mesh (if any)
+	if (m_associatedCloud && static_cast<size_t>(m_associatedCloud->size()) != vertices2D.size())
+		return false;
+
+	unsigned lastValidIndex = 0;
+
+	//test each triangle center
 	{
-		//test each triangle center
 		const int* _triIndexes = m_triIndexes;
-		unsigned lastValidIndex = 0;
 		for (unsigned i=0; i<m_numberOfTriangles; ++i,_triIndexes+=3)
 		{
 			//compute the triangle's barycenter
-			const CCVector2& A = the2dPoints[_triIndexes[0]];
-			const CCVector2& B = the2dPoints[_triIndexes[1]];
-			const CCVector2& C = the2dPoints[_triIndexes[2]];
-			CCVector2 G = CCVector2((A.x+B.x+C.x),(A.y+B.y+C.y))/static_cast<PointCoordinateType>(3.0);
+			const CCVector2& A = vertices2D[_triIndexes[0]];
+			const CCVector2& B = vertices2D[_triIndexes[1]];
+			const CCVector2& C = vertices2D[_triIndexes[2]];
+			CCVector2 G = (A + B + C) / 3.0;
 
-			//if G is outside the 'polygon'
-			if (CCLib::ManualSegmentationTools::isPointInsidePoly(G,the2dPoints))
+			//if G is inside the 'polygon'
+			if (CCLib::ManualSegmentationTools::isPointInsidePoly(G,polygon2D))
 			{
-				//we remove the corresponding triangle
+				//we keep the corresponding triangle
 				if (lastValidIndex != i)
 					memcpy(m_triIndexes+3*lastValidIndex,_triIndexes,3*sizeof(int));
 				++lastValidIndex;
 			}
 		}
-
-		//new number of triangles
-		m_numberOfTriangles = lastValidIndex;
-		if (m_numberOfTriangles)
-		{
-			//shouldn't fail as m_numberOfTriangles is smaller!
-			m_triIndexes = static_cast<int*>(realloc(m_triIndexes,sizeof(int)*3*m_numberOfTriangles));
-		}
-		else
-		{
-			//no triangle left?!
-			if (outputErrorStr)
-				strcpy(outputErrorStr,"No triangle in the output?!");
-			delete[] m_triIndexes;
-			m_triIndexes = 0;
-			return false;
-		}
 	}
 
+	//new number of triangles
+	m_numberOfTriangles = lastValidIndex;
+	if (m_numberOfTriangles)
+	{
+		//shouldn't fail as m_numberOfTriangles is smaller!
+		m_triIndexes = static_cast<int*>(realloc(m_triIndexes,sizeof(int)*3*m_numberOfTriangles));
+	}
+	else
+	{
+		//no triangle left!
+		delete[] m_triIndexes;
+		m_triIndexes = 0;
+	}
+
+	//update iterators
 	m_globalIterator = m_triIndexes;
 	m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
 
 	return true;
 }
 
-bool Delaunay2dMesh::removeTrianglesLongerThan(PointCoordinateType maxEdgeLength)
+
+bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxEdgeLength)
 {
 	if (!m_associatedCloud || maxEdgeLength <= 0)
 		return false;
@@ -200,8 +189,8 @@ bool Delaunay2dMesh::removeTrianglesLongerThan(PointCoordinateType maxEdgeLength
 		const CCVector3* B = m_associatedCloud->getPoint(_triIndexes[1]);
 		const CCVector3* C = m_associatedCloud->getPoint(_triIndexes[2]);
 
-		if ((*B-*A).norm2() <= squareMaxEdgeLength ||
-			(*C-*A).norm2() <= squareMaxEdgeLength ||
+		if ((*B-*A).norm2() <= squareMaxEdgeLength &&
+			(*C-*A).norm2() <= squareMaxEdgeLength &&
 			(*C-*B).norm2() <= squareMaxEdgeLength)
 		{
 			if (lastValidIndex != i)

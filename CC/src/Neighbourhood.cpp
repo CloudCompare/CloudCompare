@@ -586,7 +586,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 		Delaunay2dMesh* dm = new Delaunay2dMesh();
 
 		//triangulate the projected points
-		if (!dm->build(points2D,0,false,errorStr))
+		if (!dm->buildMesh(points2D,0,errorStr))
 		{
 			delete dm;
 			return 0;
@@ -617,7 +617,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 		//remove triangles with too long edges
 		if (maxEdgeLength > 0)
 		{
-			dm->removeTrianglesLongerThan(maxEdgeLength);
+			dm->removeTrianglesWithEdgesLongerThan(maxEdgeLength);
 			if (dm->size() == 0)
 			{
 				//no more triangles?

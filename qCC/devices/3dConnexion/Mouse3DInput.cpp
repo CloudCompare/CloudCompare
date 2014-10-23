@@ -120,7 +120,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	if (m_siHandle == SI_NO_HANDLE)
 	{
 		/* Get and display initialization error */
-		ccLog::Warning("[3D MOUSE] Could not open a 3DxWare device");
+		ccLog::Warning("[3D Mouse] Could not open a 3DxWare device");
 		return false;
 	}
 
@@ -133,17 +133,17 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 		if (info.majorVersion == 0 && info.minorVersion == 0)
 		{
 			/* Not a real device */
-			ccLog::Warning("[3D MOUSE] Couldn't find a connected device");
+			ccLog::Warning("[3D Mouse] Couldn't find a connected device");
 			return false;
 		}
 
 		SiDeviceName name;
 		SiGetDeviceName(m_siHandle, &name);
-		ccLog::Print(QString("[3D MOUSE] Device: %1 (%2 buttons) - firmware v%2.%3").arg(name.name).arg(info.numButtons).arg(info.majorVersion).arg(info.minorVersion));
+		ccLog::Print(QString("[3D Mouse] Device: %1 (%2 buttons) - firmware v%2.%3").arg(name.name).arg(info.numButtons).arg(info.majorVersion).arg(info.minorVersion));
 	}
 	else
 	{
-		ccLog::Warning("[3D MOUSE] Failed to retrieve device info?!");
+		ccLog::Warning("[3D Mouse] Failed to retrieve device info?!");
 	}
 
 	return true;

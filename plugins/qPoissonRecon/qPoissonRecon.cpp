@@ -36,12 +36,12 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccMesh.h>
-#include <ccPlatform.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
 //CCLib
 #include <DistanceComputationTools.h>
+#include <CCPlatform.h>
 
 //System
 #include <algorithm>

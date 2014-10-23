@@ -24,11 +24,13 @@
 
 //qCC_db
 #include <ccLog.h>
-#include <ccPlatform.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 #include "ccColorScalesManager.h"
+
+//CCLib
+#include <CCPlatform.h>
 
 //Liblas
 #include <liblas/point.hpp>

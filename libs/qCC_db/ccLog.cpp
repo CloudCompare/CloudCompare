@@ -17,8 +17,8 @@
 
 #include "ccLog.h"
 
-//Local
-#include "ccPlatform.h"
+//CCLib
+#include <CCPlatform.h>
 
 //System
 #include <assert.h>

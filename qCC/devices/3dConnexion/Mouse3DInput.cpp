@@ -22,10 +22,11 @@
 #include "Mouse3DInput.h"
 
 //qCC_db
-#include <ccPlatform.h>
 #include <ccLog.h>
 //qCC_gl
 #include <ccGLWindow.h>
+//CCLib
+#include <CCPlatform.h>
 
 //Qt
 #include <QApplication>

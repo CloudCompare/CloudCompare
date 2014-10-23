@@ -50,10 +50,10 @@
 #include <ccCylinder.h>
 #include <ccCone.h>
 #include <ccTorus.h>
-#include <ccPlatform.h>
 
 //CCLib
 #include <ScalarField.h>
+#include <CCPlatform.h>
 
 //System
 #include <algorithm>

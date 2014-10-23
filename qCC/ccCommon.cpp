@@ -17,8 +17,10 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccPlatform.h"
 #include "ccCommon.h"
+
+//CCLib
+#include <CCPlatform.h>
 
 #define CC_VER_NUM "2.6"
 #define CC_SUB_VER "0" //2014-10-17

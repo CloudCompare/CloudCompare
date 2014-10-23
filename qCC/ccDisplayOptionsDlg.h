@@ -21,8 +21,8 @@
 //Local
 #include "ccGuiParameters.h"
 
-//qCC_db
-#include <ccPlatform.h>
+//CCLib
+#include <CCPlatform.h>
 
 //Qt
 #include <QDialog>

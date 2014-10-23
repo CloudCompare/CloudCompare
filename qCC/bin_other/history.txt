@@ -47,6 +47,10 @@ v2.5.6 ??/??/2014
 			* only available on Windows
 
 - Enhancements:
+	* For 64 bits versions, the max octree depth is now 21 instead of 10. This way CC will be more efficient
+		on clouds above 20 or 30 M. points. The resulting increase in memory consumption shoudln't be an issue
+		for recent computers (the new octree needs 12 bytes per point insead of 8, which corresponds to +380 Mb
+		for 100 M. points)
 	* The 'Edit > Merge' method now works with meshes
 	* qPoissonRecon upgraded:
 		- now uses the latest PoissonRecon version 6.11

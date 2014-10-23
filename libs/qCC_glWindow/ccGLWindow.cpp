@@ -17,6 +17,7 @@
 
 //CCLib
 #include <CCConst.h>
+#include <CCPlatform.h>
 
 //qCC
 #include "ccGLWindow.h"
@@ -37,7 +38,6 @@
 #include <ccPointCloud.h>
 #include <ccColorRampShader.h>
 #include <ccClipBox.h>
-#include <ccPlatform.h>
 
 //CCFbo
 #include <ccGlew.h>

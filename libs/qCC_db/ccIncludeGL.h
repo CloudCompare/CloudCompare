@@ -18,8 +18,8 @@
 #ifndef CC_INCLUDE_GL_HEADER
 #define CC_INCLUDE_GL_HEADER
 
-//Local
-#include <ccPlatform.h>
+//CCLib
+#include <CCPlatform.h>
 
 //GLEW (if needed, must be included first)
 #ifdef USE_GLEW

@@ -23,6 +23,7 @@
 #include "GenericOctree.h"
 #include "CCTypes.h"
 #include "CCConst.h"
+#include "CCPlatform.h"
 #include "GenericProgressCallback.h"
 
 //system
@@ -30,8 +31,10 @@
 #include <assert.h>
 #include <string.h>
 
-//enabled 64 bits code octree (can go up to level 21, but take 50% more memory)
-//#define OCTREE_CODES_64_BITS
+#ifdef CC_ENV_64
+//enables 64 bits code octree (can go up to level 21, but take 50% more memory)
+#define OCTREE_CODES_64_BITS
+#endif
 
 #ifndef _DEBUG
 //enables multi-threading handling

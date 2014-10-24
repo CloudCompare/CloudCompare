@@ -11,7 +11,7 @@ File I/O:
 - PDF 3D
 - X3D files (integration with 'xiot' in... standby)
 - POD files (Pointools)
-- FARO, LEICA, POD file formats (when pigs can fly! None of them ever replied to my emails... not even a simple "no")
+- LEICA, POD file formats
 - SHP files (with GDAL?)
 - OpenCTM format (https://github.com/cloudcompare/trunk/issues/146)
 - Visual SFM format (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
@@ -22,6 +22,7 @@ Big ones:
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Command line mode could be extended
 	- Rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
+	- Label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- Let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)

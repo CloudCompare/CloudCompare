@@ -1,10 +1,10 @@
 *** CloudCompare versions history ***
 
 v2.6.0 10/24/2014
-- New method:
+- New methods:
 	* Tools > Clean > Noise filter
 		- this tool is similar to qPCL plugin's SOR filter (Statistical Outliers Filter) but
-		  with more otions:
+		  with more options:
 			* possibility to set a (sphere) radius for the nearest neighbors search instead of
 			 a fixed number of points (much better if the cloud density is not constant)
 			* possibility an absolute error instead of a relative error
@@ -28,7 +28,7 @@ v2.6.0 10/24/2014
 			button of a TLS/GBL sensor (typically opened with a PTX or Faro file for instance)
 	* New feature: "Transformation history"
 		- All rigid transformations applied to any 3D object are now 'tracked'. In practice it is
-			accumulated	in a 'history' transformation matrix for each entity. For instance this allows
+			accumulated in a 'history' transformation matrix for each entity. For instance this allows
 			to easily determine the global transformation applied to an entity since loading time (even
 			after multiple manual transformation or automatic registration steps).
 		- a dedicated widget ('Transformation history') has been added to the the 'Properties' dialog.
@@ -38,18 +38,18 @@ v2.6.0 10/24/2014
 			'Edit > Apply transformation' for instance)
 	* New buttons in the 'Apply Transformation' dialog:
 		- 'ASCII file' to import a transformation matrix from an ASCII file (see above)
-		- 'Clipoard' to paste the clipboard contents (hopefully corresponding to a transformation matrix ;)
+		- 'Clipboard' to paste the clipboard contents (hopefully corresponding to a transformation matrix ;)
 	* New plugin: qCork for Mesh Boolean Operation (= Constructive Solid Geometry)
 		- this plugin is based on the LGPL Cork Library (https://github.com/gilbo/cork)
-		- allows to comute the difference, union or intersection of two CLOSED meshes
+		- allows to compute the difference, union or intersection of two CLOSED meshes
 		- current limitations:
-			* doesn't keep the mesh(es) attributes (color, nromals, etc.)
+			* doesn't keep the mesh(es) attributes (color, nrormals, etc.)
 			* only available on Windows
 
 - Enhancements:
 	* For 64 bits versions, the max octree depth is now 21 instead of 10. This way CC will be more efficient
-		on clouds above 20 or 30 M. points. The resulting increase in memory consumption shoudln't be an issue
-		for recent computers (the new octree needs 12 bytes per point insead of 8, which corresponds to +380 Mb
+		on clouds above 20 or 30 M. points. The resulting increase in memory consumption shouldn't be an issue
+		for recent computers (the new octree needs 12 bytes per point instead of 8, which corresponds to +380 Mb
 		for 100 M. points)
 	* The 'Edit > Merge' method now works with meshes
 	* qPoissonRecon upgraded:
@@ -81,8 +81,7 @@ v2.6.0 10/24/2014
 	* PLY import:
 		- New 'Apply' button (replaces 'Ok'): the dialog will remember the previous configuration and will try
 			to restore it the next time
-		- New 'Apply all' button : the dialog is skipped whenever CC can sucessfully restore the previous configuration
-			while opening new files.
+		- New 'Apply all' button : the dialog is skipped whenever CC can successfully restore the previous configuration while opening new files.
 	* PTX import:
 		- grid translation is now also checked for 'big coordinates' (Global Shift & Scale mechanism)
 		- cancel button also cancels the normals computation!
@@ -100,18 +99,18 @@ v2.6.0 10/24/2014
 			(i.e. all PCD files can be loaded and saved  via the standard 'File > Open' and 'File > Save' menus)
 		- the equivalent icons of the qPCL plugin has been removed
 		- ccViewer can also load PCD files with the qPCL I/O plugin
-	* 'Edit > Sensors' meny has been reorganized
+	* 'Edit > Sensors' menu has been reorganized
 	* Camera sensor management enhanced:
 		- Camera sensors are now created automatically when clouds are loaded from Bundler or ICM files (TODO: from E57)
 		- A dialog let the user create or edit camera sensors
-		- the camera symbol in 3D is fully configurable (display scale, with or without frustrum, etc.)
+		- the camera symbol in 3D is fully configurable (display scale, with or without frustum, etc.)
 		- camera sensors (and images) can now be saved in BIN files
 		- the 'Camera Sensor > Project uncertainty' and 'Camera Sensor > Compute points visibility' are now
 			smarter and can be applied on any point cloud
 	* Ground Based Laser sensors management enhanced:
 		- GBL sensors are now created automatically when clouds are loaded from PTX files (TODO: from E57)
 		- the user can now apply the GBL sensor 'viewport' to the 3D display ("bubble view' mode)
-			(new 'Apply' button in the sensor poperties)
+			(new 'Apply' button in the sensor properties)
 		- the sensor symbol in 3D is now correctly centered on the optical center
 			(and can be used with the magnifier icon to zoom/focus on it)
 		- 'Theta' and 'Phi' are replaced by the clearer 'Yaw' and 'Pitch' names
@@ -175,11 +174,11 @@ v2.6.0 10/24/2014
 	* the global shift/scale infos were wrongly applied when exporting points picked with the
 		'Point list picking' tool
 	* for some clouds loaded from an ASCII file and with very particular sizes, the associated scalar fields
-		size could be wrongly set (while the data was correctly loaded) and CC woudln't accept to display them...
+		size could be wrongly set (while the data was correctly loaded) and CC wouldn't accept to display them...
 	* memory leak when loading PTX files
 	* starting the 'Manual Segmentation tool' (scissors icon) in perspective mode could dramatically change
 		the EDL rendering (anyway, using EDL in perspective mode is not really supported yet ;)
-	* qPoissonRecon: the mutli-threaded version (i.e. the 32 bits version on Windows) could crash sometimes
+	* qPoissonRecon: the multi-threaded version (i.e. the 32 bits version on Windows) could crash sometimes
 	* 3D mouse: on some configurations, the 3D mouse was not handled properly
 	* The global shift information was not applied to the cameras when importing Bundler files with large coordinates
 	* Saving E57 files could make CC crash sometimes (due to an internal inconsistency in libE57)

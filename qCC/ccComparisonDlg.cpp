@@ -66,6 +66,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	, m_compType(cpType)
 	, m_currentSFIsDistance(false)
 	, m_noDisplay(noDisplay)
+	, m_needToRecomputeBestLevel(true)
 {
 	setupUi(this);
 	setWindowFlags(Qt::Tool);
@@ -86,6 +87,8 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	connect(computeButton,			SIGNAL(clicked()),					this,	SLOT(compute()));
 	connect(histoButton,			SIGNAL(clicked()),					this,	SLOT(showHisto()));
 	connect(localModelComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(locaModelChanged(int)));
+	connect(octreeLevelCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(octreeLevelCheckBoxToggled(bool)));
+	connect(maxSearchDistSpinBox,	SIGNAL(editingFinished()),			this,	SLOT(maxDistUpdated()));
 	connect(split3DCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(split3DCheckboxToggled(bool)));
 
 	octreeLevelSpinBox->setRange(1,CCLib::DgmOctree::MAX_OCTREE_LEVEL);
@@ -186,11 +189,38 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	return true;
 }
 
-void ccComparisonDlg::updateOctreeLevel(double maxDistance)
+void ccComparisonDlg::octreeLevelCheckBoxToggled(bool state)
+{
+	if (!state) //automatic mode
+	{
+		//force best octree level computation
+		m_needToRecomputeBestLevel = true;
+
+		updateOctreeLevel();
+	}
+}
+
+void ccComparisonDlg::maxDistUpdated()
+{
+	//force best octree level computation
+	m_needToRecomputeBestLevel = true;
+
+	//change the focus to another entity!
+	computeButton->setFocus();
+
+	updateOctreeLevel();
+}
+
+void ccComparisonDlg::updateOctreeLevel()
 {
 	//we only compute best octree level if "auto" mode is on or the user has set the level to "0"
-	if (!octreeLevelSpinBox->isEnabled() || octreeLevelSpinBox->value()==0)
+	if (!octreeLevelSpinBox->isEnabled() || octreeLevelSpinBox->value() == 0)
 	{
+		if (!m_needToRecomputeBestLevel)
+			return;
+
+		double maxDistance = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+		
 		int guessedBestOctreeLevel = determineBestOctreeLevel(static_cast<ScalarType>(maxDistance));
 		if (guessedBestOctreeLevel > 0)
 		{
@@ -202,6 +232,8 @@ void ccComparisonDlg::updateOctreeLevel(double maxDistance)
 			octreeLevelCheckBox->setCheckState(Qt::Checked);
 			octreeLevelSpinBox->setEnabled(true);
 		}
+
+		m_needToRecomputeBestLevel = true;
 	}
 }
 
@@ -402,19 +434,15 @@ int ccComparisonDlg::computeApproxResults()
 		ccLog::Warning("Can't evaluate best computation level! Try to set it manually ...");
 		octreeLevelCheckBox->setCheckState(Qt::Checked);
 		octreeLevelSpinBox->setEnabled(true);
-		guessedBestOctreeLevel = (int)DEFAULT_OCTREE_LEVEL;
+		guessedBestOctreeLevel = static_cast<int>(DEFAULT_OCTREE_LEVEL);
 	}
 	octreeLevelSpinBox->setValue(guessedBestOctreeLevel);
+	m_needToRecomputeBestLevel = false;
 
 	computeButton->setEnabled(true);
-
-	//we set the button color to red and the text to white
-	QColor qRed(255,0,0);
-	ccDisplayOptionsDlg::SetButtonColor(computeButton,qRed);
-	QColor qWhite(255,255,255);
-	ccDisplayOptionsDlg::SetButtonTextColor(computeButton,qWhite);
-
 	preciseGroupBox->setEnabled(true);
+	//we don't let the user leave with approximate distances!!!
+	okButton->setEnabled(false);
 
 	updateDisplay(sfIdx >= 0, false);
 
@@ -430,13 +458,21 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	if (!m_currentSFIsDistance || m_compCloud->getCurrentOutScalarFieldIndex() < 0)
 	{
 		//we must compute approx. results again
-		//(this method will be called again)
+		//(this method will be called again later)
 		return computeApproxResults();
 	}
 
 	//evalutate the theoretical time for each octree level
-	double timings[CCLib::DgmOctree::MAX_OCTREE_LEVEL];
-	memset(timings,0,sizeof(double)*CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	std::vector<double> timings;
+	try
+	{
+		timings.resize(CCLib::DgmOctree::MAX_OCTREE_LEVEL,0);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("Can't determine best octree level: not enough memory!");
+		return -1;
+	}
 
 	//if the reference is a mesh
 	double meanTriangleSurface = 1.0;
@@ -445,13 +481,13 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	{
 		if (!m_refMesh)
 		{
-			ccLog::Error("Error: reference entity should be a mesh!");
+			ccLog::Error("Internal error: reference entity should be a mesh!");
 			return -1;
 		}
 		mesh = static_cast<CCLib::GenericIndexedMesh*>(m_refMesh);
-		if (!mesh || mesh->size()==0)
+		if (!mesh || mesh->size() == 0)
 		{
-			ccLog::Warning("Mesh is empty! Can't go further...");
+			ccLog::Warning("Can't determine best octree level: mesh is empty!");
 			return -1;
 		}
 		//total mesh surface
@@ -463,6 +499,14 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 	//we skip the lowest subdivision levels (useless + incompatible with below formulas ;)
 	int theBestOctreeLevel = 2;
+
+	//we don't test the very first and very last level
+	ccProgressDialog progressCb(false,this);
+	progressCb.setMethodTitle("Determining optimal octree level");
+	progressCb.setInfo(qPrintable(QString("Testing %1 levels...").arg(CCLib::DgmOctree::MAX_OCTREE_LEVEL))); //we lie here ;)
+	CCLib::NormalizedProgress nProgress(&progressCb,CCLib::DgmOctree::MAX_OCTREE_LEVEL-2);
+	progressCb.start();
+	QApplication::processEvents();
 
 	//for each level
 	for (int level=2; level<CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++level)
@@ -485,7 +529,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 		//scan the octree structure
 		const CCLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
-		for (CCLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin();c!=compCodes.end();++c)
+		for (CCLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin(); c!=compCodes.end(); ++c)
 		{
 			CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
 
@@ -496,7 +540,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 				if (numberOfPointsInCell != 0)
 				{
 					//if 'maxSearchDist' has been defined by the user, we must take it into account!
-					//(in this case we skipthe cell if its approx. distance is superior)
+					//(in this case we skip the cell if its approx. distance is superior)
 					if (maxSearchDist < 0 || cellDist <= maxSearchDist)
 					{
 						//approx. neighborhood radius
@@ -533,27 +577,40 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 							double lastSliceCellNumber = (cellDist > 0 ? cellDist*cellDist * 24.0 + 2.0 : 1.0);
 							//TIME = NEIGHBORS SEARCH + proportional factor * POINTS/TRIANGLES COMPARISONS
 							//(we admit that the filled cells roughly correspond to the sqrt of the total number of cells)
-							timings[level] += neighbourSize3 + 0.1 * numberOfPointsInCell * sqrt(lastSliceCellNumber)  *refListDensity;
+							timings[level] += neighbourSize3 + 0.1 * numberOfPointsInCell * sqrt(lastSliceCellNumber) * refListDensity;
 						}
 					}
 				}
 
 				numberOfPointsInCell = 0;
-				cellDist = m_compCloud->getPointScalarValue(index);
+				cellDist = 0;
 				tempCode = truncatedCode;
 			}
 
+			double pointDist = m_compCloud->getPointScalarValue(index);
+			//cellDist += pointDist;
+			cellDist = std::max(cellDist,pointDist);
 			++index;
 			++numberOfPointsInCell;
 		}
+
+		////very high levels are unlikely (levelModifier ~ 0.85 @ level 20)
+		//{
+		//	double levelModifier = level < 12 ? 1.0 : exp(-pow(level-12,2)/(20*20));
+		//	timings[level] /= levelModifier;
+
+		//	ccLog::PrintDebug(QString("[ccComparisonDlg] Level %1 - timing = %2 (modifier = %3)").arg(level).arg(timings[level]).arg(levelModifier));
+		//}
 
 		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
 
 		if (timings[level] < timings[theBestOctreeLevel])
 			theBestOctreeLevel = level;
+
+		nProgress.oneStep();
 	}
 
-	ccLog::PrintDebug("[ccComparisonDlg] Best level: %i (maxSearchDist=%f)",theBestOctreeLevel,maxSearchDist);
+	ccLog::PrintDebug("[ccComparisonDlg] Best level: %i (maxSearchDist = %f)",theBestOctreeLevel,maxSearchDist);
 
 	return theBestOctreeLevel;
 }
@@ -564,7 +621,7 @@ bool ccComparisonDlg::compute()
 		return false;
 
 	//updates best octree level guess if necessary
-	updateOctreeLevel(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+	updateOctreeLevel();
 	int bestOctreeLevel = octreeLevelSpinBox->value();
 
 	bool signedDistances = signedDistFrame->isEnabled() && signedDistCheckBox->isChecked();

@@ -64,13 +64,15 @@ protected slots:
 	void showHisto();
 	void split3DCheckboxToggled(bool);
 	void locaModelChanged(int);
+	void updateOctreeLevel();
+	void maxDistUpdated();
+	void octreeLevelCheckBoxToggled(bool);
 
 protected:
 
 	bool isValid();
 	bool prepareEntitiesForComparison();
 	int computeApproxResults();
-	void updateOctreeLevel(double);
 	int determineBestOctreeLevel(double);
 	void updateDisplay(bool showSF, bool hideRef);
 	void clean();
@@ -95,6 +97,9 @@ protected:
 
 	//! Whether a display is active (and should be refreshed) or not
 	bool m_noDisplay;
+
+	//! Best guessed level validity
+	bool m_needToRecomputeBestLevel;
 };
 
 #endif

@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.5.6 ??/??/2014
+v2.6.0 10/24/2014
 - New method:
 	* Tools > Clean > Noise filter
 		- this tool is similar to qPCL plugin's SOR filter (Statistical Outliers Filter) but
@@ -99,6 +99,7 @@ v2.5.6 ??/??/2014
 		- now fully integrated in the main application if the qPCL (I/O) plugin is present
 			(i.e. all PCD files can be loaded and saved  via the standard 'File > Open' and 'File > Save' menus)
 		- the equivalent icons of the qPCL plugin has been removed
+		- ccViewer can also load PCD files with the qPCL I/O plugin
 	* 'Edit > Sensors' meny has been reorganized
 	* Camera sensor management enhanced:
 		- Camera sensors are now created automatically when clouds are loaded from Bundler or ICM files (TODO: from E57)

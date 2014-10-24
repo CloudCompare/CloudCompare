@@ -8,4 +8,6 @@
 // All values are separated by a semicolon character (;):
 //    name; shift(X); shif(Y); shif(Z); scale;
 //
-Ankh morpork ; -621900.0 ; -5114400.0 ; 0.0 ; 1.0 ;
+// Example:
+//
+// Ankh-Morpork ; -621900.0 ; -5114400.0 ; 0.0 ; 1.0 ;

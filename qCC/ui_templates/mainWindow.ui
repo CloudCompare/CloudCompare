@@ -1340,24 +1340,24 @@
   </action>
   <action name="actionComputeMeshAA">
    <property name="text">
-    <string>Delaunay 2D (axis aligned plane)</string>
+    <string>Delaunay 2D (XY plane)</string>
    </property>
    <property name="toolTip">
-    <string>Compute &quot;2D1/2&quot; mesh by projecting points on an axis aligned plane</string>
+    <string>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</string>
    </property>
    <property name="statusTip">
-    <string>Compute &quot;2D1/2&quot; mesh by projecting points on an axis aligned plane</string>
+    <string>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</string>
    </property>
   </action>
   <action name="actionComputeMeshLS">
    <property name="text">
-    <string>Delaunay 2D (best LS plane)</string>
+    <string>Delaunay 2D (best fitting plane)</string>
    </property>
    <property name="toolTip">
-    <string>Compute &quot;2D1/2&quot; mesh by projecting points on the least squares best plane</string>
+    <string>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</string>
    </property>
    <property name="statusTip">
-    <string>Compute &quot;2D1/2&quot; mesh by projecting points on the least squares best plane</string>
+    <string>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</string>
    </property>
   </action>
   <action name="actionMeasureMeshSurface">

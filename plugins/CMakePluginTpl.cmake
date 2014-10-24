@@ -82,11 +82,10 @@ else()
 	install_shared( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} 1 /plugins )
 endif()
 
-#'GL filter' plugins specifics
-if( CC_SHADER_FOLDER )
+#GL filters and IO plugins also go the the ccViewer 'plugins' sub-folder
+if( ${OPTION_BUILD_CCVIEWER} )
 
-	#GL filters also go the the ccViewer 'plugins' sub-folder
-	if( ${OPTION_BUILD_CCVIEWER} )
+	if( CC_SHADER_FOLDER OR CC_IS_IO_PLUGIN )
 		if( APPLE )
 			install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Plugins/ccViewerPlugins COMPONENT Runtime )
 			set( CCVIEWER_PLUGINS ${CCVIEWER_PLUGINS} ${CCVIEWER_MAC_BASE_DIR}/Contents/Plugins/ccViewerPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "ccViewer plugin list")
@@ -94,6 +93,11 @@ if( CC_SHADER_FOLDER )
 			install_shared( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} 1 /plugins )
 		endif()
 	endif()
+
+endif()
+
+#'GL filter' plugins specifics
+if( CC_SHADER_FOLDER )
 
 	#copy the shader files
 	file( GLOB shaderFiles shaders/${CC_SHADER_FOLDER}/*.frag shaders/${CC_SHADER_FOLDER}/*.vert )

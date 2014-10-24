@@ -118,7 +118,7 @@ protected:
 		\param message message
 		\param level message severity
 	**/
-	void virtual displayMessage(const QString& message, MessageLevel level) = 0;
+	virtual void displayMessage(const QString& message, MessageLevel level) = 0;
 
 };
 

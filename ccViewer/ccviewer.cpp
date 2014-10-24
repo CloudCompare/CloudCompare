@@ -27,6 +27,7 @@
 #include <QPluginLoader>
 #include <QDir>
 #include <ccGLFilterPluginInterface.h>
+#include <ccIOFilterPluginInterface.h>
 
 //qCC_glWindow
 #include <ccGLWindow.h>
@@ -225,34 +226,57 @@ void ccViewer::loadPlugins()
 
 bool ccViewer::loadPlugin(QObject *plugin)
 {
-	ccGLFilterPluginInterface* ccPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
-	if (!ccPlugin)
+	//is this a GL plugin?
+	ccGLFilterPluginInterface* glPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
+	if (glPlugin)
 	{
-		ccLog::Warning("Only 'GL filter' plugins are supported for now!");
-		return false;
-	}
-	plugin->setParent(this);
+		plugin->setParent(this);
 
-	QString pluginName = ccPlugin->getName();
-	if (pluginName.isEmpty())
+		QString pluginName = glPlugin->getName();
+		if (pluginName.isEmpty())
+		{
+			ccLog::Warning("Plugin has an invalid (empty) name!");
+			return false;
+		}
+		ccLog::Print("Plugin name: [%s] (GL filter)",qPrintable(pluginName));
+
+		//(auto)create action
+		QAction* action = new QAction(pluginName,plugin);
+		action->setToolTip(glPlugin->getDescription());
+		action->setIcon(glPlugin->getIcon());
+		//connect default signal
+		connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+
+		ui.menuPlugins->addAction(action);
+		ui.menuPlugins->setEnabled(true);
+		ui.menuPlugins->setVisible(true);
+		return true;
+	}
+
+	//is this an IO plugin?
+	ccIOFilterPluginInterface* ioPlugin = qobject_cast<ccIOFilterPluginInterface*>(plugin);
+	if (ioPlugin)
 	{
-		ccLog::Warning("Plugin has an invalid (empty) name!");
-		return false;
+		plugin->setParent(this);
+
+		QString pluginName = ioPlugin->getName();
+		if (pluginName.isEmpty())
+		{
+			ccLog::Warning("Plugin has an invalid (empty) name!");
+			return false;
+		}
+		ccLog::Print("Plugin name: [%s] (I/O filter)",qPrintable(pluginName));
+
+		FileIOFilter::Shared filter = ioPlugin->getFilter(0);
+		if (filter)
+		{
+			FileIOFilter::Register(filter);
+			ccLog::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
+		}
 	}
-	ccLog::Print("Plugin name: [%s]",qPrintable(pluginName));
 
-	//(auto)create action
-	QAction* action = new QAction(pluginName,plugin);
-	action->setToolTip(ccPlugin->getDescription());
-	action->setIcon(ccPlugin->getIcon());
-	//connect default signal
-	connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
-
-	ui.menuPlugins->addAction(action);
-	ui.menuPlugins->setEnabled(true);
-	ui.menuPlugins->setVisible(true);
-
-	return true;
+	ccLog::Warning("Only 'GL filter' and 'I/O' plugins are supported for now!");
+	return false;
 }
 
 void ccViewer::doDisableGLFilter()

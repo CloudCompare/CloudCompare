@@ -2,13 +2,14 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.5.5.2"
+#define MyAppVersion "2.6.0"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
-#define MyAppURL "http://www.danielgm.net/cc/"
+#define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
-#define MyVCRedistPath "E:\Incoming\vc_redist"
-#define MyCCPath "E:\These\C++\CloudCompare\bin_x86_msvc_2008\CloudCompare"
-#define MyOutputDir "E:\These\C++\CloudCompare\bin_x86_msvc_2008"
+#define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
+#define MyFaroRedistPath "E:\These\C++\Faro\FARO LS\redist"
+#define MyCCPath "E:\These\C++\CloudCompare\bin_x86_msvc_2010\CloudCompare"
+#define MyOutputDir "E:\These\C++\CloudCompare\bin_x86_msvc_2010"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]
@@ -25,6 +26,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
+UninstallDisplayIcon={app}\{#MyAppExeName}
 AllowNoIcons=true
 OutputBaseFilename={#MyAppName}_v{#MyAppVersion}_setup_x86
 Compression=lzma2/Ultra64
@@ -36,14 +38,20 @@ InternalCompressLevel=Ultra64
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
+; Warning: update the 'Faro support' checbkox index in the NextButtonClick method if you insert another checbkox above this one!!!
+Name: "StartMenuEntry" ; Description: "Install Faro I/O plugin (to load FWS/FLS files). The will install Faro LS redistributable package as well." ; GroupDescription: "Faro LS support";  Flags: unchecked
 
 [Files]
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyCCPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "{#MyVCRedistPath}\2008\vcredist_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 
+Source: "{#MyVCRedistPath}\2010\vcredist_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 
+; FARO LS support
+Source: "{#MyFaroRedistPath}\x86\FARO LS 5.3.3.38662 x86 Setup.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; Check: WithFaro
+Source: "{#MyFaroRedistPath}\x86\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
+Source: "{#MyCCPath}\plugins\QFARO*.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithFaro
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -53,3 +61,84 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 Filename: "{tmp}\vcredist_x86.exe"; Parameters: "/q"
+Filename: "{tmp}\FARO LS 5.3.3.38662 x86 Setup.exe"; Check: WithFaro
+
+[Code]
+var
+  WithFaroSupport: Boolean;
+
+function WithFaro: Boolean;
+begin
+  Result := WithFaroSupport;
+end;
+
+/////////////////////////////////////////////////////////////////////
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+begin
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+
+/////////////////////////////////////////////////////////////////////
+function IsUpgrade(): Boolean;
+begin
+  Result := (GetUninstallString() <> '');
+end;
+
+
+/////////////////////////////////////////////////////////////////////
+function UnInstallOldVersion(): Integer;
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+begin
+// Return Values:
+// 1 - uninstall string is empty
+// 2 - error executing the UnInstallString
+// 3 - successfully executed the UnInstallString
+
+  // default return value
+  Result := 0;
+
+  // get the uninstall string of the old app
+  sUnInstallString := GetUninstallString();
+  if sUnInstallString <> '' then begin
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    if Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES','', SW_HIDE, ewWaitUntilTerminated, iResultCode) then
+      Result := 3
+    else
+      Result := 2;
+  end else
+    Result := 1;
+end;
+
+/////////////////////////////////////////////////////////////////////
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep=ssInstall) then
+  begin
+    if (IsUpgrade()) then
+    begin
+      UnInstallOldVersion();
+    end;
+  end;
+end;
+
+/////////////////////////////////////////////////////////////////////
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if (CurPageID = wpSelectTasks) then
+  begin
+    //'Faro support' checbkox is the 2nd one but each checkbox is nested
+    //inside a group, and each group conuts as 1!
+    WithFaroSupport := WizardForm.TasksList.Checked[3];
+  end;
+end;

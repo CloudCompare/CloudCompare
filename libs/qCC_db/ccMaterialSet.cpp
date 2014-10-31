@@ -50,10 +50,15 @@ ccMaterialSet::~ccMaterialSet()
 
 int ccMaterialSet::findMaterial(QString mtlName)
 {
+	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterial] Query: ") + mtlName);
+	
 	unsigned i = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it,++i)
+	{
+		ccLog::PrintDebug(QString("\tmaterial #%1 name: %2").arg(i).arg(it->name));
 		if (it->name == mtlName)
 			return static_cast<int>(i);
+	}
 
 	return -1;
 }
@@ -121,7 +126,9 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			currentMaterial = ccMaterial();
 			//materials.resize(materials.size()+1);
 			// get the name
-			currentMaterial.name = (tokens.size()>1 ? tokens[1] : "undefined");
+			currentMaterial.name = currentLine.mid(7).trimmed(); //we must take the whole line! (see OBJ filter)
+			if (currentMaterial.name.isEmpty())
+				currentMaterial.name = "undefined";
 
 		}
 		else if (currentMatIndex >= 0) //we already have a "current" material

@@ -4,6 +4,7 @@ v2.6.X ??/??/2014
 - Bug fix:
 	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1
 		(i.e. repetitive textures)
+	- Obj (mtl) material names containing space characters were not correctly handled by CC
 
 v2.6.0 10/24/2014
 - New methods:

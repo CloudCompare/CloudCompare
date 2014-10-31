@@ -43,6 +43,7 @@
 //System
 #include <string.h>
 #include <assert.h>
+#include <math.h> //for modf
 
 static CCVector3 s_blankNorm(0,0,0);
 
@@ -2897,17 +2898,17 @@ bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVe
 	PointCoordinateType d3 = ((P-*A).cross(*B-*A)).norm()/*/2.0*/;
 	//we must normalize weights
 	PointCoordinateType dsum = d1+d2+d3;
-	d1/=dsum;
-	d2/=dsum;
-	d3/=dsum;
+	d1 /= dsum;
+	d2 /= dsum;
+	d3 /= dsum;
 
 	const colorType* C1 = m_associatedCloud->getPointColor(i1);
 	const colorType* C2 = m_associatedCloud->getPointColor(i2);
 	const colorType* C3 = m_associatedCloud->getPointColor(i3);
 
-	rgb[0] = (colorType)floor((float)C1[0]*d1+(float)C2[0]*d2+(float)C3[0]*d3);
-	rgb[1] = (colorType)floor((float)C1[1]*d1+(float)C2[1]*d2+(float)C3[1]*d3);
-	rgb[2] = (colorType)floor((float)C1[2]*d1+(float)C2[2]*d2+(float)C3[2]*d3);
+	rgb[0] = static_cast<colorType>(floor(C1[0]*d1 + C2[0]*d2 + C3[0]*d3));
+	rgb[1] = static_cast<colorType>(floor(C1[1]*d1 + C2[1]*d2 + C3[1]*d3));
+	rgb[2] = static_cast<colorType>(floor(C1[2]*d1 + C2[2]*d2 + C3[2]*d3));
 
 	return true;
 }
@@ -3031,23 +3032,51 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(tri[1]);
 	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(tri[2]);
 
-	float d1 = static_cast<float>(((P-*B).cross(*C-*B)).norm()/*/2*/);
-	float d2 = static_cast<float>(((P-*C).cross(*A-*C)).norm()/*/2*/);
-	float d3 = static_cast<float>(((P-*A).cross(*B-*A)).norm()/*/2*/);
+	float x = 0;
+	float y = 0;
 	//we must normalize weights
-	float dsum = d1+d2+d3;
-	d1 /= dsum;
-	d2 /= dsum;
-	d3 /= dsum;
+	float dsum = 0;
+	if (Tx1) { float d1 = static_cast<float>(((P-*B).cross(*C-*B)).norm()/*/2*/); x += Tx1[0]*d1; y += Tx1[1]*d1; dsum += d1; }
+	if (Tx2) { float d2 = static_cast<float>(((P-*C).cross(*A-*C)).norm()/*/2*/); x += Tx2[0]*d2; y += Tx2[1]*d2; dsum += d2; }
+	if (Tx3) { float d3 = static_cast<float>(((P-*A).cross(*B-*A)).norm()/*/2*/); x += Tx3[0]*d3; y += Tx3[1]*d3; dsum += d3; }
 
-	float x = (Tx1 ? Tx1[0]*d1 : 0) + (Tx2 ? Tx2[0]*d2 : 0) + (Tx3 ? Tx3[0]*d3 : 0);
-	float y = (Tx1 ? Tx1[1]*d1 : 0) + (Tx2 ? Tx2[1]*d2 : 0) + (Tx3 ? Tx3[1]*d3 : 0);
-
-	if (x < 0 || x>1.0f || y < 0 || y>1.0f)
+	if (dsum < FLT_EPSILON)
 	{
+		assert(false);
 		if (interpolateColorIfNoTexture)
 			return interpolateColors(triIndex,P,rgb);
 		return false;
+	}
+	x /= dsum;
+	y /= dsum;
+
+	//DGM: we mut handle texture coordinates below 0 or above 1 (i.e. repetition)
+	//if (x < 0 || x > 1.0f || y < 0 || y > 1.0f)
+	if (x > 1.0)
+	{
+		double xFrac,xInt;
+		xFrac = modf(x,&xInt);
+		x = xFrac;
+	}
+	else if (x < 0.0)
+	{
+		double xFrac,xInt;
+		xFrac = modf(x,&xInt);
+		x = 1.0+xFrac;
+	}
+
+	//same thing for y
+	if (y > 1.0)
+	{
+		double yFrac,yInt;
+		yFrac = modf(y,&yInt);
+		y = yFrac;
+	}
+	else if (y < 0.0)
+	{
+		double yFrac,yInt;
+		yFrac = modf(y,&yInt);
+		y = 1.0+yFrac;
 	}
 
 	//get color from texture image
@@ -3058,9 +3087,9 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 
 		QRgb pixel = texture.pixel(xPix,yPix);
 
-		rgb[0] = static_cast<colorType>(qRed(pixel));
-		rgb[1] = static_cast<colorType>(qGreen(pixel));
-		rgb[2] = static_cast<colorType>(qBlue(pixel));
+		rgb[0] = static_cast<colorType>(material.diffuseFront[0] * qRed  (pixel));
+		rgb[1] = static_cast<colorType>(material.diffuseFront[1] * qGreen(pixel));
+		rgb[2] = static_cast<colorType>(material.diffuseFront[2] * qBlue (pixel));
 	}
 
 	return true;

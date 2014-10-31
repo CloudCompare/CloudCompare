@@ -1,5 +1,10 @@
 *** CloudCompare versions history ***
 
+v2.6.X ??/??/2014
+- Bug fix:
+	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1
+		(i.e. repetitive textures)
+
 v2.6.0 10/24/2014
 - New methods:
 	* Tools > Clean > Noise filter

@@ -16,7 +16,7 @@ if (INSTALL_QCORK_PLUGIN)
 #CloudCompare Mesh CSG operations plugin (based on the Cork library)
 project( QCORK_PLUGIN )
 
-# libfreenect is needed to build library
+# Cork lib and MPIR are needed to build this plugin
 include( CorkSupport.cmake )
 
 include( ../CMakePluginTpl.cmake )

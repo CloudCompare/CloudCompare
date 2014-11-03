@@ -34,6 +34,7 @@
 //Qt
 #include <QGLWidget>
 #include <QFont>
+#include <QMap>
 
 //system
 #include <set>
@@ -118,7 +119,6 @@ public:
 	virtual void toBeRefreshed();
 	virtual void refresh();
 	virtual void invalidateViewport();
-	virtual unsigned getTexture(const QImage& image);
 	virtual void releaseTexture(unsigned texID);
 	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
 	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag);
@@ -127,6 +127,8 @@ public:
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
 	inline virtual void makeContextCurrent() { makeCurrent(); }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
+	virtual unsigned getTextureID(const QImage& image);
+	virtual unsigned getTextureID( ccMaterial::CShared mtl);
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -850,6 +852,9 @@ protected:
 	float m_bubbleViewFov_deg;
 	//! Pre-bubble-view camera parameters (backup)
 	ccViewportParameters m_preBubbleViewParameters;
+
+	//! Map of materials (unique id.) and texture identifier
+	QMap< QString, unsigned > m_materialTextures;
 
 private:
 

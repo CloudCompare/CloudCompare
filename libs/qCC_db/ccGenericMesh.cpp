@@ -28,6 +28,7 @@
 #include "ccMaterialSet.h"
 #include "ccScalarField.h"
 #include "ccColorScalesManager.h"
+#include "ccGenericGLDisplay.h"
 
 //CCLib
 #include <MeshSamplingTools.h>
@@ -301,7 +302,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glColor3fv(context.defaultMat.diffuseFront);
+			glColor3fv(context.defaultMat->getDiffuseFront());
 		}
 
 		if (glParams.showNorms)
@@ -309,7 +310,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version can fall to 1.0!
 			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
 			glEnable(GL_LIGHTING);
-			context.defaultMat.applyGL(true,colorMaterial);
+			context.defaultMat->applyGL(true,colorMaterial);
 		}
 
 		//in the case we need normals (i.e. lighting)
@@ -555,20 +556,19 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					//do we need to change material?
 					if (lasMtlIndex != newMatlIndex)
 					{
-						assert(newMatlIndex<(int)materials->size());
+						assert(newMatlIndex < static_cast<int>(materials->size()));
 						glEnd();
 						if (showTextures)
 						{
-							GLuint texID = (newMatlIndex>=0 ? (*materials)[newMatlIndex].texID : 0);
-							if (texID>0)
-								assert(glIsTexture(texID));
+							GLuint texID = (newMatlIndex >= 0 ? context._win->getTextureID((*materials)[newMatlIndex]) : 0);
+							assert(texID <= 0 || glIsTexture(texID));
 							glBindTexture(GL_TEXTURE_2D, texID);
 						}
 
 						//if we don't have any current material, we apply default one
-						(newMatlIndex>=0 ? (*materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms,false);
+						(newMatlIndex >= 0 ? (*materials)[newMatlIndex] : context.defaultMat)->applyGL(glParams.showNorms,false);
 						glBegin(triangleDisplayType);
-						lasMtlIndex=newMatlIndex;
+						lasMtlIndex = newMatlIndex;
 					}
 
 					if (showTextures)

@@ -29,6 +29,7 @@
 #include "ccSubMesh.h"
 #include "ccScalarField.h"
 #include "ccColorScalesManager.h"
+#include "ccGenericGLDisplay.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -351,7 +352,7 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 
 	//init arrays
 	{
-		for (unsigned i=0;i<nPts;++i)
+		for (unsigned i=0; i<nPts; ++i)
 		{
 			meanSF[i] = m_associatedCloud->getPointScalarValue(i);
 			count[i] = 1;
@@ -626,15 +627,15 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 
 	if (verticesDisplacement)
 		verticesDisplacement->release();
-	verticesDisplacement=0;
+	verticesDisplacement = 0;
 
 	if (edgesCount)
 		delete[] edgesCount;
-	edgesCount=0;
+	edgesCount = 0;
 
 	if (nProgress)
 		delete nProgress;
-	nProgress=0;
+	nProgress = 0;
 
 	return true;
 }
@@ -921,7 +922,12 @@ bool ccMesh::merge(const ccMesh* mesh)
 				break;
 			}
 			vertIndexShift = vertNumBefore;
-			m_associatedCloud->setVisible(m_associatedCloud->isVisible() || vertices->isVisible());
+			if (vertNumBefore == 0)
+			{
+				//use the first merged cloud display properties
+				m_associatedCloud->setVisible(vertices->isVisible());
+				m_associatedCloud->setEnabled(vertices->isEnabled());
+			}
 		}
 		showNormals(this->normalsShown() || mesh->normalsShown());
 		showColors(this->colorsShown() || mesh->colorsShown());
@@ -933,17 +939,17 @@ bool ccMesh::merge(const ccMesh* mesh)
 		bool otherMeshHasTexCoords = (mesh->m_texCoords && mesh->m_texCoordIndexes);
 		bool otherMeshHasTriangleNormals = (mesh->m_triNormals && mesh->m_triNormalIndexes);
 		{
-			//we'll need those arrays later
-			if (	(otherMeshHasMaterials && !m_triMtlIndexes && !reservePerTriangleMtlIndexes())
-				||	(otherMeshHasTexCoords && !m_texCoordIndexes && !reservePerTriangleTexCoordIndexes())
-				||	(otherMeshHasTriangleNormals && !m_triNormalIndexes && !reservePerTriangleNormalIndexes())
-				)
+			if (!reserve(triNumBefore + triAdded))
 			{
 				ccLog::Warning("[ccMesh::merge] Not enough memory!");
 				break;
 			}
 
-			if (!reserve(triNumBefore + triAdded))
+			//we'll need those arrays later
+			if (	(otherMeshHasMaterials && !m_triMtlIndexes && !reservePerTriangleMtlIndexes())
+				||	(otherMeshHasTexCoords && !m_texCoordIndexes && !reservePerTriangleTexCoordIndexes())
+				||	(otherMeshHasTriangleNormals && !m_triNormalIndexes && !reservePerTriangleNormalIndexes())
+				)
 			{
 				ccLog::Warning("[ccMesh::merge] Not enough memory!");
 				break;
@@ -968,7 +974,11 @@ bool ccMesh::merge(const ccMesh* mesh)
 				{
 					//reserve mem for triangle normals
 					if (!m_triNormals)
-						setTriNormsTable(new NormsIndexesTableType());
+					{
+						NormsIndexesTableType* normsTable = new NormsIndexesTableType();
+						setTriNormsTable(normsTable);
+						addChild(normsTable);
+					}
 					assert(m_triNormals);
 					unsigned triNormalsCountBefore = m_triNormals->currentSize();
 					if (!m_triNormals->reserve(triNormalsCountBefore + mesh->m_triNormals->currentSize()))
@@ -1019,20 +1029,34 @@ bool ccMesh::merge(const ccMesh* mesh)
 			//1st: does the other mesh has materials?
 			if (otherMeshHasMaterials)
 			{
-				size_t mtlIndexShift = 0;
+				std::vector<int> materialIndexMap;
 				if (m_materials != mesh->m_materials)
 				{
 					//reserve mem for materials
 					if (!m_materials)
-						setMaterialSet(new ccMaterialSet("materials"));
+					{
+						ccMaterialSet* set = new ccMaterialSet("materials");
+						setMaterialSet(set);
+						addChild(set);
+					}
 					assert(m_materials);
 					size_t mtlCountBefore = m_materials->size();
-					if (!m_materials->append(*(mesh->m_materials)))
+
+					size_t otherMatSetSize = mesh->m_materials->size();
+					try
+					{
+						materialIndexMap.resize(otherMatSetSize,-1);
+					}
+					catch(std::bad_alloc)
 					{
 						ccLog::Warning("[ccMesh::merge] Not enough memory!");
 						break;
 					}
-					mtlIndexShift = mtlCountBefore;
+					//update map table
+					for (size_t m=0; m!=otherMatSetSize; ++m)
+					{
+						materialIndexMap[m] = m_materials->addMaterial(mesh->m_materials->at(m));
+					}
 				}
 
 				//the indexes should have already been resized by the call to 'reserve'!
@@ -1042,7 +1066,8 @@ bool ccMesh::merge(const ccMesh* mesh)
 					for (unsigned i=0; i<mesh->m_triMtlIndexes->currentSize(); ++i)
 					{
 						int index = mesh->m_triMtlIndexes->getValue(i);
-						int newIndex = (index < 0 ? -1 : index + static_cast<int>(mtlIndexShift));
+						assert(index < static_cast<int>(materialIndexMap.size()));
+						int newIndex = (index < 0 ? -1 : materialIndexMap[index]);
 						m_triMtlIndexes->addElement(newIndex);
 					}
 				}
@@ -1073,7 +1098,11 @@ bool ccMesh::merge(const ccMesh* mesh)
 				{
 					//reserve mem for triangle normals
 					if (!m_texCoords)
-						setTexCoordinatesTable(new TextureCoordsContainer());
+					{
+						TextureCoordsContainer* texCoordsTable = new TextureCoordsContainer;
+						setTexCoordinatesTable(texCoordsTable);
+						addChild(texCoordsTable);
+					}
 					assert(m_texCoords);
 					unsigned texCoordCountBefore = m_texCoords->currentSize();
 					if (!m_texCoords->reserve(texCoordCountBefore + mesh->m_texCoords->currentSize()))
@@ -1083,8 +1112,13 @@ bool ccMesh::merge(const ccMesh* mesh)
 					}
 					//copy the values
 					{
+						static const float TxDef[2] = {-1.0f,-1.0f};
 						for (unsigned i=0; i<mesh->m_texCoords->currentSize(); ++i)
-							m_texCoords->addElement(mesh->m_texCoords->getValue(i));
+						{
+							const float* Tx = mesh->m_texCoords->getValue(i);
+							assert(Tx);
+							m_texCoords->addElement(Tx ? Tx : TxDef);
+						}
 					}
 					texCoordIndexShift = texCoordCountBefore;
 				}
@@ -1096,9 +1130,9 @@ bool ccMesh::merge(const ccMesh* mesh)
 					for (unsigned i=0; i<mesh->m_texCoordIndexes->currentSize(); ++i)
 					{
 						const int* indexes = mesh->m_texCoordIndexes->getValue(i);
-						int newIndexes[3] = {	indexes[0] < 0 ? -1 : indexes[0] + static_cast<int>(texCoordIndexShift),
-												indexes[1] < 0 ? -1 : indexes[1] + static_cast<int>(texCoordIndexShift),
-												indexes[2] < 0 ? -1 : indexes[2] + static_cast<int>(texCoordIndexShift) };
+						int newIndexes[3] = {	!indexes || indexes[0] < 0 ? -1 : indexes[0] + static_cast<int>(texCoordIndexShift),
+												!indexes || indexes[1] < 0 ? -1 : indexes[1] + static_cast<int>(texCoordIndexShift),
+												!indexes || indexes[2] < 0 ? -1 : indexes[2] + static_cast<int>(texCoordIndexShift) };
 						m_texCoordIndexes->addElement(newIndexes);
 					}
 				}
@@ -1149,7 +1183,7 @@ void ccMesh::forEach(genericTriangleAction& anAction)
 		return;
 
 	m_triVertIndexes->placeIteratorAtBegining();
-	for (unsigned i=0;i<m_triVertIndexes->currentSize();++i)
+	for (unsigned i=0; i<m_triVertIndexes->currentSize(); ++i)
 	{
 		const unsigned* tri = m_triVertIndexes->getCurrentValue();
 		m_currentTriangle.A = m_associatedCloud->getPoint(tri[0]);
@@ -1443,7 +1477,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glColor3fv(context.defaultMat.diffuseFront);
+			glColor3fv(context.defaultMat->getDiffuseFront());
 		}
 
 		if (glParams.showNorms)
@@ -1451,7 +1485,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version can fall to 1.0!
 			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
 			glEnable(GL_LIGHTING);
-			context.defaultMat.applyGL(true,colorMaterial);
+			context.defaultMat->applyGL(true,colorMaterial);
 		}
 
 		//in the case we need normals (i.e. lighting)
@@ -1641,15 +1675,15 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						for (n=0; n<chunkSize; n+=decimStep, _triNormalIndexes+=step)
 						{
 							assert(_triNormalIndexes[0] < static_cast<int>(m_triNormals->currentSize()));
-							const CCVector3& N1 = (_triNormalIndexes[0]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[0])) : s_blankNorm);
+							const CCVector3& N1 = (_triNormalIndexes[0] >= 0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[0])) : s_blankNorm);
 							memcpy(_normals,N1.u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
 							assert(_triNormalIndexes[1] < static_cast<int>(m_triNormals->currentSize()));
-							const CCVector3& N2 = (_triNormalIndexes[0]==_triNormalIndexes[1] ? N1 : _triNormalIndexes[1]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[1])) : s_blankNorm);
+							const CCVector3& N2 = (_triNormalIndexes[0]==_triNormalIndexes[1] ? N1 : _triNormalIndexes[1] >= 0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[1])) : s_blankNorm);
 							memcpy(_normals,N2.u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
 							assert(_triNormalIndexes[2] < static_cast<int>(m_triNormals->currentSize()));
-							const CCVector3& N3 = (_triNormalIndexes[0]==_triNormalIndexes[2] ? N1 : _triNormalIndexes[2]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[2])) : s_blankNorm);
+							const CCVector3& N3 = (_triNormalIndexes[0]==_triNormalIndexes[2] ? N1 : _triNormalIndexes[2] >= 0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[2])) : s_blankNorm);
 							memcpy(_normals,N3.u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
 						}
@@ -1812,14 +1846,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glEnd();
 						if (showTextures)
 						{
-							GLuint texID = (newMatlIndex >= 0 ? (*m_materials)[newMatlIndex].texID : 0);
+							GLuint texID = (newMatlIndex >= 0 ? context._win->getTextureID((*m_materials)[newMatlIndex]) : 0);
 							if (texID > 0)
 								assert(glIsTexture(texID));
 							glBindTexture(GL_TEXTURE_2D, texID);
 						}
 
 						//if we don't have any current material, we apply default one
-						(newMatlIndex >= 0 ? (*m_materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms,false);
+						(newMatlIndex >= 0 ? (*m_materials)[newMatlIndex] : context.defaultMat)->applyGL(glParams.showNorms,false);
 						glBegin(triangleDisplayType);
 						lasMtlIndex=newMatlIndex;
 					}
@@ -2082,9 +2116,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 							//for each triangle of this mesh, try to determine if its normals are already in use
 							//(otherwise add them to the new container and increase its index)
-							for (unsigned j=0;j<3;++j)
+							for (unsigned j=0; j<3; ++j)
 							{
-								if (triNormIndexes[j] >=0 && newNormIndexes[triNormIndexes[j]] < 0)
+								if (triNormIndexes[j] >= 0 && newNormIndexes[triNormIndexes[j]] < 0)
 								{
 									if (newTriNormals->currentSize() == newTriNormals->capacity() 
 										&& !newTriNormals->reserve(newTriNormals->currentSize() + 1000)) //auto expand
@@ -2122,7 +2156,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 							//(otherwise add them to the new container and increase its index)
 							for (unsigned j=0; j<3; ++j)
 							{
-								if (triTexIndexes[j] >=0 && newTexIndexes[triTexIndexes[j]] < 0)
+								if (triTexIndexes[j] >= 0 && newTexIndexes[triTexIndexes[j]] < 0)
 								{
 									if (newTriTexIndexes->currentSize() == newTriTexIndexes->capacity() 
 										&& !newTriTexIndexes->reserve(newTriTexIndexes->currentSize() + 500)) //auto expand
@@ -2157,7 +2191,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 							//for each triangle of this mesh, try to determine if its material is already in use
 							//(otherwise add it to the new container and increase its index)
-							if (triMatIndex >=0 && newMatIndexes[triMatIndex] < 0)
+							if (triMatIndex >= 0 && newMatIndexes[triMatIndex] < 0)
 							{
 								//import old material to new subset (create new index)
 								newMatIndexes[triMatIndex] = static_cast<int>(newMaterials->size()); //new element index = new size - 1 = old size!
@@ -2331,13 +2365,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 void ccMesh::shiftTriangleIndexes(unsigned shift)
 {
 	m_triVertIndexes->placeIteratorAtBegining();
-	unsigned *ti,i=0;
-	for (;i<m_triVertIndexes->currentSize();++i)
+	for (unsigned i=0; i<m_triVertIndexes->currentSize(); ++i)
 	{
-		ti = m_triVertIndexes->getCurrentValue();
-		ti[0]+=shift;
-		ti[1]+=shift;
-		ti[2]+=shift;
+		unsigned *ti = m_triVertIndexes->getCurrentValue();
+		ti[0] += shift;
+		ti[1] += shift;
+		ti[2] += shift;
 		m_triVertIndexes->forwardIterator();
 	}
 }
@@ -2355,7 +2388,7 @@ void ccMesh::removePerTriangleNormalIndexes()
 {
 	if (m_triNormalIndexes)
 		m_triNormalIndexes->release();
-	m_triNormalIndexes=0;
+	m_triNormalIndexes = 0;
 }
 
 bool ccMesh::reservePerTriangleNormalIndexes()
@@ -2460,9 +2493,9 @@ void ccMesh::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &t
 	if (m_texCoords && m_texCoordIndexes)
 	{
 		const int* txInd = m_texCoordIndexes->getValue(triIndex);
-		tx1 = (txInd[0]>=0 ? m_texCoords->getValue(txInd[0]) : 0);
-		tx2 = (txInd[1]>=0 ? m_texCoords->getValue(txInd[1]) : 0);
-		tx3 = (txInd[2]>=0 ? m_texCoords->getValue(txInd[2]) : 0);
+		tx1 = (txInd[0] >= 0 ? m_texCoords->getValue(txInd[0]) : 0);
+		tx2 = (txInd[1] >= 0 ? m_texCoords->getValue(txInd[1]) : 0);
+		tx3 = (txInd[2] >= 0 ? m_texCoords->getValue(txInd[2]) : 0);
 	}
 	else
 	{
@@ -2549,7 +2582,7 @@ void ccMesh::removePerTriangleMtlIndexes()
 {
 	if (m_triMtlIndexes)
 		m_triMtlIndexes->release();
-	m_triMtlIndexes=0;
+	m_triMtlIndexes = 0;
 }
 
 void ccMesh::addTriangleMtlIndex(int mtlIndex)
@@ -2568,31 +2601,6 @@ int ccMesh::getTriangleMtlIndex(unsigned triangleIndex) const
 {
 	assert(m_triMtlIndexes && m_triMtlIndexes->currentSize() > triangleIndex);
 	return m_triMtlIndexes->getValue(triangleIndex);
-}
-
-void ccMesh::setDisplay(ccGenericGLDisplay* win)
-{
-	if (m_materials && !m_materials->empty())
-	{
-		//const ccGenericGLDisplay* currentDisplay = m_materials->getAssociatedDisplay();
-		//if the material set is not associated to any display --> we associate it with input display!
-		//if (currentDisplay != 0)
-			m_materials->associateTo(win);
-		/*else //else if it is associated with a different display
-		{
-		//we clone the material set
-		ccMaterialSet* newMtlSet = new ccMaterialSet();
-		newMtlSet->link();
-		m_materials->clone(*newMtlSet);
-		//and we link the clone to the new display
-		newMtlSet->associateTo(win);
-		setMaterialSet(newMtlSet);
-		newMtlSet->release();
-		}
-		//*/
-	}
-
-	ccDrawableObject::setDisplay(win);
 }
 
 bool ccMesh::toFile_MeOnly(QFile& out) const
@@ -2749,7 +2757,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		if (!ccSerializationHelper::GenericArrayFromFile(*m_triMtlIndexes,in,dataVersion))
 		{
 			m_triMtlIndexes->release();
-			m_triMtlIndexes=0;
+			m_triMtlIndexes = 0;
 			return false;
 		}
 	}
@@ -2768,7 +2776,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		if (!ccSerializationHelper::GenericArrayFromFile(*m_texCoordIndexes,in,dataVersion))
 		{
 			m_texCoordIndexes->release();
-			m_texCoordIndexes=0;
+			m_texCoordIndexes = 0;
 			return false;
 		}
 	}
@@ -2847,15 +2855,15 @@ bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCV
 	CCVector3 N1,N2,N3;
 	if (triNormIndexes) //per-triangle normals
 	{
-		if (triNormIndexes[0]>=0)
+		if (triNormIndexes[0] >= 0)
 			N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0]));
 		else
 			d1 = 0;
-		if (triNormIndexes[1]>=0)
+		if (triNormIndexes[1] >= 0)
 			N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1]));
 		else
 			d2 = 0;
-		if (triNormIndexes[2]>=0)
+		if (triNormIndexes[2] >= 0)
 			N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2]));
 		else
 			d3 = 0;
@@ -2940,18 +2948,18 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 	bool foundMaterial = false;
 	if (matIndex >= 0)
 	{
-		const ccMaterial& material = (*m_materials)[matIndex];
-		if (material.hasTexture())
+		ccMaterial::CShared material = (*m_materials)[matIndex];
+		if (material->hasTexture())
 		{
 			assert(m_texCoords && m_texCoordIndexes);
 			const int* txInd = m_texCoordIndexes->getValue(triIndex);
-			const float* Tx = (txInd[vertIndex]>=0 ? m_texCoords->getValue(txInd[vertIndex]) : 0);
+			const float* Tx = (txInd[vertIndex] >= 0 ? m_texCoords->getValue(txInd[vertIndex]) : 0);
 			if (Tx)
 			{
 				if (Tx[0] >= 0 && Tx[0] <= 1.0f && Tx[1] >= 0 && Tx[1] <= 1.0f)
 				{
 					//get color from texture image
-					const QImage texture = material.getTexture();
+					const QImage texture = material->getTexture();
 					int xPix = std::min(static_cast<int>(floor(Tx[0]*texture.width())),texture.width()-1);
 					int yPix = std::min(static_cast<int>(floor(Tx[1]*texture.height())),texture.height()-1);
 
@@ -2967,9 +2975,10 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 		}
 		else
 		{
-			rgb[0] = static_cast<colorType>(material.diffuseFront[0]*MAX_COLOR_COMP);
-			rgb[1] = static_cast<colorType>(material.diffuseFront[1]*MAX_COLOR_COMP);
-			rgb[2] = static_cast<colorType>(material.diffuseFront[2]*MAX_COLOR_COMP);
+			const float* diffuse = material->getDiffuseFront();
+			rgb[0] = static_cast<colorType>(diffuse[0]*MAX_COLOR_COMP);
+			rgb[1] = static_cast<colorType>(diffuse[1]*MAX_COLOR_COMP);
+			rgb[2] = static_cast<colorType>(diffuse[2]*MAX_COLOR_COMP);
 
 			foundMaterial = true;
 		}
@@ -3010,21 +3019,22 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 		return false;
 	}
 
-	const ccMaterial& material = (*m_materials)[matIndex];
+	ccMaterial::CShared material = (*m_materials)[matIndex];
 
-	if (!material.hasTexture())
+	if (!material->hasTexture())
 	{
-		rgb[0] = static_cast<colorType>(material.diffuseFront[0]*MAX_COLOR_COMP);
-		rgb[1] = static_cast<colorType>(material.diffuseFront[1]*MAX_COLOR_COMP);
-		rgb[2] = static_cast<colorType>(material.diffuseFront[2]*MAX_COLOR_COMP);
+		const float* diffuse = material->getDiffuseFront();
+		rgb[0] = static_cast<colorType>(diffuse[0]*MAX_COLOR_COMP);
+		rgb[1] = static_cast<colorType>(diffuse[1]*MAX_COLOR_COMP);
+		rgb[2] = static_cast<colorType>(diffuse[2]*MAX_COLOR_COMP);
 		return true;
 	}
 
 	assert(m_texCoords && m_texCoordIndexes);
 	const int* txInd = m_texCoordIndexes->getValue(triIndex);
-	const float* Tx1 = (txInd[0]>=0 ? m_texCoords->getValue(txInd[0]) : 0);
-	const float* Tx2 = (txInd[1]>=0 ? m_texCoords->getValue(txInd[1]) : 0);
-	const float* Tx3 = (txInd[2]>=0 ? m_texCoords->getValue(txInd[2]) : 0);
+	const float* Tx1 = (txInd[0] >= 0 ? m_texCoords->getValue(txInd[0]) : 0);
+	const float* Tx2 = (txInd[1] >= 0 ? m_texCoords->getValue(txInd[1]) : 0);
+	const float* Tx3 = (txInd[2] >= 0 ? m_texCoords->getValue(txInd[2]) : 0);
 
 	//interpolation weights
 	const unsigned* tri = m_triVertIndexes->getValue(triIndex);
@@ -3081,15 +3091,16 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 
 	//get color from texture image
 	{
-		const QImage texture = material.getTexture();
+		const QImage texture = material->getTexture();
 		int xPix = std::min(static_cast<int>(floor(x*static_cast<float>(texture.width()))),texture.width()-1);
 		int yPix = std::min(static_cast<int>(floor(y*static_cast<float>(texture.height()))),texture.height()-1);
 
 		QRgb pixel = texture.pixel(xPix,yPix);
 
-		rgb[0] = static_cast<colorType>(material.diffuseFront[0] * qRed  (pixel));
-		rgb[1] = static_cast<colorType>(material.diffuseFront[1] * qGreen(pixel));
-		rgb[2] = static_cast<colorType>(material.diffuseFront[2] * qBlue (pixel));
+		const float* diffuse = material->getDiffuseFront();
+		rgb[0] = static_cast<colorType>(diffuse[0] * qRed  (pixel));
+		rgb[1] = static_cast<colorType>(diffuse[1] * qGreen(pixel));
+		rgb[2] = static_cast<colorType>(diffuse[2] * qBlue (pixel));
 	}
 
 	return true;
@@ -3288,7 +3299,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	unsigned triCount = size();
 	ccGenericPointCloud* vertices = getAssociatedCloud();
 	unsigned vertCount = (vertices ? vertices->size() : 0);
-	if (!vertices || vertCount*triCount==0)
+	if (!vertices || vertCount*triCount == 0)
 	{
 		ccLog::Error("[ccMesh::subdivide] Invalid mesh: no face or no vertex!");
 		return 0;
@@ -3319,7 +3330,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 
 	try
 	{		
-		for (unsigned i=0;i<triCount;++i)
+		for (unsigned i=0; i<triCount; ++i)
 		{
 			const unsigned* tri = m_triVertIndexes->getValue(i);
 			if (!resultMesh->pushSubdivide(/*maxArea,*/tri[0],tri[1],tri[2]))
@@ -3377,17 +3388,17 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 			{
 				int indexG = indexG1;
 				unsigned char i1 = 2; //relative index facing the broken edge
-				if (indexG2>=0)
+				if (indexG2 >= 0)
 				{
 					indexG = indexG2;
 					i1 = 0;
 				}
-				else if (indexG3>=0)
+				else if (indexG3 >= 0)
 				{
 					indexG = indexG3;
 					i1 = 1;
 				}
-				assert(indexG>=0);
+				assert(indexG >= 0);
 				assert(i1<3);
 
 				unsigned indexes[3] = { indexA, indexB, indexC };

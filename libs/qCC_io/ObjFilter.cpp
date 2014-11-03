@@ -244,8 +244,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename)
 					{
 						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
 						{
-							const ccMaterial& mat = materials->at(mtlIndex);
-							stream << "usemtl " << mat.name << endl;
+							ccMaterial::CShared mat = materials->at(mtlIndex);
+							stream << "usemtl " << mat->getName() << endl;
 						}
 						else
 						{
@@ -855,7 +855,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				QString mtlName = currentLine.mid(7).trimmed();
 				//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
 				//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
-				currentMaterial = (!mtlName.isEmpty() ? materials->findMaterial(mtlName) : -1);
+				currentMaterial = (!mtlName.isEmpty() ? materials->findMaterialByName(mtlName) : -1);
 				currentMaterialDefined = true;
 			}
 		}

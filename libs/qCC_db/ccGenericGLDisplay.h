@@ -22,6 +22,7 @@
 #include "qCC_db.h"
 #include "ccSerializableObject.h"
 #include "ccGLMatrix.h"
+#include "ccMaterial.h"
 
 //Qt
 #include <QImage>
@@ -120,8 +121,11 @@ public:
 	**/
 	virtual void invalidateViewport() = 0;
 
-	//! Get texture ID from image
-	virtual unsigned getTexture(const QImage& image) = 0;
+	//! Returns the texture ID corresponding to an image
+	virtual unsigned getTextureID(const QImage& image) = 0;
+	
+	//! Returns the texture ID corresponding to a material
+	virtual unsigned getTextureID( ccMaterial::CShared mtl) = 0;
 
 	//! Release texture from context
 	virtual void releaseTexture(unsigned texID) = 0;

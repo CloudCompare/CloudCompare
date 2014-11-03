@@ -259,6 +259,15 @@ ccGLWindow::~ccGLWindow()
 	}
 
 	makeCurrent();
+
+	//release textures
+	{
+		for (QMap< QString, unsigned >::iterator it=m_materialTextures.begin(); it != m_materialTextures.end(); ++it)
+		{
+			deleteTexture(it.value());
+		}
+	}
+
 	if (m_trihedronGLList != GL_INVALID_LIST_ID)
 	{
 		glDeleteLists(m_trihedronGLList,1);
@@ -1848,14 +1857,13 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.labelsTransparency = guiParams.labelsTransparency;
 
 	//default materials
-	context.defaultMat.name = "default";
-	memcpy(context.defaultMat.diffuseFront,guiParams.meshFrontDiff,sizeof(float)*4);
-	memcpy(context.defaultMat.diffuseBack,guiParams.meshBackDiff,sizeof(float)*4);
-	memcpy(context.defaultMat.ambient,ccColor::bright,sizeof(float)*4);
-	memcpy(context.defaultMat.specular,guiParams.meshSpecular,sizeof(float)*4);
-	memcpy(context.defaultMat.emission,ccColor::night,sizeof(float)*4);
-	context.defaultMat.shininessFront = 30;
-	context.defaultMat.shininessBack = 50;
+	context.defaultMat->setDiffuseFront(guiParams.meshFrontDiff);
+	context.defaultMat->setDiffuseBack(guiParams.meshBackDiff);
+	context.defaultMat->setAmbient(ccColor::bright);
+	context.defaultMat->setSpecular(guiParams.meshSpecular);
+	context.defaultMat->setEmission(ccColor::night);
+	context.defaultMat->setShininessFront(30);
+	context.defaultMat->setShininessBack(50);
 	//default colors
 	memcpy(context.pointsDefaultCol,guiParams.pointsDefaultCol,sizeof(unsigned char)*3);
 	memcpy(context.textDefaultCol,guiParams.textDefaultCol,sizeof(unsigned char)*3);
@@ -1888,7 +1896,7 @@ void ccGLWindow::redraw()
 	updateGL();
 }
 
-unsigned ccGLWindow::getTexture(const QImage& image)
+unsigned ccGLWindow::getTextureID(const QImage& image)
 {
 	makeCurrent();
 
@@ -1935,9 +1943,33 @@ unsigned ccGLWindow::getTexture(const QImage& image)
 	}
 }
 
+unsigned ccGLWindow::getTextureID(ccMaterial::CShared mtl)
+{
+	if (!mtl)
+	{
+		assert(false);
+		return 0;
+	}
+
+	QString id = mtl->getUniqueIdentifier();
+	if (!m_materialTextures.contains(id))
+		m_materialTextures[id] = getTextureID(mtl->getTexture());
+
+	return m_materialTextures[id];
+}
+
 void ccGLWindow::releaseTexture(unsigned texID)
 {
 	makeCurrent();
+	//release texture from map!
+	for (QMap< QString, unsigned >::iterator it=m_materialTextures.begin(); it != m_materialTextures.end(); ++it)
+	{
+		if (it.value() == texID)
+		{
+			m_materialTextures.remove(it.key());
+			break;
+		}
+	}
 	deleteTexture(texID);
 }
 

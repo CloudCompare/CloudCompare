@@ -952,7 +952,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 									ccLog::PrintDebug(QString("[FBX] Texture absolue filename: %1").arg(texAbsoluteFilename));
 									if (texAbsoluteFilename != 0 && texAbsoluteFilename[0] != 0)
 									{
-										if (!mat.setTexture(texAbsoluteFilename))
+										if (!mat.loadAndSetTexture(texAbsoluteFilename))
 										{
 											ccLog::Warning(QString("[FBX] Failed to load texture file: %1").arg(texAbsoluteFilename));
 										}

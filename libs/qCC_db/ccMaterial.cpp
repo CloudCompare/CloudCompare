@@ -26,6 +26,8 @@
 //Qt
 #include <QMap>
 #include <QUuid>
+#include <QFileInfo>
+#include <QDataStream>
 
 //System
 #include <string.h>
@@ -34,51 +36,86 @@
 //Textures DB
 QMap<QString, QImage> s_textureDB;
 
-ccMaterial::ccMaterial(QString _name)
-	: name(_name)
-	, texID(0)
+ccMaterial::ccMaterial(QString name)
+	: m_name(name)
+	, m_uniqueID(QUuid::createUuid().toString())
 {
-	memcpy(diffuseFront,ccColor::bright,sizeof(float)*4);
-	memcpy(diffuseBack,ccColor::bright,sizeof(float)*4);
-	memcpy(ambient,ccColor::night,sizeof(float)*4);
-	memcpy(specular,ccColor::night,sizeof(float)*4);
-	memcpy(emission,ccColor::night,sizeof(float)*4);
+	memcpy(m_diffuseFront, ccColor::bright, sizeof(float)*4);
+	memcpy(m_diffuseBack,  ccColor::bright, sizeof(float)*4);
+	memcpy(m_ambient,      ccColor::night,  sizeof(float)*4);
+	memcpy(m_specular,     ccColor::night,  sizeof(float)*4);
+	memcpy(m_emission,     ccColor::night,  sizeof(float)*4);
 	setShininess(50.0);
 };
 
 ccMaterial::ccMaterial(const ccMaterial& mtl)
-	: name(mtl.name)
-	, textureFilename(mtl.textureFilename)
-	, shininessFront(mtl.shininessFront)
-	, shininessBack(mtl.shininessFront)
-	, texID(0)
+	: m_name(mtl.m_name)
+	, m_textureFilename(mtl.m_textureFilename)
+	, m_shininessFront(mtl.m_shininessFront)
+	, m_shininessBack(mtl.m_shininessFront)
+	, m_uniqueID(mtl.m_uniqueID)
 {
-	memcpy(diffuseFront,mtl.diffuseFront,sizeof(float)*4);
-	memcpy(diffuseBack,mtl.diffuseBack,sizeof(float)*4);
-	memcpy(ambient,mtl.ambient,sizeof(float)*4);
-	memcpy(specular,mtl.specular,sizeof(float)*4);
-	memcpy(emission,mtl.emission,sizeof(float)*4);
+	memcpy(m_diffuseFront, mtl.m_diffuseFront, sizeof(float)*4);
+	memcpy(m_diffuseBack,  mtl.m_diffuseBack,  sizeof(float)*4);
+	memcpy(m_ambient,      mtl.m_ambient,      sizeof(float)*4);
+	memcpy(m_specular,     mtl.m_specular,     sizeof(float)*4);
+	memcpy(m_emission,     mtl.m_emission,     sizeof(float)*4);
 }
 
 void ccMaterial::setDiffuse(const float color[4])
 {
-	memcpy(diffuseFront,color,sizeof(float)*4);
-	memcpy(diffuseBack,color,sizeof(float)*4);
+	setDiffuseFront(color);
+	setDiffuseBack(color);
+}
+
+void ccMaterial::setDiffuseFront(const float color[4])
+{
+	memcpy(m_diffuseFront, color, sizeof(float)*4);
+}
+
+void ccMaterial::setDiffuseBack(const float color[4])
+{
+	memcpy(m_diffuseBack, color, sizeof(float)*4);
+}
+
+void ccMaterial::setAmbient(const float color[4])
+{
+	memcpy(m_ambient, color, sizeof(float)*4);
+}
+
+void ccMaterial::setSpecular(const float color[4])
+{
+	memcpy(m_specular, color, sizeof(float)*4);
+}
+
+void ccMaterial::setEmission(const float color[4])
+{
+	memcpy(m_emission, color, sizeof(float)*4);
 }
 
 void ccMaterial::setShininess(float val)
 {
-	shininessFront = val;
-	shininessBack = 0.8f * val;
+	setShininessFront(val);
+	setShininessBack(0.8f * val);
+}
+
+void ccMaterial::setShininessFront(float val)
+{
+	m_shininessFront = val;
+}
+
+void ccMaterial::setShininessBack(float val)
+{
+	m_shininessBack = val;
 }
 
 void ccMaterial::setTransparency(float val)
 {
-	diffuseFront[3] = val;
-	diffuseBack[3] = val;
-	ambient[3] = val;
-	specular[3] = val;
-	emission[3] = val;
+	m_diffuseFront[3] = val;
+	m_diffuseBack[3]  = val;
+	m_ambient[3]      = val;
+	m_specular[3]     = val;
+	m_emission[3]     = val;
 }
 
 void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
@@ -87,78 +124,95 @@ void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
 	{
 		if (!skipDiffuse)
 		{
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuseFront);
-			glMaterialfv(GL_BACK, GL_DIFFUSE, diffuseBack);
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFront);
+			glMaterialfv(GL_BACK,  GL_DIFFUSE, m_diffuseBack);
 		}
-		glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,ambient);
-		glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
-		glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,emission);
-		glMaterialf(GL_FRONT, GL_SHININESS, shininessFront);
-		glMaterialf(GL_BACK, GL_SHININESS, shininessBack);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission);
+		glMaterialf (GL_FRONT,          GL_SHININESS, m_shininessFront);
+		glMaterialf (GL_BACK,           GL_SHININESS, m_shininessBack);
 	}
 	else
 	{
-		glColor4fv(diffuseFront);
+		glColor4fv(m_diffuseFront);
 	}
 }
 
-bool ccMaterial::setTexture(QString absoluteFilename)
+bool ccMaterial::loadAndSetTexture(QString absoluteFilename)
 {
-	if (!s_textureDB.contains(absoluteFilename))
+	if (absoluteFilename.isEmpty())
 	{
-		//try to load the corresponding file
+		ccLog::Warning(QString("[ccMaterial::loadAndSetTexture] filename can't be empty!"));
+		return false;
+	}
+	ccLog::PrintDebug(QString("[ccMaterial::loadAndSetTexture] absolute filename = %1").arg(absoluteFilename));
+
+	if (s_textureDB.contains(absoluteFilename))
+	{
+		//if the image is already in memory, we simply update the texture filename for this amterial
+		m_textureFilename = absoluteFilename;
+	}
+	else
+	{
+		//otherwise, we try to load the corresponding file
 		QImage image(absoluteFilename);
 		if (image.isNull())
 		{
-			ccLog::Warning(QString("[ccMaterial] Failed to load image '%1'").arg(absoluteFilename));
+			ccLog::Warning(QString("[ccMaterial::loadAndSetTexture] Failed to load image '%1'").arg(absoluteFilename));
 			return false;
 		}
-
-		s_textureDB[absoluteFilename] = image.mirrored();
+		else
+		{
+			setTexture(image,absoluteFilename,true);
+		}
 	}
-
-	textureFilename = absoluteFilename;
 
 	return true;
 }
 
 void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/, bool mirrorImage/*=true*/)
 {
+	ccLog::PrintDebug(QString("[ccMaterial::setTexture] absoluteFilename = %1 (+ image(%2,%3)").arg(absoluteFilename).arg(image.width()).arg(image.height()));
+
 	if (absoluteFilename.isEmpty())
 	{
-		absoluteFilename = QString("tex_") + QUuid::createUuid().toString();
+		//if the user hasn't provided any filename, we generate a fake one
+		absoluteFilename = QString("tex_%1.jpg").arg(m_uniqueID);
 		assert(!s_textureDB.contains(absoluteFilename));
 	}
 	else
 	{
+		//if the texture has already been loaded
 		if (s_textureDB.contains(absoluteFilename))
 		{
+			//check that the size is compatible at least
 			if (s_textureDB[absoluteFilename].size() != image.size())
 			{
 				ccLog::Warning(QString("[ccMaterial] A texture with the same name (%1) but with a different size has already been loaded!").arg(absoluteFilename));
 			}
-			textureFilename = absoluteFilename;
+			m_textureFilename = absoluteFilename;
 			return;
 		}
 	}
 
-	textureFilename = absoluteFilename;
+	m_textureFilename = absoluteFilename;
 
 	//insert image into DB if necessary
-	s_textureDB[absoluteFilename] = mirrorImage ? image.mirrored() : image;
+	s_textureDB[m_textureFilename] = mirrorImage ? image.mirrored() : image;
 }
 
 const QImage ccMaterial::getTexture() const
 {
-	return s_textureDB[textureFilename];
+	return s_textureDB[m_textureFilename];
 }
 
 bool ccMaterial::hasTexture() const
 {
-	if (textureFilename.isEmpty())
+	if (m_textureFilename.isEmpty())
 		return false;
 
-	return !s_textureDB[textureFilename].isNull();
+	return !s_textureDB[m_textureFilename].isNull();
 }
 
 void ccMaterial::MakeLightsNeutral()
@@ -197,4 +251,67 @@ QImage ccMaterial::GetTexture(QString absoluteFilename)
 void ccMaterial::AddTexture(QImage image, QString absoluteFilename)
 {
 	s_textureDB[absoluteFilename] = image;
+}
+
+bool ccMaterial::toFile(QFile& out) const
+{
+	QDataStream outStream(&out);
+
+	//material name (dataVersion>=20)
+	outStream << m_name;
+	//texture (dataVersion>=20)
+	outStream << m_textureFilename;
+	//material colors (dataVersion>=20)
+	//we don't use QByteArray here as it has its own versions!
+	if (out.write((const char*)m_diffuseFront,sizeof(float)*4) < 0) 
+		return WriteError();
+	if (out.write((const char*)m_diffuseBack,sizeof(float)*4) < 0) 
+		return WriteError();
+	if (out.write((const char*)m_ambient,sizeof(float)*4) < 0) 
+		return WriteError();
+	if (out.write((const char*)m_specular,sizeof(float)*4) < 0) 
+		return WriteError();
+	if (out.write((const char*)m_emission,sizeof(float)*4) < 0) 
+		return WriteError();
+	//material shininess (dataVersion>=20)
+	outStream << m_shininessFront;
+	outStream << m_shininessBack;
+
+	return true;
+}
+
+bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
+{
+	QDataStream inStream(&in);
+
+	//material name (dataVersion>=20)
+	inStream >> m_name;
+	if (dataVersion < 37)
+	{
+		//texture (dataVersion>=20)
+		QImage texture;
+		inStream >> texture;
+		setTexture(texture,QString(),false);
+	}
+	else
+	{
+		//texture 'filename' (dataVersion>=37)
+		inStream >> m_textureFilename;
+	}
+	//material colors (dataVersion>=20)
+	if (in.read((char*)m_diffuseFront,sizeof(float)*4) < 0) 
+		return ReadError();
+	if (in.read((char*)m_diffuseBack,sizeof(float)*4) < 0) 
+		return ReadError();
+	if (in.read((char*)m_ambient,sizeof(float)*4) < 0) 
+		return ReadError();
+	if (in.read((char*)m_specular,sizeof(float)*4) < 0) 
+		return ReadError();
+	if (in.read((char*)m_emission,sizeof(float)*4) < 0) 
+		return ReadError();
+	//material shininess (dataVersion>=20)
+	inStream >> m_shininessFront;
+	inStream >> m_shininessBack;
+
+	return true;
 }

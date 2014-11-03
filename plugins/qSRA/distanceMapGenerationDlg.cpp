@@ -730,12 +730,9 @@ void DistanceMapGenerationDlg::updateMapTexture()
 			materialSet->clear();
 			//add new material
 			{
-				ccMaterial material("texture");
-				material.setTexture(mapImage,QString(),false);
+				ccMaterial::Shared material(new ccMaterial("texture"));
+				material->setTexture(mapImage,QString(),false);
 				materialSet->addMaterial(material);
-				//dirty trick: reset material association so that texture will be refreshed!
-				materialSet->associateTo(0);
-				materialSet->associateTo(m_window);
 			}
 		}
 	}

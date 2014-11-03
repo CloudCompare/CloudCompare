@@ -800,8 +800,8 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 
 		//set material
 		{
-			ccMaterial material("texture");
-			material.setTexture(mapTexture, QString(), false);
+			ccMaterial::Shared material(new ccMaterial("texture"));
+			material->setTexture(mapTexture, QString(), false);
 
 			ccMaterialSet* materialSet = new ccMaterialSet();
 			materialSet->addMaterial(material);
@@ -1301,10 +1301,8 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 
 		//set material
 		{
-			ccMaterial material("texture");
-		
-			//invert texture?
-			material.setTexture(mapTexture, QString(), false);
+			ccMaterial::Shared material(new ccMaterial("texture"));
+			material->setTexture(mapTexture, QString(), false);
 
 			ccMaterialSet* materialSet = new ccMaterialSet();
 			materialSet->addMaterial(material);

@@ -57,7 +57,7 @@ struct glDrawContext
 	float renderZoom;
 
 	//! Default material
-	ccMaterial defaultMat;
+	ccMaterial::Shared defaultMat;
 	//! Default color for mesh (front side)
 	float defaultMeshFrontDiff[4];
 	//! Default color for mesh (back side)
@@ -109,6 +109,7 @@ struct glDrawContext
 		, glH(0)
 		, _win(0)
 		, renderZoom(1.0f)
+		, defaultMat(new ccMaterial("default"))
 		, decimateCloudOnMove(true)
 		, decimateMeshOnMove(true)
 		, sfColorScaleToDisplay(0)

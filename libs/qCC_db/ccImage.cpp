@@ -135,7 +135,7 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 			unbindTexture();
 
 		m_boundWin = win;
-		m_textureID = m_boundWin->getTexture(m_image);
+		m_textureID = m_boundWin->getTextureID(m_image);
 
 		//OpenGL version < 2.0 require texture with 2^n width & height
 		if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0)

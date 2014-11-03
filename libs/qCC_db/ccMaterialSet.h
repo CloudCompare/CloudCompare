@@ -29,7 +29,7 @@
 class ccGenericGLDisplay;
 
 //! Mesh (triangle) material
-class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial>, public CCShareable, public ccHObject
+class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>, public CCShareable, public ccHObject
 {
 public:
 
@@ -43,12 +43,18 @@ public:
 	//! Finds material by name
 	/** \return material index or -1 if not found
 	**/
-	int findMaterial(QString mtlName);
+	int findMaterialByName(QString mtlName);
+
+	//! Finds material by unique identifier
+	/** \return material index or -1 if not found
+	**/
+	int findMaterialByUniqueID(QString uniqueID);
 
 	//! Adds a material
 	/** Ensures unicity of material names.
+		\return material index
 	**/
-	bool addMaterial(const ccMaterial& mat);
+	int addMaterial(ccMaterial::CShared mat);
 
 	//! MTL (material) file parser
 	/** Inspired from KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
@@ -57,12 +63,6 @@ public:
 
 	//! Saves to an MTL file (+ associated texture images)
 	bool saveAsMTL(QString path, const QString& baseFilename, QStringList& errors) const;
-
-	//! Associates to a given context
-	void associateTo(ccGenericGLDisplay* display);
-
-	//! Returns associated display
-	const ccGenericGLDisplay* getAssociatedDisplay();
 
 	//! Clones materials set
 	ccMaterialSet* clone() const;
@@ -81,10 +81,6 @@ protected:
 
 	//! Default destructor (protected: use 'release' instead)
 	virtual ~ccMaterialSet();
-
-	//! Associated display
-	ccGenericGLDisplay* m_display;
-
 };
 
 #endif //CC_MATERIAL_SET_HEADER

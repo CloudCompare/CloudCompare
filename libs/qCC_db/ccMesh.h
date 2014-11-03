@@ -104,7 +104,6 @@ public:
 	virtual bool hasScalarFields() const;
 	virtual bool hasDisplayedScalarField() const;
 	virtual bool normalsShown() const;
-	virtual void setDisplay(ccGenericGLDisplay* win);
 	virtual void toggleMaterials() { showMaterials(!materialsShown()); }
 
 	//! Shifts all triangles indexes

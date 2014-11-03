@@ -4348,7 +4348,7 @@ void MainWindow::doActionMerge()
 		ccMesh* baseMesh = new ccMesh(baseVertices);
 		baseMesh->setName("Merged mesh");
 		baseMesh->addChild(baseVertices);
-		baseVertices->setVisible(false);
+		baseVertices->setEnabled(false);
 		for (size_t i=0; i<meshes.size(); ++i)
 		{
 			ccMesh* mesh = meshes[i];

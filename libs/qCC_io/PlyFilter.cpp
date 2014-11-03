@@ -116,7 +116,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	}
 	else result = 0;
 
-	const ccMaterial* material = 0;
+	ccMaterial::CShared material(0);
 	if (mesh && mesh->hasMaterials())
 	{
 		//look for textures/materials in case there's no color
@@ -130,11 +130,11 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 				for (size_t i=0; i < materials->size(); ++i)
 				{
 					//texture?
-					if (materials->at(i).texID != 0)
+					if (!materials->at(i)->getTexture().isNull())
 					{
 						//save first encountered texture
 						if (!material)
-							material = &materials->at(i);
+							material = materials->at(i);
 						++textureCount;
 					}
 				}
@@ -164,7 +164,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 														QMessageBox::Yes) == QMessageBox::No)
 							{
 								//we can forget the texture
-								material = 0;
+								material = ccMaterial::CShared(0);
 								//try to convert materials to RGB
 								if (!static_cast<ccMesh*>(mesh)->convertMaterialsToVertexColors())
 								{
@@ -175,7 +175,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 						else if (mesh->isA(CC_TYPES::SUB_MESH))
 						{
 							//we can forget the texture
-							material = 0;
+							material = ccMaterial::CShared(0);
 							ccLog::Warning("This sub-mesh has one texture and multiple materials. As this is a sub-mesh, we will ignore them...  you should convert the parent mesh textures/materials to RGB colors first");
 						}
 						else
@@ -193,7 +193,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			{
 				assert(materials->size() != 0);
 				//we can forget the (first) texture (if any)
-				material = 0;
+				material = ccMaterial::CShared(0);
 
 				if (mesh->hasColors())
 				{
@@ -235,17 +235,18 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	}
 
 	bool hasUniqueColor = false;
-	colorType uniqueColor[3]={0,0,0};
+	colorType uniqueColor[3] = {0,0,0};
 	if (material)
 	{
 		//Material without texture?
 		if (!material->hasTexture())
 		{
-			uniqueColor[0] = (colorType)(material->diffuseFront[0]*MAX_COLOR_COMP);
-			uniqueColor[1] = (colorType)(material->diffuseFront[1]*MAX_COLOR_COMP);
-			uniqueColor[2] = (colorType)(material->diffuseFront[2]*MAX_COLOR_COMP);
+			const float* diffuse = material->getDiffuseFront();
+			uniqueColor[0] = static_cast<colorType>(diffuse[0]*MAX_COLOR_COMP);
+			uniqueColor[1] = static_cast<colorType>(diffuse[1]*MAX_COLOR_COMP);
+			uniqueColor[2] = static_cast<colorType>(diffuse[2]*MAX_COLOR_COMP);
 			hasUniqueColor = true;
-			material = 0; //we can forget it!
+			material = ccMaterial::CShared(0); //we can forget it!
 		}
 	}
 
@@ -327,7 +328,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			if (material)
 			{
 				assert(material->hasTexture() && mesh->getTexCoordinatesTable());
-				QFileInfo fileInfo(material->getAbsoluteFilename());
+				QFileInfo fileInfo(material->getTextureFilename());
 				QString defaultTextureName = fileInfo.fileName();
 				if (fileInfo.suffix().isNull())
 					defaultTextureName += QString(".png");
@@ -336,7 +337,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 				if (!material->getTexture().mirrored().save(textureFilePath)) //mirrored --> see ccMaterial
 				{
 					ccLog::Warning(QString("[PLY] Failed to save texture in '%1'!").arg(textureFilePath));
-					material = 0;
+					material = ccMaterial::CShared(0);
 				}
 				else
 				{
@@ -1523,19 +1524,18 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			if (!textureFileName.isEmpty())
 			{
 				QString textureFilePath = QFileInfo(filename).absolutePath() + QString('/') + textureFileName;
-				ccMaterial material(textureFileName);
-				if (material.setTexture(textureFilePath))
+				ccMaterial::Shared material(new ccMaterial(textureFileName));
+				if (material->loadAndSetTexture(textureFilePath))
 				{
 					if (mesh->reservePerTriangleTexCoordIndexes() && mesh->reservePerTriangleMtlIndexes())
 					{
-						const QImage texture = material.getTexture();
+						const QImage texture = material->getTexture();
 						ccLog::Print(QString("[PLY][Texture] Successfully loaded texture '%1' (%2x%3 pixels)").arg(textureFileName).arg(texture.width()).arg(texture.height()));
 						//materials
 						ccMaterialSet* materials = new ccMaterialSet("materials");
-						memcpy(material.diffuseFront,ccColor::bright,sizeof(float)*4);
-						memcpy(material.diffuseBack,ccColor::bright,sizeof(float)*4);
-						memcpy(material.specular,ccColor::darker,sizeof(float)*4);
-						memcpy(material.ambient,ccColor::darker,sizeof(float)*4);
+						material->setDiffuse(ccColor::bright);
+						material->setSpecular(ccColor::darker);
+						material->setAmbient(ccColor::darker);
 						materials->push_back(material);
 						mesh->setMaterialSet(materials);
 						mesh->setTexCoordinatesTable(texCoords);

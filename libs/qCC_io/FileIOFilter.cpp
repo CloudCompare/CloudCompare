@@ -153,6 +153,15 @@ void FileIOFilter::Register(Shared filter)
 	s_ioFilters.push_back(filter);
 }
 
+void FileIOFilter::UnregisterAll()
+{
+	for (FilterContainer::iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+	{
+		(*it)->unregister();
+	}
+	s_ioFilters.clear();
+}
+
 FileIOFilter::Shared FileIOFilter::GetFilter(QString fileFilter, bool onImport)
 {
 	if (!fileFilter.isEmpty())

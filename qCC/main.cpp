@@ -188,6 +188,7 @@ int main(int argc, char **argv)
 
 	//release global structures
 	MainWindow::DestroyInstance();
+	FileIOFilter::UnregisterAll();
 
 #ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
 	//for debug purposes

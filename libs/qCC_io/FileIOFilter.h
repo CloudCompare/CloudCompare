@@ -233,6 +233,15 @@ public: //global filters registration mechanism
 	//! Returns the set of all registered filters
 	QCC_IO_LIB_API static const FilterContainer& GetFilters();
 
+	//! Unregisters all filters
+	/** Should be called at the end of the application
+	**/
+	QCC_IO_LIB_API static void UnregisterAll();
+
+	//! Called when the filter is unregistered
+	/** Does nothing by default **/
+	virtual void unregister() {}
+
 };
 
 #endif

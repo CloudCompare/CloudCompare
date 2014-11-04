@@ -181,5 +181,8 @@ int main(int argc, char *argv[])
 
 	int result = a.exec();
 
+	//release global structures
+	FileIOFilter::UnregisterAll();
+
 	return result;
 }

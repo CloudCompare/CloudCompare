@@ -172,8 +172,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			hasTextures = false;
 			for (size_t i=0; i<matCount; ++i)
 			{
-				const ccMaterial& mat = matSet->at(i);
-				if (mat.hasTexture())
+				ccMaterial::CShared mat = matSet->at(i);
+				if (mat->hasTexture())
 				{
 					hasTextures = true;
 					break;
@@ -233,19 +233,23 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 
 		for (size_t i=0; i<matCount; ++i)
 		{
-			const ccMaterial& mat = matSet->at(i);
-			FbxSurfacePhong *lMaterial = FbxSurfacePhong::Create(pScene, qPrintable(mat.name));
+			ccMaterial::CShared mat = matSet->at(i);
+			FbxSurfacePhong *lMaterial = FbxSurfacePhong::Create(pScene, qPrintable(mat->getName()));
 
-			lMaterial->Emissive.Set(FbxDouble3(mat.emission[0],mat.emission[1],mat.emission[2]));
-			lMaterial->Ambient.Set(FbxDouble3(mat.ambient[0],mat.ambient[1],mat.ambient[2]));
-			lMaterial->Diffuse.Set(FbxDouble3(mat.diffuseFront[0],mat.diffuseFront[1],mat.diffuseFront[2]));
-			lMaterial->Specular.Set(FbxDouble3(mat.specular[0],mat.specular[1],mat.specular[2]));
-			lMaterial->Shininess = mat.shininessFront;
+			const float* emission = mat->getEmission();
+			const float* ambient = mat->getAmbient();
+			const float* diffuse = mat->getDiffuseFront();
+			const float* specular = mat->getDiffuseFront();
+			lMaterial->Emissive.Set(FbxDouble3(emission[0],emission[1],emission[2]));
+			lMaterial->Ambient.Set(FbxDouble3(ambient[0],ambient[1],ambient[2]));
+			lMaterial->Diffuse.Set(FbxDouble3(diffuse[0],diffuse[1],diffuse[2]));
+			lMaterial->Specular.Set(FbxDouble3(specular[0],specular[1],specular[2]));
+			lMaterial->Shininess = mat->getShininessFront();
 			lMaterial->ShadingModel.Set("Phong");
 
-			if (hasTextures && mat.hasTexture())
+			if (hasTextures && mat->hasTexture())
 			{
-				QString texFilename = mat.getAbsoluteFilename();
+				QString texFilename = mat->getTextureFilename();
 				
 				//texture has not already been processed
 				if (!texFilenames.contains(texFilename))
@@ -273,7 +277,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 						baseTexName += QString(".png");
 
 					QString absoluteFilename = texDir.absolutePath() + QString("/") + baseTexName;
-					ccLog::PrintDebug(QString("[FBX] Material '%1' texture: %2").arg(mat.name).arg(absoluteFilename));
+					ccLog::PrintDebug(QString("[FBX] Material '%1' texture: %2").arg(mat->getName()).arg(absoluteFilename));
 
 					texFilenames[texFilename] = absoluteFilename;
 				}
@@ -883,24 +887,37 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			bool isPhong = lBaseMaterial->GetClassId().Is(FbxSurfacePhong::ClassId);
 			if (isLambert || isPhong)
 			{
-				ccMaterial mat(lBaseMaterial->GetName());
+				ccMaterial::Shared mat(new ccMaterial(lBaseMaterial->GetName()));
 
 				FbxSurfaceLambert* lLambertMat = static_cast<FbxSurfaceLambert*>(lBaseMaterial);
 			
+				float ambient[4];
+				float diffuse[4];
+				float emission[4];
+				float specular[4];
+
+				FbxSurfacePhong* lPhongMat = isPhong ? static_cast<FbxSurfacePhong*>(lBaseMaterial) : 0;
+
 				for (int k=0; k<3; ++k)
 				{
-					mat.ambient[k]		= static_cast<float>(lLambertMat->Ambient.Get()[k]);
-					mat.diffuseBack[k]	= static_cast<float>(lLambertMat->Diffuse.Get()[k]);
-					mat.diffuseFront[k]	= mat.diffuseBack[k];
-					mat.emission[k]		= static_cast<float>(lLambertMat->Emissive.Get()[k]);
+					ambient[k]		= static_cast<float>(lLambertMat->Ambient.Get()[k]);
+					diffuse[k]	= static_cast<float>(lLambertMat->Diffuse.Get()[k]);
+					emission[k]		= static_cast<float>(lLambertMat->Emissive.Get()[k]);
 
-					if (isPhong)
+					if (lPhongMat)
 					{
-						FbxSurfacePhong* lPhongMat = static_cast<FbxSurfacePhong*>(lBaseMaterial);
-						mat.specular[k]		= static_cast<float>(lPhongMat->Specular.Get()[k]);
-						mat.shininessBack	= static_cast<float>(lPhongMat->Shininess);
-						mat.shininessFront	= mat.shininessBack;
+						specular[k]		= static_cast<float>(lPhongMat->Specular.Get()[k]);
 					}
+				}
+
+				mat->setAmbient(ambient);
+				mat->setDiffuse(diffuse);
+				mat->setEmission(emission);
+				if (isPhong)
+				{
+					mat->setSpecular(specular);
+					assert(lPhongMat);
+					mat->setShininess(static_cast<float>(lPhongMat->Shininess));
 				}
 
 				//import associated texture (if any)
@@ -952,7 +969,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 									ccLog::PrintDebug(QString("[FBX] Texture absolue filename: %1").arg(texAbsoluteFilename));
 									if (texAbsoluteFilename != 0 && texAbsoluteFilename[0] != 0)
 									{
-										if (!mat.loadAndSetTexture(texAbsoluteFilename))
+										if (!mat->loadAndSetTexture(texAbsoluteFilename))
 										{
 											ccLog::Warning(QString("[FBX] Failed to load texture file: %1").arg(texAbsoluteFilename));
 										}

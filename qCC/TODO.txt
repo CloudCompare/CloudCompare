@@ -30,6 +30,7 @@ Big ones:
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 
 Various:
+[*] Handle 'Folded Normal Distribution' in the Compute Stats Params method (for positive scalar fields, e.g. unsigned C2C distances)
 [*] Change Triangle lib by a GPL-compatible library
 [*] Export primitives to a (simple, free) CAD format (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)

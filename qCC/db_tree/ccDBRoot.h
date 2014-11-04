@@ -192,6 +192,7 @@ protected slots:
 	void addEmptyGroup();
 	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
+	void enableBubbleViewMolde();
 
 signals:
 	void selectionChanged();
@@ -275,6 +276,8 @@ protected:
 	QAction* m_alignCameraWithEntity;
 	//! Context menu action: reverse of m_alignCameraWithEntity
 	QAction* m_alignCameraWithEntityReverse;
+	//! Context menu action: enable bubble-view (on a sensor)
+	QAction* m_enableBubbleViewMode;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

@@ -39,6 +39,7 @@
 #include <ccPlane.h>
 #include <ccPolyline.h>
 #include <ccFacet.h>
+#include <ccGBLSensor.h>
 
 //CClib
 #include <CCMiscTools.h>
@@ -100,6 +101,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_addEmptyGroup = new QAction("Add empty group",this);
 	m_alignCameraWithEntity = new QAction("Align camera",this);
 	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)",this);
+	m_enableBubbleViewMode = new QAction("Bubble-view",this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -122,6 +124,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
 	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
 	connect(m_alignCameraWithEntityReverse,		SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
+	connect(m_enableBubbleViewMode,				SIGNAL(triggered()),								this, SLOT(enableBubbleViewMolde()));
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -1663,6 +1666,26 @@ void ccDBRoot::addEmptyGroup()
 	addElement(newGroup);
 }
 
+void ccDBRoot::enableBubbleViewMolde()
+{
+	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
+	QModelIndexList selectedIndexes = qism->selectedIndexes();
+	int selCount = selectedIndexes.size();
+	if (selCount == 0)
+		return;
+
+	for (int i=0; i<selCount; ++i)
+	{
+		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+		if (item &&item->isA(CC_TYPES::GBL_SENSOR))
+		{
+			static_cast<ccGBLSensor*>(item)->applyViewport();
+		}
+	}
+
+	MainWindow::RefreshAllGLWindow();
+}
+
 void ccDBRoot::showContextMenu(const QPoint& menuPos)
 {
 	m_contextMenuPos = menuPos;
@@ -1686,6 +1709,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool hasMoreThan2Children = false;
 			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
+			bool hasExacltyOneGBLSenor = false;
 			for (int i=0; i<selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
@@ -1720,6 +1744,10 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						{
 							hasExactlyOnePlanarEntity = true;
 						}
+						else if (item->isA(CC_TYPES::GBL_SENSOR))
+						{
+							hasExacltyOneGBLSenor = true;
+						}
 					}
 				}
 			}
@@ -1729,6 +1757,10 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_alignCameraWithEntity);
 				menu.addAction(m_alignCameraWithEntityReverse);
 				menu.addSeparator();
+			}
+			if (hasExacltyOneGBLSenor)
+			{
+				menu.addAction(m_enableBubbleViewMode);
 			}
 			menu.addAction(m_gatherInformation);
 			menu.addSeparator();

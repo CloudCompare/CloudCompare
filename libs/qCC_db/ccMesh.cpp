@@ -1853,7 +1853,10 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 
 						//if we don't have any current material, we apply default one
-						(newMatlIndex >= 0 ? (*m_materials)[newMatlIndex] : context.defaultMat)->applyGL(glParams.showNorms,false);
+						if (newMatlIndex >= 0)
+							(*m_materials)[newMatlIndex]->applyGL(glParams.showNorms,false);
+						else
+							context.defaultMat->applyGL(glParams.showNorms,false);
 						glBegin(triangleDisplayType);
 						lasMtlIndex=newMatlIndex;
 					}

@@ -1,10 +1,12 @@
-CloudCompare V2.6
+CloudCompare v2.6
+=================
 
 Homepage: http://www.cloudcompare.org/
 
 [![Build Status](https://travis-ci.org/cloudcompare/trunk.svg)](https://travis-ci.org/cloudcompare/trunk)
 
-== Introduction ==
+Introduction
+------------
 
 CloudCompare is a 3D point cloud (and triangular mesh) processing software.
 It has been originally designed to perform comparison between two 3D points clouds
@@ -14,13 +16,14 @@ performances in this particular function. It was also meant to deal with huge po
 clouds (typically more than 10 millions points, and up to 120 millions with 2 Gb
 of memory).
 
-More: http://en.wikipedia.org/wiki/CloudCompare
+More on CloudCompare [here](http://en.wikipedia.org/wiki/CloudCompare)
 
-== Compilation ==
+Compilation
+-----------
 
 Supported OS: Windows, Linux and Mac OS X
 
-Refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
+Refer to the [wiki](http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
 
 Basically, you have to:
 - clone this repository
@@ -29,10 +32,13 @@ Basically, you have to:
 - launch CMake (from the trunk root)
 - enjoy!
 
+Supporting the project
+----------------------
 
-== Supporting the project ==
-
-If you want to help us, you can make donations via pledgie:
-http://pledgie.com/campaigns/19052
-
+If you want to help us, you can make donations via [pledgie](http://pledgie.com/campaigns/19052)  
 Thanks!
+
+<a href='https://pledgie.com/campaigns/19052'>
+    <img alt='Click here to lend your support to: CloudCompare and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/19052.png?skin_name=chrome' border='0'>
+</a>
+

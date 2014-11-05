@@ -2,6 +2,8 @@ CloudCompare V2.6
 
 Homepage: http://www.cloudcompare.org/
 
+[![Build Status](https://travis-ci.org/cloudcompare/trunk.svg)](https://travis-ci.org/cloudcompare/trunk)
+
 == Introduction ==
 
 CloudCompare is a 3D point cloud (and triangular mesh) processing software.

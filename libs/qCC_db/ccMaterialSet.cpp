@@ -417,23 +417,15 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (count == 0)
 		return true;
 
-	//Read each material
-	try
+	//Load each material
 	{
-		resize(count);
-	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
-	{
-		return MemoryError();
-	}
-
-	//load materials
-	for (ccMaterialSet::iterator it = begin(); it!=end(); ++it)
-	{
-		ccMaterial::Shared mtl(new ccMaterial);
-		if (!mtl->fromFile(in,dataVersion,flags))
-			return false;
-		addMaterial(mtl);
+		for (uint32_t i=0; i<count; ++i)
+		{
+			ccMaterial::Shared mtl(new ccMaterial);
+			if (!mtl->fromFile(in,dataVersion,flags))
+				return false;
+			addMaterial(mtl);
+		}
 	}
 
 	if (dataVersion >= 37)

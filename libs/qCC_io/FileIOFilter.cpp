@@ -45,8 +45,8 @@
 #include "DepthMapFileFilter.h"
 #include "RasterGridFilter.h"
 #include "ImageFileFilter.h"
-//#include "PovFilter.h"
 #include "DxfFilter.h"
+#include "ShpFilter.h"
 
 //Qt
 #include <QFileInfo>
@@ -88,6 +88,9 @@ void FileIOFilter::InitInternalFilters()
 #endif
 #ifdef CC_DXF_SUPPORT
 	Register(Shared(new DxfFilter()));
+#endif
+#ifdef CC_SHP_SUPPORT
+	Register(Shared(new ShpFilter()));
 #endif
 #ifdef CC_X3D_SUPPORT
 	Register(Shared(new X3DFilter()));

@@ -7544,6 +7544,7 @@ void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 }
 
 static ccGLWindow* s_pickingWindow = 0;
+static ccGLWindow::PICKING_MODE s_previousPickingMode = ccGLWindow::NO_PICKING;
 void MainWindow::doPickRotationCenter()
 {
 	if (s_pickingWindow)
@@ -7607,6 +7608,7 @@ void MainWindow::doPickRotationCenter()
 		m_pprDlg->pause(true);
 
 	connect(win, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
+	s_previousPickingMode = win->getPickingMode();
 	win->setPickingMode(ccGLWindow::POINT_PICKING);
 	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
 	win->redraw();
@@ -7629,24 +7631,35 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 			const CCVector3* P = cloud->getPoint(pointIndex);
 			if (P)
 			{
-				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
-				if (!params.perspectiveView || params.objectCenteredView)
+				CCVector3d newPivot = CCVector3d::fromArray(P->u);
+				//specific case: transformation tool is enabled
+				if (m_transTool && m_transTool->started())
 				{
-					CCVector3d newPivot = CCVector3d::fromArray(P->u);
-					//apply current GL transformation (if any)
-					cloud->getGLTransformation().apply(newPivot);
-					//compute the equivalent camera center
-					CCVector3d dP = params.pivotPoint - newPivot;
-					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
-					CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
-					s_pickingWindow->setCameraPos(newCameraPos);
-					s_pickingWindow->setPivotPoint(newPivot);
-
+					m_transTool->setRotationCenter(newPivot);
 					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
 					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
+					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center for interactive transformation").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				}
-				s_pickingWindow->redraw();
+				else
+				{
+					const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
+					if (!params.perspectiveView || params.objectCenteredView)
+					{
+						//apply current GL transformation (if any)
+						cloud->getGLTransformation().apply(newPivot);
+						//compute the equivalent camera center
+						CCVector3d dP = params.pivotPoint - newPivot;
+						CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
+						CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
+						s_pickingWindow->setCameraPos(newCameraPos);
+						s_pickingWindow->setPivotPoint(newPivot);
+
+						const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
+						s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
+						s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
+					}
+					s_pickingWindow->redraw();
+				}
 			}
 		}
 	}
@@ -7659,7 +7672,8 @@ void MainWindow::cancelPickRotationCenter()
 	if (s_pickingWindow)
 	{
 		disconnect(s_pickingWindow, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
-		s_pickingWindow->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		//restore previous picking mode
+		s_pickingWindow->setPickingMode(s_previousPickingMode);
 		s_pickingWindow = 0;
 	}
 

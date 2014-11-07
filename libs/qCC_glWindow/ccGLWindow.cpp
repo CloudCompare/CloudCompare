@@ -2547,7 +2547,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 					acceptEvent = true;
 				}
 				//otheriwse perform OpenGL picking
-				else if (m_pickingMode != NO_PICKING && m_interactionMode != TRANSFORM_ENTITY)
+				else if (m_pickingMode != NO_PICKING)
 				{
 					PICKING_MODE pickingMode = m_pickingMode;
 
@@ -2626,8 +2626,6 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 		*subID = -1;
 	if (!m_globalDBRoot && !m_winDBRoot)
 		return -1;
-
-	assert(m_interactionMode != TRANSFORM_ENTITY);
 
 	//setup rendering context
 	CC_DRAW_CONTEXT context;

@@ -57,6 +57,9 @@ public:
 	//! Returns the number of vald entities (see addEntity)
 	unsigned getNumberOfValidEntities();
 
+	//! Sets the rotation center
+	void setRotationCenter(CCVector3d& center);
+
 protected slots:
 
 	//! Applies transformation to selected entities

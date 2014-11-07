@@ -62,6 +62,9 @@ public:
 	**/
 	void addOverridenShortcut(Qt::Key key);
 
+	//! Returns whether the tool is currently started or not
+	bool started() const { return m_processing; }
+
 signals:
 
 	//! Signal emitted when process is finished

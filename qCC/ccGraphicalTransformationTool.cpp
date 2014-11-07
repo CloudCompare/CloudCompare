@@ -284,6 +284,14 @@ void ccGraphicalTransformationTool::reset()
 	updateAllGLTransformations();
 }
 
+void ccGraphicalTransformationTool::setRotationCenter(CCVector3d& center)
+{
+	m_translation += (m_rotationCenter-center) - m_rotation*(m_rotationCenter-center);
+	m_rotationCenter = center;
+
+	updateAllGLTransformations();
+}
+
 void ccGraphicalTransformationTool::updateAllGLTransformations()
 {
 	assert(m_toTransform);

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>242</width>
+    <width>251</width>
     <height>26</height>
    </rect>
   </property>
@@ -20,7 +20,19 @@
    <string>Segmentation</string>
   </property>
   <layout class="QHBoxLayout">
-   <property name="margin">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
@@ -43,6 +55,23 @@
      </property>
      <property name="checked">
       <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="loadSaveToolButton">
+     <property name="toolTip">
+      <string>Load / save segmentation polyline</string>
+     </property>
+     <property name="text">
+      <string>load/save segmentation polyline</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
+     </property>
+     <property name="popupMode">
+      <enum>QToolButton::MenuButtonPopup</enum>
      </property>
     </widget>
    </item>
@@ -188,6 +217,30 @@
    </property>
    <property name="toolTip">
     <string>Activaites polyline selection</string>
+   </property>
+  </action>
+  <action name="actionUseExistingPolyline">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
+   </property>
+   <property name="text">
+    <string>Use existing polyline</string>
+   </property>
+   <property name="toolTip">
+    <string>Import polyline from DB for segmentation</string>
+   </property>
+  </action>
+  <action name="actionExportSegmentationPolyline">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export segmentation polyline</string>
+   </property>
+   <property name="toolTip">
+    <string>Export segmentation polyline as new entity</string>
    </property>
   </action>
  </widget>

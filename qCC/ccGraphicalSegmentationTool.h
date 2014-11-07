@@ -89,6 +89,8 @@ protected slots:
 	void pauseSegmentationMode(bool);
 	void doSetPolylineSelection();
 	void doSetRectangularSelection();
+	void doActionUseExistingPolyline();
+	void doExportSegmentationPolyline();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);

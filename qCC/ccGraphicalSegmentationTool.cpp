@@ -18,7 +18,8 @@
 #include "ccGraphicalSegmentationTool.h"
 
 //Local
-#include "ccGLWindow.h"
+#include "mainwindow.h"
+#include "ccEntityPickerDlg.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -32,8 +33,13 @@
 #include <ccMesh.h>
 #include <ccHObjectCaster.h>
 
+//qCC_gl
+#include <ccGLWindow.h>
+
 //Qt
 #include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
 
 //System
 #include <assert.h>
@@ -54,26 +60,29 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(inButton,				SIGNAL(clicked()),		this,	SLOT(segmentIn()));
-	connect(outButton,				SIGNAL(clicked()),		this,	SLOT(segmentOut()));
-	connect(razButton,				SIGNAL(clicked()),		this,	SLOT(reset()));
-	connect(validButton,			SIGNAL(clicked()),		this,	SLOT(apply()));
-	connect(validAndDeleteButton,	SIGNAL(clicked()),		this,	SLOT(applyAndDelete()));
-	connect(cancelButton,			SIGNAL(clicked()),		this,	SLOT(cancel()));
-	connect(pauseButton,			SIGNAL(toggled(bool)),	this,	SLOT(pauseSegmentationMode(bool)));
+	connect(inButton,							SIGNAL(clicked()),		this,	SLOT(segmentIn()));
+	connect(outButton,							SIGNAL(clicked()),		this,	SLOT(segmentOut()));
+	connect(razButton,							SIGNAL(clicked()),		this,	SLOT(reset()));
+	connect(validButton,						SIGNAL(clicked()),		this,	SLOT(apply()));
+	connect(validAndDeleteButton,				SIGNAL(clicked()),		this,	SLOT(applyAndDelete()));
+	connect(cancelButton,						SIGNAL(clicked()),		this,	SLOT(cancel()));
+	connect(pauseButton,						SIGNAL(toggled(bool)),	this,	SLOT(pauseSegmentationMode(bool)));
 
 	//selection modes
-	connect(actionSetPolylineSelection,		SIGNAL(triggered()),	this,	SLOT(doSetPolylineSelection()));
-	connect(actionSetRectangularSelection,	SIGNAL(triggered()),	this,	SLOT(doSetRectangularSelection()));
+	connect(actionSetPolylineSelection,			SIGNAL(triggered()),	this,	SLOT(doSetPolylineSelection()));
+	connect(actionSetRectangularSelection,		SIGNAL(triggered()),	this,	SLOT(doSetRectangularSelection()));
+	//import/export options
+	connect(actionUseExistingPolyline,			SIGNAL(triggered()),	this,	SLOT(doActionUseExistingPolyline()));
+	connect(actionExportSegmentationPolyline,	SIGNAL(triggered()),	this,	SLOT(doExportSegmentationPolyline()));
 
 	//add shortcuts
-	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
+	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
 	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
 	addOverridenShortcut(Qt::Key_Delete); //delete key for the "apply and delete" button
-	addOverridenShortcut(Qt::Key_Tab); //tab key to switch between rectangular and polygonal selection modes
-	addOverridenShortcut(Qt::Key_I); //'I' key for the "segment in" button
-	addOverridenShortcut(Qt::Key_O); //'O' key for the "segment out" button
+	addOverridenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
+	addOverridenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
+	addOverridenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
 	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
 
 	QMenu* selectionModeMenu = new QMenu(this);
@@ -82,7 +91,12 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	selectionModelButton->setDefaultAction(actionSetPolylineSelection);
 	selectionModelButton->setMenu(selectionModeMenu);
 
-	m_polyVertices = new ccPointCloud();
+	QMenu* importExportMenu = new QMenu(this);
+	importExportMenu->addAction(actionUseExistingPolyline);
+	importExportMenu->addAction(actionExportSegmentationPolyline);
+	loadSaveToolButton->setMenu(importExportMenu);
+
+	m_polyVertices = new ccPointCloud("vertices");
 	m_segmentationPoly = new ccPolyline(m_polyVertices);
 	m_segmentationPoly->setForeground(true);
 	m_segmentationPoly->setColor(ccColor::green);
@@ -259,6 +273,7 @@ void ccGraphicalSegmentationTool::reset()
 	razButton->setEnabled(false);
 	validButton->setEnabled(false);
 	validAndDeleteButton->setEnabled(false);
+	loadSaveToolButton->setDefaultAction(actionUseExistingPolyline);
 }
 
 bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
@@ -375,7 +390,9 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	unsigned sz = m_polyVertices->size();
 
 	//new point
-	CCVector3 P((PointCoordinateType)x,(PointCoordinateType)y,(PointCoordinateType)0);
+	CCVector3 P(static_cast<PointCoordinateType>(x),
+				static_cast<PointCoordinateType>(y),
+				0);
 
 	if (m_state & RECTANGLE)
 	{
@@ -520,12 +537,12 @@ void ccGraphicalSegmentationTool::closeRectangle()
 void ccGraphicalSegmentationTool::closePolyLine(int, int)
 {
 	//only for polyline in RUNNING mode
-	if ((m_state & POLYLINE)==0 || (m_state & RUNNING)==0)
+	if ((m_state & POLYLINE) == 0 || (m_state & RUNNING) == 0)
 		return;
 
 	assert(m_segmentationPoly);
 	unsigned sz = m_segmentationPoly->size();
-	if (sz<4)
+	if (sz < 4)
 	{
 		m_segmentationPoly->clear();
 		m_polyVertices->clear();
@@ -539,6 +556,9 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 
 	//stop
 	m_state &= (~RUNNING);
+
+	//set the default import/export icon to 'export' mode
+	loadSaveToolButton->setDefaultAction(actionExportSegmentationPolyline);
 
 	if (m_associatedWin)
 		m_associatedWin->updateGL();
@@ -628,7 +648,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	if (state)
 	{
 		m_state = PAUSED;
-		if (m_polyVertices->size()>0)
+		if (m_polyVertices->size() != 0)
 		{
 			m_segmentationPoly->clear();
 			m_polyVertices->clear();
@@ -666,8 +686,7 @@ void ccGraphicalSegmentationTool::doSetPolylineSelection()
 	if (!m_rectangularSelection)
 		return;
 
-	QIcon icon(QString::fromUtf8(":/CC/images/smallPolygonSelect.png"));
-	selectionModelButton->setIcon(icon);
+	selectionModelButton->setDefaultAction(actionSetPolylineSelection);
 
 	m_rectangularSelection=false;
 	if (m_state != PAUSED)
@@ -686,8 +705,7 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 	if (m_rectangularSelection)
 		return;
 
-	QIcon icon(QString::fromUtf8(":/CC/images/smallRectangleSelect.png"));
-	selectionModelButton->setIcon(icon);
+	selectionModelButton->setDefaultAction(actionSetRectangularSelection);
 
 	m_rectangularSelection=true;
 	if (m_state != PAUSED)
@@ -699,6 +717,158 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
 	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+}
+
+void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
+{
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow)
+	{
+		ccHObject* root = mainWindow->dbRootObject();
+		ccHObject::Container polylines;
+		if (root)
+		{
+			root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
+		}
+
+		if (!polylines.empty())
+		{
+			ccEntityPickerDlg epDlg(polylines,0,this);
+			if (!epDlg.exec())
+				return;
+
+			int index = epDlg.getSelectedIndex();
+			assert(index >= 0 && index < static_cast<int>(polylines.size()));
+			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
+			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
+			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			bool mode3D = !poly->is2DMode();
+
+			//viewing parameters (for conversion from 3D to 2D)
+			const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
+			const double* MP = m_associatedWin->getProjectionMatd(); //projMat
+			const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
+			const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
+			int VP[4];
+			m_associatedWin->getViewportArray(VP);
+
+			//force polygonal selection mode
+			doSetPolylineSelection();
+			m_segmentationPoly->clear();
+			m_polyVertices->clear();
+
+			//duplicate polyline 'a minima' (only points and indexes + closed state)
+			if (	m_polyVertices->reserve(vertices->size())
+				&&	m_segmentationPoly->reserve(poly->size()))
+			{
+				for (unsigned i=0; i<vertices->size(); ++i)
+				{
+					CCVector3 P = *vertices->getPoint(i);
+					if (mode3D)
+					{
+						GLdouble xp,yp,zp;
+						gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
+
+						P.x = static_cast<PointCoordinateType>(xp-half_w);
+						P.y = static_cast<PointCoordinateType>(yp-half_h);
+						P.z = 0;
+					}
+					m_polyVertices->addPoint(P);
+				}
+				for (unsigned j=0; j<poly->size(); ++j)
+					m_segmentationPoly->addPointIndex(poly->getPointGlobalIndex(j));
+				
+				m_segmentationPoly->setClosed(poly->isClosed());
+				if (m_segmentationPoly->isClosed())
+				{
+					//stop
+					m_state &= (~RUNNING);
+				}
+
+				if (m_associatedWin)
+					m_associatedWin->updateGL();
+			}
+			else
+			{
+				ccLog::Error("Not enough memory!");
+			}
+		}
+		else
+		{
+			ccLog::Error("No polyline in DB!");
+		}
+	}
+}
+
+static unsigned s_polylineExportCount = 0;
+void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
+{
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow && m_segmentationPoly)
+	{
+		QMessageBox messageBox(0);
+		
+		messageBox.setWindowTitle("Choose export type");
+		messageBox.setText("Export polyline in:\n - 2D (with coordinates relative to the screen)\n - 3D (with coordinates relative to the segmented entities)");
+		QPushButton* button2D = new QPushButton("2D");
+		QPushButton* button3D = new QPushButton("3D");
+		messageBox.addButton(button2D,QMessageBox::AcceptRole);
+		messageBox.addButton(button3D,QMessageBox::AcceptRole);
+		messageBox.addButton(QMessageBox::Cancel);
+		messageBox.setDefaultButton(button3D);
+		messageBox.exec();
+		if (messageBox.clickedButton() == messageBox.button(QMessageBox::Cancel))
+		{
+			//process cancelled by user
+			return;
+		}
+
+		ccPolyline* poly = new ccPolyline(*m_segmentationPoly);
+
+		//if we export the polyline in 3D, we must project its vertices
+		bool mode2D = (messageBox.clickedButton() == button2D);
+		if (!mode2D)
+		{
+			//get current display parameters
+			const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
+			const double* MP = m_associatedWin->getProjectionMatd(); //projMat
+			const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
+			const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
+			int VP[4];
+			m_associatedWin->getViewportArray(VP);
+
+			//project the 2D polyline in 3D
+			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			ccPointCloud* verticesPC = dynamic_cast<ccPointCloud*>(vertices);
+			if (verticesPC)
+			{
+				for (unsigned i=0; i<vertices->size(); ++i)
+				{
+					CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
+					GLdouble xp,yp,zp;
+					gluUnProject(half_w+Pscreen->x,half_h+Pscreen->y,0/*Pscreen->z*/,MM,MP,VP,&xp,&yp,&zp);
+					Pscreen->x = static_cast<PointCoordinateType>(xp);
+					Pscreen->y = static_cast<PointCoordinateType>(yp);
+					Pscreen->z = static_cast<PointCoordinateType>(zp);
+				}
+				verticesPC->invalidateBoundingBox();
+			}
+			else
+			{
+				assert(false);
+				ccLog::Warning("[Segmentation] Failed to convert 2D polyline to 3D! (internal inconsistency)");
+				mode2D = false;
+			}
+		}
+		
+		poly->setName(QString("Segmentation polyline #%1").arg(++s_polylineExportCount));
+		poly->setEnabled(false); //we don't want it to appear while the segmentation mode is enabled! (anyway it's 2D only...)
+		poly->set2DMode(mode2D);
+		poly->setColor(ccColor::yellow); //we use a different color so as to differentiate them from the active polyline!
+
+		mainWindow->addToDB(poly);
+		ccLog::Print(QString("[Segmentation] Polyline exported (%1 vertices)").arg(poly->size()));
+	}
 }
 
 void ccGraphicalSegmentationTool::apply()

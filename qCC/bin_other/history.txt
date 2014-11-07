@@ -1,6 +1,12 @@
 *** CloudCompare versions history ***
 
 v2.6.X ??/??/2014
+- Enhancements:
+	- Interactive Segmentation tool: the segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)
+		* either in 2D (i.e. the coordinates are relative to the screen and the polyline will appear exactly
+			as the same position on the screen if imported later)
+		- or in 3D (i.e. the coordinates are relative to the segmented entities, and the polyline will appear
+			in the same position/orientaiton relatively to the entities if imported later)
 - Bug fix:
 	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1
 		(i.e. repetitive textures)

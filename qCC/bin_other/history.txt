@@ -3,7 +3,7 @@
 v2.6.X ??/??/2014
 - New features:
 	* SHP file I/O filter
-		- early version: only supports polylines (input/output) and clouds (output) for now
+		- supports polylines (input/output) and clouds (input/output) for now
 
 - Enhancements:
 	* Interactive Segmentation tool: the segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)

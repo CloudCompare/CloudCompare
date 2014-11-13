@@ -22,8 +22,10 @@ before_script:
       -DINSTALL_QPOISSON_RECON_PLUGIN=ON \
       -DINSTALL_QEDL_PLUGIN=ON \
       -DINSTALL_QSRA_PLUGIN=ON \
-      -DINSTALL_QSSAO_PLUGIN=ON ..
+      -DINSTALL_QSSAO_PLUGIN=ON \
       -DOPTION_USE_GDAL=ON \
+      -DOPTION_USE_SHLIB=ON \ 
+      ..
     # For now, we do not use libfreenect, liblas and dxflib 
     # since the versions of these libs in precise are too old to link with CC
 

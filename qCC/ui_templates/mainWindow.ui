@@ -1201,10 +1201,10 @@
     <string>Filter By Value</string>
    </property>
    <property name="toolTip">
-    <string>Filter ponts by value</string>
+    <string>Filter points by value</string>
    </property>
    <property name="statusTip">
-    <string>Filter ponts by value</string>
+    <string>Filter points by value</string>
    </property>
   </action>
   <action name="actionGaussianFilter">

@@ -19,6 +19,7 @@ v2.6.X ??/??/2014
 		(i.e. repetitive textures)
 	- In OBJ files (.mtl) material names containing space characters were not correctly handled by CC
 	- when merging meshes with similar material names, 'funny things' could happen
+	- option to save multiple clouds in a group as multiple ASCII files restored
 
 v2.6.0 10/24/2014
 - New methods:

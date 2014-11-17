@@ -69,8 +69,8 @@ bool AsciiFilter::canLoadExtension(QString upperCaseExt) const
 
 bool AsciiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
-	//only one cloud per file
-	if (type == CC_TYPES::POINT_CLOUD)
+	if (	type == CC_TYPES::POINT_CLOUD			//only one cloud per file
+		||	type == CC_TYPES::HIERARCHY_OBJECT )	//but we can also save a group (each cloud inside will be saved as a separated file)
 	{
 		multiple = false;
 		exclusive = true;

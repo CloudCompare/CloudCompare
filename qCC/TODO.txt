@@ -30,7 +30,10 @@ Big ones:
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 
 Various:
-[*] Let the user change the rotation center while in 'interactive transformation' mode (http://www.danielgm.net/cc/forum/viewtopic.php?t=1036)
+[*] Selection of planar area based on region growing would be nice (http://www.cloudcompare.org/forum/viewtopic.php?t=1046)
+[*] Create a camera object at the current position of the OpenGL camera
+[*] Set the rotation center with a point picked on a mesh and not only in a cloud
+[*] Add a 'two-windows' mode to the point-pair based alignment tool (http://cloudcompare.org/forum/viewtopic.php?t=1043)
 [*] Handle 'Folded Normal Distribution' in the Compute Stats Params method (for positive scalar fields, e.g. unsigned C2C distances)
 [*] Change Triangle lib by a GPL-compatible library
 [*] Export primitives to a (simple, free) CAD format (http://www.cloudcompare.org/forum/viewtopic.php?t=573)

@@ -2510,7 +2510,6 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 				removeFromOwnDB(m_rectPickingPoly);
 				m_rectPickingPoly = 0;
-				delete vertices;
 				vertices = 0;
 
 				startPicking(ENTITY_RECT_PICKING, pickX+width()/2, height()/2-pickY, pickW, pickH);

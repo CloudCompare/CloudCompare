@@ -30,6 +30,7 @@ Big ones:
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 
 Various:
+[*] Add a filter to the DB tree (http://www.danielgm.net/cc/forum/viewtopic.php?t=1055)
 [*] Selection of planar area based on region growing would be nice (http://www.cloudcompare.org/forum/viewtopic.php?t=1046)
 [*] Create a camera object at the current position of the OpenGL camera
 [*] Set the rotation center with a point picked on a mesh and not only in a cloud

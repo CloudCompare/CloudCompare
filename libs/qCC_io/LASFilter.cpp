@@ -788,7 +788,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							subFieldCount = 3;
 							data_type -= 20;
 						}
-						else if (evlrs[i].data_type > 20)
+						else if (evlrs[i].data_type > 10)
 						{
 							subFieldCount = 2;
 							data_type -= 10;

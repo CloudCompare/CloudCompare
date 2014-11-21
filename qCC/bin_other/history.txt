@@ -15,6 +15,7 @@ v2.6.X ??/??/2014
 		- the rotation center can now be modified with the 'Pick rotation center' tool (reticle icon in the left toolbar)
 
 - Bug fix:
+	- Delaunay 2D1/2 crashed on Windows 8
 	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1
 		(i.e. repetitive textures)
 	- In OBJ files (.mtl) material names containing space characters were not correctly handled by CC

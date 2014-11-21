@@ -23,6 +23,8 @@
 
 //qCC_db
 #include <ccGenericGLDisplay.h>
+#include <ccPointCloud.h>
+#include <ccHObjectCaster.h>
 
 //Qt
 #include <QPushButton>
@@ -179,6 +181,9 @@ void ccColorLevelsDlg::onApply()
 			||	maxOutputSpinBox->value() != 255
 			) )
 	{
+		//update display
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_cloud);
+
 		unsigned pointCount = m_cloud->size();
 		int qIn = s_inputLevels[1] - s_inputLevels[0];
 		int pOut = s_outputLevels[1] - s_outputLevels[0];
@@ -203,7 +208,17 @@ void ccColorLevelsDlg::onApply()
 					newRgb[c] = rgb[c];
 				}
 			}
-			memcpy(const_cast<colorType*>(rgb),newRgb,sizeof(colorType)*3);
+
+			//set the new color
+			if (pc)
+			{
+				pc->setPointColor(i,newRgb);
+			}
+			else
+			{
+				//DGM FIXME: dirty!
+				memcpy(const_cast<colorType*>(rgb),newRgb,sizeof(colorType)*3);
+			}
 		}
 
 		//update display

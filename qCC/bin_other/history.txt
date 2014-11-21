@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.6.X ??/??/2014
+v2.6.1.beta 11/21/2014
 - New features:
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
@@ -23,6 +23,8 @@ v2.6.X ??/??/2014
 	- option to save multiple clouds in a group as multiple ASCII files restored
 	- CC would crash when selecting multiple entities in the 3D view (ALT + left mouse click to define
 		a rectangular region)
+	- the 'Edit > Colors > Levels' was not updating the VBO display when changing colors (so the user couldn't see
+		any change on screen while the RGB colors were actually changed!)
 
 v2.6.0 10/24/2014
 - New methods:

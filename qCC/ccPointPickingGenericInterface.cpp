@@ -37,12 +37,12 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 	//if the dialog is already linked to a window, we must disconnect the 'point picked' signal
 	if (oldWin && win != oldWin)
 	{
-		disconnect(oldWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(handlePickedPoint(int, unsigned, int, int)));
+		disconnect(oldWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(handlePickedItem(int, unsigned, int, int)));
 	}
 	//then we can connect the new window 'point picked' signal
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(handlePickedPoint(int, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(handlePickedItem(int, unsigned, int, int)));
 	}
 
 	return true;
@@ -80,30 +80,45 @@ void ccPointPickingGenericInterface::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
-void ccPointPickingGenericInterface::handlePickedPoint(int cloudID, unsigned pointIndex, int x, int y)
+void ccPointPickingGenericInterface::handlePickedItem(int entityID, unsigned itemIdx, int x, int y)
 {
 	if (!m_processing)
 		return;
 
 	ccPointCloud* cloud = 0;
 
-	ccHObject* obj = MainWindow::TheInstance()->db()->find(cloudID);
-	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
-		cloud = static_cast<ccPointCloud*>(obj);
-
-	if (!cloud)
-	{
-		ccLog::Warning("[Point picking] Picked point is not in pickable entities DB?!");
+	ccHObject* obj = MainWindow::TheInstance()->db()->find(entityID);
+	if (!obj)
 		return;
-	}
-
-	const CCVector3* P = cloud->getPoint(pointIndex);
-	if (P)
+	
+	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		processPickedPoint(cloud, pointIndex, x, y);
+		cloud = static_cast<ccPointCloud*>(obj);
+		if (!cloud)
+		{
+			assert(false);
+			ccLog::Warning("[Item picking] Picked point is not in pickable entities DB?!");
+			return;
+		}
+
+		const CCVector3* P = cloud->getPoint(itemIdx);
+		if (P)
+		{
+			processPickedPoint(cloud, itemIdx, x, y);
+		}
+		else
+		{
+			ccLog::Warning("[Item picking] Invalid point index!");
+		}
+	}
+	else if (obj->isKindOf(CC_TYPES::MESH))
+	{
+		//NOT HANDLED: 'POINT_PICKING' mode only for now
+		assert(false);
 	}
 	else
 	{
-		ccLog::Warning("[Point picking] Invalid point index!");
+		//unhandled entity
+		assert(false);
 	}
 }

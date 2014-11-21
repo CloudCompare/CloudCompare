@@ -23,6 +23,7 @@
 //qCC_db
 #include <ccGLUtils.h>
 #include <ccHObjectCaster.h>
+#include <ccGenericMesh.h>
 
 //CCLib
 #include <CCConst.h>
@@ -225,12 +226,12 @@ void ccCameraParamEditDlg::pickPointAsPivot()
 {
 	if (m_associatedWin)
 	{
-		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
-		connect(m_associatedWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
+		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
+		connect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedItem(int, unsigned, int, int)));
 	}
 }
 
-void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointIndex, int, int)
+void ccCameraParamEditDlg::processPickedItem(int entityID, unsigned itemIndex, int x, int y)
 {
 	if (!m_associatedWin)
 		return;
@@ -238,21 +239,44 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 	ccHObject* obj = 0;
 	ccHObject* db = m_associatedWin->getSceneDB();
 	if (db)
-		obj = db->find(cloudUniqueID);
-	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
+		obj = db->find(entityID);
+	if (obj)
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
-		const CCVector3* P = cloud->getPoint(pointIndex);
-
-		if (P)
+		CCVector3 P;
+		if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
-			m_associatedWin->setPivotPoint(CCVector3d::fromArray(P->u));
-			m_associatedWin->redraw();
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+			if (!cloud)
+			{
+				assert(false);
+				return;
+			}
+			P = *cloud->getPoint(itemIndex);
 		}
+		else if (obj->isKindOf(CC_TYPES::MESH))
+		{
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+			if (!mesh)
+			{
+				assert(false);
+				return;
+			}
+			CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
+			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
+		}
+		else
+		{
+			//unhandled entity
+			assert(false);
+			return;
+		}
+
+		m_associatedWin->setPivotPoint(CCVector3d::fromArray(P.u));
+		m_associatedWin->redraw();
 	}
 
 	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-	disconnect(m_associatedWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
+	disconnect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedItem(int, unsigned, int, int)));
 }
 
 void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)

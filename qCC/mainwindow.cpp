@@ -6676,36 +6676,28 @@ void MainWindow::activateRegisterPointPairTool()
 		return;
 	}
 
-	bool lockedVertices1 = false;
-	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0],&lockedVertices1);
-	bool lockedVertices2 = false;
-	ccGenericPointCloud* cloud2 = (m_selectedEntities.size()>1 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1],&lockedVertices2) : 0);
-	if (!cloud1 || (m_selectedEntities.size()>1 && !cloud2))
+	ccHObject* aligned = m_selectedEntities[0];
+	ccHObject* reference = m_selectedEntities.size() > 1 ? m_selectedEntities[1] : 0;
+
+	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(aligned);
+	ccGenericPointCloud* cloud2 = (reference ? ccHObjectCaster::ToGenericPointCloud(reference) : 0);
+	if (!cloud1 || (m_selectedEntities.size() > 1 && !cloud2))
 	{
 		ccConsole::Error("Select point clouds or meshes only!");
 		return;
 	}
-	if (lockedVertices1 || lockedVertices2)
+	
+	//if we have 2 entities, we must ask the user which one is the 'aligned' one and which one is the 'reference' one
+	if (reference)
 	{
-		DisplayLockedVerticesWarning(lockedVertices1 ? m_selectedEntities[0]->getName() : m_selectedEntities[1]->getName(),true);
-		//ccConsole::Error("At least one vertex set is locked (you should select the 'vertices' entity directly!)");
-		return;
-	}
-
-	ccGenericPointCloud* aligned = cloud1;
-	ccGenericPointCloud* reference = 0;
-
-	//if we have 2 clouds, we must ask the user which one is the 'aligned' one and which one is the 'reference' one
-	if (cloud2)
-	{
-		ccOrderChoiceDlg dlg(	cloud1, "Aligned",
-								cloud2, "Reference",
+		ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Aligned",
+								m_selectedEntities[1], "Reference",
 								this );
 		if (!dlg.exec())
 			return;
 
-		aligned = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
-		reference = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
+		aligned = dlg.getFirstEntity();
+		reference = dlg.getSecondEntity();
 	}
 
 	//we disable all windows
@@ -7607,9 +7599,9 @@ void MainWindow::doPickRotationCenter()
 	if (m_pprDlg)
 		m_pprDlg->pause(true);
 
-	connect(win, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
+	connect(win, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
 	s_previousPickingMode = win->getPickingMode();
-	win->setPickingMode(ccGLWindow::POINT_PICKING);
+	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
 	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
 	win->redraw();
 	s_pickingWindow = win;
@@ -7617,7 +7609,7 @@ void MainWindow::doPickRotationCenter()
 	freezeUI(true);
 }
 
-void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIndex, int, int)
+void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned itemIndex, int x, int y)
 {
 	if (s_pickingWindow)
 	{
@@ -7625,42 +7617,66 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 		ccHObject* db = s_pickingWindow->getSceneDB();
 		if (db)
 			obj = db->find(cloudUniqueID);
-		if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
+		if (obj)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
-			const CCVector3* P = cloud->getPoint(pointIndex);
-			if (P)
+			CCVector3 P;
+			if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				CCVector3d newPivot = CCVector3d::fromArray(P->u);
-				//specific case: transformation tool is enabled
-				if (m_transTool && m_transTool->started())
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+				if (!cloud)
 				{
-					m_transTool->setRotationCenter(newPivot);
+					assert(false);
+					return;
+				}
+				P = *cloud->getPoint(itemIndex);
+			}
+			else if (obj->isKindOf(CC_TYPES::MESH))
+			{
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+				if (!mesh)
+				{
+					assert(false);
+					return;
+				}
+				CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
+				P = s_pickingWindow->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
+			}
+			else
+			{
+				//unhandled entity
+				assert(false);
+				return;
+			}
+
+			CCVector3d newPivot = CCVector3d::fromArray(P.u);
+			//specific case: transformation tool is enabled
+			if (m_transTool && m_transTool->started())
+			{
+				m_transTool->setRotationCenter(newPivot);
+				const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
+				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center for interactive transformation").arg(P.x,0,'f',precision).arg(P.y,0,'f',precision).arg(P.z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
+			}
+			else
+			{
+				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
+				if (!params.perspectiveView || params.objectCenteredView)
+				{
+					//apply current GL transformation (if any)
+					obj->getGLTransformation().apply(newPivot);
+					//compute the equivalent camera center
+					CCVector3d dP = params.pivotPoint - newPivot;
+					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
+					CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
+					s_pickingWindow->setCameraPos(newCameraPos);
+					s_pickingWindow->setPivotPoint(newPivot);
+
 					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
 					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center for interactive transformation").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
-				}
-				else
-				{
-					const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
-					if (!params.perspectiveView || params.objectCenteredView)
-					{
-						//apply current GL transformation (if any)
-						cloud->getGLTransformation().apply(newPivot);
-						//compute the equivalent camera center
-						CCVector3d dP = params.pivotPoint - newPivot;
-						CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
-						CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
-						s_pickingWindow->setCameraPos(newCameraPos);
-						s_pickingWindow->setPivotPoint(newPivot);
-
-						const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-						s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-						s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
-					}
-					s_pickingWindow->redraw();
+					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P.x,0,'f',precision).arg(P.y,0,'f',precision).arg(P.z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				}
 			}
+			s_pickingWindow->redraw();
 		}
 	}
 
@@ -7671,7 +7687,7 @@ void MainWindow::cancelPickRotationCenter()
 {
 	if (s_pickingWindow)
 	{
-		disconnect(s_pickingWindow, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
+		disconnect(s_pickingWindow, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
 		//restore previous picking mode
 		s_pickingWindow->setPickingMode(s_previousPickingMode);
 		s_pickingWindow = 0;

@@ -2019,6 +2019,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	case ENTITY_PICKING:
 		setCursor(QCursor(Qt::ArrowCursor));
 		break;
+	case POINT_OR_TRIANGLE_PICKING:
 	case TRIANGLE_PICKING:
 	case POINT_PICKING:
 		setCursor(QCursor(Qt::PointingHandCursor));
@@ -2647,6 +2648,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	case TRIANGLE_PICKING:
 		pickingFlags |= CC_DRAW_TRI_NAMES;		//automatically push entity names as well!
 		break;
+	case POINT_OR_TRIANGLE_PICKING:
 	case AUTO_POINT_PICKING:
 		pickingFlags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
 		pickingFlags |= CC_DRAW_TRI_NAMES;
@@ -2738,7 +2740,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	}
 
 	//process hits
-	int selectedID=-1,subSelectedID=-1;
+	int selectedID = -1,subSelectedID = -1;
 	std::set<int> selectedIDs; //for ENTITY_RECT_PICKING mode only
 	{
 		GLuint minMinDepth = (~0);
@@ -2788,12 +2790,12 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	{
 		emit entitiesSelectionChanged(selectedIDs);
 	}
-	//"3D point" picking
-	else if (pickingMode == POINT_PICKING)
+	//3D point or triangle picking
+	else if (pickingMode == POINT_PICKING || pickingMode == TRIANGLE_PICKING || pickingMode == POINT_OR_TRIANGLE_PICKING)
 	{
 		if (selectedID >= 0 && subSelectedID >= 0)
 		{
-			emit pointPicked(selectedID,(unsigned)subSelectedID,centerX,centerY);
+			emit itemPicked(selectedID,(unsigned)subSelectedID,centerX,centerY);
 		}
 	}
 	else if (pickingMode == AUTO_POINT_PICKING)
@@ -3990,4 +3992,58 @@ bool ccGLWindow::InitGLEW()
 	return false;
 
 #endif
+}
+
+CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
+													const CCVector3& A3D,
+													const CCVector3& B3D,
+													const CCVector3& C3D )
+{
+	//viewing parameters
+	const double* MM = getModelViewMatd(); //viewMat
+	const double* MP = getProjectionMatd(); //projMat
+
+	int VP[4];
+	getViewportArray(VP);
+
+	GLdouble A2Dx,A2Dy,A2Dz;
+	gluProject(A3D.x,A3D.y,A3D.z,MM,MP,VP,&A2Dx,&A2Dy,&A2Dz);
+	GLdouble B2Dx,B2Dy,B2Dz;
+	gluProject(B3D.x,B3D.y,B3D.z,MM,MP,VP,&B2Dx,&B2Dy,&B2Dz);
+	GLdouble C2Dx,C2Dy,C2Dz;
+	gluProject(C3D.x,C3D.y,C3D.z,MM,MP,VP,&C2Dx,&C2Dy,&C2Dz);
+
+	//barycentric coordinates
+	GLdouble P2Dx = P2D.x;
+	GLdouble P2Dy = height()-1 - P2D.y;
+	GLdouble detT =  (B2Dy-C2Dy) * (A2Dx-C2Dx) + (C2Dx-B2Dx) * (A2Dy-C2Dy);
+	GLdouble l1   = ((B2Dy-C2Dy) * (P2Dx-C2Dx) + (C2Dx-B2Dx) * (P2Dy-C2Dy)) / detT;
+	GLdouble l2   = ((C2Dy-A2Dy) * (P2Dx-C2Dx) + (A2Dx-C2Dx) * (P2Dy-C2Dy)) / detT;
+
+	//clamp everything between 0 and 1
+	if (l1 < 0)
+		l1 = 0;
+	else if (l1 > 1.0)
+		l1 = 1.0;
+	if (l2 < 0)
+		l2 = 0;
+	else if (l2 > 1.0)
+		l2 = 1.0;
+	double l1l2 = l1+l2;
+	assert(l1l2 >= 0);
+	if (l1l2 > 1.0)
+	{
+		l1 /= l1l2;
+		l2 /= l1l2;
+	}
+	GLdouble l3 = 1.0-l1-l2;
+	assert(l3 >= 0);
+
+	//now deduce the 3D position
+	GLdouble G[3] = {	l1 * A3D.x + l2 * B3D.x + l3 * C3D.x,
+						l1 * A3D.y + l2 * B3D.y + l3 * C3D.y,
+						l1 * A3D.z + l2 * B3D.z + l3 * C3D.z };
+
+	return CCVector3::fromArray(G);
+
 }

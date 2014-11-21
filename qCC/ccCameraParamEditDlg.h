@@ -99,7 +99,7 @@ public slots:
 	void fovChanged(double);
 
 	void pickPointAsPivot();
-	void processPickedPoint(int, unsigned, int, int);
+	void processPickedItem(int, unsigned, int, int);
 
 protected slots:
 

@@ -13,6 +13,11 @@ v2.6.1.beta 11/21/2014
 			in the same position/orientaiton relatively to the entities if imported later)
 	* Interfactive Transformation tool:
 		- the rotation center can now be modified with the 'Pick rotation center' tool (reticle icon in the left toolbar)
+	* Point-pair based alignment:
+		- the tool can now be used with meshes (points are picked directly on the mesh surface)
+		- clouds and meshes can be mixed
+	* 3D views:
+		- the rotation center of a 3D view can now be picked anywhere on the surface of a mesh
 
 - Bug fix:
 	- Delaunay 2D1/2 crashed on Windows 8

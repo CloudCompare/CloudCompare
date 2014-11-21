@@ -66,6 +66,7 @@ public:
 						FAST_PICKING,
 						POINT_PICKING,
 						TRIANGLE_PICKING,
+						POINT_OR_TRIANGLE_PICKING,
 						AUTO_POINT_PICKING,
 						DEFAULT_PICKING,
 	};
@@ -450,6 +451,19 @@ public:
 	//! Returns whether the manual rotation around the vertical (screen) axis is locked or not
 	bool isVerticalRotationLocked() const { return m_verticalRotationLocked; }
 
+	//! Backprojects a 2D points on a 3D triangle
+	/** \warning Uses the current display parameters!
+		\param P2D point on the screen
+		\param A3D first vertex of the 3D triangle
+		\param B3D second vertex of the 3D triangle
+		\param C3D third vertex of the 3D triangle
+		\return backprojected point
+	**/
+	CCVector3 backprojectPointOnTriangle(	const CCVector2i& P2D,
+											const CCVector3& A3D,
+											const CCVector3& B3D,
+											const CCVector3& C3D );
+
 public slots:
 
 	void zoomGlobal();
@@ -468,13 +482,15 @@ signals:
 	//! Signal emitted when multiple entities are selected in the 3D view
 	void entitiesSelectionChanged(std::set<int> entIDs);
 
-	//! Signal emitted in point picking mode to declare picking of a given point
-	/** \param cloudUniqueID cloud unique ID
-		\param pointIndex point index in cloud
+	//! Signal emitted when a point is picked
+	/** The POINT_PICKING or TRIANGLE_PICKING or POINT_OR_TRIANGLE_PICKING
+		mode must be enabled.
+		\param entityID entity unique ID
+		\param itemIndex point or triangle index in entity
 		\param x mouse cursor x position
 		\param y mouse cursor y position
 	**/
-	void pointPicked(int cloudUniqueID, unsigned pointIndex, int x, int y);
+	void itemPicked(int entityID, unsigned itemIndex, int x, int y);
 
 	/*** Camera link mode (interactive modifications of the view/camera are echoed to other windows) ***/
 

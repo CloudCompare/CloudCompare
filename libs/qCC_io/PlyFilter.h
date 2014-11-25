@@ -56,7 +56,7 @@ struct plyElement
 	bool isList;
 };
 
-//! Stanfod PLY file I/O filter
+//! Stanford PLY file I/O filter
 class QCC_IO_LIB_API PlyFilter : public FileIOFilter
 {
 public:

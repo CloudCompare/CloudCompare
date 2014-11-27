@@ -383,7 +383,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 			break;
 		}
 		bool ok = false;
-		int version = attributes[0].value().toInt(&ok);
+		int version = attributes[0].value().toString().toInt(&ok);
 		if (!ok || version > s_xmlColorScaleVer)
 		{
 			if (ok)
@@ -479,14 +479,15 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 				double pos = 0;
 				for (int i=0; i<attributes.size(); ++i)
 				{
+					QString value = attributes[i].value().toString();
 					if (attributes[i].name() == "r")
-						rgb.setRed(attributes[i].value().toInt());
+						rgb.setRed(value.toInt());
 					else if (attributes[i].name() == "g")
-						rgb.setGreen(attributes[i].value().toInt());
+						rgb.setGreen(value.toInt());
 					else if (attributes[i].name() == "b")
-						rgb.setBlue(attributes[i].value().toInt());
+						rgb.setBlue(value.toInt());
 					else if (attributes[i].name() == "pos")
-						pos = attributes[i].value().toDouble();
+						pos = value.toDouble();
 					else
 						--attributeCount;
 				}

@@ -611,7 +611,8 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
-			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,static_cast<PointCoordinateType>(step),0,pDlg);
+			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
+			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,static_cast<PointCoordinateType>(step),modParams,0,pDlg);
 			if (!refCloud)
 				return Error("Subsampling process failed!");
 			Print(QString("\tResult: %1 points").arg(refCloud->size()));

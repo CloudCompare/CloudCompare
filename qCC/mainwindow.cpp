@@ -4700,6 +4700,8 @@ void MainWindow::doActionSubsample()
 	std::vector<ccPointCloud*> clouds;
 	unsigned maxPointCount = 0;
 	double maxCloudRadius = 0;
+	ScalarType sfMin = NAN_VALUE;
+	ScalarType sfMax = NAN_VALUE;
 	{
 		for (size_t i=0; i<m_selectedEntities.size(); ++i)
 		{
@@ -4710,6 +4712,16 @@ void MainWindow::doActionSubsample()
 
 				maxPointCount = std::max<unsigned>(maxPointCount, cloud->size());
 				maxCloudRadius = std::max<double>(maxCloudRadius, cloud->getBB().getDiagNorm());
+
+				//we also look for the min and max sf values
+				ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
+				if (sf)
+				{
+					if (!ccScalarField::ValidValue(sfMin) || sfMin > sf->getMin())
+						sfMin = sf->getMin();
+					if (!ccScalarField::ValidValue(sfMax) || sfMax < sf->getMax())
+						sfMax = sf->getMax();
+				}
 			}
 		}
 	}
@@ -4722,6 +4734,9 @@ void MainWindow::doActionSubsample()
 
 	//Display dialog
 	ccSubsamplingDlg sDlg(maxPointCount, maxCloudRadius, this);
+	bool hasValidSF = ccScalarField::ValidValue(sfMin) && ccScalarField::ValidValue(sfMax);
+	if (hasValidSF)
+		sDlg.enableSFModulation(sfMin,sfMax);
 	if (!sDlg.exec())
 		return;
 
@@ -4754,7 +4769,7 @@ void MainWindow::doActionSubsample()
 			
 			if (newPointCloud)
 			{
-				newPointCloud->setName(cloud->getName()+QString(".subsampled"));
+				newPointCloud->setName(cloud->getName() + QString(".subsampled"));
 				newPointCloud->setGlobalShift(cloud->getGlobalShift());
 				newPointCloud->setGlobalScale(cloud->getGlobalScale());
 				newPointCloud->setDisplay(cloud->getDisplay());

@@ -22,6 +22,7 @@
 #include <ReferenceCloud.h>
 #include <CloudSamplingTools.h>
 #include <GeometricalAnalysisTools.h>
+#include <ScalarField.h>
 
 //qCC_db
 #include <ccLog.h>
@@ -36,6 +37,9 @@ ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius
 	, Ui::SubsamplingDialog()
 	, m_maxPointCount(maxPointCount)
 	, m_maxRadius(maxCloudRadius)
+	, m_sfModEnabled(false)
+	, m_sfMin(0)
+	, m_sfMax(0)
 {
 	setupUi(this);
 	setWindowFlags(Qt::Tool);
@@ -44,8 +48,8 @@ ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius
 	samplingMethod->addItem("Space");
 	samplingMethod->addItem("Octree");
 
-	connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
-	connect(samplingValue, SIGNAL(valueChanged(double)), this, SLOT(samplingRateChanged(double)));
+	connect(slider,         SIGNAL(sliderMoved(int)),         this, SLOT(sliderMoved(int)));
+	connect(samplingValue,  SIGNAL(valueChanged(double)),     this, SLOT(samplingRateChanged(double)));
 	connect(samplingMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSamplingMethod(int)));
 
 	samplingMethod->setCurrentIndex(1);
@@ -64,6 +68,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 	{
 	case RANDOM:
 		{
+			assert(samplingValue->value() >= 0);
 			unsigned count = static_cast<unsigned>(samplingValue->value());
 			return CCLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
 																		count,
@@ -79,10 +84,34 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 			if (octree)
 			{
 				PointCoordinateType minDist = static_cast<PointCoordinateType>(samplingValue->value());
+				CCLib::CloudSamplingTools::SFModulationParams modParams;
+				modParams.enabled = sfGroupBox->isEnabled() && sfGroupBox->isChecked();
+				if (modParams.enabled)
+				{
+					double deltaSF = m_sfMax - m_sfMin;
+					assert(deltaSF >= 0);
+					if (deltaSF > ZERO_TOLERANCE)
+					{
+						double sfMinSpacing = minSFSpacingDoubleSpinBox->value();
+						double sfMaxSpacing = maxSFSpacingDoubleSpinBox->value();
+						modParams.a = (sfMaxSpacing - sfMinSpacing) / deltaSF;
+						modParams.b = sfMinSpacing - modParams.a * m_sfMin;
+					}
+					else
+					{
+						modParams.a = 0.0;
+						modParams.b = m_sfMin;
+					}
+				}
 				return CCLib::CloudSamplingTools::resampleCloudSpatially(	cloud, 
 																			minDist,
+																			modParams,
 																			octree,
 																			progressCb);
+			}
+			else
+			{
+				ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 			}
 		}
 		break;
@@ -94,12 +123,17 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 				octree = cloud->computeOctree(progressCb);
 			if (octree)
 			{
+				assert(samplingValue->value() >= 0);
 				unsigned char level = static_cast<unsigned char>(samplingValue->value());
 				return CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
 																					level,
 																					CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																					progressCb,
 																					octree);
+			}
+			else
+			{
+				ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 			}
 		}
 		break;
@@ -114,18 +148,18 @@ void ccSubsamplingDlg::updateLabels()
 	switch(samplingMethod->currentIndex())
 	{
 	case RANDOM:
-		labelSliderMin->setText("None");
-		labelSliderMax->setText("All");
+		labelSliderMin->setText("none");
+		labelSliderMax->setText("all");
 		valueLabel->setText("remaining points");
 		break;
 	case SPACE:
-		labelSliderMin->setText("Large");
-		labelSliderMax->setText("Small");
+		labelSliderMin->setText("large");
+		labelSliderMax->setText("small");
 		valueLabel->setText("min. space between points");
 		break;
 	case OCTREE:
-		labelSliderMin->setText("Min");
-		labelSliderMax->setText("Max");
+		labelSliderMin->setText("min");
+		labelSliderMax->setText("max");
 		valueLabel->setText("subdivision level");
 		break;
 	default:
@@ -157,6 +191,12 @@ void ccSubsamplingDlg::samplingRateChanged(double value)
 	{
 		rate = 1.0 - rate;
 		rate = pow(rate, 1.0/SPACE_RANGE_EXPONENT);
+
+		if (m_sfModEnabled && !sfGroupBox->isChecked())
+		{
+			minSFSpacingDoubleSpinBox->setValue(value);
+			maxSFSpacingDoubleSpinBox->setValue(value);
+		}
 	}
 
 	slider->blockSignals(true);
@@ -168,6 +208,7 @@ void ccSubsamplingDlg::samplingRateChanged(double value)
 void ccSubsamplingDlg::changeSamplingMethod(int index)
 {
 	int oldSliderPos = slider->sliderPosition();
+	sfGroupBox->setEnabled(false);
 
 	//update the labels
 	samplingValue->blockSignals(true);
@@ -179,6 +220,7 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 			samplingValue->setMinimum(1);
 			samplingValue->setMaximum(static_cast<double>(m_maxPointCount));
 			samplingValue->setSingleStep(1);
+			samplingValue->setEnabled(true);
 		}
 		break;
 	case SPACE:
@@ -186,7 +228,14 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 			samplingValue->setDecimals(4);
 			samplingValue->setMinimum(0.0);
 			samplingValue->setMaximum(m_maxRadius);
-			samplingValue->setSingleStep(m_maxRadius / 1000.0);
+			double step = m_maxRadius / 1000.0;
+			samplingValue->setSingleStep(step);
+			minSFSpacingDoubleSpinBox->setMaximum(m_maxRadius);
+			minSFSpacingDoubleSpinBox->setSingleStep(step);
+			maxSFSpacingDoubleSpinBox->setMaximum(m_maxRadius);
+			maxSFSpacingDoubleSpinBox->setSingleStep(step);
+			sfGroupBox->setEnabled(m_sfModEnabled);
+			samplingValue->setDisabled(sfGroupBox->isEnabled() && sfGroupBox->isChecked());
 		}
 		break;
 	case OCTREE:
@@ -195,6 +244,7 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 			samplingValue->setMinimum(1);
 			samplingValue->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
 			samplingValue->setSingleStep(1);
+			samplingValue->setEnabled(true);
 		}
 		break;
 	default:
@@ -205,4 +255,21 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 	updateLabels();
 	//slider->setSliderPosition(oldSliderPos);
 	sliderMoved(oldSliderPos);
+}
+
+void ccSubsamplingDlg::enableSFModulation(ScalarType sfMin, ScalarType sfMax)
+{
+	m_sfModEnabled = CCLib::ScalarField::ValidValue(sfMin) && CCLib::ScalarField::ValidValue(sfMax);
+	if (!m_sfModEnabled)
+	{
+		ccLog::Warning("[ccSubsamplingDlg::enableSFModulation] Invalid input SF values");
+		return;
+	}
+
+	m_sfMin = sfMin;
+	m_sfMax = sfMax;
+
+	sfGroupBox->setEnabled(samplingMethod->currentIndex() == SPACE);
+	minSFlabel->setText(QString::number(sfMin));
+	maxSFlabel->setText(QString::number(sfMax));
 }

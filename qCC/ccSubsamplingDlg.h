@@ -18,11 +18,14 @@
 #ifndef CC_SAMPLE_DLG_HEADER
 #define CC_SAMPLE_DLG_HEADER
 
+//Qt
 #include <QDialog>
 
+//CCLib
 #include <GenericProgressCallback.h>
 #include <ReferenceCloud.h>
 
+//GUI
 #include <ui_subsamplingDlg.h>
 
 class ccGenericPointCloud;
@@ -50,13 +53,21 @@ public:
 	**/
 	CCLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCLib::GenericProgressCallback* progressCb = 0);
 
+	//! Enables the SF modulation option (SPATIAL method)
+	void enableSFModulation(ScalarType sfMin, ScalarType sfMax);
+
 protected slots:
 
 	void sliderMoved(int sliderPos);
 	void samplingRateChanged(double value);
 	void changeSamplingMethod(int index);
 
-protected:
+protected: //methods
+
+	//! Updates the dialog lables depending on the active mode
+	void updateLabels();
+
+protected: //members
 
 	//! Max point count (for RANDOM method)
 	unsigned m_maxPointCount;
@@ -64,7 +75,13 @@ protected:
 	//! Max radius (for SPACE method)
 	double m_maxRadius;
 
-	void updateLabels();
+	//! Scalar modulation
+	bool m_sfModEnabled;
+	//! Scalar modulation (min SF value)
+	ScalarType m_sfMin;
+	//! Scalar modulation (max SF value)
+	ScalarType m_sfMax;
+
 };
 
 #endif

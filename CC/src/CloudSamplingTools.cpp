@@ -27,6 +27,7 @@
 #include "GenericProgressCallback.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "DistanceComputationTools.h"
+#include "ScalarFieldTools.h"
 
 //system
 #include <assert.h>
@@ -252,6 +253,7 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 
 ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPersist* inputCloud,
 															PointCoordinateType minDistance,
+															const SFModulationParams& modParams,
 															DgmOctree* inputOctree/*=0*/,
 															GenericProgressCallback* progressCb/*=0*/)
 {
@@ -271,9 +273,9 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	assert(theOctree && theOctree->associatedCloud() == inputCloud);
 
 	//output cloud
-    ReferenceCloud* sampledCloud = new ReferenceCloud(inputCloud);
+	ReferenceCloud* sampledCloud = new ReferenceCloud(inputCloud);
 	const unsigned c_reserveStep = 65536;
-    if (!sampledCloud->reserve(std::min(cloudSize,c_reserveStep)))
+	if (!sampledCloud->reserve(std::min(cloudSize,c_reserveStep)))
 	{
 		if (!inputOctree)
 			delete theOctree;
@@ -281,8 +283,66 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	}
 
 	GenericChunkedArray<1,bool>* markers = new GenericChunkedArray<1,bool>(); //DGM: upgraded from vector, as this can be quite huge!
-    if (!markers->resize(cloudSize,true,true))
+	if (!markers->resize(cloudSize,true,true))
 	{
+		markers->release();
+		if (!inputOctree)
+			delete theOctree;
+		delete sampledCloud;
+		return 0;
+	}
+
+	//best octree level (there may be several of them if we use parameter modulation)
+	std::vector<unsigned char> bestOctreeLevel;
+	bool modParamsEnabled = modParams.enabled;
+	ScalarType sfMin = 0, sfMax = 0;
+	try
+	{
+		if (modParams.enabled)
+		{
+			//compute min and max sf values
+			ScalarFieldTools::computeScalarFieldExtremas(inputCloud,sfMin,sfMax);
+
+			if (!ScalarField::ValidValue(sfMin))
+			{
+				//all SF values are NAN?!
+				modParamsEnabled = false;
+			}
+			else
+			{
+				//compute min and max 'best' levels
+				PointCoordinateType dist0 = static_cast<PointCoordinateType>(sfMin * modParams.a + modParams.b);
+				PointCoordinateType dist1 = static_cast<PointCoordinateType>(sfMax * modParams.a + modParams.b);
+				unsigned char level0 = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(dist0);
+				unsigned char level1 = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(dist1);
+
+				bestOctreeLevel.push_back(level0);
+				if (level1 != level0)
+				{
+					//add intermediate levels if necessary
+					size_t levelCount = (level1 < level0 ? level0-level1 : level1-level0) + 1;
+					assert(levelCount != 0);
+					
+					for (size_t i=1; i<levelCount-1; ++i) //we already know level0 and level1!
+					{
+						ScalarType sfVal = sfMin + i*((sfMax-sfMin)/levelCount);
+						PointCoordinateType dist = static_cast<PointCoordinateType>(sfVal * modParams.a + modParams.b);
+						unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(dist);
+						bestOctreeLevel.push_back(level);
+					}
+				}
+				bestOctreeLevel.push_back(level1);
+			}
+		}
+		else
+		{
+			unsigned char defaultLevel = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(minDistance);
+			bestOctreeLevel.push_back(defaultLevel);
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
 		markers->release();
 		if (!inputOctree)
 			delete theOctree;
@@ -292,35 +352,59 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 
 	//progress notification
 	NormalizedProgress* normProgress = 0;
-    if (progressCb)
-    {
+	if (progressCb)
+	{
 		progressCb->setMethodTitle("Spatial resampling");
 		char buffer[256];
 		sprintf(buffer,"Points: %i\nMin dist.: %f",cloudSize,minDistance);
-        progressCb->setInfo(buffer);
+		progressCb->setInfo(buffer);
 		normProgress = new NormalizedProgress(progressCb,cloudSize);
-        progressCb->reset();
-        progressCb->start();
-    }
-
-    unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(minDistance);
+		progressCb->reset();
+		progressCb->start();
+	}
 
 	//for each point in the cloud that is still 'marked', we look
 	//for its neighbors and remove their own marks
 	markers->placeIteratorAtBegining();
 	bool error = false;
-    for (unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
-    {
+	//default octree level
+	assert(!bestOctreeLevel.empty());
+	unsigned char octreeLevel = bestOctreeLevel.front();
+	//default distance between points
+	PointCoordinateType minDistBetweenPoints = minDistance;
+	for (unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
+	{
 		//no mark? we skip this point
 		if (markers->getCurrentValue())
 		{
 			//init neighbor search structure
 			const CCVector3* P = inputCloud->getPoint(i);
 
+			//parameters modulation
+			if (modParamsEnabled)
+			{
+				ScalarType sfVal = inputCloud->getPointScalarValue(i);
+				if (ScalarField::ValidValue(sfVal))
+				{
+					//modulate minDistance
+					minDistBetweenPoints = static_cast<PointCoordinateType>(sfVal * modParams.a + modParams.b);
+					//get (approximate) best level
+					size_t levelIndex = static_cast<size_t>(bestOctreeLevel.size() * (sfVal / (sfMax-sfMin)));
+					if (levelIndex == bestOctreeLevel.size())
+						--levelIndex;
+					octreeLevel = bestOctreeLevel[levelIndex];
+				}
+				else
+				{
+					minDistBetweenPoints = minDistance;
+					octreeLevel = bestOctreeLevel.front();
+				}
+			}
+
 			//look for neighbors and 'de-mark' them
 			{
 				DgmOctree::NeighboursSet neighbours;
-				theOctree->getPointsInSphericalNeighbourhood(*P,minDistance,neighbours,level);
+				theOctree->getPointsInSphericalNeighbourhood(*P,minDistBetweenPoints,neighbours,octreeLevel);
 				for (DgmOctree::NeighboursSet::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
 					if (it->pointIndex != i)
 						markers->setValue(it->pointIndex,false);
@@ -328,7 +412,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 
 			//At this stage, the ith point is the only one marked in a radius of <minDistance>.
 			//Therefore it will necessarily be in the final cloud!
-			if (sampledCloud->size() == sampledCloud->capacity() && !sampledCloud->reserve(sampledCloud->capacity()+c_reserveStep))
+			if (sampledCloud->size() == sampledCloud->capacity() && !sampledCloud->reserve(sampledCloud->capacity() + c_reserveStep))
 			{
 				//not enough memory
 				error = true;
@@ -349,7 +433,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 			error = true;
 			break;
 		}
-    }
+	}
 
 	//remove unnecessarily allocated memory
 	if (!error)
@@ -363,7 +447,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		sampledCloud = 0;
 	}
 
-    if(normProgress)
+	if(normProgress)
 	{
 		delete normProgress;
 		normProgress = 0;
@@ -371,9 +455,14 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	}
 
 	if (!inputOctree)
+	{
+		//locally computed octree
 		delete theOctree;
+		theOctree = 0;
+	}
 
 	markers->release();
+	markers = 0;
 
 	return sampledCloud;
 }

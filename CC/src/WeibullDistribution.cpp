@@ -179,6 +179,12 @@ bool WeibullDistribution::computeParameters(const GenericCloud* cloud)
 	ScalarType maxValue = 0;
 	ScalarFieldTools::computeScalarFieldExtremas(cloud, valueShift, maxValue);
 
+	if (!ScalarField::ValidValue(valueShift))
+	{
+		//sf is only composed of NAN values?!
+		return false;
+	}
+
 	valueShift -= static_cast<ScalarType>(ZERO_TOLERANCE);
 
 	if (maxValue <= valueShift)

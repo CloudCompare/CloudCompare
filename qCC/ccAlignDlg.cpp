@@ -113,13 +113,14 @@ unsigned ccAlignDlg::getMaxNumberOfCandidates()
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 {
-	CCLib::ReferenceCloud* sampledCloud=0;
+	CCLib::ReferenceCloud* sampledCloud = 0;
 
 	switch (getSamplingMethod())
 	{
 	case SPACE:
 		{
-			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(modelObject, static_cast<PointCoordinateType>(modelSamplingRate->value()));
+			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
+			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(modelObject, static_cast<PointCoordinateType>(modelSamplingRate->value()),modParams);
 		}
 		break;
 	case OCTREE:
@@ -159,13 +160,14 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 {
-	CCLib::ReferenceCloud* sampledCloud=0;
+	CCLib::ReferenceCloud* sampledCloud = 0;
 
 	switch (getSamplingMethod())
 	{
 	case SPACE:
 		{
-			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(dataObject, static_cast<PointCoordinateType>(dataSamplingRate->value()));
+			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
+			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(dataObject, static_cast<PointCoordinateType>(dataSamplingRate->value()),modParams);
 		}
 		break;
 	case OCTREE:
@@ -231,7 +233,7 @@ void ccAlignDlg::swapModelAndData()
 
 void ccAlignDlg::modelSliderReleased()
 {
-	double rate = static_cast<double>(modelSample->sliderPosition())/static_cast<double>(modelSample->maximum());
+	double rate = static_cast<double>(modelSample->sliderPosition())/modelSample->maximum();
 	if ( getSamplingMethod() == SPACE)
 		rate = 1.0 - rate;
 	rate *= modelSamplingRate->maximum();
@@ -241,7 +243,7 @@ void ccAlignDlg::modelSliderReleased()
 
 void ccAlignDlg::dataSliderReleased()
 {
-	double rate = static_cast<double>(dataSample->sliderPosition())/static_cast<double>(dataSample->maximum());
+	double rate = static_cast<double>(dataSample->sliderPosition())/dataSample->maximum();
 	if (getSamplingMethod() == SPACE)
 		rate = 1.0 - rate;
 	rate *= dataSamplingRate->maximum();
@@ -254,10 +256,10 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 	QString message("An error occurred");
 
 	CC_SAMPLING_METHOD method = getSamplingMethod();
-	float rate = (float)modelSamplingRate->value()/(float)modelSamplingRate->maximum();
+	float rate = static_cast<float>(modelSamplingRate->value())/modelSamplingRate->maximum();
 	if (method == SPACE)
 		rate = 1.0f-rate;
-	modelSample->setSliderPosition((unsigned)((float)modelSample->maximum()*rate));
+	modelSample->setSliderPosition(static_cast<int>(rate * modelSample->maximum()));
 
 	switch(method)
 	{
@@ -288,7 +290,7 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 		break;
 	default:
 		{
-			unsigned remaining = (unsigned)(rate * (float)modelObject->size());
+			unsigned remaining = static_cast<unsigned>(rate * modelObject->size());
 			message = QString("%1 remaining points").arg(remaining);
 		}
 		break;
@@ -301,10 +303,10 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 	QString message("An error occurred");
 
 	CC_SAMPLING_METHOD method = getSamplingMethod();
-	float rate = (float)dataSamplingRate->value()/(float)dataSamplingRate->maximum();
+	double rate = static_cast<float>(dataSamplingRate->value()/dataSamplingRate->maximum());
 	if (method == SPACE)
-		rate = 1.0f-rate;
-	dataSample->setSliderPosition((unsigned)((float)dataSample->maximum()*rate));
+		rate = 1.0 - rate;
+	dataSample->setSliderPosition(static_cast<int>(rate * dataSample->maximum()));
 
 	switch(method)
 	{
@@ -320,7 +322,7 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 		break;
 	case RANDOM:
 		{
-			message = QString("remaining points (%1%)").arg(rate*100.0f,0,'f',1);
+			message = QString("remaining points (%1%)").arg(rate*100.0,0,'f',1);
 		}
 		break;
 	case OCTREE:
@@ -335,7 +337,7 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 		break;
 	default:
 		{
-			unsigned remaining = (unsigned)(rate * (float)dataObject->size());
+			unsigned remaining = static_cast<unsigned>(rate * dataObject->size());
 			message = QString("%1 remaining points").arg(remaining);
 		}
 		break;

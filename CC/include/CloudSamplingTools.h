@@ -130,6 +130,20 @@ public:
 													unsigned newNumberOfPoints,
 													GenericProgressCallback* progressCb = 0);
 
+	//! Parameters for the scalar-field based modulation of a parameter
+	struct SFModulationParams
+	{
+		//! Default constructor
+		SFModulationParams(bool state = false) : enabled(state), a(0.0), b(1.0) {}
+
+		//! Whether the modulation is enabled or not
+		bool enabled;
+		//! Modulation scheme: y = a.sf + b
+		double a;
+		//! Modulation scheme: y = a.sf + b
+		double b;
+	};
+
 	//! Resamples a point cloud (process based on inter point distance)
 	/** The cloud is resampled so that there is no point nearer than a given distance to other points
 		It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
@@ -141,6 +155,7 @@ public:
 	**/
 	static ReferenceCloud* resampleCloudSpatially(	GenericIndexedCloudPersist* theCloud,
 													PointCoordinateType minDistance,
+													const SFModulationParams& modParams,
 													DgmOctree* theOctree = 0,
 													GenericProgressCallback* progressCb = 0);
 

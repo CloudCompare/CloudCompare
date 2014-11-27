@@ -1,9 +1,14 @@
 *** CloudCompare versions history ***
 
-v2.6.1.beta 11/21/2014
+v2.6.1.beta 11/??/2014
 - New features:
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
+	* Subsample tool:
+		- when performing 'Spatial' resampling, the user can now choose to use the active scalar field
+			to modulate the sampling distance depending on the scalar field values.
+		- the user simply has to set the sampling distances associated to the minimal and maximal SF
+			values and CC will linearly map the values inbetween.
 
 - Enhancements:
 	* Interactive Segmentation tool: the segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)

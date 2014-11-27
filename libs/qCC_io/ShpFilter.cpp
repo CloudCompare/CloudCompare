@@ -224,6 +224,9 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 {
 	char header[40];
 	file.read(header,40);
+	//check for errors
+	if (file.error() != QFile::NoError)
+		return CC_FERR_READING;
 
 	//Byte 0: Box
 	{
@@ -273,6 +276,9 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 		for (int32_t i=0; i<numPoints; ++i)
 		{
 			file.read(header,16);
+			//check for errors
+			if (file.error() != QFile::NoError)
+				return CC_FERR_READING;
 			double x = qFromLittleEndian<double>(*reinterpret_cast<double*>(header  ));
 			double y = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+8));
 			CCVector3 P(static_cast<PointCoordinateType>(x + PShift.x),
@@ -283,7 +289,8 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 	}
 
 	//3D polylines
-	if (shapeTypeInt > SHP_POINT_Z && shapeTypeInt < SHP_POINT_M)
+	bool is3D = (shapeTypeInt > SHP_POINT_Z && shapeTypeInt < SHP_POINT_M);
+	if (is3D)
 	{
 		//Z boundaries
 		{
@@ -298,6 +305,9 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 			for (int32_t i=0; i<numPoints; ++i)
 			{
 				file.read(header,8);
+				//check for errors
+				if (file.error() != QFile::NoError)
+					return CC_FERR_READING;
 				double z = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
 				const CCVector3* P = vertices->getPoint(i);
 				const_cast<CCVector3*>(P)->z = static_cast<PointCoordinateType>(z + PShift.z);
@@ -312,6 +322,9 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 		ccScalarField* sf = 0;
 		{
 			file.read(header,16);
+			//check for errors
+			if (file.error() != QFile::NoError)
+				return CC_FERR_READING;
 			double mMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header  ));
 			double mMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+8));
 
@@ -334,6 +347,9 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 			for (int32_t i=0; i<numPoints; ++i)
 			{
 				file.read(header,8);
+				//check for errors
+				if (file.error() != QFile::NoError)
+					return CC_FERR_READING;
 				double m = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
 				ScalarType s = m == ESRI_NO_DATA ? NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
@@ -366,6 +382,7 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 		poly->addPointIndex(0,numPoints);
 		poly->showSF(vertices->sfShown());
 		poly->setName(QString("Polyline #%1").arg(index));
+		poly->set2DMode(!is3D); //FIXME DGM: maybe we should ask the user?
 		container.addChild(poly);
 	}
 

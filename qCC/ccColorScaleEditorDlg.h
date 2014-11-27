@@ -74,6 +74,9 @@ protected slots:
 	void deleteCurrentScale();
 	void renameCurrentScale();
 
+	void exportCurrentScale();
+	void importScale();
+
 	void createNewScale();
 
 	void onClose();

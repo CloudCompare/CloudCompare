@@ -20,6 +20,7 @@
 //local
 #include "ccColorScaleEditorWidget.h"
 #include "ccDisplayOptionsDlg.h"
+#include "ccPersistentSettings.h"
 
 //qCC_db
 #include <ccColorScalesManager.h>
@@ -30,6 +31,9 @@
 #include <QColorDialog>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QSettings>
+#include <QUuid>
 
 //System
 #include <assert.h>
@@ -55,6 +59,10 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager
 
 	//main combo box
 	connect(rampComboBox, SIGNAL(activated(int)), this, SLOT(colorScaleChanged(int)));
+
+	//import/export buttons
+	connect(exportToolButton,		SIGNAL(clicked()),				this,	SLOT(exportCurrentScale()));
+	connect(importToolButton,		SIGNAL(clicked()),				this,	SLOT(importScale()));
 
 	//upper buttons
 	connect(renameToolButton,		SIGNAL(clicked()),				this,	SLOT(renameCurrentScale()));
@@ -225,6 +233,7 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		//locked state
 		bool isLocked = !m_colorScale || m_colorScale->isLocked();
 		colorScaleParametersFrame->setEnabled(!isLocked);
+		exportToolButton->setEnabled(!isLocked);
 		lockWarningLabel->setVisible(isLocked);
 		selectedSliderGroupBox->setEnabled(!isLocked);
 		m_scaleWidget->setEnabled(!isLocked);
@@ -563,5 +572,96 @@ void ccColorScaleEditorDialog::onClose()
 	if (canChangeCurrentScale())
 	{
 		accept();
+	}
+}
+
+void ccColorScaleEditorDialog::exportCurrentScale()
+{
+	if (!m_colorScale || m_colorScale->isLocked())
+	{
+		assert(false);
+		return;
+	}
+
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+
+	//ask for a filename
+	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,"*.xml");
+	if (filename.isEmpty())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	//save last saving location
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
+	settings.endGroup();
+
+	//try to save the file
+	if (m_colorScale->saveAsXML(filename))
+	{
+		ccLog::Print(QString("[ColorScale] Scale '%1' sucessfully exported in '%2'").arg(m_colorScale->getName()).arg(filename));
+	}
+}
+
+void ccColorScaleEditorDialog::importScale()
+{
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+
+	//ask for a filename
+	QString filename = QFileDialog::getOpenFileName(this,"Select color scale file",currentPath,"*.xml");
+	if (filename.isEmpty())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	//save last loading parameters
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
+	settings.endGroup();
+
+	//try to load the file
+	ccColorScale::Shared scale = ccColorScale::LoadFromXML(filename);
+	if (scale)
+	{
+		assert(m_manager);
+		if (m_manager)
+		{
+			ccColorScale::Shared otherScale = m_manager->getScale(scale->getUuid());
+			if (otherScale)
+			{
+				QString message = "A color scale with the same UUID";
+				if (otherScale->getName() == scale->getName())
+					message += QString(" and the same name (%1)").arg(scale->getName());
+				message += " is already in store!";
+				message += "\n";
+				message += "Do you want to force the importation of this new scale? (a new UUID will be generated)";
+
+				if (QMessageBox::question	(this,
+											"UUID conflict",
+											message,
+											QMessageBox::Yes,
+											QMessageBox::No) == QMessageBox::No)
+				{
+					ccLog::Warning("[ccColorScaleEditorDialog::importScale] Importation cancelled due to a conflicting UUID (color scale may already be in store)");
+					return;
+				}
+				//generate a new UUID
+				scale->setUuid(QUuid::createUuid().toString());
+			}
+			//now we can import the scale
+			m_manager->addScale(scale);
+			ccLog::Print(QString("[ccColorScaleEditorDialog::importScale] Color scale '%1' successfully imported").arg(scale->getName()));
+		}
+
+		updateMainComboBox();
+	
+		setActiveScale(scale);
 	}
 }

@@ -133,6 +133,7 @@
 
 //other
 #include "ccRegistrationTools.h"
+#include "ccPersistentSettings.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -164,20 +165,6 @@
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
-
-//persistent settings key (to be used with QSettings)
-static const QString s_psLoadFile					("LoadFile");
-static const QString s_psSaveFile					("SaveFile");
-static const QString s_psMainWinGeom				("mainWindowGeometry");
-static const QString s_psMainWinState				("mainWindowState");
-static const QString s_psCurrentPath				("currentPath");
-static const QString s_psSelectedInputFilter		("selectedInputFilter");
-static const QString s_psSelectedOutputFilterCloud	("selectedOutputFilterCloud");
-static const QString s_psSelectedOutputFilterMesh	("selectedOutputFilterMesh");
-static const QString s_psSelectedOutputFilterImage	("selectedOutputFilterImage");
-static const QString s_psSelectedOutputFilterPoly	("selectedOutputFilterPoly");
-static const QString s_psDuplicatePointsGroup		("duplicatePoints");
-static const QString s_psDuplicatePointsMinDist		("minDist");
 
 //default 'All files' file filter
 static const QString s_allFilesFilter("All (*.*)");
@@ -214,7 +201,7 @@ MainWindow::MainWindow()
 	//Dialog "auto-construction"
 	setupUi(this);
 	QSettings settings;
-	restoreGeometry(settings.value(s_psMainWinGeom).toByteArray());
+	restoreGeometry(settings.value(ccPS::MainWinGeom()).toByteArray());
 
 	setWindowTitle(QString("CloudCompare v")+ccCommon::GetCCVersion(false));
 
@@ -303,7 +290,7 @@ MainWindow::MainWindow()
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
 
-	restoreState(settings.value(s_psMainWinState).toByteArray());
+	restoreState(settings.value(ccPS::MainWinState()).toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -3096,8 +3083,8 @@ void MainWindow::doActionExportDepthBuffer()
 
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup(s_psSaveFile);
-	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,DepthMapFileFilter::GetFileFilter());
 	if (filename.isEmpty())
@@ -3107,7 +3094,7 @@ void MainWindow::doActionExportDepthBuffer()
 	}
 
 	//save last saving location
-	settings.setValue(s_psCurrentPath,QFileInfo(filename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
 	settings.endGroup();
 
 	ccHObject* toSave = 0;
@@ -3260,8 +3247,8 @@ void MainWindow::doRemoveDuplicatePoints()
 
 	//persistent setting(s)
 	QSettings settings;
-	settings.beginGroup(s_psDuplicatePointsGroup);
-	double minDistanceBetweenPoints = settings.value(s_psDuplicatePointsMinDist,1.0e-12).toDouble();
+	settings.beginGroup(ccPS::DuplicatePointsGroup());
+	double minDistanceBetweenPoints = settings.value(ccPS::DuplicatePointsMinDist(),1.0e-12).toDouble();
 
 	bool ok;
 	minDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Min distance between points:", minDistanceBetweenPoints, 0, 1.0e8, 12, &ok);
@@ -3269,7 +3256,7 @@ void MainWindow::doRemoveDuplicatePoints()
 		return;
 
 	//save parameter
-	settings.setValue(s_psDuplicatePointsMinDist,minDistanceBetweenPoints);
+	settings.setValue(ccPS::DuplicatePointsMinDist(),minDistanceBetweenPoints);
 
 	static const char DEFAULT_DUPLICATE_TEMP_SF_NAME[] = "DuplicateFlags";
 
@@ -6482,8 +6469,8 @@ static bool s_autoSaveGuiElementPos = true;
 void MainWindow::doActionResetGUIElementsPos()
 {
 	QSettings settings;
-	settings.remove(s_psMainWinGeom);
-	settings.remove(s_psMainWinState);
+	settings.remove(ccPS::MainWinGeom());
+	settings.remove(ccPS::MainWinState());
 
 	QMessageBox::information(this,"Restart","To finish the process, you'll have to close and restart CloudCompare");
 
@@ -6522,8 +6509,8 @@ void MainWindow::saveGUIElementsPos()
 {
 	//save the state as settings
 	QSettings settings;
-	settings.setValue(s_psMainWinGeom, saveGeometry());
-	settings.setValue(s_psMainWinState, saveState());
+	settings.setValue(ccPS::MainWinGeom(), saveGeometry());
+	settings.setValue(ccPS::MainWinState(), saveState());
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)
@@ -8752,8 +8739,8 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	{
 		//persistent settings
 		QSettings settings;
-		settings.beginGroup(s_psSaveFile);
-		QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+		settings.beginGroup(ccPS::SaveFile());
+		QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
 		QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 		if (outputFilename.isEmpty())
@@ -8824,8 +8811,8 @@ void MainWindow::doActionExportCloudsInfo()
 
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup(s_psSaveFile);
-	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (outputFilename.isEmpty())
@@ -8839,7 +8826,7 @@ void MainWindow::doActionExportCloudsInfo()
 	}
 
 	//save last saving location
-	settings.setValue(s_psCurrentPath,QFileInfo(outputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(outputFilename).absolutePath());
 	settings.endGroup();
 
 	//write CSV header
@@ -9712,10 +9699,11 @@ void MainWindow::closeAll()
 
 void MainWindow::doActionLoadFile()
 {
+	//persistent settings
 	QSettings settings;
-	settings.beginGroup(s_psLoadFile);
-	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
-	QString currentOpenDlgFilter = settings.value(s_psSelectedInputFilter,BinFilter::GetFileFilter()).toString();
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(),BinFilter::GetFileFilter()).toString();
 
 	// Add all available file I/O filters (with import capabilities)
 	QStringList fileFilters;
@@ -9760,8 +9748,8 @@ void MainWindow::doActionLoadFile()
 
 	//save last loading parameters
 	currentPath = QFileInfo(selectedFiles[0]).absolutePath();
-	settings.setValue(s_psCurrentPath,currentPath);
-	settings.setValue(s_psSelectedInputFilter,currentOpenDlgFilter);
+	settings.setValue(ccPS::CurrentPath(),currentPath);
+	settings.setValue(ccPS::SelectedInputFilter(),currentOpenDlgFilter);
 	settings.endGroup();
 
 	if (currentOpenDlgFilter == s_allFilesFilter)
@@ -9953,21 +9941,21 @@ void MainWindow::doActionSaveFile()
 
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup(s_psSaveFile);
+	settings.beginGroup(ccPS::SaveFile());
 
 	//default filter
 	QString selectedFilter = fileFilters.first();
 	if (hasCloud)
-		selectedFilter = settings.value(s_psSelectedOutputFilterCloud,selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(),selectedFilter).toString();
 	else if (hasMesh)
-		selectedFilter = settings.value(s_psSelectedOutputFilterMesh, selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterMesh(), selectedFilter).toString();
 	else if (hasImages)
-		selectedFilter = settings.value(s_psSelectedOutputFilterImage, selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterImage(), selectedFilter).toString();
 	else if (hasPolylines)
-		selectedFilter = settings.value(s_psSelectedOutputFilterPoly, selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterPoly(), selectedFilter).toString();
 	
 	//default output path (+ filename)
-	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 	QString fullPathName = currentPath;
 	if (selNum == 1)
 	{
@@ -10059,17 +10047,17 @@ void MainWindow::doActionSaveFile()
 
 	//update default filters
 	if (hasCloud)
-		settings.setValue(s_psSelectedOutputFilterCloud,selectedFilter);
+		settings.setValue(ccPS::SelectedOutputFilterCloud(),selectedFilter);
 	if (hasMesh)
-		settings.setValue(s_psSelectedOutputFilterMesh, selectedFilter);
+		settings.setValue(ccPS::SelectedOutputFilterMesh(), selectedFilter);
 	if (hasImages)
-		settings.setValue(s_psSelectedOutputFilterImage,selectedFilter);
+		settings.setValue(ccPS::SelectedOutputFilterImage(),selectedFilter);
 	if (hasPolylines)
-		settings.setValue(s_psSelectedOutputFilterPoly, selectedFilter);
+		settings.setValue(ccPS::SelectedOutputFilterPoly(), selectedFilter);
 
 	//we update current file path
 	currentPath = QFileInfo(selectedFilename).absolutePath();
-	settings.setValue(s_psCurrentPath,currentPath);
+	settings.setValue(ccPS::CurrentPath(),currentPath);
 	settings.endGroup();
 }
 

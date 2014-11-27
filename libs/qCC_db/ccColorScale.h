@@ -252,6 +252,11 @@ public:
 		return m_rgbaScale + (index << 2);
 	}
 
+	//! Saves this color scale as an XML file
+	bool saveAsXML(QString filename) const;
+	//! Loads a color scale from an XML file
+	static Shared LoadFromXML(QString filename);
+
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
 	virtual bool toFile(QFile& out) const;

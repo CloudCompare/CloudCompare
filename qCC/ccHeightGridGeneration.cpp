@@ -15,15 +15,17 @@
 //#                                                                        #
 //##########################################################################
 
-//system
-#include <assert.h>
+#include "ccHeightGridGeneration.h"
 
-//CClib 
+//local
+#include "ui_rasterExportOptionsDlg.h"
+#include "ccPersistentSettings.h"
+
+//CClib
 #include <ScalarField.h>
 
 //qCC
 #include "ccCommon.h"
-#include "ccHeightGridGeneration.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -39,6 +41,7 @@
 #include <QImageWriter>
 #include <QSettings>
 #include <QMessageBox>
+#include <QDialog>
 
 #ifdef CC_GDAL_SUPPORT
 //GDAL
@@ -46,9 +49,8 @@
 #include <gdal_priv.h>
 #include <cpl_string.h>
 
-//local
-#include "ui_rasterExportOptionsDlg.h"
-#include <QDialog>
+//system
+#include <assert.h>
 
 class RasterExportOptionsDlg : public QDialog, public Ui::RasterExportOptionsDialog
 {
@@ -417,7 +419,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 	{
 		//persistent settings
 		QSettings settings;
-		settings.beginGroup("HeightGridGeneration");
+		settings.beginGroup(ccPS::HeightGridGeneration());
 
 		meanHeight /= static_cast<double>(nonEmptyCells);
 

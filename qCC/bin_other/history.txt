@@ -9,6 +9,9 @@ v2.6.1.beta 11/??/2014
 			to modulate the sampling distance depending on the scalar field values.
 		- the user simply has to set the sampling distances associated to the minimal and maximal SF
 			values and CC will linearly map the values inbetween.
+	* Color scale editor:
+		- the icon is now directly accessible in the main toolbar
+		- the user can export (and import) individual color scales as XML files
 
 - Enhancements:
 	* Interactive Segmentation tool: the segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)

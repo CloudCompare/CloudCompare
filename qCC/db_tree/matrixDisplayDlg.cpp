@@ -17,6 +17,9 @@
 
 #include "matrixDisplayDlg.h"
 
+//local
+#include "../ccPersistentSettings.h"
+
 //qCC_gl
 #include <ccGuiParameters.h>
 
@@ -102,8 +105,8 @@ void MatrixDisplayDlg::exportToASCII()
 {
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup("LoadFile"); //use the same folder as the load one
-	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	settings.beginGroup(ccPS::LoadFile()); //use the same folder as the load one
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.mat.txt");
 	if (outputFilename.isEmpty())

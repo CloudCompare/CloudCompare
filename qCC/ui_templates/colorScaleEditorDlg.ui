@@ -17,7 +17,16 @@
    <item>
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -44,6 +53,28 @@
        <widget class="QComboBox" name="rampComboBox">
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToContents</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="exportToolButton">
+        <property name="toolTip">
+         <string>Export color scale to a file</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="importToolButton">
+        <property name="toolTip">
+         <string>Import color scale from a file</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccOpen.png</normaloff>:/CC/images/ccOpen.png</iconset>
         </property>
        </widget>
       </item>
@@ -93,7 +124,16 @@
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>

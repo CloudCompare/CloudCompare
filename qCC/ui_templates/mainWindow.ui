@@ -686,6 +686,7 @@
    <addaction name="actionDeleteScalarField"/>
    <addaction name="actionAddConstantSF"/>
    <addaction name="actionScalarFieldArithmetic"/>
+   <addaction name="actionOpenColorScalesManager"/>
   </widget>
   <widget class="QToolBar" name="toolBarPluginTools">
    <property name="enabled">

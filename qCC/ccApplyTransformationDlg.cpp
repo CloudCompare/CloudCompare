@@ -17,6 +17,9 @@
 
 #include "ccApplyTransformationDlg.h"
 
+//Local
+#include "ccPersistentSettings.h"
+
 //Qt
 #include <QMessageBox>
 #include <QSettings>
@@ -233,8 +236,8 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 {
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup("LoadFile");
-	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	settings.beginGroup(ccPS::LoadFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
 	QString inputFilename = QFileDialog::getOpenFileName(this, "Select input file", currentPath, "*.txt");
 	if (inputFilename.isEmpty())

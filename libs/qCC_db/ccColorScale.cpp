@@ -270,3 +270,251 @@ void ccColorScale::getAbsoluteBoundaries(double& minVal, double& maxVal) const
 	minVal = m_absoluteMinValue;
 	maxVal = m_absoluteMinValue + m_absoluteRange;
 }
+
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+
+static QString s_xmlCloudCompare         = "CloudCompare";
+static QString s_xmlColorScaleTitle      = "ColorScale";
+static QString s_xmlColorScaleProperties = "Properties";
+static QString s_xmlColorScaleData       = "Data";
+static int s_xmlColorScaleVer = 1;
+
+bool ccColorScale::saveAsXML(QString filename) const
+{
+	QFile file(filename);
+	if (!file.open(QFile::WriteOnly | QFile::Text))
+	{
+		ccLog::Error(QString("Failed to open file '%1' for writing!").arg(filename));
+		return false;
+	}
+	
+	//write content
+	QXmlStreamWriter stream(&file);
+	stream.setAutoFormatting(true);
+	stream.writeStartDocument();
+	{
+		stream.writeStartElement(s_xmlCloudCompare);	// CloudCompare
+		{
+			stream.writeStartElement(s_xmlColorScaleTitle);	// ColorScale
+			{
+				//file version
+				stream.writeAttribute("version",QString::number(s_xmlColorScaleVer));
+					
+				//Properties
+				stream.writeStartElement(s_xmlColorScaleProperties);
+				{
+					stream.writeTextElement("name",     getName());
+					stream.writeTextElement("uuid",     getUuid());
+					stream.writeTextElement("absolute", isRelative() ? "0" : "1");
+					if (!isRelative())
+					{
+						stream.writeTextElement("minValue", QString::number(m_absoluteMinValue,'g',12));
+						stream.writeTextElement("range",    QString::number(m_absoluteRange,'g',12));
+					}
+				}
+				stream.writeEndElement(); //Properties
+
+				//Data
+				stream.writeStartElement(s_xmlColorScaleData);
+				{
+					//write each step
+					for (QList<ccColorScaleElement>::const_iterator it = m_steps.begin(); it != m_steps.end(); ++it)
+					{
+						stream.writeStartElement("step");
+						{
+							const ccColorScaleElement& elem = *it;
+							const QColor& color = elem.getColor();
+							double relativePos = elem.getRelativePos();
+
+							stream.writeAttribute("r",   QString::number(color.red())  );
+							stream.writeAttribute("g", QString::number(color.green()));
+							stream.writeAttribute("b",  QString::number(color.blue()) );
+							stream.writeAttribute("pos",   QString::number(relativePos,'g',12)  );
+						}
+						stream.writeEndElement(); //step
+					}
+				}
+				stream.writeEndElement(); //Data
+			}
+			stream.writeEndElement(); // ColorScale
+		}
+		stream.writeEndElement(); // CloudCompare
+	}
+	stream.writeEndDocument();
+
+	return true;
+}
+
+ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
+{
+	QFile file(filename);
+	if (!file.open(QFile::ReadOnly | QFile::Text))
+	{
+		ccLog::Error(QString("Failed to open file '%1' for reading!").arg(filename));
+		return Shared(0);
+	}
+	
+	Shared scale(0);
+
+	//read content
+	QXmlStreamReader stream(&file);
+	bool error = true;
+	while (true) //fake loop for easy break
+	{
+		//expected: CloudCompare
+		if (	!stream.readNextStartElement()
+			||	stream.name() != s_xmlCloudCompare)
+		{
+			break;
+		}
+
+		//expected: ColorScale
+		if (	!stream.readNextStartElement()
+			||	stream.name() != s_xmlColorScaleTitle)
+		{
+			break;
+		}
+
+		//read version number
+		QXmlStreamAttributes attributes = stream.attributes();
+		if (attributes.size() == 0 || attributes[0].name() != "version")
+		{
+			break;
+		}
+		bool ok = false;
+		int version = attributes[0].value().toInt(&ok);
+		if (!ok || version > s_xmlColorScaleVer)
+		{
+			if (ok)
+				ccLog::Warning(QString("[ccColorScale::LoadFromXML] Unhandled version: %1").arg(version));
+			break;
+		}
+
+		//expected: Properties
+		if (	!stream.readNextStartElement()
+			||	stream.name() != s_xmlColorScaleProperties)
+		{
+			break;
+		}
+		
+		//we can now create the scale structure
+		scale = Shared(new ccColorScale("temp"));
+
+		//read elements
+		int missingItems = 3;
+		while (!stream.atEnd() && missingItems > 0)
+		{
+			stream.readNextStartElement();
+			QStringRef itemName = stream.name();
+			QString itemValue = stream.readElementText();
+			ccLog::Print(QString("[XML] Item '%1': '%2'").arg(itemName.toString()).arg(itemValue));
+
+			if (itemName == "name")
+			{
+				scale->setName(itemValue);
+				--missingItems;
+			}
+			else if (itemName == "uuid")
+			{
+				scale->setUuid(itemValue);
+				--missingItems;
+			}
+			else if (itemName == "absolute")
+			{
+				if (itemValue == "1")
+				{
+					scale->setAbsolute(0,1); //the true values will be updated afterwards
+					missingItems += 2; //we need the minValue and range items!
+				}
+				--missingItems;
+			}
+			else if (itemName == "minValue")
+			{
+				scale->m_absoluteMinValue = itemValue.toDouble(&ok);
+				if (!ok)
+					break;
+				--missingItems;
+			}
+			else if (itemName == "range")
+			{
+				scale->m_absoluteRange = itemValue.toDouble(&ok);
+				if (!ok)
+					break;
+				--missingItems;
+			}
+		}
+
+		if (missingItems > 0)
+		{
+			ccLog::Warning(QString("[ccColorScale::LoadFromXML] Missing properties!"));
+			break;
+		}
+		stream.skipCurrentElement();
+
+		//expected: Data
+		if (	!stream.readNextStartElement()
+			||	stream.name() != s_xmlColorScaleData)
+		{
+			ccLog::Warning(QString("[ccColorScale::LoadFromXML] Unexpected element: %1").arg(stream.name().toString()));
+			break;
+		}
+
+		//read data
+		bool dataError = false;
+		while (!stream.atEnd())
+		{
+			if (!stream.readNextStartElement())
+				break;
+			if (stream.name() == "step")
+			{
+				QXmlStreamAttributes attributes = stream.attributes();
+				int attributeCount = attributes.size();
+				if (attributeCount < 4)
+				{
+					dataError = true;
+					break;
+				}
+				QColor rgb;
+				double pos = 0;
+				for (int i=0; i<attributes.size(); ++i)
+				{
+					if (attributes[i].name() == "r")
+						rgb.setRed(attributes[i].value().toInt());
+					else if (attributes[i].name() == "g")
+						rgb.setGreen(attributes[i].value().toInt());
+					else if (attributes[i].name() == "b")
+						rgb.setBlue(attributes[i].value().toInt());
+					else if (attributes[i].name() == "pos")
+						pos = attributes[i].value().toDouble();
+					else
+						--attributeCount;
+				}
+
+				if (attributeCount < 4)
+				{
+					ccLog::Warning(QString("[ccColorScale::LoadFromXML] Missing data attributes!"));
+					dataError = true;
+					break;
+				}
+				stream.skipCurrentElement();
+
+				scale->insert(ccColorScaleElement(pos,rgb),false);
+			}
+		}
+		scale->update();
+
+		//end
+		error = dataError;
+		break;
+	}
+
+	if (error)
+	{
+		scale.clear();
+		ccLog::Error(QString("An error occurred while reading file '%1'").arg(filename));
+	}
+
+	return scale;
+}
+

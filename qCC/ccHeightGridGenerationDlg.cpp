@@ -19,6 +19,7 @@
 
 //Local
 #include "ccBoundingBoxEditorDlg.h"
+#include "ccPersistentSettings.h";
 
 //Qt
 #include <QSettings>
@@ -207,22 +208,22 @@ ccHeightGridGeneration::EmptyCellFillOption ccHeightGridGenerationDlg::getFillEm
 void ccHeightGridGenerationDlg::loadSettings()
 {
 	QSettings settings;
-	settings.beginGroup("HeightGridGeneration");
+	settings.beginGroup(ccPS::HeightGridGeneration());
 	int projType		= settings.value("ProjectionType",typeOfProjectionComboBox->currentIndex()).toInt();
-	int fillStrategy	= settings.value("FillStrategy",fillEmptyCells->currentIndex()).toInt();
+	int projDim			= settings.value("ProjectionDim",dimensionComboBox->currentIndex()).toInt();
 	bool sfProj			= settings.value("SfProjEnabled",interpolateSFCheckBox->isChecked()).toBool();
 	int sfProjStrategy	= settings.value("SfProjStrategy",scalarFieldProjection->currentIndex()).toInt();
-	int projDim			= settings.value("ProjectionDim",dimensionComboBox->currentIndex()).toInt();
+	int fillStrategy	= settings.value("FillStrategy",fillEmptyCells->currentIndex()).toInt();
 	double step			= settings.value("GridStep",gridStep->value()).toDouble();
 	double emptyHeight	= settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
 	bool genCloud		= settings.value("GenerateCloud",generateCloudGroupBox->isChecked()).toBool();
 	bool genImage		= settings.value("GenerateImage",generateImageCheckBox->isChecked()).toBool();
-#ifdef CC_GDAL_SUPPORT
-	bool genRaster		= settings.value("GenerateRaster",generateImageCheckBox->isChecked()).toBool();
-#endif
 	bool genASCII		= settings.value("GenerateASCII",generateASCIICheckBox->isChecked()).toBool();
 	bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
 	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleOriginalCloudCheckBox->isChecked()).toBool();
+#ifdef CC_GDAL_SUPPORT
+	bool genRaster		= settings.value("GenerateRaster",generateImageCheckBox->isChecked()).toBool();
+#endif
 	settings.endGroup();
 
 	gridStep->setValue(step);
@@ -247,7 +248,7 @@ void ccHeightGridGenerationDlg::loadSettings()
 void ccHeightGridGenerationDlg::saveSettings()
 {
 	QSettings settings;
-	settings.beginGroup("HeightGridGeneration");
+	settings.beginGroup(ccPS::HeightGridGeneration());
 	settings.setValue("ProjectionType",typeOfProjectionComboBox->currentIndex());
 	settings.setValue("ProjectionDim",dimensionComboBox->currentIndex());
 	settings.setValue("SfProjEnabled",interpolateSFCheckBox->isChecked());

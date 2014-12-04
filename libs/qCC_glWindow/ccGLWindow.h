@@ -337,14 +337,14 @@ public:
 	//! Returns current font size
 	virtual int getFontPointSize() const;
 
-	//! Returns window own DB (2D objects only)
+	//! Returns window own DB
 	virtual ccHObject* getOwnDB();
-	//! Adds an entity to window own DB (2D objects only)
+	//! Adds an entity to window own DB
 	/** By default no dependency link is established between the entity and the window (DB).
 	**/
-	virtual void addToOwnDB(ccHObject* obj2D, bool noDependency = true);
-	//! Removes an entity from window own DB (2D objects only)
-	virtual void removeFromOwnDB(ccHObject* obj2D);
+	virtual void addToOwnDB(ccHObject* obj, bool noDependency = true);
+	//! Removes an entity from window own DB
+	virtual void removeFromOwnDB(ccHObject* obj);
 
 	//! Sets viewport parameters (all at once)
 	virtual void setViewportParameters(const ccViewportParameters& params);

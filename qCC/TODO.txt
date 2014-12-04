@@ -28,13 +28,14 @@ Big ones:
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
+[*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 
 Various:
+[*] Add an option to the command line mode to replace loaded clouds by their subsampled version (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)
 [*] Add a filter to the DB tree (http://www.danielgm.net/cc/forum/viewtopic.php?t=1055)
 [*] Selection of planar area based on region growing would be nice (http://www.cloudcompare.org/forum/viewtopic.php?t=1046)
 [*] Create a camera object at the current position of the OpenGL camera
-[*] Set the rotation center with a point picked on a mesh and not only in a cloud
 [*] Add a 'two-windows' mode to the point-pair based alignment tool (http://cloudcompare.org/forum/viewtopic.php?t=1043)
 [*] Handle 'Folded Normal Distribution' in the Compute Stats Params method (for positive scalar fields, e.g. unsigned C2C distances)
 [*] Change Triangle lib by a GPL-compatible library

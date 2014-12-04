@@ -1206,14 +1206,18 @@ ccHObject* ccGLWindow::getOwnDB()
 	return m_winDBRoot;
 }
 
-void ccGLWindow::addToOwnDB(ccHObject* obj2D, bool noDependency/*=true*/)
+void ccGLWindow::addToOwnDB(ccHObject* obj, bool noDependency/*=true*/)
 {
-	assert(obj2D);
+	if (!obj)
+	{
+		assert(false);
+		return;
+	}
 
 	if (m_winDBRoot)
 	{
-		m_winDBRoot->addChild(obj2D,noDependency ? ccHObject::DP_NONE : ccHObject::DP_PARENT_OF_OTHER);
-		obj2D->setDisplay(this);
+		m_winDBRoot->addChild(obj,noDependency ? ccHObject::DP_NONE : ccHObject::DP_PARENT_OF_OTHER);
+		obj->setDisplay(this);
 	}
 	else
 	{
@@ -1221,10 +1225,10 @@ void ccGLWindow::addToOwnDB(ccHObject* obj2D, bool noDependency/*=true*/)
 	}
 }
 
-void ccGLWindow::removeFromOwnDB(ccHObject* obj2D)
+void ccGLWindow::removeFromOwnDB(ccHObject* obj)
 {
 	if (m_winDBRoot)
-		m_winDBRoot->removeChild(obj2D);
+		m_winDBRoot->removeChild(obj);
 }
 
 void ccGLWindow::zoomGlobal()

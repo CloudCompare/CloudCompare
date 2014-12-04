@@ -437,7 +437,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		}
 	}
 
-	//normales (reserved)
+	//normals (reserved)
 	if (hasNormals() || addedCloud->hasNormals())
 	{
 		//merge display parameters
@@ -493,7 +493,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				if (sfIdx >= 0) //yes
 				{
 					CCLib::ScalarField* sameSF = getScalarField(sfIdx);
-					assert(sameSF && sameSF->capacity()>=pointCountBefore+addedPoints);
+					assert(sameSF && sameSF->capacity() >= pointCountBefore+addedPoints);
 					//we fill it with new values (it should have been already 'reserved' (if necessary)
 					if (sameSF->currentSize() == pointCountBefore)
 						for (unsigned i=0; i<addedPoints; i++)

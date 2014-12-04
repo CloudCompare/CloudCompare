@@ -4,6 +4,10 @@ v2.6.1.beta 11/??/2014
 - New features:
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
+	* DP file I/O filter (plugin)
+		- to open DP (DotProduct - http://www.dotproduct3d.com/) files
+		- imports each frame as a separate cloud (all frames can be merged afterwards with 'Edit > Merge')
+		- creates the corresponding 'sensor' object for each frame
 	* Subsample tool:
 		- when performing 'Spatial' resampling, the user can now choose to use the active scalar field
 			to modulate the sampling distance depending on the scalar field values.

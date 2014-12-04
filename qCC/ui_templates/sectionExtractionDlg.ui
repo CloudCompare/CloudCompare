@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SectionExtractionDlg</class>
+ <widget class="QDialog" name="SectionExtractionDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>246</width>
+    <height>26</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Section Extraction</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QToolButton" name="polylineToolButton">
+     <property name="toolTip">
+      <string>Create polyline by clicking on the screen</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="importFromDBToolButton">
+     <property name="toolTip">
+      <string>Import one or several polylines from DB</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/dbHObjectSymbol.png</normaloff>:/CC/images/dbHObjectSymbol.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="hydroAxisToolButton">
+     <property name="text">
+      <string>ah</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="extractPointsToolButton">
+     <property name="text">
+      <string>ep</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="resetToolButton">
+     <property name="toolTip">
+      <string>Clear segmentation</string>
+     </property>
+     <property name="statusTip">
+      <string>Clear segmentation</string>
+     </property>
+     <property name="text">
+      <string>raz</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="validToolButton">
+     <property name="toolTip">
+      <string>Confirm segmentation</string>
+     </property>
+     <property name="statusTip">
+      <string>Confirm segmentation</string>
+     </property>
+     <property name="text">
+      <string>OK</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Vert.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="vertAxisComboBox">
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Z</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -351,6 +351,7 @@
      </property>
      <addaction name="actionLabelConnectedComponents"/>
      <addaction name="actionCrossSection"/>
+     <addaction name="actionExtractSections"/>
      <addaction name="separator"/>
      <addaction name="actionKMeans"/>
      <addaction name="actionFrontPropagation"/>
@@ -664,6 +665,7 @@
    <addaction name="actionSegment"/>
    <addaction name="actionTranslateRotate"/>
    <addaction name="actionCrossSection"/>
+   <addaction name="actionExtractSections"/>
   </widget>
   <widget class="QToolBar" name="toolBarSFTools">
    <property name="windowTitle">
@@ -681,8 +683,6 @@
    <addaction name="actionShowHistogram"/>
    <addaction name="actionComputeStatParams"/>
    <addaction name="actionFilterByValue"/>
-   <addaction name="actionSFGradient"/>
-   <addaction name="actionGaussianFilter"/>
    <addaction name="actionDeleteScalarField"/>
    <addaction name="actionAddConstantSF"/>
    <addaction name="actionScalarFieldArithmetic"/>
@@ -2675,6 +2675,18 @@
    </property>
    <property name="shortcut">
     <string>B</string>
+   </property>
+  </action>
+  <action name="actionExtractSections">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
+   </property>
+   <property name="text">
+    <string>Extract sections</string>
+   </property>
+   <property name="toolTip">
+    <string>Extract cloud sections along polylines</string>
    </property>
   </action>
  </widget>

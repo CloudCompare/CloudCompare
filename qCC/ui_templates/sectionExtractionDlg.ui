@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>246</width>
+    <width>273</width>
     <height>26</height>
    </rect>
   </property>
@@ -52,16 +52,30 @@
     </widget>
    </item>
    <item>
-    <widget class="QToolButton" name="hydroAxisToolButton">
-     <property name="text">
-      <string>ah</string>
+    <widget class="QToolButton" name="generateOrthoSectionsToolButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Generate orthogonal sections along a path</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/orthoSections.png</normaloff>:/CC/images/orthoSections.png</iconset>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QToolButton" name="extractPointsToolButton">
-     <property name="text">
-      <string>ep</string>
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Extract points along active sections</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/sectionExtraction.png</normaloff>:/CC/images/sectionExtraction.png</iconset>
      </property>
     </widget>
    </item>
@@ -79,6 +93,20 @@
      <property name="icon">
       <iconset resource="../icones.qrc">
        <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="exportSectionsToolButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Export manually defined sections to DB</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
      </property>
     </widget>
    </item>

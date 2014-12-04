@@ -18,9 +18,11 @@
 #include <ccPointPairRegistrationDlg.h>
 
 //Local
-#include <mainwindow.h>
+#include "mainwindow.h"
+#include "ccAskThreeDoubleValuesDlg.h"
+
+//qCC_gl
 #include <ccGLWindow.h>
-#include <ccAskThreeDoubleValuesDlg.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>

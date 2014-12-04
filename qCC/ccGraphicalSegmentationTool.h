@@ -131,4 +131,4 @@ protected:
 	bool m_deleteHiddenParts;
 };
 
-#endif
+#endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

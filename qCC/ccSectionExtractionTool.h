@@ -23,6 +23,7 @@
 
 //qCC_db
 #include <ccHObject.h>
+#include <ccPolyline.h>
 
 //Qt
 #include <QList>
@@ -30,7 +31,6 @@
 //GUI
 #include <ui_sectionExtractionDlg.h>
 
-class ccPolyline;
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccGLWindow;
@@ -64,7 +64,7 @@ public:
 
 protected slots:
 
-	void reset(bool askForConfirmation = true);
+	bool reset(bool askForConfirmation = true);
 	void apply();
 	void addPointToPolyline(int x, int y);
 	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
@@ -72,6 +72,10 @@ protected slots:
 	void enableSectionEditingMode(bool);
 	void doImportPolylinesFromDB();
 	void setVertDimension(int);
+	void entitySelected(int);
+	void generateOrthoSections();
+	void extractPoints();
+	void exportSections();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
@@ -92,23 +96,49 @@ protected:
 			: entity(0)
 			, originalDisplay(0)
 			, isInDB(false)
+			, backupColorShown(false)
+			, backupWidth(1)
 		{}
 		//! Copy constructor
 		ImportedEntity(const ImportedEntity& section)
 			: entity(section.entity)
 			, originalDisplay(section.originalDisplay)
 			, isInDB(section.isInDB)
-		{}
-		//! Constructor from a polyline
+			, backupColorShown(section.backupColorShown)
+			, backupWidth(section.backupWidth)
+		{
+			backupColor[0] = section.backupColor[0];
+			backupColor[1] = section.backupColor[1];
+			backupColor[2] = section.backupColor[2];
+		}
+		//! Constructor from an entity
 		ImportedEntity(EntityType* e, bool alreadyInDB)
 			: entity(e)
 			, originalDisplay(e->getDisplay())
 			, isInDB(alreadyInDB)
-		{}
+		{
+			//specific case: polylines
+			if (e->isA(CC_TYPES::POLY_LINE))
+			{
+				ccPolyline* poly = (ccPolyline*)e;
+				//backup color
+				backupColor[0] = poly->getColor()[0];
+				backupColor[1] = poly->getColor()[1];
+				backupColor[2] = poly->getColor()[2];
+				backupColorShown = poly->colorsShown();
+				//backup thickness
+				backupWidth = poly->getWidth();
+			}
+		}
 		
 		EntityType* entity;
 		ccGenericGLDisplay* originalDisplay;
 		bool isInDB;
+
+		//backup info (for polylines only)
+		colorType backupColor[3];
+		bool backupColorShown;
+		PointCoordinateType backupWidth;
 	};
 
 	//! Section
@@ -120,14 +150,8 @@ protected:
 	//! Type of the pool of active sections
 	typedef QList<Section> SectionPool;
 
-	//! Pool of active sections
-	SectionPool m_sections;
-
 	//! Type of the pool of clouds
 	typedef QList<Cloud> CloudPool;
-
-	//! Pool of clouds
-	CloudPool m_clouds;
 
 	//! Process states
 	enum ProcessStates
@@ -141,6 +165,20 @@ protected:
 		STARTED			= 64,
 		RUNNING			= 128,
 	};
+
+	//! Deselects the currently selected polyline
+	void selectPolyline(Section* poly);
+
+protected: //members
+
+	//! Pool of active sections
+	SectionPool m_sections;
+
+	//! Selected polyline (if any)
+	Section* m_selectedPoly;
+
+	//! Pool of clouds
+	CloudPool m_clouds;
 
 	//! Current process state
 	unsigned m_state;

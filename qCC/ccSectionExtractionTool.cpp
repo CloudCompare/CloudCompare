@@ -20,6 +20,7 @@
 //Local
 #include "mainwindow.h"
 #include "ccEntityPickerDlg.h"
+#include "ccOrthoSectionGenerationDlg.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -38,9 +39,17 @@
 //System
 #include <assert.h>
 
+//default parameters
+static const colorType* s_defaultPolylineColor         = ccColor::yellow;
+static const colorType* s_defaultEditedPolylineColor   = ccColor::green;
+static const colorType* s_defaultSelectedPolylineColor = ccColor::red;
+static const int        s_defaultPolylineWidth         = 1;
+static const int        s_defaultSelectedPolylineWidth = 3;
+
 ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::SectionExtractionDlg()
+	, m_selectedPoly(0)
 	, m_state(0)
 	, m_editedPoly(0)
 	, m_editedPolyVertices(0)
@@ -54,15 +63,15 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	connect(importFromDBToolButton,				SIGNAL(clicked()),					this,	SLOT(doImportPolylinesFromDB()));
 	connect(vertAxisComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(setVertDimension(int)));
 
+	connect(generateOrthoSectionsToolButton,	SIGNAL(clicked()),					this,	SLOT(generateOrthoSections()));
+	connect(extractPointsToolButton,			SIGNAL(clicked()),					this,	SLOT(extractPoints()));
+	connect(exportSectionsToolButton,			SIGNAL(clicked()),					this,	SLOT(exportSections()));
+
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //cancel current polyline edition
+	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
 
-	//addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
-	//addOverridenShortcut(Qt::Key_Delete); //delete key for the "apply and delete" button
-	//addOverridenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
-	//addOverridenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
-	//addOverridenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
 	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
 }
 
@@ -86,10 +95,10 @@ void ccSectionExtractionTool::setVertDimension(int dim)
 	switch(dim)
 	{
 	case 0:
-		m_associatedWin->setView(CC_LEFT_VIEW);
+		m_associatedWin->setView(CC_RIGHT_VIEW);
 		break;
 	case 1:
-		m_associatedWin->setView(CC_BOTTOM_VIEW);
+		m_associatedWin->setView(CC_FRONT_VIEW);
 		break;
 	case 2:
 	default:
@@ -111,6 +120,10 @@ void ccSectionExtractionTool::onShortcutTriggered(int key)
 		cancelCurrentPolyline();
 		return;
 
+	case Qt::Key_Delete:
+		//FIXME
+		return;
+
 	default:
 		//nothing to do
 		break;
@@ -124,12 +137,15 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 	if (!ccOverlayDialog::linkWith(win))
 		return false;
 
+	selectPolyline(0);
+
 	if (oldWin)
 	{
 		disconnect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
 		disconnect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
 		disconnect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
 		disconnect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+		disconnect(m_associatedWin, SIGNAL(entitySelectionChanged(int)), this, SLOT(entitySelected(int)));
 
 		//restore sections original display
 		{
@@ -179,6 +195,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		connect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
 		connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
 		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+		connect(m_associatedWin, SIGNAL(entitySelectionChanged(int)), this, SLOT(entitySelected(int)));
 
 		//import sections in current display
 		{
@@ -216,6 +233,52 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 	return true;
 }
 
+void ccSectionExtractionTool::selectPolyline(Section* poly)
+{
+	bool redraw = false;
+
+	//deselect previously selected polyline
+	if (m_selectedPoly && m_selectedPoly->entity)
+	{
+		m_selectedPoly->entity->showColors(true);
+		m_selectedPoly->entity->setColor(s_defaultPolylineColor);
+		m_selectedPoly->entity->setWidth(s_defaultPolylineWidth);
+		redraw = true;
+	}
+
+	m_selectedPoly = poly;
+	
+	//select new polyline (if any)
+	if (m_selectedPoly)
+	{
+		m_selectedPoly->entity->showColors(true);
+		m_selectedPoly->entity->setColor(s_defaultSelectedPolylineColor);
+		m_selectedPoly->entity->setWidth(s_defaultSelectedPolylineWidth);
+		redraw = true;
+	}
+
+	if (redraw && m_associatedWin)
+	{
+		m_associatedWin->redraw();
+	}
+
+	generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != 0);
+}
+
+void ccSectionExtractionTool::entitySelected(int uniqueID)
+{
+	//look if this unique ID corresponds to an active polyline
+	for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+	{
+		Section& section = *it;
+		if (section.entity && section.entity->getUniqueID() == uniqueID)
+		{
+			selectPolyline(&section);
+			break;
+		}
+	}
+}
+
 bool ccSectionExtractionTool::start()
 {
 	assert(!m_editedPolyVertices && !m_editedPoly);
@@ -228,7 +291,6 @@ bool ccSectionExtractionTool::start()
 
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
-	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING/*ENTITY_PICKING*/); //DGM: we should be able to pick polyine?
 	m_associatedWin->updateConstellationCenterAndZoom();
 	
 	enableSectionEditingMode(true);
@@ -256,26 +318,38 @@ void ccSectionExtractionTool::removeAllEntities()
 	}
 }
 
-void ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
+bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 {
 	if (m_sections.empty() && m_clouds.empty())
 	{
 		//nothing to do
-		return;
+		return true;
 	}
 
 	if (askForConfirmation)
 	{
-		if (QMessageBox::question(MainWindow::TheInstance(), "Reset", "You'll lose all manually defined polylines: are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
-			return;
+		//if we found at least one temporary polyline, we display a confirmation message
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB)
+			{
+				if (QMessageBox::question(MainWindow::TheInstance(), "Reset", "You'll lose all manually defined polylines: are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					return false;
+				else
+					break;
+			}
+		}
 	}
+
+	selectPolyline(0);
 
 	//we remove all polylines
 	{
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			//restore original display
+			//restore original display and style
 			if (section.entity)
 			{
 				if (!section.isInDB)
@@ -287,11 +361,15 @@ void ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 				}
 				else
 				{
+					section.entity->showColors(section.backupColorShown);
+					section.entity->setColor  (section.backupColor);
+					section.entity->setWidth  (section.backupWidth);
 					section.entity->setDisplay(section.originalDisplay);
 				}
 			}
 		}
 		m_sections.clear();
+		exportSectionsToolButton->setEnabled(false);
 	}
 
 	//and we remove only temporary clouds
@@ -299,7 +377,6 @@ void ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 		for (int i=0; i < m_clouds.size(); )
 		{
 			Cloud& cloud = m_clouds[i];
-			//restore original display
 			if (cloud.entity && !cloud.isInDB)
 			{
 				if (m_associatedWin)
@@ -307,7 +384,7 @@ void ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 				delete cloud.entity;
 				cloud.entity = 0;
 
-				m_sections.removeAt(i);
+				m_clouds.removeAt(i);
 			}
 			else
 			{
@@ -318,6 +395,8 @@ void ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 
 	if (m_associatedWin)
 		m_associatedWin->redraw();
+
+	return true;
 }
 
 void ccSectionExtractionTool::stop(bool accepted)
@@ -331,7 +410,7 @@ void ccSectionExtractionTool::stop(bool accepted)
 	}
 
 	enableSectionEditingMode(false);
-	reset();
+	reset(false);
 
 	if (m_associatedWin)
 	{
@@ -372,41 +451,56 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 		int VP[4];
 		m_associatedWin->getViewportArray(VP);
 
-		ccPointCloud* duplicateVertices = new ccPointCloud();
-		ccPolyline* duplicatePoly = new ccPolyline(duplicateVertices);
-		duplicatePoly->addChild(duplicateVertices);
-
-		//duplicate polyline 'a minima' (only points and indexes + closed state)
-		CCLib::GenericIndexedCloudPersist* vertices = inputPoly->getAssociatedCloud();
-		if (	duplicateVertices->reserve(vertices->size())
-			&&	duplicatePoly->reserve(inputPoly->size()))
+		//get default altitude from the cloud(s) bouding-box
+		PointCoordinateType defaultZ = 0;
+		int vertDim = vertAxisComboBox->currentIndex();
+		assert(vertDim >= 0 && vertDim < 3);
 		{
-			for (unsigned i=0; i<vertices->size(); ++i)
+			bool validZ = false;
+			for (int i=0; i<m_clouds.size(); ++i)
 			{
-				CCVector3 P = *vertices->getPoint(i);
+				if (m_clouds[i].entity)
+				{
+					PointCoordinateType maxZ = m_clouds.front().entity->getBB().maxCorner()[vertDim];
+					if (validZ)
+					{
+						defaultZ = std::max(defaultZ, maxZ);
+					}
+					else
+					{
+						validZ = true;
+						defaultZ = maxZ;
+					}
+				}
+			}
+		}
+
+		//duplicate polyline
+		ccPolyline* duplicatePoly = new ccPolyline(0);
+		ccPointCloud* duplicateVertices = 0;
+		if (duplicatePoly->initWith(duplicateVertices,*inputPoly))
+		{
+			assert(duplicateVertices);
+			for (unsigned i=0; i<duplicateVertices->size(); ++i)
+			{
+				CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
 				GLdouble xp,yp,zp;
 				gluUnProject(half_w+P.x,half_h+P.y,0/*P.z*/,MM,MP,VP,&xp,&yp,&zp);
 				P.x = static_cast<PointCoordinateType>(xp);
 				P.y = static_cast<PointCoordinateType>(yp);
 				P.z = static_cast<PointCoordinateType>(zp);
-
-				duplicateVertices->addPoint(P);
+				P.u[vertDim] = defaultZ;
 			}
-			for (unsigned j=0; j<inputPoly->size(); ++j)
-				duplicatePoly->addPointIndex(inputPoly->getPointGlobalIndex(j));
 
-			duplicatePoly->setClosed(inputPoly->isClosed());
+			duplicateVertices->invalidateBoundingBox();
 			duplicatePoly->set2DMode(false);
-			duplicatePoly->setColor(inputPoly->getColor());
-			duplicatePoly->showColors(inputPoly->colorsShown());
-			duplicatePoly->setClosed(inputPoly->isClosed());
+			duplicatePoly->setDisplay(inputPoly->getDisplay());
 
 			if (!alreadyInDB)
 				delete inputPoly;
 			else
 				alreadyInDB = false;
 			inputPoly = duplicatePoly;
-			vertices = 0;
 		}
 		else
 		{
@@ -417,8 +511,18 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 			return false;
 		}
 	}
-	
+
+	//add polyline to the 'sections' set
+	//(all its parameters will be backuped!)
 	m_sections.push_back(Section(inputPoly,alreadyInDB));
+	exportSectionsToolButton->setEnabled(m_state == PAUSED);
+
+	//apply default look
+	inputPoly->showColors(true);
+	inputPoly->setColor(s_defaultPolylineColor);
+	inputPoly->setWidth(s_defaultPolylineWidth);
+
+	//add to display
 	if (m_associatedWin)
 	{
 		inputPoly->setDisplay(m_associatedWin);
@@ -511,7 +615,7 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 		m_editedPolyVertices = new ccPointCloud("vertices");
 		m_editedPoly = new ccPolyline(m_editedPolyVertices);
 		m_editedPoly->setForeground(true);
-		m_editedPoly->setColor(ccColor::green);
+		m_editedPoly->setColor(s_defaultEditedPolylineColor);
 		m_editedPoly->showColors(true);
 		m_editedPoly->set2DMode(true);
 		m_editedPoly->addChild(m_editedPolyVertices);
@@ -593,8 +697,14 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 		//remove polyline from the 'temporary' world
 		if (m_associatedWin)
 			m_associatedWin->removeFromOwnDB(m_editedPoly);
+		//set default display style
+		m_editedPoly->showColors(true);
+		m_editedPoly->setColor(s_defaultPolylineColor);
+		m_editedPoly->setWidth(s_defaultPolylineWidth);
+		if (!m_clouds.isEmpty())
+			m_editedPoly->setDisplay_recursive(m_clouds.front().originalDisplay); //set the same 'default' display as the cloud
+		m_editedPoly->setName(QString("Polyline #%1").arg(m_sections.size()+1));
 		//save polyline
-		m_editedPoly->setColor(ccColor::yellow);
 		if (!addPolyline(m_editedPoly,false))
 		{
 			//if something went wrong, we have to remove the polyline manually
@@ -637,6 +747,10 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 
 	if (!state/*=activate pause mode*/)
 	{
+		//select the last polyline by default (if any)
+		if (!m_sections.empty() && !m_sections.back().isInDB)
+			selectPolyline(&m_sections.back());
+
 		m_state = PAUSED;
 		
 		if (m_editedPoly && m_editedPolyVertices)
@@ -646,11 +760,16 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 		}
 		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY);
 		m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
 	}
 	else
 	{
+		//deselect all currently selected polylines
+		selectPolyline(0);
+
 		m_state = STARTED;
 		
+		m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 		m_associatedWin->setInteractionMode(ccGLWindow::SEGMENT_ENTITY);
 		m_associatedWin->displayNewMessage("Section edition mode",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Left click: add section points / Right click: stop",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
@@ -661,8 +780,9 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 	polylineToolButton->setChecked(state);
 	polylineToolButton->blockSignals(false);
 
-	hydroAxisToolButton->setEnabled(!state);
+	generateOrthoSectionsToolButton->setEnabled(!state && m_selectedPoly);
 	extractPointsToolButton->setEnabled(!state);
+	exportSectionsToolButton->setEnabled(!state && !m_sections.empty());
 
 	m_associatedWin->redraw();
 }
@@ -704,6 +824,184 @@ void ccSectionExtractionTool::doImportPolylinesFromDB()
 
 void ccSectionExtractionTool::apply()
 {
-	reset(false);
+	if (!reset(true))
+		return;
+	
 	stop(true);
 }
+
+void ccSectionExtractionTool::generateOrthoSections()
+{
+	if (!m_selectedPoly)
+	{
+		ccLog::Warning("[ccSectionExtractionTool] No polyline selected");
+		return;
+	}
+
+	//compute poyline length
+	ccPolyline* poly = m_selectedPoly->entity;
+	unsigned vertCount = (poly ? poly->size() : 0);
+	if (vertCount < 2)
+	{
+		ccLog::Warning("[ccSectionExtractionTool] Invalid polyline");
+		return;
+	}
+
+	PointCoordinateType length = poly->computeLength();
+
+	//display dialog
+	ccOrthoSectionGenerationDlg osgDlg(MainWindow::TheInstance());
+	osgDlg.setPathLength(length);
+	if (!osgDlg.exec())
+		return;
+
+	//now generate the orthogonal sections
+	double step = osgDlg.getGenerationStep();
+	double width = osgDlg.getSectionsWidth();
+
+	//normal to the plane
+	CCVector3 N(0,0,0);
+	int vertDim = vertAxisComboBox->currentIndex();
+	assert(vertDim >= 0 && vertDim < 3);
+	{
+		N.u[vertDim] = 1.0;
+	}
+
+	//curvilinear position
+	double s = 0;
+	//current length
+	double l = 0;
+	unsigned maxCount = vertCount;
+	if (!poly->isClosed())
+		maxCount--;
+	unsigned polyIndex = 0;
+	for (unsigned i=0; i<maxCount; ++i)
+	{
+		const CCVector3* A = poly->getPoint(i);
+		const CCVector3* B = poly->getPoint((i+1) % vertCount);
+		CCVector3 AB = (*B-*A);
+		AB.u[vertDim] = 0;
+		CCVector3 nAB = AB.cross(N);
+		nAB.normalize();
+		
+		double lAB = (*B-*A).norm();
+		while (s < l + lAB)
+		{
+			double s_local = s - l;
+			assert(s_local < lAB);
+
+			//create orhogonal polyline
+			ccPointCloud* vertices = new ccPointCloud("vertices");
+			ccPolyline* orthoPoly = new ccPolyline(vertices);
+			orthoPoly->addChild(vertices);
+			if (vertices->reserve(2) && orthoPoly->reserve(2))
+			{
+				//intersection point
+				CCVector3 I = *A + AB * (s_local / lAB);
+				CCVector3 I1 = I + nAB * static_cast<PointCoordinateType>(width/2);
+				CCVector3 I2 = I - nAB * static_cast<PointCoordinateType>(width/2);
+
+				vertices->addPoint(I1);
+				orthoPoly->addPointIndex(0);
+				vertices->addPoint(I2);
+				orthoPoly->addPointIndex(1);
+
+				orthoPoly->setClosed(false);
+				orthoPoly->set2DMode(false);
+
+				//set default display style
+				vertices->setVisible(false);
+				orthoPoly->showColors(true);
+				orthoPoly->setColor(s_defaultPolylineColor);
+				orthoPoly->setWidth(s_defaultPolylineWidth);
+				if (!m_clouds.isEmpty())
+					orthoPoly->setDisplay_recursive(m_clouds.front().originalDisplay); //set the same 'default' display as the cloud
+				orthoPoly->setName(QString("%1.%2").arg(poly->getName()).arg(++polyIndex));
+
+				if (!addPolyline(orthoPoly,false))
+				{
+					delete orthoPoly;
+					orthoPoly = 0;
+				}
+			}
+			else
+			{
+				delete orthoPoly;
+				ccLog::Error("Not enough memory!");
+				i = vertCount;
+				break;
+			}
+
+			s += step;
+		}
+
+		l += lAB;
+	}
+
+	if (m_associatedWin)
+		m_associatedWin->redraw();
+}
+
+void ccSectionExtractionTool::extractPoints()
+{
+}
+
+static unsigned s_exportGroupID = 0;
+void ccSectionExtractionTool::exportSections()
+{
+	if (m_sections.empty())
+		return;
+
+	//we only export 'temporary' objects
+	unsigned exportCount = 0;
+	{
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB)
+				++exportCount;
+		}
+	}
+
+	if (!exportCount)
+	{
+		//nothing to do
+		ccLog::Warning("[ccSectionExtractionTool] All active sections are already in DB");
+		return;
+	}
+
+	MainWindow* mainWin = MainWindow::TheInstance();
+	ccHObject* root = mainWin ? mainWin->dbRootObject() : 0;
+	if (!root)
+	{
+		ccLog::Warning("[ccSectionExtractionTool] Internal error (no MainWindow or DB?!)");
+		assert(false);
+		return;
+	}
+	
+	ccHObject* destEntity = (s_exportGroupID != 0 ? root->find(s_exportGroupID) : 0);
+	if (!destEntity)
+	{
+		destEntity = new ccHObject("Exported sections");
+		mainWin->addToDB(destEntity);
+		s_exportGroupID = destEntity->getUniqueID();
+	}
+	assert(destEntity);
+
+	//export entites
+	{
+		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
+		{
+			Section& section = *it;
+			if (section.entity && !section.isInDB)
+			{
+				destEntity->addChild(section.entity);
+				section.isInDB = true;
+				mainWin->addToDB(section.entity,false,false);
+			}
+		}
+	}
+
+	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
+}
+

@@ -90,6 +90,7 @@
 #include "ccDisplayOptionsDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
+#include "ccSectionExtractionTool.h"
 #include "ccClippingBoxTool.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccComparisonDlg.h"
@@ -189,6 +190,7 @@ MainWindow::MainWindow()
 	, m_pivotVisibilityPopupButton(0)
 	, m_cpeDlg(0)
 	, m_gsTool(0)
+	, m_seTool(0)
 	, m_transTool(0)
 	, m_clipTool(0)
 	, m_compDlg(0)
@@ -313,6 +315,7 @@ MainWindow::~MainWindow()
 	}
 	m_cpeDlg = 0;
 	m_gsTool = 0;
+	m_seTool = 0;
 	m_transTool = 0;
 	m_clipTool = 0;
 	m_compDlg=0;
@@ -900,6 +903,7 @@ void MainWindow::connectActions()
 	connect(actionKMeans,						SIGNAL(triggered()),	this,		SLOT(doActionKMeans()));
 	connect(actionFrontPropagation,				SIGNAL(triggered()),	this,		SLOT(doActionFrontPropagation()));
 	connect(actionCrossSection,					SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
+	connect(actionExtractSections,				SIGNAL(triggered()),	this,		SLOT(activateSectionExtractionMode()));
 	//"Tools > Fit" menu
 	connect(actionFitPlane,						SIGNAL(triggered()),	this,		SLOT(doActionFitPlane()));
 	connect(actionFitFacet,						SIGNAL(triggered()),	this,		SLOT(doActionFitFacet()));
@@ -6751,6 +6755,75 @@ void MainWindow::deactivateRegisterPointPairTool(bool state)
 		win->zoomGlobal();
 }
 
+void MainWindow::activateSectionExtractionMode()
+{
+	size_t selNum = m_selectedEntities.size();
+	if (selNum == 0)
+		return;
+
+	if (!m_seTool)
+	{
+		m_seTool = new ccSectionExtractionTool(this);
+		connect(m_seTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSectionExtractionMode(bool)));
+
+		registerMDIDialog(m_seTool,Qt::TopRightCorner);
+	}
+
+	//add clouds
+	unsigned validCount = 0;
+	for (size_t i=0; i<selNum; ++i)
+		if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+			if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(m_selectedEntities[i])))
+				++validCount;
+
+	if (validCount == 0)
+	{
+		ccConsole::Error("No cloud in selection!");
+		return;
+	}
+
+	ccGLWindow* win = new3DView();
+	if (!win)
+	{
+		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
+		return;
+	}
+	m_seTool->linkWith(win);
+
+	freezeUI(true);
+	toolBarView->setDisabled(true);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_seTool->start())
+		deactivateSectionExtractionMode(false);
+	else
+		updateMDIDialogsPlacement();
+}
+
+void MainWindow::deactivateSectionExtractionMode(bool state)
+{
+	if (m_seTool)
+		m_seTool->removeAllEntities();
+
+	//we enable all GL windows
+	enableAll();
+
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	if (!subWindowList.isEmpty())
+		subWindowList[0]->showMaximized();
+
+	freezeUI(false);
+	toolBarView->setDisabled(false);
+
+	updateUI();
+
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+		win->redraw();
+}
+
 void MainWindow::activateSegmentationMode()
 {
 	ccGLWindow* win = getActiveGLWindow();
@@ -10422,8 +10495,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
-	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
+	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
 	actionCrossSection->setEnabled(exactlyOneCloud);
+	actionExtractSections->setEnabled(atLeastOneCloud);
 	actionHeightGridGeneration->setEnabled(exactlyOneCloud);
 
 	actionPointListPicking->setEnabled(exactlyOneEntity);
@@ -10443,7 +10517,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
 
 	//>1
-	bool atLeastTwoEntities = (selInfo.selCount>1);
+	bool atLeastTwoEntities = (selInfo.selCount > 1);
 
 	actionMerge->setEnabled(atLeastTwoEntities);
 	actionMatchBBCenters->setEnabled(atLeastTwoEntities);

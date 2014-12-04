@@ -53,6 +53,7 @@ class ccGLWindow;
 class ccHObject;
 class ccComparisonDlg;
 class ccGraphicalSegmentationTool;
+class ccSectionExtractionTool;
 class ccGraphicalTransformationTool;
 class ccClippingBoxTool;
 class ccPluginInterface;
@@ -398,6 +399,10 @@ protected slots:
 	void activateSegmentationMode();
 	void deactivateSegmentationMode(bool);
 
+	//Section extraction
+	void activateSectionExtractionMode();
+	void deactivateSectionExtractionMode(bool);
+
 	//Entities comparison
 	void doActionCloudCloudDist();
 	void doActionCloudMeshDist();
@@ -609,6 +614,8 @@ protected:
 	ccCameraParamEditDlg* m_cpeDlg;
 	//! Graphical segmentation dialog
 	ccGraphicalSegmentationTool* m_gsTool;
+	//! Section extraction dialog
+	ccSectionExtractionTool* m_seTool;
 	//! Graphical transformation dialog
 	ccGraphicalTransformationTool* m_transTool;
 	//! Clipping box dialog

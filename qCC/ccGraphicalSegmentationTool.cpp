@@ -236,19 +236,19 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 {
 	assert(m_polyVertices && m_segmentationPoly);
 
-	if (!m_associatedWin) //job already done
-		return;
+	if (m_associatedWin)
+	{
+		m_associatedWin->displayNewMessage("Segmentation [OFF]",
+											ccGLWindow::UPPER_CENTER_MESSAGE,
+											false,
+											2,
+											ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 
-	m_associatedWin->displayNewMessage("Segmentation [OFF]",
-										ccGLWindow::UPPER_CENTER_MESSAGE,
-										false,
-										2,
-										ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-
-	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-	m_associatedWin->setUnclosable(false);
-	m_associatedWin->removeFromOwnDB(m_segmentationPoly);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_associatedWin->setUnclosable(false);
+		m_associatedWin->removeFromOwnDB(m_segmentationPoly);
+	}
 
 	ccOverlayDialog::stop(accepted);
 }
@@ -387,7 +387,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	assert(m_polyVertices);
 	assert(m_segmentationPoly);
 
-	unsigned sz = m_polyVertices->size();
+	unsigned vertCount = m_polyVertices->size();
 
 	//new point
 	CCVector3 P(static_cast<PointCoordinateType>(x),
@@ -397,7 +397,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	if (m_state & RECTANGLE)
 	{
 		//we need 4 points for the rectangle!
-		if (sz!=4)
+		if (vertCount != 4)
 			m_polyVertices->resize(4);
 
 		const CCVector3* A = m_polyVertices->getPointPersistentPtr(0);
@@ -408,7 +408,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 		*C = P;
 		*D = CCVector3(P.x,A->y,0);
 
-		if (sz!=4)
+		if (vertCount != 4)
 		{
 			m_segmentationPoly->clear();
 			if (!m_segmentationPoly->addPointIndex(0,4))
@@ -421,10 +421,10 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	}
 	else if (m_state & POLYLINE)
 	{
-		if (sz<2)
+		if (vertCount < 2)
 			return;
 		//we replace last point by the current one
-		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(sz-1));
+		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount-1));
 		*lastP = P;
 	}
 
@@ -439,20 +439,22 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 
 	assert(m_polyVertices);
 	assert(m_segmentationPoly);
-	unsigned sz = m_polyVertices->size();
+	unsigned vertCount = m_polyVertices->size();
 
 	//particular case: we close the rectangular selection by a 2nd click
-	if (m_rectangularSelection && sz==4 && (m_state & RUNNING))
+	if (m_rectangularSelection && vertCount == 4 && (m_state & RUNNING))
 		return;
 
 	//new point
-	CCVector3 P((PointCoordinateType)x,(PointCoordinateType)y,(PointCoordinateType)0);
+	CCVector3 P(static_cast<PointCoordinateType>(x),
+				static_cast<PointCoordinateType>(y),
+				0);
 
 	//CTRL key pressed at the same time?
 	bool ctrlKeyPressed = m_rectangularSelection || ((QApplication::keyboardModifiers() & Qt::ControlModifier) == Qt::ControlModifier);
 
 	//start new polyline?
-	if (((m_state & RUNNING) == 0) || sz==0 || ctrlKeyPressed)
+	if (((m_state & RUNNING) == 0) || vertCount == 0 || ctrlKeyPressed)
 	{
 		//reset state
 		m_state = (ctrlKeyPressed ? RECTANGLE : POLYLINE);
@@ -479,18 +481,18 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		//we were already in 'polyline' mode?
 		if (m_state & POLYLINE)
 		{
-			if (!m_polyVertices->reserve(sz+1))
+			if (!m_polyVertices->reserve(vertCount+1))
 			{
 				ccLog::Error("Out of memory!");
 				return;
 			}
 
 			//we replace last point by the current one
-			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(sz-1));
+			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount-1));
 			*lastP = P;
 			//and add a new (equivalent) one
 			m_polyVertices->addPoint(P);
-			if (!m_segmentationPoly->addPointIndex(sz))
+			if (!m_segmentationPoly->addPointIndex(vertCount))
 			{
 				ccLog::Error("Out of memory!");
 				return;
@@ -513,12 +515,12 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 void ccGraphicalSegmentationTool::closeRectangle()
 {
 	//only for rectangle selection in RUNNING mode
-	if ((m_state & RECTANGLE)==0 || (m_state & RUNNING)==0)
+	if ((m_state & RECTANGLE) == 0 || (m_state & RUNNING) == 0)
 		return;
 
 	assert(m_segmentationPoly);
-	unsigned sz = m_segmentationPoly->size();
-	if (sz<4)
+	unsigned vertCount = m_segmentationPoly->size();
+	if (vertCount < 4)
 	{
 		//first point only? we keep the real time update mechanism
 		if (m_rectangularSelection)
@@ -541,8 +543,8 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 		return;
 
 	assert(m_segmentationPoly);
-	unsigned sz = m_segmentationPoly->size();
-	if (sz < 4)
+	unsigned vertCount = m_segmentationPoly->size();
+	if (vertCount < 4)
 	{
 		m_segmentationPoly->clear();
 		m_polyVertices->clear();
@@ -550,7 +552,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	else
 	{
 		//remove last point!
-		m_segmentationPoly->resize(sz-1); //can't fail --> smaller
+		m_segmentationPoly->resize(vertCount-1); //can't fail --> smaller
 		m_segmentationPoly->setClosed(true);
 	}
 
@@ -645,7 +647,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	if (!m_associatedWin)
 		return;
 
-	if (state)
+	if (state/*=activate pause mode*/)
 	{
 		m_state = PAUSED;
 		if (m_polyVertices->size() != 0)
@@ -825,7 +827,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 
 		ccPolyline* poly = new ccPolyline(*m_segmentationPoly);
 
-		//if we export the polyline in 3D, we must project its vertices
+		//if the polyline is 2D and we export the polyline in 3D, we must project its vertices
 		bool mode2D = (messageBox.clickedButton() == button2D);
 		if (!mode2D)
 		{

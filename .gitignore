@@ -124,3 +124,4 @@ pip-log.txt
 # Mac crap
 .DS_Store
 /build_64bits_msvc10/
+/test/

@@ -86,12 +86,12 @@ public:
 	//! Returns the width of the line
 	/** \return the width of the line in pixels
 	**/
-	PointCoordinateType getWidth() const { return m_width; }
+	inline PointCoordinateType getWidth() const { return m_width; }
 
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
 	**/
-	const colorType* getColor() const;
+	inline const colorType* getColor() const { return m_rgbColor; }
 
 	//inherited methods (ccHObject)
 	virtual ccBBox getMyOwnBB();
@@ -145,6 +145,13 @@ public:
 	//! Returns the width of vertex markers
 	int getVertexMarkerWidth() const { return m_vertMarkWidth; }
 
+	//! Initializes the polyline with a given set of vertices and the parameters of another polyline
+	/** \warning Even the 'closed' state is copied as is!
+		\param vertices set of vertices (can be null, in which case the polyline vertices will be cloned)
+		\param poly polyline
+		\return success
+	**/
+	bool initWith(ccPointCloud*& vertices, const ccPolyline& poly);
 
 protected:
 
@@ -154,11 +161,6 @@ protected:
 
 	//inherited methods (ccHObject)
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-
-	//! Initializes the polyline with a given set of vertices and the parameters of another polyline
-	/** \warning Even the 'closed' state is copied as is!
-	**/
-	void initWith(ccPointCloud* vertices, const ccPolyline& poly);
 
 	//! Unique RGB color
 	colorType m_rgbColor[3];

@@ -28,9 +28,6 @@
 #include <PointProjectionTools.h>
 #include <CCMiscTools.h>
 
-//System
-#include <string.h>
-
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	: Polyline(associatedCloud)
 	, ccHObject("Polyline")
@@ -49,24 +46,32 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	: Polyline(0)
 	, ccHObject(poly)
 {
-	ccPointCloud* cloud = dynamic_cast<ccPointCloud*>(poly.m_theAssociatedCloud);
-	ccPointCloud* clone = cloud ? cloud->partialClone(&poly) : ccPointCloud::From(&poly);
-	if (clone)
-	{
-		if (cloud)
-			clone->setName(cloud->getName()); //as 'partialClone' adds the '.extract' suffix by default
-	}
-	else
-	{
-		//not enough memory?
-		ccLog::Warning("[ccPolyline][copy constructor] Not enough memory!");
-	}
-
+	ccPointCloud* clone = 0;
 	initWith(clone,poly);
 }
 
-void ccPolyline::initWith(ccPointCloud* vertices, const ccPolyline& poly)
+bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 {
+	bool success = true;
+	if (!vertices)
+	{
+		ccPointCloud* cloud = dynamic_cast<ccPointCloud*>(poly.m_theAssociatedCloud);
+		ccPointCloud* clone = cloud ? cloud->partialClone(&poly) : ccPointCloud::From(&poly);
+		if (clone)
+		{
+			if (cloud)
+				clone->setName(cloud->getName()); //as 'partialClone' adds the '.extract' suffix by default
+		}
+		else
+		{
+			//not enough memory?
+			ccLog::Warning("[ccPolyline::initWith] Not enough memory to duplicate vertices!");
+			success = false;
+		}
+
+		vertices = clone;
+	}
+
 	if (vertices)
 	{
 		setAssociatedCloud(vertices);
@@ -88,6 +93,8 @@ void ccPolyline::initWith(ccPointCloud* vertices, const ccPolyline& poly)
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
 	setVisible(poly.isVisible());
+	
+	return success;
 }
 
 void ccPolyline::set2DMode(bool state)
@@ -126,7 +133,7 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	//no picking enabled on polylines
-	if (MACRO_DrawNames(context))
+	if (MACRO_DrawPointNames(context))
 		return;
 
 	unsigned vertCount = size();
@@ -147,6 +154,11 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (draw)
 	{
+		//standard case: list names pushing
+		bool pushName = MACRO_DrawEntityNames(context);
+		if (pushName)
+			glPushName(getUniqueIDForDisplay());
+
 		if (colorsShown())
 			glColor3ubv(m_rgbColor);
 
@@ -186,22 +198,22 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			glPopAttrib();
 		}
+
+		if (pushName)
+			glPopName();
 	}
 }
 
 void ccPolyline::setColor(const colorType col[])
 {
-	memcpy(m_rgbColor,col,sizeof(colorType)*3);
+	m_rgbColor[0] = col[0];
+	m_rgbColor[1] = col[1];
+	m_rgbColor[2] = col[2];
 }
 
 void ccPolyline::setWidth(PointCoordinateType width)
 {
 	m_width = width;
-}
-
-const colorType* ccPolyline::getColor() const
-{
-	return m_rgbColor;
 }
 
 bool ccPolyline::toFile_MeOnly(QFile& out) const

@@ -72,7 +72,7 @@ bool AsciiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) c
 	if (	type == CC_TYPES::POINT_CLOUD			//only one cloud per file
 		||	type == CC_TYPES::HIERARCHY_OBJECT )	//but we can also save a group (each cloud inside will be saved as a separated file)
 	{
-		multiple = false;
+		multiple = true;
 		exclusive = true;
 		return true;
 	}
@@ -114,6 +114,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 			if (cloudCount > 1)
 			{
 				unsigned counter = 0;
+				//disable the save dialog so that it doesn't appear again!
+				QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog();
+				bool autoShow = saveDialog->autoShow();
+				saveDialog->setAutoShow(false);
+
 				for (unsigned i=0; i<count; ++i)
 				{
 					ccHObject* child = entity->getChild(i);
@@ -142,6 +147,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 						ccLog::Warning(QString("[ASCII] Entity '%1' can't be saved this way!").arg(child->getName()));
 					}
 				}
+
+				//restore previous state
+				saveDialog->setAutoShow(autoShow);
 
 				return CC_FERR_NO_ERROR;
 			}

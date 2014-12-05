@@ -85,8 +85,11 @@ protected:
 	//! Projects a 2D (screen) point to 3D
 	//CCVector3 project2Dto3D(int x, int y) const;
 
-	//! Cancels current polyline edition
+	//! Cancels currently edited polyline
 	void cancelCurrentPolyline();
+
+	//! Deletes currently selected polyline
+	void deleteSelectedPolyline();
 
 	//! Imported entity
 	template<class EntityType> struct ImportedEntity
@@ -130,6 +133,8 @@ protected:
 				backupWidth = poly->getWidth();
 			}
 		}
+
+		bool operator ==(const ImportedEntity& ie) { return entity == ie.entity; }
 		
 		EntityType* entity;
 		ccGenericGLDisplay* originalDisplay;
@@ -143,6 +148,12 @@ protected:
 
 	//! Section
 	typedef ImportedEntity<ccPolyline> Section;
+
+	//! Releases a polyline
+	/** The polyline is removed from display. Then it is
+		deleted if the polyline is not already in DB.
+	**/
+	void releasePolyline(Section* section);
 
 	//! Cloud
 	typedef ImportedEntity<ccGenericPointCloud> Cloud;
@@ -167,7 +178,7 @@ protected:
 	};
 
 	//! Deselects the currently selected polyline
-	void selectPolyline(Section* poly);
+	void selectPolyline(Section* poly, bool autoRefreshDisplay = true);
 
 protected: //members
 

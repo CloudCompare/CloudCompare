@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>273</width>
+    <width>269</width>
     <height>26</height>
    </rect>
   </property>
@@ -41,129 +41,160 @@
     </widget>
    </item>
    <item>
-    <widget class="QToolButton" name="importFromDBToolButton">
-     <property name="toolTip">
-      <string>Import one or several polylines from DB</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/dbHObjectSymbol.png</normaloff>:/CC/images/dbHObjectSymbol.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="generateOrthoSectionsToolButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Generate orthogonal sections along a path</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/orthoSections.png</normaloff>:/CC/images/orthoSections.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="extractPointsToolButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Extract points along active sections</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/sectionExtraction.png</normaloff>:/CC/images/sectionExtraction.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="resetToolButton">
-     <property name="toolTip">
-      <string>Clear segmentation</string>
-     </property>
-     <property name="statusTip">
-      <string>Clear segmentation</string>
-     </property>
-     <property name="text">
-      <string>raz</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="exportSectionsToolButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Export manually defined sections to DB</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="validToolButton">
-     <property name="toolTip">
-      <string>Confirm segmentation</string>
-     </property>
-     <property name="statusTip">
-      <string>Confirm segmentation</string>
-     </property>
-     <property name="text">
-      <string>OK</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Vert.</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="vertAxisComboBox">
-       <property name="currentIndex">
-        <number>2</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>X</string>
+    <widget class="QFrame" name="frame">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QToolButton" name="importFromDBToolButton">
+        <property name="toolTip">
+         <string>Import one or several polylines from DB</string>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Y</string>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/dbHObjectSymbol.png</normaloff>:/CC/images/dbHObjectSymbol.png</iconset>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Z</string>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="generateOrthoSectionsToolButton">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
+        <property name="toolTip">
+         <string>Generate orthogonal sections along a path</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/orthoSections.png</normaloff>:/CC/images/orthoSections.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="extractPointsToolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Extract points along active sections</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/sectionExtraction.png</normaloff>:/CC/images/sectionExtraction.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="exportSectionsToolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Export manually defined sections to DB</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="resetToolButton">
+        <property name="toolTip">
+         <string>Clear segmentation</string>
+        </property>
+        <property name="statusTip">
+         <string>Clear segmentation</string>
+        </property>
+        <property name="text">
+         <string>raz</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="validToolButton">
+        <property name="toolTip">
+         <string>Confirm segmentation</string>
+        </property>
+        <property name="statusTip">
+         <string>Confirm segmentation</string>
+        </property>
+        <property name="text">
+         <string>OK</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Vert.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="vertAxisComboBox">
+        <property name="currentIndex">
+         <number>2</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Z</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
  <resources>
   <include location="../icones.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>polylineToolButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frame</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>13</x>
+     <y>12</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>148</x>
+     <y>12</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

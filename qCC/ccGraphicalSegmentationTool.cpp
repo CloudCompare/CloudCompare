@@ -735,7 +735,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 
 		if (!polylines.empty())
 		{
-			ccEntityPickerDlg epDlg(polylines,0,this);
+			ccEntityPickerDlg epDlg(polylines,false,0,this);
 			if (!epDlg.exec())
 				return;
 

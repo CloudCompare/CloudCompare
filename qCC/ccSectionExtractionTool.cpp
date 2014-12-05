@@ -121,7 +121,7 @@ void ccSectionExtractionTool::onShortcutTriggered(int key)
 		return;
 
 	case Qt::Key_Delete:
-		//FIXME
+		deleteSelectedPolyline();
 		return;
 
 	default:
@@ -233,7 +233,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 	return true;
 }
 
-void ccSectionExtractionTool::selectPolyline(Section* poly)
+void ccSectionExtractionTool::selectPolyline(Section* poly, bool autoRefreshDisplay/*=true*/)
 {
 	bool redraw = false;
 
@@ -257,12 +257,57 @@ void ccSectionExtractionTool::selectPolyline(Section* poly)
 		redraw = true;
 	}
 
-	if (redraw && m_associatedWin)
+	if (redraw && autoRefreshDisplay && m_associatedWin)
 	{
 		m_associatedWin->redraw();
 	}
 
 	generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != 0);
+}
+
+void ccSectionExtractionTool::releasePolyline(Section* section)
+{
+	if (section && section->entity)
+	{
+		if (!section->isInDB)
+		{
+			//remove from display
+			if (m_associatedWin)
+				m_associatedWin->removeFromOwnDB(section->entity);
+			//delete entity
+			delete section->entity;
+			section->entity = 0;
+		}
+		else
+		{
+			//restore original display and style
+			section->entity->showColors(section->backupColorShown);
+			section->entity->setColor  (section->backupColor);
+			section->entity->setWidth  (section->backupWidth);
+			section->entity->setDisplay(section->originalDisplay);
+		}
+	}
+}
+
+void ccSectionExtractionTool::deleteSelectedPolyline()
+{
+	if (!m_selectedPoly)
+		return;
+
+	Section* selectedPoly = m_selectedPoly;
+
+	//deslect polyline before anything
+	selectPolyline(0,false);
+	
+	releasePolyline(selectedPoly);
+
+	//remove the section from the list
+	m_sections.removeOne(*selectedPoly);
+
+	if (m_associatedWin)
+	{
+		m_associatedWin->redraw();
+	}
 }
 
 void ccSectionExtractionTool::entitySelected(int uniqueID)
@@ -349,27 +394,11 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 		for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 		{
 			Section& section = *it;
-			//restore original display and style
-			if (section.entity)
-			{
-				if (!section.isInDB)
-				{
-					if (m_associatedWin)
-						m_associatedWin->removeFromOwnDB(section.entity);
-					delete section.entity;
-					section.entity = 0;
-				}
-				else
-				{
-					section.entity->showColors(section.backupColorShown);
-					section.entity->setColor  (section.backupColor);
-					section.entity->setWidth  (section.backupWidth);
-					section.entity->setDisplay(section.originalDisplay);
-				}
-			}
+			releasePolyline(&section);
 		}
 		m_sections.clear();
 		exportSectionsToolButton->setEnabled(false);
+		extractPointsToolButton->setEnabled(false);
 	}
 
 	//and we remove only temporary clouds
@@ -515,7 +544,8 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	//add polyline to the 'sections' set
 	//(all its parameters will be backuped!)
 	m_sections.push_back(Section(inputPoly,alreadyInDB));
-	exportSectionsToolButton->setEnabled(m_state == PAUSED);
+	exportSectionsToolButton->setEnabled(true);
+	extractPointsToolButton->setEnabled(true);
 
 	//apply default look
 	inputPoly->showColors(true);
@@ -778,11 +808,8 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 	//update mini-GUI
 	polylineToolButton->blockSignals(true);
 	polylineToolButton->setChecked(state);
+	frame->setEnabled(!state);
 	polylineToolButton->blockSignals(false);
-
-	generateOrthoSectionsToolButton->setEnabled(!state && m_selectedPoly);
-	extractPointsToolButton->setEnabled(!state);
-	exportSectionsToolButton->setEnabled(!state && !m_sections.empty());
 
 	m_associatedWin->redraw();
 }
@@ -801,17 +828,22 @@ void ccSectionExtractionTool::doImportPolylinesFromDB()
 
 		if (!polylines.empty())
 		{
-			ccEntityPickerDlg epDlg(polylines,0,this);
+			ccEntityPickerDlg epDlg(polylines,true,0,this);
 			if (!epDlg.exec())
 				return;
 
 			enableSectionEditingMode(false);
 
-			int index = epDlg.getSelectedIndex();
-			assert(index >= 0 && index < static_cast<int>(polylines.size()));
-			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
-			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
-			addPolyline(poly,true);
+			std::vector<int> indexes;
+			epDlg.getSelectedIndexes(indexes);
+			for (size_t i=0; i<indexes.size(); ++i)
+			{
+				int index = indexes[i];
+				assert(index >= 0 && index < static_cast<int>(polylines.size()));
+				assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
+				ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
+				addPolyline(poly,true);
+			}
 			if (m_associatedWin)
 				m_associatedWin->redraw();
 		}
@@ -942,10 +974,6 @@ void ccSectionExtractionTool::generateOrthoSections()
 		m_associatedWin->redraw();
 }
 
-void ccSectionExtractionTool::extractPoints()
-{
-}
-
 static unsigned s_exportGroupID = 0;
 void ccSectionExtractionTool::exportSections()
 {
@@ -1005,3 +1033,6 @@ void ccSectionExtractionTool::exportSections()
 	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
 }
 
+void ccSectionExtractionTool::extractPoints()
+{
+}

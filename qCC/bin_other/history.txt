@@ -30,6 +30,9 @@ v2.6.1.beta 11/??/2014
 		- clouds and meshes can be mixed
 	* 3D views:
 		- the rotation center of a 3D view can now be picked anywhere on the surface of a mesh
+	* GUI frozen mode:
+		- plugins toolbars are now properly deactivated
+		- the GL filters toolbar is no longer deactivated (so as to let the user change the active shader anytime)
 
 - Bug fix:
 	- Delaunay 2D1/2 crashed on Windows 8

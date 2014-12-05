@@ -36,9 +36,14 @@ public:
 	//! Sets the path legnth
 	void setPathLength(double l);
 
+	//! Sets the generation step
+	void setGenerationStep(double s);
+	//! Sets he sections width
+	void setSectionsWidth(double w);
+
 	//! Returns the generation step
 	double getGenerationStep() const;
-	//! Returns	the sections width
+	//! Returns the sections width
 	double getSectionsWidth() const;
 
 protected slots:

@@ -109,12 +109,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="resetToolButton">
-        <property name="toolTip">
-         <string>Clear segmentation</string>
+       <widget class="QToolButton" name="undoToolButton">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-        <property name="statusTip">
-         <string>Clear segmentation</string>
+        <property name="toolTip">
+         <string>Undo last polyline(s) addition</string>
         </property>
         <property name="text">
          <string>raz</string>

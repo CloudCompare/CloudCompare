@@ -64,6 +64,7 @@ public:
 
 protected slots:
 
+	void undo();
 	bool reset(bool askForConfirmation = true);
 	void apply();
 	void addPointToPolyline(int x, int y);
@@ -90,6 +91,9 @@ protected:
 
 	//! Deletes currently selected polyline
 	void deleteSelectedPolyline();
+
+	//! Adds a 'step' on the undo stack
+	void addUndoStep();
 
 	//! Imported entity
 	template<class EntityType> struct ImportedEntity
@@ -193,6 +197,9 @@ protected: //members
 
 	//! Current process state
 	unsigned m_state;
+
+	//! Last 'undo' count
+	std::vector<size_t> m_undoCount;
 
 	//! Currently edited polyline
 	ccPolyline* m_editedPoly;

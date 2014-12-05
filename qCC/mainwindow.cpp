@@ -486,10 +486,14 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 					destMenu->setIcon(stdPlugin->getIcon());
 				destToolBar = addToolBar(pluginName+QString(" toolbar"));
 
-				//not sure why but it seems that we must specifically set the object name.
-				//if not the QSettings thing will complain about a not-setted name
-				//when saving settings of qCC mainwindow
-				destToolBar->setObjectName(pluginName);
+				if (destToolBar)
+				{
+					m_stdPluginsToolbars.push_back(destToolBar);
+					//not sure why but it seems that we must specifically set the object name.
+					//if not the QSettings thing will complain about a not-setted name
+					//when saving settings of qCC mainwindow
+					destToolBar->setObjectName(pluginName);
+				}
 			}
 			else //default destination
 			{
@@ -6651,12 +6655,19 @@ void MainWindow::doActionShowHelpDialog()
 
 void MainWindow::freezeUI(bool state)
 {
+	//freeze standard plugins
 	toolBarMainTools->setDisabled(state);
 	toolBarSFTools->setDisabled(state);
 	toolBarPluginTools->setDisabled(state);
-	toolBarGLFilters->setDisabled(state);
-
+	//toolBarGLFilters->setDisabled(state);
 	//toolBarView->setDisabled(state);
+	
+	//freeze plugin toolbars
+	{
+		for (int i=0; i<m_stdPluginsToolbars.size(); ++i)
+			m_stdPluginsToolbars[i]->setDisabled(state);
+	}
+
 	DockableDBTree->setDisabled(state);
 	menubar->setDisabled(state);
 
@@ -6781,6 +6792,10 @@ void MainWindow::activateSectionExtractionMode()
 		ccConsole::Error("No cloud in selection!");
 		return;
 	}
+
+	//deselect all entities
+	if (m_ccRoot)
+		m_ccRoot->unselectAllEntities();
 
 	ccGLWindow* win = new3DView();
 	if (!win)

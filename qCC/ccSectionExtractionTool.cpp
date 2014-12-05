@@ -57,7 +57,7 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(resetToolButton,					SIGNAL(clicked()),					this,	SLOT(reset()));
+	connect(undoToolButton,						SIGNAL(clicked()),					this,	SLOT(undo()));
 	connect(validToolButton,					SIGNAL(clicked()),					this,	SLOT(apply()));
 	connect(polylineToolButton,					SIGNAL(toggled(bool)),				this,	SLOT(enableSectionEditingMode(bool)));
 	connect(importFromDBToolButton,				SIGNAL(clicked()),					this,	SLOT(doImportPolylinesFromDB()));
@@ -303,6 +303,8 @@ void ccSectionExtractionTool::deleteSelectedPolyline()
 
 	//remove the section from the list
 	m_sections.removeOne(*selectedPoly);
+	m_undoCount.clear();
+	undoToolButton->setEnabled(false);
 
 	if (m_associatedWin)
 	{
@@ -363,6 +365,48 @@ void ccSectionExtractionTool::removeAllEntities()
 	}
 }
 
+void ccSectionExtractionTool::undo()
+{
+	if (m_undoCount.empty())
+		return;
+
+	size_t count = 0;
+	do
+	{
+		count = m_undoCount.back();
+		m_undoCount.pop_back();
+	}
+	while (count >= m_sections.size() && !m_undoCount.empty());
+
+	//ask for a confirmation
+	if (QMessageBox::question(MainWindow::TheInstance(),"Undo",QString("Remove %1 polylines?").arg(m_sections.size()-count),QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+	{
+		//restore undo stack!
+		m_undoCount.push_back(count);
+		return;
+	}
+
+	selectPolyline(0);
+
+	//we remove all polylines after a given point
+	{
+		while (m_sections.size() > count)
+		{
+			Section& section = m_sections.back();
+			releasePolyline(&section);
+			m_sections.pop_back();
+		}
+	}
+
+	//update GUI
+	exportSectionsToolButton->setEnabled(count != 0);
+	extractPointsToolButton->setEnabled(count != 0);
+	undoToolButton->setEnabled(!m_undoCount.empty());
+
+	if (m_associatedWin)
+		m_associatedWin->redraw();
+}
+
 bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 {
 	if (m_sections.empty() && m_clouds.empty())
@@ -397,6 +441,8 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 			releasePolyline(&section);
 		}
 		m_sections.clear();
+		m_undoCount.clear();
+		undoToolButton->setEnabled(false);
 		exportSectionsToolButton->setEnabled(false);
 		extractPointsToolButton->setEnabled(false);
 	}
@@ -797,6 +843,9 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 		//deselect all currently selected polylines
 		selectPolyline(0);
 
+		//set new 'undo' step
+		addUndoStep();
+
 		m_state = STARTED;
 		
 		m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
@@ -814,43 +863,57 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 	m_associatedWin->redraw();
 }
 
+void ccSectionExtractionTool::addUndoStep()
+{
+	if (m_undoCount.empty() || (m_undoCount.back() < m_sections.size()))
+	{
+		m_undoCount.push_back(m_sections.size());
+		undoToolButton->setEnabled(true);
+	}
+}
+
 void ccSectionExtractionTool::doImportPolylinesFromDB()
 {
 	MainWindow* mainWindow = MainWindow::TheInstance();
-	if (mainWindow)
+	if (!mainWindow)
+		return;
+
+	ccHObject* root = mainWindow->dbRootObject();
+	ccHObject::Container polylines;
+	if (root)
 	{
-		ccHObject* root = mainWindow->dbRootObject();
-		ccHObject::Container polylines;
-		if (root)
-		{
-			root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
-		}
+		root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
+	}
 
-		if (!polylines.empty())
-		{
-			ccEntityPickerDlg epDlg(polylines,true,0,this);
-			if (!epDlg.exec())
-				return;
+	if (!polylines.empty())
+	{
+		ccEntityPickerDlg epDlg(polylines,true,0,this);
+		if (!epDlg.exec())
+			return;
 
-			enableSectionEditingMode(false);
+		//set new 'undo' step
+		addUndoStep();
 
-			std::vector<int> indexes;
-			epDlg.getSelectedIndexes(indexes);
-			for (size_t i=0; i<indexes.size(); ++i)
-			{
-				int index = indexes[i];
-				assert(index >= 0 && index < static_cast<int>(polylines.size()));
-				assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
-				ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
-				addPolyline(poly,true);
-			}
-			if (m_associatedWin)
-				m_associatedWin->redraw();
-		}
-		else
+		enableSectionEditingMode(false);
+		std::vector<int> indexes;
+		epDlg.getSelectedIndexes(indexes);
+		for (size_t i=0; i<indexes.size(); ++i)
 		{
-			ccLog::Error("No polyline in DB!");
+			int index = indexes[i];
+			assert(index >= 0 && index < static_cast<int>(polylines.size()));
+			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
+			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
+			addPolyline(poly,true);
 		}
+		//auto-select the last one
+		if (!m_sections.empty())
+			selectPolyline(&(m_sections.back()));
+		if (m_associatedWin)
+			m_associatedWin->redraw();
+	}
+	else
+	{
+		ccLog::Error("No polyline in DB!");
 	}
 }
 
@@ -862,6 +925,8 @@ void ccSectionExtractionTool::apply()
 	stop(true);
 }
 
+static double s_orthoSectionWidth = -1.0;
+static double s_orthoSectionStep  = -1.0;
 void ccSectionExtractionTool::generateOrthoSections()
 {
 	if (!m_selectedPoly)
@@ -884,12 +949,20 @@ void ccSectionExtractionTool::generateOrthoSections()
 	//display dialog
 	ccOrthoSectionGenerationDlg osgDlg(MainWindow::TheInstance());
 	osgDlg.setPathLength(length);
+	if (s_orthoSectionWidth > 0.0)
+		osgDlg.setSectionsWidth(s_orthoSectionWidth);
+	if (s_orthoSectionStep > 0.0)
+		osgDlg.setGenerationStep(s_orthoSectionStep);
+
 	if (!osgDlg.exec())
 		return;
 
+	//set new 'undo' step
+	addUndoStep();
+
 	//now generate the orthogonal sections
-	double step = osgDlg.getGenerationStep();
-	double width = osgDlg.getSectionsWidth();
+	s_orthoSectionStep = osgDlg.getGenerationStep();
+	s_orthoSectionWidth = osgDlg.getSectionsWidth();
 
 	//normal to the plane
 	CCVector3 N(0,0,0);
@@ -930,8 +1003,8 @@ void ccSectionExtractionTool::generateOrthoSections()
 			{
 				//intersection point
 				CCVector3 I = *A + AB * (s_local / lAB);
-				CCVector3 I1 = I + nAB * static_cast<PointCoordinateType>(width/2);
-				CCVector3 I2 = I - nAB * static_cast<PointCoordinateType>(width/2);
+				CCVector3 I1 = I + nAB * static_cast<PointCoordinateType>(s_orthoSectionWidth/2);
+				CCVector3 I2 = I - nAB * static_cast<PointCoordinateType>(s_orthoSectionWidth/2);
 
 				vertices->addPoint(I1);
 				orthoPoly->addPointIndex(0);
@@ -964,7 +1037,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 				break;
 			}
 
-			s += step;
+			s += s_orthoSectionStep;
 		}
 
 		l += lAB;

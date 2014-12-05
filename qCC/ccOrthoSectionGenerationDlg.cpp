@@ -39,6 +39,16 @@ void ccOrthoSectionGenerationDlg::setPathLength(double l)
 	widthDoubleSpinBox->setValue(l/5);
 }
 
+void ccOrthoSectionGenerationDlg::setGenerationStep(double s)
+{
+	stepDoubleSpinBox->setValue(s);
+}
+
+void ccOrthoSectionGenerationDlg::setSectionsWidth(double w)
+{
+	widthDoubleSpinBox->setValue(w);
+}
+
 double ccOrthoSectionGenerationDlg::getGenerationStep() const
 {
 	return stepDoubleSpinBox->value();

@@ -49,6 +49,7 @@ class QMdiArea;
 class QSignalMapper;
 class QToolButton;
 class QAction;
+class QToolBar;
 class ccGLWindow;
 class ccHObject;
 class ccComparisonDlg;
@@ -635,6 +636,7 @@ protected:
 	QString m_pluginsPath;
 	QStringList m_pluginFileNames;
 	QList<ccStdPluginInterface*> m_stdPlugins;
+	QList<QToolBar*> m_stdPluginsToolbars;
 	QActionGroup m_glFilterActions;
 
 };

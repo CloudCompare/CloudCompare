@@ -95,6 +95,9 @@ protected:
 	//! Adds a 'step' on the undo stack
 	void addUndoStep();
 
+	//! Convert one or several ReferenceCloud instances to a single cloud and add it to the main DB
+	bool extractSectionCloud(const std::vector<CCLib::ReferenceCloud*>& refClouds, unsigned sectionIndex);
+
 	//! Imported entity
 	template<class EntityType> struct ImportedEntity
 	{

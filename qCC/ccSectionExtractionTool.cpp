@@ -21,6 +21,7 @@
 #include "mainwindow.h"
 #include "ccEntityPickerDlg.h"
 #include "ccOrthoSectionGenerationDlg.h"
+#include "ccSectionExtractionSubDlg.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -28,9 +29,13 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccHObjectCaster.h>
+#include <ccProgressDialog.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
+
+//CCLib
+#include <ReferenceCloud.h>
 
 //Qt
 #include <QMessageBox>
@@ -485,7 +490,7 @@ void ccSectionExtractionTool::stop(bool accepted)
 	}
 
 	enableSectionEditingMode(false);
-	reset(false);
+	reset(true);
 
 	if (m_associatedWin)
 	{
@@ -1047,7 +1052,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 		m_associatedWin->redraw();
 }
 
-static unsigned s_exportGroupID = 0;
+static unsigned s_polyExportGroupID = 0;
 void ccSectionExtractionTool::exportSections()
 {
 	if (m_sections.empty())
@@ -1080,12 +1085,12 @@ void ccSectionExtractionTool::exportSections()
 		return;
 	}
 	
-	ccHObject* destEntity = (s_exportGroupID != 0 ? root->find(s_exportGroupID) : 0);
+	ccHObject* destEntity = (s_polyExportGroupID != 0 ? root->find(s_polyExportGroupID) : 0);
 	if (!destEntity)
 	{
 		destEntity = new ccHObject("Exported sections");
 		mainWin->addToDB(destEntity);
-		s_exportGroupID = destEntity->getUniqueID();
+		s_polyExportGroupID = destEntity->getUniqueID();
 	}
 	assert(destEntity);
 
@@ -1106,6 +1111,296 @@ void ccSectionExtractionTool::exportSections()
 	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
 }
 
+
+static unsigned s_cloudExportGroupID = 0;
+bool ccSectionExtractionTool::extractSectionCloud(const std::vector<CCLib::ReferenceCloud*>& refClouds, unsigned sectionIndex)
+{
+	ccPointCloud* sectionCloud = 0;
+	Cloud* firstValidCloud = 0;
+	for (int i=0; i<static_cast<int>(refClouds.size()); ++i)
+	{
+		if (!refClouds[i])
+			continue;
+		assert(m_clouds[i].entity); //a valid ref. cloud must have a valid counterpart!
+		if (!firstValidCloud)
+			firstValidCloud = &(m_clouds[i]);
+		
+		//extract part/section from each cloud
+		ccPointCloud* part = 0;
+		{
+			//if the cloud is a ccPointCloud, we can keep a lot more information
+			//when extracting the section cloud
+			ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_clouds[i].entity);
+			if (pc)
+				part = pc->partialClone(refClouds[i]);
+			else
+				part = ccPointCloud::From(refClouds[i]);
+		}
+
+		if (part)
+		{
+			if (refClouds.size() == 1)
+			{
+				//we simply use this 'part' cloud as the section cloud
+				sectionCloud = part;
+			}
+			else
+			{
+				//fuse it with the global cloud
+				unsigned cloudSizeBefore = sectionCloud->size();
+				unsigned partSize        = part->size();
+				sectionCloud->append(part,cloudSizeBefore,true);
+
+				//don't need it anymore
+				delete part;
+				part = 0;
+				//check that it actually worked!
+				if (sectionCloud->size() != cloudSizeBefore + partSize)
+				{
+					//not enough memory
+					ccLog::Warning("[ccSectionExtractionTool] Not enough memory");
+					if (sectionCloud)
+						delete sectionCloud;
+					return false;
+				}
+			}
+		}
+		else
+		{
+			//not enough memory
+			ccLog::Warning("[ccSectionExtractionTool] Not enough memory");
+			if (sectionCloud)
+				delete sectionCloud;
+			return false;
+		}
+	}
+
+	if (sectionCloud)
+	{
+		MainWindow* mainWin = MainWindow::TheInstance();
+		ccHObject* root = mainWin ? mainWin->dbRootObject() : 0;
+		if (!root)
+		{
+			assert(false);
+			ccLog::Warning("[ccSectionExtractionTool] Internal error (no MainWindow or DB?!)");
+			delete sectionCloud;
+			return false;
+		}
+
+		//create output group if necessary
+		ccHObject* destEntity = (s_cloudExportGroupID != 0 ? root->find(s_cloudExportGroupID) : 0);
+		if (!destEntity)
+		{
+			destEntity = new ccHObject("Extracted section clouds");
+			mainWin->addToDB(destEntity);
+			s_cloudExportGroupID = destEntity->getUniqueID();
+		}
+		assert(destEntity);
+
+		sectionCloud->setName(QString("Section cloud #%1").arg(sectionIndex+1));
+
+		//add to main DB
+		assert(firstValidCloud);
+		if (firstValidCloud)
+			sectionCloud->setDisplay_recursive(firstValidCloud->originalDisplay);
+		destEntity->addChild(sectionCloud);
+		MainWindow::TheInstance()->addToDB(sectionCloud,false,false);
+	}
+
+	return true;
+}
+
+static double s_defaultSectionThickness = -1.0;
+static double s_contourMaxEdgeLength = 0;
+static bool s_extractSectionsAsClouds = false;
+static bool s_extractSectionsAsPolys = true;
+
 void ccSectionExtractionTool::extractPoints()
 {
+	int sectionCount = m_sections.size();
+	if (sectionCount <= 0)
+		return;
+
+	//compute loaded clouds bounding-box
+	ccBBox box;
+	unsigned pointCount = 0;
+	{
+		for (int i=0; i<m_clouds.size(); ++i)
+		{
+			if (m_clouds[i].entity)
+			{
+				box += m_clouds[i].entity->getBB();
+				pointCount += m_clouds[i].entity->size();
+			}
+		}
+	}
+	
+	if (s_defaultSectionThickness <= 0)
+	{
+		s_defaultSectionThickness = box.getMaxBoxDim() / 500.0;
+	}
+
+	//show dialog
+	ccSectionExtractionSubDlg sesDlg(MainWindow::TheInstance());
+	sesDlg.setSectionThickness(s_defaultSectionThickness);
+	sesDlg.setMaxEdgeLength(s_contourMaxEdgeLength);
+	sesDlg.doExtractClouds(s_extractSectionsAsClouds);
+	sesDlg.doExtractContours(s_extractSectionsAsPolys);
+
+	if (!sesDlg.exec())
+		return;
+
+	s_defaultSectionThickness = sesDlg.getSectionThickness();
+	s_contourMaxEdgeLength    = sesDlg.getMaxEdgeLength();
+	s_extractSectionsAsClouds = sesDlg.extractClouds();
+	s_extractSectionsAsPolys  = sesDlg.extractContours();
+
+	//progress dialog
+	ccProgressDialog pdlg(true);
+	CCLib::NormalizedProgress nprogress(&pdlg,static_cast<unsigned>(sectionCount));
+	pdlg.setMethodTitle("Extract sections");
+	pdlg.setInfo(qPrintable(QString("Number of sections: %1\nNumber of points: %2").arg(sectionCount).arg(pointCount)));
+	pdlg.start();
+
+	PointCoordinateType defaultZ = 0;
+	int vertDim = vertAxisComboBox->currentIndex();
+	int xDim = (vertDim < 2 ? vertDim+1 : 0);
+	int yDim = (xDim    < 2 ? xDim+1    : 0);
+
+	double sectioThicknessSq = s_defaultSectionThickness * s_defaultSectionThickness;
+	bool error = false;
+	ccHObject* destEntity = 0;
+
+	try
+	{
+		//for each slice
+		for (int s=0; s<m_sections.size(); ++s)
+		{
+			ccPolyline* poly = m_sections[s].entity;
+			if (poly)
+			{
+				unsigned polyVertCount = poly->size();
+				if (polyVertCount < 2)
+				{
+					assert(false);
+					continue;
+				}
+				unsigned polyMaxCount = poly->isClosed() ? polyVertCount-1 : polyVertCount;
+
+				int cloudCount = m_clouds.size();
+				std::vector<CCLib::ReferenceCloud*> refClouds;
+				refClouds.resize(cloudCount,0);
+
+				//for each cloud
+				for (int c=0; c<cloudCount; ++c)
+				{
+					ccGenericPointCloud* cloud = m_clouds[c].entity;
+					if (cloud)
+					{
+						CCLib::ReferenceCloud* refCloud = new CCLib::ReferenceCloud(cloud);
+						//now test each point and see if it's close to the current polyline (in 2D)
+						for (unsigned j=0; j<polyMaxCount; ++j)
+						{
+							//current polyline segment
+							const CCVector3* A = poly->getPoint(j);
+							const CCVector3* B = poly->getPoint((j+1) % polyVertCount);
+							CCVector2 A2D(A->u[xDim],A->u[yDim]);
+							CCVector2 B2D(B->u[xDim],B->u[yDim]);
+
+							CCVector2 u = B2D-A2D;
+							PointCoordinateType d = u.norm();
+							if (d < ZERO_TOLERANCE)
+								continue;
+							u /= d;
+
+							//compute dist of each point to this poly's segment
+							for (unsigned i=0; i<cloud->size(); ++i)
+							{
+								const CCVector3* P = cloud->getPoint(i);
+								CCVector2 P2D(P->u[xDim],P->u[yDim]);
+								CCVector2 AP2D = P2D-A2D;
+								
+								//longitudinal 'distance'
+								PointCoordinateType ps = u.dot(AP2D);
+								if (ps < 0 || ps > d)
+									continue;
+
+								//orthogonal distance
+								PointCoordinateType h = (AP2D - u*ps).norm2();
+								if (h <= sectioThicknessSq)
+								{
+									if (refCloud->size() == refCloud->capacity())
+									{
+										if (!refCloud->reserve(std::max<unsigned>(refCloud->size()/2,1)*2))
+										{
+											//not enough memory
+											ccLog::Warning("[ccSectionExtractionTool] Not enough memory");
+											error = true;
+											break;
+										}
+									}
+									refCloud->addPointIndex(i);
+								}
+							}
+
+							if (error)
+								break;
+						} //for (unsigned j=0; j<polyMaxCount; ++j)
+
+						if (error || refCloud->size() == 0)
+						{
+							delete refCloud;
+							refCloud = 0;
+						}
+						else
+						{
+							refClouds[c] = refCloud;
+						}
+
+					} //if (cloud)
+
+					if (error)
+						break;
+				
+				} //for (int c=0; c<cloudCount; ++c)
+
+				if (!error)
+				{
+					assert(static_cast<int>(refClouds.size()) == cloudCount);
+
+					//Extract sections as (polyline) contours
+					if (/*!error && */s_extractSectionsAsPolys)
+					{
+						//error = ...
+					}
+					
+					//Extract sections as clouds
+					if (!error && s_extractSectionsAsClouds)
+					{
+						error = !extractSectionCloud(refClouds,s);
+					}
+				}
+				
+				//release memory
+				{
+					for (size_t i=0; i<refClouds.size(); ++i)
+					{
+						if (refClouds[i])
+							delete refClouds[i];
+						refClouds[i] = 0;
+					}
+				}
+			} //if (poly)
+
+			if (error)
+				break;
+		} //for (int s=0; s<m_sections.size(); ++s)
+	}
+	catch(std::bad_alloc)
+	{
+		error = true;
+	}
+
+	if (error)
+		ccLog::Error("An error occurred (see console)");
 }

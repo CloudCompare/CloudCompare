@@ -123,12 +123,6 @@ public:
 	**/
 	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = 0) const;
 
-	//! Creates a new point cloud object from a GenericIndexedCloud
-	/** Should be prefered to the equivalent constructor.
-		\param selection a GenericIndexedCloud structure
-	**/
-	ccPointCloud* clone(const CCLib::GenericIndexedCloud* selection);
-
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
 		the points visibility information.

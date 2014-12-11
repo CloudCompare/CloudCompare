@@ -96,7 +96,21 @@ protected:
 	void addUndoStep();
 
 	//! Convert one or several ReferenceCloud instances to a single cloud and add it to the main DB
-	bool extractSectionCloud(const std::vector<CCLib::ReferenceCloud*>& refClouds, unsigned sectionIndex);
+	bool extractSectionCloud(	const std::vector<CCLib::ReferenceCloud*>& refClouds,
+								unsigned sectionIndex,
+								bool& cloudGenerated);
+
+	//! Extract the contour from a set of 2D points and add it to the main DB
+	bool extractSectionContour(	const ccPolyline* originalSection,
+								const ccPointCloud* originalSectionCloud,
+								ccPointCloud* unrolledSectionCloud, //'2D' cloud with Z = 0
+								unsigned sectionIndex,
+								ccPolyline::ContourType type,
+								PointCoordinateType maxEdgeLength,
+								bool& contourGenerated);
+
+	//! Creates (if necessary) and returns a group to store entities in the main DB
+	ccHObject* getExportGroup(unsigned& defaultGroupID, QString defaultName);
 
 	//! Imported entity
 	template<class EntityType> struct ImportedEntity

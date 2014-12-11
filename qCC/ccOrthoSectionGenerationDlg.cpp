@@ -39,6 +39,16 @@ void ccOrthoSectionGenerationDlg::setPathLength(double l)
 	widthDoubleSpinBox->setValue(l/5);
 }
 
+void ccOrthoSectionGenerationDlg::setAutoSaveAndRemove(bool state)
+{
+	autoSaveAndRemoveCheckBox->setChecked(state);
+}
+
+bool ccOrthoSectionGenerationDlg::autoSaveAndRemove() const
+{
+	return autoSaveAndRemoveCheckBox->isChecked();
+}
+
 void ccOrthoSectionGenerationDlg::setGenerationStep(double s)
 {
 	stepDoubleSpinBox->setValue(s);

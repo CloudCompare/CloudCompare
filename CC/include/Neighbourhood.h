@@ -87,13 +87,15 @@ class CC_CORE_LIB_API Neighbourhood
 			\param O if set, the local plane base origin will be output here
 			\param X if set, the local plane base X vector will be output here
 			\param Y if set, the local plane base Y vector will be output here
+			\param useOXYasBase whether O, X and Y should be used as input base
 			\return success
 		**/
 		template<class Vec2D> bool projectPointsOn2DPlane(	std::vector<Vec2D>& points2D,
 															const PointCoordinateType* planeEquation = 0,
 															CCVector3* O = 0,
 															CCVector3* X = 0,
-															CCVector3* Y = 0)
+															CCVector3* Y = 0,
+															bool useOXYasBase = false)
 		{
 			//need at least one point ;)
 			unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
@@ -120,30 +122,43 @@ class CC_CORE_LIB_API Neighbourhood
 			}
 
 			//we construct the plane local base
-			CCVector3 u(1,0,0), v(0,1,0);
+			CCVector3 G(0,0,0), u(1,0,0), v(0,1,0);
+			if (useOXYasBase && O && X && Y)
+			{
+				G = *O;
+				u = *X;
+				v = *Y;
+			}
+			else
 			{
 				CCVector3 N(planeEquation);
 				CCMiscTools::ComputeBaseVectors(N,u,v);
+				//get the barycenter
+				const CCVector3* _G = getGravityCenter();
+				assert(_G);
+				G = *_G;
 			}
-
-			//get the barycenter
-			const CCVector3* G = getGravityCenter();
-			assert(G);
 
 			//project the points
 			for (unsigned i=0; i<count; ++i)
 			{
 				//we recenter current point
-				CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
+				CCVector3 P = *m_associatedCloud->getPoint(i) - G;
 
 				//then we project it on plane (with scalar prods)
 				points2D[i] = Vec2D(P.dot(u),P.dot(v));
 			}
 
 			//output the local base if necessary
-			if (O) *O = *G;
-			if (X) *X = u;
-			if (Y) *Y = v;
+			if (!useOXYasBase)
+			{
+				if (O)
+					*O = G;
+				if (X)
+					*X = u;
+				if (Y)
+					*Y = v;
+			}
 
 			return true;
 		}

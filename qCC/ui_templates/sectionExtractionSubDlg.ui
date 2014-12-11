@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>179</height>
+    <height>247</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,28 +15,50 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Section thickness</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="thicknessDoubleSpinBox">
-       <property name="decimals">
-        <number>6</number>
-       </property>
-       <property name="maximum">
-        <double>1000000000.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QFrame" name="frame">
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Active section(s)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="activeSectionsLabel">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Sections thickness</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="thicknessDoubleSpinBox">
+        <property name="toolTip">
+         <string>Thickness of each section (depends on the cloud density)</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>1000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="extractCloudsGroupBox">
+     <property name="toolTip">
+      <string>To extract each section as a point cloud</string>
+     </property>
      <property name="title">
       <string>Extract section cloud(s)</string>
      </property>
@@ -46,12 +68,21 @@
      <property name="checked">
       <bool>false</bool>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>No parameter</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="extractContoursGroupBox">
      <property name="toolTip">
-      <string>Check that option if you whish to extract contour(s) form each slice</string>
+      <string>To extract the contour of each section as a polyline</string>
      </property>
      <property name="title">
       <string>Extract section contour(s)</string>
@@ -72,6 +103,9 @@
       </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="contourTypeComboBox">
+        <property name="toolTip">
+         <string>Section type (lower or upper part, or both)</string>
+        </property>
         <item>
          <property name="text">
           <string>Lower</string>
@@ -99,7 +133,8 @@
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
         <property name="toolTip">
-         <string>Max edge length (if 0, generates a unique and closed contour = convex hull)</string>
+         <string>Max output polyline edge length (the smaller, the closer to the points the countour will be).
+Warning: if 0, generates the convex hull.</string>
         </property>
         <property name="decimals">
          <number>6</number>

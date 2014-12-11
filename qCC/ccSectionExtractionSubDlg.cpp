@@ -28,6 +28,11 @@ ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent/*=0*/)
 	setWindowFlags(Qt::Tool);
 }
 
+void ccSectionExtractionSubDlg::setActiveSectionCount(int count)
+{
+	activeSectionsLabel->setText(QString::number(count));
+}
+
 void ccSectionExtractionSubDlg::setSectionThickness(double t)
 {
 	thicknessDoubleSpinBox->setValue(t);
@@ -63,25 +68,41 @@ bool ccSectionExtractionSubDlg::extractContours() const
 	return extractContoursGroupBox->isChecked();
 }
 
-void ccSectionExtractionSubDlg::doExtractContours(bool state)
+void ccSectionExtractionSubDlg::doExtractContours(bool state, ccPolyline::ContourType type)
 {
 	extractContoursGroupBox->setChecked(state);
+
+	switch(type)
+	{
+	case ccPolyline::LOWER:
+		contourTypeComboBox->setCurrentIndex(0);
+		break;
+	case ccPolyline::UPPER:
+		contourTypeComboBox->setCurrentIndex(1);
+		break;
+	case ccPolyline::FULL:
+		contourTypeComboBox->setCurrentIndex(2);
+		break;
+	default:
+		assert(false);
+		break;
+	}
 }
 
-ccSectionExtractionSubDlg::ContourType ccSectionExtractionSubDlg::getContourType() const
+ccPolyline::ContourType ccSectionExtractionSubDlg::getContourType() const
 {
 	switch(contourTypeComboBox->currentIndex())
 	{
 	case 0:
-		return LOWER;
+		return ccPolyline::LOWER;
 	case 1:
-		return UPPER;
+		return ccPolyline::UPPER;
 	case 2:
-		return FULL;
+		return ccPolyline::FULL;
 	default:
 		assert(false);
 		break;
 	}
 
-	return FULL;
+	return ccPolyline::FULL;
 }

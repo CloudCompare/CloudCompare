@@ -47,6 +47,7 @@
 #include "ImageFileFilter.h"
 #include "DxfFilter.h"
 #include "ShpFilter.h"
+#include "MascaretFilter.h"
 
 //Qt
 #include <QFileInfo>
@@ -111,6 +112,7 @@ void FileIOFilter::InitInternalFilters()
 	Register(Shared(new PovFilter()));
 	Register(Shared(new IcmFilter()));
 	Register(Shared(new DepthMapFileFilter()));
+	Register(Shared(new MascaretFilter()));
 }
 
 void FileIOFilter::Register(Shared filter)

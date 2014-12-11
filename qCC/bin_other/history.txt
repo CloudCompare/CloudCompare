@@ -2,6 +2,16 @@
 
 v2.6.1.beta 11/??/2014
 - New features:
+	* Section Extraction Tool
+		- let the user define or import '2D sections' (polylines) over one or several clouds
+		- 2D sections can also be generated automatically along a path with given step and
+			width values
+		- eventually cross sections can be extracted:
+			* either as clouds
+			* or as contours/profiles (either for the lower part of the section cloud,
+				the upper part or the full section cloud)
+		- output profiles can be exported to the 'Mascaret' profile format (see http://www.opentelemac.org/)
+			or to the more standard DXF and SHP formats
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
 	* DP file I/O filter (plugin)

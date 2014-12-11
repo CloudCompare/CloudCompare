@@ -82,7 +82,7 @@ void CCMiscTools::MakeMinAndMaxCubical(CCVector3& dimMin, CCVector3& dimMax, dou
 
 void CCMiscTools::EnlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
 {
-    CCVector3 dd = (dimMax-dimMin) * static_cast<PointCoordinateType>(1.0+coef);
+	CCVector3 dd = (dimMax-dimMin) * static_cast<PointCoordinateType>(1.0+coef);
 	CCVector3 md = dimMax+dimMin;
 
 	dimMin = (md-dd) * static_cast<PointCoordinateType>(0.5);
@@ -93,49 +93,49 @@ void CCMiscTools::EnlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
 
 bool planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3], PointCoordinateType maxbox)	// -NJMP-
 {
-    PointCoordinateType vmin[3],vmax[3];
-    for (int q=0; q<=2; q++)
-    {
-        if (normal[q] > 0)
-        {
-            vmin[q] = -maxbox - vert[q];
-            vmax[q] =  maxbox - vert[q];
-        }
-        else
-        {
-            vmin[q] =  maxbox - vert[q];
-            vmax[q] = -maxbox - vert[q];
-        }
-    }
+	PointCoordinateType vmin[3],vmax[3];
+	for (int q=0; q<=2; q++)
+	{
+		if (normal[q] > 0)
+		{
+			vmin[q] = -maxbox - vert[q];
+			vmax[q] =  maxbox - vert[q];
+		}
+		else
+		{
+			vmin[q] =  maxbox - vert[q];
+			vmax[q] = -maxbox - vert[q];
+		}
+	}
 
-    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmin) > 0)
-        return false;
-    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmax) >= 0)
-        return true;
+	if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmin) > 0)
+		return false;
+	if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmax) >= 0)
+		return true;
 
-    return false;
+	return false;
 }
 
 bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateType boxhalfsize, const CCVector3* triverts[3])
 {
-    /*    use separating axis theorem to test overlap between triangle and box */
-    /*    need to test for overlap in these directions: */
-    /*    1) the {X,Y,Z}-directions (actually, since we use the AABB of the triangle */
-    /*       we do not even need to test these) */
-    /*    2) normal of the triangle */
-    /*    3) crossproduct(edge from tri, {X,Y,Z}-direction) */
-    /*       this gives 3x3=9 more tests */
+	/*    use separating axis theorem to test overlap between triangle and box */
+	/*    need to test for overlap in these directions: */
+	/*    1) the {X,Y,Z}-directions (actually, since we use the AABB of the triangle */
+	/*       we do not even need to test these) */
+	/*    2) normal of the triangle */
+	/*    3) crossproduct(edge from tri, {X,Y,Z}-direction) */
+	/*       this gives 3x3=9 more tests */
 
-    /* move everything so that the boxcenter is in (0,0,0) */
-    PointCoordinateType v0[3],v1[3],v2[3];
-    CCVector3::vsubstract(triverts[0]->u,boxcenter,v0);
-    CCVector3::vsubstract(triverts[1]->u,boxcenter,v1);
-    CCVector3::vsubstract(triverts[2]->u,boxcenter,v2);
+	/* move everything so that the boxcenter is in (0,0,0) */
+	PointCoordinateType v0[3],v1[3],v2[3];
+	CCVector3::vsubstract(triverts[0]->u,boxcenter,v0);
+	CCVector3::vsubstract(triverts[1]->u,boxcenter,v1);
+	CCVector3::vsubstract(triverts[2]->u,boxcenter,v2);
 
-    PointCoordinateType e0[3];
-    CCVector3::vsubstract(v1,v0,e0);      /* compute triangle edge 0 */
+	PointCoordinateType e0[3];
+	CCVector3::vsubstract(v1,v0,e0);      /* compute triangle edge 0 */
 
-    /* Bullet 3: */
+	/* Bullet 3: */
 
 	/*  test the 9 tests first (this was faster) */
 	PointCoordinateType rad,fex,fey,fez;		// -NJMP- "d" local variable removed
@@ -173,36 +173,36 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 	AXISTEST_Y1(e2[2], e2[0], fez, fex);
 	AXISTEST_Z12(e2[1], e2[0], fey, fex);
 
-    /* Bullet 1: */
+	/* Bullet 1: */
 
-    /*  first test overlap in the {X,Y,Z}-directions */
-    /*  find minV, maxV of the triangle each direction, and test for overlap in */
-    /*  that direction -- this is equivalent to testing a minimal AABB around */
-    /*  the triangle against the AABB */
+	/*  first test overlap in the {X,Y,Z}-directions */
+	/*  find minV, maxV of the triangle each direction, and test for overlap in */
+	/*  that direction -- this is equivalent to testing a minimal AABB around */
+	/*  the triangle against the AABB */
 
-    /* test in 0-direction */
-    FINDMINMAX(v0[0],v1[0],v2[0],minV,maxV);
-    if (minV>boxhalfsize || maxV<-boxhalfsize)
-        return false;
+	/* test in 0-direction */
+	FINDMINMAX(v0[0],v1[0],v2[0],minV,maxV);
+	if (minV>boxhalfsize || maxV<-boxhalfsize)
+		return false;
 
-    /* test in 1-direction */
-    FINDMINMAX(v0[1],v1[1],v2[1],minV,maxV);
-    if (minV>boxhalfsize || maxV<-boxhalfsize)
-        return false;
+	/* test in 1-direction */
+	FINDMINMAX(v0[1],v1[1],v2[1],minV,maxV);
+	if (minV>boxhalfsize || maxV<-boxhalfsize)
+		return false;
 
-    /* test in 2-direction */
-    FINDMINMAX(v0[2],v1[2],v2[2],minV,maxV);
-    if (minV>boxhalfsize || maxV<-boxhalfsize)
-        return false;
+	/* test in 2-direction */
+	FINDMINMAX(v0[2],v1[2],v2[2],minV,maxV);
+	if (minV>boxhalfsize || maxV<-boxhalfsize)
+		return false;
 
-    /* Bullet 2: */
-    /*  test if the box intersects the plane of the triangle */
-    /*  compute plane equation of triangle: normal*0+d=0 */
+	/* Bullet 2: */
+	/*  test if the box intersects the plane of the triangle */
+	/*  compute plane equation of triangle: normal*0+d=0 */
 
 	//PointCoordinateType normal[3];
-    CCVector3::vcross(e0,e1,/*normal*/e2); //DGM: we use 'e2' instead of 'normal' to save heap memory
-    //if (!planeBoxOverlap(/*normal*/e2,v0,boxhalfsize))
-    //    return false;
+	CCVector3::vcross(e0,e1,/*normal*/e2); //DGM: we use 'e2' instead of 'normal' to save heap memory
+	//if (!planeBoxOverlap(/*normal*/e2,v0,boxhalfsize))
+	//    return false;
 	//DGM: instead, we place the 'planeBoxOverlap' code directly here!
 	//int planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3], PointCoordinateType maxbox)	// -NJMP-
 	{
@@ -243,7 +243,7 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 			return false;
 	}
 
-    return true;   /* box and triangle overlaps */
+	return true;   /* box and triangle overlaps */
 }
 
 void CCMiscTools::ComputeBaseVectors(const CCVector3 &N, CCVector3& X, CCVector3& Y)
@@ -251,7 +251,7 @@ void CCMiscTools::ComputeBaseVectors(const CCVector3 &N, CCVector3& X, CCVector3
 	CCVector3 Nunit = N;
 	Nunit.normalize();
 
-    //we create a first vector orthogonal to the input one
+	//we create a first vector orthogonal to the input one
 	X = Nunit.orthogonal(); //X is also normalized
 
 	//we deduce the orthogonal vector to the input one and X
@@ -264,7 +264,7 @@ void CCMiscTools::ComputeBaseVectors(const CCVector3d &N, CCVector3d& X, CCVecto
 	CCVector3d Nunit = N;
 	Nunit.normalize();
 
-    //we create a first vector orthogonal to the input one
+	//we create a first vector orthogonal to the input one
 	X = Nunit.orthogonal(); //X is also normalized
 
 	//we deduce the orthogonal vector to the input one and X

@@ -15,50 +15,35 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
-#define CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
+#ifndef CC_MASCARET_FILTER_HEADER
+#define CC_MASCARET_FILTER_HEADER
 
-//Qt
-#include <QDialog>
+#include "FileIOFilter.h"
 
-#include <ui_orthoSectionGenerationDlg.h>
-
-//! Dialog for generating orthogonal sections along a path (Section Extraction Tool)
-class ccOrthoSectionGenerationDlg : public QDialog, public Ui::OrthoSectionGenerationDlg
+//! Mascaret profile I/O filter
+/** See http://www.opentelemac.org/
+**/
+class QCC_IO_LIB_API MascaretFilter : public FileIOFilter
 {
-	Q_OBJECT
-
 public:
 
-	//! Default constructor
-	ccOrthoSectionGenerationDlg(QWidget* parent = 0);
+	//static accessors
+	static inline QString GetFileFilter() { return "Mascaret profile (*.txt)"; }
+	static inline QString GetDefaultExtension() { return QString("txt"); }
 
-	//! Sets the path legnth
-	void setPathLength(double l);
+	//inherited from FileIOFilter
+	virtual bool exportSupported() const { return true; }
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const { return false; }
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
-	//! Sets whether the generatrix should be automatically saved and removed
-	void setAutoSaveAndRemove(bool state);
-	//! Returns whether the generatrix should be automatically saved and removed
-	bool autoSaveAndRemove() const;
-
-	//! Sets the generation step
-	void setGenerationStep(double s);
-	//! Sets he sections width
-	void setSectionsWidth(double w);
-
-	//! Returns the generation step
-	double getGenerationStep() const;
-	//! Returns the sections width
-	double getSectionsWidth() const;
-
-protected slots:
-	void onStepChanged(double);
-
-protected:
-
-	//! Path length
-	double m_pathLength;
-
+	//Mascaret meta-data keys
+	static QString KeyUpDir()		{ return "up.dir"; }
+	static QString KeyAbscissa()	{ return "abscissa"; }
+	static QString KeyCenter()		{ return "center"; }
+	static QString KeyDirection()	{ return "direction"; }
 };
 
-#endif // CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
+#endif //CC_MASCARET_FILTER_HEADER

@@ -448,9 +448,14 @@ bool ccPolyline::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
 
 }
 
+typedef std::list<CCLib::PointProjectionTools::IndexedCCVector2*> Hull2D;
+
 ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 											PointCoordinateType maxEdgelLength/*=0*/,
-											const PointCoordinateType* preferredDim/*=0*/)
+											const PointCoordinateType* preferredNormDim/*=0*/,
+											const PointCoordinateType* preferredUpDir/*=0*/,
+											ContourType contourType/*=FULL*/,
+											std::vector<unsigned>* originalPointIndexes/*=0*/)
 {
 	assert(points);
 	if (!points)
@@ -461,23 +466,33 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 
 	CCLib::Neighbourhood Yk(points);
 	CCVector3 O,X,Y; //local base
+	bool useOXYasBase = false;
 
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
 	PointCoordinateType* planeEq = 0;
 	//if the user has specified a default direction, we'll use it as 'projecting plane'
 	PointCoordinateType preferredPlaneEq[4] = {0, 0, 0, 0};
-	if (preferredDim != 0)
+	if (preferredNormDim != 0)
 	{
-		const CCVector3* G = points->getPoint(0); //any point through which the point pass is ok
-		preferredPlaneEq[0] = preferredDim[0];
-		preferredPlaneEq[1] = preferredDim[1];
-		preferredPlaneEq[2] = preferredDim[2];
+		const CCVector3* G = points->getPoint(0); //any point through which the point passes is ok
+		preferredPlaneEq[0] = preferredNormDim[0];
+		preferredPlaneEq[1] = preferredNormDim[1];
+		preferredPlaneEq[2] = preferredNormDim[2];
 		CCVector3::vnormalize(preferredPlaneEq);
 		preferredPlaneEq[3] = CCVector3::vdot(G->u,preferredPlaneEq);
 		planeEq = preferredPlaneEq;
+
+		if (preferredUpDir != 0)
+		{
+			O = *G;
+			Y = CCVector3(preferredUpDir);
+			X = Y.cross(CCVector3(preferredNormDim));
+			useOXYasBase = true;
+		}
 	}
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,planeEq,&O,&X,&Y))
+
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,planeEq,&O,&X,&Y,useOXYasBase))
 	{
 		ccLog::Warning("[ccPolyline::ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
 		return 0;
@@ -490,12 +505,124 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 	}
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
-	std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
+	Hull2D hullPoints;
 	if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
 															hullPoints,
 															maxEdgelLength*maxEdgelLength) )
 	{
-		ccLog::Error("[ccPolyline::ExtractFlatContour] Failed to compute the convex hull of the input points!");
+		ccLog::Warning("[ccPolyline::ExtractFlatContour] Failed to compute the convex hull of the input points!");
+		return 0;
+	}
+
+	bool isClosed = true;
+	if (contourType != FULL)
+	{
+		//look for the min and max 'X' coordinates (preferredNormDim and preferredUpDir should have been defined ;)
+		PointCoordinateType xMin = 0, xMax = 0;
+		{
+			unsigned i=0;
+			for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++i)
+			{
+				const CCLib::PointProjectionTools::IndexedCCVector2* P = *it;
+				if (i != 0)
+				{
+					if (P->x < xMin)
+						xMin = P->x;
+					else if (P->x > xMax)
+						xMax = P->x;
+				}
+				else
+				{
+					xMin = xMax = P->x;
+				}
+			}
+		}
+
+		if (xMin != xMax)
+		{
+			//now identify the 'min' vertex
+			Hull2D::const_iterator firstIt = hullPoints.end();
+			{
+				for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+				{
+					const CCLib::PointProjectionTools::IndexedCCVector2* P = *it;
+					if (P->x == xMin)
+					{
+						if (	firstIt == hullPoints.end()
+							//we take the lowest (resp highest) if multiple points with x == xMin
+							||	(contourType == LOWER && (*firstIt)->y > P->y)
+							||	(contourType == UPPER && (*firstIt)->y < P->y) )
+						{
+							firstIt = it;
+						}
+					}
+				}
+			}
+			assert(firstIt != hullPoints.end());
+
+			//now we are going to keep only the right part
+			try
+			{
+				//determine the right way
+				Hull2D::const_iterator prevIt = (firstIt != hullPoints.begin() ? firstIt : hullPoints.end()); --prevIt;
+				Hull2D::const_iterator nextIt = firstIt; ++nextIt; if (nextIt == hullPoints.end()) nextIt = hullPoints.begin();
+				bool forward = (	(contourType == LOWER && (*nextIt)->y < (*prevIt)->y)
+								||	(contourType == UPPER && (*nextIt)->y > (*prevIt)->y) );
+				if (!forward)
+					std::swap(prevIt,nextIt);
+				
+				Hull2D hullPart;
+				hullPart.push_back(*firstIt);
+
+				nextIt = firstIt;
+				while ((*nextIt)->x != xMax)
+				{
+					if (forward)
+					{
+						++nextIt;
+						if (nextIt == hullPoints.end())
+							nextIt = hullPoints.begin();
+					}
+					else
+					{
+						if (nextIt == hullPoints.begin())
+							nextIt = hullPoints.end();
+						--nextIt;
+					}
+					hullPart.push_back(*nextIt);
+				}
+
+				hullPoints = hullPart;
+				isClosed = false;
+			}
+			catch(std::bad_alloc)
+			{
+				ccLog::Error("[ccPolyline::ExtractFlatContour] Not enough memory!");
+				return 0;
+			}
+		}
+		else //xMin == xMax
+		{
+			//flat contour?!
+		}
+	}
+
+	if (originalPointIndexes)
+	{
+		try
+		{
+			originalPointIndexes->resize(hullPoints.size(),0);
+		}
+		catch(std::bad_alloc)
+		{
+			//not enough memory
+			ccLog::Error("[ccPolyline::ExtractFlatContour] Not enough memory!");
+			return 0;
+		}
+
+		unsigned i=0;
+		for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++i)
+			(*originalPointIndexes)[i] = (*it)->index;
 	}
 
 	unsigned hullPtsCount = static_cast<unsigned>(hullPoints.size());
@@ -512,7 +639,7 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 		}
 
 		//projection on the LS plane (in 3D)
-		for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+		for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
 			contourVertices->addPoint(O + X*(*it)->x + Y*(*it)->y);
 		contourVertices->setName("vertices");
 		contourVertices->setEnabled(false);
@@ -523,7 +650,7 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 	if (contourPolyline->reserve(hullPtsCount))
 	{
 		contourPolyline->addPointIndex(0,hullPtsCount);
-		contourPolyline->setClosed(true);
+		contourPolyline->setClosed(isClosed);
 		contourPolyline->setVisible(true);
 		contourPolyline->setName("contour");
 		contourPolyline->addChild(contourVertices);

@@ -18,6 +18,9 @@
 #ifndef CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER
 #define CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER
 
+//qCC_db
+#include <ccPolyline.h>
+
 //Qt
 #include <QDialog>
 
@@ -31,6 +34,9 @@ public:
 	//! Default constructor
 	ccSectionExtractionSubDlg(QWidget* parent = 0);
 
+	//! Sets the number of active section(s)
+	void setActiveSectionCount(int count);
+
 	//! Sets the default section thickness
 	void setSectionThickness(double t);
 	//! Returns the section thickness
@@ -41,10 +47,8 @@ public:
 	//! Sets the max edge length (for contour generation)
 	void setMaxEdgeLength(double l);
 	
-	//! Contour type
-	enum ContourType { LOWER, UPPER, FULL };
 	//! Returns the contour type (for contour generation)
-	ContourType getContourType() const;
+	ccPolyline::ContourType getContourType() const;
 
 	//! Whether to generate clouds or not
 	bool extractClouds() const;
@@ -53,7 +57,7 @@ public:
 	//! Whether to generate contours or not
 	bool extractContours() const;
 	//! Sets whether to generate contours or not
-	void doExtractContours(bool state);
+	void doExtractContours(bool state, ccPolyline::ContourType type);
 
 };
 

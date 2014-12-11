@@ -37,7 +37,7 @@ ccEntityPickerDlg::ccEntityPickerDlg(	const ccHObject::Container& entities,
 	if (multiSelectionEnabled)
 	{
 		label->setText("Please select one or several entities:\n(press CTRL+A to select all)");
-		listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+		listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	}
 
 	for (size_t i=0; i<entities.size(); ++i)

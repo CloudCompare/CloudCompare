@@ -20,6 +20,7 @@
 //local
 #include "ui_rasterExportOptionsDlg.h"
 #include "ccPersistentSettings.h"
+#include "ccIsolines.h"
 
 //CClib
 #include <ScalarField.h>

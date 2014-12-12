@@ -255,7 +255,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->showSF(displayColorScaleCheckBox->isChecked());
 		//add window to the right side layout
 		mapFrame->setLayout(new QHBoxLayout());
-		mapFrame->layout()->addWidget(m_window);		
+		mapFrame->layout()->addWidget(m_window);
 	}
 
 	//create labels "clouds" (empty)

@@ -130,6 +130,7 @@
 #include "ccSORFilterDlg.h"
 #include "ccDensityDlg.h"
 #include "ccEntityPickerDlg.h"
+#include "ccRasterizeTool.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -5442,6 +5443,10 @@ void MainWindow::doActionHeightGridGeneration()
 		return;
 	}
 
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+	ccRasterizeTool rasterizeTool(cloud,this);
+	rasterizeTool.exec();
+
 	ccHeightGridGenerationDlg dlg(ent->getMyOwnBB(),this);
 	if (!dlg.exec())
 		return;
@@ -5466,7 +5471,6 @@ void MainWindow::doActionHeightGridGeneration()
 	ccBBox box = dlg.getCustomBBox();
 
 	ccProgressDialog pDlg(true,this);
-	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 
 	//let's rock
 	ccPointCloud* outputGrid = ccHeightGridGeneration::Compute(	cloud,

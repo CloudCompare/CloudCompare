@@ -465,7 +465,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 			if (fillEmptyCells != LEAVE_EMPTY)
 			{
-				ccLog::Print("[ccHeightGridGeneration] Empty cells (containing no projected point) will be filled with the followin value:");
+				ccLog::Print("[ccHeightGridGeneration] Empty cells (containing no projected point) will be filled with the following value:");
 				ccLog::Print("\tempty_cell_value = %f",minHeight);
 			}
 

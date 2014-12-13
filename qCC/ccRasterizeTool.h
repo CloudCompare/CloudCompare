@@ -85,6 +85,11 @@ public:
 
 	//! Returns strategy for empty cell filling
 	EmptyCellFillOption getFillEmptyCellsStrategy() const;
+	
+	//! Returns strategy for empty cell filling (extended version)
+	EmptyCellFillOption getFillEmptyCellsStrategy(	double& emptyCellsHeight,
+													double& minHeight,
+													double& maxHeight) const;
 
 	//! Returns user defined height for empty cells
 	double getCustomHeightForEmptyCells() const;
@@ -120,6 +125,9 @@ protected slots:
 
 	//! Called when the empty cell filling strategy changes
 	void fillEmptyCellStrategyChanged(int);
+
+	//! Called when the an option of the grid generation has changed
+	void gridOptionChanged();
 
 	//! Updates the gid info
 	void updateGridInfo();
@@ -168,10 +176,12 @@ protected: //raster grid related stuff
 		RasterGrid()
 			: width(0)
 			, height(0)
+			, gridStep(1.0)
 			, minHeight(0)
 			, maxHeight(0)
 			, meanHeight(0)
 			, nonEmptyCells(0)
+			, valid(false)
 		{}
 		//! Destructor
 		virtual ~RasterGrid() { clear(); }
@@ -183,15 +193,25 @@ protected: //raster grid related stuff
 		//! Reset all cells
 		void reset();
 
+		//! Sets valid
+		inline void setValid(bool state) { valid = state; }
+		//! Returns whether the grid is 'valid' or not
+		inline bool isValid() const { return valid; }
+
 		std::vector<RasterCell*> data;
 		std::vector<double*> scalarFields;
 		unsigned width;
 		unsigned height;
+		double gridStep;
 		double minHeight;
 		double maxHeight;
 		double meanHeight;
 		unsigned nonEmptyCells;
+		bool valid;
 	};
+
+	//! Converts the grid to a scalar field
+	ccPointCloud* convertGridToCloud(bool generateCountSF, bool interpolateSF) const;
 
 protected: //members
 

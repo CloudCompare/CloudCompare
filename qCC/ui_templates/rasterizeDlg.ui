@@ -300,7 +300,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="resampleOriginalCloudCheckBox">
+          <widget class="QCheckBox" name="resampleCloudCheckBox">
            <property name="toolTip">
             <string>Use the nearest point of the input cloud in each cell instead of the cell center</string>
            </property>
@@ -329,7 +329,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="fillEmptyCells">
+          <widget class="QComboBox" name="fillEmptyCellsComboBox">
            <property name="toolTip">
             <string>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</string>
            </property>
@@ -410,10 +410,30 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="contourStartDoubleSpinBox">
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="minimum">
+            <double>-1000000000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+          </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+          <widget class="QDoubleSpinBox" name="contourStepDoubleSpinBox">
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="minimum">
+            <double>-1000000000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_10">
@@ -558,22 +578,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>RasterizeToolDialog</sender>
-   <signal>accepted()</signal>
-   <receiver>RasterizeToolDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>552</x>
-     <y>367</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>RasterizeToolDialog</receiver>
@@ -602,6 +606,22 @@
     <hint type="destinationlabel">
      <x>207</x>
      <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RasterizeToolDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>682</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>552</x>
+     <y>351</y>
     </hint>
    </hints>
   </connection>

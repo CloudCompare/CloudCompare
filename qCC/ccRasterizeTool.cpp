@@ -1608,6 +1608,47 @@ void ccRasterizeTool::generateRaster() const
 
 void ccRasterizeTool::generateASCIIMatrix() const
 {
-	//return generateASCIICheckBox->isChecked();
-}
+	if (!m_cloud || !m_grid.isValid())
+		return;
 
+	QSettings settings;
+	settings.beginGroup(ccPS::HeightGridGeneration());
+	QString asciiGridSavePath = settings.value("savePathASCIIGrid",QApplication::applicationDirPath()).toString();
+
+	//open file saving dialog
+	QString filter("ASCII file (*.txt)");
+	QString outputFilename = QFileDialog::getSaveFileName(0,"Save grid as ASCII file",asciiGridSavePath+QString("/raster_matrix.txt"),filter);
+	if (outputFilename.isNull())
+		return;
+
+	FILE* pFile = fopen(qPrintable(outputFilename),"wt");
+	if (!pFile)
+	{
+		ccLog::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilename));
+	}
+
+	//default values
+	double emptyCellsHeight = 0;
+	double minHeight = m_grid.minHeight;
+	double maxHeight = m_grid.maxHeight;
+	//get real values
+	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(	emptyCellsHeight,
+		minHeight,
+		maxHeight);
+	for (unsigned j=0; j<m_grid.height; ++j)
+	{
+		const RasterCell* aCell = m_grid.data[j];
+		for (unsigned i=0; i<m_grid.width; ++i,++aCell)
+			fprintf(pFile,"%.8f ", aCell->nbPoints ? aCell->height : emptyCellsHeight);
+
+		fprintf(pFile,"\n");
+	}
+
+	fclose(pFile);
+	pFile = 0;
+
+	//save current export path to persistent settings
+	settings.setValue("savePathASCIIGrid",QFileInfo(outputFilename).absolutePath());
+
+	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
+}

@@ -118,6 +118,9 @@ protected slots:
 	//! Generates a contour plot
 	void generateContours();
 
+	//! Removes all displayed contour lines
+	void removeContourLines();
+
 	//! Save persistent settings and 'accept' dialog
 	void saveSettings();
 
@@ -155,9 +158,6 @@ protected: //standard methods
 
 	//! Updates the grid
 	bool updateGrid(bool interpolateSF = false);
-
-	//! Removes all displayed contour lines
-	void removeContourLines();
 
 protected: //raster grid related stuff
 

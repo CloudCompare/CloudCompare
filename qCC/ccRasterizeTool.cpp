@@ -80,6 +80,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(generateASCIIPushButton,	SIGNAL(clicked()),					this,	SLOT(generateASCIIMatrix()));
 	connect(generateContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(generateContours()));
 	connect(exportContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(exportContourLines()));
+	connect(clearContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(removeContourLines()));
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getMyOwnBB() : ccBBox(); 
@@ -148,13 +149,18 @@ void ccRasterizeTool::removeContourLines()
 {
 	while (!m_contourLines.empty())
 	{
-		m_window->removeFromOwnDB(m_contourLines.back());
-		delete m_contourLines.back();
+		ccPolyline* poly = m_contourLines.back();
+		if (m_window)
+			m_window->removeFromOwnDB(poly);
+		delete poly;
 		m_contourLines.pop_back();
 	}
 
 	exportContoursPushButton->setEnabled(false);
 	clearContoursPushButton->setEnabled(false);
+
+	if (m_window)
+		m_window->redraw();
 }
 
 void ccRasterizeTool::showGridBoxEditor()
@@ -390,6 +396,7 @@ void ccRasterizeTool::loadSettings()
 	double emptyHeight	= settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
 	bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
 	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleCloudCheckBox->isChecked()).toBool();
+	int minVertexCount	= settings.value("MinVertexCount",minVertexCountSpinBox->value()).toInt();
 	settings.endGroup();
 
 	gridStepDoubleSpinBox->setValue(step);
@@ -401,6 +408,7 @@ void ccRasterizeTool::loadSettings()
 	scalarFieldProjection->setCurrentIndex(sfProjStrategy);
 	generateCountSFcheckBox->setChecked(genCountSF);
 	resampleCloudCheckBox->setChecked(resampleCloud);
+	minVertexCountSpinBox->setValue(minVertexCount);
 }
 
 void ccRasterizeTool::saveSettings()
@@ -416,6 +424,7 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("EmptyCellsHeight",emptyValueDoubleSpinBox->value());
 	settings.setValue("GenerateCountSF",generateCountSFcheckBox->isChecked());
 	settings.setValue("ResampleOrigCloud",resampleCloudCheckBox->isChecked());
+	settings.setValue("MinVertexCount",minVertexCountSpinBox->value());
 	settings.endGroup();
 }
 
@@ -1823,13 +1832,14 @@ void ccRasterizeTool::generateContours()
 		ccLog::Error("Start height is above maximum height!");
 		return;
 	}
+	double zStep = contourStepDoubleSpinBox->value();
+	assert(zStep > 0);
+	unsigned levelCount = 1+static_cast<unsigned>(floor((m_grid.maxHeight-z)/zStep));
 
 	removeContourLines();
 
-	//add a border of 1 cell
-	unsigned xDim = m_grid.width+2;
-	unsigned yDim = m_grid.height+2;
-
+	unsigned xDim = m_grid.width;
+	unsigned yDim = m_grid.height;
 	double* grid = new double[xDim * yDim];
 	if (!grid)
 	{
@@ -1854,7 +1864,7 @@ void ccRasterizeTool::generateContours()
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
 			RasterCell* cell = m_grid.data[j];
-			double* row = grid + (j+1)*xDim + 1;
+			double* row = grid + j*xDim;
 			for (unsigned i=0; i<m_grid.width; ++i)
 				row[i] = cell[i].nbPoints ? cell[i].height : emptyCellsHeight;
 		}
@@ -1876,16 +1886,31 @@ void ccRasterizeTool::generateContours()
 		const unsigned char X = Z == 2 ? 0 : Z +1;
 		const unsigned char Y = X == 2 ? 0 : X +1;
 
-		double zStep = contourStepDoubleSpinBox->value();
+		int minVertexCount = minVertexCountSpinBox->value();
+		assert(minVertexCount >= 3);
+
+		ccProgressDialog pDlg(true,this);
+		pDlg.setMethodTitle("Contour plot");
+		pDlg.setInfo(qPrintable(QString("Levels: %1\nCells: %2 x %3").arg(levelCount).arg(m_grid.width).arg(m_grid.height)));
+		pDlg.start();
+		pDlg.show();
+		QApplication::processEvents();
+		CCLib::NormalizedProgress nProgress(&pDlg,levelCount);
+
 		while (z <= m_grid.maxHeight && !memoryError)
 		{
+			//extract contour lines for the current level
 			iso.setThreshold(z);
 			int lineCount = iso.find(grid);
+
 			ccLog::PrintDebug(QString("[Rasterize][Isolines] z=%1 : %2 lines").arg(z).arg(lineCount));
+
+			//convert them to poylines
+			int realCount = 0;
 			for (int i=0; i<lineCount; ++i)
 			{
 				int vertCount = iso.getContourLength(i);
-				if (vertCount > 2)
+				if (vertCount >= minVertexCount)
 				{
 					ccPointCloud* vertices = new ccPointCloud("vertices");
 					ccPolyline* poly = new ccPolyline(vertices);
@@ -1903,12 +1928,13 @@ void ccRasterizeTool::generateContours()
 
 							vertices->addPoint(P);
 						}
-						poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(i+1));
+						poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
 						poly->addPointIndex(0,static_cast<unsigned>(vertCount));
 						poly->setWidth(1);
 						poly->setClosed(true);
 						poly->setColor(ccColor::darkGrey);
 						poly->showColors(true);
+						vertices->setEnabled(false);
 						
 						if (m_window)
 							m_window->addToOwnDB(poly);
@@ -1926,12 +1952,20 @@ void ccRasterizeTool::generateContours()
 				}
 			}
 			z += zStep;
+
+			if (!nProgress.oneStep())
+			{
+				//process cancelled by user
+				break;
+			}
 		}
 	}
 	catch(std::bad_alloc)
 	{
 		ccLog::Error("Not enough memory!");
 	}
+
+	ccLog::Print(QString("[Rasterize] %1 iso-lines generated (%2 levels)").arg(m_contourLines.size()).arg(levelCount));
 
 	if (!m_contourLines.empty())
 	{
@@ -1968,9 +2002,11 @@ void ccRasterizeTool::exportContourLines()
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(contourStepDoubleSpinBox->value()));
 	for (size_t i=0; i<m_contourLines.size(); ++i)
 	{
-		group->addChild(m_contourLines[i]);
+		ccPolyline* poly = m_contourLines[i];
+		poly->setColor(ccColor::green);
+		group->addChild(poly);
 		if (m_window)
-			m_window->removeFromOwnDB(m_contourLines[i]);
+			m_window->removeFromOwnDB(poly);
 	}
 	m_contourLines.clear();
 

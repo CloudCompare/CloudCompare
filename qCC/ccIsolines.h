@@ -91,7 +91,7 @@ public:
 	////////////////////////////////////////////////////
 	int find(T* in)
 	{
-		createOnePixelBorder(in, m_threshold + 1);
+		//createOnePixelBorder(in, m_threshold + 1);
 		preCodeImage(in);
 		return findIsolines(in);
 	}

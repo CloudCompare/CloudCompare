@@ -2198,8 +2198,10 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 
 			//let's check if the mouse is on a selected item first!
-			if (	QApplication::keyboardModifiers () == Qt::NoModifier
-				||	QApplication::keyboardModifiers () == Qt::ControlModifier )
+			if (	m_pickingMode != NO_PICKING
+				&&
+				(	QApplication::keyboardModifiers () == Qt::NoModifier
+				||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )
 			{
 				updateActiveItemsList(event->x(), event->y(), true);
 			}

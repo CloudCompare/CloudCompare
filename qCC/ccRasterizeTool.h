@@ -34,6 +34,7 @@ class ccBoundingBoxEditorDlg;
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccGLWindow;
+class ccPolyline;
 
 //! Rasterize tool (dialog)
 class ccRasterizeTool : public QDialog, public Ui::RasterizeToolDialog
@@ -111,8 +112,11 @@ protected slots:
 	//! Exports the grid as an ASCII matrix
 	void generateASCIIMatrix() const;
 
+	//! Exports the (already generated) contour lines
+	void exportContourLines();
+
 	//! Generates a contour plot
-	void generateContours() const;
+	void generateContours();
 
 	//! Save persistent settings and 'accept' dialog
 	void saveSettings();
@@ -151,6 +155,9 @@ protected: //standard methods
 
 	//! Updates the grid
 	bool updateGrid(bool interpolateSF = false);
+
+	//! Removes all displayed contour lines
+	void removeContourLines();
 
 protected: //raster grid related stuff
 
@@ -232,6 +239,9 @@ protected: //members
 
 	//! 'Raster' cloud
 	ccPointCloud* m_rasterCloud;
+
+	//! Contour lines
+	std::vector<ccPolyline*> m_contourLines;
 };
 
 #endif //CC_HEIGHT_GRID_GENERATION_DLG_HEADER

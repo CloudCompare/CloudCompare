@@ -29,6 +29,7 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
+#include <ccPolyline.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
@@ -67,6 +68,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(buttonBox,					SIGNAL(accepted()),					this,	SLOT(saveSettings()));
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateGridInfo()));
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
+	connect(emptyValueDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
 	connect(resampleCloudCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(gridOptionChanged()));
 	connect(dimensionComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionDirChanged(int)));
 	connect(heightProjectionComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionTypeChanged(int)));
@@ -77,6 +79,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(generateRasterPushButton,	SIGNAL(clicked()),					this,	SLOT(generateRaster()));
 	connect(generateASCIIPushButton,	SIGNAL(clicked()),					this,	SLOT(generateASCIIMatrix()));
 	connect(generateContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(generateContours()));
+	connect(exportContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(exportContourLines()));
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getMyOwnBB() : ccBBox(); 
@@ -136,7 +139,22 @@ ccRasterizeTool::~ccRasterizeTool()
 		m_rasterCloud = 0;
 	}
 
+	removeContourLines();
+
 	m_grid.clear();
+}
+
+void ccRasterizeTool::removeContourLines()
+{
+	while (!m_contourLines.empty())
+	{
+		m_window->removeFromOwnDB(m_contourLines.back());
+		delete m_contourLines.back();
+		m_contourLines.pop_back();
+	}
+
+	exportContoursPushButton->setEnabled(false);
+	clearContoursPushButton->setEnabled(false);
 }
 
 void ccRasterizeTool::showGridBoxEditor()
@@ -156,7 +174,7 @@ void ccRasterizeTool::showGridBoxEditor()
 
 void ccRasterizeTool::updateGridInfo()
 {
-	//Vertical dimension
+	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z +1;
@@ -467,8 +485,8 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 	}
 	updateGridPushButton->setDisabled(state);
 
-	contourLinesGroupBox->setDisabled(state);
-	exportGroupBox->setDisabled(state);
+	contourLinesGroupBox->setEnabled(state);
+	exportGroupBox->setEnabled(state);
 }
 
 void ccRasterizeTool::RasterGrid::clear()
@@ -655,7 +673,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool generateCountSF, bool int
 		return 0;
 	}
 
-	//Vertical dimension
+	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z +1;
@@ -871,7 +889,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	ProjectionType sfInterpolation = getTypeOfSFInterpolation();
 	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy();
 
-	//Vertical dimension
+	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z +1;
@@ -905,6 +923,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		if (QMessageBox::question(0,"Unexpected grid size","The generated grid will only have 1 cell! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
+
+	removeContourLines();
 
 	//memory allocation
 	if (!m_grid.init(gridWidth,gridHeight))
@@ -1573,6 +1593,7 @@ void ccRasterizeTool::generateRaster() const
 	ccBBox box = getCustomBBox();
 	assert(box.isValid());
 
+	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z +1;
@@ -1791,6 +1812,170 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
 }
 
-void ccRasterizeTool::generateContours() const
+void ccRasterizeTool::generateContours()
 {
+	if (!m_grid.isValid())
+		return;
+
+	double z = contourStartDoubleSpinBox->value();
+	if (z > m_grid.maxHeight)
+	{
+		ccLog::Error("Start height is above maximum height!");
+		return;
+	}
+
+	removeContourLines();
+
+	//add a border of 1 cell
+	unsigned xDim = m_grid.width+2;
+	unsigned yDim = m_grid.height+2;
+
+	double* grid = new double[xDim * yDim];
+	if (!grid)
+	{
+		ccLog::Error("Not enough memory!");
+		if (m_window)
+			m_window->redraw();
+		return;
+	}
+	//memset(grid,0,sizeof(double)*(xDim*yDim));
+
+	//fill grid
+	{
+		//default values
+		double emptyCellsHeight = 0;
+		double minHeight = m_grid.minHeight;
+		double maxHeight = m_grid.maxHeight;
+		//get real values
+		EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(	emptyCellsHeight,
+			minHeight,
+			maxHeight);
+
+		for (unsigned j=0; j<m_grid.height; ++j)
+		{
+			RasterCell* cell = m_grid.data[j];
+			double* row = grid + (j+1)*xDim + 1;
+			for (unsigned i=0; i<m_grid.width; ++i)
+				row[i] = cell[i].nbPoints ? cell[i].height : emptyCellsHeight;
+		}
+	}
+
+	bool memoryError = false;
+
+	try
+	{
+		Isolines<double> iso(static_cast<int>(xDim),static_cast<int>(yDim));
+
+		//bounding box
+		ccBBox box = getCustomBBox();
+		assert(box.isValid());
+
+		//vertical dimension
+		const unsigned char Z = getProjectionDimension();
+		assert(Z >= 0 && Z <= 2);
+		const unsigned char X = Z == 2 ? 0 : Z +1;
+		const unsigned char Y = X == 2 ? 0 : X +1;
+
+		double zStep = contourStepDoubleSpinBox->value();
+		while (z <= m_grid.maxHeight && !memoryError)
+		{
+			iso.setThreshold(z);
+			int lineCount = iso.find(grid);
+			ccLog::PrintDebug(QString("[Rasterize][Isolines] z=%1 : %2 lines").arg(z).arg(lineCount));
+			for (int i=0; i<lineCount; ++i)
+			{
+				int vertCount = iso.getContourLength(i);
+				if (vertCount > 2)
+				{
+					ccPointCloud* vertices = new ccPointCloud("vertices");
+					ccPolyline* poly = new ccPolyline(vertices);
+					poly->addChild(vertices);
+					if (poly->reserve(vertCount) && vertices->reserve(vertCount))
+					{
+						for (int v=0; v<vertCount; ++v)
+						{
+							double x = iso.getContourX(i,v) - 1.0;
+							double y = iso.getContourY(i,v) - 1.0;
+							CCVector3 P;
+							P.u[X] = static_cast<PointCoordinateType>(x * m_grid.gridStep + box.minCorner().u[X]);
+							P.u[Y] = static_cast<PointCoordinateType>(y * m_grid.gridStep + box.minCorner().u[Y]);
+							P.u[Z] = static_cast<PointCoordinateType>(z);
+
+							vertices->addPoint(P);
+						}
+						poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(i+1));
+						poly->addPointIndex(0,static_cast<unsigned>(vertCount));
+						poly->setWidth(1);
+						poly->setClosed(true);
+						poly->setColor(ccColor::darkGrey);
+						poly->showColors(true);
+						
+						if (m_window)
+							m_window->addToOwnDB(poly);
+
+						m_contourLines.push_back(poly);
+					}
+					else
+					{
+						delete poly;
+						poly = 0;
+						ccLog::Error("Not enough memory!");
+						memoryError = true; //early stop
+						break;
+					}
+				}
+			}
+			z += zStep;
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory!");
+	}
+
+	if (!m_contourLines.empty())
+	{
+		if (memoryError)
+		{
+			removeContourLines();
+		}
+		else
+		{
+			exportContoursPushButton->setEnabled(true);
+			clearContoursPushButton->setEnabled(true);
+		}
+	}
+
+	if (grid)
+	{
+		delete[] grid;
+		grid = 0;
+	}
+
+	if (m_window)
+		m_window->redraw();
+}
+
+void ccRasterizeTool::exportContourLines()
+{
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (!mainWindow || !m_cloud)
+	{
+		assert(false);
+		return;
+	}
+
+	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(contourStepDoubleSpinBox->value()));
+	for (size_t i=0; i<m_contourLines.size(); ++i)
+	{
+		group->addChild(m_contourLines[i]);
+		if (m_window)
+			m_window->removeFromOwnDB(m_contourLines[i]);
+	}
+	m_contourLines.clear();
+
+	group->setDisplay_recursive(m_cloud->getDisplay());
+	mainWindow->addToDB(group);
+
+	ccLog::Print(QString("Contour lines have been succesfully exported to DB (group name: %1)").arg(group->getName()));
 }

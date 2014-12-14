@@ -35,6 +35,9 @@
 * 
 */
 
+//qCC_db
+#include <ccLog.h>
+
 //system
 #include <assert.h>
 #include <vector>
@@ -68,10 +71,9 @@ public:
 		, m_threshold(0)
 		, m_numContours(0)
 	{
-		int size = w*h;
 		//try
 		{
-			m_cd.  resize(size);
+			m_cd.resize(w*h);
 		}
 		//catch(std::bad_alloc)
 		//{
@@ -118,13 +120,11 @@ protected:
 	{
 		for (int i = 0, j = m_w*m_h-1; i < m_w; i++, j--)
 		{
-			in[i] = borderval;
-			in[j] = borderval;
+			in[i] = in[j] = borderval;
 		}
-		for (int i = 0, j = m_w-1; i < m_h; i++, j+=w)
+		for (int i = 0, j = m_w-1; i < m_h; i++, j+=m_w)
 		{
-			in[i] = borderval;
-			in[j] = borderval;
+			in[i] = in[j] = borderval;
 		}
 	}
 
@@ -133,11 +133,12 @@ protected:
 	// depends only on whether each of four corners is
 	// above or below threshold.
 	////////////////////////////////////////////////////
-	void preCodeImage(T* in) const
+	void preCodeImage(const T* in)
 	{
-		for (int x = 0; x < w - 1; x++)
+		std::fill(m_cd.begin(),m_cd.end(),0);
+		for (int x = 0; x < m_w - 1; x++)
 		{
-			for (int y = 0; y < h - 1; y++)
+			for (int y = 0; y < m_h - 1; y++)
 			{
 				int b0 = in[ixy(x + 0, y + 0)] < m_threshold ? 0x00001000 : 0x00000000;
 				int b1 = in[ixy(x + 1, y + 0)] < m_threshold ? 0x00000100 : 0x00000000;
@@ -205,22 +206,22 @@ protected:
 					break;
 
 				case CASE1:									// CASE 1
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 2;
 					break;
 
 				case CASE2:									// CASE 2
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 1;
 					break;
 
 				case CASE3:									// CASE 3
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 1;
 					break;
 
 				case CASE4:									// CASE 4
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 0;
 					break;
 
@@ -236,12 +237,12 @@ protected:
 							if (fromedge == 3)				// treat as case 1, then switch code to case 4
 							{
 								toedge = 2;
-								cd[next] = CASE4;
+								m_cd[next] = CASE4;
 							}
 							else							// treat as case 4, then switch code to case 1
 							{
 								toedge = 0;
-								cd[next] = CASE1;
+								m_cd[next] = CASE1;
 							}
 						}
 						else
@@ -249,34 +250,34 @@ protected:
 							if (fromedge == 3)				// treat as case 7, then switch code to case 13
 							{
 								toedge = 0;
-								cd[next] = CASE13;
+								m_cd[next] = CASE13;
 							}
 							else							// treat as case 13, then switch code to case 7
 							{
 								toedge = 2;
-								cd[next] = CASE7;
+								m_cd[next] = CASE7;
 							}
 						}
 					}
 					break;
 
 				case CASE6:									// CASE 6
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 0;
 					break;
 
 				case CASE7:									// CASE 7
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 0;
 					break;
 
 				case CASE8:									// CASE 8
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 3;
 					break;
 
 				case CASE9:									// CASE 9
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 2;
 					break;
 
@@ -287,17 +288,17 @@ protected:
 											+	in[ixy(x + 0, y + 1)]
 											+	in[ixy(x + 1, y + 1)] );
 					
-						if (avg > threshold)
+						if (avg > m_threshold)
 						{
 							if (fromedge == 0)				// treat as case 8, then switch code to case 2
 							{
 								toedge = 3;
-								cd[next] = CASE2;
+								m_cd[next] = CASE2;
 							}
 							else							// treat as case 2, then switch code to case 8
 							{
 								toedge = 1;
-								cd[next] = CASE8;
+								m_cd[next] = CASE8;
 							}
 						}
 						else
@@ -305,34 +306,34 @@ protected:
 							if (fromedge == 2)				// treat as case 14, then switch code to case 11
 							{
 								toedge = 3;
-								cd[next] = CASE11;
+								m_cd[next] = CASE11;
 							}
 							else							// treat as case 11, then switch code to case 14
 							{
 								toedge = 1;
-								cd[next] = CASE14;
+								m_cd[next] = CASE14;
 							}
 						}
 					}
 					break;
 
 				case CASE11:								// CASE 11
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 1;
 					break;
 
 				case CASE12:								// CASE 12
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 3;
 					break;
 
 				case CASE13:								// CASE 13
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 2;
 					break;
 
 				case CASE14:								// CASE 14
-					cd[next] = 0;
+					m_cd[next] = 0;
 					toedge = 3;
 					break;
 
@@ -349,6 +350,8 @@ protected:
 				{
 					// starting a new contour
 					m_cl.push_back(0);
+					m_co.push_back(static_cast<int>(m_cx.size()));
+					//ccLog::Print(QString("New contour: #%1 - origin = %2 - (x=%3, y=%4)").arg(m_cl.size()).arg(m_co.back()).arg(x).arg(y));
 				}
 
 				switch (toedge)
@@ -395,16 +398,6 @@ protected:
 
 		m_numContours = static_cast<int>(m_cl.size());
 
-		//update contour origins
-		{
-			int sum = 0;
-			for (int i = 0; i < m_numContours; i++)
-			{
-				m_co[i] = sum;
-				sum += m_cl[i];
-			}
-		}
-
 		computeBoundingBoxes();
 
 		return m_numContours;
@@ -413,7 +406,7 @@ protected:
 	////////////////////////////////////////////////////
 	// LERP between to values
 	////////////////////////////////////////////////////    
-	static double LERP(T A, T B)
+	inline double LERP(T A, T B) const
 	{
 		T AB = A-B;
 		return AB == 0 ? 0 : static_cast<double>(A - m_threshold) / AB;
@@ -435,18 +428,6 @@ protected:
 	{
 		int o = m_co[contour];
 		m_cy[wrap(o + v, o, o + m_cl[contour])] = y;
-	}
-
-	inline double getContourX(int contour, int v) const
-	{
-		int o = m_co[contour];
-		return m_cx[wrap(o + v, o, o + m_cl[contour])];
-	}
-
-	inline double getContourY(int contour, int v) const
-	{
-		int o = m_co[contour];
-		return m_cy[wrap(o + v, o, o + m_cl[contour])];
 	}
 
 	inline int getValidIndex(int contour, int v) const
@@ -573,7 +554,6 @@ protected:
 	}
 
 	inline int ixy(int x, int y) const { return x + y * m_w; }
-	inline int ixy(double x, double y) { return static_cast<int>(x) + static_cast<int>(y) * w; }
 
 	inline double measureDistance(int contour, int first, int second) const
 	{
@@ -629,6 +609,18 @@ protected:
 	}
 
 public:
+
+	inline double getContourX(int contour, int v) const
+	{
+		int o = m_co[contour];
+		return m_cx[wrap(o + v, o, o + m_cl[contour])];
+	}
+
+	inline double getContourY(int contour, int v) const
+	{
+		int o = m_co[contour];
+		return m_cy[wrap(o + v, o, o + m_cl[contour])];
+	}
 
 	inline double measureCurvature(int contour, int i) const
 	{

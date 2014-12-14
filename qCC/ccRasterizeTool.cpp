@@ -932,6 +932,11 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		if (QMessageBox::question(0,"Unexpected grid size","The generated grid will only have 1 cell! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
+	else if (gridTotalSize > 10000000)
+	{
+		if (QMessageBox::question(0,"Big grid size","The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+			return false;
+	}
 
 	removeContourLines();
 

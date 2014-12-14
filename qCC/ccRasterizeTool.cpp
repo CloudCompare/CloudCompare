@@ -22,6 +22,7 @@
 #include "ccPersistentSettings.h"
 #include "ccCommon.h"
 #include "mainwindow.h"
+#include "ccIsolines.h"
 
 //qCC_db
 #include <ccGenericPointCloud.h>
@@ -31,6 +32,9 @@
 
 //qCC_gl
 #include <ccGLWindow.h>
+
+//CCLib
+#include <Delaunay2dMesh.h>
 
 //Qt
 #include <QSettings>
@@ -72,6 +76,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(generateImagePushButton,	SIGNAL(clicked()),					this,	SLOT(generateImage()));
 	connect(generateRasterPushButton,	SIGNAL(clicked()),					this,	SLOT(generateRaster()));
 	connect(generateASCIIPushButton,	SIGNAL(clicked()),					this,	SLOT(generateASCIIMatrix()));
+	connect(generateContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(generateContours()));
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getMyOwnBB() : ccBBox(); 
@@ -226,7 +231,10 @@ void ccRasterizeTool::projectionDirChanged(int dir)
 
 void ccRasterizeTool::fillEmptyCellStrategyChanged(int)
 {
-	emptyValueDoubleSpinBox->setEnabled(getFillEmptyCellsStrategy() == FILL_CUSTOM_HEIGHT);
+	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy();
+
+	emptyValueDoubleSpinBox->setEnabled(	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT
+										||	fillEmptyCellsStrategy == INTERPOLATE );
 	gridIsUpToDate(false);
 }
 
@@ -325,14 +333,18 @@ ccRasterizeTool::EmptyCellFillOption ccRasterizeTool::getFillEmptyCellsStrategy(
 		emptyCellsHeight = m_grid.maxHeight;
 		break;
 	case FILL_CUSTOM_HEIGHT:
+	case INTERPOLATE:
 		{
 			double customEmptyCellsHeight = getCustomHeightForEmptyCells();
-			//update min and max height by the way!
-			if (customEmptyCellsHeight <= m_grid.minHeight)
-				minHeight = customEmptyCellsHeight;
-			else if (customEmptyCellsHeight >= m_grid.maxHeight)
-				maxHeight = customEmptyCellsHeight;
-			emptyCellsHeight = customEmptyCellsHeight;
+			//update min and max height by the way (only if there are empty cells ;)
+			if (m_grid.nonEmptyCells != m_grid.width * m_grid.height)
+			{
+				if (customEmptyCellsHeight <= m_grid.minHeight)
+					minHeight = customEmptyCellsHeight;
+				else if (customEmptyCellsHeight >= m_grid.maxHeight)
+					maxHeight = customEmptyCellsHeight;
+				emptyCellsHeight = customEmptyCellsHeight;
+			}
 		}
 		break;
 	case FILL_AVERAGE_HEIGHT:
@@ -454,6 +466,9 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 		updateGridPushButton->setStyleSheet("color: white; background-color:red;");
 	}
 	updateGridPushButton->setDisabled(state);
+
+	contourLinesGroupBox->setDisabled(state);
+	exportGroupBox->setDisabled(state);
 }
 
 void ccRasterizeTool::RasterGrid::clear()
@@ -840,9 +855,6 @@ void ccRasterizeTool::updateGridAndDisplay()
 		}
 	}
 
-	contourLinesGroupBox->setEnabled(success);
-	exportGroupBox->setEnabled(success);
-
 	gridIsUpToDate(success);
 }
 
@@ -857,7 +869,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	//main parameters
 	ProjectionType projectionType = getTypeOfProjection();
 	ProjectionType sfInterpolation = getTypeOfSFInterpolation();
-	
+	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy();
+
 	//Vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
@@ -1099,6 +1112,131 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 			for (unsigned i=0; i<m_grid.width; ++i,++cell)
 				if (cell->nbPoints > 1)
 					cell->height /= static_cast<PointCoordinateType>(cell->nbPoints);
+		}
+	}
+	
+	//fill empty cells by interpolating nearest values
+	if (fillEmptyCellsStrategy == INTERPOLATE)
+	{
+		//compute the number of non empty cells
+		unsigned nonEmptyCells = 0;
+		{
+			for (unsigned i=0; i<m_grid.height; ++i)
+				for (unsigned j=0; j<m_grid.width; ++j)
+					if (m_grid.data[i][j].nbPoints) //non empty cell
+						nonEmptyCells++;
+		}
+
+		std::vector<CCVector2> the2DPoints;
+		if (nonEmptyCells > 2 && nonEmptyCells != m_grid.width * m_grid.height)
+		{
+			try
+			{
+				the2DPoints.resize(nonEmptyCells);
+			}
+			catch (...)
+			{
+				//out of memory
+				ccLog::Warning("[Rasterize] Not enough memory to interpolate empty cells!");
+			}
+		}
+		
+		//fill 2D vector with non-empty cell indexes
+		if (!the2DPoints.empty())
+		{
+			unsigned index = 0;
+			for (unsigned j=0; j<m_grid.height; ++j)
+			{
+				const RasterCell* cell = m_grid.data[j];
+				for (unsigned i=0; i<m_grid.width; ++i, ++cell)
+					if (cell->nbPoints)
+						the2DPoints[index++] = CCVector2(static_cast<PointCoordinateType>(i),static_cast<PointCoordinateType>(j));
+			}
+			assert(index == nonEmptyCells);
+
+			//mesh the '2D' points
+			CCLib::Delaunay2dMesh* dm = new CCLib::Delaunay2dMesh();
+			char errorStr[1024];
+			if (!dm->buildMesh(the2DPoints,0,errorStr))
+			{
+				ccLog::Warning(QString("[Rasterize] Empty cells interpolation failed: Triangle lib. said '%1'").arg(errorStr));
+			}
+			else
+			{
+				unsigned triNum = dm->size();
+				//now we are going to 'project' all triangles on the grid
+				dm->placeIteratorAtBegining();
+				for (unsigned k=0; k<triNum; ++k)
+				{
+					const CCLib::TriangleSummitsIndexes* tsi = dm->getNextTriangleIndexes();
+					//get the triangle bounding box (in grid coordinates)
+					int P[3][2];
+					int xMin=0,yMin=0,xMax=0,yMax=0;
+					{
+						for (unsigned j=0; j<3; ++j)
+						{
+							const CCVector2& P2D = the2DPoints[tsi->i[j]];
+							P[j][0] = static_cast<int>(P2D.x);
+							P[j][1] = static_cast<int>(P2D.y);
+						}
+						xMin = std::min(std::min(P[0][0],P[1][0]),P[2][0]);
+						yMin = std::min(std::min(P[0][1],P[1][1]),P[2][1]);
+						xMax = std::max(std::max(P[0][0],P[1][0]),P[2][0]);
+						yMax = std::max(std::max(P[0][1],P[1][1]),P[2][1]);
+					}
+					//now scan the cells
+					{
+						//pre-computation for barycentric coordinates
+						const double& valA = m_grid.data[ P[0][1] ][ P[0][0] ].height;
+						const double& valB = m_grid.data[ P[1][1] ][ P[1][0] ].height;
+						const double& valC = m_grid.data[ P[2][1] ][ P[2][0] ].height;
+
+						int det = (P[1][1]-P[2][1])*(P[0][0]-P[2][0]) + (P[2][0]-P[1][0])*(P[0][1]-P[2][1]);
+
+						for (int j=yMin; j<=yMax; ++j)
+						{
+							RasterCell* cell = m_grid.data[static_cast<unsigned>(j)];
+
+							for (int i=xMin; i<=xMax; ++i)
+							{
+								//if the cell is empty
+								if (!cell[i].nbPoints)
+								{
+									//we test if it's included or not in the current triangle
+									//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
+									bool inside = false;
+									for (int ti=0; ti<3; ++ti)
+									{
+										const int* P1 = P[ti];
+										const int* P2 = P[(ti+1)%3];
+										if ((P2[1] <= j &&j < P1[1]) || (P1[1] <= j && j < P2[1]))
+										{
+											int t = (i-P2[0])*(P1[1]-P2[1])-(P1[0]-P2[0])*(j-P2[1]);
+											if (P1[1] < P2[1])
+												t = -t;
+											if (t < 0)
+												inside = !inside;
+										}
+									}
+									//can we interpolate?
+									if (inside)
+									{
+										double l1 = static_cast<double>((P[1][1]-P[2][1])*(i-P[2][0])+(P[2][0]-P[1][0])*(j-P[2][1]))/det;
+										double l2 = static_cast<double>((P[2][1]-P[0][1])*(i-P[2][0])+(P[0][0]-P[2][0])*(j-P[2][1]))/det;
+										double l3 = 1.0-l1-l2;
+
+										cell[i].nbPoints = 1;
+										cell[i].height = l1 * valA + l2 * valB + l3 * valC;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			delete dm;
+			dm = 0;
 		}
 	}
 
@@ -1651,4 +1789,8 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	settings.setValue("savePathASCIIGrid",QFileInfo(outputFilename).absolutePath());
 
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
+}
+
+void ccRasterizeTool::generateContours() const
+{
 }

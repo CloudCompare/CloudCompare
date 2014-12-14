@@ -376,6 +376,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="toolTip">
+            <string>Custom value for empty cells</string>
+           </property>
            <property name="decimals">
             <number>6</number>
            </property>

@@ -111,6 +111,9 @@ protected slots:
 	//! Exports the grid as an ASCII matrix
 	void generateASCIIMatrix() const;
 
+	//! Generates a contour plot
+	void generateContours() const;
+
 	//! Save persistent settings and 'accept' dialog
 	void saveSettings();
 

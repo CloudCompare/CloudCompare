@@ -12,6 +12,10 @@ v2.6.1.beta 11/??/2014
 				the upper part or the full section cloud)
 		- output profiles can be exported to the 'Mascaret' profile format (see http://www.opentelemac.org/)
 			or to the more standard DXF and SHP formats
+	* Rasterize Tool (former 'Height Grid Generation' tool)
+		- brand new interface with real-time preview of the raster
+		- new option to fill empty cells: 'interpolate'
+		- new tool to generate contour lines (aka isolines, contour plot, etc.)
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
 	* DP file I/O filter (plugin)

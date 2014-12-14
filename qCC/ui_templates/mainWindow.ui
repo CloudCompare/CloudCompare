@@ -361,7 +361,7 @@
       <string>Projection</string>
      </property>
      <addaction name="actionUnroll"/>
-     <addaction name="actionHeightGridGeneration"/>
+     <addaction name="actionRasterize"/>
      <addaction name="actionExportCoordToSF"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
@@ -1821,9 +1821,16 @@
     <string>Edit</string>
    </property>
   </action>
-  <action name="actionHeightGridGeneration">
+  <action name="actionRasterize">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccGrid.png</normaloff>:/CC/images/ccGrid.png</iconset>
+   </property>
    <property name="text">
-    <string>Raterize (Height grid generation)</string>
+    <string>Rasterize (and contour plot)</string>
+   </property>
+   <property name="toolTip">
+    <string>Convert a cloud to 2D raster (and optionally generate the contour plot)</string>
    </property>
   </action>
   <action name="actionAlign">

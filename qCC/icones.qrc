@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccGrid.png</file>
     <file>images/sectionExtraction.png</file>
     <file>images/orthoSections.png</file>
     <file>images/ccExit.png</file>

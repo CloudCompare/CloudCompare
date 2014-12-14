@@ -63,7 +63,6 @@
 #include <DepthMapFileFilter.h>
 
 //qCC includes
-#include "ccHeightGridGeneration.h"
 #include "ccRenderingTools.h"
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccMinimumSpanningTreeForNormsDirection.h"
@@ -103,7 +102,6 @@
 #include "ccLabelingDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccCamSensorProjectionDlg.h"
-#include "ccHeightGridGenerationDlg.h"
 #include "ccUnrollDlg.h"
 #include "ccAlignDlg.h" //Aurelien BEY
 #include "ccRegistrationDlg.h" //Aurelien BEY
@@ -891,7 +889,7 @@ void MainWindow::connectActions()
 	
 	//"Tools > Projection" menu
 	connect(actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
-	connect(actionHeightGridGeneration,			SIGNAL(triggered()),	this,		SLOT(doActionHeightGridGeneration()));
+	connect(actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
 	connect(actionExportCoordToSF,				SIGNAL(triggered()),	this,		SLOT(doActionExportCoordToSF()));
 	//"Tools > Registration" menu
 	connect(actionRegister,						SIGNAL(triggered()),	this,		SLOT(doActionRegister()));
@@ -5427,7 +5425,7 @@ void MainWindow::doActionExportCoordToSF()
 	updateUI();
 }
 
-void MainWindow::doActionHeightGridGeneration()
+void MainWindow::doActionRasterize()
 {
 	size_t selNum = m_selectedEntities.size();
 	if (selNum != 1)
@@ -5446,82 +5444,6 @@ void MainWindow::doActionHeightGridGeneration()
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 	ccRasterizeTool rasterizeTool(cloud,this);
 	rasterizeTool.exec();
-
-	ccHeightGridGenerationDlg dlg(ent->getMyOwnBB(),this);
-	if (!dlg.exec())
-		return;
-
-	bool generateCloud = dlg.generateCloud();
-	bool generateCountSF = dlg.generateCountSF();
-	bool resampleOriginalCloud = dlg.resampleOriginalCloud();
-	bool generateImage = dlg.generateImage();
-	bool generateASCII = dlg.generateASCII();
-	bool generateRaster = dlg.generateRaster();
-
-	if (!generateCloud && !generateImage && !generateASCII && !generateRaster)
-	{
-		ccConsole::Error("Nothing to do?! Mind the 'Generate' checkboxes...");
-		return;
-	}
-
-	//Grid step must be > 0
-	double gridStep = dlg.getGridStep();
-	assert(gridStep > 0);
-	//Custom bundig box
-	ccBBox box = dlg.getCustomBBox();
-
-	ccProgressDialog pDlg(true,this);
-
-	//let's rock
-	ccPointCloud* outputGrid = ccHeightGridGeneration::Compute(	cloud,
-																gridStep,
-																box,
-																dlg.getProjectionDimension(),
-																dlg.getTypeOfProjection(),
-																dlg.getFillEmptyCellsStrategy(),
-																dlg.getTypeOfSFInterpolation(),
-																dlg.getCustomHeightForEmptyCells(),
-																generateCloud,
-																generateImage,
-																generateRaster,
-																generateASCII,
-																generateCountSF,
-																resampleOriginalCloud,
-																&pDlg);
-
-	//a cloud was demanded as output?
-	if (outputGrid)
-	{
-		if (outputGrid->size() != 0)
-		{
-			if (cloud->getParent())
-				cloud->getParent()->addChild(outputGrid);
-
-			outputGrid->setName(QString("%1.heightGrid(%2)").arg(cloud->getName()).arg(gridStep,0,'g',3));
-			outputGrid->setDisplay(cloud->getDisplay());
-			outputGrid->prepareDisplayForRefresh();
-			//zoomOn(outputGrid);
-			addToDB(outputGrid);
-			if (m_ccRoot)
-				m_ccRoot->selectEntity(outputGrid);
-
-			//don't forget original shift
-			outputGrid->setGlobalShift(cloud->getGlobalShift());
-			outputGrid->setGlobalScale(cloud->getGlobalScale());
-			cloud->prepareDisplayForRefresh_recursive();
-			cloud->setEnabled(false);
-			ccConsole::Warning("Previously selected entity (source) has been hidden!");
-
-			refreshAll();
-			updateUI();
-		}
-		else
-		{
-			ccConsole::Warning("[doActionHeightGridGeneration] Output cloud was empty!");
-			delete outputGrid;
-			outputGrid = 0;
-		}
-	}
 }
 
 void MainWindow::doActionComputeMeshAA()
@@ -10517,7 +10439,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
 	actionCrossSection->setEnabled(exactlyOneCloud);
 	actionExtractSections->setEnabled(atLeastOneCloud);
-	actionHeightGridGeneration->setEnabled(exactlyOneCloud);
+	actionRasterize->setEnabled(exactlyOneCloud);
 
 	actionPointListPicking->setEnabled(exactlyOneEntity);
 

@@ -370,7 +370,7 @@ protected slots:
 	void doActionSetViewFromSensor();
 	void doActionShowDepthBuffer();
 	void doActionExportDepthBuffer();
-	void doActionHeightGridGeneration();
+	void doActionRasterize();
 	void doActionExportCoordToSF();
 	void doComputeBestFitBB();
 	void doActionCrop();

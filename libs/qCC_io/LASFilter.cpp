@@ -961,7 +961,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
 			bool enabled = true;
 			//set the LAS shift as default shift (if none was provided)
-			if (!cseBackup || !*cseBackup)
+			if (lasShift.norm2() != 0 && (!cseBackup || !*cseBackup))
 			{
 				parameters.coordinatesShiftEnabled = &enabled;
 				parameters.coordinatesShift = &lasShift;

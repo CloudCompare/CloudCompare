@@ -1843,8 +1843,8 @@ void ccRasterizeTool::generateContours()
 
 	removeContourLines();
 
-	unsigned xDim = m_grid.width;
-	unsigned yDim = m_grid.height;
+	unsigned xDim = m_grid.width+2;
+	unsigned yDim = m_grid.height+2;
 	double* grid = new double[xDim * yDim];
 	if (!grid)
 	{
@@ -1855,21 +1855,21 @@ void ccRasterizeTool::generateContours()
 	}
 	//memset(grid,0,sizeof(double)*(xDim*yDim));
 
+	//default values
+	double emptyCellsHeight = 0;
+	double minHeight = m_grid.minHeight;
+	double maxHeight = m_grid.maxHeight;
+	//get real values
+	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(	emptyCellsHeight,
+																			minHeight,
+																			maxHeight);
+
 	//fill grid
 	{
-		//default values
-		double emptyCellsHeight = 0;
-		double minHeight = m_grid.minHeight;
-		double maxHeight = m_grid.maxHeight;
-		//get real values
-		EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(	emptyCellsHeight,
-			minHeight,
-			maxHeight);
-
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
 			RasterCell* cell = m_grid.data[j];
-			double* row = grid + j*xDim;
+			double* row = grid + (j+1)*xDim + 1;
 			for (unsigned i=0; i<m_grid.width; ++i)
 				row[i] = cell[i].nbPoints ? cell[i].height : emptyCellsHeight;
 		}
@@ -1880,7 +1880,7 @@ void ccRasterizeTool::generateContours()
 	try
 	{
 		Isolines<double> iso(static_cast<int>(xDim),static_cast<int>(yDim));
-
+		iso.createOnePixelBorder(grid,minHeight-1.0);
 		//bounding box
 		ccBBox box = getCustomBBox();
 		assert(box.isValid());

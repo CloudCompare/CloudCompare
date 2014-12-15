@@ -111,8 +111,6 @@ public:
 
 	inline double measurePerimeter(int contour) const { return measurePerimeter(contour, 0, getContourLength(contour)); }
 
-protected:
-
 	////////////////////////////////////////////////////
 	// CREATE single pixel, 0-valued border around pix
 	////////////////////////////////////////////////////
@@ -127,6 +125,8 @@ protected:
 			in[i] = in[j] = borderval;
 		}
 	}
+
+protected:
 
 	////////////////////////////////////////////////////
 	// CODE each 2x2 pixel
@@ -192,7 +192,7 @@ protected:
 				int x = next % m_w;
 				int y = next / m_w;
 			
-				if (x >= (m_w - 1) || y >= (m_h - 1))
+				if (x+1 >= m_w || y+1 >= m_h)
 				{
 					next = -1;
 					continue;
@@ -534,7 +534,7 @@ protected:
 		if (d < 0)
 			w = hi - ((-d) % l);
 		else
-			w = lo + d % l;
+			w = lo + (d % l);
 		
 		if (w == hi)
 			w = lo;

@@ -47,6 +47,7 @@ protected:
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
 	bool commandChangeMeshOutputFormat		(QStringList& arguments);
+	bool commandChangePLYExportFormat		(QStringList& arguments);
 	bool commandChangeFBXOutputFormat		(QStringList& arguments);
 	bool commandForcePTXNormalsComputation	(QStringList& arguments);
 	bool commandSaveClouds					(QStringList& arguments);

@@ -610,7 +610,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 
 }
 
-CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	//we assume the input entity is either a cloud or a group of clouds (=multiple scans)
 	std::vector<ccPointCloud*> scans;

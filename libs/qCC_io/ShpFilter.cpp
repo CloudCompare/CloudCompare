@@ -902,7 +902,7 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 }
 
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	std::vector<GenericField*> fields;
 	return saveToFile(entity, fields, filename);

@@ -21,6 +21,7 @@
 #include <FBXFilter.h>
 #include <PTXFilter.h>
 #include <BinFilter.h>
+#include <PlyFilter.h>
 
 //qCC
 #include "ccCommon.h"
@@ -85,6 +86,7 @@ static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
+static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
@@ -415,8 +417,14 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 		outputFilename.prepend(QString("%1/").arg(entDesc.path));
 
 	//save file
+	FileIOFilter::SaveParameters parameters;
+	{
+		//no dialog by default for command line mode!
+		parameters.alwaysDisplaySaveDialog = false;
+	}
 	if (FileIOFilter::SaveToFile(	entity,
 									qPrintable(outputFilename),
+									parameters,
 									isCloud ? s_CloudExportFormat : s_MeshExportFormat) != CC_FERR_NO_ERROR)
 	{
 		return QString("Failed to save result in file '%1'").arg(outputFilename);
@@ -2246,9 +2254,6 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		saveDialog->enableSwapColorAndSF(false); //default order: point, color, SF, normal
 		saveDialog->enableSaveColumnsNamesHeader(false);
 		saveDialog->enableSavePointCountHeader(false);
-
-		if (s_silentMode)
-			saveDialog->setAutoShow(false);
 	}
 
 	//look for additional parameters
@@ -2287,7 +2292,6 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			{
 				saveDialog->setCoordsPrecision(precision);
 				saveDialog->setSfPrecision(precision);
-				saveDialog->setAutoShow(false);
 			}
 		}
 		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_SEPARATOR))
@@ -2313,14 +2317,13 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			else if (separatorStr == "TAB")
 				index = 3;
 			else
-				return Error(QString("Invalid separator! ('%1')").arg(COMMAND_ASCII_EXPORT_SEPARATOR));
+				return Error(QString("Invalid separator! ('%1')").arg(separatorStr));
 
 			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
 			if (saveDialog)
 			{
 				saveDialog->setSeparatorIndex(index);
-				saveDialog->setAutoShow(false);
 			}
 		}
 		else
@@ -2380,6 +2383,29 @@ bool ccCommandLineParser::commandChangeFBXOutputFormat(QStringList& arguments)
 #ifdef CC_FBX_SUPPORT
 	FBXFilter::SetDefaultOutputFormat(formatStr);
 #endif
+
+	return true;
+}
+
+bool ccCommandLineParser::commandChangePLYExportFormat(QStringList& arguments)
+{
+	if (arguments.empty())
+		return Error(QString(QString("Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after '%1'").arg(COMMAND_PLY_EXPORT_FORMAT)));
+
+	//if (fileFilter != PlyFilter::GetFileFilter())
+	//	ccConsole::Warning(QString("Argument '%1' is only applicable to PLY format!").arg(argument));
+
+	QString plyFormat = arguments.takeFirst().toUpper();
+	//printf("%s\n",qPrintable(plyFormat));
+	int index = -1;
+	if (plyFormat == "ASCII")
+		PlyFilter::SetDefaultOutputFormat(PLY_ASCII);
+	else if (plyFormat == "BINARY_BE")
+		PlyFilter::SetDefaultOutputFormat(PLY_BIG_ENDIAN);
+	else if (plyFormat == "BINARY_LE")
+		PlyFilter::SetDefaultOutputFormat(PLY_LITTLE_ENDIAN);
+	else
+		return Error(QString("Invalid PLY format! ('%1')").arg(plyFormat));
 
 	return true;
 }
@@ -2580,6 +2606,10 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_MESH_EXPORT_FORMAT))
 		{
 			success = commandChangeMeshOutputFormat(arguments);
+		}
+		else if (IsCommand(argument,COMMAND_PLY_EXPORT_FORMAT))
+		{
+			success = commandChangePLYExportFormat(arguments);
 		}
 		//Set default FBX output format
 		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))

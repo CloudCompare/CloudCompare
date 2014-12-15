@@ -450,7 +450,7 @@ QString SanitizeFBXFormatString(QString format)
 	return format;
 }
 
-CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;

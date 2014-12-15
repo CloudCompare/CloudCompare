@@ -460,7 +460,7 @@ private:
 
 #endif //CC_DXF_SUPPORT
 
-CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
+CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParameters& parameters)
 {
 #ifndef CC_DXF_SUPPORT
 

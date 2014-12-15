@@ -65,7 +65,7 @@ bool PovFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -128,7 +128,11 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 		{
 			QString thisFilename = fullBaseName + QString("_%1.bin").arg(i);
 
-			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],thisFilename,BinFilter::GetFileFilter());
+			BinFilter::SaveParameters parameters;
+			{
+				parameters.alwaysDisplaySaveDialog = false;
+			}
+			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],thisFilename,parameters,BinFilter::GetFileFilter());
 			if (error != CC_FERR_NO_ERROR)
 			{
 				fclose(mainFile);

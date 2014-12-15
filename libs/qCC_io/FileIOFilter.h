@@ -76,12 +76,23 @@ public: //initialization
 
 		//! How to handle big coordinates
 		ccGlobalShiftManager::Mode shiftHandlingMode;
-		//! Wether to always display (eventual) display dialog, even if automatic guess is possible
+		//! Wether to always display a dialog (if any), even if automatic guess is possible
 		bool alwaysDisplayLoadDialog;
 		//! Whether shift on load has been applied after loading (optional)
 		bool* coordinatesShiftEnabled;
 		//! If applicable, applied shift on load (optional)
 		CCVector3d* coordinatesShift;
+	};
+
+	//! Generic saving parameters
+	struct SaveParameters
+	{
+		//! Default constructor
+		SaveParameters() : alwaysDisplaySaveDialog(true)
+		{}
+
+		//! Wether to always display a dialog (if any), even if automatic guess is possible
+		bool alwaysDisplaySaveDialog;
 	};
 
 	//! Shared type
@@ -116,7 +127,8 @@ public: //public interface (to be reimplemented by each I/O filter
 		\return error
 	**/
 	virtual CC_FILE_ERROR saveToFile(	ccHObject* entity,
-										QString filename)
+										QString filename,
+										SaveParameters& parameters)
 	{
 		 return CC_FERR_NOT_IMPLEMENTED;
 	}
@@ -161,8 +173,8 @@ public: //static methods
 		\return loaded entities (or 0 if an error occurred)
 	**/
 	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
-									LoadParameters& parameters,
-									Shared filter);
+													LoadParameters& parameters,
+													Shared filter);
 
 	//! Loads one or more entities from a file with known type
 	/** Shortcut to the other version of FileIOFilter::LoadFromFile
@@ -171,8 +183,8 @@ public: //static methods
 		\return loaded entities (or 0 if an error occurred)
 	**/
 	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
-									LoadParameters& parameters,
-									QString fileFilter = QString());
+													LoadParameters& parameters,
+													QString fileFilter = QString());
 
 	//! Saves an entity (or a group of) to a specific file thanks to a given filter
 	/** Shortcut to FileIOFilter::saveFile
@@ -181,9 +193,10 @@ public: //static methods
 		\param filter output filter
 		\return error type (if any)
 	**/
-	QCC_IO_LIB_API static CC_FILE_ERROR SaveToFile(ccHObject* entities,
-									const QString& filename,
-									Shared filter);
+	QCC_IO_LIB_API static CC_FILE_ERROR SaveToFile(	ccHObject* entities,
+													const QString& filename,
+													SaveParameters& parameters,
+													Shared filter);
 
 	//! Saves an entity (or a group of) to a specific file thanks to a given filter
 	/** Shortcut to the other version of FileIOFilter::SaveToFile
@@ -192,9 +205,10 @@ public: //static methods
 		\param fileFilter output filter 'file filter'
 		\return error type (if any)
 	**/
-	QCC_IO_LIB_API static CC_FILE_ERROR SaveToFile(ccHObject* entities,
-									const QString& filename,
-									QString fileFilter);
+	QCC_IO_LIB_API static CC_FILE_ERROR SaveToFile(	ccHObject* entities,
+													const QString& filename,
+													SaveParameters& parameters,
+													QString fileFilter);
 
 	//! Shortcut to the ccGlobalShiftManager mechanism specific for files
 	/** \param[in] P sample point (typically the first loaded)

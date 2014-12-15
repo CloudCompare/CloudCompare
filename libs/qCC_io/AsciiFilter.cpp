@@ -80,13 +80,13 @@ bool AsciiFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) c
 	return false;
 }
 
-CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	assert(entity && !filename.isEmpty());
 
 	QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog();
 	//if the dialog shouldn't be shown, we'll simply take the default values!
-	if (saveDialog->autoShow() && !saveDialog->exec())
+	if (parameters.alwaysDisplaySaveDialog && saveDialog->autoShow() && !saveDialog->exec())
 		return CC_FERR_CANCELED_BY_USER;
 
 	if (!entity->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -132,7 +132,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 						if (!extension.isEmpty())
 							subFilename += QString(".") + extension;
 						
-						CC_FILE_ERROR result = saveToFile(entity->getChild(i),subFilename);
+						CC_FILE_ERROR result = saveToFile(entity->getChild(i),subFilename,parameters);
 						if (result != CC_FERR_NO_ERROR)
 						{
 							return result;

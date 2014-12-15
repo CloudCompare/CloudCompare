@@ -3118,7 +3118,11 @@ void MainWindow::doActionExportDepthBuffer()
 		multEntities = true;
 	}
 
-	CC_FILE_ERROR result = DepthMapFileFilter().saveToFile(toSave,filename);
+	DepthMapFileFilter::SaveParameters parameters;
+	{
+		parameters.alwaysDisplaySaveDialog = true;
+	}
+	CC_FILE_ERROR result = DepthMapFileFilter().saveToFile(toSave,filename,parameters);
 
 	if (result != CC_FERR_NO_ERROR)
 	{
@@ -10018,13 +10022,17 @@ void MainWindow::doActionSaveFile()
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	FileIOFilter::SaveParameters parameters;
+	{
+		parameters.alwaysDisplaySaveDialog = true;
+	}
 	
 	//specific case: BIN format
 	if (selectedFilter == BinFilter::GetFileFilter())
 	{
 		if (selNum == 1)
 		{
-			result = FileIOFilter::SaveToFile(m_selectedEntities.front(),selectedFilename,selectedFilter);
+			result = FileIOFilter::SaveToFile(m_selectedEntities.front(),selectedFilename,parameters,selectedFilter);
 		}
 		else
 		{
@@ -10033,7 +10041,7 @@ void MainWindow::doActionSaveFile()
 			ConvertToGroup(m_selectedEntities,tempContainer,ccHObject::DP_NONE);
 			if (tempContainer.getChildrenNumber())
 			{
-				result = FileIOFilter::SaveToFile(&tempContainer,selectedFilename,selectedFilter);
+				result = FileIOFilter::SaveToFile(&tempContainer,selectedFilename,parameters,selectedFilter);
 			}
 			else
 			{
@@ -10056,6 +10064,7 @@ void MainWindow::doActionSaveFile()
 
 		result = FileIOFilter::SaveToFile(	entitiesToSave.getChildrenNumber() > 1 ? &entitiesToSave : entitiesToSave.getChild(0),
 											selectedFilename,
+											parameters,
 											selectedFilter);
 	}
 

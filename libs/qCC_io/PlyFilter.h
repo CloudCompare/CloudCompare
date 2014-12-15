@@ -64,12 +64,13 @@ public:
 	//static accessors
 	static inline QString GetFileFilter() { return "PLY mesh (*.ply)"; }
 	static inline QString GetDefaultExtension() { return "ply"; }
+	static void SetDefaultOutputFormat(e_ply_storage_mode format);
 
 	//inherited from FileIOFilter
 	virtual bool importSupported() const { return true; }
 	virtual bool exportSupported() const { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
 	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
 	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
 	virtual bool canLoadExtension(QString upperCaseExt) const;

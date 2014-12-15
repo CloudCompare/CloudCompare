@@ -66,15 +66,27 @@ bool PlyFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename)
+static e_ply_storage_mode s_defaultOutputFormat = PLY_DEFAULT;
+void PlyFilter::SetDefaultOutputFormat(e_ply_storage_mode format)
 {
-	//ask for output format
-	QMessageBox msgBox(QMessageBox::Question,"Choose output format","Save in BINARY or ASCII format?");
-	msgBox.addButton("BINARY", QMessageBox::AcceptRole);
-	QPushButton *asciiButton = msgBox.addButton("ASCII", QMessageBox::AcceptRole);
-	msgBox.exec();
+	s_defaultOutputFormat = format;
+}
 
-	return saveToFile(entity,filename,msgBox.clickedButton() == asciiButton ? PLY_ASCII : PLY_DEFAULT);
+CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
+{
+	e_ply_storage_mode outputFormat = s_defaultOutputFormat;
+
+	//ask for output format
+	if (parameters.alwaysDisplaySaveDialog)
+	{
+		QMessageBox msgBox(QMessageBox::Question,"Choose output format","Save in BINARY or ASCII format?");
+		msgBox.addButton("BINARY", QMessageBox::AcceptRole);
+		QPushButton *asciiButton = msgBox.addButton("ASCII", QMessageBox::AcceptRole);
+		msgBox.exec();
+		outputFormat = msgBox.clickedButton() == asciiButton ? PLY_ASCII : PLY_DEFAULT;
+	}
+
+	return saveToFile(entity,filename,outputFormat);
 }
 
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_storage_mode storageType)

@@ -150,7 +150,7 @@ CC_FILE_ERROR _SaveFileV2()
 	return (s_file && s_container ? BinFilter::SaveFileV2(*s_file,s_container) : CC_FERR_BAD_ARGUMENT);
 }
 
-CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename)
+CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename, SaveParameters& parameters)
 {
 	if (!root || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;

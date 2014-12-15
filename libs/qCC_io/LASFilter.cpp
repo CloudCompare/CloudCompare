@@ -41,11 +41,31 @@
 //Qt
 #include <QFileInfo>
 #include <QSharedPointer>
+#include <QInputDialog>
+
+//Qt gui
+#include <ui_saveLASFileDlg.h>
 
 //System
 #include <string.h>
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
+
+static const char LAS_SCALE_X_META_DATA[] = "LAS.scale.x";
+static const char LAS_SCALE_Y_META_DATA[] = "LAS.scale.y";
+static const char LAS_SCALE_Z_META_DATA[] = "LAS.scale.z";
+
+//! LAS Save dialog
+class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
+{
+public:
+	LASSaveDlg(QWidget* parent = 0)
+		: QDialog(parent)
+		, Ui::SaveLASFileDialog()
+	{
+		setupUi(this);
+	}
+};
 
 bool LASFilter::canLoadExtension(QString upperCaseExt) const
 {
@@ -160,7 +180,10 @@ struct ExtraLasField : LasField
 	double offset;
 };
 
-CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
+//! Semi persistent save dialog
+QSharedPointer<LASSaveDlg> s_saveDlg(0);
+
+CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
@@ -284,9 +307,66 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 			//int_value = (double_value-offset)/scale
 			header.SetOffset(	bbMin.x, bbMin.y, bbMin.z );
 			
-			header.SetScale(1.0e-9 * std::max<double>(diag.x,ZERO_TOLERANCE), //result must fit in 32bits?!
-							1.0e-9 * std::max<double>(diag.y,ZERO_TOLERANCE),
-							1.0e-9 * std::max<double>(diag.z,ZERO_TOLERANCE));
+			//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
+			bool hasScaleMetaData = false;
+			CCVector3d lasScale(0,0,0);
+			lasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
+			if (hasScaleMetaData)
+			{
+				lasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
+				if (hasScaleMetaData)
+				{
+					lasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
+				}
+			}
+
+			//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+			CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x,ZERO_TOLERANCE),
+									1.0e-9 * std::max<double>(diag.y,ZERO_TOLERANCE),
+									1.0e-9 * std::max<double>(diag.z,ZERO_TOLERANCE));
+
+			if (parameters.alwaysDisplaySaveDialog)
+			{
+				if (!s_saveDlg)
+					s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(0));
+				s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
+
+				if (hasScaleMetaData)
+				{
+					s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z));
+				}
+				else
+				{
+					s_saveDlg->origAccuracyLabel->setText("none");
+					if (s_saveDlg->origRadioButton->isChecked())
+						s_saveDlg->bestRadioButton->setChecked(true);
+					s_saveDlg->origRadioButton->setEnabled(false);
+				}
+
+				s_saveDlg->exec();
+
+				if (s_saveDlg->bestRadioButton->isChecked())
+				{
+					lasScale = optimalScale;
+				}
+				else if (s_saveDlg->customRadioButton->isChecked())
+				{
+					double s = s_saveDlg->customScaleDoubleSpinBox->value();
+					lasScale = CCVector3d(s,s,s);
+				}
+				//else
+				//{
+				//	lasScale = lasScale;
+				//}
+			}
+			else if (hasScaleMetaData)
+			{
+				lasScale = optimalScale;
+			}
+
+			header.SetScale(lasScale.x,
+							lasScale.y,
+							lasScale.z);
 		}
 		header.SetPointRecordsCount(numberOfPoints);
 
@@ -498,6 +578,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	const liblas::Dimension* extraDimension = 0;
 	std::vector<EVLR> evlrs;
 
+	CCVector3d lasScale(0,0,0);
+	CCVector3d lasShift(0,0,0);
 	try
 	{
 		//handling of compressed/uncompressed files
@@ -506,6 +588,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		ccLog::Print(QString("[LAS] %1 - signature: %2").arg(filename).arg(header.GetFileSignature().c_str()));
 
 		const liblas::Schema& schema = header.GetSchema();
+
+		lasScale =  CCVector3d(header.GetScaleX(), header.GetScaleY(), header.GetScaleZ());
+		lasShift = -CCVector3d(header.GetOffsetX(),header.GetOffsetY(),header.GetOffsetZ());
 
 		//get fields present in file
 		//DGM: strangely, on the 32 bits windows version, calling GetDimensionNames makes CC crash?!
@@ -713,6 +798,10 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					}
 					loadedCloud->setName(chunkName);
 
+					loadedCloud->setMetaData(LAS_SCALE_X_META_DATA,QVariant(lasScale.x));
+					loadedCloud->setMetaData(LAS_SCALE_Y_META_DATA,QVariant(lasScale.y));
+					loadedCloud->setMetaData(LAS_SCALE_Z_META_DATA,QVariant(lasScale.z));
+
 					container.addChild(loadedCloud);
 					loadedCloud = 0;
 				}
@@ -866,11 +955,31 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if (pointsRead == 0)
 		{
 			CCVector3d P( p.GetX(),p.GetY(),p.GetZ() );
+			//backup input global parameters
+			bool* cseBackup = parameters.coordinatesShiftEnabled;
+			CCVector3d* csBackup = parameters.coordinatesShift;
+			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
+			bool enabled = true;
+			//set the LAS shift as default shift (if none was provided)
+			if (!cseBackup || !*cseBackup)
+			{
+				parameters.coordinatesShiftEnabled = &enabled;
+				parameters.coordinatesShift = &lasShift;
+				if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
+					&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+				{
+					parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+				}
+			}
 			if (HandleGlobalShift(P,Pshift,parameters))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 			}
+			//restore (input) global parameters
+			parameters.coordinatesShiftEnabled = cseBackup;
+			parameters.coordinatesShift = csBackup;
+			parameters.shiftHandlingMode = csModeBackup;
 		}
 
 		CCVector3 P(static_cast<PointCoordinateType>(p.GetX()+Pshift.x),

@@ -44,7 +44,7 @@ bool PNFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) cons
 	return false;
 }
 
-CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;

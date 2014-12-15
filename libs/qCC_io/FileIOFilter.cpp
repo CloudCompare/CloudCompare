@@ -310,6 +310,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 										const QString& filename,
+										SaveParameters& parameters,
 										Shared filter)
 {
 	if (!entities || filename.isEmpty() || !filter)
@@ -323,7 +324,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		result = filter->saveToFile(entities, completeFileName);
+		result = filter->saveToFile(entities, completeFileName, parameters);
 	}
 	catch(...)
 	{
@@ -347,6 +348,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 										const QString& filename,
+										SaveParameters& parameters,
 										QString fileFilter)
 {
 	if (fileFilter.isEmpty())
@@ -359,7 +361,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 		return CC_FERR_UNKNOWN_FILE;
 	}
 
-	return SaveToFile(entities, filename, filter);
+	return SaveToFile(entities, filename, parameters, filter);
 }
 
 void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action, const QString& filename)

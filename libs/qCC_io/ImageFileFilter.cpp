@@ -87,7 +87,7 @@ bool ImageFileFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusiv
 	return false;
 }
 
-CC_FILE_ERROR ImageFileFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR ImageFileFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;

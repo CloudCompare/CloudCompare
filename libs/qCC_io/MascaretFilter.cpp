@@ -67,7 +67,7 @@ QString MakeMascaretName(QString name)
 	return name;
 }
 
-CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename)
+CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;

@@ -47,6 +47,14 @@ v2.6.1.beta 11/??/2014
 	* GUI frozen mode:
 		- plugins toolbars are now properly deactivated
 		- the GL filters toolbar is no longer deactivated (so as to let the user change the active shader anytime)
+	* LAS/LAZ files support:
+		- the original LAS offset information is now proposed by default as Global Shift
+		- A dialog now appears at save time so as to let the user choose the scale values (important for compression
+			when saving to LAZ format)
+		- the original LAS scale is stored as meta-data so as to let the user choose to save the data with the same
+			scale values (warning: accuracy might not be preserved if the cloud has been transformed, etc.)
+	* New command line option:
+		- '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
 
 - Bug fix:
 	- Delaunay 2D1/2 crashed on Windows 8

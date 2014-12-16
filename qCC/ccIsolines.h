@@ -587,12 +587,12 @@ protected:
 		double aftx = getContourX(contour, i + 1) - getContourX(contour, i + 0);
 		double afty = getContourY(contour, i + 1) - getContourY(contour, i + 0);
 
-		double befl = sqrt(befx * befx + befy * befy); 
-		double befx = befx / befl;
-		double befy = befy / befl;
-		double aftl = sqrt(aftx * aftx + afty * afty);
-		double aftx = aftx / aftl;
-		double afty = afty / aftl;		
+		befl = sqrt(befx * befx + befy * befy); 
+		befx /= befl;
+		befy /= befl;
+		aftl = sqrt(aftx * aftx + afty * afty);
+		aftx /= aftl;
+		afty /= aftl;		
 
 		double dot = befx * aftx + befy * afty;
 		if (dot > 1.0)
@@ -783,7 +783,7 @@ public:
 
 	bool contains(const std::vector<double>& polyx, const std::vector<double>& polyy, double x, double y) const
 	{
-		BOOL inside = false;
+		bool inside = false;
 		size_t l = polyx.size();
 		if (l < 1)
 			return false;
@@ -854,4 +854,4 @@ public:
 	inline double getBBCenterY(int k) const { return (getBBMinY(k) + getBBMaxY(k)) / 2; }
 };
 
-#endif ISOLINES_HEADER
+#endif //ISOLINES_HEADER

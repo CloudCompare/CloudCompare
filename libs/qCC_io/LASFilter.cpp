@@ -305,7 +305,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 			//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
 			//int_value = (double_value-offset)/scale
-			header.SetOffset(	bbMin.x, bbMin.y, bbMin.z );
+			header.SetOffset( bbMin.x, bbMin.y, bbMin.z );
 			
 			//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
 			bool hasScaleMetaData = false;

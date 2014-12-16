@@ -1854,7 +1854,7 @@ void ccRasterizeTool::generateContours()
 			m_window->redraw();
 		return;
 	}
-	//memset(grid,0,sizeof(double)*(xDim*yDim));
+	memset(grid,0,sizeof(double)*(xDim*yDim));
 
 	//default values
 	double emptyCellsHeight = 0;
@@ -1867,6 +1867,9 @@ void ccRasterizeTool::generateContours()
 
 	//fill grid
 	{
+		if (fillEmptyCellsStrategy == LEAVE_EMPTY)
+			emptyCellsHeight = minHeight-1.0;
+
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
 			RasterCell* cell = m_grid.data[j];

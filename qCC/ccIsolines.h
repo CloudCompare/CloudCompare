@@ -587,10 +587,10 @@ protected:
 		double aftx = getContourX(contour, i + 1) - getContourX(contour, i + 0);
 		double afty = getContourY(contour, i + 1) - getContourY(contour, i + 0);
 
-		befl = sqrt(befx * befx + befy * befy); 
+		double befl = sqrt(befx * befx + befy * befy); 
 		befx /= befl;
 		befy /= befl;
-		aftl = sqrt(aftx * aftx + afty * afty);
+		double aftl = sqrt(aftx * aftx + afty * afty);
 		aftx /= aftl;
 		afty /= aftl;		
 

@@ -826,8 +826,8 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 
 	//call parent method first (for points + scalar fields)
 	if (	!ChunkedPointCloud::reserve(newNumberOfPoints)
-		||	hasColors() && !reserveTheRGBTable()
-		||	hasNormals() && !reserveTheNormsTable() )
+		||	(hasColors() && !reserveTheRGBTable())
+		||	(hasNormals() && !reserveTheNormsTable()) )
 	{
 		ccLog::Error("[ccPointCloud::reserve] Not enough memory!");
 		return false;

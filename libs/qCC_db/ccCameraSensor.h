@@ -71,6 +71,9 @@ public: //general
 	//! Lens distortion parameters (interface)
 	struct LensDistortionParameters
 	{
+		//! Virtual destructor
+		virtual ~LensDistortionParameters() {}
+
 		//! Returns distortion model type
 		virtual DistortionModel getModel() const = 0;
 
@@ -182,7 +185,7 @@ public: //getters and setters
 	void setIntrinsicParameters(const IntrinsicParameters& params);
 
 	//! Returns uncertainty parameters
-	LensDistortionParameters::Shared getDistortionParameters() const { return m_distortionParams; }
+	const LensDistortionParameters::Shared& getDistortionParameters() const { return m_distortionParams; }
 	//! Sets uncertainty parameters 
 	void setDistortionParameters(LensDistortionParameters::Shared params) { m_distortionParams = params; }
 

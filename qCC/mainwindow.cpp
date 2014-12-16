@@ -2862,13 +2862,12 @@ void MainWindow::doActionProjectUncertainty()
 		return;
 	}
 
-	ccCameraSensor::LensDistortionParameters::Shared distParams = sensor->getDistortionParameters();
+	const ccCameraSensor::LensDistortionParameters::Shared& distParams = sensor->getDistortionParameters();
 	if (!distParams || distParams->getModel() != ccCameraSensor::BROWN_DISTORTION)
 	{
 		ccLog::Error("Sensor has no associated uncertainty model! (Brown, etc.)");
 		return;
 	}
-
 
 	//we need a cloud to project the uncertainty on!
 	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;

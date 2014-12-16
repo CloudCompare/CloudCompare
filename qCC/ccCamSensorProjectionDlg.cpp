@@ -95,7 +95,7 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 	/*** Distortion / uncertainty ***/
 	{
 		QString distInfo;
-		ccCameraSensor::LensDistortionParameters::Shared distParams = sensor->getDistortionParameters();
+		const ccCameraSensor::LensDistortionParameters::Shared& distParams = sensor->getDistortionParameters();
 
 		if (!distParams)
 		{

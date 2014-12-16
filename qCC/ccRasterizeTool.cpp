@@ -874,7 +874,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 		if (m_rasterCloud)
 		{
 			m_window->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getMyOwnBB()
+			ccBBox box = m_rasterCloud->getMyOwnBB();
 			update2DDisplayZoom(box);
 		}
 		else

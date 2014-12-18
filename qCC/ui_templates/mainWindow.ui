@@ -164,6 +164,7 @@
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
      <addaction name="actionAddIdField"/>
+     <addaction name="actionExportCoordToSF"/>
      <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
@@ -362,6 +363,7 @@
      </property>
      <addaction name="actionUnroll"/>
      <addaction name="actionRasterize"/>
+     <addaction name="actionConvertPolylinesToMesh"/>
      <addaction name="actionExportCoordToSF"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
@@ -1341,7 +1343,7 @@
   </action>
   <action name="actionComputeMeshAA">
    <property name="text">
-    <string>Delaunay 2D (XY plane)</string>
+    <string>Delaunay 2.5D (XY plane)</string>
    </property>
    <property name="toolTip">
     <string>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</string>
@@ -1352,7 +1354,7 @@
   </action>
   <action name="actionComputeMeshLS">
    <property name="text">
-    <string>Delaunay 2D (best fitting plane)</string>
+    <string>Delaunay 2.5D (best fitting plane)</string>
    </property>
    <property name="toolTip">
     <string>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</string>
@@ -2183,7 +2185,7 @@
   </action>
   <action name="actionExportCoordToSF">
    <property name="text">
-    <string>Export coordinate(s) to scalar field(s)</string>
+    <string>Export coordinate(s) to SF(s)</string>
    </property>
    <property name="toolTip">
     <string>Export X, Y and/or Z coordinates to scalar field(s)</string>
@@ -2694,6 +2696,14 @@
    </property>
    <property name="toolTip">
     <string>Extract cloud sections along polylines</string>
+   </property>
+  </action>
+  <action name="actionConvertPolylinesToMesh">
+   <property name="text">
+    <string>Contour plot (polylines) to mesh</string>
+   </property>
+   <property name="toolTip">
+    <string>Contour plot (set of polylines) to a 2.5D mesh</string>
    </property>
   </action>
  </widget>

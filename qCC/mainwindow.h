@@ -371,6 +371,7 @@ protected slots:
 	void doActionShowDepthBuffer();
 	void doActionExportDepthBuffer();
 	void doActionRasterize();
+	void doConvertPolylinesToMesh();
 	void doActionExportCoordToSF();
 	void doComputeBestFitBB();
 	void doActionCrop();

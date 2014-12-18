@@ -29,8 +29,8 @@
 #include <list>
 
 //! Triangulation types
-enum CC_TRIANGULATION_TYPES {	GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
-								GENERIC_BEST_LS_PLANE			=		2,		/**< Delaunay 2D in best least square fitting plane **/
+enum CC_TRIANGULATION_TYPES {	DELAUNAY_2D_AXIS_ALIGNED  = 1,		/**< Delaunay 2D triangulation in an axis-aligned plane **/
+								DELAUNAY_2D_BEST_LS_PLANE = 2,		/**< Delaunay 2D with points projected on the best least square fitting plane **/
 };
 
 namespace CCLib
@@ -67,19 +67,23 @@ public:
 	//! Develops a cylinder-shaped point cloud around its main axis
 	/** Generates a "developpee" of a cylinder-shaped point cloud.
 		WARNING: this method uses the cloud global iterator
-		\param theCloud the point cloud to be developed
+		\param cloud the point cloud to be developed
 		\param radius the cylinder radius
 		\param dim the dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
 		\param center a 3D point (as a 3 values array) belonging to the cylinder axis
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the "developed" cloud
 	**/
-	static SimpleCloud* developCloudOnCylinder(GenericCloud* theCloud, PointCoordinateType radius, unsigned char dim=2, CCVector3* center=0, GenericProgressCallback* progressCb=0);
+	static SimpleCloud* developCloudOnCylinder(	GenericCloud* cloud,
+												PointCoordinateType radius,
+												unsigned char dim = 2,
+												CCVector3* center = 0,
+												GenericProgressCallback* progressCb = 0);
 
 	//! Develops a cone-shaped point cloud around its main axis
 	/** Generates a "developpee" of a cone-shaped point cloud.
 		WARNING: this method uses the cloud global iterator
-		\param theCloud the point cloud to be developed
+		\param cloud the point cloud to be developed
 		\param dim the dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
 		\param baseRadius the radius of the base of the cone
 		\param alpha the angle of the cone "opening"
@@ -87,15 +91,22 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the "developed" cloud
 	**/
-	static SimpleCloud* developCloudOnCone(GenericCloud* theCloud, uchar dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb=0);
+	static SimpleCloud* developCloudOnCone(	GenericCloud* cloud,
+											uchar dim,
+											PointCoordinateType baseRadius,
+											float alpha,
+											const CCVector3& center,
+											GenericProgressCallback* progressCb = 0);
 
 	//! Applys a geometrical transformation to a point cloud
-	/** \param theCloud the point cloud to be "transformed"
+	/** \param cloud the point cloud to be "transformed"
 		\param trans the geometrical transformation
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the "transformed" cloud
 	**/
-	static SimpleCloud* applyTransformation(GenericCloud* theCloud, Transformation& trans, GenericProgressCallback* progressCb=0);
+	static SimpleCloud* applyTransformation(GenericCloud* cloud,
+											Transformation& trans,
+											GenericProgressCallback* progressCb = 0);
 
 	//! Computes a 2.5D Delaunay triangulation
 	/** The triangulation can be either computed on the points projected
@@ -103,15 +114,17 @@ public:
 		fitting plane. The triangulation is in 2D (in the plane) but the
 		3D points are connected, so it's a kind of 2.5D triangulation (that
 		may present however several topological aberrations ;).
-		\param theCloud a point cloud
+		\param cloud a point cloud
 		\param type the triangulation strategy
 		\param maxEdgeLength max edge length for output triangles (0 = ignored)
+		\param dim projection dimension (for axis-aligned meshes)
 		\param errorStr error (if any) [optional]
 		\return a mesh
 	**/
-	static GenericIndexedMesh* computeTriangulation(GenericIndexedCloudPersist* theCloud,
-													CC_TRIANGULATION_TYPES type = GENERIC,
+	static GenericIndexedMesh* computeTriangulation(GenericIndexedCloudPersist* cloud,
+													CC_TRIANGULATION_TYPES type = DELAUNAY_2D_AXIS_ALIGNED,
 													PointCoordinateType maxEdgeLength = 0,
+													unsigned char dim = 0,
 													char* errorStr = 0);
 
 	//! Indexed 2D vector

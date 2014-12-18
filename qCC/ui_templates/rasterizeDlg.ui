@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1106</width>
-    <height>731</height>
+    <width>1000</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -397,172 +397,217 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="contourLinesGroupBox">
-        <property name="enabled">
-         <bool>false</bool>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
         </property>
-        <property name="title">
-         <string>Contour lines</string>
-        </property>
-        <layout class="QFormLayout" name="formLayout_3">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Start height</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="contourStartDoubleSpinBox">
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="minimum">
-            <double>-1000000000.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>1000000000.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="contourStepDoubleSpinBox">
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="minimum">
-            <double>0.000001000000000</double>
-           </property>
-           <property name="maximum">
-            <double>1000000000.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Step</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="clearContoursPushButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>Remove all contour lines</string>
-           </property>
-           <property name="text">
-            <string>Clear</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <item>
-            <widget class="QPushButton" name="exportContoursPushButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="toolTip">
-              <string>Export contour lines to the DB tree</string>
-             </property>
-             <property name="text">
-              <string>Export</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="generateContoursPushButton">
-             <property name="text">
-              <string>Generate</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Min. vertex count</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QSpinBox" name="minVertexCountSpinBox">
-           <property name="toolTip">
-            <string>Min vertex count per iso-line (to ignore the smallest ones)</string>
-           </property>
-           <property name="minimum">
-            <number>3</number>
-           </property>
-           <property name="maximum">
-            <number>10000000</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="exportGroupBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="title">
-         <string>Export</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="1" colspan="2">
-          <widget class="QCheckBox" name="generateCountSFcheckBox">
-           <property name="toolTip">
-            <string>Adds a scalar field with the grid density (= number of points falling in each cell)</string>
-           </property>
-           <property name="text">
-            <string>save per-cell count as SF</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="QPushButton" name="generateASCIIPushButton">
-           <property name="text">
-            <string>Matrix (text file)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QPushButton" name="generateCloudPushButton">
-           <property name="text">
-            <string>Cloud</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QPushButton" name="generateRasterPushButton">
-           <property name="text">
-            <string>Raster (geotiff)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QPushButton" name="generateMeshPushButton">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Mesh</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="generateImagePushButton">
-           <property name="text">
-            <string>Image</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QWidget" name="exportTab">
+         <attribute name="title">
+          <string>Export</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QPushButton" name="generateCloudPushButton">
+              <property name="text">
+               <string>Cloud</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="generateCountSFcheckBox">
+              <property name="toolTip">
+               <string>Adds a scalar field with the grid density (= number of points falling in each cell)</string>
+              </property>
+              <property name="text">
+               <string>save per-cell count as SF</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QPushButton" name="generateRasterPushButton">
+              <property name="text">
+               <string>Raster (geotiff)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="generateImagePushButton">
+              <property name="text">
+               <string>Image</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QPushButton" name="generateASCIIPushButton">
+              <property name="text">
+               <string>Matrix (text file)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="generateMeshPushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Mesh</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>28</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="contourTab">
+         <attribute name="title">
+          <string>Contour plot</string>
+         </attribute>
+         <layout class="QFormLayout" name="formLayout_3">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Start height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="contourStartDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Step</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="contourStepDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>0.000001000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Min. vertex</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="minVertexCountSpinBox">
+            <property name="toolTip">
+             <string>Min vertex count per iso-line (to ignore the smallest ones)</string>
+            </property>
+            <property name="minimum">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <number>10000000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QPushButton" name="clearContoursPushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Remove all contour lines</string>
+            </property>
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QPushButton" name="exportContoursPushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Export contour lines to the DB tree</string>
+              </property>
+              <property name="text">
+               <string>Export</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="generateContoursPushButton">
+              <property name="text">
+               <string>Generate</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="ignoreContourBordersCheckBox">
+            <property name="layoutDirection">
+             <enum>Qt::RightToLeft</enum>
+            </property>
+            <property name="text">
+             <string>ignore borders</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
       <item>

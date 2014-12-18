@@ -397,6 +397,7 @@ void ccRasterizeTool::loadSettings()
 	bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
 	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleCloudCheckBox->isChecked()).toBool();
 	int minVertexCount	= settings.value("MinVertexCount",minVertexCountSpinBox->value()).toInt();
+	bool ignoreBorders	= settings.value("IgnoreBorders",ignoreContourBordersCheckBox->isChecked()).toBool();
 	settings.endGroup();
 
 	gridStepDoubleSpinBox->setValue(step);
@@ -409,6 +410,7 @@ void ccRasterizeTool::loadSettings()
 	generateCountSFcheckBox->setChecked(genCountSF);
 	resampleCloudCheckBox->setChecked(resampleCloud);
 	minVertexCountSpinBox->setValue(minVertexCount);
+	ignoreContourBordersCheckBox->setChecked(ignoreBorders);
 }
 
 void ccRasterizeTool::saveSettings()
@@ -425,6 +427,7 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("GenerateCountSF",generateCountSFcheckBox->isChecked());
 	settings.setValue("ResampleOrigCloud",resampleCloudCheckBox->isChecked());
 	settings.setValue("MinVertexCount",minVertexCountSpinBox->value());
+	settings.setValue("IgnoreBorders",ignoreContourBordersCheckBox->isChecked());
 	settings.endGroup();
 }
 
@@ -494,8 +497,7 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 	}
 	updateGridPushButton->setDisabled(state);
 
-	contourLinesGroupBox->setEnabled(state);
-	exportGroupBox->setEnabled(state);
+	tabWidget->setEnabled(state);
 }
 
 void ccRasterizeTool::RasterGrid::clear()
@@ -1880,6 +1882,7 @@ void ccRasterizeTool::generateContours()
 	}
 
 	bool memoryError = false;
+	bool ignoreBorders = ignoreContourBordersCheckBox->isChecked();
 
 	try
 	{
@@ -1926,29 +1929,106 @@ void ccRasterizeTool::generateContours()
 					poly->addChild(vertices);
 					if (poly->reserve(vertCount) && vertices->reserve(vertCount))
 					{
+						unsigned localIndex = 0;
 						for (int v=0; v<vertCount; ++v)
 						{
 							double x = iso.getContourX(i,v) - 1.0;
 							double y = iso.getContourY(i,v) - 1.0;
-							CCVector3 P;
-							P.u[X] = static_cast<PointCoordinateType>(x * m_grid.gridStep + box.minCorner().u[X]);
-							P.u[Y] = static_cast<PointCoordinateType>(y * m_grid.gridStep + box.minCorner().u[Y]);
-							P.u[Z] = static_cast<PointCoordinateType>(z);
+							bool outside = ignoreBorders && (x < 1.0 || y < 1.0 || x+1.0 >= m_grid.width || y+1.0 >= m_grid.height);
+							if (outside)
+							{
+								//split the polyline if necessary
+								if (poly->size() != 0)
+								{
+									//reset local index!
+									localIndex = 0;
 
-							vertices->addPoint(P);
+									unsigned polySize = poly->size();
+									if (polySize == 1)
+									{
+										//simply reset the polyline, we'll use it for the next part
+										poly->clear();
+										vertices->clear();
+										if (!poly->reserve(vertCount - v) || !vertices->reserve(vertCount - v))
+										{
+											ccLog::Error("Not enough memory!");
+											break;
+										}
+									}
+									else if (v+2 >= vertCount)
+									{
+										//not enough vertex after this one to create a new polyline!
+										//--> we can stop right away (the polyline will be taken care of later)
+										break;
+									}
+									else
+									{
+										//close current polyline
+										poly->resize(polySize);
+										vertices->resize(vertices->size());
+
+										//add the current poly chunk to DB
+										poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
+										poly->setWidth(1);
+										poly->setClosed(false);
+										poly->setColor(ccColor::darkGrey);
+										poly->showColors(true);
+										vertices->setEnabled(false);
+
+										if (m_window)
+											m_window->addToOwnDB(poly);
+
+										m_contourLines.push_back(poly);
+
+										//create new poly for the rest
+										vertices = new ccPointCloud("vertices");
+										poly = new ccPolyline(vertices);
+										poly->addChild(vertices);
+										if (!poly->reserve(vertCount - v) || !vertices->reserve(vertCount - v))
+										{
+											ccLog::Error("Not enough memory!");
+											break;
+											//poly will be destroyed later as its size is 0!
+											//delete poly;
+											//poly = 0;
+										}
+									}
+								}
+								continue;
+							}
+							else
+							{
+								CCVector3 P;
+								P.u[X] = static_cast<PointCoordinateType>(x * m_grid.gridStep + box.minCorner().u[X]);
+								P.u[Y] = static_cast<PointCoordinateType>(y * m_grid.gridStep + box.minCorner().u[Y]);
+								P.u[Z] = static_cast<PointCoordinateType>(z);
+
+								vertices->addPoint(P);
+								assert(localIndex < vertices->size());
+								poly->addPointIndex(localIndex++);
+							}
 						}
-						poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
-						poly->addPointIndex(0,static_cast<unsigned>(vertCount));
-						poly->setWidth(1);
-						poly->setClosed(true);
-						poly->setColor(ccColor::darkGrey);
-						poly->showColors(true);
-						vertices->setEnabled(false);
-						
-						if (m_window)
-							m_window->addToOwnDB(poly);
 
-						m_contourLines.push_back(poly);
+						assert(poly);
+						if (poly->size() > 1)
+						{
+							poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
+							poly->setWidth(1);
+							poly->setClosed(poly->size() == vertCount); //if we have less vertices, it means we have 'chopped' the original contour
+							poly->setColor(ccColor::darkGrey);
+							poly->showColors(true);
+							vertices->setEnabled(false);
+						
+							if (m_window)
+								m_window->addToOwnDB(poly);
+
+							m_contourLines.push_back(poly);
+						}
+						else
+						{
+							delete poly;
+							poly = 0;
+						}
 					}
 					else
 					{

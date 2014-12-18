@@ -636,10 +636,15 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		{
 			//alternative keypoints?
 			ccGenericPointCloud* altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : 0);
-			dummyMesh = CCLib::PointProjectionTools::computeTriangulation(altKeypoints ? altKeypoints : keypointsCloud,GENERIC_BEST_LS_PLANE);
+			char errorStr[1024];
+			dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	altKeypoints ? altKeypoints : keypointsCloud,
+																			DELAUNAY_2D_BEST_LS_PLANE,
+																			0,
+																			0,
+																			errorStr);
 			if (!dummyMesh)
 			{
-				ccLog::Warning("[Bundler] Failed to generate DTM! (not enough memory?)");
+				ccLog::Warning(QString("[Bundler] Failed to generate DTM! (%1)").arg(errorStr));
 			}
 		}
 		else

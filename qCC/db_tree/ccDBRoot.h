@@ -52,6 +52,7 @@ struct dbTreeSelectionInfo
 	int normalsCount;
 	int octreeCount;
 	int cloudCount;
+	int groupCount;
 	int polylineCount;
 	int meshCount;
 	int imageCount;
@@ -75,6 +76,8 @@ public:
 	ccCustomQTreeView(QWidget* parent) : QTreeView(parent) {}
 
 protected:
+
+	//inherited from QTreeView
 	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event=0) const;
 };
 

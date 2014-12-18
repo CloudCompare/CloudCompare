@@ -28,6 +28,7 @@ namespace CCLib
 {
 
 class GenericIndexedCloud;
+class Polyline;
 
 //! A class to compute and handle a Delaunay 2D mesh on a subset of points
 class CC_CORE_LIB_API Delaunay2dMesh : public GenericIndexedMesh
@@ -52,15 +53,25 @@ public:
 	virtual void linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnership = false);
 
 	//! Build the Delaunay mesh on top a set of 2D points
-	/** \param the2dPoints a set of 2D points
+	/** \param points2D a set of 2D points
 		\param pointCountToUse number of points to use from the input set (0 = all)
 		\param forceInputPointsAsBorder if true, the input points are considered as ordered polyon vertices and 'outside' triangles will be removed
 		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
 		\return success
 	**/
-	virtual bool buildMesh(	const std::vector<CCVector2>& the2dPoints,
+	virtual bool buildMesh(	const std::vector<CCVector2>& points2D,
 								size_t pointCountToUse = 0,
 								char* outputErrorStr = 0);
+
+	//! Build the Delaunay mesh from a set of 2D polylines
+	/** \param points2D a set of 2D points
+		\param segments2D constraining segments (as 2 indexes per segment)
+		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
+		\return success
+	**/
+	virtual bool buildMesh(	const std::vector<CCVector2>& points2D,
+							const std::vector<int>& segments2D,
+							char* outputErrorStr = 0);
 
 	//! Removes the triangles falling outside of a given (2D) polygon
 	/** \param vertices2D vertices of the mesh as 2D points (typically the one used to triangulate the mesh!)
@@ -91,6 +102,9 @@ public:
 		Check the resulting size afterwards.
 	**/
 	bool removeTrianglesWithEdgesLongerThan(PointCoordinateType maxEdgeLength);
+
+	//! Returns associated cloud
+	inline GenericIndexedCloud* getAssociatedCloud() { return m_associatedCloud; }
 
 protected:
 

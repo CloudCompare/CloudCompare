@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>498</width>
+    <width>507</width>
     <height>186</height>
    </rect>
   </property>
@@ -140,7 +140,7 @@
         <number>6</number>
        </property>
        <property name="maximum">
-        <double>100000000000000007629769841091887003294964970946560.000000000000000</double>
+        <double>1000000000.000000000000000</double>
        </property>
        <property name="value">
         <double>100.000000000000000</double>
@@ -192,10 +192,10 @@
            <number>6</number>
           </property>
           <property name="minimum">
-           <double>-100000000000000007629769841091887003294964970946560.000000000000000</double>
+           <double>-1000000000.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>100000000000000007629769841091887003294964970946560.000000000000000</double>
+           <double>1000000000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -234,10 +234,10 @@
            <number>6</number>
           </property>
           <property name="minimum">
-           <double>-100000000000000007629769841091887003294964970946560.000000000000000</double>
+           <double>-1000000000.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>100000000000000007629769841091887003294964970946560.000000000000000</double>
+           <double>1000000000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -276,10 +276,10 @@
            <number>6</number>
           </property>
           <property name="minimum">
-           <double>-100000000000000007629769841091887003294964970946560.000000000000000</double>
+           <double>-1000000000.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>100000000000000007629769841091887003294964970946560.000000000000000</double>
+           <double>1000000000.000000000000000</double>
           </property>
          </widget>
         </item>

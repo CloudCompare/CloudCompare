@@ -220,7 +220,12 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 	}
 }
 
-CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESRI_SHAPE_TYPE shapeTypeInt, const CCVector3d& PShift)
+CC_FILE_ERROR LoadPolyline(	QFile& file,
+							ccHObject& container,
+							int32_t index,
+							ESRI_SHAPE_TYPE shapeTypeInt,
+							const CCVector3d& PShift,
+							bool load2DPolyAs3DPoly = true)
 {
 	char header[40];
 	file.read(header,40);
@@ -270,6 +275,7 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 	vertices->setEnabled(false);
+	vertices->setGlobalShift(PShift);
 	
 	//Points (An array of length NumPoints)
 	{
@@ -382,7 +388,7 @@ CC_FILE_ERROR LoadPolyline(QFile& file, ccHObject& container, int32_t index, ESR
 		poly->addPointIndex(0,numPoints);
 		poly->showSF(vertices->sfShown());
 		poly->setName(QString("Polyline #%1").arg(index));
-		poly->set2DMode(!is3D); //FIXME DGM: maybe we should ask the user?
+		poly->set2DMode(!is3D && !load2DPolyAs3DPoly);
 		container.addChild(poly);
 	}
 
@@ -625,6 +631,7 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 		delete cloud;
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
+	cloud->setGlobalShift(PShift);
 	
 	//Points (An array of length NumPoints)
 	{
@@ -889,7 +896,10 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 	}
 
 	if (!singlePoints)
+	{
 		singlePoints = new ccPointCloud("Points");
+		singlePoints->setGlobalShift(PShift);
+	}
 	if (!singlePoints->reserve(singlePoints->size()+1))
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	
@@ -1311,10 +1321,10 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		double xMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 44: box Y min
-		double xMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		double yMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 52: box X max
-		double yMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		double xMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 60: box Y max
 		double yMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));

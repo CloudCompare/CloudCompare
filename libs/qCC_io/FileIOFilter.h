@@ -190,6 +190,7 @@ public: //static methods
 	/** Shortcut to FileIOFilter::saveFile
 		\param entities entity to save (can be a group of other entities)
 		\param filename filename
+		\param parameters saving parameters
 		\param filter output filter
 		\return error type (if any)
 	**/
@@ -202,6 +203,7 @@ public: //static methods
 	/** Shortcut to the other version of FileIOFilter::SaveToFile
 		\param entities entity to save (can be a group of other entities)
 		\param filename filename
+		\param parameters saving parameters
 		\param fileFilter output filter 'file filter'
 		\return error type (if any)
 	**/
@@ -213,10 +215,12 @@ public: //static methods
 	//! Shortcut to the ccGlobalShiftManager mechanism specific for files
 	/** \param[in] P sample point (typically the first loaded)
 		\param[out] Pshift global shift
-		\param loadParameters loading parameters
+		\param[in] loadParameters loading parameters
 		\return whether global shift has been defined/enabled
 	**/
-	QCC_IO_LIB_API static bool HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters);
+	QCC_IO_LIB_API static bool HandleGlobalShift(	const CCVector3d& P,
+													CCVector3d& Pshift,
+													LoadParameters& loadParameters);
 
 	//! Displays (to console) the message corresponding to a given error code
 	/** \param err error code

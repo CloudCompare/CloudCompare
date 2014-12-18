@@ -33,6 +33,7 @@
 #include <GeometricalAnalysisTools.h>
 #include <SimpleCloud.h>
 #include <RegistrationTools.h> //Aurelien BEY
+#include <Delaunay2dMesh.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -890,6 +891,7 @@ void MainWindow::connectActions()
 	//"Tools > Projection" menu
 	connect(actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
 	connect(actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
+	connect(actionConvertPolylinesToMesh,		SIGNAL(triggered()),	this,		SLOT(doConvertPolylinesToMesh()));
 	connect(actionExportCoordToSF,				SIGNAL(triggered()),	this,		SLOT(doActionExportCoordToSF()));
 	//"Tools > Registration" menu
 	connect(actionRegister,						SIGNAL(triggered()),	this,		SLOT(doActionRegister()));
@@ -1556,7 +1558,7 @@ void MainWindow::doActionComputeOctree()
 				}
 				cloud->deleteOctree();
 				octree = new ccOctree(cloud);
-				if (octree->build(bbox.minCorner(),bbox.maxCorner(),0,0,&pDlg)>0)
+				if (octree->build(bbox.minCorner(),bbox.maxCorner(),0,0,&pDlg) > 0)
 				{
 					octree->setDisplay(cloud->getDisplay());
 					cloud->addChild(octree);
@@ -5428,6 +5430,295 @@ void MainWindow::doActionExportCoordToSF()
 	updateUI();
 }
 
+void MainWindow::doConvertPolylinesToMesh()
+{
+	size_t selNum = m_selectedEntities.size();
+	if (selNum == 0)
+		return;
+
+	std::vector<ccPolyline*> polylines;
+	try
+	{
+		if (selNum == 1 && m_selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT))
+		{
+			ccHObject* obj = m_selectedEntities.back();
+			for (unsigned i=0; i<obj->getChildrenNumber(); ++i)
+			{
+				if (obj->getChild(i)->isA(CC_TYPES::POLY_LINE))
+					polylines.push_back(static_cast<ccPolyline*>(obj->getChild(i)));
+			}
+		}
+		else
+		{
+			for (size_t i=0; i<selNum; ++i)
+			{
+				if (m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
+					polylines.push_back(static_cast<ccPolyline*>(m_selectedEntities[i]));
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccConsole::Error("Not enough memory!");
+		return;
+	}
+
+	if (polylines.empty())
+	{
+		ccConsole::Error("Select a group of polylines or multiple polylines (contour plot)!");
+		return;
+	}
+
+	ccPickOneElementDlg poeDlg("Projection dimension","Contour plot to mesh",this);
+	poeDlg.addElement("X");
+	poeDlg.addElement("Y");
+	poeDlg.addElement("Z");
+	poeDlg.setDefaultIndex(2);
+	if (!poeDlg.exec())
+		return;
+
+	int dim = poeDlg.getSelectedIndex();
+	assert(dim >= 0 && dim < 3);
+
+	const unsigned char Z = static_cast<unsigned char>(dim);
+	const unsigned char X = Z == 2 ? 0 : Z+1;
+	const unsigned char Y = X == 2 ? 0 : X+1;
+
+	//number of segments
+	unsigned segmentCount = 0;
+	unsigned vertexCount = 0;
+	{
+		for (size_t i=0; i<polylines.size(); ++i)
+		{
+			ccPolyline* poly = polylines[i];
+			assert(poly);
+			if (poly)
+			{
+				//count the total number of vertices and segments
+				unsigned vertCount = poly->size();
+				unsigned maxVertCount = poly->isClosed() ? vertCount : vertCount-1;
+				if (vertCount != 0)
+				{
+					vertexCount += vertCount;
+					segmentCount += maxVertCount;
+				}
+			}
+		}
+	}
+	
+	if (segmentCount < 2)
+	{
+		//not enough points/segments
+		ccLog::Error("Not enough segments!");
+		return;
+	}
+
+#define USE_TRIANGLE_LIB
+#ifdef USE_TRIANGLE_LIB
+	std::vector<CCVector2> points2D;
+	std::vector<int> segments2D;
+	try
+	{
+		points2D.reserve(vertexCount);
+		segments2D.reserve(segmentCount * 2);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		ccLog::Error("Not enough memory");
+		return;
+	}
+
+	//fill arrays
+	{
+		for (size_t i=0; i<polylines.size(); ++i)
+		{
+			ccPolyline* poly = polylines[i];
+			if (poly)
+			{
+				unsigned vertCount = poly->size();
+				int vertIndex0 = static_cast<int>(points2D.size());
+				bool closed = poly->isClosed();
+				for (unsigned v=0; v<vertCount; ++v)
+				{
+					const CCVector3* P = poly->getPoint(v);
+					int vertIndex = static_cast<int>(points2D.size());
+					points2D.push_back(CCVector2(P->u[X],P->u[Y]));
+					
+					if (v+1 < vertCount)
+					{
+						segments2D.push_back(vertIndex);
+						segments2D.push_back(vertIndex+1);
+					}
+					else if (closed)
+					{
+						segments2D.push_back(vertIndex);
+						segments2D.push_back(vertIndex0);
+					}
+				}
+			}
+		}
+		assert(points2D.size() == vertexCount);
+		assert(segments2D.size() == segmentCount*2);
+	}
+
+	CCLib::Delaunay2dMesh* delaunayMesh = new CCLib::Delaunay2dMesh;
+	char errorStr[1024];
+	if (!delaunayMesh->buildMesh(points2D,segments2D,errorStr))
+	{
+		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
+		delete delaunayMesh;
+		return;
+	}
+
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	if (!vertices->reserve(vertexCount))
+	{
+		//not enough memory
+		ccLog::Error("Not enough memory");
+		delete vertices;
+		delete delaunayMesh;
+		return;
+	}
+
+	//fill vertices cloud
+	{
+		for (size_t i=0; i<polylines.size(); ++i)
+		{
+			ccPolyline* poly = polylines[i];
+			unsigned vertCount = poly->size();
+			for (unsigned v=0; v<vertCount; ++v)
+			{
+				const CCVector3* P = poly->getPoint(v);
+				vertices->addPoint(*P);
+			}
+		}
+		delaunayMesh->linkMeshWith(vertices,false);
+	}
+
+#else
+	double totalLength = 0.0;
+	{
+		for (size_t i=0; i<polylines.size(); ++i)
+		{
+			ccPolyline* poly = polylines[i];
+			assert(poly);
+			if (poly)
+			{
+				//compute total length
+				totalLength += poly->computeLength();
+			}
+		}
+	}
+	//sample points on the polylines
+	double step = QInputDialog::getDouble(this,"Contour plot meshing","Sampling step",totalLength/1000.0,1.0e-6,1.0e6,6);
+	unsigned approxCount = static_cast<unsigned>(totalLength/step) + vertexCount;
+
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	if (!vertices->reserve(approxCount))
+	{
+		ccLog::Error("Not enough memory!");
+		delete vertices;
+		return;
+	}
+
+	//now let sample points on the polylines
+	for (size_t i=0; i<polylines.size(); ++i)
+	{
+		ccPolyline* poly = polylines[i];
+		if (poly)
+		{
+			bool closed = poly->isClosed();
+			unsigned vertCount = poly->size();
+			unsigned maxVertCount = closed ? vertCount : vertCount-1;
+			for (unsigned v=0; v<vertCount; ++v)
+			{
+				const CCVector3* A = poly->getPoint(v);
+				const CCVector3* B = poly->getPoint((v+1)%vertCount);
+
+				CCVector3 AB = *B-*A;
+				double l = AB.norm();
+				double s = 0.0;
+				while (s < l)
+				{
+					CCVector3 P = *A + AB * (s/l);
+					vertices->addPoint(P);
+					s += step;
+				}
+
+				//add the last point if the polyline is not closed!
+				if (!closed && v+1 == maxVertCount)
+					vertices->addPoint(*B);
+			}
+		}
+
+		if (vertices->size() < 3)
+		{
+			ccLog::Error("Not enough vertices (reduce the step size)!");
+			delete vertices;
+			return;
+		}
+	}
+
+	char errorStr[1024];
+	CCLib::GenericIndexedMesh* delaunayMesh = CCLib::PointProjectionTools::computeTriangulation(vertices,DELAUNAY_2D_AXIS_ALIGNED,0,dim,errorStr);
+	if (!delaunayMesh)
+	{
+		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
+		delete delaunayMesh;
+		delete vertices;
+		return;
+	}
+
+#endif
+
+#ifdef _DEBUG
+	//Test delaunay output
+	{
+		unsigned vertCount = vertices->size();
+		for (unsigned i=0; i<delaunayMesh->size(); ++i)
+		{
+			const CCLib::TriangleSummitsIndexes* tsi = delaunayMesh->getTriangleIndexes(i);
+			assert(tsi->i1 < vertCount && tsi->i2 < vertCount && tsi->i3 < vertCount);
+		}
+	}
+#endif
+	
+	ccMesh* mesh = new ccMesh(delaunayMesh,vertices);
+	if (mesh->size() != delaunayMesh->size())
+	{
+		//not enough memory (error will be issued later)
+		delete mesh;
+		mesh = 0;
+	}
+
+	//don't need this anymore
+	delete delaunayMesh;
+	delaunayMesh = 0;
+
+	if (mesh)
+	{
+		mesh->addChild(vertices);
+		mesh->setVisible(true);
+		vertices->setEnabled(false);
+		addToDB(mesh);
+		if (mesh->computePerVertexNormals())
+			mesh->showNormals(true);
+		else
+			ccLog::Warning("[Contour plot to mesh] Failed to compute normals!");
+
+		if (mesh->getDisplay())
+			mesh->getDisplay()->redraw();
+	}
+	else
+	{
+		ccLog::Error("Not enough memory!");
+		if (vertices)
+			delete vertices;
+		vertices = 0;
+	}
+}
+
 void MainWindow::doActionRasterize()
 {
 	size_t selNum = m_selectedEntities.size();
@@ -5451,12 +5742,12 @@ void MainWindow::doActionRasterize()
 
 void MainWindow::doActionComputeMeshAA()
 {
-	doActionComputeMesh(GENERIC);
+	doActionComputeMesh(DELAUNAY_2D_AXIS_ALIGNED);
 }
 
 void MainWindow::doActionComputeMeshLS()
 {
-	doActionComputeMesh(GENERIC_BEST_LS_PLANE);
+	doActionComputeMesh(DELAUNAY_2D_BEST_LS_PLANE);
 }
 
 static double s_meshMaxEdgeLength = 0;
@@ -5509,9 +5800,12 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 		{
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			//compute raw mesh
+			char errorStr[1024];
 			CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	cloud,
 																										type,
-																										static_cast<PointCoordinateType>(maxEdgeLength));
+																										static_cast<PointCoordinateType>(maxEdgeLength),
+																										0, //XY plane by default
+																										errorStr);
 			if (dummyMesh)
 			{
 				//convert raw mesh to ccMesh
@@ -5544,6 +5838,11 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 					if (i == 0)
 						m_ccRoot->selectEntity(mesh); //auto-select first element
 				}
+			}
+			else
+			{
+				ccConsole::Error(QString("Triangle lib error: %1").arg(errorStr));
+				break;
 			}
 		}
 
@@ -10171,7 +10470,7 @@ void MainWindow::updateMenus()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	bool hasMdiChild = (win != 0);
-	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities()>0);
+	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
 
 	//General Menu
 	menuEdit->setEnabled(true/*hasSelectedEntities*/);
@@ -10326,17 +10625,17 @@ void MainWindow::disableAllBut(ccGLWindow* win)
 
 void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 {
-	//>0
-	bool atLeastOneEntity = (selInfo.selCount>0);
-	bool atLeastOneCloud = (selInfo.cloudCount>0);
-	bool atLeastOneMesh = (selInfo.meshCount>0);
-	//bool atLeastOneOctree = (selInfo.octreeCount>0);
-	bool atLeastOneNormal = (selInfo.normalsCount>0);
-	bool atLeastOneColor = (selInfo.colorCount>0);
-	bool atLeastOneSF = (selInfo.sfCount>0);
-	//bool atLeastOneSensor = (selInfo.sensorCount>0);
-	bool atLeastOneGBLSensor = (selInfo.gblSensorCount>0);
-	bool atLeastOneCameraSensor = (selInfo.cameraSensorCount>0);
+	bool atLeastOneEntity = (selInfo.selCount > 0);
+	bool atLeastOneCloud = (selInfo.cloudCount > 0);
+	bool atLeastOneMesh = (selInfo.meshCount > 0);
+	//bool atLeastOneOctree = (selInfo.octreeCount > 0);
+	bool atLeastOneNormal = (selInfo.normalsCount > 0);
+	bool atLeastOneColor = (selInfo.colorCount > 0);
+	bool atLeastOneSF = (selInfo.sfCount > 0);
+	//bool atLeastOneSensor = (selInfo.sensorCount > 0);
+	bool atLeastOneGBLSensor = (selInfo.gblSensorCount > 0);
+	bool atLeastOneCameraSensor = (selInfo.cameraSensorCount > 0);
+	bool atLeastOnePolyline = (selInfo.polylineCount > 0);
 	bool activeWindow = (getActiveGLWindow() != 0);
 
 	//menuEdit->setEnabled(atLeastOneEntity);
@@ -10418,12 +10717,14 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	// == 1
 	bool exactlyOneEntity = (selInfo.selCount == 1);
+	bool exactlyOneGroup = (selInfo.groupCount == 1);
 	bool exactlyOneCloud = (selInfo.cloudCount == 1);
 	bool exactlyOneMesh = (selInfo.meshCount == 1);
 	bool exactlyOneSF = (selInfo.sfCount == 1);
 	bool exactlyOneSensor = (selInfo.sensorCount == 1);
 	bool exactlyOneCameraSensor = (selInfo.cameraSensorCount == 1);
 
+	actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	actionModifySensor->setEnabled(exactlyOneSensor);
 	actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
 	actionComputeScatteringAngles->setEnabled(exactlyOneSensor);

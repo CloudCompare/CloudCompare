@@ -918,6 +918,9 @@ int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
 			info->colorCount += int(obj->hasColors());
 			info->normalsCount += int(obj->hasNormals());
 
+			if (obj->isA(CC_TYPES::HIERARCHY_OBJECT))
+				info->groupCount++;
+
 			if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);

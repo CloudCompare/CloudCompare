@@ -89,9 +89,9 @@ public:
 	////////////////////////////////////////////////////
 	// FIND ISOLINES
 	////////////////////////////////////////////////////
-	int find(T* in)
+	int find(const T* in)
 	{
-		//createOnePixelBorder(in, m_threshold + 1);
+		//createOnePixelBorder(in, m_threshold + 1); //DGM: not const :(
 		preCodeImage(in);
 		return findIsolines(in);
 	}
@@ -354,36 +354,68 @@ protected:
 					//ccLog::Print(QString("New contour: #%1 - origin = %2 - (x=%3, y=%4)").arg(m_cl.size()).arg(m_co.back()).arg(x).arg(y));
 				}
 
+				double x2 = 0.0, y2 = 0.0;
 				switch (toedge)
 				{
 				case 0: 
-					m_cx.push_back(x + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 1, y + 0)]));
-					m_cy.push_back(y);
+					x2 = x + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 1, y + 0)]);
+					y2 = y;
 					next = ixy(x + 0, y - 1);
-					m_cl.back() = ++length;
 					break;
 				case 1:
-					m_cx.push_back(x + 1);
-					m_cy.push_back(y + LERP(in[ixy(x + 1, y + 0)], in[ixy(x + 1, y + 1)]));
+					x2 = x + 1;
+					y2 = y + LERP(in[ixy(x + 1, y + 0)], in[ixy(x + 1, y + 1)]);
 					next = ixy(x + 1, y + 0);
-					m_cl.back() = ++length;
 					break;
 				case 2:
-					m_cx.push_back(x + LERP(in[ixy(x + 0, y + 1)], in[ixy(x + 1, y + 1)]));
-					m_cy.push_back(y + 1);
+					x2 = x + LERP(in[ixy(x + 0, y + 1)], in[ixy(x + 1, y + 1)]);
+					y2 = y + 1;
 					next = ixy(x, y + 1);
-					m_cl.back() = ++length;
 					break;
 				case 3:
-					m_cx.push_back(x);
-					m_cy.push_back(y + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 0, y + 1)]));
+					x2 = x;
+					y2 = y + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 0, y + 1)]);
 					next = ixy(x - 1, y + 0);
-					m_cl.back() = ++length;
 					break;
 				default:
 					next = -1;
 					length = 0;
-					break;
+					continue;
+				}
+
+				if (length > 1)
+				{
+					size_t vertCount = m_cx.size();
+					const double& x0 = m_cx[vertCount-2];
+					const double& y0 = m_cy[vertCount-2];
+					double& x1 = m_cx.back();
+					double& y1 = m_cy.back();
+					double ux = x1 - x0;
+					double uy = y1 - y0;
+					double vx = x2 - x0;
+					double vy = y2 - y0;
+					//test colinearity so as to merge both segments if possible
+					double dotprod = (ux*vx + uy*vy);
+					if (fabsl(dotprod - sqrt((vx*vx+vy*vy) * (ux*ux+uy*uy))) < 1.0e-6)
+					{
+						//merge: we replace the last vertex by this one
+						x1 = x2;
+						y1 = y2;
+					}
+					else
+					{
+						//new vertex
+						m_cx.push_back(x2);
+						m_cy.push_back(y2);
+						m_cl.back() = ++length;
+					}
+				}
+				else
+				{
+					//new vertex
+					m_cx.push_back(x2);
+					m_cy.push_back(y2);
+					m_cl.back() = ++length;
 				}
 			}
 		}

@@ -19,6 +19,9 @@
 
 #include "ShpFilter.h"
 
+//Local
+#include "ui_saveSHPFileDlg.h"
+
 //qCC_db
 #include <ccPolyline.h>
 #include <ccGenericPointCloud.h>
@@ -34,6 +37,7 @@
 #include <QFileInfo>
 #include <QApplication>
 #include <QtEndian>
+#include <QDialog>
 
 //CCLib
 #include <Neighbourhood.h>
@@ -64,6 +68,19 @@ enum ESRI_SHAPE_TYPE {	SHP_NULL_SHAPE		= 0 ,
 						SHP_MULTI_PATCH		= 31
 };
 
+//! Mascaret File Save dialog
+class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
+{
+public:
+	//! Default constructor
+	SaveSHPFileDialog(QWidget* parent = 0)
+		: QDialog(parent)
+		, Ui::SaveSHPFileDlg()
+	{
+		setupUi(this);
+		setWindowFlags(Qt::Tool);
+	}
+};
 bool ShpFilter::canLoadExtension(QString upperCaseExt) const
 {
 	return (upperCaseExt == "SHP");
@@ -395,8 +412,13 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten, ESRI_SHAPE_TYPE outputShapeType)
+CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten, ESRI_SHAPE_TYPE outputShapeType, int vertDim = 2)
 {
+	assert(vertDim >= 0  && vertDim < 3);
+	const unsigned char Z = static_cast<unsigned char>(vertDim);
+	const unsigned char X = Z == 2 ? 0 : Z+1;
+	const unsigned char Y = X == 2 ? 0 : X+1;
+
 	bytesWritten = 0;
 
 	if (!poly)
@@ -429,10 +451,10 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 
 	//Byte 4: Box
 	{
-		double xMin = qToLittleEndian<double>(box.minCorner().x);
-		double xMax = qToLittleEndian<double>(box.maxCorner().x);
-		double yMin = qToLittleEndian<double>(box.minCorner().y);
-		double yMax = qToLittleEndian<double>(box.maxCorner().y);
+		double xMin = qToLittleEndian<double>(box.minCorner().u[X]);
+		double xMax = qToLittleEndian<double>(box.maxCorner().u[X]);
+		double yMin = qToLittleEndian<double>(box.minCorner().u[Y]);
+		double yMax = qToLittleEndian<double>(box.maxCorner().u[Y]);
 		//The Bounding Box for the PolyLine stored in the order Xmin, Ymin, Xmax, Ymax
 		/*Byte  4*/file.write((const char*)&xMin,8);
 		/*Byte 12*/file.write((const char*)&yMin,8);
@@ -469,53 +491,44 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	//for polygons we must list the vertices in the right order:
 	//"The neighborhood to the right of an observer walking along
 	//the ring in vertex order is the inside of the polygon"
+	//== clockwise order
 	bool inverseOrder = false;
 	if (outputShapeType == SHP_POLYGON || outputShapeType == SHP_POLYGON_Z)
 	{
 		assert(isClosed);
 		assert(numPoints > 2);
-		//get bounding box
-		ccBBox box = poly->getBB();
-		assert(box.isValid());
-		//get the two largest (ordered) dimensions (dim1, dim2)
-		CCVector3 diag = box.getDiagVec();
-		unsigned char minDim = diag.y < diag.x ? 1 : 0;
-		if (diag.z < diag.u[minDim])
-			minDim = 2;
-		unsigned char dim1 = ((minDim+1) % 3);
-		unsigned char dim2 = ((minDim+2) % 3);
 
-		if (diag.u[dim1] > 0) //if the polyline is flat, no need to bother ;)
+		unsigned char dim1 = X;
+		unsigned char dim2 = Y;
+		if (outputShapeType == SHP_POLYGON_Z)
 		{
-			//look for the top-left-most point in this 'plane'
-			int32_t leftMostPointIndex = 0;
+			//get bounding box
+			ccBBox box = poly->getBB();
+			assert(box.isValid());
+			CCVector3 diag = box.getDiagVec();
+			
+			//in 3D we have to guess the 'flat' dimension
+			unsigned char minDim = diag.u[1] < diag.u[0] ? 1 : 0;
+			if (diag.u[2] < diag.u[minDim])
+				minDim = 2;
+			dim1 = minDim == 2 ? 0 : minDim+1;
+			dim2 = dim1   == 2 ? 0 : dim1+1;
+		}
+
+		//test if the polygon is clock-wise or not
+		{
+			double sum = 0.0;
+			//http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
+			//or http://en.wikipedia.org/wiki/Shoelace_formula
+			for (int32_t i=0; i+1<numPoints; ++i)
 			{
-				const CCVector3* leftMostPoint = vertices->getPoint(0);
-				for (int32_t i=1; i<realNumPoints; ++i)
-				{
-					const CCVector3* P = vertices->getPoint(i);
-					if (P->u[dim1] < leftMostPoint->u[dim1] || (P->u[dim1] == leftMostPoint->u[dim1] && P->u[dim2] < leftMostPoint->u[dim2]))
-					{
-						leftMostPoint = P;
-						leftMostPointIndex = i;
-					}
-				}
+				const CCVector3* P1 = vertices->getPoint(i);
+				const CCVector3* P2 = vertices->getPoint((i+1) % realNumPoints);
+				sum += (P2->u[dim1]-P2->u[dim1]) * (P2->u[dim2]+P1->u[dim2]);
 			}
 
-			//we simply compare the angles betwween the two edges that have the top-left-most vertex in common
-			{
-				const CCVector3* B = vertices->getPoint(leftMostPointIndex > 0 ? leftMostPointIndex-1 : realNumPoints-1);
-				const CCVector3* P = vertices->getPoint(leftMostPointIndex);
-				const CCVector3* A = vertices->getPoint(leftMostPointIndex+1 < realNumPoints ? leftMostPointIndex+1 : 0);
-			
-				CCVector3 PA = *A-*P;
-				CCVector3 PB = *B-*P;
-				PointCoordinateType anglePA = atan2(PA.u[dim2],PA.u[dim1]); //forward
-				PointCoordinateType anglePB = atan2(PB.u[dim2],PB.u[dim1]); //backward
-				//angles should all be in [-PI/2;0]
-				if (anglePA < anglePB)
-					inverseOrder = true;
-			}
+			//negative sum = counter-clockwise
+			inverseOrder = (sum < 0.0);
 		}
 	}
 
@@ -526,8 +539,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 			int32_t ii = (inverseOrder ? numPoints-1-i : i);
 			const CCVector3* P = vertices->getPoint(ii % realNumPoints); //warning: handle loop if polyline is closed
 
-			double x = qToLittleEndian<double>(P->x);
-			double y = qToLittleEndian<double>(P->y);
+			double x = qToLittleEndian<double>(P->u[X]);
+			double y = qToLittleEndian<double>(P->u[Y]);
 			/*Byte 0*/file.write((const char*)&x,8);
 			/*Byte 8*/file.write((const char*)&y,8);
 			bytesWritten += 16;
@@ -539,8 +552,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	{
 		//Z boundaries
 		{
-			double zMin = qToLittleEndian<double>(box.minCorner().z);
-			double zMax = qToLittleEndian<double>(box.maxCorner().z);
+			double zMin = qToLittleEndian<double>(box.minCorner().u[Z]);
+			double zMax = qToLittleEndian<double>(box.maxCorner().u[Z]);
 			file.write((const char*)&zMin,8);
 			file.write((const char*)&zMax,8);
 			bytesWritten += 16;
@@ -552,7 +565,7 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 			{
 				int32_t ii = (inverseOrder ? numPoints-1-i : i);
 				const CCVector3* P = vertices->getPoint(ii % realNumPoints); //warning: handle loop if polyline is closed
-				double z = qToLittleEndian<double>(P->z);
+				double z = qToLittleEndian<double>(P->u[Z]);
 				file.write((const char*)&z,8);
 				bytesWritten += 8;
 			}
@@ -915,7 +928,7 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	std::vector<GenericField*> fields;
-	return saveToFile(entity, fields, filename);
+	return saveToFile(entity, fields, filename, parameters);
 }
 
 bool ShpFilter::IntegerField::save(DBFHandle handle, int fieldIndex) const
@@ -964,7 +977,11 @@ bool ShpFilter::DoubleField3D::save(DBFHandle handle, int xFieldIndex, int yFiel
 	return true;
 }
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericField*>& fields, QString filename)
+//semi-persistent parameters
+static bool s_save3DPolysAs2D = false;
+static int  s_poly2DVertDim = 2;
+static bool s_save3DPolyHeightInDBF = false;
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericField*>& fields, QString filename, SaveParameters& parameters)
 {
 	if (!entity)
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -976,6 +993,29 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 	if (inputShapeType == SHP_NULL_SHAPE || toSave.empty())
 		return CC_FERR_BAD_ENTITY_TYPE;
+
+	bool save3DPolysAs2D = false;
+	int poly2DVertDim = 2;
+	bool save3DPolyHeightInDBF = false;
+	if (parameters.alwaysDisplaySaveDialog && inputShapeType == SHP_POLYLINE_Z)
+	{
+		//display SHP save dialog
+		SaveSHPFileDialog ssfDlg(0);
+		ssfDlg.save3DPolyAs2DCheckBox->setChecked(s_save3DPolysAs2D);
+		ssfDlg.save3DPolyHeightInDBFCheckBox->setChecked(s_save3DPolyHeightInDBF);
+		ssfDlg.dimComboBox->setCurrentIndex(s_poly2DVertDim);
+
+		if (!ssfDlg.exec())
+			return CC_FERR_CANCELED_BY_USER;
+
+		save3DPolysAs2D = s_save3DPolysAs2D = ssfDlg.save3DPolyAs2DCheckBox->isChecked();
+		poly2DVertDim = s_poly2DVertDim = ssfDlg.dimComboBox->currentIndex();
+		save3DPolyHeightInDBF = s_save3DPolyHeightInDBF =  ssfDlg.save3DPolyHeightInDBFCheckBox->isChecked();
+	}
+	assert(poly2DVertDim >= 0 &&  poly2DVertDim < 3);
+	const unsigned char Z = static_cast<unsigned char>(poly2DVertDim);
+	const unsigned char X = Z == 2 ? 0 : Z+1;
+	const unsigned char Y = X == 2 ? 0 : X+1;
 
 	ESRI_SHAPE_TYPE outputShapeType = inputShapeType;
 	if (m_closedPolylinesAsPolygons && (inputShapeType == SHP_POLYLINE || inputShapeType == SHP_POLYLINE_Z))
@@ -1046,10 +1086,10 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		assert(box.isValid());
 
 		//X and Y bounaries
-		double xMin = qToLittleEndian<double>(box.minCorner().x);
-		double xMax = qToLittleEndian<double>(box.maxCorner().x);
-		double yMin = qToLittleEndian<double>(box.minCorner().y);
-		double yMax = qToLittleEndian<double>(box.maxCorner().y);
+		double xMin = qToLittleEndian<double>(box.minCorner().u[X]);
+		double xMax = qToLittleEndian<double>(box.maxCorner().u[X]);
+		double yMin = qToLittleEndian<double>(box.minCorner().u[Y]);
+		double yMax = qToLittleEndian<double>(box.maxCorner().u[Y]);
 		//Byte 36: box X min
 		memcpy(_header,(const char*)&xMin,8);
 		_header += 8;
@@ -1065,8 +1105,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 		//Z bounaries
 		//Unused, with value 0.0, if not Measured or Z type
-		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(box.minCorner().z);
-		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(box.maxCorner().z);
+		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(box.minCorner().u[Z]);
+		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(box.maxCorner().u[Z]);
 		//Byte 68: box Z min
 		memcpy(_header,(const char*)&zMin,8);
 		_header += 8;
@@ -1126,7 +1166,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		case SHP_POLYLINE:
 		case SHP_POLYLINE_Z:
 			assert(child->isKindOf(CC_TYPES::POLY_LINE));
-			error = SavePolyline(static_cast<ccPolyline*>(child),file,recordSize,outputShapeType);
+			error = SavePolyline(static_cast<ccPolyline*>(child),file,recordSize,save3DPolysAs2D ? SHP_POLYLINE : outputShapeType, poly2DVertDim);
 			break;
 		case SHP_MULTI_POINT_Z:
 			assert(child->isKindOf(CC_TYPES::POINT_CLOUD));
@@ -1204,12 +1244,33 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 				int fieldIdx = DBFAddField(dbfHandle,"local_idx",FTInteger,6,0);
 				if (fieldIdx >= 0)
 				{
-					for (unsigned i=0; i<toSave.size(); ++i)
+					for (size_t i=0; i<toSave.size(); ++i)
 						DBFWriteIntegerAttribute(dbfHandle,static_cast<int>(i),fieldIdx,static_cast<int>(i)+1);
 				}
 				else
 				{
-					ccLog::Warning(QString("[ShpFilter::saveToFile] Failed to save field 'index' (default)"));
+					ccLog::Warning(QString("[SHP] Failed to save field 'index' (default)"));
+					result = CC_FERR_WRITING;
+					break;
+				}
+			}
+
+			//write the '3D polylines height' field if request
+			if (save3DPolyHeightInDBF)
+			{
+				int fieldIdx = DBFAddField(dbfHandle,"height",FTDouble,8,8);
+				if (fieldIdx >= 0)
+				{
+					for (size_t i=0; i<toSave.size(); ++i)
+					{
+						ccPolyline* poly = static_cast<ccPolyline*>(toSave[i]);
+						double height = (poly && poly->size() != 0 ? poly->getPoint(0)->u[Z] : 0.0);
+						DBFWriteDoubleAttribute(dbfHandle,static_cast<int>(i),fieldIdx,height);
+					}
+				}
+				else
+				{
+					ccLog::Warning(QString("[SHP] Failed to save field 'height' (3D polylines height)"));
 					result = CC_FERR_WRITING;
 					break;
 				}
@@ -1232,7 +1293,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 					if (xFieldIdx < 0)
 					{
-						ccLog::Warning(QString("[ShpFilter::saveToFile] Failed to save field '%1'").arg(field->name()));
+						ccLog::Warning(QString("[SHP] Failed to save field '%1'").arg(field->name()));
 						result = CC_FERR_WRITING;
 						break;
 					}
@@ -1248,7 +1309,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 					if (fieldIdx < 0)
 					{
-						ccLog::Warning(QString("[ShpFilter::saveToFile] Failed to save field '%1'").arg(field->name()));
+						ccLog::Warning(QString("[SHP] Failed to save field '%1'").arg(field->name()));
 						result = CC_FERR_WRITING;
 						break;
 					}

@@ -140,7 +140,7 @@ public:
 	};
 
 	//! Special method to save multiple entities with attributes
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericField*>& fields, QString filename);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericField*>& fields, QString filename, SaveParameters& parameters);
 
 	//! Sets whether to consider closed polylines as polygons or not
 	void treatClosedPolylinesAsPolygons(bool state) { m_closedPolylinesAsPolygons = state; }

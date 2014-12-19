@@ -52,10 +52,12 @@ protected:
 	std::vector<double> m_maxy;
 
 	std::vector<int>    m_cd;
-	std::vector<double> m_cx;
-	std::vector<double> m_cy;
-	std::vector<int>    m_cl;
-	std::vector<int>    m_co;
+	std::vector<double> m_contourX;
+	std::vector<double> m_contourY;
+	std::vector<int>    m_contourLength;
+	std::vector<int>    m_contourOrigin;
+	std::vector<int>    m_contourIndexes;
+	std::vector<bool>   m_contourClosed;
 
 	int m_w;
 	int m_h;
@@ -100,7 +102,10 @@ public:
 	inline int getNumContours() const { return m_numContours; }
 
 	//! Returns the length of a given contour
-	inline int getContourLength(int contour) const  { return m_cl[contour]; }
+	inline int getContourLength(int contour) const { return m_contourLength[contour]; }
+
+	//! Returns whether a given contour is closed or not
+	inline bool isContourClosed(int contour) const { return m_contourClosed[contour]; }
 
 	//! Returns the given point (x,y) of a given contour
 	void getContourPoint(int contour, size_t index, double& x, double& y)
@@ -119,13 +124,20 @@ public:
 	//! Creates a single pixel, 0-valued border around the grid
 	void createOnePixelBorder(T* in, T borderval) const
 	{
-		for (int i = 0, j = m_w*m_h-1; i < m_w; i++, j--)
+		//rows
 		{
-			in[i] = in[j] = borderval;
+			int shift = (m_h-1) * m_w;
+			for (int i=0; i<m_w; i++)
+			{
+				in[i] = in[i+shift] = borderval;
+			}
 		}
-		for (int i = 0, j = m_w-1; i < m_h; i++, j+=m_w)
+		//columns
 		{
-			in[i] = in[j] = borderval;
+			for (int j=0; j<m_h; j++)
+			{
+				in[j*m_w] = in[(j+1)*m_w-1] = borderval;
+			}
 		}
 	}
 
@@ -141,304 +153,484 @@ protected:
 		{
 			for (int y = 0; y < m_h-1; y++)
 			{
-				int b0(in[ixy(x + 0, y + 0)] < m_threshold ? 0x00001000 : 0x00000000;
-				int b1(in[ixy(x + 1, y + 0)] < m_threshold ? 0x00000100 : 0x00000000;
-				int b2(in[ixy(x + 1, y + 1)] < m_threshold ? 0x00000010 : 0x00000000;
-				int b3(in[ixy(x + 0, y + 1)] < m_threshold ? 0x00000001 : 0x00000000;
+				int b0(in[ixy(x + 0, y + 1)] < m_threshold ? 1 : 0); //bottom-left is below threshold
+				int b1(in[ixy(x + 1, y + 1)] < m_threshold ? 2 : 0); //bottom-right is below threshold
+				int b2(in[ixy(x + 1, y + 0)] < m_threshold ? 4 : 0); //top-right is below threshold
+				int b3(in[ixy(x + 0, y + 0)] < m_threshold ? 8 : 0); //top-left is below threshold
 				m_cd[ixy(x, y)] = b0 | b1 | b2 | b3;
 			}
 		} 
 	}
 
-	static const int CASE0	=	0x00000000; 
-	static const int CASE1	=	0x00000001;
-	static const int CASE2	=	0x00000010;
-	static const int CASE3	=	0x00000011;
-	static const int CASE4	=	0x00000100;
-	static const int CASE5	=	0x00000101;
-	static const int CASE6	=	0x00000110;
-	static const int CASE7	=	0x00000111;
-	static const int CASE8	=	0x00001000;
-	static const int CASE9	=	0x00001001;
-	static const int CASE10	=	0x00001010;
-	static const int CASE11	=	0x00001011;
-	static const int CASE12	=	0x00001100;
-	static const int CASE13	=	0x00001101;
-	static const int CASE14	=	0x00001110;
-	static const int CASE15	=	0x00001111;
+	//2x2 cell configuration codes
+	static const int CASE0   =  0; 
+	static const int CASE1   =  1;
+	static const int CASE2   =  2;
+	static const int CASE3   =  3;
+	static const int CASE4   =  4;
+	static const int CASE5   =  5;
+	static const int CASE6   =  6;
+	static const int CASE7   =  7;
+	static const int CASE8   =  8;
+	static const int CASE9   =  9;
+	static const int CASE10  = 10;
+	static const int CASE11  = 11;
+	static const int CASE12  = 12;
+	static const int CASE13  = 13;
+	static const int CASE14  = 14;
+	static const int CASE15  = 15;
+	static const int VISITED = 16;
 
-	////////////////////////////////////////////////////
-	// SEARCH image for contours from topleft corner
-	// to bottomright corner.
-	////////////////////////////////////////////////////    
+	//entry/exit edges
+	static const int NONE   = -1;
+	static const int TOP    =  0;
+	static const int RIGHT  =  1;
+	static const int BOTTOM =  2;
+	static const int LEFT   =  3;
+
+	void endContour(bool closed, bool alternatePath)
+	{
+		if (alternatePath)
+		{
+			//we have to merge this path with the previous one!
+			//try //will be taken care of by 'findIsolines'
+			//{
+				size_t length = m_contourLength.back();
+				size_t firstIndex = m_contourOrigin.back();
+				m_contourLength.pop_back();
+				m_contourOrigin.pop_back();
+				m_contourClosed.pop_back();
+
+				//backup the alternate part of the contour
+				std::vector<double> subContourX(length), subContourY(length);
+				std::vector<int> subContourIndexes(length);
+				{
+					for (size_t i=0; i<length; ++i)
+					{
+						subContourX[i] = m_contourX[firstIndex+i];
+						subContourY[i] = m_contourY[firstIndex+i];
+						subContourIndexes[i] = m_contourIndexes[firstIndex+i];
+					}
+				}
+
+				assert(!m_contourLength.empty() && !m_contourOrigin.empty());
+				size_t length0 = m_contourLength.back();
+				size_t firstIndex0 = m_contourOrigin.back();
+
+				//shift the first part values
+				{
+					for (int i=static_cast<int>(length0); i>=0; --i) //we start by end so as to not overwrite values!
+					{
+						m_contourX[firstIndex0+length+i] = m_contourX[firstIndex0+i];
+						m_contourX[firstIndex0+length+i] = m_contourY[firstIndex0+i];
+						m_contourIndexes[firstIndex0+length+i] = m_contourIndexes[firstIndex0+i];
+					}
+				}
+
+				//now copy the second part values
+				{
+					for (size_t i=0; i<length; ++i)
+					{
+						m_contourX[firstIndex0+i] = subContourX[i];
+						m_contourY[firstIndex0+i] = subContourY[i];
+						m_contourIndexes[firstIndex0+i] = subContourIndexes[i];
+					}
+				}
+
+				//even though we are merging contours, if we are here it
+				//means that the contour was not a proper loop!
+				closed = false;
+				assert(!m_contourClosed.empty());
+				m_contourClosed.back() = false;
+			//}
+			//catch(std::bad_alloc)
+			//{
+			//	return false;
+			//}
+		}
+
+		//simply update the closed state (just to be sure)
+		assert(!m_contourClosed.empty());
+		assert(!closed || m_contourLength.back() > 2);
+		m_contourClosed.back() = closed;
+
+		//return true;
+	}
+
+	//! Searches image for contours from topleft to bottomright corners
 	int findIsolines(const T* in)
 	{
-		m_cx.clear();
-		m_cy.clear();
-		m_cl.clear();
-		m_co.clear();
+		//traversal case
+		static const int TRAVERSAL[4]           = { /*TOP=*/BOTTOM,  /*RIGHT=*/LEFT,   /*BOTTOM=*/TOP,   /*LEFT=*/RIGHT   };
+		//disambiguation cases (CASES 5 and 10)
+		static const int DISAMBIGUATION_UP  [4] = { /*TOP=*/LEFT,    /*RIGHT=*/BOTTOM, /*BOTTOM=*/RIGHT, /*LEFT=*/TOP     };
+		static const int DISAMBIGUATION_DOWN[4] = { /*TOP=*/RIGHT,   /*RIGHT=*/TOP,    /*BOTTOM=*/LEFT,  /*LEFT=*/BOTTOM  };
+
+		m_contourX.clear();
+		m_contourY.clear();
+		m_contourLength.clear();
+		m_contourOrigin.clear();
+		m_contourIndexes.clear();
+		m_contourClosed.clear();
 
 		try
 		{
-			int cellIndex = 0;
-			int toedge = -1;
-			int nextCellIndex = -1;
-			int length = 0;
+			int toEdge = NONE;
+			int cellIndex = -1;
+			int x = 0, y = 0;
 
-			while (cellIndex < m_w * m_h)
+			//mechanism for merging two parts of a non-closed contour
+			int altToEdge = NONE;
+			int altStartIndex = 0;
+			bool alternatePath = false;
+
+			const int maxCellIndex = m_w * (m_h-1); //DGM: last line is only 0!
+			while (cellIndex < maxCellIndex)
 			{
-				int fromedge = toedge;
-				if (nextCellIndex < 0)
-					nextCellIndex = ++cellIndex;
-				int x = nextCellIndex % m_w;
-				int y = nextCellIndex / m_w;
-			
-				if (x+1 >= m_w || y+1 >= m_h)
+				//entry edge
+				int fromEdge = (toEdge == NONE ? NONE : TRAVERSAL[toEdge]);
+				//exit edge
+				toEdge = NONE;
+				//alternative exit edge (when starting a new contour)
+				if (fromEdge == NONE)
+					altToEdge = NONE;
+
+				int currentCellIndex = -1;
+
+				//last isoline is 'finished'
+				if (fromEdge == NONE)
 				{
-					nextCellIndex = -1;
-					continue;
+					//do we have an alternate path?
+					if (altToEdge != NONE && !alternatePath)
+					{
+						//we know that we are coming from the TOP (case 2 or 13)
+						fromEdge = TOP;
+						currentCellIndex = altStartIndex + m_w; //same coumn, next row
+						alternatePath = true;
+						//we start a new (temporary) contour
+						m_contourLength.push_back(0);
+						m_contourClosed.push_back(false);
+						m_contourOrigin.push_back(static_cast<int>(m_contourX.size())+1);
+					}
+					else
+					{
+						// we have to look for a new starting point
+						alternatePath = false;
+						altToEdge = NONE;
+						//skip empty cells
+						while (	++cellIndex < maxCellIndex
+							&&	(m_cd[cellIndex] == CASE0 || m_cd[cellIndex] == CASE15) )
+						{
+						}
+						if (cellIndex == maxCellIndex)
+							break;
+						currentCellIndex = cellIndex;
+					}
+					x = currentCellIndex % m_w;
+					y = currentCellIndex / m_w;
 				}
 
-				int code = m_cd[nextCellIndex];
-				switch (code)
+				//we have reached a border (bottom or right)
+				if (x < 0 || x >= m_w-1 || y < 0 || y >= m_h-1)
+				{
+					//if an isoline was underway, it won't be closed!
+					if (fromEdge != NONE)
+					{
+						endContour(false,alternatePath);
+					}
+					//toEdge = NONE;
+					continue;
+				}
+				else if (fromEdge != NONE)
+				{
+					//isoline underway: we have to re-evaluate the
+					//current position in the grid
+					currentCellIndex = ixy(x,y);
+				}
+
+				//if (x == 188 && y == 183)
+				if (currentCellIndex == 59729)
+				{
+					int i=0;
+				}
+
+				assert(currentCellIndex >= 0);
+				int& currentCode = m_cd[currentCellIndex];
+				switch (currentCode)
 				{
 				case CASE0:									// CASE 0
-					toedge = -1;
-					break;
+					//we have reached a border!
+					//if an isoline was underway, it won't be closed!
+					if (fromEdge != NONE)
+					{
+						endContour(false,alternatePath);
+					}
+					//toEdge = NONE;
+					continue;
 
 				case CASE1:									// CASE 1
-					m_cd[nextCellIndex] = 0;
-					toedge = 2;
+				case CASE14:								// CASE 14
+					toEdge = (fromEdge == NONE || fromEdge == LEFT ? BOTTOM : LEFT);
+					currentCode |= VISITED;
 					break;
 
 				case CASE2:									// CASE 2
-					m_cd[nextCellIndex] = 0;
-					toedge = 1;
-					break;
-
-				case CASE3:									// CASE 3
-					m_cd[nextCellIndex] = 0;
-					toedge = 1;
-					break;
-
-				case CASE4:									// CASE 4
-					m_cd[nextCellIndex] = 0;
-					toedge = 0;
-					break;
-
-				case CASE5:									// CASE 5, saddle
+				case CASE13:								// CASE 13
+					//if it's a new contour, we have 2 options (RIGHT and BOTTOM)
+					if (fromEdge == NONE)
 					{
-						double avg = 0.25 * (	in[ixy(x + 0, y + 0)]
-											+	in[ixy(x + 1, y + 0)]
-											+	in[ixy(x + 0, y + 1)]
-											+	in[ixy(x + 1, y + 1)] );
-					
-						if (avg > m_threshold)
+						if (x >= m_w-2) //can't go on the right!
 						{
-							if (fromedge == 3)				// treat as case 1, then switch code to case 4
+							if (y >= m_h-2) //can't go lower
 							{
-								toedge = 2;
-								m_cd[nextCellIndex] = CASE4;
+								//toEdge = NONE;
+								continue;
 							}
-							else							// treat as case 4, then switch code to case 1
+							else
 							{
-								toedge = 0;
-								m_cd[nextCellIndex] = CASE1;
+								toEdge = BOTTOM;
 							}
 						}
 						else
 						{
-							if (fromedge == 3)				// treat as case 7, then switch code to case 13
+							//go right by default
+							toEdge = RIGHT;
+							if (y < m_h-2)
 							{
-								toedge = 0;
-								m_cd[nextCellIndex] = CASE13;
+								//if we can go lower, rembemr this as an alternate rout
+								altToEdge = BOTTOM;
+								altStartIndex = currentCellIndex;
 							}
-							else							// treat as case 13, then switch code to case 7
+						}
+					}
+					else
+					{
+						toEdge = (fromEdge == BOTTOM ? RIGHT : BOTTOM);
+					}
+					currentCode |= VISITED;
+					break;
+
+				case CASE3:									// CASE 3
+				case CASE12:								// CASE 12
+					toEdge = (fromEdge == NONE || fromEdge == LEFT ? RIGHT : LEFT);
+					currentCode |= VISITED;
+					break;
+
+				case CASE11:								// CASE 11
+					//assert(fromEdge != NONE);
+				case CASE4:									// CASE 4
+					toEdge = (fromEdge == NONE || fromEdge == TOP ? RIGHT : TOP);
+					currentCode |= VISITED;
+					break;
+
+				case CASE5:									// CASE 5, saddle
+				case CASE10:								// CASE 10, saddle
+					{
+						if (fromEdge != NONE)
+						{
+							//check if we are not looping as the saddle points can't be flagged as VISITED!
+							assert(!m_contourOrigin.empty() && !m_contourIndexes.empty());
+							if (m_contourIndexes[m_contourOrigin.back()] == currentCellIndex)
 							{
-								toedge = 2;
-								m_cd[nextCellIndex] = CASE7;
+								//isoline loop is closed!
+								assert(!alternatePath);
+								endContour(true,false);
+								//no need to look at the alternate path!
+								altToEdge = NONE;
+								//toEdge = NONE;
+								continue;
+							}
+						}
+
+						double avg = (	in[ixy(x + 0, y + 0)]
+									+	in[ixy(x + 1, y + 0)]
+									+	in[ixy(x + 0, y + 1)]
+									+	in[ixy(x + 1, y + 1)] ) / 4.0;
+
+						//see http://en.wikipedia.org/wiki/Marching_squares for the disambiguation cases
+						bool down = (	(currentCode == CASE5  && avg <  m_threshold)
+									||	(currentCode == CASE10 && avg >= m_threshold) );
+						if (down)
+						{
+							if (fromEdge == NONE)
+							{
+								//if we start here, we know that some routes have already been taken (the ones coming from UP or LEFT)
+								//we can ignore the cell
+								continue;
+							}
+							else
+							{
+								toEdge = DISAMBIGUATION_DOWN[fromEdge];
+							}
+						}
+						else
+						{
+							if (fromEdge == NONE)
+							{
+								//if we start here, we know that some routes have already been taken (the ones coming from UP or LEFT)
+								//it can only be on the right
+								if (x < m_w-2)
+								{
+									if (m_cd[currentCellIndex+1] < VISITED)
+										toEdge = RIGHT;
+									else
+										//we can ignore the cell
+										continue;
+								}
+								else
+								{
+									//we can ignore the cell
+									continue;
+								}
+							}
+							else
+							{
+								toEdge = DISAMBIGUATION_UP[fromEdge];
 							}
 						}
 					}
 					break;
 
 				case CASE6:									// CASE 6
-					m_cd[nextCellIndex] = 0;
-					toedge = 0;
+					//assert(fromEdge != NONE);
+				case CASE9:									// CASE 9
+					toEdge = (fromEdge == NONE || fromEdge == TOP ? BOTTOM : TOP);
+					currentCode |= VISITED;
 					break;
 
 				case CASE7:									// CASE 7
-					m_cd[nextCellIndex] = 0;
-					toedge = 0;
-					break;
-
+					//assert(fromEdge != NONE);
 				case CASE8:									// CASE 8
-					m_cd[nextCellIndex] = 0;
-					toedge = 3;
-					break;
-
-				case CASE9:									// CASE 9
-					m_cd[nextCellIndex] = 0;
-					toedge = 2;
-					break;
-
-				case CASE10:								// CASE 10, saddle
-					{
-						double avg = 0.25 * (	in[ixy(x + 0, y + 0)]
-											+	in[ixy(x + 1, y + 0)]
-											+	in[ixy(x + 0, y + 1)]
-											+	in[ixy(x + 1, y + 1)] );
-					
-						if (avg > m_threshold)
-						{
-							if (fromedge == 0)				// treat as case 8, then switch code to case 2
-							{
-								toedge = 3;
-								m_cd[nextCellIndex] = CASE2;
-							}
-							else							// treat as case 2, then switch code to case 8
-							{
-								toedge = 1;
-								m_cd[nextCellIndex] = CASE8;
-							}
-						}
-						else
-						{
-							if (fromedge == 2)				// treat as case 14, then switch code to case 11
-							{
-								toedge = 3;
-								m_cd[nextCellIndex] = CASE11;
-							}
-							else							// treat as case 11, then switch code to case 14
-							{
-								toedge = 1;
-								m_cd[nextCellIndex] = CASE14;
-							}
-						}
-					}
-					break;
-
-				case CASE11:								// CASE 11
-					m_cd[nextCellIndex] = 0;
-					toedge = 1;
-					break;
-
-				case CASE12:								// CASE 12
-					m_cd[nextCellIndex] = 0;
-					toedge = 3;
-					break;
-
-				case CASE13:								// CASE 13
-					m_cd[nextCellIndex] = 0;
-					toedge = 2;
-					break;
-
-				case CASE14:								// CASE 14
-					m_cd[nextCellIndex] = 0;
-					toedge = 3;
+					toEdge = (fromEdge == NONE || fromEdge == LEFT ? TOP : LEFT);
+					currentCode |= VISITED;
 					break;
 
 				case CASE15:								// CASE 15
-					toedge = -1;
-					break;
+					//assert(fromEdge == NONE); //apart at the very beginning!
+					//toEdge = NONE;
+					continue;
 
 				default:
-					assert(false);
-					break;
-				}
-
-				if (fromedge == -1 && toedge > -1)
-				{
-					// starting a new contour
-					m_cl.push_back(0);
-					m_co.push_back(static_cast<int>(m_cx.size()));
-					//ccLog::Print(QString("New contour: #%1 - origin = %2 - (x=%3, y=%4)").arg(m_cl.size()).arg(m_co.back()).arg(x).arg(y));
-				}
-
-				double x2 = 0.0, y2 = 0.0;
-				switch (toedge)
-				{
-				case 0: 
-					x2 = x + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 1, y + 0)]);
-					y2 = y;
-					nextCellIndex = ixy(x + 0, y - 1);
-					break;
-				case 1:
-					x2 = x + 1;
-					y2 = y + LERP(in[ixy(x + 1, y + 0)], in[ixy(x + 1, y + 1)]);
-					nextCellIndex = ixy(x + 1, y + 0);
-					break;
-				case 2:
-					x2 = x + LERP(in[ixy(x + 0, y + 1)], in[ixy(x + 1, y + 1)]);
-					y2 = y + 1;
-					nextCellIndex = ixy(x, y + 1);
-					break;
-				case 3:
-					x2 = x;
-					y2 = y + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 0, y + 1)]);
-					nextCellIndex = ixy(x - 1, y + 0);
-					break;
-				default:
-					nextCellIndex = -1;
-					length = 0;
+					assert(currentCode > 0 && ((currentCode & VISITED) == VISITED));
+					if (fromEdge != NONE)
+					{
+						//check that we are indeed coming back to the start
+						assert(!m_contourOrigin.empty() && !m_contourIndexes.empty());
+						if (m_contourIndexes[m_contourOrigin.back()] == currentCellIndex)
+						{
+							//isoline loop is closed!
+							assert(!alternatePath);
+							endContour(true,false);
+							//no need to look at the alternate path!
+							altToEdge = NONE;
+						}
+						else
+						{
+							//have we reached a kind of tri-point? (DGM: not sure it's possible)
+							endContour(false,alternatePath);
+						}
+					}
+					//toEdge = NONE;
 					continue;
 				}
 
-				if (length > 1)
+				assert(toEdge != NONE);
+				
+				if (fromEdge == NONE)
 				{
-					size_t vertCount = m_cx.size();
-					const double& x0 = m_cx[vertCount-2];
-					const double& y0 = m_cy[vertCount-2];
-					double& x1 = m_cx.back();
-					double& y1 = m_cy.back();
+					// starting a new contour
+					m_contourLength.push_back(0);
+					m_contourClosed.push_back(false);
+					m_contourOrigin.push_back(static_cast<int>(m_contourX.size()));
+					//ccLog::Print(QString("New contour: #%1 - origin = %2 - (x=%3, y=%4)").arg(m_contourLength.size()).arg(m_contourOrigin.back()).arg(x).arg(y));
+				}
+
+				double x2 = 0.0, y2 = 0.0;
+				switch (toEdge)
+				{
+				case TOP: 
+					x2 = x + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 1, y + 0)]);
+					y2 = y;
+					y--;
+					break;
+				case RIGHT:
+					x2 = x + 1;
+					y2 = y + LERP(in[ixy(x + 1, y + 0)], in[ixy(x + 1, y + 1)]);
+					x++;
+					break;
+				case BOTTOM:
+					x2 = x + LERP(in[ixy(x + 0, y + 1)], in[ixy(x + 1, y + 1)]);
+					y2 = y + 1;
+					y++;
+					break;
+				case LEFT:
+					x2 = x;
+					y2 = y + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 0, y + 1)]);
+					x--;
+					break;
+				default:
+					assert(false);
+					continue;
+				}
+
+				/*if (m_contourLength.back() > 1)
+				{
+					size_t vertCount = m_contourX.size();
+					const double& x0 = m_contourX[vertCount-2];
+					const double& y0 = m_contourY[vertCount-2];
+					double& x1 = m_contourX.back();
+					double& y1 = m_contourY.back();
 					double ux = x1 - x0;
 					double uy = y1 - y0;
 					double vx = x2 - x0;
 					double vy = y2 - y0;
 					//test colinearity so as to merge both segments if possible
-					double dotprod = (ux*vx + uy*vy);
-					if (fabsl(dotprod - sqrt((vx*vx+vy*vy) * (ux*ux+uy*uy))) < 1.0e-6)
+					double dotprod = (ux*vx + uy*vy)/ sqrt((vx*vx+vy*vy) * (ux*ux+uy*uy));
+					if (fabsl(dotprod - 1.0) < 1.0e-6)
 					{
 						//merge: we replace the last vertex by this one
 						x1 = x2;
 						y1 = y2;
+						m_contourIndexes.back() = currentCellIndex;
 					}
 					else
 					{
 						//new vertex
-						m_cx.push_back(x2);
-						m_cy.push_back(y2);
-						m_cl.back() = ++length;
+						m_contourX.push_back(x2);
+						m_contourY.push_back(y2);
+						m_contourIndexes.push_back(currentCellIndex);
+						m_contourLength.back()++;
 					}
 				}
 				else
+				//*/
 				{
 					//new vertex
-					m_cx.push_back(x2);
-					m_cy.push_back(y2);
-					m_cl.back() = ++length;
+					m_contourX.push_back(x2);
+					m_contourY.push_back(y2);
+					m_contourIndexes.push_back(currentCellIndex);
+					m_contourLength.back()++;
 				}
 			}
 		}
 		catch(std::bad_alloc)
 		{
 			//not enough memory
-			m_cx.clear();
-			m_cy.clear();
-			m_cl.clear();
+			m_contourX.clear();
+			m_contourY.clear();
+			m_contourLength.clear();
+			m_contourIndexes.clear();
 			return -1;
 		}
 
-		m_numContours = static_cast<int>(m_cl.size());
+		m_numContours = static_cast<int>(m_contourLength.size());
 
 		computeBoundingBoxes();
 
 		return m_numContours;
 	}
 
-	////////////////////////////////////////////////////
-	// LERP between to values
-	////////////////////////////////////////////////////    
+	//! LERP between two values
 	inline double LERP(T A, T B) const
 	{
 		T AB = A-B;
@@ -448,25 +640,25 @@ protected:
 	inline int getLastIndex() const
 	{
 		int nc = getNumContours();
-		return nc > 0 ? m_co[nc - 1] + m_cl[nc - 1] : 0;
+		return nc > 0 ? m_contourOrigin[nc - 1] + m_contourLength[nc - 1] : 0;
 	}
 
 	inline void setContourX(int contour, int v, double x)
 	{
-		int o = m_co[contour];
-		m_cx[wrap(o + v, o, o + m_cl[contour])] = x;
+		int o = m_contourOrigin[contour];
+		m_contourX[wrap(o + v, o, o + m_contourLength[contour])] = x;
 	}
 
 	inline void setContourY(int contour, int v, double y)
 	{
-		int o = m_co[contour];
-		m_cy[wrap(o + v, o, o + m_cl[contour])] = y;
+		int o = m_contourOrigin[contour];
+		m_contourY[wrap(o + v, o, o + m_contourLength[contour])] = y;
 	}
 
 	inline int getValidIndex(int contour, int v) const
 	{
-		int o = m_co[contour];
-		return wrap(o + v, o, o + m_cl[contour]);
+		int o = m_contourOrigin[contour];
+		return wrap(o + v, o, o + m_contourLength[contour]);
 	}
 
 	double measureArea(int contour, int first, int last) const
@@ -598,15 +790,15 @@ protected:
 	// return length from i to i + 1
 	double measureLength(int contour, int i) const
 	{
-		int lo = m_co[contour];
-		int n  = m_cl[contour];
+		int lo = m_contourOrigin[contour];
+		int n  = m_contourLength[contour];
 		int hi = lo + n;
 
 		int v1 = wrap(lo + i+0, lo, hi);
 		int v2 = wrap(lo + i+1, lo, hi);
 
-		double aftx = m_cx[v2] - m_cx[v1];
-		double afty = m_cy[v2] - m_cy[v1];
+		double aftx = m_contourX[v2] - m_contourX[v1];
+		double afty = m_contourY[v2] - m_contourY[v1];
 
 		return sqrt(aftx * aftx + afty * afty);
 	}
@@ -645,14 +837,14 @@ public:
 
 	inline double getContourX(int contour, int v) const
 	{
-		int o = m_co[contour];
-		return m_cx[wrap(o + v, o, o + m_cl[contour])];
+		int o = m_contourOrigin[contour];
+		return m_contourX[wrap(o + v, o, o + m_contourLength[contour])];
 	}
 
 	inline double getContourY(int contour, int v) const
 	{
-		int o = m_co[contour];
-		return m_cy[wrap(o + v, o, o + m_cl[contour])];
+		int o = m_contourOrigin[contour];
+		return m_contourY[wrap(o + v, o, o + m_contourLength[contour])];
 	}
 
 	inline double measureCurvature(int contour, int i) const
@@ -737,22 +929,22 @@ public:
 
 		for (int k = 0; k < numContours; k++)
 		{
-			int o = m_co[k];
-			m_minx[k] = m_cx[o];
-			m_miny[k] = m_cy[o];
-			m_maxx[k] = m_cx[o];
-			m_maxy[k] = m_cy[o];
+			int o = m_contourOrigin[k];
+			m_minx[k] = m_contourX[o];
+			m_miny[k] = m_contourY[o];
+			m_maxx[k] = m_contourX[o];
+			m_maxy[k] = m_contourY[o];
 			for (int i = 1; i < getContourLength(k); i++)
 			{
 				int j = o + i;
-				if (m_cx[j] < m_minx[k]) 
-					m_minx[k] = m_cx[j];
-				else if (m_cx[j] > m_maxx[k]) 
-					m_maxx[k] = m_cx[j];
-				if (m_cy[j] < m_miny[k]) 
-					m_miny[k] = m_cy[j];
-				else if (m_cy[j] > m_maxy[k]) 
-					m_maxy[k] = m_cy[j];
+				if (m_contourX[j] < m_minx[k]) 
+					m_minx[k] = m_contourX[j];
+				else if (m_contourX[j] > m_maxx[k]) 
+					m_maxx[k] = m_contourX[j];
+				if (m_contourY[j] < m_miny[k]) 
+					m_miny[k] = m_contourY[j];
+				else if (m_contourY[j] > m_maxy[k]) 
+					m_maxy[k] = m_contourY[j];
 			}
 		}
 

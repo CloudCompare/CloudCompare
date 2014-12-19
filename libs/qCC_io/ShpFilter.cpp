@@ -21,6 +21,7 @@
 
 //Local
 #include "ui_saveSHPFileDlg.h"
+#include "ui_importDBFFieldDlg.h"
 
 //qCC_db
 #include <ccPolyline.h>
@@ -30,6 +31,7 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
+#include <ccProgressDialog.h>
 
 //Qt
 #include <QString>
@@ -38,6 +40,7 @@
 #include <QApplication>
 #include <QtEndian>
 #include <QDialog>
+#include <QMap>
 
 //CCLib
 #include <Neighbourhood.h>
@@ -68,7 +71,7 @@ enum ESRI_SHAPE_TYPE {	SHP_NULL_SHAPE		= 0 ,
 						SHP_MULTI_PATCH		= 31
 };
 
-//! Mascaret File Save dialog
+//! Shape File Save dialog
 class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
 {
 public:
@@ -78,9 +81,22 @@ public:
 		, Ui::SaveSHPFileDlg()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 	}
 };
+
+//! Shape File Load dialog (to choose an 'altitude' field)
+class ImportDBFFieldDialog : public QDialog, public Ui::ImportDBFFieldDlg
+{
+public:
+	//! Default constructor
+	ImportDBFFieldDialog(QWidget* parent = 0)
+		: QDialog(parent)
+		, Ui::ImportDBFFieldDlg()
+	{
+		setupUi(this);
+	}
+};
+
 bool ShpFilter::canLoadExtension(QString upperCaseExt) const
 {
 	return (upperCaseExt == "SHP");
@@ -877,6 +893,14 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 		}
 	}
 
+	if (!singlePoints)
+	{
+		singlePoints = new ccPointCloud("Points");
+		singlePoints->setGlobalShift(PShift);
+	}
+	if (!singlePoints->reserve(singlePoints->size()+1))
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	
 	ScalarType s = NAN_VALUE;
 	if (	shapeTypeInt == SHP_POINT_Z
 		||	shapeTypeInt == SHP_POINT_M )
@@ -908,14 +932,6 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 		}
 	}
 
-	if (!singlePoints)
-	{
-		singlePoints = new ccPointCloud("Points");
-		singlePoints->setGlobalShift(PShift);
-	}
-	if (!singlePoints->reserve(singlePoints->size()+1))
-		return CC_FERR_NOT_ENOUGH_MEMORY;
-	
 	singlePoints->addPoint(P);
 
 	if (singlePoints->hasScalarFields())
@@ -1233,7 +1249,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	//eventually, we create the DB file (suffix should be ".dbf")
-	QString dbfFilename = baseFileName+QString(".dbf");
+	QString dbfFilename = baseFileName + QString(".dbf");
 	DBFHandle dbfHandle = DBFCreate(qPrintable(dbfFilename));
 	if (dbfHandle)
 	{
@@ -1329,6 +1345,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	return result;
 }
 
+//semi-persistent settings
+static double s_dbfFielImportScale = 1.0;
 CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	QFile file(filename);
@@ -1427,14 +1445,26 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		return CC_FERR_NO_LOAD;
 	}
 
+	//progress bar
+	ccProgressDialog pdlg(true);
+	qint64 fileSize = file.size();
+	pdlg.setMaximum(static_cast<int>(fileSize));
+	pdlg.setMethodTitle("Load SHP file");
+	pdlg.setInfo(qPrintable(QString("File size: %1").arg(fileSize)));
+	pdlg.start();
+	QApplication::processEvents();
+
 	//load shapes
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
 	ccPointCloud* singlePoints = 0;
 	qint64 pos = file.pos();
+	//we also keep track of the polylines 'record number' (if any)
+	QMap<int32_t,ccPolyline*> polyIDs;
+	int32_t maxPolyID = 0;
 	while (fileLength >= 12)
 	{
 		file.seek(pos);
-		assert(pos + fileLength == file.size());
+		assert(pos + fileLength == fileSize);
 		//load shape record in main SHP file
 		{
 			file.read(header,8);
@@ -1474,6 +1504,13 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			case SHP_POLYGON:
 			case SHP_POLYGON_Z:
 				error = LoadPolyline(file,container,recordNumber,static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt),Pshift);
+				if (error == CC_FERR_NO_ERROR && shapeTypeInt == SHP_POLYLINE)
+				{
+					assert(container.getLastChild() && container.getLastChild()->isA(CC_TYPES::POLY_LINE));
+					polyIDs[recordNumber] = static_cast<ccPolyline*>(container.getLastChild());
+					if (recordNumber > maxPolyID)
+						maxPolyID = recordNumber;
+				}
 				break;
 			case SHP_MULTI_POINT:
 			case SHP_MULTI_POINT_Z:
@@ -1500,6 +1537,112 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		if (error != CC_FERR_NO_ERROR)
 			break;
+
+		pdlg.setValue(fileSize - (pos + fileLength));
+		if (pdlg.wasCanceled())
+		{
+			error = CC_FERR_CANCELED_BY_USER;
+			break;
+		}
+	}
+
+	//try to load the DBF to see if there's a 'height' field or something similar for polylines
+	if (error == CC_FERR_NO_ERROR && !polyIDs.empty())
+	{
+		QFileInfo fi(filename);
+		QString baseFileName = fi.path() + QString("/") + fi.completeBaseName();
+		//try to load the DB file (suffix should be ".dbf")
+		QString dbfFilename = baseFileName + QString(".dbf");
+		DBFHandle dbfHandle = DBFOpen(qPrintable(dbfFilename),"rb");
+		if (dbfHandle)
+		{
+			int fieldCount = DBFGetFieldCount(dbfHandle);
+			int recordCount = DBFGetRecordCount(dbfHandle);
+			if (fieldCount == 0)
+			{
+				ccLog::Warning("[SHP] No field in the associated DBF file!");
+			}
+			else if (recordCount < static_cast<int>(maxPolyID)) //QMap::lastKey not available with Qt4!
+			{
+				ccLog::Warning("[SHP] No enough records in the associated DBF file!");
+			}
+			else
+			{
+				QMap<int,QString> candidateFields;
+				for (int i=0; i<fieldCount; ++i)
+				{
+					char fieldName[256];
+					DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle,i,fieldName,0,0);
+					if (fieldType == FTDouble || fieldType == FTInteger)
+					{
+						candidateFields[i] = QString(fieldName);
+					}
+				}
+			
+				if (!candidateFields.empty())
+				{
+					//create a list of available fields
+					ImportDBFFieldDialog lsfDlg(0);
+					for (QMap<int,QString>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
+					{
+						lsfDlg.listWidget->addItem(it.value());
+					}
+					lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFielImportScale);
+					lsfDlg.okPushButton->setVisible(false);
+
+
+					if (lsfDlg.exec())
+					{
+						s_dbfFielImportScale = lsfDlg.scaleDoubleSpinBox->value();
+
+						//look for the selected index
+						int index = -1;
+						for (int i=0; i<candidateFields.size(); ++i)
+						{
+							if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i)))
+							{
+								index = i;
+								break;
+							}
+						}
+
+						if (index >= 0)
+						{
+							double scale = s_dbfFielImportScale;
+							//read values
+							DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle,index,0,0,0);
+							//for each poyline
+							for (QMap<int32_t,ccPolyline*>::iterator it = polyIDs.begin(); it != polyIDs.end(); ++it)
+							{
+								//get the height
+								double z = 0.0;
+								if (fieldType == FTDouble)
+									z = DBFReadDoubleAttribute(dbfHandle,it.key()-1,index);
+								else //if (fieldType == FTInteger)
+									z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle,it.key()-1,index));
+								z *= scale;
+
+								//translate the polyline
+								CCVector3 T(0,0,static_cast<PointCoordinateType>(z));
+								ccGLMatrix trans;
+								trans.setTranslation(T);
+								ccPolyline* poly = it.value();
+								if (poly)
+									poly->applyGLTransformation_recursive(&trans);
+							}
+						}
+					}
+				}
+				else
+				{
+					ccLog::Warning("[SHP] No numerical field in the associated DBF file!");
+				}
+			}
+		}
+		else
+		{
+			ccLog::Warning(QString("[SHP] Failed to load associated DBF file ('%1')").arg(dbfFilename));
+		}
 	}
 
 	if (singlePoints)

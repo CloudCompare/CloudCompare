@@ -13,11 +13,21 @@ v2.6.1.beta 11/??/2014
 		- output profiles can be exported to the 'Mascaret' profile format (see http://www.opentelemac.org/)
 			or to the more standard DXF and SHP formats
 	* Rasterize Tool (former 'Height Grid Generation' tool)
+		- accessible via 'Tools > Projection > Rasterize (and contour plot)'
 		- brand new interface with real-time preview of the raster
-		- new option to fill empty cells: 'interpolate'
+		- new option to fill empty cells by means of interpolation of the neighbors values
 		- new tool to generate contour lines (aka isolines, contour plot, etc.)
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
+		- input: if the SHP file contains 2D polylines and some numerical fields in the associated DBF
+			file, CloudCompare will let the user choose one of those field as 'altitude' for the polylines
+		- output: if the user wants to save 3D polylines, CloudCompare let him choose to export
+			them as 2D polylines, and also to export their altitude (assuming it's constant) as a 'height'
+			field in the associated DBF file
+	* New tool: 'Tools > Contour plot (polylines) to mesh'
+		- triangulates one or several polylines (e.g. contour lines)
+		- the triangulation tries to keep the input polylines as triangle edges
+			(if the poylines are not corssing once projected in 2D)
 	* DP file I/O filter (plugin)
 		- to open DP (DotProduct - http://www.dotproduct3d.com/) files
 		- imports each frame as a separate cloud (all frames can be merged afterwards with 'Edit > Merge')

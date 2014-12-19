@@ -65,15 +65,19 @@ protected:
 
 public:
 
+	//! Default constructor
 	Isolines(int w, int h)
 		: m_w(w)
 		, m_h(h)
 		, m_threshold(0)
 		, m_numContours(0)
 	{
+		//DGM: as this is done in the constructor,
+		//we don't catch the exception (so that the
+		//caller can properly handle the error!)
 		//try
 		{
-			m_cd.resize(w*h);
+			m_cd.resize(w*h,0);
 		}
 		//catch(std::bad_alloc)
 		//{
@@ -81,25 +85,24 @@ public:
 		//}
 	}
 
-	////////////////////////////////////////////////////
-	// SET Isoline value to trace
-	////////////////////////////////////////////////////
+	//! Sets isoline value to trace
 	inline void setThreshold(T t) { m_threshold = t; }
 
-	////////////////////////////////////////////////////
-	// FIND ISOLINES
-	////////////////////////////////////////////////////
+	//! Find isolines
 	int find(const T* in)
 	{
-		//createOnePixelBorder(in, m_threshold + 1); //DGM: not const :(
+		//createOnePixelBorder(in, m_threshold + 1); //DGM: modifies 'in', the user will have to do it himself :(
 		preCodeImage(in);
 		return findIsolines(in);
 	}
 
+	//! Returns the number of found contours
 	inline int getNumContours() const { return m_numContours; }
 
+	//! Returns the length of a given contour
 	inline int getContourLength(int contour) const  { return m_cl[contour]; }
 
+	//! Returns the given point (x,y) of a given contour
 	void getContourPoint(int contour, size_t index, double& x, double& y)
 	{
 		assert(static_casti<int>(index) < getContourLength(contour));
@@ -107,13 +110,13 @@ public:
 		y = getContourY(contour, index);
 	}
 
+	//! Measures the area delineated by a given contour
 	inline double measureArea(int contour) const { return measureArea(contour, 0, getContourLength(contour)); }
 
+	//! Measures the perimeter of a given contour
 	inline double measurePerimeter(int contour) const { return measurePerimeter(contour, 0, getContourLength(contour)); }
 
-	////////////////////////////////////////////////////
-	// CREATE single pixel, 0-valued border around pix
-	////////////////////////////////////////////////////
+	//! Creates a single pixel, 0-valued border around the grid
 	void createOnePixelBorder(T* in, T borderval) const
 	{
 		for (int i = 0, j = m_w*m_h-1; i < m_w; i++, j--)
@@ -128,22 +131,20 @@ public:
 
 protected:
 
-	////////////////////////////////////////////////////
-	// CODE each 2x2 pixel
-	// depends only on whether each of four corners is
-	// above or below threshold.
-	////////////////////////////////////////////////////
+	//! Computes a code for each group of 4x4 cells
+	/** The code depends only on whether each of four corners is
+		above or below threshold.
+	**/
 	void preCodeImage(const T* in)
 	{
-		std::fill(m_cd.begin(),m_cd.end(),0);
-		for (int x = 0; x < m_w - 1; x++)
+		for (int x = 0; x < m_w-1; x++)
 		{
-			for (int y = 0; y < m_h - 1; y++)
+			for (int y = 0; y < m_h-1; y++)
 			{
-				int b0 = in[ixy(x + 0, y + 0)] < m_threshold ? 0x00001000 : 0x00000000;
-				int b1 = in[ixy(x + 1, y + 0)] < m_threshold ? 0x00000100 : 0x00000000;
-				int b2 = in[ixy(x + 1, y + 1)] < m_threshold ? 0x00000010 : 0x00000000;
-				int b3 = in[ixy(x + 0, y + 1)] < m_threshold ? 0x00000001 : 0x00000000;
+				int b0(in[ixy(x + 0, y + 0)] < m_threshold ? 0x00001000 : 0x00000000;
+				int b1(in[ixy(x + 1, y + 0)] < m_threshold ? 0x00000100 : 0x00000000;
+				int b2(in[ixy(x + 1, y + 1)] < m_threshold ? 0x00000010 : 0x00000000;
+				int b3(in[ixy(x + 0, y + 1)] < m_threshold ? 0x00000001 : 0x00000000;
 				m_cd[ixy(x, y)] = b0 | b1 | b2 | b3;
 			}
 		} 
@@ -179,26 +180,26 @@ protected:
 
 		try
 		{
-			int i = 0;
+			int cellIndex = 0;
 			int toedge = -1;
-			int next = -1;
+			int nextCellIndex = -1;
 			int length = 0;
 
-			while (i < m_w * m_h)
+			while (cellIndex < m_w * m_h)
 			{
 				int fromedge = toedge;
-				if (next < 0)
-					next = ++i;
-				int x = next % m_w;
-				int y = next / m_w;
+				if (nextCellIndex < 0)
+					nextCellIndex = ++cellIndex;
+				int x = nextCellIndex % m_w;
+				int y = nextCellIndex / m_w;
 			
 				if (x+1 >= m_w || y+1 >= m_h)
 				{
-					next = -1;
+					nextCellIndex = -1;
 					continue;
 				}
 
-				int code = m_cd[next];
+				int code = m_cd[nextCellIndex];
 				switch (code)
 				{
 				case CASE0:									// CASE 0
@@ -206,22 +207,22 @@ protected:
 					break;
 
 				case CASE1:									// CASE 1
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 2;
 					break;
 
 				case CASE2:									// CASE 2
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 1;
 					break;
 
 				case CASE3:									// CASE 3
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 1;
 					break;
 
 				case CASE4:									// CASE 4
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 0;
 					break;
 
@@ -237,12 +238,12 @@ protected:
 							if (fromedge == 3)				// treat as case 1, then switch code to case 4
 							{
 								toedge = 2;
-								m_cd[next] = CASE4;
+								m_cd[nextCellIndex] = CASE4;
 							}
 							else							// treat as case 4, then switch code to case 1
 							{
 								toedge = 0;
-								m_cd[next] = CASE1;
+								m_cd[nextCellIndex] = CASE1;
 							}
 						}
 						else
@@ -250,34 +251,34 @@ protected:
 							if (fromedge == 3)				// treat as case 7, then switch code to case 13
 							{
 								toedge = 0;
-								m_cd[next] = CASE13;
+								m_cd[nextCellIndex] = CASE13;
 							}
 							else							// treat as case 13, then switch code to case 7
 							{
 								toedge = 2;
-								m_cd[next] = CASE7;
+								m_cd[nextCellIndex] = CASE7;
 							}
 						}
 					}
 					break;
 
 				case CASE6:									// CASE 6
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 0;
 					break;
 
 				case CASE7:									// CASE 7
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 0;
 					break;
 
 				case CASE8:									// CASE 8
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 3;
 					break;
 
 				case CASE9:									// CASE 9
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 2;
 					break;
 
@@ -293,12 +294,12 @@ protected:
 							if (fromedge == 0)				// treat as case 8, then switch code to case 2
 							{
 								toedge = 3;
-								m_cd[next] = CASE2;
+								m_cd[nextCellIndex] = CASE2;
 							}
 							else							// treat as case 2, then switch code to case 8
 							{
 								toedge = 1;
-								m_cd[next] = CASE8;
+								m_cd[nextCellIndex] = CASE8;
 							}
 						}
 						else
@@ -306,34 +307,34 @@ protected:
 							if (fromedge == 2)				// treat as case 14, then switch code to case 11
 							{
 								toedge = 3;
-								m_cd[next] = CASE11;
+								m_cd[nextCellIndex] = CASE11;
 							}
 							else							// treat as case 11, then switch code to case 14
 							{
 								toedge = 1;
-								m_cd[next] = CASE14;
+								m_cd[nextCellIndex] = CASE14;
 							}
 						}
 					}
 					break;
 
 				case CASE11:								// CASE 11
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 1;
 					break;
 
 				case CASE12:								// CASE 12
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 3;
 					break;
 
 				case CASE13:								// CASE 13
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 2;
 					break;
 
 				case CASE14:								// CASE 14
-					m_cd[next] = 0;
+					m_cd[nextCellIndex] = 0;
 					toedge = 3;
 					break;
 
@@ -360,25 +361,25 @@ protected:
 				case 0: 
 					x2 = x + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 1, y + 0)]);
 					y2 = y;
-					next = ixy(x + 0, y - 1);
+					nextCellIndex = ixy(x + 0, y - 1);
 					break;
 				case 1:
 					x2 = x + 1;
 					y2 = y + LERP(in[ixy(x + 1, y + 0)], in[ixy(x + 1, y + 1)]);
-					next = ixy(x + 1, y + 0);
+					nextCellIndex = ixy(x + 1, y + 0);
 					break;
 				case 2:
 					x2 = x + LERP(in[ixy(x + 0, y + 1)], in[ixy(x + 1, y + 1)]);
 					y2 = y + 1;
-					next = ixy(x, y + 1);
+					nextCellIndex = ixy(x, y + 1);
 					break;
 				case 3:
 					x2 = x;
 					y2 = y + LERP(in[ixy(x + 0, y + 0)], in[ixy(x + 0, y + 1)]);
-					next = ixy(x - 1, y + 0);
+					nextCellIndex = ixy(x - 1, y + 0);
 					break;
 				default:
-					next = -1;
+					nextCellIndex = -1;
 					length = 0;
 					continue;
 				}

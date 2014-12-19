@@ -80,7 +80,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		for (unsigned i=0; i<vertCount; ++i)
 		{
 			const CCVector3* P = cloud->getPoint(i);
-			lControlPoints[i] = FbxVector4(P->x,P->z,-P->y); //DGM: see loadFile (Y and Z are inverted)
+			lControlPoints[i] = FbxVector4(P->x,P->y,P->z);
+			//lControlPoints[i] = FbxVector4(P->x,P->z,-P->y); //DGM: see loadFile (Y and Z are inverted)
 		}
 	}
 
@@ -1339,13 +1340,13 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 										data[8]  = static_cast<float>(C[2]);
 										data[12] = static_cast<float>(C[3]);
 									}
-									ccGLMatrix invYZ;
-									invYZ.toZero();
-									invYZ.data()[0]  =  1.0;
-									invYZ.data()[6]  =  1.0;
-									invYZ.data()[9]  = -1.0;
-									invYZ.data()[15] =  1.0;
-									mat = invYZ * mat;
+									//ccGLMatrix invYZ;
+									//invYZ.toZero();
+									//invYZ.data()[0]  =  1.0;
+									//invYZ.data()[6]  =  1.0;
+									//invYZ.data()[9]  = -1.0;
+									//invYZ.data()[15] =  1.0;
+									//mat = invYZ * mat;
 									mesh->applyGLTransformation_recursive(&mat);
 
 									if (mesh->getName().isEmpty())

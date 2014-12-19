@@ -126,7 +126,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 		}
 
 		//Reduce memory size
-		if (out.numberoftriangles < m_numberOfTriangles)
+		if (out.numberoftriangles < static_cast<int>(m_numberOfTriangles))
 		{
 			assert(out.numberoftriangles > 0);
 			realloc(m_triIndexes, sizeof(int)*out.numberoftriangles*3);

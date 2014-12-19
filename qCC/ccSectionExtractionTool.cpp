@@ -391,7 +391,7 @@ void ccSectionExtractionTool::undo()
 		count = m_undoCount.back();
 		m_undoCount.pop_back();
 	}
-	while (count >= m_sections.size() && !m_undoCount.empty());
+	while (static_cast<int>(count) >= m_sections.size() && !m_undoCount.empty());
 
 	//ask for a confirmation
 	if (QMessageBox::question(MainWindow::TheInstance(),"Undo",QString("Remove %1 polylines?").arg(m_sections.size()-count),QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
@@ -405,7 +405,7 @@ void ccSectionExtractionTool::undo()
 
 	//we remove all polylines after a given point
 	{
-		while (m_sections.size() > count)
+		while (m_sections.size() > static_cast<int>(count))
 		{
 			Section& section = m_sections.back();
 			releasePolyline(&section);
@@ -884,7 +884,7 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 
 void ccSectionExtractionTool::addUndoStep()
 {
-	if (m_undoCount.empty() || (m_undoCount.back() < m_sections.size()))
+	if (m_undoCount.empty() || (static_cast<int>(m_undoCount.back()) < m_sections.size()))
 	{
 		m_undoCount.push_back(m_sections.size());
 		undoToolButton->setEnabled(true);

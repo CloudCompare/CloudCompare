@@ -67,6 +67,7 @@ v2.6.1.beta 11/??/2014
 		a rectangular region)
 	- the 'Edit > Colors > Levels' was not updating the VBO display when changing colors (so the user couldn't see
 		any change on screen while the RGB colors were actually changed!)
+	- FBX I/O filter: the transformation of meshes was considered as a column-wise matrix while it was in fact row-wise
 
 v2.6.0 10/24/2014
 - New methods:

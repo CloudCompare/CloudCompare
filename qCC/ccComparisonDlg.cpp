@@ -463,10 +463,11 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	}
 
 	//evalutate the theoretical time for each octree level
+	const int MaxLevel = m_refMesh ? 9 : CCLib::DgmOctree::MAX_OCTREE_LEVEL; //DGM: can't go higher than level 9 with a mesh as the grid is 'plain' and would take too much memory!
 	std::vector<double> timings;
 	try
 	{
-		timings.resize(CCLib::DgmOctree::MAX_OCTREE_LEVEL,0);
+		timings.resize(MaxLevel,0);
 	}
 	catch(std::bad_alloc)
 	{
@@ -503,13 +504,13 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	//we don't test the very first and very last level
 	ccProgressDialog progressCb(false,this);
 	progressCb.setMethodTitle("Determining optimal octree level");
-	progressCb.setInfo(qPrintable(QString("Testing %1 levels...").arg(CCLib::DgmOctree::MAX_OCTREE_LEVEL))); //we lie here ;)
-	CCLib::NormalizedProgress nProgress(&progressCb,CCLib::DgmOctree::MAX_OCTREE_LEVEL-2);
+	progressCb.setInfo(qPrintable(QString("Testing %1 levels...").arg(MaxLevel))); //we lie here ;)
+	CCLib::NormalizedProgress nProgress(&progressCb,MaxLevel-2);
 	progressCb.start();
 	QApplication::processEvents();
 
 	//for each level
-	for (int level=2; level<CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++level)
+	for (int level=2; level<MaxLevel; ++level)
 	{
 		const int bitDec = GET_BIT_SHIFT(level);
 		unsigned numberOfPointsInCell = 0;

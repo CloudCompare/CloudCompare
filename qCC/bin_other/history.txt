@@ -24,6 +24,13 @@ v2.6.1.beta 11/??/2014
 		- output: if the user wants to save 3D polylines, CloudCompare let him choose to export
 			them as 2D polylines, and also to export their altitude (assuming it's constant) as a 'height'
 			field in the associated DBF file
+	* CSV Matrix I/O filter
+		- to load CSV tables (typically with height values)
+		- the output can be a mesh or a cloud
+		- a texture file can be mapped on the grid:
+			* if the output is a mesh, the image will be stretched to the mesh extents
+			* if the output is a cloud, each image pixel color will be assigned the equivalent
+				grid cell (therefore the image size must be equal or greater than the grid size)
 	* New tool: 'Tools > Contour plot (polylines) to mesh'
 		- triangulates one or several polylines (e.g. contour lines)
 		- the triangulation tries to keep the input polylines as triangle edges
@@ -78,6 +85,9 @@ v2.6.1.beta 11/??/2014
 	- the 'Edit > Colors > Levels' was not updating the VBO display when changing colors (so the user couldn't see
 		any change on screen while the RGB colors were actually changed!)
 	- FBX I/O filter: the transformation of meshes was considered as a column-wise matrix while it was in fact row-wise
+	- when comparing a cloud and a mesh, the best octree level guessed by CloudCompare could go much higher than 9
+		(with the 64 bits version which has now a maximum octree level of 21 by default). However this could cause
+		a much too high memory consumption and eventually a crash.
 
 v2.6.0 10/24/2014
 - New methods:

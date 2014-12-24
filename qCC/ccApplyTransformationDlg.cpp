@@ -254,7 +254,7 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 	}
 
 	//save last loading location
-	settings.setValue("currentPath",QFileInfo(inputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(inputFilename).absolutePath());
 	settings.endGroup();
 }
 

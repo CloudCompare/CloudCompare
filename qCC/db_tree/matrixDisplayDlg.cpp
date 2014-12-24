@@ -122,7 +122,7 @@ void MatrixDisplayDlg::exportToASCII()
 	}
 
 	//save last saving location
-	settings.setValue("currentPath",QFileInfo(outputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(outputFilename).absolutePath());
 	settings.endGroup();
 }
 

@@ -52,9 +52,11 @@ public:
 
 	//! Adds a material
 	/** Ensures unicity of material names.
+		\param mat material
+		\param allowDuplicateNames whether to allow duplicate names for materials or not (in which case the returned index is the one of the material with the same name)
 		\return material index
 	**/
-	int addMaterial(ccMaterial::CShared mat);
+	int addMaterial(ccMaterial::CShared mat, bool allowDuplicateNames = false);
 
 	//! MTL (material) file parser
 	/** Inspired from KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)

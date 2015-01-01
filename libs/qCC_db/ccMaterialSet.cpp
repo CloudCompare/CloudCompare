@@ -78,7 +78,7 @@ int ccMaterialSet::findMaterialByUniqueID(QString uniqueID)
 	return -1;
 }
 
-int ccMaterialSet::addMaterial(ccMaterial::CShared mtl)
+int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames/*=false*/)
 {
 	if (!mtl)
 	{
@@ -88,7 +88,7 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl)
 	 
 	//material already exists?
 	int previousIndex = findMaterialByName(mtl->getName());
-	if (previousIndex >= 0)
+	if (previousIndex >= 0 && !allowDuplicateNames)
 		return previousIndex;
 
 	try
@@ -424,7 +424,7 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			ccMaterial::Shared mtl(new ccMaterial);
 			if (!mtl->fromFile(in,dataVersion,flags))
 				return false;
-			addMaterial(mtl);
+			addMaterial(mtl,true); //if we load a file, we can't allow that materials are not in the same order as before!
 		}
 	}
 

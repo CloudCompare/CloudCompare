@@ -434,6 +434,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 				return QIcon(QString::fromUtf8(":/CC/images/dbMeshSymbolLocked.png"));
 			else
 				return QIcon(QString::fromUtf8(":/CC/images/dbMeshSymbol.png"));
+		case CC_TYPES::MESH_GROUP:
 		case CC_TYPES::SUB_MESH:
 			if (locked)
 				return QIcon(QString::fromUtf8(":/CC/images/dbSubMeshSymbolLocked.png"));

@@ -85,6 +85,8 @@ v2.6.1.beta 11/??/2014
 	- the 'Edit > Colors > Levels' was not updating the VBO display when changing colors (so the user couldn't see
 		any change on screen while the RGB colors were actually changed!)
 	- FBX I/O filter: the transformation of meshes was considered as a column-wise matrix while it was in fact row-wise
+	- STL vertices merging was sometimes failing with the 64 bits version as it was using a too small
+		threshold distance (the bounding-box dimensions divided by 2^21!)
 	- when comparing a cloud and a mesh, the best octree level guessed by CloudCompare could go much higher than 9
 		(with the 64 bits version which has now a maximum octree level of 21 by default). However this could cause
 		a much too high memory consumption and eventually a crash.

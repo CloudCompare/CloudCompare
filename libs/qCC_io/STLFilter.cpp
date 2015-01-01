@@ -414,7 +414,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			if (octree)
 			{
 				void* additionalParameters[] = { static_cast<void*>(equivalentIndexes) };
-				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,
+				unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
 																			TagDuplicatedVertices,
 																			additionalParameters,
 																			&progressDlg,

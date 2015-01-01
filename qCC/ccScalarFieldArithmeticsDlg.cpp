@@ -30,6 +30,7 @@
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
+#include <math.h>
 
 ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 															QWidget* parent/*=0*/)
@@ -114,6 +115,8 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 		return ASIN;
 	case 15:
 		return ATAN;
+	case 16:
+		return INT;
 	default:
 		assert(false);
 		break;
@@ -158,6 +161,8 @@ QString ccScalarFieldArithmeticsDlg::getOperationName(QString sf1, QString sf2/*
 		return QString("asin(%1)").arg(sf1);
 	case ATAN:
 		return QString("atan(%1)").arg(sf1);
+	case INT:
+		return QString("int(%1)").arg(sf1);
 	default:
 		assert(false);
 		break;
@@ -209,8 +214,8 @@ bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 	if (sf2)
 	{
 		//for operations involving two SFs, we don't expand the SF names (as the resulting SF name would be tool long!)
-		sf1Name = QString("(SF#%1").arg(sf1Idx);
-		sf2Name = QString("(SF#%1").arg(sf2Idx);
+		sf1Name = QString("(SF#%1)").arg(sf1Idx);
+		sf2Name = QString("(SF#%1)").arg(sf2Idx);
 	}
 	QString sfName = getOperationName(sf1Name,sf2Name);
 
@@ -333,6 +338,9 @@ bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 				break;
 			case ATAN:
 				val = atan(val1);
+				break;
+			case INT:
+				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
 				break;
 			default:
 				assert(false);

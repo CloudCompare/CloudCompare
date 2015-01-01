@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
+    <width>250</width>
     <height>128</height>
    </rect>
   </property>
@@ -42,7 +42,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="sf1ComboBox"/>
+      <widget class="QComboBox" name="sf1ComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -63,6 +70,12 @@
      </item>
      <item>
       <widget class="QComboBox" name="operationComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="currentIndex">
         <number>1</number>
        </property>
@@ -149,7 +162,25 @@
          <string>atan</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>integer part</string>
+        </property>
+       </item>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -169,7 +200,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="sf2ComboBox"/>
+      <widget class="QComboBox" name="sf2ComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

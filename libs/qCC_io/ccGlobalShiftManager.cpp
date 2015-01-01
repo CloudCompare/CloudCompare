@@ -174,7 +174,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				}
 			}
 		}
-
+		sasDlg.showTitle(needShift || needRescale);
 		if (sasDlg.exec())
 		{
 			coordinatesShift = sasDlg.getShift();

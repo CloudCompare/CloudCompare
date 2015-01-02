@@ -4592,7 +4592,6 @@ void MainWindow::doActionRegister()
 		}
 
 		//pop-up summary
-		summary << "Refer to Console (F8) for more details";
 		QMessageBox::information(this,"Register info",summary.join("\n"));
 		forceConsoleDisplay();
 	}

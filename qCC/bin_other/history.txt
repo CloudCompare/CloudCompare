@@ -49,11 +49,12 @@ v2.6.1.beta 11/??/2014
 		- the user can export (and import) individual color scales as XML files
 
 - Enhancements:
-	* Interactive Segmentation tool: the segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)
-		- either in 2D (i.e. the coordinates are relative to the screen and the polyline will appear exactly
-			as the same position on the screen if imported later)
-		- or in 3D (i.e. the coordinates are relative to the segmented entities, and the polyline will appear
-			in the same position/orientaiton relatively to the entities if imported later)
+	* Interactive Segmentation tool:
+		The segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)
+		- the polyline is always exported as a 3D polyline (i.e. the coordinates are relative to the segmented entities).
+		- the current viewport is also exported (as a child of the polyline)
+		- if such a polyline is imported later in the tool, CC will propose to apply the associated viewport so as the
+			polyline is in the exact same position/orientation relatively to the segmented entities
 	* Interfactive Transformation tool:
 		- the rotation center can now be modified with the 'Pick rotation center' tool (reticle icon in the left toolbar)
 	* Point-pair based alignment:

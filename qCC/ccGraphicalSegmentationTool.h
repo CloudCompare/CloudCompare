@@ -97,6 +97,9 @@ protected slots:
 
 protected:
 
+	//! Whether to allow or not to exort the current segmentation polyline
+	void allowPolylineExport(bool state);
+
 	//! To be segmented entities
 	std::set<ccHObject*> m_toSegment;
 

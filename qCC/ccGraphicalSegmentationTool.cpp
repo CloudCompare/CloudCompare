@@ -32,6 +32,7 @@
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 #include <ccHObjectCaster.h>
+#include <cc2DViewportObject.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
@@ -102,6 +103,20 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	m_segmentationPoly->setColor(ccColor::green);
 	m_segmentationPoly->showColors(true);
 	m_segmentationPoly->set2DMode(true);
+	allowPolylineExport(false);
+}
+
+void ccGraphicalSegmentationTool::allowPolylineExport(bool state)
+{
+	if (state)
+	{
+		actionExportSegmentationPolyline->setEnabled(true);
+	}
+	else
+	{
+		loadSaveToolButton->setDefaultAction(actionUseExistingPolyline);
+		actionExportSegmentationPolyline->setEnabled(false);
+	}
 }
 
 ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
@@ -200,6 +215,7 @@ bool ccGraphicalSegmentationTool::start()
 
 	m_segmentationPoly->clear();
 	m_polyVertices->clear();
+	allowPolylineExport(false);
 
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
@@ -234,7 +250,7 @@ void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArr
 
 void ccGraphicalSegmentationTool::stop(bool accepted)
 {
-	assert(m_polyVertices && m_segmentationPoly);
+	assert(m_segmentationPoly);
 
 	if (m_associatedWin)
 	{
@@ -414,6 +430,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 			if (!m_segmentationPoly->addPointIndex(0,4))
 			{
 				ccLog::Error("Out of memory!");
+				allowPolylineExport(false);
 				return;
 			}
 			m_segmentationPoly->setClosed(true);
@@ -464,6 +481,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		if (!m_polyVertices->reserve(2))
 		{
 			ccLog::Error("Out of memory!");
+			allowPolylineExport(false);
 			return;
 		}
 		//we add the same point twice (the last point will be used for display only)
@@ -473,6 +491,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		if (!m_segmentationPoly->addPointIndex(0,2))
 		{
 			ccLog::Error("Out of memory!");
+			allowPolylineExport(false);
 			return;
 		}
 	}
@@ -484,6 +503,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 			if (!m_polyVertices->reserve(vertCount+1))
 			{
 				ccLog::Error("Out of memory!");
+				allowPolylineExport(false);
 				return;
 			}
 
@@ -527,6 +547,11 @@ void ccGraphicalSegmentationTool::closeRectangle()
 			return;
 		m_segmentationPoly->clear();
 		m_polyVertices->clear();
+		allowPolylineExport(false);
+	}
+	else
+	{
+		allowPolylineExport(true);
 	}
 
 	//stop
@@ -561,6 +586,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 
 	//set the default import/export icon to 'export' mode
 	loadSaveToolButton->setDefaultAction(actionExportSegmentationPolyline);
+	allowPolylineExport(m_segmentationPoly->size() > 1);
 
 	if (m_associatedWin)
 		m_associatedWin->updateGL();
@@ -654,6 +680,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 		{
 			m_segmentationPoly->clear();
 			m_polyVertices->clear();
+			allowPolylineExport(false);
 		}
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
 		m_associatedWin->displayNewMessage("Segmentation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
@@ -743,6 +770,19 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			assert(index >= 0 && index < static_cast<int>(polylines.size()));
 			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
 			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
+
+			//look for an asociated viewport
+			ccHObject::Container viewports;
+			if (poly->filterChildren(viewports,false,CC_TYPES::VIEWPORT_2D_OBJECT,true) == 1)
+			{
+				//shall we apply this viewport?
+				if (QMessageBox::question(m_associatedWin,"Associated viewport","The selected polyline has an associated viewport: do you want to apply it?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+				{
+					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject*>(viewports.front())->getParameters());
+					m_associatedWin->redraw();
+				}
+			}
+
 			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 			bool mode3D = !poly->is2DMode();
 
@@ -758,6 +798,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			doSetPolylineSelection();
 			m_segmentationPoly->clear();
 			m_polyVertices->clear();
+			allowPolylineExport(false);
 
 			//duplicate polyline 'a minima' (only points and indexes + closed state)
 			if (	m_polyVertices->reserve(vertices->size())
@@ -785,6 +826,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				{
 					//stop
 					m_state &= (~RUNNING);
+					allowPolylineExport(m_segmentationPoly->size() > 1);
 				}
 
 				if (m_associatedWin)
@@ -808,8 +850,9 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow && m_segmentationPoly)
 	{
+		bool mode2D = false;
+#ifdef ALLOW_2D_OR_3D_EXPORT
 		QMessageBox messageBox(0);
-		
 		messageBox.setWindowTitle("Choose export type");
 		messageBox.setText("Export polyline in:\n - 2D (with coordinates relative to the screen)\n - 3D (with coordinates relative to the segmented entities)");
 		QPushButton* button2D = new QPushButton("2D");
@@ -824,11 +867,12 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 			//process cancelled by user
 			return;
 		}
+		mode2D = (messageBox.clickedButton() == button2D);
+#endif
 
 		ccPolyline* poly = new ccPolyline(*m_segmentationPoly);
 
 		//if the polyline is 2D and we export the polyline in 3D, we must project its vertices
-		bool mode2D = (messageBox.clickedButton() == button2D);
 		if (!mode2D)
 		{
 			//get current display parameters
@@ -863,12 +907,19 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 			}
 		}
 		
-		poly->setName(QString("Segmentation polyline #%1").arg(++s_polylineExportCount));
+		QString polyName = QString("Segmentation polyline #%1").arg(++s_polylineExportCount);
+		poly->setName(polyName);
 		poly->setEnabled(false); //we don't want it to appear while the segmentation mode is enabled! (anyway it's 2D only...)
 		poly->set2DMode(mode2D);
 		poly->setColor(ccColor::yellow); //we use a different color so as to differentiate them from the active polyline!
 
-		mainWindow->addToDB(poly);
+		//save associated viewport
+		cc2DViewportObject* viewportObject = new cc2DViewportObject(polyName + QString(" viewport"));
+		viewportObject->setParameters(m_associatedWin->getViewportParameters());
+		viewportObject->setDisplay(m_associatedWin);
+		poly->addChild(viewportObject);
+
+		mainWindow->addToDB(poly,false,false,false);
 		ccLog::Print(QString("[Segmentation] Polyline exported (%1 vertices)").arg(poly->size()));
 	}
 }

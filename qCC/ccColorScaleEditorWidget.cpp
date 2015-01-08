@@ -168,11 +168,11 @@ void ColorBarWidget::mousePressEvent(QMouseEvent* e)
 			double relativePos = -1.0;
 			if (m_orientation == Qt::Horizontal)
 			{
-				relativePos = (double)(e->pos().x()-contentRect.left())/(double)contentRect.width();
+				relativePos = static_cast<double>(e->pos().x()-contentRect.left())/contentRect.width();
 			}
 			else
 			{
-				relativePos = (double)(e->pos().y()-contentRect.top())/(double)contentRect.height();
+				relativePos = static_cast<double>(e->pos().y()-contentRect.top())/contentRect.height();
 			}
 
 			emit pointClicked(relativePos);
@@ -186,7 +186,7 @@ void ColorBarWidget::mousePressEvent(QMouseEvent* e)
 
 void ColorBarWidget::paintEvent(QPaintEvent* e)
 {
-	if (m_sliders && m_sliders->size()>=2)
+	if (m_sliders && m_sliders->size() >= 2)
 	{
 		QPainter painter(this);
 		painter.setPen(Qt::black);
@@ -599,7 +599,7 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 		return;
 
 	//look first if this position corresponds to an already existing slider
-	const double maxDist = (double)DEFAULT_SLIDER_SYMBOL_SIZE/(double)m_colorBarWidget->length();
+	const double maxDist = static_cast<double>(DEFAULT_SLIDER_SYMBOL_SIZE)/m_colorBarWidget->length();
 	for (int i=0; i<m_sliders->size(); ++i)
 	{
 		if (fabs(m_sliders->at(i)->getRelativePos() - relativePos) < maxDist)
@@ -609,8 +609,23 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 		}
 	}
 
-	//TODO: we should add it with the corresponding color!
-	ColorScaleElementSlider* slider = m_slidersWidget->addNewSlider(relativePos, Qt::white);
+	//determine the new slider defaut color
+	QColor color = Qt::white;
+	if (m_sliders->size() > 1)
+	{
+		QLinearGradient gradient(0,0,256,0);
+		//fill gradient with sliders
+		for (int i=0; i<m_sliders->size(); i++)
+		{
+			gradient.setColorAt(m_sliders->at(i)->getRelativePos(), m_sliders->at(i)->getColor());
+		}
+		//generate fake color bar (1 pixel high)
+		QPixmap pix(256,1);
+		QPainter painter(&pix);
+		painter.fillRect(pix.rect(), gradient);
+		color = pix.toImage().pixel(static_cast<int>(relativePos*255),0);
+	}
+	ColorScaleElementSlider* slider = m_slidersWidget->addNewSlider(relativePos, color);
 
 	if (slider)
 	{

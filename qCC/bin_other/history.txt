@@ -77,7 +77,8 @@ v2.6.1.beta 11/??/2014
 		- new operator 'INT' (integer part) to extract the integer part of scalar values
 	* Edit > Multiply/Scale
 		- polylines can now be scaled (just as clouds and meshes)
-
+	* Color Scale Editor:
+		- the color of new steps is now interpolated from the existing color ramp instead of being white by default
 - Bug fix:
 	- Delaunay 2D1/2 crashed on Windows 8
 	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1

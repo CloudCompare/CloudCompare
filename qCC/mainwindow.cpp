@@ -1841,7 +1841,15 @@ void MainWindow::doActionApplyScale()
 	{
 		ccHObject* ent = selectedEntities[i];
 		bool lockedVertices;
+		//try to get the underlying cloud (or the vertices set for a mesh)
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+		//otherwise we can look if the selected entity is a polyline
+		if (!cloud && ent->isA(CC_TYPES::POLY_LINE))
+		{
+			cloud = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(ent)->getAssociatedCloud());
+			if (!cloud || cloud->isAncestorOf(ent))
+				lockedVertices = true;
+		}
 		if (lockedVertices)
 		{
 			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
@@ -1851,7 +1859,6 @@ void MainWindow::doActionApplyScale()
 
 		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
 		{
-
 			if (firstCloud)
 			{
 				if (sX == sY && sX == sZ) //the following test only works for an 'isotropic' scale!
@@ -10651,7 +10658,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);
 	actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);
 	actionResampleWithOctree->setEnabled(atLeastOneCloud);
-	actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
 	actionApplyTransformation->setEnabled(atLeastOneEntity);
 	actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);

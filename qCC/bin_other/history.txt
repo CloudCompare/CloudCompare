@@ -74,6 +74,8 @@ v2.6.1.beta 11/??/2014
 		- '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
 	* SF Arithmetics:
 		- new operator 'INT' (integer part) to extract the integer part of scalar values
+	* Edit > Multiply/Scale
+		- polylines can now be scaled (just as clouds and meshes)
 
 - Bug fix:
 	- Delaunay 2D1/2 crashed on Windows 8

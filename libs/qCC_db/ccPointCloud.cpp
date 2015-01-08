@@ -1666,8 +1666,7 @@ void ccPointCloud::glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, boo
 	}
 	else
 	{
-		assert(m_rgbColors && m_rgbColors->chunkStartPtr(chunkIndex));
-		assert(m_currentDisplayedScalarField);
+		assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->chunkStartPtr(chunkIndex));
 		//we must decode normals in a dedicated static array
 		ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(chunkIndex);
 		colorType* _sfColors = s_rgbBuffer3ub;

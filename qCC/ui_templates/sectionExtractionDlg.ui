@@ -128,10 +128,10 @@
       <item>
        <widget class="QToolButton" name="validToolButton">
         <property name="toolTip">
-         <string>Confirm segmentation</string>
+         <string>Close the tool</string>
         </property>
         <property name="statusTip">
-         <string>Confirm segmentation</string>
+         <string>Close the tool</string>
         </property>
         <property name="text">
          <string>OK</string>

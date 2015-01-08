@@ -46,6 +46,7 @@
 
 //System
 #include <assert.h>
+#include <math.h>
 
 //default parameters
 static const colorType* s_defaultPolylineColor         = ccColor::yellow;
@@ -1407,7 +1408,8 @@ void ccSectionExtractionTool::extractPoints()
 	int xDim = (vertDim < 2 ? vertDim+1 : 0);
 	int yDim = (xDim    < 2 ? xDim+1    : 0);
 
-	double sectioThicknessSq = s_defaultSectionThickness * s_defaultSectionThickness;
+	//we consider half of the total thickness as points can be on both sides!
+	double sectioThicknessSq = pow(s_defaultSectionThickness/2,2.0);
 	bool error = false;
 	ccHObject* destEntity = 0;
 

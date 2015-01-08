@@ -121,6 +121,11 @@ protected slots:
 	//! Removes all displayed contour lines
 	void removeContourLines();
 
+	//! Accepts the dialog (if some conditions are met) and save settings
+	void testAndAccept();
+	//! Rejects the dialog (if some conditions are met)
+	void testAndReject();
+
 	//! Save persistent settings and 'accept' dialog
 	void saveSettings();
 
@@ -158,6 +163,9 @@ protected: //standard methods
 
 	//! Updates the grid
 	bool updateGrid(bool interpolateSF = false);
+
+	//! Tests if the dialog can be safely closed
+	bool canClose();
 
 protected: //raster grid related stuff
 

@@ -65,7 +65,8 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	generateRasterPushButton->setChecked(false);
 #endif
 
-	connect(buttonBox,					SIGNAL(accepted()),					this,	SLOT(saveSettings()));
+	connect(buttonBox,					SIGNAL(accepted()),					this,	SLOT(testAndAccept()));
+	connect(buttonBox,					SIGNAL(rejected()),					this,	SLOT(testAndReject()));
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateGridInfo()));
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
 	connect(emptyValueDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
@@ -411,6 +412,34 @@ void ccRasterizeTool::loadSettings()
 	resampleCloudCheckBox->setChecked(resampleCloud);
 	minVertexCountSpinBox->setValue(minVertexCount);
 	ignoreContourBordersCheckBox->setChecked(ignoreBorders);
+}
+
+bool ccRasterizeTool::canClose()
+{
+	if (!m_contourLines.empty())
+	{
+		//ask the user to confirm before it's tool late!
+		if (QMessageBox::question(this,"Unsaved contour lines","Contour lines have not been exported! Do you really want to close the tool?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+			return false;
+	}
+	return true;
+}
+
+void ccRasterizeTool::testAndAccept()
+{
+	if (!canClose())
+		return;
+	
+	saveSettings();
+	accept();
+}
+
+void ccRasterizeTool::testAndReject()
+{
+	if (!canClose())
+		return;
+	
+	reject();
 }
 
 void ccRasterizeTool::saveSettings()

@@ -666,22 +666,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>RasterizeToolDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>interpolateSFCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>scalarFieldProjection</receiver>
@@ -694,22 +678,6 @@
     <hint type="destinationlabel">
      <x>207</x>
      <y>308</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>RasterizeToolDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>143</x>
-     <y>682</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>552</x>
-     <y>351</y>
     </hint>
    </hints>
   </connection>

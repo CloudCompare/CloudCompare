@@ -603,7 +603,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	if (m_visible && drawInThisContext)
 	{
 		if (( !m_selected || !MACRO_SkipSelected(context) ) &&
-			( m_selected || !MACRO_SkipUnselected(context) ))
+			(  m_selected || !MACRO_SkipUnselected(context) ))
 		{
 			//apply default color (in case of)
 			glColor3ubv(context.pointsDefaultCol);

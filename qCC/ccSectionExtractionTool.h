@@ -201,6 +201,9 @@ protected:
 	//! Deselects the currently selected polyline
 	void selectPolyline(Section* poly, bool autoRefreshDisplay = true);
 
+	//! Updates the global clouds bounding-box
+	void updateCloudsBox();
+
 protected: //members
 
 	//! Pool of active sections
@@ -222,6 +225,9 @@ protected: //members
 	ccPolyline* m_editedPoly;
 	//! Segmentation polyline vertices
 	ccPointCloud* m_editedPolyVertices;
+
+	//! Global clouds bounding-box
+	ccBBox m_cloudsBox;
 };
 
 #endif //CC_SECTION_EXTRACTION_TOOL_HEADER

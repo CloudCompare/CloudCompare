@@ -99,7 +99,7 @@ bool ccCone::buildUp()
 	assert(m_triNormals);
 
 	//2 first points: centers of the top & bottom surfaces
-	CCVector3 bottomCenter = -CCVector3(-m_xOff,-m_yOff,m_height)/2;
+	CCVector3 bottomCenter = CCVector3(m_xOff,m_yOff,-m_height)/2;
 	CCVector3 topCenter = CCVector3(-m_xOff,-m_yOff,m_height)/2;
 	{
 		//bottom center

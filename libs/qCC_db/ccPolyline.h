@@ -162,6 +162,9 @@ public:
 	**/
 	bool initWith(ccPointCloud*& vertices, const ccPolyline& poly);
 
+	//! Shows an arrow in place of a given vertex
+	void showArrow(bool state, unsigned vertIndex, PointCoordinateType length);
+
 protected:
 
 	//inherited from ccHObject
@@ -188,6 +191,13 @@ protected:
 
 	//! Vertex marker width
 	int m_vertMarkWidth;
+
+	//! Whether to show an arrow or not
+	bool m_showArrow;
+	//! Arrow length
+	PointCoordinateType m_arrowLength;
+	//! Arrow index
+	unsigned m_arrowIndex;
 };
 
 #endif //CC_GL_POLYLINE_HEADER

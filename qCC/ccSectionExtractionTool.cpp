@@ -49,7 +49,7 @@
 #include <math.h>
 
 //default parameters
-static const colorType* s_defaultPolylineColor         = ccColor::yellow;
+static const colorType* s_defaultPolylineColor         = ccColor::magenta;
 static const colorType* s_defaultContourColor          = ccColor::green;
 static const colorType* s_defaultEditedPolylineColor   = ccColor::green;
 static const colorType* s_defaultSelectedPolylineColor = ccColor::red;
@@ -60,6 +60,9 @@ static const int        s_defaultSelectedPolylineWidth = 3;
 static unsigned s_polyExportGroupID    = 0;
 static unsigned s_profileExportGroupID = 0;
 static unsigned s_cloudExportGroupID   = 0;
+
+//default arrow size
+static const PointCoordinateType s_defaultArrowSize = 20;
 
 ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -355,6 +358,7 @@ bool ccSectionExtractionTool::start()
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
 	m_associatedWin->updateConstellationCenterAndZoom();
+	updateCloudsBox();
 	
 	enableSectionEditingMode(true);
 
@@ -378,6 +382,7 @@ void ccSectionExtractionTool::removeAllEntities()
 			}
 		}
 		m_clouds.clear();
+		m_cloudsBox.clear();
 	}
 }
 
@@ -482,6 +487,7 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 				++i;
 			}
 		}
+		updateCloudsBox();
 	}
 
 	if (m_associatedWin)
@@ -514,6 +520,16 @@ void ccSectionExtractionTool::stop(bool accepted)
 	ccOverlayDialog::stop(accepted);
 }
 
+void ccSectionExtractionTool::updateCloudsBox()
+{
+	m_cloudsBox.clear();
+
+	for (int i=0; i<m_clouds.size(); ++i)
+	{
+		if (m_clouds[i].entity)
+			m_cloudsBox += m_clouds[i].entity->getBB();
+	}
+}
 bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
 {
 	if (!inputPoly)
@@ -543,28 +559,15 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 		int VP[4];
 		m_associatedWin->getViewportArray(VP);
 
-		//get default altitude from the cloud(s) bouding-box
-		PointCoordinateType defaultZ = 0;
+		//working dimension
 		int vertDim = vertAxisComboBox->currentIndex();
 		assert(vertDim >= 0 && vertDim < 3);
+
+		//get default altitude from the cloud(s) bouding-box
+		PointCoordinateType defaultZ = 0;
+		if (m_cloudsBox.isValid())
 		{
-			bool validZ = false;
-			for (int i=0; i<m_clouds.size(); ++i)
-			{
-				if (m_clouds[i].entity)
-				{
-					PointCoordinateType maxZ = m_clouds.front().entity->getBB().maxCorner()[vertDim];
-					if (validZ)
-					{
-						defaultZ = std::max(defaultZ, maxZ);
-					}
-					else
-					{
-						validZ = true;
-						defaultZ = maxZ;
-					}
-				}
-			}
+			defaultZ = m_cloudsBox.maxCorner()[vertDim];
 		}
 
 		//duplicate polyline
@@ -757,7 +760,10 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 		}
 
 		//we replace last point by the current one
+		assert(vertCount >= 2);
 		CCVector3* lastP = const_cast<CCVector3*>(m_editedPolyVertices->getPointPersistentPtr(vertCount-1));
+		CCVector3* lastQ = const_cast<CCVector3*>(m_editedPolyVertices->getPointPersistentPtr(vertCount-2));
+		PointCoordinateType tipLength = (*lastQ - *lastP).norm();
 		*lastP = P;
 		//and add a new (equivalent) one
 		m_editedPolyVertices->addPoint(P);
@@ -766,6 +772,8 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 			ccLog::Error("Out of memory!");
 			return;
 		}
+		PointCoordinateType defaultArrowSize = std::min(s_defaultArrowSize, tipLength/2);
+		m_editedPoly->showArrow(true,vertCount-1,defaultArrowSize);
 	}
 
 	if (m_associatedWin)
@@ -967,6 +975,18 @@ void ccSectionExtractionTool::generateOrthoSections()
 
 	PointCoordinateType length = poly->computeLength();
 
+	//show arrow
+	{
+		assert(vertCount >= 2);
+		const CCVector3* lastQ = poly->getPoint(vertCount-2);
+		const CCVector3* lastP = poly->getPoint(vertCount-1);
+		PointCoordinateType tipLength = (*lastQ - *lastP).norm();
+		PointCoordinateType defaultArrowSize = m_associatedWin->computeActualPixelSize() * s_defaultArrowSize;
+		defaultArrowSize = std::min(defaultArrowSize, tipLength/2);
+		poly->showArrow(true,poly->size()-1,defaultArrowSize);
+		m_associatedWin->redraw();
+	}
+
 	//display dialog
 	ccOrthoSectionGenerationDlg osgDlg(MainWindow::TheInstance());
 	osgDlg.setPathLength(length);
@@ -976,125 +996,128 @@ void ccSectionExtractionTool::generateOrthoSections()
 		osgDlg.setGenerationStep(s_orthoSectionStep);
 	osgDlg.setAutoSaveAndRemove(s_autoSaveAndRemoveGeneratrix);
 
-	if (!osgDlg.exec())
-		return;
-
-	//now generate the orthogonal sections
-	s_orthoSectionStep = osgDlg.getGenerationStep();
-	s_orthoSectionWidth = osgDlg.getSectionsWidth();
-	s_autoSaveAndRemoveGeneratrix = osgDlg.autoSaveAndRemove();
-
-	if (s_autoSaveAndRemoveGeneratrix)
+	if (osgDlg.exec())
 	{
-		//save
-		if (!m_selectedPoly->isInDB)
+		//now generate the orthogonal sections
+		s_orthoSectionStep = osgDlg.getGenerationStep();
+		s_orthoSectionWidth = osgDlg.getSectionsWidth();
+		s_autoSaveAndRemoveGeneratrix = osgDlg.autoSaveAndRemove();
+
+		if (s_autoSaveAndRemoveGeneratrix)
 		{
-			ccHObject* destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
-			assert(destEntity);
-			destEntity->addChild(m_selectedPoly->entity);
-			m_selectedPoly->isInDB = true;
-			MainWindow::TheInstance()->addToDB(m_selectedPoly->entity,false,false);
-		}
-		//and remove
-		deleteSelectedPolyline();
-	}
-
-	//set new 'undo' step
-	addUndoStep();
-
-	//normal to the plane
-	CCVector3 N(0,0,0);
-	int vertDim = vertAxisComboBox->currentIndex();
-	assert(vertDim >= 0 && vertDim < 3);
-	{
-		N.u[vertDim] = 1.0;
-	}
-
-	//curvilinear position
-	double s = 0;
-	//current length
-	double l = 0;
-	unsigned maxCount = vertCount;
-	if (!poly->isClosed())
-		maxCount--;
-	unsigned polyIndex = 0;
-	for (unsigned i=0; i<maxCount; ++i)
-	{
-		const CCVector3* A = poly->getPoint(i);
-		const CCVector3* B = poly->getPoint((i+1) % vertCount);
-		CCVector3 AB = (*B-*A);
-		AB.u[vertDim] = 0;
-		CCVector3 nAB = AB.cross(N);
-		nAB.normalize();
-		
-		double lAB = (*B-*A).norm();
-		while (s < l + lAB)
-		{
-			double s_local = s - l;
-			assert(s_local < lAB);
-
-			//create orhogonal polyline
-			ccPointCloud* vertices = new ccPointCloud("vertices");
-			ccPolyline* orthoPoly = new ccPolyline(vertices);
-			orthoPoly->addChild(vertices);
-			if (vertices->reserve(2) && orthoPoly->reserve(2))
+			//save
+			if (!m_selectedPoly->isInDB)
 			{
-				//intersection point
-				CCVector3 I = *A + AB * (s_local / lAB);
-				CCVector3 I1 = I + nAB * static_cast<PointCoordinateType>(s_orthoSectionWidth/2);
-				CCVector3 I2 = I - nAB * static_cast<PointCoordinateType>(s_orthoSectionWidth/2);
+				ccHObject* destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
+				assert(destEntity);
+				destEntity->addChild(m_selectedPoly->entity);
+				m_selectedPoly->isInDB = true;
+				MainWindow::TheInstance()->addToDB(m_selectedPoly->entity,false,false);
+			}
+			//and remove
+			deleteSelectedPolyline();
+		}
 
-				vertices->addPoint(I1);
-				orthoPoly->addPointIndex(0);
-				vertices->addPoint(I2);
-				orthoPoly->addPointIndex(1);
+		//set new 'undo' step
+		addUndoStep();
 
-				orthoPoly->setClosed(false);
-				orthoPoly->set2DMode(false);
+		//normal to the plane
+		CCVector3 N(0,0,0);
+		int vertDim = vertAxisComboBox->currentIndex();
+		assert(vertDim >= 0 && vertDim < 3);
+		{
+			N.u[vertDim] = 1.0;
+		}
 
-				//set default display style
-				vertices->setVisible(false);
-				orthoPoly->showColors(true);
-				orthoPoly->setColor(s_defaultPolylineColor);
-				orthoPoly->setWidth(s_defaultPolylineWidth);
-				if (!m_clouds.isEmpty())
-					orthoPoly->setDisplay_recursive(m_clouds.front().originalDisplay); //set the same 'default' display as the cloud
-				orthoPoly->setName(QString("%1.%2").arg(poly->getName()).arg(++polyIndex));
+		//curvilinear position
+		double s = 0;
+		//current length
+		double l = 0;
+		unsigned maxCount = vertCount;
+		if (!poly->isClosed())
+			maxCount--;
+		unsigned polyIndex = 0;
+		for (unsigned i=0; i<maxCount; ++i)
+		{
+			const CCVector3* A = poly->getPoint(i);
+			const CCVector3* B = poly->getPoint((i+1) % vertCount);
+			CCVector3 AB = (*B-*A);
+			AB.u[vertDim] = 0;
+			CCVector3 nAB = AB.cross(N);
+			nAB.normalize();
+		
+			double lAB = (*B-*A).norm();
+			while (s < l + lAB)
+			{
+				double s_local = s - l;
+				assert(s_local < lAB);
 
-				//add meta data (for Mascaret export)
+				//create orhogonal polyline
+				ccPointCloud* vertices = new ccPointCloud("vertices");
+				ccPolyline* orthoPoly = new ccPolyline(vertices);
+				orthoPoly->addChild(vertices);
+				if (vertices->reserve(2) && orthoPoly->reserve(2))
 				{
-					orthoPoly->setMetaData(MascaretFilter::KeyUpDir()         ,QVariant(vertDim));
-					orthoPoly->setMetaData(MascaretFilter::KeyAbscissa()      ,QVariant(s));
-					orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".x"   ,QVariant(static_cast<double>(I.x)));
-					orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".y"   ,QVariant(static_cast<double>(I.y)));
-					orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".z"   ,QVariant(static_cast<double>(I.z)));
-					orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".x",QVariant(static_cast<double>(nAB.x)));
-					orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".y",QVariant(static_cast<double>(nAB.y)));
-					orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".z",QVariant(static_cast<double>(nAB.z)));
-				}
+					//intersection point
+					CCVector3 I = *A + AB * (s_local / lAB);
+					CCVector3 I1 = I + nAB * static_cast<PointCoordinateType>(s_orthoSectionWidth/2);
+					CCVector3 I2 = I - nAB * static_cast<PointCoordinateType>(s_orthoSectionWidth/2);
 
-				if (!addPolyline(orthoPoly,false))
+					vertices->addPoint(I1);
+					orthoPoly->addPointIndex(0);
+					vertices->addPoint(I2);
+					orthoPoly->addPointIndex(1);
+
+					orthoPoly->setClosed(false);
+					orthoPoly->set2DMode(false);
+
+					//set default display style
+					vertices->setVisible(false);
+					orthoPoly->showColors(true);
+					orthoPoly->setColor(s_defaultPolylineColor);
+					orthoPoly->setWidth(s_defaultPolylineWidth);
+					if (!m_clouds.isEmpty())
+						orthoPoly->setDisplay_recursive(m_clouds.front().originalDisplay); //set the same 'default' display as the cloud
+					orthoPoly->setName(QString("%1.%2").arg(poly->getName()).arg(++polyIndex));
+
+					//add meta data (for Mascaret export)
+					{
+						orthoPoly->setMetaData(MascaretFilter::KeyUpDir()         ,QVariant(vertDim));
+						orthoPoly->setMetaData(MascaretFilter::KeyAbscissa()      ,QVariant(s));
+						orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".x"   ,QVariant(static_cast<double>(I.x)));
+						orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".y"   ,QVariant(static_cast<double>(I.y)));
+						orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".z"   ,QVariant(static_cast<double>(I.z)));
+						orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".x",QVariant(static_cast<double>(nAB.x)));
+						orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".y",QVariant(static_cast<double>(nAB.y)));
+						orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".z",QVariant(static_cast<double>(nAB.z)));
+					}
+
+					if (!addPolyline(orthoPoly,false))
+					{
+						delete orthoPoly;
+						orthoPoly = 0;
+					}
+				}
+				else
 				{
 					delete orthoPoly;
-					orthoPoly = 0;
+					ccLog::Error("Not enough memory!");
+					i = vertCount;
+					break;
 				}
-			}
-			else
-			{
-				delete orthoPoly;
-				ccLog::Error("Not enough memory!");
-				i = vertCount;
-				break;
+
+				s += s_orthoSectionStep;
 			}
 
-			s += s_orthoSectionStep;
+			l += lAB;
 		}
 
-		l += lAB;
+		if (m_associatedWin)
+			m_associatedWin->redraw();
 	}
 
-	if (m_associatedWin)
-		m_associatedWin->redraw();
+	poly->showArrow(false,0,0);
+	m_associatedWin->redraw();
 }
 
 ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, QString defaultName)

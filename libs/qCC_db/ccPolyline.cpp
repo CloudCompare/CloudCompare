@@ -22,6 +22,7 @@
 
 //Local
 #include "ccPointCloud.h"
+#include "ccCone.h"
 
 //CCLib
 #include <Neighbourhood.h>
@@ -40,6 +41,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	showVertices(false);
 	setVertexMarkerWidth(3);
 	setWidth(0);
+	showArrow(false,0,0);
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
@@ -93,6 +95,7 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
 	setVisible(poly.isVisible());
+	showArrow(m_showArrow,m_arrowIndex,m_arrowLength);
 	
 	return success;
 }
@@ -105,6 +108,13 @@ void ccPolyline::set2DMode(bool state)
 void ccPolyline::setForeground(bool state)
 {
 	m_foreground = state;
+}
+
+void ccPolyline::showArrow(bool state, unsigned vertIndex, PointCoordinateType length)
+{
+	m_showArrow = state;
+	m_arrowIndex = vertIndex;
+	m_arrowLength = length;
 }
 
 ccBBox ccPolyline::getMyOwnBB()
@@ -129,6 +139,9 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 	//(and we hope the vertices will be updated as well!)
 	m_validBB = false;
 }
+
+//unit arrow
+static QSharedPointer<ccCone> c_unitArrow(0);
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -163,6 +176,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glColor3ubv(m_rgbColor);
 
 		//display polyline
+		if (vertCount > 1)
 		{
 			if (m_width != 0)
 			{
@@ -176,6 +190,60 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccGL::Vertex3v(getPoint(i)->u);
 			}
 			glEnd();
+
+			//display arrow
+			if (m_showArrow && m_arrowIndex < vertCount && (m_arrowIndex > 0 || m_isClosed))
+			{
+				const CCVector3* P0 = getPoint(m_arrowIndex == 0 ? vertCount-1 : m_arrowIndex-1);
+				const CCVector3* P1 = getPoint(m_arrowIndex);
+				//direction of the last polyline chunk
+				CCVector3 u = *P1 - *P0;
+				u.normalize();
+
+				if (m_mode2D)
+				{
+					u *= -m_arrowLength;
+					static const PointCoordinateType s_defaultArrowAngle = static_cast<PointCoordinateType>(15.0 * CC_DEG_TO_RAD);
+					static const PointCoordinateType cost = cos(s_defaultArrowAngle);
+					static const PointCoordinateType sint = sin(s_defaultArrowAngle);
+					CCVector3 A(cost * u.x - sint * u.y,  sint * u.x + cost * u.y, 0);
+					CCVector3 B(cost * u.x + sint * u.y, -sint * u.x + cost * u.y, 0);
+					glBegin(GL_POLYGON);
+					ccGL::Vertex3v((A+*P1).u);
+					ccGL::Vertex3v((B+*P1).u);
+					ccGL::Vertex3v((  *P1).u);
+					glEnd();
+				}
+				else
+				{
+					if (!c_unitArrow)
+					{
+						c_unitArrow = QSharedPointer<ccCone>(new ccCone(0.5,0.0,1.0));
+						c_unitArrow->showColors(true);
+						c_unitArrow->showNormals(false);
+						c_unitArrow->setVisible(true);
+						c_unitArrow->setEnabled(true);
+					}
+					if (colorsShown())
+						c_unitArrow->setTempColor(m_rgbColor);
+					else
+						c_unitArrow->setTempColor(context.pointsDefaultCol);
+					//build-up unit arrow own 'context'
+					CC_DRAW_CONTEXT markerContext = context;
+					markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+					markerContext._win = 0;
+
+					glMatrixMode(GL_MODELVIEW);
+					glPushMatrix();
+					ccGL::Translate(P1->x,P1->y,P1->z);
+					ccGLMatrix rotMat = ccGLMatrix::FromToRotation(CCVector3(0,0,1),u);
+					glMultMatrixf(rotMat.inverse().data());
+					glScalef(m_arrowLength,m_arrowLength,m_arrowLength);
+					ccGL::Translate(0.0,0.0,-0.5);
+					c_unitArrow->draw(markerContext);
+					glPopMatrix();
+				}
+			}
 
 			if (m_width != 0)
 			{

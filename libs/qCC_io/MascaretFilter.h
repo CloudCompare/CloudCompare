@@ -28,8 +28,8 @@ class QCC_IO_LIB_API MascaretFilter : public FileIOFilter
 public:
 
 	//static accessors
-	static inline QString GetFileFilter() { return "Mascaret profile (*.txt)"; }
-	static inline QString GetDefaultExtension() { return QString("txt"); }
+	static inline QString GetFileFilter() { return "(Geo-)Mascaret profile (*.georef)"; }
+	static inline QString GetDefaultExtension() { return QString("georef"); }
 
 	//inherited from FileIOFilter
 	virtual bool exportSupported() const { return true; }

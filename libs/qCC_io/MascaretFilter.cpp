@@ -72,7 +72,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	//look for either a cloud or a mesh
+	//look for polylines only
 	std::vector<ccPolyline*> profiles;
 	try
 	{
@@ -122,7 +122,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		assert(false);
 	}
 
-	//sanitize the 'bief' (pound) name
+	//sanitize the 'bief' (reach) name
 	biefName = MakeMascaretName(biefName);
 
 	//sort the sections by their abscissa
@@ -155,6 +155,14 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 	for (size_t i=0; i<profiles.size(); ++i)
 	{
 		ccPolyline* poly = profiles[i];
+		unsigned vertCount = poly ? poly->size() : 0;
+		if (vertCount < 0)
+		{
+			//invalid size
+			ccLog::Warning(QString("[Mascaret] Polyline '%1' has not enough vertices").arg(poly->getName()));
+			continue;
+		}
+		
 		bool ok = true;
 		int upDir = 2;
 		double absc = 0.0;
@@ -181,7 +189,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		}
 		if (!ok)
 		{
-			ccLog::Warning(QString("Polyline '%1' has not the right meta-data to be saved in a Mascaret file").arg(poly->getName()));
+			ccLog::Warning(QString("[Mascaret] Polyline '%1' has not the right meta-data to be saved in a Mascaret file").arg(poly->getName()));
 			continue;
 		}
 
@@ -191,11 +199,29 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		CCVector3 C = CCVector3::fromArray(Cd.u);
 		CCVector3 U = CCVector3::fromArray(Ud.u);
 		U.normalize();
-		
-		//write header
-		outFile << "PROFIL " << biefName << " " << profileName << " " << absc << endl;
 
-		for (unsigned j=0; j<poly->size(); ++j)
+		//write header
+		outFile << "PROFIL " << biefName << " " << profileName << " " << absc;
+#define SAVE_AS_GEO_MASCARET
+#ifdef SAVE_AS_GEO_MASCARET
+		int xDir = upDir == 2 ? 0 : upDir+1;
+		int yDir =  xDir == 2 ? 0 :  xDir+1;
+		//for "geo"-mascaret, we add some more information:
+		// - first point
+		const CCVector3* firstP = poly->getPoint(0);
+		outFile << " ";
+		outFile << firstP->u[xDir] << " " << firstP->u[yDir];
+		// - last point
+		const CCVector3*  lastP = poly->getPoint(vertCount-1);
+		outFile << " ";
+		outFile <<  lastP->u[xDir] << " " <<  lastP->u[yDir];
+		// - profile/path intersection point
+		outFile << " AXE ";
+		outFile << Cd.u[xDir] << " " << Cd.u[yDir];
+#endif
+		outFile << endl;
+
+		for (unsigned j=0; j<vertCount; ++j)
 		{
 			const CCVector3* P = poly->getPoint(j);
 
@@ -205,7 +231,14 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 			Q.y = P->u[upDir];
 			Q.z = 0;
 
-			outFile << Q.x << " " << Q.y << " " << type << endl;
+			outFile << Q.x << " " << Q.y << " " << type;
+#ifdef SAVE_AS_GEO_MASCARET
+			//for "geo"-mascaret, we add some more information:
+			// - real coordinates of the point
+			outFile << " ";
+			outFile << P->u[xDir] << " " << P->u[yDir];
+#endif
+			outFile << endl;
 		}
 
 		result = CC_FERR_NO_ERROR;

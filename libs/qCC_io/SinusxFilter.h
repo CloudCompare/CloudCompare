@@ -15,30 +15,28 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MASCARET_FILTER_HEADER
-#define CC_MASCARET_FILTER_HEADER
+#ifndef CC_SINUSX_FILTER_HEADER
+#define CC_SINUSX_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-//! Mascaret profile I/O filter
-/** See http://www.opentelemac.org/
-**/
-class QCC_IO_LIB_API MascaretFilter : public FileIOFilter
+//! Sinusx curve I/O filter
+class QCC_IO_LIB_API SinusxFilter : public FileIOFilter
 {
 public:
 
 	//static accessors
-	static inline QString GetFileFilter() { return "(Geo-)Mascaret profile (*.georef)"; }
-	static inline QString GetDefaultExtension() { return "georef"; }
+	static inline QString GetFileFilter() { return "Sinusx curve (*.sinusx)"; }
+	static inline QString GetDefaultExtension() { return QString("sinusx"); }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return true; }
 	virtual bool exportSupported() const { return true; }
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
 	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
 	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const { return false; }
+	virtual bool canLoadExtension(QString upperCaseExt) const;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 };
 
-#endif //CC_MASCARET_FILTER_HEADER
+#endif //CC_SINUSX_FILTER_HEADER

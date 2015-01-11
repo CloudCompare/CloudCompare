@@ -34,9 +34,6 @@
 //qCC_gl
 #include <ccGLWindow.h>
 
-//qCC_IO
-#include <MascaretFilter.h>
-
 //CCLib
 #include <ReferenceCloud.h>
 
@@ -1082,14 +1079,14 @@ void ccSectionExtractionTool::generateOrthoSections()
 
 					//add meta data (for Mascaret export)
 					{
-						orthoPoly->setMetaData(MascaretFilter::KeyUpDir()         ,QVariant(vertDim));
-						orthoPoly->setMetaData(MascaretFilter::KeyAbscissa()      ,QVariant(s));
-						orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".x"   ,QVariant(static_cast<double>(I.x)));
-						orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".y"   ,QVariant(static_cast<double>(I.y)));
-						orthoPoly->setMetaData(MascaretFilter::KeyCenter()+".z"   ,QVariant(static_cast<double>(I.z)));
-						orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".x",QVariant(static_cast<double>(nAB.x)));
-						orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".y",QVariant(static_cast<double>(nAB.y)));
-						orthoPoly->setMetaData(MascaretFilter::KeyDirection()+".z",QVariant(static_cast<double>(nAB.z)));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyUpDir()               ,QVariant(vertDim));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyAbscissa()            ,QVariant(s));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyPrefixCenter()+".x"   ,QVariant(static_cast<double>(I.x)));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyPrefixCenter()+".y"   ,QVariant(static_cast<double>(I.y)));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyPrefixCenter()+".z"   ,QVariant(static_cast<double>(I.z)));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyPrefixDirection()+".x",QVariant(static_cast<double>(nAB.x)));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyPrefixDirection()+".y",QVariant(static_cast<double>(nAB.y)));
+						orthoPoly->setMetaData(ccPolyline::MetaKeyPrefixDirection()+".z",QVariant(static_cast<double>(nAB.z)));
 					}
 
 					if (!addPolyline(orthoPoly,false))

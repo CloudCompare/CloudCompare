@@ -165,6 +165,29 @@ public:
 	//! Shows an arrow in place of a given vertex
 	void showArrow(bool state, unsigned vertIndex, PointCoordinateType length);
 
+public: //meta-data keys
+	
+	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)
+	/** Expected value: 0(=X), 1(=Y) or 2(=Z) as int
+	**/
+	static QString MetaKeyUpDir()			{ return "up.dir"; }
+	//! Meta data key: contour plot constant altitude (for contour plots, etc.)
+	/** Expected value: altitude as double
+	**/
+	static QString MetaKeyConstAltitude()	{ return "contour.altitude"; }
+	//! Meta data key: profile abscissa along generatrix
+	static QString MetaKeyAbscissa()		{ return "profile.abscissa"; }
+	//! Meta data key (prefix): intersection point between profile and its generatrix
+	/** Expected value: 3D vector
+		\warning: must be followed by '.x', '.y' or '.z'
+	**/
+	static QString MetaKeyPrefixCenter()	{ return "profile.center"; }
+	//! Meta data key (prefix): generatrix orientation at the point of intersection with the profile
+	/** Expected value: 3D vector
+		\warning: must be followed by '.x', '.y' or '.z'
+	**/
+	static QString MetaKeyPrefixDirection()	{ return "profile.direction"; }
+
 protected:
 
 	//inherited from ccHObject

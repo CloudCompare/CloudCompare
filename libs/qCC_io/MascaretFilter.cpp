@@ -72,19 +72,43 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	//look for polylines only
+	//look for valid profiles
 	std::vector<ccPolyline*> profiles;
 	try
 	{
+		//get all polylines
+		std::vector<ccPolyline*> candidates;
 		if (entity->isA(CC_TYPES::POLY_LINE))
 		{
-			profiles.push_back(static_cast<ccPolyline*>(entity));
+			candidates.push_back(static_cast<ccPolyline*>(entity));
 		}
 		else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
 				if (entity->getChild(i) && entity->getChild(i)->isA(CC_TYPES::POLY_LINE))
-					profiles.push_back(static_cast<ccPolyline*>(entity->getChild(i)));
+					candidates.push_back(static_cast<ccPolyline*>(entity->getChild(i)));
+		}
+		
+		//then keep the valid profiles only
+		for (size_t i=0; i<candidates.size(); ++i)
+		{
+			ccPolyline* poly = candidates[i];
+			if (	!poly->hasMetaData(ccPolyline::MetaKeyUpDir())
+				||	!poly->hasMetaData(ccPolyline::MetaKeyAbscissa())
+				||	!poly->hasMetaData(ccPolyline::MetaKeyPrefixCenter()+".x")
+				||	!poly->hasMetaData(ccPolyline::MetaKeyPrefixCenter()+".y")
+				||	!poly->hasMetaData(ccPolyline::MetaKeyPrefixCenter()+".z")
+				||	!poly->hasMetaData(ccPolyline::MetaKeyPrefixDirection()+".x")
+				||	!poly->hasMetaData(ccPolyline::MetaKeyPrefixDirection()+".y")
+				||	!poly->hasMetaData(ccPolyline::MetaKeyPrefixDirection()+".z") )
+			{
+				ccLog::Warning(QString("[Mascaret] Polyline '%1' is not a valid profile (missing meta-data)").arg(poly->getName()));
+				break;
+			}
+			else
+			{
+				profiles.push_back(poly);
+			}
 		}
 	}
 	catch(std::bad_alloc)
@@ -131,10 +155,10 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		for (size_t i=0; i<profiles.size()-1; ++i)
 		{
 			size_t smallestIndex = i;
-			double smallestAbscissa = profiles[i]->getMetaData(KeyAbscissa()).toDouble();
+			double smallestAbscissa = profiles[i]->getMetaData(ccPolyline::MetaKeyAbscissa()).toDouble();
 			for (size_t j=i+1; j<profiles.size(); ++j)
 			{
-				double a = profiles[j]->getMetaData(KeyAbscissa()).toDouble();
+				double a = profiles[j]->getMetaData(ccPolyline::MetaKeyAbscissa()).toDouble();
 				if (a < smallestAbscissa)
 				{
 					smallestAbscissa = a;
@@ -163,6 +187,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 			continue;
 		}
 		
+		//decode meta-data
 		bool ok = true;
 		int upDir = 2;
 		double absc = 0.0;
@@ -170,26 +195,26 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		CCVector3d Ud(0,0,0);
 		while (true) //fake loop for easy break
 		{
-			upDir = poly->getMetaData(KeyUpDir()).toInt(&ok);
+			upDir = poly->getMetaData(ccPolyline::MetaKeyUpDir()).toInt(&ok);
 			if (!ok) break;
-			absc  = poly->getMetaData(KeyAbscissa()).toDouble(&ok);
+			absc  = poly->getMetaData(ccPolyline::MetaKeyAbscissa()).toDouble(&ok);
 			if (!ok) break;
-			Cd.x  = poly->getMetaData(KeyCenter()+".x").toDouble(&ok);
+			Cd.x  = poly->getMetaData(ccPolyline::MetaKeyPrefixCenter()+".x").toDouble(&ok);
 			if (!ok) break;
-			Cd.y  = poly->getMetaData(KeyCenter()+".y").toDouble(&ok);
+			Cd.y  = poly->getMetaData(ccPolyline::MetaKeyPrefixCenter()+".y").toDouble(&ok);
 			if (!ok) break;
-			Cd.z  = poly->getMetaData(KeyCenter()+".z").toDouble(&ok);
+			Cd.z  = poly->getMetaData(ccPolyline::MetaKeyPrefixCenter()+".z").toDouble(&ok);
 			if (!ok) break;
-			Ud.x  = poly->getMetaData(KeyDirection()+".x").toDouble(&ok);
+			Ud.x  = poly->getMetaData(ccPolyline::MetaKeyPrefixDirection()+".x").toDouble(&ok);
 			if (!ok) break;
-			Ud.y  = poly->getMetaData(KeyDirection()+".y").toDouble(&ok);
+			Ud.y  = poly->getMetaData(ccPolyline::MetaKeyPrefixDirection()+".y").toDouble(&ok);
 			if (!ok) break;
-			Ud.z  = poly->getMetaData(KeyDirection()+".z").toDouble(&ok);
+			Ud.z  = poly->getMetaData(ccPolyline::MetaKeyPrefixDirection()+".z").toDouble(&ok);
 			break;
 		}
 		if (!ok)
 		{
-			ccLog::Warning(QString("[Mascaret] Polyline '%1' has not the right meta-data to be saved in a Mascaret file").arg(poly->getName()));
+			ccLog::Warning(QString("[Mascaret] At least one of the meta-data entry of polyline '%1' is invalid?!").arg(poly->getName()));
 			continue;
 		}
 

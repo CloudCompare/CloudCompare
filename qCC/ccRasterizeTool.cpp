@@ -1989,11 +1989,14 @@ void ccRasterizeTool::generateContours()
 						if (poly->size() > 1)
 						{
 							poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
+
 							poly->setWidth(1);
 							poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
 							poly->setColor(ccColor::darkGrey);
 							poly->showColors(true);
 							vertices->setEnabled(false);
+							//add the 'const altitude' meta-data as well
+							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(z));
 						
 							if (m_window)
 								m_window->addToOwnDB(poly);

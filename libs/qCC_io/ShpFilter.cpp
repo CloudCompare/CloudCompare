@@ -1678,7 +1678,11 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 								trans.setTranslation(T);
 								ccPolyline* poly = it.key();
 								if (poly)
+								{
 									poly->applyGLTransformation_recursive(&trans);
+									//add the 'const altitude' meta-data as well
+									poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(z));
+								}
 							}
 						}
 					}

@@ -48,6 +48,7 @@
 #include "DxfFilter.h"
 #include "ShpFilter.h"
 #include "MascaretFilter.h"
+#include "SinusxFilter.h"
 
 //Qt
 #include <QFileInfo>
@@ -113,6 +114,7 @@ void FileIOFilter::InitInternalFilters()
 	Register(Shared(new IcmFilter()));
 	Register(Shared(new DepthMapFileFilter()));
 	Register(Shared(new MascaretFilter()));
+	Register(Shared(new SinusxFilter()));
 }
 
 void FileIOFilter::Register(Shared filter)

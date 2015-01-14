@@ -330,6 +330,11 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		assert(false);
 		return false;
 	}
+	if (std::find(m_children.begin(),m_children.end(),child) != m_children.end())
+	{
+		ccLog::ErrorDebug("[ccHObject::addChild] Object is already a child!");
+		return false;
+	}
 
 	if (isLeaf())
 	{
@@ -345,7 +350,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		else
 			m_children.insert(m_children.begin()+insertIndex,child);
 	}
-	catch(std::bad_alloc)
+	catch (std::bad_alloc)
 	{
 		//not enough memory!
 		return false;

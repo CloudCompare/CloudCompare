@@ -96,8 +96,6 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			{
 				setTriNormsTable(normsTable);
 				assert(m_triNormals);
-				//primitives must have their normal table as child!
-				addChild(m_triNormals);
 			}
 
 			for (unsigned i=0; i<primTriNormCount; ++i)
@@ -277,8 +275,6 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 		{
 			setTriNormsTable(normsTable);
 			assert(m_triNormals);
-			//primitives must have their normal table as child!
-			addChild(m_triNormals);
 		}
 	}
 

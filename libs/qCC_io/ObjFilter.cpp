@@ -987,20 +987,17 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			{
 				baseMesh->setTriNormsTable(normals);
 				baseMesh->showTriNorms(true);
-				baseMesh->addChild(normals);
 			}
 			if (materials)
 			{
 				baseMesh->setMaterialSet(materials);
 				baseMesh->showMaterials(true);
-				baseMesh->addChild(materials);
 			}
 			if (texCoords)
 			{
 				if (materials)
 				{
 					baseMesh->setTexCoordinatesTable(texCoords);
-					baseMesh->addChild(texCoords);
 				}
 				else
 				{

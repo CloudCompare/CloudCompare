@@ -301,7 +301,6 @@ public:
 			{
 				triNormsTable = new NormsIndexesTableType(); 
 				m_faces->setTriNormsTable(triNormsTable);
-				m_faces->addChild(triNormsTable);
 				firstTime = true;
 			}
 

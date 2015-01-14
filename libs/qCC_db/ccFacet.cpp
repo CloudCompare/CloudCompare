@@ -333,7 +333,6 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 						for (unsigned i=0; i<triCount; ++i)
 							m_polygonMesh->addTriangleNormalIndexes(0,0,0); //all triangles will have the same normal!
 						m_polygonMesh->showNormals(true);
-						m_polygonMesh->addChild(normsTable);
 						m_polygonMesh->setLocked(true);
 						m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
 						m_contourVertices->addChild(m_polygonMesh);

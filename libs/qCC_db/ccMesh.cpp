@@ -428,9 +428,16 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoRel
 
 	m_triNormals = triNormsTable;
 	if (m_triNormals)
+	{
 		m_triNormals->link();
+		int childIndex = getChildIndex(m_triNormals);
+		if (childIndex < 0)
+			addChild(m_triNormals);
+	}
 	else
-		removePerTriangleNormalIndexes();
+	{
+		removePerTriangleNormalIndexes(); //auto-remove per-triangle indexes (we don't need them anymore)
+	}
 }
 
 void ccMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMaterialSet/*=true*/)
@@ -449,7 +456,16 @@ void ccMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMater
 
 	m_materials = materialSet;
 	if (m_materials)
+	{
 		m_materials->link();
+		int childIndex = getChildIndex(m_materials);
+		if (childIndex < 0)
+			addChild(m_materials);
+	}
+	else
+	{
+		removePerTriangleMtlIndexes(); //auto-remove per-triangle indexes (we don't need them anymore)
+	}
 
 	//update display (for textures!)
 	setDisplay(m_currentDisplay);
@@ -977,7 +993,6 @@ bool ccMesh::merge(const ccMesh* mesh)
 					{
 						NormsIndexesTableType* normsTable = new NormsIndexesTableType();
 						setTriNormsTable(normsTable);
-						addChild(normsTable);
 					}
 					assert(m_triNormals);
 					unsigned triNormalsCountBefore = m_triNormals->currentSize();
@@ -1037,7 +1052,6 @@ bool ccMesh::merge(const ccMesh* mesh)
 					{
 						ccMaterialSet* set = new ccMaterialSet("materials");
 						setMaterialSet(set);
-						addChild(set);
 					}
 					assert(m_materials);
 					size_t mtlCountBefore = m_materials->size();
@@ -1101,7 +1115,6 @@ bool ccMesh::merge(const ccMesh* mesh)
 					{
 						TextureCoordsContainer* texCoordsTable = new TextureCoordsContainer;
 						setTexCoordinatesTable(texCoordsTable);
-						addChild(texCoordsTable);
 					}
 					assert(m_texCoords);
 					unsigned texCoordCountBefore = m_texCoords->currentSize();
@@ -2224,7 +2237,6 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				{
 					newTriNormals->resize(newTriNormals->currentSize()); //smaller so it should always be ok!
 					newMesh->setTriNormsTable(newTriNormals);
-					newMesh->addChild(newTriNormals);
 					newTriNormals->release();
 					newTriNormals = 0;
 				}
@@ -2232,7 +2244,6 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (newTriTexIndexes)
 				{
 					newMesh->setTexCoordinatesTable(newTriTexIndexes);
-					newMesh->addChild(newTriTexIndexes);
 					newTriTexIndexes->release();
 					newTriTexIndexes = 0;
 				}
@@ -2240,7 +2251,6 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (newMaterials)
 				{
 					newMesh->setMaterialSet(newMaterials);
-					newMesh->addChild(newMaterials);
 					newMaterials->release();
 					newMaterials = 0;
 				}
@@ -2486,9 +2496,16 @@ void ccMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool
 
 	m_texCoords = texCoordsTable;
 	if (m_texCoords)
+	{
 		m_texCoords->link();
+		int childIndex = getChildIndex(m_texCoords);
+		if (childIndex < 0)
+			addChild(m_texCoords);
+	}
 	else
-		removePerTriangleTexCoordIndexes(); //auto-remove per-triangle indexes
+	{
+		removePerTriangleTexCoordIndexes(); //auto-remove per-triangle indexes (we don't need them anymore)
+	}
 }
 
 void ccMesh::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const

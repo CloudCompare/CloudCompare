@@ -218,12 +218,11 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(QString filename,
 							}
 						}
 						mesh->setTexCoordinatesTable(texCoords);
-						mesh->addChild(texCoords);
 
 						//create material
-						ccMaterialSet* matSet = new ccMaterialSet("Materials");
 						ccMaterial::Shared mat(new ccMaterial("texture"));
 						mat->setTexture(texture,filename,false);
+						ccMaterialSet* matSet = new ccMaterialSet("Materials");
 						matSet->push_back(mat);
 						mesh->setMaterialSet(matSet);
 

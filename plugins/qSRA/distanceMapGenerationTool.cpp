@@ -1308,7 +1308,6 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 			materialSet->addMaterial(material);
 
 			mesh->setMaterialSet(materialSet);
-			mesh->addChild(materialSet);
 		}
 
 		mesh->setTexCoordinatesTable(texCoords);

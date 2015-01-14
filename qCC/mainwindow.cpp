@@ -6221,9 +6221,14 @@ void MainWindow::doActionComputeNormals()
 		else if (m_selectedEntities[i]->isA(CC_TYPES::MESH)/*|| m_selectedEntities[i]->isA(CC_TYPES::PRIMITIVE)*/) //TODO
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+			//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
+			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(mesh);
 			mesh->clearTriNormals();
 			mesh->showNormals(false);
-			if (!mesh->computeNormals(perVertex))
+			bool result = mesh->computeNormals(perVertex);
+			putObjectBackIntoDBTree(mesh,objContext);
+
+			if (!result)
 			{
 				ccConsole::Error(QString("Failed to compute normals on mesh '%1'").arg(mesh->getName()));
 				continue;

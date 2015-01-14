@@ -1551,14 +1551,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						materials->push_back(material);
 						mesh->setMaterialSet(materials);
 						mesh->setTexCoordinatesTable(texCoords);
-						mesh->addChild(texCoords);
 						for (unsigned i=0;i<mesh->size();++i)
 						{
 							mesh->addTriangleMtlIndex(0);
 							mesh->addTriangleTexCoordIndexes(i*3,i*3+1,i*3+2);
 						}
 						mesh->showMaterials(true);
-						mesh->addChild(materials);
 					}
 					else
 					{

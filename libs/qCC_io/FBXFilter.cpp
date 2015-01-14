@@ -869,7 +869,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		else
 		{
 			mesh->setTriNormsTable(normsTable);
-			mesh->addChild(normsTable);
 			vertices->showNormals(true);
 			mesh->showNormals(true);
 		}
@@ -1152,7 +1151,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		if (vertTexUVTable)
 		{
 			mesh->setTexCoordinatesTable(vertTexUVTable);
-			mesh->addChild(vertTexUVTable);
 		}
 
 		if (mesh->size() == 0)
@@ -1245,7 +1243,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		if (mesh->hasPerTriangleMtlIndexes())
 		{
 			mesh->setMaterialSet(materials);
-			//mesh->addChild(materials);
 			mesh->showMaterials(true);
 		}
 		else

@@ -110,7 +110,7 @@ public:
 	//! Returns the given point (x,y) of a given contour
 	void getContourPoint(int contour, size_t index, double& x, double& y)
 	{
-		assert(static_casti<int>(index) < getContourLength(contour));
+		assert(static_cast<int>(index) < getContourLength(contour));
 		x = getContourX(contour, index);
 		y = getContourY(contour, index);
 	}
@@ -162,31 +162,37 @@ protected:
 		} 
 	}
 
-	//2x2 cell configuration codes
-	static const int CASE0   =  0; 
-	static const int CASE1   =  1;
-	static const int CASE2   =  2;
-	static const int CASE3   =  3;
-	static const int CASE4   =  4;
-	static const int CASE5   =  5;
-	static const int CASE6   =  6;
-	static const int CASE7   =  7;
-	static const int CASE8   =  8;
-	static const int CASE9   =  9;
-	static const int CASE10  = 10;
-	static const int CASE11  = 11;
-	static const int CASE12  = 12;
-	static const int CASE13  = 13;
-	static const int CASE14  = 14;
-	static const int CASE15  = 15;
-	static const int VISITED = 16;
+	//! 2x2 cell configuration codes
+	enum ConfigurationCodes
+	{
+		CASE0   =  0, 
+		CASE1   =  1,
+		CASE2   =  2,
+		CASE3   =  3,
+		CASE4   =  4,
+		CASE5   =  5,
+		CASE6   =  6,
+		CASE7   =  7,
+		CASE8   =  8,
+		CASE9   =  9,
+		CASE10  = 10,
+		CASE11  = 11,
+		CASE12  = 12,
+		CASE13  = 13,
+		CASE14  = 14,
+		CASE15  = 15,
+		VISITED = 16
+	};
 
-	//entry/exit edges
-	static const int NONE   = -1;
-	static const int TOP    =  0;
-	static const int RIGHT  =  1;
-	static const int BOTTOM =  2;
-	static const int LEFT   =  3;
+	//! Entry/exit edges
+	enum Edges
+	{
+		NONE   = -1,
+		TOP    =  0,
+		RIGHT  =  1,
+		BOTTOM =  2,
+		LEFT   =  3
+	};
 
 	void endContour(bool closed, bool alternatePath)
 	{

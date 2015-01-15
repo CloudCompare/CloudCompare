@@ -79,6 +79,10 @@ v2.6.1.beta 11/??/2014
 		- polylines can now be scaled (just as clouds and meshes)
 	* Color Scale Editor:
 		- the color of new steps is now interpolated from the existing color ramp instead of being white by default
+	* Labels:
+		- the default title of a single-point label with an active scalar field is now the scalar field value
+		- the default title of a two-points label is now the distance between the two points
+		- moreover, the two-points label now displays dX, dY, dZ and dXY, dXZ and dYZ
 - Bug fix:
 	- Delaunay 2D1/2 crashed on Windows 8
 	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1

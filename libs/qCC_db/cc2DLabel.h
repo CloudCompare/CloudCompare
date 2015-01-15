@@ -122,7 +122,85 @@ public:
 	//! Returns a given point
 	const PickedPoint& getPoint(unsigned index) const { return m_points[index]; }
 
+	//! Returns the (3D) label title
+	QString getTitle(int numPrecision) const;
+
 protected:
+
+	//! One-point label info
+	struct LabelInfo1
+	{
+		unsigned pointIndex;
+		ccGenericPointCloud* cloud;
+		bool hasNormal;
+		CCVector3 normal;
+		bool hasRGB;
+		Vector3Tpl<colorType> rgb;
+		bool hasSF;
+		ScalarType sfValue;
+		QString sfName;
+		//! Default constructor
+		LabelInfo1()
+			: pointIndex(0)
+			, cloud(0)
+			, hasNormal(false)
+			, normal(0,0,0)
+			, hasRGB(false)
+			, rgb(0,0,0)
+			, hasSF(false)
+			, sfValue(NAN_VALUE)
+		{}
+	};
+	//! Gets one-point label info
+	void getLabelInfo1(LabelInfo1& info) const;
+
+	//! Two-points label info
+	struct LabelInfo2
+	{
+		unsigned point1Index;
+		ccGenericPointCloud* cloud1;
+		unsigned point2Index;
+		ccGenericPointCloud* cloud2;
+		CCVector3 diff;
+		//! Default constructor
+		LabelInfo2()
+			: point1Index(0)
+			, cloud1(0)
+			, point2Index(0)
+			, cloud2(0)
+			, diff(0,0,0)
+		{}
+	};
+	//! Gets two-points label info
+	void getLabelInfo2(LabelInfo2& info) const;
+
+	//! Three-points label info
+	struct LabelInfo3
+	{
+		unsigned point1Index;
+		ccGenericPointCloud* cloud1;
+		unsigned point2Index;
+		ccGenericPointCloud* cloud2;
+		unsigned point3Index;
+		ccGenericPointCloud* cloud3;
+		CCVector3 normal;
+		PointCoordinateType area;
+		CCVector3d angles;
+		//! Default constructor
+		LabelInfo3()
+			: point1Index(0)
+			, cloud1(0)
+			, point2Index(0)
+			, cloud2(0)
+			, point3Index(0)
+			, cloud3(0)
+			, normal(0,0,0)
+			, area(0)
+			, angles(0,0,0)
+		{}
+	};
+	//! Gets three-points label info
+	void getLabelInfo3(LabelInfo3& info) const;
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
@@ -151,7 +229,7 @@ protected:
 		the distance to the upper border and ROI[3] is the
 		distance to the lower border (relatively to m_screenPos).
 	**/
-	int m_labelROI[4];
+	QRect m_labelROI;
 
 	//! close button ROI
 	//int m_closeButtonROI[4];

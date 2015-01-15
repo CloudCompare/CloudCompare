@@ -27,7 +27,7 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>405</width>
-        <height>246</height>
+        <height>187</height>
        </rect>
       </property>
       <attribute name="label">
@@ -356,8 +356,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>404</width>
-        <height>263</height>
+        <width>361</width>
+        <height>92</height>
        </rect>
       </property>
       <attribute name="label">
@@ -454,7 +454,7 @@
          <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>Labels transparency</string>
+            <string>Labels opacity</string>
            </property>
           </widget>
          </item>

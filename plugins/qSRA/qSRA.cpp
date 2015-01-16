@@ -169,8 +169,7 @@ void qSRA::loadProfile()
 	bool ignoreAxisShift = piDlg.ignoreAxisShift();
 
 	//load profile as a (2D) polyline
-	ccPolyline* polyline = ProfileLoader::Load(filename,ignoreAxisShift,axisDim,m_app);
-
+	ccPolyline* polyline = ProfileLoader::Load(filename,m_app);
 	if (polyline)
 	{
 		//apply a visual transformation to see the polyline in the right place!
@@ -180,7 +179,10 @@ void qSRA::loadProfile()
 			const CCVector3d& O = vertices->getGlobalShift();
 
 			ccGLMatrix trans;
-			trans.setTranslation(CCVector3::fromArray(O.u));
+			CCVector3 T = CCVector3::fromArray(O.u);
+			if (ignoreAxisShift)
+				T.u[axisDim] = 0;
+			trans.setTranslation(T);
 			float* mat = trans.data();
 			switch(axisDim)
 			{

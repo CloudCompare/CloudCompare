@@ -204,7 +204,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 				&& DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(cloud,
 																minLat_rad,
 																maxLat_rad,
-																CCVector3d(profileOrigin),
+																profileOrigin,
 																static_cast<uchar>(revolDim)))
 			{
 				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad,m_angularUnits)); 
@@ -694,6 +694,12 @@ void DistanceMapGenerationDlg::updateMapTexture()
 
 	//current color scale
 	ccColorScale::Shared colorScale = m_colorScaleSelector->getSelectedScale();
+	if (!colorScale)
+	{
+		if (m_app)
+			m_app->dispToConsole(QString("No color scale chosen!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	//create new texture QImage
 	QImage mapImage = DistanceMapGenerationTool::ConvertMapToImage(m_map, colorScale, colorScaleStepsSpinBox->value());
@@ -824,10 +830,10 @@ void DistanceMapGenerationDlg::angularUnitChanged(int index)
 		SetSpinBoxValues(xMinDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMin_rad			* CC_RAD_TO_DEG);
 		SetSpinBoxValues(xMaxDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMax_rad			* CC_RAD_TO_DEG);
 
-		SetSpinBoxValues(latStepDoubleSpinBox,		2, 0.01, 89.99, 1.0, latStep_rad		* CC_RAD_TO_DEG);
-		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2, 0.01, 89.99, 1.0, scaleLatStep_rad	* CC_RAD_TO_DEG);
-		SetSpinBoxValues(latMinDoubleSpinBox,		2,  0.0, 89.99, 1.0, latMin_rad			* CC_RAD_TO_DEG);
-		SetSpinBoxValues(latMaxDoubleSpinBox,		2,  0.0, 89.99, 1.0, latMax_rad			* CC_RAD_TO_DEG);
+		SetSpinBoxValues(latStepDoubleSpinBox,		2,   0.01, 89.99, 1.0, latStep_rad		* CC_RAD_TO_DEG);
+		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2,   0.01, 89.99, 1.0, scaleLatStep_rad	* CC_RAD_TO_DEG);
+		SetSpinBoxValues(latMinDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMin_rad			* CC_RAD_TO_DEG);
+		SetSpinBoxValues(latMaxDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMax_rad			* CC_RAD_TO_DEG);
 
 		xMaxDoubleSpinBox->setMaximum(360.0);
 		xMaxDoubleSpinBox->setValue(360.0);
@@ -845,10 +851,10 @@ void DistanceMapGenerationDlg::angularUnitChanged(int index)
 		SetSpinBoxValues(xMaxDoubleSpinBox,			4,    0.0, PIx2,	0.5, xMax_rad);
 
 		double PIdiv2 = M_PI/2.0-0.0001;
-		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	4, 0.0001, PIdiv2, 0.3, scaleLatStep_rad);
-		SetSpinBoxValues(latStepDoubleSpinBox,		4, 0.0001, PIdiv2, 0.3, latStep_rad);
-		SetSpinBoxValues(latMinDoubleSpinBox,		4,    0.0, PIdiv2, 0.3, latMin_rad);
-		SetSpinBoxValues(latMaxDoubleSpinBox,		4,    0.0, PIdiv2, 0.3, latMax_rad);
+		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	4,  0.0001, PIdiv2, 0.3, scaleLatStep_rad);
+		SetSpinBoxValues(latStepDoubleSpinBox,		4,  0.0001, PIdiv2, 0.3, latStep_rad);
+		SetSpinBoxValues(latMinDoubleSpinBox,		4, -PIdiv2, PIdiv2, 0.3, latMin_rad);
+		SetSpinBoxValues(latMaxDoubleSpinBox,		4, -PIdiv2, PIdiv2, 0.3, latMax_rad);
 
 		xMaxDoubleSpinBox->setMaximum(PIx2);
 		xMaxDoubleSpinBox->setValue(PIx2);
@@ -864,10 +870,10 @@ void DistanceMapGenerationDlg::angularUnitChanged(int index)
 		SetSpinBoxValues(xMinDoubleSpinBox,			2,  0.0, 400.0, 5.0, xMin_rad			* 200.0 / M_PI);
 		SetSpinBoxValues(xMaxDoubleSpinBox,			2,  0.0, 400.0, 5.0, xMax_rad			* 200.0 / M_PI);
 
-		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2, 0.01, 99.99, 1.0, scaleLatStep_rad	* 200.0 / M_PI);
-		SetSpinBoxValues(latStepDoubleSpinBox,		2, 0.01, 99.99, 1.0, latStep_rad		* 200.0 / M_PI);
-		SetSpinBoxValues(latMinDoubleSpinBox,		2,  0.0, 99.99, 1.0, latMin_rad			* 200.0 / M_PI);
-		SetSpinBoxValues(latMaxDoubleSpinBox,		2,  0.0, 99.99, 1.0, latMax_rad			* 200.0 / M_PI);
+		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2,   0.01, 99.99, 1.0, scaleLatStep_rad	* 200.0 / M_PI);
+		SetSpinBoxValues(latStepDoubleSpinBox,		2,   0.01, 99.99, 1.0, latStep_rad		* 200.0 / M_PI);
+		SetSpinBoxValues(latMinDoubleSpinBox,		2, -99.99, 99.99, 1.0, latMin_rad		* 200.0 / M_PI);
+		SetSpinBoxValues(latMaxDoubleSpinBox,		2, -99.99, 99.99, 1.0, latMax_rad		* 200.0 / M_PI);
 
 		xMaxDoubleSpinBox->setMaximum(400.0);
 		xMaxDoubleSpinBox->setValue(400.0);
@@ -1864,7 +1870,8 @@ void DistanceMapGenerationDlg::saveToPersistentSettings()
 	if (m_colorScaleSelector)
 	{
 		ccColorScale::Shared colorScale = m_colorScaleSelector->getSelectedScale();
-		settings.setValue("colorScale",			colorScale->getUuid());
+		if (colorScale)
+			settings.setValue("colorScale",			colorScale->getUuid());
 	}
 	settings.setValue("colorScaleSteps",	colorScaleStepsSpinBox->value());
 	settings.setValue("symbolSize",			symbolSizeSpinBox->value());

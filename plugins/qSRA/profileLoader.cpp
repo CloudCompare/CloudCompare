@@ -29,7 +29,7 @@
 #include <QTextStream>
 #include <QFileInfo>
 
-ccPolyline* ProfileLoader::Load(QString filename, bool ignoreAxisShift/*=true*/, int heightDim/*=2*/, ccMainAppInterface* app/*=0*/)
+ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 {
 	//load profile as a polyline
 	QFile file(filename);
@@ -62,16 +62,22 @@ ccPolyline* ProfileLoader::Load(QString filename, bool ignoreAxisShift/*=true*/,
 			QString centerLine = stream.readLine();
 			{
 				QStringList tokens = centerLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
-				if (tokens.size() < 3)
+				bool validLine = false;
+				if (tokens.size() == 3)
+				{
+					bool ok[3] = {false, false, false};
+					G.x = tokens[0].toDouble(ok+0);
+					G.y = tokens[1].toDouble(ok+1);
+					G.z = tokens[2].toDouble(ok+2);
+					validLine = ok[0] && ok[1] && ok[2];
+				}
+				if (!validLine)
 				{
 					if (app)
 						app->dispToConsole(QString("Malformed file (center coordinates expected on second line)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 					error = true;
 					break;
 				}
-				G.x = tokens[0].toDouble();
-				G.y = tokens[1].toDouble();
-				G.z = tokens[2].toDouble();
 			}
 		}
 
@@ -102,9 +108,6 @@ ccPolyline* ProfileLoader::Load(QString filename, bool ignoreAxisShift/*=true*/,
 				Vector2Tpl<double> P;
 				P.x = tokens[0].toDouble(); //radius
 				P.y = tokens[1].toDouble(); //height
-
-				if (ignoreAxisShift)
-					P.y -= G.u[heightDim];
 
 				try
 				{

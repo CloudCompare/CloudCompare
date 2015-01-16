@@ -306,7 +306,7 @@ double DistanceMapGenerationTool::ConicalProjectN(double phi1, double phi2)
 
 double DistanceMapGenerationTool::ConicalProject(double phi, double phi1, double n)
 {
-	assert(phi1 >= 0.0 && phi1 < M_PI_DIV_2);
+	assert(phi1 >= -M_PI_DIV_2 && phi1 < M_PI_DIV_2);
 
 	double tan_pl1 = tan(M_PI_DIV_4 - phi1 / 2.0);
 	double tan_pl = tan(M_PI_DIV_4 - phi / 2.0);
@@ -696,7 +696,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 
 	//compute projection constant
 	double nProj = ConicalProjectN(map->yMin,map->yMax) * conicalSpanRatio;
-	assert(nProj >= 0.0 && nProj <= 1.0);
+	assert(nProj >= -1.0 && nProj <= 1.0);
 
 	//create vertices
 	{

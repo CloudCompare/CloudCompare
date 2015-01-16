@@ -37,12 +37,10 @@ public:
 		Only the X and Y coordinates of the polyline's vertices will be used:
 		X = radius and Y = height (Z = 0).
 		\param filename filename
-		\param ignoreAxisShift whether heights are expressed relatively to 0 (true) or to the input center position (false)
-		\param heightDim height dimension
 		\param app main application handle for displaying messages
 		\return loaded polyline (or 0 if an error occurred)
 	**/
-	static ccPolyline* Load(QString filename, bool ignoreAxisShift = true, int heightDim = 2, ccMainAppInterface* app = 0);
+	static ccPolyline* Load(QString filename, ccMainAppInterface* app = 0);
 
 };
 

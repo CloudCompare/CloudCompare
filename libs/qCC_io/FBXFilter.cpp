@@ -336,9 +336,9 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		for (unsigned i=0; i<vertCount; ++i)
 		{
 			const colorType* C = cloud->getPointColor(i);
-			FbxColor col(	static_cast<double>(C[0])/MAX_COLOR_COMP,
-							static_cast<double>(C[1])/MAX_COLOR_COMP,
-							static_cast<double>(C[2])/MAX_COLOR_COMP );
+			FbxColor col(	static_cast<double>(C[0])/ccColor::MAX,
+							static_cast<double>(C[1])/ccColor::MAX,
+							static_cast<double>(C[2])/ccColor::MAX );
 			lGeometryElementVertexColor->GetDirectArray().SetAt(i,col);
 		}
 
@@ -747,9 +747,9 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 								for (int i=0; i<vertCount; ++i)
 								{
 									FbxColor c = vertColor->GetDirectArray().GetAt(i);
-									vertices->addRGBColor(	static_cast<colorType>(c.mRed	* MAX_COLOR_COMP),
-															static_cast<colorType>(c.mGreen	* MAX_COLOR_COMP),
-															static_cast<colorType>(c.mBlue	* MAX_COLOR_COMP) );
+									vertices->addRGBColor(	static_cast<colorType>(c.mRed	* ccColor::MAX),
+															static_cast<colorType>(c.mGreen	* ccColor::MAX),
+															static_cast<colorType>(c.mBlue	* ccColor::MAX) );
 								}
 							}
 							break;
@@ -759,9 +759,9 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 								{
 									int id = vertColor->GetIndexArray().GetAt(i);
 									FbxColor c = vertColor->GetDirectArray().GetAt(id);
-									vertices->addRGBColor(	static_cast<colorType>(c.mRed	* MAX_COLOR_COMP),
-															static_cast<colorType>(c.mGreen	* MAX_COLOR_COMP),
-															static_cast<colorType>(c.mBlue	* MAX_COLOR_COMP) );
+									vertices->addRGBColor(	static_cast<colorType>(c.mRed	* ccColor::MAX),
+															static_cast<colorType>(c.mGreen	* ccColor::MAX),
+															static_cast<colorType>(c.mBlue	* ccColor::MAX) );
 								}
 							}
 							break;

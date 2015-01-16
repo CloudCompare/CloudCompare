@@ -75,21 +75,22 @@ QString cc2DLabel::getTitle(int precision) const
 	size_t count = m_points.size();
 	if (count == 1)
 	{
+		title = m_name;
+		title.replace(POINT_INDEX_0,QString::number(m_points[0].index));
+
+		//if available, we display the point SF value
 		LabelInfo1 info;
 		getLabelInfo1(info);
-		//by default we take the point SF value (if any)
 		if (info.hasSF)
-			title = QString("%1 = %2").arg(info.sfName).arg(info.sfValue,0,'f',precision);
-		else
 		{
-			title = m_name;
-			title.replace(POINT_INDEX_0,QString::number(m_points[0].index));
+			title = QString("%1 = %2 (%3)").arg(info.sfName).arg(info.sfValue,0,'f',precision).arg(title);
 		}
 	}
 	else if (count == 2)
 	{
 		LabelInfo2 info;
 		getLabelInfo2(info);
+		//display distance by default
 		double dist = info.diff.normd();
 		title = QString("Distance: %1").arg(dist,0,'f',precision);
 	}
@@ -97,9 +98,8 @@ QString cc2DLabel::getTitle(int precision) const
 	{
 		LabelInfo3 info;
 		getLabelInfo3(info);
-		//angle
-		double angleAtP2 = info.angles.u[1];
-		title = QString("Angle: %1 deg.").arg(angleAtP2,0,'f',precision);
+		//display area by default
+		title = QString("Area: %1").arg(info.area,0,'f',precision);
 	}
 
 	return title;
@@ -364,13 +364,15 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
-void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointCloud* cloud, int precision)
+void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointCloud* cloud, int precision, QString pointName = QString())
 {
 	assert(cloud);
 	const CCVector3* P = cloud->getPointPersistentPtr(pointIndex);
 	bool isShifted = cloud->isShifted();
 
 	QString coordStr = QString("P#%0:").arg(pointIndex);
+	if (!pointName.isEmpty())
+		coordStr = QString("%1 (%2)").arg(pointName).arg(coordStr);
 	if (isShifted)
 	{
 		body << coordStr;
@@ -481,9 +483,14 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	N.normalize();
 	info.normal = N;
 
-	//angle
-	info.angles.u[0] = GetAngle_deg(P1P2,P1P3); //angleAtP1
-	info.angles.u[1] = GetAngle_deg(P2P3,-P1P2); //angleAtP2
+	//edges length
+	info.edges.u[0] = P1P2.norm2d();  //edge 1-2
+	info.edges.u[1] = P2P3.norm2d();  //edge 2-3
+	info.edges.u[2] = P1P3.norm2d();  //edge 3-1
+
+	//angle (warning: P1P2, P1P3 and P2P3 will be normalized!)
+	info.angles.u[0] = GetAngle_deg(P1P2,P1P3);   //angleAtP1
+	info.angles.u[1] = GetAngle_deg(P2P3,-P1P2);  //angleAtP2
 	info.angles.u[2] = GetAngle_deg(-P1P3,-P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
@@ -565,19 +572,27 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			body << areaStr;
 
 			//coordinates
-			AddPointCoordinates(body,info.point1Index,info.cloud1,precision);
-			AddPointCoordinates(body,info.point2Index,info.cloud2,precision);
-			AddPointCoordinates(body,info.point3Index,info.cloud3,precision);
+			AddPointCoordinates(body,info.point1Index,info.cloud1,precision,"A");
+			AddPointCoordinates(body,info.point2Index,info.cloud2,precision,"B");
+			AddPointCoordinates(body,info.point3Index,info.cloud3,precision,"C");
 
 			//normal
 			QString normStr = QString("Normal: (%1;%2;%3)").arg(info.normal.x,0,'f',precision).arg(info.normal.y,0,'f',precision).arg(info.normal.z,0,'f',precision);
 			body << normStr;
 
-			QString angleStr = QString("Angles: A=%1 - B=%3 - C=%5 deg.")
+			//angles
+			QString angleStr = QString("Angles: A=%1 - B=%2 - C=%3 deg.")
 									.arg(info.angles.u[0],0,'f',precision)
 									.arg(info.angles.u[1],0,'f',precision)
 									.arg(info.angles.u[2],0,'f',precision);
 			body << angleStr;
+
+			//edges
+			QString edgesStr = QString("Edges: AB=%1 - BC=%2 - CA=%3")
+									.arg(info.edges.u[0],0,'f',precision)
+									.arg(info.edges.u[1],0,'f',precision)
+									.arg(info.edges.u[2],0,'f',precision);
+			body << edgesStr;
 		}
 		break;
 
@@ -707,7 +722,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				if (isSelected() && !pushName)
 					c_unitPointMarker->setTempColor(ccColor::red);
 				else
-					c_unitPointMarker->setTempColor(ccColor::magenta);
+					c_unitPointMarker->setTempColor(context.labelDefaultMarkerCol);
 
 				for (unsigned i=0; i<count; i++)
 				{
@@ -715,7 +730,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					glPushMatrix();
 					const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
 					ccGL::Translate(P->x,P->y,P->z);
-					glScalef(context.pickedPointsRadius,context.pickedPointsRadius,context.pickedPointsRadius);
+					glScalef(context.labelMarkerSize,context.labelMarkerSize,context.labelMarkerSize);
 					c_unitPointMarker->draw(markerContext);
 					glPopMatrix();
 				}
@@ -726,6 +741,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
 				//font.setPointSize(font.pointSize()+2);
 				//font.setBold(true);
+				static const QChar ABC[3] = {'A','B','C'};
 
 				//draw their name
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
@@ -733,11 +749,17 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				for (unsigned j=0; j<count; j++)
 				{
 					const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
-					QString title = count == 1 ? getName() : QString("P#%0").arg(m_points[j].index); //for single-point labels we prefer the name
+					QString title;
+					if (count == 1)
+						title = getName(); //for single-point labels we prefer the name
+					else if (count == 3)
+						title = ABC[j]; //for triangle-labels, we only display "A","B","C"
+					else
+						title = QString("P#%0").arg(m_points[j].index); 
 					context._win->display3DLabel(	title,
-													*P + CCVector3(	context.pickedPointsTextShift,
-																	context.pickedPointsTextShift,
-																	context.pickedPointsTextShift),
+													*P + CCVector3(	context.labelMarkerTextShift,
+																	context.labelMarkerTextShift,
+																	context.labelMarkerTextShift),
 													ccColor::white,
 													font );
 				}
@@ -752,8 +774,81 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 //display parameters
 static const int c_margin = 5;
+static const int c_tabMarginX = 5;
+static const int c_tabMarginY = 2;
 static const int c_arrowBaseSize = 3;
 //static const int c_buttonSize = 10;
+
+static const unsigned char darkGreen[3] = {0,200,0};
+
+//! Data table
+struct Tab
+{
+	//! Default constructor
+	Tab(int _maxBlockPerRow = 2)
+		: maxBlockPerRow(_maxBlockPerRow)
+		, blockCount(0)
+		, rowCount(0)
+		, colCount(0)
+	{}
+
+	//! Sets the maximum number of blocks per row
+	/** \warning Must be called before adding data!
+	**/
+	inline void setMaxBlockPerRow(int maxBlock) { maxBlockPerRow = maxBlock; }
+
+	//! Adds a 2x3 block (must be filled!)
+	int add2x3Block()
+	{
+		//add columns (if necessary)
+		if (colCount < maxBlockPerRow*2)
+		{
+			colCount += 2;
+			colContent.resize(colCount);
+			colWidth.resize(colCount,0);
+		}
+		int blockCol = (blockCount % maxBlockPerRow);
+		//add new row
+		if (blockCol == 0)
+			rowCount += 3;
+		++blockCount;
+
+		//return the first column index of the block
+		return blockCol*2;
+	}
+
+	//! Updates columns width table
+	/** \return the total width
+	**/
+	int updateColumnsWidthTable(const QFontMetrics& fm)
+	{
+		//compute min width of each column
+		int totalWidth = 0;
+		for (size_t i=0; i<colCount; ++i)
+		{
+			int maxWidth = 0;
+			for (int j=0; j<colContent[i].size(); ++j)
+				maxWidth = std::max(maxWidth, fm.width(colContent[i][j]));
+			colWidth[i] = maxWidth;
+			totalWidth += maxWidth;
+		}
+		return totalWidth;
+	}
+
+	//! Maximum number of blocks per row
+	int maxBlockPerRow;
+	//! Number of 2x3 blocks
+	int blockCount;
+	//! Number of rows
+	int rowCount;
+	//! Number of columns
+	int colCount;
+	//! Columns width
+	std::vector<int> colWidth;
+	//! Columns content
+	std::vector<QStringList> colContent;
+};
+
 
 void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 {
@@ -771,11 +866,20 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
 
 	//label title
-	QString title = getTitle(context.dispNumberPrecision);
+	const int precision = context.dispNumberPrecision;
+	QString title = getTitle(precision);
 
-	int strHeight = 0;
-	int titleHeight = 0;
+#define DRAW_CONTENT_AS_TAB
+#ifdef DRAW_CONTENT_AS_TAB
+	//draw contents as an array
+	Tab tab(4);
+	int rowHeight = 0;
+#else
+//simply display the content as text
 	QStringList body;
+#endif
+
+	int titleHeight = 0;
 	GLdouble arrowDestX = -1.0, arrowDestY = -1.0;
 	QFont bodyFont,titleFont;
 	if (!pushName)
@@ -787,7 +891,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		m_points[0].cloud->getPoint(m_points[0].index,arrowDest);
 		for (unsigned i=1; i<m_points.size(); ++i)
 			arrowDest += *m_points[i].cloud->getPointPersistentPtr(m_points[i].index);
-		arrowDest /= (PointCoordinateType)m_points.size();
+		arrowDest /= static_cast<PointCoordinateType>(m_points.size());
 
 		//project it in 2D screen coordinates
 		int VP[4];
@@ -798,40 +902,166 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		gluProject(arrowDest.x,arrowDest.y,arrowDest.z,MM,MP,VP,&arrowDestX,&arrowDestY,&zp);
 
 		/*** label border ***/
-		bodyFont = context._win->getTextDisplayFont(); //takes rendering zoom into account!
-		titleFont = QFont(context._win->getTextDisplayFont()); //takes rendering zoom into account!
-		titleFont.setBold(true);
-		QFontMetrics titleFontMetrics(titleFont);
-		QFontMetrics bodyFontMetrics(bodyFont);
+		bodyFont = context._win->getLabelDisplayFont(); //takes rendering zoom into account!
+		titleFont = bodyFont; //takes rendering zoom into account!
+		//titleFont.setBold(true);
 
-		strHeight = bodyFontMetrics.height();
+		QFontMetrics titleFontMetrics(titleFont);
 		titleHeight = titleFontMetrics.height();
 
-		if (m_showFullBody)
-			body = getLabelContent(context.dispNumberPrecision);
+		QFontMetrics bodyFontMetrics(bodyFont);
+		rowHeight = bodyFontMetrics.height();
 
-		//base box dimension
-		int dx = 150;
-		dx = std::max(dx,titleFontMetrics.width(title));
-
-		int dy = c_margin;	//top vertical margin
-		dy += titleHeight;	//title
-		if (!body.empty())
+		//get label box dimension
+		int dx = 100;
+		int dy = 0;
 		{
-			dy += c_margin;	//vertical margin above separator
-			for (int j=0; j<body.size(); ++j)
+			//base box dimension
+			dx = std::max(dx,titleFontMetrics.width(title));
+			dy += c_margin;		//top vertical margin
+			dy += titleHeight;	//title
+
+			if (m_showFullBody)
 			{
-				dx = std::max(dx,bodyFontMetrics.width(body[j]));
-				dy += strHeight; //body line height
+#ifdef DRAW_CONTENT_AS_TAB
+				try
+				{
+					size_t labelCount = m_points.size();
+					if (labelCount == 1)
+					{
+						LabelInfo1 info;
+						getLabelInfo1(info);
+
+						bool isShifted = info.cloud->isShifted();
+						//1st block: X, Y, Z (local)
+						{
+							int c = tab.add2x3Block();
+							QChar suffix;
+							if (isShifted)
+								suffix = 'l'; //'l' for local
+							const CCVector3* P = info.cloud->getPoint(info.pointIndex);
+							tab.colContent[c] << QString("X")+suffix; tab.colContent[c+1] << QString::number(P->x,'f',precision);
+							tab.colContent[c] << QString("Y")+suffix; tab.colContent[c+1] << QString::number(P->y,'f',precision);
+							tab.colContent[c] << QString("Z")+suffix; tab.colContent[c+1] << QString::number(P->z,'f',precision);
+						}
+						//next block:  X, Y, Z (global)
+						if (isShifted)
+						{
+							int c = tab.add2x3Block();
+							CCVector3d P = info.cloud->toGlobal3d(*info.cloud->getPoint(info.pointIndex));
+							tab.colContent[c] << "Xg"; tab.colContent[c+1] << QString::number(P.x,'f',precision);
+							tab.colContent[c] << "Yg"; tab.colContent[c+1] << QString::number(P.y,'f',precision);
+							tab.colContent[c] << "Zg"; tab.colContent[c+1] << QString::number(P.z,'f',precision);
+						}
+						//next block: normal
+						if (info.hasNormal)
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] << "Nx"; tab.colContent[c+1] << QString::number(info.normal.x,'f',precision);
+							tab.colContent[c] << "Ny"; tab.colContent[c+1] << QString::number(info.normal.y,'f',precision);
+							tab.colContent[c] << "Nz"; tab.colContent[c+1] << QString::number(info.normal.z,'f',precision);
+						}
+
+						//next block: RGB color
+						if (info.hasRGB)
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] <<"R"; tab.colContent[c+1] << QString::number(info.rgb.x);
+							tab.colContent[c] <<"G"; tab.colContent[c+1] << QString::number(info.rgb.y);
+							tab.colContent[c] <<"B"; tab.colContent[c+1] << QString::number(info.rgb.z);
+						}
+					}
+					else if (labelCount == 2)
+					{
+						LabelInfo2 info;
+						getLabelInfo2(info);
+
+						//1st block: dX, dY, dZ
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] << "dX"; tab.colContent[c+1] << QString::number(info.diff.x,'f',precision);
+							tab.colContent[c] << "dY"; tab.colContent[c+1] << QString::number(info.diff.y,'f',precision);
+							tab.colContent[c] << "dZ"; tab.colContent[c+1] << QString::number(info.diff.z,'f',precision);
+						}
+						//2nd block: dXY, dXZ, dZY
+						{
+							int c = tab.add2x3Block();
+							PointCoordinateType dXY = sqrt(info.diff.x*info.diff.x + info.diff.y*info.diff.y);
+							PointCoordinateType dXZ = sqrt(info.diff.x*info.diff.x + info.diff.z*info.diff.z);
+							PointCoordinateType dZY = sqrt(info.diff.z*info.diff.z + info.diff.y*info.diff.y);
+							tab.colContent[c] << "dXY"; tab.colContent[c+1] << QString::number(dXY,'f',precision);
+							tab.colContent[c] << "dXZ"; tab.colContent[c+1] << QString::number(dXZ,'f',precision);
+							tab.colContent[c] << "dZY"; tab.colContent[c+1] << QString::number(dZY,'f',precision);
+						}
+					}
+					else if (labelCount == 3)
+					{
+						LabelInfo3 info;
+						getLabelInfo3(info);
+						tab.setMaxBlockPerRow(2); //square tab (2x2 blocks)
+
+						//next block: indexes
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] << "index.A"; tab.colContent[c+1] << QString::number(info.point1Index);
+							tab.colContent[c] << "index.B"; tab.colContent[c+1] << QString::number(info.point2Index);
+							tab.colContent[c] << "index.C"; tab.colContent[c+1] << QString::number(info.point3Index);
+						}
+						//next block: edges length
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] << "AB"; tab.colContent[c+1] << QString::number(info.edges.u[0],'f',precision);
+							tab.colContent[c] << "BC"; tab.colContent[c+1] << QString::number(info.edges.u[1],'f',precision);
+							tab.colContent[c] << "CA"; tab.colContent[c+1] << QString::number(info.edges.u[2],'f',precision);
+						}
+						//next block: angles
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] << "angle.A"; tab.colContent[c+1] << QString::number(info.angles.u[0],'f',precision);
+							tab.colContent[c] << "angle.B"; tab.colContent[c+1] << QString::number(info.angles.u[1],'f',precision);
+							tab.colContent[c] << "angle.C"; tab.colContent[c+1] << QString::number(info.angles.u[2],'f',precision);
+						}
+						//next block: normal
+						{
+							int c = tab.add2x3Block();
+							tab.colContent[c] << "Nx"; tab.colContent[c+1] << QString::number(info.normal.x,'f',precision);
+							tab.colContent[c] << "Ny"; tab.colContent[c+1] << QString::number(info.normal.y,'f',precision);
+							tab.colContent[c] << "Nz"; tab.colContent[c+1] << QString::number(info.normal.z,'f',precision);
+						}
+					}
+				}
+				catch(std::bad_alloc)
+				{
+					//not enough memory
+					return;
+				}
+
+				//compute min width of each column
+				int totalWidth = tab.updateColumnsWidthTable(bodyFontMetrics);
+
+				int tabWidth = totalWidth + tab.colCount * (2*c_tabMarginX); //add inner margins
+				dx = std::max(dx,tabWidth);
+				dy += tab.rowCount * (rowHeight + 2*c_tabMarginY); //add inner margins
+				//we also add a margin every 3 rows
+				dy += std::max(0,(tab.rowCount/3)-1) * c_margin;
+				dy += c_margin;		//bottom vertical margin
+#else
+				body = getLabelContent(precision);
+				if (!body.empty())
+				{
+					dy += c_margin;	//vertical margin above separator
+					for (int j=0; j<body.size(); ++j)
+					{
+						dx = std::max(dx,bodyFontMetrics.width(body[j]));
+						dy += rowHeight; //body line height
+					}
+					dy += c_margin;	//vertical margin below text
+				}
+#endif //DRAW_CONTENT_AS_TAB
 			}
-			dy += c_margin;	//vertical margin below text
+
+			dx += c_margin*2;	// horizontal margins
 		}
-		else
-		{
-			dy += c_margin;	// vertical margin (purely for aesthetics)
-		}
-		dy += c_margin;		// bottom vertical margin
-		dx += c_margin*2;	// horizontal margins
 
 		//main rectangle
 		m_labelROI = QRect(0,0,dx,dy);
@@ -859,16 +1089,16 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//colors
 	bool highlighted = (!pushName && isSelected());
 	//default background color
-	colorType defaultBkgColor[4];
-	memcpy(defaultBkgColor,context.labelDefaultCol,sizeof(colorType)*3);
-	defaultBkgColor[3] = static_cast<colorType>((context.labelsTransparency/100.0f) * MAX_COLOR_COMP);
+	unsigned char alhpa = static_cast<unsigned char>((context.labelOpacity/100.0) * 255);
+	ccColor::Rgbaub defaultBkgColor(context.labelDefaultBkgCol,alhpa);
 	//default border color (mustn't be totally transparent!)
-	colorType defaultBorderColor[4];
-	if (highlighted)
-		memcpy(defaultBorderColor,ccColor::red,sizeof(colorType)*3);
-	else
-		memcpy(defaultBorderColor,context.labelDefaultCol,sizeof(colorType)*3);
-	defaultBorderColor[3] = static_cast<colorType>((50+context.labelsTransparency/2)/100.0f * MAX_COLOR_COMP);
+	ccColor::Rgbaub defaultBorderColor(ccColor::red);
+	if (!highlighted)
+	{
+		//apply only half of the transparency
+		unsigned char halfAlhpa = static_cast<unsigned char>((50.0 + context.labelOpacity/200.0) * 255);
+		defaultBorderColor = ccColor::Rgbaub(context.labelDefaultBkgCol,halfAlhpa);
+	}
 
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -993,30 +1223,110 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	if (!pushName)
 	{
 		int xStartRel = c_margin;
-		int yStartRel = -c_margin;
+		int yStartRel = 0;
 		yStartRel -= titleHeight;
 
-		const colorType* defaultTextColor = (context.labelsTransparency<40 ? context.textDefaultCol : ccColor::darkBlue);
-
-		context._win->displayText(title,xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor,&titleFont);
-		yStartRel -= c_margin;
-
-		if (!body.empty())
+		ccColor::Rgbub defaultTextColor;
+		if (context.labelOpacity < 40)
 		{
-			//line separation
-			glColor4ubv(defaultBorderColor);
-			glBegin(GL_LINES);
-			glVertex2i(xStartRel,yStartRel);
-			glVertex2i(xStartRel+m_labelROI.right()-m_labelROI.left()-2*c_margin,yStartRel);
-			glEnd();
+			//under a given opacity level, we use the default text color instead!
+			defaultTextColor = context.textDefaultCol;
+		}
+		else
+		{
+			defaultTextColor = ccColor::Rgbub(	255 - context.labelDefaultBkgCol.r,
+												255 - context.labelDefaultBkgCol.g,
+												255 - context.labelDefaultBkgCol.b);
+		}
 
-			//display body
-			yStartRel -= c_margin;
-			for (int i=0; i<body.size(); ++i)
+		//label title
+		context._win->displayText(title,xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor.rgb,&titleFont);
+		yStartRel -= c_margin;
+		
+		if (m_showFullBody)
+		{
+#ifdef DRAW_CONTENT_AS_TAB
+			int xCol = xStartRel;
+			for (int c=0; c<tab.colCount; ++c)
 			{
-				yStartRel -= strHeight;
-				context._win->displayText(body[i],xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor,&bodyFont);
+				int width = tab.colWidth[c] + 2*c_tabMarginX;
+				int height = rowHeight + 2*c_tabMarginY;
+
+				int yRow = yStartRel;
+				int actualRowCount = std::min(tab.rowCount,tab.colContent[c].size());
+				for (int r=0; r<actualRowCount; ++r)
+				{
+					if (r && (r % 3) == 0)
+						yRow -= c_margin;
+
+					//background color
+					const unsigned char* backgroundColor = 0;
+					const unsigned char* textColor = defaultTextColor.rgb;
+					bool numericCol = ((c & 1) == 1);
+					if (numericCol)
+					{
+						//textColor = defaultTextColor.rgb;
+						//backgroundColor = ccColor::white; //no need to draw a background!
+					}
+					else
+					{
+						textColor = ccColor::white;
+						int rgbIndex = (r % 3);
+						if (rgbIndex == 0)
+							backgroundColor = ccColor::red;
+						else if (rgbIndex == 1)
+							backgroundColor = darkGreen;
+						else if (rgbIndex == 2)
+							backgroundColor = ccColor::blue;
+					}
+
+					//draw background
+					if (backgroundColor)
+					{
+						glColor3ubv(backgroundColor);
+						glBegin(GL_QUADS);
+						glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);
+						glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow - height);
+						glVertex2i(m_labelROI.left() + xCol + width, -m_labelROI.top() + yRow - height);
+						glVertex2i(m_labelROI.left() + xCol + width, -m_labelROI.top() + yRow);
+						glEnd();
+					}
+
+					const QString& str = tab.colContent[c][r];
+
+					int xShift = 0;
+					if (numericCol)
+					{
+						//align digits on the right
+						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
+					}
+					else
+					{
+						//align characetrs in the middle
+						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).width(str)) / 2;
+					}
+
+					context._win->displayText(	str,
+												xStart+xCol+c_tabMarginX+xShift,
+												yStart+yRow-rowHeight,ccGenericGLDisplay::ALIGN_DEFAULT,0,textColor,&bodyFont);
+
+					yRow -= height;
+				}
+
+				xCol += width;
 			}
+#else
+			if (!body.empty())
+			{
+				//display body
+				yStartRel -= c_margin;
+				for (int i=0; i<body.size(); ++i)
+				{
+					yStartRel -= rowHeight;
+					context._win->displayText(body[i],xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor.rgb,&bodyFont);
+				}
+			}
+#endif //DRAW_CONTENT_AS_TAB
 		}
 	}
 

@@ -300,7 +300,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	const ccGui::ParamStruct& displayParams = win->getDisplayParameters();
 
 	//default color: text color
-	const unsigned char* textColor = displayParams.textDefaultCol;
+	const ccColor::Rgbub& textColor = displayParams.textDefaultCol;
 
 	//histogram?
 	const ccScalarField::Histogram histogram = sf->getHistogram();
@@ -326,12 +326,6 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	
 	std::vector<double> sortedKeyValues(keyValues.begin(),keyValues.end());
 	double maxRange = sortedKeyValues.back()-sortedKeyValues.front();
-
-	//const colorType* lineColor = ccColor::white;
-	////clear background?
-	//if (displayParams.backgroundCol[0] + displayParams.backgroundCol[1] + displayParams.backgroundCol[2] > 3*128)
-	//	lineColor = ccColor::black;
-	const colorType* lineColor = textColor;
 
 	//display color ramp
 	{
@@ -398,7 +392,8 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 
 		//scale border
 		glLineWidth(2.0f * renderZoom);
-		glColor3ubv(lineColor);
+		const ccColor::Rgbub& lineColor = textColor;
+		glColor3ubv(lineColor.rgb);
 		glBegin(GL_LINE_LOOP);
 		glVertex2i(x,y);
 		glVertex2i(x+scaleWidth,y);
@@ -477,7 +472,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		//display labels
 
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f((float)textColor[0]/255.0f,(float)textColor[1]/255.0f,(float)textColor[2]/255.0f);
+		glColor3f(textColor.r/255.0f,textColor.g/255.0f,textColor.b/255.0f);
 
 		//Scalar field name
 		const char* sfName = sf->getName();

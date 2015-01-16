@@ -134,7 +134,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glLineStipple(1, 0xAAAA);
 	glEnable(GL_LINE_STIPPLE);
 
-	const colorType* defaultColor = m_selected ? ccColor::red : context.textDefaultCol;
+	const unsigned char* defaultColor = m_selected ? ccColor::red.rgba : context.textDefaultCol.rgb;
 	glColor3ubv(defaultColor); 
 
 	glBegin(GL_LINE_LOOP);

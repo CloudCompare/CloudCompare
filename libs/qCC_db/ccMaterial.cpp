@@ -30,7 +30,6 @@
 #include <QDataStream>
 
 //System
-#include <string.h>
 #include <assert.h>
 
 //Textures DB
@@ -39,12 +38,12 @@ QMap<QString, QImage> s_textureDB;
 ccMaterial::ccMaterial(QString name)
 	: m_name(name)
 	, m_uniqueID(QUuid::createUuid().toString())
+	, m_diffuseFront(ccColor::bright)
+	, m_diffuseBack(ccColor::bright)
+	, m_ambient(ccColor::night)
+	, m_specular(ccColor::night)
+	, m_emission(ccColor::night)
 {
-	memcpy(m_diffuseFront, ccColor::bright, sizeof(float)*4);
-	memcpy(m_diffuseBack,  ccColor::bright, sizeof(float)*4);
-	memcpy(m_ambient,      ccColor::night,  sizeof(float)*4);
-	memcpy(m_specular,     ccColor::night,  sizeof(float)*4);
-	memcpy(m_emission,     ccColor::night,  sizeof(float)*4);
 	setShininess(50.0);
 };
 
@@ -54,43 +53,18 @@ ccMaterial::ccMaterial(const ccMaterial& mtl)
 	, m_shininessFront(mtl.m_shininessFront)
 	, m_shininessBack(mtl.m_shininessFront)
 	, m_uniqueID(mtl.m_uniqueID)
+	, m_diffuseFront(m_diffuseFront)
+	, m_diffuseBack(m_diffuseBack)
+	, m_ambient(m_ambient)
+	, m_specular(m_specular)
+	, m_emission(m_emission)
 {
-	memcpy(m_diffuseFront, mtl.m_diffuseFront, sizeof(float)*4);
-	memcpy(m_diffuseBack,  mtl.m_diffuseBack,  sizeof(float)*4);
-	memcpy(m_ambient,      mtl.m_ambient,      sizeof(float)*4);
-	memcpy(m_specular,     mtl.m_specular,     sizeof(float)*4);
-	memcpy(m_emission,     mtl.m_emission,     sizeof(float)*4);
 }
 
-void ccMaterial::setDiffuse(const float color[4])
+void ccMaterial::setDiffuse(const ccColor::Rgbaf& color)
 {
 	setDiffuseFront(color);
 	setDiffuseBack(color);
-}
-
-void ccMaterial::setDiffuseFront(const float color[4])
-{
-	memcpy(m_diffuseFront, color, sizeof(float)*4);
-}
-
-void ccMaterial::setDiffuseBack(const float color[4])
-{
-	memcpy(m_diffuseBack, color, sizeof(float)*4);
-}
-
-void ccMaterial::setAmbient(const float color[4])
-{
-	memcpy(m_ambient, color, sizeof(float)*4);
-}
-
-void ccMaterial::setSpecular(const float color[4])
-{
-	memcpy(m_specular, color, sizeof(float)*4);
-}
-
-void ccMaterial::setEmission(const float color[4])
-{
-	memcpy(m_emission, color, sizeof(float)*4);
 }
 
 void ccMaterial::setShininess(float val)
@@ -99,23 +73,13 @@ void ccMaterial::setShininess(float val)
 	setShininessBack(0.8f * val);
 }
 
-void ccMaterial::setShininessFront(float val)
-{
-	m_shininessFront = val;
-}
-
-void ccMaterial::setShininessBack(float val)
-{
-	m_shininessBack = val;
-}
-
 void ccMaterial::setTransparency(float val)
 {
-	m_diffuseFront[3] = val;
-	m_diffuseBack[3]  = val;
-	m_ambient[3]      = val;
-	m_specular[3]     = val;
-	m_emission[3]     = val;
+	m_diffuseFront.a = val;
+	m_diffuseBack.a  = val;
+	m_ambient.a      = val;
+	m_specular.a     = val;
+	m_emission.a     = val;
 }
 
 void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
@@ -263,15 +227,15 @@ bool ccMaterial::toFile(QFile& out) const
 	outStream << m_textureFilename;
 	//material colors (dataVersion>=20)
 	//we don't use QByteArray here as it has its own versions!
-	if (out.write((const char*)m_diffuseFront,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_diffuseFront.rgba,sizeof(float)*4) < 0) 
 		return WriteError();
-	if (out.write((const char*)m_diffuseBack,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_diffuseBack.rgba,sizeof(float)*4) < 0) 
 		return WriteError();
-	if (out.write((const char*)m_ambient,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_ambient.rgba,sizeof(float)*4) < 0) 
 		return WriteError();
-	if (out.write((const char*)m_specular,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_specular.rgba,sizeof(float)*4) < 0) 
 		return WriteError();
-	if (out.write((const char*)m_emission,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_emission.rgba,sizeof(float)*4) < 0) 
 		return WriteError();
 	//material shininess (dataVersion>=20)
 	outStream << m_shininessFront;
@@ -299,15 +263,15 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
 		inStream >> m_textureFilename;
 	}
 	//material colors (dataVersion>=20)
-	if (in.read((char*)m_diffuseFront,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_diffuseFront.rgba,sizeof(float)*4) < 0) 
 		return ReadError();
-	if (in.read((char*)m_diffuseBack,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_diffuseBack.rgba,sizeof(float)*4) < 0) 
 		return ReadError();
-	if (in.read((char*)m_ambient,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_ambient.rgba,sizeof(float)*4) < 0) 
 		return ReadError();
-	if (in.read((char*)m_specular,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_specular.rgba,sizeof(float)*4) < 0) 
 		return ReadError();
-	if (in.read((char*)m_emission,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_emission.rgba,sizeof(float)*4) < 0) 
 		return ReadError();
 	//material shininess (dataVersion>=20)
 	inStream >> m_shininessFront;

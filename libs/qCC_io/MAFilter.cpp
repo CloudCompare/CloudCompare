@@ -442,14 +442,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 
 		//for each vertex
 		{
-			float col[3];
-			float coef = 1.0f/static_cast<float>(MAX_COLOR_COMP);
 			for (unsigned i=0; i<numberOfVertexes; ++i)
 			{
 				const colorType* c = pc->getPointColor(i);
-				col[0] = static_cast<float>(c[0]) * coef;
-				col[1] = static_cast<float>(c[1]) * coef;
-				col[2] = static_cast<float>(c[2]) * coef;
+				ccColor::Rgbf col(	static_cast<float>(c[0])/ccColor::MAX,
+									static_cast<float>(c[1])/ccColor::MAX,
+									static_cast<float>(c[2])/ccColor::MAX);
 
 				//on compte le nombre de faces
 				int nf = 0;
@@ -463,12 +461,15 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				if (nf > 0)
 				{
 					if (fprintf(fp,"\tsetAttr -s %i \".vclr[%u].vfcl\";\n",nf,i) < 0)
-						{fclose(fp);return CC_FERR_WRITING;}
+					{
+						fclose(fp);
+						return CC_FERR_WRITING;
+					}
 
 					faceIndexes *oldf, *f = theFacesIndexes[i];
 					while (f)
 					{
-						if (fprintf(fp,"\tsetAttr \".vclr[%u].vfcl[%i].frgb\" -type \"float3\" %f %f %f;\n",i,f->faceIndex,col[0],col[1],col[2]) < 0)
+						if (fprintf(fp,"\tsetAttr \".vclr[%u].vfcl[%i].frgb\" -type \"float3\" %f %f %f;\n",i,f->faceIndex,col.r,col.g,col.b) < 0)
 						{
 							fclose(fp);
 							return CC_FERR_WRITING;

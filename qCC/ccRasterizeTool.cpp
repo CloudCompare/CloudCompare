@@ -46,7 +46,6 @@
 
 //System
 #include <assert.h>
-#include <string.h>
 
 ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0*/)
 	: QDialog(parent)
@@ -107,8 +106,8 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 			m_window = new ccGLWindow(this);
 			ccGui::ParamStruct params = m_window->getDisplayParameters();
 			//black (text) & white (background) display by default
-			memcpy(params.backgroundCol,ccColor::white,3*sizeof(unsigned char));
-			memcpy(params.textDefaultCol,ccColor::black,3*sizeof(unsigned char));
+			params.backgroundCol = ccColor::white;
+			params.textDefaultCol = ccColor::black;
 			params.drawBackgroundGradient = false;
 			params.decimateMeshOnMove = false;
 			params.displayCross = false;

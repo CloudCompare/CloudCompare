@@ -74,7 +74,8 @@ signals:
 		void changeTextColor();
 		void changeBackgroundColor();
 		void changeHistBackgroundColor();
-		void changeLabelColor();
+		void changeLabelBackgroundColor();
+		void changeLabelMarkerColor();
 		void changeBackgroundGradient();
 		void changeMeshDecimation();
 		void changeCloudDecimation();
@@ -85,9 +86,10 @@ signals:
 		void changeColorScaleRampWidth(int);
 
 		void changeDefaultFontSize(int);
+		void changeLabelFontSize(int);
 		void changeNumberPrecision(int);
-		void changeLabelsTransparency(int);
-		void changeLabelsMarkerSize(int);
+		void changeLabelOpacity(int);
+		void changeLabelMarkerSize(int);
 
 		void doAccept();
 		void doReject();
@@ -109,7 +111,8 @@ protected:
 	QColor textDefaultCol;
 	QColor backgroundCol;
 	QColor histBackgroundCol;
-	QColor labelCol;
+	QColor labelBackgroundCol;
+	QColor labelMarkerCol;
 	QColor bbDefaultCol;
 
 	//! Current parameters

@@ -1479,7 +1479,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (isColorOverriden())
 			{
-				glColor3ubv(m_tempColor);
+				ccGL::Color3v(m_tempColor.rgb);
 				glParams.showColors = false;
 			}
 			else
@@ -2902,7 +2902,7 @@ bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCV
 	return true;
 }
 
-bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[])
+bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C)
 {
 	assert(triIndex < size());
 
@@ -2911,10 +2911,10 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, colorType 
 
 	const unsigned* tri = m_triVertIndexes->getValue(triIndex);
 
-	return interpolateColors(tri[0],tri[1],tri[2],P,rgb);
+	return interpolateColors(tri[0],tri[1],tri[2],P,C);
 }
 
-bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, colorType rgb[])
+bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, ccColor::Rgb& rgb)
 {
 	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(i1);
 	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(i2);
@@ -2934,14 +2934,14 @@ bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVe
 	const colorType* C2 = m_associatedCloud->getPointColor(i2);
 	const colorType* C3 = m_associatedCloud->getPointColor(i3);
 
-	rgb[0] = static_cast<colorType>(floor(C1[0]*d1 + C2[0]*d2 + C3[0]*d3));
-	rgb[1] = static_cast<colorType>(floor(C1[1]*d1 + C2[1]*d2 + C3[1]*d3));
-	rgb[2] = static_cast<colorType>(floor(C1[2]*d1 + C2[2]*d2 + C3[2]*d3));
+	rgb.r = static_cast<colorType>(floor(C1[0]*d1 + C2[0]*d2 + C3[0]*d3));
+	rgb.g = static_cast<colorType>(floor(C1[1]*d1 + C2[1]*d2 + C3[1]*d3));
+	rgb.b = static_cast<colorType>(floor(C1[2]*d1 + C2[2]*d2 + C3[2]*d3));
 
 	return true;
 }
 
-bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture)
+bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture)
 {
 	assert(triIndex < size());
 
@@ -2958,7 +2958,7 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 	{
 		assert(m_materials);
 		matIndex = m_triMtlIndexes->getValue(triIndex);
-		assert(matIndex < (int)m_materials->size());
+		assert(matIndex < static_cast<int>(m_materials->size()));
 	}
 
 	const unsigned* tri = m_triVertIndexes->getValue(triIndex);
@@ -2985,9 +2985,9 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 					QRgb pixel = texture.pixel(xPix,yPix);
 
-					rgb[0] = static_cast<colorType>(qRed(pixel));
-					rgb[1] = static_cast<colorType>(qGreen(pixel));
-					rgb[2] = static_cast<colorType>(qBlue(pixel));
+					rgb.r = static_cast<colorType>(qRed(pixel));
+					rgb.g = static_cast<colorType>(qGreen(pixel));
+					rgb.b = static_cast<colorType>(qBlue(pixel));
 
 					foundMaterial = true;
 				}
@@ -2996,9 +2996,9 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 		else
 		{
 			const float* diffuse = material->getDiffuseFront();
-			rgb[0] = static_cast<colorType>(diffuse[0]*MAX_COLOR_COMP);
-			rgb[1] = static_cast<colorType>(diffuse[1]*MAX_COLOR_COMP);
-			rgb[2] = static_cast<colorType>(diffuse[2]*MAX_COLOR_COMP);
+			rgb.r = static_cast<colorType>(diffuse[0]*ccColor::MAX);
+			rgb.g = static_cast<colorType>(diffuse[1]*ccColor::MAX);
+			rgb.b = static_cast<colorType>(diffuse[2]*ccColor::MAX);
 
 			foundMaterial = true;
 		}
@@ -3006,19 +3006,14 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 	if (!foundMaterial && returnColorIfNoTexture && hasColors())
 	{
-		const colorType* col = m_associatedCloud->getPointColor(tri[vertIndex]);
-
-		rgb[0] = col[0];
-		rgb[1] = col[1];
-		rgb[2] = col[2];
-
+		rgb = ccColor::Rgb(m_associatedCloud->getPointColor(tri[vertIndex]));
 		foundMaterial = true;
 	}
 
 	return foundMaterial;
 }
 
-bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
+bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture)
 {
 	assert(triIndex < size());
 
@@ -3044,9 +3039,9 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 	if (!material->hasTexture())
 	{
 		const float* diffuse = material->getDiffuseFront();
-		rgb[0] = static_cast<colorType>(diffuse[0]*MAX_COLOR_COMP);
-		rgb[1] = static_cast<colorType>(diffuse[1]*MAX_COLOR_COMP);
-		rgb[2] = static_cast<colorType>(diffuse[2]*MAX_COLOR_COMP);
+		rgb.r = static_cast<colorType>(diffuse[0]*ccColor::MAX);
+		rgb.g = static_cast<colorType>(diffuse[1]*ccColor::MAX);
+		rgb.b = static_cast<colorType>(diffuse[2]*ccColor::MAX);
 		return true;
 	}
 
@@ -3118,9 +3113,9 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 		QRgb pixel = texture.pixel(xPix,yPix);
 
 		const float* diffuse = material->getDiffuseFront();
-		rgb[0] = static_cast<colorType>(diffuse[0] * qRed  (pixel));
-		rgb[1] = static_cast<colorType>(diffuse[1] * qGreen(pixel));
-		rgb[2] = static_cast<colorType>(diffuse[2] * qBlue (pixel));
+		rgb.r = static_cast<colorType>(diffuse[0] * qRed  (pixel));
+		rgb.g = static_cast<colorType>(diffuse[1] * qGreen(pixel));
+		rgb.b = static_cast<colorType>(diffuse[2] * qBlue (pixel));
 	}
 
 	return true;
@@ -3199,9 +3194,9 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//*/
 				if (vertices->hasColors())
 				{
-					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					ccColor::Rgb C;
 					interpolateColors(indexA,indexB,indexC,G1,C);
-					vertices->addRGBColor(C);
+					vertices->addRGBColor(C.rgb);
 				}
 				//and add it to the map
 				s_alreadyCreatedVertices.insert(key,indexG1);
@@ -3232,9 +3227,9 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//*/
 				if (vertices->hasColors())
 				{
-					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					ccColor::Rgb C;
 					interpolateColors(indexA,indexB,indexC,G2,C);
-					vertices->addRGBColor(C);
+					vertices->addRGBColor(C.rgb);
 				}
 				//and add it to the map
 				s_alreadyCreatedVertices.insert(key,indexG2);
@@ -3265,9 +3260,9 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//*/
 				if (vertices->hasColors())
 				{
-					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					ccColor::Rgb C;
 					interpolateColors(indexA,indexB,indexC,G3,C);
-					vertices->addRGBColor(C);
+					vertices->addRGBColor(C.rgb);
 				}
 				//and add it to the map
 				s_alreadyCreatedVertices.insert(key,indexG3);
@@ -3561,11 +3556,11 @@ bool ccMesh::convertMaterialsToVertexColors()
 		const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
 		for (unsigned char j=0; j<3; ++j)
 		{
-			colorType rgb[3];
-			if (getVertexColorFromMaterial(i,j,rgb,true))
+			ccColor::Rgb C;
+			if (getVertexColorFromMaterial(i,j,C,true))
 			{
 				//FIXME: could we be smarter? (we process each point several times! And we assume the color is always the same...)
-				cloud->setPointColor(tsi->i[j],rgb);
+				cloud->setPointColor(tsi->i[j],C.rgb);
 			}
 		}
 	}

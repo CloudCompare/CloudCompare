@@ -69,6 +69,10 @@ public:
 	//type-less glTranslateX call (X=f,d)
 	static inline void Translate(float x, float y, float z) { glTranslatef(x,y,z); }
 	static inline void Translate(double x, double y, double z) { glTranslated(x,y,z); }
+
+	//type-less glColor3Xv call (X=f,ub)
+	static inline void Color3v(const unsigned char* v) { glColor3ubv(v); }
+	static inline void Color3v(const float* v) { glColor3fv(v); }
 };
 
 #endif //CC_INCLUDE_GL_HEADER

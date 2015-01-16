@@ -76,7 +76,7 @@ public:
 	//! Sets the polyline color
 	/** \param col RGB color
 	**/
-	void setColor(const colorType col[]);
+	inline void setColor(const ccColor::Rgb& col) { m_rgbColor = col; }
 
 	//! Sets the width of the line
 	/**  \param width the desired width
@@ -91,7 +91,7 @@ public:
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
 	**/
-	inline const colorType* getColor() const { return m_rgbColor; }
+	inline const ccColor::Rgb& getColor() const { return m_rgbColor; }
 
 	//inherited methods (ccHObject)
 	virtual ccBBox getMyOwnBB();
@@ -198,7 +198,7 @@ protected:
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! Unique RGB color
-	colorType m_rgbColor[3];
+	ccColor::Rgb m_rgbColor;
 
 	//! Width of the line
 	PointCoordinateType m_width;

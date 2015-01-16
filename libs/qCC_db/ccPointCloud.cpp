@@ -1144,10 +1144,10 @@ bool ccPointCloud::colorize(float r, float g, float b)
 		if (!resizeTheRGBTable(false))
 			return false;
 
-		colorType RGB[3] = {static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * r) ,
-							static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * g) ,
-							static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * b) };
-		m_rgbColors->fill(RGB);
+		ccColor::Rgb C(	static_cast<colorType>(ccColor::MAX * r) ,
+						static_cast<colorType>(ccColor::MAX * g) ,
+						static_cast<colorType>(ccColor::MAX * b) );
+		m_rgbColors->fill(C.rgb);
 	}
 
 	//We must update the VBOs
@@ -1188,11 +1188,11 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, int freq)
 		const CCVector3* P = getPoint(i);
 
 		double z = bands * (P->u[dim] - minHeight) / height;
-		colorType col[3] = {	static_cast<colorType>( ((sin(z + 0) + 1.0) / 2.0) * MAX_COLOR_COMP ),
-								static_cast<colorType>( ((sin(z + 2) + 1.0) / 2.0) * MAX_COLOR_COMP ),
-								static_cast<colorType>( ((sin(z + 4) + 1.0) / 2.0) * MAX_COLOR_COMP ) };
+		ccColor::Rgb C(	static_cast<colorType>( ((sin(z + 0) + 1.0) / 2.0) * ccColor::MAX ),
+						static_cast<colorType>( ((sin(z + 2) + 1.0) / 2.0) * ccColor::MAX ),
+						static_cast<colorType>( ((sin(z + 4) + 1.0) / 2.0) * ccColor::MAX ) );
 
-		m_rgbColors->setValue(i,col);
+		m_rgbColors->setValue(i,C.rgb);
 	}
 
 	//We must update the VBOs
@@ -1732,12 +1732,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (glParams.showColors && isColorOverriden())
 		{
-			glColor3ubv(m_tempColor);
+			ccGL::Color3v(m_tempColor.rgb);
 			glParams.showColors = false;
 		}
 		else
 		{
-			glColor3ubv(context.pointsDefaultCol);
+			glColor3ubv(context.pointsDefaultCol.rgb);
 		}
 
 		//in the case we need normals (i.e. lighting)
@@ -2411,9 +2411,9 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 			if (col)
 			{
 				colorType* _color = m_rgbColors->getCurrentValue();
-				_color[0] = static_cast<colorType>(static_cast<float>(_color[0])*static_cast<float>(col[0])/static_cast<float>(MAX_COLOR_COMP));
-				_color[1] = static_cast<colorType>(static_cast<float>(_color[1])*static_cast<float>(col[1])/static_cast<float>(MAX_COLOR_COMP));
-				_color[2] = static_cast<colorType>(static_cast<float>(_color[2])*static_cast<float>(col[2])/static_cast<float>(MAX_COLOR_COMP));
+				_color[0] = static_cast<colorType>(_color[0] * (static_cast<float>(col[0])/ccColor::MAX));
+				_color[1] = static_cast<colorType>(_color[1] * (static_cast<float>(col[1])/ccColor::MAX));
+				_color[2] = static_cast<colorType>(_color[2] * (static_cast<float>(col[2])/ccColor::MAX));
 			}
 			m_rgbColors->forwardIterator();
 		}

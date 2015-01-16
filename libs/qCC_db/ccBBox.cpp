@@ -68,12 +68,12 @@ PointCoordinateType ccBBox::getMaxBoxDim() const
 	return std::max(V.x,std::max(V.y,V.z));
 }
 
-void ccBBox::draw(const colorType col[]) const
+void ccBBox::draw(const ccColor::Rgb& col) const
 {
 	if (!m_valid)
 		return;
 
-	glColor3ubv(col);
+	ccGL::Color3v(col.rgb);
 
 	glBegin(GL_LINE_LOOP);
 	ccGL::Vertex3v(m_bbMin.u);

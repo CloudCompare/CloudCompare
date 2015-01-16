@@ -568,10 +568,11 @@ PointCoordinateType ccClipBox::computeArrowsScale() const
 	return scale;
 }
 
-const colorType c_lightComp = MAX_COLOR_COMP/2;
-const colorType c_lightRed[3]	= {MAX_COLOR_COMP,c_lightComp,c_lightComp};
-const colorType c_lightGreen[3]	= {c_lightComp,MAX_COLOR_COMP,c_lightComp};
-const colorType c_lightBlue[3]	= {c_lightComp,c_lightComp,MAX_COLOR_COMP};
+const colorType c_lightComp = ccColor::MAX/2;
+const colorType c_lightRed[3]	= {ccColor::MAX, c_lightComp , c_lightComp};
+const colorType c_lightGreen[3]	= {c_lightComp , ccColor::MAX, c_lightComp};
+const colorType c_lightBlue[3]	= {c_lightComp , c_lightComp , ccColor::MAX};
+
 void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!MACRO_Draw3D(context))

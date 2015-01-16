@@ -733,7 +733,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 							for (int c=0; c<3; ++c)
 							{
 								unsigned temp = tokens[4+c].toUInt(&ok);
-								ok &= (temp <= static_cast<unsigned>(MAX_COLOR_COMP));
+								ok &= (temp <= static_cast<unsigned>(ccColor::MAX));
 								if (ok)
 								{
 									rgb[c] = static_cast<colorType>(temp);

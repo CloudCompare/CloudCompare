@@ -26,7 +26,7 @@ template<class T> struct ccSingleton
 	//! Destructor
 	~ccSingleton() { release(); }
 	//! Releases the current instance
-	void release() { if (instance) delete instance; instance = 0; }
+	inline void release() { if (instance) { delete instance; instance = 0; } }
 	
 	//! Current instance
 	T* instance;

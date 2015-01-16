@@ -280,11 +280,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 			if (saveFloatColors)
 			{
 				colorLine.append(separator);
-				colorLine.append(QString::number(static_cast<double>(col[0])/MAX_COLOR_COMP));
+				colorLine.append(QString::number(static_cast<double>(col[0])/ccColor::MAX));
 				colorLine.append(separator);
-				colorLine.append(QString::number(static_cast<double>(col[1])/MAX_COLOR_COMP));
+				colorLine.append(QString::number(static_cast<double>(col[1])/ccColor::MAX));
 				colorLine.append(separator);
-				colorLine.append(QString::number(static_cast<double>(col[2])/MAX_COLOR_COMP));
+				colorLine.append(QString::number(static_cast<double>(col[2])/ccColor::MAX));
 			}
 			else
 			{
@@ -704,7 +704,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	CCVector3d P(0,0,0);
 	CCVector3d Pshift(0,0,0);
 	CCVector3 N(0,0,0);
-	colorType col[3] = {0,0,0};
+	ccColor::Rgb col;
 
 	//other useful variables
 	unsigned linesRead = 0;
@@ -847,43 +847,43 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 				if (cloudDesc.iRgbaIndex >= 0)
 				{
 					const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
-					col[0] = ((rgb >> 16)	& 0x0000ff);
-					col[1] = ((rgb >> 8)	& 0x0000ff);
-					col[2] = ((rgb)			& 0x0000ff);
+					col.r = ((rgb >> 16) & 0x0000ff);
+					col.g = ((rgb >> 8 ) & 0x0000ff);
+					col.b = ((rgb      ) & 0x0000ff);
 
 				}
 				else if (cloudDesc.fRgbaIndex >= 0)
 				{
 					const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
 					const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
-					col[0] = ((rgb >> 16)	& 0x0000ff);
-					col[1] = ((rgb >> 8)	& 0x0000ff);
-					col[2] = ((rgb)			& 0x0000ff);
+					col.r = ((rgb >> 16) & 0x0000ff);
+					col.g = ((rgb >> 8 ) & 0x0000ff);
+					col.b = ((rgb      ) & 0x0000ff);
 				}
 				else
 				{
 					if (cloudDesc.redIndex >= 0)
 					{
-						float multiplier = cloudDesc.hasFloatRGBColors[0] ? static_cast<float>(MAX_COLOR_COMP) : 1.0f;
-						col[0] = static_cast<colorType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
+						float multiplier = cloudDesc.hasFloatRGBColors[0] ? static_cast<float>(ccColor::MAX) : 1.0f;
+						col.r = static_cast<colorType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
 					}
 					if (cloudDesc.greenIndex >= 0)
 					{
-						float multiplier = cloudDesc.hasFloatRGBColors[1] ? static_cast<float>(MAX_COLOR_COMP) : 1.0f;
-						col[1] = static_cast<colorType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
+						float multiplier = cloudDesc.hasFloatRGBColors[1] ? static_cast<float>(ccColor::MAX) : 1.0f;
+						col.g = static_cast<colorType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
 					}
 					if (cloudDesc.blueIndex >= 0)
 					{
-						float multiplier = cloudDesc.hasFloatRGBColors[2] ? static_cast<float>(MAX_COLOR_COMP) : 1.0f;
-						col[2] = static_cast<colorType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
+						float multiplier = cloudDesc.hasFloatRGBColors[2] ? static_cast<float>(ccColor::MAX) : 1.0f;
+						col.b = static_cast<colorType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
 					}
 				}
-				cloudDesc.cloud->addRGBColor(col);
+				cloudDesc.cloud->addRGBColor(col.rgb);
 			}
 			else if (cloudDesc.greyIndex >= 0)
 			{
-				col[0] = col[1] = col[2] = static_cast<colorType>(parts[cloudDesc.greyIndex].toInt());
-				cloudDesc.cloud->addRGBColor(col);
+				col.r = col.r = col.b = static_cast<colorType>(parts[cloudDesc.greyIndex].toInt());
+				cloudDesc.cloud->addRGBColor(col.rgb);
 			}
 
 			//Scalar distance

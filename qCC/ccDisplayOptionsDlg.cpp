@@ -20,46 +20,45 @@
 //Qt
 #include <QColorDialog>
 
-//System
-#include <string.h>
-
 ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui::DisplayOptionsDlg()
 {
 	setupUi(this);
 
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-	connect(ambientColorButton, SIGNAL(clicked()), this, SLOT(changeLightAmbientColor()));
-	connect(diffuseColorButton, SIGNAL(clicked()), this, SLOT(changeLightDiffuseColor()));
-	connect(specularColorButton, SIGNAL(clicked()), this, SLOT(changeLightSpecularColor()));
-	connect(meshBackColorButton, SIGNAL(clicked()), this, SLOT(changeMeshBackDiffuseColor()));
-	connect(meshSpecularColorButton, SIGNAL(clicked()), this, SLOT(changeMeshSpecularColor()));
-	connect(meshFrontColorButton, SIGNAL(clicked()), this, SLOT(changeMeshFrontDiffuseColor()));
-	connect(bbColorButton, SIGNAL(clicked()), this, SLOT(changeBBColor()));
-	connect(bkgColorButton, SIGNAL(clicked()), this, SLOT(changeBackgroundColor()));
-	connect(histBkgColorButton, SIGNAL(clicked()), this, SLOT(changeHistBackgroundColor()));
-	connect(labelsColorButton, SIGNAL(clicked()), this, SLOT(changeLabelColor()));
-	connect(enableGradientCheckBox, SIGNAL(clicked()), this, SLOT(changeBackgroundGradient()));
-	connect(pointsColorButton, SIGNAL(clicked()), this, SLOT(changePointsColor()));
-	connect(textColorButton, SIGNAL(clicked()), this, SLOT(changeTextColor()));
-	connect(decimateMeshBox, SIGNAL(clicked()), this, SLOT(changeMeshDecimation()));
-	connect(decimateCloudBox, SIGNAL(clicked()), this, SLOT(changeCloudDecimation()));
-	connect(useVBOCheckBox,	SIGNAL(clicked()), this, SLOT(changeVBOUsage()));
-	connect(showCrossCheckBox, SIGNAL(clicked()), this, SLOT(changeCrossDisplayed()));
+	connect(ambientColorButton,              SIGNAL(clicked()),         this, SLOT(changeLightAmbientColor()));
+	connect(diffuseColorButton,              SIGNAL(clicked()),         this, SLOT(changeLightDiffuseColor()));
+	connect(specularColorButton,             SIGNAL(clicked()),         this, SLOT(changeLightSpecularColor()));
+	connect(meshBackColorButton,             SIGNAL(clicked()),         this, SLOT(changeMeshBackDiffuseColor()));
+	connect(meshSpecularColorButton,         SIGNAL(clicked()),         this, SLOT(changeMeshSpecularColor()));
+	connect(meshFrontColorButton,            SIGNAL(clicked()),         this, SLOT(changeMeshFrontDiffuseColor()));
+	connect(bbColorButton,                   SIGNAL(clicked()),         this, SLOT(changeBBColor()));
+	connect(bkgColorButton,                  SIGNAL(clicked()),         this, SLOT(changeBackgroundColor()));
+	connect(histBkgColorButton,              SIGNAL(clicked()),         this, SLOT(changeHistBackgroundColor()));
+	connect(labelBkgColorButton,             SIGNAL(clicked()),         this, SLOT(changeLabelBackgroundColor()));
+	connect(labelMarkerColorButton,          SIGNAL(clicked()),         this, SLOT(changeLabelMarkerColor()));
+	connect(enableGradientCheckBox,          SIGNAL(clicked()),         this, SLOT(changeBackgroundGradient()));
+	connect(pointsColorButton,               SIGNAL(clicked()),         this, SLOT(changePointsColor()));
+	connect(textColorButton,                 SIGNAL(clicked()),         this, SLOT(changeTextColor()));
+	connect(decimateMeshBox,                 SIGNAL(clicked()),         this, SLOT(changeMeshDecimation()));
+	connect(decimateCloudBox,                SIGNAL(clicked()),         this, SLOT(changeCloudDecimation()));
+	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
+	connect(showCrossCheckBox,               SIGNAL(clicked()),         this, SLOT(changeCrossDisplayed()));
 
-	connect(colorScaleShowHistogramCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleShowHistogram()));
-	connect(useColorScaleShaderCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleUseShader()));
-	connect(colorRampWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleRampWidth(int)));
+	connect(colorScaleShowHistogramCheckBox, SIGNAL(clicked()),         this, SLOT(changeColorScaleShowHistogram()));
+	connect(useColorScaleShaderCheckBox,     SIGNAL(clicked()),         this, SLOT(changeColorScaleUseShader()));
+	connect(colorRampWidthSpinBox,           SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleRampWidth(int)));
 
-	connect(defaultFontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
-	connect(numberPrecisionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
-	connect(labelsTransparencySpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeLabelsTransparency(int)));
-	connect(labelMarkerSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeLabelsMarkerSize(int)));
+	connect(defaultFontSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
+	connect(labelFontSizeSpinBox,            SIGNAL(valueChanged(int)), this, SLOT(changeLabelFontSize(int)));
+	connect(numberPrecisionSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
+	connect(labelOpacitySpinBox,             SIGNAL(valueChanged(int)), this, SLOT(changeLabelOpacity(int)));
+	connect(labelMarkerSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeLabelMarkerSize(int)));
 
-	connect(okButton, SIGNAL(clicked()), this, SLOT(doAccept()));
-	connect(applyButton, SIGNAL(clicked()), this, SLOT(apply()));
-	connect(resetButton, SIGNAL(clicked()), this, SLOT(reset()));
-	connect(cancelButton, SIGNAL(clicked()), this, SLOT(doReject()));
+	connect(okButton,                        SIGNAL(clicked()),         this, SLOT(doAccept()));
+	connect(applyButton,                     SIGNAL(clicked()),         this, SLOT(apply()));
+	connect(resetButton,                     SIGNAL(clicked()),         this, SLOT(reset()));
+	connect(cancelButton,                    SIGNAL(clicked()),         this, SLOT(doReject()));
 
 	oldParameters = parameters = ccGui::Parameters();
 
@@ -94,27 +93,31 @@ void ccDisplayOptionsDlg::refresh()
 	meshFrontDiff.setRgbF(mfc[0],mfc[1],mfc[2],mfc[3]);
 	SetButtonColor(meshFrontColorButton,meshFrontDiff);
 
-	const unsigned char* bbc = parameters.bbDefaultCol;
+	const unsigned char* bbc = parameters.bbDefaultCol.rgb;
 	bbDefaultCol.setRgb(bbc[0],bbc[1],bbc[2]);
 	SetButtonColor(bbColorButton,bbDefaultCol);
 
-	const unsigned char* bgc = parameters.backgroundCol;
+	const unsigned char* bgc = parameters.backgroundCol.rgb;
 	backgroundCol.setRgb(bgc[0],bgc[1],bgc[2]);
 	SetButtonColor(bkgColorButton,backgroundCol);
 
-	const unsigned char* hbgc = parameters.histBackgroundCol;
+	const unsigned char* hbgc = parameters.histBackgroundCol.rgb;
 	histBackgroundCol.setRgb(hbgc[0],hbgc[1],hbgc[2]);
 	SetButtonColor(histBkgColorButton,histBackgroundCol);
 
-	const unsigned char* lblc = parameters.labelCol;
-	labelCol.setRgb(lblc[0],lblc[1],lblc[2]);
-	SetButtonColor(labelsColorButton,labelCol);
+	const unsigned char* lblbc = parameters.labelBackgroundCol.rgb;
+	labelBackgroundCol.setRgb(lblbc[0],lblbc[1],lblbc[2]);
+	SetButtonColor(labelBkgColorButton,labelBackgroundCol);
 
-	const unsigned char* pdc = parameters.pointsDefaultCol;
+	const unsigned char* lblmc = parameters.labelMarkerCol.rgb;
+	labelMarkerCol.setRgb(lblmc[0],lblmc[1],lblmc[2]);
+	SetButtonColor(labelMarkerColorButton,labelMarkerCol);
+
+	const unsigned char* pdc = parameters.pointsDefaultCol.rgb;
 	pointsDefaultCol.setRgb(pdc[0],pdc[1],pdc[2]);
 	SetButtonColor(pointsColorButton,pointsDefaultCol);
 
-	const unsigned char* tdc = parameters.textDefaultCol;
+	const unsigned char* tdc = parameters.textDefaultCol.rgb;
 	textDefaultCol.setRgb(tdc[0],tdc[1],tdc[2]);
 	SetButtonColor(textColorButton,textDefaultCol);
 
@@ -130,19 +133,20 @@ void ccDisplayOptionsDlg::refresh()
 	colorRampWidthSpinBox->setValue(parameters.colorScaleRampWidth);
 
 	defaultFontSizeSpinBox->setValue(parameters.defaultFontSize);
+	labelFontSizeSpinBox->setValue(parameters.labelFontSize);
 	numberPrecisionSpinBox->setValue(parameters.displayedNumPrecision);
-	labelsTransparencySpinBox->setValue(parameters.labelsTransparency);
-	labelMarkerSizeSpinBox->setValue(parameters.pickedPointsSize);
+	labelOpacitySpinBox->setValue(parameters.labelOpacity);
+	labelMarkerSizeSpinBox->setValue(parameters.labelMarkerSize);
 
 	update();
 }
 
-static void QColorToFloat(const QColor& col, float rgba[4])
+static void QColorToFloat(const QColor& col, ccColor::Rgbaf& rgba)
 {
-	rgba[0] = static_cast<float>(col.redF());
-	rgba[1] = static_cast<float>(col.greenF());
-	rgba[2] = static_cast<float>(col.blueF());
-	rgba[3] = static_cast<float>(col.alphaF());
+	rgba.r = static_cast<float>(col.redF  ());
+	rgba.g = static_cast<float>(col.greenF());
+	rgba.b = static_cast<float>(col.blueF ());
+	rgba.a = static_cast<float>(col.alphaF());
 }
 
 void ccDisplayOptionsDlg::changeLightDiffuseColor()
@@ -154,10 +158,10 @@ void ccDisplayOptionsDlg::changeLightDiffuseColor()
 	lightDiffuseColor = newCol;
 	SetButtonColor(diffuseColorButton,lightDiffuseColor);
 
-	float rgba[4];
+	ccColor::Rgbaf rgba;
 	QColorToFloat(lightDiffuseColor,rgba);
 
-	memcpy(parameters.lightDiffuseColor,rgba,sizeof(float)*4);
+	parameters.lightDiffuseColor = rgba;
 }
 
 void ccDisplayOptionsDlg::changeLightAmbientColor()
@@ -169,9 +173,9 @@ void ccDisplayOptionsDlg::changeLightAmbientColor()
 	lightAmbientColor = newCol;
 	SetButtonColor(ambientColorButton,lightAmbientColor);
 
-	float rgba[4];
+	ccColor::Rgbaf rgba;
 	QColorToFloat(lightAmbientColor,rgba);
-	memcpy(parameters.lightAmbientColor,rgba,sizeof(float)*4);
+	parameters.lightAmbientColor = rgba;
 
 	update();
 }
@@ -185,9 +189,9 @@ void ccDisplayOptionsDlg::changeLightSpecularColor()
 	lightSpecularColor = newCol;
 	SetButtonColor(specularColorButton,lightSpecularColor);
 
-	float rgba[4];
+	ccColor::Rgbaf rgba;
 	QColorToFloat(lightSpecularColor,rgba);
-	memcpy(parameters.lightSpecularColor,rgba,sizeof(float)*4);
+	parameters.lightSpecularColor = rgba;
 
 	update();
 }
@@ -201,9 +205,9 @@ void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 	meshFrontDiff = newCol;
 	SetButtonColor(meshFrontColorButton,meshFrontDiff);
 
-	float rgba[4];
+	ccColor::Rgbaf rgba;
 	QColorToFloat(meshFrontDiff,rgba);
-	memcpy(parameters.meshFrontDiff,rgba,sizeof(float)*4);
+	parameters.meshFrontDiff = rgba;
 
 	update();
 }
@@ -217,9 +221,9 @@ void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 	meshBackDiff = newCol;
 	SetButtonColor(meshBackColorButton,meshBackDiff);
 
-	float rgba[4];
+	ccColor::Rgbaf rgba;
 	QColorToFloat(meshBackDiff,rgba);
-	memcpy(parameters.meshBackDiff,rgba,sizeof(float)*4);
+	parameters.meshBackDiff = rgba;
 
 	update();
 }
@@ -233,9 +237,9 @@ void ccDisplayOptionsDlg::changeMeshSpecularColor()
 	meshSpecularColor = newCol;
 	SetButtonColor(meshSpecularColorButton,meshSpecularColor);
 
-	float rgba[4];
+	ccColor::Rgbaf rgba;
 	QColorToFloat(meshSpecularColor,rgba);
-	memcpy(parameters.meshSpecular,rgba,sizeof(float)*4);
+	parameters.meshSpecular = rgba;
 
 	update();
 }
@@ -249,10 +253,9 @@ void ccDisplayOptionsDlg::changePointsColor()
 	pointsDefaultCol = newCol;
 	SetButtonColor(pointsColorButton,pointsDefaultCol);
 
-	unsigned char rgb[3] = {static_cast<unsigned char>(pointsDefaultCol.red()),
-							static_cast<unsigned char>(pointsDefaultCol.green()),
-							static_cast<unsigned char>(pointsDefaultCol.blue())	};
-	memcpy(parameters.pointsDefaultCol,rgb,sizeof(unsigned char)*3);
+	parameters.pointsDefaultCol = ccColor::Rgb(	static_cast<unsigned char>(pointsDefaultCol.red()),
+												static_cast<unsigned char>(pointsDefaultCol.green()),
+												static_cast<unsigned char>(pointsDefaultCol.blue()));
 
 	update();
 }
@@ -266,10 +269,9 @@ void ccDisplayOptionsDlg::changeBBColor()
 	bbDefaultCol = newCol;
 	SetButtonColor(bbColorButton,bbDefaultCol);
 
-	unsigned char rgb[3] = {static_cast<unsigned char>(bbDefaultCol.red()),
-							static_cast<unsigned char>(bbDefaultCol.green()),
-							static_cast<unsigned char>(bbDefaultCol.blue())	};
-	memcpy(parameters.bbDefaultCol,rgb,sizeof(unsigned char)*3);
+	parameters.bbDefaultCol = ccColor::Rgb(	static_cast<unsigned char>(bbDefaultCol.red()),
+											static_cast<unsigned char>(bbDefaultCol.green()),
+											static_cast<unsigned char>(bbDefaultCol.blue()));
 
 	update();
 }
@@ -283,10 +285,11 @@ void ccDisplayOptionsDlg::changeTextColor()
 	textDefaultCol = newCol;
 	SetButtonColor(textColorButton,textDefaultCol);
 
-	unsigned char rgb[3] = {static_cast<unsigned char>(textDefaultCol.red()),
-							static_cast<unsigned char>(textDefaultCol.green()),
-							static_cast<unsigned char>(textDefaultCol.blue())	};
-	memcpy(parameters.textDefaultCol,rgb,sizeof(unsigned char)*3);
+	parameters.textDefaultCol = ccColor::Rgb(	static_cast<unsigned char>(textDefaultCol.red()),
+												static_cast<unsigned char>(textDefaultCol.green()),
+												static_cast<unsigned char>(textDefaultCol.blue()));
+	
+	update();
 }
 
 void ccDisplayOptionsDlg::changeBackgroundColor()
@@ -298,10 +301,9 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 	backgroundCol = newCol;
 	SetButtonColor(bkgColorButton,backgroundCol);
 
-	unsigned char rgb[3] = {static_cast<unsigned char>(backgroundCol.red()),
-							static_cast<unsigned char>(backgroundCol.green()),
-							static_cast<unsigned char>(backgroundCol.blue())	};
-	memcpy(parameters.backgroundCol,rgb,sizeof(unsigned char)*3);
+	parameters.backgroundCol = ccColor::Rgb(static_cast<unsigned char>(backgroundCol.red()),
+											static_cast<unsigned char>(backgroundCol.green()),
+											static_cast<unsigned char>(backgroundCol.blue()));
 
 	update();
 }
@@ -315,27 +317,41 @@ void ccDisplayOptionsDlg::changeHistBackgroundColor()
 	histBackgroundCol = newCol;
 	SetButtonColor(histBkgColorButton,histBackgroundCol);
 
-	unsigned char rgb[3] = {static_cast<unsigned char>(histBackgroundCol.red()),
-							static_cast<unsigned char>(histBackgroundCol.green()),
-							static_cast<unsigned char>(histBackgroundCol.blue())	};
-	memcpy(parameters.histBackgroundCol,rgb,sizeof(unsigned char)*3);
+	parameters.histBackgroundCol = ccColor::Rgb(static_cast<unsigned char>(histBackgroundCol.red()),
+												static_cast<unsigned char>(histBackgroundCol.green()),
+												static_cast<unsigned char>(histBackgroundCol.blue()));
 
 	update();
 }
 
-void ccDisplayOptionsDlg::changeLabelColor()
+void ccDisplayOptionsDlg::changeLabelBackgroundColor()
 {
-	QColor newCol = QColorDialog::getColor(labelCol, this);
+	QColor newCol = QColorDialog::getColor(labelBackgroundCol, this);
 	if (!newCol.isValid())
 		return;
 
-	labelCol = newCol;
-	SetButtonColor(labelsColorButton,labelCol);
+	labelBackgroundCol = newCol;
+	SetButtonColor(labelBkgColorButton,labelBackgroundCol);
 
-	unsigned char rgb[3] = {static_cast<unsigned char>(labelCol.red()),
-							static_cast<unsigned char>(labelCol.green()),
-							static_cast<unsigned char>(labelCol.blue())	};
-	memcpy(parameters.labelCol,rgb,sizeof(unsigned char)*3);
+	parameters.labelBackgroundCol = ccColor::Rgbub(	static_cast<unsigned char>(labelBackgroundCol.red()),
+													static_cast<unsigned char>(labelBackgroundCol.green()),
+													static_cast<unsigned char>(labelBackgroundCol.blue()));
+
+	update();
+}
+
+void ccDisplayOptionsDlg::changeLabelMarkerColor()
+{
+	QColor newCol = QColorDialog::getColor(labelMarkerCol, this);
+	if (!newCol.isValid())
+		return;
+
+	labelMarkerCol = newCol;
+	SetButtonColor(labelMarkerColorButton,labelMarkerCol);
+
+	parameters.labelMarkerCol = ccColor::Rgbub(	static_cast<unsigned char>(labelMarkerCol.red()),
+												static_cast<unsigned char>(labelMarkerCol.green()),
+												static_cast<unsigned char>(labelMarkerCol.blue()));
 
 	update();
 }
@@ -389,6 +405,13 @@ void ccDisplayOptionsDlg::changeDefaultFontSize(int val)
 	parameters.defaultFontSize = static_cast<unsigned>(val);
 }
 
+void ccDisplayOptionsDlg::changeLabelFontSize(int val)
+{
+	if (val < 0)
+		return;
+	parameters.labelFontSize = static_cast<unsigned>(val);
+}
+
 void ccDisplayOptionsDlg::changeNumberPrecision(int val)
 {
 	if (val < 0)
@@ -396,19 +419,19 @@ void ccDisplayOptionsDlg::changeNumberPrecision(int val)
 	parameters.displayedNumPrecision = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeLabelsTransparency(int val)
+void ccDisplayOptionsDlg::changeLabelOpacity(int val)
 {
 	if (val < 0 || val > 100)
 		return;
-	parameters.labelsTransparency = static_cast<unsigned>(val);
+	parameters.labelOpacity = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeLabelsMarkerSize(int val)
+void ccDisplayOptionsDlg::changeLabelMarkerSize(int val)
 {
 	if (val <= 0)
 		return;
 
-	parameters.pickedPointsSize = static_cast<unsigned>(val);
+	parameters.labelMarkerSize = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::doReject()

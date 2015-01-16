@@ -173,7 +173,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glPushName(getUniqueIDForDisplay());
 
 		if (colorsShown())
-			glColor3ubv(m_rgbColor);
+			ccGL::Color3v(m_rgbColor.rgb);
 
 		//display polyline
 		if (vertCount > 1)
@@ -225,9 +225,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 						c_unitArrow->setEnabled(true);
 					}
 					if (colorsShown())
-						c_unitArrow->setTempColor(m_rgbColor);
+						c_unitArrow->setTempColor(m_rgbColor.rgb);
 					else
-						c_unitArrow->setTempColor(context.pointsDefaultCol);
+						c_unitArrow->setTempColor(context.pointsDefaultCol.rgb);
 					//build-up unit arrow own 'context'
 					CC_DRAW_CONTEXT markerContext = context;
 					markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
@@ -272,13 +272,6 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-void ccPolyline::setColor(const colorType col[])
-{
-	m_rgbColor[0] = col[0];
-	m_rgbColor[1] = col[1];
-	m_rgbColor[2] = col[2];
-}
-
 void ccPolyline::setWidth(PointCoordinateType width)
 {
 	m_width = width;
@@ -321,9 +314,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 	outStream << m_isClosed;
 
 	//RGB Color (dataVersion>=28)
-	outStream << m_rgbColor[0];
-	outStream << m_rgbColor[1];
-	outStream << m_rgbColor[2];
+	outStream << m_rgbColor.r;
+	outStream << m_rgbColor.g;
+	outStream << m_rgbColor.b;
 
 	//2D mode (dataVersion>=28)
 	outStream << m_mode2D;
@@ -376,9 +369,9 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	inStream >> m_isClosed;
 
 	//RGB Color (dataVersion>=28)
-	inStream >> m_rgbColor[0];
-	inStream >> m_rgbColor[1];
-	inStream >> m_rgbColor[2];
+	inStream >> m_rgbColor.r;
+	inStream >> m_rgbColor.g;
+	inStream >> m_rgbColor.b;
 
 	//2D mode (dataVersion>=28)
 	inStream >> m_mode2D;

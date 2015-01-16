@@ -164,7 +164,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
 			const colorType* C = vertices->getPointColor(i);
-			outFile << (float)C[0]/(float)MAX_COLOR_COMP << " " << (float)C[1]/(float)MAX_COLOR_COMP << " "  << (float)C[2]/(float)MAX_COLOR_COMP << endl;
+			outFile << static_cast<float>(C[0])/ccColor::MAX << " " << static_cast<float>(C[1])/ccColor::MAX << " "  << static_cast<float>(C[2])/ccColor::MAX << endl;
 		}
 	}
 
@@ -574,7 +574,7 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				for (int i=0; i<parts.size(); ++i)
 				{
 					bool ok;
-					rgb[coordIndex] = static_cast<colorType>(parts[i].toDouble(&ok) * MAX_COLOR_COMP);
+					rgb[coordIndex] = static_cast<colorType>(parts[i].toDouble(&ok) * ccColor::MAX);
 					if (!ok)
 					{
 						ccLog::Warning("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!",iCol);

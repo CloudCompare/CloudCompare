@@ -413,9 +413,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						int R = tokens[0].toInt();
 						int G = tokens[1].toInt();
 						int B = tokens[2].toInt();
-						keypointsCloud->addRGBColor(static_cast<colorType>(std::min<int>(R,MAX_COLOR_COMP)),
-													static_cast<colorType>(std::min<int>(G,MAX_COLOR_COMP)),
-													static_cast<colorType>(std::min<int>(B,MAX_COLOR_COMP)));
+						keypointsCloud->addRGBColor(static_cast<colorType>(std::min<int>(R,ccColor::MAX)),
+													static_cast<colorType>(std::min<int>(G,ccColor::MAX)),
+													static_cast<colorType>(std::min<int>(B,ccColor::MAX)));
 					}
 
 					currentLine = stream.readLine();

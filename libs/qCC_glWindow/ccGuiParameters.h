@@ -21,13 +21,16 @@
 //Qt
 #include <QString>
 
+//qCC_db
+#include <ccColorTypes.h>
+
 /***************************************************
 				GUI parameters
 ***************************************************/
 
-//! This class manages the persistent parameters
+//! This class manages the persistent parameters (mostly for display)
 /** Values of persistent parameters are stored by the system
-	from one execution of CloudCompare to the next.
+	(either in the registry or in a separate file).
 **/
 class ccGui
 {
@@ -37,31 +40,34 @@ public:
 	struct ParamStruct
 	{
 		//! Light diffuse color (RGBA)
-		float lightDiffuseColor[4];
+		ccColor::Rgbaf lightDiffuseColor;
 		//! Light ambient color (RGBA)
-		float lightAmbientColor[4];
+		ccColor::Rgbaf lightAmbientColor;
 		//! Light specular color (RGBA)
-		float lightSpecularColor[4];
+		ccColor::Rgbaf lightSpecularColor;
 
 		//! Default mesh diffuse color (front)
-		float meshFrontDiff[4];
+		ccColor::Rgbaf meshFrontDiff;
 		//! Default mesh diffuse color (back)
-		float meshBackDiff[4];
+		ccColor::Rgbaf meshBackDiff;
 		//! Default mesh specular color
-		float meshSpecular[4];
+		ccColor::Rgbaf meshSpecular;
 
 		//! Default text color
-		unsigned char textDefaultCol[3];
+		ccColor::Rgbub textDefaultCol;
 		//! Default 3D points color
-		unsigned char pointsDefaultCol[3];
+		ccColor::Rgbub pointsDefaultCol;
 		//! Background color
-		unsigned char backgroundCol[3];
+		ccColor::Rgbub backgroundCol;
 		//! Histogram background color
-		unsigned char histBackgroundCol[3];
-		//! Labels color
-		unsigned char labelCol[3];
+		ccColor::Rgbub histBackgroundCol;
+		//! Labels background color
+		ccColor::Rgbub labelBackgroundCol;
+		//! Labels marker color
+		ccColor::Rgbub labelMarkerCol;
 		//! Bounding-boxes color
-		unsigned char bbDefaultCol[3];
+		ccColor::Rgbub bbDefaultCol;
+		
 		//! Use background gradient
 		bool drawBackgroundGradient;
 		//! Decimate meshes when moved
@@ -73,8 +79,8 @@ public:
 		//! Whether to use VBOs for faster display
 		bool useVBOs;
 
-		//! Picked points size
-		unsigned pickedPointsSize;
+		//! Label marker size
+		unsigned labelMarkerSize;
 
 		//! Color scale option: show histogram next to color ramp
 		bool colorScaleShowHistogram;
@@ -87,16 +93,15 @@ public:
 
 		//! Default displayed font size
 		unsigned defaultFontSize;
+		//! Label font size
+		unsigned labelFontSize;
 		//! Displayed numbers precision
 		unsigned displayedNumPrecision;
-		//! Labels transparency
-		unsigned labelsTransparency;
+		//! Labels background opcaity
+		unsigned labelOpacity;
 
 		//! Default constructor
 		ParamStruct();
-
-		//! Copy operator
-		ParamStruct& operator =(const ParamStruct& params);
 
 		//! Resets parameters to default values
 		void reset();

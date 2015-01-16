@@ -240,8 +240,8 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	{
 		m_window = new ccMapWindow(this);
 		ccGui::ParamStruct params = m_window->getDisplayParameters();
-		memcpy(params.backgroundCol,ccColor::white,3*sizeof(unsigned char));
-		memcpy(params.textDefaultCol,ccColor::black,3*sizeof(unsigned char));
+		params.backgroundCol = ccColor::white;
+		params.textDefaultCol = ccColor::black;
 		params.drawBackgroundGradient = false;
 		params.colorScaleShowHistogram = false;
 		params.colorScaleRampWidth = 30;

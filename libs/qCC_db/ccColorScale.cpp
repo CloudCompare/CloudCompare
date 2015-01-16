@@ -101,58 +101,63 @@ void ccColorScale::sort()
 
 void ccColorScale::update()
 {
-	if (m_steps.size() >= (int)MIN_STEPS)
+	m_updated = false;
+
+	if (m_steps.size() >= static_cast<int>(MIN_STEPS))
 	{
 		sort();
 
 		unsigned stepCount = static_cast<unsigned>(m_steps.size());
-		assert(stepCount>=2);
+		assert(stepCount >= 2);
 		assert(m_steps.front().getRelativePos() == 0.0);
 		assert(m_steps.back().getRelativePos() == 1.0);
 		if (m_steps.front().getRelativePos() != 0.0 || m_steps.back().getRelativePos() != 1.0)
 		{
-			//invalid scale: paint it black ;)
-			memset(m_rgbaScale,0,sizeof(colorType)*4*MAX_STEPS);
 			ccLog::Warning(QString("[ccColorScale] Scale '%1' is invalid! (boundaries are not [0.0-1.0]").arg(getName()));
-			return;
 		}
-		
-		colorType* _scale = m_rgbaScale;
-
-		unsigned j = 0; //current intervale
-		for (unsigned i=0; i<MAX_STEPS; ++i)
+		else
 		{
-			double relativePos = (double)i/(double)(MAX_STEPS-1);
+			unsigned j = 0; //current intervale
+			for (unsigned i=0; i<MAX_STEPS; ++i)
+			{
+				double relativePos = static_cast<double>(i)/(MAX_STEPS-1);
 
-			//forward to the right intervale
-			while (j+2 < stepCount && m_steps[j+1].getRelativePos() < relativePos)
-				++j;
+				//forward to the right intervale
+				while (j+2 < stepCount && m_steps[j+1].getRelativePos() < relativePos)
+					++j;
 
-			// linear interpolation
-			CCVector3d colBefore (	m_steps[j].getColor().redF(),
-									m_steps[j].getColor().greenF(),
-									m_steps[j].getColor().blueF() );
-			CCVector3d colNext (	m_steps[j+1].getColor().redF(),
-									m_steps[j+1].getColor().greenF(),
-									m_steps[j+1].getColor().blueF() );
+				// linear interpolation
+				CCVector3d colBefore (	m_steps[j].getColor().redF(),
+										m_steps[j].getColor().greenF(),
+										m_steps[j].getColor().blueF() );
+				CCVector3d colNext (	m_steps[j+1].getColor().redF(),
+										m_steps[j+1].getColor().greenF(),
+										m_steps[j+1].getColor().blueF() );
 
-			//interpolation coef
-			double alpha = (relativePos - m_steps[j].getRelativePos())/(m_steps[j+1].getRelativePos() - m_steps[j].getRelativePos());
+				//interpolation coef
+				double alpha = (relativePos - m_steps[j].getRelativePos()) / (m_steps[j+1].getRelativePos() - m_steps[j].getRelativePos());
 
-			CCVector3d interpCol = colBefore + (colNext-colBefore) * alpha;
+				CCVector3d interpCol = colBefore + (colNext-colBefore) * alpha;
 
-			*_scale++ = static_cast<colorType>(interpCol.x * (double)MAX_COLOR_COMP);
-			*_scale++ = static_cast<colorType>(interpCol.y * (double)MAX_COLOR_COMP);
-			*_scale++ = static_cast<colorType>(interpCol.z * (double)MAX_COLOR_COMP);
-			*_scale++ = MAX_COLOR_COMP; //do not dream: no transparency ;)
+				m_rgbaScale[i] = ccColor::Rgba(	static_cast<colorType>(interpCol.x * ccColor::MAX),
+												static_cast<colorType>(interpCol.y * ccColor::MAX),
+												static_cast<colorType>(interpCol.z * ccColor::MAX),
+												ccColor::MAX);
+			}
+		
+			m_updated = true;
 		}
-
-		m_updated = true;
 	}
-	else //invalid scale: paint it black ;)
+	else
 	{
 		ccLog::Warning(QString("[ccColorScale] Scale '%1' is invalid! (not enough elements)").arg(getName()));
-		memset(m_rgbaScale,0,sizeof(colorType)*4*MAX_STEPS);
+	}
+	
+	if (!m_updated)
+	{
+		//I saw an invalid scale and I want it painted black ;)
+		for (unsigned i=0; i<MAX_STEPS; ++i)
+			m_rgbaScale[i] = ccColor::black;
 	}
 }
 

@@ -789,28 +789,28 @@ void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R
 	switch(hi)
 	{
 	case 0:
-		r=V;g=n;b=l;
+		r=V; g=n; b=l;
 		break;
 	case 1:
-		r=m;g=V;b=l;
+		r=m; g=V; b=l;
 		break;
 	case 2:
-		r=l;g=V;b=n;
+		r=l; g=V; b=n;
 		break;
 	case 3:
-		r=l;g=m;b=V;
+		r=l; g=m; b=V;
 		break;
 	case 4:
-		r=n;g=l;b=V;
+		r=n; g=l; b=V;
 		break;
 	case 5:
-		r=V;g=l;b=m;
+		r=V; g=l; b=m;
 		break;
 	}
 
-	R = static_cast<colorType>(r * static_cast<double>(MAX_COLOR_COMP));
-	G = static_cast<colorType>(g * static_cast<double>(MAX_COLOR_COMP));
-	B = static_cast<colorType>(b * static_cast<double>(MAX_COLOR_COMP));
+	R = static_cast<colorType>(r * ccColor::MAX);
+	G = static_cast<colorType>(g * ccColor::MAX);
+	B = static_cast<colorType>(b * ccColor::MAX);
 }
 
 void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, colorType& R, colorType& G, colorType& B)

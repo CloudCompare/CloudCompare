@@ -79,9 +79,9 @@ public:
 	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }
 	virtual void refreshBB();
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]);
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture);
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture);
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C);
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture);
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture);
 	virtual unsigned maxSize() const;
 
 	//inherited methods (GenericIndexedMesh)
@@ -358,7 +358,7 @@ protected:
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
 	bool interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes = 0);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
-	bool interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, colorType rgb[]);
+	bool interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, ccColor::Rgb& C);
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);

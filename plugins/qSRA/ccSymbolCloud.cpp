@@ -156,10 +156,10 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
 
 		//default color
-		const unsigned char* color = context.pointsDefaultCol;
+		const unsigned char* color = context.pointsDefaultCol.rgb;
 		if (isColorOverriden())
 		{
-			color = m_tempColor;
+			color = m_tempColor.rgb;
 			glParams.showColors = false;
 		}
 		

@@ -41,9 +41,9 @@ public:
 	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0, ccMaterialSet* clonedMaterials = 0, NormsIndexesTableType* clonedNormsTable = 0, TextureCoordsContainer* cloneTexCoords = 0) { return 0; }
 	virtual void refreshBB() {};
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) { return false; }
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]) { return false; }
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture) { return false; }
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture) { return false; }
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) { return false; }
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) { return false; }
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) { return false; }
 	virtual bool hasMaterials() const { return false; }
 	const ccMaterialSet* getMaterialSet() const { return 0; }
 	virtual int getTriangleMtlIndex(unsigned triangleIndex) const { return -1; }

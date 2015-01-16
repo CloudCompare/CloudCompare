@@ -1184,6 +1184,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 
 		//add item back
 		addElement(item,false);
+		item->prepareDisplayForRefresh();
 	}
 
 	MainWindow::RefreshAllGLWindow();

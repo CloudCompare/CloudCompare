@@ -832,7 +832,7 @@ void ccGLWindow::paintGL()
 	if (m_displayOverlayEntities)
 	{
 		//default overlay color
-		const unsigned char* textCol = getDisplayParameters().textDefaultCol;
+		const ccColor::Rgbub& textCol = getDisplayParameters().textDefaultCol;
 
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
@@ -883,7 +883,7 @@ void ccGLWindow::paintGL()
 				int currentTime_sec = ccTimer::Sec();
 				//ccLog::Print(QString("[paintGL] Current time: %1 s.").arg(currentTime_sec));
 
-				glColor3ubv_safe(textCol);
+				glColor3ubv_safe(textCol.rgb);
 
 				int ll_currentHeight = m_glHeight-10; //lower left
 				int uc_currentHeight = 10; //upper center
@@ -987,10 +987,10 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	}
 	else
 	{
-		const unsigned char* bkgCol = getDisplayParameters().backgroundCol;
-		glClearColor(	static_cast<float>(bkgCol[0]) / 255.0f,
-						static_cast<float>(bkgCol[1]) / 255.0f,
-						static_cast<float>(bkgCol[2]) / 255.0f,
+		const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
+		glClearColor(	bkgCol.r / 255.0f,
+						bkgCol.g / 255.0f,
+						bkgCol.b / 255.0f,
 						1.0f );
 
 		//we clear background
@@ -1440,17 +1440,19 @@ void ccGLWindow::drawGradientBackground()
 	int w = m_glWidth/2+1;
 	int h = m_glHeight/2+1;
 
-	const unsigned char* bkgCol = getDisplayParameters().backgroundCol;
-	const unsigned char* forCol = getDisplayParameters().textDefaultCol;
+	const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
+	const ccColor::Rgbub& forCol = getDisplayParameters().textDefaultCol;
 
 	//Gradient "texture" drawing
 	glBegin(GL_QUADS);
 	//we the user-defined background color for gradient start
-	glColor3ubv(bkgCol);
+	glColor3ubv(bkgCol.rgb);
 	glVertex2i(-w,h);
 	glVertex2i(w,h);
 	//and the inverse of points color for gradient end
-	glColor3ub(255-forCol[0],255-forCol[1],255-forCol[2]);
+	glColor3ub(	255-forCol.r,
+				255-forCol.g,
+				255-forCol.b );
 	glVertex2i(w,-h);
 	glVertex2i(-w,-h);
 	glEnd();
@@ -1468,17 +1470,7 @@ void ccGLWindow::drawCross()
 	glEnd();
 }
 
-QFont ccGLWindow::getTextDisplayFont() const
-{
-	if (!m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f)
-		return m_font;
-
-	QFont font = m_font;
-	font.setPointSize(static_cast<int>(m_font.pointSize() * m_captureMode.zoomFactor));
-	return font;
-}
-
-void ccGLWindow::drawScale(const colorType color[] /*= white*/)
+void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 {
 	assert(!m_viewportParams.perspectiveView); //a scale is only valid in ortho. mode!
 
@@ -1513,7 +1505,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	float tick = 3.0f * m_captureMode.zoomFactor;
 
 	//scale OpenGL drawing
-	glColor3ubv(color);
+	glColor3ubv(color.rgb);
 	glBegin(GL_LINES);
 	glVertex3f(w-scaleW_pix,-h,0.0);
 	glVertex3f(w,-h,0.0);
@@ -1524,7 +1516,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	glEnd();
 
 	QString text = QString::number(m_captureMode.enabled ? equivalentWidth/m_captureMode.zoomFactor : equivalentWidth);
-	glColor3ubv_safe(color);
+	glColor3ubv_safe(color.rgb);
 	renderText(m_glWidth-static_cast<int>(scaleW_pix/2+dW)-fm.width(text)/2, m_glHeight-static_cast<int>(dH/2)+fm.height()/3, text, font);
 }
 
@@ -1853,12 +1845,13 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 	//point picking
 	double pixSize = computeActualPixelSize();
-	context.pickedPointsRadius = static_cast<float>(guiParams.pickedPointsSize * pixSize);
-	context.pickedPointsTextShift = static_cast<float>(5 * pixSize); //5 pixels shift
+	context.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * pixSize);
+	context.labelMarkerTextShift = static_cast<float>(5 * pixSize); //5 pixels shift
 
 	//text display
 	context.dispNumberPrecision = guiParams.displayedNumPrecision;
-	context.labelsTransparency = guiParams.labelsTransparency;
+	//label opacity
+	context.labelOpacity        = guiParams.labelOpacity;
 
 	//default materials
 	context.defaultMat->setDiffuseFront(guiParams.meshFrontDiff);
@@ -1869,10 +1862,11 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.defaultMat->setShininessFront(30);
 	context.defaultMat->setShininessBack(50);
 	//default colors
-	memcpy(context.pointsDefaultCol,guiParams.pointsDefaultCol,sizeof(unsigned char)*3);
-	memcpy(context.textDefaultCol,guiParams.textDefaultCol,sizeof(unsigned char)*3);
-	memcpy(context.labelDefaultCol,guiParams.labelCol,sizeof(unsigned char)*3);
-	memcpy(context.bbDefaultCol,guiParams.bbDefaultCol,sizeof(unsigned char)*3);
+	context.pointsDefaultCol      = guiParams.pointsDefaultCol;
+	context.textDefaultCol        = guiParams.textDefaultCol;
+	context.labelDefaultBkgCol    = guiParams.labelBackgroundCol;
+	context.labelDefaultMarkerCol = guiParams.labelMarkerCol;
+	context.bbDefaultCol          = guiParams.bbDefaultCol;
 
 	//default font size
 	setFontPointSize(guiParams.defaultFontSize);
@@ -2946,6 +2940,25 @@ int ccGLWindow::getFontPointSize() const
 	return m_captureMode.enabled ? static_cast<int>(m_font.pointSize() * m_captureMode.zoomFactor) : m_font.pointSize();
 }
 
+QFont ccGLWindow::getTextDisplayFont() const
+{
+	if (!m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f)
+		return m_font;
+
+	QFont font = m_font;
+	font.setPointSize(static_cast<int>(m_font.pointSize() * m_captureMode.zoomFactor));
+	return font;
+}
+
+QFont ccGLWindow::getLabelDisplayFont() const
+{
+	assert(m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f);
+
+	QFont font = m_font;
+	font.setPointSize(static_cast<int>(getDisplayParameters().labelFontSize * m_captureMode.zoomFactor));
+	return font;
+}
+
 void ccGLWindow::glEnableSunLight()
 {
 	glLightfv(GL_LIGHT0,GL_DIFFUSE,getDisplayParameters().lightDiffuseColor);
@@ -3888,7 +3901,7 @@ bool ccGLWindow::supportOpenGLVersion(unsigned openGLVersionFlag)
 
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgb/*=0*/, const QFont& font/*=QFont()*/)
 {
-	glColor3ubv_safe(rgb ? rgb : getDisplayParameters().textDefaultCol);
+	glColor3ubv_safe(rgb ? rgb : getDisplayParameters().textDefaultCol.rgb);
 
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
@@ -3907,7 +3920,7 @@ void ccGLWindow::displayText(	QString text,
 	int y2 = m_glHeight - 1 - y;
 
 	//actual text color
-	const unsigned char* col = (rgbColor ? rgbColor : getDisplayParameters().textDefaultCol);
+	const unsigned char* col = (rgbColor ? rgbColor : getDisplayParameters().textDefaultCol.rgb);
 
 	QFont textFont = (font ? *font : m_font);
 

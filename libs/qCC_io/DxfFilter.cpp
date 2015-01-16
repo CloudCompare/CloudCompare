@@ -98,19 +98,19 @@ public:
 										static_cast<PointCoordinateType>(P.y),
 										static_cast<PointCoordinateType>(P.z) ));
 
-		colorType col[3];
+		ccColor::Rgb col;
 		if (getCurrentColour(col))
 		{
 			//RGB field already instantiated?
 			if (m_points->hasColors())
 			{
-				m_points->addRGBColor(col);
+				m_points->addRGBColor(col.rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
 			else if (m_points->setRGBColor(ccColor::white))
 			{
 				//then replace the last color by the current one
-				m_points->setPointColor(m_points->size()-1,col);
+				m_points->setPointColor(m_points->size()-1,col.rgb);
 				m_points->showColors(true);
 			}
 		}
@@ -146,7 +146,7 @@ public:
 		//m_poly->set2DMode(poly.flags & 8); //DGM: "2D" polylines in CC doesn't mean the same thing ;)
 
 		//color
-		colorType col[3];
+		ccColor::Rgb col;
 		if (getCurrentColour(col))
 		{
 			m_poly->setColor(col);
@@ -214,11 +214,10 @@ public:
 			addedVertCount = 3;
 
 		//current face color
-		colorType col[3];
-		colorType* faceCol = 0;
+		ccColor::Rgb col;
+		ccColor::Rgb* faceCol = 0;
 		if (getCurrentColour(col))
-			faceCol = col;
-
+			faceCol = &col;
 
 		//look for already defined vertices
 		unsigned vertCount = vertices->size();
@@ -237,7 +236,7 @@ public:
 						//We must also check that the color is the same (if any)
 						if (faceCol || vertices->hasColors())
 						{
-							const colorType* _faceCol = faceCol ? faceCol : ccColor::white;
+							const colorType* _faceCol = faceCol ? faceCol->rgb : ccColor::white;
 							const colorType* _vertCol = vertices->hasColors() ? vertices->getPointColor(j) : ccColor::white;
 							useCurrentVertex = (_faceCol[0] == _vertCol[0] && _faceCol[1] == _vertCol[1] && _faceCol[2] == _vertCol[2]);
 						}
@@ -348,14 +347,14 @@ public:
 			if (vertices->hasColors())
 			{
 				for (unsigned i=0; i<createdVertCount; ++i)
-					vertices->addRGBColor(faceCol);
+					vertices->addRGBColor(faceCol->rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
 			else if (vertices->setRGBColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i=0; i<createdVertCount; ++i)
-					vertices->setPointColor(vertCount-1-i,faceCol);
+					vertices->setPointColor(vertCount-1-i,faceCol->rgb);
 				m_faces->showColors(true);
 			}
 		}
@@ -396,7 +395,7 @@ public:
 		poly->setClosed(false);
 
 		//color
-		colorType col[3];
+		ccColor::Rgb col;
 		if (getCurrentColour(col))
 		{
 			poly->setColor(col);
@@ -422,8 +421,8 @@ protected:
 
 private:
 
-	//!Returns current colour (either the current data's colour or the current layer's one)
-	bool getCurrentColour( colorType ccColour[/*3*/] )
+	//! Returns current colour (either the current data's colour or the current layer's one)
+	bool getCurrentColour( ccColor::Rgb& ccColour )
 	{
 		const DL_Attributes attributes = getAttributes();
 
@@ -445,9 +444,9 @@ private:
 				return false;
 		}
 
-		ccColour[0] = static_cast<colorType>( dxfColors[colourIndex][0] * MAX_COLOR_COMP );
-		ccColour[1] = static_cast<colorType>( dxfColors[colourIndex][1] * MAX_COLOR_COMP );
-		ccColour[2] = static_cast<colorType>( dxfColors[colourIndex][2] * MAX_COLOR_COMP );
+		ccColour.r = static_cast<colorType>( dxfColors[colourIndex][0] * ccColor::MAX );
+		ccColour.g = static_cast<colorType>( dxfColors[colourIndex][1] * ccColor::MAX );
+		ccColour.b = static_cast<colorType>( dxfColors[colourIndex][2] * ccColor::MAX );
 
 		return true;
 	}

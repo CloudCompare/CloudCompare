@@ -125,6 +125,7 @@ public:
 	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag);
 	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
+	virtual QFont getLabelDisplayFont() const; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
 	inline virtual void makeContextCurrent() { makeCurrent(); }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
@@ -595,7 +596,7 @@ protected:
 	void drawCross();
 	void drawTrihedron();
 	void drawGradientBackground();
-	void drawScale(const colorType color[] = ccColor::white);
+	void drawScale(const ccColor::Rgbub& color);
 
 	//Projections controls
 	void recalcModelViewMatrix();

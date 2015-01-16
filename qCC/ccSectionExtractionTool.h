@@ -131,9 +131,7 @@ protected:
 			, backupColorShown(section.backupColorShown)
 			, backupWidth(section.backupWidth)
 		{
-			backupColor[0] = section.backupColor[0];
-			backupColor[1] = section.backupColor[1];
-			backupColor[2] = section.backupColor[2];
+			backupColor = section.backupColor;
 		}
 		//! Constructor from an entity
 		ImportedEntity(EntityType* e, bool alreadyInDB)
@@ -146,9 +144,7 @@ protected:
 			{
 				ccPolyline* poly = (ccPolyline*)e;
 				//backup color
-				backupColor[0] = poly->getColor()[0];
-				backupColor[1] = poly->getColor()[1];
-				backupColor[2] = poly->getColor()[2];
+				backupColor = poly->getColor();
 				backupColorShown = poly->colorsShown();
 				//backup thickness
 				backupWidth = poly->getWidth();
@@ -162,7 +158,7 @@ protected:
 		bool isInDB;
 
 		//backup info (for polylines only)
-		colorType backupColor[3];
+		ccColor::Rgb backupColor;
 		bool backupColorShown;
 		PointCoordinateType backupWidth;
 	};

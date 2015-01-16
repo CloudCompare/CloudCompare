@@ -7377,7 +7377,7 @@ void MainWindow::activatePointListPickingMode()
 	}
 
 	//DGM: we must update marker size spin box value (as it may have changed by the user with the "display dialog")
-	m_plpDlg->markerSizeSpinBox->setValue(win->getDisplayParameters().pickedPointsSize);
+	m_plpDlg->markerSizeSpinBox->setValue(win->getDisplayParameters().labelMarkerSize);
 
 	m_plpDlg->linkWith(win);
 	m_plpDlg->linkWithCloud(pc);

@@ -186,6 +186,7 @@ protected:
 		CCVector3 normal;
 		PointCoordinateType area;
 		CCVector3d angles;
+		CCVector3d edges;
 		//! Default constructor
 		LabelInfo3()
 			: point1Index(0)
@@ -197,6 +198,7 @@ protected:
 			, normal(0,0,0)
 			, area(0)
 			, angles(0,0,0)
+			, edges(0,0,0)
 		{}
 	};
 	//! Gets three-points label info

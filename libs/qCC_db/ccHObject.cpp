@@ -611,7 +611,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			(  m_selected || !MACRO_SkipUnselected(context) ))
 		{
 			//apply default color (in case of)
-			glColor3ubv(context.pointsDefaultCol);
+			ccGL::Color3v(context.pointsDefaultCol.rgb);
 
 			drawMeOnly(context);
 
@@ -973,7 +973,7 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (out.write((const char*)m_tempColor,sizeof(colorType)*3) < 0)
+		if (out.write((const char*)m_tempColor.rgb,sizeof(colorType)*3) < 0)
 			return WriteError();
 	}
 	//'glTransEnabled' state (dataVersion>=20)
@@ -1017,7 +1017,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (in.read((char*)m_tempColor,sizeof(colorType)*3) < 0)
+		if (in.read((char*)m_tempColor.rgb,sizeof(colorType)*3) < 0)
 			return ReadError();
 	}
 	//'glTransEnabled' state (dataVersion>=20)

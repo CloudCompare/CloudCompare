@@ -254,9 +254,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		if (!material->hasTexture())
 		{
 			const float* diffuse = material->getDiffuseFront();
-			uniqueColor[0] = static_cast<colorType>(diffuse[0]*MAX_COLOR_COMP);
-			uniqueColor[1] = static_cast<colorType>(diffuse[1]*MAX_COLOR_COMP);
-			uniqueColor[2] = static_cast<colorType>(diffuse[2]*MAX_COLOR_COMP);
+			uniqueColor[0] = static_cast<colorType>(diffuse[0]*ccColor::MAX);
+			uniqueColor[1] = static_cast<colorType>(diffuse[1]*ccColor::MAX);
+			uniqueColor[2] = static_cast<colorType>(diffuse[2]*ccColor::MAX);
 			hasUniqueColor = true;
 			material = ccMaterial::CShared(0); //we can forget it!
 		}
@@ -552,16 +552,16 @@ static int rgb_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		s_color[flags & POS_MASK] = colorType(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0)*float(MAX_COLOR_COMP));
+		s_color[flags & POS_MASK] = static_cast<colorType>(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX);
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:
 	case PLY_CHAR:
 	case PLY_UCHAR:
-		s_color[flags & POS_MASK] = colorType(ply_get_argument_value(argument));
+		s_color[flags & POS_MASK] = static_cast<colorType>(ply_get_argument_value(argument));
 		break;
 	default:
-		s_color[flags & POS_MASK] = colorType(ply_get_argument_value(argument));
+		s_color[flags & POS_MASK] = static_cast<colorType>(ply_get_argument_value(argument));
 		break;
 	}
 
@@ -596,16 +596,16 @@ static int grey_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		G = colorType(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0)*float(MAX_COLOR_COMP));
+		G = static_cast<colorType>(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX);
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:
 	case PLY_CHAR:
 	case PLY_UCHAR:
-		G = colorType(ply_get_argument_value(argument));
+		G = static_cast<colorType>(ply_get_argument_value(argument));
 		break;
 	default:
-		G = colorType(ply_get_argument_value(argument));
+		G = static_cast<colorType>(ply_get_argument_value(argument));
 		break;
 	}
 

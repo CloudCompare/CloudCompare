@@ -201,7 +201,7 @@ void ccColorLevelsDlg::onApply()
 						double u = (static_cast<double>(rgb[c]) - s_inputLevels[0]) / qIn;
 						newC = s_outputLevels[0] + u * pOut; 
 					}
-					newRgb[c] = static_cast<colorType>(std::max<double>(std::min<double>(newC,MAX_COLOR_COMP),0.0));
+					newRgb[c] = static_cast<colorType>(std::max<double>(std::min<double>(newC,ccColor::MAX),0.0));
 				}
 				else
 				{

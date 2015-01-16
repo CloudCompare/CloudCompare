@@ -59,17 +59,19 @@ struct glDrawContext
 	//! Default material
 	ccMaterial::Shared defaultMat;
 	//! Default color for mesh (front side)
-	float defaultMeshFrontDiff[4];
+	ccColor::Rgbaf defaultMeshFrontDiff;
 	//! Default color for mesh (back side)
-	float defaultMeshBackDiff[4];
+	ccColor::Rgbaf defaultMeshBackDiff;
 	//! Default point color
-	unsigned char pointsDefaultCol[3];
+	ccColor::Rgbub pointsDefaultCol;
 	//! Default text color
-	unsigned char textDefaultCol[3];
-	//! Default label color
-	unsigned char labelDefaultCol[3];
+	ccColor::Rgbub textDefaultCol;
+	//! Default label background color
+	ccColor::Rgbub labelDefaultBkgCol;
+	//! Default label marker color
+	ccColor::Rgbub labelDefaultMarkerCol;
 	//! Default bounding-box color
-	unsigned char bbDefaultCol[3];
+	ccColor::Rgbub bbDefaultCol;
 
 	//! Whether to decimate big clouds when rotating the camera
 	bool decimateCloudOnMove;
@@ -86,16 +88,16 @@ struct glDrawContext
 	//! Use VBOs for faster display
 	bool useVBOs;
 
-	//! Picked points radius
-	float pickedPointsRadius;
-	//! Picked points shift for label display
-	float pickedPointsTextShift;
+	//! Label marker size (radius)
+	float labelMarkerSize;
+	//! Shift for 3D label marker display (around the marker)
+	float labelMarkerTextShift;
 
 	//! Numerical precision (for displaying text)
 	unsigned dispNumberPrecision;
 
-	//! Label background transparency
-	unsigned labelsTransparency;
+	//! Label background opacity
+	unsigned labelOpacity;
 
 	//! Blending strategy (source)
 	GLenum sourceBlend;
@@ -109,6 +111,14 @@ struct glDrawContext
 		, glH(0)
 		, _win(0)
 		, renderZoom(1.0f)
+		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
+		, defaultMeshBackDiff(ccColor::defaultMeshBackDiff)
+		, pointsDefaultCol(ccColor::defaultColor)
+		, textDefaultCol(ccColor::defaultColor)
+		, labelDefaultBkgCol(ccColor::defaultLabelBkgColor)
+		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
+		, bbDefaultCol(ccColor::yellow)
+
 		, defaultMat(new ccMaterial("default"))
 		, decimateCloudOnMove(true)
 		, decimateMeshOnMove(true)
@@ -116,10 +126,10 @@ struct glDrawContext
 		, colorRampShader(0)
 		, customRenderingShader(0)
 		, useVBOs(true)
-		, pickedPointsRadius(4)
-		, pickedPointsTextShift(0.0)
+		, labelMarkerSize(5)
+		, labelMarkerTextShift(0)
 		, dispNumberPrecision(6)
-		, labelsTransparency(100)
+		, labelOpacity(100)
 		, sourceBlend(GL_SRC_ALPHA)
 		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
 	{}
@@ -171,24 +181,24 @@ public:
 	virtual void draw(CC_DRAW_CONTEXT& context) = 0;
 
 	//! Returns whether entity is visible or not
-	virtual bool isVisible() const;
+	inline virtual bool isVisible() const { return m_visible; }
 	//! Sets entity visibility
-	virtual void setVisible(bool state);
+	inline virtual void setVisible(bool state) { m_visible = state; }
 	//! Toggles visibility
-	virtual void toggleVisibility();
+	inline virtual void toggleVisibility() { setVisible(!isVisible()); }
 
 	//! Returns whether visibilty is locked or not
-	virtual bool isVisiblityLocked() const;
+	inline virtual bool isVisiblityLocked() const { return m_lockedVisibility; }
 	//! Locks/unlocks visibilty
 	/** If visibility is locked, the user won't be able to modify it
 		(via the properties tree for instance).
 	**/
-	virtual void lockVisibility(bool state);
+	inline virtual void lockVisibility(bool state) { m_lockedVisibility = state; }
 
 	//! Returns whether entity is selected or not
-	virtual bool isSelected() const;
+	inline virtual bool isSelected() const { return m_selected; }
 	//! Selects/unselects entity
-	virtual void setSelected(bool state);
+	inline virtual void setSelected(bool state) { m_selected = state; }
 
 	//! Returns bounding-box
 	/** If bbox is not relative, any active GL transformation
@@ -215,7 +225,7 @@ public:
 	virtual ccBBox getFitBB(ccGLMatrix& trans);
 
 	//! Draws absolute (axis aligned) bounding-box
-	virtual void drawBB(const colorType col[]);
+	virtual void drawBB(const ccColor::Rgb& col);
 
 	//! Returns main OpenGL paramters for this entity
 	/** These parameters are deduced from the visiblity states
@@ -225,42 +235,42 @@ public:
 	virtual void getDrawingParameters(glDrawParams& params) const;
 
 	//! Returns whether colors are enabled or not
-	virtual bool hasColors() const;
+	inline virtual bool hasColors() const  { return false; }
 	//! Returns whether colors are shown or not
-	virtual bool colorsShown() const;
+	inline virtual bool colorsShown() const { return m_colorsDisplayed; }
 	//! Sets colors visibility
-	virtual void showColors(bool state);
+	inline virtual void showColors(bool state) { m_colorsDisplayed = state; }
 	//! Toggles colors display state
-	virtual void toggleColors();
+	inline virtual void toggleColors() { showColors(!colorsShown()); }
 
 	//! Returns whether normals are enabled or not
-	virtual bool hasNormals() const;
+	inline virtual bool hasNormals() const  { return false; }
 	//! Returns whether normals are shown or not
-	virtual bool normalsShown() const;
+	inline virtual bool normalsShown() const { return m_normalsDisplayed; }
 	//! Sets normals visibility
-	virtual void showNormals(bool state);
+	inline virtual void showNormals(bool state) { m_normalsDisplayed = state; }
 	//! Toggles normals display state
-	virtual void toggleNormals();
+	inline virtual void toggleNormals() { showNormals(!normalsShown()); }
 
 	/*** scalar fields ***/
 
 	//! Returns whether an active scalar field is available or not
-	virtual bool hasDisplayedScalarField() const;
+	inline virtual bool hasDisplayedScalarField() const { return false; }
 
 	//! Returns whether one or more scalar fields are instantiated
 	/** WARNING: doesn't mean a scalar field is currently displayed
 		(see ccDrawableObject::hasDisplayedScalarField).
 	**/
-	virtual bool hasScalarFields() const;
+	inline virtual bool hasScalarFields() const  { return false; }
 
 	//! Sets active scalarfield visibility
-	virtual void showSF(bool state);
+	inline virtual void showSF(bool state) { m_sfDisplayed = state; }
 
 	//! Toggles SF display state
-	virtual void toggleSF();
+	inline virtual void toggleSF() { showSF(!sfShown()); }
 
 	//! Returns whether active scalar field is visible
-	virtual bool sfShown() const;
+	inline virtual bool sfShown() const { return m_sfDisplayed; }
 
 	/*** Mesh materials ***/
 
@@ -270,32 +280,32 @@ public:
 	/*** Name display in 3D ***/
 
 	//! Sets whether name should be displayed in 3D
-	virtual void showNameIn3D(bool state);
+	inline virtual void showNameIn3D(bool state) { m_showNameIn3D = state; }
 
 	//! Returns whether name is displayed in 3D or not
-	virtual bool nameShownIn3D() const;
+	inline virtual bool nameShownIn3D() const { return m_showNameIn3D; }
 
 	//! Toggles name in 3D display state
-	virtual void toggleShowName();
+	inline virtual void toggleShowName() { showNameIn3D(!nameShownIn3D()); }
 
 	/*** temporary color ***/
 
 	//! Returns whether colors are currently overriden by a temporary (unique) color
 	/** See ccDrawableObject::setTempColor.
 	**/
-	virtual bool isColorOverriden() const;
+	inline virtual bool isColorOverriden() const { return m_colorIsOverriden; }
 
 	//! Returns current temporary (unique) color
-	virtual const colorType* getTempColor() const;
+	inline virtual const ccColor::Rgb& getTempColor() const { return m_tempColor; }
 
 	//! Sets current temporary (unique)
 	/** \param col rgb color
 		\param autoActivate auto activates temporary color
 	**/
-	virtual void setTempColor(const colorType* col, bool autoActivate = true);
+	virtual void setTempColor(const ccColor::Rgb& col, bool autoActivate = true);
 
 	//! Set temporary color activation state
-	virtual void enableTempColor(bool state);
+	inline virtual void enableTempColor(bool state) { m_colorIsOverriden = state; }
 
 	/*** associated display management ***/
 
@@ -306,7 +316,7 @@ public:
 	virtual void setDisplay(ccGenericGLDisplay* win);
 
 	//! Returns associated GL display
-	virtual ccGenericGLDisplay* getDisplay() const;
+	inline virtual ccGenericGLDisplay* getDisplay() const { return m_currentDisplay; }
 
 	//! Redraws associated GL display
 	virtual void redrawDisplay();
@@ -341,15 +351,15 @@ public:
 	//! Enables/disables associated GL transformation
 	/** See ccDrawableObject::setGLTransformation.
 	**/
-	virtual void enableGLTransformation(bool state);
+	inline virtual void enableGLTransformation(bool state) { m_glTransEnabled = state; }
 
 	//! Returns whether a GL transformation is enabled or not
-	virtual bool isGLTransEnabled() const;
+	inline virtual bool isGLTransEnabled() const { return m_glTransEnabled; }
 
 	//! Retuns associated GL transformation
 	/** See ccDrawableObject::setGLTransformation.
 	**/
-	virtual const ccGLMatrix& getGLTransformation() const;
+	inline virtual const ccGLMatrix& getGLTransformation() const { return m_glTrans; }
 
 	//! Resets associated GL transformation
 	/** GL transformation is reset to identity.
@@ -395,7 +405,7 @@ protected:
 	bool m_sfDisplayed;
 
 	//! Temporary (unique) color
-	colorType m_tempColor[3];
+	ccColor::Rgb m_tempColor;
 	//! Temporary (unique) color activation state
 	bool m_colorIsOverriden;
 

@@ -249,7 +249,7 @@ public:
 	inline const colorType* getColorByIndex(unsigned index) const
 	{
 		assert(m_updated && index < MAX_STEPS);
-		return m_rgbaScale + (index << 2);
+		return m_rgbaScale[index];
 	}
 
 	//! Saves this color scale as an XML file
@@ -277,7 +277,7 @@ protected:
 	QList<ccColorScaleElement> m_steps;
 
 	//! Internal representation (RGBA)
-	colorType m_rgbaScale[MAX_STEPS*4];
+	ccColor::Rgba m_rgbaScale[MAX_STEPS];
 
 	//! Internal representation validity
 	bool m_updated;

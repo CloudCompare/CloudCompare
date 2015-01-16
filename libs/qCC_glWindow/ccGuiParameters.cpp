@@ -27,11 +27,8 @@
 //System
 #include <string.h>
 
-//! Static unique instance of ccGui
+//! Unique instance of ccGui
 static ccSingleton<ccGui> s_gui;
-
-const int c_fColorArraySize = 4*sizeof(float);
-const int c_ubColorArraySize = 3*sizeof(unsigned char);
 
 const ccGui::ParamStruct& ccGui::Parameters()
 {
@@ -67,18 +64,19 @@ ccGui::ParamStruct::ParamStruct()
 
 void ccGui::ParamStruct::reset()
 {
-	memcpy(lightAmbientColor,	ccColor::darkest,				c_fColorArraySize);
-	memcpy(lightSpecularColor,	ccColor::darker,				c_fColorArraySize);
-	memcpy(lightDiffuseColor,	ccColor::bright,				c_fColorArraySize);
-	memcpy(meshFrontDiff,		ccColor::defaultMeshFrontDiff,	c_fColorArraySize);
-	memcpy(meshBackDiff,		ccColor::defaultMeshBackDiff,	c_fColorArraySize);
-	memcpy(meshSpecular,		ccColor::middle,				c_fColorArraySize);
-	memcpy(pointsDefaultCol,	ccColor::defaultColor,			c_ubColorArraySize);
-	memcpy(textDefaultCol,		ccColor::defaultColor,			c_ubColorArraySize);
-	memcpy(backgroundCol,		ccColor::defaultBkgColor,		c_ubColorArraySize);
-	memcpy(histBackgroundCol,	ccColor::defaultHistBkgColor,	c_ubColorArraySize);
-	memcpy(labelCol,			ccColor::defaultLabelColor,		c_ubColorArraySize);
-	memcpy(bbDefaultCol,		ccColor::yellow,				c_ubColorArraySize);
+	lightAmbientColor	= ccColor::darkest;
+	lightSpecularColor	= ccColor::darker;
+	lightDiffuseColor	= ccColor::bright;
+	meshFrontDiff		= ccColor::defaultMeshFrontDiff;
+	meshBackDiff		= ccColor::defaultMeshBackDiff;
+	meshSpecular		= ccColor::middle;
+	pointsDefaultCol	= ccColor::defaultColor;
+	textDefaultCol		= ccColor::defaultColor;
+	backgroundCol		= ccColor::defaultBkgColor;
+	histBackgroundCol	= ccColor::defaultHistBkgColor;
+	labelBackgroundCol	= ccColor::defaultLabelBkgColor;
+	labelMarkerCol		= ccColor::defaultLabelMarkerColor;
+	bbDefaultCol		= ccColor::yellow;
 
 	drawBackgroundGradient		= true;
 	decimateMeshOnMove			= true;
@@ -86,7 +84,7 @@ void ccGui::ParamStruct::reset()
 	useVBOs						= true;
 	displayCross				= true;
 
-	pickedPointsSize			= 4;
+	labelMarkerSize				= 5;
 
 	colorScaleShowHistogram		= true;
 	colorScaleUseShader			= false;
@@ -94,77 +92,46 @@ void ccGui::ParamStruct::reset()
 	colorScaleRampWidth			= 50;
 
 	defaultFontSize				= 10;
+	labelFontSize				= 8;
 	displayedNumPrecision		= 6;
-	labelsTransparency			= 50;
+	labelOpacity				= 75;
 }
 
-ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& params)
-{
-	memcpy(lightDiffuseColor,	params.lightDiffuseColor,	c_fColorArraySize);
-	memcpy(lightAmbientColor,	params.lightAmbientColor,	c_fColorArraySize);
-	memcpy(lightSpecularColor,	params.lightSpecularColor,	c_fColorArraySize);
-	memcpy(meshFrontDiff,		params.meshFrontDiff,		c_fColorArraySize);
-	memcpy(meshBackDiff,		params.meshBackDiff,		c_fColorArraySize);
-	memcpy(meshSpecular,		params.meshSpecular,		c_fColorArraySize);
-	memcpy(pointsDefaultCol,	params.pointsDefaultCol,	c_ubColorArraySize);
-	memcpy(textDefaultCol,		params.textDefaultCol,		c_ubColorArraySize);
-	memcpy(backgroundCol,		params.backgroundCol,		c_ubColorArraySize);
-	memcpy(histBackgroundCol,	params.histBackgroundCol,	c_ubColorArraySize);
-	memcpy(labelCol,			params.labelCol,			c_ubColorArraySize);
-	memcpy(bbDefaultCol,		params.bbDefaultCol,		c_ubColorArraySize);
-
-	drawBackgroundGradient		= params.drawBackgroundGradient;
-	decimateMeshOnMove			= params.decimateMeshOnMove;
-	decimateCloudOnMove			= params.decimateCloudOnMove;
-	useVBOs						= params.useVBOs;
-	displayCross				= params.displayCross;
-	pickedPointsSize			= params.pickedPointsSize;
-	colorScaleShowHistogram		= params.colorScaleShowHistogram;
-	colorScaleUseShader			= params.colorScaleUseShader;
-	colorScaleShaderSupported	= params.colorScaleShaderSupported;
-	colorScaleRampWidth			= params.colorScaleRampWidth;
-	defaultFontSize				= params.defaultFontSize;
-	displayedNumPrecision		= params.displayedNumPrecision;
-	labelsTransparency			= params.labelsTransparency;
-
-	return *this;
-
-}
+static int c_fColorArraySize  = sizeof(float) * 4;
+static int c_ubColorArraySize = sizeof(unsigned char) * 3;
 
 void ccGui::ParamStruct::fromPersistentSettings()
 {
 	QSettings settings;
 	settings.beginGroup("OpenGL");
+	lightAmbientColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("lightAmbientColor",		QByteArray((const char*)ccColor::darkest.rgba,					c_fColorArraySize )).toByteArray().data()));
+	lightSpecularColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",lightSpecularColor",	QByteArray((const char*)ccColor::darker.rgba,					c_fColorArraySize )).toByteArray().data()));
+	lightDiffuseColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",lightDiffuseColor",		QByteArray((const char*)ccColor::bright.rgba,					c_fColorArraySize )).toByteArray().data()));
+	meshFrontDiff		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",meshFrontDiff",			QByteArray((const char*)ccColor::defaultMeshFrontDiff.rgba,		c_fColorArraySize )).toByteArray().data()));
+	meshBackDiff		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",meshBackDiff",			QByteArray((const char*)ccColor::defaultMeshBackDiff.rgba,		c_fColorArraySize )).toByteArray().data()));
+	meshSpecular		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",meshSpecular",			QByteArray((const char*)ccColor::middle.rgba,					c_fColorArraySize )).toByteArray().data()));
+	pointsDefaultCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",pointsDefaultColor",	QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
+	textDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",textDefaultColor",		QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
+	backgroundCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",backgroundColor",		QByteArray((const char*)ccColor::defaultBkgColor.rgb,			c_ubColorArraySize)).toByteArray().data()));
+	histBackgroundCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",histBackgroundColor",	QByteArray((const char*)ccColor::defaultHistBkgColor.rgb,		c_ubColorArraySize)).toByteArray().data()));
+	labelBackgroundCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",labelBackgroundColor",	QByteArray((const char*)ccColor::defaultLabelBkgColor.rgb,		c_ubColorArraySize)).toByteArray().data()));
+	labelMarkerCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",labelMarkerColor",		QByteArray((const char*)ccColor::defaultLabelMarkerColor.rgb,	c_ubColorArraySize)).toByteArray().data()));
+	bbDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",bbDefaultColor",		QByteArray((const char*)ccColor::yellow.rgba,					c_ubColorArraySize)).toByteArray().data()));
 
-	memcpy(lightAmbientColor,	settings.value("lightAmbientColor",		QByteArray((const char*)ccColor::darkest,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
-	memcpy(lightSpecularColor,	settings.value("lightSpecularColor",	QByteArray((const char*)ccColor::darker,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
-	memcpy(lightDiffuseColor,	settings.value("lightDiffuseColor",		QByteArray((const char*)ccColor::bright,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
-	memcpy(meshFrontDiff,		settings.value("meshFrontDiff",			QByteArray((const char*)ccColor::defaultMeshFrontDiff,	c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
-	memcpy(meshBackDiff,		settings.value("meshBackDiff",			QByteArray((const char*)ccColor::defaultMeshBackDiff,	c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
-	memcpy(meshSpecular,		settings.value("meshSpecular",			QByteArray((const char*)ccColor::middle,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
-	memcpy(pointsDefaultCol,	settings.value("pointsDefaultColor",	QByteArray((const char*)ccColor::defaultColor,			c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-	memcpy(textDefaultCol,		settings.value("textDefaultColor",		QByteArray((const char*)ccColor::defaultColor,			c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-	memcpy(backgroundCol,		settings.value("backgroundColor",		QByteArray((const char*)ccColor::defaultBkgColor,		c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-	memcpy(histBackgroundCol,	settings.value("histBackgroundColor",	QByteArray((const char*)ccColor::defaultHistBkgColor,	c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-	memcpy(labelCol,			settings.value("labelColor",			QByteArray((const char*)ccColor::defaultLabelColor,		c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-	memcpy(bbDefaultCol,		settings.value("bbDefaultColor",		QByteArray((const char*)ccColor::yellow,				c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-
-	drawBackgroundGradient	= settings.value("backgroundGradient", true).toBool();
-	decimateMeshOnMove		= settings.value("meshDecimation", true).toBool();
-	decimateCloudOnMove		= settings.value("cloudDecimation", true).toBool();
-	useVBOs					= settings.value("useVBOs", true).toBool();
-	displayCross			= settings.value("crossDisplayed", true).toBool();
-
-	pickedPointsSize		= (unsigned)settings.value("pickedPointsSize", 4).toInt();
-
-	colorScaleShowHistogram		= settings.value("colorScaleShowHistogram", true).toBool();
-	colorScaleUseShader			= settings.value("colorScaleUseShader", false).toBool();
+	drawBackgroundGradient		=                                  settings.value("backgroundGradient",      true ).toBool();
+	decimateMeshOnMove			=                                  settings.value("meshDecimation",          true ).toBool();
+	decimateCloudOnMove			=                                  settings.value("cloudDecimation",         true ).toBool();
+	useVBOs						=                                  settings.value("useVBOs",                 true ).toBool();
+	displayCross				=                                  settings.value("crossDisplayed",          true ).toBool();
+	labelMarkerSize				= static_cast<unsigned>(std::max(0,settings.value("labelMarkerSize",         5    ).toInt()));
+	colorScaleShowHistogram		=                                  settings.value("colorScaleShowHistogram", true ).toBool();
+	colorScaleUseShader			=                                  settings.value("colorScaleUseShader",     false).toBool();
 	//colorScaleShaderSupported	= not saved
-	colorScaleRampWidth			= (unsigned)settings.value("colorScaleRampWidth", 50).toInt();
-
-	defaultFontSize				= (unsigned)settings.value("defaultFontSize", 10).toInt();
-	displayedNumPrecision		= (unsigned)settings.value("displayedNumPrecision", 6).toInt();
-	labelsTransparency			= (unsigned)settings.value("labelsTransparency", 50).toInt();
+	colorScaleRampWidth			= static_cast<unsigned>(std::max(0,settings.value("colorScaleRampWidth",      50  ).toInt()));
+	defaultFontSize				= static_cast<unsigned>(std::max(0,settings.value("defaultFontSize",          10  ).toInt()));
+	labelFontSize				= static_cast<unsigned>(std::max(0,settings.value("labelFontSize",            8   ).toInt()));
+	displayedNumPrecision		= static_cast<unsigned>(std::max(0,settings.value("displayedNumPrecision",    6   ).toInt()));
+	labelOpacity				= static_cast<unsigned>(std::max(0,settings.value("labelOpacity",             75  ).toInt()));
 
 	settings.endGroup();
 }
@@ -174,31 +141,33 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	QSettings settings;
 	settings.beginGroup("OpenGL");
 
-	settings.setValue("lightDiffuseColor",QByteArray((const char*)lightDiffuseColor,c_fColorArraySize));
-	settings.setValue("lightAmbientColor",QByteArray((const char*)lightAmbientColor,c_fColorArraySize));
-	settings.setValue("lightSpecularColor",QByteArray((const char*)lightSpecularColor,c_fColorArraySize));
-	settings.setValue("meshFrontDiff",QByteArray((const char*)meshFrontDiff,c_fColorArraySize));
-	settings.setValue("meshBackDiff",QByteArray((const char*)meshBackDiff,c_fColorArraySize));
-	settings.setValue("meshSpecular",QByteArray((const char*)meshSpecular,c_fColorArraySize));
-	settings.setValue("pointsDefaultColor",QByteArray((const char*)pointsDefaultCol,c_ubColorArraySize));
-	settings.setValue("textDefaultColor",QByteArray((const char*)textDefaultCol,c_ubColorArraySize));
-	settings.setValue("backgroundColor",QByteArray((const char*)backgroundCol,c_ubColorArraySize));
-	settings.setValue("histBackgroundColor",QByteArray((const char*)histBackgroundCol,c_ubColorArraySize));
-	settings.setValue("labelColor",QByteArray((const char*)labelCol,c_ubColorArraySize));
-	settings.setValue("bbDefaultColor",QByteArray((const char*)bbDefaultCol,c_ubColorArraySize));
-	settings.setValue("backgroundGradient",drawBackgroundGradient);
-	settings.setValue("meshDecimation",decimateMeshOnMove);
-	settings.setValue("cloudDecimation",decimateCloudOnMove);
-	settings.setValue("useVBOs", useVBOs);
-	settings.setValue("crossDisplayed",displayCross);
-	settings.setValue("pickedPointsSize", pickedPointsSize);
-	settings.setValue("colorScaleShowHistogram", colorScaleShowHistogram);
-	settings.setValue("colorScaleUseShader", colorScaleUseShader);
+	settings.setValue("lightDiffuseColor",        QByteArray((const char*)lightDiffuseColor.rgba,  c_fColorArraySize ));
+	settings.setValue("lightAmbientColor",        QByteArray((const char*)lightAmbientColor.rgba,  c_fColorArraySize ));
+	settings.setValue("lightSpecularColor",       QByteArray((const char*)lightSpecularColor.rgba, c_fColorArraySize ));
+	settings.setValue("meshFrontDiff",            QByteArray((const char*)meshFrontDiff.rgba,      c_fColorArraySize ));
+	settings.setValue("meshBackDiff",             QByteArray((const char*)meshBackDiff.rgba,       c_fColorArraySize ));
+	settings.setValue("meshSpecular",             QByteArray((const char*)meshSpecular.rgba,       c_fColorArraySize ));
+	settings.setValue("pointsDefaultColor",       QByteArray((const char*)pointsDefaultCol.rgb,    c_ubColorArraySize));
+	settings.setValue("textDefaultColor",         QByteArray((const char*)textDefaultCol.rgb,      c_ubColorArraySize));
+	settings.setValue("backgroundColor",          QByteArray((const char*)backgroundCol.rgb,       c_ubColorArraySize));
+	settings.setValue("histBackgroundColor",      QByteArray((const char*)histBackgroundCol.rgb,   c_ubColorArraySize));
+	settings.setValue("labelBackgroundColor",     QByteArray((const char*)labelBackgroundCol.rgb,  c_ubColorArraySize));
+	settings.setValue("labelMarkerColor",         QByteArray((const char*)labelMarkerCol.rgb,      c_ubColorArraySize));
+	settings.setValue("bbDefaultColor",           QByteArray((const char*)bbDefaultCol.rgb,        c_ubColorArraySize));
+	settings.setValue("backgroundGradient",       drawBackgroundGradient);
+	settings.setValue("meshDecimation",           decimateMeshOnMove);
+	settings.setValue("cloudDecimation",          decimateCloudOnMove);
+	settings.setValue("useVBOs",                  useVBOs);
+	settings.setValue("crossDisplayed",           displayCross);
+	settings.setValue("labelMarkerSize",          labelMarkerSize);
+	settings.setValue("colorScaleShowHistogram",  colorScaleShowHistogram);
+	settings.setValue("colorScaleUseShader",      colorScaleUseShader);
 	//settings.setValue("colorScaleShaderSupported", not saved);
-	settings.setValue("colorScaleRampWidth", colorScaleRampWidth);
-	settings.setValue("defaultFontSize", defaultFontSize);
-	settings.setValue("displayedNumPrecision", displayedNumPrecision);
-	settings.setValue("labelsTransparency", labelsTransparency);
+	settings.setValue("colorScaleRampWidth",      colorScaleRampWidth);
+	settings.setValue("defaultFontSize",          defaultFontSize);
+	settings.setValue("labelFontSize",            labelFontSize);
+	settings.setValue("displayedNumPrecision",    displayedNumPrecision);
+	settings.setValue("labelOpacity",             labelOpacity);
 
 	settings.endGroup();
 }

@@ -291,7 +291,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (isColorOverriden())
 			{
-				glColor3ubv(m_tempColor);
+				ccGL::Color3v(m_tempColor.rgb);
 				glParams.showColors = false;
 			}
 			else
@@ -778,9 +778,9 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
-					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					ccColor::Rgb C;
 					getColorFromMaterial(triIndex,*P,C,withRGB);
-					cloud->addRGBColor(C);
+					cloud->addRGBColor(C.rgb);
 				}
 
 				cloud->showColors(true);
@@ -799,9 +799,9 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
-					colorType C[3] = { MAX_COLOR_COMP, MAX_COLOR_COMP, MAX_COLOR_COMP };
+					ccColor::Rgb C;
 					interpolateColors(triIndex,*P,C);
-					cloud->addRGBColor(C);
+					cloud->addRGBColor(C.rgb);
 				}
 
 				cloud->showColors(true);

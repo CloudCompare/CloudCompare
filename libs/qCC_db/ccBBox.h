@@ -93,7 +93,7 @@ public:
 	//! Draws bounding box (OpenGL)
 	/** \param col (R,G,B) color
 	**/
-	void draw(const colorType col[]) const;
+	void draw(const ccColor::Rgb& col) const;
 
 	//! Sets bonding box validity
 	inline void setValidity(bool state) { m_valid = state; }

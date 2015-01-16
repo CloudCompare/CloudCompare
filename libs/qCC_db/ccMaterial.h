@@ -21,6 +21,7 @@
 //Local
 #include "qCC_db.h"
 #include "ccSerializableObject.h"
+#include "ccColorTypes.h"
 
 //Qt
 #include <QImage>
@@ -49,37 +50,37 @@ public:
 	inline const QString& getTextureFilename() const { return m_textureFilename; }
 
 	//! Sets diffuse color (both front and back)
-	void setDiffuse(const float color[4]);
+	void setDiffuse(const ccColor::Rgbaf& color);
 	//! Sets diffuse color (front)
-	void setDiffuseFront(const float color[4]);
+	inline void setDiffuseFront(const ccColor::Rgbaf& color) { m_diffuseFront = color; }
 	//! Sets diffuse color (back)
-	void setDiffuseBack(const float color[4]);
+	inline void setDiffuseBack(const ccColor::Rgbaf& color) { m_diffuseBack = color; }
 	//! Returns front diffuse color
-	inline const float* getDiffuseFront() const { return m_diffuseFront; }
+	inline const ccColor::Rgbaf& getDiffuseFront() const { return m_diffuseFront; }
 	//! Returns back diffuse color
-	inline const float* getDiffuseBack() const { return m_diffuseBack; }
+	inline const ccColor::Rgbaf& getDiffuseBack() const { return m_diffuseBack; }
 
 	//! Sets ambient color
-	void setAmbient(const float color[4]);
+	inline void setAmbient(const ccColor::Rgbaf& color) { m_ambient = color; }
 	//! Returns ambient color
-	inline const float* getAmbient() const { return m_ambient; }
+	inline const ccColor::Rgbaf& getAmbient() const { return m_ambient; }
 
 	//! Sets specular color
-	void setSpecular(const float color[4]);
+	inline void setSpecular(const ccColor::Rgbaf& color) { m_specular = color; }
 	//! Returns specular color
-	inline const float* getSpecular() const { return m_specular; }
+	inline const ccColor::Rgbaf& getSpecular() const { return m_specular; }
 
 	//! Sets emission color
-	void setEmission(const float color[4]);
+	inline void setEmission(const ccColor::Rgbaf& color) { m_emission = color; }
 	//! Returns emission color
-	inline const float* getEmission() const { return m_emission; }
+	inline const ccColor::Rgbaf& getEmission() const { return m_emission; }
 
 	//! Sets shininess (both front - 100% - and back - 80%)
 	void setShininess(float val);
 	//! Sets shininess (front)
-	void setShininessFront(float val);
+	inline void setShininessFront(float val) { m_shininessFront = val; }
 	//! Sets shininess (back)
-	void setShininessBack(float val);
+	inline void setShininessBack(float val) { m_shininessBack = val; }
 	//! Returns front shininess
 	inline float getShininessFront() const { return m_shininessFront; }
 	//! Returns back shininess
@@ -134,11 +135,11 @@ protected:
 	QString m_textureFilename;
 	QString m_uniqueID;
 
-	float m_diffuseFront[4];
-	float m_diffuseBack[4];
-	float m_ambient[4];
-	float m_specular[4];
-	float m_emission[4];
+	ccColor::Rgbaf m_diffuseFront;
+	ccColor::Rgbaf m_diffuseBack;
+	ccColor::Rgbaf m_ambient;
+	ccColor::Rgbaf m_specular;
+	ccColor::Rgbaf m_emission;
 	float m_shininessFront;
 	float m_shininessBack;
 

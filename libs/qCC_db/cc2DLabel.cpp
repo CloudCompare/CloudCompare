@@ -56,7 +56,7 @@ static const QString CLOUD_INDEX_2("ci2");
 
 //return angle between two vectors (in degrees)
 //warning: vectors will be normalized by default
-double GetAngle_deg(CCVector3& AB, CCVector3& AC)
+double GetAngle_deg(CCVector3 AB, CCVector3 AC)
 {
 	AB.normalize();
 	AC.normalize();
@@ -488,7 +488,7 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.edges.u[1] = P2P3.norm2d();  //edge 2-3
 	info.edges.u[2] = P1P3.norm2d();  //edge 3-1
 
-	//angle (warning: P1P2, P1P3 and P2P3 will be normalized!)
+	//angle
 	info.angles.u[0] = GetAngle_deg(P1P2,P1P3);   //angleAtP1
 	info.angles.u[1] = GetAngle_deg(P2P3,-P1P2);  //angleAtP2
 	info.angles.u[2] = GetAngle_deg(-P1P3,-P2P3); //angleAtP3 (should be equal to 180-a1-a2!)

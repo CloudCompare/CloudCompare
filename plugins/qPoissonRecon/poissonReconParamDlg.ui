@@ -106,7 +106,7 @@ a smoother, noise-reduced, reconstruction.</string>
       <item row="2" column="1">
        <widget class="QSpinBox" name="fullDepthSpinBox">
         <property name="toolTip">
-         <string>The maximum depth of the tree that will be used for surface reconstruction</string>
+         <string>The depth beyond depth the octree will be adapted. At coarser depths, the octree will be complete.</string>
         </property>
         <property name="value">
          <number>5</number>

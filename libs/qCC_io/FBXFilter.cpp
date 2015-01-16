@@ -237,14 +237,14 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			ccMaterial::CShared mat = matSet->at(i);
 			FbxSurfacePhong *lMaterial = FbxSurfacePhong::Create(pScene, qPrintable(mat->getName()));
 
-			const float* emission = mat->getEmission();
-			const float* ambient = mat->getAmbient();
-			const float* diffuse = mat->getDiffuseFront();
-			const float* specular = mat->getDiffuseFront();
-			lMaterial->Emissive.Set(FbxDouble3(emission[0],emission[1],emission[2]));
-			lMaterial->Ambient.Set(FbxDouble3(ambient[0],ambient[1],ambient[2]));
-			lMaterial->Diffuse.Set(FbxDouble3(diffuse[0],diffuse[1],diffuse[2]));
-			lMaterial->Specular.Set(FbxDouble3(specular[0],specular[1],specular[2]));
+			const ccColor::Rgbaf& emission = mat->getEmission();
+			const ccColor::Rgbaf& ambient = mat->getAmbient();
+			const ccColor::Rgbaf& diffuse = mat->getDiffuseFront();
+			const ccColor::Rgbaf& specular = mat->getDiffuseFront();
+			lMaterial->Emissive.Set(FbxDouble3(emission.r,emission.g,emission.b));
+			lMaterial->Ambient .Set(FbxDouble3( ambient.r, ambient.g, ambient.b));
+			lMaterial->Diffuse .Set(FbxDouble3( diffuse.r, diffuse.g, diffuse.b));
+			lMaterial->Specular.Set(FbxDouble3(specular.r,specular.g,specular.b));
 			lMaterial->Shininess = mat->getShininessFront();
 			lMaterial->ShadingModel.Set("Phong");
 

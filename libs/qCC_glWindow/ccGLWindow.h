@@ -621,8 +621,10 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
-	//! Starts OpenGL picking process
-	/** \param mode picking mode
+	//! Starts picking process
+	/** OpenGL is used by default (unless ccGui::ParamStruct::useOpenGLPointPicking
+		is false in which case a CPU based approach will be used for point picking).
+		\param mode picking mode
 		\param centerX picking area center X position
 		\param centerY picking area center y position
 		\param width picking area width
@@ -631,6 +633,9 @@ protected:
 		\return item ID (if any) or <1 otherwise
 	**/
 	int startPicking(PICKING_MODE mode, int centerX, int centerY, int width = 5, int height = 5, int* subID = 0);
+
+	//! Starts OpenGL picking process
+	int startCPUBasedPointPicking(int centerX, int centerY, int& subID, int width = 5, int height = 5);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context

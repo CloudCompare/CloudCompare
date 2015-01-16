@@ -685,9 +685,9 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 			//we draw the segments
 			if (isSelected())
-				glColor3ubv(ccColor::red);
+				ccGL::Color3v(ccColor::red.rgba);
 			else
-				glColor3ubv(ccColor::green);
+				ccGL::Color3v(ccColor::green.rgba);
 			
 			glBegin(GL_LINES);
 			for (unsigned i=0; i<count; i++)
@@ -760,7 +760,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 													*P + CCVector3(	context.labelMarkerTextShift,
 																	context.labelMarkerTextShift,
 																	context.labelMarkerTextShift),
-													ccColor::white,
+													ccColor::white.rgba,
 													font );
 				}
 				glPopAttrib();
@@ -1132,7 +1132,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//we make the arrow base start from the nearest corner
 		if (arrowBaseConfig != 4) //4 = label above point!
 		{
-			glColor4ubv(defaultBorderColor);
+			glColor4ubv(defaultBorderColor.rgba);
 			glBegin(GL_TRIANGLE_FAN);
 			glVertex2d(arrowDestX-xStart,arrowDestY-yStart);
 			switch(arrowBaseConfig)
@@ -1181,10 +1181,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	}
 
 	//main rectangle
-	glColor4ubv(defaultBkgColor);
+	glColor4ubv(defaultBkgColor.rgba);
 	glBegin(GL_QUADS);
-	glVertex2i(m_labelROI.left(), -m_labelROI.top());
-	glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
+	glVertex2i(m_labelROI.left(),  -m_labelROI.top());
+	glVertex2i(m_labelROI.left(),  -m_labelROI.bottom());
 	glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
 	glVertex2i(m_labelROI.right(), -m_labelROI.top());
 	glEnd();
@@ -1193,10 +1193,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	{
 		glPushAttrib(GL_LINE_BIT);
 		glLineWidth(3.0f);
-		glColor4ubv(defaultBorderColor);
+		glColor4ubv(defaultBorderColor.rgba);
 		glBegin(GL_LINE_LOOP);
-		glVertex2i(m_labelROI.left(), -m_labelROI.top());
-		glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
+		glVertex2i(m_labelROI.left(),  -m_labelROI.top());
+		glVertex2i(m_labelROI.left(),  -m_labelROI.bottom());
 		glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
 		glVertex2i(m_labelROI.right(), -m_labelROI.top());
 		glEnd();
@@ -1270,14 +1270,14 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					}
 					else
 					{
-						textColor = ccColor::white;
+						textColor = ccColor::white.rgba;
 						int rgbIndex = (r % 3);
 						if (rgbIndex == 0)
-							backgroundColor = ccColor::red;
+							backgroundColor = ccColor::red.rgba;
 						else if (rgbIndex == 1)
 							backgroundColor = darkGreen;
 						else if (rgbIndex == 2)
-							backgroundColor = ccColor::blue;
+							backgroundColor = ccColor::blue.rgba;
 					}
 
 					//draw background

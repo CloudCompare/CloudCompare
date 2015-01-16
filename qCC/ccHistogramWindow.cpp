@@ -327,7 +327,7 @@ void ccHistogramWindow::refreshBars()
 
 			const colorType* col= m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
 			if (!col) //hidden values may have no associated color!
-				col = ccColor::lightGrey;
+				col = ccColor::lightGrey.rgba;
 			colors[i] = QColor(col[0],col[1],col[2]);
 		}
 
@@ -470,7 +470,7 @@ void ccHistogramWindow::refresh()
 					col = colorScale->getColorByRelativePos(normVal);
 				}
 				if (!col) //hidden values may have no associated color!
-					col = ccColor::lightGrey;
+					col = ccColor::lightGrey.rgba;
 				colors[i] = QColor(col[0],col[1],col[2]);
 			}
 		}
@@ -500,8 +500,8 @@ void ccHistogramWindow::refresh()
 		m_overlayCurve->setName("OverlayCurve");
 
 		//set pen color
-		const unsigned char* col = ccColor::darkGrey;
-		QPen pen(QColor(col[0],col[1],col[2]));
+		const ccColor::Rgba& col = ccColor::darkGrey;
+		QPen pen(QColor(col.r,col.g,col.b));
 		m_overlayCurve->setPen(pen);
 
 		//set width

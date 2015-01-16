@@ -79,8 +79,8 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 		{
 			for (unsigned x=0; x<depthBuffer.width; ++x,++_zBuff)
 			{
-				const colorType* col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((*_zBuff-minDist)*coef)) : ccColor::black);
-				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col[0],col[1],col[2]));
+				const ccColor::Rgba& col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((*_zBuff-minDist)*coef)) : ccColor::black);
+				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col.r,col.g,col.b));
 			}
 		}
 	}
@@ -345,7 +345,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				if (logScale)
 					value = exp(value*c_log10);
 				const colorType* col = sf->getColor(static_cast<ScalarType>(value));
-				glColor3ubv(col ? col : ccColor::lightGrey);
+				glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 
 				glVertex2i(x,y+j);
 				glVertex2i(x+scaleWidth,y+j);
@@ -381,7 +381,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			if (logScale)
 				value = exp(value*c_log10);
 			const colorType* col = sf->getColor(static_cast<ScalarType>(value));
-			glColor3ubv(col ? col : ccColor::lightGrey);
+			glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 			glBegin(GL_POLYGON);
 			glVertex2i(x,y);
 			glVertex2i(x+scaleWidth,y);

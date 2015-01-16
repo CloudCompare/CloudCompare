@@ -1007,7 +1007,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					{
 						//we must set the color (black) of all the previously skipped points
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
-							loadedCloud->addRGBColor(ccColor::black);
+							loadedCloud->addRGBColor(ccColor::black.rgba);
 					}
 					else
 					{
@@ -1037,7 +1037,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						colorCompBitShift = 8;
 						//we fix all the previously read colors
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
-							loadedCloud->setPointColor(i,ccColor::black); //255 >> 8 = 0!
+							loadedCloud->setPointColor(i,ccColor::black.rgba); //255 >> 8 = 0!
 					}
 				}
 

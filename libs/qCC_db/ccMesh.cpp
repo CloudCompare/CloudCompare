@@ -1490,7 +1490,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glColor3fv(context.defaultMat->getDiffuseFront());
+			glColor3fv(context.defaultMat->getDiffuseFront().rgba);
 		}
 
 		if (glParams.showNorms)
@@ -2995,10 +2995,10 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 		}
 		else
 		{
-			const float* diffuse = material->getDiffuseFront();
-			rgb.r = static_cast<colorType>(diffuse[0]*ccColor::MAX);
-			rgb.g = static_cast<colorType>(diffuse[1]*ccColor::MAX);
-			rgb.b = static_cast<colorType>(diffuse[2]*ccColor::MAX);
+			const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
+			rgb.r = static_cast<colorType>(diffuse.r * ccColor::MAX);
+			rgb.g = static_cast<colorType>(diffuse.g * ccColor::MAX);
+			rgb.b = static_cast<colorType>(diffuse.b * ccColor::MAX);
 
 			foundMaterial = true;
 		}
@@ -3038,10 +3038,10 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 
 	if (!material->hasTexture())
 	{
-		const float* diffuse = material->getDiffuseFront();
-		rgb.r = static_cast<colorType>(diffuse[0]*ccColor::MAX);
-		rgb.g = static_cast<colorType>(diffuse[1]*ccColor::MAX);
-		rgb.b = static_cast<colorType>(diffuse[2]*ccColor::MAX);
+		const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
+		rgb.r = static_cast<colorType>(diffuse.r * ccColor::MAX);
+		rgb.g = static_cast<colorType>(diffuse.g * ccColor::MAX);
+		rgb.b = static_cast<colorType>(diffuse.b * ccColor::MAX);
 		return true;
 	}
 
@@ -3112,10 +3112,10 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 
 		QRgb pixel = texture.pixel(xPix,yPix);
 
-		const float* diffuse = material->getDiffuseFront();
-		rgb.r = static_cast<colorType>(diffuse[0] * qRed  (pixel));
-		rgb.g = static_cast<colorType>(diffuse[1] * qGreen(pixel));
-		rgb.b = static_cast<colorType>(diffuse[2] * qBlue (pixel));
+		const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
+		rgb.r = static_cast<colorType>(diffuse.r * qRed  (pixel));
+		rgb.g = static_cast<colorType>(diffuse.g * qGreen(pixel));
+		rgb.b = static_cast<colorType>(diffuse.b * qBlue (pixel));
 	}
 
 	return true;

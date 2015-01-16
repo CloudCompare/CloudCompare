@@ -66,8 +66,8 @@ public:
 
 		//set 'grayed' points color as a float-packed value
 		{
-			int rgb = (ccColor::lightGrey[0] << 16) | (ccColor::lightGrey[1] << 8) | ccColor::lightGrey[2];
-			float packedColorGray = (float)((double)rgb/(double)(1<<24));
+			int rgb = (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
+			float packedColorGray = static_cast<float>(static_cast<double>(rgb)/(1<<24));
 			setUniform1f("uf_colorGray",packedColorGray);
 		}
 
@@ -75,10 +75,10 @@ public:
 		assert(colorScale);
 		for (unsigned i=0; i<colorSteps; ++i)
 		{
-			const colorType* col = colorScale->getColorByRelativePos((double)i/(double)(colorSteps-1),colorSteps);
+			const colorType* col = colorScale->getColorByRelativePos(static_cast<double>(i)/(colorSteps-1),colorSteps);
 			//set ramp colors as float-packed values
 			int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
-			s_packedColormapf[i] = (float)((double)rgb/(double)(1<<24));
+			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb)/(1<<24));
 		}
 		setTabUniform1fv("uf_colormapTable",colorSteps,s_packedColormapf);
 

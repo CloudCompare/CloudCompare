@@ -1427,7 +1427,7 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 			//for each column
 			for (unsigned i=0; i<map->xSteps; ++i, ++cell)
 			{
-				const colorType* rgb = ccColor::lightGrey;
+				const colorType* rgb = ccColor::lightGrey.rgba;
 
 				if (cell->count != 0)
 				{
@@ -1436,7 +1436,7 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 						relativePos = 0.0;
 					else if (relativePos > 1.0)
 						relativePos = 1.0;
-					rgb = colorScale->getColorByRelativePos(relativePos,colorScaleSteps,ccColor::lightGrey);
+					rgb = colorScale->getColorByRelativePos(relativePos,colorScaleSteps,ccColor::lightGrey.rgba);
 				}
 
 				//DGM FIXME: QImage::sePixel is quite slow!

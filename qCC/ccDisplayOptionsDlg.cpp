@@ -44,6 +44,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(decimateCloudBox,                SIGNAL(clicked()),         this, SLOT(changeCloudDecimation()));
 	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
 	connect(showCrossCheckBox,               SIGNAL(clicked()),         this, SLOT(changeCrossDisplayed()));
+	connect(openGLPickingCheckBox,           SIGNAL(clicked()),         this, SLOT(changeOpenGLPicking()));
 
 	connect(colorScaleShowHistogramCheckBox, SIGNAL(clicked()),         this, SLOT(changeColorScaleShowHistogram()));
 	connect(useColorScaleShaderCheckBox,     SIGNAL(clicked()),         this, SLOT(changeColorScaleUseShader()));
@@ -69,56 +70,56 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 
 void ccDisplayOptionsDlg::refresh()
 {
-	const float* ac = parameters.lightAmbientColor;
-	lightAmbientColor.setRgbF(ac[0],ac[1],ac[2],ac[3]);
+	const ccColor::Rgbaf& ac = parameters.lightAmbientColor;
+	lightAmbientColor.setRgbF(ac.r,ac.g,ac.b,ac.a);
 	SetButtonColor(ambientColorButton,lightAmbientColor);
 
-	const float* dc = parameters.lightDiffuseColor;
-	lightDiffuseColor.setRgbF(dc[0],dc[1],dc[2],dc[3]);
+	const ccColor::Rgbaf& dc = parameters.lightDiffuseColor;
+	lightDiffuseColor.setRgbF(dc.r,dc.g,dc.b,dc.a);
 	SetButtonColor(diffuseColorButton,lightDiffuseColor);
 
-	const float* sc = parameters.lightSpecularColor;
-	lightSpecularColor.setRgbF(sc[0],sc[1],sc[2],sc[3]);
+	const ccColor::Rgbaf& sc = parameters.lightSpecularColor;
+	lightSpecularColor.setRgbF(sc.r,sc.g,sc.b,sc.a);
 	SetButtonColor(specularColorButton,lightSpecularColor);
 
-	const float* mbc = parameters.meshBackDiff;
-	meshBackDiff.setRgbF(mbc[0],mbc[1],mbc[2],mbc[3]);
+	const ccColor::Rgbaf& mbc = parameters.meshBackDiff;
+	meshBackDiff.setRgbF(mbc.r,mbc.g,mbc.b,mbc.a);
 	SetButtonColor(meshBackColorButton,meshBackDiff);
 
-	const float* mspec = parameters.meshSpecular;
-	meshSpecularColor.setRgbF(mspec[0],mspec[1],mspec[2],mspec[3]);
+	const ccColor::Rgbaf& mspec = parameters.meshSpecular;
+	meshSpecularColor.setRgbF(mspec.r,mspec.g,mspec.b,mspec.a);
 	SetButtonColor(meshSpecularColorButton,meshSpecularColor);
 
-	const float* mfc = parameters.meshFrontDiff;
-	meshFrontDiff.setRgbF(mfc[0],mfc[1],mfc[2],mfc[3]);
+	const ccColor::Rgbaf& mfc = parameters.meshFrontDiff;
+	meshFrontDiff.setRgbF(mfc.r,mfc.g,mfc.b,mfc.a);
 	SetButtonColor(meshFrontColorButton,meshFrontDiff);
 
-	const unsigned char* bbc = parameters.bbDefaultCol.rgb;
-	bbDefaultCol.setRgb(bbc[0],bbc[1],bbc[2]);
+	const ccColor::Rgbub& bbc = parameters.bbDefaultCol;
+	bbDefaultCol.setRgb(bbc.r,bbc.g,bbc.b);
 	SetButtonColor(bbColorButton,bbDefaultCol);
 
-	const unsigned char* bgc = parameters.backgroundCol.rgb;
-	backgroundCol.setRgb(bgc[0],bgc[1],bgc[2]);
+	const ccColor::Rgbub& bgc = parameters.backgroundCol;
+	backgroundCol.setRgb(bgc.r,bgc.g,bgc.b);
 	SetButtonColor(bkgColorButton,backgroundCol);
 
-	const unsigned char* hbgc = parameters.histBackgroundCol.rgb;
-	histBackgroundCol.setRgb(hbgc[0],hbgc[1],hbgc[2]);
+	const ccColor::Rgbub& hbgc = parameters.histBackgroundCol;
+	histBackgroundCol.setRgb(hbgc.r,hbgc.g,hbgc.b);
 	SetButtonColor(histBkgColorButton,histBackgroundCol);
 
-	const unsigned char* lblbc = parameters.labelBackgroundCol.rgb;
-	labelBackgroundCol.setRgb(lblbc[0],lblbc[1],lblbc[2]);
+	const ccColor::Rgbub& lblbc = parameters.labelBackgroundCol;
+	labelBackgroundCol.setRgb(lblbc.r,lblbc.g,lblbc.b);
 	SetButtonColor(labelBkgColorButton,labelBackgroundCol);
 
-	const unsigned char* lblmc = parameters.labelMarkerCol.rgb;
-	labelMarkerCol.setRgb(lblmc[0],lblmc[1],lblmc[2]);
+	const ccColor::Rgbub& lblmc = parameters.labelMarkerCol;
+	labelMarkerCol.setRgb(lblmc.r,lblmc.g,lblmc.b);
 	SetButtonColor(labelMarkerColorButton,labelMarkerCol);
 
-	const unsigned char* pdc = parameters.pointsDefaultCol.rgb;
-	pointsDefaultCol.setRgb(pdc[0],pdc[1],pdc[2]);
+	const ccColor::Rgbub& pdc = parameters.pointsDefaultCol;
+	pointsDefaultCol.setRgb(pdc.r,pdc.g,pdc.b);
 	SetButtonColor(pointsColorButton,pointsDefaultCol);
 
-	const unsigned char* tdc = parameters.textDefaultCol.rgb;
-	textDefaultCol.setRgb(tdc[0],tdc[1],tdc[2]);
+	const ccColor::Rgbub& tdc = parameters.textDefaultCol;
+	textDefaultCol.setRgb(tdc.r,tdc.g,tdc.b);
 	SetButtonColor(textColorButton,textDefaultCol);
 
 	enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
@@ -126,6 +127,7 @@ void ccDisplayOptionsDlg::refresh()
 	decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
 	useVBOCheckBox->setChecked(parameters.useVBOs);
 	showCrossCheckBox->setChecked(parameters.displayCross);
+	openGLPickingCheckBox->setChecked(parameters.useOpenGLPointPicking);
 
 	colorScaleShowHistogramCheckBox->setChecked(parameters.colorScaleShowHistogram);
 	useColorScaleShaderCheckBox->setChecked(parameters.colorScaleUseShader);
@@ -379,6 +381,11 @@ void ccDisplayOptionsDlg::changeVBOUsage()
 void ccDisplayOptionsDlg::changeCrossDisplayed()
 {
 	parameters.displayCross = showCrossCheckBox->isChecked();
+}
+
+void ccDisplayOptionsDlg::changeOpenGLPicking()
+{
+	parameters.useOpenGLPointPicking = openGLPickingCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeColorScaleShowHistogram()

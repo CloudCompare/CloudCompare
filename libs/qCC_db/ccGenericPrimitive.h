@@ -49,7 +49,7 @@ public:
 	//! Sets primitive color (shortcut)
 	/** \param col rgb color
 	**/
-	virtual void setColor(const colorType* col);
+	virtual void setColor(const ccColor::Rgb& col);
 
 	//! Add operator
 	/** Warning: simply copies the input primitive vertices/triangles to this primitive mesh!

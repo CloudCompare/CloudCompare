@@ -81,6 +81,7 @@ signals:
 		void changeCloudDecimation();
 		void changeVBOUsage();
 		void changeCrossDisplayed();
+		void changeOpenGLPicking();
 		void changeColorScaleShowHistogram();
 		void changeColorScaleUseShader();
 		void changeColorScaleRampWidth(int);

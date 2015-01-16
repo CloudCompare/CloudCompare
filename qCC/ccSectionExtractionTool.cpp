@@ -46,12 +46,12 @@
 #include <math.h>
 
 //default parameters
-static const colorType* s_defaultPolylineColor         = ccColor::magenta;
-static const colorType* s_defaultContourColor          = ccColor::green;
-static const colorType* s_defaultEditedPolylineColor   = ccColor::green;
-static const colorType* s_defaultSelectedPolylineColor = ccColor::red;
-static const int        s_defaultPolylineWidth         = 1;
-static const int        s_defaultSelectedPolylineWidth = 3;
+static const ccColor::Rgba& s_defaultPolylineColor         = ccColor::magenta;
+static const ccColor::Rgba& s_defaultContourColor          = ccColor::green;
+static const ccColor::Rgba& s_defaultEditedPolylineColor   = ccColor::green;
+static const ccColor::Rgba& s_defaultSelectedPolylineColor = ccColor::red;
+static const int            s_defaultPolylineWidth         = 1;
+static const int            s_defaultSelectedPolylineWidth = 3;
 
 //default export groups
 static unsigned s_polyExportGroupID    = 0;

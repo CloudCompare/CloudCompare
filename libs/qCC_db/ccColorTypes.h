@@ -103,7 +103,7 @@ namespace ccColor
 		//! Cast operator
 		inline operator RgbTpl<Type>() const { return RgbTpl<Type>(rgba); }
 		//! Cast operator (const version)
-		inline operator const Type*() const { return rgba; }
+		//inline operator const Type*() const { return rgba; }
 	};
 
 	//! 4 components, float type

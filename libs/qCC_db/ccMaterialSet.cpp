@@ -285,13 +285,13 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 		ccMaterial::CShared mtl = *it;
 		stream << endl << "newmtl " << mtl->getName() << endl;
 
-		const float* Ka = mtl->getAmbient();
-		const float* Kd = mtl->getDiffuseFront();
-		const float* Ks = mtl->getSpecular();
-		stream << "Ka " << Ka[0] << " " << Ka[1] << " " << Ka[2] << endl;
-		stream << "Kd " << Kd[0] << " " << Kd[1] << " " << Kd[2] << endl;
-		stream << "Ks " << Ks[0] << " " << Ks[1] << " " << Ks[2] << endl;
-		stream << "Tr " << Ka[3] << endl; //we take the ambient's by default
+		const ccColor::Rgbaf& Ka = mtl->getAmbient();
+		const ccColor::Rgbaf& Kd = mtl->getDiffuseFront();
+		const ccColor::Rgbaf& Ks = mtl->getSpecular();
+		stream << "Ka " << Ka.r << " " << Ka.g << " " << Ka.b << endl;
+		stream << "Kd " << Kd.r << " " << Kd.g << " " << Kd.b << endl;
+		stream << "Ks " << Ks.r << " " << Ks.g << " " << Ks.b << endl;
+		stream << "Tr " << Ka.a << endl; //we take the ambient's by default
 		stream << "illum 1" << endl;
 		stream << "Ns " << mtl->getShininessFront()	<< endl; //we take the front's by default
 

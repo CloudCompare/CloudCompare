@@ -293,7 +293,7 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//show path
 	{
-		glColor3ubv(ccColor::green);
+		ccGL::Color3v(ccColor::green.rgba);
 		glBegin(count > 1 && m_showAsPolyline ? GL_LINE_STRIP : GL_POINTS); //show path as a polyline or points?
 		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
 			glVertex3fv(it->getTranslation());

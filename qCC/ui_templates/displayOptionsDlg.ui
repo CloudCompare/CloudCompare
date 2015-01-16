@@ -27,7 +27,7 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
@@ -700,6 +700,19 @@
         <widget class="QCheckBox" name="useVBOCheckBox">
          <property name="text">
           <string>Try to load clouds on GPU for faster display</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="openGLPickingCheckBox">
+         <property name="toolTip">
+          <string>To use OpenGL for point picking (no octree is required but it can be slow on low-end GPUs)</string>
+         </property>
+         <property name="text">
+          <string>Use OpenGL for point picking</string>
          </property>
          <property name="checked">
           <bool>true</bool>

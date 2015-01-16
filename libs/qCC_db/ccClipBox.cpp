@@ -37,7 +37,7 @@ static QSharedPointer<ccCone> c_arrowHead(0);
 static QSharedPointer<ccSphere> c_centralSphere(0);
 static QSharedPointer<ccTorus> c_torus(0);
 
-static void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const colorType* col, CC_DRAW_CONTEXT& context)
+void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	if (ID > 0)
 		glLoadName(ID);
@@ -84,7 +84,7 @@ static void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direc
 	glPopMatrix();
 }
 
-static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const colorType* col, CC_DRAW_CONTEXT& context)
+static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	if (ID>0)
 		glLoadName(ID);
@@ -128,7 +128,7 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 
 /* 
   // Unused function
-static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const colorType* col, CC_DRAW_CONTEXT& context)
+static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	if (ID > 0)
 		glLoadName(ID);
@@ -149,7 +149,7 @@ static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType 
 }
 */
 
-static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const colorType* col, CC_DRAW_CONTEXT& context)
+static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	if (ID>0)
 		glLoadName(ID);

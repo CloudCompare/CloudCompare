@@ -132,7 +132,7 @@ public:
 	inline const colorType* getColor(ScalarType value) const
 	{
 		assert(m_colorScale);
-		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? ccColor::lightGrey : 0);
+		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? ccColor::lightGrey.rgba : 0);
 	}
 
 	//! Shortcut to getColor

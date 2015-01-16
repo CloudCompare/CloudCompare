@@ -329,7 +329,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 	//final array
 	ColorsTableType* colorGrid = new ColorsTableType;
 	{
-		if (!colorGrid->resize(gridSize,true,ccColor::black))
+		if (!colorGrid->resize(gridSize,true,ccColor::black.rgba))
 		{
 			colorAccumGrid->release();
 			return 0; //not enough memory
@@ -771,18 +771,18 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glLineWidth(width+1);
 
 			PointCoordinateType axisLength = halfHeadSize * m_scale;
-			glColor3ubv(ccColor::red);
+			ccGL::Color3v(ccColor::red.rgba);
 			CCVector3 C(0,0,0);
 			glBegin(GL_LINES);
 			ccGL::Vertex3v(C.u);
 			ccGL::Vertex3(C.x+axisLength,C.y,C.z);
 			glEnd();
-			glColor3ubv(ccColor::green);
+			ccGL::Color3v(ccColor::green.rgba);
 			glBegin(GL_LINES);
 			ccGL::Vertex3v(C.u);
 			ccGL::Vertex3(C.x,C.y+axisLength,C.z);
 			glEnd();
-			glColor3ubv(ccColor::blue);
+			ccGL::Color3v(ccColor::blue.rgba);
 			glBegin(GL_LINES);
 			ccGL::Vertex3v(C.u);
 			ccGL::Vertex3(C.x,C.y,C.z+axisLength);
@@ -798,13 +798,13 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			minCorner *= m_scale;
 			maxCorner *= m_scale;
 			ccBBox bbHead(minCorner,maxCorner);
-			bbHead.draw(m_color.u);
+			bbHead.draw(m_color);
 		}
 
 		//sensor legs
 		{
 			CCVector3 headConnect = /*headCenter*/ - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
-			glColor3ubv(m_color.u);
+			ccGL::Color3v(m_color.rgb);
 			glBegin(GL_LINES);
 			ccGL::Vertex3v(headConnect.u);
 			ccGL::Vertex3(-m_scale,-m_scale,-m_scale);

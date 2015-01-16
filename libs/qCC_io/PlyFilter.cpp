@@ -253,10 +253,10 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		//Material without texture?
 		if (!material->hasTexture())
 		{
-			const float* diffuse = material->getDiffuseFront();
-			uniqueColor[0] = static_cast<colorType>(diffuse[0]*ccColor::MAX);
-			uniqueColor[1] = static_cast<colorType>(diffuse[1]*ccColor::MAX);
-			uniqueColor[2] = static_cast<colorType>(diffuse[2]*ccColor::MAX);
+			const ccColor::Rgbaf& diffuse = material->getDiffuseFront();
+			uniqueColor[0] = static_cast<colorType>(diffuse.r * ccColor::MAX);
+			uniqueColor[1] = static_cast<colorType>(diffuse.g * ccColor::MAX);
+			uniqueColor[2] = static_cast<colorType>(diffuse.b * ccColor::MAX);
 			hasUniqueColor = true;
 			material = ccMaterial::CShared(0); //we can forget it!
 		}

@@ -97,6 +97,8 @@ void ccColorScaleSelector::setSelectedScale(QString uuid)
 
 	//search right index by UUID
 	int pos = m_comboBox->findData(uuid);
+	if (pos < 0)
+		return;
 	m_comboBox->setCurrentIndex(pos);
 
 	emit colorScaleSelected(pos);

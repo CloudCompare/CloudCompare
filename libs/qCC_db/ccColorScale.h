@@ -216,7 +216,7 @@ public:
 	{
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)
-			return getColorByIndex((unsigned)(relativePos * (double)(MAX_STEPS-1)));
+			return getColorByIndex(static_cast<unsigned>(relativePos * (MAX_STEPS-1))).rgba;
 		else
 			return outOfRangeColor;
 	}
@@ -233,8 +233,8 @@ public:
 		if (relativePos >= 0.0 && relativePos <= 1.0)
 		{
 			//quantized (16 bits) version --> much faster than floor!
-			unsigned index = ((unsigned)((relativePos*(double)steps)*65535.0))>>16;
-			return getColorByIndex((index*(MAX_STEPS-1)) / (steps-1));
+			unsigned index = (static_cast<unsigned>((relativePos*steps)*65535.0))>>16;
+			return getColorByIndex((index*(MAX_STEPS-1)) / (steps-1)).rgba;
 		}
 		else
 		{
@@ -246,7 +246,7 @@ public:
 	/** \param index color index in m_rgbaScale array (must be below MAX_STEPS)
 		\return corresponding color
 	**/
-	inline const colorType* getColorByIndex(unsigned index) const
+	inline const ccColor::Rgba& getColorByIndex(unsigned index) const
 	{
 		assert(m_updated && index < MAX_STEPS);
 		return m_rgbaScale[index];

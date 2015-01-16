@@ -410,7 +410,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		{
 			//we set a white color to new points
 			for (unsigned i=0; i<addedPoints; i++)
-				addRGBColor(ccColor::white);
+				addRGBColor(ccColor::white.rgba);
 		}
 		else //otherwise
 		{
@@ -421,7 +421,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				if (reserveTheRGBTable())
 				{
 					for (unsigned i=0; i<pointCountBefore; i++)
-						addRGBColor(ccColor::white);
+						addRGBColor(ccColor::white.rgba);
 				}
 				else
 				{
@@ -744,7 +744,7 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 		m_rgbColors->link();
 	}
 
-	if (!m_rgbColors->resize(m_points->currentSize(), fillWithWhite, fillWithWhite ? ccColor::white : 0))
+	if (!m_rgbColors->resize(m_points->currentSize(), fillWithWhite, fillWithWhite ? ccColor::white.rgba : 0))
 	{
 		m_rgbColors->release();
 		m_rgbColors = 0;
@@ -1221,7 +1221,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	double height = getBB().getDiagVec().u[heightDim];
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
-		return setRGBColor(colorScale->getColorByIndex(0));
+		return setRGBColor(colorScale->getColorByIndex(0).rgba);
 	}
 
 	unsigned count = size();
@@ -1231,7 +1231,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 		double realtivePos = (Q->u[heightDim] - minHeight) / height;
 		const colorType* col = colorScale->getColorByRelativePos(realtivePos);
 		if (!col) //DGM: yes it happens if we encounter a point with NaN coordinates!!!
-			col = ccColor::black;
+			col = ccColor::black.rgba;
 		m_rgbColors->setValue(i,col);
 	}
 
@@ -1745,10 +1745,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
 			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR  );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR  );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_EMISSION,	CC_DEFAULT_CLOUD_EMISSION_COLOR );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba  );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba  );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_EMISSION,	CC_DEFAULT_CLOUD_EMISSION_COLOR.rgba );
 			glMaterialf (GL_FRONT_AND_BACK,	GL_SHININESS,	CC_DEFAULT_CLOUD_SHININESS);
 			glEnable(GL_LIGHTING);
 
@@ -1797,7 +1797,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
 							//we force display of points hidden because of their scalar field value
 							//to be sure that the user don't miss them (during manual segmentation for instance)
-							glColor3ubv(col ? col : ccColor::lightGrey);
+							glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 						}
 						else if (glParams.showColors)
 						{
@@ -2399,7 +2399,7 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 		for (unsigned i=0; i<count; i++)
 		{
 			const colorType* col = getPointScalarValueColor(i);
-			m_rgbColors->setValue(i,col ? col : ccColor::black);
+			m_rgbColors->setValue(i,col ? col : ccColor::black.rgba);
 		}
 	}
 	else
@@ -3222,7 +3222,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 								//we need to convert scalar value to color into a temporary structure
 								const colorType* col = m_vboManager.sourceSF->getColor(*_sf);
 								if (!col)
-									col = ccColor::lightGrey;
+									col = ccColor::lightGrey.rgba;
 								*_sfColors++ = *col++;
 								*_sfColors++ = *col++;
 								*_sfColors++ = *col++;

@@ -1270,7 +1270,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		const PointCoordinateType baseHalfWidth		= 0.2f * upperLeftPoint.x;
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glColor3ubv(m_color.u);
+		ccGL::Color3v(m_color.rgb);
 
 		//near plane
 		glBegin(GL_LINE_LOOP);
@@ -1375,7 +1375,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					//set the rigth display (just to be sure)
 					m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
-					m_frustrumInfos.frustrumHull->setTempColor(m_color.u);
+					m_frustrumInfos.frustrumHull->setTempColor(m_color);
 					
 					glPushAttrib(GL_COLOR_BUFFER_BIT);
 					//glEnable(GL_BLEND);
@@ -1401,21 +1401,21 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
 
 			// right vector
-			glColor3ubv(ccColor::red);
+			ccGL::Color3v(ccColor::red.rgba);
 			glBegin(GL_LINES);
 			glVertex3f(0.0f, 0.0f, 0.0f);
 			glVertex3f(l, 0.0f, 0.0f);
 			glEnd();
 
 			// up vector
-			glColor3ubv(ccColor::green);
+			ccGL::Color3v(ccColor::green.rgba);
 			glBegin(GL_LINES);
 			glVertex3f(0.0f, 0.0f, 0.0f);
 			glVertex3f(0.0f, l, 0.0f);
 			glEnd();
 
 			// view vector
-			glColor3ubv(ccColor::blue);
+			ccGL::Color3v(ccColor::blue.rgba);
 			glBegin(GL_LINES);
 			glVertex3f(0.0f, 0.0f, 0.0f);
 			glVertex3f(0.0f, 0.0f, -l);

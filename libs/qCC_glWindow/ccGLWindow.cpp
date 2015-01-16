@@ -473,7 +473,7 @@ void ccGLWindow::initializeGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//no global ambient
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ccColor::night);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ccColor::night.rgba);
 
 	ccGLUtils::CatchGLError("ccGLWindow::initializeGL");
 
@@ -676,7 +676,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 						maxAreaCorner + QPoint(HotZone::margin(),HotZone::margin())/2 );
 
 		//draw rectangle
-		glColor4ub(ccColor::darkGrey[0], ccColor::darkGrey[1], ccColor::darkGrey[2], 210);
+		glColor4ub(ccColor::darkGrey.r, ccColor::darkGrey.g, ccColor::darkGrey.b, 210);
 		glBegin(GL_QUADS);
 		glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y())					);
 		glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y())					);
@@ -868,7 +868,7 @@ void ccGLWindow::paintGL()
 
 				glPopAttrib();
 
-				glColor3ubv_safe(ccColor::black);
+				glColor3ubv_safe(ccColor::black.rgba);
 				renderText(	10,
 							borderHeight-CC_GL_FILTER_BANNER_MARGIN-CC_GL_FILTER_BANNER_MARGIN/2,
 							QString("[GL filter] ")+m_activeGLFilter->getDescription()
@@ -1461,7 +1461,7 @@ void ccGLWindow::drawGradientBackground()
 void ccGLWindow::drawCross()
 {
 	//cross OpenGL drawing
-	glColor3ubv(ccColor::lightGrey);
+	ccGL::Color3v(ccColor::lightGrey.rgba);
 	glBegin(GL_LINES);
 	glVertex3f(0.0,-CC_DISPLAYED_CENTER_CROSS_LENGTH,0.0);
 	glVertex3f(0.0,CC_DISPLAYED_CENTER_CROSS_LENGTH,0.0);
@@ -2620,7 +2620,96 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	redraw();
 }
 
-int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY, int pickWidth, int pickHeight, int* subID/*=0*/)
+int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, int pickWidth/*=5*/, int pickHeight/*=5*/)
+{
+	subID = -1;
+	if (!m_globalDBRoot && !m_winDBRoot)
+		return -1;
+
+	centerY = height()-1 - centerY;
+	//back project the clicked point in 3D
+	CCVector3d X(0,0,0);
+	int VP[4];
+	getViewportArray(VP);
+	const double* MM = getModelViewMatd();
+	const double* MP = getProjectionMatd();
+	{
+		gluUnProject(centerX,centerY,0,MM,MP,VP,X.u,X.u+1,X.u+2);
+	}
+	//CCVector3d cameraDir = getCurrentViewDir();
+
+	ccHObject::Container toProcess;
+	try
+	{
+		toProcess.push_back(m_globalDBRoot);
+		toProcess.push_back(m_winDBRoot);
+
+		double nearestPointSquareDist = -1.0;
+		int nearestEntityID = -1;
+		int nearestPointIndex = -1;
+
+		while (!toProcess.empty())
+		{
+			//get next item
+			ccHObject* ent = toProcess.back();
+			toProcess.pop_back();
+
+			if (!ent->isEnabled())
+				continue;
+
+			//entity is a point cloud displayed in this window?
+			if (ent->isVisible() && ent->getDisplay() == this && ent->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+				//if (cloud->getOctree()
+				//brute force
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					const CCVector3* P = cloud->getPoint(i);
+					double xs,ys,zs;
+					gluProject(P->x,P->y,P->z,MM,MP,VP,&xs,&ys,&zs);
+					if (fabs(xs-centerX) <= pickWidth && fabs(ys-centerY) <= pickHeight)
+					{
+						CCVector3d delta(X.x-P->x,X.y-P->y,X.z-P->z);
+						double squareDist = delta.norm2d();
+						if (nearestPointIndex < 0 || squareDist < nearestPointSquareDist)
+						{
+							nearestPointSquareDist = squareDist;
+							nearestPointIndex = static_cast<int>(i);
+							nearestEntityID = static_cast<int>(cloud->getUniqueID());
+						}
+					}
+					/*CCVector3d Pd = CCVector3d::fromArray(P->u);
+					//compute distance to the clicked 'line'
+					CCVector3d OP = P - X;
+					double dot = OP.dot(cameraDir);
+					//orthogonal distance
+					CCVector3d HP = OP - dot * cameraDir;
+					if (
+					//*/
+				}
+			}
+
+			//add children
+			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
+			{
+				toProcess.push_back(ent->getChild(i));
+			}
+		}
+
+		subID = nearestPointIndex;
+		return nearestEntityID;
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		ccLog::Warning("[Picking][CPU] Not enough memory!");
+	}
+
+	return -1;
+}
+
+int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY, int pickWidth/*=5*/, int pickHeight/*=5*/, int* subID/*=0*/)
 {
 	if (subID)
 		*subID = -1;
@@ -2632,7 +2721,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	getContext(context);
 	unsigned short pickingFlags = CC_DRAW_FOREGROUND;
 
-	switch(pickingMode)
+	switch (pickingMode)
 	{
 	case ENTITY_PICKING:
 	case ENTITY_RECT_PICKING:
@@ -2657,123 +2746,142 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 		return -1;
 	}
 
-	makeCurrent();
-
-	//no need to clear display, we don't draw anything new!
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//setup selection buffers
-	memset(m_pickingBuffer,0,sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
-	glSelectBuffer(CC_PICKING_BUFFER_SIZE,m_pickingBuffer);
-	glRenderMode(GL_SELECT);
-	glInitNames();
-
-	//get viewport
-	GLint viewport[4];
-	glGetIntegerv(GL_VIEWPORT,viewport);
-
-	//3D objects picking
-	{
-		context.flags = CC_DRAW_3D | pickingFlags;
-
-		glEnable(GL_DEPTH_TEST);
-
-		//projection matrix
-		glMatrixMode(GL_PROJECTION);
-		//restrict drawing to the picking area
-		glLoadIdentity();
-		gluPickMatrix((GLdouble)centerX,(GLdouble)(viewport[3]-centerY),(GLdouble)pickWidth,(GLdouble)pickHeight,viewport);
-		glMultMatrixd(getProjectionMatd());
-
-		//model view matrix
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixd(getModelViewMatd());
-
-		//display 3D objects
-		if (m_globalDBRoot)
-			m_globalDBRoot->draw(context);
-		if (m_winDBRoot)
-			m_winDBRoot->draw(context);
-
-		ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(3D)");
-	}
-
-	//2D objects picking
-	if (pickingMode == ENTITY_PICKING || pickingMode == ENTITY_RECT_PICKING || pickingMode == FAST_PICKING)
-	{
-		context.flags = CC_DRAW_2D | pickingFlags;
-
-		glDisable(GL_DEPTH_TEST);
-
-		//we must first grab the 2D ortho view projection matrix
-		setStandardOrthoCenter();
-		glMatrixMode(GL_PROJECTION);
-		double orthoProjMatd[OPENGL_MATRIX_SIZE];
-		glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
-		//restrict drawing to the picking area
-		glLoadIdentity();
-		gluPickMatrix((GLdouble)centerX,(GLdouble)(viewport[3]-centerY),(GLdouble)pickWidth,(GLdouble)pickHeight,viewport);
-		glMultMatrixd(orthoProjMatd);
-		glMatrixMode(GL_MODELVIEW);
-
-		//we display 2D objects
-		if (m_globalDBRoot)
-			m_globalDBRoot->draw(context);
-		if (m_winDBRoot)
-			m_winDBRoot->draw(context);
-
-		ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(2D)");
-	}
-
-	glFlush();
-
-	// returning to normal rendering mode
-	int hits = glRenderMode(GL_RENDER);
-
-	ccGLUtils::CatchGLError("ccGLWindow::startPicking.render");
-
-	ccLog::PrintDebug("Picking hits: %i",hits);
-	if (hits < 0)
-	{
-		ccLog::Warning("Too many items inside picking zone! Try to zoom in...");
-		return -1;
-	}
-
-	//process hits
+	//picked entity (and sub-element)
 	int selectedID = -1,subSelectedID = -1;
-	std::set<int> selectedIDs; //for ENTITY_RECT_PICKING mode only
-	{
-		GLuint minMinDepth = (~0);
-		const GLuint* _selectBuf = m_pickingBuffer;
-		for (int i=0; i<hits; ++i)
-		{
-			const GLuint& n = _selectBuf[0]; //number of names on stack
-			if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
-			{
-				//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
-				assert(n==1 || n==2);
-				const GLuint& minDepth = _selectBuf[1];
-				//const GLuint& maxDepth = _selectBuf[2];
-				const GLuint& currentID = _selectBuf[3];
+	//list of picked entities (for ENTITY_RECT_PICKING mode only)
+	std::set<int> selectedIDs;
 
-				if (pickingMode == ENTITY_RECT_PICKING)
+	if (!getDisplayParameters().useOpenGLPointPicking && (pickingMode == AUTO_POINT_PICKING || pickingMode == POINT_PICKING))
+	{
+		//CPU-based point picking
+		selectedID = startCPUBasedPointPicking(centerX,centerY,subSelectedID,pickWidth,pickHeight);
+	}
+	else
+	{
+		//OpenGL picking
+		makeCurrent();
+
+		//no need to clear display, we don't draw anything new!
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//setup selection buffers
+		memset(m_pickingBuffer,0,sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
+		glSelectBuffer(CC_PICKING_BUFFER_SIZE,m_pickingBuffer);
+		glRenderMode(GL_SELECT);
+		glInitNames();
+
+		//get viewport
+		GLint viewport[4];
+		glGetIntegerv(GL_VIEWPORT,viewport);
+
+		//3D objects picking
+		{
+			context.flags = CC_DRAW_3D | pickingFlags;
+
+			glEnable(GL_DEPTH_TEST);
+
+			//projection matrix
+			glMatrixMode(GL_PROJECTION);
+			//restrict drawing to the picking area
+			glLoadIdentity();
+			gluPickMatrix((GLdouble)centerX,(GLdouble)(viewport[3]-centerY),(GLdouble)pickWidth,(GLdouble)pickHeight,viewport);
+			glMultMatrixd(getProjectionMatd());
+
+			//model view matrix
+			glMatrixMode(GL_MODELVIEW);
+			glLoadMatrixd(getModelViewMatd());
+
+			//display 3D objects
+			if (m_globalDBRoot)
+				m_globalDBRoot->draw(context);
+			if (m_winDBRoot)
+				m_winDBRoot->draw(context);
+
+			ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(3D)");
+		}
+
+		//2D objects picking
+		if (pickingMode == ENTITY_PICKING || pickingMode == ENTITY_RECT_PICKING || pickingMode == FAST_PICKING)
+		{
+			context.flags = CC_DRAW_2D | pickingFlags;
+
+			glDisable(GL_DEPTH_TEST);
+
+			//we must first grab the 2D ortho view projection matrix
+			setStandardOrthoCenter();
+			glMatrixMode(GL_PROJECTION);
+			double orthoProjMatd[OPENGL_MATRIX_SIZE];
+			glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
+			//restrict drawing to the picking area
+			glLoadIdentity();
+			gluPickMatrix((GLdouble)centerX,(GLdouble)(viewport[3]-centerY),(GLdouble)pickWidth,(GLdouble)pickHeight,viewport);
+			glMultMatrixd(orthoProjMatd);
+			glMatrixMode(GL_MODELVIEW);
+
+			//we display 2D objects
+			if (m_globalDBRoot)
+				m_globalDBRoot->draw(context);
+			if (m_winDBRoot)
+				m_winDBRoot->draw(context);
+
+			ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(2D)");
+		}
+
+		glFlush();
+
+		// returning to normal rendering mode
+		int hits = glRenderMode(GL_RENDER);
+
+		ccGLUtils::CatchGLError("ccGLWindow::startPicking.render");
+
+		ccLog::PrintDebug("[Picking] hits: %i",hits);
+		if (hits < 0)
+		{
+			ccLog::Warning("[Picking] Too many items inside picking zone! Try to zoom in...");
+			return -1;
+		}
+
+		//process hits
+		try
+		{
+			GLuint minMinDepth = (~0);
+			const GLuint* _selectBuf = m_pickingBuffer;
+			for (int i=0; i<hits; ++i)
+			{
+				const GLuint& n = _selectBuf[0]; //number of names on stack
+				if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
 				{
-					//pick them all!
-					selectedIDs.insert(currentID);
-				}
-				else
-				{
-					//if there are multiple hits, we keep only the nearest
-					if (selectedID < 0 || minDepth < minMinDepth)
+					//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
+					assert(n==1 || n==2);
+					const GLuint& minDepth = _selectBuf[1];
+					//const GLuint& maxDepth = _selectBuf[2];
+					const GLuint& currentID = _selectBuf[3];
+
+					if (pickingMode == ENTITY_RECT_PICKING)
 					{
-						selectedID = currentID;
-						subSelectedID = (n>1 ? _selectBuf[4] : -1);
-						minMinDepth = minDepth;
+						//pick them all!
+						selectedIDs.insert(currentID);
+					}
+					else
+					{
+						//if there are multiple hits, we keep only the nearest
+						if (selectedID < 0 || minDepth < minMinDepth)
+						{
+							selectedID = currentID;
+							subSelectedID = (n>1 ? _selectBuf[4] : -1);
+							minMinDepth = minDepth;
+						}
 					}
 				}
-			}
 
-			_selectBuf += (3+n);
+				_selectBuf += (3+n);
+			}
+		}
+		catch(std::bad_alloc)
+		{
+			//not enough memory
+			ccLog::Warning("[Picking] Not enough memory!");
+			return -1;
 		}
 	}
 
@@ -2795,7 +2903,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	{
 		if (selectedID >= 0 && subSelectedID >= 0)
 		{
-			emit itemPicked(selectedID,(unsigned)subSelectedID,centerX,centerY);
+			emit itemPicked(selectedID,static_cast<unsigned>(subSelectedID),centerX,centerY);
 		}
 	}
 	else if (pickingMode == AUTO_POINT_PICKING)
@@ -2961,9 +3069,9 @@ QFont ccGLWindow::getLabelDisplayFont() const
 
 void ccGLWindow::glEnableSunLight()
 {
-	glLightfv(GL_LIGHT0,GL_DIFFUSE,getDisplayParameters().lightDiffuseColor);
-	glLightfv(GL_LIGHT0,GL_AMBIENT,getDisplayParameters().lightAmbientColor);
-	glLightfv(GL_LIGHT0,GL_SPECULAR,getDisplayParameters().lightSpecularColor);
+	glLightfv(GL_LIGHT0,GL_DIFFUSE,getDisplayParameters().lightDiffuseColor.rgba);
+	glLightfv(GL_LIGHT0,GL_AMBIENT,getDisplayParameters().lightAmbientColor.rgba);
+	glLightfv(GL_LIGHT0,GL_SPECULAR,getDisplayParameters().lightSpecularColor.rgba);
 	glLightfv(GL_LIGHT0, GL_POSITION, m_sunLightPos);
 	glLightModelf(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
 	glEnable(GL_LIGHT0);
@@ -2999,9 +3107,9 @@ void ccGLWindow::toggleSunLight()
 
 void ccGLWindow::glEnableCustomLight()
 {
-	glLightfv(GL_LIGHT1,GL_DIFFUSE,getDisplayParameters().lightDiffuseColor);
-	glLightfv(GL_LIGHT1,GL_AMBIENT,getDisplayParameters().lightAmbientColor);
-	glLightfv(GL_LIGHT1,GL_SPECULAR,getDisplayParameters().lightSpecularColor);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,getDisplayParameters().lightDiffuseColor.rgba);
+	glLightfv(GL_LIGHT1,GL_AMBIENT,getDisplayParameters().lightAmbientColor.rgba);
+	glLightfv(GL_LIGHT1,GL_SPECULAR,getDisplayParameters().lightSpecularColor.rgba);
 	glLightfv(GL_LIGHT1,GL_POSITION,m_customLightPos);
 	glLightModelf(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
 	glEnable(GL_LIGHT1);
@@ -3039,7 +3147,7 @@ void ccGLWindow::toggleCustomLight()
 
 void ccGLWindow::drawCustomLight()
 {
-	glColor3ubv(ccColor::yellow);
+	ccGL::Color3v(ccColor::yellow.rgba);
 	//ensure that the star size is constant (in pixels)
 	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 

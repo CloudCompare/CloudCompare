@@ -88,18 +88,18 @@ void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
 	{
 		if (!skipDiffuse)
 		{
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFront);
-			glMaterialfv(GL_BACK,  GL_DIFFUSE, m_diffuseBack);
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFront.rgba);
+			glMaterialfv(GL_BACK,  GL_DIFFUSE, m_diffuseBack.rgba);
 		}
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient.rgba);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular.rgba);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission.rgba);
 		glMaterialf (GL_FRONT,          GL_SHININESS, m_shininessFront);
 		glMaterialf (GL_BACK,           GL_SHININESS, m_shininessBack);
 	}
 	else
 	{
-		glColor4fv(m_diffuseFront);
+		glColor4fv(m_diffuseFront.rgba);
 	}
 }
 

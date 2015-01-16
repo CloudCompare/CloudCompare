@@ -216,7 +216,7 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		//donc on doit le generer dynamiquement
 		
 		glDisable(GL_LIGHTING); //au cas où la lumiere soit allumee
-		glColor3ubv(ccColor::green);
+		ccGL::Color3v(ccColor::green.rgba);
 
 		void* additionalParameters[] = { theOctree->m_frustrumIntersector };
 		theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsABox,additionalParameters);
@@ -230,10 +230,10 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		{
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
 			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR  );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR  );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_EMISSION,	CC_DEFAULT_CLOUD_EMISSION_COLOR );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba  );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba  );
+			glMaterialfv(GL_FRONT_AND_BACK,	GL_EMISSION,	CC_DEFAULT_CLOUD_EMISSION_COLOR.rgba );
 			glMaterialf (GL_FRONT_AND_BACK,	GL_SHININESS,	CC_DEFAULT_CLOUD_SHININESS);
 			glEnable(GL_LIGHTING);
 
@@ -242,7 +242,7 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		}
 
 		if (!glParams.showColors)
-			glColor3ubv(ccColor::white);
+			ccGL::Color3v(ccColor::white.rgba);
 
 		if (updateOctreeGLDisplay || octreeGLListID < 0)
 		{
@@ -325,7 +325,7 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	// outside
 	if (vis == ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
 	{
-		glColor3ubv(ccColor::green);
+		ccGL::Color3v(ccColor::green.rgba);
 	}
 	else
 	{
@@ -333,10 +333,10 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 		glLineWidth(2.0f);
 		// inside
 		if (vis == ccOctreeFrustrumIntersector::CELL_INSIDE_FRUSTRUM)
-			glColor3ubv(ccColor::magenta);
+			ccGL::Color3v(ccColor::magenta.rgba);
 		// intersecting
 		else
-			glColor3ubv(ccColor::blue);
+			ccGL::Color3v(ccColor::blue.rgba);
 	}
 
 	glBegin(GL_LINE_LOOP);
@@ -384,7 +384,7 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const colorType* col = theAssociatedCloud->geScalarValueColor(dist);
-		glColor3ubv(col ? col : ccColor::lightGrey);
+		glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 	}
 	else if (glParams->showColors)
 	{

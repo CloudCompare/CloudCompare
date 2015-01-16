@@ -37,10 +37,10 @@ ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMat
 		m_transformation = *transMat;
 }
 
-void ccGenericPrimitive::setColor(const colorType* col)
+void ccGenericPrimitive::setColor(const ccColor::Rgb& col)
 {
 	if (m_associatedCloud)
-		static_cast<ccPointCloud*>(m_associatedCloud)->setRGBColor(col);
+		static_cast<ccPointCloud*>(m_associatedCloud)->setRGBColor(col.rgb);
 }
 
 ccPointCloud* ccGenericPrimitive::vertices()

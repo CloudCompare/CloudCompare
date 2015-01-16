@@ -78,6 +78,8 @@ public:
 		bool displayCross;
 		//! Whether to use VBOs for faster display
 		bool useVBOs;
+		//! Whether to use OpenGL picking for point picking
+		bool useOpenGLPointPicking;
 
 		//! Label marker size
 		unsigned labelMarkerSize;

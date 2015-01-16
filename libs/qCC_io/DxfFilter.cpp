@@ -107,7 +107,7 @@ public:
 				m_points->addRGBColor(col.rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
-			else if (m_points->setRGBColor(ccColor::white))
+			else if (m_points->setRGBColor(ccColor::white.rgba))
 			{
 				//then replace the last color by the current one
 				m_points->setPointColor(m_points->size()-1,col.rgb);
@@ -117,7 +117,7 @@ public:
 		else if (m_points->hasColors())
 		{
 			//add default color if none is defined!
-			m_points->addRGBColor(ccColor::white);
+			m_points->addRGBColor(ccColor::white.rgba);
 		}
 	}
 
@@ -236,8 +236,8 @@ public:
 						//We must also check that the color is the same (if any)
 						if (faceCol || vertices->hasColors())
 						{
-							const colorType* _faceCol = faceCol ? faceCol->rgb : ccColor::white;
-							const colorType* _vertCol = vertices->hasColors() ? vertices->getPointColor(j) : ccColor::white;
+							const colorType* _faceCol = faceCol ? faceCol->rgb : ccColor::white.rgba;
+							const colorType* _vertCol = vertices->hasColors() ? vertices->getPointColor(j) : ccColor::white.rgba;
 							useCurrentVertex = (_faceCol[0] == _vertCol[0] && _faceCol[1] == _vertCol[1] && _faceCol[2] == _vertCol[2]);
 						}
 
@@ -350,7 +350,7 @@ public:
 					vertices->addRGBColor(faceCol->rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
-			else if (vertices->setRGBColor(ccColor::white))
+			else if (vertices->setRGBColor(ccColor::white.rgba))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i=0; i<createdVertCount; ++i)
@@ -362,7 +362,7 @@ public:
 		{
 			//add default color if none is defined!
 			for (unsigned i=0; i<createdVertCount; ++i)
-				vertices->addRGBColor(ccColor::white);
+				vertices->addRGBColor(ccColor::white.rgba);
 		}
 	}
 

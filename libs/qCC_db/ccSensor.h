@@ -146,9 +146,9 @@ protected:
 	double m_activeIndex;
 
 	//! Color of the sensor
-	/**	Default color is green. 
+	/** Default color is green. 
 	**/
-	Vector3Tpl<colorType> m_color;
+	ccColor::Rgb m_color;
 
 	//! Sensor graphic representation scale
 	PointCoordinateType m_scale;

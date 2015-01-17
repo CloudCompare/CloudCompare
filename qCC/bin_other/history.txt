@@ -47,6 +47,10 @@ v2.6.1.beta 11/??/2014
 	* Color scale editor:
 		- the icon is now directly accessible in the main toolbar
 		- the user can export (and import) individual color scales as XML files
+	* CPU-based point picking
+		- CloudCompare now performs point picking (or triangle picking) with a CPU-based approach
+			instead of relying on OpenGL. The process should be faster, especially on low-end
+			graphic cards (Intel chipsets, etc.)
 
 - Enhancements:
 	* 2D labels:

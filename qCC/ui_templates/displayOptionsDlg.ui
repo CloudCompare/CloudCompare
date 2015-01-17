@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
-    <height>420</height>
+    <width>450</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>405</width>
-        <height>246</height>
+        <height>187</height>
        </rect>
       </property>
       <attribute name="label">
@@ -356,8 +356,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>404</width>
-        <height>263</height>
+        <width>361</width>
+        <height>92</height>
        </rect>
       </property>
       <attribute name="label">
@@ -441,8 +441,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>404</width>
-        <height>263</height>
+        <width>432</width>
+        <height>243</height>
        </rect>
       </property>
       <attribute name="label">
@@ -458,6 +458,18 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_13">
             <property name="text">
@@ -572,8 +584,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>404</width>
-        <height>263</height>
+        <width>432</width>
+        <height>243</height>
        </rect>
       </property>
       <attribute name="label">
@@ -713,9 +725,6 @@
          </property>
          <property name="text">
           <string>Use OpenGL for point picking</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
          </property>
         </widget>
        </item>

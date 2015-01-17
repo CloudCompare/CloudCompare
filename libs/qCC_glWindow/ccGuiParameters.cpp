@@ -82,7 +82,7 @@ void ccGui::ParamStruct::reset()
 	decimateMeshOnMove			= true;
 	decimateCloudOnMove			= true;
 	useVBOs						= true;
-	useOpenGLPointPicking		= true;
+	useOpenGLPointPicking		= false;
 	displayCross				= true;
 
 	labelMarkerSize				= 5;
@@ -123,7 +123,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	decimateMeshOnMove			=                                  settings.value("meshDecimation",          true ).toBool();
 	decimateCloudOnMove			=                                  settings.value("cloudDecimation",         true ).toBool();
 	useVBOs						=                                  settings.value("useVBOs",                 true ).toBool();
-	useOpenGLPointPicking		=                                  settings.value("useOpenGLPointPicking",   true ).toBool();
+	useOpenGLPointPicking		=                                  settings.value("useOpenGLPointPicking",   false).toBool();
 	displayCross				=                                  settings.value("crossDisplayed",          true ).toBool();
 	labelMarkerSize				= static_cast<unsigned>(std::max(0,settings.value("labelMarkerSize",         5    ).toInt()));
 	colorScaleShowHistogram		=                                  settings.value("colorScaleShowHistogram", true ).toBool();

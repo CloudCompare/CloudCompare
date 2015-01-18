@@ -17,6 +17,9 @@ v2.6.1.beta 11/??/2014
 		- brand new interface with real-time preview of the raster
 		- new option to fill empty cells by means of interpolation of the neighbors values
 		- new tool to generate contour lines (aka isolines, contour plot, etc.)
+		- the following scalar fields can now be generated when exporting the raster as a cloud:
+			per-cell population, min height, average height, max height, height std. dev. and height range
+		- the tool icon is now directly accessible in the main toolbar
 	* SHP file I/O filter
 		- supports polylines (input/output) and clouds (input/output) for now
 		- input: if the SHP file contains 2D polylines and some numerical fields in the associated DBF

@@ -222,9 +222,27 @@ double ccRasterizeTool::getGridStep() const
 	return gridStepDoubleSpinBox->value();
 }
 
-bool ccRasterizeTool::generateCountSF() const
+bool ccRasterizeTool::exportAsSF(ExportableFields field) const
 {
-	return generateCountSFcheckBox->isChecked();
+	switch (field)
+	{
+	case PER_CELL_COUNT:
+		return generateCountSFcheckBox->isChecked();
+	case PER_CELL_MIN_HEIGHT:
+		return generateMinHeightSFcheckBox->isChecked();
+	case PER_CELL_MAX_HEIGHT:
+		return generateMaxHeightSFcheckBox->isChecked();
+	case PER_CELL_AVG_HEIGHT:
+		return generateAvgHeightSFcheckBox->isChecked();
+	case PER_CELL_HEIGHT_STD_DEV:
+		return generateStdDevHeightSFcheckBox->isChecked();
+	case PER_CELL_HEIGHT_RANGE:
+		return generateHeightRangeSFcheckBox->isChecked();
+	default:
+		assert(false);
+	};
+	
+	return false;
 }
 
 bool ccRasterizeTool::resampleOriginalCloud() const
@@ -387,17 +405,24 @@ void ccRasterizeTool::loadSettings()
 {
 	QSettings settings;
 	settings.beginGroup(ccPS::HeightGridGeneration());
-	int projType		= settings.value("ProjectionType",heightProjectionComboBox->currentIndex()).toInt();
-	int projDim			= settings.value("ProjectionDim",dimensionComboBox->currentIndex()).toInt();
-	bool sfProj			= settings.value("SfProjEnabled",interpolateSFCheckBox->isChecked()).toBool();
-	int sfProjStrategy	= settings.value("SfProjStrategy",scalarFieldProjection->currentIndex()).toInt();
-	int fillStrategy	= settings.value("FillStrategy",fillEmptyCellsComboBox->currentIndex()).toInt();
-	double step			= settings.value("GridStep",gridStepDoubleSpinBox->value()).toDouble();
-	double emptyHeight	= settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
-	bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
-	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleCloudCheckBox->isChecked()).toBool();
-	int minVertexCount	= settings.value("MinVertexCount",minVertexCountSpinBox->value()).toInt();
-	bool ignoreBorders	= settings.value("IgnoreBorders",ignoreContourBordersCheckBox->isChecked()).toBool();
+	int projType				= settings.value("ProjectionType",heightProjectionComboBox->currentIndex()).toInt();
+	int projDim					= settings.value("ProjectionDim",dimensionComboBox->currentIndex()).toInt();
+	bool sfProj					= settings.value("SfProjEnabled",interpolateSFCheckBox->isChecked()).toBool();
+	int sfProjStrategy			= settings.value("SfProjStrategy",scalarFieldProjection->currentIndex()).toInt();
+	int fillStrategy			= settings.value("FillStrategy",fillEmptyCellsComboBox->currentIndex()).toInt();
+	double step					= settings.value("GridStep",gridStepDoubleSpinBox->value()).toDouble();
+	double emptyHeight			= settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
+	bool genCountSF				= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
+	bool resampleCloud			= settings.value("ResampleOrigCloud",resampleCloudCheckBox->isChecked()).toBool();
+	int minVertexCount			= settings.value("MinVertexCount",minVertexCountSpinBox->value()).toInt();
+	bool ignoreBorders			= settings.value("IgnoreBorders",ignoreContourBordersCheckBox->isChecked()).toBool();
+	bool generateCountSF		= settings.value("generateCountSF",generateCountSFcheckBox->isChecked()).toBool();
+	bool generateMinHeightSF	= settings.value("generateMinHeightSF",generateMinHeightSFcheckBox->isChecked()).toBool();
+	bool generateMaxHeightSF	= settings.value("generateMaxHeightSF",generateMinHeightSFcheckBox->isChecked()).toBool();
+	bool generateAbgHeightSF	= settings.value("generateAvgHeightSF",generateAvgHeightSFcheckBox->isChecked()).toBool();
+	bool generateStdDevHeightSF	= settings.value("generateStdDevHeightSF",generateStdDevHeightSFcheckBox->isChecked()).toBool();
+	bool generateHeightRangeSF	= settings.value("generateHeightRangeSF",generateHeightRangeSFcheckBox->isChecked()).toBool();
+	
 	settings.endGroup();
 
 	gridStepDoubleSpinBox->setValue(step);
@@ -411,6 +436,12 @@ void ccRasterizeTool::loadSettings()
 	resampleCloudCheckBox->setChecked(resampleCloud);
 	minVertexCountSpinBox->setValue(minVertexCount);
 	ignoreContourBordersCheckBox->setChecked(ignoreBorders);
+	generateCountSFcheckBox->setChecked(generateCountSF);
+	generateMinHeightSFcheckBox->setChecked(generateMinHeightSF);
+	generateMinHeightSFcheckBox->setChecked(generateMaxHeightSF);
+	generateAvgHeightSFcheckBox->setChecked(generateAbgHeightSF);
+	generateStdDevHeightSFcheckBox->setChecked(generateStdDevHeightSF);
+	generateHeightRangeSFcheckBox->setChecked(generateHeightRangeSF);
 }
 
 bool ccRasterizeTool::canClose()
@@ -456,6 +487,12 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("ResampleOrigCloud",resampleCloudCheckBox->isChecked());
 	settings.setValue("MinVertexCount",minVertexCountSpinBox->value());
 	settings.setValue("IgnoreBorders",ignoreContourBordersCheckBox->isChecked());
+	settings.setValue("generateCountSF",generateCountSFcheckBox->isChecked());
+	settings.setValue("generateMinHeightSF",generateMinHeightSFcheckBox->isChecked());
+	settings.setValue("generateMaxHeightSF",generateMinHeightSFcheckBox->isChecked());
+	settings.setValue("generateAvgHeightSF",generateAvgHeightSFcheckBox->isChecked());
+	settings.setValue("generateStdDevHeightSF",generateStdDevHeightSFcheckBox->isChecked());
+	settings.setValue("generateHeightRangeSF",generateHeightRangeSFcheckBox->isChecked());
 	settings.endGroup();
 }
 
@@ -611,7 +648,7 @@ bool ccRasterizeTool::RasterGrid::init(unsigned w, unsigned h)
 	return true;
 }
 
-ccPointCloud* ccRasterizeTool::convertGridToCloud(bool generateCountSF, bool interpolateSF) const
+ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFields>& exportedFields, bool interpolateSF) const
 {
 	if (!m_cloud || !m_grid.isValid())
 		return 0;
@@ -686,20 +723,46 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool generateCountSF, bool int
 		}
 	}
 
-	//shall we save per-cell population as well?
-	CCLib::ScalarField* countSF = 0;
-	int countSFIdx = -1;
-	if (generateCountSF)
+	//shall we save per-cell fields as well?
+	std::vector<CCLib::ScalarField*> exportedSFs;
+	if (!exportedFields.empty())
 	{
-		countSFIdx = cloudGrid->addScalarField("Per-cell population");
-		if (countSFIdx < 0)
+		exportedSFs.resize(exportedFields.size(),0);
+		for (size_t i=0; i<exportedFields.size(); ++i)
 		{
-			ccLog::Warning("[Rasterize] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
-		}
-		else
-		{
-			countSF = cloudGrid->getScalarField(countSFIdx);
-			assert(countSF);
+			int sfIndex = -1;
+			switch (exportedFields[i])
+			{
+			case PER_CELL_COUNT:
+				sfIndex = cloudGrid->addScalarField("Per-cell population");
+				break;
+			case PER_CELL_MIN_HEIGHT:
+				sfIndex = cloudGrid->addScalarField("Min height");
+				break;
+			case PER_CELL_MAX_HEIGHT:
+				sfIndex = cloudGrid->addScalarField("Max height");
+				break;
+			case PER_CELL_AVG_HEIGHT:
+				sfIndex = cloudGrid->addScalarField("Average height");
+				break;
+			case PER_CELL_HEIGHT_STD_DEV:
+				sfIndex = cloudGrid->addScalarField("Std. dev. height");
+				break;
+			case PER_CELL_HEIGHT_RANGE:
+				sfIndex = cloudGrid->addScalarField("Height range");
+				break;
+			default:
+				assert(false);
+				break;
+			}
+			if (sfIndex < 0)
+			{
+				ccLog::Warning("[Rasterize] Couldn't allocate scalar field(s)! Try to free some memory ...");
+				break;
+			}
+
+			exportedSFs[i] = cloudGrid->getScalarField(sfIndex);
+			assert(exportedSFs[i]);
 		}
 	}
 
@@ -760,14 +823,40 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool generateCountSF, bool int
 					else
 						heightSF->addElement(h);
 				}
-				//same thing for the 'per-cell population' SF
-				if (countSF)
+				//same thing for the SFs
+				assert(exportedSFs.size() >= exportedFields.size());
+				for (size_t i=0; i<exportedSFs.size(); ++i)
 				{
-					ScalarType pop = static_cast<ScalarType>(aCell->nbPoints);
+					CCLib::ScalarField* sf = exportedSFs[i];
+					ScalarType sVal = NAN_VALUE;
+					switch (exportedFields[i])
+					{
+					case PER_CELL_COUNT:
+						sVal = static_cast<ScalarType>(aCell->nbPoints);
+						break;
+					case PER_CELL_MIN_HEIGHT:
+						sVal = static_cast<ScalarType>(aCell->minHeight);
+						break;
+					case PER_CELL_MAX_HEIGHT:
+						sVal = static_cast<ScalarType>(aCell->maxHeight);
+						break;
+					case PER_CELL_AVG_HEIGHT:
+						sVal = static_cast<ScalarType>(aCell->avgHeight);
+						break;
+					case PER_CELL_HEIGHT_STD_DEV:
+						sVal = static_cast<ScalarType>(aCell->stdDevHeight);
+						break;
+					case PER_CELL_HEIGHT_RANGE:
+						sVal = static_cast<ScalarType>(aCell->maxHeight - aCell->minHeight);
+						break;
+					default:
+						assert(false);
+						break;
+					}
 					if (resampleInputCloud)
-						countSF->setValue(nonEmptyCellIndex,pop);
+						sf->setValue(nonEmptyCellIndex,sVal);
 					else
-						countSF->addElement(pop);
+						sf->addElement(sVal);
 				}
 				++nonEmptyCellIndex;
 			}
@@ -788,9 +877,10 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool generateCountSF, bool int
 					ScalarType s = static_cast<ScalarType>(emptyCellsHeight);
 					heightSF->addElement(s);
 				}
-				if (countSF)
+				for (size_t i=0; i<exportedSFs.size(); ++i)
 				{
-					countSF->addElement(NAN_VALUE);
+					if (exportedSFs[i])
+						exportedSFs[i]->addElement(NAN_VALUE);
 				}
 			}
 
@@ -805,13 +895,25 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool generateCountSF, bool int
 		heightSF->computeMinAndMax();
 		cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
 	}
-	if (countSF)
+	for (size_t i=0; i<exportedSFs.size(); ++i)
 	{
-		countSF->computeMinAndMax();
-		if (!heightSF)
-			cloudGrid->setCurrentDisplayedScalarField(countSFIdx);
+		CCLib::ScalarField* sf = exportedSFs[i];
+		if (sf)
+		{
+			sf->computeMinAndMax();
+			//show the first available 
+			if (!cloudGrid->getCurrentDisplayedScalarField())
+			{
+				cloudGrid->setCurrentDisplayedScalarField(cloudGrid->getScalarFieldIndexByName(sf->getName()));
+			}
+		}
 	}
-	cloudGrid->showSF(heightSF || countSF);
+
+	if (cloudGrid->getNumberOfScalarFields() != 0)
+	{
+		cloudGrid->setCurrentDisplayedScalarField(0); //first SF by default
+		cloudGrid->showSF(true);
+	}
 
 	//take care of former scalar fields
 	if (!resampleInputCloud)
@@ -899,7 +1001,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 			m_rasterCloud = 0;
 		}
 
-		m_rasterCloud = convertGridToCloud(false,false);
+		std::vector<ExportableFields> exportedFields; //don't export any field (it's only for display!)
+		m_rasterCloud = convertGridToCloud(exportedFields,false);
 
 		if (m_rasterCloud)
 		{
@@ -1053,39 +1156,27 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		unsigned& pointsInCell = aCell->nbPoints;
 		if (pointsInCell)
 		{
-			switch (projectionType)
+			if (P->u[Z] < aCell->minHeight)
 			{
-			case PROJ_MINIMUM_VALUE:
-				// Set the minimum height
-				if (P->u[Z] < aCell->height)
-				{
-					aCell->height = P->u[Z];
+				aCell->minHeight = P->u[Z];
+				if (projectionType == PROJ_MINIMUM_VALUE)
 					aCell->pointIndex = n;
-				}
-				break;
-			case PROJ_MAXIMUM_VALUE:
-				// Set the maximum height
-				if (P->u[Z] > aCell->height)
-				{
-					aCell->height = P->u[Z];
+			}
+			else if (P->u[Z] > aCell->maxHeight)
+			{
+				aCell->maxHeight = P->u[Z];
+				if (projectionType == PROJ_MAXIMUM_VALUE)
 					aCell->pointIndex = n;
-				}
-				break;
-			case PROJ_AVERAGE_VALUE:
-				// Sum the points heights
-				aCell->height += P->u[Z];
-				break;
-			default:
-				assert(false);
-				break;
 			}
 		}
 		else
 		{
-			//for the first point, we simply have to store its height (in any case)
-			aCell->height = P->u[Z];
+			aCell->minHeight = aCell->maxHeight = P->u[Z];
 			aCell->pointIndex = n;
 		}
+		// Sum the points heights
+		aCell->avgHeight += P->u[Z];
+		aCell->stdDevHeight += static_cast<double>(P->u[Z])*P->u[Z];
 
 		//scalar fields
 		if (interpolateSF)
@@ -1143,7 +1234,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		}
 	}
 
-	//update grids for 'average' cases
+	//update SF grids for 'average' cases
 	if (sfInterpolation == PROJ_AVERAGE_VALUE)
 	{
 		for (size_t k=0; k<m_grid.scalarFields.size(); ++k)
@@ -1168,15 +1259,40 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		}
 	}
 
-	//we need to finish the average height computation
-	if (projectionType == PROJ_AVERAGE_VALUE)
+	//update the main grid (average height and std.dev. computation + current 'height' value)
 	{
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
 			RasterCell* cell = m_grid.data[j];
 			for (unsigned i=0; i<m_grid.width; ++i,++cell)
+			{
 				if (cell->nbPoints > 1)
-					cell->height /= static_cast<PointCoordinateType>(cell->nbPoints);
+				{
+					cell->avgHeight /= cell->nbPoints;
+					cell->stdDevHeight = sqrt(fabs(cell->stdDevHeight/cell->nbPoints - cell->avgHeight*cell->avgHeight));
+				}
+				else
+				{
+					cell->stdDevHeight = 0;
+				}
+				
+				//set the right 'height' value
+				switch(projectionType)
+				{
+				case PROJ_MINIMUM_VALUE:
+					cell->height = cell->minHeight;
+					break;
+				case PROJ_AVERAGE_VALUE:
+					cell->height = cell->avgHeight;
+					break;
+				case PROJ_MAXIMUM_VALUE:
+					cell->height = cell->maxHeight;
+					break;
+				default:
+					assert(false);
+					break;
+				}
+			}
 		}
 	}
 	
@@ -1350,7 +1466,21 @@ void ccRasterizeTool::generateCloud() const
 	//to avoid multiple clicks
 	generateCloudPushButton->blockSignals(true);
 	
-	ccPointCloud* rasterCloud = convertGridToCloud(generateCountSF(),getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
+	//look for fields to be exported
+	std::vector<ExportableFields> exportedFields;
+	if (exportAsSF(PER_CELL_COUNT))
+		exportedFields.push_back(PER_CELL_COUNT);
+	if (exportAsSF(PER_CELL_MIN_HEIGHT))
+		exportedFields.push_back(PER_CELL_MIN_HEIGHT);
+	if (exportAsSF(PER_CELL_MAX_HEIGHT))
+		exportedFields.push_back(PER_CELL_MAX_HEIGHT);
+	if (exportAsSF(PER_CELL_AVG_HEIGHT))
+		exportedFields.push_back(PER_CELL_AVG_HEIGHT);
+	if (exportAsSF(PER_CELL_HEIGHT_STD_DEV))
+		exportedFields.push_back(PER_CELL_HEIGHT_STD_DEV);
+	if (exportAsSF(PER_CELL_HEIGHT_RANGE))
+		exportedFields.push_back(PER_CELL_HEIGHT_RANGE);
+	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
 
 	if (rasterCloud)
 	{

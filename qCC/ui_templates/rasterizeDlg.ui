@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>652</height>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -407,25 +407,108 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QPushButton" name="generateCloudPushButton">
-              <property name="text">
-               <string>Cloud</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="generateCountSFcheckBox">
-              <property name="toolTip">
-               <string>Adds a scalar field with the grid density (= number of points falling in each cell)</string>
-              </property>
-              <property name="text">
-               <string>save per-cell count as SF</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QPushButton" name="generateCloudPushButton">
+            <property name="text">
+             <string>Cloud</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Export per-cell statistics as SF(s):</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="exportCloudSFFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QFormLayout" name="formLayout_4">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="generateCountSFcheckBox">
+               <property name="toolTip">
+                <string>Adds a scalar field with the grid density (= number of points inside each cell)</string>
+               </property>
+               <property name="text">
+                <string>population</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="generateMinHeightSFcheckBox">
+               <property name="toolTip">
+                <string>Adds a scalar field with the min. height of the points inside the cell</string>
+               </property>
+               <property name="text">
+                <string>min height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="generateAvgHeightSFcheckBox">
+               <property name="toolTip">
+                <string>Adds a scalar field with the average height of the points inside the cell</string>
+               </property>
+               <property name="text">
+                <string>average height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="generateMaxHeightSFcheckBox">
+               <property name="toolTip">
+                <string>Adds a scalar field with the max. height of the points inside the cell</string>
+               </property>
+               <property name="text">
+                <string>max height</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="generateStdDevHeightSFcheckBox">
+               <property name="toolTip">
+                <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
+               </property>
+               <property name="text">
+                <string>height std. dev.</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QCheckBox" name="generateHeightRangeSFcheckBox">
+               <property name="toolTip">
+                <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
+               </property>
+               <property name="text">
+                <string>height range</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
           <item>
            <widget class="Line" name="line">
@@ -659,6 +742,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
+     <zorder>generateCountSFcheckBox</zorder>
     </widget>
    </item>
   </layout>

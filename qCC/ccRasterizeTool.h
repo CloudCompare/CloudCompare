@@ -51,8 +51,17 @@ public:
 	//! Returns projection grid step
 	double getGridStep() const;
 
-	//! Returns whether a SF with per-cell count should be generated (only if a cloud is generated!)
-	bool generateCountSF() const;
+	//! Exportable fields
+	enum ExportableFields { PER_CELL_COUNT,
+							PER_CELL_MIN_HEIGHT,
+							PER_CELL_MAX_HEIGHT,
+							PER_CELL_AVG_HEIGHT,
+							PER_CELL_HEIGHT_STD_DEV,
+							PER_CELL_HEIGHT_RANGE
+	};
+
+	//! Returns whether a given field count should be exported as SF (only if a cloud is generated!)
+	bool exportAsSF(ExportableFields field) const;
 
 	//! Returns whether the output cloud should use the original cloud or the grid as 'support'
 	bool resampleOriginalCloud() const;
@@ -175,12 +184,24 @@ protected: //raster grid related stuff
 		//! Default constructor
 		RasterCell()
 			: height(0)
+			, avgHeight(0)
+			, stdDevHeight(0)
+			, minHeight(0)
+			, maxHeight(0)
 			, nbPoints(0)
 			, pointIndex(0)
 		{}
 
 		//! Height value
-		PointCoordinateType height;
+		double height;
+		//! Average height value
+		double avgHeight;
+		//! Height std.dev.
+		double stdDevHeight;
+		//! Min height value
+		PointCoordinateType minHeight;
+		//! Max height value
+		PointCoordinateType maxHeight;
 		//! Number of points projected in this cell
 		unsigned nbPoints;
 		//! Nearest point index (if any)
@@ -229,7 +250,7 @@ protected: //raster grid related stuff
 	};
 
 	//! Converts the grid to a scalar field
-	ccPointCloud* convertGridToCloud(bool generateCountSF, bool interpolateSF) const;
+	ccPointCloud* convertGridToCloud(const std::vector<ExportableFields>& exportedFields, bool interpolateSF) const;
 
 protected: //members
 

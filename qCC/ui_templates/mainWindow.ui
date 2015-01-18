@@ -663,6 +663,7 @@
    <addaction name="actionStatisticalTest"/>
    <addaction name="actionLabelConnectedComponents"/>
    <addaction name="actionPrimitiveFactory"/>
+   <addaction name="actionRasterize"/>
    <addaction name="separator"/>
    <addaction name="actionSegment"/>
    <addaction name="actionTranslateRotate"/>

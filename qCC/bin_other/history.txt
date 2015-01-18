@@ -2,6 +2,10 @@
 
 v2.6.1.beta 11/??/2014
 - New features:
+	* Level Tool
+		- accessible via 'Tools > Level' or via the left toolbar
+		- let the user pick three points (typically on the floor) so as to make the selected entity
+			level (the selected entity can be a cloud, a mesh or even a group of entitites)
 	* Section Extraction Tool
 		- let the user define or import '2D sections' (polylines) over one or several clouds
 		- 2D sections can also be generated automatically along a path with given step and

@@ -443,6 +443,7 @@
     <addaction name="menuFit"/>
     <addaction name="menuOther"/>
     <addaction name="separator"/>
+    <addaction name="actionLevel"/>
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
     <addaction name="separator"/>
@@ -564,6 +565,7 @@
    <addaction name="actionEditCamera"/>
    <addaction name="actionGlobalZoom"/>
    <addaction name="actionPickRotationCenter"/>
+   <addaction name="actionLevel"/>
    <addaction name="actionZoomAndCenter"/>
    <addaction name="actionSetViewTop"/>
    <addaction name="actionSetViewFront"/>
@@ -2705,6 +2707,18 @@
    </property>
    <property name="toolTip">
     <string>Contour plot (set of polylines) to a 2.5D mesh</string>
+   </property>
+  </action>
+  <action name="actionLevel">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccLevel.png</normaloff>:/CC/images/ccLevel.png</iconset>
+   </property>
+   <property name="text">
+    <string>Level</string>
+   </property>
+   <property name="toolTip">
+    <string>Pick three points to make a cloud or mesh 'level'</string>
    </property>
   </action>
  </widget>

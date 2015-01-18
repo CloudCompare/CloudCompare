@@ -824,7 +824,7 @@ struct Tab
 	{
 		//compute min width of each column
 		int totalWidth = 0;
-		for (size_t i=0; i<colCount; ++i)
+		for (int i=0; i<colCount; ++i)
 		{
 			int maxWidth = 0;
 			for (int j=0; j<colContent[i].size(); ++j)

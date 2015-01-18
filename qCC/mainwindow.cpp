@@ -298,6 +298,7 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
 	release3DMouse();
+	cancelPreviousPickingOperation(false); //just in case
 
 	assert(m_ccRoot && m_mdiArea && m_windowMapper);
 	m_ccRoot->disconnect();
@@ -919,6 +920,7 @@ void MainWindow::connectActions()
 	connect(actionRoughness,					SIGNAL(triggered()),	this,		SLOT(doComputeRoughness()));
 	connect(actionRemoveDuplicatePoints,		SIGNAL(triggered()),	this,		SLOT(doRemoveDuplicatePoints()));
 	//"Tools"
+	connect(actionLevel,						SIGNAL(triggered()),	this,		SLOT(doLevel()));
 	connect(actionPointListPicking,				SIGNAL(triggered()),	this,		SLOT(activatePointListPickingMode()));
 	connect(actionPointPicking,					SIGNAL(triggered()),	this,		SLOT(activatePointPickingMode()));
 
@@ -1679,14 +1681,31 @@ void MainWindow::doActionApplyTransformation()
 		return;
 
 	ccGLMatrixd transMat = dlg.getTransformation();
+	applyTransformation(transMat);
+}
 
+void MainWindow::applyTransformation(const ccGLMatrixd& mat)
+{
 	//if the transformation is partly converted to global shift/scale
 	bool updateGlobalShiftAndScale = false;
 	double scaleChange = 1.0;
 	CCVector3d shiftChange(0,0,0);
+	ccGLMatrixd transMat = mat;
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
+
+	//special case: the selected entity is a group
+	//if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
+	//{
+	//	ccHObject* ent = selectedEntities.front();
+	//	m_selectedEntities.clear();
+	//	for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
+	//	{
+	//		selectedEntities.push_back(ent->getChild(i));
+	//	}
+	//}
+
 	size_t selNum = selectedEntities.size();
 	bool firstCloud = true;
 	for (size_t i=0; i<selNum; ++i)
@@ -3636,7 +3655,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 	if (selNum != 1)
 	{
 		if (selNum > 1)
-			ccConsole::Error("Select only one point cloud or mesh!");
+			ccConsole::Error("Select only one cloud or one mesh!");
 		return;
 	}
 	ccHObject* ent = m_selectedEntities[0];
@@ -7864,16 +7883,321 @@ void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 	}
 }
 
+//globals for point picking operations
+enum PickingOperation {	NO_PICKING_OPERATION,
+						PICKING_ROTATION_CENTER,
+						PICKING_LEVEL_POINTS,
+};
 static ccGLWindow* s_pickingWindow = 0;
 static ccGLWindow::PICKING_MODE s_previousPickingMode = ccGLWindow::NO_PICKING;
-void MainWindow::doPickRotationCenter()
+static PickingOperation s_previousPickingOperation = NO_PICKING_OPERATION;
+static std::vector<cc2DLabel*> s_levelLabels;
+static ccPointCloud* s_levelMarkersCloud = 0;
+static ccHObject* s_levelEntity = 0;
+
+void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 {
-	if (s_pickingWindow)
+	if (!win)
+	{
+		assert(false);
+		return;
+	}
+
+	//specific case: we prevent the 'point-pair based alignment' tool to process the picked point!
+	if (m_pprDlg)
+		m_pprDlg->pause(true);
+
+	connect(win, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
+	s_pickingWindow = win;
+	s_previousPickingMode = win->getPickingMode();
+	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
+	win->displayNewMessage(message,ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
+	win->redraw();
+
+	freezeUI(true);
+}
+
+void MainWindow::cancelPreviousPickingOperation(bool aborted)
+{
+	if (!s_pickingWindow)
+		return;
+
+	switch(s_previousPickingOperation)
+	{
+	case PICKING_ROTATION_CENTER:
+		//nothing to do
+		break;
+	case PICKING_LEVEL_POINTS:
+		if (s_levelMarkersCloud)
+		{
+			s_pickingWindow->removeFromOwnDB(s_levelMarkersCloud);
+			delete s_levelMarkersCloud;
+			s_levelMarkersCloud = 0;
+		}
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	if (aborted)
 	{
 		s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
-		s_pickingWindow->displayNewMessage("Rotation center picking aborted",ccGLWindow::LOWER_LEFT_MESSAGE);
-		s_pickingWindow->redraw();
-		cancelPickRotationCenter();
+		s_pickingWindow->displayNewMessage("Picking operation aborted",ccGLWindow::LOWER_LEFT_MESSAGE);
+	}
+	s_pickingWindow->redraw();
+
+	//specific case: we allow the 'point-pair based alignment' tool to process the picked point!
+	if (m_pprDlg)
+		m_pprDlg->pause(false);
+
+	freezeUI(false);
+
+	disconnect(s_pickingWindow, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
+	//restore previous picking mode
+	s_pickingWindow->setPickingMode(s_previousPickingMode);
+	s_pickingWindow = 0;
+	s_previousPickingOperation = NO_PICKING_OPERATION;
+}
+
+void MainWindow::processPickedPoint(int cloudUniqueID, unsigned itemIndex, int x, int y)
+{
+	if (!s_pickingWindow)
+		return;
+
+	ccHObject* db = s_pickingWindow->getSceneDB();
+	ccHObject* obj = db ? db->find(cloudUniqueID) : 0;
+	if (!obj)
+		return;
+
+	CCVector3 pickedPoint;
+	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+		if (!cloud)
+		{
+			assert(false);
+			return;
+		}
+		pickedPoint = *cloud->getPoint(itemIndex);
+	}
+	else if (obj->isKindOf(CC_TYPES::MESH))
+	{
+		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+		if (!mesh)
+		{
+			assert(false);
+			return;
+		}
+		CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
+		pickedPoint = s_pickingWindow->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
+	}
+	else
+	{
+		//unhandled entity
+		ccLog::Warning(QString("[Picking] Can't use points picked on this entity ('%1')!").arg(obj->getName()));
+		assert(false);
+		return;
+	}
+	
+	switch(s_previousPickingOperation)
+	{
+	case PICKING_ROTATION_CENTER:
+		{
+			CCVector3d newPivot = CCVector3d::fromArray(pickedPoint.u);
+			//specific case: transformation tool is enabled
+			if (m_transTool && m_transTool->started())
+			{
+				m_transTool->setRotationCenter(newPivot);
+				const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
+				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
+				s_pickingWindow->displayNewMessage(	QString("Point (%1,%2,%3) set as rotation center for interactive transformation")
+														.arg(pickedPoint.x,0,'f',precision)
+														.arg(pickedPoint.y,0,'f',precision)
+														.arg(pickedPoint.z,0,'f',precision),
+													ccGLWindow::LOWER_LEFT_MESSAGE,true);
+			}
+			else
+			{
+				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
+				if (!params.perspectiveView || params.objectCenteredView)
+				{
+					//apply current GL transformation (if any)
+					obj->getGLTransformation().apply(newPivot);
+					//compute the equivalent camera center
+					CCVector3d dP = params.pivotPoint - newPivot;
+					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
+					CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
+					s_pickingWindow->setCameraPos(newCameraPos);
+					s_pickingWindow->setPivotPoint(newPivot);
+
+					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
+					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
+					s_pickingWindow->displayNewMessage(	QString("Point (%1,%2,%3) set as rotation center")
+															.arg(pickedPoint.x,0,'f',precision)
+															.arg(pickedPoint.y,0,'f',precision)
+															.arg(pickedPoint.z,0,'f',precision),
+														ccGLWindow::LOWER_LEFT_MESSAGE,true);
+				}
+			}
+			s_pickingWindow->redraw();
+		}
+		break;
+	
+	case PICKING_LEVEL_POINTS:
+		{
+			//we only accept points picked on the right entity!
+			//if (obj != s_levelEntity)
+			//{
+			//	ccLog::Warning(QString("[Level] Only points picked on '%1' are considered!").arg(s_levelEntity->getName()));
+			//	return;
+			//}
+
+			if (!s_levelMarkersCloud)
+			{
+				assert(false);
+				cancelPreviousPickingOperation(true);
+			}
+
+			for (unsigned i=0; i<s_levelMarkersCloud->size(); ++i)
+			{
+				const CCVector3* P = s_levelMarkersCloud->getPoint(i);
+				if ((pickedPoint - *P).norm() < 1.0e-6)
+				{
+					ccLog::Warning("[Level] Point is too close from the others!");
+					return;
+				}
+			}
+
+			//add the corresponding marker
+			s_levelMarkersCloud->addPoint(pickedPoint);
+			unsigned markerCount = s_levelMarkersCloud->size();
+			cc2DLabel* label = new cc2DLabel();
+			label->addPoint(s_levelMarkersCloud,markerCount-1);
+			label->setName(QString("P#%1").arg(markerCount));
+			label->setDisplayedIn2D(false);
+			label->setDisplay(s_pickingWindow);
+			label->setVisible(true);
+			s_levelMarkersCloud->addChild(label);
+			s_pickingWindow->redraw();
+
+			if (markerCount == 3)
+			{
+				//we have enough points!
+				const CCVector3* A = s_levelMarkersCloud->getPoint(0);
+				const CCVector3* B = s_levelMarkersCloud->getPoint(1);
+				const CCVector3* C = s_levelMarkersCloud->getPoint(2);
+				CCVector3 X = *B-*A;
+				CCVector3 Y = *C-*A;
+				CCVector3 Z = X.cross(Y);
+				//we choose 'Z' so that it points 'upward' relatively to the camera (assuming the user will be looking from the top)
+				CCVector3d viewDir = s_pickingWindow->getCurrentViewDir();
+				if (CCVector3d::fromArray(Z.u).dot(viewDir) > 0)
+				{
+					Z = -Z;
+				}
+				Y = Z.cross(X);
+				X.normalize();
+				Y.normalize();
+				Z.normalize();
+			
+				ccGLMatrixd trans;
+				double* mat = trans.data();
+				mat[0] = X.x; mat[4] = X.y; mat[8]  = X.z; mat[12] = 0;
+				mat[1] = Y.x; mat[5] = Y.y; mat[9]  = Y.z; mat[13] = 0;
+				mat[2] = Z.x; mat[6] = Z.y; mat[10] = Z.z; mat[14] = 0;
+				mat[3] = 0  ; mat[7] = 0  ; mat[11] = 0  ; mat[15] = 1;
+
+				CCVector3d T = -CCVector3d::fromArray(A->u);
+				trans/*.inverse()*/.apply(T);
+				T += CCVector3d::fromArray(A->u);
+				trans.setTranslation(T);
+
+				assert(m_selectedEntities.size() == 1 && m_selectedEntities.front() == s_levelEntity);
+				applyTransformation(trans);
+
+				//clear message
+				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
+				s_pickingWindow->setView(CC_TOP_VIEW);
+			}
+			else
+			{
+				//we need more points!
+				return;
+			}
+		}
+		break;
+	
+	default:
+		assert(false);
+		break;
+	}
+
+	cancelPreviousPickingOperation(false);
+}
+
+void MainWindow::doLevel()
+{
+	//picking operation already in progress
+	if (s_pickingWindow)
+	{
+		if (s_previousPickingOperation == PICKING_LEVEL_POINTS)
+		{
+			cancelPreviousPickingOperation(true);
+		}
+		else
+		{
+			ccConsole::Error("Stop the other picking operation first!");
+		}
+		return;
+	}
+
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+	{
+		ccConsole::Error("No active 3D view!");
+		return;
+	}
+
+	size_t selNum = m_selectedEntities.size();
+	if (selNum != 1)
+	{
+		ccConsole::Error("Select an entity!");
+		return;
+	}
+
+	//create markers cloud
+	assert(!s_levelMarkersCloud);
+	{
+		s_levelMarkersCloud = new ccPointCloud("Level points");
+		if (!s_levelMarkersCloud->reserve(3))
+		{
+			ccConsole::Error("Not enough memory!");
+			return;
+		}
+		win->addToOwnDB(s_levelMarkersCloud);
+	}
+
+	s_levelEntity = m_selectedEntities[0];
+	s_levelLabels.clear();
+	s_previousPickingOperation = PICKING_LEVEL_POINTS;
+
+	enablePickingOperation(win,"Pick three points on the floor plane (click on icon/menu entry again to cancel)");
+}
+
+void MainWindow::doPickRotationCenter()
+{
+	//picking operation already in progress
+	if (s_pickingWindow)
+	{
+		if (s_previousPickingOperation == PICKING_ROTATION_CENTER)
+		{
+			cancelPreviousPickingOperation(true);
+		}
+		else
+		{
+			ccConsole::Error("Stop the other picking operation first!");
+		}
 		return;
 	}
 
@@ -7892,141 +8216,8 @@ void MainWindow::doPickRotationCenter()
 		return;
 	}
 
-	//we need at least one cloud
-	//bool atLeastOneCloudVisible = false;
-	//{
-	//	assert(m_ccRoot && m_ccRoot->getRootEntity());
-	//	ccHObject::Container clouds;
-	//	m_ccRoot->getRootEntity()->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
-	//	for (unsigned i=0;i<clouds.size();++i)
-	//		if (clouds[i]->isVisible() && clouds[i]->isEnabled())
-	//		{
-	//			//we must check that the cloud is really visible: i.e. it's parent are not deactivated!
-	//			atLeastOneCloudVisible = true;
-	//			ccHObject* parent = clouds[i]->getParent();
-	//			while (parent)
-	//			{
-	//				if (!parent->isEnabled())
-	//				{
-	//					atLeastOneCloudVisible = false;
-	//					break;
-	//				}
-	//				parent = parent->getParent();
-	//			}
-	//			if (atLeastOneCloudVisible)
-	//				break;
-	//		}
-	//}
-
-	//if (!atLeastOneCloudVisible)
-	//{
-	//	ccConsole::Error("No visible cloud in active 3D view!");
-	//	return;
-	//}
-
-	//specific case: we prevent the 'point-pair based alignment' tool to process the picked point!
-	if (m_pprDlg)
-		m_pprDlg->pause(true);
-
-	connect(win, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
-	s_previousPickingMode = win->getPickingMode();
-	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
-	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
-	win->redraw();
-	s_pickingWindow = win;
-
-	freezeUI(true);
-}
-
-void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned itemIndex, int x, int y)
-{
-	if (s_pickingWindow)
-	{
-		ccHObject* obj = 0;
-		ccHObject* db = s_pickingWindow->getSceneDB();
-		if (db)
-			obj = db->find(cloudUniqueID);
-		if (obj)
-		{
-			CCVector3 P;
-			if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
-			{
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
-				if (!cloud)
-				{
-					assert(false);
-					return;
-				}
-				P = *cloud->getPoint(itemIndex);
-			}
-			else if (obj->isKindOf(CC_TYPES::MESH))
-			{
-				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
-				if (!mesh)
-				{
-					assert(false);
-					return;
-				}
-				CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-				P = s_pickingWindow->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
-			}
-			else
-			{
-				//unhandled entity
-				assert(false);
-				return;
-			}
-
-			CCVector3d newPivot = CCVector3d::fromArray(P.u);
-			//specific case: transformation tool is enabled
-			if (m_transTool && m_transTool->started())
-			{
-				m_transTool->setRotationCenter(newPivot);
-				const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center for interactive transformation").arg(P.x,0,'f',precision).arg(P.y,0,'f',precision).arg(P.z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
-			}
-			else
-			{
-				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
-				if (!params.perspectiveView || params.objectCenteredView)
-				{
-					//apply current GL transformation (if any)
-					obj->getGLTransformation().apply(newPivot);
-					//compute the equivalent camera center
-					CCVector3d dP = params.pivotPoint - newPivot;
-					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
-					CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
-					s_pickingWindow->setCameraPos(newCameraPos);
-					s_pickingWindow->setPivotPoint(newPivot);
-
-					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
-					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P.x,0,'f',precision).arg(P.y,0,'f',precision).arg(P.z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
-				}
-			}
-			s_pickingWindow->redraw();
-		}
-	}
-
-	cancelPickRotationCenter();
-}
-
-void MainWindow::cancelPickRotationCenter()
-{
-	if (s_pickingWindow)
-	{
-		disconnect(s_pickingWindow, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
-		//restore previous picking mode
-		s_pickingWindow->setPickingMode(s_previousPickingMode);
-		s_pickingWindow = 0;
-	}
-
-	//specific case: we allow the 'point-pair based alignment' tool to process the picked point!
-	if (m_pprDlg)
-		m_pprDlg->pause(false);
-
-	freezeUI(false);
+	s_previousPickingOperation = PICKING_ROTATION_CENTER;
+	enablePickingOperation(win,"Pick a point to be used as rotation center (click on icon again to cancel)");
 }
 
 enum ToggleEntityState
@@ -8308,7 +8499,7 @@ void MainWindow::doActionAddConstantSF()
 	if (selNum != 1)
 	{
 		if (selNum > 1)
-			ccConsole::Error("Select only one point cloud or mesh!");
+			ccConsole::Error("Select only one cloud or one mesh!");
 		return;
 	}
 
@@ -10682,6 +10873,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionRoughness->setEnabled(atLeastOneCloud);
 	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
 	actionFitPlane->setEnabled(atLeastOneEntity);
+	actionLevel->setEnabled(atLeastOneEntity);
 	actionFitFacet->setEnabled(atLeastOneEntity);
 	actionFitQuadric->setEnabled(atLeastOneCloud);
 	actionSubsample->setEnabled(atLeastOneCloud);

@@ -245,11 +245,6 @@ protected slots:
 	virtual void setCenteredPerspectiveView();
 	virtual void setViewerPerspectiveView();
 
-	// For rotation center picking
-	virtual void doPickRotationCenter();
-	virtual void cancelPickRotationCenter();
-	void processPickedRotationCenter(int, unsigned, int, int);
-
 	//! Tries to load (and then adds to main db) several files
 	/** \param filenames list of all filenames
 	**/
@@ -331,7 +326,17 @@ protected slots:
 	void doActionLabelConnectedComponents();
 	void doActionComputeStatParams();
 	void doActionFilterByValue();
+	
+	// Picking opeations
+	void enablePickingOperation(ccGLWindow* win, QString message);
+	void cancelPreviousPickingOperation(bool aborted);
+	void processPickedPoint(int, unsigned, int, int);
 
+	// For rotation center picking
+	void doPickRotationCenter();
+	// For leveling
+	void doLevel();
+	
 	void doActionDeleteScalarField();
 	void doActionSmoothMeshSF();
 	void doActionEnhanceMeshSF();
@@ -449,6 +454,9 @@ protected slots:
 	void doActionCreateCloudFromEntCenters();
 
 protected:
+
+	//! Apply transformation to the selected entities
+	void applyTransformation(const ccGLMatrixd& transMat);
 
 	//! Normals conversion destinations
 	enum NORMAL_CONVERSION_DEST	{ HSV_COLORS, DIP_DIR_SFS };

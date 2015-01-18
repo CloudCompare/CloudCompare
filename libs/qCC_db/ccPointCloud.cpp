@@ -3379,7 +3379,8 @@ void ccPointCloud::releaseVBOs()
 
 	if (m_currentDisplay)
 	{
-		m_currentDisplay->makeContextCurrent();
+		//m_currentDisplay->makeContextCurrent(); //DGM: can't call this as it is not thread safe (and it doesn't seem necessary by the way ;)
+
 		//'destroy' all vbos
 		for (size_t i=0; i<m_vboManager.vbos.size(); ++i)
 		{

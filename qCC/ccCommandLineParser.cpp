@@ -590,12 +590,23 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 			if (result)
 			{
-				CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-				QString errorStr = Export(cloudDesc,"RANDOM_SUBSAMPLED");
-				delete result;
-				result = 0;
-				if (!errorStr.isEmpty())
-					return Error(errorStr);
+				result->setName(m_clouds[i].pc->getName() + QString(".subsampled"));
+				if (s_autoSaveMode)
+				{
+					CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc,"RANDOM_SUBSAMPLED");
+					if (!errorStr.isEmpty())
+					{
+						delete result;
+						return Error(errorStr);
+					}
+				}
+				//replace current cloud by this one
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = result;
+				m_clouds[i].basename += QString("_SUBSAMPLED");
+				//delete result;
+				//result = 0;
 			}
 			else
 			{
@@ -632,14 +643,23 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 			if (result)
 			{
-				CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-				QString errorStr = Export(cloudDesc,"SPATIAL_SUBSAMPLED");
-
-				delete result;
-				result = 0;
-
-				if (!errorStr.isEmpty())
-					return Error(errorStr);
+				result->setName(m_clouds[i].pc->getName() + QString(".subsampled"));
+				if (s_autoSaveMode)
+				{
+					CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc,"SPATIAL_SUBSAMPLED");
+					if (!errorStr.isEmpty())
+					{
+						delete result;
+						return Error(errorStr);
+					}
+				}
+				//replace current cloud by this one
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = result;
+				m_clouds[i].basename += QString("_SUBSAMPLED");
+				//delete result;
+				//result = 0;
 			}
 			else
 			{
@@ -675,14 +695,23 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 			if (result)
 			{
-				CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-				QString errorStr = Export(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
-
-				delete result;
-				result = 0;
-
-				if (!errorStr.isEmpty())
-					return Error(errorStr);
+				result->setName(m_clouds[i].pc->getName() + QString(".subsampled"));
+				if (s_autoSaveMode)
+				{
+					CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
+					if (!errorStr.isEmpty())
+					{
+						delete result;
+						return Error(errorStr);
+					}
+				}
+				//replace current cloud by this one
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = result;
+				m_clouds[i].basename += QString("_SUBSAMPLED");
+				//delete result;
+				//result = 0;
 			}
 			else
 			{
@@ -1076,14 +1105,22 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 			ccPointCloud* fitleredCloud = m_clouds[i].pc->filterPointsByScalarValue(thisMinVal,thisMaxVal);
 			if (fitleredCloud)
 			{
-				CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-				QString errorStr = Export(resultDesc,QString("FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal));
-
-				delete fitleredCloud;
-				fitleredCloud = 0;
-
-				if (!errorStr.isEmpty())
-					return Error(errorStr);
+				if (s_autoSaveMode)
+				{
+					CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+					QString errorStr = Export(resultDesc,QString("FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal));
+					if (!errorStr.isEmpty())
+					{
+						delete fitleredCloud;
+						return Error(errorStr);
+					}
+					//replace current cloud by this one
+					delete m_clouds[i].pc;
+					m_clouds[i].pc = fitleredCloud;
+					m_clouds[i].basename += QString("_FILTERED");
+					//delete fitleredCloud;
+					//fitleredCloud = 0;
+				}
 			}
 		}
 	}
@@ -1126,10 +1163,12 @@ bool ccCommandLineParser::commandMergeClouds(QStringList& arguments)
 	m_clouds.resize(1);
 	//update the first one
 	m_clouds.front().basename += QString("_MERGED");
-	QString errorStr = Export(m_clouds.front());
-	if (!errorStr.isEmpty())
-		return Error(errorStr);
-
+	if (s_autoSaveMode)
+	{
+		QString errorStr = Export(m_clouds.front());
+		if (!errorStr.isEmpty())
+			return Error(errorStr);
+	}
 	return true;
 }
 
@@ -1196,9 +1235,12 @@ bool ccCommandLineParser::matchBBCenters(QStringList& arguments)
 		//apply translation matrix
 		ent->applyGLTransformation_recursive(&glTrans);
 		Print(QString("Entity '%1' has been translated: (%2,%3,%4)").arg(ent->getName()).arg(T.x).arg(T.y).arg(T.z));
-		QString errorStr = Export(*entities[i]);
-		if (!errorStr.isEmpty())
-			return Error(errorStr);
+		if (s_autoSaveMode)
+		{
+			QString errorStr = Export(*entities[i]);
+			if (!errorStr.isEmpty())
+				return Error(errorStr);
+		}
 	}
 
 	return true;
@@ -1312,9 +1354,12 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 				pc->applyGLTransformation_recursive(&makeZPosMatrix);
 				Print(QString("Cloud '%1' has been transformed with the above matrix").arg(pc->getName()));
 				m_clouds[i].basename += QString("_HORIZ");
-				QString errorStr = Export(m_clouds[i]);
-				if (!errorStr.isEmpty())
-					ccConsole::Warning(errorStr);
+				if (s_autoSaveMode)
+				{
+					QString errorStr = Export(m_clouds[i]);
+					if (!errorStr.isEmpty())
+						ccConsole::Warning(errorStr);
+				}
 			}
 		}
 		else
@@ -1369,9 +1414,12 @@ bool ccCommandLineParser::commandSampleMesh(QStringList& arguments, ccProgressDi
 		m_clouds.push_back(CloudDesc(cloud,m_meshes[i].basename+QString("_SAMPLED_POINTS"),m_meshes[i].path));
 
 		//save it as well
-		QString errorStr = Export(m_clouds.back());
-		if (!errorStr.isEmpty())
-			return Error(errorStr);
+		if (s_autoSaveMode)
+		{
+			QString errorStr = Export(m_clouds.back());
+			if (!errorStr.isEmpty())
+				return Error(errorStr);
+		}
 	}
 
 	return true;
@@ -1441,7 +1489,12 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 					m_clouds[i].pc = croppedCloud;
 					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
 					m_clouds[i].basename += "_CROPPED";
-					Export(m_clouds[i]);
+					if (s_autoSaveMode)
+					{
+						QString errorStr = Export(m_clouds[i]);
+						if (!errorStr.isEmpty())
+							return Error(errorStr);
+					}
 				}
 				else
 				{
@@ -1568,7 +1621,12 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 					m_clouds[i].pc = croppedCloud;
 					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
 					m_clouds[i].basename += "_CROPPED";
-					Export(m_clouds[i]);
+					if (s_autoSaveMode)
+					{
+						QString errorStr = Export(m_clouds[i]);
+						if (!errorStr.isEmpty())
+							return Error(errorStr);
+					}
 				}
 				else
 				{
@@ -1882,9 +1940,12 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 
 	compCloud.basename += suffix;
 
-	QString errorStr = Export(compCloud);
-	if (!errorStr.isEmpty())
-		return Error(errorStr);
+	if (s_autoSaveMode)
+	{
+		QString errorStr = Export(compCloud);
+		if (!errorStr.isEmpty())
+			return Error(errorStr);
+	}
 
 
 	return true;
@@ -2036,9 +2097,12 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 			}
 
 			m_clouds[i].basename += QString("_STAT_TEST_%1").arg(distrib->getName());
-			QString errorStr = Export(m_clouds[i]);
-			if (!errorStr.isEmpty())
-				return Error(errorStr);
+			if (s_autoSaveMode)
+			{
+				QString errorStr = Export(m_clouds[i]);
+				if (!errorStr.isEmpty())
+					return Error(errorStr);
+			}
 		}
 	}
 
@@ -2182,9 +2246,12 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 		}
 
 		dataAndModel[0]->basename += QString("_REGISTERED");
-		QString errorStr = Export(*dataAndModel[0]);
-		if (!errorStr.isEmpty())
-			return Error(errorStr);
+		if (s_autoSaveMode)
+		{
+			QString errorStr = Export(*dataAndModel[0]);
+			if (!errorStr.isEmpty())
+				return Error(errorStr);
+		}
 	}
 	else
 	{

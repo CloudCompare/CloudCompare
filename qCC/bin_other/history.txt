@@ -90,8 +90,9 @@ v2.6.1.beta 11/??/2014
 			when saving to LAZ format)
 		- the original LAS scale is stored as meta-data so as to let the user choose to save the data with the same
 			scale values (warning: accuracy might not be preserved if the cloud has been transformed, etc.)
-	* New command line option:
-		- '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
+	* Command line:
+		- New option '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
+		- Default behavior of some commands slightly changed (see http://www.cloudcompare.org/doc/wiki/index.php?title=CommandLine)
 	* SF Arithmetics:
 		- new operator 'INT' (integer part) to extract the integer part of scalar values
 	* Edit > Multiply/Scale

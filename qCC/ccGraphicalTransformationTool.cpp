@@ -319,18 +319,27 @@ void ccGraphicalTransformationTool::apply()
 	ccGLMatrixd finalTrans = m_rotation;
 	finalTrans += m_rotationCenter + m_translation - m_rotation*m_rotationCenter;
 
-	//convert matrix back and forth so as to be sure to get a 'true' rotation matrix
-	double alpha_rad;
-	CCVector3d axis3D,t3D;
-	finalTrans.getParameters(alpha_rad,axis3D,t3D);
-	ccGLMatrixd finalTransCorrected;
-	finalTransCorrected.initFromParameters(alpha_rad,axis3D,t3D);
+	ccGLMatrixd finalTransCorrected = finalTrans;
+#define NORMALIZE_TRANSFORMATION_MATRIX_WITH_EULER
+#ifdef NORMALIZE_TRANSFORMATION_MATRIX_WITH_EULER
+	{
+		//convert matrix back and forth so as to be sure to get a 'true' rotation matrix
+		//DGM: we use Euler angles, as the axis/angle method (formerly used) is not robust
+		//enough! Shifts could be percieved by the user.
+		double phi_rad,theta_rad,psi_rad;
+		CCVector3d t3D;
+		finalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
+		finalTransCorrected.initFromParameters(phi_rad,theta_rad,psi_rad,t3D);
 
 #ifdef _DEBUG
-	ccLog::Print("[GraphicalTransformationTool] Final transformation (before correction):");
-	ccLog::Print(finalTrans.toString(12,' ')); //full precision
-	ccLog::Print(QString("Axis(%1,%2,%3) - Angle(%4) - T(%5,%6,%7)").arg(axis3D.x).arg(axis3D.y).arg(axis3D.z).arg(alpha_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));
+		ccLog::Print("[GraphicalTransformationTool] Final transformation (before correction):");
+		ccLog::Print(finalTrans.toString(12,' ')); //full precision
+		ccLog::Print(QString("Angles(%1,%2,%3) T(%5,%6,%7)").arg(phi_rad).arg(theta_rad).arg(psi_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));
+#endif //_DEBUG
+	}
+#endif //NORMALIZE_TRANSFORMATION_MATRIX_WITH_EULER
 
+#ifdef _DEBUG
 	//test: compute rotation "norm" (as it may not be exactly 1 due to numerical (in)accuracy!)
 	{
 		ccGLMatrixd finalRotation = finalTransCorrected;
@@ -340,9 +349,9 @@ void ccGraphicalTransformationTool::apply()
 		double norm = idTrans.data()[0] * idTrans.data()[5] * idTrans.data()[10];
 		ccLog::PrintDebug("[GraphicalTransformationTool] T*T-1:");
 		ccLog::PrintDebug(idTrans.toString(12,' ')); //full precision
-		ccLog::PrintDebug(QString("Rotation norm = %1").arg(norm));
+		ccLog::PrintDebug(QString("Rotation norm = %1").arg(norm,0,'f',12));
 	}
-#endif
+#endif //_DEBUG
 
 	//update GL transformation for all entities
 	ccGLMatrix correctedFinalTrans(finalTransCorrected.data());
@@ -350,6 +359,9 @@ void ccGraphicalTransformationTool::apply()
 	for (unsigned i=0; i<m_toTransform->getChildrenNumber(); ++i)
 	{
 		ccHObject* toTransform = m_toTransform->getChild(i);
+		//if (m_toTransform->getChild(i)->isA(CC_TYPES::POINT_CLOUD))
+		//{
+		//}
 		toTransform->setGLTransformation(correctedFinalTrans);
 
 		//DGM: warning, applyGLTransformation may delete associated octree!
@@ -367,8 +379,12 @@ void ccGraphicalTransformationTool::apply()
 	ccLog::Print("[GraphicalTransformationTool] Applied transformation:");
 	ccLog::Print(correctedFinalTrans.toString(12,' ')); //full precision
 #ifdef _DEBUG
-	finalTransCorrected.getParameters(alpha_rad,axis3D,t3D);
-	ccLog::Print(QString("Axis(%1,%2,%3) - Angle(%4) - T(%5,%6,%7)").arg(axis3D.x).arg(axis3D.y).arg(axis3D.z).arg(alpha_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));
+	{
+		float phi_rad,theta_rad,psi_rad;
+		Vector3Tpl<float> t3D;
+		correctedFinalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
+		ccLog::Print(QString("Angles(%1,%2,%3) T(%5,%6,%7)").arg(phi_rad).arg(theta_rad).arg(psi_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));
+	}
 #endif
 }
 

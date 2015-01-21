@@ -169,22 +169,22 @@ CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 	{
 		CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
-		mXX += (double)(P.x*P.x);
-		mYY += (double)(P.y*P.y);
-		mZZ += (double)(P.z*P.z);
-		mXY += (double)(P.x*P.y);
-		mXZ += (double)(P.x*P.z);
-		mYZ += (double)(P.y*P.z);
+		mXX += static_cast<double>(P.x)*P.x;
+		mYY += static_cast<double>(P.y)*P.y;
+		mZZ += static_cast<double>(P.z)*P.z;
+		mXY += static_cast<double>(P.x)*P.y;
+		mXZ += static_cast<double>(P.x)*P.z;
+		mYZ += static_cast<double>(P.y)*P.z;
 	}
 
 	//symmetry
 	CCLib::SquareMatrixd covMat(3);
-	covMat.m_values[0][0] = mXX/(double)count;
-	covMat.m_values[1][1] = mYY/(double)count;
-	covMat.m_values[2][2] = mZZ/(double)count;
-	covMat.m_values[1][0] = covMat.m_values[0][1] = mXY/(double)count;
-	covMat.m_values[2][0] = covMat.m_values[0][2] = mXZ/(double)count;
-	covMat.m_values[2][1] = covMat.m_values[1][2] = mYZ/(double)count;
+	covMat.m_values[0][0] = mXX/count;
+	covMat.m_values[1][1] = mYY/count;
+	covMat.m_values[2][2] = mZZ/count;
+	covMat.m_values[1][0] = covMat.m_values[0][1] = mXY/count;
+	covMat.m_values[2][0] = covMat.m_values[0][2] = mXZ/count;
+	covMat.m_values[2][1] = covMat.m_values[1][2] = mYZ/count;
 
 	return covMat;
 }

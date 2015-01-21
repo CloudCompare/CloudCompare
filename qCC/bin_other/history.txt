@@ -120,6 +120,8 @@ v2.6.1.beta 11/??/2014
 		(with the 64 bits version which has now a maximum octree level of 21 by default). However this could cause
 		a much too high memory consumption and eventually a crash.
 	- when the order of entites was changed in the DB tree, the display was not updated right away
+	- the actual transformation applied to entities at the end of the 'Interactive Transformation Tool' could be slightly
+		shifted in some cases
 
 v2.6.0 10/24/2014
 - New methods:

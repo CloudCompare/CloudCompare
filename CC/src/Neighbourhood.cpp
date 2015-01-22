@@ -157,7 +157,7 @@ CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 	const CCVector3* G = getGravityCenter();
 	assert(G);
 
-    //we build up covariance matrix
+	//we build up covariance matrix
 	double mXX = 0.0;
 	double mYY = 0.0;
 	double mZZ = 0.0;
@@ -165,7 +165,7 @@ CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 	double mXZ = 0.0;
 	double mYZ = 0.0;
 
-	for (unsigned i=0;i<count;++i)
+	for (unsigned i=0; i<count; ++i)
 	{
 		CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
@@ -199,18 +199,21 @@ PointCoordinateType Neighbourhood::computeLargestRadius()
 	//get the centroid
 	const CCVector3* G = getGravityCenter();
 	if (!G)
+	{
+		assert(false);
 		return PC_NAN;
+	}
 
-	PointCoordinateType maxSquareDist = 0;
+	double maxSquareDist = 0;
 	for (unsigned i=0; i<pointCount; ++i)
 	{
 		const CCVector3* P = m_associatedCloud->getPoint(i);
-		PointCoordinateType d2 = (*P-*G).norm2();
+		double d2 = (*P-*G).norm2();
 		if (d2 > maxSquareDist)
 			maxSquareDist = d2;
 	}
 
-	return sqrt(maxSquareDist);
+	return static_cast<PointCoordinateType>(sqrt(maxSquareDist));
 }
 
 bool Neighbourhood::computeLeastSquareBestFittingPlane()
@@ -241,17 +244,17 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 
 		//get normal
 		{
-			double vec[3];
+			CCVector3d vec;
 			//the smallest eigen vector corresponds to the "least square best fitting plane" normal
-			eig.getMinEigenValueAndVector(vec);
-			theLSQPlaneVectors[2] = CCVector3::fromArray(vec);
+			eig.getMinEigenValueAndVector(vec.u);
+			theLSQPlaneVectors[2] = CCVector3::fromArray(vec.u);
 		}
 
 		//get also X (Y will be deduced by cross product, see below
 		{
-			double vec[3];
-			eig.getMaxEigenValueAndVector(vec);
-			theLSQPlaneVectors[0] = CCVector3::fromArray(vec);
+			CCVector3d vec;
+			eig.getMaxEigenValueAndVector(vec.u);
+			theLSQPlaneVectors[0] = CCVector3::fromArray(vec.u);
 		}
 
 		//get the centroid (should already be up-to-date - see computeCovarianceMatrix)
@@ -277,7 +280,8 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 	if (theLSQPlaneVectors[2].norm2() < ZERO_TOLERANCE)
 	{
 		//this means that the points are colinear!
-		theLSQPlaneVectors[2] = CCVector3(0,0,1); //any normal will do
+		//theLSQPlaneVectors[2] = CCVector3(0,0,1); //any normal will do
+		return false;
 	}
 	else
 	{
@@ -574,6 +578,12 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(	bool duplicateVertices/*=
 		//can't compute LSF plane with less than 3 points!
 		if (errorStr)
 			strcpy(errorStr,"Not enough points");
+		return 0;
+	}
+
+	//safety check: Triangle lib will crash if the points are all the same!
+	if (computeLargestRadius() < ZERO_TOLERANCE)
+	{
 		return 0;
 	}
 

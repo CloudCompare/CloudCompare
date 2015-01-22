@@ -1195,7 +1195,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	{
 		ccHObject* child = toSave[i];
 		
-		//check entity elligibility
+		//check entity eligibility
 		if (child->isA(CC_TYPES::POLY_LINE))
 		{
 			if (static_cast<ccPolyline*>(child)->size() < 3)

@@ -50,7 +50,10 @@ public:
 	//! Returns max number of iterations
 	/** Only valid ifregistration method is 'ITERATION_REG'.
 	**/
-	unsigned int getMaxIterationCount() const;
+	unsigned getMaxIterationCount() const;
+
+	//! Returns the approximated final overlap
+	unsigned getFinalOverlap() const;
 
 	//! Returns minimum error decrease between two consecutive iterations
 	/** Only valid ifregistration method is 'MAX_ERROR_REG'.
@@ -87,6 +90,9 @@ public:
 	/** See CCLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	**/
 	int getTransformationFilters() const;
+
+	//! Saves parameters for next call
+	void saveParameters() const;
 
 protected slots:
 	void swapModelAndData();

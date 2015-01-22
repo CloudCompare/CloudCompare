@@ -1512,7 +1512,7 @@ void MainWindow::doActionComputeOctree()
 
 	if (clouds.empty() || maxBoxSize < 0.0)
 	{
-		ccLog::Warning("[doActionComputeOctree] No elligible entities in selection!");
+		ccLog::Warning("[doActionComputeOctree] No eligible entities in selection!");
 		return;
 	}
 
@@ -1949,7 +1949,7 @@ void MainWindow::doActionApplyScale()
 
 	if (processNum == 0)
 	{
-		ccConsole::Warning("No elligible entities (point clouds or meshes) were selected!");
+		ccConsole::Warning("No eligible entities (point clouds or meshes) were selected!");
 	}
 
 	refreshAll();
@@ -3365,6 +3365,7 @@ void MainWindow::doRemoveDuplicatePoints()
 							m_ccRoot->unselectAllEntities();
 							first = false;
 						}
+						cloud->setEnabled(false);
 						m_ccRoot->selectEntity(filteredCloud,true);
 					}
 				}
@@ -3377,6 +3378,9 @@ void MainWindow::doRemoveDuplicatePoints()
 			cloud->deleteScalarField(sfIdx);
 		}
 	}
+
+	if (!first)
+		ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 
 	refreshAll();
 }
@@ -3836,7 +3840,7 @@ void MainWindow::doActionSFGaussianFilter()
 	double sigma = GetDefaultCloudKernelSize(m_selectedEntities);
 	if (sigma < 0.0)
 	{
-		ccConsole::Error("No elligible point cloud in selection!");
+		ccConsole::Error("No eligible point cloud in selection!");
 		return;
 	}
 
@@ -3934,7 +3938,7 @@ void MainWindow::doActionSFBilateralFilter()
 	double sigma = GetDefaultCloudKernelSize(m_selectedEntities);
 	if (sigma < 0.0)
 	{
-		ccConsole::Error("No elligible point cloud in selection!");
+		ccConsole::Error("No eligible point cloud in selection!");
 		return;
 	}
 
@@ -4470,7 +4474,11 @@ void MainWindow::doActionRegister()
 	bool useModelSFAsWeights									= rDlg.useModelSFAsWeights();
 	bool adjustScale											= rDlg.adjustScale();
 	int transformationFilters									= rDlg.getTransformationFilters();
+	unsigned finalOverlap										= rDlg.getFinalOverlap();
 	CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
+
+	//semi-persistent storage (for next call)
+	rDlg.saveParameters();
 
 	ccGLMatrix transMat;
 	double finalError = 0.0;
@@ -4487,6 +4495,7 @@ void MainWindow::doActionRegister()
 									removeFarthestPoints,
 									method,
 									adjustScale,
+									finalOverlap/100.0,
 									useDataSFAsWeights,
 									useModelSFAsWeights,
 									transformationFilters,
@@ -6091,7 +6100,7 @@ void MainWindow::doActionComputeCPS()
 	}
 	cmpPC->setCurrentScalarField(sfIdx);
 	cmpPC->enableScalarField();
-	cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
+	//cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeHausdorffDistance
 
 	CCLib::ReferenceCloud CPSet(srcCloud);
 	ccProgressDialog pDlg(true,this);
@@ -7552,7 +7561,7 @@ void MainWindow::activateTranslateRotateMode()
 
 	if (m_transTool->getNumberOfValidEntities() == 0)
 	{
-		ccConsole::Error("No entity elligible for manual transformation! (see console)");
+		ccConsole::Error("No entity eligible for manual transformation! (see console)");
 		return;
 	}
 	else if (rejectedEntities)
@@ -8376,7 +8385,7 @@ void MainWindow::doActionCrop()
 
 	if (candidates.empty())
 	{
-		ccConsole::Warning("[Crop] No elligible candidate found!");
+		ccConsole::Warning("[Crop] No eligible candidate found!");
 		return;
 	}
 
@@ -9619,7 +9628,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
 	for (size_t i=0; i<selNum; ++i)
 	{
-		//is the ith selected data is elligible for processing?
+		//is the ith selected data is eligible for processing?
 		ccGenericPointCloud* cloud = 0;
 		switch(algo)
 		{

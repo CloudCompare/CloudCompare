@@ -80,6 +80,7 @@ static const char COMMAND_ICP[]								= "ICP";
 static const char COMMAND_ICP_REFERENCE_IS_FIRST[]			= "REFERENCE_IS_FIRST";
 static const char COMMAND_ICP_MIN_ERROR_DIIF[]				= "MIN_ERROR_DIFF";
 static const char COMMAND_ICP_ITERATION_COUNT[]				= "ITER";
+static const char COMMAND_ICP_OVERLAP[]						= "OVERLAP";
 static const char COMMAND_ICP_ADJUST_SCALE[]				= "ADJUST_SCALE";
 static const char COMMAND_ICP_RANDOM_SAMPLING_LIMIT[]		= "RANDOM_SAMPLING_LIMIT";
 static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
@@ -2118,6 +2119,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	double minErrorDiff = 1.0e-6;
 	unsigned iterationCount = 0;
 	unsigned randomSamplingLimit = 20000;
+	unsigned  overlap = 100;
 
 	while (!arguments.empty())
 	{
@@ -2163,9 +2165,23 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT)));
 			bool ok;
-			iterationCount = arguments.takeFirst().toUInt(&ok);
+			QString arg = arguments.takeFirst();
+			iterationCount = arg.toUInt(&ok);
 			if (!ok || iterationCount == 0)
-				return Error(QString("Invalid number of iterations! (%1)").arg(COMMAND_ICP_ITERATION_COUNT));
+				return Error(QString("Invalid number of iterations! (%1)").arg(arg));
+		}
+		else if (IsCommand(argument,COMMAND_ICP_OVERLAP))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP)));
+			bool ok;
+			QString arg = arguments.takeFirst();
+			overlap = arg.toUInt(&ok);
+			if (!ok || overlap < 10 || overlap > 100)
+				return Error(QString("Invalid overlap value! (%1 --> should be between 10 and 100)").arg(arg));
 		}
 		else if (IsCommand(argument,COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
 		{
@@ -2223,6 +2239,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 									enableFarthestPointRemoval,
 									iterationCount != 0 ? CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE : CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
 									adjustScale,
+									overlap/100.0,
 									false,
 									false,
 									CCLib::ICPRegistrationTools::SKIP_NONE,

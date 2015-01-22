@@ -42,7 +42,7 @@ public:
 	DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* associatedSet, unsigned count = 0);
 
 	//**** inherited form GenericCloud ****//
-	inline virtual unsigned size() const { return static_cast<unsigned>(m_set->size()); }
+	inline virtual unsigned size() const { return m_size; }
 	virtual void forEach(genericPointAction& anAction);
 	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
 	//virtual uchar testVisibility(const CCVector3& P) const; //not supported

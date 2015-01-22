@@ -26,7 +26,7 @@ DgmOctreeReferenceCloud::DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* assoc
 	: m_globalIterator(0)
 	, m_validBB(false)
 	, m_set(associatedSet)
-	, m_size(size == 0 && associatedSet ? (unsigned)m_set->size() : size)
+	, m_size(size == 0 && associatedSet ? static_cast<unsigned>(m_set->size()) : size)
 {
 	assert(associatedSet);
 }

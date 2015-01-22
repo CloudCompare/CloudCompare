@@ -237,7 +237,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	double error = 0.0;
 
 	//we compute the initial distance between the two clouds (and the CPSet by the way)
-	dataCloud->forEach(ScalarFieldTools::SetScalarValueToNaN);
+	//dataCloud->forEach(ScalarFieldTools::SetScalarValueToNaN); //DGM: done automatically in computeHausdorffDistance now
 	DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 	params.CPSet = CPSet;
 	if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params,progressCb) >= 0)
@@ -268,7 +268,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			++iteration;
 
 			//regarding the progress bar
-			if (progressCb && iteration>1) //on the first iteration, we do... nothing
+			if (progressCb && iteration > 1) //on the first iteration, we do... nothing
 			{
 				char buffer[256];
 				//then on the second iteration, we init/show it
@@ -286,7 +286,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				{
 					sprintf(buffer,"Mean square error = %f [%f]\n",error,-errorDelta);
 					progressCb->setInfo(buffer);
-					progressCb->update((float)((initialErrorDelta-errorDelta)/(initialErrorDelta-minErrorDecrease)*100.0));
+					progressCb->update(static_cast<float>((initialErrorDelta-errorDelta)/(initialErrorDelta-minErrorDecrease)*100.0));
 				}
 
 				if (progressCb->isCancelRequested())
@@ -294,6 +294,9 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			}
 
 			//shall we remove points with distance above a given threshold?
+			ReferenceCloud* trueDataCloud = 0;
+			ReferenceCloud* trueCPSet = 0;
+			ScalarField* truedataWeights = 0;
 			if (filterOutFarthestPoints)
 			{
 				NormalDistribution N;
@@ -303,7 +306,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 					ScalarType mu,sigma2;
 					N.getParameters(mu,sigma2);
 
-					ReferenceCloud* c = new ReferenceCloud(dataCloud->getAssociatedCloud());
+					ReferenceCloud* newDataCloud = new ReferenceCloud(dataCloud->getAssociatedCloud());
 					ReferenceCloud* newCPSet = new ReferenceCloud(CPSet->getAssociatedCloud()); //we must also update the CPSet!
 					ScalarField* newdataWeights = (_dataWeights ? new ScalarField("ResampledDataWeights") : 0);
 					//unsigned realCount = dataCloud->size();
@@ -321,10 +324,12 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 					//}
 
 					unsigned n = dataCloud->size();
-					if (!c->reserve(n) || !newCPSet->reserve(n) || (newdataWeights && !newdataWeights->reserve(n)))
+					if (	!newDataCloud->reserve(n)
+						||	!newCPSet->reserve(n)
+						||	(newdataWeights && !newdataWeights->reserve(n)))
 					{
 						//not enough memory
-						delete c;
+						delete newDataCloud;
 						delete newCPSet;
 						if (newdataWeights)
 							newdataWeights->release();
@@ -333,14 +338,14 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 					}
 
 					//we keep only the points with "not too high" distances
-					ScalarType maxDist = mu+3.0f*sqrt(sigma2);
+					ScalarType maxDist = mu/*+ 3*sqrt(sigma2)*/;
 					unsigned realSize = 0;
 					for (unsigned i=0; i<n; ++i)
 					{
 						unsigned index = dataCloud->getPointGlobalIndex(i);
-						if (dataCloud->getAssociatedCloud()->getPointScalarValue(index)<maxDist)
+						if (dataCloud->getAssociatedCloud()->getPointScalarValue(index) < maxDist)
 						{
-							c->addPointIndex(index); //can't fail, see above
+							newDataCloud->addPointIndex(index); //can't fail, see above
 							newCPSet->addPointIndex(CPSet->getPointGlobalIndex(i)); //can't fail, see above
 							if (newdataWeights)
 								newdataWeights->addElement(_dataWeights->getValue(index));
@@ -349,19 +354,22 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 					}
 
 					//resize should be ok as we have called reserve first
-					c->resize(realSize); //should always be ok as counter<n
+					newDataCloud->resize(realSize); //should always be ok as realSize<n
 					newCPSet->resize(realSize); //idem
 					if (newdataWeights)
 						newdataWeights->resize(realSize); //idem
 
 					//replace old structures by new ones
-					delete CPSet;
+					//delete CPSet;
+					trueCPSet = CPSet;
 					CPSet = newCPSet;
-					delete dataCloud;
-					dataCloud = c;
+					//delete dataCloud;
+					trueDataCloud = dataCloud;
+					dataCloud = newDataCloud;
 					if (_dataWeights)
 					{
-						_dataWeights->release();
+						//_dataWeights->release();
+						truedataWeights = _dataWeights;
 						_dataWeights = newdataWeights;
 					}
 				}
@@ -387,7 +395,25 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 			//single iteration of the registration procedure
 			ScaledTransformation currentTrans;
-			if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, adjustScale, _dataWeights, _modelWeights))
+			bool success = RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, adjustScale, _dataWeights, _modelWeights);
+			if (trueDataCloud)
+			{
+				//restore original data cloud!
+				delete dataCloud;
+				dataCloud = trueDataCloud;
+			}
+			if (trueCPSet)
+			{
+				delete CPSet;
+				CPSet = trueCPSet;
+			}
+			if (truedataWeights)
+			{
+				_dataWeights->release();
+				_dataWeights = truedataWeights;
+			}
+
+			if (!success)
 			{
 				result = ICP_ERROR_REGISTRATION_STEP;
 				break;

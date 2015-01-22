@@ -1363,7 +1363,7 @@ static ccPolyline::ContourType s_extractSectionsType = ccPolyline::LOWER;
 
 void ccSectionExtractionTool::extractPoints()
 {
-	//number of elligible sections
+	//number of eligible sections
 	unsigned sectionCount = 0;
 	{
 		for (int s=0; s<m_sections.size(); ++s)

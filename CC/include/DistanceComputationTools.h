@@ -58,7 +58,7 @@ public:
 
 		//! Maximum search distance (true distance won't be computed if greater)
 		/** Set to -1 to deactivate (default).
-			Not compatible with closest point set determination (see CPSet).
+			\warning Not compatible with closest point set determination (see CPSet)
 		**/
 		ScalarType maxSearchDist;
 
@@ -97,8 +97,15 @@ public:
 
 		//! Container of (references to) points to store the "Closest Point Set"
 		/** The Closest Point Set corresponds to (the reference to) each compared point's closest neighbour.
+			\warning Not compatible with max search distance (see maxSearchDist)
 		**/
 		ReferenceCloud* CPSet;
+
+		//! Whether to keep the existing distances as is (if any) or not
+		/** By default, any previous distances/scalar values stored in the 'enabled' scalar field will be
+			reset before computing them again.
+		**/
+		bool resetFormerDistances;
 
 		//! Default constructor/initialization
 		Cloud2CloudDistanceComputationParams()
@@ -111,6 +118,7 @@ public:
 			, radiusForLocalModel(0)
 			, reuseExistingLocalModels(false)
 			, CPSet(0)
+			, resetFormerDistances(true)
 		{}
 	};
 
@@ -118,8 +126,12 @@ public:
 	/** The main algorithm and its different versions (with or without local modeling) are described in
 		Daniel Girardeau-Montaut's PhD manuscript (Chapter 2, section 2.3). It is the standard way to compare
 		directly two dense (and globally close) point clouds.
-		Warning: the current scalar field  of the compared cloud should be enabled and initialized either to
-		HIDDEN_VALUE or to an approximated distance (strictly bigger than the actual distance!).
+		\warning The current scalar field of the compared cloud should be enabled. By default it will be reset to
+		NAN_VALUE but one can avoid this by definining the Cloud2CloudDistanceComputationParams::resetFormerDistances
+		parameters to false. But even in this case, only values above Cloud2CloudDistanceComputationParams::maxSearchDist
+		will remain untouched.
+		\warning Max search distance (Cloud2CloudDistanceComputationParams::maxSearchDist) is not compatible with the
+		determination the closest point set (Cloud2CloudDistanceComputationParams::CPSet)
 		\param comparedCloud the compared cloud (the distances will be computed on these points)
 		\param referenceCloud the reference cloud (the distances will be computed relatively to these points)
 		\param params distance computation parameters
@@ -200,12 +212,12 @@ public:
 											GenericProgressCallback* progressCb = 0);
 
 	//! Computes the differences between two scalar fields associated to equivalent point clouds
-	/** The compared cloud should be smaller or equal to the reference cloud. Its points should be at the same
-		position in place as their equivalents in the other cloud. The algorithm perform a simple difference
-		between the scalar values associated to each couple of equivalent points. The result is stored in a
-		the active scalar field (input) of the comparedCloud. Moreover, the output scalar field should
-		be different from the input scalar field !
-		Warning: be sure to activate an OUTPUT scalar field on both input clouds
+	/** The compared cloud should be smaller or equal to the reference cloud. Its points should be
+		at the same position in space as points in the other cloud. The algorithm simply computes
+		the difference between the scalar values associated to each couple of equivalent points.
+		\warning The result is stored in the active scalar field (input) of the comparedCloud.
+		\warning Moreover, the output scalar field should be different than the input scalar field!
+		\warning Be sure to activate an OUTPUT scalar field on both clouds
 		\param comparedCloud the compared cloud
 		\param referenceCloud the reference cloud
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
@@ -271,6 +283,7 @@ public:
 		\param comparedCloud the compared cloud
 		\param referenceCloud the reference cloud
 		\param octreeLevel the octree level at which to perform the Chamfer Distance propagation
+		\param maxSearchDist max search distance (or any negative value if no max distance is defined)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param compOctree the pre-computed octree of the compared cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
 		\param refOctree the pre-computed octree of the reference cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
@@ -279,9 +292,13 @@ public:
 														GenericIndexedCloudPersist* comparedCloud,
 														GenericIndexedCloudPersist* referenceCloud,
 														uchar octreeLevel,
+														PointCoordinateType maxSearchDist = -PC_ONE,
 														GenericProgressCallback* progressCb = 0,
 														DgmOctree* compOctree = 0,
 														DgmOctree* refOctree = 0);
+
+	//! Return codes for DistanceComputationTools::synchronizeOctrees
+	enum SOReturnCode { EMPTY_CLOUD, SYNCHRONIZED, DISJOINT, OUT_OF_MEMORY };
 
 	//! Synchronizes (and re-build if necessary) two octrees
 	/** Initializes the octrees before computing the distance between two clouds.
@@ -291,14 +308,16 @@ public:
 		\param referenceCloud the cloud corresponding to the second octree
 		\param comparedOctree the first octree
 		\param referenceOctree the second octree
+		\param maxSearchDist max search distance (or any negative value if no max distance is defined)
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\return false if a problem has occurred during the process
+		\return return code
 	**/
-	static bool synchronizeOctrees(	GenericIndexedCloudPersist* comparedCloud,
-									GenericIndexedCloudPersist* referenceCloud,
-									DgmOctree* &comparedOctree,
-									DgmOctree* &referenceOctree,
-									GenericProgressCallback* progressCb = 0);
+	static SOReturnCode synchronizeOctrees(	GenericIndexedCloudPersist* comparedCloud,
+											GenericIndexedCloudPersist* referenceCloud,
+											DgmOctree* &comparedOctree,
+											DgmOctree* &referenceOctree,
+											PointCoordinateType maxSearchDist = -PC_ONE,
+											GenericProgressCallback* progressCb = 0);
 
 protected:
 

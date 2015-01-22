@@ -2449,6 +2449,7 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
 		return false;
 	}
 
+	bool hadColors = hasColors();
 	if (!resizeTheRGBTable(false))
 	{
 		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
@@ -2464,7 +2465,30 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
 		params.CPSet = &CPSet;
 		params.octreeLevel = octreeLevel; //TODO: find a better way to set the right octree level!
 
+		//create temporary SF for the nearest neighors determination (computeHausdorffDistance)
+		//so that we can properly remove it afterwards!
+		static const char s_defaultTempSFName[] = "InterpolateColorsFromTempSF";
+		int sfIdx = getScalarFieldIndexByName(s_defaultTempSFName);
+		if (sfIdx < 0)
+			sfIdx = addScalarField(s_defaultTempSFName);
+		if (sfIdx < 0)
+		{
+			ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
+			if (!hadColors)
+				unallocateColors();
+			return false;
+		}
+
+		int currentInSFIndex = m_currentInScalarFieldIndex;
+		int currentOutSFIndex = m_currentOutScalarFieldIndex;
+		setCurrentScalarField(sfIdx);
+
 		result = CCLib::DistanceComputationTools::computeHausdorffDistance(this, cloud, params, progressCb);
+
+		//restore previous parameters
+		setCurrentInScalarField(m_currentInScalarFieldIndex);
+		setCurrentOutScalarField(m_currentOutScalarFieldIndex);
+		deleteScalarField(sfIdx);
 	}
 
 	if (result < 0)

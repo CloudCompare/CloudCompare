@@ -48,6 +48,7 @@ public:
 					bool removeFarthestPoints,
 					CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method,
 					bool adjustScale,
+					double finalOverlapRatio = 1.0,
 					bool useDataSFAsWeights = false,
 					bool useModelSFAsWeights = false,
 					int transformationFilters = CCLib::ICPRegistrationTools::SKIP_NONE,

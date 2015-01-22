@@ -1460,13 +1460,14 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 	//minimum (a priori) relative distance to get eligible points (see 'eligibleDist' below)
 	int eligibleCellDistance = visitedCellDistance;
 
-	//if we have not already looked for the first cell (the one including the query point)?
+	//if we have not already looked for the first cell (the one including the query point)
 	if (visitedCellDistance == 0)
 	{
-		//visitedCellDistance == 0 means that no cell has ever been processed! No cell should be inside 'minimalCellsSetToVisit'
+		//'visitedCellDistance == 0' means that no cell has ever been processed!
+		//No cell should be inside 'minimalCellsSetToVisit'
 		assert(nNSS.minimalCellsSetToVisit.empty());
 
-		//check for existence of 'including' cell
+		//check for existence of an 'including' cell
 		OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(nNSS.cellPos,nNSS.level);
 		unsigned index = (truncatedCellCode == INVALID_CELL_CODE ? m_numberOfProjectedPoints : getCellIndex(truncatedCellCode,bitDec));
 
@@ -1519,7 +1520,6 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 				if (minDist*minDist > nNSS.maxSearchSquareDistd)
 				{
 					return -1.0;
-					//return nNSS.maxSearchSquareDistd;
 				}
 			}
 		}
@@ -1566,7 +1566,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 			//we scan the whole cell to see if it contains a closer point
 			cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+m;
 			OctreeCellCodeType code = (p->theCode >> bitDec);
-			while (m<m_numberOfProjectedPoints && (p->theCode >> bitDec) == code)
+			while (m < m_numberOfProjectedPoints && (p->theCode >> bitDec) == code)
 			{
 				//square distance to query point
 				double dist2 = (*m_theAssociatedCloud->getPointPersistentPtr(p->theIndex) - nNSS.queryPoint).norm2d();
@@ -1575,6 +1575,8 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 				{
 					nNSS.theNearestPointIndex = p->theIndex;
 					minSquareDist = dist2;
+					if (dist2 == 0) //no need to process any further
+						break;
 				}
 				++m;
 				++p;
@@ -1599,7 +1601,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 		else
 		{
 			//no eligible point? Maybe we are already too far?
-			if (nNSS.maxSearchSquareDistd >= 0 && squareEligibleDist > nNSS.maxSearchSquareDistd)
+			if (nNSS.maxSearchSquareDistd >= 0 && squareEligibleDist >= nNSS.maxSearchSquareDistd)
 				return -1.0;
 		}
 
@@ -2844,70 +2846,88 @@ uchar DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumb
 
 uchar DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
 {
-    //we look for the level giviing the number of points per cell as close to the query
-    uchar bestLevel=1;
-    //number of cells for this level
-    int n = getCellNumber(bestLevel);
-    //error relatively to the query
-    int oldd = abs(n-static_cast<int>(indicativeNumberOfCells));
+	//we look for the level giviing the number of points per cell as close to the query
+	uchar bestLevel=1;
+	//number of cells for this level
+	int n = getCellNumber(bestLevel);
+	//error relatively to the query
+	int oldd = abs(n-static_cast<int>(indicativeNumberOfCells));
 
-    n = getCellNumber(bestLevel+1);
-    int d = abs(n-static_cast<int>(indicativeNumberOfCells));
+	n = getCellNumber(bestLevel+1);
+	int d = abs(n-static_cast<int>(indicativeNumberOfCells));
 
-    while (d < oldd && bestLevel < MAX_OCTREE_LEVEL)
-    {
-        ++bestLevel;
-        oldd = d;
-        n = getCellNumber(bestLevel+1);
-        d = abs(n-static_cast<int>(indicativeNumberOfCells));
-    }
+	while (d < oldd && bestLevel < MAX_OCTREE_LEVEL)
+	{
+		++bestLevel;
+		oldd = d;
+		n = getCellNumber(bestLevel+1);
+		d = abs(n-static_cast<int>(indicativeNumberOfCells));
+	}
 
-    return bestLevel;
+	return bestLevel;
 }
 
 double DgmOctree::computeMeanOctreeDensity(uchar level) const
 {
-    return static_cast<double>(m_numberOfProjectedPoints)/static_cast<double>(getCellNumber(level));
+	return static_cast<double>(m_numberOfProjectedPoints)/static_cast<double>(getCellNumber(level));
 }
 
-void DgmOctree::getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes/*=false*/) const
+bool DgmOctree::getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes/*=false*/) const
 {
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(level);
+	try
+	{
+		//binary shift for cell code truncation
+		uchar bitDec = GET_BIT_SHIFT(level);
 
-    cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
+		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 
-    OctreeCellCodeType predCode = (p->theCode >> bitDec)+1; //pred value must be different than the first element's
+		OctreeCellCodeType predCode = (p->theCode >> bitDec)+1; //pred value must be different than the first element's
 
-    for (unsigned i=0; i<m_numberOfProjectedPoints; ++i,++p)
-    {
-        OctreeCellCodeType currentCode = (p->theCode >> bitDec);
+		for (unsigned i=0; i<m_numberOfProjectedPoints; ++i,++p)
+		{
+			OctreeCellCodeType currentCode = (p->theCode >> bitDec);
 
-        if (predCode != currentCode)
-            vec.push_back(IndexAndCode(i,truncatedCodes ? currentCode : p->theCode));
+			if (predCode != currentCode)
+				vec.push_back(IndexAndCode(i,truncatedCodes ? currentCode : p->theCode));
 
-        predCode = currentCode;
-    }
+			predCode = currentCode;
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
+	return true;
 }
 
-void DgmOctree::getCellCodes(uchar level,cellCodesContainer& vec, bool truncatedCodes/*=false*/) const
+bool DgmOctree::getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes/*=false*/) const
 {
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(level);
+	try
+	{
+		//binary shift for cell code truncation
+		uchar bitDec = GET_BIT_SHIFT(level);
 
-    cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
+		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 
-    OctreeCellCodeType predCode = (p->theCode >> bitDec)+1; //pred value must be different than the first element's
+		OctreeCellCodeType predCode = (p->theCode >> bitDec)+1; //pred value must be different than the first element's
 
-    for (unsigned i=0; i<m_numberOfProjectedPoints; ++i,++p)
-    {
-        OctreeCellCodeType currentCode = (p->theCode >> bitDec);
+		for (unsigned i=0; i<m_numberOfProjectedPoints; ++i,++p)
+		{
+			OctreeCellCodeType currentCode = (p->theCode >> bitDec);
 
-        if (predCode != currentCode)
-            vec.push_back(truncatedCodes ? currentCode : p->theCode);
+			if (predCode != currentCode)
+				vec.push_back(truncatedCodes ? currentCode : p->theCode);
 
-        predCode = currentCode;
-    }
+			predCode = currentCode;
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
+	return true;
 }
 
 bool DgmOctree::getCellIndexes(uchar level, cellIndexesContainer& vec) const
@@ -2918,25 +2938,26 @@ bool DgmOctree::getCellIndexes(uchar level, cellIndexesContainer& vec) const
 	}
 	catch(std::bad_alloc)
 	{
+		//not enough memory
 		return false;
 	}
 
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(level);
+	//binary shift for cell code truncation
+	uchar bitDec = GET_BIT_SHIFT(level);
 
-    cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
+	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 
-    OctreeCellCodeType predCode = (p->theCode >> bitDec)+1; //pred value must be different than the first element's
+	OctreeCellCodeType predCode = (p->theCode >> bitDec)+1; //pred value must be different than the first element's
 
-    for (unsigned i=0,j=0; i<m_numberOfProjectedPoints; ++i,++p)
-    {
-        OctreeCellCodeType currentCode = (p->theCode >> bitDec);
+	for (unsigned i=0,j=0; i<m_numberOfProjectedPoints; ++i,++p)
+	{
+		OctreeCellCodeType currentCode = (p->theCode >> bitDec);
 
-        if (predCode != currentCode)
-            vec[j++] = i;
+		if (predCode != currentCode)
+			vec[j++] = i;
 
-        predCode = currentCode;
-    }
+		predCode = currentCode;
+	}
 
 	return true;
 }
@@ -2946,25 +2967,25 @@ bool DgmOctree::getPointsInCellByCellIndex(	ReferenceCloud* cloud,
 											uchar level,
 											bool clearOutputCloud/*=true*/) const
 {
-    assert(cloud && cloud->getAssociatedCloud() == m_theAssociatedCloud);
+	assert(cloud && cloud->getAssociatedCloud() == m_theAssociatedCloud);
 
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(level);
+	//binary shift for cell code truncation
+	uchar bitDec = GET_BIT_SHIFT(level);
 
-    //we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
-    cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
-    OctreeCellCodeType searchCode = (p->theCode >> bitDec);
+	//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
+	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
+	OctreeCellCodeType searchCode = (p->theCode >> bitDec);
 
 	if (clearOutputCloud)
 		cloud->clear(false);
 
-    //while the (partial) cell code matches this cell
-    while ((p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode))
-    {
-        if (!cloud->addPointIndex(p->theIndex))
+	//while the (partial) cell code matches this cell
+	while ((p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode))
+	{
+		if (!cloud->addPointIndex(p->theIndex))
 			return false;
-        ++p;
-    }
+		++p;
+	}
 
 	return true;
 }

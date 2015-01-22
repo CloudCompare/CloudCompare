@@ -60,6 +60,11 @@ v2.6.1.beta 11/??/2014
 			graphic cards (Intel chipsets, etc.)
 
 - Enhancements:
+	* Fine registration tool (ICP)
+		- new option 'Final overlap' to specify the theoretical (final) overlap of the clouds to register
+		- this allows to register clouds with a quite small overlap (down to 10%)
+	* C2C distances computation
+		- computing distances with a 'max distance' boundary is now much more efficient
 	* 2D labels:
 		- brand new look for labels (values are displayed in a more compact and tabulated way)
 		- new displayed information (dXY, dXZ and dYZ for 2-points labels, edges length for 3-points labels, etc.)
@@ -122,6 +127,9 @@ v2.6.1.beta 11/??/2014
 	- when the order of entites was changed in the DB tree, the display was not updated right away
 	- the actual transformation applied to entities at the end of the 'Interactive Transformation Tool' could be slightly
 		shifted in some cases
+	- Regarding the local modeling option '2D1/2 triangulation' of the C2C distances computation:
+		* it was much slower than it should (potentially much more points were triangulated than necessary)
+		* it could crash if many duplicate points were present in the reference cloud
 
 v2.6.0 10/24/2014
 - New methods:

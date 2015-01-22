@@ -75,10 +75,11 @@ protected:
 	int computeApproxResults();
 	int determineBestOctreeLevel(double);
 	void updateDisplay(bool showSF, bool hideRef);
-	void clean();
+	void releaseOctrees();
 
 	ccHObject *m_compEnt,*m_refEnt;
 	CCLib::DgmOctree *m_compOctree,*m_refOctree;
+	bool m_compOctreeIsPartial,m_refOctreeIsPartial;
 	ccPointCloud* m_compCloud;
 	ccGenericPointCloud* m_refCloud;
 	ccGenericMesh* m_refMesh;

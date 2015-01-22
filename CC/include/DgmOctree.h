@@ -592,7 +592,7 @@ public:
 	/** This version is optimized for a unique nearest-neighbour search.
 		See DgmOctree::NearestNeighboursSearchStruct for more details.
 		\param nNSS NN search parameters
-		\return the square distance between the query point and its nearest neighbour (or -1 if none was found)
+		\return the square distance between the query point and its nearest neighbour (or -1 if none was found - i.e. maxSearchDist was reached)
 	**/
 	double findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS) const;
 
@@ -881,8 +881,9 @@ public:
 		\param level the level of subdivision
 		\param vec the list of codes
 		\param truncatedCodes indicates if the resulting codes should be truncated or not
+		\return false if an error occurred (e.g. not enough memory)
 	**/
-	void getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes = false) const;
+	bool getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes = false) const;
 
 	//! Returns the list of indexes corresponding to the octree cells for a given level of subdivision
 	/** Only the non empty cells are represented in the octree structure.
@@ -901,8 +902,9 @@ public:
 		\param level the level of subdivision
 		\param vec the list of codes & indexes
 		\param truncatedCodes indicates if the resulting codes should be truncated or not
+		\return false if an error occurred (e.g. not enough memory)
 	**/
-	void getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes = false) const;
+	bool getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes = false) const;
 
 
 	//! Returns the cells that differ between two octrees (for a same implicit level of subdivision)

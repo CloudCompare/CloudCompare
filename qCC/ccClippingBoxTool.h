@@ -53,7 +53,7 @@ public:
 	const ccClipBox* box() const { return m_clipBox; }
 
 	//! Sets the 'clipped' entity
-	/** \return success, if the entitiy is elligible for clipping
+	/** \return success, if the entitiy is eligible for clipping
 	**/
 	bool setAssociatedEntity(ccHObject* anObject);
 

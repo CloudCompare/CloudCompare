@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>463</height>
+    <height>491</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -213,7 +213,46 @@
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>1e-6</string>
+              <string>1.0e-6</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Final overlap</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="overlapSpinBox">
+             <property name="toolTip">
+              <string>Rough estimation of the final overlap of the two clouds (the smaller, the finer the initial registration should be!)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="suffix">
+              <string>%</string>
+             </property>
+             <property name="minimum">
+              <number>10</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="singleStep">
+              <number>10</number>
+             </property>
+             <property name="value">
+              <number>100</number>
              </property>
             </widget>
            </item>
@@ -254,6 +293,9 @@
             <widget class="QSpinBox" name="randomSamplingLimitSpinBox">
              <property name="toolTip">
               <string>Above this limit, clouds are randomly resampled at each iteration</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
              <property name="maximum">
               <number>1000000000</number>
@@ -424,7 +466,7 @@
             <string>Chose this option to remove points that are likely to disturb the registration during the computation.</string>
            </property>
            <property name="text">
-            <string>Enable farthest points removal.</string>
+            <string>Enable farthest points removal</string>
            </property>
           </widget>
          </item>

@@ -61,6 +61,8 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	, m_compOctree(0)
 	, m_refOctree(0)
 	, m_compCloud(0)
+	, m_compOctreeIsPartial(false)
+	, m_refOctreeIsPartial(false)
 	, m_refCloud(0)
 	, m_refMesh(0)
 	, m_compType(cpType)
@@ -88,6 +90,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	connect(histoButton,			SIGNAL(clicked()),					this,	SLOT(showHisto()));
 	connect(localModelComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(locaModelChanged(int)));
 	connect(octreeLevelCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(octreeLevelCheckBoxToggled(bool)));
+	connect(maxDistCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(maxDistUpdated()));
 	connect(maxSearchDistSpinBox,	SIGNAL(editingFinished()),			this,	SLOT(maxDistUpdated()));
 	connect(split3DCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(split3DCheckboxToggled(bool)));
 
@@ -124,7 +127,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 
 ccComparisonDlg::~ccComparisonDlg()
 {
-	clean();
+	releaseOctrees();
 }
 
 bool ccComparisonDlg::prepareEntitiesForComparison()
@@ -157,14 +160,16 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	m_compOctree = static_cast<CCLib::DgmOctree*>(m_compCloud->getOctree());
 	if (!m_compOctree)
 		m_compOctree = new CCLib::DgmOctree(m_compCloud);
+	m_compOctreeIsPartial = false;
+
 	//backup currently displayed SF (on compared cloud)
 	int oldSfIdx = m_compCloud->getCurrentDisplayedScalarFieldIndex();
 	if (oldSfIdx >= 0)
 		m_oldSfName = QString(m_compCloud->getScalarFieldName(oldSfIdx));
 
 	//reference entity
-	if ((m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_TYPES::MESH))
-		|| (m_compType == CLOUDCLOUD_DIST && !m_refEnt->isA(CC_TYPES::POINT_CLOUD)))
+	if (	(m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_TYPES::MESH))
+		||	(m_compType == CLOUDCLOUD_DIST && !m_refEnt->isA(CC_TYPES::POINT_CLOUD)) )
 	{
 		ccLog::Error("Dialog initialization error! (bad entity type)");
 		return false;
@@ -185,6 +190,7 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 		if (!m_refOctree)
 			m_refOctree = new CCLib::DgmOctree(m_refCloud);
 	}
+	m_refOctreeIsPartial = false;
 
 	return true;
 }
@@ -204,6 +210,7 @@ void ccComparisonDlg::maxDistUpdated()
 {
 	//force best octree level computation
 	m_needToRecomputeBestLevel = true;
+	computeApproxResults();
 
 	//change the focus to another entity!
 	computeButton->setFocus();
@@ -213,12 +220,12 @@ void ccComparisonDlg::maxDistUpdated()
 
 void ccComparisonDlg::updateOctreeLevel()
 {
+	if (!m_needToRecomputeBestLevel)
+		return;
+
 	//we only compute best octree level if "auto" mode is on or the user has set the level to "0"
 	if (!octreeLevelSpinBox->isEnabled() || octreeLevelSpinBox->value() == 0)
 	{
-		if (!m_needToRecomputeBestLevel)
-			return;
-
 		double maxDistance = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
 		
 		int guessedBestOctreeLevel = determineBestOctreeLevel(static_cast<ScalarType>(maxDistance));
@@ -233,7 +240,7 @@ void ccComparisonDlg::updateOctreeLevel()
 			octreeLevelSpinBox->setEnabled(true);
 		}
 
-		m_needToRecomputeBestLevel = true;
+		m_needToRecomputeBestLevel = false;
 	}
 }
 
@@ -261,13 +268,14 @@ void ccComparisonDlg::locaModelChanged(int index)
 	}
 }
 
-void ccComparisonDlg::clean()
+void ccComparisonDlg::releaseOctrees()
 {
 	if (m_compOctree && m_compCloud)
 	{
 		if (m_compCloud->getOctree() != m_compOctree)
 			delete m_compOctree;
 		m_compOctree = 0;
+		m_compOctreeIsPartial = false;
 	}
 
 	if (m_refOctree && m_refCloud)
@@ -275,6 +283,7 @@ void ccComparisonDlg::clean()
 		if (m_refCloud->getOctree() != m_refOctree)
 			delete m_refOctree;
 		m_refOctree = 0;
+		m_refOctreeIsPartial = false;
 	}
 }
 
@@ -303,7 +312,10 @@ void ccComparisonDlg::updateDisplay(bool showSF, bool showRef)
 
 bool ccComparisonDlg::isValid()
 {
-	if (!m_compCloud || !m_compOctree || (!m_refMesh && !m_refCloud) || (!m_refMesh && !m_refOctree))
+	if (	!m_compCloud
+		||	!m_compOctree
+		||	(!m_refMesh && !m_refCloud)
+		||	(!m_refMesh && !m_refOctree))
 	{
 		ccLog::Error("Dialog initialization error! (void entity)");
 		return false;
@@ -343,7 +355,11 @@ int ccComparisonDlg::computeApproxResults()
 	switch(m_compType)
 	{
 	case CLOUDCLOUD_DIST: //hausdroff
-		approxResult = CCLib::DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CHAMFER_345,m_compCloud,m_refCloud,DEFAULT_OCTREE_LEVEL,&progressDlg,m_compOctree,m_refOctree);
+		{
+			//Approximate distance can (and must) now take max search distance into account!
+			PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+			approxResult = CCLib::DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CHAMFER_345,m_compCloud,m_refCloud,DEFAULT_OCTREE_LEVEL,maxDistance,&progressDlg,m_compOctree,m_refOctree);
+		}
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh
 		approxResult = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
@@ -358,14 +374,14 @@ int ccComparisonDlg::computeApproxResults()
 	//if the approximate distances comptation failed...
 	if (approxResult < 0)
 	{
-		ccLog::Warning("Approx. results computation failed (error code %i)",approxResult);
+		ccLog::Warning("[computeApproxResults] Computation failed (error code %i)",approxResult);
 		m_compCloud->deleteScalarField(sfIdx);
 		sfIdx = -1;
 		m_currentSFIsDistance = false;
 	}
 	else
 	{
-		ccLog::Print("[ComputeApproxDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
+		ccLog::Print("[computeApproxResults] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
 		//display approx. dist. statistics
 		ScalarType mean,variance;
@@ -431,7 +447,7 @@ int ccComparisonDlg::computeApproxResults()
 
 	if (guessedBestOctreeLevel < 0)
 	{
-		ccLog::Warning("Can't evaluate best computation level! Try to set it manually ...");
+		ccLog::Warning("[computeApproxResults] Can't evaluate best computation level! Try to set it manually ...");
 		octreeLevelCheckBox->setCheckState(Qt::Checked);
 		octreeLevelSpinBox->setEnabled(true);
 		guessedBestOctreeLevel = static_cast<int>(DEFAULT_OCTREE_LEVEL);
@@ -516,6 +532,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		unsigned numberOfPointsInCell = 0;
 		unsigned index = 0;
 		double cellDist = -1;
+		//unsigned skippedCells = 0;
 
 		//we compute a 'correction factor' that converts an approximate distance into an
 		//approximate size of the neighborhood (in terms of cells)
@@ -581,6 +598,10 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 							timings[level] += neighbourSize3 + 0.1 * numberOfPointsInCell * sqrt(lastSliceCellNumber) * refListDensity;
 						}
 					}
+					//else
+					//{
+					//	++skippedCells;
+					//}
 				}
 
 				numberOfPointsInCell = 0;
@@ -604,7 +625,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		//}
 
 		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
-
+		//timings[level] += (static_cast<qreal>(skippedCells)/1000)*skippedCells; //empirical correction for skipped cells (not taken into account while they actually require some processing time!)
 		if (timings[level] < timings[theBestOctreeLevel])
 			theBestOctreeLevel = level;
 
@@ -635,7 +656,10 @@ bool ccComparisonDlg::compute()
 	//does the cloud has already a temporary scalar field that we can use?
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx < 0)
+	{
+		//or maybe a real one?
 		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
+	}
 	if (sfIdx >= 0)
 	{
 		CCLib::ScalarField* sf = m_compCloud->getScalarField(sfIdx);
@@ -645,6 +669,7 @@ bool ccComparisonDlg::compute()
 	}
 	else
 	{
+		assert(!m_currentSFIsDistance);
 		//we need to create a new scalar field
 		sfIdx = m_compCloud->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 		if (sfIdx < 0)
@@ -742,7 +767,7 @@ bool ccComparisonDlg::compute()
 		//restore UI items
 		okButton->setEnabled(true);
 
-		m_sfName = QString();
+		m_sfName.clear();
 		switch(m_compType)
 		{
 		case CLOUDCLOUD_DIST: //hausdorff
@@ -833,6 +858,7 @@ bool ccComparisonDlg::compute()
 		m_compCloud->deleteScalarField(sfIdx);
 		m_compCloud->showSF(false);
 		sfIdx = -1;
+		m_currentSFIsDistance = false;
 	}
 
 	updateDisplay(sfIdx >= 0, false);
@@ -918,7 +944,7 @@ void ccComparisonDlg::applyAndExit()
 
 	updateDisplay(true, m_refVisibility);
 
-	clean();
+	releaseOctrees();
 
 	accept();
 }
@@ -958,7 +984,7 @@ void ccComparisonDlg::cancelAndExit()
 
 	updateDisplay(m_compSFVisibility, m_refVisibility);
 
-	clean();
+	releaseOctrees();
 
 	reject();
 }

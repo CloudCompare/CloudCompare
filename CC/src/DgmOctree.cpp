@@ -3599,7 +3599,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	uchar level,
 	++p;
 
 	//number of cells for this level
-	unsigned cellCount=getCellNumber(level);
+	unsigned cellCount = getCellNumber(level);
 
 	//progress bar
 	NormalizedProgress* nprogress = 0;
@@ -3638,7 +3638,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	uchar level,
 				break;
 
 			//and we start a new cell
-			cell.index+=cell.points->size();
+			cell.index += cell.points->size();
 			cell.points->clear(false);
 			cell.truncatedCode = nextCode;
 

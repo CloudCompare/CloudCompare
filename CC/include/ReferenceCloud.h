@@ -152,6 +152,9 @@ public:
 		- no verification for duplicates!
 	**/
 	bool add(const ReferenceCloud& cloud);
+	
+	//! Invalidates the bounding-box
+	inline void invalidateBoundingBox() { m_validBB = false; }
 
 protected:
 

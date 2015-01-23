@@ -208,7 +208,7 @@ int DistanceComputationTools::computeHausdorffDistance(	GenericIndexedCloudPersi
 		}
 	}
 
-	//by default we reste any former value stored in the 'enabled' scalar field
+	//by default we reset any former value stored in the 'enabled' scalar field
 	const ScalarType resetValue = maxSearchSquareDistd < 0 ? NAN_VALUE : params.maxSearchDist;
 	if (params.resetFormerDistances)
 	{

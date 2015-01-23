@@ -48,17 +48,17 @@ public:
 	ConvergenceMethod getConvergenceMethod() const;
 
 	//! Returns max number of iterations
-	/** Only valid ifregistration method is 'ITERATION_REG'.
+	/** Only valid if registration method is 'ITERATION_REG'.
 	**/
 	unsigned getMaxIterationCount() const;
 
 	//! Returns the approximated final overlap
 	unsigned getFinalOverlap() const;
 
-	//! Returns minimum error decrease between two consecutive iterations
-	/** Only valid ifregistration method is 'MAX_ERROR_REG'.
+	//! Returns minimum RMS decrease between two consecutive iterations
+	/** Only valid if registration method is 'MAX_ERROR_REG'.
 	**/
-	double getMinErrorDecrease() const;
+	double getMinRMSDecrease() const;
 
 	//! Returns whether farthest points should be ignored at each iteration
 	/** This is a trick to improve registration for slightly different clouds.

@@ -4466,7 +4466,7 @@ void MainWindow::doActionRegister()
 	model = rDlg.getModelEntity();
 	data = rDlg.getDataEntity();
 
-	double minErrorDecrease										= rDlg.getMinErrorDecrease();
+	double minRMSDecrease										= rDlg.getMinRMSDecrease();
 	unsigned maxIterationCount									= rDlg.getMaxIterationCount();
 	unsigned randomSamplingLimit								= rDlg.randomSamplingLimit();
 	bool removeFarthestPoints									= rDlg.removeFarthestPoints();
@@ -4483,13 +4483,15 @@ void MainWindow::doActionRegister()
 	ccGLMatrix transMat;
 	double finalError = 0.0;
 	double finalScale = 1.0;
+	unsigned finalPointCount = 0;
 
 	if (ccRegistrationTools::ICP(	data,
 									model,
 									transMat,
 									finalScale,
 									finalError,
-									minErrorDecrease,
+									finalPointCount,
+									minRMSDecrease,
 									maxIterationCount,
 									randomSamplingLimit,
 									removeFarthestPoints,
@@ -4501,9 +4503,9 @@ void MainWindow::doActionRegister()
 									transformationFilters,
 									this))
 	{
-		QString rmsString = QString("Final RMS: %1").arg(finalError);
+		QString rmsString = QString("Final RMS: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
 		ccLog::Print(QString("[Register] ") + rmsString);
-
+		
 		QStringList summary;
 		summary << rmsString;
 		summary << "----------------";
@@ -4511,7 +4513,7 @@ void MainWindow::doActionRegister()
 		//transformation matrix
 		{
 			QString matString = transMat.toString();
-			summary << QString("Transformation matrix");
+			summary << "Transformation matrix";
 			summary << transMat.toString(3,'\t'); //low precision, just for display
 			summary << "----------------";
 
@@ -4532,8 +4534,14 @@ void MainWindow::doActionRegister()
 			summary << "Scale: fixed (1.0)";
 		}
 
+		//overlap
 		summary << "----------------";
-		summary << "Refer to Console (F8) for more details";
+		QString overlapString = QString("Theorical overlap: %1%").arg(finalOverlap);
+		ccLog::Print(QString("[Register] ")+overlapString);
+		summary << overlapString;
+
+		summary << "----------------";
+		summary << "This report has been output to Console (F8)";
 
 		//cloud to move
 		ccGenericPointCloud* pc = 0;
@@ -9202,9 +9210,10 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 
 #ifndef TEST_GENERATION
 					double finalRMS = 0;
+					unsigned finalPointCount = 0;
 					CCLib::ICPRegistrationTools::RESULT_TYPE result;
 					CCLib::ICPRegistrationTools::ScaledTransformation registerTrans;
-					result = CCLib::ICPRegistrationTools::RegisterClouds(A,B,registerTrans,CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,1.0e-6,0,finalRMS);
+					result = CCLib::ICPRegistrationTools::RegisterClouds(A,B,registerTrans,CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,1.0e-6,0,finalRMS,finalPointCount);
 
 					if (result == CCLib::ICPRegistrationTools::ICP_ERROR)
 					{

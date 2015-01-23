@@ -21,17 +21,21 @@ File I/O:
 Big ones:
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Command line mode could be extended
-	- Rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
-	- Label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
-	- Let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
+	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
+	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
+	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
+	- replace loaded clouds by their subsampled version (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
+	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
+	- apply transformation (https://github.com/cloudcompare/trunk/issues/194)
+	- delete all scalar fields (http://cloudcompare.org/forum/viewtopic.php?t=1131)
+	- apply the banding (color) height ramp (http://cloudcompare.org/forum/viewtopic.php?t=1131)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 
 Various:
-[*] Add an option to the command line mode to replace loaded clouds by their subsampled version (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)
 [*] Add a filter to the DB tree (http://www.danielgm.net/cc/forum/viewtopic.php?t=1055)
 [*] Selection of planar area based on region growing would be nice (http://www.cloudcompare.org/forum/viewtopic.php?t=1046)
@@ -45,8 +49,6 @@ Various:
 [*] Enhance qCork so as to keep the mesh(es) properties (color, normals, etc.)
 [*] Properly segment meshes in both the graphical segmentation tool and the Cross section tool
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
-[*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
-	Equivalent approach with the local curvature (http://www.cloudcompare.org/forum/viewtopic.php?t=711)
 [*] Add touchpad support (http://www.cloudcompare.org/forum/viewtopic.php?t=671)
 [*] Reverse Unroll Feature (http://www.cloudcompare.org/forum/viewtopic.php?t=645)
 [*] Let the user select and handle multiple clouds in the 'Clipping box' tool

@@ -146,7 +146,7 @@
               <string>By chosing this criterion, you can control the computation time.</string>
              </property>
              <property name="text">
-              <string>Number of iterations:</string>
+              <string>Number of iterations</string>
              </property>
             </widget>
            </item>
@@ -184,11 +184,8 @@
              <property name="toolTip">
               <string>By chosing this criterion, you can control the quality of the result.</string>
              </property>
-             <property name="statusTip">
-              <string>By chosing this criterion, you can control the quality of the result.</string>
-             </property>
              <property name="text">
-              <string>Error difference:</string>
+              <string>RMS difference</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -196,7 +193,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="errorDifferenceLineEdit">
+            <widget class="QLineEdit" name="rmsDifferenceLineEdit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -204,16 +201,13 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Set the minimum error improvement between 2 consecutive iterations (beyond which the algorithm will stop)</string>
-             </property>
-             <property name="statusTip">
-              <string>Set the minimum error improvement between 2 consecutive iterations (beyond which the algorithm will stop)</string>
+              <string>Set the minimum RMS improvement between 2 consecutive iterations (below which the registration process will stop).</string>
              </property>
              <property name="layoutDirection">
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>1.0e-6</string>
+              <string>1.0e-5</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -226,6 +220,12 @@
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
             <widget class="QLabel" name="label_4">
+             <property name="toolTip">
+              <string>Rough estimation of the final overlap ratio of the two clouds (the smaller, the finer the initial registration should be!)</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: blue;</string>
+             </property>
              <property name="text">
               <string>Final overlap</string>
              </property>
@@ -234,7 +234,10 @@
            <item>
             <widget class="QSpinBox" name="overlapSpinBox">
              <property name="toolTip">
-              <string>Rough estimation of the final overlap of the two clouds (the smaller, the finer the initial registration should be!)</string>
+              <string>Rough estimation of the final overlap ratio of the two clouds (the smaller, the finer the initial registration should be!)</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: blue;</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -304,7 +307,7 @@
               <number>10000</number>
              </property>
              <property name="value">
-              <number>20000</number>
+              <number>50000</number>
              </property>
             </widget>
            </item>

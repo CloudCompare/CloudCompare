@@ -2228,11 +2228,13 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	ccGLMatrix transMat;
 	double finalError = 0.0;
 	double finalScale = 1.0;
+	unsigned finalPointCount = 0;
 	if ( ccRegistrationTools::ICP(	dataAndModel[0]->getEntity(),
 									dataAndModel[1]->getEntity(),
 									transMat,
 									finalScale,
 									finalError,
+									finalPointCount,
 									minErrorDiff,
 									iterationCount,
 									randomSamplingLimit,
@@ -2248,6 +2250,8 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 		ccHObject* data = dataAndModel[0]->getEntity();
 		data->applyGLTransformation_recursive(&transMat);
 		Print(QString("Entity '%1' has been registered").arg(data->getName()));
+		Print(QString("RMS: %1").arg(finalError));
+		Print(QString("Number of points used for final step: %1").arg(finalPointCount));
 
 		//save matrix in a separate text file
 		{

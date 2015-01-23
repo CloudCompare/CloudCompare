@@ -35,8 +35,8 @@
 
 //semi-persistent options
 static bool     s_adjustScale = false;
-static unsigned s_randomSamplingLimit = 20000;
-static double   s_errorDifference = 1.0e-6;
+static unsigned s_randomSamplingLimit = 50000;
+static double   s_rmsDifference = 1.0e-5;
 static int      s_maxIterationCount = 20;
 static bool     s_useErrorDifferenceCriterion = true;
 static int      s_finalOverlap = 100;
@@ -52,7 +52,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 	modelEntity = model;
 
 	setupUi(this);
-	errorDifferenceLineEdit->setValidator(new QDoubleValidator(errorDifferenceLineEdit));
+	rmsDifferenceLineEdit->setValidator(new QDoubleValidator(rmsDifferenceLineEdit));
 	setWindowFlags(Qt::Tool);
 
 	setColorsAndLabels();
@@ -65,7 +65,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 	//restore semi-persistent settings
 	adjustScaleCheckBox->setChecked(s_adjustScale);
 	randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
-	errorDifferenceLineEdit->setText(QString::number(s_errorDifference,'e',3));
+	rmsDifferenceLineEdit->setText(QString::number(s_rmsDifference,'e',1));
 	maxIterationCount->setValue(s_maxIterationCount);
 	if (s_useErrorDifferenceCriterion)
 		errorCriterion->setChecked(true);
@@ -100,7 +100,7 @@ void ccRegistrationDlg::saveParameters() const
 {
 	s_adjustScale = adjustScale();
 	s_randomSamplingLimit = randomSamplingLimit();
-	s_errorDifference = getMinErrorDecrease();
+	s_rmsDifference = getMinRMSDecrease();
 	s_maxIterationCount = getMaxIterationCount();
 	s_useErrorDifferenceCriterion = errorCriterion->isChecked();
 	s_finalOverlap = overlapSpinBox->value();
@@ -155,10 +155,10 @@ unsigned ccRegistrationDlg::getFinalOverlap() const
 	return static_cast<unsigned>(std::max(10,overlapSpinBox->value()));
 }
 
-double ccRegistrationDlg::getMinErrorDecrease() const
+double ccRegistrationDlg::getMinRMSDecrease() const
 {
 	bool ok = true;
-	double val = errorDifferenceLineEdit->text().toDouble(&ok);
+	double val = rmsDifferenceLineEdit->text().toDouble(&ok);
 	assert(ok);
 
 	return val;

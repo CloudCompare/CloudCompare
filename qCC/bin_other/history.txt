@@ -63,6 +63,11 @@ v2.6.1.beta 11/??/2014
 	* Fine registration tool (ICP)
 		- new option 'Final overlap' to specify the theoretical (final) overlap of the clouds to register
 		- this allows to register clouds with a quite small overlap (down to 10%)
+		- the tool now only displays RMS errors (input parameter, progress bar and report)
+		- the tool also output the number of points that have been actually used during the last
+			iteration (and have therefore been used to compute the final RMS)
+		- various glitches have been fixed
+		- the default number of sampled points has been increased (50.000 instead of 20.0000)
 	* C2C distances computation
 		- computing distances with a 'max distance' boundary is now much more efficient
 	* 2D labels:

@@ -1199,6 +1199,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 													unsigned sectionIndex,
 													ccContourExtractor::ContourType contourType,
 													PointCoordinateType maxEdgeLength,
+													bool splitContour,
 													bool& contourGenerated,
 													bool visualDebugMode/*=false*/)
 {
@@ -1213,7 +1214,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 	if (originalSectionCloud->size() < 2)
 	{
 		//nothing to do
-		ccLog::Warning(QString("[ccSectionExtractionTool][extract contour] Section #%1 contains than 2 points and will be ignored").arg(sectionIndex));
+		ccLog::Warning(QString("[ccSectionExtractionTool][extract contour] Section #%1 contains less than 2 points and will be ignored").arg(sectionIndex));
 		return true;
 	}
 
@@ -1255,25 +1256,74 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 			}
 		}
 
+		std::vector<ccPolyline*> parts;
+		if (splitContour)
+		{
+#ifdef _DEBUG
+			//compute some stats on the contour
+			{
+				double minLength = 0;
+				double maxLength = 0;
+				double sumLength = 0;
+				unsigned count = contour->size();
+				if (!contour->isClosed())
+					--count;
+				for (unsigned i=0; i<count; ++i)
+				{
+					const CCVector3* A = contour->getPoint(i);
+					const CCVector3* B = contour->getPoint((i+1) % contour->size());
+					CCVector3 e = *B - *A;
+					double l = e.norm();
+					if (i != 0)
+					{
+						minLength = std::min(minLength,l);
+						maxLength = std::max(maxLength,l);
+						sumLength += l;
+					}
+					else
+					{
+						minLength = maxLength = sumLength = l;
+					}
+				}
+				ccLog::PrintDebug(QString("Contour: min = %1 / avg = %2 / max = %3").arg(minLength).arg(sumLength/count).arg(maxLength));
+			}
+#endif
+
+			bool success = contour->split(maxEdgeLength,parts);
+			delete contour;
+			contour = 0;
+		}
+		else
+		{
+			parts.push_back(contour);
+		}
+
 		//create output group if necessary
 		ccHObject* destEntity = getExportGroup(s_profileExportGroupID,"Extracted profiles");
 		assert(destEntity);
 
-		contour->setName(QString("Section contour #%1").arg(sectionIndex));
-		contour->setColor(s_defaultContourColor);
-		contour->showColors(true);
-		//copy meta-data (import for Mascaret export!)
+		for (size_t p=0; p<parts.size(); ++p)
 		{
-			const QVariantMap& metaData = originalSection->metaData();
-			for (QVariantMap::const_iterator it = metaData.begin(); it != metaData.end(); ++it)
+			ccPolyline* contourPart = parts[p];
+			QString name = QString("Section contour #%1").arg(sectionIndex);
+			if (parts.size() > 1)
+				name += QString("(part %1/%2)").arg(p+1).arg(parts.size());
+			contourPart->setName(name);
+			contourPart->setColor(s_defaultContourColor);
+			contourPart->showColors(true);
+			//copy meta-data (import for Mascaret export!)
 			{
-				contour->setMetaData(it.key(),it.value());
+				const QVariantMap& metaData = originalSection->metaData();
+				for (QVariantMap::const_iterator it = metaData.begin(); it != metaData.end(); ++it)
+				{
+					contourPart->setMetaData(it.key(),it.value());
+				}
 			}
-		}
 
-		//add to main DB
-		destEntity->addChild(contour);
-		MainWindow::TheInstance()->addToDB(contour,false,false);
+			//add to main DB
+			destEntity->addChild(contourPart);
+			MainWindow::TheInstance()->addToDB(contourPart,false,false);
+		}
 
 		contourGenerated = true;
 	}
@@ -1367,6 +1417,7 @@ static double s_defaultSectionThickness = -1.0;
 static double s_contourMaxEdgeLength = 0;
 static bool s_extractSectionsAsClouds = false;
 static bool s_extractSectionsAsContours = true;
+static bool s_splitContour = false;
 static ccContourExtractor::ContourType s_extractSectionsType = ccContourExtractor::LOWER;
 
 void ccSectionExtractionTool::extractPoints()
@@ -1414,6 +1465,7 @@ void ccSectionExtractionTool::extractPoints()
 	sesDlg.setMaxEdgeLength(s_contourMaxEdgeLength);
 	sesDlg.doExtractClouds(s_extractSectionsAsClouds);
 	sesDlg.doExtractContours(s_extractSectionsAsContours,s_extractSectionsType);
+	sesDlg.doSplitContours(s_splitContour);
 
 	if (!sesDlg.exec())
 		return;
@@ -1423,6 +1475,7 @@ void ccSectionExtractionTool::extractPoints()
 	s_extractSectionsAsClouds   = sesDlg.extractClouds();
 	s_extractSectionsAsContours = sesDlg.extractContours();
 	s_extractSectionsType       = sesDlg.getContourType();
+	s_splitContour              = sesDlg.splitContours();
 	bool visualDebugMode        = sesDlg.visualDebugMode();
 
 	//progress dialog
@@ -1621,6 +1674,7 @@ void ccSectionExtractionTool::extractPoints()
 														s+1,
 														s_extractSectionsType,
 														s_contourMaxEdgeLength,
+														s_splitContour,
 														contourGenerated,
 														visualDebugMode);
 
@@ -1674,6 +1728,12 @@ void ccSectionExtractionTool::extractPoints()
 	catch(std::bad_alloc)
 	{
 		error = true;
+	}
+
+	if (nprogress)
+	{
+		delete nprogress;
+		nprogress = 0;
 	}
 
 	if (error)

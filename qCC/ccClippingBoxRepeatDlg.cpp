@@ -48,7 +48,7 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 
 		extractContoursGroupBox->setChecked(true);
 		extractContoursGroupBox->setCheckable(false);
-		projectOnBestFitCheckBox->setEnabled(true);
+		projectOnBestFitCheckBox->setVisible(true);
 		projectOnBestFitCheckBox->setChecked(false);
 
 		randomColorCheckBox->setChecked(false);
@@ -99,13 +99,13 @@ void ccClippingBoxRepeatDlg::onDimChecked(bool)
 
 	if (sum == 1)
 	{
-		if (!projectOnBestFitCheckBox->isEnabled())
+		if (!projectOnBestFitCheckBox->isVisible())
 			projectOnBestFitCheckBox->setChecked(false);
-		projectOnBestFitCheckBox->setEnabled(true);
+		projectOnBestFitCheckBox->setVisible(true);
 	}
 	else
 	{
-		projectOnBestFitCheckBox->setEnabled(false);
+		projectOnBestFitCheckBox->setVisible(false);
 		projectOnBestFitCheckBox->setChecked(true);
 	}
 

@@ -436,10 +436,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<CCLib::PointProjectio
 								}
 								if (!intersect)
 								{
-									if (itB == hullPoints.begin())
-										hullPoints.push_front(&points[minIndex]);
-									else
-										hullPoints.insert(itB, &points[minIndex]);
+									hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[minIndex]);
 									somethingHasChanged = true;
 
 									if (enableVisualDebugMode && !debugDialog.isSkipepd())
@@ -548,13 +545,13 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<CCLib::PointProjectio
 
 typedef std::list<CCLib::PointProjectionTools::IndexedCCVector2*> Hull2D;
 
-ccPolyline* ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
-														PointCoordinateType maxEdgelLength/*=0*/,
-														const PointCoordinateType* preferredNormDim/*=0*/,
-														const PointCoordinateType* preferredUpDir/*=0*/,
-														ContourType contourType/*=FULL*/,
-														std::vector<unsigned>* originalPointIndexes/*=0*/,
-														bool enableVisualDebugMode/*=false*/)
+ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+													PointCoordinateType maxEdgeLength/*=0*/,
+													const PointCoordinateType* preferredNormDim/*=0*/,
+													const PointCoordinateType* preferredUpDir/*=0*/,
+													ContourType contourType/*=FULL*/,
+													std::vector<unsigned>* originalPointIndexes/*=0*/,
+													bool enableVisualDebugMode/*=false*/)
 {
 	assert(points);
 	if (!points)
@@ -608,7 +605,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPer
 	if (!ExtractConcaveHull2D(	points2D,
 								hullPoints,
 								contourType,
-								maxEdgelLength*maxEdgelLength,
+								maxEdgeLength*maxEdgeLength,
 								enableVisualDebugMode) )
 	{
 		ccLog::Warning("[ExtractFlatContour] Failed to compute the convex hull of the input points!");
@@ -674,7 +671,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPer
 }
 
 bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
-											PointCoordinateType maxEdgelLength,
+											PointCoordinateType maxEdgeLength,
 											std::vector<ccPolyline*>& parts,
 											bool allowSplitting/*=true*/,
 											const PointCoordinateType* preferredDim/*=0*/,
@@ -683,7 +680,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	parts.clear();
 
 	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points,maxEdgelLength,preferredDim,0,FULL,0,enableVisualDebugMode);
+	ccPolyline* basePoly = ExtractFlatContour(points,maxEdgeLength,preferredDim,0,FULL,0,enableVisualDebugMode);
 	if (!basePoly)
 	{
 		return false;
@@ -695,7 +692,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	}
 
 	//and split it if necessary
-	bool success = basePoly->split(maxEdgelLength,parts);
+	bool success = basePoly->split(maxEdgeLength,parts);
 
 	delete basePoly;
 	basePoly = 0;

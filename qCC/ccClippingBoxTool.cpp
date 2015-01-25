@@ -47,6 +47,8 @@
 static std::vector<unsigned> s_lastContourUniqueIDs;
 //! Max edge length parameter (contour extraction)
 static double s_maxEdgeLength = -1.0;
+static bool s_splitContours = false;
+static double s_defaultGap = 0.0;
 
 ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -329,7 +331,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	if (s_maxEdgeLength < 0)
 		s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
 	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
-	
+	repeatDlg.splitContourCheckBox->setChecked(s_splitContours);
+	repeatDlg.gapDoubleSpinBox->setValue(s_defaultGap);
+
 	if (!repeatDlg.exec())
 		return;
 
@@ -372,7 +376,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	unsigned cellCount = 1;
 	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
 	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();
-	PointCoordinateType gap = (PointCoordinateType)repeatDlg.gapDoubleSpinBox->value();
+	s_defaultGap = repeatDlg.gapDoubleSpinBox->value();
+	PointCoordinateType gap = static_cast<PointCoordinateType>(s_defaultGap);
 
 	//for mutli-dimensional mode only!
 	if (!singleContourMode)
@@ -522,7 +527,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 				QProgressDialog pDlg(QString("Extract section(s): %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
 				pDlg.show();
 				QApplication::processEvents();
-
+				
+				//reset count
+				subCloudsCount = 0;
 				for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
 				{
 					for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
@@ -605,12 +612,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			//contour extraction parameter (max edge length)
 			s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
+			s_splitContours = repeatDlg.splitContourCheckBox->isChecked();
 			bool visualDebugMode = repeatDlg.debugModeCheckBox->isChecked();
-			bool splitContour = false;
-			if (s_maxEdgeLength > 0)
-			{
-				splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour(s) in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
-			}
+
 			ccHObject* contourGroup = new ccHObject(obj->getName() + QString(".contours"));
 
 			QProgressDialog pDlg(QString("Extract contour(s): %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
@@ -644,7 +648,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 							if (ccContourExtractor::ExtractFlatContour(	clouds[cloudIndex],
 																		static_cast<PointCoordinateType>(s_maxEdgeLength),
 																		polys,
-																		splitContour,
+																		s_splitContours,
 																		preferredOrientation,
 																		visualDebugMode))
 							{

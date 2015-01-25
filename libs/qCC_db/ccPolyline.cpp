@@ -388,7 +388,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
-bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
+bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 						std::vector<ccPolyline*>& parts)
 {
 	parts.clear();
@@ -406,7 +406,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
 	while (startIndex <= lastIndex)
 	{
 		unsigned stopIndex = startIndex;
-		while (stopIndex < lastIndex && (*getPoint(stopIndex+1) - *getPoint(stopIndex)).norm() <= maxEdgelLength)
+		while (stopIndex < lastIndex && (*getPoint(stopIndex+1) - *getPoint(stopIndex)).norm() <= maxEdgeLength)
 		{
 			++stopIndex;
 		}
@@ -420,7 +420,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
 			if (isClosed())
 			{
 				unsigned realStartIndex = vertCount;
-				while (realStartIndex > stopIndex && (*getPoint(realStartIndex-1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgelLength)
+				while (realStartIndex > stopIndex && (*getPoint(realStartIndex-1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
 				{
 					--realStartIndex;
 				}

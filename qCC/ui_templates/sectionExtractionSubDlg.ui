@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>270</height>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,7 @@
       <string>To extract the contour of each section as a polyline</string>
      </property>
      <property name="title">
-      <string>Extract section contour(s)</string>
+      <string>Extract section profile(s)</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -93,58 +93,93 @@
      <property name="checked">
       <bool>true</bool>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>type</string>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QFrame" name="frame_2">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>50</height>
+         </size>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="contourTypeComboBox">
-        <property name="toolTip">
-         <string>Section type (lower or upper part, or both)</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Lower</string>
+        <layout class="QFormLayout" name="formLayout">
+         <property name="leftMargin">
+          <number>0</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Upper</string>
+         <property name="topMargin">
+          <number>0</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
+         <property name="rightMargin">
+          <number>0</number>
          </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>max edge length</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
-        <property name="toolTip">
-         <string>Max output polyline edge length (the smaller, the closer to the points the countour will be).
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>type</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="contourTypeComboBox">
+           <property name="toolTip">
+            <string>Section type (lower or upper part, or both)</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Lower</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Upper</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Both</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>max edge length</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
+           <property name="toolTip">
+            <string>Max output polyline edge length (the smaller, the closer to the points the countour will be).
 Warning: if 0, generates the convex hull.</string>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="splitContourCheckBox">
+        <property name="toolTip">
+         <string>split the generated profile(s) in smaller parts to avoid creating too long edges (10 times the specified max edge length).
+Warning: may not be compatible with Mascaret export.</string>
         </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="maximum">
-         <double>1000000000.000000000000000</double>
+        <property name="text">
+         <string>split profile on longer edges</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item>
        <widget class="QCheckBox" name="debugModeCheckBox">
         <property name="toolTip">
          <string>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</string>

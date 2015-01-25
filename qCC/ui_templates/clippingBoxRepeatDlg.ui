@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>314</width>
-    <height>294</height>
+    <height>317</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -108,6 +108,16 @@ color: white;</string>
         </property>
         <property name="text">
          <string>project slice(s) points on their best fit plane</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="splitContourCheckBox">
+        <property name="toolTip">
+         <string>split the generated contour(s) in smaller parts to avoid creating edges longer than the specified max edge length.</string>
+        </property>
+        <property name="text">
+         <string>split contour(s) on longer edges</string>
         </property>
        </widget>
       </item>

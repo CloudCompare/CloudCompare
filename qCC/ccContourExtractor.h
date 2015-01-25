@@ -38,7 +38,7 @@ public:
 	//! Extracts a unique closed (2D) contour polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
 		\param points point cloud
-		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\param maxEdgeLength max edge length (ignored if 0, in which case the contour is the convex hull)
 		\param preferredNormDim to specifiy a preferred (normal) direction for the polyline extraction
 		\param preferredUpDir to specifiy a preferred up direction for the polyline extraction (preferredNormDim must be defined as well and must be normal to this 'up' direction)
 		\param contourType to specify a type of contour (you should define a 'up' direction to get proper lower and upper contours)
@@ -46,7 +46,7 @@ public:
 		\return contour polyline (or 0 if an error occurred)
 	**/
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
-											PointCoordinateType maxEdgelLength = 0,
+											PointCoordinateType maxEdgeLength = 0,
 											const PointCoordinateType* preferredNormDim = 0,
 											const PointCoordinateType* preferredUpDir = 0,
 											ContourType contourType = FULL,
@@ -57,14 +57,14 @@ public:
 	/** Projects the cloud on its best fitting LS plane first.
 		\warning output polylines set (parts) may be empty if all the vertices are too far from each other!
 		\param points point cloud
-		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\param maxEdgeLength max edge length (ignored if 0, in which case the contour is the convex hull)
 		\param[out] parts output polyline parts
 		\param allowSplitting whether the polyline can be split or not
 		\param preferredNormDim to specifiy a preferred (normal) direction for the polyline extraction
 		\return success
 	**/
 	static bool ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
-									PointCoordinateType maxEdgelLength,
+									PointCoordinateType maxEdgeLength,
 									std::vector<ccPolyline*>& parts,
 									bool allowSplitting = true,
 									const PointCoordinateType* preferredNormDim = 0,

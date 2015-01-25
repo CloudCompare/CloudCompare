@@ -89,6 +89,16 @@ void ccSectionExtractionSubDlg::doExtractContours(bool state, ccContourExtractor
 	}
 }
 
+bool ccSectionExtractionSubDlg::splitContours() const
+{
+	return splitContourCheckBox->isChecked();
+}
+
+void ccSectionExtractionSubDlg::doSplitContours(bool state)
+{
+	splitContourCheckBox->setChecked(state);
+}
+
 ccContourExtractor::ContourType ccSectionExtractionSubDlg::getContourType() const
 {
 	switch(contourTypeComboBox->currentIndex())

@@ -62,6 +62,11 @@ public:
 	//! Sets whether to generate contours or not
 	void doExtractContours(bool state, ccContourExtractor::ContourType type);
 
+	//! Whether to split the contours or not
+	bool splitContours() const;
+	//! Sets whether to split the contours or not
+	void doSplitContours(bool state);
+
 	//! Whether visual debug mode is enabled or not
 	bool visualDebugMode() const;
 

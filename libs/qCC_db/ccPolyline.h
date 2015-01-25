@@ -98,11 +98,11 @@ public:
 
 	//! Splits the polyline into several parts based on a maximum edge length
 	/** \warning output polylines set (parts) may be empty if all the vertices are too far from each other!
-		\param maxEdgelLength maximum edge length
+		\param maxEdgeLength maximum edge length
 		\param[out] parts output polyline parts
 		\return success
 	**/
-	bool split(	PointCoordinateType maxEdgelLength,
+	bool split(	PointCoordinateType maxEdgeLength,
 				std::vector<ccPolyline*>& parts );
 
 	//! Computes the polyline length

@@ -78,6 +78,10 @@ v2.6.1.beta 11/??/2014
 			* two-points label: the title is simply the distance between the two points
 			* three-points label: the title is now the area of the corresponding triangle
 		- more display options (opacity, marker color, label font size, etc.)
+	* Contour extraction
+		- contour extraction (either in the 'Cross Section' tool or the new 'Section Extraction ' tool is now smarter
+		- a 'visual debuging mode' is also available to (try to) understand how the algorithm works and
+			which parts of the cloud may cause a strange behavior / bad result
 	* Interactive Segmentation tool:
 		The segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)
 		- the polyline is always exported as a 3D polyline (i.e. the coordinates are relative to the segmented entities).

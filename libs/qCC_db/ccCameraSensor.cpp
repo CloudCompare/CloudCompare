@@ -635,7 +635,7 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 #endif
 
 	//perspective division
-	Vector2Tpl<double> p(localCoord.x/depth, localCoord.y/depth);
+	CCVector2d p(localCoord.x/depth, localCoord.y/depth);
 
 	//conversion to pixel coordinates
 	double factor = static_cast<double>(m_intrinsicParams.focal_pix);
@@ -651,7 +651,7 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	}
 	//*/
 
-	Vector2Tpl<double> p2 = p * factor;
+	CCVector2d p2 = p * factor;
 
 	p2.x += m_intrinsicParams.arrayWidth / 2.0;
 	p2.y = m_intrinsicParams.arrayHeight / 2.0 - p2.y;

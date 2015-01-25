@@ -18,6 +18,9 @@
 #ifndef CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER
 #define CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER
 
+//Local
+#include "ccContourExtractor.h"
+
 //qCC_db
 #include <ccPolyline.h>
 
@@ -48,7 +51,7 @@ public:
 	void setMaxEdgeLength(double l);
 	
 	//! Returns the contour type (for contour generation)
-	ccPolyline::ContourType getContourType() const;
+	ccContourExtractor::ContourType getContourType() const;
 
 	//! Whether to generate clouds or not
 	bool extractClouds() const;
@@ -57,7 +60,10 @@ public:
 	//! Whether to generate contours or not
 	bool extractContours() const;
 	//! Sets whether to generate contours or not
-	void doExtractContours(bool state, ccPolyline::ContourType type);
+	void doExtractContours(bool state, ccContourExtractor::ContourType type);
+
+	//! Whether visual debug mode is enabled or not
+	bool visualDebugMode() const;
 
 };
 

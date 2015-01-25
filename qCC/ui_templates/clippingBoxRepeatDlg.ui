@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>314</width>
-    <height>271</height>
+    <height>294</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -107,7 +107,17 @@ color: white;</string>
          <string>Before extracting the contour, points can be projected along the repeat dimension (if only one is defined) or on the best fit plane</string>
         </property>
         <property name="text">
-         <string>Project slice(s) points on their best fit plane</string>
+         <string>project slice(s) points on their best fit plane</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="debugModeCheckBox">
+        <property name="toolTip">
+         <string>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</string>
+        </property>
+        <property name="text">
+         <string>visual debug mode</string>
         </property>
        </widget>
       </item>

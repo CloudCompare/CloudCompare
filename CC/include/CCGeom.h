@@ -58,7 +58,7 @@ public:
 };
 
 //! 3D Vector (templated version)
-template <class Type> class Vector3Tpl : public Tuple3Tpl<Type>
+template <typename Type> class Vector3Tpl : public Tuple3Tpl<Type>
 {
 public:
 
@@ -176,12 +176,13 @@ public:
 
 };
 
-// Multiplication of a 3D vector by a scalar (front) operator
-inline Vector3Tpl<float> operator * (float s, const Vector3Tpl<float> &v) {return v*s;}
-inline Vector3Tpl<double> operator * (double s, const Vector3Tpl<double> &v) {return v*s;}
+//! Multiplication of a 3D vector by a scalar (front) operator (float version)
+inline Vector3Tpl<float> operator * (float s, const Vector3Tpl<float> &v) { return v*s; }
+// Multiplication of a 3D vector by a scalar (front) operator (double version)
+inline Vector3Tpl<double> operator * (double s, const Vector3Tpl<double> &v) { return v*s; }
 
 //! 2D Vector
-template <class Type> class Vector2Tpl
+template <typename Type> class Vector2Tpl
 {
 public:
 
@@ -255,7 +256,18 @@ typedef Vector3Tpl<double> CCVector3d;
 //! Default 2D Vector
 typedef Vector2Tpl<PointCoordinateType> CCVector2;
 
+//! Double 2D Vector
+typedef Vector2Tpl<double> CCVector2d;
+
 //! Int 2D Vector
 typedef Vector2Tpl<int> CCVector2i;
+
+//! 2D cross product of OA and OB vectors
+/** \return a positive value, if OAB makes a counter-clockwise turn, negative for clockwise turn, and zero if the points are collinear
+**/
+template<typename Type> inline Type cross(const Vector2Tpl<Type>& O, const Vector2Tpl<Type>& A, const Vector2Tpl<Type>& B)
+{
+	return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+}
 
 #endif //CC_GEOM_HEADER

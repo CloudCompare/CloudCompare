@@ -2570,3 +2570,30 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(	CC_CHAMFER
 
 	return result;
 }
+
+PointCoordinateType DistanceComputationTools::ComputeSquareDistToSegment(const CCVector2& P,
+																		 const CCVector2& A,
+																		 const CCVector2& B,
+																		 bool onlyOrthogonal/*=false*/)
+{
+	CCVector2 AP = P-A;
+	CCVector2 AB = B-A;
+	PointCoordinateType dot = AB.dot(AP); // = cos(PAB) * ||AP|| * ||AB||
+	if (dot < 0)
+	{
+		return onlyOrthogonal ? -PC_ONE : AP.norm2();
+	}
+	else
+	{
+		PointCoordinateType squareLengthAB = AB.norm2();
+		if (dot > squareLengthAB)
+		{
+			return onlyOrthogonal ? -PC_ONE : (P-B).norm2();
+		}
+		else
+		{
+			CCVector2 HP = AP - AB * (dot / squareLengthAB);
+			return HP.norm2();
+		}
+	}
+}

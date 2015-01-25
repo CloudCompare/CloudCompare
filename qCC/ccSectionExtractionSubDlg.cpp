@@ -68,19 +68,19 @@ bool ccSectionExtractionSubDlg::extractContours() const
 	return extractContoursGroupBox->isChecked();
 }
 
-void ccSectionExtractionSubDlg::doExtractContours(bool state, ccPolyline::ContourType type)
+void ccSectionExtractionSubDlg::doExtractContours(bool state, ccContourExtractor::ContourType type)
 {
 	extractContoursGroupBox->setChecked(state);
 
 	switch(type)
 	{
-	case ccPolyline::LOWER:
+	case ccContourExtractor::LOWER:
 		contourTypeComboBox->setCurrentIndex(0);
 		break;
-	case ccPolyline::UPPER:
+	case ccContourExtractor::UPPER:
 		contourTypeComboBox->setCurrentIndex(1);
 		break;
-	case ccPolyline::FULL:
+	case ccContourExtractor::FULL:
 		contourTypeComboBox->setCurrentIndex(2);
 		break;
 	default:
@@ -89,20 +89,25 @@ void ccSectionExtractionSubDlg::doExtractContours(bool state, ccPolyline::Contou
 	}
 }
 
-ccPolyline::ContourType ccSectionExtractionSubDlg::getContourType() const
+ccContourExtractor::ContourType ccSectionExtractionSubDlg::getContourType() const
 {
 	switch(contourTypeComboBox->currentIndex())
 	{
 	case 0:
-		return ccPolyline::LOWER;
+		return ccContourExtractor::LOWER;
 	case 1:
-		return ccPolyline::UPPER;
+		return ccContourExtractor::UPPER;
 	case 2:
-		return ccPolyline::FULL;
+		return ccContourExtractor::FULL;
 	default:
 		assert(false);
 		break;
 	}
 
-	return ccPolyline::FULL;
+	return ccContourExtractor::FULL;
+}
+
+bool ccSectionExtractionSubDlg::visualDebugMode() const
+{
+	return debugModeCheckBox->isChecked();
 }

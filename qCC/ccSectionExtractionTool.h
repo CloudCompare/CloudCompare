@@ -19,7 +19,8 @@
 #define CC_SECTION_EXTRACTION_TOOL_HEADER
 
 //Local
-#include <ccOverlayDialog.h>
+#include "ccOverlayDialog.h"
+#include "ccContourExtractor.h"
 
 //qCC_db
 #include <ccHObject.h>
@@ -105,9 +106,10 @@ protected:
 								const ccPointCloud* originalSectionCloud,
 								ccPointCloud* unrolledSectionCloud, //'2D' cloud with Z = 0
 								unsigned sectionIndex,
-								ccPolyline::ContourType type,
+								ccContourExtractor::ContourType type,
 								PointCoordinateType maxEdgeLength,
-								bool& contourGenerated);
+								bool& contourGenerated,
+								bool visualDebugMode = false);
 
 	//! Creates (if necessary) and returns a group to store entities in the main DB
 	ccHObject* getExportGroup(unsigned& defaultGroupID, QString defaultName);

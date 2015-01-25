@@ -93,7 +93,7 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 			}
 
 			QString line = stream.readLine();
-			std::vector< Vector2Tpl<double> > points;
+			std::vector< CCVector2d > points;
 			while (!line.isEmpty())
 			{
 				QStringList tokens = line.split(QRegExp("\\s+"),QString::SkipEmptyParts);
@@ -105,7 +105,7 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 					break;
 				}
 
-				Vector2Tpl<double> P;
+				CCVector2d P;
 				P.x = tokens[0].toDouble(); //radius
 				P.y = tokens[1].toDouble(); //height
 

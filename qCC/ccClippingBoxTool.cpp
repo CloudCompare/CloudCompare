@@ -22,6 +22,7 @@
 #include "mainwindow.h"
 #include "ccClippingBoxRepeatDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
+#include "ccContourExtractor.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -604,6 +605,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			//contour extraction parameter (max edge length)
 			s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
+			bool visualDebugMode = repeatDlg.debugModeCheckBox->isChecked();
 			bool splitContour = false;
 			if (s_maxEdgeLength > 0)
 			{
@@ -639,11 +641,12 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						if (clouds[cloudIndex]) //some slices can be empty due to rounding issues!
 						{
 							std::vector<ccPolyline*> polys;
-							if (ccPolyline::ExtractFlatContour(	clouds[cloudIndex],
-																static_cast<PointCoordinateType>(s_maxEdgeLength),
-																polys,
-																splitContour,
-																preferredOrientation))
+							if (ccContourExtractor::ExtractFlatContour(	clouds[cloudIndex],
+																		static_cast<PointCoordinateType>(s_maxEdgeLength),
+																		polys,
+																		splitContour,
+																		preferredOrientation,
+																		visualDebugMode))
 							{
 								if (!polys.empty())
 								{

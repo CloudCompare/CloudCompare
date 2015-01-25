@@ -22,6 +22,7 @@
 #include "ccEntityPickerDlg.h"
 #include "ccOrthoSectionGenerationDlg.h"
 #include "ccSectionExtractionSubDlg.h"
+#include "ccContourExtractor.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -1196,9 +1197,10 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 													const ccPointCloud* originalSectionCloud,
 													ccPointCloud* unrolledSectionCloud,
 													unsigned sectionIndex,
-													ccPolyline::ContourType contourType,
+													ccContourExtractor::ContourType contourType,
 													PointCoordinateType maxEdgeLength,
-													bool& contourGenerated)
+													bool& contourGenerated,
+													bool visualDebugMode/*=false*/)
 {
 	contourGenerated = false;
 
@@ -1220,7 +1222,13 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 	CCVector3 Y(0,1,0);
 
 	std::vector<unsigned> vertIndexes;
-	ccPolyline* contour = ccPolyline::ExtractFlatContour(unrolledSectionCloud,maxEdgeLength,N.u,Y.u,contourType,&vertIndexes);
+	ccPolyline* contour = ccContourExtractor::ExtractFlatContour(	unrolledSectionCloud,
+																	maxEdgeLength,
+																	N.u,
+																	Y.u,
+																	contourType,
+																	&vertIndexes,
+																	visualDebugMode);
 	if (contour)
 	{
 		//update vertices (to replace 'unrolled' points by 'original' ones
@@ -1359,7 +1367,7 @@ static double s_defaultSectionThickness = -1.0;
 static double s_contourMaxEdgeLength = 0;
 static bool s_extractSectionsAsClouds = false;
 static bool s_extractSectionsAsContours = true;
-static ccPolyline::ContourType s_extractSectionsType = ccPolyline::LOWER;
+static ccContourExtractor::ContourType s_extractSectionsType = ccContourExtractor::LOWER;
 
 void ccSectionExtractionTool::extractPoints()
 {
@@ -1415,13 +1423,18 @@ void ccSectionExtractionTool::extractPoints()
 	s_extractSectionsAsClouds   = sesDlg.extractClouds();
 	s_extractSectionsAsContours = sesDlg.extractContours();
 	s_extractSectionsType       = sesDlg.getContourType();
+	bool visualDebugMode        = sesDlg.visualDebugMode();
 
 	//progress dialog
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress nprogress(&pdlg,static_cast<unsigned>(sectionCount));
-	pdlg.setMethodTitle("Extract sections");
-	pdlg.setInfo(qPrintable(QString("Number of sections: %1\nNumber of points: %2").arg(sectionCount).arg(pointCount)));
-	pdlg.start();
+	CCLib::NormalizedProgress* nprogress = 0;
+	if (!visualDebugMode)
+	{
+		nprogress = new CCLib::NormalizedProgress(&pdlg,static_cast<unsigned>(sectionCount));
+		pdlg.setMethodTitle("Extract sections");
+		pdlg.setInfo(qPrintable(QString("Number of sections: %1\nNumber of points: %2").arg(sectionCount).arg(pointCount)));
+		pdlg.start();
+	}
 
 	PointCoordinateType defaultZ = 0;
 	int vertDim = vertAxisComboBox->currentIndex();
@@ -1608,7 +1621,8 @@ void ccSectionExtractionTool::extractPoints()
 														s+1,
 														s_extractSectionsType,
 														s_contourMaxEdgeLength,
-														contourGenerated);
+														contourGenerated,
+														visualDebugMode);
 
 						if (contourGenerated)
 							++generatedContours;
@@ -1646,6 +1660,12 @@ void ccSectionExtractionTool::extractPoints()
 					}
 				}
 			} //if (poly)
+
+			if (nprogress && !nprogress->oneStep())
+			{
+				ccLog::Warning("[ccSectionExtractionTool] Canceled by user");
+				error = true;
+			}
 
 			if (error)
 				break;

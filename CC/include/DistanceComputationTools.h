@@ -46,7 +46,7 @@ struct OctreeAndMeshIntersection;
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
 class CC_CORE_LIB_API DistanceComputationTools : public CCToolbox
 {
-public:
+public: //distance to clouds or meshes
 
 	//! Cloud-to-cloud "Hausdorff" distance computation parameters
 	struct Cloud2CloudDistanceComputationParams
@@ -174,7 +174,29 @@ public:
 												GenericProgressCallback* progressCb = 0,
 												DgmOctree* cloudOctree = 0);
 
-	/*** Basic entity level ***/
+	//! Computes the Chamfer distances (approximated distances) between two point clouds
+	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.
+		Therefore, the greater the octree level (used to determine the grid step) is, the finer
+		is the result, but more memory (and time) will be needed.
+		\param cType the Chamfer Distance type (1-1-1, 3-4-5, etc.)
+		\param comparedCloud the compared cloud
+		\param referenceCloud the reference cloud
+		\param octreeLevel the octree level at which to perform the Chamfer Distance propagation
+		\param maxSearchDist max search distance (or any negative value if no max distance is defined)
+		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\param compOctree the pre-computed octree of the compared cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
+		\param refOctree the pre-computed octree of the reference cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
+	**/
+	static int computeChamferDistanceBetweenTwoClouds(	CC_CHAMFER_DISTANCE_TYPE cType,
+														GenericIndexedCloudPersist* comparedCloud,
+														GenericIndexedCloudPersist* referenceCloud,
+														uchar octreeLevel,
+														PointCoordinateType maxSearchDist = -PC_ONE,
+														GenericProgressCallback* progressCb = 0,
+														DgmOctree* compOctree = 0,
+														DgmOctree* refOctree = 0);
+
+public: //distance to simple entities (triangles, planes, etc.)
 
 	//! Computes the distance between a point and a triangle
 	/** WARNING: if not signed, the returned distance is SQUARED!
@@ -210,21 +232,6 @@ public:
 											unsigned seedPointIndex,
 											uchar octreeLevel,
 											GenericProgressCallback* progressCb = 0);
-
-	//! Computes the differences between two scalar fields associated to equivalent point clouds
-	/** The compared cloud should be smaller or equal to the reference cloud. Its points should be
-		at the same position in space as points in the other cloud. The algorithm simply computes
-		the difference between the scalar values associated to each couple of equivalent points.
-		\warning The result is stored in the active scalar field (input) of the comparedCloud.
-		\warning Moreover, the output scalar field should be different than the input scalar field!
-		\warning Be sure to activate an OUTPUT scalar field on both clouds
-		\param comparedCloud the compared cloud
-		\param referenceCloud the reference cloud
-		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-	**/
-	static int diff(GenericIndexedCloudPersist* comparedCloud,
-					GenericIndexedCloudPersist* referenceCloud,
-					GenericProgressCallback* progressCb = 0);
 
 	//! Error estimators
 	enum ERROR_MEASURES
@@ -275,27 +282,34 @@ public:
 	static ScalarType computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,
 														const PointCoordinateType* planeEquation);
 
-	//! Computes the Chamfer distances (approximated distances) between two point clouds
-	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.
-		Therefore, the greater the octree level (used to determine the grid step) is, the finer
-		is the result, but more memory (and time) will be needed.
-		\param cType the Chamfer Distance type (1-1-1, 3-4-5, etc.)
+	//! Returns the (squared) distance from a point to a segment
+	/** \param P 3D point
+		\param A first point of the segment
+		\param B first point of the segment
+		\param onlyOrthogonal computes distance only if P lies 'in front' of AB (returns -1.0 otherwise)
+		\return squared distance (or potentially -1.0 if onlyOrthogonal is true)
+	**/
+	static PointCoordinateType ComputeSquareDistToSegment(	const CCVector2& P,
+															const CCVector2& A,
+															const CCVector2& B,
+															bool onlyOrthogonal = false);
+
+public: //other methods
+
+	//! Computes the differences between two scalar fields associated to equivalent point clouds
+	/** The compared cloud should be smaller or equal to the reference cloud. Its points should be
+		at the same position in space as points in the other cloud. The algorithm simply computes
+		the difference between the scalar values associated to each couple of equivalent points.
+		\warning The result is stored in the active scalar field (input) of the comparedCloud.
+		\warning Moreover, the output scalar field should be different than the input scalar field!
+		\warning Be sure to activate an OUTPUT scalar field on both clouds
 		\param comparedCloud the compared cloud
 		\param referenceCloud the reference cloud
-		\param octreeLevel the octree level at which to perform the Chamfer Distance propagation
-		\param maxSearchDist max search distance (or any negative value if no max distance is defined)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param compOctree the pre-computed octree of the compared cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
-		\param refOctree the pre-computed octree of the reference cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
 	**/
-	static int computeChamferDistanceBetweenTwoClouds(	CC_CHAMFER_DISTANCE_TYPE cType,
-														GenericIndexedCloudPersist* comparedCloud,
-														GenericIndexedCloudPersist* referenceCloud,
-														uchar octreeLevel,
-														PointCoordinateType maxSearchDist = -PC_ONE,
-														GenericProgressCallback* progressCb = 0,
-														DgmOctree* compOctree = 0,
-														DgmOctree* refOctree = 0);
+	static int diff(GenericIndexedCloudPersist* comparedCloud,
+					GenericIndexedCloudPersist* referenceCloud,
+					GenericProgressCallback* progressCb = 0);
 
 	//! Return codes for DistanceComputationTools::synchronizeOctrees
 	enum SOReturnCode { EMPTY_CLOUD, SYNCHRONIZED, DISJOINT, OUT_OF_MEMORY };

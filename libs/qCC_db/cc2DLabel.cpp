@@ -1089,15 +1089,15 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//colors
 	bool highlighted = (!pushName && isSelected());
 	//default background color
-	unsigned char alhpa = static_cast<unsigned char>((context.labelOpacity/100.0) * 255);
-	ccColor::Rgbaub defaultBkgColor(context.labelDefaultBkgCol,alhpa);
+	unsigned char alpha = static_cast<unsigned char>((context.labelOpacity/100.0) * 255);
+	ccColor::Rgbaub defaultBkgColor(context.labelDefaultBkgCol,alpha);
 	//default border color (mustn't be totally transparent!)
 	ccColor::Rgbaub defaultBorderColor(ccColor::red);
 	if (!highlighted)
 	{
 		//apply only half of the transparency
-		unsigned char halfAlhpa = static_cast<unsigned char>((50.0 + context.labelOpacity/200.0) * 255);
-		defaultBorderColor = ccColor::Rgbaub(context.labelDefaultBkgCol,halfAlhpa);
+		unsigned char halfAlpha = static_cast<unsigned char>((50.0 + context.labelOpacity/200.0) * 255);
+		defaultBorderColor = ccColor::Rgbaub(context.labelDefaultBkgCol,halfAlpha);
 	}
 
 	glPushAttrib(GL_COLOR_BUFFER_BIT);

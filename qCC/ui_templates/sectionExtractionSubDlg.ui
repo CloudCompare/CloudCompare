@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>247</height>
+    <height>270</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -141,6 +141,16 @@ Warning: if 0, generates the convex hull.</string>
         </property>
         <property name="maximum">
          <double>1000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="debugModeCheckBox">
+        <property name="toolTip">
+         <string>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</string>
+        </property>
+        <property name="text">
+         <string>visual debug mode</string>
         </property>
        </widget>
       </item>

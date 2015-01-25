@@ -174,6 +174,9 @@ public:
 	static bool extractConcaveHull2D(	std::vector<IndexedCCVector2>& points,
 										std::list<IndexedCCVector2*>& hullPoints,
 										PointCoordinateType maxSquareLength = 0);
+
+	//! Returns true if the AB and CD segments intersect each other
+	static bool segmentIntersect(const CCVector2& A, const CCVector2& B, const CCVector2& C, const CCVector2& D);
 };
 
 }

@@ -62,7 +62,8 @@ public:
 	~Garbage()
 	{
 		//dispose of left over
-		for (std::set<C*>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+		typedef typename std::set<C*>::iterator iterator;
+		for (iterator it = m_items.begin(); it != m_items.end(); ++it)
 			delete *it;
 		m_items.clear();
 	}

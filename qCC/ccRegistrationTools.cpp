@@ -136,7 +136,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
 	//add a 'safety' margin to input ratio
 	static double s_overlapMarginRatio = 0.2;
-	finalOverlapRatio = std::max(finalOverlapRatio, 0.1);
+	finalOverlapRatio = std::max(finalOverlapRatio, 0.01); //1% minimum
 	//do we need to reduce the input point cloud (so as to be close
 	//to the theoretical number of overlapping points - but not too
 	//low so as we are not registered yet ;)

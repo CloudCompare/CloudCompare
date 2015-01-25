@@ -88,7 +88,8 @@ CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, QString filename, Save
 		return CC_FERR_WRITING;
 
 	QTextStream outFile(&file);
-	outFile.setRealNumberPrecision(6);
+	static const int s_precision = 12;
+	outFile.setRealNumberPrecision(s_precision);
 
 	CC_FILE_ERROR result = CC_FERR_NO_SAVE;
 
@@ -133,7 +134,7 @@ CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, QString filename, Save
 				outFile << " ";
 				if (P->u[k] >= 0)
 					outFile << "+";
-				outFile << QString::number(P->u[k],'E',6);
+				outFile << QString::number(P->u[k],'E',s_precision);
 			}
 			outFile << " A" << endl;
 		}

@@ -465,6 +465,9 @@ public:
 											const CCVector3& B3D,
 											const CCVector3& C3D );
 
+	//! Returns unique ID
+	inline int getUniqueID() const { return m_uniqueID; }
+
 public slots:
 
 	void zoomGlobal();

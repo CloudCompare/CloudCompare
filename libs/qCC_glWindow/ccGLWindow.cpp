@@ -307,6 +307,98 @@ const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
 {
 	return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters();
 }
+	
+static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
+{
+	ccGLWindow* win = (ccGLWindow*)userParam;
+	assert(win);
+	if (!win)
+		return;
+
+	QString msg = QString("[OpenGL][Win %0]").arg(win->getUniqueID());
+
+	//Decode source
+	QString sourceStr;
+	switch (source)
+	{
+		case GL_DEBUG_SOURCE_API              :
+			sourceStr = "API";
+			break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM    :
+			sourceStr = "window system";
+			break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER  :
+			sourceStr = "shader compiler";
+			break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY      :
+			sourceStr = "third party";
+			break;
+        case GL_DEBUG_SOURCE_APPLICATION      :
+			sourceStr = "application";
+			break;
+        case GL_DEBUG_SOURCE_OTHER            :
+		default:
+			sourceStr = "other";
+			break;
+	}
+	msg += "[source: " + sourceStr + "]";
+
+	//Decode type
+	QString typeStr;
+	switch (type)
+	{
+		case GL_DEBUG_TYPE_ERROR               :
+			typeStr = "error";
+			break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR :
+			typeStr = "deprecated behavior";
+			break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  :
+			typeStr = "undefined behavior";
+			break;
+        case GL_DEBUG_TYPE_PORTABILITY         :
+			typeStr = "portability";
+			break;
+        case GL_DEBUG_TYPE_PERFORMANCE         :
+			typeStr = "performance";
+			break;
+        case GL_DEBUG_TYPE_OTHER               :
+		default:
+			typeStr = "other";
+			break;
+		case GL_DEBUG_TYPE_MARKER              :
+			typeStr = "marker";
+			break;
+	}
+	msg += "[type: " + typeStr + "]";
+
+	//Decode severity
+	QString sevStr;
+	switch (severity)
+	{
+		case GL_DEBUG_SEVERITY_HIGH         :
+			sevStr = "high";
+			break;
+        case GL_DEBUG_SEVERITY_MEDIUM       :
+			sevStr = "medium";
+			break;
+        case GL_DEBUG_SEVERITY_LOW          :
+			sevStr = "low";
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION : 
+		default:
+			sevStr = "notification";
+			break;
+	};
+	msg += "[severity: " + sevStr + "]";
+	msg += " ";
+	msg += message;
+
+	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		ccLog::Warning(msg);
+	else
+		ccLog::Print(msg);
+}
 
 void ccGLWindow::initializeGL()
 {
@@ -438,6 +530,29 @@ void ccGLWindow::initializeGL()
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	//KHR extension (debug)
+	if (ccFBOUtils::CheckExtension("GL_KHR_debug"))
+	{
+		if (!m_silentInitialization)
+			ccLog::Print("[3D View %i] GL KHR (debug) extension available",m_uniqueID);
+
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	
+		//int value = 0;
+		//glGetIntegerv(GL_CONTEXT_FLAGS, &value);
+		//if ((value & GL_CONTEXT_FLAG_DEBUG_BIT) == 0)
+		//{
+		//	ccLog::Warning("[3D View %i] But GL_CONTEXT_FLAG_DEBUG_BIT is not set!");
+		//}
+
+		glDebugMessageControl(GL_DONT_CARE,GL_DONT_CARE,GL_DONT_CARE,0,NULL,GL_TRUE);
+		//glDebugMessageControl(GL_DONT_CARE,GL_DEBUG_TYPE_OTHER,GL_DONT_CARE,0,NULL,GL_FALSE); //deactivate 'other' messages
+		glDebugMessageCallback(&GLDebugCallback, this);
+	}
+#endif
 
 	//apply (potentially) updated parameters;
 	setDisplayParameters(params,hasOverridenDisplayParameters());

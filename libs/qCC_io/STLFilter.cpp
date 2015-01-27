@@ -521,8 +521,8 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 	if (normals)
 	{
-		normals->link();
-		mesh->addChild(normals);
+		//normals->link();
+		//mesh->addChild(normals); //automatically done by setTriNormsTable
 		mesh->showNormals(true);
 	}
 	else

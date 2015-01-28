@@ -70,7 +70,7 @@ bool ImageFileFilter::canLoadExtension(QString upperCaseExt) const
 	QList<QByteArray> formats = QImageReader::supportedImageFormats();
 	//we convert this list into a proper "filters" string
 	for (int i=0; i<formats.size(); ++i)
-		if (QString(formats[i].data()) == upperCaseExt)
+		if (QString(formats[i].data()).toUpper() == upperCaseExt)
 			return true;
 
 	return false;

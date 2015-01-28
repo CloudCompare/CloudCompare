@@ -49,7 +49,7 @@ public:
 		m_items.erase(item);
 	}
 
-	//! Manually deltes an item already the trash
+	//! To manually delete an item already in the trash
 	inline void destroy(C* item)
 	{
 		m_items.erase(item);

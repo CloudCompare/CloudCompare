@@ -106,6 +106,8 @@ v2.6.1.beta 11/??/2014
 			scale values (warning: accuracy might not be preserved if the cloud has been transformed, etc.)
 	* Command line:
 		- New option '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
+		- New option '-APPLY_TRANS': to apply a transformation (read from a simple text file with the 4x4 transformation
+			matrix rows on each line)
 		- Default behavior of some commands slightly changed (see http://www.cloudcompare.org/doc/wiki/index.php?title=CommandLine)
 	* SF Arithmetics:
 		- new operator 'INT' (integer part) to extract the integer part of scalar values
@@ -139,6 +141,7 @@ v2.6.1.beta 11/??/2014
 	- Regarding the local modeling option '2D1/2 triangulation' of the C2C distances computation:
 		* it was much slower than it should (potentially much more points were triangulated than necessary)
 		* it could crash if many duplicate points were present in the reference cloud
+	- Performin the ICP registration with very few points (e.g. 4) could be much slower than expected
 
 v2.6.0 10/24/2014
 - New methods:

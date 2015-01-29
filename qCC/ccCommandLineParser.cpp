@@ -100,6 +100,7 @@ static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
 static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 static const char COMMAND_PTX_COMPUTE_NORMALS[]				= "COMPUTE_PTX_NORMALS";
+static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -970,12 +971,56 @@ bool ccCommandLineParser::commandRoughness(QStringList& arguments, QDialog* pare
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
 	for (unsigned i=0; i<m_clouds.size(); ++i)
-		entities[i]=m_clouds[i].pc;
+		entities[i] = m_clouds[i].pc;
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ROUGHNESS,entities,parent,additionalParameters))
 	{
 		//save output
 		if (s_autoSaveMode && !saveClouds(QString("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
+			return false;
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
+{
+	Print("[APPLY TRANSFORMATION]");
+
+	if (arguments.empty())
+		return Error(QString("Missing parameter: transformation file after \"-%1\"").arg(COMMAND_APPLY_TRANSFORMATION));
+
+	QString filename = arguments.takeFirst();
+	ccGLMatrix mat;
+	if (!mat.fromAsciiFile(filename))
+		return Error(QString("Failed to read transformation matrix file '%1'!").arg(COMMAND_APPLY_TRANSFORMATION).arg(filename));
+
+	Print(QString("Transformation:\n") + mat.toString(6));
+
+	if (m_clouds.empty() && m_meshes.empty())
+		return Error(QString("No entity on which to apply the transformation! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_APPLY_TRANSFORMATION));
+
+	//apply transformation
+	if (!m_clouds.empty())
+	{
+		for (unsigned i=0; i<m_clouds.size(); ++i)
+		{
+			m_clouds[i].pc->applyGLTransformation_recursive(&mat);
+			m_clouds[i].pc->setName(m_clouds[i].pc->getName()+".transformed");
+		}
+		//save output
+		if (s_autoSaveMode && !saveClouds("TRANSFORMED"))
+			return false;
+	}
+	if (!m_meshes.empty())
+	{
+		for (unsigned i=0; i<m_meshes.size(); ++i)
+		{
+			m_meshes[i].mesh->applyGLTransformation_recursive(&mat);
+			m_meshes[i].mesh->setName(m_meshes[i].mesh->getName()+".transformed");
+		}
+		//save output
+		if (s_autoSaveMode && !saveMeshes("TRANSFORMED"))
 			return false;
 	}
 
@@ -2624,6 +2669,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_ROUGHNESS))
 		{
 			success = commandRoughness(arguments,parent);
+		}
+		// "APPLY_TRANSFO" (APPLY 4x4 TRANSFORMATION)
+		else if (IsCommand(argument,COMMAND_APPLY_TRANSFORMATION))
+		{
+			success = commandApplyTransformation(arguments);
 		}
 		//Import Bundler file + orthorectification
 		else if (IsCommand(argument,COMMAND_BUNDLER))

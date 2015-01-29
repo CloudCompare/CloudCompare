@@ -54,6 +54,7 @@ protected:
 	bool commandSaveMeshes					(QStringList& arguments);
 	bool commandAutoSave					(QStringList& arguments);
 	bool setActiveSF						(QStringList& arguments);
+	bool commandApplyTransformation			(QStringList& arguments);
 
 protected:
 

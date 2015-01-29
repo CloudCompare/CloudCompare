@@ -22,6 +22,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <stdio.h>
+#include <assert.h>
 
 //////////// STRING HANDLING ////////////////////
 inline void upperStr(char *s) {while(*s) {if(((*s)>='a')&&((*s)<='z')) (*s)+='A'-'a'; s++;}}
@@ -117,11 +118,9 @@ bool PdmsLexer::initializeSession()
 void PdmsLexer::closeSession(bool destroyLoadedObject)
 {
 	dictionnary.clear();
-	if(destroyLoadedObject)
+	if (destroyLoadedObject && loadedObject)
 	{
-		if(loadedObject)
-			delete loadedObject;
-		loadedObject = NULL;
+		PdmsObjects::Stack::Detroy(loadedObject);
 	}
 }
 
@@ -482,13 +481,19 @@ PdmsParser::PdmsParser()
 
 PdmsParser::~PdmsParser()
 {
-	if(currentCommand)
+	if (currentCommand)
+	{
 		delete currentCommand;
-	if(currentItem)
+		currentCommand = 0;
+	}
+	
+	if (currentItem)
 	{
 		currentItem = currentItem->getRoot();
-		delete currentItem;
+		PdmsObjects::Stack::Detroy(currentItem);
 	}
+
+	PdmsObjects::Stack::Clear();
 }
 
 void PdmsParser::linkWithSession(PdmsLexer *s)
@@ -502,73 +507,96 @@ void PdmsParser::linkWithSession(PdmsLexer *s)
 
 bool PdmsParser::processCurrentToken()
 {
-	Token currentToken;
-	PdmsObjects::GenericItem *item;
-
-	if(!session)
+	if (!session)
+	{
+		assert(false);
 		return false;
-	currentToken = session->getCurrentToken();
+	}
+
+	Token currentToken = session->getCurrentToken();
 	switch(currentToken)
 	{
 	case PDMS_UNUSED:
 		break;
+	
 	case PDMS_UNKNOWN:
 		session->printWarning("Unknown token");
 		return false;
+	
 	case PDMS_EOS:
 		break;
+	
 	case PDMS_NUM_VALUE:
-		//There should be a activ command, and it should handle the value
-		if(!(currentCommand && currentCommand->handle(session->valueFromBuffer())))
+		//There should be a active command, and it should handle the value
+		if (!currentCommand || !currentCommand->handle(session->valueFromBuffer()))
 		{
 			session->printWarning("Unexpected numerical value");
 			return false;
 		}
 		break;
+	
 	case PDMS_NAME_STR:
-		//There should be a activ command, and it should handle the char string
-		if(!(currentCommand && currentCommand->handle(session->nameFromBuffer())))
+		//There should be a active command, and it should handle the char string
+		if (!currentCommand || !currentCommand->handle(session->nameFromBuffer()))
 		{
 			session->printWarning("Last token cannot be associated with a name");
 			return false;
 		}
 		break;
+	
 	default:
-		//If there is an activ command
-		if(currentCommand)
+		//If there is an active command
+		if (currentCommand)
 		{
-			//If the activ command can handle the new token, it's ok
-			if(currentCommand->handle(currentToken)) return true;
-			//Else, the token must be a new command. We execute the activ command and delete it
-			item = currentItem;
-			if(!currentCommand->execute(&item))
+			//If the active command can handle the new token, it's ok
+			if (currentCommand->handle(currentToken))
+				return true;
+			
+			//Else, the token must be a new command. We execute the active command and delete it
+			PdmsObjects::GenericItem* item = currentItem;
+			bool success = currentCommand->execute(item);
+			delete currentCommand;
+			currentCommand = NULL;
+			if (!success)
 			{
+				assert(false);
 				session->printWarning("Unable to resolve previous command (this token may be unexpected in current command)");
-				delete currentCommand;
 				return false;
 			}
-			delete currentCommand;
-			currentCommand=NULL;
 			//The command execution could have changed the current item
-			if(item) currentItem = item;
-			else if(!root && currentItem) {root=currentItem->getRoot(); currentItem=NULL;}
-			else if(currentItem)
+			if (item)
 			{
-				session->printWarning("Trying to create a second root for elements hierarchy");
-				return false;
+				currentItem = item;
+			}
+			else if (currentItem)
+			{
+				if (!root)
+				{
+					root = currentItem->getRoot();
+					currentItem = NULL;
+				}
+				else
+				{
+					assert(false);
+					session->printWarning("Trying to create a second root for elements hierarchy");
+					return false;
+				}
 			}
 		}
-		if(currentToken == PDMS_RETURN)
+		if (currentToken == PDMS_RETURN)
 		{
 			session->finish();
-			return true;
 		}
-		//Here, we must create a new command from the token speciffied by the lexer
-		currentCommand=PdmsCommands::Command::Create(currentToken);
-		if(!currentCommand)
+		else
 		{
-			session->printWarning("Unknown command");
-			return false;
+			//Here, we must create a new command from the token speciffied by the lexer
+			currentCommand = PdmsCommands::Command::Create(currentToken);
+			if (!currentCommand)
+			{
+				session->printWarning("Unknown command");
+				assert(false);
+				return false;
+			}
 		}
 		break;
 	}
@@ -577,37 +605,31 @@ bool PdmsParser::processCurrentToken()
 
 bool PdmsParser::parseSessionContent()
 {
-	if(!session)
-		return false;
+	PdmsObjects::Stack::Init();
 
-	if(!PdmsCommands::ElementCreation::Initialize())
-		return false;
-	if(!session->initializeSession())
+	if (!session  || !session->initializeSession())
 	{
-		PdmsCommands::ElementCreation::Finalize();
 		return false;
 	}
 
-	while(session->gotoNextToken())
+	while (session->gotoNextToken())
 	{
-		if(!processCurrentToken())
+		if (!processCurrentToken())
 		{
 			session->closeSession(true);
-			PdmsCommands::ElementCreation::Finalize();
 			return false;
 		}
 	}
 	//If the hierarchy root has not yet been computed, do it now.
-	if(!root)
+	if (!root)
 		root = currentItem->getRoot();
 	//else check that the current item doesn't belong to a new root
-	else if(currentItem->getRoot()!=root)
+	else if (currentItem->getRoot() != root)
 		session->printWarning("there could be several hierarchy root specified in this file");
-	if(root)
+	if (root)
 		root->convertCoordinateSystem();
 	session->setLoadedObject(root);
 	session->closeSession(false);
-	PdmsCommands::ElementCreation::Finalize();
 	return true;
 }
 

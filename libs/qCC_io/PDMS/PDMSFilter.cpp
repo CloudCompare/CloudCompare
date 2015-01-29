@@ -46,10 +46,12 @@ bool PDMSFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) co
 	return false;
 }
 
+typedef std::pair<PdmsTools::PdmsObjects::GenericItem*,ccHObject*> PdmsAndCCPair;
+
 CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	PdmsParser parser;
-	PdmsFileSession session(filename.toStdString());
+	PdmsFileSession session(qPrintable(filename)); //DGM: warning, toStdString doesn't preserve "local" characters
 
 	parser.linkWithSession(&session);
 	if(parser.parseSessionContent())
@@ -57,15 +59,12 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 		PdmsTools::PdmsObjects::GenericItem* pdmsmodel = parser.getLoadedObject(true);
 		assert(pdmsmodel);
 
-		std::vector< std::pair<PdmsTools::PdmsObjects::GenericItem*,ccHObject*> > treeSync;
-		std::pair<PdmsTools::PdmsObjects::GenericItem*,ccHObject*> currentPair;
-		currentPair.first = pdmsmodel;
-		currentPair.second = &container;
-		treeSync.push_back(currentPair);
+		std::vector< PdmsAndCCPair > treeSync;
+		treeSync.push_back(PdmsAndCCPair(pdmsmodel,&container));
 
 		while (!treeSync.empty())
 		{
-			currentPair = treeSync.back();
+			PdmsAndCCPair currentPair = treeSync.back();
 			treeSync.pop_back();
 
 			if (currentPair.first->isGroupElement())
@@ -73,30 +72,28 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 				PdmsTools::PdmsObjects::GroupElement* group = static_cast<PdmsTools::PdmsObjects::GroupElement*>(currentPair.first);
 
 				//primitives
-				for (std::list<PdmsTools::PdmsObjects::DesignElement*>::const_iterator it = group->elements.begin(); it!=group->elements.end();++it)
 				{
-					std::pair<PdmsTools::PdmsObjects::GenericItem*,ccHObject*> newPair;
-					newPair.first = *it;
-					newPair.second = currentPair.second;
-					treeSync.push_back(newPair);
+					for (std::list<PdmsTools::PdmsObjects::DesignElement*>::const_iterator it = group->elements.begin(); it != group->elements.end(); ++it)
+						treeSync.push_back(PdmsAndCCPair(*it,currentPair.second));
 				}
 
 				//sub-groups
-				for (std::list<PdmsTools::PdmsObjects::GroupElement*>::const_iterator it2 = group->subhierarchy.begin(); it2!=group->subhierarchy.end();++it2)
 				{
-					std::pair<PdmsTools::PdmsObjects::GenericItem*,ccHObject*> newPair;
-					newPair.first = *it2;
-					newPair.second = new ccHObject((*it2)->name);
-					currentPair.second->addChild(newPair.second);
-					treeSync.push_back(newPair);
+					for (std::list<PdmsTools::PdmsObjects::GroupElement*>::const_iterator it = group->subhierarchy.begin(); it != group->subhierarchy.end(); ++it)
+					{
+						ccHObject* subGroup = new ccHObject((*it)->name);
+						currentPair.second->addChild(subGroup);
+
+						treeSync.push_back(PdmsAndCCPair(*it,subGroup));
+					}
 				}
 			}
 			else
 			{
 				//Convert PDMS GenericItem to the corresponding ccHObject
 				ccMesh* primitive = 0;
-				QString unsupportedPrimitiveStr;
-				switch(currentPair.first->getType())
+				QString unsupportedPrimitiveStr("unknown");
+				switch (currentPair.first->getType())
 				{
 				case PDMS_SCYLINDER:
 					{
@@ -115,6 +112,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 						PdmsTools::PdmsObjects::RTorus* pdmsRTor = static_cast<PdmsTools::PdmsObjects::RTorus*>(currentPair.first);
 						primitive = new ccTorus(pdmsRTor->inside_radius,pdmsRTor->outside_radius,pdmsRTor->angle/**M_PI/180.0*/,false,pdmsRTor->height,0,pdmsRTor->name);
 					}
+					break;
 				case PDMS_DISH:
 					{
 						PdmsTools::PdmsObjects::Dish* pdmsDish = static_cast<PdmsTools::PdmsObjects::Dish*>(currentPair.first);
@@ -177,8 +175,8 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 					ccGLMatrix trans;
 					assert(currentPair.first->isCoordinateSystemUpToDate);
 					trans.setTranslation(currentPair.first->position);
-					for (unsigned c=0;c<3;++c)
-						for (unsigned l=0;l<3;++l)
+					for (unsigned c=0; c<3; ++c)
+						for (unsigned l=0; l<3; ++l)
 							trans.getColumn(c)[l] = static_cast<float>(currentPair.first->orientation[c].u[l]);
 
 					primitive->setGLTransformation(trans);

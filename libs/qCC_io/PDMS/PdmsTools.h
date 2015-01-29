@@ -133,7 +133,6 @@ namespace PdmsTools
 		static bool isUnit(Token t) {return (t==PDMS_MILLIMETRE || t==PDMS_METRE);}
 	};
 
-
 	namespace PdmsObjects
 	{
 		//! Generic item
@@ -191,6 +190,15 @@ namespace PdmsTools
 		protected:
 			bool isOrientationValid(unsigned i) const;
 			bool completeOrientation();
+		};
+
+		//! Item stack
+		class Stack
+		{
+		public:
+			static void Init();
+			static void Clear();
+			static void Detroy(GenericItem* &item);
 		};
 
 		//! Design element
@@ -404,9 +412,10 @@ namespace PdmsTools
 			Loop() {}
 			virtual ~Loop()
 			{
-				while(!loop.empty())
+				while (!loop.empty())
 				{
-					delete loop.back();
+					GenericItem* v = loop.back();
+					Stack::Detroy(v);
 					loop.pop_back();
 				}
 			}
@@ -426,13 +435,13 @@ namespace PdmsTools
 			PointCoordinateType height;
 
 			Extrusion() : loop(0), height(0.0f) {}
-			virtual ~Extrusion() {if(loop) delete loop;}
+			virtual ~Extrusion() {if(loop) { GenericItem* i = loop; Stack::Detroy(i); } }
 
 			//reimplemented from GenericItem
-			virtual void remove(Loop *l) {if(l==loop) loop=NULL;}
+			virtual void remove(Loop *l) {if (l==loop) loop=NULL;}
 			virtual bool push(GenericItem *l);
-			virtual void remove(GenericItem *i) {if(loop==i) loop=NULL;}
-			virtual bool setValue(Token t, PointCoordinateType value) {if(t==PDMS_HEIGHT){height=value; return true;} return false;}
+			virtual void remove(GenericItem *i) {if (loop==i) loop=NULL;}
+			virtual bool setValue(Token t, PointCoordinateType value) {if (t==PDMS_HEIGHT) {height=value; return true;} return false;}
 			virtual Token getType() const {return negative ? PDMS_NEXTRU : PDMS_EXTRU;}
 			virtual std::pair<int,int> write(std::ostream &output, int nbtabs=0) const;
 			virtual PointCoordinateType surface() const;
@@ -460,7 +469,7 @@ namespace PdmsTools
 			virtual bool handle(const char* str) {return false;}
 			virtual bool handle(Token t) {return false;}
 			virtual bool isValid() const {return false;}
-			virtual bool execute(PdmsObjects::GenericItem **item) const {return false;}
+			virtual bool execute(PdmsObjects::GenericItem* &item) const {return false;}
 		};
 
 		class NumericalValue : public Command
@@ -473,7 +482,7 @@ namespace PdmsTools
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool isValid() const;
 			virtual PointCoordinateType getValue() const;
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
 		class DistanceValue : public NumericalValue
@@ -487,7 +496,7 @@ namespace PdmsTools
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue) {return NumericalValue::handle(numvalue);}
 			PointCoordinateType getValueInWorkingUnit() const;
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
 		class Reference : public Command
@@ -504,7 +513,7 @@ namespace PdmsTools
 			virtual bool isValid() const;
 			virtual bool isNameReference() const;
 			virtual bool isTokenReference() const;
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 
 		protected:
 			int isSet() const;
@@ -536,7 +545,7 @@ namespace PdmsTools
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool handle(const char* str);
 			virtual bool isValid() const;
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
 		class Orientation : public Command
@@ -553,7 +562,7 @@ namespace PdmsTools
 			virtual bool handle(const char* str);
 			virtual bool isValid() const;
 			bool getAxes(CCVector3 &x, CCVector3 &y, CCVector3 &z) const;
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 
 		protected:
 			int getNbComponents() const;
@@ -568,34 +577,30 @@ namespace PdmsTools
 			Name() : Command(PDMS_NAME) {memset(name, 0, c_max_str_length);}
 			virtual bool handle(const char* str)
 			{
-				if(strlen(name)>0)
+				if (strlen(name) > 0)
 					return false;
 				strcpy(name, str);
 				return true;
 			}
 			virtual bool isValid() const
 			{
-				return strlen(name)>0;
+				return strlen(name) > 0;
 			}
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
 		class ElementCreation : public Command
 		{
 		public:
-			typedef std::list<PdmsObjects::GenericItem*> ElementsStack;
 			Token elementType;
 			std::vector<std::string> path;
-			static ElementsStack *s_elementsStack;
 
 			ElementCreation() : Command(PDMS_CREATE) {elementType=PDMS_INVALID_TOKEN;}
 			virtual bool handle(const char*str);
 			virtual bool handle(Token t);
 			bool isValid() const;
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 
-			static bool Initialize();
-			static void Finalize();
 			static const char* GetDefaultElementName(Token token);
 
 		protected:
@@ -611,7 +616,7 @@ namespace PdmsTools
 			virtual bool handle(Token t) {end.command=command; return end.handle(t);}
 			virtual bool handle(const char* str) {end.command=command; return end.handle(str);}
 			virtual bool isValid() const {if(!end.command) return true; return end.isValid();}
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
 		class HierarchyNavigation : public Command
@@ -619,7 +624,7 @@ namespace PdmsTools
 		public:
 			HierarchyNavigation(Token t) : Command(t) {}
 			virtual bool isValid() const {return (PdmsToken::isGroupElement(command));}
-			virtual bool execute(PdmsObjects::GenericItem **item) const;
+			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};
 
 	};

@@ -425,6 +425,7 @@
       <string>Fit</string>
      </property>
      <addaction name="actionFitPlane"/>
+     <addaction name="actionFitSphere"/>
      <addaction name="actionFitFacet"/>
      <addaction name="actionFitQuadric"/>
     </widget>
@@ -2719,6 +2720,14 @@
    </property>
    <property name="toolTip">
     <string>Pick three points to make a cloud or mesh 'level'</string>
+   </property>
+  </action>
+  <action name="actionFitSphere">
+   <property name="text">
+    <string>Sphere</string>
+   </property>
+   <property name="toolTip">
+    <string>Fits a sphere on the selected cloud</string>
    </property>
   </action>
  </widget>

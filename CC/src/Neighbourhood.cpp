@@ -105,9 +105,9 @@ const PointCoordinateType* Neighbourhood::getHeightFunction(uchar* dimsHF/*=0*/)
 		computeHeightFunction();
 	if (dimsHF)
 	{
-		dimsHF[0]=theHeightFunctionDirections[0];
-		dimsHF[1]=theHeightFunctionDirections[1];
-		dimsHF[2]=theHeightFunctionDirections[2];
+		dimsHF[0] = theHeightFunctionDirections[0];
+		dimsHF[1] = theHeightFunctionDirections[1];
+		dimsHF[2] = theHeightFunctionDirections[2];
 	}
 	return ((structuresValidity & HEIGHT_FUNCTION) ? theHeightFunction : 0);
 }

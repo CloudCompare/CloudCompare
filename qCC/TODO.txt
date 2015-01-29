@@ -25,11 +25,7 @@ Big ones:
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
-	- replace loaded clouds by their subsampled version (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
 	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
-	- apply transformation (https://github.com/cloudcompare/trunk/issues/194)
-	- delete all scalar fields (http://cloudcompare.org/forum/viewtopic.php?t=1131)
-	- apply the banding (color) height ramp (http://cloudcompare.org/forum/viewtopic.php?t=1131)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 [*] Update qKinect with the Kinect for Windows SDK (1.8)

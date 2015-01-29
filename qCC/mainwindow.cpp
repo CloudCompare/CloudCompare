@@ -56,6 +56,7 @@
 #include <ccFacet.h>
 #include <ccQuadric.h>
 #include <ccExternalFactory.h>
+#include <ccSphere.h>
 
 //qCC_io
 #include <ccGlobalShiftManager.h>
@@ -912,6 +913,7 @@ void MainWindow::connectActions()
 	connect(actionExtractSections,				SIGNAL(triggered()),	this,		SLOT(activateSectionExtractionMode()));
 	//"Tools > Fit" menu
 	connect(actionFitPlane,						SIGNAL(triggered()),	this,		SLOT(doActionFitPlane()));
+	connect(actionFitSphere,					SIGNAL(triggered()),	this,		SLOT(doActionFitSphere()));
 	connect(actionFitFacet,						SIGNAL(triggered()),	this,		SLOT(doActionFitFacet()));
 	connect(actionFitQuadric,					SIGNAL(triggered()),	this,		SLOT(doActionFitQuadric()));
 	//"Tools > Other" menu
@@ -8759,6 +8761,57 @@ void MainWindow::doActionScalarFieldArithmetic()
 	updateUI();
 }
 
+void MainWindow::doActionFitSphere()
+{
+	size_t selNum = m_selectedEntities.size();
+
+	double outliersRatio = 0.5;
+	double confidence = 0.99;
+
+	ccProgressDialog pDlg(true,this);
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+		if (!cloud)
+			continue;
+
+		CCVector3 center;
+		PointCoordinateType radius;
+		double rms;
+		if (!CCLib::GeometricalAnalysisTools::detectSphereRobust(cloud,
+			outliersRatio,
+			center,
+			radius,
+			rms,
+			&pDlg,
+			confidence))
+		{
+			ccLog::Warning(QString("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
+			continue;
+		}
+
+		ccLog::Print(QString("[Fit sphere] Cloud '%1': center (%2,%3,%4) - radius = %5 [RMS = %6]")
+			.arg(cloud->getName())
+			.arg(center.x)
+			.arg(center.y)
+			.arg(center.z)
+			.arg(radius)
+			.arg(rms));
+
+		ccGLMatrix trans;
+		trans.setTranslation(center);
+		ccSphere* sphere = new ccSphere(radius,&trans,QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
+		cloud->addChild(sphere);
+		sphere->setDisplay(cloud->getDisplay());
+		sphere->prepareDisplayForRefresh();
+		addToDB(sphere,false,false,false);
+	}
+	
+	refreshAll();
+}
+
 void MainWindow::doActionFitPlane()
 {
 	doComputePlaneOrientation(false);
@@ -10901,6 +10954,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionRoughness->setEnabled(atLeastOneCloud);
 	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
 	actionFitPlane->setEnabled(atLeastOneEntity);
+	actionFitSphere->setEnabled(atLeastOneCloud);
 	actionLevel->setEnabled(atLeastOneEntity);
 	actionFitFacet->setEnabled(atLeastOneEntity);
 	actionFitQuadric->setEnabled(atLeastOneCloud);

@@ -305,6 +305,7 @@ protected slots:
 	void doSphericalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doActionFitPlane();
+	void doActionFitSphere();
 	void doActionFitFacet();
 	void doActionFitQuadric();
 	void doShowPrimitiveFactory();

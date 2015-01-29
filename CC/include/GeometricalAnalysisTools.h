@@ -167,6 +167,43 @@ public:
 									GenericProgressCallback* progressCb = 0,
 									DgmOctree* inputOctree = 0);
 
+	//! Tries to detect a sphere in a point cloud
+	/** Inspired from "Parameter Estimation Techniques: A Tutorial with Application
+		to Conic Fitting" by Zhengyou Zhang (Inria Technical Report n°2676).
+		More specifically the section 9.5 about Least Median of Squares.
+		\param[in]  cloud input cloud
+		\param[in]  outliersRatio proportion of outliers (between 0 and 1)
+		\param[out] center center of the detected sphere
+		\param[out] radius radius of the detected sphere
+		\param[out] rms residuals RMS for the detected sphere
+		\param[in] progressCb for progress notification (optional)
+		\param[in] confidence probability that the detected sphere is the right one (strictly below 1)
+		\result success
+	**/
+	static bool detectSphereRobust(	GenericIndexedCloudPersist* cloud,
+									double outliersRatio,
+									CCVector3& center,
+									PointCoordinateType& radius,
+									double& rms,
+									GenericProgressCallback* progressCb = 0,
+									double confidence = 0.99);
+
+	//! Computes the center and radius of a sphere passing through 4 points
+	/** \param[in] A first point
+		\param[in] B second point
+		\param[in] C third point
+		\param[in] D fourth point
+		\param[out] center center of the sphere
+		\param[out] radius radius of the sphere
+		\return success
+	**/
+	static bool computeSphereFrom4(	const CCVector3& A,
+									const CCVector3& B,
+									const CCVector3& C,
+									const CCVector3& D,
+									CCVector3& center,
+									PointCoordinateType& radius );
+
 protected:
 
 	//! Computes cell curvature inside a cell
@@ -213,6 +250,13 @@ protected:
 	static bool flagDuplicatePointsInACellAtLevel(	const DgmOctree::octreeCell& cell,
 													void** additionalParameters,
 													NormalizedProgress* nProgress = 0);
+
+	//! Refines the estimation of a sphere by (iterative) least-squares
+	static bool refineSphereLS(	GenericIndexedCloudPersist* cloud,
+								CCVector3& center,
+								PointCoordinateType& radius,
+								double minReltaiveCenterShift = 1.0e-3);
+
 };
 
 }

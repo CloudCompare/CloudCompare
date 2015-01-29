@@ -141,7 +141,10 @@ v2.6.1.beta 11/??/2014
 	- Regarding the local modeling option '2D1/2 triangulation' of the C2C distances computation:
 		* it was much slower than it should (potentially much more points were triangulated than necessary)
 		* it could crash if many duplicate points were present in the reference cloud
-	- Performin the ICP registration with very few points (e.g. 4) could be much slower than expected
+	- Performing the ICP registration with very few points (e.g. 4) could be much slower than expected
+	- Files in a folder with 'local' language characters (accetns, etc.) could not be opened by several I/O filters
+		(LAS, E57, PCD and PDMS)
+	- Memory leaks fixed in PDMS I/O filter (the R-TORUS primitive was not even imported to the main DB!)
 
 v2.6.0 10/24/2014
 - New methods:

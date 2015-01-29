@@ -158,13 +158,13 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		imf.extensionsAdd("nor","http://www.libe57.org/E57_NOR_surface_normals.txt");
 
 	//GUID
-	scanNode.set("guid", e57::StringNode(imf, guidStr.toStdString()));	//required
+	scanNode.set("guid", e57::StringNode(imf, qPrintable(guidStr)));	//required
 
 	//Name
 	if (!cloud->getName().isEmpty())
-		scanNode.set("name", e57::StringNode(imf, cloud->getName().toStdString()));
+		scanNode.set("name", e57::StringNode(imf, qPrintable(cloud->getName())));
 	else
-		scanNode.set("name", e57::StringNode(imf, QString("Scan %1").arg(s_absoluteScanIndex).toStdString()));
+		scanNode.set("name", e57::StringNode(imf, qPrintable(QString("Scan %1").arg(s_absoluteScanIndex))));
 
 	//Description
 	scanNode.set("description", e57::StringNode(imf, "Imported from CloudCompare (EDF R&D / Telecom ParisTech)"));
@@ -525,13 +525,13 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	e57::StructureNode imageNode = e57::StructureNode(imf);
 
 	//GUID
-	imageNode.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));	//required
+	imageNode.set("guid", e57::StringNode(imf, qPrintable(GetNewGuid())));	//required
 
 	//Name
 	if(!image->getName().isEmpty())
-		imageNode.set("name", e57::StringNode(imf, image->getName().toStdString()));
+		imageNode.set("name", e57::StringNode(imf, qPrintable(image->getName())));
 	else
-		imageNode.set("name", e57::StringNode(imf, QString("Image %1").arg(s_absoluteImageIndex).toStdString()));
+		imageNode.set("name", e57::StringNode(imf, qPrintable(QString("Image %1").arg(s_absoluteImageIndex))));
 
 	//Description
 	//imageNode.set("description", e57::StringNode(imf, "Imported from CloudCompare (EDF R&D / Telecom ParisTech)"));
@@ -546,7 +546,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	//scanNode.set("relativeHumidity",	e57::FloatNode(imf,relativeHumidity));
 	//scanNode.set("atmosphericPressure",	e57::FloatNode(imf,atmosphericPressure));
 
-	imageNode.set("associatedData3DGuid", e57::StringNode(imf, scanGUID.toStdString()));
+	imageNode.set("associatedData3DGuid", e57::StringNode(imf, qPrintable(scanGUID)));
 
 	//acquisitionDateTime
 	{
@@ -604,7 +604,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	//	//nothing to do
 	//}
 
-	imageNode.set(cameraRepresentationStr.toStdString(), cameraRepresentation);
+	imageNode.set(qPrintable(cameraRepresentationStr), cameraRepresentation);
 	images2D.append(imageNode);
 	blob.write((uint8_t*)ba.data(), 0, (size_t)imageSize);
 
@@ -630,7 +630,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return CC_FERR_NO_SAVE;
 
 	//Write file to disk
-	e57::ImageFile imf(filename.toStdString(), "w");
+	e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
 	if (!imf.isOpen())
 		return CC_FERR_WRITING;
 
@@ -651,7 +651,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 		// Set per-file properties.
 		/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
 		root.set("formatName", e57::StringNode(imf, "ASTM E57 3D Imaging Data File"));
-		root.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));
+		root.set("guid", e57::StringNode(imf, qPrintable(GetNewGuid())));
 
 		// Get ASTM version number supported by library, so can write it into file
 		int astmMajor;
@@ -2039,7 +2039,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 	s_loadParameters = parameters;
 
 	//Read file from disk
-	e57::ImageFile imf(filename.toStdString(), "r");
+	e57::ImageFile imf(qPrintable(filename), "r"); //DGM: warning, toStdString doesn't preserve "local" characters
 	if (!imf.isOpen())
 		return CC_FERR_READING;
 

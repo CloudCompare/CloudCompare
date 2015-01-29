@@ -20,6 +20,9 @@
 
 #include "BaseFilter.h"
 
+//Qt
+#include <QString>
+
 class SIFTExtractDlg;
 
 //! SIFT keypoints extraction
@@ -46,7 +49,7 @@ protected:
 	int m_nr_scales_per_octave;
 	float m_min_contrast;
 	bool m_use_min_contrast;
-	std::string m_field_to_use;
+	QString m_field_to_use;
 	std::string m_field_to_use_no_space;
 
 	enum Modes {RGB, SCALAR_FIELD};

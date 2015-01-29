@@ -66,9 +66,7 @@ void BaseFilter::throwError(int errCode)
 {
 	QString errMsg = getErrorMessage(errCode);
 
-	//we display message in a popup dialog
-	//ccConsole::Error(errMsg.toStdString().c_str());
-	//DGM: libraries shouldn't issue message this way! The information should be sent to the plugin!
+	//DGM: libraries shouldn't issue message themselves! The information should be sent to the plugin!
 	emit newErrorMessage(errMsg);
 }
 
@@ -316,7 +314,6 @@ ccHObject::Container BaseFilter::getSelectedThatHaveMetaData(const QString key) 
 	}
 
 	return new_sel;
-
 }
 
 void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities)
@@ -339,8 +336,6 @@ void BaseFilter::getAllEntitiesThatHaveMetaData(QString key, ccHObject::Containe
 			entities.push_back(*it);
 	}
 }
-
-
 
 void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities)
 {

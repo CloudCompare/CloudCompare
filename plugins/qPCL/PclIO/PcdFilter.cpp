@@ -118,7 +118,7 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		ori = Eigen::Quaternionf(eigrot);
 	}
 
-	if (pcl::io::savePCDFile( filename.toStdString(), *pclCloud, pos, ori, true) < 0)
+	if (pcl::io::savePCDFile( qPrintable(filename), *pclCloud, pos, ori, true) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
@@ -133,7 +133,7 @@ CC_FILE_ERROR PcdFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	PCLCloud::Ptr cloud_ptr_in(new PCLCloud);
 	//Load the given file
-	if (pcl::io::loadPCDFile(filename.toStdString(), *cloud_ptr_in, origin, orientation) < 0)
+	if (pcl::io::loadPCDFile(qPrintable(filename), *cloud_ptr_in, origin, orientation) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}

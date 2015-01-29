@@ -272,11 +272,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	//open binary file for writing
 	std::ofstream ofs;
-#if defined(CC_MAC_OS) || _MSC_VER <= 1500
-	ofs.open(qPrintable(filename), std::ios::out | std::ios::binary);
-#else
-	ofs.open(filename.toStdString(), std::ios::out | std::ios::binary);
-#endif
+	ofs.open(qPrintable(filename), std::ios::out | std::ios::binary); //DGM: warning, toStdString doesn't preserve "local" characters
 
 	if (ofs.fail())
 		return CC_FERR_WRITING;
@@ -563,11 +559,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 {
 	//opening file
 	std::ifstream ifs;
-#if defined(CC_MAC_OS) || _MSC_VER <= 1500
-	ifs.open(qPrintable(filename), std::ios::in | std::ios::binary);
-#else
-	ifs.open(filename.toStdString(), std::ios::in | std::ios::binary);
-#endif
+	ifs.open(qPrintable(filename), std::ios::in | std::ios::binary); //DGM: warning, toStdString doesn't preserve "local" characters
 
 	if (ifs.fail())
 		return CC_FERR_READING;

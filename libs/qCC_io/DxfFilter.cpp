@@ -602,7 +602,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 
 				polyLayerNames << layerName;
 				dxf.writeLayer(*dw, 
-					DL_LayerData(layerName.toStdString(), 0), 
+					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
 					std::string(""),
 					DL_Codes::green,
@@ -620,7 +620,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 
 				meshLayerNames << layerName;
 				dxf.writeLayer(*dw, 
-					DL_LayerData(layerName.toStdString(), 0), 
+					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
 					std::string(""),
 					DL_Codes::magenta,
@@ -687,7 +687,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 					flags |= 8; //3D polyline
 				dxf.writePolyline(	*dw,
 									DL_PolylineData(static_cast<int>(vertexCount),0,0,flags),
-									DL_Attributes(polyLayerNames[i].toStdString(), DL_Codes::bylayer, -1, "BYLAYER") );
+									DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER") ); //DGM: warning, toStdString doesn't preserve "local" characters
 
 				for (unsigned v=0; v<vertexCount; ++v)
 				{
@@ -717,7 +717,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 													C->x,C->y,C->z,
 													C->x,C->y,C->z,
 													lineWidth ),
-									DL_Attributes(meshLayerNames[j].toStdString(), DL_Codes::bylayer, -1, "BYLAYER"));
+									DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
 				}
 			}
 

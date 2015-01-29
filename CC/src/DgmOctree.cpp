@@ -61,7 +61,7 @@ public:
 
 	virtual ~octreeTreeCell()
 	{
-		for (uchar i=0;i<childrenCount;++i)
+		for (uchar i=0; i<childrenCount; ++i)
 			delete children[i];
 		delete children;
 	}
@@ -91,12 +91,12 @@ octreeTreeCell* getCell(OctreeCellCodeType truncatedCellCode, uchar level)
 	uchar bitDec = 3*level;
 
 	//we look for cell by descending down the tree (until we found it!)
-	for (uchar currentLevel=0;currentLevel<level;++currentLevel)
+	for (uchar currentLevel=0; currentLevel<level; ++currentLevel)
 	{
 		bitDec -= 3;
 		uchar childPos = (uchar)((truncatedCellCode >> bitDec) & 7);
-		uchar i=0,count=currentCell->childrenCount;
-		for (;i<count;++i)
+		uchar i = 0, count = currentCell->childrenCount;
+		for ( ; i<count; ++i)
 		{
 			if (currentCell->children[i]->relativePos == childPos)
 			{
@@ -119,7 +119,7 @@ void getPointsInTreeCell(octreeTreeCell* cell, CCLib::DgmOctree::NeighboursSet& 
 {
 	if (cell->childrenCount) //no points in current cell, only children!
 	{
-		for (uchar i=0;i<cell->childrenCount;++i)
+		for (uchar i=0; i<cell->childrenCount; ++i)
 			getPointsInTreeCell(cell->children[i],set,cloud);
 	}
 	else //leaf cell
@@ -164,7 +164,7 @@ DgmOctree::~DgmOctree()
 #ifdef OCTREE_TREE_TEST
 	if (s_root)
 		delete s_root;
-	s_root=0;
+	s_root = 0;
 #endif
 }
 
@@ -191,7 +191,11 @@ int DgmOctree::build(GenericProgressCallback* progressCb)
 	return genericBuild(progressCb);
 }
 
-int DgmOctree::build(const CCVector3& octreeMin, const CCVector3& octreeMax, const CCVector3* pointsMinFilter/*=0*/, const CCVector3* pointsMaxFilter/*=0*/, GenericProgressCallback* progressCb)
+int DgmOctree::build(	const CCVector3& octreeMin,
+						const CCVector3& octreeMax,
+						const CCVector3* pointsMinFilter/*=0*/,
+						const CCVector3* pointsMaxFilter/*=0*/,
+						GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!m_thePointsAndTheirCellCodes.empty())
 		clear();
@@ -446,7 +450,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		assert(!s_root);
 		s_root = root;
 		//delete root;
-		//root=0;
+		//root = 0;
 
 		//check
 #ifdef _DEBUG
@@ -491,7 +495,7 @@ void DgmOctree::updateCellCountTable()
 
 void DgmOctree::computeCellsStatistics(uchar level)
 {
-	assert(level<=MAX_OCTREE_LEVEL);
+	assert(level <= MAX_OCTREE_LEVEL);
 
 	//empty octree case?!
 	if (m_thePointsAndTheirCellCodes.empty())
@@ -525,7 +529,7 @@ void DgmOctree::computeCellsStatistics(uchar level)
 	unsigned counter = 0;
 	unsigned cellCounter = 0;
 	unsigned maxCellPop = 0;
-	double sum=0.0, sum2=0.0;
+	double sum = 0.0, sum2 = 0.0;
 
 	for (; p != m_thePointsAndTheirCellCodes.end(); ++p)
 	{
@@ -2271,7 +2275,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 			{
 				if (current.toGrab) //don't ask any question and grab all points/children!
 				{
-					for (uchar i=0;i<current.cell->childrenCount;++i)
+					for (uchar i=0; i<current.cell->childrenCount; ++i)
 					{
 						desc.cell = current.cell->children[i];
 						desc.toGrab = true;
@@ -2282,7 +2286,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 				}
 				else //let's have a closer look
 				{
-					for (uchar i=0;i<current.cell->childrenCount;++i)
+					for (uchar i=0; i<current.cell->childrenCount; ++i)
 					{
 						octreeTreeCell* child = current.cell->children[i];
 
@@ -2644,51 +2648,51 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 			nNSS.pointsInNeighbourhood.resize(nNSS.pointsInSphericalNeighbourhood.size());
 
 		//don't forget to update the visited neighbourhood size!
-        nNSS.alreadyVisitedNeighbourhoodSize = minNeighbourhoodSize+1;
+		nNSS.alreadyVisitedNeighbourhoodSize = minNeighbourhoodSize+1;
 
 		nNSS.ready = true;
 	}
 #else
-    //current level cell size
-    const PointCoordinateType& cs = getCellSize(nNSS.level);
+	//current level cell size
+	const PointCoordinateType& cs = getCellSize(nNSS.level);
 
-    //we compute the minimal distance between the query point and all cell borders
-    PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+	//we compute the minimal distance between the query point and all cell borders
+	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
 
-    //we deduce the minimum cell neighbourhood size (integer) that includes the search sphere
-    int minNeighbourhoodSize = 1+(radius>minDistToBorder ? static_cast<int>(ceil((radius-minDistToBorder)/cs)) : 0);
+	//we deduce the minimum cell neighbourhood size (integer) that includes the search sphere
+	int minNeighbourhoodSize = 1+(radius>minDistToBorder ? static_cast<int>(ceil((radius-minDistToBorder)/cs)) : 0);
 
-    //if we don't have visited such a neighbourhood...
-    if (nNSS.alreadyVisitedNeighbourhoodSize<minNeighbourhoodSize)
-    {
-        //... let's look for the corresponding points
-        for (int i=nNSS.alreadyVisitedNeighbourhoodSize; i<minNeighbourhoodSize; ++i)
-            getPointsInNeighbourCellsAround(nNSS,i);
+	//if we don't have visited such a neighbourhood...
+	if (nNSS.alreadyVisitedNeighbourhoodSize<minNeighbourhoodSize)
+	{
+		//... let's look for the corresponding points
+		for (int i=nNSS.alreadyVisitedNeighbourhoodSize; i<minNeighbourhoodSize; ++i)
+			getPointsInNeighbourCellsAround(nNSS,i);
 
-        //don't forget to update the visited neighbourhood size!
-        nNSS.alreadyVisitedNeighbourhoodSize = minNeighbourhoodSize;
+		//don't forget to update the visited neighbourhood size!
+		nNSS.alreadyVisitedNeighbourhoodSize = minNeighbourhoodSize;
 	}
 #endif
 #endif
 
 	//squared distances comparison is faster!
-    double squareRadius = radius * radius;
-    unsigned numberOfEligiblePoints = 0;
+	double squareRadius = radius * radius;
+	unsigned numberOfEligiblePoints = 0;
 
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
-		//cell limit relatively to sphere tight bounding box
+	//cell limit relatively to sphere tight bounding box
 	//const PointCoordinateType& half_cs=getCellSize(nNSS.level+1); //half cell size at current level
 	//CCVector3 limitMin = nNSS.queryPoint-CCVector3(radius,radius,radius)-CCVector3(half_cs,half_cs,half_cs);
 	//CCVector3 limitMax = nNSS.queryPoint+CCVector3(radius,radius,radius)+CCVector3(half_cs,half_cs,half_cs);
 
 	//cell by cell scan
-    for (NeighbourCellsSet::iterator c = nNSS.cellsInNeighbourhood.begin(); c!=nNSS.cellsInNeighbourhood.end(); ++c)
-    {
+	for (NeighbourCellsSet::iterator c = nNSS.cellsInNeighbourhood.begin(); c!=nNSS.cellsInNeighbourhood.end(); ++c)
+	{
 		//we check the cell bounding box
 		/*if (limitMax.x < c->center.x || limitMin.x >  c->center.x
-			|| limitMax.y < c->center.y || limitMin.y >  c->center.y
-			|| limitMax.z < c->center.z || limitMin.z >  c->center.z)
-			continue; //sphere totally outside the cell
+		|| limitMax.y < c->center.y || limitMin.y >  c->center.y
+		|| limitMax.z < c->center.z || limitMin.z >  c->center.z)
+		continue; //sphere totally outside the cell
 		//*/
 
 		//distance between the new cell center and the sphere center
@@ -2728,7 +2732,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 		//else cell is totally outside
 		{
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
-         unsigned count = ((c+1) != nNSS.cellsInNeighbourhood.end() ? (c+1)->index : nNSS.pointsInSphericalNeighbourhood.size()) - c->index;
+			unsigned count = ((c+1) != nNSS.cellsInNeighbourhood.end() ? (c+1)->index : nNSS.pointsInSphericalNeighbourhood.size()) - c->index;
 			s_skippedPoints += static_cast<double>(count);
 #endif
 		}
@@ -2737,111 +2741,115 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 #else //TEST_CELLS_FOR_SPHERICAL_NN
 
 	//point by point scan
-    NeighboursSet::iterator p = nNSS.pointsInNeighbourhood.begin();
-    size_t k = nNSS.pointsInNeighbourhood.size();
-    for (size_t i=0; i<k; ++i,++p)
-    {
-        p->squareDistd = (*p->point - nNSS.queryPoint).norm2d();
-        //if the distance is inferior to the sphere radius...
-        if (p->squareDistd <= squareRadius)
-        {
-            //... we had it to the 'eligible points' part of the container
-            if (i > numberOfEligiblePoints)
-                std::swap(nNSS.pointsInNeighbourhood[i],nNSS.pointsInNeighbourhood[numberOfEligiblePoints]);
+	NeighboursSet::iterator p = nNSS.pointsInNeighbourhood.begin();
+	size_t k = nNSS.pointsInNeighbourhood.size();
+	for (size_t i=0; i<k; ++i,++p)
+	{
+		p->squareDistd = (*p->point - nNSS.queryPoint).norm2d();
+		//if the distance is inferior to the sphere radius...
+		if (p->squareDistd <= squareRadius)
+		{
+			//... we had it to the 'eligible points' part of the container
+			if (i > numberOfEligiblePoints)
+				std::swap(nNSS.pointsInNeighbourhood[i],nNSS.pointsInNeighbourhood[numberOfEligiblePoints]);
 
-            ++numberOfEligiblePoints;
+			++numberOfEligiblePoints;
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 			s_testedPoints += 1.0;
 #endif
-        }
-    }
+		}
+	}
 
 #endif //!TEST_CELLS_FOR_SPHERICAL_NN
 
-    //eventually (if requested) we sort the eligible points
-    if (sortValues && numberOfEligiblePoints>0)
+	//eventually (if requested) we sort the eligible points
+	if (sortValues && numberOfEligiblePoints > 0)
 		std::sort(nNSS.pointsInNeighbourhood.begin(),nNSS.pointsInNeighbourhood.begin()+numberOfEligiblePoints,PointDescriptor::distComp);
 
-    //return the number of eligible points
-    return numberOfEligiblePoints;
+	//return the number of eligible points
+	return numberOfEligiblePoints;
 }
-
-static PointCoordinateType c_neighbourhoodSizeExtractionFactor = static_cast<PointCoordinateType>(2.5);
 
 uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
 {
+	static const PointCoordinateType c_neighbourhoodSizeExtractionFactor = static_cast<PointCoordinateType>(2.5);
 	PointCoordinateType aim = radius / c_neighbourhoodSizeExtractionFactor;
-    uchar level = 1;
+	
+	int level = 1;
 	PointCoordinateType minValue = getCellSize(1)-aim;
 	minValue *= minValue;
-    for (uchar i=2; i<=MAX_OCTREE_LEVEL; ++i)
-    {
-        //The level with cell size as near as possible to the aim
-        PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
-        cellSizeDelta *= cellSizeDelta;
+	for (int i=2; i<=MAX_OCTREE_LEVEL; ++i)
+	{
+		//The level with cell size as near as possible to the aim
+		PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
+		cellSizeDelta *= cellSizeDelta;
 
-        if (cellSizeDelta < minValue)
-        {
-            level = i;
-            minValue = cellSizeDelta;
-        }
-    }
+		if (cellSizeDelta < minValue)
+		{
+			level = i;
+			minValue = cellSizeDelta;
+		}
+	}
 
-    return level;
+	return static_cast<uchar>(level);
 }
 
 uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const
 {
-    double estimatedTime[MAX_OCTREE_LEVEL];
-    estimatedTime[0] = 0.0;
+	unsigned ptsA = getNumberOfProjectedPoints();
+	unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
 
-    unsigned ptsA = getNumberOfProjectedPoints();
-    unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
-    int cellsA,cellsB,diffA,diffB;
+	int maxOctreeLevel = MAX_OCTREE_LEVEL;
+	if (std::min(ptsA,ptsB) < 16)
+		maxOctreeLevel = std::min(MAX_OCTREE_LEVEL, 5); //very small clouds
+	else if (std::max(ptsA,ptsB) < 2000000)
+		maxOctreeLevel = std::min(MAX_OCTREE_LEVEL, 10); //average size clouds
 
-    //ATTENTION i>=1
-    uchar bestLevel = 1;
-    for (uchar i=1; i<MAX_OCTREE_LEVEL; ++i)
-    {
-        diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
+	double estimatedTime[MAX_OCTREE_LEVEL];
+	estimatedTime[0] = 0.0;
+	int bestLevel = 1;
+	for (int i=1; i<maxOctreeLevel; ++i) //warning: i >= 1
+	{
+		int cellsA,cellsB,diffA,diffB;
+		diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
 
-        //we use a linear model for prediction
-        estimatedTime[i] = (double(ptsA)*double(ptsB)/double(cellsB)) * 0.001 + double(diffA);
+		//we use a linear model for prediction
+		estimatedTime[i] = ((static_cast<double>(ptsA)*ptsB) / cellsB) * 0.001 + diffA;
 
-        if (estimatedTime[i] < estimatedTime[bestLevel])
-            bestLevel = i;
-    }
+		if (estimatedTime[i] < estimatedTime[bestLevel])
+			bestLevel = i;
+	}
 
-    return bestLevel;
+	return static_cast<uchar>(bestLevel);
 }
 
 uchar DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
 {
-    uchar level=MAX_OCTREE_LEVEL;
-    double density=0,predDensity=0;
+	double density = 0, prevDensity = 0;
 
-    for (level=MAX_OCTREE_LEVEL; level>0; --level)
-    {
-        predDensity = density;
-        density = static_cast<double>(m_numberOfProjectedPoints)/static_cast<double>(getCellNumber(level));
-        if (density>=indicativeNumberOfPointsPerCell)
+	uchar level = MAX_OCTREE_LEVEL;
+	for (level=MAX_OCTREE_LEVEL; level>0; --level)
+	{
+		prevDensity = density;
+		density = static_cast<double>(m_numberOfProjectedPoints)/getCellNumber(level);
+		if (density >= indicativeNumberOfPointsPerCell)
 			break;
-    }
+	}
 
-    if (level<MAX_OCTREE_LEVEL)
+	if (level < MAX_OCTREE_LEVEL)
 	{
 		if (level == 0)
 		{
-			predDensity = density;
+			prevDensity = density;
 			density = static_cast<double>(m_numberOfProjectedPoints);
 		}
 
 		//we take the closest match
-		if (density-indicativeNumberOfPointsPerCell>indicativeNumberOfPointsPerCell-predDensity)
+		if (density-indicativeNumberOfPointsPerCell > indicativeNumberOfPointsPerCell-prevDensity)
 			++level;
 	}
 
-    return level;
+	return level;
 }
 
 uchar DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
@@ -3007,7 +3015,7 @@ ReferenceCloud* DgmOctree::getPointsInCellsWithSortedCellCodes(	cellCodesContain
     subset->clear(false);
 
     cellCodesContainer::const_iterator q=cellCodes.begin();
-    unsigned ind_p=0;
+    unsigned ind_p = 0;
     while (ind_p<m_numberOfProjectedPoints)
     {
         //we skip codes while the searched code is below the current one
@@ -3063,79 +3071,79 @@ void DgmOctree::diff(const cellCodesContainer& codesA, const cellCodesContainer&
 
 void DgmOctree::diff(uchar octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
 {
-    if (codesA.empty() && codesB.empty()) return;
+	if (codesA.empty() && codesB.empty()) return;
 
-    cellsContainer::const_iterator pA = codesA.begin();
-    cellsContainer::const_iterator pB = codesB.begin();
+	cellsContainer::const_iterator pA = codesA.begin();
+	cellsContainer::const_iterator pB = codesB.begin();
 
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(octreeLevel);
+	//binary shift for cell code truncation
+	uchar bitDec = GET_BIT_SHIFT(octreeLevel);
 
-    OctreeCellCodeType predCodeA = pA->theCode >> bitDec;
-    OctreeCellCodeType predCodeB = pB->theCode >> bitDec;
+	OctreeCellCodeType predCodeA = pA->theCode >> bitDec;
+	OctreeCellCodeType predCodeB = pB->theCode >> bitDec;
 
-    OctreeCellCodeType currentCodeA = 0;
-    OctreeCellCodeType currentCodeB = 0;
+	OctreeCellCodeType currentCodeA = 0;
+	OctreeCellCodeType currentCodeB = 0;
 
-    diffA=diffB=0;
-    cellsA=cellsB=0;
+	diffA = diffB = 0;
+	cellsA = cellsB = 0;
 
-    //cell codes should already be sorted!
-    while ((pA != codesA.end())&&(pB != codesB.end()))
-    {
-        if (predCodeA < predCodeB)
-        {
-            ++diffA;
-            ++cellsA;
-            while ((pA!=codesA.end())&&((currentCodeA = (pA->theCode >> bitDec)) == predCodeA)) ++pA;
-            predCodeA=currentCodeA;
-        }
-        else if (predCodeA > predCodeB)
-        {
-            ++diffB;
-            ++cellsB;
-            while ((pB!=codesB.end())&&((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
-            predCodeB=currentCodeB;
-        }
-        else
-        {
-            while ((pA!=codesA.end())&&((currentCodeA = (pA->theCode >> bitDec)) == predCodeA)) ++pA;
-            predCodeA=currentCodeA;
-            ++cellsA;
-            while ((pB!=codesB.end())&&((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
-            predCodeB=currentCodeB;
-            ++cellsB;
-        }
-    }
+	//cell codes should already be sorted!
+	while ((pA != codesA.end())&&(pB != codesB.end()))
+	{
+		if (predCodeA < predCodeB)
+		{
+			++diffA;
+			++cellsA;
+			while ((pA!=codesA.end())&&((currentCodeA = (pA->theCode >> bitDec)) == predCodeA)) ++pA;
+			predCodeA=currentCodeA;
+		}
+		else if (predCodeA > predCodeB)
+		{
+			++diffB;
+			++cellsB;
+			while ((pB!=codesB.end())&&((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
+			predCodeB=currentCodeB;
+		}
+		else
+		{
+			while ((pA!=codesA.end())&&((currentCodeA = (pA->theCode >> bitDec)) == predCodeA)) ++pA;
+			predCodeA=currentCodeA;
+			++cellsA;
+			while ((pB!=codesB.end())&&((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
+			predCodeB=currentCodeB;
+			++cellsB;
+		}
+	}
 
-    while (pA!=codesA.end())
-    {
-        ++diffA;
-        ++cellsA;
-        while ((pA!=codesA.end())&&((currentCodeA = (pA->theCode >> bitDec)) == predCodeA)) ++pA;
-        predCodeA=currentCodeA;
-    }
-    while (pB!=codesB.end())
-    {
-        ++diffB;
-        ++cellsB;
-        while ((pB!=codesB.end())&&((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
-        predCodeB=currentCodeB;
-    }
+	while (pA!=codesA.end())
+	{
+		++diffA;
+		++cellsA;
+		while ((pA!=codesA.end())&&((currentCodeA = (pA->theCode >> bitDec)) == predCodeA)) ++pA;
+		predCodeA=currentCodeA;
+	}
+	while (pB!=codesB.end())
+	{
+		++diffB;
+		++cellsB;
+		while ((pB!=codesB.end())&&((currentCodeB = (pB->theCode >> bitDec)) == predCodeB)) ++pB;
+		predCodeB=currentCodeB;
+	}
 }
 
 int DgmOctree::extractCCs(uchar level, bool sixConnexity, GenericProgressCallback* progressCb) const
 {
-    std::vector<OctreeCellCodeType> cellCodes;
-    getCellCodes(level,cellCodes);
-    return extractCCs(cellCodes, level, sixConnexity, progressCb);
+	std::vector<OctreeCellCodeType> cellCodes;
+	getCellCodes(level,cellCodes);
+	return extractCCs(cellCodes, level, sixConnexity, progressCb);
 }
 
 int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool sixConnexity, GenericProgressCallback* progressCb) const
 {
-    size_t numberOfCells = cellCodes.size();
+	size_t numberOfCells = cellCodes.size();
 	if (numberOfCells == 0) //no cells!
-        return -1;
+		return -1;
 
 	//filled octree cells
 	std::vector<IndexAndCode> ccCells;
@@ -3205,7 +3213,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     const int& step = gridSize[2];
 
     //instrumentation pour la recherche des 4 ou 8 voisins en 2D (donc en 3D --> 6 ou 26 voisins)
-    uchar neighborsInCurrentSlice=0, neighborsInPrecedingSlice=0;
+    uchar neighborsInCurrentSlice = 0, neighborsInPrecedingSlice = 0;
     int currentSliceNeighborsShifts[4], precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
 
 	if (sixConnexity) //6-connexity
@@ -3518,7 +3526,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 			assert(cellIndexToLabel[i]<static_cast<int>(numberOfCells)+2);
 
 			const int& label = equivalentLabels[cellIndexToLabel[i]];
-			assert(label>0);
+			assert(label > 0);
 			getPointsInCell(ccCells[i].theCode,level,&Y,true);
 			Y.placeIteratorAtBegining();
 			ScalarType d = static_cast<ScalarType>(label);
@@ -3537,7 +3545,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 			progressCb->stop();
 			if (nprogress)
 				delete nprogress;
-			nprogress=0;
+			nprogress = 0;
 		}
 	}
 
@@ -3665,7 +3673,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	uchar level,
 		fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 		fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 		fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
-		if (s_binarySearchCount>0.0)
+		if (s_binarySearchCount > 0.0)
 			fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
 		fprintf(fp,"\n");
 		fclose(fp);
@@ -3900,7 +3908,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 			break;
 		}
 		//*/
-		for (unsigned i=0;i<elements;++i)
+		for (unsigned i=0; i<elements; ++i)
 			cell.points->addPointIndex((startingElement++)->theIndex);
 
 		//call user method on current cell
@@ -3925,7 +3933,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 			assert(cell.level-shallowSteps>=startingLevel);
 			cell.level-=shallowSteps;
 			currentBitDec += 3*shallowSteps;
-			shallowSteps=0;
+			shallowSteps = 0;
 		}
 #endif
 	}
@@ -4037,9 +4045,9 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
 
     //cell descriptor (init. with first point/cell)
 	octreeCellDesc cellDesc;
-	cellDesc.i1=0;
-	cellDesc.i2=0;
-	cellDesc.level=level;
+	cellDesc.i1 = 0;
+	cellDesc.i2 = 0;
+	cellDesc.level = level;
     cellDesc.truncatedCode = (p->theCode >> bitDec);
 	++p;
 
@@ -4102,7 +4110,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
 		fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 		fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 		fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
-		if (s_binarySearchCount>0.0)
+		if (s_binarySearchCount > 0.0)
 			fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
 		fprintf(fp,"\n");
 		fclose(fp);
@@ -4158,9 +4166,9 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 
     //cell descriptor (init. with first point/cell)
 	octreeCellDesc cellDesc;
-	cellDesc.i1=0;
-	cellDesc.i2=0;
-	cellDesc.level=startingLevel;
+	cellDesc.i1 = 0;
+	cellDesc.i2 = 0;
+	cellDesc.level = startingLevel;
 
 	//binary shift for cell code truncation at current level
     uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
@@ -4324,7 +4332,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 			assert(cellDesc.level-shallowSteps>=startingLevel);
 			cellDesc.level-=shallowSteps;
 			currentBitDec += 3*shallowSteps;
-			shallowSteps=0;
+			shallowSteps = 0;
 		}
 #endif
     }
@@ -4374,7 +4382,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 		fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 		fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 		fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
-		if (s_binarySearchCount>0.0)
+		if (s_binarySearchCount > 0.0)
 			fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
 		fprintf(fp,"\n");
 		fclose(fp);
@@ -4390,7 +4398,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
         progressCb->stop();
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;
-		s_normProgressCb_MT=0;
+		s_normProgressCb_MT = 0;
 	}
 
 	//if something went wrong, we clear everything and return 0!

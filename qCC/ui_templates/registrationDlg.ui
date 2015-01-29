@@ -221,7 +221,7 @@
            <item>
             <widget class="QLabel" name="label_4">
              <property name="toolTip">
-              <string>Rough estimation of the final overlap ratio of the two clouds (the smaller, the finer the initial registration should be!)</string>
+              <string>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</string>
              </property>
              <property name="styleSheet">
               <string notr="true">color: blue;</string>
@@ -234,7 +234,7 @@
            <item>
             <widget class="QSpinBox" name="overlapSpinBox">
              <property name="toolTip">
-              <string>Rough estimation of the final overlap ratio of the two clouds (the smaller, the finer the initial registration should be!)</string>
+              <string>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</string>
              </property>
              <property name="styleSheet">
               <string notr="true">color: blue;</string>

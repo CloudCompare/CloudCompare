@@ -43,6 +43,7 @@ protected:
 	bool commandBestFitPlane				(QStringList& arguments);
 	bool commandCrop						(QStringList& arguments);
 	bool commandCrop2D						(QStringList& arguments);
+	bool commandColorBanding				(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
@@ -54,6 +55,7 @@ protected:
 	bool commandSaveMeshes					(QStringList& arguments);
 	bool commandAutoSave					(QStringList& arguments);
 	bool setActiveSF						(QStringList& arguments);
+	bool removeAllSFs						(QStringList& arguments);
 	bool commandApplyTransformation			(QStringList& arguments);
 
 protected:

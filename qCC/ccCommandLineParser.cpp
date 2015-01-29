@@ -94,11 +94,13 @@ static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 static const char COMMAND_CROP[]							= "CROP";
 static const char COMMAND_CROP_2D[]							= "CROP2D";
+static const char COMMAND_COLOR_BANDING[]					= "CBANDING";
 static const char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
 static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
 static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
+static const char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
 static const char COMMAND_PTX_COMPUTE_NORMALS[]				= "COMPUTE_PTX_NORMALS";
 static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 
@@ -221,6 +223,13 @@ static void Print(const QString& message)
 	ccConsole::Print(message);
 	if (s_silentMode)
 		printf("%s\n",qPrintable(message));
+}
+
+static void Warning(const QString& message)
+{
+	ccConsole::Warning(message);
+	if (s_silentMode)
+		printf("[WARNING] %s\n",qPrintable(message));
 }
 
 static bool Error(const QString& message)
@@ -1247,6 +1256,34 @@ bool ccCommandLineParser::setActiveSF(QStringList& arguments)
 	return true;
 }
 
+bool ccCommandLineParser::removeAllSFs(QStringList& arguments)
+{
+	//no argument required
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+	{
+		if (m_clouds[i].pc/* && m_clouds[i].pc->hasScalarFields()*/)
+		{
+			m_clouds[i].pc->deleteAllScalarFields();
+			m_clouds[i].pc->showSF(false);
+		}
+	}
+
+	for (unsigned i=0; i<m_meshes.size(); ++i)
+	{
+		if (m_meshes[i].mesh)
+		{
+			ccGenericPointCloud* cloud = m_meshes[i].mesh->getAssociatedCloud();
+			if (cloud->isA(CC_TYPES::POINT_CLOUD))
+			{
+				static_cast<ccPointCloud*>(cloud)->deleteAllScalarFields();
+				cloud->showSF(false);
+			}
+		}
+	}
+
+	return true;
+}
+
 bool ccCommandLineParser::matchBBCenters(QStringList& arguments)
 {
 	Print("[MATCH B.B. CENTERS]");
@@ -1576,7 +1613,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 	ccPointCloud vertices("polyline.vertices");
 	ccPolyline poly(&vertices);
 
-	//number of vertices
+	//orthogonal dimension
 	unsigned char orthoDim = 2;
 	{
 		QString orthoDimStr = arguments.takeFirst().toUpper();
@@ -1690,6 +1727,82 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 		{
 			return Error(QString("Crop process failed! (not enough memory)"));
 		}
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandColorBanding(QStringList& arguments)
+{
+	Print("[COLOR BANDING]");
+
+	if (arguments.size() < 2)
+		return Error(QString("Missing parameter(s) after \"-%1\" (DIM FREQUENCY)").arg(COMMAND_COLOR_BANDING));
+	if (m_clouds.empty() && m_meshes.empty())
+		return Error(QString("No entity available. Be sure to open or generate one first!"));
+
+	//dimension
+	unsigned char dim = 2;
+	QString dimStr = "Z";
+	{
+		dimStr = arguments.takeFirst().toUpper();
+		if (dimStr == "X")
+			dim = 0;
+		else if (dimStr == "Y")
+			dim = 1;
+		else if (dimStr == "Z")
+			dim = 2;
+		else
+			return Error(QString("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COLOR_BANDING));
+	}
+
+	//frequency
+	bool ok = true;
+	int freq = 0;
+	{
+		QString countStr = arguments.takeFirst();
+		freq = countStr.toInt(&ok);
+		if (!ok)
+			return Error(QString("Invalid parameter: frequency after \"-%1 DIM\" (in Hz, integer value)").arg(COMMAND_COLOR_BANDING));
+	}
+
+	//process clouds
+	if (!m_clouds.empty())
+	{
+		for (size_t i=0; i<m_clouds.size(); ++i)
+		{
+			if (m_clouds[i].pc)
+				if (!m_clouds[i].pc->setRGBColorByBanding(dim,freq))
+					return Error("Not enough memory");
+		}
+		
+		//save output
+		if (s_autoSaveMode && !saveClouds(QString("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
+			return false;
+	}
+
+	if (!m_meshes.empty())
+	{
+		bool hasMeshes = false;
+		for (size_t i=0; i<m_meshes.size(); ++i)
+		{
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_meshes[i].mesh);
+			if (cloud)
+			{
+				if (!cloud->setRGBColorByBanding(dim,freq))
+					return Error("Not enough memory");
+				m_meshes[i].mesh->showColors(true);
+				hasMeshes = true;
+			}
+			else
+			{
+				Warning(QString("Vertices of mesh '%1' are locked (they may be shared by multiple entities for instance). Can't apply the current command on them.").arg(m_meshes[i].mesh->getName()));
+			}
+		}
+
+		//save output
+		if (hasMeshes && s_autoSaveMode && !saveMeshes(QString("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
+			return false;
 	}
 
 	return true;
@@ -2735,6 +2848,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandCrop2D(arguments);
 		}
+		//Color banding
+		else if (IsCommand(argument,COMMAND_COLOR_BANDING))
+		{
+			success = commandColorBanding(arguments);
+		}
 		//Change default cloud output format
 		else if (IsCommand(argument,COMMAND_CLOUD_EXPORT_FORMAT))
 		{
@@ -2759,9 +2877,15 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandForcePTXNormalsComputation(arguments);
 		}
+		//Set the current "active" scalar-field
 		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))
 		{
 			success = setActiveSF(arguments);
+		}
+		//Removes all scalar-fields
+		else if (IsCommand(argument,COMMAND_REMOVE_ALL_SFS))
+		{
+			success = removeAllSFs(arguments);
 		}
 		//save all loaded clouds
 		else if (IsCommand(argument,COMMAND_SAVE_CLOUDS))

@@ -23,7 +23,6 @@
 //Local
 #include "qCC_db.h"
 #include "ccGLMatrix.h"
-#include "ccBBox.h"
 #include "ccMaterial.h"
 
 class ccGenericGLDisplay;
@@ -200,33 +199,6 @@ public:
 	//! Selects/unselects entity
 	inline virtual void setSelected(bool state) { m_selected = state; }
 
-	//! Returns bounding-box
-	/** If bbox is not relative, any active GL transformation
-		(see setGLTransformation) will be applied to it.
-		Moreover, one can compute a full bounding box, taking
-		into acount every children, or only the ones displayed
-		in a given GL window. Eventualy, one can also choose to
-		compute bbox only with geometrical entities, or also with
-		full GL features.
-		\param relative specifies whether bbox is relative or not
-		\param withGLfeatures include GL features (example: octree grid display) inside BB or not
-		\param window display to compute bbox only with entities displayed in a given GL window
-		\return bounding-box
-	**/
-	virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window = 0) = 0;
-
-	//! Returns best-fit bounding-box (if available)
-	/** WARNING: This method is not supported by all entities!
-		Should be re-implemented whenever possible
-		(returns the axis-aligned bounding-box by default).
-		\param[out] trans associated transformation (so that the bounding-box can be displayed in the right position!)
-		\return fit bounding-box
-	**/
-	virtual ccBBox getFitBB(ccGLMatrix& trans);
-
-	//! Draws absolute (axis aligned) bounding-box
-	virtual void drawBB(const ccColor::Rgb& col);
-
 	//! Returns main OpenGL paramters for this entity
 	/** These parameters are deduced from the visiblity states
 		of its different features (points, normals, etc.).
@@ -336,14 +308,12 @@ public:
 	/*** Transformation matrix management (for display only) ***/
 
 	//! Associates entity with a GL transformation (rotation + translation)
-	/** WARNING: FOR DISPLAY PURPOSE ONLY (i.e. should only be temporary)
+	/** \warning FOR DISPLAY PURPOSE ONLY (i.e. should only be temporary)
 		If the associated GL transformation is enabled (see
 		ccDrawableObject::enableGLTransformation), it will
-		be applied before displaying this entity. It will also be
-		taken into account during computation of a non-relative
-		bounding-box (see ccDrawableObject::getBB). However it
-		will not be taken into account by any CCLib algorithm (distance
-		computation, etc.) for instance.
+		be applied before displaying this entity.
+		However it will not be taken into account by any CCLib algorithm
+		(distance computation, etc.) for instance.
 		Note: GL transformation is automatically enabled.
 	**/
 	virtual void setGLTransformation(const ccGLMatrix& trans);

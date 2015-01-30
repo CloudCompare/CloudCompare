@@ -905,7 +905,7 @@ void ccViewer::zoomOnSelectedEntity()
 	if (!m_glWindow || !m_selectedObject)
 		return;
 
-	ccBBox box = m_selectedObject->getBB(false, false, m_glWindow);
+	ccBBox box = m_selectedObject->getDisplayBB_recursive(false, m_glWindow);
 	m_glWindow->updateConstellationCenterAndZoom(&box);
 	m_glWindow->redraw();
 }

@@ -61,8 +61,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_KDTREE; }
 
 	//Inherited from ccHObject
-	virtual ccBBox getMyOwnBB();
-	virtual ccBBox getDisplayBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
 	//! Flag points with cell index (as a scalar field)
 	bool convertCellIndexToSF();

@@ -106,7 +106,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 		return;
 
 	assert(compEntity);
-	ccBBox compEntBBox = compEntity->getBB();
+	ccBBox compEntBBox = compEntity->getOwnBB();
 	maxSearchDistSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm()));
 
 	if (m_refMesh)

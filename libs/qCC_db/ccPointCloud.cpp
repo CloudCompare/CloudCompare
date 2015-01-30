@@ -1173,8 +1173,8 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, int freq)
 	enableTempColor(false);
 	assert(m_rgbColors);
 
- 	double minHeight = getBB().minCorner().u[dim];
-	double height = getBB().getDiagVec().u[dim];
+ 	double minHeight = getOwnBB().minCorner().u[dim];
+	double height = getOwnBB().getDiagVec().u[dim];
 	
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 		height = 1.0;
@@ -1217,8 +1217,8 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	enableTempColor(false);
 	assert(m_rgbColors);
 
-	double minHeight = getBB().minCorner().u[heightDim];
-	double height = getBB().getDiagVec().u[heightDim];
+	double minHeight = getOwnBB().minCorner().u[heightDim];
+	double height = getOwnBB().getDiagVec().u[heightDim];
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
 		return setRGBColor(colorScale->getColorByIndex(0).rgba);
@@ -2425,19 +2425,19 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 	return true;
 }
 
-bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
+bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 											CCLib::GenericProgressCallback* progressCb/*=NULL*/,
 											unsigned char octreeLevel/*=7*/)
 {
-	if (!cloud || cloud->size() == 0)
+	if (!otherCloud || otherCloud->size() == 0)
 	{
 		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Invalid/empty input cloud!");
 		return false;
 	}
 
 	//check that both bounding boxes intersect!
-	ccBBox box = getBB();
-	ccBBox otherBox = cloud->getBB();
+	ccBBox box = getOwnBB();
+	ccBBox otherBox = otherCloud->getOwnBB();
 
 	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
 	CCVector3 dist = box.getCenter() - otherBox.getCenter();
@@ -2459,7 +2459,7 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
 	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
 	//(to get a mapping between the resulting vertices and the input points)
 	int result = 0;
-	CCLib::ReferenceCloud CPSet(cloud);
+	CCLib::ReferenceCloud CPSet(otherCloud);
 	{
 		CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 		params.CPSet = &CPSet;
@@ -2483,7 +2483,7 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
 		int currentOutSFIndex = m_currentOutScalarFieldIndex;
 		setCurrentScalarField(sfIdx);
 
-		result = CCLib::DistanceComputationTools::computeHausdorffDistance(this, cloud, params, progressCb);
+		result = CCLib::DistanceComputationTools::computeHausdorffDistance(this, otherCloud, params, progressCb);
 
 		//restore previous parameters
 		setCurrentInScalarField(m_currentInScalarFieldIndex);
@@ -2504,7 +2504,7 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
 	for (unsigned i=0; i<CPsize; ++i)
 	{
 		unsigned index = CPSet.getPointGlobalIndex(i);
-		setPointColor(i,cloud->getPointColor(index));
+		setPointColor(i,otherCloud->getPointColor(index));
 	}
 
 	//We must update the VBOs
@@ -2538,7 +2538,7 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 	CCVector3 C;
 	if (!center)
 	{
-		C = getBB().getCenter();
+		C = getOwnBB().getCenter();
 		center = &C;
 	}
 

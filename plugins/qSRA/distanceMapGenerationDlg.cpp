@@ -217,7 +217,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	//we will 'lock" the max height value with that information
 	if (cloud)
 	{
-		ccBBox bbox = cloud->getBB();
+		ccBBox bbox = cloud->getOwnBB();
 		PointCoordinateType hMin = 0, hMax = 0;
 		if (bbox.isValid())
 		{
@@ -646,7 +646,7 @@ void DistanceMapGenerationDlg::update()
 	//force grid update if necessary
 	//updateOverlayGrid();
 	//update zoom
-	ccBBox box = m_window ? m_window->getOwnDB()->getBB(true, true, m_window) : ccBBox();
+	ccBBox box = m_window ? m_window->getOwnDB()->getDisplayBB_recursive(false, m_window) : ccBBox();
 	updateZoom(box);
 
 	saveToPersistentSettings();

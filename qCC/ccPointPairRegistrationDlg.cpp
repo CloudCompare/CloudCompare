@@ -82,20 +82,26 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 		autoZoomCheckBox->setChecked(autoUpdateZoom);
 	}
 
-	connect(showAlignedCheckBox,	SIGNAL(toggled(bool)),	this,	SLOT(showAlignedCloud(bool)));
-	connect(showReferenceCheckBox,	SIGNAL(toggled(bool)),	this,	SLOT(showReferenceCloud(bool)));
+	connect(showAlignedCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(showAlignedCloud(bool)));
+	connect(showReferenceCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(showReferenceCloud(bool)));
 
-	connect(typeAlignToolButton,	SIGNAL(clicked()),		this,	SLOT(addManualAlignedPoint()));
-	connect(typeRefToolButton,		SIGNAL(clicked()),		this,	SLOT(addManualRefPoint()));
+	connect(typeAlignToolButton,	SIGNAL(clicked()),					this,	SLOT(addManualAlignedPoint()));
+	connect(typeRefToolButton,		SIGNAL(clicked()),					this,	SLOT(addManualRefPoint()));
 
-	connect(unstackAlignToolButton,	SIGNAL(clicked()),		this,	SLOT(unstackAligned()));
-	connect(unstackRefToolButton,	SIGNAL(clicked()),		this,	SLOT(unstackRef()));
+	connect(unstackAlignToolButton,	SIGNAL(clicked()),					this,	SLOT(unstackAligned()));
+	connect(unstackRefToolButton,	SIGNAL(clicked()),					this,	SLOT(unstackRef()));
 
-	connect(alignToolButton,		SIGNAL(clicked()),		this,	SLOT(align()));
-	connect(resetToolButton,		SIGNAL(clicked()),		this,	SLOT(reset()));
+	connect(alignToolButton,		SIGNAL(clicked()),					this,	SLOT(align()));
+	connect(resetToolButton,		SIGNAL(clicked()),					this,	SLOT(reset()));
 
-	connect(validToolButton,		SIGNAL(clicked()),		this,	SLOT(apply()));
-	connect(cancelToolButton,		SIGNAL(clicked()),		this,	SLOT(cancel()));
+	connect(validToolButton,		SIGNAL(clicked()),					this,	SLOT(apply()));
+	connect(cancelToolButton,		SIGNAL(clicked()),					this,	SLOT(cancel()));
+
+	connect(adjustScaleCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(invalidate()));
+	connect(TxCheckBox,				SIGNAL(toggled(bool)),				this,	SLOT(invalidate()));
+	connect(TyCheckBox,				SIGNAL(toggled(bool)),				this,	SLOT(invalidate()));
+	connect(TzCheckBox,				SIGNAL(toggled(bool)),				this,	SLOT(invalidate()));
+	connect(rotComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(invalidate()));
 
 	m_alignedPoints.setEnabled(true);
 	m_alignedPoints.setVisible(false);
@@ -406,20 +412,38 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 		//first roughly search for the sphere
 		if (CCLib::GeometricalAnalysisTools::detectSphereRobust(part,0.5,C,radius,rms,&pDlg,0.9))
 		{
-			//now look again (more precisely)
+			if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
 			{
-				delete part;
-				box.clear();
-				box.add(C - CCVector3(1,1,1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
-				box.add(C + CCVector3(1,1,1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
-				part = cloud->crop(box,true);
-				if (part && part->size() > 16)
-					CCLib::GeometricalAnalysisTools::detectSphereRobust(part,0.5,C,radius,rms,&pDlg,0.99);
+				ccLog::Warning(QString("[ccPointPairRegistrationDlg] Detected sphere radius (%1) is too far from search radius!").arg(radius));
 			}
-			ccLog::Print(QString("[ccPointPairRegistrationDlg] Detected sphere radius = %1 (rms = %2)").arg(radius).arg(rms));
-			sphereRadius = radius;
-			P = CCVector3d::fromArray(C.u);
-			success = true;
+			else
+			{
+				//now look again (more precisely)
+				{
+					delete part;
+					box.clear();
+					box.add(C - CCVector3(1,1,1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
+					box.add(C + CCVector3(1,1,1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
+					part = cloud->crop(box,true);
+					if (part && part->size() > 16)
+						CCLib::GeometricalAnalysisTools::detectSphereRobust(part,0.5,C,radius,rms,&pDlg,0.99);
+				}
+				ccLog::Print(QString("[ccPointPairRegistrationDlg] Detected sphere radius = %1 (rms = %2)").arg(radius).arg(rms));
+				if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
+				{
+					ccLog::Warning("[ccPointPairRegistrationDlg] Sphere radius is too far from search radius!");
+				}
+				else if (rms / searchRadius > 0.1)
+				{
+					ccLog::Warning("[ccPointPairRegistrationDlg] RMS is too high!");
+				}
+				else
+				{
+					sphereRadius = radius;
+					P = CCVector3d::fromArray(C.u);
+					success = true;
+				}
+			}
 		}
 		else
 		{
@@ -506,7 +530,7 @@ void ccPointPairRegistrationDlg::onPointCountChanged()
 {
 	bool canAlign = (m_alignedPoints.size() == m_refPoints.size() && m_refPoints.size() >= MIN_PAIRS_COUNT);
 	alignToolButton->setEnabled(canAlign);
-	validToolButton->setEnabled(canAlign);
+	validToolButton->setEnabled(false);
 
 	unstackAlignToolButton->setEnabled(m_alignedPoints.size() != 0);
 	unstackRefToolButton->setEnabled(m_refPoints.size() != 0);
@@ -722,7 +746,7 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDu
 	{
 		for (int i=pointCount-1; i>=index; --i) //downward for more efficiency
 		{
-			assert(m_alignedPoints.getChild(i) && m_alignedPoints.getChild(i)->isA(CC_TYPES::LABEL_2D));
+			assert(m_alignedPoints.getChild(i));
 			m_alignedPoints.removeChild(i);
 		}
 	}
@@ -1119,11 +1143,11 @@ void ccPointPairRegistrationDlg::autoUpdateAlignInfo()
 
 	if (callHornRegistration(trans,rms,true))
 	{
-		QString rmsString = QString("Current RMS: %1").arg(rms);
+		QString rmsString = QString("Achievable RMS: %1").arg(rms);
 		m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
 	}
 
-	m_associatedWin->refresh();
+	m_associatedWin->redraw();
 }
 
 void ccPointPairRegistrationDlg::align()
@@ -1141,13 +1165,16 @@ void ccPointPairRegistrationDlg::align()
 		{
 			QString rmsString = QString("Current RMS: %1").arg(rms);
 			ccLog::Print(QString("[PointPairRegistration] ")+rmsString);
-			m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true);
+			m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
+		}
+		else
+		{
+			ccLog::Warning("[PointPairRegistration] Internal error (negative RMS?!)");
+			return;
 		}
 
-		//fixed scale?
+		//apply (scaled) transformation (if not fixed)
 		bool adjustScale = adjustScaleCheckBox->isChecked();
-
-		//apply (scaled) transformation...
 		if (adjustScale)
 		{
 			if (trans.R.isValid())
@@ -1174,7 +1201,16 @@ void ccPointPairRegistrationDlg::align()
 		}
 
 		resetToolButton->setEnabled(true);
+		validToolButton->setEnabled(true);
 	}
+}
+
+void ccPointPairRegistrationDlg::invalidate()
+{
+	autoUpdateAlignInfo();
+
+	resetToolButton->setEnabled(false);
+	validToolButton->setEnabled(false);
 }
 
 void ccPointPairRegistrationDlg::reset()
@@ -1189,10 +1225,9 @@ void ccPointPairRegistrationDlg::reset()
 	{
 		if (autoZoomCheckBox->isChecked())
 			m_associatedWin->zoomGlobal();
-		m_associatedWin->redraw();
 	}
 
-	resetToolButton->setEnabled(false);
+	invalidate();
 }
 
 void ccPointPairRegistrationDlg::apply()
@@ -1211,9 +1246,8 @@ void ccPointPairRegistrationDlg::apply()
 			summary << "----------------";
 		}
 
-		//fixed scale?
+		//apply (scaled) transformation (if not fixed)
 		bool adjustScale = adjustScaleCheckBox->isChecked();
-		//apply (scaled) transformation...
 		if (adjustScale && trans.R.isValid())
 			trans.R.scale(trans.s);
 		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);

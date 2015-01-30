@@ -41,7 +41,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SUB_MESH; }
 
 	//inherited methods (ccHObject)
-	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 	virtual bool isSerializable() const { return true; }
 
 	//inherited methods (ccGenericMesh)

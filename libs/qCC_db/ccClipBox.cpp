@@ -185,7 +185,7 @@ void ccClipBox::reset()
 
 	if (m_associatedEntity)
 	{
-		m_box = m_associatedEntity->getBB();
+		m_box = m_associatedEntity->getOwnBB();
 	}
 
 	update();
@@ -542,28 +542,26 @@ void ccClipBox::update(bool shrink/*=false*/)
 	}
 }
 
-ccBBox ccClipBox::getMyOwnBB()
-{
-	return m_box;
-}
-
-ccBBox ccClipBox::getDisplayBB()
+ccBBox ccClipBox::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox bbox = m_box;
 
-	PointCoordinateType scale = computeArrowsScale();
-	bbox.minCorner() -= CCVector3(scale,scale,scale);
-	bbox.maxCorner() += CCVector3(scale,scale,scale);
+	if (withGLFeatures)
+	{
+		PointCoordinateType scale = computeArrowsScale();
+		bbox.minCorner() -= CCVector3(scale,scale,scale);
+		bbox.maxCorner() += CCVector3(scale,scale,scale);
+	}
 
 	return bbox;
 }
 
 PointCoordinateType ccClipBox::computeArrowsScale() const
 {
-	PointCoordinateType scale = m_box.getDiagNorm()/(PointCoordinateType)10.0;
+	PointCoordinateType scale = m_box.getDiagNorm()/10;
 
 	if (m_associatedEntity)
-		scale = std::max<PointCoordinateType>(scale,m_associatedEntity->getMyOwnBB().getDiagNorm()/(PointCoordinateType)100.0);
+		scale = std::max<PointCoordinateType>(scale,m_associatedEntity->getOwnBB().getDiagNorm()/100);
 
 	return scale;
 }

@@ -96,7 +96,7 @@ int NormalEstimation::openInputDialog()
 	ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
 	if (cloud)
 	{
-		ccBBox bBox = cloud->getBB(true,false);
+		ccBBox bBox = cloud->getOwnBB();
 		if (bBox.isValid())
 			m_dialog->radiusDoubleSpinBox->setValue(bBox.getDiagNorm() * 0.005);
 	}

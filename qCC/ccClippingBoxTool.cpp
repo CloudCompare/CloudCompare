@@ -164,7 +164,7 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 
 	//set proper "steps" value for slice thickness editors
 	{
-		CCVector3 diag = entity->getBB().getDiagVec();
+		CCVector3 diag = entity->getOwnBB().getDiagVec();
 		thickXDoubleSpinBox->setSingleStep(static_cast<double>(diag.x) / 100.0);
 		thickYDoubleSpinBox->setSingleStep(static_cast<double>(diag.y) / 100.0);
 		thickZDoubleSpinBox->setSingleStep(static_cast<double>(diag.z) / 100.0);
@@ -311,7 +311,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	
 	//by default we set the 'flat/repeat' dimension to the smallest box dimension
 	{
-		CCVector3 diagVec = m_clipBox->getBB().getDiagVec();
+		CCVector3 diagVec = m_clipBox->getOwnBB().getDiagVec();
 		unsigned char flatDim = 0;
 		if (diagVec.y < diagVec.x)
 			flatDim = 1;
@@ -329,7 +329,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	
 	//set default max edge length
 	if (s_maxEdgeLength < 0)
-		s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
+		s_maxEdgeLength = static_cast<double>(cloud->getOwnBB().getDiagNorm())/100.0;
 	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
 	repeatDlg.splitContourCheckBox->setChecked(s_splitContours);
 	repeatDlg.gapDoubleSpinBox->setValue(s_defaultGap);
@@ -374,8 +374,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	int indexMaxs[3] = { 0, 0, 0 };
 	int gridDim[3] = { 1, 1, 1 };
 	unsigned cellCount = 1;
-	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
-	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();
+	CCVector3 gridOrigin = m_clipBox->getOwnBB().minCorner();
+	CCVector3 cellSize = m_clipBox->getOwnBB().getDiagVec();
 	s_defaultGap = repeatDlg.gapDoubleSpinBox->value();
 	PointCoordinateType gap = static_cast<PointCoordinateType>(s_defaultGap);
 

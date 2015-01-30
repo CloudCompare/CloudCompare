@@ -1500,7 +1500,7 @@ void MainWindow::doActionComputeOctree()
 		clouds.insert(cloud);
 
 		//we look for the biggest box so as to define the "minimum cell size"
-		ccBBox thisBBox = cloud->getMyOwnBB();
+		ccBBox thisBBox = cloud->getOwnBB();
 		if (thisBBox.isValid())
 		{
 			CCVector3 dd = thisBBox.maxCorner()-thisBBox.minCorner();
@@ -1508,8 +1508,7 @@ void MainWindow::doActionComputeOctree()
 			if (maxBoxSize < 0.0 || maxd > maxBoxSize)
 				maxBoxSize = maxd;
 		}
-
-		bbox += cloud->getBB();
+		bbox += thisBBox;
 	}
 
 	if (clouds.empty() || maxBoxSize < 0.0)
@@ -1556,7 +1555,7 @@ void MainWindow::doActionComputeOctree()
 				{
 					double cellSize = coDlg.getMinCellSize();
 					PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
-					CCVector3 C = cloud->getBB().getCenter();
+					CCVector3 C = cloud->getOwnBB().getCenter();
 					bbox = ccBBox(	C-CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth),
 									C+CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth));
 				}
@@ -1731,7 +1730,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 				//test if the translated cloud was already "too big"
 				//(in which case we won't bother the user about the fact
 				//that the transformed cloud will be too big...)
-				ccBBox localBBox = ent->getBB();
+				ccBBox localBBox = ent->getOwnBB();
 				CCVector3d Pl = CCVector3d::fromArray(localBBox.minCorner().u);
 				double Dl = localBBox.getDiagNormd();
 
@@ -1740,7 +1739,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 					&&	!ccGlobalShiftManager::NeedRescale(Dl))
 				{
 					//test if the translated cloud is not "too big" (in local coordinate space)
-					ccBBox rotatedBox = ent->getBB() * transMat;
+					ccBBox rotatedBox = ent->getOwnBB() * transMat;
 					double Dl2 = rotatedBox.getDiagNorm();
 					CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
 
@@ -1758,7 +1757,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 						globalTransMat.scale(1.0/globalScale);
 						globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
 						//and we apply it to the cloud bounding-box
-						ccBBox rotatedBox = cloud->getBB() * globalTransMat;
+						ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
 						double Dg = rotatedBox.getDiagNorm();
 						CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
 
@@ -1826,6 +1825,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(ent);
 		ent->setGLTransformation(ccGLMatrix(transMat.data()));
+		//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
 		ent->applyGLTransformation_recursive();
 		ent->prepareDisplayForRefresh_recursive();
 		putObjectBackIntoDBTree(ent,objContext);
@@ -1892,7 +1892,7 @@ void MainWindow::doActionApplyScale()
 				if (sX == sY && sX == sZ) //the following test only works for an 'isotropic' scale!
 				{
 					//we must check that the resulting cloud is not too big
-					ccBBox bbox = cloud->getBB();
+					ccBBox bbox = cloud->getOwnBB();
 					double maxx = std::max(fabs(bbox.minCorner().x), fabs(bbox.maxCorner().x)) * sX;
 					double maxy = std::max(fabs(bbox.minCorner().y), fabs(bbox.maxCorner().y)) * sY;
 					double maxz = std::max(fabs(bbox.minCorner().z), fabs(bbox.maxCorner().z)) * sZ;
@@ -1992,8 +1992,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				continue;
 			}
 
-			CCVector3 Al = cloud->getBB().minCorner();
-			CCVector3 Bl = cloud->getBB().maxCorner();
+			CCVector3 Al = cloud->getOwnBB().minCorner();
+			CCVector3 Bl = cloud->getOwnBB().maxCorner();
 			CCVector3d Ag = cloud->toGlobal3d<PointCoordinateType>(Al);
 			CCVector3d Bg = cloud->toGlobal3d<PointCoordinateType>(Bl);
 
@@ -2074,7 +2074,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 			if (preserveGlobalPos)
 			{
 				//to preserve the global position of the cloud, we may have to translate and/or rescale the cloud
-				CCVector3d Ql = CCVector3d::fromArray(cloud->getBB().minCorner().u);
+				CCVector3d Ql = CCVector3d::fromArray(cloud->getOwnBB().minCorner().u);
 				CCVector3d Qg = cloud->toGlobal3d(Ql);
 				CCVector3d Ql2 = Qg * scale + shift;
 				CCVector3d T = Ql2 - Ql;
@@ -2089,6 +2089,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					transMat.scale(static_cast<float>(scaleCoef));
 					transMat.setTranslation(T);
 
+					//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
 					cloud->applyGLTransformation_recursive(&transMat);
 					cloud->prepareDisplayForRefresh_recursive();
 
@@ -2658,7 +2659,7 @@ void MainWindow::doActionCreateGBLSensor()
 				cloud->addChild(sensor);
 
 				//we try to guess the sensor relative size (dirty)
-				ccBBox bb = cloud->getBB();
+				ccBBox bb = cloud->getOwnBB();
 				double diag = bb.getDiagNorm();
 				if (diag < 1.0)
 					sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
@@ -2704,7 +2705,7 @@ void MainWindow::doActionCreateGBLSensor()
 				{
 					sensor->setDisplay_recursive(win);
 					sensor->setVisible(true);
-					ccBBox box = cloud->getBB();
+					ccBBox box = cloud->getOwnBB();
 					win->updateConstellationCenterAndZoom(&box);
 				}
 
@@ -2748,7 +2749,7 @@ void MainWindow::doActionCreateCameraSensor()
 			spDlg.updateCamSensor(sensor);
 
 			//we try to guess the sensor relative size (dirty)
-			ccBBox bb = cloud->getBB();
+			ccBBox bb = cloud->getOwnBB();
 			double diag = bb.getDiagNorm();
 			if (diag < 1.0)
 				sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
@@ -2764,7 +2765,7 @@ void MainWindow::doActionCreateCameraSensor()
 			{
 				sensor->setDisplay(win);
 				sensor->setVisible(true);
-				ccBBox box = cloud->getBB();
+				ccBBox box = cloud->getOwnBB();
 				win->updateConstellationCenterAndZoom(&box);
 			}
 
@@ -3808,7 +3809,7 @@ PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* c
 	{
 		//we get 1% of the cloud bounding box
 		//and we divide by the number of points / 10e6 (so that the kernel for a 20 M. points cloud is half the one of a 10 M. cloud)
-		return cloud->getBB().getDiagNorm() * static_cast<PointCoordinateType>(0.01/std::max(1.0,1.0e-7*static_cast<double>(cloud->size())));
+		return cloud->getOwnBB().getDiagNorm() * static_cast<PointCoordinateType>(0.01/std::max(1.0,1.0e-7*static_cast<double>(cloud->size())));
 	}
 
 	return -PC_ONE;
@@ -4437,12 +4438,12 @@ void MainWindow::doActionMerge()
 	updateUI();
 }
 
-void MainWindow::zoomOn(ccDrawableObject* object)
+void MainWindow::zoomOn(ccHObject* object)
 {
 	ccGLWindow* win = static_cast<ccGLWindow*>(object->getDisplay());
 	if (win)
 	{
-		ccBBox box = object->getBB(true,false,win);
+		ccBBox box = object->getDisplayBB_recursive(false,win);
 		win->updateConstellationCenterAndZoom(&box);
 	}
 }
@@ -4761,7 +4762,7 @@ void MainWindow::doActionSubsample()
 				clouds.push_back(cloud);
 
 				maxPointCount = std::max<unsigned>(maxPointCount, cloud->size());
-				maxCloudRadius = std::max<double>(maxCloudRadius, cloud->getBB().getDiagNorm());
+				maxCloudRadius = std::max<double>(maxCloudRadius, cloud->getOwnBB().getDiagNorm());
 
 				//we also look for the min and max sf values
 				ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
@@ -5993,7 +5994,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 					continue;
 				}
 
-				const ccBBox bbox = cloud->getBB();
+				const ccBBox bbox = cloud->getOwnBB();
 				PointCoordinateType maxDim = bbox.getMaxBoxDim();
 				CCVector3 C = bbox.getCenter();
 
@@ -6166,7 +6167,7 @@ void MainWindow::doActionComputeNormals()
 			if (defaultRadius == 0 && m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 			{
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-				defaultRadius = cloud->getBB().getMaxBoxDim() * static_cast<PointCoordinateType>(0.01); //diameter=1% of the bounding box max dim
+				defaultRadius = static_cast<PointCoordinateType>(cloud->getOwnBB().getMaxBoxDim() * 0.01); //diameter=1% of the bounding box max dim
 			}
 			onlyMeshes = false;
 			break;
@@ -6465,12 +6466,12 @@ void MainWindow::doActionMatchBBCenters()
 	//by default, we take the first entity as reference
 	//TODO: maybe the user would like to select the reference himself ;)
 	ccHObject* refEnt = selectedEntities[0];
-	CCVector3 refCenter = refEnt->getBBCenter();
+	CCVector3 refCenter = refEnt->getBB_recursive().getCenter();
 
 	for (size_t i=1; i<selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
-		CCVector3 center = ent->getBBCenter();
+		CCVector3 center = ent->getBB_recursive().getCenter();
 
 		CCVector3 T = refCenter-center;
 
@@ -7795,13 +7796,15 @@ void MainWindow::zoomOnSelectedEntities()
 
 	if (tempGroup.getChildrenNumber() != 0)
 	{
-		ccBBox box = tempGroup.getBB(false, false, win);
+		ccBBox box = tempGroup.getDisplayBB_recursive(false, win);
 		if (!box.isValid())
 		{
-			//if the selected entities have no valid bounding-box, then it's maybe only 'GL' objects
-			box = tempGroup.getBB(false, true, win);
+			ccLog::Warning("Selected entities have no valid bounding-box!");
 		}
-		win->updateConstellationCenterAndZoom(&box);
+		else
+		{
+			win->updateConstellationCenterAndZoom(&box);
+		}
 	}
 
 	refreshAll();
@@ -8388,7 +8391,7 @@ void MainWindow::doActionCrop()
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
 				candidates.push_back(cloud);
 
-				baseBB += cloud->getBB();
+				baseBB += cloud->getOwnBB();
 			}
 		}
 	}
@@ -9115,7 +9118,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
 			if (cloud)
 			{
-				centers->addPoint(cloud->getBBCenter());
+				centers->addPoint(cloud->getOwnBB().getCenter());
 				//we display the cloud in the same window as the first (selected) cloud we encounter
 				if (!centers->getDisplay())
 					centers->setDisplay(cloud->getDisplay());
@@ -9238,11 +9241,11 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			{
 				ccGLMatrix transBToZero;
 				transBToZero.toIdentity();
-				transBToZero.setTranslation(-clouds[j]->getBBCenter());
+				transBToZero.setTranslation(-clouds[j]->getOwnBB().getCenter());
 				
 				ccGLMatrix transFromZeroToA;
 				transFromZeroToA.toIdentity();
-				transFromZeroToA.setTranslation(A->getBBCenter());
+				transFromZeroToA.setTranslation(A->getOwnBB().getCenter());
 
 #ifndef TEST_GENERATION
 				double minRMS = -1.0;
@@ -10132,7 +10135,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	if (checkDimensions)
 	{
 		//get entity bounding box
-		ccBBox bBox = obj->getBB();
+		ccBBox bBox = obj->getBB_recursive();
 
 		CCVector3 center = bBox.getCenter();
 		PointCoordinateType diag = bBox.getDiagNorm();

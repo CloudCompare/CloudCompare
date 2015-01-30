@@ -184,7 +184,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 	return rc;
 }
 
-ccBBox ccGenericPointCloud::getMyOwnBB()
+ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox box;
 
@@ -193,6 +193,7 @@ ccBBox ccGenericPointCloud::getMyOwnBB()
 		getBoundingBox(box.minCorner().u, box.maxCorner().u);
 		box.setValidity(true);
 	}
+	
 	return box;
 }
 

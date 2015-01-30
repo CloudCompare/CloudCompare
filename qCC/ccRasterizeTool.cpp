@@ -83,7 +83,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(clearContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(removeContourLines()));
 
 	//custom bbox editor
-	ccBBox gridBBox = m_cloud ? m_cloud->getMyOwnBB() : ccBBox(); 
+	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox(); 
 	if (gridBBox.isValid())
 	{
 		m_bbEditorDlg = new ccBoundingBoxEditorDlg(this);
@@ -1007,7 +1007,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 		if (m_rasterCloud)
 		{
 			m_window->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getMyOwnBB();
+			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false,m_window);
 			update2DDisplayZoom(box);
 		}
 		else

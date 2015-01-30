@@ -97,8 +97,7 @@ public:
 	void invalidateBoundingBox();
 
 	//Inherited from ccHObject
-	virtual ccBBox getMyOwnBB();
-	virtual ccBBox getDisplayBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
 protected:
 

@@ -34,14 +34,9 @@ ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
 	lockVisibility(false);
 }
 
-ccBBox ccKdTree::getMyOwnBB()
+ccBBox ccKdTree::getOwnBB(bool withGLFeatures/*=false*/)
 {
-	return (m_associatedGenericCloud ? m_associatedGenericCloud->getMyOwnBB() : ccBBox());
-}
-
-ccBBox ccKdTree::getDisplayBB()
-{
-	return (m_associatedGenericCloud ? m_associatedGenericCloud->getDisplayBB() : ccBBox());
+	return (m_associatedGenericCloud ? m_associatedGenericCloud->getOwnBB(withGLFeatures) : ccBBox());
 }
 
 //! Recursive visitor for ccKdTree::multiplyBoundingBox
@@ -156,7 +151,7 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glPushName(getUniqueIDForDisplay());
 		}
 
-		DrawMeOnlyVisitor(m_associatedGenericCloud->getBB()).visit(m_root);
+		DrawMeOnlyVisitor(m_associatedGenericCloud->getOwnBB()).visit(m_root);
 
 		if (pushName)
 			glPopName();
@@ -382,7 +377,7 @@ bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& ne
 
 	try
 	{
-		GetNeighborLeavesVisitor visitor(cell, neighbors, cellBox, getMyOwnBB());
+		GetNeighborLeavesVisitor visitor(cell, neighbors, cellBox, getOwnBB(false));
 		if (userDataFilter)
 			visitor.setUserDataFilter(*userDataFilter);
 		visitor.visit(m_root);

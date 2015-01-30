@@ -453,7 +453,7 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 	if (!ok)
 		return false;
 #else
-	PointCoordinateType radius = static_cast<PointCoordinateType>(QInputDialog::getDouble(0,"Neighborhood radius", "radius", cloud->getBB().getDiagNorm() * 0.01, 0, 1.0e9, 6, &ok));
+	PointCoordinateType radius = static_cast<PointCoordinateType>(QInputDialog::getDouble(0,"Neighborhood radius", "radius", cloud->getOwnBB().getDiagNorm() * 0.01, 0, 1.0e9, 6, &ok));
 	if (!ok)
 		return false;
 #endif

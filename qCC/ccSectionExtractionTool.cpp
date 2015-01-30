@@ -525,7 +525,7 @@ void ccSectionExtractionTool::updateCloudsBox()
 	for (int i=0; i<m_clouds.size(); ++i)
 	{
 		if (m_clouds[i].entity)
-			m_cloudsBox += m_clouds[i].entity->getBB();
+			m_cloudsBox += m_clouds[i].entity->getOwnBB();
 	}
 }
 bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
@@ -1443,7 +1443,7 @@ void ccSectionExtractionTool::extractPoints()
 		{
 			if (m_clouds[i].entity)
 			{
-				box += m_clouds[i].entity->getBB();
+				box += m_clouds[i].entity->getOwnBB();
 				pointCount += m_clouds[i].entity->size();
 			}
 		}

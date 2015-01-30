@@ -289,7 +289,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		}
 
 		//header.SetDataFormatId(liblas::ePointFormat3);
-		ccBBox bBox = theCloud->getBB();
+		ccBBox bBox = theCloud->getOwnBB();
 		if (bBox.isValid())
 		{
 			CCVector3d bbMin = theCloud->toGlobal3d<PointCoordinateType>(bBox.minCorner());

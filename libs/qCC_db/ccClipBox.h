@@ -47,8 +47,7 @@ public:
 	void setAssociatedEntity(ccHObject* associatedEntity);
 
 	//inherited from ccHObject
-	virtual ccBBox getMyOwnBB();
-	virtual ccBBox getDisplayBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
 	//inherited from ccInteractor
 	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight);

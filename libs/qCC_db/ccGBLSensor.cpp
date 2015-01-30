@@ -822,16 +822,19 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-ccBBox ccGBLSensor::getMyOwnBB()
+ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures/*=false*/)
 {
-	return ccBBox();
-}
+	if (!withGLFeatures)
+	{
+		return ccBBox();
+	}
 
-ccBBox ccGBLSensor::getDisplayBB()
-{
+	//get sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	{
 		return ccBBox();
+	}
 
 	ccPointCloud cloud;
 	if (!cloud.reserve(8))
@@ -850,11 +853,12 @@ ccBBox ccGBLSensor::getDisplayBB()
 	cloud.addPoint(CCVector3( m_scale, m_scale, m_scale));
 
 	cloud.applyRigidTransformation(sensorPos);
-	return cloud.getBB(false);
+	return cloud.getOwnBB(false);
 }
 
-ccBBox ccGBLSensor::getFitBB(ccGLMatrix& trans)
+ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
 {
+	//get sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
 		return ccBBox();

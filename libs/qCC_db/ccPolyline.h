@@ -94,7 +94,7 @@ public:
 	inline const ccColor::Rgb& getColor() const { return m_rgbColor; }
 
 	//inherited methods (ccHObject)
-	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
 	//! Splits the polyline into several parts based on a maximum edge length
 	/** \warning output polylines set (parts) may be empty if all the vertices are too far from each other!

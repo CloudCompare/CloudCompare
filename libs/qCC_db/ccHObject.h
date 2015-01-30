@@ -22,6 +22,7 @@
 #include "qCC_db.h"
 #include "ccObject.h"
 #include "ccDrawableObject.h"
+#include "ccBBox.h"
 
 //System
 #include <vector>
@@ -31,7 +32,7 @@ class QIcon;
 //! Hierarchical CloudCompare Object
 class QCC_DB_LIB_API ccHObject : public ccObject, public ccDrawableObject
 {
-public:
+public: //construction
 
 	//! Default constructor
 	/** \param name object name (optional)
@@ -59,10 +60,17 @@ public:
 	**/
 	static ccHObject* New(QString pluginId, QString classId, const char* name = 0);
 
+public: //base members access
+
 	//! Returns class ID
 	/** \return class unique ID
 	**/
 	inline virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::HIERARCHY_OBJECT; }
+
+	//! Returns parent object
+	/** \return parent object (NULL if no parent)
+	**/
+	inline ccHObject* getParent() const { return m_parent; }
 
 	//! Returns the icon associated to this entity
 	/** ccDBRoot will call this method: if an invalid icon is returned
@@ -71,12 +79,7 @@ public:
 	**/
 	virtual QIcon getIcon() const;
 	
-	//! Returns parent object
-	/** \return parent object (NULL if no parent)
-	**/
-	inline ccHObject* getParent() const { return m_parent; }
-
-	/*** Inter-objects dependencies management ***/
+public: //dependencies management
 
 	//! Dependency flags
 	enum DEPENDENCY_FLAGS {	DP_NONE						= 0,	/**< no dependency **/
@@ -110,7 +113,7 @@ public:
 	**/
 	void removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS flag);
 
-	/*** children management ***/
+public: //children management
 
 	//! Adds a child
 	/** \warning by default (i.e. with the DP_PARENT_OF_OTHER flag) the child's parent
@@ -197,8 +200,45 @@ public:
 	//! Returns true if the current object is an ancestor of the specified one
 	bool isAncestorOf(const ccHObject *anObject) const;
 
+public: //bouding-box
+
+	//! Returns the entity's own bounding-box
+	/** Children bboxes are ignored.
+		\param withGLFeatures whether to take into account display-only elements (if any)
+		\return bounding-box
+	**/
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+
+	//! Returns the bounding-box of this entity and it's (enabled) children
+	/** \param withGLFeatures whether to take into account display-only elements (if any)
+		\return bounding-box
+	**/
+	virtual ccBBox getBB_recursive(bool withGLFeatures = false);
+
+	//! Returns the bounding-box of this entity and it's children WHEN DISPLAYED
+	/** Children's GL transformation is taken into account (if enabled).
+		\param relative whether the bounding-box is relative (i.e. in the entity's local coordinate sytem) or absolute (in which case the parent's GL transformation will be taken into account)
+		\param display if not null, this method will return the bounding-box of this entity (and its children) in the specified 3D view (i.e. potentially not visible)
+		\return bounding-box
+	**/
+	virtual ccBBox getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display = 0);
+
+	//! Returns best-fit bounding-box (if available)
+	/** \warning Only suitable for leaf objects (i.e. without children)
+		Therefore children bboxes are always ignored.
+		\warning This method is not supported by all entities!
+		(returns the axis-aligned bounding-box by default).
+		\param[out] trans associated transformation (so that the bounding-box can be displayed in the right position!)
+		\return fit bounding-box
+	**/
+	inline virtual ccBBox getOwnFitBB(ccGLMatrix& trans) { trans.toIdentity(); return getOwnBB(); }
+
+	//! Draws the entity (and its children) bounding-box
+	virtual void drawBB(const ccColor::Rgb& col);
+
+public: //display
+
 	//Inherited from ccDrawableObject
-	virtual ccBBox getBB(bool relative = true, bool withGLfeatures = false, const ccGenericGLDisplay* window = NULL);
 	virtual void draw(CC_DRAW_CONTEXT& context);
 
 	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
@@ -257,27 +297,8 @@ public:
 	**/
 	void applyGLTransformation_recursive(ccGLMatrix* trans = 0);
 
-	//! Returns the bounding-box center
-	/** \return bounding-box center
-	**/
-	virtual CCVector3 getBBCenter();
-
 	//! Notifies all dependent entities that the geometry of this entity has changed
 	virtual void notifyGeometryUpdate();
-
-	//! Returns the entity bounding-box only
-	/** Children bboxes are ignored.
-		\return bounding-box
-	**/
-	virtual ccBBox getMyOwnBB();
-
-	//! Returns the entity GL display bounding-box
-	/** Children bboxes are ignored. The bounding-box
-		should take into account entity geometrical data
-		and any other 3D displayed elements.
-		\return bounding-box
-	**/
-	virtual ccBBox getDisplayBB();
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const;

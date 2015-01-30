@@ -1272,7 +1272,7 @@ void ccMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbM
 	memcpy(bbMax, m_bBox.maxCorner().u, 3*sizeof(PointCoordinateType));
 }
 
-ccBBox ccMesh::getMyOwnBB()
+ccBBox ccMesh::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	refreshBB();
 

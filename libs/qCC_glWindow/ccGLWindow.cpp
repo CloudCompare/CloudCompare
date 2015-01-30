@@ -1372,7 +1372,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	}
 	else if (m_globalDBRoot) //otherwise we'll take the default one (if possible)
 	{
-		zoomedBox = m_globalDBRoot->getBB(true, true, this);
+		zoomedBox = m_globalDBRoot->getDisplayBB_recursive(false, this);
 	}
 
 	if (!zoomedBox.isValid())
@@ -1705,13 +1705,13 @@ ccBBox ccGLWindow::getVisibleObjectsBB() const
 	if (m_globalDBRoot)
 	{
 		//get whole bounding-box
-		box = m_globalDBRoot->getBB(true, true, this);
+		box = m_globalDBRoot->getDisplayBB_recursive(false, this);
 		if (box.isValid())
 		{
 			//incorporate window own db
 			if (m_winDBRoot)
 			{
-				ccBBox ownBox = m_winDBRoot->getBB(true, true, this);
+				ccBBox ownBox = m_winDBRoot->getDisplayBB_recursive(false, this);
 				if (ownBox.isValid())
 				{
 					box.add(ownBox.minCorner());

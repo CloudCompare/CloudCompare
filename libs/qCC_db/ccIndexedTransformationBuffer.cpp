@@ -133,7 +133,7 @@ void ccIndexedTransformationBuffer::invalidateBoundingBox()
 	m_bBox.setValidity(false);
 }
 
-ccBBox ccIndexedTransformationBuffer::getMyOwnBB()
+ccBBox ccIndexedTransformationBuffer::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	if (!m_bBox.isValid() || m_bBoxValidSize != size())
 	{
@@ -143,17 +143,16 @@ ccBBox ccIndexedTransformationBuffer::getMyOwnBB()
 		m_bBoxValidSize = size();
 	}
 
-	return m_bBox;
-}
-
-ccBBox ccIndexedTransformationBuffer::getDisplayBB()
-{
-	ccBBox box = getMyOwnBB();
-	if (m_showTrihedrons && box.isValid())
+	if (   !withGLFeatures
+		|| !m_showTrihedrons
+		|| !m_bBox.isValid() )
 	{
-		box.minCorner() -= CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
-		box.maxCorner() += CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
+		return m_bBox;
 	}
+
+	ccBBox box = m_bBox;
+	box.minCorner() -= CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
+	box.maxCorner() += CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
 
 	return box;
 }

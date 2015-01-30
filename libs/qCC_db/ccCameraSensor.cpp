@@ -242,16 +242,19 @@ ccCameraSensor::~ccCameraSensor()
 {
 }
 
-ccBBox ccCameraSensor::getMyOwnBB()
+ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 {
-	return ccBBox();
-}
+	if (!withGLFeatures)
+	{
+		return ccBBox();
+	}
 
-ccBBox ccCameraSensor::getDisplayBB()
-{
+	//get current sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	{
 		return ccBBox();
+	}
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
 
@@ -282,14 +285,17 @@ ccBBox ccCameraSensor::getDisplayBB()
 	}
 
 	cloud.applyRigidTransformation(sensorPos);
-	return cloud.getBB(false);
+	return cloud.getOwnBB(false);
 }
 
-ccBBox ccCameraSensor::getFitBB(ccGLMatrix& trans)
+ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 {
+	//get current sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	{
 		return ccBBox();
+	}
 
 	trans = sensorPos;
 

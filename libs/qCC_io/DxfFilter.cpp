@@ -490,12 +490,12 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	{
 		for (size_t i=0; i<polyCount; ++i)
 		{
-			ccBBox polyBox = polylines[i]->getBB();
+			ccBBox polyBox = polylines[i]->getOwnBB();
 			box += polyBox;
 		}
 		for (size_t j=0; j<meshCount; ++j)
 		{
-			ccBBox meshBox = meshes[j]->getBB();
+			ccBBox meshBox = meshes[j]->getOwnBB();
 			box += meshBox;
 		}
 	}

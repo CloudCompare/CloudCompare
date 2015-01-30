@@ -413,7 +413,7 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		markerContext._win = 0;
 
 		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
-		PointCoordinateType scale = m_contourPolyline->getBB().getMinBoxDim();
+		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();
 
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();

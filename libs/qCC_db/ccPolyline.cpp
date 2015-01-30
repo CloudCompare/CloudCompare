@@ -117,7 +117,7 @@ void ccPolyline::showArrow(bool state, unsigned vertIndex, PointCoordinateType l
 	m_arrowLength = length;
 }
 
-ccBBox ccPolyline::getMyOwnBB()
+ccBBox ccPolyline::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox emptyBox;
 	getBoundingBox(emptyBox.minCorner().u, emptyBox.maxCorner().u);

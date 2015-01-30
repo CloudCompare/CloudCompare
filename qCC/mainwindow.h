@@ -498,7 +498,7 @@ protected:
 	ccPluginInterface* getValidPlugin(QObject* plugin);
 
 	//! Makes the window including an entity zoom on it (helper)
-	void zoomOn(ccDrawableObject* object);
+	void zoomOn(ccHObject* object);
 
 	//! Clear property process fork
 	/** - prop=0 : COLOR

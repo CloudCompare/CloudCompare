@@ -94,6 +94,7 @@ protected slots:
 	void onDelButtonPushed();
 
 	void processPickedItem(int, unsigned, int, int);
+	void invalidate();
 	void apply();
 	void align();
 	void reset();

@@ -51,7 +51,7 @@ void ccOctreeSpinBox::setCloud(ccGenericPointCloud* cloud)
 	}
 	else
 	{
-		ccBBox box = cloud->getMyOwnBB();
+		ccBBox box = cloud->getOwnBB(false);
 		CCLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(),box.maxCorner());
 		m_octreeBoxWidth = box.getMaxBoxDim();
 		onValueChange(value());
@@ -139,14 +139,16 @@ void ccOctree::clear()
 	DgmOctree::clear();
 }
 
-ccBBox ccOctree::getMyOwnBB()
+ccBBox ccOctree::getOwnBB(bool withGLFeatures/*=false*/)
 {
-	return ccBBox(m_pointsMin,m_pointsMax);
-}
-
-ccBBox ccOctree::getDisplayBB()
-{
-	return ccBBox(m_dimMin,m_dimMax);
+	if (withGLFeatures)
+	{
+		return ccBBox(m_dimMin,m_dimMax);
+	}
+	else
+	{
+		return ccBBox(m_pointsMin,m_pointsMax);
+	}
 }
 
 void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)

@@ -216,7 +216,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<CCLib::PointProjectio
 
 		//set zoom
 		{
-			ccBBox box = debugCloud->getBB();
+			ccBBox box = debugCloud->getOwnBB();
 			debugDialog.zoomOn(box);
 		}
 		debugDialog.refresh();

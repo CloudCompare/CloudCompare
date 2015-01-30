@@ -731,7 +731,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			ccGLMatrix transf(cameras[i].trans.inverse().data());
 			
 			//dist to cloud
-			PointCoordinateType dist = (transf.getTranslationAsVec3D() - keypointsCloud->getBBCenter()).norm();
+			PointCoordinateType dist = (transf.getTranslationAsVec3D() - keypointsCloud->getOwnBB().getCenter()).norm();
 			params.zFar_mm = dist;
 			params.zNear_mm = 0.001f;
 
@@ -739,7 +739,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			sensor->setName(QString("Camera #%1").arg(i+1));
 			sensor->setEnabled(true);
 			sensor->setVisible(true/*false*/);
-			sensor->setGraphicScale(keypointsCloud->getBB().getDiagNorm() / 10);
+			sensor->setGraphicScale(keypointsCloud->getOwnBB().getDiagNorm() / 10);
 			sensor->setRigidTransformation(transf);
 
 			//distortion parameters

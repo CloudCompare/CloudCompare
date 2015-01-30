@@ -160,9 +160,8 @@ public: //general
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; }
 	virtual bool isSerializable() const { return true; }
-	virtual ccBBox getMyOwnBB();
-	virtual ccBBox getDisplayBB();
-	virtual ccBBox getFitBB(ccGLMatrix& trans);
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+	virtual ccBBox getOwnFitBB(ccGLMatrix& trans);
 
 	//inherited from ccSensor
 	virtual bool applyViewport(ccGenericGLDisplay* win = 0);

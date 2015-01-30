@@ -121,8 +121,7 @@ public:
 	virtual void clear();
 
 	//Inherited from ccHObject
-	virtual ccBBox getMyOwnBB();
-	virtual ccBBox getDisplayBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
 	/*** RENDERING METHODS ***/
 

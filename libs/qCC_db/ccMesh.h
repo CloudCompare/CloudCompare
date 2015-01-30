@@ -72,7 +72,7 @@ public:
 
 	//inherited methods (ccHObject)
 	virtual unsigned getUniqueIDForDisplay() const;
-	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 	virtual bool isSerializable() const { return true; }
 
 	//inherited methods (ccGenericMesh)

@@ -178,14 +178,6 @@ CCLib::TriangleSummitsIndexes* ccSubMesh::getTriangleIndexes(unsigned triIndex)
 	return 0;
 }
 
-void ccSubMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
-{
-	getMyOwnBB(); //forces BB refresh if necessary
-
-	memcpy(bbMin, m_bBox.minCorner().u, 3*sizeof(PointCoordinateType));
-	memcpy(bbMax, m_bBox.maxCorner().u, 3*sizeof(PointCoordinateType));
-}
-
 ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap/*=0*/)
 {
 	ccGenericPointCloud* vertices = getAssociatedCloud();
@@ -463,14 +455,27 @@ void ccSubMesh::refreshBB()
 	notifyGeometryUpdate();
 }
 
-ccBBox ccSubMesh::getMyOwnBB()
+ccBBox ccSubMesh::getOwnBB(bool withGLFeatures/*=false*/)
 {
+	//force BB refresh if necessary
 	if (!m_bBox.isValid() && size() != 0)
 	{
 		refreshBB();
 	}
 
 	return m_bBox;
+}
+
+void ccSubMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
+{
+	//force BB refresh if necessary
+	if (!m_bBox.isValid() && size() != 0)
+	{
+		refreshBB();
+	}
+
+	memcpy(bbMin, m_bBox.minCorner().u, 3*sizeof(PointCoordinateType));
+	memcpy(bbMax, m_bBox.maxCorner().u, 3*sizeof(PointCoordinateType));
 }
 
 bool ccSubMesh::toFile_MeOnly(QFile& out) const

@@ -209,7 +209,7 @@ bool ccGraphicalTransformationTool::start()
 
 	m_rotation.toIdentity();
 	m_translation = CCVector3d(0,0,0);
-	m_rotationCenter = CCVector3d::fromArray(m_toTransform->getBBCenter().u); //m_rotation center == selected entities center
+	m_rotationCenter = CCVector3d::fromArray(m_toTransform->getBB_recursive().getCenter().u); //m_rotation center == selected entities center
 
 	//activate "moving mode" in associated GL window
 	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITY);

@@ -1304,11 +1304,11 @@ bool ccCommandLineParser::matchBBCenters(QStringList& arguments)
 		return true;
 	}
 
-	CCVector3 firstCenter = entities.front()->getEntity()->getBBCenter();
+	CCVector3 firstCenter = entities.front()->getEntity()->getOwnBB().getCenter();
 	for (size_t i=1; i<entities.size(); ++i)
 	{
 		ccHObject* ent = entities[i]->getEntity();
-		CCVector3 center = ent->getBBCenter();
+		CCVector3 center = ent->getOwnBB().getCenter();
 		CCVector3 T = firstCenter-center;
 
 		//transformation (used only for translation)

@@ -218,7 +218,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	//we recenter the quadric object
 	ccGLMatrix glMat(X,Y,N,G);
 
-	ccBBox bb = tempCloud.getBB();
+	ccBBox bb = tempCloud.getOwnBB();
 	CCVector2 minXY(bb.minCorner().x,bb.minCorner().y);
 	CCVector2 maxXY(bb.maxCorner().x,bb.maxCorner().y);
 

@@ -181,7 +181,7 @@ public:
 	virtual uchar testVisibility(const CCVector3& P) const;
 
 	//Inherited from ccHObject
-	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
 	//! Forces bounding-box update
 	virtual void refreshBB() = 0;

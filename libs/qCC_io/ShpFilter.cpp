@@ -495,7 +495,7 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	bool is2D = poly->is2DMode();
 	bool isClosed = poly->isClosed();
 
-	ccBBox box = poly->getBB();
+	ccBBox box = poly->getOwnBB();
 	assert(box.isValid());
 
 	//Shape Type
@@ -560,7 +560,7 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 		if (outputShapeType == SHP_POLYGON_Z)
 		{
 			//get bounding box
-			ccBBox box = poly->getBB();
+			ccBBox box = poly->getOwnBB();
 			assert(box.isValid());
 			CCVector3 diag = box.getDiagVec();
 			
@@ -797,7 +797,7 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	ccBBox box = cloud->getBB();
+	ccBBox box = cloud->getOwnBB();
 	assert(box.isValid());
 
 	//Shape Type
@@ -1139,7 +1139,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		memcpy(_header,(const char*)&shapeTypeInt,4);
 		_header += 4;
 
-		ccBBox box = entity->getBB();
+		ccBBox box = entity->getOwnBB();
 		assert(box.isValid());
 
 		//X and Y bounaries

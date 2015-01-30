@@ -43,7 +43,7 @@ ccBox* ccInnerRect2DFinder::process( ccGenericPointCloud* cloud, unsigned char z
 	ccBox* resultBox = 0;
 	if (m_maxArea > 0)
 	{
-		ccBBox bbox = cloud->getBB();
+		ccBBox bbox = cloud->getOwnBB();
 		assert(bbox.isValid());
 
 		//box size
@@ -71,7 +71,7 @@ bool ccInnerRect2DFinder::init(ccGenericPointCloud* cloud, unsigned char zDim)
 		return false;
 	}
 
-	ccBBox bbox = cloud->getBB();
+	ccBBox bbox = cloud->getOwnBB();
 	if (!bbox.isValid())
 	{
 		ccLog::Error("[ccInnerRect2DFinder] Invalid input cloud");

@@ -508,79 +508,53 @@ void ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 	}
 }
 
-ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, const ccGenericGLDisplay* display/* = NULL*/)
-{
-	ccBBox box;
-
-	//if (!isEnabled())
-	//	return box;
-
-	if (!display || m_currentDisplay == display)
-		box = (withGLfeatures ? getDisplayBB() : getMyOwnBB());
-
-	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
-	{
-		if ((*it)->isEnabled())
-			box += (*it)->getBB(false, withGLfeatures, display);
-	}
-
-	//apply GL transformation afterwards!
-	if (!display || m_currentDisplay == display)
-		if (!relative && m_glTransEnabled && box.isValid())
-			box = box*m_glTrans;
-
-	return box;
-}
-
-ccBBox ccHObject::getMyOwnBB()
+ccBBox ccHObject::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	return ccBBox();
 }
 
-ccBBox ccHObject::getDisplayBB()
+ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/)
 {
-	//by default, this is the same bbox as the "geometrical" one
-	return getMyOwnBB();
-}
+	ccBBox box = getOwnBB(withGLFeatures);
 
-CCVector3 ccHObject::getBBCenter()
-{
-	ccBBox box = getBB(true,false,m_currentDisplay);
-
-	return box.getCenter();
-}
-
-void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
-{
-	if (!context._win)
-		return;
-
-	//we display it in the 2D layer in fact!
-	ccBBox bBox = getMyOwnBB(); //getBB(false,false,m_currentDisplay);
-	if (bBox.isValid())
+	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
-		const double* MM = context._win->getModelViewMatd(); //viewMat
-		const double* MP = context._win->getProjectionMatd(); //projMat
-		int VP[4];
-		context._win->getViewportArray(VP);
+		if ((*it)->isEnabled()) //DGM FIXE: shall we really take this into account here?
+			box += (*it)->getBB_recursive(withGLFeatures);
+	}
 
+	return box;
+}
+
+ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display/*=0*/)
+{
+	ccBBox box;
+
+	if (!display || display == m_currentDisplay)
+		box = getOwnBB(true);
+
+	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+	{
+		if ((*it)->isEnabled())
+		{
+			ccBBox childBox = (*it)->getDisplayBB_recursive(true, display);
+			if ((*it)->isGLTransEnabled())
+			{
+				childBox = childBox * (*it)->getGLTransformation();
+			}
+			box += childBox;
+		}
+	}
+
+	if (!relative && box.isValid())
+	{
+		//get absolute bounding-box?
 		ccGLMatrix trans;
 		getAbsoluteGLTransformation(trans);
-
-		GLdouble xp,yp,zp;
-		CCVector3 C = bBox.getCenter();
-		trans.apply(C);
-		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
-
-		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
-		context._win->displayText(	getName(),
-									static_cast<int>(xp),
-									static_cast<int>(yp),
-									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
-									0.75f,
-									0,
-									&font);
+		box = box * trans;
 	}
+
+	return box;
 }
 
 bool ccHObject::isDisplayed() const
@@ -597,6 +571,71 @@ bool ccHObject::isBranchEnabled() const
 		return m_parent->isBranchEnabled();
 
 	return true;
+}
+
+void ccHObject::drawBB(const ccColor::Rgb& col)
+{
+	switch (m_selectionBehavior)
+	{
+	case SELECTION_AA_BBOX:
+		getDisplayBB_recursive(true,m_currentDisplay).draw(col);
+		break;
+	
+	case SELECTION_FIT_BBOX:
+		{
+			assert(getChildrenNumber() == 0);
+			ccGLMatrix trans;
+			ccBBox box = getOwnFitBB(trans);
+			if (box.isValid())
+			{
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
+				glMultMatrixf(trans.data());
+				box.draw(col);
+				glPopMatrix();
+			}
+		}
+		break;
+	
+	case SELECTION_IGNORED:
+		break;
+
+	default:
+		assert(false);
+	}
+}
+
+void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
+{
+	if (!context._win)
+		return;
+
+	//we display it in the 2D layer in fact!
+	ccBBox bBox = getOwnBB();
+	if (bBox.isValid())
+	{
+		ccGLMatrix trans;
+		getAbsoluteGLTransformation(trans);
+
+		const double* MM = context._win->getModelViewMatd(); //viewMat
+		const double* MP = context._win->getProjectionMatd(); //projMat
+		int VP[4];
+		context._win->getViewportArray(VP);
+
+		GLdouble xp,yp,zp;
+		CCVector3 C = bBox.getCenter();
+		trans.apply(C);
+		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
+
+		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
+		context._win->displayText(	getName(),
+									static_cast<int>(xp),
+									static_cast<int>(yp),
+									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
+									0.75f,
+									0,
+									&font);
+	}
 }
 
 void ccHObject::draw(CC_DRAW_CONTEXT& context)
@@ -646,30 +685,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	//if the entity is currently selected, we draw its bounding-box
 	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawNames(context))
 	{
-		switch (m_selectionBehavior)
-		{
-		case SELECTION_AA_BBOX:
-			drawBB(context.bbDefaultCol);
-			break;
-		case SELECTION_FIT_BBOX:
-			{
-				ccGLMatrix trans;
-				ccBBox box = getFitBB(trans);
-				if (box.isValid())
-				{
-					glMatrixMode(GL_MODELVIEW);
-					glPushMatrix();
-					glMultMatrixf(trans.data());
-					box.draw(context.bbDefaultCol);
-					glPopMatrix();
-				}
-			}
-			break;
-		case SELECTION_IGNORED:
-			break;
-		default:
-			assert(false);
-		}
+		drawBB(context.bbDefaultCol);
 	}
 
 	if (draw3D && m_glTransEnabled)

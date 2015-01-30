@@ -401,13 +401,13 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		if (_obj->getSelectionBehavior() == ccHObject::SELECTION_FIT_BBOX)
 		{
 			ccGLMatrix trans;
-			box = _obj->getFitBB(trans);
+			box = _obj->getOwnFitBB(trans);
 			box += trans.getTranslationAsVec3D();
 			fitBBox = true;
 		}
 		else
 		{
-			box = _obj->getBB();
+			box = _obj->getBB_recursive();
 		}
 
 		if (box.isValid())

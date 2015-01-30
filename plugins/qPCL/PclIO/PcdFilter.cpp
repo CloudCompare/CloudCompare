@@ -190,7 +190,7 @@ CC_FILE_ERROR PcdFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//uncertainty to some default
 		sensor->setUncertainty(static_cast<PointCoordinateType>(0.01));
 		//graphic scale
-		sensor->setGraphicScale(ccCloud->getBB().getDiagNorm() / 10);
+		sensor->setGraphicScale(ccCloud->getOwnBB().getDiagNorm() / 10);
 
 		//Compute parameters
 		ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(ccCloud);

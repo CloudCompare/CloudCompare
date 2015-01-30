@@ -590,6 +590,8 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 			duplicatePoly->set2DMode(false);
 			duplicatePoly->setDisplay(inputPoly->getDisplay());
 			duplicatePoly->setName(inputPoly->getName());
+			duplicatePoly->setGlobalScale(inputPoly->getGlobalScale());
+			duplicatePoly->setGlobalShift(inputPoly->getGlobalShift());
 
 			if (!alreadyInDB)
 				delete inputPoly;
@@ -631,9 +633,14 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	return true;
 }
 
+static bool s_mixedShiftAndScaleInfo = false;
+
 bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alreadyInDB/*=true*/)
 {
 	assert(inputCloud);
+
+	if (m_clouds.empty())
+		s_mixedShiftAndScaleInfo = false;
 
 	for (CloudPool::iterator it = m_clouds.begin(); it != m_clouds.end(); ++it)
 	{
@@ -642,6 +649,17 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 		{
 			//cloud already in DB
 			return false;
+		}
+
+		//test (on the first cloud) that the global shift & scale info is the same
+		if (!s_mixedShiftAndScaleInfo && it == m_clouds.begin())
+		{
+			if (	cloud.entity->getGlobalScale() != inputCloud->getGlobalScale()
+				||	(cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() < ZERO_TOLERANCE)
+			{
+				ccLog::Warning("[ccSectionExtractionTool] Clouds have different shift & scale information! Only the first one will be used");
+				s_mixedShiftAndScaleInfo = true;
+			}
 		}
 	}
 
@@ -716,6 +734,13 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 		m_editedPoly->setColor(s_defaultEditedPolylineColor);
 		m_editedPoly->showColors(true);
 		m_editedPoly->set2DMode(true);
+		//copy (first) cloud shift & scale info!
+		if (!m_clouds.empty() && m_clouds.front().entity)
+		{
+			ccGenericPointCloud* cloud = m_clouds.front().entity;
+			m_editedPoly->setGlobalScale(cloud->getGlobalScale());
+			m_editedPoly->setGlobalShift(cloud->getGlobalShift());
+		}
 		m_editedPoly->addChild(m_editedPolyVertices);
 		if (m_associatedWin)
 			m_associatedWin->addToOwnDB(m_editedPoly);
@@ -1076,6 +1101,8 @@ void ccSectionExtractionTool::generateOrthoSections()
 
 					orthoPoly->setClosed(false);
 					orthoPoly->set2DMode(false);
+					orthoPoly->setGlobalScale(poly->getGlobalScale());
+					orthoPoly->setGlobalShift(poly->getGlobalShift());
 
 					//set default display style
 					vertices->setVisible(false);
@@ -1317,6 +1344,8 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 			if (parts.size() > 1)
 				name += QString("(part %1/%2)").arg(p+1).arg(parts.size());
 			contourPart->setName(name);
+			contourPart->setGlobalScale(originalSectionCloud->getGlobalScale());
+			contourPart->setGlobalShift(originalSectionCloud->getGlobalShift());
 			contourPart->setColor(s_defaultContourColor);
 			contourPart->showColors(true);
 			//copy meta-data (import for Mascaret export!)
@@ -1540,6 +1569,12 @@ void ccSectionExtractionTool::extractPoints()
 				{
 					originalSlicePoints = new ccPointCloud("section.orig");
 					unrolledSlicePoints = new ccPointCloud("section.unroll");
+
+					//assign them the default (first!) global shift & scale info
+					assert(!m_clouds.empty());
+					ccGenericPointCloud* cloud = m_clouds.front().entity;
+					originalSlicePoints->setGlobalScale(cloud->getGlobalScale());
+					originalSlicePoints->setGlobalShift(cloud->getGlobalShift());
 				}
 
 				//for each cloud

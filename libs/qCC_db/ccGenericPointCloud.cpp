@@ -26,14 +26,22 @@
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccHObject(name)
+	, ccShifted()
 	, m_pointsVisibility(0)
-	, m_globalShift(0,0,0)
-	, m_globalScale(1.0)
 	, m_pointSize(0)
 {
 	setVisible(true);
 	lockVisibility(false);
 }
+
+ccGenericPointCloud::ccGenericPointCloud(const ccGenericPointCloud& cloud)
+	: ccHObject(cloud)
+	, ccShifted(cloud)
+	, m_pointsVisibility(cloud.m_pointsVisibility)
+	, m_pointSize(cloud.m_pointSize)
+{
+}
+
 
 ccGenericPointCloud::~ccGenericPointCloud()
 {
@@ -197,43 +205,14 @@ ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 	return box;
 }
 
-void ccGenericPointCloud::setGlobalShift(const CCVector3d& shift)
-{
-	m_globalShift = shift;
-}
-
-void ccGenericPointCloud::setGlobalShift(double x, double y, double z)
-{
-	m_globalShift.x = x;
-	m_globalShift.y = y;
-	m_globalShift.z = z;
-}
-
-void ccGenericPointCloud::setGlobalScale(double scale)
-{
-	if (scale == 0)
-	{
-		ccLog::Warning("[ccGenericPointCloud::setGlobalScale] Can't handle a global scale equal to zero!");
-		m_globalScale = 1.0;
-		return;
-	}
-
-	m_globalScale = scale;
-}
-
 bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 {
 	if (!ccHObject::toFile_MeOnly(out))
 		return false;
 
-	//'global shift' (dataVersion>=20)
-	if (out.write((const char*)m_globalShift.u,sizeof(double)*3) < 0)
-		return WriteError();
-
-	//'global scale' (dataVersion>=32)
-	if (out.write((const char*)&m_globalScale,sizeof(double)) < 0)
-		return WriteError();
-
+	//'global shift & scale' (dataVersion>=39)
+	saveShiftInfoToFile(out);
+	
 	//'visibility' array (dataVersion>=20)
 	bool hasVisibilityArray = isVisibilityTableInstantiated();
 	if (out.write((const char*)&hasVisibilityArray,sizeof(bool)) < 0)
@@ -257,22 +236,22 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	if (dataVersion<20)
+	if (dataVersion < 20)
 		return CorruptError();
 
-	//'coordinates shift' (dataVersion>=20)
-	if (in.read((char*)m_globalShift.u,sizeof(double)*3) < 0)
-		return ReadError();
-
-	//'global scale' (dataVersion>=33)
-	if (dataVersion >= 33)
+	if (dataVersion < 33)
 	{
-		if (in.read((char*)&m_globalScale,sizeof(double)) < 0)
+		//'coordinates shift' (dataVersion>=20)
+		if (in.read((char*)m_globalShift.u,sizeof(double)*3) < 0)
 			return ReadError();
+
+		m_globalScale = 1.0;
 	}
 	else
 	{
-		m_globalScale = 1.0;
+		//'global shift & scale' (dataVersion>=33)
+		if (!loadShiftInfoFromFile(in))
+			return ReadError();
 	}
 
 	//'visibility' array (dataVersion>=20)
@@ -306,4 +285,3 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 
 	return true;
 }
-

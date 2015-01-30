@@ -429,6 +429,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		//polyline
 		ccPolyline* poly = new ccPolyline(vertices);
 		poly->addChild(vertices);
+		poly->setGlobalShift(PShift); //shouldn't be necessary but who knows ;)
 
 		if (!poly->reserve(vertCount))
 		{
@@ -507,11 +508,13 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	}
 
 	//Byte 4: Box
+	CCVector3d bbMing = poly->toGlobal3d(box.minCorner());
+	CCVector3d bbMaxg = poly->toGlobal3d(box.maxCorner());
 	{
-		double xMin = qToLittleEndian<double>(box.minCorner().u[X]);
-		double xMax = qToLittleEndian<double>(box.maxCorner().u[X]);
-		double yMin = qToLittleEndian<double>(box.minCorner().u[Y]);
-		double yMax = qToLittleEndian<double>(box.maxCorner().u[Y]);
+		double xMin = qToLittleEndian<double>(bbMing.u[X]);
+		double xMax = qToLittleEndian<double>(bbMaxg.u[X]);
+		double yMin = qToLittleEndian<double>(bbMing.u[Y]);
+		double yMax = qToLittleEndian<double>(bbMaxg.u[Y]);
 		//The Bounding Box for the PolyLine stored in the order Xmin, Ymin, Xmax, Ymax
 		/*Byte  4*/file.write((const char*)&xMin,8);
 		/*Byte 12*/file.write((const char*)&yMin,8);
@@ -595,9 +598,10 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 		{
 			int32_t ii = (inverseOrder ? numPoints-1-i : i);
 			const CCVector3* P = vertices->getPoint(ii % realNumPoints); //warning: handle loop if polyline is closed
+			CCVector3d Pg = poly->toGlobal3d(*P);
 
-			double x = qToLittleEndian<double>(P->u[X]);
-			double y = qToLittleEndian<double>(P->u[Y]);
+			double x = qToLittleEndian<double>(Pg.u[X]);
+			double y = qToLittleEndian<double>(Pg.u[Y]);
 			/*Byte 0*/file.write((const char*)&x,8);
 			/*Byte 8*/file.write((const char*)&y,8);
 			bytesWritten += 16;
@@ -609,8 +613,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	{
 		//Z boundaries
 		{
-			double zMin = qToLittleEndian<double>(box.minCorner().u[Z]);
-			double zMax = qToLittleEndian<double>(box.maxCorner().u[Z]);
+			double zMin = qToLittleEndian<double>(bbMing.u[Z]);
+			double zMax = qToLittleEndian<double>(bbMaxg.u[Z]);
 			file.write((const char*)&zMin,8);
 			file.write((const char*)&zMax,8);
 			bytesWritten += 16;
@@ -622,7 +626,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 			{
 				int32_t ii = (inverseOrder ? numPoints-1-i : i);
 				const CCVector3* P = vertices->getPoint(ii % realNumPoints); //warning: handle loop if polyline is closed
-				double z = qToLittleEndian<double>(P->u[Z]);
+				CCVector3d Pg = poly->toGlobal3d(*P);
+				double z = qToLittleEndian<double>(Pg.u[Z]);
 				file.write((const char*)&z,8);
 				bytesWritten += 8;
 			}

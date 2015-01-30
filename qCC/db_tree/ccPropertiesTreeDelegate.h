@@ -40,6 +40,7 @@ class cc2DViewportObject;
 class ccFacet;
 class ccSensor;
 class ccIndexedTransformationBuffer;
+class ccShifted;
 class CCShareable;
 
 class QStandardItemModel;
@@ -175,6 +176,7 @@ protected:
 	void fillWithMaterialSet(ccMaterialSet*);
 	void fillWithShareable(CCShareable*);
 	void fillWithMetaData(ccObject*);
+	void fillWithShifted(ccShifted*);
 	template<int N, class ElementType> void fillWithChunkedArray(ccChunkedArray<N,ElementType>*);
 
 	//! Returns whether the editor is wide (i.e. spans on two columns) or not

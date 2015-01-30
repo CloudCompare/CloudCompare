@@ -51,8 +51,9 @@
 	v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
 	v3.7 - 08/24/2014 - Textures are stored and saved as a single DB with only references to them in each material (key = absolute filename)
 	v3.8 - 09/14/2014 - GBL and camera sensors structures have evolved
+	v3.9 - 01/30/2015 - Shift & scale information are now saved for polylines (+ separate interface)
 **/
-const unsigned c_currentDBVersion = 38; //3.8
+const unsigned c_currentDBVersion = 39; //3.9
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

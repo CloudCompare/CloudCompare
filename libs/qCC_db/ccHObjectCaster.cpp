@@ -97,6 +97,22 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 	return 0;
 }
 
+ccShifted* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*= 0*/)
+{
+	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices /*= 0*/);
+	if (cloud)
+		return cloud;
+
+	if (obj && obj->isKindOf(CC_TYPES::POLY_LINE))
+	{
+		if (lockedVertices)
+			*lockedVertices = false;
+		return static_cast<ccPolyline*>(obj);
+	}
+
+	return 0;
+}
+
 ccGenericMesh* ccHObjectCaster::ToGenericMesh(ccHObject* obj)
 {
 	return (obj && obj->isKindOf(CC_TYPES::MESH) ? static_cast<ccGenericMesh*>(obj) : 0);

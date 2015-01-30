@@ -85,6 +85,12 @@ v2.6.1.beta 11/??/2014
 		- contour extraction (either in the 'Cross Section' tool or the new 'Section Extraction ' tool is now smarter
 		- a 'visual debuging mode' is also available to (try to) understand how the algorithm works and
 			which parts of the cloud may cause a strange behavior / bad result
+	* Poylines can now be associated to 'Global shift & scale' information
+		- works just as point clouds
+		- when creating a polyline (with the 'Point Picking List' tool, the 'Cross Section' tool, the 'Section extraction'
+			tool, or 'Rasterize > Contour plot' tool, etc.) the global shift & scale information should be automatically
+			transferred from the cloud
+		- it should be properly restored when saving as SHP, Mascaret or Sinusx formats
 	* Interactive Segmentation tool:
 		The segmentation polyline can now be exported (to the DB tree) or imported (from the DB tree)
 		- the polyline is always exported as a 3D polyline (i.e. the coordinates are relative to the segmented entities).

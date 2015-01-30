@@ -250,6 +250,8 @@ void ccPointListPickingDlg::exportToNewPolyline()
 		polyline->addPointIndex(0,count);
 		polyline->setVisible(true);
 		vertices->setEnabled(false);
+		polyline->setGlobalShift(m_associatedCloud->getGlobalShift());
+		polyline->setGlobalScale(m_associatedCloud->getGlobalScale());
 		polyline->addChild(vertices);
 		polyline->setDisplay_recursive(m_associatedCloud->getDisplay());
 

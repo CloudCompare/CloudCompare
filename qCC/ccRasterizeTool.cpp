@@ -2118,7 +2118,8 @@ void ccRasterizeTool::generateContours()
 						if (poly->size() > 1)
 						{
 							poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
-
+							poly->setGlobalScale(m_cloud->getGlobalScale());
+							poly->setGlobalShift(m_cloud->getGlobalShift());
 							poly->setWidth(1);
 							poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
 							poly->setColor(ccColor::darkGrey);

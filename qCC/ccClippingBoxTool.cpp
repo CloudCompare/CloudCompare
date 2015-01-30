@@ -642,10 +642,11 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
 						assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) < clouds.size());
 
-						if (clouds[cloudIndex]) //some slices can be empty due to rounding issues!
+						ccGenericPointCloud* sliceCloud = clouds[cloudIndex];
+						if (sliceCloud) //some slices can be empty due to rounding issues!
 						{
 							std::vector<ccPolyline*> polys;
-							if (ccContourExtractor::ExtractFlatContour(	clouds[cloudIndex],
+							if (ccContourExtractor::ExtractFlatContour(	sliceCloud,
 																		static_cast<PointCoordinateType>(s_maxEdgeLength),
 																		polys,
 																		s_splitContours,
@@ -659,7 +660,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 										ccPolyline* poly = polys[p];
 										poly->setColor(ccColor::green);
 										poly->showColors(true);
-										QString contourName = clouds[cloudIndex]->getName();
+										poly->setGlobalScale(sliceCloud->getGlobalScale());
+										poly->setGlobalShift(sliceCloud->getGlobalShift());
+										QString contourName = sliceCloud->getName();
 										contourName.replace("slice","contour");
 										if (polys.size() != 1)
 											contourName += QString(" (part %1)").arg(p+1);
@@ -669,13 +672,13 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 								}
 								else
 								{
-									ccLog::Warning(QString("%1: points are too far from each other! Increase the max edge length").arg(clouds[cloudIndex]->getName()));
+									ccLog::Warning(QString("%1: points are too far from each other! Increase the max edge length").arg(sliceCloud->getName()));
 									warningsIssued = true;
 								}
 							}
 							else
 							{
-								ccLog::Warning(QString("%1: contour extraction failed!").arg(clouds[cloudIndex]->getName()));
+								ccLog::Warning(QString("%1: contour extraction failed!").arg(sliceCloud->getName()));
 								warningsIssued = true;
 							}
 						}

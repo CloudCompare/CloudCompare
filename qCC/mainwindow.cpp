@@ -1963,7 +1963,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	size_t selNum = m_selectedEntities.size();
 
 	//get the global shift/scale info and bounding box of all selected clouds
-	std::vector<ccGenericPointCloud*> clouds;
+	std::vector< std::pair<ccShifted*,ccHObject*> > shiftedEntities;
 	CCVector3d Pl(0,0,0);
 	double Dl = 1.0;
 	CCVector3d Pg(0,0,0);
@@ -1982,32 +1982,37 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			bool lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-			//for (unlocked) point clouds only
-			if (!cloud)
-				continue;
-			if (lockedVertices && !ent->isAncestorOf(cloud))
+			ccShifted* shifted = ccHObjectCaster::ToShifted(ent,&lockedVertices);
+			//for (unlocked) entities only
+			if (lockedVertices)
 			{
-				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-				continue;
+				//get the vertices
+				assert(ent->isKindOf(CC_TYPES::MESH));
+				ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(ent)->getAssociatedCloud();
+				if (!vertices || !ent->isAncestorOf(vertices))
+				{
+					DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+					continue;
+				}
+				ent = vertices;
 			}
 
-			CCVector3 Al = cloud->getOwnBB().minCorner();
-			CCVector3 Bl = cloud->getOwnBB().maxCorner();
-			CCVector3d Ag = cloud->toGlobal3d<PointCoordinateType>(Al);
-			CCVector3d Bg = cloud->toGlobal3d<PointCoordinateType>(Bl);
+			CCVector3 Al = ent->getOwnBB().minCorner();
+			CCVector3 Bl = ent->getOwnBB().maxCorner();
+			CCVector3d Ag = shifted->toGlobal3d<PointCoordinateType>(Al);
+			CCVector3d Bg = shifted->toGlobal3d<PointCoordinateType>(Bl);
 
 			//update local BB
 			localBB.add(Al);
 			localBB.add(Bl);
 
 			//update global BB
-			if (clouds.empty())
+			if (shiftedEntities.empty())
 			{
 				globalBBmin = Ag;
 				globalBBmax = Bg;
-				shift = cloud->getGlobalShift();
-				uniqueScale = cloud->getGlobalScale();
+				shift = shifted->getGlobalShift();
+				uniqueScale = shifted->getGlobalScale();
 			}
 			else
 			{
@@ -2019,12 +2024,12 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 											std::max(globalBBmax.z,Bg.z) );
 
 				if (uniqueShift)
-					uniqueShift = ((cloud->getGlobalShift() - shift).norm() < ZERO_TOLERANCE);
+					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < ZERO_TOLERANCE);
 				if (uniqueScale)
-					uniqueScale = (fabs(cloud->getGlobalScale() - scale) < ZERO_TOLERANCE);
+					uniqueScale = (fabs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
 			}
 
-			clouds.push_back(cloud);
+			shiftedEntities.push_back( std::pair<ccShifted*,ccHObject*>(shifted,ent) );
 		}
 
 		Pg = globalBBmin;
@@ -2039,12 +2044,12 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 			scale = Dg / Dl;
 	}
 
-	if (clouds.empty())
+	if (shiftedEntities.empty())
 		return;
 
 	ccShiftAndScaleCloudDlg sasDlg(Pl,Dl,Pg,Dg,this);
-	sasDlg.showApplyAllButton(clouds.size() > 1);
-	sasDlg.showApplyButton(clouds.size() == 1);
+	sasDlg.showApplyAllButton(shiftedEntities.size() > 1);
+	sasDlg.showApplyButton(shiftedEntities.size() == 1);
 	sasDlg.showNoButton(false);
 	//add "original" entry
 	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",shift,scale));
@@ -2068,19 +2073,20 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 
 	//apply new shift
 	{
-		for (size_t i=0; i<clouds.size(); ++i)
+		for (size_t i=0; i<shiftedEntities.size(); ++i)
 		{
-			ccGenericPointCloud* cloud = clouds[i];
+			ccShifted* shifted = shiftedEntities[i].first;
+			ccHObject* ent = shiftedEntities[i].second;
 			if (preserveGlobalPos)
 			{
 				//to preserve the global position of the cloud, we may have to translate and/or rescale the cloud
-				CCVector3d Ql = CCVector3d::fromArray(cloud->getOwnBB().minCorner().u);
-				CCVector3d Qg = cloud->toGlobal3d(Ql);
+				CCVector3d Ql = CCVector3d::fromArray(ent->getOwnBB().minCorner().u);
+				CCVector3d Qg = shifted->toGlobal3d(Ql);
 				CCVector3d Ql2 = Qg * scale + shift;
 				CCVector3d T = Ql2 - Ql;
 
-				assert(cloud->getGlobalScale() > 0);
-				double scaleCoef = scale / cloud->getGlobalScale();
+				assert(shifted->getGlobalScale() > 0);
+				double scaleCoef = scale / shifted->getGlobalScale();
 
 				if (T.norm() > ZERO_TOLERANCE || fabs(scaleCoef-1.0) > ZERO_TOLERANCE)
 				{
@@ -2090,14 +2096,19 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					transMat.setTranslation(T);
 
 					//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
-					cloud->applyGLTransformation_recursive(&transMat);
-					cloud->prepareDisplayForRefresh_recursive();
+					ent->applyGLTransformation_recursive(&transMat);
+					ent->prepareDisplayForRefresh_recursive();
 
-					ccLog::Warning(QString("[Global Shift/Scale] To preserve its original position, the cloud '%1' has been translated of (%2,%3,%4) and rescaled of a factor %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scaleCoef));
+					ccLog::Warning(QString("[Global Shift/Scale] To preserve its original position, the entity '%1' has been translated of (%2,%3,%4) and rescaled of a factor %5")
+									.arg(ent->getName())
+									.arg(T.x)
+									.arg(T.y)
+									.arg(T.z)
+									.arg(scaleCoef));
 				}
 			}
-			cloud->setGlobalShift(shift);
-			cloud->setGlobalScale(scale);
+			shifted->setGlobalShift(shift);
+			shifted->setGlobalScale(scale);
 		}
 	}
 
@@ -8846,13 +8857,14 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	for (size_t i=0; i<selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
-
+		ccShifted* shifted = 0;
 		CCLib::GenericIndexedCloudPersist* cloud = 0;
 
 		if (ent->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline * pline = ccHObjectCaster::ToPolyline(ent);
-			cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(pline);
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
+			cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(poly);
+			shifted = poly;
 		}
 		else
 		{
@@ -8860,6 +8872,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			if (gencloud)
 			{
 				cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(gencloud);
+				shifted = gencloud;
 			}
 		}
 
@@ -8878,6 +8891,17 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 					N = facet->getNormal();
 					C = facet->getCenter();
 					rms = facet->getRMS();
+
+					//manually copy shift & scale info!
+					if (shifted)
+					{
+						ccPolyline* contour = facet->getContour();
+						if (contour)
+						{
+							contour->setGlobalScale(shifted->getGlobalScale());
+							contour->setGlobalShift(shifted->getGlobalShift());
+						}
+					}
 				}
 			}
 			else
@@ -10943,7 +10967,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
 	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!

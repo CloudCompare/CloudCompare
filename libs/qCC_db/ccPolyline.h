@@ -24,6 +24,7 @@
 //Local
 #include "qCC_db.h"
 #include "ccHObject.h"
+#include "ccShifted.h"
 
 //system
 #include <vector>
@@ -34,7 +35,7 @@ class ccPointCloud;
 /** Extends the Polyline class of CCLib.
 Check CCLib documentation for more information about it.
 **/
-class QCC_DB_LIB_API ccPolyline : public CCLib::Polyline, public ccHObject
+class QCC_DB_LIB_API ccPolyline : public CCLib::Polyline, public ccHObject, public ccShifted
 {
 public:
 

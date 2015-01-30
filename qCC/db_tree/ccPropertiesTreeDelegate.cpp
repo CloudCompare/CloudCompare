@@ -432,6 +432,18 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		appendRow( ITEM("Current Display"), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true );
 }
 
+void ccPropertiesTreeDelegate::fillWithShifted(ccShifted* _obj)
+{
+	assert(_obj && m_model);
+
+	//global shift & scale
+	const CCVector3d& shift = _obj->getGlobalShift();
+	appendRow( ITEM("Global shift"), ITEM(QString("(%1;%2;%3)").arg(shift.x,0,'f',2).arg(shift.y,0,'f',2).arg(shift.z,0,'f',2)) );
+
+	double scale = _obj->getGlobalScale();
+	appendRow( ITEM("Global scale"), ITEM(QString("%1").arg(scale,0,'f',6)) );
+}
+
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 {
 	assert(_obj && m_model);
@@ -441,14 +453,8 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 	//number of points
 	appendRow( ITEM("Points"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
 
-	//shift
-	{
-		const CCVector3d& shift = _obj->getGlobalShift();
-		appendRow( ITEM("Global shift"), ITEM(QString("(%1;%2;%3)").arg(shift.x,0,'f',2).arg(shift.y,0,'f',2).arg(shift.z,0,'f',2)) );
-
-		double scale = _obj->getGlobalScale();
-		appendRow( ITEM("Global scale"), ITEM(QString("%1").arg(scale,0,'f',6)) );
-	}
+	//global shift & scale
+	fillWithShifted(_obj);
 
 	//custom point size
 	appendRow( ITEM("Point size"), PERSISTENT_EDITOR(OBJECT_CLOUD_POINT_SIZE), true );
@@ -605,6 +611,9 @@ void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
 
 	//custom line width
 	appendRow( ITEM("Line width"), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true );
+
+	//global shift & scale
+	fillWithShifted(_obj);
 }
 
 void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)

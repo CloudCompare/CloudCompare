@@ -43,7 +43,8 @@ bool SinusxFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) 
 
 bool SinusxFilter::canLoadExtension(QString upperCaseExt) const
 {
-	return (upperCaseExt == "SINUSX");
+	return (	upperCaseExt == "SX"
+			||	upperCaseExt == "SINUSX" );
 }
 
 QString MakeSinusxName(QString name)
@@ -128,13 +129,14 @@ CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, QString filename, Save
 		for (unsigned j=0; j<vertCount; ++j)
 		{
 			const CCVector3* P = poly->getPoint(j);
+			CCVector3d Pg = poly->toGlobal3d(*P);
 
 			for (unsigned k=0; k<3; ++k)
 			{
 				outFile << " ";
 				if (P->u[k] >= 0)
 					outFile << "+";
-				outFile << QString::number(P->u[k],'E',s_precision);
+				outFile << QString::number(Pg.u[k],'E',s_precision);
 			}
 			outFile << " A" << endl;
 		}
@@ -165,6 +167,9 @@ CC_FILE_ERROR SinusxFilter::loadFile(QString filename, ccHObject& container, Loa
 	CurveType curveType = INVALID;
 	unsigned cpIndex = 0;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	CCVector3d Pshift(0,0,0);
+	bool firstVertex = true;
+
 	while (!currentLine.isEmpty() && file.error() == QFile::NoError)
 	{
 		currentLine = stream.readLine();
@@ -395,7 +400,21 @@ CC_FILE_ERROR SinusxFilter::loadFile(QString filename, ccHObject& container, Loa
 									delete currentPoly;
 									return CC_FERR_NOT_ENOUGH_MEMORY;
 								}
-								currentVertices->addPoint(CCVector3::fromArray(Pd.u));
+								//first point: check for 'big' coordinates
+								if (firstVertex/*currentVertices->size() == 0*/)
+								{
+									firstVertex = false;
+									if (HandleGlobalShift(Pd,Pshift,parameters))
+									{
+										if (currentPoly)
+											currentPoly->setGlobalShift(Pshift);
+										else
+											currentVertices->setGlobalShift(Pshift);
+										ccLog::Warning("[SinusX::loadFile] Polyline has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+									}
+								}
+
+								currentVertices->addPoint(CCVector3::fromArray((Pd+Pshift).u));
 							}
 						}
 					}

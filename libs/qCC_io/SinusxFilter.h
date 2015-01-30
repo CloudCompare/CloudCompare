@@ -26,8 +26,8 @@ class QCC_IO_LIB_API SinusxFilter : public FileIOFilter
 public:
 
 	//static accessors
-	static inline QString GetFileFilter() { return "Sinusx curve (*.sinusx)"; }
-	static inline QString GetDefaultExtension() { return QString("sinusx"); }
+	static inline QString GetFileFilter() { return "Sinusx curve (*.sx)"; }
+	static inline QString GetDefaultExtension() { return QString("sx"); }
 
 	//inherited from FileIOFilter
 	virtual bool exportSupported() const { return true; }

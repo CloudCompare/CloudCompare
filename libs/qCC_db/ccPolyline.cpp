@@ -32,6 +32,7 @@
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	: Polyline(associatedCloud)
 	, ccHObject("Polyline")
+	, ccShifted()
 {
 	set2DMode(false);
 	setForeground(true);
@@ -42,11 +43,19 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	setVertexMarkerWidth(3);
 	setWidth(0);
 	showArrow(false,0,0);
+
+	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
+	if (cloud)
+	{
+		setGlobalScale(cloud->getGlobalScale());
+		setGlobalShift(cloud->getGlobalShift());
+	}
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
 	: Polyline(0)
 	, ccHObject(poly)
+	, ccShifted(poly)
 {
 	ccPointCloud* clone = 0;
 	initWith(clone,poly);
@@ -96,6 +105,8 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
 	setVisible(poly.isVisible());
 	showArrow(m_showArrow,m_arrowIndex,m_arrowLength);
+	setGlobalScale(poly.getGlobalScale());
+	setGlobalShift(poly.getGlobalShift());
 	
 	return success;
 }
@@ -308,6 +319,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 			return WriteError();
 	}
 
+	//'global shift & scale' (dataVersion>=39)
+	saveShiftInfoToFile(out);
+	
 	QDataStream outStream(&out);
 
 	//Closing state (dataVersion>=28)
@@ -361,6 +375,18 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		if (in.read((char*)&pointIndex,4) < 0)
 			return ReadError();
 		addPointIndex(pointIndex);
+	}
+
+	//'global shift & scale' (dataVersion>=39)
+	if (dataVersion >= 39)
+	{
+		if (!loadShiftInfoFromFile(in))
+			return ReadError();
+	}
+	else
+	{
+		m_globalScale = 1.0;
+		m_globalShift = CCVector3d(0,0,0);
 	}
 
 	QDataStream inStream(&in);

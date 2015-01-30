@@ -8804,7 +8804,7 @@ void MainWindow::doActionFitSphere()
 		trans.setTranslation(center);
 		ccSphere* sphere = new ccSphere(radius,&trans,QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
 		cloud->addChild(sphere);
-		sphere->setDisplay(cloud->getDisplay());
+		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
 		addToDB(sphere,false,false,false);
 	}

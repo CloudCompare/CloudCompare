@@ -738,7 +738,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 			if (m_dispIn3D && !pushName) //no need to display label in point picking mode
 			{
-				QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
+				//QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
 				//font.setPointSize(font.pointSize()+2);
 				//font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
@@ -760,8 +760,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 													*P + CCVector3(	context.labelMarkerTextShift,
 																	context.labelMarkerTextShift,
 																	context.labelMarkerTextShift),
-													ccColor::white.rgba,
-													font );
+													ccColor::white.rgba/*,
+													font*/ ); //DGM: I get an OpenGL error if the font is defined this way?!
 				}
 				glPopAttrib();
 			}

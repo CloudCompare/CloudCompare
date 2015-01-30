@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/smallSphere.png</file>
     <file>images/ccLevel.png</file>
     <file>images/ccGrid.png</file>
     <file>images/sectionExtraction.png</file>

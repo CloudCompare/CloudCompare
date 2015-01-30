@@ -727,114 +727,247 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P,
 	trans.T = CCVector3(0,0,0);
 	trans.s = PC_ONE;
 
-	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 4)
+	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 3)
 		return false;
-
-	PointCoordinateType bbMin[3],bbMax[3];
-	X->getBoundingBox(bbMin,bbMax);
-
-	//BBox dimensions
-	PointCoordinateType dx = bbMax[0]-bbMin[0];
-	PointCoordinateType dy = bbMax[1]-bbMin[1];
-	PointCoordinateType dz = bbMax[2]-bbMin[2];
 
 	//centers of mass
 	CCVector3 Gp = GeometricalAnalysisTools::computeGravityCenter(P);
 	CCVector3 Gx = GeometricalAnalysisTools::computeGravityCenter(X);
 
-	//if the data cloud is equivalent to a single point (for instance
-	//it's the case when the two clouds are very far away from
-	//each other in the ICP process) we try to get the two clouds closer
-	if (fabs(dx)+fabs(dy)+fabs(dz) < ZERO_TOLERANCE)
+	//specific case: 3 points only
+	//See section 5.A in Horn's paper
+	if (P->size() == 3)
 	{
-		trans.T = Gx - Gp*aPrioriScale;
-		return true;
-	}
-
-	//Cross covariance matrix, eq #24 in Besl92 (but with weights, if any)
-	SquareMatrixd Sigma_px = (weightsP || weightsX	? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp,Gx,weightsP,weightsX)
-													: GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp,Gx) );
-	if (!Sigma_px.isValid())
-		return false;
-
-	//transpose sigma_px
-	SquareMatrixd Sigma_px_t = Sigma_px.transposed();
-
-	SquareMatrixd Aij = Sigma_px - Sigma_px_t;
-
-	double trace = Sigma_px.trace(); //that is the sum of diagonal elements of sigma_px
-
-	SquareMatrixd traceI3(3); //create the I matrix with eigvals equal to trace
-	traceI3.m_values[0][0] = trace;
-	traceI3.m_values[1][1] = trace;
-	traceI3.m_values[2][2] = trace;
-
-	SquareMatrixd bottomMat = Sigma_px + Sigma_px_t - traceI3;
-
-	//we build up the registration matrix (see ICP algorithm)
-	SquareMatrixd QSigma(4); //#25 in the paper (besl)
-
-	QSigma.m_values[0][0] = trace;
-
-	QSigma.m_values[0][1] = QSigma.m_values[1][0] = Aij.m_values[1][2];
-	QSigma.m_values[0][2] = QSigma.m_values[2][0] = Aij.m_values[2][0];
-	QSigma.m_values[0][3] = QSigma.m_values[3][0] = Aij.m_values[0][1];
-
-	QSigma.m_values[1][1] = bottomMat.m_values[0][0];
-	QSigma.m_values[1][2] = bottomMat.m_values[0][1];
-	QSigma.m_values[1][3] = bottomMat.m_values[0][2];
-
-	QSigma.m_values[2][1] = bottomMat.m_values[1][0];
-	QSigma.m_values[2][2] = bottomMat.m_values[1][1];
-	QSigma.m_values[2][3] = bottomMat.m_values[1][2];
-
-	QSigma.m_values[3][1] = bottomMat.m_values[2][0];
-	QSigma.m_values[3][2] = bottomMat.m_values[2][1];
-	QSigma.m_values[3][3] = bottomMat.m_values[2][2];
-
-	//we compute its eigenvalues and eigenvectors
-	SquareMatrixd eig = QSigma.computeJacobianEigenValuesAndVectors();
-
-	if (!eig.isValid())
-		return false;
-
-	//as Besl says, the best rotation corresponds to the eigenvector associated to the biggest eigenvalue
-	double qR[4];
-	eig.getMaxEigenValueAndVector(qR);
-
-	//these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
-	trans.R.initFromQuaternion(qR);
-
-	if (adjustScale)
-	{
-		//two accumulators
-		double acc_num = 0.0;
-		double acc_denom = 0.0;
-
-		//now deduce the scale (refer to "Point Set Registration with Integrated Scale Estimation", Zinsser et. al, PRIP 2005)
-		X->placeIteratorAtBegining();
+		//compute the first set normal
 		P->placeIteratorAtBegining();
-
-		unsigned count = X->size();
-		assert(P->size() == count);
-		for (unsigned i=0; i<count; ++i)
+		const CCVector3* Ap = P->getNextPoint();
+		const CCVector3* Bp = P->getNextPoint();
+		const CCVector3* Cp = P->getNextPoint();
+		CCVector3 Np(0,0,1);
 		{
-			//'a' refers to the data 'A' (moving) = P
-			//'b' refers to the model 'B' (not moving) = X
-			CCVector3 a_tilde = trans.R * (*(P->getNextPoint()) - Gp);	// a_tilde_i = R * (a_i - a_mean)
-			CCVector3 b_tilde = (*(X->getNextPoint()) - Gx);			// b_tilde_j =     (b_j - b_mean)
-
-			acc_num += (double)b_tilde.dot(a_tilde);
-			acc_denom += (double)a_tilde.dot(a_tilde);
+			Np = (*Bp-*Ap).cross(*Cp-*Ap);
+			double norm = Np.norm();
+			if (norm < ZERO_TOLERANCE)
+				return false;
+			Np /= norm;
+		}
+		//compute the second set normal
+		X->placeIteratorAtBegining();
+		const CCVector3* Ax = X->getNextPoint();
+		const CCVector3* Bx = X->getNextPoint();
+		const CCVector3* Cx = X->getNextPoint();
+		CCVector3 Nx(0,0,1);
+		{
+			Nx = (*Bx-*Ax).cross(*Cx-*Ax);
+			double norm = Nx.norm();
+			if (norm < ZERO_TOLERANCE)
+				return false;
+			Nx /= norm;
+		}
+		//now the rotation is simply the rotation from Nx to Np, centered on Gx
+		CCVector3 a = Np.cross(Nx);
+		if (a.norm() < ZERO_TOLERANCE)
+		{
+			trans.R.toIdentity();
+			if (Np.dot(Nx) < 0)
+				trans.R.scale(-1);
+		}
+		else
+		{
+			double cos_t = Np.dot(Nx);
+			assert(cos_t > -1.0 && cos_t < 1.0); //see above
+			double s = sqrt((1+cos_t)*2);
+			double q[4] = { s/2, a.x/s, a.y/s, a.z/s };
+			//don't forget to normalize the quaternion
+			double qnorm = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+			assert(qnorm >= ZERO_TOLERANCE);
+			qnorm = sqrt(qnorm);
+			q[0] /= qnorm;
+			q[1] /= qnorm;
+			q[2] /= qnorm;
+			q[3] /= qnorm;
+			trans.R.initFromQuaternion(q);
 		}
 
-		//DGM: acc_2 can't be 0 because we already have checked that the bbox is not a single point!
-		assert(acc_denom > 0.0);
-		trans.s = static_cast<PointCoordinateType>(fabs(acc_num / acc_denom));
-	}
+		if (adjustScale)
+		{
+			double sumNormP = (*Bp-*Ap).norm() + (*Cp-*Bp).norm() + (*Ap-*Cp).norm();
+			sumNormP *= aPrioriScale;
+			if (sumNormP < ZERO_TOLERANCE)
+				return false;
+			double sumNormX = (*Bx-*Ax).norm() + (*Cx-*Bx).norm() + (*Ax-*Cx).norm();
+			trans.s = sumNormX / sumNormP; //sumNormX / (sumNormP * Sa) in fact
+		}
 
-	//and we deduce the translation
-	trans.T = Gx - (trans.R*Gp)*(aPrioriScale*trans.s); //#26 in besl paper, modified with the scale as in jschmidt
+		//we deduce the first translation
+		trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //#26 in besl paper, modified with the scale as in jschmidt
+
+		//we need to find the rotation in the (X) plane now
+		{
+			CCVector3 App = trans.apply(*Ap);
+			CCVector3 Bpp = trans.apply(*Bp);
+			CCVector3 Cpp = trans.apply(*Cp);
+
+			double C = 0;
+			double S = 0;
+			CCVector3 Ssum(0,0,0);
+			CCVector3 rx,rp;
+			
+			rx = *Ax - Gx;
+			rp = App - Gx;
+			C = rx.dot(rp);
+			Ssum = rx.cross(rp);
+
+			rx = *Bx - Gx;
+			rp = Bpp - Gx;
+			C += rx.dot(rp);
+			Ssum += rx.cross(rp);
+
+			rx = *Cx - Gx;
+			rp = Cpp - Gx;
+			C += rx.dot(rp);
+			Ssum += rx.cross(rp);
+
+			S = Ssum.dot(Nx);
+			double Q = sqrt(S*S + C*C);
+			if (Q < ZERO_TOLERANCE)
+				return false;
+			
+			PointCoordinateType sin_t = static_cast<PointCoordinateType>(S / Q);
+			PointCoordinateType cos_t = static_cast<PointCoordinateType>(C / Q);
+			PointCoordinateType inv_cos_t = 1 - cos_t;
+
+			const PointCoordinateType& l1 = Nx.x;
+			const PointCoordinateType& l2 = Nx.y;
+			const PointCoordinateType& l3 = Nx.z;
+
+			PointCoordinateType l1_inv_cos_t = l1*inv_cos_t;
+			PointCoordinateType l3_inv_cos_t = l3*inv_cos_t;
+
+			SquareMatrix R(3);
+			//1st column
+			R.m_values[0][0] = cos_t + l1*l1_inv_cos_t;
+			R.m_values[0][1] = l2*l1_inv_cos_t+l3*sin_t;
+			R.m_values[0][2] = l3*l1_inv_cos_t-l2*sin_t;
+
+			//2nd column
+			R.m_values[1][0] = l2*l1_inv_cos_t-l3*sin_t;
+			R.m_values[1][1] = cos_t+l2*l2*inv_cos_t;
+			R.m_values[1][2] = l2*l3_inv_cos_t+l1*sin_t;
+
+			//3rd column
+			R.m_values[2][0] = l3*l1_inv_cos_t+l2*sin_t;
+			R.m_values[2][1] = l2*l3_inv_cos_t-l1*sin_t;
+			R.m_values[2][2] = cos_t+l3*l3_inv_cos_t;
+
+			trans.R = R * trans.R;
+			trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //update T as well
+		}
+	}
+	else
+	{
+		PointCoordinateType bbMin[3],bbMax[3];
+		X->getBoundingBox(bbMin,bbMax);
+
+		//BBox dimensions
+		PointCoordinateType dx = bbMax[0]-bbMin[0];
+		PointCoordinateType dy = bbMax[1]-bbMin[1];
+		PointCoordinateType dz = bbMax[2]-bbMin[2];
+
+		//if the data cloud is equivalent to a single point (for instance
+		//it's the case when the two clouds are very far away from
+		//each other in the ICP process) we try to get the two clouds closer
+		if (fabs(dx)+fabs(dy)+fabs(dz) < ZERO_TOLERANCE)
+		{
+			trans.T = Gx - Gp*aPrioriScale;
+			return true;
+		}
+
+		//Cross covariance matrix, eq #24 in Besl92 (but with weights, if any)
+		SquareMatrixd Sigma_px = (weightsP || weightsX	? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp,Gx,weightsP,weightsX)
+														: GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp,Gx) );
+		if (!Sigma_px.isValid())
+			return false;
+
+		//transpose sigma_px
+		SquareMatrixd Sigma_px_t = Sigma_px.transposed();
+
+		SquareMatrixd Aij = Sigma_px - Sigma_px_t;
+
+		double trace = Sigma_px.trace(); //that is the sum of diagonal elements of sigma_px
+
+		SquareMatrixd traceI3(3); //create the I matrix with eigvals equal to trace
+		traceI3.m_values[0][0] = trace;
+		traceI3.m_values[1][1] = trace;
+		traceI3.m_values[2][2] = trace;
+
+		SquareMatrixd bottomMat = Sigma_px + Sigma_px_t - traceI3;
+
+		//we build up the registration matrix (see ICP algorithm)
+		SquareMatrixd QSigma(4); //#25 in the paper (besl)
+
+		QSigma.m_values[0][0] = trace;
+
+		QSigma.m_values[0][1] = QSigma.m_values[1][0] = Aij.m_values[1][2];
+		QSigma.m_values[0][2] = QSigma.m_values[2][0] = Aij.m_values[2][0];
+		QSigma.m_values[0][3] = QSigma.m_values[3][0] = Aij.m_values[0][1];
+
+		QSigma.m_values[1][1] = bottomMat.m_values[0][0];
+		QSigma.m_values[1][2] = bottomMat.m_values[0][1];
+		QSigma.m_values[1][3] = bottomMat.m_values[0][2];
+
+		QSigma.m_values[2][1] = bottomMat.m_values[1][0];
+		QSigma.m_values[2][2] = bottomMat.m_values[1][1];
+		QSigma.m_values[2][3] = bottomMat.m_values[1][2];
+
+		QSigma.m_values[3][1] = bottomMat.m_values[2][0];
+		QSigma.m_values[3][2] = bottomMat.m_values[2][1];
+		QSigma.m_values[3][3] = bottomMat.m_values[2][2];
+
+		//we compute its eigenvalues and eigenvectors
+		SquareMatrixd eig = QSigma.computeJacobianEigenValuesAndVectors();
+
+		if (!eig.isValid())
+			return false;
+
+		//as Besl says, the best rotation corresponds to the eigenvector associated to the biggest eigenvalue
+		double qR[4];
+		eig.getMaxEigenValueAndVector(qR);
+
+		//these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
+		trans.R.initFromQuaternion(qR);
+
+		if (adjustScale)
+		{
+			//two accumulators
+			double acc_num = 0.0;
+			double acc_denom = 0.0;
+
+			//now deduce the scale (refer to "Point Set Registration with Integrated Scale Estimation", Zinsser et. al, PRIP 2005)
+			X->placeIteratorAtBegining();
+			P->placeIteratorAtBegining();
+
+			unsigned count = X->size();
+			assert(P->size() == count);
+			for (unsigned i=0; i<count; ++i)
+			{
+				//'a' refers to the data 'A' (moving) = P
+				//'b' refers to the model 'B' (not moving) = X
+				CCVector3 a_tilde = trans.R * (*(P->getNextPoint()) - Gp);	// a_tilde_i = R * (a_i - a_mean)
+				CCVector3 b_tilde = (*(X->getNextPoint()) - Gx);			// b_tilde_j =     (b_j - b_mean)
+
+				acc_num += b_tilde.dot(a_tilde);
+				acc_denom += a_tilde.dot(a_tilde);
+			}
+
+			//DGM: acc_2 can't be 0 because we already have checked that the bbox is not a single point!
+			assert(acc_denom > 0.0);
+			trans.s = static_cast<PointCoordinateType>(fabs(acc_num / acc_denom));
+		}
+
+		//and we deduce the translation
+		trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //#26 in besl paper, modified with the scale as in jschmidt
+	}
 
 	return true;
 }

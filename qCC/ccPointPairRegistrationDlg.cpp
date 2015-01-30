@@ -28,6 +28,8 @@
 #include <ccGenericPointCloud.h>
 #include <cc2DLabel.h>
 #include <ccPointCloud.h>
+#include <ccProgressDialog.h>
+#include <ccSphere.h>
 
 //qCC_io
 #include <ccGlobalShiftManager.h>
@@ -37,16 +39,21 @@
 
 //CCLib
 #include <RegistrationTools.h>
+#include <GeometricalAnalysisTools.h>
 
 //Qt
 #include <QMdiSubWindow>
 #include <QMessageBox>
 #include <QToolButton>
+#include <QSettings>
 
 //default position of each columns in the aligned and ref. table widgets
 static const int XYZ_COL_INDEX			= 0;
 static const int RMS_COL_INDEX			= 3;
 static const int DEL_BUTTON_COL_INDEX	= 4;
+
+//minimum number of pairs to let the user click on the align button
+static const unsigned MIN_PAIRS_COUNT = 3;
 
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
@@ -58,6 +65,22 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+
+	//restore from persistent settings
+	{
+		QSettings settings;
+		settings.beginGroup("PointPairAlign");
+		bool pickSpheres    = settings.value("PickSpheres",  useSphereToolButton->isChecked()).toBool();
+		double sphereRadius = settings.value("SphereRadius", radiusDoubleSpinBox->value()).toDouble();
+		bool adjustScale    = settings.value("AdjustScale",  adjustScaleCheckBox->isChecked()).toBool();
+		bool autoUpdateZoom = settings.value("AutoUpdateZom",autoZoomCheckBox->isChecked()).toBool();
+		settings.endGroup();
+
+		useSphereToolButton->setChecked(pickSpheres);
+		radiusDoubleSpinBox->setValue(sphereRadius);
+		adjustScaleCheckBox->setChecked(adjustScale);
+		autoZoomCheckBox->setChecked(autoUpdateZoom);
+	}
 
 	connect(showAlignedCheckBox,	SIGNAL(toggled(bool)),	this,	SLOT(showAlignedCloud(bool)));
 	connect(showReferenceCheckBox,	SIGNAL(toggled(bool)),	this,	SLOT(showReferenceCloud(bool)));
@@ -268,9 +291,9 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 	showAlignedCheckBox->setChecked(true);
 
 	m_associatedWin->showMaximized();
+	resetTitle();
 	m_associatedWin->zoomGlobal();
-	m_associatedWin->redraw();
-	m_associatedWin->displayNewMessage("[Point-pair registration]",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600);
+	//m_associatedWin->redraw(); //already called by zoomGlobal
 
 	onPointCountChanged();
 	
@@ -351,6 +374,70 @@ void ccPointPairRegistrationDlg::pause(bool state)
 	setDisabled(state);
 }
 
+bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject* entity, PointCoordinateType& sphereRadius)
+{
+	sphereRadius = -PC_ONE;
+	if (	!entity
+		||	!useSphereToolButton->isChecked()
+		||	!entity->isKindOf(CC_TYPES::POINT_CLOUD) ) //only works with cloud right now
+	{
+		//nothing to do
+		return true;
+	}
+
+	//we'll now try to detect the sphere
+	double searchRadius = radiusDoubleSpinBox->value();
+	ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
+	assert(cloud);
+
+	//crop points inside a box centered on the current point
+	ccBBox box;
+	box.add(CCVector3::fromArray((P - CCVector3d(1,1,1)*searchRadius).u));
+	box.add(CCVector3::fromArray((P + CCVector3d(1,1,1)*searchRadius).u));
+	CCLib::ReferenceCloud* part = cloud->crop(box,true);
+
+	bool success = false;
+	if (part && part->size() > 16)
+	{
+		PointCoordinateType radius;
+		CCVector3 C;
+		double rms;
+		ccProgressDialog pDlg(true, this);
+		//first roughly search for the sphere
+		if (CCLib::GeometricalAnalysisTools::detectSphereRobust(part,0.5,C,radius,rms,&pDlg,0.9))
+		{
+			//now look again (more precisely)
+			{
+				delete part;
+				box.clear();
+				box.add(C - CCVector3(1,1,1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
+				box.add(C + CCVector3(1,1,1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
+				part = cloud->crop(box,true);
+				if (part && part->size() > 16)
+					CCLib::GeometricalAnalysisTools::detectSphereRobust(part,0.5,C,radius,rms,&pDlg,0.99);
+			}
+			ccLog::Print(QString("[ccPointPairRegistrationDlg] Detected sphere radius = %1 (rms = %2)").arg(radius).arg(rms));
+			sphereRadius = radius;
+			P = CCVector3d::fromArray(C.u);
+			success = true;
+		}
+		else
+		{
+			ccLog::Warning("[ccPointPairRegistrationDlg] Failed to fit a sphere around the picked point!");
+		}
+	}
+	else
+	{
+		//not enough memory? No points inside the 
+		ccLog::Warning("[ccPointPairRegistrationDlg] Failed to crop points around the picked point?!");
+	}
+
+	if (part)
+		delete part;
+
+	return success;
+}
+
 void ccPointPairRegistrationDlg::processPickedItem(int entityID, unsigned itemIndex, int x, int y)
 {
 	if (!m_associatedWin)
@@ -417,12 +504,14 @@ void ccPointPairRegistrationDlg::processPickedItem(int entityID, unsigned itemIn
 
 void ccPointPairRegistrationDlg::onPointCountChanged()
 {
-	bool canAlign = (m_alignedPoints.size() == m_refPoints.size() && m_refPoints.size() >= 4); //we need at least 4 points
+	bool canAlign = (m_alignedPoints.size() == m_refPoints.size() && m_refPoints.size() >= MIN_PAIRS_COUNT);
 	alignToolButton->setEnabled(canAlign);
 	validToolButton->setEnabled(canAlign);
 
 	unstackAlignToolButton->setEnabled(m_alignedPoints.size() != 0);
 	unstackRefToolButton->setEnabled(m_refPoints.size() != 0);
+
+	autoUpdateAlignInfo();
 }
 
 static QToolButton* CreateDeleteButton()
@@ -538,6 +627,10 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 		}
 	}
 
+	PointCoordinateType sphereRadius = -PC_ONE;
+	if (!convertToSphereCenter(Pin,entity,sphereRadius))
+		return false;
+
 	//transform the input point in the 'global world' by default
 	if (shifted)
 		Pin = m_alignedPoints.toGlobal3d<double>(Pin);
@@ -569,9 +662,21 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	//add corresponding row in table
 	addPointToTable(alignedPointsTableWidget,newPointIndex,Pin,pointName);
 
-	//add a label!
-	cc2DLabel* label = CreateLabel(&m_alignedPoints,newPointIndex,pointName,m_associatedWin);
-	m_alignedPoints.addChild(label);
+	//eventually add a label (or a sphere)
+	if (sphereRadius <= 0)
+	{
+		cc2DLabel* label = CreateLabel(&m_alignedPoints,newPointIndex,pointName,m_associatedWin);
+		m_alignedPoints.addChild(label);
+	}
+	else
+	{
+		ccGLMatrix trans;
+		trans.setTranslation(Pin);
+		ccSphere* sphere = new ccSphere(sphereRadius,&trans,pointName);
+		sphere->showNameIn3D(true);
+		sphere->setTempColor(ccColor::red,true);
+		m_alignedPoints.addChild(sphere);
+	}
 
 	if (m_associatedWin)
 		m_associatedWin->redraw();
@@ -711,6 +816,10 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 		}
 	}
 
+	PointCoordinateType sphereRadius = -PC_ONE;
+	if (!convertToSphereCenter(Pin,entity,sphereRadius))
+		return false;
+
 	//transform the input point in the 'global world' by default
 	if (shifted && cloud)
 	{
@@ -746,9 +855,21 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 	//add corresponding row in table
 	addPointToTable(refPointsTableWidget,newPointIndex,Pin,pointName);
 
-	//add a label!
-	cc2DLabel* label = CreateLabel(&m_refPoints,newPointIndex,pointName,m_associatedWin);
-	m_refPoints.addChild(label);
+	//eventually add a label (or a sphere)
+	if (sphereRadius <= 0)
+	{
+		cc2DLabel* label = CreateLabel(&m_refPoints,newPointIndex,pointName,m_associatedWin);
+		m_refPoints.addChild(label);
+	}
+	else
+	{
+		ccGLMatrix trans;
+		trans.setTranslation(Pin);
+		ccSphere* sphere = new ccSphere(sphereRadius,&trans,pointName);
+		sphere->showNameIn3D(true);
+		sphere->setTempColor(ccColor::yellow,true);
+		m_refPoints.addChild(sphere);
+	}
 
 	if (m_associatedWin)
 		m_associatedWin->redraw();
@@ -882,16 +1003,16 @@ void ccPointPairRegistrationDlg::showReferenceCloud(bool state)
 	}
 }
 
-bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms)
+bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab)
 {
 	assert(m_aligned.entity);
 	if (!m_aligned.entity)
 		return false;
 
-	if (m_alignedPoints.size() != m_refPoints.size() || m_refPoints.size() < 4)
+	if (m_alignedPoints.size() != m_refPoints.size() || m_refPoints.size() < MIN_PAIRS_COUNT)
 	{
 		assert(false);
-		ccLog::Error("Need at least 4 points for each entity (and the same number of points in both subsets)!");
+		ccLog::Error(QString("Need at least %1 points for each entity (and the same number of points in both subsets)!").arg(MIN_PAIRS_COUNT));
 		return false;
 	}
 
@@ -940,6 +1061,34 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 	//compute RMS
 	rms = CCLib::HornRegistrationTools::ComputeRMS(&m_alignedPoints, &m_refPoints, trans);
 
+	if (autoUpdateTab)
+	{
+		//display resulting RMS in colums
+		if (rms >= 0)
+		{
+			assert(m_alignedPoints.size() == m_refPoints.size());
+			for (unsigned i=0; i<m_alignedPoints.size(); ++i)
+			{
+				const CCVector3* Ri = m_refPoints.getPoint(i);
+				const CCVector3* Li = m_alignedPoints.getPoint(i);
+				CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
+				PointCoordinateType dist = (*Ri-Lit).norm();
+
+				QTableWidgetItem* itemA = new QTableWidgetItem();
+				itemA->setData(Qt::EditRole, dist); 
+				alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, itemA);
+				QTableWidgetItem* itemR = new QTableWidgetItem();
+				itemR->setData(Qt::EditRole, dist); 
+				refPointsTableWidget->setItem(i, RMS_COL_INDEX, itemR);
+			}
+		}
+		else
+		{
+			//clear RMS columns
+			clearRMSColumns();
+		}
+	}
+
 	return true;
 }
 
@@ -951,43 +1100,48 @@ void ccPointPairRegistrationDlg::clearRMSColumns()
 		refPointsTableWidget->setItem(i,RMS_COL_INDEX,new QTableWidgetItem());
 }
 
+void ccPointPairRegistrationDlg::resetTitle()
+{
+	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false);
+	m_associatedWin->displayNewMessage("[Point-pair registration]",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600);
+}
+
+void ccPointPairRegistrationDlg::autoUpdateAlignInfo()
+{
+	if (m_alignedPoints.size() != m_refPoints.size() || m_refPoints.size() < MIN_PAIRS_COUNT)
+		return;
+	
+	CCLib::PointProjectionTools::Transformation trans;
+	double rms;
+
+	//reset title
+	resetTitle();
+
+	if (callHornRegistration(trans,rms,true))
+	{
+		QString rmsString = QString("Current RMS: %1").arg(rms);
+		m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
+	}
+
+	m_associatedWin->refresh();
+}
+
 void ccPointPairRegistrationDlg::align()
 {
 	CCLib::PointProjectionTools::Transformation trans;
 	double rms;
 
-	if (callHornRegistration(trans,rms))
+	//reset title
+	resetTitle();
+	m_associatedWin->refresh();
+
+	if (callHornRegistration(trans,rms,true))
 	{
 		if (rms >= 0)
 		{
 			QString rmsString = QString("Current RMS: %1").arg(rms);
 			ccLog::Print(QString("[PointPairRegistration] ")+rmsString);
 			m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true);
-
-			//display resulting RMS in colums
-			{
-				//add 'remove' button
-				assert(m_alignedPoints.size() == m_refPoints.size());
-				for (unsigned i=0; i<m_alignedPoints.size(); ++i)
-				{
-					const CCVector3* Ri = m_refPoints.getPoint(i);
-					const CCVector3* Li = m_alignedPoints.getPoint(i);
-					CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
-					PointCoordinateType dist = (*Ri-Lit).norm();
-
-					QTableWidgetItem* itemA = new QTableWidgetItem();
-					itemA->setData(Qt::EditRole, dist); 
-					alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, itemA);
-					QTableWidgetItem* itemR = new QTableWidgetItem();
-					itemR->setData(Qt::EditRole, dist); 
-					refPointsTableWidget->setItem(i, RMS_COL_INDEX, itemR);
-				}
-			}
-		}
-		else
-		{
-			//clear RMS columns
-			clearRMSColumns();
 		}
 
 		//fixed scale?
@@ -1046,7 +1200,7 @@ void ccPointPairRegistrationDlg::apply()
 	CCLib::PointProjectionTools::Transformation trans;
 	double rms = -1.0;
 	
-	if (callHornRegistration(trans,rms))
+	if (callHornRegistration(trans,rms,false))
 	{
 		QStringList summary;
 		if (rms >= 0)
@@ -1121,6 +1275,17 @@ void ccPointPairRegistrationDlg::apply()
 		ccLog::Warning(QString("[PointPairRegistration] Failed to register entities?!"));
 	}
 
+	//save persistent settings
+	{
+		QSettings settings;
+		settings.beginGroup("PointPairAlign");
+		settings.setValue("PickSpheres",  useSphereToolButton->isChecked());
+		settings.setValue("SphereRadius", radiusDoubleSpinBox->value());
+		settings.setValue("AdjustScale",  adjustScaleCheckBox->isChecked());
+		settings.setValue("AutoUpdateZom",autoZoomCheckBox->isChecked());
+		settings.endGroup();
+	}
+	
 	stop(true);
 }
 

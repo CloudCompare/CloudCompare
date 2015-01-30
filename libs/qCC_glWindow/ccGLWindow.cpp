@@ -321,23 +321,23 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 	QString sourceStr;
 	switch (source)
 	{
-		case GL_DEBUG_SOURCE_API              :
-			sourceStr = "API";
-			break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM    :
-			sourceStr = "window system";
-			break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER  :
-			sourceStr = "shader compiler";
-			break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY      :
-			sourceStr = "third party";
-			break;
-        case GL_DEBUG_SOURCE_APPLICATION      :
-			sourceStr = "application";
-			break;
-        case GL_DEBUG_SOURCE_OTHER            :
-		default:
+	case GL_DEBUG_SOURCE_API:
+		sourceStr = "API";
+		break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+		sourceStr = "window system";
+		break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+		sourceStr = "shader compiler";
+		break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:
+		sourceStr = "third party";
+		break;
+	case GL_DEBUG_SOURCE_APPLICATION:
+		sourceStr = "application";
+		break;
+	case GL_DEBUG_SOURCE_OTHER:
+	default:
 			sourceStr = "other";
 			break;
 	}
@@ -347,27 +347,27 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 	QString typeStr;
 	switch (type)
 	{
-		case GL_DEBUG_TYPE_ERROR               :
-			typeStr = "error";
-			break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR :
-			typeStr = "deprecated behavior";
-			break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  :
-			typeStr = "undefined behavior";
-			break;
-        case GL_DEBUG_TYPE_PORTABILITY         :
-			typeStr = "portability";
-			break;
-        case GL_DEBUG_TYPE_PERFORMANCE         :
-			typeStr = "performance";
-			break;
-        case GL_DEBUG_TYPE_OTHER               :
-		default:
-			typeStr = "other";
-			break;
-		case GL_DEBUG_TYPE_MARKER              :
-			typeStr = "marker";
+	case GL_DEBUG_TYPE_ERROR:
+		typeStr = "error";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		typeStr = "deprecated behavior";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		typeStr = "undefined behavior";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		typeStr = "portability";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		typeStr = "performance";
+		break;
+	case GL_DEBUG_TYPE_OTHER:
+	default:
+		typeStr = "other";
+		break;
+	case GL_DEBUG_TYPE_MARKER:
+		typeStr = "marker";
 			break;
 	}
 	msg += "[type: " + typeStr + "]";
@@ -376,19 +376,19 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 	QString sevStr;
 	switch (severity)
 	{
-		case GL_DEBUG_SEVERITY_HIGH         :
-			sevStr = "high";
-			break;
-        case GL_DEBUG_SEVERITY_MEDIUM       :
-			sevStr = "medium";
-			break;
-        case GL_DEBUG_SEVERITY_LOW          :
-			sevStr = "low";
-			break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION : 
-		default:
-			sevStr = "notification";
-			break;
+	case GL_DEBUG_SEVERITY_HIGH:
+		sevStr = "high";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		sevStr = "medium";
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		sevStr = "low";
+		break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+	default:
+		sevStr = "notification";
+		break;
 	};
 	msg += "[severity: " + sevStr + "]";
 	msg += " ";
@@ -2310,6 +2310,9 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 			//let's check if the mouse is on a selected item first!
 			if (	m_pickingMode != NO_PICKING
+				&&	m_pickingMode != POINT_PICKING
+				&&	m_pickingMode != TRIANGLE_PICKING
+				&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
 				&&
 				(	QApplication::keyboardModifiers () == Qt::NoModifier
 				||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )
@@ -2929,6 +2932,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 
 	if (!getDisplayParameters().useOpenGLPointPicking &&
 		(	pickingMode == AUTO_POINT_PICKING
+		||	pickingMode == POINT_OR_TRIANGLE_PICKING
 		||	pickingMode == POINT_PICKING
 		||	pickingMode == TRIANGLE_PICKING) )
 	{
@@ -4196,7 +4200,6 @@ bool ccGLWindow::supportOpenGLVersion(unsigned openGLVersionFlag)
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgb/*=0*/, const QFont& font/*=QFont()*/)
 {
 	glColor3ubv_safe(rgb ? rgb : getDisplayParameters().textDefaultCol.rgb);
-
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 

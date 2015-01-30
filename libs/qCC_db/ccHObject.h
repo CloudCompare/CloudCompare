@@ -201,6 +201,9 @@ public:
 	virtual ccBBox getBB(bool relative = true, bool withGLfeatures = false, const ccGenericGLDisplay* window = NULL);
 	virtual void draw(CC_DRAW_CONTEXT& context);
 
+	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
+	void getAbsoluteGLTransformation(ccGLMatrix& trans) const;
+
 	//! Returns whether the object is actually displayed (visible) or not
 	virtual bool isDisplayed() const;
 

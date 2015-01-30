@@ -95,7 +95,12 @@ v2.6.1.beta 11/??/2014
 		- the rotation center can now be modified with the 'Pick rotation center' tool (reticle icon in the left toolbar)
 	* Point-pair based alignment:
 		- the tool can now be used with meshes (points are picked directly on the mesh surface)
-		- clouds and meshes can be mixed
+		- a cloud can be aligned with a mesh
+		- the user can pick spheres (on clouds only) - just set the (very) rough sphere diameter and CC will do the rest
+		- the tool can now properly align entities with only 3 pairs (even though it's better to pick more ;)
+		- once at least 3 pairs have been picked, the tool will automatically display the current RMS and error per pair
+			(the user still needs to click on the 'align' button to see the entities moving and to validate the tool)
+		- the tool will now remember the main parameters
 	* 3D views:
 		- the rotation center of a 3D view can now be picked anywhere on the surface of a mesh
 	* GUI frozen mode:

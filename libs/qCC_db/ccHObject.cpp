@@ -494,6 +494,20 @@ bool ccHObject::isAncestorOf(const ccHObject *anObject) const
 	return isAncestorOf(parent);
 }
 
+void ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
+{
+	trans.toIdentity();
+	
+	//recurse among ancestors to get the absolute GL transformation
+	const ccHObject* obj = this;
+	while (obj)
+	{
+		if (obj->isGLTransEnabled())
+			trans = trans * obj->getGLTransformation();
+		obj = obj->getParent();
+	}
+}
+
 ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, const ccGenericGLDisplay* display/* = NULL*/)
 {
 	ccBBox box;
@@ -542,7 +556,7 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-	ccBBox bBox = getBB(false,false,m_currentDisplay);
+	ccBBox bBox = getMyOwnBB(); //getBB(false,false,m_currentDisplay);
 	if (bBox.isValid())
 	{
 		const double* MM = context._win->getModelViewMatd(); //viewMat
@@ -550,8 +564,12 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		int VP[4];
 		context._win->getViewportArray(VP);
 
+		ccGLMatrix trans;
+		getAbsoluteGLTransformation(trans);
+
 		GLdouble xp,yp,zp;
 		CCVector3 C = bBox.getCenter();
+		trans.apply(C);
 		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
 
 		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!

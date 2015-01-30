@@ -194,13 +194,20 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-	ccBBox bBox = getBB(true,false,m_currentDisplay);
+	ccBBox bBox = getMyOwnBB(); //getBB(true,false,m_currentDisplay);
 	if (bBox.isValid())
 	{
-		const double* MM = context._win->getModelViewMatd(); //viewMat
-		const double* MP = context._win->getProjectionMatd(); //projMat
+		//const double* MM = context._win->getModelViewMatd(); //viewMat
+		//const double* MP = context._win->getProjectionMatd(); //projMat
+		glMatrixMode(GL_MODELVIEW);
+		double MM[16];
+		glGetDoublev(GL_MODELVIEW_MATRIX, MM);
+		glMatrixMode(GL_PROJECTION);
+		double MP[16];
+		glGetDoublev(GL_PROJECTION_MATRIX, MP);
 		int VP[4];
-		context._win->getViewportArray(VP);
+		glGetIntegerv(GL_VIEWPORT, VP);
+		//context._win->getViewportArray(VP);
 
 		GLdouble xp,yp,zp;
 		CCVector3 C = bBox.getCenter();

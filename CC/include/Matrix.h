@@ -200,7 +200,7 @@ namespace CCLib
 		MatrixTpl operator - (const MatrixTpl& B) const
 		{
 			MatrixTpl C = *this;
-			C-=B;
+			C -= B;
 
 			return C;
 		}
@@ -239,18 +239,24 @@ namespace CCLib
 		}
 
 		//! Multiplication by a vector
-		CCVector3 operator * (const CCVector3& V) const
+		inline CCVector3 operator * (const CCVector3& V) const
 		{
-			assert(m_matrixSize == 3);
+			if (m_matrixSize == 3)
+			{
 
-			CCVector3 result;
-			apply(V.u,result.u);
+				CCVector3 result;
+				apply(V.u,result.u);
 
-			return result;
+				return result;
+			}
+			else
+			{
+				return V;
+			}
 		}
 
 		//! In-place multiplication
-		const MatrixTpl& operator *= (const MatrixTpl& B)
+		inline const MatrixTpl& operator *= (const MatrixTpl& B)
 		{
 			*this = (*this) * B;
 
@@ -260,7 +266,8 @@ namespace CCLib
 		//! In-place multiplication by a vector
 		/** Vec must have the same size as matrix. Returns Vec = M.Vec.
 		**/
-		void apply(Scalar Vec[]) const
+		//DGM: deprecated, too slow!
+		/*inline void apply(Scalar Vec[]) const
 		{
 			//we apply matrix to Vec and get the result in a (temporary) vector
 			Scalar* V = new Scalar[m_matrixSize];
@@ -273,6 +280,7 @@ namespace CCLib
 				delete[] V;
 			}
 		}
+		//*/
 
 		//! Multiplication by a vector
 		/** Vec must have the same size as matrix.
@@ -512,7 +520,7 @@ namespace CCLib
 		//! Creates a rotation matrix from a quaternion (double version)
 		/** Quaternion is composed of 4 values: an angle (cos(alpha/2))
 			and an axis (sin(alpha/2)*unit vector).
-			\param q normalized quaternion (4 double values)
+			\param q normalized quaternion (w,x,y,z)
 			\return a 3x3 rotation matrix
 		**/
 		void initFromQuaternion(const double q[])
@@ -547,6 +555,8 @@ namespace CCLib
 		//! Converts rotation matrix to quaternion
 		/** Warning: for 3x3 matrix only!
 			From libE57 'best practices' (http://www.libe57.org/best.html)
+			\param q quaternion (w,x,y,z)
+			\return success
 		**/
 		bool toQuaternion(double q[/*4*/])
 		{
@@ -593,7 +603,7 @@ namespace CCLib
 			}
 
 			// normalize the quaternion if the matrix is not a clean rigid body matrix or if it has scaler information.
-			double len = sqrt( w*w + x*x + y*y + z*z);
+			double len = sqrt(w*w + x*x + y*y + z*z);
 			if (len != 0)
 			{	
 				q[0] = w/len;

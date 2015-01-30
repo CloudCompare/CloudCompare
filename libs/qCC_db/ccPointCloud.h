@@ -284,8 +284,8 @@ public:
 	virtual const colorType* getPointColor(unsigned pointIndex) const;
 	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const;
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const;
-	/** WARNING: if removeSelectedPoints is true, any attached octree will be deleted.
-	**/
+	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
+	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false);
 	virtual void applyRigidTransformation(const ccGLMatrix& trans);
 	//virtual bool isScalarFieldEnabled() const;
@@ -490,14 +490,6 @@ public:
 
 	//! Returns pointer on compressed normals indexes table
 	NormsIndexesTableType* normals() const { return m_normals; }
-
-	//! Crops the cloud inside (or outside) a boundig box
-	/** \warning Always returns a selection (potentially empty) if successful.
-		\param box croping box
-		\param inside whether selected points are inside or outside the box
-		\return points falling inside (or outside) as a selection
-	**/
-	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
 
 	//! Crops the cloud inside (or outside) a 2D polyline
 	/** \warning Always returns a selection (potentially empty) if successful.

@@ -190,10 +190,18 @@ public:
 	/** \param removeSelectedPoints if true, exported point are also removed from the current point cloud
 		\return new point cloud with selected points
 	**/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints=false) = 0;
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false) = 0;
 
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
+
+	//! Crops the cloud inside (or outside) a boundig box
+	/** \warning Always returns a selection (potentially empty) if successful.
+		\param box croping box
+		\param inside whether selected points are inside or outside the box
+		\return points falling inside (or outside) as a selection
+	**/
+	virtual CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) = 0;
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.

@@ -93,19 +93,19 @@ public:
 	static inline Vector3Tpl fromArray(const double a[3]) { return Vector3Tpl(static_cast<Type>(a[0]),static_cast<Type>(a[1]),static_cast<Type>(a[2])); }
 
 	//! Dot product
-	inline Type dot(const Vector3Tpl& v) const { return (x*v.x)+(y*v.y)+(z*v.z); }
+	inline Type dot(const Vector3Tpl& v) const { return x*v.x + y*v.y + z*v.z; }
 	//! Cross product
 	inline Vector3Tpl cross(const Vector3Tpl &v) const { return Vector3Tpl((y*v.z)-(z*v.y), (z*v.x)-(x*v.z), (x*v.y)-(y*v.x)); }
 	//! Returns vector square norm
-	inline Type norm2() const { return (x*x)+(y*y)+(z*z); }
+	inline Type norm2() const { return x*x + y*y + z*z; }
 	//! Returns vector square norm (forces double precision output)
-	inline double norm2d() const { return static_cast<double>(x)*static_cast<double>(x) + static_cast<double>(y)*static_cast<double>(y) + static_cast<double>(z)*static_cast<double>(z); }
+	inline double norm2d() const { return static_cast<double>(x)*x + static_cast<double>(y)*y + static_cast<double>(z)*z; }
 	//! Returns vector norm
-	inline Type norm() const { return sqrt(norm2()); }
+	inline Type norm() const { return static_cast<Type>(sqrt(norm2d())); }
 	//! Returns vector norm (forces double precision output)
 	inline double normd() const { return sqrt(norm2d()); }
 	//! Sets vector norm to unity
-	inline void normalize() { Type n = norm2(); if (n>0) *this /= sqrt(n); }
+	inline void normalize() { double n = norm2d(); if (n>0) *this /= static_cast<Type>(sqrt(n)); }
 	//! Returns a normalized vector which is orthogonal to this one
 	inline Vector3Tpl orthogonal() const { Vector3Tpl ort; vorthogonal(u, ort.u); return ort; }
 

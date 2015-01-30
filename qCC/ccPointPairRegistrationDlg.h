@@ -105,13 +105,27 @@ protected:
 	void onPointCountChanged();
 
 	//! Calls Horn registration (CCLib::HornRegistrationTools)
-	bool callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms);
+	bool callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab);
 
 	//! Clears the RMS rows
 	void clearRMSColumns();
 
+	//! Automatically updates registration info
+	void autoUpdateAlignInfo();
+
 	//! Adds a point to one of the table (ref./aligned)
 	void addPointToTable(QTableWidget* tableWidget, int rowIndex, const CCVector3d& P, QString pointLabel);
+
+	//! Converts a picked point to a sphere center (if necessary)
+	/** \param P input point (may be converted to a sphere center)
+		\param associated entity
+		\param sphereRadius the detected spherer radius (or -1 if no sphere)
+		\return whether the point can be used or not
+	**/
+	bool convertToSphereCenter(CCVector3d& P, ccHObject* entity, PointCoordinateType& sphereRadius);
+
+	//! Resets the displayed title (3D view)
+	void resetTitle();
 
 	//! Original cloud context
 	struct EntityContext

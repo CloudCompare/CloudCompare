@@ -35,7 +35,7 @@ using namespace CCLib;
 
 ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCloud, const Polyline* poly, bool keepInside, const float* viewMat)
 {
-    assert(poly && aCloud);
+	assert(poly && aCloud);
 
 	CCLib::SquareMatrix* trans = (viewMat ? new CCLib::SquareMatrix(viewMat) : 0);
 
@@ -50,7 +50,9 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 
 		//we project the point in screen space first if necessary
 		if (trans)
-			trans->apply(P.u);
+		{
+			P = (*trans) * P;
+		}
 
 		bool pointInside = isPointInsidePoly(CCVector2(P.x,P.y),poly);
 		if ((keepInside && pointInside) || (!keepInside && !pointInside))
@@ -59,14 +61,14 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 			{
 				//not engouh memory
 				delete Y;
-				Y=0;
+				Y = 0;
 				break;
 			}
 		}
 	}
 
 	if (trans)
-        delete trans;
+		delete trans;
 
 	return Y;
 }

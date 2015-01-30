@@ -178,7 +178,10 @@ void ChunkedPointCloud::applyTransformation(PointProjectionTools::Transformation
 	if (trans.R.isValid())
 	{
 		for (unsigned i=0; i<count; ++i)
-			trans.R.apply(point(i)->u);
+		{
+			CCVector3* P = point(i);
+			(*P) = trans.R * (*P);
+		}
 		m_validBB = false;
 	}
 

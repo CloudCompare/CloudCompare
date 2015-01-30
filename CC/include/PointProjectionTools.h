@@ -62,6 +62,9 @@ public:
 
 		//! Default constructor
 		Transformation() : s(PC_ONE) {}
+
+		//! Applies transformation to a point
+		inline CCVector3 apply(const CCVector3& P) const { return s * (R * P) + T; }
 	};
 
 	//! Develops a cylinder-shaped point cloud around its main axis
@@ -107,6 +110,13 @@ public:
 	static SimpleCloud* applyTransformation(GenericCloud* cloud,
 											Transformation& trans,
 											GenericProgressCallback* progressCb = 0);
+
+	//! Applys a geometrical transformation to a single point
+	/** \param P the point
+		\param trans the geometrical transformation
+		\return the "transformed" point
+	**/
+	static CCVector3 applyTransformation(const CCVector3& P, Transformation& trans);
 
 	//! Computes a 2.5D Delaunay triangulation
 	/** The triangulation can be either computed on the points projected

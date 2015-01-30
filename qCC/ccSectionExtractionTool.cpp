@@ -75,6 +75,7 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 
 	connect(undoToolButton,						SIGNAL(clicked()),					this,	SLOT(undo()));
 	connect(validToolButton,					SIGNAL(clicked()),					this,	SLOT(apply()));
+	connect(cancelToolButton,					SIGNAL(clicked()),					this,	SLOT(cancel()));
 	connect(polylineToolButton,					SIGNAL(toggled(bool)),				this,	SLOT(enableSectionEditingMode(bool)));
 	connect(importFromDBToolButton,				SIGNAL(clicked()),					this,	SLOT(doImportPolylinesFromDB()));
 	connect(vertAxisComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(setVertDimension(int)));
@@ -941,6 +942,13 @@ void ccSectionExtractionTool::doImportPolylinesFromDB()
 	{
 		ccLog::Error("No polyline in DB!");
 	}
+}
+
+void ccSectionExtractionTool::cancel()
+{
+	reset(false);
+
+	stop(false);
 }
 
 void ccSectionExtractionTool::apply()

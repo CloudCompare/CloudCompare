@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
+    <width>304</width>
     <height>26</height>
    </rect>
   </property>
@@ -122,6 +122,14 @@
         <property name="icon">
          <iconset resource="../icones.qrc">
           <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="cancelToolButton">
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
         </property>
        </widget>
       </item>

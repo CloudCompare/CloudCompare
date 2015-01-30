@@ -158,7 +158,7 @@ void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)
 	m_pointsMin *= multFactor;
 	m_pointsMax *= multFactor;
 
-	for (int i=0;i<=MAX_OCTREE_LEVEL;++i)
+	for (int i=0; i<=MAX_OCTREE_LEVEL; ++i)
 		m_cellSize[i] *= multFactor;
 }
 

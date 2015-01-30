@@ -685,7 +685,7 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 		bool ok = false;
 		int octreeLevel = arguments.takeFirst().toInt(&ok);
-		if (!ok || octreeLevel<1 || octreeLevel>CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+		if (!ok || octreeLevel < 1 || octreeLevel > CCLib::DgmOctree::MAX_OCTREE_LEVEL)
 			return Error("Invalid octree level!");
 		Print(QString("\tOctree level: %1").arg(octreeLevel));
 

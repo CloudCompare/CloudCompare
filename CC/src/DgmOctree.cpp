@@ -2801,9 +2801,9 @@ uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherO
 
 	int maxOctreeLevel = MAX_OCTREE_LEVEL;
 	if (std::min(ptsA,ptsB) < 16)
-		maxOctreeLevel = std::min(MAX_OCTREE_LEVEL, 5); //very small clouds
+		maxOctreeLevel = std::min(maxOctreeLevel, 5); //very small clouds
 	else if (std::max(ptsA,ptsB) < 2000000)
-		maxOctreeLevel = std::min(MAX_OCTREE_LEVEL, 10); //average size clouds
+		maxOctreeLevel = std::min(maxOctreeLevel, 10); //average size clouds
 
 	double estimatedTime[MAX_OCTREE_LEVEL];
 	estimatedTime[0] = 0.0;
@@ -3797,7 +3797,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 					//we should go deeper in the octree (as long as the current element
 					//belongs to the same cell as the first cell element - in which case
 					//the cell will still be too big)
-					while (cell.level<MAX_OCTREE_LEVEL)
+					while (cell.level < MAX_OCTREE_LEVEL)
 					{
 						//next level
 						++cell.level;
@@ -4211,7 +4211,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 					//we should go deeper in the octree (as long as the current element
 					//belongs to the same cell as the first cell element - in which case
 					//the cell will still be too big)
-					while (cellDesc.level<MAX_OCTREE_LEVEL)
+					while (cellDesc.level < MAX_OCTREE_LEVEL)
 					{
 						//next level
 						++cellDesc.level;

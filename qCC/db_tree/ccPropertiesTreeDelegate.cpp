@@ -623,7 +623,7 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 
 	//current display level
 	int level = _obj->getDisplayedLevel();
-	assert(level>0 && level<=ccOctree::MAX_OCTREE_LEVEL);
+	assert(level > 0 && level <= ccOctree::MAX_OCTREE_LEVEL);
 
 	//cell size
 	PointCoordinateType cellSize = _obj->getCellSize(static_cast<uchar>(level));

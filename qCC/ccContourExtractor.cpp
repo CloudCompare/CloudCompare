@@ -131,8 +131,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<CCLib::PointProjectio
 			{
 				std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator itBefore = itLeft;
 				if (itBefore == hullPoints.begin()) itBefore = hullPoints.end(); --itBefore;
-				std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator itAfter = itLeft;
-				if (itAfter == hullPoints.end()) itAfter = hullPoints.begin(); else ++itAfter;
+				std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::iterator itAfter = itLeft; ++itAfter;
+				if (itAfter == hullPoints.end()) itAfter = hullPoints.begin();
 
 				bool forward = (cross(**itLeft, **itBefore, **itAfter) < 0 && contourType == LOWER);
 				if (!forward)

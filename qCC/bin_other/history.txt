@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.6.1.beta 11/??/2014
+v2.6.1.beta 01/??/2015
 - New features:
 	* Level Tool
 		- accessible via 'Tools > Level' or via the left toolbar
@@ -49,6 +49,7 @@ v2.6.1.beta 11/??/2014
 		- to open DP (DotProduct - http://www.dotproduct3d.com/) files
 		- imports each frame as a separate cloud (all frames can be merged afterwards with 'Edit > Merge')
 		- creates the corresponding 'sensor' object for each frame
+		- CC can compute robust normals at loading time (just as with PTX files)
 	* Subsample tool:
 		- when performing 'Spatial' resampling, the user can now choose to use the active scalar field
 			to modulate the sampling distance depending on the scalar field values.
@@ -124,6 +125,7 @@ v2.6.1.beta 11/??/2014
 		- New option '-REMOVE_ALL_SFS': to remove all scalar fields (from all loaded entities, i.e. clouds or meshes)
 		- New option '-CBANDING': to apply color 'banding' (the user must also specify the dimension and the frequency)
 			matrix rows on each line)
+		- the 'COMPUTE_PTX_NORMALS' option has been renamed 'COMPUTE_NORMALS' (as it can now be used for both PTX and DP files)
 		- Default behavior of some commands slightly changed (see http://www.cloudcompare.org/doc/wiki/index.php?title=CommandLine)
 	* SF Arithmetics:
 		- new operator 'INT' (integer part) to extract the integer part of scalar values
@@ -133,6 +135,9 @@ v2.6.1.beta 11/??/2014
 		- the color of new steps is now interpolated from the existing color ramp instead of being white by default
 	* qSRA plugin (Surface of Revolution Analysis):
 		- the conical projection now handles 'inverted' cases (with negative latitude values)
+	* Curvature estimation:
+		- a new curvature estimation has been added: 'Normal change rate'
+		- faster to compute, smoother, and less sensitive to noise (but also less accurate, and dimensionless)
 
 - Bug fix:
 	- Delaunay 2D1/2 was crashing on Windows 8

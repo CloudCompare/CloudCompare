@@ -38,17 +38,6 @@ public:
 	virtual bool canLoadExtension(QString upperCaseExt) const;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 
-	//! Behavior regarding whether normals should be automatically computed or not
-	enum ComputeNormalsBehavior { ALWAYS, ASK_USER, NEVER};
-
-	//! Sets the filter default behavior regarding normals computation
-	static void SetNormalsComputationBehavior(ComputeNormalsBehavior option);
-
-protected:
-
-	//! Default behavior regarding normals computation
-	static ComputeNormalsBehavior s_normalCompBehavior;
-
 };
 
 #endif //CC_PTX_FILTER_HEADER

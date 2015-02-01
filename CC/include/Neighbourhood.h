@@ -43,7 +43,7 @@ class CC_CORE_LIB_API Neighbourhood
 	public:
 
 		//! Geometric properties/elements that can be computed from the set of points (see Neighbourhood::getGeometricalElement)
-		enum CC_GEOM_ELEMENT {  DEPRECATED					= 0,
+		enum CC_GEOM_ELEMENT {	DEPRECATED					= 0,
 								GRAVITY_CENTER				= 1,
 								LSQ_PLANE					= 2,
 								HEIGHT_FUNCTION				= 4,
@@ -51,7 +51,9 @@ class CC_CORE_LIB_API Neighbourhood
 								QUADRIC_3D					= 16};
 
 		//! Curvature type
-		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV, MEAN_CURV};
+		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV,
+								MEAN_CURV,
+								NORMAL_CHANGE_RATE};
 
 		//! Default constructor
 		/** \param associatedCloud reference cloud

@@ -901,6 +901,9 @@ namespace CCLib
 			return eigenValues[index];
 		}
 
+		//! Returns the eigenvalues as an array
+		inline const Scalar* getEigenValues() const { return eigenValues; }
+
 	protected:
 
 		//! Internal initialization

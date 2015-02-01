@@ -58,7 +58,7 @@ public:
 	ccProgressDialog(	bool cancelButton = false,
 						QWidget *parent = 0,
 #ifdef CC_QT5
-						Qt::WindowFlags flags = 0 //the Qt::SubWindow or Qt::Popup flags make the cancel button disappear?!
+						Qt::WindowFlags flags = Qt::Tool //the Qt::SubWindow or Qt::Popup flags make the cancel button disappear?!
 #else
 						Qt::WindowFlags flags = Qt::SubWindow | Qt::Popup
 #endif

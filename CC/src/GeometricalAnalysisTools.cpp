@@ -142,10 +142,10 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 
 		if (neighborCount > 5)
 		{
-		    //current point index
+			//current point index
 			unsigned index = cell.points->getPointGlobalIndex(i);
-		    //current point index in neighbourhood (to compute curvature at the right position!)
-            unsigned indexInNeighbourhood = 0;
+			//current point index in neighbourhood (to compute curvature at the right position!)
+			unsigned indexInNeighbourhood = 0;
 
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount);
 			Neighbourhood Z(&neighboursCloud);
@@ -155,7 +155,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 			{
 				if (nNSS.pointsInNeighbourhood[j].pointIndex == index)
 				{
-                    indexInNeighbourhood = j;
+					indexInNeighbourhood = j;
 					break;
 				}
 			}

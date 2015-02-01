@@ -50,7 +50,7 @@ protected:
 	bool commandChangeMeshOutputFormat		(QStringList& arguments);
 	bool commandChangePLYExportFormat		(QStringList& arguments);
 	bool commandChangeFBXOutputFormat		(QStringList& arguments);
-	bool commandForcePTXNormalsComputation	(QStringList& arguments);
+	bool commandForceNormalsComputation		(QStringList& arguments);
 	bool commandSaveClouds					(QStringList& arguments);
 	bool commandSaveMeshes					(QStringList& arguments);
 	bool commandAutoSave					(QStringList& arguments);

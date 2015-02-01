@@ -42,6 +42,8 @@ CCLib::Neighbourhood::CC_CURVATURE_TYPE ccCurvatureDlg::getCurvatureType() const
 		return CCLib::Neighbourhood::GAUSSIAN_CURV;
 	case 1:
 		return CCLib::Neighbourhood::MEAN_CURV;
+	case 2:
+		return CCLib::Neighbourhood::NORMAL_CHANGE_RATE;
 	default:
 		assert(false);
 	}

@@ -9660,7 +9660,23 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				curvKernelSize = static_cast<PointCoordinateType>(curvDlg.getKernelSize());
 			}
 
-			sfName = QString("%1 (%2)").arg(curvType == CCLib::Neighbourhood::MEAN_CURV ? CC_MEAN_CURVATURE_FIELD_NAME : CC_GAUSSIAN_CURVATURE_FIELD_NAME).arg(curvKernelSize);
+			QString fieldName;
+			switch (curvType)
+			{
+			case CCLib::Neighbourhood::GAUSSIAN_CURV:
+				fieldName = CC_CURVATURE_GAUSSIAN_FIELD_NAME;
+				break;
+			case CCLib::Neighbourhood::MEAN_CURV:
+				fieldName = CC_CURVATURE_MEAN_FIELD_NAME;
+				break;
+			case CCLib::Neighbourhood::NORMAL_CHANGE_RATE:
+				fieldName = CC_CURVATURE_NORM_CHANGE_RATE_FIELD_NAME;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+			sfName = QString("%1 (%2)").arg(fieldName).arg(curvKernelSize);
 		}
 		break;
 

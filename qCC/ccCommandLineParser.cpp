@@ -19,7 +19,6 @@
 #include <BundlerFilter.h>
 #include <AsciiFilter.h>
 #include <FBXFilter.h>
-#include <PTXFilter.h>
 #include <BinFilter.h>
 #include <PlyFilter.h>
 
@@ -101,7 +100,7 @@ static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
 static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 static const char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
-static const char COMMAND_PTX_COMPUTE_NORMALS[]				= "COMPUTE_PTX_NORMALS";
+static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
 static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
@@ -144,7 +143,6 @@ struct CmdLineLoadParameters : public FileIOFilter::LoadParameters
 };
 static CmdLineLoadParameters s_loadParameters;
 
-
 bool IsCommand(const QString& token, const char* command)
 {
 	return token.startsWith("-") && token.mid(1).toUpper() == QString(command);
@@ -159,7 +157,7 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 	}
 
 	//reset default behavior(s)
-	PTXFilter::SetNormalsComputationBehavior(PTXFilter::NEVER);
+	s_loadParameters.autoComputeNormals = ccGriddedTools::NEVER;
 	s_MeshExportFormat = s_CloudExportFormat = BinFilter::GetFileFilter();
 	s_MeshExportExt = s_CloudExportExt = BinFilter::GetDefaultExtension();
 	s_precision = 12;
@@ -2656,10 +2654,10 @@ bool ccCommandLineParser::commandChangePLYExportFormat(QStringList& arguments)
 	return true;
 }
 
-bool ccCommandLineParser::commandForcePTXNormalsComputation(QStringList& arguments)
+bool ccCommandLineParser::commandForceNormalsComputation(QStringList& arguments)
 {
 	//simply change the default filter behavior
-	PTXFilter::SetNormalsComputationBehavior(PTXFilter::ALWAYS);
+	s_loadParameters.autoComputeNormals = ccGriddedTools::ALWAYS;
 
 	return true;
 }
@@ -2872,10 +2870,10 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandChangeFBXOutputFormat(arguments);
 		}
-		//Force normal computation when importing PTX files
-		else if (IsCommand(argument,COMMAND_PTX_COMPUTE_NORMALS))
+		//Force normal computation when importing gridded clouds
+		else if (IsCommand(argument,COMMAND_COMPUTE_GRIDDED_NORMALS))
 		{
-			success = commandForcePTXNormalsComputation(arguments);
+			success = commandForceNormalsComputation(arguments);
 		}
 		//Set the current "active" scalar-field
 		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))

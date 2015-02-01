@@ -324,7 +324,7 @@ bool Neighbourhood::computeHeightFunction()
 
 	const PointCoordinateType* lsq = getLSQPlane();
 	if (!lsq)
-        return false;
+		return false;
 
 	//we get centroid (should already be up-to-date - see computeCovarianceMatrix)
 	const CCVector3* G = getGravityCenter();
@@ -345,12 +345,12 @@ bool Neighbourhood::computeHeightFunction()
 	}
 	else
 	{
-	    if (nyy > nzz)
+		if (nyy > nzz)
 		{
 			//as y is the "normal" direction, we use (z,x) as the base plane
 			idx_X=2/*z*/; idx_Y=0/*x*/; idx_Z=1/*y*/;
 		}
-    }
+	}
 
 	//compute the A matrix and b vector
 	float *A = new float[6*count];
@@ -450,7 +450,7 @@ bool Neighbourhood::computeHeightFunction()
 	//init. conjugate gradient
 	cg.initConjugateGradient(X0);
 
-    //conjugate gradient iterations
+	//conjugate gradient iterations
 	{
 		double convergenceThreshold = static_cast<double>(lmax2) * 1.0e-8;  //max. error for convergence = 1e-8 of largest cloud dimension (empirical!)
 		for (unsigned i=0; i<1500; ++i)
@@ -494,63 +494,63 @@ bool Neighbourhood::compute3DQuadric()
 	if (!m_associatedCloud)
 		return false;
 
-    //computes a 3D quadric of the form ax2 +by2 +cz2 + 2exy + 2fyz + 2gzx + 2lx + 2my + 2nz + d = 0
-    //"THREE-DIMENSIONAL SURFACE CURVATURE ESTIMATION USING QUADRIC SURFACE PATCHES", I. Douros & B. Buxton, University College London
+	//computes a 3D quadric of the form ax2 +by2 +cz2 + 2exy + 2fyz + 2gzx + 2lx + 2my + 2nz + d = 0
+	//"THREE-DIMENSIONAL SURFACE CURVATURE ESTIMATION USING QUADRIC SURFACE PATCHES", I. Douros & B. Buxton, University College London
 
 	//we get centroid
 	const CCVector3* G = getGravityCenter();
 	assert(G);
 
-    //we look for the eigen vector associated to the minimum eigen value of a matrix A
-    //where A=transpose(D)*D, and D=[xi^2 yi^2 zi^2 xiyi yizi xizi xi yi zi 1] (i=1..N)
+	//we look for the eigen vector associated to the minimum eigen value of a matrix A
+	//where A=transpose(D)*D, and D=[xi^2 yi^2 zi^2 xiyi yizi xizi xi yi zi 1] (i=1..N)
 
 	unsigned count = m_associatedCloud->size();
 
-    //we compute M = [x2 y2 z2 xy yz xz x y z 1] for all points
-    PointCoordinateType* M = new PointCoordinateType[count*10];
-    if (!M)
-        return false;
+	//we compute M = [x2 y2 z2 xy yz xz x y z 1] for all points
+	PointCoordinateType* M = new PointCoordinateType[count*10];
+	if (!M)
+		return false;
 
 	PointCoordinateType* _M = M;
 	for (unsigned i=0; i<count; ++i)
 	{
 		CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
-        //we fill the ith line
-	    (*_M++) = P.x * P.x;
-	    (*_M++) = P.y * P.y;
-	    (*_M++) = P.z * P.z;
-	    (*_M++) = P.x * P.y;
-	    (*_M++) = P.y * P.z;
-	    (*_M++) = P.x * P.z;
-	    (*_M++) = P.x;
-	    (*_M++) = P.y;
-	    (*_M++) = P.z;
-	    (*_M++) = 1.0;
+		//we fill the ith line
+		(*_M++) = P.x * P.x;
+		(*_M++) = P.y * P.y;
+		(*_M++) = P.z * P.z;
+		(*_M++) = P.x * P.y;
+		(*_M++) = P.y * P.z;
+		(*_M++) = P.x * P.z;
+		(*_M++) = P.x;
+		(*_M++) = P.y;
+		(*_M++) = P.z;
+		(*_M++) = 1.0;
 	}
 
-    //D = tM.M
-    SquareMatrixd D(10);
+	//D = tM.M
+	SquareMatrixd D(10);
 	for (unsigned l=0; l<10; ++l)
 	{
-        for (unsigned c=0; c<10; ++c)
-        {
-            double sum = 0;
-            _M = M;
-            for (unsigned i=0; i<count; ++i, _M+=10)
-                sum += static_cast<double>(_M[l] * _M[c]);
+		for (unsigned c=0; c<10; ++c)
+		{
+			double sum = 0;
+			_M = M;
+			for (unsigned i=0; i<count; ++i, _M+=10)
+				sum += static_cast<double>(_M[l] * _M[c]);
 
-            D.m_values[l][c] = sum;
-        }
+			D.m_values[l][c] = sum;
+		}
 	}
 
-    //we don't need M anymore
+	//we don't need M anymore
 	delete[] M;
 	M=0;
 
-    //now we compute eigen values and vectors of D
+	//now we compute eigen values and vectors of D
 	SquareMatrixd eig = D.computeJacobianEigenValuesAndVectors();
-    //failure?
+	//failure?
 	if (!eig.isValid())
 		return false;
 
@@ -558,7 +558,7 @@ bool Neighbourhood::compute3DQuadric()
 	double vec[10];
 	/*double lambdaMin = */eig.getMinEigenValueAndVector(vec);
 
-    //we store result
+	//we store result
 	{
 		for (unsigned i=0; i<10; ++i)
 			the3DQuadric[i] = vec[i];
@@ -728,58 +728,101 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 
 ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
 {
-	//we get 2D1/2 quadric parameters
-	const PointCoordinateType* H = getHeightFunction();
-	if (!H)
-        return NAN_VALUE;
+	switch (cType)
+	{
+	case GAUSSIAN_CURV:
+	case MEAN_CURV:
+		{
+			//we get 2D1/2 quadric parameters
+			const PointCoordinateType* H = getHeightFunction();
+			if (!H)
+				return NAN_VALUE;
 
-	//compute centroid
-	const CCVector3* G = getGravityCenter();
+			//compute centroid
+			const CCVector3* G = getGravityCenter();
 
-    //we compute curvature at the input neighbour position + we recenter it by the way
-	CCVector3 Q = *m_associatedCloud->getPoint(neighbourIndex) - *G;
+			//we compute curvature at the input neighbour position + we recenter it by the way
+			CCVector3 Q = *m_associatedCloud->getPoint(neighbourIndex) - *G;
 
-	uchar X = theHeightFunctionDirections[0];
-	uchar Y = theHeightFunctionDirections[1];
+			uchar X = theHeightFunctionDirections[0];
+			uchar Y = theHeightFunctionDirections[1];
 
-	//z = a+b.x+c.y+d.x^2+e.x.y+f.y^2
-	//PointCoordinateType& a = H[0];
-	const PointCoordinateType& b = H[1];
-	const PointCoordinateType& c = H[2];
-	const PointCoordinateType& d = H[3];
-	const PointCoordinateType& e = H[4];
-	const PointCoordinateType& f = H[5];
+			//z = a+b.x+c.y+d.x^2+e.x.y+f.y^2
+			//const PointCoordinateType& a = H[0];
+			const PointCoordinateType& b = H[1];
+			const PointCoordinateType& c = H[2];
+			const PointCoordinateType& d = H[3];
+			const PointCoordinateType& e = H[4];
+			const PointCoordinateType& f = H[5];
 
-    //See "CURVATURE OF CURVES AND SURFACES – A PARABOLIC APPROACH" by ZVI HAR’EL
-	const PointCoordinateType  fx	= b + (d*2) * Q.u[X] + (e  ) * Q.u[Y];	// b+2d*X+eY
-	const PointCoordinateType  fy	= c + (e  ) * Q.u[X] + (f*2) * Q.u[Y];	// c+2f*Y+eX
-	const PointCoordinateType  fxx	= d*2;									// 2d
-	const PointCoordinateType  fyy	= f*2;									// 2f
-	const PointCoordinateType& fxy	= e;									// e
+			//See "CURVATURE OF CURVES AND SURFACES – A PARABOLIC APPROACH" by ZVI HAR’EL
+			const PointCoordinateType  fx	= b + (d*2) * Q.u[X] + (e  ) * Q.u[Y];	// b+2d*X+eY
+			const PointCoordinateType  fy	= c + (e  ) * Q.u[X] + (f*2) * Q.u[Y];	// c+2f*Y+eX
+			const PointCoordinateType  fxx	= d*2;									// 2d
+			const PointCoordinateType  fyy	= f*2;									// 2f
+			const PointCoordinateType& fxy	= e;									// e
 
-	const PointCoordinateType fx2 = fx*fx;
-	const PointCoordinateType fy2 = fy*fy;
-	const PointCoordinateType q = (1 + fx2 + fy2);
+			const PointCoordinateType fx2 = fx*fx;
+			const PointCoordinateType fy2 = fy*fy;
+			const PointCoordinateType q = (1 + fx2 + fy2);
 
-    switch (cType)
-    {
-        case GAUSSIAN_CURV:
+			switch (cType)
 			{
-				//to sign the curvature, we need a normal!
-				PointCoordinateType K = fabs( fxx*fyy - fxy*fxy ) / (q*q);
-				return static_cast<ScalarType>(K);
+			case GAUSSIAN_CURV:
+				{
+					//to sign the curvature, we need a normal!
+					PointCoordinateType K = fabs( fxx*fyy - fxy*fxy ) / (q*q);
+					return static_cast<ScalarType>(K);
+				}
+
+			case MEAN_CURV:
+				{
+					//to sign the curvature, we need a normal!
+					PointCoordinateType H = fabs( ((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx) ) / (2*sqrt(q)*q);
+					return static_cast<ScalarType>(H);
+				}
+
+			default:
+				assert(false);
+			}
+		}
+		break;
+
+	case NORMAL_CHANGE_RATE:
+		{
+			assert(m_associatedCloud);
+			unsigned pointCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
+
+			//we need at least 4 points
+			if (pointCount < 4)
+			{
+				//not enough points!
+				return pointCount == 3 ? 0 : NAN_VALUE;
 			}
 
-        case MEAN_CURV:
-            {
-                //to sign the curvature, we need a normal!
-				PointCoordinateType H = fabs( ((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx) )  / (2*sqrt(q)*q);
-				return static_cast<ScalarType>(H);
-            }
+			//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
+			CCLib::SquareMatrixd eig = computeCovarianceMatrix().computeJacobianEigenValuesAndVectors();
 
-		default:
-			assert(false);
-    }
+			//invalid matrix?
+			if (!eig.isValid())
+				return NAN_VALUE;
+
+			//compute curvature as the rate of change of the surface
+			double e0 = eig.getEigenValues()[0];
+			double e1 = eig.getEigenValues()[1];
+			double e2 = eig.getEigenValues()[2];
+			double  sum = fabs(e0+e1+e2);
+			if (sum < ZERO_TOLERANCE)
+				return NAN_VALUE;
+
+			double eMin = std::min(std::min(e0,e1),e2);
+			return fabs(eMin) / sum;
+		}
+		break;
+
+	default:
+		assert(false);
+	}
 
 	return NAN_VALUE;
 }

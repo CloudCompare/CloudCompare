@@ -31,6 +31,7 @@ public:
 
 	//inherited from FileIOFilter
 	virtual bool exportSupported() const { return true; }
+	virtual bool importSupported() const { return true; }
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
 	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }

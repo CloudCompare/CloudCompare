@@ -249,7 +249,8 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		// - profile/path intersection point
 		{
 			outFile << " AXE ";
-			outFile << Cd.u[xDir] << " " << Cd.u[yDir];
+			CCVector3d Cdg = poly->toGlobal3d(Cd);
+			outFile << Cdg.u[xDir] << " " << Cdg.u[yDir];
 		}
 #endif
 		outFile << endl;

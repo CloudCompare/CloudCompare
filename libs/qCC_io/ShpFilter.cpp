@@ -496,8 +496,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	bool is2D = poly->is2DMode();
 	bool isClosed = poly->isClosed();
 
-	ccBBox box = poly->getOwnBB();
-	assert(box.isValid());
+	CCVector3d bbMing,bbMaxg;
+	poly->getGlobalBB(bbMing,bbMaxg);
 
 	//Shape Type
 	{
@@ -508,8 +508,6 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 	}
 
 	//Byte 4: Box
-	CCVector3d bbMing = poly->toGlobal3d(box.minCorner());
-	CCVector3d bbMaxg = poly->toGlobal3d(box.maxCorner());
 	{
 		double xMin = qToLittleEndian<double>(bbMing.u[X]);
 		double xMax = qToLittleEndian<double>(bbMaxg.u[X]);
@@ -562,11 +560,8 @@ CC_FILE_ERROR SavePolyline(ccPolyline* poly, QFile& file, int32_t& bytesWritten,
 		unsigned char dim2 = Y;
 		if (outputShapeType == SHP_POLYGON_Z)
 		{
-			//get bounding box
-			ccBBox box = poly->getOwnBB();
-			assert(box.isValid());
-			CCVector3 diag = box.getDiagVec();
-			
+			CCVector3d diag = bbMaxg - bbMing;
+
 			//in 3D we have to guess the 'flat' dimension
 			unsigned char minDim = diag.u[1] < diag.u[0] ? 1 : 0;
 			if (diag.u[2] < diag.u[minDim])
@@ -802,8 +797,8 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	ccBBox box = cloud->getOwnBB();
-	assert(box.isValid());
+	CCVector3d bbMing,bbMaxg;
+	cloud->getGlobalBB(bbMing,bbMaxg);
 
 	//Shape Type
 	{
@@ -815,10 +810,10 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 
 	//Byte 4: Box
 	{
-		double xMin = qToLittleEndian<double>(box.minCorner().x);
-		double xMax = qToLittleEndian<double>(box.maxCorner().x);
-		double yMin = qToLittleEndian<double>(box.minCorner().y);
-		double yMax = qToLittleEndian<double>(box.maxCorner().y);
+		double xMin = qToLittleEndian<double>(bbMing.x);
+		double xMax = qToLittleEndian<double>(bbMaxg.x);
+		double yMin = qToLittleEndian<double>(bbMing.y);
+		double yMax = qToLittleEndian<double>(bbMaxg.y);
 		//The Bounding Box for the Cloud stored in the order Xmin, Ymin, Xmax, Ymax
 		/*Byte  4*/file.write((const char*)&xMin,8);
 		/*Byte 12*/file.write((const char*)&yMin,8);
@@ -840,9 +835,10 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 		for (int32_t i=0; i<numPoints; ++i)
 		{
 			const CCVector3* P = cloud->getPoint(i);
+			CCVector3d Pg = cloud->toGlobal3d(*P);
 
-			double x = qToLittleEndian<double>(P->x);
-			double y = qToLittleEndian<double>(P->y);
+			double x = qToLittleEndian<double>(Pg.x);
+			double y = qToLittleEndian<double>(Pg.y);
 			/*Byte 0*/file.write((const char*)&x,8);
 			/*Byte 8*/file.write((const char*)&y,8);
 			bytesWritten += 16;
@@ -851,8 +847,8 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 
 	//Z boundaries
 	{
-		double zMin = qToLittleEndian<double>(box.minCorner().z);
-		double zMax = qToLittleEndian<double>(box.maxCorner().z);
+		double zMin = qToLittleEndian<double>(bbMing.z);
+		double zMax = qToLittleEndian<double>(bbMaxg.z);
 		file.write((const char*)&zMin,8);
 		file.write((const char*)&zMax,8);
 		bytesWritten += 16;
@@ -863,7 +859,8 @@ CC_FILE_ERROR SaveAsCloud(ccGenericPointCloud* cloud, QFile& file, int32_t& byte
 		for (int32_t i=0; i<numPoints; ++i)
 		{
 			const CCVector3* P = cloud->getPoint(i);
-			double z = qToLittleEndian<double>(P->z);
+			CCVector3d Pg = cloud->toGlobal3d(*P);
+			double z = qToLittleEndian<double>(Pg.z);
 			file.write((const char*)&z,8);
 			bytesWritten += 8;
 		}
@@ -1054,7 +1051,51 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	GetSupportedShapes(entity,toSave,inputShapeType/*,m_closedPolylinesAsPolygons*/);
 
 	if (inputShapeType == SHP_NULL_SHAPE || toSave.empty())
+	{
 		return CC_FERR_BAD_ENTITY_TYPE;
+	}
+
+	CCVector3d bbMinCorner,bbMaxCorner;
+	{
+		bool isValid = false;
+		//get the global bounding-box
+		if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
+		{
+			for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+			{
+				ccHObject* child = entity->getChild(i);
+				CCVector3d minC,maxC;
+				if (child->getGlobalBB(minC,maxC))
+				{
+					if (isValid)
+					{
+						bbMinCorner.x = std::min(bbMinCorner.x,minC.x);
+						bbMinCorner.y = std::min(bbMinCorner.y,minC.y);
+						bbMinCorner.z = std::min(bbMinCorner.z,minC.z);
+						bbMaxCorner.x = std::max(bbMaxCorner.x,maxC.x);
+						bbMaxCorner.y = std::max(bbMaxCorner.y,maxC.y);
+						bbMaxCorner.z = std::max(bbMaxCorner.z,maxC.z);
+					}
+					else
+					{
+						bbMinCorner = minC;
+						bbMaxCorner = maxC;
+						isValid = true;
+					}
+				}
+			}
+		}
+		else
+		{
+			isValid = entity->getGlobalBB(bbMinCorner,bbMaxCorner);
+		}
+		if (!isValid)
+		{
+			ccLog::Error("Entity(ies) has(ve) an invalid bounding box?!");
+			return CC_FERR_BAD_ENTITY_TYPE;
+		}
+	}
+
 
 	bool save3DPolysAs2D = false;
 	int poly2DVertDim = 2;
@@ -1144,14 +1185,11 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		memcpy(_header,(const char*)&shapeTypeInt,4);
 		_header += 4;
 
-		ccBBox box = entity->getOwnBB();
-		assert(box.isValid());
-
 		//X and Y bounaries
-		double xMin = qToLittleEndian<double>(box.minCorner().u[X]);
-		double xMax = qToLittleEndian<double>(box.maxCorner().u[X]);
-		double yMin = qToLittleEndian<double>(box.minCorner().u[Y]);
-		double yMax = qToLittleEndian<double>(box.maxCorner().u[Y]);
+		double xMin = qToLittleEndian<double>(bbMinCorner.u[X]);
+		double xMax = qToLittleEndian<double>(bbMaxCorner.u[X]);
+		double yMin = qToLittleEndian<double>(bbMinCorner.u[Y]);
+		double yMax = qToLittleEndian<double>(bbMaxCorner.u[Y]);
 		//Byte 36: box X min
 		memcpy(_header,(const char*)&xMin,8);
 		_header += 8;
@@ -1167,8 +1205,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 		//Z bounaries
 		//Unused, with value 0.0, if not Measured or Z type
-		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(box.minCorner().u[Z]);
-		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(box.maxCorner().u[Z]);
+		double zMin = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(bbMinCorner.u[Z]);
+		double zMax = outputShapeType < SHP_POINT_Z ? 0.0 : qToLittleEndian<double>(bbMaxCorner.u[Z]);
 		//Byte 68: box Z min
 		memcpy(_header,(const char*)&zMin,8);
 		_header += 8;
@@ -1326,7 +1364,13 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 					for (size_t i=0; i<toSave.size(); ++i)
 					{
 						ccPolyline* poly = static_cast<ccPolyline*>(toSave[i]);
-						double height = (poly && poly->size() != 0 ? poly->getPoint(0)->u[Z] : 0.0);
+						double height = 0.0;
+						if (poly && poly->size() != 0)
+						{
+							const CCVector3* P0 = poly->getPoint(0);
+							CCVector3d Pg0 = poly->toGlobal3d(*P0);
+							height = Pg0.u[Z];
+						}
 						DBFWriteDoubleAttribute(dbfHandle,static_cast<int>(i),fieldIdx,height);
 					}
 				}

@@ -513,14 +513,14 @@ ccBBox ccHObject::getOwnBB(bool withGLFeatures/*=false*/)
 	return ccBBox();
 }
 
-ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/)
+ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnabledChildren/*=true*/)
 {
 	ccBBox box = getOwnBB(withGLFeatures);
 
 	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
-		if ((*it)->isEnabled()) //DGM FIXE: shall we really take this into account here?
-			box += (*it)->getBB_recursive(withGLFeatures);
+		if (!onlyEnabledChildren || (*it)->isEnabled())
+			box += (*it)->getBB_recursive(withGLFeatures,onlyEnabledChildren);
 	}
 
 	return box;

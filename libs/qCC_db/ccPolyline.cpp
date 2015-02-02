@@ -31,8 +31,7 @@
 
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	: Polyline(associatedCloud)
-	, ccHObject("Polyline")
-	, ccShifted()
+	, ccShiftedObject("Polyline")
 {
 	set2DMode(false);
 	setForeground(true);
@@ -54,8 +53,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
 	: Polyline(0)
-	, ccHObject(poly)
-	, ccShifted(poly)
+	, ccShiftedObject(poly)
 {
 	ccPointCloud* clone = 0;
 	initWith(clone,poly);

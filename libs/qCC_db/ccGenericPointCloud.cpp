@@ -25,8 +25,7 @@
 #include "ccSensor.h"
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
-	: ccHObject(name)
-	, ccShifted()
+	: ccShiftedObject(name)
 	, m_pointsVisibility(0)
 	, m_pointSize(0)
 {
@@ -35,13 +34,11 @@ ccGenericPointCloud::ccGenericPointCloud(QString name)
 }
 
 ccGenericPointCloud::ccGenericPointCloud(const ccGenericPointCloud& cloud)
-	: ccHObject(cloud)
-	, ccShifted(cloud)
+	: ccShiftedObject(cloud)
 	, m_pointsVisibility(cloud.m_pointsVisibility)
 	, m_pointSize(cloud.m_pointSize)
 {
 }
-
 
 ccGenericPointCloud::~ccGenericPointCloud()
 {

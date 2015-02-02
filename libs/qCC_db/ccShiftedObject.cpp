@@ -15,37 +15,39 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccShifted.h"
+#include "ccShiftedObject.h"
 
 //local
 #include "ccLog.h"
 #include "ccSerializableObject.h"
 
-ccShifted::ccShifted()
-	: m_globalShift(0,0,0)
+ccShiftedObject::ccShiftedObject(QString name)
+	: ccHObject(name)
+	, m_globalShift(0,0,0)
 	, m_globalScale(1.0)
 {
 }
 
-ccShifted::ccShifted(const ccShifted& s)
-	: m_globalShift(s.m_globalShift)
+ccShiftedObject::ccShiftedObject(const ccShiftedObject& s)
+	: ccHObject(s)
+	, m_globalShift(s.m_globalShift)
 	, m_globalScale(s.m_globalScale)
 {
 }
 
-void ccShifted::setGlobalShift(const CCVector3d& shift)
+void ccShiftedObject::setGlobalShift(const CCVector3d& shift)
 {
 	m_globalShift = shift;
 }
 
-void ccShifted::setGlobalShift(double x, double y, double z)
+void ccShiftedObject::setGlobalShift(double x, double y, double z)
 {
 	m_globalShift.x = x;
 	m_globalShift.y = y;
 	m_globalShift.z = z;
 }
 
-void ccShifted::setGlobalScale(double scale)
+void ccShiftedObject::setGlobalScale(double scale)
 {
 	if (scale == 0)
 	{
@@ -58,7 +60,7 @@ void ccShifted::setGlobalScale(double scale)
 	}
 }
 
-bool ccShifted::saveShiftInfoToFile(QFile& out) const
+bool ccShiftedObject::saveShiftInfoToFile(QFile& out) const
 {
 	//'coordinates shift'
 	if (out.write((const char*)m_globalShift.u,sizeof(double)*3) < 0)
@@ -70,7 +72,7 @@ bool ccShifted::saveShiftInfoToFile(QFile& out) const
 	return true;
 }
 
-bool ccShifted::loadShiftInfoFromFile(QFile& in)
+bool ccShiftedObject::loadShiftInfoFromFile(QFile& in)
 {
 	//'coordinates shift'
 	if (in.read((char*)m_globalShift.u,sizeof(double)*3) < 0)
@@ -80,4 +82,12 @@ bool ccShifted::loadShiftInfoFromFile(QFile& in)
 		return ccSerializableObject::ReadError();
 
 	return true;
+}
+
+bool ccShiftedObject::getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
+{
+	ccBBox box = getOwnBB(false);
+	minCorner = toGlobal3d(box.minCorner());
+	maxCorner = toGlobal3d(box.maxCorner());
+	return box.isValid();
 }

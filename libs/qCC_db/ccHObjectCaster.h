@@ -47,7 +47,7 @@ class ccPlane;
 class ccDish;
 class ccExtru;
 class ccTorus;
-class ccShifted;
+class ccShiftedObject;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 class QCC_DB_LIB_API ccHObjectCaster
@@ -66,10 +66,10 @@ public:
 	**/
 	static ccGenericPointCloud* ToGenericPointCloud(ccHObject* obj, bool* isLockedVertices = 0);
 
-	//! Converts current object to 'equivalent' ccShifted
+	//! Converts current object to 'equivalent' ccShiftedObject
 	/** Waring: if a mesh is passed, this method returns its vertices.
 	**/
-	static ccShifted* ToShifted(ccHObject* obj, bool* isLockedVertices = 0);
+	static ccShiftedObject* ToShifted(ccHObject* obj, bool* isLockedVertices = 0);
 
 	//! Converts current object to ccGenericMesh (if possible)
 	static ccGenericMesh* ToGenericMesh(ccHObject* obj);

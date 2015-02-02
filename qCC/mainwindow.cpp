@@ -1963,7 +1963,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	size_t selNum = m_selectedEntities.size();
 
 	//get the global shift/scale info and bounding box of all selected clouds
-	std::vector< std::pair<ccShifted*,ccHObject*> > shiftedEntities;
+	std::vector< std::pair<ccShiftedObject*,ccHObject*> > shiftedEntities;
 	CCVector3d Pl(0,0,0);
 	double Dl = 1.0;
 	CCVector3d Pg(0,0,0);
@@ -1982,7 +1982,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			bool lockedVertices;
-			ccShifted* shifted = ccHObjectCaster::ToShifted(ent,&lockedVertices);
+			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(ent,&lockedVertices);
 			//for (unlocked) entities only
 			if (lockedVertices)
 			{
@@ -2029,7 +2029,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					uniqueScale = (fabs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
 			}
 
-			shiftedEntities.push_back( std::pair<ccShifted*,ccHObject*>(shifted,ent) );
+			shiftedEntities.push_back( std::pair<ccShiftedObject*,ccHObject*>(shifted,ent) );
 		}
 
 		Pg = globalBBmin;
@@ -2075,7 +2075,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	{
 		for (size_t i=0; i<shiftedEntities.size(); ++i)
 		{
-			ccShifted* shifted = shiftedEntities[i].first;
+			ccShiftedObject* shifted = shiftedEntities[i].first;
 			ccHObject* ent = shiftedEntities[i].second;
 			if (preserveGlobalPos)
 			{
@@ -8857,7 +8857,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	for (size_t i=0; i<selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
-		ccShifted* shifted = 0;
+		ccShiftedObject* shifted = 0;
 		CCLib::GenericIndexedCloudPersist* cloud = 0;
 
 		if (ent->isKindOf(CC_TYPES::POLY_LINE))

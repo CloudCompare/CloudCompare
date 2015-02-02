@@ -20,6 +20,7 @@
 
 //Local
 #include "qCC_db.h"
+#include "ccHObject.h"
 
 //CCLib
 #include <CCGeom.h>
@@ -32,14 +33,14 @@
 	(optionally) shifted so as to reduce their amplitude and
 	therefore display or accuracy issues.
 **/
-class QCC_DB_LIB_API ccShifted
+class QCC_DB_LIB_API ccShiftedObject : public ccHObject
 {
 public:
 
 	//! Default constructor
-	ccShifted();
+	ccShiftedObject(QString name = QString());
 	//! Copy constructor
-	ccShifted(const ccShifted& s);
+	ccShiftedObject(const ccShiftedObject& s);
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
@@ -93,6 +94,9 @@ public:
 		CCVector3d Plocal = CCVector3d::fromArray(Pglobal.u) * m_globalScale + m_globalShift;
 		return CCVector3::fromArray(Plocal.u);
 	}
+
+	//inherited from ccHObject
+	virtual bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner);
 
 protected:
 

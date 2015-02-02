@@ -25,10 +25,9 @@
 
 //Local
 #include "qCC_db.h"
-#include "ccHObject.h"
+#include "ccShiftedObject.h"
 #include "ccGLMatrix.h"
 #include "ccAdvancedTypes.h"
-#include "ccShifted.h"
 
 class ccOctree;
 
@@ -50,7 +49,7 @@ class ccOctree;
 	- an octree strucutre
 	- visibility information per point (to hide/display subsets of points)
 **/
-class QCC_DB_LIB_API ccGenericPointCloud : public ccHObject,  public ccShifted, virtual public CCLib::GenericIndexedCloudPersist
+class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  virtual public CCLib::GenericIndexedCloudPersist
 {
 	friend class ccMesh;
 

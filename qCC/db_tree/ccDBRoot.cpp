@@ -1305,7 +1305,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		planeNormal = CCVector3d::fromArray(facet->getNormal().u);
 		CCVector3d planeHorizDir(0,1,0);
 		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
-		center = facet->getBB_recursive().getCenter();
+		center = facet->getBB_recursive(false,false).getCenter();
 	}
 	else
 	{

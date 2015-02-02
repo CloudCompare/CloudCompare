@@ -289,15 +289,12 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		}
 
 		//header.SetDataFormatId(liblas::ePointFormat3);
-		ccBBox bBox = theCloud->getOwnBB();
-		if (bBox.isValid())
+		CCVector3d bbMin,bbMax;
+		if (theCloud->getGlobalBB(bbMin,bbMax))
 		{
-			CCVector3d bbMin = theCloud->toGlobal3d<PointCoordinateType>(bBox.minCorner());
-			CCVector3d bbMax = theCloud->toGlobal3d<PointCoordinateType>(bBox.maxCorner());
-			
 			header.SetMin(	bbMin.x, bbMin.y, bbMin.z );
 			header.SetMax(	bbMax.x, bbMax.y, bbMax.z );
-			CCVector3 diag = bBox.getDiagVec();
+			CCVector3d diag = bbMax - bbMin;
 
 			//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
 			//int_value = (double_value-offset)/scale

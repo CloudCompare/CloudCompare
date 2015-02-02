@@ -432,7 +432,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		appendRow( ITEM("Current Display"), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true );
 }
 
-void ccPropertiesTreeDelegate::fillWithShifted(ccShifted* _obj)
+void ccPropertiesTreeDelegate::fillWithShifted(ccShiftedObject* _obj)
 {
 	assert(_obj && m_model);
 

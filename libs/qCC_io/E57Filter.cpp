@@ -138,15 +138,15 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 {
 	assert(cloud);
 
-	ccBBox bbox = cloud->getOwnBB();
-	if (!bbox.isValid())
+	CCVector3d bbMin,bbMax;
+	if (!cloud->getGlobalBB(bbMin,bbMax))
 	{
 		ccLog::Error(QString("[E57Filter::SaveScan] Internal error: cloud '%1' has an invalid bounding box?!").arg(cloud->getName()));
 		return false;
 	}
 
 	unsigned pointCount = cloud->size();
-	if (pointCount==0)
+	if (pointCount == 0)
 	{
 		ccLog::Error(QString("[E57Filter::SaveScan] Cloud '%1' is empty!").arg(cloud->getName()));
 		return false;
@@ -287,12 +287,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		scanNode.set("colorLimits", colorbox);
 	}
 
-	// Shifted bounding-box limits
-	CCVector3d bbMin = cloud->toGlobal3d<PointCoordinateType>(bbox.minCorner());
-	CCVector3d bbMax = cloud->toGlobal3d<PointCoordinateType>(bbox.maxCorner());
-
 	// Add Cartesian bounding box to scan.
-	assert(bbox.isValid());
 	{
 		e57::StructureNode bboxNode = e57::StructureNode(imf);
 		bboxNode.set("xMinimum", e57::FloatNode(imf,bbMin.x));
@@ -337,7 +332,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	{
 		e57::FloatPrecision precision = sizeof(PointCoordinateType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
 
-		CCVector3d bbCenter = cloud->toGlobal3d<PointCoordinateType>(bbox.getCenter());
+		CCVector3d bbCenter = (bbMin+bbMax)/2;
 
 		proto.set("cartesianX", e57::FloatNode(	imf,
 												bbCenter.x,

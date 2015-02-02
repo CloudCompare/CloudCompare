@@ -209,11 +209,12 @@ public: //bouding-box
 	**/
 	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
-	//! Returns the bounding-box of this entity and it's (enabled) children
+	//! Returns the bounding-box of this entity and it's children
 	/** \param withGLFeatures whether to take into account display-only elements (if any)
+		\param onlyEnabledChildren only consider the 'enabled' children
 		\return bounding-box
 	**/
-	virtual ccBBox getBB_recursive(bool withGLFeatures = false);
+	virtual ccBBox getBB_recursive(bool withGLFeatures = false, bool onlyEnabledChildren = true);
 
 	//! Returns the bounding-box of this entity and it's children WHEN DISPLAYED
 	/** Children's GL transformation is taken into account (if enabled).
@@ -232,6 +233,22 @@ public: //bouding-box
 		\return fit bounding-box
 	**/
 	inline virtual ccBBox getOwnFitBB(ccGLMatrix& trans) { trans.toIdentity(); return getOwnBB(); }
+
+	//! Returns the entity's own global bounding-box
+	/** Children bboxes are ignored.
+		May differ from the (local) bounding-box if the entity is shifted
+		\param[out] minCorner min global bounding-box corner
+		\param[out] maxCorner max global bounding-box corner
+		\return whether the bounding box is valid or not
+	**/
+	virtual bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
+	{
+		//by default this method returns the local bounding-box!
+		ccBBox box = getOwnBB(false);
+		minCorner = CCVector3d::fromArray(box.minCorner().u);
+		maxCorner = CCVector3d::fromArray(box.maxCorner().u);
+		return box.isValid();
+	}
 
 	//! Draws the entity (and its children) bounding-box
 	virtual void drawBB(const ccColor::Rgb& col);

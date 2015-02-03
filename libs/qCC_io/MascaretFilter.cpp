@@ -67,6 +67,13 @@ QString MakeMascaretName(QString name)
 	return name;
 }
 
+inline void ToLocalAbscissa(const CCVector3& P, const CCVector3& C, const CCVector3& U, unsigned char upDir, CCVector2& localP)
+{
+	//convert to 'local' coordinate system
+	localP.x = (P-C).dot(U);
+	localP.y = P.u[upDir];
+}
+
 CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
@@ -255,15 +262,30 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 #endif
 		outFile << endl;
 
+		//check the abscissa values order (must be increasing!)
+		bool inverted = false;
+		{
+			const CCVector3* P0 = poly->getPoint(0);
+			//convert to 'local' coordinate system
+			CCVector2 Q0;
+			ToLocalAbscissa(*P0, C, U, upDir, Q0);
+
+			const CCVector3* P1 = poly->getPoint(vertCount-1);
+			//convert to 'local' coordinate system
+			CCVector2 Q1;
+			ToLocalAbscissa(*P1, C, U, upDir, Q1);
+
+			inverted = (Q1.x < Q0.x);
+		}
+
+
 		for (unsigned j=0; j<vertCount; ++j)
 		{
-			const CCVector3* P = poly->getPoint(j);
+			const CCVector3* P = poly->getPoint(inverted ? vertCount-1-j : j);
 
 			//convert to 'local' coordinate system
-			CCVector3 Q = *P - C;
-			Q.x = Q.dot(U);
-			Q.y = P->u[upDir];
-			Q.z = 0;
+			CCVector2 Q;
+			ToLocalAbscissa(*P, C, U, upDir, Q);
 
 			outFile << Q.x << " " << Q.y << " " << type;
 #ifdef SAVE_AS_GEO_MASCARET

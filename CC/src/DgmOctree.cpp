@@ -2780,6 +2780,10 @@ uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordina
 	minValue *= minValue;
 	for (int i=2; i<=MAX_OCTREE_LEVEL; ++i)
 	{
+		//we need two points per cell ideally
+		if (m_averageCellPopulation[i] < 1.5)
+			break;
+		
 		//The level with cell size as near as possible to the aim
 		PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
 		cellSizeDelta *= cellSizeDelta;

@@ -134,7 +134,7 @@ public:
 	static GenericIndexedMesh* computeTriangulation(GenericIndexedCloudPersist* cloud,
 													CC_TRIANGULATION_TYPES type = DELAUNAY_2D_AXIS_ALIGNED,
 													PointCoordinateType maxEdgeLength = 0,
-													unsigned char dim = 0,
+													unsigned char dim = 2,
 													char* errorStr = 0);
 
 	//! Indexed 2D vector

@@ -5867,7 +5867,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 			CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	cloud,
 																										type,
 																										static_cast<PointCoordinateType>(maxEdgeLength),
-																										0, //XY plane by default
+																										2, //XY plane by default
 																										errorStr);
 			if (dummyMesh)
 			{

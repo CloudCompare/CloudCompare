@@ -259,7 +259,10 @@ public: //display
 	virtual void draw(CC_DRAW_CONTEXT& context);
 
 	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
-	void getAbsoluteGLTransformation(ccGLMatrix& trans) const;
+	/** \param[out] trans absolute transformation
+		\return whether a GL transformation is actually enabled or not
+	**/
+	bool getAbsoluteGLTransformation(ccGLMatrix& trans) const;
 
 	//! Returns whether the object is actually displayed (visible) or not
 	virtual bool isDisplayed() const;

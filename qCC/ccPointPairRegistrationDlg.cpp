@@ -195,7 +195,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 		m_associatedWin->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE);
 		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
-		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 4 pairs - mind the order)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
+		m_associatedWin->displayNewMessage(QString("Pick equivalent points on both clouds (at least %1 pairs - mind the order)").arg(MIN_PAIRS_COUNT),ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 	}
 
 	return true;
@@ -1192,6 +1192,19 @@ void ccPointPairRegistrationDlg::align()
 		//...virtually
 		m_aligned.entity->setGLTransformation(transMat);
 		m_alignedPoints.setGLTransformation(transMat);
+
+		//force clouds visibility
+		{
+			//we don't want the window zoom to change or the window to be be redrawn
+			ccGLWindow* associatedWin = 0;
+			std::swap(m_associatedWin,associatedWin);
+			if (!showAlignedCheckBox->isChecked())
+				showAlignedCheckBox->setChecked(true);
+			if (!showReferenceCheckBox->isChecked())
+				showReferenceCheckBox->setChecked(true);
+			//restore window ref
+			std::swap(m_associatedWin,associatedWin);
+		}
 
 		if (m_associatedWin)
 		{

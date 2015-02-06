@@ -494,18 +494,24 @@ bool ccHObject::isAncestorOf(const ccHObject *anObject) const
 	return isAncestorOf(parent);
 }
 
-void ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
+bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 {
 	trans.toIdentity();
+	bool hasGLTrans = false;
 	
 	//recurse among ancestors to get the absolute GL transformation
 	const ccHObject* obj = this;
 	while (obj)
 	{
 		if (obj->isGLTransEnabled())
+		{
 			trans = trans * obj->getGLTransformation();
+			hasGLTrans = true;
+		}
 		obj = obj->getParent();
 	}
+
+	return hasGLTrans;
 }
 
 ccBBox ccHObject::getOwnBB(bool withGLFeatures/*=false*/)

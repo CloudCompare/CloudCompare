@@ -2784,13 +2784,24 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 				if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+					ccGLMatrix trans;
+					bool noGLTrans = !cloud->getAbsoluteGLTransformation(trans);
 
 					//brute force works quite well in fact?!
 					for (unsigned i=0; i<cloud->size(); ++i)
 					{
 						const CCVector3* P = cloud->getPoint(i);
 						double xs,ys,zs;
-						gluProject(P->x,P->y,P->z,MM,MP,VP,&xs,&ys,&zs);
+						if (noGLTrans)
+						{
+							gluProject(P->x,P->y,P->z,MM,MP,VP,&xs,&ys,&zs);
+						}
+						else
+						{
+							CCVector3 Q = *P;
+							trans.apply(Q);
+							gluProject(Q.x,Q.y,Q.z,MM,MP,VP,&xs,&ys,&zs);
+						}
 						if (fabs(xs-centerX) <= pickWidth && fabs(ys-centerY) <= pickHeight)
 						{
 							double squareDist = CCVector3d(X.x-P->x,X.y-P->y,X.z-P->z).norm2d();
@@ -2806,6 +2817,8 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 				else if (ent->isKindOf(CC_TYPES::MESH))
 				{
 					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+					ccGLMatrix trans;
+					bool noGLTrans = !mesh->getAbsoluteGLTransformation(trans);
 					ignoreSubmeshes = true;
 
 					ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
@@ -2818,9 +2831,24 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 						const CCVector3* C3D = vertices->getPoint(tsi->i3);
 
 						CCVector3d A2D,B2D,C2D; 
-						gluProject(A3D->x,A3D->y,A3D->z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
-						gluProject(B3D->x,B3D->y,B3D->z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
-						gluProject(C3D->x,C3D->y,C3D->z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
+						if (noGLTrans)
+						{
+							gluProject(A3D->x,A3D->y,A3D->z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
+							gluProject(B3D->x,B3D->y,B3D->z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
+							gluProject(C3D->x,C3D->y,C3D->z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
+						}
+						else
+						{
+							CCVector3 A3Dp = *A3D;
+							CCVector3 B3Dp = *B3D;
+							CCVector3 C3Dp = *C3D;
+							trans.apply(A3Dp);
+							trans.apply(B3Dp);
+							trans.apply(C3Dp);
+							gluProject(A3Dp.x,A3Dp.y,A3Dp.z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
+							gluProject(B3Dp.x,B3Dp.y,B3Dp.z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
+							gluProject(C3Dp.x,C3Dp.y,C3Dp.z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
+						}
 
 						//barycentric coordinates
 						GLdouble detT =  (B2D.y-C2D.y) *   (A2D.x-C2D.x) + (C2D.x-B2D.x) *   (A2D.y-C2D.y);

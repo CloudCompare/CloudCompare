@@ -1000,7 +1000,7 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	QString filename = arguments.takeFirst();
 	ccGLMatrix mat;
 	if (!mat.fromAsciiFile(filename))
-		return Error(QString("Failed to read transformation matrix file '%1'!").arg(COMMAND_APPLY_TRANSFORMATION).arg(filename));
+		return Error(QString("Failed to read transformation matrix file '%1'!").arg(filename));
 
 	Print(QString("Transformation:\n") + mat.toString(6));
 

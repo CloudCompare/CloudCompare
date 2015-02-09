@@ -2310,9 +2310,11 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 			//let's check if the mouse is on a selected item first!
 			if (	m_pickingMode != NO_PICKING
+				/*//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
 				&&	m_pickingMode != POINT_PICKING
 				&&	m_pickingMode != TRIANGLE_PICKING
 				&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
+				//*/
 				&&
 				(	QApplication::keyboardModifiers () == Qt::NoModifier
 				||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )

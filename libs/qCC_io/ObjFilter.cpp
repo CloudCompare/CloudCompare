@@ -1108,17 +1108,17 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (normals)
 	{
 		normals->release();
-		normals=0;
+		normals = 0;
 	}
 	if (texCoords)
 	{
 		texCoords->release();
-		texCoords=0;
+		texCoords = 0;
 	}
 	if (materials)
 	{
 		materials->release();
-		materials=0;
+		materials = 0;
 	}
 
 	progressDlg.close();

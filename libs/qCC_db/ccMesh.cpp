@@ -851,9 +851,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 			if (!cloneTexCoords)
 			{
 				cloneTexCoords = m_texCoords->clone(); //TODO: keep only what's necessary!
-				if (cloneTexCoords)
-					cloneMesh->addChild(cloneTexCoords);
-				else
+				if (!cloneTexCoords)
 				{
 					ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone texture coordinates!");
 					cloneMesh->removePerTriangleTexCoordIndexes(); //don't need this anymore!

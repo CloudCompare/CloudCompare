@@ -121,6 +121,9 @@ protected slots:
 	//! Exports the grid as an ASCII matrix
 	void generateASCIIMatrix() const;
 
+	//! Exports the grid as a mesh
+	void generateMesh() const;
+
 	//! Exports the (already generated) contour lines
 	void exportContourLines();
 

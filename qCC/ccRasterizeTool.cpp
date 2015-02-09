@@ -30,12 +30,14 @@
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
 #include <ccPolyline.h>
+#include <ccMesh.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
 
 //CCLib
 #include <Delaunay2dMesh.h>
+#include <PointProjectionTools.h>
 
 //Qt
 #include <QSettings>
@@ -78,6 +80,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(generateImagePushButton,	SIGNAL(clicked()),					this,	SLOT(generateImage()));
 	connect(generateRasterPushButton,	SIGNAL(clicked()),					this,	SLOT(generateRaster()));
 	connect(generateASCIIPushButton,	SIGNAL(clicked()),					this,	SLOT(generateASCIIMatrix()));
+	connect(generateMeshPushButton,		SIGNAL(clicked()),					this,	SLOT(generateMesh()));
 	connect(generateContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(generateContours()));
 	connect(exportContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(exportContourLines()));
 	connect(clearContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(removeContourLines()));
@@ -1987,6 +1990,53 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	settings.setValue("savePathASCIIGrid",QFileInfo(outputFilename).absolutePath());
 
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
+}
+
+void ccRasterizeTool::generateMesh() const
+{
+	if (!m_cloud || !m_grid.isValid())
+		return;
+
+	std::vector<ExportableFields> exportedFields;
+	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
+
+	if (rasterCloud)
+	{
+		char errorStr[1024];
+		CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
+																								DELAUNAY_2D_AXIS_ALIGNED,
+																								0,
+																								2,
+																								errorStr);
+		ccMesh* rasterMesh = 0;
+		if (baseMesh)
+		{
+			rasterMesh = new ccMesh(baseMesh,rasterCloud);
+			delete baseMesh;
+			baseMesh = 0;
+		}
+
+		if (rasterMesh)
+		{
+			if (m_cloud->getParent())
+				m_cloud->getParent()->addChild(rasterMesh);
+			rasterCloud->setEnabled(false);
+			rasterCloud->setVisible(true);
+			rasterCloud->setName("vertices");
+			rasterMesh->addChild(rasterCloud);
+			rasterMesh->setDisplay_recursive(m_cloud->getDisplay());
+			rasterMesh->setName(m_cloud->getName() + ".mesh");
+
+			MainWindow* mainWindow = MainWindow::TheInstance();
+			if (mainWindow)
+				MainWindow::TheInstance()->addToDB(rasterMesh);
+			ccLog::Print(QString("[Rasterize] Mesh '%1' successfully exported").arg(rasterMesh->getName()));
+		}
+		else
+		{
+			ccLog::Warning(QString("[Rasterize] Failed to create mesh: Triangle lib. said '%1'").arg(errorStr));
+		}
+	}
 }
 
 void ccRasterizeTool::generateContours()

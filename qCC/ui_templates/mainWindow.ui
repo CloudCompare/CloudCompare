@@ -663,7 +663,6 @@
    <addaction name="actionSamplePoints"/>
    <addaction name="actionCloudCloudDist"/>
    <addaction name="actionCloudMeshDist"/>
-   <addaction name="actionStatisticalTest"/>
    <addaction name="actionLabelConnectedComponents"/>
    <addaction name="actionPrimitiveFactory"/>
    <addaction name="actionRasterize"/>

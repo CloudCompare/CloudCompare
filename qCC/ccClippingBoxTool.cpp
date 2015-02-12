@@ -550,9 +550,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 								{
 									if (generateRandomColors && cloud->isA(CC_TYPES::POINT_CLOUD))
 									{
-										colorType col[3];
-										ccColor::Generator::Random(col);
-										if (!sliceCloud->setRGBColor(col))
+										ccColor::Rgb col = ccColor::Generator::Random();
+										if (!sliceCloud->setRGBColor(col.rgb))
 										{
 											ccLog::Error("Not enough memory!");
 											error = true;

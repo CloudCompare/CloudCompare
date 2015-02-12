@@ -216,13 +216,12 @@ bool ccKdTree::convertCellIndexToRandomColor()
 	//for each cell
 	for (size_t i=0; i<leaves.size(); ++i)
 	{
-		colorType col[3];
-		ccColor::Generator::Random(col);
+		ccColor::Rgb col = ccColor::Generator::Random();
 		CCLib::ReferenceCloud* subset = leaves[i]->points;
 		if (subset)
 		{
 			for (unsigned j=0; j<subset->size(); ++j)
-				pc->setPointColor(subset->getPointGlobalIndex(j),col);
+				pc->setPointColor(subset->getPointGlobalIndex(j),col.rgb);
 		}
 	}
 

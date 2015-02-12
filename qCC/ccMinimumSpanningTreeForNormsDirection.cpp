@@ -219,9 +219,8 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 		}
 
 #ifdef COLOR_PATCHES
-		colorType patchCol[3];
-		ccColor::Generator::Random(patchCol);
-		cloud->setPointColor(static_cast<unsigned>(firstUnvisitedIndex), patchCol);
+		ccColor::Rgb patchCol = ccColor::Generator::Random();
+		cloud->setPointColor(static_cast<unsigned>(firstUnvisitedIndex), patchCol.rgb);
 		sf->setValue(static_cast<unsigned>(firstUnvisitedIndex),static_cast<ScalarType>(visitedCount));
 #endif
 

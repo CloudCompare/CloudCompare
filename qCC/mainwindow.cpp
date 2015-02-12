@@ -3545,9 +3545,8 @@ void MainWindow::doActionSFConvertToRandomRGB()
 	{
 		for (int i=0; i<s_randomColorsNumber; ++i)
 		{
-			colorType col[3];
-			ccColor::Generator::Random(col);
-			randomColors->addElement(col);
+			ccColor::Rgb col = ccColor::Generator::Random();
+			randomColors->addElement(col.rgb);
 		}
 	}
 
@@ -5200,9 +5199,8 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					//shall we colorize it with random color?
 					if (randomColors)
 					{
-						colorType col[3];
-						ccColor::Generator::Random(col);
-						compCloud->setRGBColor(col);
+						ccColor::Rgb col = ccColor::Generator::Random();
+						compCloud->setRGBColor(col.rgb);
 						compCloud->showColors(true);
 						compCloud->showSF(false);
 					}

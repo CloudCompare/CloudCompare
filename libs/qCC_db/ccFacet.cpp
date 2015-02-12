@@ -236,7 +236,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
 		if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
 																hullPoints,
-																m_maxEdgeLength) )
+																m_maxEdgeLength*m_maxEdgeLength) )
 		{
 			ccLog::Error("[ccFacet::createInternalRepresentation] Failed to compute the convex hull of the input points!");
 		}

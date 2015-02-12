@@ -481,7 +481,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 		return false;
 
 	//do we really need to compute the concave hull?
-	if (hullPoints.size() < 2 || maxSquareEdgeLength < 0)
+	if (hullPoints.size() < 2 || maxSquareEdgeLength <= 0)
 		return true;
 
 	unsigned pointCount = static_cast<unsigned>(points.size());

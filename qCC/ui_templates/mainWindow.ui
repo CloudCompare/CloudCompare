@@ -2442,7 +2442,7 @@
   </action>
   <action name="actionFitFacet">
    <property name="text">
-    <string>2D polygon</string>
+    <string>2D polygon (facet)</string>
    </property>
   </action>
   <action name="actionAdjustZoom">

@@ -1974,7 +1974,7 @@
   </action>
   <action name="actionFitQuadric">
    <property name="text">
-    <string>2D1/2 quadric</string>
+    <string>2.5D quadric</string>
    </property>
   </action>
   <action name="actionSNETest">

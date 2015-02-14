@@ -20,6 +20,7 @@
 
 //CCLib
 #include <SimpleTriangle.h>
+#include <PointProjectionTools.h>
 
 //Local
 #include "qCC_db.h"
@@ -64,6 +65,15 @@ public:
 								ccMaterialSet* clonedMaterials = 0,
 								NormsIndexesTableType* clonedNormsTable = 0,
 								TextureCoordsContainer* cloneTexCoords = 0);
+
+	//! Creates a Delaunay 2.5D mesh from a point cloud
+	/** See CCLib::PointProjectionTools::computeTriangulation.
+	**/
+	static ccMesh* Triangulate( ccGenericPointCloud* cloud,
+								CC_TRIANGULATION_TYPES type,
+								bool updateNormals = false,
+								PointCoordinateType maxEdgeLength = 0,
+								unsigned char dim = 2);
 
 	//! Merges another mesh into this one
 	/** \param mesh mesh to be merged in this one

@@ -40,6 +40,9 @@
 #include <QStringList>
 #include <QTextStream>
 
+//system
+#include <set>
+
 static const char COMMAND_SILENT_MODE[]						= "SILENT";
 static const char COMMAND_OPEN[]							= "O";				//+file name
 static const char COMMAND_OPEN_SKIP_LINES[]					= "SKIP";			//+number of lines to skip
@@ -102,6 +105,10 @@ static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 static const char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
 static const char COMMAND_COMPUTE_GRIDDED_NORMALS[]			= "COMPUTE_NORMALS";
 static const char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
+static const char COMMAND_DELAUNAY[]						= "DELAUNAY";
+static const char COMMAND_DELAUNAY_AA[]						= "AA";
+static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
+static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -253,8 +260,9 @@ void ccCommandLineParser::removeMeshes()
 {
 	while (!m_meshes.empty())
 	{
-		if (m_meshes.back().mesh)
-			delete m_meshes.back().mesh;
+		MeshDesc& desc = m_meshes.back();
+		if (desc.mesh)
+			delete desc.mesh;
 		m_meshes.pop_back();
 	}
 }
@@ -351,7 +359,8 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 	return true;
 }
 
-ccCommandLineParser::EntityDesc::EntityDesc(QString filename)
+ccCommandLineParser::EntityDesc::EntityDesc(QString filename, int _indexInFile/*=-1*/)
+	: indexInFile(-1)
 {
 	if (filename.isNull())
 	{
@@ -366,9 +375,10 @@ ccCommandLineParser::EntityDesc::EntityDesc(QString filename)
 	}
 }
 
-ccCommandLineParser::EntityDesc::EntityDesc(QString _basename, QString _path)
+ccCommandLineParser::EntityDesc::EntityDesc(QString _basename, QString _path, int _indexInFile/*=-1*/)
 	: basename(_basename)
 	, path(_path)
+	, indexInFile(_indexInFile)
 {
 }
 
@@ -389,20 +399,18 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	if (entName.isEmpty())
 		entName = entDesc.basename;
 
+	//sub-item?
+	if (entDesc.indexInFile >= 0)
+	{
+		if (suffix.isEmpty())
+			suffix = QString("%1").arg(entDesc.indexInFile);
+		else
+			suffix.prepend(QString("%1_").arg(entDesc.indexInFile));
+	}
+
 	//specific case: clouds
 	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD);
-	if (isCloud)
-	{
-		CloudDesc& cloudDesc = static_cast<CloudDesc&>(entDesc);
-		if (cloudDesc.indexInFile >= 0)
-		{
-			if (suffix.isEmpty())
-				suffix = QString("%1").arg(cloudDesc.indexInFile);
-			else
-				suffix.prepend(QString("%1_").arg(cloudDesc.indexInFile));
-		}
-	}
-	isCloud |= forceIsCloud; //don't force this before this point (static cast to CloudDesc above!)
+	isCloud |= forceIsCloud;
 
 	if (!suffix.isEmpty())
 		entName += QString("_") + suffix;
@@ -424,6 +432,19 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 
 	if (!entDesc.path.isEmpty())
 		outputFilename.prepend(QString("%1/").arg(entDesc.path));
+
+	if (entity->isKindOf(CC_TYPES::MESH))
+	{
+		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+		ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+		//we must save the vertices cloud as well if it's not a child of the mesh!
+		if (vertices && !mesh->isAncestorOf(vertices))
+		{
+			//we save the cloud first!
+			vertices->addChild(mesh,ccHObject::DP_NONE); //we simply add a fake dependency
+			entity = vertices;
+		}
+	}
 
 	//save file
 	FileIOFilter::SaveParameters parameters;
@@ -531,27 +552,86 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	if (!db)
 		return false/*Error(QString("Failed to open file '%1'").arg(filename))*/;
 
-	//look for clouds inside loaded DB
-	ccHObject::Container clouds;
-	db->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
-	size_t count = clouds.size();
-	for (size_t i=0; i<count; ++i)
+	std::set<unsigned> verticesIDs;
+	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
 	{
-		ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
-		db->detachChild(pc);
-		Print(QString("Found one cloud with %1 points").arg(pc->size()));
-		m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : static_cast<int>(i)));
+		ccHObject::Container meshes;
+		size_t count = 0;
+		//first look for all REAL meshes (so as to no consider sub-meshes)
+		if (db->filterChildren(meshes,true,CC_TYPES::MESH,true) != 0)
+		{
+			count += meshes.size();
+			for (size_t i=0; i<meshes.size(); ++i)
+			{
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
+				if (mesh->getParent())
+					mesh->getParent()->detachChild(mesh);
+
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				if (vertices)
+				{
+					verticesIDs.insert(vertices->getUniqueID());
+					Print(QString("Found one mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
+					m_meshes.push_back(MeshDesc(mesh,filename,count == 1 ? -1 : static_cast<int>(i)));
+				}
+				else
+				{
+					delete mesh;
+					mesh = 0;
+					assert(false);
+				}
+			}
+		}
+
+		//then look for the other meshes
+		meshes.clear();
+		if (db->filterChildren(meshes,true,CC_TYPES::MESH,false) != 0)
+		{
+			size_t countBefore = count;
+			count += meshes.size();
+			for (size_t i=0; i<meshes.size(); ++i)
+			{
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
+				if (mesh->getParent())
+					mesh->getParent()->detachChild(mesh);
+
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				if (vertices)
+				{
+					verticesIDs.insert(vertices->getUniqueID());
+					Print(QString("Found one kind of mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
+					m_meshes.push_back(MeshDesc(mesh,filename,count == 1 ? -1 : static_cast<int>(countBefore+i)));
+				}
+				else
+				{
+					delete mesh;
+					mesh = 0;
+					assert(false);
+				}
+			}
+		}
 	}
 
-	//look for meshes inside loaded DB
-	ccHObject::Container meshes;
-	db->filterChildren(meshes,false,CC_TYPES::MESH);
-	if (!meshes.empty())
+	//now look for the remaining clouds inside loaded DB
 	{
-		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
-		db->detachChild(mesh);
-		Print(QString("Found one mesh with %1 faces and %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
-		m_meshes.push_back(MeshDesc(mesh,filename));
+		ccHObject::Container clouds;
+		db->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
+		size_t count = clouds.size();
+		for (size_t i=0; i<count; ++i)
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
+			if (pc->getParent())
+				pc->getParent()->detachChild(pc);
+
+			//if the cloud is a set of vertices, we ignore it!
+			if (verticesIDs.find(pc->getUniqueID()) != verticesIDs.end())
+			{
+				m_orphans.addChild(pc);
+				continue;
+			}
+			Print(QString("Found one cloud with %1 points").arg(pc->size()));
+			m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : static_cast<int>(i)));
+		}
 	}
 
 	delete db;
@@ -2266,8 +2346,97 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 	return true;
 }
 
+bool ccCommandLineParser::commandDelaunay(QStringList& arguments, QDialog* parent/*=0*/)
+{
+	Print("[DELAUNAY TRIANGULATION]");
+
+	bool axisAligned = true;
+	double maxEdgeLength = 0;
+
+	while (!arguments.empty())
+	{
+		QString argument = arguments.front();
+		if (IsCommand(argument,COMMAND_DELAUNAY_AA))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			axisAligned = true;
+		}
+		else if (IsCommand(argument,COMMAND_DELAUNAY_BF))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			axisAligned = false;
+		}
+		else if (IsCommand(argument,COMMAND_DELAUNAY_MAX_EDGE_LENGTH))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: max edge length value after '%1'").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH)));
+			bool ok;
+			maxEdgeLength = arguments.takeFirst().toDouble(&ok);
+			if (!ok)
+				return Error(QString("Invalid value for max edge length! (after %1)").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
+			Print(QString("Max edge length: %1").arg(maxEdgeLength));
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	Print(QString("Axis aligned: %1").arg(axisAligned ? "yes" : "no"));
+
+	//try to triangulate each cloud
+	for (size_t i=0; i<m_clouds.size(); ++i)
+	{
+		ccPointCloud* cloud = m_clouds[i].pc;
+		Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+
+		ccMesh* mesh = ccMesh::Triangulate(	cloud,
+			axisAligned ? DELAUNAY_2D_AXIS_ALIGNED : DELAUNAY_2D_BEST_LS_PLANE,
+			false,
+			static_cast<PointCoordinateType>(maxEdgeLength),
+			2 //XY plane by default
+			);
+		if (mesh)
+		{
+			Print(QString("\tResulting mesh: #%1 faces, %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
+
+			MeshDesc meshDesc;
+			meshDesc.mesh = mesh;
+			meshDesc.basename = m_clouds[i].basename;
+			meshDesc.path = m_clouds[i].path;
+			meshDesc.indexInFile = m_clouds[i].indexInFile;
+
+			//save plane as a BIN file
+			QString outputFilename;
+			QString errorStr = Export(meshDesc,"DELAUNAY",&outputFilename);
+			if (!errorStr.isEmpty())
+				ccConsole::Warning(errorStr);
+
+			//add the resulting mesh to the main set
+			m_meshes.push_back(meshDesc);
+
+			//the mesh takes ownership of the cloud.
+			//Therefore we have to remove all clouds from the 'cloud set'! (see below)
+			//(otherwise bad things will happen when we'll clear it later ;)
+			cloud->setVisible(false);
+			mesh->addChild(cloud);
+		}
+	}
+	//mehses have taken ownership of the clouds!
+	m_clouds.clear();
+
+	return true;
+}
+
 bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0*/)
 {
+	Print("[ICP]");
+
 	//look for local options
 	bool referenceIsFirst = false;
 	bool adjustScale = false;
@@ -2311,7 +2480,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			bool ok;
 			minErrorDiff = arguments.takeFirst().toDouble(&ok);
 			if (!ok || minErrorDiff <= 0)
-				return Error(QString("Invalid value for min. error difference! (%1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
+				return Error(QString("Invalid value for min. error difference! (after %1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
 		}
 		else if (IsCommand(argument,COMMAND_ICP_ITERATION_COUNT))
 		{
@@ -2349,7 +2518,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			bool ok;
 			randomSamplingLimit = arguments.takeFirst().toUInt(&ok);
 			if (!ok || randomSamplingLimit < 3)
-				return Error(QString("Invalid random sampling limit! (%1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
+				return Error(QString("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 		}
 		else
 		{
@@ -2835,6 +3004,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_ICP))
 		{
 			success = commandICP(arguments,parent);
+		}
+		//Delaunay 2.5D triangulation
+		else if (IsCommand(argument,COMMAND_DELAUNAY))
+		{
+			success = commandDelaunay(arguments,parent);
 		}
 		//Crop
 		else if (IsCommand(argument,COMMAND_CROP))

@@ -799,6 +799,7 @@ void MainWindow::connectActions()
 
 	//TODO... but not ready yet ;)
 	actionLoadShader->setVisible(false);
+	actionDeleteShader->setVisible(false);
 	actionKMeans->setVisible(false);
 	actionFrontPropagation->setVisible(false);
 
@@ -5851,67 +5852,38 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	pDlg.show();
 	QApplication::processEvents();
 
+	bool errors = false;
 	for (size_t i=0; i<clouds.size(); ++i)
 	{
 		ccHObject* ent = clouds[i];
 		assert(ent->isKindOf(CC_TYPES::POINT_CLOUD));
 
 		//compute mesh
-		ccMesh* mesh = 0;
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+		ccMesh* mesh = ccMesh::Triangulate(	cloud,
+											type,
+											updateNormals,
+											static_cast<PointCoordinateType>(maxEdgeLength),
+											2 //XY plane by default
+											);
+		if (mesh)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
-			//compute raw mesh
-			char errorStr[1024];
-			CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	cloud,
-																										type,
-																										static_cast<PointCoordinateType>(maxEdgeLength),
-																										2, //XY plane by default
-																										errorStr);
-			if (dummyMesh)
-			{
-				//convert raw mesh to ccMesh
-				mesh = new ccMesh(dummyMesh, cloud);
-
-				//don't need it anymore
-				delete dummyMesh;
-				dummyMesh = 0;
-
-				if (mesh)
-				{
-					mesh->setName(cloud->getName()+QString(".mesh"));
-					mesh->setDisplay(cloud->getDisplay());
-					bool cloudHadNormals = cloud->hasNormals();
-					if (!cloudHadNormals || (ent->isA(CC_TYPES::POINT_CLOUD) && updateNormals))
-					{
-						//compute per-vertex normals by default
-						mesh->computeNormals(true);
-					}
-					mesh->showNormals(cloudHadNormals || !cloud->hasColors());
-					cloud->setVisible(false);
-					cloud->addChild(mesh);
-					cloud->prepareDisplayForRefresh();
-					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
-					{
-						mesh->getAssociatedCloud()->setGlobalShift(cloud->getGlobalShift());
-						mesh->getAssociatedCloud()->setGlobalScale(cloud->getGlobalScale());
-					}
-					addToDB(mesh);
-					if (i == 0)
-						m_ccRoot->selectEntity(mesh); //auto-select first element
-				}
-			}
-			else
-			{
-				ccConsole::Error(QString("Triangle lib error: %1").arg(errorStr));
-				break;
-			}
+			cloud->setVisible(false);
+			cloud->addChild(mesh);
+			cloud->prepareDisplayForRefresh_recursive();
+			addToDB(mesh);
+			if (i == 0)
+				m_ccRoot->selectEntity(mesh); //auto-select first element
 		}
-
-		if (!mesh)
+		else
 		{
-			ccConsole::Error("An error occurred while computing mesh! (not enough memory?)");
-			break;
+			errors = true;
 		}
+	}
+
+	if (errors)
+	{
+		ccConsole::Error("Error(s) occurred! See the Console messages");
 	}
 
 	refreshAll();

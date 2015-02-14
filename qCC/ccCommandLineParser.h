@@ -46,6 +46,7 @@ protected:
 	bool commandColorBanding				(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
+	bool commandDelaunay					(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
 	bool commandChangeMeshOutputFormat		(QStringList& arguments);
 	bool commandChangePLYExportFormat		(QStringList& arguments);
@@ -78,9 +79,10 @@ protected:
 	{
 		QString basename;
 		QString path;
+		int indexInFile;
 
-		EntityDesc(QString filename);
-		EntityDesc(QString basename, QString path);
+		EntityDesc(QString filename, int _indexInFile =-1);
+		EntityDesc(QString baseName, QString path, int _indexInFile =-1);
 		virtual ccHObject* getEntity() = 0;
 	};
 
@@ -103,29 +105,25 @@ protected:
 	struct CloudDesc : EntityDesc
 	{
 		ccPointCloud* pc;
-		int indexInFile;
 
 		CloudDesc()
 			: EntityDesc(QString())
 			, pc(0)
-			, indexInFile(-1)
 		{}
 
 		CloudDesc(	ccPointCloud* cloud,
 					QString filename,
 					int index = -1)
-			: EntityDesc(filename)
+			: EntityDesc(filename,index)
 			, pc(cloud)
-			, indexInFile(index)
 		{}
 
 		CloudDesc(	ccPointCloud* cloud,
 					QString basename,
 					QString path,
 					int index = -1)
-			: EntityDesc(basename,path)
+			: EntityDesc(basename,path,index)
 			, pc(cloud)
-			, indexInFile(index)
 		{}
 		
 		virtual ccHObject* getEntity() { return static_cast<ccHObject*>(pc); }
@@ -142,8 +140,9 @@ protected:
 		{}
 
 		MeshDesc(	ccGenericMesh* _mesh,
-					QString filename)
-			: EntityDesc(filename)
+					QString filename,
+					int index = -1)
+			: EntityDesc(filename,index)
 			, mesh(_mesh)
 		{}
 
@@ -181,6 +180,9 @@ protected:
 
 	//! Currently opened meshes and their filename
 	std::vector< MeshDesc > m_meshes;
+
+	//! Oprhan entities
+	ccHObject m_orphans;
 
 	//! Mesh filename
 	QString m_meshFilename;

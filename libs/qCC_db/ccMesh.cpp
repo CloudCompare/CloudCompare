@@ -896,6 +896,66 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	return cloneMesh;
 }
 
+
+ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
+							CC_TRIANGULATION_TYPES type,
+							bool updateNormals/*=false*/,
+							PointCoordinateType maxEdgeLength/*=0*/,
+							unsigned char dim/*=2*/)
+{
+	if (!cloud || dim > 2)
+	{
+		ccLog::Warning("[ccMesh::Triangulate] Invalid input parameters!");
+		return 0;
+	}
+	if (cloud->size() < 3)
+	{
+		ccLog::Warning("[ccMesh::Triangulate] Cloud has not enough points!");
+		return 0;
+	}
+	
+	//compute raw mesh
+	char errorStr[1024];
+	CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	cloud,
+																								type,
+																								maxEdgeLength,
+																								dim,
+																								errorStr);
+	if (!dummyMesh)
+	{
+		ccLog::Warning(QString("[ccMesh::Triangulate] Failed to construct Delaunay mesh (Triangle lib error: %1)").arg(errorStr));
+		return 0;
+	}
+
+	//convert raw mesh to ccMesh
+	ccMesh* mesh = new ccMesh(dummyMesh, cloud);
+
+	//don't need this anymore
+	delete dummyMesh;
+	dummyMesh = 0;
+
+	if (!mesh)
+	{
+		ccLog::Warning("[ccMesh::Triangulate] An error occurred while computing mesh! (not enough memory?)");
+		return 0;
+	}
+
+	mesh->setName(cloud->getName()+QString(".mesh"));
+	mesh->setDisplay(cloud->getDisplay());
+	bool cloudHadNormals = cloud->hasNormals();
+	//compute per-vertex normals if necessary
+	if (!cloudHadNormals || updateNormals)
+		mesh->computeNormals(true);
+	mesh->showNormals(cloudHadNormals || !cloud->hasColors());
+	if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
+	{
+		mesh->getAssociatedCloud()->setGlobalShift(cloud->getGlobalShift());
+		mesh->getAssociatedCloud()->setGlobalScale(cloud->getGlobalScale());
+	}
+
+	return mesh;
+}
+
 bool ccMesh::merge(const ccMesh* mesh)
 {
 	if (!mesh)

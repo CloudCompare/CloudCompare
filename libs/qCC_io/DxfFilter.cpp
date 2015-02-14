@@ -64,14 +64,41 @@ class DxfImporter : public DL_CreationAdapter
 {
 public:
 	//! Default constructor
-	DxfImporter(ccHObject* root)
+	DxfImporter(ccHObject* root, FileIOFilter::LoadParameters& parameters)
 		: m_root(root)
 		, m_points(0)
 		, m_faces(0)
 		, m_poly(0)
 		, m_polyVertices(0)
+		, m_firstPoint(true)
+		, m_globalShift(0,0,0)
+		, m_loadParameters(parameters)
 	{
 		assert(m_root);
+	}
+
+	CCVector3 convertPoint(double x, double y, double z)
+	{
+		CCVector3d P(x,y,z);
+		if (m_firstPoint)
+		{
+			if (FileIOFilter::HandleGlobalShift(P,m_globalShift,m_loadParameters))
+			{
+				ccLog::Warning("[DXF] All points/vertices will been recentered! Translation: (%.2f,%.2f,%.2f)",m_globalShift.x,m_globalShift.y,m_globalShift.z);
+			}
+			m_firstPoint = false;
+		}
+
+		P += m_globalShift;
+		return CCVector3::fromArray(P.u);
+	}
+
+	void applyGlobalShift()
+	{
+		if (m_points)
+			m_points->setGlobalShift(m_globalShift);
+		if (m_polyVertices)
+			m_polyVertices->setGlobalShift(m_globalShift);
 	}
 
 	virtual void addLayer(const DL_LayerData& data)
@@ -94,9 +121,7 @@ public:
 			return;
 		}
 
-		m_points->addPoint(CCVector3(	static_cast<PointCoordinateType>(P.x),
-										static_cast<PointCoordinateType>(P.y),
-										static_cast<PointCoordinateType>(P.z) ));
+		m_points->addPoint(convertPoint(P.x,P.y,P.z));
 
 		ccColor::Rgb col;
 		if (getCurrentColour(col))
@@ -166,9 +191,7 @@ public:
 				m_polyVertices->reserve(m_polyVertices->size()+1);
 			
 			m_poly->addPointIndex(m_polyVertices->size());
-			m_polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(vertex.x),
-												static_cast<PointCoordinateType>(vertex.y),
-												static_cast<PointCoordinateType>(vertex.z) ));
+			m_polyVertices->addPoint(convertPoint(vertex.x,vertex.y,vertex.z));
 
 			if (m_poly->size() == 1)
 				m_root->addChild(m_poly);
@@ -181,9 +204,7 @@ public:
 		CCVector3 P[4];
 		for (unsigned i=0; i<4; ++i)
 		{
-			P[i] = CCVector3(	static_cast<PointCoordinateType>(face.x[i]),
-								static_cast<PointCoordinateType>(face.y[i]),
-								static_cast<PointCoordinateType>(face.z[i]) );
+			P[i] = convertPoint(face.x[i],face.y[i],face.z[i]);
 		}
 		
 		//create the 'faces' mesh if necessary
@@ -196,6 +217,7 @@ public:
 			m_faces->setVisible(true);
 			vertices->setEnabled(false);
 			vertices->setLocked(true);
+			vertices->setGlobalShift(m_globalShift);
 			
 			m_root->addChild(m_faces);
 		}
@@ -383,13 +405,10 @@ public:
 		poly->setName("Line");
 		poly->addPointIndex(0,2);
 		//add first point
-		polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(line.x1),
-											static_cast<PointCoordinateType>(line.y1),
-											static_cast<PointCoordinateType>(line.z1) ));
+		polyVertices->addPoint(convertPoint(line.x1,line.y1,line.z1));
 		//add second point
-		polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(line.x2),
-											static_cast<PointCoordinateType>(line.y2),
-											static_cast<PointCoordinateType>(line.z2) ));
+		polyVertices->addPoint(convertPoint(line.x2,line.y2,line.z2));
+		polyVertices->setGlobalShift(m_globalShift);
 
 		//flags
 		poly->setClosed(false);
@@ -454,6 +473,14 @@ private:
 	//! Keep track of the colour of each layer in case the colour attribute is set to BYLAYER
 	QMap<QString,int> m_layerColourMap;
 
+	//! Whether the very first point has been loaded or not
+	bool m_firstPoint;
+
+	//! Global shift
+	CCVector3d m_globalShift;
+
+	//! Load parameters
+	FileIOFilter::LoadParameters m_loadParameters;
 };
 
 #endif //CC_DXF_SUPPORT
@@ -486,22 +513,59 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		return CC_FERR_NO_SAVE;
 
 	//get global bounding box
-	ccBBox box;
+	CCVector3d bbMinCorner, bbMaxCorner;
 	{
+		bool firstEntity = true;
 		for (size_t i=0; i<polyCount; ++i)
 		{
-			ccBBox polyBox = polylines[i]->getOwnBB();
-			box += polyBox;
+			CCVector3d minC, maxC;
+			if (polylines[i]->getGlobalBB(minC,maxC))
+			{
+				//update global BB
+				if (firstEntity)
+				{
+					bbMinCorner = minC;
+					bbMaxCorner = maxC;
+					firstEntity = false;
+				}
+				else
+				{
+					bbMinCorner.x = std::min(bbMinCorner.x,minC.x);
+					bbMinCorner.y = std::min(bbMinCorner.y,minC.y);
+					bbMinCorner.z = std::min(bbMinCorner.z,minC.z);
+					bbMaxCorner.x = std::max(bbMaxCorner.x,maxC.x);
+					bbMaxCorner.y = std::max(bbMaxCorner.y,maxC.y);
+					bbMaxCorner.z = std::max(bbMaxCorner.z,maxC.z);
+				}
+			}
 		}
 		for (size_t j=0; j<meshCount; ++j)
 		{
-			ccBBox meshBox = meshes[j]->getOwnBB();
-			box += meshBox;
+			CCVector3d minC, maxC;
+			if (meshes[j]->getGlobalBB(minC,maxC))
+			{
+				//update global BB
+				if (firstEntity)
+				{
+					bbMinCorner = minC;
+					bbMaxCorner = maxC;
+					firstEntity = false;
+				}
+				else
+				{
+					bbMinCorner.x = std::min(bbMinCorner.x,minC.x);
+					bbMinCorner.y = std::min(bbMinCorner.y,minC.y);
+					bbMinCorner.z = std::min(bbMinCorner.z,minC.z);
+					bbMaxCorner.x = std::max(bbMaxCorner.x,maxC.x);
+					bbMaxCorner.y = std::max(bbMaxCorner.y,maxC.y);
+					bbMaxCorner.z = std::max(bbMaxCorner.z,maxC.z);
+				}
+			}
 		}
 	}
 
-	CCVector3 diag = box.getDiagVec();
-	double baseSize = static_cast<double>(std::max(diag.x,diag.y));
+	CCVector3d diag = bbMaxCorner - bbMinCorner;
+	double baseSize = std::max(diag.x,diag.y);
 	double lineWidth = baseSize / 40.0;
 	double pageMargin = baseSize / 20.0;
 
@@ -525,19 +589,19 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		dw->dxfReal(20,0.0);
 		dw->dxfReal(30,0.0);
 		dw->dxfString(9, "$EXTMIN");
-		dw->dxfReal(10,static_cast<double>(box.minCorner().x)-pageMargin);
-		dw->dxfReal(20,static_cast<double>(box.minCorner().y)-pageMargin);
-		dw->dxfReal(30,static_cast<double>(box.minCorner().z)-pageMargin);
+		dw->dxfReal(10,bbMinCorner.x-pageMargin);
+		dw->dxfReal(20,bbMinCorner.y-pageMargin);
+		dw->dxfReal(30,bbMinCorner.z-pageMargin);
 		dw->dxfString(9, "$EXTMAX");
-		dw->dxfReal(10,static_cast<double>(box.maxCorner().x)+pageMargin);
-		dw->dxfReal(20,static_cast<double>(box.maxCorner().y)+pageMargin);
-		dw->dxfReal(30,static_cast<double>(box.maxCorner().z)+pageMargin);
+		dw->dxfReal(10,bbMaxCorner.x+pageMargin);
+		dw->dxfReal(20,bbMaxCorner.y+pageMargin);
+		dw->dxfReal(30,bbMaxCorner.z+pageMargin);
 		dw->dxfString(9, "$LIMMIN");
-		dw->dxfReal(10,static_cast<double>(box.minCorner().x)-pageMargin);
-		dw->dxfReal(20,static_cast<double>(box.minCorner().y)-pageMargin);
+		dw->dxfReal(10,bbMinCorner.x-pageMargin);
+		dw->dxfReal(20,bbMinCorner.y-pageMargin);
 		dw->dxfString(9, "$LIMMAX");
-		dw->dxfReal(10,static_cast<double>(box.maxCorner().x)+pageMargin);
-		dw->dxfReal(20,static_cast<double>(box.maxCorner().y)+pageMargin);
+		dw->dxfReal(10,bbMaxCorner.x+pageMargin);
+		dw->dxfReal(20,bbMaxCorner.y+pageMargin);
 
 		//close header
 		dw->sectionEnd();
@@ -691,8 +755,9 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 
 				for (unsigned v=0; v<vertexCount; ++v)
 				{
-					CCVector3 P;
-					poly->getPoint(v,P);
+					CCVector3 Pl;
+					poly->getPoint(v,Pl);
+					CCVector3d P = poly->toGlobal3d(Pl);
 					dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.z ) );
 				}
 
@@ -703,19 +768,22 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 			for (unsigned j=0; j<meshCount; ++j)
 			{
 				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[j]);
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				assert(vertices);
+				
 				unsigned triCount = mesh->size();
 				mesh->placeIteratorAtBegining();
 				for (unsigned f=0; f<triCount; ++f)
 				{
 					const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();
-					const CCVector3* A = tri->_getA();
-					const CCVector3* B = tri->_getB();
-					const CCVector3* C = tri->_getC();
+					CCVector3d A = vertices->toGlobal3d(*tri->_getA());
+					CCVector3d B = vertices->toGlobal3d(*tri->_getB());
+					CCVector3d C = vertices->toGlobal3d(*tri->_getC());
 					dxf.write3dFace(*dw,
-									DL_3dFaceData(	A->x,A->y,A->z,
-													B->x,B->y,B->z,
-													C->x,C->y,C->z,
-													C->x,C->y,C->z,
+									DL_3dFaceData(	A.x,A.y,A.z,
+													B.x,B.y,B.z,
+													C.x,C.y,C.z,
+													C.x,C.y,C.z,
 													lineWidth ),
 									DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER")); //DGM: warning, toStdString doesn't preserve "local" characters
 				}
@@ -753,9 +821,10 @@ CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadPa
 #ifdef CC_DXF_SUPPORT
 	try
 	{
-		DxfImporter importer(&container);
+		DxfImporter importer(&container,parameters);
 		if (DL_Dxf().in(qPrintable(filename), &importer))
 		{
+			importer.applyGlobalShift(); //apply the (potential) global shift to shared clouds
 			if (container.getChildrenNumber() != 0)
 				result = CC_FERR_NO_ERROR;
 		}

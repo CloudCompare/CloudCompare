@@ -73,7 +73,6 @@ void ccGui::ParamStruct::reset()
 	pointsDefaultCol	= ccColor::defaultColor;
 	textDefaultCol		= ccColor::defaultColor;
 	backgroundCol		= ccColor::defaultBkgColor;
-	histBackgroundCol	= ccColor::defaultHistBkgColor;
 	labelBackgroundCol	= ccColor::defaultLabelBkgColor;
 	labelMarkerCol		= ccColor::defaultLabelMarkerColor;
 	bbDefaultCol		= ccColor::yellow;
@@ -96,6 +95,8 @@ void ccGui::ParamStruct::reset()
 	labelFontSize				= 8;
 	displayedNumPrecision		= 6;
 	labelOpacity				= 75;
+
+	zoomSpeed					= 1.0;
 }
 
 static int c_fColorArraySize  = sizeof(float) * 4;
@@ -114,7 +115,6 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	pointsDefaultCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",pointsDefaultColor",	QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
 	textDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",textDefaultColor",		QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
 	backgroundCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",backgroundColor",		QByteArray((const char*)ccColor::defaultBkgColor.rgb,			c_ubColorArraySize)).toByteArray().data()));
-	histBackgroundCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",histBackgroundColor",	QByteArray((const char*)ccColor::defaultHistBkgColor.rgb,		c_ubColorArraySize)).toByteArray().data()));
 	labelBackgroundCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",labelBackgroundColor",	QByteArray((const char*)ccColor::defaultLabelBkgColor.rgb,		c_ubColorArraySize)).toByteArray().data()));
 	labelMarkerCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",labelMarkerColor",		QByteArray((const char*)ccColor::defaultLabelMarkerColor.rgb,	c_ubColorArraySize)).toByteArray().data()));
 	bbDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",bbDefaultColor",		QByteArray((const char*)ccColor::yellow.rgba,					c_ubColorArraySize)).toByteArray().data()));
@@ -134,6 +134,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	labelFontSize				= static_cast<unsigned>(std::max(0,settings.value("labelFontSize",            8   ).toInt()));
 	displayedNumPrecision		= static_cast<unsigned>(std::max(0,settings.value("displayedNumPrecision",    6   ).toInt()));
 	labelOpacity				= static_cast<unsigned>(std::max(0,settings.value("labelOpacity",             75  ).toInt()));
+	zoomSpeed					= settings.value("zoomSpeed", 1.0).toDouble();
 
 	settings.endGroup();
 }
@@ -152,7 +153,6 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("pointsDefaultColor",       QByteArray((const char*)pointsDefaultCol.rgb,    c_ubColorArraySize));
 	settings.setValue("textDefaultColor",         QByteArray((const char*)textDefaultCol.rgb,      c_ubColorArraySize));
 	settings.setValue("backgroundColor",          QByteArray((const char*)backgroundCol.rgb,       c_ubColorArraySize));
-	settings.setValue("histBackgroundColor",      QByteArray((const char*)histBackgroundCol.rgb,   c_ubColorArraySize));
 	settings.setValue("labelBackgroundColor",     QByteArray((const char*)labelBackgroundCol.rgb,  c_ubColorArraySize));
 	settings.setValue("labelMarkerColor",         QByteArray((const char*)labelMarkerCol.rgb,      c_ubColorArraySize));
 	settings.setValue("bbDefaultColor",           QByteArray((const char*)bbDefaultCol.rgb,        c_ubColorArraySize));
@@ -171,6 +171,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("labelFontSize",            labelFontSize);
 	settings.setValue("displayedNumPrecision",    displayedNumPrecision);
 	settings.setValue("labelOpacity",             labelOpacity);
+	settings.setValue("zoomSpeed",                zoomSpeed);
 
 	settings.endGroup();
 }

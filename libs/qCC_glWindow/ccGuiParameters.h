@@ -28,9 +28,9 @@
 				GUI parameters
 ***************************************************/
 
-//! This class manages the persistent parameters (mostly for display)
+//! This class manages some persistent parameters (mostly for display)
 /** Values of persistent parameters are stored by the system
-	(either in the registry or in a separate file).
+	(either in the registry or in a separate file depending on the OS).
 **/
 class ccGui
 {
@@ -59,8 +59,6 @@ public:
 		ccColor::Rgbub pointsDefaultCol;
 		//! Background color
 		ccColor::Rgbub backgroundCol;
-		//! Histogram background color
-		ccColor::Rgbub histBackgroundCol;
 		//! Labels background color
 		ccColor::Rgbub labelBackgroundCol;
 		//! Labels marker color
@@ -101,6 +99,9 @@ public:
 		unsigned displayedNumPrecision;
 		//! Labels background opcaity
 		unsigned labelOpacity;
+
+		//! Zoom speed (1.0 by default)
+		double zoomSpeed;
 
 		//! Default constructor
 		ParamStruct();

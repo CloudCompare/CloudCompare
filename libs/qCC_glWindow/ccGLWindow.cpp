@@ -531,7 +531,9 @@ void ccGLWindow::initializeGL()
 		}
 	}
 
+
 #ifdef _DEBUG
+#if !defined(_MSC_VER) || _MSC_VER > 1600
 	//KHR extension (debug)
 	if (ccFBOUtils::CheckExtension("GL_KHR_debug"))
 	{
@@ -552,6 +554,7 @@ void ccGLWindow::initializeGL()
 		//glDebugMessageControl(GL_DONT_CARE,GL_DEBUG_TYPE_OTHER,GL_DONT_CARE,0,NULL,GL_FALSE); //deactivate 'other' messages
 		glDebugMessageCallback(&GLDebugCallback, this);
 	}
+#endif
 #endif
 
 	//apply (potentially) updated parameters;
@@ -2727,8 +2730,8 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 		else
 		{
 			//convert degrees in 'constant' walking speed in ... pixels ;)
-			static const float c_deg2PixConversion = 1.0f;
-			moveCamera(0,0,-(c_deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
+			const double& c_deg2PixConversion = getDisplayParameters().zoomSpeed;
+			moveCamera(0,0,-static_cast<float>(c_deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
 		}
 	}
 	else //ortho. mode

@@ -34,7 +34,6 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(meshFrontColorButton,            SIGNAL(clicked()),         this, SLOT(changeMeshFrontDiffuseColor()));
 	connect(bbColorButton,                   SIGNAL(clicked()),         this, SLOT(changeBBColor()));
 	connect(bkgColorButton,                  SIGNAL(clicked()),         this, SLOT(changeBackgroundColor()));
-	connect(histBkgColorButton,              SIGNAL(clicked()),         this, SLOT(changeHistBackgroundColor()));
 	connect(labelBkgColorButton,             SIGNAL(clicked()),         this, SLOT(changeLabelBackgroundColor()));
 	connect(labelMarkerColorButton,          SIGNAL(clicked()),         this, SLOT(changeLabelMarkerColor()));
 	connect(enableGradientCheckBox,          SIGNAL(clicked()),         this, SLOT(changeBackgroundGradient()));
@@ -55,6 +54,8 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(numberPrecisionSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
 	connect(labelOpacitySpinBox,             SIGNAL(valueChanged(int)), this, SLOT(changeLabelOpacity(int)));
 	connect(labelMarkerSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeLabelMarkerSize(int)));
+
+	connect(zoomSpeedDoubleSpinBox,          SIGNAL(valueChanged(double)), this, SLOT(changeZoomSpeed(double)));
 
 	connect(okButton,                        SIGNAL(clicked()),         this, SLOT(doAccept()));
 	connect(applyButton,                     SIGNAL(clicked()),         this, SLOT(apply()));
@@ -102,10 +103,6 @@ void ccDisplayOptionsDlg::refresh()
 	backgroundCol.setRgb(bgc.r,bgc.g,bgc.b);
 	SetButtonColor(bkgColorButton,backgroundCol);
 
-	const ccColor::Rgbub& hbgc = parameters.histBackgroundCol;
-	histBackgroundCol.setRgb(hbgc.r,hbgc.g,hbgc.b);
-	SetButtonColor(histBkgColorButton,histBackgroundCol);
-
 	const ccColor::Rgbub& lblbc = parameters.labelBackgroundCol;
 	labelBackgroundCol.setRgb(lblbc.r,lblbc.g,lblbc.b);
 	SetButtonColor(labelBkgColorButton,labelBackgroundCol);
@@ -139,6 +136,8 @@ void ccDisplayOptionsDlg::refresh()
 	numberPrecisionSpinBox->setValue(parameters.displayedNumPrecision);
 	labelOpacitySpinBox->setValue(parameters.labelOpacity);
 	labelMarkerSizeSpinBox->setValue(parameters.labelMarkerSize);
+
+	zoomSpeedDoubleSpinBox->setValue(parameters.zoomSpeed);
 
 	update();
 }
@@ -310,22 +309,6 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeHistBackgroundColor()
-{
-	QColor newCol = QColorDialog::getColor(histBackgroundCol, this);
-	if (!newCol.isValid())
-		return;
-
-	histBackgroundCol = newCol;
-	SetButtonColor(histBkgColorButton,histBackgroundCol);
-
-	parameters.histBackgroundCol = ccColor::Rgb(static_cast<unsigned char>(histBackgroundCol.red()),
-												static_cast<unsigned char>(histBackgroundCol.green()),
-												static_cast<unsigned char>(histBackgroundCol.blue()));
-
-	update();
-}
-
 void ccDisplayOptionsDlg::changeLabelBackgroundColor()
 {
 	QColor newCol = QColorDialog::getColor(labelBackgroundCol, this);
@@ -424,6 +407,11 @@ void ccDisplayOptionsDlg::changeNumberPrecision(int val)
 	if (val < 0)
 		return;
 	parameters.displayedNumPrecision = static_cast<unsigned>(val);
+}
+
+void ccDisplayOptionsDlg::changeZoomSpeed(double val)
+{
+	parameters.zoomSpeed = val;
 }
 
 void ccDisplayOptionsDlg::changeLabelOpacity(int val)

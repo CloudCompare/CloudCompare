@@ -73,7 +73,6 @@ signals:
 		void changeBBColor();
 		void changeTextColor();
 		void changeBackgroundColor();
-		void changeHistBackgroundColor();
 		void changeLabelBackgroundColor();
 		void changeLabelMarkerColor();
 		void changeBackgroundGradient();
@@ -91,6 +90,8 @@ signals:
 		void changeNumberPrecision(int);
 		void changeLabelOpacity(int);
 		void changeLabelMarkerSize(int);
+
+		void changeZoomSpeed(double);
 
 		void doAccept();
 		void doReject();
@@ -111,7 +112,6 @@ protected:
 	QColor pointsDefaultCol;
 	QColor textDefaultCol;
 	QColor backgroundCol;
-	QColor histBackgroundCol;
 	QColor labelBackgroundCol;
 	QColor labelMarkerCol;
 	QColor bbDefaultCol;

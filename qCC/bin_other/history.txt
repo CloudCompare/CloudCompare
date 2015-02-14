@@ -140,6 +140,8 @@ v2.6.1.beta 01/??/2015
 	* Curvature estimation:
 		- a new curvature estimation has been added: 'Normal change rate'
 		- faster to compute, smoother, and less sensitive to noise (but also less accurate, and dimensionless)
+	* New display parameter:
+		- the 'zoom speed' in perspective mode can now be set by the user
 
 - Bug fix:
 	- Delaunay 2D1/2 was crashing on Windows 8

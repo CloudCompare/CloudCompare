@@ -142,7 +142,6 @@ namespace ccColor
 	// Default foreground color (unsigned byte)
 	static const Rgbub defaultColor				(255, 255, 255); //white
 	static const Rgbub defaultBkgColor			( 10, 102, 151); //dark blue
-	static const Rgbub defaultHistBkgColor		( 51,   0,  51); //purple
 	static const Rgbub defaultLabelBkgColor		(255, 255, 255); //white
 	static const Rgbub defaultLabelMarkerColor	(255,   0, 255); //magenta
 

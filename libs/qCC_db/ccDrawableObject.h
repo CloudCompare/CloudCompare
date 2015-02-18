@@ -110,6 +110,7 @@ struct glDrawContext
 		, glH(0)
 		, _win(0)
 		, renderZoom(1.0f)
+		, defaultMat(new ccMaterial("default"))
 		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
 		, defaultMeshBackDiff(ccColor::defaultMeshBackDiff)
 		, pointsDefaultCol(ccColor::defaultColor)
@@ -117,8 +118,6 @@ struct glDrawContext
 		, labelDefaultBkgCol(ccColor::defaultLabelBkgColor)
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
 		, bbDefaultCol(ccColor::yellow)
-
-		, defaultMat(new ccMaterial("default"))
 		, decimateCloudOnMove(true)
 		, decimateMeshOnMove(true)
 		, sfColorScaleToDisplay(0)

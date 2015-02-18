@@ -32,9 +32,9 @@
 struct PlyLoadingContext
 {
 	PlyLoadingContext()
-		: valid(false)
+		: ignoredProps(0)
+		, valid(false)
 		, applyAll(false)
-		, ignoredProps(0)
 	{}
 	
 	QStringList allProperties;

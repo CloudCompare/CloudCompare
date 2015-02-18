@@ -832,7 +832,6 @@ bool GeometricalAnalysisTools::refineSphereLS(	GenericIndexedCloudPersist* cloud
 		G /= count;
 	}
 
-	double lastError = -1.0;
 	static const unsigned MAX_ITERATIONS = 100;
 	for (unsigned it=0; it<MAX_ITERATIONS; ++it)
 	{

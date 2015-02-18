@@ -1526,7 +1526,6 @@ void ccSectionExtractionTool::extractPoints()
 		pdlg.start();
 	}
 
-	PointCoordinateType defaultZ = 0;
 	int vertDim = vertAxisComboBox->currentIndex();
 	int xDim = (vertDim < 2 ? vertDim+1 : 0);
 	int yDim = (xDim    < 2 ? xDim+1    : 0);
@@ -1534,7 +1533,6 @@ void ccSectionExtractionTool::extractPoints()
 	//we consider half of the total thickness as points can be on both sides!
 	double sectioThicknessSq = pow(s_defaultSectionThickness/2,2.0);
 	bool error = false;
-	ccHObject* destEntity = 0;
 
 	unsigned generatedContours = 0;
 	unsigned generatedClouds = 0;

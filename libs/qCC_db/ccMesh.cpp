@@ -1112,7 +1112,6 @@ bool ccMesh::merge(const ccMesh* mesh)
 						setMaterialSet(set);
 					}
 					assert(m_materials);
-					size_t mtlCountBefore = m_materials->size();
 
 					size_t otherMatSetSize = mesh->m_materials->size();
 					try

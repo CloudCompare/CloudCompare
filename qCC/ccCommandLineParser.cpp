@@ -2810,7 +2810,7 @@ bool ccCommandLineParser::commandChangePLYExportFormat(QStringList& arguments)
 
 	QString plyFormat = arguments.takeFirst().toUpper();
 	//printf("%s\n",qPrintable(plyFormat));
-	int index = -1;
+
 	if (plyFormat == "ASCII")
 		PlyFilter::SetDefaultOutputFormat(PLY_ASCII);
 	else if (plyFormat == "BINARY_BE")

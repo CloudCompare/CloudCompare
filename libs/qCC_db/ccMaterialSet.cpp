@@ -123,7 +123,6 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 
 	QString currentLine = stream.readLine();
 	unsigned currentLineIndex = 0;
-	int currentMatIndex = -1;
 	ccMaterial::Shared currentMaterial(0);
 	while( !currentLine.isNull() )
 	{

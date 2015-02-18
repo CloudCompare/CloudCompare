@@ -141,7 +141,7 @@ struct Model
 
 struct Data
 {
-	Data() : cloud(0), weights(0), CPSet(0), rotatedCloud(0) {}
+	Data() : cloud(0), rotatedCloud(0), weights(0), CPSet(0) {}
 	Data(const Data& d) : cloud(d.cloud), rotatedCloud(d.rotatedCloud), weights(d.weights), CPSet(d.CPSet) {}
 	ReferenceCloud* cloud;
 	SimpleCloud* rotatedCloud;

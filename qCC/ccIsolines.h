@@ -71,8 +71,8 @@ public:
 	Isolines(int w, int h)
 		: m_w(w)
 		, m_h(h)
-		, m_threshold(0)
 		, m_numContours(0)
+		, m_threshold(0)
 	{
 		//DGM: as this is done in the constructor,
 		//we don't catch the exception (so that the

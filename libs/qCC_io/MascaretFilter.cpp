@@ -187,7 +187,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 	{
 		ccPolyline* poly = profiles[i];
 		unsigned vertCount = poly ? poly->size() : 0;
-		if (vertCount < 0)
+		if (vertCount < 2)
 		{
 			//invalid size
 			ccLog::Warning(QString("[Mascaret] Polyline '%1' does not have enough vertices").arg(poly->getName()));

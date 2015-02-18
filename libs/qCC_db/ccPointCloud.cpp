@@ -2486,8 +2486,8 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		result = CCLib::DistanceComputationTools::computeHausdorffDistance(this, otherCloud, params, progressCb);
 
 		//restore previous parameters
-		setCurrentInScalarField(m_currentInScalarFieldIndex);
-		setCurrentOutScalarField(m_currentOutScalarFieldIndex);
+		setCurrentInScalarField(currentInSFIndex);
+		setCurrentOutScalarField(currentOutSFIndex);
 		deleteScalarField(sfIdx);
 	}
 

@@ -21,7 +21,7 @@
 #include <ui_matchScalesDlg.h>
 
 //Local
-#include "MainWindow.h"
+#include "mainwindow.h"
 
 //qCC_db
 #include <ccHObject.h>

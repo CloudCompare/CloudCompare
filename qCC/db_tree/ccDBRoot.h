@@ -170,11 +170,16 @@ public slots:
 	//! Shortcut to selectEntity(ccHObject*)
 	void selectEntity(int uniqueID);
 
-	//! Selects multiple entities at once
-	/** If ctrl is pressed by the user at the same time,
-		previous selection will be simply updated accordingly.
+	//! Selects multiple entities at once (shortcut to the other version)
+	/** \param entIDs list of the IDs of the entities to select
 	**/
 	void selectEntities(std::set<int> entIDs);
+
+	//! Selects multiple entities at once
+	/** \param entIDs set of the entities to 'select'
+		\param incremental whether to 'add' the input set to the selected entities set or to use it as replacement
+	**/
+	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
 
 protected slots:
 	void showContextMenu(const QPoint&);

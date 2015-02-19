@@ -745,9 +745,10 @@ void ccDBRoot::selectEntity(int uniqueID)
 
 void ccDBRoot::selectEntities(std::set<int> entIDs)
 {
+	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+
 	//convert input list of IDs to proper entities
 	ccHObject::Container entities;
-	size_t labelCount = 0;
 	{
 		try
 		{
@@ -755,7 +756,7 @@ void ccDBRoot::selectEntities(std::set<int> entIDs)
 		}
 		catch(std::bad_alloc)
 		{
-			ccLog::Error("[ccDBRoot::selectEntities] Not enough memory!");
+			ccLog::Warning("[ccDBRoot::selectEntities] Not enough memory!");
 			return;
 		}
 
@@ -763,19 +764,34 @@ void ccDBRoot::selectEntities(std::set<int> entIDs)
 		{
 			ccHObject* obj = find(*it);
 			if (obj)
-			{
 				entities.push_back(obj);
-				if (obj->isA(CC_TYPES::LABEL_2D))
-					++labelCount;
-			}
 		}
 	}
 
+	selectEntities(entities,ctrlPushed);
+}
+
+void ccDBRoot::selectEntities(const ccHObject::Container& entities, bool incremental/*=false*/)
+{
 	//selection model
 	QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
 	assert(selectionModel);
 
-	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	//count the number of lables
+	size_t labelCount = 0;
+	{
+		for (size_t i=0; i<entities.size(); ++i)
+		{
+			ccHObject* ent = entities[i];
+			if (!ent)
+			{
+				assert(false);
+				continue;
+			}
+			if (ent->isA(CC_TYPES::LABEL_2D))
+				++labelCount;
+		}
+	}
 
 	//create new selection structure
 	QItemSelection newSelection;
@@ -784,27 +800,31 @@ void ccDBRoot::selectEntities(std::set<int> entIDs)
 		bool keepLabels = false;
 		{
 			QModelIndexList formerSelectedIndexes = selectionModel->selectedIndexes();
-			if (formerSelectedIndexes.isEmpty() || !ctrlPushed)
+			if (formerSelectedIndexes.isEmpty() || !incremental)
 				keepLabels = (labelCount == entities.size()); //yes if they are the only selected entities
-			else if (ctrlPushed)
+			else if (incremental)
 				keepLabels = static_cast<ccHObject*>(formerSelectedIndexes[0].internalPointer())->isA(CC_TYPES::LABEL_2D); //yes if previously selected entities were already labels
 		}
 
-		for (ccHObject::Container::const_iterator it = entities.begin(); it != entities.end(); ++it)
+		for (size_t i=0; i<entities.size(); ++i)
 		{
-			//filter input selection (can't keep both labels and standard entities --> we can't mix them!)
-			bool isLabel = (*it)->isA(CC_TYPES::LABEL_2D);
-			if (isLabel == keepLabels && (!ctrlPushed || !(*it)->isSelected()))
+			ccHObject* ent = entities[i];
+			if (ent)
 			{
-				QModelIndex selectedIndex = index(*it);
-				if (selectedIndex.isValid())
-					newSelection.merge(QItemSelection(selectedIndex,selectedIndex),QItemSelectionModel::Select);
+				//filter input selection (can't keep both labels and standard entities --> we can't mix them!)
+				bool isLabel = ent->isA(CC_TYPES::LABEL_2D);
+				if (isLabel == keepLabels && (!incremental || !ent->isSelected()))
+				{
+					QModelIndex selectedIndex = index(ent);
+					if (selectedIndex.isValid())
+						newSelection.merge(QItemSelection(selectedIndex,selectedIndex),QItemSelectionModel::Select);
+				}
 			}
 		}
 	}
 
 	//default behavior: clear previous selection if CTRL is not pushed
-	selectionModel->select(newSelection,ctrlPushed ? QItemSelectionModel::Select : QItemSelectionModel::ClearAndSelect);
+	selectionModel->select(newSelection,incremental ? QItemSelectionModel::Select : QItemSelectionModel::ClearAndSelect);
 }
 
 ccHObject* ccDBRoot::find(int uniqueID) const

@@ -892,6 +892,8 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	cloneMesh->setName(getName()+QString(".clone"));
 	cloneMesh->setVisible(isVisible());
 	cloneMesh->setEnabled(isEnabled());
+	cloneMesh->setGLTransformationHistory(getGLTransformationHistory());
+	cloneMesh->setMetaData(metaData());
 
 	return cloneMesh;
 }
@@ -2322,6 +2324,8 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			newMesh->enableStippling(stipplingEnabled());
 			newMesh->showWired(isShownAsWire());
 			newMesh->setGLTransformationHistory(getGLTransformationHistory());
+			newMesh->setMetaData(metaData());
+
 			newVertices->setEnabled(false);
 		}
 

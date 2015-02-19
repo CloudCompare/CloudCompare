@@ -4852,6 +4852,7 @@ void MainWindow::doActionSubsample()
 		return;
 
 	//process clouds
+	ccHObject::Container resultingClouds;
 	{
 		ccProgressDialog pDlg(false,this);
 		pDlg.setMethodTitle("Subsampling");
@@ -4891,6 +4892,7 @@ void MainWindow::doActionSubsample()
 				addToDB(newPointCloud);
 
 				newPointCloud->refreshDisplay();
+				resultingClouds.push_back(newPointCloud);
 
 				if (warnings)
 				{
@@ -4912,6 +4914,9 @@ void MainWindow::doActionSubsample()
 			ccLog::Error("Errors occurred (see console)");
 		}
 	}
+
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(resultingClouds);
 
 	refreshAll();
 	updateUI();

@@ -289,6 +289,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	result->setGLTransformationHistory(getGLTransformationHistory());
 	//custom point size
 	result->setPointSize(getPointSize());
+	//meta-data
+	result->setMetaData(metaData());
 
 	return result;
 }
@@ -354,9 +356,10 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignore
 	//original shift
 	result->setGlobalShift(getGlobalShift());
 	result->setGlobalScale(getGlobalScale());
-
 	//transformation history
 	result->setGLTransformationHistory(getGLTransformationHistory());
+	//meta-data
+	result->setMetaData(metaData());
 
 	result->setName(getName()+QString(".clone"));
 
@@ -610,7 +613,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//ccGenericMesh* addedTri = mesh;
 
 				//or clone?
-				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud()==addedCloud ? this : 0);
+				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud() == addedCloud ? this : 0);
 				if (cloneMesh)
 				{
 					//change mesh vertices

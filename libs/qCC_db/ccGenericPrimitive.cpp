@@ -299,6 +299,8 @@ ccGenericPrimitive* ccGenericPrimitive::finishCloneJob(ccGenericPrimitive* primi
 		//primitive->setName(getName()+QString(".clone"));
 		primitive->setVisible(isVisible());
 		primitive->setEnabled(isEnabled());
+		primitive->setGLTransformationHistory(getGLTransformationHistory());
+		primitive->setMetaData(metaData());
 	}
 	else
 	{

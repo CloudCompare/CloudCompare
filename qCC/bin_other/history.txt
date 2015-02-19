@@ -154,6 +154,7 @@ v2.6.1.beta 01/??/2015
 	* Transformation history is now properly maintained:
 		- on a mesh vertices after cloning
 		- when manually segmenting an entity
+	* Meta-data are now preseverd when cloning, subsampling or segmenting an entity
 
 - Bug fix:
 	- Delaunay 2D1/2 was crashing on Windows 8

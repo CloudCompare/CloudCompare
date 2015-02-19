@@ -266,19 +266,25 @@ public:
 	**/
 	QVariant getMetaData(QString key) const;
 
-	//! Removes a given associated meta data
-	/** \param key meta data unique identifier (case sensitive!)
+	//! Removes a given associated meta-data
+	/** \param key meta-data unique identifier (case sensitive!)
 		\return success
 	**/
 	bool removeMetaData(QString key);
 
-	//! Sets a meta data element
-	/** \param key meta data unique identifier (case sensitive!)
+	//! Sets a meta-data element
+	/** \param key meta-data unique identifier (case sensitive!)
 		\param data data
 	**/
 	void setMetaData(QString key, QVariant data);
 
-	//! Says if a metadata with the given key exists or not
+	//! Sets several meta-data elements at a time
+	/** \param dataset meta-data set
+		\param overwrite whether existing meta-data elements should be replaced by the input ones (with the same key) or not
+	**/
+	void setMetaData(const QVariantMap& dataset, bool overwrite = false);
+
+	//! Says if a meta-data element with the given key exists or not
 	/** \param key is the key to look for
 		\return true, if exists
 	**/

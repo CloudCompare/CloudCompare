@@ -209,6 +209,17 @@ void ccObject::setMetaData(QString key, QVariant data)
 	m_metaData.insert(key,data);
 }
 
+void ccObject::setMetaData(const QVariantMap& dataset, bool overwrite/*=false*/)
+{
+	for (QVariantMap::const_iterator it = dataset.begin(); it != dataset.end(); ++it)
+	{
+		if (overwrite || !m_metaData.contains(it.key()))
+		{
+			m_metaData[it.key()] = it.value();
+		}
+	}
+}
+
 bool ccObject::hasMetaData(QString key)
 {
 	return ( m_metaData.find(key) != m_metaData.end());

@@ -70,6 +70,8 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 		{
 			if (cloud)
 				clone->setName(cloud->getName()); //as 'partialClone' adds the '.extract' suffix by default
+			else
+				clone->setGLTransformationHistory(poly.getGLTransformationHistory());
 		}
 		else
 		{
@@ -105,6 +107,8 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 	showArrow(m_showArrow,m_arrowIndex,m_arrowLength);
 	setGlobalScale(poly.getGlobalScale());
 	setGlobalShift(poly.getGlobalShift());
+	setGLTransformationHistory(poly.getGLTransformationHistory());
+	setMetaData(poly.metaData());
 	
 	return success;
 }

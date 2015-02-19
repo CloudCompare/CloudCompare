@@ -55,7 +55,7 @@ public:
 	bool addEntity(ccHObject* anObject);
 
 	//! Returns the number of vald entities (see addEntity)
-	unsigned getNumberOfValidEntities();
+	unsigned getNumberOfValidEntities() const;
 
 	//! Sets the rotation center
 	void setRotationCenter(CCVector3d& center);

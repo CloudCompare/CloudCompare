@@ -54,8 +54,12 @@ public:
 	//! Default destructor
 	~ccComparisonDlg();
 
-public slots:
+	//! Returns compared entity
+	ccHObject* getComparedEntity() const { return m_compEnt; }
+	//! Returns compared entity
+	ccHObject* getReferenceEntity() { return m_refEnt; }
 
+public slots:
 	bool compute();
 	void applyAndExit();
 	void cancelAndExit();
@@ -77,20 +81,37 @@ protected:
 	void updateDisplay(bool showSF, bool hideRef);
 	void releaseOctrees();
 
-	ccHObject *m_compEnt,*m_refEnt;
-	CCLib::DgmOctree *m_compOctree,*m_refOctree;
-	bool m_compOctreeIsPartial,m_refOctreeIsPartial;
+	//! Compared entity
+	ccHObject* m_compEnt;
+	//! Compared entity equivalent cloud
 	ccPointCloud* m_compCloud;
+	//! Compared entity's octree
+	CCLib::DgmOctree* m_compOctree;
+	//! Whether the compared entity octree is partial or not
+	bool m_compOctreeIsPartial;
+	//! Initial compared entity visibility
+	bool m_compSFVisibility;
+
+	//! Reference entity
+	ccHObject* m_refEnt;
+	//! Reference entity equivalent cloud (if any)
 	ccGenericPointCloud* m_refCloud;
+	//! Reference entity equivalent mesh (if any)
 	ccGenericMesh* m_refMesh;
+	//! Reference entity's octree
+	CCLib::DgmOctree* m_refOctree;
+	//! Whether the reference entity octree is partial or not
+	bool m_refOctreeIsPartial;
+	//! Initial reference entity visibility
+	bool m_refVisibility;
+
+	//! Comparison type
 	CC_COMPARISON_TYPE m_compType;
 
 	//! last computed scalar field name
 	QString m_sfName;
 
-	//initial state
-	bool m_refVisibility;
-	bool m_compSFVisibility;
+	//! Initial SF name enabled on the compared entity
 	QString m_oldSfName;
 
 	//! Whether the current SF is a distance field or not

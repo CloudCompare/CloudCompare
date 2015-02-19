@@ -358,8 +358,8 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 		{
 			while (hullPoints.size() >= 2)
 			{
-				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); itB--;
-				std::list<IndexedCCVector2*>::iterator itA = itB; itA--;
+				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); --itB;
+				std::list<IndexedCCVector2*>::iterator itA = itB; --itA;
 				if (cross(**itA, **itB, points[i]) <= 0)
 				{
 					hullPoints.pop_back();
@@ -389,8 +389,8 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 		{
 			while (hullPoints.size() >= t)
 			{
-				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); itB--;
-				std::list<IndexedCCVector2*>::iterator itA = itB; itA--;
+				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); --itB;
+				std::list<IndexedCCVector2*>::iterator itA = itB; --itA;
 				if (cross(**itA, **itB, points[i]) <= 0)
 				{
 					hullPoints.pop_back();

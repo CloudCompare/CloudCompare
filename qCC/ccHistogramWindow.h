@@ -152,7 +152,6 @@ protected: //attributes
 
 	//Title
 	QString m_titleStr;
-	bool m_showTitle;
 	QCPPlotTitle* m_titlePlot;
 
 	//! Color scheme

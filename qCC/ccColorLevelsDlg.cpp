@@ -170,10 +170,6 @@ void ccColorLevelsDlg::onApply()
 	s_outputLevels[1] = maxOutputSpinBox->value();
 	s_outputLevelsEnabled = outputLevelsCheckBox->isChecked();
 
-	bool applyRGB[3] = {channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == RED,
-						channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
-						channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE };
-
 	if (	m_cloud
 		&&	(	minInputSpinBox->value() != 0
 			||	maxInputSpinBox->value() != 255
@@ -181,6 +177,11 @@ void ccColorLevelsDlg::onApply()
 			||	maxOutputSpinBox->value() != 255
 			) )
 	{
+
+		bool applyRGB[3] = {channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == RED,
+						channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
+						channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE };
+
 		//update display
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_cloud);
 

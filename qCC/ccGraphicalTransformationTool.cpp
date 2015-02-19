@@ -170,7 +170,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 	return true;
 }
 
-unsigned ccGraphicalTransformationTool::getNumberOfValidEntities()
+unsigned ccGraphicalTransformationTool::getNumberOfValidEntities() const
 {
 	assert(m_toTransform);
 	return m_toTransform->getChildrenNumber();

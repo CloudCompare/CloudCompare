@@ -131,6 +131,7 @@
 #include "ccDensityDlg.h"
 #include "ccEntityPickerDlg.h"
 #include "ccRasterizeTool.h"
+#include "ccMatchScalesDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -150,7 +151,6 @@
 #include <QLCDNumber>
 #include <QFileDialog>
 #include <QActionGroup>
-#include <QProcess>
 #include <QSettings>
 #include <QMessageBox>
 #include <QElapsedTimer>
@@ -320,7 +320,7 @@ MainWindow::~MainWindow()
 	m_seTool = 0;
 	m_transTool = 0;
 	m_clipTool = 0;
-	m_compDlg=0;
+	m_compDlg = 0;
 	m_ppDlg = 0;
 	m_plpDlg = 0;
 	m_pprDlg = 0;
@@ -886,6 +886,7 @@ void MainWindow::connectActions()
 	connect(actionEditGlobalShiftAndScale,		SIGNAL(triggered()),	this,		SLOT(doActionEditGlobalShiftAndScale()));
 	connect(actionSubsample,					SIGNAL(triggered()),	this,		SLOT(doActionSubsample()));
 	connect(actionMatchBBCenters,				SIGNAL(triggered()),	this,		SLOT(doActionMatchBBCenters()));
+	connect(actionMatchScales,					SIGNAL(triggered()),	this,		SLOT(doActionMatchScales()));
 	connect(actionDelete,						SIGNAL(triggered()),	m_ccRoot,	SLOT(deleteSelectedEntities()));
 
 	//"Tools > Clean" menu
@@ -1710,7 +1711,6 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 	size_t selNum = selectedEntities.size();
 	bool firstCloud = true;
-	std::set<int> entIDs; //to re-select entities after the whole process is finished!
 	for (size_t i=0; i<selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
@@ -1830,34 +1830,38 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 		ent->applyGLTransformation_recursive();
 		ent->prepareDisplayForRefresh_recursive();
 		putObjectBackIntoDBTree(ent,objContext);
-
-		entIDs.insert(ent->getUniqueID());
 	}
 
 	//reselect previously selected entities!
 	if (m_ccRoot)
-		m_ccRoot->selectEntities(entIDs);
+		m_ccRoot->selectEntities(selectedEntities);
 	
 	ccLog::Print("[ApplyTransformation] Applied transformation matrix:");
 	ccLog::Print(transMat.toString(12,' ')); //full precision
 	ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
+	//reselect previously selected entities!
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(selectedEntities);
+
 	refreshAll();
 }
 
-static double s_lastMultFactorX = 1.0;
-static double s_lastMultFactorY = 1.0;
-static double s_lastMultFactorZ = 1.0;
+static CCVector3d s_lastMultFactors(1.0,1.0,1.0);
+static bool s_lastMultKeepInPlace = true;
+typedef std::pair<ccHObject*,ccGenericPointCloud*> EntityCloudAssociation;
 void MainWindow::doActionApplyScale()
 {
-	ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactorX,s_lastMultFactorY,s_lastMultFactorZ,8,"Scaling",this);
+	ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactors.x,s_lastMultFactors.y,s_lastMultFactors.z,8,"Scaling",this);
+	dlg.showCheckbox("Keep in place",s_lastMultKeepInPlace,"Whether the cloud (center) should stay at the same place or not (i.e. coordinates are multiplied directly)");
 	if (!dlg.exec())
 		return;
 
 	//save values for next time
-	double sX = s_lastMultFactorX = dlg.doubleSpinBox1->value();
-	double sY = s_lastMultFactorY = dlg.doubleSpinBox2->value();
-	double sZ = s_lastMultFactorZ = dlg.doubleSpinBox3->value();
+	double sX = s_lastMultFactors.x = dlg.doubleSpinBox1->value();
+	double sY = s_lastMultFactors.y = dlg.doubleSpinBox2->value();
+	double sZ = s_lastMultFactors.z = dlg.doubleSpinBox3->value();
+	bool keepInPlace = s_lastMultKeepInPlace = dlg.getCheckboxState();
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -1866,94 +1870,139 @@ void MainWindow::doActionApplyScale()
 	bool firstCloud = true;
 	bool applyScaleAsShift = false;
 
-	for (size_t i=0; i<selNum; ++i)
+	//first check that all coordinates are kept 'small'
+	std::vector< EntityCloudAssociation > candidates;
 	{
-		ccHObject* ent = selectedEntities[i];
-		bool lockedVertices;
-		//try to get the underlying cloud (or the vertices set for a mesh)
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		//otherwise we can look if the selected entity is a polyline
-		if (!cloud && ent->isA(CC_TYPES::POLY_LINE))
+		bool testBigCoordinates = true;
+		for (size_t i=0; i<selNum; ++i)
 		{
-			cloud = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(ent)->getAssociatedCloud());
-			if (!cloud || cloud->isAncestorOf(ent))
-				lockedVertices = true;
-		}
-		if (lockedVertices)
-		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			++processNum;
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
-		{
-			if (firstCloud)
+			ccHObject* ent = selectedEntities[i];
+			bool lockedVertices;
+			//try to get the underlying cloud (or the vertices set for a mesh)
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			//otherwise we can look if the selected entity is a polyline
+			if (!cloud && ent->isA(CC_TYPES::POLY_LINE))
 			{
-				if (sX == sY && sX == sZ) //the following test only works for an 'isotropic' scale!
+				cloud = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(ent)->getAssociatedCloud());
+				if (!cloud || cloud->isAncestorOf(ent))
+					lockedVertices = true;
+			}
+			if (!cloud || !cloud->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				ccLog::Warning(QString("[Apply scale] Entity '%1' can't be scaled this way").arg(ent->getName()));
+				continue;
+			}
+			if (lockedVertices)
+			{
+				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				++processNum;
+				continue;
+			}
+
+			CCVector3 C(0,0,0);
+			if (keepInPlace)
+				C = cloud->getOwnBB().getCenter();
+
+			//we must check that the resulting cloud coordinates are not too big
+			if (testBigCoordinates)
+			{
+				ccBBox bbox = cloud->getOwnBB();
+				CCVector3 bbMin = bbox.minCorner();
+				CCVector3 bbMax = bbox.maxCorner();
+
+				double maxx = std::max(fabs(bbMin.x), fabs(bbMax.x));
+				double maxy = std::max(fabs(bbMin.y), fabs(bbMax.y));
+				double maxz = std::max(fabs(bbMin.z), fabs(bbMax.z));
+
+				const double maxCoord = ccGlobalShiftManager::MaxCoordinateAbsValue();
+				bool oldCoordsWereTooBig = (	maxx > maxCoord
+					||	maxy > maxCoord
+					||	maxz > maxCoord );
+
+				if (!oldCoordsWereTooBig)
 				{
-					//we must check that the resulting cloud is not too big
-					ccBBox bbox = cloud->getOwnBB();
-					double maxx = std::max(fabs(bbox.minCorner().x), fabs(bbox.maxCorner().x)) * sX;
-					double maxy = std::max(fabs(bbox.minCorner().y), fabs(bbox.maxCorner().y)) * sY;
-					double maxz = std::max(fabs(bbox.minCorner().z), fabs(bbox.maxCorner().z)) * sZ;
+					maxx = std::max( fabs((bbMin.x - C.x) * sX + C.x), fabs( (bbMax.x - C.x) * sX + C.x) );
+					maxy = std::max( fabs((bbMin.y - C.y) * sY + C.y), fabs( (bbMax.y - C.y) * sY + C.y) );
+					maxz = std::max( fabs((bbMin.z - C.z) * sZ + C.z), fabs( (bbMax.z - C.z) * sZ + C.z) );
 
-					const double maxCoord = ccGlobalShiftManager::MaxCoordinateAbsValue();
-					bool coordsWereTooBig = (	maxx > maxCoord
-											||	maxy > maxCoord
-											||	maxz > maxCoord );
-					bool coordsAreTooBig = (	maxx*sX > maxCoord
-											||	maxy*sY > maxCoord
-											||	maxz*sZ > maxCoord );
+					bool newCoordsAreTooBig = (	maxx > maxCoord
+						||	maxy > maxCoord
+						||	maxz > maxCoord );
 
-					if (!coordsWereTooBig && coordsAreTooBig)
+					if (newCoordsAreTooBig)
 					{
-						applyScaleAsShift = (QMessageBox::question(	this,
+						if (QMessageBox::question(	this,
 							"Big coordinates",
-							"Scale is too big (original precision may be lost!). Do you wish to save it as 'global scale' instead?\n(global scale will only be applied at export time)",
+							"Resutling coordinates will be too big (original precision may be lost!). Proceeed anyway?",
 							QMessageBox::Yes,
-							QMessageBox::No) == QMessageBox::Yes);
+							QMessageBox::No) == QMessageBox::Yes)
+						{
+							//ok, we won't test anymore and proceed
+							testBigCoordinates = false;
+						}
+						else
+						{
+							//we stop the process
+							return;
+						}
 					}
 				}
-
-				firstCloud = false;
 			}
 
-			if (applyScaleAsShift)
-			{
-				assert(sX == sY && sX == sZ);
-				const double& scale = cloud->getGlobalScale();
-				cloud->setGlobalScale(scale*sX);
-			}
-			else
-			{
-				//we temporarily detach entity, as it may undergo
-				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::multiply
-				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
-				static_cast<ccPointCloud*>(cloud)->multiply(static_cast<PointCoordinateType>(sX),
-															static_cast<PointCoordinateType>(sY),
-															static_cast<PointCoordinateType>(sZ));
-				putObjectBackIntoDBTree(cloud,objContext);
-				cloud->prepareDisplayForRefresh_recursive();
+			assert(cloud);
+			candidates.push_back(EntityCloudAssociation(ent,cloud));
+		}
+	}
 
-				//don't forget the 'global shift'!
+	if (candidates.empty())
+	{
+		ccConsole::Warning("[Apply scale] No eligible entities (point clouds or meshes) were selected!");
+		return;
+	}
+
+	//now do the real scaling work
+	{
+		for (size_t i=0; i<candidates.size(); ++i)
+		{
+			ccHObject* ent = candidates[i].first;
+			ccGenericPointCloud* cloud = candidates[i].second;
+
+			CCVector3 C(0,0,0);
+			if (keepInPlace)
+				C = cloud->getOwnBB().getCenter();
+
+			//we temporarily detach entity, as it may undergo
+			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
+			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
+			
+			cloud->scale(	static_cast<PointCoordinateType>(sX),
+							static_cast<PointCoordinateType>(sY),
+							static_cast<PointCoordinateType>(sZ),
+							C );
+
+			putObjectBackIntoDBTree(cloud,objContext);
+			cloud->prepareDisplayForRefresh_recursive();
+
+			//don't forget the 'global shift'!
+			//DGM: but not the global scale!
+			if (!keepInPlace)
+			{
 				const CCVector3d& shift = cloud->getGlobalShift();
 				cloud->setGlobalShift( CCVector3d(	shift.x*sX,
 													shift.y*sY,
 													shift.z*sZ) );
-				//DGM: nope! Not the global scale!
-				//const double& scale = cloud->getGlobalScale();
-				//cloud->setGlobalScale(scale*s_lastMultFactorX);
 			}
 
-			++processNum;
+			ent->prepareDisplayForRefresh_recursive();
 		}
 	}
 
-	if (processNum == 0)
-	{
-		ccConsole::Warning("No eligible entities (point clouds or meshes) were selected!");
-	}
+	//reselect previously selected entities!
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(selectedEntities);
+
+	if (!keepInPlace)
+		zoomOnSelectedEntities();
 
 	refreshAll();
 	updateUI();
@@ -6474,9 +6523,307 @@ void MainWindow::doActionMatchBBCenters()
 		ent->prepareDisplayForRefresh_recursive();
 	}
 
+	//reselect previously selected entities!
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(selectedEntities);
+
 	zoomOnSelectedEntities();
 
 	updateUI();
+}
+
+//semi-persistent parameters
+static MainWindow::ScaleMatchingAlgorithm s_msAlgorithm = MainWindow::PCA_MAX_DIM;
+static double s_msRmsDiff = 1.0e-5;
+static int s_msFinalOverlap = 100;
+
+void MainWindow::doActionMatchScales()
+{
+	size_t selNum = m_selectedEntities.size();
+
+	//we need at least 2 entities
+	if (selNum < 2)
+		return;
+
+	//we must select the point clouds and meshes
+	ccHObject::Container selectedEntities;
+	try
+	{
+		for (unsigned i=0; i<m_selectedEntities.size(); ++i)
+		{
+			ccHObject* ent = m_selectedEntities[i];
+			if (	ent->isKindOf(CC_TYPES::POINT_CLOUD)
+				||	ent->isKindOf(CC_TYPES::MESH))
+			{
+				selectedEntities.push_back(ent);
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccConsole::Error("Not enough memory!");
+		return;
+	}
+
+	ccMatchScalesDlg msDlg(selectedEntities, 0, this);
+	msDlg.setSelectedAlgorithm(s_msAlgorithm);
+	msDlg.rmsDifferenceLineEdit->setText(QString::number(s_msRmsDiff,'e',1));
+	msDlg.overlapSpinBox->setValue(s_msFinalOverlap);
+
+	if (!msDlg.exec())
+		return;
+
+	//save semi-persistent parameters
+	s_msAlgorithm = msDlg.getSelectedAlgorithm();
+	if (s_msAlgorithm == MainWindow::ICP_SCALE)
+	{
+		s_msRmsDiff = msDlg.rmsDifferenceLineEdit->text().toDouble();
+		s_msFinalOverlap = msDlg.overlapSpinBox->value();
+	}
+
+	ApplyScaleMatchingAlgortihm(s_msAlgorithm,
+								selectedEntities,
+								s_msRmsDiff,
+								s_msFinalOverlap,
+								msDlg.getSelectedIndex(),
+								this);
+
+	//reselect previously selected entities!
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(selectedEntities);
+
+	refreshAll();
+	updateUI();
+}
+
+bool MainWindow::ApplyScaleMatchingAlgortihm(ScaleMatchingAlgorithm algo,
+											ccHObject::Container& entities,
+											double icpRmsDiff,
+											int icpFinalOverlap,
+											unsigned refEntityIndex/*=0*/,
+											QWidget* parent/*=0*/)
+{
+	if (	entities.size() < 2
+		||	refEntityIndex >= entities.size())
+	{
+		ccLog::Error("[ApplyScaleMatchingAlgortihm] Invalid input parameter(s)");
+		return false;
+	}
+	
+	std::vector<double> scales;
+	try
+	{
+		scales.resize(entities.size(),-1.0);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory!");
+		return false;
+	}
+
+	//check the reference entity
+	ccHObject* refEntity = entities[refEntityIndex];
+	if (	!refEntity->isKindOf(CC_TYPES::POINT_CLOUD)
+		&&	!refEntity->isKindOf(CC_TYPES::MESH))
+	{
+		ccLog::Warning("[Scale Matching] The reference entity must be a cloud or a mesh!");
+		return false;
+	}
+
+	unsigned count = static_cast<unsigned>(entities.size());
+
+	//now compute the scales
+	ccProgressDialog pDlg(true,parent);
+	pDlg.setMethodTitle("Computing entities scales");
+	pDlg.setInfo(qPrintable(QString("Entities: %1").arg(count)));
+	CCLib::NormalizedProgress nProgress(&pDlg,2*count-1);
+	pDlg.start();
+	QApplication::processEvents();
+
+	for (unsigned i=0; i<count; ++i)
+	{
+		ccHObject* ent = entities[i];
+		//try to get the underlying cloud (or the vertices set for a mesh)
+		bool lockedVertices;
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+		if (cloud && !lockedVertices)
+		{
+			switch (algo)
+			{
+			case BB_MAX_DIM:
+			case BB_VOLUME:
+				{
+					ccBBox box = ent->getOwnBB();
+					if (box.isValid())
+						scales[i] = algo == BB_MAX_DIM ? box.getMaxBoxDim() : box.computeVolume();
+					else
+						ccLog::Warning(QString("[Scale Matching] Entity '%1' has an invalid bounding-box!").arg(ent->getName()));
+				}
+				break;
+
+			case PCA_MAX_DIM:
+				{
+					CCLib::Neighbourhood Yk(cloud);
+					if (!Yk.getLSQPlane())
+					{
+						ccLog::Warning(QString("[Scale Matching] Failed to perform PCA on entity '%1'!").arg(ent->getName()));
+						break;
+					}
+					//deduce the scale
+					{
+						const CCVector3* X = Yk.getLSQPlaneX();
+						const CCVector3* O = Yk.getGravityCenter();
+						double minX = 0,maxX = 0;
+						for (unsigned j=0; j<cloud->size(); ++j)
+						{
+							double x = (*cloud->getPoint(j) - *O).dot(*X);
+							if (j != 0)
+							{
+								minX = std::min(x,minX);
+								maxX = std::max(x,maxX);
+							}
+							else
+							{
+								minX = maxX = x;
+							}
+						}
+						scales[i] = maxX-minX;
+					}
+				}
+				break;
+
+			case ICP_SCALE:
+				{
+					ccGLMatrix transMat;
+					double finalError = 0.0;
+					double finalScale = 1.0;
+					unsigned finalPointCount = 0;
+					int transformationFilters = 0; //CCLib::RegistrationTools::SKIP_ROTATION;
+
+					if (ccRegistrationTools::ICP(
+						ent,
+						refEntity,
+						transMat,
+						finalScale,
+						finalError,
+						finalPointCount,
+						icpRmsDiff,
+						0,
+						50000,
+						false,
+						CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
+						true,
+						icpFinalOverlap/100.0,
+						false,
+						false,
+						transformationFilters,
+						parent))
+					{
+						scales[i] = finalScale;
+					}
+					else
+					{
+						ccLog::Warning(QString("[Scale Matching] Failed to register entity '%1'!").arg(ent->getName()));
+					}
+
+				}
+				break;
+
+			default:
+				assert(false);
+				break;
+			}
+		}
+		else if (cloud && lockedVertices)
+		{
+			//locked entities
+			DisplayLockedVerticesWarning(ent->getName(),false);
+		}
+		else
+		{
+			//we need a cloud or a mesh
+			ccLog::Warning(QString("[Scale Matching] Entity '%1' can't be rescaled this way!").arg(ent->getName()));
+		}
+
+		//if the reference entity is invalid!
+		if (scales[i] <= 0 &&  i == refEntityIndex)
+		{
+			ccLog::Error("Reference entity has an invalid scale! Can't proceed.");
+			return false;
+		}
+
+		if (!nProgress.oneStep())
+		{
+			//process cancelled by user
+			return false;
+		}
+	}
+
+	MainWindow* instance = dynamic_cast<MainWindow*>(parent);
+	ccLog::Print(QString("[Scale Matching] Reference entity scale: %1").arg(scales[refEntityIndex]));
+
+	//now we can rescale
+	pDlg.setMethodTitle("Rescaling entities");
+	{
+		for (unsigned i=0; i<count; ++i)
+		{
+			if (i == refEntityIndex)
+				continue;
+			if (scales[i] < 0)
+				continue;
+
+			ccLog::Print(QString("[Scale Matching] Entity '%1' scale: %2").arg(entities[i]->getName()).arg(scales[i]));
+			if (scales[i] <= ZERO_TOLERANCE)
+			{
+				ccLog::Warning("[Scale Matching] Entity scale is too small!");
+				continue;
+			}
+			
+			ccHObject* ent = entities[i];
+		
+			bool lockedVertices;
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			if (!cloud || lockedVertices)
+				continue;
+
+			double scaled = 1.0;
+			if (algo == ICP_SCALE)
+				scaled = scales[i];
+			else
+				scaled = scales[refEntityIndex]/scales[i];
+			PointCoordinateType scale_pc = static_cast<PointCoordinateType>(scaled);
+
+			//we temporarily detach entity, as it may undergo
+			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
+			ccHObjectContext objContext;
+			if (instance)
+				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
+
+			CCVector3 C = cloud->getOwnBB().getCenter();
+			
+			cloud->scale(	scale_pc,
+							scale_pc,
+							scale_pc,
+							C );
+			
+			if (instance)
+				instance->putObjectBackIntoDBTree(cloud,objContext);
+			cloud->prepareDisplayForRefresh_recursive();
+
+			//don't forget the 'global shift'!
+			const CCVector3d& shift = cloud->getGlobalShift();
+			cloud->setGlobalShift(shift*scaled);
+			//DGM: nope! Not the global scale!
+		}
+
+		if (!nProgress.oneStep())
+		{
+			//process cancelled by user
+			return false;
+		}
+	}
+
+	return true;
 }
 
 static bool s_noiseFilterUseKnn = false;
@@ -6902,21 +7249,7 @@ void MainWindow::doActionShawAboutDialog()
 
 void MainWindow::doActionShowHelpDialog()
 {
-	QFile doc(QApplication::applicationDirPath()+QString("/user_guide_CloudCompare.pdf"));
-	if (!doc.open(QIODevice::ReadOnly))
-	{
-		QMessageBox::warning(	this,
-								QString("User guide not found"),
-								QString("Goto http://www.cloudcompare.org/documentation.html") );
-	}
-	else
-	{
-		QString program = "AcroRd32.exe";
-		QStringList arguments;
-		arguments << "user_guide_CloudCompare.pdf";
-		QProcess *myProcess = new QProcess();
-		myProcess->start(program, arguments);
-	}
+	QMessageBox::information(	this, "Documentation", "Please visit http://www.cloudcompare.org/doc" );
 }
 
 void MainWindow::freezeUI(bool state)
@@ -7182,16 +7515,18 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					{
 						if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 						{
-							//we must check all dependent labels and remove them!!!
+							//we must search for all dependent labels and remove them!!!
 							//TODO: couldn't we be more clever and update the label instead?
 							cc2DLabel* label = static_cast<cc2DLabel*>(*it);
 							bool removeLabel = false;
 							for (unsigned i=0; i<label->size(); ++i)
+							{
 								if (label->getPoint(i).cloud == entity)
 								{
 									removeLabel = true;
 									break;
 								}
+							}
 
 							if (removeLabel && label->getParent())
 							{
@@ -7579,8 +7914,29 @@ void MainWindow::activateTranslateRotateMode()
 
 void MainWindow::deactivateTranslateRotateMode(bool state)
 {
-	//if (m_transTool)
-	//	m_transTool->close();
+	if (m_transTool)
+	{
+		//reselect previously selected entities!
+		if (state && m_ccRoot)
+		{
+			const ccHObject& transformedSet = m_transTool->getValidEntities();
+			try
+			{
+				ccHObject::Container transformedEntities;
+				transformedEntities.resize(transformedSet.getChildrenNumber());
+				for (unsigned i=0; i<transformedSet.getChildrenNumber(); ++i)
+				{
+					transformedEntities[i] = transformedSet.getChild(i);
+				}
+				m_ccRoot->selectEntities(transformedEntities);
+			}
+			catch(std::bad_alloc)
+			{
+				//not enough memory (nothing to do)
+			}
+		}
+		//m_transTool->close();
+	}
 
 	//we reactivate all GL windows
 	enableAll();
@@ -10000,7 +10356,7 @@ void MainWindow::doActionCloudMeshDist()
 	freezeUI(true);
 }
 
-void MainWindow::deactivateComparisonMode(int)
+void MainWindow::deactivateComparisonMode(int result)
 {
 	//DGM: a bug apperead with recent changes (from CC or QT?)
 	//which prevent us from deleting the dialog right away...
@@ -10009,6 +10365,14 @@ void MainWindow::deactivateComparisonMode(int)
 	//if(m_compDlg)
 	//	delete m_compDlg;
 	//m_compDlg = 0;
+
+	//if the comparison is a success, we select only the compared entity
+	if (m_compDlg && result == QDialog::Accepted && m_ccRoot)
+	{
+		ccHObject* compEntity = m_compDlg->getComparedEntity();
+		if (compEntity)
+			m_ccRoot->selectEntity(compEntity);
+	}
 
 	freezeUI(false);
 
@@ -11069,6 +11433,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	actionMerge->setEnabled(atLeastTwoEntities);
 	actionMatchBBCenters->setEnabled(atLeastTwoEntities);
+	actionMatchScales->setEnabled(atLeastTwoEntities);
 
 	//standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)

@@ -285,6 +285,7 @@ public:
 	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const;
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const;
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
+	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0));
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false);
 	virtual void applyRigidTransformation(const ccGLMatrix& trans);
@@ -420,14 +421,6 @@ public:
     /** \param T translation vector
     **/
 	void translate(const CCVector3& T);
-
-	//! Multiplies all coordinates by a constant factor (per dimension)
-	/** WARNING: any attached octree will be deleted.
-		\param fx multipliation factor along the X dimension
-        \param fy multipliation factor along the Y dimension
-        \param fz multipliation factor along the Z dimension
-    **/
-	void multiply(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz);
 
     //! Filters out points whose scalar values falls into an interval
     /** Threshold values should be expressed relatively to the current displayed scalar field.

@@ -206,6 +206,15 @@ public:
 	**/
 	virtual CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) = 0;
 
+	//! Multiplies all coordinates by constant factors (one per dimension)
+	/** WARNING: attached octree may be deleted.
+		\param fx multiplication factor along the X dimension
+        \param fy multiplication factor along the Y dimension
+        \param fz multiplication factor along the Z dimension
+		\param center scaling center (0,0,0) by default
+    **/
+	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) = 0;
+
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
 

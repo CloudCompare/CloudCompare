@@ -285,7 +285,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	//original center
 	result->setGlobalShift(getGlobalShift());
 	result->setGlobalScale(getGlobalScale());
-
+	//keep the transformation history!
+	result->setGLTransformationHistory(getGLTransformationHistory());
 	//custom point size
 	result->setPointSize(getPointSize());
 
@@ -353,6 +354,9 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignore
 	//original shift
 	result->setGlobalShift(getGlobalShift());
 	result->setGlobalScale(getGlobalScale());
+
+	//transformation history
+	result->setGLTransformationHistory(getGLTransformationHistory());
 
 	result->setName(getName()+QString(".clone"));
 
@@ -1375,55 +1379,76 @@ void ccPointCloud::translate(const CCVector3& T)
 	}
 }
 
-void ccPointCloud::multiply(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz)
+void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center)
 {
 	unsigned count = size();
 	{
 		for (unsigned i=0; i<count; i++)
 		{
 			CCVector3* P = point(i);
-			P->x *= fx;
-			P->y *= fy;
-			P->z *= fz;
+			P->x = (P->x - center.x) * fx + center.x;
+			P->y = (P->y - center.y) * fy + center.y;
+			P->z = (P->z - center.z) * fz + center.z;
 		}
 	}
 
-	notifyGeometryUpdate(); //calls releaseVBOs()
-
 	//refreshBB();
-	//--> instead, we update BBox directly! (faster)
-	PointCoordinateType* bbMin = m_points->getMin();
-	PointCoordinateType* bbMax = m_points->getMax();
-	bbMin[0] *= fx;
-	bbMax[0] *= fx;
-	if (fx < 0)
-		std::swap(bbMin[0],bbMax[0]);
-	bbMin[1] *= fy;
-	bbMax[1] *= fy;
-	if (fy < 0)
-		std::swap(bbMin[1],bbMax[1]);
-	bbMin[2] *= fz;
-	bbMax[2] *= fz;
-	if (fz < 0)
-		std::swap(bbMin[2],bbMax[2]);
+	{
+		//--> instead, we update BBox directly! (faster)
+		PointCoordinateType* bbMin = m_points->getMin();
+		PointCoordinateType* bbMax = m_points->getMax();
+		CCVector3 f(fx,fy,fz);
+		for (int d=0; d<3; ++d)
+		{
+			bbMin[d] = (bbMin[d] - center.u[d]) * f.u[d] + center.u[d];
+			bbMax[d] = (bbMax[d] - center.u[d]) * f.u[d] + center.u[d];
+			if (f.u[d] < 0)
+				std::swap(bbMin[d],bbMax[d]);
+		}
+	}
 
 	//same thing for the octree
 	ccOctree* oct = getOctree();
 	if (oct)
 	{
-		if (fx==fy && fx==fz && fx > 0)
+		if (fx == fy && fx == fz && fx > 0)
+		{
+			CCVector3 centerInv = -center;
+			oct->translateBoundingBox(centerInv);
 			oct->multiplyBoundingBox(fx);
+			oct->translateBoundingBox(center);
+		}
 		else
+		{
+			//we can't keep the octree
 			deleteOctree();
+		}
 	}
 
 	//and same thing for the Kd-tree(s)!
 	ccHObject::Container kdtrees;
 	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
+	if (fx == fy && fx == fz && fx > 0)
 	{
 		for (size_t i=0; i<kdtrees.size(); ++i)
-			static_cast<ccKdTree*>(kdtrees[i])->multiplyBoundingBox(fx);
+		{
+			ccKdTree* kdTree = static_cast<ccKdTree*>(kdtrees[i]);
+			CCVector3 centerInv = -center;
+			kdTree->translateBoundingBox(centerInv);
+			kdTree->multiplyBoundingBox(fx);
+			kdTree->translateBoundingBox(center);
+		}
 	}
+	else
+	{
+		//we can't keep the kd-trees
+		for (size_t i=0; i<kdtrees.size(); ++i)
+		{
+			removeChild(kdtrees[i]);
+		}
+	}
+
+	notifyGeometryUpdate(); //calls releaseVBOs()
 }
 
 void ccPointCloud::invertNormals()

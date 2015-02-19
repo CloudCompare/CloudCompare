@@ -386,6 +386,7 @@
       <string>Registration</string>
      </property>
      <addaction name="actionMatchBBCenters"/>
+     <addaction name="actionMatchScales"/>
      <addaction name="actionPointPairsAlign"/>
      <addaction name="actionRegister"/>
     </widget>
@@ -2727,6 +2728,11 @@
    </property>
    <property name="toolTip">
     <string>Fits a sphere on the selected cloud</string>
+   </property>
+  </action>
+  <action name="actionMatchScales">
+   <property name="text">
+    <string>Match scales</string>
    </property>
   </action>
  </widget>

@@ -6,9 +6,13 @@ v2.6.1.beta 01/??/2015
 		- accessible via 'Tools > Level' or via the left toolbar
 		- let the user pick three points (typically on the floor) so as to make the selected entity
 			level (the selected entity can be a cloud, a mesh or even a group of entitites)
-	* Tools > Fit > Sphere
+	* New tool: 'Tools > Fit > Sphere'
 		- to robustly fit a sphere on a cloud (up to 50% outliers)
 		- automatically detects the center and radius
+	* New tool: 'Tools > Register > Match scales'
+		- to rescale a of entities so that they all have the same scale
+		- several methods to compute the scale (longest bounding-box dimension, bouding-box volume,
+			principal dimension according to PCA, ICP registration)
 	* Section Extraction Tool
 		- let the user define or import '2D sections' (polylines) over one or several clouds
 		- 2D sections can also be generated automatically along a path with given step and
@@ -144,6 +148,12 @@ v2.6.1.beta 01/??/2015
 		- the 'zoom speed' in perspective mode can now be set by the user
 	* DXF filter:
 		- the DXF I/O filter now handles global shift (i.e. large coordinates)
+	* 'Edit > Multiply / Scale' tool:
+		- the user can choose whether the entities (center) stay at the same position (new default) or not
+		- if the coordinates after scaling become too big, CC will warn the user but will let proceed anyway
+	* Transformation history is now properly maintained:
+		- on a mesh vertices after cloning
+		- when manually segmenting an entity
 
 - Bug fix:
 	- Delaunay 2D1/2 was crashing on Windows 8
@@ -172,6 +182,8 @@ v2.6.1.beta 01/??/2015
 	- Files in a folder with 'local' language characters (accetns, etc.) could not be opened by several I/O filters
 		(LAS, E57, PCD and PDMS)
 	- Memory leaks fixed in PDMS I/O filter (the R-TORUS primitive was not even imported to the main DB!)
+	- Polylines could be selected when performing graphical segmentation (while they are not supported yet) causing
+		a potential crash
 
 v2.6.0 10/24/2014
 - New methods:

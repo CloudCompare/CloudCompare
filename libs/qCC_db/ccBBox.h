@@ -89,6 +89,8 @@ public:
 	PointCoordinateType getMinBoxDim() const;
 	//! Returns maximal box dimension
 	PointCoordinateType getMaxBoxDim() const;
+	//! Returns the bounding-box volume
+	double computeVolume() const;
 
 	//! Draws bounding box (OpenGL)
 	/** \param col (R,G,B) color

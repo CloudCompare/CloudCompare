@@ -292,32 +292,32 @@ void ccGraphicalSegmentationTool::reset()
 	loadSaveToolButton->setDefaultAction(actionUseExistingPolyline);
 }
 
-bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
+bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 {
 	//FIXME
-	/*if (anObject->isLocked())
-		ccLog::Warning(QString("Can't use entity [%1] cause it's locked!").arg(anObject->getName()));
+	/*if (entity->isLocked())
+		ccLog::Warning(QString("Can't use entity [%1] cause it's locked!").arg(entity->getName()));
 	else */
-	if (anObject->getDisplay() != m_associatedWin)
+	if (entity->getDisplay() != m_associatedWin)
 	{
-		ccLog::Warning(QString("[Graphical Segmentation Tool] Can't use entity [%1] cause it's not displayed in the active 3D view!").arg(anObject->getName()));
+		ccLog::Warning(QString("[Graphical Segmentation Tool] Can't use entity [%1] cause it's not displayed in the active 3D view!").arg(entity->getName()));
 		return false;
 	}
-	if (!anObject->isVisible() || !anObject->isBranchEnabled())
+	if (!entity->isVisible() || !entity->isBranchEnabled())
 	{
-		ccLog::Warning(QString("[Graphical Segmentation Tool] Entity [%1] is not visible in the active 3D view!").arg(anObject->getName()));
+		ccLog::Warning(QString("[Graphical Segmentation Tool] Entity [%1] is not visible in the active 3D view!").arg(entity->getName()));
 	}
 
 	bool result = false;
-	if (anObject->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(anObject);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		//detect if this cloud is in fact a vertex set for at least one mesh
 		{
 			//either the cloud is the child of its parent mesh
 			if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH) && ccHObjectCaster::ToGenericMesh(cloud->getParent())->getAssociatedCloud() == cloud)
 			{
-				ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(anObject->getName()));
+				ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(entity->getName()));
 				return false;
 			}
 			//or the parent of its child mesh!
@@ -327,7 +327,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 				for (unsigned i=0; i<meshes.size(); ++i)
 					if (ccHObjectCaster::ToGenericMesh(meshes[i])->getAssociatedCloud() == cloud)
 					{
-						ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(anObject->getName()));
+						ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(entity->getName()));
 						return false;
 					}
 			}
@@ -337,24 +337,24 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 		m_toSegment.insert(cloud);
 
 		//automatically add cloud's children
-		for (unsigned i=0; i<anObject->getChildrenNumber(); ++i)
-			result |= addEntity(anObject->getChild(i));
+		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+			result |= addEntity(entity->getChild(i));
 	}
-	else if (anObject->isKindOf(CC_TYPES::MESH))
+	else if (entity->isKindOf(CC_TYPES::MESH))
 	{
-		if (anObject->isKindOf(CC_TYPES::PRIMITIVE))
+		if (entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment primitives yet! Sorry...");
 			return false;
 		}
-		if (anObject->isKindOf(CC_TYPES::SUB_MESH))
+		if (entity->isKindOf(CC_TYPES::SUB_MESH))
 		{
 			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment sub-meshes! Select the parent mesh...");
 			return false;
 		}
 		else
 		{
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(anObject);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 
 			//first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
 			for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
@@ -379,11 +379,11 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 			result = true;
 		}
 	}
-	else
+	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//automatically add entity's children
-		for (unsigned i=0;i<anObject->getChildrenNumber();++i)
-			result |= addEntity(anObject->getChild(i));
+		for (unsigned i=0;i<entity->getChildrenNumber();++i)
+			result |= addEntity(entity->getChild(i));
 	}
 
 	return result;

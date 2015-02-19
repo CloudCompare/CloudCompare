@@ -157,6 +157,17 @@ public:
 									QWidget* parent = 0,
 									void** additionalParameters = 0);
 
+	//! Scale matching algorithms
+	enum ScaleMatchingAlgorithm { BB_MAX_DIM, BB_VOLUME, PCA_MAX_DIM, ICP_SCALE };
+
+	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
+	static bool ApplyScaleMatchingAlgortihm(ScaleMatchingAlgorithm algo,
+											ccHObject::Container& entities,
+											double icpRmsDiff,
+											int icpFinalOverlap,
+											unsigned refEntityIndex = 0,
+											QWidget* parent = 0);
+
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
@@ -364,6 +375,7 @@ protected slots:
 	void doActionApplyScale();
 	void doActionEditGlobalShiftAndScale();
 	void doActionMatchBBCenters();
+	void doActionMatchScales();
 	void doActionFilterNoise();
 	void doActionUnroll();
 	void doActionCreateGBLSensor();

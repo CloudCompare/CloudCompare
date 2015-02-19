@@ -68,6 +68,13 @@ PointCoordinateType ccBBox::getMaxBoxDim() const
 	return std::max(V.x,std::max(V.y,V.z));
 }
 
+double ccBBox::computeVolume() const
+{
+	CCVector3 V = getDiagVec();
+
+	return static_cast<double>(V.x) * static_cast<double>(V.y) * static_cast<double>(V.z);
+}
+
 void ccBBox::draw(const ccColor::Rgb& col) const
 {
 	if (!m_valid)

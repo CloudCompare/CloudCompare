@@ -236,14 +236,14 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			//otherwise we must merge the smallest class with its neighbor (to make the classes repartition more equilibrated)
 			Chi2ClassList::iterator smallestIt;
 			{
-				Chi2ClassList::iterator nextIt = minIt; nextIt++;
+				Chi2ClassList::iterator nextIt = minIt; ++nextIt;
 				if (minIt == classes.begin())
 				{
 					smallestIt = nextIt;
 				}
 				else
 				{
-					Chi2ClassList::iterator predIt = minIt; predIt--;
+					Chi2ClassList::iterator predIt = minIt; --predIt;
 					smallestIt = (nextIt != classes.end() && nextIt->pi < predIt->pi ? nextIt : predIt);
 				}
 			}

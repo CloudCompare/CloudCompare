@@ -352,7 +352,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				//	lasScale = lasScale;
 				//}
 			}
-			else if (hasScaleMetaData)
+			else if (!hasScaleMetaData)
 			{
 				lasScale = optimalScale;
 			}

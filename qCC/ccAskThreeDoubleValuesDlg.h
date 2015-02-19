@@ -42,7 +42,7 @@ public:
 								QWidget* parent = 0);
 
 	//! Enable the checkbox (bottom-left)
-	void showCheckbox(const QString& label, bool state, const QString* tooltip = 0);
+	void showCheckbox(const QString& label, bool state, QString tooltip = QString());
 
 	//! Returns 
 	bool getCheckboxState() const;

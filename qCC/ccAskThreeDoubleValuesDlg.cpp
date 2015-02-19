@@ -54,17 +54,16 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
 		setWindowTitle(windowTitle);
 }
 
-void ccAskThreeDoubleValuesDlg::showCheckbox(const QString& label, bool state, const QString* tooltip/*=0*/)
+void ccAskThreeDoubleValuesDlg::showCheckbox(const QString& label, bool state, QString tooltip/*=QString()*/)
 {
 	checkBox->setVisible(true);
 	checkBox->setEnabled(true);
 	checkBox->setChecked(state);
-
-	if (tooltip)
-		checkBox->setToolTip(*tooltip);
+	checkBox->setText(label);
+	checkBox->setToolTip(tooltip);
 }
 
 bool ccAskThreeDoubleValuesDlg::getCheckboxState() const
 {
-	return checkBox->isEnabled() && checkBox->isChecked();
+	return checkBox->isChecked();
 }

@@ -319,7 +319,7 @@ void ccPointPairRegistrationDlg::addManualAlignedPoint()
 	//in the original coordinate system or the shifted one
 	bool alignIsShifted = (m_aligned.entity && ccHObjectCaster::ToGenericPointCloud(m_aligned.entity)->isShifted());
 	if (alignIsShifted)
-		ptsDlg.showCheckbox("Not shifted",s_last_a_isGlobal,&s_aligned_tooltip);
+		ptsDlg.showCheckbox("Not shifted",s_last_a_isGlobal,s_aligned_tooltip);
 
 	if (!ptsDlg.exec())
 		return;
@@ -353,7 +353,7 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 	//(if there's no reference entity, we use a 'global'	one by default)
 	bool refIsShifted = (m_reference.entity && ccHObjectCaster::ToGenericPointCloud(m_reference.entity)->isShifted());
 	if (refIsShifted)
-		ptsDlg.showCheckbox("Not shifted",s_last_r_isGlobal,&s_aligned_tooltip);
+		ptsDlg.showCheckbox("Not shifted",s_last_r_isGlobal,s_aligned_tooltip);
 
 	if (!ptsDlg.exec())
 		return;

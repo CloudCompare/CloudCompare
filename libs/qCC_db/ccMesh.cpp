@@ -2321,6 +2321,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			newMesh->showSF(sfShown());
 			newMesh->enableStippling(stipplingEnabled());
 			newMesh->showWired(isShownAsWire());
+			newMesh->setGLTransformationHistory(getGLTransformationHistory());
 			newVertices->setEnabled(false);
 		}
 

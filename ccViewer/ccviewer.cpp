@@ -420,41 +420,6 @@ void ccViewer::selectEntity(int uniqueID)
 	m_glWindow->redraw();
 }
 
-//not supported!
-//void ccViewer::selectEntities(std::set<int> entIDs)
-//{
-//	ccHObject* currentRoot = m_glWindow->getSceneDB();
-//	if (!currentRoot)
-//		return;
-//
-//	//convert input list of IDs to proper entities
-//	ccHObject::Container entities;
-//	size_t labelCount = 0;
-//	{
-//		try
-//		{
-//			entities.reserve(entIDs.size());
-//		}
-//		catch(std::bad_alloc)
-//		{
-//			ccLog::Error("[ccViewer::selectEntities] Not enough memory!");
-//			return;
-//		}
-//
-//		for (std::set<int>::const_iterator it = entIDs.begin(); it != entIDs.end(); ++it)
-//		{
-//			ccHObject* obj = currentRoot->find(*it);
-//			if (obj)
-//			{
-//				entities.push_back(obj);
-//				if (obj->isA(CC_TYPES::LABEL_2D))
-//					++labelCount;
-//			}
-//		}
-//	}
-//
-//}
-
 bool ccViewer::checkForLoadedEntities()
 {
 	bool loadedEntities = true;

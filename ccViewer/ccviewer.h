@@ -73,9 +73,6 @@ protected slots:
 	//! Selects entity
 	void selectEntity(int uniqueID);
 
-	//! Selects multiple entities
-	//void selectEntities(std::set<int> entIDs); //not supported yet!
-
 	//! Delete selected entity
 	void doActionDeleteSelectedEntity();
 

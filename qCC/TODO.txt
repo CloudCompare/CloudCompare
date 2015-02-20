@@ -30,6 +30,7 @@ Big ones:
 [*] Volume calculation
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
+[*] Finish the Oculus Rift plugin
 
 Various:
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)

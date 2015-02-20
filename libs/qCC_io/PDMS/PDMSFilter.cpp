@@ -54,7 +54,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 	PdmsFileSession session(qPrintable(filename)); //DGM: warning, toStdString doesn't preserve "local" characters
 
 	parser.linkWithSession(&session);
-	if(parser.parseSessionContent())
+	if (parser.parseSessionContent())
 	{
 		PdmsTools::PdmsObjects::GenericItem* pdmsmodel = parser.getLoadedObject(true);
 		assert(pdmsmodel);

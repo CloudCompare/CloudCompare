@@ -126,8 +126,8 @@ void PdmsLexer::closeSession(bool destroyLoadedObject)
 
 bool PdmsLexer::gotoNextToken()
 {
-	const int enter_meta_group_mask=1;
-	const int leave_meta_group_mask=100;
+	const int enter_meta_group_mask = 1;
+	const int leave_meta_group_mask = 100;
 
 	//Special case: in meta group, the lexer splits Meta Group comments into appropriated tokens
 	if(metaGroupMask)
@@ -135,11 +135,11 @@ bool PdmsLexer::gotoNextToken()
 		metaGroupMask++;
 		switch(metaGroupMask)
 		{
-		case enter_meta_group_mask+1: currentToken=PDMS_CREATE; return true;
-		case enter_meta_group_mask+2: currentToken=PDMS_GROUP; return true;
-		case enter_meta_group_mask+3: currentToken=PDMS_NAME_STR; return true;
-		case leave_meta_group_mask+1: currentToken=PDMS_END; return true;
-		case leave_meta_group_mask+2: currentToken=PDMS_GROUP; return true;
+		case enter_meta_group_mask+1: currentToken = PDMS_CREATE; return true;
+		case enter_meta_group_mask+2: currentToken = PDMS_GROUP; return true;
+		case enter_meta_group_mask+3: currentToken = PDMS_NAME_STR; return true;
+		case leave_meta_group_mask+1: currentToken = PDMS_END; return true;
+		case leave_meta_group_mask+2: currentToken = PDMS_GROUP; return true;
 		default: metaGroupMask=0; break;
 		}
 	}
@@ -158,12 +158,12 @@ bool PdmsLexer::gotoNextToken()
 			case PDMS_COMMENT_LINE:
 			case PDMS_COMMENT_BLOCK:
 				skipComment();
-				if(currentToken==PDMS_ENTER_METAGROUP)
+				if(currentToken == PDMS_ENTER_METAGROUP)
 				{
 					metaGroupMask = enter_meta_group_mask;
 					break;
 				}
-				if(currentToken==PDMS_LEAVE_METAGROUP)
+				if(currentToken == PDMS_LEAVE_METAGROUP)
 				{
 					metaGroupMask = leave_meta_group_mask;
 					break;
@@ -216,14 +216,14 @@ PointCoordinateType PdmsLexer::valueFromBuffer()
 	size_t length = 0;
 	while (index > 0) //go back until we meet a number symbol
 	{
-		if((tokenBuffer[index-1]>='0' && tokenBuffer[index-1]<='9') || tokenBuffer[index-1]=='.')
+		if ((tokenBuffer[index-1]>='0' && tokenBuffer[index-1]<='9') || tokenBuffer[index-1]=='.')
 			break;
 		index--;
 		length++;
 	}
 
 	//Read units
-	if(length>0)
+	if (length > 0)
 	{
 		strcpy(nextBuffer, &(tokenBuffer[index]));
 		memset(&(tokenBuffer[index]), 0, length);
@@ -231,8 +231,8 @@ PointCoordinateType PdmsLexer::valueFromBuffer()
 
 	//Replace comma
 	length = strlen(tokenBuffer);
-	for(index=0; index<length; index++)
-		if(tokenBuffer[index]==',')
+	for (index=0; index<length; index++)
+		if (tokenBuffer[index]==',')
 			tokenBuffer[index]='.';
 
 	//convert value

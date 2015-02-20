@@ -24,6 +24,9 @@
 #include <assert.h>
 #include <set>
 
+//qCC_db
+//#include <ccLog.h>
+
 using namespace PdmsTools;
 using namespace PdmsCommands;
 using namespace PdmsObjects;
@@ -54,19 +57,32 @@ void PdmsObjects::Stack::Init()
 
 void PdmsObjects::Stack::Clear()
 {
-	for (ElementsStack::iterator it = s_elementsStack.begin(); it != s_elementsStack.end(); ++it)
+	//DGM: warning, while deleting some entities, the stack may be modified!!!
+	while (!s_elementsStack.empty())
 	{
-		if (*it)
-			delete (*it);
+		GenericItem* item = *(s_elementsStack.begin());
+		s_elementsStack.erase(item);
+		if (item)
+		{
+			//ccLog::Print(QString("[PDMS] Should be deleting %1").arg(item->name));
+			delete item;
+		}
 	}
 	s_elementsStack.clear();
 }
 
 void PdmsObjects::Stack::Detroy(GenericItem* &item)
 {
-	s_elementsStack.erase(item);
-	delete item;
-	item = 0;
+	if (item)
+	{
+		//ccLog::Print(QString("[PDMS] Destroying %1").arg((item)->name));
+		if (s_elementsStack.find(item) != s_elementsStack.end())
+		{
+			s_elementsStack.erase(item);
+			delete item;
+		}
+		item = 0;
+	}
 }
 
 ///////////////////////////////
@@ -798,7 +814,8 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 	{
 		if (!item)
 		{
-			delete newElement; 
+			//delete newElement;
+			PdmsObjects::Stack::Detroy(newElement);
 			return false;
 		}
 		PdmsObjects::GenericItem* mitem = item->getRoot();
@@ -807,7 +824,8 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 			mitem = mitem->scan(path[i].c_str());
 			if (!mitem)
 			{
-				delete newElement;
+				//delete newElement;
+				PdmsObjects::Stack::Detroy(newElement);
 				return false;
 			}
 		}
@@ -817,7 +835,8 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 	//Then we can (try to) push the new element in the hierarchy
 	if (item && !item->push(newElement))
 	{
-		delete newElement;
+		//delete newElement;
+		PdmsObjects::Stack::Detroy(newElement);
 		return false;
 	}
 	
@@ -831,7 +850,8 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 	catch(std::exception &pex)
 	{
 		memalert(pex,1);
-		delete newElement;
+		PdmsObjects::Stack::Detroy(newElement);
+		//delete newElement;
 		return false;
 	}
 	item = newElement;
@@ -1161,6 +1181,7 @@ DesignElement::~DesignElement()
 			Stack::Detroy(item);
 		}
 	}
+	nelements.clear();
 }
 
 bool DesignElement::push(GenericItem *i)

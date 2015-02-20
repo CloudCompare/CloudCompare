@@ -588,7 +588,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 	appendRow( ITEM("Wireframe"), CHECKABLE_ITEM(_obj->isShownAsWire(),OBJECT_MESH_WIRE) );
 
 	//stippling (ccMesh only)
-	if (_obj->isA(CC_TYPES::MESH))
+	//if (_obj->isA(CC_TYPES::MESH)) //DGM: can't remember why?
 		appendRow( ITEM("Stippling"), CHECKABLE_ITEM(static_cast<ccMesh*>(_obj)->stipplingEnabled(),OBJECT_MESH_STIPPLING) );
 
 	//we also integrate vertices SF into mesh properties

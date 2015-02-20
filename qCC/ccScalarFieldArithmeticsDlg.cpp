@@ -32,6 +32,9 @@
 #endif
 #include <math.h>
 
+//semi persitent 
+static int s_previouslySelectedOperationIndex = 1;
+
 ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 															QWidget* parent/*=0*/)
 	: QDialog(parent)
@@ -61,12 +64,15 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 		sf2ComboBox->setCurrentIndex(std::min<unsigned>(1,sfCount-1));
 	}
 
+	operationComboBox->setCurrentIndex(s_previouslySelectedOperationIndex);
+
 	connect(operationComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
 }
 
 void ccScalarFieldArithmeticsDlg::onCurrentIndexChanged(int index)
 {
 	sf2ComboBox->setEnabled(index <= DIVIDE); //only the 4 first operations are between two SFs
+	s_previouslySelectedOperationIndex = index;
 }
 
 int ccScalarFieldArithmeticsDlg::getSF1Index()
@@ -117,6 +123,8 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 		return ATAN;
 	case 16:
 		return INT;
+	case 17:
+		return INT;
 	default:
 		assert(false);
 		break;
@@ -163,6 +171,8 @@ QString ccScalarFieldArithmeticsDlg::getOperationName(QString sf1, QString sf2/*
 		return QString("atan(%1)").arg(sf1);
 	case INT:
 		return QString("int(%1)").arg(sf1);
+	case INVERSE:
+		return QString("inverse(%1)").arg(sf1);
 	default:
 		assert(false);
 		break;
@@ -341,6 +351,9 @@ bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 				break;
 			case INT:
 				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
+				break;
+			case INVERSE:
+				val = fabs(val1) < ZERO_TOLERANCE ? NAN_VALUE : static_cast<ScalarType>(1.0/val1);
 				break;
 			default:
 				assert(false);

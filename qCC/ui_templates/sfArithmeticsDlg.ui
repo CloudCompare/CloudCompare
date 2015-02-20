@@ -167,6 +167,11 @@
          <string>integer part</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>inverse (1/x)</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

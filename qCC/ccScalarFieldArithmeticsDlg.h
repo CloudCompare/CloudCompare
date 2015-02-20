@@ -57,6 +57,7 @@ public:
 						ASIN		= 14,
 						ATAN		= 15,
 						INT			= 16,
+						INVERSE		= 17,
 						/* Invalid enum. (always last) */
 						INVALID		= 255
 	};

@@ -156,6 +156,10 @@ v2.6.1 02/20/2015
 		- on a mesh vertices after cloning
 		- when manually segmenting an entity
 	* Meta-data are now preseverd when cloning, subsampling or segmenting an entity
+	* FARO I/O plugin:
+		- the plugin can now load the RGB colors (instead of the reflection values - as a scalar field)
+	* DotProduct I/O plugin:
+		- updated SDK version (2.0) with bug fixes and other enhancements
 
 - Bug fix:
 	- Delaunay 2D1/2 was crashing on Windows 8

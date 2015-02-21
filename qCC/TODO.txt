@@ -71,6 +71,8 @@ From Andrew B.
 From Dimitri L.
 [*] Being able to apply various methods based on a sub-sampled cloud
 [*] Vector fields (http://www.cloudcompare.org/forum/viewtopic.php?t=201)
+[*] Histogram enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=1160)
+[*] Color scale enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=1160)
 
 From Thomas D.
 [*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)

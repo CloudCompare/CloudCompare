@@ -5,13 +5,13 @@ v2.6.1 02/20/2015
 	* Level Tool
 		- accessible via 'Tools > Level' or via the left toolbar
 		- let the user pick three points (typically on the floor) so as to make the selected entity
-			level (the selected entity can be a cloud, a mesh or even a group of entitites)
+			level (the selected entity can be a cloud, a mesh or even a group of entities)
 	* New tool: 'Tools > Fit > Sphere'
 		- to robustly fit a sphere on a cloud (up to 50% outliers)
 		- automatically detects the center and radius
 	* New tool: 'Tools > Register > Match scales'
 		- to rescale a of entities so that they all have the same scale
-		- several methods to compute the scale (longest bounding-box dimension, bouding-box volume,
+		- several methods to compute the scale (longest bounding-box dimension, bounding-box volume,
 			principal dimension according to PCA, ICP registration)
 	* Section Extraction Tool
 		- let the user define or import '2D sections' (polylines) over one or several clouds
@@ -48,7 +48,7 @@ v2.6.1 02/20/2015
 	* New tool: 'Tools > Contour plot (polylines) to mesh'
 		- triangulates one or several polylines (e.g. contour lines)
 		- the triangulation tries to keep the input polylines as triangle edges
-			(if the poylines are not corssing once projected in 2D)
+			(if the poylines are not crossing once projected in 2D)
 	* DP file I/O filter (plugin)
 		- to open DP (DotProduct - http://www.dotproduct3d.com/) files
 		- imports each frame as a separate cloud (all frames can be merged afterwards with 'Edit > Merge')
@@ -58,7 +58,7 @@ v2.6.1 02/20/2015
 		- when performing 'Spatial' resampling, the user can now choose to use the active scalar field
 			to modulate the sampling distance depending on the scalar field values.
 		- the user simply has to set the sampling distances associated to the minimal and maximal SF
-			values and CC will linearly map the values inbetween.
+			values and CC will linearly map the values in-between.
 	* Color scale editor:
 		- the icon is now directly accessible in the main toolbar
 		- the user can export (and import) individual color scales as XML files
@@ -88,7 +88,7 @@ v2.6.1 02/20/2015
 		- more display options (opacity, marker color, label font size, etc.)
 	* Contour extraction
 		- contour extraction (either in the 'Cross Section' tool or the new 'Section Extraction ' tool is now smarter
-		- a 'visual debuging mode' is also available to (try to) understand how the algorithm works and
+		- a 'visual debugging mode' is also available to (try to) understand how the algorithm works and
 			which parts of the cloud may cause a strange behavior / bad result
 	* Poylines can now be associated to 'Global shift & scale' information
 		- works just as point clouds
@@ -102,7 +102,7 @@ v2.6.1 02/20/2015
 		- the current viewport is also exported (as a child of the polyline)
 		- if such a polyline is imported later in the tool, CC will propose to apply the associated viewport so as the
 			polyline is in the exact same position/orientation relatively to the segmented entities
-	* Interfactive Transformation tool:
+	* Interactive Transformation tool:
 		- the rotation center can now be modified with the 'Pick rotation center' tool (reticle icon in the left toolbar)
 	* Point-pair based alignment:
 		- the tool can now be used with meshes (points are picked directly on the mesh surface)
@@ -125,7 +125,7 @@ v2.6.1 02/20/2015
 			scale values (warning: accuracy might not be preserved if the cloud has been transformed, etc.)
 	* Command line:
 		- the command line tool can now load and process multiple meshes coming from the same file
-		- New option '-DELAUNAY': to mesh the laoded clouds with Delaunay 2.5D triangulation
+		- New option '-DELAUNAY': to mesh the loaded clouds with Delaunay 2.5D triangulation
 		- New option '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
 		- New option '-APPLY_TRANS': to apply a transformation (read from a simple text file with the 4x4 transformation
 		- New option '-REMOVE_ALL_SFS': to remove all scalar fields (from all loaded entities, i.e. clouds or meshes)
@@ -133,7 +133,7 @@ v2.6.1 02/20/2015
 			matrix rows on each line)
 		- the 'COMPUTE_PTX_NORMALS' option has been renamed 'COMPUTE_NORMALS' (as it can now be used for both PTX and DP files)
 		- Default behavior of some commands has slightly changed (see http://www.cloudcompare.org/doc/wiki/index.php?title=CommandLine)
-	* SF Arithmetics:
+	* SF Arithmetic:
 		- new operator 'INT' (integer part) to extract the integer part of scalar values
 		- new operator 'INVERSE' (1/x)
 	* Edit > Multiply/Scale
@@ -155,15 +155,15 @@ v2.6.1 02/20/2015
 	* Transformation history is now properly maintained:
 		- on a mesh vertices after cloning
 		- when manually segmenting an entity
-	* Meta-data are now preseverd when cloning, subsampling or segmenting an entity
+	* Meta-data are now preserved when cloning, subsampling or segmenting an entity
 	* FARO I/O plugin:
 		- the plugin can now load the RGB colors (instead of the reflection values - as a scalar field)
 	* DotProduct I/O plugin:
 		- updated SDK version (2.0) with bug fixes and other enhancements
 
-- Bug fix:
+- Bug fixes:
 	- Delaunay 2D1/2 was crashing on Windows 8
-	- the 'Sample points' tools was not handling texture coordinates with negative vaues or values above 1
+	- the 'Sample points' tools was not handling texture coordinates with negative values or values above 1
 		(i.e. repetitive textures)
 	- In OBJ files (.mtl) material names containing space characters were not correctly handled by CC
 	- when merging meshes with similar material names, 'funny things' could happen
@@ -178,14 +178,14 @@ v2.6.1 02/20/2015
 	- when comparing a cloud and a mesh, the best octree level guessed by CloudCompare could go much higher than 9
 		(with the 64 bits version which has now a maximum octree level of 21 by default). However this could cause
 		a much too high memory consumption and eventually a crash.
-	- when the order of entites was changed in the DB tree, the display was not updated right away
+	- when the order of entities was changed in the DB tree, the display was not updated right away
 	- the actual transformation applied to entities at the end of the 'Interactive Transformation Tool' could be slightly
 		shifted in some cases
 	- Regarding the local modeling option '2D1/2 triangulation' of the C2C distances computation:
 		* it was much slower than it should (potentially much more points were triangulated than necessary)
 		* it could crash if many duplicate points were present in the reference cloud
 	- Performing the ICP registration with very few points (e.g. 4) could be much slower than expected
-	- Files in a folder with 'local' language characters (accetns, etc.) could not be opened by several I/O filters
+	- Files in a folder with 'local' language characters (accents, etc.) could not be opened by several I/O filters
 		(LAS, E57, PCD and PDMS)
 	- Memory leaks fixed in PDMS I/O filter (the R-TORUS primitive was not even imported to the main DB!)
 	- Polylines could be selected when performing graphical segmentation (while they are not supported yet) causing

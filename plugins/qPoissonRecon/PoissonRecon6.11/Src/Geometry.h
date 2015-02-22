@@ -31,6 +31,7 @@ DAMAGE.
 
 #include <math.h>
 #include <vector>
+#include <stdlib.h>
 #include "Hash.h"
 
 template<class Real>

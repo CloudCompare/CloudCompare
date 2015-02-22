@@ -312,7 +312,7 @@ MainWindow::~MainWindow()
 	if (m_mdiArea)
 	{
 		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-		for (int i=0;i<subWindowList.size();++i)
+		for (int i=0; i<subWindowList.size(); ++i)
 			static_cast<ccGLWindow*>(subWindowList[i]->widget())->setSceneDB(0);
 	}
 	m_cpeDlg = 0;
@@ -11323,7 +11323,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
-	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	actionCrop->setEnabled(atLeastOneCloud);
 	actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);

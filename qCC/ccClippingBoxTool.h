@@ -68,8 +68,8 @@ protected slots:
 	void closeDialog();
 	void extractContour();
 	void removeLastContour();
-	void exportCloud();
-	void exportMultCloud();
+	void exportSlice();
+	void exportMultSlices();
 
 	void onBoxModified(const ccBBox* box);
 

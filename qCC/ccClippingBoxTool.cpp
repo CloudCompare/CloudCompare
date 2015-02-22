@@ -62,8 +62,8 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	connect(editBoxToolButton,				SIGNAL(clicked()), this, SLOT(editBox()));
 	connect(extractContourToolButton,		SIGNAL(clicked()), this, SLOT(extractContour()));
 	connect(removeLastContourToolButton,	SIGNAL(clicked()), this, SLOT(removeLastContour()));
-	connect(exportButton,					SIGNAL(clicked()), this, SLOT(exportCloud()));
-	connect(exportMultButton,				SIGNAL(clicked()), this, SLOT(exportMultCloud()));
+	connect(exportButton,					SIGNAL(clicked()), this, SLOT(exportSlice()));
+	connect(exportMultButton,				SIGNAL(clicked()), this, SLOT(exportMultSlices()));
 	connect(resetButton,					SIGNAL(clicked()), this, SLOT(reset()));
 	connect(closeButton,					SIGNAL(clicked()), this, SLOT(closeDialog()));
 
@@ -263,7 +263,7 @@ void ccClippingBoxTool::removeLastContour()
 	removeLastContourToolButton->setEnabled(false);
 }
 
-void ccClippingBoxTool::exportCloud()
+void ccClippingBoxTool::exportSlice()
 {
 	if (!m_clipBox || !MainWindow::TheInstance())
 		return;
@@ -289,7 +289,7 @@ void ccClippingBoxTool::extractContour()
 	extractSlicesAndContours(false, true, /*singleContourMode=*/true);
 }
 
-void ccClippingBoxTool::exportMultCloud()
+void ccClippingBoxTool::exportMultSlices()
 {
 	extractSlicesAndContours(true, true, /*singleContourMode=*/false);
 }
@@ -582,7 +582,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 								if (pDlg.wasCanceled())
 								{
 									error = true;
-									ccLog::Warning(QString("[ccClippingBoxTool::exportMultCloud] Process canceled by user"));
+									ccLog::Warning(QString("[ccClippingBoxTool::extractSlicesAndContours] Process canceled by user"));
 									//early stop
 									i = indexMaxs[0];
 									j = indexMaxs[1];
@@ -686,7 +686,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						if (pDlg.wasCanceled())
 						{
 							error = true;
-							ccLog::Warning(QString("[ccClippingBoxTool::exportMultCloud] Process canceled by user"));
+							ccLog::Warning(QString("[ccClippingBoxTool::extractSlicesAndContours] Process canceled by user"));
 							//early stop
 							i = indexMaxs[0];
 							j = indexMaxs[1];
@@ -733,7 +733,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			if (warningsIssued)
 			{
-				ccLog::Warning("[ccClippingBoxTool::exportMultCloud] Warnings were issued during the process! (result may be incomplete)");
+				ccLog::Warning("[ccClippingBoxTool::extractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)");
 			}
 			if (sliceGroup)
 			{

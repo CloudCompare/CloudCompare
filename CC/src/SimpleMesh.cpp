@@ -55,8 +55,8 @@ unsigned SimpleMesh::size() const
 void SimpleMesh::forEach(genericTriangleAction& anAction)
 {
 	SimpleTriangle tri;
-	unsigned i,count=m_triIndexes->currentSize();
-	for (i=0;i<count;++i)
+	unsigned count = m_triIndexes->currentSize();
+	for (unsigned i=0; i<count; ++i)
 	{
 		const unsigned *ti = m_triIndexes->getValue(i);
 		theVertices->getPoint(ti[0],tri.A);

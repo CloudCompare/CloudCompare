@@ -35,7 +35,7 @@ class GenericIndexedCloud;
 **/
 class CC_CORE_LIB_API SimpleMesh : virtual public GenericIndexedMesh
 {
-public:
+public: //constructors
 
 	//! SimpleMesh Constructor
 	/** \param _theVertices the point cloud containing the vertices
@@ -46,7 +46,8 @@ public:
 	//! SimpleMesh destructor
 	virtual ~SimpleMesh();
 
-	//inherited methods
+public: //inherited methods
+
 	virtual void forEach(genericTriangleAction& anAction);
 	virtual void placeIteratorAtBegining();
 	virtual GenericTriangle* _getNextTriangle(); //temporary
@@ -57,7 +58,13 @@ public:
 	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 
-	//specific methods
+public: //specific methods
+
+	//! Returns the mesh capacity
+	inline unsigned capacity() const { return m_triIndexes->capacity(); }
+
+	//! Returns the vertices
+	inline const GenericIndexedCloud* vertices() const { return theVertices; }
 
 	//! Adds a triangle to the mesh
 	/** \param i1 first summit index (relatively to the vertex cloud)
@@ -95,7 +102,7 @@ protected:
 	//! Dump triangle structure to transmit temporary data
 	SimpleTriangle dummyTriangle;
 
-	//! The associated point cloud (vertexes)
+	//! The associated point cloud (vertices)
 	GenericIndexedCloud* theVertices;
 	//! Specifies if the associated cloud should be deleted when the mesh is deleted
 	bool verticesLinked;

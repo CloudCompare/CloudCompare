@@ -32,8 +32,10 @@
 #include <PointProjectionTools.h>
 #include <GeometricalAnalysisTools.h>
 #include <SimpleCloud.h>
+#include <SimpleMesh.h>
 #include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
+#include <ManualSegmentationTools.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -8722,18 +8724,17 @@ void MainWindow::doActionCrop()
 	size_t selNum = selectedEntities.size();
 
 	//find candidates
-	std::vector<ccPointCloud*> candidates;
+	std::vector<ccHObject*> candidates;
 	ccBBox baseBB;
 	{
 		for (size_t i=0; i<selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
-			if (ent->isA(CC_TYPES::POINT_CLOUD))
+			if (	ent->isA(CC_TYPES::POINT_CLOUD)
+				||	ent->isKindOf(CC_TYPES::MESH) )
 			{
-				ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
-				candidates.push_back(cloud);
-
-				baseBB += cloud->getOwnBB();
+				candidates.push_back(ent);
+				baseBB += ent->getOwnBB();
 			}
 		}
 	}
@@ -8756,35 +8757,108 @@ void MainWindow::doActionCrop()
 	if (m_ccRoot)
 		m_ccRoot->unselectAllEntities();
 
+	//cropping box
+	ccBBox box = bbeDlg.getBox();
+
 	//process cloud/meshes
 	{
 		for (size_t i=0; i<candidates.size(); ++i)
 		{
-			ccPointCloud* cloud = candidates[i];
-
-			CCLib::ReferenceCloud* selection = cloud->crop(bbeDlg.getBox(),true);
-			if (selection)
+			ccHObject* ent = candidates[i];
+			if (ent->isA(CC_TYPES::POINT_CLOUD))
 			{
-				if (selection->size() != 0)
+				ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
+
+				CCLib::ReferenceCloud* selection = cloud->crop(box, true);
+				if (selection)
 				{
-					//crop
-					ccPointCloud* croppedEnt = cloud->partialClone(selection);
-					if (croppedEnt)
+					if (selection->size() != 0)
 					{
-						croppedEnt->setName(cloud->getName()+QString(".cropped"));
-						croppedEnt->setDisplay(cloud->getDisplay());
-						addToDB(croppedEnt);
-						m_ccRoot->selectEntity(croppedEnt,true);
+						//crop
+						ccPointCloud* croppedEnt = cloud->partialClone(selection);
+						if (croppedEnt)
+						{
+							croppedEnt->setName(cloud->getName() + QString(".cropped"));
+							croppedEnt->setDisplay(cloud->getDisplay());
+							addToDB(croppedEnt);
+							m_ccRoot->selectEntity(croppedEnt, true);
+						}
+					}
+					else
+					{
+						//no points fall inside selection!
+						ccConsole::Warning(QString("[ccPointCloud::crop] No point of cloud '%1' falls inside the input box!").arg(cloud->getName()));
+					}
+
+					delete selection;
+					selection = 0;
+				}
+			}
+			else if (ent->isKindOf(CC_TYPES::MESH))
+			{
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+				CCLib::ManualSegmentationTools::PlaneCutterParams params;
+				params.planeOrthoDim = 2;
+				params.planeCoord = box.minCorner().z;
+				if (CCLib::ManualSegmentationTools::segmentMeshWitAAPlane(mesh, mesh->getAssociatedCloud(), params))
+				{
+					if (params.minusMesh)
+					{
+						ccPointCloud* minusVertices = ccPointCloud::From(params.minusMesh->vertices());
+						if (minusVertices)
+						{
+							ccMesh* minusMesh = new ccMesh(params.minusMesh, minusVertices);
+							minusMesh->addChild(minusVertices);
+							minusVertices->setEnabled(false);
+							if (minusMesh->size() != 0)
+							{
+								minusMesh->setDisplay_recursive(ent->getDisplay());
+								addToDB(minusMesh);
+							}
+							else
+							{
+								//not enough memory
+								delete minusMesh;
+								minusMesh = 0;
+								ccLog::Error("Failed to create 'minus' part (not enough memory)");
+							}
+						}
+
+						//don't need this anymore
+						delete params.minusMesh;
+						params.minusMesh = 0;
+					}
+					if (params.plusMesh)
+					{
+						ccPointCloud* plusVertices = ccPointCloud::From(params.plusMesh->vertices());
+						if (plusVertices)
+						{
+							ccMesh* plusMesh = new ccMesh(params.plusMesh, plusVertices);
+							plusMesh->addChild(plusVertices);
+							plusVertices->setEnabled(false);
+							if (plusMesh->size() != 0)
+							{
+								plusMesh->setDisplay_recursive(ent->getDisplay());
+								addToDB(plusMesh);
+							}
+							else
+							{
+								//not enough memory
+								delete plusMesh;
+								plusMesh = 0;
+								ccLog::Error("Failed to create 'plus' part (not enough memory)");
+							}
+						}
+
+						//don't need this anymore
+						delete params.plusMesh;
+						params.plusMesh = 0;
 					}
 				}
-				else
-				{
-					//no points fall inside selection!
-					ccConsole::Warning(QString("[ccPointCloud::crop] No point of cloud '%1' falls inside the input box!").arg(cloud->getName()));
-				}
-
-				delete selection;
-				selection = 0;
+			}
+			else
+			{
+				assert(false);
 			}
 		}
 	}

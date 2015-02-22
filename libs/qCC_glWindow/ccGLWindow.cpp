@@ -503,7 +503,7 @@ void ccGLWindow::initializeGL()
 				if (!colorRampShader->loadProgram(QString(),shadersPath+QString("/ColorRamp/color_ramp.frag"),error))
 				{
 					if (!m_silentInitialization)
-						ccLog::Warning(QString("[3D View %i] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
+						ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
 					delete colorRampShader;
 					colorRampShader = 0;
 				}

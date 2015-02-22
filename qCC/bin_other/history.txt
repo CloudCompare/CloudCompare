@@ -62,6 +62,7 @@ v2.6.1 02/20/2015
 	* Color scale editor:
 		- the icon is now directly accessible in the main toolbar
 		- the user can export (and import) individual color scales as XML files
+		- the color of new steps is now interpolated from the existing color ramp instead of being white by default
 	* CPU-based point picking
 		- CloudCompare now performs point picking (or triangle picking) with a CPU-based approach
 			instead of relying on OpenGL. The process should be faster, especially on low-end
@@ -128,9 +129,9 @@ v2.6.1 02/20/2015
 		- New option '-DELAUNAY': to mesh the loaded clouds with Delaunay 2.5D triangulation
 		- New option '-PLY_EXPORT_FMT': to specify the format of output PLY files (ASCII, BINARY_LE or BINARY_BE)
 		- New option '-APPLY_TRANS': to apply a transformation (read from a simple text file with the 4x4 transformation
+			matrix rows on each line)
 		- New option '-REMOVE_ALL_SFS': to remove all scalar fields (from all loaded entities, i.e. clouds or meshes)
 		- New option '-CBANDING': to apply color 'banding' (the user must also specify the dimension and the frequency)
-			matrix rows on each line)
 		- the 'COMPUTE_PTX_NORMALS' option has been renamed 'COMPUTE_NORMALS' (as it can now be used for both PTX and DP files)
 		- Default behavior of some commands has slightly changed (see http://www.cloudcompare.org/doc/wiki/index.php?title=CommandLine)
 	* SF Arithmetic:
@@ -138,8 +139,8 @@ v2.6.1 02/20/2015
 		- new operator 'INVERSE' (1/x)
 	* Edit > Multiply/Scale
 		- polylines can now be scaled (just as clouds and meshes)
-	* Color Scale Editor:
-		- the color of new steps is now interpolated from the existing color ramp instead of being white by default
+		- new 'keep in place' option: the user can choose whether the entities (center) stay at the same position (new default) or not
+		- if the coordinates after scaling become too big, CC will warn the user but will let proceed anyway
 	* qSRA plugin (Surface of Revolution Analysis):
 		- the conical projection now handles 'inverted' cases (with negative latitude values)
 	* Curvature estimation:
@@ -149,9 +150,6 @@ v2.6.1 02/20/2015
 		- the 'zoom speed' in perspective mode can now be set by the user
 	* DXF filter:
 		- the DXF I/O filter now handles global shift (i.e. large coordinates)
-	* 'Edit > Multiply / Scale' tool:
-		- the user can choose whether the entities (center) stay at the same position (new default) or not
-		- if the coordinates after scaling become too big, CC will warn the user but will let proceed anyway
 	* Transformation history is now properly maintained:
 		- on a mesh vertices after cloning
 		- when manually segmenting an entity

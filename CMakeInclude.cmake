@@ -140,17 +140,8 @@ if( WIN32 )		# 1 argument: ARGV0 = base destination
 			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}d${QT_VER_NUM}.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/imageformats )
 		endif()
 	endforeach()
-elseif( APPLE )	# 2 arguments: ARGV0 = bundle's plugin dir (destination) / ARGV1 = list of plugins to pass to fixup_bundle
-	if ( USE_QT5 )
-		message( SEND_ERROR "CMake's FindQt5 script doesn't help us anymore for this!!!" )
-	endif()
-	# install imageformat plugins
-	foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
-		set( PLUGIN_NAME lib${imagePlugin}${CMAKE_SHARED_LIBRARY_SUFFIX} )
-		install( FILES ${QT_PLUGINS_DIR}/imageformats/${PLUGIN_NAME} DESTINATION ${ARGV0}/imageformats COMPONENT Runtime )
-		list( APPEND QT_PLUGINS ${ARGV0}/imageformats/${PLUGIN_NAME} )
-	endforeach()
-	set( ${ARGV1} ${QT_PLUGINS} PARENT_SCOPE )
+elseif( APPLE )
+    message( SEND_ERROR "install_Qt_ImageFormats should not be called on Mac OS X.  This is handled by macdeployqt." )
 endif()
 endfunction()
 
@@ -223,13 +214,10 @@ if( APPLE )
 
       if( ${OPTION_USE_XIOT} )
          list( APPEND SUPPORT_LIB_NAMES libxiot )
-         list( APPEND SUPPORT_LIB_NAMES libxerces-c )
-         list( APPEND SUPPORT_LIB_NAMES libopenFI )
       endif()
       
       if( ${OPTION_USE_LIBLAS} )
          list( APPEND SUPPORT_LIB_NAMES liblas )
-         list( APPEND SUPPORT_LIB_NAMES liblaszip )
       endif()
 
       foreach( supportLib ${SUPPORT_LIB_NAMES} )

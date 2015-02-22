@@ -55,7 +55,7 @@
 #include <assert.h>
 
 //! Current version
-const double CC_VIEWER_VERSION = 1.33;
+const double CC_VIEWER_VERSION = 1.34;
 const QString CC_VIEWER_VERSION_STR = QString::number(CC_VIEWER_VERSION,'f',2);
 
 //Camera parameters dialog

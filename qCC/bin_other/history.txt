@@ -1,5 +1,8 @@
 *** CloudCompare versions history ***
 
+v2.6.2 XX/XX/2015
+-
+
 v2.6.1 02/20/2015
 - New features:
 	* Level Tool

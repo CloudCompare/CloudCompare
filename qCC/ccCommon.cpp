@@ -23,7 +23,7 @@
 #include <CCPlatform.h>
 
 #define CC_VER_NUM "2.6"
-#define CC_SUB_VER "1" //2015-02-21
+#define CC_SUB_VER "2.beta" //2015-02-23
 
 //! Returns current version as a string
 QString ccCommon::GetCCVersion(bool full/*=true*/)

@@ -1867,8 +1867,6 @@ void MainWindow::doActionApplyScale()
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
 	size_t processNum = 0;
-	bool firstCloud = true;
-	bool applyScaleAsShift = false;
 
 	//first check that all coordinates are kept 'small'
 	std::vector< EntityCloudAssociation > candidates;

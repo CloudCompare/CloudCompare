@@ -293,7 +293,9 @@ MainWindow::MainWindow()
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
 
+#ifndef Q_OS_MAC
 	restoreState(settings.value(ccPS::MainWinState()).toByteArray());
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -1867,8 +1869,6 @@ void MainWindow::doActionApplyScale()
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
 	size_t processNum = 0;
-	bool firstCloud = true;
-	bool applyScaleAsShift = false;
 
 	//first check that all coordinates are kept 'small'
 	std::vector< EntityCloudAssociation > candidates;

@@ -293,7 +293,9 @@ MainWindow::MainWindow()
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
 
+#ifndef Q_OS_MAC
 	restoreState(settings.value(ccPS::MainWinState()).toByteArray());
+#endif
 }
 
 MainWindow::~MainWindow()

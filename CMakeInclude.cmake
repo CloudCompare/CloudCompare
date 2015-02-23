@@ -36,7 +36,6 @@ if( WIN32 )
 		if ( NOT USE_QT5 )
 			set( QT_RELEASE_DLLS_BASE_NAME QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
 		else()
-			set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
 			#standard DLLs
 			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
 			#ICU DLLs
@@ -76,7 +75,6 @@ if( WIN32 )
 			if ( NOT USE_QT5 )
 				set( QT_DEBUG_DLLS_BASE_NAME QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
 			else()
-				#set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
 				#standard DLLs
 				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
 				#ICU DLLs

@@ -11428,7 +11428,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
-	actionCrop->setEnabled(atLeastOneCloud);
+	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);

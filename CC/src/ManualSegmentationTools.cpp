@@ -701,15 +701,16 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 		unsigned triCount = mesh->size();
 		for (unsigned i = 0; i < triCount; ++i)
 		{
-			//original vertices
-			const GenericTriangle* tri = mesh->_getTriangle(i);
-			CCVector3d V[3] = { CCVector3d::fromArray(tri->_getA()->u),
-								CCVector3d::fromArray(tri->_getB()->u),
-								CCVector3d::fromArray(tri->_getC()->u) };
-
 			//original vertices indexes
 			const TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
-			unsigned origVertIndexes[3] = { tsi->i1, tsi->i2, tsi->i3 };
+			CCVector3d V[3] = { CCVector3d::fromArray(vertices->getPoint(tsi->i1)->u),
+								CCVector3d::fromArray(vertices->getPoint(tsi->i2)->u),
+								CCVector3d::fromArray(vertices->getPoint(tsi->i3)->u) };
+
+			unsigned origVertIndexes[3] = {
+				tsi->i1 | c_origIndexFlag,
+				tsi->i2 | c_origIndexFlag,
+				tsi->i3 | c_origIndexFlag };
 
 			//test each vertex
 			char relativePos[3] = { 1, 1, 1 };
@@ -800,20 +801,20 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 					}
 
 					//we can now create two triangles
-					unsigned char i0 = 3 - iMinus - iPlus;
+					unsigned char iCenter = 3 - iMinus - iPlus;
 					if (!AddTriangle(
-						origVertIndexes[i0] | c_origIndexFlag,
-						origVertIndexes[iMinus] | c_origIndexFlag,
+						origVertIndexes[iCenter],
+						origVertIndexes[iMinus],
 						iCinside,
 						minusMesh,
-						((i0 + 1) % 3) == iMinus)
+						((iCenter + 1) % 3) == iMinus)
 
 					||	!AddTriangle(
-						origVertIndexes[i0] | c_origIndexFlag,
-						origVertIndexes[iPlus] | c_origIndexFlag,
+						origVertIndexes[iCenter],
+						origVertIndexes[iPlus],
 						iCoutside,
 						plusMesh,
-						((i0 + 1) % 3) == iPlus))
+						((iCenter + 1) % 3) == iPlus))
 					{
 						//early stop
 						i = triCount;
@@ -872,7 +873,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 
 					//we are going to create 3 triangles
 					if (!AddTriangle(
-						origVertIndexes[iLeft] | c_origIndexFlag,
+						origVertIndexes[iLeft],
 						leftIsMinus ? i1inside : i1outside,
 						leftIsMinus ? i2inside : i2outside,
 						leftIsMinus ? minusMesh : plusMesh,
@@ -881,14 +882,14 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 					||	!AddTriangle(
 						leftIsMinus ? i1outside : i1inside,
 						leftIsMinus ? i2outside : i2inside,
-						origVertIndexes[iRight1] | c_origIndexFlag,
+						origVertIndexes[iRight1],
 						leftIsMinus ? plusMesh : minusMesh,
 						((iRight2 + 1) % 3) == iRight1)
 
 					||	!AddTriangle(
-						origVertIndexes[iRight1] | c_origIndexFlag,
+						origVertIndexes[iRight1],
 						leftIsMinus ? i2outside : i2inside,
-						origVertIndexes[iRight2] | c_origIndexFlag,
+						origVertIndexes[iRight2],
 						leftIsMinus ? plusMesh : minusMesh,
 						((iRight2 + 1) % 3) == iRight1) )
 					{
@@ -967,6 +968,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	const CCVector3d& bbMin = ioParams.bbMin;
 	const CCVector3d& bbMax = ioParams.bbMax;
 
+	//Extract the 6 'planes' corresponding to the input box faces
 	Plane planes[6];
 	{
 		//X
@@ -1038,10 +1040,10 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			s_edgePoint.clear();
 
 			//look for original triangles
-			//(the first time they only come from the original mesh
-			// then they can come from the original mesh through the 'preserved'
-			// list or from the previous 'inside' mesh as we have to test those
-			// triangles against the new plane)
+			//(the first time they only come from the original mesh but afterwards
+			// they can come from the original mesh through the 'preserved' list
+			// or from the previous 'inside' mesh as we have to test those triangles
+			// against the new plane)
 			unsigned sourceTriCount = sourceMesh->size(); //source: previous/original mesh
 			unsigned formerPreservedTriCount = static_cast<unsigned>(formerPreservedTriangles->size());
 			unsigned triCount = sourceTriCount + formerPreservedTriCount;
@@ -1131,8 +1133,6 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				case 1: //2 vertices 'in' the plane
 				{
 					//the triangle is either on one side or another ;)
-					//const std::vector<unsigned char>& nonEmptySet = (insideVertices.empty() ? outsideVertices : insideVertices);
-					//assert(nonEmptySet.size() != 0);
 					if (insideLocalVertIndexes.empty())
 					{
 						//the only vertex far from the plane is on the 'otuside'

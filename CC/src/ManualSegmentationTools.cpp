@@ -295,7 +295,8 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 }
 
 const unsigned c_origIndexFlag = 0x80000000; //original index flag (bit 31)
-const unsigned c_origIndexMask = 0x7FFFFFFF; //original index maskl
+const unsigned c_srcIndexFlag  = 0x40000000; //source index flag (bit 30)
+const unsigned c_realIndexMask = 0x3FFFFFFF; //original index mask (bit 0 to 29) --> max allowed index = 1073741823 ;)
 const unsigned c_defaultArrayGrowth = 100;
 
 #include <map>
@@ -311,13 +312,30 @@ struct PlusMinusIndexes
 };
 static std::map< uint64_t, PlusMinusIndexes > s_edgePoint;
 
+bool AddVertex(CCVector3d& P, ChunkedPointCloud* vertices, unsigned& index)
+{
+	assert(vertices);
+	//add vertex to the 'vertices' set
+	unsigned vertCount = vertices->size();
+	if (vertCount == vertices->capacity()
+		&& !vertices->reserve(vertCount + c_defaultArrayGrowth))
+	{
+		//not enough memory!
+		return false;
+	}
+	vertices->addPoint(CCVector3::fromArray(P.u));
+	index = vertCount;
+	return true;
+}
+
+
 bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 	const CCVector3d& B, unsigned iB,
-	unsigned& iCplus, unsigned& iCminus,
+	unsigned& iCoutside, unsigned& iCinside,
 	double planeCoord, unsigned char planeDim,
-	ChunkedPointCloud* plusVertices, ChunkedPointCloud* minusVertices)
+	ChunkedPointCloud* outsideVertices, ChunkedPointCloud* insideVertices)
 {
-	assert(plusVertices && minusVertices);
+	assert(outsideVertices && insideVertices);
 
 	//first look if we already know this edge
 	uint64_t key = 0;
@@ -329,12 +347,12 @@ bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 		key = (static_cast<uint64_t>(minIndex) << 32) | static_cast<uint64_t>(maxIndex);
 	}
 	
-	//if the key (edge) alread exists
+	//if the key (edge) already exists
 	if (s_edgePoint.find(key) != s_edgePoint.end())
 	{
 		const PlusMinusIndexes& pmi = s_edgePoint[key];
-		iCplus = pmi.plusIndex;
-		iCminus = pmi.minusIndex;
+		iCoutside = pmi.plusIndex;
+		iCinside = pmi.minusIndex;
 	}
 	//otherwise we'll create it
 	else
@@ -342,31 +360,13 @@ bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 		CCVector3d I = A + (B - A) * (planeCoord - A.u[planeDim]) / (B.u[planeDim] - A.u[planeDim]);
 
 		//add vertex to the plus 'vertices' set
-		{
-			unsigned vertCount = plusVertices->size();
-			if (vertCount == plusVertices->capacity()
-				&& !plusVertices->reserve(vertCount + c_defaultArrayGrowth))
-			{
-				//not enough memory!
-				return false;
-			}
-			plusVertices->addPoint(CCVector3::fromArray(I.u));
-			iCplus = vertCount;
-		}
+		if (!AddVertex(I, outsideVertices, iCoutside))
+			return false;
 		//add vertex to the minus 'vertices' set
-		{
-			unsigned vertCount = minusVertices->size();
-			if (vertCount == minusVertices->capacity()
-				&& !minusVertices->reserve(vertCount + c_defaultArrayGrowth))
-			{
-				//not enough memory!
-				return false;
-			}
-			minusVertices->addPoint(CCVector3::fromArray(I.u));
-			iCminus = vertCount;
-		}
+		if (!AddVertex(I, insideVertices, iCinside))
+			return false;
 
-		s_edgePoint[key] = PlusMinusIndexes(iCplus,iCminus);
+		s_edgePoint[key] = PlusMinusIndexes(iCoutside,iCinside);
 	}
 
 	return true;
@@ -484,11 +484,11 @@ bool MergeOldTriangles(GenericIndexedMesh* origMesh,
 			{
 				const TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
 				if (tsi->i1 & c_origIndexFlag)
-					newIndexMap[tsi->i1 & c_origIndexMask] = 1;
+					newIndexMap[tsi->i1 & c_realIndexMask] = 1;
 				if (tsi->i2 & c_origIndexFlag)
-					newIndexMap[tsi->i2 & c_origIndexMask] = 1;
+					newIndexMap[tsi->i2 & c_realIndexMask] = 1;
 				if (tsi->i3 & c_origIndexFlag)
-					newIndexMap[tsi->i3 & c_origIndexMask] = 1;
+					newIndexMap[tsi->i3 & c_realIndexMask] = 1;
 			}
 		}
 
@@ -533,11 +533,11 @@ bool MergeOldTriangles(GenericIndexedMesh* origMesh,
 			{
 				TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
 				if (tsi->i1 & c_origIndexFlag)
-					tsi->i1 = newIndexMap[tsi->i1 & c_origIndexMask];
+					tsi->i1 = newIndexMap[tsi->i1 & c_realIndexMask];
 				if (tsi->i2 & c_origIndexFlag)
-					tsi->i2 = newIndexMap[tsi->i2 & c_origIndexMask];
+					tsi->i2 = newIndexMap[tsi->i2 & c_realIndexMask];
 				if (tsi->i3 & c_origIndexFlag)
-					tsi->i3 = newIndexMap[tsi->i3 & c_origIndexMask];
+					tsi->i3 = newIndexMap[tsi->i3 & c_realIndexMask];
 			}
 		}
 
@@ -572,9 +572,95 @@ bool MergeOldTriangles(GenericIndexedMesh* origMesh,
 	return true;
 }
 
+bool ImportSourceVertices(GenericIndexedCloudPersist* srcVertices,
+							SimpleMesh* newMesh,
+							ChunkedPointCloud* newVertices)
+{
+	assert(srcVertices && newMesh && newVertices);
+
+	unsigned srcVertCount = srcVertices->size();
+	unsigned newVertCount = newVertices->size();
+	unsigned newTriCount = newMesh->size();
+
+	try
+	{
+		//first determine the number of source vertices that should be imported
+		std::vector<unsigned> newIndexMap;
+		newIndexMap.resize(srcVertCount, 0);
+
+		for (unsigned i = 0; i < newTriCount; ++i)
+		{
+			const TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
+			if (tsi->i1 & c_srcIndexFlag)
+				newIndexMap[tsi->i1 & c_realIndexMask] = 1;
+			if (tsi->i2 & c_srcIndexFlag)
+				newIndexMap[tsi->i2 & c_realIndexMask] = 1;
+			if (tsi->i3 & c_srcIndexFlag)
+				newIndexMap[tsi->i3 & c_realIndexMask] = 1;
+		}
+
+		//count the number of used vertices
+		unsigned importedVertCount = 0;
+		{
+			for (unsigned i = 0; i < srcVertCount; ++i)
+				if (newIndexMap[i])
+					++importedVertCount;
+		}
+
+		if (importedVertCount == 0)
+		{
+			//nothing to do
+			//(shouldn't happen but who knows?)
+			return true;
+		}
+
+		//reserve the memory to import the source vertices
+		if (!newVertices->reserve(newVertices->size() + importedVertCount))
+		{
+			//not enough memory
+			return false;
+		}
+		//then copy them
+		{
+			//update the destination indexes by the way
+			unsigned lastVertIndex = newVertCount;
+			for (unsigned i = 0; i < srcVertCount; ++i)
+			{
+				if (newIndexMap[i])
+				{
+					newVertices->addPoint(*srcVertices->getPoint(i));
+					newIndexMap[i] = lastVertIndex++;
+				}
+			}
+		}
+
+		//update the existing indexes
+		{
+			for (unsigned i = 0; i < newTriCount; ++i)
+			{
+				TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
+				if (tsi->i1 & c_srcIndexFlag)
+					tsi->i1 = newIndexMap[tsi->i1 & c_realIndexMask];
+				if (tsi->i2 & c_srcIndexFlag)
+					tsi->i2 = newIndexMap[tsi->i2 & c_realIndexMask];
+				if (tsi->i3 & c_srcIndexFlag)
+					tsi->i3 = newIndexMap[tsi->i3 & c_realIndexMask];
+			}
+		}
+	}
+	catch (std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
+
+	newVertices->resize(newVertices->size());
+
+	return true;
+}
 bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 	GenericIndexedCloudPersist* vertices,
-	PlaneCutterParams& ioParams,
+	MeshCutterParams& ioParams,
 	GenericProgressCallback* progressCb/*=0*/)
 {
 	if (	!mesh
@@ -602,10 +688,10 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 	std::vector<unsigned> preservedTrianglesMinus;
 	std::vector<unsigned> preservedTrianglesPlus;
 
-	ChunkedPointCloud* minusVertices = new ChunkedPointCloud;
-	SimpleMesh* minusMesh = new SimpleMesh(minusVertices, true);
-	ChunkedPointCloud* plusVertices = new ChunkedPointCloud;
-	SimpleMesh* plusMesh = new SimpleMesh(plusVertices, true);
+	ChunkedPointCloud* insideVertices = new ChunkedPointCloud;
+	SimpleMesh* minusMesh = new SimpleMesh(insideVertices, true);
+	ChunkedPointCloud* outsideVertices = new ChunkedPointCloud;
+	SimpleMesh* plusMesh = new SimpleMesh(outsideVertices, true);
 
 	bool error = false;
 
@@ -623,7 +709,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 
 			//original vertices indexes
 			const TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
-			unsigned origIndexes[3] = { tsi->i1, tsi->i2, tsi->i3 };
+			unsigned origVertIndexes[3] = { tsi->i1, tsi->i2, tsi->i3 };
 
 			//test each vertex
 			char relativePos[3] = { 1, 1, 1 };
@@ -664,8 +750,8 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 
 			case 1: //2 vertices 'in' the plane
 			{
-				//the triangle is either on one side or antehr ;)
-				//const std::vector<unsigned char>& nonEmptySet = (minusVertices.empty() ? plusVertices : minusVertices);
+				//the triangle is either on one side or another ;)
+				//const std::vector<unsigned char>& nonEmptySet = (insideVertices.empty() ? outsideVertices : insideVertices);
 				//assert(nonEmptySet.size() != 0);
 				if (minusVertIndexes.empty())
 				{
@@ -700,12 +786,12 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 					unsigned char iMinus = minusVertIndexes.front();
 					unsigned char iPlus = plusVertIndexes.front();
 
-					unsigned iCplus,ICminus;
-					if (!ComputeEdgePoint(V[iMinus], origIndexes[iMinus],
-						V[iPlus], origIndexes[iPlus],
-						iCplus, ICminus,
+					unsigned iCoutside,iCinside;
+					if (!ComputeEdgePoint(V[iMinus], origVertIndexes[iMinus],
+						V[iPlus], origVertIndexes[iPlus],
+						iCoutside, iCinside,
 						planeZ, Z,
-						plusVertices, minusVertices))
+						outsideVertices, insideVertices))
 					{
 						//early stop
 						i = triCount;
@@ -716,16 +802,16 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 					//we can now create two triangles
 					unsigned char i0 = 3 - iMinus - iPlus;
 					if (!AddTriangle(
-						origIndexes[i0] | c_origIndexFlag,
-						origIndexes[iMinus] | c_origIndexFlag,
-						ICminus,
+						origVertIndexes[i0] | c_origIndexFlag,
+						origVertIndexes[iMinus] | c_origIndexFlag,
+						iCinside,
 						minusMesh,
 						((i0 + 1) % 3) == iMinus)
 
 					||	!AddTriangle(
-						origIndexes[i0] | c_origIndexFlag,
-						origIndexes[iPlus] | c_origIndexFlag,
-						iCplus,
+						origVertIndexes[i0] | c_origIndexFlag,
+						origVertIndexes[iPlus] | c_origIndexFlag,
+						iCoutside,
 						plusMesh,
 						((i0 + 1) % 3) == iPlus))
 					{
@@ -773,10 +859,10 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 					}
 
 					//the plane cuts through the two edges having the 'single' vertex in common
-					unsigned i1plus, i1minus;
-					unsigned i2plus, i2minus;
-					if (!ComputeEdgePoint(V[iRight1], origIndexes[iRight1], V[iLeft], origIndexes[iLeft], i1plus, i1minus, planeZ, Z, plusVertices, minusVertices)
-					||	!ComputeEdgePoint(V[iRight2], origIndexes[iRight2], V[iLeft], origIndexes[iLeft], i2plus, i2minus, planeZ, Z, plusVertices, minusVertices))
+					unsigned i1outside, i1inside;
+					unsigned i2outside, i2inside;
+					if (!ComputeEdgePoint(V[iRight1], origVertIndexes[iRight1], V[iLeft], origVertIndexes[iLeft], i1outside, i1inside, planeZ, Z, outsideVertices, insideVertices)
+					||	!ComputeEdgePoint(V[iRight2], origVertIndexes[iRight2], V[iLeft], origVertIndexes[iLeft], i2outside, i2inside, planeZ, Z, outsideVertices, insideVertices))
 					{
 						//early stop
 						i = triCount;
@@ -786,23 +872,23 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 
 					//we are going to create 3 triangles
 					if (!AddTriangle(
-						origIndexes[iLeft] | c_origIndexFlag,
-						leftIsMinus ? i1minus : i1plus,
-						leftIsMinus ? i2minus : i2plus,
+						origVertIndexes[iLeft] | c_origIndexFlag,
+						leftIsMinus ? i1inside : i1outside,
+						leftIsMinus ? i2inside : i2outside,
 						leftIsMinus ? minusMesh : plusMesh,
 						((iLeft + 1) % 3) == iRight1)
 
 					||	!AddTriangle(
-						leftIsMinus ? i1plus : i1minus,
-						leftIsMinus ? i2plus : i2minus,
-						origIndexes[iRight1] | c_origIndexFlag,
+						leftIsMinus ? i1outside : i1inside,
+						leftIsMinus ? i2outside : i2inside,
+						origVertIndexes[iRight1] | c_origIndexFlag,
 						leftIsMinus ? plusMesh : minusMesh,
 						((iRight2 + 1) % 3) == iRight1)
 
 					||	!AddTriangle(
-						origIndexes[iRight1] | c_origIndexFlag,
-						leftIsMinus ? i2plus : i2minus,
-						origIndexes[iRight2] | c_origIndexFlag,
+						origVertIndexes[iRight1] | c_origIndexFlag,
+						leftIsMinus ? i2outside : i2inside,
+						origVertIndexes[iRight2] | c_origIndexFlag,
 						leftIsMinus ? plusMesh : minusMesh,
 						((iRight2 + 1) % 3) == iRight1) )
 					{
@@ -833,8 +919,8 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 	if (!error)
 	{
 		//import the 'preserved' (original) triangles 
-		if (	!MergeOldTriangles(mesh, vertices, minusMesh, minusVertices, preservedTrianglesMinus)
-			||	!MergeOldTriangles(mesh, vertices, plusMesh, plusVertices, preservedTrianglesPlus))
+		if (	!MergeOldTriangles(mesh, vertices, minusMesh, insideVertices, preservedTrianglesMinus)
+			||	!MergeOldTriangles(mesh, vertices, plusMesh, outsideVertices, preservedTrianglesPlus))
 		{
 			error = true;
 		}
@@ -847,7 +933,469 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 		return false;
 	}
 
-	ioParams.minusMesh = minusMesh;
-	ioParams.plusMesh = plusMesh;
+	ioParams.insideMesh  = minusMesh;
+	ioParams.outsideMesh = plusMesh;
+	return true;
+}
+
+struct Plane
+{
+	double coord;
+	double xMin, xMax, yMin, yMax;
+	unsigned char X,Y,Z;
+	bool keepBelow;
+};
+
+bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
+	GenericIndexedCloudPersist* origVertices,
+	MeshCutterParams& ioParams,
+	GenericProgressCallback* progressCb/*=0*/)
+{
+	if (!origMesh
+		|| !origVertices
+		|| origMesh->size() == 0
+		|| origVertices->size() < 3
+		|| ioParams.bbMin.x >= ioParams.bbMax.x
+		|| ioParams.bbMin.y >= ioParams.bbMax.y
+		|| ioParams.bbMin.z >= ioParams.bbMax.z)
+	{
+		//invalid input parameters
+		return false;
+	}
+
+	const double& epsilon = ioParams.epsilon;
+	const CCVector3d& bbMin = ioParams.bbMin;
+	const CCVector3d& bbMax = ioParams.bbMax;
+
+	Plane planes[6];
+	{
+		//X
+		planes[1].Z = planes[0].Z = 0; //'x'
+		planes[1].X = planes[0].X = 1; //'y'
+		planes[1].Y = planes[0].Y = 2; //'z'
+		//Y
+		planes[3].Z = planes[2].Z = 1; //'y'
+		planes[3].X = planes[2].X = 2; //'z'
+		planes[3].Y = planes[2].Y = 0; //'x'
+		//Z
+		planes[5].Z = planes[4].Z = 2; //'z'
+		planes[5].X = planes[4].X = 0; //'x'
+		planes[5].Y = planes[4].Y = 1; //'y'
+
+		for (unsigned i = 0; i < 6; ++i)
+		{
+			if (i & 1)
+			{
+				//'plus' planes
+				planes[i].coord = bbMax.u[planes[i].Z];
+				planes[i].keepBelow = true;
+			}
+			else
+			{
+				//'minus' planes
+				planes[i].coord = bbMin.u[planes[i].Z];
+				planes[i].keepBelow = false;
+			}
+			planes[i].xMin = bbMin[planes[i].X];
+			planes[i].xMax = bbMin[planes[i].X];
+			planes[i].yMin = bbMin[planes[i].Y];
+			planes[i].yMax = bbMin[planes[i].Y];
+		}
+	}
+
+	//indexes of original triangle that are not modified bt copied "as is"
+	std::vector<unsigned> preservedTrianglesInside1;	//insde (1)
+	std::vector<unsigned> preservedTrianglesInside2;	//insde (2)
+	std::vector<unsigned> preservedTrianglesOutside;	//outside
+
+	ChunkedPointCloud* insideVertices1 = new ChunkedPointCloud;
+	SimpleMesh* insideMesh1 = new SimpleMesh(insideVertices1, true);
+	ChunkedPointCloud* insideVertices2 = new ChunkedPointCloud;
+	SimpleMesh* insideMesh2 = new SimpleMesh(insideVertices2, true);
+	ChunkedPointCloud* outsideVertices = new ChunkedPointCloud;
+	SimpleMesh* outsideMesh = new SimpleMesh(outsideVertices, true);
+
+	//pointers on input and output structures (will change for each dimension)
+	std::vector<unsigned>* preservedTrianglesInside = &preservedTrianglesInside1;
+	std::vector<unsigned>* formerPreservedTriangles = &preservedTrianglesInside2;
+	ChunkedPointCloud* insideVertices = insideVertices1;
+	SimpleMesh* insideMesh = insideMesh1;
+	GenericIndexedMesh* sourceMesh = origMesh;
+	GenericIndexedCloudPersist* sourceVertices = origVertices;
+	
+	bool error = false;
+
+	//for each triangle
+	try
+	{
+		//for each plane
+		for (unsigned d = 0; d < 6; ++d)
+		{
+			const Plane& plane = planes[d];
+			assert(preservedTrianglesInside && formerPreservedTriangles);
+			assert(insideVertices && insideMesh);
+			assert(sourceVertices && sourceMesh);
+			s_edgePoint.clear();
+
+			//look for original triangles
+			//(the first time they only come from the original mesh
+			// then they can come from the original mesh through the 'preserved'
+			// list or from the previous 'inside' mesh as we have to test those
+			// triangles against the new plane)
+			unsigned sourceTriCount = sourceMesh->size(); //source: previous/original mesh
+			unsigned formerPreservedTriCount = static_cast<unsigned>(formerPreservedTriangles->size());
+			unsigned triCount = sourceTriCount + formerPreservedTriCount;
+			
+			for (unsigned i = 0; i < triCount; ++i)
+			{
+				bool triangleIsOriginal = false;
+				unsigned souceTriIndex = 0;
+				const TriangleSummitsIndexes* tsi = 0;
+				if (i < sourceTriCount)
+				{
+					souceTriIndex = i;
+					triangleIsOriginal = (sourceMesh == origMesh);
+					tsi = sourceMesh->getTriangleIndexes(souceTriIndex);
+				}
+				else
+				{
+					souceTriIndex = (*formerPreservedTriangles)[i - sourceTriCount];
+					triangleIsOriginal = true;
+					tsi = origMesh->getTriangleIndexes(souceTriIndex);
+				}
+
+				//vertices indexes
+				unsigned vertIndexes[3] = { tsi->i1, tsi->i2, tsi->i3 };
+				if (triangleIsOriginal)
+				{
+					//we flag the vertices indexes as referring to the 'original' mesh
+					vertIndexes[0] |= c_origIndexFlag;
+					vertIndexes[1] |= c_origIndexFlag;
+					vertIndexes[2] |= c_origIndexFlag;
+				}
+				else
+				{
+					//we flag the vertices indexes as referring to the 'source' mesh
+					if ((vertIndexes[0] & c_origIndexFlag) == 0)
+						vertIndexes[0] |= c_srcIndexFlag;
+					if ((vertIndexes[1] & c_origIndexFlag) == 0)
+						vertIndexes[1] |= c_srcIndexFlag;
+					if ((vertIndexes[2] & c_origIndexFlag) == 0)
+						vertIndexes[2] |= c_srcIndexFlag;
+				}
+
+				//get the vertices (from the right source!)
+				CCVector3d V[3] = { CCVector3d::fromArray((vertIndexes[0] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[0] & c_realIndexMask)->u),
+									CCVector3d::fromArray((vertIndexes[1] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[1] & c_realIndexMask)->u),
+									CCVector3d::fromArray((vertIndexes[2] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[2] & c_realIndexMask)->u) };
+
+				//test the position of each vertex relatively to the current plane
+				char relativePos[3] = { 1, 1, 1 };
+				std::vector<unsigned char> insideLocalVertIndexes, outsideLocalVertIndexes;
+				for (unsigned char j = 0; j < 3; ++j)
+				{
+					const CCVector3d& v = V[j];
+					if (fabs(v.u[plane.Z] - plane.coord) < epsilon)
+					{
+						relativePos[j] = 0;
+					}
+					else
+					{
+						if (v.u[plane.Z] < plane.coord)
+						{
+							insideLocalVertIndexes.push_back(j);
+							relativePos[j] = -1;
+						}
+						else
+						{
+							//relativePos is already equal to 1
+							//relativePos[j] = 1;
+							outsideLocalVertIndexes.push_back(j);
+						}
+					}
+				}
+
+				//depending on the number of entities on the plane
+				//we'll process the triangles differently
+				bool isFullyInside = false;
+				bool isFullyOutside = false;
+				switch (insideLocalVertIndexes.size() + outsideLocalVertIndexes.size())
+				{
+				case 0: //all vertices 'in' the plane
+				{
+					//we arbitrarily decide that the triangle is inside!
+					isFullyInside = true;
+				}
+				break;
+
+				case 1: //2 vertices 'in' the plane
+				{
+					//the triangle is either on one side or another ;)
+					//const std::vector<unsigned char>& nonEmptySet = (insideVertices.empty() ? outsideVertices : insideVertices);
+					//assert(nonEmptySet.size() != 0);
+					if (insideLocalVertIndexes.empty())
+					{
+						//the only vertex far from the plane is on the 'otuside'
+						isFullyOutside = true;
+					}
+					else
+					{
+						//the only vertex far from the plane is on the 'inside'
+						isFullyInside = true;
+					}
+				}
+				break;
+
+				case 2: //1 vertex 'in' the plane
+				{
+					//3 cases:
+					if (insideLocalVertIndexes.empty())
+					{
+						//the two vertices far from the plane are 'outside'
+						isFullyOutside = true;
+					}
+					else if (outsideLocalVertIndexes.empty())
+					{
+						//the two vertices far from the plane are 'inside'
+						isFullyInside = true;
+					}
+					else
+					{
+						//the two vertices far from the plane are on both sides
+						//the plane will cut through the edge connecting those two vertices
+						unsigned char iInside = insideLocalVertIndexes.front();
+						unsigned char iOuside = outsideLocalVertIndexes.front();
+
+						unsigned iCoutside, iCinside;
+						if (!ComputeEdgePoint(V[iInside], vertIndexes[iInside],
+							V[iOuside], vertIndexes[iOuside],
+							iCoutside, iCinside,
+							plane.coord, plane.Z,
+							plane.keepBelow ? outsideVertices : insideVertices,
+							plane.keepBelow ? insideVertices : outsideVertices))
+						{
+							//early stop
+							i = triCount;
+							error = true;
+							break;
+						}
+
+						//we can now create two triangles
+						unsigned char iCenter = 3 - iInside - iOuside;
+						if (!AddTriangle(
+							vertIndexes[iCenter],
+							vertIndexes[iInside],
+							iCinside,
+							plane.keepBelow ? insideMesh : outsideMesh,
+							((iCenter + 1) % 3) == iInside)
+
+							|| !AddTriangle(
+							vertIndexes[iCenter],
+							vertIndexes[iOuside],
+							iCoutside,
+							plane.keepBelow ? outsideMesh : insideMesh,
+							((iCenter + 1) % 3) == iOuside))
+						{
+							//early stop
+							i = triCount;
+							error = true;
+							break;
+						}
+					}
+				}
+				break;
+
+				case 3: //no vertex 'in' the plane
+				{
+					if (insideLocalVertIndexes.empty())
+					{
+						//all vertices are 'outside'
+						isFullyOutside = true;
+					}
+					else if (outsideLocalVertIndexes.empty())
+					{
+						//all vertices are 'inside'
+						isFullyInside = true;
+					}
+					else
+					{
+						//we have one vertex on one side and two on the other side
+						unsigned char iLeft, iRight1, iRight2;
+						bool leftIsInside = true;
+						if (insideLocalVertIndexes.size() == 1)
+						{
+							assert(outsideLocalVertIndexes.size() == 2);
+							iLeft = insideLocalVertIndexes.front();
+							iRight1 = outsideLocalVertIndexes[0];
+							iRight2 = outsideLocalVertIndexes[1];
+							leftIsInside = plane.keepBelow;
+						}
+						else
+						{
+							assert(insideLocalVertIndexes.size() == 2);
+							iLeft = outsideLocalVertIndexes.front();
+							iRight1 = insideLocalVertIndexes[0];
+							iRight2 = insideLocalVertIndexes[1];
+							leftIsInside = !plane.keepBelow;
+						}
+
+						//the plane cuts through the two edges having the 'single' vertex in common
+						unsigned i1outside, i1inside;
+						unsigned i2outside, i2inside;
+						if (!ComputeEdgePoint(V[iRight1], vertIndexes[iRight1], V[iLeft], vertIndexes[iLeft], i1outside, i1inside, plane.coord, plane.Z, outsideVertices, insideVertices)
+							|| !ComputeEdgePoint(V[iRight2], vertIndexes[iRight2], V[iLeft], vertIndexes[iLeft], i2outside, i2inside, plane.coord , plane.Z, outsideVertices, insideVertices))
+						{
+							//early stop
+							i = triCount;
+							error = true;
+							break;
+						}
+
+						//we are going to create 3 triangles
+						if (!AddTriangle(
+							vertIndexes[iLeft],
+							leftIsInside ? i1inside : i1outside,
+							leftIsInside ? i2inside : i2outside,
+							leftIsInside ? insideMesh : outsideMesh,
+							((iLeft + 1) % 3) == iRight1)
+
+							|| !AddTriangle(
+							leftIsInside ? i1outside : i1inside,
+							leftIsInside ? i2outside : i2inside,
+							vertIndexes[iRight1],
+							leftIsInside ? outsideMesh : insideMesh,
+							((iRight2 + 1) % 3) == iRight1)
+
+							|| !AddTriangle(
+							vertIndexes[iRight1],
+							leftIsInside ? i2outside : i2inside,
+							vertIndexes[iRight2],
+							leftIsInside ? outsideMesh : insideMesh,
+							((iRight2 + 1) % 3) == iRight1))
+						{
+							//early stop
+							i = triCount;
+							error = true;
+							break;
+						}
+					}
+				}
+				break;
+
+				}
+
+				if (isFullyInside || isFullyOutside)
+				{
+					//inverted selection?
+					if (!plane.keepBelow)
+						std::swap(isFullyInside, isFullyOutside);
+					
+					if (triangleIsOriginal)
+					{
+						if (isFullyInside)
+							preservedTrianglesInside->push_back(souceTriIndex);
+						else
+							preservedTrianglesOutside.push_back(souceTriIndex);
+					}
+					else
+					{
+						//we import the former triangle
+						if (!AddTriangle(vertIndexes[0], vertIndexes[1], vertIndexes[2], isFullyInside ? insideMesh : outsideMesh, true))
+						{
+							//early stop
+							error = true;
+							break;
+						}
+					}
+				}
+
+			}
+			//end for each triangle
+
+			if (   !ImportSourceVertices(sourceVertices, insideMesh, insideVertices)
+				|| !ImportSourceVertices(sourceVertices, outsideMesh, outsideVertices))
+			{
+				//early stop
+				error = true;
+				break;
+			}
+
+			if (d < 5)
+			{
+				//clear the source mesh and swap the buffers
+				if (insideMesh == insideMesh1)
+				{
+					assert(sourceMesh == insideMesh2 || sourceMesh == origMesh);
+					insideMesh2->clear(false);
+					insideVertices2->clear();
+					sourceMesh = insideMesh1;
+					sourceVertices = insideVertices1;
+					insideMesh = insideMesh2;
+					insideVertices = insideVertices2;
+					preservedTrianglesInside2.clear();
+					preservedTrianglesInside = &preservedTrianglesInside2;
+					formerPreservedTriangles = &preservedTrianglesInside1;
+				}
+				else
+				{
+					assert(sourceMesh == insideMesh1 || sourceMesh == origMesh);
+					insideMesh1->clear(false);
+					insideVertices1->clear();
+					sourceMesh = insideMesh2;
+					sourceVertices = insideVertices2;
+					insideMesh = insideMesh1;
+					insideVertices = insideVertices1;
+					preservedTrianglesInside1.clear();
+					preservedTrianglesInside = &preservedTrianglesInside1;
+					formerPreservedTriangles = &preservedTrianglesInside2;
+				}
+			}
+		}
+		//end for each plane
+
+		//now add the remaining triangles
+	}
+	catch (std::bad_alloc)
+	{
+		//not enough memory
+		error = true;
+	}
+
+	//free some memory
+	s_edgePoint.clear();
+	formerPreservedTriangles->clear();
+
+	if (!error)
+	{
+		//import the 'preserved' (original) triangles 
+		if (	!MergeOldTriangles(origMesh, origVertices, insideMesh, insideVertices, *preservedTrianglesInside)
+			||	!MergeOldTriangles(origMesh, origVertices, outsideMesh, outsideVertices, preservedTrianglesOutside))
+		{
+			error = true;
+		}
+	}
+
+	if (insideMesh == insideMesh1)
+	{
+		delete insideMesh2;
+		insideMesh2 = 0;
+		insideVertices2 = 0;
+	}
+	else
+	{
+		delete insideMesh1;
+		insideMesh1 = 0;
+		insideVertices1 = 0;
+	}
+
+	if (error)
+	{
+		delete insideMesh;
+		delete outsideMesh;
+		return false;
+	}
+
+	ioParams.insideMesh = insideMesh;
+	ioParams.outsideMesh = outsideMesh;
 	return true;
 }

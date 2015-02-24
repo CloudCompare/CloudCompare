@@ -8797,62 +8797,64 @@ void MainWindow::doActionCrop()
 			else if (ent->isKindOf(CC_TYPES::MESH))
 			{
 				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-				CCLib::ManualSegmentationTools::PlaneCutterParams params;
-				params.planeOrthoDim = 2;
-				params.planeCoord = box.minCorner().z;
-				if (CCLib::ManualSegmentationTools::segmentMeshWitAAPlane(mesh, mesh->getAssociatedCloud(), params))
+				CCLib::ManualSegmentationTools::MeshCutterParams params;
+				//params.planeOrthoDim = 2;
+				//params.planeCoord = box.minCorner().z;
+				params.bbMin = CCVector3d::fromArray(box.minCorner().u);
+				params.bbMax = CCVector3d::fromArray(box.maxCorner().u);
+				if (CCLib::ManualSegmentationTools::segmentMeshWitAABox(mesh, mesh->getAssociatedCloud(), params))
 				{
-					if (params.minusMesh)
+					if (params.insideMesh)
 					{
-						ccPointCloud* minusVertices = ccPointCloud::From(params.minusMesh->vertices());
-						if (minusVertices)
+						ccPointCloud* insideVertices = ccPointCloud::From(params.insideMesh->vertices());
+						if (insideVertices)
 						{
-							ccMesh* minusMesh = new ccMesh(params.minusMesh, minusVertices);
-							minusMesh->addChild(minusVertices);
-							minusVertices->setEnabled(false);
-							if (minusMesh->size() != 0)
+							ccMesh* insideMesh = new ccMesh(params.insideMesh, insideVertices);
+							insideMesh->addChild(insideVertices);
+							insideVertices->setEnabled(false);
+							if (insideMesh->size() != 0)
 							{
-								minusMesh->setDisplay_recursive(ent->getDisplay());
-								addToDB(minusMesh);
+								insideMesh->setDisplay_recursive(ent->getDisplay());
+								addToDB(insideMesh);
 							}
 							else
 							{
 								//not enough memory
-								delete minusMesh;
-								minusMesh = 0;
+								delete insideMesh;
+								insideMesh = 0;
 								ccLog::Error("Failed to create 'minus' part (not enough memory)");
 							}
 						}
 
 						//don't need this anymore
-						delete params.minusMesh;
-						params.minusMesh = 0;
+						delete params.insideMesh;
+						params.insideMesh = 0;
 					}
-					if (params.plusMesh)
+					if (params.outsideMesh)
 					{
-						ccPointCloud* plusVertices = ccPointCloud::From(params.plusMesh->vertices());
-						if (plusVertices)
+						ccPointCloud* outsideVertices = ccPointCloud::From(params.outsideMesh->vertices());
+						if (outsideVertices)
 						{
-							ccMesh* plusMesh = new ccMesh(params.plusMesh, plusVertices);
-							plusMesh->addChild(plusVertices);
-							plusVertices->setEnabled(false);
-							if (plusMesh->size() != 0)
+							ccMesh* outsideMesh = new ccMesh(params.outsideMesh, outsideVertices);
+							outsideMesh->addChild(outsideVertices);
+							outsideVertices->setEnabled(false);
+							if (outsideMesh->size() != 0)
 							{
-								plusMesh->setDisplay_recursive(ent->getDisplay());
-								addToDB(plusMesh);
+								outsideMesh->setDisplay_recursive(ent->getDisplay());
+								addToDB(outsideMesh);
 							}
 							else
 							{
 								//not enough memory
-								delete plusMesh;
-								plusMesh = 0;
+								delete outsideMesh;
+								outsideMesh = 0;
 								ccLog::Error("Failed to create 'plus' part (not enough memory)");
 							}
 						}
 
 						//don't need this anymore
-						delete params.plusMesh;
-						params.plusMesh = 0;
+						delete params.outsideMesh;
+						params.outsideMesh = 0;
 					}
 				}
 			}

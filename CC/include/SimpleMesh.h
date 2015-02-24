@@ -66,6 +66,9 @@ public: //specific methods
 	//! Returns the vertices
 	inline const GenericIndexedCloud* vertices() const { return theVertices; }
 
+	//! Clears the mesh
+	inline void clear(bool releaseMemory) { m_triIndexes->clear(releaseMemory); }
+
 	//! Adds a triangle to the mesh
 	/** \param i1 first summit index (relatively to the vertex cloud)
 		\param i2 second summit index (relatively to the vertex cloud)

@@ -94,26 +94,36 @@ public:
 	static GenericIndexedMesh* segmentMesh(GenericIndexedMesh* theMesh, ReferenceCloud* pointsIndexes, bool pointsWillBeInside, GenericProgressCallback* progressCb = 0, GenericIndexedCloud* destCloud = 0, unsigned indexShift = 0);
 
 	//! Input/output parameters for the segmentMeshWitAAPlane method
-	struct PlaneCutterParams
+	struct MeshCutterParams
 	{
-		SimpleMesh* minusMesh;
-		SimpleMesh* plusMesh;
+		SimpleMesh* insideMesh;
+		SimpleMesh* outsideMesh;
+		double epsilon;
+		//for infinite plane intersection
 		unsigned char planeOrthoDim;
 		double planeCoord;
-		double epsilon;
+		//for box intersection
+		CCVector3d bbMin, bbMax;
 
-		PlaneCutterParams()
-			: minusMesh(0)
-			, plusMesh(0)
+		MeshCutterParams()
+			: insideMesh(0)
+			, outsideMesh(0)
+			, epsilon(ZERO_TOLERANCE)
 			, planeOrthoDim(0)
 			, planeCoord(0)
-			, epsilon(ZERO_TOLERANCE)
+			, bbMin(0, 0, 0)
+			, bbMax(0, 0, 0)
 		{}
 	};
 
 	static bool segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
-		PlaneCutterParams& ioParams,
+		MeshCutterParams& ioParams,
+		GenericProgressCallback* progressCb = 0);
+
+	static bool segmentMeshWitAABox(GenericIndexedMesh* mesh,
+		GenericIndexedCloudPersist* vertices,
+		MeshCutterParams& ioParams,
 		GenericProgressCallback* progressCb = 0);
 };
 

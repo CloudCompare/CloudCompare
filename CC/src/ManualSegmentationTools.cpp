@@ -302,15 +302,15 @@ const unsigned c_defaultArrayGrowth = 100;
 #include <map>
 #include <stdint.h> //for uint fixed-sized types
 
-struct PlusMinusIndexes
+struct InsideOutsideIndexes
 {
-	PlusMinusIndexes() : minusIndex(0), plusIndex(0) {}
-	PlusMinusIndexes(unsigned plus, unsigned minus) : minusIndex(minus), plusIndex(plus) {}
-	PlusMinusIndexes(const PlusMinusIndexes& pmi) : minusIndex(pmi.minusIndex), plusIndex(pmi.plusIndex){}
-	unsigned minusIndex;
-	unsigned plusIndex;
+	InsideOutsideIndexes() : insideIndex(0), outsideIndex(0) {}
+	InsideOutsideIndexes(unsigned inside, unsigned outside) : insideIndex(inside), outsideIndex(outside) {}
+	InsideOutsideIndexes(const InsideOutsideIndexes& pmi) : insideIndex(pmi.insideIndex), outsideIndex(pmi.outsideIndex){}
+	unsigned insideIndex;
+	unsigned outsideIndex;
 };
-static std::map< uint64_t, PlusMinusIndexes > s_edgePoint;
+static std::map< uint64_t, InsideOutsideIndexes > s_edgePoint;
 
 bool AddVertex(CCVector3d& P, ChunkedPointCloud* vertices, unsigned& index)
 {
@@ -350,9 +350,9 @@ bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 	//if the key (edge) already exists
 	if (s_edgePoint.find(key) != s_edgePoint.end())
 	{
-		const PlusMinusIndexes& pmi = s_edgePoint[key];
-		iCoutside = pmi.plusIndex;
-		iCinside = pmi.minusIndex;
+		const InsideOutsideIndexes& pmi = s_edgePoint[key];
+		iCoutside = pmi.outsideIndex;
+		iCinside = pmi.insideIndex;
 	}
 	//otherwise we'll create it
 	else
@@ -366,63 +366,11 @@ bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 		if (!AddVertex(I, insideVertices, iCinside))
 			return false;
 
-		s_edgePoint[key] = PlusMinusIndexes(iCoutside,iCinside);
+		s_edgePoint[key] = InsideOutsideIndexes(iCinside, iCoutside);
 	}
 
 	return true;
 }
-
-//bool AddTriangle(const CCVector3d& A, unsigned iA, bool existA,
-//	const CCVector3d& B, unsigned iB, bool existB,
-//	const CCVector3d& C, unsigned iC, bool existC,
-//	SimpleMesh* mesh,
-//	ChunkedPointCloud* vertices,
-//	bool directOrder)
-//{
-//	assert(mesh && vertices);
-//	
-//	const CCVector3d* V[3] = { &A, &B, &C };
-//	unsigned indexes[3] = { iA, iB, iC };
-//	bool exists[3] = { existA, existB, existC };
-//
-//	//process each vertex
-//	for (unsigned char i = 0; i < 3; ++i)
-//	{
-//		//if the vertex doesn't exist yet (neither in the
-//		//original vertex set nor in the new one
-//		if (!exists[i])
-//		{
-//			//add vertex to the 'vertices' set
-//			unsigned vertCount = vertices->size();
-//			if (	vertCount == vertices->capacity()
-//				&&	!vertices->reserve(vertCount + c_defaultArrayGrowth))
-//			{
-//				//not enough memory!
-//				return false;
-//			}
-//			vertices->addPoint(CCVector3::fromArray(V[i]->u));
-//			indexes[i] = vertCount;
-//		}
-//		//otherwise the vertex is either:
-//		// - an original vertex (with c_origIndexFlag set, so >> 1)
-//		// - or a vertex already in the new set
-//	}
-//
-//	//now add the triangle
-//	if (	mesh->size() == mesh->capacity()
-//		&& !mesh->reserve(mesh->size() + c_defaultArrayGrowth))
-//	{
-//		//not enough memory
-//		return false;
-//	}
-//
-//	if (directOrder)
-//		mesh->addTriangle(indexes[0], indexes[1], indexes[2]);
-//	else
-//		mesh->addTriangle(indexes[0], indexes[2], indexes[1]);
-//
-//	return true;
-//}
 
 bool AddTriangle(unsigned iA, unsigned iB, unsigned iC,
 	SimpleMesh* mesh,
@@ -939,14 +887,6 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 	return true;
 }
 
-struct Plane
-{
-	double coord;
-	double xMin, xMax, yMin, yMax;
-	unsigned char X,Y,Z;
-	bool keepBelow;
-};
-
 bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	GenericIndexedCloudPersist* origVertices,
 	MeshCutterParams& ioParams,
@@ -968,43 +908,6 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	const CCVector3d& bbMin = ioParams.bbMin;
 	const CCVector3d& bbMax = ioParams.bbMax;
 
-	//Extract the 6 'planes' corresponding to the input box faces
-	Plane planes[6];
-	{
-		//X
-		planes[1].Z = planes[0].Z = 0; //'x'
-		planes[1].X = planes[0].X = 1; //'y'
-		planes[1].Y = planes[0].Y = 2; //'z'
-		//Y
-		planes[3].Z = planes[2].Z = 1; //'y'
-		planes[3].X = planes[2].X = 2; //'z'
-		planes[3].Y = planes[2].Y = 0; //'x'
-		//Z
-		planes[5].Z = planes[4].Z = 2; //'z'
-		planes[5].X = planes[4].X = 0; //'x'
-		planes[5].Y = planes[4].Y = 1; //'y'
-
-		for (unsigned i = 0; i < 6; ++i)
-		{
-			if (i & 1)
-			{
-				//'plus' planes
-				planes[i].coord = bbMax.u[planes[i].Z];
-				planes[i].keepBelow = true;
-			}
-			else
-			{
-				//'minus' planes
-				planes[i].coord = bbMin.u[planes[i].Z];
-				planes[i].keepBelow = false;
-			}
-			planes[i].xMin = bbMin[planes[i].X];
-			planes[i].xMax = bbMin[planes[i].X];
-			planes[i].yMin = bbMin[planes[i].Y];
-			planes[i].yMax = bbMin[planes[i].Y];
-		}
-	}
-
 	//indexes of original triangle that are not modified bt copied "as is"
 	std::vector<unsigned> preservedTrianglesInside1;	//insde (1)
 	std::vector<unsigned> preservedTrianglesInside2;	//insde (2)
@@ -1025,6 +928,8 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	GenericIndexedMesh* sourceMesh = origMesh;
 	GenericIndexedCloudPersist* sourceVertices = origVertices;
 	
+	CCVector3d boxCenter = (ioParams.bbMin + ioParams.bbMax) / 2;
+	CCVector3d boxHalfSize = (ioParams.bbMax - ioParams.bbMin) / 2;
 	bool error = false;
 
 	//for each triangle
@@ -1033,7 +938,12 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 		//for each plane
 		for (unsigned d = 0; d < 6; ++d)
 		{
-			const Plane& plane = planes[d];
+			//Extract the 'plane' information corresponding to the input box faces
+			//-X,+X,-Y,+Y,-Z,+Z
+			unsigned char Z = static_cast<unsigned char>(d / 2); 
+			double planeCoord = (d & 1 ? bbMax : bbMin).u[Z];
+			bool keepBelow = (d & 1 ? true : false);
+
 			assert(preservedTrianglesInside && formerPreservedTriangles);
 			assert(insideVertices && insideMesh);
 			assert(sourceVertices && sourceMesh);
@@ -1091,19 +1001,30 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 									CCVector3d::fromArray((vertIndexes[1] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[1] & c_realIndexMask)->u),
 									CCVector3d::fromArray((vertIndexes[2] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[2] & c_realIndexMask)->u) };
 
+				if (d == 0)
+				{
+					//perform a triangle-box overlap test the first time!
+					if (!CCMiscTools::TriBoxOverlapd(boxCenter, boxHalfSize, V))
+					{
+						preservedTrianglesOutside.push_back(i);
+						continue;
+					}
+				}
+
 				//test the position of each vertex relatively to the current plane
 				char relativePos[3] = { 1, 1, 1 };
+				bool insideXY[3] = { false, false, false };
 				std::vector<unsigned char> insideLocalVertIndexes, outsideLocalVertIndexes;
 				for (unsigned char j = 0; j < 3; ++j)
 				{
 					const CCVector3d& v = V[j];
-					if (fabs(v.u[plane.Z] - plane.coord) < epsilon)
+					if (fabs(v.u[Z] - planeCoord) < epsilon)
 					{
 						relativePos[j] = 0;
 					}
 					else
 					{
-						if (v.u[plane.Z] < plane.coord)
+						if (v.u[Z] < planeCoord)
 						{
 							insideLocalVertIndexes.push_back(j);
 							relativePos[j] = -1;
@@ -1170,9 +1091,9 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 						if (!ComputeEdgePoint(V[iInside], vertIndexes[iInside],
 							V[iOuside], vertIndexes[iOuside],
 							iCoutside, iCinside,
-							plane.coord, plane.Z,
-							plane.keepBelow ? outsideVertices : insideVertices,
-							plane.keepBelow ? insideVertices : outsideVertices))
+							planeCoord, Z,
+							keepBelow ? outsideVertices : insideVertices,
+							keepBelow ? insideVertices : outsideVertices))
 						{
 							//early stop
 							i = triCount;
@@ -1186,14 +1107,14 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 							vertIndexes[iCenter],
 							vertIndexes[iInside],
 							iCinside,
-							plane.keepBelow ? insideMesh : outsideMesh,
+							keepBelow ? insideMesh : outsideMesh,
 							((iCenter + 1) % 3) == iInside)
 
 							|| !AddTriangle(
 							vertIndexes[iCenter],
 							vertIndexes[iOuside],
 							iCoutside,
-							plane.keepBelow ? outsideMesh : insideMesh,
+							keepBelow ? outsideMesh : insideMesh,
 							((iCenter + 1) % 3) == iOuside))
 						{
 							//early stop
@@ -1228,7 +1149,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 							iLeft = insideLocalVertIndexes.front();
 							iRight1 = outsideLocalVertIndexes[0];
 							iRight2 = outsideLocalVertIndexes[1];
-							leftIsInside = plane.keepBelow;
+							leftIsInside = keepBelow;
 						}
 						else
 						{
@@ -1236,14 +1157,14 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 							iLeft = outsideLocalVertIndexes.front();
 							iRight1 = insideLocalVertIndexes[0];
 							iRight2 = insideLocalVertIndexes[1];
-							leftIsInside = !plane.keepBelow;
+							leftIsInside = !keepBelow;
 						}
 
 						//the plane cuts through the two edges having the 'single' vertex in common
 						unsigned i1outside, i1inside;
 						unsigned i2outside, i2inside;
-						if (!ComputeEdgePoint(V[iRight1], vertIndexes[iRight1], V[iLeft], vertIndexes[iLeft], i1outside, i1inside, plane.coord, plane.Z, outsideVertices, insideVertices)
-							|| !ComputeEdgePoint(V[iRight2], vertIndexes[iRight2], V[iLeft], vertIndexes[iLeft], i2outside, i2inside, plane.coord , plane.Z, outsideVertices, insideVertices))
+						if (!ComputeEdgePoint(V[iRight1], vertIndexes[iRight1], V[iLeft], vertIndexes[iLeft], i1outside, i1inside, planeCoord, Z, outsideVertices, insideVertices)
+							|| !ComputeEdgePoint(V[iRight2], vertIndexes[iRight2], V[iLeft], vertIndexes[iLeft], i2outside, i2inside, planeCoord , Z, outsideVertices, insideVertices))
 						{
 							//early stop
 							i = triCount;
@@ -1287,7 +1208,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				if (isFullyInside || isFullyOutside)
 				{
 					//inverted selection?
-					if (!plane.keepBelow)
+					if (!keepBelow)
 						std::swap(isFullyInside, isFullyOutside);
 					
 					if (triangleIsOriginal)

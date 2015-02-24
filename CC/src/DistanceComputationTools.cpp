@@ -722,6 +722,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 
 	//cell dimension
 	PointCoordinateType cellLength = theIntersection->theOctree->getCellSize(octreeLevel);
+	CCVector3 halfCellDimensions(cellLength / 2, cellLength / 2, cellLength / 2);
 	std::vector<cellToTest> cellsToTest;
 
 	unsigned cellsToTestCapacity = 1;
@@ -823,7 +824,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 					theOctree->computeCellCenter(_currentCell->pos,octreeLevel,AB.u);
 
 					//check that the triangle do intersects the cell (box)
-					if (CCMiscTools::TriBoxOverlap(AB.u,cellLength*0.5f,triPoints))
+					if (CCMiscTools::TriBoxOverlap(AB, halfCellDimensions, triPoints))
 					{
 						if ((currentCellPos[0] >= theIntersection->minFillIndexes[0] && currentCellPos[0] <= theIntersection->maxFillIndexes[0]) &&
 							(currentCellPos[1] >= theIntersection->minFillIndexes[1] && currentCellPos[1] <= theIntersection->maxFillIndexes[1]) &&

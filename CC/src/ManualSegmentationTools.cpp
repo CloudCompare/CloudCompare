@@ -335,7 +335,7 @@ bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 	double planeCoord, unsigned char planeDim,
 	ChunkedPointCloud* outsideVertices, ChunkedPointCloud* insideVertices)
 {
-	assert(outsideVertices && insideVertices);
+	assert(outsideVertices || insideVertices);
 
 	//first look if we already know this edge
 	uint64_t key = 0;
@@ -359,11 +359,13 @@ bool ComputeEdgePoint(const CCVector3d& A, unsigned iA,
 	{
 		CCVector3d I = A + (B - A) * (planeCoord - A.u[planeDim]) / (B.u[planeDim] - A.u[planeDim]);
 
-		//add vertex to the plus 'vertices' set
-		if (!AddVertex(I, outsideVertices, iCoutside))
+		//add vertex to the inside 'vertices' set
+		iCinside = 0;
+		if (insideVertices && !AddVertex(I, insideVertices, iCinside))
 			return false;
-		//add vertex to the minus 'vertices' set
-		if (!AddVertex(I, insideVertices, iCinside))
+		//add vertex to the outside 'vertices' set
+		iCoutside = 0;
+		if (outsideVertices && !AddVertex(I, outsideVertices, iCoutside))
 			return false;
 
 		s_edgePoint[key] = InsideOutsideIndexes(iCinside, iCoutside);
@@ -376,7 +378,10 @@ bool AddTriangle(unsigned iA, unsigned iB, unsigned iC,
 	SimpleMesh* mesh,
 	bool directOrder)
 {
-	assert(mesh);
+	//special case: the mesh might not exist (if we skip the 'outside' mesh creation)
+	//so we accept this eventuallity to simply the code
+	if (!mesh)
+		return true;
 
 	//now add the triangle
 	if (	mesh->size() == mesh->capacity()
@@ -913,12 +918,20 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	std::vector<unsigned> preservedTrianglesInside2;	//insde (2)
 	std::vector<unsigned> preservedTrianglesOutside;	//outside
 
+	//inside meshes (swapped for each dimension)
 	ChunkedPointCloud* insideVertices1 = new ChunkedPointCloud;
 	SimpleMesh* insideMesh1 = new SimpleMesh(insideVertices1, true);
 	ChunkedPointCloud* insideVertices2 = new ChunkedPointCloud;
 	SimpleMesh* insideMesh2 = new SimpleMesh(insideVertices2, true);
-	ChunkedPointCloud* outsideVertices = new ChunkedPointCloud;
-	SimpleMesh* outsideMesh = new SimpleMesh(outsideVertices, true);
+	
+	//outside mesh (output)
+	ChunkedPointCloud* outsideVertices = 0;
+	SimpleMesh* outsideMesh = 0;
+	if (ioParams.generateOutsideMesh)
+	{
+		outsideVertices = new ChunkedPointCloud;
+		outsideMesh = new SimpleMesh(outsideVertices, true);
+	}
 
 	//pointers on input and output structures (will change for each dimension)
 	std::vector<unsigned>* preservedTrianglesInside = &preservedTrianglesInside1;
@@ -954,7 +967,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			// they can come from the original mesh through the 'preserved' list
 			// or from the previous 'inside' mesh as we have to test those triangles
 			// against the new plane)
-			unsigned sourceTriCount = sourceMesh->size(); //source: previous/original mesh
+			unsigned sourceTriCount = sourceMesh ? sourceMesh->size() : 0; //source: previous/original mesh
 			unsigned formerPreservedTriCount = static_cast<unsigned>(formerPreservedTriangles->size());
 			unsigned triCount = sourceTriCount + formerPreservedTriCount;
 			
@@ -1006,7 +1019,8 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 					//perform a triangle-box overlap test the first time!
 					if (!CCMiscTools::TriBoxOverlapd(boxCenter, boxHalfSize, V))
 					{
-						preservedTrianglesOutside.push_back(i);
+						if (ioParams.generateOutsideMesh)
+							preservedTrianglesOutside.push_back(i);
 						continue;
 					}
 				}
@@ -1087,33 +1101,27 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 						unsigned char iInside = insideLocalVertIndexes.front();
 						unsigned char iOuside = outsideLocalVertIndexes.front();
 
+						unsigned char iCenter = 3 - iInside - iOuside;
 						unsigned iCoutside, iCinside;
-						if (!ComputeEdgePoint(V[iInside], vertIndexes[iInside],
+						//we can now create one vertex and two new triangles
+						if (!ComputeEdgePoint(
+							V[iInside], vertIndexes[iInside],
 							V[iOuside], vertIndexes[iOuside],
 							iCoutside, iCinside,
 							planeCoord, Z,
-							keepBelow ? outsideVertices : insideVertices,
-							keepBelow ? insideVertices : outsideVertices))
-						{
-							//early stop
-							i = triCount;
-							error = true;
-							break;
-						}
+							outsideVertices, insideVertices)
 
-						//we can now create two triangles
-						unsigned char iCenter = 3 - iInside - iOuside;
-						if (!AddTriangle(
+						|| !AddTriangle(
 							vertIndexes[iCenter],
 							vertIndexes[iInside],
-							iCinside,
+							keepBelow ? iCinside : iCoutside,
 							keepBelow ? insideMesh : outsideMesh,
 							((iCenter + 1) % 3) == iInside)
 
-							|| !AddTriangle(
+						|| !AddTriangle(
 							vertIndexes[iCenter],
 							vertIndexes[iOuside],
-							iCoutside,
+							keepBelow ? iCoutside : iCinside,
 							keepBelow ? outsideMesh : insideMesh,
 							((iCenter + 1) % 3) == iOuside))
 						{
@@ -1161,38 +1169,39 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 						}
 
 						//the plane cuts through the two edges having the 'single' vertex in common
+						//we are going to create 3 triangles
 						unsigned i1outside, i1inside;
 						unsigned i2outside, i2inside;
-						if (!ComputeEdgePoint(V[iRight1], vertIndexes[iRight1], V[iLeft], vertIndexes[iLeft], i1outside, i1inside, planeCoord, Z, outsideVertices, insideVertices)
-							|| !ComputeEdgePoint(V[iRight2], vertIndexes[iRight2], V[iLeft], vertIndexes[iLeft], i2outside, i2inside, planeCoord , Z, outsideVertices, insideVertices))
-						{
-							//early stop
-							i = triCount;
-							error = true;
-							break;
-						}
+						if (  !ComputeEdgePoint(	V[iRight1], vertIndexes[iRight1],
+													V[iLeft], vertIndexes[iLeft],
+													i1outside, i1inside,
+													planeCoord, Z,
+													outsideVertices, insideVertices)
+							
+							|| !ComputeEdgePoint(	V[iRight2], vertIndexes[iRight2],
+													V[iLeft], vertIndexes[iLeft],
+													i2outside, i2inside,
+													planeCoord, Z,
+													outsideVertices, insideVertices)
 
-						//we are going to create 3 triangles
-						if (!AddTriangle(
-							vertIndexes[iLeft],
-							leftIsInside ? i1inside : i1outside,
-							leftIsInside ? i2inside : i2outside,
-							leftIsInside ? insideMesh : outsideMesh,
-							((iLeft + 1) % 3) == iRight1)
+							|| !AddTriangle(	vertIndexes[iLeft],
+												leftIsInside ? i1inside : i1outside,
+												leftIsInside ? i2inside : i2outside,
+												leftIsInside ? insideMesh : outsideMesh,
+												((iLeft + 1) % 3) == iRight1)
 
-							|| !AddTriangle(
-							leftIsInside ? i1outside : i1inside,
-							leftIsInside ? i2outside : i2inside,
-							vertIndexes[iRight1],
-							leftIsInside ? outsideMesh : insideMesh,
-							((iRight2 + 1) % 3) == iRight1)
+							|| !AddTriangle(	leftIsInside ? i1outside : i1inside,
+												leftIsInside ? i2outside : i2inside,
+												vertIndexes[iRight1],
+												leftIsInside ? outsideMesh : insideMesh,
+												((iRight2 + 1) % 3) == iRight1)
 
-							|| !AddTriangle(
-							vertIndexes[iRight1],
-							leftIsInside ? i2outside : i2inside,
-							vertIndexes[iRight2],
-							leftIsInside ? outsideMesh : insideMesh,
-							((iRight2 + 1) % 3) == iRight1))
+							|| !AddTriangle(	vertIndexes[iRight1],
+												leftIsInside ? i2outside : i2inside,
+												vertIndexes[iRight2],
+												leftIsInside ? outsideMesh : insideMesh,
+												((iRight2 + 1) % 3) == iRight1)
+							)
 						{
 							//early stop
 							i = triCount;
@@ -1215,7 +1224,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 					{
 						if (isFullyInside)
 							preservedTrianglesInside->push_back(souceTriIndex);
-						else
+						else if (ioParams.generateOutsideMesh)
 							preservedTrianglesOutside.push_back(souceTriIndex);
 					}
 					else
@@ -1234,7 +1243,8 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			//end for each triangle
 
 			if (   !ImportSourceVertices(sourceVertices, insideMesh, insideVertices)
-				|| !ImportSourceVertices(sourceVertices, outsideMesh, outsideVertices))
+				|| (ioParams.generateOutsideMesh && !ImportSourceVertices(sourceVertices, outsideMesh, outsideVertices))
+				)
 			{
 				//early stop
 				error = true;
@@ -1290,7 +1300,8 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	{
 		//import the 'preserved' (original) triangles 
 		if (	!MergeOldTriangles(origMesh, origVertices, insideMesh, insideVertices, *preservedTrianglesInside)
-			||	!MergeOldTriangles(origMesh, origVertices, outsideMesh, outsideVertices, preservedTrianglesOutside))
+			||	(ioParams.generateOutsideMesh && !MergeOldTriangles(origMesh, origVertices, outsideMesh, outsideVertices, preservedTrianglesOutside))
+			)
 		{
 			error = true;
 		}
@@ -1312,8 +1323,18 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	if (error)
 	{
 		delete insideMesh;
-		delete outsideMesh;
+		if (outsideMesh)
+			delete outsideMesh;
 		return false;
+	}
+
+	if (insideMesh)
+	{
+		insideMesh->resize(insideMesh->size());
+	}
+	if (outsideMesh)
+	{
+		outsideMesh->resize(outsideMesh->size());
 	}
 
 	ioParams.insideMesh = insideMesh;

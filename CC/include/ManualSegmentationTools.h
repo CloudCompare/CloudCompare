@@ -98,6 +98,7 @@ public:
 	{
 		SimpleMesh* insideMesh;
 		SimpleMesh* outsideMesh;
+		bool generateOutsideMesh;
 		double epsilon;
 		//for infinite plane intersection
 		unsigned char planeOrthoDim;
@@ -108,6 +109,7 @@ public:
 		MeshCutterParams()
 			: insideMesh(0)
 			, outsideMesh(0)
+			, generateOutsideMesh(false)
 			, epsilon(ZERO_TOLERANCE)
 			, planeOrthoDim(0)
 			, planeCoord(0)

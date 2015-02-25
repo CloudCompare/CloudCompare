@@ -32,10 +32,8 @@
 #include <PointProjectionTools.h>
 #include <GeometricalAnalysisTools.h>
 #include <SimpleCloud.h>
-#include <SimpleMesh.h>
 #include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
-#include <ManualSegmentationTools.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -139,6 +137,7 @@
 //other
 #include "ccRegistrationTools.h"
 #include "ccPersistentSettings.h"
+#include "ccCropTool.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -8762,138 +8761,38 @@ void MainWindow::doActionCrop()
 
 	//process cloud/meshes
 	bool errors = false;
+	bool successes = false;
 	{
 		for (size_t i=0; i<candidates.size(); ++i)
 		{
 			ccHObject* ent = candidates[i];
-			if (ent->isA(CC_TYPES::POINT_CLOUD))
+			ccHObject* croppedEnt = ccCropTool::Crop(ent,box,true);
+			if (croppedEnt)
 			{
-				ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
-
-				CCLib::ReferenceCloud* selection = cloud->crop(box, true);
-				if (selection)
-				{
-					if (selection->size() != 0)
-					{
-						ent->setEnabled(false);
-						//crop
-						ccPointCloud* croppedEnt = cloud->partialClone(selection);
-						if (croppedEnt)
-						{
-							croppedEnt->setName(cloud->getName() + QString(".cropped"));
-							croppedEnt->setDisplay(cloud->getDisplay());
-							if (ent->getParent())
-								ent->getParent()->addChild(croppedEnt);
-							addToDB(croppedEnt);
-							m_ccRoot->selectEntity(croppedEnt, true);
-						}
-					}
-					else
-					{
-						//no points fall inside selection!
-						ccConsole::Warning(QString("[Crop] No point of cloud '%1' falls inside the input box!").arg(cloud->getName()));
-						errors = true;
-					}
-
-					delete selection;
-					selection = 0;
-				}
-			}
-			else if (ent->isKindOf(CC_TYPES::MESH))
-			{
-				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-				CCLib::ManualSegmentationTools::MeshCutterParams params;
-				//params.planeOrthoDim = 2;
-				//params.planeCoord = box.minCorner().z;
-				params.bbMin = CCVector3d::fromArray(box.minCorner().u);
-				params.bbMax = CCVector3d::fromArray(box.maxCorner().u);
-				if (CCLib::ManualSegmentationTools::segmentMeshWitAABox(mesh, mesh->getAssociatedCloud(), params))
-				{
-					mesh->setEnabled(false);
-					if (params.insideMesh)
-					{
-						ccPointCloud* insideVertices = ccPointCloud::From(params.insideMesh->vertices());
-						if (insideVertices)
-						{
-							ccMesh* insideMesh = new ccMesh(params.insideMesh, insideVertices);
-							insideMesh->addChild(insideVertices);
-							if (insideMesh->size() != 0)
-							{
-								insideMesh->setName(mesh->getName() + QString(".inside"));
-								if (mesh->getParent())
-									mesh->getParent()->addChild(insideMesh);
-								insideVertices->setEnabled(false);
-								insideMesh->setDisplay_recursive(ent->getDisplay());
-								addToDB(insideMesh);
-							}
-							else
-							{
-								//not enough memory
-								delete insideMesh;
-								insideMesh = 0;
-								ccLog::Warning("[Crop] Failed to create 'inside' part (not enough memory)");
-								errors = true;
-							}
-						}
-						else
-						{
-							ccLog::Warning("[Crop] Failed to create 'inside' part (not enough memory)");
-							errors = true;
-						}
-
-						//don't need this anymore
-						delete params.insideMesh;
-						params.insideMesh = 0;
-					}
-					if (params.outsideMesh)
-					{
-						ccPointCloud* outsideVertices = ccPointCloud::From(params.outsideMesh->vertices());
-						if (outsideVertices)
-						{
-							ccMesh* outsideMesh = new ccMesh(params.outsideMesh, outsideVertices);
-							outsideMesh->addChild(outsideVertices);
-							if (outsideMesh->size() != 0)
-							{
-								outsideMesh->setName(mesh->getName() + QString(".outside"));
-								if (mesh->getParent())
-									mesh->getParent()->addChild(outsideMesh);
-								outsideVertices->setEnabled(false);
-								outsideMesh->setDisplay_recursive(ent->getDisplay());
-								addToDB(outsideMesh);
-							}
-							else
-							{
-								//not enough memory
-								delete outsideMesh;
-								outsideMesh = 0;
-								ccLog::Warning("[Crop] Failed to create 'outside' part (not enough memory)");
-								errors = true;
-							}
-						}
-						else
-						{
-							ccLog::Warning("[Crop] Failed to create 'outside' part (not enough memory)");
-							errors = true;
-						}
-
-						//don't need this anymore
-						delete params.outsideMesh;
-						params.outsideMesh = 0;
-					}
-				}
+				croppedEnt->setName(ent->getName() + QString(".cropped"));
+				croppedEnt->setDisplay(ent->getDisplay());
+				croppedEnt->prepareDisplayForRefresh();
+				if (ent->getParent())
+					ent->getParent()->addChild(croppedEnt);
+				ent->setEnabled(false);
+				addToDB(croppedEnt);
+				//select output entity
+				m_ccRoot->selectEntity(croppedEnt, true);
+				successes = true;
 			}
 			else
 			{
-				assert(false);
+				errors = true;
 			}
 		}
 	}
 
-	if (!candidates.empty())
+	if (successes)
 		ccLog::Warning("[Crop] Selected entities have been hidden");
 	if (errors)
 		ccLog::Error("Error(s) occurred! See the Console");
 
+	refreshAll();
 	updateUI();
 }
 

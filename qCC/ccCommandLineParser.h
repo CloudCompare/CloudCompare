@@ -43,6 +43,7 @@ protected:
 	bool commandBestFitPlane				(QStringList& arguments);
 	bool commandCrop						(QStringList& arguments);
 	bool commandCrop2D						(QStringList& arguments);
+	bool commandCrossSection				(QStringList& arguments, QDialog* parent = 0);
 	bool commandColorBanding				(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
@@ -143,6 +144,14 @@ protected:
 					QString filename,
 					int index = -1)
 			: EntityDesc(filename,index)
+			, mesh(_mesh)
+		{}
+
+		MeshDesc(	ccGenericMesh* _mesh,
+					QString basename,
+					QString path,
+					int index = -1)
+			: EntityDesc(basename,path,index)
 			, mesh(_mesh)
 		{}
 

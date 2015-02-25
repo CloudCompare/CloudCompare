@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "ccComparisonDlg.h"
 #include "ccRegistrationTools.h"
+#include "ccCropTool.h"
 
 //Qt
 #include <QMessageBox>
@@ -109,6 +110,7 @@ static const char COMMAND_DELAUNAY[]						= "DELAUNAY";
 static const char COMMAND_DELAUNAY_AA[]						= "AA";
 static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
 static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
+static const char COMMAND_CROSS_SECTION[]					= "CROSS_SECTION";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -1586,14 +1588,306 @@ bool ccCommandLineParser::commandSampleMesh(QStringList& arguments, ccProgressDi
 	return true;
 }
 
+//to read the 'Cross Section' tool XML parameters file
+#include <QXmlStreamReader>
+static QString s_xmlCloudCompare = "CloudCompare";
+static QString s_xmlBoxThickness = "BoxThickness";
+static QString s_xmlBoxCenter    = "BoxCenter";
+static QString s_xmlRepeatDim    = "RepeatDim";
+static QString s_xmlRepeatGap    = "RepeatGap";
+static QString s_xmlFilePath     = "FilePath";
+
+bool ReadVector(const QXmlStreamAttributes& attributes, CCVector3 P, QString element)
+{
+	if (attributes.size() < 3)
+	{
+		return Error(QString("Invalid XML file (3 attributes expected for element '<%1>')").arg(element));
+	}
+
+	int count = 0;
+	for (int i=0; i<attributes.size(); ++i)
+	{
+		QString name = attributes[i].name().toString().toUpper();
+		QString value = attributes[i].value().toString();
+
+		bool ok = false;
+		if (value == "X")
+		{
+			P.x = value.toDouble(&ok);
+			++count;
+		}
+		else if (value == "Y")
+		{
+			P.y = value.toDouble(&ok);
+			++count;
+		}
+		else if (value == "Z")
+		{
+			P.z = value.toDouble(&ok);
+			++count;
+		}
+		else
+		{
+			ok = true;
+		}
+		
+		if (!ok)
+		{
+			return Error(QString("Invalid XML file (numerical attribute expected for attribute '%1' of element '<%2>')").arg(name).arg(element));
+		}
+	}
+
+	if (count < 3)
+	{
+		return Error(QString("Invalid XML file (attributes 'X','Y' and 'Z' are mandatory for element '<%1>')").arg(element));
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* parent/*=0*/)
+{
+	Print("[CROSS SECTION]");
+
+	//expected argument: XML file
+	if (arguments.empty())
+		return Error(QString("Missing parameter: XML parameters file after \"-%1\"").arg(COMMAND_CROSS_SECTION));
+	QString xmlFilename = arguments.takeFirst();
+
+	//read the XML file
+	CCVector3 boxCenter(0,0,0), boxThickness(0,0,0);
+	unsigned char repeatDim = 2;
+	double repeatGap = 0.0;
+	bool inside = true;
+	QString filePath;
+	{
+		QFile file(xmlFilename);
+		if (!file.open(QFile::ReadOnly | QFile::Text))
+		{
+			return Error(QString("Couldn't open XML file '%1'").arg(xmlFilename));
+		}
+
+		//read file content
+		QXmlStreamReader stream(&file);
+		bool error = true;
+
+		//expected: CloudCompare
+		if (	!stream.readNextStartElement()
+			||	stream.name() != s_xmlCloudCompare)
+		{
+			return Error(QString("Invalid XML file (should start by '<%1>')").arg(s_xmlCloudCompare));
+		}
+		
+		unsigned count = 0;
+		while (stream.readNextStartElement()) //loop over the elements
+		{
+			if (stream.name() == s_xmlBoxThickness)
+			{
+				QXmlStreamAttributes attributes = stream.attributes();
+				if (!ReadVector(attributes,boxThickness,s_xmlBoxThickness))
+					return false;
+				stream.skipCurrentElement();
+				++count;
+			}
+			else if (stream.name() == s_xmlBoxCenter)
+			{
+				QXmlStreamAttributes attributes = stream.attributes();
+				if (!ReadVector(attributes,boxCenter,s_xmlBoxCenter))
+					return false;
+				stream.skipCurrentElement();
+				++count;
+			}
+			else if (stream.name() == s_xmlRepeatDim)
+			{
+				QString itemValue = stream.readElementText();
+				bool ok = false;
+				int dim = itemValue.toInt(&ok);
+				if (!ok || dim < 0 || dim > 2)
+				{
+					return Error(QString("Invalid XML file (invalid value for '<%1>')").arg(s_xmlRepeatDim));
+					repeatDim = static_cast<unsigned char>(dim);
+				}
+				++count;
+			}
+			else if (stream.name() == s_xmlRepeatGap)
+			{
+				QString itemValue = stream.readElementText();
+				bool ok = false;
+				repeatGap = itemValue.toDouble(&ok);
+				if (!ok)
+				{
+					return Error(QString("Invalid XML file (invalid value for '<%1>')").arg(s_xmlRepeatGap));
+				}
+				++count;
+			}
+			else if (stream.name() == s_xmlFilePath)
+			{
+				filePath = stream.readElementText();
+				if (!QDir(filePath).exists())
+				{
+					return Error(QString("Invalid file path (directory pointed by '<%1>' doesn't exist)").arg(s_xmlFilePath));
+				}
+				++count;
+			}
+			else
+			{
+				Warning(QString("Unknown element: %1").arg(stream.name().toString()));
+				stream.skipCurrentElement();
+			}
+		}
+
+		if (count < 5)
+		{
+			return Error(QString("Some elements are missing in the XML file (see documentation)"));
+		}
+	}
+
+	//safety checks
+	if (	boxThickness.x < ZERO_TOLERANCE
+		||	boxThickness.y < ZERO_TOLERANCE
+		||	boxThickness.z < ZERO_TOLERANCE)
+	{
+		return Error(QString("Invalid box thickness"));
+	}
+	PointCoordinateType boxHalfWidth = boxThickness.u[repeatDim]/2;
+	PointCoordinateType repeatStep = boxHalfWidth + repeatGap;
+	if (repeatStep < ZERO_TOLERANCE)
+	{
+		return Error(QString("Repeat gap can't be equal or smaller than 'minus' box width"));
+	}
+
+	removeClouds();
+	removeMeshes();
+
+	//look for all files in the input directory
+	QDir dir(filePath);
+	assert(dir.exists());
+	QStringList files = dir.entryList();
+	for (int f=0; f<files.size(); ++f)
+	{
+		QString filename = files[f];
+		QFileInfo fileinfo(filename);
+		if (!fileinfo.isFile() || filename.toUpper().endsWith(".XML"))
+		{
+			continue;
+		}
+		Print(QString("Processing file: '%1'").arg(filename));
+
+		//otherwise let's try to load the file
+		QStringList loadArguments;
+		loadArguments << filename;
+		if (commandLoad(loadArguments))
+		{
+			//we can now apply the repeat process
+			ccHObject::Container entities;
+			try
+			{
+				for (size_t i=0; i<m_clouds.size(); ++i)
+					entities.push_back(m_clouds[i].pc);
+				for (size_t j=0; j<m_meshes.size(); ++j)
+					entities.push_back(m_meshes[j].mesh);
+			}
+			catch(std::bad_alloc)
+			{
+				return Error("Not enough memory!");
+			}
+
+			//repeat crop process on each entity
+			{
+				for (size_t i=0; i<entities.size(); ++i)
+				{
+					//check entity bounding-box
+					ccHObject* ent = entities[i];
+					ccBBox bbox = ent->getOwnBB();
+					if (!bbox.isValid())
+					{
+						Warning(QString("Entity '%1' has an invalid bounding-box!").arg(ent->getName()));
+						continue;
+					}
+
+					//browse to/create a subdirectory with the (base) filename as name
+					QString basename = fileinfo.baseName();
+					if (entities.size() > 1)
+						basename += QString("_%1").arg(i+1);
+					
+					QDir outputDir = dir;
+					if (outputDir.cd(basename))
+					{
+						//if the directory already exists...
+						Warning(QString("Subdirectory '%1' already exists").arg(basename));
+					}
+					else if (outputDir.mkdir(basename))
+					{
+						outputDir.cd(basename);
+					}
+					else
+					{
+						Warning(QString("Failed to create subdirectory '%1' (check access rights and base name validity!)").arg(basename));
+						continue;
+					}
+
+					//place the initial box at the beginning of the entity bounding box
+					CCVector3 C = boxCenter;
+					{
+						PointCoordinateType distToMinBorder = C.u[repeatDim]-boxHalfWidth - bbox.minCorner().u[repeatDim];
+						int steps = static_cast<int>(ceil(distToMinBorder / repeatStep));
+						C.u[repeatDim] -= steps * repeatStep;
+					}
+
+					//now extract the slices
+					{
+						while (C.u[repeatDim] - boxHalfWidth < bbox.maxCorner().u[repeatDim])
+						{
+							ccBBox cropBox(C-boxThickness/2,C+boxThickness/2);
+							ccHObject* croppedEnt = ccCropTool::Crop(ent, cropBox, inside);
+							if (croppedEnt)
+							{
+								QString outputBasename = basename + QString("%1_%2_%3").arg(C.x).arg(C.y).arg(C.z);
+								QString errorStr;
+								//original entity is a cloud?
+								if (i < m_clouds.size())
+								{
+									CloudDesc desc(	static_cast<ccPointCloud*>(croppedEnt),
+													outputBasename,
+													outputDir.absolutePath(),
+													entities.size() > 1 ? static_cast<int>(i) : -1);
+									errorStr = Export(desc);
+								}
+								else
+								{
+									MeshDesc desc(	static_cast<ccMesh*>(croppedEnt),
+													outputBasename,
+													outputDir.absolutePath(),
+													entities.size() > 1 ? static_cast<int>(i) : -1);
+									errorStr = Export(desc);
+								}
+								delete croppedEnt;
+								if (!errorStr.isEmpty())
+									return Error(errorStr);
+							}
+
+							C += boxThickness;
+							C.u[repeatDim] += repeatGap;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			Warning("\tFailed to load file!");
+		}
+	}
+}
+
 bool ccCommandLineParser::commandCrop(QStringList& arguments)
 {
 	Print("[CROP]");
 
 	if (arguments.empty())
 		return Error(QString("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
-	if (m_clouds.empty())
-		return Error(QString("No point cloud available. Be sure to open or generate one first!"));
+	if (m_clouds.empty() && m_meshes.empty())
+		return Error(QString("No point cloud or mesh available. Be sure to open or generate one first!"));
 
 	//decode box extents
 	CCVector3 boxMin,boxMax;
@@ -1633,45 +1927,47 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 	}
 
 	ccBBox cropBox(boxMin,boxMax);
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	//crop clouds
 	{
-		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop(cropBox,inside);
-		if (ref)
+		for (unsigned i=0; i<m_clouds.size(); ++i)
 		{
-			if (ref->size() != 0)
+			ccHObject* croppedCloud = ccCropTool::Crop(m_clouds[i].pc, cropBox, inside);
+			if (croppedCloud)
 			{
-				ccPointCloud* croppedCloud = m_clouds[i].pc->partialClone(ref);
-				delete ref;
-				ref = 0;
-
-				if (croppedCloud)
+				delete m_clouds[i].pc;
+				assert(croppedCloud->isA(CC_TYPES::POINT_CLOUD));
+				m_clouds[i].pc = static_cast<ccPointCloud*>(croppedCloud);
+				m_clouds[i].basename += "_CROPPED";
+				if (s_autoSaveMode)
 				{
-					delete m_clouds[i].pc;
-					m_clouds[i].pc = croppedCloud;
-					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
-					m_clouds[i].basename += "_CROPPED";
-					if (s_autoSaveMode)
-					{
-						QString errorStr = Export(m_clouds[i]);
-						if (!errorStr.isEmpty())
-							return Error(errorStr);
-					}
-				}
-				else
-				{
-					return Error(QString("Not enough memory to crop cloud '%1'!").arg(m_clouds[i].pc->getName()));
+					QString errorStr = Export(m_clouds[i]);
+					if (!errorStr.isEmpty())
+						return Error(errorStr);
 				}
 			}
-			else
-			{
-				delete ref;
-				ref = 0;
-				return Error (QString("No point of cloud '%1' falls inside the input box!").arg(m_clouds[i].pc->getName()));
-			}
+			//otherwise an error message has already been issued
 		}
-		else
+	}
+
+	//crop meshes
+	{
+		for (unsigned i=0; i<m_meshes.size(); ++i)
 		{
-			return Error(QString("Crop process failed! (not enough memory)"));
+			ccHObject* croppedMesh = ccCropTool::Crop(m_meshes[i].mesh, cropBox, inside);
+			if (croppedMesh)
+			{
+				delete m_meshes[i].mesh;
+				assert(croppedMesh->isA(CC_TYPES::MESH));
+				m_meshes[i].mesh = static_cast<ccMesh*>(croppedMesh);
+				m_meshes[i].basename += "_CROPPED";
+				if (s_autoSaveMode)
+				{
+					QString errorStr = Export(m_meshes[i]);
+					if (!errorStr.isEmpty())
+						return Error(errorStr);
+				}
+			}
+			//otherwise an error message has already been issued
 		}
 	}
 
@@ -3019,6 +3315,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_CROP_2D))
 		{
 			success = commandCrop2D(arguments);
+		}
+		//Cross section
+		else if (IsCommand(argument,COMMAND_CROSS_SECTION))
+		{
+			success = commandCrossSection(arguments);
 		}
 		//Color banding
 		else if (IsCommand(argument,COMMAND_COLOR_BANDING))

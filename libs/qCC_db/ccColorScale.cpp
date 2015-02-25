@@ -484,14 +484,15 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 				double pos = 0;
 				for (int i=0; i<attributes.size(); ++i)
 				{
+					QString name = attributes[i].name().toString().toUpper();
 					QString value = attributes[i].value().toString();
-					if (attributes[i].name() == "r")
+					if (name == "R")
 						rgb.setRed(value.toInt());
-					else if (attributes[i].name() == "g")
+					else if (name == "G")
 						rgb.setGreen(value.toInt());
-					else if (attributes[i].name() == "b")
+					else if (name == "B")
 						rgb.setBlue(value.toInt());
-					else if (attributes[i].name() == "pos")
+					else if (name == "POS")
 						pos = value.toDouble();
 					else
 						--attributeCount;

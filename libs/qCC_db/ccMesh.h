@@ -90,6 +90,7 @@ public:
 	virtual void refreshBB();
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C);
+	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
 	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture);
 	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture);
 	virtual unsigned maxSize() const;
@@ -365,6 +366,8 @@ protected:
 	virtual void onUpdateOf(ccHObject* obj);
 	virtual void onDeletionOf(const ccHObject* obj);
 
+	//! Same as other 'computeInterpolationWeights' method with a set of 3 vertices indexes
+	void computeInterpolationWeights(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3d& weights) const;
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
 	bool interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes = 0);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes

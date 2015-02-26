@@ -109,6 +109,9 @@ public:
 	//! Returns per-triangle normals shared array
 	virtual NormsIndexesTableType* getTriNormsTable() const = 0;
 	
+	//! Returns the (barycentric) interpolation weights for a given triangle
+	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
+
 	//! Interpolates normal(s) inside a given triangle
 	/** \param triIndex triangle index
 		\param P point where to interpolate (should be inside the triangle!)

@@ -2904,6 +2904,30 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
+void ccMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const
+{
+	assert(triIndex < m_triVertIndexes->currentSize());
+
+	const unsigned* tri = m_triVertIndexes->getValue(triIndex);
+	return computeInterpolationWeights(tri[0],tri[1],tri[2],P,weights);
+}
+
+void ccMesh::computeInterpolationWeights(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3d& weights) const
+{
+	const CCVector3 *A = m_associatedCloud->getPoint(i1);
+	const CCVector3 *B = m_associatedCloud->getPoint(i2);
+	const CCVector3 *C = m_associatedCloud->getPoint(i3);
+
+	//barcyentric intepolation weights
+	weights.x = sqrt(((P-*B).cross(*C-*B)).norm2d())/*/2*/;
+	weights.y = sqrt(((P-*C).cross(*A-*C)).norm2d())/*/2*/;
+	weights.z = sqrt(((P-*A).cross(*B-*A)).norm2d())/*/2*/;
+
+	//normalize weights
+	double sum = weights.x + weights.y + weights.z;
+	weights /= sum;
+}
+
 bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)
 {
 	assert(triIndex < size());
@@ -2918,41 +2942,33 @@ bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3
 
 bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes/*=0*/)
 {
-	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(i1);
-	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(i2);
-	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(i3);
-
 	//intepolation weights
-	PointCoordinateType d1 = ((P-*B).cross(*C-*B)).norm()/*/2.0*/;
-	PointCoordinateType d2 = ((P-*C).cross(*A-*C)).norm()/*/2.0*/;
-	PointCoordinateType d3 = ((P-*A).cross(*B-*A)).norm()/*/2.0*/;
+	CCVector3d w;
+	computeInterpolationWeights(i1,i2,i3,P,w);
 
-	CCVector3 N1,N2,N3;
-	if (triNormIndexes) //per-triangle normals
+	CCVector3d Nd(0,0,0);
 	{
-		if (triNormIndexes[0] >= 0)
-			N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0]));
-		else
-			d1 = 0;
-		if (triNormIndexes[1] >= 0)
-			N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1]));
-		else
-			d2 = 0;
-		if (triNormIndexes[2] >= 0)
-			N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2]));
-		else
-			d3 = 0;
-	}
-	else //per-vertex normals
-	{
-		N1 = m_associatedCloud->getPointNormal(i1);
-		N2 = m_associatedCloud->getPointNormal(i2);
-		N3 = m_associatedCloud->getPointNormal(i3);
+		if (!triNormIndexes || triNormIndexes[0] >= 0)
+		{
+			const CCVector3& N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0]));
+			Nd += CCVector3d(N1.x,N1.y,N1.z) * w.u[0];
+		}
+
+		if (!triNormIndexes || triNormIndexes[1] >= 0)
+		{
+			const CCVector3& N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1]));
+			Nd += CCVector3d(N2.x,N2.y,N2.z) * w.u[1];
+		}
+
+		if (!triNormIndexes || triNormIndexes[2] >= 0)
+		{
+			const CCVector3& N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2]));
+			Nd += CCVector3d(N3.x,N3.y,N3.z) * w.u[2];
+		}
+		Nd.normalize();
 	}
 
-	N = N1*d1 + N2*d2 + N3*d3;
-
-	N.normalize();
+	N = CCVector3::fromArray(Nd.u);
 
 	return true;
 }
@@ -2971,27 +2987,17 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::R
 
 bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, ccColor::Rgb& rgb)
 {
-	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(i1);
-	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(i2);
-	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(i3);
-
 	//intepolation weights
-	PointCoordinateType d1 = ((P-*B).cross(*C-*B)).norm()/*/2.0*/;
-	PointCoordinateType d2 = ((P-*C).cross(*A-*C)).norm()/*/2.0*/;
-	PointCoordinateType d3 = ((P-*A).cross(*B-*A)).norm()/*/2.0*/;
-	//we must normalize weights
-	PointCoordinateType dsum = d1+d2+d3;
-	d1 /= dsum;
-	d2 /= dsum;
-	d3 /= dsum;
+	CCVector3d w;
+	computeInterpolationWeights(i1,i2,i3,P,w);
 
 	const colorType* C1 = m_associatedCloud->getPointColor(i1);
 	const colorType* C2 = m_associatedCloud->getPointColor(i2);
 	const colorType* C3 = m_associatedCloud->getPointColor(i3);
 
-	rgb.r = static_cast<colorType>(floor(C1[0]*d1 + C2[0]*d2 + C3[0]*d3));
-	rgb.g = static_cast<colorType>(floor(C1[1]*d1 + C2[1]*d2 + C3[1]*d3));
-	rgb.b = static_cast<colorType>(floor(C1[2]*d1 + C2[2]*d2 + C3[2]*d3));
+	rgb.r = static_cast<colorType>(floor(C1[0]*w.u[0] + C2[0]*w.u[1] + C3[0]*w.u[2]));
+	rgb.g = static_cast<colorType>(floor(C1[1]*w.u[0] + C2[1]*w.u[1] + C3[1]*w.u[2]));
+	rgb.b = static_cast<colorType>(floor(C1[2]*w.u[0] + C2[2]*w.u[1] + C3[2]*w.u[2]));
 
 	return true;
 }
@@ -3106,32 +3112,25 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	const float* Tx2 = (txInd[1] >= 0 ? m_texCoords->getValue(txInd[1]) : 0);
 	const float* Tx3 = (txInd[2] >= 0 ? m_texCoords->getValue(txInd[2]) : 0);
 
-	//interpolation weights
-	const unsigned* tri = m_triVertIndexes->getValue(triIndex);
-	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(tri[0]);
-	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(tri[1]);
-	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(tri[2]);
+	//intepolation weights
+	CCVector3d w;
+	computeInterpolationWeights(triIndex,P,w);
 
-	float x = 0;
-	float y = 0;
-	//we must normalize weights
-	float dsum = 0;
-	if (Tx1) { float d1 = static_cast<float>(((P-*B).cross(*C-*B)).norm()/*/2*/); x += Tx1[0]*d1; y += Tx1[1]*d1; dsum += d1; }
-	if (Tx2) { float d2 = static_cast<float>(((P-*C).cross(*A-*C)).norm()/*/2*/); x += Tx2[0]*d2; y += Tx2[1]*d2; dsum += d2; }
-	if (Tx3) { float d3 = static_cast<float>(((P-*A).cross(*B-*A)).norm()/*/2*/); x += Tx3[0]*d3; y += Tx3[1]*d3; dsum += d3; }
-
-	if (dsum < FLT_EPSILON)
+	if (	(!Tx1 && w.u[0] > ZERO_TOLERANCE)
+		||	(!Tx2 && w.u[1] > ZERO_TOLERANCE)
+		||	(!Tx3 && w.u[2] > ZERO_TOLERANCE) )
 	{
-		assert(false);
+		//assert(false);
 		if (interpolateColorIfNoTexture)
 			return interpolateColors(triIndex,P,rgb);
 		return false;
 	}
-	x /= dsum;
-	y /= dsum;
+
+	double x = (Tx1 ? Tx1[0]*w.u[0] : 0.0) + (Tx2 ? Tx2[0]*w.u[1] : 0.0) + (Tx3 ? Tx3[0]*w.u[2] : 0.0);
+	double y = (Tx1 ? Tx1[1]*w.u[0] : 0.0) + (Tx2 ? Tx2[1]*w.u[1] : 0.0) + (Tx3 ? Tx3[1]*w.u[2] : 0.0);
 
 	//DGM: we mut handle texture coordinates below 0 or above 1 (i.e. repetition)
-	//if (x < 0 || x > 1.0f || y < 0 || y > 1.0f)
+	//if (x < 0 || x > 1.0 || y < 0 || y > 1.0)
 	if (x > 1.0)
 	{
 		double xFrac,xInt;
@@ -3142,7 +3141,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	{
 		double xFrac,xInt;
 		xFrac = modf(x,&xInt);
-		x = 1.0+xFrac;
+		x = 1.0 + xFrac;
 	}
 
 	//same thing for y
@@ -3156,14 +3155,14 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	{
 		double yFrac,yInt;
 		yFrac = modf(y,&yInt);
-		y = 1.0+yFrac;
+		y = 1.0 + yFrac;
 	}
 
 	//get color from texture image
 	{
 		const QImage texture = material->getTexture();
-		int xPix = std::min(static_cast<int>(floor(x*static_cast<float>(texture.width()))),texture.width()-1);
-		int yPix = std::min(static_cast<int>(floor(y*static_cast<float>(texture.height()))),texture.height()-1);
+		int xPix = std::min(static_cast<int>(floor(x*texture.width())),texture.width()-1);
+		int yPix = std::min(static_cast<int>(floor(y*texture.height())),texture.height()-1);
 
 		QRgb pixel = texture.pixel(xPix,yPix);
 
@@ -3243,7 +3242,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				{
 				//vertices->reserveTheNormsTable();
 				CCVector3 N(0.0,0.0,1.0);
-				interpolateNormals(indexA,indexB,indexC,G1,N);
+				<(indexA,indexB,indexC,G1,N);
 				vertices->addNorm(N);
 				}
 				//*/

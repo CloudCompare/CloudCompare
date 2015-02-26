@@ -23,6 +23,8 @@
 #include <ccMesh.h>
 #include <ccLog.h>
 #include <ccScalarField.h>
+#include <ccMaterial.h>
+#include <ccMaterialSet.h>
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -190,10 +192,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										//get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
-										const CCLib::TriangleSummitsIndexes* tsio = mesh->getTriangleIndexes(origTriIndex);
-										const CCVector3* Vo[3] = {	origVertices->getPoint(tsio->i1),
-																	origVertices->getPoint(tsio->i2),
-																	origVertices->getPoint(tsio->i3) };
+										const CCLib::TriangleSummitsIndexes* tsio = mesh->getTriangleIndexes(i);
 
 										//get the new triangle
 										const CCLib::TriangleSummitsIndexes* tsic = croppedMesh->getTriangleIndexes(i);
@@ -210,98 +209,49 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 											}
 
 											const CCVector3* Vcj = croppedVertices->getPoint(vertIndex);
-											bool matchOriginVertex = false;
-											for (unsigned k=0; k<3; ++k)
-											{
-												const CCVector3* Vok = Vo[k];
-												if ((*Vcj-*Vok).norm2d() < params.epsilon*params.epsilon)
-												{
-													unsigned origVertIndex = tsio->i[k];
-													//simply import the RGB color
-													if (importColors)
-													{
-														croppedVertices->setPointColor(vertIndex,origVertices->getPointColor(origVertIndex));
-													}
-													//...and SF value(s)
-													if (importSFs)
-													{
-														if (origVertices_pc)
-														{
-															//import multiple SF
-															for (unsigned s=0; s<static_cast<unsigned>(importedSFs.size()); ++s)
-															{
-																const CCLib::ScalarField* sf = origVertices_pc->getScalarField(s);
-																importedSFs[s]->setValue(vertIndex,sf->getValue(origVertIndex));
-															}
-														}
-														else
-														{
-															assert(importedSFs.size() == 1);
-															importedSFs.front()->setValue(vertIndex,origVertices->getPointScalarValue(origVertIndex));
-														}
-													}
 
-													matchOriginVertex = true;
-													break;
+											//we'll deduce its color and SFs values by triangulation
+											if (importColors)
+											{
+												ccColor::Rgb col;
+												if (mesh->interpolateColors(origTriIndex, *Vcj, col))
+												{
+													croppedVertices->setPointColor(vertIndex,col.rgb);
 												}
 											}
 
-											if (!matchOriginVertex)
+											if (importSFs)
 											{
-												//if we couldn't find a 'match' then it means
-												//that the vertex has been created inside the triangle
-												//we'll deduce its color and SFs values by triangulation
-												if (importColors)
+												CCVector3d w;
+												mesh->computeInterpolationWeights(origTriIndex,*Vcj,w);
+
+												//import SFs
+												for (unsigned s=0; s<static_cast<unsigned>(importedSFs.size()); ++s)
 												{
-													ccColor::Rgb col;
-													if (mesh->interpolateColors(origTriIndex, *Vcj, col))
-													{
-														croppedVertices->setPointColor(vertIndex,col.rgb);
-													}
-												}
-												
-												if (importSFs)
-												{
-													//intepolation weights
-													double d1 = sqrt(((*Vcj-*Vo[1]).cross(*Vo[2]-*Vo[1])).norm2d())/*/2.0*/;
-													double d2 = sqrt(((*Vcj-*Vo[2]).cross(*Vo[0]-*Vo[2])).norm2d())/*/2.0*/;
-													double d3 = sqrt(((*Vcj-*Vo[0]).cross(*Vo[1]-*Vo[1])).norm2d())/*/2.0*/;
-													//we must normalize weights
-													double dsum = d1+d2+d3;
-													d1 /= dsum;
-													d2 /= dsum;
-													d3 /= dsum;
+													CCVector3d scalarValues(0,0,0);
 													if (origVertices_pc)
 													{
-														//import multiple SF
-														for (unsigned s=0; s<static_cast<unsigned>(importedSFs.size()); ++s)
-														{
-															const CCLib::ScalarField* sf = origVertices_pc->getScalarField(s);
-															ScalarType s1 = sf->getValue(tsio->i1);
-															ScalarType s2 = sf->getValue(tsio->i2);
-															ScalarType s3 = sf->getValue(tsio->i3);
-															
-															ScalarType sVal = static_cast<ScalarType>(s1*d1 + s2*d2 + s3*d3);
-															importedSFs[s]->setValue(vertIndex,sVal);
-														}
+														const CCLib::ScalarField* sf = origVertices_pc->getScalarField(s);
+														scalarValues.x = sf->getValue(tsio->i1);
+														scalarValues.y = sf->getValue(tsio->i2);
+														scalarValues.z = sf->getValue(tsio->i3);
 													}
 													else
 													{
-														assert(importedSFs.size() == 1);
-														ScalarType s1 = origVertices->getPointScalarValue(tsio->i1);
-														ScalarType s2 = origVertices->getPointScalarValue(tsio->i2);
-														ScalarType s3 = origVertices->getPointScalarValue(tsio->i3);
-
-														ScalarType sVal = static_cast<ScalarType>(s1*d1 + s2*d2 + s3*d3);
-														importedSFs.front()->setValue(vertIndex,sVal);
+														assert(s == 0);
+														scalarValues.x = origVertices->getPointScalarValue(tsio->i1);
+														scalarValues.y = origVertices->getPointScalarValue(tsio->i2);
+														scalarValues.z = origVertices->getPointScalarValue(tsio->i3);
 													}
+
+													ScalarType sVal = static_cast<ScalarType>(scalarValues.dot(w));
+													importedSFs[s]->setValue(vertIndex,sVal);
 												}
 											}
 
 											//update 'processed' flag
 											vertProcessed[vertIndex] = true;
 										}
-
 									}
 
 									for (size_t s=0; s<importedSFs.size(); ++s)
@@ -313,6 +263,136 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									croppedVertices->showSF(importSFs && origVertices->sfShown());
 									croppedMesh->showColors(importColors && mesh->colorsShown());
 									croppedMesh->showSF(importSFs && mesh->sfShown());
+								}
+							}
+
+							//per-triangle features (materials)
+							if (mesh->hasMaterials())
+							{
+								const ccMaterialSet* origMaterialSet = mesh->getMaterialSet();
+								assert(origMaterialSet);
+								
+								if (origMaterialSet && !origMaterialSet->empty() && croppedMesh->reservePerTriangleMtlIndexes())
+								{
+									std::vector<int> materialUsed(origMaterialSet->size(),-1);
+									
+									//per-triangle materials
+									for (unsigned i=0; i<croppedMesh->size(); ++i)
+									{
+										//get the origin triangle
+										unsigned origTriIndex = origTriIndexes[i];
+										int mtlIndex = mesh->getTriangleMtlIndex(origTriIndex);
+										croppedMesh->addTriangleMtlIndex(mtlIndex);
+										
+										if (mtlIndex >= 0)
+											materialUsed[mtlIndex] = 1;
+									}
+
+									//import materials
+									{
+										size_t materialUsedCount = 0;
+										{
+											for (size_t i=0; i<materialUsed.size(); ++i)
+												if (materialUsed[i] == 1)
+													++materialUsedCount;
+										}
+
+										if (materialUsedCount == materialUsed.size())
+										{
+											//nothing to do, we use all input materials
+											croppedMesh->setMaterialSet(origMaterialSet->clone());
+										}
+										else
+										{
+											//create a subset of the input materials
+											ccMaterialSet* matSet = new ccMaterialSet(origMaterialSet->getName());
+											{
+												matSet->reserve(materialUsedCount);
+												for (size_t i=0; i<materialUsed.size(); ++i)
+												{
+													if (materialUsed[i] >= 0)
+													{
+														matSet->push_back(ccMaterial::Shared(new ccMaterial(*origMaterialSet->at(i))));
+														//update index
+														materialUsed[i] = static_cast<int>(matSet->size())-1;
+													}
+												}
+											}
+											croppedMesh->setMaterialSet(matSet);
+											
+											//and update the materials indexes!
+											for (unsigned i=0; i<croppedMesh->size(); ++i)
+											{
+												int mtlIndex = croppedMesh->getTriangleMtlIndex(i);
+												if (mtlIndex >= 0)
+												{
+													assert(mtlIndex < static_cast<int>(materialUsed.size()));
+													croppedMesh->setTriangleMtlIndex(i,materialUsed[mtlIndex]);
+												}
+											}
+										}
+									}
+
+									croppedMesh->showMaterials(mesh->materialsShown());
+								}
+								else
+								{
+									ccLog::Warning("[Crop] Failed to transfer materials on the output mesh (not enough memory)");
+								}
+
+								//per-triangle texture coordinates
+								if (mesh->hasPerTriangleTexCoordIndexes())
+								{
+									TextureCoordsContainer* texCoords = new TextureCoordsContainer;
+									if (	croppedMesh->reservePerTriangleTexCoordIndexes()
+										&&	texCoords->reserve(croppedMesh->size()*3))
+									{
+										//for each new triangle
+										for (unsigned i=0; i<croppedMesh->size(); ++i)
+										{
+											//get the origin triangle
+											unsigned origTriIndex = origTriIndexes[i];
+											float* tx1 = 0;
+											float* tx2 = 0;
+											float* tx3 = 0;
+											mesh->getTriangleTexCoordinates(origTriIndex,tx1,tx2,tx3);
+
+											//get the new triangle
+											const CCLib::TriangleSummitsIndexes* tsic = croppedMesh->getTriangleIndexes(i);
+
+											//for each vertex of the new triangle
+											int texIndexes[3] = {-1,-1,-1};
+											for (unsigned j=0; j<3; ++j)
+											{
+												unsigned vertIndex = tsic->i[j];
+												const CCVector3* Vcj = croppedVertices->getPoint(vertIndex);
+
+												//intepolation weights
+												CCVector3d w;
+												mesh->computeInterpolationWeights(origTriIndex,*Vcj,w);
+
+												if (	(tx1 || w.u[0] < ZERO_TOLERANCE)
+													&&	(tx2 || w.u[1] < ZERO_TOLERANCE)
+													&&	(tx3 || w.u[2] < ZERO_TOLERANCE) )
+												{
+													float t[2] = {	static_cast<float>((tx1 ? tx1[0]*w.u[0] : 0.0) + (tx2 ? tx2[0]*w.u[1] : 0.0) + (tx3 ? tx3[0]*w.u[2] : 0.0)),
+																	static_cast<float>((tx1 ? tx1[1]*w.u[0] : 0.0) + (tx2 ? tx2[1]*w.u[1] : 0.0) + (tx3 ? tx3[1]*w.u[2] : 0.0)) };
+
+													texCoords->addElement(t);
+													texIndexes[j] = static_cast<int>(texCoords->currentSize())-1;
+												}
+											}
+											
+											croppedMesh->addTriangleTexCoordIndexes(texIndexes[0], texIndexes[1], texIndexes[2]);
+										}
+										croppedMesh->setTexCoordinatesTable(texCoords);
+									}
+									else
+									{
+										ccLog::Warning("[Crop] Failed to transfer texture coordinates on the output mesh (not enough memory)");
+										delete texCoords;
+										texCoords = 0;
+									}
 								}
 							}
 						}

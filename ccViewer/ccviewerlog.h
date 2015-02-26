@@ -31,16 +31,18 @@
 class ccViewerLog : public ccLog
 {
 public:
+	//! Default constructor
 	ccViewerLog(QMainWindow* parentWindow = 0) : ccLog(), m_parentWindow(parentWindow) {}
 
 protected:
-
-	virtual void displayMessage(const QString& message, MessageLevel level)
+	//inherited from ccLog
+	virtual void displayMessage(const QString& message, int level)
 	{
-		if (level >= LOG_ERROR)
+		if (level & LOG_ERROR)
 			QMessageBox::warning(m_parentWindow, "Error", message);
 	}
 
+	//! Associated window
 	QMainWindow* m_parentWindow;
 };
 

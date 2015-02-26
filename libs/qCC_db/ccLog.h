@@ -102,23 +102,21 @@ public:
 protected:
 
 	//! Message level
-	enum MessageLevel
+	enum MessageLevelFlags
 	{
 		LOG_STANDARD		= 0, /**< Standard message (Print) **/
-		LOG_STANDARD_DEBUG	= 1, /**< Standard message - debug only (PrintDebug) **/
+		LOG_DEBUG	        = 1, /**< Debug only flag **/
 		LOG_WARNING			= 2, /**< Warning message (Warning) **/
-		LOG_WARNING_DEBUG	= 3, /**< Warning message - debug only (WarningDebug) **/
 		LOG_ERROR			= 4, /**< Error message (Error) **/
-		LOG_ERROR_DEBUG		= 5, /**< Error message - debug only (ErrorDebug) **/
 	};
 
 	//! Generic message display method
 	/** To be implemented by child class.
 		WARNING: MUST BE THREAD SAFE!
 		\param message message
-		\param level message severity
+		\param level message severity (see MessageLevelFlags)
 	**/
-	virtual void displayMessage(const QString& message, MessageLevel level) = 0;
+	virtual void displayMessage(const QString& message, int level) = 0;
 
 };
 

@@ -95,7 +95,7 @@ public:
 				ccPointCloud* vertices = ccPointCloud::From(tempMesh->vertices());
 				if (vertices)
 				{
-					ccMesh* croppedMesh = new ccMesh(tempMesh, vertices);
+					croppedMesh = new ccMesh(tempMesh, vertices);
 					croppedMesh->addChild(vertices);
 					vertices->setEnabled(false);
 					if (croppedMesh->size() == 0)
@@ -104,6 +104,24 @@ public:
 						ccLog::Warning(QString("[Crop] No trinagle of the mesh '%1' falls %2side the input box!").arg(mesh->getName()).arg(inside ? "in" : "out"));
 						delete croppedMesh;
 						croppedMesh = 0;
+					}
+					else
+					{
+						//compute normals if necessary
+						if (mesh->hasNormals())
+						{
+							bool success = false;
+							if (mesh->hasTriNormals())
+								success = croppedMesh->computePerTriangleNormals();
+							else
+								success = croppedMesh->computePerVertexNormals();
+
+							if (!success)
+							{
+								ccLog::Warning("[Crop] Failed to compute normals on the output mesh (not enough memory)");
+							}
+							croppedMesh->showNormals(success && mesh->normalsShown());
+						}
 					}
 				}
 				else

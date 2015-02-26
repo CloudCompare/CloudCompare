@@ -59,6 +59,7 @@ protected:
 	bool setActiveSF						(QStringList& arguments);
 	bool removeAllSFs						(QStringList& arguments);
 	bool commandApplyTransformation			(QStringList& arguments);
+	bool commandLogFile						(QStringList& arguments);
 
 protected:
 

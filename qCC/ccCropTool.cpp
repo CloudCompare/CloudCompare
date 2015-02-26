@@ -92,7 +92,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 				if (croppedMesh->size() == 0)
 				{
 					//no points fall inside selection!
-					ccLog::Warning(QString("[Crop] No trinagle of the mesh '%1' falls %2side the input box!").arg(mesh->getName()).arg(inside ? "in" : "out"));
+					ccLog::Warning(QString("[Crop] No triangle of the mesh '%1' falls %2side the input box!").arg(mesh->getName()).arg(inside ? "in" : "out"));
 					delete croppedMesh;
 					croppedMesh = 0;
 				}
@@ -192,7 +192,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										//get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
-										const CCLib::TriangleSummitsIndexes* tsio = mesh->getTriangleIndexes(i);
+										const CCLib::TriangleSummitsIndexes* tsio = mesh->getTriangleIndexes(origTriIndex);
 
 										//get the new triangle
 										const CCLib::TriangleSummitsIndexes* tsic = croppedMesh->getTriangleIndexes(i);
@@ -223,7 +223,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 											if (importSFs)
 											{
 												CCVector3d w;
-												mesh->computeInterpolationWeights(origTriIndex,*Vcj,w);
+												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
 												//import SFs
 												for (unsigned s=0; s<static_cast<unsigned>(importedSFs.size()); ++s)

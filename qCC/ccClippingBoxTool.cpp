@@ -39,7 +39,6 @@
 #include <Neighbourhood.h>
 
 //Qt
-#include <QProgressDialog>
 #include <QMessageBox>
 #include <QInputDialog>
 
@@ -524,7 +523,10 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			{
 				sliceGroup = new ccHObject(QString("%1.slices").arg(cloud->getName()));
 
-				QProgressDialog pDlg(QString("Extract section(s): %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
+				ccProgressDialog pDlg(true,this);
+				pDlg.setWindowTitle("Section extraction");
+				pDlg.setInfo(qPrintable(QString("Section(s): %1").arg(subCloudsCount)));
+				pDlg.setMaximum(static_cast<int>(subCloudsCount));
 				pDlg.show();
 				QApplication::processEvents();
 				
@@ -616,7 +618,10 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 
 			ccHObject* contourGroup = new ccHObject(obj->getName() + QString(".contours"));
 
-			QProgressDialog pDlg(QString("Extract contour(s): %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
+			ccProgressDialog pDlg(true,this);
+			pDlg.setWindowTitle("Contour extraction");
+			pDlg.setInfo(qPrintable(QString("Contour(s): %1").arg(subCloudsCount)));
+			pDlg.setMaximum(static_cast<int>(subCloudsCount));
 			pDlg.show();
 			QApplication::processEvents();
 

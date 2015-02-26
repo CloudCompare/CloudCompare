@@ -1657,7 +1657,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 
 	//read the XML file
 	CCVector3 boxCenter(0,0,0), boxThickness(0,0,0);
-	unsigned char repeatDim = 2;
+	bool repeatDim[3] = {false, false, false};
 	double repeatGap = 0.0;
 	bool inside = true;
 	bool autoCenter = true;
@@ -1708,8 +1708,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 				{
 					return Error(QString("Invalid XML file (invalid value for '<%1>')").arg(s_xmlRepeatDim));
 				}
-				repeatDim = static_cast<unsigned char>(dim);
-				++mandatoryCount;
+				repeatDim[dim] = true;
 			}
 			else if (stream.name() == s_xmlRepeatGap)
 			{
@@ -1737,7 +1736,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 			}
 		}
 
-		if (mandatoryCount < 3)
+		if (mandatoryCount < 2 || (!repeatDim[0] && !repeatDim[1] && !repeatDim[2]))
 		{
 			return Error(QString("Some mandatory elements are missing in the XML file (see documentation)"));
 		}
@@ -1750,8 +1749,10 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 	{
 		return Error(QString("Invalid box thickness"));
 	}
-	PointCoordinateType repeatStep = boxThickness.u[repeatDim] + repeatGap;
-	if (repeatStep < ZERO_TOLERANCE)
+	CCVector3 repeatStep = boxThickness + CCVector3(repeatGap,repeatGap,repeatGap);
+	if (	(repeatDim[0] && repeatStep.x < ZERO_TOLERANCE)
+		||	(repeatDim[1] && repeatStep.y < ZERO_TOLERANCE)
+		||	(repeatDim[2] && repeatStep.z < ZERO_TOLERANCE))
 	{
 		return Error(QString("Repeat gap can't be equal or smaller than 'minus' box width"));
 	}
@@ -1827,58 +1828,66 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 					}
 
 					//place the initial box at the beginning of the entity bounding box
-					CCVector3 C(0,0,0);
-					PointCoordinateType boxHalfWidth = boxThickness.u[repeatDim]/2;
-					if (autoCenter)
+					CCVector3 C0 = autoCenter ? bbox.getCenter() : boxCenter;
+					unsigned steps[3] = {1,1,1};
+					for (unsigned d=0; d<3; ++d)
 					{
-						C = bbox.getCenter();
-						C.u[repeatDim] = bbox.minCorner().u[repeatDim];
+						if (repeatDim[d])
+						{
+							PointCoordinateType boxHalfWidth = boxThickness.u[d]/2;
+							PointCoordinateType distToMinBorder = C0.u[d]-boxHalfWidth - bbox.minCorner().u[d];
+							int stepsToMinBorder = static_cast<int>(ceil(distToMinBorder / repeatStep.u[d]));
+							C0.u[d] -= stepsToMinBorder * repeatStep.u[d];
+
+							PointCoordinateType distToMaxBorder = bbox.maxCorner().u[d] - C0.u[d];
+							assert(distToMaxBorder >= 0);
+							unsigned stepsToMaxBoder = static_cast<unsigned>(ceil(distToMaxBorder / repeatStep.u[d]));
+							steps[d] = std::max<unsigned>(stepsToMaxBoder,1);
+						}
 					}
-					else
-					{
-						C = boxCenter;
-						PointCoordinateType distToMinBorder = C.u[repeatDim]-boxHalfWidth - bbox.minCorner().u[repeatDim];
-						int steps = static_cast<int>(ceil(distToMinBorder / repeatStep));
-						C.u[repeatDim] -= steps * repeatStep;
-					}
+
+					Print(QString("Will extract up to (%1 x %2 x %3) = %4 sections").arg(steps[0]).arg(steps[1]).arg(steps[2]).arg(steps[0]*steps[1]*steps[2]));
 
 					//now extract the slices
+					for (unsigned dx=0; dx<steps[0]; ++dx)
 					{
-						while (C.u[repeatDim]-boxHalfWidth < bbox.maxCorner().u[repeatDim])
+						for (unsigned dy=0; dy<steps[1]; ++dy)
 						{
-							ccBBox cropBox(C-boxThickness/2,C+boxThickness/2);
-							Print(QString("Box (%1;%2;%3) --> (%4;%5;%6)")
-								.arg(cropBox.minCorner().x).arg(cropBox.minCorner().y).arg(cropBox.minCorner().z)
-								.arg(cropBox.maxCorner().x).arg(cropBox.maxCorner().y).arg(cropBox.maxCorner().z)
-								);
-							ccHObject* croppedEnt = ccCropTool::Crop(ent, cropBox, inside);
-							if (croppedEnt)
+							for (unsigned dz=0; dz<steps[2]; ++dz)
 							{
-								QString outputBasename = basename + QString("_%1_%2_%3").arg(C.x).arg(C.y).arg(C.z);
-								QString errorStr;
-								//original entity is a cloud?
-								if (i < m_clouds.size())
+								CCVector3 C = C0 + CCVector3(dx*repeatStep.x,dy*repeatStep.y,dz*repeatStep.z);
+								ccBBox cropBox(C-boxThickness/2,C+boxThickness/2);
+								Print(QString("Box (%1;%2;%3) --> (%4;%5;%6)")
+									.arg(cropBox.minCorner().x).arg(cropBox.minCorner().y).arg(cropBox.minCorner().z)
+									.arg(cropBox.maxCorner().x).arg(cropBox.maxCorner().y).arg(cropBox.maxCorner().z)
+									);
+								ccHObject* croppedEnt = ccCropTool::Crop(ent, cropBox, inside);
+								if (croppedEnt)
 								{
-									CloudDesc desc(	static_cast<ccPointCloud*>(croppedEnt),
-													outputBasename,
-													outputDir.absolutePath(),
-													entities.size() > 1 ? static_cast<int>(i) : -1);
-									errorStr = Export(desc);
+									QString outputBasename = basename + QString("_%1_%2_%3").arg(C.x).arg(C.y).arg(C.z);
+									QString errorStr;
+									//original entity is a cloud?
+									if (i < m_clouds.size())
+									{
+										CloudDesc desc(	static_cast<ccPointCloud*>(croppedEnt),
+											outputBasename,
+											outputDir.absolutePath(),
+											entities.size() > 1 ? static_cast<int>(i) : -1);
+										errorStr = Export(desc);
+									}
+									else
+									{
+										MeshDesc desc(	static_cast<ccMesh*>(croppedEnt),
+											outputBasename,
+											outputDir.absolutePath(),
+											entities.size() > 1 ? static_cast<int>(i) : -1);
+										errorStr = Export(desc);
+									}
+									delete croppedEnt;
+									if (!errorStr.isEmpty())
+										return Error(errorStr);
 								}
-								else
-								{
-									MeshDesc desc(	static_cast<ccMesh*>(croppedEnt),
-													outputBasename,
-													outputDir.absolutePath(),
-													entities.size() > 1 ? static_cast<int>(i) : -1);
-									errorStr = Export(desc);
-								}
-								delete croppedEnt;
-								if (!errorStr.isEmpty())
-									return Error(errorStr);
 							}
-
-							C.u[repeatDim] += repeatStep;
 						}
 					}
 				}

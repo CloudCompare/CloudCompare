@@ -5891,7 +5891,10 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 												QMessageBox::No ) == QMessageBox::Yes);
 	}
 
-	QProgressDialog pDlg("Triangulation in progress...", QString(), 0, 0, this);
+	ccProgressDialog pDlg(false,this);
+	pDlg.setWindowTitle("Triangulation");
+	pDlg.setInfo("Triangulation in progress...");
+	pDlg.setRange(0,0);
 	pDlg.show();
 	QApplication::processEvents();
 

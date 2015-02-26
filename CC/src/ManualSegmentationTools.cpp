@@ -1313,6 +1313,12 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				break;
 			}
 
+			if (insideMesh->size() == 0 && preservedTrianglesInside->empty())
+			{
+				//no triangle inside!
+				break;
+			}
+
 			if (d < 5)
 			{
 				//clear the source mesh and swap the buffers

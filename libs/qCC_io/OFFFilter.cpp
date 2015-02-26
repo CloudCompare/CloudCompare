@@ -27,7 +27,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>

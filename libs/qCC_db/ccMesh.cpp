@@ -882,9 +882,6 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 		cloneMesh->setDisplay_recursive(getDisplay());
 	}
 
-	//stippling
-	cloneMesh->enableStippling(m_stippling);
-
 	cloneMesh->showNormals(normalsShown());
 	cloneMesh->showColors(colorsShown());
 	cloneMesh->showSF(sfShown());
@@ -892,8 +889,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	cloneMesh->setName(getName()+QString(".clone"));
 	cloneMesh->setVisible(isVisible());
 	cloneMesh->setEnabled(isEnabled());
-	cloneMesh->setGLTransformationHistory(getGLTransformationHistory());
-	cloneMesh->setMetaData(metaData());
+	cloneMesh->importParametersFrom(this);
 
 	return cloneMesh;
 }
@@ -2321,10 +2317,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			newMesh->showNormals(normalsShown());
 			newMesh->showMaterials(materialsShown());
 			newMesh->showSF(sfShown());
-			newMesh->enableStippling(stipplingEnabled());
-			newMesh->showWired(isShownAsWire());
-			newMesh->setGLTransformationHistory(getGLTransformationHistory());
-			newMesh->setMetaData(metaData());
+			newMesh->importParametersFrom(this);
 
 			newVertices->setEnabled(false);
 		}
@@ -2952,12 +2945,12 @@ bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCV
 	}
 	else //per-vertex normals
 	{
-		N1 = CCVector3(m_associatedCloud->getPointNormal(i1));
-		N2 = CCVector3(m_associatedCloud->getPointNormal(i2));
-		N3 = CCVector3(m_associatedCloud->getPointNormal(i3));
+		N1 = m_associatedCloud->getPointNormal(i1);
+		N2 = m_associatedCloud->getPointNormal(i2);
+		N3 = m_associatedCloud->getPointNormal(i3);
 	}
 
-	N = N1*d1+N2*d2+N3*d3;
+	N = N1*d1 + N2*d2 + N3*d3;
 
 	N.normalize();
 
@@ -3382,11 +3375,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 		return 0;
 	}
 
-	ccPointCloud* resultVertices = 0;
-	if (vertices->isA(CC_TYPES::POINT_CLOUD))
-		resultVertices = static_cast<ccPointCloud*>(vertices)->cloneThis();
-	else
-		resultVertices = ccPointCloud::From(vertices);
+	ccPointCloud* resultVertices = vertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(vertices)->cloneThis() : ccPointCloud::From(vertices,vertices);
 	if (!resultVertices)
 	{
 		ccLog::Error("[ccMesh::subdivide] Not enough memory!");

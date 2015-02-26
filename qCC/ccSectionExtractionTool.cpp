@@ -1388,9 +1388,13 @@ bool ccSectionExtractionTool::extractSectionCloud(	const std::vector<CCLib::Refe
 			//when extracting the section cloud
 			ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_clouds[i].entity);
 			if (pc)
+			{
 				part = pc->partialClone(refClouds[i]);
+			}
 			else
-				part = ccPointCloud::From(refClouds[i]);
+			{
+				part = ccPointCloud::From(refClouds[i],m_clouds[i].entity);
+			}
 		}
 
 		if (part)

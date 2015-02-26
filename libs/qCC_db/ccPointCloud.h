@@ -94,8 +94,9 @@ public:
 		As the GenericIndexedCloud interface is very simple, only points are imported.
 		Note: throws an 'int' exception in case of error (see CTOR_ERRORS)
 		\param cloud a GenericIndexedCloud structure
+		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud);
+	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud = 0);
 
 	//! Creates a new point cloud object from a GenericCloud
 	/** "GenericCloud" is a very simple and light interface from CCLib. It is
@@ -105,8 +106,9 @@ public:
 		As the GenericCloud interface is very simple, only points are imported.
 		Note: throws an 'int' exception in case of error (see CTOR_ERRORS)
 		\param cloud a GenericCloud structure
+		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(CCLib::GenericCloud* cloud);
+	static ccPointCloud* From(CCLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud = 0);
 
 	//! Warnings for the partialClone method (bit flags)
 	enum CLONE_WARNINGS {	WRN_OUT_OF_MEM_FOR_COLORS		= 1,

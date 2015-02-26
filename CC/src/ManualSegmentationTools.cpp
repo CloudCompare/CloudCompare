@@ -385,9 +385,10 @@ bool AddTriangle(unsigned iA, unsigned iB, unsigned iC,
 
 	//now add the triangle
 	if (	mesh->size() == mesh->capacity()
-		&&	!mesh->reserve(mesh->size() + c_defaultArrayGrowth))
+		&& (mesh->size() + c_defaultArrayGrowth > c_realIndexMask
+		|| !mesh->reserve(mesh->size() + c_defaultArrayGrowth)))
 	{
-		//not enough memory
+		//not enough memory (or too many triangles!)
 		return false;
 	}
 
@@ -399,11 +400,12 @@ bool AddTriangle(unsigned iA, unsigned iB, unsigned iC,
 	return true;
 }
 
-bool MergeOldTriangles(GenericIndexedMesh* origMesh,
-	GenericIndexedCloudPersist* origVertices,
-	SimpleMesh* newMesh,
-	ChunkedPointCloud* newVertices,
-	const std::vector<unsigned>& preservedTriangleIndexes)
+bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
+						GenericIndexedCloudPersist* origVertices,
+						SimpleMesh* newMesh,
+						ChunkedPointCloud* newVertices,
+						const std::vector<unsigned>& preservedTriangleIndexes,
+						std::vector<unsigned>* origTriIndexesMap = 0)
 {
 	assert(origMesh && origVertices && newMesh && newVertices);
 	
@@ -504,11 +506,14 @@ bool MergeOldTriangles(GenericIndexedMesh* origMesh,
 			}
 			//then copy them
 			{
+				assert(!origTriIndexesMap || newMesh->size() == origTriIndexesMap->size());
 				for (unsigned i = 0; i < importedTriCount; ++i)
 				{
 					unsigned triIndex = preservedTriangleIndexes[i];
 					const TriangleSummitsIndexes* tsi = origMesh->getTriangleIndexes(triIndex);
 					newMesh->addTriangle(newIndexMap[tsi->i1], newIndexMap[tsi->i2], newIndexMap[tsi->i3]);
+					if (origTriIndexesMap)
+						origTriIndexesMap->push_back(triIndex);
 				}
 			}
 		}
@@ -521,6 +526,8 @@ bool MergeOldTriangles(GenericIndexedMesh* origMesh,
 
 	newMesh->resize(newMesh->size());
 	newVertices->resize(newVertices->size());
+
+	assert(!origTriIndexesMap || newMesh->size() == origTriIndexesMap->size());
 
 	return true;
 }
@@ -623,6 +630,12 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 		||	ioParams.planeOrthoDim > 2)
 	{
 		//invalid input parameters
+		return false;
+	}
+
+	if (mesh->size() > c_realIndexMask)
+	{
+		//too many triangles!
 		return false;
 	}
 
@@ -909,6 +922,12 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 		return false;
 	}
 
+	if (origMesh->size() > c_realIndexMask)
+	{
+		//too many triangles!
+		return false;
+	}
+
 	const double& epsilon = ioParams.epsilon;
 	const CCVector3d& bbMin = ioParams.bbMin;
 	const CCVector3d& bbMax = ioParams.bbMax;
@@ -961,6 +980,13 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			assert(insideVertices && insideMesh);
 			assert(sourceVertices && sourceMesh);
 			s_edgePoint.clear();
+
+			std::vector<unsigned> origTriIndexesMapInsideBackup;
+			if (ioParams.trackOrigIndexes)
+			{
+				origTriIndexesMapInsideBackup = ioParams.origTriIndexesMapInside;
+				ioParams.origTriIndexesMapInside.clear();
+			}
 
 			//look for original triangles
 			//(the first time they only come from the original mesh but afterwards
@@ -1130,6 +1156,17 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 							error = true;
 							break;
 						}
+
+						//remember (origin) source triangle index
+						if (ioParams.trackOrigIndexes)
+						{
+							assert(triangleIsOriginal || souceTriIndex < origTriIndexesMapInsideBackup.size());
+							unsigned origTriIndex = triangleIsOriginal ? souceTriIndex : origTriIndexesMapInsideBackup[souceTriIndex];
+							//the source triangle is split in two so each side get one new triangle
+							ioParams.origTriIndexesMapInside.push_back(origTriIndex);
+							if (ioParams.generateOutsideMesh)
+								ioParams.origTriIndexesMapOutside.push_back(origTriIndex);
+						}
 					}
 				}
 				break;
@@ -1208,6 +1245,22 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 							error = true;
 							break;
 						}
+
+						//remember (origin) source triangle index
+						if (ioParams.trackOrigIndexes)
+						{
+							assert(triangleIsOriginal || souceTriIndex < origTriIndexesMapInsideBackup.size());
+							unsigned origTriIndex = triangleIsOriginal ? souceTriIndex : origTriIndexesMapInsideBackup[souceTriIndex];
+							//each side gets at least one new triangle
+							ioParams.origTriIndexesMapInside.push_back(origTriIndex);
+							if (ioParams.generateOutsideMesh)
+								ioParams.origTriIndexesMapOutside.push_back(origTriIndex);
+							//the third triangle has been added either to the 'inside' or to the 'outside' mesh
+							if (!leftIsInside)
+								ioParams.origTriIndexesMapInside.push_back(origTriIndex);
+							else if (ioParams.generateOutsideMesh)
+								ioParams.origTriIndexesMapOutside.push_back(origTriIndex);
+						}
 					}
 				}
 				break;
@@ -1235,6 +1288,15 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 							//early stop
 							error = true;
 							break;
+						}
+						if (ioParams.trackOrigIndexes)
+						{
+							assert(souceTriIndex < origTriIndexesMapInsideBackup.size());
+							unsigned origTriIndex = origTriIndexesMapInsideBackup[souceTriIndex];
+							if (isFullyInside)
+								ioParams.origTriIndexesMapInside.push_back(origTriIndex);
+							else if (ioParams.generateOutsideMesh)
+								ioParams.origTriIndexesMapOutside.push_back(origTriIndex);
 						}
 					}
 				}
@@ -1299,8 +1361,15 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 	if (!error)
 	{
 		//import the 'preserved' (original) triangles 
-		if (	!MergeOldTriangles(origMesh, origVertices, insideMesh, insideVertices, *preservedTrianglesInside)
-			||	(ioParams.generateOutsideMesh && !MergeOldTriangles(origMesh, origVertices, outsideMesh, outsideVertices, preservedTrianglesOutside))
+		if (	!MergeOldTriangles(	origMesh, origVertices,
+									insideMesh, insideVertices,
+									*preservedTrianglesInside,
+									ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapInside : 0)
+			||	(	ioParams.generateOutsideMesh
+				&&	!MergeOldTriangles(	origMesh, origVertices,
+										outsideMesh, outsideVertices,
+										preservedTrianglesOutside,
+										ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapOutside : 0))
 			)
 		{
 			error = true;

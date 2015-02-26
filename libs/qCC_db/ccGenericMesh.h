@@ -175,6 +175,11 @@ public:
 								bool withTexture,
 								CCLib::GenericProgressCallback* pDlg = 0);
 
+	//! Imports the parameters from another mesh
+	/** Only the specific parameters are imported.
+	**/
+	void importParametersFrom(const ccGenericMesh* mesh);
+
 protected:
 
 	//inherited from ccHObject

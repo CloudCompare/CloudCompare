@@ -730,6 +730,16 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	if (sampledCloud)
 	{
 		cloud = ccPointCloud::From(sampledCloud);
+
+		//import parameters from both the source vertices and the source mesh
+		ccGenericPointCloud* vertices = getAssociatedCloud();
+		if (vertices)
+		{
+			cloud->setGlobalShift(vertices->getGlobalShift());
+			cloud->setGlobalScale(vertices->getGlobalScale());
+		}
+		cloud->setGLTransformationHistory(getGLTransformationHistory());
+		
 		delete sampledCloud;
 		sampledCloud = 0;
 	}
@@ -832,3 +842,27 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 
 	return cloud;
 }
+
+void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
+{
+	if (!mesh)
+	{
+		assert(false);
+		return;
+	}
+
+	//original shift & scale
+	//setGlobalShift(mesh->getGlobalShift());
+	//setGlobalScale(mesh->getGlobalScale());
+
+	//stippling
+	enableStippling(mesh->stipplingEnabled());
+	//wired style
+	showWired(mesh->isShownAsWire());
+	
+	//keep the transformation history!
+	setGLTransformationHistory(mesh->getGLTransformationHistory());
+	//and meta-data
+	setMetaData(mesh->metaData());
+}
+

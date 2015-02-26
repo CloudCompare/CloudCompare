@@ -57,7 +57,7 @@ ccPointCloud::ccPointCloud(QString name) throw()
 	showSF(false);
 }
 
-ccPointCloud* ccPointCloud::From(CCLib::GenericCloud* cloud)
+ccPointCloud* ccPointCloud::From(CCLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud/*=0*/)
 {
 	ccPointCloud* pc = new ccPointCloud("Cloud");
 
@@ -83,10 +83,13 @@ ccPointCloud* ccPointCloud::From(CCLib::GenericCloud* cloud)
 		}
 	}
 
+	if (pc && sourceCloud)
+		pc->importParametersFrom(sourceCloud);
+
 	return pc;
 }
 
-ccPointCloud* ccPointCloud::From(const CCLib::GenericIndexedCloud* cloud)
+ccPointCloud* ccPointCloud::From(const CCLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud/*=0*/)
 {
 	ccPointCloud* pc = new ccPointCloud("Cloud");
 
@@ -114,6 +117,9 @@ ccPointCloud* ccPointCloud::From(const CCLib::GenericIndexedCloud* cloud)
 			}
 		}
 	}
+
+	if (pc && sourceCloud)
+		pc->importParametersFrom(sourceCloud);
 
 	return pc;
 }
@@ -213,17 +219,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 							currentScalarField->setValue(i,sf->getValue(selection->getPointGlobalIndex(i)));
 
 						currentScalarField->computeMinAndMax();
-						//copy color ramp parameters
-						currentScalarField->setColorRampSteps(sf->getColorRampSteps());
-						currentScalarField->setColorScale(sf->getColorScale());
-						currentScalarField->showNaNValuesInGrey(sf->areNaNValuesShownInGrey());
-						currentScalarField->setLogScale(sf->logScale());
-						currentScalarField->setSymmetricalScale(sf->symmetricalScale());
-						currentScalarField->alwaysShowZero(sf->isZeroAlwaysShown());
-						currentScalarField->setMinDisplayed(sf->displayRange().start());
-						currentScalarField->setMaxDisplayed(sf->displayRange().stop());
-						currentScalarField->setSaturationStart(sf->saturationRange().start());
-						currentScalarField->setSaturationStop(sf->saturationRange().stop());
+						//copy display parameters
+						currentScalarField->importParametersFrom(sf);
 					}
 					else
 					{
@@ -282,15 +279,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	}
 	*/
 
-	//original center
-	result->setGlobalShift(getGlobalShift());
-	result->setGlobalScale(getGlobalScale());
-	//keep the transformation history!
-	result->setGLTransformationHistory(getGLTransformationHistory());
-	//custom point size
-	result->setPointSize(getPointSize());
-	//meta-data
-	result->setMetaData(metaData());
+	//other parameters
+	result->importParametersFrom(this);
 
 	return result;
 }
@@ -349,17 +339,10 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignore
 	result->showSF(sfShown());
 	result->showNormals(normalsShown());
 	result->setEnabled(isEnabled());
-
 	result->setCurrentDisplayedScalarField(getCurrentDisplayedScalarFieldIndex());
-	result->setPointSize(getPointSize());
 
-	//original shift
-	result->setGlobalShift(getGlobalShift());
-	result->setGlobalScale(getGlobalScale());
-	//transformation history
-	result->setGLTransformationHistory(getGLTransformationHistory());
-	//meta-data
-	result->setMetaData(metaData());
+	//import other parameters
+	result->importParametersFrom(this);
 
 	result->setName(getName()+QString(".clone"));
 
@@ -521,17 +504,8 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 						for (unsigned i=0; i<addedPoints; i++)
 							newSF->setValue(pointCountBefore+i,sf->getValue(i));
 						newSF->computeMinAndMax();
-						//copy color ramp parameters
-						newSF->setColorRampSteps(sf->getColorRampSteps());
-						newSF->setColorScale(sf->getColorScale());
-						newSF->showNaNValuesInGrey(sf->areNaNValuesShownInGrey());
-						newSF->setLogScale(sf->logScale());
-						newSF->setSymmetricalScale(sf->symmetricalScale());
-						newSF->alwaysShowZero(sf->isZeroAlwaysShown());
-						newSF->setMinDisplayed(sf->displayRange().start());
-						newSF->setMaxDisplayed(sf->displayRange().stop());
-						newSF->setSaturationStart(sf->saturationRange().start());
-						newSF->setSaturationStop(sf->saturationRange().stop());
+						//copy display parameters
+						newSF->importParametersFrom(sf);
 
 						//add scalar field to this cloud
 						sfIdx = addScalarField(newSF);

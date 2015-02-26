@@ -1653,15 +1653,13 @@ void MainWindow::doActionResampleWithOctree()
 			if (result)
 			{
 				ccConsole::Print("[ResampleWithOctree] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
-				ccPointCloud* newCloud = ccPointCloud::From(result);
+				ccPointCloud* newCloud = ccPointCloud::From(result,cloud);
 
 				delete result;
 				result = 0;
 
 				if (newCloud)
 				{
-					newCloud->setGlobalShift(cloud->getGlobalShift());
-					newCloud->setGlobalScale(cloud->getGlobalScale());
 					addToDB(newCloud);
 					newCloud->setDisplay(cloud->getDisplay());
 					newCloud->prepareDisplayForRefresh();
@@ -4768,17 +4766,7 @@ void MainWindow::doAction4pcsRegister()
 			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		}
 
-		ccPointCloud *newDataCloud=0;
-		if (data->isA(CC_TYPES::POINT_CLOUD))
-		{
-			newDataCloud = static_cast<ccPointCloud*>(data)->cloneThis();
-		}
-		else
-		{
-			newDataCloud = ccPointCloud::From(data);
-			newDataCloud->setGlobalShift(data->getGlobalShift());
-			newDataCloud->setGlobalScale(data->getGlobalScale());
-		}
+		ccPointCloud *newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data,data);
 
 		if (data->getParent())
 			data->getParent()->addChild(newDataCloud);
@@ -6161,14 +6149,7 @@ void MainWindow::doActionComputeCPS()
 		ccPointCloud* newCloud = 0;
 		//if the source cloud is a "true" cloud, the extracted CPS
 		//will also get its attributes
-		if (srcCloud->isA(CC_TYPES::POINT_CLOUD))
-			newCloud = static_cast<ccPointCloud*>(srcCloud)->partialClone(&CPSet);
-		else
-		{
-			newCloud = ccPointCloud::From(&CPSet);
-			newCloud->setGlobalShift(srcCloud->getGlobalShift());
-			newCloud->setGlobalScale(srcCloud->getGlobalScale());
-		}
+		newCloud = srcCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(srcCloud)->partialClone(&CPSet) : ccPointCloud::From(&CPSet,srcCloud);
 
 		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
 		newCloud->setDisplay(compCloud->getDisplay());

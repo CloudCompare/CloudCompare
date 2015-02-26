@@ -105,6 +105,10 @@ public:
 		double planeCoord;
 		//for box intersection
 		CCVector3d bbMin, bbMax;
+		//for the reprojection of triangle features
+		bool trackOrigIndexes;
+		std::vector<unsigned> origTriIndexesMapInside;
+		std::vector<unsigned> origTriIndexesMapOutside;
 
 		MeshCutterParams()
 			: insideMesh(0)
@@ -115,6 +119,7 @@ public:
 			, planeCoord(0)
 			, bbMin(0, 0, 0)
 			, bbMax(0, 0, 0)
+			, trackOrigIndexes(false)
 		{}
 	};
 

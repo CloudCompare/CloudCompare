@@ -282,3 +282,22 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 
 	return true;
 }
+
+void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return;
+	}
+
+	//original center
+	setGlobalShift(cloud->getGlobalShift());
+	setGlobalScale(cloud->getGlobalScale());
+	//keep the transformation history!
+	setGLTransformationHistory(cloud->getGLTransformationHistory());
+	//custom point size
+	setPointSize(cloud->getPointSize());
+	//meta-data
+	setMetaData(cloud->metaData());
+}

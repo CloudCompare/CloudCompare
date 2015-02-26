@@ -230,6 +230,11 @@ public:
 	**/
 	unsigned char getPointSize() const { return m_pointSize; }
 
+	//! Imports the parameters from another cloud
+	/** Only the specific parameters are imported.
+	**/
+	void importParametersFrom(const ccGenericPointCloud* cloud);
+
 protected:
 
 	//inherited from ccHObject

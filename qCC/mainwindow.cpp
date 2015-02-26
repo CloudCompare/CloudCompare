@@ -7822,7 +7822,6 @@ void MainWindow::activateClippingBoxMode()
 	ccHObject* entity = m_selectedEntities[0];
 	if (!m_clipTool->setAssociatedEntity(entity))
 	{
-		ccConsole::Error("Select a point cloud!");
 		return;
 	}
 
@@ -11401,7 +11400,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
-	actionCrossSection->setEnabled(exactlyOneCloud);
+	actionCrossSection->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionExtractSections->setEnabled(atLeastOneCloud);
 	actionRasterize->setEnabled(exactlyOneCloud);
 

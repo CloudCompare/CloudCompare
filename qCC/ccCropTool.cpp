@@ -30,11 +30,13 @@
 #include <ManualSegmentationTools.h>
 #include <SimpleMesh.h>
 
-ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=true*/)
+ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=true*/, const ccGLMatrix* meshRotation/*=0*/)
 {
 	assert(entity);
 	if (!entity)
+	{
 		return 0;
+	}
 
 	if (entity->isA(CC_TYPES::POINT_CLOUD))
 	{
@@ -71,21 +73,51 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		params.generateOutsideMesh = !inside;
 		params.trackOrigIndexes = mesh->hasColors() || mesh->hasScalarFields() || mesh->hasMaterials();
 
-		if (!CCLib::ManualSegmentationTools::segmentMeshWitAABox(mesh, mesh->getAssociatedCloud(), params))
+		ccGenericPointCloud* origVertices = mesh->getAssociatedCloud();
+		assert(origVertices);
+		ccGenericPointCloud* cropVertices = origVertices;
+		if (meshRotation)
+		{
+			ccPointCloud* rotatedVertices = ccPointCloud::From(origVertices);
+			if (!rotatedVertices)
+			{
+				ccLog::Warning(QString("[Crop] Failed to crop mesh '%1'! (not enough memory)").arg(mesh->getName()));
+				return 0;
+			}
+			rotatedVertices->setGLTransformation(*meshRotation);
+			rotatedVertices->applyGLTransformation_recursive();
+			cropVertices = rotatedVertices;
+		}
+
+		if (!CCLib::ManualSegmentationTools::segmentMeshWitAABox(mesh, cropVertices, params))
 		{
 			//process failed!
 			ccLog::Warning(QString("[Crop] Failed to crop mesh '%1'!").arg(mesh->getName()));
 		}
 
+		if (cropVertices != origVertices)
+		{
+			//don't need those anymore
+			delete cropVertices;
+			cropVertices = origVertices;
+		}
+
+		CCLib::SimpleMesh* tempMesh = inside ? params.insideMesh : params.outsideMesh;
+
 		//output
 		ccMesh* croppedMesh = 0;
 
-		CCLib::SimpleMesh* tempMesh = inside ? params.insideMesh : params.outsideMesh;
 		if (tempMesh)
 		{
 			ccPointCloud* croppedVertices = ccPointCloud::From(tempMesh->vertices());
 			if (croppedVertices)
 			{
+				if (meshRotation)
+				{
+					//apply inverse transformation
+					croppedVertices->setGLTransformation(meshRotation->inverse());
+					croppedVertices->applyGLTransformation_recursive();
+				}
 				croppedMesh = new ccMesh(tempMesh, croppedVertices);
 				croppedMesh->addChild(croppedVertices);
 				croppedVertices->setEnabled(false);
@@ -98,7 +130,6 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 				}
 				else
 				{
-					ccGenericPointCloud* origVertices = mesh->getAssociatedCloud();
 					assert(origVertices);
 					
 					//import parameters

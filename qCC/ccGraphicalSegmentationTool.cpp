@@ -236,12 +236,7 @@ void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArr
 	{
 		for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 		{
-			ccHObject* entity = *p;
-
-			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-				ccHObjectCaster::ToGenericPointCloud(entity)->unallocateVisibilityArray();
-			else if (entity->isKindOf(CC_TYPES::MESH))
-				ccHObjectCaster::ToGenericMesh(entity)->getAssociatedCloud()->unallocateVisibilityArray();
+			ccHObjectCaster::ToGenericPointCloud(*p)->unallocateVisibilityArray();
 		}
 	}
 
@@ -275,10 +270,7 @@ void ccGraphicalSegmentationTool::reset()
 	{
 		for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 		{
-			if ((*p)->isKindOf(CC_TYPES::POINT_CLOUD))
-				ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
-			else if ((*p)->isKindOf(CC_TYPES::MESH))
-				ccHObjectCaster::ToGenericMesh(*p)->getAssociatedCloud()->resetVisibilityArray();
+			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
 		}
 
 		if (m_associatedWin)

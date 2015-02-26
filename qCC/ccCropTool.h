@@ -22,6 +22,7 @@
 #include <ccBBox.h>
 
 class ccHObject;
+class ccGLMatrix;
 
 //! Cropping tool
 /** Handles clouds and meshes for now
@@ -33,9 +34,10 @@ public:
 	/** \param entity entity to be cropped (should be a cloud or a mesh)
 		\param box cropping box
 		\param inside whether to keep the points/triangles inside or outside the input box
+		\param meshRotation optional rotation (for meshes only)
 		\return cropped entity (if any)
 	**/
-	static ccHObject* Crop(ccHObject* entity, const ccBBox& box, bool inside = true);
+	static ccHObject* Crop(ccHObject* entity, const ccBBox& box, bool inside = true, const ccGLMatrix* meshRotation = 0);
 
 };
 

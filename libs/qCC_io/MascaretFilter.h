@@ -32,7 +32,7 @@ public:
 	static inline QString GetDefaultExtension() { return "georef"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return true; }
+	virtual bool importSupported() const { return false; }
 	virtual bool exportSupported() const { return true; }
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
 	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }

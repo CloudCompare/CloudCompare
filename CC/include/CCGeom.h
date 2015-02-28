@@ -220,6 +220,10 @@ public:
 
 	//! Dot product
 	inline Type dot(const Vector2Tpl& v) const { return (x*v.x)+(y*v.y); }
+	//! Cross product
+	/** \return a positive value if (u,v) makes a counter-clockwise turn, negative for clockwise turn, and zero if the vectors are parallel
+	**/
+	inline Type cross(const Vector2Tpl& v) const { return x * v.y - y * v.x; }
 
 	//! Inverse operator
 	inline Vector2Tpl& operator - () {x=-x; y=-y; return *this;}
@@ -261,13 +265,5 @@ typedef Vector2Tpl<double> CCVector2d;
 
 //! Int 2D Vector
 typedef Vector2Tpl<int> CCVector2i;
-
-//! 2D cross product of OA and OB vectors
-/** \return a positive value, if OAB makes a counter-clockwise turn, negative for clockwise turn, and zero if the points are collinear
-**/
-template<typename Type> inline Type cross(const Vector2Tpl<Type>& O, const Vector2Tpl<Type>& A, const Vector2Tpl<Type>& B)
-{
-	return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
-}
 
 #endif //CC_GEOM_HEADER

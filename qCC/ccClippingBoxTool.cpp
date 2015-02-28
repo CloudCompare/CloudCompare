@@ -42,6 +42,7 @@
 //Qt
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QElapsedTimer>
 
 //! Last contour unique ID
 static std::vector<unsigned> s_lastContourUniqueIDs;
@@ -352,6 +353,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		ccLog::Warning("Only works with point clouds or meshes!");
 		return;
 	}
+
+	QElapsedTimer eTimer;
+	eTimer.start();
 
 	ccClippingBoxRepeatDlg repeatDlg(singleContourMode, MainWindow::TheInstance());
 	bool isCloud = obj->isKindOf(CC_TYPES::POINT_CLOUD);
@@ -757,8 +761,11 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			pDlg.setWindowTitle("Contour extraction");
 			pDlg.setInfo(qPrintable(QString("Contour(s): %1").arg(subCloudsCount)));
 			pDlg.setMaximum(static_cast<int>(subCloudsCount));
-			pDlg.show();
-			QApplication::processEvents();
+			if (!visualDebugMode)
+			{
+				pDlg.show();
+				QApplication::processEvents();
+			}
 
 			//preferred dimension?
 			int preferredDim = -1;
@@ -824,17 +831,20 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						}
 						
 						++currentCloudCount;
-						if (pDlg.wasCanceled())
+						if (!visualDebugMode)
 						{
-							error = true;
-							ccLog::Warning(QString("[ccClippingBoxTool::extractSlicesAndContours] Process canceled by user"));
-							//early stop
-							i = indexMaxs[0];
-							j = indexMaxs[1];
-							k = indexMaxs[2];
-							break;
+							if (pDlg.wasCanceled())
+							{
+								error = true;
+								ccLog::Warning(QString("[ccClippingBoxTool::extractSlicesAndContours] Process canceled by user"));
+								//early stop
+								i = indexMaxs[0];
+								j = indexMaxs[1];
+								k = indexMaxs[2];
+								break;
+							}
+							pDlg.setValue(static_cast<int>(currentCloudCount));
 						}
-						pDlg.setValue(static_cast<int>(currentCloudCount));
 					}
 				}
 			}
@@ -891,6 +901,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 					MainWindow::TheInstance()->addToDB(sliceGroup);
 				}
 			}
+
+			ccLog::Print("[ccClippingBoxTool] Processed finished in %.2f s.",eTimer.elapsed()/1.0e3);
+
 		}
 
 		//m_clipBox->setBox(originalBox);

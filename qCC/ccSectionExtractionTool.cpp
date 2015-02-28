@@ -173,7 +173,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 				{
 					if (!section.isInDB)
 						oldWin->removeFromOwnDB(section.entity);
-					section.entity->setDisplay(section.originalDisplay);
+					section.entity->setDisplay_recursive(section.originalDisplay);
 				}
 			}
 		}
@@ -192,7 +192,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		}
 
 		if (m_editedPoly)
-			m_editedPoly->setDisplay(0);
+			m_editedPoly->setDisplay_recursive(0);
 
 		//update view direction
 		setVertDimension(vertAxisComboBox->currentIndex());
@@ -222,7 +222,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 				if (section.entity)
 				{
 					section.originalDisplay = section.entity->getDisplay();
-					section.entity->setDisplay(m_associatedWin);
+					section.entity->setDisplay_recursive(m_associatedWin);
 					if (!section.isInDB)
 						m_associatedWin->addToOwnDB(section.entity);
 				}
@@ -244,7 +244,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		}
 
 		if (m_editedPoly)
-			m_editedPoly->setDisplay(m_associatedWin);
+			m_editedPoly->setDisplay_recursive(m_associatedWin);
 	}
 
 	return true;
@@ -300,9 +300,9 @@ void ccSectionExtractionTool::releasePolyline(Section* section)
 		{
 			//restore original display and style
 			section->entity->showColors(section->backupColorShown);
-			section->entity->setColor  (section->backupColor);
-			section->entity->setWidth  (section->backupWidth);
-			section->entity->setDisplay(section->originalDisplay);
+			section->entity->setColor(section->backupColor);
+			section->entity->setWidth(section->backupWidth);
+			section->entity->setDisplay_recursive(section->originalDisplay);
 		}
 	}
 }
@@ -588,7 +588,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 
 			duplicateVertices->invalidateBoundingBox();
 			duplicatePoly->set2DMode(false);
-			duplicatePoly->setDisplay(inputPoly->getDisplay());
+			duplicatePoly->setDisplay_recursive(inputPoly->getDisplay());
 			duplicatePoly->setName(inputPoly->getName());
 			duplicatePoly->setGlobalScale(inputPoly->getGlobalScale());
 			duplicatePoly->setGlobalShift(inputPoly->getGlobalShift());
@@ -625,7 +625,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	//add to display
 	if (m_associatedWin)
 	{
-		inputPoly->setDisplay(m_associatedWin);
+		inputPoly->setDisplay_recursive(m_associatedWin);
 		if (!alreadyInDB)
 			m_associatedWin->addToOwnDB(inputPoly);
 	}
@@ -1043,6 +1043,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 				assert(destEntity);
 				destEntity->addChild(m_selectedPoly->entity);
 				m_selectedPoly->isInDB = true;
+				m_selectedPoly->entity->setDisplay_recursive(destEntity->getDisplay());
 				MainWindow::TheInstance()->addToDB(m_selectedPoly->entity,false,false);
 			}
 			//and remove
@@ -1220,6 +1221,7 @@ void ccSectionExtractionTool::exportSections()
 			{
 				destEntity->addChild(section.entity);
 				section.isInDB = true;
+				section.entity->setDisplay_recursive(destEntity->getDisplay());
 				mainWin->addToDB(section.entity,false,false);
 			}
 		}
@@ -1359,6 +1361,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 
 			//add to main DB
 			destEntity->addChild(contourPart);
+			contourPart->setDisplay_recursive(destEntity->getDisplay());
 			MainWindow::TheInstance()->addToDB(contourPart,false,false);
 		}
 

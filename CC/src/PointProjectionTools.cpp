@@ -360,7 +360,7 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 			{
 				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); --itB;
 				std::list<IndexedCCVector2*>::iterator itA = itB; --itA;
-				if (cross(**itA, **itB, points[i]) <= 0)
+				if ((**itB - **itA).cross(points[i] - **itA) <= 0)
 				{
 					hullPoints.pop_back();
 				}
@@ -391,7 +391,7 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 			{
 				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); --itB;
 				std::list<IndexedCCVector2*>::iterator itA = itB; --itA;
-				if (cross(**itA, **itB, points[i]) <= 0)
+				if ((**itB - **itA).cross(points[i] - **itA) <= 0)
 				{
 					hullPoints.pop_back();
 				}
@@ -426,42 +426,60 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 
 bool PointProjectionTools::segmentIntersect(const CCVector2& A, const CCVector2& B, const CCVector2& C, const CCVector2& D)
 {
-	if (cross(A,B,C) * cross(A,B,D) >= 0) //both points are on the same side? No intersection
-		return false;
-
 	CCVector2 AB = B-A;
 	CCVector2 AC = C-A;
-	CCVector2 CD = D-C;
-
-	PointCoordinateType q = CD.y * AB.x - CD.x * AB.y;
-	if (fabs(q) > ZERO_TOLERANCE) //AB and CD are not parallel
+	CCVector2 AD = D-A;
+	PointCoordinateType cross_AB_AC = AB.cross(AC);
+	PointCoordinateType cross_AB_AD = AB.cross(AD);
+	
+	//both C and D are on the same side of AB?
+	if (cross_AB_AC * cross_AB_AD > 0)
 	{
-		//where do they interest?
-		PointCoordinateType p = AC.x * AB.y - AC.y * AB.x;
-		PointCoordinateType v = p/q;
-		if (v <= 0 || v >= 1) //not CD!
-			return false;
-
-		//test further with AB
-		p = CD.y * AC.x - CD.x * AC.y;
-		v= p/q;
-		return (v > 0 && v < 1); //not AB?
+		//no intersection
+		return false;
 	}
-	else //AB and CD are parallel
+
+	CCVector2 CD = D-C;
+	CCVector2 CB = B-C;
+	PointCoordinateType cross_CD_CA = -CD.cross(AC);
+	PointCoordinateType cross_CD_CB = CD.cross(CB);
+
+	//both A and B are on the same side of CD?
+	if (cross_CD_CA * cross_CD_CB > 0)
+	{
+		//no intersection
+		return false;
+	}
+
+	PointCoordinateType cross_AB_CD = AB.cross(CD);
+	if (fabs(cross_AB_CD) != 0) //AB and CD are not parallel
+	{
+		//where do they intersect?
+		//PointCoordinateType v = cross_AB_AC/cross_AB_CD;
+		//assert(v >= 0 && v <= 1);
+
+		return true;
+	}
+	else //AB and CD are parallel (therefore they are colinear - see above tests)
 	{
 		PointCoordinateType dAB = AB.norm();
-		PointCoordinateType dAC = AC.norm();
-		PointCoordinateType dot = AB.dot(AC) / (dAB * dAC);
-		if (fabs(dot) < 0.999)
+		
+		PointCoordinateType dot_AB_AC = AB.dot(AC);
+		if (dot_AB_AC >= 0 && dot_AB_AC < dAB * AC.norm())
 		{
-			//not colinear
-			return false;
+			//C is between A and B
+			return true;
 		}
-		else
+
+		PointCoordinateType dot_AB_AD = AB.dot(AD);
+		if (dot_AB_AD >= 0 && dot_AB_AD < dAB * AD.norm())
 		{
-			//colinear --> do they actually intersect?
-			return (dAC < dAB || (D-A).norm() < dAB);
+			//D is between A and B
+			return true;
 		}
+
+		//otherwise there's an intersection only if B and C are on both sides!
+		return (dot_AB_AC * dot_AB_AD < 0);
 	}
 }
 
@@ -599,7 +617,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 						continue;
 
 					//we only consider 'inner' points
-					if (cross(**itA, **itB, P) < 0)
+					if ((**itB - **itA).cross(P - **itA) < 0)
 					{
 						continue;
 					}

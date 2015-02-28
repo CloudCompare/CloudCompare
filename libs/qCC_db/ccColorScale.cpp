@@ -485,7 +485,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 				for (int i=0; i<attributes.size(); ++i)
 				{
 					QString name = attributes[i].name().toString().toUpper();
-					QStringRef value = attributes[i].value();
+					QString value = attributes[i].value().toString();
 					if (name == "R")
 						rgb.setRed(value.toInt());
 					else if (name == "G")

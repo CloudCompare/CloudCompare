@@ -1609,7 +1609,7 @@ bool ReadVector(const QXmlStreamAttributes& attributes, CCVector3& P, QString el
 	for (int i=0; i<attributes.size(); ++i)
 	{
 		QString name = attributes[i].name().toString().toUpper();
-		QStringRef value = attributes[i].value();
+		QString value = attributes[i].value().toString();
 
 		bool ok = false;
 		if (name == "X")

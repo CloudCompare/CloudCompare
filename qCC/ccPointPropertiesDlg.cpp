@@ -164,7 +164,7 @@ void ccPointPropertiesDlg::activateDistanceDisplay()
 	if (m_associatedWin)
 	{
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 	}
 }
 
@@ -181,7 +181,7 @@ void ccPointPropertiesDlg::activateAngleDisplay()
 	if (m_associatedWin)
 	{
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 	}
 }
 
@@ -198,7 +198,7 @@ void ccPointPropertiesDlg::activate2DZonePicking()
 	if (m_associatedWin)
 	{
 		m_associatedWin->setInteractionMode(ccGLWindow::SEGMENT_ENTITY);
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 	}
 }
 
@@ -322,7 +322,7 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
@@ -341,7 +341,7 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 	m_rect2DLabel->setVisible(true);
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 static QString s_last2DLabelComment("");
@@ -368,5 +368,5 @@ void ccPointPropertiesDlg::close2DZone()
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }

@@ -1413,7 +1413,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (parameters.alwaysDisplayLoadDialog)
 	{
 		pDlg.setInfo("Loading in progress...");
-		pDlg.setWindowTitle("PLY file");
+		pDlg.setMethodTitle("PLY file");
 		pDlg.setRange(0,0);
 		pDlg.show();
 		QApplication::processEvents();

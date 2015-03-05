@@ -92,7 +92,7 @@ void ccOctreeSpinBox::onValueChange(int level)
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	: CCLib::DgmOctree(aCloud)
 	, ccHObject("Octree")
-	, m_associatedCloud(aCloud)
+	, m_theAssociatedCloudAsGPC(aCloud)
 	, m_displayType(DEFAULT_OCTREE_DISPLAY_TYPE)
 	, m_displayedLevel(1)
 	, m_glListID(-1)
@@ -106,7 +106,10 @@ ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 ccOctree::~ccOctree()
 {
 	if (m_frustrumIntersector)
+	{
 		delete m_frustrumIntersector;
+		m_frustrumIntersector = 0;
+	}
 }
 
 void ccOctree::setDisplayedLevel(int level)
@@ -133,7 +136,7 @@ void ccOctree::clear()
 	{
 		if (glIsList(m_glListID))
 			glDeleteLists(m_glListID,1);
-		m_glListID=-1;
+		m_glListID = -1;
 	}
 
 	DgmOctree::clear();
@@ -188,7 +191,7 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		assert(m_displayedLevel < 256);
-		RenderOctreeAs(m_displayType,this,static_cast<uchar>(m_displayedLevel),m_associatedCloud,m_glListID,m_shouldBeRefreshed);
+		RenderOctreeAs(m_displayType,this,static_cast<uchar>(m_displayedLevel),m_theAssociatedCloudAsGPC,m_glListID,m_shouldBeRefreshed);
 
 		if (m_shouldBeRefreshed)
 			m_shouldBeRefreshed = false;
@@ -534,4 +537,3 @@ bool ccOctree::intersectWithFrustrum(ccCameraSensor* sensor, std::vector<unsigne
 
 	return true;
 }
-

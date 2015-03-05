@@ -51,10 +51,10 @@
 //Qt
 #include <QtGui>
 #include <QWheelEvent>
-#include <QElapsedTimer>
 #include <QSettings>
 #include <QApplication>
 #include <QSharedPointer>
+#include <QTimer>
 
 #ifdef USE_VLD
 //VLD
@@ -135,7 +135,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_validProjectionMatrix(false)
 	, m_glWidth(0)
 	, m_glHeight(0)
-	, m_lodActivated(false)
+	, m_LODEnabled(true)
 	, m_shouldBeRefreshed(false)
 	, m_cursorMoved(false)
 	, m_unclosable(false)
@@ -169,6 +169,9 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_verticalRotationLocked(false)
 	, m_bubbleViewModeEnabled(false)
 	, m_bubbleViewFov_deg(90.0f)
+	, m_currentLODLevel(0)
+	, m_LODInProgress(false)
+	, m_LODPendingRefresh(false)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -595,6 +598,9 @@ void ccGLWindow::initializeGL()
 	//no global ambient
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ccColor::night.rgba);
 
+	//start internal timer
+	m_timer.start();
+
 	ccGLUtils::CatchGLError("ccGLWindow::initializeGL");
 
 	m_initialized = true;
@@ -872,13 +878,55 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 	glPopAttrib();
 }
 
+void ccGLWindow::toBeRefreshed()
+{
+	m_shouldBeRefreshed = true;
+
+	invalidateViewport();
+}
+
+void ccGLWindow::refresh()
+{
+	if (m_shouldBeRefreshed && isVisible())
+	{
+		redraw();
+	}
+}
+
+void ccGLWindow::redraw(bool only2D/*=false*/)
+{
+	if (m_LODInProgress)
+	{
+		//reset current LOD cycle
+		m_LODPendingIgnore = true;
+		m_LODPendingRefresh = false;
+		disableLOD();
+	}
+	
+	if (!only2D)
+		m_updateFBO = true;
+	updateGL();
+}
+
+static bool s_rendering = false;
 void ccGLWindow::paintGL()
 {
+	if (s_rendering)
+		return;
+	s_rendering = true;
+
 	//context initialization
 	CC_DRAW_CONTEXT context;
 	getContext(context);
 
-	bool doDraw3D = (!m_fbo || ((m_alwaysUseFBO && m_updateFBO) || m_activeGLFilter || m_captureMode.enabled));
+	qint64 startTime_ms = m_LODInProgress ? m_timer.elapsed() : 0;
+
+	bool doDraw3D = (	!m_fbo
+					||	(	(m_alwaysUseFBO && m_updateFBO)
+						||	m_activeGLFilter
+						||	m_captureMode.enabled
+						||	m_LODInProgress )
+					);
 
 	if (doDraw3D)
 	{
@@ -1080,7 +1128,34 @@ void ccGLWindow::paintGL()
 			glPopMatrix();
 		}
 	}
+
+	//should we render a new LOD level?
+	if (m_LODInProgress)
+	{
+		if ((!m_LODPendingRefresh || m_LODPendingIgnore) && !m_cursorMoved)
+		{
+			qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
+			//we try to refresh LOD levels at a regular intervale
+			static const qint64 s_baseLODRefreshTime_ms = 100;
+
+			m_LODPendingRefresh = true;
+			m_LODPendingIgnore = false;
+			QTimer::singleShot(displayTime_ms < s_baseLODRefreshTime_ms ? s_baseLODRefreshTime_ms - displayTime_ms : 0, this, SLOT(renderNextLODLevel()));
+		}
+	}
+
+	s_rendering = false;
 }
+
+void ccGLWindow::renderNextLODLevel()
+{
+	m_LODPendingRefresh = false;
+	if (m_LODInProgress && m_currentLODLevel != 0 && !m_LODPendingIgnore)
+	{
+		updateGL();
+	}
+}
+
 void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBufferObject* fbo/*=0*/)
 {
 	makeCurrent();
@@ -1092,44 +1167,47 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 		ccGLUtils::CatchGLError("ccGLWindow::paintGL/FBO start");
 	}
 
-	setStandardOrthoCenter();
-	glDisable(GL_DEPTH_TEST);
-
 	glPointSize(m_viewportParams.defaultPointSize);
 	glLineWidth(m_viewportParams.defaultLineWidth);
 
-	//gradient color background
-	if (getDisplayParameters().drawBackgroundGradient)
+	if (m_currentLODLevel == 0)
 	{
-		drawGradientBackground();
-		//we clear background
-		glClear(GL_DEPTH_BUFFER_BIT);
+		setStandardOrthoCenter();
+		glDisable(GL_DEPTH_TEST);
+
+		//gradient color background
+		if (getDisplayParameters().drawBackgroundGradient)
+		{
+			drawGradientBackground();
+			//we clear background
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
+		else
+		{
+			const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
+			glClearColor(	bkgCol.r / 255.0f,
+							bkgCol.g / 255.0f,
+							bkgCol.b / 255.0f,
+							1.0f );
+
+			//we clear background
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
+
+		/****************************************/
+		/****  PASS: 2D/BACKGROUND/NO LIGHT  ****/
+		/****************************************/
+		/*context.flags = CC_DRAW_2D;
+		if (m_interactionMode == TRANSFORM_ENTITY)		
+			context.flags |= CC_VIRTUAL_TRANS_ENABLED;
+
+		//we draw 2D entities
+		if (m_globalDBRoot)
+			m_globalDBRoot->draw(context);
+		if (m_winDBRoot)
+			m_winDBRoot->draw(context);
+		//*/
 	}
-	else
-	{
-		const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
-		glClearColor(	bkgCol.r / 255.0f,
-						bkgCol.g / 255.0f,
-						bkgCol.b / 255.0f,
-						1.0f );
-
-		//we clear background
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
-	/****************************************/
-	/****  PASS: 2D/BACKGROUND/NO LIGHT  ****/
-	/****************************************/
-	/*context.flags = CC_DRAW_2D;
-	if (m_interactionMode == TRANSFORM_ENTITY)		
-		context.flags |= CC_VIRTUAL_TRANS_ENABLED;
-
-	//we draw 2D entities
-	if (m_globalDBRoot)
-		m_globalDBRoot->draw(context);
-	if (m_winDBRoot)
-		m_winDBRoot->draw(context);
-	//*/
 
 	/****************************************/
 	/****  PASS: 3D/BACKGROUND/NO LIGHT  ****/
@@ -1140,7 +1218,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 
 	glEnable(GL_DEPTH_TEST);
 
-	if (doDrawCross)
+	if (doDrawCross && m_currentLODLevel == 0)
 		drawCross();
 
 	/****************************************/
@@ -1148,14 +1226,12 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	/****************************************/
 	if (m_customLightEnabled || m_sunLightEnabled)
 		context.flags |= CC_LIGHT_ENABLED;
-	if (m_lodActivated)
-		context.flags |= CC_LOD_ACTIVATED;
 
 	//we enable absolute sun light (if activated)
 	if (m_sunLightEnabled)
 		glEnableSunLight();
 
-	//we setup projection matrix
+	//we setup the projection matrix
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixd(getProjectionMatd());
 
@@ -1167,9 +1243,12 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	if (m_customLightEnabled)
 	{
 		glEnableCustomLight();
-		if (!m_captureMode.enabled/* && !m_viewportParams.perspectiveView*/)
+		if (	!m_captureMode.enabled
+			&&	m_currentLODLevel == 0)
+		{
 			//we display it as a litle 3D star
 			drawCustomLight();
+		}
 	}
 
 	//we activate the current shader (if any)
@@ -1178,10 +1257,27 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	
 	//color ramp shader for fast dynamic color ramp lookup-up
 	if (m_colorRampShader && getDisplayParameters().colorScaleUseShader)
+	{
 		context.colorRampShader = m_colorRampShader;
-
+	}
 	//custom rendering shader (OpenGL 3.3+)
 	context.customRenderingShader = m_customRenderingShader;
+
+	//LOD
+	if (m_LODEnabled)
+	{
+		context.flags |= CC_LOD_ACTIVATED;
+	
+		//LOD rendering level (for clouds only)
+		if (context.decimateCloudOnMove)
+		{
+			//ccLog::Print(QString("[LOD] Rendering level %1").arg(m_currentLODLevel));
+			m_LODInProgress = true;
+			context.useVBOs = false;
+			context.currentLODLevel = m_currentLODLevel;
+			context.higherLODLevelsAvailable = false;
+		}
+	}
 
 	//we draw 3D entities
 	if (m_globalDBRoot)
@@ -1197,7 +1293,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 		m_winDBRoot->draw(context);
 
 	//for connected items
-	emit drawing3D();
+	if (m_currentLODLevel == 0)
+		emit drawing3D();
 
 	//we disable shader (if any)
 	if (m_activeShader)
@@ -1215,6 +1312,31 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 		fbo->stop();
 		ccGLUtils::CatchGLError("ccGLWindow::paintGL/FBO stop");
 	}
+
+	//LOD
+	if (m_LODInProgress)
+	{
+		if (context.higherLODLevelsAvailable)
+		{
+			//we skip the lowest levels (should have already been drawn anyway)
+			if (m_currentLODLevel == 0)
+				m_currentLODLevel = context.minLODLevel;
+			else
+				++m_currentLODLevel;
+		}
+		else
+		{
+			//we reached the final level
+			disableLOD();
+		}
+	}
+}
+
+void ccGLWindow::disableLOD()
+{
+	//reset LOD rendering (if any)
+	m_currentLODLevel = 0;
+	m_LODInProgress = false;
 }
 
 void ccGLWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -1959,6 +2081,9 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	//decimation options
 	context.decimateCloudOnMove = guiParams.decimateCloudOnMove;
 	context.decimateMeshOnMove = guiParams.decimateMeshOnMove;
+	context.higherLODLevelsAvailable = false;
+	context.currentLODLevel = 0;
+	context.minLODLevel = 9;
 
 	//scalar field color-bar
 	context.sfColorScaleToDisplay = 0;
@@ -1993,25 +2118,6 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 	//display acceleration
 	context.useVBOs = guiParams.useVBOs;
-}
-
-void ccGLWindow::toBeRefreshed()
-{
-	m_shouldBeRefreshed = true;
-
-	invalidateViewport();
-}
-
-void ccGLWindow::refresh()
-{
-	if (m_shouldBeRefreshed && isVisible())
-		redraw();
-}
-
-void ccGLWindow::redraw()
-{
-	m_updateFBO = true;
-	updateGL();
 }
 
 unsigned ccGLWindow::getTextureID(const QImage& image)
@@ -2292,7 +2398,6 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		if (m_interactionMode != SEGMENT_ENTITY) //mouse movement = panning (2D translation)
 		{
 			m_lastMousePos = event->pos();
-			m_lodActivated = true;
 
 			QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
 		}
@@ -2307,7 +2412,6 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 			m_lastMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
 			m_lastMousePos = event->pos();
-			m_lodActivated = true;
 
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 
@@ -2355,7 +2459,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			if (inZone != m_hotZoneActivated)
 			{
 				m_hotZoneActivated = inZone;
-				updateGL();
+				redraw(true);
 			}
 			event->accept();
 		}
@@ -2518,7 +2622,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	event->accept();
 
 	if (m_interactionMode != TRANSFORM_ENTITY)
-		updateGL();
+		redraw(true);
 }
 
 bool ccGLWindow::processClickableItems(int x, int y)
@@ -2542,20 +2646,20 @@ bool ccGLWindow::processClickableItems(int x, int y)
 		if (m_viewportParams.defaultPointSize < MAX_POINT_SIZE)
 		{
 			setPointSize(m_viewportParams.defaultPointSize+1);
-			updateGL();
+			redraw();
 		}
 		return true;
 	case ClickableItem::DECREASE_POINT_SIZE:
 		if (m_viewportParams.defaultPointSize > MIN_POINT_SIZE)
 		{
 			setPointSize(m_viewportParams.defaultPointSize-1);
-			updateGL();
+			redraw();
 		}
 		return true;
 	case ClickableItem::LEAVE_BUBBLE_VIEW_MODE:
 		{
 			setBubbleViewMode(false);
-			updateGL();
+			redraw();
 		}
 		return true;
 	default:
@@ -2574,7 +2678,6 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 	//reset to default state
 	m_cursorMoved = false;
-	m_lodActivated = false;
 	QApplication::restoreOverrideCursor();
 
 	if (m_interactionMode == SEGMENT_ENTITY)
@@ -2924,12 +3027,11 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	if (!m_globalDBRoot && !m_winDBRoot)
 		return -1;
 
-	static QElapsedTimer timer;
-
 	//setup rendering context
 	CC_DRAW_CONTEXT context;
 	getContext(context);
 	unsigned short pickingFlags = CC_DRAW_FOREGROUND;
+	qint64 startTime = 0;
 
 	switch (pickingMode)
 	{
@@ -2951,7 +3053,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	case AUTO_POINT_PICKING:
 		pickingFlags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
 		pickingFlags |= CC_DRAW_TRI_NAMES;
-		timer.start();
+		startTime = m_timer.nsecsElapsed();
 		break;
 	default:
 		return -1;
@@ -3130,8 +3232,8 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	{
 		if (m_globalDBRoot && selectedID >= 0 && subSelectedID >= 0)
 		{
-			qint64 nsec = timer.nsecsElapsed();
-			ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(subSelectedID).arg(nsec / 1.0e6));
+			qint64 stopTime = m_timer.nsecsElapsed();
+			ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(subSelectedID).arg((stopTime-startTime) / 1.0e6));
 			
 			ccHObject* obj = m_globalDBRoot->find(selectedID);
 			if (obj)
@@ -3985,6 +4087,9 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			context.glW = Wp;
 			context.glH = Hp;
 			context.renderZoom = zoomFactor;
+
+			//just to be sure
+			disableLOD();
 
 			draw3D(context,false,fbo);
 

@@ -35,6 +35,7 @@
 #include <QGLWidget>
 #include <QFont>
 #include <QMap>
+#include <QElapsedTimer>
 
 //system
 #include <set>
@@ -131,6 +132,7 @@ public:
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
 	virtual unsigned getTextureID(const QImage& image);
 	virtual unsigned getTextureID( ccMaterial::CShared mtl);
+	virtual QWidget* asWidget() { return this; }
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -468,16 +470,29 @@ public:
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
 
+	//! Returns whether LOD is enabled on this display or not
+	inline bool isLODEnabled() const { return m_LODEnabled; }
+
+	//! Enables or disables LOD on this display
+	inline bool setLODEnabled(bool state) { m_LODEnabled = state; }
+
 public slots:
 
+	//! Applies a 1:1 global zoom
 	void zoomGlobal();
+	//! Tests frame rate
 	void testFrameRate();
 
 	//inherited from ccGenericGLDisplay
-	virtual void redraw();
+	virtual void redraw(bool only2D = false);
 
 	//called when recieving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
+
+protected slots:
+
+	//! Renders the next L.O.D. level
+	void renderNextLODLevel();
 
 signals:
 
@@ -675,6 +690,9 @@ protected:
 	//! Draws the 'hot zone' (+/- icons for point size), 'leave bubble-view' button, etc.
 	void drawClickableItems(int xStart, int& yStart);
 
+	//! Disables LOD rendering
+	void disableLOD();
+
 	/***************************************************
 					OpenGL Extensions
 	***************************************************/
@@ -724,8 +742,8 @@ protected:
 	//! GL context height
 	int m_glHeight;
 
-	//! L.O.D. (level of detail) display mode
-	bool m_lodActivated;
+	//! Whether L.O.D. (level of detail) is enabled or not
+	bool m_LODEnabled;
 	//! Whether the display should be refreshed on next call to 'refresh'
 	bool m_shouldBeRefreshed;
 	//! Whether the mouse cursor has moved after being pressed or not
@@ -880,6 +898,20 @@ protected:
 
 	//! Map of materials (unique id.) and texture identifier
 	QMap< QString, unsigned > m_materialTextures;
+
+	//! Currently rendered LOD level
+	unsigned char m_currentLODLevel;
+
+	//! LOD display in progress
+	bool m_LODInProgress;
+	//! LOD refresh signal sent
+	bool m_LODPendingRefresh;
+	//! LOD refresh signal should be ignored
+	bool m_LODPendingIgnore;
+
+	//! Internal timer
+	QElapsedTimer m_timer;
+
 
 private:
 

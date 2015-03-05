@@ -112,7 +112,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctree* ccGenericPointCloud::getOctree()
 {
-	for (unsigned i=0; i<m_children.size(); ++i)
+	for (size_t i=0; i<m_children.size(); ++i)
 	{
 		if (m_children[i]->isA(CC_TYPES::POINT_OCTREE))
 			return static_cast<ccOctree*>(m_children[i]);

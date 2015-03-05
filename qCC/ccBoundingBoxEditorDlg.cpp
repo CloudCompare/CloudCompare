@@ -341,7 +341,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 
 		CCVector3 W = m_currentBBox.getDiagVec();
 		//if 'square mode' is on, all width values should be the same!
-		assert(!keepSquare() || fabs(W.x-W.y) < 1.0e-6 && fabs(W.x-W.z) < 1.0e-6);
+		assert(!keepSquare() || fabs(W.x-W.y)*1.0e-6 < 1.0 && fabs(W.x-W.z)*1.0e-6 < 1.0);
 		dxDoubleSpinBox->setValue(W.x);
 		dyDoubleSpinBox->setValue(W.y);
 		dzDoubleSpinBox->setValue(W.z);

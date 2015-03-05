@@ -72,8 +72,15 @@ struct glDrawContext
 	//! Default bounding-box color
 	ccColor::Rgbub bbDefaultCol;
 
-	//! Whether to decimate big clouds when rotating the camera
+	//! Whether to decimate big clouds when updating the 3D view
 	bool decimateCloudOnMove;
+	//! Minimum level for LOD display
+	unsigned char minLODLevel;
+	//! Current level for LOD display
+	unsigned char currentLODLevel;
+	//! Wheter higher levels are available or not
+	bool higherLODLevelsAvailable;
+
 	//! Whether to decimate big meshes when rotating the camera
 	bool decimateMeshOnMove;
 
@@ -119,6 +126,9 @@ struct glDrawContext
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
 		, bbDefaultCol(ccColor::yellow)
 		, decimateCloudOnMove(true)
+		, minLODLevel(4)
+		, currentLODLevel(0)
+		, higherLODLevelsAvailable(false)
 		, decimateMeshOnMove(true)
 		, sfColorScaleToDisplay(0)
 		, colorRampShader(0)

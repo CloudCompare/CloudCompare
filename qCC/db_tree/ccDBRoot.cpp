@@ -267,7 +267,7 @@ void ccDBRoot::removeElement(ccHObject* anObject)
 	}
 
 	int childPos = parent->getChildIndex(anObject);
-	assert(childPos>=0);
+	assert(childPos >= 0);
 	{
 		//row removal operation (start)
 		beginRemoveRows(index(parent),childPos,childPos);
@@ -291,6 +291,7 @@ void ccDBRoot::deleteSelectedEntities()
 	unsigned selCount = static_cast<unsigned>(selectedIndexes.size());
 
 	hidePropertiesView();
+	bool verticesWarningIssued = false;
 
 	//we remove all objects that are children of other deleted ones!
 	//(otherwise we may delete the parent before the child!)
@@ -306,8 +307,8 @@ void ccDBRoot::deleteSelectedEntities()
 			continue;
 		}
 
-		//we don't take objects that are siblings of others
-		bool isSiblingOfAnotherOne = false;
+		//we don't consider objects that are siblings of others in the selection
+		bool isSibling = false;
 		for (unsigned j=0; j<selCount; ++j)
 		{
 			if (i != j)
@@ -315,21 +316,25 @@ void ccDBRoot::deleteSelectedEntities()
 				ccHObject* otherObj = static_cast<ccHObject*>(selectedIndexes[j].internalPointer());
 				if (otherObj->isAncestorOf(obj))
 				{
-					isSiblingOfAnotherOne = true;
+					isSibling = true;
 					break;
 				}
 			}
 		}
 
-		if (!isSiblingOfAnotherOne)
+		if (!isSibling)
 		{
 			//last check: mesh vertices
 			if (obj->isKindOf(CC_TYPES::POINT_CLOUD) && obj->getParent()->isKindOf(CC_TYPES::MESH))
+			{
 				if (ccHObjectCaster::ToGenericMesh(obj->getParent())->getAssociatedCloud() == obj)
 				{
-					ccLog::Warning("Mesh vertices can't be deleted without their parent mesh!");
+					if (!verticesWarningIssued)
+						ccLog::Warning("Mesh vertices can't be deleted without their parent mesh!");
+					verticesWarningIssued = true;
 					continue;
 				}
+			}
 
 			toBeDeleted.push_back(obj);
 		}
@@ -574,7 +579,7 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	}
 
 	int pos = parent->getChildIndex(object);
-	assert(pos>=0);
+	assert(pos >= 0);
 
 	return createIndex(pos,0,object);
 }
@@ -860,7 +865,7 @@ void ccDBRoot::updatePropertiesView()
 	assert(m_propertiesTreeWidget);
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	if (selectedIndexes.size()==1)
+	if (selectedIndexes.size() == 1)
 		showPropertiesView(static_cast<ccHObject*>(selectedIndexes[0].internalPointer()));
 	else
 		hidePropertiesView();
@@ -946,7 +951,7 @@ int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
-				info->octreeCount += int(cloud->getOctree()!=NULL);
+				info->octreeCount += int(cloud->getOctree() != NULL);
 			}
 
 			if (obj->isKindOf(CC_TYPES::MESH))

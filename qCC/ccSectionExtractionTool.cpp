@@ -717,7 +717,7 @@ void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons butt
 	*lastP = P;
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccSectionExtractionTool::addPointToPolyline(int x, int y)
@@ -801,7 +801,7 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccSectionExtractionTool::closePolyLine(int, int)
@@ -846,7 +846,7 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccSectionExtractionTool::cancelCurrentPolyline()

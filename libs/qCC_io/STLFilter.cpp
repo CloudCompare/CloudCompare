@@ -578,7 +578,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 
 	//progress dialog
 	ccProgressDialog pDlg(true);
-	pDlg.setWindowTitle("(ASCII) STL file");
+	pDlg.setMethodTitle("(ASCII) STL file");
 	pDlg.setInfo("Loading in progress...");
 	pDlg.setRange(0,0);
 	pDlg.show();

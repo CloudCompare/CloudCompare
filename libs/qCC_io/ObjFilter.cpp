@@ -445,7 +445,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	//progress dialog
 	ccProgressDialog pDlg(false);
-	pDlg.setWindowTitle("OBJ file");
+	pDlg.setMethodTitle("OBJ file");
 	pDlg.setInfo("Loading in progress...");
 	pDlg.setRange(0,0);
 	pDlg.show();

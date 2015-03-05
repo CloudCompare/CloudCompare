@@ -41,9 +41,13 @@
 #include "ccScalarField.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGBLSensor.h"
+#include "ccProgressDialog.h"
 
 //system
 #include <assert.h>
+
+//! Min number of displayed point to enable LOD display
+const unsigned MIN_LOD_POINTS_NUMBER = 100000;
 
 ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
@@ -300,6 +304,7 @@ void ccPointCloud::clear()
 
 void ccPointCloud::unalloactePoints()
 {
+	m_lod.clear();
 	showSFColorsScale(false); //SFs will be destroyed
 	ChunkedPointCloud::clear();
 	ccGenericPointCloud::clear();
@@ -1686,6 +1691,39 @@ void ccPointCloud::glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, boo
 	}
 }
 
+//description of the (sub)set of points to display
+struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
+{
+	//! Default constructor
+	DisplayDesc()
+		: LevelDesc()
+		, endIndex(0)
+		, indexMap(0)
+	{}
+
+	//! Constructor from a start index and a count value
+	DisplayDesc(unsigned startIndex, unsigned count)
+		: LevelDesc(startIndex, count)
+		, endIndex(startIndex+count)
+		, indexMap(0)
+	{}
+
+	//! Set operator
+	DisplayDesc& operator = (const LevelDesc& desc)
+	{
+		startIndex = desc.startIndex;
+		count = desc.count;
+		endIndex = startIndex + count;
+		return *this;
+	}
+	
+	//! Last index (excluded)
+	unsigned endIndex;
+
+	//! Map of indexes (to invert the natural order)
+	ccPointCloud::LodStruct::IndexSet* indexMap;
+};
+
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!m_points->isAllocated())
@@ -1722,6 +1760,87 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (glParams.showSF && m_currentDisplayedScalarField->areNaNValuesShownInGrey())
 				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are potentially hidden
 		}
+
+		// L.O.D. display
+		unsigned decimStep = 1;
+		DisplayDesc toDisplay(0,size());
+		{
+			if (	context.decimateCloudOnMove
+				&&	toDisplay.count > MIN_LOD_POINTS_NUMBER
+				&&	MACRO_LODActivated(context)
+				)
+			{
+				bool skipLOD = false;
+
+				//is there a LOD structure associated yet?
+				if (!m_lod.isBroken())
+				{
+					if (!m_lod.isInitialized())
+					{
+						//auto-init LOD structure
+						ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
+						initLOD(&pDlg);
+					}
+					if (m_lod.isInitialized())
+					{
+						assert(m_lod.indexes);
+						if (m_lod.levels.size() <= context.minLODLevel)
+						{
+							if (context.currentLODLevel == 0)
+							{
+								//no need for LOD display
+								skipLOD = true;
+							}
+							else
+							{
+								//already displayed!
+								return;
+							}
+						}
+						else
+						{
+							if (context.currentLODLevel == 0)
+							{
+								toDisplay.indexMap = m_lod.indexes;
+								//the first time (LOD level = 0), we display all the small levels at once
+								toDisplay.startIndex = 0;
+								toDisplay.count = 0;
+								{
+									for (unsigned char l=1; l<context.minLODLevel; ++l)
+										toDisplay.count += m_lod.levels[l].count;
+								}
+								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
+
+								//could we draw more points? yes (we know that lod.levels.size() > context.minLODLevel)
+								context.higherLODLevelsAvailable = true;
+							}
+							else if (context.currentLODLevel < m_lod.levels.size())
+							{
+								toDisplay.indexMap = m_lod.indexes;
+								toDisplay = m_lod.levels[context.currentLODLevel];
+								//could we draw more points?
+								context.higherLODLevelsAvailable = (context.currentLODLevel+1 < m_lod.levels.size());
+							}
+						}
+					}
+				}
+
+				if (!toDisplay.indexMap && !skipLOD)
+				{
+					//if we don't have a LOD map, we can only display points at level 0!
+					if (context.currentLODLevel != 0)
+					{
+						return;
+					}
+
+					if (toDisplay.count > MIN_LOD_POINTS_NUMBER)
+					{
+						decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / MIN_LOD_POINTS_NUMBER));
+					}
+				}
+			}
+		}
+		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LOD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
 
 		bool colorMaterialEnabled = false;
 
@@ -1762,14 +1881,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 
-		// L.O.D.
-		unsigned numberOfPoints = size();
-		unsigned decimStep = 1;
-		if (numberOfPoints > MAX_LOD_POINTS_NUMBER && context.decimateCloudOnMove &&  MACRO_LODActivated(context))
-		{
-			decimStep = static_cast<int>(ceil(static_cast<float>(numberOfPoints) / MAX_LOD_POINTS_NUMBER));
-		}
-
 		/*** DISPLAY ***/
 
 		//custom point size?
@@ -1780,36 +1891,38 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!pushPointNames) //standard "full" display
 		{
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
-			if (isVisibilityTableInstantiated())
+			if (isVisibilityTableInstantiated() || toDisplay.indexMap)
 			{
+				assert(m_pointsVisibility || toDisplay.indexMap);
 				//compressed normals set
 				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
 				assert(compressedNormals);
 
 				glBegin(GL_POINTS);
 
-				for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 				{
 					//we must test each point visibility
-					if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
+					unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j;
+					if (!m_pointsVisibility || m_pointsVisibility->getValue(pointIndex) == POINT_VISIBLE)
 					{
 						if (glParams.showSF)
 						{
-							assert(j < m_currentDisplayedScalarField->currentSize());
-							const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
+							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+							const colorType* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 							//we force display of points hidden because of their scalar field value
 							//to be sure that the user don't miss them (during manual segmentation for instance)
 							glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 						}
 						else if (glParams.showColors)
 						{
-							glColor3ubv(m_rgbColors->getValue(j));
+							glColor3ubv(m_rgbColors->getValue(pointIndex));
 						}
 						if (glParams.showNorms)
 						{
-							ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
+							ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
 						}
-						ccGL::Vertex3v(m_points->getValue(j));
+						ccGL::Vertex3v(m_points->getValue(pointIndex));
 					}
 				}
 
@@ -2000,44 +2113,47 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 								{
-									assert(j < m_currentDisplayedScalarField->currentSize());
-									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(pointIndex);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
-										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
-										ccGL::Vertex3v(m_points->getValue(j));
+										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+										ccGL::Vertex3v(m_points->getValue(pointIndex));
 									}
 								}
 							}
 							else
 							{
-								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 								{
-									assert(j < m_currentDisplayedScalarField->currentSize());
-									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(pointIndex);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
-										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
-										ccGL::Vertex3v(m_points->getValue(j));
+										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+										ccGL::Vertex3v(m_points->getValue(pointIndex));
 									}
 								}
 							}
 						}
 						else
 						{
-							for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 							{
-								assert(j < m_currentDisplayedScalarField->currentSize());
-								const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
+								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const colorType* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								if (col)
 								{
 									glColor3ubv(col);
-									ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
-									ccGL::Vertex3v(m_points->getValue(j));
+									ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+									ccGL::Vertex3v(m_points->getValue(pointIndex));
 								}
 							}
 						}
@@ -2048,41 +2164,44 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 								{
-									assert(j < m_currentDisplayedScalarField->currentSize());
-									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(pointIndex);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
-										ccGL::Vertex3v(m_points->getValue(j));
+										ccGL::Vertex3v(m_points->getValue(pointIndex));
 									}
 								}
 							}
 							else
 							{
-								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 								{
-									assert(j < m_currentDisplayedScalarField->currentSize());
-									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(pointIndex);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
-										ccGL::Vertex3v(m_points->getValue(j));
+										ccGL::Vertex3v(m_points->getValue(pointIndex));
 									}
 								}
 							}
 						}
 						else
 						{
-							for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 							{
-								assert(j < m_currentDisplayedScalarField->currentSize());
-								const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
+								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const colorType* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								if (col)
 								{
 									glColor3ubv(col);
-									ccGL::Vertex3v(m_points->getValue(j));
+									ccGL::Vertex3v(m_points->getValue(pointIndex));
 								}
 							}
 						}
@@ -2141,13 +2260,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//however we must take hidden points into account!
 			if (isVisibilityTableInstantiated())
 			{
-				for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 				{
+					unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 					if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
 					{
-						glLoadName(j);
+						glLoadName(pointIndex);
 						glBegin(GL_POINTS);
-						ccGL::Vertex3v(m_points->getValue(j));
+						ccGL::Vertex3v(m_points->getValue(pointIndex));
 						glEnd();
 					}
 				}
@@ -2164,15 +2284,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				
 				if (hiddenPoints) //potentially hidden points
 				{
-					for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 					{
+						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 						//we must generate the synthetic "color" of each point
-						const colorType* col = getPointScalarValueColor(j);
+						const colorType* col = getPointScalarValueColor(pointIndex);
 						if (col)
 						{
-							glLoadName(j);
+							glLoadName(pointIndex);
 							glBegin(GL_POINTS);
-							ccGL::Vertex3v(m_points->getValue(j));
+							ccGL::Vertex3v(m_points->getValue(pointIndex));
 							glEnd();
 						}
 					}
@@ -2180,11 +2301,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				else
 				{
 					//no hidden point
-					for (unsigned j=0; j<numberOfPoints; j+=decimStep)
+					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
 					{
-						glLoadName(j);
+						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
+						glLoadName(pointIndex);
 						glBegin(GL_POINTS);
-						ccGL::Vertex3v(m_points->getValue(j));
+						ccGL::Vertex3v(m_points->getValue(pointIndex));
 						glEnd();
 					}
 				}
@@ -3439,4 +3561,173 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 
 	//call parent's method
 	ccGenericPointCloud::removeFromDisplay(win);
+}
+
+bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*/)
+{
+	m_lod.clear();
+
+	unsigned pointCount = size();
+	if (pointCount == 0)
+		return false;
+
+	ccLog::Print(QString("[LOD] '%1' [%2 points]").arg(getName()).arg(pointCount));
+	m_lod.state = LodStruct::BROKEN;
+
+	//first we need an octree
+	ccOctree* originalOctree = getOctree();
+	ccOctree* octree = originalOctree ? originalOctree : computeOctree(progressCallback);
+	if (!octree)
+	{
+		//not enough memory
+		ccLog::Warning("[LOD] Failed to compute octree (not enough memory)");
+		return false;
+	}
+
+	//flags
+	GenericChunkedArray<1,unsigned char>* flags = new GenericChunkedArray<1,unsigned char>;
+	static const unsigned char NoFlag = 0;
+	if (!flags->resize(pointCount,true,NoFlag))
+	{
+		//not enough memory
+		ccLog::Warning("[LOD] Failed to compute LOD structure (not enough memory)");
+		return false;
+	}
+
+	//init LOD indexes
+	if (!m_lod.indexes)
+		m_lod.indexes = new LodStruct::IndexSet;
+	if (!m_lod.indexes->reserve(pointCount))
+	{
+		//not enough memory
+		ccLog::Warning("[LOD] Failed to compute LOD structure (not enough memory)");
+		flags->release();
+		return false;
+	}
+
+	//reserve memory for the LOD level descriptors
+	try
+	{
+		m_lod.levels.reserve(CCLib::DgmOctree::MAX_OCTREE_LEVEL+1); //level 0 included
+		m_lod.levels.push_back(LodStruct::LevelDesc(0,0));
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		ccLog::Warning("[LOD] Failed to compute LOD structure (not enough memory)");
+		m_lod.indexes->clear(true);
+		flags->release();
+		return false;
+	}
+
+	if (progressCallback)
+	{
+		progressCallback->setMethodTitle("L.O.D. display");
+		progressCallback->setInfo("Preparing L.O.D. structure to speed-up the display...");
+		progressCallback->start();
+	}
+	CCLib::NormalizedProgress nProgress(progressCallback,pointCount);
+
+	assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
+	for (unsigned char level=1; level<=static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL); ++level)
+	{
+		const int bitDec = GET_BIT_SHIFT(level);
+
+		//for each cell we'll look for the (not-yet-flagged) point which is closest to the cell center
+		static const unsigned INVALID_INDEX = 0xFFFFFFFF;
+		unsigned nearestIndex = INVALID_INDEX;
+		PointCoordinateType nearestSquareDist = 0;
+		CCVector3 cellCenter;
+
+		LodStruct::LevelDesc levelDesc;
+		levelDesc.startIndex = m_lod.indexes->currentSize();
+		
+		CCLib::DgmOctree::OctreeCellCodeType currentTruncatedCellCode = 0xFFFFFFFF;
+
+		//scan the octree structure
+		const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
+		for (CCLib::DgmOctree::cellsContainer::const_iterator c=thePointsAndTheirCellCodes.begin(); c!=thePointsAndTheirCellCodes.end(); ++c)
+		{
+			CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
+
+			//new cell?
+			if (truncatedCode != currentTruncatedCellCode)
+			{
+				//process the previous cell
+				if (nearestIndex != INVALID_INDEX)
+				{
+					m_lod.indexes->addElement(nearestIndex);
+					assert(flags->getValue(nearestIndex) == NoFlag);
+					flags->setValue(nearestIndex,level);
+					levelDesc.count++;
+					nProgress.oneStep();
+				}
+
+				//prepare new cell
+				currentTruncatedCellCode = truncatedCode;
+				octree->computeCellCenter(currentTruncatedCellCode,level,cellCenter.u,true);
+				
+				nearestIndex = INVALID_INDEX;
+			}
+
+			if (flags->getValue(c->theIndex) == NoFlag)
+			{
+				//compute distance to the cell center
+				const CCVector3* P = getPoint(c->theIndex);
+				PointCoordinateType squareDist = (*P - cellCenter).norm2();
+				if (nearestIndex == INVALID_INDEX || squareDist < nearestSquareDist)
+				{
+					nearestSquareDist = squareDist;
+					nearestIndex = c->theIndex;
+				}
+			}
+		}
+
+		//don't forget the last cell!
+		if (nearestIndex != INVALID_INDEX)
+		{
+			m_lod.indexes->addElement(nearestIndex);
+			assert(flags->getValue(nearestIndex) == NoFlag);
+			flags->setValue(nearestIndex,level);
+			levelDesc.count++;
+			nProgress.oneStep();
+		}
+
+		//no new point was flagged during this round? Then we have reached the maximum level
+		if (levelDesc.count == 0 || level == CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+		{
+			//assert(m_lod.indexes->currentSize() == levelDesc.startIndex);
+
+			//flag the remaining points with the current level
+			for (unsigned i=0; i<pointCount; ++i)
+			{
+				if (flags->getValue(i) == NoFlag)
+				{
+					m_lod.indexes->addElement(i);
+					levelDesc.count++;
+					nProgress.oneStep();
+				}
+			}
+		}
+
+		assert(levelDesc.count != 0);
+		m_lod.levels.push_back(levelDesc);
+
+		ccLog::Print(QString("[LOD] Level %1: %2 points").arg(level).arg(levelDesc.count));
+
+		if (m_lod.indexes->currentSize() == pointCount)
+		{
+			//all points have been processed? We can stop right now
+			break;
+		}
+	}
+
+	assert(m_lod.indexes->currentSize() == pointCount);
+	m_lod.levels.resize(m_lod.levels.size());
+	m_lod.state = LodStruct::INITIALIZED;
+
+	flags->release();
+	flags = 0;
+
+	return true;
 }

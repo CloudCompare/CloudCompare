@@ -53,9 +53,6 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD =  128000000;
 const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it below MAX_INT to avoid probable issues ;)
 #endif
 
-//! Max number of displayed point (per entity) in "low detail" display
-const unsigned MAX_LOD_POINTS_NUMBER = 10000000;
-
 //! A 3D cloud and its associated features (color, normals, scalar fields, etc.)
 /** A point cloud can have multiple features:
 	- colors (RGB)
@@ -590,6 +587,80 @@ protected: // VBO
 	void glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 
+public: //Level of Detail (LOD)
+
+	//! L.O.D. (Level of Detail) structure
+	struct LodStruct
+	{
+		//! Default constructor
+		LodStruct() : indexes(0), state(NOT_INITIALIZED) {}
+		//! Destructor
+		~LodStruct() { clear(); }
+
+		//! Clears the structure
+		void clear()
+		{
+			levels.clear();
+			if (indexes)
+			{
+				indexes->release();
+				indexes = 0;
+			}
+			state = NOT_INITIALIZED;
+		}
+
+		//! Returns whether the structure is initialized or not
+		inline bool isInitialized() const { return state == INITIALIZED; }
+
+		//! Returns whether the structure is broken or not
+		inline bool isBroken() const { return state == BROKEN; }
+
+		//! L.O.D. indexes set
+		typedef GenericChunkedArray<1,unsigned> IndexSet;
+		
+		//! L.O.D. indexes
+		/** Point indexes that should be displayed at each level of detail.
+		**/
+		IndexSet* indexes;
+
+		//! Level descriptor
+		struct LevelDesc
+		{
+			//! Default constructor
+			LevelDesc() : startIndex(0), count(0) {}
+			//! Constructor from a start index and a count value
+			LevelDesc(unsigned _startIndex, unsigned _count) : startIndex(_startIndex), count(_count) {}
+			//! Start index (refers to the 'indexes' table)
+			unsigned startIndex;
+			//! Index count for this level
+			unsigned count;
+		};
+
+		//! Actual levels
+		std::vector<LevelDesc> levels;
+
+		//! Structure initialization state
+		enum State { NOT_INITIALIZED, INITIALIZED, BROKEN };
+
+		//! State
+		State state;
+	};
+
+	//! Intializes the LOD structure
+	/** \return success
+	**/
+	bool initLOD(CCLib::GenericProgressCallback* progressCallback = 0);
+
+	//! Clears the LOD structure
+	//inline void clearLOD() { m_lod.clear(); }
+
+	//! Returns the associated LOD structure
+	//inline const LodStruct& getLOD() const { return m_lod; }
+
+protected:
+
+	//! L.O.D. structure
+	LodStruct m_lod;
 };
 
 #endif //CC_POINT_CLOUD_HEADER

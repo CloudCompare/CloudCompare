@@ -83,7 +83,7 @@ protected:
 **/
 class QCC_DB_LIB_API ccOctree : public CCLib::DgmOctree, public ccHObject
 {
-public:
+public: //GENERAL METHODS
 
 	//! Default constructor
 	/** \param aCloud a point cloud
@@ -123,7 +123,7 @@ public:
 	//Inherited from ccHObject
 	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
-	/*** RENDERING METHODS ***/
+public: //RENDERING METHODS
 
 	static void RenderOctreeAs(	CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 								ccOctree* theOctree,
@@ -162,14 +162,13 @@ protected:
 										void** additionalParameters,
 										CCLib::NormalizedProgress* nProgress = 0);
 
-	ccGenericPointCloud* m_associatedCloud;
+	ccGenericPointCloud* m_theAssociatedCloudAsGPC;
 	CC_OCTREE_DISPLAY_TYPE m_displayType;
 	int m_displayedLevel;
 	int m_glListID;
 	bool m_shouldBeRefreshed;
 
 	ccOctreeFrustrumIntersector* m_frustrumIntersector;
-
 };
 
 #endif //CC_OCTREE_HEADER

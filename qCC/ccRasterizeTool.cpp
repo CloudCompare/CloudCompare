@@ -693,7 +693,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 
 			assert(refCloud.size() != 0);
 			cloudGrid = m_cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(m_cloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud,m_cloud);
-			cloudGrid->setPointSize(1); //to avoid display issues
+			cloudGrid->setPointSize(0); //to avoid display issues
 
 			//even if we have already resampled the original cloud we may have to create new points and/or scalar fields
 			//if (!interpolateSF && fillEmptyCellsStrategy == LEAVE_EMPTY)

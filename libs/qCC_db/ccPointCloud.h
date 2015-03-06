@@ -582,9 +582,10 @@ protected: // VBO
 	//! Set of VBOs attached to this cloud
 	vboSet m_vboManager;
 
+	//per-block data transfer to the GPU (VBO or standard mode)
 	void glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer    (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 
 public: //Level of Detail (LOD)
@@ -651,13 +652,18 @@ public: //Level of Detail (LOD)
 	**/
 	bool initLOD(CCLib::GenericProgressCallback* progressCallback = 0);
 
-	//! Clears the LOD structure
-	//inline void clearLOD() { m_lod.clear(); }
-
-	//! Returns the associated LOD structure
-	//inline const LodStruct& getLOD() const { return m_lod; }
+	//! Maximum number of points (per cloud) displayed in a single LOD iteration
+	/** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+	**/
+	static const unsigned MAX_LOD_COUNT_AT_ONCE = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK * 10; //~ 650K
 
 protected:
+
+	//per-block data transfer to the GPU (LOD)
+	void glLODChunkVertexPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+	void glLODChunkColorPointer (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+	void glLODChunkSFPointer    (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+	void glLODChunkNormalPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
 
 	//! L.O.D. structure
 	LodStruct m_lod;

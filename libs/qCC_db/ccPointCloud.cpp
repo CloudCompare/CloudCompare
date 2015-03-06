@@ -46,9 +46,6 @@
 //system
 #include <assert.h>
 
-//! Min number of displayed point to enable LOD display
-const unsigned MIN_LOD_POINTS_NUMBER = 100000;
-
 ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
 	, ccGenericPointCloud(name)
@@ -1497,11 +1494,6 @@ void ccPointCloud::getDrawingParameters(glDrawParams& params) const
 	}
 }
 
-//Vertex indexes for OpenGL "arrays" drawing
-static PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
-static colorType s_rgbBuffer3ub[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
-static float s_rgbBuffer3f[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
-
 //helpers (for ColorRamp shader)
 
 inline float GetNormalizedValue(const ScalarType& sfVal, const ccScalarField::Range& displayRange)
@@ -1556,6 +1548,12 @@ void ccPointCloud::glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep,
 	}
 }
 
+//Vertex indexes for OpenGL "arrays" drawing
+static PointCoordinateType s_pointBuffer [ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
+static PointCoordinateType s_normalBuffer[ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
+static colorType           s_rgbBuffer3ub[ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
+static float               s_rgbBuffer3f [ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
+
 void ccPointCloud::glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs)
 {
 	assert(m_normals);
@@ -1587,7 +1585,7 @@ void ccPointCloud::glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep,
 	{
 		assert(m_normals && m_normals->chunkStartPtr(chunkIndex));
 		//we must decode normals in a dedicated static array
-		PointCoordinateType* _normals = s_normBuffer;
+		PointCoordinateType* _normals = s_normalBuffer;
 		const normsType* _normalsIndexes = m_normals->chunkStartPtr(chunkIndex);
 		unsigned chunkSize = m_normals->chunkSize(chunkIndex);
 
@@ -1602,7 +1600,7 @@ void ccPointCloud::glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep,
 			*(_normals)++ = N.y;
 			*(_normals)++ = N.z;
 		}
-		glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
+		glNormalPointer(GL_COORD_TYPE,0,s_normalBuffer);
 	}
 }
 
@@ -1674,13 +1672,13 @@ void ccPointCloud::glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, boo
 	else
 	{
 		assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->chunkStartPtr(chunkIndex));
-		//we must decode normals in a dedicated static array
+		//we must convert the scalar values to RGB colors in a dedicated static array
 		ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(chunkIndex);
 		colorType* _sfColors = s_rgbBuffer3ub;
 		unsigned chunkSize = m_currentDisplayedScalarField->chunkSize(chunkIndex);
 		for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep)
 		{
-			//we need to convert scalar value to color into a temporary structure
+			//convert the scalar value to a RGB color
 			const colorType* col = m_currentDisplayedScalarField->getColor(*_sf);
 			assert(col);
 			*_sfColors++ = *col++;
@@ -1691,6 +1689,88 @@ void ccPointCloud::glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, boo
 	}
 }
 
+void ccPointCloud::glLODChunkVertexPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex)
+{
+	assert(startIndex < indexMap.currentSize() && stopIndex <= indexMap.currentSize());
+
+	PointCoordinateType* _points = s_pointBuffer;
+	for (unsigned j=startIndex; j<stopIndex; j++)
+	{
+		unsigned pointIndex = indexMap.getValue(j);
+		const CCVector3* P = getPoint(pointIndex);
+		*(_points)++ = P->x;
+		*(_points)++ = P->y;
+		*(_points)++ = P->z;
+	}
+	//standard OpenGL copy
+	glVertexPointer(3,GL_COORD_TYPE,0,s_pointBuffer);
+}
+
+void ccPointCloud::glLODChunkNormalPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex)
+{
+	assert(startIndex < indexMap.currentSize() && stopIndex <= indexMap.currentSize());
+	assert(m_normals);
+
+	//compressed normals set
+	const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+	assert(compressedNormals);
+
+	//we must decode normals in a dedicated static array
+	PointCoordinateType* _normals = s_normalBuffer;
+	for (unsigned j=startIndex; j<stopIndex; j++)
+	{
+		unsigned pointIndex = indexMap.getValue(j);
+		const CCVector3& N = compressedNormals->getNormal(m_normals->getValue(pointIndex));
+		*(_normals)++ = N.x;
+		*(_normals)++ = N.y;
+		*(_normals)++ = N.z;
+	}
+	//standard OpenGL copy
+	glNormalPointer(GL_COORD_TYPE,0,s_normalBuffer);
+}
+
+void ccPointCloud::glLODChunkColorPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex)
+{
+	assert(startIndex < indexMap.currentSize() && stopIndex <= indexMap.currentSize());
+	assert(m_rgbColors);
+	assert(sizeof(colorType) == 1);
+
+	//we must re-order colors in a dedicated static array
+	colorType* _rgb = s_rgbBuffer3ub;
+	for (unsigned j=startIndex; j<stopIndex; j++)
+	{
+		unsigned pointIndex = indexMap.getValue(j);
+		const colorType* col = m_rgbColors->getValue(pointIndex);
+		*(_rgb)++ = *col++;
+		*(_rgb)++ = *col++;
+		*(_rgb)++ = *col++;
+	}
+	//standard OpenGL copy
+	glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer3ub);
+}
+
+void ccPointCloud::glLODChunkSFPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex)
+{
+	assert(startIndex < indexMap.currentSize() && stopIndex <= indexMap.currentSize());
+	assert(m_currentDisplayedScalarField);
+	assert(sizeof(colorType) == 1);
+
+	//we must re-order and convert SF values to RGB colors in a dedicated static array
+	colorType* _sfColors = s_rgbBuffer3ub;
+	for (unsigned j=startIndex; j<stopIndex; j++)
+	{
+		unsigned pointIndex = indexMap.getValue(j);
+		//convert the scalar value to a RGB color
+		const colorType* col = m_currentDisplayedScalarField->getColor(m_currentDisplayedScalarField->getValue(pointIndex));
+		assert(col);
+		*_sfColors++ = *col++;
+		*_sfColors++ = *col++;
+		*_sfColors++ = *col++;
+	}
+	//standard OpenGL copy
+	glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer3ub);
+}
+
 //description of the (sub)set of points to display
 struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 {
@@ -1699,6 +1779,7 @@ struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 		: LevelDesc()
 		, endIndex(0)
 		, indexMap(0)
+		, decimStep(1)
 	{}
 
 	//! Constructor from a start index and a count value
@@ -1706,6 +1787,7 @@ struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 		: LevelDesc(startIndex, count)
 		, endIndex(startIndex+count)
 		, indexMap(0)
+		, decimStep(1)
 	{}
 
 	//! Set operator
@@ -1722,6 +1804,9 @@ struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 
 	//! Map of indexes (to invert the natural order)
 	ccPointCloud::LodStruct::IndexSet* indexMap;
+
+	//! Decimation step (for non-octree based LOD)
+	unsigned decimStep;
 };
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -1762,11 +1847,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		// L.O.D. display
-		unsigned decimStep = 1;
 		DisplayDesc toDisplay(0,size());
 		{
 			if (	context.decimateCloudOnMove
-				&&	toDisplay.count > MIN_LOD_POINTS_NUMBER
+				&&	toDisplay.count > context.minLODPointCount
 				&&	MACRO_LODActivated(context)
 				)
 			{
@@ -1816,9 +1900,28 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else if (context.currentLODLevel < m_lod.levels.size())
 							{
-								toDisplay.indexMap = m_lod.indexes;
 								toDisplay = m_lod.levels[context.currentLODLevel];
-								//could we draw more points?
+
+								if (toDisplay.count < context.currentLODStartIndex)
+								{
+									//nothing to do at this level
+									toDisplay.indexMap = 0;
+								}
+								else
+								{
+									toDisplay.indexMap = m_lod.indexes;
+									//shift current draw range
+									toDisplay.startIndex += context.currentLODStartIndex;
+									toDisplay.count -= context.currentLODStartIndex;
+
+									if (toDisplay.count > MAX_LOD_COUNT_AT_ONCE)
+									{
+										toDisplay.count = MAX_LOD_COUNT_AT_ONCE;
+										context.moreLODPointsAvailable = true;
+									}
+								}
+								
+								//could we draw more points at the next level?
 								context.higherLODLevelsAvailable = (context.currentLODLevel+1 < m_lod.levels.size());
 							}
 						}
@@ -1833,9 +1936,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						return;
 					}
 
-					if (toDisplay.count > MIN_LOD_POINTS_NUMBER)
+					if (toDisplay.count > context.minLODPointCount && context.minLODPointCount != 0)
 					{
-						decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / MIN_LOD_POINTS_NUMBER));
+						toDisplay.decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / context.minLODPointCount));
 					}
 				}
 			}
@@ -1891,16 +1994,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!pushPointNames) //standard "full" display
 		{
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
-			if (isVisibilityTableInstantiated() || toDisplay.indexMap)
+			if (isVisibilityTableInstantiated())
 			{
-				assert(m_pointsVisibility || toDisplay.indexMap);
+				assert(m_pointsVisibility);
 				//compressed normals set
 				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
 				assert(compressedNormals);
 
 				glBegin(GL_POINTS);
 
-				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 				{
 					//we must test each point visibility
 					unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j;
@@ -1935,7 +2038,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//if some points may not be displayed, we'll have to be smarter!
 				bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
 
-				//whether VBOs are available (faster)
+				//whether VBOs are available (for faster display) or not
 				bool useVBOs = false;
 				if (!hiddenPoints && context.useVBOs)
 				{
@@ -2048,50 +2151,85 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (glParams.showNorms)
 						glEnableClientState(GL_NORMAL_ARRAY);
 
-					unsigned chunks = m_points->chunksCount();
-					for (unsigned k=0; k<chunks; ++k)
+					if (toDisplay.indexMap) //LOD display
 					{
-						unsigned chunkSize = m_points->chunkSize(k);
-
-						//points
-						glChunkVertexPointer(k,decimStep,useVBOs);
-						//normals
-						if (glParams.showNorms)
-							glChunkNormalPointer(k,decimStep,useVBOs);
-						//SF colors
-						if (colorRampShader)
+						unsigned s = toDisplay.startIndex;
+						while (s < toDisplay.endIndex)
 						{
-							ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(k);
-							float* _sfColors = s_rgbBuffer3f;
-							if (!m_currentDisplayedScalarField->symmetricalScale())
-							{
-								for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep,_sfColors+=3)
-								{
-									_sfColors[0] = GetNormalizedValue(*_sf,sfDisplayRange);					//normalized sf value
-									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;			//flag: whether point is grayed out or not (NaN values are also rejected!)
-									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
-								}
-							}
-							else //symmetrical scale
-							{
-								//we must handle the values between -minSat et +minSat 'manually'
-								for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep,_sfColors+=3)
-								{
-									_sfColors[0] = GetSymmetricalNormalizedValue(*_sf,sfSaturationRange);	//normalized sf value
-									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;			//flag: whether point is grayed out or not (NaN values are also rejected!)
-									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
-								}
-							}
-							glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
-						}
-						else
-						{
-							glChunkSFPointer(k,decimStep,useVBOs);
-						}
+							unsigned count = std::min(MAX_LOD_COUNT_AT_ONCE,toDisplay.endIndex-s);
+							unsigned e = s+count;
 
-						if (decimStep > 1)
-							chunkSize = static_cast<unsigned>( floor(static_cast<float>(chunkSize)/decimStep) );
-						glDrawArrays(GL_POINTS,0,chunkSize);
+							//points
+							glLODChunkVertexPointer(*toDisplay.indexMap,s,e);
+							//normals
+							if (glParams.showNorms)
+								glLODChunkNormalPointer(*toDisplay.indexMap,s,e);
+							//SF colors
+							if (colorRampShader)
+							{
+								float* _sfColors = s_rgbBuffer3f;
+								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
+								for (unsigned j=s; j<e; j++,_sfColors+=3)
+								{
+									unsigned pointIndex = toDisplay.indexMap->getValue(j);
+									ScalarType sfVal = m_currentDisplayedScalarField->getValue(pointIndex);
+									//normalized sf value
+									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(sfVal,sfSaturationRange) : GetNormalizedValue(sfVal,sfDisplayRange);
+									//flag: whether point is grayed out or not (NaN values are also rejected!)
+									_sfColors[1] = sfDisplayRange.isInRange(sfVal) ? 1.0f : 0.0f;
+									//reference value (to get the true lighting value)
+									_sfColors[2] = 1.0f;
+								}
+								glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
+							}
+							else
+							{
+								glLODChunkSFPointer(*toDisplay.indexMap,s,e);
+							}
+
+							glDrawArrays(GL_POINTS,0,count);
+
+							s = e;
+						}
+					}
+					else
+					{
+						unsigned chunks = m_points->chunksCount();
+						for (unsigned k=0; k<chunks; ++k)
+						{
+							unsigned chunkSize = m_points->chunkSize(k);
+
+							//points
+							glChunkVertexPointer(k,toDisplay.decimStep,useVBOs);
+							//normals
+							if (glParams.showNorms)
+								glChunkNormalPointer(k,toDisplay.decimStep,useVBOs);
+							//SF colors
+							if (colorRampShader)
+							{
+								ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(k);
+								float* _sfColors = s_rgbBuffer3f;
+								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
+								for (unsigned j=0; j<chunkSize; j+=toDisplay.decimStep,_sf+=toDisplay.decimStep,_sfColors+=3)
+								{
+									//normalized sf value
+									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(*_sf,sfSaturationRange) : GetNormalizedValue(*_sf,sfDisplayRange);
+									//flag: whether point is grayed out or not (NaN values are also rejected!)
+									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;
+									//reference value (to get the true lighting value)
+									_sfColors[2] = 1.0f;
+								}
+								glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
+							}
+							else
+							{
+								glChunkSFPointer(k,toDisplay.decimStep,useVBOs);
+							}
+
+							if (toDisplay.decimStep > 1)
+								chunkSize = static_cast<unsigned>( floor(static_cast<float>(chunkSize)/toDisplay.decimStep) );
+							glDrawArrays(GL_POINTS,0,chunkSize);
+						}
 					}
 
 					if (glParams.showNorms)
@@ -2113,7 +2251,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -2128,7 +2266,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -2144,7 +2282,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 							{
 								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -2164,7 +2302,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -2178,7 +2316,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -2193,7 +2331,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 							{
 								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -2229,22 +2367,46 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showColors)
 					glEnableClientState(GL_COLOR_ARRAY);
 
-				for (unsigned k=0; k<chunks; ++k)
+				if (toDisplay.indexMap) //LOD display
 				{
-					unsigned chunkSize = m_points->chunkSize(k);
+					unsigned s = toDisplay.startIndex;
+					while (s < toDisplay.endIndex)
+					{
+						unsigned count = std::min(MAX_LOD_COUNT_AT_ONCE,toDisplay.endIndex-s);
+						unsigned e = s+count;
 
-					//points
-					glChunkVertexPointer(k,decimStep,useVBOs);
-					//normals
-					if (glParams.showNorms)
-						glChunkNormalPointer(k,decimStep,useVBOs);
-					//colors
-					if (glParams.showColors)
-						glChunkColorPointer(k,decimStep,useVBOs);
+						//points
+						glLODChunkVertexPointer(*toDisplay.indexMap,s,e);
+						//normals
+						if (glParams.showNorms)
+							glLODChunkNormalPointer(*toDisplay.indexMap,s,e);
+						//colors
+						if (glParams.showColors)
+							glLODChunkColorPointer(*toDisplay.indexMap,s,e);
 
-					if (decimStep > 1)
-						chunkSize = static_cast<unsigned>(floor(static_cast<float>(chunkSize)/decimStep));
-					glDrawArrays(GL_POINTS,0,chunkSize);
+						glDrawArrays(GL_POINTS,0,count);
+						s = e;
+					}
+				}
+				else
+				{
+					for (unsigned k=0; k<chunks; ++k)
+					{
+						unsigned chunkSize = m_points->chunkSize(k);
+
+						//points
+						glChunkVertexPointer(k,toDisplay.decimStep,useVBOs);
+						//normals
+						if (glParams.showNorms)
+							glChunkNormalPointer(k,toDisplay.decimStep,useVBOs);
+						//colors
+						if (glParams.showColors)
+							glChunkColorPointer(k,toDisplay.decimStep,useVBOs);
+
+						if (toDisplay.decimStep > 1)
+							chunkSize = static_cast<unsigned>(floor(static_cast<float>(chunkSize)/toDisplay.decimStep));
+						glDrawArrays(GL_POINTS,0,chunkSize);
+					}
 				}
 
 				glDisableClientState(GL_VERTEX_ARRAY);
@@ -2260,7 +2422,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//however we must take hidden points into account!
 			if (isVisibilityTableInstantiated())
 			{
-				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 				{
 					unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 					if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
@@ -2284,7 +2446,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				
 				if (hiddenPoints) //potentially hidden points
 				{
-					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 					{
 						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 						//we must generate the synthetic "color" of each point
@@ -2301,7 +2463,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				else
 				{
 					//no hidden point
-					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=decimStep)
+					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
 					{
 						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 						glLoadName(pointIndex);
@@ -3392,7 +3554,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 				{
 					//we must decode the normals first!
 					normsType* inNorms = m_normals->chunkStartPtr(i);
-					PointCoordinateType* outNorms = s_normBuffer;
+					PointCoordinateType* outNorms = s_normalBuffer;
 					for (int j=0; j<chunkSize; ++j)
 					{
 						const CCVector3& N = ccNormalVectors::GetNormal(*inNorms++);
@@ -3400,7 +3562,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 						*(outNorms)++ = N.y;
 						*(outNorms)++ = N.z;
 					}
-					m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->normalShift,s_normBuffer,sizeof(PointCoordinateType)*chunkSize*3);
+					m_vboManager.vbos[i]->write(m_vboManager.vbos[i]->normalShift,s_normalBuffer,sizeof(PointCoordinateType)*chunkSize*3);
 				}
 #endif
 				m_vboManager.vbos[i]->release();

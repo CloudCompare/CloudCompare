@@ -5490,10 +5490,9 @@ void MainWindow::doActionExportCoordToSF()
 	size_t selNum = m_selectedEntities.size();
 	for (size_t i=0; i<selNum; ++i)
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
+		if (pc)
 		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			unsigned ptsCount = pc->size();
 
 			//test each dimension
@@ -5528,7 +5527,6 @@ void MainWindow::doActionExportCoordToSF()
 				}
 			}
 		}
-
 	}
 
 	refreshAll();
@@ -7939,7 +7937,7 @@ void MainWindow::testFrameRate()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
-		win->testFrameRate();
+		win->startFrameRateTest();
 }
 
 void MainWindow::setTopView()
@@ -10160,6 +10158,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
 			case CCLIB_ALGO_SF_GRADIENT:
 				result = CCLib::ScalarFieldTools::computeScalarFieldGradient(	cloud,
+																				0, //auto --> FIXME: should be properly set by the user!
 																				euclidean,
 																				false,
 																				&pDlg,

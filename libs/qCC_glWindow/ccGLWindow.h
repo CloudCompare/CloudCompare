@@ -480,8 +480,6 @@ public slots:
 
 	//! Applies a 1:1 global zoom
 	void zoomGlobal();
-	//! Tests frame rate
-	void testFrameRate();
 
 	//inherited from ccGenericGLDisplay
 	virtual void redraw(bool only2D = false);
@@ -489,10 +487,16 @@ public slots:
 	//called when recieving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
 
+	//! Tests frame rate
+	void startFrameRateTest();
+
 protected slots:
 
 	//! Renders the next L.O.D. level
 	void renderNextLODLevel();
+
+	//! Stops frame rate test
+	void stopFrameRateTest();
 
 signals:
 
@@ -632,9 +636,6 @@ protected:
 	//! Draws pivot point symbol in 3D
 	void drawPivot();
 
-	//! Stops frame rate test
-	void stopFrameRateTest();
-
 	//inherited from QWidget (drag & drop support)
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
@@ -746,8 +747,10 @@ protected:
 	bool m_LODEnabled;
 	//! Whether the display should be refreshed on next call to 'refresh'
 	bool m_shouldBeRefreshed;
-	//! Whether the mouse cursor has moved after being pressed or not
-	bool m_cursorMoved;
+	//! Whether the mouse (cursor) has moved after being pressed or not
+	bool m_mouseMoved;
+	//! Whether the mouse is currently pressed or not
+	bool m_mouseButtonPressed;
 	//! Whether this 3D window can be closed by the user or not
 	bool m_unclosable;
 	//! Current intercation mode (with mouse)
@@ -901,6 +904,8 @@ protected:
 
 	//! Currently rendered LOD level
 	unsigned char m_currentLODLevel;
+	//! Currently rendered LOD start index
+	unsigned m_currentLODStartIndex;
 
 	//! LOD display in progress
 	bool m_LODInProgress;

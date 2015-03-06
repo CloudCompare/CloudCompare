@@ -76,8 +76,14 @@ struct glDrawContext
 	bool decimateCloudOnMove;
 	//! Minimum level for LOD display
 	unsigned char minLODLevel;
+	//! Minimum number of points for activating LOD display
+	unsigned minLODPointCount;
 	//! Current level for LOD display
 	unsigned char currentLODLevel;
+	//! Start index for current LOD level
+	unsigned currentLODStartIndex;
+	//! Wheter more points are available or not at the current level
+	bool moreLODPointsAvailable;
 	//! Wheter higher levels are available or not
 	bool higherLODLevelsAvailable;
 
@@ -126,8 +132,11 @@ struct glDrawContext
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
 		, bbDefaultCol(ccColor::yellow)
 		, decimateCloudOnMove(true)
-		, minLODLevel(4)
+		, minLODLevel(10)
+		, minLODPointCount(10000000)
 		, currentLODLevel(0)
+		, currentLODStartIndex(0)
+		, moreLODPointsAvailable(false)
 		, higherLODLevelsAvailable(false)
 		, decimateMeshOnMove(true)
 		, sfColorScaleToDisplay(0)

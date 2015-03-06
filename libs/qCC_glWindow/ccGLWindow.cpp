@@ -137,7 +137,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_glHeight(0)
 	, m_LODEnabled(true)
 	, m_shouldBeRefreshed(false)
-	, m_cursorMoved(false)
+	, m_mouseMoved(false)
+	, m_mouseButtonPressed(false)
 	, m_unclosable(false)
 	, m_interactionMode(TRANSFORM_CAMERA)
 	, m_pickingMode(NO_PICKING)
@@ -170,6 +171,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_bubbleViewModeEnabled(false)
 	, m_bubbleViewFov_deg(90.0f)
 	, m_currentLODLevel(0)
+	, m_currentLODStartIndex(0)
 	, m_LODInProgress(false)
 	, m_LODPendingRefresh(false)
 {
@@ -655,7 +657,7 @@ static QElapsedTimer s_frameRateElapsedTimer;
 static qint64 s_frameRateElapsedTime_ms = 0; //i.e. not initialized
 static unsigned s_frameRateCurrentFrame = 0;
 
-void ccGLWindow::testFrameRate()
+void ccGLWindow::startFrameRateTest()
 {
 	if (s_frameRateTestInProgress)
 	{
@@ -673,6 +675,8 @@ void ccGLWindow::testFrameRate()
 						ccGLWindow::UPPER_CENTER_MESSAGE,
 						true,
 						3600);
+
+	disableLOD();
 
 	//let's start
 	s_frameRateCurrentFrame = 0;
@@ -697,7 +701,7 @@ void ccGLWindow::stopFrameRateTest()
 	displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear message in the upper center area
 	if (s_frameRateElapsedTime_ms > 0)
 	{
-		QString message = QString("Framerate: %1 f/s").arg(static_cast<double>(s_frameRateCurrentFrame)*1.0e3/static_cast<double>(s_frameRateElapsedTime_ms),0,'f',3);
+		QString message = QString("Framerate: %1 fps").arg((s_frameRateCurrentFrame*1.0e3)/s_frameRateElapsedTime_ms,0,'f',3);
 		displayNewMessage(message,ccGLWindow::LOWER_LEFT_MESSAGE,true);
 		ccLog::Print(message);
 	}
@@ -705,8 +709,6 @@ void ccGLWindow::stopFrameRateTest()
 	{
 		ccLog::Error("An error occurred during framerate test!");
 	}
-
-	QApplication::processEvents();
 
 	redraw();
 }
@@ -1115,7 +1117,9 @@ void ccGLWindow::paintGL()
 	{
 		s_frameRateElapsedTime_ms = s_frameRateElapsedTimer.elapsed();
 		if (++s_frameRateCurrentFrame > FRAMERATE_TEST_MIN_FRAMES && s_frameRateElapsedTime_ms > FRAMERATE_TEST_DURATION_MSEC)
-			stopFrameRateTest();
+		{
+			QTimer::singleShot(0, this, SLOT(stopFrameRateTest()));
+		}
 		else
 		{
 			//rotate base view matrix
@@ -1128,19 +1132,27 @@ void ccGLWindow::paintGL()
 			glPopMatrix();
 		}
 	}
-
-	//should we render a new LOD level?
-	if (m_LODInProgress)
+	else
 	{
-		if ((!m_LODPendingRefresh || m_LODPendingIgnore) && !m_cursorMoved)
+		//should we render a new LOD level?
+		if (m_LODInProgress)
 		{
-			qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
-			//we try to refresh LOD levels at a regular intervale
-			static const qint64 s_baseLODRefreshTime_ms = 100;
+			if ((!m_LODPendingRefresh || m_LODPendingIgnore) && !m_mouseMoved && !m_mouseButtonPressed)
+			{
+				qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
+				//we try to refresh LOD levels at a regular pace
+				qint64 baseLODRefreshTime_ms = 50;
+				if (context.currentLODStartIndex == 0)
+				{
+					baseLODRefreshTime_ms = 250;
+					if (m_currentLODLevel > context.minLODLevel)
+						baseLODRefreshTime_ms /= (m_currentLODLevel-context.minLODLevel+1);
+				}
 
-			m_LODPendingRefresh = true;
-			m_LODPendingIgnore = false;
-			QTimer::singleShot(displayTime_ms < s_baseLODRefreshTime_ms ? s_baseLODRefreshTime_ms - displayTime_ms : 0, this, SLOT(renderNextLODLevel()));
+				m_LODPendingRefresh = true;
+				m_LODPendingIgnore = false;
+				QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms-displayTime_ms,0), this, SLOT(renderNextLODLevel()));
+			}
 		}
 	}
 
@@ -1264,7 +1276,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	context.customRenderingShader = m_customRenderingShader;
 
 	//LOD
-	if (m_LODEnabled)
+	if (m_LODEnabled && !s_frameRateTestInProgress)
 	{
 		context.flags |= CC_LOD_ACTIVATED;
 	
@@ -1275,7 +1287,9 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 			m_LODInProgress = true;
 			context.useVBOs = false;
 			context.currentLODLevel = m_currentLODLevel;
+			context.currentLODStartIndex = m_currentLODStartIndex;
 			context.higherLODLevelsAvailable = false;
+			context.moreLODPointsAvailable = false;
 		}
 	}
 
@@ -1316,13 +1330,28 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	//LOD
 	if (m_LODInProgress)
 	{
-		if (context.higherLODLevelsAvailable)
+		if (context.moreLODPointsAvailable || context.higherLODLevelsAvailable)
 		{
 			//we skip the lowest levels (should have already been drawn anyway)
 			if (m_currentLODLevel == 0)
+			{
 				m_currentLODLevel = context.minLODLevel;
+				m_currentLODStartIndex = 0;
+			}
 			else
-				++m_currentLODLevel;
+			{
+				if (context.moreLODPointsAvailable)
+				{
+					//either we increase the start index
+					m_currentLODStartIndex += ccPointCloud::MAX_LOD_COUNT_AT_ONCE;
+				}
+				else
+				{
+					//or the level
+					++m_currentLODLevel;
+					m_currentLODStartIndex = 0;
+				}
+			}
 		}
 		else
 		{
@@ -2083,7 +2112,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.decimateMeshOnMove = guiParams.decimateMeshOnMove;
 	context.higherLODLevelsAvailable = false;
 	context.currentLODLevel = 0;
-	context.minLODLevel = 9;
+	context.minLODLevel = 10;
 
 	//scalar field color-bar
 	context.sfColorScaleToDisplay = 0;
@@ -2387,7 +2416,8 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 
 void ccGLWindow::mousePressEvent(QMouseEvent *event)
 {
-	m_cursorMoved = false;
+	m_mouseMoved = false;
+	m_mouseButtonPressed = true;
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -2616,7 +2646,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		}
 	}
 
-	m_cursorMoved = true;
+	m_mouseMoved = true;
 	m_lastMousePos = event->pos();
 
 	event->accept();
@@ -2673,11 +2703,12 @@ bool ccGLWindow::processClickableItems(int x, int y)
 
 void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-	bool cursorHasMoved = m_cursorMoved;
+	bool mouseHasMoved = m_mouseMoved;
 	bool acceptEvent = false;
 
 	//reset to default state
-	m_cursorMoved = false;
+	m_mouseButtonPressed = false;
+	m_mouseMoved = false;
 	QApplication::restoreOverrideCursor();
 
 	if (m_interactionMode == SEGMENT_ENTITY)
@@ -2699,7 +2730,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 #endif
 		)
 	{
-		if (!cursorHasMoved)
+		if (!mouseHasMoved)
 		{
 			//specific case: interaction with item(s)
 			updateActiveItemsList(event->x(),event->y(),false);
@@ -2722,7 +2753,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	}
 	else if (event->button() == Qt::LeftButton)
 	{
-		if (cursorHasMoved)
+		if (mouseHasMoved)
 		{
 			//if a rectangular picking area has been defined
 			if (m_rectPickingPoly)

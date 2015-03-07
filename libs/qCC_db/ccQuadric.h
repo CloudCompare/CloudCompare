@@ -75,7 +75,17 @@ public:
 	const CCVector2& getMaxCorner() const { return m_maxCorner; }
 
 	//! Returns the equation coefficients
-	const PointCoordinateType* getEquationCoefs() const { return m_eq; }
+	inline const PointCoordinateType* getEquationCoefs() const { return m_eq; }
+
+	//! Returns the equation 'coordinate system' (X,Y,Z dimensions indexes)
+	inline const unsigned char* getEquationDims() const { return m_hfDims; }
+
+	//! Projects a 3D point in the quadric coordinate system
+	/** \param P input 3D point
+		\param[out] position of the input point in the quadric coordinate sytem
+		\return elevation
+	**/
+	PointCoordinateType project(const CCVector3& P, CCVector3& Q) const;
 
 	//! Returns the equation coefficients as a string
 	QString getEquationString() const;

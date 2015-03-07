@@ -34,9 +34,6 @@ class GenericIndexedCloud;
 class GenericIndexedCloudPersist;
 class GenericProgressCallback;
 
-//! Average number of points used to compute the scalar gradient
-const int NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION = 14;
-
 //! A K-mean class position and boundaries
 struct KMeanClass
 {
@@ -78,6 +75,7 @@ public:
 		(euclidean) distances between the points and another entity, then it is possible
 		to filter out aberrant values.
 		\param theCloud a point cloud (associated to scalar values)
+		\param radius spherical neighborhood size (or 0 for automatic size)
 		\param euclideanDistances indicates if the scalar values are euclidean distances
 		\param sameInAndOutScalarField specifies that the 'in' and 'out' scalar field of the input point cloud are the same structure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
@@ -85,8 +83,9 @@ public:
 		\return error code (0 if ok)
 	**/
 	static int computeScalarFieldGradient(	GenericIndexedCloudPersist* theCloud, 
-											bool euclideanDistances, 
-											bool sameInAndOutScalarField,
+											PointCoordinateType radius,
+											bool euclideanDistances,
+											bool sameInAndOutScalarField = false,
 											GenericProgressCallback* progressCb = 0, 
 											DgmOctree* theOctree = 0);
 

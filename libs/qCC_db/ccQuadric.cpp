@@ -254,6 +254,19 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	return quadric;
 }
 
+PointCoordinateType ccQuadric::project(const CCVector3& P, CCVector3& Q) const
+{
+	//back project into quadric coordinate system
+	Q = P;
+	m_transformation.inverse().apply(Q);
+
+	const uchar& dX = m_hfDims[0];
+	const uchar& dY = m_hfDims[1];
+
+	return m_eq[0] + m_eq[1]*Q.u[dX] + m_eq[2]*Q.u[dY] + m_eq[3]*Q.u[dX]*Q.u[dX] + m_eq[4]*Q.u[dX]*Q.u[dY] + m_eq[5]*Q.u[dY]*Q.u[dY];
+}
+
+
 QString ccQuadric::getEquationString() const
 {
 	const uchar& dX = m_hfDims[0];

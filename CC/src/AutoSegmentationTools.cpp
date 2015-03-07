@@ -116,7 +116,8 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 	return true;
 }
 
-bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud,
+bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedCloudPersist* theCloud,
+																PointCoordinateType radius,
                                                                 ScalarType minSeedDist,
                                                                 uchar octreeLevel,
                                                                 ReferenceCloudContainer& theSegmentedLists,
@@ -134,7 +135,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return false;
@@ -142,7 +143,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	}
 
 	//on calcule le gradient (va ecraser le champ des distances)
-	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,true,true,progressCb,theOctree) < 0)
+	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,radius,true,true,progressCb,theOctree) < 0)
 	{
 		if (!inputOctree)
 			delete theOctree;
@@ -152,9 +153,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	//et on lisse le resultat
 	if (applyGaussianFilter)
 	{
-		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
-		PointCoordinateType cellSize = theOctree->getCellSize(level);
-        ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<float>(cellSize/3),theCloud,-1,progressCb,theOctree);
+        ScalarFieldTools::applyScalarFieldGaussianFilter(radius/3,theCloud,-1,progressCb,theOctree);
 	}
 
 	unsigned seedPoints = 0;

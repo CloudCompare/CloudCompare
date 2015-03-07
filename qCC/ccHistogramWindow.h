@@ -39,6 +39,7 @@ class QCPColoredBars;
 class QCPBarsWithText;
 class QCPHiddenArea;
 class QCPArrow;
+class ccHistogramWindowDlg;
 
 //! Histogram widget
 class ccHistogramWindow : public QCustomPlot
@@ -150,6 +151,8 @@ protected: //methods
 
 protected: //attributes
 
+	friend ccHistogramWindowDlg;
+
 	//Title
 	QString m_titleStr;
 	QCPPlotTitle* m_titlePlot;
@@ -211,20 +214,37 @@ protected: //SF interactor mode
 	QPoint m_lastMouseClick;
 };
 
+class Ui_HistogramDialog;
+
 //! Encapsulating dialog for ccHistogramWindow
 class ccHistogramWindowDlg : public QDialog
 {
+	Q_OBJECT
+
 public:
 	//! Default constructor
 	ccHistogramWindowDlg(QWidget* parent = 0);
+	//! Destructor
+	virtual ~ccHistogramWindowDlg();
 
 	//! Returns encapsulated ccHistogramWindow
 	inline ccHistogramWindow* window() { return m_win; }
+
+	//! Exports histogram to a CSV file
+	bool exportToCSV(QString filename) const;
+
+protected slots:
+
+	//! When the export to CSV file button is pressed
+	void onExportToCSV();
 
 protected:
 
 	//Associated histogram window
 	ccHistogramWindow* m_win;
+
+	//! Associated widgets
+	Ui_HistogramDialog* m_gui;
 };
 
 #endif

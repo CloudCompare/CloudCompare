@@ -19,17 +19,23 @@
 #include "ccGuiParameters.h"
 
 //Local
-#include <ccQCustomPlot.h>
-
+#include "ccQCustomPlot.h"
+#include "ccPersistentSettings.h"
 
 //qCC_db
 #include <ccColorScalesManager.h>
 
 //Qt
 #include <QCloseEvent>
+#include <QFile>
+#include <QTextStream>
+#include <QFileDialog>
 
 //System
 #include <assert.h>
+
+//Gui
+#include "ui_histogramDlg.h"
 
 ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	: QCustomPlot(parent)
@@ -883,10 +889,104 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, m_win(new ccHistogramWindow(this))
+	, m_gui(new Ui_HistogramDialog)
 {
-	QHBoxLayout* hboxLayout = new QHBoxLayout(this);
+	m_gui->setupUi(this);
+	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->histoFrame);
 	hboxLayout->addWidget(m_win);
 	hboxLayout->setContentsMargins(0,0,0,0);
+	m_gui->histoFrame->setLayout(hboxLayout);
+
+	connect(m_gui->exportCSVToolButton, SIGNAL(clicked()), this, SLOT(onExportToCSV()));
 
 	resize(400,275);
+}
+
+ccHistogramWindowDlg::~ccHistogramWindowDlg()
+{
+	if (m_gui)
+		delete m_gui;
+}
+
+//CSV file default separator
+static const QChar s_csvSep(';');
+
+bool ccHistogramWindowDlg::exportToCSV(QString filename) const
+{
+	if (!m_win || m_win->m_histoValues.empty())
+	{
+		ccLog::Warning("[Histogram] Histogram has no associated values (can't save file)");
+		return false;
+	}
+
+	QFile file(filename);
+	if (!file.open(QFile::WriteOnly | QFile::Text))
+	{
+		ccLog::Warning(QString("[Histogram] Failed to save histogram to file '%1'").arg(filename));
+		return false;
+	}
+
+	QTextStream stream(&file);
+	stream.setRealNumberPrecision(12);
+	stream.setRealNumberNotation(QTextStream::FixedNotation);
+	
+	//header
+	stream << "Class; Value; Class start; Class end;" << endl;
+
+	//data
+	{
+		const std::vector<unsigned>& histoValues = m_win->m_histoValues;
+		int histoSize = static_cast<int>(histoValues.size());
+		double step = (m_win->m_maxVal - m_win->m_minVal) / histoSize;
+		for (int i=0; i<histoSize; ++i)
+		{
+			double minVal = m_win->m_minVal + i*step;
+			stream << i+1;				//class index
+			stream << s_csvSep;
+			stream << histoValues[i];	//class value
+			stream << s_csvSep;
+			stream << minVal;			//min value
+			stream << s_csvSep;
+			stream << minVal + step;	//max value
+			stream << s_csvSep;
+			stream << endl;
+		}
+	}
+
+	file.close();
+
+	ccLog::Print(QString("[Histogram] File '%1' saved").arg(filename));
+	
+	return true;
+}
+
+void ccHistogramWindowDlg::onExportToCSV()
+{
+	if (!m_win)
+	{
+		assert(false);
+		return;
+	}
+
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+
+	currentPath += QString("/") + m_win->windowTitle() + ".csv";
+
+	//ask for a filename
+	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,"*.csv");
+	if (filename.isEmpty())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	//save last saving location
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
+	settings.endGroup();
+
+	//save file
+	exportToCSV(filename);
 }

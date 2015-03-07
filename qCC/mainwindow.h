@@ -136,6 +136,7 @@ public:
 	inline virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator();
 	virtual ccColorScalesManager* getColorScalesManager();
+	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel);
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();

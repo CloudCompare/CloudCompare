@@ -117,6 +117,13 @@ public:
 	//! Returns color scale manager (unique instance)
 	virtual ccColorScalesManager* getColorScalesManager() = 0;
 
+	//! Spawns an histogram dialog
+	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
+										double minVal,
+										double maxVal,
+										QString title,
+										QString xAxisLabel ) = 0;
+
 	//other usefull methods
 	virtual void setFrontView() = 0;
 	virtual void setBottomView() = 0;

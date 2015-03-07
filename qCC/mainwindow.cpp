@@ -8662,6 +8662,22 @@ void MainWindow::toggleSelectedEntitiesProp(int prop)
 	updateUI();
 }
 
+void MainWindow::spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel)
+{
+	ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
+	hDlg->setWindowTitle("Histogram");
+
+	ccHistogramWindow* histogram = hDlg->window();
+	{
+		histogram->setTitle(title);
+		histogram->fromBinArray(histoValues,minVal,maxVal);
+		histogram->setAxisLabels(xAxisLabel,"Count");
+		histogram->refresh();
+	}
+
+	hDlg->show();
+}
+
 void MainWindow::showSelectedEntitiesHistogram()
 {
 	size_t selNum = m_selectedEntities.size();

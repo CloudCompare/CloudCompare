@@ -30,6 +30,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QFileDialog>
+#include <QSettings>
 
 //System
 #include <assert.h>

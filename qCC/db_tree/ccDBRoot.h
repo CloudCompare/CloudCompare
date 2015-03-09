@@ -200,7 +200,7 @@ protected slots:
 	void addEmptyGroup();
 	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
-	void enableBubbleViewMolde();
+	void enableBubbleViewMode();
 
 signals:
 	void selectionChanged();

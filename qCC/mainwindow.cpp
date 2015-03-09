@@ -8265,7 +8265,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 	s_previousPickingMode = win->getPickingMode();
 	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
 	win->displayNewMessage(message,ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
-	win->redraw();
+	win->redraw(true);
 
 	freezeUI(true);
 }
@@ -8298,7 +8298,7 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 		s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
 		s_pickingWindow->displayNewMessage("Picking operation aborted",ccGLWindow::LOWER_LEFT_MESSAGE);
 	}
-	s_pickingWindow->redraw();
+	s_pickingWindow->redraw(false);
 
 	//specific case: we allow the 'point-pair based alignment' tool to process the picked point!
 	if (m_pprDlg)
@@ -8938,7 +8938,7 @@ void MainWindow::doActionAddConstantSF()
 		cloud->showSF(true);
 		updateUI();
 		if (cloud->getDisplay())
-			cloud->getDisplay()->redraw();
+			cloud->getDisplay()->redraw(false);
 	}
 
 	ccLog::Print(QString("New scalar field added to %1 (constant value: %2)").arg(cloud->getName()).arg(sfValue));
@@ -10392,7 +10392,7 @@ void MainWindow::toggleActiveWindowSunLight()
 	if (win)
 	{
 		win->toggleSunLight();
-		win->redraw();
+		win->redraw(false);
 	}
 }
 
@@ -10402,7 +10402,7 @@ void MainWindow::toggleActiveWindowCustomLight()
 	if (win)
 	{
 		win->toggleCustomLight();
-		win->redraw();
+		win->redraw(false);
 	}
 }
 
@@ -10412,7 +10412,7 @@ void MainWindow::toggleActiveWindowCenteredPerspective()
 	if (win)
 	{
 		win->togglePerspective(true);
-		win->redraw();
+		win->redraw(false);
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
 	}
@@ -10424,7 +10424,7 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 	if (win)
 	{
 		win->togglePerspective(false);
-		win->redraw();
+		win->redraw(false);
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
 	}
@@ -10452,7 +10452,7 @@ void MainWindow::toggleRotationAboutVertAxis()
 		{
 			win->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
-		win->redraw();
+		win->redraw(true);
 	}
 }
 
@@ -10462,7 +10462,7 @@ void MainWindow::doActionEnableBubbleViewMode()
 	if (win)
 	{
 		win->setBubbleViewMode(true);
-		win->redraw();
+		win->redraw(false);
 	}
 }
 
@@ -10479,7 +10479,7 @@ void MainWindow::doDisableGLFilter()
 	if (win)
 	{
 		win->setGlFilter(0);
-		win->redraw();
+		win->redraw(false);
 	}
 }
 
@@ -10677,7 +10677,7 @@ void MainWindow::closeAll()
 		m_ccRoot->unloadAll();
 	}
 
-	redrawAll();
+	redrawAll(false);
 }
 
 void MainWindow::doActionLoadFile()
@@ -11222,18 +11222,18 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 	m_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
-void MainWindow::redrawAll()
+void MainWindow::redrawAll(bool only2D/*=false*/)
 {
 	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
-		static_cast<ccGLWindow*>(windows.at(i)->widget())->redraw();
+		static_cast<ccGLWindow*>(windows.at(i)->widget())->redraw(only2D);
 }
 
-void MainWindow::refreshAll()
+void MainWindow::refreshAll(bool only2D/*=false*/)
 {
 	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
-		static_cast<ccGLWindow*>(windows.at(i)->widget())->refresh();
+		static_cast<ccGLWindow*>(windows.at(i)->widget())->refresh(only2D);
 }
 
 void MainWindow::updateUI()
@@ -11670,9 +11670,9 @@ ccGLWindow* MainWindow::GetGLWindow(const QString& title)
 	return 0;
 }
 
-void MainWindow::RefreshAllGLWindow()
+void MainWindow::RefreshAllGLWindow(bool only2D/*=false*/)
 {
-	TheInstance()->refreshAll();
+	TheInstance()->refreshAll(only2D);
 }
 
 void MainWindow::UpdateUI()

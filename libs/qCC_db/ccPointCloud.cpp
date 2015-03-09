@@ -314,6 +314,7 @@ void ccPointCloud::notifyGeometryUpdate()
 	ccHObject::notifyGeometryUpdate();
 
 	releaseVBOs();
+	m_lod.clear();
 }
 
 ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)

@@ -124,7 +124,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
 	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
 	connect(m_alignCameraWithEntityReverse,		SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
-	connect(m_enableBubbleViewMode,				SIGNAL(triggered()),								this, SLOT(enableBubbleViewMolde()));
+	connect(m_enableBubbleViewMode,				SIGNAL(triggered()),								this, SLOT(enableBubbleViewMode()));
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -187,7 +187,7 @@ void ccDBRoot::unloadAll()
 
 	updatePropertiesView();
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 ccHObject* ccDBRoot::getRootEntity()
@@ -369,7 +369,7 @@ void ccDBRoot::deleteSelectedEntities()
 
 	updatePropertiesView();
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 QVariant ccDBRoot::data(const QModelIndex &index, int role) const
@@ -644,7 +644,7 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
 	//then select
 	QModelIndexList selectedItems = selected.indexes();
 	{
-		for (int i=0;i<selectedItems.count();++i)
+		for (int i=0; i<selectedItems.count(); ++i)
 		{
 			ccHObject* element = static_cast<ccHObject*>(selectedItems.at(i).internalPointer());
 			assert(element);
@@ -1212,7 +1212,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		item->prepareDisplayForRefresh();
 	}
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 
 	return true;
 }
@@ -1675,7 +1675,7 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 	//we restablish properties view
 	updatePropertiesView();
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccDBRoot::addEmptyGroup()
@@ -1696,7 +1696,7 @@ void ccDBRoot::addEmptyGroup()
 	addElement(newGroup);
 }
 
-void ccDBRoot::enableBubbleViewMolde()
+void ccDBRoot::enableBubbleViewMode()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
@@ -1713,7 +1713,7 @@ void ccDBRoot::enableBubbleViewMolde()
 		}
 	}
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccDBRoot::showContextMenu(const QPoint& menuPos)

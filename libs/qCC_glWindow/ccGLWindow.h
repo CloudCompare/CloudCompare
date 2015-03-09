@@ -119,7 +119,7 @@ public:
 
 	//inherited from ccGenericGLDisplay
 	virtual void toBeRefreshed();
-	virtual void refresh();
+	virtual void refresh(bool only2D = false);
 	virtual void invalidateViewport();
 	virtual void releaseTexture(unsigned texID);
 	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
@@ -906,6 +906,8 @@ protected:
 	unsigned char m_currentLODLevel;
 	//! Currently rendered LOD start index
 	unsigned m_currentLODStartIndex;
+	//! Currently LOD progress indicator
+	unsigned m_LODProgressIndicator;
 
 	//! LOD display in progress
 	bool m_LODInProgress;

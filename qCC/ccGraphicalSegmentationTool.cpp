@@ -274,7 +274,7 @@ void ccGraphicalSegmentationTool::reset()
 		}
 
 		if (m_associatedWin)
-			m_associatedWin->redraw();
+			m_associatedWin->redraw(false);
 		m_somethingHasChanged = false;
 	}
 
@@ -699,7 +699,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-	m_associatedWin->redraw();
+	m_associatedWin->redraw(true);
 }
 
 void ccGraphicalSegmentationTool::doSetPolylineSelection()
@@ -771,7 +771,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				if (QMessageBox::question(m_associatedWin,"Associated viewport","The selected polyline has an associated viewport: do you want to apply it?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 				{
 					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject*>(viewports.front())->getParameters());
-					m_associatedWin->redraw();
+					m_associatedWin->redraw(false);
 				}
 			}
 

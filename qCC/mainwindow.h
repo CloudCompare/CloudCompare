@@ -101,7 +101,7 @@ public:
 	static void GetGLWindows(std::vector<ccGLWindow*>& glWindows);
 
 	//! Static shortcut to MainWindow::refreshAll
-	static void RefreshAllGLWindow();
+	static void RefreshAllGLWindow(bool only2D = false);
 
 	//! Static shortcut to MainWindow::updateUI
 	static void UpdateUI();
@@ -228,11 +228,11 @@ protected slots:
 
 	//inherited from ccMainAppInterface
 	virtual void freezeUI(bool state);
-	virtual void redrawAll();
+	virtual void redrawAll(bool only2D = false);
+	virtual void refreshAll(bool only2D = false);
 	virtual void enableAll();
 	virtual void disableAll();
 	virtual void disableAllBut(ccGLWindow* win);
-	virtual void refreshAll();
 	virtual void updateUI();
 	virtual void setFrontView();
 	virtual void setBottomView();

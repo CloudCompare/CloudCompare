@@ -1147,7 +1147,7 @@ void ccPointPairRegistrationDlg::autoUpdateAlignInfo()
 		m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
 	}
 
-	m_associatedWin->redraw();
+	m_associatedWin->redraw(true);
 }
 
 void ccPointPairRegistrationDlg::align()
@@ -1157,7 +1157,7 @@ void ccPointPairRegistrationDlg::align()
 
 	//reset title
 	resetTitle();
-	m_associatedWin->refresh();
+	m_associatedWin->refresh(true);
 
 	if (callHornRegistration(trans,rms,true))
 	{

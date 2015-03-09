@@ -220,7 +220,7 @@ void ccAlignDlg::setColorsAndLabels()
 	dataObject->setTempColor(ccColor::yellow);
 	dataObject->prepareDisplayForRefresh_recursive();
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 //SLOTS

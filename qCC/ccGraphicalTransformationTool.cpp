@@ -94,7 +94,7 @@ void ccGraphicalTransformationTool::pause(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-	m_associatedWin->redraw();
+	m_associatedWin->redraw(true);
 }
 
 void ccGraphicalTransformationTool::clear()
@@ -288,7 +288,7 @@ void ccGraphicalTransformationTool::updateAllGLTransformations()
 		child->prepareDisplayForRefresh_recursive();
 	}
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccGraphicalTransformationTool::apply()

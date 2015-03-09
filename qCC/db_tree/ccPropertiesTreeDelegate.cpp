@@ -2096,7 +2096,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 			win->zoomGlobal();
 		}
 
-		MainWindow::RefreshAllGLWindow();
+		MainWindow::RefreshAllGLWindow(false);
 	}
 }
 

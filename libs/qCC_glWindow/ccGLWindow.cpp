@@ -172,6 +172,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_bubbleViewFov_deg(90.0f)
 	, m_currentLODLevel(0)
 	, m_currentLODStartIndex(0)
+	, m_LODProgressIndicator(0)
 	, m_LODInProgress(false)
 	, m_LODPendingRefresh(false)
 {
@@ -876,6 +877,8 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		yStart += HotZone::iconSize();
 	}
 
+	yStart += HotZone::margin();
+
 	glDisable(GL_BLEND);
 	glPopAttrib();
 }
@@ -887,11 +890,11 @@ void ccGLWindow::toBeRefreshed()
 	invalidateViewport();
 }
 
-void ccGLWindow::refresh()
+void ccGLWindow::refresh(bool only2D/*=false*/)
 {
 	if (m_shouldBeRefreshed && isVisible())
 	{
-		redraw();
+		redraw(only2D);
 	}
 }
 
@@ -1104,7 +1107,53 @@ void ccGLWindow::paintGL()
 				}
 			}
 
-			drawClickableItems(0,yStart);
+			//hot-zone
+			{
+				drawClickableItems(0,yStart);
+			}
+
+			if (m_LODInProgress)
+			{
+				//draw LOD in progress 'icon'
+				static const int lodIconSize = 32;
+				static const int margin = 6;
+				static const unsigned lodIconParts = 12;
+				static const float lodPartsRadius = 3.0f;
+				int x = margin;
+				yStart += margin;
+
+				static const float radius = static_cast<float>(lodIconSize/2) - lodPartsRadius;
+				static const float alpha = static_cast<float>((2*M_PI)/lodIconParts);
+				int cx = x + lodIconSize/2 - m_glWidth/2;
+				int cy = m_glHeight/2 - (yStart+lodIconSize/2);
+
+				glPushAttrib(GL_POINT_BIT);
+				glPushAttrib(GL_DEPTH_BUFFER_BIT);
+				glPointSize(lodPartsRadius);
+				glEnable(GL_POINT_SMOOTH);
+				glDisable(GL_DEPTH_TEST);
+
+				//draw spinning circles
+				++m_LODProgressIndicator;
+				glBegin(GL_POINTS);
+				for (unsigned i=0; i<lodIconParts; ++i)
+				{
+					float intensity = static_cast<float>((i+m_LODProgressIndicator) % lodIconParts) / (lodIconParts-1);
+					intensity /= ccColor::MAX;
+					float col[3] = { textCol.rgb[0] * intensity,
+									 textCol.rgb[1] * intensity,
+									 textCol.rgb[2] * intensity };
+					glColor3fv(col);
+					glVertex3f(cx+radius*cos(i*alpha),static_cast<float>(cy)+radius*sin(i*alpha),0);
+				}
+				glEnd();
+
+				glPopAttrib();
+				glPopAttrib();
+
+				yStart += lodIconSize + margin;
+			}
+
 		}
 	}
 
@@ -1365,6 +1414,7 @@ void ccGLWindow::disableLOD()
 {
 	//reset LOD rendering (if any)
 	m_currentLODLevel = 0;
+	m_LODProgressIndicator = 0;
 	m_LODInProgress = false;
 }
 
@@ -2112,7 +2162,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.decimateMeshOnMove = guiParams.decimateMeshOnMove;
 	context.higherLODLevelsAvailable = false;
 	context.currentLODLevel = 0;
-	context.minLODLevel = 10;
+	context.minLODLevel = 11;
 
 	//scalar field color-bar
 	context.sfColorScaleToDisplay = 0;
@@ -2832,7 +2882,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	else
 		event->ignore();
 
-	refresh();
+	refresh(false);
 }
 
 void ccGLWindow::wheelEvent(QWheelEvent* event)

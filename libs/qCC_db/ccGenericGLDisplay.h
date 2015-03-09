@@ -115,8 +115,9 @@ public:
 	//! Redraws display only if flagged as 'to be refreshed'
 	/** See ccGenericGLDisplay::toBeRefreshed. Flag is turned
 		to false after a call to this method.
+		\param only2D whether to redraw everything (false) or only the 2D layer (true)
 	**/
-	virtual void refresh() = 0;
+	virtual void refresh(bool only2D = false) = 0;
 
 	//! Invalidates current viewport setup
 	/** On next redraw, viewport information will be recomputed.

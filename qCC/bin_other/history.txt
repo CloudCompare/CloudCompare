@@ -5,9 +5,12 @@ v2.6.2 XX/XX/2015
 
 - Enhancements:
 	* Display:
-		- CloudCompare now supports 'Level Of Detail' (LOD) display for big clouds
-		- If enabled, the clouds are now displayed first at a low octree level when moved
+		- CloudCompare now supports 'Level Of Detail' (LoD) display for big clouds
+		- if enabled, the clouds are now displayed first at a low octree level when moved
 			and are then regularly refined when the user doesn't interact with them.
+	* New 'Display options':
+		- the user can now specify the minimal number of points and the minimal number of
+			triangles necessary to activate LoD/decimated display
 	* The 'Edit > Crop' and 'Tools > Segmentation > Cross Section' tools can now be applied on
 		triangular meshes. Moreover, the applied cut is clean (i.e. true re-meshing is performed
 		on the edges)

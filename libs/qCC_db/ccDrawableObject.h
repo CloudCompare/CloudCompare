@@ -89,6 +89,8 @@ struct glDrawContext
 
 	//! Whether to decimate big meshes when rotating the camera
 	bool decimateMeshOnMove;
+	//! Minimum number of triangles for activating LOD display
+	unsigned minLODTriangleCount;
 
 	//! Currently displayed color scale (the corresponding scalar field in fact)
 	ccScalarField* sfColorScaleToDisplay;
@@ -132,13 +134,14 @@ struct glDrawContext
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
 		, bbDefaultCol(ccColor::yellow)
 		, decimateCloudOnMove(true)
-		, minLODLevel(10)
+		, minLODLevel(11)
 		, minLODPointCount(10000000)
 		, currentLODLevel(0)
 		, currentLODStartIndex(0)
 		, moreLODPointsAvailable(false)
 		, higherLODLevelsAvailable(false)
 		, decimateMeshOnMove(true)
+		, minLODTriangleCount(2500000)
 		, sfColorScaleToDisplay(0)
 		, colorRampShader(0)
 		, customRenderingShader(0)

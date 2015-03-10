@@ -79,7 +79,9 @@ void ccGui::ParamStruct::reset()
 
 	drawBackgroundGradient		= true;
 	decimateMeshOnMove			= true;
+	minLoDMeshSize				= 2500000;
 	decimateCloudOnMove			= true;
+	minLoDCloudSize				= 10000000;
 	useVBOs						= true;
 	useOpenGLPointPicking		= false;
 	displayCross				= true;
@@ -121,7 +123,9 @@ void ccGui::ParamStruct::fromPersistentSettings()
 
 	drawBackgroundGradient		=                                  settings.value("backgroundGradient",      true ).toBool();
 	decimateMeshOnMove			=                                  settings.value("meshDecimation",          true ).toBool();
+	minLoDMeshSize				=                                  settings.value("minLoDMeshSize",       2500000 ).toUInt();
 	decimateCloudOnMove			=                                  settings.value("cloudDecimation",         true ).toBool();
+	minLoDCloudSize				=                                  settings.value("minLoDCloudSize",     10000000 ).toUInt();
 	useVBOs						=                                  settings.value("useVBOs",                 true ).toBool();
 	useOpenGLPointPicking		=                                  settings.value("useOpenGLPointPicking",   false).toBool();
 	displayCross				=                                  settings.value("crossDisplayed",          true ).toBool();
@@ -158,7 +162,9 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("bbDefaultColor",           QByteArray((const char*)bbDefaultCol.rgb,        c_ubColorArraySize));
 	settings.setValue("backgroundGradient",       drawBackgroundGradient);
 	settings.setValue("meshDecimation",           decimateMeshOnMove);
+	settings.setValue("minLoDMeshSize",	          minLoDMeshSize);
 	settings.setValue("cloudDecimation",          decimateCloudOnMove);
+	settings.setValue("minLoDCloudSize",	      minLoDCloudSize);
 	settings.setValue("useVBOs",                  useVBOs);
 	settings.setValue("useOpenGLPointPicking",    useOpenGLPointPicking);
 	settings.setValue("crossDisplayed",           displayCross);

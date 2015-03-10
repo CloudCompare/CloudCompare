@@ -1550,10 +1550,10 @@ void ccPointCloud::glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep,
 }
 
 //Vertex indexes for OpenGL "arrays" drawing
-static PointCoordinateType s_pointBuffer [ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
-static PointCoordinateType s_normalBuffer[ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
-static colorType           s_rgbBuffer3ub[ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
-static float               s_rgbBuffer3f [ccPointCloud::MAX_LOD_COUNT_AT_ONCE*3];
+static PointCoordinateType s_pointBuffer [MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
+static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
+static colorType           s_rgbBuffer3ub[MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
+static float               s_rgbBuffer3f [MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
 
 void ccPointCloud::glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs)
 {
@@ -1806,7 +1806,7 @@ struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 	//! Map of indexes (to invert the natural order)
 	ccPointCloud::LodStruct::IndexSet* indexMap;
 
-	//! Decimation step (for non-octree based LOD)
+	//! Decimation step (for non-octree based LoD)
 	unsigned decimStep;
 };
 
@@ -1855,14 +1855,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				&&	MACRO_LODActivated(context)
 				)
 			{
-				bool skipLOD = false;
+				bool skipLoD = false;
 
-				//is there a LOD structure associated yet?
+				//is there a LoD structure associated yet?
 				if (!m_lod.isBroken())
 				{
 					if (!m_lod.isInitialized())
 					{
-						//auto-init LOD structure
+						//auto-init LoD structure
 						ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
 						initLOD(&pDlg);
 					}
@@ -1873,8 +1873,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (context.currentLODLevel == 0)
 							{
-								//no need for LOD display
-								skipLOD = true;
+								//no need for LoD display
+								skipLoD = true;
 							}
 							else
 							{
@@ -1887,7 +1887,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							if (context.currentLODLevel == 0)
 							{
 								toDisplay.indexMap = m_lod.indexes;
-								//the first time (LOD level = 0), we display all the small levels at once
+								//the first time (LoD level = 0), we display all the small levels at once
 								toDisplay.startIndex = 0;
 								toDisplay.count = 0;
 								{
@@ -1915,9 +1915,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									toDisplay.startIndex += context.currentLODStartIndex;
 									toDisplay.count -= context.currentLODStartIndex;
 
-									if (toDisplay.count > MAX_LOD_COUNT_AT_ONCE)
+									if (toDisplay.count > MAX_POINT_COUNT_PER_LOD_RENDER_PASS)
 									{
-										toDisplay.count = MAX_LOD_COUNT_AT_ONCE;
+										toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
 										context.moreLODPointsAvailable = true;
 									}
 								}
@@ -1929,9 +1929,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 
-				if (!toDisplay.indexMap && !skipLOD)
+				if (!toDisplay.indexMap && !skipLoD)
 				{
-					//if we don't have a LOD map, we can only display points at level 0!
+					//if we don't have a LoD map, we can only display points at level 0!
 					if (context.currentLODLevel != 0)
 					{
 						return;
@@ -1944,7 +1944,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 		}
-		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LOD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
+		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
 
 		bool colorMaterialEnabled = false;
 
@@ -2041,7 +2041,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				//whether VBOs are available (for faster display) or not
 				bool useVBOs = false;
-				if (!hiddenPoints && context.useVBOs)
+				if (!hiddenPoints && context.useVBOs && !toDisplay.indexMap) //VBOs are not compatible with LoD
 				{
 					//can't use VBOs if some points are hidden
 					useVBOs = updateVBOs(glParams);
@@ -2152,12 +2152,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (glParams.showNorms)
 						glEnableClientState(GL_NORMAL_ARRAY);
 
-					if (toDisplay.indexMap) //LOD display
+					if (toDisplay.indexMap) //LoD display
 					{
 						unsigned s = toDisplay.startIndex;
 						while (s < toDisplay.endIndex)
 						{
-							unsigned count = std::min(MAX_LOD_COUNT_AT_ONCE,toDisplay.endIndex-s);
+							unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS,toDisplay.endIndex-s);
 							unsigned e = s+count;
 
 							//points
@@ -2358,7 +2358,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else //no visibility table enabled, no scalar field
 			{
-				bool useVBOs = context.useVBOs ? updateVBOs(glParams) : false;
+				bool useVBOs = context.useVBOs && !toDisplay.indexMap ? updateVBOs(glParams) : false; //VBOs are not compatible with LoD
 
 				unsigned chunks = m_points->chunksCount();
 
@@ -2368,12 +2368,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showColors)
 					glEnableClientState(GL_COLOR_ARRAY);
 
-				if (toDisplay.indexMap) //LOD display
+				if (toDisplay.indexMap) //LoD display
 				{
 					unsigned s = toDisplay.startIndex;
 					while (s < toDisplay.endIndex)
 					{
-						unsigned count = std::min(MAX_LOD_COUNT_AT_ONCE,toDisplay.endIndex-s);
+						unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS,toDisplay.endIndex-s);
 						unsigned e = s+count;
 
 						//points
@@ -3734,7 +3734,7 @@ bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*
 	if (pointCount == 0)
 		return false;
 
-	ccLog::Print(QString("[LOD] '%1' [%2 points]").arg(getName()).arg(pointCount));
+	ccLog::Print(QString("[LoD] '%1' [%2 points]").arg(getName()).arg(pointCount));
 	m_lod.state = LodStruct::BROKEN;
 
 	//first we need an octree
@@ -3743,7 +3743,7 @@ bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*
 	if (!octree)
 	{
 		//not enough memory
-		ccLog::Warning("[LOD] Failed to compute octree (not enough memory)");
+		ccLog::Warning("[LoD] Failed to compute octree (not enough memory)");
 		return false;
 	}
 
@@ -3753,31 +3753,30 @@ bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*
 	if (!flags->resize(pointCount,true,NoFlag))
 	{
 		//not enough memory
-		ccLog::Warning("[LOD] Failed to compute LOD structure (not enough memory)");
+		ccLog::Warning("[LoD] Failed to compute LoD structure (not enough memory)");
 		return false;
 	}
 
-	//init LOD indexes
+	//init LoD indexes
 	if (!m_lod.indexes)
 		m_lod.indexes = new LodStruct::IndexSet;
 	if (!m_lod.indexes->reserve(pointCount))
 	{
 		//not enough memory
-		ccLog::Warning("[LOD] Failed to compute LOD structure (not enough memory)");
+		ccLog::Warning("[LoD] Failed to compute LoD structure (not enough memory)");
 		flags->release();
 		return false;
 	}
 
-	//reserve memory for the LOD level descriptors
+	//reserve memory for the LoD level descriptors
 	try
 	{
 		m_lod.levels.reserve(CCLib::DgmOctree::MAX_OCTREE_LEVEL+1); //level 0 included
-		m_lod.levels.push_back(LodStruct::LevelDesc(0,0));
 	}
 	catch(std::bad_alloc)
 	{
 		//not enough memory
-		ccLog::Warning("[LOD] Failed to compute LOD structure (not enough memory)");
+		ccLog::Warning("[LoD] Failed to compute LoD structure (not enough memory)");
 		m_lod.indexes->clear(true);
 		flags->release();
 		return false;
@@ -3792,6 +3791,9 @@ bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*
 	CCLib::NormalizedProgress nProgress(progressCallback,pointCount);
 
 	assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
+	//first level (default)
+	m_lod.levels.push_back(LodStruct::LevelDesc(0,0));
+	//and the next ones
 	for (unsigned char level=1; level<=static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL); ++level)
 	{
 		const int bitDec = GET_BIT_SHIFT(level);
@@ -3800,8 +3802,9 @@ bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*
 		static const unsigned INVALID_INDEX = 0xFFFFFFFF;
 		unsigned nearestIndex = INVALID_INDEX;
 		PointCoordinateType nearestSquareDist = 0;
-		CCVector3 cellCenter;
+		CCVector3 cellCenter(0,0,0);
 
+		//current level descriptor
 		LodStruct::LevelDesc levelDesc;
 		levelDesc.startIndex = m_lod.indexes->currentSize();
 		
@@ -3876,7 +3879,7 @@ bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*
 		assert(levelDesc.count != 0);
 		m_lod.levels.push_back(levelDesc);
 
-		ccLog::Print(QString("[LOD] Level %1: %2 points").arg(level).arg(levelDesc.count));
+		ccLog::Print(QString("[LoD] Level %1: %2 points").arg(level).arg(levelDesc.count));
 
 		if (m_lod.indexes->currentSize() == pointCount)
 		{

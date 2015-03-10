@@ -70,8 +70,12 @@ public:
 		bool drawBackgroundGradient;
 		//! Decimate meshes when moved
 		bool decimateMeshOnMove;
+		//! Min mesh size for decimation
+		unsigned minLoDMeshSize;
 		//! Decimate clouds when moved
 		bool decimateCloudOnMove;
+		//! Min cloud size for decimation
+		unsigned minLoDCloudSize;
 		//! Display cross in the middle of the screen
 		bool displayCross;
 		//! Whether to use VBOs for faster display

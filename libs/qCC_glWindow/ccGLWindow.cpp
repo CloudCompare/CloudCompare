@@ -1334,7 +1334,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 		{
 			//ccLog::Print(QString("[LOD] Rendering level %1").arg(m_currentLODLevel));
 			m_LODInProgress = true;
-			context.useVBOs = false;
 			context.currentLODLevel = m_currentLODLevel;
 			context.currentLODStartIndex = m_currentLODStartIndex;
 			context.higherLODLevelsAvailable = false;
@@ -1392,7 +1391,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 				if (context.moreLODPointsAvailable)
 				{
 					//either we increase the start index
-					m_currentLODStartIndex += ccPointCloud::MAX_LOD_COUNT_AT_ONCE;
+					m_currentLODStartIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
 				}
 				else
 				{
@@ -2159,10 +2158,23 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 	//decimation options
 	context.decimateCloudOnMove = guiParams.decimateCloudOnMove;
-	context.decimateMeshOnMove = guiParams.decimateMeshOnMove;
+	context.minLODPointCount    = guiParams.minLoDCloudSize;
+	context.decimateMeshOnMove  = guiParams.decimateMeshOnMove;
+	context.minLODTriangleCount = guiParams.minLoDMeshSize;
 	context.higherLODLevelsAvailable = false;
+	context.moreLODPointsAvailable = false;
 	context.currentLODLevel = 0;
-	context.minLODLevel = 11;
+	context.minLODLevel = 0;
+	if (guiParams.decimateCloudOnMove)
+	{
+		//we automatically deduce the minimal octree level for decimation
+		//(we make the hypothesis that couds are filling a (flat) 'square' portion of the octree (and not 'cubical'))
+		context.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000,guiParams.minLoDCloudSize)))/(2.0*log(2.0)));
+		//ccLog::Print(QString("context.minLODLevel = %1").arg(context.minLODLevel));
+		//just in case...
+		assert(context.minLODLevel > 0);
+		context.minLODLevel = std::max<unsigned>(context.minLODLevel,1);
+	}
 
 	//scalar field color-bar
 	context.sfColorScaleToDisplay = 0;

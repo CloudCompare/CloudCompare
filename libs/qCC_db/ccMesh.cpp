@@ -1441,8 +1441,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 
 		//L.O.D.
-		bool lodEnabled = (triNum > GET_MAX_LOD_FACES_NUMBER() && context.decimateMeshOnMove && MACRO_LODActivated(context));
-		int decimStep = (lodEnabled ? static_cast<int>(ceil(static_cast<float>(triNum*3) / GET_MAX_LOD_FACES_NUMBER())) : 1);
+		bool lodEnabled = (triNum > context.minLODTriangleCount && context.decimateMeshOnMove && MACRO_LODActivated(context));
+		unsigned decimStep = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum*3) / context.minLODTriangleCount)) : 1);
 
 		//display parameters
 		glDrawParams glParams;

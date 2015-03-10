@@ -145,11 +145,6 @@ unsigned* ccGenericMesh::GetWireVertexIndexes()
 	return s_vertWireIndexes;
 }
 
-unsigned ccGenericMesh::GET_MAX_LOD_FACES_NUMBER()
-{
-	return 2500000;
-}
-
 void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 {
 	if (MACRO_Draw2D(context))
@@ -199,8 +194,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 
 		//L.O.D.
-		bool lodEnabled = (triNum > GET_MAX_LOD_FACES_NUMBER() && context.decimateMeshOnMove && MACRO_LODActivated(context));
-		unsigned decimStep = (lodEnabled ? (unsigned)ceil((float)triNum*3 / (float)GET_MAX_LOD_FACES_NUMBER()) : 1);
+		bool lodEnabled = (triNum > context.minLODTriangleCount && context.decimateMeshOnMove && MACRO_LODActivated(context));
+		unsigned decimStep = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum*3) / context.minLODTriangleCount)) : 1);
 		unsigned displayedTriNum = triNum / decimStep;
 
 		//display parameters

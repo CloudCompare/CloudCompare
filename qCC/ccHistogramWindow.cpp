@@ -914,7 +914,7 @@ static const QChar s_csvSep(';');
 
 bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 {
-	if (!m_win || m_win->m_histoValues.empty())
+	if (!m_win || m_win->histoValues().empty())
 	{
 		ccLog::Warning("[Histogram] Histogram has no associated values (can't save file)");
 		return false;
@@ -936,12 +936,12 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 
 	//data
 	{
-		const std::vector<unsigned>& histoValues = m_win->m_histoValues;
+		const std::vector<unsigned>& histoValues = m_win->histoValues();
 		int histoSize = static_cast<int>(histoValues.size());
-		double step = (m_win->m_maxVal - m_win->m_minVal) / histoSize;
+		double step = (m_win->maxVal() - m_win->minVal()) / histoSize;
 		for (int i=0; i<histoSize; ++i)
 		{
-			double minVal = m_win->m_minVal + i*step;
+			double minVal = m_win->minVal() + i*step;
 			stream << i+1;				//class index
 			stream << s_csvSep;
 			stream << histoValues[i];	//class value

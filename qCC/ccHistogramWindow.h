@@ -39,39 +39,7 @@ class QCPColoredBars;
 class QCPBarsWithText;
 class QCPHiddenArea;
 class QCPArrow;
-class ccHistogramWindow;
 class Ui_HistogramDialog;
-
-//! Encapsulating dialog for ccHistogramWindow
-class ccHistogramWindowDlg : public QDialog
-{
-	Q_OBJECT
-
-public:
-	//! Default constructor
-	ccHistogramWindowDlg(QWidget* parent = 0);
-	//! Destructor
-	virtual ~ccHistogramWindowDlg();
-
-	//! Returns encapsulated ccHistogramWindow
-	inline ccHistogramWindow* window() { return m_win; }
-
-	//! Exports histogram to a CSV file
-	bool exportToCSV(QString filename) const;
-
-protected slots:
-
-	//! When the export to CSV file button is pressed
-	void onExportToCSV();
-
-protected:
-
-	//Associated histogram window
-	ccHistogramWindow* m_win;
-
-	//! Associated widgets
-	Ui_HistogramDialog* m_gui;
-};
 
 //! Histogram widget
 class ccHistogramWindow : public QCustomPlot
@@ -139,6 +107,13 @@ public:
 	**/
 	void refreshBars();
 
+	//! Returns the current histogram bins
+	inline const std::vector<unsigned>& histoValues() const { return m_histoValues; }
+	//! Returns the current histogram min value
+	inline double minVal() const { return m_minVal; }
+	//! Returns the current histogram max value
+	inline double maxVal() const { return m_maxVal; }
+
 public: //SF interactor mode
 
 	//! Enables SF interaction mode
@@ -182,8 +157,6 @@ protected: //methods
 	void updateOverlayCurveWidth(int w, int h);
 
 protected: //attributes
-
-	friend ccHistogramWindowDlg;
 
 	//Title
 	QString m_titleStr;
@@ -244,6 +217,37 @@ protected: //SF interactor mode
 
 	//! Last mouse click
 	QPoint m_lastMouseClick;
+};
+
+//! Encapsulating dialog for ccHistogramWindow
+class ccHistogramWindowDlg : public QDialog
+{
+	Q_OBJECT
+
+public:
+	//! Default constructor
+	ccHistogramWindowDlg(QWidget* parent = 0);
+	//! Destructor
+	virtual ~ccHistogramWindowDlg();
+
+	//! Returns encapsulated ccHistogramWindow
+	inline ccHistogramWindow* window() { return m_win; }
+
+	//! Exports histogram to a CSV file
+	bool exportToCSV(QString filename) const;
+
+protected slots:
+
+	//! When the export to CSV file button is pressed
+	void onExportToCSV();
+
+protected:
+
+	//Associated histogram window
+	ccHistogramWindow* m_win;
+
+	//! Associated widgets
+	Ui_HistogramDialog* m_gui;
 };
 
 #endif

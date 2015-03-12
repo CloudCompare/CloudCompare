@@ -14,6 +14,8 @@ v2.6.2 XX/XX/2015
 	* The 'Edit > Crop' and 'Tools > Segmentation > Cross Section' tools can now be applied on
 		triangular meshes. Moreover, the applied cut is clean (i.e. true re-meshing is performed
 		on the edges)
+	* Histogram dialog:
+		- new icon 'Export to CSV'
 	* Command line:
 		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
 		the command line (with a dedicated XML parameters file)

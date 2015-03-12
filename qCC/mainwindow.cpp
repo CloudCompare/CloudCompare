@@ -5211,7 +5211,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 
 		if (sortBysize) //still ok?
 		{
-			for (unsigned i=0; i<components.size(); ++i)
+			for (size_t i=0; i<components.size(); ++i)
 			{
 				sortedIndexes.push_back(ComponentIndexAndSize(i,components[i]->size()));
 			}
@@ -5376,7 +5376,7 @@ void MainWindow::doActionLabelConnectedComponents()
 																		&pDlg,
 																		theOctree) >= 0)
 			{
-				//if successful, we extract each CC (stored in "components")
+				//if successfull, we extract each CC (stored in "components")
 				pc->getCurrentInScalarField()->computeMinAndMax();
 				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud,components))
 				{

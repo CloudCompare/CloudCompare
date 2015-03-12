@@ -50,7 +50,7 @@ public:
 				const PointCoordinateType eq[6],
 				const unsigned char* hfDims = 0,
 				const ccGLMatrix* transMat = 0,
-				QString name = QString("Plane"),
+				QString name = QString("Quadric"),
 				unsigned precision = DEFAULT_DRAWING_PRECISION);
 
 	//! Simplified constructor
@@ -82,10 +82,10 @@ public:
 
 	//! Projects a 3D point in the quadric coordinate system
 	/** \param P input 3D point
-		\param[out] position of the input point in the quadric coordinate sytem
-		\return elevation
+		\param[out] Q position of the input point in the quadric coordinate sytem
+		\return elevation of the input point (in the coordinate system quadric)
 	**/
-	PointCoordinateType project(const CCVector3& P, CCVector3& Q) const;
+	PointCoordinateType projectOnQuadric(const CCVector3& P, CCVector3& Q) const;
 
 	//! Returns the equation coefficients as a string
 	QString getEquationString() const;

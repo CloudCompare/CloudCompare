@@ -5211,7 +5211,8 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 
 		if (sortBysize) //still ok?
 		{
-			for (size_t i=0; i<components.size(); ++i)
+			unsigned compCount = static_cast<unsigned>(components.size());
+			for (unsigned i=0; i<compCount; ++i)
 			{
 				sortedIndexes.push_back(ComponentIndexAndSize(i,components[i]->size()));
 			}

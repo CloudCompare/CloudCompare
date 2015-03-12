@@ -35,7 +35,7 @@ ccQuadric::ccQuadric(	CCVector2 minCorner,
 						const PointCoordinateType eq[6],
 						const unsigned char* hfDims/*=0*/,
 						const ccGLMatrix* transMat/*=0*/,
-						QString name/*=QString("Plane")*/,
+						QString name/*=QString("Quadric")*/,
 						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_minCorner(minCorner)
@@ -254,7 +254,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	return quadric;
 }
 
-PointCoordinateType ccQuadric::project(const CCVector3& P, CCVector3& Q) const
+PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q) const
 {
 	//back project into quadric coordinate system
 	Q = P;
@@ -262,10 +262,15 @@ PointCoordinateType ccQuadric::project(const CCVector3& P, CCVector3& Q) const
 
 	const uchar& dX = m_hfDims[0];
 	const uchar& dY = m_hfDims[1];
+	const uchar& dZ = m_hfDims[2];
 
-	return m_eq[0] + m_eq[1]*Q.u[dX] + m_eq[2]*Q.u[dY] + m_eq[3]*Q.u[dX]*Q.u[dX] + m_eq[4]*Q.u[dX]*Q.u[dY] + m_eq[5]*Q.u[dY]*Q.u[dY];
+	PointCoordinateType originalZ = Q.u[dZ];
+	Q.u[dZ] = m_eq[0] + m_eq[1]*Q.u[dX] + m_eq[2]*Q.u[dY] + m_eq[3]*Q.u[dX]*Q.u[dX] + m_eq[4]*Q.u[dX]*Q.u[dY] + m_eq[5]*Q.u[dY]*Q.u[dY];
+
+	m_transformation.apply(Q);
+
+	return originalZ - Q.u[dZ];
 }
-
 
 QString ccQuadric::getEquationString() const
 {

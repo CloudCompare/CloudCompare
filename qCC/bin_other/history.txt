@@ -22,6 +22,7 @@ v2.6.2 XX/XX/2015
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
+	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (integer part was applied instead)
 
 v2.6.1 02/20/2015
 - New features:

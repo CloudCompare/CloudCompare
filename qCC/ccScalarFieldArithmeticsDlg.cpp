@@ -123,7 +123,7 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 	case 16:
 		return INT;
 	case 17:
-		return INT;
+		return INVERSE;
 	default:
 		assert(false);
 		break;

@@ -15,30 +15,31 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MASCARET_FILTER_HEADER
-#define CC_MASCARET_FILTER_HEADER
+#ifndef CC_SALOME_HYDRO_HEADER
+#define CC_SALOME_HYDRO_HEADER
 
 #include "FileIOFilter.h"
 
-//! Mascaret profile I/O filter
-/** See http://www.opentelemac.org/
+//! SALOME hydro polylines I/O filter
+/** See http://chercheurs.edf.com/logiciels/salome-41218.html
 **/
-class QCC_IO_LIB_API MascaretFilter : public FileIOFilter
+class QCC_IO_LIB_API SalomeHydroFilter : public FileIOFilter
 {
 public:
 
 	//static accessors
-	static inline QString GetFileFilter() { return "(Geo-)Mascaret profile (*.georef)"; }
-	static inline QString GetDefaultExtension() { return "georef"; }
+	static inline QString GetFileFilter() { return "Salome Hydro polylines (*.poly)"; }
+	static inline QString GetDefaultExtension() { return "poly"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return false; }
+	virtual bool importSupported() const { return true; }
 	virtual bool exportSupported() const { return true; }
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
 	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
 	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const { return false; }
+	virtual bool canLoadExtension(QString upperCaseExt) const;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
 };
 
-#endif //CC_MASCARET_FILTER_HEADER
+#endif //CC_SALOME_HYDRO_HEADER

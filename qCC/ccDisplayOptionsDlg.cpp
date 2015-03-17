@@ -20,6 +20,9 @@
 //Qt
 #include <QColorDialog>
 
+//Default 'min cloud size' for LoD  when VBOs are activated
+static const double s_defaultMaxVBOCloudSizeM = 50.0;
+
 ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui::DisplayOptionsDlg()
 {
 	setupUi(this);
@@ -56,6 +59,8 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(labelMarkerSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeLabelMarkerSize(int)));
 
 	connect(zoomSpeedDoubleSpinBox,          SIGNAL(valueChanged(double)), this, SLOT(changeZoomSpeed(double)));
+	connect(maxCloudSizeDoubleSpinBox,       SIGNAL(valueChanged(double)), this, SLOT(changeMaxCloudSize(double)));
+	connect(maxMeshSizeDoubleSpinBox,        SIGNAL(valueChanged(double)), this, SLOT(changeMaxMeshSize(double)));
 
 	connect(okButton,                        SIGNAL(clicked()),         this, SLOT(doAccept()));
 	connect(applyButton,                     SIGNAL(clicked()),         this, SLOT(apply()));
@@ -121,7 +126,9 @@ void ccDisplayOptionsDlg::refresh()
 
 	enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
 	decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
+	maxMeshSizeDoubleSpinBox->setValue(static_cast<double>(parameters.minLoDMeshSize)/1000000.0);
 	decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
+	maxCloudSizeDoubleSpinBox->setValue(static_cast<double>(parameters.minLoDCloudSize)/1000000.0);
 	useVBOCheckBox->setChecked(parameters.useVBOs);
 	showCrossCheckBox->setChecked(parameters.displayCross);
 	openGLPickingCheckBox->setChecked(parameters.useOpenGLPointPicking);
@@ -351,14 +358,26 @@ void ccDisplayOptionsDlg::changeMeshDecimation()
 	parameters.decimateMeshOnMove = decimateMeshBox->isChecked();
 }
 
+void ccDisplayOptionsDlg::changeMaxMeshSize(double val)
+{
+	parameters.minLoDMeshSize = static_cast<unsigned>(val * 1000000);
+}
+
 void ccDisplayOptionsDlg::changeCloudDecimation()
 {
 	parameters.decimateCloudOnMove = decimateCloudBox->isChecked();
 }
 
+void ccDisplayOptionsDlg::changeMaxCloudSize(double val)
+{
+	parameters.minLoDCloudSize = static_cast<unsigned>(val * 1000000);
+}
+
 void ccDisplayOptionsDlg::changeVBOUsage()
 {
 	parameters.useVBOs = useVBOCheckBox->isChecked();
+	if (parameters.useVBOs && maxCloudSizeDoubleSpinBox->value() < s_defaultMaxVBOCloudSizeM)
+		maxCloudSizeDoubleSpinBox->setValue(s_defaultMaxVBOCloudSizeM);
 }
 
 void ccDisplayOptionsDlg::changeCrossDisplayed()

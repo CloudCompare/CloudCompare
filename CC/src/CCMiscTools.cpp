@@ -38,19 +38,19 @@
 #ifdef FINDMINMAX
 #undef FINDMINMAX
 #endif
-#define FINDMINMAX(x0,x1,x2,minV,maxV) minV = maxV = x0;if(x1<minV) minV=x1; else if(x1>maxV) maxV=x1;if(x2<minV) minV=x2; else if(x2>maxV) maxV=x2;
+#define FINDMINMAX(x0,x1,x2,minV,maxV) minV = maxV = x0; if(x1<minV) minV=x1; else if(x1>maxV) maxV=x1;if(x2<minV) minV=x2; else if(x2>maxV) maxV=x2;
 
 /*======================== X-tests ========================*/
-#define AXISTEST_X01(a, b, fa, fb) minV = a*v0[1] - b*v0[2];maxV = a*v2[1] - b*v2[2]; if(maxV<minV) std::swap(minV,maxV); rad = (fa + fb) * boxhalfsize;if(minV>rad || maxV<-rad) return 0;
-#define AXISTEST_X2(a, b, fa, fb) minV = a*v0[1] - b*v0[2];maxV = a*v1[1] - b*v1[2]; if(maxV<minV) std::swap(minV,maxV); rad = (fa + fb) * boxhalfsize;if(minV>rad || maxV<-rad) return 0;
+#define AXISTEST_X01(a, b, fa, fb) minV = a*v0[1] - b*v0[2]; maxV = a*v2[1] - b*v2[2]; if (maxV<minV) std::swap(minV,maxV); rad = fa * boxhalfSize.y + fb * boxhalfSize.z; if (minV>rad || maxV<-rad) return 0;
+#define AXISTEST_X2(a, b, fa, fb) minV = a*v0[1] - b*v0[2]; maxV = a*v1[1] - b*v1[2]; if (maxV<minV) std::swap(minV,maxV); rad = fa * boxhalfSize.y + fb * boxhalfSize.z; if (minV>rad || maxV<-rad) return 0;
 
 /*======================== Y-tests ========================*/
-#define AXISTEST_Y02(a, b, fa, fb) minV = -a*v0[0] + b*v0[2];maxV = -a*v2[0] + b*v2[2]; if(maxV<minV) std::swap(minV,maxV); rad = (fa + fb) * boxhalfsize; if(minV>rad || maxV<-rad) return 0;
-#define AXISTEST_Y1(a, b, fa, fb) minV = -a*v0[0] + b*v0[2];maxV = -a*v1[0] + b*v1[2]; if(maxV<minV) std::swap(minV,maxV); rad = (fa + fb) * boxhalfsize;if(minV>rad || maxV<-rad) return 0;
+#define AXISTEST_Y02(a, b, fa, fb) minV = -a*v0[0] + b*v0[2]; maxV = -a*v2[0] + b*v2[2]; if (maxV<minV) std::swap(minV,maxV); rad = fa * boxhalfSize.x + fb * boxhalfSize.z; if (minV>rad || maxV<-rad) return 0;
+#define AXISTEST_Y1(a, b, fa, fb) minV = -a*v0[0] + b*v0[2]; maxV = -a*v1[0] + b*v1[2]; if (maxV<minV) std::swap(minV,maxV); rad = fa * boxhalfSize.x + fb * boxhalfSize.z; if (minV>rad || maxV<-rad) return 0;
 
 /*======================== Z-tests ========================*/
-#define AXISTEST_Z12(a, b, fa, fb) minV = a*v1[0] - b*v1[1];maxV = a*v2[0] - b*v2[1]; if(maxV<minV) std::swap(minV,maxV); rad = (fa + fb) * boxhalfsize;if(minV>rad || maxV<-rad) return 0;
-#define AXISTEST_Z0(a, b, fa, fb) minV = a*v0[0] - b*v0[1];maxV = a*v1[0] - b*v1[1]; if(maxV<minV) std::swap(minV,maxV); rad = (fa + fb) * boxhalfsize;if(minV>rad || maxV<-rad) return 0;
+#define AXISTEST_Z12(a, b, fa, fb) minV = a*v1[0] - b*v1[1]; maxV = a*v2[0] - b*v2[1]; if (maxV<minV) std::swap(minV,maxV); rad = fa * boxhalfSize.x + fb * boxhalfSize.y; if (minV>rad || maxV<-rad) return 0;
+#define AXISTEST_Z0(a, b, fa, fb) minV = a*v0[0] - b*v0[1]; maxV = a*v1[0] - b*v1[1]; if (maxV<minV) std::swap(minV,maxV); rad = fa * boxhalfSize.x + fb * boxhalfSize.y; if (minV>rad || maxV<-rad) return 0;
 
 using namespace CCLib;
 
@@ -91,32 +91,7 @@ void CCMiscTools::EnlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
 
 /**** tribox3.c *****/
 
-bool planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3], PointCoordinateType maxbox)	// -NJMP-
-{
-	PointCoordinateType vmin[3],vmax[3];
-	for (int q=0; q<=2; q++)
-	{
-		if (normal[q] > 0)
-		{
-			vmin[q] = -maxbox - vert[q];
-			vmax[q] =  maxbox - vert[q];
-		}
-		else
-		{
-			vmin[q] =  maxbox - vert[q];
-			vmax[q] = -maxbox - vert[q];
-		}
-	}
-
-	if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmin) > 0)
-		return false;
-	if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmax) >= 0)
-		return true;
-
-	return false;
-}
-
-bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateType boxhalfsize, const CCVector3* triverts[3])
+bool CCMiscTools::TriBoxOverlap(const CCVector3& boxcenter, const CCVector3& boxhalfSize, const CCVector3* triverts[3])
 {
 	/*    use separating axis theorem to test overlap between triangle and box */
 	/*    need to test for overlap in these directions: */
@@ -128,9 +103,9 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 
 	/* move everything so that the boxcenter is in (0,0,0) */
 	PointCoordinateType v0[3],v1[3],v2[3];
-	CCVector3::vsubstract(triverts[0]->u,boxcenter,v0);
-	CCVector3::vsubstract(triverts[1]->u,boxcenter,v1);
-	CCVector3::vsubstract(triverts[2]->u,boxcenter,v2);
+	CCVector3::vsubstract(triverts[0]->u, boxcenter.u, v0);
+	CCVector3::vsubstract(triverts[1]->u, boxcenter.u, v1);
+	CCVector3::vsubstract(triverts[2]->u, boxcenter.u, v2);
 
 	PointCoordinateType e0[3];
 	CCVector3::vsubstract(v1,v0,e0);      /* compute triangle edge 0 */
@@ -182,17 +157,17 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 
 	/* test in 0-direction */
 	FINDMINMAX(v0[0],v1[0],v2[0],minV,maxV);
-	if (minV>boxhalfsize || maxV<-boxhalfsize)
+	if (minV>boxhalfSize.x || maxV<-boxhalfSize.x)
 		return false;
 
 	/* test in 1-direction */
 	FINDMINMAX(v0[1],v1[1],v2[1],minV,maxV);
-	if (minV>boxhalfsize || maxV<-boxhalfsize)
+	if (minV>boxhalfSize.y || maxV<-boxhalfSize.y)
 		return false;
 
 	/* test in 2-direction */
 	FINDMINMAX(v0[2],v1[2],v2[2],minV,maxV);
-	if (minV>boxhalfsize || maxV<-boxhalfsize)
+	if (minV>boxhalfSize.z || maxV<-boxhalfSize.z)
 		return false;
 
 	/* Bullet 2: */
@@ -201,46 +176,172 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 
 	//PointCoordinateType normal[3];
 	CCVector3::vcross(e0,e1,/*normal*/e2); //DGM: we use 'e2' instead of 'normal' to save heap memory
-	//if (!planeBoxOverlap(/*normal*/e2,v0,boxhalfsize))
-	//    return false;
-	//DGM: instead, we place the 'planeBoxOverlap' code directly here!
-	//int planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3], PointCoordinateType maxbox)	// -NJMP-
 	{
 		//PointCoordinateType vmin[3],vmax[3]; //DGM: we use e0 and e1 instead of vmin and vmax
 		if (/*normal*/e2[0]>0)
 		{
-			/*vmin*/e0[0] = -boxhalfsize - v0[0];
-			/*vmax*/e1[0] =  boxhalfsize - v0[0];
+			/*vmin*/e0[0] = -boxhalfSize.x - v0[0];
+			/*vmax*/e1[0] =  boxhalfSize.x - v0[0];
 		}
 		else
 		{
-			/*vmin*/e0[0] =  boxhalfsize - v0[0];
-			/*vmax*/e1[0] = -boxhalfsize - v0[0];
+			/*vmin*/e0[0] =  boxhalfSize.x - v0[0];
+			/*vmax*/e1[0] = -boxhalfSize.x - v0[0];
 		}
 		if (/*normal*/e2[1]>0)
 		{
-			/*vmin*/e0[1] = -boxhalfsize - v0[1];
-			/*vmax*/e1[1] =  boxhalfsize - v0[1];
+			/*vmin*/e0[1] = -boxhalfSize.y - v0[1];
+			/*vmax*/e1[1] =  boxhalfSize.y - v0[1];
 		}
 		else
 		{
-			/*vmin*/e0[1] =  boxhalfsize - v0[1];
-			/*vmax*/e1[1] = -boxhalfsize - v0[1];
+			/*vmin*/e0[1] =  boxhalfSize.y - v0[1];
+			/*vmax*/e1[1] = -boxhalfSize.y - v0[1];
 		}
 		if (/*normal*/e2[2]>0)
 		{
-			/*vmin*/e0[2] = -boxhalfsize - v0[2];
-			/*vmax*/e1[2] =  boxhalfsize - v0[2];
+			/*vmin*/e0[2] = -boxhalfSize.z - v0[2];
+			/*vmax*/e1[2] =  boxhalfSize.z - v0[2];
 		}
 		else
 		{
-			/*vmin*/e0[2] =  boxhalfsize - v0[2];
-			/*vmax*/e1[2] = -boxhalfsize - v0[2];
+			/*vmin*/e0[2] =  boxhalfSize.z - v0[2];
+			/*vmax*/e1[2] = -boxhalfSize.z - v0[2];
 		}
 
-		if (	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmin*/e0) > 0
-			||	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmax*/e1) < 0)
+		if (   CCVector3::vdot(/*normal*/e2,/*vmin*/e0) > 0
+			|| CCVector3::vdot(/*normal*/e2,/*vmax*/e1) < 0)
+		{
 			return false;
+		}
+	}
+
+	return true;   /* box and triangle overlaps */
+}
+
+bool CCMiscTools::TriBoxOverlapd(const CCVector3d& boxcenter, const CCVector3d& boxhalfSize, const CCVector3d triverts[3])
+{
+	/*    use separating axis theorem to test overlap between triangle and box */
+	/*    need to test for overlap in these directions: */
+	/*    1) the {X,Y,Z}-directions (actually, since we use the AABB of the triangle */
+	/*       we do not even need to test these) */
+	/*    2) normal of the triangle */
+	/*    3) crossproduct(edge from tri, {X,Y,Z}-direction) */
+	/*       this gives 3x3=9 more tests */
+
+	/* move everything so that the boxcenter is in (0,0,0) */
+	double v0[3], v1[3], v2[3];
+	CCVector3d::vsubstract(triverts[0].u, boxcenter.u, v0);
+	CCVector3d::vsubstract(triverts[1].u, boxcenter.u, v1);
+	CCVector3d::vsubstract(triverts[2].u, boxcenter.u, v2);
+
+	double e0[3];
+	CCVector3d::vsubstract(v1, v0, e0);      /* compute triangle edge 0 */
+
+	/* Bullet 3: */
+
+	/*  test the 9 tests first (this was faster) */
+	double rad, fex, fey, fez;		// -NJMP- "d" local variable removed
+	//fex = fabs(e0[0]);
+	fey = fabs(e0[1]);
+	fez = fabs(e0[2]);
+
+	double minV, maxV;
+	AXISTEST_X01(e0[2], e0[1], fez, fey);
+	fex = fabs(e0[0]); //DGM: not necessary before!
+	AXISTEST_Y02(e0[2], e0[0], fez, fex);
+	AXISTEST_Z12(e0[1], e0[0], fey, fex);
+
+	double e1[3];
+	CCVector3d::vsubstract(v2, v1, e1);      /* compute triangle edge 1 */
+
+	//fex = fabs(e1[0]);
+	fey = fabs(e1[1]);
+	fez = fabs(e1[2]);
+
+	AXISTEST_X01(e1[2], e1[1], fez, fey);
+	fex = fabs(e1[0]); //DGM: not necessary before!
+	AXISTEST_Y02(e1[2], e1[0], fez, fex);
+	AXISTEST_Z0(e1[1], e1[0], fey, fex);
+
+	double e2[3];
+	CCVector3d::vsubstract(v0, v2, e2);      /* compute triangle edge 2 */
+
+	//fex = fabs(e2[0]);
+	fey = fabs(e2[1]);
+	fez = fabs(e2[2]);
+
+	AXISTEST_X2(e2[2], e2[1], fez, fey);
+	fex = fabs(e2[0]); //DGM: not necessary before!
+	AXISTEST_Y1(e2[2], e2[0], fez, fex);
+	AXISTEST_Z12(e2[1], e2[0], fey, fex);
+
+	/* Bullet 1: */
+
+	/*  first test overlap in the {X,Y,Z}-directions */
+	/*  find minV, maxV of the triangle each direction, and test for overlap in */
+	/*  that direction -- this is equivalent to testing a minimal AABB around */
+	/*  the triangle against the AABB */
+
+	/* test in 0-direction */
+	FINDMINMAX(v0[0], v1[0], v2[0], minV, maxV);
+	if (minV>boxhalfSize.x || maxV<-boxhalfSize.x)
+		return false;
+
+	/* test in 1-direction */
+	FINDMINMAX(v0[1], v1[1], v2[1], minV, maxV);
+	if (minV>boxhalfSize.y || maxV<-boxhalfSize.y)
+		return false;
+
+	/* test in 2-direction */
+	FINDMINMAX(v0[2], v1[2], v2[2], minV, maxV);
+	if (minV>boxhalfSize.z || maxV<-boxhalfSize.z)
+		return false;
+
+	/* Bullet 2: */
+	/*  test if the box intersects the plane of the triangle */
+	/*  compute plane equation of triangle: normal*0+d=0 */
+
+	//double normal[3];
+	CCVector3d::vcross(e0, e1,/*normal*/e2); //DGM: we use 'e2' instead of 'normal' to save heap memory
+	{
+		//double vmin[3],vmax[3]; //DGM: we use e0 and e1 instead of vmin and vmax
+		if (/*normal*/e2[0]>0)
+		{
+			/*vmin*/e0[0] = -boxhalfSize.x - v0[0];
+			/*vmax*/e1[0] = boxhalfSize.x - v0[0];
+		}
+		else
+		{
+			/*vmin*/e0[0] = boxhalfSize.x - v0[0];
+			/*vmax*/e1[0] = -boxhalfSize.x - v0[0];
+		}
+		if (/*normal*/e2[1]>0)
+		{
+			/*vmin*/e0[1] = -boxhalfSize.y - v0[1];
+			/*vmax*/e1[1] = boxhalfSize.y - v0[1];
+		}
+		else
+		{
+			/*vmin*/e0[1] = boxhalfSize.y - v0[1];
+			/*vmax*/e1[1] = -boxhalfSize.y - v0[1];
+		}
+		if (/*normal*/e2[2]>0)
+		{
+			/*vmin*/e0[2] = -boxhalfSize.z - v0[2];
+			/*vmax*/e1[2] = boxhalfSize.z - v0[2];
+		}
+		else
+		{
+			/*vmin*/e0[2] = boxhalfSize.z - v0[2];
+			/*vmax*/e1[2] = -boxhalfSize.z - v0[2];
+		}
+
+		if (   CCVector3d::vdot(/*normal*/e2,/*vmin*/e0) > 0
+			|| CCVector3d::vdot(/*normal*/e2,/*vmax*/e1) < 0)
+		{
+			return false;
+		}
 	}
 
 	return true;   /* box and triangle overlaps */

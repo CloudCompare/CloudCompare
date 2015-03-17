@@ -236,12 +236,7 @@ void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArr
 	{
 		for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 		{
-			ccHObject* entity = *p;
-
-			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-				ccHObjectCaster::ToGenericPointCloud(entity)->unallocateVisibilityArray();
-			else if (entity->isKindOf(CC_TYPES::MESH))
-				ccHObjectCaster::ToGenericMesh(entity)->getAssociatedCloud()->unallocateVisibilityArray();
+			ccHObjectCaster::ToGenericPointCloud(*p)->unallocateVisibilityArray();
 		}
 	}
 
@@ -275,14 +270,11 @@ void ccGraphicalSegmentationTool::reset()
 	{
 		for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 		{
-			if ((*p)->isKindOf(CC_TYPES::POINT_CLOUD))
-				ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
-			else if ((*p)->isKindOf(CC_TYPES::MESH))
-				ccHObjectCaster::ToGenericMesh(*p)->getAssociatedCloud()->resetVisibilityArray();
+			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
 		}
 
 		if (m_associatedWin)
-			m_associatedWin->redraw();
+			m_associatedWin->redraw(false);
 		m_somethingHasChanged = false;
 	}
 
@@ -446,7 +438,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
@@ -529,7 +521,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccGraphicalSegmentationTool::closeRectangle()
@@ -558,7 +550,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccGraphicalSegmentationTool::closePolyLine(int, int)
@@ -589,7 +581,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	allowPolylineExport(m_segmentationPoly->size() > 1);
 
 	if (m_associatedWin)
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw(true);
 }
 
 void ccGraphicalSegmentationTool::segmentIn()
@@ -707,7 +699,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-	m_associatedWin->redraw();
+	m_associatedWin->redraw(state);
 }
 
 void ccGraphicalSegmentationTool::doSetPolylineSelection()
@@ -779,7 +771,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				if (QMessageBox::question(m_associatedWin,"Associated viewport","The selected polyline has an associated viewport: do you want to apply it?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 				{
 					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject*>(viewports.front())->getParameters());
-					m_associatedWin->redraw();
+					m_associatedWin->redraw(false);
 				}
 			}
 
@@ -830,7 +822,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				}
 
 				if (m_associatedWin)
-					m_associatedWin->updateGL();
+					m_associatedWin->redraw(true);
 			}
 			else
 			{

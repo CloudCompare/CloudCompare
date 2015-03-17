@@ -20,7 +20,6 @@
 //Qt
 #include <QMessageBox>
 #include <QApplication>
-#include <QProgressDialog>
 #include <QFileInfo>
 #include <QtConcurrentRun>
 
@@ -159,8 +158,10 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	QProgressDialog pDlg(QString("Please wait... saving in progress"),QString(),0,0);
-	pDlg.setWindowTitle("BIN file");
+	ccProgressDialog pDlg(false);
+	pDlg.setMethodTitle("BIN file");
+	pDlg.setInfo("Please wait... saving in progress");
+	pDlg.setRange(0,0);
 	pDlg.setModal(true);
 	pDlg.show();
 
@@ -363,8 +364,10 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		if (parameters.alwaysDisplayLoadDialog)
 		{
-			QProgressDialog pDlg(QString("Loading: %1").arg(QFileInfo(filename).fileName()),QString(),0,0/*static_cast<int>(in.size())*/);
-			pDlg.setWindowTitle("BIN file");
+			ccProgressDialog pDlg(false);
+			pDlg.setMethodTitle("BIN file");
+			pDlg.setInfo(qPrintable(QString("Loading: %1").arg(QFileInfo(filename).fileName())));
+			pDlg.setRange(0,0);
 			pDlg.show();
 
 			//concurrent call in a separate thread

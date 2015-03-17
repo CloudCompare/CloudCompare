@@ -93,7 +93,7 @@ ccRegistrationDlg::~ccRegistrationDlg()
 		dataEntity->prepareDisplayForRefresh_recursive();
 	}
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccRegistrationDlg::saveParameters() const
@@ -216,7 +216,7 @@ void ccRegistrationDlg::setColorsAndLabels()
 	dataEntity->setTempColor(ccColor::red);
 	dataEntity->prepareDisplayForRefresh_recursive();
 
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccRegistrationDlg::swapModelAndData()

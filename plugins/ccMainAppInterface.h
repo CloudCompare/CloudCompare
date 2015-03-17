@@ -88,12 +88,15 @@ public:
 	virtual ccHObject* dbRootObject() = 0;
 
 	//! Forces redraw of all GL windows
-	virtual void redrawAll() = 0;
+	/** \param only2D whether to redraw everything (false) or only the 2D layer (true)
+	**/
+	virtual void redrawAll(bool only2D = false) = 0;
 
 	//! Redraws all GL windows that have the 'refresh' flag on
 	/** See ccGLWindow::toBeRefreshed and ccDrawableObject::prepareDisplayForRefresh.
+		\param only2D whether to redraw everything (false) or only the 2D layer (true)
 	**/
-	virtual void refreshAll() = 0;
+	virtual void refreshAll(bool only2D = false) = 0;
 
 	//! Enables all GL windows
 	virtual void enableAll() = 0;
@@ -116,6 +119,13 @@ public:
 
 	//! Returns color scale manager (unique instance)
 	virtual ccColorScalesManager* getColorScalesManager() = 0;
+
+	//! Spawns an histogram dialog
+	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
+										double minVal,
+										double maxVal,
+										QString title,
+										QString xAxisLabel ) = 0;
 
 	//other usefull methods
 	virtual void setFrontView() = 0;

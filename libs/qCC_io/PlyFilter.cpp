@@ -21,7 +21,6 @@
 #include "PlyOpenDlg.h"
 
 //Qt
-#include <QProgressDialog>
 #include <QImage>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -36,6 +35,7 @@
 #include <ccPointCloud.h>
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
+#include <ccProgressDialog.h>
 
 //System
 #include <string.h>
@@ -1409,10 +1409,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 	}
 
-	QProgressDialog pDlg(QString("Loading in progress..."),QString(),0,0);
+	ccProgressDialog pDlg(false);
 	if (parameters.alwaysDisplayLoadDialog)
 	{
-		pDlg.setWindowTitle("PLY file");
+		pDlg.setInfo("Loading in progress...");
+		pDlg.setMethodTitle("PLY file");
+		pDlg.setRange(0,0);
 		pDlg.show();
 		QApplication::processEvents();
 	}

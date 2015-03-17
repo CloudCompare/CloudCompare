@@ -101,7 +101,7 @@ public:
 	static void GetGLWindows(std::vector<ccGLWindow*>& glWindows);
 
 	//! Static shortcut to MainWindow::refreshAll
-	static void RefreshAllGLWindow();
+	static void RefreshAllGLWindow(bool only2D = false);
 
 	//! Static shortcut to MainWindow::updateUI
 	static void UpdateUI();
@@ -136,6 +136,7 @@ public:
 	inline virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator();
 	virtual ccColorScalesManager* getColorScalesManager();
+	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel);
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
@@ -227,11 +228,11 @@ protected slots:
 
 	//inherited from ccMainAppInterface
 	virtual void freezeUI(bool state);
-	virtual void redrawAll();
+	virtual void redrawAll(bool only2D = false);
+	virtual void refreshAll(bool only2D = false);
 	virtual void enableAll();
 	virtual void disableAll();
 	virtual void disableAllBut(ccGLWindow* win);
-	virtual void refreshAll();
 	virtual void updateUI();
 	virtual void setFrontView();
 	virtual void setBottomView();

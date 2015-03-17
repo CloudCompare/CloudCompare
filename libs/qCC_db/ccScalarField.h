@@ -205,6 +205,9 @@ public:
 	//! Returns modification flag state
 	bool getModificationFlag() const { return m_modified; }
 
+	//! Imports the parameters from another scalar field
+	void importParametersFrom(const ccScalarField* sf);
+
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
 	virtual bool toFile(QFile& out) const;

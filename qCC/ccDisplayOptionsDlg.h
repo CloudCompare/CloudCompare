@@ -77,7 +77,9 @@ signals:
 		void changeLabelMarkerColor();
 		void changeBackgroundGradient();
 		void changeMeshDecimation();
+		void changeMaxMeshSize(double);
 		void changeCloudDecimation();
+		void changeMaxCloudSize(double);
 		void changeVBOUsage();
 		void changeCrossDisplayed();
 		void changeOpenGLPicking();

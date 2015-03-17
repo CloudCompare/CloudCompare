@@ -30,6 +30,7 @@
 #include <QColor>
 #include <QTime>
 #include <QThread>
+#include <QTextStream>
 
 //system
 #include <assert.h>
@@ -62,7 +63,13 @@ ccConsole::ccConsole()
 	: m_textDisplay(0)
 	, m_parentWidget(0)
 	, m_parentWindow(0)
+	, m_logStream(0)
 {
+}
+
+ccConsole::~ccConsole()
+{
+	setLogFile(QString()); //to close/delete any active stream
 }
 
 void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
@@ -71,12 +78,16 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 {
 	ccConsole* console = TheInstance();
 	assert(console);
+
 	console->m_textDisplay = textDisplay;
 	console->m_parentWidget = parentWidget;
 	console->m_parentWindow = parentWindow;
+
+	//auto-start
 	if (textDisplay)
-		//auto-start
+	{
 		console->setAutoRefresh(true);
+	}
 }
 
 void ccConsole::setAutoRefresh(bool state)
@@ -97,55 +108,64 @@ void ccConsole::refresh()
 {
 	m_mutex.lock();
 	
-	if (m_textDisplay && !m_queue.isEmpty())
+	if ((m_textDisplay || m_logStream) && !m_queue.isEmpty())
 	{
-		for (QVector<ConsoleItemType>::const_iterator it = m_queue.begin(); it!=m_queue.end(); ++it)
+		for (QVector<ConsoleItemType>::const_iterator it=m_queue.begin(); it!=m_queue.end(); ++it)
 		{
-			QListWidgetItem* item = new QListWidgetItem(it->first); //first = message text
-
-			//set color based on the message severity
-			Qt::GlobalColor color = Qt::black;
-			switch (it->second) //second = message severity
-			{
-			case LOG_STANDARD:
-				//color = Qt::black;
-				break;
-#ifdef _DEBUG
-			case LOG_STANDARD_DEBUG:
-#endif
-				color = Qt::blue;
-				break;
-			case LOG_WARNING:	
-#ifdef _DEBUG
-			case LOG_WARNING_DEBUG:
-#endif
-				color = Qt::darkRed;
-				//we also force the console visibility if a warning message arrives!
-				if (m_parentWindow)
-					m_parentWindow->forceConsoleDisplay();
-				break;
-			case LOG_ERROR:	
-#ifdef _DEBUG
-			case LOG_ERROR_DEBUG:
-#endif
-				color = Qt::red;
-				break;
-			default:
+			 //it->second = message severity
+			bool debugMessage = (it->second & LOG_DEBUG);
 #ifndef _DEBUG
-				//skip debug message in debug mode
+			//skip debug message in release mode
+			if (debugMessage)
 				continue;
-#else
-				//we shoudn't fall here in debug mode!
-				assert(false);
-				break;
 #endif
-			}
-			item->setForeground(color);
 
-			m_textDisplay->addItem(item);
+			//destination: log file
+			if (m_logStream)
+			{
+				*m_logStream << it->first << endl;
+			}
+
+			//destination: console widget
+			if (m_textDisplay)
+			{
+				//it->first = message text
+				QListWidgetItem* item = new QListWidgetItem(it->first);
+
+				//set color based on the message severity
+				//Error
+				if (it->second & LOG_ERROR)
+				{
+					item->setForeground(Qt::red);
+				}
+				//Warning
+				else if (it->second & LOG_WARNING)
+				{
+					item->setForeground(Qt::darkRed);
+					//we also force the console visibility if a warning message arrives!
+					if (m_parentWindow)
+						m_parentWindow->forceConsoleDisplay();
+				}
+				//Standard
+				else
+				{
+#ifdef _DEBUG
+					if (debugMessage)
+						item->setForeground(Qt::blue);
+					else
+#endif
+						item->setForeground(Qt::black);
+				}
+
+				m_textDisplay->addItem(item);
+			}
 		}
 
-		m_textDisplay->scrollToBottom();
+		if (m_logStream)
+			m_logFile.flush();
+
+		if (m_textDisplay)
+			m_textDisplay->scrollToBottom();
 	}
 
 	m_queue.clear();
@@ -153,9 +173,15 @@ void ccConsole::refresh()
 	m_mutex.unlock();
 }
 
-void ccConsole::displayMessage(const QString& message, MessageLevel level)
+void ccConsole::displayMessage(const QString& message, int level)
 {
-	QString formatedMessage = QString("[")+QTime::currentTime().toString()+QString("] ")+message;
+#ifndef _DEBUG
+	//skip debug messages in release mode
+	if (level & LOG_DEBUG)
+		return;
+#endif
+
+	QString formatedMessage = QString("[") + QTime::currentTime().toString() + QString("] ") + message;
 
 	if (m_textDisplay)
 	{
@@ -166,35 +192,75 @@ void ccConsole::displayMessage(const QString& message, MessageLevel level)
 #ifdef _DEBUG
 	else
 	{
-		switch(level)
+		//Error
+		if (level & LOG_ERROR)
 		{
-		case LOG_STANDARD:
-			printf("MSG: ");
-			break;
-		case LOG_STANDARD_DEBUG:
-			printf("MSG-DBG: ");
-			break;
-		case LOG_WARNING:	
-			printf("WARNING: ");
-			break;
-		case LOG_WARNING_DEBUG:
-			printf("WARNING-DBG: ");
-			break;
-		case LOG_ERROR:	
-			printf("ERROR: ");
-			break;
-		case LOG_ERROR_DEBUG:
-			printf("ERROR-DBG: ");
-			break;
+			if (level & LOG_DEBUG)
+				printf("ERR-DBG: ");
+			else
+				printf("ERR: ");
+		}
+		//Warning
+		else if (level & LOG_WARNING)
+		{
+			if (level & LOG_DEBUG)
+				printf("WARN-DBG: ");
+			else
+				printf("WARN: ");
+		}
+		//Standard
+		else
+		{
+			if (level & LOG_DEBUG)
+				printf("MSG-DBG: ");
+			else
+				printf("MSG: ");
 		}
 		printf(" %s\n",qPrintable(formatedMessage));
 	}
 #endif
 
-	if (m_parentWidget && (level==LOG_ERROR || level==LOG_ERROR_DEBUG))
+	//we display the error messages in a popup dialog
+	if (	(level & LOG_ERROR)
+		&&	qApp
+		&&	m_parentWidget
+		&&	QThread::currentThread() == qApp->thread()
+		)
 	{
-		//we display error message in a popup dialog
-		if( qApp && QThread::currentThread() == qApp->thread() )
-			QMessageBox::warning(m_parentWidget, "Error", message);
+		QMessageBox::warning(m_parentWidget, "Error", message);
 	}
+}
+
+bool ccConsole::setLogFile(QString filename)
+{
+	//close previous stream (if any)
+	if (m_logStream)
+	{
+		m_mutex.lock();
+		delete m_logStream;
+		m_logStream = 0;
+		m_mutex.unlock();
+
+		if (m_logFile.isOpen())
+		{
+			m_logFile.close();
+		}
+	}
+	
+	if (!filename.isEmpty())
+	{
+		m_logFile.setFileName(filename);
+		if (!m_logFile.open(QFile::Text| QFile::WriteOnly))
+		{
+			return Error(QString("[Console] Failed to open/create log file '%1'").arg(filename));
+		}
+
+		m_mutex.lock();
+		m_logStream = new QTextStream(&m_logFile);
+		m_mutex.unlock();
+		setAutoRefresh(true);
+	}
+
+
+	return true;
 }

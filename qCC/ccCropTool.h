@@ -1,8 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                   CLOUDCOMPARE LIGHT VIEWER                            #
-//#                                                                        #
-//#  This project has been initiated under funding from ANR/CIFRE          #
+//#                            CLOUDCOMPARE                                #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -13,37 +11,34 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCVIEWER_LOG_H
-#define CCVIEWER_LOG_H
-
-//Qt
-#include <QMessageBox>
-#include <QMainWindow>
+#ifndef CC_CROP_TOOL_HEADER
+#define CC_CROP_TOOL_HEADER
 
 //qCC_db
-#include <ccLog.h>
+#include <ccBBox.h>
 
-//! Minimalist logger (only displays error messages)
-class ccViewerLog : public ccLog
+class ccHObject;
+class ccGLMatrix;
+
+//! Cropping tool
+/** Handles clouds and meshes for now
+**/
+class ccCropTool
 {
 public:
-	//! Default constructor
-	ccViewerLog(QMainWindow* parentWindow = 0) : ccLog(), m_parentWindow(parentWindow) {}
+	//! Crops the input entity
+	/** \param entity entity to be cropped (should be a cloud or a mesh)
+		\param box cropping box
+		\param inside whether to keep the points/triangles inside or outside the input box
+		\param meshRotation optional rotation (for meshes only)
+		\return cropped entity (if any)
+	**/
+	static ccHObject* Crop(ccHObject* entity, const ccBBox& box, bool inside = true, const ccGLMatrix* meshRotation = 0);
 
-protected:
-	//inherited from ccLog
-	virtual void displayMessage(const QString& message, int level)
-	{
-		if (level & LOG_ERROR)
-			QMessageBox::warning(m_parentWindow, "Error", message);
-	}
-
-	//! Associated window
-	QMainWindow* m_parentWindow;
 };
 
-#endif // CCVIEWER_LOG_H
+#endif //CC_CROP_TOOL_HEADER

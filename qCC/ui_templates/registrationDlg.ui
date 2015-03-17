@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>491</height>
+    <height>567</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -474,16 +474,24 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxUseModelSFAsWeights">
+          <widget class="QCheckBox" name="checkBoxUseDataSFAsWeights">
+           <property name="toolTip">
+            <string>Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).
+Note that only absolute distances are considered (i.e. minimal weight is 0).</string>
+           </property>
            <property name="text">
-            <string>Use displayed model scalar field as weights</string>
+            <string>Data: use displayed S.F. as weights</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxUseDataSFAsWeights">
+          <widget class="QCheckBox" name="checkBoxUseModelSFAsWeights">
+           <property name="toolTip">
+            <string>Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).
+Note that only absolute distances are considered (i.e. minimal weight is 0).</string>
+           </property>
            <property name="text">
-            <string>Use displayed data scalar field as weights</string>
+            <string>Model: use displayed S.F. as weights</string>
            </property>
           </widget>
          </item>

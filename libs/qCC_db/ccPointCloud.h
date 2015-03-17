@@ -42,6 +42,11 @@ class ccScalarField;
 class ccPolyline;
 class QGLBuffer;
 
+//! Maximum number of points (per cloud) displayed in a single LOD iteration
+/** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+**/
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK * 10; //~ 650K
+
 /***************************************************
 				ccPointCloud
 ***************************************************/
@@ -52,9 +57,6 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD =  128000000;
 #else //CC_ENV_64 (but maybe CC_ENV_128 one day ;)
 const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it below MAX_INT to avoid probable issues ;)
 #endif
-
-//! Max number of displayed point (per entity) in "low detail" display
-const unsigned MAX_LOD_POINTS_NUMBER = 10000000;
 
 //! A 3D cloud and its associated features (color, normals, scalar fields, etc.)
 /** A point cloud can have multiple features:
@@ -94,8 +96,9 @@ public:
 		As the GenericIndexedCloud interface is very simple, only points are imported.
 		Note: throws an 'int' exception in case of error (see CTOR_ERRORS)
 		\param cloud a GenericIndexedCloud structure
+		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud);
+	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud = 0);
 
 	//! Creates a new point cloud object from a GenericCloud
 	/** "GenericCloud" is a very simple and light interface from CCLib. It is
@@ -105,8 +108,9 @@ public:
 		As the GenericCloud interface is very simple, only points are imported.
 		Note: throws an 'int' exception in case of error (see CTOR_ERRORS)
 		\param cloud a GenericCloud structure
+		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(CCLib::GenericCloud* cloud);
+	static ccPointCloud* From(CCLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud = 0);
 
 	//! Warnings for the partialClone method (bit flags)
 	enum CLONE_WARNINGS {	WRN_OUT_OF_MEM_FOR_COLORS		= 1,
@@ -583,11 +587,86 @@ protected: // VBO
 	//! Set of VBOs attached to this cloud
 	vboSet m_vboManager;
 
+	//per-block data transfer to the GPU (VBO or standard mode)
 	void glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer    (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 
+public: //Level of Detail (LOD)
+
+	//! L.O.D. (Level of Detail) structure
+	struct LodStruct
+	{
+		//! Default constructor
+		LodStruct() : indexes(0), state(NOT_INITIALIZED) {}
+		//! Destructor
+		~LodStruct() { clear(); }
+
+		//! Clears the structure
+		void clear()
+		{
+			levels.clear();
+			if (indexes)
+			{
+				indexes->release();
+				indexes = 0;
+			}
+			state = NOT_INITIALIZED;
+		}
+
+		//! Returns whether the structure is initialized or not
+		inline bool isInitialized() const { return state == INITIALIZED; }
+
+		//! Returns whether the structure is broken or not
+		inline bool isBroken() const { return state == BROKEN; }
+
+		//! L.O.D. indexes set
+		typedef GenericChunkedArray<1,unsigned> IndexSet;
+		
+		//! L.O.D. indexes
+		/** Point indexes that should be displayed at each level of detail.
+		**/
+		IndexSet* indexes;
+
+		//! Level descriptor
+		struct LevelDesc
+		{
+			//! Default constructor
+			LevelDesc() : startIndex(0), count(0) {}
+			//! Constructor from a start index and a count value
+			LevelDesc(unsigned _startIndex, unsigned _count) : startIndex(_startIndex), count(_count) {}
+			//! Start index (refers to the 'indexes' table)
+			unsigned startIndex;
+			//! Index count for this level
+			unsigned count;
+		};
+
+		//! Actual levels
+		std::vector<LevelDesc> levels;
+
+		//! Structure initialization state
+		enum State { NOT_INITIALIZED, INITIALIZED, BROKEN };
+
+		//! State
+		State state;
+	};
+
+	//! Intializes the LOD structure
+	/** \return success
+	**/
+	bool initLOD(CCLib::GenericProgressCallback* progressCallback = 0);
+
+protected:
+
+	//per-block data transfer to the GPU (LOD)
+	void glLODChunkVertexPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+	void glLODChunkColorPointer (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+	void glLODChunkSFPointer    (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+	void glLODChunkNormalPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
+
+	//! L.O.D. structure
+	LodStruct m_lod;
 };
 
 #endif //CC_POINT_CLOUD_HEADER

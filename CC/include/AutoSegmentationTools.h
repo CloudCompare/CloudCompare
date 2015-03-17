@@ -91,7 +91,8 @@ public:
 		Warning: be sure to activate an OUTPUT scalar field on the input cloud
 		\param theCloud the point cloud to segment
 		\param minSeedDist the minimum value associated to the point where to start the propagation from ("security" value)
-		\param octreeLevel the octree level of subdivision where to apply the gridding (the greater it is, the smaller and numerous the segmented parts will be)
+		\param radius spherical neighborhood size (or 0 for automatic size)
+		\param octreeLevel level of subdivision where to apply the gridding (the greater it is, the smaller and numerous the segmented parts will be)
 		\param theSegmentedLists the segmented parts (as a list of subsets of points)
 		\param applyGaussianFilter to specify if a gaussian filter should be applied after computing the scalar field gradient (to smooth the results)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
@@ -101,6 +102,7 @@ public:
 	**/
 	static bool frontPropagationBasedSegmentation(	GenericIndexedCloudPersist* theCloud,
 													ScalarType minSeedDist,
+													PointCoordinateType radius,
 													uchar octreeLevel,
 													ReferenceCloudContainer& theSegmentedLists,
 													CCLib::GenericProgressCallback* progressCb = 0,

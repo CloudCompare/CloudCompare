@@ -1,7 +1,28 @@
 *** CloudCompare versions history ***
 
 v2.6.2 XX/XX/2015
--
+- New features:
+
+- Enhancements:
+	* Display:
+		- CloudCompare now supports 'Level Of Detail' (LoD) display for big clouds
+		- if enabled, the clouds are now displayed first at a low octree level when moved
+			and are then regularly refined when the user doesn't interact with them.
+	* New 'Display options':
+		- the user can now specify the minimal number of points and the minimal number of
+			triangles necessary to activate LoD/decimated display
+	* The 'Edit > Crop' and 'Tools > Segmentation > Cross Section' tools can now be applied on
+		triangular meshes. Moreover, the applied cut is clean (i.e. true re-meshing is performed
+		on the edges)
+	* Histogram dialog:
+		- new icon 'Export to CSV'
+	* Command line:
+		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
+		the command line (with a dedicated XML parameters file)
+		
+- Bug fixes:
+	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
+	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (integer part was applied instead)
 
 v2.6.1 02/20/2015
 - New features:

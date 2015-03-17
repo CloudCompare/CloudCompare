@@ -60,7 +60,7 @@ bool ccPointPickingGenericInterface::start()
 	m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
-	m_associatedWin->redraw();
+	m_associatedWin->redraw(true);
 
 	ccOverlayDialog::start();
 
@@ -74,7 +74,7 @@ void ccPointPickingGenericInterface::stop(bool state)
 		//deactivate "point picking mode" in all GL windows
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
-		m_associatedWin->redraw();
+		m_associatedWin->redraw(true);
 	}
 
 	ccOverlayDialog::stop(state);

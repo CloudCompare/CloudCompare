@@ -197,8 +197,11 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				unsigned destCount = subModelCloud->size();
 				if (model.weights->reserve(destCount))
 				{
-					for (unsigned i=0; i<destCount; ++i)
-						model.weights->addElement(inputModelWeights->getValue(subModelCloud->getPointGlobalIndex(i)));
+					for (unsigned i = 0; i < destCount; ++i)
+					{
+						unsigned pointIndex = subModelCloud->getPointGlobalIndex(i);
+						model.weights->addElement(inputModelWeights->getValue(pointIndex));
+					}
 					model.weights->computeMinAndMax();
 				}
 				else
@@ -243,8 +246,11 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				unsigned destCount = data.cloud->size();
 				if (data.weights->reserve(destCount))
 				{
-					for (unsigned i=0; i<destCount; ++i)
-						data.weights->addElement(inputDataWeights->getValue(data.cloud->getPointGlobalIndex(i)));
+					for (unsigned i = 0; i < destCount; ++i)
+					{
+						unsigned pointIndex = data.cloud->getPointGlobalIndex(i);
+						data.weights->addElement(inputDataWeights->getValue(pointIndex));
+					}
 					data.weights->computeMinAndMax();
 				}
 				else
@@ -458,13 +464,81 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			data = filteredData;
 		}
 
-		//we can compute the actual if registration (now that we have selected the points that will be used for registration!)
+		//update CPSet weights (if any)
+		if (model.weights)
 		{
-			//12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
-			double meanSquareError = ScalarFieldTools::computeMeanSquareScalarValue(data.cloud);
+			assert(model.CPSetWeights);
+			unsigned count = data.CPSet->size();
+
+			if (model.CPSetWeights->currentSize() != count
+				&& !model.CPSetWeights->resize(count))
+			{
+				//not enough memory to store weights
+				result = ICP_ERROR_NOT_ENOUGH_MEMORY;
+				break;
+			}
+			for (unsigned i = 0; i<count; ++i)
+			{
+				unsigned dataIndex = data.CPSet->getPointGlobalIndex(i);
+				model.CPSetWeights->setValue(i, model.weights->getValue(dataIndex));
+			}
+			model.CPSetWeights->computeMinAndMax();
+		}
+
+		//we can now compute the best registration transformation for this step
+		//(now that we have selected the points that will be used for registration!)
+		{
+			double meanSquareError = 0;
+			if (data.weights || model.CPSetWeights)
+			{
+				//if we have weights, we have to compute weighted RMS!!!
+				double meanSquareValue = 0.0;
+				//double wiMax = 0.0;
+				double wiSum = 0.0;
+				unsigned count = 0;
+
+				for (unsigned i = 0; i<data.cloud->size(); ++i)
+				{
+					ScalarType V = data.cloud->getPointScalarValue(i);
+					if (ScalarField::ValidValue(V))
+					{
+						double wi = 1.0;
+						if (data.weights)
+						{
+							ScalarType wd = data.weights->getValue(i);
+							if (!ScalarField::ValidValue(wd))
+								continue;
+							wi = wd;
+						}
+						if (model.CPSetWeights)
+						{
+							ScalarType wm = model.CPSetWeights->getValue(i);
+							if (!ScalarField::ValidValue(wm))
+								continue;
+							wi *= wm;
+						}
+						wi = fabs(wi);
+						//wiMax = std::max(wiMax, wi);
+						wiSum += wi;
+						
+						double Vd = static_cast<double>(V);
+						meanSquareValue += wi * Vd*Vd;
+						++count;
+					}
+				}
+
+				//meanSquareError = (wiMax != 0 ? static_cast<ScalarType>(meanSquareValue / (count*wiMax)) : 0);
+				meanSquareError = (wiSum != 0 ? static_cast<ScalarType>(meanSquareValue / wiSum) : 0);
+			}
+			else
+			{
+				//12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
+				meanSquareError = ScalarFieldTools::computeMeanSquareScalarValue(data.cloud);
+			}
+
 			if (meanSquareError < 0)
 			{
-				//en error occurred
+				//an error occurred
 				result = ICP_ERROR_DIST_COMPUTATION;
 				break;
 			}
@@ -513,7 +587,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				//should be better!
 				assert(deltaRMS >= 0.0);
 
-				//we update global transformation matrix
+				//we update the global transformation matrix
 				if (currentTrans.R.isValid())
 				{
 					if (transform.R.isValid())
@@ -568,28 +642,9 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			lastStepRMS = rms;
 		}
 
-		//update CPSet weights (if any)
-		if (model.weights)
-		{
-			assert(model.CPSetWeights);
-			unsigned count = data.CPSet->size();
-
-			if (	model.CPSetWeights->currentSize() != count
-				&&	!model.CPSetWeights->resize(count))
-			{
-				result = ICP_ERROR_REGISTRATION_STEP;
-				break;
-			}
-			for (unsigned i=0; i<count; ++i)
-			{
-				model.CPSetWeights->setValue(i,model.weights->getValue(data.CPSet->getPointGlobalIndex(i)));
-			}
-			model.CPSetWeights->computeMinAndMax();
-		}
-
 		//single iteration of the registration procedure
 		currentTrans = ScaledTransformation();
-		if (!RegistrationTools::RegistrationProcedure(data.cloud, data.CPSet, currentTrans, adjustScale, data.weights, model.weights))
+		if (!RegistrationTools::RegistrationProcedure(data.cloud, data.CPSet, currentTrans, adjustScale, data.weights, model.CPSetWeights))
 		{
 			result = ICP_ERROR_REGISTRATION_STEP;
 			break;
@@ -714,8 +769,8 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 	return sqrt(rms/(double)count);
 }
 
-bool RegistrationTools::RegistrationProcedure(	GenericCloud* P,
-												GenericCloud* X,
+bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
+												GenericCloud* X, //model
 												ScaledTransformation& trans,
 												bool adjustScale/*=false*/,
 												ScalarField* weightsP/*=0*/,
@@ -869,7 +924,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P,
 		PointCoordinateType bbMin[3],bbMax[3];
 		X->getBoundingBox(bbMin,bbMax);
 
-		//BBox dimensions
+		//bounding-box dimensions
 		PointCoordinateType dx = bbMax[0]-bbMin[0];
 		PointCoordinateType dy = bbMax[1]-bbMin[1];
 		PointCoordinateType dz = bbMax[2]-bbMin[2];
@@ -877,7 +932,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P,
 		//if the data cloud is equivalent to a single point (for instance
 		//it's the case when the two clouds are very far away from
 		//each other in the ICP process) we try to get the two clouds closer
-		if (fabs(dx)+fabs(dy)+fabs(dz) < ZERO_TOLERANCE)
+		if (fabs(dx) + fabs(dy) + fabs(dz) < ZERO_TOLERANCE)
 		{
 			trans.T = Gx - Gp*aPrioriScale;
 			return true;

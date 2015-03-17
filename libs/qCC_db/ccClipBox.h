@@ -44,7 +44,7 @@ public:
 	//! Sets associated entity
 	/** Warning: resets the current clipping box
 	**/
-	void setAssociatedEntity(ccHObject* associatedEntity);
+	bool setAssociatedEntity(ccHObject* associatedEntity);
 
 	//inherited from ccHObject
 	virtual ccBBox getOwnBB(bool withGLFeatures = false);

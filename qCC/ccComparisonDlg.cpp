@@ -309,7 +309,7 @@ void ccComparisonDlg::updateDisplay(bool showSF, bool showRef)
 	}
 
 	MainWindow::UpdateUI();
-	MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow(false);
 }
 
 bool ccComparisonDlg::isValid()

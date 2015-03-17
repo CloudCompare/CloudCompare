@@ -24,7 +24,6 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
-#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>
@@ -445,8 +444,11 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	int maxTriNormIndex = -1;
 
 	//progress dialog
-	QProgressDialog progressDlg("Loading OBJ file",QString(),0,0);
-	progressDlg.show();
+	ccProgressDialog pDlg(false);
+	pDlg.setMethodTitle("OBJ file");
+	pDlg.setInfo("Loading in progress...");
+	pDlg.setRange(0,0);
+	pDlg.show();
 	QApplication::processEvents();
 
 	//common warnings that can appear multiple time (we avoid to send too many messages to the console!)
@@ -466,7 +468,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	while (!currentLine.isNull())
 	{
 		if ((++lineCount % 4096) == 0)
-			progressDlg.setValue(static_cast<int>(lineCount>>12));
+			pDlg.setValue(static_cast<int>(lineCount>>12));
 
 		QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
 
@@ -1121,7 +1123,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		materials = 0;
 	}
 
-	progressDlg.close();
+	pDlg.close();
 
 	//potential warnings
 	if (objWarnings[DISCARED_GROUP])

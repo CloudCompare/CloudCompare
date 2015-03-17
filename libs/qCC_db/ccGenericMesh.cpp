@@ -145,11 +145,6 @@ unsigned* ccGenericMesh::GetWireVertexIndexes()
 	return s_vertWireIndexes;
 }
 
-unsigned ccGenericMesh::GET_MAX_LOD_FACES_NUMBER()
-{
-	return 2500000;
-}
-
 void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 {
 	if (MACRO_Draw2D(context))
@@ -199,8 +194,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 
 		//L.O.D.
-		bool lodEnabled = (triNum > GET_MAX_LOD_FACES_NUMBER() && context.decimateMeshOnMove && MACRO_LODActivated(context));
-		unsigned decimStep = (lodEnabled ? (unsigned)ceil((float)triNum*3 / (float)GET_MAX_LOD_FACES_NUMBER()) : 1);
+		bool lodEnabled = (triNum > context.minLODTriangleCount && context.decimateMeshOnMove && MACRO_LODActivated(context));
+		unsigned decimStep = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum*3) / context.minLODTriangleCount)) : 1);
 		unsigned displayedTriNum = triNum / decimStep;
 
 		//display parameters
@@ -730,6 +725,16 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	if (sampledCloud)
 	{
 		cloud = ccPointCloud::From(sampledCloud);
+
+		//import parameters from both the source vertices and the source mesh
+		ccGenericPointCloud* vertices = getAssociatedCloud();
+		if (vertices)
+		{
+			cloud->setGlobalShift(vertices->getGlobalShift());
+			cloud->setGlobalScale(vertices->getGlobalScale());
+		}
+		cloud->setGLTransformationHistory(getGLTransformationHistory());
+		
 		delete sampledCloud;
 		sampledCloud = 0;
 	}
@@ -831,4 +836,44 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		triIndices->release();
 
 	return cloud;
+}
+
+void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
+{
+	if (!mesh)
+	{
+		assert(false);
+		return;
+	}
+
+	//original shift & scale
+	//setGlobalShift(mesh->getGlobalShift());
+	//setGlobalScale(mesh->getGlobalScale());
+
+	//stippling
+	enableStippling(mesh->stipplingEnabled());
+	//wired style
+	showWired(mesh->isShownAsWire());
+	
+	//keep the transformation history!
+	setGLTransformationHistory(mesh->getGLTransformationHistory());
+	//and meta-data
+	setMetaData(mesh->metaData());
+}
+
+void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const
+{
+	CCLib::GenericTriangle* tri = const_cast<ccGenericMesh*>(this)->_getTriangle(triIndex);
+	const CCVector3 *A = tri->_getA();
+	const CCVector3 *B = tri->_getB();
+	const CCVector3 *C = tri->_getC();
+
+	//barcyentric intepolation weights
+	weights.x = sqrt(((P-*B).cross(*C-*B)).norm2d())/*/2*/;
+	weights.y = sqrt(((P-*C).cross(*A-*C)).norm2d())/*/2*/;
+	weights.z = sqrt(((P-*A).cross(*B-*A)).norm2d())/*/2*/;
+
+	//normalize weights
+	double sum = weights.x + weights.y + weights.z;
+	weights /= sum;
 }

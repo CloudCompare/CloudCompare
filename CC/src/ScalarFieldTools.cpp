@@ -33,6 +33,8 @@
 
 using namespace CCLib;
 
+static const int AVERAGE_NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION = 14;
+
 void ScalarFieldTools::SetScalarValueToNaN(const CCVector3& P, ScalarType& scalarValue)
 {
 	scalarValue = NAN_VALUE;
@@ -43,7 +45,12 @@ void ScalarFieldTools::SetScalarValueToZero(const CCVector3& P, ScalarType& scal
 	scalarValue = 0;
 }
 
-int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* theCloud, bool euclideanDistances, bool sameInAndOutScalarField, GenericProgressCallback* progressCb, DgmOctree* theCloudOctree)
+int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* theCloud,
+													PointCoordinateType radius,
+													bool euclideanDistances,
+													bool sameInAndOutScalarField/*=false*/,
+													GenericProgressCallback* progressCb/*=0*/,
+													DgmOctree* theCloudOctree/*=0*/)
 {
 	if (!theCloud)
         return -1;
@@ -59,7 +66,16 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
 		}
 	}
 
-	uchar octreeLevel = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
+	uchar octreeLevel = 0;
+	if (radius <= 0)
+	{
+		octreeLevel = theOctree->findBestLevelForAGivenPopulationPerCell(AVERAGE_NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
+		radius = theOctree->getCellSize(octreeLevel);
+	}
+	else
+	{
+		octreeLevel = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+	}
 
 	ScalarField* theGradientNorms = new ScalarField("gradient norms");
 	ScalarField* _theGradientNorms = 0;
@@ -90,7 +106,6 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
 	}
 
 	//structure contenant les parametres additionnels
-	PointCoordinateType radius = theOctree->getCellSize(octreeLevel);
 	void* additionalParameters[3] = {	static_cast<void*>(&euclideanDistances),
 										static_cast<void*>(&radius),
 										static_cast<void*>(_theGradientNorms)
@@ -99,16 +114,14 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
 	int result = 0;
 
 #ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtStartingLevel(octreeLevel,
+	if (theOctree->executeFunctionForAllCellsAtLevel(octreeLevel,
 #else
-	if (theOctree->executeFunctionForAllCellsAtStartingLevel_MT(octreeLevel,
+	if (theOctree->executeFunctionForAllCellsAtLevel_MT(octreeLevel,
 #endif
-															computeMeanGradientOnPatch,
-															additionalParameters,
-															NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION/2,
-															NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION*3,
-															progressCb,
-															"Gradient Computation")==0)
+														computeMeanGradientOnPatch,
+														additionalParameters,
+														progressCb,
+														"Gradient Computation") == 0)
 	{
 		//something went wrong
 		result = -5;
@@ -127,23 +140,22 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 													void** additionalParameters,
 													NormalizedProgress* nProgress/*=0*/)
 {
-	//variables additionnelles
+	//additional parameters
 	bool euclideanDistances			= *((bool*)additionalParameters[0]);
 	PointCoordinateType radius		= *((PointCoordinateType*)additionalParameters[1]);
 	ScalarField* theGradientNorms	= (ScalarField*)additionalParameters[2];
 
-	//nombre de points dans la cellule courante
+	//number of points inside the current cell
 	unsigned n = cell.points->size();
 
-	//structures pour la recherche de voisinages SPECIFIQUES
+	//spherical neighborhood extraction structure
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
-	//on connait deja les points de la premiere cellule
-	//(c'est la cellule qu'on est en train de traiter !)
+	//we already know the points inside the current cell
 	{
 		try
 		{
@@ -167,7 +179,6 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 	for (unsigned i=0; i<n; ++i)
 	{
 		ScalarType gN = NAN_VALUE;
-
 		ScalarType d1 = cell.points->getPointScalarValue(i);
 
         if (ScalarField::ValidValue(d1))
@@ -184,24 +195,24 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 				CCVector3d sum(0,0,0);
 				unsigned counter = 0;
 
-				//j=1 because the first point is the query point itself --> contribution = 0
+				//j = 1 because the first point is the query point itself --> contribution = 0
 				for (unsigned j=1; j<k; ++j)
 				{
 					ScalarType d2 = cloud->getPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex);
 					if (ScalarField::ValidValue(d2))
 					{
 						CCVector3 u = *nNSS.pointsInNeighbourhood[j].point - nNSS.queryPoint;
-						PointCoordinateType norm2 = u.norm2();
+						double norm2 = u.norm2d();
 
 						if (norm2 > ZERO_TOLERANCE)
 						{
-                            PointCoordinateType dd = static_cast<PointCoordinateType>(d2 - d1);
-							if (!euclideanDistances || dd*dd < static_cast<PointCoordinateType>(1.01) * norm2)
+                            double dd = d2 - d1;
+							if (!euclideanDistances || dd*dd < 1.01 * norm2)
 							{
 								dd /= norm2;
-								sum.x += static_cast<double>(u.x * dd); //warning: and here 'dd'=dd/norm2 ;)
-								sum.y += static_cast<double>(u.y * dd);
-								sum.z += static_cast<double>(u.z * dd);
+								sum.x += u.x * dd; //warning: and here 'dd'=dd/norm2 ;)
+								sum.y += u.y * dd;
+								sum.z += u.z * dd;
 								++counter;
 							}
 						}

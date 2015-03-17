@@ -72,10 +72,25 @@ struct glDrawContext
 	//! Default bounding-box color
 	ccColor::Rgbub bbDefaultCol;
 
-	//! Whether to decimate big clouds when rotating the camera
+	//! Whether to decimate big clouds when updating the 3D view
 	bool decimateCloudOnMove;
+	//! Minimum level for LOD display
+	unsigned char minLODLevel;
+	//! Minimum number of points for activating LOD display
+	unsigned minLODPointCount;
+	//! Current level for LOD display
+	unsigned char currentLODLevel;
+	//! Start index for current LOD level
+	unsigned currentLODStartIndex;
+	//! Wheter more points are available or not at the current level
+	bool moreLODPointsAvailable;
+	//! Wheter higher levels are available or not
+	bool higherLODLevelsAvailable;
+
 	//! Whether to decimate big meshes when rotating the camera
 	bool decimateMeshOnMove;
+	//! Minimum number of triangles for activating LOD display
+	unsigned minLODTriangleCount;
 
 	//! Currently displayed color scale (the corresponding scalar field in fact)
 	ccScalarField* sfColorScaleToDisplay;
@@ -119,7 +134,14 @@ struct glDrawContext
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
 		, bbDefaultCol(ccColor::yellow)
 		, decimateCloudOnMove(true)
+		, minLODLevel(11)
+		, minLODPointCount(10000000)
+		, currentLODLevel(0)
+		, currentLODStartIndex(0)
+		, moreLODPointsAvailable(false)
+		, higherLODLevelsAvailable(false)
 		, decimateMeshOnMove(true)
+		, minLODTriangleCount(2500000)
 		, sfColorScaleToDisplay(0)
 		, colorRampShader(0)
 		, customRenderingShader(0)

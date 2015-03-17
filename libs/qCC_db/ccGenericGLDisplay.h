@@ -32,6 +32,8 @@
 //CCLib
 #include <CCGeom.h>
 
+class QWidget;
+
 //! Standard parameters for GL displays/viewports
 class QCC_DB_LIB_API ccViewportParameters : public ccSerializableObject
 {
@@ -103,7 +105,7 @@ class ccGenericGLDisplay
 public:
 
 	//! Redraws display immediately
-	virtual void redraw() = 0;
+	virtual void redraw(bool only2D = false) = 0;
 
 	//! Flags display as 'to be refreshed'
 	/** See ccGenericGLDisplay::refresh.
@@ -113,8 +115,9 @@ public:
 	//! Redraws display only if flagged as 'to be refreshed'
 	/** See ccGenericGLDisplay::toBeRefreshed. Flag is turned
 		to false after a call to this method.
+		\param only2D whether to redraw everything (false) or only the 2D layer (true)
 	**/
-	virtual void refresh() = 0;
+	virtual void refresh(bool only2D = false) = 0;
 
 	//! Invalidates current viewport setup
 	/** On next redraw, viewport information will be recomputed.
@@ -212,6 +215,9 @@ public:
 											float ar = 1.0f,
 											bool viewerBasedPerspective = true,
 											bool bubbleViewMode = false) = 0;
+
+	//! Returns this window as a proper Qt widget
+	virtual QWidget* asWidget() { return 0; }
 
 };
 

@@ -558,7 +558,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 		uint32_t colorRampSteps = 0;
 		if (in.read((char*)&colorRampSteps,4) < 0)
 			return ReadError();
-		setColorRampSteps((unsigned)colorRampSteps);
+		setColorRampSteps(static_cast<unsigned>(colorRampSteps));
 	}
 
 	//update values
@@ -595,4 +595,24 @@ void ccScalarField::alwaysShowZero(bool state)
 {
 	m_alwaysShowZero = state;
 	m_modified = true;
+}
+
+void ccScalarField::importParametersFrom(const ccScalarField* sf)
+{
+	if (!sf)
+	{
+		assert(false);
+		return;
+	}
+
+	setColorRampSteps(sf->getColorRampSteps());
+	setColorScale(sf->getColorScale());
+	showNaNValuesInGrey(sf->areNaNValuesShownInGrey());
+	setLogScale(sf->logScale());
+	setSymmetricalScale(sf->symmetricalScale());
+	alwaysShowZero(sf->isZeroAlwaysShown());
+	setMinDisplayed(sf->displayRange().start());
+	setMaxDisplayed(sf->displayRange().stop());
+	setSaturationStart(sf->saturationRange().start());
+	setSaturationStop(sf->saturationRange().stop());
 }

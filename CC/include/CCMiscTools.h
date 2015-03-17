@@ -68,15 +68,25 @@ namespace CCLib
 										CCVector3d& X,
 										CCVector3d& Y);
 
-		//! Ovelap test between a 3D cubical box and a triangle
-		/** \param boxcenter the box center (as a 3 coordinates array)
-			\param boxhalfsize the box half size
-			\param triverts the 3 summits (as 3 arrays of 3 coordinates)
-			\return true if cube and triangle overlap, false otherwise
+		//! Ovelap test between a 3D box and a triangle
+		/** \param boxcenter the box center
+		\param boxhalfsize the box half dimenions
+		\param triverts the 3 triangle vertices
+		\return true if the input box and triangle overlap, false otherwise
 		**/
-		static bool TriBoxOverlap(	PointCoordinateType* boxcenter,
-									PointCoordinateType boxhalfsize,
-									const CCVector3* triverts[3]);
+		static bool TriBoxOverlap(const CCVector3& boxcenter,
+			const CCVector3& boxhalfsize,
+			const CCVector3* triverts[3]);
+
+		//! Ovelap test between a 3D box and a triangle (double version)
+		/** \param boxcenter the box center
+			\param boxhalfsize the box half dimenions
+			\param triverts the 3 triangle vertices
+			\return true if the input box and triangle overlap, false otherwise
+		**/
+		static bool TriBoxOverlapd(const CCVector3d& boxcenter,
+			const CCVector3d& boxhalfsize,
+			const CCVector3d triverts[3]);
 
 	};
 

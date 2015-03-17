@@ -194,36 +194,46 @@ void ccClipBox::reset()
 	emit boxModified(&m_box);
 }
 
-void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
+bool ccClipBox::setAssociatedEntity(ccHObject* entity)
 {
 	//release previous one
-	if (m_associatedEntity && m_associatedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (m_associatedEntity)
 	{
-		ccHObjectCaster::ToGenericPointCloud(m_associatedEntity)->unallocateVisibilityArray();
+		ccGenericPointCloud* points = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
+		if (points)
+			points->unallocateVisibilityArray();
 	}
 	m_associatedEntity = 0;
 
 	//try to initialize new one
-	if (associatedEntity)
+	if (entity)
 	{
-		if (!associatedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+		if (!entity->isKindOf(CC_TYPES::POINT_CLOUD) && !entity->isKindOf(CC_TYPES::MESH))
 		{
-			ccLog::Error("Unhandled entity! Clipping box will be deactivated...");
+			ccLog::Warning("[Clipping box] Unhandled type of entity");
+			return false;
 		}
 		else
 		{
-			if (ccHObjectCaster::ToGenericPointCloud(associatedEntity)->resetVisibilityArray())
+			ccGenericPointCloud* points = ccHObjectCaster::ToGenericPointCloud(entity);
+			if (points)
 			{
-				m_associatedEntity = associatedEntity;
-			}
-			else
-			{
-				ccLog::Error("Not enough memory! Clipping box will be deactivated...");
+				if (points->resetVisibilityArray())
+				{
+					m_associatedEntity = entity;
+				}
+				else
+				{
+					ccLog::Warning("[Clipping box] Not enough memory");
+					return false;
+				}
 			}
 		}
 	}
 
 	reset();
+
+	return true;
 }
 
 void ccClipBox::setActiveComponent(int id)
@@ -497,12 +507,12 @@ void ccClipBox::shift(const CCVector3& v)
 
 void ccClipBox::update(bool shrink/*=false*/)
 {
-	if (!m_associatedEntity || !m_associatedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	ccGenericPointCloud* cloud = m_associatedEntity ? ccHObjectCaster::ToGenericPointCloud(m_associatedEntity) : 0;
+	if (!cloud)
 		return;
 
-	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
 	unsigned count = cloud->size();
-	if (count==0 || !cloud->isVisibilityTableInstantiated())
+	if (count == 0 || !cloud->isVisibilityTableInstantiated())
 	{
 		assert(false);
 		return;
@@ -512,12 +522,7 @@ void ccClipBox::update(bool shrink/*=false*/)
 
 	if (m_glTransEnabled)
 	{
-		ccGLMatrix transMat;
-		//CCVector3 C = m_box.getCenter();
-		//transMat.setTranslation(-C);
-		//transMat = m_glTrans.inverse() * transMat;
-		//transMat.setTranslation(CCVector3(transMat.getTranslation())+C);
-		transMat = m_glTrans.inverse();
+		ccGLMatrix transMat = m_glTrans.inverse();
 
 		for (unsigned i=0; i<count; ++i)
 		{
@@ -561,7 +566,9 @@ PointCoordinateType ccClipBox::computeArrowsScale() const
 	PointCoordinateType scale = m_box.getDiagNorm()/10;
 
 	if (m_associatedEntity)
+	{
 		scale = std::max<PointCoordinateType>(scale,m_associatedEntity->getOwnBB().getDiagNorm()/100);
+	}
 
 	return scale;
 }

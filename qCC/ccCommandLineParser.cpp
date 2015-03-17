@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "ccComparisonDlg.h"
 #include "ccRegistrationTools.h"
+#include "ccCropTool.h"
 
 //Qt
 #include <QMessageBox>
@@ -109,6 +110,8 @@ static const char COMMAND_DELAUNAY[]						= "DELAUNAY";
 static const char COMMAND_DELAUNAY_AA[]						= "AA";
 static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
 static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
+static const char COMMAND_CROSS_SECTION[]					= "CROSS_SECTION";
+static const char COMMAND_LOG_FILE[]						= "LOG_FILE";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -480,12 +483,12 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+				return Error(QString("Missing parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 
 			bool ok;
 			skipLines = arguments.takeFirst().toInt(&ok);
 			if (!ok)
-				return Error(QString(QString("Invalid parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+				return Error(QString("Invalid parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 			
 			Print(QString("Will skip %1 lines").arg(skipLines));
 		}
@@ -495,7 +498,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_KEYWORD_AUTO).arg(COMMAND_OPEN_SHIFT_ON_LOAD)));
+				return Error(QString("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_KEYWORD_AUTO).arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 
 			QString firstParam = arguments.takeFirst();
 
@@ -510,7 +513,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 			}
 			else if (arguments.size() < 2)
 			{
-				return Error(QString(QString("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD)));
+				return Error(QString("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 			}
 			else
 			{
@@ -518,13 +521,13 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 				CCVector3d shiftOnLoadVec;
 				shiftOnLoadVec.x = firstParam.toDouble(&ok);
 				if (!ok)
-					return Error(QString(QString("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+					return Error(QString("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 				shiftOnLoadVec.y = arguments.takeFirst().toDouble(&ok);
 				if (!ok)
-					return Error(QString(QString("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+					return Error(QString("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 				shiftOnLoadVec.z = arguments.takeFirst().toDouble(&ok);
 				if (!ok)
-					return Error(QString(QString("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+					return Error(QString("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
 
 				//set the user defined shift vector as default shift information
 				s_loadParameters.m_coordinatesShiftEnabled = true;
@@ -1586,14 +1589,331 @@ bool ccCommandLineParser::commandSampleMesh(QStringList& arguments, ccProgressDi
 	return true;
 }
 
+//to read the 'Cross Section' tool XML parameters file
+#include <QXmlStreamReader>
+static QString s_xmlCloudCompare = "CloudCompare";
+static QString s_xmlBoxThickness = "BoxThickness";
+static QString s_xmlBoxCenter    = "BoxCenter";
+static QString s_xmlRepeatDim    = "RepeatDim";
+static QString s_xmlRepeatGap    = "RepeatGap";
+static QString s_xmlFilePath     = "FilePath";
+
+bool ReadVector(const QXmlStreamAttributes& attributes, CCVector3& P, QString element)
+{
+	if (attributes.size() < 3)
+	{
+		return Error(QString("Invalid XML file (3 attributes expected for element '<%1>')").arg(element));
+	}
+
+	int count = 0;
+	for (int i=0; i<attributes.size(); ++i)
+	{
+		QString name = attributes[i].name().toString().toUpper();
+		QString value = attributes[i].value().toString();
+
+		bool ok = false;
+		if (name == "X")
+		{
+			P.x = value.toDouble(&ok);
+			++count;
+		}
+		else if (name == "Y")
+		{
+			P.y = value.toDouble(&ok);
+			++count;
+		}
+		else if (name == "Z")
+		{
+			P.z = value.toDouble(&ok);
+			++count;
+		}
+		else
+		{
+			ok = true;
+		}
+		
+		if (!ok)
+		{
+			return Error(QString("Invalid XML file (numerical attribute expected for attribute '%1' of element '<%2>')").arg(name).arg(element));
+		}
+	}
+
+	if (count < 3)
+	{
+		return Error(QString("Invalid XML file (attributes 'X','Y' and 'Z' are mandatory for element '<%1>')").arg(element));
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* parent/*=0*/)
+{
+	Print("[CROSS SECTION]");
+
+	//expected argument: XML file
+	if (arguments.empty())
+		return Error(QString("Missing parameter: XML parameters file after \"-%1\"").arg(COMMAND_CROSS_SECTION));
+	QString xmlFilename = arguments.takeFirst();
+
+	//read the XML file
+	CCVector3 boxCenter(0,0,0), boxThickness(0,0,0);
+	bool repeatDim[3] = {false, false, false};
+	double repeatGap = 0.0;
+	bool inside = true;
+	bool autoCenter = true;
+	QString filePath;
+	{
+		QFile file(xmlFilename);
+		if (!file.open(QFile::ReadOnly | QFile::Text))
+		{
+			return Error(QString("Couldn't open XML file '%1'").arg(xmlFilename));
+		}
+
+		//read file content
+		QXmlStreamReader stream(&file);
+		bool error = true;
+
+		//expected: CloudCompare
+		if (	!stream.readNextStartElement()
+			||	stream.name() != s_xmlCloudCompare)
+		{
+			return Error(QString("Invalid XML file (should start by '<%1>')").arg(s_xmlCloudCompare));
+		}
+		
+		unsigned mandatoryCount = 0;
+		while (stream.readNextStartElement()) //loop over the elements
+		{
+			if (stream.name() == s_xmlBoxThickness)
+			{
+				QXmlStreamAttributes attributes = stream.attributes();
+				if (!ReadVector(attributes,boxThickness,s_xmlBoxThickness))
+					return false;
+				stream.skipCurrentElement();
+				++mandatoryCount;
+			}
+			else if (stream.name() == s_xmlBoxCenter)
+			{
+				QXmlStreamAttributes attributes = stream.attributes();
+				if (!ReadVector(attributes,boxCenter,s_xmlBoxCenter))
+					return false;
+				stream.skipCurrentElement();
+				autoCenter = false;
+			}
+			else if (stream.name() == s_xmlRepeatDim)
+			{
+				QString itemValue = stream.readElementText();
+				bool ok = false;
+				int dim = itemValue.toInt(&ok);
+				if (!ok || dim < 0 || dim > 2)
+				{
+					return Error(QString("Invalid XML file (invalid value for '<%1>')").arg(s_xmlRepeatDim));
+				}
+				repeatDim[dim] = true;
+			}
+			else if (stream.name() == s_xmlRepeatGap)
+			{
+				QString itemValue = stream.readElementText();
+				bool ok = false;
+				repeatGap = itemValue.toDouble(&ok);
+				if (!ok)
+				{
+					return Error(QString("Invalid XML file (invalid value for '<%1>')").arg(s_xmlRepeatGap));
+				}
+			}
+			else if (stream.name() == s_xmlFilePath)
+			{
+				filePath = stream.readElementText();
+				if (!QDir(filePath).exists())
+				{
+					return Error(QString("Invalid file path (directory pointed by '<%1>' doesn't exist)").arg(s_xmlFilePath));
+				}
+				++mandatoryCount;
+			}
+			else
+			{
+				Warning(QString("Unknown element: %1").arg(stream.name().toString()));
+				stream.skipCurrentElement();
+			}
+		}
+
+		if (mandatoryCount < 2 || (!repeatDim[0] && !repeatDim[1] && !repeatDim[2]))
+		{
+			return Error(QString("Some mandatory elements are missing in the XML file (see documentation)"));
+		}
+	}
+
+	//safety checks
+	if (	boxThickness.x < ZERO_TOLERANCE
+		||	boxThickness.y < ZERO_TOLERANCE
+		||	boxThickness.z < ZERO_TOLERANCE)
+	{
+		return Error(QString("Invalid box thickness"));
+	}
+	CCVector3 repeatStep = boxThickness + CCVector3(repeatGap,repeatGap,repeatGap);
+	if (	(repeatDim[0] && repeatStep.x < ZERO_TOLERANCE)
+		||	(repeatDim[1] && repeatStep.y < ZERO_TOLERANCE)
+		||	(repeatDim[2] && repeatStep.z < ZERO_TOLERANCE))
+	{
+		return Error(QString("Repeat gap can't be equal or smaller than 'minus' box width"));
+	}
+
+	removeClouds();
+	removeMeshes();
+
+	//look for all files in the input directory
+	QDir dir(filePath);
+	assert(dir.exists());
+	QStringList files = dir.entryList(QDir::Files);
+	for (int f=0; f<files.size(); ++f)
+	{
+		QString filename = dir.absoluteFilePath(files[f]);
+		QFileInfo fileinfo(filename);
+		if (!fileinfo.isFile() || fileinfo.suffix().toUpper() == "XML")
+		{
+			continue;
+		}
+		Print(QString("Processing file: '%1'").arg(files[f]));
+
+		//otherwise let's try to load the file
+		QStringList loadArguments;
+		loadArguments << filename;
+		if (commandLoad(loadArguments))
+		{
+			//we can now apply the repeat process
+			ccHObject::Container entities;
+			try
+			{
+				for (size_t i=0; i<m_clouds.size(); ++i)
+					entities.push_back(m_clouds[i].pc);
+				for (size_t j=0; j<m_meshes.size(); ++j)
+					entities.push_back(m_meshes[j].mesh);
+			}
+			catch(std::bad_alloc)
+			{
+				return Error("Not enough memory!");
+			}
+
+			//repeat crop process on each entity
+			{
+				for (size_t i=0; i<entities.size(); ++i)
+				{
+					//check entity bounding-box
+					ccHObject* ent = entities[i];
+					ccBBox bbox = ent->getOwnBB();
+					if (!bbox.isValid())
+					{
+						Warning(QString("Entity '%1' has an invalid bounding-box!").arg(ent->getName()));
+						continue;
+					}
+
+					//browse to/create a subdirectory with the (base) filename as name
+					QString basename = fileinfo.baseName();
+					if (entities.size() > 1)
+						basename += QString("_%1").arg(i+1);
+					
+					QDir outputDir = dir;
+					if (outputDir.cd(basename))
+					{
+						//if the directory already exists...
+						Warning(QString("Subdirectory '%1' already exists").arg(basename));
+					}
+					else if (outputDir.mkdir(basename))
+					{
+						outputDir.cd(basename);
+					}
+					else
+					{
+						Warning(QString("Failed to create subdirectory '%1' (check access rights and base name validity!)").arg(basename));
+						continue;
+					}
+
+					//place the initial box at the beginning of the entity bounding box
+					CCVector3 C0 = autoCenter ? bbox.getCenter() : boxCenter;
+					unsigned steps[3] = {1,1,1};
+					for (unsigned d=0; d<3; ++d)
+					{
+						if (repeatDim[d])
+						{
+							PointCoordinateType boxHalfWidth = boxThickness.u[d]/2;
+							PointCoordinateType distToMinBorder = C0.u[d]-boxHalfWidth - bbox.minCorner().u[d];
+							int stepsToMinBorder = static_cast<int>(ceil(distToMinBorder / repeatStep.u[d]));
+							C0.u[d] -= stepsToMinBorder * repeatStep.u[d];
+
+							PointCoordinateType distToMaxBorder = bbox.maxCorner().u[d] - C0.u[d];
+							assert(distToMaxBorder >= 0);
+							unsigned stepsToMaxBoder = static_cast<unsigned>(ceil(distToMaxBorder / repeatStep.u[d]));
+							steps[d] = std::max<unsigned>(stepsToMaxBoder,1);
+						}
+					}
+
+					Print(QString("Will extract up to (%1 x %2 x %3) = %4 sections").arg(steps[0]).arg(steps[1]).arg(steps[2]).arg(steps[0]*steps[1]*steps[2]));
+
+					//now extract the slices
+					for (unsigned dx=0; dx<steps[0]; ++dx)
+					{
+						for (unsigned dy=0; dy<steps[1]; ++dy)
+						{
+							for (unsigned dz=0; dz<steps[2]; ++dz)
+							{
+								CCVector3 C = C0 + CCVector3(dx*repeatStep.x,dy*repeatStep.y,dz*repeatStep.z);
+								ccBBox cropBox(C-boxThickness/2,C+boxThickness/2);
+								Print(QString("Box (%1;%2;%3) --> (%4;%5;%6)")
+									.arg(cropBox.minCorner().x).arg(cropBox.minCorner().y).arg(cropBox.minCorner().z)
+									.arg(cropBox.maxCorner().x).arg(cropBox.maxCorner().y).arg(cropBox.maxCorner().z)
+									);
+								ccHObject* croppedEnt = ccCropTool::Crop(ent, cropBox, inside);
+								if (croppedEnt)
+								{
+									QString outputBasename = basename + QString("_%1_%2_%3").arg(C.x).arg(C.y).arg(C.z);
+									QString errorStr;
+									//original entity is a cloud?
+									if (i < m_clouds.size())
+									{
+										CloudDesc desc(	static_cast<ccPointCloud*>(croppedEnt),
+											outputBasename,
+											outputDir.absolutePath(),
+											entities.size() > 1 ? static_cast<int>(i) : -1);
+										errorStr = Export(desc);
+									}
+									else
+									{
+										MeshDesc desc(	static_cast<ccMesh*>(croppedEnt),
+											outputBasename,
+											outputDir.absolutePath(),
+											entities.size() > 1 ? static_cast<int>(i) : -1);
+										errorStr = Export(desc);
+									}
+									delete croppedEnt;
+									if (!errorStr.isEmpty())
+										return Error(errorStr);
+								}
+							}
+						}
+					}
+				}
+			}
+
+			//unload entities
+			removeClouds();
+			removeMeshes();
+		}
+		else
+		{
+			Warning("\tFailed to load file!");
+		}
+	}
+
+	return true;
+}
+
 bool ccCommandLineParser::commandCrop(QStringList& arguments)
 {
 	Print("[CROP]");
 
 	if (arguments.empty())
 		return Error(QString("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
-	if (m_clouds.empty())
-		return Error(QString("No point cloud available. Be sure to open or generate one first!"));
+	if (m_clouds.empty() && m_meshes.empty())
+		return Error(QString("No point cloud or mesh available. Be sure to open or generate one first!"));
 
 	//decode box extents
 	CCVector3 boxMin,boxMax;
@@ -1633,45 +1953,47 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 	}
 
 	ccBBox cropBox(boxMin,boxMax);
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	//crop clouds
 	{
-		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop(cropBox,inside);
-		if (ref)
+		for (unsigned i=0; i<m_clouds.size(); ++i)
 		{
-			if (ref->size() != 0)
+			ccHObject* croppedCloud = ccCropTool::Crop(m_clouds[i].pc, cropBox, inside);
+			if (croppedCloud)
 			{
-				ccPointCloud* croppedCloud = m_clouds[i].pc->partialClone(ref);
-				delete ref;
-				ref = 0;
-
-				if (croppedCloud)
+				delete m_clouds[i].pc;
+				assert(croppedCloud->isA(CC_TYPES::POINT_CLOUD));
+				m_clouds[i].pc = static_cast<ccPointCloud*>(croppedCloud);
+				m_clouds[i].basename += "_CROPPED";
+				if (s_autoSaveMode)
 				{
-					delete m_clouds[i].pc;
-					m_clouds[i].pc = croppedCloud;
-					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
-					m_clouds[i].basename += "_CROPPED";
-					if (s_autoSaveMode)
-					{
-						QString errorStr = Export(m_clouds[i]);
-						if (!errorStr.isEmpty())
-							return Error(errorStr);
-					}
-				}
-				else
-				{
-					return Error(QString("Not enough memory to crop cloud '%1'!").arg(m_clouds[i].pc->getName()));
+					QString errorStr = Export(m_clouds[i]);
+					if (!errorStr.isEmpty())
+						return Error(errorStr);
 				}
 			}
-			else
-			{
-				delete ref;
-				ref = 0;
-				return Error (QString("No point of cloud '%1' falls inside the input box!").arg(m_clouds[i].pc->getName()));
-			}
+			//otherwise an error message has already been issued
 		}
-		else
+	}
+
+	//crop meshes
+	{
+		for (unsigned i=0; i<m_meshes.size(); ++i)
 		{
-			return Error(QString("Crop process failed! (not enough memory)"));
+			ccHObject* croppedMesh = ccCropTool::Crop(m_meshes[i].mesh, cropBox, inside);
+			if (croppedMesh)
+			{
+				delete m_meshes[i].mesh;
+				assert(croppedMesh->isA(CC_TYPES::MESH));
+				m_meshes[i].mesh = static_cast<ccMesh*>(croppedMesh);
+				m_meshes[i].basename += "_CROPPED";
+				if (s_autoSaveMode)
+				{
+					QString errorStr = Export(m_meshes[i]);
+					if (!errorStr.isEmpty())
+						return Error(errorStr);
+				}
+			}
+			//otherwise an error message has already been issued
 		}
 	}
 
@@ -2374,7 +2696,7 @@ bool ccCommandLineParser::commandDelaunay(QStringList& arguments, QDialog* paren
 			arguments.pop_front();
 			
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: max edge length value after '%1'").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH)));
+				return Error(QString("Missing parameter: max edge length value after '%1'").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
 			bool ok;
 			maxEdgeLength = arguments.takeFirst().toDouble(&ok);
 			if (!ok)
@@ -2476,7 +2798,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF)));
+				return Error(QString("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF));
 			bool ok;
 			minErrorDiff = arguments.takeFirst().toDouble(&ok);
 			if (!ok || minErrorDiff <= 0)
@@ -2488,7 +2810,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT)));
+				return Error(QString("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT));
 			bool ok;
 			QString arg = arguments.takeFirst();
 			iterationCount = arg.toUInt(&ok);
@@ -2501,7 +2823,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP)));
+				return Error(QString("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP));
 			bool ok;
 			QString arg = arguments.takeFirst();
 			overlap = arg.toUInt(&ok);
@@ -2514,7 +2836,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT)));
+				return Error(QString("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 			bool ok;
 			randomSamplingLimit = arguments.takeFirst().toUInt(&ok);
 			if (!ok || randomSamplingLimit < 3)
@@ -2679,7 +3001,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION)));
+				return Error(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
 
 			s_CloudExportExt = arguments.takeFirst();
 			Print(QString("New output extension for clouds: %1").arg(s_CloudExportExt));
@@ -2690,7 +3012,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: precision value after '%1'").arg(COMMAND_ASCII_EXPORT_PRECISION)));
+				return Error(QString("Missing parameter: precision value after '%1'").arg(COMMAND_ASCII_EXPORT_PRECISION));
 			bool ok;
 			int precision = arguments.takeFirst().toInt(&ok);
 			if (!ok || precision < 0)
@@ -2713,7 +3035,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR)));
+				return Error(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR));
 
 			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
@@ -2771,7 +3093,7 @@ bool ccCommandLineParser::commandChangeMeshOutputFormat(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION)));
+				return Error(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
 
 			s_MeshExportExt = arguments.takeFirst();
 			Print(QString("New output extension for meshes: %1").arg(s_MeshExportExt));
@@ -2803,7 +3125,7 @@ bool ccCommandLineParser::commandChangeFBXOutputFormat(QStringList& arguments)
 bool ccCommandLineParser::commandChangePLYExportFormat(QStringList& arguments)
 {
 	if (arguments.empty())
-		return Error(QString(QString("Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after '%1'").arg(COMMAND_PLY_EXPORT_FORMAT)));
+		return Error(QString("Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after '%1'").arg(COMMAND_PLY_EXPORT_FORMAT));
 
 	//if (fileFilter != PlyFilter::GetFileFilter())
 	//	ccConsole::Warning(QString("Argument '%1' is only applicable to PLY format!").arg(argument));
@@ -2882,7 +3204,7 @@ bool ccCommandLineParser::commandSaveMeshes(QStringList& arguments)
 bool ccCommandLineParser::commandAutoSave(QStringList& arguments)
 {
 	if (arguments.empty())
-		return Error(QString(QString("Missing parameter: option after '%1' (%2/%2)").arg(COMMAND_AUTO_SAVE).arg(OPTION_ON).arg(OPTION_OFF)));
+		return Error(QString("Missing parameter: option after '%1' (%2/%2)").arg(COMMAND_AUTO_SAVE).arg(OPTION_ON).arg(OPTION_OFF));
 
 	QString option = arguments.takeFirst().toUpper();
 	if (option == OPTION_ON)
@@ -2897,10 +3219,25 @@ bool ccCommandLineParser::commandAutoSave(QStringList& arguments)
 	}
 	else
 	{
-		return Error(QString(QString("Unrecognized option afer '%1' (%2 or %3 expected)").arg(COMMAND_AUTO_SAVE).arg(OPTION_ON).arg(OPTION_OFF)));
+		return Error(QString("Unrecognized option afer '%1' (%2 or %3 expected)").arg(COMMAND_AUTO_SAVE).arg(OPTION_ON).arg(OPTION_OFF));
 	}
 
 	return true;
+}
+
+bool ccCommandLineParser::commandLogFile(QStringList& arguments)
+{
+	if (arguments.empty())
+		return Error(QString("Missing parameter: filename after '%1'").arg(COMMAND_LOG_FILE));
+
+	QString filename = arguments.takeFirst();
+	if (!ccConsole::TheInstance())
+	{
+		assert(s_silentMode);
+		ccConsole::Init();
+	}
+
+	return ccConsole::TheInstance() ? ccConsole::TheInstance()->setLogFile(filename) : false;
 }
 
 int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
@@ -3020,6 +3357,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandCrop2D(arguments);
 		}
+		//Cross section
+		else if (IsCommand(argument,COMMAND_CROSS_SECTION))
+		{
+			success = commandCrossSection(arguments);
+		}
 		//Color banding
 		else if (IsCommand(argument,COMMAND_COLOR_BANDING))
 		{
@@ -3094,6 +3436,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_NO_TIMESTAMP))
 		{
 			s_addTimestamp = false;
+		}
+		//log file
+		else if (IsCommand(argument,COMMAND_LOG_FILE))
+		{
+			success = commandLogFile(arguments);
 		}
 		//silent mode (i.e. no console)
 		else if (IsCommand(argument,COMMAND_SILENT_MODE))

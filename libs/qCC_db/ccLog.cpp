@@ -32,7 +32,8 @@
  ***************/
 
 //buffer for formated string generation
-static char s_buffer[4096];
+static const size_t s_bufferMaxSize = 4096;
+static char s_buffer[s_bufferMaxSize];
 
 //unique console instance
 static ccLog* s_instance = 0;
@@ -55,7 +56,7 @@ bool ccLog::Print(const char* format, ...)
 		//we get the "..." parameters as "printf" would do
 		va_list args;
 		va_start(args, format);
-		_vsnprintf(s_buffer, (size_t)4096, format, args);
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);
 		va_end(args);
 
 		s_instance->displayMessage(QString(s_buffer), LOG_STANDARD);
@@ -79,7 +80,7 @@ bool ccLog::Warning(const char* format, ...)
 		//we get the "..." parameters as "printf" would do
 		va_list args;
 		va_start(args, format);
-		_vsnprintf(s_buffer, (size_t)4096, format, args);
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);
 		va_end(args);
 
 		s_instance->displayMessage(QString(s_buffer), LOG_WARNING);
@@ -103,7 +104,7 @@ bool ccLog::Error(const char* format, ...)
 		//we get the "..." parameters as "printf" would do
 		va_list args;
 		va_start(args, format);
-		_vsnprintf(s_buffer, (size_t)4096, format, args);
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);
 		va_end(args);
 
 		s_instance->displayMessage(QString(s_buffer), LOG_ERROR);
@@ -127,10 +128,10 @@ bool ccLog::PrintDebug(const char* format, ...)
 		//we get the "..." parameters as "printf" would do
 		va_list args;
 		va_start(args, format);
-		_vsnprintf(s_buffer, (size_t)4096, format, args);
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);
 		va_end(args);
 
-		s_instance->displayMessage(QString(s_buffer), LOG_STANDARD_DEBUG);
+		s_instance->displayMessage(QString(s_buffer), LOG_STANDARD | LOG_DEBUG);
 	}
 
 	return true;
@@ -139,7 +140,7 @@ bool ccLog::PrintDebug(const char* format, ...)
 bool ccLog::PrintDebug(const QString& message)
 {
 	if (s_instance)
-		s_instance->displayMessage(message, LOG_STANDARD_DEBUG);
+		s_instance->displayMessage(message, LOG_STANDARD | LOG_DEBUG);
 
 	return true;
 }
@@ -151,10 +152,10 @@ bool ccLog::WarningDebug(const char* format, ...)
 		//we get the "..." parameters as "printf" would do
 		va_list args;
 		va_start(args, format);
-		_vsnprintf(s_buffer, (size_t)4096, format, args);
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);
 		va_end(args);
 
-		s_instance->displayMessage(QString(s_buffer), LOG_WARNING_DEBUG);
+		s_instance->displayMessage(QString(s_buffer), LOG_WARNING | LOG_DEBUG);
 	}
 
 	return false;
@@ -163,7 +164,7 @@ bool ccLog::WarningDebug(const char* format, ...)
 bool ccLog::WarningDebug(const QString& message)
 {
 	if (s_instance)
-		s_instance->displayMessage(message, LOG_WARNING_DEBUG);
+		s_instance->displayMessage(message, LOG_WARNING | LOG_DEBUG);
 
 	return false;
 }
@@ -175,10 +176,10 @@ bool ccLog::ErrorDebug(const char* format, ...)
 		//we get the "..." parameters as "printf" would do
 		va_list args;
 		va_start(args, format);
-		_vsnprintf(s_buffer, (size_t)4096, format, args);
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);
 		va_end(args);
 
-		s_instance->displayMessage(QString(s_buffer), LOG_ERROR_DEBUG);
+		s_instance->displayMessage(QString(s_buffer), LOG_ERROR | LOG_DEBUG);
 	}
 
 	return false;
@@ -187,7 +188,7 @@ bool ccLog::ErrorDebug(const char* format, ...)
 bool ccLog::ErrorDebug(const QString& message)
 {
 	if (s_instance)
-		s_instance->displayMessage(message, LOG_ERROR_DEBUG);
+		s_instance->displayMessage(message, LOG_ERROR | LOG_DEBUG);
 
 	return false;
 }

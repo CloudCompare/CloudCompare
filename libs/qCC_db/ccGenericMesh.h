@@ -109,6 +109,9 @@ public:
 	//! Returns per-triangle normals shared array
 	virtual NormsIndexesTableType* getTriNormsTable() const = 0;
 	
+	//! Returns the (barycentric) interpolation weights for a given triangle
+	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
+
 	//! Interpolates normal(s) inside a given triangle
 	/** \param triIndex triangle index
 		\param P point where to interpolate (should be inside the triangle!)
@@ -175,14 +178,16 @@ public:
 								bool withTexture,
 								CCLib::GenericProgressCallback* pDlg = 0);
 
+	//! Imports the parameters from another mesh
+	/** Only the specific parameters are imported.
+	**/
+	void importParametersFrom(const ccGenericMesh* mesh);
+
 protected:
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-
-	//! Max number of displayed triangles (per entity) in "low detail" display
-	static unsigned GET_MAX_LOD_FACES_NUMBER();
 
 	//Static arrays for OpenGL drawing
 	static PointCoordinateType* GetVertexBuffer();

@@ -31,6 +31,7 @@ class GenericIndexedCloudPersist;
 class GenericIndexedMesh;
 class GenericProgressCallback;
 class ReferenceCloud;
+class SimpleMesh;
 class Polyline;
 
 //! Manual segmentation algorithms (inside/outside a polyline, etc.)
@@ -78,20 +79,59 @@ public:
 
 	//! Segments a mesh knowing which vertices should be kept or not
 	/** This method takes as input a set of vertex indexes and creates a new mesh
-		composed either of the triangles that have exactly those vertices as
-		summits (pointsWillBeInside=true), or all the triangles from which none of
-		the vertices is part of this subset (pointsWillBeInside=false). There is no
-		re-triangulation on the border.
-		\param theMesh a mesh
-		\param pointsIndexes the vertices indexes as a set of references
-		\param pointsWillBeInside specifies if the points corresponding to the input indexes should be the new mesh vertices, or the opposite
-		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param destCloud optionnaly, a cloud object can be specified to be associated to the new created mesh object, instead of the cloud associated to the ReferenceCloud "pointsIndexes"
-		\param indexShift optionnaly, a shift can be added to all vertex indexes of the new mesh
-		\return a new mesh structure, or 0 if something went wrong
+	composed either of the triangles that have exactly those vertices as
+	summits (pointsWillBeInside=true), or all the triangles from which none of
+	the vertices is part of this subset (pointsWillBeInside=false). There is no
+	re-triangulation on the border.
+	\param theMesh a mesh
+	\param pointsIndexes the vertices indexes as a set of references
+	\param pointsWillBeInside specifies if the points corresponding to the input indexes should be the new mesh vertices, or the opposite
+	\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+	\param destCloud optionnaly, a cloud object can be specified to be associated to the new created mesh object, instead of the cloud associated to the ReferenceCloud "pointsIndexes"
+	\param indexShift optionnaly, a shift can be added to all vertex indexes of the new mesh
+	\return a new mesh structure, or 0 if something went wrong
 	**/
-	static GenericIndexedMesh* segmentMesh(GenericIndexedMesh* theMesh, ReferenceCloud* pointsIndexes, bool pointsWillBeInside, GenericProgressCallback* progressCb=0, GenericIndexedCloud* destCloud=0, unsigned indexShift=0);
+	static GenericIndexedMesh* segmentMesh(GenericIndexedMesh* theMesh, ReferenceCloud* pointsIndexes, bool pointsWillBeInside, GenericProgressCallback* progressCb = 0, GenericIndexedCloud* destCloud = 0, unsigned indexShift = 0);
 
+	//! Input/output parameters for the segmentMeshWitAAPlane method
+	struct MeshCutterParams
+	{
+		SimpleMesh* insideMesh;
+		SimpleMesh* outsideMesh;
+		bool generateOutsideMesh;
+		double epsilon;
+		//for infinite plane intersection
+		unsigned char planeOrthoDim;
+		double planeCoord;
+		//for box intersection
+		CCVector3d bbMin, bbMax;
+		//for the reprojection of triangle features
+		bool trackOrigIndexes;
+		std::vector<unsigned> origTriIndexesMapInside;
+		std::vector<unsigned> origTriIndexesMapOutside;
+
+		MeshCutterParams()
+			: insideMesh(0)
+			, outsideMesh(0)
+			, generateOutsideMesh(false)
+			, epsilon(ZERO_TOLERANCE)
+			, planeOrthoDim(0)
+			, planeCoord(0)
+			, bbMin(0, 0, 0)
+			, bbMax(0, 0, 0)
+			, trackOrigIndexes(false)
+		{}
+	};
+
+	static bool segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
+		GenericIndexedCloudPersist* vertices,
+		MeshCutterParams& ioParams,
+		GenericProgressCallback* progressCb = 0);
+
+	static bool segmentMeshWitAABox(GenericIndexedMesh* mesh,
+		GenericIndexedCloudPersist* vertices,
+		MeshCutterParams& ioParams,
+		GenericProgressCallback* progressCb = 0);
 };
 
 }

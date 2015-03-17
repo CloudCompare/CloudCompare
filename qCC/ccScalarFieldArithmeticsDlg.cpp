@@ -64,9 +64,8 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 		sf2ComboBox->setCurrentIndex(std::min<unsigned>(1,sfCount-1));
 	}
 
-	operationComboBox->setCurrentIndex(s_previouslySelectedOperationIndex);
-
 	connect(operationComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
+	operationComboBox->setCurrentIndex(s_previouslySelectedOperationIndex);
 }
 
 void ccScalarFieldArithmeticsDlg::onCurrentIndexChanged(int index)
@@ -124,7 +123,7 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 	case 16:
 		return INT;
 	case 17:
-		return INT;
+		return INVERSE;
 	default:
 		assert(false);
 		break;

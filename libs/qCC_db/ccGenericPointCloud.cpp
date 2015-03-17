@@ -112,7 +112,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctree* ccGenericPointCloud::getOctree()
 {
-	for (unsigned i=0; i<m_children.size(); ++i)
+	for (size_t i=0; i<m_children.size(); ++i)
 	{
 		if (m_children[i]->isA(CC_TYPES::POINT_OCTREE))
 			return static_cast<ccOctree*>(m_children[i]);
@@ -281,4 +281,23 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	}
 
 	return true;
+}
+
+void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return;
+	}
+
+	//original center
+	setGlobalShift(cloud->getGlobalShift());
+	setGlobalScale(cloud->getGlobalScale());
+	//keep the transformation history!
+	setGLTransformationHistory(cloud->getGLTransformationHistory());
+	//custom point size
+	setPointSize(cloud->getPointSize());
+	//meta-data
+	setMetaData(cloud->metaData());
 }

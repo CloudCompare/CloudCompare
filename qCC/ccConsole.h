@@ -32,10 +32,12 @@
 #include <QTimer>
 #include <QVector>
 #include <QPair>
+#include <QFile>
 
 class QListWidget;
 class QWidget;
 class MainWindow;
+class QTextStream;
 
 //! Console
 class ccConsole : public QObject, public ccLog
@@ -44,6 +46,9 @@ class ccConsole : public QObject, public ccLog
 	Q_OBJECT
 
 public:
+
+	//! Destructor
+	virtual ~ccConsole();
 
 	//! Inits console (and optionaly associates it with a text output widget)
 	/** WARNING: in release mode, no message will be output if no 'textDisplay'
@@ -54,7 +59,9 @@ public:
 		\param parentWidget parent widget (optional)
 		\param parentWindow parent window (if any - optional)
 	**/
-	static void Init(QListWidget* textDisplay = 0, QWidget* parentWidget = 0, MainWindow* parentWindow = 0);
+	static void Init(	QListWidget* textDisplay = 0,
+						QWidget* parentWidget = 0,
+						MainWindow* parentWindow = 0);
 
 	//! Returns the (unique) static instance
 	static ccConsole* TheInstance();
@@ -64,6 +71,9 @@ public:
 
 	//! Sets auto-refresh state
 	void setAutoRefresh(bool state);
+
+	//! Sets log file
+	bool setLogFile(QString filename);
 
 public slots:
 
@@ -78,7 +88,7 @@ protected:
 	ccConsole();
 
 	//inherited from ccLog
-	virtual void displayMessage(const QString& message, MessageLevel level);
+	virtual void displayMessage(const QString& message, int level);
 
 	//! Associated text display widget
 	QListWidget* m_textDisplay;
@@ -93,13 +103,19 @@ protected:
 	QMutex m_mutex;
 
 	//! Queue element type (message + color)
-	typedef QPair<QString,MessageLevel> ConsoleItemType;
+	typedef QPair<QString,int> ConsoleItemType;
 
 	//! Queue for incoming messages
 	QVector<ConsoleItemType> m_queue;
 
 	//! Timer for auto-refresh
 	QTimer m_timer;
+
+	//! Log file
+	QFile m_logFile;
+	//! Log file stream
+	QTextStream* m_logStream;
+
 };
 
 #endif

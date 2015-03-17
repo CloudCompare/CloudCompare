@@ -308,11 +308,10 @@ void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS fl
 
 void ccHObject::onDeletionOf(const ccHObject* obj)
 {
-	//remove any dependency declarated with this object
+	//remove any dependency declared with this object
 	//and remove it from the children list as well (in case of)
 	//DGM: we can't call 'detachChild' as this method will try to
-	//modify the child's content!
-	//remove any dependency (bilateral)
+	//modify the child contents!
 	removeDependencyWith(const_cast<ccHObject*>(obj)); //this method will only modify the dependency flags of obj
 
 	int pos = getChildIndex(obj);
@@ -659,12 +658,23 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	drawInThisContext &= (	( !MACRO_DrawPointNames(context)	|| isKindOf(CC_TYPES::POINT_CLOUD) ) || 
 							( !MACRO_DrawTriangleNames(context)	|| isKindOf(CC_TYPES::MESH) ));
 
-	//apply 3D 'temporary' transformation (for display only)
-	if (draw3D && m_glTransEnabled)
+	if (draw3D)
 	{
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glMultMatrixf(m_glTrans.data());
+		//apply 3D 'temporary' transformation (for display only)
+		if (m_glTransEnabled)
+		{
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glMultMatrixf(m_glTrans.data());
+		}
+
+		if (	context.decimateCloudOnMove						//LOD for clouds is enabled?
+			&&	context.currentLODLevel >= context.minLODLevel	//and we are currently rendering higher levels?
+			)
+		{
+			//only for real clouds
+			drawInThisContext &= isA(CC_TYPES::POINT_CLOUD);
+		}
 	}
 
 	//draw entity
@@ -689,7 +699,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		(*it)->draw(context);
 
 	//if the entity is currently selected, we draw its bounding-box
-	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawNames(context))
+	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawNames(context) && context.currentLODLevel == 0)
 	{
 		drawBB(context.bbDefaultCol);
 	}
@@ -799,7 +809,11 @@ void ccHObject::removeChild(ccHObject* child)
 
 void ccHObject::removeChild(int pos)
 {
-	assert(pos >= 0 && static_cast<size_t>(pos) < m_children.size());
+	if (pos < 0 || static_cast<size_t>(pos) >= m_children.size())
+	{
+		assert(false);
+		return;
+	}
 
 	ccHObject* child = m_children[pos];
 
@@ -820,7 +834,7 @@ void ccHObject::removeChild(int pos)
 		//delete object
 		if (child->isShareable())
 			dynamic_cast<CCShareable*>(child)->release();
-		else
+		else/* if (!child->isA(CC_TYPES::POINT_OCTREE))*/
 			delete child;
 	}
 	else if (child->getParent() == this)

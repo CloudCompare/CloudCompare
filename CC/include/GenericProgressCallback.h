@@ -43,7 +43,7 @@ public:
 	//! Resets the progress status
 	/** The progress (percentage) is set to 0, and the title/infos are cleared.
 	**/
-	virtual void reset()=0;
+	virtual void reset() = 0;
 
 	//! Notifies the algorithm progress
 	/** The notification is sent by the ongoing algorithm (on the library side).
@@ -52,50 +52,52 @@ public:
         be called more than once per percent.
 		\param percent the current progress, between 0 and 100%
 	**/
-	virtual void update(float percent)=0;
+	virtual void update(float percent) = 0;
 
 	//! Notifies the algorithm title
 	/** The notification is sent by the ongoing algorithm (on the library side).
 		\param methodTitle the algorithm title
 	**/
-	virtual void setMethodTitle(const char* methodTitle)=0;
+	virtual void setMethodTitle(const char* methodTitle) = 0;
 
 	//! Notifies some information about the ongoing process
 	/** The notification is sent by the ongoing algorithm (on the library side).
 		\param infoStr some textual information about the ongoing process
 	**/
-	virtual void setInfo(const char* infoStr)=0;
+	virtual void setInfo(const char* infoStr) = 0;
 
 	//! Notifies the fact that every information has been sent and that the process begins
 	/** Once start() is called, the progress bar and other informations could be displayed (for example).
 	**/
-	virtual void start()=0;
+	virtual void start() = 0;
 
 	//! Notifies the fact that the process has ended
 	/** Once end() is called, the progress bar and other informations could be hidden (for example).
 	**/
-	virtual void stop()=0;
+	virtual void stop() = 0;
 
 	//! Checks if the process should be canceled
 	/** This method is called by some process from time to time to know if it
-	should halt before its normal ending. This is a way for the client application
-	to cancel an ongoing process (but it won't work with all algorithms).
-	Process results may be incomplete/void. The cancel requirement mechanism must
-	be implemented (typically a simple "cancel()" method that will be called by the
-	client application).
+		should halt before its normal ending. This is a way for the client application
+		to cancel an ongoing process (but it won't work with all algorithms).
+		Process results may be incomplete/void. The cancel requirement mechanism must
+		be implemented (typically a simple "cancel()" method that will be called by the
+		client application).
 	**/
-	virtual bool isCancelRequested()=0;
+	virtual bool isCancelRequested() = 0;
 
 };
 
 //! Efficient management of progress based on a total number of steps different than 100
+/** DGM: can now be associated to a null 'callback' pointer to simplify the client code.
+**/
 class NormalizedProgress
 {
 public:
 	//! Default constructor
-	/** \param callback associated GenericProgressCallback
-		\param totalSteps total number of steps
-		\param totalPercentage equivalent percentage
+	/** \param callback associated GenericProgressCallback instance (can be null)
+		\param totalSteps total number of steps (> 0)
+		\param totalPercentage equivalent percentage (> 0)
 	**/
 	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage = 100)
 		: m_percent(0)
@@ -104,45 +106,46 @@ public:
 		, m_counter(0)
 		, progressCallback(callback)
 	{
-		assert(progressCallback);
-
 		scale(totalSteps, totalPercentage);
 	}
 
 	//! Scales inner parameters so that 'totalSteps' calls of the 'oneStep' method correspond to 'totalPercentage' percents
 	void scale(unsigned totalSteps, unsigned totalPercentage = 100, bool updateCurrentProgress = false)
 	{
-		if (totalSteps*totalPercentage == 0)
+		if (progressCallback)
 		{
-			m_step = 1;
-			m_percentAdd = 0;
-			return;
-		}
+			if (totalSteps == 0 || totalPercentage == 0)
+			{
+				m_step = 1;
+				m_percentAdd = 0;
+				return;
+			}
 
-        if (totalSteps >= 2*totalPercentage)
-		{
-            m_step = static_cast<unsigned>(ceil(static_cast<float>(totalSteps) / static_cast<float>(totalPercentage)));
-			assert(m_step!=0 && m_step<totalSteps);
-            m_percentAdd = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps/m_step);
-		}
-        else
-		{
-			m_step = 1;
-            m_percentAdd = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps);
-		}
+			if (totalSteps >= 2*totalPercentage)
+			{
+				m_step = static_cast<unsigned>(ceil(static_cast<float>(totalSteps) / totalPercentage));
+				assert(m_step != 0 && m_step < totalSteps);
+				m_percentAdd = static_cast<float>(totalPercentage) / (totalSteps/m_step);
+			}
+			else
+			{
+				m_step = 1;
+				m_percentAdd = static_cast<float>(totalPercentage) / totalSteps;
+			}
 
-		if (updateCurrentProgress)
-		{
-			m_percent = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps)
-#ifdef CC_QT5
-				* static_cast<float>(m_counter.load());
-#else
-				* static_cast<float>(m_counter);
-#endif
-		}
-		else
-		{
-			m_counter = 0;
+			if (updateCurrentProgress)
+			{
+				m_percent = static_cast<float>(totalPercentage) / totalSteps
+	#ifdef CC_QT5
+					* static_cast<float>(m_counter.load());
+	#else
+					* static_cast<float>(m_counter);
+	#endif
+			}
+			else
+			{
+				m_counter = 0;
+			}
 		}
 	}
 
@@ -151,12 +154,16 @@ public:
 	{
 		m_percent = 0;
 		m_counter = 0;
-		progressCallback->update(0);
+		if (progressCallback)
+			progressCallback->update(0);
 	}
 
 	//! Increments total progress value of a single unit
 	inline bool oneStep()
 	{
+		if (!progressCallback)
+			return true;
+
 		unsigned currentCount = m_counter.fetchAndAddRelaxed(1)+1;
 		if ((currentCount % m_step) == 0)
 		{
@@ -170,6 +177,9 @@ public:
 	//! Increments total progress value of more than a single unit
 	inline bool steps(unsigned n)
 	{
+		if (!progressCallback)
+			return true;
+
 		unsigned currentCount = m_counter.fetchAndAddRelaxed(n);
 		unsigned d1 = currentCount / m_step;
 		unsigned d2 = (currentCount+n) / m_step;

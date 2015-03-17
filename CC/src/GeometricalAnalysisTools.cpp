@@ -736,8 +736,8 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeCrossCovarianceMatrix(Gene
 	return covMat;
 }
 
-CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(GenericCloud* P,
-																					GenericCloud* Q,
+CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(GenericCloud* P, //data
+																					GenericCloud* Q, //model
 																					const CCVector3& Gp,
 																					const CCVector3& Gq,
 																					ScalarField* weightsP/*=0*/,
@@ -745,6 +745,7 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 {
     assert(P && Q);
 	assert(Q->size() == P->size());
+	assert(weightsP || weightsQ);
 	assert(!weightsP || weightsP->currentSize() == P->size());
 	assert(!weightsQ || weightsQ->currentSize() == Q->size());
 
@@ -760,30 +761,37 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 	//sums
 	unsigned count = P->size();
 	double wSum = 0.0;
-	for (unsigned i=0; i<count; i++)
+	//double wMax = 0.0;
+	for (unsigned i = 0; i<count; i++)
 	{
 		CCVector3 Pt = *P->getNextPoint() - Gp;
 		CCVector3 Qt = *Q->getNextPoint() - Gq;
 
 		//Weighting scheme for cross-covariance is inspired from
 		//https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_covariance
-		PointCoordinateType wi = PC_ONE;
+		double wi = 1.0;
 		if (weightsP)
 		{
-			const ScalarType& wp = weightsP->getValue(i);
+			ScalarType wp = weightsP->getValue(i);
 			if (!ScalarField::ValidValue(wp))
 				continue;
-			wi = static_cast<PointCoordinateType>(wp);
+			wi = wp;
 		}
 		if (weightsQ)
 		{
-			const ScalarType& wq = weightsQ->getValue(i);
+			ScalarType wq = weightsQ->getValue(i);
 			if (!ScalarField::ValidValue(wq))
 				continue;
-			wi *= static_cast<PointCoordinateType>(wq);
+			wi *= wq;
 		}
+		wi = fabs(wi);
+
+		//DGM: we virtually make the P (data) point nearer if it has a lower weight
+		//This way it will 'pull' the data cloud less towards its own position?
+		//Pt = Qt + (Pt - Qt) * static_cast<PointCoordinateType>(wi);
 		Pt *= wi;
 		wSum += wi;
+		//wMax = std::max(wMax, wi);
 
 		//1st row
 		r1[0] += Pt.x * Qt.x;
@@ -801,7 +809,8 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 
 	if (wSum != 0.0)
 		covMat.scale(1.0/wSum);
-
+	//if (wMax != 0.0)
+	//	covMat.scale(1.0 / wMax);
 	return covMat;
 }
 

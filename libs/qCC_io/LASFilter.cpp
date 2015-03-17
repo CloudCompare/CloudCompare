@@ -391,9 +391,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	ccProgressDialog pdlg(true); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save LAS file");
-	char buffer[256];
-	sprintf(buffer,"Points: %u",numberOfPoints);
-	pdlg.setInfo(buffer);
+	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
 	pdlg.start();
 
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(writer->GetHeader())));

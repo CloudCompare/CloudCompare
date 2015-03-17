@@ -177,9 +177,6 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_LODPendingRefresh(false)
 	, m_activeContext(const_cast<QGLContext*>(context()))
 	, m_renderingThread(0)
-#ifdef USE_RENDERING_THREAD
-	, m_openGLContext(0)
-#endif
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -262,148 +259,6 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
 	}
 }
-
-#ifdef USE_RENDERING_THREAD
-ccGLWindow::ccGLWindow(	QWidget *parent,
-						QOpenGLContext* openGLContext )
-	: QGLWidget(QGLContext::fromOpenGLContext(openGLContext),parent)
-	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
-	, m_initialized(false)
-	, m_trihedronGLList(GL_INVALID_LIST_ID)
-	, m_pivotGLList(GL_INVALID_LIST_ID)
-	, m_lastMousePos(-1,-1)
-	, m_lastMouseOrientation(1,0,0)
-	, m_currentMouseOrientation(1,0,0)
-	, m_validModelviewMatrix(false)
-	, m_validProjectionMatrix(false)
-	, m_glWidth(0)
-	, m_glHeight(0)
-	, m_LODEnabled(true)
-	, m_shouldBeRefreshed(false)
-	, m_mouseMoved(false)
-	, m_mouseButtonPressed(false)
-	, m_unclosable(false)
-	, m_interactionMode(TRANSFORM_CAMERA)
-	, m_pickingMode(NO_PICKING)
-	, m_pickingModeLocked(false)
-	, m_lastClickTime_ticks(0)
-	, m_sunLightEnabled(true)
-	, m_customLightEnabled(false)
-	, m_embeddedIconsEnabled(false)
-	, m_hotZoneActivated(false)
-	, m_activeShader(0)
-	, m_shadersEnabled(false)
-	, m_fbo(0)
-	, m_alwaysUseFBO(false)
-	, m_updateFBO(true)
-	, m_colorRampShader(0)
-	, m_customRenderingShader(0)
-	, m_activeGLFilter(0)
-	, m_glFiltersEnabled(false)
-	, m_winDBRoot(0)
-	, m_globalDBRoot(0) //external DB
-	, m_font(font())
-	, m_pivotVisibility(PIVOT_SHOW_ON_MOVE)
-	, m_pivotSymbolShown(false)
-	, m_allowRectangularEntityPicking(true)
-	, m_rectPickingPoly(0)
-	, m_overridenDisplayParametersEnabled(false)
-	, m_displayOverlayEntities(true)
-	, m_silentInitialization(false)
-	, m_verticalRotationLocked(false)
-	, m_bubbleViewModeEnabled(false)
-	, m_bubbleViewFov_deg(90.0f)
-	, m_currentLODLevel(0)
-	, m_currentLODStartIndex(0)
-	, m_LODProgressIndicator(0)
-	, m_LODInProgress(false)
-	, m_LODPendingRefresh(false)
-	, m_activeContext(context())
-	, m_renderingThread(0)
-	, m_openGLContext(openGLContext)
-{
-	//GL window title
-	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
-
-	//GL window own DB
-	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
-
-	//lights
-	m_sunLightEnabled = true;
-	m_sunLightPos[0] = 0;
-	m_sunLightPos[1] = 1;
-	m_sunLightPos[2] = 1;
-	m_sunLightPos[3] = 0;
-
-	m_customLightEnabled = false;
-	m_customLightPos[0] = 0;
-	m_customLightPos[1] = 0;
-	m_customLightPos[2] = 0;
-	m_customLightPos[3] = 1; //positional light
-
-	//matrices
-	m_viewportParams.viewMat.toIdentity();
-	memset(m_viewMatd, 0, sizeof(double)*OPENGL_MATRIX_SIZE);
-	memset(m_projMatd, 0, sizeof(double)*OPENGL_MATRIX_SIZE);
-
-	//default modes
-	setPickingMode(DEFAULT_PICKING);
-	setInteractionMode(TRANSFORM_CAMERA);
-
-	//drag & drop handling
-	setAcceptDrops(true);
-
-	//embedded icons (point size, etc.)
-	enableEmbeddedIcons(true);
-
-	//auto-load previous perspective settings
-	{
-		QSettings settings;
-		settings.beginGroup(c_ps_groupName);
-		
-		//load parameters
-		bool perspectiveView	= settings.value(c_ps_perspectiveView,	false				).toBool();
-		//DGM: we force object-centered view by default now, as the viewer-based perspective is too dependent
-		//on what is displayed (so restoring this parameter at next startup is rarely a good idea)
-		bool objectCenteredView	= /*settings.value(c_ps_objectMode,		true				).toBool()*/true;
-		m_sunLightEnabled		= settings.value(c_ps_sunLight,			true				).toBool();
-		m_customLightEnabled	= settings.value(c_ps_customLight,		false				).toBool();
-		int pivotVisibility		= settings.value(c_ps_pivotVisibility,	PIVOT_SHOW_ON_MOVE	).toInt();
-		
-		settings.endGroup();
-
-		//report current perspective
-		if (!m_silentInitialization)
-		{
-			if (!perspectiveView)
-				ccLog::Print("[ccGLWindow] Perspective is off by default");
-			else
-				ccLog::Print(QString("[ccGLWindow] Perspective is on by default (%1)").arg(objectCenteredView ? "object-centered" : "viewer-centered"));
-		}
-
-		//pivot visibility
-		switch(pivotVisibility)
-		{
-		case PIVOT_HIDE:
-			setPivotVisibility(PIVOT_HIDE);
-			break;
-		case PIVOT_SHOW_ON_MOVE:
-			setPivotVisibility(PIVOT_SHOW_ON_MOVE);
-			break;
-		case PIVOT_ALWAYS_SHOW:
-			setPivotVisibility(PIVOT_ALWAYS_SHOW);
-			break;
-		}
-
-		//apply saved parameters
-		setPerspectiveState(perspectiveView, objectCenteredView);
-		if (m_customLightEnabled)
-			displayNewMessage("Warning: custom light is ON",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,CUSTOM_LIGHT_STATE_MESSAGE);
-		if (!m_sunLightEnabled)
-			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
-	}
-}
-#endif
 
 ccGLWindow::~ccGLWindow()
 {
@@ -1105,14 +960,15 @@ void ccGLWindow::paintGL()
 		if (m_renderingThread->isRunning())
 		{
 			ccLog::PrintDebug(QString("[QPaintGL] Thread rendering in progress"));
+			s_rendering = false;
 			return;
 		}
 		if (m_renderingThread->isReady())
 		{
 			screenTex = m_renderingThread->useTexture();
-			ccLog::PrintDebug(QString("[QPaintGL] Will use the thread rendering result (tex ID = %1)").arg(screenTex));
 			if (glIsTexture(screenTex))
 			{
+				ccLog::PrintDebug(QString("[QPaintGL] Will use the thread rendering result (tex ID = %1)").arg(screenTex));
 				doDraw3D = false;
 			}
 			else
@@ -1178,12 +1034,16 @@ void ccGLWindow::paintGL()
 
 			//if capture mode is ON: we only want to capture it, not to display it
 			if (!m_captureMode.enabled)
+			{
 				screenTex = m_activeGLFilter->getTexture();
+				ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
+			}
 		}
 		else if (!m_captureMode.enabled)
 		{
 			//screenTex = m_fbo->getDepthTexture();
 			screenTex = m_fbo->getColorTexture(0);
+			ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
 		}
 	}
 
@@ -1409,7 +1269,7 @@ void ccGLWindow::paintGL()
 				{
 					m_renderingThread = new ccGLRenderingThread(this);
 					m_renderingThread->init(size());
-					connect(m_renderingThread, SIGNAL(ready()), this, SLOT(renderNextLODLevel()));
+					connect(m_renderingThread, SIGNAL(ready()), this, SLOT(renderNextLODLevel()), Qt::QueuedConnection);
 				}
 				
 				if (m_renderingThread->isValid() && !m_renderingThread->isRunning())
@@ -1436,6 +1296,7 @@ void ccGLWindow::renderNextLODLevel()
 	if (m_LODInProgress && m_currentLODLevel != 0 && !m_LODPendingIgnore)
 	{
 		ccLog::PrintDebug(QString("[renderNextLODLevel] Confirmed"));
+		QApplication::processEvents();
 		updateGL();
 	}
 	else

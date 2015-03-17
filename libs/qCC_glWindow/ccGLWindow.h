@@ -111,16 +111,6 @@ public:
 				const QGLFormat& format = QGLFormat::defaultFormat(),
 				QGLWidget* shareWidget = 0,
 				bool silentInitialization = false);
-
-#ifdef USE_RENDERING_THREAD
-	//! Constructor from an existing/shared QOpenGLContext
-	ccGLWindow(	QWidget *parent,
-				QOpenGLContext* openGLContext );
-
-	//! Returns the associated QOpenGLContext
-	inline QOpenGLContext* getOpenGLContext() const { return m_openGLContext; }
-
-#endif
 	
 	//! Destructor
 	virtual ~ccGLWindow();
@@ -940,11 +930,6 @@ protected:
 	QGLContext* m_activeContext;
 	//! Rendering thread
 	ccGLRenderingThread* m_renderingThread;
-
-#ifdef USE_RENDERING_THREAD
-	//! OpenGL context (Qt 5+)
-	QOpenGLContext* m_openGLContext;
-#endif
 
 	//! Mutex for thread based rendering
 	QMutex m_draw3DMutex;

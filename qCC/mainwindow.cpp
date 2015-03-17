@@ -7027,21 +7027,11 @@ ccGLWindow* MainWindow::new3DView()
 	if (!subWindowList.isEmpty())
 		otherWin = static_cast<ccGLWindow*>(subWindowList[0]->widget());
 
-#ifdef USE_RENDERING_THREAD
-	QOpenGLContext* context = otherWin ? otherWin->getOpenGLContext() : 0;
-	if (!context)
-	{
-		context = new QOpenGLContext();
-		context->setFormat(QSurfaceFormat::defaultFormat());
-		context->create();
-	}
-	ccGLWindow *view3D = new ccGLWindow(this,context); //We share OpenGL contexts between windows!
-#else
 	QGLFormat format = QGLFormat::defaultFormat();
 	format.setStencil(false);
 	format.setSwapInterval(0);
 	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
-#endif
+
 	view3D->setMinimumSize(400,300);
 	view3D->resize(500,400);
 

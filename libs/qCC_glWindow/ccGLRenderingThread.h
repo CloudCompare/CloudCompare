@@ -82,8 +82,10 @@ protected:
 	//! Associated context
 	QOpenGLContext* m_context;
 
+	//! Rendering size
+	QSize m_size;
+
 #ifdef USE_RENDERING_THREAD
-	QAtomicInt m_renderingInProgress;
 	QAtomicInt m_renderingReady;
 	QAtomicInt m_isValid;
 	QOpenGLFramebufferObject* m_renderingFBO;

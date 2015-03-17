@@ -1849,6 +1849,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// L.O.D. display
 		DisplayDesc toDisplay(0,size());
+		if (!pushName)
 		{
 			if (	context.decimateCloudOnMove
 				&&	toDisplay.count > context.minLODPointCount

@@ -26,7 +26,6 @@ ccGLRenderingThread::ccGLRenderingThread(ccGLWindow* associatedWindow)
 	, m_associatedWindow(associatedWindow)
 	, m_context(0)
 #ifdef USE_RENDERING_THREAD
-	, m_renderingInProgress(0)
 	, m_renderingReady(0)
 	, m_isValid(0)
 	, m_renderingFBO(0)
@@ -38,11 +37,11 @@ ccGLRenderingThread::ccGLRenderingThread(ccGLWindow* associatedWindow)
 	// memory space with the GL context of the scene graph. This constructor is called
 	// during updatePaintNode, so we are currently on the scene graph thread with the
 	// scene graph's OpenGL context current.
-	if (m_associatedWindow && associatedWindow->getOpenGLContext())
+	if (m_associatedWindow)
 	{
-		QOpenGLContext* context = associatedWindow->getOpenGLContext();
+		QOpenGLContext* context = m_associatedWindow->context()->contextHandle();
 
-		m_context = new QOpenGLContext(m_associatedWindow);
+		m_context = new QOpenGLContext();
 		m_context->setShareContext(context);
 		m_context->setFormat(context->format());
 		m_context->moveToThread(this);
@@ -78,42 +77,14 @@ void ccGLRenderingThread::kill(unsigned timeout_ms/*=1000*/)
 		wait(timeout_ms);
 	}
 	m_renderingReady.store(0);
-	m_renderingInProgress.store(0);
 #endif
 }
 
 bool ccGLRenderingThread::init(QSize size)
 {
-#ifdef USE_RENDERING_THREAD
-	m_isValid.store(0);
-	m_renderingReady.store(0);
-
-	if (!m_context)
-		return false;
-
-	if (m_renderingFBO && m_renderingFBO->size() != size)
-	{
-		kill();
-		delete m_renderingFBO;
-		m_renderingFBO = 0;
-	}
-	
-	//m_associatedWindow->makeCurrent();
-	m_context->makeCurrent(m_fakeSurface);
-	m_renderingFBO = new QOpenGLFramebufferObject(size,QOpenGLFramebufferObject::Depth);
-	if (m_renderingFBO->size() != size)
-	{
-		delete m_renderingFBO;
-		m_renderingFBO = 0;
-		ccLog::Warning("[ccGLRenderingThread] Failed to init offline FBO!");
-		return false;
-	}
-
+	m_size = size;
 	m_isValid.store(1);
 	return true;
-#else
-	return false;
-#endif
 }
 
 bool ccGLRenderingThread::isValid() const
@@ -152,39 +123,53 @@ GLuint ccGLRenderingThread::useTexture()
 	return tex;
 }
 
-
 void ccGLRenderingThread::run()
 {
 #ifdef USE_RENDERING_THREAD
 	m_renderingReady.store(0);
 	if (	m_isValid.load() == 0
 		||	!m_associatedWindow
-		||	!m_renderingFBO
+		//||	!m_renderingFBO
 		||	!m_context
 		)
 	{
 		return;
 	}
 
-	m_renderingInProgress.store(1);
-
-	//render
-	bool drawCross = m_associatedWindow->crossShouldBeDrawn();
-	CC_DRAW_CONTEXT context;
-	m_associatedWindow->getContext(context);
-
 	if (!m_context->isValid())
 		m_context->create();
 	m_context->makeCurrent(m_fakeSurface);
 
+	assert(QGLContext::areSharing(m_associatedWindow->context(), QGLContext::fromOpenGLContext(m_context)));
+
+	if (!m_renderingFBO || m_renderingFBO->size() != m_size)
+	{
+		if (m_renderingFBO)
+			delete m_renderingFBO;
+
+		m_renderingFBO = new QOpenGLFramebufferObject(m_size, QOpenGLFramebufferObject::Depth);
+		if (m_renderingFBO->size() != m_size)
+		{
+			delete m_renderingFBO;
+			m_renderingFBO = 0;
+			ccLog::Warning("[ccGLRenderingThread] Failed to init offline FBO!");
+			m_isValid.store(0);
+			return;
+		}
+	}
+
 	m_renderingFBO->bind();
 
-	m_associatedWindow->draw3D(context,drawCross,QGLContext::fromOpenGLContext(m_context));
+	//render
+	bool drawCross = m_associatedWindow->crossShouldBeDrawn();
+	CC_DRAW_CONTEXT CONTEXT;
+	m_associatedWindow->getContext(CONTEXT);
+
+	m_associatedWindow->draw3D(CONTEXT, drawCross, QGLContext::fromOpenGLContext(m_context));
 	glFlush();
 
 	m_renderingFBO->bindDefault();
 
-	m_renderingInProgress.store(0);
 	m_renderingReady.store(1);
 	emit ready();
 #endif

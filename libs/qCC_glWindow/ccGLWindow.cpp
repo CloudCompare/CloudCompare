@@ -1625,7 +1625,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross, QGLContext* 
 	}
 
 	if (activeContext != 0)
-		m_activeContext = context();
+		m_activeContext = const_cast<QGLContext*>(context());
 	m_draw3DMutex.unlock();
 }
 

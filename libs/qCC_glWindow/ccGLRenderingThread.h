@@ -33,7 +33,7 @@
 #include <QOpenGLContext>
 #else
 class QOpenGLFramebufferObject; 
-clalss QOpenGLContext;
+class QOpenGLContext;
 #endif
 
 class ccGLWindow;

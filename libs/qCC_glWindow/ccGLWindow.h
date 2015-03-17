@@ -18,6 +18,9 @@
 #ifndef CC_GL_WINDOW_HEADER
 #define CC_GL_WINDOW_HEADER
 
+//Local
+#include "ccGLRenderingThread.h"
+
 //CCLib
 #include <CCGeom.h>
 
@@ -36,6 +39,7 @@
 #include <QFont>
 #include <QMap>
 #include <QElapsedTimer>
+#include <QMutex>
 
 //system
 #include <set>
@@ -107,6 +111,16 @@ public:
 				const QGLFormat& format = QGLFormat::defaultFormat(),
 				QGLWidget* shareWidget = 0,
 				bool silentInitialization = false);
+
+#ifdef USE_RENDERING_THREAD
+	//! Constructor from an existing/shared QOpenGLContext
+	ccGLWindow(	QWidget *parent,
+				QOpenGLContext* openGLContext );
+
+	//! Returns the associated QOpenGLContext
+	inline QOpenGLContext* getOpenGLContext() const { return m_openGLContext; }
+
+#endif
 	
 	//! Destructor
 	virtual ~ccGLWindow();
@@ -588,6 +602,8 @@ signals:
 
 protected:
 
+	friend ccGLRenderingThread;
+
 	//! Processes the clickable items
 	/** \return true if an item has been clicked
 	**/
@@ -612,9 +628,10 @@ protected:
 	void paintGL();
 
 	//! main OpenGL loop
-	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBufferObject* fbo = 0);
+	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, QGLContext* activeContext = 0);
 
 	//Graphical features controls
+	bool crossShouldBeDrawn() const;
 	void drawCross();
 	void drawTrihedron();
 	void drawGradientBackground();
@@ -919,6 +936,18 @@ protected:
 	//! Internal timer
 	QElapsedTimer m_timer;
 
+	//! Active context
+	QGLContext* m_activeContext;
+	//! Rendering thread
+	ccGLRenderingThread* m_renderingThread;
+
+#ifdef USE_RENDERING_THREAD
+	//! OpenGL context (Qt 5+)
+	QOpenGLContext* m_openGLContext;
+#endif
+
+	//! Mutex for thread based rendering
+	QMutex m_draw3DMutex;
 
 private:
 

@@ -7023,14 +7023,25 @@ ccGLWindow* MainWindow::new3DView()
 
 	//already existing window?
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	ccGLWindow* otherWin=0;
+	ccGLWindow* otherWin = 0;
 	if (!subWindowList.isEmpty())
-		otherWin=static_cast<ccGLWindow*>(subWindowList[0]->widget());
+		otherWin = static_cast<ccGLWindow*>(subWindowList[0]->widget());
 
+#ifdef USE_RENDERING_THREAD
+	QOpenGLContext* context = otherWin ? otherWin->getOpenGLContext() : 0;
+	if (!context)
+	{
+		context = new QOpenGLContext();
+		context->setFormat(QSurfaceFormat::defaultFormat());
+		context->create();
+	}
+	ccGLWindow *view3D = new ccGLWindow(this,context); //We share OpenGL contexts between windows!
+#else
 	QGLFormat format = QGLFormat::defaultFormat();
 	format.setStencil(false);
 	format.setSwapInterval(0);
 	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
+#endif
 	view3D->setMinimumSize(400,300);
 	view3D->resize(500,400);
 

@@ -33,6 +33,7 @@ ccGLRenderingThread::ccGLRenderingThread(ccGLWindow* associatedWindow)
 	, m_fakeSurface(0)
 #endif
 {
+#ifdef USE_RENDERING_THREAD
 	// Set up the QGLContext to use for rendering in this thread. It is sharing
 	// memory space with the GL context of the scene graph. This constructor is called
 	// during updatePaintNode, so we are currently on the scene graph thread with the
@@ -52,17 +53,20 @@ ccGLRenderingThread::ccGLRenderingThread(ccGLWindow* associatedWindow)
 		m_fakeSurface->setFormat(context->format());
 		m_fakeSurface->create();
 	}
+#endif
 }
 
 ccGLRenderingThread::~ccGLRenderingThread()
 {
 	kill();
 	
+#ifdef USE_RENDERING_THREAD
 	if (m_fakeSurface)
 	{
 		delete m_fakeSurface;
 		m_fakeSurface = 0;
 	}
+#endif
 }
 
 void ccGLRenderingThread::kill(unsigned timeout_ms/*=1000*/)

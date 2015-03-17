@@ -175,7 +175,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_LODProgressIndicator(0)
 	, m_LODInProgress(false)
 	, m_LODPendingRefresh(false)
-	, m_activeContext(context())
+	, m_activeContext(const_cast<QGLContext*>(context()))
 	, m_renderingThread(0)
 #ifdef USE_RENDERING_THREAD
 	, m_openGLContext(0)

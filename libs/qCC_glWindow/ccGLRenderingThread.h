@@ -23,6 +23,7 @@
 
 //Qt
 #include <QThread>
+#include <QElapsedTimer>
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 #define USE_RENDERING_THREAD
@@ -31,7 +32,6 @@
 #include <QGLContext>
 #include <QAtomicInt>
 #include <QOpenGLContext>
-#include <QElapsedTimer>
 #else
 class QOpenGLFramebufferObject; 
 class QOpenGLContext;

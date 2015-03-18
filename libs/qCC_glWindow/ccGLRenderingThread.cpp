@@ -18,6 +18,9 @@
 #include "ccGLRenderingThread.h"
 #include "ccGLWindow.h"
 
+//CC_FBO_LIB
+#include <ccFrameBufferObject.h>
+
 //qCC_db
 #include <ccLog.h>
 
@@ -25,6 +28,7 @@ ccGLRenderingThread::ccGLRenderingThread(ccGLWindow* associatedWindow)
 	: QThread(associatedWindow)
 	, m_associatedWindow(associatedWindow)
 	, m_context(0)
+	, m_fbo(0)
 #ifdef USE_RENDERING_THREAD
 	, m_renderingReady(0)
 	, m_isValid(0)
@@ -111,7 +115,9 @@ GLuint ccGLRenderingThread::useTexture()
 #ifdef USE_RENDERING_THREAD
 	if (isReady())
 	{
-		if (m_renderingFBO)
+		if (m_fbo)
+			tex = m_fbo->getColorTexture(0);
+		else if (m_renderingFBO)
 			tex = m_renderingFBO->texture();
 		else
 			assert(false);
@@ -129,12 +135,13 @@ void ccGLRenderingThread::run()
 	m_renderingReady.store(0);
 	if (	m_isValid.load() == 0
 		||	!m_associatedWindow
-		//||	!m_renderingFBO
 		||	!m_context
 		)
 	{
 		return;
 	}
+
+	m_timer.restart();
 
 	if (!m_context->isValid())
 		m_context->create();
@@ -142,24 +149,41 @@ void ccGLRenderingThread::run()
 
 	assert(QGLContext::areSharing(m_associatedWindow->context(), QGLContext::fromOpenGLContext(m_context)));
 
-	if (!m_renderingFBO || m_renderingFBO->size() != m_size)
+	if (!m_fbo || QSize(m_fbo->width(), m_fbo->height()) != m_size)
 	{
-		if (m_renderingFBO)
-			delete m_renderingFBO;
+		if (m_fbo)
+			delete m_fbo;
 
-		m_renderingFBO = new QOpenGLFramebufferObject(m_size, QOpenGLFramebufferObject::Depth);
-		if (m_renderingFBO->size() != m_size)
+		m_fbo = new ccFrameBufferObject();
+		if (	!m_fbo->init(m_size.width(), m_size.height())
+			||	!m_fbo->initTexture(0, GL_RGBA, GL_RGBA, GL_FLOAT)
+			||	!m_fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D))
 		{
-			delete m_renderingFBO;
-			m_renderingFBO = 0;
+			delete m_fbo;
+			m_fbo = 0;
 			ccLog::Warning("[ccGLRenderingThread] Failed to init offline FBO!");
 			m_isValid.store(0);
 			return;
 		}
 	}
+	//if (!m_renderingFBO || m_renderingFBO->size() != m_size)
+	//{
+	//	if (m_renderingFBO)
+	//		delete m_renderingFBO;
 
-	m_renderingFBO->bind();
+	//	m_renderingFBO = new QOpenGLFramebufferObject(m_size, QOpenGLFramebufferObject::Depth);
+	//	if (m_renderingFBO->size() != m_size)
+	//	{
+	//		delete m_renderingFBO;
+	//		m_renderingFBO = 0;
+	//		ccLog::Warning("[ccGLRenderingThread] Failed to init offline FBO!");
+	//		m_isValid.store(0);
+	//		return;
+	//	}
+	//}
 
+	//m_renderingFBO->bind();
+	m_fbo->start();
 	//render
 	bool drawCross = m_associatedWindow->crossShouldBeDrawn();
 	CC_DRAW_CONTEXT CONTEXT;
@@ -168,7 +192,12 @@ void ccGLRenderingThread::run()
 	m_associatedWindow->draw3D(CONTEXT, drawCross, QGLContext::fromOpenGLContext(m_context));
 	glFlush();
 
-	m_renderingFBO->bindDefault();
+	//m_renderingFBO->release();
+	m_fbo->stop();
+
+	qint64 duration_ms = m_timer.elapsed();
+	if (duration_ms < 300)
+		wait(300 - duration_ms);
 
 	m_renderingReady.store(1);
 	emit ready();

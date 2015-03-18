@@ -15,6 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
+//Local
+#include "ccGLRenderingThread.h"
+
+
 //CCLib
 #include <CCConst.h>
 #include <CCPlatform.h>
@@ -953,7 +957,8 @@ void ccGLWindow::paintGL()
 
 	//do we have a offline rendering in store?
 	GLuint screenTex = 0;
-	if (	!m_captureMode.enabled
+	if (	doDraw3D
+		&&	!m_captureMode.enabled
 		&&	m_renderingThread
 		&&	m_renderingThread->isValid())
 	{
@@ -4463,14 +4468,9 @@ bool ccGLWindow::initFBO(int w, int h)
 	if (!_fbo)
 		_fbo = new ccFrameBufferObject();
 
-	bool success = false;
-	if (_fbo->init(w,h))
-	{
-		if (_fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_FLOAT))
-			success = _fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D);
-	}
-
-	if (!success)
+	if (	!_fbo->init(w,h)
+		||	!_fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_FLOAT)
+		||	!_fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D))
 	{
 		ccLog::Warning("[FBO] Initialization failed!");
 		delete _fbo;

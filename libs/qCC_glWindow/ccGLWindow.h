@@ -18,9 +18,6 @@
 #ifndef CC_GL_WINDOW_HEADER
 #define CC_GL_WINDOW_HEADER
 
-//Local
-#include "ccGLRenderingThread.h"
-
 //CCLib
 #include <CCGeom.h>
 
@@ -56,6 +53,7 @@ class ccGlFilter;
 class ccFrameBufferObject;
 class ccInteractor;
 class ccPolyline;
+class ccGLRenderingThread;
 
 //! OpenGL 3D view
 class ccGLWindow : public QGLWidget, public ccGenericGLDisplay
@@ -480,6 +478,12 @@ public:
 	//! Enables or disables LOD on this display
 	inline bool setLODEnabled(bool state) { m_LODEnabled = state; }
 
+	//! Whether the middle-screen cross should be displayed or not
+	bool crossShouldBeDrawn() const;
+	
+	//! Main OpenGL display sequence
+	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, QGLContext* activeContext = 0);
+
 public slots:
 
 	//! Applies a 1:1 global zoom
@@ -592,8 +596,6 @@ signals:
 
 protected:
 
-	friend ccGLRenderingThread;
-
 	//! Processes the clickable items
 	/** \return true if an item has been clicked
 	**/
@@ -617,11 +619,7 @@ protected:
 	void resizeGL(int w, int h);
 	void paintGL();
 
-	//! main OpenGL loop
-	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, QGLContext* activeContext = 0);
-
 	//Graphical features controls
-	bool crossShouldBeDrawn() const;
 	void drawCross();
 	void drawTrihedron();
 	void drawGradientBackground();

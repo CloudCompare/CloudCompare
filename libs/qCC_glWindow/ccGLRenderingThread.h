@@ -31,12 +31,14 @@
 #include <QGLContext>
 #include <QAtomicInt>
 #include <QOpenGLContext>
+#include <QElapsedTimer>
 #else
 class QOpenGLFramebufferObject; 
 class QOpenGLContext;
 #endif
 
 class ccGLWindow;
+class ccFrameBufferObject;
 
 //! Rendering thread for offline rendering
 class ccGLRenderingThread : public QThread
@@ -84,6 +86,12 @@ protected:
 
 	//! Rendering size
 	QSize m_size;
+
+	//! Rendering FBO
+	ccFrameBufferObject* m_fbo;
+
+	//! Internal timer
+	QElapsedTimer m_timer;
 
 #ifdef USE_RENDERING_THREAD
 	QAtomicInt m_renderingReady;

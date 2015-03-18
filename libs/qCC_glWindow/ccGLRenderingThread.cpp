@@ -87,7 +87,9 @@ void ccGLRenderingThread::kill(unsigned timeout_ms/*=1000*/)
 bool ccGLRenderingThread::init(QSize size)
 {
 	m_size = size;
+#ifdef USE_RENDERING_THREAD
 	m_isValid.store(1);
+#endif
 	return true;
 }
 

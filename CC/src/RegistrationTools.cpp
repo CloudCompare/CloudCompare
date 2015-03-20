@@ -195,12 +195,12 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				sfGarbage.add(model.weights);
 
 				unsigned destCount = subModelCloud->size();
-				if (model.weights->reserve(destCount))
+				if (model.weights->resize(destCount))
 				{
 					for (unsigned i = 0; i < destCount; ++i)
 					{
 						unsigned pointIndex = subModelCloud->getPointGlobalIndex(i);
-						model.weights->addElement(inputModelWeights->getValue(pointIndex));
+						model.weights->setValue(i,inputModelWeights->getValue(pointIndex));
 					}
 					model.weights->computeMinAndMax();
 				}
@@ -244,12 +244,12 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				sfGarbage.add(data.weights);
 				
 				unsigned destCount = data.cloud->size();
-				if (data.weights->reserve(destCount))
+				if (data.weights->resize(destCount))
 				{
 					for (unsigned i = 0; i < destCount; ++i)
 					{
 						unsigned pointIndex = data.cloud->getPointGlobalIndex(i);
-						data.weights->addElement(inputDataWeights->getValue(pointIndex));
+						data.weights->setValue(i,inputDataWeights->getValue(pointIndex));
 					}
 					data.weights->computeMinAndMax();
 				}
@@ -470,8 +470,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			assert(model.CPSetWeights);
 			unsigned count = data.CPSet->size();
 
-			if (model.CPSetWeights->currentSize() != count
-				&& !model.CPSetWeights->resize(count))
+			if (	model.CPSetWeights->currentSize() != count
+				&&	!model.CPSetWeights->resize(count))
 			{
 				//not enough memory to store weights
 				result = ICP_ERROR_NOT_ENOUGH_MEMORY;

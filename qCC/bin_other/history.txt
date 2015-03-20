@@ -19,9 +19,14 @@ v2.6.2 XX/XX/2015
 	* Command line:
 		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
 		the command line (with a dedicated XML parameters file)
+		- the 'SF Arithmetic' tool can now be called via the command line:
+			* 'SF_ARITHMETIC' + SF index + operation
+			* supported operations are: sqrt, pow2, pow3, exp, log, log10, cos, sin, tan, acos, asin, atan, int, inverse)
 		- new options for the 'ICP' tool:
-			* 'DATA_SF_AS_WEIGHTS' + sf index (to use the given scalar field of the data entity as weights)
-			* 'MODEL_SF_AS_WEIGHTS' + sf index (to use the given scalar field of the model entity as weights)
+			* 'DATA_SF_AS_WEIGHTS' + SF index (to use the given scalar field of the data entity as weights)
+			* 'MODEL_SF_AS_WEIGHTS' + SF index (to use the given scalar field of the model entity as weights)
+			* the 'LAST' option can be used instead of an explicit SF index
+		- new options 'POP_CLOUDS' and 'POP_MESHES' to remove the last loaded cloud or mesh
 	* Weighted ICP is now functional
 		- the user can use the currently active scalar field on the registered and/or the reference
 		clouds as weights. The bigger the weights, the more influence the points will have.

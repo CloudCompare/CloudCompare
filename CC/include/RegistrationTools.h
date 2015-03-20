@@ -85,8 +85,7 @@ protected:
 		\param X the reference cloud (model)
 		\param trans the resulting transformation
 		\param adjustScale whether to estimate scale (s) as well (see jschmidt 2005)
-		\param weightsP weights for the registered points (optional)
-		\param weightsX weights for the reference points (optional)
+		\param coupleWeights weights for each (Pi,Xi) couple (optional)
 		\param aPrioriScale 'a priori' scale (Sa) between P and X
 		\return success
 	**/
@@ -94,8 +93,7 @@ protected:
 										GenericCloud* X,
 										ScaledTransformation& trans,
 										bool adjustScale = false,
-										ScalarField* weightsP = 0,
-										ScalarField* weightsX = 0,
+										ScalarField* coupleWeights = 0,
 										PointCoordinateType aPrioriScale = 1.0f);
 
 };

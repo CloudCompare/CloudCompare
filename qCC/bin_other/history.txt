@@ -19,6 +19,11 @@ v2.6.2 XX/XX/2015
 	* Command line:
 		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
 		the command line (with a dedicated XML parameters file)
+	* Weighted ICP is now functional
+		- the user can use the currently active scalar field on the registered and/or the reference
+		clouds as weights. The bigger the weights, the more influence the points will have.
+		- weights are automatically normalized
+		- only absolute values are considered
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

@@ -132,11 +132,10 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 
 struct Model
 {
-	Model() : cloud(0), weights(0), CPSetWeights(0) {}
-	Model(const Model& m) : cloud(m.cloud), weights(m.weights), CPSetWeights(m.CPSetWeights) {}
+	Model() : cloud(0), weights(0) {}
+	Model(const Model& m) : cloud(m.cloud), weights(m.weights) {}
 	GenericIndexedCloudPersist* cloud;
 	ScalarField* weights;
-	ScalarField* CPSetWeights;
 };
 
 struct Data
@@ -305,10 +304,13 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	//Closest Point Set (see ICP algorithm)
 	data.CPSet = new ReferenceCloud(model.cloud);
 	cloudGarbage.add(data.CPSet);
-	if (model.weights)
+
+	//per-point couple weights
+	ScalarField* coupleWeights = 0;
+	if (model.weights || data.weights)
 	{
-		model.CPSetWeights = new ScalarField("CPSetWeights");
-		sfGarbage.add(model.CPSetWeights);
+		coupleWeights = new ScalarField("CoupleWeights");
+		sfGarbage.add(coupleWeights);
 	}
 
 	//we compute the initial distance between the two clouds (and the CPSet by the way)
@@ -464,14 +466,14 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			data = filteredData;
 		}
 
-		//update CPSet weights (if any)
-		if (model.weights)
+		//update couple weights (if any)
+		if (coupleWeights)
 		{
-			assert(model.CPSetWeights);
-			unsigned count = data.CPSet->size();
+			assert(model.weights || data.weights);
+			unsigned count = data.cloud->size();
+			assert(data.CPSet->size() == count);
 
-			if (	model.CPSetWeights->currentSize() != count
-				&&	!model.CPSetWeights->resize(count))
+			if (coupleWeights->currentSize() != count && !coupleWeights->resize(count))
 			{
 				//not enough memory to store weights
 				result = ICP_ERROR_NOT_ENOUGH_MEMORY;
@@ -479,69 +481,42 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			}
 			for (unsigned i = 0; i<count; ++i)
 			{
-				unsigned dataIndex = data.CPSet->getPointGlobalIndex(i);
-				model.CPSetWeights->setValue(i, model.weights->getValue(dataIndex));
+				ScalarType wd = (data.weights ? data.weights->getValue(i) : static_cast<ScalarType>(1.0));
+				ScalarType wm = (model.weights ? model.weights->getValue(data.CPSet->getPointGlobalIndex(i)) : static_cast<ScalarType>(1.0));
+				coupleWeights->setValue(i, wd*wm);
 			}
-			model.CPSetWeights->computeMinAndMax();
+			coupleWeights->computeMinAndMax();
 		}
 
 		//we can now compute the best registration transformation for this step
 		//(now that we have selected the points that will be used for registration!)
 		{
-			double meanSquareError = 0;
-			if (data.weights || model.CPSetWeights)
-			{
-				//if we have weights, we have to compute weighted RMS!!!
-				double meanSquareValue = 0.0;
-				//double wiMax = 0.0;
-				double wiSum = 0.0;
-				unsigned count = 0;
+			//if we use weights, we have to compute weighted RMS!!!
+			double meanSquareValue = 0.0;
+			double wiSum = 0.0; //we normalize the weights by their sum
 
-				for (unsigned i = 0; i<data.cloud->size(); ++i)
+			for (unsigned i = 0; i < data.cloud->size(); ++i)
+			{
+				ScalarType V = data.cloud->getPointScalarValue(i);
+				if (ScalarField::ValidValue(V))
 				{
-					ScalarType V = data.cloud->getPointScalarValue(i);
-					if (ScalarField::ValidValue(V))
+					double wi = 1.0;
+					if (coupleWeights)
 					{
-						double wi = 1.0;
-						if (data.weights)
-						{
-							ScalarType wd = data.weights->getValue(i);
-							if (!ScalarField::ValidValue(wd))
-								continue;
-							wi = wd;
-						}
-						if (model.CPSetWeights)
-						{
-							ScalarType wm = model.CPSetWeights->getValue(i);
-							if (!ScalarField::ValidValue(wm))
-								continue;
-							wi *= wm;
-						}
-						wi = fabs(wi);
-						//wiMax = std::max(wiMax, wi);
-						wiSum += wi;
-						
-						double Vd = static_cast<double>(V);
-						meanSquareValue += wi * Vd*Vd;
-						++count;
+						ScalarType w = coupleWeights->getValue(i);
+						if (!ScalarField::ValidValue(w))
+							continue;
+						wi = fabs(w);
 					}
+					double Vd = wi * static_cast<double>(V);
+					wiSum += wi*wi;
+					meanSquareValue += Vd*Vd;
 				}
-
-				//meanSquareError = (wiMax != 0 ? static_cast<ScalarType>(meanSquareValue / (count*wiMax)) : 0);
-				meanSquareError = (wiSum != 0 ? static_cast<ScalarType>(meanSquareValue / wiSum) : 0);
-			}
-			else
-			{
-				//12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
-				meanSquareError = ScalarFieldTools::computeMeanSquareScalarValue(data.cloud);
 			}
 
-			if (meanSquareError < 0)
-			{
-				//an error occurred
-				result = ICP_ERROR_DIST_COMPUTATION;
-				break;
-			}
+			//12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
+			double meanSquareError = (wiSum != 0 ? static_cast<ScalarType>(meanSquareValue / wiSum) : 0);
+
 			double rms = sqrt(meanSquareError);
 
 #ifdef _DEBUG
@@ -644,7 +619,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 		//single iteration of the registration procedure
 		currentTrans = ScaledTransformation();
-		if (!RegistrationTools::RegistrationProcedure(data.cloud, data.CPSet, currentTrans, adjustScale, data.weights, model.CPSetWeights))
+		if (!RegistrationTools::RegistrationProcedure(data.cloud, data.CPSet, currentTrans, adjustScale, coupleWeights))
 		{
 			result = ICP_ERROR_REGISTRATION_STEP;
 			break;
@@ -773,8 +748,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 												GenericCloud* X, //model
 												ScaledTransformation& trans,
 												bool adjustScale/*=false*/,
-												ScalarField* weightsP/*=0*/,
-												ScalarField* weightsX/*=0*/,
+												ScalarField* coupleWeights/*=0*/,
 												PointCoordinateType aPrioriScale/*=1.0f*/)
 {
 	//resulting transformation (R is invalid on initialization, T is (0,0,0) and s==1)
@@ -786,8 +760,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		return false;
 
 	//centers of mass
-	CCVector3 Gp = GeometricalAnalysisTools::computeGravityCenter(P);
-	CCVector3 Gx = GeometricalAnalysisTools::computeGravityCenter(X);
+	CCVector3 Gp = coupleWeights ? GeometricalAnalysisTools::computeWeightedGravityCenter(P, coupleWeights) : GeometricalAnalysisTools::computeGravityCenter(P);
+	CCVector3 Gx = coupleWeights ? GeometricalAnalysisTools::computeWeightedGravityCenter(X, coupleWeights) : GeometricalAnalysisTools::computeGravityCenter(X);
 
 	//specific case: 3 points only
 	//See section 5.A in Horn's paper
@@ -939,8 +913,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		}
 
 		//Cross covariance matrix, eq #24 in Besl92 (but with weights, if any)
-		SquareMatrixd Sigma_px = (weightsP || weightsX	? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp,Gx,weightsP,weightsX)
-														: GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp,Gx) );
+		SquareMatrixd Sigma_px = (coupleWeights ? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P, X, Gp, Gx, coupleWeights)
+												: GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp,Gx) );
 		if (!Sigma_px.isValid())
 			return false;
 

@@ -87,6 +87,8 @@ static const char COMMAND_ICP_OVERLAP[]						= "OVERLAP";
 static const char COMMAND_ICP_ADJUST_SCALE[]				= "ADJUST_SCALE";
 static const char COMMAND_ICP_RANDOM_SAMPLING_LIMIT[]		= "RANDOM_SAMPLING_LIMIT";
 static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
+static const char COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT[]		= "MODEL_SF_AS_WEIGHTS";
+static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
@@ -112,6 +114,7 @@ static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
 static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_CROSS_SECTION[]					= "CROSS_SECTION";
 static const char COMMAND_LOG_FILE[]						= "LOG_FILE";
+static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -2767,6 +2770,8 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	unsigned iterationCount = 0;
 	unsigned randomSamplingLimit = 20000;
 	unsigned  overlap = 100;
+	int modelSFAsWeights = -1;
+	int dataSFAsWeights = -1;
 
 	while (!arguments.empty())
 	{
@@ -2842,6 +2847,30 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (!ok || randomSamplingLimit < 3)
 				return Error(QString("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 		}
+		else if (IsCommand(argument,COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
+			bool ok;
+			modelSFAsWeights = arguments.takeFirst().toInt(&ok);
+			if (!ok || modelSFAsWeights < 0)
+				return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
+		}
+		else if (IsCommand(argument,COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
+			bool ok;
+			dataSFAsWeights = arguments.takeFirst().toInt(&ok);
+			if (!ok || dataSFAsWeights < 0)
+				return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
+		}
 		else
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
@@ -2869,8 +2898,40 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			return Error("Not enough loaded entities (expect at least 2!)");
 	}
 
+	//put them in the right order (data first, model next)
 	if (referenceIsFirst)
+	{
 		std::swap(dataAndModel[0],dataAndModel[1]);
+	}
+
+	//check that the scalar fields (weights) exist
+	if (dataSFAsWeights >= 0)
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
+		if (!cloud || dataSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			return Error(QString("Invalid SF index for data entity! (%1)").arg(dataSFAsWeights));
+		}
+		else
+		{
+			Print(QString("[ICP] SF #%1 (data entity) will be used as weights").arg(dataSFAsWeights));
+			cloud->setCurrentDisplayedScalarField(dataSFAsWeights);
+		}
+
+	}
+	if (modelSFAsWeights >= 0)
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
+		if (!cloud || modelSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			return Error(QString("Invalid SF index for model entity! (%1)").arg(modelSFAsWeights));
+		}
+		else
+		{
+			Print(QString("[ICP] SF #%1 (model entity) will be used as weights").arg(modelSFAsWeights));
+			cloud->setCurrentDisplayedScalarField(modelSFAsWeights);
+		}
+	}
 
 	ccGLMatrix transMat;
 	double finalError = 0.0;
@@ -2889,8 +2950,8 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 									iterationCount != 0 ? CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE : CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
 									adjustScale,
 									overlap/100.0,
-									false,
-									false,
+									dataSFAsWeights >= 0,
+									modelSFAsWeights >= 0,
 									CCLib::ICPRegistrationTools::SKIP_NONE,
 									parent ))
 	{

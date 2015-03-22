@@ -431,6 +431,11 @@ void MainWindow::loadPlugins()
 		}
 	}
 
+	if (menuPlugins)
+	{
+		menuPlugins->setEnabled(!m_stdPlugins.empty());
+	}
+
 	if (toolBarPluginTools->isEnabled())
 	{
 		actionDisplayPluginTools->setEnabled(true);

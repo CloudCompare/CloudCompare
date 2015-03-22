@@ -44,8 +44,10 @@ if( WIN32 )
 
 		#specific case for the MinGW version of Qts
 		if( MINGW )
-			list( APPEND QT_RELEASE_DLLS_BASE_NAME libgcc )
-			list( APPEND QT_RELEASE_DLLS_BASE_NAME mingwm )
+			# OLD: list( APPEND QT_RELEASE_DLLS_BASE_NAME libgcc )
+			# OLD: list( APPEND QT_RELEASE_DLLS_BASE_NAME mingwm )
+			file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libgcc*.dll )
+			file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libstdc++*.dll )
 		endif()
 
 		#generate full path of release Dlls

@@ -197,10 +197,17 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glLineWidth(static_cast<GLfloat>(m_width));
 			}
 
-			glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
+			//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
+			//on one on my graphic card with this mode!
+			//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
+			glBegin(GL_LINE_STRIP);
 			for (unsigned i=0; i<vertCount; ++i)
 			{
 				ccGL::Vertex3v(getPoint(i)->u);
+			}
+			if (m_isClosed)
+			{
+				ccGL::Vertex3v(getPoint(0)->u);
 			}
 			glEnd();
 

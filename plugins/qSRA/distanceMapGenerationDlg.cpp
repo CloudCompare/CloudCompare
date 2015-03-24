@@ -1156,7 +1156,7 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 	if (rtfDlg.exec())
 	{
 		QApplication::processEvents();
-		m_window->renderToFile(qPrintable(rtfDlg.getFilename()),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
+		m_window->renderToFile(rtfDlg.getFilename(),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
 	}
 }
 

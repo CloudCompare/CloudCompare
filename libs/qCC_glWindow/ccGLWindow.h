@@ -377,7 +377,7 @@ public:
 	virtual void invalidateVisualization();
 
 	//! Renders screen to a file
-	virtual bool renderToFile(	const char* filename,
+	virtual bool renderToFile(	QString filename,
 								float zoomFactor = 1.0,
 								bool dontScaleFeatures = false,
 								bool renderOverlayItems = false);

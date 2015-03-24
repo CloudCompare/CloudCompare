@@ -4179,12 +4179,12 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 		redraw();
 }
 
-bool ccGLWindow::renderToFile(	const char* filename,
+bool ccGLWindow::renderToFile(	QString filename,
 								float zoomFactor/*=1.0*/,
 								bool dontScaleFeatures/*=false*/,
 								bool renderOverlayItems/*=false*/)
 {
-	if (!filename || zoomFactor<1e-2)
+	if (filename.isEmpty() || zoomFactor < 1.0e-2f)
 		return false;
 
 	//current window size (in pixels)
@@ -4394,7 +4394,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 				delete fbo;
 			fbo = 0;
 
-			output.save(filename);
+			result = output.save(filename);
 
 			ccGLUtils::CatchGLError("ccGLWindow::renderToFile");
 
@@ -4405,7 +4405,6 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			glViewport(0,0,width(),height());
 
 			//updateZoom(1.0/zoomFactor);
-			result = true;
 		}
 
 		//resizeGL(width(),height());
@@ -4422,8 +4421,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		QPixmap capture = renderPixmap(Wp,Hp);
 		if (capture.width()>0 && capture.height()>0)
 		{
-			capture.save(filename);
-			result = true;
+			result = capture.save(filename);
 		}
 		else
 		{
@@ -4442,7 +4440,9 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	m_captureMode.zoomFactor = 1.0f;
 
 	if (result)
-		ccLog::Print("[Snapshot] File '%s' saved! (%i x %i pixels)",filename,Wp,Hp);
+		ccLog::Print(QString("[Snapshot] File '%1' saved! (%2 x %3 pixels)").arg(filename).arg(Wp).arg(Hp));
+	else
+		ccLog::Print(QString("[Snapshot] Failed to save file '%1'!").arg(filename));
 
 	return true;
 }

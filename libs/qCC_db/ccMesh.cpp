@@ -2950,19 +2950,19 @@ bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCV
 	{
 		if (!triNormIndexes || triNormIndexes[0] >= 0)
 		{
-			const CCVector3& N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0]));
+			const CCVector3& N1 = triNormIndexes ? ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0])) : m_associatedCloud->getPointNormal(i1);
 			Nd += CCVector3d(N1.x,N1.y,N1.z) * w.u[0];
 		}
 
 		if (!triNormIndexes || triNormIndexes[1] >= 0)
 		{
-			const CCVector3& N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1]));
+			const CCVector3& N2 = triNormIndexes ? ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1])) : m_associatedCloud->getPointNormal(i2);
 			Nd += CCVector3d(N2.x,N2.y,N2.z) * w.u[1];
 		}
 
 		if (!triNormIndexes || triNormIndexes[2] >= 0)
 		{
-			const CCVector3& N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2]));
+			const CCVector3& N3 = triNormIndexes ? ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2])) : m_associatedCloud->getPointNormal(i3);
 			Nd += CCVector3d(N3.x,N3.y,N3.z) * w.u[2];
 		}
 		Nd.normalize();

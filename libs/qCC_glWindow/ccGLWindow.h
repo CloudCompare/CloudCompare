@@ -74,7 +74,7 @@ public:
 						POINT_PICKING,
 						TRIANGLE_PICKING,
 						POINT_OR_TRIANGLE_PICKING,
-						AUTO_POINT_PICKING,
+						LABEL_PICKING,
 						DEFAULT_PICKING,
 	};
 
@@ -509,6 +509,9 @@ protected slots:
 	//! Stops frame rate test
 	void stopFrameRateTest();
 
+	//! Reacts to the itemPickedFast signal
+	void onItemPickedFast(int entityID, int subEntityID, int x, int y);
+
 signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
@@ -516,15 +519,24 @@ signals:
 	//! Signal emitted when multiple entities are selected in the 3D view
 	void entitiesSelectionChanged(std::set<int> entIDs);
 
-	//! Signal emitted when a point is picked
-	/** The POINT_PICKING or TRIANGLE_PICKING or POINT_OR_TRIANGLE_PICKING
-		mode must be enabled.
-		\param entityID entity unique ID
-		\param itemIndex point or triangle index in entity
+	//! Signal emitted when a point (or a triangle) is picked
+	/** \param entityID entity unique ID
+		\param subEntityID point or triangle index in entity
 		\param x mouse cursor x position
 		\param y mouse cursor y position
 	**/
-	void itemPicked(int entityID, unsigned itemIndex, int x, int y);
+	void itemPicked(int entityID, unsigned subEntityID, int x, int y);
+
+	//! Signal emitted when an item is picked (FAST_PICKING mode only)
+	/** \param entityID entity unique ID
+		\param subEntityID point or triangle index in entity
+		\param x mouse cursor x position
+		\param y mouse cursor y position
+	**/
+	void itemPickedFast(int entityID, int subEntityID, int x, int y);
+
+	//! Signal emitted when fast picking is finished (FAST_PICKING mode only)
+	void fastPickingFinished();
 
 	/*** Camera link mode (interactive modifications of the view/camera are echoed to other windows) ***/
 
@@ -631,20 +643,16 @@ protected:
 	void glInit() { /*stop QGLWidget standard behavior*/ }
 	void glDraw() { /*stop QGLWidget standard behavior*/ }
 
+	//! Rendering thread
 	class RenderingThread : public QThread
 	{
 	public:
 
-		RenderingThread(ccGLWindow* win = 0)
-			: QThread(win)
-			, m_window(win)
-			, m_abort(0)
-		{}
-
+		RenderingThread(ccGLWindow* win);
 		~RenderingThread() { stop(); }
 		
 		void stop();
-		inline void wake() { m_waitCondition.wakeOne(); }
+		void redraw();
 
 	protected:
 
@@ -653,6 +661,7 @@ protected:
 		ccGLWindow* m_window;
 		QWaitCondition m_waitCondition;
 		QAtomicInt m_abort;
+		QAtomicInt m_pendingRedraw;
 	};
 
 	friend RenderingThread;
@@ -690,21 +699,46 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
+	//! Picking parameters
+	struct PickingParameters
+	{
+		//! Default constructor
+		PickingParameters(	PICKING_MODE _mode = NO_PICKING,
+							int _centerX = 0,
+							int _centerY = 0,
+							int _pickWidth = 5,
+							int _pickHeight = 5)
+			: mode(_mode)
+			, centerX(_centerX)
+			, centerY(_centerY)
+			, pickWidth(_pickWidth)
+			, pickHeight(_pickHeight)
+			, flags(0)
+		{}
+
+		PICKING_MODE mode;
+		int centerX;
+		int centerY;
+		int pickWidth;
+		int pickHeight;
+		unsigned short flags;
+	};
+
 	//! Starts picking process
 	/** OpenGL is used by default (unless ccGui::ParamStruct::useOpenGLPointPicking
 		is false in which case a CPU based approach will be used for point picking).
-		\param mode picking mode
-		\param centerX picking area center X position
-		\param centerY picking area center y position
-		\param width picking area width
-		\param height picking area height
-		\param[out] subID [optional] poiter to store sub item ID (if any - <1 otherwise)
-		\return item ID (if any) or <1 otherwise
+		\param params picking parameters
 	**/
-	int startPicking(PICKING_MODE mode, int centerX, int centerY, int width = 5, int height = 5, int* subID = 0);
+	void startPicking(PickingParameters& params);
+
+	//! Performs the picking with OpenGL
+	void startOpenGLPicking(const PickingParameters& params);
 
 	//! Starts OpenGL picking process
-	int startCPUBasedPointPicking(int centerX, int centerY, int& subID, int width = 5, int height = 5);
+	void startCPUBasedPointPicking(const PickingParameters& params);
+
+	//! Processes the picking process result and sends the corresponding signal
+	void processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::set<int>* selectedIDs = 0);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context

@@ -55,6 +55,7 @@
 #include <QApplication>
 #include <QSharedPointer>
 #include <QTimer>
+#include <QEventLoop>
 
 #ifdef USE_VLD
 //VLD
@@ -262,6 +263,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 		if (!m_sunLightEnabled)
 			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
 	}
+
+	connect(this, SLOT(itemPickedFast(int,int,int,int)), this, SLOT(onItemPickedFast(int,int,int,int)), Qt::DirectConnection);
 
 #ifdef THREADED_GL_WIDGET
 	setAutoBufferSwap(false);
@@ -673,7 +676,7 @@ void ccGLWindow::resizeEvent(QResizeEvent *evt)
 	m_resized.store(1);
 	//notify thread of resize event
 	if (m_renderingThread)
-		m_renderingThread->wake();
+		m_renderingThread->redraw();
 	else
 		assert(false);
 }
@@ -689,7 +692,7 @@ bool ccGLWindow::event(QEvent* evt)
 	switch (evt->type())
 	{
 	case QEvent::Show:
-		m_renderingThread->wake();
+		m_renderingThread->redraw();
 		break;
 
 	case QEvent::ParentChange: //The context will be changed, need to reinit OpenGL
@@ -701,7 +704,7 @@ bool ccGLWindow::event(QEvent* evt)
 			//notify thread of re-init context
 			m_initialized = false;
 			m_renderingThread->start();
-			//m_renderingThread->wake();
+
 			return ret;
 		}
 
@@ -712,11 +715,25 @@ bool ccGLWindow::event(QEvent* evt)
 	return QGLWidget::event(evt);
 }
 
+ccGLWindow::RenderingThread::RenderingThread(ccGLWindow* win)
+	: QThread(win)
+	, m_window(win)
+	, m_abort(0)
+	, m_pendingRedraw(0)
+{}
+
+void ccGLWindow::RenderingThread::redraw()
+{
+	m_pendingRedraw.store(1);
+	m_waitCondition.wakeOne();
+}
+
 void ccGLWindow::RenderingThread::stop()
 {
 	m_abort.store(1);
-	wake();
-	wait();
+	m_pendingRedraw.store(0);
+	m_waitCondition.wakeOne();
+	wait(5*60*1000); ///wait max 5 s.
 }
 
 void ccGLWindow::RenderingThread::run()
@@ -730,26 +747,39 @@ void ccGLWindow::RenderingThread::run()
 
 	while (true)
 	{
-		m_window->m_mutex.lock();
-		m_waitCondition.wait(&m_window->m_mutex);
-		m_window->m_mutex.unlock();
-		if (m_abort.load() != 0)
+		if (m_pendingRedraw.load() == 0)
 		{
-			break;
+			m_window->m_mutex.lock();
+			m_waitCondition.wait(&m_window->m_mutex);
+			m_window->m_mutex.unlock();
+		
+			if (m_abort.load() != 0)
+			{
+				//we should stop the rendering loop!
+				break;
+			}
 		}
 
 		if (!m_window->m_initialized)
+		{
 			m_window->initialize();
-
-		m_window->makeCurrent();
+		}
 
 		if (m_window->m_resized.load() != 0)
+		{
+			m_window->makeCurrent();
 			m_window->resizeGL2();
+			m_window->doneCurrent();
+		}
 
-		m_window->paint();
-		m_window->swapBuffers();
-		
-		m_window->doneCurrent();
+		if (m_pendingRedraw.load() != 0)
+		{
+			m_pendingRedraw.store(0);
+			m_window->makeCurrent();
+			m_window->paint();
+			m_window->swapBuffers();
+			m_window->doneCurrent();
+		}
 	}
 	m_window->uninitializeGL();
 }
@@ -1068,7 +1098,7 @@ void ccGLWindow::redraw(bool only2D/*=false*/)
 #ifdef THREADED_GL_WIDGET
 	if (m_renderingThread)
 	{
-		m_renderingThread->wake();
+		m_renderingThread->redraw();
 	}
 	else
 	{
@@ -1107,8 +1137,8 @@ void ccGLWindow::paint()
 	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(doDraw3D ? "yes" : "no").arg(m_LODInProgress ? "yes" : "no"));
 
 	//context initialization
-	CC_DRAW_CONTEXT context;
-	getContext(context);
+	CC_DRAW_CONTEXT CONTEXT;
+	getContext(CONTEXT);
 
 	if (doDraw3D)
 	{
@@ -1119,7 +1149,7 @@ void ccGLWindow::paint()
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/FBO start");
 		}
 
-		draw3D(context,crossShouldBeDrawn());
+		draw3D(CONTEXT,crossShouldBeDrawn());
 		
 		//we disable fbo (if any)
 		if (m_fbo)
@@ -1134,9 +1164,9 @@ void ccGLWindow::paint()
 	/****************************************/
 	/****  PASS: 2D/FOREGROUND/NO LIGHT  ****/
 	/****************************************/
-	context.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
+	CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
 	if (m_interactionMode == TRANSFORM_ENTITY)		
-		context.flags |= CC_VIRTUAL_TRANS_ENABLED;
+		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 
 	setStandardOrthoCenter();
 	glDisable(GL_DEPTH_TEST);
@@ -1184,12 +1214,12 @@ void ccGLWindow::paint()
 
 	//we draw 2D entities
 	if (m_globalDBRoot)
-		m_globalDBRoot->draw(context);
+		m_globalDBRoot->draw(CONTEXT);
 	if (m_winDBRoot)
-		m_winDBRoot->draw(context);
+		m_winDBRoot->draw(CONTEXT);
 
 	//current displayed scalar field color ramp (if any)
-	ccRenderingTools::DrawColorRamp(context);
+	ccRenderingTools::DrawColorRamp(CONTEXT);
 
 	m_clickableItems.clear();
 
@@ -1383,11 +1413,11 @@ void ccGLWindow::paint()
 				qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
 				//we try to refresh LOD levels at a regular pace
 				qint64 baseLODRefreshTime_ms = 50;
-				if (context.currentLODStartIndex == 0)
+				if (CONTEXT.currentLODStartIndex == 0)
 				{
 					baseLODRefreshTime_ms = 250;
-					if (m_currentLODLevel > context.minLODLevel)
-						baseLODRefreshTime_ms /= (m_currentLODLevel-context.minLODLevel+1);
+					if (m_currentLODLevel > CONTEXT.minLODLevel)
+						baseLODRefreshTime_ms /= (m_currentLODLevel-CONTEXT.minLODLevel+1);
 				}
 
 				m_LODPendingRefresh = true;
@@ -2545,7 +2575,6 @@ void ccGLWindow::releaseTexture(unsigned texID)
 #ifdef THREADED_GL_WIDGET
 	//FIXME
 #else
-	return;
 	makeCurrent();
 
 	//release texture from map!
@@ -2688,33 +2717,35 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 {
 	m_activeItems.clear();
 
-	if (!m_globalDBRoot && !m_winDBRoot)
-		return;
-
 	if (m_interactionMode == TRANSFORM_ENTITY) //labels are ignored in 'Interactive Transformation' mode
 		return;
 
-	int subID=-1;
-	int itemID = startPicking(FAST_PICKING,x,y,2,2,&subID);
-	if (itemID < 1)
-		return;
+	int subID = -1;
+	PickingParameters params(FAST_PICKING,x,y,2,2);
 
-	//items can be in local or global DB
-	ccHObject* pickedObj = m_globalDBRoot->find(itemID);
-	if (!pickedObj && m_winDBRoot)
-		pickedObj = m_winDBRoot->find(itemID);
-	if (pickedObj)
+#ifdef THREADED_GL_WIDGET
+	//DGM TOOD: wait for the thread to finish the process!
+	QEventLoop loop;
+	loop.connect(this, SIGNAL(fastPickingFinished()), SLOT(quit()), Qt::QueuedConnection);
+#endif
+
+	startPicking(params);
+
+#ifdef THREADED_GL_WIDGET
+	loop.exec();
+#endif
+
+	if (m_activeItems.size() == 1)
 	{
-		if (pickedObj->isA(CC_TYPES::LABEL_2D))
+		ccInteractor* pickedObj = m_activeItems.front();
+		cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
+		if (label)
 		{
-			cc2DLabel* label = static_cast<cc2DLabel*>(pickedObj);
 			if (!label->isSelected() || !extendToSelectedLabels)
 			{
 				//select it?
 				//emit entitySelectionChanged(label->getUniqueID());
 				//QApplication::processEvents();
-				m_activeItems.push_back(label);
-				return;
 			}
 			else
 			{
@@ -2729,24 +2760,48 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 				{
 					if ((*it)->isA(CC_TYPES::LABEL_2D) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 					{
-						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
-						if (label->isSelected())
+						cc2DLabel* l = static_cast<cc2DLabel*>(*it);
+						if (l != label && l->isSelected())
 						{
-							m_activeItems.push_back(label);
+							m_activeItems.push_back(l);
 						}
 					}
 				}
 			}
 		}
-		else if (pickedObj->isA(CC_TYPES::CLIPPING_BOX))
-		{
-			ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
-			cbox->setActiveComponent(subID);
-			cbox->setClickedPoint(x,y,width(),height(),m_viewportParams.viewMat);
+	}
+}
 
-			m_activeItems.push_back(cbox);
+void ccGLWindow::onItemPickedFast(int itemID, int subID, int x, int y)
+{
+	if (itemID >= 1)
+	{
+		//items can be in local or global DB
+		ccHObject* pickedObj = m_globalDBRoot->find(itemID);
+		if (!pickedObj && m_winDBRoot)
+		{
+			//if we don't find the object in the main DB, we look in the local one
+			pickedObj = m_winDBRoot->find(itemID);
+		}
+		if (pickedObj)
+		{
+			if (pickedObj->isA(CC_TYPES::LABEL_2D))
+			{
+				cc2DLabel* label = static_cast<cc2DLabel*>(pickedObj);
+				m_activeItems.push_back(label);
+			}
+			else if (pickedObj->isA(CC_TYPES::CLIPPING_BOX))
+			{
+				ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
+				cbox->setActiveComponent(subID);
+				cbox->setClickedPoint(x,y,width(),height(),m_viewportParams.viewMat);
+
+				m_activeItems.push_back(cbox);
+			}
 		}
 	}
+
+	emit fastPickingFinished();
 }
 
 void ccGLWindow::mousePressEvent(QMouseEvent *event)
@@ -3068,7 +3123,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		if (!mouseHasMoved)
 		{
 			//specific case: interaction with item(s)
-			updateActiveItemsList(event->x(),event->y(),false);
+			updateActiveItemsList(event->x(), event->y(), false);
 			if (!m_activeItems.empty())
 			{
 				ccInteractor* item = m_activeItems.front();
@@ -3107,7 +3162,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				m_rectPickingPoly = 0;
 				vertices = 0;
 
-				startPicking(ENTITY_RECT_PICKING, pickX+width()/2, height()/2-pickY, pickW, pickH);
+				PickingParameters params(ENTITY_RECT_PICKING, pickX+width()/2, height()/2-pickY, pickW, pickH);
+				startPicking(params);
 			}
 
 			toBeRefreshed();
@@ -3147,9 +3203,10 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 					//shift+click = point/triangle picking
 					if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
-						pickingMode = AUTO_POINT_PICKING;
+						pickingMode = LABEL_PICKING;
 
-					startPicking(pickingMode,event->x(),event->y());
+					PickingParameters params(pickingMode,event->x(),event->y());
+					startPicking(params);
 
 					//we also spread the news (if anyone is interested ;)
 					emit leftButtonClicked(event->x(), event->y());
@@ -3214,13 +3271,308 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	redraw();
 }
 
-int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, int pickWidth/*=5*/, int pickHeight/*=5*/)
+void ccGLWindow::startPicking(PickingParameters& params)
 {
-	subID = -1;
 	if (!m_globalDBRoot && !m_winDBRoot)
-		return -1;
+	{
+		//we must always emit a signal!
+		processPickingResult(params,-1,-1);
+		return;
+	}
 
-	centerY = height()-1 - centerY;
+	//setup rendering context
+	params.flags = CC_DRAW_FOREGROUND;
+	qint64 startTime = 0;
+
+	switch (params.mode)
+	{
+	case ENTITY_PICKING:
+	case ENTITY_RECT_PICKING:
+		params.flags |= CC_DRAW_ENTITY_NAMES;
+		break;
+	case FAST_PICKING:
+		params.flags |= CC_DRAW_ENTITY_NAMES;
+		params.flags |= CC_DRAW_FAST_NAMES_ONLY;
+		break;
+	case POINT_PICKING:
+		params.flags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
+		break;
+	case TRIANGLE_PICKING:
+		params.flags |= CC_DRAW_TRI_NAMES;		//automatically push entity names as well!
+		break;
+	case POINT_OR_TRIANGLE_PICKING:
+	case LABEL_PICKING:
+		params.flags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
+		params.flags |= CC_DRAW_TRI_NAMES;
+		startTime = m_timer.nsecsElapsed();
+		break;
+	default:
+		assert(false);
+		//we must always emit a signal!
+		processPickingResult(params,-1,-1);
+		return;
+	}
+
+	if (!getDisplayParameters().useOpenGLPointPicking &&
+		(	params.mode == LABEL_PICKING
+		||	params.mode == POINT_OR_TRIANGLE_PICKING
+		||	params.mode == POINT_PICKING
+		||	params.mode == TRIANGLE_PICKING) )
+	{
+		//CPU-based point picking
+		startCPUBasedPointPicking(params);
+	}
+	else
+	{
+#ifdef THREADED_GL_WIDGET
+		//FIXME
+#else
+		startOpenGLPicking(params);
+#endif
+	}
+}
+
+void ccGLWindow::processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::set<int>* selectedIDs/*=0*/)
+{
+	//standard "entity" picking
+	if (params.mode == ENTITY_PICKING)
+	{
+		emit entitySelectionChanged(selectedID);
+	}
+	//rectangular "entity" picking
+	else if (params.mode == ENTITY_RECT_PICKING)
+	{
+		if (selectedIDs)
+			emit entitiesSelectionChanged(*selectedIDs);
+		else
+			assert(false);
+	}
+	//3D point or triangle picking
+	else if (	params.mode == POINT_PICKING
+			||	params.mode == TRIANGLE_PICKING
+			||	params.mode == POINT_OR_TRIANGLE_PICKING)
+	{
+		assert(selectedID < 0 || subSelectedID >= 0);
+
+		emit itemPicked(selectedID,static_cast<unsigned>(subSelectedID),params.centerX,params.centerY);
+	}
+	//fast picking (labels, interactors, etc.)
+	else if (params.mode == FAST_PICKING)
+	{
+		emit itemPickedFast(selectedID,subSelectedID,params.centerX,params.centerY);
+	}
+	else if (params.mode == LABEL_PICKING)
+	{
+		if (m_globalDBRoot && selectedID >= 0 && subSelectedID >= 0)
+		{
+			//qint64 stopTime = m_timer.nsecsElapsed();
+			//ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(subSelectedID).arg((stopTime-startTime) / 1.0e6));
+			
+			ccHObject* obj = m_globalDBRoot->find(selectedID);
+			if (obj)
+			{
+				//auto spawn the right label
+				cc2DLabel* label = 0;
+				if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+				{
+					label = new cc2DLabel();
+					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
+					obj->addChild(label);
+				}
+				else if (obj->isKindOf(CC_TYPES::MESH))
+				{
+					label = new cc2DLabel();
+					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);
+					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
+					assert(cloud);
+					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subSelectedID);
+					label->addPoint(cloud,summitsIndexes->i1);
+					label->addPoint(cloud,summitsIndexes->i2);
+					label->addPoint(cloud,summitsIndexes->i3);
+					cloud->addChild(label);
+					if (!cloud->isEnabled())
+					{
+						cloud->setVisible(false);
+						cloud->setEnabled(true);
+					}
+				}
+
+				if (label)
+				{
+					label->setVisible(true);
+					label->setDisplay(obj->getDisplay());
+					label->setPosition(	static_cast<float>(params.centerX+20)/static_cast<float>(width()),
+										static_cast<float>(params.centerY+20)/static_cast<float>(height()) );
+					emit newLabel(static_cast<ccHObject*>(label));
+					QApplication::processEvents();
+
+					toBeRefreshed();
+				}
+			}
+		}
+	}
+}
+
+void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
+{
+	//OpenGL picking
+	makeCurrent();
+
+	//no need to clear display, we don't draw anything new!
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//setup selection buffers
+	memset(m_pickingBuffer,0,sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
+	glSelectBuffer(CC_PICKING_BUFFER_SIZE,m_pickingBuffer);
+	glRenderMode(GL_SELECT);
+	glInitNames();
+
+	//get viewport
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT,viewport);
+
+	//get context
+	CC_DRAW_CONTEXT CONTEXT;
+	getContext(CONTEXT);
+
+	//3D objects picking
+	{
+		CONTEXT.flags = CC_DRAW_3D | params.flags;
+
+		glEnable(GL_DEPTH_TEST);
+
+		//projection matrix
+		glMatrixMode(GL_PROJECTION);
+		//restrict drawing to the picking area
+		glLoadIdentity();
+		gluPickMatrix(	static_cast<GLdouble>(params.centerX),
+						static_cast<GLdouble>(viewport[3]-params.centerY),
+						static_cast<GLdouble>(params.pickWidth),
+						static_cast<GLdouble>(params.pickHeight),
+						viewport);
+		glMultMatrixd(getProjectionMatd());
+
+		//model view matrix
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixd(getModelViewMatd());
+
+		//display 3D objects
+		if (m_globalDBRoot)
+			m_globalDBRoot->draw(CONTEXT);
+		if (m_winDBRoot)
+			m_winDBRoot->draw(CONTEXT);
+
+		ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(3D)");
+	}
+
+	//2D objects picking
+	if (params.mode == ENTITY_PICKING || params.mode == ENTITY_RECT_PICKING || params.mode == FAST_PICKING)
+	{
+		CONTEXT.flags = CC_DRAW_2D | params.flags;
+
+		glDisable(GL_DEPTH_TEST);
+
+		//we must first grab the 2D ortho view projection matrix
+		setStandardOrthoCenter();
+		glMatrixMode(GL_PROJECTION);
+		double orthoProjMatd[OPENGL_MATRIX_SIZE];
+		glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
+		//restrict drawing to the picking area
+		glLoadIdentity();
+		gluPickMatrix(	static_cast<GLdouble>(params.centerX),
+						static_cast<GLdouble>(viewport[3]-params.centerY),
+						static_cast<GLdouble>(params.pickWidth),
+						static_cast<GLdouble>(params.pickHeight),
+						viewport);
+		glMultMatrixd(orthoProjMatd);
+		glMatrixMode(GL_MODELVIEW);
+
+		//we display 2D objects
+		if (m_globalDBRoot)
+			m_globalDBRoot->draw(CONTEXT);
+		if (m_winDBRoot)
+			m_winDBRoot->draw(CONTEXT);
+
+		ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(2D)");
+	}
+
+	glFlush();
+
+	// returning to normal rendering mode
+	int hits = glRenderMode(GL_RENDER);
+
+	ccGLUtils::CatchGLError("ccGLWindow::startPicking.render");
+
+	ccLog::PrintDebug("[Picking] hits: %i",hits);
+	if (hits < 0)
+	{
+		ccLog::Warning("[Picking] Too many items inside picking zone! Try to zoom in...");
+		//we must always emit a signal!
+		processPickingResult(params,-1,-1);
+	}
+
+	//process hits
+	std::set<int> selectedIDs;
+	int subSelectedID = -1;
+	int selectedID = -1;
+	try
+	{
+		GLuint minMinDepth = (~0);
+		const GLuint* _selectBuf = m_pickingBuffer;
+
+		for (int i=0; i<hits; ++i)
+		{
+			const GLuint& n = _selectBuf[0]; //number of names on stack
+			if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
+			{
+				//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
+				assert(n == 1 || n == 2);
+				const GLuint& minDepth = _selectBuf[1];
+				//const GLuint& maxDepth = _selectBuf[2];
+				const GLuint& currentID = _selectBuf[3];
+
+				if (params.mode == ENTITY_RECT_PICKING)
+				{
+					//pick them all!
+					selectedIDs.insert(currentID);
+				}
+				else
+				{
+					//if there are multiple hits, we keep only the nearest
+					if (selectedID < 0 || minDepth < minMinDepth)
+					{
+						selectedID = currentID;
+						subSelectedID = (n>1 ? _selectBuf[4] : -1);
+						minMinDepth = minDepth;
+					}
+				}
+			}
+
+			_selectBuf += (3+n);
+		}
+
+		//standard output is made through the 'selectedIDs' set
+		if (	params.mode != ENTITY_RECT_PICKING
+			&&	selectedID != -1)
+		{
+			selectedIDs.insert(selectedID);
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		ccLog::Warning("[Picking] Not enough memory!");
+	}
+
+	//we must always emit a signal!
+	processPickingResult(params, selectedID, subSelectedID, &selectedIDs);
+}
+
+void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
+{
+	int centerX = params.centerX;
+	int centerY = height()-1 - params.centerY;
+	
 	//back project the clicked point in 3D
 	CCVector3d X(0,0,0);
 	int VP[4];
@@ -3231,15 +3583,17 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 		gluUnProject(centerX,centerY,0,MM,MP,VP,X.u,X.u+1,X.u+2);
 	}
 
-	ccHObject::Container toProcess;
+	int nearestEntityID = -1;
+	int nearestPointIndex = -1;
 	try
 	{
-		toProcess.push_back(m_globalDBRoot);
-		toProcess.push_back(m_winDBRoot);
+		ccHObject::Container toProcess;
+		if (m_globalDBRoot)
+			toProcess.push_back(m_globalDBRoot);
+		if (m_winDBRoot)
+			toProcess.push_back(m_winDBRoot);
 
 		double nearestPointSquareDist = -1.0;
-		int nearestEntityID = -1;
-		int nearestPointIndex = -1;
 
 		while (!toProcess.empty())
 		{
@@ -3276,7 +3630,7 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 							trans.apply(Q);
 							gluProject(Q.x,Q.y,Q.z,MM,MP,VP,&xs,&ys,&zs);
 						}
-						if (fabs(xs-centerX) <= pickWidth && fabs(ys-centerY) <= pickHeight)
+						if (fabs(xs-centerX) <= params.pickWidth && fabs(ys-centerY) <= params.pickHeight)
 						{
 							double squareDist = CCVector3d(X.x-P->x,X.y-P->y,X.z-P->z).norm2d();
 							if (nearestPointIndex < 0 || squareDist < nearestPointSquareDist)
@@ -3373,9 +3727,6 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 				toProcess.push_back(ent->getChild(i));
 			}
 		}
-
-		subID = nearestPointIndex;
-		return nearestEntityID;
 	}
 	catch(std::bad_alloc)
 	{
@@ -3383,274 +3734,8 @@ int ccGLWindow::startCPUBasedPointPicking(int centerX, int centerY, int& subID, 
 		ccLog::Warning("[Picking][CPU] Not enough memory!");
 	}
 
-	return -1;
-}
-
-int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY, int pickWidth/*=5*/, int pickHeight/*=5*/, int* subID/*=0*/)
-{
-	if (subID)
-		*subID = -1;
-	if (!m_globalDBRoot && !m_winDBRoot)
-		return -1;
-
-	//setup rendering context
-	CC_DRAW_CONTEXT context;
-	getContext(context);
-	unsigned short pickingFlags = CC_DRAW_FOREGROUND;
-	qint64 startTime = 0;
-
-	switch (pickingMode)
-	{
-	case ENTITY_PICKING:
-	case ENTITY_RECT_PICKING:
-		pickingFlags |= CC_DRAW_ENTITY_NAMES;
-		break;
-	case FAST_PICKING:
-		pickingFlags |= CC_DRAW_ENTITY_NAMES;
-		pickingFlags |= CC_DRAW_FAST_NAMES_ONLY;
-		break;
-	case POINT_PICKING:
-		pickingFlags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
-		break;
-	case TRIANGLE_PICKING:
-		pickingFlags |= CC_DRAW_TRI_NAMES;		//automatically push entity names as well!
-		break;
-	case POINT_OR_TRIANGLE_PICKING:
-	case AUTO_POINT_PICKING:
-		pickingFlags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
-		pickingFlags |= CC_DRAW_TRI_NAMES;
-		startTime = m_timer.nsecsElapsed();
-		break;
-	default:
-		return -1;
-	}
-
-	//picked entity (and sub-element)
-	int selectedID = -1,subSelectedID = -1;
-	CCVector3 pickedPoint;
-	//list of picked entities (for ENTITY_RECT_PICKING mode only)
-	std::set<int> selectedIDs;
-
-	if (!getDisplayParameters().useOpenGLPointPicking &&
-		(	pickingMode == AUTO_POINT_PICKING
-		||	pickingMode == POINT_OR_TRIANGLE_PICKING
-		||	pickingMode == POINT_PICKING
-		||	pickingMode == TRIANGLE_PICKING) )
-	{
-		//CPU-based point picking
-		selectedID = startCPUBasedPointPicking(centerX,centerY,subSelectedID,pickWidth,pickHeight);
-	}
-	else
-	{
-#ifdef THREADED_GL_WIDGET
-		//FIXME
-		return -1;
-#else
-		//OpenGL picking
-		makeCurrent();
-
-		//no need to clear display, we don't draw anything new!
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//setup selection buffers
-		memset(m_pickingBuffer,0,sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
-		glSelectBuffer(CC_PICKING_BUFFER_SIZE,m_pickingBuffer);
-		glRenderMode(GL_SELECT);
-		glInitNames();
-
-		//get viewport
-		GLint viewport[4];
-		glGetIntegerv(GL_VIEWPORT,viewport);
-
-		//3D objects picking
-		{
-			context.flags = CC_DRAW_3D | pickingFlags;
-
-			glEnable(GL_DEPTH_TEST);
-
-			//projection matrix
-			glMatrixMode(GL_PROJECTION);
-			//restrict drawing to the picking area
-			glLoadIdentity();
-			gluPickMatrix(	static_cast<GLdouble>(centerX),
-							static_cast<GLdouble>(viewport[3]-centerY),
-							static_cast<GLdouble>(pickWidth),
-							static_cast<GLdouble>(pickHeight),
-							viewport);
-			glMultMatrixd(getProjectionMatd());
-
-			//model view matrix
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixd(getModelViewMatd());
-
-			//display 3D objects
-			if (m_globalDBRoot)
-				m_globalDBRoot->draw(context);
-			if (m_winDBRoot)
-				m_winDBRoot->draw(context);
-
-			ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(3D)");
-		}
-
-		//2D objects picking
-		if (pickingMode == ENTITY_PICKING || pickingMode == ENTITY_RECT_PICKING || pickingMode == FAST_PICKING)
-		{
-			context.flags = CC_DRAW_2D | pickingFlags;
-
-			glDisable(GL_DEPTH_TEST);
-
-			//we must first grab the 2D ortho view projection matrix
-			setStandardOrthoCenter();
-			glMatrixMode(GL_PROJECTION);
-			double orthoProjMatd[OPENGL_MATRIX_SIZE];
-			glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
-			//restrict drawing to the picking area
-			glLoadIdentity();
-			gluPickMatrix((GLdouble)centerX,(GLdouble)(viewport[3]-centerY),(GLdouble)pickWidth,(GLdouble)pickHeight,viewport);
-			glMultMatrixd(orthoProjMatd);
-			glMatrixMode(GL_MODELVIEW);
-
-			//we display 2D objects
-			if (m_globalDBRoot)
-				m_globalDBRoot->draw(context);
-			if (m_winDBRoot)
-				m_winDBRoot->draw(context);
-
-			ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(2D)");
-		}
-
-		glFlush();
-
-		// returning to normal rendering mode
-		int hits = glRenderMode(GL_RENDER);
-
-		ccGLUtils::CatchGLError("ccGLWindow::startPicking.render");
-
-		ccLog::PrintDebug("[Picking] hits: %i",hits);
-		if (hits < 0)
-		{
-			ccLog::Warning("[Picking] Too many items inside picking zone! Try to zoom in...");
-			return -1;
-		}
-
-		//process hits
-		try
-		{
-			GLuint minMinDepth = (~0);
-			const GLuint* _selectBuf = m_pickingBuffer;
-			for (int i=0; i<hits; ++i)
-			{
-				const GLuint& n = _selectBuf[0]; //number of names on stack
-				if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
-				{
-					//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
-					assert(n==1 || n==2);
-					const GLuint& minDepth = _selectBuf[1];
-					//const GLuint& maxDepth = _selectBuf[2];
-					const GLuint& currentID = _selectBuf[3];
-
-					if (pickingMode == ENTITY_RECT_PICKING)
-					{
-						//pick them all!
-						selectedIDs.insert(currentID);
-					}
-					else
-					{
-						//if there are multiple hits, we keep only the nearest
-						if (selectedID < 0 || minDepth < minMinDepth)
-						{
-							selectedID = currentID;
-							subSelectedID = (n>1 ? _selectBuf[4] : -1);
-							minMinDepth = minDepth;
-						}
-					}
-				}
-
-				_selectBuf += (3+n);
-			}
-		}
-		catch(std::bad_alloc)
-		{
-			//not enough memory
-			ccLog::Warning("[Picking] Not enough memory!");
-			return -1;
-		}
-#endif
-	}
-
-	if (subID)
-		*subID = subSelectedID;
-
-	//standard "entity" picking
-	if (pickingMode == ENTITY_PICKING)
-	{
-		emit entitySelectionChanged(selectedID);
-	}
-	//rectangular "entity" picking
-	else if (pickingMode == ENTITY_RECT_PICKING)
-	{
-		emit entitiesSelectionChanged(selectedIDs);
-	}
-	//3D point or triangle picking
-	else if (pickingMode == POINT_PICKING || pickingMode == TRIANGLE_PICKING || pickingMode == POINT_OR_TRIANGLE_PICKING)
-	{
-		if (selectedID >= 0 && subSelectedID >= 0)
-		{
-			emit itemPicked(selectedID,static_cast<unsigned>(subSelectedID),centerX,centerY);
-		}
-	}
-	else if (pickingMode == AUTO_POINT_PICKING)
-	{
-		if (m_globalDBRoot && selectedID >= 0 && subSelectedID >= 0)
-		{
-			qint64 stopTime = m_timer.nsecsElapsed();
-			ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(subSelectedID).arg((stopTime-startTime) / 1.0e6));
-			
-			ccHObject* obj = m_globalDBRoot->find(selectedID);
-			if (obj)
-			{
-				//auto spawn the right label
-				cc2DLabel* label = 0;
-				if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
-				{
-					label = new cc2DLabel();
-					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
-					obj->addChild(label);
-				}
-				else if (obj->isKindOf(CC_TYPES::MESH))
-				{
-					label = new cc2DLabel();
-					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);
-					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
-					assert(cloud);
-					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subSelectedID);
-					label->addPoint(cloud,summitsIndexes->i1);
-					label->addPoint(cloud,summitsIndexes->i2);
-					label->addPoint(cloud,summitsIndexes->i3);
-					cloud->addChild(label);
-					if (!cloud->isEnabled())
-					{
-						cloud->setVisible(false);
-						cloud->setEnabled(true);
-					}
-				}
-
-				if (label)
-				{
-					label->setVisible(true);
-					label->setDisplay(obj->getDisplay());
-					label->setPosition(	static_cast<float>(centerX+20)/static_cast<float>(width()),
-										static_cast<float>(centerY+20)/static_cast<float>(height()) );
-					emit newLabel(static_cast<ccHObject*>(label));
-					QApplication::processEvents();
-
-					toBeRefreshed();
-				}
-			}
-		}
-	}
-
-	return selectedID;
+	//we must always emit a signal!
+	processPickingResult(params, nearestEntityID, nearestPointIndex);
 }
 
 void ccGLWindow::displayNewMessage(	const QString& message,
@@ -3939,11 +4024,11 @@ void ccGLWindow::drawPivot()
 			//force lighting for proper sphere display
 			glPushAttrib(GL_LIGHTING_BIT);
 			glEnableSunLight();
-			CC_DRAW_CONTEXT context;
-			getContext(context);
-			context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
-			context._win = 0;
-			sphere.draw(context);
+			CC_DRAW_CONTEXT CONTEXT;
+			getContext(CONTEXT);
+			CONTEXT.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+			CONTEXT._win = 0;
+			sphere.draw(CONTEXT);
 			glPopAttrib();
 		}
 
@@ -4451,11 +4536,11 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 			//updateZoom(zoomFactor);
 
-			CC_DRAW_CONTEXT context;
-			getContext(context);
-			context.glW = Wp;
-			context.glH = Hp;
-			context.renderZoom = zoomFactor;
+			CC_DRAW_CONTEXT CONTEXT;
+			getContext(CONTEXT);
+			CONTEXT.glW = Wp;
+			CONTEXT.glH = Hp;
+			CONTEXT.renderZoom = zoomFactor;
 
 			//just to be sure
 			disableLOD();
@@ -4464,15 +4549,15 @@ bool ccGLWindow::renderToFile(	QString filename,
 			fbo->start();
 			ccGLUtils::CatchGLError("ccGLWindow::renderToFile/FBO start");
 
-			draw3D(context,false);
+			draw3D(CONTEXT,false);
 		
 			//disable the FBO
 			fbo->stop();
 			ccGLUtils::CatchGLError("ccGLWindow::renderToFile/FBO stop");
 
-			context.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
+			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
 			if (m_interactionMode == TRANSFORM_ENTITY)		
-				context.flags |= CC_VIRTUAL_TRANS_ENABLED;
+				CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 
 			//setStandardOrthoCenter();
 			{
@@ -4506,7 +4591,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 				//if render mode is ON: we only want to capture it, not to display it
 				fbo->start();
-				ccGLUtils::DisplayTexture2D(filter->getTexture(),context.glW,context.glH);
+				ccGLUtils::DisplayTexture2D(filter->getTexture(),CONTEXT.glW,CONTEXT.glH);
 				//glClear(GL_DEPTH_BUFFER_BIT);
 				fbo->stop();
 			}
@@ -4523,9 +4608,9 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 			//we draw 2D entities (mainly for the color ramp!)
 			if (m_globalDBRoot)
-				m_globalDBRoot->draw(context);
+				m_globalDBRoot->draw(CONTEXT);
 			if (m_winDBRoot)
-				m_winDBRoot->draw(context);
+				m_winDBRoot->draw(CONTEXT);
 
 			//For tests
 			//displayText("BOTTOM_LEFT",10,10);
@@ -4539,7 +4624,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 			//displayText("MIDDLE",Wp/2,Hp/2);
 
 			//current displayed scalar field color ramp (if any)
-			ccRenderingTools::DrawColorRamp(context);
+			ccRenderingTools::DrawColorRamp(CONTEXT);
 
 			if (m_displayOverlayEntities && m_captureMode.renderOverlayItems)
 			{

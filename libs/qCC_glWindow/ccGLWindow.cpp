@@ -203,8 +203,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 
 	//matrices
 	m_viewportParams.viewMat.toIdentity();
-	memset(m_viewMatd, 0, sizeof(double)*OPENGL_MATRIX_SIZE);
-	memset(m_projMatd, 0, sizeof(double)*OPENGL_MATRIX_SIZE);
+	m_viewMatd.toIdentity();
+	m_projMatd.toIdentity();
 
 	//default modes
 	setPickingMode(DEFAULT_PICKING);
@@ -423,7 +423,7 @@ void ccGLWindow::initialize()
 		return;
 
 	//create context from inside thread
-	QGLContext *glContext = new QGLContext(m_format, this);
+	QGLContext* glContext = new QGLContext(m_format, this);
 
 	//share context with another QGLWidget
 	if (m_shareWidget != NULL)
@@ -437,19 +437,18 @@ void ccGLWindow::initialize()
 	if (m_initialized)
 		return;
 
-	//we init model view matrix with identity and store it into 'viewMat' and 'm_viewMatd'
+	//we init the model view and projection matrices with identity
+	m_viewMatd.toIdentity();
+	m_projMatd.toIdentity();
+
+	//we init the OpenGL ones with the same values
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
-	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewMatd);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
 	//we emit the 'baseViewMatChanged' signal
 	emit baseViewMatChanged(m_viewportParams.viewMat);
-
-	//we init projection matrix with identity
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glGetDoublev(GL_PROJECTION_MATRIX, m_projMatd);
 
 	//set viewport and visu. as invalid
 	invalidateViewport();
@@ -759,19 +758,17 @@ void ccGLWindow::RenderingThread::run()
 
 void ccGLWindow::resizeGL(int w, int h)
 {
-	m_glWidth = w;
-	m_glHeight = h;
-
 #ifdef THREADED_GL_WIDGET
 	//do nothing more
-	//m_resized.store(1);
 }
 
 void ccGLWindow::resizeGL2()
 {
+	int w = width();
+	int h = height();
 #endif
-	//DGM --> QGLWidget doc: 'There is no need to call makeCurrent() because this has already been done when this function is called."
-	//makeCurrent();
+	m_glWidth = w;
+	m_glHeight = h;
 
 	//update OpenGL viewport
 	glViewport(0, 0, m_glWidth, m_glHeight);
@@ -854,7 +851,7 @@ void ccGLWindow::stopFrameRateTest()
 
 	//we restore the original view mat
 	m_viewportParams.viewMat = s_frameRateBackupMat;
-	m_validModelviewMatrix = false;
+	invalidateVisualization();
 
 	displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear message in the upper center area
 	if (s_frameRateElapsedTime_ms > 0)
@@ -1372,7 +1369,7 @@ void ccGLWindow::paint()
 			glLoadMatrixd(m_viewportParams.viewMat.data());
 			glRotated(360.0/FRAMERATE_TEST_MIN_FRAMES,0.0,1.0,0.0);
 			glGetDoublev(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
-			m_validModelviewMatrix = false;
+			invalidateVisualization();
 			glPopMatrix();
 		}
 	}
@@ -2132,13 +2129,77 @@ void ccGLWindow::invalidateViewport()
 	m_updateFBO = true;
 }
 
+//inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
+ccGLMatrixd ccGluPerspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
+{
+	double ymax = znear * tanf(fovyInDegrees * M_PI / 360.0);
+	double xmax = ymax * aspectRatio;
+    double dZ = zfar - znear;
+
+	ccGLMatrixd matrix;
+	{
+		double* mat = matrix.data();
+		mat[0]  = znear / xmax;
+		mat[1]  = 0.0;
+		mat[2]  = 0.0;
+		mat[3]  = 0.0;
+		
+		mat[4]  = 0.0;
+		mat[5]  = znear / ymax;
+		mat[6]  = 0.0;
+		mat[7]  = 0.0;
+
+		mat[8]  = 0.0;
+		mat[9]  = 0.0;
+		mat[10] = - (zfar + znear) / dZ;
+		mat[11] = -1.0;
+
+		mat[12] = 0.0;
+		mat[13] = 0.0;
+		mat[14] = - (2.0 * znear * zfar) / dZ;
+		mat[15] = 1.0;
+	}
+
+	return matrix;
+}
+
+//inspired from http://www.songho.ca/opengl/gl_projectionmatrix.html
+ccGLMatrixd ccGlOrtho(double w, double h, double d)
+{
+	ccGLMatrixd matrix;
+	if (w != 0 && h != 0 && d != 0)
+	{
+		double* mat = matrix.data();
+		mat[0]  = 1.0 / w;
+		mat[1]  = 0.0;
+		mat[2]  = 0.0;
+		mat[3]  = 0.0;
+		
+		mat[4]  = 0.0;
+		mat[5]  = 1.0 / h;
+		mat[6]  = 0.0;
+		mat[7]  = 0.0;
+
+		mat[8]  = 0.0;
+		mat[9]  = 0.0;
+		mat[10] = - 1.0 / d;
+		mat[11] = 0.0;
+
+		mat[12] = 0.0;
+		mat[13] = 0.0;
+		mat[14] = 0.0;
+		mat[15] = 1.0;
+	}
+	else
+	{
+		matrix.toIdentity();
+	}
+
+	return matrix;
+}
+
 void ccGLWindow::recalcProjectionMatrix()
 {
-	makeCurrent();
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
 	double bbHalfDiag = 1.0;
 	CCVector3d bbCenter(0,0,0);
 
@@ -2208,7 +2269,7 @@ void ccGLWindow::recalcProjectionMatrix()
 		double ar = static_cast<double>(m_glWidth)/m_glHeight;
 
 		float currentFov_deg = getFov();
-		gluPerspective(currentFov_deg,ar,zNear,zFar);
+		m_projMatd = ccGluPerspective(currentFov_deg,ar,zNear,zFar);
 	}
 	else
 	{
@@ -2225,11 +2286,8 @@ void ccGLWindow::recalcProjectionMatrix()
 		m_viewportParams.zNear = -maxDist_pix;
 		m_viewportParams.zFar = maxDist_pix;
 
-		glOrtho(-halfW,halfW,-halfH,halfH,-maxDist_pix,maxDist_pix);
+		m_projMatd = ccGlOrtho(halfW,halfH,maxDist_pix);
 	}
-
-	//we save projection matrix
-	glGetDoublev(GL_PROJECTION_MATRIX, m_projMatd);
 
 	m_validProjectionMatrix = true;
 }
@@ -2242,53 +2300,58 @@ void ccGLWindow::invalidateVisualization()
 
 void ccGLWindow::recalcModelViewMatrix()
 {
-	makeCurrent();
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	if (m_viewportParams.perspectiveView) //perspective mode
-	{
-		//for proper aspect ratio handling
-		float ar = (m_glHeight != 0 ? float(m_glWidth)/(m_glHeight*m_viewportParams.perspectiveAspectRatio) : 0.0f);
-		if (ar < 1.0)
-			glScalef(ar,ar,1.0);
-	}
-	else //ortho. mode
-	{
-		//apply zoom
-		float totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
-		glScalef(totalZoom,totalZoom,totalZoom);
-	}
+	ccGLMatrixd viewMatd;
+	viewMatd.toIdentity();
 
 	CCVector3d cameraCenter = getRealCameraCenter();
 
 	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
 	if (m_viewportParams.objectCenteredView)
 	{
-		//place origin on camera center
-		glTranslated(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
-
-		//go back to initial origin
-		glTranslated(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
+		//place origin on pivot point
+		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() - m_viewportParams.pivotPoint);
 
 		//rotation (viewMat is simply a rotation matrix around the pivot here!)
-		glMultMatrixd(m_viewportParams.viewMat.data());
+		viewMatd = m_viewportParams.viewMat * viewMatd;
 
-		//place origin on pivot point
-		glTranslated(-m_viewportParams.pivotPoint.x, -m_viewportParams.pivotPoint.y, -m_viewportParams.pivotPoint.z);
+		//go back to initial origin
+		//then place origin on camera center
+		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() + m_viewportParams.pivotPoint - cameraCenter);
 	}
 	else
 	{
-		//rotation (viewMat is the rotation around the camera center here - no pivot)
-		glMultMatrixd(m_viewportParams.viewMat.data());
-
 		//place origin on camera center
-		glTranslated(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
-	}		
+		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() - cameraCenter);
+
+		//rotation (viewMat is the rotation around the camera center here - no pivot)
+		viewMatd = m_viewportParams.viewMat * viewMatd;
+	}
+
+	ccGLMatrixd scaleMatd;
+	scaleMatd.toIdentity();
+	if (m_viewportParams.perspectiveView) //perspective mode
+	{
+		//for proper aspect ratio handling
+		float ar = (m_glHeight != 0 ? static_cast<float>(m_glWidth)/(m_glHeight*m_viewportParams.perspectiveAspectRatio) : 0.0f);
+		if (ar < 1.0f)
+		{
+			//glScalef(ar,ar,1.0);
+			scaleMatd.data()[0] = ar;
+			scaleMatd.data()[5] = ar;
+		}
+	}
+	else //ortho. mode
+	{
+		//apply zoom
+		float totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
+		//glScalef(totalZoom,totalZoom,totalZoom);
+		scaleMatd.data()[0]  = totalZoom;
+		scaleMatd.data()[5]  = totalZoom;
+		scaleMatd.data()[10] = totalZoom;
+	}
 
 	//we save visualization matrix
-	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewMatd);
+	m_viewMatd = scaleMatd * viewMatd;
 
 	m_validModelviewMatrix = true;
 }
@@ -2313,7 +2376,7 @@ const double* ccGLWindow::getModelViewMatd()
 	if (!m_validModelviewMatrix)
 		recalcModelViewMatrix();
 
-	return m_viewMatd;
+	return m_viewMatd.data();
 }
 
 const double* ccGLWindow::getProjectionMatd()
@@ -2321,7 +2384,7 @@ const double* ccGLWindow::getProjectionMatd()
 	if (!m_validProjectionMatrix)
 		recalcProjectionMatrix();
 
-	return m_projMatd;
+	return m_projMatd.data();
 }
 
 void ccGLWindow::setStandardOrthoCenter()
@@ -2893,7 +2956,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			{
 				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
 
-				ccGLMatrixd rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation,m_currentMouseOrientation);
+				ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_currentMouseOrientation,m_lastMouseOrientation);
 				m_lastMouseOrientation = m_currentMouseOrientation;
 				m_updateFBO = true;
 
@@ -3379,6 +3442,10 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	}
 	else
 	{
+#ifdef THREADED_GL_WIDGET
+		//FIXME
+		return -1;
+#else
 		//OpenGL picking
 		makeCurrent();
 
@@ -3508,6 +3575,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 			ccLog::Warning("[Picking] Not enough memory!");
 			return -1;
 		}
+#endif
 	}
 
 	if (subID)
@@ -4189,8 +4257,10 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 
 void ccGLWindow::getViewportArray(int vpArray[])
 {
-	makeCurrent();
-	glGetIntegerv(GL_VIEWPORT, vpArray);
+	vpArray[0] = 0;
+	vpArray[1] = 0;
+	vpArray[2] = m_glWidth;
+	vpArray[3] = m_glHeight;
 }
 
 void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
@@ -4248,11 +4318,6 @@ void ccGLWindow::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
 
 void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw/*=true*/)
 {
-#ifdef THREADED_GL_WIDGET
-	//FIXME
-#else
-	makeCurrent();
-
 	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView,true);
@@ -4265,16 +4330,10 @@ void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, 
 
 	if (forceRedraw)
 		redraw();
-#endif
 }
 
 void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=true*/)
 {
-#ifdef THREADED_GL_WIDGET
-	//FIXME
-#else
-	makeCurrent();
-
 	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView,true);
@@ -4291,7 +4350,6 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 
 	if (forceRedraw)
 		redraw();
-#endif
 }
 
 bool ccGLWindow::renderToFile(	QString filename,
@@ -4663,7 +4721,8 @@ void ccGLWindow::displayText(	QString text,
 								const unsigned char* rgbColor/*=0*/,
 								const QFont* font/*=0*/)
 {
-	makeCurrent();
+	//DGM: the context should be already active!
+	//makeCurrent();
 
 	int x2 = x;
 	int y2 = m_glHeight - 1 - y;

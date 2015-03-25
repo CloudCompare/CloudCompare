@@ -134,7 +134,6 @@ public:
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
 	virtual QFont getLabelDisplayFont() const; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
-	inline virtual void makeContextCurrent() { makeCurrent(); }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
 	virtual unsigned getTextureID(const QImage& image);
 	virtual unsigned getTextureID( ccMaterial::CShared mtl);
@@ -629,6 +628,8 @@ protected:
 	void paint();
 	void resizeEvent(QResizeEvent* evt);
 	bool event(QEvent* evt);
+	void glInit() { /*stop QGLWidget standard behavior*/ }
+	void glDraw() { /*stop QGLWidget standard behavior*/ }
 
 	class RenderingThread : public QThread
 	{
@@ -782,11 +783,11 @@ protected:
 	CCVector3d m_currentMouseOrientation;
 
 	//! Complete visualization matrix (GL style - double version)
-	double m_viewMatd[OPENGL_MATRIX_SIZE];
+	ccGLMatrixd m_viewMatd;
 	//! Whether the model veiw matrix is valid (or need to be recomputed)
 	bool m_validModelviewMatrix;
 	//! Projection matrix (GL style - double version)
-	double m_projMatd[OPENGL_MATRIX_SIZE];
+	ccGLMatrixd m_projMatd;
 	//! Whether the projection matrix is valid (or need to be recomputed)
 	bool m_validProjectionMatrix;
 

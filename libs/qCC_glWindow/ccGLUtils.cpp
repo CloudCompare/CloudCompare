@@ -72,110 +72,58 @@ void ccGLUtils::DisplayTexture2D(GLuint tex, int w, int h, uchar alpha/*=255*/)
 
 //*********** OPENGL MATRICES ***********//
 
-ccGLMatrixd ccGLUtils::GenerateGLRotationMatrixFromVectors(const CCVector3d& sourceVec, const CCVector3d& destVec)
-{
-	//we compute scalar prod between the two vectors
-	double ps = sourceVec.dot(destVec);
-
-	//we bound result (in case vecors are not exactly unit)
-	if (ps > 1.0)
-		ps = 1.0;
-	else if (ps < -1.0)
-		ps = -1.0;
-
-	//we deduce angle from scalar prod
-	double angle_deg = acos(ps) * CC_RAD_TO_DEG;
-
-	//we compute rotation axis with scalar prod
-	CCVector3d axis = sourceVec.cross(destVec);
-
-	//we eventually compute the rotation matrix with axis and angle
-	return GenerateGLRotationMatrixFromAxisAndAngle(axis, angle_deg);
-}
-
-ccGLMatrixd ccGLUtils::GenerateGLRotationMatrixFromAxisAndAngle(const CCVector3d& axis, double angle_deg)
-{
-	//we backup actual matrix...
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	glLoadIdentity();
-	glRotated(angle_deg, axis.x, axis.y, axis.z);
-
-	ccGLMatrixd mat;
-	glGetDoublev(GL_MODELVIEW_MATRIX, mat.data());
-
-	//... and restore it
-	glPopMatrix();
-
-	return mat;
-}
-
 ccGLMatrixd ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 {
-	GLdouble eye[3] = {0.0, 0.0, 0.0};
-	GLdouble top[3] = {0.0, 0.0, 0.0};
+	CCVector3d eye(0,0,0);
+	CCVector3d center(0,0,0);
+	CCVector3d top(0,0,0);
 
 	//we look at (0,0,0) by default
 	switch (orientation)
 	{
 	case CC_TOP_VIEW:
-		eye[2] =  1.0;
-		top[1] =  1.0;
+		eye.z =  1.0;
+		top.y =  1.0;
 		break;
 	case CC_BOTTOM_VIEW:
-		eye[2] = -1.0;
-		top[1] = -1.0;
+		eye.z = -1.0;
+		top.y =  1.0;
 		break;
 	case CC_FRONT_VIEW:
-		eye[1] = -1.0;
-		top[2] =  1.0;
+		eye.y = -1.0;
+		top.z =  1.0;
 		break;
 	case CC_BACK_VIEW:
-		eye[1] =  1.0;
-		top[2] =  1.0;
+		eye.y =  1.0;
+		top.z =  1.0;
 		break;
 	case CC_LEFT_VIEW:
-		eye[0] = -1.0;
-		top[2] =  1.0;
+		eye.x = -1.0;
+		top.z =  1.0;
 		break;
 	case CC_RIGHT_VIEW:
-		eye[0] =  1.0;
-		top[2] =  1.0;
+		eye.x =  1.0;
+		top.z =  1.0;
 		break;
 	case CC_ISO_VIEW_1:
-		eye[0] = -1.0;
-		eye[1] = -1.0;
-		eye[2] =  1.0;
-		top[0] =  1.0;
-		top[1] =  1.0;
-		top[2] =  1.0;
+		eye.x = -1.0;
+		eye.y = -1.0;
+		eye.z =  1.0;
+		top.x =  1.0;
+		top.y =  1.0;
+		top.z =  1.0;
 		break;
 	case CC_ISO_VIEW_2:
-		eye[0] =  1.0;
-		eye[1] =  1.0;
-		eye[2] =  1.0;
-		top[0] = -1.0;
-		top[1] = -1.0;
-		top[2] =  1.0;
+		eye.x =  1.0;
+		eye.y =  1.0;
+		eye.z =  1.0;
+		top.x = -1.0;
+		top.y = -1.0;
+		top.z =  1.0;
 		break;
 	}
 
-	ccGLMatrixd result;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	//call gluLookAt
-	glLoadIdentity();
-	gluLookAt(eye[0],eye[1],eye[2],0.0,0.0,0.0,top[0],top[1],top[2]);
-	//then grab the resulting matrix
-	glGetDoublev(GL_MODELVIEW_MATRIX, result.data());
-
-	glPopMatrix();
-
-	result.data()[14] = 0; //annoying value (?!)
-	return result;
+	return ccGLMatrixd::LookAt(eye,center,top);
 }
 
 bool ccGLUtils::CatchGLError(const char* context)

@@ -200,9 +200,6 @@ public:
 	//! Returns viewport parameters (zoom, etc.)
 	virtual const ccViewportParameters& getViewportParameters() const = 0;
 
-	//! Makes the associated OpenGL context active
-	virtual void makeContextCurrent() = 0;
-
 	//! Setups a (projective) camera
 	/** \param cameraMatrix orientation/position matrix of the camera
 		\param fov_deg vertical field of view (in degrees). Optional (ignored if 0).

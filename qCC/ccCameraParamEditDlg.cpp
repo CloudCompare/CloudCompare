@@ -286,7 +286,6 @@ void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
 
 	PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 
-	m_associatedWin->makeCurrent();
 	ccGLMatrixd mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
 	initWithMatrix(mat);
 	m_associatedWin->blockSignals(true);

@@ -1777,12 +1777,12 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 						//add "original" entry
 						int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
-						//sasDlg.makeCurrent(index);
+						//sasDlg.setCurrentProfile(index);
 						//add "suggested" entry
 						CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 						double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
 						index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
-						sasDlg.makeCurrent(index);
+						sasDlg.setCurrentProfile(index);
 						//add "last" entry (if available)
 						ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
 						if (sasDlg.getLast(lastInfo))
@@ -2107,7 +2107,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showNoButton(false);
 	//add "original" entry
 	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",shift,scale));
-	sasDlg.makeCurrent(index);
+	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
 	ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
 	if (sasDlg.getLast(lastInfo))

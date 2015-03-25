@@ -3472,7 +3472,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 	int totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
 	m_vboManager.totalMemSizeBytes = 0;
 	{
-		m_currentDisplay->makeContextCurrent();
+		//DGM: the context should be already active as this method should only be called from 'drawMeOnly'
 
 		assert(!glParams.showSF		|| (m_currentDisplayedScalarField && m_currentDisplayedScalarField->chunksCount() >= chunksCount));
 		assert(!glParams.showColors	|| (m_rgbColors && m_rgbColors->chunksCount() >= chunksCount));
@@ -3691,8 +3691,6 @@ void ccPointCloud::releaseVBOs()
 
 	if (m_currentDisplay)
 	{
-		//m_currentDisplay->makeContextCurrent(); //DGM: can't call this as it is not thread safe (and it doesn't seem necessary by the way ;)
-
 		//'destroy' all vbos
 		for (size_t i=0; i<m_vboManager.vbos.size(); ++i)
 		{

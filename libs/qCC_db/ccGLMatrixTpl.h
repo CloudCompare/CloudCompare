@@ -129,6 +129,55 @@ public:
 		return glMat1 * m12;
 	}
 
+	//! Returns a 'look at' matrix similar to what gluLookAt would produce
+	/** Inspired from https://www.opengl.org/wiki/GluLookAt_code
+		\param eyePosition3D  eye/camera position
+		\param center3D where to look at
+		\param upVector3D vertical direction
+		\return resulting 'look at' matrix
+	**/
+	static ccGLMatrixTpl<T> LookAt( const Vector3Tpl<T>& eyePosition3D, const Vector3Tpl<T>& center3D, const Vector3Tpl<T>& upVector3D)
+	{
+		//------------------
+		Vector3Tpl<T> forward = center3D - eyePosition3D;
+		forward.normalize();
+		//------------------
+		//Side = forward x up
+		Vector3Tpl<T> side = forward.cross(upVector3D);
+		side.normalize();
+		//------------------
+		//Recompute up as: up = side x forward
+		Vector3Tpl<T> up = side.cross(forward);
+
+		//------------------
+		ccGLMatrixTpl<T> matrix;
+		{
+			T* mat = matrix.data();
+			mat[0]  = side.x;
+			mat[4]  = side.y;
+			mat[8]  = side.z;
+			mat[12] = -eyePosition3D.x;
+			//------------------
+			mat[1]  = up.x;
+			mat[5]  = up.y;
+			mat[9]  = up.z;
+			mat[13] = -eyePosition3D.y;
+			//------------------
+			mat[2]  = -forward.x;
+			mat[6]  = -forward.y;
+			mat[10] = -forward.z;
+			mat[14] = -eyePosition3D.z;
+			//------------------
+			mat[3]  = 0.0;
+			mat[7]  = 0.0;
+			mat[11] = 0.0;
+			mat[15] = 1.0;
+		}
+		//------------------
+
+		return matrix;
+	}
+
 	//! Creates a transformation matrix that rotates a vector to another
 	/** Adapted from  "Efficiently Building a Matrix to Rotate One Vector to Another"
 		By Tomas Möller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
@@ -141,34 +190,23 @@ public:
 		T f = (e < 0 ? -e : e);
 		ccGLMatrixTpl<T> result;
 
-		if (f > 1.0-ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
+		if (1.0-f < ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
 		{
-			// vector most nearly orthogonal to "from"
-			Vector3Tpl<T> x(from.x > 0 ? from.x : -from.x,
-							from.y > 0 ? from.y : -from.y,
-							from.z > 0 ? from.z : -from.z);
-
+			// "to" vector most nearly orthogonal to "from"
+			Vector3Tpl<T> x(0,0,0);
 			if (x.x < x.y)
 			{
 				if (x.x < x.z)
-				{
-					x.x = 1; x.y = x.z = 0;
-				}
+					x.x = 1;
 				else
-				{
-					x.z = 1; x.x = x.y = 0;
-				}
+					x.z = 1;
 			}
 			else
 			{
 				if (x.y < x.z)
-				{
-					x.y = 1; x.x = x.z = 0;
-				}
+					x.y = 1;
 				else
-				{
-					x.z = 1; x.x = x.y = 0;
-				}
+					x.z = 1;
 			}
 
 			Vector3Tpl<T> u = x-from;

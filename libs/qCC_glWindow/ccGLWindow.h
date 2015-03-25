@@ -36,8 +36,13 @@
 #include <QFont>
 #include <QMap>
 #include <QElapsedTimer>
+//#define THREADED_GL_WIDGET
+#ifdef THREADED_GL_WIDGET
+#include <QThread>
 #include <QMutex>
-
+#include <QWaitCondition>
+#include <QAtomicInt>
+#endif
 //system
 #include <set>
 #include <list>
@@ -53,7 +58,6 @@ class ccGlFilter;
 class ccFrameBufferObject;
 class ccInteractor;
 class ccPolyline;
-class ccGLRenderingThread;
 
 //! OpenGL 3D view
 class ccGLWindow : public QGLWidget, public ccGenericGLDisplay
@@ -482,7 +486,7 @@ public:
 	bool crossShouldBeDrawn() const;
 	
 	//! Main OpenGL display sequence
-	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, QGLContext* activeContext = 0);
+	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross);
 
 public slots:
 
@@ -619,6 +623,46 @@ protected:
 	void resizeGL(int w, int h);
 	void paintGL();
 
+#ifdef THREADED_GL_WIDGET
+	void initialize();
+	void resizeGL2();
+	void paint();
+	void resizeEvent(QResizeEvent* evt);
+	bool event(QEvent* evt);
+
+	class RenderingThread : public QThread
+	{
+	public:
+
+		RenderingThread(ccGLWindow* win = 0)
+			: QThread(win)
+			, m_window(win)
+			, m_abort(0)
+		{}
+
+		~RenderingThread() { stop(); }
+		
+		void stop();
+		inline void wake() { m_waitCondition.wakeOne(); }
+
+	protected:
+
+		virtual void run();
+
+		ccGLWindow* m_window;
+		QWaitCondition m_waitCondition;
+		QAtomicInt m_abort;
+	};
+
+	friend RenderingThread;
+
+	RenderingThread* m_renderingThread;
+	QMutex m_mutex;
+	QGLFormat m_format;
+	const QGLWidget* m_shareWidget; 
+	QAtomicInt m_resized;
+#endif
+
 	//Graphical features controls
 	void drawCross();
 	void drawTrihedron();
@@ -698,6 +742,9 @@ protected:
 
 	//! Disables LOD rendering
 	void disableLOD();
+
+	// Releases all textures, GL lists, etc.
+	void uninitializeGL();
 
 	/***************************************************
 					OpenGL Extensions
@@ -923,14 +970,6 @@ protected:
 
 	//! Internal timer
 	QElapsedTimer m_timer;
-
-	//! Active context
-	QGLContext* m_activeContext;
-	//! Rendering thread
-	ccGLRenderingThread* m_renderingThread;
-
-	//! Mutex for thread based rendering
-	QMutex m_draw3DMutex;
 
 private:
 

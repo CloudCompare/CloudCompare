@@ -15,10 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-//Local
-#include "ccGLRenderingThread.h"
-
-
 //CCLib
 #include <CCConst.h>
 #include <CCPlatform.h>
@@ -128,6 +124,12 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 						QGLWidget* shareWidget/*=0*/,
 						bool silentInitialization/*=false*/)
 	: QGLWidget(format,parent,shareWidget)
+#ifdef THREADED_GL_WIDGET
+	, m_renderingThread(new RenderingThread(this))
+	, m_format(format)
+	, m_shareWidget(shareWidget)
+	, m_resized(1)
+#endif
 	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
 	, m_initialized(false)
 	, m_trihedronGLList(GL_INVALID_LIST_ID)
@@ -179,8 +181,6 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_LODProgressIndicator(0)
 	, m_LODInProgress(false)
 	, m_LODPendingRefresh(false)
-	, m_activeContext(const_cast<QGLContext*>(context()))
-	, m_renderingThread(0)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -262,42 +262,35 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 		if (!m_sunLightEnabled)
 			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
 	}
+
+#ifdef THREADED_GL_WIDGET
+	setAutoBufferSwap(false);
+	//if (m_renderingThread)
+	//	m_renderingThread->start();
+	//else
+	//	assert(false);
+#endif
+
 }
 
 ccGLWindow::~ccGLWindow()
 {
+#ifdef THREADED_GL_WIDGET
+	if (m_renderingThread)
+		m_renderingThread->stop();
+	else
+		assert(false);
+#endif
+
 	if (m_globalDBRoot)
 	{
 		//we must unlink entities currently linked to this window
 		m_globalDBRoot->removeFromDisplay_recursive(this);
 	}
 
-	makeCurrent();
-
-	if (m_renderingThread)
-	{
-		delete m_renderingThread;
-		m_renderingThread = 0;
-	}
-
-	//release textures
-	{
-		for (QMap< QString, unsigned >::iterator it=m_materialTextures.begin(); it != m_materialTextures.end(); ++it)
-		{
-			deleteTexture(it.value());
-		}
-	}
-
-	if (m_trihedronGLList != GL_INVALID_LIST_ID)
-	{
-		glDeleteLists(m_trihedronGLList,1);
-		m_trihedronGLList = GL_INVALID_LIST_ID;
-	}
-	if (m_pivotGLList != GL_INVALID_LIST_ID)
-	{
-		glDeleteLists(m_pivotGLList,1);
-		m_pivotGLList = GL_INVALID_LIST_ID;
-	}
+#ifndef THREADED_GL_WIDGET
+	uninitializeGL();
+#endif
 
 	if (m_winDBRoot)
 		delete m_winDBRoot;
@@ -420,6 +413,27 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 
 void ccGLWindow::initializeGL()
 {
+#ifdef THREADED_GL_WIDGET
+	//do nothing
+}
+
+void ccGLWindow::initialize()
+{
+	if (m_initialized)
+		return;
+
+	//create context from inside thread
+	QGLContext *glContext = new QGLContext(m_format, this);
+
+	//share context with another QGLWidget
+	if (m_shareWidget != NULL)
+		glContext->create(m_shareWidget->context());
+	setContext(glContext);
+
+	//make sure new context is current
+	makeCurrent();
+#endif
+
 	if (m_initialized)
 		return;
 
@@ -624,16 +638,143 @@ void ccGLWindow::initializeGL()
 		ccLog::Print("[ccGLWindow] 3D view initialized");
 }
 
+void ccGLWindow::uninitializeGL()
+{
+	if (!m_initialized)
+		return;
+
+	makeCurrent();
+
+	//release textures
+	{
+		for (QMap< QString, unsigned >::iterator it = m_materialTextures.begin(); it != m_materialTextures.end(); ++it)
+		{
+			deleteTexture(it.value());
+		}
+		m_materialTextures.clear();
+	}
+
+	if (m_trihedronGLList != GL_INVALID_LIST_ID)
+	{
+		glDeleteLists(m_trihedronGLList, 1);
+		m_trihedronGLList = GL_INVALID_LIST_ID;
+	}
+	if (m_pivotGLList != GL_INVALID_LIST_ID)
+	{
+		glDeleteLists(m_pivotGLList, 1);
+		m_pivotGLList = GL_INVALID_LIST_ID;
+	}
+
+	m_initialized = false;
+}
+
+#ifdef THREADED_GL_WIDGET
+void ccGLWindow::resizeEvent(QResizeEvent *evt)
+{
+	m_resized.store(1);
+	//notify thread of resize event
+	if (m_renderingThread)
+		m_renderingThread->wake();
+	else
+		assert(false);
+}
+
+bool ccGLWindow::event(QEvent* evt)
+{
+	if (!m_renderingThread)
+	{
+		assert(false);
+		return false;
+	}
+	
+	switch (evt->type())
+	{
+	case QEvent::Show:
+		m_renderingThread->wake();
+		break;
+
+	case QEvent::ParentChange: //The context will be changed, need to reinit OpenGL
+		{
+			//wait for thread to finish current work
+			m_renderingThread->stop();
+			bool ret = QGLWidget::event(evt);
+
+			//notify thread of re-init context
+			m_initialized = false;
+			m_renderingThread->start();
+			//m_renderingThread->wake();
+			return ret;
+		}
+
+	default:
+		break;
+	}
+
+	return QGLWidget::event(evt);
+}
+
+void ccGLWindow::RenderingThread::stop()
+{
+	m_abort.store(1);
+	wake();
+	wait();
+}
+
+void ccGLWindow::RenderingThread::run()
+{
+	if (!m_window)
+	{
+		assert(false);
+		return;
+	}
+	m_abort.store(0);
+
+	while (true)
+	{
+		m_window->m_mutex.lock();
+		m_waitCondition.wait(&m_window->m_mutex);
+		m_window->m_mutex.unlock();
+		if (m_abort.load() != 0)
+		{
+			break;
+		}
+
+		if (!m_window->m_initialized)
+			m_window->initialize();
+
+		m_window->makeCurrent();
+
+		if (m_window->m_resized.load() != 0)
+			m_window->resizeGL2();
+
+		m_window->paint();
+		m_window->swapBuffers();
+		
+		m_window->doneCurrent();
+	}
+	m_window->uninitializeGL();
+}
+
+#endif
+
 void ccGLWindow::resizeGL(int w, int h)
 {
 	m_glWidth = w;
 	m_glHeight = h;
 
+#ifdef THREADED_GL_WIDGET
+	//do nothing more
+	//m_resized.store(1);
+}
+
+void ccGLWindow::resizeGL2()
+{
+#endif
 	//DGM --> QGLWidget doc: 'There is no need to call makeCurrent() because this has already been done when this function is called."
 	//makeCurrent();
 
 	//update OpenGL viewport
-	glViewport(0,0,w,h);
+	glViewport(0, 0, m_glWidth, m_glHeight);
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -651,18 +792,17 @@ void ccGLWindow::resizeGL(int w, int h)
 		m_pivotGLList = GL_INVALID_LIST_ID;
 	}
 
-	if (m_renderingThread)
-	{
-		m_renderingThread->init(QSize(w,h));
-	}
-
-	displayNewMessage(QString("New size = %1 * %2 (px)").arg(w).arg(h),
+	displayNewMessage(QString("New size = %1 * %2 (px)").arg(m_glWidth).arg(m_glHeight),
 						ccGLWindow::LOWER_LEFT_MESSAGE,
 						false,
 						2,
 						SCREEN_SIZE_MESSAGE);
 
 	ccGLUtils::CatchGLError("ccGLWindow::resizeGL");
+	
+#ifdef THREADED_GL_WIDGET
+	m_resized.store(0);
+#endif
 }
 
 //Framerate test
@@ -927,7 +1067,19 @@ void ccGLWindow::redraw(bool only2D/*=false*/)
 	
 	if (!only2D)
 		m_updateFBO = true;
+
+#ifdef THREADED_GL_WIDGET
+	if (m_renderingThread)
+	{
+		m_renderingThread->wake();
+	}
+	else
+	{
+		assert(false);
+	}
+#else
 	updateGL();
+#endif
 }
 
 bool ccGLWindow::crossShouldBeDrawn() const
@@ -938,13 +1090,15 @@ bool ccGLWindow::crossShouldBeDrawn() const
 			&&	!(m_fbo && m_activeGLFilter);
 }
 
-static bool s_rendering = false;
 void ccGLWindow::paintGL()
 {
-	if (s_rendering)
-		return;
-	s_rendering = true;
+#ifdef THREADED_GL_WIDGET
+	//do nothing
+}
 
+void ccGLWindow::paint()
+{
+#endif
 	qint64 startTime_ms = m_LODInProgress ? m_timer.elapsed() : 0;
 
 	bool doDraw3D = (	!m_fbo
@@ -954,35 +1108,6 @@ void ccGLWindow::paintGL()
 						||	m_LODInProgress )
 					);
 	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(doDraw3D ? "yes" : "no").arg(m_LODInProgress ? "yes" : "no"));
-
-	//do we have a offline rendering in store?
-	GLuint screenTex = 0;
-	if (	doDraw3D
-		&&	!m_captureMode.enabled
-		&&	m_renderingThread
-		&&	m_renderingThread->isValid())
-	{
-		if (m_renderingThread->isRunning())
-		{
-			ccLog::PrintDebug(QString("[QPaintGL] Thread rendering in progress"));
-			s_rendering = false;
-			return;
-		}
-		if (m_renderingThread->isReady())
-		{
-			screenTex = m_renderingThread->useTexture();
-			if (glIsTexture(screenTex))
-			{
-				ccLog::PrintDebug(QString("[QPaintGL] Will use the thread rendering result (tex ID = %1)").arg(screenTex));
-				doDraw3D = false;
-			}
-			else
-			{
-				//invalid FBO texture?!
-				screenTex = 0;
-			}
-		}
-	}
 
 	//context initialization
 	CC_DRAW_CONTEXT context;
@@ -1019,7 +1144,8 @@ void ccGLWindow::paintGL()
 	setStandardOrthoCenter();
 	glDisable(GL_DEPTH_TEST);
 
-	if (screenTex == 0 && m_fbo)
+	GLuint screenTex = 0;
+	if (m_fbo)
 	{
 		if (m_activeGLFilter)
 		{
@@ -1270,28 +1396,11 @@ void ccGLWindow::paintGL()
 				m_LODPendingRefresh = true;
 				m_LODPendingIgnore = false;
 
-				if (!m_renderingThread)
-				{
-					m_renderingThread = new ccGLRenderingThread(this);
-					m_renderingThread->init(size());
-					connect(m_renderingThread, SIGNAL(ready()), this, SLOT(renderNextLODLevel()), Qt::QueuedConnection);
-				}
-				
-				if (m_renderingThread->isValid() && !m_renderingThread->isRunning())
-				{
-					ccLog::PrintDebug(QString("[QPaintGL] New LOD pass scheduled with thread"));
-					QTimer::singleShot(0, m_renderingThread, SLOT(start()));
-				}
-				else
-				{
-					ccLog::PrintDebug(QString("[QPaintGL] New LOD pass scheduled with timer"));
-					QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms-displayTime_ms,0), this, SLOT(renderNextLODLevel()));
-				}
+				ccLog::PrintDebug(QString("[QPaintGL] New LOD pass scheduled with timer"));
+				QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms-displayTime_ms,0), this, SLOT(renderNextLODLevel()));
 			}
 		}
 	}
-
-	s_rendering = false;
 }
 
 void ccGLWindow::renderNextLODLevel()
@@ -1310,12 +1419,8 @@ void ccGLWindow::renderNextLODLevel()
 	}
 }
 
-void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross, QGLContext* activeContext/*=0*/)
+void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 {
-	m_draw3DMutex.lock();
-	if (activeContext != 0)
-		m_activeContext = activeContext;
-
 	glPointSize(m_viewportParams.defaultPointSize);
 	glLineWidth(m_viewportParams.defaultLineWidth);
 
@@ -1489,10 +1594,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross, QGLContext* 
 			disableLOD();
 		}
 	}
-
-	if (activeContext != 0)
-		m_activeContext = const_cast<QGLContext*>(context());
-	m_draw3DMutex.unlock();
 }
 
 void ccGLWindow::disableLOD()
@@ -1597,9 +1698,21 @@ bool ccGLWindow::getPerspectiveState(bool& objectCentered) const
 void ccGLWindow::closeEvent(QCloseEvent *event)
 {
 	if (m_unclosable)
+	{
 		event->ignore();
+	}
 	else
+	{
+#ifdef THREADED_GL_WIDGET
+		if (m_renderingThread)
+		{
+			m_renderingThread->stop();
+			QGLWidget::closeEvent(event);
+		}
+#else
 		event->accept();
+#endif
+	}
 }
 
 void ccGLWindow::setUnclosable(bool state)
@@ -2021,9 +2134,7 @@ void ccGLWindow::invalidateViewport()
 
 void ccGLWindow::recalcProjectionMatrix()
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+	makeCurrent();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -2131,9 +2242,7 @@ void ccGLWindow::invalidateVisualization()
 
 void ccGLWindow::recalcModelViewMatrix()
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+	makeCurrent();
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -2303,9 +2412,11 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 unsigned ccGLWindow::getTextureID(const QImage& image)
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+#ifdef THREADED_GL_WIDGET
+	//FIXME
+	return GL_INVALID_TEXTURE_ID;
+#else
+	makeCurrent();
 
 	//default parameters
 	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -2348,6 +2459,7 @@ unsigned ccGLWindow::getTextureID(const QImage& image)
 
 		return bindTexture(qImage,GL_TEXTURE_2D,GL_RGBA,QGLContext::NoBindOption);
 	}
+#endif
 }
 
 unsigned ccGLWindow::getTextureID(ccMaterial::CShared mtl)
@@ -2367,9 +2479,11 @@ unsigned ccGLWindow::getTextureID(ccMaterial::CShared mtl)
 
 void ccGLWindow::releaseTexture(unsigned texID)
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+#ifdef THREADED_GL_WIDGET
+	//FIXME
+#else
+	return;
+	makeCurrent();
 
 	//release texture from map!
 	for (QMap< QString, unsigned >::iterator it=m_materialTextures.begin(); it != m_materialTextures.end(); ++it)
@@ -2381,6 +2495,7 @@ void ccGLWindow::releaseTexture(unsigned texID)
 		}
 	}
 	deleteTexture(texID);
+#endif
 }
 
 CCVector3d ccGLWindow::getCurrentViewDir() const
@@ -3265,9 +3380,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	else
 	{
 		//OpenGL picking
-		assert(m_activeContext);
-		//if (QThread::currentThread() == thread())
-			m_activeContext->makeCurrent();
+		makeCurrent();
 
 		//no need to clear display, we don't draw anything new!
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -4076,9 +4189,7 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 
 void ccGLWindow::getViewportArray(int vpArray[])
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+	makeCurrent();
 	glGetIntegerv(GL_VIEWPORT, vpArray);
 }
 
@@ -4137,9 +4248,10 @@ void ccGLWindow::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
 
 void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw/*=true*/)
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+#ifdef THREADED_GL_WIDGET
+	//FIXME
+#else
+	makeCurrent();
 
 	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
@@ -4153,13 +4265,15 @@ void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, 
 
 	if (forceRedraw)
 		redraw();
+#endif
 }
 
 void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=true*/)
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+#ifdef THREADED_GL_WIDGET
+	//FIXME
+#else
+	makeCurrent();
 
 	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
@@ -4177,6 +4291,7 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 
 	if (forceRedraw)
 		redraw();
+#endif
 }
 
 bool ccGLWindow::renderToFile(	QString filename,
@@ -4548,9 +4663,7 @@ void ccGLWindow::displayText(	QString text,
 								const unsigned char* rgbColor/*=0*/,
 								const QFont* font/*=0*/)
 {
-	assert(m_activeContext);
-	//if (QThread::currentThread() == thread())
-		m_activeContext->makeCurrent();
+	makeCurrent();
 
 	int x2 = x;
 	int y2 = m_glHeight - 1 - y;

@@ -16,7 +16,10 @@ project( CC_DUMMY_PROJECT )
 add_subdirectory (triangle)
 
 # Additional dependencies (only Qt in fact)
-include( ../CMakeExternalLibs.cmake )
+option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to allow parallel processing)" ON )
+if (COMPILE_CC_CORE_LIB_WITH_QT)
+	include( ../CMakeExternalLibs.cmake )
+endif()
 
 project( CC_CORE_LIB )
 
@@ -36,12 +39,15 @@ add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} )
 
 target_link_libraries( ${PROJECT_NAME} triangle )
 
-if ( USE_QT5 )
-	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} )
-	qt5_use_modules(${PROJECT_NAME} Core Widgets Concurrent)
-else()
-	include_directories( ${QT_INCLUDE_DIR} )
-	target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES} )
+if ( COMPILE_CC_CORE_LIB_WITH_QT )
+	if ( USE_QT5 )
+		include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} )
+		qt5_use_modules(${PROJECT_NAME} Core Widgets Concurrent)
+	else()
+		include_directories( ${QT_INCLUDE_DIR} )
+		target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES} )
+	endif()
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_QT )
 endif()
 
 # Load advanced scripts
@@ -50,15 +56,18 @@ include( ../CMakeInclude.cmake )
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
 
-if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
-endif()
+option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
+if ( COMPILE_CC_CORE_LIB_SHARED )
+	if (WIN32)
+		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
+	endif()
 
-# Install (shared) library to specified destinations
-if( UNIX )
-	install_shared( CC_CORE_LIB lib 0 ) #default destination: /usr/lib
-else()
-	foreach( dest ${INSTALL_DESTINATIONS} )
-		install_shared( CC_CORE_LIB ${dest} 1 )
-	endforeach()
+	# Install (shared) library to specified destinations
+	if( UNIX )
+		install_shared( CC_CORE_LIB lib 0 ) #default destination: /usr/lib
+	else()
+		foreach( dest ${INSTALL_DESTINATIONS} )
+			install_shared( CC_CORE_LIB ${dest} 1 )
+		endforeach()
+	endif()
 endif()

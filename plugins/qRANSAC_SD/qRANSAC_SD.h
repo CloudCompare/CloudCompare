@@ -18,9 +18,6 @@
 #ifndef Q_RANSAC_SD_PLUGIN_HEADER
 #define Q_RANSAC_SD_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
 #include "../ccStdPluginInterface.h"
 
 //! Wrapper to Schnabel et al. library for automatic shape detection in point cloud

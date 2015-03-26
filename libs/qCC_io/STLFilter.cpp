@@ -416,6 +416,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
 																			TagDuplicatedVertices,
 																			additionalParameters,
+																			false,
 																			&pDlg,
 																			"Tag duplicated vertices");
 				vertices->deleteOctree();

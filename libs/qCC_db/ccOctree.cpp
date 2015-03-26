@@ -224,7 +224,9 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		ccGL::Color3v(ccColor::green.rgba);
 
 		void* additionalParameters[] = { theOctree->m_frustrumIntersector };
-		theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsABox,additionalParameters);
+		theOctree->executeFunctionForAllCellsAtLevel(	level,
+														&DrawCellAsABox,
+														additionalParameters);
 	}
 	else
 	{
@@ -264,7 +266,9 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 				};
 
 				glBegin(GL_POINTS);
-				theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsAPoint,additionalParameters,0,"Render octree");
+				theOctree->executeFunctionForAllCellsAtLevel(	level,
+																&DrawCellAsAPoint,
+																additionalParameters);
 				glEnd();
 			}
 			else
@@ -294,7 +298,9 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 													(void*)&context
 				};
 
-				theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsAPrimitive,additionalParameters,0);
+				theOctree->executeFunctionForAllCellsAtLevel(	level,
+																&DrawCellAsAPrimitive,
+																additionalParameters);
 			}
 
 			glEndList();

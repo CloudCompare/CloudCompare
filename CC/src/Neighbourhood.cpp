@@ -816,7 +816,7 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 				return NAN_VALUE;
 
 			double eMin = std::min(std::min(e0,e1),e2);
-			return fabs(eMin) / sum;
+			return static_cast<ScalarType>(fabs(eMin) / sum);
 		}
 		break;
 

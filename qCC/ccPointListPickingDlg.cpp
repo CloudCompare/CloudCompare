@@ -30,6 +30,7 @@
 
 //qCC_db
 #include <ccLog.h>
+#include <ccObject.h> //for CC_QT5 def
 #include <ccPointCloud.h>
 #include <cc2DLabel.h>
 #include <ccPolyline.h>

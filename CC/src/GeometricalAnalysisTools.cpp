@@ -67,13 +67,10 @@ int GeometricalAnalysisTools::computeCurvature(	GenericIndexedCloudPersist* theC
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
 	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
 													&computeCellCurvatureAtLevel,
 													additionalParameters,
+													true,
 													progressCb,
 													"Curvature Computation") == 0)
 	{
@@ -206,10 +203,10 @@ int GeometricalAnalysisTools::flagDuplicatePoints(	GenericIndexedCloudPersist* t
 
 	int result = 0;
 
-	//doesn't work in parallel!
 	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														&flagDuplicatePointsInACellAtLevel,
 														additionalParameters,
+														false, //doesn't work in parallel!
 														progressCb,
 														"Flag duplicate points") == 0)
 	{
@@ -307,13 +304,10 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														&computeApproxPointsDensityInACellAtLevel,
 														additionalParameters,
+														true,
 														progressCb,
 														"Approximate Local Density Computation") == 0)
 	{
@@ -454,13 +448,10 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														&computePointsDensityInACellAtLevel,
 														additionalParameters,
+														true,
 														progressCb,
 														"Local Density Computation") == 0)
 	{
@@ -545,13 +536,10 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 
 	int result = 0;
 
-#ifdef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#else
 	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
-#endif
 														&computePointsRoughnessInACellAtLevel,
 														additionalParameters,
+														true,
 														progressCb,
 														"Roughness Computation") == 0)
 	{
@@ -789,7 +777,7 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 	double wSum = 0.0; //we will normalize by the sum
 	for (unsigned i = 0; i<count; i++)
 	{
-		CCVector3 Pt = *P->getNextPoint() - Gp;
+		CCVector3d Pt = CCVector3d::fromArray((*P->getNextPoint() - Gp).u);
 		CCVector3 Qt = *Q->getNextPoint() - Gq;
 
 		//Weighting scheme for cross-covariance is inspired from
@@ -1198,9 +1186,9 @@ bool GeometricalAnalysisTools::computeSphereFrom4(	const CCVector3& A,
 	}
 
 	//  Compute the radius and center.
-	CCVector3 u = CCVector3(a[0+3*3],
-							a[1+3*3],
-							a[2+3*3] )/2;
+	CCVector3 u = CCVector3(static_cast<PointCoordinateType>(a[0+3*3]),
+							static_cast<PointCoordinateType>(a[1+3*3]),
+							static_cast<PointCoordinateType>(a[2+3*3])) / 2;
 	radius = u.norm();
 	center = A + u;
 

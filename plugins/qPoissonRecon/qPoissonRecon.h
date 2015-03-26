@@ -18,9 +18,6 @@
 #ifndef Q_POISSON_RECON_PLUGIN_HEADER
 #define Q_POISSON_RECON_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
 #include "../ccStdPluginInterface.h"
 
 //! Wrapper to the "Poisson Surface Reconstruction (Version 3)" algorithm

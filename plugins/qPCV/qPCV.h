@@ -18,8 +18,6 @@
 #ifndef Q_PCV_PLUGIN_HEADER
 #define Q_PCV_PLUGIN_HEADER
 
-#include <QObject>
-
 #include "../ccStdPluginInterface.h"
 
 //! Wrapper to the ShadeVis algorithm for computing Ambient Occlusion on meshes and point clouds

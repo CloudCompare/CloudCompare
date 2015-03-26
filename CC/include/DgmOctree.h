@@ -36,11 +36,6 @@
 #define OCTREE_CODES_64_BITS
 #endif
 
-#ifndef _DEBUG
-//enables multi-threading handling
-#define ENABLE_MT_OCTREE
-#endif
-
 //DGM: tests in progress
 //#define TEST_CELLS_FOR_SPHERICAL_NN
 
@@ -91,7 +86,7 @@ public:
 	/** Warning: 3 bits per level are required.
 	**/
 #ifdef OCTREE_CODES_64_BITS
-	typedef qint64 OctreeCellCodeType; //max 21 levels (but twice more memory!)
+	typedef unsigned long long OctreeCellCodeType; //max 21 levels (but twice more memory!)
 #else
 	typedef unsigned OctreeCellCodeType; //max 10 levels
 #endif
@@ -396,7 +391,8 @@ public:
 	};
 
 	//! Generic form of a function that can be applied automatically to all cells of the octree
-	/** See DgmOctree::executeFunctionForAllCellsAtLevel and DgmOctree::executeFunctionForAllCellsAtStartingLevel.
+	/** See DgmOctree::executeFunctionForAllCellsAtLevel and 
+		DgmOctree::executeFunctionForAllCellsStartingAtLevel.
 		The parameters of such a function are:
 		- (octreeCell) cell descriptor
 		- (void**) table of user parameters for the function (maybe void)
@@ -1006,29 +1002,38 @@ public:
 		the number of points in a cell. Thanks to this, the function is applied on a limited
 		number of points, avoiding great loss of performances. The only limitation is when the
 		level of subdivision is deepest level. In this case no more splitting is possible.
+
+		Parallel processing is based on QtConcurrent::map system.
+
 		\param startingLevel the initial level of subdivision
 		\param func the function to apply
 		\param additionalParameters the function parameters
 		\param minNumberOfPointsPerCell	minimal number of points inside a cell (indicative)
 		\param maxNumberOfPointsPerCell maximum number of points inside a cell (indicative)
+		\param multiThread whether to use parallel processing or not
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param functionTitle function title
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
-	unsigned executeFunctionForAllCellsAtStartingLevel(	uchar startingLevel,
+	unsigned executeFunctionForAllCellsStartingAtLevel(	uchar startingLevel,
 														octreeCellFunc func,
 														void** additionalParameters,
 														unsigned minNumberOfPointsPerCell,
 														unsigned maxNumberOfPointsPerCell,
+														bool multiThread = true,
 														GenericProgressCallback* progressCb = 0,
 														const char* functionTitle = 0);
 
 	//! Method to apply automatically a specific function to each cell of the octree
 	/** The function to apply should be of the form DgmOctree::octreeCellFunc. In this case
 		the octree cells are scanned one by one at the same level of subdivision.
+
+		Parallel processing is based on QtConcurrent::map system.
+
 		\param level the level of subdivision
 		\param func the function to apply
 		\param additionalParameters the function parameters
+		\param multiThread whether to use parallel processing or not
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param functionTitle function title
 		\return the number of processed cells (or 0 is something went wrong)
@@ -1036,34 +1041,9 @@ public:
 	unsigned executeFunctionForAllCellsAtLevel(	uchar level,
 												octreeCellFunc func,
 												void** additionalParameters,
+												bool multiThread = false,
 												GenericProgressCallback* progressCb = 0,
 												const char* functionTitle = 0);
-
-#ifdef ENABLE_MT_OCTREE
-	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
-	/** Based on QtConcurrent::map system. Dispatches automatically
-		computation on as much cores on the system.
-		\return the number of processed cells (or 0 is something went wrong)
-	**/
-	unsigned executeFunctionForAllCellsAtLevel_MT(uchar level,
-													octreeCellFunc func,
-													void** additionalParameters,
-													GenericProgressCallback* progressCb = 0,
-													const char* functionTitle = 0);
-
-	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
-	/** Based on QtConcurrent::map system. Dispatches automatically
-		computation on as much cores on the system.
-		\return the number of processed cells (or 0 is something went wrong)
-	**/
-	unsigned executeFunctionForAllCellsAtStartingLevel_MT(	uchar level,
-															octreeCellFunc func,
-															void** additionalParameters,
-															unsigned minNumberOfPointsPerCell,
-															unsigned maxNumberOfPointsPerCell,
-															GenericProgressCallback* progressCb = 0,
-															const char* functionTitle = 0);
-#endif
 
 	//! Returns the associated cloud
 	inline GenericIndexedCloudPersist* associatedCloud() const
@@ -1076,6 +1056,9 @@ public:
 	{
 		return m_thePointsAndTheirCellCodes;
 	}
+
+	//! Returns whether multi-threading (parallel) computation is supported or not
+	static bool MultiThreadSupport();
 
 protected:
 

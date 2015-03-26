@@ -366,17 +366,14 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	double maxChi2 = -1.0;
 
 	//let's compute Chi2 distances
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtStartingLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtStartingLevel_MT(level,
-#endif
-															&computeLocalChi2DistAtLevel,
-															additionalParameters,
-															numberOfNeighbours/2,
-															numberOfNeighbours*3,
-															progressCb,
-															"Statistical Test")>0) //sucess
+	if (theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
+																&computeLocalChi2DistAtLevel,
+																additionalParameters,
+																numberOfNeighbours/2,
+																numberOfNeighbours*3,
+																true,
+																progressCb,
+																"Statistical Test") != 0) //sucess
 	{
 		if (!progressCb || !progressCb->isCancelRequested())
 		{

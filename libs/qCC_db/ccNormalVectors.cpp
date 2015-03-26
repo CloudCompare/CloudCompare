@@ -252,46 +252,37 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	{
 	case LS:
 		{
-		uchar level=theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
-#ifndef ENABLE_MT_OCTREE
-		processedCells = theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-		processedCells = theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
-															&(ComputeNormsAtLevelWithLS),
-															additionalParameters,
-															progressCb,
-															"Normals Computation[LS]");
+		uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+		processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
+																		&(ComputeNormsAtLevelWithLS),
+																		additionalParameters,
+																		true,
+																		progressCb,
+																		"Normals Computation[LS]");
 		}
 		break;
 	case TRI:
 		{
-		uchar level=theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
-#ifndef ENABLE_MT_OCTREE
-		processedCells = theOctree->executeFunctionForAllCellsAtStartingLevel(level,
-#else
-		processedCells = theOctree->executeFunctionForAllCellsAtStartingLevel_MT(level,
-#endif
-															&(ComputeNormsAtLevelWithTri),
-															additionalParameters,
-															NUMBER_OF_POINTS_FOR_NORM_WITH_TRI/2,
-															NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3,
-															progressCb,
-															"Normals Computation[TRI]");
+		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
+		processedCells = theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
+																				&(ComputeNormsAtLevelWithTri),
+																				additionalParameters,
+																				NUMBER_OF_POINTS_FOR_NORM_WITH_TRI/2,
+																				NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3,
+																				true,
+																				progressCb,
+																				"Normals Computation[TRI]");
 		}
 		break;
 	case HF:
 		{
-		uchar level=theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
-#ifndef ENABLE_MT_OCTREE
-		processedCells = theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-		processedCells = theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
-															&(ComputeNormsAtLevelWithHF),
-															additionalParameters,
-															progressCb,
-															"Normals Computation[HF]");
+		uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+		processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
+																		&(ComputeNormsAtLevelWithHF),
+																		additionalParameters,
+																		true,
+																		progressCb,
+																		"Normals Computation[HF]");
 		}
 		break;
 

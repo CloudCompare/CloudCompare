@@ -20,6 +20,7 @@
 
 //Local
 #include "qCC_db.h"
+#include "ccObject.h" //for CC_QT5 def
 
 //CCLib
 #include <CCConst.h>

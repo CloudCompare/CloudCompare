@@ -18,10 +18,9 @@
 #ifndef Q_EDL_PLUGIN_HEADER
 #define Q_EDL_PLUGIN_HEADER
 
-#include <QObject>
-
 #include "../ccGLFilterPluginInterface.h"
 
+//! EDL shader (Eye Dome Lighting)
 class qEDL : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT

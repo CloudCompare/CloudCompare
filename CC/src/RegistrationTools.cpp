@@ -775,10 +775,10 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		CCVector3 Np(0,0,1);
 		{
 			Np = (*Bp-*Ap).cross(*Cp-*Ap);
-			double norm = Np.norm();
+			double norm = Np.normd();
 			if (norm < ZERO_TOLERANCE)
 				return false;
-			Np /= norm;
+			Np /= static_cast<PointCoordinateType>(norm);
 		}
 		//compute the second set normal
 		X->placeIteratorAtBegining();
@@ -788,10 +788,10 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		CCVector3 Nx(0,0,1);
 		{
 			Nx = (*Bx-*Ax).cross(*Cx-*Ax);
-			double norm = Nx.norm();
+			double norm = Nx.normd();
 			if (norm < ZERO_TOLERANCE)
 				return false;
-			Nx /= norm;
+			Nx /= static_cast<PointCoordinateType>(norm);
 		}
 		//now the rotation is simply the rotation from Nx to Np, centered on Gx
 		CCVector3 a = Np.cross(Nx);
@@ -825,7 +825,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			if (sumNormP < ZERO_TOLERANCE)
 				return false;
 			double sumNormX = (*Bx-*Ax).norm() + (*Cx-*Bx).norm() + (*Ax-*Cx).norm();
-			trans.s = sumNormX / sumNormP; //sumNormX / (sumNormP * Sa) in fact
+			trans.s = static_cast<PointCoordinateType>(sumNormX / sumNormP); //sumNormX / (sumNormP * Sa) in fact
 		}
 
 		//we deduce the first translation

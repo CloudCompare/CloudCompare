@@ -37,12 +37,6 @@ class GenericProgressCallback;
 class ChamferDistanceTransform;
 struct OctreeAndMeshIntersection;
 
-//INTERNAL TESTS
-//#define DO_CLOUD2MESH_DISTANCE_TESTS
-#ifdef ENABLE_MT_OCTREE
-#define ENABLE_CLOUD2MESH_DIST_MT
-#endif
-
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
 class CC_CORE_LIB_API DistanceComputationTools : public CCToolbox
 {
@@ -333,6 +327,9 @@ public: //other methods
 											PointCoordinateType maxSearchDist = -PC_ONE,
 											GenericProgressCallback* progressCb = 0);
 
+	//! Returns whether multi-threading (parallel) computation is supported or not
+	static bool MultiThreadSupport();
+
 protected:
 
 	//! Projects a mesh into a grid structure
@@ -351,7 +348,8 @@ protected:
 		\param octreeLevel the octree subdivision level corresponding to the grid
 		\param signedDistances specify whether to compute signed or positive (squared) distances
 		\param flipTriangleNormals if 'signedDistances' is true,  specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
-		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value
+		\param multiThread whether to use parallel processing or not
+		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value (ignored if multiThread is true)
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return -1 if an error occurred (e.g. not enough memory) and 0 otherwise
 	**/
@@ -359,24 +357,9 @@ protected:
 														uchar octreeLevel,
 														bool signedDistances,
 														bool flipTriangleNormals,
+														bool multiThread = false,
 														ScalarType maxSearchDist = -1.0,
 														GenericProgressCallback* progressCb = 0);
-
-#ifdef ENABLE_CLOUD2MESH_DIST_MT
-	//! Multi-thread version of computePointCloud2MeshSignedDistanceWithOctree and computePointCloud2MeshSquareDistanceWithOctree
-	/** Warning: doesn't support the 'maxSearchDist' feature.
-		\param theIntersection a specific structure corresponding the intersection of the mesh with the grid
-		\param octreeLevel the octree subdivision level corresponding to the grid
-		\param signedDistances whether to compute signed or positive (squared) distances
-		\param flipTriangleNormals if 'signedDistances' is true, specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
-		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-	**/
-	static int computePointCloud2MeshDistanceWithOctree_MT(	OctreeAndMeshIntersection* theIntersection,
-															uchar octreeLevel,
-															bool signedDistances,
-															bool flipTriangleNormals=false,
-															GenericProgressCallback* progressCb = 0);
-#endif
 
 	//! Computes the "nearest neighbour distance" without local modeling for all points of an octree cell
 	/** This method has the generic syntax of a "cellular function" (see DgmOctree::localFunctionPtr).

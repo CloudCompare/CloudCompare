@@ -18,10 +18,6 @@
 #ifndef Q_SRA_PLUGIN_HEADER
 #define Q_SRA_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
-//qCC
 #include "../ccStdPluginInterface.h"
 
 class ccPointCloud;

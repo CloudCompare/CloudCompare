@@ -27,7 +27,9 @@
 #include <assert.h>
 
 //Qt
+#ifdef USE_QT
 #include <QCoreApplication>
+#endif
 
 using namespace CCLib;
 
@@ -74,7 +76,9 @@ static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCoun
 		sprintf(info,"Points: %u",totalCount);
 		s_progressCb->setInfo(info);
 		s_progressCb->start();
+#ifdef USE_QT
 		QCoreApplication::processEvents();
+#endif
 	}
 }
 
@@ -90,7 +94,9 @@ static inline void UpdateProgress(unsigned increment)
 		{
 			s_progressCb->update(fPercent);
 			s_lastProgress = uiPercent;
+#ifdef USE_QT
 			QCoreApplication::processEvents();
+#endif
 		}
 	}
 }

@@ -113,13 +113,10 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel(octreeLevel,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(octreeLevel,
-#endif
+	if (theOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
 														computeMeanGradientOnPatch,
 														additionalParameters,
+														true,
 														progressCb,
 														"Gradient Computation") == 0)
 	{
@@ -285,15 +282,12 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 
 	bool success = true;
 
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
-													computeCellGaussianFilter,
-                                                    additionalParameters,
-                                                    progressCb,
-													"Gaussian Filter computation")==0)
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
+														computeCellGaussianFilter,
+														additionalParameters,
+														true,
+														progressCb,
+														"Gaussian Filter computation") == 0)
 	{
 		//something went wrong
 		success = false;

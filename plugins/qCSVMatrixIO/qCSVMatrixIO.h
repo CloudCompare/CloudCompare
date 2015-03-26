@@ -18,11 +18,9 @@
 #ifndef Q_CSV_MATRIX_IO_PLUGIN_HEADER
 #define Q_CSV_MATRIX_IO_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
 #include "../ccIOFilterPluginInterface.h"
 
+//! CSV Matrix file (2.5D cloud)
 class qCSVMatrixIO : public QObject, public ccIOFilterPluginInterface
 {
 	Q_OBJECT

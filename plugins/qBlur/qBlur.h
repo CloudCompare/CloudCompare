@@ -18,10 +18,9 @@
 #ifndef Q_BLUR_PLUGIN_HEADER
 #define Q_BLUR_PLUGIN_HEADER
 
-#include <QObject>
-
 #include "../ccGLFilterPluginInterface.h"
 
+//! Blur shader
 class qBlur : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT

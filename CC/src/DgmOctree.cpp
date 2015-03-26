@@ -148,7 +148,23 @@ void getPointsInTreeCell(octreeTreeCell* cell, CCLib::DgmOctree::NeighboursSet& 
 
 #endif
 
+#ifdef USE_QT
+#ifndef _DEBUG
+//enables multi-threading handling
+#define ENABLE_MT_OCTREE
+#endif
+#endif
+
 using namespace CCLib;
+
+bool DgmOctree::MultiThreadSupport()
+{
+#ifdef ENABLE_MT_OCTREE
+	return true;
+#else
+	return false;
+#endif
+}
 
 DgmOctree::DgmOctree(GenericIndexedCloudPersist* cloud)
 	: m_theAssociatedCloud(cloud)
@@ -3563,379 +3579,17 @@ DgmOctree::octreeCell::~octreeCell()
 		delete points;
 }
 
-unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	uchar level,
-														octreeCellFunc func,
-														void** additionalParameters,
-														GenericProgressCallback* progressCb,
-														const char* functionTitle)
-{
-	if (m_thePointsAndTheirCellCodes.empty())
-		return 0;
-
-	//we get the maximum cell population for this level
-	unsigned maxCellPopulation=m_maxCellPopulation[level];
-
-	//cell descriptor (initialize it with first cell/point)
-	octreeCell cell(this);
-	if (!cell.points->reserve(maxCellPopulation)) //not enough memory
-		return 0;
-	cell.level=level;
-	cell.index = 0;
-
-	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(level);
-
-	//iterator on cell codes
-	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
-
-	//init with first cell
-	cell.truncatedCode = (p->theCode >> bitDec);
-	cell.points->addPointIndex(p->theIndex); //can't fail (see above)
-	++p;
-
-	//number of cells for this level
-	unsigned cellCount = getCellNumber(level);
-
-	//progress bar
-	if (progressCb)
-	{
-		progressCb->reset();
-		if (functionTitle)
-			progressCb->setMethodTitle(functionTitle);
-		char buffer[512];
-		sprintf(buffer,"Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %i",level,cellCount,m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
-		progressCb->setInfo(buffer);
-		progressCb->start();
-	}
-	NormalizedProgress nprogress(progressCb,m_theAssociatedCloud->size());
-
-	bool result = true;
-
-#ifdef COMPUTE_NN_SEARCH_STATISTICS
-	s_skippedPoints = 0;
-	s_testedPoints = 0;
-	s_jumps = 0.0;
-	s_binarySearchCount = 0.0;
-#endif
-
-	//for each point
-	for (; p!=m_thePointsAndTheirCellCodes.end(); ++p)
-	{
-		//check if it belongs to the current cell
-		OctreeCellCodeType nextCode = (p->theCode >> bitDec);
-		if (nextCode != cell.truncatedCode)
-		{
-			//if not, we call the user function on the previous cell
-			result = (*func)(cell,additionalParameters,&nprogress);
-
-			if (!result)
-				break;
-
-			//and we start a new cell
-			cell.index += cell.points->size();
-			cell.points->clear(false);
-			cell.truncatedCode = nextCode;
-
-			//if (!nprogress.oneStep())
-			//{
-			//	//process canceled by user
-			//	result = false;
-			//	break;
-			//}
-		}
-
-		cell.points->addPointIndex(p->theIndex); //can't fail (see above)
-	}
-
-	//don't forget last cell!
-	if (result)
-		result = (*func)(cell,additionalParameters, &nprogress);
-
-#ifdef COMPUTE_NN_SEARCH_STATISTICS
-	FILE* fp=fopen("octree_log.txt","at");
-	if (fp)
-	{
-		fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
-		fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
-		fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
-		fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
-		if (s_binarySearchCount > 0.0)
-			fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
-		fprintf(fp,"\n");
-		fclose(fp);
-	}
-#endif
-
-	//if something went wrong, we return 0
-	return (result ? cellCount : 0);
-}
-
-#define ENABLE_DOWN_TOP_TRAVERSAL
-unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLevel,
-															  octreeCellFunc func,
-															  void** additionalParameters,
-															  unsigned minNumberOfPointsPerCell,
-															  unsigned maxNumberOfPointsPerCell,
-															  GenericProgressCallback* progressCb,
-															  const char* functionTitle)
-{
-	if (m_thePointsAndTheirCellCodes.empty())
-		return 0;
-
-	//we get the maximum cell population for this level
-	unsigned maxCellPopulation=m_maxCellPopulation[startingLevel];
-
-	//cell descriptor
-	octreeCell cell(this);
-	if (!cell.points->reserve(maxCellPopulation)) //not enough memory
-		return 0;
-	cell.level = startingLevel;
-	cell.index = 0;
-
-	//progress notification
-	const unsigned cellsNumber = getCellNumber(startingLevel);
-	if (progressCb)
-	{
-		progressCb->reset();
-		if (functionTitle)
-			progressCb->setMethodTitle(functionTitle);
-		char buffer[1024];
-		sprintf(buffer,"Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %i - %i",
-				startingLevel,MAX_OCTREE_LEVEL,
-				getCellNumber(startingLevel),getCellNumber(MAX_OCTREE_LEVEL),
-				m_averageCellPopulation[startingLevel],m_stdDevCellPopulation[startingLevel],
-				m_averageCellPopulation[MAX_OCTREE_LEVEL],m_stdDevCellPopulation[MAX_OCTREE_LEVEL],
-				m_maxCellPopulation[startingLevel],m_maxCellPopulation[MAX_OCTREE_LEVEL]);
-		progressCb->setInfo(buffer);
-		progressCb->start();
-	}
-#ifndef ENABLE_DOWN_TOP_TRAVERSAL
-	NormalizedProgress nprogress(progressCb,m_theAssociatedCloud->size());
-#endif
-
-	//binary shift for cell code truncation at current level
-	uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
-
-#ifdef ENABLE_DOWN_TOP_TRAVERSAL
-	bool firstSubCell=true;
-#else
-	uchar shallowSteps = 0;
-#endif
-
-	//pointer on the current octree element
-	cellsContainer::const_iterator startingElement = m_thePointsAndTheirCellCodes.begin();
-
-	bool result = true;
-
-	//let's sweep through the octree
-	while (cell.index < m_numberOfProjectedPoints)
-	{
-		//new cell
-		cell.truncatedCode = (startingElement->theCode >> currentBitDec);
-		//we can already 'add' (virtually) the first point to the current cell description struct
-		unsigned elements = 1;
-
-		//progress notification
-#ifndef ENABLE_DOWN_TOP_TRAVERSAL
-		//if (cell.level == startingLevel)
-		//{
-		//	if (!nprogress.oneStep())
-		//	{
-		//		result=false;
-		//		break;
-		//	}
-		//}
-#else
-		//in this mode, we can't update progress notification regularly...
-		if (progressCb)
-		{
-			progressCb->update(100.0f*static_cast<float>(cell.index)/static_cast<float>(m_numberOfProjectedPoints));
-			if (progressCb->isCancelRequested())
-			{
-				result=false;
-				break;
-			}
-		}
-#endif
-
-		//let's test the following points
-		for (cellsContainer::const_iterator p = startingElement+1; p != m_thePointsAndTheirCellCodes.end(); ++p)
-		{
-			//next point code (at current level of subdivision)
-			OctreeCellCodeType currentTruncatedCode = (p->theCode >> currentBitDec);
-			//same code? Then it belongs to the same cell
-			if (currentTruncatedCode == cell.truncatedCode)
-			{
-				//if we have reached the user specified limit
-				if (elements == maxNumberOfPointsPerCell)
-				{
-					bool keepGoing = true;
-
-					//we should go deeper in the octree (as long as the current element
-					//belongs to the same cell as the first cell element - in which case
-					//the cell will still be too big)
-					while (cell.level < MAX_OCTREE_LEVEL)
-					{
-						//next level
-						++cell.level;
-						currentBitDec -= 3;
-						cell.truncatedCode = (startingElement->theCode >> currentBitDec);
-
-						//not the same cell anymore?
-						if (cell.truncatedCode != (p->theCode >> currentBitDec))
-						{
-							//we must re-check all the previous inserted points at this new level
-							//to determine the end of this new cell
-							p = startingElement;
-							elements=1;
-							while (((++p)->theCode >> currentBitDec) == cell.truncatedCode)
-								++elements;
-
-							//and we must stop point collection here
-							keepGoing=false;
-
-#ifdef ENABLE_DOWN_TOP_TRAVERSAL
-							//in this case, the next cell won't be the first sub-cell!
-							firstSubCell=false;
-#endif
-							break;
-						}
-					}
-
-					//we should stop point collection here
-					if (!keepGoing)
-						break;
-				}
-
-				//otherwise we 'add' the point to the cell descriptor
-				++elements;
-			}
-			else //code is different --> not the same cell anymore
-			{
-#ifndef ENABLE_DOWN_TOP_TRAVERSAL
-				//we may have to go shallower ... as long as the parent cell is different
-				assert(shallowSteps == 0);
-				OctreeCellCodeType cellTruncatedCode = cell.truncatedCode;
-				while (cell.level > startingLevel+shallowSteps)
-				{
-					cellTruncatedCode>>=3;
-					currentTruncatedCode>>=3;
-					//this cell and the following share the same parent
-					if (cellTruncatedCode == currentTruncatedCode)
-						break;
-					++shallowSteps;
-				}
-
-				//we must stop point collection here
-				break;
-#else
-				//we are at the end of the cell
-				bool keepGoing = false;
-				//can we continue collecting points?
-				if (cell.level > startingLevel)
-				{
-					//this cell and the following share the same parent?
-					if ((cell.truncatedCode>>3) == (currentTruncatedCode>>3))
-					{
-						//if this cell is the first one, and we don't have enough points
-						//we can simply proceed with its parent cell
-						if (firstSubCell && elements < minNumberOfPointsPerCell)
-						{
-							//previous level
-							--cell.level;
-							currentBitDec+=3;
-							cell.truncatedCode>>=3;
-
-							//we 'add' the point to the cell descriptor
-							++elements;
-							//and we can continue collecting points
-							keepGoing=true;
-						}
-
-						//as this cell and the next one share the same parent,
-						//the next cell won't be the first sub-cell!
-						firstSubCell=false;
-					}
-					else
-					{
-						//as this cell and the next one have differnt parents,
-						//the next cell is the first sub-cell!
-						firstSubCell=true;
-					}
-				}
-				else
-				{
-					//at the ceiling level, all cells are considered as 'frist' sub-cells
-					firstSubCell=true;
-				}
-
-				//we must stop point collection here
-				if (!keepGoing)
-					break;
-#endif
-			}
-        }
-
-		//we can now really 'add' the points to the cell descriptor
-		cell.points->clear(false);
-		//DGM: already done earlier
-		/*if (!cell.points->reserve(elements)) //not enough memory
-		{
-			result=false;
-			break;
-		}
-		//*/
-		for (unsigned i=0; i<elements; ++i)
-			cell.points->addPointIndex((startingElement++)->theIndex);
-
-		//call user method on current cell
-		result = (*func)(cell,additionalParameters,
-#ifndef ENABLE_DOWN_TOP_TRAVERSAL
-			&nProgress
-#else
-			0
-#endif
-			);
-
-		if (!result)
-			break;
-
-		//proceed to next cell
-		cell.index += elements;
-
-#ifndef ENABLE_DOWN_TOP_TRAVERSAL
-		if (shallowSteps)
-		{
-			//we should go shallower
-			assert(cell.level-shallowSteps>=startingLevel);
-			cell.level-=shallowSteps;
-			currentBitDec += 3*shallowSteps;
-			shallowSteps = 0;
-		}
-#endif
-	}
-
-	if (progressCb)
-	{
-		progressCb->stop();
-	}
-
-	//if something went wrong, we return 0
-	return (result ? cellsNumber : 0);
-}
-
 #ifdef ENABLE_MT_OCTREE
 
 #include <QtCore>
 #include <QApplication>
 #include <QtConcurrentMap>
 
-/*** MULTI THREADING WRAPPER ***/
-
+/*** FOR THE MULTI THREADING WRAPPER ***/
 struct octreeCellDesc
 {
 	DgmOctree::OctreeCellCodeType truncatedCode;
-	unsigned i1,i2;
+	unsigned i1, i2;
 	uchar level;
 };
 
@@ -3954,17 +3608,17 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 
 	const DgmOctree::cellsContainer& pointsAndCodes = s_octree_MT->pointsAndTheirCellCodes();
 
-    //cell descriptor
-    DgmOctree::octreeCell cell(s_octree_MT);
+	//cell descriptor
+	DgmOctree::octreeCell cell(s_octree_MT);
 	cell.level = desc.level;
 	cell.index = desc.i1;
 	cell.truncatedCode = desc.truncatedCode;
-	if (cell.points->reserve(desc.i2-desc.i1+1))
+	if (cell.points->reserve(desc.i2 - desc.i1 + 1))
 	{
-		for (unsigned i=desc.i1; i<=desc.i2; ++i)
+		for (unsigned i = desc.i1; i <= desc.i2; ++i)
 			cell.points->addPointIndex(pointsAndCodes[i].theIndex);
 
-		s_cellFunc_MT_success &= (*s_func_MT)(cell,s_userParams_MT,s_normProgressCb_MT);
+		s_cellFunc_MT_success &= (*s_func_MT)(cell, s_userParams_MT, s_normProgressCb_MT);
 	}
 	else
 	{
@@ -3980,405 +3634,782 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 			QApplication::processEvents();
 		}
 
-	//if (s_normProgressCb_MT)
-	//{
-	//	//QApplication::processEvents(); //let the application breath!
-	//	if (!s_normProgressCb_MT->oneStep())
-	//	{
-	//		s_cellFunc_MT_success = false;
-	//		return;
-	//	}
-	//}
+		//if (s_normProgressCb_MT)
+		//{
+		//	//QApplication::processEvents(); //let the application breath!
+		//	if (!s_normProgressCb_MT->oneStep())
+		//	{
+		//		s_cellFunc_MT_success = false;
+		//		return;
+		//	}
+		//}
 	}
 }
 
-unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
-        octreeCellFunc func,
-        void** additionalParameters,
-        GenericProgressCallback* progressCb,
-        const char* functionTitle)
-{
-    if (m_thePointsAndTheirCellCodes.empty())
-        return 0;
+#endif
 
-	const unsigned cellsNumber = getCellNumber(level);
+unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
+														octreeCellFunc func,
+														void** additionalParameters,
+														bool multiThread/*=false*/,
+														GenericProgressCallback* progressCb/*=0*/,
+														const char* functionTitle/*=0*/)
+{
+	if (m_thePointsAndTheirCellCodes.empty())
+		return 0;
+
+#ifdef ENABLE_MT_OCTREE
 
 	//cells that will be processed by QtConcurrent::map
+	const unsigned cellsNumber = getCellNumber(level);
 	std::vector<octreeCellDesc> cells;
-	cells.reserve(cellsNumber);
-	if (cells.capacity() < cellsNumber) //not enough memory
-		//we use standard way (DGM TODO: we should warn the user!)
-		return executeFunctionForAllCellsAtLevel(level,func,additionalParameters,progressCb,functionTitle);
 
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(level);
-
-    //iterator on cell codes
-    cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
-
-    //cell descriptor (init. with first point/cell)
-	octreeCellDesc cellDesc;
-	cellDesc.i1 = 0;
-	cellDesc.i2 = 0;
-	cellDesc.level = level;
-    cellDesc.truncatedCode = (p->theCode >> bitDec);
-	++p;
-
-    //sweep through the octree
-    for (; p!=m_thePointsAndTheirCellCodes.end(); ++p)
-    {
-        OctreeCellCodeType nextCode = (p->theCode >> bitDec);
-
-        if (nextCode != cellDesc.truncatedCode)
-        {
-			cells.push_back(cellDesc);
-            cellDesc.i1=cellDesc.i2+1;
-        }
-
-        cellDesc.truncatedCode = nextCode;
-		++cellDesc.i2;
-    }
-    //don't forget the last cell!
-	cells.push_back(cellDesc);
-
-	//static wrap
-	s_octree_MT = this;
-	s_func_MT = func;
-	s_userParams_MT = additionalParameters;
-	s_cellFunc_MT_success = true;
-	s_progressCb_MT = progressCb;
-	if (s_normProgressCb_MT)
+	if (multiThread)
 	{
-		delete s_normProgressCb_MT;
-		s_normProgressCb_MT = 0;
+		try
+		{
+			cells.reserve(cellsNumber);
+		}
+		catch (std::bad_alloc)
+		{
+			//not enough memory
+			//we use standard way (DGM TODO: we should warn the user!)
+			multiThread = false;
+		}
 	}
 
-    //progress notification
-    if (progressCb)
-    {
-        progressCb->reset();
-        if (functionTitle)
-            progressCb->setMethodTitle(functionTitle);
-        char buffer[512];
-		sprintf(buffer,"Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %d",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
-        progressCb->setInfo(buffer);
-		s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
-        progressCb->start();
-    }
+	if (!multiThread)
+#endif
+	{
+		//we get the maximum cell population for this level
+		unsigned maxCellPopulation = m_maxCellPopulation[level];
+
+		//cell descriptor (initialize it with first cell/point)
+		octreeCell cell(this);
+		if (!cell.points->reserve(maxCellPopulation)) //not enough memory
+			return 0;
+		cell.level = level;
+		cell.index = 0;
+
+		//binary shift for cell code truncation
+		uchar bitDec = GET_BIT_SHIFT(level);
+
+		//iterator on cell codes
+		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
+
+		//init with first cell
+		cell.truncatedCode = (p->theCode >> bitDec);
+		cell.points->addPointIndex(p->theIndex); //can't fail (see above)
+		++p;
+
+		//number of cells for this level
+		unsigned cellCount = getCellNumber(level);
+
+		//progress bar
+		if (progressCb)
+		{
+			progressCb->reset();
+			if (functionTitle)
+				progressCb->setMethodTitle(functionTitle);
+			char buffer[512];
+			sprintf(buffer, "Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %i", level, cellCount, m_averageCellPopulation[level], m_stdDevCellPopulation[level], m_maxCellPopulation[level]);
+			progressCb->setInfo(buffer);
+			progressCb->start();
+		}
+		NormalizedProgress nprogress(progressCb, m_theAssociatedCloud->size());
+
+		bool result = true;
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
-	s_skippedPoints = 0;
-	s_testedPoints = 0;
-	s_jumps = 0.0;
-	s_binarySearchCount = 0.0;
+		s_skippedPoints = 0;
+		s_testedPoints = 0;
+		s_jumps = 0.0;
+		s_binarySearchCount = 0.0;
 #endif
 
-	QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
+		//for each point
+		for (; p != m_thePointsAndTheirCellCodes.end(); ++p)
+		{
+			//check if it belongs to the current cell
+			OctreeCellCodeType nextCode = (p->theCode >> bitDec);
+			if (nextCode != cell.truncatedCode)
+			{
+				//if not, we call the user function on the previous cell
+				result = (*func)(cell, additionalParameters, &nprogress);
+
+				if (!result)
+					break;
+
+				//and we start a new cell
+				cell.index += cell.points->size();
+				cell.points->clear(false);
+				cell.truncatedCode = nextCode;
+
+				//if (!nprogress.oneStep())
+				//{
+				//	//process canceled by user
+				//	result = false;
+				//	break;
+				//}
+			}
+
+			cell.points->addPointIndex(p->theIndex); //can't fail (see above)
+		}
+
+		//don't forget last cell!
+		if (result)
+			result = (*func)(cell, additionalParameters, &nprogress);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
-	FILE* fp=fopen("octree_log.txt","at");
-	if (fp)
-	{
-		fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
-		fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
-		fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
-		fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
-		if (s_binarySearchCount > 0.0)
-			fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
-		fprintf(fp,"\n");
-		fclose(fp);
+		FILE* fp=fopen("octree_log.txt","at");
+		if (fp)
+		{
+			fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
+			fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
+			fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
+			fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
+			if (s_binarySearchCount > 0.0)
+				fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
+			fprintf(fp,"\n");
+			fclose(fp);
+		}
+#endif
+
+		//if something went wrong, we return 0
+		return (result ? cellCount : 0);
 	}
-#endif
-
-	s_octree_MT = 0;
-	s_func_MT = 0;
-	s_userParams_MT = 0;
-
-	if (progressCb)
+#ifdef ENABLE_MT_OCTREE
+	else
 	{
-        progressCb->stop();
+		assert(cells.capacity() == cellsNumber);
+
+		//binary shift for cell code truncation
+		uchar bitDec = GET_BIT_SHIFT(level);
+
+		//iterator on cell codes
+		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
+
+		//cell descriptor (init. with first point/cell)
+		octreeCellDesc cellDesc;
+		cellDesc.i1 = 0;
+		cellDesc.i2 = 0;
+		cellDesc.level = level;
+		cellDesc.truncatedCode = (p->theCode >> bitDec);
+		++p;
+
+		//sweep through the octree
+		for (; p!=m_thePointsAndTheirCellCodes.end(); ++p)
+		{
+			OctreeCellCodeType nextCode = (p->theCode >> bitDec);
+
+			if (nextCode != cellDesc.truncatedCode)
+			{
+				cells.push_back(cellDesc);
+				cellDesc.i1=cellDesc.i2+1;
+			}
+
+			cellDesc.truncatedCode = nextCode;
+			++cellDesc.i2;
+		}
+		//don't forget the last cell!
+		cells.push_back(cellDesc);
+
+		//static wrap
+		s_octree_MT = this;
+		s_func_MT = func;
+		s_userParams_MT = additionalParameters;
+		s_cellFunc_MT_success = true;
+		s_progressCb_MT = progressCb;
 		if (s_normProgressCb_MT)
+		{
 			delete s_normProgressCb_MT;
-		s_normProgressCb_MT = 0;
-		s_progressCb_MT = 0;
+			s_normProgressCb_MT = 0;
+		}
+
+		//progress notification
+		if (progressCb)
+		{
+			progressCb->reset();
+			if (functionTitle)
+				progressCb->setMethodTitle(functionTitle);
+			char buffer[512];
+			sprintf(buffer,"Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %d",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+			progressCb->setInfo(buffer);
+			s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
+			progressCb->start();
+		}
+
+#ifdef COMPUTE_NN_SEARCH_STATISTICS
+		s_skippedPoints = 0;
+		s_testedPoints = 0;
+		s_jumps = 0.0;
+		s_binarySearchCount = 0.0;
+#endif
+
+		QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
+
+#ifdef COMPUTE_NN_SEARCH_STATISTICS
+		FILE* fp = fopen("octree_log.txt", "at");
+		if (fp)
+		{
+			fprintf(fp, "Function: %s\n", functionTitle ? functionTitle : "unknown");
+			fprintf(fp, "Tested:  %f (%3.1f %%)\n", s_testedPoints, 100.0*s_testedPoints / std::max(1.0, s_testedPoints + s_skippedPoints));
+			fprintf(fp, "skipped: %f (%3.1f %%)\n", s_skippedPoints, 100.0*s_skippedPoints / std::max(1.0, s_testedPoints + s_skippedPoints));
+			fprintf(fp, "Binary search count: %.0f\n", s_binarySearchCount);
+			if (s_binarySearchCount > 0.0)
+				fprintf(fp, "Mean jumps: %f\n", s_jumps / s_binarySearchCount);
+			fprintf(fp, "\n");
+			fclose(fp);
+		}
+#endif
+
+		s_octree_MT = 0;
+		s_func_MT = 0;
+		s_userParams_MT = 0;
+
+		if (progressCb)
+		{
+			progressCb->stop();
+			if (s_normProgressCb_MT)
+				delete s_normProgressCb_MT;
+			s_normProgressCb_MT = 0;
+			s_progressCb_MT = 0;
+		}
+
+		//if something went wrong, we clear everything and return 0!
+		if (!s_cellFunc_MT_success)
+			cells.clear();
+
+		return static_cast<unsigned>(cells.size());
 	}
-
-	//if something went wrong, we clear everything and return 0!
-	if (!s_cellFunc_MT_success)
-		cells.clear();
-
-    return static_cast<unsigned>(cells.size());
+#endif
 }
 
+//Down-top traversal (for standard and mutli-threaded versions)
+#define ENABLE_DOWN_TOP_TRAVERSAL
 #define ENABLE_DOWN_TOP_TRAVERSAL_MT
-unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingLevel,
-        octreeCellFunc func,
-        void** additionalParameters,
-        unsigned minNumberOfPointsPerCell,
-        unsigned maxNumberOfPointsPerCell,
-        GenericProgressCallback* progressCb,
-        const char* functionTitle)
+
+unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLevel,
+	octreeCellFunc func,
+	void** additionalParameters,
+	unsigned minNumberOfPointsPerCell,
+	unsigned maxNumberOfPointsPerCell,
+	bool multiThread/*=true*/,
+	GenericProgressCallback* progressCb/*=0*/,
+	const char* functionTitle/*=0*/)
 {
-    if (m_thePointsAndTheirCellCodes.empty())
-        return 0;
+	if (m_thePointsAndTheirCellCodes.empty())
+		return 0;
 
 	const unsigned cellsNumber = getCellNumber(startingLevel);
 
+#ifdef ENABLE_MT_OCTREE
+
 	//cells that will be processed by QtConcurrent::map
 	std::vector<octreeCellDesc> cells;
-	cells.reserve(cellsNumber); //at least!
-	if (cells.capacity() < cellsNumber) //not enough memory?
-		//we use standard way (DGM TODO: we should warn the user!)
-		return executeFunctionForAllCellsAtStartingLevel(startingLevel,
-														func,
-														additionalParameters,
-														minNumberOfPointsPerCell,
-														maxNumberOfPointsPerCell,
-														progressCb,
-														functionTitle);
+	if (multiThread)
+	{
+		try
+		{
+			cells.reserve(cellsNumber); //at least!
+		}
+		catch (std::bad_alloc)
+		{
+			//not enough memory?
+			//we use standard way (DGM TODO: we should warn the user!)
+			multiThread = false;
+		}
+	}
 
-    //cell descriptor (init. with first point/cell)
-	octreeCellDesc cellDesc;
-	cellDesc.i1 = 0;
-	cellDesc.i2 = 0;
-	cellDesc.level = startingLevel;
+	if (!multiThread)
+#endif
+	{
+		//we get the maximum cell population for this level
+		unsigned maxCellPopulation = m_maxCellPopulation[startingLevel];
 
-	//binary shift for cell code truncation at current level
-    uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
+		//cell descriptor
+		octreeCell cell(this);
+		if (!cell.points->reserve(maxCellPopulation)) //not enough memory
+			return 0;
+		cell.level = startingLevel;
+		cell.index = 0;
 
-#ifdef ENABLE_DOWN_TOP_TRAVERSAL_MT
-	bool firstSubCell=true;
+		//progress notification
+		if (progressCb)
+		{
+			progressCb->reset();
+			if (functionTitle)
+				progressCb->setMethodTitle(functionTitle);
+			char buffer[1024];
+			sprintf(buffer, "Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %i - %i",
+				startingLevel, MAX_OCTREE_LEVEL,
+				getCellNumber(startingLevel), getCellNumber(MAX_OCTREE_LEVEL),
+				m_averageCellPopulation[startingLevel], m_stdDevCellPopulation[startingLevel],
+				m_averageCellPopulation[MAX_OCTREE_LEVEL], m_stdDevCellPopulation[MAX_OCTREE_LEVEL],
+				m_maxCellPopulation[startingLevel], m_maxCellPopulation[MAX_OCTREE_LEVEL]);
+			progressCb->setInfo(buffer);
+			progressCb->start();
+		}
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+		NormalizedProgress nprogress(progressCb,m_theAssociatedCloud->size());
+#endif
+
+		//binary shift for cell code truncation at current level
+		uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
+
+#ifdef ENABLE_DOWN_TOP_TRAVERSAL
+		bool firstSubCell = true;
 #else
-	uchar shallowSteps = 0;
+		uchar shallowSteps = 0;
 #endif
 
-	//pointer on the current octree element
-	cellsContainer::const_iterator startingElement = m_thePointsAndTheirCellCodes.begin();
+		//pointer on the current octree element
+		cellsContainer::const_iterator startingElement = m_thePointsAndTheirCellCodes.begin();
 
-	//we compute some statistics on the fly
-	unsigned long long popSum = 0;
-	unsigned long long popSum2 = 0;
-	unsigned long long maxPop = 0;
+		bool result = true;
 
-	//let's sweep through the octree
-    while (cellDesc.i1 < m_numberOfProjectedPoints)
-    {
-		//new cell
-		cellDesc.truncatedCode = (startingElement->theCode >> currentBitDec);
-		//we can already 'add' (virtually) the first point to the current cell description struct
-		unsigned elements = 1;
+		//let's sweep through the octree
+		while (cell.index < m_numberOfProjectedPoints)
+		{
+			//new cell
+			cell.truncatedCode = (startingElement->theCode >> currentBitDec);
+			//we can already 'add' (virtually) the first point to the current cell description struct
+			unsigned elements = 1;
 
-		//let's test the following points
-		for (cellsContainer::const_iterator p = startingElement+1; p != m_thePointsAndTheirCellCodes.end(); ++p)
-        {
-			//next point code (at current level of subdivision)
-            OctreeCellCodeType currentTruncatedCode = (p->theCode >> currentBitDec);
-            //same code? Then it belongs to the same cell
-            if (currentTruncatedCode == cellDesc.truncatedCode)
+			//progress notification
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+			//if (cell.level == startingLevel)
+			//{
+			//	if (!nprogress.oneStep())
+			//	{
+			//		result=false;
+			//		break;
+			//	}
+			//}
+#else
+			//in this mode, we can't update progress notification regularly...
+			if (progressCb)
 			{
-				//if we have reached the user specified limit
-				if (elements == maxNumberOfPointsPerCell)
+				progressCb->update(100.0f*static_cast<float>(cell.index) / static_cast<float>(m_numberOfProjectedPoints));
+				if (progressCb->isCancelRequested())
 				{
-					bool keepGoing = true;
-
-					//we should go deeper in the octree (as long as the current element
-					//belongs to the same cell as the first cell element - in which case
-					//the cell will still be too big)
-					while (cellDesc.level < MAX_OCTREE_LEVEL)
-					{
-						//next level
-						++cellDesc.level;
-						currentBitDec -= 3;
-						cellDesc.truncatedCode = (startingElement->theCode >> currentBitDec);
-
-						//not the same cell anymore?
-						if (cellDesc.truncatedCode != (p->theCode >> currentBitDec))
-						{
-							//we must re-check all the previously inserted points at this new level
-							//to determine the end of this new cell
-							p = startingElement;
-							elements=1;
-							while (((++p)->theCode >> currentBitDec) == cellDesc.truncatedCode)
-								++elements;
-
-							//and we must stop point collection here
-							keepGoing=false;
-
-#ifdef ENABLE_DOWN_TOP_TRAVERSAL_MT
-							//in this case, the next cell won't be the first sub-cell!
-							firstSubCell=false;
+					result = false;
+					break;
+				}
+			}
 #endif
-							break;
+
+			//let's test the following points
+			for (cellsContainer::const_iterator p = startingElement + 1; p != m_thePointsAndTheirCellCodes.end(); ++p)
+			{
+				//next point code (at current level of subdivision)
+				OctreeCellCodeType currentTruncatedCode = (p->theCode >> currentBitDec);
+				//same code? Then it belongs to the same cell
+				if (currentTruncatedCode == cell.truncatedCode)
+				{
+					//if we have reached the user specified limit
+					if (elements == maxNumberOfPointsPerCell)
+					{
+						bool keepGoing = true;
+
+						//we should go deeper in the octree (as long as the current element
+						//belongs to the same cell as the first cell element - in which case
+						//the cell will still be too big)
+						while (cell.level < MAX_OCTREE_LEVEL)
+						{
+							//next level
+							++cell.level;
+							currentBitDec -= 3;
+							cell.truncatedCode = (startingElement->theCode >> currentBitDec);
+
+							//not the same cell anymore?
+							if (cell.truncatedCode != (p->theCode >> currentBitDec))
+							{
+								//we must re-check all the previous inserted points at this new level
+								//to determine the end of this new cell
+								p = startingElement;
+								elements = 1;
+								while (((++p)->theCode >> currentBitDec) == cell.truncatedCode)
+									++elements;
+
+								//and we must stop point collection here
+								keepGoing = false;
+
+#ifdef ENABLE_DOWN_TOP_TRAVERSAL
+								//in this case, the next cell won't be the first sub-cell!
+								firstSubCell = false;
+#endif
+								break;
+							}
 						}
+
+						//we should stop point collection here
+						if (!keepGoing)
+							break;
 					}
 
-					//we should stop point collection here
-					if (!keepGoing)
-						break;
+					//otherwise we 'add' the point to the cell descriptor
+					++elements;
 				}
-
-				//otherwise we 'add' the point to the cell descriptor
-				++elements;
-			}
-			else //code is different --> not the same cell anymore
-			{
-#ifndef ENABLE_DOWN_TOP_TRAVERSAL_MT
-				//we may have to go shallower ... as long as the parent cell is different
-				assert(shallowSteps == 0);
-				OctreeCellCodeType cellTruncatedCode = cellDesc.truncatedCode;
-				while (cellDesc.level > startingLevel+shallowSteps)
+				else //code is different --> not the same cell anymore
 				{
-					cellTruncatedCode>>=3;
-					currentTruncatedCode>>=3;
-					//this cell and the following share the same parent
-					if (cellTruncatedCode == currentTruncatedCode)
-						break;
-					++shallowSteps;
-				}
-
-				//we must stop point collection here
-				break;
-#else
-				//we are at the end of the cell
-				bool keepGoing = false;
-				//can we continue collecting points?
-				if (cellDesc.level > startingLevel)
-				{
-					//this cell and the following share the same parent?
-					if ((cellDesc.truncatedCode>>3) == (currentTruncatedCode>>3))
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+					//we may have to go shallower ... as long as the parent cell is different
+					assert(shallowSteps == 0);
+					OctreeCellCodeType cellTruncatedCode = cell.truncatedCode;
+					while (cell.level > startingLevel+shallowSteps)
 					{
-						//if this cell is the first one, and we don't have enough points
-						//we can simply proceed with its parent cell
-						if (firstSubCell && elements < minNumberOfPointsPerCell)
+						cellTruncatedCode>>=3;
+						currentTruncatedCode>>=3;
+						//this cell and the following share the same parent
+						if (cellTruncatedCode == currentTruncatedCode)
+							break;
+						++shallowSteps;
+					}
+
+					//we must stop point collection here
+					break;
+#else
+					//we are at the end of the cell
+					bool keepGoing = false;
+					//can we continue collecting points?
+					if (cell.level > startingLevel)
+					{
+						//this cell and the following share the same parent?
+						if ((cell.truncatedCode >> 3) == (currentTruncatedCode >> 3))
 						{
-							//previous level
-							--cellDesc.level;
-							currentBitDec+=3;
-							cellDesc.truncatedCode>>=3;
+							//if this cell is the first one, and we don't have enough points
+							//we can simply proceed with its parent cell
+							if (firstSubCell && elements < minNumberOfPointsPerCell)
+							{
+								//previous level
+								--cell.level;
+								currentBitDec += 3;
+								cell.truncatedCode >>= 3;
 
-							//we 'add' the point to the cell descriptor
-							++elements;
-							//and we can continue collecting points
-							keepGoing=true;
+								//we 'add' the point to the cell descriptor
+								++elements;
+								//and we can continue collecting points
+								keepGoing = true;
+							}
+
+							//as this cell and the next one share the same parent,
+							//the next cell won't be the first sub-cell!
+							firstSubCell = false;
 						}
-
-						//as this cell and the next one share the same parent,
-						//the next cell won't be the first sub-cell!
-						firstSubCell=false;
+						else
+						{
+							//as this cell and the next one have differnt parents,
+							//the next cell is the first sub-cell!
+							firstSubCell = true;
+						}
 					}
 					else
 					{
-						//as this cell and the next one have differnt parents,
-						//the next cell is the first sub-cell!
+						//at the ceiling level, all cells are considered as 'frist' sub-cells
+						firstSubCell = true;
+					}
+
+					//we must stop point collection here
+					if (!keepGoing)
+						break;
+#endif
+				}
+			}
+
+			//we can now really 'add' the points to the cell descriptor
+			cell.points->clear(false);
+			//DGM: already done earlier
+			/*if (!cell.points->reserve(elements)) //not enough memory
+			{
+			result=false;
+			break;
+			}
+			//*/
+			for (unsigned i = 0; i < elements; ++i)
+				cell.points->addPointIndex((startingElement++)->theIndex);
+
+			//call user method on current cell
+			result = (*func)(cell, additionalParameters,
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+				&nProgress
+#else
+				0
+#endif
+				);
+
+			if (!result)
+				break;
+
+			//proceed to next cell
+			cell.index += elements;
+
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+			if (shallowSteps)
+			{
+				//we should go shallower
+				assert(cell.level-shallowSteps>=startingLevel);
+				cell.level-=shallowSteps;
+				currentBitDec += 3*shallowSteps;
+				shallowSteps = 0;
+			}
+#endif
+		}
+
+		if (progressCb)
+		{
+			progressCb->stop();
+		}
+
+		//if something went wrong, we return 0
+		return (result ? cellsNumber : 0);
+	}
+#ifdef ENABLE_MT_OCTREE
+	else
+	{
+		assert(cells.capacity() == cellsNumber);
+
+		//cell descriptor (init. with first point/cell)
+		octreeCellDesc cellDesc;
+		cellDesc.i1 = 0;
+		cellDesc.i2 = 0;
+		cellDesc.level = startingLevel;
+
+		//binary shift for cell code truncation at current level
+		uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
+
+#ifdef ENABLE_DOWN_TOP_TRAVERSAL_MT
+		bool firstSubCell = true;
+#else
+		uchar shallowSteps = 0;
+#endif
+		//pointer on the current octree element
+		cellsContainer::const_iterator startingElement = m_thePointsAndTheirCellCodes.begin();
+
+		//we compute some statistics on the fly
+		unsigned long long popSum = 0;
+		unsigned long long popSum2 = 0;
+		unsigned long long maxPop = 0;
+
+		//let's sweep through the octree
+		while (cellDesc.i1 < m_numberOfProjectedPoints)
+		{
+			//new cell
+			cellDesc.truncatedCode = (startingElement->theCode >> currentBitDec);
+			//we can already 'add' (virtually) the first point to the current cell description struct
+			unsigned elements = 1;
+
+			//let's test the following points
+			for (cellsContainer::const_iterator p = startingElement+1; p != m_thePointsAndTheirCellCodes.end(); ++p)
+			{
+				//next point code (at current level of subdivision)
+				OctreeCellCodeType currentTruncatedCode = (p->theCode >> currentBitDec);
+				//same code? Then it belongs to the same cell
+				if (currentTruncatedCode == cellDesc.truncatedCode)
+				{
+					//if we have reached the user specified limit
+					if (elements == maxNumberOfPointsPerCell)
+					{
+						bool keepGoing = true;
+
+						//we should go deeper in the octree (as long as the current element
+						//belongs to the same cell as the first cell element - in which case
+						//the cell will still be too big)
+						while (cellDesc.level < MAX_OCTREE_LEVEL)
+						{
+							//next level
+							++cellDesc.level;
+							currentBitDec -= 3;
+							cellDesc.truncatedCode = (startingElement->theCode >> currentBitDec);
+
+							//not the same cell anymore?
+							if (cellDesc.truncatedCode != (p->theCode >> currentBitDec))
+							{
+								//we must re-check all the previously inserted points at this new level
+								//to determine the end of this new cell
+								p = startingElement;
+								elements=1;
+								while (((++p)->theCode >> currentBitDec) == cellDesc.truncatedCode)
+									++elements;
+
+								//and we must stop point collection here
+								keepGoing=false;
+
+#ifdef ENABLE_DOWN_TOP_TRAVERSAL_MT
+								//in this case, the next cell won't be the first sub-cell!
+								firstSubCell=false;
+#endif
+								break;
+							}
+						}
+
+						//we should stop point collection here
+						if (!keepGoing)
+							break;
+					}
+
+					//otherwise we 'add' the point to the cell descriptor
+					++elements;
+				}
+				else //code is different --> not the same cell anymore
+				{
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL_MT
+					//we may have to go shallower ... as long as the parent cell is different
+					assert(shallowSteps == 0);
+					OctreeCellCodeType cellTruncatedCode = cellDesc.truncatedCode;
+					while (cellDesc.level > startingLevel+shallowSteps)
+					{
+						cellTruncatedCode>>=3;
+						currentTruncatedCode>>=3;
+						//this cell and the following share the same parent
+						if (cellTruncatedCode == currentTruncatedCode)
+							break;
+						++shallowSteps;
+					}
+
+					//we must stop point collection here
+					break;
+#else
+					//we are at the end of the cell
+					bool keepGoing = false;
+					//can we continue collecting points?
+					if (cellDesc.level > startingLevel)
+					{
+						//this cell and the following share the same parent?
+						if ((cellDesc.truncatedCode>>3) == (currentTruncatedCode>>3))
+						{
+							//if this cell is the first one, and we don't have enough points
+							//we can simply proceed with its parent cell
+							if (firstSubCell && elements < minNumberOfPointsPerCell)
+							{
+								//previous level
+								--cellDesc.level;
+								currentBitDec+=3;
+								cellDesc.truncatedCode>>=3;
+
+								//we 'add' the point to the cell descriptor
+								++elements;
+								//and we can continue collecting points
+								keepGoing=true;
+							}
+
+							//as this cell and the next one share the same parent,
+							//the next cell won't be the first sub-cell!
+							firstSubCell=false;
+						}
+						else
+						{
+							//as this cell and the next one have differnt parents,
+							//the next cell is the first sub-cell!
+							firstSubCell=true;
+						}
+					}
+					else
+					{
+						//at the ceiling level, all cells are considered as 'frist' sub-cells
 						firstSubCell=true;
 					}
-				}
-				else
-				{
-					//at the ceiling level, all cells are considered as 'frist' sub-cells
-					firstSubCell=true;
-				}
 
-				//we must stop point collection here
-				if (!keepGoing)
-					break;
+					//we must stop point collection here
+					if (!keepGoing)
+						break;
 #endif
+				}
 			}
-        }
 
-		//we can now 'add' this cell to the list
-		cellDesc.i2 = cellDesc.i1 + (elements-1);
-		cells.push_back(cellDesc);
-		popSum += static_cast<unsigned long long>(elements);
-		popSum2 += static_cast<unsigned long long>(elements*elements);
-		if (maxPop < elements)
-			maxPop = elements;
+			//we can now 'add' this cell to the list
+			cellDesc.i2 = cellDesc.i1 + (elements-1);
+			cells.push_back(cellDesc);
+			popSum += static_cast<unsigned long long>(elements);
+			popSum2 += static_cast<unsigned long long>(elements*elements);
+			if (maxPop < elements)
+				maxPop = elements;
 
-		//proceed to next cell
-		cellDesc.i1 += elements;
-		startingElement += elements;
+			//proceed to next cell
+			cellDesc.i1 += elements;
+			startingElement += elements;
 
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL_MT
-		if (shallowSteps)
-		{
-			//we should go shallower
-			assert(cellDesc.level-shallowSteps>=startingLevel);
-			cellDesc.level-=shallowSteps;
-			currentBitDec += 3*shallowSteps;
-			shallowSteps = 0;
+			if (shallowSteps)
+			{
+				//we should go shallower
+				assert(cellDesc.level-shallowSteps>=startingLevel);
+				cellDesc.level-=shallowSteps;
+				currentBitDec += 3*shallowSteps;
+				shallowSteps = 0;
+			}
+#endif
 		}
-#endif
-    }
 
-	//statistics
-	double mean = static_cast<double>(popSum)/static_cast<double>(cells.size());
-	double stddev = sqrt(static_cast<double>(popSum2-popSum*popSum))/static_cast<double>(cells.size());
+		//statistics
+		double mean = static_cast<double>(popSum)/static_cast<double>(cells.size());
+		double stddev = sqrt(static_cast<double>(popSum2-popSum*popSum))/static_cast<double>(cells.size());
 
-	//static wrap
-	s_octree_MT = this;
-	s_func_MT = func;
-	s_userParams_MT = additionalParameters;
-	s_cellFunc_MT_success = true;
-	if (s_normProgressCb_MT)
-		delete s_normProgressCb_MT;
-	s_normProgressCb_MT = 0;
-
-    //progress notification
-    if (progressCb)
-    {
-        progressCb->reset();
-        if (functionTitle)
-            progressCb->setMethodTitle(functionTitle);
-        char buffer[1024];
-		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %llu",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
-        progressCb->setInfo(buffer);
-		if (s_normProgressCb_MT)
-			delete s_normProgressCb_MT;
-		s_normProgressCb_MT = new NormalizedProgress(progressCb,static_cast<unsigned>(cells.size()));
-        progressCb->start();
-    }
-
-#ifdef COMPUTE_NN_SEARCH_STATISTICS
-	s_skippedPoints = 0;
-	s_testedPoints = 0;
-	s_jumps = 0.0;
-	s_binarySearchCount = 0.0;
-#endif
-
-	QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
-
-#ifdef COMPUTE_NN_SEARCH_STATISTICS
-	FILE* fp=fopen("octree_log.txt","at");
-	if (fp)
-	{
-		fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
-		fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
-		fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
-		fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
-		if (s_binarySearchCount > 0.0)
-			fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
-		fprintf(fp,"\n");
-		fclose(fp);
-	}
-#endif
-
-	s_octree_MT = 0;
-	s_func_MT = 0;
-	s_userParams_MT = 0;
-
-	if (progressCb)
-	{
-        progressCb->stop();
+		//static wrap
+		s_octree_MT = this;
+		s_func_MT = func;
+		s_userParams_MT = additionalParameters;
+		s_cellFunc_MT_success = true;
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;
 		s_normProgressCb_MT = 0;
-	}
 
-	//if something went wrong, we clear everything and return 0!
-	if (!s_cellFunc_MT_success)
-		cells.clear();
+		//progress notification
+		if (progressCb)
+		{
+			progressCb->reset();
+			if (functionTitle)
+				progressCb->setMethodTitle(functionTitle);
+			char buffer[1024];
+			sprintf(buffer,"Octree levels %i - %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %llu",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
+			progressCb->setInfo(buffer);
+			if (s_normProgressCb_MT)
+				delete s_normProgressCb_MT;
+			s_normProgressCb_MT = new NormalizedProgress(progressCb,static_cast<unsigned>(cells.size()));
+			progressCb->start();
+		}
 
-    return static_cast<unsigned>(cells.size());
-}
-
+#ifdef COMPUTE_NN_SEARCH_STATISTICS
+		s_skippedPoints = 0;
+		s_testedPoints = 0;
+		s_jumps = 0.0;
+		s_binarySearchCount = 0.0;
 #endif
+
+		QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
+
+#ifdef COMPUTE_NN_SEARCH_STATISTICS
+		FILE* fp=fopen("octree_log.txt","at");
+		if (fp)
+		{
+			fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
+			fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
+			fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
+			fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
+			if (s_binarySearchCount > 0.0)
+				fprintf(fp,"Mean jumps: %f\n",s_jumps/s_binarySearchCount);
+			fprintf(fp,"\n");
+			fclose(fp);
+		}
+#endif
+
+		s_octree_MT = 0;
+		s_func_MT = 0;
+		s_userParams_MT = 0;
+
+		if (progressCb)
+		{
+			progressCb->stop();
+			if (s_normProgressCb_MT)
+				delete s_normProgressCb_MT;
+			s_normProgressCb_MT = 0;
+		}
+
+		//if something went wrong, we clear everything and return 0!
+		if (!s_cellFunc_MT_success)
+			cells.clear();
+
+		return static_cast<unsigned>(cells.size());
+	}
+#endif
+}

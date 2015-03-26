@@ -18,15 +18,10 @@
 #ifndef Q_HPR_PLUGIN_HEADER
 #define Q_HPR_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
+#include "../ccStdPluginInterface.h"
 
 //CCLib
 #include <ReferenceCloud.h>
-
-#include "../ccStdPluginInterface.h"
-
-class QAction;
 
 //! Wrapper to the "Hidden Point Removal" algorithm for approximating points visibility in an N dimensional point cloud, as seen from a given viewpoint
 /** "Direct Visibility of Point Sets", Sagi Katz, Ayellet Tal, and Ronen Basri. 

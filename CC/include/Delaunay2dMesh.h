@@ -41,6 +41,11 @@ public:
 	//! Delaunay2dMesh destructor
 	virtual ~Delaunay2dMesh();
 
+	//! Returns whether 2D Delaunay triangulation is supported or not
+	/** 2D Delaunay triangulation requires Triangle library.
+	**/
+	static bool Available();
+
 	//! Associate this mesh to a point cloud
 	/** This particular mesh structure deals with point indexes instead of points.
 		Therefore, it is possible to change the associated point cloud (it the

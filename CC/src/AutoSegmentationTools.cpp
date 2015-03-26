@@ -42,7 +42,7 @@ int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* 
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return -1;

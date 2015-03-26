@@ -85,7 +85,6 @@ protected:
 #endif
 };
 
-
 int main(int argc, char **argv)
 {
 	//QT initialiation

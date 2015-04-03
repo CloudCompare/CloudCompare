@@ -392,7 +392,7 @@ void AsciiOpenDlg::updateTable()
 	}
 
 	//average line size
-	m_averageLineSize = double(totalChars)/double(lineCount);
+	m_averageLineSize = static_cast<double>(totalChars)/lineCount;
 
 	//we add a type selector for each column
 	QStringList propsText;

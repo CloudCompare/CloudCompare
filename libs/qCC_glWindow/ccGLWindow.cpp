@@ -2946,7 +2946,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		{
 			//displacement vector (in "3D")
 			double pixSize = computeActualPixelSize();
-			CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
+			CCVector3d u(dx*pixSize, -dy*pixSize, 0);
 			m_viewportParams.viewMat.transposed().applyRotation(u);
 
 			for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)

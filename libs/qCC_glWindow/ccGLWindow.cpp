@@ -1063,7 +1063,6 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 	yStart += HotZone::margin();
 
-	glDisable(GL_BLEND);
 	glPopAttrib();
 }
 
@@ -2089,8 +2088,7 @@ void ccGLWindow::drawTrihedron()
 		m_trihedronGLList = glGenLists(1);
 		glNewList(m_trihedronGLList, GL_COMPILE);
 
-		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_LINE_SMOOTH);
+		glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
 		//trihedron OpenGL drawing
@@ -4049,8 +4047,6 @@ void ccGLWindow::drawPivot()
 		}
 
 		//draw 3 circles
-		glPushAttrib(GL_LINE_BIT);
-		glEnable(GL_LINE_SMOOTH);
 		glPushAttrib(GL_COLOR_BUFFER_BIT);
 		glEnable(GL_BLEND);
 		const float c_alpha = 0.6f;
@@ -4078,7 +4074,6 @@ void ccGLWindow::drawPivot()
 		glVertex3f(0.0f,0.0f, 1.0f);
 		glEnd();
 
-		glPopAttrib();
 		glPopAttrib();
 
 		glEndList();

@@ -5462,11 +5462,12 @@ void MainWindow::doActionSetSFAsCoord()
 					CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
 
 					//test each dimension
-					for (unsigned d=0; d<3; ++d)
-					{
-						if (exportDim[d])
-							P->u[d] = s;
-					}
+					if (exportDim[0])
+						P->x = s;
+					if (exportDim[1])
+						P->y = s;
+					if (exportDim[2])
+						P->z = s;
 				}
 
 				pc->invalidateBoundingBox();

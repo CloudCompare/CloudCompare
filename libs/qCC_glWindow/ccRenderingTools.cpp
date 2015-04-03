@@ -139,7 +139,7 @@ typedef std::list<vlabel> vlabelSet;
 typedef std::pair<vlabelSet::iterator,vlabelSet::iterator> vlabelPair;
 static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 {
-	if (set.size()==0)
+	if (set.size() == 0)
 	{
 		return vlabelPair(set.end(),set.end());
 	}
@@ -320,8 +320,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	const int xShift = static_cast<int>(20 * renderZoom) + (showHistogram ? scaleWidth/2 : 0);
 	const int yShift = halfH-scaleMaxHeight/2 - static_cast<int>(10 * renderZoom);
 
-	glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_LINE_SMOOTH);
+	glPushAttrib(GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	
 	std::vector<double> sortedKeyValues(keyValues.begin(),keyValues.end());
@@ -341,7 +340,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			glBegin(GL_LINES);
 			for (int j=0; j<scaleMaxHeight; ++j)
 			{
-				double value = sortedKeyValues.front() + ((double)j * maxRange) / (double)scaleMaxHeight;
+				double value = sortedKeyValues.front() + (j * maxRange) / scaleMaxHeight;
 				if (logScale)
 					value = exp(value*c_log10);
 				const colorType* col = sf->getColor(static_cast<ScalarType>(value));
@@ -352,22 +351,22 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				
 				if (showHistogram)
 				{
-					double bind = (value-(double)sf->displayRange().min())*(double)(histogram.size()-1)/(double)sf->displayRange().maxRange();
+					double bind = (value-sf->displayRange().min())*(histogram.size()-1)/sf->displayRange().maxRange();
 					int bin = static_cast<int>(floor(bind));
 					
 					double hVal = 0.0;
-					if (bin >= 0 && bin < (int)histogram.size()) //in symmetrical case we can get values outside of the real SF range
+					if (bin >= 0 && bin < static_cast<int>(histogram.size())) //in symmetrical case we can get values outside of the real SF range
 					{
-						hVal = (double)histogram[bin];
-						if (bin+1 < (int)histogram.size())
+						hVal = histogram[bin];
+						if (bin+1 < static_cast<int>(histogram.size()))
 						{
 							//linear interpolation
-							double alpha = bind-(double)bin;
-							hVal = (1.0-alpha) * hVal + alpha * (double)histogram[bin+1];
+							double alpha = bind-static_cast<double>(bin);
+							hVal = (1.0-alpha) * hVal + alpha * histogram[bin+1];
 						}
 					}
 
-					int xSpan = std::max(static_cast<int>(hVal / (double)histogram.maxValue * (double)(scaleWidth/2)),1);
+					int xSpan = std::max(static_cast<int>(hVal / histogram.maxValue * (scaleWidth/2)),1);
 					glVertex2i(histoStart,y+j);
 					glVertex2i(histoStart+xSpan,y+j);
 				}
@@ -394,12 +393,15 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		glLineWidth(2.0f * renderZoom);
 		const ccColor::Rgbub& lineColor = textColor;
 		glColor3ubv(lineColor.rgb);
+		glPushAttrib(GL_LINE_BIT);
+		glEnable(GL_LINE_SMOOTH);
 		glBegin(GL_LINE_LOOP);
 		glVertex2i(x,y);
 		glVertex2i(x+scaleWidth,y);
 		glVertex2i(x+scaleWidth,y+scaleMaxHeight);
 		glVertex2i(x,y+scaleMaxHeight);
 		glEnd();
+		glPopAttrib();
 	}
 
 	//display labels
@@ -423,7 +425,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			const int minGap = strHeight;
 			for (size_t i=1; i<keyValues.size()-1; ++i)
 			{
-				int yScale = static_cast<int>((sortedKeyValues[i]-sortedKeyValues[0]) * (double)scaleMaxHeight / maxRange);
+				int yScale = static_cast<int>((sortedKeyValues[i]-sortedKeyValues[0]) * scaleMaxHeight / maxRange);
 				vlabelPair nLabels = GetVLabelsAround(yScale,drawnLabels);
 
 				assert(nLabels.first != drawnLabels.end() && nLabels.second != drawnLabels.end());
@@ -457,7 +459,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 					{
 						//insert label
 						double val = (it1->val + it2->val)/2.0;
-						int yScale = static_cast<int>((val-sortedKeyValues[0]) * (double)scaleMaxHeight / maxRange);
+						int yScale = static_cast<int>((val-sortedKeyValues[0]) * scaleMaxHeight / maxRange);
 
 						//insert it at the right place (so as to keep a sorted list!)
 						drawnLabels.insert(it2,vlabel(yScale,yScale-strHeight/2,yScale+strHeight/2,val));

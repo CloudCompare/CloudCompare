@@ -1383,7 +1383,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 					m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
 					m_frustrumInfos.frustrumHull->setTempColor(m_color);
 					
-					glPushAttrib(GL_COLOR_BUFFER_BIT);
+					//glPushAttrib(GL_COLOR_BUFFER_BIT);
 					//glEnable(GL_BLEND);
 					//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 					//glColor4ub(m_color.x, m_color.y, m_color.z, 76);
@@ -1392,7 +1392,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 					m_frustrumInfos.frustrumHull->enableStippling(true);
 					m_frustrumInfos.frustrumHull->draw(context);
 
-					glPopAttrib();
+					//glPopAttrib();
 				}
 			}
 			//*/

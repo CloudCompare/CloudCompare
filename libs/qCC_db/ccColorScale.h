@@ -234,7 +234,7 @@ public:
 		{
 			//quantized (16 bits) version --> much faster than floor!
 			unsigned index = (static_cast<unsigned>((relativePos*steps)*65535.0))>>16;
-			return getColorByIndex((index*(MAX_STEPS-1)) / (steps-1)).rgba;
+			return getColorByIndex((index*(MAX_STEPS-1)) / steps).rgba;
 		}
 		else
 		{

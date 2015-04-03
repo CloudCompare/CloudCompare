@@ -25,7 +25,6 @@
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
-#include <cc2DLabel.h>
 
 bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 {

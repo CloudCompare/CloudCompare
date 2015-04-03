@@ -36,7 +36,7 @@
 cc2DLabel::cc2DLabel(QString name/*=QString()*/)
 	: ccHObject(name.isEmpty() ? "label" : name)
 	, m_showFullBody(true)
-	, m_dispIn3D(true)
+	, m_dispIn3D(false)
 	, m_dispIn2D(true)
 {
 	m_screenPos[0] = m_screenPos[1] = 0.05f;
@@ -681,7 +681,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		{
 			//segment width
 			glPushAttrib(GL_LINE_BIT);
-			glLineWidth(c_sizeFactor);
+			glLineWidth(c_sizeFactor * context.renderZoom);
 
 			//we draw the segments
 			if (isSelected())
@@ -738,9 +738,9 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 			if (m_dispIn3D && !pushName) //no need to display label in point picking mode
 			{
-				//QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
-				//font.setPointSize(font.pointSize()+2);
-				//font.setBold(true);
+				QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
+				font.setPointSize(font.pointSize()+2);
+				font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
 
 				//draw their name
@@ -760,8 +760,9 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 													*P + CCVector3(	context.labelMarkerTextShift,
 																	context.labelMarkerTextShift,
 																	context.labelMarkerTextShift),
-													ccColor::white.rgba/*,
-													font*/ ); //DGM: I get an OpenGL error if the font is defined this way?!
+													ccColor::white.rgba
+													, font
+												);
 				}
 				glPopAttrib();
 			}
@@ -849,7 +850,6 @@ struct Tab
 	std::vector<QStringList> colContent;
 };
 
-
 void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 {
 	if (!m_dispIn2D)
@@ -879,6 +879,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	QStringList body;
 #endif
 
+	//render zoom
+	int margin        = static_cast<int>(c_margin * context.renderZoom);
+	int tabMarginX    = static_cast<int>(c_tabMarginX * context.renderZoom);
+	int tabMarginY    = static_cast<int>(c_tabMarginY * context.renderZoom);
+	int arrowBaseSize = static_cast<int>(c_arrowBaseSize * context.renderZoom);
+	
 	int titleHeight = 0;
 	GLdouble arrowDestX = -1.0, arrowDestY = -1.0;
 	QFont bodyFont,titleFont;
@@ -915,10 +921,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//get label box dimension
 		int dx = 100;
 		int dy = 0;
+		//int buttonSize    = static_cast<int>(c_buttonSize * context.renderZoom);
 		{
 			//base box dimension
 			dx = std::max(dx,titleFontMetrics.width(title));
-			dy += c_margin;		//top vertical margin
+			dy += margin;		//top vertical margin
 			dy += titleHeight;	//title
 
 			if (m_showFullBody)
@@ -1039,41 +1046,41 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				//compute min width of each column
 				int totalWidth = tab.updateColumnsWidthTable(bodyFontMetrics);
 
-				int tabWidth = totalWidth + tab.colCount * (2*c_tabMarginX); //add inner margins
+				int tabWidth = totalWidth + tab.colCount * (2*tabMarginX); //add inner margins
 				dx = std::max(dx,tabWidth);
-				dy += tab.rowCount * (rowHeight + 2*c_tabMarginY); //add inner margins
+				dy += tab.rowCount * (rowHeight + 2*tabMarginY); //add inner margins
 				//we also add a margin every 3 rows
-				dy += std::max(0,(tab.rowCount/3)-1) * c_margin;
-				dy += c_margin;		//bottom vertical margin
+				dy += std::max(0,(tab.rowCount/3)-1) * margin;
+				dy += margin;		//bottom vertical margin
 #else
 				body = getLabelContent(precision);
 				if (!body.empty())
 				{
-					dy += c_margin;	//vertical margin above separator
+					dy += margin;	//vertical margin above separator
 					for (int j=0; j<body.size(); ++j)
 					{
 						dx = std::max(dx,bodyFontMetrics.width(body[j]));
 						dy += rowHeight; //body line height
 					}
-					dy += c_margin;	//vertical margin below text
+					dy += margin;	//vertical margin below text
 				}
 #endif //DRAW_CONTENT_AS_TAB
 			}
 
-			dx += c_margin*2;	// horizontal margins
+			dx += margin*2;	// horizontal margins
 		}
 
 		//main rectangle
 		m_labelROI = QRect(0,0,dx,dy);
 
 		//close button
-		//m_closeButtonROI.right()   = dx-c_margin;
-		//m_closeButtonROI.left()    = m_closeButtonROI.right()-c_buttonSize;
-		//m_closeButtonROI.bottom()  = c_margin;
-		//m_closeButtonROI.top()     = m_closeButtonROI.bottom()+c_buttonSize;
+		//m_closeButtonROI.right()   = dx-margin;
+		//m_closeButtonROI.left()    = m_closeButtonROI.right()-buttonSize;
+		//m_closeButtonROI.bottom()  = margin;
+		//m_closeButtonROI.top()     = m_closeButtonROI.bottom()+buttonSize;
 
 		//automatically elide the title
-		//title = titleFontMetrics.elidedText(title,Qt::ElideRight,m_closeButtonROI[0]-2*c_margin);
+		//title = titleFontMetrics.elidedText(title,Qt::ElideRight,m_closeButtonROI[0]-2*margin);
 	}
 
 	int halfW = (context.glW >> 1);
@@ -1138,42 +1145,42 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 			switch(arrowBaseConfig)
 			{
 			case 0: //top-left corner
-				glVertex2i(m_labelROI.left(), -m_labelROI.top()-2*c_arrowBaseSize);
+				glVertex2i(m_labelROI.left(), -m_labelROI.top()-2*arrowBaseSize);
 				glVertex2i(m_labelROI.left(), -m_labelROI.top());
-				glVertex2i(m_labelROI.left()+2*c_arrowBaseSize, -m_labelROI.top());
+				glVertex2i(m_labelROI.left()+2*arrowBaseSize, -m_labelROI.top());
 				break;
 			case 1: //top-middle edge
-				glVertex2i(std::max(m_labelROI.left(),iArrowDestX-c_arrowBaseSize), -m_labelROI.top());
-				glVertex2i(std::min(m_labelROI.right(),iArrowDestX+c_arrowBaseSize), -m_labelROI.top());
+				glVertex2i(std::max(m_labelROI.left(),iArrowDestX-arrowBaseSize), -m_labelROI.top());
+				glVertex2i(std::min(m_labelROI.right(),iArrowDestX+arrowBaseSize), -m_labelROI.top());
 				break;
 			case 2: //top-right corner
-				glVertex2i(m_labelROI.right(), -m_labelROI.top()-2*c_arrowBaseSize);
+				glVertex2i(m_labelROI.right(), -m_labelROI.top()-2*arrowBaseSize);
 				glVertex2i(m_labelROI.right(), -m_labelROI.top());
-				glVertex2i(m_labelROI.right()-2*c_arrowBaseSize, -m_labelROI.top());
+				glVertex2i(m_labelROI.right()-2*arrowBaseSize, -m_labelROI.top());
 				break;
 			case 3: //middle-left edge
-				glVertex2i(m_labelROI.left(), std::min(-m_labelROI.top(),iArrowDestY+c_arrowBaseSize));
-				glVertex2i(m_labelROI.left(), std::max(-m_labelROI.bottom(),iArrowDestY-c_arrowBaseSize));
+				glVertex2i(m_labelROI.left(), std::min(-m_labelROI.top(),iArrowDestY+arrowBaseSize));
+				glVertex2i(m_labelROI.left(), std::max(-m_labelROI.bottom(),iArrowDestY-arrowBaseSize));
 				break;
 			case 4: //middle of rectangle!
 				break;
 			case 5: //middle-right edge
-				glVertex2i(m_labelROI.right(), std::min(-m_labelROI.top(),iArrowDestY+c_arrowBaseSize));
-				glVertex2i(m_labelROI.right(), std::max(-m_labelROI.bottom(),iArrowDestY-c_arrowBaseSize));
+				glVertex2i(m_labelROI.right(), std::min(-m_labelROI.top(),iArrowDestY+arrowBaseSize));
+				glVertex2i(m_labelROI.right(), std::max(-m_labelROI.bottom(),iArrowDestY-arrowBaseSize));
 				break;
 			case 6: //bottom-left corner
-				glVertex2i(m_labelROI.left(), -m_labelROI.bottom()+2*c_arrowBaseSize);
+				glVertex2i(m_labelROI.left(), -m_labelROI.bottom()+2*arrowBaseSize);
 				glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
-				glVertex2i(m_labelROI.left()+2*c_arrowBaseSize, -m_labelROI.bottom());
+				glVertex2i(m_labelROI.left()+2*arrowBaseSize, -m_labelROI.bottom());
 				break;
 			case 7: //bottom-middle edge
-				glVertex2i(std::max(m_labelROI.left(),iArrowDestX-c_arrowBaseSize), -m_labelROI.bottom());
-				glVertex2i(std::min(m_labelROI.right(),iArrowDestX+c_arrowBaseSize), -m_labelROI.bottom());
+				glVertex2i(std::max(m_labelROI.left(),iArrowDestX-arrowBaseSize), -m_labelROI.bottom());
+				glVertex2i(std::min(m_labelROI.right(),iArrowDestX+arrowBaseSize), -m_labelROI.bottom());
 				break;
 			case 8: //bottom-right corner
-				glVertex2i(m_labelROI.right(), -m_labelROI.bottom()+2*c_arrowBaseSize);
+				glVertex2i(m_labelROI.right(), -m_labelROI.bottom()+2*arrowBaseSize);
 				glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
-				glVertex2i(m_labelROI.right()-2*c_arrowBaseSize, -m_labelROI.bottom());
+				glVertex2i(m_labelROI.right()-2*arrowBaseSize, -m_labelROI.bottom());
 				break;
 			}
 			glEnd();
@@ -1192,7 +1199,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//if (highlighted)
 	{
 		glPushAttrib(GL_LINE_BIT);
-		glLineWidth(3.0f);
+		glLineWidth(3.0f * context.renderZoom);
 		glColor4ubv(defaultBorderColor.rgba);
 		glBegin(GL_LINE_LOOP);
 		glVertex2i(m_labelROI.left(),  -m_labelROI.top());
@@ -1222,7 +1229,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//display text
 	if (!pushName)
 	{
-		int xStartRel = c_margin;
+		int xStartRel = margin;
 		int yStartRel = 0;
 		yStartRel -= titleHeight;
 
@@ -1241,7 +1248,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 		//label title
 		context._win->displayText(title,xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor.rgb,&titleFont);
-		yStartRel -= c_margin;
+		yStartRel -= margin;
 		
 		if (m_showFullBody)
 		{
@@ -1249,15 +1256,15 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 			int xCol = xStartRel;
 			for (int c=0; c<tab.colCount; ++c)
 			{
-				int width = tab.colWidth[c] + 2*c_tabMarginX;
-				int height = rowHeight + 2*c_tabMarginY;
+				int width = tab.colWidth[c] + 2*tabMarginX;
+				int height = rowHeight + 2*tabMarginY;
 
 				int yRow = yStartRel;
 				int actualRowCount = std::min(tab.rowCount,tab.colContent[c].size());
 				for (int r=0; r<actualRowCount; ++r)
 				{
 					if (r && (r % 3) == 0)
-						yRow -= c_margin;
+						yRow -= margin;
 
 					//background color
 					const unsigned char* backgroundColor = 0;
@@ -1307,7 +1314,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					}
 
 					context._win->displayText(	str,
-												xStart+xCol+c_tabMarginX+xShift,
+												xStart+xCol+tabMarginX+xShift,
 												yStart+yRow-rowHeight,ccGenericGLDisplay::ALIGN_DEFAULT,0,textColor,&bodyFont);
 
 					yRow -= height;
@@ -1319,7 +1326,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 			if (!body.empty())
 			{
 				//display body
-				yStartRel -= c_margin;
+				yStartRel -= margin;
 				for (int i=0; i<body.size(); ++i)
 				{
 					yStartRel -= rowHeight;

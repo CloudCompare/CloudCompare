@@ -344,6 +344,8 @@ public:
 
 	//! Returns current font size
 	virtual int getFontPointSize() const;
+	//! Returns current font size for labels
+	virtual int getLabelFontPointSize() const;
 
 	//! Returns window own DB
 	virtual ccHObject* getOwnDB();

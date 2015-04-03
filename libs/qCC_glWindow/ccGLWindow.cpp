@@ -1136,6 +1136,9 @@ void ccGLWindow::paint()
 					);
 	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(doDraw3D ? "yes" : "no").arg(m_LODInProgress ? "yes" : "no"));
 
+	//we update font size (for text display)
+	setFontPointSize(getFontPointSize());
+
 	//context initialization
 	CC_DRAW_CONTEXT CONTEXT;
 	getContext(CONTEXT);
@@ -1246,8 +1249,8 @@ void ccGLWindow::paint()
 			//transparent border at the top of the screen
 			if (m_activeGLFilter)
 			{
-				float w = static_cast<float>(m_glWidth)/2;
-				float h = static_cast<float>(m_glHeight)/2;
+				float w = m_glWidth/2.0f;
+				float h = m_glHeight/2.0f;
 				int borderHeight = getGlFilterBannerHeight();
 
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
@@ -2016,6 +2019,15 @@ void ccGLWindow::drawCross()
 	glEnd();
 }
 
+float RoundScale(float equivalentWidth)
+{
+	//we compute the scale granularity (to avoid width values with a lot of decimals)
+	int k = int(floor(log(static_cast<float>(equivalentWidth))/log(10.0f)));
+	float granularity = pow(10.0f,static_cast<float>(k))/2;
+	//we choose the value closest to equivalentWidth with the right granularity
+	return floor(std::max(equivalentWidth/granularity,1.0f))*granularity;
+}
+
 void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 {
 	assert(!m_viewportParams.perspectiveView); //a scale is only valid in ortho. mode!
@@ -2029,14 +2041,8 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 
 	//we first compute the width equivalent to 25% of horizontal screen width
 	//(this is why it's only valid in orthographic mode !)
-	float equivalentWidth = scaleMaxW * m_viewportParams.pixelSize / m_viewportParams.zoom;
-
-	//we then compute the scale granularity (to avoid width values with a lot of decimals)
-	int k = int(floor(log(static_cast<float>(equivalentWidth))/log(10.0f)));
-	float granularity = pow(10.0f,static_cast<float>(k))/2;
-
-	//we choose the value closest to equivalentWidth with the right granularity
-	equivalentWidth = floor(std::max(equivalentWidth/granularity,1.0f))*granularity;
+	float equivalentWidthRaw = scaleMaxW * m_viewportParams.pixelSize / m_viewportParams.zoom;
+	float equivalentWidth = RoundScale(equivalentWidthRaw);
 
 	QFont font = getTextDisplayFont(); //we take rendering zoom into account!
 	QFontMetrics fm(font);
@@ -2045,10 +2051,10 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	float scaleW_pix = equivalentWidth / m_viewportParams.pixelSize * m_viewportParams.zoom;
 	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 	float dW = 2.0f * trihedronLength + 20.0f;
-	float dH = std::max<float>(static_cast<float>(fm.height()) * 1.25f,trihedronLength + 5.0f);
-	float w = static_cast<float>(m_glWidth) * 0.5f - dW;
-	float h = static_cast<float>(m_glHeight) * 0.5f - dH;
-	float tick = 3.0f * m_captureMode.zoomFactor;
+	float dH = std::max<float>(fm.height() * 1.25f,trihedronLength + 5.0f);
+	float w = m_glWidth / 2.0f - dW;
+	float h = m_glHeight / 2.0f - dH;
+	float tick = 3 * m_captureMode.zoomFactor;
 
 	//scale OpenGL drawing
 	glColor3ubv(color.rgb);
@@ -2061,7 +2067,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glVertex3f(w,-h-tick,0.0);
 	glEnd();
 
-	QString text = QString::number(m_captureMode.enabled ? equivalentWidth/m_captureMode.zoomFactor : equivalentWidth);
+	QString text = QString::number(m_captureMode.enabled ? RoundScale(equivalentWidthRaw/m_captureMode.zoomFactor) : equivalentWidth);
 	glColor3ubv_safe(color.rgb);
 	renderText(m_glWidth-static_cast<int>(scaleW_pix/2+dW)-fm.width(text)/2, m_glHeight-static_cast<int>(dH/2)+fm.height()/3, text, font);
 }
@@ -2495,9 +2501,6 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.labelDefaultBkgCol    = guiParams.labelBackgroundCol;
 	context.labelDefaultMarkerCol = guiParams.labelMarkerCol;
 	context.bbDefaultCol          = guiParams.bbDefaultCol;
-
-	//default font size
-	setFontPointSize(guiParams.defaultFontSize);
 
 	//display acceleration
 	context.useVBOs = guiParams.useVBOs;
@@ -3819,32 +3822,45 @@ void ccGLWindow::setLineWidth(float width)
 	m_updateFBO = true;
 }
 
+int FontSizeModifier(int fontSize, float zoomFactor)
+{
+	int scaledFontSize = static_cast<int>(floor(fontSize * zoomFactor));
+	if (zoomFactor >= 2.0f)
+		scaledFontSize -= static_cast<int>(zoomFactor);
+	if (scaledFontSize < 1)
+		scaledFontSize = 1;
+	return scaledFontSize;
+}
+
+int ccGLWindow::getFontPointSize() const
+{
+	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize,m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize);
+}
+
 void ccGLWindow::setFontPointSize(int pixelSize)
 {
 	m_font.setPointSize(pixelSize);
 }
 
-int ccGLWindow::getFontPointSize() const
-{
-	return m_captureMode.enabled ? static_cast<int>(m_font.pointSize() * m_captureMode.zoomFactor) : m_font.pointSize();
-}
-
 QFont ccGLWindow::getTextDisplayFont() const
 {
-	if (!m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f)
+	//if (!m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f)
 		return m_font;
 
-	QFont font = m_font;
-	font.setPointSize(static_cast<int>(m_font.pointSize() * m_captureMode.zoomFactor));
-	return font;
+	//QFont font = m_font;
+	//font.setPointSize(getFontPointSize());
+	//return font;
+}
+
+int ccGLWindow::getLabelFontPointSize() const
+{
+	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize,m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize);
 }
 
 QFont ccGLWindow::getLabelDisplayFont() const
 {
-	assert(m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f);
-
 	QFont font = m_font;
-	font.setPointSize(static_cast<int>(getDisplayParameters().labelFontSize * m_captureMode.zoomFactor));
+	font.setPointSize(getLabelFontPointSize());
 	return font;
 }
 
@@ -4363,7 +4379,7 @@ void ccGLWindow::updateZoom(float zoomFactor)
 	//no 'zoom' in viewer based perspective
 	assert(!m_viewportParams.perspectiveView);
 
-	if (zoomFactor>0.0 && zoomFactor!=1.0)
+	if (zoomFactor > 0.0 && zoomFactor != 1.0)
 		setZoom(m_viewportParams.zoom*zoomFactor);
 }
 
@@ -4480,7 +4496,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 		//we update line width (for bounding-boxes, etc.)
 		setLineWidth(_defaultLineWidth*zoomFactor);
 		//we update font size (for text display)
-		//displayParams.defaultFontSize = static_cast<int>(static_cast<float>(_fontSize) * zoomFactor);
+		setFontPointSize(getFontPointSize());
 	}
 
 	//setDisplayParameters(displayParams,true);
@@ -4500,10 +4516,9 @@ bool ccGLWindow::renderToFile(	QString filename,
 		else
 		{
 			fbo = new ccFrameBufferObject();
-			bool success = false;
-			if (fbo->init(Wp,Hp))
-				if (fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_UNSIGNED_BYTE))
-					success = fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D);
+			bool success = (	fbo->init(Wp,Hp)
+							&&	fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_UNSIGNED_BYTE)
+							&&	fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D) );
 			if (!success)
 			{
 				ccLog::Error("[FBO] Initialization failed! (not enough memory?)");
@@ -4514,6 +4529,14 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 		if (fbo)
 		{
+			//WARNING: THIS IS A ***FRACKING*** TRICK!!!
+			//we must trick Qt painter that the widget has actually
+			//been resized, otherwise the 'renderText' won't work!
+			QRect backupRect = geometry();
+			QRect& ncrect = const_cast<QRect&>(geometry());
+			ncrect.setWidth(Wp);
+			ncrect.setHeight(Hp);
+
 			makeCurrent();
 
 			//update viewport
@@ -4563,8 +4586,8 @@ bool ccGLWindow::renderToFile(	QString filename,
 			{
 				glMatrixMode(GL_PROJECTION);
 				glLoadIdentity();
-				float halfW = float(Wp)*0.5f;
-				float halfH = float(Hp)*0.5f;
+				float halfW = Wp/2.0f;
+				float halfH = Hp/2.0f;
 				float maxS = std::max(halfW,halfH);
 				glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
 				glMatrixMode(GL_MODELVIEW);
@@ -4598,14 +4621,6 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 			fbo->start();
 
-			//WARNING: THIS IS A ***FRACKING*** TRICK!!!
-			//we must trick Qt painter that the widget has actually
-			//been resized, otherwise the 'renderText' won't work!
-			QRect backupRect = geometry();
-			QRect& ncrect = const_cast<QRect&>(geometry());
-			ncrect.setWidth(Wp);
-			ncrect.setHeight(Hp);
-
 			//we draw 2D entities (mainly for the color ramp!)
 			if (m_globalDBRoot)
 				m_globalDBRoot->draw(CONTEXT);
@@ -4636,8 +4651,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 				drawTrihedron();
 			}
 
-			//don't forget to restore the right 'rect' or the widget will be broken!
-			ncrect = backupRect;
+			glFlush();
 
 			//read from fbo
 			glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
@@ -4652,7 +4666,8 @@ bool ccGLWindow::renderToFile(	QString filename,
 				delete fbo;
 			fbo = 0;
 
-			result = output.save(filename);
+			//don't forget to restore the right 'rect' or the widget will be broken!
+			ncrect = backupRect;
 
 			ccGLUtils::CatchGLError("ccGLWindow::renderToFile");
 
@@ -4661,6 +4676,8 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 			//resizeGL(width(),height());
 			glViewport(0,0,width(),height());
+
+			result = output.save(filename);
 
 			//updateZoom(1.0/zoomFactor);
 		}
@@ -4696,6 +4713,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 	setLineWidth(_defaultLineWidth);
 	m_captureMode.enabled = false;
 	m_captureMode.zoomFactor = 1.0f;
+	setFontPointSize(getFontPointSize());
 
 	if (result)
 		ccLog::Print(QString("[Snapshot] File '%1' saved! (%2 x %3 pixels)").arg(filename).arg(Wp).arg(Hp));

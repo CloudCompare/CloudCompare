@@ -32,11 +32,17 @@ v2.6.2 XX/XX/2015
 		clouds as weights. The bigger the weights, the more influence the points will have.
 		- weights are automatically normalized
 		- only absolute values are considered
+	* 'Render to file' method:
+		- rendering zoom is now more properly taken into account when displaying 2D labels
+		- zoomed text size is estimated in a more accurate way
+		- the displayed size for the scale was wrong when the zoom was not 1
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
 	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (integer part was applied instead)
 	* If only one plugin was loaded (with mulitple methods such as qPCL) then the 'Plugins' was staying disabled
+	* The scale value displayed in the 3D views (under the scale bar) was wrong when the zoom of the 'Render to file'
+		method was greater than 1
 
 v2.6.1 02/20/2015
 - New features:

@@ -264,7 +264,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
 	}
 
-	connect(this, SLOT(itemPickedFast(int,int,int,int)), this, SLOT(onItemPickedFast(int,int,int,int)), Qt::DirectConnection);
+	connect(this, SIGNAL(itemPickedFast(int,int,int,int)), this, SLOT(onItemPickedFast(int,int,int,int)), Qt::DirectConnection);
 
 #ifdef THREADED_GL_WIDGET
 	setAutoBufferSwap(false);

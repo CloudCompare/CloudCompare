@@ -943,29 +943,26 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		{
 			CCVector3d P( p.GetX(),p.GetY(),p.GetZ() );
 			//backup input global parameters
-			bool* cseBackup = parameters.coordinatesShiftEnabled;
-			CCVector3d* csBackup = parameters.coordinatesShift;
 			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-			bool enabled = true;
+			bool useLasShift = false;
 			//set the LAS shift as default shift (if none was provided)
-			if (lasShift.norm2() != 0 && (!cseBackup || !*cseBackup))
+			if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
 			{
-				parameters.coordinatesShiftEnabled = &enabled;
-				parameters.coordinatesShift = &lasShift;
+				useLasShift = true;
+				Pshift = lasShift;
 				if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
 					&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
 				{
 					parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
 				}
 			}
-			if (HandleGlobalShift(P,Pshift,parameters))
+			if (HandleGlobalShift(P,Pshift,parameters,useLasShift))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 			}
-			//restore (input) global parameters
-			parameters.coordinatesShiftEnabled = cseBackup;
-			parameters.coordinatesShift = csBackup;
+
+			//restore previous parameters
 			parameters.shiftHandlingMode = csModeBackup;
 		}
 

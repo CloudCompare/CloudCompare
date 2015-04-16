@@ -220,11 +220,13 @@ public: //static methods
 	/** \param[in] P sample point (typically the first loaded)
 		\param[out] Pshift global shift
 		\param[in] loadParameters loading parameters
+		\param[in] useInputCoordinatesShiftIfPossible whether to use the input 'PShift' vector if possible
 		\return whether global shift has been defined/enabled
 	**/
 	QCC_IO_LIB_API static bool HandleGlobalShift(	const CCVector3d& P,
 													CCVector3d& Pshift,
-													LoadParameters& loadParameters);
+													LoadParameters& loadParameters,
+													bool useInputCoordinatesShiftIfPossible = false);
 
 	//! Displays (to console) the message corresponding to a given error code
 	/** \param err error code

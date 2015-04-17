@@ -39,7 +39,7 @@ ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=0*/)
 
 void ccSelectChildrenDlg::addType(QString typeName, CC_CLASS_ENUM type)
 {
-	typeComboBox->addItem(typeName,QVariant(type));
+	typeComboBox->addItem(typeName,QVariant::fromValue<qint64>(type));
 
 	//auto select last selected type
 	if (type == s_lastType)
@@ -60,7 +60,7 @@ CC_CLASS_ENUM ccSelectChildrenDlg::getSelectedType()
 		return CC_TYPES::HIERARCHY_OBJECT;
 
 	int currentIndex = typeComboBox->currentIndex();
-	return typeComboBox->itemData(currentIndex).value<CC_CLASS_ENUM>();
+	return static_cast<CC_CLASS_ENUM>(typeComboBox->itemData(currentIndex).value<qint64>());
 }
 
 QString ccSelectChildrenDlg::getSelectedName()

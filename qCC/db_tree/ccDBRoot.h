@@ -190,6 +190,7 @@ protected slots:
 	void sortSiblingsAZ();
 	void sortSiblingsZA();
 	void sortSiblingsType();
+	void selectByTypeAndName();
 	void toggleSelectedEntities();
 	void toggleSelectedEntitiesVisibility();
 	void toggleSelectedEntitiesColor();
@@ -236,6 +237,9 @@ protected:
 	//! Expands or collapses hovered item
 	void expandOrCollapseHoveredBranch(bool expand);
 
+	//! Selects objects by type and/or name
+	void selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive = true, QString name = QString());
+
 	//! Associated DB root
 	ccHObject* m_treeRoot;
 
@@ -262,6 +266,8 @@ protected:
 	QAction* m_sortSiblingsZA;
 	//! Context menu action: sort siblings by type
 	QAction* m_sortSiblingsType;
+	//! Context menu action: select object by type and/or by name
+	QAction* m_selectByTypeAndName;
 	//! Context menu action: delete selected entities
 	QAction* m_deleteSelectedEntities;
 	//! Context menu action: enabled/disable selected entities

@@ -47,6 +47,8 @@
 //local
 #include "ccPropertiesTreeDelegate.h"
 #include "../mainwindow.h"
+#include "../ccPickOneElementDlg.h"
+#include "../ccSelectChildrenDlg.h"
 
 //system
 #include <assert.h>
@@ -90,6 +92,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_sortSiblingsType = new QAction("Sort siblings by type",this);
 	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
 	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
+	m_selectByTypeAndName = new QAction("Select siblings by type and/or name",this);
 	m_deleteSelectedEntities = new QAction("Delete",this);
 	m_toggleSelectedEntities = new QAction("Toggle",this);
 	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility",this);
@@ -113,6 +116,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_sortSiblingsAZ,					SIGNAL(triggered()),								this, SLOT(sortSiblingsAZ()));
 	connect(m_sortSiblingsZA,					SIGNAL(triggered()),								this, SLOT(sortSiblingsZA()));
 	connect(m_sortSiblingsType,					SIGNAL(triggered()),								this, SLOT(sortSiblingsType()));
+	connect(m_selectByTypeAndName,              SIGNAL(triggered()),								this, SLOT(selectByTypeAndName()));
 	connect(m_deleteSelectedEntities,			SIGNAL(triggered()),								this, SLOT(deleteSelectedEntities()));
 	connect(m_toggleSelectedEntities,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities()));
 	connect(m_toggleSelectedEntitiesVisibility,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesVisibility()));
@@ -1585,6 +1589,110 @@ void ccDBRoot::sortSelectedEntitiesSiblings(SortRules sortRule)
 	}
 }
 
+void ccDBRoot::selectByTypeAndName()
+{
+	ccSelectChildrenDlg scDlg(MainWindow::TheInstance());
+	scDlg.addType("Point cloud",       CC_TYPES::POINT_CLOUD);
+	scDlg.addType("Poly-line",         CC_TYPES::POLY_LINE);
+	scDlg.addType("Mesh",              CC_TYPES::MESH);
+	scDlg.addType("  Sub-mesh",        CC_TYPES::SUB_MESH);
+	scDlg.addType("  Primitive",       CC_TYPES::PRIMITIVE);
+	scDlg.addType("    Plane",         CC_TYPES::PLANE);
+	scDlg.addType("    Sphere",        CC_TYPES::SPHERE);
+	scDlg.addType("    Torus",         CC_TYPES::TORUS);
+	scDlg.addType("    Cylinder",      CC_TYPES::CYLINDER);
+	scDlg.addType("    Cone",          CC_TYPES::CONE);
+	scDlg.addType("    Box",           CC_TYPES::BOX);
+	scDlg.addType("    Dish",          CC_TYPES::DISH);
+	scDlg.addType("    Extrusion",     CC_TYPES::EXTRU);
+	scDlg.addType("Sensor",            CC_TYPES::SENSOR);
+	scDlg.addType("  GBL/TLS sensor",  CC_TYPES::GBL_SENSOR);
+	scDlg.addType("  Camera sensor",   CC_TYPES::CAMERA_SENSOR);
+	scDlg.addType("Image",             CC_TYPES::IMAGE);
+	scDlg.addType("Facet",             CC_TYPES::FACET);
+	scDlg.addType("Label",             CC_TYPES::LABEL_2D);
+	scDlg.addType("Area label",        CC_TYPES::VIEWPORT_2D_LABEL);
+	scDlg.addType("Octree",            CC_TYPES::POINT_OCTREE);
+	scDlg.addType("Kd-tree",           CC_TYPES::POINT_KDTREE);
+	scDlg.addType("Viewport",          CC_TYPES::VIEWPORT_2D_OBJECT);
+
+	if (!scDlg.exec())
+		return;
+
+	CC_CLASS_ENUM type = scDlg.getSelectedType();
+	QString name = scDlg.getSelectedName();
+
+	//some types are exclusive, but some are generic!
+	bool exclusive = true;
+	switch (type)
+	{
+	case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
+	case CC_TYPES::MESH:
+	case CC_TYPES::PRIMITIVE:
+	case CC_TYPES::SENSOR:
+	case CC_TYPES::IMAGE:
+		exclusive = false;
+		break;
+	default:
+		exclusive = true;
+		break;
+	}
+
+	selectChildrenByTypeAndName(type, exclusive, name);
+}
+
+/* name is optional, if passed it is used to restrict the selection by type */
+void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive/*=true*/, QString name/*=QString()*/)
+{
+	//not initialized?
+	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
+		return;
+
+	QModelIndex clickIndex = m_dbTreeWidget->indexAt(m_contextMenuPos);
+	if (!clickIndex.isValid())
+		return;
+	ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
+	assert(item);
+
+	if (!item || item->getChildrenNumber() == 0)
+		return;
+
+	ccHObject::Container filteredByType;
+	item->filterChildren(filteredByType, true, type, typeIsExclusive);
+
+	// The case of an empty filteredByType is handled implicitly, to make
+	// the ctrlPushed behavior below more consistent (i.e. when no object
+	// is found and Control was NOT pressed the selection will still be
+	// cleared).
+
+	ccHObject::Container toSelect;
+	try
+	{
+		if (name.isEmpty())
+		{
+			toSelect = filteredByType;
+		}
+		else
+		{
+			for (size_t i=0; i<filteredByType.size(); ++i)
+			{
+				ccHObject* child = filteredByType[i];
+
+				if (child->getName().compare(name) == 0)
+					toSelect.push_back(child);
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[selectChildrenByTypeAndName] Not enough memory!");
+		return;
+	}
+
+	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	selectEntities(toSelect, ctrlPushed);
+}
+
 void ccDBRoot::toggleSelectedEntities()
 {
 	toggleSelectedEntitiesProperty(0);
@@ -1736,7 +1844,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool toggleVisibility = false;
 			bool toggleOtherProperties = false;
 			bool toggleMaterials = false;
-			bool hasMoreThan2Children = false;
+			bool hasMoreThanOneChild = false;
 			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
@@ -1749,7 +1857,9 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 					continue;
 				}
 				if (item->getChildrenNumber() > 1)
-					hasMoreThan2Children = true;
+				{
+					hasMoreThanOneChild = true;
+				}
 				leafObject |= item->isLeaf();
 				if (!item->isA(CC_TYPES::HIERARCHY_OBJECT))
 				{
@@ -1810,14 +1920,16 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			menu.addAction(m_toggleSelectedEntities3DName);
 			menu.addSeparator();
 			menu.addAction(m_deleteSelectedEntities);
-			if (hasMoreThan2Children)
+			if (selCount == 1 && hasMoreThanOneChild)
 			{
 				menu.addSeparator();
 				menu.addAction(m_sortSiblingsAZ);
 				menu.addAction(m_sortSiblingsZA);
 				menu.addAction(m_sortSiblingsType);
+				menu.addAction(m_selectByTypeAndName);
 			}
-			if (selCount==1 && !leafObject)
+
+			if (selCount == 1 && !leafObject)
 			{
 				menu.addSeparator();
 				menu.addAction(m_addEmptyGroup);

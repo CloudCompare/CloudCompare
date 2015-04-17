@@ -4,6 +4,12 @@ v2.6.2 XX/XX/2015
 - New features:
 
 - Enhancements:
+	* Rasterize tool
+		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
+		- the input cloud SFs can now be properly interpolated in empty cells
+		- the contour lines are now computed on the active layer
+		- the user can set the default width for the countour lines
+		- the contour lines can be colored (according to the layer associated scalar field settings)
 	* Display:
 		- CloudCompare now supports 'Level Of Detail' (LoD) display for big clouds
 		- if enabled, the clouds are now displayed first at a low octree level when moved

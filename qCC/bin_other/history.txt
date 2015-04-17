@@ -50,6 +50,7 @@ v2.6.2 XX/XX/2015
 	* The scale value displayed in the 3D views (under the scale bar) was wrong when the zoom of the 'Render to file'
 		method was greater than 1
 	* The 'Apply all' option of the 'Global shift & scale' dialog wasn't taken into account when loading LAS/LAZ files
+	* The main window could sometimes disappear in the background when the progress bar was appearing (Qt 5 issue)
 
 v2.6.1 02/20/2015
 - New features:

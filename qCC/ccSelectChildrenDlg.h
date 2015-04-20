@@ -27,7 +27,7 @@
 //qCC_db
 #include <ccObject.h>
 
-//! Minimal dialog to pick one element in a list (combox box)
+//! Minimal dialog to pick one element in a list (combo box)
 class ccSelectChildrenDlg : public QDialog, public Ui::SelectChildrenDialog
 {
 	Q_OBJECT

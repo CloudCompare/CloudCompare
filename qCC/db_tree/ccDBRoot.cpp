@@ -92,7 +92,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_sortSiblingsType = new QAction("Sort siblings by type",this);
 	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
 	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
-	m_selectByTypeAndName = new QAction("Select siblings by type and/or name",this);
+	m_selectByTypeAndName = new QAction("Select children by type and/or name",this);
 	m_deleteSelectedEntities = new QAction("Delete",this);
 	m_toggleSelectedEntities = new QAction("Toggle",this);
 	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility",this);
@@ -1622,19 +1622,22 @@ void ccDBRoot::selectByTypeAndName()
 	CC_CLASS_ENUM type = scDlg.getSelectedType();
 	QString name = scDlg.getSelectedName();
 
-	//some types are exclusive, but some are generic!
-	bool exclusive = true;
+	//some types are exclusive, some are generic, and some can be both
+	//(e.g. Meshes)
+	//
+	//For generic-only types the match type gets overridden and forced to
+	//false because exclusive match makes no sense!
+	bool exclusive;
 	switch (type)
 	{
 	case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
-	case CC_TYPES::MESH:
 	case CC_TYPES::PRIMITIVE:
 	case CC_TYPES::SENSOR:
 	case CC_TYPES::IMAGE:
 		exclusive = false;
 		break;
 	default:
-		exclusive = true;
+		exclusive = scDlg.getStrictMatchState();
 		break;
 	}
 
@@ -1926,11 +1929,12 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_sortSiblingsAZ);
 				menu.addAction(m_sortSiblingsZA);
 				menu.addAction(m_sortSiblingsType);
-				menu.addAction(m_selectByTypeAndName);
 			}
 
 			if (selCount == 1 && !leafObject)
 			{
+				menu.addSeparator();
+				menu.addAction(m_selectByTypeAndName);
 				menu.addSeparator();
 				menu.addAction(m_addEmptyGroup);
 			}

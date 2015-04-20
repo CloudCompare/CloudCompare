@@ -27,7 +27,7 @@
 //qCC_db
 #include <ccObject.h>
 
-//! Minimal dialog to pick one element in a list (combox box)
+//! Minimal dialog to pick one element in a list (combo box)
 class ccSelectChildrenDlg : public QDialog, public Ui::SelectChildrenDialog
 {
 	Q_OBJECT
@@ -44,6 +44,8 @@ public:
 	CC_CLASS_ENUM getSelectedType();
 	//! Returns the selected name (if any)
 	QString getSelectedName();
+	//! Returns the state of the strict type checkbox
+	bool getStrictMatchState();
 
 protected slots:
 

@@ -1926,11 +1926,12 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_sortSiblingsAZ);
 				menu.addAction(m_sortSiblingsZA);
 				menu.addAction(m_sortSiblingsType);
-				menu.addAction(m_selectByTypeAndName);
 			}
 
 			if (selCount == 1 && !leafObject)
 			{
+				menu.addSeparator();
+				menu.addAction(m_selectByTypeAndName);
 				menu.addSeparator();
 				menu.addAction(m_addEmptyGroup);
 			}

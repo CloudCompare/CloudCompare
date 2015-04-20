@@ -92,7 +92,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_sortSiblingsType = new QAction("Sort siblings by type",this);
 	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
 	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
-	m_selectByTypeAndName = new QAction("Select siblings by type and/or name",this);
+	m_selectByTypeAndName = new QAction("Select children by type and/or name",this);
 	m_deleteSelectedEntities = new QAction("Delete",this);
 	m_toggleSelectedEntities = new QAction("Toggle",this);
 	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility",this);

@@ -21,6 +21,7 @@ static QString s_lastName;
 static bool s_lastNameState = false;
 static CC_CLASS_ENUM s_lastType = CC_TYPES::POINT_CLOUD;
 static bool s_lastTypeState = true;
+static bool s_lastTypeStrictState = true;
 
 ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
@@ -31,6 +32,7 @@ ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=0*/)
 	setWindowFlags(Qt::Tool);
 
 	typeCheckBox->setChecked(s_lastTypeState);
+	typeStrictCheckBox->setChecked(s_lastTypeStrictState);
 	nameCheckBox->setChecked(s_lastNameState);
 	nameLineEdit->setText(s_lastName);
 
@@ -51,6 +53,7 @@ void ccSelectChildrenDlg::onAccept()
 	s_lastNameState = nameCheckBox->isChecked();
 	s_lastName = nameLineEdit->text();
 	s_lastTypeState = typeCheckBox->isChecked();
+	s_lastTypeStrictState = typeCheckBox->isChecked();
 	s_lastType = getSelectedType();
 }
 
@@ -69,4 +72,9 @@ QString ccSelectChildrenDlg::getSelectedName()
 		return QString();
 
 	return nameLineEdit->text();
+}
+
+bool ccSelectChildrenDlg::getStrictMatchState()
+{
+	return typeStrictCheckBox->isChecked();
 }

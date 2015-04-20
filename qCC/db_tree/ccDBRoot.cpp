@@ -1622,19 +1622,22 @@ void ccDBRoot::selectByTypeAndName()
 	CC_CLASS_ENUM type = scDlg.getSelectedType();
 	QString name = scDlg.getSelectedName();
 
-	//some types are exclusive, but some are generic!
-	bool exclusive = true;
+	//some types are exclusive, some are generic, and some can be both
+	//(e.g. Meshes)
+	//
+	//For generic-only types the match type gets overridden and forced to
+	//false because exclusive match makes no sense!
+	bool exclusive;
 	switch (type)
 	{
 	case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
-	case CC_TYPES::MESH:
 	case CC_TYPES::PRIMITIVE:
 	case CC_TYPES::SENSOR:
 	case CC_TYPES::IMAGE:
 		exclusive = false;
 		break;
 	default:
-		exclusive = true;
+		exclusive = scDlg.getStrictMatchState();
 		break;
 	}
 

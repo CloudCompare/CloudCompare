@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>140</height>
+    <height>175</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,10 @@
       <string>Select children...</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <item row="1" column="0">
        <widget class="QCheckBox" name="typeCheckBox">
         <property name="text">
          <string>of type</string>
@@ -30,17 +33,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="typeComboBox"/>
-      </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QCheckBox" name="nameCheckBox">
         <property name="text">
          <string>with name</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QFrame" name="nameFrame">
         <property name="enabled">
          <bool>false</bool>
@@ -62,6 +62,44 @@
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>(case sensitive)</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QFrame" name="typeFrame">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="typeComboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="typeStrictCheckBox">
+           <property name="text">
+            <string>strict</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -105,12 +143,12 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>165</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
-     <y>274</y>
+     <y>174</y>
     </hint>
    </hints>
   </connection>
@@ -121,19 +159,19 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>165</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
-     <y>274</y>
+     <y>174</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>typeCheckBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>typeComboBox</receiver>
+   <receiver>typeFrame</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -153,12 +191,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>54</x>
-     <y>66</y>
+     <x>80</x>
+     <y>102</y>
     </hint>
     <hint type="destinationlabel">
-     <x>288</x>
-     <y>68</y>
+     <x>417</x>
+     <y>111</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>typeStrictCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>typeStrictCheckBox</receiver>
+   <slot>setOn(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>321</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>50</y>
     </hint>
    </hints>
   </connection>

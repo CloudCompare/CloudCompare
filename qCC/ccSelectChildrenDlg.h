@@ -44,6 +44,8 @@ public:
 	CC_CLASS_ENUM getSelectedType();
 	//! Returns the selected name (if any)
 	QString getSelectedName();
+	//! Returns the state of the strict type checkbox
+	bool getStrictMatchState();
 
 protected slots:
 

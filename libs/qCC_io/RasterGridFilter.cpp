@@ -113,19 +113,14 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				double z = 0.0 /*+ Pshift.z*/;
 				for (int j=0; j<rasterY; ++j)
 				{
-					double y = adfGeoTransform[3] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
-					CCVector3 P(	0,
-									static_cast<PointCoordinateType>(y),
-									static_cast<PointCoordinateType>(z));
 					for (int i=0; i<rasterX; ++i)
 					{
-						double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + Pshift.x;
-
-						P.x = static_cast<PointCoordinateType>(x);
+						double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + static_cast<double>(j) * adfGeoTransform[2] + Pshift.x;
+						double y = adfGeoTransform[3] + static_cast<double>(i) * adfGeoTransform[4] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
+						CCVector3 P(static_cast<PointCoordinateType>(x), static_cast<PointCoordinateType>(y), static_cast<PointCoordinateType>(z));
 						pc->addPoint(P);
 					}
 				}
-
 				QVariant xVar = QVariant::fromValue<int>(rasterX);
 				QVariant yVar = QVariant::fromValue<int>(rasterY);
 				pc->setMetaData("raster_width",xVar);

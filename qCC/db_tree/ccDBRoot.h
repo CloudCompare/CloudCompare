@@ -187,9 +187,9 @@ protected slots:
 	void expandBranch();
 	void collapseBranch();
 	void gatherRecursiveInformation();
-	void sortSiblingsAZ();
-	void sortSiblingsZA();
-	void sortSiblingsType();
+	void sortChildrenAZ();
+	void sortChildrenZA();
+	void sortChildrenType();
 	void selectByTypeAndName();
 	void toggleSelectedEntities();
 	void toggleSelectedEntitiesVisibility();
@@ -231,8 +231,8 @@ protected:
 	//! Entities sorting schemes
 	enum SortRules { SORT_A2Z, SORT_Z2A, SORT_BY_TYPE };
 
-	//! Sorts selected entities siblings
-	void sortSelectedEntitiesSiblings(SortRules rule);
+	//! Sorts selected entities children
+	void sortSelectedEntitiesChildren(SortRules rule);
 
 	//! Expands or collapses hovered item
 	void expandOrCollapseHoveredBranch(bool expand);
@@ -260,12 +260,12 @@ protected:
 	QAction* m_collapseBranch;
 	//! Context menu action: gather (recursive) information on selected entities
 	QAction* m_gatherInformation;
-	//! Context menu action: sort siblings in alphabetical order
-	QAction* m_sortSiblingsAZ;
-	//! Context menu action: sort siblings in reverse alphabetical order
-	QAction* m_sortSiblingsZA;
-	//! Context menu action: sort siblings by type
-	QAction* m_sortSiblingsType;
+	//! Context menu action: sort children in alphabetical order
+	QAction* m_sortChildrenAZ;
+	//! Context menu action: sort children in reverse alphabetical order
+	QAction* m_sortChildrenZA;
+	//! Context menu action: sort children by type
+	QAction* m_sortChildrenType;
 	//! Context menu action: select object by type and/or by name
 	QAction* m_selectByTypeAndName;
 	//! Context menu action: delete selected entities

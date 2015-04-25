@@ -89,9 +89,9 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_expandBranch = new QAction("Expand branch",this);
 	m_collapseBranch = new QAction("Collapse branch",this);
 	m_gatherInformation = new QAction("Information (recursive)",this);
-	m_sortSiblingsType = new QAction("Sort siblings by type",this);
-	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
-	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
+	m_sortChildrenType = new QAction("Sort children by type",this);
+	m_sortChildrenAZ = new QAction("Sort children by name (A-Z)",this);
+	m_sortChildrenZA = new QAction("Sort children by name (Z-A)",this);
 	m_selectByTypeAndName = new QAction("Select children by type and/or name",this);
 	m_deleteSelectedEntities = new QAction("Delete",this);
 	m_toggleSelectedEntities = new QAction("Toggle",this);
@@ -113,9 +113,9 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
 	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
 	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
-	connect(m_sortSiblingsAZ,					SIGNAL(triggered()),								this, SLOT(sortSiblingsAZ()));
-	connect(m_sortSiblingsZA,					SIGNAL(triggered()),								this, SLOT(sortSiblingsZA()));
-	connect(m_sortSiblingsType,					SIGNAL(triggered()),								this, SLOT(sortSiblingsType()));
+	connect(m_sortChildrenAZ,					SIGNAL(triggered()),								this, SLOT(sortChildrenAZ()));
+	connect(m_sortChildrenZA,					SIGNAL(triggered()),								this, SLOT(sortChildrenZA()));
+	connect(m_sortChildrenType,					SIGNAL(triggered()),								this, SLOT(sortChildrenType()));
 	connect(m_selectByTypeAndName,              SIGNAL(triggered()),								this, SLOT(selectByTypeAndName()));
 	connect(m_deleteSelectedEntities,			SIGNAL(triggered()),								this, SLOT(deleteSelectedEntities()));
 	connect(m_toggleSelectedEntities,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities()));
@@ -311,7 +311,7 @@ void ccDBRoot::deleteSelectedEntities()
 			continue;
 		}
 
-		//we don't consider objects that are siblings of others in the selection
+		//we don't consider objects that are 'descendent' of others in the selection
 		bool isSibling = false;
 		for (unsigned j=0; j<selCount; ++j)
 		{
@@ -1507,22 +1507,22 @@ void ccDBRoot::gatherRecursiveInformation()
 	}
 }
 
-void ccDBRoot::sortSiblingsAZ()
+void ccDBRoot::sortChildrenAZ()
 {
-	sortSelectedEntitiesSiblings(SORT_A2Z);
+	sortSelectedEntitiesChildren(SORT_A2Z);
 }
 
-void ccDBRoot::sortSiblingsZA()
+void ccDBRoot::sortChildrenZA()
 {
-	sortSelectedEntitiesSiblings(SORT_Z2A);
+	sortSelectedEntitiesChildren(SORT_Z2A);
 }
 
-void ccDBRoot::sortSiblingsType()
+void ccDBRoot::sortChildrenType()
 {
-	sortSelectedEntitiesSiblings(SORT_BY_TYPE);
+	sortSelectedEntitiesChildren(SORT_BY_TYPE);
 }
 
-void ccDBRoot::sortSelectedEntitiesSiblings(SortRules sortRule)
+void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
@@ -1926,9 +1926,9 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			if (selCount == 1 && hasMoreThanOneChild)
 			{
 				menu.addSeparator();
-				menu.addAction(m_sortSiblingsAZ);
-				menu.addAction(m_sortSiblingsZA);
-				menu.addAction(m_sortSiblingsType);
+				menu.addAction(m_sortChildrenAZ);
+				menu.addAction(m_sortChildrenZA);
+				menu.addAction(m_sortChildrenType);
 			}
 
 			if (selCount == 1 && !leafObject)

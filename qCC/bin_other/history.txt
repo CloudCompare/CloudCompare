@@ -2,6 +2,8 @@
 
 v2.6.2 XX/XX/2015
 - New features:
+	* New option in the context menu of the DB tree (right click on an item)
+		- 'Select children by type and/or name' - to select items either by type and/or by name
 
 - Enhancements:
 	* Rasterize tool
@@ -51,6 +53,7 @@ v2.6.2 XX/XX/2015
 		method was greater than 1
 	* The 'Apply all' option of the 'Global shift & scale' dialog wasn't taken into account when loading LAS/LAZ files
 	* The main window could sometimes disappear in the background when the progress bar was appearing (Qt 5 issue)
+	* Some options of the context menu of the DB tree were incorrectly using the term 'siblings' instead of 'children'
 
 v2.6.1 02/20/2015
 - New features:

@@ -39,7 +39,7 @@ class qHPR : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qHPR(QObject* parent = 0);
+	explicit qHPR(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Hidden Point Removal"; }

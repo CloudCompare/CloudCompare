@@ -1365,7 +1365,7 @@ void ccDBRoot::gatherRecursiveInformation()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	int i,selCount = selectedIndexes.size();
+	int selCount = selectedIndexes.size();
 	if (selCount == 0)
 		return;
 
@@ -1402,7 +1402,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		return;
 	}
 	{
-		for (i=0;i<selCount;++i)
+		for (int i=0; i<selCount; ++i)
 			toProcess[i] = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 	}
 
@@ -1458,7 +1458,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		//we can add its children to the 'toProcess' list and itself to the 'processed' list 
 		try
 		{
-			for (unsigned i=0;i<ent->getChildrenNumber();++i)
+			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
 				toProcess.push_back(ent->getChild(i));
 			alreadyProcessed.push_back(ent);
 		}

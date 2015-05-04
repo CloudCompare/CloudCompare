@@ -397,12 +397,12 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 															NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	GenericDistribution* statModel		= (GenericDistribution*)additionalParameters[0];
-	unsigned numberOfNeighbours         = *(unsigned*)additionalParameters[1];
-	unsigned numberOfChi2Classes		= *(unsigned*)additionalParameters[2];
-	unsigned* histoValues				= (unsigned*)additionalParameters[3];
-	ScalarType* histoMin				= (ScalarType*)additionalParameters[4];
-	ScalarType* histoMax				= (ScalarType*)additionalParameters[5];
+	GenericDistribution* statModel		= reinterpret_cast<GenericDistribution*>(additionalParameters[0]);
+	unsigned numberOfNeighbours         = *reinterpret_cast<unsigned*>(additionalParameters[1]);
+	unsigned numberOfChi2Classes		= *reinterpret_cast<unsigned*>(additionalParameters[2]);
+	unsigned* histoValues				= reinterpret_cast<unsigned*>(additionalParameters[3]);
+	ScalarType* histoMin				= reinterpret_cast<ScalarType*>(additionalParameters[4]);
+	ScalarType* histoMax				= reinterpret_cast<ScalarType*>(additionalParameters[5]);
 
 	//number of points in the current cell
 	unsigned n = cell.points->size();

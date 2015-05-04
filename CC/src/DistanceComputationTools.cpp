@@ -429,10 +429,10 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 															NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
-	const GenericIndexedCloudPersist* referenceCloud	= (GenericIndexedCloudPersist*)additionalParameters[0];
-	const DgmOctree* referenceOctree					= (DgmOctree*)additionalParameters[1];
-	Cloud2CloudDistanceComputationParams* params		= (Cloud2CloudDistanceComputationParams*)additionalParameters[2];
-	const double* maxSearchSquareDistd					= (double*)additionalParameters[3];
+	const GenericIndexedCloudPersist* referenceCloud	= reinterpret_cast<GenericIndexedCloudPersist*>(additionalParameters[0]);
+	const DgmOctree* referenceOctree					= reinterpret_cast<DgmOctree*>(additionalParameters[1]);
+	Cloud2CloudDistanceComputationParams* params		= reinterpret_cast<Cloud2CloudDistanceComputationParams*>(additionalParameters[2]);
+	const double* maxSearchSquareDistd					= reinterpret_cast<double*>(additionalParameters[3]);
 
 	//structure for the nearest neighbor search
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
@@ -490,10 +490,10 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 																			NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
-	GenericIndexedCloudPersist* referenceCloud		= (GenericIndexedCloudPersist*)additionalParameters[0];
-	const DgmOctree* referenceOctree				= (DgmOctree*)additionalParameters[1];
-	Cloud2CloudDistanceComputationParams* params	= (Cloud2CloudDistanceComputationParams*)additionalParameters[2];
-	const double* maxSearchSquareDistd				= (double*)additionalParameters[3];
+	GenericIndexedCloudPersist* referenceCloud		= reinterpret_cast<GenericIndexedCloudPersist*>(additionalParameters[0]);
+	const DgmOctree* referenceOctree				= reinterpret_cast<DgmOctree*>(additionalParameters[1]);
+	Cloud2CloudDistanceComputationParams* params	= reinterpret_cast<Cloud2CloudDistanceComputationParams*>(additionalParameters[2]);
+	const double* maxSearchSquareDistd				= reinterpret_cast<double*>(additionalParameters[3]);
 
 	assert(params && params->localModel != NO_MODEL);
 

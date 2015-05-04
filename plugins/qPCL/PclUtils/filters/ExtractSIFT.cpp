@@ -81,6 +81,11 @@ ExtractSIFT::ExtractSIFT()
 									"Extract SIFT keypoints for clouds with intensity/RGB or any scalar field",
 									":/toolbar/PclUtils/icons/sift.png"))
 	, m_dialog(0)
+	, m_nr_octaves(0)
+	, m_min_scale(0)
+	, m_nr_scales_per_octave(0)
+	, m_min_contrast(0)
+	, m_use_min_contrast(false)
 {
 }
 

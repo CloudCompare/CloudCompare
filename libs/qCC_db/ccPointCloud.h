@@ -416,7 +416,7 @@ public:
         \param col RGB color (size: 3)
 		\return success
 	**/
-	bool setRGBColor(const colorType* col);
+	bool setRGBColor(const ccColor::Rgb& col);
 
     //! Inverts normals (if any)
 	void invertNormals();

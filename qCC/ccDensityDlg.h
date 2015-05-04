@@ -34,7 +34,7 @@ class ccDensityDlg: public QDialog, public Ui::DensityDialog
 public:
 
 	//! Default constructor
-	ccDensityDlg(QWidget* parent = 0);
+	explicit ccDensityDlg(QWidget* parent = 0);
 
 	//! Returns output type
 	CCLib::GeometricalAnalysisTools::Density getDensityType() const;

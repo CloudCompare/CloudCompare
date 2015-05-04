@@ -41,7 +41,7 @@ class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg
 public:
 
 	//! Default constructor
-	ccCameraParamEditDlg(QWidget* parent);
+	explicit ccCameraParamEditDlg(QWidget* parent);
 
 	//! Destructor
 	virtual ~ccCameraParamEditDlg();

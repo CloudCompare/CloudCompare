@@ -43,7 +43,9 @@ FastMarching::FastMarching()
 	, m_cellSize(1.0f)
 	, m_numberOfNeighbours(6)
 {
-	memset(m_minFillIndexes,0,sizeof(int)*3);
+	memset(m_minFillIndexes,       0, sizeof(int)*3);
+	memset(m_neighboursIndexShift, 0, sizeof(int)*CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
+	memset(m_neighboursDistance,   0, sizeof(float)*CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
 }
 
 FastMarching::~FastMarching()

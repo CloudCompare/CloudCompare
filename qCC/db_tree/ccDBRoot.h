@@ -73,7 +73,7 @@ class ccCustomQTreeView : public QTreeView
 public:
 
 	//! Default constructor
-	ccCustomQTreeView(QWidget* parent) : QTreeView(parent) {}
+	explicit ccCustomQTreeView(QWidget* parent) : QTreeView(parent) {}
 
 protected:
 

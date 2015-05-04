@@ -388,8 +388,8 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 								CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	glDrawParams* glParams						= (glDrawParams*)additionalParameters[0];
-	ccGenericPointCloud* theAssociatedCloud		= (ccGenericPointCloud*)additionalParameters[1];
+	glDrawParams* glParams						= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
+	ccGenericPointCloud* theAssociatedCloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
 
 	if (glParams->showSF)
 	{
@@ -422,10 +422,10 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 									CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	glDrawParams* glParams						= (glDrawParams*)additionalParameters[0];
-	ccGenericPointCloud* theAssociatedCloud		= (ccGenericPointCloud*)additionalParameters[1];
-	ccGenericPrimitive*	primitive				= (ccGenericPrimitive*)additionalParameters[2];
-	CC_DRAW_CONTEXT* context					= (CC_DRAW_CONTEXT*)additionalParameters[3];
+	glDrawParams* glParams						= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
+	ccGenericPointCloud* theAssociatedCloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
+	ccGenericPrimitive*	primitive				= reinterpret_cast<ccGenericPrimitive*>(additionalParameters[2]);
+	CC_DRAW_CONTEXT* context					= reinterpret_cast<CC_DRAW_CONTEXT*>(additionalParameters[3]);
 
 	PointCoordinateType cellCenter[3];
 	cell.parentOctree->computeCellCenter(cell.truncatedCode,cell.level,cellCenter,true);
@@ -433,13 +433,13 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 	if (glParams->showSF)
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
-		const colorType* col = theAssociatedCloud->geScalarValueColor(dist);
-		primitive->setColor(col);
+		ccColor::Rgba rgb(theAssociatedCloud->geScalarValueColor(dist));
+		primitive->setColor(rgb);
 	}
 	else if (glParams->showColors)
 	{
-		colorType col[3];
-		ComputeAverageColor(cell.points,theAssociatedCloud,col);
+		ccColor::Rgb col;
+		ComputeAverageColor(cell.points,theAssociatedCloud,col.rgb);
 		primitive->setColor(col);
 	}
 

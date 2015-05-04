@@ -405,7 +405,7 @@ TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleInde
 {
 	assert(triangleIndex < m_numberOfTriangles);
 
-	return (TriangleSummitsIndexes*)(m_triIndexes + 3*triangleIndex);
+	return reinterpret_cast<TriangleSummitsIndexes*>(m_triIndexes + 3*triangleIndex);
 }
 
 void Delaunay2dMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])

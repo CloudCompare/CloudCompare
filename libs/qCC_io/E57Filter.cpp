@@ -750,7 +750,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 		imf.close();
 	}
-	catch(e57::E57Exception e)
+	catch(const e57::E57Exception& e)
 	{
 		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
@@ -1829,10 +1829,10 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		cameraRepresentation = new SphericalRepresentation;
 		cameraRepresentationStr = "sphericalRepresentation";
 	}
-	else if (imageNode.isDefined("sphericalRepresentation"))
+	else if (imageNode.isDefined("cylindricalRepresentation"))
 	{
 		cameraRepresentation = new CylindricalRepresentation;
-		cameraRepresentationStr = "sphericalRepresentation";
+		cameraRepresentationStr = "cylindricalRepresentation";
 	}
 
 	if (!cameraRepresentation)
@@ -2224,7 +2224,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		imf.close();
 	}
-	catch(e57::E57Exception e)
+	catch(const e57::E57Exception& e)
 	{
 		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
 		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;

@@ -51,10 +51,10 @@ namespace ccColor
 		inline RgbTpl() : r(0), g(0), b(0) {}
 
 		//! Constructor from a triplet of r,g,b values
-		inline RgbTpl(Type red, Type green, Type blue) : r(red), g(green), b(blue) {}
+		explicit inline RgbTpl(Type red, Type green, Type blue) : r(red), g(green), b(blue) {}
 
 		//! Constructor from an array of 3 values
-		inline RgbTpl(const Type col[3]) : r(col[0]), g(col[1]), b(col[2]) {}
+		explicit inline RgbTpl(const Type col[3]) : r(col[0]), g(col[1]), b(col[2]) {}
 	
 		//! Copy constructor
 		inline RgbTpl(const RgbTpl& c) : r(c.r), g(c.g), b(c.b) {}
@@ -88,12 +88,12 @@ namespace ccColor
 		inline RgbaTpl() : r(0), g(0), b(0), a(0) {}
 
 		//! Constructor from a triplet of r,g,b values and a transparency value
-		inline RgbaTpl(Type red, Type green, Type blue, Type alpha) : r(red), g(green), b(blue), a(alpha) {}
+		explicit inline RgbaTpl(Type red, Type green, Type blue, Type alpha) : r(red), g(green), b(blue), a(alpha) {}
 
 		//! RgbaTpl from an array of 4 values
-		inline RgbaTpl(const Type col[4]) : r(col[0]), g(col[1]), b(col[2]), a(col[3]) {}
+		explicit inline RgbaTpl(const Type col[4]) : r(col[0]), g(col[1]), b(col[2]), a(col[3]) {}
 		//! RgbaTpl from an array of 3 values and a transparency value
-		inline RgbaTpl(const Type col[3], Type alpha) : r(col[0]), g(col[1]), b(col[2]), a(alpha) {}
+		explicit inline RgbaTpl(const Type col[3], Type alpha) : r(col[0]), g(col[1]), b(col[2]), a(alpha) {}
 	
 		//! Copy constructor
 		inline RgbaTpl(const RgbaTpl<Type>& c) : r(c.r), g(c.g), b(c.b), a(c.a) {}

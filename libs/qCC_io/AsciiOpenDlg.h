@@ -105,7 +105,7 @@ public:
 	//! Default constructor
 	/** \param parent parent widget
 	**/
-	AsciiOpenDlg(QWidget* parent = 0);
+	explicit AsciiOpenDlg(QWidget* parent = 0);
 
 	//! Default destructor
 	virtual ~AsciiOpenDlg();

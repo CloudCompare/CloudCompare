@@ -650,7 +650,7 @@ protected:
 	{
 	public:
 
-		RenderingThread(ccGLWindow* win);
+		explicit RenderingThread(ccGLWindow* win);
 		~RenderingThread() { stop(); }
 		
 		void stop();

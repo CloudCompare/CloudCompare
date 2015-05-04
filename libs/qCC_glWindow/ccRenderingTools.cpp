@@ -139,7 +139,7 @@ typedef std::list<vlabel> vlabelSet;
 typedef std::pair<vlabelSet::iterator,vlabelSet::iterator> vlabelPair;
 static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 {
-	if (set.size() == 0)
+	if (set.empty())
 	{
 		return vlabelPair(set.end(),set.end());
 	}
@@ -148,7 +148,7 @@ static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 		vlabelSet::iterator it1 = set.begin();
 		if (y < it1->yPos)
 			return vlabelPair(set.end(),it1);
-		vlabelSet::iterator it2 = it1; it2++;
+		vlabelSet::iterator it2 = it1; ++it2;
 		for (; it2 != set.end(); ++it2, ++it1)
 		{
 			if (y <= it2->yPos) // '<=' to make sure the last label stays at the top!
@@ -452,7 +452,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				drawnLabelsBefore = drawnLabelsAfter;
 
 				vlabelSet::iterator it1 = drawnLabels.begin();
-				vlabelSet::iterator it2 = it1; it2++;
+				vlabelSet::iterator it2 = it1; ++it2;
 				for (; it2 != drawnLabels.end(); ++it2)
 				{
 					if (it1->yMax + 2*minGap < it2->yMin)
@@ -504,7 +504,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 
 		for (vlabelSet::iterator it = drawnLabels.begin(); it != drawnLabels.end(); ++it)
 		{
-			vlabelSet::iterator itNext = it; itNext++;
+			vlabelSet::iterator itNext = it; ++itNext;
 			//position
 			unsigned char align = ccGLWindow::ALIGN_HRIGHT;
 			if (it == drawnLabels.begin())

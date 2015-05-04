@@ -67,7 +67,7 @@ public:
 	//! Sets the facet unique color
 	/** \param rgb RGB color
 	**/
-	void setColor(const colorType rgb[]);
+	void setColor(const ccColor::Rgb& rgb);
 
 	//! Returns associated RMS
 	inline double getRMS() const { return m_rms; }

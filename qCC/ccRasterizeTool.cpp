@@ -1777,7 +1777,7 @@ class RasterExportOptionsDlg : public QDialog, public Ui::RasterExportOptionsDia
 {
 public:
 
-	RasterExportOptionsDlg(QWidget* parent = 0)
+	explicit RasterExportOptionsDlg(QWidget* parent = 0)
 		: QDialog(parent)
 		, Ui::RasterExportOptionsDialog()
 	{

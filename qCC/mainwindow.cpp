@@ -1089,9 +1089,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
-			colorType col[3] = {static_cast<colorType>(newCol.red()),
+			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) };
+								static_cast<colorType>(newCol.blue()) );
 			prim->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1099,9 +1099,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isA(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-			colorType col[3] = {static_cast<colorType>(newCol.red()),
+			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) };
+								static_cast<colorType>(newCol.blue()) );
 			poly->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1109,9 +1109,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-			colorType col[3] = {static_cast<colorType>(newCol.red()),
+			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) };
+								static_cast<colorType>(newCol.blue()) );
 			facet->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1872,12 +1872,12 @@ void MainWindow::doActionApplyScale()
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
-	size_t processNum = 0;
 
 	//first check that all coordinates are kept 'small'
 	std::vector< EntityCloudAssociation > candidates;
 	{
 		bool testBigCoordinates = true;
+		//size_t processNum = 0;
 		for (size_t i=0; i<selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
@@ -1899,7 +1899,7 @@ void MainWindow::doActionApplyScale()
 			if (lockedVertices)
 			{
 				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-				++processNum;
+				//++processNum;
 				continue;
 			}
 
@@ -5250,7 +5250,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					if (randomColors)
 					{
 						ccColor::Rgb col = ccColor::Generator::Random();
-						compCloud->setRGBColor(col.rgb);
+						compCloud->setRGBColor(col);
 						compCloud->showColors(true);
 						compCloud->showSF(false);
 					}
@@ -6004,8 +6004,8 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			CCLib::Neighbourhood Yk(cloud);
 
-			const double* Q = Yk.get3DQuadric();
-			if (Q)
+			double Q[10];
+			if (Yk.compute3DQuadric(Q))
 			{
 				const double& a = Q[0];
 				const double& b = Q[1];

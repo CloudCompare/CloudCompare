@@ -222,14 +222,14 @@ protected:
 			\param index point index
 			\return pointer on point stored data
 		**/
-		inline virtual CCVector3* point(unsigned index) { assert(index < size()); return (CCVector3*)m_points->getValue(index); }
+		inline virtual CCVector3* point(unsigned index) { assert(index < size()); return reinterpret_cast<CCVector3*>(m_points->getValue(index)); }
 
 		//! Returns const access to a given point
 		/** WARNING: index must be valid
 			\param index point index
 			\return pointer on point stored data
 		**/
-		inline virtual const CCVector3* point(unsigned index) const { assert(index < size()); return (CCVector3*)m_points->getValue(index); }
+		inline virtual const CCVector3* point(unsigned index) const { assert(index < size()); return reinterpret_cast<CCVector3*>(m_points->getValue(index)); }
 
 		//! 3D Points database
 		GenericChunkedArray<3,PointCoordinateType>* m_points;

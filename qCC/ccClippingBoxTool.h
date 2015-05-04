@@ -40,7 +40,7 @@ class ccClippingBoxTool : public ccOverlayDialog, public Ui::ClippingBoxDlg
 public:
 
 	//! Default constructor
-	ccClippingBoxTool(QWidget* parent);
+	explicit ccClippingBoxTool(QWidget* parent);
 	//! Default destructor
 	virtual ~ccClippingBoxTool();
 

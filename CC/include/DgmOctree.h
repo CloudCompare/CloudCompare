@@ -384,10 +384,15 @@ public:
 		ReferenceCloud* points;
 
 		//! Default constructor
-		octreeCell(DgmOctree* parentOctree);
+		explicit octreeCell(DgmOctree* parentOctree);
 
 		//! Default destructor
 		virtual ~octreeCell();
+
+	private:
+		
+		//! Copy constructor
+		octreeCell(const octreeCell& cell);
 	};
 
 	//! Generic form of a function that can be applied automatically to all cells of the octree
@@ -408,7 +413,7 @@ public:
 	//! DgmOctree constructor
 	/** \param cloud the cloud to construct the octree on
 	**/
-	DgmOctree(GenericIndexedCloudPersist* cloud);
+	explicit DgmOctree(GenericIndexedCloudPersist* cloud);
 
 	//! DgmOctree destructor
 	virtual ~DgmOctree();

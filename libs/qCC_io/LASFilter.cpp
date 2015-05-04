@@ -59,7 +59,7 @@ static const char LAS_SCALE_Z_META_DATA[] = "LAS.scale.z";
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
 {
 public:
-	LASSaveDlg(QWidget* parent = 0)
+	explicit LASSaveDlg(QWidget* parent = 0)
 		: QDialog(parent)
 		, Ui::SaveLASFileDialog()
 	{
@@ -627,7 +627,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					dimensions.push_back(it->GetName());
 				}
 				ccLog::PrintDebug(QString("\tDimension: %1 (size: %2 - type: %3)").arg(QString::fromStdString(it->GetName())).arg(it->GetByteSize()).arg(it->IsNumeric() ? (it->IsInteger() ? "integer" : "Float") : "Non numeric"));
-				it++;
+				++it;
 			}
 		}
 

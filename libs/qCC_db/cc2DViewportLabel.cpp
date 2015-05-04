@@ -29,8 +29,8 @@
 //system
 #include <string.h>
 
-cc2DViewportLabel::cc2DViewportLabel(const char* name/*=0*/)
-	: cc2DViewportObject(name ? name : "")
+cc2DViewportLabel::cc2DViewportLabel(QString name/*=QString()*/)
+	: cc2DViewportObject(name)
 {
 	//label rectangle
 	memset(m_roi,0,sizeof(float)*4);

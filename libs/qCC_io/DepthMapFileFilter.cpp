@@ -205,7 +205,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 		for (unsigned j=0; j<db.width; ++j, ++_zBuff)
 		{
 			//grid index and depth
-			fprintf(fp,"%i %i %.12f",j,k,*_zBuff);
+			fprintf(fp,"%u %u %.12f",j,k,*_zBuff);
 
 			//color
 			if (theColors)

@@ -49,7 +49,7 @@ class ccHistogramWindow : public QCustomPlot
 public:
 
 	//! Default constructor
-	ccHistogramWindow(QWidget *parent = 0);
+	explicit ccHistogramWindow(QWidget *parent = 0);
 
 	//! Destructor
 	virtual ~ccHistogramWindow();
@@ -226,7 +226,7 @@ class ccHistogramWindowDlg : public QDialog
 
 public:
 	//! Default constructor
-	ccHistogramWindowDlg(QWidget* parent = 0);
+	explicit ccHistogramWindowDlg(QWidget* parent = 0);
 	//! Destructor
 	virtual ~ccHistogramWindowDlg();
 

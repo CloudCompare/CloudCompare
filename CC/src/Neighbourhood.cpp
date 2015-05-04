@@ -37,6 +37,10 @@ Neighbourhood::Neighbourhood(GenericIndexedCloudPersist* associatedCloud)
 	: structuresValidity(DEPRECATED)
 	, m_associatedCloud(associatedCloud)
 {
+	memset(theHeightFunction,           0, sizeof(PointCoordinateType)*6);
+	memset(theHeightFunctionDirections, 0, sizeof(uchar)*3);
+	memset(theLSQPlaneEquation,         0, sizeof(PointCoordinateType)*4);
+	
 	assert(m_associatedCloud);
 }
 
@@ -110,13 +114,6 @@ const PointCoordinateType* Neighbourhood::getHeightFunction(uchar* dimsHF/*=0*/)
 		dimsHF[2] = theHeightFunctionDirections[2];
 	}
 	return ((structuresValidity & HEIGHT_FUNCTION) ? theHeightFunction : 0);
-}
-
-const double* Neighbourhood::get3DQuadric()
-{
-	if (!(structuresValidity & QUADRIC_3D))
-		compute3DQuadric();
-	return ((structuresValidity & QUADRIC_3D) ? the3DQuadric : 0);
 }
 
 void Neighbourhood::computeGravityCenter()
@@ -485,14 +482,14 @@ bool Neighbourhood::computeHeightFunction()
 	return true;
 }
 
-bool Neighbourhood::compute3DQuadric()
+bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 {
-	//invalidate previous quadric (if any)
-	structuresValidity &= (~QUADRIC_3D);
-
-	assert(m_associatedCloud);
-	if (!m_associatedCloud)
+	if (!m_associatedCloud || !quadricEquation)
+	{
+		//invalid (input) parameters
+		assert(false);
 		return false;
+	}
 
 	//computes a 3D quadric of the form ax2 +by2 +cz2 + 2exy + 2fyz + 2gzx + 2lx + 2my + 2nz + d = 0
 	//"THREE-DIMENSIONAL SURFACE CURVATURE ESTIMATION USING QUADRIC SURFACE PATCHES", I. Douros & B. Buxton, University College London
@@ -507,9 +504,16 @@ bool Neighbourhood::compute3DQuadric()
 	unsigned count = m_associatedCloud->size();
 
 	//we compute M = [x2 y2 z2 xy yz xz x y z 1] for all points
-	PointCoordinateType* M = new PointCoordinateType[count*10];
-	if (!M)
+	PointCoordinateType* M = 0;
+	try
+	{
+		M = new PointCoordinateType[count*10];
+	}
+	catch(std::bad_alloc)
+	{
 		return false;
+	}
+	assert(M);
 
 	PointCoordinateType* _M = M;
 	for (unsigned i=0; i<count; ++i)
@@ -546,7 +550,7 @@ bool Neighbourhood::compute3DQuadric()
 
 	//we don't need M anymore
 	delete[] M;
-	M=0;
+	M = 0;
 
 	//now we compute eigen values and vectors of D
 	SquareMatrixd eig = D.computeJacobianEigenValuesAndVectors();
@@ -555,16 +559,7 @@ bool Neighbourhood::compute3DQuadric()
 		return false;
 
 	//we get the eigen vector corresponding to the minimum eigen value
-	double vec[10];
-	/*double lambdaMin = */eig.getMinEigenValueAndVector(vec);
-
-	//we store result
-	{
-		for (unsigned i=0; i<10; ++i)
-			the3DQuadric[i] = vec[i];
-	}
-
-	structuresValidity |= QUADRIC_3D;
+	/*double lambdaMin = */eig.getMinEigenValueAndVector(quadricEquation);
 
 	return true;
 }
@@ -708,7 +703,7 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 			Pc.u[hfZ] = P.z;
 			Pc += *G;
 
-			vertices->addPoint(Pc.u);
+			vertices->addPoint(Pc);
 
 			if (x>0 && y>0)
 			{

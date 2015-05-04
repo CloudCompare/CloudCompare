@@ -334,7 +334,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 		}
 	}
 
-	return CC_FERR_NO_ERROR;
+	return result;
 }
 
 CC_FILE_ERROR AsciiFilter::loadFile(QString filename,

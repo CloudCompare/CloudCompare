@@ -368,7 +368,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		char buffer[256];
 		if (m_numberOfProjectedPoints == pointCount)
 		{
-			sprintf(buffer,"[Octree::build] Octree successfully built... %i points (ok)!",m_numberOfProjectedPoints);
+			sprintf(buffer,"[Octree::build] Octree successfully built... %u points (ok)!",m_numberOfProjectedPoints);
 		}
 		else
 		{
@@ -1677,11 +1677,11 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 		{
 			//fill indexes for current level
 			const int* _fillIndexes = m_fillIndexes+6*nNSS.level;
-			int distToBorder, diagonalDistance = 0;
+			int diagonalDistance = 0;
 			for (int dim=0; dim<3; ++dim)
 			{
 				//distance to min border of octree along each axis
-				distToBorder = *_fillIndexes-nNSS.cellPos[dim];
+				int distToBorder = *_fillIndexes-nNSS.cellPos[dim];
 				//if its negative, lets look the other side
 				if (distToBorder < 0)
 					//distance to max border of octree along each axis
@@ -3573,6 +3573,17 @@ DgmOctree::octreeCell::octreeCell(DgmOctree* _parentOctree)
 	points = new ReferenceCloud(parentOctree->m_theAssociatedCloud);
 }
 
+DgmOctree::octreeCell::octreeCell(const octreeCell& cell)
+	: parentOctree(cell.parentOctree)
+	, level(cell.level)
+	, truncatedCode(cell.truncatedCode)
+	, index(cell.index)
+	, points(0)
+{
+	//copy constructor shouldn't be used (we can't properly share the 'points' reference)
+	assert(false);
+}
+
 DgmOctree::octreeCell::~octreeCell()
 {
 	if (points)
@@ -3712,7 +3723,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 			if (functionTitle)
 				progressCb->setMethodTitle(functionTitle);
 			char buffer[512];
-			sprintf(buffer, "Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %i", level, cellCount, m_averageCellPopulation[level], m_stdDevCellPopulation[level], m_maxCellPopulation[level]);
+			sprintf(buffer, "Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %u", level, cellCount, m_averageCellPopulation[level], m_stdDevCellPopulation[level], m_maxCellPopulation[level]);
 			progressCb->setInfo(buffer);
 			progressCb->start();
 		}
@@ -3833,7 +3844,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 			if (functionTitle)
 				progressCb->setMethodTitle(functionTitle);
 			char buffer[512];
-			sprintf(buffer,"Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %d",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+			sprintf(buffer,"Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %u",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
 			progressCb->setInfo(buffer);
 			s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
 			progressCb->start();
@@ -3941,7 +3952,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLeve
 			if (functionTitle)
 				progressCb->setMethodTitle(functionTitle);
 			char buffer[1024];
-			sprintf(buffer, "Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %i - %i",
+			sprintf(buffer, "Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %u - %u",
 				startingLevel, MAX_OCTREE_LEVEL,
 				getCellNumber(startingLevel), getCellNumber(MAX_OCTREE_LEVEL),
 				m_averageCellPopulation[startingLevel], m_stdDevCellPopulation[startingLevel],

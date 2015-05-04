@@ -40,7 +40,7 @@ public:
 	//! Default constructor
 	/** \param aCloud a point cloud
 	**/
-	ccKdTree(ccGenericPointCloud* aCloud);
+	explicit ccKdTree(ccGenericPointCloud* aCloud);
 
 	//! Multiplies the bounding-box of the tree
 	/** If the cloud coordinates are simply multiplied by the same factor,

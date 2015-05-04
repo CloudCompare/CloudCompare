@@ -31,7 +31,7 @@ class ccOrthoSectionGenerationDlg : public QDialog, public Ui::OrthoSectionGener
 public:
 
 	//! Default constructor
-	ccOrthoSectionGenerationDlg(QWidget* parent = 0);
+	explicit ccOrthoSectionGenerationDlg(QWidget* parent = 0);
 
 	//! Sets the path legnth
 	void setPathLength(double l);

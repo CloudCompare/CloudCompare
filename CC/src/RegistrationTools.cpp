@@ -521,7 +521,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 #ifdef _DEBUG
 			if (fTraceFile)
-				fprintf(fTraceFile,"%i; %f; %i;\n",iteration,rms,data.cloud->size());
+				fprintf(fTraceFile,"%u; %f; %u;\n",iteration,rms,data.cloud->size());
 #endif
 			if (iteration == 0)
 			{
@@ -734,9 +734,9 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 		const CCVector3* Li = lCloud->getNextPoint();
 		CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
 
-#ifdef _DEBUG
-		double dist = (*Ri-Lit).norm();
-#endif
+//#ifdef _DEBUG
+//		double dist = (*Ri-Lit).norm();
+//#endif
 
 		rms += (*Ri-Lit).norm2();
 	}
@@ -1175,7 +1175,7 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 										unsigned nbTries,
 										Base &base)
 {
-	unsigned a, b, c, d, t1, t2;
+	unsigned a, b, c, d;
 	unsigned i, size;
 	PointCoordinateType f, best, d0, d1, d2, x, y, z, w;
 	const CCVector3 *p0, *p1, *p2, *p3;
@@ -1190,8 +1190,8 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 	//Randomly pick 3 points as sparsed as possible
 	for(i=0; i<nbTries; i++)
 	{
-		t1 = rand()%size;
-		t2 = rand()%size;
+		unsigned t1 = (rand() % size);
+		unsigned t2 = (rand() % size);
 		if (t1 == a || t2 == a || t1 == t2)
 			continue;
 
@@ -1227,7 +1227,7 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 
 	//Once we found the points, we have to search for a fourth coplanar point
 	f = normal.norm();
-	if (f<=0.)
+	if (f <= 0)
 		return false;
 	normal *= 1.0f/f;
 	//plane equation : p lies in the plane if x*p[0] + y*p[1] + z*p[2] + w = 0
@@ -1241,7 +1241,7 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 	p2 = cloud->getPoint(c);
 	for(i=0; i<nbTries; i++)
 	{
-		t1 = rand()%size;
+		unsigned t1 = (rand() % size);
 		if (t1 == a || t1 == b || t1 == c)
 			continue;
 		p3 = cloud->getPoint(t1);
@@ -1528,35 +1528,38 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 {
 	std::vector<Base> table;
 	std::vector<float> scores, sortedscores;
-	const CCVector3 *p[4], *q;
-	unsigned i, j;
+	const CCVector3* p[4];
 	ScaledTransformation t;
 	std::vector<ScaledTransformation> tarray;
 	SimpleCloud referenceBaseCloud, dataBaseCloud;
 
-	unsigned candidatesCount = (unsigned)candidates.size();
+	unsigned candidatesCount = static_cast<unsigned>(candidates.size());
 	if (candidatesCount == 0)
 		return false;
 
-	bool filter = (nbMaxCandidates>0 && candidatesCount>nbMaxCandidates);
-	try
+	bool filter = (nbMaxCandidates>0 && candidatesCount > nbMaxCandidates);
 	{
-		table.resize(candidatesCount);
+		try
+		{
+			table.resize(candidatesCount);
+		}
+		catch (.../*const std::bad_alloc&*/) //out of memory
+		{
+			return false;
+		}
+		for (unsigned i=0; i<candidatesCount; i++)
+			table[i].copy(candidates[i]);
 	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
-	{
-		return false;
-	}
-	for(i=0; i<candidatesCount; i++)
-		table[i].copy(candidates[i]);
 
 	if (!referenceBaseCloud.reserve(4)) //we never know ;)
 		return false;
 
-	for(j=0; j<4; j++)
 	{
-		p[j] = modelCloud->getPoint(reference.getIndex(j));
-		referenceBaseCloud.addPoint(*p[j]);
+		for (unsigned j=0; j<4; j++)
+		{
+			p[j] = modelCloud->getPoint(reference.getIndex(j));
+			referenceBaseCloud.addPoint(*p[j]);
+		}
 	}
 
 	try
@@ -1572,40 +1575,42 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 	}
 
 	//enough memory?
-	if (scores.capacity() < candidatesCount 
-		|| sortedscores.capacity() < candidatesCount 
-		|| tarray.capacity() < candidatesCount 
-		|| transforms.capacity() < candidatesCount)
+	if (	scores.capacity() < candidatesCount 
+		||	sortedscores.capacity() < candidatesCount 
+		||	tarray.capacity() < candidatesCount 
+		||	transforms.capacity() < candidatesCount)
 	{
 		return false;
 	}
 
-	for(i=0; i<table.size(); i++)
 	{
-		dataBaseCloud.clear();
-		if (!dataBaseCloud.reserve(4)) //we never know ;)
-			return false;
-		for(j=0; j<4; j++)
-			dataBaseCloud.addPoint(*dataCloud->getPoint(table[i].getIndex(j)));
-
-		if (!RegistrationTools::RegistrationProcedure(&dataBaseCloud, &referenceBaseCloud, t, false))
-			return false;
-
-		tarray.push_back(t);
-		if (filter)
+		for (unsigned i=0; i<table.size(); i++)
 		{
-			float score = 0;
-			GenericIndexedCloud* b = PointProjectionTools::applyTransformation(&dataBaseCloud, t);
-			if (!b)
-				return false; //not enough memory
-			for (j=0; j<4; j++)
+			dataBaseCloud.clear();
+			if (!dataBaseCloud.reserve(4)) //we never know ;)
+				return false;
+			for (unsigned j=0; j<4; j++)
+				dataBaseCloud.addPoint(*dataCloud->getPoint(table[i].getIndex(j)));
+
+			if (!RegistrationTools::RegistrationProcedure(&dataBaseCloud, &referenceBaseCloud, t, false))
+				return false;
+
+			tarray.push_back(t);
+			if (filter)
 			{
-				q = b->getPoint(j);
-				score += static_cast<float>((*q - *(p[j])).norm());
+				float score = 0;
+				GenericIndexedCloud* b = PointProjectionTools::applyTransformation(&dataBaseCloud, t);
+				if (!b)
+					return false; //not enough memory
+				for (unsigned j=0; j<4; j++)
+				{
+					const CCVector3* q = b->getPoint(j);
+					score += static_cast<float>((*q - *(p[j])).norm());
+				}
+				delete b;
+				scores.push_back(score);
+				sortedscores.push_back(score);
 			}
-			delete b;
-			scores.push_back(score);
-			sortedscores.push_back(score);
 		}
 	}
 
@@ -1621,15 +1626,14 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 		{
 			return false;
 		}
-		candidatesCount=nbMaxCandidates;
 
 		//Sort the scores in ascending order and only keep the nbMaxCandidates smallest scores
 		sort(sortedscores.begin(), sortedscores.end());
 		float score = sortedscores[nbMaxCandidates-1];
-		j = 0;
-		for(i=0; i<scores.size(); i++)
+		unsigned j = 0;
+		for (unsigned i=0; i<scores.size(); i++)
 		{
-			if (scores[i]<=score && j<nbMaxCandidates)
+			if (scores[i] <= score && j < nbMaxCandidates)
 			{
 				candidates[i].copy(table[i]);
 				transforms.push_back(tarray[i]);

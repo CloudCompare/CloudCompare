@@ -215,7 +215,6 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
 		//evntually select the points with distance below 'maxSearchDist'
 		//(should roughly correspond to 'finalOverlapRatio + margin' percent)
-		double keptRatio = 1.0;
 		{
 			CCLib::ReferenceCloud* refCloud = new CCLib::ReferenceCloud(dataCloud);
 			cloudGarbage.add(refCloud);
@@ -238,7 +237,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			dataCloud = refCloud;
 
 			unsigned countAfter = dataCloud->size();
-			keptRatio = static_cast<double>(countAfter)/countBefore;
+			double keptRatio = static_cast<double>(countAfter)/countBefore;
 			ccLog::Print(QString("[ICP][Partial overlap] Selecting %1 points out of %2 (%3%) for registration").arg(countAfter).arg(countBefore).arg(100.0*keptRatio));
 
 			//update the relative 'final overlap' ratio

@@ -287,9 +287,12 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	if (allAtOnce)
 	{
 		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_CloudExportFormat,false);
-		bool multiple = false, exclusive = true;
+		bool multiple = false;
 		if (filter)
+		{
+			bool exclusive = true;
 			filter->canSave(CC_TYPES::POINT_CLOUD,multiple,exclusive);
+		}
 		
 		if (multiple)
 		{
@@ -333,9 +336,12 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 	if (allAtOnce)
 	{
 		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_MeshExportFormat,false);
-		bool multiple = false, exclusive = true;
+		bool multiple = false;
 		if (filter)
+		{
+			bool exclusive = true;
 			filter->canSave(CC_TYPES::MESH,multiple,exclusive);
+		}
 		
 		if (multiple)
 		{
@@ -1682,7 +1688,6 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 
 		//read file content
 		QXmlStreamReader stream(&file);
-		bool error = true;
 
 		//expected: CloudCompare
 		if (	!stream.readNextStartElement()
@@ -2778,7 +2783,7 @@ bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
 	//read sf index
 	int sfIndex = -1;
 	{
-		bool ok;
+		bool ok = true;
 		QString sfIndex = arguments.takeFirst();
 		if (sfIndex.toUpper() == OPTION_LAST)
 			sfIndex = -2;

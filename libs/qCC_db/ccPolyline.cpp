@@ -245,9 +245,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 						c_unitArrow->setEnabled(true);
 					}
 					if (colorsShown())
-						c_unitArrow->setTempColor(m_rgbColor.rgb);
+						c_unitArrow->setTempColor(m_rgbColor);
 					else
-						c_unitArrow->setTempColor(context.pointsDefaultCol.rgb);
+						c_unitArrow->setTempColor(context.pointsDefaultCol);
 					//build-up unit arrow own 'context'
 					CC_DRAW_CONTEXT markerContext = context;
 					markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!

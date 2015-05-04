@@ -1327,7 +1327,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 			}
 #endif
 
-			bool success = contour->split(maxEdgeLength,parts);
+			/*bool success = */contour->split(maxEdgeLength,parts);
 			delete contour;
 			contour = 0;
 		}

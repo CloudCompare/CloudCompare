@@ -35,14 +35,14 @@ public:
 	//! Default ccMesh constructor
 	/** \param vertices the vertices cloud
 	**/
-	ccMesh(ccGenericPointCloud* vertices);
+	explicit ccMesh(ccGenericPointCloud* vertices);
 
 	//! ccMesh constructor (from a CCLib::GenericIndexedMesh)
 	/** The GenericIndexedMesh should refer to a known ccGenericPointCloud.
 		\param giMesh the GenericIndexedMesh
 		\param giVertices giMesh vertices
 	**/
-	ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices);
+	explicit ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices);
 
 	//! Default destructor
 	virtual ~ccMesh();

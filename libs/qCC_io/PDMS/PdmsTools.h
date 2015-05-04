@@ -228,7 +228,7 @@ namespace PdmsTools
 			std::list<DesignElement*> elements;
 			std::list<GroupElement*> subhierarchy;
 
-			GroupElement(Token l);
+			explicit GroupElement(Token l);
 			virtual ~GroupElement();
 
 			//GroupElement(const Model* model);
@@ -458,7 +458,7 @@ namespace PdmsTools
 		public:
 			Token command;
 
-			Command(Token t) {command=t;}
+			explicit Command(Token t) {command=t;}
 			Command(const Command &com) {command=com.command;}
 			virtual ~Command() {}
 
@@ -478,7 +478,7 @@ namespace PdmsTools
 			PointCoordinateType value;
 			int valueChanges;
 
-			NumericalValue(Token t) : Command(t), valueChanges(0) {}
+			explicit NumericalValue(Token t) : Command(t), valueChanges(0) {}
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool isValid() const;
 			virtual PointCoordinateType getValue() const;
@@ -491,7 +491,7 @@ namespace PdmsTools
 			Token unit;
 			static Token workingUnit;
 
-			DistanceValue(Token t=PDMS_INVALID_TOKEN) : NumericalValue(t), unit(PDMS_INVALID_TOKEN) {}
+			explicit DistanceValue(Token t = PDMS_INVALID_TOKEN) : NumericalValue(t), unit(PDMS_INVALID_TOKEN) {}
 			static void setWorkingUnit(Token wu) {workingUnit=wu;}
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue) {return NumericalValue::handle(numvalue);}
@@ -505,7 +505,7 @@ namespace PdmsTools
 			Token token;
 			char refname[c_max_str_length];
 
-			Reference(Token t=PDMS_INVALID_TOKEN) : Command(t), token(PDMS_INVALID_TOKEN) { memset(refname, 0, c_max_str_length); }
+			explicit Reference(Token t = PDMS_INVALID_TOKEN) : Command(t), token(PDMS_INVALID_TOKEN) { memset(refname, 0, c_max_str_length); }
 			Reference(const Reference &ref) : Command(ref), token(ref.token) { strcpy(refname, ref.refname); }
 			Reference& operator=(const Reference &ref);
 			virtual bool handle(Token t);
@@ -525,7 +525,7 @@ namespace PdmsTools
 			DistanceValue coords[3];
 			int current;
 
-			Coordinates(Token t=PDMS_INVALID_TOKEN) : Command(t) {current = -1;}
+			explicit Coordinates(Token t = PDMS_INVALID_TOKEN) : Command(t) {current = -1;}
 			virtual bool handle(Token t);
 			virtual bool handle(PointCoordinateType numvalue);
 			virtual bool isValid() const;
@@ -612,7 +612,7 @@ namespace PdmsTools
 		public:
 			Reference end;
 
-			ElementEnding(Token t=PDMS_END) : Command(t) {}
+			explicit ElementEnding(Token t = PDMS_END) : Command(t) {}
 			virtual bool handle(Token t) {end.command=command; return end.handle(t);}
 			virtual bool handle(const char* str) {end.command=command; return end.handle(str);}
 			virtual bool isValid() const {if(!end.command) return true; return end.isValid();}
@@ -622,7 +622,7 @@ namespace PdmsTools
 		class HierarchyNavigation : public Command
 		{
 		public:
-			HierarchyNavigation(Token t) : Command(t) {}
+			explicit HierarchyNavigation(Token t) : Command(t) {}
 			virtual bool isValid() const {return (PdmsToken::isGroupElement(command));}
 			virtual bool execute(PdmsObjects::GenericItem* &item) const;
 		};

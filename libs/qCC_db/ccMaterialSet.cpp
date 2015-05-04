@@ -161,9 +161,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				if (tokens.size() > 3)
 				{
-					float ambient[3] = { tokens[1].toFloat(),
-										 tokens[2].toFloat(),
-										 tokens[3].toFloat() };
+					ccColor::Rgbaf ambient(	tokens[1].toFloat(),
+											tokens[2].toFloat(),
+											tokens[3].toFloat(),
+											1.0f);
 					currentMaterial->setAmbient(ambient);
 				}
 			}
@@ -173,9 +174,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				if (tokens.size() > 3)
 				{
-					float diffuse[3] = { tokens[1].toFloat(),
-										 tokens[2].toFloat(),
-										 tokens[3].toFloat() };
+					ccColor::Rgbaf diffuse(	tokens[1].toFloat(),
+											tokens[2].toFloat(),
+											tokens[3].toFloat(),
+											1.0f);
 					currentMaterial->setDiffuse(diffuse);
 				}
 			}
@@ -185,9 +187,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				if (tokens.size() > 3)
 				{
-					float specular[3] = {	tokens[1].toFloat(),
+					ccColor::Rgbaf specular(tokens[1].toFloat(),
 											tokens[2].toFloat(),
-											tokens[3].toFloat() };
+											tokens[3].toFloat(),
+											1.0f);
 					currentMaterial->setSpecular(specular);
 				}
 			}

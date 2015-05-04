@@ -225,7 +225,7 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 		normProgress = new NormalizedProgress(progressCb,m_gridY*m_gridZ);
 		progressCb->setMethodTitle("Chamfer distance");
 		char buffer[256];
-		sprintf(buffer,"Box: [%i*%i*%i]",m_gridX,m_gridY,m_gridZ);
+		sprintf(buffer,"Box: [%u*%u*%u]",m_gridX,m_gridY,m_gridZ);
 		progressCb->setInfo(buffer);
         progressCb->reset();
 		progressCb->start();

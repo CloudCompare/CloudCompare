@@ -138,9 +138,9 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 													NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
-	bool euclideanDistances			= *((bool*)additionalParameters[0]);
-	PointCoordinateType radius		= *((PointCoordinateType*)additionalParameters[1]);
-	ScalarField* theGradientNorms	= (ScalarField*)additionalParameters[2];
+	bool euclideanDistances			= *reinterpret_cast<bool*>(additionalParameters[0]);
+	PointCoordinateType radius		= *reinterpret_cast<PointCoordinateType*>(additionalParameters[1]);
+	ScalarField* theGradientNorms	= reinterpret_cast<ScalarField*>(additionalParameters[2]);
 
 	//number of points inside the current cell
 	unsigned n = cell.points->size();
@@ -613,7 +613,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 	}
 
 	//for progress notification
-	double initialCMD = 0, classMovingDist = 0;
+	double initialCMD = 0;
 
 	//let's start
 	bool meansHaveMoved = false;
@@ -664,7 +664,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 			}
 		}
 
-		classMovingDist = 0.0;
+		double classMovingDist = 0.0;
 		{
 			for (uchar j=0; j<K; ++j)
 			{

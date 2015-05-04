@@ -39,7 +39,7 @@ public:
 	//! Default constructor
 	/** \param name scalar field name
 	**/
-	ccScalarField(const char* name = 0);
+	explicit ccScalarField(const char* name = 0);
 
 	/*** Scalar values display handling ***/
 

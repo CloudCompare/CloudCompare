@@ -351,9 +351,9 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			
 			QTextStream stream(&fp);
 			//skip first line
-			QString line = stream.readLine();
+			stream.readLine();
 			//we look if the second line (if any) starts by 'facet'
-			line = stream.readLine();
+			QString line = stream.readLine();
 			ascii = true;
 			if (	line.isEmpty()
 				||	fp.error() != QFile::NoError

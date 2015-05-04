@@ -35,7 +35,7 @@ class ccSelectChildrenDlg : public QDialog, public Ui::SelectChildrenDialog
 public:
 
 	//! Default constructor
-	ccSelectChildrenDlg(QWidget* parent = 0);
+	explicit ccSelectChildrenDlg(QWidget* parent = 0);
 
 	//! Add an element to the 'type' combo box
 	void addType(QString typeName, CC_CLASS_ENUM type);

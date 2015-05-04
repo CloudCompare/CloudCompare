@@ -38,7 +38,7 @@ class QCC_IO_LIB_API BundlerImportDlg : public QDialog, public Ui::BundlerImport
 public:
 
 	//! Default constructor
-	BundlerImportDlg(QWidget* parent = 0);
+	explicit BundlerImportDlg(QWidget* parent = 0);
 
 	//! Destructor
 	virtual ~BundlerImportDlg();

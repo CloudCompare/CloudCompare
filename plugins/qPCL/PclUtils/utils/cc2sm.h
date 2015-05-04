@@ -35,7 +35,7 @@ class ccPointCloud;
 class cc2smReader
 {
 public:
-	cc2smReader(const ccPointCloud* cc_cloud);
+	explicit cc2smReader(const ccPointCloud* cc_cloud);
 
 	PCLCloud::Ptr getGenericField(std::string field_name) const;
 
@@ -49,9 +49,9 @@ public:
 	enum Fields { COORD_X, COORD_Y, COORD_Z, NORM_X, NORM_Y, NORM_Z };
 	PCLCloud::Ptr getOneOf(Fields field) const;
 
-	PCLCloud::Ptr getFloatScalarField(const std::string field_name) const;
+	PCLCloud::Ptr getFloatScalarField(const std::string& field_name) const;
 
-	PCLCloud::Ptr getAsSM(std::list<std::string> requested_fields) const;
+	PCLCloud::Ptr getAsSM(std::list<std::string>& requested_fields) const;
 
 	//! Converts all the data in a ccPointCloud to a sesor_msgs::PointCloud2
 	/** This is useful for saving a ccPointCloud into a PCD file.
@@ -63,7 +63,7 @@ public:
 
 protected:
 	
-	bool checkIfFieldExists(const std::string field_name) const;
+	bool checkIfFieldExists(const std::string& field_name) const;
 
 	//! Associated cloud
 	const ccPointCloud* m_cc_cloud;

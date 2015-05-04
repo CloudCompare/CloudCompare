@@ -36,7 +36,7 @@ class qRansacSD : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qRansacSD(QObject* parent = 0);
+	explicit qRansacSD(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "RANSAC Shape Detection"; }

@@ -676,10 +676,12 @@ void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, PointC
 		}
 		else
 		{
-			PointCoordinateType tmp = box[3+sector];
+			PointCoordinateType tmp = (sector != 3 ? box[3+sector] : 0);
+			
 			box[3] = (box[0] + box[3]) / 2;
 			box[4] = (box[1] + box[4]) / 2;
 			box[5] = (box[2] + box[5]) / 2;
+			
 			if (sector != 3)
 			{
 				box[sector] = box[3+sector];

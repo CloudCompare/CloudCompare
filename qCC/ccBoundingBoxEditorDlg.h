@@ -31,7 +31,7 @@ class ccBoundingBoxEditorDlg : public QDialog, public Ui::BoundingBoxEditorDialo
 public:
 
 	//! Default constructor
-	ccBoundingBoxEditorDlg(QWidget* parent = 0);
+	explicit ccBoundingBoxEditorDlg(QWidget* parent = 0);
 
 	//! Returns bounding box
 	ccBBox getBox() const { return m_currentBBox; }

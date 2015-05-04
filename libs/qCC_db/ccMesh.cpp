@@ -1491,7 +1491,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//in the case we need to display scalar field colors
 		ccScalarField* currentDisplayedScalarField = 0;
 		bool greyForNanScalarValues = true;
-		unsigned colorRampSteps = 0;
+		//unsigned colorRampSteps = 0;
 		ccColorScale::Shared colorScale(0);
 
 		if (glParams.showSF)
@@ -1509,7 +1509,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
 				colorScale = currentDisplayedScalarField->getColorScale();
-				colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
+				//colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
 
 				assert(colorScale);
 				//get default color ramp if cloud has no scale associated?!
@@ -3236,7 +3236,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//generate new vertex
 				indexG1 = vertices->size();
 				CCVector3 G1 = (*A+*B)/(PointCoordinateType)2.0;
-				vertices->addPoint(G1.u);
+				vertices->addPoint(G1);
 				//interpolate other features?
 				/*if (vertices->hasNormals())
 				{
@@ -3269,7 +3269,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//generate new vertex
 				indexG2 = vertices->size();
 				CCVector3 G2 = (*B+*C)/(PointCoordinateType)2.0;
-				vertices->addPoint(G2.u);
+				vertices->addPoint(G2);
 				//interpolate other features?
 				/*if (vertices->hasNormals())
 				{
@@ -3302,7 +3302,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//generate new vertex
 				indexG3 = vertices->size();
 				CCVector3 G3 = (*C+*A)/(PointCoordinateType)2.0;
-				vertices->addPoint(G3.u);
+				vertices->addPoint(G3);
 				//interpolate other features?
 				/*if (vertices->hasNormals())
 				{

@@ -61,42 +61,36 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 		center = &C;
 	}
 
-	NormalizedProgress* nprogress = 0;
+	NormalizedProgress nprogress(progressCb,count);
 	if (progressCb)
 	{
 		progressCb->reset();
 		progressCb->setMethodTitle("Develop");
 		char buffer[256];
 		sprintf(buffer,"Number of points = %u",count);
-		nprogress = new NormalizedProgress(progressCb,count);
 		progressCb->setInfo(buffer);
 		progressCb->start();
 	}
 
-	const CCVector3 *Q;
-	CCVector3 P;
-	PointCoordinateType u,lon;
-
+	const CCVector3* Q = 0;
 	cloud->placeIteratorAtBegining();
 	while ((Q = cloud->getNextPoint()))
 	{
-		P = *Q-*center;
-		u = sqrt(P.u[dim1] * P.u[dim1] + P.u[dim2] * P.u[dim2]);
-		lon = atan2(P.u[dim1],P.u[dim2]);
+		CCVector3 P = *Q-*center;
+		PointCoordinateType u = sqrt(P.u[dim1] * P.u[dim1] + P.u[dim2] * P.u[dim2]);
+		PointCoordinateType lon = atan2(P.u[dim1],P.u[dim2]);
 
 		newList->addPoint(CCVector3(lon*radius,P.u[dim],u-radius));
 
-		if (nprogress)
+		if (progressCb && !nprogress.oneStep())
 		{
-			if (!nprogress->oneStep())
-				break;
+			break;
 		}
 
 	}
 
 	if (progressCb)
 	{
-		delete nprogress;
 		progressCb->stop();
 	}
 
@@ -123,9 +117,6 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, uchar
 	//float sin_alpha = sin(alpha*CC_DEG_TO_RAD);
 	float q = 1.0f/(1.0f+tan_alpha*tan_alpha);
 
-	CCVector3 P;
-	PointCoordinateType u,lon,z2,x2,dX,dZ,lat,alt;
-
 	cloud->placeIteratorAtBegining();
 	//normsType* _theNorms = theNorms.begin();
 
@@ -144,27 +135,27 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, uchar
 	for (unsigned i=0; i<count; i++)
 	{
 		const CCVector3 *Q = cloud->getNextPoint();
-		P = *Q-center;
+		CCVector3 P = *Q-center;
 
-		u = sqrt(P.u[dim1]*P.u[dim1] + P.u[dim2]*P.u[dim2]);
-		lon = atan2(P.u[dim1],P.u[dim2]);
+		PointCoordinateType u = sqrt(P.u[dim1]*P.u[dim1] + P.u[dim2]*P.u[dim2]);
+		PointCoordinateType lon = atan2(P.u[dim1],P.u[dim2]);
 
 		//projection sur le cone
-		z2 = (P.u[dim]+u*tan_alpha)*q;
-		x2 = z2*tan_alpha;
+		PointCoordinateType z2 = (P.u[dim]+u*tan_alpha)*q;
+		PointCoordinateType x2 = z2*tan_alpha;
 		//ordonnee
 		//#define ORTHO_CONIC_PROJECTION
 		#ifdef ORTHO_CONIC_PROJECTION
-		lat = sqrt(x2*x2+z2*z2)*cos_alpha;
+		PointCoordinateType lat = sqrt(x2*x2+z2*z2)*cos_alpha;
 		if (lat*z2 < 0.0)
 			lat=-lat;
 		#else
-		lat = P.u[dim];
+		PointCoordinateType lat = P.u[dim];
 		#endif
 		//altitude
-		dX = u-x2;
-		dZ = P.u[dim]-z2;
-		alt = sqrt(dX*dX+dZ*dZ);
+		PointCoordinateType dX = u-x2;
+		PointCoordinateType dZ = P.u[dim]-z2;
+		PointCoordinateType alt = sqrt(dX*dX+dZ*dZ);
 		//on regarde de quel cote de la surface du cone le resultat tombe par p.v.
 		if (x2*P.u[dim] - z2*u < 0)
 			alt=-alt;

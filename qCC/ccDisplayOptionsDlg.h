@@ -43,7 +43,7 @@ class ccDisplayOptionsDlg : public QDialog, public Ui::DisplayOptionsDlg
 public:
 
 	//! Default constructor
-	ccDisplayOptionsDlg(QWidget* parent);
+	explicit ccDisplayOptionsDlg(QWidget* parent);
 
 	//! Sets a button background color
 	/** Support Windows XP style particularity.

@@ -40,7 +40,7 @@ class ccPointPickingGenericInterface : public ccOverlayDialog
 public:
 
 	//! Default constructor
-	ccPointPickingGenericInterface(QWidget* parent = 0) : ccOverlayDialog(parent) {}
+	explicit ccPointPickingGenericInterface(QWidget* parent = 0) : ccOverlayDialog(parent) {}
 	//! Destructor
 	virtual ~ccPointPickingGenericInterface() {};
 

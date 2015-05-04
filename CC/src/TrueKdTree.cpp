@@ -306,7 +306,7 @@ class GetLeavesVisitor
 {
 public:
 
-	GetLeavesVisitor(TrueKdTree::LeafVector& leaves) : m_leaves(&leaves) {}
+	explicit GetLeavesVisitor(TrueKdTree::LeafVector& leaves) : m_leaves(&leaves) {}
 
 	void visit(TrueKdTree::BaseNode* node)
 	{

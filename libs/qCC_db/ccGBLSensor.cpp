@@ -234,7 +234,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 
 			CCVector3 S;
 
-			CCVector3 U = *P - sensorPos.getTranslation();
+			CCVector3 U = *P - sensorPos.getTranslationAsVec3D();
 			PointCoordinateType distToSensor = U.norm();
 
 			if (distToSensor > ZERO_TOLERANCE)

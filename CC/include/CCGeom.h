@@ -51,7 +51,7 @@ public:
 	inline Tuple3Tpl(Type a, Type b, Type c) : x(a),y(b),z(c) {}
 
 	//! Constructor from an array of 3 elements
-	inline Tuple3Tpl(const Type p[]) : x(p[0]),y(p[1]),z(p[2]) {}
+	inline explicit Tuple3Tpl(const Type p[]) : x(p[0]),y(p[1]),z(p[2]) {}
 	
 	//! Copy constructor
 	inline Tuple3Tpl(const Tuple3Tpl& v) : x(v.x),y(v.y),z(v.z) {}
@@ -80,7 +80,7 @@ public:
 	inline Vector3Tpl(Type _x, Type _y, Type _z) : Tuple3Tpl<Type>(_x,_y,_z) {}
 
 	//! Constructor from an array of 3 elements
-	inline Vector3Tpl(const Type p[]) : Tuple3Tpl<Type>(p) {}
+	inline explicit Vector3Tpl(const Type p[]) : Tuple3Tpl<Type>(p) {}
 	
 	//! Copy constructor
 	inline Vector3Tpl(const Vector3Tpl& v) : Tuple3Tpl<Type>(v) {}
@@ -199,7 +199,7 @@ public:
 	/** Inits vector to (0,0).
 		\param s default init value for both coordinates
 	**/
-	inline Vector2Tpl(Type s = 0) : x(s), y(s) {}
+	inline explicit Vector2Tpl(Type s = 0) : x(s), y(s) {}
 
 	//! Constructor from a couple of coordinates
 	/** Inits vector to (x,y).

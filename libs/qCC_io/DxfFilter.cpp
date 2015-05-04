@@ -132,7 +132,7 @@ public:
 				m_points->addRGBColor(col.rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
-			else if (m_points->setRGBColor(ccColor::white.rgba))
+			else if (m_points->setRGBColor(ccColor::white))
 			{
 				//then replace the last color by the current one
 				m_points->setPointColor(m_points->size()-1,col.rgb);
@@ -372,7 +372,7 @@ public:
 					vertices->addRGBColor(faceCol->rgb);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
-			else if (vertices->setRGBColor(ccColor::white.rgba))
+			else if (vertices->setRGBColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i=0; i<createdVertCount; ++i)

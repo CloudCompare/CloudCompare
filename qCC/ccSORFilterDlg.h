@@ -26,7 +26,7 @@ class ccSORFilterDlg : public QDialog, public Ui::SorFilterDialog
 public:
 
 	//! Default constructor
-	ccSORFilterDlg(QWidget* parent = 0);
+	explicit ccSORFilterDlg(QWidget* parent = 0);
 };
 
 #endif //CC_SOR_FILTER_DLG_HEADER

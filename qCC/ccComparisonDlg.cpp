@@ -907,7 +907,7 @@ void ccComparisonDlg::applyAndExit()
 		if (tmpSfIdx >= 0)
 		{
 			m_compCloud->deleteScalarField(tmpSfIdx);
-			tmpSfIdx=-1;
+			tmpSfIdx = -1;
 		}
 
 		//now, if we have a temp distance scalar field (the 'real' distances computed by the user)
@@ -963,14 +963,14 @@ void ccComparisonDlg::cancelAndExit()
 		if (tmpSfIdx >= 0)
 		{
 			m_compCloud->deleteScalarField(tmpSfIdx);
-			tmpSfIdx=-1;
+			tmpSfIdx = -1;
 		}
 
 		int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 		if (sfIdx >= 0)
 		{
 			m_compCloud->deleteScalarField(sfIdx);
-			sfIdx=-1;
+			sfIdx = -1;
 		}
 
 		if (!m_oldSfName.isEmpty())

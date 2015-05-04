@@ -33,7 +33,7 @@ class ccPrimitiveFactoryDlg : public QDialog, public Ui::PrimitiveFactoryDlg
 public:
 
 	//! Default constructor
-	ccPrimitiveFactoryDlg(MainWindow* win);
+	explicit ccPrimitiveFactoryDlg(MainWindow* win);
 
 protected slots:
 

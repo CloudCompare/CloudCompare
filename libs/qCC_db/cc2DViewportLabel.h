@@ -28,7 +28,7 @@ class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
 public:
 
 	//! Default constructor
-	cc2DViewportLabel(const char* name=0);
+	explicit cc2DViewportLabel(QString name = QString());
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_LABEL; }

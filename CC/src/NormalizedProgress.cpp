@@ -32,7 +32,7 @@ class AtomicCounter : public QAtomicInt
 public:
 	AtomicCounter() : QAtomicInt(0) {}
 
-#ifndef CC_QT5
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 	inline int load() { return *this; }
 	inline void store(int value) { *static_cast<QAtomicInt*>(this) = value; }
 #endif

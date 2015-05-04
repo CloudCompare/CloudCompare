@@ -1205,7 +1205,8 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	double height = getOwnBB().getDiagVec().u[heightDim];
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
-		return setRGBColor(colorScale->getColorByIndex(0).rgba);
+		const ccColor::Rgba& col = colorScale->getColorByIndex(0);
+		return setRGBColor(col);
 	}
 
 	unsigned count = size();
@@ -1227,11 +1228,11 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 bool ccPointCloud::setRGBColor(colorType r, colorType g, colorType b)
 {
-	colorType c[3] = {r,g,b};
+	ccColor::Rgb c(r,g,b);
 	return setRGBColor(c);
 }
 
-bool ccPointCloud::setRGBColor(const colorType* col)
+bool ccPointCloud::setRGBColor(const ccColor::Rgb& col)
 {
 	enableTempColor(false);
 
@@ -1241,7 +1242,7 @@ bool ccPointCloud::setRGBColor(const colorType* col)
 			return false;
 
 	assert(m_rgbColors);
-	m_rgbColors->fill(col);
+	m_rgbColors->fill(col.rgb);
 
 	//We must update the VBOs
 	releaseVBOs();
@@ -2548,11 +2549,11 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 
 	//we use the visibility table to tag the points to filter out
-	unsigned count=size();
+	unsigned count = size();
 	for (unsigned i=0; i<count; ++i)
 	{
 		const ScalarType& val = sf->getValue(i);
-		if (val<minVal || val>maxVal || val != val) //handle NaN values!
+		if (val < minVal || val > maxVal || val != val) //handle NaN values!
 			m_pointsVisibility->setValue(i,POINT_HIDDEN);
 	}
 }

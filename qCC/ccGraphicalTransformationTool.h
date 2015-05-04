@@ -39,7 +39,7 @@ class ccGraphicalTransformationTool : public ccOverlayDialog, public Ui::Graphic
 public:
 
 	//! Default constructor
-	ccGraphicalTransformationTool(QWidget* parent);
+	explicit ccGraphicalTransformationTool(QWidget* parent);
 	//! Default destructor
 	virtual ~ccGraphicalTransformationTool();
 

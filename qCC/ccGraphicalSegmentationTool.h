@@ -42,7 +42,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog, public Ui::Graphical
 public:
 
 	//! Default constructor
-	ccGraphicalSegmentationTool(QWidget* parent);
+	explicit ccGraphicalSegmentationTool(QWidget* parent);
 	//! Destructor
 	virtual ~ccGraphicalSegmentationTool();
 

@@ -28,7 +28,7 @@ class ccCustomDoubleValidator : public QValidator
 public:
 
 	//! Default constructor
-	ccCustomDoubleValidator(QObject * parent = 0) : QValidator(parent)
+	explicit ccCustomDoubleValidator(QObject * parent = 0) : QValidator(parent)
 	{}
 
 	//reimplemented from QValidator

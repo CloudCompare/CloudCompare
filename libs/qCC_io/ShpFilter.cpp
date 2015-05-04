@@ -76,7 +76,7 @@ class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
 {
 public:
 	//! Default constructor
-	SaveSHPFileDialog(QWidget* parent = 0)
+	explicit SaveSHPFileDialog(QWidget* parent = 0)
 		: QDialog(parent)
 		, Ui::SaveSHPFileDlg()
 	{
@@ -89,7 +89,7 @@ class ImportDBFFieldDialog : public QDialog, public Ui::ImportDBFFieldDlg
 {
 public:
 	//! Default constructor
-	ImportDBFFieldDialog(QWidget* parent = 0)
+	explicit ImportDBFFieldDialog(QWidget* parent = 0)
 		: QDialog(parent)
 		, Ui::ImportDBFFieldDlg()
 	{
@@ -384,7 +384,6 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		//M values (an array of length NumPoints)
 		if (!scalarValues.empty())
 		{
-			double scalar = qToLittleEndian<double>(ESRI_NO_DATA);
 			for (int32_t i=0; i<numPoints; ++i)
 			{
 				file.read(header,8);
@@ -767,7 +766,6 @@ CC_FILE_ERROR LoadCloud(QFile& file, ccHObject& container, int32_t index, ESRI_S
 		//M values (an array of length NumPoints)
 		if (sf)
 		{
-			double scalar = qToLittleEndian<double>(ESRI_NO_DATA);
 			for (int32_t i=0; i<numPoints; ++i)
 			{
 				file.read(header,8);
@@ -1493,10 +1491,10 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		double yMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 52: box X max
-		double xMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double xMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 60: box Y max
-		double yMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double yMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 
 		//Z bounaries
@@ -1505,7 +1503,7 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		double zMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 76: box Z max
-		double zMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double zMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 
 		CCVector3d Pmin(xMin,yMin,zMin);
@@ -1516,10 +1514,10 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//M bounaries (M = measures)
 		//Byte 84: M min
-		double mMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double mMin = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 		//Byte 92: M max
-		double mMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
+		//double mMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 	}
 	assert(fileLength >= 100);

@@ -324,7 +324,7 @@ const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
 	
 static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
 {
-	ccGLWindow* win = (ccGLWindow*)userParam;
+	ccGLWindow* win = reinterpret_cast<ccGLWindow*>(userParam);
 	assert(win);
 	if (!win)
 		return;
@@ -923,7 +923,7 @@ struct HotZone
 	//! Default icon size
 	static inline int iconSize() { return 16; }
 
-	HotZone(ccGLWindow* win)
+	explicit HotZone(ccGLWindow* win)
 		: textHeight(0)
 		, yTextBottomLineShift(0)
 		, bbv_label("bubble-view mode")
@@ -2721,7 +2721,6 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 	if (m_interactionMode == TRANSFORM_ENTITY) //labels are ignored in 'Interactive Transformation' mode
 		return;
 
-	int subID = -1;
 	PickingParameters params(FAST_PICKING,x,y,2,2);
 
 #ifdef THREADED_GL_WIDGET

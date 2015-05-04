@@ -56,7 +56,7 @@
 template <class Real> class ccPointStream : public PointStream<Real>
 {
 public:
-	ccPointStream( ccPointCloud* cloud ) : m_cloud(cloud), m_index(0) {}
+	explicit ccPointStream( ccPointCloud* cloud ) : m_cloud(cloud), m_index(0) {}
 	virtual void reset( void ) { m_index = 0; }
 	virtual bool nextPoint( Point3D< Real >& p , Point3D< Real >& n )
 	{
@@ -91,7 +91,7 @@ protected:
 class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
 {
 public:
-	PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
+	explicit PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
 	{
 		setupUi(this);
 		setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);

@@ -44,7 +44,7 @@ class ccSectionExtractionTool : public ccOverlayDialog, public Ui::SectionExtrac
 public:
 
 	//! Default constructor
-	ccSectionExtractionTool(QWidget* parent);
+	explicit ccSectionExtractionTool(QWidget* parent);
 	//! Destructor
 	virtual ~ccSectionExtractionTool();
 

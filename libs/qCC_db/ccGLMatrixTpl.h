@@ -80,13 +80,13 @@ public:
 	//! Constructor from a float GL matrix array
 	/** \param mat16f a 16 elements array (column major order)
 	**/
-	ccGLMatrixTpl(const float* mat16f) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16f[i]); }
+	explicit ccGLMatrixTpl(const float* mat16f) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16f[i]); }
 
 	//! Constructor from a double GL matrix array
 	/** \warning Will implicitly cast the elements to float!
 		\param mat16d a 16 elements array (column major order)
 	**/
-	ccGLMatrixTpl(const double* mat16d) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16d[i]); }
+	explicit ccGLMatrixTpl(const double* mat16d) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16d[i]); }
 
 	//! Constructor from 4 columns (X,Y,Z,T)
 	/** \param X 3 first elements of the 1st column (last one is 0)

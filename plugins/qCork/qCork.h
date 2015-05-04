@@ -40,7 +40,7 @@ class qCork : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qCork(QObject* parent = 0);
+	explicit qCork(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Mesh Boolean Operations"; }

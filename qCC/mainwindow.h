@@ -207,6 +207,11 @@ protected slots:
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView();
 
+	//! Zooms in (current 3D view)
+	void zoomIn();
+	//! Zooms out (current 3D view)
+	void zoomOut();
+
 	//! Displays 'about' dialog
 	void doActionShawAboutDialog();
 	//! Displays 'help' dialog

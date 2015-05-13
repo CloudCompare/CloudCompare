@@ -983,6 +983,8 @@ void MainWindow::connectActions()
 	//"3D Views" menu
 	connect(menu3DViews,						SIGNAL(aboutToShow()),	this,		SLOT(update3DViewsMenu()));
 	connect(actionNew3DView,					SIGNAL(triggered()),	this,		SLOT(new3DView()));
+	connect(actionZoomIn,						SIGNAL(triggered()),	this,		SLOT(zoomIn()));
+	connect(actionZoomOut,						SIGNAL(triggered()),	this,		SLOT(zoomOut()));
 	connect(actionClose3DView,					SIGNAL(triggered()),	m_mdiArea,	SLOT(closeActiveSubWindow()));
 	connect(actionCloseAll3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(closeAllSubWindows()));
 	connect(actionTile3DViews,					SIGNAL(triggered()),	m_mdiArea,	SLOT(tileSubWindows()));
@@ -6996,7 +6998,7 @@ void MainWindow::doActionUnroll()
 	updateUI();
 }
 
-ccGLWindow *MainWindow::getActiveGLWindow()
+ccGLWindow* MainWindow::getActiveGLWindow()
 {
 	if (!m_mdiArea)
 		return 0;
@@ -7023,6 +7025,26 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 
 	//not found!
 	return 0;
+}
+
+void MainWindow::zoomIn()
+{
+	ccGLWindow* win = MainWindow::getActiveGLWindow();
+	if (win)
+	{
+		//we simulate a real wheel event
+		win->onWheelEvent(15.0f);
+	}
+}
+
+void MainWindow::zoomOut()
+{
+	ccGLWindow* win = MainWindow::getActiveGLWindow();
+	if (win)
+	{
+		//we simulate a real wheel event
+		win->onWheelEvent(-15.0f);
+	}
 }
 
 ccGLWindow* MainWindow::new3DView()

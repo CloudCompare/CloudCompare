@@ -4,7 +4,9 @@ v2.6.2 XX/XX/2015
 - New features:
 	* New option in the context menu of the DB tree (right click on an item)
 		- 'Select children by type and/or name' - to select items either by type and/or by name
-
+	* New shortcuts:
+		- Zoom in (+)
+		- Zoom out (=)
 - Enhancements:
 	* Rasterize tool
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
@@ -47,6 +49,7 @@ v2.6.2 XX/XX/2015
 		- rendering zoom is now more properly taken into account when displaying 2D labels
 		- zoomed text size is estimated in a more accurate way
 		- the displayed size for the scale was wrong when the zoom was not 1
+	* 3D views now recognize the 'pinching' gesture (with 2 fingers) on multi-touch screens (to zoom)
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
@@ -58,6 +61,7 @@ v2.6.2 XX/XX/2015
 	* The main window could sometimes disappear in the background when the progress bar was appearing (Qt 5 issue)
 	* Some options of the context menu of the DB tree were incorrectly using the term 'siblings' instead of 'children'
 	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds was not displayed in the right place)
+	* While importing a Bundler file, if the images were to be 'kept in memory' but not the keypoints, then CC would crash
 
 v2.6.1 02/20/2015
 - New features:

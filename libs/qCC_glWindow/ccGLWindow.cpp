@@ -56,6 +56,7 @@
 #include <QSharedPointer>
 #include <QTimer>
 #include <QEventLoop>
+#include <QTouchEvent>
 
 #ifdef USE_VLD
 //VLD
@@ -182,6 +183,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_LODProgressIndicator(0)
 	, m_LODInProgress(false)
 	, m_LODPendingRefresh(false)
+	, m_touchInProgress(false)
+	, m_touchBaseDist(0)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -274,6 +277,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	//	assert(false);
 #endif
 
+	setAttribute(Qt::WA_AcceptTouchEvents, true);
 }
 
 ccGLWindow::~ccGLWindow()
@@ -670,34 +674,58 @@ void ccGLWindow::uninitializeGL()
 	m_initialized = false;
 }
 
-#ifdef THREADED_GL_WIDGET
-void ccGLWindow::resizeEvent(QResizeEvent *evt)
-{
-	m_resized.store(1);
-	//notify thread of resize event
-	if (m_renderingThread)
-		m_renderingThread->redraw();
-	else
-		assert(false);
-}
-
 bool ccGLWindow::event(QEvent* evt)
 {
-	if (!m_renderingThread)
-	{
-		assert(false);
-		return false;
-	}
-	
 	switch (evt->type())
 	{
+		//Gesture start/stop
+	case QEvent::TouchBegin:
+	case QEvent::TouchEnd:
+	{
+		QTouchEvent* touchEvent = static_cast<QTouchEvent*>(evt);
+		touchEvent->accept();
+		m_touchInProgress = (evt->type() == QEvent::TouchBegin);
+		m_touchBaseDist = 0;
+		ccLog::PrintDebug(QString("Touch event %1").arg(m_touchInProgress ? "begins" : "ends"));
+		return true;
+	}
+	break;
+
+	case QEvent::TouchUpdate:
+	{
+		//Gesture update
+		if (m_touchInProgress && !m_viewportParams.perspectiveView)
+		{
+			QTouchEvent* touchEvent = static_cast<QTouchEvent*>(evt);
+			const QList<QTouchEvent::TouchPoint>& touchPoints = touchEvent->touchPoints();
+			if (touchPoints.size() == 2)
+			{
+				QPointF D = (touchPoints[1].pos() - touchPoints[0].pos());
+				qreal dist = sqrt(D.x()*D.x() + D.y()*D.y());
+				if (m_touchBaseDist != 0)
+				{
+					float zoomFactor = dist/m_touchBaseDist;
+					updateZoom(zoomFactor);
+				}
+				m_touchBaseDist = dist;
+				evt->accept();
+				return true;
+			}
+		}
+		ccLog::PrintDebug(QString("Touch update (%1 points)").arg(static_cast<QTouchEvent*>(evt)->touchPoints().size()));
+	}
+
+#ifdef THREADED_GL_WIDGET
 	case QEvent::Show:
-		m_renderingThread->redraw();
+		if (m_renderingThread)
+			m_renderingThread->redraw();
 		break;
 
 	case QEvent::ParentChange: //The context will be changed, need to reinit OpenGL
+	{
+		//wait for thread to finish current work
+		if (m_renderingThread)
 		{
-			//wait for thread to finish current work
 			m_renderingThread->stop();
 			bool ret = QGLWidget::event(evt);
 
@@ -707,12 +735,25 @@ bool ccGLWindow::event(QEvent* evt)
 
 			return ret;
 		}
+	}
+#endif
 
 	default:
 		break;
 	}
 
 	return QGLWidget::event(evt);
+}
+
+#ifdef THREADED_GL_WIDGET
+void ccGLWindow::resizeEvent(QResizeEvent *evt)
+{
+	m_resized.store(1);
+	//notify thread of resize event
+	if (m_renderingThread)
+		m_renderingThread->redraw();
+	else
+		assert(false);
 }
 
 ccGLWindow::RenderingThread::RenderingThread(ccGLWindow* win)

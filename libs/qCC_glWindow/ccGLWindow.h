@@ -635,13 +635,13 @@ protected:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL();
+	bool event(QEvent* evt);
 
 #ifdef THREADED_GL_WIDGET
 	void initialize();
 	void resizeGL2();
 	void paint();
 	void resizeEvent(QResizeEvent* evt);
-	bool event(QEvent* evt);
 	void glInit() { /*stop QGLWidget standard behavior*/ }
 	void glDraw() { /*stop QGLWidget standard behavior*/ }
 
@@ -1007,6 +1007,11 @@ protected:
 
 	//! Internal timer
 	QElapsedTimer m_timer;
+
+	//! Touch event in progress
+	bool m_touchInProgress;
+	//! Touch gesture initial distance
+	qreal m_touchBaseDist;
 
 private:
 

@@ -157,8 +157,8 @@ void ccHistogramWindow::fromSF(	ccScalarField* sf,
 
 	if (m_associatedSF)
 	{
-		m_minVal = showNaNValuesInGrey ? m_associatedSF->getMin() : m_associatedSF->displayRange().min();
-		m_maxVal = showNaNValuesInGrey ? m_associatedSF->getMax() : m_associatedSF->displayRange().max();
+		m_minVal = showNaNValuesInGrey ? m_associatedSF->getMin() : m_associatedSF->displayRange().start();
+		m_maxVal = showNaNValuesInGrey ? m_associatedSF->getMax() : m_associatedSF->displayRange().stop();
 		m_numberOfClassesCanBeChanged = numberOfClassesCanBeChanged;
 	}
 	else

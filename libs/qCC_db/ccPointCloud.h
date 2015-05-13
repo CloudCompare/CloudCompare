@@ -85,6 +85,9 @@ public:
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_CLOUD; }
 
+	//inherited from ChunkedPointCloud
+	virtual void invalidateBoundingBox();
+
 	/***************************************************
 						Clone/Copy
 	***************************************************/
@@ -254,6 +257,7 @@ public:
 	//inherited from ChunkedPointCloud
 	virtual void deleteScalarField(int index);
 	virtual void deleteAllScalarFields();
+	virtual int addScalarField(const char* uniqueName);
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;
@@ -294,7 +298,7 @@ public:
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false);
 	virtual void applyRigidTransformation(const ccGLMatrix& trans);
 	//virtual bool isScalarFieldEnabled() const;
-	virtual void refreshBB();
+	inline virtual void refreshBB() { invalidateBoundingBox(); }
 
 	//! Interpolate colors from another cloud
 	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
@@ -471,9 +475,6 @@ public:
 
 	//! Adds associated SF color ramp info to current GL context
 	virtual void addColorRampInfo(CC_DRAW_CONTEXT& context);
-
-    //inherited from ChunkedPointCloud
-	virtual int addScalarField(const char* uniqueName);
 
 	//! Adds an existing scalar field to this cloud
 	/** Warning: the cloud takes ownership of it!

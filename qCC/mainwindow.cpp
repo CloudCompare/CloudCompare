@@ -607,20 +607,22 @@ void MainWindow::doEnableGLFilter()
 	if (ccPlugin->getType() != CC_GL_FILTER_PLUGIN)
 		return;
 
-	ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
-	if (filter)
+	if (win->areGLFiltersEnabled())
 	{
-		if (win->areGLFiltersEnabled())
+		ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
+		if (filter)
 		{
 			win->setGlFilter(filter);
 			ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
 		}
 		else
-			ccConsole::Error("GL filters not supported!");
+		{
+			ccConsole::Error("Can't load GL filter (an error occurred)!");
+		}
 	}
 	else
 	{
-		ccConsole::Error("Can't load GL filter (an error occurred)!");
+		ccConsole::Error("GL filters not supported!");
 	}
 }
 

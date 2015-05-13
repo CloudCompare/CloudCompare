@@ -21,6 +21,7 @@ File I/O:
 Big ones:
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Command line mode could be extended
+	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
 	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
@@ -33,6 +34,7 @@ Big ones:
 [*] Finish the Oculus Rift plugin
 
 Various:
+[*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)
 [*] Add a filter to the DB tree (http://www.danielgm.net/cc/forum/viewtopic.php?t=1055)
 [*] Selection of planar area based on region growing would be nice (http://www.cloudcompare.org/forum/viewtopic.php?t=1046)

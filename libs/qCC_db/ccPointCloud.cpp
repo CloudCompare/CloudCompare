@@ -957,9 +957,10 @@ bool ccPointCloud::hasDisplayedScalarField() const
 	return m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale();
 }
 
-void ccPointCloud::refreshBB()
+void ccPointCloud::invalidateBoundingBox()
 {
-	invalidateBoundingBox();
+	CCLib::ChunkedPointCloud::invalidateBoundingBox();
+
 	notifyGeometryUpdate();	//calls releaseVBOs()
 }
 

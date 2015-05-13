@@ -54,6 +54,7 @@ v2.6.2 XX/XX/2015
 	* The 'Apply all' option of the 'Global shift & scale' dialog wasn't taken into account when loading LAS/LAZ files
 	* The main window could sometimes disappear in the background when the progress bar was appearing (Qt 5 issue)
 	* Some options of the context menu of the DB tree were incorrectly using the term 'siblings' instead of 'children'
+	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds was not displayed in the right place)
 
 v2.6.1 02/20/2015
 - New features:

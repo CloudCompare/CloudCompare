@@ -170,7 +170,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	scanNode.set("description", e57::StringNode(imf, "Imported from CloudCompare (EDF R&D / Telecom ParisTech)"));
 
 	//Original GUIDs (TODO)
-	//if(originalGuids.size() > 0 )
+	//if (originalGuids.size() > 0 )
 	//{
 	//	scanNode.set("originalGuids", e57::VectorNode(imf));
 	//	e57::VectorNode originalGuids(scanNode.get("originalGuids"));
@@ -330,7 +330,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 
 	//Cartesian field
 	{
-		e57::FloatPrecision precision = sizeof(PointCoordinateType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
+		e57::FloatPrecision precision = sizeof(PointCoordinateType) == 8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
 
 		CCVector3d bbCenter = (bbMin+bbMax)/2;
 
@@ -362,7 +362,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	//Normals
 	if (hasNormals)
 	{
-		e57::FloatPrecision precision = sizeof(PointCoordinateType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
+		e57::FloatPrecision precision = sizeof(PointCoordinateType) == 8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
 
 		proto.set("nor:normalX", e57::FloatNode(imf, 0.0, precision, -1.0, 1.0));
 		arrays.xNormData.resize(nSize);
@@ -380,7 +380,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	//Return index
 	if (returnIndexSF)
 	{
-		assert(maxReturnIndex>minReturnIndex);
+		assert(maxReturnIndex > minReturnIndex);
 		proto.set("returnIndex", e57::IntegerNode(imf, minReturnIndex, minReturnIndex, maxReturnIndex));
 		arrays.scanIndexData.resize(nSize);
 		dbufs.push_back(e57::SourceDestBuffer(imf, "returnIndex",  &(arrays.scanIndexData.front()),  nSize, true, true));
@@ -388,7 +388,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	//Intensity field
 	if (intensitySF)
 	{
-		proto.set("intensity", e57::FloatNode(imf, intensitySF->getMin(), sizeof(ScalarType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE, intensitySF->getMin(), intensitySF->getMax()));
+		proto.set("intensity", e57::FloatNode(imf, intensitySF->getMin(), sizeof(ScalarType) == 8 ? e57::E57_DOUBLE : e57::E57_SINGLE, intensitySF->getMin(), intensitySF->getMax()));
 		arrays.intData.resize(nSize);
 		dbufs.push_back(e57::SourceDestBuffer(imf, "intensity",  &(arrays.intData.front()),  nSize, true, true));
 
@@ -403,13 +403,13 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	//Color fields
 	if (hasColors)
 	{
-		proto.set("colorRed",	e57::FloatNode(imf, 0., e57::E57_DOUBLE, 0., 255.));
+		proto.set("colorRed",	e57::IntegerNode(imf, 0, 0, 255));
 		arrays.redData.resize(nSize);
 		dbufs.push_back(e57::SourceDestBuffer(imf, "colorRed",  &(arrays.redData.front()),  nSize, true, true));
-		proto.set("colorGreen",	e57::FloatNode(imf, 0., e57::E57_DOUBLE, 0., 255.));
+		proto.set("colorGreen",	e57::IntegerNode(imf, 0, 0, 255));
 		arrays.greenData.resize(nSize);
 		dbufs.push_back(e57::SourceDestBuffer(imf, "colorGreen",  &(arrays.greenData.front()),  nSize, true, true));
-		proto.set("colorBlue",	e57::FloatNode(imf, 0., e57::E57_DOUBLE, 0., 255.));
+		proto.set("colorBlue",	e57::IntegerNode(imf, 0, 0, 255));
 		arrays.blueData.resize(nSize);
 		dbufs.push_back(e57::SourceDestBuffer(imf, "colorBlue",  &(arrays.blueData.front()),  nSize, true, true));
 	}
@@ -460,7 +460,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			arrays.yData[i] = Pglobal.y;
 			arrays.zData[i] = Pglobal.z;
 
-			if(intensitySF)
+			if (intensitySF)
 			{
 				assert(!arrays.intData.empty());
 				ScalarType sfVal = intensitySF->getValue(indexShift+i);
@@ -523,7 +523,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	imageNode.set("guid", e57::StringNode(imf, qPrintable(GetNewGuid())));	//required
 
 	//Name
-	if(!image->getName().isEmpty())
+	if (!image->getName().isEmpty())
 		imageNode.set("name", e57::StringNode(imf, qPrintable(image->getName())));
 	else
 		imageNode.set("name", e57::StringNode(imf, qPrintable(QString("Image %1").arg(s_absoluteImageIndex))));
@@ -602,7 +602,6 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	imageNode.set(qPrintable(cameraRepresentationStr), cameraRepresentation);
 	images2D.append(imageNode);
 	blob.write((uint8_t*)ba.data(), 0, (size_t)imageSize);
-
 }
 
 CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters)
@@ -970,9 +969,9 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.pointFields.pointRangeMinimum = 0.;
 	header.pointFields.pointRangeMaximum = 0.; 
 
-	if( proto.isDefined("cartesianX"))
+	if ( proto.isDefined("cartesianX"))
 	{
-		if( proto.get("cartesianX").type() == e57::E57_SCALED_INTEGER )
+		if ( proto.get("cartesianX").type() == e57::E57_SCALED_INTEGER )
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("cartesianX")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("cartesianX")).offset();
@@ -983,15 +982,15 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.pointFields.pointRangeScaledInteger = scale;
 
 		}
-		else if( proto.get("cartesianX").type() == e57::E57_FLOAT )
+		else if ( proto.get("cartesianX").type() == e57::E57_FLOAT )
 		{
 			header.pointFields.pointRangeMinimum = e57::FloatNode(proto.get("cartesianX")).minimum();
 			header.pointFields.pointRangeMaximum = e57::FloatNode(proto.get("cartesianX")).maximum();
 		}
 	} 
-	else if( proto.isDefined("sphericalRange"))
+	else if ( proto.isDefined("sphericalRange"))
 	{
-		if( proto.get("sphericalRange").type() == e57::E57_SCALED_INTEGER )
+		if ( proto.get("sphericalRange").type() == e57::E57_SCALED_INTEGER )
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("sphericalRange")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("sphericalRange")).offset();
@@ -1002,7 +1001,7 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.pointFields.pointRangeScaledInteger = scale;
 
 		}
-		else if( proto.get("sphericalRange").type() == e57::E57_FLOAT )
+		else if ( proto.get("sphericalRange").type() == e57::E57_FLOAT )
 		{
 			header.pointFields.pointRangeMinimum = e57::FloatNode(proto.get("sphericalRange")).minimum();
 			header.pointFields.pointRangeMaximum = e57::FloatNode(proto.get("sphericalRange")).maximum();
@@ -1018,9 +1017,9 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.pointFields.angleMinimum = 0.;
 	header.pointFields.angleMaximum = 0.;
 
-	if(proto.isDefined("sphericalAzimuth"))
+	if (proto.isDefined("sphericalAzimuth"))
 	{
-		if( proto.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER)
+		if ( proto.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER)
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).offset();
@@ -1031,7 +1030,7 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.pointFields.angleScaledInteger = scale;
 
 		}
-		else if( proto.get("sphericalAzimuth").type() == e57::E57_FLOAT )
+		else if ( proto.get("sphericalAzimuth").type() == e57::E57_FLOAT )
 		{
 			header.pointFields.angleMinimum = e57::FloatNode(proto.get("sphericalAzimuth")).minimum();
 			header.pointFields.angleMaximum = e57::FloatNode(proto.get("sphericalAzimuth")).maximum();
@@ -1043,26 +1042,26 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.pointFields.rowIndexMaximum = 0;
 	header.pointFields.columnIndexMaximum = 0;
 
-	if( proto.isDefined("rowIndex"))
+	if ( proto.isDefined("rowIndex"))
 		header.pointFields.rowIndexMaximum = (uint32_t)e57::IntegerNode(proto.get("rowIndex")).maximum();
 
-	if( proto.isDefined("columnIndex"))
+	if ( proto.isDefined("columnIndex"))
 		header.pointFields.columnIndexMaximum = (uint32_t)e57::IntegerNode(proto.get("columnIndex")).maximum();
 
 	header.pointFields.returnIndexField = proto.isDefined("returnIndex");
 	header.pointFields.returnCountField = proto.isDefined("returnCount");
 	header.pointFields.returnMaximum = 0;
 
-	if( proto.isDefined("returnIndex"))
+	if ( proto.isDefined("returnIndex"))
 		header.pointFields.returnMaximum = (uint8_t)e57::IntegerNode(proto.get("returnIndex")).maximum();
 
 	header.pointFields.normXField = proto.isDefined("nor:normalX");
 	header.pointFields.normYField = proto.isDefined("nor:normalY");
 	header.pointFields.normZField = proto.isDefined("nor:normalZ");
 
-	if( proto.isDefined("nor:normalX"))
+	if ( proto.isDefined("nor:normalX"))
 	{
-		if( proto.get("nor:normalX").type() == e57::E57_SCALED_INTEGER )
+		if ( proto.get("nor:normalX").type() == e57::E57_SCALED_INTEGER )
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("nor:normalX")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("nor:normalX")).offset();
@@ -1073,7 +1072,7 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.pointFields.normRangeScaledInteger = scale;
 
 		}
-		else if( proto.get("nor:normalX").type() == e57::E57_FLOAT )
+		else if ( proto.get("nor:normalX").type() == e57::E57_FLOAT )
 		{
 			header.pointFields.normRangeMinimum = e57::FloatNode(proto.get("nor:normalX")).minimum();
 			header.pointFields.normRangeMaximum = e57::FloatNode(proto.get("nor:normalX")).maximum();
@@ -1084,11 +1083,11 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.pointFields.isTimeStampInvalidField = proto.isDefined("isTimeStampInvalid");
 	header.pointFields.timeMaximum = 0.;
 
-	if(proto.isDefined("timeStamp"))
+	if (proto.isDefined("timeStamp"))
 	{
-		if( proto.get("timeStamp").type() == e57::E57_INTEGER)
+		if ( proto.get("timeStamp").type() == e57::E57_INTEGER)
 			header.pointFields.timeMaximum = static_cast<double>(e57::IntegerNode(proto.get("timeStamp")).maximum());
-		else if( proto.get("timeStamp").type() == e57::E57_FLOAT)
+		else if ( proto.get("timeStamp").type() == e57::E57_FLOAT)
 			header.pointFields.timeMaximum = static_cast<double>(e57::FloatNode(proto.get("timeStamp")).maximum());
 	}
 
@@ -1099,43 +1098,43 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.intensityLimits.intensityMinimum = 0.;
 	header.intensityLimits.intensityMaximum = 0.;
 
-	if(scan.isDefined("intensityLimits"))
+	if (scan.isDefined("intensityLimits"))
 	{
 		e57::StructureNode intbox(scan.get("intensityLimits"));
-		if( intbox.get("intensityMaximum").type() == e57::E57_SCALED_INTEGER )
+		if ( intbox.get("intensityMaximum").type() == e57::E57_SCALED_INTEGER )
 		{
 			header.intensityLimits.intensityMaximum = e57::ScaledIntegerNode(intbox.get("intensityMaximum")).scaledValue();
 			header.intensityLimits.intensityMinimum = e57::ScaledIntegerNode(intbox.get("intensityMinimum")).scaledValue();
 		}
-		else if( intbox.get("intensityMaximum").type() == e57::E57_FLOAT )
+		else if ( intbox.get("intensityMaximum").type() == e57::E57_FLOAT )
 		{
 			header.intensityLimits.intensityMaximum = e57::FloatNode(intbox.get("intensityMaximum")).value();
 			header.intensityLimits.intensityMinimum = e57::FloatNode(intbox.get("intensityMinimum")).value();
 		}
-		else if( intbox.get("intensityMaximum").type() == e57::E57_INTEGER)
+		else if ( intbox.get("intensityMaximum").type() == e57::E57_INTEGER)
 		{
 			header.intensityLimits.intensityMaximum = static_cast<double>(e57::IntegerNode(intbox.get("intensityMaximum")).value());
 			header.intensityLimits.intensityMinimum = static_cast<double>(e57::IntegerNode(intbox.get("intensityMinimum")).value());
 		}
 	}
 	
-	if(proto.isDefined("intensity"))
+	if (proto.isDefined("intensity"))
 	{
-		if(proto.get("intensity").type() == e57::E57_INTEGER)
+		if (proto.get("intensity").type() == e57::E57_INTEGER)
 		{
-			if(header.intensityLimits.intensityMaximum == 0.)
+			if (header.intensityLimits.intensityMaximum == 0.)
 			{
 				header.intensityLimits.intensityMinimum = static_cast<double>(e57::IntegerNode(proto.get("intensity")).minimum());
 				header.intensityLimits.intensityMaximum = static_cast<double>(e57::IntegerNode(proto.get("intensity")).maximum());
 			}
 			header.pointFields.intensityScaledInteger = -1.;
 
-		} else if(proto.get("intensity").type() == e57::E57_SCALED_INTEGER)
+		} else if (proto.get("intensity").type() == e57::E57_SCALED_INTEGER)
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("intensity")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("intensity")).offset();
 
-			if(header.intensityLimits.intensityMaximum == 0.)
+			if (header.intensityLimits.intensityMaximum == 0.)
 			{
 				int64_t minimum = e57::ScaledIntegerNode(proto.get("intensity")).minimum();
 				int64_t maximum = e57::ScaledIntegerNode(proto.get("intensity")).maximum();
@@ -1144,9 +1143,9 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			}
 			header.pointFields.intensityScaledInteger = scale;
 		}
-		else if(proto.get("intensity").type() == e57::E57_FLOAT)
+		else if (proto.get("intensity").type() == e57::E57_FLOAT)
 		{
-			if(header.intensityLimits.intensityMaximum == 0.)
+			if (header.intensityLimits.intensityMaximum == 0.)
 			{
 				header.intensityLimits.intensityMinimum = e57::FloatNode(proto.get("intensity")).minimum();
 				header.intensityLimits.intensityMaximum = e57::FloatNode(proto.get("intensity")).maximum();
@@ -1166,10 +1165,10 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	header.colorLimits.colorBlueMinimum = 0.;
 	header.colorLimits.colorBlueMaximum = 0.;
 
-	if(scan.isDefined("colorLimits"))
+	if (scan.isDefined("colorLimits"))
 	{
 		e57::StructureNode colorbox(scan.get("colorLimits"));
-		if( colorbox.get("colorRedMaximum").type() == e57::E57_SCALED_INTEGER )
+		if ( colorbox.get("colorRedMaximum").type() == e57::E57_SCALED_INTEGER )
 		{
 			header.colorLimits.colorRedMaximum   = e57::ScaledIntegerNode(colorbox.get("colorRedMaximum")  ).scaledValue();
 			header.colorLimits.colorRedMinimum   = e57::ScaledIntegerNode(colorbox.get("colorRedMinimum")  ).scaledValue();
@@ -1178,7 +1177,7 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.colorLimits.colorBlueMaximum  = e57::ScaledIntegerNode(colorbox.get("colorBlueMaximum") ).scaledValue();
 			header.colorLimits.colorBlueMinimum  = e57::ScaledIntegerNode(colorbox.get("colorBlueMinimum") ).scaledValue();
 		}
-		else if( colorbox.get("colorRedMaximum").type() == e57::E57_FLOAT )
+		else if ( colorbox.get("colorRedMaximum").type() == e57::E57_FLOAT )
 		{
 			header.colorLimits.colorRedMaximum =   e57::FloatNode(colorbox.get("colorRedMaximum")  ).value();
 			header.colorLimits.colorRedMinimum =   e57::FloatNode(colorbox.get("colorRedMinimum")  ).value();
@@ -1187,7 +1186,7 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.colorLimits.colorBlueMaximum =  e57::FloatNode(colorbox.get("colorBlueMaximum") ).value();
 			header.colorLimits.colorBlueMinimum =  e57::FloatNode(colorbox.get("colorBlueMinimum") ).value();
 		}
-		else if( colorbox.get("colorRedMaximum").type() == e57::E57_INTEGER)
+		else if ( colorbox.get("colorRedMaximum").type() == e57::E57_INTEGER)
 		{
 			header.colorLimits.colorRedMaximum =   static_cast<double>(e57::IntegerNode(colorbox.get("colorRedMaximum")  ).value());
 			header.colorLimits.colorRedMinimum =   static_cast<double>(e57::IntegerNode(colorbox.get("colorRedMinimum")  ).value());
@@ -1198,19 +1197,19 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 		}
 	}
 
-	if((header.colorLimits.colorRedMaximum == 0.) && proto.isDefined("colorRed"))
+	if ((header.colorLimits.colorRedMaximum == 0.) && proto.isDefined("colorRed"))
 	{
-		if(proto.get("colorRed").type() == e57::E57_INTEGER)
+		if (proto.get("colorRed").type() == e57::E57_INTEGER)
 		{
 			header.colorLimits.colorRedMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorRed")).minimum());
 			header.colorLimits.colorRedMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorRed")).maximum());
 		}
-		else if(proto.get("colorRed").type() == e57::E57_FLOAT)
+		else if (proto.get("colorRed").type() == e57::E57_FLOAT)
 		{
 			header.colorLimits.colorRedMinimum = e57::FloatNode(proto.get("colorRed")).minimum();
 			header.colorLimits.colorRedMaximum = e57::FloatNode(proto.get("colorRed")).maximum();
 		}
-		else if(proto.get("colorRed").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("colorRed").type() == e57::E57_SCALED_INTEGER)
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("colorRed")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("colorRed")).offset();
@@ -1221,19 +1220,19 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 		}
 	}
 
-	if((header.colorLimits.colorGreenMaximum == 0.) && proto.isDefined("colorGreen"))
+	if ((header.colorLimits.colorGreenMaximum == 0.) && proto.isDefined("colorGreen"))
 	{
-		if(proto.get("colorGreen").type() == e57::E57_INTEGER)
+		if (proto.get("colorGreen").type() == e57::E57_INTEGER)
 		{
 			header.colorLimits.colorGreenMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorGreen")).minimum());
 			header.colorLimits.colorGreenMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorGreen")).maximum());
 		}
-		else if(proto.get("colorGreen").type() == e57::E57_FLOAT)
+		else if (proto.get("colorGreen").type() == e57::E57_FLOAT)
 		{
 			header.colorLimits.colorGreenMinimum = e57::FloatNode(proto.get("colorGreen")).minimum();
 			header.colorLimits.colorGreenMaximum = e57::FloatNode(proto.get("colorGreen")).maximum();
 		}
-		else if(proto.get("colorGreen").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("colorGreen").type() == e57::E57_SCALED_INTEGER)
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("colorGreen")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("colorGreen")).offset();
@@ -1243,19 +1242,19 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			header.colorLimits.colorGreenMaximum = maximum * scale + offset;
 		}
 	}
-	if((header.colorLimits.colorBlueMaximum == 0.) && proto.isDefined("colorBlue"))
+	if ((header.colorLimits.colorBlueMaximum == 0.) && proto.isDefined("colorBlue"))
 	{
-		if( proto.get("colorBlue").type() == e57::E57_INTEGER)
+		if ( proto.get("colorBlue").type() == e57::E57_INTEGER)
 		{
 			header.colorLimits.colorBlueMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorBlue")).minimum());
 			header.colorLimits.colorBlueMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorBlue")).maximum());
 		}
-		else if( proto.get("colorBlue").type() == e57::E57_FLOAT)
+		else if ( proto.get("colorBlue").type() == e57::E57_FLOAT)
 		{
 			header.colorLimits.colorBlueMinimum = e57::FloatNode(proto.get("colorBlue")).minimum();
 			header.colorLimits.colorBlueMaximum = e57::FloatNode(proto.get("colorBlue")).maximum();
 		}
-		else if(proto.get("colorBlue").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("colorBlue").type() == e57::E57_SCALED_INTEGER)
 		{
 			double scale = e57::ScaledIntegerNode(proto.get("colorBlue")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("colorBlue")).offset();
@@ -1271,11 +1270,11 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 //Helper: decode pose information
 bool GetPoseInformation(e57::StructureNode& node, ccGLMatrix& poseMat)
 {
-	bool validPoseMat=false;
+	bool validPoseMat = false;
 	if (node.isDefined("pose"))
 	{
 		e57::StructureNode pose(node.get("pose"));
-		if(pose.isDefined("rotation"))
+		if (pose.isDefined("rotation"))
 		{
 			e57::StructureNode rotNode(pose.get("rotation"));
 			double quaternion[4];
@@ -1287,16 +1286,16 @@ bool GetPoseInformation(e57::StructureNode& node, ccGLMatrix& poseMat)
 			CCLib::SquareMatrixd rotMat(3);
 			rotMat.initFromQuaternion(quaternion);
 			rotMat.toGlMatrix(poseMat.data());
-			validPoseMat=true;
+			validPoseMat = true;
 		}
 
-		if(pose.isDefined("translation"))
+		if (pose.isDefined("translation"))
 		{
 			e57::StructureNode transNode(pose.get("translation"));  
 			poseMat.getTranslation()[0] = static_cast<float>(e57::FloatNode(transNode.get("x")).value());
 			poseMat.getTranslation()[1] = static_cast<float>(e57::FloatNode(transNode.get("y")).value());
 			poseMat.getTranslation()[2] = static_cast<float>(e57::FloatNode(transNode.get("z")).value());
-			validPoseMat=true;
+			validPoseMat = true;
 		}
 	}
 
@@ -1369,28 +1368,28 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 
 	ccPointCloud* cloud = new ccPointCloud();
 
-	if(scanNode.isDefined("name"))
+	if (scanNode.isDefined("name"))
 		cloud->setName(e57::StringNode(scanNode.get("name")).value().c_str());
-	if(scanNode.isDefined("description"))
+	if (scanNode.isDefined("description"))
 		ccLog::Print(QString("[E57] Internal description: %1").arg(e57::StringNode(scanNode.get("description")).value().c_str()));
 
 	/* //Ignored fields (for the moment)
-	if(scanNode.isDefined("indexBounds"))
-	if(scanNode.isDefined("originalGuids"))
-	if(scanNode.isDefined("sensorVendor"))
-	if(scanNode.isDefined("sensorModel"))
-	if(scanNode.isDefined("sensorSerialNumber"))
-	if(scanNode.isDefined("sensorHardwareVersion"))
-	if(scanNode.isDefined("sensorSoftwareVersion"))
-	if(scanNode.isDefined("sensorFirmwareVersion"))
-	if(scanNode.isDefined("temperature"))
-	if(scanNode.isDefined("relativeHumidity"))
-	if(scanNode.isDefined("atmosphericPressure"))
-	if(scanNode.isDefined("pointGroupingSchemes"))
-	if(scanNode.isDefined("cartesianBounds"))
-	if(scanNode.isDefined("sphericalBounds"))
-	if(scan.isDefined("acquisitionStart"))
-	if(scan.isDefined("acquisitionEnd"))
+	if (scanNode.isDefined("indexBounds"))
+	if (scanNode.isDefined("originalGuids"))
+	if (scanNode.isDefined("sensorVendor"))
+	if (scanNode.isDefined("sensorModel"))
+	if (scanNode.isDefined("sensorSerialNumber"))
+	if (scanNode.isDefined("sensorHardwareVersion"))
+	if (scanNode.isDefined("sensorSoftwareVersion"))
+	if (scanNode.isDefined("sensorFirmwareVersion"))
+	if (scanNode.isDefined("temperature"))
+	if (scanNode.isDefined("relativeHumidity"))
+	if (scanNode.isDefined("atmosphericPressure"))
+	if (scanNode.isDefined("pointGroupingSchemes"))
+	if (scanNode.isDefined("cartesianBounds"))
+	if (scanNode.isDefined("sphericalBounds"))
+	if (scan.isDefined("acquisitionStart"))
+	if (scan.isDefined("acquisitionEnd"))
 	//*/
 
 	//scan "pose" relatively to the others
@@ -1415,24 +1414,24 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	if (sphericalMode)
 	{
 		//spherical coordinates
-		if(header.pointFields.sphericalRangeField)
+		if (header.pointFields.sphericalRangeField)
 		{
 			arrays.xData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalRange", &(arrays.xData.front()), nSize, true, (prototype.get("sphericalRange").type() == e57::E57_SCALED_INTEGER)));
 		}
-		if(header.pointFields.sphericalAzimuthField)
+		if (header.pointFields.sphericalAzimuthField)
 		{
 			arrays.yData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalAzimuth", &(arrays.yData.front()), nSize, true, (prototype.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER)));
 		}
-		if(header.pointFields.sphericalElevationField)
+		if (header.pointFields.sphericalElevationField)
 		{
 			arrays.zData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalElevation", &(arrays.zData.front()), nSize, true, (prototype.get("sphericalElevation").type() == e57::E57_SCALED_INTEGER)));
 		}
 
 		//data validity
-		if( header.pointFields.sphericalInvalidStateField)
+		if (header.pointFields.sphericalInvalidStateField)
 		{
 			arrays.isInvalidData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "sphericalInvalidState", &(arrays.isInvalidData.front()), nSize, true, (prototype.get("sphericalInvalidState").type() == e57::E57_SCALED_INTEGER)));
@@ -1441,24 +1440,24 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	else
 	{
 		//cartesian coordinates
-		if(header.pointFields.cartesianXField)
+		if (header.pointFields.cartesianXField)
 		{
 			arrays.xData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianX", &(arrays.xData.front()), nSize, true, (prototype.get("cartesianX").type() == e57::E57_SCALED_INTEGER)));
 		}
-		if(header.pointFields.cartesianYField)
+		if (header.pointFields.cartesianYField)
 		{
 			arrays.yData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianY", &(arrays.yData.front()), nSize, true, (prototype.get("cartesianY").type() == e57::E57_SCALED_INTEGER)));
 		}
-		if(header.pointFields.cartesianZField)
+		if (header.pointFields.cartesianZField)
 		{
 			arrays.zData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianZ", &(arrays.zData.front()), nSize, true, (prototype.get("cartesianZ").type() == e57::E57_SCALED_INTEGER)));
 		}
 
 		//data validity
-		if( header.pointFields.cartesianInvalidStateField)
+		if ( header.pointFields.cartesianInvalidStateField)
 		{
 			arrays.isInvalidData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "cartesianInvalidState", &(arrays.isInvalidData.front()), nSize, true, (prototype.get("cartesianInvalidState").type() == e57::E57_SCALED_INTEGER)));
@@ -1478,17 +1477,17 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			return 0;
 		}
 		cloud->showNormals(true);
-		if(header.pointFields.normXField)
+		if (header.pointFields.normXField)
 		{
 			arrays.xNormData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalX", &(arrays.xNormData.front()), nSize, true, (prototype.get("nor:normalX").type() == e57::E57_SCALED_INTEGER)));
 		}
-		if(header.pointFields.normYField)
+		if (header.pointFields.normYField)
 		{
 			arrays.yNormData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalY", &(arrays.yNormData.front()), nSize, true, (prototype.get("nor:normalY").type() == e57::E57_SCALED_INTEGER)));
 		}
-		if(header.pointFields.normZField)
+		if (header.pointFields.normZField)
 		{
 			arrays.zNormData.resize(nSize);
 			dbufs.push_back(e57::SourceDestBuffer(node.destImageFile(), "nor:normalZ", &(arrays.zNormData.front()), nSize, true, (prototype.get("nor:normalZ").type() == e57::E57_SCALED_INTEGER)));
@@ -1683,16 +1682,16 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != 0)
 				{
 					//ScalarType intensity = (ScalarType)((arrays.intData[i] - intOffset)/intRange); //Normalize intensity to 0 - 1.
-					ScalarType intensity = (ScalarType)arrays.intData[i];
+					ScalarType intensity = static_cast<ScalarType>(arrays.intData[i]);
 					intensitySF->setValue(static_cast<unsigned>(realCount),intensity);
 
 					//track max intensity (for proper visualization)
 					if (s_absoluteScanIndex != 0 || realCount != 0)
 					{
-						if (s_maxIntensity<intensity)
-							s_maxIntensity=intensity;
-						else if (s_minIntensity>intensity)
-							s_minIntensity=intensity;
+						if (s_maxIntensity < intensity)
+							s_maxIntensity = intensity;
+						else if (s_minIntensity > intensity)
+							s_minIntensity = intensity;
 					}
 					else
 					{
@@ -1732,7 +1731,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		if (nprogress && !nprogress->oneStep())
 		{
 			QApplication::processEvents();
-			s_cancelRequestedByUser=true;
+			s_cancelRequestedByUser = true;
 			break;
 		}
 	}
@@ -1761,7 +1760,10 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	if (intensitySF)
 	{
 		intensitySF->computeMinAndMax();
-		intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::ABS_NORM_GREY));
+		if (intensitySF->getMin() >= 0 && intensitySF->getMax() <= 1.0)
+			intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::ABS_NORM_GREY));
+		else
+			intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
 		cloud->setCurrentDisplayedScalarField(cloud->getScalarFieldIndexByName(intensitySF->getName()));
 		cloud->showSF(true);
 	}
@@ -1880,7 +1882,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		return 0;
 	}
 	
-	if(cameraRepresentationNode.isDefined("imageMask"))
+	if (cameraRepresentationNode.isDefined("imageMask"))
 		visualRefRepresentation->imageMaskSize = e57::BlobNode(cameraRepresentationNode.get("imageMask")).byteCount();
 
 	visualRefRepresentation->imageHeight = (int32_t)e57::IntegerNode(cameraRepresentationNode.get("imageHeight")).value();
@@ -1945,7 +1947,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	}
 
 	//handle mask?
-	if (visualRefRepresentation->imageMaskSize>0)
+	if (visualRefRepresentation->imageMaskSize > 0)
 	{
 		assert(cameraRepresentationNode.isDefined("imageMask"));
 		e57::BlobNode imageMask(cameraRepresentationNode.get("imageMask"));
@@ -2038,6 +2040,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (!imf.isOpen())
 		return CC_FERR_READING;
 
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
 		//for normals handling
@@ -2221,21 +2224,27 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 				}
 			}
 		}
-
-		imf.close();
 	}
 	catch(const e57::E57Exception& e)
 	{
 		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
-		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch(...)
 	{
 		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
-		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
+		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 
-	return s_cancelRequestedByUser ? CC_FERR_CANCELED_BY_USER : CC_FERR_NO_ERROR;
+	imf.close();
+
+	//special case: process has benn cancelled by user
+	if (result == CC_FERR_NO_ERROR && s_cancelRequestedByUser)
+	{
+		result = CC_FERR_CANCELED_BY_USER;
+	}
+
+	return result;
 }
 
 #endif

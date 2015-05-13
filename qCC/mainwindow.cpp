@@ -8697,7 +8697,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
 		if (cloud)
 		{
-			//on affiche l'histogramme du champ scalaire courant
+			//we display the histogram of the current scalar field
 			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
 			if (sf)
 			{
@@ -8714,7 +8714,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::min<unsigned>(256,numberOfClasses);
 
 					histogram->setTitle(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
-					histogram->fromSF(sf,numberOfClasses);
+					histogram->fromSF(sf,numberOfClasses,sf->areNaNValuesShownInGray());
 					histogram->setAxisLabels(sf->getName(),"Count");
 					histogram->refresh();
 				}

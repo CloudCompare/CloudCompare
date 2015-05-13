@@ -24,6 +24,9 @@ v2.6.2 XX/XX/2015
 		on the edges)
 	* Histogram dialog:
 		- new icon 'Export to CSV'
+		- new icon 'Export to image'
+		- the SF parameter 'Show NaN values in gray' is now taken into account
+			(i.e. the gray/hidden values won't appear in the histogram if this option is not checked)
 	* Command line:
 		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
 		the command line (with a dedicated XML parameters file)

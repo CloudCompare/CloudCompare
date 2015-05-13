@@ -37,9 +37,9 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 {
 	setupUi(this);
 
-	//we grab the list of supported image file formats (writing)
+	//we grab the list of supported image file formats (output)
 	QList<QByteArray> list = QImageWriter::supportedImageFormats();
-	if (list.size()<1)
+	if (list.size() < 1)
 	{
 		ccLog::Error("No supported image format on this platform?!");
 		reject();
@@ -49,10 +49,10 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 	//we convert this list into a proper "filters" string
 	QString firstExtension(list[0].data());
 	QString firstFilter;
-	for (int i=0;i<list.size();++i)
+	for (int i=0; i<list.size(); ++i)
 	{
 		filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
-		if (i==0)
+		if (i == 0)
 			firstFilter = filters;
 	}
 
@@ -107,7 +107,7 @@ void ccRenderToFileDlg::chooseFile()
 															&selectedFilter);
 
 	//if operation is canceled, selectedFileName is empty
-	if (selectedFileName.size()<1)
+	if (selectedFileName.size() < 1)
 		return;
 
 	filenameLineEdit->setText(selectedFileName);

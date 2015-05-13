@@ -11217,6 +11217,9 @@ void MainWindow::update3DViewsMenu()
 	menu3DViews->clear();
 	menu3DViews->addAction(actionNew3DView);
 	menu3DViews->addSeparator();
+	menu3DViews->addAction(actionZoomIn);
+	menu3DViews->addAction(actionZoomOut);
+	menu3DViews->addSeparator();
 	menu3DViews->addAction(actionClose3DView);
 	menu3DViews->addAction(actionCloseAll3DViews);
 	menu3DViews->addSeparator();

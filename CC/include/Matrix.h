@@ -35,6 +35,8 @@ namespace CCLib
 {
 
 	//! Square matrix
+	/** Row-major ordered matrix (i.e. elements are accessed with 'values[row][column]')
+	**/
 	template <typename Scalar> class MatrixTpl
 	{
 	public:
@@ -71,9 +73,9 @@ namespace CCLib
 
 			if (init(size))
 			{
-				for (unsigned l=0; l<size; l++)
+				for (unsigned r=0; r<size; r++)
 					for (unsigned c=0; c<size; c++)
-						m_values[l][c] = static_cast<Scalar>(M16f[c*4+l]);
+						m_values[r][c] = static_cast<Scalar>(M16f[c*4+r]);
 			}
 		}
 
@@ -90,9 +92,9 @@ namespace CCLib
 
 			if (init(size))
 			{
-				for (unsigned l=0; l<size; l++)
+				for (unsigned r=0; r<size; r++)
 					for (unsigned c=0; c<size; c++)
-						m_values[l][c] = static_cast<Scalar>(M16d[c*4+l]);
+						m_values[r][c] = static_cast<Scalar>(M16d[c*4+r]);
 			}
 		}
 
@@ -144,7 +146,7 @@ namespace CCLib
 		//! Sets a particular matrix value
 		void inline setValue(unsigned row, unsigned column, Scalar value)
 		{
-			m_values[row][column]=value;
+			m_values[row][column] = value;
 		}
 
 		//! Returns a particular matrix value
@@ -162,9 +164,9 @@ namespace CCLib
 				init(B.size());
 			}
 
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 				for (unsigned c=0; c<m_matrixSize; c++)
-					m_values[l][c] = B.m_values[l][c];
+					m_values[r][c] = B.m_values[r][c];
 
 			if (B.eigenValues)
 			{
@@ -189,9 +191,9 @@ namespace CCLib
 		{
 			assert(B.size() == m_matrixSize);
 
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 				for (unsigned c=0; c<m_matrixSize; c++)
-					m_values[l][c] += B.m_values[l][c];
+					m_values[r][c] += B.m_values[r][c];
 
 			return *this;
 		}
@@ -210,28 +212,28 @@ namespace CCLib
 		{
 			assert(B.size() == m_matrixSize);
 
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 				for (unsigned c=0; c<m_matrixSize; c++)
-					m_values[l][c] -= B.m_values[l][c];
+					m_values[r][c] -= B.m_values[r][c];
 
 			return *this;
 		}
 
-		//! Multiplication
+		//! Multiplication (M = A*B)
 		MatrixTpl operator * (const MatrixTpl& B) const
 		{
 			assert(B.size() == m_matrixSize);
 
 			MatrixTpl C(m_matrixSize);
 
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 			{
 				for (unsigned c=0; c<m_matrixSize; c++)
 				{
 					Scalar sum = 0;
 					for (unsigned k=0; k<m_matrixSize; k++)
-						sum += m_values[l][k] * B.m_values[k][c];
-					C.m_values[l][c] = sum;
+						sum += m_values[r][k] * B.m_values[k][c];
+					C.m_values[r][c] = sum;
 				}
 			}
 
@@ -288,25 +290,25 @@ namespace CCLib
 		**/
 		void apply(const Scalar Vec[], Scalar result[]) const
 		{
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 			{
 				Scalar sum = 0;
 				for (unsigned k=0; k<m_matrixSize; k++)
-					sum += m_values[l][k] * static_cast<Scalar>(Vec[k]);
-				result[l] = sum;
+					sum += m_values[r][k] * static_cast<Scalar>(Vec[k]);
+				result[r] = sum;
 			}
 		}
 
 		//! In-place transpose
 		void transpose()
 		{
-			for (unsigned l=0; l<m_matrixSize-1; l++)
-				for (unsigned c=l+1; c<m_matrixSize; c++)
-					std::swap(m_values[l][c],m_values[c][l]);
+			for (unsigned r=0; r<m_matrixSize-1; r++)
+				for (unsigned c=r+1; c<m_matrixSize; c++)
+					std::swap(m_values[r][c],m_values[c][r]);
 		}
 
 		//! Returns the transposed version of this matrix
-		MatrixTpl transposed()
+		MatrixTpl transposed() const
 		{
 			MatrixTpl T(*this);
 			T.transpose();
@@ -317,8 +319,8 @@ namespace CCLib
 		//! Sets all elements to 0
 		void clear()
 		{
-			for (unsigned l=0; l<m_matrixSize; ++l)
-				memset(m_values[l],0,sizeof(Scalar)*m_matrixSize);
+			for (unsigned r=0; r<m_matrixSize; ++r)
+				memset(m_values[r],0,sizeof(Scalar)*m_matrixSize);
 
 			if (eigenValues)
 				memset(eigenValues,0,sizeof(Scalar)*m_matrixSize);
@@ -451,14 +453,14 @@ namespace CCLib
 		**/
 		void print(FILE* fp = 0) const
 		{
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 			{
 				for (unsigned c=0; c<m_matrixSize; c++)
 				{
 					if (fp)
-						fprintf(fp,"%6.6f ",m_values[l][c]);
+						fprintf(fp,"%6.6f ",m_values[r][c]);
 					else
-						printf("%6.6f ",m_values[l][c]);
+						printf("%6.6f ",m_values[r][c]);
 				}
 
 				if (fp)
@@ -473,16 +475,16 @@ namespace CCLib
 		{
 			clear();
 
-			for (unsigned l=0; l<m_matrixSize; l++)
-				m_values[l][l] = 1;
+			for (unsigned r=0; r<m_matrixSize; r++)
+				m_values[r][r] = 1;
 		}
 
 		//! Scales matrix (all elements are multiplied by the same coef.)
 		void scale(Scalar coef)
 		{
-			for (unsigned l=0; l<m_matrixSize; l++)
+			for (unsigned r=0; r<m_matrixSize; r++)
 				for (unsigned c=0; c<m_matrixSize; c++)
-					m_values[l][c] *= coef;
+					m_values[r][c] *= coef;
 		}
 
 		//! Returns trace
@@ -490,8 +492,8 @@ namespace CCLib
 		{
 			Scalar trace = 0;
 
-			for (unsigned l=0; l<m_matrixSize; l++)
-				trace += m_values[l][l];
+			for (unsigned r=0; r<m_matrixSize; r++)
+				trace += m_values[r][r];
 
 			return trace;
 		}
@@ -793,15 +795,15 @@ namespace CCLib
 			assert(m_matrixSize == 3 || m_matrixSize == 4);
 			memset(M16f,0,sizeof(float)*16);
 
-			for (unsigned l=0; l<3; l++)
+			for (unsigned r=0; r<3; r++)
 				for (unsigned c=0; c<3; c++)
-					M16f[l+c*4] = static_cast<float>(m_values[l][c]);
+					M16f[r+c*4] = static_cast<float>(m_values[r][c]);
 
 			if (m_matrixSize == 4)
-				for (unsigned l=0; l<3; l++)
+				for (unsigned r=0; r<3; r++)
 				{
-					M16f[12+l] = static_cast<float>(m_values[3][l]);
-					M16f[3+l*4] = static_cast<float>(m_values[l][3]);
+					M16f[12+r] = static_cast<float>(m_values[3][r]);
+					M16f[3+r*4] = static_cast<float>(m_values[r][3]);
 				}
 
 			M16f[15] = 1.0f;
@@ -813,16 +815,16 @@ namespace CCLib
 			assert(m_matrixSize == 3 || m_matrixSize == 4);
 			memset(M16d,0,sizeof(double)*16);
 
-			for (unsigned l=0; l<3; l++)
+			for (unsigned r=0; r<3; r++)
 				for (unsigned c=0; c<3; c++)
-					M16d[l+c*4] = static_cast<double>(m_values[l][c]);
+					M16d[r+c*4] = static_cast<double>(m_values[r][c]);
 
 			if (m_matrixSize == 4)
 			{
-				for (unsigned l=0; l<3; l++)
+				for (unsigned r=0; r<3; r++)
 				{
-					M16d[12+l] = static_cast<double>(m_values[3][l]);
-					M16d[3+l*4] = static_cast<double>(m_values[l][3]);
+					M16d[12+r] = static_cast<double>(m_values[3][r]);
+					M16d[3+r*4] = static_cast<double>(m_values[r][3]);
 				}
 			}
 

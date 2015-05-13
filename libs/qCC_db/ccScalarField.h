@@ -242,7 +242,7 @@ protected:
 	**/
 	Range m_logSaturationRange;
 
-	// Whether NaN values are shown in grey or are hidden
+	//! Whether NaN values are shown in grey or are hidden
 	bool m_showNaNValuesInGrey;
 
 	//! Whether color scale is symmetrical or not

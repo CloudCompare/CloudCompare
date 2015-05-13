@@ -8714,7 +8714,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::min<unsigned>(256,numberOfClasses);
 
 					histogram->setTitle(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
-					histogram->fromSF(sf,numberOfClasses,sf->areNaNValuesShownInGray());
+					histogram->fromSF(sf,numberOfClasses,sf->areNaNValuesShownInGrey());
 					histogram->setAxisLabels(sf->getName(),"Count");
 					histogram->refresh();
 				}

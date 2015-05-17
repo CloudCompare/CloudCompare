@@ -275,13 +275,13 @@ PointCoordinateType ccBBox::minDistTo(const ccBBox& box) const
 	{
 		CCVector3 d(0,0,0);
 
-		for (unsigned char dim=0; dim<3; ++dim)
+		for (unsigned char dim=0; dim < 3; ++dim)
 		{
 			//if the boxes overlap in one dimension, the distance is zero (in this dimension)
 			if (box.m_bbMin.u[dim] > m_bbMax.u[dim])
 				d.u[dim] = box.m_bbMin.u[dim] - m_bbMax.u[dim];
 			else if (box.m_bbMax.u[dim] < m_bbMin.u[dim])
-				d.x = m_bbMin.u[dim] - box.m_bbMax.u[dim];
+				d.u[dim] = m_bbMin.u[dim] - box.m_bbMax.u[dim];
 		}
 
 		return d.norm();

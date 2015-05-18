@@ -62,6 +62,7 @@ v2.6.2 XX/XX/2015
 	* Some options of the context menu of the DB tree were incorrectly using the term 'siblings' instead of 'children'
 	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds was not displayed in the right place)
 	* While importing a Bundler file, if the images were to be 'kept in memory' but not the keypoints, then CC would crash
+	* When saving a mesh composed of multiple sub-meshes to OBJ format, the triangles and texture information could be inconsistent
 
 v2.6.1 02/20/2015
 - New features:

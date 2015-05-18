@@ -217,6 +217,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	}
 
 	//mesh or sub-meshes
+	unsigned indexShift = 0;
 	for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
 	{
 		ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(*it);
@@ -238,7 +239,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			{
 				if (withMaterials)
 				{
-					int mtlIndex = mesh->getTriangleMtlIndex(i);
+					int mtlIndex = mesh->getTriangleMtlIndex(indexShift+i);
 					if (mtlIndex != lastMtlIndex)
 					{
 						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
@@ -257,7 +258,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 					if (withTexCoordinates)
 					{
-						mesh->getTriangleTexCoordinatesIndexes(i,t1,t2,t3);
+						mesh->getTriangleTexCoordinatesIndexes(indexShift+i,t1,t2,t3);
 						if (t1 >= 0) ++t1;
 						if (t2 >= 0) ++t2;
 						if (t3 >= 0) ++t3;
@@ -324,6 +325,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			stream << "#" << triNum << " faces" << endl;
 			if (file.error() != QFile::NoError)
 				return CC_FERR_WRITING;
+
+			indexShift += triNum;
 		}
 	}
 

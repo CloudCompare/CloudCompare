@@ -27,8 +27,11 @@ Big ones:
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
+	- export the history transformation (or the barycenter translation - see http://www.danielgm.net/cc/forum/viewtopic.php?t=1242)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
+	- between clouds (from distances)
+	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Finish the Oculus Rift plugin

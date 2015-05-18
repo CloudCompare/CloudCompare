@@ -50,6 +50,8 @@ v2.6.2 XX/XX/2015
 		- zoomed text size is estimated in a more accurate way
 		- the displayed size for the scale was wrong when the zoom was not 1
 	* 3D views now recognize the 'pinching' gesture (with 2 fingers) on multi-touch screens (to zoom)
+	* If available the version of the Visual Studio compiler and the version of Qt used to compile
+		CC are now displayed in the 'About' dialog
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

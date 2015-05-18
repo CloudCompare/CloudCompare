@@ -7254,6 +7254,13 @@ void MainWindow::doActionShawAboutDialog()
 	ui.setupUi(aboutDialog);
 
 	QString ccVer = ccCommon::GetCCVersion();
+	//add compilation info
+	ccVer += QString("<br><i>Compiled with");
+#if defined(_MSC_VER)
+	ccVer += QString(" MSVC %1 and").arg(_MSC_VER);
+#endif
+	ccVer += QString(" Qt %1").arg(QT_VERSION_STR);
+	ccVer += QString("</i>");
 	QString htmlText = ui.textEdit->toHtml();
 	QString enrichedHtmlText = htmlText.arg(ccVer);
 	//ccLog::PrintDebug(htmlText);
@@ -7269,7 +7276,7 @@ void MainWindow::doActionShawAboutDialog()
 
 void MainWindow::doActionShowHelpDialog()
 {
-	QMessageBox::information(	this, "Documentation", "Please visit http://www.cloudcompare.org/doc" );
+	QMessageBox::information(this, "Documentation", "Please visit http://www.cloudcompare.org/doc");
 }
 
 void MainWindow::freezeUI(bool state)

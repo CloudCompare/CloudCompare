@@ -50,6 +50,7 @@ if ( USE_QT5 )
 else()
 
 	set( DESIRED_QT_VERSION 4 )
+	set (QT_BINARY_DIR "") #to force CMake to update QT_BINARY_DIR!
 	if ( MSVC )
 		#We need QtMain to use 'WIN32' mode (/subsystem:windows) with MSVC
 		find_package( Qt4 ${QT_VERSION} COMPONENTS QtMain QtCore QtGui QtOpenGL REQUIRED )
@@ -64,6 +65,8 @@ else()
 	
 	list( APPEND EXTERNAL_LIBS_INCLUDE_DIR ${QT_INCLUDE_DIR} )
 	list( APPEND EXTERNAL_LIBS_LIBRARIES ${QT_LIBRARIES} )
+	
+	message(${QT_BINARY_DIR})
 
 endif()
 

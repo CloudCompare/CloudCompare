@@ -65,6 +65,7 @@ v2.6.2 XX/XX/2015
 	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds was not displayed in the right place)
 	* While importing a Bundler file, if the images were to be 'kept in memory' but not the keypoints, then CC would crash
 	* When saving a mesh composed of multiple sub-meshes to OBJ format, the triangles and texture information could be inconsistent
+	* When merging two or more meshes, material were merged if their name were the same even if the texture or other parameters were different
 
 v2.6.1 02/20/2015
 - New features:

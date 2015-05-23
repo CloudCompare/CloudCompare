@@ -48,6 +48,8 @@ public:
 	inline const QString& getName() const { return m_name; }
 	//! Returns the texture filename (if any)
 	inline const QString& getTextureFilename() const { return m_textureFilename; }
+	//! Sets the material name
+	inline void setName(QString name) { m_name = name; }
 
 	//! Sets diffuse color (both front and back)
 	void setDiffuse(const ccColor::Rgbaf& color);
@@ -119,6 +121,11 @@ public:
 
 	//! Adds a texture to the global texture DB
 	static void AddTexture(QImage image, QString absoluteFilename);
+
+	//! Compares this material with another one
+	/** \return true if both materials are equivalent or false otherwise
+	**/
+	bool compare(const ccMaterial& mtl) const;
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }

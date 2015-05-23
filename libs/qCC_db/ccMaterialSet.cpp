@@ -88,6 +88,33 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 	 
 	//material already exists?
 	int previousIndex = findMaterialByName(mtl->getName());
+	//DGM: warning, the materials may have the same name, but they may be different in reality (other texture, etc.)!
+	if (previousIndex >= 0)
+	{
+		const ccMaterial::CShared& previousMtl = (*this)[previousIndex];
+		if (!previousMtl->compare(*mtl))
+		{
+			//in fact the material is a bit different
+			previousIndex = -1;
+			if (!allowDuplicateNames)
+			{
+				//generate a new name
+				static const unsigned MAX_ATTEMPTS = 100;
+				for (unsigned i=1 ; i < MAX_ATTEMPTS; i++)
+				{
+					QString newMtlName = previousMtl->getName() + QString("_%1").arg(i);
+					if (findMaterialByName(newMtlName) < 0)
+					{
+						//we duplicate the material and we change its name
+						ccMaterial::Shared newMtl(new ccMaterial(*mtl));
+						newMtl->setName(newMtlName);
+						mtl = newMtl;
+						break;
+					}
+				}
+			}
+		}
+	}
 	if (previousIndex >= 0 && !allowDuplicateNames)
 		return previousIndex;
 

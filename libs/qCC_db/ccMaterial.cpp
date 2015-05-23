@@ -279,3 +279,9 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
 
 	return true;
 }
+
+bool ccMaterial::compare(const ccMaterial& mtl) const
+{
+	if (mtl.m_ambient != m_ambient)
+		return false;
+}

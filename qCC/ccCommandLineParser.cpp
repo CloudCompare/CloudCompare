@@ -1260,21 +1260,21 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 			ccPointCloud* fitleredCloud = m_clouds[i].pc->filterPointsByScalarValue(thisMinVal,thisMaxVal);
 			if (fitleredCloud)
 			{
+				Print(QString("\t\tCloud '%1' --> %2/%3 points remaining").arg(m_clouds[i].pc->getName()).arg(fitleredCloud->size()).arg(m_clouds[i].pc->size()));
+
+				CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+				//replace current cloud by this one
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = fitleredCloud;
+				m_clouds[i].basename += QString("_FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal);
 				if (s_autoSaveMode)
 				{
-					CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-					QString errorStr = Export(resultDesc,QString("FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal));
+					QString errorStr = Export(resultDesc);
 					if (!errorStr.isEmpty())
 					{
 						delete fitleredCloud;
 						return Error(errorStr);
 					}
-					//replace current cloud by this one
-					delete m_clouds[i].pc;
-					m_clouds[i].pc = fitleredCloud;
-					m_clouds[i].basename += QString("_FILTERED");
-					//delete fitleredCloud;
-					//fitleredCloud = 0;
 				}
 			}
 		}

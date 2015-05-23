@@ -95,6 +95,8 @@ static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
+static const char COMMAND_ASCII_EXPORT_ADD_COL_HEADER[]		= "ADD_HEADER";
+static const char COMMAND_ASCII_EXPORT_ADD_PTS_COUNT[]		= "ADD_PTS_COUNT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
@@ -3225,6 +3227,30 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (saveDialog)
 			{
 				saveDialog->setSeparatorIndex(index);
+			}
+		}
+		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_ADD_COL_HEADER))
+		{
+			if (fileFilter != AsciiFilter::GetFileFilter())
+				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+
+			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			assert(saveDialog);
+			if (saveDialog)
+			{
+				saveDialog->enableSaveColumnsNamesHeader(true);
+			}
+		}
+		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_ADD_PTS_COUNT))
+		{
+			if (fileFilter != AsciiFilter::GetFileFilter())
+				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+
+			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			assert(saveDialog);
+			if (saveDialog)
+			{
+				saveDialog->enableSavePointCountHeader(true);
 			}
 		}
 		else

@@ -20,13 +20,13 @@
 
 #include "ccClipBox.h"
 
-//qCC_db
-#include <ccGenericPointCloud.h>
-#include <ccCylinder.h>
-#include <ccCone.h>
-#include <ccSphere.h>
-#include <ccTorus.h>
-#include <ccHObjectCaster.h>
+//Local
+#include "ccGenericPointCloud.h"
+#include "ccCylinder.h"
+#include "ccCone.h"
+#include "ccSphere.h"
+#include "ccTorus.h"
+#include "ccHObjectCaster.h"
 
 //system
 #include <assert.h>

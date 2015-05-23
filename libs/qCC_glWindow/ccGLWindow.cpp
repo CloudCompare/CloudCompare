@@ -4140,7 +4140,7 @@ double ccGLWindow::computeActualPixelSize() const
 {
 	if (!m_viewportParams.perspectiveView)
 	{
-		return static_cast<double>(m_viewportParams.pixelSize) / static_cast<double>(m_viewportParams.zoom);
+		return static_cast<double>(m_viewportParams.pixelSize) / m_viewportParams.zoom;
 	}
 
 	int minScreenDim = std::min(m_glWidth,m_glHeight);
@@ -4151,7 +4151,7 @@ double ccGLWindow::computeActualPixelSize() const
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
 	float currentFov_deg = getFov();
-	return static_cast<double>(zoomEquivalentDist) * tan(currentFov_deg * static_cast<float>(CC_DEG_TO_RAD)) / static_cast<double>(minScreenDim);
+	return zoomEquivalentDist * tan(currentFov_deg * CC_DEG_TO_RAD) / static_cast<double>(minScreenDim);
 }
 
 float ccGLWindow::computePerspectiveZoom() const

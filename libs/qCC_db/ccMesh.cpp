@@ -35,9 +35,6 @@
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
 
-//qCC_db
-#include <ccScalarField.h>
-
 //Qt
 #include <QGLFormat>
 

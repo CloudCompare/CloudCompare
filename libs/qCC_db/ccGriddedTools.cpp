@@ -17,16 +17,16 @@
 
 #include "ccGriddedTools.h"
 
+//Local
+#include "ccPointCloud.h"
+#include "ccProgressDialog.h"
+#include "ccGBLSensor.h"
+#include "ccLog.h"
+
 //CCLib
 #include <ReferenceCloud.h>
 #include <GenericIndexedMesh.h>
 #include <Neighbourhood.h>
-
-//qCC_db
-#include <ccPointCloud.h>
-#include <ccProgressDialog.h>
-#include <ccGBLSensor.h>
-#include <ccLog.h>
 
 //Qt
 #include <QMessageBox>

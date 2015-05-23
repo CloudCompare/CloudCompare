@@ -35,11 +35,6 @@ public:
 	**/
 	ccGLMatrix() : ccGLMatrixTpl<float>() {}
 
-	//! Copy constructor from a ccGLMatrix
-	/** \param mat matrix
-	**/
-	ccGLMatrix(const ccGLMatrix& mat) : ccGLMatrixTpl<float>(mat) {}
-
 	//! Copy constructor from a ccGLMatrixTpl
 	/** \param mat matrix
 	**/
@@ -75,11 +70,6 @@ public:
 	/** Matrix is set to identity (see ccGLMatrixTpl::toIdentity) by default.
 	**/
 	ccGLMatrixd() : ccGLMatrixTpl<double>() {}
-
-	//! Copy constructor from a ccGLMatrixd
-	/** \param mat matrix
-	**/
-	ccGLMatrixd(const ccGLMatrixd& mat) : ccGLMatrixTpl<double>(mat) {}
 
 	//! Copy constructor from a ccGLMatrixTpl
 	/** \param mat matrix

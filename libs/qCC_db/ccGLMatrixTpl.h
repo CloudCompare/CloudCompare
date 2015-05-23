@@ -99,7 +99,7 @@ public:
 		CC_MAT_R11 = X.x;  CC_MAT_R21 = X.y;  CC_MAT_R31 = X.z;  CC_MAT_R41 = 0;
 		CC_MAT_R12 = Y.x;  CC_MAT_R22 = Y.y;  CC_MAT_R32 = Y.z;  CC_MAT_R42 = 0;
 		CC_MAT_R13 = Z.x;  CC_MAT_R23 = Z.y;  CC_MAT_R33 = Z.z;  CC_MAT_R43 = 0;
-		CC_MAT_R14 = Tr.x; CC_MAT_R24 = Tr.y; CC_MAT_R34 = Tr.z; CC_MAT_R44 = 1;
+		CC_MAT_R14 = Tr.x; CC_MAT_R24 = Tr.y; CC_MAT_R34 = Tr.z; CC_MAT_R44 = static_cast<T>(1);
 	}
 
 	//! Interpolates two matrices at relative position 'coef'
@@ -168,10 +168,10 @@ public:
 			mat[10] = -forward.z;
 			mat[14] = -eyePosition3D.z;
 			//------------------
-			mat[3]  = 0.0;
-			mat[7]  = 0.0;
-			mat[11] = 0.0;
-			mat[15] = 1.0;
+			mat[3]  = 0;
+			mat[7]  = 0;
+			mat[11] = 0;
+			mat[15] = static_cast<T>(1);
 		}
 		//------------------
 
@@ -197,16 +197,16 @@ public:
 			if (x.x < x.y)
 			{
 				if (x.x < x.z)
-					x.x = 1;
+					x.x = static_cast<T>(1);
 				else
-					x.z = 1;
+					x.z = static_cast<T>(1);
 			}
 			else
 			{
 				if (x.y < x.z)
-					x.y = 1;
+					x.y = static_cast<T>(1);
 				else
-					x.z = 1;
+					x.z = static_cast<T>(1);
 			}
 
 			Vector3Tpl<T> u = x-from;
@@ -277,7 +277,7 @@ public:
 			mat[0]	= static_cast<T>(q00 + q11 - q22 - q33);
 			mat[5]	= static_cast<T>(q00 - q11 + q22 - q33);
 			mat[10]	= static_cast<T>(q00 - q11 - q22 + q33);
-			mat[15]	= 1;
+			mat[15]	= static_cast<T>(1);
 		}
 
 		//non-diagonal elements
@@ -340,7 +340,7 @@ public:
 	static ccGLMatrixTpl<T> FromString(QString matText, bool& success)
 	{
 		QStringList valuesStr = matText.split(QRegExp("\\s+"),QString::SkipEmptyParts);
-		if (valuesStr.size() != 16)
+		if (valuesStr.size() != OPENGL_MATRIX_SIZE)
 		{
 			success = false;
 			return ccGLMatrixTpl<T>();
@@ -348,7 +348,7 @@ public:
 
 		ccGLMatrixTpl<T> matrix;
 		T* matValues = matrix.data();
-		for (int i=0; i<16; ++i)
+		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 		{
 			matValues[i] = static_cast<T>(valuesStr[(i%4)*4+(i>>2)].toDouble(&success));
 			if (!success)
@@ -495,7 +495,7 @@ public:
 	inline virtual void toZero() { memset(m_mat,0,OPENGL_MATRIX_SIZE*sizeof(T)); }
 
 	//! Sets matrix to identity
-	inline virtual void toIdentity() { toZero(); CC_MAT_R11 = CC_MAT_R22 = CC_MAT_R33 = CC_MAT_R44 = 1; }
+	inline virtual void toIdentity() { toZero(); CC_MAT_R11 = CC_MAT_R22 = CC_MAT_R33 = CC_MAT_R44 = static_cast<T>(1); }
 
 	//! Clears translation
 	/** Translation is set to (0,0,0).
@@ -513,7 +513,7 @@ public:
 	{
 		T cos_t = cos(alpha_rad);
 		T sin_t = sin(alpha_rad);
-		T inv_cos_t = 1 - cos_t;
+		T inv_cos_t = static_cast<T>(1) - cos_t;
 
 		//normalize rotation axis
 		Vector3Tpl<T> uAxis3D = axis3D;
@@ -548,7 +548,7 @@ public:
 		CC_MAT_R14 = t3D.x;
 		CC_MAT_R24 = t3D.y;
 		CC_MAT_R34 = t3D.z;
-		CC_MAT_R44 = 1.0;
+		CC_MAT_R44 = static_cast<T>(1);
 	}
 
 
@@ -767,7 +767,7 @@ public:
 	//! (in place) Addition operator
 	ccGLMatrixTpl<T>& operator += (const ccGLMatrixTpl<T>& mat)
 	{
-		for (unsigned i=0; i<16; ++i)
+		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 			m_mat[i] += mat.m_mat[i];
 		return (*this);
 	}
@@ -775,7 +775,7 @@ public:
 	//! (in place) Difference operator
 	ccGLMatrixTpl<T>& operator -= (const ccGLMatrixTpl<T>& mat)
 	{
-		for (unsigned i=0; i<16; ++i)
+		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 			m_mat[i] -= mat.m_mat[i];
 		return (*this);
 	}

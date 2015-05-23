@@ -18,7 +18,7 @@
 #ifndef CC_DRAWABLE_OBJECT_HEADER
 #define CC_DRAWABLE_OBJECT_HEADER
 
-#include <ccIncludeGL.h>
+#include "ccIncludeGL.h"
 
 //Local
 #include "qCC_db.h"

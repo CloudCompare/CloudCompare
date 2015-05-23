@@ -58,6 +58,9 @@ namespace ccColor
 	
 		//! Copy constructor
 		inline RgbTpl(const RgbTpl& c) : r(c.r), g(c.g), b(c.b) {}
+
+		//! Comparison operator
+		inline bool operator != (const RgbTpl<Type>& t) const { return (r != t.r || g != t.g || b != t.b); }
 	};
 
 	//! 3 components, float type
@@ -104,6 +107,9 @@ namespace ccColor
 		inline operator RgbTpl<Type>() const { return RgbTpl<Type>(rgba); }
 		//! Cast operator (const version)
 		//inline operator const Type*() const { return rgba; }
+
+		//! Comparison operator
+		inline bool operator != (const RgbaTpl<Type>& t) const { return (r != t.r || g != t.g || b != t.b || a != t.a); }
 	};
 
 	//! 4 components, float type

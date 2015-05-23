@@ -651,7 +651,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	//are we currently drawing objects in 2D or 3D?
 	bool draw3D = MACRO_Draw3D(context);
 	
-	//the entity must be either visible and selected, and of course it should be displayed in this context
+	//the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
 
 	//no need to display anything but clouds and meshes in "element picking mode"

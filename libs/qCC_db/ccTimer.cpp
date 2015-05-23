@@ -17,11 +17,11 @@
 
 #include "ccTimer.h"
 
+//Local
+#include "ccSingleton.h"
+
 //Qt
 #include <QTime>
-
-//qCC_db
-#include <ccSingleton.h>
 
 //System
 #include <assert.h>

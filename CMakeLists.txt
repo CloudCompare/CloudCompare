@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-# Eliminate a warning when building in Windows that relates
-# to static linking of Qt executables to qtmain.lib.
-# This policy was introduced in CMake version 2.8.11.
-# CMake version 2.8.11.2 warns when the policy is not set
-# and uses OLD behavior.
-if(POLICY CMP0020)
-  cmake_policy(SET CMP0020 OLD)
-endif()
+cmake_policy(PUSH)
+include ( CMakePolicies.cmake )
 
 # Set a consistent MACOSX_RPATH default across all CMake versions.
 # When CMake 2.8.12 is required, change this default to 1.
@@ -134,3 +128,5 @@ if( ${OPTION_EXPORT_TARGETS} )
     # configure the cmake.in file and place in the build tree so external apps may find it
     configure_file(CCPConfig.cmake.in "${PROJECT_BINARY_DIR}/CCPConfig.cmake" @ONLY)
 endif()
+
+cmake_policy(POP)

@@ -1,7 +1,6 @@
 # ------------------------------------------------------------------------------
 # Qt
 # ------------------------------------------------------------------------------
-
 option( USE_QT5 "Check to use Qt5 instead of Qt4" OFF )
 if ( USE_QT5 )
 
@@ -66,7 +65,7 @@ else()
 	list( APPEND EXTERNAL_LIBS_INCLUDE_DIR ${QT_INCLUDE_DIR} )
 	list( APPEND EXTERNAL_LIBS_LIBRARIES ${QT_LIBRARIES} )
 	
-	message(${QT_BINARY_DIR})
+	#message(${QT_BINARY_DIR})
 
 endif()
 

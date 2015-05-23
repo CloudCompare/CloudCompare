@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-# Eliminate a warning when building in Windows that relates
-# to static linking of Qt executables to qtmain.lib.
-# This policy was introduced in CMake version 2.8.11.
-# CMake version 2.8.11.2 warns when the policy is not set
-# and uses OLD behavior.
-if(POLICY CMP0020)
-  cmake_policy(SET CMP0020 OLD)
-endif()
+cmake_policy(PUSH)
+include ( ../CMakePolicies.cmake )
 
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
@@ -84,3 +78,5 @@ if ( COMPILE_CC_CORE_LIB_SHARED )
 		endforeach()
 	endif()
 endif()
+
+cmake_policy(POP)

@@ -11,8 +11,7 @@ File I/O:
 - PDF 3D
 - X3D files (integration with 'xiot' in... standby)
 - POD files (Pointools)
-- LEICA, POD file formats
-- SHP files (with GDAL?)
+- LEICA files
 - OpenCTM format (https://github.com/cloudcompare/trunk/issues/146)
 - Visual SFM format (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 
@@ -37,6 +36,7 @@ Big ones:
 [*] Finish the Oculus Rift plugin
 
 Various:
+[*] Select and copy multiple lines of the Console at once (http://www.danielgm.net/cc/forum/viewtopic.php?t=1272)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)

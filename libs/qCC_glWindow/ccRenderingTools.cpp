@@ -41,7 +41,7 @@
 #include <cmath>
 #include <limits>
 
-void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
+void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*/, unsigned maxDim/*=1024*/)
 {
 	if (!sensor)
 		return;
@@ -54,6 +54,9 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 	ScalarType minDist = 0, maxDist = 0;
 	{
 		const ScalarType *_zBuff = depthBuffer.zBuff;
+		double sumDist = 0;
+		double sumDist2 = 0;
+		unsigned count = 0;
 		for (unsigned x=0; x<depthBuffer.height*depthBuffer.width; ++x,++_zBuff)
 		{
 			if (x == 0)
@@ -65,6 +68,21 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 				maxDist = std::max(maxDist,*_zBuff);
 				minDist = std::min(minDist,*_zBuff);
 			}
+
+			if (*_zBuff > 0)
+			{
+				sumDist += *_zBuff;
+				sumDist2 += *_zBuff * *_zBuff;
+				++count;
+			}
+		}
+
+		if (count)
+		{
+			double avg = sumDist / count;
+			double stdDev = sqrt(fabs(sumDist2 / count - avg*avg));
+			//for better dynamics
+			maxDist = std::min(maxDist, static_cast<ScalarType>(avg + 1.0 * stdDev));
 		}
 	}
 
@@ -79,7 +97,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 		{
 			for (unsigned x=0; x<depthBuffer.width; ++x,++_zBuff)
 			{
-				const ccColor::Rgba& col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((*_zBuff-minDist)*coef)) : ccColor::black);
+				const ccColor::Rgba& col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((std::min(maxDist,*_zBuff)-minDist)*coef)) : ccColor::black);
 				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col.r,col.g,col.b));
 			}
 		}
@@ -87,7 +105,16 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 
 	QDialog* dlg = new QDialog(parent);
 	dlg->setWindowTitle(QString("%0 depth buffer [%1 x %2]").arg(sensor->getParent()->getName()).arg(depthBuffer.width).arg(depthBuffer.height));
-	dlg->setFixedSize(bufferImage.size());
+
+	unsigned maxDBDim = std::max<unsigned>(depthBuffer.width,depthBuffer.height);
+	unsigned scale = 1;
+	while (maxDBDim > maxDim)
+	{
+		maxDBDim >>= 1;
+		scale <<= 1;
+	}
+	dlg->setFixedSize(bufferImage.size()/scale);
+
 	QVBoxLayout* vboxLayout = new QVBoxLayout(dlg);
 	vboxLayout->setContentsMargins(0,0,0,0);
 	QLabel* label = new QLabel(dlg);

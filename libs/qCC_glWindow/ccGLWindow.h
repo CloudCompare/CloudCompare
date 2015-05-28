@@ -261,7 +261,7 @@ public:
 	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
 
 	//! Returns the visible objects bounding-box
-	ccBBox getVisibleObjectsBB() const;
+	void getVisibleObjectsBB(ccBBox& box) const;
 
 	//! Rotates the base view matrix
 	/** Warning: 'base view' marix is either:

@@ -713,35 +713,34 @@ void ccHObject::applyGLTransformation(const ccGLMatrix& trans)
 	m_glTransHistory = trans * m_glTransHistory;
 }
 
-void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
+void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput/*=NULL*/)
 {
-	ccGLMatrix* _trans = NULL;
+	ccGLMatrix transTemp;
+	const ccGLMatrix* transToApply = transInput;
 
 	if (m_glTransEnabled)
 	{
-		if (!trans)
+		if (!transInput)
 		{
 			//if no transformation is provided (by father)
 			//we initiate it with the current one
-			trans = _trans = new ccGLMatrix(m_glTrans);
+			transToApply = &m_glTrans;
 		}
 		else
 		{
-			*trans *= m_glTrans;
+			transTemp = *transInput * m_glTrans;
+			transToApply = &transTemp;
 		}
 	}
 
-	if (trans)
+	if (transToApply)
 	{
-		applyGLTransformation(*trans);
+		applyGLTransformation(*transToApply);
 		notifyGeometryUpdate();
 	}
 
 	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->applyGLTransformation_recursive(trans);
-
-	if (_trans)
-		delete _trans;
+		(*it)->applyGLTransformation_recursive(transToApply);
 
 	if (m_glTransEnabled)
 		resetGLTransformation();

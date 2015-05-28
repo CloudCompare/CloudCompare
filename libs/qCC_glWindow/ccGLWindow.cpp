@@ -1494,7 +1494,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 	glPointSize(m_viewportParams.defaultPointSize);
 	glLineWidth(m_viewportParams.defaultLineWidth);
 
-	ccLog::PrintDebug(QString("[draw3D] LOD leve: %1").arg(m_currentLODLevel));
+	ccLog::PrintDebug(QString("[draw3D] LOD level: %1").arg(m_currentLODLevel));
 	if (m_currentLODLevel == 0)
 	{
 		setStandardOrthoCenter();
@@ -1586,6 +1586,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 		CONTEXT.colorRampShader = m_colorRampShader;
 	}
 	//custom rendering shader (OpenGL 3.3+)
+	//FIXME: work in progress
 	CONTEXT.customRenderingShader = m_customRenderingShader;
 
 	//LOD
@@ -2116,20 +2117,22 @@ void ccGLWindow::drawTrihedron()
 {
 	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 
-	float w = static_cast<float>(m_glWidth)*0.5f-trihedronLength-10.0f;
-	float h = static_cast<float>(m_glHeight)*0.5f-trihedronLength-5.0f;
+	float w = static_cast<float>(m_glWidth)/2 - trihedronLength - 10.0f;
+	float h = static_cast<float>(m_glHeight)/2 - trihedronLength - 5.0f;
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glTranslatef(w, -h, 0);
 	glMultMatrixd(m_viewportParams.viewMat.data());
 
+	//on first call, compile the GL list once and for all
 	if (m_trihedronGLList == GL_INVALID_LIST_ID)
 	{
 		m_trihedronGLList = glGenLists(1);
 		glNewList(m_trihedronGLList, GL_COMPILE);
 
-		glPushAttrib(GL_DEPTH_BUFFER_BIT);
+		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 
 		//trihedron OpenGL drawing
@@ -2145,7 +2148,7 @@ void ccGLWindow::drawTrihedron()
 		glVertex3f(0.0f,0.0f,CC_DISPLAYED_TRIHEDRON_AXES_LENGTH);
 		glEnd();
 
-		glPopAttrib();
+		glPopAttrib(); //GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
 
 		glEndList();
 	}
@@ -2161,41 +2164,40 @@ void ccGLWindow::drawTrihedron()
 
 CCVector3d ccGLWindow::getRealCameraCenter() const
 {
+	//the camera center is always defined in perspective mode
 	if (m_viewportParams.perspectiveView)
+	{
 		return m_viewportParams.cameraCenter;
+	}
 
-	ccBBox box = getVisibleObjectsBB();
+	//in orthographic mode, we put the camera at the center of the
+	//visible objects (along the viewing direction)
+	ccBBox box;
+	getVisibleObjectsBB(box);
 
 	return CCVector3d(	m_viewportParams.cameraCenter.x,
 						m_viewportParams.cameraCenter.y,
 						box.isValid() ? box.getCenter().z : 0 );
 }
 
-ccBBox ccGLWindow::getVisibleObjectsBB() const
+void ccGLWindow::getVisibleObjectsBB(ccBBox& box) const
 {
-	ccBBox box;
-
 	//compute center of visible objects constellation
 	if (m_globalDBRoot)
 	{
 		//get whole bounding-box
 		box = m_globalDBRoot->getDisplayBB_recursive(false, this);
-		if (box.isValid())
-		{
-			//incorporate window own db
-			if (m_winDBRoot)
-			{
-				ccBBox ownBox = m_winDBRoot->getDisplayBB_recursive(false, this);
-				if (ownBox.isValid())
-				{
-					box.add(ownBox.minCorner());
-					box.add(ownBox.maxCorner());
-				}
-			}
-		}
 	}
 
-	return box;
+	//incorporate window own db
+	if (m_winDBRoot)
+	{
+		ccBBox ownBox = m_winDBRoot->getDisplayBB_recursive(false, this);
+		if (ownBox.isValid())
+		{
+			box += ownBox;
+		}
+	}
 }
 
 void ccGLWindow::invalidateViewport()
@@ -2282,13 +2284,14 @@ void ccGLWindow::recalcProjectionMatrix()
 	if (m_globalDBRoot)
 	{
 		//get whole bounding-box
-		ccBBox box = getVisibleObjectsBB();
+		ccBBox box;
+		getVisibleObjectsBB(box);
 		if (box.isValid())
 		{
 			//get bbox center
 			bbCenter = CCVector3d::fromArray(box.getCenter().u);
 			//get half bbox diagonal length
-			bbHalfDiag = static_cast<double>(box.getDiagNorm()) / 2;
+			bbHalfDiag = box.getDiagNormd() / 2;
 		}
 	}
 
@@ -2709,7 +2712,13 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 		int VP[4];
 		getViewportArray(VP);
 		GLdouble zp;
-		gluProject(m_viewportParams.pivotPoint.x,m_viewportParams.pivotPoint.y,m_viewportParams.pivotPoint.z,getModelViewMatd(),getProjectionMatd(),VP,&xp,&yp,&zp);
+		gluProject(	m_viewportParams.pivotPoint.x,
+					m_viewportParams.pivotPoint.y,
+					m_viewportParams.pivotPoint.z,
+					getModelViewMatd(),
+					getProjectionMatd(),
+					VP,
+					&xp,&yp,&zp);
 
 		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
 		xp = std::min<GLdouble>(xp,3*width()/4);
@@ -2946,9 +2955,12 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		double pixSize = computeActualPixelSize();
 		CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
 		if (!m_viewportParams.perspectiveView)
+		{
 			u.y *= m_viewportParams.orthoAspectRatio;
+		}
 
-		bool entityMovingMode = (m_interactionMode == TRANSFORM_ENTITY) || ((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
+		bool entityMovingMode =		(m_interactionMode == TRANSFORM_ENTITY)
+								||	((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
 		if (entityMovingMode)
 		{
 			//apply inverse view matrix
@@ -3277,7 +3289,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 	}
 
 	//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-	float wheelDelta_deg = static_cast<float>(event->delta()) / 8.0f;
+	float wheelDelta_deg = static_cast<float>(event->delta()) / 8;
 
 	onWheelEvent(wheelDelta_deg);
 
@@ -3297,8 +3309,8 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 		else
 		{
 			//convert degrees in 'constant' walking speed in ... pixels ;)
-			const double& c_deg2PixConversion = getDisplayParameters().zoomSpeed;
-			moveCamera(0,0,-static_cast<float>(c_deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
+			const double& deg2PixConversion = getDisplayParameters().zoomSpeed;
+			moveCamera(0,0,-static_cast<float>(deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
 		}
 	}
 	else //ortho. mode
@@ -4414,8 +4426,10 @@ void ccGLWindow::updateZoom(float zoomFactor)
 	//no 'zoom' in viewer based perspective
 	assert(!m_viewportParams.perspectiveView);
 
-	if (zoomFactor > 0.0 && zoomFactor != 1.0)
+	if (zoomFactor > 0 && zoomFactor != 1.0f)
+	{
 		setZoom(m_viewportParams.zoom*zoomFactor);
+	}
 }
 
 void ccGLWindow::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,

@@ -40,7 +40,6 @@ class QStandardItemModel;
 class QAction;
 class ccPropertiesTreeDelegate;
 class ccHObject;
-class ccGLWindow;
 
 //! Precise statistics about current selection
 struct dbTreeSelectionInfo
@@ -176,10 +175,24 @@ public slots:
 	void selectEntities(std::set<int> entIDs);
 
 	//! Selects multiple entities at once
-	/** \param entIDs set of the entities to 'select'
+	/** \param entities set of the entities to 'select'
 		\param incremental whether to 'add' the input set to the selected entities set or to use it as replacement
 	**/
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
+
+protected:
+
+	//! Entity property that can be toggled
+	enum TOGGLE_PROPERTY {	TG_ENABLE,
+							TG_VISIBLE,
+							TG_COLOR,
+							TG_SF,
+							TG_NORMAL,
+							TG_MATERIAL,
+							TG_3D_NAME };
+
+	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
+	void toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop);
 
 protected slots:
 	void showContextMenu(const QPoint&);
@@ -191,13 +204,15 @@ protected slots:
 	void sortChildrenZA();
 	void sortChildrenType();
 	void selectByTypeAndName();
-	void toggleSelectedEntities();
-	void toggleSelectedEntitiesVisibility();
-	void toggleSelectedEntitiesColor();
-	void toggleSelectedEntitiesNormals();
-	void toggleSelectedEntitiesSF();
-	void toggleSelectedEntitiesMat();
-	void toggleSelectedEntities3DName();
+
+	inline void toggleSelectedEntities()			{ toggleSelectedEntitiesProperty(TG_ENABLE); }
+	inline void toggleSelectedEntitiesVisibility()	{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
+	inline void toggleSelectedEntitiesColor()		{ toggleSelectedEntitiesProperty(TG_COLOR); }
+	inline void toggleSelectedEntitiesNormals()		{ toggleSelectedEntitiesProperty(TG_NORMAL); }
+	inline void toggleSelectedEntitiesSF()			{ toggleSelectedEntitiesProperty(TG_SF); }
+	inline void toggleSelectedEntitiesMat()         { toggleSelectedEntitiesProperty(TG_MATERIAL); }
+	inline void toggleSelectedEntities3DName()      { toggleSelectedEntitiesProperty(TG_3D_NAME); }
+
 	void addEmptyGroup();
 	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
@@ -215,18 +230,6 @@ protected:
 
 	//! Shows properties view for a given element
 	void showPropertiesView(ccHObject* obj);
-
-	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
-	/** Properties are:
-			0 - enable state
-			1 - visibility
-			2 - normal
-			3 - color
-			4 - SF
-			5 - materials/textures
-			6 - 3D name
-	**/
-	void toggleSelectedEntitiesProperty(unsigned prop);
 
 	//! Entities sorting schemes
 	enum SortRules { SORT_A2Z, SORT_Z2A, SORT_BY_TYPE };

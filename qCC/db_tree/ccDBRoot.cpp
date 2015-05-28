@@ -1045,18 +1045,22 @@ QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
 bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int destRow, int destColumn, const QModelIndex& destParent)
 {
 	if (action != Qt::MoveAction)
+	{
 		return false;
+	}
 
 	//default mime type for QAbstractItemModel items)
 	if (!data->hasFormat("application/x-qabstractitemmodeldatalist"))
+	{
 		return false;
+	}
 
 	//new parent (can't be a leaf object!)
 	ccHObject* newParent = destParent.isValid() ? static_cast<ccHObject*>(destParent.internalPointer()) : m_treeRoot;
-	char newParentName[1024];
-	strcpy(newParentName,newParent->getName().toLocal8Bit().constData());
 	if (newParent && newParent->isLeaf())
+	{
 		return false;
+	}
 
 	//decode data
 	QByteArray encoded = data->data("application/x-qabstractitemmodeldatalist");
@@ -1076,8 +1080,6 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		if (!item)
 			continue;
 		//ccLog::Print(QString("[Drag & Drop] Source: %1").arg(item->getName()));
-		char itemName[1024];
-		strcpy(itemName,item->getName().toLocal8Bit().constData());
 
 		//old parent
 		ccHObject* oldParent = item->getParent();
@@ -1086,17 +1088,17 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		//let's check if we can actually move the entity
 		if (oldParent)
 		{
-			char oldParentName[1024];
-			strcpy(oldParentName,oldParent->getName().toLocal8Bit().constData());
 			if (item->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				//point cloud == mesh vertices?
 				if (oldParent->isKindOf(CC_TYPES::MESH) && ccHObjectCaster::ToGenericMesh(oldParent)->getAssociatedCloud() == item)
+				{
 					if (oldParent != newParent)
 					{
 						ccLog::Error("Vertices can't leave their parent mesh!");
 						return false;
 					}
+				}
 			}
 			else if (item->isKindOf(CC_TYPES::MESH))
 			{
@@ -1168,19 +1170,21 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		//special case: moving an item inside the same 'parent'
 		if (oldParent && newParent == oldParent)
 		{
-			int oldRow = newParent->getChildIndex(item);
+			int oldRow = oldParent->getChildIndex(item);
 			if (destRow < 0)
 			{
-				assert(newParent->getChildrenNumber()>0);
-				destRow = static_cast<int>(newParent->getChildrenNumber())-1;
+				assert(oldParent->getChildrenNumber() != 0);
+				destRow = static_cast<int>(oldParent->getChildrenNumber())-1;
 			}
-			else if (oldRow<destRow)
+			else if (oldRow < destRow)
 			{
 				assert(destRow > 0);
 				--destRow;
 			}
 			else if (oldRow == destRow)
+			{
 				return false; //nothing to do
+			}
 		}
 
 		//remove link with old parent (only CHILD/PARENT related flags!)
@@ -1248,27 +1252,34 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 	
 	//we recursively expand sub-branches
 	ccHObject::Container toExpand;
-	toExpand.push_back(item);
-	while (!toExpand.empty())
+	try
 	{
-		item = toExpand.back();
-		toExpand.pop_back();
-
-		QModelIndex itemIndex = index(item);
-		if (itemIndex.isValid())
+		toExpand.push_back(item);
+		while (!toExpand.empty())
 		{
-			if (expand)
-				m_dbTreeWidget->expand(itemIndex);
-			else
-				m_dbTreeWidget->collapse(itemIndex);
-		}
+			item = toExpand.back();
+			toExpand.pop_back();
 
-		assert(item->getChildrenNumber() > 0);
-		for (unsigned i=0; i<item->getChildrenNumber(); ++i)
-		{
-			if (item->getChild(i)->getChildrenNumber() > 0)
-				toExpand.push_back(item->getChild(i));
+			QModelIndex itemIndex = index(item);
+			if (itemIndex.isValid())
+			{
+				if (expand)
+					m_dbTreeWidget->expand(itemIndex);
+				else
+					m_dbTreeWidget->collapse(itemIndex);
+			}
+
+			assert(item->getChildrenNumber() != 0);
+			for (unsigned i=0; i<item->getChildrenNumber(); ++i)
+			{
+				if (item->getChild(i)->getChildrenNumber() != 0)
+					toExpand.push_back(item->getChild(i));
+			}
 		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory!
 	}
 }
 
@@ -1696,49 +1707,8 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclus
 	selectEntities(toSelect, ctrlPushed);
 }
 
-void ccDBRoot::toggleSelectedEntities()
+void ccDBRoot::toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop)
 {
-	toggleSelectedEntitiesProperty(0);
-}
-
-void ccDBRoot::toggleSelectedEntitiesVisibility()
-{
-	toggleSelectedEntitiesProperty(1);
-}
-
-void ccDBRoot::toggleSelectedEntitiesColor()
-{
-	toggleSelectedEntitiesProperty(2);
-}
-
-void ccDBRoot::toggleSelectedEntitiesNormals()
-{
-	toggleSelectedEntitiesProperty(3);
-}
-
-void ccDBRoot::toggleSelectedEntitiesSF()
-{
-	toggleSelectedEntitiesProperty(4);
-}
-
-void ccDBRoot::toggleSelectedEntitiesMat()
-{
-	toggleSelectedEntitiesProperty(5);
-}
-
-void ccDBRoot::toggleSelectedEntities3DName()
-{
-	toggleSelectedEntitiesProperty(6);
-}
-
-void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
-{
-	if (prop > 6)
-	{
-		ccLog::Warning("[ccDBRoot::toggleSelectedEntitiesProperty] Internal error: invalid 'prop' value");
-		return;
-	}
-
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	int selCount = selectedIndexes.size();
@@ -1756,27 +1726,27 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 			assert(false);
 			continue;
 		}
-		switch(prop)
+		switch (prop)
 		{
-		case 0: //enable state
+		case TG_ENABLE: //enable state
 			item->setEnabled(!item->isEnabled());
 			break;
-		case 1: //visibility
+		case TG_VISIBLE: //visibility
 			item->toggleVisibility();
 			break;
-		case 2: //color
+		case TG_COLOR: //color
 			item->toggleColors();
 			break;
-		case 3: //normal
+		case TG_NORMAL: //normal
 			item->toggleNormals();
 			break;
-		case 4: //SF
+		case TG_SF: //SF
 			item->toggleSF();
 			break;
-		case 5: //Materials/textures
+		case TG_MATERIAL: //Materials/textures
 			item->toggleMaterials();
 			break;
-		case 6: //3D name
+		case TG_3D_NAME: //3D name
 			item->toggleShowName();
 			break;
 		}

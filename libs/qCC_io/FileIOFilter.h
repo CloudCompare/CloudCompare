@@ -102,7 +102,7 @@ public: //initialization
 	//! Shared type
 	typedef QSharedPointer<FileIOFilter> Shared;
 
-public: //public interface (to be reimplemented by each I/O filter
+public: //public interface (to be reimplemented by each I/O filter)
 
 	//! Returns whether this I/O filter can import files
 	virtual bool importSupported() const { return false; }

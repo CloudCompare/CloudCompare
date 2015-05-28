@@ -116,33 +116,25 @@ ccBBox ccBBox::operator + (const ccBBox& aBBox) const
 		return *this;
 
 	ccBBox tempBox;
-
-	tempBox.m_bbMin.x = std::min(m_bbMin.x, aBBox.m_bbMin.x);
-	tempBox.m_bbMin.y = std::min(m_bbMin.y, aBBox.m_bbMin.y);
-	tempBox.m_bbMin.z = std::min(m_bbMin.z, aBBox.m_bbMin.z);
-	tempBox.m_bbMax.x = std::max(m_bbMax.x, aBBox.m_bbMax.x);
-	tempBox.m_bbMax.y = std::max(m_bbMax.y, aBBox.m_bbMax.y);
-	tempBox.m_bbMax.z = std::max(m_bbMax.z, aBBox.m_bbMax.z);
-
-	tempBox.setValidity(true);
+	{
+		tempBox.m_bbMin.x = std::min(m_bbMin.x, aBBox.m_bbMin.x);
+		tempBox.m_bbMin.y = std::min(m_bbMin.y, aBBox.m_bbMin.y);
+		tempBox.m_bbMin.z = std::min(m_bbMin.z, aBBox.m_bbMin.z);
+		tempBox.m_bbMax.x = std::max(m_bbMax.x, aBBox.m_bbMax.x);
+		tempBox.m_bbMax.y = std::max(m_bbMax.y, aBBox.m_bbMax.y);
+		tempBox.m_bbMax.z = std::max(m_bbMax.z, aBBox.m_bbMax.z);
+		tempBox.setValidity(true);
+	}
 
 	return tempBox;
 }
 
 const ccBBox& ccBBox::operator += (const ccBBox& aBBox)
 {
-	if (!m_valid)
+	if (aBBox.isValid())
 	{
-		*this = aBBox;
-	}
-	else if (aBBox.isValid())
-	{
-		m_bbMin.x = std::min(m_bbMin.x, aBBox.m_bbMin.x);
-		m_bbMin.y = std::min(m_bbMin.y, aBBox.m_bbMin.y);
-		m_bbMin.z = std::min(m_bbMin.z, aBBox.m_bbMin.z);
-		m_bbMax.x = std::max(m_bbMax.x, aBBox.m_bbMax.x);
-		m_bbMax.y = std::max(m_bbMax.y, aBBox.m_bbMax.y);
-		m_bbMax.z = std::max(m_bbMax.z, aBBox.m_bbMax.z);
+		add(aBBox.minCorner());
+		add(aBBox.maxCorner());
 	}
 
 	return *this;

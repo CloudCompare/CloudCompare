@@ -11177,6 +11177,7 @@ void MainWindow::updateMenus()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	bool hasMdiChild = (win != 0);
+	int mdiChildCount = m_mdiArea->subWindowList().size();
 	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
 
 	//General Menu
@@ -11184,12 +11185,12 @@ void MainWindow::updateMenus()
 	menuTools->setEnabled(true/*hasSelectedEntities*/);
 
 	//3D Views Menu
-	actionClose3DView->setEnabled(hasMdiChild);
-	actionCloseAll3DViews->setEnabled(hasMdiChild);
-	actionTile3DViews->setEnabled(hasMdiChild);
-	actionCascade3DViews->setEnabled(hasMdiChild);
-	actionNext3DView->setEnabled(hasMdiChild);
-	actionPrevious3DView->setEnabled(hasMdiChild);
+	actionClose3DView    ->setEnabled(hasMdiChild);
+	actionCloseAll3DViews->setEnabled(mdiChildCount != 0);
+	actionTile3DViews    ->setEnabled(mdiChildCount > 1);
+	actionCascade3DViews ->setEnabled(mdiChildCount > 1);
+	actionNext3DView     ->setEnabled(mdiChildCount > 1);
+	actionPrevious3DView ->setEnabled(mdiChildCount > 1);
 
 	//Shaders & Filters display Menu
 	bool shadersEnabled = (win ? win->areShadersEnabled() : false);

@@ -14,7 +14,11 @@
 #include <algorithm>
 #include <memory>
 #include <deque>
+#ifndef __APPLE__
 #include <malloc.h>
+#else
+#include <stdlib.h>
+#endif
 
 namespace GfxTL
 {

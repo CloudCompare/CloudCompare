@@ -1,7 +1,7 @@
 #ifndef MiscLib__ALIGNEDALLOCATOR_HEADER__
 #define MiscLib__ALIGNEDALLOCATOR_HEADER__
 #include <memory>
-#include <malloc.h>
+#include <stdlib.h>
 #include <xmmintrin.h>
 #include <limits>
 #ifdef max

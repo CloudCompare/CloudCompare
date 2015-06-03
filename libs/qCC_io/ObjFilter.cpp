@@ -597,7 +597,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			++normsRead;
 		}
 		/*** new group ***/
-		else if (tokens.front() == "g")
+		else if (tokens.front() == "g" || tokens.front() == "o")
 		{
 			//update new group index
 			facesRead = 0;

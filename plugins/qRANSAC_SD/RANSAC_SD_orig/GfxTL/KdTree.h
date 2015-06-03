@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <memory>
 #include <deque>
-#include <malloc.h>
+#include <stdlib.h>
 
 namespace GfxTL
 {

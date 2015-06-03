@@ -1,6 +1,6 @@
 #ifndef GfxTL__FLATCOPYVECTOR_HEADER__
 #define GfxTL__FLATCOPYVECTOR_HEADER__
-#include <malloc.h>
+#include <stdlib.h>
 #include <memory.h>
 #include <iterator>
 

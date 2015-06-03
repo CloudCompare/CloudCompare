@@ -63,9 +63,9 @@ double GetAngle_deg(CCVector3 AB, CCVector3 AC)
 	double dotprod = AB.dot(AC);
 	//clamp value (just in case)
 	if (dotprod <= -1.0)
-		return dotprod = -1.0;
+		dotprod = -1.0;
 	else if (dotprod > 1.0)
-		return dotprod = 1.0;
+		dotprod = 1.0;
 	return acos(dotprod) * CC_RAD_TO_DEG;
 }
 

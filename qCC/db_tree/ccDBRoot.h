@@ -44,21 +44,20 @@ class ccHObject;
 //! Precise statistics about current selection
 struct dbTreeSelectionInfo
 {
-	int selCount;
-
-	int sfCount;
-	int colorCount;
-	int normalsCount;
-	int octreeCount;
-	int cloudCount;
-	int groupCount;
-	int polylineCount;
-	int meshCount;
-	int imageCount;
-	int sensorCount;
-	int gblSensorCount;
-	int cameraSensorCount;
-	int kdTreeCount;
+	size_t selCount;
+	size_t sfCount;
+	size_t colorCount;
+	size_t normalsCount;
+	size_t octreeCount;
+	size_t cloudCount;
+	size_t groupCount;
+	size_t polylineCount;
+	size_t meshCount;
+	size_t imageCount;
+	size_t sensorCount;
+	size_t gblSensorCount;
+	size_t cameraSensorCount;
+	size_t kdTreeCount;
 
 	void reset()
 	{
@@ -118,9 +117,9 @@ public:
 	int countSelectedEntities(CC_CLASS_ENUM filter = CC_TYPES::OBJECT);
 
 	//! Returns selected entities in DB tree (optionally with a given type and additional information)
-	int getSelectedEntities(ccHObject::Container& selEntities,
-							CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
-							dbTreeSelectionInfo* info = NULL);
+	size_t getSelectedEntities(	ccHObject::Container& selectedEntities,
+								CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
+								dbTreeSelectionInfo* info = NULL);
 
 	//! Expands tree at a given node
 	void expandElement(ccHObject* anObject, bool state);

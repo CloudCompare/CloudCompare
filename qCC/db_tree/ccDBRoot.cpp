@@ -920,33 +920,42 @@ int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
 	return realCount;
 }
 
-int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
-									CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
-									dbTreeSelectionInfo* info/*=NULL*/)
+size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
+										CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
+										dbTreeSelectionInfo* info/*=NULL*/ )
 {
+	selectedEntities.clear();
+	
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	int i,selCount = selectedIndexes.size();
 
-	for (i=0; i<selCount; ++i)
+	try
 	{
-		ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-		if (anObject && anObject->isKindOf(filter))
-			selEntities.push_back(anObject);
+		int selCount = selectedIndexes.size();
+		for (int i=0; i<selCount; ++i)
+		{
+			ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+			if (anObject && anObject->isKindOf(filter))
+				selectedEntities.push_back(anObject);
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory!
 	}
 
 	if (info)
 	{
 		info->reset();
-		info->selCount = selCount;
+		info->selCount = selectedIndexes.size();
 
-		for (i=0; i<selCount; ++i)
+		for (size_t i=0; i<info->selCount; ++i)
 		{
-			ccHObject* obj = selEntities[i];
+			ccHObject* obj = selectedEntities[i];
 
-			info->sfCount += int(obj->hasScalarFields());
-			info->colorCount += int(obj->hasColors());
-			info->normalsCount += int(obj->hasNormals());
+			info->sfCount += obj->hasScalarFields() ? 1 : 0;
+			info->colorCount += obj->hasColors() ? 1 : 0;
+			info->normalsCount += obj->hasNormals() ? 1 : 0;
 
 			if (obj->isA(CC_TYPES::HIERARCHY_OBJECT))
 				info->groupCount++;
@@ -955,7 +964,7 @@ int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
-				info->octreeCount += int(cloud->getOctree() != NULL);
+				info->octreeCount += cloud->getOctree() != NULL ? 1 : 0;
 			}
 
 			if (obj->isKindOf(CC_TYPES::MESH))
@@ -978,7 +987,7 @@ int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
 		}
 	}
 
-	return int(selEntities.size());
+	return selectedEntities.size();
 }
 
 Qt::DropActions ccDBRoot::supportedDropActions() const

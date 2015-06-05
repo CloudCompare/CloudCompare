@@ -53,7 +53,7 @@ struct plyElement
 	long elementInstances;
 	std::vector<plyProperty> properties;
 	int propertiesCount;
-	bool isList;
+	bool isFace;
 };
 
 //! Stanford PLY file I/O filter

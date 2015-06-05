@@ -2636,6 +2636,24 @@ bool ccMesh::hasMaterials() const
 	return m_materials && !m_materials->empty() && m_triMtlIndexes && (m_triMtlIndexes->currentSize() == m_triVertIndexes->currentSize());
 }
 
+void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTable, bool autoReleaseOldTable/*=true*/)
+{
+	if (m_triMtlIndexes == matIndexesTable)
+		return;
+
+	if (m_triMtlIndexes && autoReleaseOldTable)
+	{
+		m_triMtlIndexes->release();
+		m_triMtlIndexes = 0;
+	}
+
+	m_triMtlIndexes = matIndexesTable;
+	if (m_triMtlIndexes)
+	{
+		m_triMtlIndexes->link();
+	}
+}
+
 bool ccMesh::reservePerTriangleMtlIndexes()
 {
 	assert(!m_triMtlIndexes); //try to avoid doing this twice!

@@ -241,6 +241,15 @@ public:
 	**/
 	void addTriangleMtlIndex(int mtlIndex);
 
+	//! Container of per-triangle material descriptors
+	typedef GenericChunkedArray<1,int> triangleMaterialIndexesSet;
+
+	//! Sets per-triangle material indexes array
+	void setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTable, bool autoReleaseOldTable = true);
+
+	//! Returns the per-triangle material indexes array
+	inline const triangleMaterialIndexesSet* getTriangleMtlIndexesTable() const { return m_triMtlIndexes; }
+
 	//! Sets triangle material indexes
 	/** Cf. ccMesh::reservePerTriangleMtlIndexes.
 		\param triangleIndex triangle index
@@ -426,8 +435,6 @@ protected:
 	//! Bounding-box
 	ccBBox m_bBox;
 
-	//! Container of per-triangle material descriptors
-	typedef GenericChunkedArray<1,int> triangleMaterialIndexesSet;
 	//! Per-triangle material indexes
 	triangleMaterialIndexesSet* m_triMtlIndexes;
 

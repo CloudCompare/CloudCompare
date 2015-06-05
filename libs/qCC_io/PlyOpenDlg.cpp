@@ -41,6 +41,7 @@ struct PlyLoadingContext
 	std::vector<QString> standardCombosProperties;
 	std::vector<QString> sfCombosProperties;
 	std::vector<QString> listCombosProperties;
+	std::vector<QString> singleCombosProperties;
 	int ignoredProps;
 	bool valid;
 	bool applyAll;
@@ -71,6 +72,8 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 
 		m_listCombos.push_back(facesComboBox);
 		m_listCombos.push_back(textCoordsComboBox);
+
+		m_singleCombos.push_back(texIndexComboBox);
 	}
 	catch(std::bad_alloc)
 	{
@@ -117,6 +120,19 @@ void PlyOpenDlg::setListComboItems(const QStringList& listPropsText)
 	}
 }
 
+void PlyOpenDlg::setSingleComboItems(const QStringList& singlePropsText)
+{
+	m_singlePropsText = singlePropsText;
+	int singlePropsCount = singlePropsText.count();
+
+	for (size_t i=0; i<m_singleCombos.size(); ++i)
+	{
+		assert(m_singleCombos[i]);
+		m_singleCombos[i]->addItems(m_singlePropsText);
+		m_singleCombos[i]->setMaxVisibleItems(singlePropsCount);
+	}
+}
+
 bool PlyOpenDlg::restorePreviousContext(bool& hasAPreviousContext)
 {
 	hasAPreviousContext = s_lastContext.valid;
@@ -157,6 +173,10 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 	if (m_listCombos.front())
 		for (int i=1; i<m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
 			context->allProperties.append(m_listCombos.front()->itemText(i));
+	assert(m_singleCombos.front());
+	if (m_singleCombos.front())
+		for (int i=1; i<m_singleCombos.front()->count(); ++i) //the first item is always 'NONE'
+			context->allProperties.append(m_singleCombos.front()->itemText(i));
 
 	//now remember how each combo-box is mapped
 	int assignedProps = 0;
@@ -184,6 +204,19 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 				if (m_listCombos[i] && m_listCombos[i]->currentIndex() > 0)
 				{
 					context->listCombosProperties[i] = m_listCombos[i]->currentText();
+					++assignedProps;
+				}
+			}
+		}
+		//single combos
+		{
+			context->singleCombosProperties.resize(m_singleCombos.size());
+			std::fill(context->singleCombosProperties.begin(),context->singleCombosProperties.end(),QString());
+			for (size_t i=0; i<m_singleCombos.size(); ++i)
+			{
+				if (m_singleCombos[i] && m_singleCombos[i]->currentIndex() > 0)
+				{
+					context->singleCombosProperties[i] = m_singleCombos[i]->currentText();
 					++assignedProps;
 				}
 			}
@@ -237,7 +270,15 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 			for (int i=1; i<m_listCombos.front()->count(); ++i) //the first item is always 'NONE'
 			{
 				++totalProps;
-				if (!context->allProperties.contains(m_standardCombos.front()->itemText(i)))
+				if (!context->allProperties.contains(m_listCombos.front()->itemText(i)))
+					++mismatchProps;
+			}
+		assert(m_singleCombos.front());
+		if (m_singleCombos.front())
+			for (int i=1; i<m_singleCombos.front()->count(); ++i) //the first item is always 'NONE'
+			{
+				++totalProps;
+				if (!context->allProperties.contains(m_singleCombos.front()->itemText(i)))
 					++mismatchProps;
 			}
 	}
@@ -284,7 +325,27 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 					}
 				}
 			}
+	}
 
+	//single combox
+	assert(m_singleCombos.size() == context->singleCombosProperties.size());
+	{
+		for (size_t i=0; i<m_singleCombos.size(); ++i)
+			if (m_singleCombos[i])
+			{
+				m_singleCombos[i]->setCurrentIndex(0);
+				//if a specific property was defined for this field
+				if (!context->singleCombosProperties[i].isNull())
+				{
+					//try to find it in the new property list!
+					int idx = m_singleCombos[i]->findText(context->singleCombosProperties[i]);
+					if (idx >= 0)
+					{
+						++assignedEntries;
+						m_singleCombos[i]->setCurrentIndex(idx);
+					}
+				}
+			}
 	}
 	
 	//additional SF combos
@@ -353,18 +414,21 @@ bool PlyOpenDlg::isValid(bool displayErrors/*=true*/) const
 	//we must ensure that no property is assigned to more than one field
 	int n = m_stdPropsText.size();
 	int p = m_listPropsText.size();
+	int q = m_singlePropsText.size();
 
-	assert(n+p >= 2);
-	std::vector<int> assignedIndexCount(n+p,0);
+	assert(n+p+q >= 2);
+	std::vector<int> assignedIndexCount(n+p+q,0);
 
 	for (size_t i=0; i<m_standardCombos.size(); ++i)
 		++assignedIndexCount[m_standardCombos[i]->currentIndex()];
 	for (size_t j=0; j<m_listCombos.size(); ++j)
 		++assignedIndexCount[m_listCombos[j]->currentIndex() > 0 ? n+m_listCombos[j]->currentIndex() : 0];
-	for (size_t k=0; k<m_sfCombos.size(); ++k)
-		++assignedIndexCount[m_sfCombos[k]->currentIndex()];
+	for (size_t k=0; k<m_singleCombos.size(); ++k)
+		++assignedIndexCount[m_singleCombos[k]->currentIndex() > 0 ? n+p+m_singleCombos[k]->currentIndex() : 0];
+	for (size_t l=0; l<m_sfCombos.size(); ++l)
+		++assignedIndexCount[m_sfCombos[l]->currentIndex()];
 
-	for (int i=1; i<n+p; ++i)
+	for (int i=1; i<n+p+q; ++i)
 	{
 		if (assignedIndexCount[i] > 1)
 		{

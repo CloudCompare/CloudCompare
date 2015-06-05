@@ -55,6 +55,7 @@ v2.6.2 XX/XX/2015
 	* 3D views now recognize the 'pinching' gesture (with 2 fingers) on multi-touch screens (to zoom)
 	* If available the version of the Visual Studio compiler and the version of Qt used to compile
 		CC are now displayed in the 'About' dialog
+	* PLY files with more than one texture can now be properly opened
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

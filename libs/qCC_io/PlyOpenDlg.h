@@ -40,11 +40,14 @@ public:
 
 	void setDefaultComboItems(const QStringList& stdPropsText);
 	void setListComboItems(const QStringList& listPropsText);
+	void setSingleComboItems(const QStringList& singlePropsText);
 
 	//! Standard comboboxes
 	std::vector<QComboBox*> m_standardCombos;
 	//! List-related comboboxes (faces, etc.)
 	std::vector<QComboBox*> m_listCombos;
+	//! Single-related comboboxes (texture index, etc.)
+	std::vector<QComboBox*> m_singleCombos;
 	//! SF comboboxes
 	std::vector<QComboBox*> m_sfCombos;
 
@@ -84,6 +87,8 @@ protected:
 	QStringList m_stdPropsText;
 	//! List-related comboboxes elements
 	QStringList m_listPropsText;
+	//! Single-related comboboxes elements
+	QStringList m_singlePropsText;
 
 };
 

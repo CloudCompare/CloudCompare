@@ -55,6 +55,11 @@ ccConsole* ccConsole::TheInstance()
 
 void ccConsole::ReleaseInstance()
 {
+	if (s_console.instance)
+	{
+		//DGM: just in case some messages are still in the queue
+		s_console.instance->refresh();
+	}
 	s_console.release();
 	ccLog::RegisterInstance(0);
 }
@@ -183,7 +188,7 @@ void ccConsole::displayMessage(const QString& message, int level)
 
 	QString formatedMessage = QString("[") + QTime::currentTime().toString() + QString("] ") + message;
 
-	if (m_textDisplay)
+	if (m_textDisplay || m_logStream)
 	{
 		m_mutex.lock();
 		m_queue.push_back(ConsoleItemType(formatedMessage,level));

@@ -72,6 +72,7 @@ v2.6.2 XX/XX/2015
 	* When merging two or more meshes, material were merged if their name were the same even if the texture or other parameters were different
 	* When filtering a cloud through the command line (with FILTER_SF), the cloud was not updated in memory if the AUTO_SAVE feature was disabled
 	* The 'o' keyword in OBJ files was ignored (this could led to missing textures, etc.)
+	* Registration (either ICP or point-pair based picking) could crash in some particular cases
 
 v2.6.1 02/20/2015
 - New features:

@@ -797,9 +797,12 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		CCVector3 a = Np.cross(Nx);
 		if (a.norm() < ZERO_TOLERANCE)
 		{
+			trans.R = CCLib::SquareMatrix(3);
 			trans.R.toIdentity();
 			if (Np.dot(Nx) < 0)
+			{
 				trans.R.scale(-1);
+			}
 		}
 		else
 		{

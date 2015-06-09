@@ -743,6 +743,11 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
 
+				int VP[4];
+				context._win->getViewportArray(VP);
+				const double* MM = context._win->getModelViewMatd(); //viewMat
+				const double* MP = context._win->getProjectionMatd(); //projMat
+
 				//draw their name
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
 				glDisable(GL_DEPTH_TEST);
@@ -756,13 +761,18 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 						title = ABC[j]; //for triangle-labels, we only display "A","B","C"
 					else
 						title = QString("P#%0").arg(m_points[j].index); 
-					context._win->display3DLabel(	title,
-													*P + CCVector3(	context.labelMarkerTextShift,
-																	context.labelMarkerTextShift,
-																	context.labelMarkerTextShift),
-													ccColor::white.rgba
-													, font
-												);
+
+					//project it in 2D screen coordinates
+					GLdouble xp,yp,zp;
+					gluProject(P->x,P->y,P->z,MM,MP,VP,&xp,&yp,&zp);
+
+					context._win->displayText(	title,
+												static_cast<int>(xp) + context.labelMarkerTextShift_pix,
+												static_cast<int>(yp) + context.labelMarkerTextShift_pix,
+												ccGenericGLDisplay::ALIGN_DEFAULT,
+												0,
+												ccColor::white.rgba,
+												&font );
 				}
 				glPopAttrib();
 			}
@@ -780,7 +790,7 @@ static const int c_tabMarginY = 2;
 static const int c_arrowBaseSize = 3;
 //static const int c_buttonSize = 10;
 
-static const unsigned char darkGreen[3] = {0,200,0};
+static const ccColor::Rgba c_darkGreen(0,200,0,255);
 
 //! Data table
 struct Tab
@@ -947,9 +957,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 							if (isShifted)
 								suffix = 'l'; //'l' for local
 							const CCVector3* P = info.cloud->getPoint(info.pointIndex);
-							tab.colContent[c] << QString("X")+suffix; tab.colContent[c+1] << QString::number(P->x,'f',precision);
-							tab.colContent[c] << QString("Y")+suffix; tab.colContent[c+1] << QString::number(P->y,'f',precision);
-							tab.colContent[c] << QString("Z")+suffix; tab.colContent[c+1] << QString::number(P->z,'f',precision);
+							tab.colContent[c] << QString("X") + suffix; tab.colContent[c+1] << QString::number(P->x,'f',precision);
+							tab.colContent[c] << QString("Y") + suffix; tab.colContent[c+1] << QString::number(P->y,'f',precision);
+							tab.colContent[c] << QString("Z") + suffix; tab.colContent[c+1] << QString::number(P->z,'f',precision);
 						}
 						//next block:  X, Y, Z (global)
 						if (isShifted)
@@ -1247,7 +1257,13 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 
 		//label title
-		context._win->displayText(title,xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor.rgb,&titleFont);
+		context._win->displayText(	title,
+									xStart+xStartRel,
+									yStart+yStartRel,
+									ccGenericGLDisplay::ALIGN_DEFAULT,
+									0,
+									defaultTextColor.rgb,
+									&titleFont);
 		yStartRel -= margin;
 		
 		if (m_showFullBody)
@@ -1261,36 +1277,26 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 				int yRow = yStartRel;
 				int actualRowCount = std::min(tab.rowCount,tab.colContent[c].size());
+
+				bool labelCol = ((c & 1) == 0);
+				const unsigned char* textColor = labelCol ? ccColor::white.rgba : defaultTextColor.rgb;
+				
 				for (int r=0; r<actualRowCount; ++r)
 				{
 					if (r && (r % 3) == 0)
 						yRow -= margin;
 
-					//background color
-					const unsigned char* backgroundColor = 0;
-					const unsigned char* textColor = defaultTextColor.rgb;
-					bool numericCol = ((c & 1) == 1);
-					if (numericCol)
+					if (labelCol)
 					{
-						//textColor = defaultTextColor.rgb;
-						//backgroundColor = ccColor::white; //no need to draw a background!
-					}
-					else
-					{
-						textColor = ccColor::white.rgba;
+						//draw background
 						int rgbIndex = (r % 3);
 						if (rgbIndex == 0)
-							backgroundColor = ccColor::red.rgba;
+							glColor3ubv(ccColor::red.rgba);
 						else if (rgbIndex == 1)
-							backgroundColor = darkGreen;
+							glColor3ubv(c_darkGreen.rgba);
 						else if (rgbIndex == 2)
-							backgroundColor = ccColor::blue.rgba;
-					}
+							glColor3ubv(ccColor::blue.rgba);
 
-					//draw background
-					if (backgroundColor)
-					{
-						glColor3ubv(backgroundColor);
 						glBegin(GL_QUADS);
 						glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);
 						glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow - height);
@@ -1302,15 +1308,15 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					const QString& str = tab.colContent[c][r];
 
 					int xShift = 0;
-					if (numericCol)
+					if (labelCol)
 					{
-						//align digits on the right
-						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
+						//align characters in the middle
+						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).width(str)) / 2;
 					}
 					else
 					{
-						//align characetrs in the middle
-						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).width(str)) / 2;
+						//align digits on the right
+						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
 					}
 
 					context._win->displayText(	str,

@@ -2520,9 +2520,8 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.sfColorScaleToDisplay = 0;
 
 	//point picking
-	double pixSize = computeActualPixelSize();
-	context.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * pixSize);
-	context.labelMarkerTextShift = static_cast<float>(5 * pixSize); //5 pixels shift
+	context.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * computeActualPixelSize());
+	context.labelMarkerTextShift_pix = 5; //5 pixels shift
 
 	//text display
 	context.dispNumberPrecision = guiParams.displayedNumPrecision;

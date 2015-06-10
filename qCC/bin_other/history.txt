@@ -56,6 +56,10 @@ v2.6.2 XX/XX/2015
 	* If available the version of the Visual Studio compiler and the version of Qt used to compile
 		CC are now displayed in the 'About' dialog
 	* PLY files with more than one texture can now be properly opened
+	* ASCII save dialog:
+		- the output precision of scalar values can now be set up to 12 (instead of 8)
+		- Note that the internal representation of scalars remains 32-bits floats (i.e. with a relative precision ~10^-7)
+
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

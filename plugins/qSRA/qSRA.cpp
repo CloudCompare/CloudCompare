@@ -166,7 +166,7 @@ void qSRA::loadProfile()
 	//get the user defined global axis
 	int axisDim = piDlg.getAxisDimension();
 	//get whether heights are expressed relatively to 0 or to the input center
-	bool ignoreAxisShift = piDlg.ignoreAxisShift();
+	bool absoluteHeightValues = piDlg.absoluteHeightValues();
 
 	//load profile as a (2D) polyline
 	ccPolyline* polyline = ProfileLoader::Load(filename,m_app);
@@ -180,11 +180,14 @@ void qSRA::loadProfile()
 
 			ccGLMatrix trans;
 			CCVector3 T = CCVector3::fromArray(O.u);
-			if (ignoreAxisShift)
+			if (absoluteHeightValues)
+			{
+				//no need to (visually) shift the polyline
 				T.u[axisDim] = 0;
+			}
 			trans.setTranslation(T);
 			float* mat = trans.data();
-			switch(axisDim)
+			switch (axisDim)
 			{
 			case 0: //X
 				//invert X and Y
@@ -207,6 +210,7 @@ void qSRA::loadProfile()
 
 		//add revolution axis as meta-data
 		DistanceMapGenerationTool::SetPoylineAxis(polyline,axisDim);
+		DistanceMapGenerationTool::SetAbsoluteHeights(polyline,absoluteHeightValues);
 
 		//default destination container
 		ccHObject* defaultContainer = GetDefaultContainer(m_app);

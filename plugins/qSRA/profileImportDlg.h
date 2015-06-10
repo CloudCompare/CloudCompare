@@ -41,8 +41,8 @@ public:
 	//! Returns input filename (on completion)
 	QString getFilename() const;
 
-	//! Returns whether poyline shift should be ignored along the revolution axis
-	bool ignoreAxisShift() const;
+	//! Returns whether the profile heights are absolute or not (i.e. relative to the center)
+	bool absoluteHeightValues() const;
 
 protected slots:
 

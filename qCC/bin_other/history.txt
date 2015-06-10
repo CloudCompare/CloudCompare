@@ -73,6 +73,9 @@ v2.6.2 XX/XX/2015
 	* When filtering a cloud through the command line (with FILTER_SF), the cloud was not updated in memory if the AUTO_SAVE feature was disabled
 	* The 'o' keyword in OBJ files was ignored (this could led to missing textures, etc.)
 	* Registration (either ICP or point-pair based picking) could crash in some particular cases
+	* qSRA:
+		- whether the profile origin is absolute or relative was not always taken into account!
+		- a flat profile (e.g. perfect cylinder) would prevent the plugin to export DXF files
 
 v2.6.1 02/20/2015
 - New features:

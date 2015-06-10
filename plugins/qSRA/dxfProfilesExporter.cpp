@@ -88,7 +88,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 //	const double xMax = profileBBMax[0];
 	const double xSpan = profileBBMax[0] - profileBBMin[0];
 
-	if (xSpan == 0.0 || ySpan == 0.0)
+	if (xSpan == 0.0 && ySpan == 0.0)
 	{
 		if (app)
 			app->dispToConsole(QString("Internal error: null profile?!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -272,8 +272,22 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 		dw->sectionEntities();
 
 		//we make the profile fit in the middle of the page (21.0 x 29.7 cm)
-		double scale = std::min((c_pageWidth_mm - 2.0 * c_profileMargin_mm)/xSpan,
-								(c_pageHeight_mm - 2.0 * c_profileMargin_mm)/ySpan);
+		double scale = 1.0;
+		if (xSpan == 0)
+		{
+			assert(ySpan != 0);
+			scale = (c_pageHeight_mm - 2.0 * c_profileMargin_mm)/ySpan;
+		}
+		else if (ySpan == 0)
+		{
+			assert(xSpan != 0);
+			scale = (c_pageWidth_mm - 2.0 * c_profileMargin_mm)/xSpan;
+		}
+		else
+		{
+			scale = std::min(	(c_pageWidth_mm - 2.0 * c_profileMargin_mm)/xSpan,
+								(c_pageHeight_mm - 2.0 * c_profileMargin_mm)/ySpan );
+		}
 
 		//min corner of profile area
 		const double x0 = (c_pageWidth_mm - xSpan*scale) / 2.0;
@@ -573,11 +587,10 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	//For the 'X' dimension, it's easier to stick with the th. profile
 //	const double xMin = profileBBMin[0];
 	const double xMax = profileBBMax[0];
-	const double xSpan = profileBBMax[0] - profileBBMin[0];
 	//shortcut for clarity
 	const double& maxRadius = xMax;
 
-	if (xSpan == 0.0 || ySpan == 0.0)
+	if (ySpan == 0.0)
 	{
 		if (app)
 			app->dispToConsole(QString("Internal error: null profile?!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);

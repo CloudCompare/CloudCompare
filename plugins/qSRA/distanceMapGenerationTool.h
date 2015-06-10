@@ -58,6 +58,16 @@ public:
 	**/
 	static int GetPoylineAxis(const ccPolyline* polyline);
 
+	//! Sets whether the profile heights are absolute or relative to the center (along the revolution axis)
+	/** This information is associated with a specific meta-data.
+	**/
+	static void SetAbsoluteHeights(ccPolyline* polyline, bool absolute);
+
+	//! Returns whether the profile heights are absolute or relative to the center (along the revolution axis)
+	/** This information is associated with a specific meta-data.
+	**/
+	static bool HeightsAreAbsolute(const ccPolyline* polyline);
+
 	//! Computes radial distance between cloud and a profile
 	static bool ComputeRadialDist(	ccPointCloud* cloud,
 									ccPolyline* profile,

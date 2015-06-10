@@ -2826,7 +2826,7 @@ void ccGLWindow::onItemPickedFast(int itemID, int subID, int x, int y)
 	if (itemID >= 1)
 	{
 		//items can be in local or global DB
-		ccHObject* pickedObj = m_globalDBRoot->find(itemID);
+		ccHObject* pickedObj = m_globalDBRoot ? m_globalDBRoot->find(itemID) : 0;
 		if (!pickedObj && m_winDBRoot)
 		{
 			//if we don't find the object in the main DB, we look in the local one

@@ -1922,8 +1922,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 							(*m_materials)[newMatlIndex]->applyGL(glParams.showNorms,false);
 						else
 							context.defaultMat->applyGL(glParams.showNorms,false);
+						
 						glBegin(triangleDisplayType);
-						lasMtlIndex=newMatlIndex;
+						lasMtlIndex = newMatlIndex;
 					}
 
 					if (showTextures)

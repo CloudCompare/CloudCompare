@@ -2604,7 +2604,7 @@ unsigned ccGLWindow::getTextureID(ccMaterial::CShared mtl)
 	if (!mtl)
 	{
 		assert(false);
-		return 0;
+		return GL_INVALID_TEXTURE_ID;
 	}
 
 	QString id = mtl->getUniqueIdentifier();

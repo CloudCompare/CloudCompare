@@ -335,21 +335,23 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 
 				QString texName = fileInfo.fileName();
 				if (fileInfo.suffix().isEmpty())
+				{
 					texName += QString(".jpg");
+				}
 
 				//new absolute filemane
-				filenamesSaved[absFilename] = path + QString('/') + texName;
+				filenamesSaved[absFilename] = texName;
 			}
 
 			assert(!filenamesSaved[absFilename].isEmpty());
-			absFilename = filenamesSaved[absFilename];
-			if (mtl->getTexture().mirrored().save(absFilename)) //mirrored: see ccMaterial
+			QString destFilename = path + QString('/') + filenamesSaved[absFilename];
+			if (mtl->getTexture().mirrored().save(destFilename)) //mirrored: see ccMaterial
 			{
-				stream << "map_Kd " << QFileInfo(absFilename).fileName() << endl;
+				stream << "map_Kd " << filenamesSaved[absFilename] << endl;
 			}
 			else
 			{
-				errors << QString("Failed to save texture #%1 to file '%2'!").arg(texIndex).arg(absFilename);
+				errors << QString("Failed to save texture #%1 to file '%2'!").arg(texIndex).arg(destFilename);
 			}
 			++texIndex;
 		}

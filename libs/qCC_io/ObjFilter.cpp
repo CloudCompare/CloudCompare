@@ -220,114 +220,110 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	unsigned indexShift = 0;
 	for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
 	{
-		ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(*it);
+		ccGenericMesh* st = static_cast<ccGenericMesh*>(*it);
 
-		if (subMesh->isKindOf(CC_TYPES::MESH))
+		stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << endl;
+		if (file.error() != QFile::NoError)
+			return CC_FERR_WRITING;
+
+		unsigned triNum = st->size();
+		st->placeIteratorAtBegining();
+
+		int lastMtlIndex = -1;
+		int t1 = -1, t2 = -1, t3 = -1;
+
+		for (unsigned i=0; i<triNum; ++i)
 		{
-			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
-			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << endl;
-			if (file.error() != QFile::NoError)
-				return CC_FERR_WRITING;
-
-			unsigned triNum = st->size();
-			st->placeIteratorAtBegining();
-
-			int lastMtlIndex = -1;
-			int t1 = -1, t2 = -1, t3 = -1;
-
-			for (unsigned i=0; i<triNum; ++i)
+			if (withMaterials)
 			{
-				if (withMaterials)
+				int mtlIndex = mesh->getTriangleMtlIndex(indexShift+i);
+				if (mtlIndex != lastMtlIndex)
 				{
-					int mtlIndex = mesh->getTriangleMtlIndex(indexShift+i);
-					if (mtlIndex != lastMtlIndex)
+					if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
 					{
-						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
-						{
-							ccMaterial::CShared mat = materials->at(mtlIndex);
-							stream << "usemtl " << mat->getName() << endl;
-						}
-						else
-						{
-							stream << "usemtl " << endl;
-						}
-						if (file.error() != QFile::NoError)
-							return CC_FERR_WRITING;
-						lastMtlIndex = mtlIndex;
-					}
-
-					if (withTexCoordinates)
-					{
-						mesh->getTriangleTexCoordinatesIndexes(indexShift+i,t1,t2,t3);
-						if (t1 >= 0) ++t1;
-						if (t2 >= 0) ++t2;
-						if (t3 >= 0) ++t3;
-					}
-				}
-
-				const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
-				//for per-triangle normals
-				unsigned i1 = tsi->i1 + 1;
-				unsigned i2 = tsi->i2 + 1;
-				unsigned i3 = tsi->i3 + 1;
-
-				stream << "f";
-				if (withNormals)
-				{
-					int n1 = static_cast<int>(i1);
-					int n2 = static_cast<int>(i2);
-					int n3 = static_cast<int>(i3);
-					if (withTriNormals)
-					{
-						st->getTriangleNormalIndexes(i,n1,n2,n3);
-						if (n1 >= 0) ++n1;
-						if (n2 >= 0) ++n2;
-						if (n3 >= 0) ++n3;
-					}
-
-					if (withTexCoordinates)
-					{
-						stream << " " << i1 << "/" << t1 << "/" << n1;
-						stream << " " << i2 << "/" << t2 << "/" << n2;
-						stream << " " << i3 << "/" << t3 << "/" << n3;
+						ccMaterial::CShared mat = materials->at(mtlIndex);
+						stream << "usemtl " << mat->getName() << endl;
 					}
 					else
 					{
-						stream << " " << i1 << "//" << n1;
-						stream << " " << i2 << "//" << n2;
-						stream << " " << i3 << "//" << n3;
+						stream << "usemtl " << endl;
 					}
+					if (file.error() != QFile::NoError)
+						return CC_FERR_WRITING;
+					lastMtlIndex = mtlIndex;
+				}
+
+				if (withTexCoordinates)
+				{
+					mesh->getTriangleTexCoordinatesIndexes(indexShift+i,t1,t2,t3);
+					if (t1 >= 0) ++t1;
+					if (t2 >= 0) ++t2;
+					if (t3 >= 0) ++t3;
+				}
+			}
+
+			const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
+			//for per-triangle normals
+			unsigned i1 = tsi->i1 + 1;
+			unsigned i2 = tsi->i2 + 1;
+			unsigned i3 = tsi->i3 + 1;
+
+			stream << "f";
+			if (withNormals)
+			{
+				int n1 = static_cast<int>(i1);
+				int n2 = static_cast<int>(i2);
+				int n3 = static_cast<int>(i3);
+				if (withTriNormals)
+				{
+					st->getTriangleNormalIndexes(i,n1,n2,n3);
+					if (n1 >= 0) ++n1;
+					if (n2 >= 0) ++n2;
+					if (n3 >= 0) ++n3;
+				}
+
+				if (withTexCoordinates)
+				{
+					stream << " " << i1 << "/" << t1 << "/" << n1;
+					stream << " " << i2 << "/" << t2 << "/" << n2;
+					stream << " " << i3 << "/" << t3 << "/" << n3;
 				}
 				else
 				{
-					if (withTexCoordinates)
-					{
-						stream << " " << i1 << "/" << t1;
-						stream << " " << i2 << "/" << t2;
-						stream << " " << i3 << "/" << t3;
-					}
-					else
-					{
-						stream << " " << i1;
-						stream << " " << i2;
-						stream << " " << i3;
-					}
+					stream << " " << i1 << "//" << n1;
+					stream << " " << i2 << "//" << n2;
+					stream << " " << i3 << "//" << n3;
 				}
-				stream << endl;
-
-				if (file.error() != QFile::NoError)
-					return CC_FERR_WRITING;
-				
-				if (!nprogress.oneStep()) //cancel requested
-					return CC_FERR_CANCELED_BY_USER;
 			}
+			else
+			{
+				if (withTexCoordinates)
+				{
+					stream << " " << i1 << "/" << t1;
+					stream << " " << i2 << "/" << t2;
+					stream << " " << i3 << "/" << t3;
+				}
+				else
+				{
+					stream << " " << i1;
+					stream << " " << i2;
+					stream << " " << i3;
+				}
+			}
+			stream << endl;
 
-			stream << "#" << triNum << " faces" << endl;
 			if (file.error() != QFile::NoError)
 				return CC_FERR_WRITING;
 
-			indexShift += triNum;
+			if (!nprogress.oneStep()) //cancel requested
+				return CC_FERR_CANCELED_BY_USER;
 		}
+
+		stream << "#" << triNum << " faces" << endl;
+		if (file.error() != QFile::NoError)
+			return CC_FERR_WRITING;
+
+		indexShift += triNum;
 	}
 
 	return CC_FERR_NO_ERROR;
@@ -455,14 +451,12 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	QApplication::processEvents();
 
 	//common warnings that can appear multiple time (we avoid to send too many messages to the console!)
-	enum OBJ_WARNINGS {	DISCARED_GROUP		= 0,
-						EMPTY_GROUP			= 1,
-						INVALID_NORMALS		= 2,
-						INVALID_INDEX		= 3,
-						NOT_ENOUGH_MEMORY	= 4,
-						INVALID_LINE		= 5,
+	enum OBJ_WARNINGS {	INVALID_NORMALS		= 0,
+						INVALID_INDEX		= 1,
+						NOT_ENOUGH_MEMORY	= 2,
+						INVALID_LINE		= 3,
 	};
-	bool objWarnings[6] = { false, false, false, false, false, false };
+	bool objWarnings[4] = { false, false, false, false };
 	bool error = false;
 
 	unsigned lineCount = 0;
@@ -585,12 +579,15 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				break;
 			}
 
-			CCVector3 N((PointCoordinateType)tokens[1].toDouble(),
-				(PointCoordinateType)tokens[2].toDouble(),
-				(PointCoordinateType)tokens[3].toDouble());
+			CCVector3 N(static_cast<PointCoordinateType>(tokens[1].toDouble()),
+						static_cast<PointCoordinateType>(tokens[2].toDouble()),
+						static_cast<PointCoordinateType>(tokens[3].toDouble()));
 
 			if (fabs(N.norm2() - 1.0) > 0.005)
+			{
 				objWarnings[INVALID_NORMALS] = true;
+				N.normalize();
+			}
 			normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
 
 			normals->addElement(nIndex); //we don't know yet if it's per-vertex or per-triangle normal...
@@ -643,9 +640,9 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				else
 				{
 					fe.vIndex = vertexTokens[0].toInt();
-					if (vertexTokens.size()>1 && !vertexTokens[1].isEmpty())
+					if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
 						fe.tcIndex = vertexTokens[1].toInt();
-					if (vertexTokens.size()>2 && !vertexTokens[2].isEmpty())
+					if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
 						fe.nIndex = vertexTokens[2].toInt();
 				}
 
@@ -657,7 +654,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 			if (currentFace.size() < 3)
 			{
-				ccLog::Error("Malformed file: face on line %1 has less than 3 vertices!",lineCount);
+				ccLog::Error("[OBJ] Malformed file: face on line %1 has less than 3 vertices!",lineCount);
 				error = true;
 				break;
 			}
@@ -1129,10 +1126,6 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	pDlg.close();
 
 	//potential warnings
-	if (objWarnings[DISCARED_GROUP])
-		ccLog::Warning("[OBJ] At least one group has been discared while not empty. The file might be malformed, or otherwise it's a bug! You may send us the file to help us correct it...");
-	if (objWarnings[EMPTY_GROUP])
-		ccLog::Warning("[OBJ] At least one group has been ignored because it was empty. It's generally because it is composed of unhandled components (lines, nurbs, etc.)");
 	if (objWarnings[INVALID_NORMALS])
 		ccLog::Warning("[OBJ] Some normals in file were invalid. You should re-compute them (select entity, then \"Edit > Normals > Compute\")");
 	if (objWarnings[INVALID_INDEX])

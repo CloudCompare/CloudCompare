@@ -10873,7 +10873,6 @@ void MainWindow::doActionSaveFile()
 		for (size_t i=0; i<filters.size(); ++i)
 		{
 			bool atLeastOneExclusive = false;
-			bool multiple = false;
 
 			//current I/O filter
 			const FileIOFilter::Shared filter = filters[i];
@@ -10883,16 +10882,18 @@ void MainWindow::doActionSaveFile()
 			if (hasCloud)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportClouds = (		filter->canSave(CC_TYPES::POINT_CLOUD,multiple,isExclusive)
 									&&	(multiple || clouds.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
 			}
 
-			//does this filter can export one or several clouds?
+			//does this filter can export one or several meshes?
 			bool canExportMeshes = true;
 			if (hasMesh)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportMeshes = (		filter->canSave(CC_TYPES::MESH,multiple,isExclusive)
 									&&	(multiple || meshes.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
@@ -10903,6 +10904,7 @@ void MainWindow::doActionSaveFile()
 			if (hasPolylines)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportPolylines = (	filter->canSave(CC_TYPES::POLY_LINE,multiple,isExclusive)
 									&&	(multiple || polylines.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
@@ -10913,6 +10915,7 @@ void MainWindow::doActionSaveFile()
 			if (hasImages)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportImages = (		filter->canSave(CC_TYPES::IMAGE,multiple,isExclusive)
 									&&	(multiple || images.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
@@ -10940,6 +10943,7 @@ void MainWindow::doActionSaveFile()
 				{
 					ccHObject* child = otherSerializable.getChild(j);
 					bool isExclusive = true;
+					bool multiple = false;
 					canExportSerializables &= (		filter->canSave(child->getUniqueID(),multiple,isExclusive)
 												&&	(multiple || otherSerializable.getChildrenNumber() == 1) );
 					atLeastOneExclusive |= isExclusive;

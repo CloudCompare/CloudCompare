@@ -1590,7 +1590,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 	CONTEXT.customRenderingShader = m_customRenderingShader;
 
 	//LOD
-	if (m_LODEnabled && !s_frameRateTestInProgress)
+	if (isLODEnabled() && !s_frameRateTestInProgress)
 	{
 		CONTEXT.flags |= CC_LOD_ACTIVATED;
 	
@@ -2883,20 +2883,6 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 			m_lastMousePos = event->pos();
 
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
-
-			//let's check if the mouse is on a selected item first!
-			if (	m_pickingMode != NO_PICKING
-				/*//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
-				&&	m_pickingMode != POINT_PICKING
-				&&	m_pickingMode != TRIANGLE_PICKING
-				&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
-				//*/
-				&&
-				(	QApplication::keyboardModifiers () == Qt::NoModifier
-				||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )
-			{
-				updateActiveItemsList(event->x(), event->y(), true);
-			}
 		}
 
 		emit leftButtonClicked(event->x()-width()/2,height()/2-event->y());
@@ -2943,6 +2929,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 	int dx = x - m_lastMousePos.x();
 	int dy = y - m_lastMousePos.y();
+	setLODEnabled(true);
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -2990,6 +2977,23 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	}
 	else if (event->buttons() & Qt::LeftButton) //rotation
 	{
+		//on the first time, let's check if the mouse is on a selected item
+		if (!m_mouseMoved)
+		{
+			if (	m_pickingMode != NO_PICKING
+				/*//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
+				&&	m_pickingMode != POINT_PICKING
+				&&	m_pickingMode != TRIANGLE_PICKING
+				&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
+				//*/
+				&&
+				(	QApplication::keyboardModifiers () == Qt::NoModifier
+				||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )
+			{
+				updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
+			}
+		}
+
 		//specific case: move active item(s)
 		if (!m_activeItems.empty())
 		{
@@ -3147,6 +3151,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool mouseHasMoved = m_mouseMoved;
 	bool acceptEvent = false;
+	setLODEnabled(false);
 
 	//reset to default state
 	m_mouseButtonPressed = false;

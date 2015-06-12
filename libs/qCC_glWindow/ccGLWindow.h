@@ -481,7 +481,7 @@ public:
 	inline bool isLODEnabled() const { return m_LODEnabled; }
 
 	//! Enables or disables LOD on this display
-	inline bool setLODEnabled(bool state) { m_LODEnabled = state; }
+	inline void setLODEnabled(bool state) { m_LODEnabled = state; }
 
 	//! Whether the middle-screen cross should be displayed or not
 	bool crossShouldBeDrawn() const;

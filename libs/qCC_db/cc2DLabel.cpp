@@ -33,6 +33,9 @@
 #include <string.h>
 #include <assert.h>
 
+//'Delta' character
+static const QChar MathSymbolDelta(0x0394);
+
 cc2DLabel::cc2DLabel(QString name/*=QString()*/)
 	: ccHObject(name.isEmpty() ? "label" : name)
 	, m_showFullBody(true)
@@ -548,13 +551,19 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//QString distStr = QString("Distance = %1").arg(dist,0,'f',precision);
 			//body << distStr;
 
-			QString vecStr = QString("dX: %1\tdY: %2\tdZ: %3").arg(info.diff.x,0,'f',precision).arg(info.diff.y,0,'f',precision).arg(info.diff.z,0,'f',precision);
+			QString vecStr =	MathSymbolDelta + QString("X: %1\t").arg(info.diff.x,0,'f',precision)
+							+	MathSymbolDelta + QString("Y: %1\t").arg(info.diff.y,0,'f',precision)
+							+	MathSymbolDelta + QString("Z: %1"  ).arg(info.diff.z,0,'f',precision);
+
 			body << vecStr;
 
 			PointCoordinateType dXY = sqrt(info.diff.x*info.diff.x + info.diff.y*info.diff.y);
 			PointCoordinateType dXZ = sqrt(info.diff.x*info.diff.x + info.diff.z*info.diff.z);
 			PointCoordinateType dZY = sqrt(info.diff.z*info.diff.z + info.diff.y*info.diff.y);
-			vecStr = QString("dXY: %1\tdXZ: %2\tdZY: %3").arg(dXY,0,'f',precision).arg(dXZ,0,'f',precision).arg(dZY,0,'f',precision);
+
+			vecStr =	MathSymbolDelta + QString("XY: %1\t").arg(dXY,0,'f',precision)
+					+	MathSymbolDelta + QString("XZ: %1\t").arg(dXZ,0,'f',precision)
+					+	MathSymbolDelta + QString("ZY: %1"  ).arg(dZY,0,'f',precision);
 			body << vecStr;
 
 			AddPointCoordinates(body,info.point1Index,info.cloud1,precision);
@@ -890,9 +899,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 #endif
 
 	//render zoom
-	int margin        = static_cast<int>(c_margin * context.renderZoom);
-	int tabMarginX    = static_cast<int>(c_tabMarginX * context.renderZoom);
-	int tabMarginY    = static_cast<int>(c_tabMarginY * context.renderZoom);
+	int margin        = static_cast<int>(c_margin        * context.renderZoom);
+	int tabMarginX    = static_cast<int>(c_tabMarginX    * context.renderZoom);
+	int tabMarginY    = static_cast<int>(c_tabMarginY    * context.renderZoom);
 	int arrowBaseSize = static_cast<int>(c_arrowBaseSize * context.renderZoom);
 	
 	int titleHeight = 0;
@@ -996,9 +1005,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//1st block: dX, dY, dZ
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "dX"; tab.colContent[c+1] << QString::number(info.diff.x,'f',precision);
-							tab.colContent[c] << "dY"; tab.colContent[c+1] << QString::number(info.diff.y,'f',precision);
-							tab.colContent[c] << "dZ"; tab.colContent[c+1] << QString::number(info.diff.z,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("X"); tab.colContent[c+1] << QString::number(info.diff.x,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("Y"); tab.colContent[c+1] << QString::number(info.diff.y,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("Z"); tab.colContent[c+1] << QString::number(info.diff.z,'f',precision);
 						}
 						//2nd block: dXY, dXZ, dZY
 						{
@@ -1006,9 +1015,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 							PointCoordinateType dXY = sqrt(info.diff.x*info.diff.x + info.diff.y*info.diff.y);
 							PointCoordinateType dXZ = sqrt(info.diff.x*info.diff.x + info.diff.z*info.diff.z);
 							PointCoordinateType dZY = sqrt(info.diff.z*info.diff.z + info.diff.y*info.diff.y);
-							tab.colContent[c] << "dXY"; tab.colContent[c+1] << QString::number(dXY,'f',precision);
-							tab.colContent[c] << "dXZ"; tab.colContent[c+1] << QString::number(dXZ,'f',precision);
-							tab.colContent[c] << "dZY"; tab.colContent[c+1] << QString::number(dZY,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("XY"); tab.colContent[c+1] << QString::number(dXY,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("XZ"); tab.colContent[c+1] << QString::number(dXZ,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("ZY"); tab.colContent[c+1] << QString::number(dZY,'f',precision);
 						}
 					}
 					else if (labelCount == 3)

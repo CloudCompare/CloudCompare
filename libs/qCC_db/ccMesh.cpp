@@ -1983,7 +1983,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glEnd();
 
 			if (pushTriangleNames)
+			{
 				glPopName();
+			}
 
 			if (showTextures)
 			{
@@ -1996,10 +1998,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		if (m_stippling)
+		{
 			EnableGLStippleMask(false);
+		}
 
 		if (colorMaterial)
+		{
 			glDisable(GL_COLOR_MATERIAL);
+		}
 
 		if (glParams.showNorms)
 		{
@@ -2008,7 +2014,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		if (pushName)
+		{
 			glPopName();
+		}
 	}
 }
 

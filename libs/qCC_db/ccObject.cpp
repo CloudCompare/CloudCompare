@@ -220,9 +220,9 @@ void ccObject::setMetaData(const QVariantMap& dataset, bool overwrite/*=false*/)
 	}
 }
 
-bool ccObject::hasMetaData(QString key)
+bool ccObject::hasMetaData(QString key) const
 {
-	return ( m_metaData.find(key) != m_metaData.end());
+	return m_metaData.contains(key);
 }
 
 bool ccObject::fromFile(QFile& in, short dataVersion, int flags)

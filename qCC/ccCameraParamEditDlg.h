@@ -64,9 +64,6 @@ public slots:
 	//! Inits dialog values with matrix
 	void initWithMatrix(const ccGLMatrixd& mat);
 
-	//! Slots called when the view matrix of the associated window changes
-	void updateViewMatrix(const ccGLMatrixd& dummyMat);
-
 	//! Updates dialog values with pivot point
 	void updatePivotPoint(const CCVector3d& P);
 	//! Updates dialog values with camera center

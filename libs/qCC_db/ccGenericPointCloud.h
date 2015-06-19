@@ -160,7 +160,7 @@ public:
 	typedef GenericChunkedArray<1,uchar> VisibilityTableType;
 
 	//! Returns associated visiblity array
-	virtual VisibilityTableType* getTheVisibilityArray();
+	virtual inline VisibilityTableType* getTheVisibilityArray() { return m_pointsVisibility; }
 
 	//! Returns a ReferenceCloud equivalent to the visiblity array
 	virtual CCLib::ReferenceCloud* getTheVisiblePoints() const;

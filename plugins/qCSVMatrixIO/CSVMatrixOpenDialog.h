@@ -32,7 +32,7 @@ class CSVMatrixOpenDialog : public QDialog, public Ui::CSVMatrixOpenDlg
 public:
 
 	//! Default constructor
-	CSVMatrixOpenDialog(QWidget* parent = 0);
+	explicit CSVMatrixOpenDialog(QWidget* parent = 0);
 
 protected slots:
 

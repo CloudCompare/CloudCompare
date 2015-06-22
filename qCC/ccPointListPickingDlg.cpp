@@ -30,6 +30,7 @@
 
 //qCC_db
 #include <ccLog.h>
+#include <ccObject.h> //for CC_QT5 def
 #include <ccPointCloud.h>
 #include <cc2DLabel.h>
 #include <ccPolyline.h>
@@ -495,6 +496,7 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	newLabel->addPoint(cloud,pointIndex);
 	newLabel->setVisible(true);
 	newLabel->setDisplayedIn2D(false);
+	newLabel->setDisplayedIn3D(true);
 	newLabel->setCollapsed(true);
 	ccGenericGLDisplay* display = m_associatedCloud->getDisplay();
 	if (display)

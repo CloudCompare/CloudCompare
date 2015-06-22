@@ -476,8 +476,7 @@
          <item>
           <widget class="QCheckBox" name="checkBoxUseDataSFAsWeights">
            <property name="toolTip">
-            <string>Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).
-Note that only absolute distances are considered (i.e. minimal weight is 0).</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Data: use displayed S.F. as weights</string>
@@ -487,8 +486,7 @@ Note that only absolute distances are considered (i.e. minimal weight is 0).</st
          <item>
           <widget class="QCheckBox" name="checkBoxUseModelSFAsWeights">
            <property name="toolTip">
-            <string>Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).
-Note that only absolute distances are considered (i.e. minimal weight is 0).</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Model: use displayed S.F. as weights</string>

@@ -36,7 +36,13 @@
 #include <QFont>
 #include <QMap>
 #include <QElapsedTimer>
-
+//#define THREADED_GL_WIDGET
+#ifdef THREADED_GL_WIDGET
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QAtomicInt>
+#endif
 //system
 #include <set>
 #include <list>
@@ -68,7 +74,7 @@ public:
 						POINT_PICKING,
 						TRIANGLE_PICKING,
 						POINT_OR_TRIANGLE_PICKING,
-						AUTO_POINT_PICKING,
+						LABEL_PICKING,
 						DEFAULT_PICKING,
 	};
 
@@ -128,7 +134,6 @@ public:
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
 	virtual QFont getLabelDisplayFont() const; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
-	inline virtual void makeContextCurrent() { makeCurrent(); }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
 	virtual unsigned getTextureID(const QImage& image);
 	virtual unsigned getTextureID( ccMaterial::CShared mtl);
@@ -256,7 +261,7 @@ public:
 	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
 
 	//! Returns the visible objects bounding-box
-	ccBBox getVisibleObjectsBB() const;
+	void getVisibleObjectsBB(ccBBox& box) const;
 
 	//! Rotates the base view matrix
 	/** Warning: 'base view' marix is either:
@@ -339,6 +344,8 @@ public:
 
 	//! Returns current font size
 	virtual int getFontPointSize() const;
+	//! Returns current font size for labels
+	virtual int getLabelFontPointSize() const;
 
 	//! Returns window own DB
 	virtual ccHObject* getOwnDB();
@@ -375,7 +382,7 @@ public:
 	virtual void invalidateVisualization();
 
 	//! Renders screen to a file
-	virtual bool renderToFile(	const char* filename,
+	virtual bool renderToFile(	QString filename,
 								float zoomFactor = 1.0,
 								bool dontScaleFeatures = false,
 								bool renderOverlayItems = false);
@@ -474,7 +481,13 @@ public:
 	inline bool isLODEnabled() const { return m_LODEnabled; }
 
 	//! Enables or disables LOD on this display
-	inline bool setLODEnabled(bool state) { m_LODEnabled = state; }
+	inline void setLODEnabled(bool state) { m_LODEnabled = state; }
+
+	//! Whether the middle-screen cross should be displayed or not
+	bool crossShouldBeDrawn() const;
+	
+	//! Main OpenGL display sequence
+	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross);
 
 public slots:
 
@@ -498,6 +511,9 @@ protected slots:
 	//! Stops frame rate test
 	void stopFrameRateTest();
 
+	//! Reacts to the itemPickedFast signal
+	void onItemPickedFast(int entityID, int subEntityID, int x, int y);
+
 signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
@@ -505,15 +521,24 @@ signals:
 	//! Signal emitted when multiple entities are selected in the 3D view
 	void entitiesSelectionChanged(std::set<int> entIDs);
 
-	//! Signal emitted when a point is picked
-	/** The POINT_PICKING or TRIANGLE_PICKING or POINT_OR_TRIANGLE_PICKING
-		mode must be enabled.
-		\param entityID entity unique ID
-		\param itemIndex point or triangle index in entity
+	//! Signal emitted when a point (or a triangle) is picked
+	/** \param entityID entity unique ID
+		\param subEntityID point or triangle index in entity
 		\param x mouse cursor x position
 		\param y mouse cursor y position
 	**/
-	void itemPicked(int entityID, unsigned itemIndex, int x, int y);
+	void itemPicked(int entityID, unsigned subEntityID, int x, int y);
+
+	//! Signal emitted when an item is picked (FAST_PICKING mode only)
+	/** \param entityID entity unique ID
+		\param subEntityID point or triangle index in entity
+		\param x mouse cursor x position
+		\param y mouse cursor y position
+	**/
+	void itemPickedFast(int entityID, int subEntityID, int x, int y);
+
+	//! Signal emitted when fast picking is finished (FAST_PICKING mode only)
+	void fastPickingFinished();
 
 	/*** Camera link mode (interactive modifications of the view/camera are echoed to other windows) ***/
 
@@ -610,9 +635,45 @@ protected:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL();
+	bool event(QEvent* evt);
 
-	//! main OpenGL loop
-	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBufferObject* fbo = 0);
+#ifdef THREADED_GL_WIDGET
+	void initialize();
+	void resizeGL2();
+	void paint();
+	void resizeEvent(QResizeEvent* evt);
+	void glInit() { /*stop QGLWidget standard behavior*/ }
+	void glDraw() { /*stop QGLWidget standard behavior*/ }
+
+	//! Rendering thread
+	class RenderingThread : public QThread
+	{
+	public:
+
+		explicit RenderingThread(ccGLWindow* win);
+		~RenderingThread() { stop(); }
+		
+		void stop();
+		void redraw();
+
+	protected:
+
+		virtual void run();
+
+		ccGLWindow* m_window;
+		QWaitCondition m_waitCondition;
+		QAtomicInt m_abort;
+		QAtomicInt m_pendingRedraw;
+	};
+
+	friend RenderingThread;
+
+	RenderingThread* m_renderingThread;
+	QMutex m_mutex;
+	QGLFormat m_format;
+	const QGLWidget* m_shareWidget; 
+	QAtomicInt m_resized;
+#endif
 
 	//Graphical features controls
 	void drawCross();
@@ -640,21 +701,46 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
+	//! Picking parameters
+	struct PickingParameters
+	{
+		//! Default constructor
+		PickingParameters(	PICKING_MODE _mode = NO_PICKING,
+							int _centerX = 0,
+							int _centerY = 0,
+							int _pickWidth = 5,
+							int _pickHeight = 5)
+			: mode(_mode)
+			, centerX(_centerX)
+			, centerY(_centerY)
+			, pickWidth(_pickWidth)
+			, pickHeight(_pickHeight)
+			, flags(0)
+		{}
+
+		PICKING_MODE mode;
+		int centerX;
+		int centerY;
+		int pickWidth;
+		int pickHeight;
+		unsigned short flags;
+	};
+
 	//! Starts picking process
 	/** OpenGL is used by default (unless ccGui::ParamStruct::useOpenGLPointPicking
 		is false in which case a CPU based approach will be used for point picking).
-		\param mode picking mode
-		\param centerX picking area center X position
-		\param centerY picking area center y position
-		\param width picking area width
-		\param height picking area height
-		\param[out] subID [optional] poiter to store sub item ID (if any - <1 otherwise)
-		\return item ID (if any) or <1 otherwise
+		\param params picking parameters
 	**/
-	int startPicking(PICKING_MODE mode, int centerX, int centerY, int width = 5, int height = 5, int* subID = 0);
+	void startPicking(PickingParameters& params);
+
+	//! Performs the picking with OpenGL
+	void startOpenGLPicking(const PickingParameters& params);
 
 	//! Starts OpenGL picking process
-	int startCPUBasedPointPicking(int centerX, int centerY, int& subID, int width = 5, int height = 5);
+	void startCPUBasedPointPicking(const PickingParameters& params);
+
+	//! Processes the picking process result and sends the corresponding signal
+	void processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::set<int>* selectedIDs = 0);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context
@@ -694,6 +780,9 @@ protected:
 	//! Disables LOD rendering
 	void disableLOD();
 
+	// Releases all textures, GL lists, etc.
+	void uninitializeGL();
+
 	/***************************************************
 					OpenGL Extensions
 	***************************************************/
@@ -730,11 +819,11 @@ protected:
 	CCVector3d m_currentMouseOrientation;
 
 	//! Complete visualization matrix (GL style - double version)
-	double m_viewMatd[OPENGL_MATRIX_SIZE];
+	ccGLMatrixd m_viewMatd;
 	//! Whether the model veiw matrix is valid (or need to be recomputed)
 	bool m_validModelviewMatrix;
 	//! Projection matrix (GL style - double version)
-	double m_projMatd[OPENGL_MATRIX_SIZE];
+	ccGLMatrixd m_projMatd;
 	//! Whether the projection matrix is valid (or need to be recomputed)
 	bool m_validProjectionMatrix;
 
@@ -919,6 +1008,10 @@ protected:
 	//! Internal timer
 	QElapsedTimer m_timer;
 
+	//! Touch event in progress
+	bool m_touchInProgress;
+	//! Touch gesture initial distance
+	qreal m_touchBaseDist;
 
 private:
 

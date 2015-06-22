@@ -20,13 +20,13 @@
 
 #include "ccClipBox.h"
 
-//qCC_db
-#include <ccGenericPointCloud.h>
-#include <ccCylinder.h>
-#include <ccCone.h>
-#include <ccSphere.h>
-#include <ccTorus.h>
-#include <ccHObjectCaster.h>
+//Local
+#include "ccGenericPointCloud.h"
+#include "ccCylinder.h"
+#include "ccCone.h"
+#include "ccSphere.h"
+#include "ccTorus.h"
+#include "ccHObjectCaster.h"
 
 //system
 #include <assert.h>
@@ -444,7 +444,6 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		CCVector3d RxU = R.cross(u);
 
 		//look for the most parallel dimension
-		int minDim = 0;
 		double maxDot = m_viewMatrix.getColumnAsVec3D(0).dot(RxU);
 		for (int i=1; i<3; ++i)
 		{
@@ -452,7 +451,6 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 			if (fabs(dot) > fabs(maxDot))
 			{
 				maxDot = dot;
-				minDim = i;
 			}
 		}
 
@@ -574,9 +572,9 @@ PointCoordinateType ccClipBox::computeArrowsScale() const
 }
 
 const colorType c_lightComp = ccColor::MAX/2;
-const colorType c_lightRed[3]	= {ccColor::MAX, c_lightComp , c_lightComp};
-const colorType c_lightGreen[3]	= {c_lightComp , ccColor::MAX, c_lightComp};
-const colorType c_lightBlue[3]	= {c_lightComp , c_lightComp , ccColor::MAX};
+const ccColor::Rgb c_lightRed  (ccColor::MAX, c_lightComp , c_lightComp);
+const ccColor::Rgb c_lightGreen(c_lightComp,  ccColor::MAX, c_lightComp);
+const ccColor::Rgb c_lightBlue (c_lightComp,  c_lightComp , ccColor::MAX);
 
 void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 {

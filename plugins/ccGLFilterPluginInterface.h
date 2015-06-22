@@ -20,6 +20,7 @@
 
 #include "ccPluginInterface.h"
 
+//CC_FBO_LIB
 #include <ccGlFilter.h>
 
 //! GL Filter plugin interface

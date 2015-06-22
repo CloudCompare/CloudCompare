@@ -47,6 +47,8 @@
 //local
 #include "ccPropertiesTreeDelegate.h"
 #include "../mainwindow.h"
+#include "../ccPickOneElementDlg.h"
+#include "../ccSelectChildrenDlg.h"
 
 //system
 #include <assert.h>
@@ -87,9 +89,10 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_expandBranch = new QAction("Expand branch",this);
 	m_collapseBranch = new QAction("Collapse branch",this);
 	m_gatherInformation = new QAction("Information (recursive)",this);
-	m_sortSiblingsType = new QAction("Sort siblings by type",this);
-	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
-	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
+	m_sortChildrenType = new QAction("Sort children by type",this);
+	m_sortChildrenAZ = new QAction("Sort children by name (A-Z)",this);
+	m_sortChildrenZA = new QAction("Sort children by name (Z-A)",this);
+	m_selectByTypeAndName = new QAction("Select children by type and/or name",this);
 	m_deleteSelectedEntities = new QAction("Delete",this);
 	m_toggleSelectedEntities = new QAction("Toggle",this);
 	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility",this);
@@ -110,9 +113,10 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
 	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
 	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
-	connect(m_sortSiblingsAZ,					SIGNAL(triggered()),								this, SLOT(sortSiblingsAZ()));
-	connect(m_sortSiblingsZA,					SIGNAL(triggered()),								this, SLOT(sortSiblingsZA()));
-	connect(m_sortSiblingsType,					SIGNAL(triggered()),								this, SLOT(sortSiblingsType()));
+	connect(m_sortChildrenAZ,					SIGNAL(triggered()),								this, SLOT(sortChildrenAZ()));
+	connect(m_sortChildrenZA,					SIGNAL(triggered()),								this, SLOT(sortChildrenZA()));
+	connect(m_sortChildrenType,					SIGNAL(triggered()),								this, SLOT(sortChildrenType()));
+	connect(m_selectByTypeAndName,              SIGNAL(triggered()),								this, SLOT(selectByTypeAndName()));
 	connect(m_deleteSelectedEntities,			SIGNAL(triggered()),								this, SLOT(deleteSelectedEntities()));
 	connect(m_toggleSelectedEntities,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities()));
 	connect(m_toggleSelectedEntitiesVisibility,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesVisibility()));
@@ -307,7 +311,7 @@ void ccDBRoot::deleteSelectedEntities()
 			continue;
 		}
 
-		//we don't consider objects that are siblings of others in the selection
+		//we don't consider objects that are 'descendent' of others in the selection
 		bool isSibling = false;
 		for (unsigned j=0; j<selCount; ++j)
 		{
@@ -916,33 +920,42 @@ int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
 	return realCount;
 }
 
-int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
-									CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
-									dbTreeSelectionInfo* info/*=NULL*/)
+size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
+										CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
+										dbTreeSelectionInfo* info/*=NULL*/ )
 {
+	selectedEntities.clear();
+	
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	int i,selCount = selectedIndexes.size();
 
-	for (i=0; i<selCount; ++i)
+	try
 	{
-		ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-		if (anObject && anObject->isKindOf(filter))
-			selEntities.push_back(anObject);
+		int selCount = selectedIndexes.size();
+		for (int i=0; i<selCount; ++i)
+		{
+			ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+			if (anObject && anObject->isKindOf(filter))
+				selectedEntities.push_back(anObject);
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory!
 	}
 
 	if (info)
 	{
 		info->reset();
-		info->selCount = selCount;
+		info->selCount = selectedIndexes.size();
 
-		for (i=0; i<selCount; ++i)
+		for (size_t i=0; i<info->selCount; ++i)
 		{
-			ccHObject* obj = selEntities[i];
+			ccHObject* obj = selectedEntities[i];
 
-			info->sfCount += int(obj->hasScalarFields());
-			info->colorCount += int(obj->hasColors());
-			info->normalsCount += int(obj->hasNormals());
+			info->sfCount += obj->hasScalarFields() ? 1 : 0;
+			info->colorCount += obj->hasColors() ? 1 : 0;
+			info->normalsCount += obj->hasNormals() ? 1 : 0;
 
 			if (obj->isA(CC_TYPES::HIERARCHY_OBJECT))
 				info->groupCount++;
@@ -951,7 +964,7 @@ int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
-				info->octreeCount += int(cloud->getOctree() != NULL);
+				info->octreeCount += cloud->getOctree() != NULL ? 1 : 0;
 			}
 
 			if (obj->isKindOf(CC_TYPES::MESH))
@@ -974,7 +987,7 @@ int ccDBRoot::getSelectedEntities(	ccHObject::Container& selEntities,
 		}
 	}
 
-	return int(selEntities.size());
+	return selectedEntities.size();
 }
 
 Qt::DropActions ccDBRoot::supportedDropActions() const
@@ -1041,18 +1054,22 @@ QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
 bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int destRow, int destColumn, const QModelIndex& destParent)
 {
 	if (action != Qt::MoveAction)
+	{
 		return false;
+	}
 
 	//default mime type for QAbstractItemModel items)
 	if (!data->hasFormat("application/x-qabstractitemmodeldatalist"))
+	{
 		return false;
+	}
 
 	//new parent (can't be a leaf object!)
 	ccHObject* newParent = destParent.isValid() ? static_cast<ccHObject*>(destParent.internalPointer()) : m_treeRoot;
-	char newParentName[1024];
-	strcpy(newParentName,newParent->getName().toLocal8Bit().constData());
 	if (newParent && newParent->isLeaf())
+	{
 		return false;
+	}
 
 	//decode data
 	QByteArray encoded = data->data("application/x-qabstractitemmodeldatalist");
@@ -1072,8 +1089,6 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		if (!item)
 			continue;
 		//ccLog::Print(QString("[Drag & Drop] Source: %1").arg(item->getName()));
-		char itemName[1024];
-		strcpy(itemName,item->getName().toLocal8Bit().constData());
 
 		//old parent
 		ccHObject* oldParent = item->getParent();
@@ -1082,17 +1097,17 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		//let's check if we can actually move the entity
 		if (oldParent)
 		{
-			char oldParentName[1024];
-			strcpy(oldParentName,oldParent->getName().toLocal8Bit().constData());
 			if (item->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				//point cloud == mesh vertices?
 				if (oldParent->isKindOf(CC_TYPES::MESH) && ccHObjectCaster::ToGenericMesh(oldParent)->getAssociatedCloud() == item)
+				{
 					if (oldParent != newParent)
 					{
 						ccLog::Error("Vertices can't leave their parent mesh!");
 						return false;
 					}
+				}
 			}
 			else if (item->isKindOf(CC_TYPES::MESH))
 			{
@@ -1164,19 +1179,21 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		//special case: moving an item inside the same 'parent'
 		if (oldParent && newParent == oldParent)
 		{
-			int oldRow = newParent->getChildIndex(item);
+			int oldRow = oldParent->getChildIndex(item);
 			if (destRow < 0)
 			{
-				assert(newParent->getChildrenNumber()>0);
-				destRow = static_cast<int>(newParent->getChildrenNumber())-1;
+				assert(oldParent->getChildrenNumber() != 0);
+				destRow = static_cast<int>(oldParent->getChildrenNumber())-1;
 			}
-			else if (oldRow<destRow)
+			else if (oldRow < destRow)
 			{
 				assert(destRow > 0);
 				--destRow;
 			}
 			else if (oldRow == destRow)
+			{
 				return false; //nothing to do
+			}
 		}
 
 		//remove link with old parent (only CHILD/PARENT related flags!)
@@ -1244,27 +1261,34 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 	
 	//we recursively expand sub-branches
 	ccHObject::Container toExpand;
-	toExpand.push_back(item);
-	while (!toExpand.empty())
+	try
 	{
-		item = toExpand.back();
-		toExpand.pop_back();
-
-		QModelIndex itemIndex = index(item);
-		if (itemIndex.isValid())
+		toExpand.push_back(item);
+		while (!toExpand.empty())
 		{
-			if (expand)
-				m_dbTreeWidget->expand(itemIndex);
-			else
-				m_dbTreeWidget->collapse(itemIndex);
-		}
+			item = toExpand.back();
+			toExpand.pop_back();
 
-		assert(item->getChildrenNumber() > 0);
-		for (unsigned i=0; i<item->getChildrenNumber(); ++i)
-		{
-			if (item->getChild(i)->getChildrenNumber() > 0)
-				toExpand.push_back(item->getChild(i));
+			QModelIndex itemIndex = index(item);
+			if (itemIndex.isValid())
+			{
+				if (expand)
+					m_dbTreeWidget->expand(itemIndex);
+				else
+					m_dbTreeWidget->collapse(itemIndex);
+			}
+
+			assert(item->getChildrenNumber() != 0);
+			for (unsigned i=0; i<item->getChildrenNumber(); ++i)
+			{
+				if (item->getChild(i)->getChildrenNumber() != 0)
+					toExpand.push_back(item->getChild(i));
+			}
 		}
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory!
 	}
 }
 
@@ -1361,7 +1385,7 @@ void ccDBRoot::gatherRecursiveInformation()
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	int i,selCount = selectedIndexes.size();
+	int selCount = selectedIndexes.size();
 	if (selCount == 0)
 		return;
 
@@ -1398,7 +1422,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		return;
 	}
 	{
-		for (i=0;i<selCount;++i)
+		for (int i=0; i<selCount; ++i)
 			toProcess[i] = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 	}
 
@@ -1454,7 +1478,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		//we can add its children to the 'toProcess' list and itself to the 'processed' list 
 		try
 		{
-			for (unsigned i=0;i<ent->getChildrenNumber();++i)
+			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
 				toProcess.push_back(ent->getChild(i));
 			alreadyProcessed.push_back(ent);
 		}
@@ -1503,22 +1527,22 @@ void ccDBRoot::gatherRecursiveInformation()
 	}
 }
 
-void ccDBRoot::sortSiblingsAZ()
+void ccDBRoot::sortChildrenAZ()
 {
-	sortSelectedEntitiesSiblings(SORT_A2Z);
+	sortSelectedEntitiesChildren(SORT_A2Z);
 }
 
-void ccDBRoot::sortSiblingsZA()
+void ccDBRoot::sortChildrenZA()
 {
-	sortSelectedEntitiesSiblings(SORT_Z2A);
+	sortSelectedEntitiesChildren(SORT_Z2A);
 }
 
-void ccDBRoot::sortSiblingsType()
+void ccDBRoot::sortChildrenType()
 {
-	sortSelectedEntitiesSiblings(SORT_BY_TYPE);
+	sortSelectedEntitiesChildren(SORT_BY_TYPE);
 }
 
-void ccDBRoot::sortSelectedEntitiesSiblings(SortRules sortRule)
+void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 {
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
@@ -1585,49 +1609,115 @@ void ccDBRoot::sortSelectedEntitiesSiblings(SortRules sortRule)
 	}
 }
 
-void ccDBRoot::toggleSelectedEntities()
+void ccDBRoot::selectByTypeAndName()
 {
-	toggleSelectedEntitiesProperty(0);
-}
+	ccSelectChildrenDlg scDlg(MainWindow::TheInstance());
+	scDlg.addType("Point cloud",       CC_TYPES::POINT_CLOUD);
+	scDlg.addType("Poly-line",         CC_TYPES::POLY_LINE);
+	scDlg.addType("Mesh",              CC_TYPES::MESH);
+	scDlg.addType("  Sub-mesh",        CC_TYPES::SUB_MESH);
+	scDlg.addType("  Primitive",       CC_TYPES::PRIMITIVE);
+	scDlg.addType("    Plane",         CC_TYPES::PLANE);
+	scDlg.addType("    Sphere",        CC_TYPES::SPHERE);
+	scDlg.addType("    Torus",         CC_TYPES::TORUS);
+	scDlg.addType("    Cylinder",      CC_TYPES::CYLINDER);
+	scDlg.addType("    Cone",          CC_TYPES::CONE);
+	scDlg.addType("    Box",           CC_TYPES::BOX);
+	scDlg.addType("    Dish",          CC_TYPES::DISH);
+	scDlg.addType("    Extrusion",     CC_TYPES::EXTRU);
+	scDlg.addType("Sensor",            CC_TYPES::SENSOR);
+	scDlg.addType("  GBL/TLS sensor",  CC_TYPES::GBL_SENSOR);
+	scDlg.addType("  Camera sensor",   CC_TYPES::CAMERA_SENSOR);
+	scDlg.addType("Image",             CC_TYPES::IMAGE);
+	scDlg.addType("Facet",             CC_TYPES::FACET);
+	scDlg.addType("Label",             CC_TYPES::LABEL_2D);
+	scDlg.addType("Area label",        CC_TYPES::VIEWPORT_2D_LABEL);
+	scDlg.addType("Octree",            CC_TYPES::POINT_OCTREE);
+	scDlg.addType("Kd-tree",           CC_TYPES::POINT_KDTREE);
+	scDlg.addType("Viewport",          CC_TYPES::VIEWPORT_2D_OBJECT);
 
-void ccDBRoot::toggleSelectedEntitiesVisibility()
-{
-	toggleSelectedEntitiesProperty(1);
-}
+	if (!scDlg.exec())
+		return;
 
-void ccDBRoot::toggleSelectedEntitiesColor()
-{
-	toggleSelectedEntitiesProperty(2);
-}
+	CC_CLASS_ENUM type = scDlg.getSelectedType();
+	QString name = scDlg.getSelectedName();
 
-void ccDBRoot::toggleSelectedEntitiesNormals()
-{
-	toggleSelectedEntitiesProperty(3);
-}
-
-void ccDBRoot::toggleSelectedEntitiesSF()
-{
-	toggleSelectedEntitiesProperty(4);
-}
-
-void ccDBRoot::toggleSelectedEntitiesMat()
-{
-	toggleSelectedEntitiesProperty(5);
-}
-
-void ccDBRoot::toggleSelectedEntities3DName()
-{
-	toggleSelectedEntitiesProperty(6);
-}
-
-void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
-{
-	if (prop > 6)
+	//some types are exclusive, some are generic, and some can be both
+	//(e.g. Meshes)
+	//
+	//For generic-only types the match type gets overridden and forced to
+	//false because exclusive match makes no sense!
+	bool exclusive;
+	switch (type)
 	{
-		ccLog::Warning("[ccDBRoot::toggleSelectedEntitiesProperty] Internal error: invalid 'prop' value");
+	case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
+	case CC_TYPES::PRIMITIVE:
+	case CC_TYPES::SENSOR:
+	case CC_TYPES::IMAGE:
+		exclusive = false;
+		break;
+	default:
+		exclusive = scDlg.getStrictMatchState();
+		break;
+	}
+
+	selectChildrenByTypeAndName(type, exclusive, name);
+}
+
+/* name is optional, if passed it is used to restrict the selection by type */
+void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive/*=true*/, QString name/*=QString()*/)
+{
+	//not initialized?
+	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
+		return;
+
+	QModelIndex clickIndex = m_dbTreeWidget->indexAt(m_contextMenuPos);
+	if (!clickIndex.isValid())
+		return;
+	ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
+	assert(item);
+
+	if (!item || item->getChildrenNumber() == 0)
+		return;
+
+	ccHObject::Container filteredByType;
+	item->filterChildren(filteredByType, true, type, typeIsExclusive);
+
+	// The case of an empty filteredByType is handled implicitly, to make
+	// the ctrlPushed behavior below more consistent (i.e. when no object
+	// is found and Control was NOT pressed the selection will still be
+	// cleared).
+
+	ccHObject::Container toSelect;
+	try
+	{
+		if (name.isEmpty())
+		{
+			toSelect = filteredByType;
+		}
+		else
+		{
+			for (size_t i=0; i<filteredByType.size(); ++i)
+			{
+				ccHObject* child = filteredByType[i];
+
+				if (child->getName().compare(name) == 0)
+					toSelect.push_back(child);
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[selectChildrenByTypeAndName] Not enough memory!");
 		return;
 	}
 
+	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	selectEntities(toSelect, ctrlPushed);
+}
+
+void ccDBRoot::toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop)
+{
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	int selCount = selectedIndexes.size();
@@ -1645,27 +1735,27 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 			assert(false);
 			continue;
 		}
-		switch(prop)
+		switch (prop)
 		{
-		case 0: //enable state
+		case TG_ENABLE: //enable state
 			item->setEnabled(!item->isEnabled());
 			break;
-		case 1: //visibility
+		case TG_VISIBLE: //visibility
 			item->toggleVisibility();
 			break;
-		case 2: //color
+		case TG_COLOR: //color
 			item->toggleColors();
 			break;
-		case 3: //normal
+		case TG_NORMAL: //normal
 			item->toggleNormals();
 			break;
-		case 4: //SF
+		case TG_SF: //SF
 			item->toggleSF();
 			break;
-		case 5: //Materials/textures
+		case TG_MATERIAL: //Materials/textures
 			item->toggleMaterials();
 			break;
-		case 6: //3D name
+		case TG_3D_NAME: //3D name
 			item->toggleShowName();
 			break;
 		}
@@ -1736,7 +1826,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool toggleVisibility = false;
 			bool toggleOtherProperties = false;
 			bool toggleMaterials = false;
-			bool hasMoreThan2Children = false;
+			bool hasMoreThanOneChild = false;
 			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
@@ -1749,7 +1839,9 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 					continue;
 				}
 				if (item->getChildrenNumber() > 1)
-					hasMoreThan2Children = true;
+				{
+					hasMoreThanOneChild = true;
+				}
 				leafObject |= item->isLeaf();
 				if (!item->isA(CC_TYPES::HIERARCHY_OBJECT))
 				{
@@ -1810,15 +1902,18 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			menu.addAction(m_toggleSelectedEntities3DName);
 			menu.addSeparator();
 			menu.addAction(m_deleteSelectedEntities);
-			if (hasMoreThan2Children)
+			if (selCount == 1 && hasMoreThanOneChild)
 			{
 				menu.addSeparator();
-				menu.addAction(m_sortSiblingsAZ);
-				menu.addAction(m_sortSiblingsZA);
-				menu.addAction(m_sortSiblingsType);
+				menu.addAction(m_sortChildrenAZ);
+				menu.addAction(m_sortChildrenZA);
+				menu.addAction(m_sortChildrenType);
 			}
-			if (selCount==1 && !leafObject)
+
+			if (selCount == 1 && !leafObject)
 			{
+				menu.addSeparator();
+				menu.addAction(m_selectByTypeAndName);
 				menu.addSeparator();
 				menu.addAction(m_addEmptyGroup);
 			}

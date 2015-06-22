@@ -325,6 +325,9 @@
     </property>
     <addaction name="actionNew3DView"/>
     <addaction name="separator"/>
+    <addaction name="actionZoomIn"/>
+    <addaction name="actionZoomOut"/>
+    <addaction name="separator"/>
     <addaction name="actionClose3DView"/>
     <addaction name="actionCloseAll3DViews"/>
     <addaction name="separator"/>
@@ -463,7 +466,7 @@
    <property name="minimumSize">
     <size>
      <width>135</width>
-     <height>155</height>
+     <height>172</height>
     </size>
    </property>
    <property name="floating">
@@ -587,8 +590,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>80</width>
-     <height>124</height>
+     <width>91</width>
+     <height>128</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -714,8 +717,8 @@
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
     <size>
-     <width>100</width>
-     <height>116</height>
+     <width>109</width>
+     <height>135</height>
     </size>
    </property>
    <property name="floating">
@@ -2733,6 +2736,28 @@
   <action name="actionMatchScales">
    <property name="text">
     <string>Match scales</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="text">
+    <string>Zoom in</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom in (current 3D view)</string>
+   </property>
+   <property name="shortcut">
+    <string>+</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="text">
+    <string>Zoom out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom out (current 3D view)</string>
+   </property>
+   <property name="shortcut">
+    <string>=</string>
    </property>
   </action>
  </widget>

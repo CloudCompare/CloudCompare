@@ -43,7 +43,7 @@ class ccDisplayOptionsDlg : public QDialog, public Ui::DisplayOptionsDlg
 public:
 
 	//! Default constructor
-	ccDisplayOptionsDlg(QWidget* parent);
+	explicit ccDisplayOptionsDlg(QWidget* parent);
 
 	//! Sets a button background color
 	/** Support Windows XP style particularity.
@@ -62,43 +62,43 @@ public:
 signals:
 	void aspectHasChanged();
 
-	protected slots:
-		void changeLightDiffuseColor();
-		void changeLightAmbientColor();
-		void changeLightSpecularColor();
-		void changeMeshFrontDiffuseColor();
-		void changeMeshBackDiffuseColor();
-		void changeMeshSpecularColor();
-		void changePointsColor();
-		void changeBBColor();
-		void changeTextColor();
-		void changeBackgroundColor();
-		void changeLabelBackgroundColor();
-		void changeLabelMarkerColor();
-		void changeBackgroundGradient();
-		void changeMeshDecimation();
-		void changeMaxMeshSize(double);
-		void changeCloudDecimation();
-		void changeMaxCloudSize(double);
-		void changeVBOUsage();
-		void changeCrossDisplayed();
-		void changeOpenGLPicking();
-		void changeColorScaleShowHistogram();
-		void changeColorScaleUseShader();
-		void changeColorScaleRampWidth(int);
+protected slots:
+	void changeLightDiffuseColor();
+	void changeLightAmbientColor();
+	void changeLightSpecularColor();
+	void changeMeshFrontDiffuseColor();
+	void changeMeshBackDiffuseColor();
+	void changeMeshSpecularColor();
+	void changePointsColor();
+	void changeBBColor();
+	void changeTextColor();
+	void changeBackgroundColor();
+	void changeLabelBackgroundColor();
+	void changeLabelMarkerColor();
+	void changeBackgroundGradient();
+	void changeMeshDecimation();
+	void changeMaxMeshSize(double);
+	void changeCloudDecimation();
+	void changeMaxCloudSize(double);
+	void changeVBOUsage();
+	void changeCrossDisplayed();
+	void changeOpenGLPicking();
+	void changeColorScaleShowHistogram();
+	void changeColorScaleUseShader();
+	void changeColorScaleRampWidth(int);
 
-		void changeDefaultFontSize(int);
-		void changeLabelFontSize(int);
-		void changeNumberPrecision(int);
-		void changeLabelOpacity(int);
-		void changeLabelMarkerSize(int);
+	void changeDefaultFontSize(int);
+	void changeLabelFontSize(int);
+	void changeNumberPrecision(int);
+	void changeLabelOpacity(int);
+	void changeLabelMarkerSize(int);
 
-		void changeZoomSpeed(double);
+	void changeZoomSpeed(double);
 
-		void doAccept();
-		void doReject();
-		void apply();
-		void reset();
+	void doAccept();
+	void doReject();
+	void apply();
+	void reset();
 
 protected:
 

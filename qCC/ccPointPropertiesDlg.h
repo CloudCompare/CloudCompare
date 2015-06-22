@@ -35,7 +35,7 @@ class ccPointPropertiesDlg : public ccPointPickingGenericInterface, public Ui::P
 public:
 
 	//! Default constructor
-	ccPointPropertiesDlg(QWidget* parent);
+	explicit ccPointPropertiesDlg(QWidget* parent);
 	//! Default destructor
 	virtual ~ccPointPropertiesDlg();
 

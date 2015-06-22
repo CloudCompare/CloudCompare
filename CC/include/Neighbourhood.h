@@ -47,8 +47,7 @@ class CC_CORE_LIB_API Neighbourhood
 								GRAVITY_CENTER				= 1,
 								LSQ_PLANE					= 2,
 								HEIGHT_FUNCTION				= 4,
-								HEIGHT_FUNCTION_DIRECTIONS	= 8,
-								QUADRIC_3D					= 16};
+								HEIGHT_FUNCTION_DIRECTIONS	= 8 };
 
 		//! Curvature type
 		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV,
@@ -58,7 +57,7 @@ class CC_CORE_LIB_API Neighbourhood
 		//! Default constructor
 		/** \param associatedCloud reference cloud
 		**/
-		Neighbourhood(GenericIndexedCloudPersist* associatedCloud);
+		explicit Neighbourhood(GenericIndexedCloudPersist* associatedCloud);
 
 		//! Default destructor
 		virtual ~Neighbourhood() {}
@@ -227,12 +226,12 @@ class CC_CORE_LIB_API Neighbourhood
 		**/
 		const PointCoordinateType* getHeightFunction(uchar* dimsHF = 0);
 
-		//! Returns the best interpolating quadric (Least-square)
-		/** Returns an array [a,b,c,d,e,f,g,l,m,n] such as
-				a.x^2+b.y^2+c.z^2+2e.x.y+2f.y.z+2g.z.x+2l.x+2m.y+2n.z+d = 0
-			\return 0 if computation failed
+		//! Computes the best interpolating quadric (Least-square)
+		/** \param[out] quadricEquation an array of 10 coefficients [a,b,c,d,e,f,g,l,m,n] such as
+				         a.x^2+b.y^2+c.z^2+2e.x.y+2f.y.z+2g.z.x+2l.x+2m.y+2n.z+d = 0
+			\return success
 		**/
-		const double* get3DQuadric();
+		bool compute3DQuadric(double quadricEquation[10]);
 
 		//! Computes the covariance matrix
 		CCLib::SquareMatrixd computeCovarianceMatrix();
@@ -262,14 +261,6 @@ class CC_CORE_LIB_API Neighbourhood
 		//! Least-square best fitting plane base vectors
 		CCVector3 theLSQPlaneVectors[3];
 		
-		//! Least-square best fitting 3D quadric parameters
-		/** Array [a,b,c,d,e,f,g,l,m,n] such as
-			a.x^2+b.y^2+c.z^2+2e.x.y+2f.y.z+2g.z.x+2l.x+2m.y+2n.z+d = 0.
-			Shouldn't be used directly: use _the3DQuadric instead.
-			Only valid if 'structuresValidity & QUADRIC_3D != 0'.
-		**/
-		double the3DQuadric[10];
-		
 		//! Gravity center
 		/** Only valid if 'structuresValidity & GRAVITY_CENTER != 0'.
 		**/
@@ -284,8 +275,6 @@ class CC_CORE_LIB_API Neighbourhood
 		bool computeLeastSquareBestFittingPlane();
 		//! Computes best fitting height function
 		bool computeHeightFunction();
-		//! Computes best fitting 3D quadric function
-		bool compute3DQuadric();
 
 		//! Associated cloud
 		GenericIndexedCloudPersist* m_associatedCloud;

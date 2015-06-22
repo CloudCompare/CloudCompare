@@ -147,7 +147,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 
 		//add "suggested" entry
 		int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",shift,scale));
-		sasDlg.makeCurrent(index);
+		sasDlg.setCurrentProfile(index);
 		//add "last" entry (if available)
 		{
 			ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
@@ -168,7 +168,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 					if (	!NeedShift((CCVector3d(P) + info.shift) * info.scale )
 						&&  !NeedRescale(diagonal*info.scale) )
 					{
-						sasDlg.makeCurrent(static_cast<int>(i));
+						sasDlg.setCurrentProfile(static_cast<int>(i));
 						break;
 					}
 				}

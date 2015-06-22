@@ -61,7 +61,7 @@ void ChunkedPointCloud::forEach(genericPointAction& anAction)
 	if (currentOutScalarFieldArray)
 	{
 		for (unsigned i=0; i<n; ++i)
-			anAction(*(CCVector3*)m_points->getValue(i),(*currentOutScalarFieldArray)[i]);
+			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),(*currentOutScalarFieldArray)[i]);
 	}
 	/*else //otherwise we use a fake SF (DGM FIXME: is it really interesting?!) --> NO ;)
 	{

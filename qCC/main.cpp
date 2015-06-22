@@ -85,7 +85,6 @@ protected:
 #endif
 };
 
-
 int main(int argc, char **argv)
 {
 	//QT initialiation
@@ -112,7 +111,7 @@ int main(int argc, char **argv)
 	QTime splashStartTime;
 
 	//Command line mode?
-	bool commandLine = (argc>1 && argv[1][0]=='-');
+	bool commandLine = (argc > 1 && argv[1][0] == '-');
 	if (!commandLine)
 	{
 		//OpenGL?

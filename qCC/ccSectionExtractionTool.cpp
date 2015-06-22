@@ -194,9 +194,6 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		if (m_editedPoly)
 			m_editedPoly->setDisplay_recursive(0);
 
-		//update view direction
-		setVertDimension(vertAxisComboBox->currentIndex());
-
 		//auto-close formerly associated window
 		if (MainWindow::TheInstance())
 		{
@@ -245,6 +242,9 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 
 		if (m_editedPoly)
 			m_editedPoly->setDisplay_recursive(m_associatedWin);
+
+		//update view direction
+		setVertDimension(vertAxisComboBox->currentIndex());
 	}
 
 	return true;
@@ -529,6 +529,7 @@ void ccSectionExtractionTool::updateCloudsBox()
 			m_cloudsBox += m_clouds[i].entity->getOwnBB();
 	}
 }
+
 bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInDB/*=true*/)
 {
 	if (!inputPoly)
@@ -1326,7 +1327,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 			}
 #endif
 
-			bool success = contour->split(maxEdgeLength,parts);
+			/*bool success = */contour->split(maxEdgeLength,parts);
 			delete contour;
 			contour = 0;
 		}

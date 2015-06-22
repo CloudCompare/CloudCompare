@@ -59,10 +59,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 	QTextStream inFile(&file);
 
-	QString line;
-	QStringList tokens;
-	bool ok;
-
 	//by default we don't compute normals without asking the user
 	bool computeNormals = (parameters.autoComputeNormals == ccGriddedTools::ALWAYS);
 
@@ -79,9 +75,10 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 		//read header
 		{
-			line = inFile.readLine();
+			QString line = inFile.readLine();
 			if (line.isNull() && container.getChildrenNumber() != 0) //end of file?
 				break;
+			bool ok;
 			height = line.toUInt(&ok);
 			if (!ok)
 				return CC_FERR_MALFORMED_FILE;
@@ -96,20 +93,24 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			for (int i=0; i<4; ++i)
 			{
 				line = inFile.readLine();
-				tokens = line.split(" ",QString::SkipEmptyParts);
+				QStringList tokens = line.split(" ",QString::SkipEmptyParts);
 				if (tokens.size() != 3)
 					return CC_FERR_MALFORMED_FILE;
 
+				float* colDest = 0;
+				if (i == 0)
+				{
+					//Translation
+					colDest = sensorTrans.getTranslation();
+				}
+				else
+				{
+					//X, Y and Z axis
+					colDest = sensorTrans.getColumn(i-1);
+				}
+
 				for (int j=0; j<3; ++j)
 				{
-					float* colDest = 0;
-					if (i == 0)
-						//Translation
-						colDest = sensorTrans.getTranslation();
-					else
-						//X, Y and Z axis
-						colDest = sensorTrans.getColumn(i-1);
-
 					assert(colDest);
 					colDest[j] = tokens[j].toFloat(&ok);
 					if (!ok)
@@ -122,7 +123,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			for (int i=0; i<4; ++i)
 			{
 				line = inFile.readLine();
-				tokens = line.split(" ",QString::SkipEmptyParts);
+				QStringList tokens = line.split(" ",QString::SkipEmptyParts);
 				if (tokens.size() != 4)
 					return CC_FERR_MALFORMED_FILE;
 
@@ -147,7 +148,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			}
 
 			//handle Global Shift directly on the first cloud's translation!
-			const CCVector3d& translation = cloudTransD.getTranslationAsVec3D();
+			CCVector3d translation = cloudTransD.getTranslationAsVec3D();
 			if (cloudIndex == 0)
 			{
 				if (HandleGlobalShift(translation,PshiftTrans,parameters))
@@ -225,8 +226,8 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			{
 				for (unsigned i=0; i<width; ++i, ++_indexGrid)
 				{
-					line = inFile.readLine();
-					tokens = line.split(" ",QString::SkipEmptyParts);
+					QString line = inFile.readLine();
+					QStringList tokens = line.split(" ",QString::SkipEmptyParts);
 
 					if (firstPoint)
 					{
@@ -249,6 +250,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 					double values[4];
 					for (int v=0; v<4; ++v)
 					{
+						bool ok;
 						values[v] = tokens[v].toDouble(&ok);
 						if (!ok)
 						{
@@ -297,6 +299,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 							colorType rgb[3];
 							for (int c=0; c<3; ++c)
 							{
+								bool ok;
 								unsigned temp = tokens[4+c].toUInt(&ok);
 								ok &= (temp <= static_cast<unsigned>(ccColor::MAX));
 								if (ok)
@@ -332,7 +335,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			if (intensitySF)
 				intensitySF->release();
 
-			ccLog::Warning(QString("[PTX] Scan #1 is empty?!").arg(cloudIndex+1));
+			ccLog::Warning(QString("[PTX] Scan #%1 is empty?!").arg(cloudIndex+1));
 		}
 		else if (cloud->size() <= cloud->capacity())
 		{

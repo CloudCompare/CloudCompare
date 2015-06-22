@@ -345,7 +345,7 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 		for (unsigned i=0; i<m_numberOfNeighbours; ++i)
 		{
 			unsigned nIndex = index + m_neighboursIndexShift[i];
-			DirectionCell* nCell = (DirectionCell*)m_theGrid[nIndex];
+			DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[nIndex]);
 			//if the neighbor exists (it shouldn't be in the TRIAL or ACTIVE sets)
 			if (nCell/* && nCell->state == DirectionCell::FAR_CELL*/)
 			{

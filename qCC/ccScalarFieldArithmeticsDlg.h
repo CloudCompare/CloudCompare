@@ -65,14 +65,29 @@ public:
 	//! Returns selected operation
 	Operation getOperation() const;
 
+	//! Returns the operation enumerator based on its name
+	static Operation GetOperationByName(QString name);
+
+	//! Returns operation name
+	static QString GetOperationName(Operation op, QString sf1, QString sf2 = QString());
+
 	//! Applies operation on a given cloud
 	/** Should be applied on the same cloud as the one input to the constructor
 		Otherwise you'd better know what you're doing ;).
 		\param cloud cloud on which to apply the SF operation
 		\return success
-
 	**/
 	bool apply(ccPointCloud* cloud);
+
+	//! Applies operation on a given cloud
+	/** \param cloud cloud on which to apply the SF operation
+		\param op operation
+		\param sf1Idx first (or only) scalar field index
+		\param sf2Idx secondary scalar field (only for PLUS, MINUS, MULTIPLY and DIVIDE operations)
+		\param parent parent widget (optional)
+		\return success
+	**/
+	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, int sf2Idx = -1, QWidget* parent = 0);
 
 protected slots:
 	

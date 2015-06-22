@@ -134,7 +134,7 @@ public:
 	struct SFModulationParams
 	{
 		//! Default constructor
-		SFModulationParams(bool state = false) : enabled(state), a(0.0), b(1.0) {}
+		explicit SFModulationParams(bool state = false) : enabled(state), a(0.0), b(1.0) {}
 
 		//! Whether the modulation is enabled or not
 		bool enabled;

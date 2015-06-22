@@ -40,7 +40,7 @@ class ccContourExtractorDlg : public QDialog, public Ui::ContourExtractorDlg
 public:
 
 	//! Default constructor
-	ccContourExtractorDlg(QWidget* parent = 0);
+	explicit ccContourExtractorDlg(QWidget* parent = 0);
 
 	//! Initializes the display
 	void init();

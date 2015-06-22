@@ -28,7 +28,7 @@ class ccScalarFieldFromColorDlg : public QDialog, public Ui::scalarFieldFromColo
 public:
 
 	//! Default constructor
-	ccScalarFieldFromColorDlg(QWidget* parent = 0);
+	explicit ccScalarFieldFromColorDlg(QWidget* parent = 0);
 
 	//! Returns if to export R channel as SF
 	bool getRStatus();

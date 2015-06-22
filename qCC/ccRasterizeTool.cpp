@@ -45,9 +45,26 @@
 #include <QMessageBox>
 #include <QImageWriter>
 #include <QFileDialog>
+#include <QMap>
 
 //System
 #include <assert.h>
+
+//default field names
+struct DefaultFieldNames : public QMap<ccRasterizeTool::ExportableFields,QString>
+{
+	DefaultFieldNames()
+	{
+		insert(ccRasterizeTool::PER_CELL_HEIGHT,        CC_HEIGHT_GRID_FIELD_NAME);
+		insert(ccRasterizeTool::PER_CELL_COUNT,         "Per-cell population");
+		insert(ccRasterizeTool::PER_CELL_MIN_HEIGHT,    "Min height");
+		insert(ccRasterizeTool::PER_CELL_MAX_HEIGHT,    "Max height");
+		insert(ccRasterizeTool::PER_CELL_AVG_HEIGHT,    "Average height");
+		insert(ccRasterizeTool::PER_CELL_HEIGHT_STD_DEV,"Std. dev. height");
+		insert(ccRasterizeTool::PER_CELL_HEIGHT_RANGE,   "Height range");
+	}
+};
+static DefaultFieldNames s_defaultFieldNames;
 
 ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0*/)
 	: QDialog(parent)
@@ -74,6 +91,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(resampleCloudCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(gridOptionChanged()));
 	connect(dimensionComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionDirChanged(int)));
 	connect(heightProjectionComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionTypeChanged(int)));
+	connect(scalarFieldProjection,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(sfProjectionTypeChanged(int)));
 	connect(fillEmptyCellsComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(fillEmptyCellStrategyChanged(int)));
 	connect(updateGridPushButton,		SIGNAL(clicked()),					this,	SLOT(updateGridAndDisplay()));
 	connect(generateCloudPushButton,	SIGNAL(clicked()),					this,	SLOT(generateCloud()));
@@ -84,6 +102,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(generateContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(generateContours()));
 	connect(exportContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(exportContourLines()));
 	connect(clearContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(removeContourLines()));
+	connect(activeLayerComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(activeLayerChanged(int)));
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox(); 
@@ -103,6 +122,19 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 		cloudNameLabel->setText(m_cloud->getName());
 		pointCountLabel->setText(QString::number(m_cloud->size()));
 		interpolateSFFrame->setEnabled(cloud->hasScalarFields());
+
+		//populate layer box
+		activeLayerComboBox->addItem(s_defaultFieldNames[PER_CELL_HEIGHT]);
+		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			for (unsigned i=0; i<pc->getNumberOfScalarFields(); ++i)
+				activeLayerComboBox->addItem(pc->getScalarField(i)->getName());
+		}
+		else
+		{
+			activeLayerComboBox->setEnabled(false);
+		}
 
 		//add window
 		{
@@ -204,10 +236,6 @@ void ccRasterizeTool::updateGridInfo()
 		unsigned gridHeight = static_cast<unsigned>(ceil(boxDiag.u[Y] / gridStep));
 
 		gridWidthLabel->setText(QString("%1 x %2").arg(gridWidth).arg(gridHeight));
-		gridHeightRangeLabel->setText(QString("%1 (%2 - %3)").arg(boxDiag.u[Z]).arg(box.minCorner().u[Z]).arg(box.maxCorner().u[Z]));
-
-		contourStartDoubleSpinBox->setValue(box.minCorner().u[Z]);
-		contourStepDoubleSpinBox->setValue(boxDiag.u[Z] / 10.0);
 	}
 	else
 	{
@@ -268,10 +296,59 @@ void ccRasterizeTool::projectionTypeChanged(int index)
 	gridIsUpToDate(false);
 }
 
+void ccRasterizeTool::sfProjectionTypeChanged(int index)
+{
+	gridIsUpToDate(false);
+}
+
 void ccRasterizeTool::projectionDirChanged(int dir)
 {
 	updateGridInfo();
 	gridIsUpToDate(false);
+}
+
+void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
+{
+	if (layerIndex != 0)
+	{
+		interpolateSFCheckBox->setChecked(true);
+		interpolateSFCheckBox->setEnabled(false);
+	}
+	else
+	{
+		interpolateSFCheckBox->setEnabled(true);
+	}
+
+	if (m_rasterCloud)
+	{
+		//does the selected 'layer' exist?
+		int sfIndex = m_rasterCloud->getScalarFieldIndexByName(qPrintable(activeLayerComboBox->itemText(layerIndex)));
+		m_rasterCloud->setCurrentDisplayedScalarField(sfIndex);
+
+		if (sfIndex >= 0)
+		{
+			ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
+			if (activeLayer)
+			{
+				const ccScalarField::Range& layerValues = activeLayer->displayRange();
+				gridLayerRangeLabel->setText(QString("%1 (%2 - %3)").arg(layerValues.range()).arg(layerValues.min()).arg(layerValues.max()));
+				contourStartDoubleSpinBox->setValue(layerValues.min());
+				contourStepDoubleSpinBox->setValue(layerValues.range() / 10.0);
+			}
+			else
+			{
+				assert(false);
+				gridLayerRangeLabel->setText("no active layer?!");
+			}
+		}
+		else
+		{
+			gridIsUpToDate(false);
+		}
+
+		if (m_window && autoRedraw)
+			m_window->redraw();
+	}
 }
 
 void ccRasterizeTool::fillEmptyCellStrategyChanged(int)
@@ -651,7 +728,9 @@ bool ccRasterizeTool::RasterGrid::init(unsigned w, unsigned h)
 	return true;
 }
 
-ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFields>& exportedFields, bool interpolateSF) const
+ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
+													bool interpolateSF,
+													QString activeSFName) const
 {
 	if (!m_cloud || !m_grid.isValid())
 		return 0;
@@ -711,23 +790,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 	}
 	assert(cloudGrid);
 	
-	//per-point height SF
-	CCLib::ScalarField* heightSF = 0;
-	int heightSFIdx = -1;
-	{
-		heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME);
-		if (heightSFIdx < 0)
-		{
-			ccLog::Warning("[Rasterize] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
-		}
-		else
-		{
-			heightSF = cloudGrid->getScalarField(heightSFIdx);
-			assert(heightSF);
-		}
-	}
-
-	//shall we save per-cell fields as well?
+	//shall we generate per-cell fields as well?
 	std::vector<CCLib::ScalarField*> exportedSFs;
 	if (!exportedFields.empty())
 	{
@@ -737,23 +800,14 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 			int sfIndex = -1;
 			switch (exportedFields[i])
 			{
+			case PER_CELL_HEIGHT:
 			case PER_CELL_COUNT:
-				sfIndex = cloudGrid->addScalarField("Per-cell population");
-				break;
 			case PER_CELL_MIN_HEIGHT:
-				sfIndex = cloudGrid->addScalarField("Min height");
-				break;
 			case PER_CELL_MAX_HEIGHT:
-				sfIndex = cloudGrid->addScalarField("Max height");
-				break;
 			case PER_CELL_AVG_HEIGHT:
-				sfIndex = cloudGrid->addScalarField("Average height");
-				break;
 			case PER_CELL_HEIGHT_STD_DEV:
-				sfIndex = cloudGrid->addScalarField("Std. dev. height");
-				break;
 			case PER_CELL_HEIGHT_RANGE:
-				sfIndex = cloudGrid->addScalarField("Height range");
+				sfIndex = cloudGrid->addScalarField(qPrintable(s_defaultFieldNames[exportedFields[i]]));
 				break;
 			default:
 				assert(false);
@@ -817,24 +871,18 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 					cloudGrid->addPoint(Pf);
 				}
 
-				//if a SF is available, we set the point height equal to this cell's height
-				assert(nonEmptyCellIndex < m_cloud->size());
-				if (heightSF)
-				{
-					ScalarType h = static_cast<ScalarType>(aCell->height);
-					if (resampleInputCloud)
-						heightSF->setValue(nonEmptyCellIndex,h);
-					else
-						heightSF->addElement(h);
-				}
-				//same thing for the SFs
+				//fill the associated SFs
 				assert(exportedSFs.size() >= exportedFields.size());
+				assert(nonEmptyCellIndex < m_cloud->size());
 				for (size_t i=0; i<exportedSFs.size(); ++i)
 				{
 					CCLib::ScalarField* sf = exportedSFs[i];
 					ScalarType sVal = NAN_VALUE;
 					switch (exportedFields[i])
 					{
+					case PER_CELL_HEIGHT:
+						sVal = static_cast<ScalarType>(aCell->height);
+						break;
 					case PER_CELL_COUNT:
 						sVal = static_cast<ScalarType>(aCell->nbPoints);
 						break;
@@ -875,16 +923,25 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 					cloudGrid->addPoint(Pf);
 				}
 
-				//if a SF is available, we set the point height to the default height
-				if (heightSF)
-				{
-					ScalarType s = static_cast<ScalarType>(emptyCellsHeight);
-					heightSF->addElement(s);
-				}
+				assert(exportedSFs.size() == exportedFields.size());
 				for (size_t i=0; i<exportedSFs.size(); ++i)
 				{
-					if (exportedSFs[i])
+					if (!exportedSFs[i])
+						continue;
+					
+					switch (exportedFields[i])
+					{
+					case PER_CELL_HEIGHT:
+						{
+							//we set the point height to the default height
+							ScalarType s = static_cast<ScalarType>(emptyCellsHeight);
+							exportedSFs[i]->addElement(s);
+						}
+						break;
+					default:
 						exportedSFs[i]->addElement(NAN_VALUE);
+						break;
+					}
 				}
 			}
 
@@ -894,29 +951,12 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 		Py += m_grid.gridStep;
 	}
 
-	if (heightSF)
-	{
-		heightSF->computeMinAndMax();
-		cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
-	}
+	assert(exportedSFs.size() == exportedFields.size());
 	for (size_t i=0; i<exportedSFs.size(); ++i)
 	{
 		CCLib::ScalarField* sf = exportedSFs[i];
 		if (sf)
-		{
 			sf->computeMinAndMax();
-			//show the first available 
-			if (!cloudGrid->getCurrentDisplayedScalarField())
-			{
-				cloudGrid->setCurrentDisplayedScalarField(cloudGrid->getScalarFieldIndexByName(sf->getName()));
-			}
-		}
-	}
-
-	if (cloudGrid->getNumberOfScalarFields() != 0)
-	{
-		cloudGrid->setCurrentDisplayedScalarField(0); //first SF by default
-		cloudGrid->showSF(true);
 	}
 
 	//take care of former scalar fields
@@ -931,7 +971,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 				if (_sfGrid) //valid SF grid
 				{
 					//the corresponding SF should exist on the input cloud
-					CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
+					ccScalarField* formerSf = static_cast<ccScalarField*>(pc->getScalarField(static_cast<int>(k)));
 					assert(formerSf);
 
 					//we try to create an equivalent SF on the output grid
@@ -945,7 +985,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 					}
 					else
 					{
-						CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
+						ccScalarField* sf = static_cast<ccScalarField*>(cloudGrid->getScalarField(sfIdx));
 						assert(sf);
 						//set sf values
 						unsigned n = 0;
@@ -967,6 +1007,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 							}
 						}
 						sf->computeMinAndMax();
+						sf->importParametersFrom(formerSf);
 						assert(sf->currentSize() == pointsCount);
 					}
 				}
@@ -984,6 +1025,11 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 
 	cloudGrid->setName(m_cloud->getName() + QString(".raster(%1)").arg(m_grid.gridStep));
 
+	//currently displayed SF
+	int activeSFIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(activeSFName));
+	cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
+	cloudGrid->showSF(true);
+
 	//don't forget original shift
 	cloudGrid->setGlobalShift(m_cloud->getGlobalShift());
 	cloudGrid->setGlobalScale(m_cloud->getGlobalScale());
@@ -993,7 +1039,9 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(const std::vector<ExportableFi
 
 void ccRasterizeTool::updateGridAndDisplay()
 {
-	bool success = updateGrid(getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
+	bool activeLayerIsSF = activeLayerComboBox->currentIndex() != 0;
+	bool interpolateSF = activeLayerIsSF || (getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
+	bool success = updateGrid(interpolateSF);
 
 	if (success && m_window)
 	{
@@ -1005,17 +1053,31 @@ void ccRasterizeTool::updateGridAndDisplay()
 			m_rasterCloud = 0;
 		}
 
-		std::vector<ExportableFields> exportedFields; //don't export any field (it's only for display!)
-		m_rasterCloud = convertGridToCloud(exportedFields,false);
+		std::vector<ExportableFields> exportedFields;
+		try
+		{
+			//we always compute the default 'height' layer
+			exportedFields.push_back(PER_CELL_HEIGHT);
+			//but we may also have to compute the 'original SF(s)' layer(s)
+			QString activeLayerName = activeLayerComboBox->currentText();
+			m_rasterCloud = convertGridToCloud(exportedFields,activeLayerIsSF,activeLayerName);
+		}
+		catch(std::bad_alloc)
+		{
+		}
 
 		if (m_rasterCloud)
 		{
 			m_window->addToOwnDB(m_rasterCloud);
 			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false,m_window);
 			update2DDisplayZoom(box);
+
+			//update 
+			activeLayerChanged(activeLayerComboBox->currentIndex(),false);
 		}
 		else
 		{
+			ccLog::Error("Not enough memory!");
 			m_window->redraw();
 		}
 	}
@@ -1185,7 +1247,6 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		//scalar fields
 		if (interpolateSF)
 		{
-			assert(sfInterpolation != INVALID_PROJECTION_TYPE);
 			int pos = j*static_cast<int>(m_grid.width)+i; //pos in 2D SF grid(s)
 			assert(pos < static_cast<int>(gridTotalSize));
 			for (size_t k=0; k<m_grid.scalarFields.size(); ++k)
@@ -1412,6 +1473,20 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 
 										cell[i].nbPoints = 1;
 										cell[i].height = l1 * valA + l2 * valB + l3 * valC;
+
+										//interpolate SFs as well!
+										for (size_t sfIndex=0; sfIndex<m_grid.scalarFields.size(); ++sfIndex)
+										{
+											if (m_grid.scalarFields[sfIndex])
+											{
+												double* gridSF = m_grid.scalarFields[sfIndex];
+												const double& sfValA = gridSF[ P[0][0] + P[0][1]*m_grid.width ];
+												const double& sfValB = gridSF[ P[1][0] + P[1][1]*m_grid.width ];
+												const double& sfValC = gridSF[ P[2][0] + P[2][1]*m_grid.width ];
+												gridSF[i + j*m_grid.width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
+											}
+										}
+
 									}
 								}
 							}
@@ -1465,28 +1540,39 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	return true;
 }
 
-void ccRasterizeTool::generateCloud() const
+ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 {
-	//to avoid multiple clicks
-	generateCloudPushButton->blockSignals(true);
-	
+	if (!m_cloud || !m_grid.isValid())
+		return 0;
+
 	//look for fields to be exported
 	std::vector<ExportableFields> exportedFields;
-	if (exportAsSF(PER_CELL_COUNT))
-		exportedFields.push_back(PER_CELL_COUNT);
-	if (exportAsSF(PER_CELL_MIN_HEIGHT))
-		exportedFields.push_back(PER_CELL_MIN_HEIGHT);
-	if (exportAsSF(PER_CELL_MAX_HEIGHT))
-		exportedFields.push_back(PER_CELL_MAX_HEIGHT);
-	if (exportAsSF(PER_CELL_AVG_HEIGHT))
-		exportedFields.push_back(PER_CELL_AVG_HEIGHT);
-	if (exportAsSF(PER_CELL_HEIGHT_STD_DEV))
-		exportedFields.push_back(PER_CELL_HEIGHT_STD_DEV);
-	if (exportAsSF(PER_CELL_HEIGHT_RANGE))
-		exportedFields.push_back(PER_CELL_HEIGHT_RANGE);
-	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
+	try
+	{
+		exportedFields.push_back(PER_CELL_HEIGHT);
+		if (exportAsSF(PER_CELL_COUNT))
+			exportedFields.push_back(PER_CELL_COUNT);
+		if (exportAsSF(PER_CELL_MIN_HEIGHT))
+			exportedFields.push_back(PER_CELL_MIN_HEIGHT);
+		if (exportAsSF(PER_CELL_MAX_HEIGHT))
+			exportedFields.push_back(PER_CELL_MAX_HEIGHT);
+		if (exportAsSF(PER_CELL_AVG_HEIGHT))
+			exportedFields.push_back(PER_CELL_AVG_HEIGHT);
+		if (exportAsSF(PER_CELL_HEIGHT_STD_DEV))
+			exportedFields.push_back(PER_CELL_HEIGHT_STD_DEV);
+		if (exportAsSF(PER_CELL_HEIGHT_RANGE))
+			exportedFields.push_back(PER_CELL_HEIGHT_RANGE);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory!");
+		return 0;
+	}
+	QString activeLayerName = activeLayerComboBox->currentText();
+	bool activeLayerIsSF = activeLayerComboBox->currentIndex() != 0;
+	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE || activeLayerIsSF,activeLayerName);
 
-	if (rasterCloud)
+	if (rasterCloud && autoExport)
 	{
 		if (m_cloud->getParent())
 			m_cloud->getParent()->addChild(rasterCloud);
@@ -1503,8 +1589,49 @@ void ccRasterizeTool::generateCloud() const
 			MainWindow::TheInstance()->addToDB(rasterCloud);
 		ccLog::Print(QString("[Rasterize] Cloud '%1' successfully exported").arg(rasterCloud->getName()));
 	}
-	
-	generateCloudPushButton->blockSignals(false);
+
+	return rasterCloud;
+}
+
+void ccRasterizeTool::generateMesh() const
+{
+	ccPointCloud* rasterCloud = generateCloud(false);
+	if (rasterCloud)
+	{
+		char errorStr[1024];
+		CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
+																								DELAUNAY_2D_AXIS_ALIGNED,
+																								0,
+																								2,
+																								errorStr);
+		ccMesh* rasterMesh = 0;
+		if (baseMesh)
+		{
+			rasterMesh = new ccMesh(baseMesh,rasterCloud);
+			delete baseMesh;
+			baseMesh = 0;
+		}
+		if (rasterMesh)
+		{
+			if (m_cloud->getParent())
+				m_cloud->getParent()->addChild(rasterMesh);
+			rasterCloud->setEnabled(false);
+			rasterCloud->setVisible(true);
+			rasterCloud->setName("vertices");
+			rasterMesh->addChild(rasterCloud);
+			rasterMesh->setDisplay_recursive(m_cloud->getDisplay());
+			rasterMesh->setName(m_cloud->getName() + ".mesh");
+
+			MainWindow* mainWindow = MainWindow::TheInstance();
+			if (mainWindow)
+				MainWindow::TheInstance()->addToDB(rasterMesh);
+			ccLog::Print(QString("[Rasterize] Mesh '%1' successfully exported").arg(rasterMesh->getName()));
+		}
+		else
+		{
+			ccLog::Error(QString("Failed to create mesh (Triangle lib error: '%1')").arg(errorStr));
+		}
+	}
 }
 
 void ccRasterizeTool::generateImage() const
@@ -1650,7 +1777,7 @@ class RasterExportOptionsDlg : public QDialog, public Ui::RasterExportOptionsDia
 {
 public:
 
-	RasterExportOptionsDlg(QWidget* parent = 0)
+	explicit RasterExportOptionsDlg(QWidget* parent = 0)
 		: QDialog(parent)
 		, Ui::RasterExportOptionsDialog()
 	{
@@ -1993,67 +2120,30 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
 }
 
-void ccRasterizeTool::generateMesh() const
-{
-	if (!m_cloud || !m_grid.isValid())
-		return;
-
-	std::vector<ExportableFields> exportedFields;
-	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
-
-	if (rasterCloud)
-	{
-		char errorStr[1024];
-		CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
-																								DELAUNAY_2D_AXIS_ALIGNED,
-																								0,
-																								2,
-																								errorStr);
-		ccMesh* rasterMesh = 0;
-		if (baseMesh)
-		{
-			rasterMesh = new ccMesh(baseMesh,rasterCloud);
-			delete baseMesh;
-			baseMesh = 0;
-		}
-
-		if (rasterMesh)
-		{
-			if (m_cloud->getParent())
-				m_cloud->getParent()->addChild(rasterMesh);
-			rasterCloud->setEnabled(false);
-			rasterCloud->setVisible(true);
-			rasterCloud->setName("vertices");
-			rasterMesh->addChild(rasterCloud);
-			rasterMesh->setDisplay_recursive(m_cloud->getDisplay());
-			rasterMesh->setName(m_cloud->getName() + ".mesh");
-
-			MainWindow* mainWindow = MainWindow::TheInstance();
-			if (mainWindow)
-				MainWindow::TheInstance()->addToDB(rasterMesh);
-			ccLog::Print(QString("[Rasterize] Mesh '%1' successfully exported").arg(rasterMesh->getName()));
-		}
-		else
-		{
-			ccLog::Warning(QString("[Rasterize] Failed to create mesh: Triangle lib. said '%1'").arg(errorStr));
-		}
-	}
-}
-
 void ccRasterizeTool::generateContours()
 {
-	if (!m_grid.isValid())
-		return;
-
-	double z = contourStartDoubleSpinBox->value();
-	if (z > m_grid.maxHeight)
+	if (!m_grid.isValid() || !m_rasterCloud)
 	{
-		ccLog::Error("Start height is above maximum height!");
+		ccLog::Error("Need a valid raster/cloud to compute contours!");
 		return;
 	}
-	double zStep = contourStepDoubleSpinBox->value();
-	assert(zStep > 0);
-	unsigned levelCount = 1+static_cast<unsigned>(floor((m_grid.maxHeight-z)/zStep));
+
+	ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
+	if (!activeLayer)
+	{
+		ccLog::Error("No valid/active layer!");
+		return;
+	}
+
+	double startValue = contourStartDoubleSpinBox->value();
+	if (startValue > activeLayer->getMax())
+	{
+		ccLog::Error("Start value is above the layer maximum value!");
+		return;
+	}
+	double step = contourStepDoubleSpinBox->value();
+	assert(step > 0);
+	unsigned levelCount = 1 + static_cast<unsigned>(floor((activeLayer->getMax()-startValue)/step));
 
 	removeContourLines();
 	bool ignoreBorders = ignoreContourBordersCheckBox->isChecked();
@@ -2077,26 +2167,28 @@ void ccRasterizeTool::generateContours()
 	}
 	memset(grid,0,sizeof(double)*(xDim*yDim));
 
-	//default values
-	double emptyCellsHeight = 0;
-	double minHeight = m_grid.minHeight;
-	double maxHeight = m_grid.maxHeight;
-	//get real values
-	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(	emptyCellsHeight,
-																			minHeight,
-																			maxHeight);
-
 	//fill grid
 	{
-		if (fillEmptyCellsStrategy == LEAVE_EMPTY)
-			emptyCellsHeight = minHeight-1.0;
+		bool sparseLayer = (activeLayer->currentSize() != m_grid.height * m_grid.width);
+		double emptyCellsValue = activeLayer->getMin()-1.0;
 
+		unsigned layerIndex = 0;
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
 			RasterCell* cell = m_grid.data[j];
 			double* row = grid + (j+margin)*xDim + margin;
 			for (unsigned i=0; i<m_grid.width; ++i)
-				row[i] = cell[i].nbPoints ? cell[i].height : emptyCellsHeight;
+			{
+				if (cell[i].nbPoints || !sparseLayer)
+				{
+					ScalarType value = activeLayer->getValue(layerIndex++);
+					row[i] = ccScalarField::ValidValue(value) ? value : emptyCellsValue;
+				}
+				else
+				{
+					row[i] = emptyCellsValue;
+				}
+			}
 		}
 	}
 
@@ -2106,7 +2198,7 @@ void ccRasterizeTool::generateContours()
 	{
 		Isolines<double> iso(static_cast<int>(xDim),static_cast<int>(yDim));
 		if (!ignoreBorders)
-			iso.createOnePixelBorder(grid,minHeight-1.0);
+			iso.createOnePixelBorder(grid,activeLayer->getMin()-1.0);
 		//bounding box
 		ccBBox box = getCustomBBox();
 		assert(box.isValid());
@@ -2128,13 +2220,17 @@ void ccRasterizeTool::generateContours()
 		QApplication::processEvents();
 		CCLib::NormalizedProgress nProgress(&pDlg,levelCount);
 
-		while (z <= m_grid.maxHeight && !memoryError)
+		int lineWidth = contourWidthSpinBox->value();
+		bool colorize = colorizeContoursCheckBox->isChecked();
+
+		double v = startValue;
+		while (v <= activeLayer->getMax() && !memoryError)
 		{
 			//extract contour lines for the current level
-			iso.setThreshold(z);
+			iso.setThreshold(v);
 			int lineCount = iso.find(grid);
 
-			ccLog::PrintDebug(QString("[Rasterize][Isolines] z=%1 : %2 lines").arg(z).arg(lineCount));
+			ccLog::PrintDebug(QString("[Rasterize][Isolines] value=%1 : %2 lines").arg(v).arg(lineCount));
 
 			//convert them to poylines
 			int realCount = 0;
@@ -2150,15 +2246,15 @@ void ccRasterizeTool::generateContours()
 					if (poly->reserve(vertCount) && vertices->reserve(vertCount))
 					{
 						unsigned localIndex = 0;
-						for (int v=0; v<vertCount; ++v)
+						for (int vi=0; vi<vertCount; ++vi)
 						{
-							double x = iso.getContourX(i,v) - margin + 0.5;
-							double y = iso.getContourY(i,v) - margin + 0.5;
+							double x = iso.getContourX(i,vi) - margin + 0.5;
+							double y = iso.getContourY(i,vi) - margin + 0.5;
 
 							CCVector3 P;
 							P.u[X] = static_cast<PointCoordinateType>(x * m_grid.gridStep + box.minCorner().u[X]);
 							P.u[Y] = static_cast<PointCoordinateType>(y * m_grid.gridStep + box.minCorner().u[Y]);
-							P.u[Z] = static_cast<PointCoordinateType>(z);
+							P.u[Z] = static_cast<PointCoordinateType>(v);
 
 							vertices->addPoint(P);
 							assert(localIndex < vertices->size());
@@ -2168,16 +2264,22 @@ void ccRasterizeTool::generateContours()
 						assert(poly);
 						if (poly->size() > 1)
 						{
-							poly->setName(QString("Contour line z=%1 (#%2)").arg(z).arg(++realCount));
+							poly->setName(QString("Contour line value=%1 (#%2)").arg(v).arg(++realCount));
 							poly->setGlobalScale(m_cloud->getGlobalScale());
 							poly->setGlobalShift(m_cloud->getGlobalShift());
-							poly->setWidth(1);
+							poly->setWidth(lineWidth);
 							poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
 							poly->setColor(ccColor::darkGrey);
+							if (colorize)
+							{
+								const colorType* col = activeLayer->getColor(v);
+								if (col)
+									poly->setColor(ccColor::Rgb(col));
+							}
 							poly->showColors(true);
 							vertices->setEnabled(false);
 							//add the 'const altitude' meta-data as well
-							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(z));
+							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(v));
 						
 							if (m_window)
 								m_window->addToOwnDB(poly);
@@ -2200,7 +2302,7 @@ void ccRasterizeTool::generateContours()
 					}
 				}
 			}
-			z += zStep;
+			v += step;
 
 			if (!nProgress.oneStep())
 			{
@@ -2248,11 +2350,14 @@ void ccRasterizeTool::exportContourLines()
 		return;
 	}
 
+	bool colorize = colorizeContoursCheckBox->isChecked();
+
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(contourStepDoubleSpinBox->value()));
 	for (size_t i=0; i<m_contourLines.size(); ++i)
 	{
 		ccPolyline* poly = m_contourLines[i];
-		poly->setColor(ccColor::green);
+		if (!colorize)
+			poly->showColors(false);
 		group->addChild(poly);
 		if (m_window)
 			m_window->removeFromOwnDB(poly);

@@ -18,7 +18,7 @@
 #ifndef CC_DRAWABLE_OBJECT_HEADER
 #define CC_DRAWABLE_OBJECT_HEADER
 
-#include <ccIncludeGL.h>
+#include "ccIncludeGL.h"
 
 //Local
 #include "qCC_db.h"
@@ -104,8 +104,8 @@ struct glDrawContext
 
 	//! Label marker size (radius)
 	float labelMarkerSize;
-	//! Shift for 3D label marker display (around the marker)
-	float labelMarkerTextShift;
+	//! Shift for 3D label marker display (around the marker, in pixels)
+	float labelMarkerTextShift_pix;
 
 	//! Numerical precision (for displaying text)
 	unsigned dispNumberPrecision;
@@ -147,7 +147,7 @@ struct glDrawContext
 		, customRenderingShader(0)
 		, useVBOs(true)
 		, labelMarkerSize(5)
-		, labelMarkerTextShift(0)
+		, labelMarkerTextShift_pix(5)
 		, dispNumberPrecision(6)
 		, labelOpacity(100)
 		, sourceBlend(GL_SRC_ALPHA)

@@ -45,7 +45,7 @@ class ccPointPairRegistrationDlg : public ccOverlayDialog, Ui::pointPairRegistra
 public:
 
 	//! Default constructor
-	ccPointPairRegistrationDlg(QWidget* parent = 0);
+	explicit ccPointPairRegistrationDlg(QWidget* parent = 0);
 
 	//inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindow* win);
@@ -132,7 +132,7 @@ protected:
 	struct EntityContext
 	{
 		//! Default constructor
-		EntityContext(ccHObject* ent);
+		explicit EntityContext(ccHObject* ent);
 
 		//! Restores cloud original state
 		void restore();

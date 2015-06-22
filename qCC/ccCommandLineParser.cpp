@@ -30,6 +30,7 @@
 #include "ccComparisonDlg.h"
 #include "ccRegistrationTools.h"
 #include "ccCropTool.h"
+#include "ccScalarFieldArithmeticsDlg.h"
 
 //Qt
 #include <QMessageBox>
@@ -73,7 +74,9 @@ static const char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 static const char COMMAND_STAT_TEST[]						= "STAT_TEST";
 static const char COMMAND_FILTER_SF_BY_VALUE[]				= "FILTER_SF";
 static const char COMMAND_CLEAR_CLOUDS[]					= "CLEAR_CLOUDS";
+static const char COMMAND_POP_CLOUDS[]						= "POP_CLOUDS";
 static const char COMMAND_CLEAR_MESHES[]					= "CLEAR_MESHES";
+static const char COMMAND_POP_MESHES[]						= "POP_MESHES";
 static const char COMMAND_CLEAR[]							= "CLEAR";
 static const char COMMAND_BEST_FIT_PLANE[]					= "BEST_FIT_PLANE";
 static const char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]		= "MAKE_HORIZ";
@@ -87,9 +90,13 @@ static const char COMMAND_ICP_OVERLAP[]						= "OVERLAP";
 static const char COMMAND_ICP_ADJUST_SCALE[]				= "ADJUST_SCALE";
 static const char COMMAND_ICP_RANDOM_SAMPLING_LIMIT[]		= "RANDOM_SAMPLING_LIMIT";
 static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
+static const char COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT[]		= "MODEL_SF_AS_WEIGHTS";
+static const char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
+static const char COMMAND_ASCII_EXPORT_ADD_COL_HEADER[]		= "ADD_HEADER";
+static const char COMMAND_ASCII_EXPORT_ADD_PTS_COUNT[]		= "ADD_PTS_COUNT";
 static const char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
@@ -112,10 +119,12 @@ static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
 static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_CROSS_SECTION[]					= "CROSS_SECTION";
 static const char COMMAND_LOG_FILE[]						= "LOG_FILE";
+static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
 static const char OPTION_OFF[]								= "OFF";
+static const char OPTION_LAST[]								= "LAST";
 
 //Current cloud(s) export format (can be modified with the 'COMMAND_CLOUD_EXPORT_FORMAT' option)
 static QString s_CloudExportFormat(BinFilter::GetFileFilter());
@@ -249,17 +258,19 @@ static bool Error(const QString& message)
 	return false;
 }
 
-void ccCommandLineParser::removeClouds()
+void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
 {
 	while (!m_clouds.empty())
 	{
 		if (m_clouds.back().pc)
 			delete m_clouds.back().pc;
 		m_clouds.pop_back();
+		if (onlyLast)
+			break;
 	}
 }
 
-void ccCommandLineParser::removeMeshes()
+void ccCommandLineParser::removeMeshes(bool onlyLast/*=false*/)
 {
 	while (!m_meshes.empty())
 	{
@@ -267,6 +278,8 @@ void ccCommandLineParser::removeMeshes()
 		if (desc.mesh)
 			delete desc.mesh;
 		m_meshes.pop_back();
+		if (onlyLast)
+			break;
 	}
 }
 
@@ -276,9 +289,12 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	if (allAtOnce)
 	{
 		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_CloudExportFormat,false);
-		bool multiple = false, exclusive = true;
+		bool multiple = false;
 		if (filter)
+		{
+			bool exclusive = true;
 			filter->canSave(CC_TYPES::POINT_CLOUD,multiple,exclusive);
+		}
 		
 		if (multiple)
 		{
@@ -322,9 +338,12 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 	if (allAtOnce)
 	{
 		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_MeshExportFormat,false);
-		bool multiple = false, exclusive = true;
+		bool multiple = false;
 		if (filter)
+		{
+			bool exclusive = true;
 			filter->canSave(CC_TYPES::MESH,multiple,exclusive);
+		}
 		
 		if (multiple)
 		{
@@ -1241,21 +1260,21 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 			ccPointCloud* fitleredCloud = m_clouds[i].pc->filterPointsByScalarValue(thisMinVal,thisMaxVal);
 			if (fitleredCloud)
 			{
+				Print(QString("\t\tCloud '%1' --> %2/%3 points remaining").arg(m_clouds[i].pc->getName()).arg(fitleredCloud->size()).arg(m_clouds[i].pc->size()));
+
+				CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+				//replace current cloud by this one
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = fitleredCloud;
+				m_clouds[i].basename += QString("_FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal);
 				if (s_autoSaveMode)
 				{
-					CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-					QString errorStr = Export(resultDesc,QString("FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal));
+					QString errorStr = Export(resultDesc);
 					if (!errorStr.isEmpty())
 					{
 						delete fitleredCloud;
 						return Error(errorStr);
 					}
-					//replace current cloud by this one
-					delete m_clouds[i].pc;
-					m_clouds[i].pc = fitleredCloud;
-					m_clouds[i].basename += QString("_FILTERED");
-					//delete fitleredCloud;
-					//fitleredCloud = 0;
 				}
 			}
 		}
@@ -1671,7 +1690,6 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 
 		//read file content
 		QXmlStreamReader stream(&file);
-		bool error = true;
 
 		//expected: CloudCompare
 		if (	!stream.readNextStartElement()
@@ -2755,6 +2773,78 @@ bool ccCommandLineParser::commandDelaunay(QStringList& arguments, QDialog* paren
 	return true;
 }
 
+bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
+{
+	Print("[SF ARITHMETIC]");
+
+	if (arguments.size() < 2)
+	{
+		return Error(QString("Missing parameter(s): SF index and/or operation after '%1' (2 values expected)").arg(COMMAND_SF_ARITHMETIC));
+	}
+
+	//read sf index
+	int sfIndex = -1;
+	{
+		bool ok = true;
+		QString sfIndex = arguments.takeFirst();
+		if (sfIndex.toUpper() == OPTION_LAST)
+			sfIndex = -2;
+		else
+			sfIndex = sfIndex.toInt(&ok);
+		if (!ok || sfIndex < 0)
+			return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
+	}
+
+	//read operation type
+	ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
+	{
+		QString opName = arguments.takeFirst();
+		operation = ccScalarFieldArithmeticsDlg::GetOperationByName(opName);
+		if (operation == ccScalarFieldArithmeticsDlg::INVALID)
+		{
+			return Error(QString("Unknown operation! (%1)").arg(opName));
+		}
+	}
+
+	//apply operation on clouds
+	for (size_t i=0; i<m_clouds.size(); ++i)
+	{
+		ccPointCloud* cloud = m_clouds[i].pc;
+		if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex))
+				return Error(QString("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
+			else if (s_autoSaveMode)
+			{
+				QString errorStr = Export(m_clouds[i],"SF_ARITHMETIC");
+				if (!errorStr.isEmpty())
+					return Error(errorStr);
+			}
+		}
+	}
+
+	//and meshes!
+	for (size_t j=0; j<m_meshes.size(); ++j)
+	{
+		bool isLocked = false;
+		ccGenericMesh* mesh = m_meshes[j].mesh;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh,&isLocked);
+		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex))
+				return Error(QString("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+			else if (s_autoSaveMode)
+			{
+				QString errorStr = Export(m_meshes[j],"SF_ARITHMETIC");
+				if (!errorStr.isEmpty())
+					return Error(errorStr);
+			}
+		}
+	}
+
+	return true;
+}
+
 bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0*/)
 {
 	Print("[ICP]");
@@ -2767,6 +2857,8 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	unsigned iterationCount = 0;
 	unsigned randomSamplingLimit = 20000;
 	unsigned  overlap = 100;
+	int modelSFAsWeights = -1;
+	int dataSFAsWeights = -1;
 
 	while (!arguments.empty())
 	{
@@ -2842,6 +2934,46 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (!ok || randomSamplingLimit < 3)
 				return Error(QString("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 		}
+		else if (IsCommand(argument,COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
+			QString sfIndex = arguments.takeFirst();
+			if (sfIndex.toUpper() == OPTION_LAST)
+			{
+				modelSFAsWeights = -2;
+			}
+			else
+			{
+				bool ok;
+				modelSFAsWeights = sfIndex.toInt(&ok);
+				if (!ok || modelSFAsWeights < 0)
+					return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
+			}
+		}
+		else if (IsCommand(argument,COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
+			QString sfIndex = arguments.takeFirst();
+			if (sfIndex.toUpper() == OPTION_LAST)
+			{
+				dataSFAsWeights = -2;
+			}
+			else
+			{
+				bool ok;
+				dataSFAsWeights = sfIndex.toInt(&ok);
+				if (!ok || dataSFAsWeights < 0)
+					return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
+			}
+		}
 		else
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
@@ -2869,8 +3001,44 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			return Error("Not enough loaded entities (expect at least 2!)");
 	}
 
+	//put them in the right order (data first, model next)
 	if (referenceIsFirst)
+	{
 		std::swap(dataAndModel[0],dataAndModel[1]);
+	}
+
+	//check that the scalar fields (weights) exist
+	if (dataSFAsWeights != -1)
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
+		if (!cloud || cloud->getNumberOfScalarFields() == 0 || dataSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			return Error(QString("Invalid SF index for data entity! (%1)").arg(dataSFAsWeights));
+		}
+		else
+		{
+			if (dataSFAsWeights < 0) //last SF
+				dataSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields())-1;
+			Print(QString("[ICP] SF #%1 (data entity) will be used as weights").arg(dataSFAsWeights));
+			cloud->setCurrentDisplayedScalarField(dataSFAsWeights);
+		}
+
+	}
+	if (modelSFAsWeights != -1)
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
+		if (!cloud || cloud->getNumberOfScalarFields() == 0 || modelSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			return Error(QString("Invalid SF index for model entity! (%1)").arg(modelSFAsWeights));
+		}
+		else
+		{
+			if (modelSFAsWeights < 0) //last SF
+				modelSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields())-1;
+			Print(QString("[ICP] SF #%1 (model entity) will be used as weights").arg(modelSFAsWeights));
+			cloud->setCurrentDisplayedScalarField(modelSFAsWeights);
+		}
+	}
 
 	ccGLMatrix transMat;
 	double finalError = 0.0;
@@ -2889,8 +3057,8 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 									iterationCount != 0 ? CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE : CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
 									adjustScale,
 									overlap/100.0,
-									false,
-									false,
+									dataSFAsWeights >= 0,
+									modelSFAsWeights >= 0,
 									CCLib::ICPRegistrationTools::SKIP_NONE,
 									parent ))
 	{
@@ -3059,6 +3227,30 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (saveDialog)
 			{
 				saveDialog->setSeparatorIndex(index);
+			}
+		}
+		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_ADD_COL_HEADER))
+		{
+			if (fileFilter != AsciiFilter::GetFileFilter())
+				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+
+			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			assert(saveDialog);
+			if (saveDialog)
+			{
+				saveDialog->enableSaveColumnsNamesHeader(true);
+			}
+		}
+		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_ADD_PTS_COUNT))
+		{
+			if (fileFilter != AsciiFilter::GetFileFilter())
+				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+
+			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			assert(saveDialog);
+			if (saveDialog)
+			{
+				saveDialog->enableSavePointCountHeader(true);
 			}
 		}
 		else
@@ -3337,6 +3529,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandStatTest(arguments,&progressDlg);
 		}
+		//SF Arithmetic tool
+		else if (IsCommand(argument,COMMAND_SF_ARITHMETIC))
+		{
+			success = commandSfArithmetic(arguments);
+		}
 		//ICP registration
 		else if (IsCommand(argument,COMMAND_ICP))
 		{
@@ -3421,10 +3618,20 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			removeClouds();
 		}
+		//unload the last loaded cloud
+		else if (IsCommand(argument,COMMAND_POP_CLOUDS))
+		{
+			removeClouds(true);
+		}
 		//unload all loaded meshes
 		else if (IsCommand(argument,COMMAND_CLEAR_MESHES))
 		{
 			removeMeshes();
+		}
+		//unload the last loaded cloud
+		else if (IsCommand(argument,COMMAND_POP_MESHES))
+		{
+			removeMeshes(true);
 		}
 		//unload all loaded entities
 		else if (IsCommand(argument,COMMAND_CLEAR))

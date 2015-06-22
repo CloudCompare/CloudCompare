@@ -23,6 +23,7 @@
 
 //qCC_db
 #include <ccLog.h>
+#include <ccObject.h> //for CC_QT5 def
 //qCC_gl
 #include <ccGLWindow.h>
 //CCLib

@@ -564,7 +564,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 
 bool ccHObject::isDisplayed() const
 {
-	return isBranchEnabled() && isVisible() && (getDisplay() != 0);
+	return isVisible() && (getDisplay() != 0) && isBranchEnabled();
 }
 
 bool ccHObject::isBranchEnabled() const
@@ -651,7 +651,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	//are we currently drawing objects in 2D or 3D?
 	bool draw3D = MACRO_Draw3D(context);
 	
-	//the entity must be either visible and selected, and of course it should be displayed in this context
+	//the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
 
 	//no need to display anything but clouds and meshes in "element picking mode"
@@ -713,35 +713,34 @@ void ccHObject::applyGLTransformation(const ccGLMatrix& trans)
 	m_glTransHistory = trans * m_glTransHistory;
 }
 
-void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
+void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput/*=NULL*/)
 {
-	ccGLMatrix* _trans = NULL;
+	ccGLMatrix transTemp;
+	const ccGLMatrix* transToApply = transInput;
 
 	if (m_glTransEnabled)
 	{
-		if (!trans)
+		if (!transInput)
 		{
 			//if no transformation is provided (by father)
 			//we initiate it with the current one
-			trans = _trans = new ccGLMatrix(m_glTrans);
+			transToApply = &m_glTrans;
 		}
 		else
 		{
-			*trans *= m_glTrans;
+			transTemp = *transInput * m_glTrans;
+			transToApply = &transTemp;
 		}
 	}
 
-	if (trans)
+	if (transToApply)
 	{
-		applyGLTransformation(*trans);
+		applyGLTransformation(*transToApply);
 		notifyGeometryUpdate();
 	}
 
 	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->applyGLTransformation_recursive(trans);
-
-	if (_trans)
-		delete _trans;
+		(*it)->applyGLTransformation_recursive(transToApply);
 
 	if (m_glTransEnabled)
 		resetGLTransformation();

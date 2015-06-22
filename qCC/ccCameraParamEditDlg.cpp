@@ -286,7 +286,6 @@ void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
 
 	PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 
-	m_associatedWin->makeCurrent();
 	ccGLMatrixd mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
 	initWithMatrix(mat);
 	m_associatedWin->blockSignals(true);
@@ -368,7 +367,6 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 	{
 		initWith(m_associatedWin);
 		connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixd&)),		this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
-		connect(m_associatedWin,	SIGNAL(viewMatRotated(const ccGLMatrixd&)),			this,	SLOT(updateViewMatrix(const ccGLMatrixd&)));
 
 		connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,	SLOT(updateCameraCenter(const CCVector3d&)));
 		connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,	SLOT(updatePivotPoint(const CCVector3d&)));
@@ -416,12 +414,6 @@ void ccCameraParamEditDlg::updateViewMode()
 		pivotPickingToolButton->setEnabled(objectBased);
 		eyePositionFrame->setEnabled(perspective);
 	}
-}
-
-void ccCameraParamEditDlg::updateViewMatrix(const ccGLMatrixd&)
-{
-	if (m_associatedWin)
-		initWithMatrix(m_associatedWin->getBaseViewMat());
 }
 
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)

@@ -486,8 +486,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	if (binVersion < 20) //should be superior to 2.0!
 		return CC_FERR_MALFORMED_FILE;
 
-	QString coordsFormat = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS ? "double" : "float");
-	QString scalarFormat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS ? "float" : "double");
+	QString coordsFormat = ( (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS) ? "double" : "float");
+	QString scalarFormat = ( (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS)   ? "float" : "double");
 	ccLog::Print(QString("[BIN] Version %1.%2 (coords: %3 / scalar: %4)").arg(binVersion/10).arg(binVersion%10).arg(coordsFormat).arg(scalarFormat));
 
 	//we keep track of the last unique ID before load

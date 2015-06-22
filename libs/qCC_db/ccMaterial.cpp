@@ -173,10 +173,7 @@ const QImage ccMaterial::getTexture() const
 
 bool ccMaterial::hasTexture() const
 {
-	if (m_textureFilename.isEmpty())
-		return false;
-
-	return !s_textureDB[m_textureFilename].isNull();
+	return m_textureFilename.isEmpty() ? false : !s_textureDB[m_textureFilename].isNull();
 }
 
 void ccMaterial::MakeLightsNeutral()
@@ -276,6 +273,25 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
 	//material shininess (dataVersion>=20)
 	inStream >> m_shininessFront;
 	inStream >> m_shininessBack;
+
+	return true;
+}
+
+bool ccMaterial::compare(const ccMaterial& mtl) const
+{
+	if (	mtl.m_name != m_name
+		||	mtl.m_textureFilename != m_textureFilename
+		||	mtl.m_shininessFront != m_shininessFront
+		||	mtl.m_shininessBack != m_shininessBack
+		||	mtl.m_ambient != m_ambient
+		||	mtl.m_specular != m_specular
+		||	mtl.m_emission != m_emission
+		||	mtl.m_diffuseBack != m_diffuseBack
+		||	mtl.m_diffuseFront != m_diffuseFront
+		||	mtl.m_diffuseFront != m_diffuseFront)
+	{
+		return false;
+	}
 
 	return true;
 }

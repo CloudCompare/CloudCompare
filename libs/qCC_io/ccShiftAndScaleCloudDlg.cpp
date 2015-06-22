@@ -431,7 +431,7 @@ bool ccShiftAndScaleCloudDlg::getInfo(size_t index, ShiftInfo& info) const
 	return true;
 }
 
-void ccShiftAndScaleCloudDlg::makeCurrent(int index)
+void ccShiftAndScaleCloudDlg::setCurrentProfile(int index)
 {
 	if (index >= 0 && index < static_cast<int>(m_defaultInfos.size()))
 	{

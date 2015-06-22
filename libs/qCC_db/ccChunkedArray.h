@@ -30,7 +30,7 @@ template <int N, class ElementType> class ccChunkedArray : public GenericChunked
 public:
 
 	//! Default constructor
-	ccChunkedArray(QString name=QString())
+	ccChunkedArray(QString name = QString())
 		: GenericChunkedArray<N,ElementType>()
 		, ccHObject(name)
 	{
@@ -45,7 +45,7 @@ public:
 		{
 			ccLog::Error("[ccChunkedArray::clone] Failed to clone array (not enough memory?)");
 			cloneArray->release();
-			cloneArray=0;
+			cloneArray = 0;
 		}
 		return cloneArray;
 	}

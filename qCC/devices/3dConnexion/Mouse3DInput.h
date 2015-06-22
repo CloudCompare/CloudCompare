@@ -40,7 +40,7 @@ class Mouse3DInput : public QObject
 public:
 
 	//! Default constructor
-	Mouse3DInput(QWidget* widget);
+	explicit Mouse3DInput(QWidget* widget);
 	//! Destructor
 	virtual ~Mouse3DInput();
 

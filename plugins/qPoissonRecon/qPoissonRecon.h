@@ -18,9 +18,6 @@
 #ifndef Q_POISSON_RECON_PLUGIN_HEADER
 #define Q_POISSON_RECON_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
 #include "../ccStdPluginInterface.h"
 
 //! Wrapper to the "Poisson Surface Reconstruction (Version 3)" algorithm
@@ -39,7 +36,7 @@ class qPoissonRecon : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qPoissonRecon(QObject* parent = 0);
+	explicit qPoissonRecon(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Poisson Surface Reconstruction"; }

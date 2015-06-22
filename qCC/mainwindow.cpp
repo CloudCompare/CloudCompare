@@ -431,6 +431,11 @@ void MainWindow::loadPlugins()
 		}
 	}
 
+	if (menuPlugins)
+	{
+		menuPlugins->setEnabled(!m_stdPlugins.empty());
+	}
+
 	if (toolBarPluginTools->isEnabled())
 	{
 		actionDisplayPluginTools->setEnabled(true);
@@ -602,20 +607,22 @@ void MainWindow::doEnableGLFilter()
 	if (ccPlugin->getType() != CC_GL_FILTER_PLUGIN)
 		return;
 
-	ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
-	if (filter)
+	if (win->areGLFiltersEnabled())
 	{
-		if (win->areGLFiltersEnabled())
+		ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
+		if (filter)
 		{
 			win->setGlFilter(filter);
 			ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
 		}
 		else
-			ccConsole::Error("GL filters not supported!");
+		{
+			ccConsole::Error("Can't load GL filter (an error occurred)!");
+		}
 	}
 	else
 	{
-		ccConsole::Error("Can't load GL filter (an error occurred)!");
+		ccConsole::Error("GL filters not supported!");
 	}
 }
 
@@ -976,6 +983,8 @@ void MainWindow::connectActions()
 	//"3D Views" menu
 	connect(menu3DViews,						SIGNAL(aboutToShow()),	this,		SLOT(update3DViewsMenu()));
 	connect(actionNew3DView,					SIGNAL(triggered()),	this,		SLOT(new3DView()));
+	connect(actionZoomIn,						SIGNAL(triggered()),	this,		SLOT(zoomIn()));
+	connect(actionZoomOut,						SIGNAL(triggered()),	this,		SLOT(zoomOut()));
 	connect(actionClose3DView,					SIGNAL(triggered()),	m_mdiArea,	SLOT(closeActiveSubWindow()));
 	connect(actionCloseAll3DViews,				SIGNAL(triggered()),	m_mdiArea,	SLOT(closeAllSubWindows()));
 	connect(actionTile3DViews,					SIGNAL(triggered()),	m_mdiArea,	SLOT(tileSubWindows()));
@@ -1084,9 +1093,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
-			colorType col[3] = {static_cast<colorType>(newCol.red()),
+			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) };
+								static_cast<colorType>(newCol.blue()) );
 			prim->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1094,9 +1103,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isA(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-			colorType col[3] = {static_cast<colorType>(newCol.red()),
+			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) };
+								static_cast<colorType>(newCol.blue()) );
 			poly->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1104,9 +1113,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-			colorType col[3] = {static_cast<colorType>(newCol.red()),
+			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) };
+								static_cast<colorType>(newCol.blue()) );
 			facet->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1772,12 +1781,12 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 						//add "original" entry
 						int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
-						//sasDlg.makeCurrent(index);
+						//sasDlg.setCurrentProfile(index);
 						//add "suggested" entry
 						CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 						double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
 						index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
-						sasDlg.makeCurrent(index);
+						sasDlg.setCurrentProfile(index);
 						//add "last" entry (if available)
 						ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
 						if (sasDlg.getLast(lastInfo))
@@ -1867,12 +1876,12 @@ void MainWindow::doActionApplyScale()
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
-	size_t processNum = 0;
 
 	//first check that all coordinates are kept 'small'
 	std::vector< EntityCloudAssociation > candidates;
 	{
 		bool testBigCoordinates = true;
+		//size_t processNum = 0;
 		for (size_t i=0; i<selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
@@ -1894,7 +1903,7 @@ void MainWindow::doActionApplyScale()
 			if (lockedVertices)
 			{
 				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-				++processNum;
+				//++processNum;
 				continue;
 			}
 
@@ -2102,7 +2111,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showNoButton(false);
 	//add "original" entry
 	int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",shift,scale));
-	sasDlg.makeCurrent(index);
+	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
 	ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
 	if (sasDlg.getLast(lastInfo))
@@ -5245,7 +5254,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					if (randomColors)
 					{
 						ccColor::Rgb col = ccColor::Generator::Random();
-						compCloud->setRGBColor(col.rgb);
+						compCloud->setRGBColor(col);
 						compCloud->showColors(true);
 						compCloud->showSF(false);
 					}
@@ -5457,11 +5466,12 @@ void MainWindow::doActionSetSFAsCoord()
 					CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
 
 					//test each dimension
-					for (unsigned d=0; d<3; ++d)
-					{
-						if (exportDim[d])
-							P->u[d] = s;
-					}
+					if (exportDim[0])
+						P->x = s;
+					if (exportDim[1])
+						P->y = s;
+					if (exportDim[2])
+						P->z = s;
 				}
 
 				pc->invalidateBoundingBox();
@@ -5998,8 +6008,8 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			CCLib::Neighbourhood Yk(cloud);
 
-			const double* Q = Yk.get3DQuadric();
-			if (Q)
+			double Q[10];
+			if (Yk.compute3DQuadric(Q))
 			{
 				const double& a = Q[0];
 				const double& b = Q[1];
@@ -6988,7 +6998,7 @@ void MainWindow::doActionUnroll()
 	updateUI();
 }
 
-ccGLWindow *MainWindow::getActiveGLWindow()
+ccGLWindow* MainWindow::getActiveGLWindow()
 {
 	if (!m_mdiArea)
 		return 0;
@@ -7017,20 +7027,41 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 	return 0;
 }
 
+void MainWindow::zoomIn()
+{
+	ccGLWindow* win = MainWindow::getActiveGLWindow();
+	if (win)
+	{
+		//we simulate a real wheel event
+		win->onWheelEvent(15.0f);
+	}
+}
+
+void MainWindow::zoomOut()
+{
+	ccGLWindow* win = MainWindow::getActiveGLWindow();
+	if (win)
+	{
+		//we simulate a real wheel event
+		win->onWheelEvent(-15.0f);
+	}
+}
+
 ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
 
 	//already existing window?
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	ccGLWindow* otherWin=0;
+	ccGLWindow* otherWin = 0;
 	if (!subWindowList.isEmpty())
-		otherWin=static_cast<ccGLWindow*>(subWindowList[0]->widget());
+		otherWin = static_cast<ccGLWindow*>(subWindowList[0]->widget());
 
 	QGLFormat format = QGLFormat::defaultFormat();
 	format.setStencil(false);
 	format.setSwapInterval(0);
 	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
+
 	view3D->setMinimumSize(400,300);
 	view3D->resize(500,400);
 
@@ -7223,6 +7254,13 @@ void MainWindow::doActionShawAboutDialog()
 	ui.setupUi(aboutDialog);
 
 	QString ccVer = ccCommon::GetCCVersion();
+	//add compilation info
+	ccVer += QString("<br><i>Compiled with");
+#if defined(_MSC_VER)
+	ccVer += QString(" MSVC %1 and").arg(_MSC_VER);
+#endif
+	ccVer += QString(" Qt %1").arg(QT_VERSION_STR);
+	ccVer += QString("</i>");
 	QString htmlText = ui.textEdit->toHtml();
 	QString enrichedHtmlText = htmlText.arg(ccVer);
 	//ccLog::PrintDebug(htmlText);
@@ -7238,7 +7276,7 @@ void MainWindow::doActionShawAboutDialog()
 
 void MainWindow::doActionShowHelpDialog()
 {
-	QMessageBox::information(	this, "Documentation", "Please visit http://www.cloudcompare.org/doc" );
+	QMessageBox::information(this, "Documentation", "Please visit http://www.cloudcompare.org/doc");
 }
 
 void MainWindow::freezeUI(bool state)
@@ -8688,7 +8726,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
 		if (cloud)
 		{
-			//on affiche l'histogramme du champ scalaire courant
+			//we display the histogram of the current scalar field
 			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
 			if (sf)
 			{
@@ -8705,7 +8743,8 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::min<unsigned>(256,numberOfClasses);
 
 					histogram->setTitle(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
-					histogram->fromSF(sf,numberOfClasses);
+					bool showNaNValuesInGrey = sf->areNaNValuesShownInGrey();
+					histogram->fromSF(sf,numberOfClasses,true,showNaNValuesInGrey);
 					histogram->setAxisLabels(sf->getName(),"Count");
 					histogram->refresh();
 				}
@@ -10834,7 +10873,6 @@ void MainWindow::doActionSaveFile()
 		for (size_t i=0; i<filters.size(); ++i)
 		{
 			bool atLeastOneExclusive = false;
-			bool multiple = false;
 
 			//current I/O filter
 			const FileIOFilter::Shared filter = filters[i];
@@ -10844,16 +10882,18 @@ void MainWindow::doActionSaveFile()
 			if (hasCloud)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportClouds = (		filter->canSave(CC_TYPES::POINT_CLOUD,multiple,isExclusive)
 									&&	(multiple || clouds.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
 			}
 
-			//does this filter can export one or several clouds?
+			//does this filter can export one or several meshes?
 			bool canExportMeshes = true;
 			if (hasMesh)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportMeshes = (		filter->canSave(CC_TYPES::MESH,multiple,isExclusive)
 									&&	(multiple || meshes.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
@@ -10864,6 +10904,7 @@ void MainWindow::doActionSaveFile()
 			if (hasPolylines)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportPolylines = (	filter->canSave(CC_TYPES::POLY_LINE,multiple,isExclusive)
 									&&	(multiple || polylines.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
@@ -10874,6 +10915,7 @@ void MainWindow::doActionSaveFile()
 			if (hasImages)
 			{
 				bool isExclusive = true;
+				bool multiple = false;
 				canExportImages = (		filter->canSave(CC_TYPES::IMAGE,multiple,isExclusive)
 									&&	(multiple || images.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
@@ -10901,6 +10943,7 @@ void MainWindow::doActionSaveFile()
 				{
 					ccHObject* child = otherSerializable.getChild(j);
 					bool isExclusive = true;
+					bool multiple = false;
 					canExportSerializables &= (		filter->canSave(child->getUniqueID(),multiple,isExclusive)
 												&&	(multiple || otherSerializable.getChildrenNumber() == 1) );
 					atLeastOneExclusive |= isExclusive;
@@ -11138,6 +11181,7 @@ void MainWindow::updateMenus()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	bool hasMdiChild = (win != 0);
+	int mdiChildCount = m_mdiArea->subWindowList().size();
 	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
 
 	//General Menu
@@ -11145,12 +11189,12 @@ void MainWindow::updateMenus()
 	menuTools->setEnabled(true/*hasSelectedEntities*/);
 
 	//3D Views Menu
-	actionClose3DView->setEnabled(hasMdiChild);
-	actionCloseAll3DViews->setEnabled(hasMdiChild);
-	actionTile3DViews->setEnabled(hasMdiChild);
-	actionCascade3DViews->setEnabled(hasMdiChild);
-	actionNext3DView->setEnabled(hasMdiChild);
-	actionPrevious3DView->setEnabled(hasMdiChild);
+	actionClose3DView    ->setEnabled(hasMdiChild);
+	actionCloseAll3DViews->setEnabled(mdiChildCount != 0);
+	actionTile3DViews    ->setEnabled(mdiChildCount > 1);
+	actionCascade3DViews ->setEnabled(mdiChildCount > 1);
+	actionNext3DView     ->setEnabled(mdiChildCount > 1);
+	actionPrevious3DView ->setEnabled(mdiChildCount > 1);
 
 	//Shaders & Filters display Menu
 	bool shadersEnabled = (win ? win->areShadersEnabled() : false);
@@ -11184,6 +11228,9 @@ void MainWindow::update3DViewsMenu()
 {
 	menu3DViews->clear();
 	menu3DViews->addAction(actionNew3DView);
+	menu3DViews->addSeparator();
+	menu3DViews->addAction(actionZoomIn);
+	menu3DViews->addAction(actionZoomOut);
 	menu3DViews->addSeparator();
 	menu3DViews->addAction(actionClose3DView);
 	menu3DViews->addAction(actionCloseAll3DViews);

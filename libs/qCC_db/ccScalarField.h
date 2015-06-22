@@ -39,7 +39,7 @@ public:
 	//! Default constructor
 	/** \param name scalar field name
 	**/
-	ccScalarField(const char* name = 0);
+	explicit ccScalarField(const char* name = 0);
 
 	/*** Scalar values display handling ***/
 
@@ -242,7 +242,7 @@ protected:
 	**/
 	Range m_logSaturationRange;
 
-	// Whether NaN values are shown in grey or are hidden
+	//! Whether NaN values are shown in grey or are hidden
 	bool m_showNaNValuesInGrey;
 
 	//! Whether color scale is symmetrical or not

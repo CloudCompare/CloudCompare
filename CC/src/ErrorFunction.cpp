@@ -76,19 +76,19 @@ double ErrorFunction::erfc(double x)
 	double a=1, b=x; //last two convergent numerators
 	double c=x, d=x*x+0.5; //last two convergent denominators
 	double q1, q2= b/d; //last two convergents (a/c and b/d)
-	double n= 1.0, t;
+	double n= 1.0;
 
 	do
 	{
-		t= a*n+b*x;
-		a= b;
-		b= t;
-		t= c*n+d*x;
-		c= d;
-		d= t;
-		n+= 0.5;
-		q1= q2;
-		q2= b/d;
+		double t = a*n+b*x;
+		a = b;
+		b = t;
+		t = c*n+d*x;
+		c = d;
+		d = t;
+		n += 0.5;
+		q1 = q2;
+		q2 = b/d;
 	}
 	while (fabs(q1-q2)/q2 > c_erfRelativeError);
 

@@ -76,7 +76,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	verticalLayout_2->setSpacing(0);
 	const int margin = 10;
 	verticalLayout_2->setContentsMargins(margin,margin,margin,margin);
-	QGLFormat format;
+	QGLFormat format = QGLFormat::defaultFormat();
 	format.setSwapInterval(0);
 	m_glWindow = new ccGLWindow(ui.GLframe,format);
 	verticalLayout_2->addWidget(m_glWindow);

@@ -32,7 +32,7 @@ class ccViewerLog : public ccLog
 {
 public:
 	//! Default constructor
-	ccViewerLog(QMainWindow* parentWindow = 0) : ccLog(), m_parentWindow(parentWindow) {}
+	explicit ccViewerLog(QMainWindow* parentWindow = 0) : ccLog(), m_parentWindow(parentWindow) {}
 
 protected:
 	//inherited from ccLog

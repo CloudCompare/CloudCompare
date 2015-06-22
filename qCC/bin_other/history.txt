@@ -2,8 +2,18 @@
 
 v2.6.2 XX/XX/2015
 - New features:
-
+	* New option in the context menu of the DB tree (right click on an item)
+		- 'Select children by type and/or name' - to select items either by type and/or by name
+	* New shortcuts:
+		- Zoom in (+)
+		- Zoom out (=)
 - Enhancements:
+	* Rasterize tool
+		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
+		- the input cloud SFs can now be properly interpolated in empty cells
+		- the contour lines are now computed on the active layer
+		- the user can set the default width for the countour lines
+		- the contour lines can be colored (according to the layer associated scalar field settings)
 	* Display:
 		- CloudCompare now supports 'Level Of Detail' (LoD) display for big clouds
 		- if enabled, the clouds are now displayed first at a low octree level when moved
@@ -16,13 +26,60 @@ v2.6.2 XX/XX/2015
 		on the edges)
 	* Histogram dialog:
 		- new icon 'Export to CSV'
+		- new icon 'Export to image'
+		- the SF parameter 'Show NaN values in gray' is now taken into account
+			(i.e. the gray/hidden values won't appear in the histogram if this option is not checked)
 	* Command line:
 		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
 		the command line (with a dedicated XML parameters file)
+		- the 'SF Arithmetic' tool can now be called via the command line:
+			* 'SF_ARITHMETIC' + SF index + operation
+			* supported operations are: sqrt, pow2, pow3, exp, log, log10, cos, sin, tan, acos, asin, atan, int, inverse)
+		- new options for the 'ICP' tool:
+			* 'DATA_SF_AS_WEIGHTS' + SF index (to use the given scalar field of the data entity as weights)
+			* 'MODEL_SF_AS_WEIGHTS' + SF index (to use the given scalar field of the model entity as weights)
+			* the 'LAST' option can be used instead of an explicit SF index
+		- new options 'POP_CLOUDS' and 'POP_MESHES' to remove the last loaded cloud or mesh
+		- new options for ASCII export:
+			* 'ADD_HEADER' to add a header with each column's name to the saved file
+			* 'ADD_PTS_COUNT' to add the number of points at the beginning of the saved file
+	* Weighted ICP is now functional
+		- the user can use the currently active scalar field on the registered and/or the reference
+		clouds as weights. The bigger the weights, the more influence the points will have.
+		- weights are automatically normalized
+		- only absolute values are considered
+	* 'Render to file' method:
+		- rendering zoom is now more properly taken into account when displaying 2D labels
+		- zoomed text size is estimated in a more accurate way
+		- the displayed size for the scale was wrong when the zoom was not 1
+	* 3D views now recognize the 'pinching' gesture (with 2 fingers) on multi-touch screens (to zoom)
+	* If available the version of the Visual Studio compiler and the version of Qt used to compile
+		CC are now displayed in the 'About' dialog
+	* PLY files with more than one texture can now be properly opened
+	* ASCII save dialog:
+		- the output precision of scalar values can now be set up to 12 (instead of 8)
+		- Note that the internal representation of scalars remains 32-bits floats (i.e. with a relative precision ~10^-7)
+
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
 	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (integer part was applied instead)
+	* If only one plugin was loaded (with mulitple methods such as qPCL) then the 'Plugins' was staying disabled
+	* The scale value displayed in the 3D views (under the scale bar) was wrong when the zoom of the 'Render to file'
+		method was greater than 1
+	* The 'Apply all' option of the 'Global shift & scale' dialog wasn't taken into account when loading LAS/LAZ files
+	* The main window could sometimes disappear in the background when the progress bar was appearing (Qt 5 issue)
+	* Some options of the context menu of the DB tree were incorrectly using the term 'siblings' instead of 'children'
+	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds was not displayed in the right place)
+	* While importing a Bundler file, if the images were to be 'kept in memory' but not the keypoints, then CC would crash
+	* When saving a mesh composed of multiple sub-meshes to OBJ format, the triangles and texture information could be inconsistent
+	* When merging two or more meshes, material were merged if their name were the same even if the texture or other parameters were different
+	* When filtering a cloud through the command line (with FILTER_SF), the cloud was not updated in memory if the AUTO_SAVE feature was disabled
+	* The 'o' keyword in OBJ files was ignored (this could led to missing textures, etc.)
+	* Registration (either ICP or point-pair based picking) could crash in some particular cases
+	* qSRA:
+		- whether the profile origin is absolute or relative was not always taken into account!
+		- a flat profile (e.g. perfect cylinder) would prevent the plugin to export DXF files
 
 v2.6.1 02/20/2015
 - New features:

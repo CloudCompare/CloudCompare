@@ -80,13 +80,13 @@ public:
 	//! Constructor from a float GL matrix array
 	/** \param mat16f a 16 elements array (column major order)
 	**/
-	ccGLMatrixTpl(const float* mat16f) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16f[i]); }
+	explicit ccGLMatrixTpl(const float* mat16f) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16f[i]); }
 
 	//! Constructor from a double GL matrix array
 	/** \warning Will implicitly cast the elements to float!
 		\param mat16d a 16 elements array (column major order)
 	**/
-	ccGLMatrixTpl(const double* mat16d) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16d[i]); }
+	explicit ccGLMatrixTpl(const double* mat16d) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16d[i]); }
 
 	//! Constructor from 4 columns (X,Y,Z,T)
 	/** \param X 3 first elements of the 1st column (last one is 0)
@@ -99,7 +99,7 @@ public:
 		CC_MAT_R11 = X.x;  CC_MAT_R21 = X.y;  CC_MAT_R31 = X.z;  CC_MAT_R41 = 0;
 		CC_MAT_R12 = Y.x;  CC_MAT_R22 = Y.y;  CC_MAT_R32 = Y.z;  CC_MAT_R42 = 0;
 		CC_MAT_R13 = Z.x;  CC_MAT_R23 = Z.y;  CC_MAT_R33 = Z.z;  CC_MAT_R43 = 0;
-		CC_MAT_R14 = Tr.x; CC_MAT_R24 = Tr.y; CC_MAT_R34 = Tr.z; CC_MAT_R44 = 1;
+		CC_MAT_R14 = Tr.x; CC_MAT_R24 = Tr.y; CC_MAT_R34 = Tr.z; CC_MAT_R44 = static_cast<T>(1);
 	}
 
 	//! Interpolates two matrices at relative position 'coef'
@@ -129,6 +129,55 @@ public:
 		return glMat1 * m12;
 	}
 
+	//! Returns a 'look at' matrix similar to what gluLookAt would produce
+	/** Inspired from https://www.opengl.org/wiki/GluLookAt_code
+		\param eyePosition3D  eye/camera position
+		\param center3D where to look at
+		\param upVector3D vertical direction
+		\return resulting 'look at' matrix
+	**/
+	static ccGLMatrixTpl<T> LookAt( const Vector3Tpl<T>& eyePosition3D, const Vector3Tpl<T>& center3D, const Vector3Tpl<T>& upVector3D)
+	{
+		//------------------
+		Vector3Tpl<T> forward = center3D - eyePosition3D;
+		forward.normalize();
+		//------------------
+		//Side = forward x up
+		Vector3Tpl<T> side = forward.cross(upVector3D);
+		side.normalize();
+		//------------------
+		//Recompute up as: up = side x forward
+		Vector3Tpl<T> up = side.cross(forward);
+
+		//------------------
+		ccGLMatrixTpl<T> matrix;
+		{
+			T* mat = matrix.data();
+			mat[0]  = side.x;
+			mat[4]  = side.y;
+			mat[8]  = side.z;
+			mat[12] = -eyePosition3D.x;
+			//------------------
+			mat[1]  = up.x;
+			mat[5]  = up.y;
+			mat[9]  = up.z;
+			mat[13] = -eyePosition3D.y;
+			//------------------
+			mat[2]  = -forward.x;
+			mat[6]  = -forward.y;
+			mat[10] = -forward.z;
+			mat[14] = -eyePosition3D.z;
+			//------------------
+			mat[3]  = 0;
+			mat[7]  = 0;
+			mat[11] = 0;
+			mat[15] = static_cast<T>(1);
+		}
+		//------------------
+
+		return matrix;
+	}
+
 	//! Creates a transformation matrix that rotates a vector to another
 	/** Adapted from  "Efficiently Building a Matrix to Rotate One Vector to Another"
 		By Tomas Möller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
@@ -141,34 +190,23 @@ public:
 		T f = (e < 0 ? -e : e);
 		ccGLMatrixTpl<T> result;
 
-		if (f > 1.0-ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
+		if (1.0-f < ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
 		{
-			// vector most nearly orthogonal to "from"
-			Vector3Tpl<T> x(from.x > 0 ? from.x : -from.x,
-							from.y > 0 ? from.y : -from.y,
-							from.z > 0 ? from.z : -from.z);
-
+			// "to" vector most nearly orthogonal to "from"
+			Vector3Tpl<T> x(0,0,0);
 			if (x.x < x.y)
 			{
 				if (x.x < x.z)
-				{
-					x.x = 1; x.y = x.z = 0;
-				}
+					x.x = static_cast<T>(1);
 				else
-				{
-					x.z = 1; x.x = x.y = 0;
-				}
+					x.z = static_cast<T>(1);
 			}
 			else
 			{
 				if (x.y < x.z)
-				{
-					x.y = 1; x.x = x.z = 0;
-				}
+					x.y = static_cast<T>(1);
 				else
-				{
-					x.z = 1; x.x = x.y = 0;
-				}
+					x.z = static_cast<T>(1);
 			}
 
 			Vector3Tpl<T> u = x-from;
@@ -239,7 +277,7 @@ public:
 			mat[0]	= static_cast<T>(q00 + q11 - q22 - q33);
 			mat[5]	= static_cast<T>(q00 - q11 + q22 - q33);
 			mat[10]	= static_cast<T>(q00 - q11 - q22 + q33);
-			mat[15]	= 1;
+			mat[15]	= static_cast<T>(1);
 		}
 
 		//non-diagonal elements
@@ -302,7 +340,7 @@ public:
 	static ccGLMatrixTpl<T> FromString(QString matText, bool& success)
 	{
 		QStringList valuesStr = matText.split(QRegExp("\\s+"),QString::SkipEmptyParts);
-		if (valuesStr.size() != 16)
+		if (valuesStr.size() != OPENGL_MATRIX_SIZE)
 		{
 			success = false;
 			return ccGLMatrixTpl<T>();
@@ -310,7 +348,7 @@ public:
 
 		ccGLMatrixTpl<T> matrix;
 		T* matValues = matrix.data();
-		for (int i=0; i<16; ++i)
+		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 		{
 			matValues[i] = static_cast<T>(valuesStr[(i%4)*4+(i>>2)].toDouble(&success));
 			if (!success)
@@ -457,7 +495,7 @@ public:
 	inline virtual void toZero() { memset(m_mat,0,OPENGL_MATRIX_SIZE*sizeof(T)); }
 
 	//! Sets matrix to identity
-	inline virtual void toIdentity() { toZero(); CC_MAT_R11 = CC_MAT_R22 = CC_MAT_R33 = CC_MAT_R44 = 1; }
+	inline virtual void toIdentity() { toZero(); CC_MAT_R11 = CC_MAT_R22 = CC_MAT_R33 = CC_MAT_R44 = static_cast<T>(1); }
 
 	//! Clears translation
 	/** Translation is set to (0,0,0).
@@ -475,7 +513,7 @@ public:
 	{
 		T cos_t = cos(alpha_rad);
 		T sin_t = sin(alpha_rad);
-		T inv_cos_t = 1 - cos_t;
+		T inv_cos_t = static_cast<T>(1) - cos_t;
 
 		//normalize rotation axis
 		Vector3Tpl<T> uAxis3D = axis3D;
@@ -510,7 +548,7 @@ public:
 		CC_MAT_R14 = t3D.x;
 		CC_MAT_R24 = t3D.y;
 		CC_MAT_R34 = t3D.z;
-		CC_MAT_R44 = 1.0;
+		CC_MAT_R44 = static_cast<T>(1);
 	}
 
 
@@ -729,7 +767,7 @@ public:
 	//! (in place) Addition operator
 	ccGLMatrixTpl<T>& operator += (const ccGLMatrixTpl<T>& mat)
 	{
-		for (unsigned i=0; i<16; ++i)
+		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 			m_mat[i] += mat.m_mat[i];
 		return (*this);
 	}
@@ -737,7 +775,7 @@ public:
 	//! (in place) Difference operator
 	ccGLMatrixTpl<T>& operator -= (const ccGLMatrixTpl<T>& mat)
 	{
-		for (unsigned i=0; i<16; ++i)
+		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 			m_mat[i] -= mat.m_mat[i];
 		return (*this);
 	}

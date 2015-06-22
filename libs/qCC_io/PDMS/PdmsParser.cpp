@@ -32,7 +32,13 @@ inline void upperStr(char *s) {while(*s) {if(((*s)>='a')&&((*s)<='z')) (*s)+='A'
 ////////////////////////////
 
 PdmsLexer::PdmsLexer()
+	: loadedObject(0)
+	, currentToken(PDMS_INVALID_TOKEN)
+	, stop(false)
+	, metaGroupMask(0)
 {
+	tokenBuffer[0] = 0;
+	nextBuffer[0] = 0;
 }
 
 bool PdmsLexer::initializeSession()
@@ -309,22 +315,19 @@ void PdmsFileSession::parseCurrentToken()
 
 bool PdmsFileSession::moveForward()
 {
-	int car;
-	unsigned n;
-	bool tokenFilled;
-	n=0;
-
-	if(PdmsLexer::moveForward()) return true;
+	if (PdmsLexer::moveForward())
+		return true;
 
 	m_eol = false;
-	tokenFilled = false;
-	while(!tokenFilled)
+	bool tokenFilled = false;
+	unsigned n = 0;
+	while (!tokenFilled)
 	{
-		car = getc(m_file);
+		int car = getc(m_file);
 		switch(car)
 		{
 		case '\n':
-			if(n>0)
+			if(n > 0)
 			{
 				tokenFilled = true;
 				m_eol = true;
@@ -333,7 +336,7 @@ bool PdmsFileSession::moveForward()
 			break;
 		case ' ':
 		case '\t':
-			if(n>0)
+			if(n > 0)
 				tokenFilled = true;
 			break;
 		case EOF:
@@ -354,23 +357,19 @@ bool PdmsFileSession::moveForward()
 	tokenBuffer[n] = '\0';
 	if(tokenBuffer[0] != '/')
 		upperStr(tokenBuffer);
-	return (n>0);
+	return (n > 0);
 }
 
 void PdmsFileSession::skipComment()
 {
-	int car, commentBlockLevel;
-	bool commentSymb;
-	char *ptr1, *ptr2;
-	int n;
-
 	switch(currentToken)
 	{
 	case PDMS_COMMENT_LINE:
 		//skip line only if the end of line has not been read in current buffer
 		if(!m_eol)
 		{
-			n = 0;
+			int n = 0;
+			int car = 0;
 			do{
 				car = getc(m_file);
 				if(car=='\t') car=' ';
@@ -384,11 +383,13 @@ void PdmsFileSession::skipComment()
 		m_eol = false;
 		break;
 	case PDMS_COMMENT_BLOCK:
+		{
 		//comment block opening symbol has been met. Search for comment block ending symbol
 		//don't forget that some other comments could be embeded in this comment
-		commentSymb = false;
-		commentBlockLevel = 1;
-		n = 0;
+		bool commentSymb = false;
+		int commentBlockLevel = 1;
+		int n = 0;
+		int car = 0;
 		do{
 			car = getc(m_file);
 			if(car=='\n') m_currentLine++;
@@ -405,6 +406,7 @@ void PdmsFileSession::skipComment()
 		} while(car!=EOF && commentBlockLevel>0);
 		tokenBuffer[n-1] = '\0';
 		m_eol = false;
+		}
 		break;
 	default:
 		break;
@@ -416,11 +418,11 @@ void PdmsFileSession::skipComment()
 		currentToken = PDMS_ENTER_METAGROUP;
 		//The meta group name starts after the "entering in group:" statement, after the last slash
 		//But we still store the whole path
-		ptr2 = &(tokenBuffer[18]);
+		char* ptr2 = &(tokenBuffer[18]);
 		while((*ptr2)==' ') {ptr2++;}
 		//Copy the meta group name at the begining of tokenbuffer
 		tokenBuffer[0] = '/';
-		ptr1 = &(tokenBuffer[1]);
+		char* ptr1 = &(tokenBuffer[1]);
 		while((*ptr2) && (*ptr2)!=' ')
 		{
 			*ptr1 = *ptr2;
@@ -439,11 +441,10 @@ void PdmsFileSession::skipComment()
 
 void PdmsFileSession::skipHandleCommand()
 {
-	int opened=0, state=0, car;
-	unsigned i;
+	int opened=0, state=0;
 
 	//Search for "HANDLE(...)" and remove this string from tokenBuffer
-	for(i=0; i<strlen(tokenBuffer); i++)
+	for(unsigned i=0; i<strlen(tokenBuffer); i++)
 	{
 		if(tokenBuffer[i]=='(') {opened++; state++;}
 		else if(tokenBuffer[i]==')') state--;
@@ -453,7 +454,7 @@ void PdmsFileSession::skipHandleCommand()
 	//"HANDLE(...) does not lie in tokenBuffer, then search it in the file
 	while(!(opened>0 && state==0))
 	{
-		car = getc(m_file);
+		int car = getc(m_file);
 		if(car=='(') {opened++; state++;}
 		else if(car==')') state--;
 	}

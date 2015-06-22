@@ -134,7 +134,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 	unsigned index = 0;
 	while (true)
 	{
-		QString currentLine = stream.readLine();
+		QString currentLine = stream.readLine().trimmed();
 		if (currentLine.isNull() || currentLine.isEmpty())
 		{
 			//close any ongoing polyline
@@ -182,7 +182,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 					currentVertices->setGlobalShift(Pshift);
 			}
 
-			QStringList parts = currentLine.trimmed().split(' ',QString::SkipEmptyParts);
+			QStringList parts = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
 			if (parts.size() == 3)
 			{
 				//(X,Y,Z)

@@ -26,7 +26,7 @@
 #include <QFile>
 
 //default normal value
-static const PointCoordinateType s_defaultNorm[3] = {0,0,1};
+static const CCVector3 s_defaultNorm(0,0,1);
 
 bool PNFilter::canLoadExtension(QString upperCaseExt) const
 {
@@ -76,7 +76,9 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	bool hasNorms = theCloud->hasNormals();
 	if (!hasNorms)
 		ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no normal (we will save points with a default normal)!").arg(theCloud->getName()));
-	float norm[3] = {(float)s_defaultNorm[0], (float)s_defaultNorm[1], (float)s_defaultNorm[2]};
+	float norm[3] = {	static_cast<float>(s_defaultNorm.x),
+						static_cast<float>(s_defaultNorm.y),
+						static_cast<float>(s_defaultNorm.z) };
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available

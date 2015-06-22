@@ -22,12 +22,7 @@
 #include "CCCoreLib.h"
 #include "CCConst.h"
 
-//Qt
-#include <QAtomicInt>
-
-//system
-#include <assert.h>
-#include <math.h>
+class AtomicCounter;
 
 namespace CCLib
 {
@@ -91,7 +86,7 @@ public:
 //! Efficient management of progress based on a total number of steps different than 100
 /** DGM: can now be associated to a null 'callback' pointer to simplify the client code.
 **/
-class NormalizedProgress
+class CC_CORE_LIB_API NormalizedProgress
 {
 public:
 	//! Default constructor
@@ -99,99 +94,22 @@ public:
 		\param totalSteps total number of steps (> 0)
 		\param totalPercentage equivalent percentage (> 0)
 	**/
-	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage = 100)
-		: m_percent(0)
-		, m_step(1)
-		, m_percentAdd(1.0f)
-		, m_counter(0)
-		, progressCallback(callback)
-	{
-		scale(totalSteps, totalPercentage);
-	}
+	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage = 100);
+
+	//! Destructor
+	virtual ~NormalizedProgress();
 
 	//! Scales inner parameters so that 'totalSteps' calls of the 'oneStep' method correspond to 'totalPercentage' percents
-	void scale(unsigned totalSteps, unsigned totalPercentage = 100, bool updateCurrentProgress = false)
-	{
-		if (progressCallback)
-		{
-			if (totalSteps == 0 || totalPercentage == 0)
-			{
-				m_step = 1;
-				m_percentAdd = 0;
-				return;
-			}
-
-			if (totalSteps >= 2*totalPercentage)
-			{
-				m_step = static_cast<unsigned>(ceil(static_cast<float>(totalSteps) / totalPercentage));
-				assert(m_step != 0 && m_step < totalSteps);
-				m_percentAdd = static_cast<float>(totalPercentage) / (totalSteps/m_step);
-			}
-			else
-			{
-				m_step = 1;
-				m_percentAdd = static_cast<float>(totalPercentage) / totalSteps;
-			}
-
-			if (updateCurrentProgress)
-			{
-				m_percent = static_cast<float>(totalPercentage) / totalSteps
-	#ifdef CC_QT5
-					* static_cast<float>(m_counter.load());
-	#else
-					* static_cast<float>(m_counter);
-	#endif
-			}
-			else
-			{
-				m_counter = 0;
-			}
-		}
-	}
+	void scale(unsigned totalSteps, unsigned totalPercentage = 100, bool updateCurrentProgress = false);
 
 	//! Resets progress state
-	void reset()
-	{
-		m_percent = 0;
-		m_counter = 0;
-		if (progressCallback)
-			progressCallback->update(0);
-	}
+	void reset();
 
 	//! Increments total progress value of a single unit
-	inline bool oneStep()
-	{
-		if (!progressCallback)
-			return true;
-
-		unsigned currentCount = m_counter.fetchAndAddRelaxed(1)+1;
-		if ((currentCount % m_step) == 0)
-		{
-			m_percent += m_percentAdd;
-			progressCallback->update(m_percent);
-		}
-
-		return !progressCallback->isCancelRequested();
-	}
+	bool oneStep();
 
 	//! Increments total progress value of more than a single unit
-	inline bool steps(unsigned n)
-	{
-		if (!progressCallback)
-			return true;
-
-		unsigned currentCount = m_counter.fetchAndAddRelaxed(n);
-		unsigned d1 = currentCount / m_step;
-		unsigned d2 = (currentCount+n) / m_step;
-
-		if (d2 != d1) //thread safe? Well '++int' is a kind of atomic operation ;)
-		{
-			m_percent += static_cast<float>(d2-d1) * m_percentAdd;
-			progressCallback->update(m_percent);
-		}
-
-		return !progressCallback->isCancelRequested();
-	}
+	bool steps(unsigned n);
 
 protected:
 
@@ -205,7 +123,9 @@ protected:
 	float m_percentAdd;
 
 	//! Current number of calls to 'oneStep'
-	QAtomicInt m_counter;
+	/** Thread safe if CC_CORE_LIB is compiled with Qt.
+	**/
+	AtomicCounter* m_counter;
 
 	//! associated GenericProgressCallback
 	GenericProgressCallback* progressCallback;

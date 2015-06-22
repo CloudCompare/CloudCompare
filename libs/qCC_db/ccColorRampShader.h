@@ -19,7 +19,7 @@
 #define CC_COLOR_RAMP_SHADER_HEADER
 
 //Always on top!
-#include <ccIncludeGL.h>
+#include "ccIncludeGL.h"
 
 //CCFbo
 #include <ccShader.h>

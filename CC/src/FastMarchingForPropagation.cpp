@@ -116,12 +116,11 @@ int FastMarchingForPropagation::step()
 		assert(minTCell->T >= lastT);
 
 		//add its neighbors to the TRIAL set
-		unsigned nIndex;
 		Cell* nCell;
 		for (unsigned i=0;i<m_numberOfNeighbours;++i)
 		{
 			//get neighbor cell
-			nIndex = minTCellIndex + m_neighboursIndexShift[i];
+			unsigned nIndex = minTCellIndex + m_neighboursIndexShift[i];
 			nCell = m_theGrid[nIndex];
 			if (nCell)
 			{
@@ -249,11 +248,11 @@ void FastMarchingForPropagation::findPeaks()
 				
 				PropagationCell* theCell = reinterpret_cast<PropagationCell*>(m_theGrid[index]);
 
-				bool isMin = true;
-				bool isMax = true;
-
 				if (theCell)
 				{
+					bool isMin = true;
+					bool isMax = true;
+
 					//theCell->state = ACTIVE_CELL;
 
 					for (unsigned n=0; n<CC_FM_MAX_NUMBER_OF_NEIGHBOURS; ++n)

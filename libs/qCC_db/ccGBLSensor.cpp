@@ -30,7 +30,7 @@
 #include <assert.h>
 
 //maximum depth buffer dimension (width or height)
-static const int s_MaxDepthBufferSize = 4096;
+static const int s_MaxDepthBufferSize = (1 << 14); //16384
 
 ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=YAW_THEN_PITCH*/)
 	: ccSensor("Ground Based Laser Scanner")
@@ -82,7 +82,7 @@ void ccGBLSensor::setPitchRange(PointCoordinateType minPhi, PointCoordinateType 
 	m_phiMin = minPhi;
 	m_phiMax = maxPhi;
 
-	if (m_phiMax >= M_PI)
+	if (m_phiMax > static_cast<PointCoordinateType>(M_PI))
 		m_pitchAnglesAreShifted = true;
 
 	clearDepthBuffer();
@@ -102,7 +102,7 @@ void ccGBLSensor::setYawRange(PointCoordinateType minTehta, PointCoordinateType 
 	m_thetaMin = minTehta;
 	m_thetaMax = maxTheta;
 
-	if (m_thetaMax >= M_PI)
+	if (m_thetaMax > static_cast<PointCoordinateType>(M_PI))
 		m_yawAnglesAreShifted = true;
 
 	clearDepthBuffer();
@@ -234,7 +234,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 
 			CCVector3 S;
 
-			CCVector3 U = *P - sensorPos.getTranslation();
+			CCVector3 U = *P - sensorPos.getTranslationAsVec3D();
 			PointCoordinateType distToSensor = U.norm();
 
 			if (distToSensor > ZERO_TOLERANCE)
@@ -900,7 +900,7 @@ bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 			rotz.applyRotation(sensorX);
 			rotz.applyRotation(sensorY);
 
-			double phi = (getMinPitch() + getMaxPitch())/2;
+			double phi = 0; //(getMinPitch() + getMaxPitch())/2;
 			ccGLMatrixd roty; roty.initFromParameters(-phi,sensorY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
 			roty.applyRotation(sensorX);
 			roty.applyRotation(sensorZ);

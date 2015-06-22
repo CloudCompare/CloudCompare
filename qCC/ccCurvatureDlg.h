@@ -29,7 +29,7 @@ class ccCurvatureDlg : public QDialog, public Ui::CurvatureDialog
 public:
 
 	//! Default constructor
-	ccCurvatureDlg(QWidget* parent = 0);
+	explicit ccCurvatureDlg(QWidget* parent = 0);
 
 	//! Returns kernel size
 	double getKernelSize() const;

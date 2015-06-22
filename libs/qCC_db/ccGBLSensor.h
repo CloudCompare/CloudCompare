@@ -50,7 +50,7 @@ public:
 	//! Default constructor
 	/** \param rotOrder inner rotations order
 	**/
-	ccGBLSensor(ROTATION_ORDER rotOrder = YAW_THEN_PITCH);
+	explicit ccGBLSensor(ROTATION_ORDER rotOrder = YAW_THEN_PITCH);
 
 	//! Copy constructor
 	/** \warning The depth buffer is not copied!

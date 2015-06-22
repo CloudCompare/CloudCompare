@@ -41,7 +41,7 @@ class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg
 public:
 
 	//! Default constructor
-	ccCameraParamEditDlg(QWidget* parent);
+	explicit ccCameraParamEditDlg(QWidget* parent);
 
 	//! Destructor
 	virtual ~ccCameraParamEditDlg();
@@ -63,9 +63,6 @@ public slots:
 
 	//! Inits dialog values with matrix
 	void initWithMatrix(const ccGLMatrixd& mat);
-
-	//! Slots called when the view matrix of the associated window changes
-	void updateViewMatrix(const ccGLMatrixd& dummyMat);
 
 	//! Updates dialog values with pivot point
 	void updatePivotPoint(const CCVector3d& P);

@@ -32,7 +32,7 @@ class ccRenderingTools
 public:
 
 	//! Displays a depth buffer as an image
-	static void ShowDepthBuffer(ccGBLSensor* lidar, QWidget* parent = 0);
+	static void ShowDepthBuffer(ccGBLSensor* lidar, QWidget* parent = 0, unsigned maxDim = 1024);
 
 	//! Displays the colored scale corresponding to the currently activated context scalar field
 	/** Its appearance depends on the scalar fields min and max displayed

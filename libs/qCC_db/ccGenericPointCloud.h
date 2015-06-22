@@ -99,9 +99,10 @@ public:
 		WARNING: any previously attached octree will be deleted,
 				 even if new octree computation failed.
 		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCLib documentation)
+		\param autoAddChild whether to automatically add the computed octree as child of this cloud or not
 		\return the computed octree
 	**/
-	virtual ccOctree* computeOctree(CCLib::GenericProgressCallback* progressCb=NULL);
+	virtual ccOctree* computeOctree(CCLib::GenericProgressCallback* progressCb = 0, bool autoAddChild = true);
 
 	//! Returns associated octree
 	virtual ccOctree* getOctree();
@@ -160,7 +161,7 @@ public:
 	typedef GenericChunkedArray<1,uchar> VisibilityTableType;
 
 	//! Returns associated visiblity array
-	virtual VisibilityTableType* getTheVisibilityArray();
+	virtual inline VisibilityTableType* getTheVisibilityArray() { return m_pointsVisibility; }
 
 	//! Returns a ReferenceCloud equivalent to the visiblity array
 	virtual CCLib::ReferenceCloud* getTheVisiblePoints() const;

@@ -35,7 +35,7 @@ class CC_CORE_LIB_API ReferenceCloud : public GenericIndexedCloudPersist
 public:
 
 	//! Default constructor
-	ReferenceCloud(GenericIndexedCloudPersist* associatedCloud);
+	explicit ReferenceCloud(GenericIndexedCloudPersist* associatedCloud);
 
 	//! Copy constructor
 	ReferenceCloud(const ReferenceCloud& refCloud);

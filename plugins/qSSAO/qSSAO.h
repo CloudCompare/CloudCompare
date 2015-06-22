@@ -18,10 +18,9 @@
 #ifndef Q_SSAO_PLUGIN_HEADER
 #define Q_SSAO_PLUGIN_HEADER
 
-#include <QObject>
-
 #include "../ccGLFilterPluginInterface.h"
 
+//! SSAO shader (Screen Space Ambient Occlusion)
 class qSSAO : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT

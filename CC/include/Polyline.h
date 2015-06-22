@@ -35,7 +35,7 @@ class CC_CORE_LIB_API Polyline : public ReferenceCloud
 	public:
 
 		//! Polyline constructor
-		Polyline(GenericIndexedCloudPersist* associatedCloud);
+		explicit Polyline(GenericIndexedCloudPersist* associatedCloud);
 
 		//! Returns whether the polyline is closed or not
 		inline bool isClosed() const { return m_isClosed; }

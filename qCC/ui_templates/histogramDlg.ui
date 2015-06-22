@@ -66,6 +66,17 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="exportImageToolButton">
+        <property name="toolTip">
+         <string>Export histogram to an image file</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/dbImageSymbol.png</normaloff>:/CC/images/dbImageSymbol.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

@@ -59,7 +59,7 @@ public:
 		\param level the level of subdivision of the octree (between 1 and MAX_OCTREE_LEVEL)
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param inputOctree the cloud octree if it has already be computed
+		\param inputOctree the cloud octree if it has already been computed
 		\return error code (see DgmOctree::extractCCs)
 	**/
 	static int labelConnectedComponents(GenericIndexedCloudPersist* theCloud,

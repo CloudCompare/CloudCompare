@@ -294,7 +294,7 @@ bool doPerformBooleanOp()
 			break;
 		}
 	}
-	catch(std::exception e)
+	catch(const std::exception& e)
 	{
 		if (s_params.app)
 			s_params.app->dispToConsole(QString("Exception caught: %1").arg(e.what()),ccMainAppInterface::WRN_CONSOLE_MESSAGE);

@@ -33,7 +33,7 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 public:
 
 	//! Default constructor
-	ccSubMesh(ccMesh* parentMesh);
+	explicit ccSubMesh(ccMesh* parentMesh);
 	//! Destructor
 	virtual ~ccSubMesh();
 

@@ -49,7 +49,7 @@ class ccHistogramWindow : public QCustomPlot
 public:
 
 	//! Default constructor
-	ccHistogramWindow(QWidget *parent = 0);
+	explicit ccHistogramWindow(QWidget *parent = 0);
 
 	//! Destructor
 	virtual ~ccHistogramWindow();
@@ -64,11 +64,13 @@ public:
 		\param sf associated scalar field
 		\param initialNumberOfClasses initial number of classes
 		\param numberOfClassesCanBeChanged whether to allow the user to modify the number of classes
+		\param showNaNValuesInGrey show NaN values (in gray)
 		\return success
 	**/
 	void fromSF(ccScalarField* sf,
 				unsigned initialNumberOfClasses = 0,
-				bool numberOfClassesCanBeChanged = true);
+				bool numberOfClassesCanBeChanged = true,
+				bool showNaNValuesInGrey = true);
 
 	//! Creates histogram from a bin array (each bin = number of elements per class)
 	/** Number of classes can't be modified.
@@ -226,7 +228,7 @@ class ccHistogramWindowDlg : public QDialog
 
 public:
 	//! Default constructor
-	ccHistogramWindowDlg(QWidget* parent = 0);
+	explicit ccHistogramWindowDlg(QWidget* parent = 0);
 	//! Destructor
 	virtual ~ccHistogramWindowDlg();
 
@@ -240,6 +242,9 @@ protected slots:
 
 	//! When the export to CSV file button is pressed
 	void onExportToCSV();
+
+	//! When the export to Image file button is pressed
+	void onExportToImage();
 
 protected:
 

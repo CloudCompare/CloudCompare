@@ -18,8 +18,6 @@
 #ifndef Q_PCV_PLUGIN_HEADER
 #define Q_PCV_PLUGIN_HEADER
 
-#include <QObject>
-
 #include "../ccStdPluginInterface.h"
 
 //! Wrapper to the ShadeVis algorithm for computing Ambient Occlusion on meshes and point clouds
@@ -38,7 +36,7 @@ class qPCV : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qPCV(QObject* parent = 0);
+	explicit qPCV(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "P.C.V. (Ambient Occlusion)"; }

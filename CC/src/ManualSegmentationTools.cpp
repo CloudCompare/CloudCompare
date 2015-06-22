@@ -411,7 +411,6 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 	
 	unsigned importedTriCount = static_cast<unsigned>(preservedTriangleIndexes.size());
  	unsigned origVertCount = origVertices->size();
-	unsigned origTriCount = origMesh->size();
 	unsigned newVertCount = newVertices->size();
 	unsigned newTriCount = newMesh->size();
 
@@ -644,8 +643,8 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 
 	//working dimensions
 	unsigned char Z = ioParams.planeOrthoDim;
-	unsigned char X = (Z == 2 ? 0 : Z + 1);
-	unsigned char Y = (X == 2 ? 0 : X + 1);
+	//unsigned char X = (Z == 2 ? 0 : Z + 1);
+	//unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	const double& epsilon = ioParams.epsilon;
 	const double& planeZ = ioParams.planeCoord;
@@ -679,21 +678,21 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 				tsi->i3 | c_origIndexFlag };
 
 			//test each vertex
-			char relativePos[3] = { 1, 1, 1 };
+			//char relativePos[3] = { 1, 1, 1 };
 			std::vector<unsigned char> minusVertIndexes, plusVertIndexes;
 			for (unsigned char j = 0; j < 3; ++j)
 			{
 				const CCVector3d& v = V[j];
 				if (fabs(v.u[Z] - planeZ) < epsilon)
 				{
-					relativePos[j] = 0;
+					//relativePos[j] = 0;
 				}
 				else
 				{
 					if (v.u[Z] < planeZ)
 					{
 						minusVertIndexes.push_back(j);
-						relativePos[j] = -1;
+						//relativePos[j] = -1;
 					}
 					else
 					{
@@ -973,8 +972,8 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			//Extract the 'plane' information corresponding to the input box faces
 			//-X,+X,-Y,+Y,-Z,+Z
 			unsigned char Z = static_cast<unsigned char>(d / 2); 
-			double planeCoord = (d & 1 ? bbMax : bbMin).u[Z];
-			bool keepBelow = (d & 1 ? true : false);
+			double planeCoord = ((d & 1) ? bbMax : bbMin).u[Z];
+			bool keepBelow = ((d & 1) ? true : false);
 
 			assert(preservedTrianglesInside && formerPreservedTriangles);
 			assert(insideVertices && insideMesh);
@@ -1036,9 +1035,9 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				}
 
 				//get the vertices (from the right source!)
-				CCVector3d V[3] = { CCVector3d::fromArray((vertIndexes[0] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[0] & c_realIndexMask)->u),
-									CCVector3d::fromArray((vertIndexes[1] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[1] & c_realIndexMask)->u),
-									CCVector3d::fromArray((vertIndexes[2] & c_origIndexFlag ? origVertices : sourceVertices)->getPoint(vertIndexes[2] & c_realIndexMask)->u) };
+				CCVector3d V[3] = { CCVector3d::fromArray(( (vertIndexes[0] & c_origIndexFlag) ? origVertices : sourceVertices)->getPoint(vertIndexes[0] & c_realIndexMask)->u),
+									CCVector3d::fromArray(( (vertIndexes[1] & c_origIndexFlag) ? origVertices : sourceVertices)->getPoint(vertIndexes[1] & c_realIndexMask)->u),
+									CCVector3d::fromArray(( (vertIndexes[2] & c_origIndexFlag) ? origVertices : sourceVertices)->getPoint(vertIndexes[2] & c_realIndexMask)->u) };
 
 				if (d == 0)
 				{
@@ -1052,22 +1051,22 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 				}
 
 				//test the position of each vertex relatively to the current plane
-				char relativePos[3] = { 1, 1, 1 };
-				bool insideXY[3] = { false, false, false };
+				//char relativePos[3] = { 1, 1, 1 };
+				//bool insideXY[3] = { false, false, false };
 				std::vector<unsigned char> insideLocalVertIndexes, outsideLocalVertIndexes;
 				for (unsigned char j = 0; j < 3; ++j)
 				{
 					const CCVector3d& v = V[j];
 					if (fabs(v.u[Z] - planeCoord) < epsilon)
 					{
-						relativePos[j] = 0;
+						//relativePos[j] = 0;
 					}
 					else
 					{
 						if (v.u[Z] < planeCoord)
 						{
 							insideLocalVertIndexes.push_back(j);
-							relativePos[j] = -1;
+							//relativePos[j] = -1;
 						}
 						else
 						{

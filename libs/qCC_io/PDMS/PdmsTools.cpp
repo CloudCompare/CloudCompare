@@ -208,7 +208,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 	{
 		if (s_elementsStack.size() < 2)
 			return false;
-		ElementsStack::const_reverse_iterator it = s_elementsStack.rbegin(); it++;
+		ElementsStack::const_reverse_iterator it = s_elementsStack.rbegin(); ++it;
 		if (isSet() == 1)
 		{
 			for( ; it != s_elementsStack.rend(); ++it)
@@ -1173,7 +1173,7 @@ bool GenericItem::scan(Token t, std::vector<GenericItem *> &array)
 
 DesignElement::~DesignElement()
 {
-	for (std::list<DesignElement*>::iterator it=nelements.begin(); it!=nelements.end(); it++)
+	for (std::list<DesignElement*>::iterator it=nelements.begin(); it!=nelements.end(); ++it)
 	{
 		GenericItem* item = *it;
 		if (item)
@@ -1221,7 +1221,7 @@ void DesignElement::remove(GenericItem *i)
 		if (*it == i)
 			nelements.erase(it);
 		else
-			it++;
+			++it;
 	}
 }
 
@@ -1242,13 +1242,13 @@ void GroupElement::clear(bool del)
 {
 	if (del)
 	{
-		for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); eit++)
+		for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
 		{
 			GenericItem* item = *eit;
 			if (*eit)
 				Stack::Detroy(item);
 		}
-		for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); hit++)
+		for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 		{
 			GenericItem* item = *hit;
 			if (*hit)
@@ -1312,7 +1312,7 @@ bool GroupElement::push(GenericItem *i)
 
 void GroupElement::remove(GenericItem *i)
 {
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); hit++)
+	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 	{
 		if (*hit == i)
 		{
@@ -1321,7 +1321,7 @@ void GroupElement::remove(GenericItem *i)
 		}
 	}
 
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); eit++)
+	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
 	{
 		if (*eit == i)
 		{
@@ -1340,10 +1340,10 @@ bool GroupElement::convertCoordinateSystem()
 
 	if (!GenericItem::convertCoordinateSystem())
 		return false;
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); eit++)
+	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end(); ++eit)
 		if (!(*eit)->convertCoordinateSystem())
 			return false;
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); hit++)
+	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 		if (!(*hit)->convertCoordinateSystem())
 			return false;
 	return true;
@@ -1353,9 +1353,9 @@ GenericItem* GroupElement::scan(const char* str)
 {
 	//scan all elements contained in this group, begining with this one, while none matches the requested name
 	GenericItem *item=GenericItem::scan(str);
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end() && !item; eit++)
+	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end() && !item; ++eit)
 		item = (*eit)->scan(str);
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end() && !item; hit++)
+	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end() && !item; ++hit)
 		item = (*hit)->scan(str);
 	return item;
 }
@@ -1364,9 +1364,9 @@ bool GroupElement::scan(Token t, std::vector<GenericItem*> &items)
 {
 	GenericItem::scan(t, items);
 	size_t size = items.size();
-	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit!=elements.end(); eit++)
+	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit!=elements.end(); ++eit)
 		(*eit)->scan(t, items);
-	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); hit++)
+	for (std::list<GroupElement*>::iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 		(*hit)->scan(t, items);
 	return (items.size() > size);
 }
@@ -1399,14 +1399,14 @@ std::pair<int,int> GroupElement::write(std::ostream &output, int nbtabs) const
 
 	std::pair<int,int> nb(1,0);
 
-	for (std::list<GroupElement*>::const_iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); hit++)
+	for (std::list<GroupElement*>::const_iterator hit = subhierarchy.begin(); hit != subhierarchy.end(); ++hit)
 	{
 		std::pair<int,int> n = (*hit)->write(output, nbtabs+1);
 		nb.first += n.first;
 		nb.second += n.second;
 	}
 
-	for (std::list<DesignElement*>::const_iterator eit = elements.begin(); eit != elements.end(); eit++)
+	for (std::list<DesignElement*>::const_iterator eit = elements.begin(); eit != elements.end(); ++eit)
 	{
 		std::pair<int,int> n = (*eit)->write(output, nbtabs+1);
 		nb.first += n.first;
@@ -1838,7 +1838,7 @@ void Loop::remove(GenericItem *i)
 		if ((*it) == i)
 			loop.erase(it);
 		else
-			it++;
+			++it;
 	}
 }
 
@@ -1876,8 +1876,8 @@ PointCoordinateType Extrusion::surface() const
 			if (it2 == loop->loop.end())
 				it2 = loop->loop.begin();
 			p += ((*it1)->v-(*it2)->v).norm();
-			it1++;
-			it2++;
+			++it1;
+			++it2;
 		}
 	}
 

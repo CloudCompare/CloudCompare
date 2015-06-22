@@ -100,6 +100,7 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (!filter)
 	{
 		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName).arg(subFileType));
+		fclose(fp);
 		return CC_FERR_UNKNOWN_FILE;
 	}
 

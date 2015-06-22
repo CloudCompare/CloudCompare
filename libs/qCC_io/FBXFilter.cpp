@@ -891,22 +891,22 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 
 				FbxSurfaceLambert* lLambertMat = static_cast<FbxSurfaceLambert*>(lBaseMaterial);
 			
-				float ambient[4];
-				float diffuse[4];
-				float emission[4];
-				float specular[4];
+				ccColor::Rgbaf ambient(0,0,0,1);
+				ccColor::Rgbaf diffuse(0,0,0,1);
+				ccColor::Rgbaf emission(0,0,0,1);
+				ccColor::Rgbaf specular(0,0,0,1);
 
 				FbxSurfacePhong* lPhongMat = isPhong ? static_cast<FbxSurfacePhong*>(lBaseMaterial) : 0;
 
 				for (int k=0; k<3; ++k)
 				{
-					ambient[k]  = static_cast<float>(lLambertMat->Ambient.Get()[k]);
-					diffuse[k]  = static_cast<float>(lLambertMat->Diffuse.Get()[k]);
-					emission[k] = static_cast<float>(lLambertMat->Emissive.Get()[k]);
+					ambient.rgba[k]  = static_cast<float>(lLambertMat->Ambient.Get()[k]);
+					diffuse.rgba[k]  = static_cast<float>(lLambertMat->Diffuse.Get()[k]);
+					emission.rgba[k] = static_cast<float>(lLambertMat->Emissive.Get()[k]);
 
 					if (lPhongMat)
 					{
-						specular[k]		= static_cast<float>(lPhongMat->Specular.Get()[k]);
+						specular.rgba[k] = static_cast<float>(lPhongMat->Specular.Get()[k]);
 					}
 				}
 
@@ -1025,7 +1025,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 						vertTexUVTable->addElement(uvf);
 					}
 
-					int indexCount = leUV->GetIndexArray().GetCount();
 					if (refMode == FbxGeometryElement::eIndexToDirect)
 					{
 						hasTexUVIndexes = true;
@@ -1168,8 +1167,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		CCVector3d Pshift(0,0,0);
 		for (int i=0; i<vertCount; ++i, ++fbxVertices)
 		{
-			const double* P = fbxVertices->Buffer();
-			assert(P[3] == 0);
+			CCVector3d P(fbxVertices->Buffer());
 
 			//coordinate shift management
 			if (i == 0)
@@ -1181,10 +1179,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				}
 			}
 
-			CCVector3 PV(	static_cast<PointCoordinateType>(P[0] + Pshift.x),
-							static_cast<PointCoordinateType>(P[1] + Pshift.y),
-							static_cast<PointCoordinateType>(P[2] + Pshift.z) );
-
+			CCVector3 PV = CCVector3::fromArray((P + Pshift).u);
 			vertices->addPoint(PV);
 		}
 	}

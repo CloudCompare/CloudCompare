@@ -408,7 +408,7 @@ void qRansacSD::doAction()
 
 			//random color
 			ccColor::Rgb col = ccColor::Generator::Random();
-			pcShape->setRGBColor(col.rgb);
+			pcShape->setRGBColor(col);
 			pcShape->showColors(true);
 			pcShape->showNormals(saveNormals);
 			pcShape->setVisible(true);

@@ -127,13 +127,13 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 
 			//convert 2D points to polyline
 			{
-				unsigned count = (unsigned)points.size();
+				unsigned count = static_cast<unsigned>(points.size());
 				if (count > 1)
 				{
 					ccPointCloud* vertices = new ccPointCloud("vertices");
 					polyline = new ccPolyline(vertices);
 					polyline->addChild(vertices);
-					if (!vertices->reserve(count) || !polyline->reserve(count-1))
+					if (!vertices->reserve(count) || !polyline->reserve(count))
 					{
 						//not enough memory
 						if (app)
@@ -146,7 +146,9 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 					{
 						for (unsigned i=0; i<count; ++i)
 						{
-							vertices->addPoint(CCVector3((PointCoordinateType)points[i].x,(PointCoordinateType)points[i].y,0));
+							vertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(points[i].x),
+															static_cast<PointCoordinateType>(points[i].y),
+															0));
 						}
 
 						vertices->setGlobalShift(G);

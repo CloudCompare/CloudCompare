@@ -362,7 +362,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	return true;
 }
 
-void ccFacet::setColor(const colorType rgb[])
+void ccFacet::setColor(const ccColor::Rgb& rgb)
 {
 	if (m_contourVertices && m_contourVertices->setRGBColor(rgb))
 	{

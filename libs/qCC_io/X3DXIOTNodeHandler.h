@@ -40,7 +40,7 @@ class X3DXIOTNodeHandler : public X3DDefaultNodeHandler
 public:
 
 	//! Default constructor
-	X3DXIOTNodeHandler(ccHObject* root);
+	explicit X3DXIOTNodeHandler(ccHObject* root);
 
 	//Destructor
 	virtual ~X3DXIOTNodeHandler();

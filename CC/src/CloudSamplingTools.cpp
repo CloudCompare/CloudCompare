@@ -91,13 +91,10 @@ SimpleCloud* CloudSamplingTools::resampleCloudWithOctreeAtLevel(GenericIndexedCl
 	void* additionalParameters[2] = {	(void*)cloud,
 										(void*)&resamplingMethod };
 
-	//The process is so simple that MT is slower!
-	//#ifdef ENABLE_MT_OCTREE
-	//theOctree->executeFunctionForAllCellsAtLevel_MT(octreeLevel,
-	//#else
 	if (theOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
 														&resampleCellAtLevel,
 														additionalParameters,
+														false, //the process is so simple that MT is slower!
 														progressCb,
 														"Cloud Resampling") == 0)
 	{
@@ -174,15 +171,12 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctreeAtLevel(GenericIndex
 	void* additionalParameters[2] = {	(void*)cloud,
 										(void*)&subsamplingMethod };
 
-	//The process is so simple that MT is slower!
-	//#ifdef ENABLE_MT_OCTREE
-	//theOctree->executeFunctionForAllCellsAtLevel_MT(octreeLevel,
-	//#else
-	if (theOctree->executeFunctionForAllCellsAtLevel(octreeLevel,
-													&subsampleCellAtLevel,
-													additionalParameters,
-													progressCb,
-													"Cloud Subsampling") == 0)
+	if (theOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
+														&subsampleCellAtLevel,
+														additionalParameters,
+														false, //the process is so simple that MT is slower!
+														progressCb,
+														"Cloud Subsampling") == 0)
 	{
 		//something went wrong
 		delete cloud;
@@ -356,7 +350,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	{
 		progressCb->setMethodTitle("Spatial resampling");
 		char buffer[256];
-		sprintf(buffer,"Points: %i\nMin dist.: %f",cloudSize,minDistance);
+		sprintf(buffer,"Points: %u\nMin dist.: %f",cloudSize,minDistance);
 		progressCb->setInfo(buffer);
 		normProgress = new NormalizedProgress(progressCb,cloudSize);
 		progressCb->reset();
@@ -519,15 +513,12 @@ ReferenceCloud* CloudSamplingTools::sorFilter(GenericIndexedCloudPersist* inputC
 	else
 		octreeLevel = theOctree->findBestLevelForAGivenPopulationPerCell(knn);
 
-	#ifdef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(octreeLevel,
-	#else
-	if (theOctree->executeFunctionForAllCellsAtLevel(octreeLevel,
-	#endif
-													&applySORFilterAtLevel,
-													additionalParameters,
-													progressCb,
-													"SOR filter") == 0)
+	if (theOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
+														&applySORFilterAtLevel,
+														additionalParameters,
+														true,
+														progressCb,
+														"SOR filter" ) == 0)
 	{
 		//something went wrong
 		delete cloud;

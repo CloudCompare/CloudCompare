@@ -699,7 +699,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-	m_associatedWin->redraw(state);
+	m_associatedWin->redraw(!state);
 }
 
 void ccGraphicalSegmentationTool::doSetPolylineSelection()

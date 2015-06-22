@@ -33,9 +33,9 @@ ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 				 QString name/*="Extrusion"*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_height(height)
+	, m_profile(profile)
 {
-	m_profile = profile;
-	assert(m_profile.size()>2);
+	assert(m_profile.size() > 2);
 
 	updateRepresentation();
 }

@@ -201,6 +201,7 @@ ccCameraSensor::ccCameraSensor(const IntrinsicParameters& iParams)
 
 ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 	: ccSensor(sensor)
+	, m_projectionMatrix(sensor.m_projectionMatrix)
 	, m_projectionMatrixIsValid(false)
 {
 	setIntrinsicParameters(m_intrinsicParams);
@@ -1383,7 +1384,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 					m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
 					m_frustrumInfos.frustrumHull->setTempColor(m_color);
 					
-					glPushAttrib(GL_COLOR_BUFFER_BIT);
+					//glPushAttrib(GL_COLOR_BUFFER_BIT);
 					//glEnable(GL_BLEND);
 					//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 					//glColor4ub(m_color.x, m_color.y, m_color.z, 76);
@@ -1392,7 +1393,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 					m_frustrumInfos.frustrumHull->enableStippling(true);
 					m_frustrumInfos.frustrumHull->draw(context);
 
-					glPopAttrib();
+					//glPopAttrib();
 				}
 			}
 			//*/
@@ -2292,7 +2293,7 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 
 	try
 	{
-		for (it=thePointsAndTheirCellCodes.begin(); it!=thePointsAndTheirCellCodes.end(); it++)
+		for (it=thePointsAndTheirCellCodes.begin(); it!=thePointsAndTheirCellCodes.end(); ++it)
 		{
 			CCLib::DgmOctree::OctreeCellCodeType completeCode = it->theCode;
 			for (unsigned char level=1; level<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
@@ -2382,9 +2383,9 @@ ccOctreeFrustrumIntersector::OctreeCellVisibility
 	CCVector3 boxCorners[8];
 	{
 		for (unsigned i=0; i<8; i++)
-			boxCorners[i] = CCVector3(	i&4 ? bbMin.x : bbMax.x,
-										i&2 ? bbMin.y : bbMax.y,
-										i&1 ? bbMin.z : bbMax.z);
+			boxCorners[i] = CCVector3(	(i & 4) ? bbMin.x : bbMax.x,
+										(i & 2) ? bbMin.y : bbMax.y,
+										(i & 1) ? bbMin.z : bbMax.z);
 	}
 
 	//There are 28 tests to perform:
@@ -2560,7 +2561,7 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionWithOctree(	std::vec
 	// dealing with cells completely inside the frustrum
 	std::set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator it;
 	CCLib::ReferenceCloud pointsInCell(m_associatedOctree->associatedCloud());
-	for (it = m_cellsInFrustum[level].begin(); it != m_cellsInFrustum[level].end(); it++)
+	for (it = m_cellsInFrustum[level].begin(); it != m_cellsInFrustum[level].end(); ++it)
 	{
 		// get all points in cell
 		if (m_associatedOctree->getPointsInCell(*it, level, &pointsInCell, true))
@@ -2572,7 +2573,7 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionWithOctree(	std::vec
 	}
 
 	// dealing with cells intersecting the frustrum (not completely inside)
-	for (it = m_cellsIntersectFrustum[level].begin(); it != m_cellsIntersectFrustum[level].end(); it++)
+	for (it = m_cellsIntersectFrustum[level].begin(); it != m_cellsIntersectFrustum[level].end(); ++it)
 	{
 		// get all points in cell
 		if (m_associatedOctree->getPointsInCell(*it, level, &pointsInCell, true))

@@ -52,12 +52,15 @@ public:
 	double getGridStep() const;
 
 	//! Exportable fields
-	enum ExportableFields { PER_CELL_COUNT,
+	enum ExportableFields { PER_CELL_HEIGHT,
+							PER_CELL_COUNT,
 							PER_CELL_MIN_HEIGHT,
 							PER_CELL_MAX_HEIGHT,
 							PER_CELL_AVG_HEIGHT,
 							PER_CELL_HEIGHT_STD_DEV,
-							PER_CELL_HEIGHT_RANGE
+							PER_CELL_HEIGHT_RANGE,
+							PER_CELL_INVALID,
+							EXISTING_SF
 	};
 
 	//! Returns whether a given field count should be exported as SF (only if a cloud is generated!)
@@ -110,7 +113,7 @@ public:
 protected slots:
 
 	//! Exports the grid as a cloud
-	void generateCloud() const;
+	ccPointCloud* generateCloud(bool autoExport = true) const;
 
 	//! Exports the grid as an image
 	void generateImage() const;
@@ -141,11 +144,17 @@ protected slots:
 	//! Save persistent settings and 'accept' dialog
 	void saveSettings();
 
+	//! Called when the active layer changes
+	void activeLayerChanged(int, bool autoRedraw = true);
+
 	//! Called when the projection direction changes
 	void projectionDirChanged(int);
 
 	//! Called when the projection type changes
 	void projectionTypeChanged(int);
+
+	//! Called when the SF projection type changes
+	void sfProjectionTypeChanged(int);
 
 	//! Show grid box editor
 	void showGridBoxEditor();
@@ -253,7 +262,9 @@ protected: //raster grid related stuff
 	};
 
 	//! Converts the grid to a scalar field
-	ccPointCloud* convertGridToCloud(const std::vector<ExportableFields>& exportedFields, bool interpolateSF) const;
+	ccPointCloud* convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
+										bool interpolateSF,
+										QString activeSFName) const;
 
 protected: //members
 

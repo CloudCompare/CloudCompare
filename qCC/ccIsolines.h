@@ -354,12 +354,6 @@ protected:
 					currentCellIndex = ixy(x,y);
 				}
 
-				//if (x == 188 && y == 183)
-				if (currentCellIndex == 59729)
-				{
-					int i=0;
-				}
-
 				assert(currentCellIndex >= 0);
 				int& currentCode = m_cd[currentCellIndex];
 				switch (currentCode)
@@ -672,7 +666,6 @@ protected:
 		double area = 0;
 		if (getValidIndex(contour, first) == getValidIndex(contour, last))
 			last = last - 1;
-		int n = last - first + 1;
 		
 		double w = 0, h = 0;
 		for (int i = first; i < last ; i++)

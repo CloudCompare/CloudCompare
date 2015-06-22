@@ -59,7 +59,7 @@ static const char LAS_SCALE_Z_META_DATA[] = "LAS.scale.z";
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
 {
 public:
-	LASSaveDlg(QWidget* parent = 0)
+	explicit LASSaveDlg(QWidget* parent = 0)
 		: QDialog(parent)
 		, Ui::SaveLASFileDialog()
 	{
@@ -391,9 +391,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	ccProgressDialog pdlg(true); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save LAS file");
-	char buffer[256];
-	sprintf(buffer,"Points: %u",numberOfPoints);
-	pdlg.setInfo(buffer);
+	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
 	pdlg.start();
 
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(writer->GetHeader())));
@@ -629,7 +627,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					dimensions.push_back(it->GetName());
 				}
 				ccLog::PrintDebug(QString("\tDimension: %1 (size: %2 - type: %3)").arg(QString::fromStdString(it->GetName())).arg(it->GetByteSize()).arg(it->IsNumeric() ? (it->IsInteger() ? "integer" : "Float") : "Non numeric"));
-				it++;
+				++it;
 			}
 		}
 
@@ -945,29 +943,26 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		{
 			CCVector3d P( p.GetX(),p.GetY(),p.GetZ() );
 			//backup input global parameters
-			bool* cseBackup = parameters.coordinatesShiftEnabled;
-			CCVector3d* csBackup = parameters.coordinatesShift;
 			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-			bool enabled = true;
+			bool useLasShift = false;
 			//set the LAS shift as default shift (if none was provided)
-			if (lasShift.norm2() != 0 && (!cseBackup || !*cseBackup))
+			if (lasShift.norm2() != 0 && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
 			{
-				parameters.coordinatesShiftEnabled = &enabled;
-				parameters.coordinatesShift = &lasShift;
+				useLasShift = true;
+				Pshift = lasShift;
 				if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
 					&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
 				{
 					parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
 				}
 			}
-			if (HandleGlobalShift(P,Pshift,parameters))
+			if (HandleGlobalShift(P,Pshift,parameters,useLasShift))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 			}
-			//restore (input) global parameters
-			parameters.coordinatesShiftEnabled = cseBackup;
-			parameters.coordinatesShift = csBackup;
+
+			//restore previous parameters
 			parameters.shiftHandlingMode = csModeBackup;
 		}
 

@@ -181,7 +181,7 @@ bool SimpleMesh::resize(unsigned n)
 
 TriangleSummitsIndexes* SimpleMesh::getTriangleIndexes(unsigned triangleIndex)
 {
-	return (TriangleSummitsIndexes*)m_triIndexes->getValue(triangleIndex);
+	return reinterpret_cast<TriangleSummitsIndexes*>(m_triIndexes->getValue(triangleIndex));
 }
 
 TriangleSummitsIndexes* SimpleMesh::getNextTriangleIndexes()

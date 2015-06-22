@@ -15,7 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#include <ccIncludeGL.h>
+//Always on top!
+#include "ccIncludeGL.h"
 
 #include "ccPlane.h"
 

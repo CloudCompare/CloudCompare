@@ -23,9 +23,14 @@
 #include "ccSerializableObject.h"
 
 //Qt
+#include <qglobal.h>
 #include <QString>
 #include <QVariant>
 #include <QSharedPointer>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#define CC_QT5
+#endif
+
 
 //System
 #include <stdint.h>
@@ -261,19 +266,19 @@ public:
 	static CC_CLASS_ENUM ReadClassIDFromFile(QFile& in, short dataVersion);
 
 	//! Returns a given associated meta data
-	/** \param key meta data unique identifier (case sensitive!)
+	/** \param key meta data unique identifier (case sensitive)
 		\return meta data (if any) or an invalid QVariant
 	**/
 	QVariant getMetaData(QString key) const;
 
 	//! Removes a given associated meta-data
-	/** \param key meta-data unique identifier (case sensitive!)
+	/** \param key meta-data unique identifier (case sensitive)
 		\return success
 	**/
 	bool removeMetaData(QString key);
 
 	//! Sets a meta-data element
-	/** \param key meta-data unique identifier (case sensitive!)
+	/** \param key meta-data unique identifier (case sensitive)
 		\param data data
 	**/
 	void setMetaData(QString key, QVariant data);
@@ -284,11 +289,11 @@ public:
 	**/
 	void setMetaData(const QVariantMap& dataset, bool overwrite = false);
 
-	//! Says if a meta-data element with the given key exists or not
-	/** \param key is the key to look for
-		\return true, if exists
+	//! Returns whether a meta-data element with the given key exists or not
+	/** \param key meta-data unique identifier (case sensitive)
+		\return whether the element exists or not
 	**/
-	bool hasMetaData(QString key);
+	bool hasMetaData(QString key) const;
 
 	//! Returns meta-data map (const only)
 	const QVariantMap& metaData() const { return m_metaData; }

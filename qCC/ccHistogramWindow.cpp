@@ -31,6 +31,7 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <QSettings>
+#include <QImageWriter>
 
 //System
 #include <assert.h>
@@ -142,7 +143,8 @@ void ccHistogramWindow::setAxisLabels(const QString& xLabel, const QString& yLab
 
 void ccHistogramWindow::fromSF(	ccScalarField* sf,
 								unsigned initialNumberOfClasses/*=0*/,
-								bool numberOfClassesCanBeChanged/*=true*/)
+								bool numberOfClassesCanBeChanged/*=true*/,
+								bool showNaNValuesInGrey/*=true*/)
 {
 	if (m_associatedSF != sf)
 	{
@@ -155,8 +157,8 @@ void ccHistogramWindow::fromSF(	ccScalarField* sf,
 
 	if (m_associatedSF)
 	{
-		m_minVal = m_associatedSF->getMin();
-		m_maxVal = m_associatedSF->getMax();
+		m_minVal = showNaNValuesInGrey ? m_associatedSF->getMin() : m_associatedSF->displayRange().start();
+		m_maxVal = showNaNValuesInGrey ? m_associatedSF->getMax() : m_associatedSF->displayRange().stop();
 		m_numberOfClassesCanBeChanged = numberOfClassesCanBeChanged;
 	}
 	else
@@ -898,7 +900,8 @@ ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
 	hboxLayout->setContentsMargins(0,0,0,0);
 	m_gui->histoFrame->setLayout(hboxLayout);
 
-	connect(m_gui->exportCSVToolButton, SIGNAL(clicked()), this, SLOT(onExportToCSV()));
+	connect(m_gui->exportCSVToolButton,   SIGNAL(clicked()), this, SLOT(onExportToCSV()));
+	connect(m_gui->exportImageToolButton, SIGNAL(clicked()), this, SLOT(onExportToImage()));
 
 	resize(400,275);
 }
@@ -990,4 +993,57 @@ void ccHistogramWindowDlg::onExportToCSV()
 
 	//save file
 	exportToCSV(filename);
+}
+
+void ccHistogramWindowDlg::onExportToImage()
+{
+	if (!m_win)
+	{
+		assert(false);
+		return;
+	}
+
+	//we grab the list of supported image file formats (output)
+	QList<QByteArray> list = QImageWriter::supportedImageFormats();
+	if (list.size() < 1)
+	{
+		ccLog::Error("No supported image format on this platform?!");
+		return;
+	}
+
+	//we convert this list into a proper "filters" string
+	QString firstFilter;
+	QString filters;
+	for (int i=0; i<list.size(); ++i)
+	{
+		filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
+		if (i == 0)
+			firstFilter = filters;
+	}
+
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+
+	currentPath += QString("/") + m_win->windowTitle();
+
+	//ask for a filename
+	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,filters);
+	if (filename.isEmpty())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	//save last saving location
+	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
+	settings.endGroup();
+
+	//save widget as an image file
+	QPixmap image = QPixmap::grabWidget(m_win);
+	if (!image.save(filename))
+	{
+		ccLog::Error(QString("Failed to save file '%1'").arg(filename));
+	}
 }

@@ -73,13 +73,13 @@ void SimpleCloud::forEach(genericPointAction& anAction)
 	if (m_scalarField->currentSize()>=n) //existing scalar field?
 	{
 		for (i=0;i<n;++i)
-			anAction(*(CCVector3*)m_points->getValue(i),(*m_scalarField)[i]);
+			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),(*m_scalarField)[i]);
 	}
 	else //otherwise (we provide a fake zero distance)
 	{
 		ScalarType d=0;
 		for (i=0;i<n;++i)
-			anAction(*(CCVector3*)m_points->getValue(i),d);
+			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),d);
 	}
 }
 
@@ -130,19 +130,19 @@ void SimpleCloud::placeIteratorAtBegining()
 
 const CCVector3* SimpleCloud::getNextPoint()
 {
-	return (CCVector3*)(globalIterator < m_points->currentSize() ? m_points->getValue(globalIterator++) : 0);
+	return reinterpret_cast<CCVector3*>(globalIterator < m_points->currentSize() ? m_points->getValue(globalIterator++) : 0);
 }
 
 const CCVector3* SimpleCloud::getPointPersistentPtr(unsigned index)
 {
 	assert(index < m_points->currentSize());
-	return (CCVector3*)m_points->getValue(index);
+	return reinterpret_cast<CCVector3*>(m_points->getValue(index));
 }
 
 void SimpleCloud::getPoint(unsigned index, CCVector3& P) const
 {
 	assert(index < m_points->currentSize());
-	P = *(CCVector3*)m_points->getValue(index);
+	P = *reinterpret_cast<CCVector3*>(m_points->getValue(index));
 }
 
 void SimpleCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
@@ -175,7 +175,7 @@ void SimpleCloud::applyTransformation(PointProjectionTools::Transformation& tran
 	{
 		for (unsigned i=0; i<count; ++i)
 		{
-			CCVector3* P = ((CCVector3*)m_points->getValue(i));
+			CCVector3* P = reinterpret_cast<CCVector3*>(m_points->getValue(i));
 			(*P) *= trans.s;
 		}
 		m_validBB = false;
@@ -185,7 +185,7 @@ void SimpleCloud::applyTransformation(PointProjectionTools::Transformation& tran
 	{
 		for (unsigned i=0; i<count; ++i)
 		{
-			CCVector3* P = ((CCVector3*)m_points->getValue(i));
+			CCVector3* P = reinterpret_cast<CCVector3*>(m_points->getValue(i));
 			(*P) = trans.R * (*P);
 			m_validBB = false;
 		}
@@ -195,7 +195,7 @@ void SimpleCloud::applyTransformation(PointProjectionTools::Transformation& tran
 	{
 		for (unsigned i=0; i<count; ++i)
 		{
-			CCVector3* P = ((CCVector3*)m_points->getValue(i));
+			CCVector3* P = reinterpret_cast<CCVector3*>(m_points->getValue(i));
 			(*P) += trans.T;
 		}
 		m_validBB = false;

@@ -95,7 +95,7 @@ p, li { white-space: pre-wrap; }
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="ignoreAxisShiftCheckBox">
+      <widget class="QCheckBox" name="absoluteHeightValuesCheckBox">
        <property name="text">
         <string>height values are absolute (i.e. not relative to profile origin)</string>
        </property>

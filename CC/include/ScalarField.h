@@ -42,7 +42,7 @@ public:
 	/** [SHAREABLE] Call 'link' when associating this structure to an object.
 		\param name scalar field name
 	**/
-	ScalarField(const char* name = 0);
+	explicit ScalarField(const char* name = 0);
 
 	//! Sets scalar field name
 	void setName(const char* name);

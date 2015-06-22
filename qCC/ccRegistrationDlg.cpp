@@ -122,12 +122,12 @@ ccHObject *ccRegistrationDlg::getModelEntity()
 
 bool ccRegistrationDlg::useDataSFAsWeights() const
 {
-	return checkBoxUseDataSFAsWeights->isChecked();
+	return checkBoxUseDataSFAsWeights->isEnabled() && checkBoxUseDataSFAsWeights->isChecked();
 }
 
 bool ccRegistrationDlg::useModelSFAsWeights() const
 {
-	return checkBoxUseModelSFAsWeights->isChecked();
+	return checkBoxUseModelSFAsWeights->isEnabled() && checkBoxUseModelSFAsWeights->isChecked();
 }
 
 bool ccRegistrationDlg::adjustScale() const
@@ -215,6 +215,9 @@ void ccRegistrationDlg::setColorsAndLabels()
 	dataEntity->setVisible(true);
 	dataEntity->setTempColor(ccColor::red);
 	dataEntity->prepareDisplayForRefresh_recursive();
+
+	checkBoxUseDataSFAsWeights->setEnabled(dataEntity->hasDisplayedScalarField());
+	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->hasDisplayedScalarField());
 
 	MainWindow::RefreshAllGLWindow(false);
 }

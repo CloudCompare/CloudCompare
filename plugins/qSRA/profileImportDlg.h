@@ -28,7 +28,7 @@ class ProfileImportDlg : public QDialog, public Ui::ProfileImportDlg
 public:
 
 	//! Default constructor
-    ProfileImportDlg(QWidget* parent = 0);
+    explicit ProfileImportDlg(QWidget* parent = 0);
 
 	//! Returns revolution axis dimension index
 	/** \return 0(X), 1(Y) or 2(Z).
@@ -41,8 +41,8 @@ public:
 	//! Returns input filename (on completion)
 	QString getFilename() const;
 
-	//! Returns whether poyline shift should be ignored along the revolution axis
-	bool ignoreAxisShift() const;
+	//! Returns whether the profile heights are absolute or not (i.e. relative to the center)
+	bool absoluteHeightValues() const;
 
 protected slots:
 

@@ -217,114 +217,113 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	}
 
 	//mesh or sub-meshes
+	unsigned indexShift = 0;
 	for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
 	{
-		ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(*it);
+		ccGenericMesh* st = static_cast<ccGenericMesh*>(*it);
 
-		if (subMesh->isKindOf(CC_TYPES::MESH))
+		stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << endl;
+		if (file.error() != QFile::NoError)
+			return CC_FERR_WRITING;
+
+		unsigned triNum = st->size();
+		st->placeIteratorAtBegining();
+
+		int lastMtlIndex = -1;
+		int t1 = -1, t2 = -1, t3 = -1;
+
+		for (unsigned i=0; i<triNum; ++i)
 		{
-			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
-			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << endl;
-			if (file.error() != QFile::NoError)
-				return CC_FERR_WRITING;
-
-			unsigned triNum = st->size();
-			st->placeIteratorAtBegining();
-
-			int lastMtlIndex = -1;
-			int t1 = -1, t2 = -1, t3 = -1;
-
-			for (unsigned i=0; i<triNum; ++i)
+			if (withMaterials)
 			{
-				if (withMaterials)
+				int mtlIndex = mesh->getTriangleMtlIndex(indexShift+i);
+				if (mtlIndex != lastMtlIndex)
 				{
-					int mtlIndex = mesh->getTriangleMtlIndex(i);
-					if (mtlIndex != lastMtlIndex)
+					if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
 					{
-						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
-						{
-							ccMaterial::CShared mat = materials->at(mtlIndex);
-							stream << "usemtl " << mat->getName() << endl;
-						}
-						else
-						{
-							stream << "usemtl " << endl;
-						}
-						if (file.error() != QFile::NoError)
-							return CC_FERR_WRITING;
-						lastMtlIndex = mtlIndex;
-					}
-
-					if (withTexCoordinates)
-					{
-						mesh->getTriangleTexCoordinatesIndexes(i,t1,t2,t3);
-						if (t1 >= 0) ++t1;
-						if (t2 >= 0) ++t2;
-						if (t3 >= 0) ++t3;
-					}
-				}
-
-				const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
-				//for per-triangle normals
-				unsigned i1 = tsi->i1 + 1;
-				unsigned i2 = tsi->i2 + 1;
-				unsigned i3 = tsi->i3 + 1;
-
-				stream << "f";
-				if (withNormals)
-				{
-					int n1 = static_cast<int>(i1);
-					int n2 = static_cast<int>(i2);
-					int n3 = static_cast<int>(i3);
-					if (withTriNormals)
-					{
-						st->getTriangleNormalIndexes(i,n1,n2,n3);
-						if (n1 >= 0) ++n1;
-						if (n2 >= 0) ++n2;
-						if (n3 >= 0) ++n3;
-					}
-
-					if (withTexCoordinates)
-					{
-						stream << " " << i1 << "/" << t1 << "/" << n1;
-						stream << " " << i2 << "/" << t2 << "/" << n2;
-						stream << " " << i3 << "/" << t3 << "/" << n3;
+						ccMaterial::CShared mat = materials->at(mtlIndex);
+						stream << "usemtl " << mat->getName() << endl;
 					}
 					else
 					{
-						stream << " " << i1 << "//" << n1;
-						stream << " " << i2 << "//" << n2;
-						stream << " " << i3 << "//" << n3;
+						stream << "usemtl " << endl;
 					}
+					if (file.error() != QFile::NoError)
+						return CC_FERR_WRITING;
+					lastMtlIndex = mtlIndex;
+				}
+
+				if (withTexCoordinates)
+				{
+					mesh->getTriangleTexCoordinatesIndexes(indexShift+i,t1,t2,t3);
+					if (t1 >= 0) ++t1;
+					if (t2 >= 0) ++t2;
+					if (t3 >= 0) ++t3;
+				}
+			}
+
+			const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
+			//for per-triangle normals
+			unsigned i1 = tsi->i1 + 1;
+			unsigned i2 = tsi->i2 + 1;
+			unsigned i3 = tsi->i3 + 1;
+
+			stream << "f";
+			if (withNormals)
+			{
+				int n1 = static_cast<int>(i1);
+				int n2 = static_cast<int>(i2);
+				int n3 = static_cast<int>(i3);
+				if (withTriNormals)
+				{
+					st->getTriangleNormalIndexes(i,n1,n2,n3);
+					if (n1 >= 0) ++n1;
+					if (n2 >= 0) ++n2;
+					if (n3 >= 0) ++n3;
+				}
+
+				if (withTexCoordinates)
+				{
+					stream << " " << i1 << "/" << t1 << "/" << n1;
+					stream << " " << i2 << "/" << t2 << "/" << n2;
+					stream << " " << i3 << "/" << t3 << "/" << n3;
 				}
 				else
 				{
-					if (withTexCoordinates)
-					{
-						stream << " " << i1 << "/" << t1;
-						stream << " " << i2 << "/" << t2;
-						stream << " " << i3 << "/" << t3;
-					}
-					else
-					{
-						stream << " " << i1;
-						stream << " " << i2;
-						stream << " " << i3;
-					}
+					stream << " " << i1 << "//" << n1;
+					stream << " " << i2 << "//" << n2;
+					stream << " " << i3 << "//" << n3;
 				}
-				stream << endl;
-
-				if (file.error() != QFile::NoError)
-					return CC_FERR_WRITING;
-				
-				if (!nprogress.oneStep()) //cancel requested
-					return CC_FERR_CANCELED_BY_USER;
 			}
+			else
+			{
+				if (withTexCoordinates)
+				{
+					stream << " " << i1 << "/" << t1;
+					stream << " " << i2 << "/" << t2;
+					stream << " " << i3 << "/" << t3;
+				}
+				else
+				{
+					stream << " " << i1;
+					stream << " " << i2;
+					stream << " " << i3;
+				}
+			}
+			stream << endl;
 
-			stream << "#" << triNum << " faces" << endl;
 			if (file.error() != QFile::NoError)
 				return CC_FERR_WRITING;
+
+			if (!nprogress.oneStep()) //cancel requested
+				return CC_FERR_CANCELED_BY_USER;
 		}
+
+		stream << "#" << triNum << " faces" << endl;
+		if (file.error() != QFile::NoError)
+			return CC_FERR_WRITING;
+
+		indexShift += triNum;
 	}
 
 	return CC_FERR_NO_ERROR;
@@ -444,482 +443,509 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	int maxTriNormIndex = -1;
 
 	//progress dialog
-	ccProgressDialog pDlg(false);
+	ccProgressDialog pDlg(true);
 	pDlg.setMethodTitle("OBJ file");
 	pDlg.setInfo("Loading in progress...");
-	pDlg.setRange(0,0);
+	pDlg.setRange(0,static_cast<int>(file.size()));
 	pDlg.show();
 	QApplication::processEvents();
 
 	//common warnings that can appear multiple time (we avoid to send too many messages to the console!)
-	enum OBJ_WARNINGS {	DISCARED_GROUP		= 0,
-						EMPTY_GROUP			= 1,
-						INVALID_NORMALS		= 2,
-						INVALID_INDEX		= 3,
-						NOT_ENOUGH_MEMORY	= 4,
-						INVALID_LINE		= 5,
+	enum OBJ_WARNINGS {	INVALID_NORMALS		= 0,
+						INVALID_INDEX		= 1,
+						NOT_ENOUGH_MEMORY	= 2,
+						INVALID_LINE		= 3,
+						CANCELLED_BY_USER	= 4,
 	};
-	bool objWarnings[6] = { false, false, false, false, false, false };
+	bool objWarnings[5] = { false, false, false, false, false };
 	bool error = false;
 
-	unsigned lineCount = 0;
-	unsigned polyCount = 0;
-	QString currentLine = stream.readLine();
-	while (!currentLine.isNull())
+	try
 	{
-		if ((++lineCount % 4096) == 0)
-			pDlg.setValue(static_cast<int>(lineCount>>12));
-
-		QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
-
-		//skip comments & empty lines
-		if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
+		unsigned lineCount = 0;
+		unsigned polyCount = 0;
+		QString currentLine = stream.readLine();
+		while (!currentLine.isNull())
 		{
-			currentLine = stream.readLine();
-			continue;
-		}
-
-		/*** new vertex ***/
-		if (tokens.front() == "v")
-		{
-			//reserve more memory if necessary
-			if (vertices->size() == vertices->capacity())
+			if ((++lineCount % 2048) == 0)
 			{
-				if (!vertices->reserve(vertices->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+				if (pDlg.wasCanceled())
 				{
-					objWarnings[NOT_ENOUGH_MEMORY] = true;
 					error = true;
+					objWarnings[CANCELLED_BY_USER] = true;
 					break;
 				}
+				pDlg.setValue(static_cast<int>(file.pos()));
+				QApplication::processEvents();
 			}
 
-			//malformed line?
-			if (tokens.size() < 4)
+			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+
+			//skip comments & empty lines
+			if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
 			{
-				objWarnings[INVALID_LINE] = true;
-				error = true;
-				break;
-			}
-
-			CCVector3d Pd( tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble() );
-
-			//first point: check for 'big' coordinates
-			if (pointsRead == 0)
-			{
-				if (HandleGlobalShift(Pd,Pshift,parameters))
-				{
-					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-				}
-			}
-
-			//shifted point
-			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
-			vertices->addPoint(P);
-			++pointsRead;
-		}
-		/*** new vertex texture coordinates ***/
-		else if (tokens.front() == "vt")
-		{
-			//create and reserve memory for tex. coords container if necessary
-			if (!texCoords)
-			{
-				texCoords = new TextureCoordsContainer();
-				texCoords->link();
-			}
-			if (texCoords->currentSize() == texCoords->capacity())
-			{
-				if (!texCoords->reserve(texCoords->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
-				{
-					objWarnings[NOT_ENOUGH_MEMORY] = true;
-					error = true;
-					break;
-				}
-			}
-
-			//malformed line?
-			if (tokens.size() < 2)
-			{
-				objWarnings[INVALID_LINE] = true;
-				error = true;
-				break;
-			}
-
-			float T[2] = { T[0] = tokens[1].toFloat(), 0 };
-
-			if (tokens.size() > 2) //OBJ specification allows for only one value!!!
-			{
-				T[1] = tokens[2].toFloat();
-			}
-
-			texCoords->addElement(T);
-			++texCoordsRead;
-		}
-		/*** new vertex normal ***/
-		else if (tokens.front() == "vn") //--> in fact it can also be a facet normal!!!
-		{
-			//create and reserve memory for normals container if necessary
-			if (!normals)
-			{
-				normals = new NormsIndexesTableType;
-				normals->link();
-			}
-			if (normals->currentSize() == normals->capacity())
-			{
-				if (!normals->reserve(normals->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
-				{
-					objWarnings[NOT_ENOUGH_MEMORY] = true;
-					error = true;
-					break;
-				}
-			}
-
-			//malformed line?
-			if (tokens.size() < 4)
-			{
-				objWarnings[INVALID_LINE] = true;
-				error = true;
-				break;
-			}
-
-			CCVector3 N((PointCoordinateType)tokens[1].toDouble(),
-				(PointCoordinateType)tokens[2].toDouble(),
-				(PointCoordinateType)tokens[3].toDouble());
-
-			if (fabs(N.norm2() - 1.0) > 0.005)
-				objWarnings[INVALID_NORMALS] = true;
-			normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
-
-			normals->addElement(nIndex); //we don't know yet if it's per-vertex or per-triangle normal...
-			++normsRead;
-		}
-		/*** new group ***/
-		else if (tokens.front() == "g")
-		{
-			//update new group index
-			facesRead = 0;
-			//get the group name
-			QString groupName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
-			for (int i=2; i<tokens.size(); ++i) //multiple parts?
-				groupName.append(QString(" ")+tokens[i]);
-			//push previous group descriptor (if none was pushed)
-			if (groups.empty() && totalFacesRead > 0)
-				groups.push_back(std::pair<unsigned,QString>(0,"default"));
-			//push new group descriptor
-			if (!groups.empty() && groups.back().first == totalFacesRead)
-				groups.back().second = groupName; //simply replace the group name if the previous group was empty!
-			else
-				groups.push_back(std::pair<unsigned,QString>(totalFacesRead,groupName));
-			polyCount = 0; //restart polyline count at 0!
-		}
-		/*** new face ***/
-		else if (tokens.front().startsWith('f'))
-		{
-			//malformed line?
-			if (tokens.size() < 4)
-			{
-				objWarnings[INVALID_LINE] = true;
-				currentLine = stream.readLine();
-				continue;
-				//error = true;
-				//break;
-			}
-
-			//read the face elements (singleton, pair or triplet)
-			std::vector<facetElement> currentFace;
-			for (int i=1; i<tokens.size(); ++i)
-			{
-				//new summit
-				facetElement fe; //(0,0,0) by default
-				QStringList vertexTokens = tokens[i].split('/');
-				if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
-				{
-					objWarnings[INVALID_LINE] = true;
-					error = true;
-				}
-				else
-				{
-					fe.vIndex = vertexTokens[0].toInt();
-					if (vertexTokens.size()>1 && !vertexTokens[1].isEmpty())
-						fe.tcIndex = vertexTokens[1].toInt();
-					if (vertexTokens.size()>2 && !vertexTokens[2].isEmpty())
-						fe.nIndex = vertexTokens[2].toInt();
-				}
-
-				currentFace.push_back(fe);
-			}
-
-			if (error)
-				break;
-
-			if (currentFace.size() < 3)
-			{
-				ccLog::Error("Malformed file: face on line %1 has less than 3 vertices!",lineCount);
-				error = true;
-				break;
-			}
-
-			//first vertex
-			std::vector<facetElement>::iterator A = currentFace.begin();
-
-			//the very first vertex of the group tells us about the whole sequence
-			if (facesRead == 0)
-			{
-				//we have a tex. coord index as second vertex element!
-				if (!hasTexCoords && A->tcIndex != 0 && !materialsLoadFailed)
-				{
-					if (!baseMesh->reservePerTriangleTexCoordIndexes())
-					{
-						objWarnings[NOT_ENOUGH_MEMORY] = true;
-						error = true;
-						break;
-					}
-					for (unsigned int i=0; i<totalFacesRead; ++i)
-						baseMesh->addTriangleTexCoordIndexes(-1, -1, -1);
-
-					hasTexCoords = true;
-				}
-
-				//we have a normal index as third vertex element!
-				if (!normalsPerFacet && A->nIndex != 0)
-				{
-					//so the normals are 'per-facet'
-					if (!baseMesh->reservePerTriangleNormalIndexes())
-					{
-						objWarnings[NOT_ENOUGH_MEMORY] = true;
-						error = true;
-						break;
-					}
-					for (unsigned int i=0; i<totalFacesRead; ++i)
-						baseMesh->addTriangleNormalIndexes(-1, -1, -1);
-					normalsPerFacet = true;
-				}
-			}
-
-			//we process all vertices accordingly
-			std::vector<facetElement>::iterator it = currentFace.begin();
-			for ( ; it!=currentFace.end(); ++it)
-			{
-				if (!it->updatePointIndex(pointsRead))
-				{
-					objWarnings[INVALID_INDEX] = true;
-					error = true;
-					break;
-				}
-				if (it->vIndex > maxVertexIndex)
-					maxVertexIndex = it->vIndex;
-
-				//should we have a tex. coord index as second vertex element?
-				if (hasTexCoords && currentMaterialDefined)
-				{
-					if (!it->updateTexCoordIndex(texCoordsRead))
-					{
-						objWarnings[INVALID_INDEX] = true;
-						error = true;
-						break;
-					}
-					if (it->tcIndex > maxTexCoordIndex)
-						maxTexCoordIndex = it->tcIndex;
-				}
-
-				//should we have a normal index as third vertex element?
-				if (normalsPerFacet)
-				{
-					if (!it->updateNormalIndex(normsRead))
-					{
-						objWarnings[INVALID_INDEX] = true;
-						error = true;
-						break;
-					}
-					if (it->nIndex > maxTriNormIndex)
-						maxTriNormIndex = it->nIndex;
-				}
-			}
-
-			//don't forget material (common for all vertices)
-			if (currentMaterialDefined && !materialsLoadFailed)
-			{
-				if (!hasMaterial)
-				{
-					if (!baseMesh->reservePerTriangleMtlIndexes())
-					{
-						objWarnings[NOT_ENOUGH_MEMORY] = true;
-						error = true;
-						break;
-					}
-					for (unsigned int i=0; i<totalFacesRead; ++i)
-						baseMesh->addTriangleMtlIndex(-1);
-
-					hasMaterial = true;
-				}
-			}
-
-			if (error)
-				break;
-
-			//Now, let's tesselate the whole polygon
-			//FIXME: yeah, we do very ulgy tesselation here!
-			std::vector<facetElement>::const_iterator B = A+1;
-			std::vector<facetElement>::const_iterator C = B+1;
-			for ( ; C != currentFace.end(); ++B,++C)
-			{
-				//need more space?
-				if (baseMesh->size() == baseMesh->maxSize())
-				{
-					if (!baseMesh->reserve(baseMesh->size()+128))
-					{
-						objWarnings[NOT_ENOUGH_MEMORY] = true;
-						error = true;
-						break;
-					}
-				}
-
-				//push new triangle
-				baseMesh->addTriangle(A->vIndex, B->vIndex, C->vIndex);
-				++facesRead;
-				++totalFacesRead;
-
-				if (hasMaterial)
-					baseMesh->addTriangleMtlIndex(currentMaterial);
-
-				if (hasTexCoords)
-					baseMesh->addTriangleTexCoordIndexes(A->tcIndex, B->tcIndex, C->tcIndex);
-
-				if (normalsPerFacet)
-					baseMesh->addTriangleNormalIndexes(A->nIndex, B->nIndex, C->nIndex);
-			}
-		}
-		/*** polyline ***/
-		else if (tokens.front().startsWith('l'))
-		{
-			//malformed line?
-			if (tokens.size() < 3)
-			{
-				objWarnings[INVALID_LINE] = true;
 				currentLine = stream.readLine();
 				continue;
 			}
 
-			//read the face elements (singleton, pair or triplet)
-			ccPolyline* polyline = new ccPolyline(vertices);
-			if (!polyline->reserve(static_cast<unsigned>(tokens.size()-1)))
+			/*** new vertex ***/
+			if (tokens.front() == "v")
 			{
-				//not enough memory
-				objWarnings[NOT_ENOUGH_MEMORY] = true;
-				delete polyline;
-				polyline = 0;
-				currentLine = stream.readLine();
-				continue;
-			}
+				//reserve more memory if necessary
+				if (vertices->size() == vertices->capacity())
+				{
+					if (!vertices->reserve(vertices->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					{
+						objWarnings[NOT_ENOUGH_MEMORY] = true;
+						error = true;
+						break;
+					}
+				}
 
-			for (int i=1; i<tokens.size(); ++i)
-			{
-				//get next polyline's vertex index
-				QStringList vertexTokens = tokens[i].split('/');
-				if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
+				//malformed line?
+				if (tokens.size() < 4)
 				{
 					objWarnings[INVALID_LINE] = true;
 					error = true;
 					break;
 				}
-				else
+
+				CCVector3d Pd( tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble() );
+
+				//first point: check for 'big' coordinates
+				if (pointsRead == 0)
 				{
-					int index = vertexTokens[0].toInt(); //we ignore normal index (if any!)
-					if (!UpdatePointIndex(index,pointsRead))
+					if (HandleGlobalShift(Pd,Pshift,parameters))
 					{
-						objWarnings[INVALID_INDEX] = true;
+						vertices->setGlobalShift(Pshift);
+						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+					}
+				}
+
+				//shifted point
+				CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+				vertices->addPoint(P);
+				++pointsRead;
+			}
+			/*** new vertex texture coordinates ***/
+			else if (tokens.front() == "vt")
+			{
+				//create and reserve memory for tex. coords container if necessary
+				if (!texCoords)
+				{
+					texCoords = new TextureCoordsContainer();
+					texCoords->link();
+				}
+				if (texCoords->currentSize() == texCoords->capacity())
+				{
+					if (!texCoords->reserve(texCoords->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					{
+						objWarnings[NOT_ENOUGH_MEMORY] = true;
 						error = true;
 						break;
 					}
+				}
 
-					polyline->addPointIndex(index);
+				//malformed line?
+				if (tokens.size() < 2)
+				{
+					objWarnings[INVALID_LINE] = true;
+					error = true;
+					break;
+				}
+
+				float T[2] = { T[0] = tokens[1].toFloat(), 0 };
+
+				if (tokens.size() > 2) //OBJ specification allows for only one value!!!
+				{
+					T[1] = tokens[2].toFloat();
+				}
+
+				texCoords->addElement(T);
+				++texCoordsRead;
+			}
+			/*** new vertex normal ***/
+			else if (tokens.front() == "vn") //--> in fact it can also be a facet normal!!!
+			{
+				//create and reserve memory for normals container if necessary
+				if (!normals)
+				{
+					normals = new NormsIndexesTableType;
+					normals->link();
+				}
+				if (normals->currentSize() == normals->capacity())
+				{
+					if (!normals->reserve(normals->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					{
+						objWarnings[NOT_ENOUGH_MEMORY] = true;
+						error = true;
+						break;
+					}
+				}
+
+				//malformed line?
+				if (tokens.size() < 4)
+				{
+					objWarnings[INVALID_LINE] = true;
+					error = true;
+					break;
+				}
+
+				CCVector3 N(static_cast<PointCoordinateType>(tokens[1].toDouble()),
+							static_cast<PointCoordinateType>(tokens[2].toDouble()),
+							static_cast<PointCoordinateType>(tokens[3].toDouble()));
+
+				if (fabs(N.norm2() - 1.0) > 0.005)
+				{
+					objWarnings[INVALID_NORMALS] = true;
+					N.normalize();
+				}
+				normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+
+				normals->addElement(nIndex); //we don't know yet if it's per-vertex or per-triangle normal...
+				++normsRead;
+			}
+			/*** new group ***/
+			else if (tokens.front() == "g" || tokens.front() == "o")
+			{
+				//update new group index
+				facesRead = 0;
+				//get the group name
+				QString groupName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
+				for (int i=2; i<tokens.size(); ++i) //multiple parts?
+					groupName.append(QString(" ")+tokens[i]);
+				//push previous group descriptor (if none was pushed)
+				if (groups.empty() && totalFacesRead > 0)
+					groups.push_back(std::pair<unsigned,QString>(0,"default"));
+				//push new group descriptor
+				if (!groups.empty() && groups.back().first == totalFacesRead)
+					groups.back().second = groupName; //simply replace the group name if the previous group was empty!
+				else
+					groups.push_back(std::pair<unsigned,QString>(totalFacesRead,groupName));
+				polyCount = 0; //restart polyline count at 0!
+			}
+			/*** new face ***/
+			else if (tokens.front().startsWith('f'))
+			{
+				//malformed line?
+				if (tokens.size() < 4)
+				{
+					objWarnings[INVALID_LINE] = true;
+					currentLine = stream.readLine();
+					continue;
+					//error = true;
+					//break;
+				}
+
+				//read the face elements (singleton, pair or triplet)
+				std::vector<facetElement> currentFace;
+				{
+					for (int i=1; i<tokens.size(); ++i)
+					{
+						QStringList vertexTokens = tokens[i].split('/');
+						if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
+						{
+							objWarnings[INVALID_LINE] = true;
+							error = true;
+							break;
+						}
+						else
+						{
+							//new vertex
+							facetElement fe; //(0,0,0) by default
+							
+							fe.vIndex = vertexTokens[0].toInt();
+							if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
+								fe.tcIndex = vertexTokens[1].toInt();
+							if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
+								fe.nIndex = vertexTokens[2].toInt();
+						
+							currentFace.push_back(fe);
+						}
+					}
+				}
+
+				if (error)
+					break;
+
+				if (currentFace.size() < 3)
+				{
+					ccLog::Error("[OBJ] Malformed file: face on line %1 has less than 3 vertices!",lineCount);
+					error = true;
+					break;
+				}
+
+				//first vertex
+				std::vector<facetElement>::iterator A = currentFace.begin();
+
+				//the very first vertex of the group tells us about the whole sequence
+				if (facesRead == 0)
+				{
+					//we have a tex. coord index as second vertex element!
+					if (!hasTexCoords && A->tcIndex != 0 && !materialsLoadFailed)
+					{
+						if (!baseMesh->reservePerTriangleTexCoordIndexes())
+						{
+							objWarnings[NOT_ENOUGH_MEMORY] = true;
+							error = true;
+							break;
+						}
+						for (unsigned int i=0; i<totalFacesRead; ++i)
+							baseMesh->addTriangleTexCoordIndexes(-1, -1, -1);
+
+						hasTexCoords = true;
+					}
+
+					//we have a normal index as third vertex element!
+					if (!normalsPerFacet && A->nIndex != 0)
+					{
+						//so the normals are 'per-facet'
+						if (!baseMesh->reservePerTriangleNormalIndexes())
+						{
+							objWarnings[NOT_ENOUGH_MEMORY] = true;
+							error = true;
+							break;
+						}
+						for (unsigned int i=0; i<totalFacesRead; ++i)
+							baseMesh->addTriangleNormalIndexes(-1, -1, -1);
+						normalsPerFacet = true;
+					}
+				}
+
+				//we process all vertices accordingly
+				for (std::vector<facetElement>::iterator it = currentFace.begin() ; it!=currentFace.end(); ++it)
+				{
+					facetElement& vertex = *it;
+
+					//vertex index
+					{
+						if (!vertex.updatePointIndex(pointsRead))
+						{
+							objWarnings[INVALID_INDEX] = true;
+							error = true;
+							break;
+						}
+						if (vertex.vIndex > maxVertexIndex)
+							maxVertexIndex = vertex.vIndex;
+					}
+					//should we have a tex. coord index as second vertex element?
+					if (hasTexCoords && currentMaterialDefined)
+					{
+						if (!vertex.updateTexCoordIndex(texCoordsRead))
+						{
+							objWarnings[INVALID_INDEX] = true;
+							error = true;
+							break;
+						}
+						if (vertex.tcIndex > maxTexCoordIndex)
+							maxTexCoordIndex = vertex.tcIndex;
+					}
+
+					//should we have a normal index as third vertex element?
+					if (normalsPerFacet)
+					{
+						if (!vertex.updateNormalIndex(normsRead))
+						{
+							objWarnings[INVALID_INDEX] = true;
+							error = true;
+							break;
+						}
+						if (vertex.nIndex > maxTriNormIndex)
+							maxTriNormIndex = vertex.nIndex;
+					}
+				}
+
+				//don't forget material (common for all vertices)
+				if (currentMaterialDefined && !materialsLoadFailed)
+				{
+					if (!hasMaterial)
+					{
+						if (!baseMesh->reservePerTriangleMtlIndexes())
+						{
+							objWarnings[NOT_ENOUGH_MEMORY] = true;
+							error = true;
+							break;
+						}
+						for (unsigned int i=0; i<totalFacesRead; ++i)
+							baseMesh->addTriangleMtlIndex(-1);
+
+						hasMaterial = true;
+					}
+				}
+
+				if (error)
+					break;
+
+				//Now, let's tesselate the whole polygon
+				//FIXME: yeah, we do very ulgy tesselation here!
+				std::vector<facetElement>::const_iterator B = A+1;
+				std::vector<facetElement>::const_iterator C = B+1;
+				for ( ; C != currentFace.end(); ++B,++C)
+				{
+					//need more space?
+					if (baseMesh->size() == baseMesh->maxSize())
+					{
+						if (!baseMesh->reserve(baseMesh->size()+128))
+						{
+							objWarnings[NOT_ENOUGH_MEMORY] = true;
+							error = true;
+							break;
+						}
+					}
+
+					//push new triangle
+					baseMesh->addTriangle(A->vIndex, B->vIndex, C->vIndex);
+					++facesRead;
+					++totalFacesRead;
+
+					if (hasMaterial)
+						baseMesh->addTriangleMtlIndex(currentMaterial);
+
+					if (hasTexCoords)
+						baseMesh->addTriangleTexCoordIndexes(A->tcIndex, B->tcIndex, C->tcIndex);
+
+					if (normalsPerFacet)
+						baseMesh->addTriangleNormalIndexes(A->nIndex, B->nIndex, C->nIndex);
 				}
 			}
-
-			if (error)
+			/*** polyline ***/
+			else if (tokens.front().startsWith('l'))
 			{
-				delete polyline;
-				polyline = 0;
-				break;
-			}
+				//malformed line?
+				if (tokens.size() < 3)
+				{
+					objWarnings[INVALID_LINE] = true;
+					currentLine = stream.readLine();
+					continue;
+				}
+
+				//read the face elements (singleton, pair or triplet)
+				ccPolyline* polyline = new ccPolyline(vertices);
+				if (!polyline->reserve(static_cast<unsigned>(tokens.size()-1)))
+				{
+					//not enough memory
+					objWarnings[NOT_ENOUGH_MEMORY] = true;
+					delete polyline;
+					polyline = 0;
+					currentLine = stream.readLine();
+					continue;
+				}
+
+				for (int i=1; i<tokens.size(); ++i)
+				{
+					//get next polyline's vertex index
+					QStringList vertexTokens = tokens[i].split('/');
+					if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
+					{
+						objWarnings[INVALID_LINE] = true;
+						error = true;
+						break;
+					}
+					else
+					{
+						int index = vertexTokens[0].toInt(); //we ignore normal index (if any!)
+						if (!UpdatePointIndex(index,pointsRead))
+						{
+							objWarnings[INVALID_INDEX] = true;
+							error = true;
+							break;
+						}
+
+						polyline->addPointIndex(index);
+					}
+				}
+
+				if (error)
+				{
+					delete polyline;
+					polyline = 0;
+					break;
+				}
 			
-			polyline->setVisible(true);
-			QString name = groups.empty() ? QString("Line") : groups.back().second+QString(".line");
-			polyline->setName(QString("%1 %2").arg(name).arg(++polyCount));
-			vertices->addChild(polyline);
+				polyline->setVisible(true);
+				QString name = groups.empty() ? QString("Line") : groups.back().second+QString(".line");
+				polyline->setName(QString("%1 %2").arg(name).arg(++polyCount));
+				vertices->addChild(polyline);
 
-		}
-		/*** material ***/
-		else if (tokens.front() == "usemtl") //see 'MTL file' below
-		{
-			if (materials) //otherwise we have failed to load MTL file!!!
-			{
-				QString mtlName = currentLine.mid(7).trimmed();
-				//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
-				//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
-				currentMaterial = (!mtlName.isEmpty() ? materials->findMaterialByName(mtlName) : -1);
-				currentMaterialDefined = true;
 			}
-		}
-		/*** material file (MTL) ***/
-		else if (tokens.front() == "mtllib")
-		{
-			//malformed line?
-			if (tokens.size() < 2 || tokens[1].isEmpty())
+			/*** material ***/
+			else if (tokens.front() == "usemtl") //see 'MTL file' below
 			{
-				objWarnings[INVALID_LINE] = true;
-			}
-			else
-			{
-				//we build the whole MTL filename + path
-				//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
-				//QString mtlFilename = tokens[1];
-				QString mtlFilename = currentLine.mid(7).trimmed();
-				ccLog::Print(QString("[OBJ] Material file: ")+mtlFilename);
-				QString mtlPath = QFileInfo(filename).canonicalPath();
-				//we try to load it
-				if (!materials)
+				if (materials) //otherwise we have failed to load MTL file!!!
 				{
-					materials = new ccMaterialSet("materials");
-					materials->link();
+					QString mtlName = currentLine.mid(7).trimmed();
+					//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
+					//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
+					currentMaterial = (!mtlName.isEmpty() ? materials->findMaterialByName(mtlName) : -1);
+					currentMaterialDefined = true;
 				}
-
-				size_t oldSize = materials->size();
-				QStringList errors;
-				if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
+			}
+			/*** material file (MTL) ***/
+			else if (tokens.front() == "mtllib")
+			{
+				//malformed line?
+				if (tokens.size() < 2 || tokens[1].isEmpty())
 				{
-					ccLog::Print("[OBJ] %i materials loaded",materials->size()-oldSize);
-					materialsLoadFailed = false;
+					objWarnings[INVALID_LINE] = true;
 				}
 				else
 				{
-					ccLog::Error(QString("[OBJ] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
-					materialsLoadFailed = true;
-				}
+					//we build the whole MTL filename + path
+					//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
+					//QString mtlFilename = tokens[1];
+					QString mtlFilename = currentLine.mid(7).trimmed();
+					ccLog::Print(QString("[OBJ] Material file: ")+mtlFilename);
+					QString mtlPath = QFileInfo(filename).canonicalPath();
+					//we try to load it
+					if (!materials)
+					{
+						materials = new ccMaterialSet("materials");
+						materials->link();
+					}
 
-				if (!errors.empty())
-				{
-					for (int i=0; i<errors.size(); ++i)
-						ccLog::Warning(QString("[OBJ::Load::MTL parser] ")+errors[i]);
-				}
-				if (materials->empty())
-				{
-					materials->release();
-					materials=0;
-					materialsLoadFailed = true;
+					size_t oldSize = materials->size();
+					QStringList errors;
+					if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
+					{
+						ccLog::Print("[OBJ] %i materials loaded",materials->size()-oldSize);
+						materialsLoadFailed = false;
+					}
+					else
+					{
+						ccLog::Error(QString("[OBJ] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
+						materialsLoadFailed = true;
+					}
+
+					if (!errors.empty())
+					{
+						for (int i=0; i<errors.size(); ++i)
+							ccLog::Warning(QString("[OBJ::Load::MTL parser] ")+errors[i]);
+					}
+					if (materials->empty())
+					{
+						materials->release();
+						materials=0;
+						materialsLoadFailed = true;
+					}
 				}
 			}
+			///*** shading group ***/
+			//else if (tokens.front() == "s")
+			//{
+			//	//ignored!
+			//}
+
+			if (error)
+				break;
+
+			currentLine = stream.readLine();
 		}
-		///*** shading group ***/
-		//else if (tokens.front() == "s")
-		//{
-		//	//ignored!
-		//}
-
-		if (error)
-			break;
-
-		currentLine = stream.readLine();
+	}
+	catch (std::bad_alloc)
+	{
+		//not enough memory
+		objWarnings[NOT_ENOUGH_MEMORY] = true;
+		error = true;
 	}
 
 	file.close();
@@ -955,9 +981,9 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			baseMesh->resize(baseMesh->size());
 		}
 
-		if (maxVertexIndex >= pointsRead
-			|| maxTexCoordIndex >= texCoordsRead
-			|| maxTriNormIndex >= normsRead)
+		if (	maxVertexIndex >= pointsRead
+			||	maxTexCoordIndex >= texCoordsRead
+			||	maxTriNormIndex >= normsRead)
 		{
 			//hum, we've got a problem here
 			ccLog::Warning("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)",maxVertexIndex,maxTexCoordIndex,maxTriNormIndex);
@@ -1036,7 +1062,6 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 					if (startIndex == endIndex)
 					{
-						currentLine = stream.readLine();
 						continue;
 					}
 
@@ -1073,13 +1098,15 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			container.addChild(baseMesh);
 		}
 
-		if (!baseMesh)
+		if (!baseMesh && vertices->size() != 0)
 		{
 			//no (valid) mesh!
 			container.addChild(vertices);
 			//we hide the vertices if the entity has children (probably polylines!)
 			if (vertices->getChildrenNumber() != 0)
+			{
 				vertices->setVisible(false);
+			}
 		}
 
 		//special case: normals held by cloud!
@@ -1126,10 +1153,6 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	pDlg.close();
 
 	//potential warnings
-	if (objWarnings[DISCARED_GROUP])
-		ccLog::Warning("[OBJ] At least one group has been discared while not empty. The file might be malformed, or otherwise it's a bug! You may send us the file to help us correct it...");
-	if (objWarnings[EMPTY_GROUP])
-		ccLog::Warning("[OBJ] At least one group has been ignored because it was empty. It's generally because it is composed of unhandled components (lines, nurbs, etc.)");
 	if (objWarnings[INVALID_NORMALS])
 		ccLog::Warning("[OBJ] Some normals in file were invalid. You should re-compute them (select entity, then \"Edit > Normals > Compute\")");
 	if (objWarnings[INVALID_INDEX])
@@ -1139,5 +1162,17 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (objWarnings[INVALID_LINE])
 		ccLog::Warning("[OBJ] File is malformed! Missing data.");
 
-	return (error ? (objWarnings[NOT_ENOUGH_MEMORY] ? CC_FERR_NOT_ENOUGH_MEMORY : CC_FERR_MALFORMED_FILE) : CC_FERR_NO_ERROR);
+	if (error)
+	{
+		if (objWarnings[NOT_ENOUGH_MEMORY])
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		else if (objWarnings[CANCELLED_BY_USER])
+			return CC_FERR_CANCELED_BY_USER;
+		else 
+			return CC_FERR_MALFORMED_FILE;
+	}
+	else
+	{
+		return CC_FERR_NO_ERROR;
+	}
 }

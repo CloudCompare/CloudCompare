@@ -48,23 +48,7 @@ public:
 					OpenGL Matrices
 	***************************************************/
 
-	//! Generates the rotation matrix that transforms a vector in another given one
-	/** WARNING: an OpenGL context must be active!
-		\param sourceVec the original UNIT vector
-		\param destVec the resulting UNIT vector
-		\return 'OpenGL' style 4x4 matrix
-	**/
-	static ccGLMatrixd GenerateGLRotationMatrixFromVectors(const CCVector3d& sourceVec, const CCVector3d& destVec);
-
-	//! Generates the rotation matrix corresponding to an axis (vector) and an angle
-	/** WARNING: an OpenGL context must be active!
-		\param axis the rotation axis (as a vector)
-		\param angle_deg the rotation angle (in degrees)
-		\return 'OpenGL' style 4x4 matrix
-	**/
-	static ccGLMatrixd GenerateGLRotationMatrixFromAxisAndAngle(const CCVector3d& axis, double angle_deg);
-
-	//! Returns a 4x4 'OpenGL' matrix corresponding to a given vue orientation
+	//! Returns a 4x4 'OpenGL' matrix corresponding to a default 'view' orientation
 	/** \param orientation view orientation
 		\return corresponding GL matrix
 	**/

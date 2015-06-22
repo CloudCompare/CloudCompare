@@ -35,9 +35,6 @@
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
 
-//qCC_db
-#include <ccScalarField.h>
-
 //Qt
 #include <QGLFormat>
 
@@ -1491,7 +1488,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//in the case we need to display scalar field colors
 		ccScalarField* currentDisplayedScalarField = 0;
 		bool greyForNanScalarValues = true;
-		unsigned colorRampSteps = 0;
+		//unsigned colorRampSteps = 0;
 		ccColorScale::Shared colorScale(0);
 
 		if (glParams.showSF)
@@ -1509,7 +1506,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
 				colorScale = currentDisplayedScalarField->getColorScale();
-				colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
+				//colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
 
 				assert(colorScale);
 				//get default color ramp if cloud has no scale associated?!
@@ -1925,8 +1922,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 							(*m_materials)[newMatlIndex]->applyGL(glParams.showNorms,false);
 						else
 							context.defaultMat->applyGL(glParams.showNorms,false);
+						
 						glBegin(triangleDisplayType);
-						lasMtlIndex=newMatlIndex;
+						lasMtlIndex = newMatlIndex;
 					}
 
 					if (showTextures)
@@ -1985,7 +1983,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glEnd();
 
 			if (pushTriangleNames)
+			{
 				glPopName();
+			}
 
 			if (showTextures)
 			{
@@ -1998,10 +1998,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		if (m_stippling)
+		{
 			EnableGLStippleMask(false);
+		}
 
 		if (colorMaterial)
+		{
 			glDisable(GL_COLOR_MATERIAL);
+		}
 
 		if (glParams.showNorms)
 		{
@@ -2010,7 +2014,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		if (pushName)
+		{
 			glPopName();
+		}
 	}
 }
 
@@ -2639,6 +2645,24 @@ bool ccMesh::hasMaterials() const
 	return m_materials && !m_materials->empty() && m_triMtlIndexes && (m_triMtlIndexes->currentSize() == m_triVertIndexes->currentSize());
 }
 
+void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTable, bool autoReleaseOldTable/*=true*/)
+{
+	if (m_triMtlIndexes == matIndexesTable)
+		return;
+
+	if (m_triMtlIndexes && autoReleaseOldTable)
+	{
+		m_triMtlIndexes->release();
+		m_triMtlIndexes = 0;
+	}
+
+	m_triMtlIndexes = matIndexesTable;
+	if (m_triMtlIndexes)
+	{
+		m_triMtlIndexes->link();
+	}
+}
+
 bool ccMesh::reservePerTriangleMtlIndexes()
 {
 	assert(!m_triMtlIndexes); //try to avoid doing this twice!
@@ -2950,19 +2974,19 @@ bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCV
 	{
 		if (!triNormIndexes || triNormIndexes[0] >= 0)
 		{
-			const CCVector3& N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0]));
+			const CCVector3& N1 = triNormIndexes ? ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0])) : m_associatedCloud->getPointNormal(i1);
 			Nd += CCVector3d(N1.x,N1.y,N1.z) * w.u[0];
 		}
 
 		if (!triNormIndexes || triNormIndexes[1] >= 0)
 		{
-			const CCVector3& N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1]));
+			const CCVector3& N2 = triNormIndexes ? ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1])) : m_associatedCloud->getPointNormal(i2);
 			Nd += CCVector3d(N2.x,N2.y,N2.z) * w.u[1];
 		}
 
 		if (!triNormIndexes || triNormIndexes[2] >= 0)
 		{
-			const CCVector3& N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2]));
+			const CCVector3& N3 = triNormIndexes ? ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2])) : m_associatedCloud->getPointNormal(i3);
 			Nd += CCVector3d(N3.x,N3.y,N3.z) * w.u[2];
 		}
 		Nd.normalize();
@@ -3236,7 +3260,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//generate new vertex
 				indexG1 = vertices->size();
 				CCVector3 G1 = (*A+*B)/(PointCoordinateType)2.0;
-				vertices->addPoint(G1.u);
+				vertices->addPoint(G1);
 				//interpolate other features?
 				/*if (vertices->hasNormals())
 				{
@@ -3269,7 +3293,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//generate new vertex
 				indexG2 = vertices->size();
 				CCVector3 G2 = (*B+*C)/(PointCoordinateType)2.0;
-				vertices->addPoint(G2.u);
+				vertices->addPoint(G2);
 				//interpolate other features?
 				/*if (vertices->hasNormals())
 				{
@@ -3302,7 +3326,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//generate new vertex
 				indexG3 = vertices->size();
 				CCVector3 G3 = (*C+*A)/(PointCoordinateType)2.0;
-				vertices->addPoint(G3.u);
+				vertices->addPoint(G3);
 				//interpolate other features?
 				/*if (vertices->hasNormals())
 				{

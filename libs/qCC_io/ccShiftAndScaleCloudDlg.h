@@ -105,8 +105,8 @@ public:
 	//! Returns the number of info currently stored
 	size_t infoCount() const { return m_defaultInfos.size(); }
 
-	//! Makes the specified combo-box entry (index) the current one
-	void makeCurrent(int index);
+	//! Sets the current combo-box entry (profile)
+	void setCurrentProfile(int index);
 
 	//! Adds information from default file (if any)
 	bool addFileInfo();

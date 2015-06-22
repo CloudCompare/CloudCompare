@@ -35,11 +35,6 @@ public:
 	**/
 	ccGLMatrix() : ccGLMatrixTpl<float>() {}
 
-	//! Copy constructor from a ccGLMatrix
-	/** \param mat matrix
-	**/
-	ccGLMatrix(const ccGLMatrix& mat) : ccGLMatrixTpl<float>(mat) {}
-
 	//! Copy constructor from a ccGLMatrixTpl
 	/** \param mat matrix
 	**/
@@ -48,13 +43,13 @@ public:
 	//! Constructor from a float GL matrix array
 	/** \param mat16f a 16 elements array (column major order)
 	**/
-	ccGLMatrix(const float* mat16f) : ccGLMatrixTpl<float>(mat16f) {}
+	explicit ccGLMatrix(const float* mat16f) : ccGLMatrixTpl<float>(mat16f) {}
 
 	//! Constructor from a double GL matrix array
 	/** \warning Will implicitly cast the elements to float!
 		\param mat16d a 16 elements array (column major order)
 	**/
-	ccGLMatrix(const double* mat16d) : ccGLMatrixTpl<float>(mat16d) {}
+	explicit ccGLMatrix(const double* mat16d) : ccGLMatrixTpl<float>(mat16d) {}
 
 	//! Constructor from 4 columns (X,Y,Z,Tr)
 	/** \param X 3 first elements of the 1st column (last one is 0)
@@ -76,11 +71,6 @@ public:
 	**/
 	ccGLMatrixd() : ccGLMatrixTpl<double>() {}
 
-	//! Copy constructor from a ccGLMatrixd
-	/** \param mat matrix
-	**/
-	ccGLMatrixd(const ccGLMatrixd& mat) : ccGLMatrixTpl<double>(mat) {}
-
 	//! Copy constructor from a ccGLMatrixTpl
 	/** \param mat matrix
 	**/
@@ -89,12 +79,12 @@ public:
 	//! Constructor from a float GL matrix array
 	/** \param mat16f a 16 elements array (column major order)
 	**/
-	ccGLMatrixd(const float* mat16f) : ccGLMatrixTpl<double>(mat16f) {}
+	explicit ccGLMatrixd(const float* mat16f) : ccGLMatrixTpl<double>(mat16f) {}
 
 	//! Constructor from a double GL matrix array
 	/** \param mat16d a 16 elements array (column major order)
 	**/
-	ccGLMatrixd(const double* mat16d) : ccGLMatrixTpl<double>(mat16d) {}
+	explicit ccGLMatrixd(const double* mat16d) : ccGLMatrixTpl<double>(mat16d) {}
 
 	//! Constructor from 4 columns (X,Y,Z,Tr)
 	/** \param X 3 first elements of the 1st column (last one is 0)

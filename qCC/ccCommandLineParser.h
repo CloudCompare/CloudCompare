@@ -46,6 +46,7 @@ protected:
 	bool commandCrossSection				(QStringList& arguments, QDialog* parent = 0);
 	bool commandColorBanding				(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
+	bool commandSfArithmetic				(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandDelaunay					(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
@@ -179,11 +180,11 @@ protected:
 	**/
 	bool saveMeshes(QString suffix = QString(), bool allAtOnce = false);
 
-	//! Removes all clouds
-	void removeClouds();
+	//! Removes all clouds (or only the last one ;)
+	void removeClouds(bool onlyLast = false);
 
-	//! Removes all meshes
-	void removeMeshes();
+	//! Removes all meshes (or only the last one ;)
+	void removeMeshes(bool onlyLast = false);
 
 	//! Currently opened point clouds and their filename
 	std::vector< CloudDesc > m_clouds;

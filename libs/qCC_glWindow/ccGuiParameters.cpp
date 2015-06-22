@@ -109,17 +109,17 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("OpenGL");
 	lightAmbientColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("lightAmbientColor",		QByteArray((const char*)ccColor::darkest.rgba,					c_fColorArraySize )).toByteArray().data()));
-	lightSpecularColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",lightSpecularColor",	QByteArray((const char*)ccColor::darker.rgba,					c_fColorArraySize )).toByteArray().data()));
-	lightDiffuseColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",lightDiffuseColor",		QByteArray((const char*)ccColor::bright.rgba,					c_fColorArraySize )).toByteArray().data()));
-	meshFrontDiff		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",meshFrontDiff",			QByteArray((const char*)ccColor::defaultMeshFrontDiff.rgba,		c_fColorArraySize )).toByteArray().data()));
-	meshBackDiff		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",meshBackDiff",			QByteArray((const char*)ccColor::defaultMeshBackDiff.rgba,		c_fColorArraySize )).toByteArray().data()));
-	meshSpecular		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value(",meshSpecular",			QByteArray((const char*)ccColor::middle.rgba,					c_fColorArraySize )).toByteArray().data()));
-	pointsDefaultCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",pointsDefaultColor",	QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
-	textDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",textDefaultColor",		QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
-	backgroundCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",backgroundColor",		QByteArray((const char*)ccColor::defaultBkgColor.rgb,			c_ubColorArraySize)).toByteArray().data()));
-	labelBackgroundCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",labelBackgroundColor",	QByteArray((const char*)ccColor::defaultLabelBkgColor.rgb,		c_ubColorArraySize)).toByteArray().data()));
-	labelMarkerCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",labelMarkerColor",		QByteArray((const char*)ccColor::defaultLabelMarkerColor.rgb,	c_ubColorArraySize)).toByteArray().data()));
-	bbDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value(",bbDefaultColor",		QByteArray((const char*)ccColor::yellow.rgba,					c_ubColorArraySize)).toByteArray().data()));
+	lightSpecularColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("lightSpecularColor",		QByteArray((const char*)ccColor::darker.rgba,					c_fColorArraySize )).toByteArray().data()));
+	lightDiffuseColor	= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("lightDiffuseColor",		QByteArray((const char*)ccColor::bright.rgba,					c_fColorArraySize )).toByteArray().data()));
+	meshFrontDiff		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("meshFrontDiff",			QByteArray((const char*)ccColor::defaultMeshFrontDiff.rgba,		c_fColorArraySize )).toByteArray().data()));
+	meshBackDiff		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("meshBackDiff",			QByteArray((const char*)ccColor::defaultMeshBackDiff.rgba,		c_fColorArraySize )).toByteArray().data()));
+	meshSpecular		= ccColor::Rgbaf (reinterpret_cast<float*>        (settings.value("meshSpecular",			QByteArray((const char*)ccColor::middle.rgba,					c_fColorArraySize )).toByteArray().data()));
+	pointsDefaultCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("pointsDefaultColor",		QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
+	textDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("textDefaultColor",		QByteArray((const char*)ccColor::defaultColor.rgb,				c_ubColorArraySize)).toByteArray().data()));
+	backgroundCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("backgroundColor",		QByteArray((const char*)ccColor::defaultBkgColor.rgb,			c_ubColorArraySize)).toByteArray().data()));
+	labelBackgroundCol	= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("labelBackgroundColor",	QByteArray((const char*)ccColor::defaultLabelBkgColor.rgb,		c_ubColorArraySize)).toByteArray().data()));
+	labelMarkerCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("labelMarkerColor",		QByteArray((const char*)ccColor::defaultLabelMarkerColor.rgb,	c_ubColorArraySize)).toByteArray().data()));
+	bbDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("bbDefaultColor",			QByteArray((const char*)ccColor::yellow.rgba,					c_ubColorArraySize)).toByteArray().data()));
 
 	drawBackgroundGradient		=                                  settings.value("backgroundGradient",      true ).toBool();
 	decimateMeshOnMove			=                                  settings.value("meshDecimation",          true ).toBool();

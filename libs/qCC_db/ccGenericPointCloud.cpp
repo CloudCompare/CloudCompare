@@ -74,8 +74,10 @@ bool ccGenericPointCloud::resetVisibilityArray()
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
 	if (m_pointsVisibility)
+	{
 		m_pointsVisibility->release();
-	m_pointsVisibility=0;
+		m_pointsVisibility = 0;
+	}
 }
 
 bool ccGenericPointCloud::isVisibilityTableInstantiated() const
@@ -94,7 +96,9 @@ uchar ccGenericPointCloud::testVisibility(const CCVector3& P) const
 			uchar visibility = static_cast<ccSensor*>(*it)->checkVisibility(P);
 
 			if (visibility == POINT_VISIBLE)
+			{
 				return POINT_VISIBLE; //shortcut
+			}
 
 			bestVisibility = std::min<uchar>(visibility,bestVisibility);
 		}
@@ -121,7 +125,7 @@ ccOctree* ccGenericPointCloud::getOctree()
 	return NULL;
 }
 
-ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb)
+ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
 {
 	deleteOctree();
 	ccOctree* octree = new ccOctree(this);
@@ -130,7 +134,10 @@ ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* pro
 		octree->setDisplay(getDisplay());
 		octree->setVisible(true);
 		octree->setEnabled(false);
-		addChild(octree);
+		if (autoAddChild)
+		{
+			addChild(octree);
+		}
 	}
 	else
 	{
@@ -139,11 +146,6 @@ ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* pro
 	}
 
 	return octree;
-}
-
-ccGenericPointCloud::VisibilityTableType* ccGenericPointCloud::getTheVisibilityArray()
-{
-	return m_pointsVisibility;
 }
 
 CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const

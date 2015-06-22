@@ -20,6 +20,7 @@
 
 //Local
 #include "qCC_db.h"
+#include "ccObject.h" //for CC_QT5 def
 
 //CCLib
 #include <CCConst.h>
@@ -53,16 +54,9 @@ public:
 		process: it depends only on the client algorithm implementation.
 		\param cancelButton activates or deactivates the cancel button
 		\param parent parent widget
-		\param flags window flags
 	**/
 	ccProgressDialog(	bool cancelButton = false,
-						QWidget *parent = 0,
-#ifdef CC_QT5
-						Qt::WindowFlags flags = Qt::Tool //the Qt::SubWindow or Qt::Popup flags make the cancel button disappear?!
-#else
-						Qt::WindowFlags flags = Qt::SubWindow | Qt::Popup
-#endif
-						);
+						QWidget *parent = 0 );
 
 	//! Destructor (virtual)
 	virtual ~ccProgressDialog() {}

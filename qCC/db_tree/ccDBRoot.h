@@ -40,26 +40,24 @@ class QStandardItemModel;
 class QAction;
 class ccPropertiesTreeDelegate;
 class ccHObject;
-class ccGLWindow;
 
 //! Precise statistics about current selection
 struct dbTreeSelectionInfo
 {
-	int selCount;
-
-	int sfCount;
-	int colorCount;
-	int normalsCount;
-	int octreeCount;
-	int cloudCount;
-	int groupCount;
-	int polylineCount;
-	int meshCount;
-	int imageCount;
-	int sensorCount;
-	int gblSensorCount;
-	int cameraSensorCount;
-	int kdTreeCount;
+	size_t selCount;
+	size_t sfCount;
+	size_t colorCount;
+	size_t normalsCount;
+	size_t octreeCount;
+	size_t cloudCount;
+	size_t groupCount;
+	size_t polylineCount;
+	size_t meshCount;
+	size_t imageCount;
+	size_t sensorCount;
+	size_t gblSensorCount;
+	size_t cameraSensorCount;
+	size_t kdTreeCount;
 
 	void reset()
 	{
@@ -73,7 +71,7 @@ class ccCustomQTreeView : public QTreeView
 public:
 
 	//! Default constructor
-	ccCustomQTreeView(QWidget* parent) : QTreeView(parent) {}
+	explicit ccCustomQTreeView(QWidget* parent) : QTreeView(parent) {}
 
 protected:
 
@@ -119,9 +117,9 @@ public:
 	int countSelectedEntities(CC_CLASS_ENUM filter = CC_TYPES::OBJECT);
 
 	//! Returns selected entities in DB tree (optionally with a given type and additional information)
-	int getSelectedEntities(ccHObject::Container& selEntities,
-							CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
-							dbTreeSelectionInfo* info = NULL);
+	size_t getSelectedEntities(	ccHObject::Container& selectedEntities,
+								CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
+								dbTreeSelectionInfo* info = NULL);
 
 	//! Expands tree at a given node
 	void expandElement(ccHObject* anObject, bool state);
@@ -176,10 +174,24 @@ public slots:
 	void selectEntities(std::set<int> entIDs);
 
 	//! Selects multiple entities at once
-	/** \param entIDs set of the entities to 'select'
+	/** \param entities set of the entities to 'select'
 		\param incremental whether to 'add' the input set to the selected entities set or to use it as replacement
 	**/
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
+
+protected:
+
+	//! Entity property that can be toggled
+	enum TOGGLE_PROPERTY {	TG_ENABLE,
+							TG_VISIBLE,
+							TG_COLOR,
+							TG_SF,
+							TG_NORMAL,
+							TG_MATERIAL,
+							TG_3D_NAME };
+
+	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
+	void toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop);
 
 protected slots:
 	void showContextMenu(const QPoint&);
@@ -187,16 +199,19 @@ protected slots:
 	void expandBranch();
 	void collapseBranch();
 	void gatherRecursiveInformation();
-	void sortSiblingsAZ();
-	void sortSiblingsZA();
-	void sortSiblingsType();
-	void toggleSelectedEntities();
-	void toggleSelectedEntitiesVisibility();
-	void toggleSelectedEntitiesColor();
-	void toggleSelectedEntitiesNormals();
-	void toggleSelectedEntitiesSF();
-	void toggleSelectedEntitiesMat();
-	void toggleSelectedEntities3DName();
+	void sortChildrenAZ();
+	void sortChildrenZA();
+	void sortChildrenType();
+	void selectByTypeAndName();
+
+	inline void toggleSelectedEntities()			{ toggleSelectedEntitiesProperty(TG_ENABLE); }
+	inline void toggleSelectedEntitiesVisibility()	{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
+	inline void toggleSelectedEntitiesColor()		{ toggleSelectedEntitiesProperty(TG_COLOR); }
+	inline void toggleSelectedEntitiesNormals()		{ toggleSelectedEntitiesProperty(TG_NORMAL); }
+	inline void toggleSelectedEntitiesSF()			{ toggleSelectedEntitiesProperty(TG_SF); }
+	inline void toggleSelectedEntitiesMat()         { toggleSelectedEntitiesProperty(TG_MATERIAL); }
+	inline void toggleSelectedEntities3DName()      { toggleSelectedEntitiesProperty(TG_3D_NAME); }
+
 	void addEmptyGroup();
 	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
@@ -215,26 +230,17 @@ protected:
 	//! Shows properties view for a given element
 	void showPropertiesView(ccHObject* obj);
 
-	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
-	/** Properties are:
-			0 - enable state
-			1 - visibility
-			2 - normal
-			3 - color
-			4 - SF
-			5 - materials/textures
-			6 - 3D name
-	**/
-	void toggleSelectedEntitiesProperty(unsigned prop);
-
 	//! Entities sorting schemes
 	enum SortRules { SORT_A2Z, SORT_Z2A, SORT_BY_TYPE };
 
-	//! Sorts selected entities siblings
-	void sortSelectedEntitiesSiblings(SortRules rule);
+	//! Sorts selected entities children
+	void sortSelectedEntitiesChildren(SortRules rule);
 
 	//! Expands or collapses hovered item
 	void expandOrCollapseHoveredBranch(bool expand);
+
+	//! Selects objects by type and/or name
+	void selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive = true, QString name = QString());
 
 	//! Associated DB root
 	ccHObject* m_treeRoot;
@@ -256,12 +262,14 @@ protected:
 	QAction* m_collapseBranch;
 	//! Context menu action: gather (recursive) information on selected entities
 	QAction* m_gatherInformation;
-	//! Context menu action: sort siblings in alphabetical order
-	QAction* m_sortSiblingsAZ;
-	//! Context menu action: sort siblings in reverse alphabetical order
-	QAction* m_sortSiblingsZA;
-	//! Context menu action: sort siblings by type
-	QAction* m_sortSiblingsType;
+	//! Context menu action: sort children in alphabetical order
+	QAction* m_sortChildrenAZ;
+	//! Context menu action: sort children in reverse alphabetical order
+	QAction* m_sortChildrenZA;
+	//! Context menu action: sort children by type
+	QAction* m_sortChildrenType;
+	//! Context menu action: select object by type and/or by name
+	QAction* m_selectByTypeAndName;
 	//! Context menu action: delete selected entities
 	QAction* m_deleteSelectedEntities;
 	//! Context menu action: enabled/disable selected entities

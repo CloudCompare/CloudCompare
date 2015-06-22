@@ -18,9 +18,6 @@
 #ifndef Q_RANSAC_SD_PLUGIN_HEADER
 #define Q_RANSAC_SD_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
 #include "../ccStdPluginInterface.h"
 
 //! Wrapper to Schnabel et al. library for automatic shape detection in point cloud
@@ -39,7 +36,7 @@ class qRansacSD : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qRansacSD(QObject* parent = 0);
+	explicit qRansacSD(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "RANSAC Shape Detection"; }

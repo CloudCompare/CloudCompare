@@ -18,7 +18,11 @@
 #ifndef CC_PLUGIN_INTERFACE_HEADER
 #define CC_PLUGIN_INTERFACE_HEADER
 
+//qCC_db
+#include <ccObject.h> //for CC_QT5 def
+
 //Qt
+#include <QObject>
 #include <QString>
 #include <QIcon>
 

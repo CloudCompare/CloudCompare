@@ -88,6 +88,33 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 	 
 	//material already exists?
 	int previousIndex = findMaterialByName(mtl->getName());
+	//DGM: warning, the materials may have the same name, but they may be different in reality (other texture, etc.)!
+	if (previousIndex >= 0)
+	{
+		const ccMaterial::CShared& previousMtl = (*this)[previousIndex];
+		if (!previousMtl->compare(*mtl))
+		{
+			//in fact the material is a bit different
+			previousIndex = -1;
+			if (!allowDuplicateNames)
+			{
+				//generate a new name
+				static const unsigned MAX_ATTEMPTS = 100;
+				for (unsigned i=1 ; i < MAX_ATTEMPTS; i++)
+				{
+					QString newMtlName = previousMtl->getName() + QString("_%1").arg(i);
+					if (findMaterialByName(newMtlName) < 0)
+					{
+						//we duplicate the material and we change its name
+						ccMaterial::Shared newMtl(new ccMaterial(*mtl));
+						newMtl->setName(newMtlName);
+						mtl = newMtl;
+						break;
+					}
+				}
+			}
+		}
+	}
 	if (previousIndex >= 0 && !allowDuplicateNames)
 		return previousIndex;
 
@@ -161,9 +188,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				if (tokens.size() > 3)
 				{
-					float ambient[3] = { tokens[1].toFloat(),
-										 tokens[2].toFloat(),
-										 tokens[3].toFloat() };
+					ccColor::Rgbaf ambient(	tokens[1].toFloat(),
+											tokens[2].toFloat(),
+											tokens[3].toFloat(),
+											1.0f);
 					currentMaterial->setAmbient(ambient);
 				}
 			}
@@ -173,9 +201,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				if (tokens.size() > 3)
 				{
-					float diffuse[3] = { tokens[1].toFloat(),
-										 tokens[2].toFloat(),
-										 tokens[3].toFloat() };
+					ccColor::Rgbaf diffuse(	tokens[1].toFloat(),
+											tokens[2].toFloat(),
+											tokens[3].toFloat(),
+											1.0f);
 					currentMaterial->setDiffuse(diffuse);
 				}
 			}
@@ -185,9 +214,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			{
 				if (tokens.size() > 3)
 				{
-					float specular[3] = {	tokens[1].toFloat(),
+					ccColor::Rgbaf specular(tokens[1].toFloat(),
 											tokens[2].toFloat(),
-											tokens[3].toFloat() };
+											tokens[3].toFloat(),
+											1.0f);
 					currentMaterial->setSpecular(specular);
 				}
 			}
@@ -305,21 +335,23 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 
 				QString texName = fileInfo.fileName();
 				if (fileInfo.suffix().isEmpty())
+				{
 					texName += QString(".jpg");
+				}
 
 				//new absolute filemane
-				filenamesSaved[absFilename] = path + QString('/') + texName;
+				filenamesSaved[absFilename] = texName;
 			}
 
 			assert(!filenamesSaved[absFilename].isEmpty());
-			absFilename = filenamesSaved[absFilename];
-			if (mtl->getTexture().mirrored().save(absFilename)) //mirrored: see ccMaterial
+			QString destFilename = path + QString('/') + filenamesSaved[absFilename];
+			if (mtl->getTexture().mirrored().save(destFilename)) //mirrored: see ccMaterial
 			{
-				stream << "map_Kd " << QFileInfo(absFilename).fileName() << endl;
+				stream << "map_Kd " << filenamesSaved[absFilename] << endl;
 			}
 			else
 			{
-				errors << QString("Failed to save texture #%1 to file '%2'!").arg(texIndex).arg(absFilename);
+				errors << QString("Failed to save texture #%1 to file '%2'!").arg(texIndex).arg(destFilename);
 			}
 			++texIndex;
 		}

@@ -110,6 +110,14 @@ public:
 	**/
 	static CCVector3 computeGravityCenter(GenericCloud* theCloud);
 
+	//! Computes the weighted gravity center of a point cloud
+	/** \warning this method uses the cloud global iterator
+		\param theCloud cloud
+		\param weights per point weights (only absolute values are considered)
+		\return gravity center
+	**/
+	static CCVector3 computeWeightedGravityCenter(GenericCloud* theCloud, ScalarField* weights);
+
 	//! Computes the cross covariance matrix between two clouds (same size)
 	/** Used in the ICP algorithm between the cloud to register and the "Closest Points Set"
 		determined from the reference cloud.
@@ -133,16 +141,14 @@ public:
 		\param Q the "Closest Point Set"
 		\param pGravityCenter the gravity center of P
 		\param qGravityCenter the gravity center of Q
-		\param weightsP weights for the points of P (optional)
-		\param weightsQ weights for the points of Q (optional)
+		\param coupleWeights weights for each (Pi,Qi) couple (optional)
 		\return weighted cross covariance matrix
 	**/
 	static SquareMatrixd computeWeightedCrossCovarianceMatrix(	GenericCloud* P,
 																GenericCloud* Q,
 																const CCVector3& pGravityCenter,
 																const CCVector3& qGravityCenter,
-																ScalarField* weightsP = 0,
-																ScalarField* weightsQ = 0);
+																ScalarField* coupleWeights = 0);
 
 	//! Computes the covariance matrix of a clouds
 	/** \warning this method uses the cloud global iterator

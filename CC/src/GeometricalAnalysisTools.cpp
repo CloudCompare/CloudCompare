@@ -67,13 +67,10 @@ int GeometricalAnalysisTools::computeCurvature(	GenericIndexedCloudPersist* theC
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
 	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
 													&computeCellCurvatureAtLevel,
 													additionalParameters,
+													true,
 													progressCb,
 													"Curvature Computation") == 0)
 	{
@@ -206,10 +203,10 @@ int GeometricalAnalysisTools::flagDuplicatePoints(	GenericIndexedCloudPersist* t
 
 	int result = 0;
 
-	//doesn't work in parallel!
 	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														&flagDuplicatePointsInACellAtLevel,
 														additionalParameters,
+														false, //doesn't work in parallel!
 														progressCb,
 														"Flag duplicate points") == 0)
 	{
@@ -307,13 +304,10 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														&computeApproxPointsDensityInACellAtLevel,
 														additionalParameters,
+														true,
 														progressCb,
 														"Approximate Local Density Computation") == 0)
 	{
@@ -454,13 +448,10 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 
 	int result = 0;
 
-#ifndef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-#else
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#endif
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														&computePointsDensityInACellAtLevel,
 														additionalParameters,
+														true,
 														progressCb,
 														"Local Density Computation") == 0)
 	{
@@ -545,13 +536,10 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 
 	int result = 0;
 
-#ifdef ENABLE_MT_OCTREE
-	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
-#else
 	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
-#endif
 														&computePointsRoughnessInACellAtLevel,
 														additionalParameters,
+														true,
 														progressCb,
 														"Roughness Computation") == 0)
 	{
@@ -651,6 +639,34 @@ CCVector3 GeometricalAnalysisTools::computeGravityCenter(GenericCloud* theCloud)
 	return CCVector3::fromArray(sum.u);
 }
 
+CCVector3 GeometricalAnalysisTools::computeWeightedGravityCenter(GenericCloud* theCloud, ScalarField* weights)
+{
+	assert(theCloud && weights);
+
+	unsigned count = theCloud->size();
+	if (count == 0 || !weights || weights->currentSize() < count)
+		return CCVector3();
+
+	CCVector3d sum(0, 0, 0);
+
+	theCloud->placeIteratorAtBegining();
+	double wSum = 0;
+	for (unsigned i = 0; i < count; ++i)
+	{
+		const CCVector3* P = theCloud->getNextPoint();
+		ScalarType w = weights->getValue(i);
+		if (!ScalarField::ValidValue(w))
+			continue;
+		sum += CCVector3d::fromArray(P->u) * fabs(w);
+		wSum += w;
+	}
+
+	if (wSum != 0)
+		sum /= wSum;
+
+	return CCVector3::fromArray(sum.u);
+}
+
 CCLib::SquareMatrixd GeometricalAnalysisTools::computeCovarianceMatrix(GenericCloud* theCloud, const PointCoordinateType* _gravityCenter)
 {
 	assert(theCloud);
@@ -740,14 +756,12 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 																					GenericCloud* Q, //model
 																					const CCVector3& Gp,
 																					const CCVector3& Gq,
-																					ScalarField* weightsP/*=0*/,
-																					ScalarField* weightsQ/*=0*/)
+																					ScalarField* coupleWeights/*=0*/)
 {
     assert(P && Q);
 	assert(Q->size() == P->size());
-	assert(weightsP || weightsQ);
-	assert(!weightsP || weightsP->currentSize() == P->size());
-	assert(!weightsQ || weightsQ->currentSize() == Q->size());
+	assert(coupleWeights);
+	assert(coupleWeights->currentSize() == P->size());
 
 	//shortcuts to output matrix lines
 	CCLib::SquareMatrixd covMat(3);
@@ -760,38 +774,26 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 
 	//sums
 	unsigned count = P->size();
-	double wSum = 0.0;
-	//double wMax = 0.0;
+	double wSum = 0.0; //we will normalize by the sum
 	for (unsigned i = 0; i<count; i++)
 	{
-		CCVector3 Pt = *P->getNextPoint() - Gp;
+		CCVector3d Pt = CCVector3d::fromArray((*P->getNextPoint() - Gp).u);
 		CCVector3 Qt = *Q->getNextPoint() - Gq;
 
 		//Weighting scheme for cross-covariance is inspired from
 		//https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_covariance
 		double wi = 1.0;
-		if (weightsP)
+		if (coupleWeights)
 		{
-			ScalarType wp = weightsP->getValue(i);
-			if (!ScalarField::ValidValue(wp))
+			ScalarType w = coupleWeights->getValue(i);
+			if (!ScalarField::ValidValue(w))
 				continue;
-			wi = wp;
+			wi = fabs(w);
 		}
-		if (weightsQ)
-		{
-			ScalarType wq = weightsQ->getValue(i);
-			if (!ScalarField::ValidValue(wq))
-				continue;
-			wi *= wq;
-		}
-		wi = fabs(wi);
 
 		//DGM: we virtually make the P (data) point nearer if it has a lower weight
-		//This way it will 'pull' the data cloud less towards its own position?
-		//Pt = Qt + (Pt - Qt) * static_cast<PointCoordinateType>(wi);
 		Pt *= wi;
 		wSum += wi;
-		//wMax = std::max(wMax, wi);
 
 		//1st row
 		r1[0] += Pt.x * Qt.x;
@@ -809,8 +811,7 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 
 	if (wSum != 0.0)
 		covMat.scale(1.0/wSum);
-	//if (wMax != 0.0)
-	//	covMat.scale(1.0 / wMax);
+
 	return covMat;
 }
 
@@ -1185,9 +1186,9 @@ bool GeometricalAnalysisTools::computeSphereFrom4(	const CCVector3& A,
 	}
 
 	//  Compute the radius and center.
-	CCVector3 u = CCVector3(a[0+3*3],
-							a[1+3*3],
-							a[2+3*3] )/2;
+	CCVector3 u = CCVector3(static_cast<PointCoordinateType>(a[0+3*3]),
+							static_cast<PointCoordinateType>(a[1+3*3]),
+							static_cast<PointCoordinateType>(a[2+3*3])) / 2;
 	radius = u.norm();
 	center = A + u;
 

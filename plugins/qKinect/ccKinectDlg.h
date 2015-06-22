@@ -26,7 +26,7 @@ class ccKinectDlg : public QDialog, public Ui::KinectDialog
 public:
 
 	//! Default constructor
-	ccKinectDlg(QWidget* parent = 0);
+	explicit ccKinectDlg(QWidget* parent = 0);
 
 	//! Returns output clound name
 	QString getCloudName() const;

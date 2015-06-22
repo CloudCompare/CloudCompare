@@ -41,35 +41,19 @@
    <item>
     <widget class="QFrame" name="anglesFrame">
      <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
+      <property name="margin">
        <number>0</number>
       </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="toolTip">
-         <string>First rotation: around the camera Z axis (normal to the screen)</string>
-        </property>
-        <property name="text">
-         <string>phi</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
-       <widget class="QSlider" name="phiSlider">
+       <widget class="QSlider" name="psiSlider">
         <property name="minimumSize">
          <size>
           <width>120</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>First rotation: around X</string>
         </property>
         <property name="minimum">
          <number>-1800</number>
@@ -89,7 +73,10 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QDoubleSpinBox" name="phiSpinBox">
+       <widget class="QDoubleSpinBox" name="psiSpinBox">
+        <property name="toolTip">
+         <string>First rotation: around X</string>
+        </property>
         <property name="suffix">
          <string>°</string>
         </property>
@@ -107,17 +94,17 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_3">
         <property name="toolTip">
-         <string>Second rotation: around the camera Y axis (vertical if phi = 0)</string>
+         <string>Third rotation: around the camera X axis (horizontal if phi = 0 and theta = 0)</string>
         </property>
         <property name="text">
-         <string>theta</string>
+         <string>X1</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QSlider" name="thetaSlider">
         <property name="minimumSize">
          <size>
@@ -125,59 +112,8 @@
           <height>0</height>
          </size>
         </property>
-        <property name="minimum">
-         <number>-1800</number>
-        </property>
-        <property name="maximum">
-         <number>1800</number>
-        </property>
-        <property name="singleStep">
-         <number>10</number>
-        </property>
-        <property name="pageStep">
-         <number>100</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="thetaSpinBox">
-        <property name="suffix">
-         <string>°</string>
-        </property>
-        <property name="decimals">
-         <number>1</number>
-        </property>
-        <property name="minimum">
-         <double>-180.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>180.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
         <property name="toolTip">
-         <string>Third rotation: around the camera X axis (horizontal if phi = 0 and theta = 0)</string>
-        </property>
-        <property name="text">
-         <string>psi</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSlider" name="psiSlider">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
+         <string>Second rotation: around Y2 (i.e. after the rotation around X)</string>
         </property>
         <property name="minimum">
          <number>-1800</number>
@@ -197,7 +133,80 @@
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QDoubleSpinBox" name="psiSpinBox">
+       <widget class="QDoubleSpinBox" name="thetaSpinBox">
+        <property name="toolTip">
+         <string>Second rotation: around Y2 (i.e. after the rotation around X)</string>
+        </property>
+        <property name="suffix">
+         <string>°</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label">
+        <property name="toolTip">
+         <string>Second rotation: around the camera Y axis (vertical if phi = 0)</string>
+        </property>
+        <property name="text">
+         <string>Y2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSlider" name="phiSlider">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Third rotation: around Z3 (i.e. after the rotation around X1 and Y2)</string>
+        </property>
+        <property name="minimum">
+         <number>-1800</number>
+        </property>
+        <property name="maximum">
+         <number>1800</number>
+        </property>
+        <property name="singleStep">
+         <number>10</number>
+        </property>
+        <property name="pageStep">
+         <number>100</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="toolTip">
+         <string>First rotation: around the camera Z axis (normal to the screen)</string>
+        </property>
+        <property name="text">
+         <string>Z3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QDoubleSpinBox" name="phiSpinBox">
+        <property name="toolTip">
+         <string>Third rotation: around Z3 (i.e. after the rotation around X1 and Y2)</string>
+        </property>
         <property name="suffix">
          <string>°</string>
         </property>
@@ -256,16 +265,7 @@
         <enum>QFrame::NoFrame</enum>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
@@ -669,10 +669,10 @@
         <double>0.010000000000000</double>
        </property>
        <property name="maximum">
-        <double>10000.000000000000000</double>
+        <double>180.000000000000000</double>
        </property>
        <property name="value">
-        <double>25.000000000000000</double>
+        <double>30.000000000000000</double>
        </property>
       </widget>
      </item>

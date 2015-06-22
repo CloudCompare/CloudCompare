@@ -33,7 +33,7 @@ class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
 public:
 
 	//! Default constructor
-	cc2DViewportObject(QString name=QString());
+	cc2DViewportObject(QString name = QString());
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_OBJECT; }

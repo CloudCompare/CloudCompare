@@ -716,7 +716,7 @@ void ccPointPairRegistrationDlg::unstackAligned()
 	if (pointCount == 0) //nothing to do
 		return;
 
-	assert(alignedPointsTableWidget->rowCount()>0);
+	assert(alignedPointsTableWidget->rowCount() > 0);
 	alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount()-1);
 
 	//remove label
@@ -909,7 +909,7 @@ void ccPointPairRegistrationDlg::unstackRef()
 	if (pointCount == 0)
 		return;
 
-	assert(refPointsTableWidget->rowCount()>0);
+	assert(refPointsTableWidget->rowCount() > 0);
 	refPointsTableWidget->removeRow(refPointsTableWidget->rowCount()-1);
 
 	//remove label

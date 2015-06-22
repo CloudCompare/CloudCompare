@@ -54,7 +54,7 @@ class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
 public:
 
 	//! Default constructor
-	ccOctreeSpinBox(QWidget* parent = 0);
+	explicit ccOctreeSpinBox(QWidget* parent = 0);
 
 	//! Sets associated cloud on which the octree will be computed
 	/** Alternative to ccOctreeSpinBox::setOctree
@@ -88,7 +88,7 @@ public: //GENERAL METHODS
 	//! Default constructor
 	/** \param aCloud a point cloud
 	**/
-	ccOctree(ccGenericPointCloud* aCloud);
+	explicit ccOctree(ccGenericPointCloud* aCloud);
 
 	//! Destructor
 	virtual ~ccOctree();

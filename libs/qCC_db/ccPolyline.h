@@ -41,7 +41,7 @@ public:
 	//! Default constructor
 	/** \param associatedCloud the associated point cloud (e.g. the summits)
 	**/
-	ccPolyline(GenericIndexedCloudPersist* associatedCloud);
+	explicit ccPolyline(GenericIndexedCloudPersist* associatedCloud);
 
 	//! Copy constructor
 	/** \param poly polyline to clone

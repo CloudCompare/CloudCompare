@@ -15,7 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#include <ccIncludeGL.h>
+//Always on top!
+#include "ccIncludeGL.h"
 
 #include "ccQuadric.h"
 
@@ -65,6 +66,9 @@ ccQuadric::ccQuadric(QString name /*=QString("Plane")*/)
 	, m_minZ(0)
 	, m_maxZ(0)
 {
+	m_hfDims[0] = 0;
+	m_hfDims[1] = 1;
+	m_hfDims[2] = 2;
 }
 
 bool ccQuadric::buildUp()

@@ -42,9 +42,314 @@
 #include "ccGenericGLDisplay.h"
 #include "ccGBLSensor.h"
 #include "ccProgressDialog.h"
+#include "ccAtomicBool.h"
+
+//Qt
+#include <QThread>
+#include <QElapsedTimer>
 
 //system
 #include <assert.h>
+
+//! Thread for background computation
+class LodStructThread : public QThread
+{
+public:
+	
+	//! Default constructor
+	LodStructThread(ccPointCloud& cloud)
+		: QThread()
+		, m_cloud(cloud)
+		, m_abort(false)
+	{}
+	
+	//!Destructor
+	virtual ~LodStructThread()
+	{
+		stop();
+	}
+	
+	//! Stops the thread
+	void stop(int timeout = ULONG_MAX)
+	{
+		m_abort = true;
+		wait(timeout);
+	}
+
+protected:
+
+	//reimplemented from QThread
+	virtual void run()
+	{
+		m_abort = false;
+
+		ccPointCloud::LodStruct& lod = m_cloud.getLOD();
+
+		//reset structure
+		lod.clearExtended(false,ccPointCloud::LodStruct::UNDER_CONSTRUCTION);
+
+		unsigned pointCount = m_cloud.size();
+		if (pointCount == 0)
+		{
+			lod.setState(ccPointCloud::LodStruct::BROKEN);
+			return;
+		}
+
+		ccLog::Print(QString("[LoD] Preparing LoD acceleration structure for cloud '%1' [%2 points]...").arg(m_cloud.getName()).arg(pointCount));
+		QElapsedTimer timer;
+		timer.start();
+
+		//first we need an octree
+		ccOctree* originalOctree = m_cloud.getOctree();
+		ccOctree* octree = originalOctree ? originalOctree : m_cloud.computeOctree(0/*progressCallback*/,false);
+		if (!octree)
+		{
+			//not enough memory
+			ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
+			lod.setState(ccPointCloud::LodStruct::BROKEN);
+			return;
+		}
+
+		//flags
+		GenericChunkedArray<1,unsigned char>* flags = new GenericChunkedArray<1,unsigned char>;
+		static const unsigned char NoFlag = 0;
+		if (!flags->resize(pointCount,true,NoFlag))
+		{
+			//not enough memory
+			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
+			lod.setState(ccPointCloud::LodStruct::BROKEN);
+			flags->release();
+			if (octree != originalOctree)
+			{
+				delete octree;
+			}
+			return;
+		}
+
+		//init LoD indexes and level descriptors
+		if (!lod.reserve(	pointCount,
+							CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1) ) //level 0 included
+		{
+			//not enough memory
+			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
+			lod.setState(ccPointCloud::LodStruct::BROKEN);
+			flags->release();
+			if (octree != originalOctree)
+				delete octree;
+			return;
+		}
+
+		//if (progressCallback)
+		//{
+		//	progressCallback->setMethodTitle("L.O.D. display");
+		//	progressCallback->setInfo("Preparing L.O.D. structure to speed-up the display...");
+		//	progressCallback->start();
+		//}
+		//CCLib::NormalizedProgress nProgress(progressCallback,pointCount);
+
+		assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
+		//first level (default)
+		lod.addLevel(ccPointCloud::LodStruct::LevelDesc(0, 0));
+
+		//and the next ones
+		for (unsigned char level=1; level<=static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL); ++level)
+		{
+			const int bitDec = GET_BIT_SHIFT(level);
+
+			//for each cell we'll look for the (not-yet-flagged) point which is closest to the cell center
+			static const unsigned INVALID_INDEX = 0xFFFFFFFF;
+			unsigned nearestIndex = INVALID_INDEX;
+			PointCoordinateType nearestSquareDist = 0;
+			CCVector3 cellCenter(0,0,0);
+
+			//current level descriptor
+			ccPointCloud::LodStruct::LevelDesc levelDesc;
+			ccPointCloud::LodStruct::IndexSet* indexes = lod.indexes();
+			assert(indexes);
+			levelDesc.startIndex = indexes->currentSize();
+		
+			CCLib::DgmOctree::OctreeCellCodeType currentTruncatedCellCode = 0xFFFFFFFF;
+
+			//scan the octree structure
+			const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
+			for (CCLib::DgmOctree::cellsContainer::const_iterator c=thePointsAndTheirCellCodes.begin(); c!=thePointsAndTheirCellCodes.end(); ++c)
+			{
+				CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
+
+				//new cell?
+				if (truncatedCode != currentTruncatedCellCode)
+				{
+					//process the previous cell
+					if (nearestIndex != INVALID_INDEX)
+					{
+						indexes->addElement(nearestIndex);
+						assert(flags->getValue(nearestIndex) == NoFlag);
+						flags->setValue(nearestIndex,level);
+						levelDesc.count++;
+						//nProgress.oneStep();
+						if (m_abort)
+							break;
+					}
+
+					//prepare new cell
+					currentTruncatedCellCode = truncatedCode;
+					octree->computeCellCenter(currentTruncatedCellCode,level,cellCenter.u,true);
+				
+					nearestIndex = INVALID_INDEX;
+				}
+
+				if (flags->getValue(c->theIndex) == NoFlag)
+				{
+					//compute distance to the cell center
+					const CCVector3* P = m_cloud.getPoint(c->theIndex);
+					PointCoordinateType squareDist = (*P - cellCenter).norm2();
+					if (nearestIndex == INVALID_INDEX || squareDist < nearestSquareDist)
+					{
+						nearestSquareDist = squareDist;
+						nearestIndex = c->theIndex;
+					}
+				}
+			}
+
+			if (m_abort)
+				break;
+
+			//don't forget the last cell!
+			if (nearestIndex != INVALID_INDEX)
+			{
+				indexes->addElement(nearestIndex);
+				assert(flags->getValue(nearestIndex) == NoFlag);
+				flags->setValue(nearestIndex,level);
+				levelDesc.count++;
+				//nProgress.oneStep();
+			}
+
+			//no new point was flagged during this round? Then we have reached the maximum level
+			if (levelDesc.count == 0 || level == CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+			{
+				//assert(indexes->currentSize() == levelDesc.startIndex);
+
+				//flag the remaining points with the current level
+				for (unsigned i=0; i<pointCount; ++i)
+				{
+					if (flags->getValue(i) == NoFlag)
+					{
+						indexes->addElement(i);
+						levelDesc.count++;
+						//nProgress.oneStep();
+					}
+				}
+			}
+
+			assert(levelDesc.count != 0);
+			lod.addLevel(levelDesc);
+
+			ccLog::PrintDebug(QString("[LoD] Cloud %1 - level %2: %3 points").arg(m_cloud.getName()).arg(level).arg(levelDesc.count));
+
+			if (indexes->currentSize() == pointCount)
+			{
+				//all points have been processed? We can stop right now
+				break;
+			}
+		}
+
+		if (!m_abort)
+		{
+			assert(lod.indexes() && lod.indexes()->currentSize() == pointCount);
+			lod.shrink();
+			lod.setState(ccPointCloud::LodStruct::INITIALIZED);
+		}
+		else
+		{
+			//reset
+			lod.clearExtended(false, ccPointCloud::LodStruct::NOT_INITIALIZED);
+		}
+
+		flags->release();
+		flags = 0;
+
+		if (octree != originalOctree)
+			delete octree;
+
+		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / duration: %3 s.)").arg(m_cloud.getName()).arg(static_cast<int>(lod.maxLevel())-1).arg(timer.elapsed() / 1000.0,0,'f',1));
+	}
+
+	ccPointCloud& m_cloud;
+	ccAtomicBool m_abort;
+};
+
+bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*/)
+{
+	return m_lod.init(*this);
+}
+
+bool ccPointCloud::LodStruct::init(ccPointCloud& cloud)
+{
+	if (isBroken())
+		return false;
+
+	if (!m_thread)
+	{
+		m_thread = new LodStructThread(cloud);
+	}
+	else if (m_thread->isRunning())
+	{
+		//already running?
+		assert(false);
+		return true;
+	}
+
+	m_thread->start();
+	return true;
+}
+
+bool ccPointCloud::LodStruct::reserve(unsigned pointCount, int levelCount)
+{
+	m_mutex.lock();
+	//init the levels descriptors
+	try
+	{
+		m_levels.reserve(levelCount);
+	}
+	catch (std::bad_alloc)
+	{
+		m_mutex.unlock();
+		return false;
+	}
+
+	//init LoD indexes
+	if (!m_indexes)
+	{
+		m_indexes = new LodStruct::IndexSet;
+	}
+	if (!m_indexes->reserve(pointCount))
+	{
+		m_indexes->release();
+	}
+	m_mutex.unlock();
+
+	return m_indexes != 0;
+}
+
+void ccPointCloud::LodStruct::clearExtended(bool autoStopThread, State newState)
+{
+	if (autoStopThread && m_thread)
+	{
+		m_thread->stop();
+		delete m_thread;
+		m_thread = 0;
+	}
+
+	m_mutex.lock();
+	m_levels.clear();
+	if (m_indexes)
+	{
+		m_indexes->release();
+		m_indexes = 0;
+	}
+	m_state = newState;
+	m_mutex.unlock();
+}
 
 ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
@@ -644,6 +949,8 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 	//We should update the VBOs (just in case)
 	releaseVBOs();
+	//As well as the LOD structure
+	m_lod.clear();
 
 	return *this;
 }
@@ -957,9 +1264,10 @@ bool ccPointCloud::hasDisplayedScalarField() const
 	return m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale();
 }
 
-void ccPointCloud::refreshBB()
+void ccPointCloud::invalidateBoundingBox()
 {
-	invalidateBoundingBox();
+	CCLib::ChunkedPointCloud::invalidateBoundingBox();
+
 	notifyGeometryUpdate();	//calls releaseVBOs()
 }
 
@@ -1205,7 +1513,8 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	double height = getOwnBB().getDiagVec().u[heightDim];
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
-		return setRGBColor(colorScale->getColorByIndex(0).rgba);
+		const ccColor::Rgba& col = colorScale->getColorByIndex(0);
+		return setRGBColor(col);
 	}
 
 	unsigned count = size();
@@ -1227,11 +1536,11 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 bool ccPointCloud::setRGBColor(colorType r, colorType g, colorType b)
 {
-	colorType c[3] = {r,g,b};
+	ccColor::Rgb c(r,g,b);
 	return setRGBColor(c);
 }
 
-bool ccPointCloud::setRGBColor(const colorType* col)
+bool ccPointCloud::setRGBColor(const ccColor::Rgb& col)
 {
 	enableTempColor(false);
 
@@ -1241,7 +1550,7 @@ bool ccPointCloud::setRGBColor(const colorType* col)
 			return false;
 
 	assert(m_rgbColors);
-	m_rgbColors->fill(col);
+	m_rgbColors->fill(col.rgb);
 
 	//We must update the VBOs
 	releaseVBOs();
@@ -1849,6 +2158,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// L.O.D. display
 		DisplayDesc toDisplay(0,size());
+		if (!pushName)
 		{
 			if (	context.decimateCloudOnMove
 				&&	toDisplay.count > context.minLODPointCount
@@ -1860,21 +2170,28 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//is there a LoD structure associated yet?
 				if (!m_lod.isBroken())
 				{
-					if (!m_lod.isInitialized())
+					if (m_lod.isNull())
 					{
 						//auto-init LoD structure
-						ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
-						initLOD(&pDlg);
+						//ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
+						initLOD(0/*&pDlg*/);
 					}
-					if (m_lod.isInitialized())
+					else
 					{
-						assert(m_lod.indexes);
-						if (m_lod.levels.size() <= context.minLODLevel)
+						unsigned char maxLevel = m_lod.maxLevel();
+						bool underConstruction = m_lod.isUnderConstruction();
+
+						//if the cloud has less LOD levels than the minimum to display
+						if (maxLevel <= context.minLODLevel)
 						{
 							if (context.currentLODLevel == 0)
 							{
-								//no need for LoD display
-								skipLoD = true;
+								//we can display the cloud in fill resolution
+								if (!underConstruction)
+								{
+									//no need for LOD display
+									skipLoD = true;
+								}
 							}
 							else
 							{
@@ -1886,22 +2203,23 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (context.currentLODLevel == 0)
 							{
-								toDisplay.indexMap = m_lod.indexes;
+								toDisplay.indexMap = m_lod.indexes();
+								assert(toDisplay.indexMap);
 								//the first time (LoD level = 0), we display all the small levels at once
 								toDisplay.startIndex = 0;
 								toDisplay.count = 0;
 								{
-									for (unsigned char l=1; l<context.minLODLevel; ++l)
-										toDisplay.count += m_lod.levels[l].count;
+									for (unsigned char l = 1; l < context.minLODLevel; ++l)
+										toDisplay.count += m_lod.level(l).count;
 								}
 								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
 
 								//could we draw more points? yes (we know that lod.levels.size() > context.minLODLevel)
 								context.higherLODLevelsAvailable = true;
 							}
-							else if (context.currentLODLevel < m_lod.levels.size())
+							else if (context.currentLODLevel < maxLevel)
 							{
-								toDisplay = m_lod.levels[context.currentLODLevel];
+								toDisplay = m_lod.level(context.currentLODLevel);
 
 								if (toDisplay.count < context.currentLODStartIndex)
 								{
@@ -1910,7 +2228,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								}
 								else
 								{
-									toDisplay.indexMap = m_lod.indexes;
+									toDisplay.indexMap = m_lod.indexes();
+									assert(toDisplay.indexMap);
 									//shift current draw range
 									toDisplay.startIndex += context.currentLODStartIndex;
 									toDisplay.count -= context.currentLODStartIndex;
@@ -1921,9 +2240,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 										context.moreLODPointsAvailable = true;
 									}
 								}
-								
+
 								//could we draw more points at the next level?
-								context.higherLODLevelsAvailable = (context.currentLODLevel+1 < m_lod.levels.size());
+								context.higherLODLevelsAvailable = underConstruction || (context.currentLODLevel + 1 < maxLevel);
 							}
 						}
 					}
@@ -1945,7 +2264,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
-
 		bool colorMaterialEnabled = false;
 
 		if (glParams.showSF || glParams.showColors)
@@ -2547,11 +2865,11 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 
 	//we use the visibility table to tag the points to filter out
-	unsigned count=size();
+	unsigned count = size();
 	for (unsigned i=0; i<count; ++i)
 	{
 		const ScalarType& val = sf->getValue(i);
-		if (val<minVal || val>maxVal || val != val) //handle NaN values!
+		if (val < minVal || val > maxVal || val != val) //handle NaN values!
 			m_pointsVisibility->setValue(i,POINT_HIDDEN);
 	}
 }
@@ -3471,7 +3789,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 	int totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
 	m_vboManager.totalMemSizeBytes = 0;
 	{
-		m_currentDisplay->makeContextCurrent();
+		//DGM: the context should be already active as this method should only be called from 'drawMeOnly'
 
 		assert(!glParams.showSF		|| (m_currentDisplayedScalarField && m_currentDisplayedScalarField->chunksCount() >= chunksCount));
 		assert(!glParams.showColors	|| (m_rgbColors && m_rgbColors->chunksCount() >= chunksCount));
@@ -3690,8 +4008,6 @@ void ccPointCloud::releaseVBOs()
 
 	if (m_currentDisplay)
 	{
-		//m_currentDisplay->makeContextCurrent(); //DGM: can't call this as it is not thread safe (and it doesn't seem necessary by the way ;)
-
 		//'destroy' all vbos
 		for (size_t i=0; i<m_vboManager.vbos.size(); ++i)
 		{
@@ -3724,176 +4040,4 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 
 	//call parent's method
 	ccGenericPointCloud::removeFromDisplay(win);
-}
-
-bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*/)
-{
-	m_lod.clear();
-
-	unsigned pointCount = size();
-	if (pointCount == 0)
-		return false;
-
-	ccLog::Print(QString("[LoD] '%1' [%2 points]").arg(getName()).arg(pointCount));
-	m_lod.state = LodStruct::BROKEN;
-
-	//first we need an octree
-	ccOctree* originalOctree = getOctree();
-	ccOctree* octree = originalOctree ? originalOctree : computeOctree(progressCallback);
-	if (!octree)
-	{
-		//not enough memory
-		ccLog::Warning("[LoD] Failed to compute octree (not enough memory)");
-		return false;
-	}
-
-	//flags
-	GenericChunkedArray<1,unsigned char>* flags = new GenericChunkedArray<1,unsigned char>;
-	static const unsigned char NoFlag = 0;
-	if (!flags->resize(pointCount,true,NoFlag))
-	{
-		//not enough memory
-		ccLog::Warning("[LoD] Failed to compute LoD structure (not enough memory)");
-		return false;
-	}
-
-	//init LoD indexes
-	if (!m_lod.indexes)
-		m_lod.indexes = new LodStruct::IndexSet;
-	if (!m_lod.indexes->reserve(pointCount))
-	{
-		//not enough memory
-		ccLog::Warning("[LoD] Failed to compute LoD structure (not enough memory)");
-		flags->release();
-		return false;
-	}
-
-	//reserve memory for the LoD level descriptors
-	try
-	{
-		m_lod.levels.reserve(CCLib::DgmOctree::MAX_OCTREE_LEVEL+1); //level 0 included
-	}
-	catch(std::bad_alloc)
-	{
-		//not enough memory
-		ccLog::Warning("[LoD] Failed to compute LoD structure (not enough memory)");
-		m_lod.indexes->clear(true);
-		flags->release();
-		return false;
-	}
-
-	if (progressCallback)
-	{
-		progressCallback->setMethodTitle("L.O.D. display");
-		progressCallback->setInfo("Preparing L.O.D. structure to speed-up the display...");
-		progressCallback->start();
-	}
-	CCLib::NormalizedProgress nProgress(progressCallback,pointCount);
-
-	assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
-	//first level (default)
-	m_lod.levels.push_back(LodStruct::LevelDesc(0,0));
-	//and the next ones
-	for (unsigned char level=1; level<=static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL); ++level)
-	{
-		const int bitDec = GET_BIT_SHIFT(level);
-
-		//for each cell we'll look for the (not-yet-flagged) point which is closest to the cell center
-		static const unsigned INVALID_INDEX = 0xFFFFFFFF;
-		unsigned nearestIndex = INVALID_INDEX;
-		PointCoordinateType nearestSquareDist = 0;
-		CCVector3 cellCenter(0,0,0);
-
-		//current level descriptor
-		LodStruct::LevelDesc levelDesc;
-		levelDesc.startIndex = m_lod.indexes->currentSize();
-		
-		CCLib::DgmOctree::OctreeCellCodeType currentTruncatedCellCode = 0xFFFFFFFF;
-
-		//scan the octree structure
-		const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
-		for (CCLib::DgmOctree::cellsContainer::const_iterator c=thePointsAndTheirCellCodes.begin(); c!=thePointsAndTheirCellCodes.end(); ++c)
-		{
-			CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
-
-			//new cell?
-			if (truncatedCode != currentTruncatedCellCode)
-			{
-				//process the previous cell
-				if (nearestIndex != INVALID_INDEX)
-				{
-					m_lod.indexes->addElement(nearestIndex);
-					assert(flags->getValue(nearestIndex) == NoFlag);
-					flags->setValue(nearestIndex,level);
-					levelDesc.count++;
-					nProgress.oneStep();
-				}
-
-				//prepare new cell
-				currentTruncatedCellCode = truncatedCode;
-				octree->computeCellCenter(currentTruncatedCellCode,level,cellCenter.u,true);
-				
-				nearestIndex = INVALID_INDEX;
-			}
-
-			if (flags->getValue(c->theIndex) == NoFlag)
-			{
-				//compute distance to the cell center
-				const CCVector3* P = getPoint(c->theIndex);
-				PointCoordinateType squareDist = (*P - cellCenter).norm2();
-				if (nearestIndex == INVALID_INDEX || squareDist < nearestSquareDist)
-				{
-					nearestSquareDist = squareDist;
-					nearestIndex = c->theIndex;
-				}
-			}
-		}
-
-		//don't forget the last cell!
-		if (nearestIndex != INVALID_INDEX)
-		{
-			m_lod.indexes->addElement(nearestIndex);
-			assert(flags->getValue(nearestIndex) == NoFlag);
-			flags->setValue(nearestIndex,level);
-			levelDesc.count++;
-			nProgress.oneStep();
-		}
-
-		//no new point was flagged during this round? Then we have reached the maximum level
-		if (levelDesc.count == 0 || level == CCLib::DgmOctree::MAX_OCTREE_LEVEL)
-		{
-			//assert(m_lod.indexes->currentSize() == levelDesc.startIndex);
-
-			//flag the remaining points with the current level
-			for (unsigned i=0; i<pointCount; ++i)
-			{
-				if (flags->getValue(i) == NoFlag)
-				{
-					m_lod.indexes->addElement(i);
-					levelDesc.count++;
-					nProgress.oneStep();
-				}
-			}
-		}
-
-		assert(levelDesc.count != 0);
-		m_lod.levels.push_back(levelDesc);
-
-		ccLog::Print(QString("[LoD] Level %1: %2 points").arg(level).arg(levelDesc.count));
-
-		if (m_lod.indexes->currentSize() == pointCount)
-		{
-			//all points have been processed? We can stop right now
-			break;
-		}
-	}
-
-	assert(m_lod.indexes->currentSize() == pointCount);
-	m_lod.levels.resize(m_lod.levels.size());
-	m_lod.state = LodStruct::INITIALIZED;
-
-	flags->release();
-	flags = 0;
-
-	return true;
 }

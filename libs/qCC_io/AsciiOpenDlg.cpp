@@ -277,6 +277,7 @@ void AsciiOpenDlg::updateTable()
 	std::vector<bool> valueIsInteger;	//identifies columns with integer values only
 	std::vector<bool> valueIsBelow255;	//identifies columns with integer values between 0 and 255 only
 
+	QChar decimalPoint = QLocale().decimalPoint();
 	QString currentLine = stream.readLine();
 	while (lineCount < LINES_READ_FOR_STATS && !currentLine.isNull())
 	{
@@ -330,9 +331,11 @@ void AsciiOpenDlg::updateTable()
 							double intPart, fracPart;
 							fracPart = modf(value,&intPart);
 
-							valueIsBelowOne[i]	= valueIsBelowOne[i] && (fabs(value) <= 1.0);
-							valueIsInteger[i]	= valueIsInteger[i] && (fracPart == 0.0);
-							valueIsBelow255[i]	= valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value <= 255.0));
+							valueIsBelowOne[i] = valueIsBelowOne[i] && (fabs(value) <= 1.0);
+							char temp[2048];
+							strcpy(temp, qPrintable(parts[i]));
+							valueIsInteger[i]  = valueIsInteger[i] && /*(fracPart == 0.0)*/!parts[i].contains(decimalPoint);
+							valueIsBelow255[i] = valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value <= 255.0));
 						}
 
 						m_ui->tableWidget->setItem(lineCount+1, i, newItem); //+1 for first line shifting
@@ -392,7 +395,7 @@ void AsciiOpenDlg::updateTable()
 	}
 
 	//average line size
-	m_averageLineSize = double(totalChars)/double(lineCount);
+	m_averageLineSize = static_cast<double>(totalChars)/lineCount;
 
 	//we add a type selector for each column
 	QStringList propsText;
@@ -633,11 +636,12 @@ void AsciiOpenDlg::updateTable()
 					if (assignedXYZFlags < XYZ_BITS)
 					{
 						//in rare cases, the first column is an index
-						if (	i == 0
-							&&	EnabledBits(assignedXYZFlags) == 0
-							&&	valueIsInteger[i]
-							&&	i+1 < columnsCount
-							&&	!valueIsInteger[i+1] )
+						if (   columnsCount > 3
+							&& i == 0
+							&& (EnabledBits(assignedXYZFlags) == 0)
+							&& valueIsInteger[i]
+							&& i+1 < columnsCount
+							&& !valueIsInteger[i+1] )
 						{
 							//let's consider it as a scalar
 							columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Scalar);

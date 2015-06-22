@@ -27,6 +27,7 @@
 #endif
 
 //System
+#include <assert.h>
 #include <algorithm>
 #include <vector>
 #include <string.h>

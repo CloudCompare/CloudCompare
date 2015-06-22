@@ -18,10 +18,6 @@
 #ifndef Q_SRA_PLUGIN_HEADER
 #define Q_SRA_PLUGIN_HEADER
 
-//Qt
-#include <QObject>
-
-//qCC
 #include "../ccStdPluginInterface.h"
 
 class ccPointCloud;
@@ -39,7 +35,7 @@ class qSRA : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qSRA(QObject* parent = 0);
+	explicit qSRA(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Surface of Revolution Analysis"; }

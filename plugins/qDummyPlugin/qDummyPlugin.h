@@ -50,7 +50,7 @@ class qDummyPlugin : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qDummyPlugin(QObject* parent=0);
+	explicit qDummyPlugin(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "qDummyPlugin"; }

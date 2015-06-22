@@ -31,7 +31,7 @@ class ccColorGradientDlg : public QDialog, public Ui::ColorGradientDialog
 public:
 
 	//! Default constructor
-	ccColorGradientDlg(QWidget* parent);
+	explicit ccColorGradientDlg(QWidget* parent);
 
 	//! Gradient types
 	enum GradientType { Default, TwoColors, Banding };

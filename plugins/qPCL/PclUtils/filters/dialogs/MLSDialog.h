@@ -28,7 +28,7 @@ class MLSDialog : public QDialog, public Ui::MLSDialog
 	Q_OBJECT
 
 public:
-	MLSDialog(QWidget *parent = 0);
+	explicit MLSDialog(QWidget *parent = 0);
 
 protected slots:
 	void activateMenu(QString name);

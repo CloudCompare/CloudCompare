@@ -613,7 +613,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 									if (generateRandomColors)
 									{
 										ccColor::Rgb col = ccColor::Generator::Random();
-										if (!sliceCloud->setRGBColor(col.rgb))
+										if (!sliceCloud->setRGBColor(col))
 										{
 											ccLog::Error("Not enough memory!");
 											error = true;
@@ -706,7 +706,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 								if (croppedCloud)
 								{
 									ccColor::Rgb col = ccColor::Generator::Random();
-									if (!croppedCloud->setRGBColor(col.rgb))
+									if (!croppedCloud->setRGBColor(col))
 									{
 										ccLog::Error("Not enough memory!");
 										error = true;

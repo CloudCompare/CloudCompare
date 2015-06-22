@@ -496,8 +496,12 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 			(void*)&radius };
 #endif
 
-		//not compatible with parallel strategies!
-		if (octree->executeFunctionForAllCellsAtLevel(level,&ComputeMSTGraphAtLevel,additionalParameters,progressCb,"Build Spanning Tree") == 0)
+		if (octree->executeFunctionForAllCellsAtLevel(	level,
+														&ComputeMSTGraphAtLevel,
+														additionalParameters,
+														false, //not compatible with parallel strategies!
+														progressCb,
+														"Build Spanning Tree") == 0)
 		{
 			//something went wrong
 			ccLog::Warning(QString("Failed to compute Spanning Tree on cloud '%1'").arg(cloud->getName()));

@@ -36,11 +36,13 @@
 
 //Qt
 #include <QGLBuffer>
+#include <QMutex>
 
 class ccPointCloud;
 class ccScalarField;
 class ccPolyline;
 class QGLBuffer;
+class LodStructThread;
 
 //! Maximum number of points (per cloud) displayed in a single LOD iteration
 /** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
@@ -596,39 +598,61 @@ protected: // VBO
 
 public: //Level of Detail (LOD)
 
+public: //Level of Detail (LOD)
+
 	//! L.O.D. (Level of Detail) structure
-	struct LodStruct
+	class LodStruct
 	{
+	public:
+		//! Structure initialization state
+		enum State { NOT_INITIALIZED, UNDER_CONSTRUCTION, INITIALIZED, BROKEN };
+
 		//! Default constructor
-		LodStruct() : indexes(0), state(NOT_INITIALIZED) {}
+		LodStruct() : m_indexes(0), m_thread(0), m_state(NOT_INITIALIZED) {}
 		//! Destructor
 		~LodStruct() { clear(); }
 
+		//! Initializes the construction process (asynchronous)
+		bool init(ccPointCloud& cloud);
+
+		//! Locks the structure
+		inline void lock() { m_mutex.lock(); }
+		//! Unlocks the structure
+		inline void unlock() { m_mutex.unlock(); }
+
+		//! Returns the current state
+		inline State getState() { lock(); State state = m_state; unlock(); return state; }
+
+		//! Sets the current state
+		inline void setState(State state) { lock(); m_state = state; unlock(); }
+
 		//! Clears the structure
-		void clear()
-		{
-			levels.clear();
-			if (indexes)
-			{
-				indexes->release();
-				indexes = 0;
-			}
-			state = NOT_INITIALIZED;
-		}
+		inline void clear() { clearExtended(true, NOT_INITIALIZED); }
+		//! Clears the structure (extended version)
+		void clearExtended(bool autoStopThread, State newState);
+
+		//! Reserves memory for the indexes
+		bool reserve(unsigned pointCount, int levelCount);
+
+		//! Returns whether the structure is null (i.e. not under construction or initialized) or not
+		inline bool isNull() { return getState() == NOT_INITIALIZED; }
 
 		//! Returns whether the structure is initialized or not
-		inline bool isInitialized() const { return state == INITIALIZED; }
+		inline bool isInitialized() { return getState() == INITIALIZED; }
+
+		//! Returns whether the structure is initialized or not
+		inline bool isUnderConstruction() { return getState() == UNDER_CONSTRUCTION; }
 
 		//! Returns whether the structure is broken or not
-		inline bool isBroken() const { return state == BROKEN; }
+		inline bool isBroken() { return getState() == BROKEN; }
 
 		//! L.O.D. indexes set
-		typedef GenericChunkedArray<1,unsigned> IndexSet;
-		
-		//! L.O.D. indexes
-		/** Point indexes that should be displayed at each level of detail.
-		**/
-		IndexSet* indexes;
+		typedef GenericChunkedArray<1, unsigned> IndexSet;
+
+		//! Returns the indexes (if any)
+		inline IndexSet* indexes() { return m_indexes; }
+		//! Returns the indexes (if any) - const version
+		inline const IndexSet* indexes() const { return m_indexes; }
 
 		//! Level descriptor
 		struct LevelDesc
@@ -643,20 +667,46 @@ public: //Level of Detail (LOD)
 			unsigned count;
 		};
 
-		//! Actual levels
-		std::vector<LevelDesc> levels;
+		//! Adds a level descriptor
+		inline void addLevel(const LevelDesc& desc) { lock(); m_levels.push_back(desc); unlock(); }
+		//! Shrinks the level descriptor set to its minimal size
+		inline void shrink() { lock(); m_levels.resize(m_levels.capacity()); unlock(); }
 
-		//! Structure initialization state
-		enum State { NOT_INITIALIZED, INITIALIZED, BROKEN };
+		//! Returns the maximum level
+		inline unsigned char maxLevel() { lock(); size_t count = m_levels.size(); unlock(); return static_cast<unsigned char>(std::min<size_t>(count,256)); }
+		//! Returns a given level descriptor
+		inline LevelDesc level(unsigned char index) { lock(); LevelDesc desc = m_levels[index]; unlock(); return desc; }
+
+	protected:
+
+		//! L.O.D. indexes
+		/** Point indexes that should be displayed at each level of detail.
+		**/
+		IndexSet* m_indexes;
+
+		//! Actual levels
+		std::vector<LevelDesc> m_levels;
+
+		//! Computing thread
+		LodStructThread* m_thread;
+
+		//! For concurrent access
+		QMutex m_mutex;
 
 		//! State
-		State state;
+		State m_state;
 	};
 
 	//! Intializes the LOD structure
 	/** \return success
 	**/
 	bool initLOD(CCLib::GenericProgressCallback* progressCallback = 0);
+
+	//! Clears the LOD structure
+	void clearLOD();
+
+	//! Returns the LOD structure
+	LodStruct& getLOD() { return m_lod; }
 
 protected:
 

@@ -125,7 +125,7 @@ ccOctree* ccGenericPointCloud::getOctree()
 	return NULL;
 }
 
-ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb)
+ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
 {
 	deleteOctree();
 	ccOctree* octree = new ccOctree(this);
@@ -134,7 +134,10 @@ ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* pro
 		octree->setDisplay(getDisplay());
 		octree->setVisible(true);
 		octree->setEnabled(false);
-		addChild(octree);
+		if (autoAddChild)
+		{
+			addChild(octree);
+		}
 	}
 	else
 	{

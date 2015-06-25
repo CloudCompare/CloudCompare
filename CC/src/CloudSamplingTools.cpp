@@ -88,8 +88,8 @@ SimpleCloud* CloudSamplingTools::resampleCloudWithOctreeAtLevel(GenericIndexedCl
 	}
 
 	//structure contenant les parametres additionnels
-	void* additionalParameters[2] = {	(void*)cloud,
-										(void*)&resamplingMethod };
+	void* additionalParameters[2] = {	reinterpret_cast<void*>(cloud),
+										reinterpret_cast<void*>(&resamplingMethod) };
 
 	if (theOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
 														&resampleCellAtLevel,
@@ -168,8 +168,8 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctreeAtLevel(GenericIndex
 	}
 
 	//structure contenant les parametres additionnels
-	void* additionalParameters[2] = {	(void*)cloud,
-										(void*)&subsamplingMethod };
+	void* additionalParameters[2] = {	reinterpret_cast<void*>(cloud),
+										reinterpret_cast<void*>(&subsamplingMethod) };
 
 	if (theOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
 														&subsampleCellAtLevel,
@@ -497,14 +497,14 @@ ReferenceCloud* CloudSamplingTools::sorFilter(GenericIndexedCloudPersist* inputC
 	}
 
 	//structure contenant les parametres additionnels
-	void* additionalParameters[] = {(void*)cloud,
-									(void*)&kernelRadius,
-									(void*)&nSigma,
-									(void*)&removeIsolatedPoints,
-									(void*)&useKnn,
-									(void*)&knn,
-									(void*)&useAbsoluteError,
-									(void*)&absoluteError
+	void* additionalParameters[] = {reinterpret_cast<void*>(cloud),
+									reinterpret_cast<void*>(&kernelRadius),
+									reinterpret_cast<void*>(&nSigma),
+									reinterpret_cast<void*>(&removeIsolatedPoints),
+									reinterpret_cast<void*>(&useKnn),
+									reinterpret_cast<void*>(&knn),
+									reinterpret_cast<void*>(&useAbsoluteError),
+									reinterpret_cast<void*>(&absoluteError)
 	};
 
 	uchar octreeLevel = 0;

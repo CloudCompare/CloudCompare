@@ -276,8 +276,8 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 		progressCb->setInfo(infos);
 	}
 
-    void* additionalParameters[2] = {	additionalParameters[0] = (void*)&sigma,
-										additionalParameters[1] = (void*)&sigmaSF
+    void* additionalParameters[2] = {	reinterpret_cast<void*>(&sigma),
+										reinterpret_cast<void*>(&sigmaSF)
 	};
 
 	bool success = true;

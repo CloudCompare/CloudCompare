@@ -6,183 +6,176 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>319</width>
-    <height>168</height>
+    <width>300</width>
+    <height>200</height>
    </rect>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>319</width>
-    <height>168</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>319</width>
-    <height>168</height>
-   </size>
-  </property>
   <property name="windowTitle">
-   <string>Compute normal</string>
+   <string>Compute normals</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>local model</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="localModelComboBox">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>26</height>
-        </size>
-       </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <item>
+    <widget class="QGroupBox" name="LocalSurfaceGroupBox">
+     <property name="title">
+      <string>Surface estimation</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Plane</string>
+         <string>model</string>
         </property>
-       </item>
-       <item>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="localModelComboBox">
+        <property name="toolTip">
+         <string>Local surface estimation model</string>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Plane</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Quadric</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Triangulation</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Height function</string>
+         <string>local radius</string>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Triangulation</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QFrame" name="localRadiusFrame">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
+           <property name="toolTip">
+            <string>Local neighborhood radius (to estimate the surface)</string>
+           </property>
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="minimum">
+            <double>0.000001000000000</double>
+           </property>
+           <property name="maximum">
+            <double>999999.989999999990687</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="autoRadiusToolButton">
+           <property name="text">
+            <string>Auto</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <property name="topMargin">
-      <number>2</number>
+    <widget class="QGroupBox" name="preferredOrientationGroupBox">
+     <property name="title">
+      <string>Preferred orientation</string>
      </property>
-     <property name="bottomMargin">
-      <number>2</number>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>local radius</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="decimals">
-        <number>6</number>
-       </property>
-       <property name="minimum">
-        <double>0.000001000000000</double>
-       </property>
-       <property name="maximum">
-        <double>999999.989999999990687</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QCheckBox" name="preferedOrientationCheckBox">
-       <property name="text">
-        <string>Preferred orientation</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="preferedOrientationComboBox">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>26</height>
-        </size>
-       </property>
-       <property name="currentIndex">
-        <number>4</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>+X</string>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QComboBox" name="preferredOrientationComboBox">
+        <property name="currentIndex">
+         <number>4</number>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-X</string>
+        <property name="maxVisibleItems">
+         <number>12</number>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>+Y</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-Y</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>+Z</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-Z</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>+Barycenter</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>- Barycenter</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>+ (0,0,0)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>- (0,0,0)</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
+        <item>
+         <property name="text">
+          <string>+X</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>-X</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>+Y</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>-Y</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>+Z</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>-Z</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>+Barycenter</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>- Barycenter</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>+ (0,0,0)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>- (0,0,0)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Use previous normal</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">
@@ -240,22 +233,6 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>preferedOrientationCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>preferedOrientationComboBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>91</x>
-     <y>53</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>258</x>
-     <y>53</y>
     </hint>
    </hints>
   </connection>

@@ -261,8 +261,8 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 
 			if (octreeDisplayType == MEAN_POINTS)
 			{
-				void* additionalParameters[2] = {	(void*)&glParams,
-													(void*)theAssociatedCloud,
+				void* additionalParameters[2] = {	reinterpret_cast<void*>(&glParams),
+													reinterpret_cast<void*>(theAssociatedCloud),
 				};
 
 				glBegin(GL_POINTS);
@@ -292,10 +292,10 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 				context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND| CC_LIGHT_ENABLED;
 				context._win = 0;
 
-				void* additionalParameters[4] = {	(void*)&glParams,
-													(void*)theAssociatedCloud,
-													(void*)&box,
-													(void*)&context
+				void* additionalParameters[4] = {	reinterpret_cast<void*>(&glParams),
+													reinterpret_cast<void*>(theAssociatedCloud),
+													reinterpret_cast<void*>(&box),
+													reinterpret_cast<void*>(&context)
 				};
 
 				theOctree->executeFunctionForAllCellsAtLevel(	level,

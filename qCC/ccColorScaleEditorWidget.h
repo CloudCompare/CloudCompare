@@ -89,7 +89,7 @@ public:
 typedef QSharedPointer<ColorScaleElementSliders> SharedColorScaleElementSliders;
 
 //! Base color scale editor (sub)Widget
-/** A widget with a margin (along a prefered orientation)
+/** A widget with a margin (along a preferred orientation)
 **/
 class ColorScaleEditorBaseWidget : public QWidget
 {

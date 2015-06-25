@@ -20,8 +20,13 @@
 
 #include <ui_normalComputationDlg.h>
 
+//qCC_db
+#include <ccNormalVectors.h>
+
 //CCLib
 #include <CCConst.h> //for CC_LOCAL_MODEL_TYPES
+
+class ccPointCloud;
 
 //! Dialog for normal computation
 class ccNormalComputationDlg : public QDialog, public Ui::NormalComputationDlg
@@ -38,18 +43,31 @@ public:
 	//! Sets default value for local neighbourhood radius
 	void setRadius(PointCoordinateType radius);
 
+	//! Sets the preferred orientation
+	void setPreferredOrientation(ccNormalVectors::Orientation orientation);
+
+	//! Sets the currently selected cloud (required for 'auto' feature)
+	void setCloud(ccPointCloud* cloud);
+
 	//! Returns local neighbourhood radius
 	PointCoordinateType getRadius() const;
 
-	//! Returns prefered orientation
-	/** \return prefered orientation (-1: none, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z)
-	**/
-	int getPreferedOrientation() const;
+	//! Returns the preferred orientation (if any)
+	ccNormalVectors::Orientation getPreferredOrientation() const;
 
 protected slots:
 
 	//! On local model change
 	void localModelChanged(int index);
+
+	//! Automatically estimate the local surface radius
+	void autoEstimateRadius();
+
+protected:
+
+	//! Selected cloud
+	ccPointCloud* m_cloud;
+
 };
 
 #endif // CC_NORMAL_COMPUTATION_DLG_HEADER

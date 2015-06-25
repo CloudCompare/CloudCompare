@@ -56,15 +56,15 @@ public:
 	inline const CCVector3& getNormal(unsigned normIndex) const { return m_theNormalVectors[normIndex]; }
 
 	//! Compressed normals quantization level (number of directions/bits: 2^(2*N+3))
-	static const unsigned NORMALS_QUANTIZE_LEVEL =	6;
+	static const unsigned QUANTIZE_LEVEL = 6;
 
 	//! Computes the normal corresponding to a given compressed index
 	/** Warning: slower than 'GetNormal' (but avoids computation of the whole table)
 	**/
-	static inline void ComputeNormal(normsType normIndex, PointCoordinateType N[]) { Quant_dequantize_normal(normIndex,NORMALS_QUANTIZE_LEVEL,N); }
+	static inline void ComputeNormal(normsType normIndex, PointCoordinateType N[]) { Quant_dequantize_normal(normIndex,QUANTIZE_LEVEL,N); }
 
 	//! Returns the compressed index corresponding to a normal vector
-	static inline normsType GetNormIndex(const PointCoordinateType N[]) { return static_cast<normsType>( Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL) ); }
+	static inline normsType GetNormIndex(const PointCoordinateType N[]) { return static_cast<normsType>( Quant_quantize_normal(N,QUANTIZE_LEVEL) ); }
 	//! Returns the compressed index corresponding to a normal vector (shortcut)
 	static inline normsType GetNormIndex(const CCVector3& N) { return GetNormIndex(N.u); }
 
@@ -73,33 +73,67 @@ public:
 	**/
 	static void InvertNormal(normsType &code);
 
+	//! 'Default' orientations
+	enum Orientation {
+
+		PLUS_X  = 0,
+		MINUS_X = 1,
+		PLUS_Y  = 2,
+		MINUS_Y = 3,
+		PLUS_Z  = 4,
+		MINUS_Z = 5,
+		PLUS_BARYCENTER  = 6,
+		MINUS_BARYCENTER = 7,
+		PLUS_ZERO  = 8,
+		MINUS_ZERO = 9,
+		PREVIOUS   = 10,
+		
+		UNDEFINED  = 255
+	};
+
 	//! Computes normal at each point of a given cloud
-	/** \param theCloud point cloud on which to process the normals.
+	/** \param cloud point cloud on which to process the normals.
 		\param theNormsCodes array in which the normals indexes are stored
-		\param method which kind of model to use for the computation (LS = plane, HF = quadratic Height Function, TRI = triangulation)
-		\param radius local neighborhood radius (not necessary for TRI)
-		\param preferedOrientation specifies a preferred orientation for normals (-1: no preferred orientation, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter)
-		\param progressCb progress bar
-		\param inputOctree octree associated with theCloud.
+		\param localModel which kind of model to use for the computation (LS = plane, HF = quadratic Height Function, TRI = triangulation)
+		\param localRadius local neighborhood radius (not necessary for TRI)
+		\param preferredOrientation specifies a preferred orientation for normals (optional)
+		\param progressCb progress notification (optional)
+		\param inputOctree inputOctree input cloud octree (optional).
 		\return success
 	**/
-	static bool ComputeCloudNormals(ccGenericPointCloud* theCloud,
+	static bool ComputeCloudNormals(ccGenericPointCloud* cloud,
 									NormsIndexesTableType& theNormsCodes,
-									CC_LOCAL_MODEL_TYPES method,
-									PointCoordinateType radius,
-									int preferedOrientation = -1,
+									CC_LOCAL_MODEL_TYPES localModel,
+									PointCoordinateType localRadius,
+									Orientation preferredOrientation = UNDEFINED,
 									CCLib::GenericProgressCallback* progressCb = 0,
 									CCLib::DgmOctree* inputOctree = 0);
+
+	//! Tries to guess a very naive 'local radius' for normals computation (see ComputeCloudNormals)
+	/** \param cloud point cloud on which to process the normals.
+		\return naive radius (percentage of the cloud bounding-box)
+	**/
+	static PointCoordinateType GuessNaiveRadius(ccGenericPointCloud* cloud);
+
+	//! Tries to guess the best 'local radius' for normals computation (see ComputeCloudNormals)
+	/** \param cloud point cloud on which to process the normals.
+		\param cloudOctree inputOctree input cloud octree (optional).
+		\param progressCb progress notification (optional)
+		\return the best radius (strictly positive value) or 0 if an error occurred
+	**/
+	static PointCoordinateType GuessBestRadius(	ccGenericPointCloud* cloud,
+												CCLib::DgmOctree* cloudOctree = 0,
+												CCLib::GenericProgressCallback* progressCb = 0);
 
 	//! Updates normals orientation based on a preferred orientation
 	/** \param theCloud point cloud on which to process the normals.
 		\param theNormsCodes array in which the normals indexes are stored
-		\param preferedOrientation specifies a preferred orientation for normals (0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter, 8:+Zero, 9:-Zero)
+		\param preferredOrientation specifies a preferred orientation for normals
 		\return success
 	**/
 	static bool UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 											NormsIndexesTableType& theNormsCodes,
-											int preferedOrientation);
+											Orientation preferredOrientation);
 
 	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°)
 	/** \param[in] N normal (should be normalized!)

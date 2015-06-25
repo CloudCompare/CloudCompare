@@ -314,7 +314,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return -2.0;
@@ -356,12 +356,12 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	}
 
 	//additionnal parameters for local process
-	void* additionalParameters[] = {	(void*)distrib,
-										(void*)&numberOfNeighbours,
-										(void*)&numberOfChi2Classes,
-										(void*)histoValues,
-										(void*)histoMin,
-										(void*)histoMax};
+	void* additionalParameters[] = {	reinterpret_cast<void*>(const_cast<GenericDistribution*>(distrib)),
+										reinterpret_cast<void*>(&numberOfNeighbours),
+										reinterpret_cast<void*>(&numberOfChi2Classes),
+										reinterpret_cast<void*>(histoValues),
+										reinterpret_cast<void*>(histoMin),
+										reinterpret_cast<void*>(histoMax) };
 
 	double maxChi2 = -1.0;
 

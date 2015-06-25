@@ -53,7 +53,7 @@ void ccNormalVectors::ReleaseUniqueInstance()
 ccNormalVectors::ccNormalVectors()
 	: m_theNormalHSVColors(0)
 {
-	init(NORMALS_QUANTIZE_LEVEL);
+	init(QUANTIZE_LEVEL);
 }
 
 ccNormalVectors::~ccNormalVectors()
@@ -125,7 +125,7 @@ bool ccNormalVectors::init(unsigned quantizeLevel)
 void ccNormalVectors::InvertNormal(normsType &code)
 {
 	//See 'Quant_quantize_normal' for a better understanding
-	normsType mask = 1 << 2*NORMALS_QUANTIZE_LEVEL;
+	normsType mask = 1 << 2*QUANTIZE_LEVEL;
 
 	code += ((code & mask) ? -mask : mask);
 	mask <<= 1;
@@ -136,47 +136,77 @@ void ccNormalVectors::InvertNormal(normsType &code)
 
 bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 												NormsIndexesTableType& theNormsCodes,
-												int preferedOrientation)
+												Orientation preferredOrientation)
 {
 	assert(theCloud);
 
-	if (preferedOrientation < 0 || preferedOrientation > 9)
-	{
-		ccLog::Warning(QString("[ccNormalVectors::UpdateNormalOrientations] Invalid parameter (prefered orientation = %1)").arg(preferedOrientation));
-		return false;
-	}
-
-	//prefered orientation
-	CCVector3 orientation(0.0,0.0,0.0);
+	//preferred orientation
+	CCVector3 orientation(0,0,0);
 	CCVector3 barycenter(0,0,0);
 	bool useBarycenter = false;
 	bool positiveSign = true;
-	if (preferedOrientation < 6) //0-5 = +/-X,Y,Z
+
+	switch (preferredOrientation)
 	{
-		orientation.u[preferedOrientation>>1]=((preferedOrientation & 1) == 0 ? PC_ONE : -PC_ONE); //odd number --> inverse direction
-	}
-	else if (preferedOrientation == 6 || preferedOrientation == 7) //+/-gravity center
-	{
-		barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
-		ccLog::Print(QString("[ccNormalVectors::UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
-		useBarycenter = true;
-		positiveSign = (preferedOrientation == 6);
-	}
-	else //if (preferedOrientation == 8 || preferedOrientation == 9) //+/-Zero
-	{
-		//barycenter = CCVector3(0,0,0);
-		useBarycenter = true;
-		positiveSign = (preferedOrientation == 8);
+	case PLUS_X:
+	case MINUS_X:
+	case PLUS_Y:
+	case MINUS_Y:
+	case PLUS_Z:
+	case MINUS_Z:
+		{
+			//0-5 = +/-X,Y,Z
+			assert(preferredOrientation >= 0 && preferredOrientation <= 5);
+
+			orientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? PC_ONE : -PC_ONE); //odd number --> inverse direction
+		}
+		break;
+
+	case PLUS_BARYCENTER:
+	case MINUS_BARYCENTER:
+		{
+			barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
+			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
+			useBarycenter = true;
+			positiveSign = (preferredOrientation == 6);
+		}
+		break;
+
+	case PLUS_ZERO:
+	case MINUS_ZERO:
+		{
+			//barycenter = CCVector3(0,0,0);
+			useBarycenter = true;
+			positiveSign = (preferredOrientation == 8);
+		}
+		break;
+
+	case PREVIOUS:
+		{
+			if (!theCloud->hasNormals())
+			{
+				ccLog::Warning("[UpdateNormalOrientations] Can't orient the new normals with the previous ones... as the cloud has no normals!");
+				return false;
+			}
+		}
+		break;
+
+	default:
+		assert(false);
+		return false;
 	}
 
-	//we 'compress' each normal (and we check its orientation if necessary)
+	//we check each normal orientation
 	for (unsigned i=0; i<theNormsCodes.currentSize(); i++)
 	{
-		const normsType& nCode = theNormsCodes.getValue(i);
-		CCVector3 N(GetNormal(nCode));
+		const normsType& code = theNormsCodes.getValue(i);
+		CCVector3 N = GetNormal(code);
 
-		//we check sign
-		if (useBarycenter)
+		if (preferredOrientation == PREVIOUS)
+		{
+			orientation = theCloud->getPointNormal(i);
+		}
+		else if (useBarycenter)
 		{
 			if (positiveSign)
 			{
@@ -188,6 +218,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 			}
 		}
 
+		//we eventually check the sign
 		if (N.dot(orientation) < 0)
 		{
 			//inverse normal and re-compress it
@@ -199,25 +230,202 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	return true;
 }
 
+PointCoordinateType ccNormalVectors::GuessNaiveRadius(ccGenericPointCloud* cloud)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return 0;
+	}
+
+	PointCoordinateType largetDim = cloud->getOwnBB().getMaxBoxDim();
+
+	return largetDim / std::min<unsigned>(100, std::max<unsigned>(1, cloud->size()/100 ) );
+}
+
+PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud,
+														CCLib::DgmOctree* inputOctree/*=0*/,
+														CCLib::GenericProgressCallback* progressCb/*=0*/)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return 0;
+	}
+
+	CCLib::DgmOctree* octree = inputOctree;
+	if (!octree)
+	{
+		octree = new CCLib::DgmOctree(cloud);
+		if (octree->build() <= 0)
+		{
+			delete octree;
+			ccLog::Warning("[GuessBestRadius] Failed to compute the cloud octree");
+			return 0;
+		}
+	}
+
+	PointCoordinateType bestRadius = GuessNaiveRadius(cloud);
+	if (bestRadius == 0)
+	{
+		ccLog::Warning("[GuessBestRadius] The cloud has invalid dimensions");
+		return 0;
+	}
+
+	if (cloud->size() < 100)
+	{
+		//no need to do anything else for very small clouds!
+		return bestRadius;
+	}
+
+	//we are now going to sample the cloud so as to compute statistics on the density
+	{
+		static const int s_aimedPop = 16;
+		static const int s_aimedPopRange = 4;
+		static const int s_minPop = 6;
+
+		const unsigned sampleCount = std::min<unsigned>(200,cloud->size()/10);
+
+		double aimedPop = s_aimedPop;
+		PointCoordinateType radius = bestRadius;
+		PointCoordinateType lastRadius = radius;
+		double bestMeanPop = 0;
+		double lastMeanPop = 0;
+
+		//we may have to do this several times
+		for (size_t attempt=0; attempt<10; ++attempt)
+		{
+			int totalCount = 0;
+			int totalSquareCount = 0;
+			int minPop = 0;
+			int maxPop = 0;
+			int aboveMinPopCount = 0;
+
+			uchar octreeLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+
+			for (size_t i=0; i<sampleCount; ++i)
+			{
+				unsigned randomIndex = static_cast<unsigned>(floor((static_cast<double>(rand()) / (RAND_MAX+1)) * cloud->size()));
+				assert(randomIndex < cloud->size());
+
+				const CCVector3* P = cloud->getPoint(randomIndex);
+				CCLib::DgmOctree::NeighboursSet Yk;
+				int n = octree->getPointsInSphericalNeighbourhood(*P, radius, Yk, octreeLevel);
+				assert(n >= 1);
+
+				totalCount += n;
+				totalSquareCount += n*n;
+				if (i == 0)
+				{
+					minPop = maxPop = n;
+				}
+				else
+				{
+					if (n < minPop)
+						minPop = n;
+					else if (n > maxPop)
+						maxPop = n;
+				}
+
+				if (n >= s_minPop)
+				{
+					++aboveMinPopCount;
+				}
+			}
+
+			double meanPop = static_cast<double>(totalCount) / sampleCount;
+			double stdDevPop = sqrt(fabs(static_cast<double>(totalSquareCount) / sampleCount - meanPop*meanPop));
+			double aboveMinPopRatio = static_cast<double>(aboveMinPopCount) / sampleCount;
+
+			ccLog::Print(QString("[GuessBestRadius] Radius = %1 -> samples population in [%2 ; %3] (mean %4 / std. dev. %5 / %6% above mininmum)")
+										.arg(radius)
+										.arg(minPop)
+										.arg(maxPop)
+										.arg(meanPop)
+										.arg(stdDevPop)
+										.arg(aboveMinPopRatio * 100)
+						);
+
+			if (fabs(meanPop - aimedPop) < s_aimedPopRange)
+			{
+				//we have found a correct radius
+				bestRadius = radius;
+				bestMeanPop = meanPop;
+
+				if (aboveMinPopRatio < 0.9)
+				{
+					//ccLog::Warning("[GuessBestRadius] The cloud density is very inhomogeneous! You may have to increase the radius to get valid normals everywhere... but the result will be smoother");
+					aimedPop = s_aimedPop + (2.0*stdDevPop) * (1.0-aboveMinPopRatio);
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			//otherwise we have to find a better estimate for the radius
+			PointCoordinateType newRadius = radius;
+			//(warning: we consider below that the number of points is proportional to the SURFACE of the neighborhood)
+			assert(meanPop >= 1.0);
+			if (attempt == 0)
+			{
+				//this is our best (only) guess for the moment
+				bestRadius = radius;
+				bestMeanPop = meanPop;
+
+				newRadius = radius * sqrt(aimedPop/meanPop);
+			}
+			else
+			{
+				//keep track of our best guess nevertheless
+				if (fabs(meanPop - aimedPop) < fabs(bestRadius - aimedPop))
+				{
+					bestRadius = radius;
+					bestMeanPop = meanPop;
+				}
+
+				double slope = (radius*radius - lastRadius*lastRadius) / (meanPop - lastMeanPop);
+				newRadius = sqrt(lastRadius*lastRadius + (aimedPop - lastMeanPop) * slope);
+			}
+
+			lastRadius = radius;
+			lastMeanPop = meanPop;
+
+			radius = newRadius;
+		}
+	}
+
+	if (octree && !inputOctree)
+	{
+		delete octree;
+		octree = 0;
+	}
+
+	return bestRadius;
+}
+
+
 bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 											NormsIndexesTableType& theNormsCodes,
-											CC_LOCAL_MODEL_TYPES method,
-											PointCoordinateType radius,
-											int preferedOrientation/*=-1*/,
+											CC_LOCAL_MODEL_TYPES localModel,
+											PointCoordinateType localRadius,
+											Orientation preferredOrientation/*=UNDEFINED*/,
 											CCLib::GenericProgressCallback* progressCb/*=0*/,
 											CCLib::DgmOctree* inputOctree/*=0*/)
 {
 	assert(theCloud);
 
-	unsigned n = theCloud->size();
-	if (n<3)
+	unsigned pointCount = theCloud->size();
+	if (pointCount < 3)
+	{
 		return false;
+	}
 
 	CCLib::DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new CCLib::DgmOctree(theCloud);
-		if (theOctree->build() == 0)
+		if (theOctree->build() <= 0)
 		{
 			delete theOctree;
 			return false;
@@ -225,64 +433,66 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	}
 
 	//on reserve la memoire pour stocker les normales
-	if (!theNormsCodes.isAllocated() || theNormsCodes.currentSize()<n)
-		if (!theNormsCodes.resize(n))
+	if (!theNormsCodes.isAllocated() || theNormsCodes.currentSize() < pointCount)
+	{
+		if (!theNormsCodes.resize(pointCount))
 		{
-			if (!inputOctree)
+			if (theOctree && !inputOctree)
 				delete theOctree;
 			return false;
 		}
+	}
 
-	//we instantiate 'n' 3D normal vectors
+	//we instantiate 3D normal vectors
 	NormsTableType* theNorms = new NormsTableType;
-	CCVector3 blankN(0.0,0.0,0.0);
-	if (!theNorms->resize(n,true,blankN.u))
+	CCVector3 blankN(0,0,0);
+	if (!theNorms->resize(pointCount,true,blankN.u))
 	{
 		theNormsCodes.clear();
-		if (!inputOctree)
+		if (theOctree && !inputOctree)
 			delete theOctree;
 		return false;
 	}
 	//theNorms->fill(0);
 
-	void* additionalParameters[2] = { (void*)theNorms, (void*)&radius };
+	void* additionalParameters[2] = { reinterpret_cast<void*>(theNorms), reinterpret_cast<void*>(&localRadius) };
 
 	unsigned processedCells = 0;
-	switch(method)
+	switch (localModel)
 	{
 	case LS:
 		{
-		uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
-		processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
-																		&(ComputeNormsAtLevelWithLS),
-																		additionalParameters,
-																		true,
-																		progressCb,
-																		"Normals Computation[LS]");
+			uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
+			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
+																			&(ComputeNormsAtLevelWithLS),
+																			additionalParameters,
+																			true,
+																			progressCb,
+																			"Normals Computation[LS]");
 		}
 		break;
 	case TRI:
 		{
-		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
-		processedCells = theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
-																				&(ComputeNormsAtLevelWithTri),
-																				additionalParameters,
-																				NUMBER_OF_POINTS_FOR_NORM_WITH_TRI/2,
-																				NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3,
-																				true,
-																				progressCb,
-																				"Normals Computation[TRI]");
+			uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
+			processedCells = theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
+																					&(ComputeNormsAtLevelWithTri),
+																					additionalParameters,
+																					NUMBER_OF_POINTS_FOR_NORM_WITH_TRI/2,
+																					NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3,
+																					true,
+																					progressCb,
+																					"Normals Computation[TRI]");
 		}
 		break;
 	case HF:
 		{
-		uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
-		processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
-																		&(ComputeNormsAtLevelWithHF),
-																		additionalParameters,
-																		true,
-																		progressCb,
-																		"Normals Computation[HF]");
+			uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
+			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
+																			&(ComputeNormsAtLevelWithHF),
+																			additionalParameters,
+																			true,
+																			progressCb,
+																			"Normals Computation[HF]");
 		}
 		break;
 
@@ -297,10 +507,10 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		return false;
 	}
 
-	//we 'compress' each normal (and we check its orientation if necessary)
+	//we 'compress' each normal
 	theNormsCodes.fill(0);
 	theNorms->placeIteratorAtBegining();
-	for (unsigned i=0; i<n; i++)
+	for (unsigned i=0; i<pointCount; i++)
 	{
 		const PointCoordinateType* N = theNorms->getCurrentValue();
 		normsType nCode = GetNormIndex(N);
@@ -311,11 +521,13 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	theNorms->release();
 	theNorms = 0;
 
-	//prefered orientation
-	if (preferedOrientation >= 0)
-		UpdateNormalOrientations(theCloud,theNormsCodes,preferedOrientation);
+	//preferred orientation
+	if (preferredOrientation != UNDEFINED)
+	{
+		UpdateNormalOrientations(theCloud,theNormsCodes,preferredOrientation);
+	}
 
-	if (!inputOctree)
+	if (theOctree && !inputOctree)
 	{
 		delete theOctree;
 		theOctree = 0;
@@ -339,17 +551,17 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
 	//we already know which points are lying in the current cell
-	unsigned n = cell.points->size();
-	nNSS.pointsInNeighbourhood.resize(n);
+	unsigned pointCount = cell.points->size();
+	nNSS.pointsInNeighbourhood.resize(pointCount);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (unsigned j=0; j<n; ++j,++it)
+	for (unsigned j=0; j<pointCount; ++j,++it)
 	{
 		it->point = cell.points->getPointPersistentPtr(j);
 		it->pointIndex = cell.points->getPointGlobalIndex(j);
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i=0; i<pointCount; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -408,11 +620,11 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
 	//we already know which points are lying in the current cell
-	unsigned n = cell.points->size();
-	nNSS.pointsInNeighbourhood.resize(n);
+	unsigned pointCount = cell.points->size();
+	nNSS.pointsInNeighbourhood.resize(pointCount);
 	{
 		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-		for (unsigned j=0; j<n; ++j,++it)
+		for (unsigned j=0; j<pointCount; ++j,++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(j);
 			it->pointIndex = cell.points->getPointGlobalIndex(j);
@@ -420,7 +632,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i=0; i<pointCount; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -460,11 +672,11 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
 	//we already know which points are lying in the current cell
-	unsigned n = cell.points->size();
-	nNSS.pointsInNeighbourhood.resize(n);
+	unsigned pointCount = cell.points->size();
+	nNSS.pointsInNeighbourhood.resize(pointCount);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	{
-		for (unsigned j=0; j<n; ++j,++it)
+		for (unsigned j=0; j<pointCount; ++j,++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(j);
 			it->pointIndex = cell.points->getPointGlobalIndex(j);
@@ -472,7 +684,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i=0; i<pointCount; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 

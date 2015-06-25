@@ -487,14 +487,14 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 		}
 
 		//parameters
-		void* additionalParameters[3] = {
-			(void*)&graph,
-			(void*)cloud,
+		void* additionalParameters[3] = {	reinterpret_cast<void*>(&graph),
+											reinterpret_cast<void*>(cloud),
 #ifdef MST_USE_KNN
-			(void*)&kNN };
+											reinterpret_cast<void*>(&kNN)
 #else
-			(void*)&radius };
+											reinterpret_cast<void*>(&radius)
 #endif
+										};
 
 		if (octree->executeFunctionForAllCellsAtLevel(	level,
 														&ComputeMSTGraphAtLevel,

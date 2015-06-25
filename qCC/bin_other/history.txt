@@ -59,7 +59,10 @@ v2.6.2 XX/XX/2015
 	* ASCII save dialog:
 		- the output precision of scalar values can now be set up to 12 (instead of 8)
 		- Note that the internal representation of scalars remains 32-bits floats (i.e. with a relative precision ~10^-7)
-
+	* Normal computations:
+		- dialog has been refreshed
+		- new 'auto' button (when a single cloud is selected) to automatically estimate the local radius
+		- new preferred orientation 'Use previous normal' to use the former normal (if any) to orient the new one
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

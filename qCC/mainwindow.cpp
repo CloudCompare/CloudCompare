@@ -6176,6 +6176,7 @@ void MainWindow::doActionComputeCPS()
 	refreshAll();
 }
 
+static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 void MainWindow::doActionComputeNormals()
 {
 	if (m_selectedEntities.empty())
@@ -6184,89 +6185,97 @@ void MainWindow::doActionComputeNormals()
 		return;
 	}
 
-	size_t count = m_selectedEntities.size();
+	//look for clouds and meshes
+	std::vector<ccPointCloud*> clouds;
+	std::vector<ccMesh*> meshes;
 	PointCoordinateType defaultRadius = 0;
-	bool onlyMeshes = true;
-	bool hasMeshes = false;
-	bool hasSubMeshes = false;
-	for (size_t i=0; i<count; ++i)
+	try
 	{
-		if (!m_selectedEntities[i]->isKindOf(CC_TYPES::MESH))
+		for (size_t i=0; i<m_selectedEntities.size(); ++i)
 		{
-			if (defaultRadius == 0 && m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 			{
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-				defaultRadius = static_cast<PointCoordinateType>(cloud->getOwnBB().getMaxBoxDim() * 0.01); //diameter=1% of the bounding box max dim
+				clouds.push_back(cloud);
+
+				if (defaultRadius == 0)
+				{
+					//default radius
+					defaultRadius = ccNormalVectors::GuessNaiveRadius(cloud);
+				}
 			}
-			onlyMeshes = false;
-			break;
-		}
-		else
-		{
-			if (m_selectedEntities[i]->isA(CC_TYPES::MESH))
-				hasMeshes = true;
-			else
-				hasSubMeshes = true;
+			else if (m_selectedEntities[i]->isKindOf(CC_TYPES::MESH))
+			{
+				if (m_selectedEntities[i]->isA(CC_TYPES::MESH))
+				{
+					ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+					meshes.push_back(mesh);
+				}
+				else
+				{
+					ccConsole::Error(QString("Can't compute normals on sub-meshes! Select the parent mesh instead"));
+					return;
+				}
+			}
 		}
 	}
-
-	if (hasSubMeshes)
+	catch (std::bad_alloc)
 	{
-		ccConsole::Error(QString("Can't compute normals on sub-meshes! Select the parent mesh instead"));
+		ccConsole::Error("Not enough memory!");
 		return;
 	}
 
-	CC_LOCAL_MODEL_TYPES model = NO_MODEL;
-	int preferedOrientation = -1;
-
-	//We display dialog only for point clouds
-	if (!onlyMeshes)
+	//compute normals for each selected cloud
+	if (!clouds.empty())
 	{
 		ccNormalComputationDlg ncDlg(this);
 		ncDlg.setRadius(defaultRadius);
+		ncDlg.setPreferredOrientation(s_lastNormalOrientation);
+		if (clouds.size() == 1)
+		{
+			ncDlg.setCloud(clouds.front());
+		}
 
 		if (!ncDlg.exec())
 			return;
 
-		model = ncDlg.getLocalModel();
-		preferedOrientation = ncDlg.getPreferedOrientation();
+		CC_LOCAL_MODEL_TYPES model = ncDlg.getLocalModel();
+		ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
 		defaultRadius = ncDlg.getRadius();
-	}
+		bool error = false;
 
-	bool perVertex = true;
-	if (hasMeshes)
-	{
-		perVertex = (QMessageBox::question(	this,
-											"Mesh normals",
-											"Compute per-vertex normals (yes) or per-triangle (no)?",
-											QMessageBox::Yes,
-											QMessageBox::No ) == QMessageBox::Yes);
-	}
-
-	//Compute normals for each selected cloud
-	for (size_t i=0; i<m_selectedEntities.size(); i++)
-	{
-		if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+		for (size_t i=0; i<clouds.size(); i++)
 		{
-			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
+			ccPointCloud* cloud = clouds[i];
+			assert(cloud);
 
 			ccProgressDialog pDlg(true,this);
 
 			if (!cloud->getOctree())
+			{
 				if (!cloud->computeOctree(&pDlg))
 				{
 					ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
-					continue;
+					error = true;
+					break;
 				}
+			}
 
 			//computes cloud normals
 			QElapsedTimer eTimer;
 			eTimer.start();
 			NormsIndexesTableType* normsIndexes = new NormsIndexesTableType;
-			if (!ccNormalVectors::ComputeCloudNormals(cloud, *normsIndexes, model, defaultRadius, preferedOrientation, (CCLib::GenericProgressCallback*)&pDlg, cloud->getOctree()))
+			if (!ccNormalVectors::ComputeCloudNormals(	cloud,
+														*normsIndexes,
+														model,
+														defaultRadius,
+														preferredOrientation,
+														(CCLib::GenericProgressCallback*)&pDlg,
+														cloud->getOctree()))
 			{
 				ccConsole::Error(QString("Failed to compute normals on cloud '%1'").arg(cloud->getName()));
-				continue;
+				error = true;
+				break;
 			}
 			ccConsole::Print("[ComputeCloudNormals] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
 
@@ -6275,7 +6284,8 @@ void MainWindow::doActionComputeNormals()
 				if (!cloud->resizeTheNormsTable())
 				{
 					ccConsole::Error(QString("Failed to instantiate normals array on cloud '%1'").arg(cloud->getName()));
-					continue;
+					error = true;
+					break;
 				}
 			}
 			else
@@ -6285,7 +6295,9 @@ void MainWindow::doActionComputeNormals()
 			}
 
 			for (unsigned j=0; j<normsIndexes->currentSize(); j++)
+			{
 				cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
+			}
 
 			normsIndexes->release();
 			normsIndexes = 0;
@@ -6293,14 +6305,48 @@ void MainWindow::doActionComputeNormals()
 			cloud->showNormals(true);
 			cloud->prepareDisplayForRefresh();
 		}
-		else if (m_selectedEntities[i]->isA(CC_TYPES::MESH)/*|| m_selectedEntities[i]->isA(CC_TYPES::PRIMITIVE)*/) //TODO
+
+		//ask the user if we wants to orient cloud normals (with MST)
+		if (!error && preferredOrientation == ccNormalVectors::UNDEFINED)
 		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+			bool orientNormals = (QMessageBox::question(this,
+														"Orient normals",
+														"Orient normals with Minimum Spanning Tree?",
+														QMessageBox::Yes,
+														QMessageBox::No) == QMessageBox::Yes);
+			if (orientNormals)
+			{
+				doActionOrientNormalsMST();
+			}
+		}
+	}
+
+	//compute normals for each selected mesh
+	if (!meshes.empty())
+	{
+		QMessageBox question(	QMessageBox::Question,
+								"Mesh normals",
+								"Compute per-vertex normals (smooth) or per-triangle (faceted)?",
+								QMessageBox::NoButton,
+								this);
+
+		QPushButton* perVertexButton   = question.addButton("Per-vertex", QMessageBox::YesRole);
+		QPushButton* perTriangleButton = question.addButton("Per-triangle", QMessageBox::NoRole);
+
+		question.exec();
+		
+		bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
+
+		for (size_t i=0; i<meshes.size(); i++)
+		{
+			ccMesh* mesh = meshes[i];
+			assert(mesh);
+			
 			//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(mesh);
 			mesh->clearTriNormals();
 			mesh->showNormals(false);
-			bool result = mesh->computeNormals(perVertex);
+			bool result = mesh->computeNormals(computePerVertexNormals);
 			putObjectBackIntoDBTree(mesh,objContext);
 
 			if (!result)
@@ -6310,17 +6356,6 @@ void MainWindow::doActionComputeNormals()
 			}
 			mesh->prepareDisplayForRefresh_recursive();
 		}
-	}
-
-	//ask the user if we wants to orient cloud normals (with MST)
-	if (	!onlyMeshes
-		&&	preferedOrientation < 0
-		&&	QMessageBox::question(	this,
-									"Orient normals",
-									"Orient normals with Minimum Spanning Tree?",
-									QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
-	{
-		doActionOrientNormalsMST();
 	}
 
 	refreshAll();

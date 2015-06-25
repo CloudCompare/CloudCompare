@@ -246,10 +246,10 @@ int DistanceComputationTools::computeHausdorffDistance(	GenericIndexedCloudPersi
 	}
 
 	//additional parameters
-	void* additionalParameters[4] = {	(void*)referenceCloud,
-										(void*)referenceOctree,
-										(void*)&params,
-										(void*)&maxSearchSquareDistd
+	void* additionalParameters[4] = {	reinterpret_cast<void*>(referenceCloud),
+										reinterpret_cast<void*>(referenceOctree),
+										reinterpret_cast<void*>(&params),
+										reinterpret_cast<void*>(&maxSearchSquareDistd)
 	};
 
 	int result = 0;

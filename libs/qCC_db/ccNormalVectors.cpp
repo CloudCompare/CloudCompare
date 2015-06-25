@@ -283,6 +283,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 		static const int s_aimedPop = 16;
 		static const int s_aimedPopRange = 4;
 		static const int s_minPop = 6;
+		static const double s_minAboveMinRatio = 0.97;
 
 		const unsigned sampleCount = std::min<unsigned>(200,cloud->size()/10);
 
@@ -352,10 +353,11 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 				bestRadius = radius;
 				bestMeanPop = meanPop;
 
-				if (aboveMinPopRatio < 0.9)
+				if (aboveMinPopRatio < s_minAboveMinRatio)
 				{
 					//ccLog::Warning("[GuessBestRadius] The cloud density is very inhomogeneous! You may have to increase the radius to get valid normals everywhere... but the result will be smoother");
-					aimedPop = s_aimedPop + (2.0*stdDevPop) * (1.0-aboveMinPopRatio);
+					aimedPop = s_aimedPop + (2.0*stdDevPop)/* * (1.0-aboveMinPopRatio)*/;
+					assert(aimedPop >= s_aimedPop);
 				}
 				else
 				{
@@ -385,7 +387,16 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 				}
 
 				double slope = (radius*radius - lastRadius*lastRadius) / (meanPop - lastMeanPop);
-				newRadius = sqrt(lastRadius*lastRadius + (aimedPop - lastMeanPop) * slope);
+				PointCoordinateType newSquareRadius = lastRadius*lastRadius + (aimedPop - lastMeanPop) * slope;
+				if (newSquareRadius > 0)
+				{
+					newRadius = sqrt(newSquareRadius);
+				}
+				else
+				{
+					//can't do any better!
+					break;
+				}
 			}
 
 			lastRadius = radius;

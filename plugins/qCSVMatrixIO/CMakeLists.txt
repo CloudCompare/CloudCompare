@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 # Windows only for now
 if (WIN32)
 
-option( INSTALL_QCSV_MATRIX_IO_PLUGIN "Check to install qCSVMatrix I/O plugin" ON )
+option( INSTALL_QCSV_MATRIX_IO_PLUGIN "Check to install qCSVMatrix I/O plugin" OFF )
 
 if (INSTALL_QCSV_MATRIX_IO_PLUGIN)
 

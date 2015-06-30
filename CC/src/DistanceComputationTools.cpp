@@ -573,13 +573,13 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 					{
 						bool inbounds = false;
 						Tuple3i cellPos;
-						referenceOctree->getTheCellPosWhichIncludesThePoint(&nearestPoint,cellPos.u,cell.level,inbounds);
+						referenceOctree->getTheCellPosWhichIncludesThePoint(&nearestPoint,cellPos,cell.level,inbounds);
 						//if the cell is different or the structure has not yet been initialized, we reset it!
-						if (	cellPos.x != nNSS_Model.cellPos[0]
-							||	cellPos.y != nNSS_Model.cellPos[1]
-							||	cellPos.z != nNSS_Model.cellPos[2])
+						if (	cellPos.x != nNSS_Model.cellPos.x
+							||	cellPos.y != nNSS_Model.cellPos.y
+							||	cellPos.z != nNSS_Model.cellPos.z)
 						{
-							memcpy(nNSS_Model.cellPos,cellPos.u,sizeof(int)*3);
+							nNSS_Model.cellPos = cellPos;
 							referenceOctree->computeCellCenter(nNSS_Model.cellPos,nNSS_Model.level,nNSS_Model.cellCenter);
 							assert(inbounds);
 							nNSS_Model.minimalCellsSetToVisit.clear();
@@ -747,9 +747,9 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 		triPoints[1] = T->_getB();
 		triPoints[2] = T->_getC();
 
-		CCVector3 AB = *triPoints[1] - *triPoints[0];
-		CCVector3 BC = *triPoints[2] - *triPoints[1];
-		CCVector3 CA = *triPoints[0] - *triPoints[2];
+		CCVector3 AB = (*triPoints[1]) - (*triPoints[0]);
+		CCVector3 BC = (*triPoints[2]) - (*triPoints[1]);
+		CCVector3 CA = (*triPoints[0]) - (*triPoints[2]);
 
 		//be sure that the triangle is not degenerate!!!
 		if (AB.norm2() > ZERO_TOLERANCE &&
@@ -757,9 +757,9 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 			CA.norm2() > ZERO_TOLERANCE)
 		{
 			Tuple3i cellPos[3];
-			theOctree->getTheCellPosWhichIncludesThePoint(triPoints[0],cellPos[0].u,octreeLevel);
-			theOctree->getTheCellPosWhichIncludesThePoint(triPoints[1],cellPos[1].u,octreeLevel);
-			theOctree->getTheCellPosWhichIncludesThePoint(triPoints[2],cellPos[2].u,octreeLevel);
+			theOctree->getTheCellPosWhichIncludesThePoint(triPoints[0], cellPos[0], octreeLevel);
+			theOctree->getTheCellPosWhichIncludesThePoint(triPoints[1], cellPos[1], octreeLevel);
+			theOctree->getTheCellPosWhichIncludesThePoint(triPoints[2], cellPos[2], octreeLevel);
 
 			//compute the triangle bounding-box
 			Tuple3i minPos,maxPos;
@@ -808,7 +808,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 				if (_currentCell->level == octreeLevel)
 				{
 					//compute the (absolute) cell center
-					theOctree->computeCellCenter(currentCellPos.u,octreeLevel,AB.u);
+					theOctree->computeCellCenter(currentCellPos,octreeLevel,AB.u);
 
 					//check that the triangle do intersects the cell (box)
 					if (CCMiscTools::TriBoxOverlap(AB, halfCellDimensions, triPoints))
@@ -827,7 +827,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 								if (!f)
 								{
 									f = new FacesInCell();
-									f->cellCode = theOctree->generateTruncatedCellCode(currentCellPos.u,octreeLevel);
+									f->cellCode = theOctree->generateTruncatedCellCode(currentCellPos,octreeLevel);
 								}
 
 								//add the triangle to the current 'intersecting triangles' list
@@ -999,7 +999,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 	//on recupere la position de la cellule (dans startPos)
 	Tuple3i startPos;
-	s_octree_MT->getCellPos(desc.theCode, s_octreeLevel_MT, startPos.u, true);
+	s_octree_MT->getCellPos(desc.theCode, s_octreeLevel_MT, startPos, true);
 
 	//on en deduit le symetrique ainsi que la distance au bord de la grille le plus eloigne (maxDistToBoundaries)
 	int maxDistToBoundaries = 0;
@@ -1014,7 +1014,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 	//on determine son centre
 	CCVector3 cellCenter;
-	s_octree_MT->computeCellCenter(startPos.u, s_octreeLevel_MT, cellCenter.u);
+	s_octree_MT->computeCellCenter(startPos, s_octreeLevel_MT, cellCenter.u);
 
 	//on exprime maintenant startPos relativement aux bords de la grille
 	startPos -= s_theIntersection_MT->minFillIndexes;
@@ -1339,7 +1339,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(	OctreeAn
 
 				//get the cell pos
 				Tuple3i cellPos;
-				theOctree->getCellPos(pCodeAndIndex->theCode, octreeLevel, cellPos.u, true);
+				theOctree->getCellPos(pCodeAndIndex->theCode, octreeLevel, cellPos, true);
 				cellPos -= theIntersection->minFillIndexes;
 
 				//get the Chamfer distance
@@ -1404,7 +1404,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(	OctreeAn
 
 			//get cell pos
 			Tuple3i startPos;
-			theOctree->getCellPos(pCodeAndIndex->theCode, octreeLevel, startPos.u, true);
+			theOctree->getCellPos(pCodeAndIndex->theCode, octreeLevel, startPos, true);
 
 			//get the distance to the nearest and farthest boundaries
 			int maxDistToBoundaries = 0;
@@ -1419,7 +1419,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(	OctreeAn
 
 			//determine the cell center
 			CCVector3 cellCenter;
-			theOctree->computeCellCenter(startPos.u, octreeLevel, cellCenter.u);
+			theOctree->computeCellCenter(startPos, octreeLevel, cellCenter.u);
 
 			//express 'startPos' relatively to the grid borders
 			startPos -= theIntersection->minFillIndexes;
@@ -2329,7 +2329,7 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 
 	//on cherche la cellule de l'octree qui englobe le "seedPoint"
 	Tuple3i cellPos;
-	theOctree->getTheCellPosWhichIncludesThePoint(cloud->getPoint(seedPointIndex),cellPos.u,octreeLevel);
+	theOctree->getTheCellPosWhichIncludesThePoint(cloud->getPoint(seedPointIndex),cellPos,octreeLevel);
 	fm.setSeedCell(cellPos.u);
 
 	bool result = false;
@@ -2441,7 +2441,7 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(	CC_CHAMFER
 				DgmOctree::OctreeCellCodeType theCode = theCodes.back();
 				theCodes.pop_back();
 				Tuple3i cellPos;
-				octreeB->getCellPos(theCode,octreeLevel,cellPos.u,true);
+				octreeB->getCellPos(theCode,octreeLevel,cellPos,true);
 				cellPos -= minIndexes;
 				chamferGrid.setValue(cellPos,0);
 			}
@@ -2476,7 +2476,7 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(	CC_CHAMFER
 			theIndexes.pop_back();
 
 			Tuple3i cellPos;
-			octreeA->getCellPos(octreeA->getCellCode(theIndex),octreeLevel,cellPos.u,false);
+			octreeA->getCellPos(octreeA->getCellCode(theIndex),octreeLevel,cellPos,false);
 			cellPos -= minIndexes;
 			int di = static_cast<int>(chamferGrid.getValue(cellPos));
 			if (di > maxDi)

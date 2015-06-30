@@ -240,14 +240,17 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 			}
 		}
 
-		int pos[3];
-		theOctree->getTheCellPosWhichIncludesThePoint(&startPoint,pos,octreeLevel);
-		//clipping (important!)
-		pos[0] = std::min(octreeLength,pos[0]);
-		pos[1] = std::min(octreeLength,pos[1]);
-		pos[2] = std::min(octreeLength,pos[2]);
-		fm->setSeedCell(pos);
-		++seedPoints;
+		//set seed point
+		{
+			Tuple3i cellPos;
+			theOctree->getTheCellPosWhichIncludesThePoint(&startPoint,cellPos,octreeLevel);
+			//clipping (important!)
+			cellPos.x = std::min(octreeLength,cellPos.x);
+			cellPos.y = std::min(octreeLength,cellPos.y);
+			cellPos.z = std::min(octreeLength,cellPos.z);
+			fm->setSeedCell(cellPos.u);
+			++seedPoints;
+		}
 
 		int result = fm->propagate();
 

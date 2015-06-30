@@ -62,11 +62,11 @@ int FastMarchingForPropagation::init(	GenericCloud* theCloud,
 		}
 		
 		//on transforme le code de cellule en position
-		int cellPos[3];
+		Tuple3i cellPos;
 		theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
 
 		//on renseigne la grille
-		unsigned gridPos = FM_pos2index(cellPos);
+		unsigned gridPos = FM_pos2index(cellPos.u);
 
 		PropagationCell* aCell = new PropagationCell;
 		aCell->cellCode = cellCodes.back();

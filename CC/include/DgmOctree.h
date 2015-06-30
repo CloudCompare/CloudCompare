@@ -208,7 +208,7 @@ public:
 			be processed. Use see DgmOctree::getCellPos to determine this position.
 			This information should only be updated if the cell changes.
 		**/
-		int cellPos[3];
+		Tuple3i cellPos;
 		//! Coordinates of the center of the cell including the query point
 		/** Use DgmOctree::computeCellCenter to determine these coordinates.
 			This information should only be updated if the cell changes.
@@ -260,11 +260,11 @@ public:
 			: queryPoint(0,0,0)
 			, level(1)
 			, minNumberOfNeighbors(1)
+			, cellPos(0,0,0)
 			, maxSearchSquareDistd(-1.0)
 			, alreadyVisitedNeighbourhoodSize(0)
 			, theNearestPointIndex(0)
 		{
-			memset(cellPos,0,sizeof(int)*3);
 			memset(cellCenter,0,sizeof(PointCoordinateType)*3);
 		}
 	};
@@ -500,7 +500,7 @@ public:
 		\param level level at which octree grid is considered
 		\param cellDists output
 	**/
-	void getCellDistanceFromBorders(const int* cellPos,
+	void getCellDistanceFromBorders(const Tuple3i& cellPos,
 									uchar level,
 									int* cellDists) const;
 
@@ -512,7 +512,7 @@ public:
 		\param neighbourhoodLength cell neighbourhood "radius"
 		\param cellDists output
 	**/
-	void getCellDistanceFromBorders(const int* cellPos,
+	void getCellDistanceFromBorders(const Tuple3i& cellPos,
 									uchar level,
 									int neighbourhoodLength,
 									int* cellDists) const;
@@ -692,9 +692,9 @@ public:
 		**/
 		NeighboursSet potentialCandidates;
 		//! Previous search box (min corner)
-		Vector3Tpl<int> prevMinCornerPos;
+		Tuple3i prevMinCornerPos;
 		//! Previous search box (max corner)
-		Vector3Tpl<int> prevMaxCornerPos;
+		Tuple3i prevMaxCornerPos;
 
 		ProgressiveCylindricalNeighbourhood()
 			: CylindricalNeighbourhood()
@@ -719,15 +719,15 @@ public:
 		number of cells along each dimension). This method computes the
 		corresponding cell code, truncated at the level N (meaning that it
 		is only valid for the Nth level, not for other levels).
-		\param pos the cell position
+		\param cellPos the cell position
 		\param level the level of subdivision
 		\return the truncated cell code
 	**/
-	OctreeCellCodeType generateTruncatedCellCode(const int pos[],uchar level) const;
+	OctreeCellCodeType generateTruncatedCellCode(const Tuple3i& cellPos, uchar level) const;
 
 #ifndef OCTREE_CODES_64_BITS
 	//! Short version of generateTruncatedCellCode
-	OctreeCellCodeType generateTruncatedCellCode(const short pos[],uchar level) const;
+	OctreeCellCodeType generateTruncatedCellCode(const Tuple3s& pos, uchar level) const;
 #endif
 
 	//! Returns the position FOR THE DEEPEST LEVEL OF SUBDIVISION of the cell that includes a given point
@@ -736,13 +736,13 @@ public:
 		\param thePoint the query point
 		\param cellPos the computed position
 	**/
-	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, int cellPos[]) const
+	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos) const
 	{
 		const PointCoordinateType& cs = getCellSize(MAX_OCTREE_LEVEL);
 		//DGM: if we admit that cs >= 0, then the 'floor' operator is useless (int cast = truncation)
-		cellPos[0] = static_cast<int>(/*floor*/(thePoint->x - m_dimMin[0])/cs);
-		cellPos[1] = static_cast<int>(/*floor*/(thePoint->y - m_dimMin[1])/cs);
-		cellPos[2] = static_cast<int>(/*floor*/(thePoint->z - m_dimMin[2])/cs);
+		cellPos.x = static_cast<int>(/*floor*/(thePoint->x - m_dimMin.x)/cs);
+		cellPos.y = static_cast<int>(/*floor*/(thePoint->y - m_dimMin.y)/cs);
+		cellPos.z = static_cast<int>(/*floor*/(thePoint->z - m_dimMin.z)/cs);
 	}
 
 	//! Returns the position for a given level of subdivision of the cell that includes a given point
@@ -753,16 +753,16 @@ public:
 		\param cellPos the computed position
 		\param level the level of subdivision
 	**/
-	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, int cellPos[], uchar level) const
+	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos, uchar level) const
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 
 		getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
 
 		const uchar dec = MAX_OCTREE_LEVEL-level;
-		cellPos[0] >>= dec;
-		cellPos[1] >>= dec;
-		cellPos[2] >>= dec;
+		cellPos.x >>= dec;
+		cellPos.y >>= dec;
+		cellPos.z >>= dec;
 	}
 
 	//! Returns the position for a given level of subdivision of the cell that includes a given point
@@ -775,29 +775,29 @@ public:
 		\param level the level of subdivision
 		\param inBounds indicates if the query point is inside or outside the octree bounding-box
 	**/
-	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, int cellPos[], uchar level, bool& inBounds) const
+	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos, uchar level, bool& inBounds) const
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 
 		getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
 
-		inBounds =	(	cellPos[0] >= 0 && cellPos[0] < MAX_OCTREE_LENGTH
-					 && cellPos[1] >= 0 && cellPos[1] < MAX_OCTREE_LENGTH
-					 && cellPos[2] >= 0 && cellPos[2] < MAX_OCTREE_LENGTH );
+		inBounds =	(	cellPos.x >= 0 && cellPos.x < MAX_OCTREE_LENGTH
+					 && cellPos.y >= 0 && cellPos.y < MAX_OCTREE_LENGTH
+					 && cellPos.z >= 0 && cellPos.z < MAX_OCTREE_LENGTH );
 
 		const uchar dec = MAX_OCTREE_LEVEL-level;
-		cellPos[0] >>= dec;
-		cellPos[1] >>= dec;
-		cellPos[2] >>= dec;
+		cellPos.x >>= dec;
+		cellPos.y >>= dec;
+		cellPos.z >>= dec;
 	}
 
 	//! Returns the cell position for a given level of subdivision of a cell designated by its code
 	/** \param code the cell code
 		\param level the level of subdivision
-		\param pos the computed position
+		\param cellPos the computed position
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	void getCellPos(OctreeCellCodeType code, uchar level, int pos[], bool isCodeTruncated) const;
+	void getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPos, bool isCodeTruncated) const;
 
 	//! Returns the cell center for a given level of subdivision of a cell designated by its code
 	/** \param code the cell code
@@ -805,9 +805,9 @@ public:
 		\param center the computed center
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	inline void computeCellCenter(OctreeCellCodeType code, uchar level,PointCoordinateType center[], bool isCodeTruncated = false) const
+	inline void computeCellCenter(OctreeCellCodeType code, uchar level, PointCoordinateType center[], bool isCodeTruncated = false) const
 	{
-		int cellPos[3];
+		Tuple3i cellPos;
 		getCellPos(code,level,cellPos,isCodeTruncated);
 
 		return computeCellCenter(cellPos,level,center);
@@ -818,22 +818,22 @@ public:
 		\param level the level of subdivision
 		\param center the computed center
 	**/
-	inline void computeCellCenter(const int cellPos[], uchar level, PointCoordinateType center[]) const
+	inline void computeCellCenter(const Tuple3i& cellPos, uchar level, PointCoordinateType center[]) const
 	{
 		const PointCoordinateType& cs = getCellSize(level);
-		center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[0]));
-		center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[1]));
-		center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[2]));
+		center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
+		center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.y));
+		center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.z));
 	}
 
 #ifndef OCTREE_CODES_64_BITS
 	//! Short version of computeCellCenter
-	inline void computeCellCenter(const short cellPos[], uchar level, PointCoordinateType center[]) const
+	inline void computeCellCenter(const Tuple3s& cellPos, uchar level, PointCoordinateType center[]) const
 	{
 		const PointCoordinateType& cs = getCellSize(level);
-		center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[0]));
-		center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[1]));
-		center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[2]));
+		center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
+		center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.y));
+		center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.z));
 	}
 #endif
 
@@ -1151,10 +1151,10 @@ protected:
 		\param neighbourhoodLength the distance (in terms of cells) at which to look for neighbour cells
 		\param level the level of subdivision
 	**/
-	void getNeighborCellsAround(const int cellPos[],
-									cellIndexesContainer &neighborCellsIndexes,
-									int neighbourhoodLength,
-									uchar level) const;
+	void getNeighborCellsAround(const Tuple3i& cellPos,
+								cellIndexesContainer &neighborCellsIndexes,
+								int neighbourhoodLength,
+								uchar level) const;
 
 	//! Gets point in the neighbourhing cells of a specific cell
 	/** \param nNSS NN search parameters (from which are used: cellPos, pointsInNeighbourCells and level)

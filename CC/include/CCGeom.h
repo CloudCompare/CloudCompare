@@ -55,7 +55,31 @@ public:
 	
 	//! Copy constructor
 	inline Tuple3Tpl(const Tuple3Tpl& v) : x(v.x),y(v.y),z(v.z) {}
+
+	//! Inverse operator
+	inline Tuple3Tpl operator - () const { Tuple3Tpl V(-x,-y,-z); return V; }
+	//! In-place addition operator
+	inline Tuple3Tpl& operator += (const Tuple3Tpl& v) { x+=v.x; y+=v.y; z+=v.z; return *this; }
+	//! In-place substraction operator
+	inline Tuple3Tpl& operator -= (const Tuple3Tpl& v) { x-=v.x; y-=v.y; z-=v.z; return *this; }
+	//! In-place multiplication (by a scalar) operator
+	inline Tuple3Tpl& operator *= (Type v) { x*=v; y*=v; z*=v; return *this; }
+	//! In-place division (by a scalar) operator
+	inline Tuple3Tpl& operator /= (Type v) { x/=v; y/=v; z/=v; return *this; }
+	//! Addition operator
+	inline Tuple3Tpl operator + (const Tuple3Tpl& v) const { return Tuple3Tpl(x+v.x, y+v.y, z+v.z); }
+	//! Substraction operator
+	inline Tuple3Tpl operator - (const Tuple3Tpl& v) const { return Tuple3Tpl(x-v.x, y-v.y, z-v.z); }
+	//! Multiplication operator
+	inline Tuple3Tpl operator * (Type s) const { return Tuple3Tpl(x*s, y*s, z*s); }
+	//! Division operator
+	inline Tuple3Tpl operator / (Type s) const { return Tuple3Tpl(x/s, y/s, z/s); }
 };
+
+//! Tuple of 3 int values
+typedef Tuple3Tpl<int> Tuple3i;
+//! Tuple of 3 unsigned int values
+typedef Tuple3Tpl<unsigned int> Tuple3ui;
 
 //! 3D Vector (templated version)
 template <typename Type> class Vector3Tpl : public Tuple3Tpl<Type>

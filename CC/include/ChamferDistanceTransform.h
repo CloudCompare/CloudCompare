@@ -20,7 +20,7 @@
 
 //Local
 #include "CCCoreLib.h"
-#include "CCConst.h"
+#include "Grid3D.h"
 #include "MathTools.h"
 
 namespace CCLib
@@ -29,31 +29,30 @@ namespace CCLib
 class GenericProgressCallback;
 class NormalizedProgress;
 
-//! Class to compute and handle Chamfer distances on a 3D grid
-class CC_CORE_LIB_API ChamferDistanceTransform : MathTools
+//! Class to compute a Chamfer distance field on a 3D grid
+/** Internally we use 'unsigned short' value to limit memory consumption.
+	For computational reasons, the max computable 'distance' is 0xFAFA = 64250.
+**/
+class CC_CORE_LIB_API ChamferDistanceTransform : public Grid3D<unsigned short>, public MathTools
 {
 
 public:
 
-	//! Chamfer distance type
-	typedef unsigned short GridElement;//'short' to limit memory consumption
+	//! Max possible 'distance'
+	static const unsigned short MAX_DIST = 0xFAFA;
 
 	//! Default constructor
-	/** \param Di the grid size along the X dimension
-		\param Dj the grid size along the Y dimension
-		\param Dk the grid size along the Z dimension
+	/** 'Zero' cells must be initialized with setValue(0).
+		\warning ChamferDistanceTransform::init must be called at least once before any action.
+		\param gridSize the grid size
 	**/
-	ChamferDistanceTransform(unsigned Di, unsigned Dj, unsigned Dk);
+	ChamferDistanceTransform(Tuple3ui& gridSize) : Grid3D<GridElement>(gridSize.x, gridSize.y, gridSize.z, 1) {}
 
-	//! Default destructor
-	virtual ~ChamferDistanceTransform();
-
-	//! Initializes the 3D grid
-	/** The Chamfer distance is computed on a 3D grid.
-		This grid must be initialized in memory prior to any action.
+	//! Initializes the grid
+	/** This memory for the grid must be explicitelty reserved prior to any action.
 		\return true if the initialization succeeded
 	**/
-	bool init();
+	inline bool init() { return Grid3D<GridElement>::init(MAX_DIST); }
 
 	//! Computes the Chamfer distance on the whole grid
 	/** Propagates the distances on the whole grid. The 'zeros' should
@@ -65,67 +64,17 @@ public:
 	**/
 	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb = 0);
 
-	//! Sets a cell as a "zero"
-	/** Chamfer distance is computed on the whole grid relatively to the
-		"zero" cells.
-		\param i the cell coordinate along the X dimension
-		\param j the cell coordinate along the Y dimension
-		\param k the cell coordinate along the Z dimension
-	**/
-	void setZero(int i, int j, int k);
-
-	//! Sets a cell as a "zero"
-	/** Chamfer distance is computed on the whole grid relatively to the
-		"zero" cells.
-		\param cellPos the cell position (as a 3-size array)
-	**/
-	void setZero(int cellPos[]);
-
-	//! Returns a cell "distance"
-	/** This method should be called after the Chamfer distance had
-		been properly propagated (see ChamferDistanceTransform::propagateDistance).
-		\param i the cell coordinate along the X dimension
-		\param j the cell coordinate along the Y dimension
-		\param k the cell coordinate along the Z dimension
-		\return the Chamfer distance value
-	**/
-	GridElement getValue(int i, int j, int k) const;
-
-	//! Returns a cell "distance"
-	/** This method should be called after the Chamfer distance had
-		been properly propagated (see ChamferDistanceTransform::propagateDistance).
-		\param cellPos the cell position (as a 3-size array)
-		\return the Chamfer distance value
-	**/
-	GridElement getValue(int cellPos[]);
-
 protected:
 
 	//! Internal method for distance propagation
 	/** \return max distance
 	**/
-	GridElement propagateDistance(	GridElement iStart,
-									GridElement jStart,
-									GridElement kStart,
-									int sign,
+	GridElement propagateDistance(	unsigned iStart,
+									unsigned jStart,
+									unsigned kStart,
+									bool forward,
 									const int neighbours[14][4],
 									NormalizedProgress* normProgress = 0);
-
-    //! Grid structure
-	GridElement *m_grid;
-
-	//! Grid dimension along the X dimension
-	unsigned m_gridX;
-	//! Grid dimension along the Y dimension
-	unsigned m_gridY;
-	//! Grid dimension along the Z dimension
-	unsigned m_gridZ;
-    //! Shift along the Y dimension for faster element access
-	int m_decY;
-    //! Shift along the Z dimension for faster element access
-	int m_decZ;
-	//! First index of innerbound grid
-	int m_decIndex;
 };
 
 }

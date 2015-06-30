@@ -476,7 +476,7 @@ void DgmOctree::updateMinAndMaxTables()
 	if (!m_theAssociatedCloud)
 		return;
 
-	m_theAssociatedCloud->getBoundingBox(m_pointsMin.u,m_pointsMax.u);
+	m_theAssociatedCloud->getBoundingBox(m_pointsMin,m_pointsMax);
 	m_dimMin = m_pointsMin;
 	m_dimMax = m_pointsMax;
 
@@ -486,7 +486,7 @@ void DgmOctree::updateMinAndMaxTables()
 void DgmOctree::updateCellSizeTable()
 {
 	//update the cell dimension for each subdivision level
-	m_cellSize[0] = m_dimMax[0]-m_dimMin[0];
+	m_cellSize[0] = m_dimMax.x - m_dimMin.x;
 
 	for (int k=1; k<=MAX_OCTREE_LEVEL; k++)
 	{
@@ -498,7 +498,9 @@ void DgmOctree::updateCellCountTable()
 {
 	//level 0 is just the octree bounding-box
 	for (uchar i=0; i<=MAX_OCTREE_LEVEL; ++i)
+	{
 		computeCellsStatistics(i);
+	}
 }
 
 void DgmOctree::computeCellsStatistics(uchar level)
@@ -648,10 +650,10 @@ static inline DgmOctree::OctreeCellCodeType GenerateCellCodeForDim(int pos)
 	return PRE_COMPUTED_POS_CODES.values[pos];
 }
 
-void DgmOctree::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) const
+void DgmOctree::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) const
 {
-	memcpy(bbMin, m_dimMin.u, sizeof(PointCoordinateType)*3);
-	memcpy(bbMax, m_dimMax.u, sizeof(PointCoordinateType)*3);
+	bbMin = m_dimMin;
+	bbMax = m_dimMax;
 }
 
 void DgmOctree::getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPos, bool isCodeTruncated) const
@@ -677,20 +679,18 @@ void DgmOctree::getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPo
 	}
 }
 
-void DgmOctree::computeCellLimits(OctreeCellCodeType code, uchar level, PointCoordinateType cellMin[], PointCoordinateType cellMax[], bool isCodeTruncated) const
+void DgmOctree::computeCellLimits(OctreeCellCodeType code, uchar level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated) const
 {
 	Tuple3i cellPos;
 	getCellPos(code,level,cellPos,isCodeTruncated);
 
 	const PointCoordinateType& cs = getCellSize(level);
 
-	cellMin[0] = m_dimMin[0] + cs * static_cast<PointCoordinateType>(cellPos.x);
-	cellMin[1] = m_dimMin[1] + cs * static_cast<PointCoordinateType>(cellPos.y);
-	cellMin[2] = m_dimMin[2] + cs * static_cast<PointCoordinateType>(cellPos.z);
+	cellMin.x = m_dimMin[0] + cs * cellPos.x;
+	cellMin.y = m_dimMin[1] + cs * cellPos.y;
+	cellMin.z = m_dimMin[2] + cs * cellPos.z;
 
-	cellMax[0] = cellMin[0] + cs;
-	cellMax[1] = cellMin[1] + cs;
-	cellMax[2] = cellMin[2] + cs;
+	cellMax = cellMin + CCVector3(cs,cs,cs);
 }
 
 bool DgmOctree::getPointsInCell(OctreeCellCodeType cellCode,
@@ -1240,7 +1240,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
                     {
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
-						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center.u);
+						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
 						cellDesc.index = nNSS.pointsInSphericalNeighbourhood.size();
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
@@ -1280,7 +1280,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
                     {
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
-						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center.u);
+						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
 						cellDesc.index = nNSS.pointsInSphericalNeighbourhood.size();
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
@@ -1320,7 +1320,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
                     {
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
-						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center.u);
+						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
 						cellDesc.index = nNSS.pointsInSphericalNeighbourhood.size();
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
@@ -1360,7 +1360,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
                     {
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
-						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center.u);
+						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
 						cellDesc.index = nNSS.pointsInSphericalNeighbourhood.size();
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
@@ -1399,7 +1399,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 					{
 						//add cell descriptor to cells list
 						currentCellPos.y = v1;
-						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center.u);
+						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
 						cellDesc.index = nNSS.pointsInSphericalNeighbourhood.size();
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
@@ -1438,7 +1438,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 					{
 						//add cell descriptor to cells list
 						currentCellPos.y = v1;
-						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center.u);
+						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
 						cellDesc.index = nNSS.pointsInSphericalNeighbourhood.size();
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
@@ -1543,7 +1543,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 	//for each dimension, we look for the min distance between the query point and the cell border.
 	//This distance (minDistToBorder) corresponds to the maximal radius of a sphere centered on the
 	//query point and totally included inside the cell
-	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(nNSS.queryPoint,cs,nNSS.cellCenter);
 
 	//cells for which we have already computed the distances from their points to the query point
 	unsigned alreadyProcessedCells = 0;
@@ -1719,7 +1719,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 	//for each dimension, we look for the min distance between the query point and the cell border.
 	//This distance (minDistToBorder) corresponds to the maximal radius of a sphere centered on the
 	//query point and totally included inside the cell
-	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(nNSS.queryPoint,cs,nNSS.cellCenter);
 
 	//eligible points found
 	unsigned eligiblePoints = 0;
@@ -2667,7 +2667,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 	const PointCoordinateType& cs = getCellSize(nNSS.level);
 
 	//we compute the minimal distance between the query point and all cell borders
-	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+	PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(nNSS.queryPoint,cs,nNSS.cellCenter);
 
 	//we deduce the minimum cell neighbourhood size (integer) that includes the search sphere
 	int minNeighbourhoodSize = 1+(radius>minDistToBorder ? static_cast<int>(ceil((radius-minDistToBorder)/cs)) : 0);
@@ -3268,37 +3268,24 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 
     //temporary virtual 'slices'
     int sliceSize = (di+2)*(dj+2); //add a margin to avoid "boundary effects"
-    int *slice = new int[sliceSize];
-    if (!slice) //Not enough memory
-        return -2;
-
-    int *oldSlice = new int[sliceSize];
-    if (!oldSlice) //Not enough memory
-    {
-        delete[] slice;
-        return -2;
-    }
-
+	std::vector<int> slice;
+	std::vector<int> oldSlice;
     //equivalence table between 'on the fly' labels
-    int* equivalentLabels = new int[numberOfCells+2];
-    if (!equivalentLabels) //Not enough memory
-    {
-        delete[] slice;
-        delete[] oldSlice;
-        return -2;
-    }
-    memset(equivalentLabels,0,sizeof(int)*(numberOfCells+2));
+	std::vector<int> equivalentLabels;
+    std::vector<int> cellIndexToLabel;
 
-    //equivalence between a cell index and its label
-    int* cellIndexToLabel = new int[numberOfCells];
-    if (!cellIndexToLabel) //Not enough memory
-    {
-        delete[] slice;
-        delete[] oldSlice;
-        delete[] equivalentLabels;
-        return -2;
-    }
-    memset(cellIndexToLabel,0,sizeof(int)*numberOfCells);
+	try
+	{
+		slice.resize(sliceSize);
+		oldSlice.resize(sliceSize,0); //previous slice is empty by default
+		equivalentLabels.resize(numberOfCells+2,0);
+		cellIndexToLabel.resize(numberOfCells,0);
+	}
+	catch (std::bad_alloc)
+	{
+		//not enough memory
+		return -2;
+	}
 
     //progress notification
     if (progressCb)
@@ -3310,9 +3297,6 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
         progressCb->setInfo(buffer);
         progressCb->start();
     }
-
-    //previous slice is empty by default
-    memset(oldSlice,0,sizeof(int)*sliceSize);
 
     //current label
     size_t currentLabel = 1;
@@ -3327,7 +3311,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 		for (int k = indexMin.z; k < indexMin.z+step; k++)
 		{
 			//initialize the 'current' slice
-			memset(slice,0,sizeof(int)*sliceSize);
+			std::fill(slice.begin(),slice.end(),0);
 
 			//for each cell of the slice
 			while (counter<numberOfCells && static_cast<int>(_ccCells->theIndex >> (level<<1)) == k)
@@ -3338,25 +3322,25 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 				++_ccCells;
 
 				//we look if the cell has neighbors inside the slice
-				int* _slice = slice + cellIndex;
+				int* _slice = &(slice[cellIndex]);
 				{
 					for (uchar n=0; n<neighborsInCurrentSlice; n++)
 					{
 						assert(cellIndex+currentSliceNeighborsShifts[n]<sliceSize);
 						const int& neighborLabel = _slice[currentSliceNeighborsShifts[n]];
-						if (neighborLabel>1)
+						if (neighborLabel > 1)
 							neighboursVal.push_back(neighborLabel);
 					}
 				}
 
 				//and in the previous slice
-				int* _oldSlice = oldSlice + cellIndex;
+				const int* _oldSlice = &(oldSlice[cellIndex]);
 				{
 					for (uchar n=0; n<neighborsInPrecedingSlice; n++)
 					{
 						assert(cellIndex+precedingSliceNeighborsShifts[n]<sliceSize);
 						const int& neighborLabel = _oldSlice[precedingSliceNeighborsShifts[n]];
-						if (neighborLabel>1)
+						if (neighborLabel > 1)
 							neighboursVal.push_back(neighborLabel);
 					}
 				}
@@ -3449,18 +3433,17 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 	}
 
     //release some memory
-    delete[] slice;
-    delete[] oldSlice;
+    slice.clear();
+    oldSlice.clear();
 
     if (progressCb)
 	{
 		progressCb->stop();
 	}
 
-    if (currentLabel<2) //No CC found !!!
+    if (currentLabel < 2)
     {
-        delete[] cellIndexToLabel;
-        delete[] equivalentLabels;
+		//No component found
         return -3;
     }
 
@@ -3494,18 +3477,18 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     //hack: we use "equivalentLabels" to count how many components will have to be created
 	int numberOfComponents = 0;
 	{
-		memset(equivalentLabels,0,(numberOfCells+2)*sizeof(int));
+		std::fill(equivalentLabels.begin(),equivalentLabels.end(),0);
 
 		for (size_t i=0; i<numberOfCells; i++)
 		{
-			assert(cellIndexToLabel[i]>1 && cellIndexToLabel[i]<static_cast<int>(numberOfCells)+2);
-			equivalentLabels[cellIndexToLabel[i]]=1;
+			assert(cellIndexToLabel[i] > 1 && cellIndexToLabel[i]<static_cast<int>(numberOfCells)+2);
+			equivalentLabels[cellIndexToLabel[i]] = 1;
 		}
 
 		//we create (following) indexes for each components
 		for (size_t i=2; i<numberOfCells+2; i++)
 			if (equivalentLabels[i] == 1)
-				equivalentLabels[i]=++numberOfComponents; //labels start at '1'
+				equivalentLabels[i] = ++numberOfComponents; //labels start at '1'
 	}
     assert(equivalentLabels[0] == 0);
     assert(equivalentLabels[1] == 0);
@@ -3547,11 +3530,6 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 			progressCb->stop();
 		}
 	}
-
-	if (cellIndexToLabel)
-		delete[] cellIndexToLabel;
-	if (equivalentLabels)
-		delete[] equivalentLabels;
 
     return 0;
 }

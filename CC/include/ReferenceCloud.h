@@ -46,7 +46,7 @@ public:
 	//**** inherited form GenericCloud ****//
 	inline virtual unsigned size() const { return m_theIndexes->currentSize(); }
 	virtual void forEach(genericPointAction& anAction);
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 	inline virtual uchar testVisibility(const CCVector3& P) const { assert(m_theAssociatedCloud); return m_theAssociatedCloud->testVisibility(P); }
 	inline virtual void placeIteratorAtBegining() { m_globalIterator = 0; }
 	inline virtual const CCVector3* getNextPoint() { assert(m_theAssociatedCloud); return (m_globalIterator < size() ? m_theAssociatedCloud->getPoint(m_theIndexes->getValue(m_globalIterator++)) : 0); }

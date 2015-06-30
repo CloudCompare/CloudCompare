@@ -466,7 +466,7 @@ ccBBox ccSubMesh::getOwnBB(bool withGLFeatures/*=false*/)
 	return m_bBox;
 }
 
-void ccSubMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
+void ccSubMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
 	//force BB refresh if necessary
 	if (!m_bBox.isValid() && size() != 0)
@@ -474,8 +474,8 @@ void ccSubMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType 
 		refreshBB();
 	}
 
-	memcpy(bbMin, m_bBox.minCorner().u, 3*sizeof(PointCoordinateType));
-	memcpy(bbMax, m_bBox.maxCorner().u, 3*sizeof(PointCoordinateType));
+	bbMin = m_bBox.minCorner();
+	bbMax = m_bBox.maxCorner();
 }
 
 bool ccSubMesh::toFile_MeOnly(QFile& out) const

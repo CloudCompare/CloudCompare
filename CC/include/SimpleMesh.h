@@ -55,7 +55,7 @@ public: //inherited methods
 	virtual TriangleSummitsIndexes* getNextTriangleIndexes();
 	virtual TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex);
 	virtual unsigned size() const;
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 
 public: //specific methods

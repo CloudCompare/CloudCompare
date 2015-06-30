@@ -77,16 +77,16 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	}
 
 	//Theoretical profile bounding box
-	PointCoordinateType profileBBMin[3],profileBBMax[3];
+	CCVector3 profileBBMin, profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
-	double yMin = std::max(map->yMin,static_cast<double>(profileBBMin[1]));
-	double yMax = std::min(map->yMin + static_cast<double>(map->ySteps) * map->yStep, static_cast<double>(profileBBMax[1]));
+	double yMin = std::max(map->yMin,static_cast<double>(profileBBMin.y));
+	double yMax = std::min(map->yMin + static_cast<double>(map->ySteps) * map->yStep, static_cast<double>(profileBBMax.y));
 	const double ySpan = yMax - yMin;
 	//For the 'X' dimension, it's easier to stick with the th. profile
-	const double xMin = profileBBMin[0];
-//	const double xMax = profileBBMax[0];
-	const double xSpan = profileBBMax[0] - profileBBMin[0];
+	const double xMin = profileBBMin.x;
+//	const double xMax = profileBBMax.x;
+	const double xSpan = profileBBMax.x - profileBBMin.x;
 
 	if (xSpan == 0.0 && ySpan == 0.0)
 	{
@@ -575,18 +575,18 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	}
 
 	//Theoretical profile bounding box
-	PointCoordinateType profileBBMin[3],profileBBMax[3];
+	CCVector3 profileBBMin, profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
 	double yMin = std::max(	map->yMin + 0.5 * map->xStep, //central height of first row
-							static_cast<double>(profileBBMin[1]));
+							static_cast<double>(profileBBMin.y));
 	double yMax = std::min(	map->yMin + (static_cast<double>(map->ySteps)-0.5) * map->yStep, //central height of last row
-							static_cast<double>(profileBBMax[1]));
+							static_cast<double>(profileBBMax.y));
 	const double ySpan = yMax - yMin;
 
 	//For the 'X' dimension, it's easier to stick with the th. profile
-//	const double xMin = profileBBMin[0];
-	const double xMax = profileBBMax[0];
+//	const double xMin = profileBBMin.x;
+	const double xMax = profileBBMax.x;
 	//shortcut for clarity
 	const double& maxRadius = xMax;
 

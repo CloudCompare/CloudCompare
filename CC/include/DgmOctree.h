@@ -163,16 +163,13 @@ public:
 		unsigned index;
 
 		//! Default empty constructor
-		CellDescriptor()
-		{
-		}
+		CellDescriptor() {}
 
 		//! Constructor from a point and an index
-		CellDescriptor(const PointCoordinateType c[], unsigned i)
-			: center(c)
+		CellDescriptor(const CCVector3& C, unsigned i)
+			: center(C)
 			, index(i)
-		{
-		}
+		{}
 	};
 
 	//! A set of neighbour cells descriptors
@@ -213,7 +210,7 @@ public:
 		/** Use DgmOctree::computeCellCenter to determine these coordinates.
 			This information should only be updated if the cell changes.
 		**/
-		PointCoordinateType cellCenter[3];
+		CCVector3 cellCenter;
 
 		//! Maximum neihgbours distance
 		/** The NN search process will stop if it reaches this radius even if it
@@ -261,12 +258,11 @@ public:
 			, level(1)
 			, minNumberOfNeighbors(1)
 			, cellPos(0,0,0)
+			, cellCenter(0,0,0)
 			, maxSearchSquareDistd(-1.0)
 			, alreadyVisitedNeighbourhoodSize(0)
 			, theNearestPointIndex(0)
-		{
-			memset(cellCenter,0,sizeof(PointCoordinateType)*3);
-		}
+		{}
 	};
 
 	struct NearestNeighboursSphericalSearchStruct : public NearestNeighboursSearchStruct
@@ -291,7 +287,7 @@ public:
 		inline void prepare(PointCoordinateType radius, PointCoordinateType cellSize)
 		{
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
-			PointCoordinateType cellDiag = cellSize * static_cast<PointCoordinateType>(SQRT_3/2.0);
+			PointCoordinateType cellDiag = cellSize * static_cast<PointCoordinateType>(SQRT_3/2);
 			minOutD2 = radius+cellDiag;
 			minOutD2 *= minOutD2;
 			maxInD2 = radius-cellDiag;
@@ -467,7 +463,7 @@ public:
 		\param bbMin lower bounding-box limits (Xmin,Ymin,Zmin)
 		\param bbMax higher bounding-box limits (Xmax,Ymax,Zmax)
 	**/
-	void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) const;
+	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) const;
 
 	//! Returns the lowest cell positions in the octree along all dimensions and for a given level of subdivision
 	/** For example, at a level	n, the octree length is 2^n cells along each
@@ -805,7 +801,7 @@ public:
 		\param center the computed center
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	inline void computeCellCenter(OctreeCellCodeType code, uchar level, PointCoordinateType center[], bool isCodeTruncated = false) const
+	inline void computeCellCenter(OctreeCellCodeType code, uchar level, CCVector3& center, bool isCodeTruncated = false) const
 	{
 		Tuple3i cellPos;
 		getCellPos(code,level,cellPos,isCodeTruncated);
@@ -818,22 +814,22 @@ public:
 		\param level the level of subdivision
 		\param center the computed center
 	**/
-	inline void computeCellCenter(const Tuple3i& cellPos, uchar level, PointCoordinateType center[]) const
+	inline void computeCellCenter(const Tuple3i& cellPos, uchar level, CCVector3& center) const
 	{
 		const PointCoordinateType& cs = getCellSize(level);
-		center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
-		center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.y));
-		center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.z));
+		center.x = m_dimMin.x + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
+		center.y = m_dimMin.y + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.y));
+		center.z = m_dimMin.z + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.z));
 	}
 
 #ifndef OCTREE_CODES_64_BITS
 	//! Short version of computeCellCenter
-	inline void computeCellCenter(const Tuple3s& cellPos, uchar level, PointCoordinateType center[]) const
+	inline void computeCellCenter(const Tuple3s& cellPos, uchar level, CCVector3& center) const
 	{
 		const PointCoordinateType& cs = getCellSize(level);
-		center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
-		center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.y));
-		center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.z));
+		center.x = m_dimMin.x + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
+		center.y = m_dimMin.y + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.y));
+		center.z = m_dimMin.z + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.z));
 	}
 #endif
 
@@ -844,7 +840,7 @@ public:
 		\param cellMax the maximum coordinates along each dimension
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	void computeCellLimits(OctreeCellCodeType code, uchar level, PointCoordinateType cellMin[], PointCoordinateType cellMax[], bool isCodeTruncated = false) const;
+	void computeCellLimits(OctreeCellCodeType code, uchar level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated = false) const;
 
 	/**** OCTREE DIAGNOSIS ****/
 
@@ -948,14 +944,15 @@ public:
 		\param cellCenter the cell center
 		\return the minimal distance
 	**/
-	static inline PointCoordinateType ComputeMinDistanceToCellBorder(const CCVector3* queryPoint, PointCoordinateType cs, const PointCoordinateType* cellCenter)
+	static inline PointCoordinateType ComputeMinDistanceToCellBorder(const CCVector3& queryPoint, PointCoordinateType cs, const CCVector3& cellCenter)
 	{
-		PointCoordinateType d1 = fabs(cellCenter[0]-queryPoint->x);
-		PointCoordinateType d2 = fabs(cellCenter[1]-queryPoint->y);
+		PointCoordinateType d1 = fabs(cellCenter.x - queryPoint.x);
+		PointCoordinateType d2 = fabs(cellCenter.y - queryPoint.y);
 		if (d2 > d1)
 			d1 = d2;
-		d2 = fabs(cellCenter[2]-queryPoint->z);
-		return cs/2 - (d2>d1 ? d2 : d1);
+		
+		d2 = fabs(cellCenter.z - queryPoint.z);
+		return cs/2 - (d2 > d1 ? d2 : d1);
 	}
 
 	/**** ADVANCED METHODS ****/

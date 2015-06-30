@@ -94,7 +94,7 @@ public:
 	//! Computes normal at each point of a given cloud
 	/** \param cloud point cloud on which to process the normals.
 		\param theNormsCodes array in which the normals indexes are stored
-		\param localModel which kind of model to use for the computation (LS = plane, HF = quadratic Height Function, TRI = triangulation)
+		\param localModel which kind of model to use for the computation (LS = plane, QUADRIC = quadratic Height Function, TRI = triangulation)
 		\param localRadius local neighborhood radius (not necessary for TRI)
 		\param preferredOrientation specifies a preferred orientation for normals (optional)
 		\param progressCb progress notification (optional)
@@ -234,7 +234,7 @@ protected:
 	static unsigned Quant_quantize_normal(const PointCoordinateType* n, unsigned level);
 
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithQuadric(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
 	//! Cellular method for octree-based normal computation
 	static bool ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
 	//! Cellular method for octree-based normal computation

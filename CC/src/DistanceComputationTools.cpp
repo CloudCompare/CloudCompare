@@ -293,8 +293,8 @@ DistanceComputationTools::SOReturnCode
 
 	//we compute the bounding box of BOTH clouds
 	CCVector3 minsA,minsB,maxsA,maxsB;
-	comparedCloud->getBoundingBox(minsA.u,maxsA.u);
-	referenceCloud->getBoundingBox(minsB.u,maxsB.u);
+	comparedCloud->getBoundingBox(minsA,maxsA);
+	referenceCloud->getBoundingBox(minsB,maxsB);
 
 	CCVector3 maxD,minD;
 	//we compute the union of both bounding-boxes
@@ -808,7 +808,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 				if (_currentCell->level == octreeLevel)
 				{
 					//compute the (absolute) cell center
-					theOctree->computeCellCenter(currentCellPos,octreeLevel,AB.u);
+					theOctree->computeCellCenter(currentCellPos,octreeLevel,AB);
 
 					//check that the triangle do intersects the cell (box)
 					if (CCMiscTools::TriBoxOverlap(AB, halfCellDimensions, triPoints))
@@ -1014,7 +1014,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 	//on determine son centre
 	CCVector3 cellCenter;
-	s_octree_MT->computeCellCenter(startPos, s_octreeLevel_MT, cellCenter.u);
+	s_octree_MT->computeCellCenter(startPos, s_octreeLevel_MT, cellCenter);
 
 	//on exprime maintenant startPos relativement aux bords de la grille
 	startPos -= s_theIntersection_MT->minFillIndexes;
@@ -1056,8 +1056,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		//coordonnees du point courant
 		const CCVector3 *tempPt = Yk.getCurrentPointCoordinates();
 		//distance du bord le plus proche = taille de la cellule - distance la plus grande par rapport au centre de la cellule
-		//minDists.push_back(cellLength*0.5-DgmOctree::computeMaxDistanceToCellCenter(tempPt,cellCenter.u));
-		minDists[j] = DgmOctree::ComputeMinDistanceToCellBorder(tempPt, cellLength, cellCenter.u);
+		minDists[j] = DgmOctree::ComputeMinDistanceToCellBorder(*tempPt, cellLength, cellCenter);
 		Yk.forwardIterator();
 	}
 
@@ -1419,7 +1418,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(	OctreeAn
 
 			//determine the cell center
 			CCVector3 cellCenter;
-			theOctree->computeCellCenter(startPos, octreeLevel, cellCenter.u);
+			theOctree->computeCellCenter(startPos, octreeLevel, cellCenter);
 
 			//express 'startPos' relatively to the grid borders
 			startPos -= theIntersection->minFillIndexes;
@@ -1458,8 +1457,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(	OctreeAn
 			for (unsigned j = 0; j < remainingPoints; ++j)
 			{
 				const CCVector3 *tempPt = Yk.getPointPersistentPtr(j);
-				//distance to the nearest border = cell size - max distance to the cell center
-				minDists[j] = static_cast<ScalarType>(DgmOctree::ComputeMinDistanceToCellBorder(tempPt, cellLength, cellCenter.u));
+				minDists[j] = static_cast<ScalarType>(DgmOctree::ComputeMinDistanceToCellBorder(*tempPt, cellLength, cellCenter));
 			}
 
 			//boundedSearch: compute the accurate distance below 'maxSearchDist'
@@ -1771,8 +1769,8 @@ int DistanceComputationTools::computePointCloud2MeshDistance(	GenericIndexedClou
 
 	//on regarde si la boite englobante du nuage et du maillage coinc\EFdent
 	CCVector3 cloudMinBB,cloudMaxBB,meshMinBB,meshMaxBB,minBB,maxBB,minCubifiedBB,maxCubifiedBB;
-	pointCloud->getBoundingBox(cloudMinBB.u,cloudMaxBB.u);
-	theMesh->getBoundingBox(meshMinBB.u,meshMaxBB.u);
+	pointCloud->getBoundingBox(cloudMinBB,cloudMaxBB);
+	theMesh->getBoundingBox(meshMinBB,meshMaxBB);
 
 	//on calcule les limites de la boite englobante maximale
 	{
@@ -2330,7 +2328,7 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 	//on cherche la cellule de l'octree qui englobe le "seedPoint"
 	Tuple3i cellPos;
 	theOctree->getTheCellPosWhichIncludesThePoint(cloud->getPoint(seedPointIndex),cellPos,octreeLevel);
-	fm.setSeedCell(cellPos.u);
+	fm.setSeedCell(cellPos);
 
 	bool result = false;
 	if (fm.propagate() >= 0)

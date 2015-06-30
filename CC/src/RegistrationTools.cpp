@@ -898,18 +898,14 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 	}
 	else
 	{
-		PointCoordinateType bbMin[3],bbMax[3];
+		CCVector3 bbMin,bbMax;
 		X->getBoundingBox(bbMin,bbMax);
-
-		//bounding-box dimensions
-		PointCoordinateType dx = bbMax[0]-bbMin[0];
-		PointCoordinateType dy = bbMax[1]-bbMin[1];
-		PointCoordinateType dz = bbMax[2]-bbMin[2];
 
 		//if the data cloud is equivalent to a single point (for instance
 		//it's the case when the two clouds are very far away from
 		//each other in the ICP process) we try to get the two clouds closer
-		if (fabs(dx) + fabs(dy) + fabs(dz) < ZERO_TOLERANCE)
+		CCVector3 diag = bbMax-bbMin;
+		if (fabs(diag.x) + fabs(diag.y) + fabs(diag.z) < ZERO_TOLERANCE)
 		{
 			trans.T = Gx - Gp*aPrioriScale;
 			return true;
@@ -1015,45 +1011,39 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 											GenericProgressCallback* progressCb,
 											unsigned nbMaxCandidates)
 {
-	unsigned i, j;
-	unsigned bestScore, score;
-	Base reference;
-	std::vector<Base> candidates;
-	std::vector<ScaledTransformation> transforms;
-	ScaledTransformation RT;
-	KDTree *dataTree, *modelTree;
-	CCVector3 min, max, diff;
-
-	/*DGM: KDTree::buildFromCloud call reset right away!
+	/*DGM: KDTree::buildFromCloud will call reset right away!
 	if (progressCb)
 	{
-	progressCb->reset();
-	progressCb->setMethodTitle("Clouds registration");
-	progressCb->setInfo("Starting 4PCS");
-	progressCb->start();
+		progressCb->reset();
+		progressCb->setMethodTitle("Clouds registration");
+		progressCb->setInfo("Starting 4PCS");
+		progressCb->start();
 	}
 	//*/
 
 	//Initialize random seed with current time
-	srand((unsigned)time(0));
+	srand(static_cast<unsigned>(time(0)));
 
-	bestScore = score = 0;
+	unsigned bestScore = 0, score = 0;
 	transform.R.invalidate();
 	transform.T = CCVector3(0,0,0);
 
 	//Adapt overlap to the model cloud size
-	modelCloud->getBoundingBox(min.u, max.u);
-	diff = max-min;
-	overlap *= diff.norm() / 2;
+	{
+		CCVector3 bbMin, bbMax;
+		modelCloud->getBoundingBox(bbMin, bbMax);
+		CCVector3 diff = bbMax - bbMin;
+		overlap *= diff.norm() / 2;
+	}
 
-	//Buil the associated KDtrees
-	dataTree = new KDTree();
+	//Build the associated KDtrees
+	KDTree* dataTree = new KDTree();
 	if (!dataTree->buildFromCloud(dataCloud, progressCb))
 	{
 		delete dataTree;
 		return false;
 	}
-	modelTree = new KDTree();
+	KDTree* modelTree = new KDTree();
 	if (!modelTree->buildFromCloud(modelCloud, progressCb))
 	{
 		delete dataTree;
@@ -1064,14 +1054,15 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 	//if (progressCb)
 	//    progressCb->stop();
 
-	for(i=0; i<nbBases; i++)
+	for (unsigned i=0; i<nbBases; i++)
 	{
 		//Randomly find the current reference base
+		Base reference;
 		if (!FindBase(modelCloud, overlap, nbTries, reference))
 			continue;
 
 		//Search for all the congruent bases in the second cloud
-		candidates.clear();
+		std::vector<Base> candidates;
 		unsigned count = dataCloud->size();
 		candidates.reserve(count);
 		if (candidates.capacity() < count) //not enough memory
@@ -1082,8 +1073,10 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 			return false;
 		}
 		const CCVector3* referenceBasePoints[4];
-		for(j=0; j<4; j++)
-			referenceBasePoints[j] = modelCloud->getPoint(reference.getIndex(j));
+		{
+			for(unsigned j=0; j<4; j++)
+				referenceBasePoints[j] = modelCloud->getPoint(reference.getIndex(j));
+		}
 		int result = FindCongruentBases(dataTree, beta, referenceBasePoints, candidates);
 		if (result == 0)
 			continue;
@@ -1096,29 +1089,32 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 		}
 
 		//Compute rigid transforms and filter bases if necessary
-		if (!FilterCandidates(modelCloud, dataCloud, reference, candidates, nbMaxCandidates, transforms))
 		{
-			delete dataTree;
-			delete modelTree;
-			transform.R = SquareMatrix();
-			return false;
-		}
-
-		for(j=0; j<candidates.size(); j++)
-		{
-			//Register the current candidate base with the reference base
-			RT = transforms[j];
-			//Apply the rigid transform to the data cloud and compute the registration score
-			if (RT.R.isValid())
+			std::vector<ScaledTransformation> transforms;
+			if (!FilterCandidates(modelCloud, dataCloud, reference, candidates, nbMaxCandidates, transforms))
 			{
-				score = ComputeRegistrationScore(modelTree, dataCloud, delta, RT);
+				delete dataTree;
+				delete modelTree;
+				transform.R = SquareMatrix();
+				return false;
+			}
 
-				//Keep parameters that lead to the best result
-				if (score > bestScore)
+			for(unsigned j=0; j<candidates.size(); j++)
+			{
+				//Register the current candidate base with the reference base
+				const ScaledTransformation& RT = transforms[j];
+				//Apply the rigid transform to the data cloud and compute the registration score
+				if (RT.R.isValid())
 				{
-					transform.R = RT.R;
-					transform.T = RT.T;
-					bestScore = score;
+					score = ComputeRegistrationScore(modelTree, dataCloud, delta, RT);
+
+					//Keep parameters that lead to the best result
+					if (score > bestScore)
+					{
+						transform.R = RT.R;
+						transform.T = RT.T;
+						bestScore = score;
+					}
 				}
 			}
 		}
@@ -1153,7 +1149,7 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
  unsigned FPCSRegistrationTools::ComputeRegistrationScore(	KDTree *modelTree,
 															GenericIndexedCloud *dataCloud,
 															ScalarType delta,
-															ScaledTransformation& dataToModel)
+															const ScaledTransformation& dataToModel)
 {
 	CCVector3 Q;
 

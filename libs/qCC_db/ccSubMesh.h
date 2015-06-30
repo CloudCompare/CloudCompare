@@ -82,7 +82,7 @@ public:
 	virtual CCLib::TriangleSummitsIndexes* getNextTriangleIndexes();
 	virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex);
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 
 	//! Returns global index (i.e. relative to the associated mesh) of a given element
 	/** \param localIndex local index (i.e. relative to the internal index container)

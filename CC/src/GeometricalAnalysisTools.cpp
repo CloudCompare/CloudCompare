@@ -598,9 +598,9 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount-1); //we don't take the query point into account!
 			Neighbourhood Z(&neighboursCloud);
 
-			const PointCoordinateType* lsq = Z.getLSQPlane();
-			if (lsq)
-				d = fabs(DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq));
+			const PointCoordinateType* lsPlane = Z.getLSPlane();
+			if (lsPlane)
+				d = fabs(DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsPlane));
 
 			//swap the points back to their original position (DGM: not necessary)
 			//if (localIndex+1 < neighborCount)

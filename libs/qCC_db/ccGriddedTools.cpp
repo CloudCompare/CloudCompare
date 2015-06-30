@@ -106,16 +106,16 @@ bool ccGriddedTools::ComputeNormals(ccPointCloud* cloud,
 						//compute normal with quadratic func. (if we have enough points)
 						if (false/*knn.size() >= 6*/)
 						{
-							uchar hfDims[3];
-							const PointCoordinateType* h = Z.getHeightFunction(hfDims);
+							Tuple3ub dims;
+							const PointCoordinateType* h = Z.getQuadric(&dims);
 							if (h)
 							{
 								const CCVector3* gv = Z.getGravityCenter();
 								assert(gv);
 
-								const uchar& iX = hfDims[0];
-								const uchar& iY = hfDims[1];
-								const uchar& iZ = hfDims[2];
+								const uchar& iX = dims.x;
+								const uchar& iY = dims.y;
+								const uchar& iZ = dims.z;
 
 								PointCoordinateType lX = P->u[iX] - gv->u[iX];
 								PointCoordinateType lY = P->u[iY] - gv->u[iY];
@@ -128,11 +128,11 @@ bool ccGriddedTools::ComputeNormals(ccPointCloud* cloud,
 							}
 						}
 						else
-#define USE_LSQ_PLANE
-#ifdef USE_LSQ_PLANE
+#define USE_LS_PLANE
+#ifdef USE_LS_PLANE
 						{
 							//compute normal with best fit plane
-							const CCVector3* _N = Z.getLSQPlaneNormal();
+							const CCVector3* _N = Z.getLSPlaneNormal();
 							if (_N)
 								N = *_N;
 						}

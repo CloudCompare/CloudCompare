@@ -83,8 +83,8 @@ enum CC_CHAMFER_DISTANCE_TYPE { CHAMFER_111		=	0,				/**< Chamfer distance <1-1-
 //! Types of local models (no model, least square best fitting plan, Delaunay 2D1/2 triangulation, height function)
 enum CC_LOCAL_MODEL_TYPES {NO_MODEL				=	0,				/**< No local model **/
 							LS					=	1,				/**< Least Square best fitting plane **/
-							TRI					=	2,				/**< Delaunay triangulation (2.5D) **/
-							HF					=	3				/**< Quadratic 'height' function **/
+							TRI					=	2,				/**< 2.5D Delaunay triangulation **/
+							QUADRIC				=	3				/**< 2.5D quadric function **/
 };
 
 //! Min number of points to compute local models (see CC_LOCAL_MODEL_TYPES)

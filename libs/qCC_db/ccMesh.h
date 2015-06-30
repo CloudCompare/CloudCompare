@@ -104,7 +104,7 @@ public:
 	virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex);
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 	virtual unsigned size() const;
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 
 	//const version of getTriangleIndexes
 	const virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex) const;

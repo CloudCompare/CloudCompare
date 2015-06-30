@@ -33,19 +33,19 @@ FastMarching::FastMarching()
 	, m_dx(0)
 	, m_dy(0)
 	, m_dz(0)
-	, m_decY(0)
-	, m_decZ(0)
-	, m_indexDec(0)
+	, m_rowSize(0)
+	, m_sliceSize(0)
+	, m_indexShift(0)
 	, m_gridSize(0)
 	, m_theGrid(0)
 	, m_octree(0)
 	, m_gridLevel(0)
 	, m_cellSize(1.0f)
+	, m_minFillIndexes(0,0,0)
 	, m_numberOfNeighbours(6)
 {
-	memset(m_minFillIndexes,       0, sizeof(int)*3);
-	memset(m_neighboursIndexShift, 0, sizeof(int)*CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
-	memset(m_neighboursDistance,   0, sizeof(float)*CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
+	memset(m_neighboursIndexShift, 0, sizeof(int)   * CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
+	memset(m_neighboursDistance,   0, sizeof(float) * CC_FM_MAX_NUMBER_OF_NEIGHBOURS);
 }
 
 FastMarching::~FastMarching()
@@ -60,19 +60,19 @@ FastMarching::~FastMarching()
 	}
 }
 
-float FastMarching::getTime(int pos[], bool absoluteCoordinates) const
+float FastMarching::getTime(Tuple3i& pos, bool absoluteCoordinates) const
 {
 	unsigned index = 0;
 
 	if (absoluteCoordinates)
 	{
-		index = FM_pos2index(pos);
+		index = pos2index(pos);
 	}
 	else
 	{
-		index =	  static_cast<unsigned>(pos[0]+1)
-				+ static_cast<unsigned>(pos[1]+1) * m_decY
-				+ static_cast<unsigned>(pos[2]+1) * m_decZ;
+		index =	  static_cast<unsigned>(pos.x+1)
+				+ static_cast<unsigned>(pos.y+1) * m_rowSize
+				+ static_cast<unsigned>(pos.z+1) * m_sliceSize;
 	}
 
 	assert(m_theGrid[index]);
@@ -85,9 +85,7 @@ int FastMarching::initGrid(float step, unsigned dim[3])
 	m_octree = 0;
 	m_gridLevel = 0;
 	m_cellSize = step;
-	m_minFillIndexes[0] = 0;
-	m_minFillIndexes[1] = 0;
-	m_minFillIndexes[2] = 0;
+	m_minFillIndexes = Tuple3i(0,0,0);
 
 	m_dx = dim[0];
 	m_dy = dim[1];
@@ -107,9 +105,9 @@ int FastMarching::initGridWithOctree(DgmOctree* octree, uchar gridLevel)
 	m_octree = octree;
 	m_gridLevel = gridLevel;
 	m_cellSize = static_cast<float>(octree->getCellSize(gridLevel));
-	m_minFillIndexes[0] = minFillIndexes[0];
-	m_minFillIndexes[1] = minFillIndexes[1];
-	m_minFillIndexes[2] = minFillIndexes[2];
+	m_minFillIndexes.x = minFillIndexes[0];
+	m_minFillIndexes.y = minFillIndexes[1];
+	m_minFillIndexes.z = minFillIndexes[2];
 
 	m_dx = static_cast<unsigned>(maxFillIndexes[0]-minFillIndexes[0]+1);
 	m_dy = static_cast<unsigned>(maxFillIndexes[1]-minFillIndexes[1]+1);
@@ -120,16 +118,16 @@ int FastMarching::initGridWithOctree(DgmOctree* octree, uchar gridLevel)
 
 int FastMarching::initOther()
 {
-	m_decY = m_dx+2;
-	m_decZ = m_decY*(m_dy+2);
-	m_gridSize = m_decZ*(m_dz+2);
-	m_indexDec = 1+m_decY+m_decZ;
+	m_rowSize = m_dx+2;
+	m_sliceSize = m_rowSize*(m_dy+2);
+	m_gridSize = m_sliceSize*(m_dz+2);
+	m_indexShift = 1+m_rowSize+m_sliceSize;
 
 	for (unsigned i=0; i<CC_FM_MAX_NUMBER_OF_NEIGHBOURS; ++i)
 	{
 		m_neighboursIndexShift[i] =	  c_FastMarchingNeighbourPosShift[i*3  ]
-									+ c_FastMarchingNeighbourPosShift[i*3+1] * static_cast<int>(m_decY)
-									+ c_FastMarchingNeighbourPosShift[i*3+2] * static_cast<int>(m_decZ);
+									+ c_FastMarchingNeighbourPosShift[i*3+1] * static_cast<int>(m_rowSize)
+									+ c_FastMarchingNeighbourPosShift[i*3+2] * static_cast<int>(m_sliceSize);
 
 		m_neighboursDistance[i] =	sqrt(static_cast<float>(c_FastMarchingNeighbourPosShift[i*3  ] * c_FastMarchingNeighbourPosShift[i*3  ]+
 															c_FastMarchingNeighbourPosShift[i*3+1] * c_FastMarchingNeighbourPosShift[i*3+1]+
@@ -168,9 +166,9 @@ void FastMarching::cleanLastPropagation()
 	resetCells(m_ignoredCells);
 }
 
-bool FastMarching::setSeedCell(int pos[])
+bool FastMarching::setSeedCell(Tuple3i& pos)
 {
-	unsigned index = FM_pos2index(pos);
+	unsigned index = pos2index(pos);
 
 	assert(index < m_gridSize);
 

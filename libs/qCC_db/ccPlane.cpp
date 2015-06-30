@@ -88,8 +88,8 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	CCLib::Neighbourhood Yk(cloud);
 
 	//plane equation
-	const PointCoordinateType* theLSQPlane = Yk.getLSQPlane();
-	if (!theLSQPlane)
+	const PointCoordinateType* theLSPlane = Yk.getLSPlane();
+	if (!theLSPlane)
 	{
 		ccLog::Warning("[ccPlane::Fit] Not enough points to fit a plane!");
 		return 0;
@@ -100,8 +100,8 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	assert(G);
 
 	//and a local base
-	CCVector3 N(theLSQPlane);
-	const CCVector3* X = Yk.getLSQPlaneX(); //main direction
+	CCVector3 N(theLSPlane);
+	const CCVector3* X = Yk.getLSPlaneX(); //main direction
 	assert(X);
 	CCVector3 Y = N * (*X);
 
@@ -143,7 +143,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	//compute least-square fitting RMS if requested
 	if (rms)
 	{
-		*rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSQPlane);
+		*rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSPlane);
 		plane->setMetaData(QString("RMS"),QVariant(*rms));
 	}
 

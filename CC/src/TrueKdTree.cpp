@@ -107,7 +107,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	
 	unsigned count = subset->size();
 
-	const PointCoordinateType* planeEquation = Neighbourhood(subset).getLSQPlane();
+	const PointCoordinateType* planeEquation = Neighbourhood(subset).getLSPlane();
 	if (!planeEquation)
 	{
 		//an error occurred during LS plane computation?!
@@ -139,7 +139,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	CCVector3 dims;
 	{
 		CCVector3 bbMin,bbMax;
-		subset->getBoundingBox(bbMin.u,bbMax.u);
+		subset->getBoundingBox(bbMin,bbMax);
 		dims = bbMax - bbMin;
 	}
 

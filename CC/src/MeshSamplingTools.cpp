@@ -74,7 +74,7 @@ double MeshSamplingTools::computeMeshVolume(GenericMesh* mesh)
 	double Vtotal = 0.0;
 
 	CCVector3 origin,upperCorner;
-	mesh->getBoundingBox(origin.u,upperCorner.u);
+	mesh->getBoundingBox(origin,upperCorner);
 
 	mesh->placeIteratorAtBegining();
 	for (unsigned n=0; n<mesh->size(); ++n)

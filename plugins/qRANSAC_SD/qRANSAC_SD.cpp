@@ -135,7 +135,7 @@ void qRansacSD::doAction()
 	//input cloud
 	unsigned count = pc->size();
 	bool hasNorms = pc->hasNormals();
-	PointCoordinateType bbMin[3],bbMax[3];
+	CCVector3 bbMin, bbMax;
 	pc->getBoundingBox(bbMin,bbMax);
 	const CCVector3d& globalShift = pc->getGlobalShift();
 	double globalScale = pc->getGlobalScale();
@@ -176,12 +176,12 @@ void qRansacSD::doAction()
 		
 		//manually set bounding box!
 		Vec3f cbbMin,cbbMax;
-		cbbMin[0] = static_cast<float>(bbMin[0]);
-		cbbMin[1] = static_cast<float>(bbMin[1]);
-		cbbMin[2] = static_cast<float>(bbMin[2]);
-		cbbMax[0] = static_cast<float>(bbMax[0]);
-		cbbMax[1] = static_cast<float>(bbMax[1]);
-		cbbMax[2] = static_cast<float>(bbMax[2]);
+		cbbMin[0] = static_cast<float>(bbMin.x);
+		cbbMin[1] = static_cast<float>(bbMin.y);
+		cbbMin[2] = static_cast<float>(bbMin.z);
+		cbbMax[0] = static_cast<float>(bbMax.x);
+		cbbMax[1] = static_cast<float>(bbMax.y);
+		cbbMax[2] = static_cast<float>(bbMax.z);
 		cloud.setBBox(cbbMin,cbbMax);
 	}
 

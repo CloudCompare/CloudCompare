@@ -248,7 +248,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 			cellPos.x = std::min(octreeLength,cellPos.x);
 			cellPos.y = std::min(octreeLength,cellPos.y);
 			cellPos.z = std::min(octreeLength,cellPos.z);
-			fm->setSeedCell(cellPos.u);
+			fm->setSeedCell(cellPos);
 			++seedPoints;
 		}
 

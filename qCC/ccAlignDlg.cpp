@@ -390,85 +390,114 @@ void ccAlignDlg::estimateDelta()
 void ccAlignDlg::changeSamplingMethod(int index)
 {
 	//Reste a changer les textes d'aide
-	switch(index)
+	switch (index)
 	{
 	case SPACE:
 		{
-			modelSamplingRate->setDecimals(4);
-			dataSamplingRate->setDecimals(4);
-			int oldSliderPos = modelSample->sliderPosition();
-			CCVector3 min, max;
-			modelObject->getBoundingBox(min.u, max.u);
-			double dist = (min-max).norm();
-			modelSamplingRate->setMaximum(dist);
-			modelSample->setSliderPosition(oldSliderPos);
-			oldSliderPos = dataSample->sliderPosition();
-			dataObject->getBoundingBox(min.u, max.u);
-			dist = (min-max).norm();
-			dataSamplingRate->setMaximum(dist);
-			dataSample->setSliderPosition(oldSliderPos);
-			modelSamplingRate->setSingleStep(0.01);
-			dataSamplingRate->setSingleStep(0.01);
-			modelSamplingRate->setMinimum(0.);
-			dataSamplingRate->setMinimum(0.);
+			//model
+			{
+				modelSamplingRate->setDecimals(4);
+				int oldSliderPos = modelSample->sliderPosition();
+				CCVector3 bbMin, bbMax;
+				modelObject->getBoundingBox(bbMin, bbMax);
+				double dist = (bbMin-bbMax).norm();
+				modelSamplingRate->setMaximum(dist);
+				modelSample->setSliderPosition(oldSliderPos);
+				modelSamplingRate->setSingleStep(0.01);
+				modelSamplingRate->setMinimum(0.);
+			}
+			//data
+			{
+				dataSamplingRate->setDecimals(4);
+				int oldSliderPos = dataSample->sliderPosition();
+				CCVector3 bbMin, bbMax;
+				dataObject->getBoundingBox(bbMin, bbMax);
+				double dist = (bbMin-bbMax).norm();
+				dataSamplingRate->setMaximum(dist);
+				dataSample->setSliderPosition(oldSliderPos);
+				dataSamplingRate->setSingleStep(0.01);
+				dataSamplingRate->setMinimum(0.);
+			}
 		}
 		break;
 	case RANDOM:
 		{
-			modelSamplingRate->setDecimals(0);
-			dataSamplingRate->setDecimals(0);
-			modelSamplingRate->setMaximum((float)modelObject->size());
-			dataSamplingRate->setMaximum((float)dataObject->size());
-			modelSamplingRate->setSingleStep(1.);
-			dataSamplingRate->setSingleStep(1.);
-			modelSamplingRate->setMinimum(0.);
-			dataSamplingRate->setMinimum(0.);
+			//model
+			{
+				modelSamplingRate->setDecimals(0);
+				modelSamplingRate->setMaximum(static_cast<float>(modelObject->size()));
+				modelSamplingRate->setSingleStep(1.);
+				modelSamplingRate->setMinimum(0.);
+			}
+			//data
+			{
+				dataSamplingRate->setDecimals(0);
+				dataSamplingRate->setMaximum(static_cast<float>(dataObject->size()));
+				dataSamplingRate->setSingleStep(1.);
+				dataSamplingRate->setMinimum(0.);
+			}
 		}
 		break;
 	case OCTREE:
 		{
-			if (!modelObject->getOctree())
-				modelObject->computeOctree();
-			if (!dataObject->getOctree())
-				dataObject->computeOctree();
-			modelSamplingRate->setDecimals(0);
-			dataSamplingRate->setDecimals(0);
-			modelSamplingRate->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-			dataSamplingRate->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-			modelSamplingRate->setMinimum(1.);
-			dataSamplingRate->setMinimum(1.);
-			modelSamplingRate->setSingleStep(1.);
-			dataSamplingRate->setSingleStep(1.);
+			//model
+			{
+				if (!modelObject->getOctree())
+					modelObject->computeOctree();
+				modelSamplingRate->setDecimals(0);
+				modelSamplingRate->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+				modelSamplingRate->setMinimum(1.);
+				modelSamplingRate->setSingleStep(1.);
+			}
+			//data
+			{
+				if (!dataObject->getOctree())
+					dataObject->computeOctree();
+				dataSamplingRate->setDecimals(0);
+				dataSamplingRate->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+				dataSamplingRate->setMinimum(1.);
+				dataSamplingRate->setSingleStep(1.);
+			}
 		}
 		break;
 	default:
 		{
-			modelSamplingRate->setDecimals(2);
-			dataSamplingRate->setDecimals(2);
-			modelSamplingRate->setMaximum(100.);
-			dataSamplingRate->setMaximum(100.);
-			modelSamplingRate->setSingleStep(0.01);
-			dataSamplingRate->setSingleStep(0.01);
-			modelSamplingRate->setMinimum(0.);
-			dataSamplingRate->setMinimum(0.);
+			//model
+			{
+				modelSamplingRate->setDecimals(2);
+				modelSamplingRate->setMaximum(100.);
+				modelSamplingRate->setSingleStep(0.01);
+				modelSamplingRate->setMinimum(0.);
+			}
+			//data
+			{
+				dataSamplingRate->setDecimals(2);
+				dataSamplingRate->setMaximum(100.);
+				dataSamplingRate->setSingleStep(0.01);
+				dataSamplingRate->setMinimum(0.);
+			}
 		}
 		break;
 	}
 
 	if (index == NONE)
 	{
+		//model
 		modelSample->setSliderPosition(modelSample->maximum());
-		dataSample->setSliderPosition(dataSample->maximum());
 		modelSample->setEnabled(false);
-		dataSample->setEnabled(false);
 		modelSamplingRate->setEnabled(false);
+		//data
+		dataSample->setSliderPosition(dataSample->maximum());
+		dataSample->setEnabled(false);
 		dataSamplingRate->setEnabled(false);
 	}
 	else
 	{
+		//model
 		modelSample->setEnabled(true);
-		dataSample->setEnabled(true);
 		modelSamplingRate->setEnabled(true);
+		//data
+		dataSample->setEnabled(true);
 		dataSamplingRate->setEnabled(true);
 	}
 

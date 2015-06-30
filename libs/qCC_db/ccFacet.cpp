@@ -204,7 +204,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	//get corresponding plane
 	if (!planeEquation)
 	{
-		planeEquation = Yk.getLSQPlane();
+		planeEquation = Yk.getLSPlane();
 		if (!planeEquation)
 		{
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Failed to compute the LS plane passing through the input points!");

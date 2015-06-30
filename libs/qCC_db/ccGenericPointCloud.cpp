@@ -197,7 +197,7 @@ ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 
 	if (size())
 	{
-		getBoundingBox(box.minCorner().u, box.maxCorner().u);
+		getBoundingBox(box.minCorner(), box.maxCorner());
 		box.setValidity(true);
 	}
 	

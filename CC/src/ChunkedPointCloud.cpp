@@ -69,7 +69,7 @@ void ChunkedPointCloud::forEach(genericPointAction& anAction)
 	}
 }
 
-void ChunkedPointCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
+void ChunkedPointCloud::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
 	if (!m_validBB)
 	{
@@ -77,8 +77,8 @@ void ChunkedPointCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordin
 		m_validBB = true;
 	}
 
-	memcpy(bbMin, m_points->getMin(), 3*sizeof(PointCoordinateType));
-	memcpy(bbMax, m_points->getMax(), 3*sizeof(PointCoordinateType));
+	bbMin = CCVector3(m_points->getMin());
+	bbMax = CCVector3(m_points->getMax());
 }
 
 void ChunkedPointCloud::invalidateBoundingBox()

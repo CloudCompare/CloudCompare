@@ -21,6 +21,7 @@
 //Local
 #include "CCCoreLib.h"
 #include "CCConst.h"
+#include "CCGeom.h"
 
 //system
 #include <vector>
@@ -33,12 +34,6 @@ namespace CCLib
 {
 
 class DgmOctree;
-
-// Macro: cell position [i,j,k] to table (3D grid) index
-#define FM_pos2index(pos)	( static_cast<unsigned>(pos[0] - m_minFillIndexes[0]) \
-							+ static_cast<unsigned>(pos[1] - m_minFillIndexes[1]) * m_decY \
-							+ static_cast<unsigned>(pos[2] - m_minFillIndexes[2]) * m_decZ \
-							+ m_indexDec )
 
 // Maximum number of neighbors
 #define CC_FM_MAX_NUMBER_OF_NEIGHBOURS 26
@@ -92,7 +87,7 @@ public:
 	/** \param pos the cell position in the grid (3 integer coordinates)
 		\return whether the cell could be set as a seed or not
 	**/
-	virtual bool setSeedCell(int pos[]);
+	virtual bool setSeedCell(Tuple3i& pos);
 
 	//! Propagates the front
 	/** The seeds should have already been initialized
@@ -114,7 +109,7 @@ public:
 		\param pos the cell position (3 integer coordinates)
 		\param absoluteCoordinates whether the cell coordinates are absolute or relative
 	**/
-	virtual float getTime(int pos[], bool absoluteCoordinates = false) const;
+	virtual float getTime(Tuple3i& pos, bool absoluteCoordinates = false) const;
 
 	//! Sets extended connectivity mode
 	/** To use common edges instead of common faces (much slower)
@@ -122,6 +117,14 @@ public:
 	virtual void setExtendedConnectivity(bool state) { m_numberOfNeighbours = state ? 26 : 6; }
 
 protected:
+
+	// Macro: cell position [i,j,k] to table (3D grid) index
+	inline unsigned pos2index(const Tuple3i& pos) const
+	{
+		return	  static_cast<unsigned>(pos.x - m_minFillIndexes.x)
+				+ static_cast<unsigned>(pos.y - m_minFillIndexes.y) * m_rowSize
+				+ static_cast<unsigned>(pos.z - m_minFillIndexes.z) * m_sliceSize + m_indexShift;
+	}
 
 	//! A generic Fast Marching grid cell
 	class Cell
@@ -258,11 +261,11 @@ protected:
 	//! Grid size along the Z dimension
 	unsigned m_dz;
 	//! Shift for cell access acceleration (Y dimension)
-	unsigned m_decY;
-	//! Shift for cell access acceleration (Y dimension)
-	unsigned m_decZ;
+	unsigned m_rowSize;
+	//! Shift for cell access acceleration (Z dimension)
+	unsigned m_sliceSize;
 	//! First index of innerbound grid
-	unsigned m_indexDec;
+	unsigned m_indexShift;
 	//! Grid size
 	unsigned m_gridSize;
 	//! Grid used to process Fast Marching
@@ -275,7 +278,7 @@ protected:
 	//! Octree cell size at equivalent subdivision level
 	float m_cellSize;
 	//! Octree min fill indexes at 'm_gridLevel'
-	int m_minFillIndexes[3];
+	Tuple3i m_minFillIndexes;
 
 	//! Current number of neighbours (6 or 26)
 	unsigned m_numberOfNeighbours;

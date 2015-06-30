@@ -55,9 +55,9 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 	CCVector3 C;
 	if (!center)
 	{
-		PointCoordinateType Mins[3],Maxs[3];
-		cloud->getBoundingBox(Mins,Maxs);
-		C = (CCVector3(Mins)+CCVector3(Maxs))*0.5;
+		CCVector3 bbMin,bbMax;
+		cloud->getBoundingBox(bbMin,bbMax);
+		C = (bbMin+bbMax)/2;
 		center = &C;
 	}
 

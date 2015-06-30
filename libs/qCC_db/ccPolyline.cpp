@@ -133,7 +133,7 @@ void ccPolyline::showArrow(bool state, unsigned vertIndex, PointCoordinateType l
 ccBBox ccPolyline::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox emptyBox;
-	getBoundingBox(emptyBox.minCorner().u, emptyBox.maxCorner().u);
+	getBoundingBox(emptyBox.minCorner(), emptyBox.maxCorner());
 	emptyBox.setValidity(!is2DMode() && size() != 0);
 	return emptyBox;
 }

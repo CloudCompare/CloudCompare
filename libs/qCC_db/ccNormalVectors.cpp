@@ -36,7 +36,7 @@ static ccSingleton<ccNormalVectors> s_uniqueInstance;
 //Number of points for local modeling to compute normals with least square plane
 #define	NUMBER_OF_POINTS_FOR_NORM_WITH_LS 6
 //Number of points for local modeling to compute normals with quadratic 'height' function
-#define	NUMBER_OF_POINTS_FOR_NORM_WITH_HF 12
+#define	NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC 12
 
 ccNormalVectors* ccNormalVectors::GetUniqueInstance()
 {
@@ -494,15 +494,15 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 																					"Normals Computation[TRI]");
 		}
 		break;
-	case HF:
+	case QUADRIC:
 		{
 			uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
-																			&(ComputeNormsAtLevelWithHF),
+																			&(ComputeNormsAtLevelWithQuadric),
 																			additionalParameters,
 																			true,
 																			progressCb,
-																			"Normals Computation[HF]");
+																			"Normals Computation[QUADRIC]");
 		}
 		break;
 
@@ -546,9 +546,9 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell,
-												void** additionalParameters,
-												CCLib::NormalizedProgress* nProgress/*=0*/)
+bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::octreeCell& cell,
+														void** additionalParameters,
+														CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	NormsTableType* theNorms	= static_cast<NormsTableType*>(additionalParameters[0]);
@@ -582,16 +582,16 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
 			CCLib::Neighbourhood Z(&neighbours);
 
-			uchar hfDims[3];
-			const PointCoordinateType* h = Z.getHeightFunction(hfDims);
+			Tuple3ub dims;
+			const PointCoordinateType* h = Z.getQuadric(&dims);
 			if (h)
 			{
 				const CCVector3* gv = Z.getGravityCenter();
 				assert(gv);
 
-				const uchar& iX = hfDims[0];
-				const uchar& iY = hfDims[1];
-				const uchar& iZ = hfDims[2];
+				const uchar& iX = dims.x;
+				const uchar& iY = dims.y;
+				const uchar& iZ = dims.z;
 
 				PointCoordinateType lX = nNSS.queryPoint.u[iX] - gv->u[iX];
 				PointCoordinateType lY = nNSS.queryPoint.u[iY] - gv->u[iY];
@@ -648,16 +648,16 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_HF)
+		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
 			CCLib::Neighbourhood Z(&neighbours);
 
 			//compute best fit plane
-			const CCVector3* lsqPlaneNormal = Z.getLSQPlaneNormal();
-			if (lsqPlaneNormal) //should already be unit!
+			const CCVector3* lsPlaneNormal = Z.getLSPlaneNormal();
+			if (lsPlaneNormal) //should already be unit!
 			{
-				theNorms->setValue(cell.points->getPointGlobalIndex(i),lsqPlaneNormal->u);
+				theNorms->setValue(cell.points->getPointGlobalIndex(i),lsPlaneNormal->u);
 			}
 		}
 

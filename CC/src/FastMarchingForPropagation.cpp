@@ -66,7 +66,7 @@ int FastMarchingForPropagation::init(	GenericCloud* theCloud,
 		theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
 
 		//on renseigne la grille
-		unsigned gridPos = FM_pos2index(cellPos.u);
+		unsigned gridPos = pos2index(cellPos);
 
 		PropagationCell* aCell = new PropagationCell;
 		aCell->cellCode = cellCodes.back();
@@ -243,8 +243,8 @@ void FastMarchingForPropagation::findPeaks()
 				pos[0] = static_cast<int>(i);
 
 				unsigned index =  static_cast<unsigned>(pos[0]+1)
-								+ static_cast<unsigned>(pos[1]+1) * m_decY
-								+ static_cast<unsigned>(pos[2]+1) * m_decZ;
+								+ static_cast<unsigned>(pos[1]+1) * m_rowSize
+								+ static_cast<unsigned>(pos[2]+1) * m_sliceSize;
 				
 				PropagationCell* theCell = reinterpret_cast<PropagationCell*>(m_theGrid[index]);
 

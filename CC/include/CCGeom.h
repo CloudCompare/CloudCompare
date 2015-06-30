@@ -76,6 +76,8 @@ public:
 	inline Tuple3Tpl operator / (Type s) const { return Tuple3Tpl(x/s, y/s, z/s); }
 };
 
+//! Tuple of 3 unsigned bytes
+typedef Tuple3Tpl<unsigned char> Tuple3ub;
 //! Tuple of 3 short values
 typedef Tuple3Tpl<short> Tuple3s;
 //! Tuple of 3 int values

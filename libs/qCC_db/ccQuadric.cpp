@@ -34,26 +34,22 @@
 ccQuadric::ccQuadric(	CCVector2 minCorner,
 						CCVector2 maxCorner,
 						const PointCoordinateType eq[6],
-						const unsigned char* hfDims/*=0*/,
+						const Tuple3ub* dims/*=0*/,
 						const ccGLMatrix* transMat/*=0*/,
 						QString name/*=QString("Quadric")*/,
 						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_minCorner(minCorner)
 	, m_maxCorner(maxCorner)
+	, m_dims(0,1,2)
 	, m_minZ(0)
 	, m_maxZ(0)
 {
 	memcpy(m_eq,eq,sizeof(PointCoordinateType)*6);
-	if (hfDims)
+
+	if (dims)
 	{
-		memcpy(m_hfDims,hfDims,sizeof(unsigned char)*3);
-	}
-	else
-	{
-		m_hfDims[0] = 0;
-		m_hfDims[1] = 1;
-		m_hfDims[2] = 2;
+		m_dims = *dims;
 	}
 	
 	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION));  //automatically calls updateRepresentation
@@ -63,13 +59,10 @@ ccQuadric::ccQuadric(QString name /*=QString("Plane")*/)
 	: ccGenericPrimitive(name)
 	, m_minCorner(0,0)
 	, m_maxCorner(0,0)
+	, m_dims(0,1,2)
 	, m_minZ(0)
 	, m_maxZ(0)
-{
-	m_hfDims[0] = 0;
-	m_hfDims[1] = 1;
-	m_hfDims[2] = 2;
-}
+{}
 
 bool ccQuadric::buildUp()
 {
@@ -146,16 +139,16 @@ bool ccQuadric::buildUp()
 
 ccGenericPrimitive* ccQuadric::clone() const
 {
-	return finishCloneJob(new ccQuadric(m_minCorner,m_maxCorner,m_eq,m_hfDims,&m_transformation,getName(),m_drawPrecision));
+	return finishCloneJob(new ccQuadric(m_minCorner,m_maxCorner,m_eq,&m_dims,&m_transformation,getName(),m_drawPrecision));
 }
 
 ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
 {
 	//number of points
 	unsigned count = cloud->size();
-	if (count < CC_LOCAL_MODEL_MIN_SIZE[HF])
+	if (count < CC_LOCAL_MODEL_MIN_SIZE[QUADRIC])
 	{
-		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[HF]));
+		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[QUADRIC]));
 		return 0;
 	}
 
@@ -165,8 +158,8 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		CCLib::Neighbourhood Yk(cloud);
 		
 		//plane equation
-		const PointCoordinateType* theLSQPlane = Yk.getLSQPlane();
-		if (!theLSQPlane)
+		const PointCoordinateType* theLSPlane = Yk.getLSPlane();
+		if (!theLSPlane)
 		{
 			ccLog::Warning("[ccQuadric::Fit] Not enough points to fit a quadric!");
 			return 0;
@@ -176,10 +169,10 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		G = *Yk.getGravityCenter();
 
 		//local base
-		N = CCVector3(theLSQPlane);
-		assert(Yk.getLSQPlaneX() && Yk.getLSQPlaneY());
-		X = *Yk.getLSQPlaneX(); //main direction
-		Y = *Yk.getLSQPlaneY(); //secondary direction
+		N = CCVector3(theLSPlane);
+		assert(Yk.getLSPlaneX() && Yk.getLSPlaneY());
+		X = *Yk.getLSPlaneX(); //main direction
+		Y = *Yk.getLSPlaneY(); //secondary direction
 	}
 
 	//project the points in a temporary cloud
@@ -205,14 +198,14 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		//(just to be sure and to avoid re-computing them)
 		Zk.setGravityCenter(CCVector3(0,0,0));
 		PointCoordinateType perfectEq[4] = { 0, 0, 1, 0 };
-		Zk.setLSQPlane(	perfectEq,
+		Zk.setLSPlane(	perfectEq,
 						CCVector3(1,0,0),
 						CCVector3(0,1,0),
 						CCVector3(0,0,1));
 	}
 
-	uchar hfdims[3];
-	const PointCoordinateType* eq = Zk.getHeightFunction(hfdims);
+	Tuple3ub dims;
+	const PointCoordinateType* eq = Zk.getQuadric(&dims);
 	if (!eq)
 	{
 		ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
@@ -226,16 +219,16 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	CCVector2 minXY(bb.minCorner().x,bb.minCorner().y);
 	CCVector2 maxXY(bb.maxCorner().x,bb.maxCorner().y);
 
-	ccQuadric* quadric = new ccQuadric(minXY, maxXY, eq, hfdims, &glMat);
+	ccQuadric* quadric = new ccQuadric(minXY, maxXY, eq, &dims, &glMat);
 
 	quadric->setMetaData(QString("Equation"),QVariant(quadric->getEquationString()));
 
 	//compute rms if necessary
 	if (rms)
 	{
-		const uchar& dX = hfdims[0];
-		const uchar& dY = hfdims[1];
-//		const uchar& dZ = hfdims[2];
+		const uchar dX = dims.x;
+		const uchar dY = dims.y;
+//		const uchar dZ = dims.z;
 
 		*rms = 0;
 
@@ -264,9 +257,9 @@ PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q
 	Q = P;
 	m_transformation.inverse().apply(Q);
 
-	const uchar& dX = m_hfDims[0];
-	const uchar& dY = m_hfDims[1];
-	const uchar& dZ = m_hfDims[2];
+	const uchar dX = m_dims.x;
+	const uchar dY = m_dims.y;
+	const uchar dZ = m_dims.z;
 
 	PointCoordinateType originalZ = Q.u[dZ];
 	Q.u[dZ] = m_eq[0] + m_eq[1]*Q.u[dX] + m_eq[2]*Q.u[dY] + m_eq[3]*Q.u[dX]*Q.u[dX] + m_eq[4]*Q.u[dX]*Q.u[dY] + m_eq[5]*Q.u[dY]*Q.u[dY];
@@ -278,9 +271,9 @@ PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q
 
 QString ccQuadric::getEquationString() const
 {
-	const uchar& dX = m_hfDims[0];
-	const uchar& dY = m_hfDims[1];
-	const uchar& dZ = m_hfDims[2];
+	const uchar dX = m_dims.x;
+	const uchar dY = m_dims.y;
+	const uchar dZ = m_dims.z;
 	static const char dimChars[3] = {'x','y','z'};
 
 	QString equationStr = QString("%1 = %2 + %3 * %4").arg(dimChars[dZ]).arg(m_eq[0]).arg(m_eq[1]).arg(dimChars[dX]);

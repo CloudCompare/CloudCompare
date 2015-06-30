@@ -843,7 +843,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 						//we take the keypoints 'middle altitude' by default
 						CCVector3 bbMin,bbMax;
-						_keypointsCloud->getBoundingBox(bbMin.u,bbMax.u);
+						_keypointsCloud->getBoundingBox(bbMin,bbMax);
 						PointCoordinateType Z0 = (bbMin.z + bbMax.z)/2;
 
 						orthoImage = sensor->orthoRectifyAsImageDirect(	image,

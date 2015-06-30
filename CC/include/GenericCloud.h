@@ -55,7 +55,7 @@ public:
 			\param bbMin lower bounding-box limits (Xmin,Ymin,Zmin)
 			\param bbMax higher bounding-box limits (Xmax,Ymax,Zmax)
 		**/
-		virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) = 0;
+		virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) = 0;
 
 		//! Returns a given point visibility state (relatively to a sensor for instance)
 		/**	Generic method to request a point visibility (should be overloaded if this functionality is required).

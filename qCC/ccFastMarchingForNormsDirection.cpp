@@ -42,7 +42,7 @@ static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 	assert(sourceCloud->hasNormals());
 	assert(subset->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(sourceCloud));
 
-	//we simply take the first normal as reference (DGM: seems to work better than the LSQ plane!)
+	//we simply take the first normal as reference (DGM: seems to work better than the LS plane!)
 	const CCVector3& N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
 
 	//now we can compute the mean normal, using the first normal as reference for the sign
@@ -92,7 +92,7 @@ int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
 		theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
 
 		//convert it to FM cell pos index
-		unsigned gridPos = FM_pos2index(cellPos.u);
+		unsigned gridPos = pos2index(cellPos);
 
 		//create corresponding cell
 		DirectionCell* aCell = new DirectionCell;
@@ -480,7 +480,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 		cellPos.z = std::min(octreeWidth,cellPos.z);
 
 		//set corresponding FM cell as 'seed'
-		fm.setSeedCell(cellPos.u);
+		fm.setSeedCell(cellPos);
 
 		//launch propagation
 		int propagationResult = fm.propagate();

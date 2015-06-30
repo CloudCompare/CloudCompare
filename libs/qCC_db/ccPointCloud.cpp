@@ -193,7 +193,7 @@ protected:
 
 					//prepare new cell
 					currentTruncatedCellCode = truncatedCode;
-					octree->computeCellCenter(currentTruncatedCellCode,level,cellCenter.u,true);
+					octree->computeCellCenter(currentTruncatedCellCode,level,cellCenter,true);
 				
 					nearestIndex = INVALID_INDEX;
 				}

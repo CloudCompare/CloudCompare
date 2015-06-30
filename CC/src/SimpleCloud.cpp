@@ -68,31 +68,35 @@ void SimpleCloud::addPoint(const PointCoordinateType P[])
 
 void SimpleCloud::forEach(genericPointAction& anAction)
 {
-	unsigned i,n=m_points->currentSize();
+	unsigned n = m_points->currentSize();
 
-	if (m_scalarField->currentSize()>=n) //existing scalar field?
+	if (m_scalarField->currentSize() >= n) //existing scalar field?
 	{
-		for (i=0;i<n;++i)
+		for (unsigned i=0; i<n; ++i)
+		{
 			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),(*m_scalarField)[i]);
+		}
 	}
 	else //otherwise (we provide a fake zero distance)
 	{
-		ScalarType d=0;
-		for (i=0;i<n;++i)
+		ScalarType d = 0;
+		for (unsigned i=0; i<n; ++i)
+		{
 			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),d);
+		}
 	}
 }
 
-void SimpleCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
+void SimpleCloud::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
 	if (!m_validBB)
 	{
 		m_points->computeMinAndMax();
-		m_validBB=true;
+		m_validBB = true;
 	}
 
-	memcpy(bbMin, m_points->getMin(), sizeof(PointCoordinateType)*3);
-	memcpy(bbMax, m_points->getMax(), sizeof(PointCoordinateType)*3);
+	bbMin = CCVector3(m_points->getMin());
+	bbMax = CCVector3(m_points->getMax());
 }
 
 bool SimpleCloud::reserve(unsigned n)

@@ -2515,7 +2515,7 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionByLevel(unsigned cha
 		{
 			// get extrema of the current cell
 			CCVector3 bbMin, bbMax;
-			m_associatedOctree->computeCellLimits(truncatedCode, level, bbMin.u, bbMax.u, true);
+			m_associatedOctree->computeCellLimits(truncatedCode, level, bbMin, bbMax, true);
 
 			// look if there is a separating plane
 			OctreeCellVisibility result = (parentResult == CELL_INSIDE_FRUSTRUM ? CELL_INSIDE_FRUSTRUM : separatingAxisTest(bbMin, bbMax, planesCoefficients, ptsFrustrum, edges, center));

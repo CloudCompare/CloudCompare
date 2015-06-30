@@ -72,7 +72,7 @@ public:
 	virtual CCLib::TriangleSummitsIndexes* getNextTriangleIndexes() { return 0; }
 	virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex) { return 0; }
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) {}
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) {};
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) {};
 
 protected:
 

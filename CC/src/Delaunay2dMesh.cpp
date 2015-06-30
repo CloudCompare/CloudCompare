@@ -408,14 +408,14 @@ TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleInde
 	return reinterpret_cast<TriangleSummitsIndexes*>(m_triIndexes + 3*triangleIndex);
 }
 
-void Delaunay2dMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
+void Delaunay2dMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
 	if (m_associatedCloud)
+	{
 		m_associatedCloud->getBoundingBox(bbMin,bbMax);
+	}
 	else
 	{
-		bbMin[0] = bbMax[0] = 0;
-		bbMin[1] = bbMax[1] = 0;
-		bbMin[2] = bbMax[2] = 0;
+		bbMin = bbMax = CCVector3(0,0,0);
 	}
 }

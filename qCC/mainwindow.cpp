@@ -6698,14 +6698,14 @@ bool MainWindow::ApplyScaleMatchingAlgortihm(ScaleMatchingAlgorithm algo,
 			case PCA_MAX_DIM:
 				{
 					CCLib::Neighbourhood Yk(cloud);
-					if (!Yk.getLSQPlane())
+					if (!Yk.getLSPlane())
 					{
 						ccLog::Warning(QString("[Scale Matching] Failed to perform PCA on entity '%1'!").arg(ent->getName()));
 						break;
 					}
 					//deduce the scale
 					{
-						const CCVector3* X = Yk.getLSQPlaneX();
+						const CCVector3* X = Yk.getLSPlaneX();
 						const CCVector3* O = Yk.getGravityCenter();
 						double minX = 0,maxX = 0;
 						for (unsigned j=0; j<cloud->size(); ++j)

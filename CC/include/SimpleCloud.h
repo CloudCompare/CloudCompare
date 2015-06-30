@@ -45,7 +45,7 @@ public:
 	//**** inherited form GenericCloud ****//
 	virtual unsigned size() const;
 	virtual void forEach(genericPointAction& anAction);
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 	virtual void placeIteratorAtBegining();
 	virtual const CCVector3* getNextPoint();
 	virtual bool enableScalarField();

@@ -124,7 +124,7 @@ void SimpleMesh::updateBBWithPoint(const CCVector3* P)
     }
 }
 
-void SimpleMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
+void SimpleMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
     /* TODO: how can we know if the vertices cloud changes?!
     if (!bbIsValid)

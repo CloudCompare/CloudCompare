@@ -40,7 +40,7 @@ public:
 	/**	Virtual method to request the mesh size
 		\return the mesh size
 	**/
-	virtual unsigned size() const =0;
+	virtual unsigned size() const = 0;
 
 	//! Fast iteration mechanism
 	/**	Virtual method to apply a function to the whole mesh
@@ -54,12 +54,12 @@ public:
 		\param bbMin lower bounding-box limits (Xmin,Ymin,Zmin)
 		\param bbMax higher bounding-box limits (Xmax,Ymax,Zmax)
 	**/
-	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) = 0;
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) = 0;
 
 	//! Places the mesh iterator at the begining
 	/**	Virtual method to handle the mesh global iterator
 	**/
-	virtual void placeIteratorAtBegining()=0;
+	virtual void placeIteratorAtBegining() = 0;
 
 	//! Returns the next triangle (relatively to the global iterator position)
 	/**	Virtual method to handle the mesh global iterator.
@@ -67,7 +67,7 @@ public:
 		this method is called. The returned object can be temporary.
 		\return a triangle
 	**/
-	virtual GenericTriangle* _getNextTriangle()=0; //temporary
+	virtual GenericTriangle* _getNextTriangle() = 0; //temporary
 
 };
 

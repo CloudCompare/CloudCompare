@@ -51,7 +51,7 @@ CC_LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
 	case 0:
 		return LS;
 	case 1:
-		return HF;
+		return QUADRIC;
 	case 2:
 		return TRI;
 	}

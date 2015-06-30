@@ -547,7 +547,7 @@ bool CloudSamplingTools::resampleCellAtLevel(	const DgmOctree::octreeCell& cell,
 	}
 	else //if (resamplingMethod == CELL_CENTER)
 	{
-		PointCoordinateType center[3];
+		CCVector3 center;
 		cell.parentOctree->computeCellCenter(cell.truncatedCode,cell.level,center,true);
 		cloud->addPoint(center);
 	}
@@ -577,18 +577,18 @@ bool CloudSamplingTools::subsampleCellAtLevel(	const DgmOctree::octreeCell& cell
 	}
 	else // if (subsamplingMethod == NEAREST_POINT_TO_CELL_CENTER)
 	{
-		PointCoordinateType center[3];
+		CCVector3 center;
 		cell.parentOctree->computeCellCenter(cell.truncatedCode,cell.level,center,true);
 
-		PointCoordinateType minDist = CCVector3::vdistance2(cell.points->getPoint(0)->u,center);
+		PointCoordinateType minSquareDist = (*cell.points->getPoint(0) - center).norm2();
 
 		for (unsigned i=1; i<pointsCount; ++i)
 		{
-			PointCoordinateType dist = CCVector3::vdistance2(cell.points->getPoint(i)->u,center);
-			if (dist < minDist)
+			PointCoordinateType squareDist = (*cell.points->getPoint(i) - center).norm2();
+			if (squareDist < minSquareDist)
 			{
 				selectedPointIndex = i;
-				minDist = dist;
+				minSquareDist = squareDist;
 			}
 
 			if (nProgress && !nProgress->oneStep())
@@ -655,8 +655,8 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,realNeighborCount); //we don't take the query point into account!
 			Neighbourhood Z(&neighboursCloud);
 
-			const PointCoordinateType* lsq = Z.getLSQPlane();
-			if (lsq)
+			const PointCoordinateType* lsPlane = Z.getLSPlane();
+			if (lsPlane)
 			{
 				double maxD = absoluteError;
 				if (!useAbsoluteError)
@@ -667,7 +667,7 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 					for (unsigned j=0; j<realNeighborCount; ++j)
 					{
 						const CCVector3* P = neighboursCloud.getPoint(j);
-						double d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(P,lsq);
+						double d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(P,lsPlane);
 						sum_d += d;
 						sum_d2 += d*d;
 					}
@@ -677,7 +677,7 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 				}
 
 				//distance from the query point to the plane
-				double d = fabs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq));
+				double d = fabs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsPlane));
 
 				if (d <= maxD)
 					cloud->addPointIndex(globalIndex);

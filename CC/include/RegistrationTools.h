@@ -270,7 +270,7 @@ protected:
     static unsigned ComputeRegistrationScore(	KDTree *modelTree,
 												GenericIndexedCloud *dataCloud,
 												ScalarType delta,
-												ScaledTransformation& dataToModel);
+												const ScaledTransformation& dataToModel);
 
     //! Find the 3D pseudo intersection between two lines
     /** This function finds the 3D point which is the nearest from the both lines (when this point is unique, i.e. when

@@ -117,7 +117,7 @@ public:
 
 	//! Tries to guess the best 'local radius' for normals computation (see ComputeCloudNormals)
 	/** \param cloud point cloud on which to process the normals.
-		\param cloudOctree inputOctree input cloud octree (optional).
+		\param cloudOctree input cloud octree (optional)
 		\param progressCb progress notification (optional)
 		\return the best radius (strictly positive value) or 0 if an error occurred
 	**/

@@ -185,13 +185,12 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 	}
 
 	//progress notification
-	CCLib::NormalizedProgress* nProgress(0);
+	CCLib::NormalizedProgress nProgress(progressCb,static_cast<unsigned>(vertexCount));
 	if (progressCb)
 	{
 		progressCb->reset();
 		progressCb->setMethodTitle("Orient normals (MST)");
 		progressCb->setInfo(qPrintable(QString("Compute Minimum spanning tree\nPoints: %1\nEdges: %2").arg(vertexCount).arg(graph.edgeCount())));
-		nProgress = new CCLib::NormalizedProgress(progressCb,static_cast<unsigned>(vertexCount));
 		progressCb->start();
 	}
 
@@ -214,7 +213,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 			for (std::set<size_t>::const_iterator it = neighbors.begin(); it != neighbors.end(); ++it)
 				priorityQueue.push(Edge(firstUnvisitedIndex, *it, graph.weight(firstUnvisitedIndex, *it)));
 
-			if (nProgress && !nProgress->oneStep())
+			if (progressCb && !nProgress.oneStep())
 				break;
 		}
 
@@ -269,7 +268,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 			cloud->setPointColor(static_cast<unsigned>(v), patchCol);
 			sf->setValue(static_cast<unsigned>(v),static_cast<ScalarType>(visitedCount));
 #endif
-			if (nProgress && !nProgress->oneStep())
+			if (progressCb && !nProgress.oneStep())
 			{
 				visitedCount = static_cast<unsigned>(vertexCount); //early stop
 				break;
@@ -285,10 +284,8 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 	cloud->showSF(true);
 #endif
 
-	if (nProgress)
+	if (progressCb)
 	{
-		delete nProgress;
-		nProgress = 0;
 		progressCb->stop();
 	}
 
@@ -401,7 +398,7 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 
 		//current point index
 		unsigned index = cell.points->getPointGlobalIndex(i);
-		const CCVector3& N1 = cloud->getPointNormal(static_cast<unsigned>(index));
+		const CCVector3& N1 = cloud->getPointNormal(index);
 		//const CCVector3* P1 = cloud->getPoint(static_cast<unsigned>(index));
 		for (unsigned j=0; j<neighborCount; ++j)
 		{
@@ -409,10 +406,10 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 			const unsigned& neighborIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
 			if (index != neighborIndex)
 			{
-				const CCVector3& N2 = cloud->getPointNormal(static_cast<unsigned>(neighborIndex));
+				const CCVector3& N2 = cloud->getPointNormal(neighborIndex);
 				double weight = 0;
 				//dot product
-				weight = std::max(0.0,1.0 - fabs(N1.dot(N2)));
+				weight = std::max(0.0, 1.0 - fabs(N1.dot(N2)));
 				
 				//distance
 				//weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);

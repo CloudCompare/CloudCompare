@@ -41,13 +41,13 @@ void DebugProgressCallback::reset()
 {
 	setMethodTitle("Undefined Method");
 	setInfo("No info");
-	currentPercentage=0.0;
-	decade=0;
+	currentPercentage = 0;
+	decade = 0;
 }
 
 void DebugProgressCallback::update(float percent)
 {
-	while (percent-10.0*float(decade)>10.0)
+	while (percent - static_cast<float>(10*decade) > 10.0)
 	{
 		++decade;
 		printf(".");

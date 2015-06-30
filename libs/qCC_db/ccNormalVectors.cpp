@@ -415,7 +415,6 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 	return bestRadius;
 }
 
-
 bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 											NormsIndexesTableType& theNormsCodes,
 											CC_LOCAL_MODEL_TYPES localModel,
@@ -443,7 +442,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		}
 	}
 
-	//on reserve la memoire pour stocker les normales
+	//reserve some memory to store the (compressed) normals
 	if (!theNormsCodes.isAllocated() || theNormsCodes.currentSize() < pointCount)
 	{
 		if (!theNormsCodes.resize(pointCount))

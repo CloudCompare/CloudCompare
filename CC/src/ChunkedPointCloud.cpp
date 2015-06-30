@@ -54,22 +54,19 @@ void ChunkedPointCloud::clear()
 
 void ChunkedPointCloud::forEach(genericPointAction& anAction)
 {
-	unsigned n = size();
-
-	//if a SF is already activated
+	//there's no point of calling forEach if there's no activated scalar field!
 	ScalarField* currentOutScalarFieldArray = getCurrentOutScalarField();
-	if (currentOutScalarFieldArray)
+	if (!currentOutScalarFieldArray)
 	{
-		for (unsigned i=0; i<n; ++i)
-			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),(*currentOutScalarFieldArray)[i]);
+		assert(false);
+		return;
 	}
-	/*else //otherwise we use a fake SF (DGM FIXME: is it really interesting?!) --> NO ;)
+
+	unsigned n = size();
+	for (unsigned i=0; i<n; ++i)
 	{
-		ScalarType dummyDist = 0;
-		for (unsigned i=0; i<n; ++i)
-			anAction(*(CCVector3*)m_points->getValue(i),dummyDist);
+		anAction(*getPoint(i),(*currentOutScalarFieldArray)[i]);
 	}
-	//*/
 }
 
 void ChunkedPointCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])

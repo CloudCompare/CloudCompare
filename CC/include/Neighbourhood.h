@@ -43,11 +43,10 @@ class CC_CORE_LIB_API Neighbourhood
 	public:
 
 		//! Geometric properties/elements that can be computed from the set of points (see Neighbourhood::getGeometricalElement)
-		enum CC_GEOM_ELEMENT {	DEPRECATED			= 0,
-								GRAVITY_CENTER		= 1,
-								LS_PLANE			= 2,
-								QUADRIC				= 4,
-								QUADRIC_DIRECTIONS	= 8 };
+		enum CC_GEOM_ELEMENT {	FLAG_DEPRECATED			= 0,
+								FLAG_GRAVITY_CENTER		= 1,
+								FLAG_LS_PLANE			= 2,
+								FLAG_QUADRIC			= 4 };
 
 		//! Curvature type
 		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV,

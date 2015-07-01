@@ -3,6 +3,12 @@
 //Local
 #include <GenericProgressCallback.h>
 
+//system
+#include <algorithm>
+#include <string.h>
+#include <assert.h>
+#include <stdio.h> //for sprintf
+
 using namespace CCLib;
 
 //! 3x3x3 neighborhood

@@ -35,7 +35,7 @@ using namespace CCLib;
 
 Neighbourhood::Neighbourhood(GenericIndexedCloudPersist* associatedCloud)
 	: m_quadricEquationDirections(0,1,2)
-	, m_structuresValidity(DEPRECATED)
+	, m_structuresValidity(FLAG_DEPRECATED)
 	, m_associatedCloud(associatedCloud)
 {
 	memset(m_quadricEquation,  0, sizeof(PointCoordinateType)*6);
@@ -46,27 +46,27 @@ Neighbourhood::Neighbourhood(GenericIndexedCloudPersist* associatedCloud)
 
 void Neighbourhood::reset()
 {
-	m_structuresValidity = DEPRECATED;
+	m_structuresValidity = FLAG_DEPRECATED;
 }
 
 const CCVector3* Neighbourhood::getGravityCenter()
 {
-	if (!(m_structuresValidity & GRAVITY_CENTER))
+	if (!(m_structuresValidity & FLAG_GRAVITY_CENTER))
 		computeGravityCenter();
-	return ((m_structuresValidity & GRAVITY_CENTER) ? &m_gravityCenter : 0);
+	return ((m_structuresValidity & FLAG_GRAVITY_CENTER) ? &m_gravityCenter : 0);
 }
 
 void Neighbourhood::setGravityCenter(const CCVector3& G)
 {
 	m_gravityCenter = G;
-	m_structuresValidity |= GRAVITY_CENTER;
+	m_structuresValidity |= FLAG_GRAVITY_CENTER;
 }
 
 const PointCoordinateType* Neighbourhood::getLSPlane()
 {
-	if (!(m_structuresValidity & LS_PLANE))
+	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & LS_PLANE) ? m_lsPlaneEquation : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneEquation : 0);
 }
 
 void Neighbourhood::setLSPlane(	const PointCoordinateType eq[4],
@@ -79,33 +79,33 @@ void Neighbourhood::setLSPlane(	const PointCoordinateType eq[4],
 	m_lsPlaneVectors[1] = Y;
 	m_lsPlaneVectors[2] = N;
 	
-	m_structuresValidity |= LS_PLANE;
+	m_structuresValidity |= FLAG_LS_PLANE;
 }
 
 const CCVector3* Neighbourhood::getLSPlaneX()
 {
-	if (!(m_structuresValidity & LS_PLANE))
+	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & LS_PLANE) ? m_lsPlaneVectors : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors : 0);
 }
 
 const CCVector3* Neighbourhood::getLSPlaneY()
 {
-	if (!(m_structuresValidity & LS_PLANE))
+	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & LS_PLANE) ? m_lsPlaneVectors+1 : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors + 1 : 0);
 }
 
 const CCVector3* Neighbourhood::getLSPlaneNormal()
 {
-	if (!(m_structuresValidity & LS_PLANE))
+	if (!(m_structuresValidity & FLAG_LS_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return ((m_structuresValidity & LS_PLANE) ? m_lsPlaneVectors+2 : 0);
+	return ((m_structuresValidity & FLAG_LS_PLANE) ? m_lsPlaneVectors + 2 : 0);
 }
 
 const PointCoordinateType* Neighbourhood::getQuadric(Tuple3ub* dims/*=0*/)
 {
-	if (!(m_structuresValidity & QUADRIC))
+	if (!(m_structuresValidity & FLAG_QUADRIC))
 	{
 		computeQuadric();
 	}
@@ -115,13 +115,13 @@ const PointCoordinateType* Neighbourhood::getQuadric(Tuple3ub* dims/*=0*/)
 		*dims = m_quadricEquationDirections;
 	}
 
-	return ((m_structuresValidity & QUADRIC) ? m_quadricEquation : 0);
+	return ((m_structuresValidity & FLAG_QUADRIC) ? m_quadricEquation : 0);
 }
 
 void Neighbourhood::computeGravityCenter()
 {
 	//invalidate previous centroid (if any)
-	m_structuresValidity &= (~GRAVITY_CENTER);
+	m_structuresValidity &= (~FLAG_GRAVITY_CENTER);
 
 	assert(m_associatedCloud);
 	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
@@ -218,7 +218,7 @@ PointCoordinateType Neighbourhood::computeLargestRadius()
 bool Neighbourhood::computeLeastSquareBestFittingPlane()
 {
 	//invalidate previous LS plane (if any)
-	m_structuresValidity &= (~LS_PLANE);
+	m_structuresValidity &= (~FLAG_LS_PLANE);
 
 	assert(m_associatedCloud);
 	unsigned pointCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
@@ -301,7 +301,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 	//i.e. a0*G[0]+a1*G[1]+a2*G[2]=a3
 	m_lsPlaneEquation[3] = G.dot(m_lsPlaneVectors[2]);
 
-	m_structuresValidity |= LS_PLANE;
+	m_structuresValidity |= FLAG_LS_PLANE;
 
 	return true;
 }
@@ -309,7 +309,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 bool Neighbourhood::computeQuadric()
 {
 	//invalidate previous quadric (if any)
-	m_structuresValidity &= (~QUADRIC);
+	m_structuresValidity &= (~FLAG_QUADRIC);
 
 	assert(m_associatedCloud);
 	if (!m_associatedCloud)
@@ -481,7 +481,7 @@ bool Neighbourhood::computeQuadric()
 		}
 		m_quadricEquationDirections = idx;
 
-		m_structuresValidity |= QUADRIC;
+		m_structuresValidity |= FLAG_QUADRIC;
 	}
 
 	return true;

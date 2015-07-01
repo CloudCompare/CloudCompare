@@ -6,7 +6,7 @@
 using namespace CCLib;
 
 //! 3x3x3 neighborhood
-const int Neighbours333[27][4] = {
+const char Neighbours333[27][4] = {
 	{-1,-1,-1, -1},
 	{-1,-1, 0, -1},
 	{-1,-1, 1, -1},
@@ -42,12 +42,12 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 {
 	const float Weights[3] = { 0.92644f, 1.34065f, 1.65849f };
 
-	NormalizedProgress normProgress(progressCb,m_gridY*m_gridZ*2);
+	NormalizedProgress normProgress(progressCb,m_innerSize.y*m_innerSize.z*2);
 	if (progressCb)
 	{
 		progressCb->setMethodTitle("Chamfer distance");
 		char buffer[256];
-		sprintf(buffer,"Box: [%u x %u x %u]",m_gridX,m_gridY,m_gridZ);
+		sprintf(buffer,"Box: [%u x %u x %u]",m_innerSize.x,m_innerSize.y,m_innerSize.z);
 		progressCb->setInfo(buffer);
         progressCb->reset();
 		progressCb->start();
@@ -58,11 +58,11 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 	{
 		for (size_t i=0; i<neighborDist.size(); ++i)
 		{
-			const int* pos = Neighbours333[4*i];
+			const char* pos = Neighbours333[4*i];
 			//neighborDist[i] = -1;
-			neighborDist[i] += static_cast< int >( pos[0] != 0 );
-			neighborDist[i] += static_cast< int >( pos[1] != 0 );
-			neighborDist[i] += static_cast< int >( pos[2] != 0 );
+			neighborDist[i] += static_cast< char >( pos[0] != 0 );
+			neighborDist[i] += static_cast< char >( pos[1] != 0 );
+			neighborDist[i] += static_cast< char >( pos[2] != 0 );
 		}
 	}
 
@@ -72,11 +72,11 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 		size_t firstNeighborIndex = centerNeighborIndex + 1;
 		size_t lastNeighborIndex  = neighborDist.size() - 1;
 
-		for (size_t k=0; k<m_gridZ; ++k)
+		for (size_t k=0; k<m_innerSize.z; ++k)
 		{
-			for (size_t j=0; j<m_gridY; ++j)
+			for (size_t j=0; j<m_innerSize.y; ++j)
 			{
-				for (size_t i=0; i<m_gridX; ++i)
+				for (size_t i=0; i<m_innerSize.x; ++i)
 				{
 					GridElement center_value = getValue(static_cast<int>(i),
 														static_cast<int>(j),
@@ -91,10 +91,10 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const int* pos = Neighbours333[4*n];
-							Tuple3i neighborPos(static_cast<int>(i) + pos[0],
-												static_cast<int>(j) + pos[1],
-												static_cast<int>(k) + pos[2] );
+							const char* pos = Neighbours333[4*n];
+							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
+												static_cast<int>(j) + static_cast<int>(pos[1]),
+												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
 							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
 							if ( val[neighborDist[n]] < getValue(neighborPos) )
@@ -112,10 +112,10 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const int* pos = Neighbours333[4*n];
-							Tuple3i neighborPos(static_cast<int>(i) + pos[0],
-												static_cast<int>(j) + pos[1],
-												static_cast<int>(k) + pos[2] );
+							const char* pos = Neighbours333[4*n];
+							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
+												static_cast<int>(j) + static_cast<int>(pos[1]),
+												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
 							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
 							if ( val[neighborDist[n]] > getValue(neighborPos) )
@@ -140,11 +140,11 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 		size_t firstNeighborIndex = 0;
 		size_t lastNeighborIndex  = centerNeighborIndex - 1;
 
-		for (size_t k=0; k<m_gridZ; ++k)
+		for (size_t k=0; k<m_innerSize.z; ++k)
 		{
-			for (size_t j=0; j<m_gridY; ++j)
+			for (size_t j=0; j<m_innerSize.y; ++j)
 			{
-				for (size_t i=0; i<m_gridX; ++i)
+				for (size_t i=0; i<m_innerSize.x; ++i)
 				{
 					GridElement center_value = getValue(static_cast<int>(i),
 														static_cast<int>(j),
@@ -159,10 +159,10 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const int* pos = Neighbours333[4*n];
-							Tuple3i neighborPos(static_cast<int>(i) + pos[0],
-												static_cast<int>(j) + pos[1],
-												static_cast<int>(k) + pos[2] );
+							const char* pos = Neighbours333[4*n];
+							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
+												static_cast<int>(j) + static_cast<int>(pos[1]),
+												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
 							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
 							if ( val[neighborDist[n]] < getValue(neighborPos) )
@@ -180,10 +180,10 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const int* pos = Neighbours333[4*n];
-							Tuple3i neighborPos(static_cast<int>(i) + pos[0],
-												static_cast<int>(j) + pos[1],
-												static_cast<int>(k) + pos[2] );
+							const char* pos = Neighbours333[4*n];
+							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
+												static_cast<int>(j) + static_cast<int>(pos[1]),
+												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
 							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
 							if ( val[neighborDist[n]] > getValue(neighborPos) )

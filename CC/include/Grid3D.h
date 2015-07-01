@@ -30,6 +30,8 @@ namespace CCLib
 {
 
 //! Simple 3D grid structure
+/** The grid data is contiguous in memory.
+**/
 template< class Type > class Grid3D
 {
 
@@ -39,28 +41,42 @@ public:
 	typedef Type GridElement;
 
 	//! Default constructor
-	/** \param di grid size along the X dimension
-		\param dj grid size along the Y dimension
-		\param dk grid size along the Z dimension
-	**/
-	Grid3D(unsigned di, unsigned dj, unsigned dk, unsigned margin)
-		: m_gridX       (di)
-		, m_gridY       (dj)
-		, m_gridZ       (dk)
-		, m_margin      (margin)
-		, m_rowSize     (static_cast<int>(m_gridX+2*m_margin)              )
-		, m_sliceSize   (static_cast<int>(m_gridY+2*m_margin) * m_rowSize  )
-		, m_gridSize    (static_cast<int>(m_gridZ+2*m_margin) * m_sliceSize)
-		, m_marginShift (m_margin + m_rowSize + m_sliceSize)
+	Grid3D()
+		: m_innerSize      (0,0,0)
+		, m_margin         (0)
+		, m_rowSize        (0)
+		, m_sliceSize      (0)
+		, m_innerCellCount (0)
+		, m_totalCellCount (0)
+		, m_marginShift    (0)
 	{}
 
+	//! Returns the grid dimensions
+	inline const Tuple3ui& size() const { return m_innerSize; }
+
+	//! Returns whether the grid has been initialized or not
+	inline bool isInitialized() const { return m_totalCellCount != 0; }
+
 	//! Initializes the grid
-	/** This memory for the grid must be explicitelty reserved prior to any action.
+	/** The grid must be explicitelty initialized prior to any action.
+		\param di grid size along the X dimension
+		\param dj grid size along the Y dimension
+		\param dk grid size along the Z dimension
+		\param margin grid margin
+		\param defaultCellValue default cell value
 		\return true if the initialization succeeded
 	**/
-	bool init(GridElement defaultCellValue)
+	bool init(unsigned di, unsigned dj, unsigned dk, unsigned margin, GridElement defaultCellValue = 0)
 	{
-		if (m_gridSize == 0)
+		m_innerSize      = Tuple3ui(di,dj,dk);
+		m_margin         = margin;
+		m_innerCellCount = m_innerSize.x * m_innerSize.y * m_innerSize.z;
+		m_rowSize        = (m_innerSize.x + 2*m_margin);
+		m_sliceSize      = (m_innerSize.y + 2*m_margin) * m_rowSize;
+		m_totalCellCount = (m_innerSize.z + 2*m_margin) * m_sliceSize;
+		m_marginShift    = m_margin * (1 + m_rowSize + m_sliceSize);
+
+		if (m_totalCellCount == 0)
 		{
 			assert(false);
 			return false;
@@ -69,11 +85,12 @@ public:
 		//grid initialization
 		try
 		{
-			m_grid.resize(m_gridSize,defaultCellValue);
+			m_grid.resize(m_totalCellCount,defaultCellValue);
 		}
 		catch (std::bad_alloc)
 		{
 			//not enough memory
+			m_totalCellCount = 0;
 			return false;
 		}
 
@@ -98,70 +115,76 @@ public:
 		m_grid[pos2index(cellPos.x,cellPos.y,cellPos.z)] = value;
 	}
 
+	//! Returns the value of a given cell (const version)
+	/** \param i the cell coordinate along the X dimension
+		\param j the cell coordinate along the Y dimension
+		\param k the cell coordinate along the Z dimension
+		\return the cell value
+	**/
+	inline const GridElement& getValue(int i, int j, int k) const
+	{
+		return m_grid[pos2index(i,j,k)];
+	}
 	//! Returns the value of a given cell
 	/** \param i the cell coordinate along the X dimension
 		\param j the cell coordinate along the Y dimension
 		\param k the cell coordinate along the Z dimension
 		\return the cell value
 	**/
-	inline GridElement getValue(int i, int j, int k) const
+	inline GridElement& getValue(int i, int j, int k)
 	{
 		return m_grid[pos2index(i,j,k)];
 	}
 
+	//! Returns the value of a given cell const version)
+	/** \param cellPos the cell position
+		\return the cell value
+	**/
+	const GridElement& getValue(Tuple3i& cellPos) const
+	{
+		return m_grid[pos2index(cellPos.x,cellPos.y,cellPos.z)];
+	}
 	//! Returns the value of a given cell
 	/** \param cellPos the cell position
 		\return the cell value
 	**/
-	GridElement getValue(Tuple3i& cellPos) const
+	GridElement& getValue(Tuple3i& cellPos)
 	{
 		return m_grid[pos2index(cellPos.x,cellPos.y,cellPos.z)];
 	}
 
+	//! Gives access to the internal grid data (with margin)
+	inline GridElement* data() { return &(m_grid[0]); }
+	//! Gives access to the internal grid data (with margin) (const version)
+	inline const GridElement* data() const { return &(m_grid[0]); }
+
+	//! Returns the number of cell count (whithout margin)
+	inline unsigned innerCellCount() const { return m_innerCellCount; }
+	//! Returns the total number of cell count (with margin)
+	inline unsigned totalCellCount() const { return m_totalCellCount; }
+
 protected:
 
 	//! Converts a 3D position to an absolute index
-	inline int pos2index(int i, int j, int k) const { return i + j * m_rowSize + k * m_sliceSize + m_marginShift; }
-
-	//! Converts an absolute index to a 3D position
-	inline Tuple3i index2pos(int index) const
-	{
-		assert(index >= m_marginShift && index < m_gridSize);
-		
-		Tuple3i pos;
-		//index = i + j * m_rowSize + k * m_sliceSize + m_marginShift
-		index -= m_marginShift;
-		//index = i + j * m_rowSize + k * m_sliceSize
-		pos.z = index / m_sliceSize;
-		index -= pos.z * m_sliceSize;
-		//index = i + j * m_rowSize
-		pos.y = index / m_rowSize;
-		index -= pos.y * m_rowSize;
-		//index = i
-		pos.x = index;
-		
-		return pos;
-	}
+	inline int pos2index(int i, int j, int k) const { return i + j * static_cast<int>(m_rowSize) + k * static_cast<int>(m_sliceSize) + static_cast<int>(m_marginShift); }
 
     //! Grid data
 	std::vector<GridElement> m_grid;
 
-	//! Grid dimension along the X dimension (without margin)
-	unsigned m_gridX;
-	//! Grid dimension along the Y dimension (without margin)
-	unsigned m_gridY;
-	//! Grid dimension along the Z dimension (without margin)
-	unsigned m_gridZ;
+	//! Dimensions of the grid (without margin)
+	Tuple3ui m_innerSize;
 	//! Margin
 	unsigned m_margin;
     //! 1D row size (with margin)
-	int m_rowSize;
+	unsigned m_rowSize;
     //! 2D slice size (with margin)
-	int m_sliceSize;
-	//! 3D grid size (with margin)
-	int m_gridSize;
+	unsigned m_sliceSize;
+	//! 3D grid size without margin
+	unsigned m_innerCellCount;
+	//! 3D grid size with margin
+	unsigned m_totalCellCount;
 	//! First index of real data (i.e. after marin)
-	int m_marginShift;
+	unsigned m_marginShift;
 };
 
 }

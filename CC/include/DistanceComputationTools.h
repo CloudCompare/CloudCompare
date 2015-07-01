@@ -30,11 +30,9 @@ namespace CCLib
 class GenericTriangle;
 class GenericIndexedMesh;
 class GenericCloud;
-class GenericIndexedCloud;
 class GenericIndexedCloudPersist;
 class ReferenceCloud;
 class GenericProgressCallback;
-class ChamferDistanceTransform;
 struct OctreeAndMeshIntersection;
 
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
@@ -57,7 +55,7 @@ public: //distance to clouds or meshes
 		ScalarType maxSearchDist;
 
 		//! Whether to use multi-thread or single thread mode
-		/** If maxSearchDist>=0, single thread mode is forced.
+		/** If maxSearchDist >= 0, single thread mode is forced.
 		**/
 		bool multiThread;
 
@@ -168,7 +166,9 @@ public: //distance to clouds or meshes
 											GenericProgressCallback* progressCb = 0,
 											DgmOctree* cloudOctree = 0);
 
-	//! Computes the Chamfer distances (approximated distances) between two point clouds
+public: //approximate distances to clouds or meshes
+
+	//! Computes approximate (Chamfer) distances between two point clouds
 	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.
 		Therefore, the greater the octree level (used to determine the grid step) is, the finer
 		is the result, but more memory (and time) will be needed.
@@ -181,14 +181,14 @@ public: //distance to clouds or meshes
 		\param compOctree the pre-computed octree of the compared cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
 		\param refOctree the pre-computed octree of the reference cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
 	**/
-	static int computeChamferDistanceBetweenTwoClouds(	CC_CHAMFER_DISTANCE_TYPE cType,
-														GenericIndexedCloudPersist* comparedCloud,
-														GenericIndexedCloudPersist* referenceCloud,
-														uchar octreeLevel,
-														PointCoordinateType maxSearchDist = -PC_ONE,
-														GenericProgressCallback* progressCb = 0,
-														DgmOctree* compOctree = 0,
-														DgmOctree* refOctree = 0);
+	static int computeApproxCloud2CloudDistance(CC_CHAMFER_DISTANCE_TYPE cType,
+												GenericIndexedCloudPersist* comparedCloud,
+												GenericIndexedCloudPersist* referenceCloud,
+												uchar octreeLevel,
+												PointCoordinateType maxSearchDist = -PC_ONE,
+												GenericProgressCallback* progressCb = 0,
+												DgmOctree* compOctree = 0,
+												DgmOctree* refOctree = 0);
 
 public: //distance to simple entities (triangles, planes, etc.)
 
@@ -207,25 +207,6 @@ public: //distance to simple entities (triangles, planes, etc.)
 		\return the signed distance between the point and the plane
 	**/
 	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation);
-
-	/*** OTHER METHODS ***/
-
-	//! Computes a the geodesic distances over a point cloud "surface", starting from a seed point
-	/** This method uses the FastMarching algorithm, and thereofre it needs an octree level as input
-		parameter in order to compute a 3D grid. The greater this level is, the finer the result is,
-		but more memory will be needed. Moreover, for interesting results, the cells size should be
-		not too small in order to avoid creating holes in the approximated surface (the propagation will
-		be stoped).
-		\param cloud the point cloud
-		\param seedPointIndex the index of the point from where to start the propagation
-		\param octreeLevel the octree at which to perform the Fast Marching propagation
-		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\return true if the method succeeds
-	**/
-	static bool computeGeodesicDistances(	GenericIndexedCloudPersist* cloud,
-											unsigned seedPointIndex,
-											uchar octreeLevel,
-											GenericProgressCallback* progressCb = 0);
 
 	//! Error estimators
 	enum ERROR_MEASURES
@@ -289,6 +270,23 @@ public: //distance to simple entities (triangles, planes, etc.)
 															bool onlyOrthogonal = false);
 
 public: //other methods
+
+	//! Computes geodesic distances over a point cloud "surface" (starting from a seed point)
+	/** This method uses the FastMarching algorithm. Thereofre it needs an octree level as input
+		parameter in order to create the corresponding 3D grid. The greater this level is, the finer
+		the result will be, but more memory will be required as well.
+		Moreover to get an interesting result the cells size should not be too small (the propagation
+		will be stoped more easily on any encountered 'hole').
+		\param cloud the point cloud
+		\param seedPointIndex the index of the point from where to start the propagation
+		\param octreeLevel the octree at which to perform the Fast Marching propagation
+		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\return true if the method succeeds
+	**/
+	static bool computeGeodesicDistances(	GenericIndexedCloudPersist* cloud,
+											unsigned seedPointIndex,
+											uchar octreeLevel,
+											GenericProgressCallback* progressCb = 0);
 
 	//! Computes the differences between two scalar fields associated to equivalent point clouds
 	/** The compared cloud should be smaller or equal to the reference cloud. Its points should be

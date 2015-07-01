@@ -29,139 +29,140 @@
 using namespace CCLib;
 
 //! Forward mask shifts and weights (Chamfer 3-4-5)
-const int ForwardNeighbours345[14][4] = {
-	{-1,-1,-1, 5},
-	{ 0,-1,-1, 4},
-	{ 1,-1,-1, 5},
-	{-1, 0,-1, 4},
-	{ 0, 0,-1, 3},
-	{ 1, 0,-1, 4},
-	{-1, 1,-1, 5},
-	{ 0, 1,-1, 4},
-	{ 1, 1,-1, 5},
-	{-1,-1, 0, 4},
-	{ 0,-1, 0, 3},
-	{ 1,-1, 0, 4},
-	{-1, 0, 0, 3},
-	{ 0, 0, 0, 0}
+const char ForwardNeighbours345[14*4] = {
+	-1,-1,-1, 5,
+	 0,-1,-1, 4,
+	 1,-1,-1, 5,
+	-1, 0,-1, 4,
+	 0, 0,-1, 3,
+	 1, 0,-1, 4,
+	-1, 1,-1, 5,
+	 0, 1,-1, 4,
+	 1, 1,-1, 5,
+	-1,-1, 0, 4,
+	 0,-1, 0, 3,
+	 1,-1, 0, 4,
+	-1, 0, 0, 3,
+	 0, 0, 0, 0
 };
 
 //! Backward mask shifts and weights (Chamfer 3-4-5)
-const int BackwardNeighbours345[14][4] = {
-	{ 0, 0, 0, 0},
-	{ 1, 0, 0, 3},
-	{-1, 1, 0, 4},
-	{ 0, 1, 0, 3},
-	{ 1, 1, 0, 4},
-	{-1,-1, 1, 5},
-	{ 0,-1, 1, 4},
-	{ 1,-1, 1, 5},
-	{-1, 0, 1, 4},
-	{ 0, 0, 1, 3},
-	{ 1, 0, 1, 4},
-	{-1, 1, 1, 5},
-	{ 0, 1, 1, 4},
-	{ 1, 1, 1, 5}
+const char BackwardNeighbours345[14*4] = {
+	 0, 0, 0, 0,
+	 1, 0, 0, 3,
+	-1, 1, 0, 4,
+	 0, 1, 0, 3,
+	 1, 1, 0, 4,
+	-1,-1, 1, 5,
+	 0,-1, 1, 4,
+	 1,-1, 1, 5,
+	-1, 0, 1, 4,
+	 0, 0, 1, 3,
+	 1, 0, 1, 4,
+	-1, 1, 1, 5,
+	 0, 1, 1, 4,
+	 1, 1, 1, 5
 };
 
 //! Forward mask shifts and weights (Chamfer 1-1-1)
-const int ForwardNeighbours111[14][4] = {
-	{-1,-1,-1, 1},
-	{ 0,-1,-1, 1},
-	{ 1,-1,-1, 1},
-	{-1, 0,-1, 1},
-	{ 0, 0,-1, 1},
-	{ 1, 0,-1, 1},
-	{-1, 1,-1, 1},
-	{ 0, 1,-1, 1},
-	{ 1, 1,-1, 1},
-	{-1,-1, 0, 1},
-	{ 0,-1, 0, 1},
-	{ 1,-1, 0, 1},
-	{-1, 0, 0, 1},
-	{ 0, 0, 0, 0}
+const char ForwardNeighbours111[14*4] = {
+	-1,-1,-1, 1,
+	 0,-1,-1, 1,
+	 1,-1,-1, 1,
+	-1, 0,-1, 1,
+	 0, 0,-1, 1,
+	 1, 0,-1, 1,
+	-1, 1,-1, 1,
+	 0, 1,-1, 1,
+	 1, 1,-1, 1,
+	-1,-1, 0, 1,
+	 0,-1, 0, 1,
+	 1,-1, 0, 1,
+	-1, 0, 0, 1,
+	 0, 0, 0, 0
 };
 
 //! Backward masks shifts and weights (Chamfer 1-1-1)
-const int BackwardNeighbours111[14][4] = {
-	{ 0, 0, 0, 0},
-	{ 1, 0, 0, 1},
-	{-1, 1, 0, 1},
-	{ 0, 1, 0, 1},
-	{ 1, 1, 0, 1},
-	{-1,-1, 1, 1},
-	{ 0,-1, 1, 1},
-	{ 1,-1, 1, 1},
-	{-1, 0, 1, 1},
-	{ 0, 0, 1, 1},
-	{ 1, 0, 1, 1},
-	{-1, 1, 1, 1},
-	{ 0, 1, 1, 1},
-	{ 1, 1, 1, 1}
+const char BackwardNeighbours111[14*4] = {
+	 0, 0, 0, 0,
+	 1, 0, 0, 1,
+	-1, 1, 0, 1,
+	 0, 1, 0, 1,
+	 1, 1, 0, 1,
+	-1,-1, 1, 1,
+	 0,-1, 1, 1,
+	 1,-1, 1, 1,
+	-1, 0, 1, 1,
+	 0, 0, 1, 1,
+	 1, 0, 1, 1,
+	-1, 1, 1, 1,
+	 0, 1, 1, 1,
+	 1, 1, 1, 1
 };
 
-ChamferDistanceTransform::GridElement ChamferDistanceTransform::propagateDistance(	unsigned iStart,
-																					unsigned jStart,
-																					unsigned kStart,
-																					bool forward,
-																					const int neighbours[14][4],
-																					NormalizedProgress* normProgress/*=0*/)
-{
-	assert(!m_grid.empty());
-
-	GridElement* _grid = &(m_grid[pos2index(iStart,jStart,kStart)]);
-
-	//accelerating structure
-	int neighborShift[14];
-	{
-		for (unsigned char v=0; v<14; ++v)
-		{
-			neighborShift[v] =	neighbours[v][0]               +
-								neighbours[v][1] * m_rowSize   +
-								neighbours[v][2] * m_sliceSize ;
-		}
-	}
-
-	GridElement maxDist = 0;
-
-	int order = forward ? 1 : -1;
-
-	for (unsigned k=0; k<m_gridZ; ++k)
-	{
-		for (unsigned j=0; j<m_gridY; ++j)
-		{
-			for (unsigned i=0; i<m_gridX; ++i)
-			{
-				GridElement minVal = _grid[neighborShift[0]] + static_cast<GridElement>(neighbours[0][3]);
-
-				for (unsigned char v=1; v<14; ++v)
-				{
-					minVal = std::min<GridElement>(minVal,_grid[neighborShift[v]] + static_cast<GridElement>(neighbours[v][3]));
-				}
-
-				*_grid = minVal;
-
-				//we track the max distance
-				if (minVal > maxDist)
-				{
-					maxDist = minVal;
-				}
-
-				_grid += order;
-			}
-			_grid += order*2; //next line
-
-			if (normProgress && !normProgress->oneStep())
-			{
-				break;
-			}
-		}
-
-		_grid += (order*2) * m_rowSize; //next slice
-	}
-
-	return maxDist;
-}
+//ChamferDistanceTransform::GridElement ChamferDistanceTransform::propagateDistance(	unsigned iStart,
+//																					unsigned jStart,
+//																					unsigned kStart,
+//																					bool forward,
+//																					const char neighbours[14][4],
+//																					NormalizedProgress* normProgress/*=0*/)
+//{
+//	assert(!m_grid.empty());
+//
+//	GridElement* _grid = &(m_grid[pos2index(iStart,jStart,kStart)]);
+//
+//	//accelerating structure
+//	int neighborShift[14];
+//	{
+//		for (unsigned char v=0; v<14; ++v)
+//		{
+//			neighborShift[v] =	static_cast<int>(neighbours[v][0]) +
+//								static_cast<int>(neighbours[v][1]) * static_cast<int>(m_rowSize) +
+//								static_cast<int>(neighbours[v][2]) * static_cast<int>(m_sliceSize);
+//		}
+//	}
+//
+//	GridElement maxDist = 0;
+//
+//	int order = forward ? 1 : -1;
+//
+//	for (unsigned k=0; k<m_innerSize.z; ++k)
+//	{
+//		for (unsigned j=0; j<m_innerSize.y; ++j)
+//		{
+//			for (unsigned i=0; i<m_innerSize.x; ++i)
+//			{
+//				GridElement minVal = _grid[neighborShift[0]] + static_cast<GridElement>(neighbours[0][3]);
+//
+//				for (unsigned char v=1; v<14; ++v)
+//				{
+//					GridElement neighborVal = _grid[neighborShift[v]] + static_cast<GridElement>(neighbours[v][3]);
+//					minVal = std::min(minVal, neighborVal);
+//				}
+//
+//				*_grid = minVal;
+//
+//				//we track the max distance
+//				if (minVal > maxDist)
+//				{
+//					maxDist = minVal;
+//				}
+//
+//				_grid += order;
+//			}
+//			_grid += order*2; //next line
+//
+//			if (normProgress && !normProgress->oneStep())
+//			{
+//				break;
+//			}
+//		}
+//
+//		_grid += (order*2) * static_cast<int>(m_rowSize); //next slice
+//	}
+//
+//	return maxDist;
+//}
 
 int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb)
 {
@@ -171,33 +172,136 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
         return -1;
 	}
 
-	NormalizedProgress normProgress(progressCb,m_gridY*m_gridZ);
+	const char* fwNeighbours = 0;
+	const char* bwNeighbours = 0;
+	switch (type)
+	{
+	case CHAMFER_111:
+		{
+			fwNeighbours = ForwardNeighbours111;
+			bwNeighbours = BackwardNeighbours111;
+		}
+		break;
+
+	case CHAMFER_345:
+		{
+			fwNeighbours = ForwardNeighbours345;
+			bwNeighbours = BackwardNeighbours345;
+		}
+		break;
+
+	default:
+		//unhandled type?!
+		assert(false);
+		return -1;
+	}
+
+	NormalizedProgress normProgress(progressCb,m_innerSize.y*m_innerSize.z*2);
 	if (progressCb)
 	{
 		progressCb->setMethodTitle("Chamfer distance");
 		char buffer[256];
-		sprintf(buffer,"Box: [%u x %u x %u]",m_gridX,m_gridY,m_gridZ);
+		sprintf(buffer,"Box: [%u x %u x %u]",m_innerSize.x,m_innerSize.y,m_innerSize.z);
 		progressCb->setInfo(buffer);
         progressCb->reset();
 		progressCb->start();
 	}
 
-	GridElement maxDist = 0;
-
-	switch (type)
+	//1st pass: forward scan
 	{
-	case CHAMFER_111:
+		GridElement* _grid = &(m_grid[pos2index(0,0,0)]);
+
+		//accelerating structure
+		int neighborShift[14];
 		{
-					  propagateDistance(0,        0,        0,        true, ForwardNeighbours111, progressCb ? &normProgress : 0);
-			maxDist = propagateDistance(m_gridX-1,m_gridY-1,m_gridZ-1,false,BackwardNeighbours111,progressCb ? &normProgress : 0);
+			for (unsigned char v=0; v<14; ++v)
+			{
+				const char* fwNeighbour = fwNeighbours + 4*v;
+				neighborShift[v] =	static_cast<int>(fwNeighbour[0]) +
+									static_cast<int>(fwNeighbour[1]) * static_cast<int>(m_rowSize) +
+									static_cast<int>(fwNeighbour[2]) * static_cast<int>(m_sliceSize);
+			}
 		}
-		break;
-	case CHAMFER_345:
+
+		for (unsigned k=0; k<m_innerSize.z; ++k)
 		{
-					  propagateDistance(0,        0,        0,        true, ForwardNeighbours345, progressCb ? &normProgress : 0);
-			maxDist = propagateDistance(m_gridX-1,m_gridY-1,m_gridZ-1,false,BackwardNeighbours345,progressCb ? &normProgress : 0);
+			for (unsigned j=0; j<m_innerSize.y; ++j)
+			{
+				for (unsigned i=0; i<m_innerSize.x; ++i)
+				{
+					GridElement minVal = _grid[neighborShift[0]] + static_cast<GridElement>(fwNeighbours[3]);
+
+					for (unsigned char v=1; v<14; ++v)
+					{
+						const char* fwNeighbour = fwNeighbours + 4*v;
+						GridElement neighborVal = _grid[neighborShift[v]] + static_cast<GridElement>(fwNeighbour[3]);
+						minVal = std::min(minVal, neighborVal);
+					}
+
+					*_grid++ = minVal;
+				}
+				_grid += 2; //next line
+
+				if (progressCb && !normProgress.oneStep())
+				{
+					break;
+				}
+			}
+
+			_grid += 2*m_rowSize; //next slice
 		}
-		break;
+	}
+
+	//2nd pass: backward scan
+	GridElement maxDist = 0;
+	{
+		//accelerating structure
+		int neighborShift[14];
+		{
+			for (unsigned char v=0; v<14; ++v)
+			{
+				const char* bwNeighbour = bwNeighbours + 4*v;
+				neighborShift[v] =	static_cast<int>(bwNeighbour[0]) +
+									static_cast<int>(bwNeighbour[1]) * static_cast<int>(m_rowSize) +
+									static_cast<int>(bwNeighbour[2]) * static_cast<int>(m_sliceSize);
+			}
+		}
+
+		GridElement* _grid = &(m_grid[pos2index(static_cast<int>(m_innerSize.x)-1, static_cast<int>(m_innerSize.y)-1, static_cast<int>(m_innerSize.z)-1)]);
+
+		for (unsigned k=0; k<m_innerSize.z; ++k)
+		{
+			for (unsigned j=0; j<m_innerSize.y; ++j)
+			{
+				for (unsigned i=0; i<m_innerSize.x; ++i)
+				{
+					GridElement minVal = _grid[neighborShift[0]] + static_cast<GridElement>(bwNeighbours[3]);
+
+					for (unsigned char v=1; v<14; ++v)
+					{
+						const char* bwNeighbour = bwNeighbours + 4*v;
+						GridElement neighborVal = _grid[neighborShift[v]] + static_cast<GridElement>(bwNeighbour[3]);
+						minVal = std::min(minVal, neighborVal);
+					}
+
+					*_grid-- = minVal;
+
+					//we track the max distance
+					if (minVal > maxDist)
+					{
+						maxDist = minVal;
+					}
+				}
+				_grid -= 2; //next line
+
+				if (progressCb && !normProgress.oneStep())
+				{
+					break;
+				}
+			}
+
+			_grid -= 2*m_rowSize; //next slice
+		}
 	}
 
 	return static_cast<int>(maxDist);

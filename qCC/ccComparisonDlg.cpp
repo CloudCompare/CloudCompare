@@ -360,7 +360,7 @@ int ccComparisonDlg::computeApproxResults()
 		{
 			//Approximate distance can (and must) now take max search distance into account!
 			PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
-			approxResult = CCLib::DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CHAMFER_345,m_compCloud,m_refCloud,DEFAULT_OCTREE_LEVEL,maxDistance,&progressDlg,m_compOctree,m_refOctree);
+			approxResult = CCLib::DistanceComputationTools::computeApproxCloud2CloudDistance(CHAMFER_345,m_compCloud,m_refCloud,DEFAULT_OCTREE_LEVEL,maxDistance,&progressDlg,m_compOctree,m_refOctree);
 		}
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh

@@ -35,18 +35,12 @@ class CC_CORE_LIB_API ChamferDistanceTransformSigned : public Grid3D<float>, pub
 
 public:
 
-	//! Default constructor
-	/** 'Zero' cells must be initialized with setValue(0).
-		\warning ChamferDistanceTransformSigned::init must be called at least once before any action.
-		\param gridSize the grid size
-	**/
-	ChamferDistanceTransformSigned(Tuple3ui& gridSize) : Grid3D<GridElement>(gridSize.x, gridSize.y, gridSize.z, 1) {}
-
 	//! Initializes the grid
 	/** This memory for the grid must be explicitelty reserved prior to any action.
+		'Zero' cells must be initialized with setValue(0).
 		\return true if the initialization succeeded
 	**/
-	inline bool init(float maxDist = 4096.0f) { return Grid3D<GridElement>::init(maxDist); }
+	inline bool init(const Tuple3ui& gridSize, float maxDist = 4096.0f) { return Grid3D<GridElement>::init(gridSize.x, gridSize.y, gridSize.z, 1, maxDist); }
 
 	//! Computes the Chamfer distance on the whole grid
 	/** Propagates the distances on the whole grid. The 'zeros' should

@@ -41,18 +41,12 @@ public:
 	//! Max possible 'distance'
 	static const unsigned short MAX_DIST = 0xFAFA;
 
-	//! Default constructor
-	/** 'Zero' cells must be initialized with setValue(0).
-		\warning ChamferDistanceTransform::init must be called at least once before any action.
-		\param gridSize the grid size
-	**/
-	ChamferDistanceTransform(Tuple3ui& gridSize) : Grid3D<GridElement>(gridSize.x, gridSize.y, gridSize.z, 1) {}
-
 	//! Initializes the grid
-	/** This memory for the grid must be explicitelty reserved prior to any action.
+	/** 'Zero' cells must be initialized with setValue(0).
+		The grid must be explicitelty initialized prior to any action.
 		\return true if the initialization succeeded
 	**/
-	inline bool init() { return Grid3D<GridElement>::init(MAX_DIST); }
+	inline bool init(const Tuple3ui& gridSize) { return Grid3D<GridElement>::init(gridSize.x, gridSize.y, gridSize.z, 1, MAX_DIST); }
 
 	//! Computes the Chamfer distance on the whole grid
 	/** Propagates the distances on the whole grid. The 'zeros' should
@@ -64,17 +58,6 @@ public:
 	**/
 	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb = 0);
 
-protected:
-
-	//! Internal method for distance propagation
-	/** \return max distance
-	**/
-	GridElement propagateDistance(	unsigned iStart,
-									unsigned jStart,
-									unsigned kStart,
-									bool forward,
-									const int neighbours[14][4],
-									NormalizedProgress* normProgress = 0);
 };
 
 }

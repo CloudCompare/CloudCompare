@@ -1,4 +1,4 @@
-#include "../ChamferDistanceTransformSigned.h"
+#include "../include/ChamferDistanceTransformSigned.h"
 
 //Local
 #include <GenericProgressCallback.h>

@@ -123,14 +123,34 @@ protected:
 	//! Converts a 3D position to an absolute index
 	inline int pos2index(int i, int j, int k) const { return i + j * m_rowSize + k * m_sliceSize + m_marginShift; }
 
+	//! Converts an absolute index to a 3D position
+	inline Tuple3i index2pos(int index) const
+	{
+		assert(index >= m_marginShift && index < m_gridSize);
+		
+		Tuple3i pos;
+		//index = i + j * m_rowSize + k * m_sliceSize + m_marginShift
+		index -= m_marginShift;
+		//index = i + j * m_rowSize + k * m_sliceSize
+		pos.z = index / m_sliceSize;
+		index -= pos.z * m_sliceSize;
+		//index = i + j * m_rowSize
+		pos.y = index / m_rowSize;
+		index -= pos.y * m_rowSize;
+		//index = i
+		pos.x = index;
+		
+		return pos;
+	}
+
     //! Grid data
 	std::vector<GridElement> m_grid;
 
-	//! Grid dimension along the X dimension
+	//! Grid dimension along the X dimension (without margin)
 	unsigned m_gridX;
-	//! Grid dimension along the Y dimension
+	//! Grid dimension along the Y dimension (without margin)
 	unsigned m_gridY;
-	//! Grid dimension along the Z dimension
+	//! Grid dimension along the Z dimension (without margin)
 	unsigned m_gridZ;
 	//! Margin
 	unsigned m_margin;

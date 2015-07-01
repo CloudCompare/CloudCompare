@@ -44,9 +44,9 @@ public:
 
 	//! Fast iteration mechanism
 	/**	Virtual method to apply a function to the whole mesh
-		\param anAction the function to apply (see GenericMesh::genericTriangleAction)
+		\param action function to apply (see GenericMesh::genericTriangleAction)
 	**/
-	virtual void forEach(genericTriangleAction& anAction) = 0;
+	virtual void forEach(genericTriangleAction& action) = 0;
 
 	//! Returns the mesh bounding-box
 	/**	Virtual method to request the mesh bounding-box limits. It is equivalent to

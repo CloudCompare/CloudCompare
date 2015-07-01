@@ -718,8 +718,8 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 				theMesh->placeIteratorAtBegining();
 				for (unsigned j=0; j<faceCount; ++j)
 				{
-					//we can't use getNextTriangleIndexes (which is faster on mesh groups but not multi-thread compatible) but anyway we'll never get mesh groups here!
-					const CCLib::TriangleSummitsIndexes* tsi = theMesh->getTriangleIndexes(j);
+					//we can't use getNextTriangleVertIndexes (which is faster on mesh groups but not multi-thread compatible) but anyway we'll never get mesh groups here!
+					const CCLib::VerticesIndexes* tsi = theMesh->getTriangleVertIndexes(j);
 
 					//we look if the central point is one of the triangle's vertices
 					if (tsi->i1 == 0 || tsi->i2 == 0 || tsi->i3 == 0)

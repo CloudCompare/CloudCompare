@@ -419,7 +419,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		mesh->placeIteratorAtBegining();
 		for (unsigned i=0;i<triNum;++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = mesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			const CCLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			ply_write(ply,double(3));
 			assert(tsi->i1<vertCount);
 			assert(tsi->i2<vertCount);
@@ -1616,7 +1616,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		unsigned minVertIndex = numberOfPoints, maxVertIndex = 0;
 		for (unsigned i=0; i<s_triCount; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+			const CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 			if (tri->i1 < minVertIndex)
 				minVertIndex = tri->i1;
 			else if (tri->i1 > maxVertIndex)
@@ -1638,7 +1638,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				ccLog::Warning("[PLY] Vertex indexes seem to be shifted (+1)! We will try to 'unshift' indices (otherwise file is corrupted...)");
 				for (unsigned i=0;i<s_triCount;++i)
 				{
-					CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+					CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 					--tri->i1;
 					--tri->i2;
 					--tri->i3;

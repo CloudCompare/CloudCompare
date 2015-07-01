@@ -43,7 +43,7 @@ public:
 
 	//**** inherited form GenericCloud ****//
 	inline virtual unsigned size() const { return m_size; }
-	virtual void forEach(genericPointAction& anAction);
+	virtual void forEach(genericPointAction& action);
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 	//virtual uchar testVisibility(const CCVector3& P) const; //not supported
 	inline virtual void placeIteratorAtBegining() { m_globalIterator = 0; }

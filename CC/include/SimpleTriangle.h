@@ -41,10 +41,10 @@ public:
 		, C(0)
 	{}
 
-	//! Constructor with 3 summits
-	/** \param _A first summit
-		\param _B second summit
-		\param _C third summit
+	//! Constructor from 3 vertices (references to)
+	/** \param _A first vertex
+		\param _B second vertex
+		\param _C third vertex
 	**/
 	SimpleRefTriangle(const CCVector3* _A, const CCVector3* _B, const CCVector3* _C)
 		: A(_A)
@@ -57,11 +57,11 @@ public:
 	inline virtual const CCVector3* _getB() const { return B; }
 	inline virtual const CCVector3* _getC() const { return C; }
 
-	//! A summit
+	//! A vertex (ref)
 	const CCVector3 *A;
-	//! B summit
+	//! B vertex (ref)
 	const CCVector3 *B;
-	//! C summit
+	//! C vertex (ref)
 	const CCVector3 *C;
 };
 
@@ -80,10 +80,10 @@ public:
 		, C(0,0,0)
 	{}
 
-	//! Constructor with 3 summits
-	/** \param _A first summit
-		\param _B second summit
-		\param _C third summit
+	//! Constructor from 3 vertices
+	/** \param _A first vertex
+		\param _B second vertex
+		\param _C third vertex
 	**/
 	SimpleTriangle(const CCVector3& _A, const CCVector3& _B, const CCVector3& _C)
 		: A(_A)
@@ -96,11 +96,11 @@ public:
 	inline virtual const CCVector3* _getB() const { return &B; }
 	inline virtual const CCVector3* _getC() const { return &C; }
 
-	//! A summit
+	//! A vertex
 	CCVector3 A;
-	//! B summit
+	//! B vertex
 	CCVector3 B;
-	//! C summit
+	//! C vertex
 	CCVector3 C;
 };
 

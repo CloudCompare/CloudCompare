@@ -96,18 +96,18 @@ public:
 	virtual unsigned maxSize() const;
 
 	//inherited methods (GenericIndexedMesh)
-	virtual void forEach(genericTriangleAction& anAction);
+	virtual void forEach(genericTriangleAction& action);
 	virtual void placeIteratorAtBegining();
 	virtual CCLib::GenericTriangle* _getNextTriangle(); //temporary
 	virtual CCLib::GenericTriangle* _getTriangle(unsigned triangleIndex); //temporary
-	virtual CCLib::TriangleSummitsIndexes* getNextTriangleIndexes();
-	virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex);
-	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
+	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes();
+	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex);
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 	virtual unsigned size() const;
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
 
-	//const version of getTriangleIndexes
-	const virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex) const;
+	//const version of getTriangleVertIndexes
+	const virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) const;
 
 	//inherited methods (ccDrawableObject)
 	virtual bool hasColors() const;
@@ -126,9 +126,9 @@ public:
 	/** \warning Bounding-box validity is broken after a call to this method.
 		However, for the sake of performance, no call to notifyGeometryUpdate
 		is made automatically. Make sure to do so when all modifications are done!
-		\param i1 first summit index (relatively to the vertex cloud)
-		\param i2 second summit index (relatively to the vertex cloud)
-		\param i3 third summit index (relatively to the vertex cloud)
+		\param i1 first vertex index (relatively to the vertex cloud)
+		\param i2 second vertex index (relatively to the vertex cloud)
+		\param i3 third vertex index (relatively to the vertex cloud)
 	**/
 	void addTriangle(unsigned i1, unsigned i2, unsigned i3);
 
@@ -186,17 +186,17 @@ public:
 	//! Adds a triplet of normal indexes for next triangle
 	/** Make sure per-triangle normal indexes array is allocated
 		(see reservePerTriangleNormalIndexes)
-		\param i1 first summit normal index
-		\param i2 second summit normal index
-		\param i3 third summit normal index
+		\param i1 first vertex normal index
+		\param i2 second vertex normal index
+		\param i3 third vertex normal index
 	**/
 	void addTriangleNormalIndexes(int i1, int i2, int i3);
 
 	//! Sets a triplet of normal indexes for a given triangle
 	/** \param triangleIndex triangle index
-		\param i1 first summit normal index
-		\param i2 second summit normal index
-		\param i3 third summit normal index
+		\param i1 first vertex normal index
+		\param i2 second vertex normal index
+		\param i3 third vertex normal index
 	**/
 	void setTriangleNormalIndexes(unsigned triangleIndex, int i1, int i2, int i3);
 
@@ -292,17 +292,17 @@ public:
 	//! Adds a triplet of tex coords indexes for next triangle
 	/** Make sure per-triangle tex coords indexes array is allocated
 		(see reservePerTriangleTexCoordIndexes)
-		\param i1 first summit tex coords index
-		\param i2 second summit tex coords index
-		\param i3 third summit tex coords index
+		\param i1 first vertex tex coords index
+		\param i2 second vertex tex coords index
+		\param i3 third vertex tex coords index
 	**/
 	void addTriangleTexCoordIndexes(int i1, int i2, int i3);
 
 	//! Sets a triplet of tex coords indexes for a given triangle
 	/** \param triangleIndex triangle index
-		\param i1 first summit tex coords index
-		\param i2 second summit tex coords index
-		\param i3 third summit tex coords index
+		\param i1 first vertex tex coords index
+		\param i2 second vertex tex coords index
+		\param i3 third vertex tex coords index
 	**/
 	void setTriangleTexCoordIndexes(unsigned triangleIndex, int i1, int i2, int i3);
 
@@ -427,7 +427,7 @@ protected:
 	//! Triangles' vertices indexes (3 per triangle)
 	triangleIndexesContainer* m_triVertIndexes;
 
-	//! Iterator on the list of triangle summits indexes
+	//! Iterator on the list of triangles
 	unsigned m_globalIterator;
 	//! Dump triangle structure to transmit temporary data
 	CCLib::SimpleRefTriangle m_currentTriangle;

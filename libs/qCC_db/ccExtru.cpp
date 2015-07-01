@@ -72,7 +72,7 @@ bool ccExtru::buildUp()
 	}
 
 	unsigned numberOfTriangles = mesh.size();
-	int* triIndexes = mesh.getTriangleIndexesArray();
+	int* triIndexes = mesh.getTriangleVertIndexesArray();
 
 	if (numberOfTriangles == 0)
 		return false;

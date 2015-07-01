@@ -128,7 +128,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		mesh->placeIteratorAtBegining();
 		for (unsigned i=0; i<triCount; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = mesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			const CCLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			outFile << "3 " << tsi->i1 << " " << tsi->i2  << " " << tsi->i3 << endl;
 		}
 	}

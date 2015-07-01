@@ -84,9 +84,9 @@ public:
 
 	//! Returns the triplet of tex coords indexes for a given triangle
 	/** \param triangleIndex triangle index
-		\param i1 first summit tex coords index
-		\param i2 second summit tex coords index
-		\param i3 third summit tex coords index
+		\param i1 first vertex tex coords index
+		\param i2 second vertex tex coords index
+		\param i3 third vertex tex coords index
 	**/
 	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const = 0;
 
@@ -95,9 +95,9 @@ public:
 
 	//! Returns a triplet of normal indexes for a given triangle (if any)
 	/** \param[in] triangleIndex triangle index
-		\param[out] i1 first summit normal index (or -1 if none)
-		\param[out] i2 second summit normal index (or -1 if none)
-		\param[out] i3 third summit normal index (or -1 if none)
+		\param[out] i1 first vertex normal index (or -1 if none)
+		\param[out] i2 second vertex normal index (or -1 if none)
+		\param[out] i3 third vertex normal index (or -1 if none)
 	**/
 	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const = 0;
 

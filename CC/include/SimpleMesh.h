@@ -48,15 +48,15 @@ public: //constructors
 
 public: //inherited methods
 
-	virtual void forEach(genericTriangleAction& anAction);
+	virtual void forEach(genericTriangleAction& action);
 	virtual void placeIteratorAtBegining();
 	virtual GenericTriangle* _getNextTriangle(); //temporary
 	virtual GenericTriangle* _getTriangle(unsigned triangleIndex); //temporary
-	virtual TriangleSummitsIndexes* getNextTriangleIndexes();
-	virtual TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex);
+	virtual VerticesIndexes* getNextTriangleVertIndexes();
+	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex);
 	virtual unsigned size() const;
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 
 public: //specific methods
 
@@ -70,9 +70,10 @@ public: //specific methods
 	inline void clear(bool releaseMemory) { m_triIndexes->clear(releaseMemory); }
 
 	//! Adds a triangle to the mesh
-	/** \param i1 first summit index (relatively to the vertex cloud)
-		\param i2 second summit index (relatively to the vertex cloud)
-		\param i3 third summit index (relatively to the vertex cloud)
+	/** Vertex indexes are expresesed relatively to the vertex cloud.
+		\param i1 first vertex index
+		\param i2 second vertex index
+		\param i3 third vertex index
 	**/
 	virtual void addTriangle(unsigned i1, unsigned i2, unsigned i3);
 
@@ -100,7 +101,7 @@ protected:
 	//! The triangles indexes
 	TriangleIndexesContainer* m_triIndexes;
 
-	//! Iterator on the list of triangle summits indexes
+	//! Iterator on the list of triangles
 	unsigned globalIterator;
 	//! Dump triangle structure to transmit temporary data
 	SimpleTriangle dummyTriangle;

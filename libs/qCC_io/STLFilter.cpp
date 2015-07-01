@@ -136,7 +136,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile)
 	mesh->placeIteratorAtBegining();
 	for (unsigned i=0; i<faceCount; ++i)
 	{
-		CCLib::TriangleSummitsIndexes*tsi = mesh->getNextTriangleIndexes();
+		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
@@ -200,7 +200,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 	mesh->placeIteratorAtBegining();
 	for (unsigned i=0; i<faceCount; ++i)
 	{
-		CCLib::TriangleSummitsIndexes*tsi = mesh->getNextTriangleIndexes();
+		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
@@ -457,7 +457,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							unsigned newFaceCount = 0;
 							for (unsigned i=0; i<faceCount; ++i)
 							{
-								CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+								CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 								tri->i1 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i1))-vertCount;
 								tri->i2 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i2))-vertCount;
 								tri->i3 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i3))-vertCount;

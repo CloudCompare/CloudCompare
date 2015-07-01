@@ -46,9 +46,9 @@ public:
 
 		//! Fast iteration mechanism
 		/**	Virtual method to apply a function to the whole cloud
-			\param anAction the function to apply (see GenericCloud::genericPointAction)
+			\param action the function to apply (see GenericCloud::genericPointAction)
 		**/
-		virtual void forEach(genericPointAction& anAction) = 0;
+		virtual void forEach(genericPointAction& action) = 0;
 
 		//! Returns the cloud bounding box
 		/**	Virtual method to request the cloud bounding box limits

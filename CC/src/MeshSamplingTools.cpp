@@ -128,7 +128,7 @@ bool MeshSamplingTools::buildMeshEdgeUsageMap(GenericIndexedMesh* mesh, EdgeUsag
 		//for all triangles
 		for (unsigned n=0; n<mesh->size(); ++n)
 		{
-			TriangleSummitsIndexes* tri = mesh->getNextTriangleIndexes();
+			VerticesIndexes* tri = mesh->getNextTriangleVertIndexes();
 
 			//for all edges
 			for (unsigned j=0; j<3; ++j)

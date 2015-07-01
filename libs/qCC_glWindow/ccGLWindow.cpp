@@ -3442,10 +3442,10 @@ void ccGLWindow::processPickingResult(const PickingParameters& params, int selec
 					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);
 					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
 					assert(cloud);
-					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subSelectedID);
-					label->addPoint(cloud,summitsIndexes->i1);
-					label->addPoint(cloud,summitsIndexes->i2);
-					label->addPoint(cloud,summitsIndexes->i3);
+					CCLib::VerticesIndexes *vertexIndexes = mesh->getTriangleVertIndexes(subSelectedID);
+					label->addPoint(cloud, vertexIndexes->i1);
+					label->addPoint(cloud, vertexIndexes->i2);
+					label->addPoint(cloud, vertexIndexes->i3);
 					cloud->addChild(label);
 					if (!cloud->isEnabled())
 					{
@@ -3710,7 +3710,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					assert(vertices);
 					for (unsigned i=0; i<mesh->size(); ++i)
 					{
-						CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
+						CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 						const CCVector3* A3D = vertices->getPoint(tsi->i1);
 						const CCVector3* B3D = vertices->getPoint(tsi->i2);
 						const CCVector3* C3D = vertices->getPoint(tsi->i3);

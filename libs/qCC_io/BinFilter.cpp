@@ -699,7 +699,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						unsigned vertCount = pc->size();
 						for (unsigned i=0; i<faceCount; ++i)
 						{
-							const CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+							const CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 							if (	tri->i1 >= vertCount
 								||	tri->i2 >= vertCount
 								||	tri->i3 >= vertCount )

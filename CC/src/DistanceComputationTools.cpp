@@ -1169,7 +1169,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		{
 			//we query the vertex coordinates
 			CCLib::SimpleTriangle tri;
-			s_intersection_MT->mesh->getTriangleSummits(trianglesToTest[--trianglesToTestCount], tri.A, tri.B, tri.C);
+			s_intersection_MT->mesh->getTriangleVertices(trianglesToTest[--trianglesToTestCount], tri.A, tri.B, tri.C);
 
 			//for each point inside the current cell
 			Yk.placeIteratorAtBegining();

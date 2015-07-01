@@ -149,7 +149,7 @@ bool ccGriddedTools::ComputeNormals(ccPointCloud* cloud,
 								theMesh->placeIteratorAtBegining();
 								for (unsigned j=0; j<faceCount; ++j)
 								{
-									const CCLib::TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes();
+									const CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes();
 									//we look if the central point is one of the triangle's vertices
 									if (tsi->i1 == 0 || tsi->i2 == 0|| tsi->i3 == 0)
 									{

@@ -25,7 +25,9 @@
 namespace CCLib
 {
 
-//! A generic triangle interface for data communication between library and client applications
+//! A generic triangle interface
+/** Returns (temporary) references to each vertex.
+**/
 class CC_CORE_LIB_API GenericTriangle
 {
 public:
@@ -33,22 +35,13 @@ public:
 	//! Default destructor
 	virtual ~GenericTriangle() {}
 
-	//! Returns the first summit (A)
-	/**	Virtual method to access first summit data
-		\return the first summit (as a reference to a Generic3dPoint object)
-	**/
+	//! Returns the first vertex (A)
 	virtual const CCVector3* _getA() const = 0;
 
-	//! Returns the second summit (B)
-	/**	Virtual method to access second summit data
-		\return the second summit (as a reference to a Generic3dPoint object)
-	**/
+	//! Returns the second vertex (B)
 	virtual const CCVector3* _getB() const = 0;
 
-	//! Returns the third summit (C)
-	/**	Virtual method to access third summit data
-		\return the third summit (as a reference to a Generic3dPoint object)
-	**/
+	//! Returns the third vertex (C)
 	virtual const CCVector3* _getC() const = 0;
 };
 

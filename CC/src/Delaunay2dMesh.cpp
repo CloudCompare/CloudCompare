@@ -330,7 +330,7 @@ bool Delaunay2dMesh::removeTrianglesWithEdgesLongerThan(PointCoordinateType maxE
 	return true;
 }
 
-void Delaunay2dMesh::forEach(genericTriangleAction& anAction)
+void Delaunay2dMesh::forEach(genericTriangleAction& action)
 {
 	if (!m_associatedCloud)
 		return;
@@ -343,7 +343,7 @@ void Delaunay2dMesh::forEach(genericTriangleAction& anAction)
 		tri.A = *m_associatedCloud->getPoint(_triIndexes[0]);
 		tri.B = *m_associatedCloud->getPoint(_triIndexes[1]);
 		tri.C = *m_associatedCloud->getPoint(_triIndexes[2]);
-		anAction(tri);
+		action(tri);
 	}
 }
 
@@ -365,7 +365,7 @@ GenericTriangle* Delaunay2dMesh::_getNextTriangle()
 	return &m_dumpTriangle; //temporary!
 }
 
-TriangleSummitsIndexes* Delaunay2dMesh::getNextTriangleIndexes()
+VerticesIndexes* Delaunay2dMesh::getNextTriangleVertIndexes()
 {
 	if (m_globalIterator >= m_globalIteratorEnd)
         return 0;
@@ -391,7 +391,7 @@ GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 	return (GenericTriangle*)&m_dumpTriangle;
 }
 
-void Delaunay2dMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void Delaunay2dMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
 	assert(m_associatedCloud && triangleIndex<m_numberOfTriangles);
 
@@ -401,11 +401,11 @@ void Delaunay2dMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CC
 	m_associatedCloud->getPoint(*tri++,C);
 }
 
-TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleIndex)
+VerticesIndexes* Delaunay2dMesh::getTriangleVertIndexes(unsigned triangleIndex)
 {
 	assert(triangleIndex < m_numberOfTriangles);
 
-	return reinterpret_cast<TriangleSummitsIndexes*>(m_triIndexes + 3*triangleIndex);
+	return reinterpret_cast<VerticesIndexes*>(m_triIndexes + 3*triangleIndex);
 }
 
 void Delaunay2dMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)

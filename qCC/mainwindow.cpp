@@ -5792,7 +5792,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		unsigned vertCount = vertices->size();
 		for (unsigned i=0; i<delaunayMesh->size(); ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = delaunayMesh->getTriangleIndexes(i);
+			const CCLib::VerticesIndexes* tsi = delaunayMesh->getTriangleVertIndexes(i);
 			assert(tsi->i1 < vertCount && tsi->i2 < vertCount && tsi->i3 < vertCount);
 		}
 	}

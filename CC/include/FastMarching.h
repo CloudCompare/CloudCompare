@@ -87,7 +87,7 @@ public:
 	/** \param pos the cell position in the grid (3 integer coordinates)
 		\return whether the cell could be set as a seed or not
 	**/
-	virtual bool setSeedCell(Tuple3i& pos);
+	virtual bool setSeedCell(const Tuple3i& pos);
 
 	//! Propagates the front
 	/** The seeds should have already been initialized

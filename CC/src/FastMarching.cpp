@@ -166,7 +166,7 @@ void FastMarching::cleanLastPropagation()
 	resetCells(m_ignoredCells);
 }
 
-bool FastMarching::setSeedCell(Tuple3i& pos)
+bool FastMarching::setSeedCell(const Tuple3i& pos)
 {
 	unsigned index = pos2index(pos);
 

@@ -262,7 +262,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				}
 			}
 
-			const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
+			const CCLib::VerticesIndexes* tsi = st->getNextTriangleVertIndexes();
 			//for per-triangle normals
 			unsigned i1 = tsi->i1 + 1;
 			unsigned i2 = tsi->i2 + 1;

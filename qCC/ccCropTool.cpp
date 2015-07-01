@@ -223,10 +223,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										//get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
-										const CCLib::TriangleSummitsIndexes* tsio = mesh->getTriangleIndexes(origTriIndex);
+										const CCLib::VerticesIndexes* tsio = mesh->getTriangleVertIndexes(origTriIndex);
 
 										//get the new triangle
-										const CCLib::TriangleSummitsIndexes* tsic = croppedMesh->getTriangleIndexes(i);
+										const CCLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 										//we now have to test the 3 vertices of the new triangle
 										for (unsigned j=0; j<3; ++j)
@@ -389,7 +389,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 											mesh->getTriangleTexCoordinates(origTriIndex,tx1,tx2,tx3);
 
 											//get the new triangle
-											const CCLib::TriangleSummitsIndexes* tsic = croppedMesh->getTriangleIndexes(i);
+											const CCLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 											//for each vertex of the new triangle
 											int texIndexes[3] = {-1,-1,-1};

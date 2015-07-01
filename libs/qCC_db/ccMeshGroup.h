@@ -65,13 +65,13 @@ public:
 
 	//inherited methods (GenericIndexedMesh)
 	virtual unsigned size() const { return 0; }
-	virtual void forEach(genericTriangleAction& anAction) {}
+	virtual void forEach(genericTriangleAction& action) {}
 	virtual void placeIteratorAtBegining() {}
 	virtual CCLib::GenericTriangle* _getNextTriangle() { return 0; }
 	virtual CCLib::GenericTriangle* _getTriangle(unsigned index) { return 0; }
-	virtual CCLib::TriangleSummitsIndexes* getNextTriangleIndexes() { return 0; }
-	virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex) { return 0; }
-	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) {}
+	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() { return 0; }
+	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) { return 0; }
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) {}
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) {};
 
 protected:

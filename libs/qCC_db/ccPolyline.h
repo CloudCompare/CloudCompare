@@ -31,15 +31,14 @@
 class ccPointCloud;
 
 //! Colored polyline
-/** Extends the Polyline class of CCLib.
-Check CCLib documentation for more information about it.
+/** Extends the CCLib::Polyline class
 **/
 class QCC_DB_LIB_API ccPolyline : public CCLib::Polyline, public ccShiftedObject
 {
 public:
 
 	//! Default constructor
-	/** \param associatedCloud the associated point cloud (e.g. the summits)
+	/** \param associatedCloud the associated point cloud (i.e. the vertices)
 	**/
 	explicit ccPolyline(GenericIndexedCloudPersist* associatedCloud);
 

@@ -230,7 +230,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		{
 			bool triangleIsOnTheRightSide = true;
 
-			const TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			const VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			int newVertexIndexes[3];
 
 			//VERSION: WE KEEP THE TRIANGLE ONLY IF ITS 3 VERTICES ARE INSIDE
@@ -425,7 +425,7 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 			for (unsigned i = 0; i < importedTriCount; ++i)
 			{
 				unsigned triIndex = preservedTriangleIndexes[i];
-				const TriangleSummitsIndexes* tsi = origMesh->getTriangleIndexes(triIndex);
+				const VerticesIndexes* tsi = origMesh->getTriangleVertIndexes(triIndex);
 				newIndexMap[tsi->i1] = 1;
 				newIndexMap[tsi->i2] = 1;
 				newIndexMap[tsi->i3] = 1;
@@ -436,7 +436,7 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 		{
 			for (unsigned i = 0; i < newTriCount; ++i)
 			{
-				const TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
+				const VerticesIndexes* tsi = newMesh->getTriangleVertIndexes(i);
 				if (tsi->i1 & c_origIndexFlag)
 					newIndexMap[tsi->i1 & c_realIndexMask] = 1;
 				if (tsi->i2 & c_origIndexFlag)
@@ -485,7 +485,7 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 		{
 			for (unsigned i = 0; i < newTriCount; ++i)
 			{
-				TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
+				VerticesIndexes* tsi = newMesh->getTriangleVertIndexes(i);
 				if (tsi->i1 & c_origIndexFlag)
 					tsi->i1 = newIndexMap[tsi->i1 & c_realIndexMask];
 				if (tsi->i2 & c_origIndexFlag)
@@ -509,7 +509,7 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 				for (unsigned i = 0; i < importedTriCount; ++i)
 				{
 					unsigned triIndex = preservedTriangleIndexes[i];
-					const TriangleSummitsIndexes* tsi = origMesh->getTriangleIndexes(triIndex);
+					const VerticesIndexes* tsi = origMesh->getTriangleVertIndexes(triIndex);
 					newMesh->addTriangle(newIndexMap[tsi->i1], newIndexMap[tsi->i2], newIndexMap[tsi->i3]);
 					if (origTriIndexesMap)
 						origTriIndexesMap->push_back(triIndex);
@@ -549,7 +549,7 @@ bool ImportSourceVertices(GenericIndexedCloudPersist* srcVertices,
 
 		for (unsigned i = 0; i < newTriCount; ++i)
 		{
-			const TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
+			const VerticesIndexes* tsi = newMesh->getTriangleVertIndexes(i);
 			if (tsi->i1 & c_srcIndexFlag)
 				newIndexMap[tsi->i1 & c_realIndexMask] = 1;
 			if (tsi->i2 & c_srcIndexFlag)
@@ -597,7 +597,7 @@ bool ImportSourceVertices(GenericIndexedCloudPersist* srcVertices,
 		{
 			for (unsigned i = 0; i < newTriCount; ++i)
 			{
-				TriangleSummitsIndexes* tsi = newMesh->getTriangleIndexes(i);
+				VerticesIndexes* tsi = newMesh->getTriangleVertIndexes(i);
 				if (tsi->i1 & c_srcIndexFlag)
 					tsi->i1 = newIndexMap[tsi->i1 & c_realIndexMask];
 				if (tsi->i2 & c_srcIndexFlag)
@@ -667,7 +667,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 		for (unsigned i = 0; i < triCount; ++i)
 		{
 			//original vertices indexes
-			const TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
+			const VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 			CCVector3d V[3] = { CCVector3d::fromArray(vertices->getPoint(tsi->i1)->u),
 								CCVector3d::fromArray(vertices->getPoint(tsi->i2)->u),
 								CCVector3d::fromArray(vertices->getPoint(tsi->i3)->u) };
@@ -1000,18 +1000,18 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 			{
 				bool triangleIsOriginal = false;
 				unsigned souceTriIndex = 0;
-				const TriangleSummitsIndexes* tsi = 0;
+				const VerticesIndexes* tsi = 0;
 				if (i < sourceTriCount)
 				{
 					souceTriIndex = i;
 					triangleIsOriginal = (sourceMesh == origMesh);
-					tsi = sourceMesh->getTriangleIndexes(souceTriIndex);
+					tsi = sourceMesh->getTriangleVertIndexes(souceTriIndex);
 				}
 				else
 				{
 					souceTriIndex = (*formerPreservedTriangles)[i - sourceTriCount];
 					triangleIsOriginal = true;
-					tsi = origMesh->getTriangleIndexes(souceTriIndex);
+					tsi = origMesh->getTriangleVertIndexes(souceTriIndex);
 				}
 
 				//vertices indexes

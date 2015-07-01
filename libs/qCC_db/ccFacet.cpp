@@ -316,7 +316,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 					//import faces
 					for (unsigned i=0; i<triCount; ++i)
 					{
-						const CCLib::TriangleSummitsIndexes* tsi = dm.getTriangleIndexes(i);
+						const CCLib::VerticesIndexes* tsi = dm.getTriangleVertIndexes(i);
 						m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
 					}
 					m_polygonMesh->setVisible(true);

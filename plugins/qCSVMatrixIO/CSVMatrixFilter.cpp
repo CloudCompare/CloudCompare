@@ -229,7 +229,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(QString filename,
 						//assign texture coordinaetes and material to each triangle
 						for (unsigned i=0; i<mesh->size(); ++i)
 						{
-							CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
+							CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 							mesh->addTriangleTexCoordIndexes(tsi->i1,tsi->i2,tsi->i3);
 							mesh->addTriangleMtlIndex(0);
 						}

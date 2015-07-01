@@ -247,7 +247,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		theMesh->placeIteratorAtBegining();
 		for (unsigned i=0; i<numberOfTriangles; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			const CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 
 			ind[0] = tsi->i1;
 			ind[1] = tsi->i2;
@@ -359,7 +359,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				return CC_FERR_WRITING;
 			}
 
-			CCLib::TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			ind[0] = tsi->i1;
 			ind[1] = tsi->i2;
 			ind[2] = tsi->i3;
@@ -429,7 +429,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		{
 			for (unsigned i=0; i<numberOfTriangles; ++i)
 			{
-				CCLib::TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+				CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 				ind[0] = tsi->i1;
 				ind[1] = tsi->i2;
 				ind[2] = tsi->i3;

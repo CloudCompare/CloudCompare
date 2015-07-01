@@ -87,7 +87,7 @@ ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertice
 	giMesh->placeIteratorAtBegining();
 	for (unsigned i=0; i<triNum; ++i)
 	{
-		const CCLib::TriangleSummitsIndexes* tsi = giMesh->getNextTriangleIndexes();
+		const CCLib::VerticesIndexes* tsi = giMesh->getNextTriangleVertIndexes();
 		addTriangle(tsi->i1,tsi->i2,tsi->i3);
 	}
 
@@ -220,7 +220,7 @@ bool ccMesh::computePerVertexNormals()
 	{
 		for (unsigned i=0; i<triCount; ++i)
 		{
-			CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+			CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 
 			assert(tsi->i1<vertCount && tsi->i2<vertCount && tsi->i3<vertCount);
 			const CCVector3 *A = cloud->getPoint(tsi->i1);
@@ -362,7 +362,7 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 		placeIteratorAtBegining();
 		for (unsigned i=0; i<nTri; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 
 			//compute the sum of all connected vertices SF values
 			meanSF[tsi->i1] += m_associatedCloud->getPointScalarValue(tsi->i2);
@@ -572,7 +572,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	placeIteratorAtBegining();
 	for(unsigned j=0; j<faceCount; j++)
 	{
-		const CCLib::TriangleSummitsIndexes* tri = getNextTriangleIndexes();
+		const CCLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
 		edgesCount[tri->i1]+=2;
 		edgesCount[tri->i2]+=2;
 		edgesCount[tri->i3]+=2;
@@ -598,7 +598,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 		placeIteratorAtBegining();
 		for(unsigned j=0; j<faceCount; j++)
 		{
-			const CCLib::TriangleSummitsIndexes* tri = getNextTriangleIndexes();
+			const CCLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
 
 			const CCVector3* A = m_associatedCloud->getPoint(tri->i1);
 			const CCVector3* B = m_associatedCloud->getPoint(tri->i2);
@@ -689,7 +689,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 			placeIteratorAtBegining();
 			for (unsigned i=0; i<triNum; ++i)
 			{
-				const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+				const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 				usedVerts[tsi->i1] = 1;
 				usedVerts[tsi->i2] = 1;
 				usedVerts[tsi->i3] = 1;
@@ -755,7 +755,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 		placeIteratorAtBegining();
 		for (unsigned i=0; i<triNum; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 			cloneMesh->addTriangle(usedVerts[tsi->i1],usedVerts[tsi->i2],usedVerts[tsi->i3]);
 		}
 		usedVerts.clear();
@@ -765,7 +765,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 		placeIteratorAtBegining();
 		for (unsigned i=0; i<triNum; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+			const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 			cloneMesh->addTriangle(tsi->i1,tsi->i2,tsi->i3);
 		}
 	}
@@ -1026,7 +1026,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 
 			for (unsigned i=0; i<triAdded; ++i)
 			{
-				const CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
+				const CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 				addTriangle(vertIndexShift+tsi->i1, vertIndexShift+tsi->i2, vertIndexShift+tsi->i3);
 			}
 		}
@@ -1242,7 +1242,7 @@ unsigned ccMesh::maxSize() const
 	return m_triVertIndexes->capacity();
 }
 
-void ccMesh::forEach(genericTriangleAction& anAction)
+void ccMesh::forEach(genericTriangleAction& action)
 {
 	if (!m_associatedCloud)
 		return;
@@ -1254,7 +1254,7 @@ void ccMesh::forEach(genericTriangleAction& anAction)
 		m_currentTriangle.A = m_associatedCloud->getPoint(tri[0]);
 		m_currentTriangle.B = m_associatedCloud->getPoint(tri[1]);
 		m_currentTriangle.C = m_associatedCloud->getPoint(tri[2]);
-		anAction(m_currentTriangle);
+		action(m_currentTriangle);
 		m_triVertIndexes->forwardIterator();
 	}
 }
@@ -1284,7 +1284,7 @@ CCLib::GenericTriangle* ccMesh::_getTriangle(unsigned triangleIndex) //temporary
 	return &m_currentTriangle;
 }
 
-void ccMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void ccMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
 	assert(triangleIndex < m_triVertIndexes->currentSize());
 
@@ -1334,7 +1334,7 @@ ccBBox ccMesh::getOwnBB(bool withGLFeatures/*=false*/)
 //specific methods
 void ccMesh::addTriangle(unsigned i1, unsigned i2, unsigned i3)
 {
-	CCLib::TriangleSummitsIndexes t(i1,i2,i3);
+	CCLib::VerticesIndexes t(i1,i2,i3);
 	m_triVertIndexes->addElement(t.i);
 }
 
@@ -1396,20 +1396,20 @@ void ccMesh::swapTriangles(unsigned index1, unsigned index2)
 		m_triNormalIndexes->swap(index1,index2);
 }
 
-CCLib::TriangleSummitsIndexes* ccMesh::getTriangleIndexes(unsigned triangleIndex)
+CCLib::VerticesIndexes* ccMesh::getTriangleVertIndexes(unsigned triangleIndex)
 {
-	return reinterpret_cast<CCLib::TriangleSummitsIndexes*>(m_triVertIndexes->getValue(triangleIndex));
+	return reinterpret_cast<CCLib::VerticesIndexes*>(m_triVertIndexes->getValue(triangleIndex));
 }
 
-const CCLib::TriangleSummitsIndexes* ccMesh::getTriangleIndexes(unsigned triangleIndex) const
+const CCLib::VerticesIndexes* ccMesh::getTriangleVertIndexes(unsigned triangleIndex) const
 {
-	return reinterpret_cast<CCLib::TriangleSummitsIndexes*>(m_triVertIndexes->getValue(triangleIndex));
+	return reinterpret_cast<CCLib::VerticesIndexes*>(m_triVertIndexes->getValue(triangleIndex));
 }
 
-CCLib::TriangleSummitsIndexes* ccMesh::getNextTriangleIndexes()
+CCLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 {
 	if (m_globalIterator<m_triVertIndexes->currentSize())
-		return getTriangleIndexes(m_globalIterator++);
+		return getTriangleVertIndexes(m_globalIterator++);
 
 	return NULL;
 }
@@ -1842,7 +1842,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			for (n=0; n<triNum; ++n)
 			{
 				//current triangle vertices
-				const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triVertIndexes->getCurrentValue();
+				const CCLib::VerticesIndexes* tsi = (CCLib::VerticesIndexes*)m_triVertIndexes->getCurrentValue();
 				m_triVertIndexes->forwardIterator();
 
 				//LOD: shall we display this triangle?
@@ -2175,7 +2175,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				m_triVertIndexes->placeIteratorAtBegining();
 				for (unsigned i=0; i<triNum; ++i)
 				{
-					const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triVertIndexes->getCurrentValue();
+					const CCLib::VerticesIndexes* tsi = (CCLib::VerticesIndexes*)m_triVertIndexes->getCurrentValue();
 					m_triVertIndexes->forwardIterator();
 
 					//all vertices must be visible
@@ -2358,7 +2358,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				m_triVertIndexes->placeIteratorAtBegining();
 				for (unsigned i=0; i<triNum; ++i)
 				{
-					const CCLib::TriangleSummitsIndexes* tsi = reinterpret_cast<CCLib::TriangleSummitsIndexes*>(m_triVertIndexes->getCurrentValue());
+					const CCLib::VerticesIndexes* tsi = reinterpret_cast<CCLib::VerticesIndexes*>(m_triVertIndexes->getCurrentValue());
 					m_triVertIndexes->forwardIterator();
 
 					//at least one hidden vertex --> we keep it
@@ -2406,7 +2406,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		m_triVertIndexes->placeIteratorAtBegining();
 		for (unsigned i=0; i<triNum; ++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = reinterpret_cast<CCLib::TriangleSummitsIndexes*>(m_triVertIndexes->getCurrentValue());
+			const CCLib::VerticesIndexes* tsi = reinterpret_cast<CCLib::VerticesIndexes*>(m_triVertIndexes->getCurrentValue());
 			m_triVertIndexes->forwardIterator();
 
 			//at least one hidden vertex --> we keep it
@@ -3627,7 +3627,7 @@ bool ccMesh::convertMaterialsToVertexColors()
 	placeIteratorAtBegining();
 	for (unsigned i=0; i<faceCount; ++i)
 	{
-		const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+		const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
 		for (unsigned char j=0; j<3; ++j)
 		{
 			ccColor::Rgb C;

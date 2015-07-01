@@ -105,7 +105,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 		//copy faces
 		for (i=0;i<prim.size();++i)
 		{
-			const CCLib::TriangleSummitsIndexes* tsi = prim.getTriangleIndexes(i);
+			const CCLib::VerticesIndexes* tsi = prim.getTriangleVertIndexes(i);
 			addTriangle(vertCount+tsi->i1,vertCount+tsi->i2,vertCount+tsi->i3);
 			if (primHasFaceNorms)
 			{

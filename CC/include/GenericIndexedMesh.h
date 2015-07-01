@@ -25,11 +25,8 @@
 namespace CCLib
 {
 
-//! A triangle descriptor
-/** The triangle is described by the 3 indexes
-	of its summits.
-**/
-struct TriangleSummitsIndexes
+//! Triangle described by the indexes of its 3 vertices
+struct VerticesIndexes
 {
 	union
 	{
@@ -41,20 +38,18 @@ struct TriangleSummitsIndexes
 	};
 
 	//! Constructor with specified indexes
-	TriangleSummitsIndexes(unsigned _i1, unsigned _i2, unsigned _i3)
+	VerticesIndexes(unsigned _i1, unsigned _i2, unsigned _i3)
 		: i1(_i1)
 		, i2(_i2)
 		, i3(_i3)
-	{
-	}
+	{}
 
 	//! Default constructor
-	TriangleSummitsIndexes()
+	VerticesIndexes()
 		: i1(0)
 		, i2(0)
 		, i3(0)
-	{
-	}
+	{}
 };
 
 //! A generic mesh with index-based vertex access
@@ -73,33 +68,26 @@ public:
 		\param triangleIndex of the requested triangle (between 0 and the mesh size-1)
 		\return the requested triangle, or 0 if index value is not valid
 	**/
-	virtual GenericTriangle* _getTriangle(unsigned triangleIndex)=0;
+	virtual GenericTriangle* _getTriangle(unsigned triangleIndex) = 0;
 
-	//! Returns the summits indexes of the ith triangle
-	/**	Virtual method to request the 3 summits indexes of a triangle with a
-		specific index.
-		\param triangleIndex index of the requested triangle (between 0 and the mesh size-1)
-		\return the requested indexes (a 3-size array), or 0 if index value is not valid
+	//! Returns the indexes of the vertices of a given triangle
+	/**	\param triangleIndex index of the triangle (between 0 and size(mesh)-1)
+		\return the triangle indexes (or 0 if index value is not valid)
 	**/
-	virtual TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex)=0;
+	virtual VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) = 0;
 
-	//! Returns the summits of the ith triangle
-	/**	Virtual method to request the 3 summits of a triangle with a
-		specific index.
-		\param triangleIndex index of the requested triangle (between 0 and the mesh size-1)
-		\param A the first requested summit
-		\param B the second requested summit
-		\param C the third requested summit
+	//! Returns the vertices of a given triangle
+	/**	\param[in] triangleIndex index of the triangle (between 0 and the size(mesh)-1)
+		\param[out] A first vertex
+		\param[out] B second vertex
+		\param[out] C third vertex
 	**/
-	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)=0;
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) = 0;
 
-	//! Returns the next triangle summit indexes (relatively to the global iterator position)
-	/**	Virtual method to handle the mesh global iterator.
-		Global iterator position should be increased each time
-		this method is called.
-		\return a triangle
+	//! Returns the indexes of the vertices of the next triangle (relatively to the global iterator position)
+	/**	\return the triangle indexes (or 0 if the global iterator is out of bounds)
 	**/
-	virtual TriangleSummitsIndexes* getNextTriangleIndexes()=0;
+	virtual VerticesIndexes* getNextTriangleVertIndexes() = 0;
 
 protected:
 };

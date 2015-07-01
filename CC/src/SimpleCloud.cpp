@@ -66,7 +66,7 @@ void SimpleCloud::addPoint(const PointCoordinateType P[])
 	m_validBB=false;
 }
 
-void SimpleCloud::forEach(genericPointAction& anAction)
+void SimpleCloud::forEach(genericPointAction& action)
 {
 	unsigned n = m_points->currentSize();
 
@@ -74,7 +74,7 @@ void SimpleCloud::forEach(genericPointAction& anAction)
 	{
 		for (unsigned i=0; i<n; ++i)
 		{
-			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),(*m_scalarField)[i]);
+			action(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),(*m_scalarField)[i]);
 		}
 	}
 	else //otherwise (we provide a fake zero distance)
@@ -82,7 +82,7 @@ void SimpleCloud::forEach(genericPointAction& anAction)
 		ScalarType d = 0;
 		for (unsigned i=0; i<n; ++i)
 		{
-			anAction(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),d);
+			action(*reinterpret_cast<CCVector3*>(m_points->getValue(i)),d);
 		}
 	}
 }

@@ -1414,7 +1414,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 				dm->placeIteratorAtBegining();
 				for (unsigned k=0; k<triNum; ++k)
 				{
-					const CCLib::TriangleSummitsIndexes* tsi = dm->getNextTriangleIndexes();
+					const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
 					//get the triangle bounding box (in grid coordinates)
 					int P[3][2];
 					int xMin=0,yMin=0,xMax=0,yMax=0;

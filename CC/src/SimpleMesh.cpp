@@ -52,7 +52,7 @@ unsigned SimpleMesh::size() const
     return m_triIndexes->currentSize();
 };
 
-void SimpleMesh::forEach(genericTriangleAction& anAction)
+void SimpleMesh::forEach(genericTriangleAction& action)
 {
 	SimpleTriangle tri;
 	unsigned count = m_triIndexes->currentSize();
@@ -62,7 +62,7 @@ void SimpleMesh::forEach(genericTriangleAction& anAction)
 		theVertices->getPoint(ti[0],tri.A);
 		theVertices->getPoint(ti[1],tri.B);
 		theVertices->getPoint(ti[2],tri.C);
-		anAction(tri);
+		action(tri);
 	}
 }
 
@@ -88,7 +88,7 @@ GenericTriangle* SimpleMesh::_getTriangle(unsigned triangleIndex)
 	return &dummyTriangle; //temporary!
 }
 
-void SimpleMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
+void SimpleMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
 	assert(triangleIndex<m_triIndexes->currentSize());
 
@@ -179,12 +179,12 @@ bool SimpleMesh::resize(unsigned n)
 	return m_triIndexes->resize(n);
 }
 
-TriangleSummitsIndexes* SimpleMesh::getTriangleIndexes(unsigned triangleIndex)
+VerticesIndexes* SimpleMesh::getTriangleVertIndexes(unsigned triangleIndex)
 {
-	return reinterpret_cast<TriangleSummitsIndexes*>(m_triIndexes->getValue(triangleIndex));
+	return reinterpret_cast<VerticesIndexes*>(m_triIndexes->getValue(triangleIndex));
 }
 
-TriangleSummitsIndexes* SimpleMesh::getNextTriangleIndexes()
+VerticesIndexes* SimpleMesh::getNextTriangleVertIndexes()
 {
-	return getTriangleIndexes(globalIterator++);
+	return getTriangleVertIndexes(globalIterator++);
 }

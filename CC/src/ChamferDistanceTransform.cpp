@@ -152,7 +152,9 @@ ChamferDistanceTransform::GridElement ChamferDistanceTransform::propagateDistanc
 			_grid += order*2; //next line
 
 			if (normProgress && !normProgress->oneStep())
+			{
 				break;
+			}
 		}
 
 		_grid += (order*2) * m_rowSize; //next slice
@@ -186,14 +188,14 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 	{
 	case CHAMFER_111:
 		{
-					  propagateDistance(0,        0,        0,        true, ForwardNeighbours111, &normProgress);
-			maxDist = propagateDistance(m_gridX-1,m_gridY-1,m_gridZ-1,false,BackwardNeighbours111,&normProgress);
+					  propagateDistance(0,        0,        0,        true, ForwardNeighbours111, progressCb ? &normProgress : 0);
+			maxDist = propagateDistance(m_gridX-1,m_gridY-1,m_gridZ-1,false,BackwardNeighbours111,progressCb ? &normProgress : 0);
 		}
 		break;
 	case CHAMFER_345:
 		{
-					  propagateDistance(0,        0,        0,        true, ForwardNeighbours345, &normProgress);
-			maxDist = propagateDistance(m_gridX-1,m_gridY-1,m_gridZ-1,false,BackwardNeighbours345,&normProgress);
+					  propagateDistance(0,        0,        0,        true, ForwardNeighbours345, progressCb ? &normProgress : 0);
+			maxDist = propagateDistance(m_gridX-1,m_gridY-1,m_gridZ-1,false,BackwardNeighbours345,progressCb ? &normProgress : 0);
 		}
 		break;
 	}

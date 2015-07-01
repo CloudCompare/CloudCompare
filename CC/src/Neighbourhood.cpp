@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "Neighbourhood.h"
+#include "../include/Neighbourhood.h"
 
 //local
 #include "GenericIndexedMesh.h"
@@ -519,7 +519,6 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 		{
 			return false;
 		}
-		assert(M);
 
 		PointCoordinateType* _M = &(M[0]);
 		for (unsigned i=0; i<count; ++i)

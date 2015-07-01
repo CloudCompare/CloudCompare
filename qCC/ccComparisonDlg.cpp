@@ -364,7 +364,7 @@ int ccComparisonDlg::computeApproxResults()
 		}
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh
-		approxResult = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
+		approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
@@ -724,12 +724,12 @@ bool ccComparisonDlg::compute()
 	{
 	case CLOUDCLOUD_DIST: //hausdorff
 
-		result = CCLib::DistanceComputationTools::computeHausdorffDistance(m_compCloud,
-			m_refCloud,
-			params,
-			&progressDlg,
-			m_compOctree,
-			m_refOctree);
+		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
+																				m_refCloud,
+																				params,
+																				&progressDlg,
+																				m_compOctree,
+																				m_refOctree);
 		break;
 
 	case CLOUDMESH_DIST: //cloud-mesh
@@ -737,16 +737,16 @@ bool ccComparisonDlg::compute()
 		if (multiThread && maxSearchDistSpinBox->isEnabled())
 			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
 		
-		result = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(	m_compCloud,
-																					m_refMesh,
-																					static_cast<uchar>(bestOctreeLevel),
-																					maxSearchDist,
-																					false,
-																					signedDistances,
-																					flipNormals,
-																					multiThread,
-																					&progressDlg,
-																					m_compOctree);
+		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
+																				m_refMesh,
+																				static_cast<uchar>(bestOctreeLevel),
+																				maxSearchDist,
+																				false,
+																				signedDistances,
+																				flipNormals,
+																				multiThread,
+																				&progressDlg,
+																				m_compOctree);
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();

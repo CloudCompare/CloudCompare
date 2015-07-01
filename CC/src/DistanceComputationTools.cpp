@@ -51,7 +51,7 @@
 namespace CCLib
 {
 
-	//! Internal structure used by DistanceComputationTools::computePointCloud2MeshDistance
+	//! Internal structure used by DistanceComputationTools::computeCloud2MeshDistance
 	struct FacesInCell
 	{
 	public:
@@ -84,7 +84,7 @@ namespace CCLib
 	//! Pointer on a FacesInCell structure
 	typedef FacesInCell* FacesInCellPtr;
 
-	//! Internal structure used by DistanceComputationTools::computePointCloud2MeshDistance
+	//! Internal structure used by DistanceComputationTools::computeCloud2MeshDistance
 	struct OctreeAndMeshIntersection
 	{
 	public:
@@ -164,12 +164,12 @@ bool DistanceComputationTools::MultiThreadSupport()
 #endif
 }
 
-int DistanceComputationTools::computeHausdorffDistance(	GenericIndexedCloudPersist* comparedCloud,
-														GenericIndexedCloudPersist* referenceCloud,
-														Cloud2CloudDistanceComputationParams& params,
-														GenericProgressCallback* progressCb/*=0*/,
-														DgmOctree* compOctree/*=0*/,
-														DgmOctree* refOctree/*=0*/)
+int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPersist* comparedCloud,
+															GenericIndexedCloudPersist* referenceCloud,
+															Cloud2CloudDistanceComputationParams& params,
+															GenericProgressCallback* progressCb/*=0*/,
+															DgmOctree* compOctree/*=0*/,
+															DgmOctree* refOctree/*=0*/)
 {
 	assert(comparedCloud && referenceCloud);
 
@@ -686,7 +686,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 	return true;
 }
 
-//Internal structure used by DistanceComputationTools::computePointCloud2MeshDistance
+//Internal structure used by DistanceComputationTools::computeCloud2MeshDistance
 struct CellToTest
 {
 	//! Cell position
@@ -1284,13 +1284,13 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 #endif
 
-int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* theIntersection,
-																		uchar octreeLevel,
-																		bool signedDistances,
-																		bool flipTriangleNormals/*=false*/,
-																		bool multiThread/*=false*/,
-																		ScalarType maxSearchDist/*=-1.0*/,
-																		GenericProgressCallback* progressCb/*=0*/)
+int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* theIntersection,
+																	uchar octreeLevel,
+																	bool signedDistances,
+																	bool flipTriangleNormals/*=false*/,
+																	bool multiThread/*=false*/,
+																	ScalarType maxSearchDist/*=-1.0*/,
+																	GenericProgressCallback* progressCb/*=0*/)
 {
 	assert(theIntersection);
 	assert(!signedDistances || !theIntersection->distanceTransform); //signed distances are not compatible with Distance Transform acceleration
@@ -1746,16 +1746,16 @@ inline void applySqrtToPointDist(const CCVector3 &aPoint, ScalarType& aScalarVal
 		aScalarValue = sqrt(aScalarValue);
 }
 
-int DistanceComputationTools::computePointCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
-																GenericIndexedMesh* theMesh,
-																uchar octreeLevel,
-																ScalarType maxSearchDist,
-																bool useDistanceMap/*=false*/,
-																bool signedDistances/*=false*/,
-																bool flipNormals/*=false*/,
-																bool multiThread/*=true*/,
-																GenericProgressCallback* progressCb/*=0*/,
-																DgmOctree* cloudOctree/*=0*/)
+int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
+															GenericIndexedMesh* theMesh,
+															uchar octreeLevel,
+															ScalarType maxSearchDist,
+															bool useDistanceMap/*=false*/,
+															bool signedDistances/*=false*/,
+															bool flipNormals/*=false*/,
+															bool multiThread/*=true*/,
+															GenericProgressCallback* progressCb/*=0*/,
+															DgmOctree* cloudOctree/*=0*/)
 {
 	assert(pointCloud && theMesh);
 
@@ -1908,8 +1908,8 @@ int DistanceComputationTools::computePointCloud2MeshDistance(	GenericIndexedClou
 	if (useDistanceMap && theIntersection.distanceTransform)
         theIntersection.distanceTransform->propagateDistance(CHAMFER_345, progressCb);
 
-	//EVENTUALLY, WE CAN COMPUTE DISTANCES!
-	result = computePointCloud2MeshDistanceWithOctree(&theIntersection, octreeLevel, signedDistances, flipNormals, multiThread, maxSearchDist, progressCb);
+	//WE CAN EVENTUALLY COMPUTE THE DISTANCES!
+	result = computeCloud2MeshDistanceWithOctree(&theIntersection, octreeLevel, signedDistances, flipNormals, multiThread, maxSearchDist, progressCb);
 
 	//special operation for non-signed distances
 	if (result == 0 && !signedDistances)
@@ -2358,7 +2358,7 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 	params.octreeLevel = DgmOctree::MAX_OCTREE_LEVEL-1;
 	params.CPSet = &A_in_B;
 
-	int result = computeHausdorffDistance(comparedCloud,referenceCloud,params,progressCb);
+	int result = computeCloud2CloudDistance(comparedCloud,referenceCloud,params,progressCb);
 	if (result < 0)
 		return -3;
 

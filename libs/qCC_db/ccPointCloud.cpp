@@ -3070,7 +3070,7 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		params.CPSet = &CPSet;
 		params.octreeLevel = octreeLevel; //TODO: find a better way to set the right octree level!
 
-		//create temporary SF for the nearest neighors determination (computeHausdorffDistance)
+		//create temporary SF for the nearest neighors determination (computeCloud2CloudDistance)
 		//so that we can properly remove it afterwards!
 		static const char s_defaultTempSFName[] = "InterpolateColorsFromTempSF";
 		int sfIdx = getScalarFieldIndexByName(s_defaultTempSFName);
@@ -3088,7 +3088,7 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		int currentOutSFIndex = m_currentOutScalarFieldIndex;
 		setCurrentScalarField(sfIdx);
 
-		result = CCLib::DistanceComputationTools::computeHausdorffDistance(this, otherCloud, params, progressCb);
+		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(this, otherCloud, params, progressCb);
 
 		//restore previous parameters
 		setCurrentInScalarField(currentInSFIndex);

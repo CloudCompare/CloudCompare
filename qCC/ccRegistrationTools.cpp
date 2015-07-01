@@ -165,7 +165,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 			params.multiThread = true;
 			//params.octreeLevel = 6;
-			int result = CCLib::DistanceComputationTools::computeHausdorffDistance(probedCloud,modelCloud,params,&pDlg);
+			int result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(probedCloud,modelCloud,params,&pDlg);
 			if (result < 0)
 			{
 				ccLog::Error("Failed to determine the max (overlap) distance (not enough memory?)");
@@ -205,7 +205,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 			params.multiThread = true;
 			params.maxSearchDist = static_cast<ScalarType>(maxSearchDist * 1.01); //+1% to differentiate the 'max' value from the real values!
-			int result = CCLib::DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params,&pDlg);
+			int result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(dataCloud,modelCloud,params,&pDlg);
 			if (result < 0)
 			{
 				ccLog::Error("Failed to determine the max (overlap) distance (not enough memory?)");

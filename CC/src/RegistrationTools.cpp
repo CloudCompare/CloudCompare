@@ -315,10 +315,10 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 	//we compute the initial distance between the two clouds (and the CPSet by the way)
 	{
-		//data.cloud->forEach(ScalarFieldTools::SetScalarValueToNaN); //DGM: done automatically in computeHausdorffDistance now
+		//data.cloud->forEach(ScalarFieldTools::SetScalarValueToNaN); //DGM: done automatically in computeCloud2CloudDistance now
 		DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cDistParams;
 		c2cDistParams.CPSet = data.CPSet;
-		if (DistanceComputationTools::computeHausdorffDistance(data.cloud,model.cloud,c2cDistParams,progressCb) < 0)
+		if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud,model.cloud,c2cDistParams,progressCb) < 0)
 		{
 			//an error occurred during distances computation...
 			return ICP_ERROR_DIST_COMPUTATION;
@@ -681,7 +681,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 		{
 			DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cDistParams;
 			c2cDistParams.CPSet = data.CPSet;
-			if (DistanceComputationTools::computeHausdorffDistance(data.cloud,model.cloud,c2cDistParams) < 0)
+			if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud,model.cloud,c2cDistParams) < 0)
 			{
 				//an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;

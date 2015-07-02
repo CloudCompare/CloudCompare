@@ -63,6 +63,8 @@ v2.6.2 XX/XX/2015
 		- dialog has been refreshed
 		- new 'auto' button (when a single cloud is selected) to automatically estimate the local radius
 		- new preferred orientation 'Use previous normal' to use the former normal (if any) to orient the new one
+	* Poisson Surface Reconstruction:
+		- Now using version 6.13 (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version6.13/)
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

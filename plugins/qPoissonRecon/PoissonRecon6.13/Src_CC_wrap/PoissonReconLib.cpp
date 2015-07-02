@@ -22,7 +22,7 @@
 #include <Psapi.h>
 #endif // _WIN32
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -57,7 +57,7 @@ PoissonReconLib::Parameters::Parameters()
 	, nonManifold(false)
 	, density(false)
 {
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 	threads = omp_get_num_procs();
 #endif
 }

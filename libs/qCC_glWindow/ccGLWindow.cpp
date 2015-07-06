@@ -4912,15 +4912,22 @@ void ccGLWindow::displayText(	QString text,
 			glEnable(GL_BLEND);
 
 			//inverted color with a bit of transparency
-			const float invertedCol[4] = {	1.0f-static_cast<float>(col[0])/255.0f,
-											1.0f-static_cast<float>(col[0])/255.0f,
-											1.0f-static_cast<float>(col[0])/255.0f,
+			const float invertedCol[4] = {	(255 - col[0]) / 255.0f,
+											(255 - col[0]) / 255.0f,
+											(255 - col[0]) / 255.0f,
 											bkgAlpha };
 			glColor4fv(invertedCol);
 
 			int xB = x2 - m_glWidth/2;
 			int yB = m_glHeight/2 - y2;
-			yB += margin/2; //empirical compensation
+			//yB += margin/2; //empirical compensation
+
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+
+			setStandardOrthoCenter();
 
 			glBegin(GL_POLYGON);
 			glVertex2d(xB - margin, yB - margin);
@@ -4928,6 +4935,11 @@ void ccGLWindow::displayText(	QString text,
 			glVertex2d(xB + rect.width() + margin, yB + rect.height() + margin/2); 
 			glVertex2d(xB + rect.width() + margin, yB - margin); 
 			glEnd();
+
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+			glPopMatrix();
 			glPopAttrib();
 		}
 	}

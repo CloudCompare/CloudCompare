@@ -125,7 +125,8 @@ public:
 	virtual void addToDB(	ccHObject* obj,
 							bool updateZoom = false,
 							bool autoExpandDBTree = true,
-							bool checkDimensions = false );
+							bool checkDimensions = false,
+							bool autoRedraw = true);
 
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true);
 	virtual void setSelectedInDB(ccHObject* obj, bool selected);

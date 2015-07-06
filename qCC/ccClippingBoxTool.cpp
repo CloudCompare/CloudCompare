@@ -253,6 +253,7 @@ void ccClippingBoxTool::removeLastContour()
 			ccHObject* obj = mainWindow->db()->find(s_lastContourUniqueIDs[i]);
 			if (obj)
 			{
+				//obj->prepareDisplayForRefresh();
 				mainWindow->removeFromDB(obj);
 				ccGLWindow* win = mainWindow->getActiveGLWindow();
 				if (win)

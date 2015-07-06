@@ -748,7 +748,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			if (m_dispIn3D && !pushName) //no need to display label in point picking mode
 			{
 				QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
-				font.setPointSize(font.pointSize()+2);
+				//font.setPointSize(font.pointSize()+2);
 				font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
 
@@ -779,7 +779,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 												static_cast<int>(xp) + context.labelMarkerTextShift_pix,
 												static_cast<int>(yp) + context.labelMarkerTextShift_pix,
 												ccGenericGLDisplay::ALIGN_DEFAULT,
-												0,
+												context.labelOpacity/100.0f,
 												ccColor::white.rgba,
 												&font );
 				}

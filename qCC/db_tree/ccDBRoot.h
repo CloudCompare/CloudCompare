@@ -105,10 +105,19 @@ public:
 	void updatePropertiesView();
 
 	//! Adds an element to the DB tree
-	void addElement(ccHObject* anObject, bool autoExpand = true);
+	void addElement(ccHObject* object, bool autoExpand = true);
 
 	//! Removes an element from the DB tree
-	void removeElement(ccHObject* anObject);
+	/** Automatically calls prepareDisplayForRefresh on the object.
+	**/
+	void removeElement(ccHObject* object);
+
+	//! Removes several elements at once from the DB tree
+	/** Faster than multiple calls to removeElement.
+		Automatically calls prepareDisplayForRefresh on the objects.
+		\warning The input container will be cleared.
+	**/
+	void removeElements(ccHObject::Container& objects);
 
 	//! Finds an element in DB
 	ccHObject* find(int uniqueID) const;
@@ -122,7 +131,7 @@ public:
 								dbTreeSelectionInfo* info = NULL);
 
 	//! Expands tree at a given node
-	void expandElement(ccHObject* anObject, bool state);
+	void expandElement(ccHObject* object, bool state);
 
 	//! Selects a given entity
 	/** If ctrl is pressed by the user at the same time,
@@ -160,9 +169,9 @@ public:
 public slots:
 	void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);
 	void reflectObjectPropChange(ccHObject* obj);
-	void redrawCCObject(ccHObject* anObject);
-	void redrawCCObjectAndChildren(ccHObject* anObject);
-	void updateCCObject(ccHObject* anObject);
+	void redrawCCObject(ccHObject* object);
+	void redrawCCObjectAndChildren(ccHObject* object);
+	void updateCCObject(ccHObject* object);
 	void deleteSelectedEntities();
 
 	//! Shortcut to selectEntity(ccHObject*)

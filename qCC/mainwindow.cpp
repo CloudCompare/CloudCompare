@@ -4432,7 +4432,9 @@ void MainWindow::doActionMerge()
 		while (!toBeRemoved.empty())
 		{
 			if (toBeRemoved.back() && m_ccRoot)
+			{
 				m_ccRoot->removeElement(toBeRemoved.back());
+			}
 			toBeRemoved.pop_back();
 		}
 
@@ -10585,7 +10587,8 @@ void MainWindow::setSelectedInDB(ccHObject* obj, bool selected)
 void MainWindow::addToDB(	ccHObject* obj,
 							bool updateZoom/*=true*/,
 							bool autoExpandDBTree/*=true*/,
-							bool checkDimensions/*=true*/ )
+							bool checkDimensions/*=true*/,
+							bool autoRedraw/*=true*/)
 {
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
@@ -10670,10 +10673,9 @@ void MainWindow::addToDB(	ccHObject* obj,
 	{
 		static_cast<ccGLWindow*>(obj->getDisplay())->zoomGlobal(); //automatically calls ccGLWindow::redraw
 	}
-	else
+	else if (autoRedraw)
 	{
-		obj->prepareDisplayForRefresh();
-		refreshAll();
+		obj->redrawDisplay();
 	}
 }
 

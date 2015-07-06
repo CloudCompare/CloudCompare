@@ -58,9 +58,11 @@ protected slots:
 	//! Removes last inserted point from list
 	void removeLastEntry();
 	//! Exports list to an 'xyz' ASCII file
-	void exportToASCII_xyz();
+	inline void exportToASCII_xyz() { return exportToASCII(PLP_ASCII_EXPORT_XYZ); }
 	//! Exports list to an 'ixyz' ASCII file
-	void exportToASCII_ixyz();
+	inline void exportToASCII_ixyz() { return exportToASCII(PLP_ASCII_EXPORT_IXYZ); }
+	//! Exports list to an 'lxyz' ASCII file
+	inline void exportToASCII_lxyz() { return exportToASCII(PLP_ASCII_EXPORT_LXYZ); }
 
 	//! Redraw window when marker size changes
 	void markerSizeChanged(int);
@@ -82,6 +84,7 @@ protected:
 	**/
 	enum ExportFormat {	PLP_ASCII_EXPORT_XYZ,
 						PLP_ASCII_EXPORT_IXYZ,
+						PLP_ASCII_EXPORT_LXYZ
 	};
 
 	//! Exports list to an ASCII file

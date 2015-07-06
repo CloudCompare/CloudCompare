@@ -65,6 +65,10 @@ v2.6.2 XX/XX/2015
 		- new preferred orientation 'Use previous normal' to use the former normal (if any) to orient the new one
 	* Poisson Surface Reconstruction:
 		- Now using version 6.13 (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version6.13/)
+	* Point list picking:
+		- Label names are now preserved (if the user quits the tool, changes the labels name and restart the tool)
+		- Labels title in 3D have now a semi-transparent background
+		- The point list can now be exported in a text file with 'label name, x, y, z' on each line
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

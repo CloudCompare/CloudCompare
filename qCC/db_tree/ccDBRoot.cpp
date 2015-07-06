@@ -179,12 +179,12 @@ void ccDBRoot::unloadAll()
 	while (m_treeRoot->getChildrenNumber() > 0)
 	{
 		int i = static_cast<int>(m_treeRoot->getChildrenNumber())-1;
-		ccHObject* anObject = m_treeRoot->getChild(i);
-		assert(anObject);
+		ccHObject* object = m_treeRoot->getChild(i);
+		assert(object);
 
-		anObject->prepareDisplayForRefresh_recursive();
+		object->prepareDisplayForRefresh_recursive();
 
-		beginRemoveRows(index(anObject).parent(),i,i);
+		beginRemoveRows(index(object).parent(),i,i);
 		m_treeRoot->removeChild(i);
 		endRemoveRows();
 	}
@@ -199,18 +199,18 @@ ccHObject* ccDBRoot::getRootEntity()
 	return m_treeRoot;
 }
 
-void ccDBRoot::addElement(ccHObject* anObject, bool autoExpand/*=true*/)
+void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 {
-	if (!anObject)
+	if (!object)
 		return;
 
 	//look for object's parent
-	ccHObject* parentObject = anObject->getParent();
+	ccHObject* parentObject = object->getParent();
 	if (!parentObject)
 	{
 		//if the object has no parent, it will be inserted at tree root
 		parentObject = m_treeRoot;
-		m_treeRoot->addChild(anObject);
+		m_treeRoot->addChild(object);
 	}
 	else
 	{
@@ -219,14 +219,14 @@ void ccDBRoot::addElement(ccHObject* anObject, bool autoExpand/*=true*/)
 
 		//The code below doesn't work because the 'index' method will always return a valid index
 		//as soon as the object has a parent (index creation is a purely 'logical' approach)
-		//QModelIndex nodeIndex = index(anObject);
+		//QModelIndex nodeIndex = index(object);
 		//if (nodeIndex.isValid())
 		//	return;
 	}
 
 	//look for insert node index in tree
 	QModelIndex insertNodeIndex = index(parentObject);
-	int childPos = parentObject->getChildIndex(anObject);
+	int childPos = parentObject->getChildIndex(object);
 
 	//row insertion operation (start)
 	beginInsertRows(insertNodeIndex, childPos, childPos);
@@ -236,7 +236,7 @@ void ccDBRoot::addElement(ccHObject* anObject, bool autoExpand/*=true*/)
 
 	if (autoExpand)
 	{
-		QModelIndex childIndex = index(anObject);
+		QModelIndex childIndex = index(object);
 		if (childIndex.isValid())
 			m_dbTreeWidget->expand(childIndex);
 	}
@@ -246,31 +246,79 @@ void ccDBRoot::addElement(ccHObject* anObject, bool autoExpand/*=true*/)
 	}
 }
 
-void ccDBRoot::expandElement(ccHObject* anObject, bool state)
+void ccDBRoot::expandElement(ccHObject* object, bool state)
 {
-	if (!anObject || !m_dbTreeWidget)
+	if (!object || !m_dbTreeWidget)
 		return;
 
-	m_dbTreeWidget->setExpanded(index(anObject),state);
+	m_dbTreeWidget->setExpanded(index(object),state);
 }
 
-void ccDBRoot::removeElement(ccHObject* anObject)
+void ccDBRoot::removeElements(ccHObject::Container& objects)
 {
-	if (!anObject)
+	if (objects.empty())
+	{
+		assert(false);
 		return;
+	}
 
 	//we hide properties view in case this is the deleted object that is currently selected
 	hidePropertiesView();
 
 	//every object in tree must have a parent!
-	ccHObject* parent = anObject->getParent();
+	for (size_t i=0; i<objects.size(); ++i)
+	{
+		ccHObject* object = objects[i];
+		ccHObject* parent = object->getParent();
+		if (!parent)
+		{
+			ccLog::Warning(QString("[ccDBRoot::removeElements] Internal error: object '%1' has no parent!").arg(object->getName()));
+			continue;
+		}
+
+		//just in case
+		object->prepareDisplayForRefresh();
+
+		int childPos = parent->getChildIndex(object);
+		assert(childPos >= 0);
+		{
+			//row removal operation (start)
+			beginRemoveRows(index(parent),childPos,childPos);
+
+			parent->removeChild(childPos);
+
+			//row removal operation (end)
+			endRemoveRows();
+		}
+	}
+
+	//we restore properties view
+	updatePropertiesView();
+}
+
+void ccDBRoot::removeElement(ccHObject* object)
+{
+	if (!object)
+	{
+		assert(false);
+		return;
+	}
+
+	//we hide properties view in case this is the deleted object that is currently selected
+	hidePropertiesView();
+
+	//every object in tree must have a parent!
+	ccHObject* parent = object->getParent();
 	if (!parent)
 	{
 		ccLog::Warning("[ccDBRoot::removeElement] Internal error: object has no parent!");
 		return;
 	}
 
-	int childPos = parent->getChildIndex(anObject);
+	//just in case
+	object->prepareDisplayForRefresh();
+
+	int childPos = parent->getChildIndex(object);
 	assert(childPos >= 0);
 	{
 		//row removal operation (start)
@@ -348,25 +396,25 @@ void ccDBRoot::deleteSelectedEntities()
 
 	while (!toBeDeleted.empty())
 	{
-		ccHObject* anObject = toBeDeleted.back();
-		assert(anObject);
+		ccHObject* object = toBeDeleted.back();
+		assert(object);
 		toBeDeleted.pop_back();
 
-		anObject->prepareDisplayForRefresh_recursive();
+		object->prepareDisplayForRefresh_recursive();
 
-		if (anObject->isKindOf(CC_TYPES::MESH))
+		if (object->isKindOf(CC_TYPES::MESH))
 		{
 			//specific case: the object is a mesh and its parent is its vertices!
 			//(can happen if a Delaunay mesh is computed directly in CC)
-			if (anObject->getParent() && anObject->getParent() == ccHObjectCaster::ToGenericMesh(anObject)->getAssociatedCloud())
-				anObject->getParent()->setVisible(true);
+			if (object->getParent() && object->getParent() == ccHObjectCaster::ToGenericMesh(object)->getAssociatedCloud())
+				object->getParent()->setVisible(true);
 		}
 
-		ccHObject* parent = anObject->getParent();
-		int childPos = parent->getChildIndex(anObject);
+		ccHObject* parent = object->getParent();
+		int childPos = parent->getChildIndex(object);
 		assert(childPos >= 0);
 
-		beginRemoveRows(index(anObject).parent(),childPos,childPos);
+		beginRemoveRows(index(object).parent(),childPos,childPos);
 		parent->removeChild(childPos);
 		endRemoveRows();
 	}
@@ -875,29 +923,29 @@ void ccDBRoot::updatePropertiesView()
 		hidePropertiesView();
 }
 
-void ccDBRoot::updateCCObject(ccHObject* anObject)
+void ccDBRoot::updateCCObject(ccHObject* object)
 {
-	assert(anObject);
+	assert(object);
 
-	QModelIndex idx = index(anObject);
+	QModelIndex idx = index(object);
 
 	if (idx.isValid())
 		emit dataChanged(idx,idx);
 }
 
-void ccDBRoot::redrawCCObject(ccHObject* anObject)
+void ccDBRoot::redrawCCObject(ccHObject* object)
 {
-	assert(anObject);
+	assert(object);
 
-	anObject->redrawDisplay();
+	object->redrawDisplay();
 }
 
-void ccDBRoot::redrawCCObjectAndChildren(ccHObject* anObject)
+void ccDBRoot::redrawCCObjectAndChildren(ccHObject* object)
 {
-	assert(anObject);
+	assert(object);
 
-	anObject->prepareDisplayForRefresh_recursive();
-	anObject->refreshDisplay_recursive();
+	object->prepareDisplayForRefresh_recursive();
+	object->refreshDisplay_recursive();
 }
 
 int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
@@ -912,8 +960,8 @@ int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
 	int realCount = 0;
 	for (int i=0; i<selCount; ++i)
 	{
-		ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-		if (anObject && anObject->isKindOf(filter))
+		ccHObject* object = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+		if (object && object->isKindOf(filter))
 			++realCount;
 	}
 
@@ -934,9 +982,9 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 		int selCount = selectedIndexes.size();
 		for (int i=0; i<selCount; ++i)
 		{
-			ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-			if (anObject && anObject->isKindOf(filter))
-				selectedEntities.push_back(anObject);
+			ccHObject* object = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+			if (object && object->isKindOf(filter))
+				selectedEntities.push_back(object);
 		}
 	}
 	catch(std::bad_alloc)
@@ -1042,9 +1090,9 @@ QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
 
 	if (index.isValid())
 	{
-		ccHObject* anObject = static_cast<ccHObject*>(index.internalPointer());
-		if (anObject)
-			map.insert(Qt::UserRole,QVariant(anObject->getUniqueID()));
+		ccHObject* object = static_cast<ccHObject*>(index.internalPointer());
+		if (object)
+			map.insert(Qt::UserRole,QVariant(object->getUniqueID()));
 	}
 	
 	return map;

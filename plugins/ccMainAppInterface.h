@@ -47,11 +47,13 @@ public:
 		\param updateZoom updates active GL display zoom to fit the whole scene, including this new entity (addToDisplay must be true)
 		\param autoExpandDBTree whether DB tree should automatically be expanded
 		\param checkDimensions whether to check entity's dimensions (and potentially asking the user to shift/rescale it) or not
+		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
 	**/
 	virtual void addToDB(	ccHObject* obj,
 							bool updateZoom = false,
 							bool autoExpandDBTree = true,
-							bool checkDimensions = false ) = 0;
+							bool checkDimensions = false,
+							bool autoRedraw = true ) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.

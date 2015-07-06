@@ -1686,7 +1686,9 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	}
 
 	if (redraw)
+	{
 		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::updateDisplay()
@@ -1731,10 +1733,10 @@ void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
 		return;
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-	if (cloud && cloud->getCurrentDisplayedScalarFieldIndex()+1 != pos)
+	if (cloud && cloud->getCurrentDisplayedScalarFieldIndex() + 1 != pos)
 	{
 		cloud->setCurrentDisplayedScalarField(pos-1);
-		cloud->showSF(pos>0);
+		cloud->showSF(pos > 0);
 
 		updateDisplay();
 		//we must also reset the properties display!
@@ -1812,7 +1814,7 @@ void ccPropertiesTreeDelegate::colorRampStepsChanged(int pos)
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
-	if (sf)
+	if (sf && sf->getColorRampSteps() != pos)
 	{
 		sf->setColorRampSteps(pos);
 		updateDisplay();
@@ -1827,8 +1829,11 @@ void ccPropertiesTreeDelegate::octreeDisplayTypeChanged(int pos)
 	ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 	assert(octree);
 
-	octree->setDisplayType(OCTREE_DISPLAY_TYPE_ENUMS[pos]);
-	updateDisplay();
+	if (octree->getDisplayType() != OCTREE_DISPLAY_TYPE_ENUMS[pos])
+	{
+		octree->setDisplayType(OCTREE_DISPLAY_TYPE_ENUMS[pos]);
+		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
@@ -1856,16 +1861,16 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 	ccGenericPrimitive* primitive = ccHObjectCaster::ToPrimitive(m_currentObject);
 	assert(primitive);
 
-	if (static_cast<unsigned int>(val) == primitive->getDrawingPrecision())
-		return;
+	if (primitive->getDrawingPrecision() != static_cast<unsigned int>(val))
+	{
+		bool wasVisible = primitive->isVisible();
+		primitive->setDrawingPrecision(val);
+		primitive->setVisible(wasVisible);
 
-	bool wasVisible = primitive->isVisible();
-	primitive->setDrawingPrecision(val);
-	primitive->setVisible(wasVisible);
-
-	updateDisplay();
-	//we must also reset the properties display!
-	updateModel();
+		updateDisplay();
+		//we must also reset the properties display!
+		updateModel();
+	}
 }
 
 void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
@@ -1877,16 +1882,16 @@ void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 	assert(sphere);
 
 	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
-	if (radius == sphere->getRadius())
-		return;
+	if (sphere->getRadius() != radius)
+	{
+		bool wasVisible = sphere->isVisible();
+		sphere->setRadius(radius);
+		sphere->setVisible(wasVisible);
 
-	bool wasVisible = sphere->isVisible();
-	sphere->setRadius(radius);
-	sphere->setVisible(wasVisible);
-
-	updateDisplay();
-	//we must also reset the properties display!
-	updateModel();
+		updateDisplay();
+		//we must also reset the properties display!
+		updateModel();
+	}
 }
 
 void ccPropertiesTreeDelegate::coneHeightChanged(double val)
@@ -1898,16 +1903,16 @@ void ccPropertiesTreeDelegate::coneHeightChanged(double val)
 	assert(cone);
 
 	PointCoordinateType height = static_cast<PointCoordinateType>(val);
-	if (height == cone->getHeight())
-		return;
+	if (cone->getHeight() != height)
+	{
+		bool wasVisible = cone->isVisible();
+		cone->setHeight(height);
+		cone->setVisible(wasVisible);
 
-	bool wasVisible = cone->isVisible();
-	cone->setHeight(height);
-	cone->setVisible(wasVisible);
-
-	updateDisplay();
-	//we must also reset the properties display!
-	updateModel();
+		updateDisplay();
+		//we must also reset the properties display!
+		updateModel();
+	}
 }
 
 void ccPropertiesTreeDelegate::coneBottomRadiusChanged(double val)
@@ -1919,16 +1924,16 @@ void ccPropertiesTreeDelegate::coneBottomRadiusChanged(double val)
 	assert(cone);
 
 	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
-	if (radius == cone->getBottomRadius())
-		return;
+	if (cone->getBottomRadius() != radius)
+	{
+		bool wasVisible = cone->isVisible();
+		cone->setBottomRadius(radius); //works for both the bottom and top radii for cylinders!
+		cone->setVisible(wasVisible);
 
-	bool wasVisible = cone->isVisible();
-	cone->setBottomRadius(radius); //works for both the bottom and top radii for cylinders!
-	cone->setVisible(wasVisible);
-
-	updateDisplay();
-	//we must also reset the properties display!
-	updateModel();
+		updateDisplay();
+		//we must also reset the properties display!
+		updateModel();
+	}
 }
 
 void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
@@ -1940,26 +1945,28 @@ void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
 	assert(cone);
 
 	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
-	if (radius == cone->getTopRadius())
-		return;
+	if (cone->getTopRadius() != radius)
+	{
+		bool wasVisible = cone->isVisible();
+		cone->setTopRadius(radius); //works for both the bottom and top radii for cylinders!
+		cone->setVisible(wasVisible);
 
-	bool wasVisible = cone->isVisible();
-	cone->setTopRadius(radius); //works for both the bottom and top radii for cylinders!
-	cone->setVisible(wasVisible);
-
-	updateDisplay();
-	//we must also reset the properties display!
-	updateModel();
+		updateDisplay();
+		//we must also reset the properties display!
+		updateModel();
+	}
 }
 
 void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
 {
 	ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
-	if (!image)
-		return;
-	image->setAlpha(static_cast<float>(val)/255.0f);
 
-	updateDisplay();
+	float alpha = val/255.0f;
+	if (image && image->getAlpha() != alpha)
+	{
+		image->setAlpha(alpha);
+		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::applyImageViewport()
@@ -2014,8 +2021,11 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
 
-	sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
-	updateDisplay();
+	if (sensor && sensor->getGraphicScale() != static_cast<PointCoordinateType>(val))
+	{
+		sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
+		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
@@ -2026,8 +2036,11 @@ void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
 
-	sensor->setActiveIndex(val);
-	updateDisplay();
+	if (sensor && sensor->getActiveIndex() != val)
+	{
+		sensor->setActiveIndex(val);
+		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
@@ -2038,9 +2051,12 @@ void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 	ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 	assert(buffer);
 
-	buffer->setTriherdonsDisplayScale(static_cast<float>(val));
-	if (buffer->triherdonsShown())
-		updateDisplay();
+	if (buffer && buffer->triherdonsDisplayScale() != static_cast<float>(val))
+	{
+		buffer->setTriherdonsDisplayScale(static_cast<float>(val));
+		if (buffer->triherdonsShown())
+			updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
@@ -2051,8 +2067,11 @@ void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
 	assert(cloud);
 
-	cloud->setPointSize(size);
-	updateDisplay();
+	if (cloud && cloud->getPointSize() != size)
+	{
+		cloud->setPointSize(size);
+		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
@@ -2060,13 +2079,14 @@ void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
 	if (!m_currentObject)
 		return;
 
-	ccPolyline* pline = ccHObjectCaster::ToPolyline(m_currentObject);
-	assert(pline);
+	ccPolyline* polyline = ccHObjectCaster::ToPolyline(m_currentObject);
+	assert(polyline);
 
-	if (pline)
-		pline->setWidth(static_cast<PointCoordinateType>(size));
-
-	updateDisplay();
+	if (polyline && polyline->getWidth() != static_cast<PointCoordinateType>(size))
+	{
+		polyline->setWidth(static_cast<PointCoordinateType>(size));
+		updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTitle)
@@ -2105,18 +2125,23 @@ void ccPropertiesTreeDelegate::colorSourceChanged(const QString & source)
 	if (!m_currentObject)
 		return;
 
+	bool appearanceChanged = false;
+
 	if (source == c_noneString)
 	{
+		appearanceChanged = m_currentObject->colorsShown() || m_currentObject->sfShown();
 		m_currentObject->showColors(false);
 		m_currentObject->showSF(false);
 	}
 	else if (source == s_rgbColor)
 	{
+		appearanceChanged = !m_currentObject->colorsShown() || m_currentObject->sfShown();
 		m_currentObject->showColors(true);
 		m_currentObject->showSF(false);
 	}
 	else if (source == s_sfColor)
 	{
+		appearanceChanged = m_currentObject->colorsShown() || !m_currentObject->sfShown();
 		m_currentObject->showColors(false);
 		m_currentObject->showSF(true);
 	}
@@ -2125,5 +2150,8 @@ void ccPropertiesTreeDelegate::colorSourceChanged(const QString & source)
 		assert(false);
 	}
 
-	updateDisplay();
+	if (appearanceChanged)
+	{
+		updateDisplay();
+	}
 }

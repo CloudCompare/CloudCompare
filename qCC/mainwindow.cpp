@@ -7563,7 +7563,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
 			{
-				//first, do the things that must absolutely done BEFORE removing the entity from DB (even temporarily)
+				//first, do the things that must absolutely be done BEFORE removing the entity from DB (even temporarily)
 				//bool lockedVertices;
 				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity/*,&lockedVertices*/);
 				assert(cloud);
@@ -7605,7 +7605,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					} //for each label
 				} // if (cloud)
 
-				//we temporarily detach entity, as it may undergo
+				//we temporarily detach the entity, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
 				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 

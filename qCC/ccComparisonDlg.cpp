@@ -349,7 +349,7 @@ int ccComparisonDlg::computeApproxResults()
 	CCLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
-	//Preparation des octrees
+	//prepare the octree structures
 	ccProgressDialog progressDlg(true,this);
 
 	QElapsedTimer eTimer;
@@ -364,7 +364,9 @@ int ccComparisonDlg::computeApproxResults()
 		}
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh
-		approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
+		{
+			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
+		}
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();

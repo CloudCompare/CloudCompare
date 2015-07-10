@@ -950,7 +950,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	//We should update the VBOs (just in case)
 	releaseVBOs();
 	//As well as the LOD structure
-	m_lod.clear();
+	clearLOD();
 
 	return *this;
 }
@@ -2916,6 +2916,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	{
 		//we drop the octree before modifying this cloud's contents
 		deleteOctree();
+		clearLOD();
 
 		//we remove all visible points
 		unsigned lastPoint = 0;

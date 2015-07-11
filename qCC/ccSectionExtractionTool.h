@@ -109,6 +109,7 @@ protected:
 								unsigned sectionIndex,
 								ccContourExtractor::ContourType type,
 								PointCoordinateType maxEdgeLength,
+								bool multiPass,
 								bool splitContour,
 								bool& contourGenerated,
 								bool visualDebugMode = false);

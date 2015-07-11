@@ -67,6 +67,12 @@ public:
 	//! Sets whether to split the contours or not
 	void doSplitContours(bool state);
 
+	//! Whether to use multipass or not
+	bool useMultiPass() const;
+	//! Sets whether to use multipass or not
+	void doUseMultiPass(bool state);
+	
+
 	//! Whether visual debug mode is enabled or not
 	bool visualDebugMode() const;
 

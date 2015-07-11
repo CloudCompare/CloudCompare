@@ -38,6 +38,7 @@ public:
 	//! Extracts a unique closed (2D) contour polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
 		\param points point cloud
+		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
 		\param maxEdgeLength max edge length (ignored if 0, in which case the contour is the convex hull)
 		\param preferredNormDim to specifiy a preferred (normal) direction for the polyline extraction
 		\param preferredUpDir to specifiy a preferred up direction for the polyline extraction (preferredNormDim must be defined as well and must be normal to this 'up' direction)
@@ -46,6 +47,7 @@ public:
 		\return contour polyline (or 0 if an error occurred)
 	**/
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+											bool allowMultiPass,
 											PointCoordinateType maxEdgeLength = 0,
 											const PointCoordinateType* preferredNormDim = 0,
 											const PointCoordinateType* preferredUpDir = 0,
@@ -57,6 +59,7 @@ public:
 	/** Projects the cloud on its best fitting LS plane first.
 		\warning output polylines set (parts) may be empty if all the vertices are too far from each other!
 		\param points point cloud
+		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
 		\param maxEdgeLength max edge length (ignored if 0, in which case the contour is the convex hull)
 		\param[out] parts output polyline parts
 		\param allowSplitting whether the polyline can be split or not
@@ -64,6 +67,7 @@ public:
 		\return success
 	**/
 	static bool ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+									bool allowMultiPass,
 									PointCoordinateType maxEdgeLength,
 									std::vector<ccPolyline*>& parts,
 									bool allowSplitting = true,
@@ -80,12 +84,14 @@ protected:
 		but with partial contour support and visual debug mode.
 		\param points input set of points
 		\param hullPoints output points (on the convex hull)
+		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
 		\param maxSquareLength maximum square length (ignored if <= 0, in which case the method simply returns the convex hull!)
 		\return success
 	**/
 	static bool ExtractConcaveHull2D(	std::vector<CCLib::PointProjectionTools::IndexedCCVector2>& points,
 										std::list<CCLib::PointProjectionTools::IndexedCCVector2*>& hullPoints,
 										ContourType contourType,
+										bool allowMultiPass,
 										PointCoordinateType maxSquareLength = 0,
 										bool enableVisualDebugMode = false);
 

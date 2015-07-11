@@ -1237,6 +1237,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 													unsigned sectionIndex,
 													ccContourExtractor::ContourType contourType,
 													PointCoordinateType maxEdgeLength,
+													bool multiPass,
 													bool splitContour,
 													bool& contourGenerated,
 													bool visualDebugMode/*=false*/)
@@ -1262,6 +1263,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 
 	std::vector<unsigned> vertIndexes;
 	ccPolyline* contour = ccContourExtractor::ExtractFlatContour(	unrolledSectionCloud,
+																	multiPass,
 																	maxEdgeLength,
 																	N.u,
 																	Y.u,
@@ -1462,6 +1464,7 @@ static double s_defaultSectionThickness = -1.0;
 static double s_contourMaxEdgeLength = 0;
 static bool s_extractSectionsAsClouds = false;
 static bool s_extractSectionsAsContours = true;
+static bool s_multiPass = false;
 static bool s_splitContour = false;
 static ccContourExtractor::ContourType s_extractSectionsType = ccContourExtractor::LOWER;
 
@@ -1510,6 +1513,7 @@ void ccSectionExtractionTool::extractPoints()
 	sesDlg.setMaxEdgeLength(s_contourMaxEdgeLength);
 	sesDlg.doExtractClouds(s_extractSectionsAsClouds);
 	sesDlg.doExtractContours(s_extractSectionsAsContours,s_extractSectionsType);
+	sesDlg.doUseMultiPass(s_multiPass);
 	sesDlg.doSplitContours(s_splitContour);
 
 	if (!sesDlg.exec())
@@ -1520,6 +1524,7 @@ void ccSectionExtractionTool::extractPoints()
 	s_extractSectionsAsClouds   = sesDlg.extractClouds();
 	s_extractSectionsAsContours = sesDlg.extractContours();
 	s_extractSectionsType       = sesDlg.getContourType();
+	s_multiPass                 = sesDlg.useMultiPass();
 	s_splitContour              = sesDlg.splitContours();
 	bool visualDebugMode        = sesDlg.visualDebugMode();
 
@@ -1723,6 +1728,7 @@ void ccSectionExtractionTool::extractPoints()
 														s+1,
 														s_extractSectionsType,
 														s_contourMaxEdgeLength,
+														s_multiPass,
 														s_splitContour,
 														contourGenerated,
 														visualDebugMode);

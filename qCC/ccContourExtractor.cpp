@@ -131,6 +131,7 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 												std::list<Vertex2D*>& hullPoints,
 												ContourType contourType,
+												bool allowMultiPass,
 												PointCoordinateType maxSquareEdgeLength/*=0*/,
 												bool enableVisualDebugMode/*=false*/)
 {
@@ -312,239 +313,47 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 	unsigned step = 0;
 	bool somethingHasChanged = true;
 	while (somethingHasChanged)
-	try
 	{
-		somethingHasChanged = false;
-		++step;
-
-		//reset point flags
-		//for (size_t i=0; i<pointCount; ++i)
-		//{
-		//	if (pointFlags[i] != POINT_FROZEN)
-		//		pointFlags[i] = POINT_NOT_USED;
-		//}
-
-		//build the initial edge list & flag the convex hull points
-		std::multiset<Edge> edges;
-		//initial number of edges
-		assert(hullPoints.size() >= 2);
-		size_t initEdgeCount = hullPoints.size();
-		if (contourType != FULL)
-			--initEdgeCount;
-
-		VertexIterator itB = hullPoints.begin();
-		for (size_t i=0; i<initEdgeCount; ++i)
+		try
 		{
-			VertexIterator itA = itB; ++itB;
-			if (itB == hullPoints.end())
-				itB = hullPoints.begin();
+			somethingHasChanged = false;
+			++step;
 
-			//we will only process the edges that are longer than the maximum specified length
-			if ((**itB - **itA).norm2() > maxSquareEdgeLength)
-			{
-				unsigned nearestPointIndex = 0;
-				PointCoordinateType minSquareDist = FindNearestCandidate(
-					nearestPointIndex,
-					itA,
-					itB,
-					points,
-					pointFlags,
-					minSquareEdgeLength,
-					maxSquareEdgeLength,
-					step > 1);
-
-				if (minSquareDist >= 0)
-				{
-					Edge e(itA,nearestPointIndex,minSquareDist);
-					edges.insert(e);
-				}
-			}
-
-			pointFlags[(*itA)->index] = POINT_USED;
-		}
-
-		//flag the last vertex as well for non closed contours!
-		if (contourType != FULL)
-			pointFlags[(*hullPoints.rbegin())->index] = POINT_USED;
-
-		while (!edges.empty())
-		{
-			//current edge (AB)
-			//this should be the edge with the nearest 'candidate'
-			Edge e = *edges.begin();
-			edges.erase(edges.begin());
-
-			VertexIterator itA = e.itA;
-			VertexIterator itB = itA; ++itB;
-			if (itB == hullPoints.end())
-			{
-				assert((contourType == FULL));
-				itB = hullPoints.begin();
-			}
-
-			//nearest point
-			const Vertex2D& P = points[e.nearestPointIndex];
-			assert(pointFlags[P.index] == POINT_NOT_USED); //we don't consider already used points!
-
-			//create labels
-			cc2DLabel* edgeLabel = 0;
-			cc2DLabel* label = 0;
-			if (enableVisualDebugMode && !debugDialog.isSkipepd())
-			{
-				edgeLabel = new cc2DLabel("edge");
-				unsigned indexA = 0;
-				unsigned indexB = 0;
-				for (size_t i=0; i<pointCount; ++i)
-				{
-					const Vertex2D& P = points[i];
-					if (&P == *itA)
-						indexA = static_cast<unsigned>(i);
-					if (&P == *itB)
-						indexB = static_cast<unsigned>(i);
-				}
-				edgeLabel->addPoint(debugCloud,indexA);
-				edgeLabel->addPoint(debugCloud,indexB);
-				edgeLabel->setVisible(true);
-				edgeLabel->setDisplayedIn2D(false);
-				debugDialog.addToDisplay(edgeLabel);
-				debugDialog.refresh();
-
-				label = new cc2DLabel("nearest point");
-				label->addPoint(debugCloud,e.nearestPointIndex);
-				label->setVisible(true);
-				label->setSelected(true);
-				debugDialog.addToDisplay(label);
-				debugDialog.displayMessage(QString("nearest point found index #%1 (dist = %2)").arg(e.nearestPointIndex).arg(sqrt(e.nearestPointSquareDist)),true);
-			}
-
-			//check that we don't create too small edges!
-			//CCVector2 AP = (P-**itA);
-			//CCVector2 PB = (**itB-P);
-			//PointCoordinateType squareLengthAP = (P-**itA).norm2();
-			//PointCoordinateType squareLengthPB = (**itB-P).norm2();
-			////at least one of the new segments must be smaller than the initial one!
-			//assert( squareLengthAP < e.squareLength || squareLengthPB < e.squareLength );
-			//if (squareLengthAP < minSquareEdgeLength || squareLengthPB < minSquareEdgeLength)
+			//reset point flags
+			//for (size_t i=0; i<pointCount; ++i)
 			//{
-			//	pointFlags[P.index] = POINT_IGNORED;
-			//	edges.push(e); //retest the edge!
-			//	if (enableVisualDebugMode)
-			//		debugDialog.displayMessage("nearest point is too close!",true);
+			//	if (pointFlags[i] != POINT_FROZEN)
+			//		pointFlags[i] = POINT_NOT_USED;
 			//}
 
-			//last check: the new segments must not intersect with the actual hull!
-			bool intersect = false;
-			//if (false)
+			//build the initial edge list & flag the convex hull points
+			std::multiset<Edge> edges;
+			//initial number of edges
+			assert(hullPoints.size() >= 2);
+			size_t initEdgeCount = hullPoints.size();
+			if (contourType != FULL)
+				--initEdgeCount;
+
+			VertexIterator itB = hullPoints.begin();
+			for (size_t i=0; i<initEdgeCount; ++i)
 			{
-				for (VertexIterator itJ = hullPoints.begin(), itI = itJ++; itI != hullPoints.end(); ++itI, ++itJ)
-				{
-					if (itJ == hullPoints.end())
-					{
-						if (contourType == FULL)
-							itJ = hullPoints.begin();
-						else
-							break;
-					}
+				VertexIterator itA = itB; ++itB;
+				if (itB == hullPoints.end())
+					itB = hullPoints.begin();
 
-					if (	((*itI)->index != (*itA)->index && (*itJ)->index != (*itA)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,**itA,P))
-						||	((*itI)->index != (*itB)->index && (*itJ)->index != (*itB)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,P,**itB)) )
-					{
-						intersect = true;
-						break;
-					}
-				}
-			}
-			if (!intersect)
-			{
-				//add point to concave hull
-				VertexIterator itP = hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[e.nearestPointIndex]);
-
-				//we won't use P anymore!
-				pointFlags[P.index] = POINT_USED;
-
-				somethingHasChanged = true;
-
-				if (enableVisualDebugMode && !debugDialog.isSkipepd())
-				{
-					if (debugContour)
-					{
-						debugContourVertices->clear();
-						unsigned hullSize = static_cast<unsigned>(hullPoints.size());
-						debugContourVertices->reserve(hullSize);
-						unsigned index = 0;
-						for (VertexIterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++index)
-						{
-							const Vertex2D* P = *it;
-							debugContourVertices->addPoint(CCVector3(P->x,P->y,0));
-						}
-						debugContour->reserve(hullSize);
-						debugContour->addPointIndex(hullSize-1);
-						debugDialog.refresh();
-					}
-					debugDialog.displayMessage("point has been added to contour",true);
-				}
-
-				//update all edges that were having 'P' as their nearest candidate as well
-				{
-					std::vector<VertexIterator> removed;
-					std::multiset<Edge>::const_iterator lastValidIt = edges.end();
-					for (std::multiset<Edge>::const_iterator it = edges.begin(); it != edges.end(); ++it)
-					{
-						if ((*it).nearestPointIndex == e.nearestPointIndex)
-						{
-							//we'll have to put them back afterwards!
-							removed.push_back((*it).itA);
-							
-							edges.erase(it);
-							if (lastValidIt != edges.end())
-								it = lastValidIt;
-							else
-								it = edges.begin();
-						}
-						else
-						{
-							lastValidIt = it;
-						}
-					}
-
-					//update the removed edges info and put them back in the main list
-					for (size_t i=0; i<removed.size(); ++i)
-					{
-						VertexIterator itC = removed[i];
-						VertexIterator itD = itC; ++itD;
-						if (itD == hullPoints.end())
-							itD = hullPoints.begin();
-						
-						unsigned nearestPointIndex = 0;
-						PointCoordinateType minSquareDist = FindNearestCandidate(
-							nearestPointIndex,
-							itC,
-							itD,
-							points,
-							pointFlags,
-							minSquareEdgeLength,
-							maxSquareEdgeLength);
-
-						if (minSquareDist >= 0)
-						{
-							Edge e(itC,nearestPointIndex,minSquareDist);
-							edges.insert(e);
-						}
-					}
-				}
-
-				//we'll inspect the two new segments later (if necessary)
-				if ((P-**itA).norm2() > maxSquareEdgeLength)
+				//we will only process the edges that are longer than the maximum specified length
+				if ((**itB - **itA).norm2() > maxSquareEdgeLength)
 				{
 					unsigned nearestPointIndex = 0;
 					PointCoordinateType minSquareDist = FindNearestCandidate(
 						nearestPointIndex,
 						itA,
-						itP,
+						itB,
 						points,
 						pointFlags,
 						minSquareEdgeLength,
-						maxSquareEdgeLength);
+						maxSquareEdgeLength,
+						step > 1);
 
 					if (minSquareDist >= 0)
 					{
@@ -552,55 +361,252 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 						edges.insert(e);
 					}
 				}
-				if ((**itB-P).norm2() > maxSquareEdgeLength)
-				{
-					unsigned nearestPointIndex = 0;
-					PointCoordinateType minSquareDist = FindNearestCandidate(
-						nearestPointIndex,
-						itP,
-						itB,
-						points,
-						pointFlags,
-						minSquareEdgeLength,
-						maxSquareEdgeLength);
 
-					if (minSquareDist >= 0)
+				pointFlags[(*itA)->index] = POINT_USED;
+			}
+
+			//flag the last vertex as well for non closed contours!
+			if (contourType != FULL)
+				pointFlags[(*hullPoints.rbegin())->index] = POINT_USED;
+
+			while (!edges.empty())
+			{
+				//current edge (AB)
+				//this should be the edge with the nearest 'candidate'
+				Edge e = *edges.begin();
+				edges.erase(edges.begin());
+
+				VertexIterator itA = e.itA;
+				VertexIterator itB = itA; ++itB;
+				if (itB == hullPoints.end())
+				{
+					assert((contourType == FULL));
+					itB = hullPoints.begin();
+				}
+
+				//nearest point
+				const Vertex2D& P = points[e.nearestPointIndex];
+				assert(pointFlags[P.index] == POINT_NOT_USED); //we don't consider already used points!
+
+				//create labels
+				cc2DLabel* edgeLabel = 0;
+				cc2DLabel* label = 0;
+				if (enableVisualDebugMode && !debugDialog.isSkipepd())
+				{
+					edgeLabel = new cc2DLabel("edge");
+					unsigned indexA = 0;
+					unsigned indexB = 0;
+					for (size_t i=0; i<pointCount; ++i)
 					{
-						Edge e(itP,nearestPointIndex,minSquareDist);
-						edges.insert(e);
+						const Vertex2D& P = points[i];
+						if (&P == *itA)
+							indexA = static_cast<unsigned>(i);
+						if (&P == *itB)
+							indexB = static_cast<unsigned>(i);
+					}
+					edgeLabel->addPoint(debugCloud,indexA);
+					edgeLabel->addPoint(debugCloud,indexB);
+					edgeLabel->setVisible(true);
+					edgeLabel->setDisplayedIn2D(false);
+					debugDialog.addToDisplay(edgeLabel);
+					debugDialog.refresh();
+
+					label = new cc2DLabel("nearest point");
+					label->addPoint(debugCloud,e.nearestPointIndex);
+					label->setVisible(true);
+					label->setSelected(true);
+					debugDialog.addToDisplay(label);
+					debugDialog.displayMessage(QString("nearest point found index #%1 (dist = %2)").arg(e.nearestPointIndex).arg(sqrt(e.nearestPointSquareDist)),true);
+				}
+
+				//check that we don't create too small edges!
+				//CCVector2 AP = (P-**itA);
+				//CCVector2 PB = (**itB-P);
+				//PointCoordinateType squareLengthAP = (P-**itA).norm2();
+				//PointCoordinateType squareLengthPB = (**itB-P).norm2();
+				////at least one of the new segments must be smaller than the initial one!
+				//assert( squareLengthAP < e.squareLength || squareLengthPB < e.squareLength );
+				//if (squareLengthAP < minSquareEdgeLength || squareLengthPB < minSquareEdgeLength)
+				//{
+				//	pointFlags[P.index] = POINT_IGNORED;
+				//	edges.push(e); //retest the edge!
+				//	if (enableVisualDebugMode)
+				//		debugDialog.displayMessage("nearest point is too close!",true);
+				//}
+
+				//last check: the new segments must not intersect with the actual hull!
+				bool intersect = false;
+				//if (false)
+				{
+					for (VertexIterator itJ = hullPoints.begin(), itI = itJ++; itI != hullPoints.end(); ++itI, ++itJ)
+					{
+						if (itJ == hullPoints.end())
+						{
+							if (contourType == FULL)
+								itJ = hullPoints.begin();
+							else
+								break;
+						}
+
+						if (	((*itI)->index != (*itA)->index && (*itJ)->index != (*itA)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,**itA,P))
+							||	((*itI)->index != (*itB)->index && (*itJ)->index != (*itB)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,P,**itB)) )
+						{
+							intersect = true;
+							break;
+						}
 					}
 				}
-			}
-			else
-			{
-				if (enableVisualDebugMode)
-					debugDialog.displayMessage("[rejected] new edge would intersect the current contour!",true);
-			}
-			
-			//remove labels
-			if (label)
-			{
-				assert(enableVisualDebugMode);
-				debugDialog.removFromDisplay(label);
-				delete label;
-				label = 0;
-				//debugDialog.refresh();
-			}
+				if (!intersect)
+				{
+					//add point to concave hull
+					VertexIterator itP = hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[e.nearestPointIndex]);
 
-			if (edgeLabel)
-			{
-				assert(enableVisualDebugMode);
-				debugDialog.removFromDisplay(edgeLabel);
-				delete edgeLabel;
-				edgeLabel = 0;
-				//debugDialog.refresh();
+					//we won't use P anymore!
+					pointFlags[P.index] = POINT_USED;
+
+					somethingHasChanged = true;
+
+					if (enableVisualDebugMode && !debugDialog.isSkipepd())
+					{
+						if (debugContour)
+						{
+							debugContourVertices->clear();
+							unsigned hullSize = static_cast<unsigned>(hullPoints.size());
+							debugContourVertices->reserve(hullSize);
+							unsigned index = 0;
+							for (VertexIterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++index)
+							{
+								const Vertex2D* P = *it;
+								debugContourVertices->addPoint(CCVector3(P->x,P->y,0));
+							}
+							debugContour->reserve(hullSize);
+							debugContour->addPointIndex(hullSize-1);
+							debugDialog.refresh();
+						}
+						debugDialog.displayMessage("point has been added to contour",true);
+					}
+
+					//update all edges that were having 'P' as their nearest candidate as well
+					{
+						std::vector<VertexIterator> removed;
+						std::multiset<Edge>::const_iterator lastValidIt = edges.end();
+						for (std::multiset<Edge>::const_iterator it = edges.begin(); it != edges.end(); ++it)
+						{
+							if ((*it).nearestPointIndex == e.nearestPointIndex)
+							{
+								//we'll have to put them back afterwards!
+								removed.push_back((*it).itA);
+							
+								edges.erase(it);
+								if (lastValidIt != edges.end())
+									it = lastValidIt;
+								else
+									it = edges.begin();
+							}
+							else
+							{
+								lastValidIt = it;
+							}
+						}
+
+						//update the removed edges info and put them back in the main list
+						for (size_t i=0; i<removed.size(); ++i)
+						{
+							VertexIterator itC = removed[i];
+							VertexIterator itD = itC; ++itD;
+							if (itD == hullPoints.end())
+								itD = hullPoints.begin();
+						
+							unsigned nearestPointIndex = 0;
+							PointCoordinateType minSquareDist = FindNearestCandidate(
+								nearestPointIndex,
+								itC,
+								itD,
+								points,
+								pointFlags,
+								minSquareEdgeLength,
+								maxSquareEdgeLength);
+
+							if (minSquareDist >= 0)
+							{
+								Edge e(itC,nearestPointIndex,minSquareDist);
+								edges.insert(e);
+							}
+						}
+					}
+
+					//we'll inspect the two new segments later (if necessary)
+					if ((P-**itA).norm2() > maxSquareEdgeLength)
+					{
+						unsigned nearestPointIndex = 0;
+						PointCoordinateType minSquareDist = FindNearestCandidate(
+							nearestPointIndex,
+							itA,
+							itP,
+							points,
+							pointFlags,
+							minSquareEdgeLength,
+							maxSquareEdgeLength);
+
+						if (minSquareDist >= 0)
+						{
+							Edge e(itA,nearestPointIndex,minSquareDist);
+							edges.insert(e);
+						}
+					}
+					if ((**itB-P).norm2() > maxSquareEdgeLength)
+					{
+						unsigned nearestPointIndex = 0;
+						PointCoordinateType minSquareDist = FindNearestCandidate(
+							nearestPointIndex,
+							itP,
+							itB,
+							points,
+							pointFlags,
+							minSquareEdgeLength,
+							maxSquareEdgeLength);
+
+						if (minSquareDist >= 0)
+						{
+							Edge e(itP,nearestPointIndex,minSquareDist);
+							edges.insert(e);
+						}
+					}
+				}
+				else
+				{
+					if (enableVisualDebugMode)
+						debugDialog.displayMessage("[rejected] new edge would intersect the current contour!",true);
+				}
+			
+				//remove labels
+				if (label)
+				{
+					assert(enableVisualDebugMode);
+					debugDialog.removFromDisplay(label);
+					delete label;
+					label = 0;
+					//debugDialog.refresh();
+				}
+
+				if (edgeLabel)
+				{
+					assert(enableVisualDebugMode);
+					debugDialog.removFromDisplay(edgeLabel);
+					delete edgeLabel;
+					edgeLabel = 0;
+					//debugDialog.refresh();
+				}
 			}
 		}
-	}
-	catch(...)
-	{
-		//not enough memory
-		return false;
+		catch(...)
+		{
+			//not enough memory
+			return false;
+		}
+
+		if (!allowMultiPass)
+			break;
 	}
 
 	return true;
@@ -609,6 +615,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 typedef std::list<Vertex2D*> Hull2D;
 
 ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+													bool allowMultiPass,
 													PointCoordinateType maxEdgeLength/*=0*/,
 													const PointCoordinateType* preferredNormDim/*=0*/,
 													const PointCoordinateType* preferredUpDir/*=0*/,
@@ -668,6 +675,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	if (!ExtractConcaveHull2D(	points2D,
 								hullPoints,
 								contourType,
+								allowMultiPass,
 								maxEdgeLength*maxEdgeLength,
 								enableVisualDebugMode) )
 	{
@@ -734,6 +742,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 }
 
 bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
+											bool allowMultiPass,
 											PointCoordinateType maxEdgeLength,
 											std::vector<ccPolyline*>& parts,
 											bool allowSplitting/*=true*/,
@@ -743,7 +752,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	parts.clear();
 
 	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points,maxEdgeLength,preferredDim,0,FULL,0,enableVisualDebugMode);
+	ccPolyline* basePoly = ExtractFlatContour(points,allowMultiPass,maxEdgeLength,preferredDim,0,FULL,0,enableVisualDebugMode);
 	if (!basePoly)
 	{
 		return false;

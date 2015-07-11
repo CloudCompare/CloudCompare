@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>297</height>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -103,16 +103,7 @@
          </size>
         </property>
         <layout class="QFormLayout" name="formLayout">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
+         <property name="margin">
           <number>0</number>
          </property>
          <item row="0" column="0">
@@ -166,6 +157,16 @@ Warning: if 0, generates the convex hull.</string>
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="multiPassCheckBox">
+        <property name="toolTip">
+         <string>Multi-pass process where longer edges may be temporarilly created to obtain a better fit... or a worst one ;)</string>
+        </property>
+        <property name="text">
+         <string>multi-pass</string>
+        </property>
        </widget>
       </item>
       <item>

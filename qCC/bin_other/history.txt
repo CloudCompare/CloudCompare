@@ -64,11 +64,14 @@ v2.6.2 XX/XX/2015
 		- new 'auto' button (when a single cloud is selected) to automatically estimate the local radius
 		- new preferred orientation 'Use previous normal' to use the former normal (if any) to orient the new one
 	* Poisson Surface Reconstruction:
-		- Now using version 6.13 (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version6.13/)
+		- now using version 6.13 (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version6.13/)
 	* Point list picking:
-		- Label names are now preserved (if the user quits the tool, changes the labels name and restart the tool)
-		- Labels title in 3D have now a semi-transparent background
-		- The point list can now be exported in a text file with 'label name, x, y, z' on each line
+		- label names are now preserved (if the user quits the tool, changes the labels name and restart the tool)
+		- labels title in 3D have now a semi-transparent background
+		- the point list can now be exported in a text file with 'label name, x, y, z' on each line
+	* Profile extraction (both in the Cross Section tool and the Section Extraction tool):
+		- new 'multi-pass' option to enable/disable the additional passes where longer edges can be generated
+			(in order to ultimately get a better fit... or not). It was enabled by default in the previous version.
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

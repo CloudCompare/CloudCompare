@@ -99,6 +99,16 @@ void ccSectionExtractionSubDlg::doSplitContours(bool state)
 	splitContourCheckBox->setChecked(state);
 }
 
+bool ccSectionExtractionSubDlg::useMultiPass() const
+{
+	return multiPassCheckBox->isChecked();
+}
+
+void ccSectionExtractionSubDlg::doUseMultiPass(bool state)
+{
+	multiPassCheckBox->setChecked(state);
+}
+
 ccContourExtractor::ContourType ccSectionExtractionSubDlg::getContourType() const
 {
 	switch(contourTypeComboBox->currentIndex())

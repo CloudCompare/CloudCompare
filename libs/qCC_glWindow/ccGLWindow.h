@@ -606,7 +606,7 @@ signals:
 	void drawing3D();
 
 	//! Signal emitted when files are dropped on the window
-	void filesDropped(const QStringList& filenames);
+	void filesDropped(QStringList);
 
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject* obj);

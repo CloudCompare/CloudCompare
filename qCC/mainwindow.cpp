@@ -7116,7 +7116,7 @@ ccGLWindow* MainWindow::new3DView()
 	connect(view3D,	SIGNAL(pixelSizeChanged(float)),					this,		SLOT(echoPixelSizeChanged(float)));
 
 	connect(view3D,	SIGNAL(destroyed(QObject*)),						this,		SLOT(prepareWindowDeletion(QObject*)));
-	connect(view3D,	SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDBAuto(const QStringList&)));
+	connect(view3D,	SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDBAuto(QStringList)), Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
 	connect(view3D,	SIGNAL(newLabel(ccHObject*)),						this,		SLOT(handleNewLabel(ccHObject*)));
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
@@ -10679,7 +10679,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	}
 }
 
-void MainWindow::addToDBAuto(const QStringList& filenames)
+void MainWindow::addToDBAuto(QStringList filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
 

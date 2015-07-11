@@ -1679,22 +1679,21 @@ void ccGLWindow::dragEnterEvent(QDragEnterEvent *event)
 {
 	const QMimeData* mimeData = event->mimeData();
 
-	/*//Display all MIME info
-	for (unsigned i=0; i<mimeData->formats().size(); ++i)
-	{
-	QString format = mimeData->formats().at(i);
-	ccLog::Print(QString("Drop format: %1").arg(format));
-	if (mimeData->hasFormat("FileNameW"))
-	{
-	QByteArray byteData = mimeData->data(format);
-	ccLog::Print(QString("\tdata: %1").arg(QString::fromUtf16((ushort*)byteData.data(), byteData.size() / 2)));
-	}
-	else
-	{
-	ccLog::Print(QString("\tdata: %1").arg(QString(mimeData->data(format))));
-	}
-	}
-	//*/
+	//Display all MIME info
+	//for (unsigned i=0; i<mimeData->formats().size(); ++i)
+	//{
+	//	QString format = mimeData->formats().at(i);
+	//	ccLog::Print(QString("Drop format: %1").arg(format));
+	//	if (mimeData->hasFormat("FileNameW"))
+	//	{
+	//		QByteArray byteData = mimeData->data(format);
+	//		ccLog::Print(QString("\tdata: %1").arg(QString::fromUtf16((ushort*)byteData.data(), byteData.size() / 2)));
+	//	}
+	//	else
+	//	{
+	//		ccLog::Print(QString("\tdata: %1").arg(QString(mimeData->data(format))));
+	//	}
+	//}
 
 	if (mimeData->hasFormat("text/uri-list"))
 		event->acceptProposedAction();
@@ -1704,7 +1703,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 {
 	const QMimeData* mimeData = event->mimeData();
 
-	if (mimeData->hasFormat("text/uri-list"))
+	if (mimeData && mimeData->hasFormat("text/uri-list"))
 	{
 		QByteArray data = mimeData->data("text/uri-list");
 		QStringList fileNames = QUrl::fromPercentEncoding(data).split(QRegExp("\\n+"),QString::SkipEmptyParts);
@@ -1724,28 +1723,27 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 		}
 
 		if (!fileNames.empty())
+		{
 			emit filesDropped(fileNames);
-
-		setFocus();
+		}
 
 		event->acceptProposedAction();
 	}
 
-	/*QString filename("none");
-	if (event->mimeData()->hasFormat("FileNameW"))
-	{
-	QByteArray data = event->mimeData()->data("FileNameW");
-	filename = QString::fromUtf16((ushort*)data.data(), data.size() / 2);
-	event->acceptProposedAction();
-	}
-	else if (event->mimeData()->hasFormat("FileName"))
-	{
-	filename = event->mimeData()->data("FileNameW");
-	event->acceptProposedAction();
-	}
+	//QString filename("none");
+	//if (event->mimeData()->hasFormat("FileNameW"))
+	//{
+	//	QByteArray data = event->mimeData()->data("FileNameW");
+	//	filename = QString::fromUtf16((ushort*)data.data(), data.size() / 2);
+	//	event->acceptProposedAction();
+	//}
+	//else if (event->mimeData()->hasFormat("FileName"))
+	//{
+	//	filename = event->mimeData()->data("FileNameW");
+	//	event->acceptProposedAction();
+	//}
 
-	ccLog::Print(QString("Drop file(s): %1").arg(filename));
-	//*/
+	//ccLog::Print(QString("Drop file(s): %1").arg(filename));
 
 	event->ignore();
 }

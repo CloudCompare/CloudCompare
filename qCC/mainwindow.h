@@ -263,11 +263,6 @@ protected slots:
 	virtual void setCenteredPerspectiveView();
 	virtual void setViewerPerspectiveView();
 
-	//! Tries to load (and then adds to main db) several files
-	/** \param filenames list of all filenames
-	**/
-	void addToDBAuto(const QStringList& filenames);
-
 	//! Handles new label
 	void handleNewLabel(ccHObject*);
 
@@ -280,6 +275,7 @@ protected slots:
 	void updateMenus();
 	void on3DViewActivated(QMdiSubWindow*);
 	void updateUIWithSelection();
+	void addToDBAuto(QStringList);
 
 	void echoMouseWheelRotate(float);
 	void echoCameraDisplaced(float ddx, float ddy);

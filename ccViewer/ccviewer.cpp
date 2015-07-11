@@ -99,8 +99,8 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDB(const QStringList&)));
-	connect(m_glWindow,								SIGNAL(entitySelectionChanged(int)),				this,		SLOT(selectEntity(int)));
+	connect(m_glWindow,								SIGNAL(filesDropped(QStringList)),			this,		SLOT(addToDB(QStringList)));
+	connect(m_glWindow,								SIGNAL(entitySelectionChanged(int)),		this,		SLOT(selectEntity(int)));
 	//connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::set<int>)),	this,		SLOT(selectEntities(std::set<int>))); //not supported!
 	//connect(m_glWindow,							SIGNAL(newLabel(ccHObject*),						this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
 
@@ -467,7 +467,7 @@ void ccViewer::updateGLFrameGradient()
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 
-void ccViewer::addToDB(const QStringList& filenames)
+void ccViewer::addToDB(QStringList filenames)
 {
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)

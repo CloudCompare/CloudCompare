@@ -71,13 +71,12 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	//drag & drop support
 	m_dbTreeWidget->setDragEnabled(true);
 	m_dbTreeWidget->setAcceptDrops(true);
-	//m_dbTreeWidget->viewport()->setAcceptDrops(true);
 	m_dbTreeWidget->setDropIndicatorShown(true);
-	m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
 #ifndef CC_QT5
 	setSupportedDragActions(Qt::MoveAction);
 #endif
 	/*//already done in ui file!
+	m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
 	m_dbTreeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
 	m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
 	m_dbTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);

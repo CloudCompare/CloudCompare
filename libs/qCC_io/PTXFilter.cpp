@@ -120,16 +120,17 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				break;
 
 			//read the width (number of columns) and the height (number of rows) on the two first lines
+			//(DGM: we transpose the matrix right away)
 			bool ok;
-			width = line.toUInt(&ok);
-			if (!ok)
-				return CC_FERR_MALFORMED_FILE;
-			line = inFile.readLine();
 			height = line.toUInt(&ok);
 			if (!ok)
 				return CC_FERR_MALFORMED_FILE;
+			line = inFile.readLine();
+			width = line.toUInt(&ok);
+			if (!ok)
+				return CC_FERR_MALFORMED_FILE;
 
-			ccLog::Print(QString("[PTX] Scan #%1 - grid size: %2 x %3").arg(cloudIndex+1).arg(width).arg(height));
+			ccLog::Print(QString("[PTX] Scan #%1 - grid size: %2 x %3").arg(cloudIndex+1).arg(height).arg(width));
 
 			//read sensor transformation matrix
 			for (int i=0; i<4; ++i)
@@ -257,9 +258,9 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			bool loadColors = false;
 			int* _indexGrid = hasIndexGrid ? &(indexGrid[0]) : 0;
 
-			for (unsigned i=0; i<width; ++i)
+			for (unsigned j=0; j<height; ++j)
 			{
-				for (unsigned j=0; j<height; ++j, ++_indexGrid)
+				for (unsigned i=0; i<width; ++i, ++_indexGrid)
 				{
 					QString line = inFile.readLine();
 					QStringList tokens = line.split(" ",QString::SkipEmptyParts);

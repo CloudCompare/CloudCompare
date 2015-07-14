@@ -70,29 +70,25 @@ bool ccGriddedTools::ComputeNormals(ccPointCloud* cloud,
 			{
 				if (*_indexGrid >= 0)
 				{
-					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
-					//add the point itself
 					knn.clear(false);
-					knn.addPointIndex(pointIndex); //warning: indexes are shifted (0 = no point)
+
+					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
 					const CCVector3* P = cloud->getPoint(pointIndex);
 
 					//look for neighbors
 					for (int v=std::max(0,j-kernelWidth); v<std::min<int>(height,j+kernelWidth); ++v)
 					{
-						if (v != j)
+						for (int u=std::max(0,i-kernelWidth); u<std::min<int>(width,i+kernelWidth); ++u)
 						{
-							for (int u=std::max(0,i-kernelWidth); u<std::min<int>(width,i+kernelWidth); ++u)
+							if (v != j || u != i)
 							{
-								if (u != i)
+								int indexN = indexGrid[v*width + u];
+								if (indexN >= 0)
 								{
-									int indexN = indexGrid[v*width + u];
-									if (indexN >= 0)
-									{
-										//we don't consider points with a too much different depth than the central point
-										const CCVector3* Pn = cloud->getPoint(static_cast<unsigned>(indexN));
-										if (fabs(Pn->z - P->z) <= std::max(fabs(Pn->x - P->x),fabs(Pn->y - P->y)))
-											knn.addPointIndex(static_cast<unsigned>(indexN)); //warning: indexes are shifted (0 = no point)
-									}
+									//we don't consider points with a too much different depth than the central point
+									const CCVector3* Pn = cloud->getPoint(static_cast<unsigned>(indexN));
+									if (fabs(Pn->z - P->z) <= std::max(fabs(Pn->x - P->x),fabs(Pn->y - P->y)))
+										knn.addPointIndex(static_cast<unsigned>(indexN));
 								}
 							}
 						}

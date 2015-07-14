@@ -203,7 +203,7 @@ bool ccGriddedTools::ComputeNormals(ccPointCloud* cloud,
 	return result;
 }
 
-ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::vector<int>& indexGrid, unsigned width, unsigned height)
+ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::vector<int>& indexGrid, unsigned width, unsigned height, ccGLMatrix* sensorPos/*=0*/)
 {
 	PointCoordinateType minPhi = static_cast<PointCoordinateType>(M_PI), maxPhi = -minPhi;
 	PointCoordinateType minTheta = static_cast<PointCoordinateType>(M_PI), maxTheta = -minTheta;
@@ -214,6 +214,14 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 	//we'll compute all parameters for both cases, and choose the best one at the end!
 	PointCoordinateType minPhiShifted = minPhi, maxPhiShifted = maxPhi;
 	PointCoordinateType minThetaShifted = minTheta, maxThetaShifted = maxTheta;
+
+	bool hasSensorPos = false;
+	ccGLMatrix invSensorPos;
+	if (sensorPos)
+	{
+		invSensorPos = sensorPos->inverse();
+		hasSensorPos = true;
+	}
 
 	try
 	{
@@ -248,9 +256,10 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 						int index = _indexGrid[k];
 						if (index >= 0)
 						{
-							//warning: indexes are shifted (0 = no point)
-							const CCVector3* P = cloud->getPoint(static_cast<unsigned>(index));
-							PointCoordinateType p = atan2(P->z,sqrt(P->x*P->x + P->y*P->y)); //see ccGBLSensor::projectPoint
+							CCVector3 P = *(cloud->getPoint(static_cast<unsigned>(index)));
+							if (hasSensorPos)
+								invSensorPos.apply(P);
+							PointCoordinateType p = atan2(P.z,sqrt(P.x*P.x + P.y*P.y)); //see ccGBLSensor::projectPoint
 							PointCoordinateType pShifted = (p < 0 ? p + static_cast<PointCoordinateType>(2.0*M_PI) : p);
 							if (k != minIndex)
 							{
@@ -271,7 +280,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 							}
 
 							//find max range
-							PointCoordinateType range = P->norm();
+							PointCoordinateType range = P.norm();
 							if (range > maxRange)
 								maxRange = range;
 						}
@@ -365,8 +374,10 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 						if (index >= 0)
 						{
 							//warning: indexes are shifted (0 = no point)
-							const CCVector3* P = cloud->getPoint(static_cast<unsigned>(index));
-							PointCoordinateType t = atan2(P->y,P->x); //see ccGBLSensor::projectPoint
+							CCVector3 P = *(cloud->getPoint(static_cast<unsigned>(index)));
+							if (hasSensorPos)
+								invSensorPos.apply(P);
+							PointCoordinateType t = atan2(P.y,P.x); //see ccGBLSensor::projectPoint
 							PointCoordinateType tShifted = (t < 0 ? t + static_cast<PointCoordinateType>(2.0*M_PI) : t);
 							if (k != minIndex)
 							{

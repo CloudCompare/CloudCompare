@@ -27,6 +27,7 @@
 
 class ccPointCloud;
 class ccGBLSensor;
+class ccGLMatrix;
 
 //! Tools dedicated to gridded clouds
 class QCC_DB_LIB_API ccGriddedTools
@@ -54,9 +55,10 @@ public:
 		\param indexes for each grid cell, this table gives the index of the corresponding point (or -1)
 		\param width grid width
 		\param height grid height
+		\param sensorPos sensor position matrix (optional)
 		\return sensor (if successful) or 0 otherwise
 	**/
-	static ccGBLSensor* ComputeBestSensor(ccPointCloud* cloud, const std::vector<int>& indexGrid, unsigned width, unsigned height);
+	static ccGBLSensor* ComputeBestSensor(ccPointCloud* cloud, const std::vector<int>& indexGrid, unsigned width, unsigned height, ccGLMatrix* sensorPos = 0);
 
 	//! Behavior regarding whether normals should be automatically computed or not at loading time
 	/** Only for formats supporting this (i.e. gridded clouds: PTX, etc.)

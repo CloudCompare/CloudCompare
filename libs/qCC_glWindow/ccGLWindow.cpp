@@ -2207,35 +2207,36 @@ void ccGLWindow::invalidateViewport()
 //inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
 ccGLMatrixd ccGluPerspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
 {
-	double ymax = znear * tanf(fovyInDegrees * M_PI / 360.0);
-	double xmax = ymax * aspectRatio;
-    double dZ = zfar - znear;
-
-	ccGLMatrixd matrix;
+	ccGLMatrixd outMatrix;
 	{
-		double* mat = matrix.data();
-		mat[0]  = znear / xmax;
-		mat[1]  = 0.0;
-		mat[2]  = 0.0;
-		mat[3]  = 0.0;
-		
-		mat[4]  = 0.0;
-		mat[5]  = znear / ymax;
-		mat[6]  = 0.0;
-		mat[7]  = 0.0;
+		double* matrix = outMatrix.data();
 
-		mat[8]  = 0.0;
-		mat[9]  = 0.0;
-		mat[10] = - (zfar + znear) / dZ;
-		mat[11] = -1.0;
+		double ymax = znear * tanf(fovyInDegrees * M_PI / 360.0);
+		double xmax = ymax * aspectRatio;
 
-		mat[12] = 0.0;
-		mat[13] = 0.0;
-		mat[14] = - (2.0 * znear * zfar) / dZ;
-		mat[15] = 1.0;
+		double dZ = zfar - znear;
+		matrix[0]  =  znear / xmax;
+		matrix[1]  =  0.0;
+		matrix[2]  =  0.0;
+		matrix[3]  =  0.0;
+
+		matrix[4]  =  0.0;
+		matrix[5]  =  znear / ymax;
+		matrix[6]  =  0.0;
+		matrix[7]  =  0.0;
+
+		matrix[8]  =  0.0;
+		matrix[9]  =  0.0;
+		matrix[10] = -(zfar + znear) / dZ;
+		matrix[11] = -1.0;
+
+		matrix[12] =  0.0;
+		matrix[13] =  0.0;
+		matrix[14] =  -(2.0 * znear * zfar) / dZ;
+		matrix[15] =  0.0;
 	}
 
-	return matrix;
+	return outMatrix;
 }
 
 //inspired from http://www.songho.ca/opengl/gl_projectionmatrix.html

@@ -92,6 +92,7 @@ v2.6.2 XX/XX/2015
 	* qSRA:
 		- whether the profile origin is absolute or relative was not always taken into account!
 		- a flat profile (e.g. perfect cylinder) would prevent the plugin to export DXF files
+	* PTX files: the sensor position was overlooked (as it's almost always the same as the scan position... almost ;)
 
 v2.6.1 02/20/2015
 - New features:

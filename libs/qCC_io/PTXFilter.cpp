@@ -405,13 +405,8 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			if (hasIndexGrid && result != CC_FERR_CANCELED_BY_USER)
 			{
 				//determine best sensor parameters (mainly yaw and pitch steps)
-				//ccGLMatrix localSensorTrans((cloudTransD.inverse() * sensorTransD).data());
-				sensor = ccGriddedTools::ComputeBestSensor(cloud,indexGrid,width,height,0/*&localSensorTrans*/);
-				if (sensor)
-				{
-					//sensor->setRigidTransformation(localSensorTrans);
-					cloud->addChild(sensor);
-				}
+				ccGLMatrix cloudToSensorTrans((sensorTransD.inverse() * cloudTransD).data());
+				sensor = ccGriddedTools::ComputeBestSensor(cloud,indexGrid,width,height,&cloudToSensorTrans);
 
 #ifndef _DEBUG
 				if (cloudIndex == 0)
@@ -446,10 +441,12 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			ccGLMatrix cloudTrans(cloudTransD.data());
 			cloud->applyGLTransformation_recursive(&cloudTrans);
 			
-			//if (sensor)
-			//{
-			//	cloud->addChild(sensor);
-			//}
+			if (sensor)
+			{
+				ccGLMatrix sensorTrans(sensorTransD.data());
+				sensor->setRigidTransformation(sensorTrans); //after cloud->applyGLTransformation_recursive!
+				cloud->addChild(sensor);
+			}
 
 			cloud->setVisible(true);
 			cloud->showColors(cloud->hasColors());

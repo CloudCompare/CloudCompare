@@ -40,7 +40,7 @@ PoissonReconLib::Parameters::Parameters()
 	, cgDepth(0) //0
 	, kernelDepth(0) //?
 	, adaptiveExp(1) //AdaptiveExponent (1)
-	, cgMaxIters(8) //8
+	, iters(8) //8
 	, fullDepth(5) //5
 	, minDepth(0) //0
 	, maxSolveDepth(0) //?
@@ -113,7 +113,7 @@ bool Execute(PoissonReconLib::Parameters params, PointStream< PointCoordinateTyp
 
 	tree.maxMemoryUsage = 0;
 
-	Pointer( Real ) solution = tree.SolveSystem( *pointInfo , constraints , params.showResidual , params.cgMaxIters, params.maxSolveDepth, params.cgDepth, params.cgAccuracy );
+	Pointer( Real ) solution = tree.SolveSystem( *pointInfo , constraints , params.showResidual , params.iters, params.maxSolveDepth, params.cgDepth, params.cgAccuracy );
 
 	delete pointInfo;
 	pointInfo = 0;

@@ -67,10 +67,8 @@ public:
 		**/
 		float pointWeight;
 
-		//! The number of Gauss-Seidel relaxations to be performed at each level of the hiearchy.
-		/** This flag specifies the (maximum if CG) number of solver iterations
-		**/
-		int cgMaxIters;
+		//! The (maximum if CG) number of solver iterations
+		int iters;
 
 		//! This parameter specifies the number of threads across which the solver should be parallelized
 		int threads;

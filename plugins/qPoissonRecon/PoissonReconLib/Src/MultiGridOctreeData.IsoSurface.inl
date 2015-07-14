@@ -421,7 +421,12 @@ void Octree< Real >::SetSliceIsoVertices( ConstPointer( Real ) kernelDensityWeig
 										TreeOctNode* node = leaf;
 										int _depth = depth , _slice = slice;
 										bool _isNeeded = isNeeded;
+#if 1
+										// Bug fix courtesy of asmaloney
+										while( _isNeeded && node->parent && Cube::IsFaceCorner( (int)(node-node->parent->children) , f[k] ) )
+#else
 										while( _isNeeded = node->parent && Cube::IsFaceCorner( (int)(node-node->parent->children) , f[k] ) )
+#endif
 										{
 											node = node->parent , _depth-- , _slice >>= 1;
 											typename Octree< Real >::template SliceValues< Vertex >& _sValues = slabValues[_depth].sliceValues( _slice );

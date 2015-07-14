@@ -147,7 +147,7 @@ public:
 		std::vector< SquareEdgeIndices > eTable;
 		std::vector< SquareFaceIndices > fTable;
 		int cCount , eCount , fCount , nodeOffset , nodeCount;
-		SliceTableData( void ){ fCount , eCount = cCount = 0; }
+		SliceTableData( void ){ fCount = eCount = cCount = 0; }
 		~SliceTableData( void ){ clear(); }
 		void clear( void ) { cTable.clear() , eTable.clear() , fTable.clear() , fCount = eCount = cCount = 0; }
 		SquareCornerIndices& cornerIndices( const TreeOctNode* node );
@@ -171,7 +171,7 @@ public:
 		std::vector< SquareCornerIndices > eTable;
 		std::vector< SquareEdgeIndices > fTable;
 		int fCount , eCount , nodeOffset , nodeCount;
-		XSliceTableData( void ){ fCount , eCount = 0; }
+		XSliceTableData( void ){ fCount = eCount = 0; }
 		~XSliceTableData( void ){ clear(); }
 		void clear( void ) { fTable.clear() , eTable.clear() , fCount = eCount = 0; }
 		SquareCornerIndices& edgeIndices( const TreeOctNode* node );
@@ -430,7 +430,12 @@ public:
 	int SetTree( PointStream< PointReal >* pointStream , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
 		Real scaleFactor , bool useConfidence , bool useNormalWeight , Real constraintWeight , int adaptiveExponent ,
 		PointInfo& pointInfo , NormalInfo& normalInfo , std::vector< Real >& kernelDensityWeights , std::vector< Real >& centerWeights ,
+#if 1
+		// Bug fix courtesy of asmaloney
+		int boundaryType=BSplineElements< 2 >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity() , bool makeComplete=false );
+#else
 		int boundaryType=BSplineElements< 2 >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity , bool makeComplete=false );
+#endif
 	Pointer( Real ) SetLaplacianConstraints( const NormalInfo& normalInfo );
 	Pointer( Real ) SolveSystem( PointInfo& pointInfo , Pointer( Real ) constraints , bool showResidual , int iters , int maxSolveDepth , int cgDepth=0 , double cgAccuracy=0 );
 

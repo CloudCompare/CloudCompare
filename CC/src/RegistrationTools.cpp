@@ -18,7 +18,7 @@
 #include "RegistrationTools.h"
 
 //local
-#include "Matrix.h"
+#include "SquareMatrix.h"
 #include "GenericProgressCallback.h"
 #include "GenericCloud.h"
 #include "GenericIndexedCloudPersist.h"

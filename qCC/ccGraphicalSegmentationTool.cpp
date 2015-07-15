@@ -23,7 +23,7 @@
 
 //CCLib
 #include <ManualSegmentationTools.h>
-#include <Matrix.h>
+#include <SquareMatrix.h>
 
 //qCC_db
 #include <ccLog.h>

@@ -18,7 +18,7 @@
 #include "ManualSegmentationTools.h"
 
 //local
-#include "Matrix.h"
+#include "SquareMatrix.h"
 #include "CCTypes.h"
 #include "GenericProgressCallback.h"
 #include "GenericIndexedCloudPersist.h"

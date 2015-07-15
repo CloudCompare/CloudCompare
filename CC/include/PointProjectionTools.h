@@ -21,7 +21,7 @@
 //Local
 #include "CCCoreLib.h"
 #include "CCToolbox.h"
-#include "Matrix.h"
+#include "SquareMatrix.h"
 #include "CCConst.h"
 
 //System

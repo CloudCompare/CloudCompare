@@ -20,7 +20,7 @@
 //local
 #include "GenericIndexedMesh.h"
 #include "GenericIndexedCloudPersist.h"
-#include "Matrix.h"
+#include "SquareMatrix.h"
 #include "Delaunay2dMesh.h"
 #include "ConjugateGradient.h"
 #include "DistanceComputationTools.h"

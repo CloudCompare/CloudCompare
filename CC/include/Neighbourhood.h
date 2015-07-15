@@ -21,7 +21,7 @@
 //Local
 #include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
-#include "Matrix.h"
+#include "SquareMatrix.h"
 #include "CCGeom.h"
 #include "CCMiscTools.h"
 

@@ -20,7 +20,7 @@
 
 //CCLib
 #include <CCGeom.h>
-#include <Matrix.h>
+#include <SquareMatrix.h>
 
 //Local
 #include "qCC_db.h"

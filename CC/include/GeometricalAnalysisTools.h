@@ -23,7 +23,7 @@
 #include "CCToolbox.h"
 #include "Neighbourhood.h"
 #include "DgmOctree.h"
-#include "Matrix.h"
+#include "SquareMatrix.h"
 
 namespace CCLib
 {

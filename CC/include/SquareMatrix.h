@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef MATRIX_HEADER
-#define MATRIX_HEADER
+#ifndef SQUARE_MATRIX_HEADER
+#define SQUARE_MATRIX_HEADER
 
 //local
 #include "CCCoreLib.h"
@@ -37,24 +37,24 @@ namespace CCLib
 	//! Square matrix
 	/** Row-major ordered matrix (i.e. elements are accessed with 'values[row][column]')
 	**/
-	template <typename Scalar> class MatrixTpl
+	template <typename Scalar> class SquareMatrixTpl
 	{
 	public:
 
 		//! Default constructor
 		/** Warning: invalid matrix.
 		**/
-		MatrixTpl() { init(0); }
+		SquareMatrixTpl() { init(0); }
 
 		//! Constructor with a given size
 		/** \param size the (square) matrix dimension
 		**/
-		MatrixTpl(unsigned size) { init(size); }
+		SquareMatrixTpl(unsigned size) { init(size); }
 
 		//! Constructor from another matrix
 		/** \param mat matrix
 		**/
-		MatrixTpl(const MatrixTpl& mat)
+		SquareMatrixTpl(const SquareMatrixTpl& mat)
 		{
 			if (init(mat.m_matrixSize))
 				*this = mat;
@@ -67,7 +67,7 @@ namespace CCLib
 			\param M16f a table of 16 floats (OpenGL float transformation matrix)
 			\param rotationOnly consider only the roation part (3x3 matrix)
 		**/
-		MatrixTpl(const float M16f[], bool rotationOnly = false)
+		SquareMatrixTpl(const float M16f[], bool rotationOnly = false)
 		{
 			unsigned size = (rotationOnly ? 3 : 4);
 
@@ -86,7 +86,7 @@ namespace CCLib
 			\param M16d a table of 16 floats (OpenGL double transformation matrix)
 			\param rotationOnly consider only the roation part (3x3 matrix)
 		**/
-		MatrixTpl(const double M16d[], bool rotationOnly = false)
+		SquareMatrixTpl(const double M16d[], bool rotationOnly = false)
 		{
 			unsigned size = (rotationOnly ? 3 : 4);
 
@@ -99,7 +99,7 @@ namespace CCLib
 		}
 
 		//! Default destructor
-		virtual ~MatrixTpl()
+		virtual ~SquareMatrixTpl()
 		{
 			invalidate();
 		}
@@ -156,7 +156,7 @@ namespace CCLib
 		}
 
 		//! Matrix copy operator
-		MatrixTpl& operator = (const MatrixTpl& B)
+		SquareMatrixTpl& operator = (const SquareMatrixTpl& B)
 		{
 			if (m_matrixSize != B.size())
 			{
@@ -178,16 +178,16 @@ namespace CCLib
 		}
 
 		//! Addition
-		MatrixTpl operator + (const MatrixTpl& B) const
+		SquareMatrixTpl operator + (const SquareMatrixTpl& B) const
 		{
-			MatrixTpl C = *this;
+			SquareMatrixTpl C = *this;
 			C += B;
 
 			return C;
 		}
 
 		//! In-place addition
-		const MatrixTpl& operator += (const MatrixTpl& B)
+		const SquareMatrixTpl& operator += (const SquareMatrixTpl& B)
 		{
 			assert(B.size() == m_matrixSize);
 
@@ -199,16 +199,16 @@ namespace CCLib
 		}
 
 		//! Substraction
-		MatrixTpl operator - (const MatrixTpl& B) const
+		SquareMatrixTpl operator - (const SquareMatrixTpl& B) const
 		{
-			MatrixTpl C = *this;
+			SquareMatrixTpl C = *this;
 			C -= B;
 
 			return C;
 		}
 
 		//! In-place substraction
-		const MatrixTpl& operator -= (const MatrixTpl& B)
+		const SquareMatrixTpl& operator -= (const SquareMatrixTpl& B)
 		{
 			assert(B.size() == m_matrixSize);
 
@@ -220,11 +220,11 @@ namespace CCLib
 		}
 
 		//! Multiplication (M = A*B)
-		MatrixTpl operator * (const MatrixTpl& B) const
+		SquareMatrixTpl operator * (const SquareMatrixTpl& B) const
 		{
 			assert(B.size() == m_matrixSize);
 
-			MatrixTpl C(m_matrixSize);
+			SquareMatrixTpl C(m_matrixSize);
 
 			for (unsigned r=0; r<m_matrixSize; r++)
 			{
@@ -258,7 +258,7 @@ namespace CCLib
 		}
 
 		//! In-place multiplication
-		inline const MatrixTpl& operator *= (const MatrixTpl& B)
+		inline const SquareMatrixTpl& operator *= (const SquareMatrixTpl& B)
 		{
 			*this = (*this) * B;
 
@@ -308,9 +308,9 @@ namespace CCLib
 		}
 
 		//! Returns the transposed version of this matrix
-		MatrixTpl transposed() const
+		SquareMatrixTpl transposed() const
 		{
-			MatrixTpl T(*this);
+			SquareMatrixTpl T(*this);
 			T.transpose();
 
 			return T;
@@ -327,7 +327,7 @@ namespace CCLib
 		}
 
 		//! Returns inverse (Gauss)
-		MatrixTpl inv() const
+		SquareMatrixTpl inv() const
 		{
 			//we create the n by 2n matrix, composed of this matrix and the identity
 			Scalar** tempM = 0;
@@ -336,7 +336,7 @@ namespace CCLib
 				if (!tempM)
 				{
 					//not enough memory
-					return MatrixTpl();
+					return SquareMatrixTpl();
 				}
 				for (unsigned i=0; i<m_matrixSize; i++)
 				{
@@ -347,7 +347,7 @@ namespace CCLib
 						for (unsigned j=0; j<i; j++)
 							delete[] tempM[j];
 						delete[] tempM;
-						return MatrixTpl();
+						return SquareMatrixTpl();
 					}
 				}
 			}
@@ -382,7 +382,7 @@ namespace CCLib
 							for (unsigned j=0; j<m_matrixSize; j++)
 								delete[] tempM[j];
 							delete[] tempM;
-							return MatrixTpl();
+							return SquareMatrixTpl();
 						}
 					}
 
@@ -430,7 +430,7 @@ namespace CCLib
 			}
 
 			//result: second part or tempM
-			MatrixTpl result(m_matrixSize);
+			SquareMatrixTpl result(m_matrixSize);
 			{
 				for (unsigned i=0; i<m_matrixSize; i++)
 					for (unsigned j=0; j<m_matrixSize; j++)
@@ -622,7 +622,7 @@ namespace CCLib
 		//! Returns Delta-determinant (see Kramer formula)
 		Scalar deltaDeterminant(unsigned column, Scalar* Vec) const
 		{
-			MatrixTpl mat(m_matrixSize);
+			SquareMatrixTpl mat(m_matrixSize);
 
 			for (unsigned i=0; i<m_matrixSize; i++)
 			{
@@ -647,17 +647,17 @@ namespace CCLib
 		//! Computes eigen vectors (and values) with the Jacobian method
 		/** See numerical recipes.
 		**/
-		MatrixTpl computeJacobianEigenValuesAndVectors(unsigned maxIterationCount = 50) const
+		SquareMatrixTpl computeJacobianEigenValuesAndVectors(unsigned maxIterationCount = 50) const
 		{
 			if (!isValid())
-				return MatrixTpl();
+				return SquareMatrixTpl();
 
-			MatrixTpl eigenVectors(m_matrixSize);
+			SquareMatrixTpl eigenVectors(m_matrixSize);
 			eigenVectors.toIdentity();
 			if (!eigenVectors.enableEigenValues())
 			{
 				//not enough memory
-				return MatrixTpl();
+				return SquareMatrixTpl();
 			}
 			Scalar* d = eigenVectors.eigenValues;
 			
@@ -670,7 +670,7 @@ namespace CCLib
 			catch(std::bad_alloc)
 			{
 				//not enough memory
-				return MatrixTpl();
+				return SquareMatrixTpl();
 			}
 
 			//init
@@ -786,7 +786,7 @@ namespace CCLib
 			}
 
 			//Too many iterations!
-			return MatrixTpl();
+			return SquareMatrixTpl();
 		}
 
 		//! Converts a 3*3 or 4*4 matrix to an OpenGL-style float matrix (float[16])
@@ -1009,14 +1009,14 @@ namespace CCLib
 	};
 
 	//! Default CC square matrix type (PointCoordinateType)
-	typedef MatrixTpl<PointCoordinateType> SquareMatrix;
+	typedef SquareMatrixTpl<PointCoordinateType> SquareMatrix;
 
 	//! Float square matrix type
-	typedef MatrixTpl<float> SquareMatrixf;
+	typedef SquareMatrixTpl<float> SquareMatrixf;
 
 	//! Double square matrix type
-	typedef MatrixTpl<double> SquareMatrixd;
+	typedef SquareMatrixTpl<double> SquareMatrixd;
 
 } //namespace CCLib
 
-#endif //MATRIX_HEADER
+#endif //SQUARE_MATRIX_HEADER

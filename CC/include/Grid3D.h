@@ -28,6 +28,7 @@
 //System
 #include <vector>
 #include <assert.h>
+#include <stdio.h> //for sprintf
 
 namespace CCLib
 {

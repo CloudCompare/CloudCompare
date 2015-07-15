@@ -28,6 +28,7 @@ namespace CCLib
 
 class GenericProgressCallback;
 class NormalizedProgress;
+class GenericIndexedMesh;
 
 //! Class to compute a signed Chamfer distance field on a 3D grid
 class CC_CORE_LIB_API ChamferDistanceTransformSigned : public Grid3D<float>, public MathTools
@@ -35,12 +36,27 @@ class CC_CORE_LIB_API ChamferDistanceTransformSigned : public Grid3D<float>, pub
 
 public:
 
+	//! Default constructor
+	ChamferDistanceTransformSigned()
+		: Grid3D<float>()
+		, m_maxDist(65536.0f)
+	{}
+
 	//! Initializes the grid
-	/** This memory for the grid must be explicitelty reserved prior to any action.
-		'Zero' cells must be initialized with setValue(0).
+	/** The memory for the grid must be explicitelty reserved prior to any action.
 		\return true if the initialization succeeded
 	**/
-	inline bool init(const Tuple3ui& gridSize, float maxDist = 4096.0f) { return Grid3D<GridElement>::init(gridSize.x, gridSize.y, gridSize.z, 1, maxDist); }
+	inline bool initGrid(const Tuple3ui& gridSize, float maxDist = 65536.0f)
+	{
+		m_maxDist = maxDist;
+		return Grid3D<GridElement>::init(gridSize.x, gridSize.y, gridSize.z, 1, maxDist);
+	}
+
+	//! Initializes the distance transform with a mesh
+	bool initDT(GenericIndexedMesh* mesh,
+				PointCoordinateType cellLength,
+				const CCVector3& gridMinCorner,
+				GenericProgressCallback* progressCb = 0);
 
 	//! Computes the Chamfer distance on the whole grid
 	/** Propagates the distances on the whole grid. The 'zeros' should
@@ -51,6 +67,10 @@ public:
 	**/
 	bool propagateDistance(GenericProgressCallback* progressCb = 0);
 
+protected:
+
+	//! Max distance
+	float m_maxDist;
 };
 
 }

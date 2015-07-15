@@ -131,7 +131,7 @@ public:
 		//number of triangles
 		unsigned numberOfTriangles = mesh->size();
 
-		//for progress notification
+		//progress notification
 		NormalizedProgress nProgress(progressCb, numberOfTriangles);
 		if (progressCb)
 		{
@@ -143,7 +143,7 @@ public:
 			progressCb->start();
 		}
 
-		//For each triangle: look for intersecting cells
+		//for each triangle: look for intersecting cells
 		mesh->placeIteratorAtBegining();
 		for (unsigned n = 0; n<numberOfTriangles; ++n)
 		{
@@ -191,7 +191,7 @@ public:
 				CellToTest* _currentCell = &cellsToTest[0/*cellsToTestCount-1*/];
 
 				_currentCell->pos = minPos;
-				CCVector3 distanceToOctreeMinBorder = gridMinCorner - (*triPoints[0]);
+				CCVector3 distanceToMinBorder = gridMinCorner - (*triPoints[0]);
 
 				//compute the triangle normal
 				CCVector3 N = AB.cross(BC);
@@ -223,7 +223,7 @@ public:
 						//compute the (absolute) cell center
 						AB = gridMinCorner + CCVector3::fromArray(currentCellPos.u) * cellLength + halfCellDimensions;
 
-						//check that the triangle do intersects the cell (box)
+						//check that the triangle does intersect the cell (box)
 						if (CCMiscTools::TriBoxOverlap(AB, halfCellDimensions, triPoints))
 						{
 							if ((currentCellPos.x >= 0 && currentCellPos.x < static_cast<int>(size().x)) &&
@@ -238,19 +238,19 @@ public:
 					{
 						int halfCellSize = (_currentCell->cellSize >> 1);
 
-						//compute the position of each cell 'neighbors' relatively to the triangle (3*3*3 = 27, including the cell itself)
+						//compute the position of each neighbor cell relatively to the triangle (3*3*3 = 27, including the cell itself)
 						char pointsPosition[27];
 						{
 							char* _pointsPosition = pointsPosition;
 							for (int i = 0; i<3; ++i)
 							{
-								AB.x = distanceToOctreeMinBorder.x + static_cast<PointCoordinateType>(currentCellPos.x + i*halfCellSize) * cellLength;
+								AB.x = distanceToMinBorder.x + static_cast<PointCoordinateType>(currentCellPos.x + i*halfCellSize) * cellLength;
 								for (int j = 0; j<3; ++j)
 								{
-									AB.y = distanceToOctreeMinBorder.y + static_cast<PointCoordinateType>(currentCellPos.y + j*halfCellSize) * cellLength;
+									AB.y = distanceToMinBorder.y + static_cast<PointCoordinateType>(currentCellPos.y + j*halfCellSize) * cellLength;
 									for (int k = 0; k<3; ++k)
 									{
-										AB.z = distanceToOctreeMinBorder.z + static_cast<PointCoordinateType>(currentCellPos.z + k*halfCellSize) * cellLength;
+										AB.z = distanceToMinBorder.z + static_cast<PointCoordinateType>(currentCellPos.z + k*halfCellSize) * cellLength;
 
 										//determine on which side the triangle is
 										*_pointsPosition++/*pointsPosition[i*9+j*3+k]*/ = (AB.dot(N) < 0 ? -1 : 1);
@@ -266,7 +266,7 @@ public:
 							{
 								cellsToTest.resize(std::max(cellsToTest.capacity() + 27, 2 * cellsToTest.capacity()));
 							}
-							catch (std::bad_alloc)
+							catch (const std::bad_alloc&)
 							{
 								//out of memory
 								return false;
@@ -277,35 +277,35 @@ public:
 						CellToTest* _newCell = &cellsToTest[cellsToTestCount];
 						_newCell->cellSize = halfCellSize;
 
-						//we look at the position of the 8 sub-cubes relatively to the triangle
+						//we look at the position of the 8 sub-cells relatively to the triangle
 						for (int i = 0; i<2; ++i)
 						{
 							_newCell->pos.x = currentCellPos.x + i*halfCellSize;
 							//quick test to determine if the cube is potentially intersecting the triangle's bbox
-							if (static_cast<int>(_newCell->pos.x) + halfCellSize >= minPos.x
+							if (	static_cast<int>(_newCell->pos.x) + halfCellSize >= minPos.x
 								&&	static_cast<int>(_newCell->pos.x) <= maxPos.x)
 							{
 								for (int j = 0; j<2; ++j)
 								{
 									_newCell->pos.y = currentCellPos.y + j*halfCellSize;
-									if (static_cast<int>(_newCell->pos.y) + halfCellSize >= minPos.y
+									if (	static_cast<int>(_newCell->pos.y) + halfCellSize >= minPos.y
 										&&	static_cast<int>(_newCell->pos.y) <= maxPos.y)
 									{
 										for (int k = 0; k<2; ++k)
 										{
 											_newCell->pos.z = currentCellPos.z + k*halfCellSize;
-											if (static_cast<int>(_newCell->pos.z) + halfCellSize >= minPos.z
+											if (	static_cast<int>(_newCell->pos.z) + halfCellSize >= minPos.z
 												&&	static_cast<int>(_newCell->pos.z) <= maxPos.z)
 											{
 												const char* _pointsPosition = pointsPosition + (i * 9 + j * 3 + k);
-												char sum = _pointsPosition[0] + _pointsPosition[1] + _pointsPosition[3]
-													+ _pointsPosition[4] + _pointsPosition[9] + _pointsPosition[10]
-													+ _pointsPosition[12] + _pointsPosition[13];
+												char sum =		_pointsPosition[ 0] + _pointsPosition[ 1] + _pointsPosition[ 3]
+															+	_pointsPosition[ 4] + _pointsPosition[ 9] + _pointsPosition[10]
+															+	_pointsPosition[12] + _pointsPosition[13];
 
-												//if all the sub-cube vertices are not on the same side, then the triangle may intersect the cell
+												//if not all the vertices of this sub-cube are on the same side, then the triangle may intersect the sub-cube
 												if (sum > -8 && sum < 8)
 												{
-													//we make newCell point on next cell in array (we copy current info by the way)
+													//we make newCell point on next cell in array
 													cellsToTest[++cellsToTestCount] = *_newCell;
 													_newCell = &cellsToTest[cellsToTestCount];
 												}
@@ -328,8 +328,6 @@ public:
 
 		return true;
 	}
-
-
 
 	//! Sets the value of a given cell
 	/** \param i the cell coordinate along the X dimension

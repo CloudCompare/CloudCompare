@@ -6012,7 +6012,8 @@ void MainWindow::doActionComputeDistanceMap()
 		{
 			//CCLib::ChamferDistanceTransform cdt;
 			CCLib::ChamferDistanceTransformSigned cdt;
-			if (!cdt.init(Tuple3ui(steps, steps, steps)))
+			float maxDist = 65536.0f;
+			if (!cdt.initGrid(Tuple3ui(steps, steps, steps), maxDist))
 			{
 				//not enough memory
 				ccLog::Error("Not enough memory!");
@@ -6026,10 +6027,10 @@ void MainWindow::doActionComputeDistanceMap()
 			CCVector3 minCorner = box.getCenter() - CCVector3(1, 1, 1) * (largestDim / 2);
 
 			ccProgressDialog pDlg(true, this);
-			if (cdt.intersecthWith(mesh, cellDim, minCorner, &pDlg))
+			if (cdt.initDT(mesh, cellDim, minCorner, &pDlg))
 			{
 				//cdt.propagateDistance(CHAMFER_345, &pDlg);
-				cdt.propagateDistance(&pDlg);
+				//cdt.propagateDistance(&pDlg);
 
 				//convert the grid to a cloud
 				ccPointCloud* gridCloud = new ccPointCloud(mesh->getName() + QString(".distance_grid(%1)").arg(steps));
@@ -6059,13 +6060,14 @@ void MainWindow::doActionComputeDistanceMap()
 							{
 								gridCloud->addPoint(minCorner + CCVector3(i + 0.5, j + 0.5, k + 0.5) * cellDim);
 								ScalarType s = static_cast<ScalarType>(cdt.getValue(i, j, k));
-								sf->addElement(s);
+								sf->addElement(s < maxDist ? s : NAN_VALUE);
 							}
 						}
 					}
 
 					sf->computeMinAndMax();
-					gridCloud->addScalarField(sf);
+					int sfIdx = gridCloud->addScalarField(sf);
+					gridCloud->setCurrentDisplayedScalarField(sfIdx);
 					gridCloud->showSF(true);
 					gridCloud->setDisplay(mesh->getDisplay());
 					addToDB(gridCloud);

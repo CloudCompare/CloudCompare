@@ -303,7 +303,7 @@ public:
 													+ _pointsPosition[12] + _pointsPosition[13];
 
 												//if all the sub-cube vertices are not on the same side, then the triangle may intersect the cell
-												if (abs(sum) < 8)
+												if (sum > -8 && sum < 8)
 												{
 													//we make newCell point on next cell in array (we copy current info by the way)
 													cellsToTest[++cellsToTestCount] = *_newCell;

@@ -13,35 +13,43 @@ using namespace CCLib;
 
 //! 3x3x3 neighborhood
 const char Neighbours333[27][4] = {
-	{-1,-1,-1, -1},
-	{-1,-1, 0, -1},
-	{-1,-1, 1, -1},
-	{-1, 0,-1, -1},
-	{-1, 0, 0, -1},
-	{-1, 0, 1, -1},
-	{-1, 1,-1, -1},
-	{-1, 1, 0, -1},
-	{-1, 1, 1, -1},
-	{ 0,-1,-1, -1},
-	{ 0,-1, 0, -1},
-	{ 0,-1, 1, -1},
-	{ 0, 0,-1, -1},
-	{ 0, 0, 0, -1},
-	{ 0, 0, 1, -1},
-	{ 0, 1,-1, -1},
-	{ 0, 1, 0, -1},
-	{ 0, 1, 1, -1},
-	{ 1,-1,-1, -1},
-	{ 1,-1, 0, -1},
-	{ 1,-1, 1, -1},
-	{ 1, 0,-1, -1},
-	{ 1, 0, 0, -1},
-	{ 1, 0, 1, -1},
-	{ 1, 1,-1, -1},
-	{ 1, 1, 0, -1},
-	{ 1, 1, 1, -1}
-};
+	//back slice
+	{-1,-1,-1, 2},
+	{ 0,-1,-1, 1},
+	{ 1,-1,-1, 2},
+	{-1, 0,-1, 1},
+	{ 0, 0,-1, 0},
+	{ 1, 0,-1, 1},
+	{-1, 1,-1, 2},
+	{ 0, 1,-1, 1},
+	{ 1, 1,-1, 2},
 
+	//current slice (backward half)
+	{-1,-1, 0, 1},
+	{ 0,-1, 0, 0},
+	{ 1,-1, 0, 1},
+	{-1, 0, 0, 0},
+	
+	//center (13th value)
+	{ 0, 0, 0,-1},
+	
+	//current slice (forward half)
+	{ 1, 0, 0, 0},
+	{-1, 1, 0, 1},
+	{ 0, 1, 0, 0},
+	{ 1, 1, 0, 1},
+
+	//next slice
+	{-1,-1, 1, 2},
+	{ 0,-1, 1, 1},
+	{ 1,-1, 1, 2},
+	{-1, 0, 1, 1},
+	{ 0, 0, 1, 0},
+	{ 1, 0, 1, 1},
+	{-1, 1, 1, 2},
+	{ 0, 1, 1, 1},
+	{ 1, 1, 1, 2}
+};
 
 //inspired from ITK's FastChamferDistanceImageFilter
 bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* progressCb/*=0*/)
@@ -51,7 +59,7 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 	NormalizedProgress normProgress(progressCb,m_innerSize.y*m_innerSize.z*2);
 	if (progressCb)
 	{
-		progressCb->setMethodTitle("Chamfer distance");
+		progressCb->setMethodTitle("Signed Chamfer distance");
 		char buffer[256];
 		sprintf(buffer,"Box: [%u x %u x %u]",m_innerSize.x,m_innerSize.y,m_innerSize.z);
 		progressCb->setInfo(buffer);
@@ -59,24 +67,10 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 		progressCb->start();
 	}
 
-	/** Precomputing the neighbor types */
-	std::vector<char> neighborDist(3*3*3,-1);
-	{
-		for (size_t i=0; i<neighborDist.size(); ++i)
-		{
-			const char* pos = Neighbours333[4*i];
-			//neighborDist[i] = -1;
-			neighborDist[i] += static_cast< char >( pos[0] != 0 );
-			neighborDist[i] += static_cast< char >( pos[1] != 0 );
-			neighborDist[i] += static_cast< char >( pos[2] != 0 );
-		}
-	}
-
 	/** 1st Scan , using neighbors from centerNeighborIndex+1 to neighborhoodSize-1 */
-	const size_t centerNeighborIndex = neighborDist.size() / 2;
 	{
-		size_t firstNeighborIndex = centerNeighborIndex + 1;
-		size_t lastNeighborIndex  = neighborDist.size() - 1;
+		const size_t firstNeighborIndex = 27/2 + 1; //14
+		const size_t lastNeighborIndex = 27 - 1; //26
 
 		for (size_t k=0; k<m_innerSize.z; ++k)
 		{
@@ -97,15 +91,15 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const char* pos = Neighbours333[4*n];
+							const char* pos = Neighbours333[n];
 							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
 												static_cast<int>(j) + static_cast<int>(pos[1]),
 												static_cast<int>(k) + static_cast<int>(pos[2]) );
-						
-							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
-							if ( val[neighborDist[n]] < getValue(neighborPos) )
+					
+							assert(pos[3] >= 0 && pos[3] < 3);
+							if (val[pos[3]] < getValue(neighborPos))
 							{
-								setValue(neighborPos,val[neighborDist[n]]);
+								setValue(neighborPos, val[pos[3]]);
 							}
 						}
 					}
@@ -118,15 +112,15 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const char* pos = Neighbours333[4*n];
+							const char* pos = Neighbours333[n];
 							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
 												static_cast<int>(j) + static_cast<int>(pos[1]),
 												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
-							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
-							if ( val[neighborDist[n]] > getValue(neighborPos) )
+							assert(pos[3] >= 0 && pos[3] < 3);
+							if (val[pos[3]] > getValue(neighborPos))
 							{
-								setValue(neighborPos,val[neighborDist[n]]);
+								setValue(neighborPos, val[pos[3]]);
 							}
 						}
 					}
@@ -143,8 +137,8 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 	/** 2nd Scan , using neighbors from 0 to centerNeighborIndex-1 */
 	{
-		size_t firstNeighborIndex = 0;
-		size_t lastNeighborIndex  = centerNeighborIndex - 1;
+		const size_t firstNeighborIndex = 0;
+		const size_t lastNeighborIndex = 27 / 2 - 1; //12
 
 		for (size_t k=0; k<m_innerSize.z; ++k)
 		{
@@ -165,15 +159,15 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const char* pos = Neighbours333[4*n];
+							const char* pos = Neighbours333[n];
 							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
 												static_cast<int>(j) + static_cast<int>(pos[1]),
 												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
-							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
-							if ( val[neighborDist[n]] < getValue(neighborPos) )
+							assert(pos[3] >= 0 && pos[3] < 3);
+							if (val[pos[3]] < getValue(neighborPos))
 							{
-								setValue(neighborPos,val[neighborDist[n]]);
+								setValue(neighborPos, val[pos[3]]);
 							}
 						}
 					}
@@ -186,15 +180,15 @@ bool ChamferDistanceTransformSigned::propagateDistance(GenericProgressCallback* 
 
 						for (size_t n=firstNeighborIndex; n<=lastNeighborIndex; ++n)
 						{
-							const char* pos = Neighbours333[4*n];
+							const char* pos = Neighbours333[n];
 							Tuple3i neighborPos(static_cast<int>(i) + static_cast<int>(pos[0]),
 												static_cast<int>(j) + static_cast<int>(pos[1]),
 												static_cast<int>(k) + static_cast<int>(pos[2]) );
 						
-							assert(neighborDist[n] >= 0 && neighborDist[n] < 3);
-							if ( val[neighborDist[n]] > getValue(neighborPos) )
+							assert(pos[3] >= 0 && pos[3] < 3);
+							if (val[pos[3]] > getValue(neighborPos))
 							{
-								setValue(neighborPos,val[neighborDist[n]]);
+								setValue(neighborPos, val[pos[3]]);
 							}
 						}
 					}

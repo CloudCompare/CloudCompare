@@ -341,13 +341,6 @@ protected:
 										uchar octreeLevel,
 										GenericProgressCallback* progressCb = 0);
 
-	//! Intersects a mesh with a Distance Transform grid structure
-	static int intersectMeshWithDTGrid( GenericIndexedMesh* mesh,
-										ChamferDistanceTransform* distanceTransform,
-										PointCoordinateType cellLength,
-										const CCVector3& gridMinCorner,
-										GenericProgressCallback* progressCb = 0);
-
 	//! Computes the distances between a point cloud and a mesh projected into a grid structure
 	/** This method is used by computeCloud2MeshDistance, after intersectMeshWithOctree has been called.
 		\param theIntersection a specific structure corresponding the intersection of the mesh with the grid

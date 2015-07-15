@@ -365,6 +365,7 @@ protected slots:
 	void doActionResampleWithOctree();
 	void doActionComputeMeshAA();
 	void doActionComputeMeshLS();
+	void doActionComputeDistanceMap();
 	void doActionComputeDistToBestFitQuadric3D();
 	void doActionMeasureMeshSurface();
 	void doActionMeasureMeshVolume();

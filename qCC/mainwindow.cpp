@@ -34,6 +34,8 @@
 #include <SimpleCloud.h>
 #include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
+#include <ChamferDistanceTransform.h>
+#include <ChamferDistanceTransformSigned.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -940,6 +942,7 @@ void MainWindow::connectActions()
 
 	//"Tools > Sand box (research)" menu
 	connect(actionComputeKdTree,				SIGNAL(triggered()),	this,		SLOT(doActionComputeKdTree()));
+	connect(actionDistanceMapToMesh,			SIGNAL(triggered()),	this,		SLOT(doActionComputeDistanceMap()));
 	connect(actionDistanceToBestFitQuadric3D,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistToBestFitQuadric3D()));
 	connect(actionComputeBestFitBB,				SIGNAL(triggered()),	this,		SLOT(doComputeBestFitBB()));
 	connect(actionAlign,						SIGNAL(triggered()),	this,		SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
@@ -5990,6 +5993,91 @@ void MainWindow::doActionFitQuadric()
 	}
 
 	refreshAll();
+}
+
+void MainWindow::doActionComputeDistanceMap()
+{
+	ccHObject::Container selectedEntities = m_selectedEntities;
+
+	bool ok = true;
+	unsigned steps = static_cast<unsigned>(QInputDialog::getInt(this, "Distance map", "Distance map resolution", 128, 16, 1024, 16, &ok));
+	if (!ok)
+		return;
+
+	size_t selNum = selectedEntities.size();
+	for (size_t i = 0; i < selNum; ++i)
+	{
+		ccHObject* ent = selectedEntities[i];
+		if (ent->isKindOf(CC_TYPES::MESH))
+		{
+			//CCLib::ChamferDistanceTransform cdt;
+			CCLib::ChamferDistanceTransformSigned cdt;
+			if (!cdt.init(Tuple3ui(steps, steps, steps)))
+			{
+				//not enough memory
+				ccLog::Error("Not enough memory!");
+				return;
+			}
+
+			ccMesh* mesh = static_cast<ccMesh*>(ent);
+			ccBBox box = mesh->getOwnBB();
+			PointCoordinateType largestDim = box.getMaxBoxDim();
+			PointCoordinateType cellDim = largestDim / steps;
+			CCVector3 minCorner = box.getCenter() - CCVector3(1, 1, 1) * (largestDim / 2);
+
+			ccProgressDialog pDlg(true, this);
+			if (cdt.intersecthWith(mesh, cellDim, minCorner, &pDlg))
+			{
+				//cdt.propagateDistance(CHAMFER_345, &pDlg);
+				cdt.propagateDistance(&pDlg);
+
+				//convert the grid to a cloud
+				ccPointCloud* gridCloud = new ccPointCloud(mesh->getName() + QString(".distance_grid(%1)").arg(steps));
+				{
+					unsigned pointCount = steps*steps*steps;
+					if (!gridCloud->reserve(pointCount))
+					{
+						ccLog::Error("Not enough memory!");
+						delete gridCloud;
+						return;
+					}
+
+					ccScalarField* sf = new ccScalarField("DT values");
+					if (!sf->reserve(pointCount))
+					{
+						ccLog::Error("Not enough memory!");
+						delete gridCloud;
+						sf->release();
+						return;
+					}
+
+					for (unsigned i = 0; i < steps; ++i)
+					{
+						for (unsigned j = 0; j < steps; ++j)
+						{
+							for (unsigned k = 0; k < steps; ++k)
+							{
+								gridCloud->addPoint(minCorner + CCVector3(i + 0.5, j + 0.5, k + 0.5) * cellDim);
+								ScalarType s = static_cast<ScalarType>(cdt.getValue(i, j, k));
+								sf->addElement(s);
+							}
+						}
+					}
+
+					sf->computeMinAndMax();
+					gridCloud->addScalarField(sf);
+					gridCloud->showSF(true);
+					gridCloud->setDisplay(mesh->getDisplay());
+					addToDB(gridCloud);
+				}
+			}
+			else
+			{
+				ccLog::Error("Not enough memory!");
+				return;
+			}
+		}
+	}
 }
 
 void MainWindow::doActionComputeDistToBestFitQuadric3D()
@@ -11456,6 +11544,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
 	actionSubdivideMesh->setEnabled(atLeastOneMesh);
 	actionDistanceToBestFitQuadric3D->setEnabled(atLeastOneCloud);
+	actionDistanceMapToMesh->setEnabled(atLeastOneMesh);
 
 	menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);

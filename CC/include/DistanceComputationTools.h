@@ -34,6 +34,7 @@ class GenericIndexedCloudPersist;
 class ReferenceCloud;
 class GenericProgressCallback;
 struct OctreeAndMeshIntersection;
+class ChamferDistanceTransform;
 
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
 class CC_CORE_LIB_API DistanceComputationTools : public CCToolbox
@@ -330,7 +331,7 @@ public: //other methods
 
 protected:
 
-	//! Projects a mesh into a grid structure
+	//! Intersects a mesh with a grid structure
 	/** This method is used by computeCloud2MeshDistance.
 		\param theIntersection a specific structure to store the result of the intersection
 		\param octreeLevel the octree subdivision level corresponding to the grid
@@ -338,6 +339,13 @@ protected:
 	**/
 	static int intersectMeshWithOctree(	OctreeAndMeshIntersection* theIntersection,
 										uchar octreeLevel,
+										GenericProgressCallback* progressCb = 0);
+
+	//! Intersects a mesh with a Distance Transform grid structure
+	static int intersectMeshWithDTGrid( GenericIndexedMesh* mesh,
+										ChamferDistanceTransform* distanceTransform,
+										PointCoordinateType cellLength,
+										const CCVector3& gridMinCorner,
 										GenericProgressCallback* progressCb = 0);
 
 	//! Computes the distances between a point cloud and a mesh projected into a grid structure

@@ -673,22 +673,25 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 														uchar octreeLevel,
 														GenericProgressCallback* progressCb/*=0*/)
 {
-	assert(intersection);
+	if (!intersection)
+	{
+		assert(false);
+		return -1;
+	}
+
 	DgmOctree* octree = intersection->octree;
 	GenericIndexedMesh* mesh = intersection->mesh;
-
-	//current triangle vertices
-	const CCVector3* triPoints[3];
-	//relative position of each (cell) neighbors relatively to the triangle (plane)
-	char pointsPosition[27];
+	if (!octree || !mesh)
+	{
+		assert(false);
+		return -1;
+	}
 
 	//cell dimension
-	PointCoordinateType cellLength = intersection->octree->getCellSize(octreeLevel);
+	PointCoordinateType cellLength = octree->getCellSize(octreeLevel);
 	CCVector3 halfCellDimensions(cellLength / 2, cellLength / 2, cellLength / 2);
-	std::vector<CellToTest> cellsToTest;
-
-	unsigned cellsToTestCapacity = 1;
-	cellsToTest.resize(cellsToTestCapacity);
+	
+	std::vector<CellToTest> cellsToTest(1); //initial size must be > 0
 	unsigned cellsToTestCount = 0;
 
 	//get octree box
@@ -704,7 +707,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 		sprintf(buffer,"Triangles: %u",numberOfTriangles);
 		progressCb->reset();
 		progressCb->setInfo(buffer);
-		progressCb->setMethodTitle("Intersect Cloud/Mesh");
+		progressCb->setMethodTitle("Intersect Grid/Mesh");
 		progressCb->start();
 	}
 
@@ -715,9 +718,9 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 	{
 		//get the positions (in the grid) of each vertex 
 		const GenericTriangle* T = mesh->_getNextTriangle();
-		triPoints[0] = T->_getA();
-		triPoints[1] = T->_getB();
-		triPoints[2] = T->_getC();
+		const CCVector3* triPoints[3] = {	T->_getA(),
+											T->_getB(),
+											T->_getC() };
 
 		CCVector3 AB = (*triPoints[1]) - (*triPoints[0]);
 		CCVector3 BC = (*triPoints[2]) - (*triPoints[1]);
@@ -742,7 +745,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 			}
 
 			//first cell
-			assert(cellsToTestCapacity != 0);
+			assert(cellsToTest.capacity() != 0);
 			cellsToTestCount = 1;
 			CellToTest* _currentCell = &cellsToTest[0/*cellsToTestCount-1*/];
 
@@ -816,17 +819,18 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 					int halfCellSize = (_currentCell->cellSize >> 1);
 
 					//compute the position of each cell 'neighbors' relatively to the triangle (3*3*3 = 27, including the cell itself)
+					char pointsPosition[27];
 					{
 						char* _pointsPosition = pointsPosition;
 						for (int i=0; i<3; ++i)
 						{
-							AB.x = distanceToOctreeMinBorder.x+PointCoordinateType(currentCellPos.x + i*halfCellSize) * cellLength;
+							AB.x = distanceToOctreeMinBorder.x + static_cast<PointCoordinateType>(currentCellPos.x + i*halfCellSize) * cellLength;
 							for (int j=0; j<3; ++j)
 							{
-								AB.y = distanceToOctreeMinBorder.y+PointCoordinateType(currentCellPos.y + j*halfCellSize) * cellLength;
+								AB.y = distanceToOctreeMinBorder.y + static_cast<PointCoordinateType>(currentCellPos.y + j*halfCellSize) * cellLength;
 								for (int k=0; k<3; ++k)
 								{
-									AB.z = distanceToOctreeMinBorder.z+PointCoordinateType(currentCellPos.z + k*halfCellSize) * cellLength;
+									AB.z = distanceToOctreeMinBorder.z + static_cast<PointCoordinateType>(currentCellPos.z + k*halfCellSize) * cellLength;
 
 									//determine on which side the triangle is
 									*_pointsPosition++/*pointsPosition[i*9+j*3+k]*/ = (AB.dot(N) < 0 ? -1 : 1);
@@ -836,12 +840,11 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 					}
 
 					//if necessary we enlarge the queue
-					if (cellsToTestCount+27 > cellsToTestCapacity)
+					if (cellsToTestCount + 27 > cellsToTest.capacity())
 					{
-						cellsToTestCapacity = std::max(cellsToTestCapacity+27,2*cellsToTestCapacity);
 						try
 						{
-							cellsToTest.resize(cellsToTestCapacity);
+							cellsToTest.resize(std::max(cellsToTest.capacity()+27, 2*cellsToTest.capacity()));
 						}
 						catch (std::bad_alloc)
 						{
@@ -883,9 +886,8 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 											//if all the sub-cube vertices are not on the same side, then the triangle may intersect the cell
 											if (abs(sum) < 8)
 											{
-												++cellsToTestCount;
 												//we make newCell point on next cell in array (we copy current info by the way)
-												cellsToTest[cellsToTestCount] = *_newCell;
+												cellsToTest[++cellsToTestCount] = *_newCell;
 												_newCell = &cellsToTest[cellsToTestCount];
 											}
 										}
@@ -908,6 +910,229 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 
 	return result;
 }
+
+int DistanceComputationTools::intersectMeshWithDTGrid(	GenericIndexedMesh* mesh,
+														ChamferDistanceTransform* distanceTransform,
+														PointCoordinateType cellLength,
+														const CCVector3& gridMinCorner,
+														GenericProgressCallback* progressCb/*=0*/)
+{
+	if (!mesh || !distanceTransform || !distanceTransform->isInitialized())
+	{
+		assert(false);
+		return -1;
+	}
+
+	//cell dimension
+	CCVector3 halfCellDimensions(cellLength / 2, cellLength / 2, cellLength / 2);
+	
+	std::vector<CellToTest> cellsToTest(1); //initial size must be > 0
+	unsigned cellsToTestCount = 0;
+
+	//number of triangles
+	unsigned numberOfTriangles = mesh->size();
+
+	//for progress notification
+	NormalizedProgress nProgress(progressCb,numberOfTriangles);
+	if (progressCb)
+	{
+		char buffer[64];
+		sprintf(buffer,"Triangles: %u",numberOfTriangles);
+		progressCb->reset();
+		progressCb->setInfo(buffer);
+		progressCb->setMethodTitle("Intersect Grid/Mesh");
+		progressCb->start();
+	}
+
+	//For each triangle: look for intersecting cells
+	mesh->placeIteratorAtBegining();
+	int result = 0;
+	for (unsigned n=0; n<numberOfTriangles; ++n)
+	{
+		//get the positions (in the grid) of each vertex 
+		const GenericTriangle* T = mesh->_getNextTriangle();
+
+		//current triangle vertices
+		const CCVector3* triPoints[3] = {	T->_getA(),
+											T->_getB(),
+											T->_getC() };
+
+		CCVector3 AB = (*triPoints[1]) - (*triPoints[0]);
+		CCVector3 BC = (*triPoints[2]) - (*triPoints[1]);
+		CCVector3 CA = (*triPoints[0]) - (*triPoints[2]);
+
+		//be sure that the triangle is not degenerate!!!
+		if (AB.norm2() > ZERO_TOLERANCE &&
+			BC.norm2() > ZERO_TOLERANCE &&
+			CA.norm2() > ZERO_TOLERANCE)
+		{
+			Tuple3i cellPos[3];
+			{
+				for (int k=0; k<3; k++)
+				{
+					CCVector3 P = *(triPoints[k]) - gridMinCorner;
+					cellPos[k].x = std::min( static_cast<int>(P.x / cellLength), static_cast<int>(distanceTransform->size().x)-1 );
+					cellPos[k].y = std::min( static_cast<int>(P.y / cellLength), static_cast<int>(distanceTransform->size().y)-1 );
+					cellPos[k].z = std::min( static_cast<int>(P.z / cellLength), static_cast<int>(distanceTransform->size().z)-1 );
+				}
+			}
+
+			//compute the triangle bounding-box
+			Tuple3i minPos,maxPos;
+			{
+				for (int k=0; k<3; k++)
+				{
+					minPos.u[k] = std::min( cellPos[0].u[k], std::min( cellPos[1].u[k],cellPos[2].u[k] ));
+					maxPos.u[k] = std::max( cellPos[0].u[k], std::max( cellPos[1].u[k],cellPos[2].u[k] ));
+				}
+			}
+
+			//first cell
+			assert(cellsToTest.capacity() != 0);
+			cellsToTestCount = 1;
+			CellToTest* _currentCell = &cellsToTest[0/*cellsToTestCount-1*/];
+
+			_currentCell->pos = minPos;
+			CCVector3 distanceToOctreeMinBorder = gridMinCorner - (*triPoints[0]);
+
+			//compute the triangle normal
+			CCVector3 N = AB.cross(BC);
+
+			//max distance (in terms of cell) between the vertices
+			int maxSize = 0;
+			{
+				Tuple3i delta = maxPos - minPos + Tuple3i(1,1,1);
+				maxSize = std::max(delta.x, delta.y);
+			    maxSize = std::max(maxSize, delta.z);
+			}
+
+			//we deduce the smallest bounding cell
+			static const double LOG_2 = log(2.0);
+			_currentCell->cellSize = (maxSize > 1 ? static_cast<uchar>(ceil(log(static_cast<double>(maxSize))/LOG_2)) : 0);
+
+			//now we can (recursively) find the intersecting cells
+			while (cellsToTestCount != 0)
+			{
+				_currentCell = &cellsToTest[--cellsToTestCount];
+
+				//new cells may be written over the actual one
+				//so we need to remember its position!
+				Tuple3i currentCellPos = _currentCell->pos;
+
+				//if we have reached the maximal subdivision level
+				if (_currentCell->cellSize == 1)
+				{
+					//compute the (absolute) cell center
+					AB = gridMinCorner + CCVector3::fromArray(currentCellPos.u) * cellLength + halfCellDimensions;
+
+					//check that the triangle do intersects the cell (box)
+					if (CCMiscTools::TriBoxOverlap(AB, halfCellDimensions, triPoints))
+					{
+						if ((currentCellPos.x >= 0 && currentCellPos.x < static_cast<int>(distanceTransform->size().x)) &&
+							(currentCellPos.y >= 0 && currentCellPos.y < static_cast<int>(distanceTransform->size().y)) &&
+							(currentCellPos.z >= 0 && currentCellPos.z < static_cast<int>(distanceTransform->size().z)) )
+						{
+							distanceTransform->setValue(currentCellPos, 0);
+						}
+					}
+				}
+				else
+				{
+					int halfCellSize = (_currentCell->cellSize >> 1);
+
+					//compute the position of each cell 'neighbors' relatively to the triangle (3*3*3 = 27, including the cell itself)
+					char pointsPosition[27];
+					{
+						char* _pointsPosition = pointsPosition;
+						for (int i=0; i<3; ++i)
+						{
+							AB.x = distanceToOctreeMinBorder.x + static_cast<PointCoordinateType>(currentCellPos.x + i*halfCellSize) * cellLength;
+							for (int j=0; j<3; ++j)
+							{
+								AB.y = distanceToOctreeMinBorder.y + static_cast<PointCoordinateType>(currentCellPos.y + j*halfCellSize) * cellLength;
+								for (int k=0; k<3; ++k)
+								{
+									AB.z = distanceToOctreeMinBorder.z + static_cast<PointCoordinateType>(currentCellPos.z + k*halfCellSize) * cellLength;
+
+									//determine on which side the triangle is
+									*_pointsPosition++/*pointsPosition[i*9+j*3+k]*/ = (AB.dot(N) < 0 ? -1 : 1);
+								}
+							}
+						}
+					}
+
+					//if necessary we enlarge the queue
+					if (cellsToTestCount + 27 > cellsToTest.capacity())
+					{
+						try
+						{
+							cellsToTest.resize(std::max(cellsToTest.capacity()+27, 2*cellsToTest.capacity()));
+						}
+						catch (std::bad_alloc)
+						{
+							//out of memory
+							return -1;
+						}
+					}
+
+					//the first new cell will be written over the actual one
+					CellToTest* _newCell = &cellsToTest[cellsToTestCount];
+					_newCell->level++;
+					_newCell->cellSize = halfCellSize;
+
+					//we look at the position of the 8 sub-cubes relatively to the triangle
+					for (int i=0; i<2; ++i)
+					{
+						_newCell->pos.x = currentCellPos.x + i*halfCellSize;
+						//quick test to determine if the cube is potentially intersecting the triangle's bbox
+						if (	static_cast<int>(_newCell->pos.x) + halfCellSize >= minPos.x
+							&&	static_cast<int>(_newCell->pos.x)                <= maxPos.x )
+						{
+							for (int j=0; j<2; ++j)
+							{
+								_newCell->pos.y = currentCellPos.y + j*halfCellSize;
+								if (	static_cast<int>(_newCell->pos.y) + halfCellSize >= minPos.y
+									&&	static_cast<int>(_newCell->pos.y)                <= maxPos.y )
+								{
+									for (int k=0; k<2; ++k)
+									{
+										_newCell->pos.z = currentCellPos.z + k*halfCellSize;
+										if (	static_cast<int>(_newCell->pos.z) + halfCellSize >= minPos.z
+											&&	static_cast<int>(_newCell->pos.z)                <= maxPos.z )
+										{
+											const char* _pointsPosition = pointsPosition + (i*9+j*3+k);
+											char sum =	  _pointsPosition[0]  + _pointsPosition[1]  + _pointsPosition[3]
+														+ _pointsPosition[4]  + _pointsPosition[9]  + _pointsPosition[10]
+														+ _pointsPosition[12] + _pointsPosition[13];
+
+											//if all the sub-cube vertices are not on the same side, then the triangle may intersect the cell
+											if (abs(sum) < 8)
+											{
+												//we make newCell point on next cell in array (we copy current info by the way)
+												cellsToTest[++cellsToTestCount] = *_newCell;
+												_newCell = &cellsToTest[cellsToTestCount];
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (progressCb && !nProgress.oneStep())
+		{
+			//cancel by user
+			result = -2;
+			break;
+		}
+	}
+
+	return result;
+}
+
 
 #ifdef ENABLE_CLOUD2MESH_DIST_MT
 

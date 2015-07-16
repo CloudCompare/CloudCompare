@@ -667,7 +667,7 @@ namespace CCLib
 				b.resize(m_matrixSize);
 				z.resize(m_matrixSize);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory
 				return SquareMatrixTpl();

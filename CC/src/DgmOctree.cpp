@@ -2915,7 +2915,7 @@ bool DgmOctree::getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool tr
 			predCode = currentCode;
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -2944,7 +2944,7 @@ bool DgmOctree::getCellCodes(uchar level, cellCodesContainer& vec, bool truncate
 			predCode = currentCode;
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -2958,7 +2958,7 @@ bool DgmOctree::getCellIndexes(uchar level, cellIndexesContainer& vec) const
 	{
 		vec.resize(m_cellCount[level]);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -3165,7 +3165,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 	{
 		ccCells.resize(numberOfCells);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return -2;
@@ -3260,7 +3260,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 		neighboursVal.reserve(neighborsInCurrentSlice+neighborsInPrecedingSlice);
 		neighboursMin.reserve(neighborsInCurrentSlice+neighborsInPrecedingSlice);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return -2;
@@ -3281,7 +3281,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 		equivalentLabels.resize(numberOfCells+2,0);
 		cellIndexToLabel.resize(numberOfCells,0);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return -2;
@@ -3655,7 +3655,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 		{
 			cells.reserve(cellsNumber);
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			//we use standard way (DGM TODO: we should warn the user!)
@@ -3898,7 +3898,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLeve
 		{
 			cells.reserve(cellsNumber); //at least!
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory?
 			//we use standard way (DGM TODO: we should warn the user!)

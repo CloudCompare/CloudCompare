@@ -290,7 +290,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		{
 			startIndexes.resize(numParts,0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
@@ -308,7 +308,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	{
 		points.resize(numPoints);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return CC_FERR_NOT_ENOUGH_MEMORY;
@@ -373,7 +373,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 				{
 					scalarValues.resize(numPoints);
 				}
-				catch(std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					//not enough memory to load scalar values!
 					ccLog::Warning(QString("[SHP] Polyline #%1: not enough memory to load scalar values!").arg(index));

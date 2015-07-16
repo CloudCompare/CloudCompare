@@ -115,7 +115,7 @@ class CC_CORE_LIB_API Neighbourhood
 			{
 				points2D.resize(count);
 			}
-			catch (std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//out of memory
 				return false;

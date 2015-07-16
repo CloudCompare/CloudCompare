@@ -103,7 +103,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
 		outVerts.resize(vertCount);
 		outTris.resize(triCount);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		if (app)
 			app->dispToConsole("[Cork] Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);

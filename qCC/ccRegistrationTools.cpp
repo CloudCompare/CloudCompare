@@ -182,7 +182,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			{
 				distances.resize(count);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				ccLog::Error("Not enough memory!");
 				return false;

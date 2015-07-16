@@ -887,7 +887,7 @@ bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vect
 	{
 		accuracy.resize(count);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccCameraSensor::computeUncertainty] Not enough memory!");
 		return false;
@@ -1966,7 +1966,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		minCorners.resize(2*count);
 		maxCorners.resize(2*count);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		ccLog::Warning("[OrthoRectifyAsImages] Not enough memory!");
@@ -2303,7 +2303,7 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 			}
 		}
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccCameraSensor::prepareOctree] Not enough memory!");
 		for (int i=0; i<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; i++)

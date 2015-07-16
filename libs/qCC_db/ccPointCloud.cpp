@@ -311,7 +311,7 @@ bool ccPointCloud::LodStruct::reserve(unsigned pointCount, int levelCount)
 	{
 		m_levels.reserve(levelCount);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		m_mutex.unlock();
 		return false;
@@ -3313,7 +3313,7 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 	{
 		m_scalarFields.push_back(sf);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 		sf->release();
@@ -3777,7 +3777,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 		{
 			m_vboManager.vbos.resize(chunksCount,0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(getName()));
 			m_vboManager.state = vboSet::FAILED;

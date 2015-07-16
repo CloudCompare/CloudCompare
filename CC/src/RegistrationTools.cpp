@@ -292,7 +292,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 		{
 			overlapDistances.resize(data.cloud->size());
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			return ICP_ERROR_NOT_ENOUGH_MEMORY;

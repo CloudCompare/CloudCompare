@@ -55,7 +55,7 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 	{
 		m_posBuffer->push_back(ccIndexedTransformation(trans,index));
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory!
 		return false;

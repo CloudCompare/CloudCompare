@@ -312,7 +312,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 	{
 		pointPerDMCell.resize(gridSize,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return 0;
@@ -469,7 +469,7 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 		nonEmptyAnglesYaw.resize(360,false);
 		nonEmptyAnglesPitch.resize(360,false);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -1046,7 +1046,7 @@ int ccGBLSensor::DepthBuffer::fillHoles()
 	{
 		zBuffTemp.resize(tempZBuffSize,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return -2;

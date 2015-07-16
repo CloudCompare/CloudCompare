@@ -3614,7 +3614,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 			selectedIDs.insert(selectedID);
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		ccLog::Warning("[Picking] Not enough memory!");
@@ -3784,7 +3784,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		ccLog::Warning("[Picking][CPU] Not enough memory!");

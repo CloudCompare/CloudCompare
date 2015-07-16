@@ -214,7 +214,7 @@ bool ccShiftAndScaleCloudDlg::loadInfoFromFile(QString filename)
 		{
 			m_defaultInfos.push_back(info);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			ccLog::Warning(QString("[ccShiftAndScaleCloudDlg::loadInfoFromFile] Not enough memory to read file '%1'").arg(filename));
@@ -445,7 +445,7 @@ int ccShiftAndScaleCloudDlg::addShiftInfo(const ShiftInfo& info)
 	{
 		m_defaultInfos.push_back(info);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return -1;

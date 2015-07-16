@@ -349,7 +349,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		else
 			m_children.insert(m_children.begin()+insertIndex,child);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory!
 		return false;

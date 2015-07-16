@@ -810,7 +810,7 @@ void ccDBRoot::selectEntities(std::set<int> entIDs)
 		{
 			entities.reserve(entIDs.size());
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning("[ccDBRoot::selectEntities] Not enough memory!");
 			return;
@@ -986,7 +986,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 				selectedEntities.push_back(object);
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory!
 	}
@@ -1333,7 +1333,7 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory!
 	}
@@ -1463,7 +1463,7 @@ void ccDBRoot::gatherRecursiveInformation()
 	{
 		toProcess.resize(selCount);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not engough memory!");
 		return;
@@ -1529,7 +1529,7 @@ void ccDBRoot::gatherRecursiveInformation()
 				toProcess.push_back(ent->getChild(i));
 			alreadyProcessed.push_back(ent);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Error("Not engough memory!");
 			return;
@@ -1753,7 +1753,7 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclus
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[selectChildrenByTypeAndName] Not enough memory!");
 		return;

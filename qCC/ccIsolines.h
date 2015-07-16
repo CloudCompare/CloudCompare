@@ -81,7 +81,7 @@ public:
 		{
 			m_cd.resize(w*h,0);
 		}
-		//catch(std::bad_alloc)
+		//catch (const std::bad_alloc&)
 		//{
 		//	//not enough memory!
 		//}
@@ -249,7 +249,7 @@ protected:
 				assert(!m_contourClosed.empty());
 				m_contourClosed.back() = false;
 			//}
-			//catch(std::bad_alloc)
+			//catch (const std::bad_alloc&)
 			//{
 			//	return false;
 			//}
@@ -613,7 +613,7 @@ protected:
 				}
 			}
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			m_contourX.clear();
@@ -920,7 +920,7 @@ public:
 			m_maxx.resize(numContours);
 			m_maxy.resize(numContours);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory!
 			return false;

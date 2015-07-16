@@ -287,7 +287,7 @@ int ChunkedPointCloud::addScalarField(const char* uniqueName)
 		//we don't want 'm_scalarFields' to grow by 50% each time! (default behavior of std::vector::push_back)
 		m_scalarFields.resize(m_scalarFields.size()+1);
 	}
-	catch (std::bad_alloc) //out of memory
+	catch (const std::bad_alloc&) //out of memory
 	{
 		sf->release();
 		return -1;

@@ -251,7 +251,7 @@ bool cc2DLabel::addPoint(ccGenericPointCloud* cloud, unsigned pointIndex)
 	{
 		m_points.resize(m_points.size()+1);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -1056,7 +1056,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						}
 					}
 				}
-				catch(std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					//not enough memory
 					return;

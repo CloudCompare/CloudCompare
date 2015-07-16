@@ -219,7 +219,7 @@ int ExtractSIFT::compute()
 			break;
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return -1;

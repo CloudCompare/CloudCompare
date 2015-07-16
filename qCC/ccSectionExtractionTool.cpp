@@ -1780,7 +1780,7 @@ void ccSectionExtractionTool::extractPoints()
 				break;
 		} //for (int s=0; s<m_sections.size(); ++s)
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		error = true;
 	}

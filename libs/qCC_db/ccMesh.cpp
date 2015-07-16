@@ -201,7 +201,7 @@ bool ccMesh::computePerVertexNormals()
 	{
 		theNorms.resize(vertCount,s_blankNorm);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccMesh::computePerVertexNormals] Not enough memory!");
 		return false;
@@ -678,7 +678,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 		{
 			usedVerts.resize(vertNum,0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Error("[ccMesh::clone] Not enough memory!");
 			return 0;
@@ -1113,7 +1113,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 					{
 						materialIndexMap.resize(otherMatSetSize,-1);
 					}
-					catch(std::bad_alloc)
+					catch (const std::bad_alloc&)
 					{
 						ccLog::Warning("[ccMesh::merge] Not enough memory!");
 						break;
@@ -2111,7 +2111,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					{
 						newNormIndexes.resize(m_triNormals->currentSize(),-1);
 					}
-					catch(std::bad_alloc)
+					catch (const std::bad_alloc&)
 					{
 						ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 						newMesh->removePerTriangleNormalIndexes();
@@ -2133,7 +2133,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					{
 						newTexIndexes.resize(m_texCoords->currentSize(),-1);
 					}
-					catch(std::bad_alloc)
+					catch (const std::bad_alloc&)
 					{
 						ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new texture indexes subset! (not enough memory)");
 						newMesh->removePerTriangleTexCoordIndexes();
@@ -2155,7 +2155,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					{
 						newMatIndexes.resize(m_materials->size(),-1);
 					}
-					catch(std::bad_alloc)
+					catch (const std::bad_alloc&)
 					{
 						ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new material subset! (not enough memory)");
 						newMesh->removePerTriangleMtlIndexes();
@@ -2276,7 +2276,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 								{
 									newMaterials->push_back(m_materials->at(triMatIndex));
 								}
-								catch(std::bad_alloc)
+								catch (const std::bad_alloc&)
 								{
 									ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new materials subset! (not enough memory)");
 									newMesh->removePerTriangleMtlIndexes();

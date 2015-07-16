@@ -96,7 +96,7 @@ void ccColorLevelsDlg::updateHistogram()
 				}
 			}
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			m_histogram->clear();

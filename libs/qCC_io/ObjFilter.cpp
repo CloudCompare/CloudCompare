@@ -670,7 +670,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 				if (currentFace.size() < 3)
 				{
-					ccLog::Error("[OBJ] Malformed file: face on line %1 has less than 3 vertices!",lineCount);
+					ccLog::Warning("[OBJ] Malformed file: polygon on line %1 has less than 3 vertices!",lineCount);
 					error = true;
 					break;
 				}
@@ -941,7 +941,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			currentLine = stream.readLine();
 		}
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		objWarnings[NOT_ENOUGH_MEMORY] = true;

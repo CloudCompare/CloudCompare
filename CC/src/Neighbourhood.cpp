@@ -359,7 +359,7 @@ bool Neighbourhood::computeQuadric()
 		A.resize(6*count);
 		b.resize(count);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -515,7 +515,7 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 		{
 			M.resize(count*10);
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			return false;
 		}

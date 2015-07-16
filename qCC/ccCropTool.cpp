@@ -427,7 +427,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 								}
 							}
 						}
-						catch(std::bad_alloc)
+						catch (const std::bad_alloc&)
 						{
 							ccLog::Warning("[Crop] Failed to transfer per-vertex features (color, SF values, etc.) on the output mesh (not enough memory)");
 							croppedVertices->unallocateColors();

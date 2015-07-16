@@ -272,7 +272,7 @@ bool TrueKdTree::build(	double maxError,
 	{
 		s_sortedCoordsForSplit.resize(count);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory!
 		return false;
@@ -339,7 +339,7 @@ bool TrueKdTree::getLeaves(LeafVector& leaves) const
 	{		
 		GetLeavesVisitor(leaves).visit(m_root);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		return false;
 	}

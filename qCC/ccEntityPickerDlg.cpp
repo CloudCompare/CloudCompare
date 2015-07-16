@@ -70,7 +70,7 @@ void ccEntityPickerDlg::getSelectedIndexes(std::vector<int>& indexes) const
 	{
 		indexes.resize(static_cast<size_t>(list.size()));
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory?!
 		return;

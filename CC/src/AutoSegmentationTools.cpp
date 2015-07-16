@@ -92,7 +92,7 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 				while (static_cast<size_t>(ccLabel) >= cc.size())
 					cc.push_back(new ReferenceCloud(theCloud));
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory
 				cc.clear();

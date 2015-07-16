@@ -41,7 +41,7 @@ bool ccSymbolCloud::reserveLabelArray(unsigned count)
 	{
 		m_labels.reserve(count);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -55,7 +55,7 @@ void ccSymbolCloud::addLabel(QString label)
 	{
 		m_labels.push_back(label);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		//TODO?
@@ -68,7 +68,7 @@ bool ccSymbolCloud::resizeLabelArray(unsigned count)
 	{
 		m_labels.resize(count);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;

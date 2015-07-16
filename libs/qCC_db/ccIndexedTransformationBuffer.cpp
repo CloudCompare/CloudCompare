@@ -42,7 +42,7 @@ ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(const ccIndexedTran
 	{
 		this->std::vector< ccIndexedTransformation >::operator = (buffer);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccIndexedTransformationBuffer] Failed to copy original content (not enough memory)");
 	}
@@ -252,7 +252,7 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 	{
 		resize(count);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return MemoryError();

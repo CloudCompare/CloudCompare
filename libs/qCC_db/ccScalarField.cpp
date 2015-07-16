@@ -166,7 +166,7 @@ void ccScalarField::computeMinAndMax()
 			{
 				m_histogram.resize(numberOfClasses);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				ccLog::Warning("[ccScalarField::computeMinAndMax] Failed to update associated histogram!");
 				m_histogram.clear();

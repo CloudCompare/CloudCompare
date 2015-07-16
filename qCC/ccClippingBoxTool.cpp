@@ -487,7 +487,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		{
 			slices.resize(cellCount,0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Error("Not enough memory!");
 			return;
@@ -520,7 +520,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 				{
 					refClouds.resize(cellCount,0);
 				}
-				catch(std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					ccLog::Error("Not enough memory!");
 					return;

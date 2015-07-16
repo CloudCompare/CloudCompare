@@ -381,7 +381,7 @@ bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& ne
 			visitor.setUserDataFilter(*userDataFilter);
 		visitor.visit(m_root);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		return false;
 	}

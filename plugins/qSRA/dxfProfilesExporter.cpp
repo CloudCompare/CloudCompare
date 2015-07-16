@@ -379,7 +379,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 			{
 				polySteps.reserve(map->ySteps);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory
 				dw->dxfEOF();
@@ -866,7 +866,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 		{
 			polySteps.resize(map->xSteps);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not engouh memory
 			dw->dxfEOF();

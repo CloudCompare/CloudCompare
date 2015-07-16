@@ -1806,7 +1806,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 				for (size_t j=0; j<m_meshes.size(); ++j)
 					entities.push_back(m_meshes[j].mesh);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				return Error("Not enough memory!");
 			}

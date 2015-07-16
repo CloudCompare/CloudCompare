@@ -587,7 +587,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 		theKNums.resize(K);
 		theOldKNums.resize(K);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -706,7 +706,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 		mins.resize(K,maxV);
 		maxs.resize(K,minV);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;

@@ -450,7 +450,7 @@ ccHObject* FindRobust(ccHObject* root, ccHObject* source, unsigned uniqueID, CC_
 					//we temporarily 'hide' this entity by removing its unique ID
 					object->setUniqueID(0);
 				}
-				catch(std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					//not enough memory?! Stop this process (anyway it's already a degenerate case ;)
 					break;

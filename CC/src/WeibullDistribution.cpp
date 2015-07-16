@@ -431,7 +431,7 @@ bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 	{
 		chi2ClassesPositions.resize(numberOfClasses-1);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not engouh memory
 		return false;

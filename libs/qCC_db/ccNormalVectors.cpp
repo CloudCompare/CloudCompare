@@ -107,7 +107,7 @@ bool ccNormalVectors::init(unsigned quantizeLevel)
 	{
 		m_theNormalVectors.resize(numberOfVectors);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccNormalVectors::init] Not enough memory!");
 		return false;

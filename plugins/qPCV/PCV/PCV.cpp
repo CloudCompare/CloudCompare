@@ -64,7 +64,7 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 	{
 		dirs.resize(N,CCVector3(0,0,1));
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -87,7 +87,7 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 	{
 		mbar.resize(L,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -108,7 +108,7 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 	{
 		m.resize(L,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -137,7 +137,7 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 		{
 			offset.resize(L-1,0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			return false;
@@ -247,7 +247,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	{
 		visibilityCount.resize(numberOfPoints,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory?
 		return false;

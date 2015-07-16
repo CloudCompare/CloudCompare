@@ -444,7 +444,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 			}
 		}
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[PTX] Not enough memory to compute sensor angular steps!");
 		return 0;

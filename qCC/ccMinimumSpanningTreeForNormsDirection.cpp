@@ -96,7 +96,7 @@ public:
 		{
 			m_vertexNeighbors.resize(vertexCount, std::set<size_t>());
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			return false;
@@ -178,7 +178,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 	{
 		visited.resize(vertexCount,false);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;

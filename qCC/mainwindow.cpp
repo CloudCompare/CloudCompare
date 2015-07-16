@@ -4357,7 +4357,7 @@ void MainWindow::doActionMerge()
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 		return;
@@ -5138,7 +5138,7 @@ void MainWindow::doActionComputeStatParams()
 						histo.resize(numberOfClasses,0);
 						npis.resize(numberOfClasses,0.0);
 					}
-					catch(std::bad_alloc)
+					catch (const std::bad_alloc&)
 					{
 						ccConsole::Warning("[Distribution fitting] Not enough memory!");
 						continue;
@@ -5217,7 +5217,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		{
 			sortedIndexes.reserve(components.size());
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning("[CreateComponentsClouds] Not enough memory to sort components by size!");
 			sortBysize = false;
@@ -5576,7 +5576,7 @@ void MainWindow::doConvertPolylinesToMesh()
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccConsole::Error("Not enough memory!");
 		return;
@@ -5641,7 +5641,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		points2D.reserve(vertexCount);
 		segments2D.reserve(segmentCount * 2);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		ccLog::Error("Not enough memory");
@@ -6311,7 +6311,7 @@ void MainWindow::doActionComputeNormals()
 			}
 		}
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccConsole::Error("Not enough memory!");
 		return;
@@ -6685,7 +6685,7 @@ void MainWindow::doActionMatchScales()
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccConsole::Error("Not enough memory!");
 		return;
@@ -6741,7 +6741,7 @@ bool MainWindow::ApplyScaleMatchingAlgortihm(ScaleMatchingAlgorithm algo,
 	{
 		scales.resize(entities.size(),-1.0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 		return false;
@@ -8083,7 +8083,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 				}
 				m_ccRoot->selectEntities(transformedEntities);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory (nothing to do)
 			}
@@ -9682,7 +9682,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 		return;
@@ -9734,7 +9734,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 		return;

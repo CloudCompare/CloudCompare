@@ -430,7 +430,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	{
 		grid->resize(cellCount);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		if (app)
 			app->dispToConsole(QString("[DistanceMapGenerationTool] Not enough memory!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);

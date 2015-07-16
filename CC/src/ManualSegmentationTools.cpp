@@ -184,7 +184,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		{
 			newPointIndexes.resize(numberOfPoints,0);
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			return 0; //not enough memory
 		}
@@ -517,7 +517,7 @@ bool MergeOldTriangles(	GenericIndexedMesh* origMesh,
 			}
 		}
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -607,7 +607,7 @@ bool ImportSourceVertices(GenericIndexedCloudPersist* srcVertices,
 			}
 		}
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -873,7 +873,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 
 		//now add the remaining triangles
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		error = true;
@@ -1353,7 +1353,7 @@ bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
 
 		//now add the remaining triangles
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		error = true;

@@ -238,7 +238,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		{
 			indexGrid.resize(gridSize,-1);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning("[PTX] Not enough memory to save grid structure (required to compute normals!)");
 			hasIndexGrid = false;

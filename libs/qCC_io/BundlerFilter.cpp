@@ -333,7 +333,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				{
 					camUsage.resize(cameras.size(),false);
 				}
-				catch(std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					//nothing serious here
 				}
@@ -482,7 +482,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 									{
 										keypointsDescriptors.push_back(lastKeyPoint);
 									}
-									catch(std::bad_alloc)
+									catch (const std::bad_alloc&)
 									{
 										ccLog::Warning("[Bundler] Not enough memory to store keypoints!");
 										keypointsDescriptors.clear();

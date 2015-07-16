@@ -63,7 +63,7 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, QString filename,
 					candidates.push_back(static_cast<ccPolyline*>(entity->getChild(i)));
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}

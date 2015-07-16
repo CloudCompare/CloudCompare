@@ -75,7 +75,7 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 
 		m_singleCombos.push_back(texIndexComboBox);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory?! What can we do...
 	}
@@ -235,7 +235,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return;

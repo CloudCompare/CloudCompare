@@ -171,7 +171,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			{
 				classes.push_back(Chi2Class(1.0e-6,(int)histoBefore));
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory!
 				return -1.0;
@@ -193,7 +193,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			{
 				classes.push_back(currentClass);
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory!
 				return -1.0;
@@ -207,7 +207,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			{
 				classes.push_back(Chi2Class(1.0e-6,(int)histoAfter));
 			}
-			catch(std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory!
 				return -1.0;
@@ -419,7 +419,7 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 		{
 			nNSS.pointsInNeighbourhood.resize(n);
 		}
-		catch (std::bad_alloc) //out of memory
+		catch (const std::bad_alloc&) //out of memory
 		{
 			return false;
 		}

@@ -366,7 +366,7 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 			{
 				hullPoints.push_back(&points[i]);
 			}
-			catch (std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory
 				return false;
@@ -397,7 +397,7 @@ bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& p
 			{
 				hullPoints.push_back(&points[i]);
 			}
-			catch (std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory
 				return false;

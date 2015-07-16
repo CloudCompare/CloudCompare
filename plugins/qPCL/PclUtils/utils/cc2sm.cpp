@@ -429,7 +429,7 @@ PCLCloud::Ptr cc2smReader::getAsSM() const
 		for (unsigned i=0; i<m_cc_cloud->getNumberOfScalarFields(); ++i)
 			fields.push_back(m_cc_cloud->getScalarField(static_cast<int>(i))->getName());
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));

@@ -35,7 +35,7 @@ public:
 		{
 			m_items.insert(item);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//what can we do?!
 		}
@@ -83,7 +83,7 @@ public:
 		{
 			m_items.insert(item);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//what can we do?!
 		}

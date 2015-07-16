@@ -716,7 +716,7 @@ bool ccRasterizeTool::RasterGrid::init(unsigned w, unsigned h)
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		return false;
@@ -1062,7 +1062,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 			QString activeLayerName = activeLayerComboBox->currentText();
 			m_rasterCloud = convertGridToCloud(exportedFields,activeLayerIsSF,activeLayerName);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 		}
 
@@ -1161,7 +1161,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		{
 			m_grid.scalarFields.resize(sfCount,0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			memoryError = true;
@@ -1563,7 +1563,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 		if (exportAsSF(PER_CELL_HEIGHT_RANGE))
 			exportedFields.push_back(PER_CELL_HEIGHT_RANGE);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 		return 0;
@@ -2311,7 +2311,7 @@ void ccRasterizeTool::generateContours()
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 	}

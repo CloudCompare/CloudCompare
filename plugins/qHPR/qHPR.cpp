@@ -150,7 +150,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		{
 			pointBelongsToCvxHull.resize(nbPoints+1,false);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory!
 			delete[] pt_array;

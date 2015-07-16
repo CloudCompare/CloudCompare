@@ -595,7 +595,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 								{
 									models.push_back(lm);
 								}
-								catch(std::bad_alloc)
+								catch (const std::bad_alloc&)
 								{
 									//not enough memory!
 									while (!models.empty())
@@ -846,7 +846,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 						{
 							cellsToTest.resize(std::max(cellsToTest.capacity()+27, 2*cellsToTest.capacity()));
 						}
-						catch (std::bad_alloc)
+						catch (const std::bad_alloc&)
 						{
 							//out of memory
 							return -1;
@@ -960,7 +960,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	{
 		minDists.resize(remainingPoints);
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		//not enough memory
 		s_cellFunc_MT_success = false;
@@ -1352,7 +1352,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		{
 			processTriangles.resize(numberOfTriangles, 0);
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//otherwise, no big deal, we can do without it!
 		}
@@ -1409,7 +1409,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 				{
 					minDists.resize(remainingPoints);
 				}
-				catch (std::bad_alloc) //out of memory
+				catch (const std::bad_alloc&) //out of memory
 				{
 					//not enough memory
 					return -1;

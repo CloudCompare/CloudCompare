@@ -91,7 +91,7 @@ public:
 		{
 			m_grid.resize(m_totalCellCount,defaultCellValue);
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			m_totalCellCount = 0;

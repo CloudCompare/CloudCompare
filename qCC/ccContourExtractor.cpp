@@ -239,7 +239,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 						break;
 				}
 			}
-			catch (std::bad_alloc)
+			catch (const std::bad_alloc&)
 			{
 				//not enough memory
 				return false;
@@ -689,7 +689,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		{
 			originalPointIndexes->resize(hullPoints.size(),0);
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			ccLog::Error("[ExtractFlatContour] Not enough memory!");

@@ -113,7 +113,7 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 				{
 					points.push_back(P);
 				}
-				catch(std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					//not enough memory
 					if (app)

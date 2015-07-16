@@ -489,7 +489,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	{
 		timings.resize(MaxLevel,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("Can't determine best octree level: not enough memory!");
 		return -1;

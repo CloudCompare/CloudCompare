@@ -118,7 +118,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 			}
 		}
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}

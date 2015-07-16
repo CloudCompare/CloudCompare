@@ -438,7 +438,7 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					{
 						indexes.resize(vertCount);
 					}
-					catch (std::bad_alloc)
+					catch (const std::bad_alloc&)
 					{
 						error = CC_FERR_NOT_ENOUGH_MEMORY;
 						break;

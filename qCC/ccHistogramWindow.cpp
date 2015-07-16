@@ -180,7 +180,7 @@ void ccHistogramWindow::fromBinArray(	const std::vector<unsigned>& histoValues,
 	{
 		m_histoValues = histoValues;
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccHistogramWindow::fromBinArray] Not enough memory!");
 		return;
@@ -199,7 +199,7 @@ void ccHistogramWindow::setCurveValues(const std::vector<double>& curveValues)
 	{
 		m_curveValues = curveValues;
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccHistogramWindow::setCurveValues] Not enough memory!");
 	}
@@ -231,7 +231,7 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 		{
 			m_histoValues = m_associatedSF->getHistogram();
 		}
-		catch(std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning("[ccHistogramWindow::computeBinArrayFromSF] Not enough memory!");
 			return false;
@@ -244,7 +244,7 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 	{
 		m_histoValues.resize(binCount,0);
 	}
-	catch(std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccHistogramWindow::computeBinArrayFromSF] Not enough memory!");
 		return false;

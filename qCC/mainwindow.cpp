@@ -5928,7 +5928,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 											);
 		if (mesh)
 		{
-			cloud->setVisible(false);
+			cloud->setEnabled(false);
 			cloud->addChild(mesh);
 			cloud->prepareDisplayForRefresh_recursive();
 			addToDB(mesh);

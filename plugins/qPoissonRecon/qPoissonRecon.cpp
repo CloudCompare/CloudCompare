@@ -367,7 +367,7 @@ void qPoissonRecon::doAction()
 		}
 
 		newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
-		newPC->setVisible(false);
+		newPC->setEnabled(false);
 		newMesh->setVisible(true);
 		newMesh->computeNormals(true);
 		newMesh->showNormals(newMesh->hasNormals());

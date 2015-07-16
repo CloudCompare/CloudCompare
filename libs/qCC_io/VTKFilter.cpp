@@ -825,7 +825,6 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		mesh->setVisible(true);
 
 		mesh->addChild(vertices);
-		vertices->setVisible(false);
 		vertices->setEnabled(false);
 		vertices->setName("Vertices");
 		vertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!

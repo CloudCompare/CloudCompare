@@ -2736,11 +2736,12 @@ bool ccCommandLineParser::commandDelaunay(QStringList& arguments, QDialog* paren
 		Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 		ccMesh* mesh = ccMesh::Triangulate(	cloud,
-			axisAligned ? DELAUNAY_2D_AXIS_ALIGNED : DELAUNAY_2D_BEST_LS_PLANE,
-			false,
-			static_cast<PointCoordinateType>(maxEdgeLength),
-			2 //XY plane by default
-			);
+											axisAligned ? DELAUNAY_2D_AXIS_ALIGNED : DELAUNAY_2D_BEST_LS_PLANE,
+											false,
+											static_cast<PointCoordinateType>(maxEdgeLength),
+											2 //XY plane by default
+											);
+		
 		if (mesh)
 		{
 			Print(QString("\tResulting mesh: #%1 faces, %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
@@ -2763,7 +2764,7 @@ bool ccCommandLineParser::commandDelaunay(QStringList& arguments, QDialog* paren
 			//the mesh takes ownership of the cloud.
 			//Therefore we have to remove all clouds from the 'cloud set'! (see below)
 			//(otherwise bad things will happen when we'll clear it later ;)
-			cloud->setVisible(false);
+			cloud->setEnabled(false);
 			mesh->addChild(cloud);
 		}
 	}

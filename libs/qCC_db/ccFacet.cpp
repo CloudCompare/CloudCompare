@@ -259,7 +259,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 				m_contourVertices->addPoint(m_center + X*(*it)->x + Y*(*it)->y);
 			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
 			m_contourVertices->setLocked(true);
-			m_contourVertices->setVisible(false);
+			m_contourVertices->setEnabled(false);
 			addChild(m_contourVertices);
 		}
 
@@ -274,6 +274,8 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 				m_contourPolyline->setLocked(true);
 				m_contourPolyline->setName(DEFAULT_CONTOUR_NAME);
 				m_contourVertices->addChild(m_contourPolyline);
+				m_contourVertices->setEnabled(true);
+				m_contourVertices->setVisible(false);
 			}
 			else
 			{
@@ -336,6 +338,8 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 						m_polygonMesh->setLocked(true);
 						m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
 						m_contourVertices->addChild(m_polygonMesh);
+						m_contourVertices->setEnabled(true);
+						m_contourVertices->setVisible(false);
 					}
 					else
 					{

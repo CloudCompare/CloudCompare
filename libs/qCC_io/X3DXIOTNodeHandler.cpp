@@ -149,7 +149,7 @@ int X3DXIOTNodeHandler::startCoordinate(const X3DAttributes &attr)
 	if (m_currentLeaf->isKindOf(CC_TYPES::MESH))
 	{
 		ccMesh* mesh = ccHObjectCaster::ToMesh(m_currentLeaf);
-		if (mesh && mesh->getAssociatedCloud()==0)
+		if (mesh && mesh->getAssociatedCloud() == 0) //FIXME DGM: weird
 		{
 			cloud->setVisible(false);
 		}

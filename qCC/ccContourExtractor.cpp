@@ -296,7 +296,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				debugContour->addPointIndex(index/*(*itA)->index*/);
 			}
 			debugContour->setColor(ccColor::red);
-			debugContourVertices->setVisible(false);
+			debugContourVertices->setEnabled(false);
 			debugContour->setClosed(contourType == FULL);
 			debugDialog.addToDisplay(debugContour,false); //the window will take care of deleting this entity!
 		}

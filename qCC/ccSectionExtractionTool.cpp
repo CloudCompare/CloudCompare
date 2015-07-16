@@ -1107,7 +1107,7 @@ void ccSectionExtractionTool::generateOrthoSections()
 					orthoPoly->setGlobalShift(poly->getGlobalShift());
 
 					//set default display style
-					vertices->setVisible(false);
+					vertices->setEnabled(false);
 					orthoPoly->showColors(true);
 					orthoPoly->setColor(s_defaultPolylineColor);
 					orthoPoly->setWidth(s_defaultPolylineWidth);

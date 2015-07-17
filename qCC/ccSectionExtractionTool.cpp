@@ -1405,7 +1405,7 @@ bool ccSectionExtractionTool::extractSectionCloud(	const std::vector<CCLib::Refe
 
 		if (part)
 		{
-			if (refClouds.size() == 1)
+			if (i == 0)
 			{
 				//we simply use this 'part' cloud as the section cloud
 				sectionCloud = part;

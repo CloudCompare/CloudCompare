@@ -56,7 +56,7 @@ void main (void)
 
             //pixel distance based damping
 			int dabs;
-			if (dabs < 0)
+			if (d < 0)
 				dabs = -d;
 			else
 				dabs = d;

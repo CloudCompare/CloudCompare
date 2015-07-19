@@ -22,6 +22,9 @@
 #include "MathTools.h"
 #include "SquareMatrix.h"
 
+//System
+#include <string.h>
+
 namespace CCLib
 {
 
@@ -40,7 +43,12 @@ public:
 	//! Default constructor
 	ConjugateGradient()
 		: cg_A(N)
-	{}
+	{
+		memset(cg_Gn, 0, sizeof(Scalar)*N);
+		memset(cg_Hn, 0, sizeof(Scalar)*N);
+		memset(cg_u,  0, sizeof(Scalar)*N);
+		memset(cg_b,  0, sizeof(Scalar)*N);
+	}
 
 	//! Default destructor
 	virtual ~ConjugateGradient()

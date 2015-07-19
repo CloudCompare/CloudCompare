@@ -356,8 +356,8 @@ bool Neighbourhood::computeQuadric()
 	std::vector<float> b;
 	try
 	{
-		A.resize(6*count);
-		b.resize(count);
+		A.resize(6*count,0);
+		b.resize(count, 0);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -418,12 +418,10 @@ bool Neighbourhood::computeQuadric()
 				double tmp = 0;
 				float* _Ai = &(A[i]);
 				float* _Aj = &(A[j]);
-				for (unsigned k=0; k<count; ++k)
+				for (unsigned k = 0; k<count; ++k, _Ai += 6, _Aj += 6)
 				{
 					//tmp += A[(6*k)+i] * A[(6*k)+j];
 					tmp += static_cast<double>(*_Ai) * static_cast<double>(*_Aj);
-					_Ai += 6;
-					_Aj += 6;
 				}
 				tAA.m_values[j][i] = tAA.m_values[i][j] = tmp;
 			}
@@ -432,16 +430,65 @@ bool Neighbourhood::computeQuadric()
 			{
 				double tmp = 0;
 				float* _Ai = &(A[i]);
-				float* _b  = &(b[i]);
-				for (unsigned k=0; k<count; ++k)
+				for (unsigned k = 0; k<count; ++k, _Ai += 6)
 				{
 					//tmp += A[(6*k)+i]*b[k];
-					tmp += static_cast<double>(*_Ai) * static_cast<double>(*_b++);
-					_Ai += 6;
+					tmp += static_cast<double>(*_Ai) * static_cast<double>(b[k]);
 				}
 				tAb[i] = tmp;
 			}
 		}
+
+#if 0
+		//trace tA.A and tA.b to a file
+		FILE* f = 0;
+		fopen_s(&f, "CG_trace.txt", "wt");
+		if (f)
+		{
+			fprintf_s(f, "lmax2 = %3.12f\n", lmax2);
+
+			{
+				float Amin = 0, Amax = 0;
+				Amin = Amax = A[0];
+				for (unsigned i = 1; i < 6 * count; ++i)
+				{
+					Amin = std::min(A[i], Amin);
+					Amax = std::max(A[i], Amax);
+				}
+				fprintf_s(f, "A in [%3.12f ; %3.12f]\n", Amin, Amax);
+			}
+			{
+				float bmin = 0, bmax = 0;
+				bmin = bmax = b[0];
+				for (unsigned i = 1; i < count; ++i)
+				{
+					bmin = std::min(b[i], bmin);
+					bmax = std::max(b[i], bmax);
+				}
+				fprintf_s(f, "b in [%3.12f ; %3.12f]\n", bmin, bmax);
+			}
+
+			fprintf_s(f, "tA.A\n");
+			for (unsigned i = 0; i<6; ++i)
+			{
+				for (unsigned j = 0; j < 6; ++j)
+				{
+					fprintf_s(f, "%3.12f ", tAA.m_values[i][j]);
+				}
+				fprintf_s(f, "\n");
+			}
+
+			//tA.b part
+			fprintf_s(f, "tA.b\n");
+			for (unsigned i = 0; i<6; ++i)
+			{
+				fprintf_s(f, "%3.12f ", tAb[i]);
+			}
+			fprintf_s(f, "\n");
+
+			fclose(f);
+		}
+#endif
 	}
 
 	//first guess for X: plane equation (a0.x+a1.y+a2.z=a3 --> z = a3/a2 - a0/a2.x - a1/a2.y)
@@ -454,7 +501,9 @@ bool Neighbourhood::computeQuadric()
 
 	//special case: a0 = a1 = a2 = 0! //happens for perfectly flat surfaces!
 	if (X0[1] == 0 && X0[2] == 0)
+	{
 		X0[0] = 1.0;
+	}
 
 	//init. conjugate gradient
 	cg.initConjugateGradient(X0);

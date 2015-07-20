@@ -756,8 +756,8 @@ static double s_binarySearchCount = 0.0;
 unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const
 {
 	assert(truncatedCellCode != INVALID_CELL_CODE);
-	assert(end>=begin);
-	assert(end<m_numberOfProjectedPoints);
+	assert(end >= begin);
+	assert(end < m_numberOfProjectedPoints);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 	s_binarySearchCount += 1;
@@ -1171,7 +1171,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 												int minNeighbourhoodLength,
 												int maxNeighbourhoodLength) const
 {
-	assert(minNeighbourhoodLength>=nNSS.alreadyVisitedNeighbourhoodSize);
+	assert(minNeighbourhoodLength >= nNSS.alreadyVisitedNeighbourhoodSize);
 
 	//binary shift for cell code truncation
 	uchar bitDec = GET_BIT_SHIFT(nNSS.level);
@@ -2332,7 +2332,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 						else //let's try to prune this branch/leaf by looking at its bbox
 						{
 							desc.level = current.level+1;
-							assert(desc.level<=MAX_OCTREE_LEVEL);
+							assert(desc.level <= MAX_OCTREE_LEVEL);
 							desc.corner = current.corner;
 							//cell size at next level = half of current level cell size
 							const PointCoordinateType& cs = getCellSize(desc.level);
@@ -3220,7 +3220,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     const int& dj = gridSize.y;
     const int& step = gridSize.z;
 
-    //instrumentation pour la recherche des 4 ou 8 voisins en 2D (donc en 3D --> 6 ou 26 voisins)
+    //relative neighbos positions (either 6 or 26 total - but we only use half of it)
     uchar neighborsInCurrentSlice = 0, neighborsInPrecedingSlice = 0;
     int currentSliceNeighborsShifts[4], precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
 
@@ -3326,7 +3326,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 				{
 					for (uchar n=0; n<neighborsInCurrentSlice; n++)
 					{
-						assert(cellIndex+currentSliceNeighborsShifts[n]<sliceSize);
+						assert(cellIndex+currentSliceNeighborsShifts[n] < sliceSize);
 						const int& neighborLabel = _slice[currentSliceNeighborsShifts[n]];
 						if (neighborLabel > 1)
 							neighboursVal.push_back(neighborLabel);
@@ -3338,7 +3338,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 				{
 					for (uchar n=0; n<neighborsInPrecedingSlice; n++)
 					{
-						assert(cellIndex+precedingSliceNeighborsShifts[n]<sliceSize);
+						assert(cellIndex+precedingSliceNeighborsShifts[n] < sliceSize);
 						const int& neighborLabel = _oldSlice[precedingSliceNeighborsShifts[n]];
 						if (neighborLabel > 1)
 							neighboursVal.push_back(neighborLabel);
@@ -3346,7 +3346,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 				}
 
 				//number of neighbors for current cell
-				uchar p = (uchar)neighboursVal.size();
+				size_t p = neighboursVal.size();
 
 				if (p == 0) //no neighbor
 				{
@@ -3370,22 +3370,22 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 						neighboursMin.clear();
 						//we get the smallest equivalent label for each neighbor's branch
 						{
-							for (uchar n=0; n<p; n++)
+							for (size_t n=0; n<p; n++)
 							{
-								// ... we start from it's C.C. indec
+								// ... we start from its C.C. index
 								int label = neighboursVal[n];
 								//if it's not the same as the previous neighbor's
 								if (label != lastLabel)
 								{
 									//we update the 'before' value
-									assert(label<static_cast<int>(numberOfCells)+2);
+									assert(label < static_cast<int>(numberOfCells)+2);
 									lastLabel = label;
 
 									//we look for its real equivalent value
 									while (equivalentLabels[label] > 1)
 									{
 										label = equivalentLabels[label];
-										assert(label<static_cast<int>(numberOfCells)+2);
+										assert(label < static_cast<int>(numberOfCells)+2);
 									}
 
 									neighboursMin.push_back(label);
@@ -3395,16 +3395,16 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 
 						//get the smallest one
 						std::sort(neighboursMin.begin(),neighboursMin.end());
-						smallestLabel = neighboursMin[0];
+						smallestLabel = neighboursMin.front();
 
 						//update the equivalence table by the way
 						//for all other branches
 						lastLabel = smallestLabel;
 						{
-							for (uchar n=1; n<neighboursMin.size(); n++)
+							for (size_t n=1; n<neighboursMin.size(); n++)
 							{
 								int label = neighboursMin[n];
-								assert(label<static_cast<int>(numberOfCells)+2);
+								assert(label < static_cast<int>(numberOfCells)+2);
 								//we don't process it if it's the same label as the previous neighbor
 								if (label != lastLabel)
 								{
@@ -3448,16 +3448,16 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     }
 
     //path compression (http://en.wikipedia.org/wiki/Union_find)
-    assert(currentLabel<numberOfCells+2);
+    assert(currentLabel < numberOfCells+2);
 	{
 		for (size_t i=2; i<=currentLabel; i++)
 		{
 			int label = equivalentLabels[i];
-			assert(label<static_cast<int>(numberOfCells)+2);
+			assert(label < static_cast<int>(numberOfCells)+2);
 			while (equivalentLabels[label] > 1) //equivalentLabels[0] == 0 !!!
 			{
 				label = equivalentLabels[label];
-				assert(label<static_cast<int>(numberOfCells)+2);
+				assert(label < static_cast<int>(numberOfCells)+2);
 			}
 			equivalentLabels[i] = label;
 		}
@@ -3468,8 +3468,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 		for (size_t i=0; i<numberOfCells; i++)
 		{
 			int label = cellIndexToLabel[i];
-			assert(label<static_cast<int>(numberOfCells)+2);
-			if (equivalentLabels[label]>1)
+			assert(label < static_cast<int>(numberOfCells)+2);
+			if (equivalentLabels[label] > 1)
 				cellIndexToLabel[i] = equivalentLabels[label];
 		}
 	}
@@ -3481,7 +3481,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 
 		for (size_t i=0; i<numberOfCells; i++)
 		{
-			assert(cellIndexToLabel[i] > 1 && cellIndexToLabel[i]<static_cast<int>(numberOfCells)+2);
+			assert(cellIndexToLabel[i] > 1 && cellIndexToLabel[i] < static_cast<int>(numberOfCells)+2);
 			equivalentLabels[cellIndexToLabel[i]] = 1;
 		}
 
@@ -3509,7 +3509,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 		ReferenceCloud Y(m_theAssociatedCloud);
 		for (size_t i=0; i<numberOfCells; i++)
 		{
-			assert(cellIndexToLabel[i]<static_cast<int>(numberOfCells)+2);
+			assert(cellIndexToLabel[i] < static_cast<int>(numberOfCells)+2);
 
 			const int& label = equivalentLabels[cellIndexToLabel[i]];
 			assert(label > 0);
@@ -4133,7 +4133,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLeve
 			if (shallowSteps)
 			{
 				//we should go shallower
-				assert(cell.level-shallowSteps>=startingLevel);
+				assert(cell.level-shallowSteps >= startingLevel);
 				cell.level-=shallowSteps;
 				currentBitDec += 3*shallowSteps;
 				shallowSteps = 0;
@@ -4318,7 +4318,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLeve
 			if (shallowSteps)
 			{
 				//we should go shallower
-				assert(cellDesc.level-shallowSteps>=startingLevel);
+				assert(cellDesc.level-shallowSteps >= startingLevel);
 				cellDesc.level-=shallowSteps;
 				currentBitDec += 3*shallowSteps;
 				shallowSteps = 0;

@@ -5928,7 +5928,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 											);
 		if (mesh)
 		{
-			cloud->setEnabled(false);
+			cloud->setVisible(false); //can't disable the cloud as the resulting mesh will be its child!
 			cloud->addChild(mesh);
 			cloud->prepareDisplayForRefresh_recursive();
 			addToDB(mesh);

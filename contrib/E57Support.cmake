@@ -20,22 +20,24 @@ if( ${OPTION_USE_LIBE57} )
 
 	# Find Boost
 	find_package( Boost COMPONENTS system QUIET ) #DGM: not sure why, but "system" lib doesn't show up otherwise...
-	if( NOT Boost_FOUND )
+	if( Boost_FOUND )
+		include_directories( ${Boost_INCLUDE_DIR} )
+	else()
 		set( BOOST_ROOT CACHE PATH "Location of the boost root directory" )
-		message( FATAL_ERROR "Unable to find boost library. Please set the BOOST_ROOT to point to the boost distribution files." )
+		message( FATAL_ERROR "Unable to find boost library. Please set BOOST_ROOT to point to the boost distribution files." )
 	endif()
 	
 	# Find Xerces
-	# we use libE57 own Xerces find module
-	set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/contrib/cmake/Modules/" )
+	set( Xerces_INCLUDE_DIR "" CACHE PATH "Xerces include directory" )
+	set( Xerces_LIBRARY_RELEASE "" CACHE FILEPATH "Xerces (release) library file" )
+	if( CMAKE_CONFIGURATION_TYPES )
+		set( Xerces_LIBRARY_DEBUG "" CACHE FILEPATH "Xerces (debug) library file" )
+	endif()
 
-	set( Xerces_USE_STATIC_LIBS ON )
-	find_package( Xerces QUIET )
-	if ( NOT Xerces_FOUND )
-		set( XERCES_ROOT CACHE PATH "Location of the Xerces library" )
-		message( FATAL_ERROR "Unable to find Xerces library. Please make XERCES_ROOT point to the root of Xerces directory." )
+	if ( NOT Xerces_INCLUDE_DIR )
+		message( SEND_ERROR "No Xerces include dir specified (Xerces_INCLUDE_DIR)" )
 	else()
-		include_directories( ${Xerces_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
+		include_directories( ${Xerces_INCLUDE_DIR} )
 	endif()
 
 endif()
@@ -55,12 +57,28 @@ if( ${OPTION_USE_LIBE57} )
 		if (WIN32)
 			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.lib optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.lib )
 		elseif()
-			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.a optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.a )
-		endif()		
+			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/libE57RefImpl-d.a optimized ${LIBE57_INSTALL_DIR}/lib/libE57RefImpl.a )
+		endif()
+		
 		#Xerces
-		target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} ${Boost_LIBRARIES} )
+		if ( CMAKE_CONFIGURATION_TYPES )
+			if (Xerces_LIBRARY_DEBUG AND Xerces_LIBRARY_RELEASE)
+				target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} )
+			else()
+				message( FATAL_ERROR "Unable to find Xerces library. Please set Xerces_LIBRARY_DEBUG and Xerces_LIBRARY_RELEASE to point to the release and debug library files." )
+			endif()
+		else()
+			message( FATAL_ERROR "Unable to find Xerces library. Please set Xerces_LIBRARY_RELEASE to point to the (release) library file." )
+		elseif()
+			if (Xerces_LIBRARY_RELEASE)
+				target_link_libraries( ${ARGV0} ${Xerces_LIBRARY_RELEASE} )
+			else()
+				message( FATAL_ERROR "Unable to find Xerces library. Please set Xerces_LIBRARY_RELEASE to point to the (release) library file." )
+			endif()
+		endif()
+		
 		#Boost
-		#link_directories( ${Boost_LIBRARY_DIRS} )
+		target_link_libraries( ${ARGV0} ${Boost_LIBRARIES} )
 
 		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_E57_SUPPORT XERCES_STATIC_LIBRARY )
 	else()

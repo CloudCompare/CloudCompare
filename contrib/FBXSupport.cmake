@@ -5,7 +5,7 @@
 OPTION( OPTION_USE_FBX_SDK "Build with Autodesk FBX SDK support" OFF )
 if(OPTION_USE_FBX_SDK)
 
-	# liblas
+	# FBX SDK
 	set( FBX_SDK_INCLUDE_DIR "" CACHE PATH "FBX SDK include directory" )
 	set( FBX_SDK_LIBRARY_FILE "" CACHE FILEPATH "FBX SDK static library file" )
 

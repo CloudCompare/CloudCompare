@@ -23,7 +23,7 @@
 #include "E57Header.h"
 
 //libE57
-#include <E57/E57Foundation.h>
+#include <e57/E57Foundation.h>
 //using namespace e57; //conflict between boost and stdint!
 
 //CCLib

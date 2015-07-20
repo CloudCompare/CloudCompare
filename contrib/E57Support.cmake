@@ -52,7 +52,11 @@ if( ${OPTION_USE_LIBE57} )
 	# manual version
 	if( LIBE57_INSTALL_DIR )
 		#libE57
-		target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.lib optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.lib )
+		if (WIN32)
+			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.lib optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.lib )
+		elseif()
+			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.a optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.a )
+		endif()		
 		#Xerces
 		target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} ${Boost_LIBRARIES} )
 		#Boost

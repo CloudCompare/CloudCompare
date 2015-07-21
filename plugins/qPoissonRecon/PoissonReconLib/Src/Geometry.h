@@ -42,6 +42,7 @@ struct Point3D
 {
 	Real coords[3];
 	Point3D( void ) { coords[0] = coords[1] = coords[2] = Real(0); }
+	Point3D( Real v ) { coords[0] = coords[1] = coords[2] = v; }
 	template< class _Real > Point3D( _Real v0 , _Real v1 , _Real v2 ){ coords[0] = Real(v0) , coords[1] = Real(v1) , coords[2] = Real(v2); }
 	template< class _Real > Point3D( const Point3D< _Real >& p ){ coords[0] = Real( p[0] ) , coords[1] = Real( p[1] ) , coords[2] = Real( p[2] ); }
 	inline       Real& operator[] ( int i )       { return coords[i]; }

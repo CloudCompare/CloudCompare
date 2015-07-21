@@ -64,7 +64,8 @@ v2.6.2 XX/XX/2015
 		- new 'auto' button (when a single cloud is selected) to automatically estimate the local radius
 		- new preferred orientation 'Use previous normal' to use the former normal (if any) to orient the new one
 	* Poisson Surface Reconstruction:
-		- now using version 6.13 (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version6.13/)
+		- now using version 7 (https://github.com/mkazhdan/PoissonRecon/)
+		- built-in color interpolation (faster & cleaner)
 	* Point list picking:
 		- label names are now preserved (if the user quits the tool, changes the labels name and restart the tool)
 		- labels title in 3D have now a semi-transparent background

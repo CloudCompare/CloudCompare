@@ -195,29 +195,39 @@ template< class Real >
 class Octree
 {
 	typedef OctNode< TreeNodeData > TreeOctNode;
-	struct _PointData
+public:
+	template< class V >
+	struct ProjectiveData
+	{
+		V v;
+		Real w;
+		ProjectiveData( V vv=V(0) , Real ww=Real(0) ) : v(vv) , w(ww) { }
+		operator V (){ return w!=0 ? v/w : v*w; }
+		ProjectiveData& operator += ( const ProjectiveData& p ){ v += p.v , w += p.w ; return *this; }
+		ProjectiveData& operator -= ( const ProjectiveData& p ){ v -= p.v , w -= p.w ; return *this; }
+		ProjectiveData& operator *= ( Real s ){ v *= s , w *= s ; return *this; }
+		ProjectiveData& operator /= ( Real s ){ v /= s , w /= s ; return *this; }
+		ProjectiveData operator + ( const ProjectiveData& p ) const { return ProjectiveData( v+p.v , w+p.w ); }
+		ProjectiveData operator - ( const ProjectiveData& p ) const { return ProjectiveData( v-p.v , w-p.w ); }
+		ProjectiveData operator * ( Real s ) const { return ProjectiveData( v*s , w*s ); }
+		ProjectiveData operator / ( Real s ) const { return ProjectiveData( v/s , w/s ); }
+	};
+	struct PointData
 	{
 		Point3D< Real > position;
 		Real weightedCoarserValue;
 		Real weight;
-		_PointData( Point3D< Real > p=Point3D< Real >() , Real w=0 ) { position = p , weight = w , weightedCoarserValue = Real(0); }
+		PointData( Point3D< Real > p=Point3D< Real >() , Real w=0 ) { position = p , weight = w , weightedCoarserValue = Real(0); }
 	};
-public:
-	struct NormalInfo
+	template< class Data >
+	struct SparseNodeData
 	{
-		std::vector< int > normalIndices;
-		std::vector< Point3D< Real > > normals;
-		int normalIndex( const TreeOctNode* node ) const { return node->nodeData.nodeIndex>=normalIndices.size() ? -1 : normalIndices[ node->nodeData.nodeIndex ]; }
-	};
-	struct PointInfo
-	{
-		std::vector< int > pointIndices;
-		std::vector< _PointData > points;
-		int pointIndex( const TreeOctNode* node ) const { return node->nodeData.nodeIndex>=pointIndices.size() ? -1 : pointIndices[ node->nodeData.nodeIndex ]; }
+		std::vector< int > indices;
+		std::vector< Data > data;
+		int index( const TreeOctNode* node ) const { return node->nodeData.nodeIndex>=indices.size() ? -1 : indices[ node->nodeData.nodeIndex ]; }
 	};
 protected:
 	SortedTreeNodes _sNodes;
-	Real _samplesPerNode;
 	int _splatDepth;
 	int _minDepth;
 	int _fullDepth;
@@ -226,7 +236,6 @@ protected:
 	Real _scale;
 	Point3D< Real > _center;
 	std::vector< int > _pointCount;
-	Real _normalSmooth;
 	BSplineData< 2 > _fData;
 
 	bool _InBounds( Point3D< Real > ) const;
@@ -255,11 +264,11 @@ protected:
 	};
 
 	void _setMultiColorIndices( int start , int end , std::vector< std::vector< int > >& indices ) const;
-	int _SolveSystemGS( PointInfo& pointInfo , int depth , const typename BSplineData< 2 >::Integrator& integrator , const SortedTreeNodes& sNodes , Pointer( Real ) solution , Pointer( Real ) constraints , Pointer( Real ) metSolutionConstraints , int iters , bool coarseToFine , bool showResidual=false , double* bNorm2=NULL , double* inRNorm2=NULL , double* outRNorm2=NULL , bool forceSilent=false );
-	int _SolveSystemCG( PointInfo& pointInfo , int depth , const typename BSplineData< 2 >::Integrator& integrator , const SortedTreeNodes& sNodes , Pointer( Real ) solution , Pointer( Real ) constraints , Pointer( Real ) metSolutionConstraints , int iters , bool coarseToFine , bool showResidual=false , double* bNorm2=NULL , double* inRNorm2=NULL , double* outRNorm2=NULL , double accuracy=0 );
+	int _SolveSystemGS( SparseNodeData< PointData >& pointInfo , int depth , const typename BSplineData< 2 >::Integrator& integrator , const SortedTreeNodes& sNodes , Pointer( Real ) solution , Pointer( Real ) constraints , Pointer( Real ) metSolutionConstraints , int iters , bool coarseToFine , bool showResidual=false , double* bNorm2=NULL , double* inRNorm2=NULL , double* outRNorm2=NULL , bool forceSilent=false );
+	int _SolveSystemCG( SparseNodeData< PointData >& pointInfo , int depth , const typename BSplineData< 2 >::Integrator& integrator , const SortedTreeNodes& sNodes , Pointer( Real ) solution , Pointer( Real ) constraints , Pointer( Real ) metSolutionConstraints , int iters , bool coarseToFine , bool showResidual=false , double* bNorm2=NULL , double* inRNorm2=NULL , double* outRNorm2=NULL , double accuracy=0 );
 
 	int GetMatrixRowSize( const typename TreeOctNode::Neighbors5& neighbors5 , bool symmetric ) const;
-	int SetMatrixRow( const PointInfo& pointInfo , const typename TreeOctNode::Neighbors5& neighbors5 , Pointer( MatrixEntry< Real > ) row , int offset , const typename BSplineData< 2 >::Integrator& integrator , const Stencil< double , 5 >& stencil , bool symmetric ) const;
+	int SetMatrixRow( const SparseNodeData< PointData >& pointInfo , const typename TreeOctNode::Neighbors5& neighbors5 , Pointer( MatrixEntry< Real > ) row , int offset , const typename BSplineData< 2 >::Integrator& integrator , const Stencil< double , 5 >& stencil , bool symmetric ) const;
 
 	void SetDivergenceStencil ( int depth , const typename BSplineData< 2 >::Integrator& integrator , Stencil< Point3D< double > , 5 >& stencil , bool scatter ) const;
 	void SetDivergenceStencils( int depth , const typename BSplineData< 2 >::Integrator& integrator , Stencil< Point3D< double > , 5 > stencil[2][2][2] , bool scatter ) const;
@@ -276,34 +285,45 @@ protected:
 
 	static void UpdateCoarserSupportBounds( const TreeOctNode* node , int& startX , int& endX , int& startY , int& endY , int& startZ , int& endZ );
 
-	void UpdateConstraintsFromCoarser( const PointInfo& pointInfo , const typename TreeOctNode::Neighbors5& neighbors5 , const typename TreeOctNode::Neighbors5& pNeighbors5 , TreeOctNode* node , Pointer( Real ) constraints , ConstPointer( Real ) metSolution , const typename BSplineData< 2 >::Integrator& integrator , const Stencil< double , 5 >& stencil ) const;
+	void UpdateConstraintsFromCoarser( const SparseNodeData< PointData >& pointInfo , const typename TreeOctNode::Neighbors5& neighbors5 , const typename TreeOctNode::Neighbors5& pNeighbors5 , TreeOctNode* node , Pointer( Real ) constraints , ConstPointer( Real ) metSolution , const typename BSplineData< 2 >::Integrator& integrator , const Stencil< double , 5 >& stencil ) const;
 	// Updates the constraints @(depth-1) based on the solution coefficients @(depth)
 	void UpdateConstraintsFromFiner( const typename BSplineData< 2 >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) fineSolution , Pointer( Real ) coarseConstraints ) const;
 	// Evaluate the points @(depth) using coefficients @(depth-1)
-	void SetPointValuesFromCoarser( PointInfo& pointInfo , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) coarseCoefficients );
+	void SetPointValuesFromCoarser( SparseNodeData< PointData >& pointInfo , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) coarseCoefficients );
 	// Evalutes the solution @(depth) at the points @(depth-1) and updates the met constraints @(depth-1)
-	void SetPointConstraintsFromFiner( const PointInfo& pointInfo , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real )  finerCoefficients , Pointer( Real ) metConstraints) const;
-	Real _WeightedCoarserFunctionValue( const _PointData& pointData , const typename TreeOctNode::NeighborKey3& neighborKey3 , const TreeOctNode* node , ConstPointer( Real ) coarseCoefficients ) const;
-	Real _WeightedFinerFunctionValue  ( const _PointData& pointData , const typename TreeOctNode::NeighborKey3& neighborKey3 , const TreeOctNode* node , ConstPointer( Real )  finerCoefficients ) const;
+	void SetPointConstraintsFromFiner ( const SparseNodeData< PointData >& pointInfo , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) finerCoefficients , Pointer( Real ) metConstraints ) const;
+	Real _WeightedCoarserFunctionValue( const PointData& pointData , const typename TreeOctNode::NeighborKey3& neighborKey3 , const TreeOctNode* node , ConstPointer( Real ) coarseCoefficients ) const;
+	Real _WeightedFinerFunctionValue  ( const PointData& pointData , const typename TreeOctNode::NeighborKey3& neighborKey3 , const TreeOctNode* node , ConstPointer( Real )  finerCoefficients ) const;
 
 	// Down samples constraints @(depth) to constraints @(depth-1)
 	template< class C > void DownSample( int depth , const SortedTreeNodes& sNodes , ConstPointer( C ) fineConstraints    , Pointer( C ) coarseConstraints ) const;
 	// Up samples solution @(depth-1) to solution @(depth)
 	template< class C > void UpSample  ( int depth , const SortedTreeNodes& sNodes , ConstPointer( C ) coarseCoefficients , Pointer( C )  fineCoefficients ) const;
-	int GetSliceMatrixAndUpdateConstraints( const PointInfo& pointInfo , SparseMatrix< Real >& matrix , Pointer( Real ) constraints , const typename BSplineData< 2 >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) metSolution , bool coarseToFine , int nStart , int nEnd );
-	int GetMatrixAndUpdateConstraints( const PointInfo& pointInfo , SparseSymmetricMatrix< Real >& matrix , Pointer( Real ) constraints , const typename BSplineData< 2 >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) metSolution , bool coarseToFine );
+	int GetSliceMatrixAndUpdateConstraints( const SparseNodeData< PointData >& pointInfo , SparseMatrix< Real >& matrix , Pointer( Real ) constraints , const typename BSplineData< 2 >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) metSolution , bool coarseToFine , int nStart , int nEnd );
+	int GetMatrixAndUpdateConstraints( const SparseNodeData< PointData >& pointInfo , SparseSymmetricMatrix< Real >& matrix , Pointer( Real ) constraints , const typename BSplineData< 2 >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) metSolution , bool coarseToFine );
 
 
 	int UpdateWeightContribution( std::vector< Real >& kernelDensityWeights , TreeOctNode* node , const Point3D<Real>& position , typename TreeOctNode::NeighborKey3& neighborKey , Real weight=Real(1.0) );
-	Real GetSampleWeight( ConstPointer( Real ) kernelDensityWeight , const Point3D<Real>& position , typename TreeOctNode::NeighborKey3& neighborKey , int splatDepth );
-	Real GetSampleWeight( ConstPointer( Real ) kernelDensityWeight , const TreeOctNode* node , const Point3D<Real>& position , typename TreeOctNode::ConstNeighborKey3& neighborKey );
-	void GetSampleDepthAndWeight( ConstPointer( Real ) kernelDensityWeight , const TreeOctNode* node , const Point3D<Real>& position , typename TreeOctNode::ConstNeighborKey3& neighborKey , Real samplesPerNode , Real& depth , Real& weight );
-	Real GetSampleWeight( ConstPointer( Real ) kernelDensityWeight , TreeOctNode* node , const Point3D<Real>& position , typename TreeOctNode::NeighborKey3& neighborKey );
-	void GetSampleDepthAndWeight( ConstPointer( Real ) kernelDensityWeight , TreeOctNode* node , const Point3D<Real>& position , typename TreeOctNode::NeighborKey3& neighborKey , Real samplesPerNode , Real& depth , Real& weight );
-	int SplatOrientedPoint( ConstPointer( Real ) kernelDensityWeights , TreeOctNode* node , const Point3D<Real>& point , const Point3D< Real >& normal , NormalInfo& normalInfo , typename TreeOctNode::NeighborKey3& neighborKey );
-	Real SplatOrientedPoint( ConstPointer( Real ) kernelDensityWeights , const Point3D<Real>& point , const Point3D<Real>& normal , NormalInfo& normalInfo , typename TreeOctNode::NeighborKey3& neighborKey , int kernelDepth , Real samplesPerNode , int minDepth , int maxDepth );
+	Real GetSamplesPerNode( ConstPointer( Real ) kernelDensityWeight , const TreeOctNode* node , const Point3D< Real >& position , typename TreeOctNode::ConstNeighborKey3& neighborKey );
+	Real GetSamplesPerNode( ConstPointer( Real ) kernelDensityWeight ,       TreeOctNode* node , const Point3D< Real >& position , typename TreeOctNode::NeighborKey3&      neighborKey );
+public:
+	void GetSampleDepthAndWeight( ConstPointer( Real ) kernelDensityWeight , const Point3D< Real >& position , typename TreeOctNode::NeighborKey3& neighborKey , Real& depth , Real& weight );
+	void GetSampleDepthAndWeight( ConstPointer( Real ) kernelDensityWeight , const Point3D< Real >& position , typename TreeOctNode::ConstNeighborKey3& neighborKey , Real& depth , Real& weight );
+protected:
+	void GetSampleDepthAndWeight( ConstPointer( Real ) kernelDensityWeight , const TreeOctNode* node , const Point3D< Real >& position , typename TreeOctNode::ConstNeighborKey3& neighborKey , Real& depth , Real& weight );
+	void GetSampleDepthAndWeight( ConstPointer( Real ) kernelDensityWeight ,       TreeOctNode* node , const Point3D< Real >& position , typename TreeOctNode::NeighborKey3&      neighborKey , Real& depth , Real& weight );
+	template< class V >
+	int SplatPointData( TreeOctNode* node , const Point3D<Real>& point , const V& v , SparseNodeData< V >& data , typename TreeOctNode::NeighborKey3& neighborKey );
+	template< class V >
+	int SplatPointData( TreeOctNode* node , const Point3D<Real>& point , const V& v , SparseNodeData< V >& data , typename TreeOctNode::ConstNeighborKey3& neighborKey );
+	template< class V >
+	Real SplatPointData( ConstPointer( Real ) kernelDensityWeights , const Point3D< Real >& point , const V& v , SparseNodeData< V >& data , typename TreeOctNode::NeighborKey3& neighborKey , int minDepth , int maxDepth , int dim=DIMENSION );
+	template< class V >
+	void MultiSplatPointData( ConstPointer( Real ) kernelDensityWeights , const Point3D< Real >& point , const V& v , SparseNodeData< V >& data , typename TreeOctNode::NeighborKey3& neighborKey , int maxDepth , int dim=DIMENSION );
+	template< class V >
+	void MultiSplatPointData( ConstPointer( Real ) kernelDensityWeights , const Point3D< Real >& point , const V& v , SparseNodeData< V >& data , typename TreeOctNode::ConstNeighborKey3& neighborKey , int dim=DIMENSION );
 
-	int HasNormals( TreeOctNode* node , const NormalInfo& normalInfo );
+	int HasNormals( TreeOctNode* node , const SparseNodeData< Point3D< Real > >& normalInfo );
 
 	///////////////////////////
 	// Iso-Surfacing Methods //
@@ -370,11 +390,11 @@ protected:
 	template< class Vertex >
 	void SetSliceIsoCorners( ConstPointer( Real ) solution , ConstPointer( Real ) coarseSolution , Real isoValue , int depth , int slice , int z , std::vector< SlabValues< Vertex > >& sValues , const typename BSplineData< 2 >::template CornerEvaluator< 2 >& evaluator , const Stencil< double , 3 > stencil[8] , const Stencil< double , 3 > stencils[8][8] , const Stencil< Point3D< double > , 3 > nStencil[8] , const Stencil< Point3D< double > , 3 > nStencils[8][8] , int threads );
 	template< class Vertex >
-	void SetSliceIsoVertices( ConstPointer( Real ) kernelDensityWeights , Real isoValue , int depth , int slice ,         int& vOffset , CoredMeshData< Vertex >& mesh , std::vector< SlabValues< Vertex > >& sValues , int threads );
+	void SetSliceIsoVertices( ConstPointer( Real ) kernelDensityWeights , const SparseNodeData< ProjectiveData< Point3D< Real > > >* colorData , Real isoValue , int depth , int slice ,         int& vOffset , CoredMeshData< Vertex >& mesh , std::vector< SlabValues< Vertex > >& sValues , int threads );
 	template< class Vertex >
-	void SetSliceIsoVertices( ConstPointer( Real ) kernelDensityWeights , Real isoValue , int depth , int slice , int z , int& vOffset , CoredMeshData< Vertex >& mesh , std::vector< SlabValues< Vertex > >& sValues , int threads );
+	void SetSliceIsoVertices( ConstPointer( Real ) kernelDensityWeights , const SparseNodeData< ProjectiveData< Point3D< Real > > >* colorData , Real isoValue , int depth , int slice , int z , int& vOffset , CoredMeshData< Vertex >& mesh , std::vector< SlabValues< Vertex > >& sValues , int threads );
 	template< class Vertex >
-	void SetXSliceIsoVertices( ConstPointer( Real ) kernelDensityWeights , Real isoValue , int depth , int slab , int& vOffset , CoredMeshData< Vertex >& mesh , std::vector< SlabValues< Vertex > >& sValues , int threads );
+	void SetXSliceIsoVertices( ConstPointer( Real ) kernelDensityWeights , const SparseNodeData< ProjectiveData< Point3D< Real > > >* colorData , Real isoValue , int depth , int slab , int& vOffset , CoredMeshData< Vertex >& mesh , std::vector< SlabValues< Vertex > >& sValues , int threads );
 	template< class Vertex >
 	void CopyFinerSliceIsoEdgeKeys( int depth , int slice ,         std::vector< SlabValues< Vertex > >& sValues , int threads );
 	template< class Vertex >
@@ -388,33 +408,35 @@ protected:
 	template< class Vertex >
 	void SetXSliceIsoEdges( int depth , int slice , std::vector< SlabValues< Vertex > >& slabValues , int threads );
 
-	template< class Vertex >
+	template< class Vertex , class _Vertex >
 	void SetIsoSurface( int depth , int offset , const SliceValues< Vertex >& bValues , const SliceValues< Vertex >& fValues , const XSliceValues< Vertex >& xValues , CoredMeshData< Vertex >& mesh , bool polygonMesh , bool addBarycenter , int& vOffset , int threads );
 
-	template< class Vertex >
+	template< class Vertex , class _Vertex >
 	static int AddIsoPolygons( CoredMeshData< Vertex >& mesh , std::vector< std::pair< int , Vertex > >& polygon , bool polygonMesh , bool addBarycenter , int& vOffset );
 
 	template< class Vertex >
-	bool GetIsoVertex( ConstPointer( Real ) kernelDensityWeights , Real isoValue , typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int edgeIndex , int z , const SliceValues< Vertex >& sValues , Vertex& vertex );
+	bool GetIsoVertex( ConstPointer( Real ) kernelDensityWeights , const SparseNodeData< ProjectiveData< Point3D< Real > > >* colorData , Real isoValue , typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int edgeIndex , int z , const SliceValues< Vertex >& sValues , Vertex& vertex );
 	template< class Vertex >
-	bool GetIsoVertex( ConstPointer( Real ) kernelDensityWeights , Real isoValue , typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int cornerIndex , const SliceValues< Vertex >& bValues , const SliceValues< Vertex >& fValues , Vertex& vertex );
+	bool GetIsoVertex( ConstPointer( Real ) kernelDensityWeights , const SparseNodeData< ProjectiveData< Point3D< Real > > >* colorData , Real isoValue , typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int cornerIndex , const SliceValues< Vertex >& bValues , const SliceValues< Vertex >& fValues , Vertex& vertex );
 
 
 	////////////////////////
 	// Evaluation Methods //
 	////////////////////////
-	Real getCornerValue( const typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int corner , ConstPointer( Real ) solution , ConstPointer( Real ) metSolution , const typename BSplineData< 2 >::template CornerEvaluator< 2 >& evaluator , const Stencil< double , 3 >& stencil , const Stencil< double , 3 > stencils[8] , bool isInterior ) const;
+	template< class V >
+	V getCornerValue( const typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int corner , ConstPointer( V ) solution , ConstPointer( V ) metSolution , const typename BSplineData< 2 >::template CornerEvaluator< 2 >& evaluator , const Stencil< double , 3 >& stencil , const Stencil< double , 3 > stencils[8] , bool isInterior ) const;
 	Point3D< Real > getCornerNormal( const typename TreeOctNode::ConstNeighbors5& neighbors5 , const typename TreeOctNode::ConstNeighbors5& pNeighbors5 , const TreeOctNode* node , int corner , ConstPointer( Real ) solution , ConstPointer( Real ) metSolution , const typename BSplineData< 2 >::template CornerEvaluator< 2 >& evaluator , const Stencil< Point3D< double > , 5 >& nStencil , const Stencil< Point3D< double > , 5 > nStencils[8] , bool isInterior ) const;
 	std::pair< Real , Point3D< Real > > getCornerValueAndNormal( const typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , int corner , ConstPointer( Real ) solution , ConstPointer( Real ) metSolution , const typename BSplineData< 2 >::template CornerEvaluator< 2 >& evaluator , const Stencil< double , 3 >& vStencil , const Stencil< double , 3 > vStencils[8] , const Stencil< Point3D< double > , 3 >& nStencil , const Stencil< Point3D< double > , 3 > nStencils[8] , bool isInterior ) const;
-	Real getCenterValue( const typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , ConstPointer( Real ) solution , ConstPointer( Real ) metSolution , const typename BSplineData< 2 >::template CenterEvaluator< 1 >& evaluator , const Stencil< double , 3 >& stencil , const Stencil< double , 3 >& pStencil , bool isInterior ) const;
+	template< class V >
+	V getCenterValue( const typename TreeOctNode::ConstNeighborKey3& neighborKey3 , const TreeOctNode* node , ConstPointer( V ) solution , ConstPointer( V ) metSolution , const typename BSplineData< 2 >::template CenterEvaluator< 1 >& evaluator , const Stencil< double , 3 >& stencil , const Stencil< double , 3 >& pStencil , bool isInterior ) const;
 
 	static bool _IsInset( const TreeOctNode* node );
 	static bool _IsInsetSupported( const TreeOctNode* node );
 
 	void refineBoundary( std::vector< int >* map );
 public:
-	int threads;
 	static double maxMemoryUsage;
+	int threads;
 	TreeOctNode tree;
 
 	static double MemoryUsage( void );
@@ -422,26 +444,38 @@ public:
 
 	void MakeComplete( std::vector< int >* map=NULL );
 	void Finalize( std::vector< int >* map=NULL );
-	void ClipTree( const NormalInfo& normalInfo );
+	void ClipTree( const SparseNodeData< Point3D< Real > >& normalInfo );
 
-	Real Evaluate( ConstPointer( Real ) coefficients , Point3D< Real > p , const BSplineData< 2 >* fData=NULL ) const;
-	Pointer( Real ) Evaluate( ConstPointer( Real ) coefficients , int& res , Real isoValue=0.f , int depth=-1 );
+protected:
+	template< class V > V _Evaluate(         ConstPointer( V )  coefficients , Point3D< Real > p , typename TreeOctNode::ConstNeighborKey3& neighborKey3 ) const;
+	template< class V > V _Evaluate( const SparseNodeData< V >& coefficients , Point3D< Real > p , typename TreeOctNode::ConstNeighborKey3& neighborKey3 ) const;
+public:
+	template< class V > V Evaluate(         ConstPointer( V )  coefficients , Point3D< Real > p , const BSplineData< 2 >* fData = NULL , int depth=-1 ) const;
+	template< class V > V Evaluate( const SparseNodeData< V >& coefficients , Point3D< Real > p , const BSplineData< 2 >* fData = NULL , int depth=-1 ) const;
+	template< class V > Pointer( V ) Evaluate( ConstPointer( V ) coefficients , int& res , Real isoValue=0.f , int depth=-1 );
+	// After calling set tree, the indices of the octree node will be stored by depth, and within depth they will be sorted by z-coordinate
 	template< class PointReal >
-	int SetTree( PointStream< PointReal >* pointStream , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
+	int SetTree( OrientedPointStream< PointReal >* pointStream , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
 		Real scaleFactor , bool useConfidence , bool useNormalWeight , Real constraintWeight , int adaptiveExponent ,
-		PointInfo& pointInfo , NormalInfo& normalInfo , std::vector< Real >& kernelDensityWeights , std::vector< Real >& centerWeights ,
-#if 1
-		// Bug fix courtesy of asmaloney
-		int boundaryType=BSplineElements< 2 >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity() , bool makeComplete=false );
-#else
-		int boundaryType=BSplineElements< 2 >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity , bool makeComplete=false );
-#endif
-	Pointer( Real ) SetLaplacianConstraints( const NormalInfo& normalInfo );
-	Pointer( Real ) SolveSystem( PointInfo& pointInfo , Pointer( Real ) constraints , bool showResidual , int iters , int maxSolveDepth , int cgDepth=0 , double cgAccuracy=0 );
+		std::vector< Real >& kernelDensityWeights ,
+		SparseNodeData< PointData >& pointInfo , SparseNodeData< Point3D< Real > >& normalInfo , std::vector< Real >& centerWeights ,
+		XForm4x4< Real >& xForm , int boundaryType=BSplineElements< 2 >::NONE , bool makeComplete=false );
+
+	template< class PointReal , class Data , class _Data >
+	int SetTree( OrientedPointStreamWithData< PointReal , Data >* pointStream , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
+		Real scaleFactor , bool useConfidence , bool useNormalWeight ,
+		Real constraintWeight , int adaptiveExponent ,
+		std::vector< Real >& kernelDensityWeights ,
+		SparseNodeData< PointData >& pointInfo , SparseNodeData< Point3D< Real > >& normalInfo , std::vector< Real >& centerWeights ,
+		SparseNodeData< ProjectiveData< _Data > >& dataValues ,
+		XForm4x4< Real >& xForm , int boundaryType=BSplineElements< 2 >::NONE , bool makeComplete=false );
+
+	Pointer( Real ) SetLaplacianConstraints( const SparseNodeData< Point3D< Real > >& normalInfo );
+	Pointer( Real ) SolveSystem( SparseNodeData< PointData >& pointInfo , Pointer( Real ) constraints , bool showResidual , int iters , int maxSolveDepth , int cgDepth=0 , double cgAccuracy=0 );
 
 	Real GetIsoValue( ConstPointer( Real ) solution , const std::vector< Real >& centerWeights );
-	template< class Vertex >
-	void GetMCIsoSurface( ConstPointer( Real ) kernelDensityWeights , ConstPointer( Real ) solution , Real isoValue , CoredMeshData< Vertex >& mesh , bool nonLinearFit=true , bool addBarycenter=false , bool polygonMesh=false );
+	template< class Vertex , class _Vertex >
+	void GetMCIsoSurface( ConstPointer( Real ) kernelDensityWeights , const SparseNodeData< ProjectiveData< Point3D< Real > > >* colorData , ConstPointer( Real ) solution , Real isoValue , CoredMeshData< Vertex >& mesh , bool nonLinearFit=true , bool addBarycenter=false , bool polygonMesh=false );
 };
 template< class Real >
 void Reset( void )

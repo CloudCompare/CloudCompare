@@ -80,6 +80,9 @@ public:
 		//! If this flag is enabled, the sampling density is written out with the vertices
 		bool density;
 
+		//! Pull factor for color interpolation
+		float colorInterp;
+
 		//DGM: the above parameters are not documented in PoissonRecon
 
 		bool complete;
@@ -101,10 +104,14 @@ public:
 	};
 
 	//! Main entry point (shortcut to Execute)
-	static bool Reconstruct(Parameters params, PointStream< float >* pointStream, CoredVectorMeshData< PlyValueVertex< float > >& mesh);
+	static bool Reconstruct(Parameters params, OrientedPointStream< float >* pointStream, CoredVectorMeshData< PlyValueVertex< float > >& mesh);
+	//! Main entry point (shortcut to Execute) for colored clouds
+	static bool Reconstruct(Parameters params, OrientedPointStreamWithData< float , Point3D< unsigned char > >* pointStream, CoredVectorMeshData< PlyColorAndValueVertex< float > >& mesh);
 
 	//! Main entry point (shortcut to Execute)
-	static bool Reconstruct(Parameters params, PointStream< double >* pointStream, CoredVectorMeshData< PlyValueVertex< double > >& mesh);
+	static bool Reconstruct(Parameters params, OrientedPointStream< double >* pointStream, CoredVectorMeshData< PlyValueVertex< double > >& mesh);
+	//! Main entry point (shortcut to Execute) for colored clouds
+	static bool Reconstruct(Parameters params, OrientedPointStreamWithData< double , Point3D< unsigned char > >* pointStream, CoredVectorMeshData< PlyColorAndValueVertex< double > >& mesh);
 
 };
 

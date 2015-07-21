@@ -32,9 +32,9 @@ DAMAGE.
 SortedTreeNodes::SortedTreeNodes( void )
 {
 	nodeCount = NULL;
-	treeNodes = NullPointer< TreeOctNode* >();
+	treeNodes = NullPointer( TreeOctNode* );
 	maxDepth = 0;
-	sliceOffsets = NullPointer< Pointer( int ) >();
+	sliceOffsets = NullPointer( Pointer( int ) );
 }
 SortedTreeNodes::~SortedTreeNodes( void )
 {

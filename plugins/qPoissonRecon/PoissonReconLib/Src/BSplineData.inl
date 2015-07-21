@@ -183,7 +183,7 @@ double BSplineData< Degree >::CornerEvaluator< Radius >::value( int depth , int 
 template< int Degree >
 void BSplineData< Degree >::set( int maxDepth , int boundaryType )
 {
-	_boundaryType = boundaryType;
+	_boundaryType = boundaryType>0 ? 1 : ( boundaryType<0 ? -1 : 0 );
 
 	depth = maxDepth;
 	// [Warning] This assumes that the functions spacing is dual
@@ -378,9 +378,9 @@ template< int Degree >
 template< class Real >
 BSplineData< Degree >::DotTables< Real >::DotTables( void )
 {
-	vvDotTable = NullPointer< Real >();	
-	dvDotTable = NullPointer< Real >();	
-	ddDotTable = NullPointer< Real >();	
+	vvDotTable = NullPointer( Real );	
+	dvDotTable = NullPointer( Real );	
+	ddDotTable = NullPointer( Real );	
 }
 template< int Degree >
 template< class Real >
@@ -533,8 +533,8 @@ template< int Degree >
 template< class Real >
 BSplineData< Degree >::ValueTables< Real >::ValueTables( void )
 {
-	valueTable = NullPointer< Real >();
-	dValueTable = NullPointer< Real >();
+	valueTable = NullPointer( Real );
+	dValueTable = NullPointer( Real );
 }
 template< int Degree >
 template< class Real >

@@ -43,8 +43,8 @@ void SparseMatrix< T >::_init( void )
 	_contiguous = false;
 	_maxEntriesPerRow = 0;
 	rows = 0;
-	rowSizes = NullPointer< int >( );
-	m_ppElements = NullPointer< Pointer( MatrixEntry< T > ) >( );
+	rowSizes = NullPointer( int );
+	m_ppElements = NullPointer( Pointer( MatrixEntry< T > ) );
 }
 
 template< class T > SparseMatrix< T >::SparseMatrix( void ){  _init(); }

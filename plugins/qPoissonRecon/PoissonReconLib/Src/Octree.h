@@ -253,6 +253,7 @@ public:
 		NeighborKey3( void );
 		NeighborKey3( const NeighborKey3& key3 );
 		~NeighborKey3( void );
+		int depth( void ) const { return _depth; }
 
 		void set( int depth );
 		template< class Real > Neighbors3& setNeighbors( OctNode* root , Point3D< Real > p , int d );
@@ -275,8 +276,9 @@ public:
 		ConstNeighborKey3( void );
 		ConstNeighborKey3( const ConstNeighborKey3& key3 );
 		~ConstNeighborKey3( void );
+		int depth( void ) const { return _depth; }
 
-		void set(int depth);
+		void set( int depth );
 		ConstNeighbors3& getNeighbors( const OctNode* node );
 		ConstNeighbors3& getNeighbors( const OctNode* node , int minDepth );
 		void getNeighbors( const OctNode* node , typename OctNode< NodeData >::ConstNeighbors5& neighbors );

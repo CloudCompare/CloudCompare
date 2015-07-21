@@ -26,88 +26,97 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+
+///////////////////////////////
+// MemoryOrientedPointStream //
+///////////////////////////////
 template< class Real >
-MemoryPointStream< Real >::MemoryPointStream( size_t pointCount , std::pair< Point3D< Real > , Point3D< Real > >* points ){ _points = points , _pointCount = pointCount , _current = 0; }
+MemoryOrientedPointStream< Real >::MemoryOrientedPointStream( size_t pointCount , const OrientedPoint3D< Real >* points ){ _points = points , _pointCount = pointCount , _current = 0; }
 template< class Real >
-MemoryPointStream< Real >::~MemoryPointStream( void ){ ; }
+MemoryOrientedPointStream< Real >::~MemoryOrientedPointStream( void ){ ; }
 template< class Real >
-void MemoryPointStream< Real >::reset( void ) { _current=0; }
+void MemoryOrientedPointStream< Real >::reset( void ) { _current=0; }
 template< class Real >
-bool MemoryPointStream< Real >::nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+bool MemoryOrientedPointStream< Real >::nextPoint( OrientedPoint3D< Real >& p )
 {
 	if( _current>=_pointCount ) return false;
-	p = _points[_current].first , n = _points[_current].second;
+	p = _points[_current];
 	_current++;
 	return true;
 }
 
+//////////////////////////////
+// ASCIIOrientedPointStream //
+//////////////////////////////
 template< class Real >
-ASCIIPointStream< Real >::ASCIIPointStream( const char* fileName )
+ASCIIOrientedPointStream< Real >::ASCIIOrientedPointStream( const char* fileName )
 {
 	_fp = fopen( fileName , "r" );
 	if( !_fp ) fprintf( stderr , "Failed to open file for reading: %s\n" , fileName ) , exit( 0 );
 }
 template< class Real >
-ASCIIPointStream< Real >::~ASCIIPointStream( void )
+ASCIIOrientedPointStream< Real >::~ASCIIOrientedPointStream( void )
 {
 	fclose( _fp );
 	_fp = NULL;
 }
 template< class Real >
-void ASCIIPointStream< Real >::reset( void ) { fseek( _fp , SEEK_SET , 0 ); }
+void ASCIIOrientedPointStream< Real >::reset( void ) { fseek( _fp , SEEK_SET , 0 ); }
 template< class Real >
-bool ASCIIPointStream< Real >::nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+bool ASCIIOrientedPointStream< Real >::nextPoint( OrientedPoint3D< Real >& p )
 {
 	float c[2*DIMENSION];
 	if( fscanf( _fp , " %f %f %f %f %f %f " , &c[0] , &c[1] , &c[2] , &c[3] , &c[4] , &c[5] )!=2*DIMENSION ) return false;
-	p[0] = c[0] , p[1] = c[1] , p[2] = c[2];
-	n[0] = c[3] , n[1] = c[4] , n[2] = c[5];
+	p.p[0] = c[0] , p.p[1] = c[1] , p.p[2] = c[2];
+	p.n[0] = c[3] , p.n[1] = c[4] , p.n[2] = c[5];
 	return true;
 }
+
+///////////////////////////////
+// BinaryOrientedPointStream //
+///////////////////////////////
 template< class Real >
-BinaryPointStream< Real >::BinaryPointStream( const char* fileName )
+BinaryOrientedPointStream< Real >::BinaryOrientedPointStream( const char* fileName )
 {
 	_pointsInBuffer = _currentPointIndex = 0;
 	_fp = fopen( fileName , "rb" );
 	if( !_fp ) fprintf( stderr , "Failed to open file for reading: %s\n" , fileName ) , exit( 0 );
 }
 template< class Real >
-BinaryPointStream< Real >::~BinaryPointStream( void )
+BinaryOrientedPointStream< Real >::~BinaryOrientedPointStream( void )
 {
 	fclose( _fp );
 	_fp = NULL;
 }
 template< class Real >
-void BinaryPointStream< Real >::reset( void )
+void BinaryOrientedPointStream< Real >::reset( void )
 {
 	fseek( _fp , SEEK_SET , 0 );
 	_pointsInBuffer = _currentPointIndex = 0;
 }
 template< class Real >
-bool BinaryPointStream< Real >::nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+bool BinaryOrientedPointStream< Real >::nextPoint( OrientedPoint3D< Real >& p )
 {
 	if( _currentPointIndex<_pointsInBuffer )
 	{
-		p[0] = _pointBuffer[ _currentPointIndex*6+0 ];
-		p[1] = _pointBuffer[ _currentPointIndex*6+1 ];
-		p[2] = _pointBuffer[ _currentPointIndex*6+2 ];
-		n[0] = _pointBuffer[ _currentPointIndex*6+3 ];
-		n[1] = _pointBuffer[ _currentPointIndex*6+4 ];
-		n[2] = _pointBuffer[ _currentPointIndex*6+5 ];
+		p = _pointBuffer[ _currentPointIndex ];
 		_currentPointIndex++;
 		return true;
 	}
 	else
 	{
 		_currentPointIndex = 0;
-		_pointsInBuffer = int( fread( _pointBuffer , sizeof( Real ) * 6 , POINT_BUFFER_SIZE , _fp ) );
+		_pointsInBuffer = int( fread( _pointBuffer , sizeof( OrientedPoint3D< Real > ) , POINT_BUFFER_SIZE , _fp ) );
 		if( !_pointsInBuffer ) return false;
-		else return nextPoint( p , n );
+		else return nextPoint( p );
 	}
 }
 
+////////////////////////////
+// PLYOrientedPointStream //
+////////////////////////////
 template< class Real >
-PLYPointStream< Real >::PLYPointStream( const char* fileName )
+PLYOrientedPointStream< Real >::PLYOrientedPointStream( const char* fileName )
 {
 	_fileName = new char[ strlen( fileName )+1 ];
 	strcpy( _fileName , fileName );
@@ -115,7 +124,7 @@ PLYPointStream< Real >::PLYPointStream( const char* fileName )
 	reset();
 }
 template< class Real >
-void PLYPointStream< Real >::reset( void )
+void PLYOrientedPointStream< Real >::reset( void )
 {
 	int fileType;
 	float version;
@@ -166,7 +175,7 @@ void PLYPointStream< Real >::reset( void )
 	}
 }
 template< class Real >
-void PLYPointStream< Real >::_free( void )
+void PLYOrientedPointStream< Real >::_free( void )
 {
 	if( _ply ) ply_close( _ply ) , _ply = NULL;
 	if( _elist )
@@ -176,20 +185,222 @@ void PLYPointStream< Real >::_free( void )
 	}
 }
 template< class Real >
-PLYPointStream< Real >::~PLYPointStream( void )
+PLYOrientedPointStream< Real >::~PLYOrientedPointStream( void )
 {
 	_free();
 	if( _fileName ) delete[] _fileName , _fileName = NULL;
 }
 template< class Real >
-bool PLYPointStream< Real >::nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+bool PLYOrientedPointStream< Real >::nextPoint( OrientedPoint3D< Real >& p )
 {
 	if( _pIdx<_pCount )
 	{
 		PlyOrientedVertex< Real > op;
 		ply_get_element( _ply, (void *)&op );
-		p = op.point;
-		n = op.normal;
+		p.p = op.point;
+		p.n = op.normal;
+		_pIdx++;
+		return true;
+	}
+	else return false;
+}
+
+///////////////////////////////////////
+// MemoryOrientedPointStreamWithData //
+///////////////////////////////////////
+template< class Real , class Data >
+MemoryOrientedPointStreamWithData< Real , Data >::MemoryOrientedPointStreamWithData( size_t pointCount , const std::pair< OrientedPoint3D< Real > , Data >* points ){ _points = points , _pointCount = pointCount , _current = 0; }
+template< class Real , class Data >
+MemoryOrientedPointStreamWithData< Real , Data >::~MemoryOrientedPointStreamWithData( void ){ ; }
+template< class Real , class Data >
+void MemoryOrientedPointStreamWithData< Real , Data >::reset( void ) { _current=0; }
+template< class Real , class Data >
+bool MemoryOrientedPointStreamWithData< Real , Data >::nextPoint( OrientedPoint3D< Real >& p , Data& d )
+{
+	if( _current>=_pointCount ) return false;
+	p = _points[_current].first;
+	d = _points[_current].second;
+	_current++;
+	return true;
+}
+
+//////////////////////////////////////
+// ASCIIOrientedPointStreamWithData //
+//////////////////////////////////////
+template< class Real , class Data >
+ASCIIOrientedPointStreamWithData< Real , Data >::ASCIIOrientedPointStreamWithData( const char* fileName , Data (*readData)( FILE* ) ) : _readData( readData )
+{
+	_fp = fopen( fileName , "r" );
+	if( !_fp ) fprintf( stderr , "Failed to open file for reading: %s\n" , fileName ) , exit( 0 );
+}
+template< class Real , class Data >
+ASCIIOrientedPointStreamWithData< Real , Data >::~ASCIIOrientedPointStreamWithData( void )
+{
+	fclose( _fp );
+	_fp = NULL;
+}
+template< class Real , class Data >
+void ASCIIOrientedPointStreamWithData< Real , Data >::reset( void ) { fseek( _fp , SEEK_SET , 0 ); }
+template< class Real , class Data >
+bool ASCIIOrientedPointStreamWithData< Real , Data >::nextPoint( OrientedPoint3D< Real >& p , Data& d )
+{
+	float c[2*DIMENSION];
+	if( fscanf( _fp , " %f %f %f %f %f %f " , &c[0] , &c[1] , &c[2] , &c[3] , &c[4] , &c[5] )!=2*DIMENSION ) return false;
+	p.p[0] = c[0] , p.p[1] = c[1] , p.p[2] = c[2];
+	p.n[0] = c[3] , p.n[1] = c[4] , p.n[2] = c[5];
+	d = _readData( _fp );
+	return true;
+}
+
+///////////////////////////////////////
+// BinaryOrientedPointStreamWithData //
+///////////////////////////////////////
+template< class Real , class Data >
+BinaryOrientedPointStreamWithData< Real , Data >::BinaryOrientedPointStreamWithData( const char* fileName )
+{
+	_pointsInBuffer = _currentPointIndex = 0;
+	_fp = fopen( fileName , "rb" );
+	if( !_fp ) fprintf( stderr , "Failed to open file for reading: %s\n" , fileName ) , exit( 0 );
+}
+template< class Real , class Data >
+BinaryOrientedPointStreamWithData< Real , Data >::~BinaryOrientedPointStreamWithData( void )
+{
+	fclose( _fp );
+	_fp = NULL;
+}
+template< class Real , class Data >
+void BinaryOrientedPointStreamWithData< Real , Data >::reset( void )
+{
+	fseek( _fp , SEEK_SET , 0 );
+	_pointsInBuffer = _currentPointIndex = 0;
+}
+template< class Real , class Data >
+bool BinaryOrientedPointStreamWithData< Real , Data >::nextPoint( OrientedPoint3D< Real >& p , Data& d )
+{
+	if( _currentPointIndex<_pointsInBuffer )
+	{
+		p = _pointBuffer[ _currentPointIndex ].first;
+		d = _pointBuffer[ _currentPointIndex ].second;
+		_currentPointIndex++;
+		return true;
+	}
+	else
+	{
+		_currentPointIndex = 0;
+		_pointsInBuffer = int( fread( _pointBuffer , sizeof( std::pair< OrientedPoint3D< Real > , Data > ) , POINT_BUFFER_SIZE , _fp ) );
+		if( !_pointsInBuffer ) return false;
+		else return nextPoint( p , d );
+	}
+}
+
+////////////////////////////////////
+// PLYOrientedPointStreamWithData //
+////////////////////////////////////
+template< class Real , class Data >
+PLYOrientedPointStreamWithData< Real , Data >::PLYOrientedPointStreamWithData( const char* fileName , const PlyProperty* dataProperties , int dataPropertiesCount , bool (*validationFunction)( const bool* ) ) : _dataPropertiesCount( dataPropertiesCount ) , _validationFunction( validationFunction )
+{
+	_dataProperties = new PlyProperty[ _dataPropertiesCount ];
+	memcpy( _dataProperties , dataProperties , sizeof(PlyProperty) * _dataPropertiesCount );
+	for( int i=0 ; i<_dataPropertiesCount ; i++ ) _dataProperties[i].offset += sizeof( PlyOrientedVertex< Real > );
+	_fileName = new char[ strlen( fileName )+1 ];
+	strcpy( _fileName , fileName );
+	_ply = NULL;
+	reset();
+}
+template< class Real , class Data >
+void PLYOrientedPointStreamWithData< Real , Data >::reset( void )
+{
+	int fileType;
+	float version;
+	PlyProperty** plist;
+	if( _ply ) _free();
+	_ply = ply_open_for_reading( _fileName, &_nr_elems, &_elist, &fileType, &version );
+	if( !_ply )
+	{
+		fprintf( stderr, "[ERROR] Failed to open ply file for reading: %s\n" , _fileName );
+		exit( 0 );
+	}
+	bool foundVertices = false;
+	for( int i=0 ; i<_nr_elems ; i++ )
+	{
+		int num_elems;
+		int nr_props;
+		char* elem_name = _elist[i];
+		plist = ply_get_element_description( _ply , elem_name , &num_elems , &nr_props );
+		if( !plist )
+		{
+			fprintf( stderr , "[ERROR] Failed to get element description: %s\n" , elem_name );
+			exit( 0 );
+		}	
+
+		if( equal_strings( "vertex" , elem_name ) )
+		{
+			foundVertices = true;
+			_pCount = num_elems , _pIdx = 0;
+			for( int i=0 ; i<PlyOrientedVertex< Real >::Components ; i++ ) 
+				if( !ply_get_property( _ply , elem_name , &(PlyOrientedVertex< Real >::Properties[i]) ) )
+				{
+					fprintf( stderr , "[ERROR] Failed to find property in ply file: %s\n" , PlyOrientedVertex< Real >::Properties[i].name );
+					exit( 0 );
+				}
+			if( _validationFunction )
+			{
+				bool* properties = new bool[_dataPropertiesCount];
+				for( int i=0 ; i<_dataPropertiesCount ; i++ )
+					if( !ply_get_property( _ply , elem_name , &(_dataProperties[i]) ) ) properties[i] = false;
+					else                                                                properties[i] = true;
+				bool valid = _validationFunction( properties );
+				delete[] properties;
+				if( !valid ) fprintf( stderr , "[ERROR] Failed to validate properties in file\n" ) , exit( 0 );
+			}
+			else
+			{
+				for( int i=0 ; i<_dataPropertiesCount ; i++ )
+					if( !ply_get_property( _ply , elem_name , &(_dataProperties[i]) ) )
+						fprintf( stderr , "[WARNING] Failed to find property in ply file: %s\n" , _dataProperties[i].name );
+			}
+		}
+		for( int j=0 ; j<nr_props ; j++ )
+		{
+			free( plist[j]->name );
+			free( plist[j] );
+		}
+		free( plist );
+		if( foundVertices ) break;
+	}
+	if( !foundVertices )
+	{
+		fprintf( stderr , "[ERROR] Could not find vertices in ply file\n" );
+		exit( 0 );
+	}
+}
+template< class Real , class Data >
+void PLYOrientedPointStreamWithData< Real , Data >::_free( void )
+{
+	if( _ply ) ply_close( _ply ) , _ply = NULL;
+	if( _elist )
+	{
+		for( int i=0 ; i<_nr_elems ; i++ ) free( _elist[i] );
+		free( _elist );
+	}
+}
+template< class Real , class Data >
+PLYOrientedPointStreamWithData< Real , Data >::~PLYOrientedPointStreamWithData( void )
+{
+	_free();
+	if( _fileName ) delete[] _fileName , _fileName = NULL;
+	if( _dataProperties ) delete[] _dataProperties , _dataProperties = NULL;
+}
+template< class Real , class Data >
+bool PLYOrientedPointStreamWithData< Real , Data >::nextPoint( OrientedPoint3D< Real >& p , Data& d )
+{
+	if( _pIdx<_pCount )
+	{
+		_PlyOrientedVertexWithData op;
+		ply_get_element( _ply, (void *)&op );
+		p.p = op.point;
+		p.n = op.normal;
+		d = op.data;
 		_pIdx++;
 		return true;
 	}

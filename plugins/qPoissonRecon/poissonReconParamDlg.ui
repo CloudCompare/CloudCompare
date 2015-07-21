@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>285</width>
-    <height>346</height>
+    <width>400</width>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,125 +45,142 @@
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Advanced</string>
+    <widget class="QCheckBox" name="importColorsCheckBox">
+     <property name="layoutDirection">
+      <enum>Qt::RightToLeft</enum>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-      </property>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="toolTip">
-         <string>The minimum number of sample points that should fall within an octree node
-as the octree construction is adapted to sampling density. For noise-free
-samples, small values in the range [1.0 - 5.0] can be used. For more noisy
-samples, larger values in the range [15.0 - 20.0] may be needed to provide
-a smoother, noise-reduced, reconstruction.</string>
-        </property>
-        <property name="text">
-         <string>samples per node</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="samplesPerNodeSpinBox">
-        <property name="toolTip">
-         <string>The minimum number of sample points that should fall within an octree node
-as the octree construction is adapted to sampling density. For noise-free
-samples, small values in the range [1.0 - 5.0] can be used. For more noisy
-samples, larger values in the range [15.0 - 20.0] may be needed to provide
-a smoother, noise-reduced, reconstruction.</string>
-        </property>
-        <property name="decimals">
-         <number>2</number>
-        </property>
-        <property name="minimum">
-         <double>1.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>20.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>1.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="toolTip">
-         <string>The maximum depth of the tree that will be used for surface reconstruction</string>
-        </property>
-        <property name="text">
-         <string>full depth</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="fullDepthSpinBox">
-        <property name="toolTip">
-         <string>The depth beyond depth the octree will be adapted. At coarser depths, the octree will be complete.</string>
-        </property>
-        <property name="value">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="toolTip">
-         <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
-        </property>
-        <property name="text">
-         <string>point weight</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QDoubleSpinBox" name="weightDoubleSpinBox">
-        <property name="toolTip">
-         <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
-        </property>
-        <property name="value">
-         <double>4.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="text">
+      <string>interpolate cloud colors</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Densty</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QCheckBox" name="densityCheckBox">
-        <property name="toolTip">
-         <string>If this flag is enabled, the sampling density is output as a scalar field</string>
-        </property>
-        <property name="text">
-         <string>output density as SF</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTextEdit" name="textEdit">
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+     <widget class="QWidget" name="tabDensity">
+      <attribute name="title">
+       <string>Density</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QCheckBox" name="densityCheckBox">
+         <property name="toolTip">
+          <string>If this flag is enabled, the sampling density is output as a scalar field</string>
+         </property>
+         <property name="text">
+          <string>output density as SF</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="textEdit">
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Density is useful to reduce the output mesh extents to fit as much as possible to the input point cloud. Use the SF '&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;min displayed&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;' value until the remaining part of the mesh suits your needs. Then export this mesh as a new one with '&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;'. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Density is useful to reduce the extents of the output mesh to fit as much as possible the input point cloud.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;On the outpu mesh:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Change the SF '&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;min displayed'&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;' value (in the mesh properties) until the visible part meets your expectations&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Eventually export this mesh as a new one with '&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;'. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabAdvanced">
+      <attribute name="title">
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="toolTip">
+          <string>The minimum number of sample points that should fall within an octree node
+as the octree construction is adapted to sampling density. For noise-free
+samples, small values in the range [1.0 - 5.0] can be used. For more noisy
+samples, larger values in the range [15.0 - 20.0] may be needed to provide
+a smoother, noise-reduced, reconstruction.</string>
+         </property>
+         <property name="text">
+          <string>samples per node</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="samplesPerNodeSpinBox">
+         <property name="toolTip">
+          <string>The minimum number of sample points that should fall within an octree node
+as the octree construction is adapted to sampling density. For noise-free
+samples, small values in the range [1.0 - 5.0] can be used. For more noisy
+samples, larger values in the range [15.0 - 20.0] may be needed to provide
+a smoother, noise-reduced, reconstruction.</string>
+         </property>
+         <property name="decimals">
+          <number>2</number>
+         </property>
+         <property name="minimum">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>20.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="toolTip">
+          <string>The maximum depth of the tree that will be used for surface reconstruction</string>
+         </property>
+         <property name="text">
+          <string>full depth</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="fullDepthSpinBox">
+         <property name="toolTip">
+          <string>The depth beyond depth the octree will be adapted. At coarser depths, the octree will be complete.</string>
+         </property>
+         <property name="value">
+          <number>5</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="toolTip">
+          <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
+         </property>
+         <property name="text">
+          <string>point weight</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="weightDoubleSpinBox">
+         <property name="toolTip">
+          <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
+         </property>
+         <property name="value">
+          <double>4.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

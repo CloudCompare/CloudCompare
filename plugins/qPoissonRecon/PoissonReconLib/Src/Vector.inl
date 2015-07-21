@@ -38,13 +38,13 @@ template<class T>
 Vector<T>::Vector( void )
 {
 	m_N = 0;
-	m_pV = NullPointer< T >();
+	m_pV = NullPointer( T );
 }
 template< class T >
 Vector< T >::Vector( const Vector<T>& V )
 {
 	m_N = 0;
-	m_pV = NullPointer< T >();
+	m_pV = NullPointer( T );
 	Resize( V.m_N );
 	memcpy( m_pV , V.m_pV , m_N*sizeof(T) );
 }
@@ -52,7 +52,7 @@ template<class T>
 Vector<T>::Vector( size_t N )
 {
 	m_N=0;
-	m_pV = NullPointer< T >();
+	m_pV = NullPointer( T );
 	Resize(N);
 }
 template<class T>

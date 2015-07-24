@@ -1,0 +1,3 @@
+[submodule "plugins/qPoissonRecon/PoissonReconLib"]
+	path = plugins/qPoissonRecon/PoissonReconLib
+	url = https://github.com/cloudcompare/PoissonRecon

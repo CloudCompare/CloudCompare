@@ -456,12 +456,12 @@ int CoredVectorMeshData< Vertex >::addPolygon_s( const std::vector< int >& polyg
 {
 	size_t sz;
 //#pragma omp critical (CoredVectorMeshData_addPolygon_s)
-	omp_set_lock(&writelock);
+	omp_set_lock((omp_lock_t*)(&writelock));
 	{
 		sz = polygon.size();
 		polygons.push_back( polygon );
 	}
-	omp_unset_lock(&writelock);
+	omp_unset_lock((omp_lock_t*)(&writelock));
 	return (int)sz;
 }
 template< class Vertex >

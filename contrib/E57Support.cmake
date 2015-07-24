@@ -53,11 +53,20 @@ if( ${OPTION_USE_LIBE57} )
 
 	# manual version
 	if( LIBE57_INSTALL_DIR )
-		#libE57
+
+	#libE57
 		if (WIN32)
-			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.lib optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.lib )
-		elseif()
-			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/libE57RefImpl-d.a optimized ${LIBE57_INSTALL_DIR}/lib/libE57RefImpl.a )
+			set(LIBE57_LIB_DEBUG "E57RefImpl-d.lib")
+			set(LIBE57_LIB_RELEASE "E57RefImpl.lib")
+		else()
+			set(LIBE57_LIB_DEBUG "libE57RefImpl-d.a")
+			set(LIBE57_LIB_RELEASE "libE57RefImpl.a")
+		endif()
+		
+		if ( CMAKE_CONFIGURATION_TYPES )
+			target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/${LIBE57_LIB_DEBUG} optimized ${LIBE57_INSTALL_DIR}/lib/${LIBE57_LIB_RELEASE} )
+		else()
+			target_link_libraries( ${ARGV0} ${LIBE57_INSTALL_DIR}/lib/${LIBE57_LIB_RELEASE} )
 		endif()
 		
 		#Xerces

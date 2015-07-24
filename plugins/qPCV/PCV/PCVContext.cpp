@@ -118,7 +118,7 @@ bool PCVContext::init(unsigned W,
 	m_width=W;
 	m_height=H;
 
-	associateToEntity(cloud,mesh);
+	associateToEntity(cloud, mesh);
 
 	glInit();
 

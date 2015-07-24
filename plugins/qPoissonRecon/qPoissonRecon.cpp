@@ -271,7 +271,6 @@ void qPoissonRecon::doAction()
 		//progress dialog (Qtconcurrent::run can't be canceled!)
 		QProgressDialog pDlg("Initialization",QString(),0,0,m_app->getMainWindow());
 		pDlg.setWindowTitle("Poisson Reconstruction");
-		pDlg.setRange(0,0);
 		pDlg.show();
 		//QApplication::processEvents();
 

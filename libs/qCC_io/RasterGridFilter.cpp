@@ -138,7 +138,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				GDALRasterBand* poBand = poDataset->GetRasterBand(i);
 
 				GDALColorInterp colorInterp = poBand->GetColorInterpretation();
-				GDALDataType bandType = poBand->GetRasterDataType();
 
 				int nBlockXSize, nBlockYSize;
 				poBand->GetBlockSize( &nBlockXSize, &nBlockYSize );

@@ -2099,9 +2099,7 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	double minHeight = m_grid.minHeight;
 	double maxHeight = m_grid.maxHeight;
 	//get real values
-	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(	emptyCellsHeight,
-		minHeight,
-		maxHeight);
+	getFillEmptyCellsStrategy(emptyCellsHeight, minHeight, maxHeight);
 	for (unsigned j=0; j<m_grid.height; ++j)
 	{
 		const RasterCell* aCell = m_grid.data[j];

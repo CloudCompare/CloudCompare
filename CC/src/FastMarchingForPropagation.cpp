@@ -221,7 +221,7 @@ float FastMarchingForPropagation::computeTCoefApprox(Cell* currentCell, Cell* ne
 {
 	PropagationCell* cCell = static_cast<PropagationCell*>(currentCell);
 	PropagationCell* nCell = static_cast<PropagationCell*>(neighbourCell);
-	return exp(m_jumpCoef * (cCell->f-nCell->f)) -1.0f;
+	return expm1(m_jumpCoef * (cCell->f-nCell->f));
 }
 
 void FastMarchingForPropagation::findPeaks()

@@ -70,7 +70,7 @@ public:
 	}
 	
 	//! Stops the thread
-	void stop(int timeout = ULONG_MAX)
+	void stop(unsigned long timeout = ULONG_MAX)
 	{
 		m_abort = true;
 		wait(timeout);

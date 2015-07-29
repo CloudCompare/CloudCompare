@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include <cmath>
+
 #include "ccCameraSensor.h"
 
 //local
@@ -849,9 +851,9 @@ bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float dept
 			const float& f_pix = m_intrinsicParams.focal_pix;
 
 			// computes uncertainty
-			sigma.x = static_cast<ScalarType>(abs(factor * (pixel.x - width/2.0f) / f_pix));
-			sigma.y = static_cast<ScalarType>(abs(factor * (pixel.y - height/2.0f) / f_pix));
-			sigma.z = static_cast<ScalarType>(abs(factor * mu));
+			sigma.x = static_cast<ScalarType>(std::abs(factor * (pixel.x - width/2.0f) / f_pix));
+			sigma.y = static_cast<ScalarType>(std::abs(factor * (pixel.y - height/2.0f) / f_pix));
+			sigma.z = static_cast<ScalarType>(std::abs(factor * mu));
 
 			return true;
 		}
@@ -902,7 +904,7 @@ bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vect
 		if (	fromGlobalCoordToLocalCoord(*coordGlobal,coordLocal)
 			&&	fromLocalCoordToImageCoord(coordLocal, coordImage) )
 		{
-			computeUncertainty(coordImage, abs(coordLocal.z), accuracy[i]);
+			computeUncertainty(coordImage, std::abs(coordLocal.z), accuracy[i]);
 		}
 		else
 		{
@@ -1049,7 +1051,7 @@ bool ccCameraSensor::isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, boo
 	const float& n = m_intrinsicParams.zNear_mm;
 	const float& f = m_intrinsicParams.zFar_mm;
 
-	return (-z <= f && -z > n && abs(f+z) >= FLT_EPSILON && abs(n+z) >= FLT_EPSILON);
+	return (-z <= f && -z > n && std::abs(f+z) >= FLT_EPSILON && std::abs(n+z) >= FLT_EPSILON);
 }
 
 CCVector3 ccCameraSensor::computeUpperLeftPoint() const
@@ -1079,8 +1081,8 @@ bool ccCameraSensor::computeFrustumCorners()
 	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / static_cast<float>(m_intrinsicParams.arrayHeight);
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
 
-	float xIn = abs( tan(halfFov * ar) );
-	float yIn = abs( tan(halfFov     ) );
+	float xIn = std::abs( tan(halfFov * ar) );
+	float yIn = std::abs( tan(halfFov     ) );
 	const float& zNear = m_intrinsicParams.zNear_mm;
 	const float& zFar  = m_intrinsicParams.zFar_mm;
 
@@ -1106,7 +1108,7 @@ bool ccCameraSensor::computeFrustumCorners()
 	const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
 
 	float dz = P0->z-P5->z;
-	float z = (abs(dz) < FLT_EPSILON ? P0->z : (P0->norm2() - P5->norm2()) / (2*dz));
+	float z = (std::abs(dz) < FLT_EPSILON ? P0->z : (P0->norm2() - P5->norm2()) / (2*dz));
 	
 	m_frustrumInfos.center = CCVector3(0, 0, z);
 

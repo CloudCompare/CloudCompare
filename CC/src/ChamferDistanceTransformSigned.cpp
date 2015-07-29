@@ -289,10 +289,6 @@ bool ChamferDistanceTransformSigned::initDT(GenericIndexedMesh* mesh,
 			CellToTest* _currentCell = &cellsToTest[0/*cellsToTestCount-1*/];
 
 			_currentCell->pos = minPos;
-			CCVector3 distanceToMinBorder = gridMinCorner - (*triPoints[0]);
-
-			//compute the triangle normal
-			CCVector3 N = AB.cross(BC);
 
 			//max distance (in terms of cell) between the vertices
 			int maxSize = 0;

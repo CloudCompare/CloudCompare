@@ -450,7 +450,6 @@ void ConePrimitiveShape::WrapComponents(
 	}
 	// relabel the components
 	MiscLib::Vector< std::pair< int, size_t > > tempLabels(*labels);
-	int curLabel = tempLabels.size() - 1;
 	for(size_t u = 0; u < uextent; ++u)
 	{
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);

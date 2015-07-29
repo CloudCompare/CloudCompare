@@ -74,7 +74,6 @@ public:
 	void Derivatives(const ScalarType *params, IteratorT begin, IteratorT end,
 		ScalarType *values, ScalarType *temp, ScalarType *matrix) const
 	{
-		ScalarType chi = 0;
 		intptr_t size = end - begin;
 		#pragma omp parallel for schedule(static)
 		for(intptr_t i = 0; i < size; ++i)

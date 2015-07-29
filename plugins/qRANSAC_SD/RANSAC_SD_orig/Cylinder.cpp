@@ -39,7 +39,6 @@ bool Cylinder::Init(const MiscLib::Vector< Vec3f > &samples)
 	// estimate axis from all pairs
 	m_axisDir = Vec3f(0, 0, 0);
 	size_t c = samples.size() / 2;
-	size_t axisCount = 0;
 	m_axisDir = samples[0 + c].cross(samples[1 + c]);
 	if(m_axisDir.normalize() < 1e-3)
 		return false;
@@ -111,7 +110,6 @@ bool Cylinder::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	m_axisPos = Vec3f(0, 0, 0);
 	m_radius = 0;
 	size_t pointCount = 0;
-	size_t pairCount = 0;
 	for(size_t i = 0; i < c - 1; ++i)
 		for(size_t j = i + 1; j < c; ++j)
 		{

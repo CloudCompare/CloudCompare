@@ -195,7 +195,6 @@ bool Candidate::ImproveBounds(const MiscLib::Vector< ImmediateOctreeType * > &oc
 			return true;
 		}
 		m_hasConnectedComponent = true;
-		size_t oldSize = m_indices->size();
 		m_score = m_shape->ConnectedComponent(pc,
 			(4 << ((octrees.size() - m_subset) / 2)) * bitmapEpsilon,
 			m_indices, false);

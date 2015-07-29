@@ -524,8 +524,6 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		sampleLevelProbability[i] = 1.0 / sampleLevelProbability.size();
 	size_t drawnCandidates = 0; // keep track of number of candidates
 		// that have been generated
-	size_t generatedCandidates = 0, testedCandidates = 0,
-		tddFailCandidates = 0;
 	float maxForgottenCandidate = 0; // the maximum size of a canidate
 		// that has been forgotten
 	size_t numTries = 0; // number of loops since last successful candidate
@@ -539,7 +537,6 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 	subsetScoreVisitor.SetShapeIndex(shapeIndex);
 	globalScoreVisitor.SetShapeIndex(shapeIndex);
 	size_t currentSize = pcSize;
-	size_t maxImproveSubsetDuringMaxSearch = octrees.size();
 	do
 	{
 		MiscLib::Vector< std::pair< float, size_t > > sampleLevelScores(
@@ -854,7 +851,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		for(size_t i = 0; i < numShapes; ++i, ++shapeIt)
 			shapeIterators[i] = end -= ((*shapes)[shapeIt]).second;
 
-		for(size_t i = beginIdx, j = 0; i < beginIdx + currentSize; ++i)
+		for(size_t i = beginIdx; i < beginIdx + currentSize; ++i)
 			if(shapeIndex[i] < 0)
 				shapeIndex[i] = begin++;
 			else

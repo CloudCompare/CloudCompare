@@ -86,7 +86,6 @@ float Candidate::WeightedScore(const PointCloud &pc, float epsilon,
 
 void Candidate::ConnectedComponent(const PointCloud &pc, float bitmapEpsilon, float* borderRatio )
 {
-	size_t oldSize = m_indices->size();
 	size_t connectedSize = m_shape->ConnectedComponent(pc, bitmapEpsilon, m_indices, true, borderRatio);
 	m_indices->resize(connectedSize);
 	m_lowerBound = m_upperBound = (float)m_indices->size();

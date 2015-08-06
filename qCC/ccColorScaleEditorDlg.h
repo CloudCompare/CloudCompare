@@ -31,6 +31,7 @@
 
 class ccScalarField;
 class ccColorScalesManager;
+class ccMainAppInterface;
 
 //! Dialog to edit/create color scales
 class ccColorScaleEditorDialog : public QDialog, public Ui::ColorScaleEditorDlg
@@ -40,7 +41,10 @@ class ccColorScaleEditorDialog : public QDialog, public Ui::ColorScaleEditorDlg
 public:
 
 	//! Default constructor
-	ccColorScaleEditorDialog(ccColorScalesManager* manager, ccColorScale::Shared currentScale = ccColorScale::Shared(0), QWidget* parent = 0);
+	ccColorScaleEditorDialog(	ccColorScalesManager* manager,
+								ccMainAppInterface* mainApp,
+								ccColorScale::Shared currentScale = ccColorScale::Shared(0),
+								QWidget* parent = 0);
 
 	//! Destructor
 	virtual ~ccColorScaleEditorDialog();
@@ -69,8 +73,11 @@ protected slots:
 
 	void changeSelectedStepValue(double);
 
+	void onCustomLabelsListChanged();
+	void toggleCustomLabelsList(bool);
+
 	void copyCurrentScale();
-	void saveCurrentScale();
+	bool saveCurrentScale();
 	void deleteCurrentScale();
 	void renameCurrentScale();
 
@@ -79,6 +86,7 @@ protected slots:
 
 	void createNewScale();
 
+	void onApply();
 	void onClose();
 
 protected:
@@ -106,6 +114,12 @@ protected:
 	**/
 	void setScaleModeToRelative(bool isRelative);
 
+	//! Checks the custom labels list
+	bool checkCustomLabelsList(bool showWarnings);
+
+	//! Exports the custom labels list
+	bool exportCustomLabelsList(ccColorScale::LabelSet& labels);
+
 	//! Color scale manager
 	ccColorScalesManager* m_manager;
 
@@ -125,6 +139,9 @@ protected:
 	double m_minAbsoluteVal;
 	//! Current max boundary for absolute scales
 	double m_maxAbsoluteVal;
+
+	//! Associated application (interface)
+	ccMainAppInterface* m_mainApp;
 };
 
 #endif //CC_COLOR_SCALE_EDITOR_DLG_HEADER

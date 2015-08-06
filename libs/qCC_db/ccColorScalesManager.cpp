@@ -43,6 +43,8 @@ static const char c_csm_scaleName[]				= "scaleName";
 static const char c_csm_stepsList[]				= "steps";
 static const char c_csm_stepRelativePos[]		= "value";
 static const char c_csm_stepColor[]				= "color";
+static const char c_csm_customLabels[]			= "labels";
+static const char c_csm_customLabelValue[]		= "value";
 
 ccColorScalesManager* ccColorScalesManager::GetUniqueInstance()
 {
@@ -105,21 +107,47 @@ void ccColorScalesManager::fromPersistentSettings()
 			scale->setAbsolute(minVal,maxVal);
 		}
 		
-		int size = settings.beginReadArray(c_csm_stepsList);
-		for (int i=0; i<size;++i)
+		try
 		{
-			settings.setArrayIndex(i);
-			double relativePos = settings.value(c_csm_stepRelativePos, 0.0).toDouble();
-			QRgb rgb = static_cast<QRgb>(settings.value(c_csm_stepColor, 0).toInt());
-			QColor color = QColor::fromRgb(rgb);
-			scale->insert(ccColorScaleElement(relativePos,color),false);
+			//steps
+			{
+				int size = settings.beginReadArray(c_csm_stepsList);
+				for (int i=0; i<size;++i)
+				{
+					settings.setArrayIndex(i);
+					double relativePos = settings.value(c_csm_stepRelativePos, 0.0).toDouble();
+					QRgb rgb = static_cast<QRgb>(settings.value(c_csm_stepColor, 0).toInt());
+					QColor color = QColor::fromRgb(rgb);
+					scale->insert(ccColorScaleElement(relativePos,color),false);
+				}
+				settings.endArray();
+			}
+
+			//custom labels
+			{
+				int size = settings.beginReadArray(c_csm_customLabels);
+				for (int i=0; i<size;++i)
+				{
+					settings.setArrayIndex(i);
+					double label = settings.value(c_csm_customLabelValue, 0.0).toDouble();
+					scale->customLabels().insert(label);
+				}
+				settings.endArray();
+			}
 		}
-		settings.endArray();
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Warning(QString("[ccColorScalesManager] Failed to load scale '%1' (not enough memory)").arg(scale->getName()));
+			scale.clear();
+		}
 
 		settings.endGroup();
 
-		scale->update();
-		addScale(scale);
+		if (scale)
+		{
+			scale->update();
+			addScale(scale);
+		}
 	}
 
 	settings.endGroup();
@@ -151,14 +179,28 @@ void ccColorScalesManager::toPersistentSettings() const
 			}
 
 			settings.beginWriteArray(c_csm_stepsList);
-			for (int i=0; i<(*it)->stepCount();++i)
 			{
-				 settings.setArrayIndex(i);
-				 settings.setValue(c_csm_stepRelativePos, (*it)->step(i).getRelativePos());
-				 int rgb = static_cast<int>((*it)->step(i).getColor().rgb());
-				 settings.setValue(c_csm_stepColor, rgb);
+				for (int i=0; i<(*it)->stepCount();++i)
+				{
+					 settings.setArrayIndex(i);
+					 settings.setValue(c_csm_stepRelativePos, (*it)->step(i).getRelativePos());
+					 int rgb = static_cast<int>((*it)->step(i).getColor().rgb());
+					 settings.setValue(c_csm_stepColor, rgb);
+				}
 			}
 			settings.endArray();
+
+			settings.beginWriteArray(c_csm_customLabels);
+			{
+				int i=0;
+				for (ccColorScale::LabelSet::const_iterator itL=(*it)->customLabels().begin(); itL!=(*it)->customLabels().end(); ++itL, ++i)
+				{
+					 settings.setArrayIndex(i);
+					 settings.setValue(c_csm_customLabelValue, *itL);
+				}
+			}
+			settings.endArray();
+			
 
 			settings.endGroup();
 		}

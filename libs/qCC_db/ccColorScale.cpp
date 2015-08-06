@@ -62,8 +62,10 @@ void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate/*=tru
 
 	m_updated = false;
 
-	if (autoUpdate && m_steps.size() >= (int)MIN_STEPS)
+	if (autoUpdate && m_steps.size() >= static_cast<int>(MIN_STEPS))
+	{
 		update();
+	}
 }
 
 void ccColorScale::clear()
@@ -189,7 +191,7 @@ bool ccColorScale::toFile(QFile& out) const
 	//steps list (dataVersion>=27)
 	{
 		//steps count
-		uint32_t stepCount = (uint32_t)m_steps.size();
+		uint32_t stepCount = static_cast<uint32_t>(m_steps.size());
 		if (out.write((const char*)&stepCount,4) < 0)
 			return WriteError();
 
@@ -198,6 +200,20 @@ bool ccColorScale::toFile(QFile& out) const
 		{
 			outStream << m_steps[i].getRelativePos();
 			outStream << m_steps[i].getColor();
+		}
+	}
+
+	//custom labels (dataVersion>=40)
+	{
+		//custom label count
+		uint32_t labelCount = static_cast<uint32_t>(m_customLabels.size());
+		if (out.write((const char*)&labelCount,4) < 0)
+			return WriteError();
+
+		//write each custom label
+		for (LabelSet::const_iterator it=m_customLabels.begin(); it!=m_customLabels.end(); ++it)
+		{
+			outStream << *it;
 		}
 	}
 
@@ -252,6 +268,31 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags)
 		}
 
 		update();
+	}
+
+	//custom labels (dataVersion>=40)
+	if (dataVersion >= 40)
+	{
+		//custom label count
+		uint32_t labelCount = 0;
+		if (in.read((char*)&labelCount,4) < 0)
+			return ReadError();
+
+		try
+		{
+			for (uint32_t i=0; i<labelCount; ++i)
+			{
+				double label = 0.0;
+				inStream >> label;
+
+				m_customLabels.insert(label);
+			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			return MemoryError();
+		}
 	}
 
 	return true;
@@ -324,21 +365,36 @@ bool ccColorScale::saveAsXML(QString filename) const
 				stream.writeStartElement(s_xmlColorScaleData);
 				{
 					//write each step
-					for (QList<ccColorScaleElement>::const_iterator it = m_steps.begin(); it != m_steps.end(); ++it)
 					{
-						stream.writeStartElement("step");
+						for (QList<ccColorScaleElement>::const_iterator it = m_steps.begin(); it != m_steps.end(); ++it)
 						{
-							const ccColorScaleElement& elem = *it;
-							const QColor& color = elem.getColor();
-							double relativePos = elem.getRelativePos();
+							stream.writeStartElement("step");
+							{
+								const ccColorScaleElement& elem = *it;
+								const QColor& color = elem.getColor();
+								double relativePos = elem.getRelativePos();
 
-							stream.writeAttribute("r",   QString::number(color.red())  );
-							stream.writeAttribute("g", QString::number(color.green()));
-							stream.writeAttribute("b",  QString::number(color.blue()) );
-							stream.writeAttribute("pos",   QString::number(relativePos,'g',12)  );
+								stream.writeAttribute("r",   QString::number(color.red())  );
+								stream.writeAttribute("g", QString::number(color.green()));
+								stream.writeAttribute("b",  QString::number(color.blue()) );
+								stream.writeAttribute("pos",   QString::number(relativePos,'g',12)  );
+							}
+							stream.writeEndElement(); //step
 						}
-						stream.writeEndElement(); //step
 					}
+
+					//write custom labels as well (if any)
+					{
+						for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
+						{
+							stream.writeStartElement("label");
+							{
+								stream.writeAttribute("val", QString::number(*it,'g',12));
+							}
+							stream.writeEndElement(); //label
+						}
+					}
+
 				}
 				stream.writeEndElement(); //Data
 			}
@@ -467,47 +523,76 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 
 		//read data
 		bool dataError = false;
-		while (!stream.atEnd())
+		try
 		{
-			if (!stream.readNextStartElement())
-				break;
-			if (stream.name() == "step")
+			while (!stream.atEnd())
 			{
-				QXmlStreamAttributes attributes = stream.attributes();
-				int attributeCount = attributes.size();
-				if (attributeCount < 4)
-				{
-					dataError = true;
+				if (!stream.readNextStartElement())
 					break;
-				}
-				QColor rgb;
-				double pos = 0;
-				for (int i=0; i<attributes.size(); ++i)
+				if (stream.name() == "step")
 				{
-					QString name = attributes[i].name().toString().toUpper();
-					QString value = attributes[i].value().toString();
-					if (name == "R")
-						rgb.setRed(value.toInt());
-					else if (name == "G")
-						rgb.setGreen(value.toInt());
-					else if (name == "B")
-						rgb.setBlue(value.toInt());
-					else if (name == "POS")
-						pos = value.toDouble();
-					else
-						--attributeCount;
-				}
+					QXmlStreamAttributes attributes = stream.attributes();
+					int attributeCount = attributes.size();
+					if (attributeCount < 4)
+					{
+						dataError = true;
+						break;
+					}
+					QColor rgb;
+					double pos = 0;
+					for (int i=0; i<attributes.size(); ++i)
+					{
+						QString name = attributes[i].name().toString().toUpper();
+						QString value = attributes[i].value().toString();
+						if (name == "R")
+							rgb.setRed(value.toInt());
+						else if (name == "G")
+							rgb.setGreen(value.toInt());
+						else if (name == "B")
+							rgb.setBlue(value.toInt());
+						else if (name == "POS")
+							pos = value.toDouble();
+						else
+							--attributeCount;
+					}
 
-				if (attributeCount < 4)
+					if (attributeCount < 4)
+					{
+						ccLog::Warning(QString("[ccColorScale::LoadFromXML] Missing data attributes!"));
+						dataError = true;
+						break;
+					}
+					stream.skipCurrentElement();
+
+					scale->insert(ccColorScaleElement(pos,rgb),false);
+				}
+				else if (stream.name() == "label")
 				{
-					ccLog::Warning(QString("[ccColorScale::LoadFromXML] Missing data attributes!"));
-					dataError = true;
-					break;
+					QXmlStreamAttributes attributes = stream.attributes();
+					int attributeCount = attributes.size();
+					if (attributeCount < 1)
+					{
+						dataError = true;
+						break;
+					}
+					for (int i=0; i<attributes.size(); ++i)
+					{
+						QString name = attributes[i].name().toString().toUpper();
+						if (name == "VAL")
+						{
+							QString value = attributes[i].value().toString();
+							scale->customLabels().insert(value.toDouble());
+							break;
+						}
+					}
+					stream.skipCurrentElement();
 				}
-				stream.skipCurrentElement();
-
-				scale->insert(ccColorScaleElement(pos,rgb),false);
 			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Warning(QString("[ccColorScale::LoadFromXML] Not enough memory!"));
+			dataError = true;
 		}
 		scale->update();
 
@@ -524,4 +609,3 @@ ccColorScale::Shared ccColorScale::LoadFromXML(QString filename)
 
 	return scale;
 }
-

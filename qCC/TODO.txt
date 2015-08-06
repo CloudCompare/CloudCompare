@@ -84,7 +84,6 @@ From Dimitri L.
 [*] Being able to apply various methods based on a sub-sampled cloud
 [*] Vector fields (http://www.cloudcompare.org/forum/viewtopic.php?t=201)
 [*] Histogram enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=1160)
-[*] Color scale enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=1160)
 
 From Thomas D.
 [*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)
@@ -116,9 +115,6 @@ From Andrew O.
 
 From Tim C.
 [*] Translate/Rotate with keys or GUI buttons (http://www.cloudcompare.org/forum/viewtopic.php?t=556)
-
-From Raphael M.
-[*] Add a checkbox on the Color Scale Manager to apply the current scale modifications in real time
 
 From Andrew O.
 [*] Small Clouds: I consider a cloud to be 2 or more data points. Small clouds don't behave well in Cloud compare. RANSAC, Connected Components and some other functions either crash the app or hang or go off in an endless loop when this is the case. 

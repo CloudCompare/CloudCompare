@@ -783,7 +783,7 @@ void DistanceMapGenerationDlg::spawnColorScaleEditor()
 		return;
 
 	ccColorScale::Shared colorScale = (m_colorScaleSelector ? m_colorScaleSelector->getSelectedScale() : m_app->getColorScalesManager()->getDefaultScale(ccColorScalesManager::BGYR));
-	ccColorScaleEditorDialog cseDlg(m_app->getColorScalesManager(),colorScale,m_app->getMainWindow());
+	ccColorScaleEditorDialog cseDlg(m_app->getColorScalesManager(),m_app,colorScale,m_app->getMainWindow());
 	if (cseDlg.exec())
 	{
 		colorScale = cseDlg.getActiveScale();

@@ -31,6 +31,7 @@
 
 //System
 #include <assert.h>
+#include <set>
 
 //! Color scale element: one value + one color
 class ccColorScaleElement
@@ -150,6 +151,19 @@ public:
 
 	//! Sets whether scale is locked or not
 	inline void setLocked(bool state) { m_locked = state; }
+
+	//! Type of a list of custom labels
+	typedef std::set<double> LabelSet;
+
+	//! Returns the list of custom labels (if any)
+	inline LabelSet& customLabels() { return m_customLabels; }
+	//! Returns the list of custom labels (if any - const version)
+	inline const LabelSet& customLabels() const { return m_customLabels; }
+
+	//! Sets the list of custom labels (only if the scale is absolute)
+	/** \warning May throw std::bad_alloc exception)
+	**/
+	inline void setCustomLabels(const LabelSet& labels) { m_customLabels = labels; }
 
 	//! Returns the current number of steps
 	/** A valid scale should always have at least 2 steps!
@@ -300,6 +314,8 @@ protected:
 	**/
 	double m_absoluteRange;
 
+	//! List of custom labels
+	LabelSet m_customLabels;
 };
 
 #endif //CC_COLOR_SCALE_HEADER

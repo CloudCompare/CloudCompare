@@ -74,6 +74,12 @@ v2.6.2 XX/XX/2015
 		- new 'multi-pass' option to enable/disable the additional passes where longer edges can be generated
 			(in order to ultimately get a better fit... or not). It was enabled by default in the previous version.
 	* Console: multiple lines can be selected (and copied) at once
+	* Color Scales Manager:
+		- custom labels can be defined for each color scale (if that's the case, then only those labels will be used
+			when displaying the color ramp next to the cloud in the 3D view)
+		- when the 'relative/absolute' parameter of an existing color scale is modified, the saturation of the scalar
+			fields relying on this scale are now properly updated
+		- new 'Apply' button to apply the change without leaving the tool dialog
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

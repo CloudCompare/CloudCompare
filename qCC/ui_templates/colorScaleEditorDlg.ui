@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>250</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -341,6 +341,28 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="customLabelsGroupBox">
+     <property name="title">
+      <string>Custom labels (one value per line)</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QPlainTextEdit" name="customLabelsPlainTextEdit">
+        <property name="plainText">
+         <string>(auto)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <spacer name="horizontalSpacer_7">
@@ -354,6 +376,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyPushButton">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="closePushButton">

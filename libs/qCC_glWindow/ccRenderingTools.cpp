@@ -219,42 +219,60 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	
 	//set of particular values
 	//DGM: we work with doubles for maximum accuracy
-	std::set<double> keyValues;
-	if (!logScale)
+	ccColorScale::LabelSet keyValues;
+	bool customLabels = false;
+	try
 	{
-		keyValues.insert(sf->displayRange().min());
-		keyValues.insert(sf->displayRange().start());
-		keyValues.insert(sf->displayRange().stop());
-		keyValues.insert(sf->displayRange().max());
-		keyValues.insert(sf->saturationRange().min());
-		keyValues.insert(sf->saturationRange().start());
-		keyValues.insert(sf->saturationRange().stop());
-		keyValues.insert(sf->saturationRange().max());
+		ccColorScale::Shared colorScale = sf->getColorScale();
+		if (colorScale && colorScale->customLabels().size() >= 2)
+		{
+			keyValues = colorScale->customLabels();
+			customLabels = true;
 
-		if (symmetricalScale)
-			keyValues.insert(-sf->saturationRange().max());
+			if (alwaysShowZero)
+				keyValues.insert(0.0);
+		}
+		else if (!logScale)
+		{
+			keyValues.insert(sf->displayRange().min());
+			keyValues.insert(sf->displayRange().start());
+			keyValues.insert(sf->displayRange().stop());
+			keyValues.insert(sf->displayRange().max());
+			keyValues.insert(sf->saturationRange().min());
+			keyValues.insert(sf->saturationRange().start());
+			keyValues.insert(sf->saturationRange().stop());
+			keyValues.insert(sf->saturationRange().max());
 
-		if (alwaysShowZero)
-			keyValues.insert(0.0);
+			if (symmetricalScale)
+				keyValues.insert(-sf->saturationRange().max());
+
+			if (alwaysShowZero)
+				keyValues.insert(0.0);
+		}
+		else
+		{
+			ScalarType minDisp = sf->displayRange().min();
+			ScalarType maxDisp = sf->displayRange().max();
+			ConvertToLogScale(minDisp, maxDisp);
+			keyValues.insert(minDisp);
+			keyValues.insert(maxDisp);
+
+			ScalarType startDisp = sf->displayRange().start();
+			ScalarType stopDisp = sf->displayRange().stop();
+			ConvertToLogScale(startDisp, stopDisp);
+			keyValues.insert(startDisp);
+			keyValues.insert(stopDisp);
+
+			keyValues.insert(sf->saturationRange().min());
+			keyValues.insert(sf->saturationRange().start());
+			keyValues.insert(sf->saturationRange().stop());
+			keyValues.insert(sf->saturationRange().max());
+		}
 	}
-	else
+	catch (const std::bad_alloc&)
 	{
-		ScalarType minDisp = sf->displayRange().min();
-		ScalarType maxDisp = sf->displayRange().max();
-		ConvertToLogScale(minDisp,maxDisp);
-		keyValues.insert(minDisp);
-		keyValues.insert(maxDisp);
-
-		ScalarType startDisp = sf->displayRange().start();
-		ScalarType stopDisp = sf->displayRange().stop();
-		ConvertToLogScale(startDisp,stopDisp);
-		keyValues.insert(startDisp);
-		keyValues.insert(stopDisp);
-
-		keyValues.insert(sf->saturationRange().min());
-		keyValues.insert(sf->saturationRange().start());
-		keyValues.insert(sf->saturationRange().stop());
-		keyValues.insert(sf->saturationRange().max());
+		//not enough memory
+		return;
 	}
 
 	//magic fix (for infinite values!)
@@ -466,7 +484,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		}
 
 		//now we recursively display labels for which we have some room left
-		if (drawnLabels.size() > 1)
+		if (!customLabels && drawnLabels.size() > 1)
 		{
 			const int minGap = strHeight*2;
 

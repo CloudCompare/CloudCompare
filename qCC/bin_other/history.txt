@@ -73,6 +73,7 @@ v2.6.2 XX/XX/2015
 	* Profile extraction (both in the Cross Section tool and the Section Extraction tool):
 		- new 'multi-pass' option to enable/disable the additional passes where longer edges can be generated
 			(in order to ultimately get a better fit... or not). It was enabled by default in the previous version.
+	* Console: multiple lines can be selected (and copied) at once
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

@@ -37,9 +37,6 @@ Big ones:
 [*] Finish the Oculus Rift plugin
 [*] Release the qFacets plugin
 
-Done:
-[*] Select and copy multiple lines of the Console at once (http://www.danielgm.net/cc/forum/viewtopic.php?t=1272)
-
 Various:
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)

@@ -185,16 +185,16 @@ static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 	}
 }
 
-//! For log scale inversion
+//For log scale inversion
 const double c_log10 = log(10.0);
 
-//! Convert standard range to log scale
+//Convert standard range to log scale
 void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
 {
 	ScalarType absDispMin = ( dispMax < 0 ? std::min(-dispMax,-dispMin) : std::max<ScalarType>(dispMin,0) );
 	ScalarType absDispMax = std::max(fabs(dispMin),fabs(dispMax));
-	dispMin = log10(std::max(absDispMin,(ScalarType)ZERO_TOLERANCE));
-	dispMax = log10(std::max(absDispMax,(ScalarType)ZERO_TOLERANCE));
+	dispMin = log10(std::max(absDispMin,static_cast<ScalarType>(ZERO_TOLERANCE)));
+	dispMax = log10(std::max(absDispMax,static_cast<ScalarType>(ZERO_TOLERANCE)));
 }
 
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
@@ -227,10 +227,11 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		if (colorScale && colorScale->customLabels().size() >= 2)
 		{
 			keyValues = colorScale->customLabels();
-			customLabels = true;
 
 			if (alwaysShowZero)
 				keyValues.insert(0.0);
+
+			customLabels = true;
 		}
 		else if (!logScale)
 		{

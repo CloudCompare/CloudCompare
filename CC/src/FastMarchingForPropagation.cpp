@@ -218,6 +218,7 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 	return true;
 }
 
+#ifdef _MSC_VER
 //Visual 2012 (and previous versions) don't know expm1
 #if _MSC_VER <= 1700
 
@@ -230,6 +231,7 @@ template <typename T> T expm1(T x)
 		return exp(x) - 1;
 }
 
+#endif
 #endif
 
 float FastMarchingForPropagation::computeTCoefApprox(Cell* currentCell, Cell* neighbourCell) const

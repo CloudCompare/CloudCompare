@@ -38,6 +38,8 @@ Big ones:
 [*] Release the qFacets plugin
 
 Various:
+
+[*] Inverse crop function in command line mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1329)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)
 [*] Import sensors from E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1168)
@@ -67,6 +69,9 @@ Various:
 [*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
 [*] Overlay grid (for 3D views - http://www.cloudcompare.org/forum/viewtopic.php?t=926) 
 
+From Caleb B. (http://www.danielgm.org/forum/viewtopic.php?t=1334)
+[*] an ICP option for "no-rotation" (or more complex, max-rotation) that finds the best translation between the clouds
+[*] exposure of the existing in-gui option for rotation around only one specified plane to the command line, i.e., -AXISOFROT Z to the command line mode
 
 From Thomas S. (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).

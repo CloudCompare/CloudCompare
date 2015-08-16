@@ -80,6 +80,7 @@ v2.6.2 XX/XX/2015
 		- when the 'relative/absolute' parameter of an existing color scale is modified, the saturation of the scalar
 			fields relying on this scale is now properly updated
 		- new 'Apply' button to apply the modifications without leaving the tool dialog
+	* the SOR and MLS filters of the qPCL plugin (Point Cloud Library wrapper) now preserve the global shift & scale information
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

@@ -204,6 +204,10 @@ int MLSSmoothingUpsampling::compute()
 	copyRGBColors(cloud, new_cloud, mapping_indices, true);
 #endif
 
+	//copy global shift & scale
+	new_cloud->setGlobalScale(cloud->getGlobalScale());
+	new_cloud->setGlobalShift(cloud->getGlobalShift());
+
 	//disable original cloud
 	cloud->setEnabled(false);
 	if (cloud->getParent())

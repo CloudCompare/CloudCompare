@@ -256,7 +256,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 							}
 							else
 							{
-								assert(bandType <= GDT_Int32);
+								assert(poBand->GetRasterDataType() <= GDT_Int32);
 
 								int* colIndexes = (int*) CPLMalloc(sizeof(int)*nXSize);
 								//double* scanline = new double[nXSize];

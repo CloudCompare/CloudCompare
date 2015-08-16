@@ -277,6 +277,10 @@ int ExtractSIFT::compute()
 
 	out_cloud_cc->setName(name.str().c_str());
 	out_cloud_cc->setDisplay(cloud->getDisplay());
+	//copy global shift & scale
+	out_cloud_cc->setGlobalScale(cloud->getGlobalScale());
+	out_cloud_cc->setGlobalShift(cloud->getGlobalShift());
+
 	if (cloud->getParent())
 		cloud->getParent()->addChild(out_cloud_cc);
 

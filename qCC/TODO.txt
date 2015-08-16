@@ -23,7 +23,7 @@ Big ones:
 	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
 	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
-	- Clean / SOR filter
+	- Clean filter
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
@@ -39,7 +39,6 @@ Big ones:
 
 Various:
 
-[*] Inverse crop function in command line mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1329)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)
 [*] Import sensors from E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1168)

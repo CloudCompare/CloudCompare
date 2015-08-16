@@ -51,14 +51,14 @@ public:
 		(see RESAMPLING_CELL_METHOD) and consist in simple processes
 		such as replacing all the points lying in a cell by the cell center or
 		by the points gravity center.
-		\param theCloud the point cloud to resample
+		\param cloud the point cloud to resample
 		\param octreeLevel the octree level at which to perform the resampling process
 		\param resamplingMethod resampling method (applied to each octree cell)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if the octree has been already computed, it can be used by the process (avoid recomputation)
 		\return the resampled cloud (new cloud)
 	**/
-	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* theCloud,
+	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* cloud,
 														uchar octreeLevel,
 														RESAMPLING_CELL_METHOD resamplingMethod,
 														GenericProgressCallback* progressCb = 0,
@@ -69,14 +69,14 @@ public:
 		of giving a specific octree subdivision level as input parameter, one can specify
 		an approximative number of points for the resulting cloud (algorithm will
 		automatically determine the corresponding octree level).
-		\param theCloud the point cloud to resample
+		\param cloud the point cloud to resample
 		\param newNumberOfPoints desired number of points (approximative)
 		\param resamplingMethod resampling method (applied to each octree cell)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if the octree has been already computed, it can be used by the process (avoid recomputation)
 		\return the resampled cloud (new cloud)
 	**/
-	static GenericIndexedCloud* resampleCloudWithOctree(GenericIndexedCloudPersist* theCloud,
+	static GenericIndexedCloud* resampleCloudWithOctree(GenericIndexedCloudPersist* cloud,
 														int newNumberOfPoints,
 														RESAMPLING_CELL_METHOD resamplingMethod,
 														GenericProgressCallback* progressCb = 0,
@@ -87,14 +87,14 @@ public:
 		different subsampling methods are represented as an enumerator
 		(see SUBSAMPLING_CELL_METHOD) and consist in simple processes
 		such as choosing a random point, or the one closest to the cell center.
-		\param theCloud point cloud to subsample
+		\param cloud point cloud to subsample
 		\param octreeLevel octree level at which to perform the subsampling process
 		\param subsamplingMethod subsampling method (applied to each octree cell)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if the octree has been already computed, it can be used by the process (avoid recomputation)
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
-	static ReferenceCloud* subsampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* theCloud,
+	static ReferenceCloud* subsampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* cloud,
 															uchar octreeLevel,
 															SUBSAMPLING_CELL_METHOD subsamplingMethod,
 															GenericProgressCallback* progressCb = 0,
@@ -105,14 +105,14 @@ public:
 		of giving a specific octree subdivision level as input parameter, one can specify
 		an approximative number of points for the resulting cloud (algorithm will
 		automatically determine the corresponding octree level).
-		\param theCloud point cloud to subsample
+		\param cloud point cloud to subsample
 		\param newNumberOfPoints desired number of points (approximative)
 		\param subsamplingMethod resampling method (applied to each octree cell)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if the octree has been already computed, it can be used by the process (avoid recomputation)
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
-	static ReferenceCloud* subsampleCloudWithOctree(GenericIndexedCloudPersist* theCloud,
+	static ReferenceCloud* subsampleCloudWithOctree(GenericIndexedCloudPersist* cloud,
 													int newNumberOfPoints,
 													SUBSAMPLING_CELL_METHOD subsamplingMethod,
 													GenericProgressCallback* progressCb = 0,
@@ -121,12 +121,12 @@ public:
 	//! Subsamples a point cloud (process based on random selections)
 	/** A very simple subsampling algorithm that simply consists in selecting
 		"n" different points, in a random way.
-		\param theCloud point cloud to subsample
+		\param cloud point cloud to subsample
 		\param newNumberOfPoints desired number of points (exact)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
-	static ReferenceCloud* subsampleCloudRandomly(	GenericIndexedCloudPersist* theCloud,
+	static ReferenceCloud* subsampleCloudRandomly(	GenericIndexedCloudPersist* cloud,
 													unsigned newNumberOfPoints,
 													GenericProgressCallback* progressCb = 0);
 
@@ -147,34 +147,49 @@ public:
 	//! Resamples a point cloud (process based on inter point distance)
 	/** The cloud is resampled so that there is no point nearer than a given distance to other points
 		It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
-		\param theCloud the point cloud to resample
+		\param cloud the point cloud to resample
 		\param minDistance the distance under which a point in the resulting cloud cannot have any neighbour
-		\param theOctree associated octree if available
+		\param octree associated octree if available
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return a reference cloud corresponding to the resampling 'selection'
 	**/
-	static ReferenceCloud* resampleCloudSpatially(	GenericIndexedCloudPersist* theCloud,
+	static ReferenceCloud* resampleCloudSpatially(	GenericIndexedCloudPersist* cloud,
 													PointCoordinateType minDistance,
 													const SFModulationParams& modParams,
-													DgmOctree* theOctree = 0,
+													DgmOctree* octree = 0,
 													GenericProgressCallback* progressCb = 0);
 
 	//! Statistical Outliers Removal (SOR) filter
-	/** This filter removes points based on their distance relatively to the best fit plane computed above their neighbors.
-		It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
-		\param theCloud the point cloud to resample
+	/** This filter removes points based on their mean distance to their distance (by comparing it to the average distance of all points to their neighbors).
+		It is equivalent to PCL StatisticalOutlierRemoval filter (see http://pointclouds.org/documentation/tutorials/statistical_outlier.php)
+		\param cloud the point cloud to resample
+		\param knn number of neighbors
+		\param nSigma number of sigmas under which the points should be kept
+		\param octree associated octree if available
+		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\return a reference cloud corresponding to the filtered cloud
+	**/
+	static ReferenceCloud* sorFilter(	GenericIndexedCloudPersist* cloud,
+										int knn = 6,
+										double nSigma = 1.0,
+										DgmOctree* octree = 0,
+										GenericProgressCallback* progressCb = 0);
+
+	//! Noise filter based on the distance to the approximate local surface
+	/** This filter removes points based on their distance relatively to the best fit plane computed on their neighbors.
+		\param cloud the point cloud to resample
 		\param kernelRadius neighborhood radius
 		\param nSigma number of sigmas under which the points should be kept
 		\param removeIsolatedPoints whether to remove isolated points (i.e. whith 3 points or less in the neighborhood)
 		\param useKnn whether to use a constant number of neighbors instead of a radius
-		\param number of neighbors (if useKnn is true)
+		\param knn number of neighbors (if useKnn is true)
 		\param useAbsoluteError whether to use an absolute error instead of 'n' sigmas
 		\param absoluteError absolute error (if useAbsoluteError is true)
-		\param theOctree associated octree if available
+		\param octree associated octree if available
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\return a reference cloud corresponding to the resampling 'selection'
+		\return a reference cloud corresponding to the filtered cloud
 	**/
-	static ReferenceCloud* sorFilter(	GenericIndexedCloudPersist* theCloud,
+	static ReferenceCloud* noiseFilter(	GenericIndexedCloudPersist* cloud,
 										PointCoordinateType kernelRadius,
 										double nSigma,
 										bool removeIsolatedPoints = false,
@@ -182,7 +197,7 @@ public:
 										int knn = 6,
 										bool useAbsoluteError = true,
 										double absoluteError = 0.0,
-										DgmOctree* theOctree = 0,
+										DgmOctree* octree = 0,
 										GenericProgressCallback* progressCb = 0);
 
 protected:
@@ -217,13 +232,20 @@ protected:
 										void** additionalParameters,
 										NormalizedProgress* nProgress = 0);
 
+	//! "Cellular" function to apply the noise filter inside an octree cell
+	/** This function is meant to be applied to all cells of the octree
+		(it is of the form DgmOctree::localFunctionPtr).
+		\param cell structure describing the cell on which processing is applied
+		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
+	**/
+	static bool applyNoiseFilterAtLevel(const DgmOctree::octreeCell& cell,
+										void** additionalParameters,
+										NormalizedProgress* nProgress = 0);
+
 	//! "Cellular" function to apply the SOR filter inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
-		(it is of the form DgmOctree::localFunctionPtr). It chooses one point
-		from the set of points inside a cell, according to different rules.
-		Method parameters (defined in "additionalParameters") are :
-		- (ReferenceCloud*) reference point cloud to store selected points
-		- (SUBSAMPLING_CELL_METHOD*) subampling method
+		(it is of the form DgmOctree::localFunctionPtr).
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
 		\param nProgress optional (normalized) progress notification (per-point)
@@ -231,7 +253,6 @@ protected:
 	static bool applySORFilterAtLevel(	const DgmOctree::octreeCell& cell,
 										void** additionalParameters,
 										NormalizedProgress* nProgress = 0);
-
 };
 
 }

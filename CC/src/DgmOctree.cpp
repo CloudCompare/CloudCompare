@@ -2630,7 +2630,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 		int n = getPointsInSphericalNeighbourhood(nNSS.cellCenter, static_cast<PointCoordinateType>(radius+cs*SQRT_3/2.0), nNSS.pointsInNeighbourhood);
 		nNSS.pointsInNeighbourhood.resize(n);
 
-		nNSS.ready=true;
+		nNSS.ready = true;
 	}
 #else
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN

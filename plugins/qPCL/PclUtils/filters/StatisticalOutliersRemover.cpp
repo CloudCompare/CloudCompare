@@ -37,14 +37,13 @@
 //Boost
 #include <boost/make_shared.hpp>
 
-int	removeOutliersStatistical(const PCLCloud::ConstPtr incloud, const int &k, const float &nStds, PCLCloud::Ptr outcloud)
+void removeOutliersStatistical(const PCLCloud::ConstPtr incloud, int knn, double nSigma, PCLCloud::Ptr outcloud)
 {
 	pcl::StatisticalOutlierRemoval<PCLCloud> remover;
 	remover.setInputCloud(incloud);
-	remover.setMeanK(k);
-	remover.setStddevMulThresh(nStds);
+	remover.setMeanK(knn);
+	remover.setStddevMulThresh(nSigma);
 	remover.filter(*outcloud);
-	return 1;
 }
 
 StatisticalOutliersRemover::StatisticalOutliersRemover()
@@ -78,9 +77,7 @@ int StatisticalOutliersRemover::compute()
 		return -1;
 
 	PCLCloud::Ptr outcloud ( new PCLCloud);
-	int result = removeOutliersStatistical(tmp_cloud, m_k, m_std, outcloud);
-	if (result < 0)
-		return -1;
+	removeOutliersStatistical(tmp_cloud, m_k, m_std, outcloud);
 
 	//get back outcloud as a ccPointCloud
 	ccPointCloud* final_cloud = sm2ccConverter(outcloud).getCloud();

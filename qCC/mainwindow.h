@@ -380,6 +380,7 @@ protected slots:
 	void doActionEditGlobalShiftAndScale();
 	void doActionMatchBBCenters();
 	void doActionMatchScales();
+	void doActionSORFilter();
 	void doActionFilterNoise();
 	void doActionUnroll();
 	void doActionCreateGBLSensor();

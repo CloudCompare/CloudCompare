@@ -120,6 +120,7 @@ static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_CROSS_SECTION[]					= "CROSS_SECTION";
 static const char COMMAND_LOG_FILE[]						= "LOG_FILE";
 static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
+static const char COMMAND_SOR_FILTER[]						= "SOR";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -1548,6 +1549,82 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 		else
 		{
 			ccConsole::Warning(QString("Failed to compute best fit plane for cloud '%1'").arg(m_clouds[i].pc->getName()));
+		}
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandSORFilter(QStringList& arguments, ccProgressDialog* pDlg/*=0*/)
+{
+	Print("[SOR FILTER]");
+
+	if (arguments.empty())
+		return Error(QString("Missing parameter: number of neighbors mode after \"-%1\"").arg(COMMAND_SOR_FILTER));
+
+	QString knnStr = arguments.takeFirst();
+	bool ok;
+	int knn = knnStr.toInt(&ok);
+	if (!ok || knn <= 0)
+		return Error(QString("Invalid parameter: number of neighbors (%1)").arg(knnStr));
+
+	if (arguments.empty())
+		return Error(QString("Missing parameter: sigma multiplier after number of neighbors (SOR)"));
+	QString sigmaStr = arguments.takeFirst();
+	double nSigma = sigmaStr.toDouble(&ok);
+	if (!ok || nSigma < 0)
+		return Error(QString("Invalid parameter: sigma multiplier (%1)").arg(nSigma));
+
+	if (m_clouds.empty())
+		return Error(QString("No cloud available. Be sure to open one first!"));
+
+	for (size_t i=0; i<m_clouds.size(); ++i)
+	{
+		ccPointCloud* cloud = m_clouds[i].pc;
+		assert(cloud);
+
+		//computation
+		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
+																				knn,
+																				nSigma,
+																				0,
+																				pDlg);
+
+		if (selection)
+		{
+			ccPointCloud* cleanCloud = cloud->partialClone(selection);
+			if (cleanCloud)
+			{
+				cleanCloud->setName(cloud->getName()+QString(".clean"));
+				if (s_autoSaveMode)
+				{
+					CloudDesc cloudDesc(cleanCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc,"SOR");
+					if (!errorStr.isEmpty())
+					{
+						delete cleanCloud;
+						return Error(errorStr);
+					}
+				}
+				//replace current cloud by this one
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = cleanCloud;
+				m_clouds[i].basename += QString("_SOR");
+				//delete cleanCloud;
+				//cleanCloud = 0;
+			}
+			else
+			{
+				return Error(QString("Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+			}
+			
+			delete selection;
+			selection = 0;
+		}
+		else
+		{
+			//no points fall inside selection!
+			return Error(QString("Failed to apply SOR filter on cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 		}
 	}
 
@@ -3564,6 +3641,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_COLOR_BANDING))
 		{
 			success = commandColorBanding(arguments);
+		}
+		// "SOR" FILTER
+		else if (IsCommand(argument,COMMAND_SOR_FILTER))
+		{
+			success = commandSORFilter(arguments,&progressDlg);
 		}
 		//Change default cloud output format
 		else if (IsCommand(argument,COMMAND_CLOUD_EXPORT_FORMAT))

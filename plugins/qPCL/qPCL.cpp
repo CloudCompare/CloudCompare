@@ -29,7 +29,7 @@
 #include <ExtractSIFT.h>
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
-#include <StatisticalOutliersRemover.h>
+//#include <StatisticalOutliersRemover.h>
 
 qPCL::~qPCL()
 {
@@ -65,10 +65,10 @@ void qPCL::getActions(QActionGroup& group)
 	if (m_filters.empty())
 	{
 		//ADD FILTERS
-		//addFilter( new LoadPCD() );
-		//addFilter( new SavePCD() );
+		//addFilter( new LoadPCD() ); //Now integrated in CC (qPCLIO plugin)
+		//addFilter( new SavePCD() ); //Now integrated in CC (qPCLIO plugin)
 		addFilter( new NormalEstimation());
-		addFilter( new StatisticalOutliersRemover() );
+		//addFilter( new StatisticalOutliersRemover() ); //Now integrated in CC ('Tools > Clean > SOR filter')
 		addFilter( new MLSSmoothingUpsampling() );
 	}
 

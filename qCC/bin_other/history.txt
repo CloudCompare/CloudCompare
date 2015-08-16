@@ -14,6 +14,12 @@ v2.6.2 XX/XX/2015
 		- the contour lines are now computed on the active layer
 		- the user can set the default width for the countour lines
 		- the contour lines can be colored (according to the layer associated scalar field settings)
+	* SOR filter:
+		- the PCL Statistical Outlier filter (for noise cleaning) has been integrated in CloudCompare
+		- can be accessed via 'Tools > Clean > SOR filter'
+		- its icon has been moved to the main toolbar
+		- the tool is now accessible through the command line (see below)
+		- the other noise filtering tool has been renamed ('Tools > Clean > Noise filter')
 	* Display:
 		- CloudCompare now supports 'Level Of Detail' (LoD) display for big clouds
 		- if enabled, the clouds are now displayed first at a low octree level when moved
@@ -31,7 +37,10 @@ v2.6.2 XX/XX/2015
 			(i.e. the gray/hidden values won't appear in the histogram if this option is not checked)
 	* Command line:
 		- the 'Cross Section' tool (single or multiple slices extraction) can now be called via
-		the command line (with a dedicated XML parameters file)
+			the command line (with a dedicated XML parameters file)
+		- the SOR filter can now be called with via the command line:
+			* 'SOR' + number of neighbors (knn) + std. dev. multiplier (nSigma)
+			* the loaded clouds are replaced by their filtered version
 		- the 'SF Arithmetic' tool can now be called via the command line:
 			* 'SF_ARITHMETIC' + SF index + operation
 			* supported operations are: sqrt, pow2, pow3, exp, log, log10, cos, sin, tan, acos, asin, atan, int, inverse)

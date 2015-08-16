@@ -130,6 +130,7 @@
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccColorLevelsDlg.h"
 #include "ccSORFilterDlg.h"
+#include "ccNoiseFilterDlg.h"
 #include "ccDensityDlg.h"
 #include "ccEntityPickerDlg.h"
 #include "ccRasterizeTool.h"
@@ -902,6 +903,7 @@ void MainWindow::connectActions()
 	connect(actionDelete,						SIGNAL(triggered()),	m_ccRoot,	SLOT(deleteSelectedEntities()));
 
 	//"Tools > Clean" menu
+	connect(actionSORFilter,					SIGNAL(triggered()),	this,		SLOT(doActionSORFilter()));
 	connect(actionNoiseFilter,					SIGNAL(triggered()),	this,		SLOT(doActionFilterNoise()));
 	
 	//"Tools > Projection" menu
@@ -6952,45 +6954,21 @@ bool MainWindow::ApplyScaleMatchingAlgortihm(ScaleMatchingAlgorithm algo,
 	return true;
 }
 
-static bool s_noiseFilterUseKnn = false;
-static int s_noiseFilterKnn = 6;
-static bool s_noiseFilterUseAbsError = false;
-static double s_noiseFilterAbsError = 1.0;
-static double s_noiseFilterNSigma = 1.0;
-static bool s_noiseFilterRemoveIsolatedPoints = false;
-
-void MainWindow::doActionFilterNoise()
+static int s_sorFilterKnn = 6;
+static double s_sorFilterNSigma = 1.0;
+void MainWindow::doActionSORFilter()
 {
-	PointCoordinateType kernelRadius = GetDefaultCloudKernelSize(m_selectedEntities);
-
 	ccSORFilterDlg sorDlg(this);
 	
 	//set semi-persistent/dynamic parameters
-	sorDlg.radiusDoubleSpinBox->setValue(kernelRadius);
-	sorDlg.knnSpinBox->setValue(s_noiseFilterKnn);
-	sorDlg.nSigmaDoubleSpinBox->setValue(s_noiseFilterNSigma);
-	sorDlg.absErrorDoubleSpinBox->setValue(s_noiseFilterAbsError);
-	sorDlg.removeIsolatedPointsCheckBox->setChecked(s_noiseFilterRemoveIsolatedPoints);
-	if (s_noiseFilterUseAbsError)
-		sorDlg.absErrorRadioButton->setChecked(true);
-	else
-		sorDlg.relativeRadioButton->setChecked(true);
-	if (s_noiseFilterUseKnn)
-		sorDlg.knnRadioButton->setChecked(true);
-	else
-		sorDlg.radiusRadioButton->setChecked(true);
-
+	sorDlg.knnSpinBox->setValue(s_sorFilterKnn);
+	sorDlg.nSigmaDoubleSpinBox->setValue(s_sorFilterNSigma);
 	if (!sorDlg.exec())
 		return;
 
 	//update semi-persistent/dynamic parameters
-	kernelRadius = static_cast<PointCoordinateType>(sorDlg.radiusDoubleSpinBox->value());
-	s_noiseFilterUseKnn = sorDlg.knnRadioButton->isChecked();
-	s_noiseFilterKnn = sorDlg.knnSpinBox->value();
-	s_noiseFilterUseAbsError = sorDlg.absErrorRadioButton->isChecked();
-	s_noiseFilterNSigma = sorDlg.nSigmaDoubleSpinBox->value();
-	s_noiseFilterAbsError = sorDlg.absErrorDoubleSpinBox->value();
-	s_noiseFilterRemoveIsolatedPoints = sorDlg.removeIsolatedPointsCheckBox->isChecked();
+	s_sorFilterKnn = sorDlg.knnSpinBox->value();
+	s_sorFilterNSigma = sorDlg.nSigmaDoubleSpinBox->value();
 
 	ccProgressDialog pDlg(true,this);
 
@@ -7012,13 +6990,8 @@ void MainWindow::doActionFilterNoise()
 
 		//computation
 		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
-																				kernelRadius,
-																				s_noiseFilterNSigma,
-																				s_noiseFilterRemoveIsolatedPoints,
-																				s_noiseFilterUseKnn,
-																				s_noiseFilterKnn,
-																				s_noiseFilterUseAbsError,
-																				s_noiseFilterAbsError,
+																				s_sorFilterKnn,
+																				s_sorFilterNSigma,
 																				0,
 																				&pDlg);
 
@@ -7049,7 +7022,7 @@ void MainWindow::doActionFilterNoise()
 				}
 				else
 				{
-					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create clean version of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
 			
@@ -7059,7 +7032,121 @@ void MainWindow::doActionFilterNoise()
 		else
 		{
 			//no points fall inside selection!
-			ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply SOR filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+		}
+	}
+
+	refreshAll();
+	updateUI();
+}
+
+static bool s_noiseFilterUseKnn = false;
+static int s_noiseFilterKnn = 6;
+static bool s_noiseFilterUseAbsError = false;
+static double s_noiseFilterAbsError = 1.0;
+static double s_noiseFilterNSigma = 1.0;
+static bool s_noiseFilterRemoveIsolatedPoints = false;
+void MainWindow::doActionFilterNoise()
+{
+	PointCoordinateType kernelRadius = GetDefaultCloudKernelSize(m_selectedEntities);
+
+	ccNoiseFilterDlg noiseDlg(this);
+	
+	//set semi-persistent/dynamic parameters
+	noiseDlg.radiusDoubleSpinBox->setValue(kernelRadius);
+	noiseDlg.knnSpinBox->setValue(s_noiseFilterKnn);
+	noiseDlg.nSigmaDoubleSpinBox->setValue(s_noiseFilterNSigma);
+	noiseDlg.absErrorDoubleSpinBox->setValue(s_noiseFilterAbsError);
+	noiseDlg.removeIsolatedPointsCheckBox->setChecked(s_noiseFilterRemoveIsolatedPoints);
+	if (s_noiseFilterUseAbsError)
+		noiseDlg.absErrorRadioButton->setChecked(true);
+	else
+		noiseDlg.relativeRadioButton->setChecked(true);
+	if (s_noiseFilterUseKnn)
+		noiseDlg.knnRadioButton->setChecked(true);
+	else
+		noiseDlg.radiusRadioButton->setChecked(true);
+
+	if (!noiseDlg.exec())
+		return;
+
+	//update semi-persistent/dynamic parameters
+	kernelRadius = static_cast<PointCoordinateType>(noiseDlg.radiusDoubleSpinBox->value());
+	s_noiseFilterUseKnn = noiseDlg.knnRadioButton->isChecked();
+	s_noiseFilterKnn = noiseDlg.knnSpinBox->value();
+	s_noiseFilterUseAbsError = noiseDlg.absErrorRadioButton->isChecked();
+	s_noiseFilterNSigma = noiseDlg.nSigmaDoubleSpinBox->value();
+	s_noiseFilterAbsError = noiseDlg.absErrorDoubleSpinBox->value();
+	s_noiseFilterRemoveIsolatedPoints = noiseDlg.removeIsolatedPointsCheckBox->isChecked();
+
+	ccProgressDialog pDlg(true,this);
+
+	size_t selNum = m_selectedEntities.size();
+	bool firstCloud = true;
+	
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+
+		//specific test for locked vertices
+		bool lockedVertices;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+		if (cloud && lockedVertices)
+		{
+			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			continue;
+		}
+
+		//computation
+		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::noiseFilter(	cloud,
+																					kernelRadius,
+																					s_noiseFilterNSigma,
+																					s_noiseFilterRemoveIsolatedPoints,
+																					s_noiseFilterUseKnn,
+																					s_noiseFilterKnn,
+																					s_noiseFilterUseAbsError,
+																					s_noiseFilterAbsError,
+																					0,
+																					&pDlg);
+
+		if (selection)
+		{
+			if (selection->size() == cloud->size())
+			{
+				ccLog::Warning(QString("[doActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
+			}
+			else
+			{
+				ccPointCloud* cleanCloud = cloud->partialClone(selection);
+				if (cleanCloud)
+				{
+					cleanCloud->setName(cloud->getName()+QString(".clean"));
+					cleanCloud->setDisplay(cloud->getDisplay());
+					if (cloud->getParent())
+						cloud->getParent()->addChild(cleanCloud);
+					addToDB(cleanCloud);
+
+					cloud->setEnabled(false);
+					if (firstCloud)
+					{
+						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
+						firstCloud = false;
+						m_ccRoot->selectEntity(cleanCloud,true);
+					}
+				}
+				else
+				{
+					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+				}
+			}
+			
+			delete selection;
+			selection = 0;
+		}
+		else
+		{
+			//no points fall inside selection!
+			ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 		}
 	}
 
@@ -11579,6 +11666,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionProjectUncertainty->setEnabled(exactlyOneCameraSensor);
 	actionCheckPointsInsideFrustrum->setEnabled(exactlyOneCameraSensor);
 	actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
+	actionSORFilter->setEnabled(atLeastOneCloud);
+	actionNoiseFilter->setEnabled(atLeastOneCloud);
 	actionUnroll->setEnabled(exactlyOneEntity);
 	actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);
 	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);

@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -438,6 +438,7 @@
      <property name="title">
       <string>Clean</string>
      </property>
+     <addaction name="actionSORFilter"/>
      <addaction name="actionNoiseFilter"/>
     </widget>
     <addaction name="menuClean"/>
@@ -680,6 +681,7 @@
    <addaction name="actionLabelConnectedComponents"/>
    <addaction name="actionPrimitiveFactory"/>
    <addaction name="actionRasterize"/>
+   <addaction name="actionSORFilter"/>
    <addaction name="separator"/>
    <addaction name="actionSegment"/>
    <addaction name="actionTranslateRotate"/>
@@ -2622,6 +2624,9 @@
    <property name="text">
     <string>Noise filter</string>
    </property>
+   <property name="toolTip">
+    <string>Noise filter (remove the points far from the - approximate - local surface)</string>
+   </property>
   </action>
   <action name="actionComputeStatParams2">
    <property name="icon">
@@ -2773,6 +2778,18 @@
   <action name="actionDistanceMapToMesh">
    <property name="text">
     <string>Distance map to mesh</string>
+   </property>
+  </action>
+  <action name="actionSORFilter">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccSORFilter.png</normaloff>:/CC/images/ccSORFilter.png</iconset>
+   </property>
+   <property name="text">
+    <string>SOR filter</string>
+   </property>
+   <property name="toolTip">
+    <string>Statistical Outlier Filter (remove the points far from their neighbors)</string>
    </property>
   </action>
  </widget>

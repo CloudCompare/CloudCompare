@@ -393,7 +393,7 @@ ccCommandLineParser::EntityDesc::EntityDesc(QString filename, int _indexInFile/*
 	else
 	{
 		QFileInfo fi(filename);
-		basename = fi.baseName();
+		basename = fi.completeBaseName();
 		path = fi.path();
 	}
 }

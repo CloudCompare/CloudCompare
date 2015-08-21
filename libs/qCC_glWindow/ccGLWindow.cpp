@@ -4536,7 +4536,8 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 									bool dontScaleFeatures/*=false*/,
-									bool renderOverlayItems/*=false*/)
+									bool renderOverlayItems/*=false*/,
+									bool silent/*=false*/)
 {
 	//current window size (in pixels)
 	int Wp = static_cast<int>(width() * zoomFactor);
@@ -4546,7 +4547,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 	GLubyte* data = output.bits();
 	if (!data)
 	{
-		ccLog::Error("Not enough memory!");
+		if (!silent)
+			ccLog::Error("Not enough memory!");
 		return QImage();
 	}
 
@@ -4581,7 +4583,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 	QImage outputImage;
 	if (m_fbo)
 	{
-		ccLog::Print("[Render screen via FBO]");
+		if (!silent)
+			ccLog::Print("[Render screen via FBO]");
 
 		ccFrameBufferObject* fbo = 0;
 		ccGlFilter* filter = 0;
@@ -4598,7 +4601,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 							&&	fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D) );
 			if (!success)
 			{
-				ccLog::Error("[FBO] Initialization failed! (not enough memory?)");
+				if (!silent)
+					ccLog::Error("[FBO] Initialization failed! (not enough memory?)");
 				delete fbo;
 				fbo = 0;
 			}
@@ -4626,7 +4630,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				QString error;
 				if (!m_activeGLFilter->init(Wp,Hp,shadersPath,error))
 				{
-					ccLog::Error(QString("[GL Filter] GL filter can't be used during rendering: %1").arg(error));
+					if (!silent)
+						ccLog::Error(QString("[GL Filter] GL filter can't be used during rendering: %1").arg(error));
 				}
 				else
 				{
@@ -4763,12 +4768,14 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 	}
 	else if (m_activeShader)
 	{
-		ccLog::Error("Screen capture with shader not supported!");
+		if (!silent)
+			ccLog::Error("Screen capture with shader not supported!");
 	}
 	//if no shader or fbo --> we grab screen directly
 	else
 	{
-		ccLog::Print("[Render screen via QT pixmap]");
+		if (!silent)
+			ccLog::Print("[Render screen via QT pixmap]");
 
 		QPixmap capture = renderPixmap(Wp,Hp);
 		if (capture.width()>0 && capture.height()>0)
@@ -4777,7 +4784,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 		}
 		else
 		{
-			ccLog::Error("Direct screen capture failed! (not enough memory?)");
+			if (!silent)
+				ccLog::Error("Direct screen capture failed! (not enough memory?)");
 		}
 	}
 

@@ -58,6 +58,8 @@ protected:
 
 	int getCurrentListIndex();
 
+	int countFrameAndResetInterpolators();
+
 	void applyViewport( const cc2DViewportObject* viewport );
 };
 

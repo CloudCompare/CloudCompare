@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qAnimation">
+        <file>animation.png</file>
+    </qresource>
+</RCC>

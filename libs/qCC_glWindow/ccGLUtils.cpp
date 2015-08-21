@@ -123,7 +123,7 @@ ccGLMatrixd ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 		break;
 	}
 
-	return ccGLMatrixd::LookAt(eye,center,top);
+	return ccGLMatrixd::FromViewDirAndUpDir(center-eye,top);
 }
 
 bool ccGLUtils::CatchGLError(const char* context)

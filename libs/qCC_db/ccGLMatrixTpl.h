@@ -129,55 +129,6 @@ public:
 		return glMat1 * m12;
 	}
 
-	//! Returns a 'look at' matrix similar to what gluLookAt would produce
-	/** Inspired from https://www.opengl.org/wiki/GluLookAt_code
-		\param eyePosition3D  eye/camera position
-		\param center3D where to look at
-		\param upVector3D vertical direction
-		\return resulting 'look at' matrix
-	**/
-	static ccGLMatrixTpl<T> LookAt( const Vector3Tpl<T>& eyePosition3D, const Vector3Tpl<T>& center3D, const Vector3Tpl<T>& upVector3D)
-	{
-		//------------------
-		Vector3Tpl<T> forward = center3D - eyePosition3D;
-		forward.normalize();
-		//------------------
-		//Side = forward x up
-		Vector3Tpl<T> side = forward.cross(upVector3D);
-		side.normalize();
-		//------------------
-		//Recompute up as: up = side x forward
-		Vector3Tpl<T> up = side.cross(forward);
-
-		//------------------
-		ccGLMatrixTpl<T> matrix;
-		{
-			T* mat = matrix.data();
-			mat[0]  = side.x;
-			mat[4]  = side.y;
-			mat[8]  = side.z;
-			mat[12] = -eyePosition3D.x;
-			//------------------
-			mat[1]  = up.x;
-			mat[5]  = up.y;
-			mat[9]  = up.z;
-			mat[13] = -eyePosition3D.y;
-			//------------------
-			mat[2]  = -forward.x;
-			mat[6]  = -forward.y;
-			mat[10] = -forward.z;
-			mat[14] = -eyePosition3D.z;
-			//------------------
-			mat[3]  = 0;
-			mat[7]  = 0;
-			mat[11] = 0;
-			mat[15] = static_cast<T>(1);
-		}
-		//------------------
-
-		return matrix;
-	}
-
 	//! Creates a transformation matrix that rotates a vector to another
 	/** Adapted from  "Efficiently Building a Matrix to Rotate One Vector to Another"
 		By Tomas Möller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
@@ -300,36 +251,46 @@ public:
 		return rotMat;
 	}
 
-	//! Generates a 'viewing' matrix from a looking vector and a 'up' direction (no translation)
-	/** \param forward forward 'view' vector
+	//! Generates a 'viewing' matrix from a looking vector and a 'up' direction
+	/** \warning No translation is applied (pure rotation matrix)
+		\param forward forward 'view' vector
 		\param up up vector
 		\return corresponding rotation matrix
 	**/
 	static ccGLMatrixTpl<T> FromViewDirAndUpDir(const Vector3Tpl<T>& forward, const Vector3Tpl<T>& up)
 	{
-		Vector3Tpl<T> uForward = forward; uForward.normalize();
-		Vector3Tpl<T> uSide = uForward.cross(up);  uSide.normalize();
-		Vector3Tpl<T> uUp = uSide.cross(uForward); uUp.normalize();
+		//normalize forward
+		Vector3Tpl<T> uForward = forward;
+		uForward.normalize();
+		
+		//side = forward x up
+		Vector3Tpl<T> uSide = uForward.cross(up);
+		uSide.normalize();
+		
+		//recompute 'up' as: up = side x forward
+		Vector3Tpl<T> uUp = uSide.cross(uForward);
+		uUp.normalize();
 
 		ccGLMatrixTpl<T> matrix;
-		T* mat = matrix.data();
-		mat[ 0] =  uSide.x ;
-		mat[ 4] =  uSide.y ;
-		mat[ 8] =  uSide.z ;
-		mat[12] =  0 ;
-		mat[ 1] =  uUp.x ;
-		mat[ 5] =  uUp.y ;
-		mat[ 9] =  uUp.z ;
-		mat[13] =  0 ;
-		mat[ 2] = -uForward.x ;
-		mat[ 6] = -uForward.y ;
-		mat[10] = -uForward.z ;
-		mat[14] =  0 ;
-		mat[ 3] =  0;
-		mat[ 7] =  0;
-		mat[11] =  0;
-		mat[15] =  static_cast<T>(1) ;
-
+		{
+			T* mat = matrix.data();
+			mat[ 0] =  uSide.x;
+			mat[ 4] =  uSide.y;
+			mat[ 8] =  uSide.z;
+			mat[12] =  0;
+			mat[ 1] =  uUp.x;
+			mat[ 5] =  uUp.y;
+			mat[ 9] =  uUp.z;
+			mat[13] =  0 ;
+			mat[ 2] = -uForward.x;
+			mat[ 6] = -uForward.y;
+			mat[10] = -uForward.z;
+			mat[14] =  0 ;
+			mat[ 3] =  0;
+			mat[ 7] =  0;
+			mat[11] =  0;
+			mat[15] =  static_cast<T>(1) ;
+		}
 		return matrix;
 	}
 

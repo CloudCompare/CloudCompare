@@ -4513,6 +4513,31 @@ bool ccGLWindow::renderToFile(	QString filename,
 	if (filename.isEmpty() || zoomFactor < 1.0e-2f)
 		return false;
 
+	QImage output = renderToImage(zoomFactor, dontScaleFeatures, renderOverlayItems);
+
+	if (output.isNull())
+	{
+		//an error occurred (message should have already been issued!)
+		return false;
+	}
+
+	bool success = output.save(filename);
+	if (success)
+	{
+		ccLog::Print(QString("[Snapshot] File '%1' saved! (%2 x %3 pixels)").arg(filename).arg(output.width()).arg(output.height()));
+	}
+	else
+	{
+		ccLog::Print(QString("[Snapshot] Failed to save file '%1'!").arg(filename));
+	}
+
+	return success;
+}
+
+QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
+									bool dontScaleFeatures/*=false*/,
+									bool renderOverlayItems/*=false*/)
+{
 	//current window size (in pixels)
 	int Wp = static_cast<int>(width() * zoomFactor);
 	int Hp = static_cast<int>(height() * zoomFactor);
@@ -4521,8 +4546,8 @@ bool ccGLWindow::renderToFile(	QString filename,
 	GLubyte* data = output.bits();
 	if (!data)
 	{
-		ccLog::Error("[ccGLWindow::renderToFile] Not enough memory!");
-		return false;
+		ccLog::Error("Not enough memory!");
+		return QImage();
 	}
 
 	m_glWidth = Wp;
@@ -4553,7 +4578,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 
 	//setDisplayParameters(displayParams,true);
 
-	bool result = false;
+	QImage outputImage;
 	if (m_fbo)
 	{
 		ccLog::Print("[Render screen via FBO]");
@@ -4729,7 +4754,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 			//resizeGL(width(),height());
 			glViewport(0,0,width(),height());
 
-			result = output.save(filename);
+			outputImage = output;
 
 			//updateZoom(1.0/zoomFactor);
 		}
@@ -4748,7 +4773,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 		QPixmap capture = renderPixmap(Wp,Hp);
 		if (capture.width()>0 && capture.height()>0)
 		{
-			result = capture.save(filename);
+			outputImage = capture.toImage();
 		}
 		else
 		{
@@ -4767,12 +4792,7 @@ bool ccGLWindow::renderToFile(	QString filename,
 	m_captureMode.zoomFactor = 1.0f;
 	setFontPointSize(getFontPointSize());
 
-	if (result)
-		ccLog::Print(QString("[Snapshot] File '%1' saved! (%2 x %3 pixels)").arg(filename).arg(Wp).arg(Hp));
-	else
-		ccLog::Print(QString("[Snapshot] Failed to save file '%1'!").arg(filename));
-
-	return true;
+	return outputImage;
 }
 
 void ccGLWindow::removeFBO()

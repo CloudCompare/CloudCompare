@@ -23,14 +23,19 @@
 //Qt
 #include <QtGui>
 #include <QApplication>
-#include <QDoubleSpinBox>
-#include <QLabel>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QSettings>
+#include <QElapsedTimer>
 
 //standard includes
 #include <vector>
-#include <sstream>
 #include <iomanip>
+
+#ifdef QFFMPEG_SUPPORT
+//QTFFmpeg
+#include <QVideoEncoder.h>
+#endif
 
 //System
 #include <algorithm>
@@ -40,174 +45,250 @@
 #include <unistd.h>
 #endif
 
-qAnimationDlg::qAnimationDlg( std::vector < VideoStepItem > & video_steps, ccGLWindow * main_window, QWidget* parent) :
-	QDialog(parent),
-	Ui::AnimationDialog(),
-	m_video_steps ( video_steps ),
-	m_main_window ( main_window )
+qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow* view3d, QWidget* parent)
+	: QDialog(parent)
+	, Ui::AnimationDialog()
+	, m_videoSteps(videoSteps)
+	, m_view3d(view3d)
 {
 	setupUi(this);
 
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-	for ( unsigned int i = 0; i < m_video_steps.size(); ++i )
+	for (size_t i=0; i<m_videoSteps.size(); ++i )
 	{
-		stepSelectionList->addItem( (m_video_steps[i]).interpolator.view1()->getName() );
+		stepSelectionList->addItem( m_videoSteps[i].interpolator.view1()->getName() );
 	}
 
-	directoryLabel->setText( QDir::homePath() );
-
-	stepSelectionList->setSelectionMode(QAbstractItemView::SingleSelection);
-
-	QModelIndex modelIndex = stepSelectionList->rootIndex(); // u have to find the model index of the first item here
-	stepSelectionList->setCurrentIndex(modelIndex);
-
-	int current_item = GetCurrentListIndex();
-
-	VideoStepItem first_video_step = m_video_steps[current_item];
-
-
-	on_fpsSpinBox_valueChanged( first_video_step.fps );
-	on_timeForStepBox_valueChanged( first_video_step.time_to_run );
-
-	//    connect (fpsSpinBox, SIGNAL( valueChanged( double ) ), this, SLOT( on_fpsSpinBox_valueChanged (double) ) );
-	//    connect (timeForStepBox , SIGNAL ( valueChanged ( double ) ), this, SLOT ( on_timeForStepBox_valueChanged( int ) ) );
-	//    connect (stepSelectionList , SIGNAL ( itemChanged ( QListWidgetItem * ) ), this, SLOT ( on_stepSelectionList_itemChanged( QListWidgetItem *  ) ) );
-
-
-}
-
-int qAnimationDlg::GetCurrentListIndex()
-{
-	QModelIndex index ( stepSelectionList->currentIndex() );
-	if ( index.isValid() )
+	//read persistent settings
 	{
-		return index.row();
+		QSettings settings;
+		settings.beginGroup("qAnimation");
+		QString defaultDir;
+#ifdef _MSC_VER
+		defaultDir = QApplication::applicationDirPath();
+#else
+		defaultDir = QDir::homePath();
+#endif
+		QString lastFilename = settings.value("filename", defaultDir + "/animation.mpg" ).toString();
+#ifndef QFFMPEG_SUPPORT
+		lastFilename = QFileInfo(lastFilename).absolutePath();
+#endif
+		outputFileLineEdit->setText( lastFilename );
+		settings.endGroup();
 	}
-	return 0;
+
+	connect ( fpsSpinBox,			SIGNAL( valueChanged(double) ),		this, SLOT( onFPSChanged(double) ) );
+	connect ( timeForStepBox,		SIGNAL( valueChanged(double) ),		this, SLOT( onTimeForStepChanged(double) ) );
+	connect ( stepSelectionList,	SIGNAL( currentRowChanged(int) ),	this, SLOT( onCurrentStepChanged(int) ) );
+	connect ( browseButton,			SIGNAL( clicked() ),				this, SLOT( onBrowseButtonClicked() ) );
+	connect ( previewButton,		SIGNAL( clicked() ),				this, SLOT( preview() ) );
+	connect ( renderButton,			SIGNAL( clicked() ),				this, SLOT( render() ) );
+
+	stepSelectionList->setCurrentRow(0); //select the first one by default
+
+	int currentItemIndex = getCurrentListIndex();
+	onCurrentStepChanged(currentItemIndex);
 }
 
-void qAnimationDlg::SetView ( cc2DViewportObject * current_params )
+int qAnimationDlg::getCurrentListIndex()
 {
-	m_main_window->setViewportParameters( current_params->getParameters() );
-
-	m_main_window->redraw();
-	QApplication::processEvents();
+	return stepSelectionList->currentRow();
 }
 
-void qAnimationDlg::Preview(  )
+void qAnimationDlg::applyViewport( const cc2DViewportObject* viewport )
 {
-	for ( int i = 0 ; i < stepSelectionList->count() ; ++i )
+	m_view3d->setViewportParameters( viewport->getParameters() );
+	m_view3d->redraw();
+
+	//QApplication::processEvents();
+}
+
+void qAnimationDlg::onFPSChanged(double fps)
+{
+	m_videoSteps[ getCurrentListIndex() ].fps = fps;
+}
+
+void qAnimationDlg::onTimeForStepChanged(double time)
+{
+	m_videoSteps[ getCurrentListIndex() ].time_to_run = time;
+}
+
+void qAnimationDlg::onBrowseButtonClicked()
+{
+#ifdef QFFMPEG_SUPPORT
+	QString filename = QFileDialog::getSaveFileName(	this,
+														tr("Output animation file"),
+														outputFileLineEdit->text() );
+#else
+	QString filename = QFileDialog::getExistingDirectory(	this,
+															tr("Open Directory"),
+															outputFileLineEdit->text(),
+															QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+#endif
+
+	if (filename.isEmpty())
 	{
+		//cancelled by user
+		return;
+	}
 
-		//stepSelectionList->setCurrentIndex( i );
+	outputFileLineEdit->setText(filename);
+}
 
-		VideoStepItem current_video_step = m_video_steps[i];
+void qAnimationDlg::preview()
+{
+	//we'll take the rendering time into account!
+	QElapsedTimer timer;
+	timer.start();
+
+	for ( int i=0; i<stepSelectionList->count(); ++i )
+	{
+		VideoStepItem& currentVideoStep = m_videoSteps[i];
+
+		cc2DViewportObject currentParams;
+		currentVideoStep.interpolator.reset();
+		currentVideoStep.interpolator.setMaxStep( static_cast< unsigned int >( currentVideoStep.fps * currentVideoStep.time_to_run ) );
+
+		//theoretical waiting time per frame
+		qint64 delay_ms = static_cast<int>(1000 * currentVideoStep.time_to_run / currentVideoStep.fps);
+
+		while ( currentVideoStep.interpolator.nextView( currentParams ) )
+		{
+			timer.restart();
+			applyViewport ( &currentParams );
+			qint64 dt_ms = timer.elapsed();
+
+			//remaining time
+			if (dt_ms < delay_ms)
+			{
+				int wait_ms = static_cast<int>(delay_ms - dt_ms);
+#if defined(CC_WINDOWS)
+				::Sleep( wait_ms );
+#else
+				usleep( wait_ms * 1000 );
+#endif
+			}
+		}
+	}
+
+}
+
+void qAnimationDlg::render()
+{
+	QString outputFilename = outputFileLineEdit->text();
+
+	//save to persistent settings
+	{
+		QSettings settings;
+		settings.beginGroup("qAnimation");
+		settings.setValue("filename", outputFilename);
+		settings.endGroup();
+	}
+
+#ifdef QFFMPEG_SUPPORT
+	//get original viewport size
+	QSize originalViewSize = m_view3d->size();
+
+	//hack: FIXME
+	{
+		//find the nearest multiples of 8
+		QSize customSize = originalViewSize;
+		if (originalViewSize.width() % 8 || originalViewSize.height() % 8)
+		{
+			if (originalViewSize.width() % 8)
+				customSize.setWidth((originalViewSize.width() / 8 + 1) * 8);
+			if (originalViewSize.height() % 8)
+				customSize.setHeight((originalViewSize.height() / 8 + 1) * 8);
+			m_view3d->resize(customSize);
+			QApplication::processEvents();
+		}
+	}
+
+	int bitrate = 400000;
+	int gop = 12;
+	QVideoEncoder encoder(outputFilename, m_view3d->width(), m_view3d->height(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value()));
+	QString errorString;
+	if (!encoder.open(&errorString))
+	{
+		QMessageBox::critical(this, "Error", QString("Failed to open file for output: %1").arg(errorString));
+		return;
+	}
+#endif
+
+	setEnabled(false);
+
+	double frameTime = 0.0;
+	unsigned frameIndex = 0;
+	bool success = true;
+	for ( int i=0; i<stepSelectionList->count(); ++i )
+	{
+		VideoStepItem& currentVideoStep = m_videoSteps[i];
 
 		cc2DViewportObject current_params;
+		currentVideoStep.interpolator.reset();
+		currentVideoStep.interpolator.setMaxStep( static_cast < unsigned int > ( currentVideoStep.fps * currentVideoStep.time_to_run ) );
 
-		current_video_step.interpolator.setMaxStep( static_cast < unsigned int > ( current_video_step.fps * current_video_step.time_to_run ) );
-
-		while ( (current_video_step).interpolator.nextView( current_params ) )
+		while ( currentVideoStep.interpolator.nextView( current_params ) )
 		{
-			SetView ( &current_params );
+			frameTime += 1.0 / currentVideoStep.fps;
 
-			int fps ( current_video_step.fps );
-#if defined(CC_WINDOWS)
-			::Sleep( 1000/fps );
+			applyViewport ( &current_params );
+
+			//render to image
+			QImage image = m_view3d->renderToImage(1.0 , true, false );
+			++frameIndex;
+
+			if (image.isNull())
+			{
+				QMessageBox::critical(this, "Error", "Failed to grab the screen!");
+				success = false;
+				break;
+			}
+
+#ifdef QFFMPEG_SUPPORT
+			if (!encoder.encodeImage(image, &errorString))
+			{
+				QMessageBox::critical(this, "Error", QString("Failed to encode frame #%1: %2").arg(frameIndex).arg(errorString));
+				success = false;
+				break;
+			}
 #else
-			usleep(1000/fps * 1000);
+			QString filename = QString("frame_%1.png").arg(frameIndex,6,10,QChar('0'));
+			QString fullPath = QDir(outputFilename).filePath(filename);
+			if (!image.save(fullPath))
+			{
+				QMessageBox::critical(this, "Error", QString("Failed to save frame #%1").arg(frameIndex));
+				success = false;
+				break;
+			}
 #endif
 		}
 	}
 
-}
+#ifdef QFFMPEG_SUPPORT
+	encoder.close();
 
-void qAnimationDlg::RenderToFile ( const QString & filename )
-{
+	//hack: restore original size
+	m_view3d->resize(originalViewSize);
 	QApplication::processEvents();
-	m_main_window->renderToFile(qPrintable( filename ), 1.0 , true, false );
-}
+#endif
+	
+	setEnabled(true);
 
-void qAnimationDlg::RunRender ()
-{
-	double frame_time = 0.0;
-	for ( int i = 0 ; i < stepSelectionList->count() ; ++i )
+	if (success)
 	{
-		VideoStepItem current_video_step = m_video_steps[i];
-
-		cc2DViewportObject current_params;
-
-		current_video_step.interpolator.setMaxStep( static_cast < unsigned int > ( current_video_step.fps * current_video_step.time_to_run ) );
-
-		while ( (current_video_step).interpolator.nextView( current_params ) )
-		{
-			frame_time += 1.0 / current_video_step.fps;
-
-			std::stringstream filename ;
-			filename << std::fixed ;
-			filename << std::setprecision (6);
-			filename << std::setfill ('0');
-			filename << std::setw(20);
-			filename << std::right;
-			filename << frame_time << ".png";
-			QString filename_q = QString::fromStdString( filename.str() );
-			QString dirname ( directoryLabel->text() );
-
-			QString full_path ( QDir ( dirname ).filePath( filename_q ) );
-
-			SetView ( &current_params );
-
-			RenderToFile( full_path );
-		}
+		QMessageBox::information(this, "Job done", "The animation has been saved successfully");
 	}
 }
 
-void qAnimationDlg::on_fpsSpinBox_valueChanged(double arg1)
+void qAnimationDlg::onCurrentStepChanged(int index)
 {
+	const VideoStepItem& videoStep = m_videoSteps[index];
+	
+	//update current values
+	fpsSpinBox->setValue(videoStep.fps);
+	timeForStepBox->setValue(videoStep.time_to_run);
 
-	m_video_steps[ GetCurrentListIndex() ].fps = arg1 ;
-}
-
-void qAnimationDlg::on_timeForStepBox_valueChanged(double arg1)
-{
-	m_video_steps[ GetCurrentListIndex() ].time_to_run = arg1 ;
-}
-
-void qAnimationDlg::on_directoryButton_clicked()
-{
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-		directoryLabel->text(),
-		QFileDialog::ShowDirsOnly
-		| QFileDialog::DontResolveSymlinks);
-	if ( dir == QString("") )
-	{
-		dir = QDir::homePath();
-	}
-
-	directoryLabel->setText (dir);
-}
-
-void qAnimationDlg::on_previewButton_clicked()
-{
-	Preview ();
-}
-
-
-void qAnimationDlg::on_renderButton_clicked()
-{
-	RunRender ();
-}
-
-void qAnimationDlg::on_stepSelectionList_itemSelectionChanged()
-{
-	int index = GetCurrentListIndex();
-
-	fpsSpinBox->setValue ( m_video_steps[index].fps );
-	timeForStepBox->setValue ( m_video_steps[index].time_to_run );
-
-	cc2DViewportObject * current_params ( m_video_steps[index].interpolator.view1() );
-
-	SetView ( current_params );
-
+	applyViewport( videoStep.interpolator.view1() );
 }

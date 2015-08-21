@@ -73,11 +73,6 @@ void qAnimation::getActions(QActionGroup& group)
     group.addAction(m_action);
 }
 
-
-//static information
-static double g_fps             =    25.0;
-static double g_default_wait    =    1.0;
-
 //what to do when clicked.
 void qAnimation::doAction()
 {
@@ -92,64 +87,67 @@ void qAnimation::doAction()
     //This is how you can output messages
     m_app->dispToConsole("[qAnimation] Starting Animation plugin!",ccMainAppInterface::STD_CONSOLE_MESSAGE); //a standard message is displayed in the console
 
-    const ccHObject::Container& selected_entities = m_app->getSelectedEntities();
+    const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
-    std::vector < cc2DViewportObject * > selected_views;
+    std::vector<cc2DViewportObject*> selectedViews;
+	try
+	{
+		for ( ccHObject::Container::const_iterator entity_iterator = selectedEntities.begin(); entity_iterator != selectedEntities.end() ; ++entity_iterator )
+		{
+			if ( (*(entity_iterator))->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT )
+			{
+				selectedViews.push_back ( static_cast<cc2DViewportObject*>(*entity_iterator) );
+			}
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_app->dispToConsole("Not enough memory!");
+		return;
+	}
 
-    for ( ccHObject::Container::const_iterator entity_iterator = selected_entities.begin(); entity_iterator != selected_entities.end() ; ++entity_iterator )
+    if ( selectedViews.size() < 2 )
     {
-        if ( (*(entity_iterator))->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT )
-        {
-            selected_views.push_back ( dynamic_cast < cc2DViewportObject * > ( *(entity_iterator) ) );
-        }
-    }
-
-    if ( selected_views.size() < 2 )
-    {
-        //m_app->dispToConsole("[qAnimation] Warning: Animation plugin requires at least two selected viewports to function!",ccMainAppInterface::WRN_CONSOLE_MESSAGE); //a warning message is displayed in the console
-        m_app->dispToConsole("Animation plugin requires at least two selected viewports to function!",ccMainAppInterface::ERR_CONSOLE_MESSAGE); //an error message is displayed in the console AND an error box will pop-up!
+        m_app->dispToConsole("Animation plugin requires at least two selected viewports to function!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
     }
 
-    std::stringstream loaded_message;
-    loaded_message << "[qAnimation] Loaded " << selected_views.size() << " viewports.";
+    m_app->dispToConsole( QString("[qAnimation] Loaded %1 viewports").arg(selectedViews.size()) );
 
-    m_app->dispToConsole( QString::fromStdString( loaded_message.str() ) );
-
-    std::vector < VideoStepItem > video_steps;
-    video_steps.reserve ( selected_views.size() );
-
-    for ( unsigned int i = 0 ; i < selected_views.size()-1 ; ++i )
+	//get active GL window
+    ccGLWindow* glWindow( m_app->getActiveGLWindow() );
+    if ( !glWindow )
     {
-        VideoStepItem temp_item;
-        temp_item.interpolator.setView1 ( selected_views[i] );
-        temp_item.interpolator.setView2 ( selected_views[i+1] );
-        temp_item.time_to_run = g_default_wait;
-        temp_item.fps = g_fps;
-        video_steps.push_back( temp_item );
-    }
-
-    ccGLWindow * main_window ( m_app->getActiveGLWindow() );
-
-    if ( !main_window )
-    {
-        m_app->dispToConsole("Animation plugin can't access window object.",ccMainAppInterface::ERR_CONSOLE_MESSAGE); //an error message is displayed in the console AND an error box will pop-up!
+        m_app->dispToConsole("No active GL view!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
     }
 
-    qAnimationDlg videoDlg ( video_steps, main_window );
+    std::vector<VideoStepItem> videoSteps;
+	{
+		try
+		{
+			videoSteps.reserve( selectedViews.size() );
+		}
+		catch (const std::bad_alloc&)
+		{
+			m_app->dispToConsole("Not enough memory!");
+			return;
+		}
 
+		for (size_t i=0 ; i<selectedViews.size()-1; ++i )
+		{
+			videoSteps.push_back( VideoStepItem(selectedViews[i], selectedViews[i+1]) );
+		}
+	}
+
+    qAnimationDlg videoDlg ( videoSteps, glWindow );
     if ( !videoDlg.exec() )
     {
         return;
     }
 
-
     /*** HERE ENDS THE ACTION ***/
-
 }
-
-
 
 //This method should return the plugin icon (it will be used mainly
 //if your plugin as several actions in which case CC will create a

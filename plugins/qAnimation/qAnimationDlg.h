@@ -34,38 +34,31 @@ class qAnimationDlg : public QDialog, public Ui::AnimationDialog
 public:
 
 	//! Default constructor
-	qAnimationDlg( std::vector < VideoStepItem > & video_steps, ccGLWindow * main_window,  QWidget* parent = 0  );
+	qAnimationDlg( std::vector<VideoStepItem>& video_steps, ccGLWindow* view3d,  QWidget* parent = 0 );
 
 protected slots:
 
-	void on_fpsSpinBox_valueChanged(double arg1);
+	void onFPSChanged(double);
 
-	void on_timeForStepBox_valueChanged(double arg1);
+	void onTimeForStepChanged(double);
 
-	void on_directoryButton_clicked();
+	void onBrowseButtonClicked();
 
-	void on_previewButton_clicked();
+	void preview();
 
-	void on_renderButton_clicked();
+	void render();
 
-	void on_stepSelectionList_itemSelectionChanged();
+	void onCurrentStepChanged(int);
 
-private:
+protected:
 
-	std::vector < VideoStepItem > m_video_steps;
+	std::vector<VideoStepItem>& m_videoSteps;
 
-	ccGLWindow * m_main_window;
+	ccGLWindow* m_view3d;
 
-	int GetCurrentListIndex();
+	int getCurrentListIndex();
 
-	void SetView ( cc2DViewportObject * current_params );
-
-	void Preview(   );
-
-	void RenderToFile ( const QString & filename );
-
-	void RunRender (  );
-
+	void applyViewport( const cc2DViewportObject* viewport );
 };
 
 #endif

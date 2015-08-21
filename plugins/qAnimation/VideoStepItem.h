@@ -24,6 +24,17 @@ class VideoStepItem
 {
 public:
 
+	VideoStepItem()
+		: time_to_run(1.0)
+		, fps(25.0)
+	{}
+
+	VideoStepItem(cc2DViewportObject* view1, cc2DViewportObject* view2)
+		: interpolator(view1, view2)
+		, time_to_run(1.0)
+		, fps(25.0)
+	{}
+
     ViewInterpolate interpolator;
     double time_to_run;
     double fps;

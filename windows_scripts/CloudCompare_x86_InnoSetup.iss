@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.6.0"
+#define MyAppVersion "2.6.1"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
@@ -47,9 +47,11 @@ Name: "StartMenuEntry" ; Description: "Install Faro I/O plugin (to load FWS/FLS 
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "{#MyVCRedistPath}\2010\vcredist_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 
+Source: "{#MyVCRedistPath}\vcredist_2010_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 
+; DotProduct support
+Source: "{#MyVCRedistPath}\vcredist_2013_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit;
 ; FARO LS support
-Source: "{#MyFaroRedistPath}\x86\FARO LS 5.3.3.38662 x86 Setup.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; Check: WithFaro
+Source: "{#MyFaroRedistPath}\x86\FARO LS 5.3.3.38662 x86 Setup.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; Check: WithFaro
 Source: "{#MyFaroRedistPath}\x86\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
 Source: "{#MyCCPath}\plugins\QFARO*.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithFaro
 
@@ -60,7 +62,8 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-Filename: "{tmp}\vcredist_x86.exe"; Parameters: "/q"
+Filename: "{tmp}\vcredist_2010_x86.exe"; Parameters: "/q"
+Filename: "{tmp}\vcredist_2013_x86.exe"; Parameters: "/q"
 Filename: "{tmp}\FARO LS 5.3.3.38662 x86 Setup.exe"; Check: WithFaro
 
 [Code]

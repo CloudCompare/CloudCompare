@@ -13,9 +13,21 @@ option( INSTALL_QANIMATION_PLUGIN "Check to install qAnimation plugin" OFF )
 
 if (INSTALL_QANIMATION_PLUGIN)
 
+	option( WITH_FFMPEG_SUPPORT "Check to setup FFMPEG support (to create movies instead of images with qAnimation)" OFF )
+	if (WITH_FFMPEG_SUPPORT)
+		add_subdirectory (QTFFmpegWrapper)
+	endif()
+	
+	include_directories( ${QTFFMPEG_LIB_SOURCE_DIR} )
+
 	#CloudCompare 'ANIMATION' plugin
 	project( QANIMATION_PLUGIN )
 
 	include( ../CMakePluginTpl.cmake )
+	
+	if (WITH_FFMPEG_SUPPORT)
+		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
+		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QFFMPEG_SUPPORT )
+	endif()
 
 endif()

@@ -36,53 +36,43 @@ public:
     ViewInterpolate( );
 
 	//! Constructor from two viewports and a number of steps
-    ViewInterpolate( cc2DViewportObject * a_first_view,  cc2DViewportObject * a_second_view, unsigned int a_max_steps = 0 );
-
-	//! Destructor
-    virtual ~ViewInterpolate();
+    ViewInterpolate( cc2DViewportObject * view1,  cc2DViewportObject * view2, unsigned int stepCount = 0 );
 
     //! Sets the first viewport object
-	inline void setView1 ( cc2DViewportObject * a_first_view ) { m_view1 = a_first_view; }
+	inline void setView1 ( cc2DViewportObject * view ) { m_view1 = view; }
     //! Returns the first viewport object
-	inline cc2DViewportObject * view1 () {  return m_view1; }
+	inline const cc2DViewportObject * view1 () const { return m_view1; }
 
     // Sets the second viewport object
-	inline void setView2 ( cc2DViewportObject * a_second_view ) {  m_view2 = a_second_view; }
+	inline void setView2 ( cc2DViewportObject * view ) {  m_view2 = view; }
     // Returns the second viewport object
-	inline cc2DViewportObject * view2 () { return m_view2; }
+	inline const cc2DViewportObject * view2 () const { return m_view2; }
 
     //! Returns the next viewport
     bool nextView ( cc2DViewportObject& a_returned_viewport );
 
     //! Returns the current step
-	inline unsigned int currentStep () { return m_current_step; }
+	inline unsigned int currentStep () { return m_currentStep; }
     //! Sets the current step
-	inline void setCurrentStep ( unsigned int a_current_step ) { m_current_step = a_current_step; }
+	inline void setCurrentStep ( unsigned int step ) { m_currentStep = step; }
 
     //! Returns the max number of steps
-	inline unsigned int maxStep() { return m_total_steps; }
+	inline unsigned int maxStep() { return m_totalSteps; }
     //! Sets the max number of steps
-	inline void setMaxStep ( unsigned int a_max_step ) { m_total_steps = a_max_step; }
+	inline void setMaxStep ( unsigned int stepCount ) { m_totalSteps = stepCount; }
+
+	//! Restes the interpolator
+	inline void reset() { m_currentStep = 0; }
 
 private:
 
-    cc2DViewportObject * m_view1;
+    cc2DViewportObject* m_view1;
 
-    cc2DViewportObject * m_view2;
+    cc2DViewportObject* m_view2;
 
-    unsigned int m_total_steps;
+    unsigned int m_totalSteps;
 
-    unsigned int m_current_step;
+    unsigned int m_currentStep;
 };
-
-//helper function for interpolating between simple numerical types
-template <class T>
-T InterpolateNumber ( T start_num, T end_num, double interpolation_fraction )
-{
-    double start_double ( static_cast <double> ( start_num ) );
-    double end_double ( static_cast <double> ( end_num ) );
-
-    return static_cast < T > ( start_double + (end_double - start_double) * interpolation_fraction );
-}
 
 #endif // VIEWINTERPOLATE_H

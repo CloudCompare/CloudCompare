@@ -86,7 +86,7 @@ protected:
 	unsigned m_index;
 };
 
-//Dedicated 'OrientedPointStream' for the ccPointCloud structure
+//Dedicated 'OrientedPointStream' for the ccPointCloud structure (with colors)
 template <class Real> class ccColoredPointStream : public OrientedPointStreamWithData<Real , Point3D< unsigned char > >
 {
 public:
@@ -206,7 +206,9 @@ void qPoissonRecon::doAction()
 {
 	assert(m_app);
 	if (!m_app)
+	{
 		return;
+	}
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
@@ -261,6 +263,9 @@ void qPoissonRecon::doAction()
 
 	PoissonMesh mesh;
 	ColoredPoissonMesh coloredMesh;
+	s_cloud = 0;
+	s_mesh = 0;
+	s_coloredMesh = 0;
 
 	//run in a separate thread
 	bool result = false;

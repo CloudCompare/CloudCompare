@@ -119,7 +119,7 @@ void qAnimation::doAction()
     std::vector < VideoStepItem > video_steps;
     video_steps.reserve ( selected_views.size() );
 
-    for ( unsigned int i = 0 ; i < selected_views.size() ; ++i )
+    for ( unsigned int i = 0 ; i < selected_views.size()-1 ; ++i )
     {
         VideoStepItem temp_item;
         temp_item.interpolator.setView1 ( selected_views[i] );

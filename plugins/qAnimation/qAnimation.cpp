@@ -20,21 +20,18 @@
 //Local
 #include "ViewInterpolate.h"
 #include "VideoStepItem.h"
+#include "qAnimationDlg.h"
 
 //Qt
 #include <QtGui>
 #include <QApplication>
 #include <QListWidget>
 
-//standard includes
-#include <vector>
-#include <sstream>
-
 //qCC_db
 #include "qCC_db.h"
 
-//Local
-#include "qAnimationDlg.h"
+//system
+#include <vector>
 
 //Default constructor: should mainly be used to initialize
 //actions (pointers) and other members
@@ -118,7 +115,7 @@ void qAnimation::doAction()
     ccGLWindow* glWindow( m_app->getActiveGLWindow() );
     if ( !glWindow )
     {
-        m_app->dispToConsole("No active GL view!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        m_app->dispToConsole("No active 3D view!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
     }
 

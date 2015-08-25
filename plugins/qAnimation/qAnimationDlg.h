@@ -40,15 +40,16 @@ protected slots:
 
 	void onFPSChanged(double);
 
-	void onTimeForStepChanged(double);
+	void onTotalTimeChanged(double);
+	void onStepTimeChanged(double);
+
+	void onCurrentStepChanged(int);
 
 	void onBrowseButtonClicked();
 
 	void preview();
-
 	void render();
-
-	void onCurrentStepChanged(int);
+	void onAccept();
 
 protected:
 
@@ -56,11 +57,16 @@ protected:
 
 	ccGLWindow* m_view3d;
 
-	int getCurrentListIndex();
+	int getCurrentStepIndex();
 
 	int countFrameAndResetInterpolators();
 
 	void applyViewport( const cc2DViewportObject* viewport );
+
+	double computeTotalTime();
+
+	void updateCurrentStepDuration();
+	void updateTotalDuration();
 };
 
 #endif

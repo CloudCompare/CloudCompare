@@ -46,6 +46,8 @@
 #include <unistd.h>
 #endif
 
+static const QString s_stepDurationKey("StepDurationSec");
+
 qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow* view3d, QWidget* parent)
 	: QDialog(parent)
 	, Ui::AnimationDialog()
@@ -56,9 +58,19 @@ qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow
 
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-	for (size_t i=0; i<m_videoSteps.size(); ++i )
+	for ( size_t i=0; i<m_videoSteps.size(); ++i )
 	{
-		stepSelectionList->addItem( m_videoSteps[i].interpolator.view1()->getName() );
+		cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
+
+		stepSelectionList->addItem( viewport1->getName() );
+
+		//check if the (1st) viewport has a duration in meta data (from a previous run)
+		double duration_sec = 2.0;
+		if (viewport1->hasMetaData(s_stepDurationKey))
+		{
+			duration_sec = viewport1->getMetaData(s_stepDurationKey).toDouble();
+		}
+		m_videoSteps[i].duration_sec = duration_sec;
 	}
 
 	//read persistent settings
@@ -79,19 +91,44 @@ qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow
 		settings.endGroup();
 	}
 
-	connect ( fpsSpinBox,			SIGNAL( valueChanged(double) ),		this, SLOT( onFPSChanged(double) ) );
-	connect ( timeForStepBox,		SIGNAL( valueChanged(double) ),		this, SLOT( onTimeForStepChanged(double) ) );
-	connect ( stepSelectionList,	SIGNAL( currentRowChanged(int) ),	this, SLOT( onCurrentStepChanged(int) ) );
-	connect ( browseButton,			SIGNAL( clicked() ),				this, SLOT( onBrowseButtonClicked() ) );
-	connect ( previewButton,		SIGNAL( clicked() ),				this, SLOT( preview() ) );
-	connect ( renderButton,			SIGNAL( clicked() ),				this, SLOT( render() ) );
+	connect ( fpsSpinBox,				SIGNAL( valueChanged(double) ),		this, SLOT( onFPSChanged(double) ) );
+	connect ( totalTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onTotalTimeChanged(double) ) );
+	connect ( stepTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onStepTimeChanged(double) ) );
+	connect ( stepSelectionList,		SIGNAL( currentRowChanged(int) ),	this, SLOT( onCurrentStepChanged(int) ) );
+	connect ( browseButton,				SIGNAL( clicked() ),				this, SLOT( onBrowseButtonClicked() ) );
+	connect ( previewButton,			SIGNAL( clicked() ),				this, SLOT( preview() ) );
+	connect ( renderButton,				SIGNAL( clicked() ),				this, SLOT( render() ) );
+	connect ( buttonBox,				SIGNAL( accepted() ),				this, SLOT( onAccept() ) );
 
 	stepSelectionList->setCurrentRow(0); //select the first one by default
 
-	onCurrentStepChanged(getCurrentListIndex());
+	onCurrentStepChanged(getCurrentStepIndex());
+	updateTotalDuration();
 }
 
-int qAnimationDlg::getCurrentListIndex()
+void qAnimationDlg::onAccept()
+{
+	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	{
+		cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
+
+		//save the step duration as meta data
+		viewport1->setMetaData(s_stepDurationKey, m_videoSteps[i].duration_sec);
+	}
+}
+
+double qAnimationDlg::computeTotalTime()
+{
+	double totalDuration_sec = 0;
+	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	{
+		totalDuration_sec += m_videoSteps[i].duration_sec;
+	}
+
+	return totalDuration_sec;
+}
+
+int qAnimationDlg::getCurrentStepIndex()
 {
 	return stepSelectionList->currentRow();
 }
@@ -106,12 +143,36 @@ void qAnimationDlg::applyViewport( const cc2DViewportObject* viewport )
 
 void qAnimationDlg::onFPSChanged(double fps)
 {
-	m_videoSteps[ getCurrentListIndex() ].fps = fps;
+	//nothing to do
 }
 
-void qAnimationDlg::onTimeForStepChanged(double time)
+void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 {
-	m_videoSteps[ getCurrentListIndex() ].time_to_run = time;
+	double previousTime_sec = computeTotalTime();
+	if (previousTime_sec != newTime_sec)
+	{
+		assert(previousTime_sec != 0);
+		double scale = newTime_sec / previousTime_sec;
+
+		//scale all the steps
+		for ( size_t i=0; i<m_videoSteps.size(); ++i )
+		{
+			m_videoSteps[i].duration_sec *= scale;
+		}
+
+		//update current step
+		updateCurrentStepDuration();
+	}
+}
+
+void qAnimationDlg::onStepTimeChanged(double time_sec)
+{
+	m_videoSteps[ getCurrentStepIndex() ].duration_sec = time_sec;
+
+	//update total duration
+	updateTotalDuration();
+	//update current step
+	updateCurrentStepDuration();
 }
 
 void qAnimationDlg::onBrowseButtonClicked()
@@ -139,22 +200,25 @@ void qAnimationDlg::onBrowseButtonClicked()
 int qAnimationDlg::countFrameAndResetInterpolators()
 {
 	//reset the interpolators and count the total number of frames
-	int frameCount = 0;
+	int totalFrameCount = 0;
 	{
-		for ( int i=0; i<stepSelectionList->count(); ++i )
+		double fps = fpsSpinBox->value();
+
+		for ( size_t i=0; i<m_videoSteps.size(); ++i )
 		{
 			VideoStepItem& currentVideoStep = m_videoSteps[i];
 
 			cc2DViewportObject currentParams;
 			currentVideoStep.interpolator.reset();
-			int count = static_cast<int>( currentVideoStep.fps * currentVideoStep.time_to_run );
-			currentVideoStep.interpolator.setMaxStep(static_cast<unsigned>(count));
 
-			frameCount += count;
+			int frameCount = static_cast<int>( fps * currentVideoStep.duration_sec );
+			currentVideoStep.interpolator.setMaxStep(static_cast<unsigned>(frameCount));
+
+			totalFrameCount += frameCount;
 		}
 	}
 
-	return frameCount;
+	return totalFrameCount;
 }
 
 void qAnimationDlg::preview()
@@ -174,13 +238,15 @@ void qAnimationDlg::preview()
 	progressDialog.show();
 	QApplication::processEvents();
 
+	double fps = fpsSpinBox->value();
+	
 	int frameIndex = 0;
-	for ( int i=0; i<stepSelectionList->count(); ++i )
+	for ( size_t i=0; i<m_videoSteps.size(); ++i )
 	{
 		VideoStepItem& currentVideoStep = m_videoSteps[i];
 
 		//theoretical waiting time per frame
-		qint64 delay_ms = static_cast<int>(1000 * currentVideoStep.time_to_run / currentVideoStep.fps);
+		qint64 delay_ms = static_cast<int>(1000 * currentVideoStep.duration_sec / fps);
 
 		cc2DViewportObject currentParams;
 		while ( currentVideoStep.interpolator.nextView( currentParams ) )
@@ -210,7 +276,7 @@ void qAnimationDlg::preview()
 	}
 
 	//reset view
-	onCurrentStepChanged(getCurrentListIndex());
+	onCurrentStepChanged( getCurrentStepIndex() );
 
 	setEnabled(true);
 }
@@ -271,14 +337,11 @@ void qAnimationDlg::render()
 
 	int frameIndex = 0;
 	bool success = true;
-	for ( int i=0; i<stepSelectionList->count(); ++i )
+	for ( size_t i=0; i<m_videoSteps.size(); ++i )
 	{
 		VideoStepItem& currentVideoStep = m_videoSteps[i];
 
 		cc2DViewportObject current_params;
-		currentVideoStep.interpolator.reset();
-		currentVideoStep.interpolator.setMaxStep( static_cast < unsigned int > ( currentVideoStep.fps * currentVideoStep.time_to_run ) );
-
 		while ( currentVideoStep.interpolator.nextView( current_params ) )
 		{
 			applyViewport ( &current_params );
@@ -346,13 +409,31 @@ void qAnimationDlg::render()
 	setEnabled(true);
 }
 
+void qAnimationDlg::updateTotalDuration()
+{
+	double totalDuration_sec = computeTotalTime();
+
+	totalTimeDoubleSpinBox->blockSignals(true);
+	totalTimeDoubleSpinBox->setValue(totalDuration_sec);
+	totalTimeDoubleSpinBox->blockSignals(false);
+}
+
+void qAnimationDlg::updateCurrentStepDuration()
+{
+	int index = getCurrentStepIndex();
+	const VideoStepItem& currentVideoStep = m_videoSteps[index];
+
+	stepTimeDoubleSpinBox->blockSignals(true);
+	stepTimeDoubleSpinBox->setValue(currentVideoStep.duration_sec);
+	stepTimeDoubleSpinBox->blockSignals(false);
+}
+
 void qAnimationDlg::onCurrentStepChanged(int index)
 {
-	const VideoStepItem& videoStep = m_videoSteps[index];
-	
-	//update current values
-	fpsSpinBox->setValue(videoStep.fps);
-	timeForStepBox->setValue(videoStep.time_to_run);
+	//update current step descriptor
+	stepIndexLabel->setText(QString::number(index+1));
 
-	applyViewport( videoStep.interpolator.view1() );
+	updateCurrentStepDuration();
+
+	applyViewport( m_videoSteps[index].interpolator.view1() );
 }

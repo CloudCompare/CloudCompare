@@ -41,7 +41,7 @@ public:
     //! Sets the first viewport object
 	inline void setView1 ( cc2DViewportObject * view ) { m_view1 = view; }
     //! Returns the first viewport object
-	inline const cc2DViewportObject * view1 () const { return m_view1; }
+	inline cc2DViewportObject * view1 () const { return m_view1; }
 
     // Sets the second viewport object
 	inline void setView2 ( cc2DViewportObject * view ) {  m_view2 = view; }
@@ -61,7 +61,7 @@ public:
     //! Sets the max number of steps
 	inline void setMaxStep ( unsigned int stepCount ) { m_totalSteps = stepCount; }
 
-	//! Restes the interpolator
+	//! Resets the interpolator
 	inline void reset() { m_currentStep = 0; }
 
 private:

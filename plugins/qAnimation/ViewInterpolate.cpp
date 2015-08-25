@@ -28,9 +28,9 @@ ViewInterpolate::ViewInterpolate()
 {
 }
 
-ViewInterpolate::ViewInterpolate(cc2DViewportObject * view1,  cc2DViewportObject * view2, unsigned int stepCount )
-	: m_view1 ( view1 )
-    , m_view2 ( view2 )
+ViewInterpolate::ViewInterpolate(cc2DViewportObject * viewParams1,  cc2DViewportObject * viewParams2, unsigned int stepCount )
+	: m_view1 ( viewParams1 )
+    , m_view2 ( viewParams2 )
     , m_totalSteps ( stepCount )
     , m_currentStep ( 0 )
 {
@@ -52,26 +52,26 @@ bool ViewInterpolate::nextView ( cc2DViewportObject& outViewport )
     }
 
     //initial and final views
-    const ccViewportParameters& view1 = m_view1->getParameters();
-    const ccViewportParameters& view2 = m_view2->getParameters();
+    const ccViewportParameters& viewParams1 = m_view1->getParameters();
+    const ccViewportParameters& viewParams2 = m_view2->getParameters();
     ccViewportParameters interpView = m_view1->getParameters();
 
     //interpolation fraction
     double interpolate_fraction = static_cast <double>(m_currentStep) / m_totalSteps;
 
-    interpView.pixelSize              = InterpolateNumber ( view1.pixelSize, view2.pixelSize, interpolate_fraction );
-    interpView.zoom                   = InterpolateNumber ( view1.zoom, view2.zoom, interpolate_fraction );
-    interpView.defaultPointSize       = InterpolateNumber ( view1.defaultPointSize, view2.defaultPointSize, interpolate_fraction );
-    interpView.defaultLineWidth       = InterpolateNumber ( view1.defaultLineWidth, view2.defaultLineWidth, interpolate_fraction );
-    interpView.zNearCoef              = InterpolateNumber ( view1.zNearCoef, view2.zNearCoef, interpolate_fraction );
-    interpView.zNear                  = InterpolateNumber ( view1.zNear, view2.zNear, interpolate_fraction );
-    interpView.zFar                   = InterpolateNumber ( view1.zFar, view2.zFar, interpolate_fraction );
-    interpView.fov                    = InterpolateNumber ( view1.fov, view2.fov, interpolate_fraction );
-    interpView.perspectiveAspectRatio = InterpolateNumber ( view1.perspectiveAspectRatio, view2.perspectiveAspectRatio, interpolate_fraction );
-    interpView.orthoAspectRatio       = InterpolateNumber ( view1.orthoAspectRatio, view2.orthoAspectRatio, interpolate_fraction );
-	interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, view1.viewMat, view2.viewMat);
-	interpView.pivotPoint             = view1.pivotPoint + (view2.pivotPoint - view1.pivotPoint) * interpolate_fraction;
-	interpView.cameraCenter           = view1.cameraCenter + (view2.cameraCenter - view1.cameraCenter) * interpolate_fraction;
+    interpView.pixelSize              = InterpolateNumber ( viewParams1.pixelSize, viewParams2.pixelSize, interpolate_fraction );
+    interpView.zoom                   = InterpolateNumber ( viewParams1.zoom, viewParams2.zoom, interpolate_fraction );
+    interpView.defaultPointSize       = InterpolateNumber ( viewParams1.defaultPointSize, viewParams2.defaultPointSize, interpolate_fraction );
+    interpView.defaultLineWidth       = InterpolateNumber ( viewParams1.defaultLineWidth, viewParams2.defaultLineWidth, interpolate_fraction );
+    interpView.zNearCoef              = InterpolateNumber ( viewParams1.zNearCoef, viewParams2.zNearCoef, interpolate_fraction );
+    interpView.zNear                  = InterpolateNumber ( viewParams1.zNear, viewParams2.zNear, interpolate_fraction );
+    interpView.zFar                   = InterpolateNumber ( viewParams1.zFar, viewParams2.zFar, interpolate_fraction );
+    interpView.fov                    = InterpolateNumber ( viewParams1.fov, viewParams2.fov, interpolate_fraction );
+    interpView.perspectiveAspectRatio = InterpolateNumber ( viewParams1.perspectiveAspectRatio, viewParams2.perspectiveAspectRatio, interpolate_fraction );
+    interpView.orthoAspectRatio       = InterpolateNumber ( viewParams1.orthoAspectRatio, viewParams2.orthoAspectRatio, interpolate_fraction );
+	interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, viewParams1.viewMat, viewParams2.viewMat);
+	interpView.pivotPoint             = viewParams1.pivotPoint + (viewParams2.pivotPoint - viewParams1.pivotPoint) * interpolate_fraction;
+	interpView.cameraCenter           = viewParams1.cameraCenter + (viewParams2.cameraCenter - viewParams1.cameraCenter) * interpolate_fraction;
 
     outViewport.setParameters( interpView );
 

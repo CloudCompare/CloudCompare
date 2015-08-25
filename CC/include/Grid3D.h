@@ -114,6 +114,7 @@ public:
 	bool intersecthWith(GenericIndexedMesh* mesh,
 						PointCoordinateType cellLength,
 						const CCVector3& gridMinCorner,
+						GridElement intersectValue = 0,
 						GenericProgressCallback* progressCb = 0)
 	{
 		if (!mesh || !isInitialized())
@@ -230,7 +231,7 @@ public:
 								(currentCellPos.y >= 0 && currentCellPos.y < static_cast<int>(size().y)) &&
 								(currentCellPos.z >= 0 && currentCellPos.z < static_cast<int>(size().z)))
 							{
-								setValue(currentCellPos, 0);
+								setValue(currentCellPos, intersectValue);
 							}
 						}
 					}

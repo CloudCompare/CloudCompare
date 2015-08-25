@@ -34,8 +34,11 @@
 #include <SimpleCloud.h>
 #include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
+
+//for tests
 #include <ChamferDistanceTransform.h>
 #include <ChamferDistanceTransformSigned.h>
+#include <SaitoSquaredDistanceTransform.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -6013,9 +6016,18 @@ void MainWindow::doActionComputeDistanceMap()
 		if (ent->isKindOf(CC_TYPES::MESH))
 		{
 			//CCLib::ChamferDistanceTransform cdt;
-			CCLib::ChamferDistanceTransformSigned cdt;
-			float maxDist = 65536.0f;
-			if (!cdt.initGrid(Tuple3ui(steps, steps, steps), maxDist))
+
+			//CCLib::ChamferDistanceTransformSigned cdt;
+			//float maxDist = 65536.0f;
+			//if (!cdt.initGrid(Tuple3ui(steps, steps, steps), maxDist))
+			//{
+			//	//not enough memory
+			//	ccLog::Error("Not enough memory!");
+			//	return;
+			//}
+
+			CCLib::SaitoSquaredDistanceTransform cdt;
+			if (!cdt.initGrid(Tuple3ui(steps, steps, steps)))
 			{
 				//not enough memory
 				ccLog::Error("Not enough memory!");
@@ -6032,7 +6044,7 @@ void MainWindow::doActionComputeDistanceMap()
 			if (cdt.initDT(mesh, cellDim, minCorner, &pDlg))
 			{
 				//cdt.propagateDistance(CHAMFER_345, &pDlg);
-				//cdt.propagateDistance(&pDlg);
+				cdt.propagateDistance(&pDlg);
 
 				//convert the grid to a cloud
 				ccPointCloud* gridCloud = new ccPointCloud(mesh->getName() + QString(".distance_grid(%1)").arg(steps));
@@ -6062,7 +6074,8 @@ void MainWindow::doActionComputeDistanceMap()
 							{
 								gridCloud->addPoint(minCorner + CCVector3(i + 0.5, j + 0.5, k + 0.5) * cellDim);
 								ScalarType s = static_cast<ScalarType>(cdt.getValue(i, j, k));
-								sf->addElement(s < maxDist ? s : NAN_VALUE);
+								//sf->addElement(s < maxDist ? s : NAN_VALUE);
+								sf->addElement(sqrt(s));
 							}
 						}
 					}

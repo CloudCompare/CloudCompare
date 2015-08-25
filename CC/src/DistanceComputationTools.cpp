@@ -750,7 +750,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 			CellToTest* _currentCell = &cellsToTest[0/*cellsToTestCount-1*/];
 
 			_currentCell->pos = minPos;
-			CCVector3 distanceToOctreeMinBorder = minBB-(*triPoints[0]);
+			CCVector3 distanceToOctreeMinBorder = minBB - (*triPoints[0]);
 
 			//compute the triangle normal
 			CCVector3 N = AB.cross(BC);

@@ -34,7 +34,6 @@ class GenericIndexedCloudPersist;
 class ReferenceCloud;
 class GenericProgressCallback;
 struct OctreeAndMeshIntersection;
-class ChamferDistanceTransform;
 
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
 class CC_CORE_LIB_API DistanceComputationTools : public CCToolbox
@@ -148,8 +147,8 @@ public: //distance to clouds or meshes
 		\param theMesh the reference mesh (the distances will be computed relatively to its triangles)
 		\param octreeLevel the level of subdivision of the octree at witch to apply the algorithm
 		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value (acceleration)
-		\param useDistanceMap if true, the distances over "maxSearchDist" will be aproximated by the Chamfer 3-4-5 distance transform (acceleration)
-		\param signedDistances if true, the computed distances will be signed (in this case, Chamfer distances can't be computed and useDistanceMap is ignored)
+		\param useDistanceMap if true, the distances over "maxSearchDist" will be aproximated by a Distance Transform (acceleration)
+		\param signedDistances if true, the computed distances will be signed (in this case, the Distance Transform can't used computed and therefore useDistanceMap will be ignored)
 		\param flipNormals specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
 		\param multiThread specify whether to use multi-thread or single thread mode (if maxSearchDist>=0, single thread mode is forced)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
@@ -169,21 +168,20 @@ public: //distance to clouds or meshes
 
 public: //approximate distances to clouds or meshes
 
-	//! Computes approximate (Chamfer) distances between two point clouds
-	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.
-		Therefore, the greater the octree level (used to determine the grid step) is, the finer
-		is the result, but more memory (and time) will be needed.
-		\param cType the Chamfer Distance type (1-1-1, 3-4-5, etc.)
+	//! Computes approximate distances between two point clouds
+	/** This methods uses an exact Distance Transform to approximate the real distances.
+		Therefore, the greater the octree level is (it is used to determine the grid step), the finer
+		the result will be (but more memory and time will be needed).
 		\param comparedCloud the compared cloud
 		\param referenceCloud the reference cloud
-		\param octreeLevel the octree level at which to perform the Chamfer Distance propagation
+		\param octreeLevel the octree level at which to compute the Distance Transform
 		\param maxSearchDist max search distance (or any negative value if no max distance is defined)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param compOctree the pre-computed octree of the compared cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
 		\param refOctree the pre-computed octree of the reference cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
+		\return negative error code or a positive value in case of success
 	**/
-	static int computeApproxCloud2CloudDistance(CC_CHAMFER_DISTANCE_TYPE cType,
-												GenericIndexedCloudPersist* comparedCloud,
+	static int computeApproxCloud2CloudDistance(GenericIndexedCloudPersist* comparedCloud,
 												GenericIndexedCloudPersist* referenceCloud,
 												uchar octreeLevel,
 												PointCoordinateType maxSearchDist = -PC_ONE,

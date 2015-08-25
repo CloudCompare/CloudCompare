@@ -37,7 +37,6 @@
 
 //for tests
 #include <ChamferDistanceTransform.h>
-#include <ChamferDistanceTransformSigned.h>
 #include <SaitoSquaredDistanceTransform.h>
 
 //qCC_db
@@ -6016,15 +6015,6 @@ void MainWindow::doActionComputeDistanceMap()
 		if (ent->isKindOf(CC_TYPES::MESH))
 		{
 			//CCLib::ChamferDistanceTransform cdt;
-
-			//CCLib::ChamferDistanceTransformSigned cdt;
-			//float maxDist = 65536.0f;
-			//if (!cdt.initGrid(Tuple3ui(steps, steps, steps), maxDist))
-			//{
-			//	//not enough memory
-			//	ccLog::Error("Not enough memory!");
-			//	return;
-			//}
 
 			CCLib::SaitoSquaredDistanceTransform cdt;
 			if (!cdt.initGrid(Tuple3ui(steps, steps, steps)))

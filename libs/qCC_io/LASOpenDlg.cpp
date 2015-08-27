@@ -27,16 +27,24 @@
 LASOpenDlg::LASOpenDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::OpenLASFileDialog()
+	, m_autoSkip(false)
 {
 	setupUi(this);
-	autoSkipNextCheckBox->setChecked(false); //just to be sure
 
 	clearEVLRs();
+
+	connect(applyAllButton, SIGNAL(clicked()), this, SLOT(onApplyAll()));
+}
+
+void LASOpenDlg::onApplyAll()
+{
+	m_autoSkip = true;
+	accept();
 }
 
 bool FieldIsPresent(const std::vector<std::string>& dimensions, LAS_FIELDS field)
 {
-	for (std::vector<std::string>::const_iterator it=dimensions.begin();it!=dimensions.end();++it)
+	for (std::vector<std::string>::const_iterator it=dimensions.begin(); it!=dimensions.end(); ++it)
 	{
 		if (QString(it->c_str()).toUpper() == QString(LAS_FIELD_NAMES[field]).toUpper())
 			return true;
@@ -150,11 +158,6 @@ bool LASOpenDlg::doLoadEVLR(size_t index) const
 	
 	QListWidgetItem* item = evlrListWidget->item(static_cast<int>(index));
 	return item && item->isSelected();
-}
-
-bool LASOpenDlg::autoSkipMode() const
-{
-	return autoSkipNextCheckBox->isChecked();
 }
 
 bool LASOpenDlg::forced8bitRgbMode() const

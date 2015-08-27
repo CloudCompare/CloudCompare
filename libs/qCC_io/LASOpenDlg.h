@@ -78,6 +78,8 @@ const char LAS_FIELD_NAMES[][28] = {"X",
 //! Dialog to choose the LAS fields to load
 class LASOpenDlg : public QDialog, public Ui::OpenLASFileDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
@@ -99,10 +101,18 @@ public:
 	bool doLoadEVLR(size_t index) const;
 
 	//! Auto-skip mode (to use the same parameters for ALL files afterwards)
-	bool autoSkipMode() const;
+	inline bool autoSkipMode() const { return m_autoSkip; }
 
 	//! Whether 8-bit RGB mode is forced or not
 	bool forced8bitRgbMode() const;
+
+protected slots:
+
+	void onApplyAll();
+
+protected:
+
+	bool m_autoSkip;
 };
 
 #endif //CC_LAS_OPEN_DIALOG

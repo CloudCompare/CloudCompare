@@ -64,7 +64,7 @@ ccGui::ParamStruct::ParamStruct()
 
 void ccGui::ParamStruct::reset()
 {
-	lightAmbientColor	= ccColor::darkest;
+	lightAmbientColor	= ccColor::night;
 	lightSpecularColor	= ccColor::darker;
 	lightDiffuseColor	= ccColor::bright;
 	meshFrontDiff		= ccColor::defaultMeshFrontDiff;

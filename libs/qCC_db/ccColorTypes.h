@@ -142,8 +142,8 @@ namespace ccColor
 	static const Rgbaf darker					(0.17f, 0.17f, 0.17f, 1.00f);
 	static const Rgbaf darkest					(0.08f, 0.08f, 0.08f, 1.00f);
 	static const Rgbaf night					(0.00f, 0.00f, 0.00f, 1.00F);
-	static const Rgbaf defaultMeshFrontDiff		(0.00f, 1.00f, 0.32f, 1.00f);
-	static const Rgbaf defaultMeshBackDiff		(0.32f, 1.00f, 1.00f, 1.00f);
+	static const Rgbaf defaultMeshFrontDiff		(0.00f, 0.90f, 0.27f, 1.00f);
+	static const Rgbaf defaultMeshBackDiff		(0.27f, 0.90f, 0.90f, 1.00f);
 
 	// Default foreground color (unsigned byte)
 	static const Rgbub defaultColor				(255, 255, 255); //white

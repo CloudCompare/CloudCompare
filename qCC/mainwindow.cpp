@@ -5390,7 +5390,7 @@ void MainWindow::doActionLabelConnectedComponents()
 			//we try to label all CCs
 			CCLib::ReferenceCloudContainer components;
 			if (CCLib::AutoSegmentationTools::labelConnectedComponents(	cloud,
-																		static_cast<uchar>(octreeLevel),
+																		static_cast<unsigned char>(octreeLevel),
 																		false,
 																		&pDlg,
 																		theOctree) >= 0)
@@ -6515,7 +6515,7 @@ void MainWindow::doActionOrientNormalsFM()
 	if (!ok)
 		return;
 	assert(value >= 0 && value <= 255);
-	uchar level = static_cast<uchar>(value);
+	unsigned char level = static_cast<unsigned char>(value);
 
 	ccProgressDialog pDlg(false,this);
 

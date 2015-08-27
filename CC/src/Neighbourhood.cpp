@@ -709,9 +709,9 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	const PointCoordinateType& e = Q[4];
 	const PointCoordinateType& f = Q[5];
 
-	const uchar X = m_quadricEquationDirections.x;
-	const uchar Y = m_quadricEquationDirections.y;
-	const uchar Z = m_quadricEquationDirections.z;
+	const unsigned char X = m_quadricEquationDirections.x;
+	const unsigned char Y = m_quadricEquationDirections.y;
+	const unsigned char Z = m_quadricEquationDirections.z;
 
 	//gravity center (should be ok if the quadric is ok)
 	const CCVector3* G = getGravityCenter();
@@ -793,8 +793,8 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 			//we compute curvature at the input neighbour position + we recenter it by the way
 			CCVector3 Q = *m_associatedCloud->getPoint(neighbourIndex) - *G;
 
-			const uchar X = m_quadricEquationDirections.x;
-			const uchar Y = m_quadricEquationDirections.y;
+			const unsigned char X = m_quadricEquationDirections.x;
+			const unsigned char Y = m_quadricEquationDirections.y;
 
 			//z = a+b.x+c.y+d.x^2+e.x.y+f.y^2
 			//const PointCoordinateType& a = H[0];

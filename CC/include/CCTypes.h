@@ -18,11 +18,6 @@
 #ifndef CC_TYPES_HEADER
 #define CC_TYPES_HEADER
 
-//'uchar' shortcut
-#ifndef uchar
-typedef unsigned char uchar;
-#endif
-
 //! Type of the coordinates of a (N-D) point
 typedef float PointCoordinateType;
 

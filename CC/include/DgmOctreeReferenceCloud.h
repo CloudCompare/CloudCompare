@@ -45,7 +45,7 @@ public:
 	inline virtual unsigned size() const { return m_size; }
 	virtual void forEach(genericPointAction& action);
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
-	//virtual uchar testVisibility(const CCVector3& P) const; //not supported
+	//virtual unsigned char testVisibility(const CCVector3& P) const; //not supported
 	inline virtual void placeIteratorAtBegining() { m_globalIterator = 0; }
 	inline virtual const CCVector3* getNextPoint() { return (m_globalIterator < size() ? m_set->at(m_globalIterator++).point : 0); }
 	inline virtual bool enableScalarField() { return true; } //use DgmOctree::PointDescriptor::squareDistd by default

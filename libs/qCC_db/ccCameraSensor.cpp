@@ -2300,7 +2300,7 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 			CCLib::DgmOctree::OctreeCellCodeType completeCode = it->theCode;
 			for (unsigned char level=1; level<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
 			{
-				uchar bitDec = GET_BIT_SHIFT(level);
+				unsigned char bitDec = GET_BIT_SHIFT(level);
 				m_cellsBuilt[level].insert(completeCode >> bitDec);
 			}
 		}

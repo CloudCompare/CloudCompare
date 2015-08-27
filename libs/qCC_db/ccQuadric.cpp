@@ -226,9 +226,9 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	//compute rms if necessary
 	if (rms)
 	{
-		const uchar dX = dims.x;
-		const uchar dY = dims.y;
-//		const uchar dZ = dims.z;
+		const unsigned char dX = dims.x;
+		const unsigned char dY = dims.y;
+		//const unsigned char dZ = dims.z;
 
 		*rms = 0;
 
@@ -257,9 +257,9 @@ PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q
 	Q = P;
 	m_transformation.inverse().apply(Q);
 
-	const uchar dX = m_dims.x;
-	const uchar dY = m_dims.y;
-	const uchar dZ = m_dims.z;
+	const unsigned char dX = m_dims.x;
+	const unsigned char dY = m_dims.y;
+	const unsigned char dZ = m_dims.z;
 
 	PointCoordinateType originalZ = Q.u[dZ];
 	Q.u[dZ] = m_eq[0] + m_eq[1]*Q.u[dX] + m_eq[2]*Q.u[dY] + m_eq[3]*Q.u[dX]*Q.u[dX] + m_eq[4]*Q.u[dX]*Q.u[dY] + m_eq[5]*Q.u[dY]*Q.u[dY];
@@ -271,9 +271,9 @@ PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q
 
 QString ccQuadric::getEquationString() const
 {
-	const uchar dX = m_dims.x;
-	const uchar dY = m_dims.y;
-	const uchar dZ = m_dims.z;
+	const unsigned char dX = m_dims.x;
+	const unsigned char dY = m_dims.y;
+	const unsigned char dZ = m_dims.z;
 	static const char dimChars[3] = {'x','y','z'};
 
 	QString equationStr = QString("%1 = %2 + %3 * %4").arg(dimChars[dZ]).arg(m_eq[0]).arg(m_eq[1]).arg(dimChars[dX]);

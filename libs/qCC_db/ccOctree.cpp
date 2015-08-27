@@ -191,7 +191,12 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		assert(m_displayedLevel < 256);
-		RenderOctreeAs(m_displayType,this,static_cast<uchar>(m_displayedLevel),m_theAssociatedCloudAsGPC,m_glListID,m_shouldBeRefreshed);
+		RenderOctreeAs(	m_displayType,
+						this,
+						static_cast<unsigned char>(m_displayedLevel),
+						m_theAssociatedCloudAsGPC,
+						m_glListID,
+						m_shouldBeRefreshed);
 
 		if (m_shouldBeRefreshed)
 			m_shouldBeRefreshed = false;

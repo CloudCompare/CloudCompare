@@ -302,7 +302,7 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						float V[3];
 						sscanf(line+2,"%f %f %f\n",V,V+1,V+2);
 
-						uchar col = uchar(line[0])-88;
+						unsigned char col = static_cast<unsigned char>(line[0])-88;
 						float* mat = rot.data();
 						mat[col+0] = V[0];
 						mat[col+4] = V[1];

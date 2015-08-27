@@ -39,7 +39,7 @@ FastMarchingForPropagation::FastMarchingForPropagation()
 
 int FastMarchingForPropagation::init(	GenericCloud* theCloud,
 										DgmOctree* theOctree,
-										uchar level,
+										unsigned char level,
 										bool constantAcceleration/*=false*/)
 {
 	assert(theCloud && theOctree);

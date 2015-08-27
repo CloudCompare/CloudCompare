@@ -50,7 +50,7 @@ public:
 	void enableSavePointCountHeader(bool state);
 
 	//! Returns separator
-	uchar getSeparator() const;
+	unsigned char getSeparator() const;
 
 	//! Set separator (index)
 	/** 0 = space

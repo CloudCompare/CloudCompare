@@ -66,7 +66,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 		}
 	}
 
-	uchar octreeLevel = 0;
+	unsigned char octreeLevel = 0;
 	if (radius <= 0)
 	{
 		octreeLevel = theOctree->findBestLevelForAGivenPopulationPerCell(AVERAGE_NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
@@ -262,7 +262,7 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 	}
 
     //best octree level
-	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(3.0f*sigma);
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(3.0f*sigma);
 
 	//output scalar field should be different than input one
 	theCloud->enableScalarField();
@@ -555,7 +555,7 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 }
 
 bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
-										uchar K,
+										unsigned char K,
 										KMeanClass kmcc[],
 										GenericProgressCallback* progressCb)
 {
@@ -572,7 +572,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 	//on a besoin de memoire ici !
 	std::vector<ScalarType> theKMeans;		//K clusters centers
-	std::vector<uchar> belongings;			//index of the cluster the point belongs to
+	std::vector<unsigned char> belongings;			//index of the cluster the point belongs to
 	std::vector<ScalarType> minDistsToMean;	//distance to the nearest cluster center
 	std::vector<ScalarType> theKSums;		//sum of distances to the clusters
 	std::vector<unsigned> theKNums;			//number of points per clusters
@@ -608,7 +608,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 	//init classes centers (regularly sampled)
 	{
 		ScalarType step = (maxV - minV) / K;
-		for (uchar j=0; j<K; ++j)
+		for (unsigned char j=0; j<K; ++j)
 			theKMeans[j] = minV + step * j;
 	}
 
@@ -625,7 +625,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 		{
 			for (unsigned i=0; i<n; ++i)
 			{
-				uchar minK = 0;
+				unsigned char minK = 0;
 
 				ScalarType V = theCloud->getPointScalarValue(i);
 				if (ScalarField::ValidValue(V))
@@ -633,7 +633,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 					minDistsToMean[i] = fabs(theKMeans[minK]-V);
 
 					//we look for the nearest cluster center
-					for (uchar j=1; j<K; ++j)
+					for (unsigned char j=1; j<K; ++j)
 					{
 						ScalarType distToMean = fabs(theKMeans[j]-V);
 						if (distToMean<minDistsToMean[i])
@@ -666,7 +666,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 		double classMovingDist = 0.0;
 		{
-			for (uchar j=0; j<K; ++j)
+			for (unsigned char j=0; j<K; ++j)
 			{
 				ScalarType newMean = (theKNums[j] > 0 ? theKSums[j]/theKNums[j] : theKMeans[j]);
 
@@ -729,14 +729,14 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 
 	//last check
 	{
-		for (uchar j=0; j<K; ++j)
+		for (unsigned char j=0; j<K; ++j)
 			if (theKNums[j] == 0)
 				mins[j] = maxs[j] = -1.0;
 	}
 
 	//output
 	{
-		for (uchar j=0; j<K; ++j)
+		for (unsigned char j=0; j<K; ++j)
 		{
 			kmcc[j].mean = theKMeans[j];
 			kmcc[j].minValue = mins[j];

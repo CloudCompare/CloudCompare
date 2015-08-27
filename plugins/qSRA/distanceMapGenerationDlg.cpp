@@ -215,7 +215,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 																			minLat_rad,
 																			maxLat_rad,
 																			profileOrigin,
-																			static_cast<uchar>(revolDim)))
+																			static_cast<unsigned char>(revolDim)))
 			{
 				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad,m_angularUnits)); 
 				latMaxDoubleSpinBox->setValue(ConvertAngleFromRad(maxLat_rad,m_angularUnits));
@@ -1026,7 +1026,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 				 zOriginDoubleSpinBox->value());
 	//revolution axis
 	assert(axisDimComboBox->currentIndex() < 3);
-	const unsigned char Z = static_cast<uchar>(axisDimComboBox->currentIndex());
+	const unsigned char Z = static_cast<unsigned char>(axisDimComboBox->currentIndex());
 	//absolute heights?
 	bool absoluteHeights = DistanceMapGenerationTool::HeightsAreAbsolute(m_profile);
 	if (absoluteHeights)
@@ -1369,7 +1369,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 							zOriginDoubleSpinBox->value() );
 			//revolution axis
 			assert(axisDimComboBox->currentIndex() < 3);
-			const unsigned char Z = static_cast<uchar>(axisDimComboBox->currentIndex());
+			const unsigned char Z = static_cast<unsigned char>(axisDimComboBox->currentIndex());
 			//absolute heights?
 			bool absoluteHeights = DistanceMapGenerationTool::HeightsAreAbsolute(m_profile);
 			if (absoluteHeights)

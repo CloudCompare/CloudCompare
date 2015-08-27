@@ -95,7 +95,7 @@ public:
 		\return the "developed" cloud
 	**/
 	static SimpleCloud* developCloudOnCone(	GenericCloud* cloud,
-											uchar dim,
+											unsigned char dim,
 											PointCoordinateType baseRadius,
 											float alpha,
 											const CCVector3& center,

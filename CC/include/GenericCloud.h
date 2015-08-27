@@ -67,7 +67,7 @@ public:
 			\param P the 3D point to test
 			\return visibility (default: POINT_VISIBLE)
 		**/
-		virtual inline uchar testVisibility(const CCVector3& P) const { return POINT_VISIBLE; };
+		virtual inline unsigned char testVisibility(const CCVector3& P) const { return POINT_VISIBLE; };
 
 		//! Sets the cloud iterator at the begining
 		/**	Virtual method to handle the cloud global iterator

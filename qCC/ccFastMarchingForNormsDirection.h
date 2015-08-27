@@ -40,7 +40,7 @@ public:
 	//! Static entry point (helper)
 	static int ResolveNormsDirectionByFrontPropagation(	ccPointCloud* theCloud,
 														NormsIndexesTableType* theNorms,
-														uchar octreeLevel,
+														unsigned char octreeLevel,
 														CCLib::GenericProgressCallback* progressCb = 0,
 														CCLib::DgmOctree* inputOctree = 0);
 	//! Default constructor
@@ -59,13 +59,13 @@ public:
 	int init(	ccGenericPointCloud* cloud,
 				NormsIndexesTableType* theNorms,
 				CCLib::DgmOctree* theOctree,
-				uchar gridLevel);
+				unsigned char gridLevel);
 
 	//! Updates a list of point flags, indicating the points already processed
 	/** \return the number of resolved points
 	**/
 	unsigned updateResolvedTable(	ccGenericPointCloud* theCloud,
-									GenericChunkedArray<1,uchar> &resolved,
+									GenericChunkedArray<1,unsigned char> &resolved,
 									NormsIndexesTableType* theNorms);
 
 	//inherited methods (see FastMarchingAlgorithm)

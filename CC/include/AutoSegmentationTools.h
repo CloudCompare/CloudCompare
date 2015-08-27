@@ -63,7 +63,7 @@ public:
 		\return error code (see DgmOctree::extractCCs)
 	**/
 	static int labelConnectedComponents(GenericIndexedCloudPersist* theCloud,
-										uchar level,
+										unsigned char level,
 										bool sixConnexity = false,
 										CCLib::GenericProgressCallback* progressCb = 0,
 										CCLib::DgmOctree* inputOctree = 0);
@@ -103,7 +103,7 @@ public:
 	static bool frontPropagationBasedSegmentation(	GenericIndexedCloudPersist* theCloud,
 													ScalarType minSeedDist,
 													PointCoordinateType radius,
-													uchar octreeLevel,
+													unsigned char octreeLevel,
 													ReferenceCloudContainer& theSegmentedLists,
 													CCLib::GenericProgressCallback* progressCb = 0,
 													CCLib::DgmOctree* inputOctree = 0,

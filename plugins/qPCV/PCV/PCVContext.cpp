@@ -104,7 +104,7 @@ bool PCVContext::init(unsigned W,
 	if (!m_meshIsClosed)
 	{
 		//buffer for color
-		m_snapC = new uchar[4*size];
+		m_snapC = new unsigned char[4*size];
 		if (!m_snapC)
 		{
 			delete m_pixBuffer;
@@ -331,7 +331,7 @@ int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 			{
 				//int c1 = std::max(m_snapC[dec],m_snapC[dec<<2+4]);
 				//int c2 = std::max(m_snapC[dec<<2+sx4],m_snapC[dec<<2+sx4+4]);
-				const uchar* pix = m_snapC + (dec<<2);
+				const unsigned char* pix = m_snapC + (dec<<2);
 				int c1 = std::max(pix[0],pix[4]);
 				pix += sx4;
 				int c2 = std::max(pix[0],pix[4]);

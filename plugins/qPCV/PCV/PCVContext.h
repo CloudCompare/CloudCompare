@@ -97,7 +97,7 @@ class PCVContext
 		//! Depth buffer
 		float* m_snapZ;
 		//! Color buffer
-		uchar* m_snapC;
+		unsigned char* m_snapC;
 
 		//! Whether displayed mesh is closed or not
 		bool m_meshIsClosed;

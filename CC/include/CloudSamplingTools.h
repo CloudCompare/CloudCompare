@@ -59,7 +59,7 @@ public:
 		\return the resampled cloud (new cloud)
 	**/
 	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* cloud,
-														uchar octreeLevel,
+														unsigned char octreeLevel,
 														RESAMPLING_CELL_METHOD resamplingMethod,
 														GenericProgressCallback* progressCb = 0,
 														DgmOctree* inputOctree = 0);
@@ -95,7 +95,7 @@ public:
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
 	static ReferenceCloud* subsampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* cloud,
-															uchar octreeLevel,
+															unsigned char octreeLevel,
 															SUBSAMPLING_CELL_METHOD subsamplingMethod,
 															GenericProgressCallback* progressCb = 0,
 															DgmOctree* inputOctree = 0);

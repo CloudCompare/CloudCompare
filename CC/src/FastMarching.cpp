@@ -94,7 +94,7 @@ int FastMarching::initGrid(float step, unsigned dim[3])
 	return initOther();
 }
 
-int FastMarching::initGridWithOctree(DgmOctree* octree, uchar gridLevel)
+int FastMarching::initGridWithOctree(DgmOctree* octree, unsigned char gridLevel)
 {
 	if (!octree || gridLevel > DgmOctree::MAX_OCTREE_LEVEL)
 		return -2;

@@ -253,9 +253,9 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 			ind[1] = tsi->i2;
 			ind[2] = tsi->i3;
 
-			for (uchar k=0; k<3; ++k)
+			for (unsigned char k=0; k<3; ++k)
 			{
-				uchar l = (k<2 ? k+1 : 0);
+				unsigned char l = (k<2 ? k+1 : 0);
 				a = (ind[k]<ind[l] ? ind[k] : ind[l]);
 				b = (a==ind[k] ? ind[l] : ind[k]);
 
@@ -364,9 +364,9 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 			ind[1] = tsi->i2;
 			ind[2] = tsi->i3;
 
-			for (uchar k=0; k<3; ++k)
+			for (unsigned char k=0; k<3; ++k)
 			{
-				uchar l = (k<2 ? k+1 : 0);
+				unsigned char l = (k<2 ? k+1 : 0);
 				a = (ind[k]<ind[l] ? ind[k] : ind[l]);
 				b = (a==ind[k] ? ind[l] : ind[k]);
 
@@ -434,7 +434,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				ind[1] = tsi->i2;
 				ind[2] = tsi->i3;
 
-				for (uchar j=0; j<3; ++j)
+				for (unsigned char j=0; j<3; ++j)
 				{
 					if (!theFacesIndexes[ind[j]])
 					{

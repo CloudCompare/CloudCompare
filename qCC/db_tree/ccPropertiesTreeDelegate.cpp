@@ -635,11 +635,11 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 	assert(level > 0 && level <= ccOctree::MAX_OCTREE_LEVEL);
 
 	//cell size
-	PointCoordinateType cellSize = _obj->getCellSize(static_cast<uchar>(level));
+	PointCoordinateType cellSize = _obj->getCellSize(static_cast<unsigned char>(level));
 	appendRow( ITEM("Cell size"), ITEM(QString::number(cellSize)) );
 
 	//cell count
-	unsigned cellCount = _obj->getCellNumber(static_cast<uchar>(level));
+	unsigned cellCount = _obj->getCellNumber(static_cast<unsigned char>(level));
 	appendRow( ITEM("Cell count"), ITEM(QLocale(QLocale::English).toString(cellCount)) );
 
 	//total volume of filled cells

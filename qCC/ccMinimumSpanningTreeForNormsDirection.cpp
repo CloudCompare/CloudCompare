@@ -468,9 +468,9 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 	}
 		
 #ifdef MST_USE_KNN
-	uchar level = octree->findBestLevelForAGivenPopulationPerCell(kNN*2);
+	unsigned char level = octree->findBestLevelForAGivenPopulationPerCell(kNN*2);
 #else
-	uchar level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+	unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
 #endif
 
 	bool result = true;

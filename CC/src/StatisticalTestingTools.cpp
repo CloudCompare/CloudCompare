@@ -324,7 +324,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	//on active le champ scalaire (IN) pour recevoir les distances du Chi2
 	theCloud->enableScalarField();
 
-	uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(numberOfNeighbours);
+	unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(numberOfNeighbours);
 
 	unsigned numberOfChi2Classes = (unsigned)ceil(sqrt((double)numberOfNeighbours));
 

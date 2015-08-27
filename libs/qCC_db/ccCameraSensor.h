@@ -517,7 +517,7 @@ public:
 	bool build(CCLib::DgmOctree* octree);
 
 	//! Returns the cell visibility
-	OctreeCellVisibility positionFromFrustum(CCLib::DgmOctree::OctreeCellCodeType truncatedCode, uchar level) const
+	OctreeCellVisibility positionFromFrustum(CCLib::DgmOctree::OctreeCellCodeType truncatedCode, unsigned char level) const
 	{
 		assert(m_associatedOctree);
 

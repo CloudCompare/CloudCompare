@@ -80,7 +80,7 @@ public:
 		\param P the point to test
 		\return the point's visibility (POINT_VISIBLE, POINT_HIDDEN, POINT_OUT_OF_RANGE or POINT_OUT_OF_FOV)
 	**/
-	virtual uchar checkVisibility(const CCVector3& P) const;
+	virtual unsigned char checkVisibility(const CCVector3& P) const;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
 	/** WARNING: this method uses the cloud global iterator.

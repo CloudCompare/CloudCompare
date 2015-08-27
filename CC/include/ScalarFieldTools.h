@@ -156,7 +156,7 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
 	static bool computeKmeans(	const GenericCloud* theCloud, 
-								uchar K, 
+								unsigned char K, 
 								KMeanClass kmcc[], 
 								GenericProgressCallback* progressCb = 0);
 

@@ -70,10 +70,10 @@ const ScalarType NAN_VALUE = std::numeric_limits<ScalarType>::quiet_NaN();
 // Point visibility states
 // By default visibility is expressed relatively to the sensor point of view.
 // Warning: 'visible' value must always be the lowest!
-const uchar POINT_VISIBLE						=	 0;				/**< Point visibility state: visible **/
-const uchar POINT_HIDDEN						=	 1;				/**< Point visibility state: hidden (e.g. behind other points) **/
-const uchar POINT_OUT_OF_RANGE					=	 2;				/**< Point visibility state: out of range **/
-const uchar POINT_OUT_OF_FOV					=	 4;				/**< Point visibility state: out of field of view **/
+const unsigned char POINT_VISIBLE				=	 0;				/**< Point visibility state: visible **/
+const unsigned char POINT_HIDDEN				=	 1;				/**< Point visibility state: hidden (e.g. behind other points) **/
+const unsigned char POINT_OUT_OF_RANGE			=	 2;				/**< Point visibility state: out of range **/
+const unsigned char POINT_OUT_OF_FOV			=	 4;				/**< Point visibility state: out of field of view **/
 
 //! Chamfer distances types
 enum CC_CHAMFER_DISTANCE_TYPE { CHAMFER_111		=	0,				/**< Chamfer distance <1-1-1> **/

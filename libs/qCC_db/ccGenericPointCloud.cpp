@@ -85,22 +85,22 @@ bool ccGenericPointCloud::isVisibilityTableInstantiated() const
 	return m_pointsVisibility && m_pointsVisibility->isAllocated();
 }
 
-uchar ccGenericPointCloud::testVisibility(const CCVector3& P) const
+unsigned char ccGenericPointCloud::testVisibility(const CCVector3& P) const
 {
-	uchar bestVisibility = 255; //impossible value
+	unsigned char bestVisibility = 255; //impossible value
 
 	for (ccHObject::Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
 		if ((*it)->isKindOf(CC_TYPES::SENSOR))
 		{
-			uchar visibility = static_cast<ccSensor*>(*it)->checkVisibility(P);
+			unsigned char visibility = static_cast<ccSensor*>(*it)->checkVisibility(P);
 
 			if (visibility == POINT_VISIBLE)
 			{
 				return POINT_VISIBLE; //shortcut
 			}
 
-			bestVisibility = std::min<uchar>(visibility,bestVisibility);
+			bestVisibility = std::min<unsigned char>(visibility,bestVisibility);
 		}
 	}
 

@@ -302,7 +302,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 			int maxPop = 0;
 			int aboveMinPopCount = 0;
 
-			uchar octreeLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+			unsigned char octreeLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
 
 			for (size_t i=0; i<sampleCount; ++i)
 			{
@@ -472,7 +472,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	{
 	case LS:
 		{
-			uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
+			unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
 																			&(ComputeNormsAtLevelWithLS),
 																			additionalParameters,
@@ -483,7 +483,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		break;
 	case TRI:
 		{
-			uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
+			unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
 			processedCells = theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
 																					&(ComputeNormsAtLevelWithTri),
 																					additionalParameters,
@@ -496,7 +496,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		break;
 	case QUADRIC:
 		{
-			uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
+			unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
 																			&(ComputeNormsAtLevelWithQuadric),
 																			additionalParameters,
@@ -589,9 +589,9 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 				const CCVector3* gv = Z.getGravityCenter();
 				assert(gv);
 
-				const uchar& iX = dims.x;
-				const uchar& iY = dims.y;
-				const uchar& iZ = dims.z;
+				const unsigned char& iX = dims.x;
+				const unsigned char& iY = dims.y;
+				const unsigned char& iZ = dims.z;
 
 				PointCoordinateType lX = nNSS.queryPoint.u[iX] - gv->u[iX];
 				PointCoordinateType lY = nNSS.queryPoint.u[iY] - gv->u[iY];

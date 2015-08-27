@@ -234,7 +234,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 			int newVertexIndexes[3];
 
 			//VERSION: WE KEEP THE TRIANGLE ONLY IF ITS 3 VERTICES ARE INSIDE
-			for (uchar j=0;j <3; ++j)
+			for (unsigned char j=0;j <3; ++j)
 			{
 				const unsigned& currentVertexFlag = newPointIndexes[tsi->i[j]];
 

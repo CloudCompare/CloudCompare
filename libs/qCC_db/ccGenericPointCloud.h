@@ -158,7 +158,7 @@ public:
 	//! Array of "visibility" information for each point
 	/** See <CCConst.h>
 	**/
-	typedef GenericChunkedArray<1,uchar> VisibilityTableType;
+	typedef GenericChunkedArray<1,unsigned char> VisibilityTableType;
 
 	//! Returns associated visiblity array
 	virtual inline VisibilityTableType* getTheVisibilityArray() { return m_pointsVisibility; }
@@ -182,7 +182,7 @@ public:
 	***************************************************/
 
 	//Inherited from GenericCloud
-	virtual uchar testVisibility(const CCVector3& P) const;
+	virtual unsigned char testVisibility(const CCVector3& P) const;
 
 	//Inherited from ccHObject
 	virtual ccBBox getOwnBB(bool withGLFeatures = false);

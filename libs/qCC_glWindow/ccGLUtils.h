@@ -41,8 +41,8 @@ public:
 					OpenGL Textures
 	***************************************************/
 
-	static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, uchar alpha = 255);
-	static void DisplayTexture2D(GLuint tex, int w, int h, uchar alpha = 255);
+	static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, unsigned char alpha = 255);
+	static void DisplayTexture2D(GLuint tex, int w, int h, unsigned char alpha = 255);
 
 	/***************************************************
 					OpenGL Matrices

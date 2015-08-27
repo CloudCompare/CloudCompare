@@ -47,7 +47,7 @@
 //System
 #include <assert.h>
 
-const uchar DEFAULT_OCTREE_LEVEL = 7;
+const unsigned char DEFAULT_OCTREE_LEVEL = 7;
 
 ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 									ccHObject* refEntity,
@@ -536,12 +536,12 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 		//we compute a 'correction factor' that converts an approximate distance into an
 		//approximate size of the neighborhood (in terms of cells)
-		PointCoordinateType cellSize = m_compOctree->getCellSize(static_cast<uchar>(level));
+		PointCoordinateType cellSize = m_compOctree->getCellSize(static_cast<unsigned char>(level));
 
 		//we also use the reference cloud density (points/cell) if we have the info
 		double refListDensity = 1.0;
 		if (m_refOctree)
-			refListDensity = m_refOctree->computeMeanOctreeDensity(static_cast<uchar>(level));
+			refListDensity = m_refOctree->computeMeanOctreeDensity(static_cast<unsigned char>(level));
 
 		CCLib::DgmOctree::OctreeCellCodeType tempCode = 0xFFFFFFFF;
 
@@ -700,7 +700,7 @@ bool ccComparisonDlg::compute()
 	}
 
 	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
-	params.octreeLevel = static_cast<uchar>(bestOctreeLevel);
+	params.octreeLevel = static_cast<unsigned char>(bestOctreeLevel);
 	if (localModelingTab->isEnabled())
 	{
 		params.localModel = (CC_LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
@@ -737,7 +737,7 @@ bool ccComparisonDlg::compute()
 		
 		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
 																				m_refMesh,
-																				static_cast<uchar>(bestOctreeLevel),
+																				static_cast<unsigned char>(bestOctreeLevel),
 																				maxSearchDist,
 																				false,
 																				signedDistances,

@@ -780,9 +780,9 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 		}
 	}
 
-	uchar coordIsDefined[3] = {	counters[ASCII_OPEN_DLG_X] != 0,
-								counters[ASCII_OPEN_DLG_Y] != 0,
-								counters[ASCII_OPEN_DLG_Z] != 0 };
+	unsigned char coordIsDefined[3] = {	counters[ASCII_OPEN_DLG_X] != 0,
+										counters[ASCII_OPEN_DLG_Y] != 0,
+										counters[ASCII_OPEN_DLG_Z] != 0 };
 
 	if (coordIsDefined[0] + coordIsDefined[1] + coordIsDefined[2] < 2)
 	{
@@ -1072,15 +1072,15 @@ void AsciiOpenDlg::shortcutButtonPressed()
 	//it should be a QToolButton (could we test this?)
 	QToolButton* shortcutButton = static_cast<QToolButton*>(obj);
 
-	uchar newSeparator=0;
+	char newSeparator = 0;
 	if (shortcutButton == m_ui->toolButtonShortcutESP)
-		newSeparator=uchar(32);
+		newSeparator = 32;
 	else if (shortcutButton == m_ui->toolButtonShortcutTAB)
-		newSeparator=uchar(9);
+		newSeparator = 9;
 	else if (shortcutButton == m_ui->toolButtonShortcutComma)
-		newSeparator=uchar(44);
+		newSeparator = 44;
 	else if (shortcutButton == m_ui->toolButtonShortcutDotcomma)
-		newSeparator=uchar(59);
+		newSeparator = 59;
 
 	if (newSeparator>0 && getSeparator()!=newSeparator)
 		m_ui->lineEditSeparator->setText(QChar(newSeparator));

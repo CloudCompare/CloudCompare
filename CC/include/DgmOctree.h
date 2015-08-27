@@ -194,7 +194,7 @@ public:
 		//! Level of subdivision of the octree at which to start the search
 		/** Should be set once and for all.
 		**/
-		uchar level;
+		unsigned char level;
 		//! Minimal number of neighbours to find
 		/** used only during multiple neighbours search (see findNearestNeighborsStartingFromCell).
 			This is only indicative and not guaranteed.
@@ -371,7 +371,7 @@ public:
 		//! Octree to which the cell belongs
 		const DgmOctree* parentOctree;
 		//! Cell level of subdivision
-		uchar level;
+		unsigned char level;
 		//! Truncated cell code
 		OctreeCellCodeType truncatedCode;
 		//! Cell index in octree structure (see m_thePointsAndTheirCellCodes)
@@ -472,7 +472,7 @@ public:
 		\param level the level of subdivision
 		\return the lowest cell position along X,Y and Z for a given level of subdivision
 	**/
-	inline const int* getMinFillIndexes(uchar level) const { return m_fillIndexes+6*level; }
+	inline const int* getMinFillIndexes(unsigned char level) const { return m_fillIndexes+6*level; }
 
 	//! Returns the highest cell positions in the octree along all dimensions and for a given level of subdivision
 	/** For example, at a level	n, the octree length is 2^n cells along each
@@ -481,14 +481,14 @@ public:
 		\param level the level of subdivision
 		\return the highest cell position along X,Y and Z for a given level of subdivision
 	**/
-	inline const int* getMaxFillIndexes(uchar level) const { return getMinFillIndexes(level)+3; }
+	inline const int* getMaxFillIndexes(unsigned char level) const { return getMinFillIndexes(level)+3; }
 
 	//! Returns the octree cells length for a given level of subdivision
 	/** As the octree is cubical, cells are cubical.
 		\param level the level of subdivision (up to MAX_OCTREE_LEVEL+1 for convenience)
 		\return the cell size
 	**/
-	inline const PointCoordinateType& getCellSize(uchar level) const { return m_cellSize[level]; }
+	inline const PointCoordinateType& getCellSize(unsigned char level) const { return m_cellSize[level]; }
 
 	//! Returns distance form a cell to the filled octree borders in all directions.
 	/** WARNING: distance values may be negative! (if cell is outside
@@ -497,7 +497,7 @@ public:
 		\param cellDists output
 	**/
 	void getCellDistanceFromBorders(const Tuple3i& cellPos,
-									uchar level,
+									unsigned char level,
 									int* cellDists) const;
 
 	//! Returns distance from cell center to cell neighbourhood INSIDE filled octree
@@ -509,7 +509,7 @@ public:
 		\param cellDists output
 	**/
 	void getCellDistanceFromBorders(const Tuple3i& cellPos,
-									uchar level,
+									unsigned char level,
 									int neighbourhoodLength,
 									int* cellDists) const;
 
@@ -529,7 +529,7 @@ public:
 	**/
 	bool getPointsInCellByCellIndex(ReferenceCloud* cloud,
 									unsigned cellIndex,
-									uchar level,
+									unsigned char level,
 									bool clearOutputCloud = true) const;
 
 	//! Returns the points lying in a specific cell
@@ -541,7 +541,7 @@ public:
 		\return success
 	**/
 	bool getPointsInCell(	OctreeCellCodeType cellCode,
-							uchar level,
+							unsigned char level,
 							ReferenceCloud* subset,
 							bool isCodeTruncated = false,
 							bool clearOutputCloud = true) const;
@@ -557,7 +557,7 @@ public:
 		\return the set of points lying in the cell (references, no duplication)
 	**/
 	ReferenceCloud* getPointsInCellsWithSortedCellCodes(cellCodesContainer& cellCodes,
-														uchar level,
+														unsigned char level,
 														ReferenceCloud* subset,
 														bool areCodesTruncated = false) const;
 
@@ -581,7 +581,7 @@ public:
 	unsigned findPointNeighbourhood(const CCVector3* _queryPoint,
 									ReferenceCloud* Yk,
 									unsigned maxNumberOfNeighbors,
-									uchar level,
+									unsigned char level,
 									double &maxSquareDist,
 									double maxSearchDist = -1.0) const;
 
@@ -719,11 +719,11 @@ public:
 		\param level the level of subdivision
 		\return the truncated cell code
 	**/
-	OctreeCellCodeType generateTruncatedCellCode(const Tuple3i& cellPos, uchar level) const;
+	OctreeCellCodeType generateTruncatedCellCode(const Tuple3i& cellPos, unsigned char level) const;
 
 #ifndef OCTREE_CODES_64_BITS
 	//! Short version of generateTruncatedCellCode
-	OctreeCellCodeType generateTruncatedCellCode(const Tuple3s& pos, uchar level) const;
+	OctreeCellCodeType generateTruncatedCellCode(const Tuple3s& pos, unsigned char level) const;
 #endif
 
 	//! Returns the position FOR THE DEEPEST LEVEL OF SUBDIVISION of the cell that includes a given point
@@ -749,13 +749,13 @@ public:
 		\param cellPos the computed position
 		\param level the level of subdivision
 	**/
-	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos, uchar level) const
+	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos, unsigned char level) const
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 
 		getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
 
-		const uchar dec = MAX_OCTREE_LEVEL-level;
+		const unsigned char dec = MAX_OCTREE_LEVEL-level;
 		cellPos.x >>= dec;
 		cellPos.y >>= dec;
 		cellPos.z >>= dec;
@@ -771,7 +771,7 @@ public:
 		\param level the level of subdivision
 		\param inBounds indicates if the query point is inside or outside the octree bounding-box
 	**/
-	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos, uchar level, bool& inBounds) const
+	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, Tuple3i& cellPos, unsigned char level, bool& inBounds) const
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 
@@ -781,7 +781,7 @@ public:
 					 && cellPos.y >= 0 && cellPos.y < MAX_OCTREE_LENGTH
 					 && cellPos.z >= 0 && cellPos.z < MAX_OCTREE_LENGTH );
 
-		const uchar dec = MAX_OCTREE_LEVEL-level;
+		const unsigned char dec = MAX_OCTREE_LEVEL-level;
 		cellPos.x >>= dec;
 		cellPos.y >>= dec;
 		cellPos.z >>= dec;
@@ -793,7 +793,7 @@ public:
 		\param cellPos the computed position
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	void getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPos, bool isCodeTruncated) const;
+	void getCellPos(OctreeCellCodeType code, unsigned char level, Tuple3i& cellPos, bool isCodeTruncated) const;
 
 	//! Returns the cell center for a given level of subdivision of a cell designated by its code
 	/** \param code the cell code
@@ -801,7 +801,7 @@ public:
 		\param center the computed center
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	inline void computeCellCenter(OctreeCellCodeType code, uchar level, CCVector3& center, bool isCodeTruncated = false) const
+	inline void computeCellCenter(OctreeCellCodeType code, unsigned char level, CCVector3& center, bool isCodeTruncated = false) const
 	{
 		Tuple3i cellPos;
 		getCellPos(code,level,cellPos,isCodeTruncated);
@@ -814,7 +814,7 @@ public:
 		\param level the level of subdivision
 		\param center the computed center
 	**/
-	inline void computeCellCenter(const Tuple3i& cellPos, uchar level, CCVector3& center) const
+	inline void computeCellCenter(const Tuple3i& cellPos, unsigned char level, CCVector3& center) const
 	{
 		const PointCoordinateType& cs = getCellSize(level);
 		center.x = m_dimMin.x + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
@@ -824,7 +824,7 @@ public:
 
 #ifndef OCTREE_CODES_64_BITS
 	//! Short version of computeCellCenter
-	inline void computeCellCenter(const Tuple3s& cellPos, uchar level, CCVector3& center) const
+	inline void computeCellCenter(const Tuple3s& cellPos, unsigned char level, CCVector3& center) const
 	{
 		const PointCoordinateType& cs = getCellSize(level);
 		center.x = m_dimMin.x + cs * (static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos.x));
@@ -840,7 +840,7 @@ public:
 		\param cellMax the maximum coordinates along each dimension
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	void computeCellLimits(OctreeCellCodeType code, uchar level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated = false) const;
+	void computeCellLimits(OctreeCellCodeType code, unsigned char level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated = false) const;
 
 	/**** OCTREE DIAGNOSIS ****/
 
@@ -848,7 +848,7 @@ public:
 	/** \param radius the sphere radius
 		\return the 'best' level
 	**/
-	uchar findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const;
+	unsigned char findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const;
 
 	//! Determines the best level of subdivision of the octree at which to apply a cloud-2-cloud distance computation algorithm
 	/** The octree instance on which is "applied" this method should be the compared cloud's one.
@@ -856,19 +856,19 @@ public:
 		\param theOtherOctree the octree of the other cloud
 		\return the 'best' level
 	**/
-	uchar findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const;
+	unsigned char findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const;
 
 	//! Determines the best subdivision level of the octree to assure a mean number of points per cell
 	/** \param indicativeNumberOfPointsPerCell 'desired' number of points per cell
 		\return the 'best' level
 	**/
-	uchar findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const;
+	unsigned char findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const;
 
 	//! Determines the best subdivision level of the octree to match a given number of cells
 	/** \param indicativeNumberOfCells 'desired' number of cells
 		\return the 'best' level
 	**/
-	uchar findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const;
+	unsigned char findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const;
 
 	//! Returns the ith cell code
 	inline const OctreeCellCodeType& getCellCode(unsigned index) const { return m_thePointsAndTheirCellCodes[index].theCode; }
@@ -880,7 +880,7 @@ public:
 		\param truncatedCodes indicates if the resulting codes should be truncated or not
 		\return false if an error occurred (e.g. not enough memory)
 	**/
-	bool getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes = false) const;
+	bool getCellCodes(unsigned char level, cellCodesContainer& vec, bool truncatedCodes = false) const;
 
 	//! Returns the list of indexes corresponding to the octree cells for a given level of subdivision
 	/** Only the non empty cells are represented in the octree structure.
@@ -890,7 +890,7 @@ public:
 		\param vec the list of indexes
 		\return false if an error occurred (e.g. not enough memory)
 	**/
-	bool getCellIndexes(uchar level, cellIndexesContainer& vec) const;
+	bool getCellIndexes(unsigned char level, cellIndexesContainer& vec) const;
 
 	//! Returns the list of indexes and codes corresponding to the octree cells for a given level of subdivision
 	/** Only the non empty cells are represented in the octree structure.
@@ -901,7 +901,7 @@ public:
 		\param truncatedCodes indicates if the resulting codes should be truncated or not
 		\return false if an error occurred (e.g. not enough memory)
 	**/
-	bool getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes = false) const;
+	bool getCellCodesAndIndexes(unsigned char level, cellsContainer& vec, bool truncatedCodes = false) const;
 
 
 	//! Returns the cells that differ between two octrees (for a same implicit level of subdivision)
@@ -923,10 +923,10 @@ public:
 		\param cellsA the number of cells of the first octree for the given number of subdivision
 		\param cellsB the number of cells of the second octree for the given number of subdivision
 	**/
-	void diff(uchar octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const;
+	void diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const;
 
 	//! Returns the number of cells for a given level of subdivision
-	inline const unsigned& getCellNumber(uchar level) const
+	inline const unsigned& getCellNumber(unsigned char level) const
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 		return m_cellCount[level];
@@ -936,7 +936,7 @@ public:
 	/** \param level the level of subdivision
 		\return mean density (point/cell)
 	**/
-	double computeMeanOctreeDensity(uchar level) const;
+	double computeMeanOctreeDensity(unsigned char level) const;
 
 	//! Computes the minimal distance between a point and the borders (faces) of the cell (cube) in which it is included
 	/** \param queryPoint the point
@@ -973,7 +973,7 @@ public:
 			- '-3' = no CC found
 	**/
 	int extractCCs(	const cellCodesContainer& cellCodes,
-					uchar level,
+					unsigned char level,
 					bool sixConnexity,
 					GenericProgressCallback* progressCb = 0) const;
 
@@ -991,7 +991,7 @@ public:
 			- '-2' = not enough memory
 			- '-3' = no CC found
 	**/
-	int extractCCs(	uchar level,
+	int extractCCs(	unsigned char level,
 					bool sixConnexity,
 					GenericProgressCallback* progressCb = 0) const;
 
@@ -1017,7 +1017,7 @@ public:
 		\param functionTitle function title
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
-	unsigned executeFunctionForAllCellsStartingAtLevel(	uchar startingLevel,
+	unsigned executeFunctionForAllCellsStartingAtLevel(	unsigned char startingLevel,
 														octreeCellFunc func,
 														void** additionalParameters,
 														unsigned minNumberOfPointsPerCell,
@@ -1040,7 +1040,7 @@ public:
 		\param functionTitle function title
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
-	unsigned executeFunctionForAllCellsAtLevel(	uchar level,
+	unsigned executeFunctionForAllCellsAtLevel(	unsigned char level,
 												octreeCellFunc func,
 												void** additionalParameters,
 												bool multiThread = false,
@@ -1076,7 +1076,7 @@ protected:
 		//! Number of points in cell
 		unsigned elements;
 		//! Subdivision level
-		uchar level;
+		unsigned char level;
 	};
 
 	/********************************/
@@ -1139,7 +1139,7 @@ protected:
 		called too often.
 		\param level the level of subdivision
 	**/
-	void computeCellsStatistics(uchar level);
+	void computeCellsStatistics(unsigned char level);
 
 	//! Returns the indexes of the neighbourhing (existing) cells of a given cell
 	/** This function is used by the nearest neighbours search algorithms.
@@ -1151,7 +1151,7 @@ protected:
 	void getNeighborCellsAround(const Tuple3i& cellPos,
 								cellIndexesContainer &neighborCellsIndexes,
 								int neighbourhoodLength,
-								uchar level) const;
+								unsigned char level) const;
 
 	//! Gets point in the neighbourhing cells of a specific cell
 	/** \param nNSS NN search parameters (from which are used: cellPos, pointsInNeighbourCells and level)
@@ -1177,7 +1177,7 @@ protected:
 		\param bitDec binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
 		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/
-	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec) const;
+	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, unsigned char bitDec) const;
 
 	//! Returns the index of a given cell represented by its code
 	/** Same algorithm as the other "getCellIndex" method, but in an optimized form.
@@ -1188,7 +1188,7 @@ protected:
 		\param end last index of the sub-list in which to perform the binary search
 		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/
-	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const;
+	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, unsigned char bitDec, unsigned begin, unsigned end) const;
 };
 
 }

@@ -45,10 +45,10 @@ static const double LOG_NAT_2 = log(2.0);
 class octreeTreeCell
 {
 public:
-	uchar relativePos; //from 0 to 7
+	unsigned char relativePos; //from 0 to 7
 	octreeTreeCell* parent;
 	octreeTreeCell** children; //up to 8 ones
-	uchar childrenCount;
+	unsigned char childrenCount;
 
 	//default constructor
 	octreeTreeCell()
@@ -61,7 +61,7 @@ public:
 
 	virtual ~octreeTreeCell()
 	{
-		for (uchar i=0; i<childrenCount; ++i)
+		for (unsigned char i=0; i<childrenCount; ++i)
 			delete children[i];
 		delete children;
 	}
@@ -84,18 +84,18 @@ public:
 
 static octreeTreeCell* s_root = 0;
 
-octreeTreeCell* getCell(OctreeCellCodeType truncatedCellCode, uchar level)
+octreeTreeCell* getCell(OctreeCellCodeType truncatedCellCode, unsigned char level)
 {
 	assert(s_root);
 	octreeTreeCell* currentCell = s_root;
-	uchar bitDec = 3*level;
+	unsigned char bitDec = 3*level;
 
 	//we look for cell by descending down the tree (until we found it!)
-	for (uchar currentLevel=0; currentLevel<level; ++currentLevel)
+	for (unsigned char currentLevel=0; currentLevel<level; ++currentLevel)
 	{
 		bitDec -= 3;
-		uchar childPos = (uchar)((truncatedCellCode >> bitDec) & 7);
-		uchar i = 0, count = currentCell->childrenCount;
+		unsigned char childPos = (unsigned char)((truncatedCellCode >> bitDec) & 7);
+		unsigned char i = 0, count = currentCell->childrenCount;
 		for ( ; i<count; ++i)
 		{
 			if (currentCell->children[i]->relativePos == childPos)
@@ -119,7 +119,7 @@ void getPointsInTreeCell(octreeTreeCell* cell, CCLib::DgmOctree::NeighboursSet& 
 {
 	if (cell->childrenCount) //no points in current cell, only children!
 	{
-		for (uchar i=0; i<cell->childrenCount; ++i)
+		for (unsigned char i=0; i<cell->childrenCount; ++i)
 			getPointsInTreeCell(cell->children[i],set,cloud);
 	}
 	else //leaf cell
@@ -389,8 +389,8 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		octreeTreeCell* root = new octreeTreeCell();
 
 		//begin 'recursion'
-		uchar currentLevel = 0;
-		uchar currentBitDec = GET_BIT_SHIFT(currentLevel);
+		unsigned char currentLevel = 0;
+		unsigned char currentBitDec = GET_BIT_SHIFT(currentLevel);
 		OctreeCellCodeType currentCode = INVALID_CELL_CODE;
 		OctreeCellCodeType currentTruncatedCode = INVALID_CELL_CODE;
 		std::vector<octreeTreeCell*> cellStack;
@@ -497,13 +497,13 @@ void DgmOctree::updateCellSizeTable()
 void DgmOctree::updateCellCountTable()
 {
 	//level 0 is just the octree bounding-box
-	for (uchar i=0; i<=MAX_OCTREE_LEVEL; ++i)
+	for (unsigned char i=0; i<=MAX_OCTREE_LEVEL; ++i)
 	{
 		computeCellsStatistics(i);
 	}
 }
 
-void DgmOctree::computeCellsStatistics(uchar level)
+void DgmOctree::computeCellsStatistics(unsigned char level)
 {
 	assert(level <= MAX_OCTREE_LEVEL);
 
@@ -529,7 +529,7 @@ void DgmOctree::computeCellsStatistics(uchar level)
 	}
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(level);
+	unsigned char bitDec = GET_BIT_SHIFT(level);
 
 	//iterator on octree elements
 	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
@@ -589,7 +589,7 @@ struct MonoDimensionalCellCodes
 		{
 			int mask = VALUE_COUNT;
 			CCLib::DgmOctree::OctreeCellCodeType code = 0;
-			for (uchar k=0; k<CCLib::DgmOctree::MAX_OCTREE_LEVEL; k++)
+			for (unsigned char k=0; k<CCLib::DgmOctree::MAX_OCTREE_LEVEL; k++)
 			{
 				mask >>= 1;
 				code <<= 3;
@@ -615,13 +615,13 @@ struct MonoDimensionalCellCodes
 };
 static MonoDimensionalCellCodes PRE_COMPUTED_POS_CODES;
 
-DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const Tuple3i& cellPos, uchar level) const
+DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const Tuple3i& cellPos, unsigned char level) const
 {
 	assert(		cellPos.x >= 0 && cellPos.x < MonoDimensionalCellCodes::VALUE_COUNT
 			&&	cellPos.y >= 0 && cellPos.y < MonoDimensionalCellCodes::VALUE_COUNT
 			&&	cellPos.z >= 0 && cellPos.z < MonoDimensionalCellCodes::VALUE_COUNT );
 
-	const uchar dec = MAX_OCTREE_LEVEL-level;
+	const unsigned char dec = MAX_OCTREE_LEVEL-level;
 
 	return	(	 PRE_COMPUTED_POS_CODES.values[cellPos.x << dec]
 			|	(PRE_COMPUTED_POS_CODES.values[cellPos.y << dec] << 1)
@@ -630,13 +630,13 @@ DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const Tuple3i
 }
 
 #ifndef OCTREE_CODES_64_BITS
-DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const Tuple3s& cellPos, uchar level) const
+DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const Tuple3s& cellPos, unsigned char level) const
 {
 	assert(		cellPos.x >= 0 && cellPos.x < MonoDimensionalCellCodes::VALUE_COUNT
 			&&	cellPos.y >= 0 && cellPos.y < MonoDimensionalCellCodes::VALUE_COUNT
 			&&	cellPos.z >= 0 && cellPos.z < MonoDimensionalCellCodes::VALUE_COUNT );
 
-	const uchar dec = MAX_OCTREE_LEVEL-level;
+	const unsigned char dec = MAX_OCTREE_LEVEL-level;
 
 	return	(	 PRE_COMPUTED_POS_CODES.values[cellPos.x << dec]
 			|	(PRE_COMPUTED_POS_CODES.values[cellPos.y << dec] << 1)
@@ -656,7 +656,7 @@ void DgmOctree::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) const
 	bbMax = m_dimMax;
 }
 
-void DgmOctree::getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPos, bool isCodeTruncated) const
+void DgmOctree::getCellPos(OctreeCellCodeType code, unsigned char level, Tuple3i& cellPos, bool isCodeTruncated) const
 {
 	//binary shift for cell code truncation
 	if (!isCodeTruncated)
@@ -665,7 +665,7 @@ void DgmOctree::getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPo
 	cellPos = Tuple3i(0,0,0);
 
 	int bitMask = 1;
-	for (uchar k=0; k<level; ++k)
+	for (unsigned char k=0; k<level; ++k)
 	{
 		if (code & 4)
 			cellPos.z |= bitMask;
@@ -679,7 +679,7 @@ void DgmOctree::getCellPos(OctreeCellCodeType code, uchar level, Tuple3i& cellPo
 	}
 }
 
-void DgmOctree::computeCellLimits(OctreeCellCodeType code, uchar level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated) const
+void DgmOctree::computeCellLimits(OctreeCellCodeType code, unsigned char level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated) const
 {
 	Tuple3i cellPos;
 	getCellPos(code,level,cellPos,isCodeTruncated);
@@ -694,12 +694,12 @@ void DgmOctree::computeCellLimits(OctreeCellCodeType code, uchar level, CCVector
 }
 
 bool DgmOctree::getPointsInCell(OctreeCellCodeType cellCode,
-								uchar level,
+								unsigned char level,
 								ReferenceCloud* subset,
 								bool isCodeTruncated/*=false*/,
 								bool clearOutputCloud/*=true*/) const
 {
-	uchar bitDec = GET_BIT_SHIFT(level);
+	unsigned char bitDec = GET_BIT_SHIFT(level);
 	if (!isCodeTruncated)
 		cellCode >>= bitDec; 
 
@@ -713,7 +713,7 @@ bool DgmOctree::getPointsInCell(OctreeCellCodeType cellCode,
 	return true;
 }
 
-unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec) const
+unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, unsigned char bitDec) const
 {
 	//inspired from the algorithm proposed by MATT PULVER (see http://eigenjoy.com/2011/01/21/worlds-fastest-binary-search/)
 	//DGM:	it's not faster, but the code is simpler ;)
@@ -753,7 +753,7 @@ static double s_binarySearchCount = 0.0;
 #endif
 
 #ifdef ADAPTATIVE_BINARY_SEARCH
-unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const
+unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, unsigned char bitDec, unsigned begin, unsigned end) const
 {
 	assert(truncatedCellCode != INVALID_CELL_CODE);
 	assert(end >= begin);
@@ -820,7 +820,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
 
 #else
 
-unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const
+unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, unsigned char bitDec, unsigned begin, unsigned end) const
 {
 	assert(truncatedCellCode != INVALID_CELL_CODE);
 	assert(end >= begin && end < m_numberOfProjectedPoints);
@@ -871,7 +871,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
 unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 											ReferenceCloud* Yk,
 											unsigned maxNumberOfNeighbors,
-											uchar level,
+											unsigned char level,
 											double &maxSquareDist,
 											double maxSearchDist/*=-1.0*/) const
 {
@@ -923,7 +923,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 }
 
 void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
-											uchar level,
+											unsigned char level,
 											int* cellDists) const
 {
 	const int* fillIndexes = m_fillIndexes+6*level;
@@ -938,7 +938,7 @@ void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
 }
 
 void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
-											uchar level,
+											unsigned char level,
 											int neighbourhoodLength,
 											int* limits) const
 {
@@ -972,7 +972,7 @@ void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
 void DgmOctree::getNeighborCellsAround(const Tuple3i& cellPos,
 										cellIndexesContainer &neighborCellsIndexes,
 										int neighbourhoodLength,
-										uchar level) const
+										unsigned char level) const
 {
 	assert(neighbourhoodLength > 0);
 
@@ -989,7 +989,7 @@ void DgmOctree::getNeighborCellsAround(const Tuple3i& cellPos,
 	const int &kMax = limits[5];
 
 	//binary shift for cell code truncation
-	const uchar bitDec = GET_BIT_SHIFT(level);
+	const unsigned char bitDec = GET_BIT_SHIFT(level);
 
 	for (int i=-iMin; i<=iMax; i++)
 	{
@@ -1061,7 +1061,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 	const int &kMax = limits[5];
 
 	//binary shift for cell code truncation
-	const uchar bitDec = GET_BIT_SHIFT(nNSS.level);
+	const unsigned char bitDec = GET_BIT_SHIFT(nNSS.level);
 
 	for (int i=-iMin; i<=iMax; i++)
 	{
@@ -1174,7 +1174,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 	assert(minNeighbourhoodLength >= nNSS.alreadyVisitedNeighbourhoodSize);
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(nNSS.level);
+	unsigned char bitDec = GET_BIT_SHIFT(nNSS.level);
 	CellDescriptor cellDesc;
 
 	if (minNeighbourhoodLength == 0) //special case
@@ -1462,7 +1462,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS) const
 {
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(nNSS.level);
+	unsigned char bitDec = GET_BIT_SHIFT(nNSS.level);
 
 	//cell size at the current level of subdivision
 	const PointCoordinateType& cs = getCellSize(nNSS.level);
@@ -1632,7 +1632,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 															bool getOnlyPointsWithValidScalar/*=false*/) const
 {
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(nNSS.level);
+	unsigned char bitDec = GET_BIT_SHIFT(nNSS.level);
 
 	//cell size at the current level of subdivision
 	const PointCoordinateType& cs = getCellSize(nNSS.level);
@@ -1828,7 +1828,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(	const CCVector3& sphereCenter,
 	//max number of cells for this dimension
 	int maxCellCount = OCTREE_LENGTH(level);
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(level);
+	unsigned char bitDec = GET_BIT_SHIFT(level);
 
 	CCVector3 cellMin = boxMin;
 	Tuple3i cellPos(cornerPos.x, 0, 0);
@@ -1947,7 +1947,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos.z) );
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(params.level);
+	unsigned char bitDec = GET_BIT_SHIFT(params.level);
 
 	CCVector3 cellMin = boxMin;
 	Tuple3i cellPos( cornerPos.x, 0, 0 );
@@ -2099,7 +2099,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos.z) );
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(params.level);
+	unsigned char bitDec = GET_BIT_SHIFT(params.level);
 
 	Tuple3i cellPos(cornerPos.x,0,0);
 	CCVector3 cellMin = boxMin;
@@ -2196,7 +2196,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 struct cellToInspect
 {
 	octreeTreeCell* cell;
-	uchar level;
+	unsigned char level;
 	CCVector3 corner;
 	bool toGrab;
 };
@@ -2285,7 +2285,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 			{
 				if (current.toGrab) //don't ask any question and grab all points/children!
 				{
-					for (uchar i=0; i<current.cell->childrenCount; ++i)
+					for (unsigned char i=0; i<current.cell->childrenCount; ++i)
 					{
 						desc.cell = current.cell->children[i];
 						desc.toGrab = true;
@@ -2296,7 +2296,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 				}
 				else //let's have a closer look
 				{
-					for (uchar i=0; i<current.cell->childrenCount; ++i)
+					for (unsigned char i=0; i<current.cell->childrenCount; ++i)
 					{
 						octreeTreeCell* child = current.cell->children[i];
 
@@ -2383,11 +2383,11 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 	else
 #endif
 	{
-		uchar level = 0;
+		unsigned char level = 0;
 		OctreeCellCodeType englobCode = 0;
 
 		//let's find the minimum enclosing cell
-		for (uchar nextLevel=1; nextLevel<=MAX_OCTREE_LEVEL; ++nextLevel)
+		for (unsigned char nextLevel=1; nextLevel<=MAX_OCTREE_LEVEL; ++nextLevel)
 		{
 			//cell size at next level
 			const PointCoordinateType& cs = getCellSize(nextLevel);
@@ -2451,7 +2451,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 
 		unsigned startIndex = 0;
 		//neighbours.clear();
-		uchar bitDec = GET_BIT_SHIFT(level);
+		unsigned char bitDec = GET_BIT_SHIFT(level);
 
 		//apart from the case where we must start from the very beginning of the octree (level 0)
 		//we are now gonna look to the first point in the including cell
@@ -2463,8 +2463,8 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 		}
 
 		//begin 'recursion'
-		uchar currentLevel = level;
-		uchar currentBitDec = bitDec;
+		unsigned char currentLevel = level;
+		unsigned char currentBitDec = bitDec;
 		bool skipCell = false;
 		bool toGrab = false;
 		OctreeCellCodeType currentCode = INVALID_CELL_CODE;
@@ -2780,7 +2780,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 	return numberOfEligiblePoints;
 }
 
-uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
+unsigned char DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
 {
 	static const PointCoordinateType c_neighbourhoodSizeExtractionFactor = static_cast<PointCoordinateType>(2.5);
 	PointCoordinateType aim = radius / c_neighbourhoodSizeExtractionFactor;
@@ -2805,10 +2805,10 @@ uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordina
 		}
 	}
 
-	return static_cast<uchar>(level);
+	return static_cast<unsigned char>(level);
 }
 
-uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const
+unsigned char DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const
 {
 	unsigned ptsA = getNumberOfProjectedPoints();
 	unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
@@ -2834,14 +2834,14 @@ uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherO
 			bestLevel = i;
 	}
 
-	return static_cast<uchar>(bestLevel);
+	return static_cast<unsigned char>(bestLevel);
 }
 
-uchar DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
+unsigned char DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
 {
 	double density = 0, prevDensity = 0;
 
-	uchar level = MAX_OCTREE_LEVEL;
+	unsigned char level = MAX_OCTREE_LEVEL;
 	for (level=MAX_OCTREE_LEVEL; level>0; --level)
 	{
 		prevDensity = density;
@@ -2866,10 +2866,10 @@ uchar DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumb
 	return level;
 }
 
-uchar DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
+unsigned char DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
 {
 	//we look for the level giviing the number of points per cell as close to the query
-	uchar bestLevel=1;
+	unsigned char bestLevel=1;
 	//number of cells for this level
 	int n = getCellNumber(bestLevel);
 	//error relatively to the query
@@ -2889,17 +2889,17 @@ uchar DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCel
 	return bestLevel;
 }
 
-double DgmOctree::computeMeanOctreeDensity(uchar level) const
+double DgmOctree::computeMeanOctreeDensity(unsigned char level) const
 {
 	return static_cast<double>(m_numberOfProjectedPoints)/static_cast<double>(getCellNumber(level));
 }
 
-bool DgmOctree::getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes/*=false*/) const
+bool DgmOctree::getCellCodesAndIndexes(unsigned char level, cellsContainer& vec, bool truncatedCodes/*=false*/) const
 {
 	try
 	{
 		//binary shift for cell code truncation
-		uchar bitDec = GET_BIT_SHIFT(level);
+		unsigned char bitDec = GET_BIT_SHIFT(level);
 
 		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 
@@ -2923,12 +2923,12 @@ bool DgmOctree::getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool tr
 	return true;
 }
 
-bool DgmOctree::getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes/*=false*/) const
+bool DgmOctree::getCellCodes(unsigned char level, cellCodesContainer& vec, bool truncatedCodes/*=false*/) const
 {
 	try
 	{
 		//binary shift for cell code truncation
-		uchar bitDec = GET_BIT_SHIFT(level);
+		unsigned char bitDec = GET_BIT_SHIFT(level);
 
 		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 
@@ -2952,7 +2952,7 @@ bool DgmOctree::getCellCodes(uchar level, cellCodesContainer& vec, bool truncate
 	return true;
 }
 
-bool DgmOctree::getCellIndexes(uchar level, cellIndexesContainer& vec) const
+bool DgmOctree::getCellIndexes(unsigned char level, cellIndexesContainer& vec) const
 {
 	try
 	{
@@ -2965,7 +2965,7 @@ bool DgmOctree::getCellIndexes(uchar level, cellIndexesContainer& vec) const
 	}
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(level);
+	unsigned char bitDec = GET_BIT_SHIFT(level);
 
 	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 
@@ -2986,13 +2986,13 @@ bool DgmOctree::getCellIndexes(uchar level, cellIndexesContainer& vec) const
 
 bool DgmOctree::getPointsInCellByCellIndex(	ReferenceCloud* cloud,
 											unsigned cellIndex,
-											uchar level,
+											unsigned char level,
 											bool clearOutputCloud/*=true*/) const
 {
 	assert(cloud && cloud->getAssociatedCloud() == m_theAssociatedCloud);
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(level);
+	unsigned char bitDec = GET_BIT_SHIFT(level);
 
 	//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
 	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
@@ -3013,15 +3013,15 @@ bool DgmOctree::getPointsInCellByCellIndex(	ReferenceCloud* cloud,
 }
 
 ReferenceCloud* DgmOctree::getPointsInCellsWithSortedCellCodes(	cellCodesContainer& cellCodes,
-																uchar level,
+																unsigned char level,
 																ReferenceCloud* subset,
 																bool areCodesTruncated/*=false*/) const
 {
 	assert(subset);
 
     //binary shift for cell code truncation
-    uchar bitDec1 = GET_BIT_SHIFT(level); //shift for this octree codes
-    uchar bitDec2 = (areCodesTruncated ? 0 : bitDec1); //shift for the input codes
+    unsigned char bitDec1 = GET_BIT_SHIFT(level); //shift for this octree codes
+    unsigned char bitDec2 = (areCodesTruncated ? 0 : bitDec1); //shift for the input codes
 
     cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
     OctreeCellCodeType toExtractCode,currentCode = (p->theCode >> bitDec1); //pred value must be different than the first element's
@@ -3083,7 +3083,7 @@ void DgmOctree::diff(const cellCodesContainer& codesA, const cellCodesContainer&
         diffB.push_back(*pB++);
 }
 
-void DgmOctree::diff(uchar octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
+void DgmOctree::diff(unsigned char octreeLevel, const cellsContainer &codesA, const cellsContainer &codesB, int &diffA, int &diffB, int &cellsA, int &cellsB) const
 {
 	if (codesA.empty() && codesB.empty()) return;
 
@@ -3091,7 +3091,7 @@ void DgmOctree::diff(uchar octreeLevel, const cellsContainer &codesA, const cell
 	cellsContainer::const_iterator pB = codesB.begin();
 
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(octreeLevel);
+	unsigned char bitDec = GET_BIT_SHIFT(octreeLevel);
 
 	OctreeCellCodeType predCodeA = pA->theCode >> bitDec;
 	OctreeCellCodeType predCodeB = pB->theCode >> bitDec;
@@ -3146,14 +3146,14 @@ void DgmOctree::diff(uchar octreeLevel, const cellsContainer &codesA, const cell
 	}
 }
 
-int DgmOctree::extractCCs(uchar level, bool sixConnexity, GenericProgressCallback* progressCb) const
+int DgmOctree::extractCCs(unsigned char level, bool sixConnexity, GenericProgressCallback* progressCb) const
 {
 	std::vector<OctreeCellCodeType> cellCodes;
 	getCellCodes(level,cellCodes);
 	return extractCCs(cellCodes, level, sixConnexity, progressCb);
 }
 
-int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool sixConnexity, GenericProgressCallback* progressCb) const
+int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char level, bool sixConnexity, GenericProgressCallback* progressCb) const
 {
 	size_t numberOfCells = cellCodes.size();
 	if (numberOfCells == 0) //no cells!
@@ -3175,7 +3175,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     Tuple3i indexMin, indexMax;
 	{
 		//binary shift for cell code truncation
-		uchar bitDec = GET_BIT_SHIFT(level);
+		unsigned char bitDec = GET_BIT_SHIFT(level);
 
 		for (size_t i=0; i<numberOfCells; i++)
 		{
@@ -3221,7 +3221,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     const int& step = gridSize.z;
 
     //relative neighbos positions (either 6 or 26 total - but we only use half of it)
-    uchar neighborsInCurrentSlice = 0, neighborsInPrecedingSlice = 0;
+    unsigned char neighborsInCurrentSlice = 0, neighborsInPrecedingSlice = 0;
     int currentSliceNeighborsShifts[4], precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
 
 	if (sixConnexity) //6-connexity
@@ -3324,7 +3324,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 				//we look if the cell has neighbors inside the slice
 				int* _slice = &(slice[cellIndex]);
 				{
-					for (uchar n=0; n<neighborsInCurrentSlice; n++)
+					for (unsigned char n=0; n<neighborsInCurrentSlice; n++)
 					{
 						assert(cellIndex+currentSliceNeighborsShifts[n] < sliceSize);
 						const int& neighborLabel = _slice[currentSliceNeighborsShifts[n]];
@@ -3336,7 +3336,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 				//and in the previous slice
 				const int* _oldSlice = &(oldSlice[cellIndex]);
 				{
-					for (uchar n=0; n<neighborsInPrecedingSlice; n++)
+					for (unsigned char n=0; n<neighborsInPrecedingSlice; n++)
 					{
 						assert(cellIndex+precedingSliceNeighborsShifts[n] < sliceSize);
 						const int& neighborLabel = _oldSlice[precedingSliceNeighborsShifts[n]];
@@ -3575,7 +3575,7 @@ struct octreeCellDesc
 {
 	DgmOctree::OctreeCellCodeType truncatedCode;
 	unsigned i1, i2;
-	uchar level;
+	unsigned char level;
 };
 
 static DgmOctree* s_octree_MT = 0;
@@ -3633,7 +3633,7 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 
 #endif
 
-unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
+unsigned DgmOctree::executeFunctionForAllCellsAtLevel(unsigned char level,
 														octreeCellFunc func,
 														void** additionalParameters,
 														bool multiThread/*=false*/,
@@ -3677,7 +3677,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 		cell.index = 0;
 
 		//binary shift for cell code truncation
-		uchar bitDec = GET_BIT_SHIFT(level);
+		unsigned char bitDec = GET_BIT_SHIFT(level);
 
 		//iterator on cell codes
 		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
@@ -3769,7 +3769,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 		assert(cells.capacity() == cellsNumber);
 
 		//binary shift for cell code truncation
-		uchar bitDec = GET_BIT_SHIFT(level);
+		unsigned char bitDec = GET_BIT_SHIFT(level);
 
 		//iterator on cell codes
 		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
@@ -3874,7 +3874,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 #define ENABLE_DOWN_TOP_TRAVERSAL
 #define ENABLE_DOWN_TOP_TRAVERSAL_MT
 
-unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLevel,
+unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char startingLevel,
 	octreeCellFunc func,
 	void** additionalParameters,
 	unsigned minNumberOfPointsPerCell,
@@ -3940,12 +3940,12 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLeve
 #endif
 
 		//binary shift for cell code truncation at current level
-		uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
+		unsigned char currentBitDec = GET_BIT_SHIFT(startingLevel);
 
 #ifdef ENABLE_DOWN_TOP_TRAVERSAL
 		bool firstSubCell = true;
 #else
-		uchar shallowSteps = 0;
+		unsigned char shallowSteps = 0;
 #endif
 
 		//pointer on the current octree element
@@ -4161,12 +4161,12 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(uchar startingLeve
 		cellDesc.level = startingLevel;
 
 		//binary shift for cell code truncation at current level
-		uchar currentBitDec = GET_BIT_SHIFT(startingLevel);
+		unsigned char currentBitDec = GET_BIT_SHIFT(startingLevel);
 
 #ifdef ENABLE_DOWN_TOP_TRAVERSAL_MT
 		bool firstSubCell = true;
 #else
-		uchar shallowSteps = 0;
+		unsigned char shallowSteps = 0;
 #endif
 		//pointer on the current octree element
 		cellsContainer::const_iterator startingElement = m_thePointsAndTheirCellCodes.begin();

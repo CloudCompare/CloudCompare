@@ -114,7 +114,9 @@ public:
 
 	//! Constructor
 	QuadricLocalModel(	const PointCoordinateType eq[6],
-						uchar X, uchar Y, uchar Z,
+						unsigned char X,
+						unsigned char Y,
+						unsigned char Z,
 						CCVector3 gravityCenter,
 						const CCVector3 &center,
 						PointCoordinateType squaredRadius)
@@ -146,11 +148,11 @@ protected:
 	//! Quadric equation
 	PointCoordinateType m_eq[6];
 	//! Height function first dimension (0=X, 1=Y, 2=Z)
-	uchar m_X;
+	unsigned char m_X;
 	//! Height function second dimension (0=X, 1=Y, 2=Z)
-	uchar m_Y;
+	unsigned char m_Y;
 	//! Height function third dimension (0=X, 1=Y, 2=Z)
-	uchar m_Z;
+	unsigned char m_Z;
 	//! Model gravity center
 	CCVector3 m_gravityCenter;
 

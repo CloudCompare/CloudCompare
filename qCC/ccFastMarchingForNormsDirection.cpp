@@ -67,7 +67,7 @@ static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
 											NormsIndexesTableType* theNorms,
 											CCLib::DgmOctree* theOctree,
-											uchar level)
+											unsigned char level)
 {
 	int result = initGridWithOctree(theOctree, level);
 	if (result < 0)
@@ -281,7 +281,7 @@ int ccFastMarchingForNormsDirection::propagate()
 }
 
 unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointCloud* theCloud,
-																GenericChunkedArray<1,uchar> &resolved,
+																GenericChunkedArray<1,unsigned char> &resolved,
 																NormsIndexesTableType* theNorms)
 {
 	if (!m_initialized || !m_octree || m_gridLevel > CCLib::DgmOctree::MAX_OCTREE_LEVEL)
@@ -361,7 +361,7 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 
 int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	ccPointCloud* theCloud,
 																				NormsIndexesTableType* theNorms,
-																				uchar octreeLevel,
+																				unsigned char octreeLevel,
 																				CCLib::GenericProgressCallback* progressCb,
 																				CCLib::DgmOctree* inputOctree)
 {
@@ -411,7 +411,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 	}
 
 	//flags indicating if each point has been processed or not
-	GenericChunkedArray<1,uchar>* resolved = new GenericChunkedArray<1,uchar>();
+	GenericChunkedArray<1,unsigned char>* resolved = new GenericChunkedArray<1,unsigned char>();
 	if (!resolved->resize(numberOfPoints,true,0)) //defaultResolvedValue = 0
 	{
 		ccLog::Warning("[ccFastMarchingForNormsDirection] Not enough memory!");

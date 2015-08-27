@@ -42,8 +42,8 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 	if (!cloud)
 		return 0;
 
-	uchar dim1 = (dim>0 ? dim-1 : 2);
-	uchar dim2 = (dim<2 ? dim+1 : 0);
+	unsigned char dim1 = (dim > 0 ? dim-1 : 2);
+	unsigned char dim2 = (dim < 2 ? dim+1 : 0);
 
 	unsigned count = cloud->size();
 
@@ -98,7 +98,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 }
 
 //deroule la liste sur un cone dont le centre est "center" et d'angle alpha en degres
-SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, uchar dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb)
+SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsigned char dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb)
 {
 	if (!cloud)
 		return 0;
@@ -109,8 +109,8 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, uchar
 	if (!outCloud->reserve(count)) //not enough memory
 		return 0;
 
-	uchar dim1 = (dim>0 ? dim-1 : 2);
-	uchar dim2 = (dim<2 ? dim+1 : 0);
+	unsigned char dim1 = (dim>0 ? dim-1 : 2);
+	unsigned char dim2 = (dim<2 ? dim+1 : 0);
 
 	float tan_alpha = tan(alpha*static_cast<float>(CC_DEG_TO_RAD));
 	//float cos_alpha = cos(alpha*CC_DEG_TO_RAD);

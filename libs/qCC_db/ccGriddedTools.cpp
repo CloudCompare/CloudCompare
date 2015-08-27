@@ -109,9 +109,9 @@ bool ccGriddedTools::ComputeNormals(ccPointCloud* cloud,
 								const CCVector3* gv = Z.getGravityCenter();
 								assert(gv);
 
-								const uchar& iX = dims.x;
-								const uchar& iY = dims.y;
-								const uchar& iZ = dims.z;
+								const unsigned char& iX = dims.x;
+								const unsigned char& iY = dims.y;
+								const unsigned char& iZ = dims.z;
 
 								PointCoordinateType lX = P->u[iX] - gv->u[iX];
 								PointCoordinateType lY = P->u[iY] - gv->u[iY];

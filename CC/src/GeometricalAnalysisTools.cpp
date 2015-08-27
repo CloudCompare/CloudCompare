@@ -59,7 +59,7 @@ int GeometricalAnalysisTools::computeCurvature(	GenericIndexedCloudPersist* theC
 
 	theCloud->enableScalarField();
 
-	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
 
 	//parameters
 	void* additionalParameters[2] = {	static_cast<void*>(&cType),
@@ -297,7 +297,7 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 	theCloud->enableScalarField();
 
 	//determine best octree level to perform the computation
-	uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(3);
+	unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(3);
 
 	//parameters
 	void* additionalParameters[] = { static_cast<void*>(&densityType) };
@@ -440,7 +440,7 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 	theCloud->enableScalarField();
 
 	//determine best octree level to perform the computation
-	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
 
 	//parameters
 	void* additionalParameters[] = {	static_cast<void*>(&kernelRadius),
@@ -529,7 +529,7 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 
 	theCloud->enableScalarField();
 
-	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
 
 	//parameters
 	void* additionalParameters[1] = { static_cast<void*>(&kernelRadius) };

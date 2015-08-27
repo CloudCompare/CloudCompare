@@ -207,7 +207,7 @@ public:
 
 				//we deduce the smallest bounding cell
 				static const double LOG_2 = log(2.0);
-				_currentCell->cellSize = (1 << (maxSize > 1 ? static_cast<uchar>(ceil(log(static_cast<double>(maxSize)) / LOG_2)) : 0));
+				_currentCell->cellSize = (1 << (maxSize > 1 ? static_cast<unsigned char>(ceil(log(static_cast<double>(maxSize)) / LOG_2)) : 0));
 
 				//now we can (recursively) find the intersecting cells
 				while (cellsToTestCount != 0)

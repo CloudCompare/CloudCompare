@@ -161,7 +161,7 @@ protected:
 		\param gridLevel subdivision level
 		\return a negative value if a problem occurred
 	**/
-	virtual int initGridWithOctree(DgmOctree* octree, uchar gridLevel);
+	virtual int initGridWithOctree(DgmOctree* octree, unsigned char gridLevel);
 
 	//! Intializes the grid with a given step and dimensions
 	/** \param step grid step
@@ -274,7 +274,7 @@ protected:
 	//! Associated octree
 	DgmOctree* m_octree;
 	//! Equivalent octree subdivision level
-	uchar m_gridLevel;
+	unsigned char m_gridLevel;
 	//! Octree cell size at equivalent subdivision level
 	float m_cellSize;
 	//! Octree min fill indexes at 'm_gridLevel'

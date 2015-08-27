@@ -46,7 +46,7 @@ public: //distance to clouds or meshes
 		//! Level of subdivision of the octree at witch to apply the distance computation algorithm
 		/** If set to 0 (default) the algorithm will try to guess the best level automatically.
 		**/
-		uchar octreeLevel;
+		unsigned char octreeLevel;
 
 		//! Maximum search distance (true distance won't be computed if greater)
 		/** Set to -1 to deactivate (default).
@@ -157,7 +157,7 @@ public: //distance to clouds or meshes
 	**/
 	static int computeCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
 											GenericIndexedMesh* theMesh,
-											uchar octreeLevel,
+											unsigned char octreeLevel,
 											ScalarType maxSearchDist = -1.0,
 											bool useDistanceMap = false,
 											bool signedDistances = false,
@@ -183,7 +183,7 @@ public: //approximate distances to clouds or meshes
 	**/
 	static int computeApproxCloud2CloudDistance(GenericIndexedCloudPersist* comparedCloud,
 												GenericIndexedCloudPersist* referenceCloud,
-												uchar octreeLevel,
+												unsigned char octreeLevel,
 												PointCoordinateType maxSearchDist = -PC_ONE,
 												GenericProgressCallback* progressCb = 0,
 												DgmOctree* compOctree = 0,
@@ -284,7 +284,7 @@ public: //other methods
 	**/
 	static bool computeGeodesicDistances(	GenericIndexedCloudPersist* cloud,
 											unsigned seedPointIndex,
-											uchar octreeLevel,
+											unsigned char octreeLevel,
 											GenericProgressCallback* progressCb = 0);
 
 	//! Computes the differences between two scalar fields associated to equivalent point clouds
@@ -336,7 +336,7 @@ protected:
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
 	static int intersectMeshWithOctree(	OctreeAndMeshIntersection* theIntersection,
-										uchar octreeLevel,
+										unsigned char octreeLevel,
 										GenericProgressCallback* progressCb = 0);
 
 	//! Computes the distances between a point cloud and a mesh projected into a grid structure
@@ -351,7 +351,7 @@ protected:
 		\return -1 if an error occurred (e.g. not enough memory) and 0 otherwise
 	**/
 	static int computeCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* theIntersection,
-													uchar octreeLevel,
+													unsigned char octreeLevel,
 													bool signedDistances,
 													bool flipTriangleNormals,
 													bool multiThread = false,

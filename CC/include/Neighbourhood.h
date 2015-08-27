@@ -270,7 +270,7 @@ class CC_CORE_LIB_API Neighbourhood
 		CCVector3 m_gravityCenter;
 		
 		//! Geometrical elements validity (flags)
-		uchar m_structuresValidity;
+		unsigned char m_structuresValidity;
 
 		//! Computes the gravity center
 		void computeGravityCenter();

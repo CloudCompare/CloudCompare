@@ -679,7 +679,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 	return true;
 }
 
-uchar ccGBLSensor::checkVisibility(const CCVector3& P) const
+unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 {
 	if (!m_depthBuffer.zBuff) //no z-buffer?
 		return POINT_VISIBLE;
@@ -1075,7 +1075,7 @@ int ccGBLSensor::DepthBuffer::fillHoles()
 			{
 				if (z[1] == 0) //hole
 				{
-					uchar nsup = 0; //non empty holes
+					unsigned char nsup = 0; //non empty holes
 					//upper line
 					nsup += (zu[0] > 0);
 					nsup += (zu[1] > 0);

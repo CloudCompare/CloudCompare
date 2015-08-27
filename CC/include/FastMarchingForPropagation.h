@@ -53,7 +53,7 @@ public:
 	**/
 	int init(GenericCloud* theCloud,
 				DgmOctree* theOctree,
-				uchar gridLevel,
+				unsigned char gridLevel,
 				bool constantAcceleration = false);
 
 	//! Returns a list of the points (references to) reached by the propagation process

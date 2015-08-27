@@ -77,7 +77,7 @@ bool AsciiSaveDlg::saveFloatColors() const
 	return m_ui->saveFloatColorsCheckBox->isChecked();
 }
 
-uchar AsciiSaveDlg::getSeparator() const
+unsigned char AsciiSaveDlg::getSeparator() const
 {
 	switch(m_ui->separatorComboBox->currentIndex())
 	{

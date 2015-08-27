@@ -268,18 +268,20 @@ DistanceComputationTools::SOReturnCode
 	comparedCloud->getBoundingBox(minsA,maxsA);
 	referenceCloud->getBoundingBox(minsB,maxsB);
 
-	CCVector3 maxD,minD;
 	//we compute the union of both bounding-boxes
-	for (uchar k=0; k<3; k++)
+	CCVector3 maxD,minD;
 	{
-		minD.u[k] = std::min(minsA.u[k],minsB.u[k]);
-		maxD.u[k] = std::max(maxsA.u[k],maxsB.u[k]);
+		for (unsigned char k=0; k<3; k++)
+		{
+			minD.u[k] = std::min(minsA.u[k],minsB.u[k]);
+			maxD.u[k] = std::max(maxsA.u[k],maxsB.u[k]);
+		}
 	}
 
 	if (maxDist >= 0)
 	{
 		//we reduce the bouding box to the intersection of both bounding-boxes enlarged by 'maxDist'
-		for (uchar k=0; k<3; k++)
+		for (unsigned char k=0; k<3; k++)
 		{
 			minD.u[k] = std::max(minD.u[k],std::max(minsA.u[k],minsB.u[k])-maxDist);
 			maxD.u[k] = std::min(maxD.u[k],std::min(maxsA.u[k],maxsB.u[k])+maxDist);
@@ -301,7 +303,7 @@ DistanceComputationTools::SOReturnCode
 	if (comparedOctree && comparedOctree->getNumberOfProjectedPoints() != 0)
 	{
 		needToRecalculateOctreeA = false;
-		for (uchar k=0; k<3; k++)
+		for (unsigned char k=0; k<3; k++)
 		{
 			if (	maxD.u[k] != comparedOctree->getOctreeMaxs().u[k]
 				||	minD.u[k] != comparedOctree->getOctreeMins().u[k] )
@@ -341,7 +343,7 @@ DistanceComputationTools::SOReturnCode
 	if (referenceOctree && referenceOctree->getNumberOfProjectedPoints() != 0)
 	{
 		needToRecalculateOctreeB = false;
-		for (uchar k=0; k<3; k++)
+		for (unsigned char k=0; k<3; k++)
 		{
 			if (	maxD.u[k] != referenceOctree->getOctreeMaxs().u[k]
 				||	minD.u[k] != referenceOctree->getOctreeMins().u[k] )
@@ -666,11 +668,11 @@ struct CellToTest
 	//! Cell size
 	int cellSize;
 	//! Subdivision level
-	uchar level;
+	unsigned char level;
 };
 
 int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection* intersection,
-														uchar octreeLevel,
+														unsigned char octreeLevel,
 														GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!intersection)
@@ -767,7 +769,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 			//(not a real octree cell in fact as its starting position is anywhere in the grid
 			//and it can even 'outbounds' the grid, i.e. currentCell.pos.u[k]+currentCell.cellSize > octreeLength)
 			static const double LOG_2 = log(2.0);
-			_currentCell->level = octreeLevel-(maxSize > 1 ? static_cast<uchar>(ceil(log(static_cast<double>(maxSize))/LOG_2)) : 0);
+			_currentCell->level = octreeLevel-(maxSize > 1 ? static_cast<unsigned char>(ceil(log(static_cast<double>(maxSize))/LOG_2)) : 0);
 			_currentCell->cellSize = (1 << (octreeLevel-_currentCell->level));
 
 			//now we can (recursively) find the intersecting cells
@@ -1251,7 +1253,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 #endif
 
 int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* intersection,
-																	uchar octreeLevel,
+																	unsigned char octreeLevel,
 																	bool signedDistances,
 																	bool flipTriangleNormals/*=false*/,
 																	bool multiThread/*=false*/,
@@ -1712,7 +1714,7 @@ inline void applySqrtToPointDist(const CCVector3 &aPoint, ScalarType& aScalarVal
 
 int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
 															GenericIndexedMesh* mesh,
-															uchar octreeLevel,
+															unsigned char octreeLevel,
 															ScalarType maxSearchDist,
 															bool useDistanceMap/*=false*/,
 															bool signedDistances/*=false*/,
@@ -1744,7 +1746,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		mesh->getBoundingBox(meshMinBB,meshMaxBB);
 
 		//max bounding-box (non-cubical)
-		for (uchar k=0; k<3; ++k)
+		for (unsigned char k=0; k<3; ++k)
 		{
 			minBB.u[k] = std::min(meshMinBB.u[k],cloudMinBB.u[k]);
 			maxBB.u[k] = std::max(meshMaxBB.u[k],cloudMaxBB.u[k]);
@@ -1770,7 +1772,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		//check the input octree dimensions
 		const CCVector3& theOctreeMins = octree->getOctreeMins();
 		const CCVector3& theOctreeMaxs = octree->getOctreeMaxs();
-		for (uchar k=0; k<3; ++k)
+		for (unsigned char k=0; k<3; ++k)
 		{
 			if (	theOctreeMins.u[k] != minCubifiedBB.u[k]
 				||	theOctreeMaxs.u[k] != maxCubifiedBB.u[k] )
@@ -1799,7 +1801,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	//we compute grid occupancy ... and we deduce the grid dimensions
 	Tuple3ui gridSize;
 	{
-		for (uchar k=0; k<3; ++k)
+		for (unsigned char k=0; k<3; ++k)
 		{
 			intersection.minFillIndexes.u[k] = static_cast<int>(floor((minBB.u[k]-minCubifiedBB.u[k])/cellSize));
 			intersection.maxFillIndexes.u[k] = static_cast<int>(floor((maxBB.u[k]-minCubifiedBB.u[k])/cellSize));
@@ -2241,7 +2243,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneDistance(CCLib::GenericCl
 	}
 }
 
-bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, uchar octreeLevel, GenericProgressCallback* progressCb)
+bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, unsigned char octreeLevel, GenericProgressCallback* progressCb)
 {
 	assert(cloud);
 
@@ -2317,7 +2319,7 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 
 int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCloudPersist* comparedCloud,
 																GenericIndexedCloudPersist* referenceCloud,
-																uchar octreeLevel,
+																unsigned char octreeLevel,
 																PointCoordinateType maxSearchDist/*=-PC_ONE*/,
 																GenericProgressCallback* progressCb/*=0*/,
 																DgmOctree* compOctree/*=0*/,

@@ -3125,8 +3125,8 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 									CCLib::GenericProgressCallback* progressCb/*=NULL*/)
 {
 	assert(dim <= 2);
-	uchar dim1 = (dim<2 ? dim+1 : 0);
-	uchar dim2 = (dim1<2 ? dim1+1 : 0);
+	unsigned char dim1 = (dim<2 ? dim+1 : 0);
+	unsigned char dim2 = (dim1<2 ? dim1+1 : 0);
 
 	unsigned numberOfPoints = size();
 
@@ -3201,8 +3201,8 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 								CCLib::GenericProgressCallback* progressCb/*=NULL*/)
 {
 	assert(dim < 3);
-	uchar dim1 = (dim<2 ? dim+1 : 0);
-	uchar dim2 = (dim1<2 ? dim1+1 : 0);
+	unsigned char dim1 = (dim<2 ? dim+1 : 0);
+	unsigned char dim2 = (dim1<2 ? dim1+1 : 0);
 
 	unsigned numberOfPoints = size();
 

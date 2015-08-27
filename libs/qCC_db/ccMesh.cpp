@@ -594,7 +594,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	}
 
 	//repeat Laplacian smoothing iterations
-	for(unsigned iter = 0; iter < nbIteration; iter++)
+	for (unsigned iter = 0; iter < nbIteration; iter++)
 	{
 		verticesDisplacement->fill(0);
 

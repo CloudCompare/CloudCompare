@@ -24,10 +24,18 @@
 #pragma warning( disable: 4530 )
 #endif
 
+#include "CCPlatform.h"
+
+//DGM: we don't really need to 'chunk' the memory on 64 bits architectures
+//But we keep this mechanism as it is handy when displaying entities!
+
 //Chunks can only be handled rapidly if their size is a power of 2
 #define CHUNK_INDEX_BIT_DEC 16 //2^14 = 16384 - 2^15 = 32768 - 2^16 = 65536
 static const unsigned MAX_NUMBER_OF_ELEMENTS_PER_CHUNK = (1<<CHUNK_INDEX_BIT_DEC);
+
+#ifndef CC_ENV_64
 static const unsigned ELEMENT_INDEX_BIT_MASK = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK-1;
+#endif
 
 #include "CCShareable.h"
 
@@ -84,9 +92,11 @@ public:
 	inline unsigned memory() const
 	{
 		return sizeof(GenericChunkedArray) 
-				+ N*capacity()*sizeof(ElementType)
+#ifndef CC_ENV_64
 				+ static_cast<unsigned>(m_theChunks.capacity())*sizeof(ElementType*)
-				+ static_cast<unsigned>(m_perChunkCount.capacity())*sizeof(unsigned);
+				+ static_cast<unsigned>(m_perChunkCount.capacity())*sizeof(unsigned)
+#endif
+				+ N*capacity()*sizeof(ElementType);
 	}
 
 	//! Clears the array
@@ -96,12 +106,16 @@ public:
 	{
 		if (releaseMemory)
 		{
+#ifdef CC_ENV_64
+			m_data.clear();
+#else
 			while (!m_theChunks.empty())
 			{
 				delete[] m_theChunks.back();
 				m_theChunks.pop_back();
 			}
 			m_perChunkCount.clear();
+#endif
 			m_capacity = 0;
 		}
 
@@ -116,26 +130,42 @@ public:
 	**/
 	void fill(const ElementType* fillValue = 0)
 	{
-		if (m_theChunks.empty())
+		if (capacity() == 0)
+		{
+			//nothing to do
 			return;
+		}
 
 		if (!fillValue)
 		{
 			//default fill value = 0
+#ifdef CC_ENV_64
+			ElementType zero = 0;
+			std::fill(m_data.begin(), m_data.end(), zero);
+#else
 			for (size_t i=0; i<m_theChunks.size(); ++i)
 				memset(m_theChunks[i],0,m_perChunkCount[i]*sizeof(ElementType)*N);
+#endif
 		}
 		else
 		{
 			//we initialize the first chunk properly
 			//with a recursive copy of N*2^k bytes (k=0,1,2,...)
+#ifdef CC_ENV_64
+			ElementType* _cDest = &(m_data.front());
+#else
 			ElementType* _cDest = m_theChunks.front();
+#endif
 			const ElementType* _cSrc = _cDest;
 			//we copy only the first element to init recurrence
 			memcpy(_cDest,fillValue,N*sizeof(ElementType));
 			_cDest += N;
 
+#ifdef CC_ENV_64
+			unsigned elemToFill = m_count;
+#else
 			unsigned elemToFill = m_perChunkCount[0];
+#endif
 			unsigned elemFilled = 1;
 			unsigned copySize = 1;
 
@@ -151,9 +181,11 @@ public:
 				copySize <<= 1;
 			}
 
+#ifndef CC_ENV_64
 			//then we simply have to copy the first chunk to the other ones
 			for (size_t i=1; i<m_theChunks.size(); ++i)
 				memcpy(m_theChunks[i],_cSrc,m_perChunkCount[i]*sizeof(ElementType)*N);
+#endif
 		}
 
 		//done
@@ -172,6 +204,19 @@ public:
 	**/
 	bool reserve(unsigned capacity)
 	{
+#ifdef CC_ENV_64
+		try
+		{
+			m_data.resize(capacity * N);
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			return false;
+		}
+
+		m_capacity = capacity;
+#else
 		while (m_capacity < capacity)
 		{
 			if (m_theChunks.empty() || m_perChunkCount.back() == MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
@@ -206,6 +251,7 @@ public:
 			m_perChunkCount.back() += capacityForThisChunk;
 			m_capacity += capacityForThisChunk;
 		}
+#endif
 
 		return true;
 	}
@@ -233,7 +279,8 @@ public:
 		{
 			if (!reserve(count))
 				return false;
-			//eventually we can fill it with a custom value
+
+			//eventually we can fill it with a custom value if necessary
 			if (initNewElements)
 			{
 				//m_capacity should be up-to-date after a call to 'reserve'
@@ -243,6 +290,19 @@ public:
 		}
 		else //last case: we have to reduce the array size
 		{
+#ifdef CC_ENV_64
+			try
+			{
+				m_data.resize(count * N); //shouldn't fail, smaller
+			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory
+				return false;
+			}
+		
+			m_capacity = count;
+#else
 			while (m_capacity > count)
 			{
 				//no (more) chunk?! we stop
@@ -278,6 +338,7 @@ public:
 					m_capacity -= spaceToFree;
 				}
 			}
+#endif
 		}
 
 		m_count = m_capacity;
@@ -286,13 +347,17 @@ public:
 	}
 
 	//! Removes unused capacity
-	inline void shrinkToFit() { if (currentSize() < capacity()) resize(currentSize()); }
+	inline void shrinkToFit()
+	{
+		if (currentSize() < capacity())
+			resize(currentSize());
+	}
 
 	//! Sets current size
 	/** WARNINGS:
-		- min and max boundaries may be modified (see 'computeMinAndMax').
+		- min and max boundaries may not be valid anymore (see GenericChunkedArray::computeMinAndMax).
 		- global iterator may be invalidated
-		\param size new size (should be inferior to m_capacity)
+		\param size new size (must be inferior to m_capacity)
 	**/
 	void setCurrentSize(unsigned size)
 	{
@@ -320,7 +385,7 @@ public:
 	inline void forwardIterator() { ++m_iterator; }
 
 	//! Returns the value currently pointed by the global iterator
-	/** Warning: the global iterator must have been previously initizialized
+	/** \warning The global iterator must have been previously initialized
 		(see GenericChunkedArray::placeIteratorAtBegining) and it shouldn't
 		be out of bounds.
 		\return a pointer to the current element.
@@ -335,20 +400,46 @@ public:
 	inline void addElement(const ElementType* newElement)
 	{
 		assert(m_count < m_capacity);
-		setValue(m_count++,newElement);
+		setValue(m_count++, newElement);
 	}
 
 	//! Returns the ith value stored in the array
 	/** \param index the index of the element to return
 		\return a pointer to the ith element
 	**/
-	inline ElementType* getValue(unsigned index) const { assert(index < m_capacity); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N); }
+	inline ElementType* getValue(unsigned index)
+	{
+		assert(index < m_capacity);
+#ifdef CC_ENV_64
+		return &(m_data[index * N]);
+#else
+		return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N);
+#endif
+	}
+
+	//! Returns the ith value stored in the array (const version)
+	/** \param index the index of the element to return
+		\return a pointer to the ith element
+	**/
+	inline const ElementType* getValue(unsigned index) const
+	{
+		assert(index < m_capacity);
+#ifdef CC_ENV_64
+		return &(m_data[index * N]);
+#else
+		return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N);
+#endif
+	}
 
 	//! Sets the value of the ith element
 	/** \param index the index of the element to update
 		\param value the new value for the element
 	**/
-	inline void setValue(unsigned index, const ElementType* value) { assert(index < m_capacity); memcpy(getValue(index),value,N*sizeof(ElementType)); }
+	inline void setValue(unsigned index, const ElementType* value)
+	{
+		assert(index < m_capacity);
+		memcpy(getValue(index), value, N*sizeof(ElementType));
+	}
 
 	//! Returns the element with the minimum value stored in the array
 	/** The computeMinAndMax method must be called prior to this one
@@ -436,14 +527,46 @@ public:
 		//}
 	}
 
+#ifdef CC_ENV_64
+	//! Returns a pointer on the (contiguous) data array
+	inline ElementType* data() { return &(m_data.front()); }
+
+	//! Returns a pointer on the (contiguous) data array (const version)
+	inline const ElementType* data() const { return &(m_data.front()); }
+#endif //!CC_ENV_64
+	
 	//! Returns the number of chunks
-	inline unsigned chunksCount() const { return static_cast<unsigned>(m_theChunks.size()); }
+	inline unsigned chunksCount() const
+	{
+#ifdef CC_ENV_64
+		//fake chunk count
+		return (m_count >> CHUNK_INDEX_BIT_DEC) + ((m_count & (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK-1)) ? 1 : 0);
+#else
+		return static_cast<unsigned>(m_theChunks.size());
+#endif
+	}
 
 	//! Returns the number of points in a given chunk
-	inline unsigned chunkSize(unsigned index) const { assert(index < static_cast<unsigned>(m_theChunks.size())); return m_perChunkCount[index]; }
+	inline unsigned chunkSize(unsigned index) const
+	{
+		assert(index < chunksCount());
+#ifdef CC_ENV_64
+		return  (index + 1 < chunksCount() ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : currentSize() % MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+#else
+		return m_perChunkCount[index];
+#endif
+	}
 
 	//! Returns the begining of a given chunk (pointer)
-	inline ElementType* chunkStartPtr(unsigned index) const { assert(index < static_cast<unsigned>(m_theChunks.size())); return m_theChunks[index]; }
+	inline ElementType* chunkStartPtr(unsigned index)
+	{
+		assert(index < chunksCount());
+#ifdef CC_ENV_64
+		return data() + (index * MAX_NUMBER_OF_ELEMENTS_PER_CHUNK * N);
+#else
+		return m_theChunks[index];
+#endif
+	}
 
 	//! Copy array data to another one
 	/** \param dest destination array (will be resize if necessary)
@@ -456,6 +579,9 @@ public:
 			return false;
 		
 		//copy content		
+#ifdef CC_ENV_64
+		std::copy(m_data.begin(),m_data.end(),dest.m_data.begin());
+#else
 		unsigned copyCount = 0;
 		assert(dest.m_theChunks.size() <= m_theChunks.size());
 		for (size_t i=0; i<dest.m_theChunks.size(); ++i)
@@ -465,6 +591,7 @@ public:
 			memcpy(dest.m_theChunks[i],m_theChunks[i],toCopyCount*sizeof(ElementType)*N);
 			copyCount += toCopyCount;
 		}
+#endif
 		return true;
 	}
 
@@ -475,11 +602,13 @@ protected:
 	**/
 	virtual ~GenericChunkedArray()
 	{
+#ifndef CC_ENV_64
 		while (!m_theChunks.empty())
 		{
 			delete[] m_theChunks.back();
 			m_theChunks.pop_back();
 		}
+#endif
 	}
 
 	//! Minimum values stored in array (along each dimension)
@@ -488,10 +617,16 @@ protected:
 	//! Maximum values stored in array (along each dimension)
 	ElementType m_maxVal[N];
 
+#ifdef CC_ENV_64
+	//! Data
+	std::vector<ElementType> m_data;
+#else
 	//! Arrays 'chunks'
 	std::vector<ElementType*> m_theChunks;
 	//! Elements per chunk
 	std::vector<unsigned> m_perChunkCount;
+#endif
+
 	//! Total number of elements
 	unsigned m_count;
 	//! Max total number of elements
@@ -543,9 +678,11 @@ public:
 	inline unsigned memory() const
 	{
 		return sizeof(GenericChunkedArray) 
-				+ capacity()*sizeof(ElementType)
+#ifndef CC_ENV_64
 				+ static_cast<unsigned>(m_theChunks.capacity())*sizeof(ElementType*)
-				+ static_cast<unsigned>(m_perChunkCount.capacity())*sizeof(unsigned);
+				+ static_cast<unsigned>(m_perChunkCount.capacity())*sizeof(unsigned)
+#endif
+				+ capacity()*sizeof(ElementType);
 	}
 	//! Clears the array
 	/** \param releaseMemory whether memory should be released or not (for quicker "refill")
@@ -554,12 +691,16 @@ public:
 	{
 		if (releaseMemory)
 		{
+#ifdef CC_ENV_64
+			m_data.clear();
+#else
 			while (!m_theChunks.empty())
 			{
 				delete[] m_theChunks.back();
 				m_theChunks.pop_back();
 			}
 			m_perChunkCount.clear();
+#endif
 			m_capacity = 0;
 		}
 
@@ -573,9 +714,15 @@ public:
 	**/
 	void fill(const ElementType& fillValue = 0)
 	{
-		if (m_theChunks.empty())
+		if (capacity() == 0)
+		{
+			//nothing to do
 			return;
+		}
 
+#ifdef CC_ENV_64
+		std::fill(m_data.begin(), m_data.end(), fillValue);
+#else
 		if (fillValue == 0)
 		{
 			//default fill value = 0
@@ -611,6 +758,7 @@ public:
 			for (size_t i=1; i<m_theChunks.size(); ++i)
 				memcpy(m_theChunks[i],_cSrc,m_perChunkCount[i]*sizeof(ElementType));
 		}
+#endif
 
 		//done
 		m_count = m_capacity;
@@ -628,6 +776,19 @@ public:
 	**/
 	bool reserve(unsigned capacity)
 	{
+#ifdef CC_ENV_64
+		try
+		{
+			m_data.resize(capacity);
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			return false;
+		}
+
+		m_capacity = capacity;
+#else
 		while (m_capacity < capacity)
 		{
 			if (m_theChunks.empty() || m_perChunkCount.back() == MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
@@ -662,7 +823,7 @@ public:
 			m_perChunkCount.back() += capacityForThisChunk;
 			m_capacity += capacityForThisChunk;
 		}
-
+#endif
 		return true;
 	}
 
@@ -699,6 +860,19 @@ public:
 		}
 		else //last case: we have to reduce the array size
 		{
+#ifdef CC_ENV_64
+			try
+			{
+				m_data.resize(count); //shouldn't fail, smaller
+			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory
+				return false;
+			}
+		
+			m_capacity = count;
+#else
 			while (m_capacity > count)
 			{
 				//no (more) chunk?! we stop
@@ -734,6 +908,7 @@ public:
 					m_capacity -= spaceToFree;
 				}
 			}
+#endif
 		}
 
 		m_count = m_capacity;
@@ -742,13 +917,17 @@ public:
 	}
 
 	//! Removes unused capacity
-	inline void shrinkToFit() { if (currentSize() < capacity()) resize(currentSize()); }
+	inline void shrinkToFit()
+	{
+		if (currentSize() < capacity())
+			resize(currentSize());
+	}
 
 	//! Sets current size
 	/** WARNINGS:
-		- min and max boundaries may be modified (see 'computeMinAndMax').
+		- min and max boundaries may not be valid anymore (see GenericChunkedArray::computeMinAndMax).
 		- global iterator may be invalidated
-		\param size new size (should be inferior to m_capacity)
+		\param size new size (must be inferior to m_capacity)
 	**/
 	void setCurrentSize(unsigned size)
 	{
@@ -765,7 +944,7 @@ public:
 	/** \param index an element index
 		\return pointer to the ith element.
 	**/
-	inline ElementType& operator[] (unsigned index) { assert(index < m_capacity); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK]; }
+	inline ElementType& operator[] (unsigned index) { return getValue(index); }
 
 	//***** data access *****//
 
@@ -789,7 +968,7 @@ public:
 		be out of bounds.
 		\return a pointer to the current element.
 	**/
-	inline ElementType* getCurrentValuePtr() { return &(*this)[m_iterator]; }
+	inline ElementType* getCurrentValuePtr() { return &(getValue(m_iterator)); }
 
 	//! Adds a new element to the array
 	/** Warning: the memory should have been previously reserved (see
@@ -806,13 +985,35 @@ public:
 	/** \param index the index of the element to return
 		\return a pointer to the ith element
 	**/
-	inline const ElementType& getValue(unsigned index) const { assert(index < m_capacity); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK]; }
+	inline ElementType& getValue(unsigned index)
+	{
+		assert(index < m_capacity);
+#ifdef CC_ENV_64
+		return m_data[index];
+#else
+		return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK];
+#endif
+	}
+
+	//! Returns the ith value stored in the array (const version)
+	/** \param index the index of the element to return
+		\return a pointer to the ith element
+	**/
+	inline const ElementType& getValue(unsigned index) const
+	{
+		assert(index < m_capacity);
+#ifdef CC_ENV_64
+		return m_data[index];
+#else
+		return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK];
+#endif
+	}
 
 	//! Sets the value of the ith element
 	/** \param index the index of the element to update
 		\param value the new value for the element
 	**/
-	inline void setValue(unsigned index, const ElementType& value) { (*this)[index]=value; }
+	inline void setValue(unsigned index, const ElementType& value) { getValue(index) = value; }
 
 	//! Returns the element with the minimum value stored in the array
 	/** The computeMinAndMax method must be called prior to this one
@@ -888,14 +1089,46 @@ public:
 		v2 = temp;
 	}
 
+#ifdef CC_ENV_64
+	//! Returns a pointer on the (contiguous) data array
+	inline ElementType* data() { return &(m_data.front()); }
+
+	//! Returns a pointer on the (contiguous) data array (const version)
+	inline const ElementType* data() const { return &(m_data.front()); }
+#endif //!CC_ENV_64
+
 	//! Returns the number of chunks
-	inline unsigned chunksCount() const { return static_cast<unsigned>(m_theChunks.size()); }
+	inline unsigned chunksCount() const
+	{
+#ifdef CC_ENV_64
+		//fake chunk count
+		return (m_count >> CHUNK_INDEX_BIT_DEC) + ((m_count & (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK-1)) ? 1 : 0);
+#else
+		return static_cast<unsigned>(m_theChunks.size());
+#endif
+	}
 
 	//! Returns the number of points in a given chunk
-	inline unsigned chunkSize(unsigned index) const { assert(index < m_theChunks.size()); return m_perChunkCount[index]; }
+	inline unsigned chunkSize(unsigned index) const
+	{
+		assert(index < chunksCount());
+#ifdef CC_ENV_64
+		return  (index + 1 < chunksCount() ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : currentSize() % MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+#else
+		return m_perChunkCount[index];
+#endif
+	}
 
 	//! Returns the begining of a given chunk (pointer)
-	inline ElementType* chunkStartPtr(unsigned index) const { assert(index < m_theChunks.size()); return m_theChunks[index]; }
+	inline ElementType* chunkStartPtr(unsigned index)
+	{
+		assert(index < chunksCount());
+#ifdef CC_ENV_64
+		return data() + (index * MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+#else
+		return m_theChunks[index];
+#endif
+	}
 
 	//! Copy array data to another one
 	/** \param dest destination array (will be resized if necessary)
@@ -908,6 +1141,9 @@ public:
 			return false;
 		
 		//copy content		
+#ifdef CC_ENV_64
+		std::copy(m_data.begin(),m_data.end(),dest.m_data.begin());
+#else
 		unsigned copyCount = 0;
 		assert(dest.m_theChunks.size() <= m_theChunks.size());
 		for (size_t i=0; i<dest.m_theChunks.size(); ++i)
@@ -917,6 +1153,7 @@ public:
 			memcpy(dest.m_theChunks[i],m_theChunks[i],toCopyCount*sizeof(ElementType));
 			copyCount += toCopyCount;
 		}
+#endif
 		return true;
 	}
 
@@ -927,11 +1164,13 @@ protected:
 	**/
 	virtual ~GenericChunkedArray()
 	{
+#ifndef CC_ENV_64
 		while (!m_theChunks.empty())
 		{
 			delete[] m_theChunks.back();
 			m_theChunks.pop_back();
 		}
+#endif
 	}
 
 	//! Minimum values stored in array (along each dimension)
@@ -940,10 +1179,16 @@ protected:
 	//! Maximum values stored in array (along each dimension)
 	ElementType m_maxVal;
 
+#ifdef CC_ENV_64
+	//! Data
+	std::vector<ElementType> m_data;
+#else
 	//! Arrays 'chunks'
 	std::vector<ElementType*> m_theChunks;
 	//! Elements per chunk
 	std::vector<unsigned> m_perChunkCount;
+#endif
+
 	//! Total number of elements
 	unsigned m_count;
 	//! Max total number of elements

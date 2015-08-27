@@ -343,7 +343,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			//we can scan and process each chunk separately in an optimized way
 			//we mimic the way ccMesh beahves by using virtual chunks!
-			unsigned chunks = static_cast<unsigned>(ceil((double)displayedTriNum/(double)MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
+			unsigned chunks = static_cast<unsigned>(ceil(static_cast<double>(displayedTriNum)/MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
 			unsigned chunkStart = 0;
 			const colorType* col = 0;
 			for (unsigned k=0; k<chunks; ++k, chunkStart += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)

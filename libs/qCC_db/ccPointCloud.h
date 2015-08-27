@@ -47,7 +47,7 @@ class LodStructThread;
 //! Maximum number of points (per cloud) displayed in a single LOD iteration
 /** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
 **/
-static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK * 10; //~ 650K
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 3); //~ 65K * 8 = 512K
 
 /***************************************************
 				ccPointCloud

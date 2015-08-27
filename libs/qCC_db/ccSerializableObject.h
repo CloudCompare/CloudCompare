@@ -165,21 +165,27 @@ public:
 			return ccSerializableObject::WriteError();
 
 		//array data (dataVersion>=20)
-		//--> we write each chunk as a block (faster)
-		while (elementCount!=0)
 		{
-			unsigned chunksCount = chunkArray.chunksCount();
-			for (unsigned i=0; i<chunksCount; ++i)
+#ifdef CC_ENV_64
+			if (out.write((const char*)chunkArray.data(),sizeof(ElementType)*N*chunkArray.currentSize()) < 0)
+				return ccSerializableObject::WriteError();
+#else
+			//--> we write each chunk as a block (faster)
+			while (elementCount != 0)
 			{
-				//DGM: since dataVersion>=22, we make sure to write as much items as declared in 'currentSize'!
-				unsigned toWrite = std::min<unsigned>(elementCount,chunkArray.chunkSize(i));
-				if (out.write((const char*)chunkArray.chunkStartPtr(i),sizeof(ElementType)*N*toWrite) < 0)
-					return ccSerializableObject::WriteError();
-				assert(toWrite <= elementCount);
-				elementCount -= toWrite;
+				unsigned chunksCount = chunkArray.chunksCount();
+				for (unsigned i=0; i<chunksCount; ++i)
+				{
+					//DGM: since dataVersion>=22, we make sure to write as much items as declared in 'currentSize'!
+					unsigned toWrite = std::min<unsigned>(elementCount,chunkArray.chunkSize(i));
+					if (out.write((const char*)chunkArray.chunkStartPtr(i),sizeof(ElementType)*N*toWrite) < 0)
+						return ccSerializableObject::WriteError();
+					assert(toWrite <= elementCount);
+					elementCount -= toWrite;
+				}
 			}
+#endif //CC_ENV_64
 		}
-
 		return true;
 	}
 
@@ -205,11 +211,18 @@ public:
 				return ccSerializableObject::MemoryError();
 
 			//array data (dataVersion>=20)
-			//--> we read each chunk as a block (faster)
-			unsigned chunksCount = chunkArray.chunksCount();
-			for (unsigned i=0; i<chunksCount; ++i)
-				if (in.read((char*)chunkArray.chunkStartPtr(i),sizeof(ElementType)*N*chunkArray.chunkSize(i)) < 0)
+			{
+#ifdef CC_ENV_64
+				if (in.read((char*)chunkArray.data(),sizeof(ElementType)*N*chunkArray.currentSize()) < 0)
 					return ccSerializableObject::ReadError();
+#else
+				//--> we read each chunk as a block (faster)
+				unsigned chunksCount = chunkArray.chunksCount();
+				for (unsigned i=0; i<chunksCount; ++i)
+					if (in.read((char*)chunkArray.chunkStartPtr(i),sizeof(ElementType)*N*chunkArray.chunkSize(i)) < 0)
+						return ccSerializableObject::ReadError();
+#endif //CC_ENV_64
+			}
 
 			//update array boundaries
 			chunkArray.computeMinAndMax();
@@ -243,6 +256,21 @@ public:
 			//--> saldy we can't read it as a block...
 			//we must convert each element, value by value!
 			FileElementType dummyArray[N] = {0};
+#ifdef CC_ENV_64
+			ElementType* data = chunkArray.data();
+			for (unsigned i=0; i<elementCount; ++i)
+			{
+				if (in.read((char*)dummyArray,sizeof(FileElementType)*N) >= 0)
+				{
+					for (unsigned k=0; k<N; ++k)
+						*data++ = static_cast<ElementType>(dummyArray[k]);
+				}
+				else
+				{
+					return ccSerializableObject::ReadError();
+				}
+			}
+#else
 			unsigned chunksCount = chunkArray.chunksCount();
 			for (unsigned i=0; i<chunksCount; ++i)
 			{
@@ -261,6 +289,7 @@ public:
 					}
 				}
 			}
+#endif //CC_ENV_64
 
 			//update array boundaries
 			chunkArray.computeMinAndMax();

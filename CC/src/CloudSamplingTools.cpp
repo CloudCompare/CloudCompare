@@ -280,8 +280,8 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		return 0;
 	}
 
-	GenericChunkedArray<1,bool>* markers = new GenericChunkedArray<1,bool>(); //DGM: upgraded from vector, as this can be quite huge!
-	if (!markers->resize(cloudSize,true,true))
+	GenericChunkedArray<1,char>* markers = new GenericChunkedArray<1,char>(); //DGM: upgraded from vector, as this can be quite huge!
+	if (!markers->resize(cloudSize,true,1)) //true by default
 	{
 		markers->release();
 		if (!inputOctree)
@@ -373,7 +373,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	for (unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
 	{
 		//no mark? we skip this point
-		if (markers->getCurrentValue())
+		if (markers->getCurrentValue() != 0)
 		{
 			//init neighbor search structure
 			const CCVector3* P = inputCloud->getPoint(i);
@@ -405,7 +405,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 				octree->getPointsInSphericalNeighbourhood(*P,minDistBetweenPoints,neighbours,octreeLevel);
 				for (DgmOctree::NeighboursSet::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
 					if (it->pointIndex != i)
-						markers->setValue(it->pointIndex,false);
+						markers->setValue(it->pointIndex,0);
 			}
 
 			//At this stage, the ith point is the only one marked in a radius of <minDistance>.

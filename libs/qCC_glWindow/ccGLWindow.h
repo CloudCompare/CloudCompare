@@ -36,6 +36,7 @@
 #include <QFont>
 #include <QMap>
 #include <QElapsedTimer>
+#include <QTimer>
 //#define THREADED_GL_WIDGET
 #ifdef THREADED_GL_WIDGET
 #include <QThread>
@@ -487,7 +488,7 @@ public:
 	inline bool isLODEnabled() const { return m_LODEnabled; }
 
 	//! Enables or disables LOD on this display
-	inline void setLODEnabled(bool state) { m_LODEnabled = state; }
+	inline void setLODEnabled(bool state, bool autoDisable = false) { m_LODEnabled = state; m_LODAutoDisable = autoDisable; }
 
 	//! Whether the middle-screen cross should be displayed or not
 	bool crossShouldBeDrawn() const;
@@ -519,6 +520,9 @@ protected slots:
 
 	//! Reacts to the itemPickedFast signal
 	void onItemPickedFast(int entityID, int subEntityID, int x, int y);
+
+	//! Checks for scheduled redraw
+	void checkScheduledRedraw();
 
 signals:
 
@@ -617,7 +621,7 @@ signals:
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject* obj);
 
-protected:
+protected: //methods
 
 	//! Processes the clickable items
 	/** \return true if an item has been clicked
@@ -783,21 +787,33 @@ protected:
 	//! Draws the 'hot zone' (+/- icons for point size), 'leave bubble-view' button, etc.
 	void drawClickableItems(int xStart, int& yStart);
 
-	//! Disables LOD rendering
-	void disableLOD();
+	//! Disables current LOD rendering cycle
+	void stopLODCycle();
 
 	// Releases all textures, GL lists, etc.
 	void uninitializeGL();
 
-	/***************************************************
-					OpenGL Extensions
-	***************************************************/
+	//! Schedules a full redraw
+	/** Any previously scheduled redraw will be cancelled.
+		\warning The redraw will be cancelled if redraw/updateGL is called before.
+		\param maxDelay_ms the maximum delay for the call to redraw (in ms)
+	**/
+	void scheduleFullRedraw(unsigned maxDelay_ms);
+
+	//! Cancels any scheduled redraw
+	/** See ccGLWindow::scheduleFullRedraw.
+	**/
+	void cancelScheduledRedraw();
+
+protected: //OpenGL Extensions
 
 	//! Loads OpenGL extensions
 	/** Wrapper around ccFBOUtils::InitGLEW.
 		\return success
 	**/
 	static bool InitGLEW();
+
+protected: //members
 
 	//! GL names picking buffer
 	GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];
@@ -840,6 +856,8 @@ protected:
 
 	//! Whether L.O.D. (level of detail) is enabled or not
 	bool m_LODEnabled;
+	//! Whether L.O.D. should be automatically disabled at the end of the rendering cycle
+	bool m_LODAutoDisable;
 	//! Whether the display should be refreshed on next call to 'refresh'
 	bool m_shouldBeRefreshed;
 	//! Whether the mouse (cursor) has moved after being pressed or not
@@ -1018,6 +1036,11 @@ protected:
 	bool m_touchInProgress;
 	//! Touch gesture initial distance
 	qreal m_touchBaseDist;
+
+	//! Scheduler timer
+	QTimer m_scheduleTimer;
+	//! Scheduled full redraw (no LOD)
+	qint64 m_scheduledFullRedrawTime;
 
 private:
 

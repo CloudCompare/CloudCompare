@@ -144,6 +144,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_glWidth(0)
 	, m_glHeight(0)
 	, m_LODEnabled(true)
+	, m_LODAutoDisable(false)
 	, m_shouldBeRefreshed(false)
 	, m_mouseMoved(false)
 	, m_mouseButtonPressed(false)
@@ -185,6 +186,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_LODPendingRefresh(false)
 	, m_touchInProgress(false)
 	, m_touchBaseDist(0)
+	, m_scheduledFullRedrawTime(0)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -267,7 +269,9 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
 	}
 
-	connect(this, SIGNAL(itemPickedFast(int,int,int,int)), this, SLOT(onItemPickedFast(int,int,int,int)), Qt::DirectConnection);
+	//singal/slot connections
+	connect(this,				SIGNAL(itemPickedFast(int,int,int,int)),	this, SLOT(onItemPickedFast(int,int,int,int)), Qt::DirectConnection);
+	connect(&m_scheduleTimer,	SIGNAL(timeout()),							this, SLOT(checkScheduledRedraw()));
 
 #ifdef THREADED_GL_WIDGET
 	setAutoBufferSwap(false);
@@ -282,6 +286,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 
 ccGLWindow::~ccGLWindow()
 {
+	cancelScheduledRedraw();
+
 #ifdef THREADED_GL_WIDGET
 	if (m_renderingThread)
 		m_renderingThread->stop();
@@ -902,7 +908,7 @@ void ccGLWindow::startFrameRateTest()
 						true,
 						3600);
 
-	disableLOD();
+	stopLODCycle();
 
 	//let's start
 	s_frameRateCurrentFrame = 0;
@@ -1129,7 +1135,7 @@ void ccGLWindow::redraw(bool only2D/*=false*/)
 		//reset current LOD cycle
 		m_LODPendingIgnore = true;
 		m_LODPendingRefresh = false;
-		disableLOD();
+		stopLODCycle();
 	}
 	
 	if (!only2D)
@@ -1167,6 +1173,12 @@ void ccGLWindow::paint()
 {
 #endif
 	qint64 startTime_ms = m_LODInProgress ? m_timer.elapsed() : 0;
+
+	if (m_scheduledFullRedrawTime)
+	{
+		//scheduled redraw is (almost) done
+		cancelScheduledRedraw();
+	}
 
 	bool doDraw3D = (	!m_fbo
 					||	(	(m_alwaysUseFBO && m_updateFBO)
@@ -1662,12 +1674,18 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 		else
 		{
 			//we reached the final level
-			disableLOD();
+			stopLODCycle();
+
+			if (m_LODAutoDisable)
+			{
+				setLODEnabled(false);
+			}
+
 		}
 	}
 }
 
-void ccGLWindow::disableLOD()
+void ccGLWindow::stopLODCycle()
 {
 	//reset LOD rendering (if any)
 	m_currentLODLevel = 0;
@@ -2928,7 +2946,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 	int dx = x - m_lastMousePos.x();
 	int dy = y - m_lastMousePos.y();
-	setLODEnabled(true);
+	setLODEnabled(true, false);
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -3150,7 +3168,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool mouseHasMoved = m_mouseMoved;
 	bool acceptEvent = false;
-	setLODEnabled(false);
+	setLODEnabled(false, false);
 
 	//reset to default state
 	m_mouseButtonPressed = false;
@@ -3341,7 +3359,10 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 		updateZoom(zoomFactor);
 	}
 
+	setLODEnabled(true, true);
 	redraw();
+
+	//scheduleFullRedraw(1000);
 }
 
 void ccGLWindow::startPicking(PickingParameters& params)
@@ -4665,7 +4686,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			CONTEXT.renderZoom = zoomFactor;
 
 			//just to be sure
-			disableLOD();
+			stopLODCycle();
 
 			//enable the FBO
 			fbo->start();
@@ -5085,4 +5106,28 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 
 	return CCVector3::fromArray(G);
 
+}
+
+void ccGLWindow::checkScheduledRedraw()
+{
+	if (m_scheduledFullRedrawTime && m_timer.elapsed() > m_scheduledFullRedrawTime)
+	{
+		redraw();
+	}
+}
+
+void ccGLWindow::cancelScheduledRedraw()
+{
+	m_scheduledFullRedrawTime = 0;
+	m_scheduleTimer.stop();
+}
+
+void ccGLWindow::scheduleFullRedraw(unsigned maxDelay_ms)
+{
+	m_scheduledFullRedrawTime = m_timer.elapsed() + maxDelay_ms;
+	
+	if (!m_scheduleTimer.isActive())
+	{
+		m_scheduleTimer.start(500);
+	}
 }

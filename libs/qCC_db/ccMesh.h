@@ -366,6 +366,9 @@ public:
 	**/
 	void swapTriangles(unsigned index1, unsigned index2);
 
+	//! Transforms the mesh per-triangle normals
+	void transformTriNormals(const ccGLMatrix& trans);
+
 protected:
 
 	//inherited from ccHObject

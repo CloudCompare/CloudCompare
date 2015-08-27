@@ -473,17 +473,25 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 	//transparent call
 	ccGenericMesh::applyGLTransformation(trans);
 
-	//vertices should be handled another way!
+	//we take care of per-triangle normals
+	//(vertices and per-vertex normals should be taken care of by the recursive call)
+	transformTriNormals(trans);
+}
 
+void ccMesh::transformTriNormals(const ccGLMatrix& trans)
+{
     //we must take care of the triangle normals!
 	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_TYPES::MESH)))
     {
         bool recoded = false;
 
-        //if there is more triangle normals than the size of the compressed
-		//normals array, we recompress the array instead of recompressing each normal
 		unsigned numTriNormals = m_triNormals->currentSize();
-        if (numTriNormals>ccNormalVectors::GetNumberOfVectors())
+
+#if 0 //no use to use memory for this!
+
+        //if there are more triangle normals than the size of the compressed
+		//normals array, we recompress the array instead of recompressing each normal
+        if (numTriNormals > ccNormalVectors::GetNumberOfVectors())
         {
             NormsIndexesTableType* newNorms = new NormsIndexesTableType;
             if (newNorms->reserve(ccNormalVectors::GetNumberOfVectors()))
@@ -515,12 +523,12 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 			newNorms = 0;
         }
 
-        //if there is less triangle normals than the compressed normals array size
+        //if there are less triangle normals than the compressed normals array size
         //(or if there is not enough memory to instantiate the temporary array),
 		//we recompress each normal ...
         if (!recoded)
+#endif
         {
-            //on recode direct chaque normale
             m_triNormals->placeIteratorAtBegining();
             for (unsigned i=0; i<numTriNormals; i++)
             {
@@ -531,10 +539,6 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
                 m_triNormals->forwardIterator();
             }
         }
-	}
-	else
-	{
-		//TODO: process failed!
 	}
 }
 

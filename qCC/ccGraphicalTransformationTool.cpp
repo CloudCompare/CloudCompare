@@ -337,16 +337,23 @@ void ccGraphicalTransformationTool::apply()
 	for (unsigned i=0; i<m_toTransform.getChildrenNumber(); ++i)
 	{
 		ccHObject* toTransform = m_toTransform.getChild(i);
-		//if (m_toTransform.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
-		//{
-		//}
 		toTransform->setGLTransformation(correctedFinalTrans);
 
-		//DGM: warning, applyGLTransformation may delete associated octree!
+		//DGM: warning, applyGLTransformation may delete the associated octree!
 		MainWindow::ccHObjectContext objContext = MainWindow::TheInstance()->removeObjectTemporarilyFromDBTree(toTransform);
 		toTransform->applyGLTransformation_recursive();
 		toTransform->prepareDisplayForRefresh_recursive();
 		MainWindow::TheInstance()->putObjectBackIntoDBTree(toTransform,objContext);
+
+		//specif case: if the object is a mesh vertices set, we may have to update the mesh normals!
+		if (toTransform->isA(CC_TYPES::POINT_CLOUD) && toTransform->getParent() && toTransform->getParent()->isKindOf(CC_TYPES::MESH))
+		{
+			ccMesh* mesh = static_cast<ccMesh*>(toTransform->getParent());
+			if (mesh->hasTriNormals() && !m_toTransform.isAncestorOf(mesh))
+			{
+				mesh->transformTriNormals(correctedFinalTrans);
+			}
+		}
 	}
 
 	stop(true);

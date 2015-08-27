@@ -370,7 +370,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 	if (dataVersion < 20)
 		return CorruptError();
 
-	//name (dataVersion>=20)
+	//name (dataVersion >= 20)
 	if (in.read(m_name,256) < 0)
 		return ReadError();
 
@@ -382,7 +382,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 			return ReadError();
 	}
 
-	//data (dataVersion>=20)
+	//data (dataVersion >= 20)
 	bool result = false;
 	{
 		bool fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
@@ -407,7 +407,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 	{
 		const ScalarType FORMER_BIG_VALUE = static_cast<ScalarType>(sqrt(3.4e38f)-1.0f);
 
-		for (unsigned i=0; i<m_maxCount; ++i)
+		for (unsigned i=0; i<currentSize(); ++i)
 		{
 			ScalarType val = getValue(i);
 			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'

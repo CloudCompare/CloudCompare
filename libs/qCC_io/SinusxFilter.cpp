@@ -395,7 +395,8 @@ CC_FILE_ERROR SinusxFilter::loadFile(QString filename, ccHObject& container, Loa
 							if (ok)
 							{
 								//resize vertex cloud if necessary
-								if (currentVertices->size() == currentVertices->capacity() && !currentVertices->reserve(currentVertices->size() + 10))
+								if (	currentVertices->size() == currentVertices->capacity()
+									&&	!currentVertices->reserve(currentVertices->size() + 10))
 								{
 									delete currentPoly;
 									return CC_FERR_NOT_ENOUGH_MEMORY;
@@ -434,7 +435,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(QString filename, ccHObject& container, Loa
 	{
 		if (	currentVertices
 			&&	currentVertices->size() != 0
-			&& currentVertices->resize(currentVertices->size())
+			&&	currentVertices->resize(currentVertices->size())
 			&&	currentPoly->addPointIndex(0,currentVertices->size()) )
 		{
 			container.addChild(currentPoly);

@@ -96,27 +96,27 @@ const CCVector3* ChunkedPointCloud::getNextPoint()
 	return (m_currentPointIndex < m_points->currentSize() ? point(m_currentPointIndex++) : 0);
 }
 
-bool ChunkedPointCloud::resize(unsigned newNumberOfPoints)
+bool ChunkedPointCloud::resize(unsigned newCount)
 {
-	unsigned oldNumberOfPoints = m_points->currentSize();
+	unsigned oldCount = m_points->currentSize();
 
 	//we try to enlarge the 3D points array
-	if (!m_points->resize(newNumberOfPoints))
+	if (!m_points->resize(newCount))
 		return false;
 
 	//then the scalar fields
 	for (size_t i=0; i<m_scalarFields.size(); ++i)
 	{
-		if (!m_scalarFields[i]->resize(newNumberOfPoints))
+		if (!m_scalarFields[i]->resize(newCount))
 		{
 			//if something fails, we restore the previous size for already processed SFs!
 			for (size_t j=0; j<i; ++j)
 			{
-				m_scalarFields[j]->resize(oldNumberOfPoints);
+				m_scalarFields[j]->resize(oldCount);
 				m_scalarFields[j]->computeMinAndMax();
 			}
-			//we can assume that newNumberOfPoints > oldNumberOfPoints, so it should always be ok
-			m_points->resize(oldNumberOfPoints);
+			//we can assume that newCount > oldNumberOfPoints, so it should always be ok
+			m_points->resize(oldCount);
 			return false;
 		}
 		m_scalarFields[i]->computeMinAndMax();
@@ -125,21 +125,21 @@ bool ChunkedPointCloud::resize(unsigned newNumberOfPoints)
 	return true;
 }
 
-bool ChunkedPointCloud::reserve(unsigned newNumberOfPoints)
+bool ChunkedPointCloud::reserve(unsigned newCapacity)
 {
 	//we try to enlarge the 3D points array
-	if (!m_points->reserve(newNumberOfPoints))
+	if (!m_points->reserve(newCapacity))
 		return false;
 
 	//then the scalar fields
 	for (size_t i=0; i<m_scalarFields.size(); ++i)
 	{
-		if (!m_scalarFields[i]->reserve(newNumberOfPoints))
+		if (!m_scalarFields[i]->reserve(newCapacity))
 			return false;
 	}
 
 	//double check
-	return m_points->capacity() >= newNumberOfPoints;
+	return m_points->capacity() >= newCapacity;
 }
 
 void ChunkedPointCloud::addPoint(const CCVector3 &P)

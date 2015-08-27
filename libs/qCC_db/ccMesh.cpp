@@ -1241,7 +1241,7 @@ unsigned ccMesh::size() const
 	return m_triVertIndexes->currentSize();
 }
 
-unsigned ccMesh::maxSize() const
+unsigned ccMesh::capacity() const
 {
 	return m_triVertIndexes->capacity();
 }
@@ -3375,9 +3375,9 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 	else
 	{
 		//we will add one triangle, so we must be sure to have enough memory
-		if (size() == maxSize())
+		if (size() == capacity())
 		{
-			if (!reserve(size()+3*s_defaultSubdivideGrowRate))
+			if (!reserve(size() + 3*s_defaultSubdivideGrowRate))
 			{
 				ccLog::Error("[ccMesh::pushSubdivide] Not enough memory!");
 				return false;
@@ -3590,10 +3590,8 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 
 	s_alreadyCreatedVertices.clear();
 
-	if (resultMesh->size() < resultMesh->maxSize())
-		resultMesh->resize(resultMesh->size());
-	if (resultVertices->size() < resultVertices->capacity())
-		resultVertices->resize(resultVertices->size());
+	resultMesh->shrinkToFit();
+	resultVertices->shrinkToFit();
 
 	//we import from the original mesh... what we can
 	if (hasNormals())

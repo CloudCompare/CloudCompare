@@ -52,7 +52,7 @@ public:
 	GenericChunkedArray()
 		: CCShareable()
 		, m_count(0)
-		, m_maxCount(0)
+		, m_capacity(0)
 		, m_iterator(0)
 	{
 		memset(m_minVal,0,sizeof(ElementType)*N);
@@ -69,7 +69,7 @@ public:
 	/** This is the total (reserved) size, not only the number of inserted elements
 		\return the number of elements that can be stored in this array
 	**/
-	inline unsigned capacity() const { return m_maxCount; }
+	inline unsigned capacity() const { return m_capacity; }
 
 	//! Specifies if the array has been initialized or not
 	/** The array is initialized after a call to reserve or resize (with at least one element).
@@ -102,7 +102,7 @@ public:
 				m_theChunks.pop_back();
 			}
 			m_perChunkCount.clear();
-			m_maxCount = 0;
+			m_capacity = 0;
 		}
 
 		m_count = 0;
@@ -122,7 +122,7 @@ public:
 		if (!fillValue)
 		{
 			//default fill value = 0
-			for (unsigned i=0; i<m_theChunks.size(); ++i)
+			for (size_t i=0; i<m_theChunks.size(); ++i)
 				memset(m_theChunks[i],0,m_perChunkCount[i]*sizeof(ElementType)*N);
 		}
 		else
@@ -157,7 +157,7 @@ public:
 		}
 
 		//done
-		m_count = m_maxCount;
+		m_count = m_capacity;
 	}
 
 	//****** memory allocators ******//
@@ -167,12 +167,12 @@ public:
 		that will be inserted later (see GenericChunkedArray::addElement).
 		If the new number of elements is smaller than the actual one,
 		nothing happens.
-		\param newNumberOfElements the new number of elements
+		\param capacity the new number of elements
 		\return true if the method succeeds, false otherwise
 	**/
-	bool reserve(unsigned newNumberOfElements)
+	bool reserve(unsigned capacity)
 	{
-		while (m_maxCount<newNumberOfElements)
+		while (m_capacity < capacity)
 		{
 			if (m_theChunks.empty() || m_perChunkCount.back() == MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
 			{
@@ -181,15 +181,15 @@ public:
 			}
 
 			//the number of new elements that we want to reserve
-			unsigned newNumberOfElementsForThisChunk = newNumberOfElements-m_maxCount;
+			unsigned capacityForThisChunk = capacity - m_capacity;
 			//free room left in the current chunk
 			unsigned freeSpaceInThisChunk = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK-m_perChunkCount.back();
 			//of course, we can't take more than that...
-			if (freeSpaceInThisChunk < newNumberOfElementsForThisChunk)
-				newNumberOfElementsForThisChunk = freeSpaceInThisChunk;
+			if (freeSpaceInThisChunk < capacityForThisChunk)
+				capacityForThisChunk = freeSpaceInThisChunk;
 
 			//let's reallocate the chunk
-			void* newTable = realloc(m_theChunks.back(),(m_perChunkCount.back()+newNumberOfElementsForThisChunk)*N*sizeof(ElementType));
+			void* newTable = realloc(m_theChunks.back(),(m_perChunkCount.back()+capacityForThisChunk)*N*sizeof(ElementType));
 			//not enough memory?!
 			if (!newTable)
 			{
@@ -203,8 +203,8 @@ public:
 			}
 			//otherwise we update current structure
 			m_theChunks.back() = (ElementType*)newTable;
-			m_perChunkCount.back() += newNumberOfElementsForThisChunk;
-			m_maxCount += newNumberOfElementsForThisChunk;
+			m_perChunkCount.back() += capacityForThisChunk;
+			m_capacity += capacityForThisChunk;
 		}
 
 		return true;
@@ -216,49 +216,49 @@ public:
 		the array is filled with blank values (warning, the GenericChunkedArray::addElement
 		method will insert values after the new ones, use the GenericChunkedArray::setValue
 		method instead).
-		\param newNumberOfElements the new number of n-uplets
+		\param count the new number of elements
 		\param initNewElements specifies if the new elements should be initialized with a specific value (in this case, the last parameter shouldn't be 0)
 		\param valueForNewElements the default value for the new elements (only necessary if the previous parameter is true)
 		\return true if the method succeeds, false otherwise
 	**/
-	bool resize(unsigned newNumberOfElements, bool initNewElements = false, const ElementType* valueForNewElements = 0)
+	bool resize(unsigned count, bool initNewElements = false, const ElementType* valueForNewElements = 0)
 	{
 		//if the new size is 0, we can simply clear the array!
-		if (newNumberOfElements == 0)
+		if (count == 0)
 		{
 			clear();
 		}
 		//otherwise if we need to enlarge the array we must 'reserve' some memory
-		else if (newNumberOfElements > m_maxCount)
+		else if (count > m_capacity)
 		{
-			if (!reserve(newNumberOfElements))
+			if (!reserve(count))
 				return false;
 			//eventually we can fill it with a custom value
 			if (initNewElements)
 			{
-				//m_maxCount should be up-to-date after a call to 'reserve'
-				for (unsigned i=m_count; i<m_maxCount; ++i)
+				//m_capacity should be up-to-date after a call to 'reserve'
+				for (unsigned i=m_count; i<m_capacity; ++i)
 					setValue(i,valueForNewElements);
 			}
 		}
 		else //last case: we have to reduce the array size
 		{
-			while (m_maxCount > newNumberOfElements)
+			while (m_capacity > count)
 			{
 				//no (more) chunk?! we stop
 				if (m_perChunkCount.empty())
 					return true;
 
 				//number of elements to remove
-				unsigned spaceToFree = m_maxCount-newNumberOfElements;
+				unsigned spaceToFree = m_capacity - count;
 				//number of elements in this chunk
 				unsigned numberOfElementsForThisChunk = m_perChunkCount.back();
 
 				//if there's more elements to remove than elements in this chunk
-				if (spaceToFree>=numberOfElementsForThisChunk)
+				if (spaceToFree >= numberOfElementsForThisChunk)
 				{
 					//simply remove the chunk
-					m_maxCount -= numberOfElementsForThisChunk;
+					m_capacity -= numberOfElementsForThisChunk;
 					delete m_theChunks.back();
 					m_theChunks.pop_back();
 					m_perChunkCount.pop_back();
@@ -275,25 +275,28 @@ public:
 						return false;
 					m_theChunks.back() = static_cast<ElementType*>(newTable);
 					m_perChunkCount.back() = numberOfElementsForThisChunk;
-					m_maxCount -= spaceToFree;
+					m_capacity -= spaceToFree;
 				}
 			}
 		}
 
-		m_count = m_maxCount;
+		m_count = m_capacity;
 
 		return true;
 	}
+
+	//! Removes unused capacity
+	inline void shrinkToFit() { if (currentSize() < capacity()) resize(currentSize()); }
 
 	//! Sets current size
 	/** WARNINGS:
 		- min and max boundaries may be modified (see 'computeMinAndMax').
 		- global iterator may be invalidated
-		\param size new size (should be inferior to m_maxCount)
+		\param size new size (should be inferior to m_capacity)
 	**/
 	void setCurrentSize(unsigned size)
 	{
-		if (size > m_maxCount)
+		if (size > m_capacity)
 		{
 			assert(false);
 			return;
@@ -331,7 +334,7 @@ public:
 	**/
 	inline void addElement(const ElementType* newElement)
 	{
-		assert(m_count < m_maxCount);
+		assert(m_count < m_capacity);
 		setValue(m_count++,newElement);
 	}
 
@@ -339,13 +342,13 @@ public:
 	/** \param index the index of the element to return
 		\return a pointer to the ith element
 	**/
-	inline ElementType* getValue(unsigned index) const { assert(index < m_maxCount); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N); }
+	inline ElementType* getValue(unsigned index) const { assert(index < m_capacity); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N); }
 
 	//! Sets the value of the ith element
 	/** \param index the index of the element to update
 		\param value the new value for the element
 	**/
-	inline void setValue(unsigned index, const ElementType* value) { assert(index < m_maxCount); memcpy(getValue(index),value,N*sizeof(ElementType)); }
+	inline void setValue(unsigned index, const ElementType* value) { assert(index < m_capacity); memcpy(getValue(index),value,N*sizeof(ElementType)); }
 
 	//! Returns the element with the minimum value stored in the array
 	/** The computeMinAndMax method must be called prior to this one
@@ -455,7 +458,7 @@ public:
 		//copy content		
 		unsigned copyCount = 0;
 		assert(dest.m_theChunks.size() <= m_theChunks.size());
-		for (unsigned i=0; i<dest.m_theChunks.size(); ++i)
+		for (size_t i=0; i<dest.m_theChunks.size(); ++i)
 		{
 			unsigned toCopyCount = std::min<unsigned>(count-copyCount,m_perChunkCount[i]);
 			assert(dest.m_perChunkCount[i] >= toCopyCount);
@@ -492,7 +495,7 @@ protected:
 	//! Total number of elements
 	unsigned m_count;
 	//! Max total number of elements
-	unsigned m_maxCount;
+	unsigned m_capacity;
 
 	//! Iterator
 	unsigned m_iterator;
@@ -511,7 +514,7 @@ public:
 		, m_minVal(0)
 		, m_maxVal(0)
 		, m_count(0)
-		, m_maxCount(0)
+		, m_capacity(0)
 		, m_iterator(0)
 	{}
 
@@ -525,7 +528,7 @@ public:
 	/** This is the total (reserved) size, not only the number of inserted elements
 		\return the number of elements that can be stored in this array
 	**/
-	inline unsigned capacity() const { return m_maxCount; }
+	inline unsigned capacity() const { return m_capacity; }
 
 	//! Specifies if the array has been initialized or not
 	/** The array is initialized after a call to reserve or resize (with at least one element).
@@ -557,7 +560,7 @@ public:
 				m_theChunks.pop_back();
 			}
 			m_perChunkCount.clear();
-			m_maxCount = 0;
+			m_capacity = 0;
 		}
 
 		m_count = 0;
@@ -576,7 +579,7 @@ public:
 		if (fillValue == 0)
 		{
 			//default fill value = 0
-			for (unsigned i=0; i<m_theChunks.size(); ++i)
+			for (size_t i=0; i<m_theChunks.size(); ++i)
 				memset(m_theChunks[i],0,m_perChunkCount[i]*sizeof(ElementType));
 		}
 		else
@@ -593,7 +596,7 @@ public:
 			unsigned copySize = 1;
 
 			//recurrence
-			while (elemFilled<elemToFill)
+			while (elemFilled < elemToFill)
 			{
 				unsigned cs = elemToFill-elemFilled;
 				if (copySize < cs)
@@ -610,7 +613,7 @@ public:
 		}
 
 		//done
-		m_count = m_maxCount;
+		m_count = m_capacity;
 	}
 
 	//****** memory allocators ******//
@@ -620,12 +623,12 @@ public:
 		that will be inserted later (see GenericChunkedArray::addElement).
 		If the new number of elements is smaller than the actual one,
 		nothing happens.
-		\param newNumberOfElements the new number of elements
+		\param capacity the new number of elements
 		\return true if the method succeeds, false otherwise
 	**/
-	bool reserve(unsigned newNumberOfElements)
+	bool reserve(unsigned capacity)
 	{
-		while (m_maxCount < newNumberOfElements)
+		while (m_capacity < capacity)
 		{
 			if (m_theChunks.empty() || m_perChunkCount.back() == MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
 			{
@@ -634,15 +637,15 @@ public:
 			}
 
 			//the number of new elements that we want to reserve
-			unsigned newNumberOfElementsForThisChunk = newNumberOfElements - m_maxCount;
+			unsigned capacityForThisChunk = capacity - m_capacity;
 			//free room left in the current chunk
 			unsigned freeSpaceInThisChunk = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK - m_perChunkCount.back();
 			//of course, we can't take more than that...
-			if (freeSpaceInThisChunk < newNumberOfElementsForThisChunk)
-				newNumberOfElementsForThisChunk = freeSpaceInThisChunk;
+			if (freeSpaceInThisChunk < capacityForThisChunk)
+				capacityForThisChunk = freeSpaceInThisChunk;
 
 			//let's reallocate the chunk
-			void* newTable = realloc(m_theChunks.back(),(m_perChunkCount.back()+newNumberOfElementsForThisChunk)*sizeof(ElementType));
+			void* newTable = realloc(m_theChunks.back(),(m_perChunkCount.back()+capacityForThisChunk)*sizeof(ElementType));
 			//not enough memory?!
 			if (!newTable)
 			{
@@ -656,8 +659,8 @@ public:
 			}
 			//otherwise we update current structure
 			m_theChunks.back() = static_cast<ElementType*>(newTable);
-			m_perChunkCount.back() += newNumberOfElementsForThisChunk;
-			m_maxCount += newNumberOfElementsForThisChunk;
+			m_perChunkCount.back() += capacityForThisChunk;
+			m_capacity += capacityForThisChunk;
 		}
 
 		return true;
@@ -669,41 +672,41 @@ public:
 		the array is filled with blank values (warning, the GenericChunkedArray::addElement
 		method will insert values after the new ones, use the GenericChunkedArray::setValue
 		method instead).
-		\param newNumberOfElements the new number of n-uplets
+		\param count the new number of elements
 		\param initNewElements specifies if the new elements should be initialized with a specific value (in this case, the last parameter shouldn't be 0)
 		\param valueForNewElements the default value for the new elements (only necessary if the previous parameter is true)
 		\return true if the method succeeds, false otherwise
 	**/
-	bool resize(unsigned newNumberOfElements, bool initNewElements = false, const ElementType& valueForNewElements = 0)
+	bool resize(unsigned count, bool initNewElements = false, const ElementType& valueForNewElements = 0)
 	{
 		//if the new size is 0, we can simply clear the array!
-		if (newNumberOfElements == 0)
+		if (count == 0)
 		{
 			clear();
 		}
 		//otherwise if we need to enlarge the array we must 'reserve' some memory
-		else if (newNumberOfElements>m_maxCount)
+		else if (count > m_capacity)
 		{
-			if (!reserve(newNumberOfElements))
+			if (!reserve(count))
 				return false;
 			//eventually we can fill it with a custom value
 			if (initNewElements)
 			{
-				//m_maxCount should be up-to-date after a call to 'reserve'
-				for (unsigned i=m_count; i<m_maxCount; ++i)
+				//m_capacity should be up-to-date after a call to 'reserve'
+				for (unsigned i=m_count; i<m_capacity; ++i)
 					setValue(i,valueForNewElements);
 			}
 		}
 		else //last case: we have to reduce the array size
 		{
-			while (m_maxCount > newNumberOfElements)
+			while (m_capacity > count)
 			{
 				//no (more) chunk?! we stop
 				if (m_perChunkCount.empty())
 					return true;
 
 				//number of elements to remove
-				unsigned spaceToFree = m_maxCount-newNumberOfElements;
+				unsigned spaceToFree = m_capacity-count;
 				//number of elements in this chunk
 				unsigned numberOfElementsForThisChunk = m_perChunkCount.back();
 
@@ -711,7 +714,7 @@ public:
 				if (spaceToFree >= numberOfElementsForThisChunk)
 				{
 					//simply remove the chunk
-					m_maxCount -= numberOfElementsForThisChunk;
+					m_capacity -= numberOfElementsForThisChunk;
 					delete m_theChunks.back();
 					m_theChunks.pop_back();
 					m_perChunkCount.pop_back();
@@ -728,25 +731,28 @@ public:
 						return false;
 					m_theChunks.back() = static_cast<ElementType*>(newTable);
 					m_perChunkCount.back() = numberOfElementsForThisChunk;
-					m_maxCount -= spaceToFree;
+					m_capacity -= spaceToFree;
 				}
 			}
 		}
 
-		m_count = m_maxCount;
+		m_count = m_capacity;
 
 		return true;
 	}
+
+	//! Removes unused capacity
+	inline void shrinkToFit() { if (currentSize() < capacity()) resize(currentSize()); }
 
 	//! Sets current size
 	/** WARNINGS:
 		- min and max boundaries may be modified (see 'computeMinAndMax').
 		- global iterator may be invalidated
-		\param size new size (should be inferior to m_maxCount)
+		\param size new size (should be inferior to m_capacity)
 	**/
 	void setCurrentSize(unsigned size)
 	{
-		if (size > m_maxCount)
+		if (size > m_capacity)
 		{
 			assert(false);
 			return;
@@ -759,7 +765,7 @@ public:
 	/** \param index an element index
 		\return pointer to the ith element.
 	**/
-	inline ElementType& operator[] (unsigned index) { assert(index < m_maxCount); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK]; }
+	inline ElementType& operator[] (unsigned index) { assert(index < m_capacity); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK]; }
 
 	//***** data access *****//
 
@@ -792,7 +798,7 @@ public:
 	**/
 	inline void addElement(const ElementType& newElement)
 	{
-		assert(m_count < m_maxCount);
+		assert(m_count < m_capacity);
 		setValue(m_count++,newElement);
 	}
 
@@ -800,7 +806,7 @@ public:
 	/** \param index the index of the element to return
 		\return a pointer to the ith element
 	**/
-	inline const ElementType& getValue(unsigned index) const { assert(index < m_maxCount); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK]; }
+	inline const ElementType& getValue(unsigned index) const { assert(index < m_capacity); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK]; }
 
 	//! Sets the value of the ith element
 	/** \param index the index of the element to update
@@ -847,7 +853,7 @@ public:
 	virtual void computeMinAndMax()
 	{
 		//no points?
-		if (m_maxCount == 0)
+		if (m_capacity == 0)
 		{
 			//all boundaries to zero
 			m_minVal = m_maxVal = 0;
@@ -858,7 +864,7 @@ public:
 		m_minVal = m_minVal = getValue(0);
 
 		//we update boundaries with all other values
-		for (unsigned i=1; i<m_maxCount; ++i)
+		for (unsigned i=1; i<m_capacity; ++i)
 		{
 			const ElementType& val = getValue(i);
 			if (val < m_minVal)
@@ -904,7 +910,7 @@ public:
 		//copy content		
 		unsigned copyCount = 0;
 		assert(dest.m_theChunks.size() <= m_theChunks.size());
-		for (unsigned i=0; i<dest.m_theChunks.size(); ++i)
+		for (size_t i=0; i<dest.m_theChunks.size(); ++i)
 		{
 			unsigned toCopyCount = std::min<unsigned>(count-copyCount,m_perChunkCount[i]);
 			assert(dest.m_perChunkCount[i] >= toCopyCount);
@@ -941,7 +947,7 @@ protected:
 	//! Total number of elements
 	unsigned m_count;
 	//! Max total number of elements
-	unsigned m_maxCount;
+	unsigned m_capacity;
 
 	//! Iterator
 	unsigned m_iterator;

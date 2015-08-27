@@ -101,29 +101,32 @@ void SimpleCloud::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 
 bool SimpleCloud::reserve(unsigned n)
 {
-	unsigned oldN = m_points->capacity();
 	if (!m_points->reserve(n))
+	{
 		return false;
-	if (m_scalarField->capacity()>0)
-		if (!m_scalarField->reserve(n))
-		{
-			m_points->resize(oldN);
-			return false;
-		}
+	}
+
+	if (m_scalarField->capacity() != 0 && !m_scalarField->reserve(n))
+	{
+		return false;
+	}
+
 	return true;
 }
 
 bool SimpleCloud::resize(unsigned n)
 {
-	unsigned oldN = m_points->capacity();
+	unsigned oldCount = m_points->capacity();
 	if (!m_points->resize(n))
+	{
 		return false;
-	if (m_scalarField->capacity()>0)
-		if (!m_scalarField->resize(n))
-		{
-			m_points->resize(oldN);
-			return false;
-		}
+	}
+	if (m_scalarField->capacity() > 0 && !m_scalarField->resize(n))
+	{
+		//revert to previous state
+		m_points->resize(oldCount);
+		return false;
+	}
 	return true;
 }
 

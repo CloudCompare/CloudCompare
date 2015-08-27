@@ -64,7 +64,7 @@ public:
 	static inline void ComputeNormal(normsType normIndex, PointCoordinateType N[]) { Quant_dequantize_normal(normIndex,QUANTIZE_LEVEL,N); }
 
 	//! Returns the compressed index corresponding to a normal vector
-	static inline normsType GetNormIndex(const PointCoordinateType N[]) { return static_cast<normsType>( Quant_quantize_normal(N,QUANTIZE_LEVEL) ); }
+	static inline normsType GetNormIndex(const PointCoordinateType N[]) { unsigned index = Quant_quantize_normal(N,QUANTIZE_LEVEL); return static_cast<normsType>(index); }
 	//! Returns the compressed index corresponding to a normal vector (shortcut)
 	static inline normsType GetNormIndex(const CCVector3& N) { return GetNormIndex(N.u); }
 

@@ -269,15 +269,15 @@ int X3DXIOTNodeHandler::startIndexedFaceSet(const X3DAttributes &attr)
 			}
 		}
 
-		if (mesh->size() < mesh->maxSize())
+		//unhandled type of mesh
+		if (mesh->size() == 0)
 		{
-			//unhandled type of mesh
-			if (mesh->size()==0)
-			{
-				delete mesh;
-				return SKIP_CHILDREN;
-			}
-			mesh->resize(mesh->size());
+			delete mesh;
+			return SKIP_CHILDREN;
+		}
+		else
+		{
+			mesh->shrinkToFit();
 		}
 	}
 

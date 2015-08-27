@@ -227,8 +227,7 @@ CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, LoadPar
 
 	if (loadedCloud)
 	{
-		if (loadedCloud->size() < loadedCloud->capacity())
-			loadedCloud->resize(loadedCloud->size());
+		loadedCloud->shrinkToFit();
 		container.addChild(loadedCloud);
 	}
 

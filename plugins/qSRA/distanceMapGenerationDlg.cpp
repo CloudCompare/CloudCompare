@@ -1345,9 +1345,9 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 			delete symbolCloud;
 			symbolCloud = 0;
 		}
-		else if (symbolCloud->size() < symbolCloud->capacity())
+		else
 		{
-			symbolCloud->resize(symbolCloud->size());
+			symbolCloud->shrinkToFit();
 		}
 
 		if (error)

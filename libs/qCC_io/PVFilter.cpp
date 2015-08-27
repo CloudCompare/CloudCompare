@@ -235,10 +235,9 @@ CC_FILE_ERROR PVFilter::loadFile(QString filename, ccHObject& container, LoadPar
 
 	if (loadedCloud)
 	{
-		if (loadedCloud->size() < loadedCloud->capacity())
-			loadedCloud->resize(loadedCloud->size());
+		loadedCloud->shrinkToFit();
 		int sfIdx = loadedCloud->getCurrentInScalarFieldIndex();
-		if (sfIdx>=0)
+		if (sfIdx >= 0)
 		{
 			CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
 			sf->computeMinAndMax();

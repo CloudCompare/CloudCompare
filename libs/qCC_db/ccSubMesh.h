@@ -64,7 +64,7 @@ public:
 	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const;
 	virtual NormsIndexesTableType* getTriNormsTable() const;
-	virtual unsigned maxSize() const;
+	virtual unsigned capacity() const;
 
 	//inherited methods (ccDrawableObject)
 	virtual bool hasColors() const;

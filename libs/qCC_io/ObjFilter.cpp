@@ -783,7 +783,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				for ( ; C != currentFace.end(); ++B,++C)
 				{
 					//need more space?
-					if (baseMesh->size() == baseMesh->maxSize())
+					if (baseMesh->size() == baseMesh->capacity())
 					{
 						if (!baseMesh->reserve(baseMesh->size()+128))
 						{
@@ -965,20 +965,19 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			ccLog::Print("[OBJ] %i tex. coords, %i normals",texCoordsRead,normsRead);
 
 		//do some cleaning
-		if (vertices->size() < vertices->capacity())
-			vertices->resize(vertices->size());
-		if (normals && normals->currentSize() < normals->capacity())
-			normals->resize(normals->currentSize());
-		if (texCoords && texCoords->currentSize() < texCoords->capacity())
-			texCoords->resize(texCoords->currentSize());
+		vertices->shrinkToFit();
+		if (normals)
+			normals->shrinkToFit();
+		if (texCoords)
+			texCoords->shrinkToFit();
 		if (baseMesh->size() == 0)
 		{
 			delete baseMesh;
 			baseMesh = 0;
 		}
-		else if (baseMesh->maxSize() > baseMesh->size())
+		else
 		{
-			baseMesh->resize(baseMesh->size());
+			baseMesh->shrinkToFit();
 		}
 
 		if (	maxVertexIndex >= pointsRead

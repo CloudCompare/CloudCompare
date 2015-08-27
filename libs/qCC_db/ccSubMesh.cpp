@@ -435,7 +435,7 @@ bool ccSubMesh::resize(unsigned n)
 	return m_triIndexes->resize(n);
 }
 
-unsigned ccSubMesh::maxSize() const
+unsigned ccSubMesh::capacity() const
 {
 	return m_triIndexes->capacity();
 }

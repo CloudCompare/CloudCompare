@@ -59,7 +59,7 @@ public:
 	virtual void refreshBB() = 0;
 
 	//! Returns max capacity
-	virtual unsigned maxSize() const = 0;
+	virtual unsigned capacity() const = 0;
 
 	//! Returns whether the mesh has materials/textures
 	virtual bool hasMaterials() const = 0;

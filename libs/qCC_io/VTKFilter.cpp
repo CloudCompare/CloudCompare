@@ -460,7 +460,7 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				{
 					assert(vertCount > 2);
 					unsigned triCount = vertCount-2;
-					if (mesh->size() + triCount > mesh->maxSize())
+					if (mesh->size() + triCount > mesh->capacity())
 					{
 						if (!mesh->reserve(mesh->size()+triCount+256)) //take some advance to avoid too many allocations
 						{
@@ -485,9 +485,9 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				}
 			}
 			
-			if (mesh->size() != 0 && mesh->size() < mesh->maxSize())
+			if (mesh->size() != 0)
 			{
-				mesh->resize(mesh->size());
+				mesh->shrinkToFit();
 			}
 		//end POLYGONS or TRIANGLE_STRIPS
 		}

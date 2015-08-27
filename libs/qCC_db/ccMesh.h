@@ -94,7 +94,7 @@ public:
 	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
 	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture);
 	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture);
-	virtual unsigned maxSize() const;
+	virtual unsigned capacity() const;
 
 	//inherited methods (GenericIndexedMesh)
 	virtual void forEach(genericTriangleAction& action);
@@ -146,6 +146,9 @@ public:
 		\return true if the method succeeds, false otherwise
 	**/
 	bool resize(unsigned n);
+
+	//! Removes unused capacity
+	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
 
 	/*********************************************************/
 	/**************    PER-TRIANGLE NORMALS    ***************/

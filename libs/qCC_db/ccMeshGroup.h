@@ -56,7 +56,7 @@ public:
 	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const { i1 = i2 = i3 = -1; }
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const { return false; }
 	virtual NormsIndexesTableType* getTriNormsTable() const { return 0; }
-	virtual unsigned maxSize() const { return 0; }
+	virtual unsigned capacity() const { return 0; }
 
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const { return true; }

@@ -148,6 +148,8 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 				}
 				else
 				{
+					currentVertices->shrinkToFit();
+					
 					//create the corresponding polyline
 					ccPolyline* newPoly = new ccPolyline(currentVertices);
 					newPoly->setName(QString(QString("Polyline #%1").arg(++index)));

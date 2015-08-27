@@ -392,13 +392,11 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	//do some cleaning
 	{
-		if (vertCount < vertices->capacity())
-			vertices->resize(vertCount);
-		if (faceCount < mesh->maxSize())
-			mesh->resize(faceCount);
+		vertices->shrinkToFit();
+		mesh->shrinkToFit();
 		NormsIndexesTableType* normals = mesh->getTriNormsTable();
-		if (normals && normals->currentSize() < normals->capacity())
-			normals->resize(normals->currentSize());
+		if (normals)
+			normals->shrinkToFit();
 	}
 
 	//remove duplicated vertices
@@ -769,7 +767,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 		//let's add a new triangle
 		{
 			//mesh is full?
-			if (mesh->maxSize() == faceCount)
+			if (mesh->capacity() == faceCount)
 			{
 				if (!mesh->reserve(faceCount+1000))
 				{
@@ -779,7 +777,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 
 				if (normals)
 				{
-					bool success = normals->reserve(mesh->maxSize());
+					bool success = normals->reserve(mesh->capacity());
 					if (success && faceCount == 0) //specific case: allocate per triangle normal indexes the first time!
 						success = mesh->reservePerTriangleNormalIndexes();
 

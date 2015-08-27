@@ -274,9 +274,9 @@ CC_FILE_ERROR OFFFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 				//reserve memory if necessary
 				unsigned polyTriCount = polyVertCount-2;
-				if (mesh->size() + polyTriCount > mesh->maxSize())
+				if (mesh->size() + polyTriCount > mesh->capacity())
 				{
-					if (!mesh->reserve(mesh->size() + polyTriCount + 256)) //take some advance to avoid too many allocations
+					if (!mesh->reserve(mesh->size() + polyTriCount + 256)) //use some margin to avoid too many allocations
 					{
 						delete mesh;
 						return CC_FERR_NOT_ENOUGH_MEMORY;
@@ -313,8 +313,7 @@ CC_FILE_ERROR OFFFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 	else
 	{
-		if (mesh->size() < mesh->maxSize())
-			mesh->resize(mesh->size());
+		mesh->shrinkToFit();
 
 		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
 		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)

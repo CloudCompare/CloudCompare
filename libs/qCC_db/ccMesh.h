@@ -84,6 +84,7 @@ public:
 	virtual unsigned getUniqueIDForDisplay() const;
 	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 	virtual bool isSerializable() const { return true; }
+	virtual const ccGLMatrix& getGLTransformationHistory() const;
 
 	//inherited methods (ccGenericMesh)
 	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }

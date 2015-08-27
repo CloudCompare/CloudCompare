@@ -1331,6 +1331,13 @@ ccBBox ccMesh::getOwnBB(bool withGLFeatures/*=false*/)
 	return m_bBox;
 }
 
+const ccGLMatrix& ccMesh::getGLTransformationHistory() const
+{
+	//DGM: it may happen that the vertices transformation history matrix is not the same as the mesh
+	//(if applyGLTransformation is called directly on the vertices). Therefore we prefer the cloud's by default.
+	return m_associatedCloud ? m_associatedCloud->getGLTransformationHistory() : m_glTransHistory;
+}
+
 //specific methods
 void ccMesh::addTriangle(unsigned i1, unsigned i2, unsigned i3)
 {

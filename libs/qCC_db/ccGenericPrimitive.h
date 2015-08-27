@@ -44,7 +44,7 @@ public:
 	virtual ccGenericPrimitive* clone() const = 0;
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::PRIMITIVE; }
+	virtual inline CC_CLASS_ENUM getClassID() const { return CC_TYPES::PRIMITIVE; }
 
 	//! Sets primitive color (shortcut)
 	/** \param col rgb color
@@ -57,7 +57,7 @@ public:
 	const ccGenericPrimitive& operator += (const ccGenericPrimitive& prim);
 
 	//! Whether drawing is dependent on 'precision' parameter
-	virtual bool hasDrawingPrecision() const { return false; }
+	virtual inline bool hasDrawingPrecision() const { return false; }
 
 	//! Minimum drawing precision
 	static const int MIN_DRAWING_PRECISION = 4;
@@ -73,13 +73,16 @@ public:
 	virtual bool setDrawingPrecision(unsigned steps);
 
 	//! Returns drawing precision (or 0 if feature is not supported)
-	virtual unsigned getDrawingPrecision() const { return m_drawPrecision; }
+	virtual inline unsigned getDrawingPrecision() const { return m_drawPrecision; }
 
 	//! Returns the transformation that is currently applied to the vertices
-	virtual ccGLMatrix& getTransformation() { return m_transformation; }
+	virtual inline ccGLMatrix& getTransformation() { return m_transformation; }
 
 	//! Returns the transformation that is currently applied to the vertices (const version)
-	virtual const ccGLMatrix& getTransformation() const { return m_transformation; }
+	virtual inline const ccGLMatrix& getTransformation() const { return m_transformation; }
+
+	//inherited methods (ccHObject)
+	virtual const ccGLMatrix& getGLTransformationHistory() const;
 
 protected:
 

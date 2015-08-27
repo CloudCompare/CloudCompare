@@ -21,7 +21,7 @@
 #include "ccGenericPrimitive.h"
 #include "ccPointCloud.h"
 
-ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMatrix* transMat /*= 0*/)
+ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMatrix* transMat/*=0*/)
 	: ccMesh(new ccPointCloud("vertices"))
 	, m_drawPrecision(0)
 {
@@ -32,6 +32,8 @@ ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMat
 	assert(vert);
 	addChild(vert);
 	vert->setEnabled(false);
+	//we don't want the user to transform the vertices for instance (as they are only temporary)
+	vert->setLocked(true);
 
 	if (transMat)
 		m_transformation = *transMat;
@@ -191,6 +193,11 @@ void ccGenericPrimitive::applyGLTransformation(const ccGLMatrix& trans)
 
 	//we update the vertices transformation
 	m_transformation = trans * m_transformation;
+}
+
+const ccGLMatrix& ccGenericPrimitive::getGLTransformationHistory() const
+{
+	return m_transformation;
 }
 
 void ccGenericPrimitive::applyTransformationToVertices()

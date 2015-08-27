@@ -323,7 +323,7 @@ public: //display
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const;
 	virtual bool toFile(QFile& out) const;
-	inline virtual bool fromFile(QFile& in, short dataVersion, int flags) { return fromFile(in,dataVersion,flags,false); }
+	virtual inline bool fromFile(QFile& in, short dataVersion, int flags) { return fromFile(in,dataVersion,flags,false); }
 
 	//! Custom version of ccSerializableObject::fromFile
 	/** This version is used to load only the object own part of a stream (an not its children's)
@@ -339,7 +339,7 @@ public: //display
 	/** If object is father dependent and 'shared', it won't
 		be deleted but 'released' instead.
 	**/
-	virtual bool isShareable() const { return false; }
+	virtual inline bool isShareable() const { return false; }
 
 	//! Behavior when selected
 	enum SelectionBehavior { SELECTION_AA_BBOX,
@@ -351,20 +351,20 @@ public: //display
 		'ccDrawableObject::getFitBB' method (which
 		is not supported by all entities).
 	**/
-	void setSelectionBehavior(SelectionBehavior mode) { m_selectionBehavior = mode; }
+	virtual inline void setSelectionBehavior(SelectionBehavior mode) { m_selectionBehavior = mode; }
 
 	//! Returns selection behavior
-	SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
+	virtual inline SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
 
 	//! Returns object unqiue ID used for display
-	virtual unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
+	virtual inline unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
 
 	//! Returns the transformation 'history' matrix
-	const ccGLMatrix& getGLTransformationHistory() const { return m_glTransHistory; }
+	virtual inline const ccGLMatrix& getGLTransformationHistory() const { return m_glTransHistory; }
 	//! Sets the transformation 'history' matrix (handle with care!)
-	void setGLTransformationHistory(const ccGLMatrix& mat) { m_glTransHistory = mat; }
+	virtual inline void setGLTransformationHistory(const ccGLMatrix& mat) { m_glTransHistory = mat; }
 	//! Resets the transformation 'history' matrix
-	void resetGLTransformationHistory() { m_glTransHistory.toIdentity(); }
+	virtual inline void resetGLTransformationHistory() { m_glTransHistory.toIdentity(); }
 
 protected:
 

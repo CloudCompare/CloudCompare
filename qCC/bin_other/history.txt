@@ -7,6 +7,11 @@ v2.6.2 XX/XX/2015
 	* New shortcuts:
 		- Zoom in (+)
 		- Zoom out (=)
+	* qAnimation plugin (initiated by 2G Robotics - http://www.2grobotics.com/)
+		- prior to use the plugin, the user must create several viewport objects
+			(with CTRL+V or 'Display > Save viewport as object') corresponding to
+			the various 'keypoints' of the animation
+		- the plugin can create video files (MPEG, h232, etc. - depending on the installed codecs)
 - Enhancements:
 	* Rasterize tool
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
@@ -113,6 +118,7 @@ v2.6.2 XX/XX/2015
 	* PTX files: the sensor position was overlooked (as it's almost always the same as the scan position... almost ;)
 	* Section extraction: CC crashed when extracting section clouds from multiple clouds at the same time
 	* Command line: when automatically saving a file, CC will now add the suffix after the last point of the origin filename
+	* qCork was crashing on Windows 8 (Cork also relies on the 'triangle' library ;)
 
 v2.6.1 02/20/2015
 - New features:

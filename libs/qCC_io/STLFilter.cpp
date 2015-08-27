@@ -398,7 +398,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			mesh->resize(faceCount);
 		NormsIndexesTableType* normals = mesh->getTriNormsTable();
 		if (normals && normals->currentSize() < normals->capacity())
-			normals->resize(normals->capacity());
+			normals->resize(normals->currentSize());
 	}
 
 	//remove duplicated vertices
@@ -771,7 +771,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 			//mesh is full?
 			if (mesh->maxSize() == faceCount)
 			{
-				if(!mesh->reserve(faceCount+1000))
+				if (!mesh->reserve(faceCount+1000))
 				{
 					result = CC_FERR_NOT_ENOUGH_MEMORY;
 					break;
@@ -804,7 +804,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 			if (normalIsOk)
 			{
 				//compress normal
-				index = (int)normals->currentSize();
+				index = static_cast<int>(normals->currentSize());
 				normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
 				normals->addElement(nIndex);
 			}

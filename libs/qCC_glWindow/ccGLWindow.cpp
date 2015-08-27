@@ -3233,41 +3233,58 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				int x = event->x();
 				int y = event->y();
 
-				//specific case: interaction with item(s) such as labels, etc.
-				//DGM TODO: to activate only if some items take left clicks into account!
-				/*if (!m_activeItems.empty())
-				{
-					for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
-					if ((*it)->acceptClick(x,y,Qt::LeftButton))
-					{
-						event->accept();
-						redraw();
-						return;
-					}
-				}
-				//*/
-
 				//first test if the user has clicked on a particular item on the screen
 				if (processClickableItems(x,y))
 				{
 					acceptEvent = true;
 				}
-				//otheriwse perform OpenGL picking
-				else if (m_pickingMode != NO_PICKING)
+
+				if (!acceptEvent && m_pickingMode != NO_PICKING)
 				{
-					PICKING_MODE pickingMode = m_pickingMode;
+					//specific case: label selection
+					updateActiveItemsList(event->x(), event->y(), false);
+					if (!m_activeItems.empty())
+					{
+						if (m_activeItems.size() == 1)
+						{
+							ccInteractor* pickedObj = m_activeItems.front();
+							cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
+							if (label && !label->isSelected())
+							{
+								emit entitySelectionChanged(label->getUniqueID());
+								QApplication::processEvents();
+							}
+						}
 
-					//shift+click = point/triangle picking
-					if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
-						pickingMode = LABEL_PICKING;
+						//interaction with item(s) such as labels, etc.
+						//DGM TODO: to activate only if some items take left clicks into account!
+						//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+						//if ((*it)->acceptClick(x,y,Qt::LeftButton))
+						//{
+						//	event->accept();
+						//	redraw();
+						//	return;
+						//}
 
-					PickingParameters params(pickingMode,event->x(),event->y());
-					startPicking(params);
+						acceptEvent = true;
+					}
+					else
+					{
+						//perform standard picking
+						PICKING_MODE pickingMode = m_pickingMode;
 
-					//we also spread the news (if anyone is interested ;)
-					emit leftButtonClicked(event->x(), event->y());
+						//shift+click = point/triangle picking
+						if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+							pickingMode = LABEL_PICKING;
 
-					acceptEvent = true;
+						PickingParameters params(pickingMode,event->x(),event->y());
+						startPicking(params);
+
+						//we also spread the news (if anyone is interested ;)
+						emit leftButtonClicked(event->x(), event->y());
+
+						acceptEvent = true;
+					}
 				}
 			}
 		}

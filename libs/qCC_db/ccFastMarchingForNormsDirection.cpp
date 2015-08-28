@@ -17,13 +17,14 @@
 
 #include "ccFastMarchingForNormsDirection.h"
 
-//qCC_db
-#include <ccNormalVectors.h>
-#include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccOctree.h>
-#include <ccScalarField.h>
-#include <ccLog.h>
+//Local
+#include "ccNormalVectors.h"
+#include "ccGenericPointCloud.h"
+#include "ccPointCloud.h"
+#include "ccOctree.h"
+#include "ccScalarField.h"
+#include "ccLog.h"
+#include "ccProgressDialog.h"
 
 //system
 #include <assert.h>
@@ -36,7 +37,7 @@ ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
 static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 											ccGenericPointCloud* sourceCloud)
 {
-	if (!subset || subset->size()==0 || !sourceCloud)
+	if (!subset || subset->size() == 0 || !sourceCloud)
 		return CCVector3(0,0,1);
 
 	assert(sourceCloud->hasNormals());
@@ -66,7 +67,7 @@ static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 
 int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
 											NormsIndexesTableType* theNorms,
-											CCLib::DgmOctree* theOctree,
+											ccOctree* theOctree,
 											unsigned char level)
 {
 	int result = initGridWithOctree(theOctree, level);
@@ -280,7 +281,7 @@ int ccFastMarchingForNormsDirection::propagate()
 	return result;
 }
 
-unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointCloud* theCloud,
+unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointCloud* cloud,
 																GenericChunkedArray<1,unsigned char> &resolved,
 																NormsIndexesTableType* theNorms)
 {
@@ -314,9 +315,9 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 			}
 
 #ifdef _DEBUG
-			theCloud->setPointScalarValue(index,aCell->T);
-			//theCloud->setPointScalarValue(index,aCell->signConfidence);
-			//theCloud->setPointScalarValue(index,aCell->scalar);
+			cloud->setPointScalarValue(index,aCell->T);
+			//cloud->setPointScalarValue(index,aCell->signConfidence);
+			//cloud->setPointScalarValue(index,aCell->scalar);
 #endif
 			
 			++count;
@@ -359,54 +360,54 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 	}
 }
 
-int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	ccPointCloud* theCloud,
-																				NormsIndexesTableType* theNorms,
-																				unsigned char octreeLevel,
-																				CCLib::GenericProgressCallback* progressCb,
-																				CCLib::DgmOctree* inputOctree)
+int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
+													unsigned char octreeLevel,
+													ccProgressDialog* progressCb)
 {
-	assert(theCloud);
+	if (!cloud || !cloud->normals())
+	{
+		ccLog::Warning(QString("[orientNormalsWithFM] Cloud '%1' is invalid (or cloud has no normals)").arg(cloud->getName()));
+		assert(false);
+	}
+	NormsIndexesTableType* theNorms = cloud->normals();
 
-	unsigned numberOfPoints = theCloud->size();
+	unsigned numberOfPoints = cloud->size();
 	if (numberOfPoints == 0)
 		return -1;
 
-	//we compute the octree if none is provided
-	CCLib::DgmOctree* theOctree = inputOctree;
-	if (!theOctree)
+	//we need the octree
+	if (!cloud->getOctree())
 	{
-		theOctree = new CCLib::DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (!cloud->computeOctree(progressCb))
 		{
-			delete theOctree;
-			return -2;
+			ccLog::Warning(QString("[orientNormalsWithFM] Could not compute octree on cloud '%1'").arg(cloud->getName()));
+			return false;
 		}
 	}
+	ccOctree* octree = cloud->getOctree();
+	assert(octree);
 
 	//temporary SF
-	int oldSfIdx = theCloud->getCurrentDisplayedScalarFieldIndex();
-	int sfIdx = theCloud->getScalarFieldIndexByName("FM_Propagation");
+	bool sfWasDisplayed = cloud->sfShown();
+	int oldSfIdx = cloud->getCurrentDisplayedScalarFieldIndex();
+	int sfIdx = cloud->getScalarFieldIndexByName("FM_Propagation");
 	if (sfIdx < 0)
-		sfIdx = theCloud->addScalarField("FM_Propagation");
+		sfIdx = cloud->addScalarField("FM_Propagation");
 	if (sfIdx >= 0)
 	{
-		theCloud->setCurrentScalarField(sfIdx);
+		cloud->setCurrentScalarField(sfIdx);
 	}
 	else
 	{
-		ccLog::Warning("[ccFastMarchingForNormsDirection] Couldn't create temporary scalar field! Not enough memory?");
-		if (!inputOctree)
-			delete theOctree;
+		ccLog::Warning("[orientNormalsWithFM] Couldn't create temporary scalar field! Not enough memory?");
 		return -3;
 	}
 
-	if (!theCloud->enableScalarField())
+	if (!cloud->enableScalarField())
 	{
-		ccLog::Warning("[ccFastMarchingForNormsDirection] Couldn't enable temporary scalar field! Not enough memory?");
-		theCloud->deleteScalarField(sfIdx);
-		theCloud->setCurrentScalarField(oldSfIdx);
-		if (!inputOctree)
-			delete theOctree;
+		ccLog::Warning("[orientNormalsWithFM] Couldn't enable temporary scalar field! Not enough memory?");
+		cloud->deleteScalarField(sfIdx);
+		cloud->setCurrentScalarField(oldSfIdx);
 		return -4;
 	}
 
@@ -414,11 +415,9 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 	GenericChunkedArray<1,unsigned char>* resolved = new GenericChunkedArray<1,unsigned char>();
 	if (!resolved->resize(numberOfPoints,true,0)) //defaultResolvedValue = 0
 	{
-		ccLog::Warning("[ccFastMarchingForNormsDirection] Not enough memory!");
-		theCloud->deleteScalarField(sfIdx);
-		theCloud->setCurrentScalarField(oldSfIdx);
-		if (!inputOctree)
-			delete theOctree;
+		ccLog::Warning("[orientNormalsWithFM] Not enough memory!");
+		cloud->deleteScalarField(sfIdx);
+		cloud->setCurrentScalarField(oldSfIdx);
 		resolved->release();
 		return -5;
 	}
@@ -426,15 +425,13 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 	//Fast Marching propagation
 	ccFastMarchingForNormsDirection fm;
 
-	int result = fm.init(theCloud,theNorms,theOctree,octreeLevel);
+	int result = fm.init(cloud, theNorms, octree, octreeLevel);
 	if (result < 0)
 	{
-		ccLog::Error("[ccFastMarchingForNormsDirection] Something went wrong during initialization...");
-		theCloud->deleteScalarField(sfIdx);
-		theCloud->setCurrentScalarField(oldSfIdx);
+		ccLog::Error("[orientNormalsWithFM] Something went wrong during initialization...");
+		cloud->deleteScalarField(sfIdx);
+		cloud->setCurrentScalarField(oldSfIdx);
 		resolved->release();
-		if (!inputOctree)
-			delete theOctree;
 		return -6;
 	}
 
@@ -455,7 +452,8 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 	//while non-processed points remain...
 	unsigned resolvedPoints = 0;
 	int lastProcessedPoint = -1;
-	while (true)
+	bool success = true;
+	while (success)
 	{
 		//find the next non-processed point
 		do
@@ -470,9 +468,9 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 
 		//we start the propagation from this point
 		//its corresponding cell in fact ;)
-		const CCVector3 *thePoint = theCloud->getPoint(lastProcessedPoint);
+		const CCVector3 *thePoint = cloud->getPoint(lastProcessedPoint);
 		Tuple3i cellPos;
-		theOctree->getTheCellPosWhichIncludesThePoint(thePoint,cellPos,octreeLevel);
+		octree->getTheCellPosWhichIncludesThePoint(thePoint,cellPos,octreeLevel);
 
 		//clipping (in case the octree is not 'complete')
 		cellPos.x = std::min(octreeWidth,cellPos.x);
@@ -489,7 +487,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 		if (propagationResult >= 0)
 		{
 			//compute the number of points processed during this pass
-			unsigned count = fm.updateResolvedTable(theCloud,*resolved,theNorms);
+			unsigned count = fm.updateResolvedTable(cloud,*resolved,theNorms);
 
 			if (count != 0)
 			{
@@ -503,7 +501,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 		else
 		{
 			ccLog::Error("An error occurred during front propagation! Process cancelled...");
-			break;
+			success = false;
 		}
 	}
 
@@ -513,18 +511,16 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	cc
 	resolved->release();
 	resolved = 0;
 
-	if (!inputOctree)
-		delete theOctree;
-
-	theCloud->showNormals(true);
+	cloud->showNormals(true);
 #ifdef _DEBUG
-	theCloud->setCurrentDisplayedScalarField(sfIdx);
-	theCloud->getCurrentDisplayedScalarField()->computeMinAndMax();
-	theCloud->showSF(true);
+	cloud->setCurrentDisplayedScalarField(sfIdx);
+	cloud->getCurrentDisplayedScalarField()->computeMinAndMax();
+	cloud->showSF(true);
 #else
-	theCloud->deleteScalarField(sfIdx);
-	theCloud->setCurrentScalarField(oldSfIdx);
+	cloud->deleteScalarField(sfIdx);
+	cloud->setCurrentScalarField(oldSfIdx);
+	cloud->showSF(sfWasDisplayed);
 #endif
 
-	return 0;
+	return success;
 }

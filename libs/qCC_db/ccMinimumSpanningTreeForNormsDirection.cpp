@@ -20,13 +20,12 @@
 //CCLib
 #include <ReferenceCloud.h>
 
-//qCC_db
-#include <ccLog.h>
-#include <ccPointCloud.h>
-#include <ccScalarField.h>
-
-//Qt
-#include <QInputDialog>
+//local
+#include "ccLog.h"
+#include "ccPointCloud.h"
+#include "ccScalarField.h"
+#include "ccProgressDialog.h"
+#include "ccOctree.h"
 
 //system
 #include <set>
@@ -294,8 +293,6 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 	return true;
 }
 
-#define MST_USE_KNN
-
 static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
 									CCLib::NormalizedProgress* nProgress/*=0*/)
@@ -305,8 +302,6 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(additionalParameters[1]);
 
 	//structure for the nearest neighbor search
-#ifdef MST_USE_KNN
-
 	unsigned kNN = *static_cast<unsigned*>(additionalParameters[2]);
 
 	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
@@ -314,16 +309,6 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 	nNSS.minNumberOfNeighbors				= kNN+1; //+1 because we'll get the query point itself!
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
-#else
-
-	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[2]);
-
-	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
-	nNSS.level								= cell.level;
-	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
-	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
-#endif
 
 	unsigned n = cell.points->size(); //number of points in the current cell
 
@@ -353,48 +338,8 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors in a sphere
-#ifdef MST_USE_KNN
 		unsigned neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,false);
 		neighborCount = std::min(neighborCount,kNN+1);
-#else
-		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
-		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (neighborCount < 2)
-		{
-			//second chance with nearest neighbor!
-			CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS2;
-			nNSS2.level								= cell.level;
-			nNSS2.minNumberOfNeighbors				= 2; //+1 because we'll get the query point itself!
-			nNSS2.cellPos[0] = nNSS.cellPos[0];
-			nNSS2.cellPos[1] = nNSS.cellPos[1];
-			nNSS2.cellPos[2] = nNSS.cellPos[2];
-			nNSS2.cellCenter[0] = nNSS.cellCenter[0];
-			nNSS2.cellCenter[1] = nNSS.cellCenter[1];
-			nNSS2.cellCenter[2] = nNSS.cellCenter[2];
-			cell.parentOctree->computeCellCenter(nNSS2.cellPos,cell.level,nNSS2.cellCenter);
-
-			try
-			{
-				nNSS2.pointsInNeighbourhood.resize(n);
-			}
-			catch (.../*const std::bad_alloc&*/) //out of memory
-			{
-				return false;
-			}
-			CCLib::DgmOctree::NeighboursSet::iterator it = nNSS2.pointsInNeighbourhood.begin();
-			for (unsigned i=0; i<n; ++i,++it)
-			{
-				it->point = cell.points->getPointPersistentPtr(i);
-				it->pointIndex = cell.points->getPointGlobalIndex(i);
-			}
-			nNSS2.alreadyVisitedNeighbourhoodSize = 1;
-
-			neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS2,false);
-			neighborCount = std::min<unsigned>(neighborCount,2);
-
-			nNSS.pointsInNeighbourhood = nNSS2.pointsInNeighbourhood;
-		}
-#endif
 
 		//current point index
 		unsigned index = cell.points->getPointGlobalIndex(i);
@@ -431,9 +376,9 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 	return true;
 }
 
-bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
-														CCLib::GenericProgressCallback* progressCb/*=0*/,
-														CCLib::DgmOctree* _octree/*=0*/)
+bool ccMinimumSpanningTreeForNormsDirection::OrientNormals(	ccPointCloud* cloud,
+															unsigned kNN/*=6*/,
+															ccProgressDialog* progressDlg/*=0*/)
 {
 	assert(cloud);
 	if (!cloud->hasNormals())
@@ -442,36 +387,19 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 		return false;
 	}
 
-	//ask for parameter
-	bool ok;
-#ifdef MST_USE_KNN
-	unsigned kNN = static_cast<unsigned>(QInputDialog::getInt(0,"Neighborhood size", "Neighbors", 6, 1, 1000, 1, &ok));
-	if (!ok)
-		return false;
-#else
-	PointCoordinateType radius = static_cast<PointCoordinateType>(QInputDialog::getDouble(0,"Neighborhood radius", "radius", cloud->getOwnBB().getDiagNorm() * 0.01, 0, 1.0e9, 6, &ok));
-	if (!ok)
-		return false;
-#endif
-
-	//build octree if necessary
-	CCLib::DgmOctree* octree = _octree;
-	if (!octree)
+	//we need the octree
+	if (!cloud->getOctree())
 	{
-		octree = new CCLib::DgmOctree(cloud);
-		if (octree->build(progressCb) <= 0)
+		if (!cloud->computeOctree(progressDlg))
 		{
-			ccLog::Warning(QString("Failed to compute octree on cloud '%1'").arg(cloud->getName()));
-			delete octree;
+			ccLog::Warning(QString("[orientNormalsWithMST] Could not compute octree on cloud '%1'").arg(cloud->getName()));
 			return false;
 		}
 	}
-		
-#ifdef MST_USE_KNN
+	ccOctree* octree = cloud->getOctree();
+	assert(octree);
+
 	unsigned char level = octree->findBestLevelForAGivenPopulationPerCell(kNN*2);
-#else
-	unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
-#endif
 
 	bool result = true;
 	try
@@ -486,18 +414,14 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 		//parameters
 		void* additionalParameters[3] = {	reinterpret_cast<void*>(&graph),
 											reinterpret_cast<void*>(cloud),
-#ifdef MST_USE_KNN
 											reinterpret_cast<void*>(&kNN)
-#else
-											reinterpret_cast<void*>(&radius)
-#endif
 										};
 
 		if (octree->executeFunctionForAllCellsAtLevel(	level,
 														&ComputeMSTGraphAtLevel,
 														additionalParameters,
 														false, //not compatible with parallel strategies!
-														progressCb,
+														progressDlg,
 														"Build Spanning Tree") == 0)
 		{
 			//something went wrong
@@ -506,7 +430,7 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 		}
 		else
 		{
-			if (!ResolveNormalsWithMST(cloud,graph,progressCb))
+			if (!ResolveNormalsWithMST(cloud, graph, progressDlg))
 			{
 				//something went wrong
 				ccLog::Warning(QString("Failed to compute Minimum Spanning Tree on cloud '%1'").arg(cloud->getName()));
@@ -514,16 +438,10 @@ bool ccMinimumSpanningTreeForNormsDirection::Process(	ccPointCloud* cloud,
 			}
 		}
 	}
-	catch(...)
+	catch (...)
 	{
 		ccLog::Error(QString("Process failed on cloud '%1'").arg(cloud->getName()));
 		result = false;
-	}
-
-	if (octree && !_octree)
-	{
-		delete octree;
-		octree = 0;
 	}
 
 	return result;

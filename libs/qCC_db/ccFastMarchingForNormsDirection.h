@@ -20,14 +20,15 @@
 
 //CCLib
 #include <FastMarching.h>
-#include <GenericProgressCallback.h>
 #include <DgmOctree.h>
 
 //qCC_db
-#include <ccAdvancedTypes.h>
+#include "ccAdvancedTypes.h"
 
 class ccGenericPointCloud;
 class ccPointCloud;
+class ccOctree;
+class ccProgressDialog;
 
 //! Fast Marching algorithm for normals direction resolution
 /** Extends the FastMarching class.
@@ -38,11 +39,9 @@ class ccFastMarchingForNormsDirection : public CCLib::FastMarching
 public:
 
 	//! Static entry point (helper)
-	static int ResolveNormsDirectionByFrontPropagation(	ccPointCloud* theCloud,
-														NormsIndexesTableType* theNorms,
-														unsigned char octreeLevel,
-														CCLib::GenericProgressCallback* progressCb = 0,
-														CCLib::DgmOctree* inputOctree = 0);
+	static int OrientNormals(	ccPointCloud* theCloud,
+								unsigned char octreeLevel,
+								ccProgressDialog* progressCb = 0);
 	//! Default constructor
 	ccFastMarchingForNormsDirection();
 
@@ -58,7 +57,7 @@ public:
 	**/
 	int init(	ccGenericPointCloud* cloud,
 				NormsIndexesTableType* theNorms,
-				CCLib::DgmOctree* theOctree,
+				ccOctree* theOctree,
 				unsigned char gridLevel);
 
 	//! Updates a list of point flags, indicating the points already processed

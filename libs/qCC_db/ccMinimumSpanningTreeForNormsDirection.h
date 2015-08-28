@@ -18,24 +18,20 @@
 #ifndef CC_MST_FOR_NORMS_DIRECTION_HEADER
 #define CC_MST_FOR_NORMS_DIRECTION_HEADER
 
-//CCLib
-#include <GenericProgressCallback.h>
-#include <DgmOctree.h>
-
 class ccPointCloud;
+class ccProgressDialog;
 
 //! Minimum Spanning Tree for normals direction resolution
 /** See http://people.maths.ox.ac.uk/wendland/research/old/reconhtml/node3.html
 **/
 class ccMinimumSpanningTreeForNormsDirection
 {
-
 public:
 
 	//! Main entry point
-	static bool Process(	ccPointCloud* cloud,
-							CCLib::GenericProgressCallback* progressCb = 0,
-							CCLib::DgmOctree* octree = 0);
+	static bool OrientNormals(	ccPointCloud* cloud,
+								unsigned kNN = 6,
+								ccProgressDialog* progressDlg = 0);
 };
 
 #endif //CC_MST_FOR_NORMS_DIRECTION_HEADER

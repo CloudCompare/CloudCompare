@@ -210,6 +210,20 @@ public:
 	//! Returns the HSV color array
 	const colorType* getNormalHSVColorArray() const;
 
+	//! Helper: computes the normal (with best LS fit)
+	static bool ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
+
+	//! Helper: computes the normal (with Delaunay 2.5D)
+	/** The normal is computed at the first point (assuming the others are its neighbors).
+	**/
+	static bool ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
+
+	//! Helper: computes the normal (with Delaunay 2.5D)
+	/** The normal is computed at the first point (assuming the others are its neighbors).
+	**/
+	static bool ComputeNormalWithQuadric(CCLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N);
+
+
 protected:
 
 	//! Default constructor

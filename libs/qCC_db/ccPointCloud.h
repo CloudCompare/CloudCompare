@@ -32,17 +32,20 @@
 //Local
 #include "qCC_db.h"
 #include "ccGenericPointCloud.h"
+#include "ccNormalVectors.h"
 #include "ccColorScale.h"
 
 //Qt
 #include <QGLBuffer>
 #include <QMutex>
+#include <QSharedPointer>
 
 class ccPointCloud;
 class ccScalarField;
 class ccPolyline;
 class QGLBuffer;
 class LodStructThread;
+class ccProgressDialog;
 
 //! Maximum number of points (per cloud) displayed in a single LOD iteration
 /** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
@@ -268,6 +271,94 @@ public:
 	//! Sets whether color scale should be displayed or not
 	void showSFColorsScale(bool state);
 
+	/***************************************************
+				Associated grid structure
+	***************************************************/
+
+	//! Grid structure
+	struct Grid
+	{
+		//! Shared type
+		typedef QSharedPointer<Grid> Shared;
+		
+		//! Default constructor
+		Grid()
+			: w(0)
+			, h(0)
+			, validCount(0)
+			, minValidIndex(0)
+			, maxValidIndex(0)
+		{
+			sensorPosition.toIdentity();
+		}
+
+		//! Copy constructor
+		/** \warning May throw a bad_alloc exception
+		**/
+		Grid(const Grid& grid)
+			: w(grid.w)
+			, h(grid.h)
+			, indexes(grid.indexes)
+			, validCount(grid.validCount)
+			, minValidIndex(grid.minValidIndex)
+			, maxValidIndex(grid.minValidIndex)
+			, sensorPosition(grid.sensorPosition)
+		{}
+		
+		//! Grid width
+		unsigned w;
+		//! Grid height
+		unsigned h;
+
+		//! Number of valid indexes
+		unsigned validCount;
+		//! Minimum valid index
+		unsigned minValidIndex;
+		//! Maximum valid index
+		unsigned maxValidIndex;
+
+		//! Grid indexes (size: w x h)
+		std::vector<int> indexes;
+
+		//! Sensor position (expressed relatively to the cloud points)
+		ccGLMatrixd sensorPosition;
+	};
+
+	//! Returns the number of associated grids
+	size_t gridCount() const { return m_grids.size(); }
+	//! Returns an associated grid
+	inline Grid::Shared& grid(size_t gridIndex) { return m_grids[gridIndex]; }
+	//! Returns an associated grid (const verson)
+	inline const Grid::Shared& grid(size_t gridIndex) const { return m_grids[gridIndex]; }
+	//! Adds an associated grid
+	inline bool addGrid(Grid::Shared grid) { try{ m_grids.push_back(grid); } catch (const std::bad_alloc&) { return false; } return true; }
+	//! Remove all associated grids
+	inline void removeGrids() { m_grids.clear(); }
+
+	//! Compute the normals with the associated grid structure(s)
+	/** Can also orient the normals in the same run.
+	**/
+	bool computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
+									int kernelWidth,
+									bool orientNormals = true,
+									ccProgressDialog* pDlg = 0 );
+
+	//! Orient the normals with the associated grid structure(s)
+	bool orientNormalsWithGrids(	ccProgressDialog* pDlg = 0 );
+
+	//! Compute the normals by approximating the local surface around each point
+	bool computeNormalsWithOctree(	CC_LOCAL_MODEL_TYPES model,
+									ccNormalVectors::Orientation preferredOrientation,
+									PointCoordinateType defaultRadius,
+									ccProgressDialog* pDlg = 0 );
+
+	//! Orient the normals with a Minimum Spanning Tree
+	bool orientNormalsWithMST(		unsigned kNN = 6,
+									ccProgressDialog* pDlg = 0 );
+
+	//! Orient normals with Fast Marching
+	bool orientNormalsWithFM(		unsigned char level,
+									ccProgressDialog* pDlg = 0 );
 
 	/***************************************************
 						Other methods
@@ -521,6 +612,8 @@ protected:
 	virtual void notifyGeometryUpdate();
 
 	//inherited from ChunkedPointCloud
+	/** \warning Doesn't handle scan grids!
+	**/
 	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
 
 	//! Colors
@@ -536,6 +629,9 @@ protected:
 	ccScalarField* m_currentDisplayedScalarField;
 	//! Currently displayed scalar field index
 	int m_currentDisplayedScalarFieldIndex;
+
+	//! Associated grid structure
+	std::vector<Grid::Shared> m_grids;
 
 protected: // VBO
 

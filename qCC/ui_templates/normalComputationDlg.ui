@@ -6,34 +6,50 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>200</height>
+    <width>400</width>
+    <height>362</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Compute normals</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QGroupBox" name="LocalSurfaceGroupBox">
-     <property name="title">
-      <string>Surface estimation</string>
+    <widget class="QLabel" name="mixedSelectionLabel">
+     <property name="styleSheet">
+      <string notr="true">color: red;</string>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
+     <property name="text">
+      <string>Mixed selection: some clouds don't have scan grid(s)</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="surfaceGroupBox">
+     <property name="title">
+      <string>Surface approximation</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="leftMargin">
+       <number>30</number>
+      </property>
+      <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>model</string>
+         <string>Local surface model</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item>
        <widget class="QComboBox" name="localModelComboBox">
         <property name="toolTip">
          <string>Local surface estimation model</string>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <item>
          <property name="text">
@@ -52,127 +68,353 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>local radius</string>
-        </property>
-       </widget>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="neighborsGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Nieghbors</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>30</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QRadioButton" name="useScanGridRadioButton">
+          <property name="toolTip">
+           <string>Using scan grid(s) instead of the octree</string>
+          </property>
+          <property name="text">
+           <string>use scan grid(s) whenever possible</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QFrame" name="gridKernelFrame">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="margin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="toolTip">
+              <string>Each normal will be computed using the (2p+1)*(2p+1) neighbors in the grid</string>
+             </property>
+             <property name="text">
+              <string>kernel size</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="gridKernelSpinBox">
+             <property name="toolTip">
+              <string>Each normal will be computed using the (2p+1)*(2p+1) neighbors in the grid</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>10</number>
+             </property>
+             <property name="value">
+              <number>2</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="1" column="1">
-       <widget class="QFrame" name="localRadiusFrame">
-        <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QFrame" name="useScanGridsFrame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
          <property name="margin">
           <number>0</number>
          </property>
-         <item>
-          <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
-           <property name="toolTip">
-            <string>Local neighborhood radius (to estimate the surface)</string>
-           </property>
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="minimum">
-            <double>0.000001000000000</double>
-           </property>
-           <property name="maximum">
-            <double>999999.989999999990687</double>
-           </property>
-           <property name="singleStep">
-            <double>0.100000000000000</double>
-           </property>
-           <property name="value">
-            <double>1.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="autoRadiusToolButton">
-           <property name="text">
-            <string>Auto</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QRadioButton" name="useOctreeRadioButton">
+          <property name="toolTip">
+           <string>The octree works for any cloud</string>
+          </property>
+          <property name="text">
+           <string>use octree</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QFrame" name="localRadiusFrame">
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <property name="margin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="toolTip">
+              <string>Radius of the sphere in which the neighbors will be extracted</string>
+             </property>
+             <property name="text">
+              <string>radius</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="radiusDoubleSpinBox">
+             <property name="toolTip">
+              <string>Radius of the sphere in which the neighbors will be extracted</string>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>0.000001000000000</double>
+             </property>
+             <property name="maximum">
+              <double>999999.989999999990687</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="autoRadiusToolButton">
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="preferredOrientationGroupBox">
+    <widget class="QGroupBox" name="normalsOrientGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
-      <string>Preferred orientation</string>
+      <string>Orientation</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>30</number>
+      </property>
       <item>
-       <widget class="QComboBox" name="preferredOrientationComboBox">
-        <property name="currentIndex">
-         <number>4</number>
+       <widget class="QRadioButton" name="scanGridsOrientRadioButton">
+        <property name="toolTip">
+         <string>Using scan grid(s) is the most robust method</string>
         </property>
-        <property name="maxVisibleItems">
-         <number>12</number>
+        <property name="text">
+         <string>Use scan grid(s) whenever possible</string>
         </property>
-        <item>
-         <property name="text">
-          <string>+X</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>-X</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>+Y</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>-Y</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>+Z</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>-Z</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>+Barycenter</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>- Barycenter</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>+ (0,0,0)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>- (0,0,0)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Use previous normal</string>
-         </property>
-        </item>
        </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QRadioButton" name="preferredOrientRadioButton">
+          <property name="toolTip">
+           <string>To give a hint on how to orient normals</string>
+          </property>
+          <property name="text">
+           <string>Use preferred orientation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QComboBox" name="preferredOrientationComboBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="currentIndex">
+           <number>4</number>
+          </property>
+          <property name="maxVisibleItems">
+           <number>12</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>+X</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>-X</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>+Y</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>-Y</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>+Z</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>-Z</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>+Barycenter</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>- Barycenter</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>+ (0,0,0)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>- (0,0,0)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Use previous normal</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QRadioButton" name="mstOrientRadioButton">
+          <property name="toolTip">
+           <string>Generic 3D orientation algorithm</string>
+          </property>
+          <property name="text">
+           <string>Use Minimum Spanning Tree</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="mstNeighborsSpinBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Number of neighbors used to build the tree</string>
+          </property>
+          <property name="prefix">
+           <string>knn = </string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -201,6 +443,11 @@
     </widget>
    </item>
   </layout>
+  <zorder>buttonBox</zorder>
+  <zorder>normalsOrientGroupBox</zorder>
+  <zorder>mixedSelectionLabel</zorder>
+  <zorder>surfaceGroupBox</zorder>
+  <zorder>neighborsGroupBox</zorder>
  </widget>
  <resources/>
  <connections>
@@ -233,6 +480,70 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useScanGridRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>gridKernelFrame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>414</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useOctreeRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>localRadiusFrame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>77</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preferredOrientRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>preferredOrientationComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>238</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>238</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mstOrientRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mstNeighborsSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>118</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>332</x>
+     <y>266</y>
     </hint>
    </hints>
   </connection>

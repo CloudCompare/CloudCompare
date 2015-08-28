@@ -68,16 +68,14 @@
 #include <BinFilter.h>
 #include <DepthMapFileFilter.h>
 
-//qCC includes
-#include "ccRenderingTools.h"
-#include "ccFastMarchingForNormsDirection.h"
-#include "ccMinimumSpanningTreeForNormsDirection.h"
-#include <ccInnerRect2DFinder.h>
-#include "ccCommon.h"
+//QCC_glWindow
+#include <ccRenderingTools.h>
+#include <ccGLWindow.h>
 
-//sub-windows
-#include "ccGLWindow.h"
+//local includes
+#include "ccCommon.h"
 #include "ccConsole.h"
+#include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
 
 //plugins handling
@@ -6273,7 +6271,6 @@ void MainWindow::doActionComputeCPS()
 	refreshAll();
 }
 
-static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 void MainWindow::doActionComputeNormals()
 {
 	if (m_selectedEntities.empty())
@@ -6284,6 +6281,7 @@ void MainWindow::doActionComputeNormals()
 
 	//look for clouds and meshes
 	std::vector<ccPointCloud*> clouds;
+	size_t cloudsWithScanGrids = 0;
 	std::vector<ccMesh*> meshes;
 	PointCoordinateType defaultRadius = 0;
 	try
@@ -6294,6 +6292,9 @@ void MainWindow::doActionComputeNormals()
 			{
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
 				clouds.push_back(cloud);
+
+				if (cloud->gridCount() != 0)
+					++cloudsWithScanGrids;
 
 				if (defaultRadius == 0)
 				{
@@ -6325,9 +6326,32 @@ void MainWindow::doActionComputeNormals()
 	//compute normals for each selected cloud
 	if (!clouds.empty())
 	{
-		ccNormalComputationDlg ncDlg(this);
+		ccNormalComputationDlg::SelectionMode selectionMode = ccNormalComputationDlg::WITHOUT_SCAN_GRIDS;
+		if (cloudsWithScanGrids)
+		{
+			if (clouds.size() == cloudsWithScanGrids)
+			{
+				//all clouds have an associated grid
+				selectionMode = ccNormalComputationDlg::WITH_SCAN_GRIDS;
+			}
+			else
+			{
+				//only a part of the clouds have an associated grid
+				selectionMode = ccNormalComputationDlg::MIXED;
+			}
+		}
+
+		static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
+		static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
+		static int s_lastMSTNeighborCount = 6;
+		static int s_lastKernelSize = 2;
+
+		ccNormalComputationDlg ncDlg(selectionMode, this);
+		ncDlg.setLocalModel(s_lastModelType);
 		ncDlg.setRadius(defaultRadius);
 		ncDlg.setPreferredOrientation(s_lastNormalOrientation);
+		ncDlg.setMSTNeighborCount(s_lastMSTNeighborCount);
+		ncDlg.setGridKernelSize(s_lastKernelSize);
 		if (clouds.size() == 1)
 		{
 			ncDlg.setCloud(clouds.front());
@@ -6336,11 +6360,21 @@ void MainWindow::doActionComputeNormals()
 		if (!ncDlg.exec())
 			return;
 
-		CC_LOCAL_MODEL_TYPES model = ncDlg.getLocalModel();
-		ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
+		//normals computation
+		CC_LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
+		bool useGridStructure = cloudsWithScanGrids && ncDlg.useScanGridsForComputation();
 		defaultRadius = ncDlg.getRadius();
-		bool error = false;
+		int kernelSize = s_lastKernelSize = ncDlg.getGridKernelSize();
 
+		//normals orientation
+		bool orientNormals = ncDlg.orientNormals();
+		bool orientNormalsWithGrids = cloudsWithScanGrids && ncDlg.useScanGridsForOrientation();
+		bool orientNormalsPreferred = ncDlg.usePreferredOrientation();
+		ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
+		bool orientNormalsMST = ncDlg.useMSTOrientation();
+		int mstNeighbors = s_lastMSTNeighborCount = ncDlg.getMSTNeighborCount();
+		
+		size_t errors = 0;
 		for (size_t i=0; i<clouds.size(); i++)
 		{
 			ccPointCloud* cloud = clouds[i];
@@ -6348,73 +6382,83 @@ void MainWindow::doActionComputeNormals()
 
 			ccProgressDialog pDlg(true,this);
 
-			if (!cloud->getOctree())
+			bool result = false;
+			bool orientNormalsForThisCloud = false;
+			if (useGridStructure && cloud->gridCount())
 			{
-				if (!cloud->computeOctree(&pDlg))
+#if 0
+				ccPointCloud* newCloud = new ccPointCloud("temp");
+				newCloud->reserve(cloud->size());
+				for (size_t gi=0; gi<cloud->gridCount(); ++gi)
 				{
-					ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
-					error = true;
-					break;
-				}
-			}
+					const ccPointCloud::Grid::Shared& scanGrid = cloud->grid(gi);
+					if (scanGrid && scanGrid->indexes.empty())
+					{
+						//empty grid, we skip it
+						continue;
+					}
+					ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
 
-			//computes cloud normals
-			QElapsedTimer eTimer;
-			eTimer.start();
-			NormsIndexesTableType* normsIndexes = new NormsIndexesTableType;
-			if (!ccNormalVectors::ComputeCloudNormals(	cloud,
-														*normsIndexes,
-														model,
-														defaultRadius,
-														preferredOrientation,
-														(CCLib::GenericProgressCallback*)&pDlg,
-														cloud->getOctree()))
-			{
-				ccConsole::Error(QString("Failed to compute normals on cloud '%1'").arg(cloud->getName()));
-				error = true;
-				break;
-			}
-			ccConsole::Print("[ComputeCloudNormals] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
+					const int* _indexGrid = &(scanGrid->indexes[0]);
+					for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
+					{
+						for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+						{
+							if (*_indexGrid >= 0)
+							{
+								unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
+								const CCVector3* P = cloud->getPoint(pointIndex);
+								CCVector3 Q = toSensor * (*P);
+								newCloud->addPoint(Q);
+							}
+						}
+					}
 
-			if (!cloud->hasNormals())
-			{
-				if (!cloud->resizeTheNormsTable())
-				{
-					ccConsole::Error(QString("Failed to instantiate normals array on cloud '%1'").arg(cloud->getName()));
-					error = true;
-					break;
+					addToDB(newCloud);
 				}
+#endif
+
+
+				//compute normals with the associated scan grid(s)
+				orientNormalsForThisCloud = orientNormals && orientNormalsWithGrids;
+				result = cloud->computeNormalsWithGrids(model, kernelSize, orientNormalsForThisCloud, &pDlg);
 			}
 			else
 			{
-				//we hide normals during process
-				cloud->showNormals(false);
+				//compute normals with the octree
+				orientNormalsForThisCloud = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
+				result = cloud->computeNormalsWithOctree(model, orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
 			}
 
-			for (unsigned j=0; j<normsIndexes->currentSize(); j++)
+			//do we need to orient the normals? (this may have been already done if 'orientNormalsForThisCloud' is true)
+			if (result && orientNormals && !orientNormalsForThisCloud)
 			{
-				cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
+				if (cloud->gridCount() && orientNormalsWithGrids)
+				{
+					//we can still use the grid structure(s) to orient the normals!
+					result = cloud->orientNormalsWithGrids();
+				}
+				else if (orientNormalsMST)
+				{
+					//use Minimum Spanning Tree to resolve normals direction
+					result = cloud->orientNormalsWithMST(mstNeighbors, &pDlg);
+				}
 			}
 
-			normsIndexes->release();
-			normsIndexes = 0;
+			if (!result)
+			{
+				++errors;
+			}
 
-			cloud->showNormals(true);
 			cloud->prepareDisplayForRefresh();
 		}
 
-		//ask the user if we wants to orient cloud normals (with MST)
-		if (!error && preferredOrientation == ccNormalVectors::UNDEFINED)
+		if (errors != 0)
 		{
-			bool orientNormals = (QMessageBox::question(this,
-														"Orient normals",
-														"Orient normals with Minimum Spanning Tree?",
-														QMessageBox::Yes,
-														QMessageBox::No) == QMessageBox::Yes);
-			if (orientNormals)
-			{
-				doActionOrientNormalsMST();
-			}
+			if (errors < clouds.size())
+				ccConsole::Error("Failed to compute or orient the normals on some clouds! (see console)");
+			else
+				ccConsole::Error("Failed to compute or orient the normals! (see console)");
 		}
 	}
 
@@ -6467,9 +6511,16 @@ void MainWindow::doActionOrientNormalsMST()
 		return;
 	}
 
-	ccProgressDialog pDlg(true,this);
+	bool ok;
+	static unsigned s_defaultKNN = 6;
+	unsigned kNN = static_cast<unsigned>(QInputDialog::getInt(0,"Neighborhood size", "Neighbors", s_defaultKNN , 1, 1000, 1, &ok));
+	if (!ok)
+		return;
+	s_defaultKNN = kNN;
 
-	bool success = false;
+	ccProgressDialog pDlg(true,this);
+	
+	size_t errors = 0;
 	for (size_t i=0; i<m_selectedEntities.size(); i++)
 	{
 		if (!m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
@@ -6483,20 +6534,25 @@ void MainWindow::doActionOrientNormalsMST()
 		}
 
 		//use Minimum Spanning Tree to resolve normals direction
-		if (ccMinimumSpanningTreeForNormsDirection::Process(cloud,&pDlg,cloud->getOctree()))
+		if (cloud->orientNormalsWithMST(kNN, &pDlg))
 		{
 			cloud->prepareDisplayForRefresh();
-			success = true;
 		}
 		else
 		{
-			ccConsole::Error(QString("Process failed on cloud '%1'").arg(cloud->getName()));
-			break;
+			ccConsole::Warning(QString("Process failed on cloud '%1'").arg(cloud->getName()));
+			++errors;
 		}
 	}
 
-	if (success)
+	if (errors)
+	{
+		ccConsole::Error(QString("Process failed (check console)"));
+	}
+	else
+	{
 		ccLog::Warning("Normals have been oriented: you may still have to globally invert the cloud normals however (Edit > Normals > Invert).");
+	}
 
 	refreshAll();
 	updateUI();
@@ -6511,15 +6567,18 @@ void MainWindow::doActionOrientNormalsFM()
 	}
 
 	bool ok;
-	int value = QInputDialog::getInt(this,"Orient normals (FM)", "Octree level", 5, 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 1, &ok);
+	unsigned char s_defaultLevel = 6;
+	int value = QInputDialog::getInt(this,"Orient normals (FM)", "Octree level", s_defaultLevel, 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 1, &ok);
 	if (!ok)
 		return;
+
 	assert(value >= 0 && value <= 255);
 	unsigned char level = static_cast<unsigned char>(value);
+	s_defaultLevel = level;
 
 	ccProgressDialog pDlg(false,this);
 
-	bool success = false;
+	size_t errors = 0;
 	for (size_t i=0; i<m_selectedEntities.size(); i++)
 	{
 		if (!m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
@@ -6532,47 +6591,25 @@ void MainWindow::doActionOrientNormalsFM()
 			continue;
 		}
 
-		if (!cloud->getOctree())
+		//orient normals with Fast Marching
+		if (cloud->orientNormalsWithFM(level, &pDlg))
 		{
-			if (!cloud->computeOctree((CCLib::GenericProgressCallback*)&pDlg))
-			{
-				ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
-				continue;
-			}
+			cloud->prepareDisplayForRefresh();
 		}
-
-		unsigned pointCount = cloud->size();
-
-		NormsIndexesTableType* normsIndexes = new NormsIndexesTableType;
-		if (!normsIndexes->reserve(pointCount))
+		else
 		{
-			ccConsole::Error(QString("Not engouh memory! (cloud '%1')").arg(cloud->getName()));
-			continue;
+			++errors;
 		}
-
-		//init array with current normals
-		for (unsigned j=0; j<pointCount; j++)
-		{
-			const normsType& index = cloud->getPointNormalIndex(j);
-			normsIndexes->addElement(index);
-		}
-
-		//apply algorithm
-		ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(cloud, normsIndexes, level, (CCLib::GenericProgressCallback*)&pDlg, cloud->getOctree());
-
-		//compress resulting normals and transfer them to the cloud
-		for (unsigned j=0; j<pointCount; j++)
-			cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
-
-		normsIndexes->release();
-		normsIndexes=0;
-
-		cloud->prepareDisplayForRefresh();
-		success = true;
 	}
 
-	if (success)
+	if (errors)
+	{
+		ccConsole::Error(QString("Process failed (check console)"));
+	}
+	else
+	{
 		ccLog::Warning("Normals have been oriented: you may still have to globally invert the cloud normals however (Edit > Normals > Invert).");
+	}
 
 	refreshAll();
 	updateUI();

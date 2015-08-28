@@ -43,6 +43,8 @@
 #include "ccGBLSensor.h"
 #include "ccProgressDialog.h"
 #include "ccAtomicBool.h"
+#include "ccFastMarchingForNormsDirection.h"
+#include "ccMinimumSpanningTreeForNormsDirection.h"
 
 //Qt
 #include <QThread>
@@ -430,6 +432,41 @@ ccPointCloud* ccPointCloud::From(const CCLib::GenericIndexedCloud* cloud, const 
 	return pc;
 }
 
+void UpdateGridIndexes(const std::vector<int>& newIndexMap, std::vector<ccPointCloud::Grid::Shared>& grids)
+{
+	for (size_t i=0; i<grids.size(); ++i)
+	{
+		ccPointCloud::Grid::Shared& scanGrid = grids[i];
+
+		unsigned cellCount = scanGrid->w*scanGrid->h;
+		scanGrid->validCount = 0;
+		scanGrid->minValidIndex = -1;
+		scanGrid->maxValidIndex = -1;
+		int* _gridIndex = &(scanGrid->indexes[0]);
+		for (size_t j=0; j<cellCount; ++j, ++_gridIndex)
+		{
+			if (*_gridIndex >= 0)
+			{
+				assert(*_gridIndex < newIndexMap.size());
+				*_gridIndex = newIndexMap[*_gridIndex];
+				if (*_gridIndex >= 0)
+				{
+					if (scanGrid->validCount)
+					{
+						scanGrid->minValidIndex = std::min(scanGrid->minValidIndex, static_cast<unsigned>(*_gridIndex));
+						scanGrid->maxValidIndex = std::max(scanGrid->maxValidIndex, static_cast<unsigned>(*_gridIndex));
+					}
+					else
+					{
+						scanGrid->minValidIndex = scanGrid->maxValidIndex = static_cast<unsigned>(*_gridIndex);
+					}
+					++scanGrid->validCount;
+				}
+			}
+		}
+	}
+}
+
 ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection, int* warnings/*=0*/) const
 {
 	if (warnings)
@@ -550,10 +587,57 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 				if (sfIdx >= 0)
 					result->setCurrentDisplayedScalarField(sfIdx);
 				else
-					result->setCurrentDisplayedScalarField((int)copiedSFCount-1);
+					result->setCurrentDisplayedScalarField(static_cast<int>(copiedSFCount)-1);
 			}
 			//copy visibility
 			result->showSF(sfShown());
+		}
+	}
+
+	//scan grids
+	if (gridCount() != 0)
+	{
+		try
+		{
+			//we need a map between old and new indexes
+			std::vector<int> newIndexMap(size(), -1);
+			{
+				for (unsigned i=0; i<n; i++)
+					newIndexMap[selection->getPointGlobalIndex(i)] = i;
+			}
+
+			//duplicate the grid structure(s)
+			std::vector<Grid::Shared> newGrids;
+			{
+				for (size_t i=0; i<gridCount(); ++i)
+				{
+					const Grid::Shared& scanGrid = grid(i);
+					if (scanGrid->validCount != 0) //no need to copy empty grids!
+					{
+						//duplicate the grid
+						Grid::Shared newGrid(new Grid(*scanGrid));
+						newGrids.push_back(newGrid);
+					}
+				}
+			}
+
+			//then update the indexes
+			UpdateGridIndexes(newIndexMap, newGrids);
+
+			//and keep the valid (non empty) ones
+			for (size_t i=0; i<newGrids.size(); ++i)
+			{
+				Grid::Shared& scanGrid = newGrids[i];
+				if (scanGrid->validCount)
+				{
+					result->addGrid(scanGrid);
+				}
+			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy the grid structure(s)"));
 		}
 	}
 
@@ -799,7 +883,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					sameSF->computeMinAndMax();
 
 					//flag this SF as 'updated'
-					assert(sfIdx<(int)sfCount);
+					assert(sfIdx < static_cast<int>(sfCount));
 					sfUpdated[sfIdx] = true;
 				}
 				else //otherwise we create a new SF
@@ -873,7 +957,60 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		}
 	}
 
-	//Has the cloud been recentered/rescaled?
+	//if the merged cloud has grid structures AND this one is blank or also has grid structures
+	if (addedCloud->gridCount() != 0 && (gridCount() != 0 || pointCountBefore == 0))
+	{
+		//copy the grid structures
+		for (size_t i=0; i<addedCloud->gridCount(); ++i)
+		{
+			const Grid::Shared& otherGrid = addedCloud->grid(i);
+			if (otherGrid && otherGrid->validCount != 0) //no need to copy empty grids!
+			{
+				try
+				{
+					//copy the grid date
+					Grid::Shared grid(new Grid(*otherGrid));
+					{
+						//then update the indexes
+						unsigned cellCount = grid->w*grid->h;
+						int* _gridIndex = &(grid->indexes[0]);
+						for (size_t j=0; j<cellCount; ++j, ++_gridIndex)
+						{
+							if (*_gridIndex >= 0)
+							{
+								//shift the index
+								*_gridIndex += static_cast<int>(pointCountBefore);
+							}
+						}
+
+						//don't forget to shift the boundaries as well
+						grid->minValidIndex += pointCountBefore;
+						grid->maxValidIndex += pointCountBefore;
+					}
+
+					addGrid(grid);
+				}
+				catch (const std::bad_alloc&)
+				{
+					//not enough memory
+					m_grids.clear();
+					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to copy the grid structure(s) from '%1'").arg(addedCloud->getName()));
+					break;
+				}
+			}
+			else
+			{
+				assert(otherGrid);
+			}
+		}
+	}
+	else if (gridCount() != 0) //otherwise we'll have to drop the former grid structures!
+	{
+		ccLog::Warning(QString("[ccPointCloud::fusion] Grid structure(s) will be dropped as the merged cloud is unstructured"));
+		m_grids.clear();
+	}
+
+	//has the cloud been recentered/rescaled?
 	{
 		if (addedCloud->isShifted())
 			ccLog::Warning(QString("[ccPointCloud::fusion] Global shift/scale information for cloud '%1' will be lost!").arg(addedCloud->getName()));
@@ -2918,9 +3055,38 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		deleteOctree();
 		clearLOD();
 
+		unsigned count = size();
+
+		//we have to take care of scan grids first
+		{
+			//we need a map between old and new indexes
+			std::vector<int> newIndexMap(size(), -1);
+			{
+				unsigned newIndex = 0;
+				for (unsigned i=0; i<count; ++i)
+				{
+					if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
+						newIndexMap[i] = newIndex++;
+				}
+			}
+
+			//then update the indexes
+			UpdateGridIndexes(newIndexMap, m_grids);
+
+			//and reset the invalid (empty) ones
+			//(DGM: we don't erase them as they may still be useful?)
+			for (size_t i=0; i<m_grids.size(); ++i)
+			{
+				Grid::Shared& scanGrid = m_grids[i];
+				if (scanGrid->validCount == 0)
+				{
+					scanGrid->indexes.clear();
+				}
+			}
+		}
+
 		//we remove all visible points
 		unsigned lastPoint = 0;
-		unsigned count = size();
 		for (unsigned i=0; i<count; ++i)
 		{
 			if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
@@ -4041,4 +4207,413 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 
 	//call parent's method
 	ccGenericPointCloud::removeFromDisplay(win);
+}
+
+bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
+											int kernelWidth,
+											bool orientNormals/*=true*/,
+											ccProgressDialog* pDlg/*=0*/)
+{
+	if (kernelWidth < 1)
+	{
+		assert(false);
+		ccLog::Warning("[computeNormalsWithGrids] Invalid input parameter");
+		return false;
+	}
+
+	unsigned pointCount = size();
+	if (pointCount < 3)
+	{
+		ccLog::Warning(QString("[computeNormalsWithGrids] Cloud '%1' has not enough points").arg(getName()));
+		return false;
+	}
+
+	//neighborhood 'half-width' (total width = 1 + 2*kernelWidth) 
+	//max number of neighbours: (1+2*nw)^2
+	CCLib::ReferenceCloud knn(this);
+	if (!knn.reserve((1+2*kernelWidth)*(1+2*kernelWidth)))
+	{
+		ccLog::Warning("[computeNormalsWithGrids] Not enough memory");
+		return false;
+	}
+
+	//neighbors distances
+	std::vector<double> distances;
+	try
+	{
+		distances.resize((2*kernelWidth+1)*(2*kernelWidth+1));
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[computeNormalsWithGrids] Not enough memory");
+		return false;
+	}
+	distances[0] = 0.0; //central point
+
+	//and we also reserve the memory for the (compressed) normals
+	if (!hasNormals())
+	{
+		if (!resizeTheNormsTable())
+		{
+			ccLog::Warning("[computeNormalsWithGrids] Not enough memory");
+			return false;
+		}
+	}
+
+	//we hide normals during process
+	showNormals(false);
+
+	//progress dialog
+	if (pDlg)
+	{
+		pDlg->setWindowTitle(QObject::tr("Normals computation"));
+		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setRange(0,static_cast<int>(pointCount));
+		pDlg->show();
+	}
+
+	//for each grid cell
+	int progressIndex = 0;
+	for (size_t gi=0; gi<gridCount(); ++gi)
+	{
+		const ccPointCloud::Grid::Shared& scanGrid = grid(gi);
+		if (scanGrid && scanGrid->indexes.empty())
+		{
+			//empty grid, we skip it
+			continue;
+		}
+		if (!scanGrid || scanGrid->h == 0 || scanGrid->w == 0 || scanGrid->indexes.size() != scanGrid->h * scanGrid->w)
+		{
+			//invalid grid
+			ccLog::Warning(QString("[computeNormalsWithGrids] Grid structure #%i is invalid").arg(gi+1));
+			continue;
+		}
+
+		ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
+
+//#define TEST_LOCAL
+#ifdef TEST_LOCAL
+		setRGBColor(ccColor::white);
+		unsigned validIndex = 0;
+#endif
+
+		const int* _indexGrid = &(scanGrid->indexes[0]);
+		for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
+		{
+			for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+			{
+				if (*_indexGrid >= 0)
+				{
+					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
+					assert(pointIndex <= pointCount);
+					const CCVector3* P = getPoint(pointIndex);
+					CCVector3 Q = toSensor * (*P);
+
+					knn.clear(false);
+					knn.addPointIndex(pointIndex); //the central point itself
+
+					//look for neighbors
+					int vmin = std::max(0,j-kernelWidth);
+					int vmax = std::min<int>(scanGrid->h-1,j+kernelWidth);
+
+					int umin = std::max(0,i-kernelWidth);
+					int umax = std::min<int>(scanGrid->w-1,i+kernelWidth);
+
+#ifdef TEST_LOCAL
+					++validIndex;
+					bool flag = ((validIndex % 1000) == 0);
+					if (flag)
+					{
+						setPointColor(pointIndex, ccColor::green.rgba);
+					}
+#endif
+					
+					double sumDist = 0;
+					double sumDist2 = 0;
+					unsigned neighborIndex = 1;
+					for (int v=vmin; v<=vmax; ++v)
+					{
+						for (int u=umin; u<=umax; ++u)
+						{
+							int indexN = scanGrid->indexes[v*scanGrid->w + u];
+							if (indexN >= 0 && (u != i || v != j))
+							{
+#ifdef TEST_LOCAL
+								if (flag)
+									setPointColor(indexN, ccColor::red.rgba);
+#endif
+								//we don't consider points with a depth too different from the central point depth
+								const CCVector3* Pn = getPoint(static_cast<unsigned>(indexN));
+								CCVector3 deltaP = *Pn - *P;
+								double d2 = deltaP.norm2d();
+								sumDist2 += d2;
+								double d = sqrt(d2);
+								sumDist += d;
+								distances[neighborIndex++] = d;
+
+								knn.addPointIndex(static_cast<unsigned>(indexN));
+							}
+						}
+					}
+
+					if (knn.size() > 1)
+					{
+						//we ignore the farthest points
+						unsigned neighborCount = knn.size()-1; //we don't use the central point!
+						double meanDist = sumDist / neighborCount;
+						double stdDevDist = sqrt(fabs(sumDist2 / neighborCount - meanDist*meanDist));
+						double maxDist = meanDist + 2.0 * stdDevDist;
+						//update knn
+						{
+							unsigned newIndex = 1;
+							for (unsigned k=1; k<=neighborCount; ++k)
+							{
+								if (distances[k] <= maxDist)
+								{
+									if (newIndex != k)
+										knn.setPointIndex(newIndex, knn.getPointGlobalIndex(k));
+									++newIndex;
+								}
+							}
+							if (newIndex+1 < knn.size())
+							{
+								int toto = 1;
+							}
+							knn.resize(newIndex);
+						}
+					}
+
+					if (knn.size() >= 3)
+					{
+						CCVector3 N(0,0,0);
+						bool normalIsValid = false;
+
+						switch (localModel)
+						{
+						case LS:
+							//compute normal with best fit plane
+							normalIsValid = ccNormalVectors::ComputeNormalWithLS(&knn, N);
+							break;
+
+						case TRI:
+							//compute normal with Delaunay 2.5D
+							normalIsValid = ccNormalVectors::ComputeNormalWithTri(&knn, N);
+							break;
+
+						case QUADRIC:
+							//compute normal with Quadric
+							normalIsValid = ccNormalVectors::ComputeNormalWithQuadric(&knn, *P, N);
+							break;
+
+						default:
+							assert(false);
+							break;
+						}
+
+						if (normalIsValid && orientNormals)
+						{
+							//check normal vector sign
+							CCVector3 Nsensor(N);
+							toSensor.applyRotation(Nsensor);
+							if (Q.dot(Nsensor) > 0)
+							{
+								N = -N;
+							}
+						}
+
+						setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
+					}
+
+					if (pDlg)
+					{
+						//update progress dialog
+						if (pDlg->wasCanceled())
+						{
+							unallocateNorms();
+							ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
+							return false;
+						}
+						else
+						{
+							pDlg->setValue(++progressIndex);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//we restore the normals
+	showNormals(true);
+
+	return true;
+}
+
+bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
+{
+	unsigned pointCount = size();
+	if (pointCount == 0)
+	{
+		ccLog::Warning(QString("[orientNormalsWithGrids] Cloud '%1' is empty").arg(getName()));
+		return false;
+	}
+
+	if (!hasNormals())
+	{
+		ccLog::Warning(QString("[orientNormalsWithGrids] Cloud '%1' has no normals").arg(getName()));
+		return false;
+	}
+	if (gridCount() == 0)
+	{
+		ccLog::Warning(QString("[orientNormalsWithGrids] Cloud '%1' has no associated grid scan").arg(getName()));
+		return false;
+	}
+
+	//progress dialog
+	if (pDlg)
+	{
+		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
+		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
+		pDlg->setRange(0,static_cast<int>(pointCount));
+		pDlg->show();
+	}
+
+	//for each grid cell
+	int progressIndex = 0;
+	for (size_t gi=0; gi<gridCount(); ++gi)
+	{
+		const ccPointCloud::Grid::Shared& scanGrid = grid(gi);
+		if (scanGrid && scanGrid->indexes.empty())
+		{
+			//empty grid, we skip it
+			continue;
+		}
+		if (!scanGrid || scanGrid->h == 0 || scanGrid->w == 0 || scanGrid->indexes.size() != scanGrid->h * scanGrid->w)
+		{
+			//invalid grid
+			ccLog::Warning(QString("[orientNormalsWithGrids] Grid structure #%i is invalid").arg(gi+1));
+			continue;
+		}
+
+		ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
+
+		const int* _indexGrid = &(scanGrid->indexes[0]);
+		for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
+		{
+			for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+			{
+				if (*_indexGrid >= 0)
+				{
+					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
+					assert(pointIndex <= pointCount);
+					const CCVector3* P = getPoint(pointIndex);
+					CCVector3 Q = toSensor * (*P);
+
+					CCVector3 N = getPointNormal(pointIndex);
+
+					//check normal vector sign
+					CCVector3 Nsensor(N);
+					toSensor.applyRotation(Nsensor);
+					if (Q.dot(Nsensor) > 0)
+					{
+						N = -N;
+						setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
+					}
+
+					if (pDlg)
+					{
+						//update progress dialog
+						if (pDlg->wasCanceled())
+						{
+							unallocateNorms();
+							ccLog::Warning("[orientNormalsWithGrids] Process cancelled by user");
+							return false;
+						}
+						else
+						{
+							pDlg->setValue(++progressIndex);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool ccPointCloud::computeNormalsWithOctree(CC_LOCAL_MODEL_TYPES model,
+											ccNormalVectors::Orientation preferredOrientation,
+											PointCoordinateType defaultRadius,
+											ccProgressDialog* pDlg/*=0*/)
+{
+	//compute the normals the 'old' way ;)
+	if (!getOctree())
+	{
+		if (!computeOctree(pDlg))
+		{
+			ccLog::Warning(QString("[computeNormals] Could not compute octree on cloud '%1'").arg(getName()));
+			return false;
+		}
+	}
+
+	//computes cloud normals
+	QElapsedTimer eTimer;
+	eTimer.start();
+	NormsIndexesTableType* normsIndexes = new NormsIndexesTableType;
+	if (!ccNormalVectors::ComputeCloudNormals(	this,
+												*normsIndexes,
+												model,
+												defaultRadius,
+												preferredOrientation,
+												(CCLib::GenericProgressCallback*)pDlg,
+												getOctree()))
+	{
+		ccLog::Warning(QString("[computeNormals] Failed to compute normals on cloud '%1'").arg(getName()));
+		return false;
+	}
+	
+	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.",eTimer.elapsed()/1000.0);
+
+	if (!hasNormals())
+	{
+		if (!resizeTheNormsTable())
+		{
+			ccLog::Error(QString("Not enough memory to compute normals on cloud '%1'").arg(getName()));
+			normsIndexes->release();
+			return false;
+		}
+	}
+
+	//we hide normals during process
+	showNormals(false);
+
+	//compress the normals
+	{
+		for (unsigned j=0; j<normsIndexes->currentSize(); j++)
+		{
+			setPointNormalIndex(j, normsIndexes->getValue(j));
+		}
+	}
+
+	//we don't need this anymore...
+	normsIndexes->release();
+	normsIndexes = 0;
+
+	//we restore the normals
+	showNormals(true);
+
+	return true;
+}
+
+bool ccPointCloud::orientNormalsWithMST(unsigned kNN/*=6*/,
+										ccProgressDialog* pDlg/*=0*/)
+{
+	return ccMinimumSpanningTreeForNormsDirection::OrientNormals(this, kNN, pDlg);
+}
+
+bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
+										ccProgressDialog* pDlg/*=0*/)
+{
+	return ccFastMarchingForNormsDirection::OrientNormals(this, level, pDlg);
 }

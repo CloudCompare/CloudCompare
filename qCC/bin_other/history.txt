@@ -18,6 +18,20 @@ v2.6.2 XX/XX/2015
 		- stereogram display
 		- stereogram based segmentation
 		- export to SHP files
+	* Gridded/structured clouds handling
+		- CC will now remember the structure of gridded clouds (PTX, DP, FARO, etc.)
+			(see the new 'Scan grid' section of the cloud properties)
+		- this structure can be used when computing normals for instance (see below)
+		- this information is preserved if multiple gridded clouds are merged, cloned or segmented
+	* Brand new 'Normal Computation' dialog
+		- grid structures (see above) can now be used in the 'Normal Computation' dialog
+			(they can be used for computation but they are more interesting to orient the normals)
+		- new 'auto' button for the standard 'octree-based' computation algorithm (if a single cloud is selected)
+			(CC will automatically estimate a good local radius for neighbors extraction)
+		- new 'preferred orientation' option:
+			'Use previous normal' to use the former normal (if any) to orient the new one
+		- all the orientation options can now be set in the dialog (gridded/preferred/Minimum Spanning Tree)
+			no more nagging about using the Minimum Spanning Tree and other questions...
 - Enhancements:
 	* Rasterize tool
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
@@ -79,10 +93,6 @@ v2.6.2 XX/XX/2015
 	* ASCII save dialog:
 		- the output precision of scalar values can now be set up to 12 (instead of 8)
 		- Note that the internal representation of scalars remains 32-bits floats (i.e. with a relative precision ~10^-7)
-	* Normal computations:
-		- dialog has been refreshed
-		- new 'auto' button (when a single cloud is selected) to automatically estimate the local radius
-		- new preferred orientation 'Use previous normal' to use the former normal (if any) to orient the new one
 	* Poisson Surface Reconstruction:
 		- now using version 7 (https://github.com/mkazhdan/PoissonRecon/)
 		- built-in color interpolation (faster & cleaner)

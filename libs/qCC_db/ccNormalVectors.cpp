@@ -546,6 +546,123 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	return true;
 }
 
+bool ccNormalVectors::ComputeNormalWithQuadric(CCLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N)
+{
+	CCLib::Neighbourhood Z(points);
+
+	Tuple3ub dims;
+	const PointCoordinateType* h = Z.getQuadric(&dims);
+	if (h)
+	{
+		const CCVector3* gv = Z.getGravityCenter();
+		assert(gv);
+
+		const unsigned char& iX = dims.x;
+		const unsigned char& iY = dims.y;
+		const unsigned char& iZ = dims.z;
+
+		PointCoordinateType lX = P.u[iX] - gv->u[iX];
+		PointCoordinateType lY = P.u[iY] - gv->u[iY];
+
+		N.u[iX] = h[1] + (2 * h[3] * lX) + (h[4] * lY);
+		N.u[iY] = h[2] + (2 * h[5] * lY) + (h[4] * lX);
+		N.u[iZ] = -1;
+
+		//normalize the result
+		N.normalize();
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool ccNormalVectors::ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
+{
+	N = CCVector3(0,0,0);
+
+	if (!pointAndNeighbors)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (pointAndNeighbors->size() < 3)
+	{
+		return false;
+	}
+
+	CCLib::Neighbourhood Z(pointAndNeighbors);
+	const CCVector3* _N = Z.getLSPlaneNormal();
+	if (_N)
+	{
+		N = *_N;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
+bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
+{
+	N = CCVector3(0,0,0);
+
+	if (!pointAndNeighbors)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (pointAndNeighbors->size() < 3)
+	{
+		return false;
+	}
+
+	CCLib::Neighbourhood Z(pointAndNeighbors);
+
+	//we mesh the neighbour points (2D1/2)
+	CCLib::GenericIndexedMesh* theMesh = Z.triangulateOnPlane();
+	if (!theMesh)
+	{
+		return false;
+	}
+
+	unsigned triCount = theMesh->size();
+
+	//for all triangles
+	theMesh->placeIteratorAtBegining();
+	for (unsigned j=0; j<triCount; ++j)
+	{
+		//we can't use getNextTriangleVertIndexes (which is faster on mesh groups but not multi-thread compatible) but anyway we'll never get mesh groups here!
+		const CCLib::VerticesIndexes* tsi = theMesh->getTriangleVertIndexes(j);
+
+		//we look if the central point is one of the triangle's vertices
+		if (tsi->i1 == 0 || tsi->i2 == 0 || tsi->i3 == 0)
+		{
+			const CCVector3 *A = pointAndNeighbors->getPoint(tsi->i1);
+			const CCVector3 *B = pointAndNeighbors->getPoint(tsi->i2);
+			const CCVector3 *C = pointAndNeighbors->getPoint(tsi->i3);
+
+			CCVector3 no = (*B - *A).cross(*C - *A);
+			//no.normalize();
+			N += no;
+		}
+	}
+
+	delete theMesh;
+	theMesh = 0;
+
+	//normalize the 'mean' vector
+	N.normalize();
+
+	return true;
+}
+
 bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::octreeCell& cell,
 														void** additionalParameters,
 														CCLib::NormalizedProgress* nProgress/*=0*/)
@@ -580,31 +697,11 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
-			CCLib::Neighbourhood Z(&neighbours);
 
-			Tuple3ub dims;
-			const PointCoordinateType* h = Z.getQuadric(&dims);
-			if (h)
+			CCVector3 N;
+			if (ComputeNormalWithQuadric(&neighbours, nNSS.queryPoint, N))
 			{
-				const CCVector3* gv = Z.getGravityCenter();
-				assert(gv);
-
-				const unsigned char& iX = dims.x;
-				const unsigned char& iY = dims.y;
-				const unsigned char& iZ = dims.z;
-
-				PointCoordinateType lX = nNSS.queryPoint.u[iX] - gv->u[iX];
-				PointCoordinateType lY = nNSS.queryPoint.u[iY] - gv->u[iY];
-
-				PointCoordinateType N[3];
-				N[iX] = h[1] + (2 * h[3] * lX) + (h[4] * lY);
-				N[iY] = h[2] + (2 * h[5] * lY) + (h[4] * lX);
-				N[iZ] = -1;
-
-				//on normalise
-				CCVector3::vnormalize(N);
-
-				theNorms->setValue(cell.points->getPointGlobalIndex(i),N);
+				theNorms->setValue(cell.points->getPointGlobalIndex(i), N.u);
 			}
 		}
 
@@ -651,13 +748,11 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
-			CCLib::Neighbourhood Z(&neighbours);
 
-			//compute best fit plane
-			const CCVector3* lsPlaneNormal = Z.getLSPlaneNormal();
-			if (lsPlaneNormal) //should already be unit!
+			CCVector3 N;
+			if (ComputeNormalWithLS(&neighbours, N))
 			{
-				theNorms->setValue(cell.points->getPointGlobalIndex(i),lsPlaneNormal->u);
+				theNorms->setValue(cell.points->getPointGlobalIndex(i), N.u);
 			}
 		}
 
@@ -704,41 +799,10 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3)
 				k = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3;
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
-			CCLib::Neighbourhood Z(&neighbours);
 
-			//we mesh the neighbour points (2D1/2)
-			CCLib::GenericIndexedMesh* theMesh = Z.triangulateOnPlane();
-			if (theMesh)
+			CCVector3 N;
+			if (ComputeNormalWithTri(&neighbours, N))
 			{
-				CCVector3 N(0,0,0);
-
-				unsigned faceCount = theMesh->size();
-
-				//for all triangles
-				theMesh->placeIteratorAtBegining();
-				for (unsigned j=0; j<faceCount; ++j)
-				{
-					//we can't use getNextTriangleVertIndexes (which is faster on mesh groups but not multi-thread compatible) but anyway we'll never get mesh groups here!
-					const CCLib::VerticesIndexes* tsi = theMesh->getTriangleVertIndexes(j);
-
-					//we look if the central point is one of the triangle's vertices
-					if (tsi->i1 == 0 || tsi->i2 == 0 || tsi->i3 == 0)
-					{
-						const CCVector3 *A = neighbours.getPoint(tsi->i1);
-						const CCVector3 *B = neighbours.getPoint(tsi->i2);
-						const CCVector3 *C = neighbours.getPoint(tsi->i3);
-
-						CCVector3 no = (*B - *A).cross(*C - *A);
-						//no.normalize();
-						N += no;
-					}
-				}
-
-				delete theMesh;
-				theMesh = 0;
-
-				//normalize the 'mean' vector
-				N.normalize();
 				theNorms->setValue(cell.points->getPointGlobalIndex(i),N.u);
 			}
 		}

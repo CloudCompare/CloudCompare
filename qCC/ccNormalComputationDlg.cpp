@@ -28,10 +28,11 @@
 //system
 #include <assert.h>
 
-ccNormalComputationDlg::ccNormalComputationDlg(QWidget* parent/*=0*/)
+ccNormalComputationDlg::ccNormalComputationDlg(SelectionMode selectionMode, QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, Ui::NormalComputationDlg()
 	, m_cloud(0)
+	, m_selectionMode(selectionMode)
 {
 	setupUi(this);
 
@@ -40,8 +41,74 @@ ccNormalComputationDlg::ccNormalComputationDlg(QWidget* parent/*=0*/)
 	//by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);
 
-	connect(localModelComboBox,   SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
-	connect(autoRadiusToolButton, SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
+	connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
+	connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
+
+	//selection mode
+	{
+		//warning label (for MIXED selection)
+		mixedSelectionLabel->setVisible(selectionMode == MIXED);
+
+		switch (selectionMode)
+		{
+		case WITH_SCAN_GRIDS:
+			{
+				//useScanGridRadioButton->setChecked(true); //DGM: not so interesting in fact!
+				useOctreeRadioButton->setChecked(true);
+				scanGridsOrientRadioButton->setChecked(true);
+			}
+			break;
+
+		case MIXED:
+			{
+				//both computation methods can be choosed
+				useScanGridRadioButton->setAutoExclusive(false);
+				useOctreeRadioButton->setAutoExclusive(false);
+				useOctreeRadioButton->setChecked(true);
+				useOctreeRadioButton->setEnabled(true);
+				//and the orientation methods can also be mixed
+				scanGridsOrientRadioButton->setAutoExclusive(false);
+			}
+			break;
+
+		case WITHOUT_SCAN_GRIDS:
+			{
+				//disable 'scan grid' options
+				useScanGridRadioButton->setChecked(false);
+				useScanGridRadioButton->setEnabled(false);
+
+				scanGridsOrientRadioButton->setChecked(false);
+				scanGridsOrientRadioButton->setEnabled(false);
+
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+	}
+}
+
+void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)
+{
+	int index = -1;
+	switch (model)
+	{
+	case LS:
+		index = 0;
+		break;
+	case QUADRIC:
+		index = 1;
+		break;
+	case TRI:
+		index = 2;
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	localModelComboBox->setCurrentIndex(index);
 }
 
 CC_LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
@@ -62,7 +129,9 @@ CC_LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
 
 void ccNormalComputationDlg::localModelChanged(int index)
 {
-	localRadiusFrame->setEnabled(index != 2);
+	//DGM: we don't disable the parent frame anymore as it is used by the octree/grid toggling
+	radiusDoubleSpinBox->setEnabled(index != 2);
+	autoRadiusToolButton->setEnabled(index != 2);
 }
 
 void ccNormalComputationDlg::setRadius(PointCoordinateType radius)
@@ -86,18 +155,63 @@ void ccNormalComputationDlg::setPreferredOrientation(ccNormalVectors::Orientatio
 {
 	if (orientation == ccNormalVectors::UNDEFINED)
 	{
-		preferredOrientationGroupBox->setChecked(false);
+		preferredOrientRadioButton->setChecked(false);
 	}
 	else
 	{
-		preferredOrientationGroupBox->setChecked(true);
+		preferredOrientRadioButton->setChecked(true);
 		preferredOrientationComboBox->setCurrentIndex(orientation);
 	}
 }
 
+bool ccNormalComputationDlg::useScanGridsForComputation() const
+{
+	return useScanGridRadioButton->isChecked();
+}
+
+int ccNormalComputationDlg::getGridKernelSize() const
+{
+	return gridKernelSpinBox->value();
+}
+
+void ccNormalComputationDlg::setGridKernelSize(int value)
+{
+	gridKernelSpinBox->setValue(value);
+}
+
+bool ccNormalComputationDlg::orientNormals() const
+{
+	return normalsOrientGroupBox->isChecked();
+}
+
+bool ccNormalComputationDlg::useScanGridsForOrientation() const
+{
+	return scanGridsOrientRadioButton->isChecked();
+}
+
+bool ccNormalComputationDlg::usePreferredOrientation() const
+{
+	return preferredOrientRadioButton->isChecked();
+}
+
+bool ccNormalComputationDlg::useMSTOrientation() const
+{
+	return mstOrientRadioButton->isChecked();
+}
+
+void ccNormalComputationDlg::setMSTNeighborCount(int n)
+{
+	mstNeighborsSpinBox->setValue(n);
+}
+
+int ccNormalComputationDlg::getMSTNeighborCount() const
+{
+	return mstNeighborsSpinBox->value();
+}
+
 ccNormalVectors::Orientation ccNormalComputationDlg::getPreferredOrientation() const
 {
-	int index = preferredOrientationGroupBox->isChecked() ? preferredOrientationComboBox->currentIndex() : -1;
+	int index = preferredOrientRadioButton->isChecked() ? preferredOrientationComboBox->currentIndex() : -1;
 
 	return (index >= 0 && index <= ccNormalVectors::PREVIOUS ? static_cast<ccNormalVectors::Orientation>(index) : ccNormalVectors::UNDEFINED);
 }

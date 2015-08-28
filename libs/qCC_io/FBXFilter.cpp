@@ -240,7 +240,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			const ccColor::Rgbaf& emission = mat->getEmission();
 			const ccColor::Rgbaf& ambient = mat->getAmbient();
 			const ccColor::Rgbaf& diffuse = mat->getDiffuseFront();
-			const ccColor::Rgbaf& specular = mat->getDiffuseFront();
+			const ccColor::Rgbaf& specular = mat->getSpecular();
 			lMaterial->Emissive.Set(FbxDouble3(emission.r,emission.g,emission.b));
 			lMaterial->Ambient .Set(FbxDouble3( ambient.r, ambient.g, ambient.b));
 			lMaterial->Diffuse .Set(FbxDouble3( diffuse.r, diffuse.g, diffuse.b));

@@ -2163,7 +2163,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 
 		if (pos < tailSize)
 		{
-			tail[++pos] = d;
+			tail[pos++] = d;
 		}
 		else if (tail.back() < d)
 		{

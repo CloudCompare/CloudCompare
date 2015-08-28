@@ -162,7 +162,7 @@ public:
 			_cDest += N;
 
 #ifdef CC_ENV_64
-			unsigned elemToFill = m_count;
+			unsigned elemToFill = m_capacity;
 #else
 			unsigned elemToFill = m_perChunkCount[0];
 #endif

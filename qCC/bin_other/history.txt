@@ -12,6 +12,12 @@ v2.6.2 XX/XX/2015
 			(with CTRL+V or 'Display > Save viewport as object') corresponding to
 			the various 'keypoints' of the animation
 		- the plugin can create video files (MPEG, h232, etc. - depending on the installed codecs)
+	* qFacet plugin (created by BRGM - http://www.brgm.eu)
+		- automatic fracture planes detection (by region growing)
+		- orientation-based classification
+		- stereogram display
+		- stereogram based segmentation
+		- export to SHP files
 - Enhancements:
 	* Rasterize tool
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)

@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qFacets">
+    <file>logoBRGM.png</file>
+    <file>extractFM.png</file>
+    <file>extractKD.png</file>
+    <file>stereogram.png</file>
+    <file>csvFile.png</file>
+    <file>shpFile.png</file>
+    <file>qFacets.png</file>
+    <file>gearIcon.png</file>
+    <file>classifIcon.png</file>
+  </qresource>
+</RCC>

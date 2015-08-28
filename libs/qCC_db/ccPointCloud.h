@@ -672,7 +672,7 @@ public: //Level of Detail (LOD)
 		//! Adds a level descriptor
 		inline void addLevel(const LevelDesc& desc) { lock(); m_levels.push_back(desc); unlock(); }
 		//! Shrinks the level descriptor set to its minimal size
-		inline void shrink() { lock(); m_levels.shrink_to_fit(); unlock(); }
+		inline void shrink() { lock(); m_levels.resize(m_levels.size()); unlock(); } //DGM: shrink_to_fit is a C++11 method
 
 		//! Returns the maximum level
 		inline unsigned char maxLevel() { lock(); size_t count = m_levels.size(); unlock(); return static_cast<unsigned char>(std::min<size_t>(count,256)); }

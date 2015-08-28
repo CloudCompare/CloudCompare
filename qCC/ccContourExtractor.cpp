@@ -380,7 +380,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				VertexIterator itB = itA; ++itB;
 				if (itB == hullPoints.end())
 				{
-					assert((contourType == FULL));
+					assert(contourType == FULL);
 					itB = hullPoints.begin();
 				}
 
@@ -487,6 +487,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 					}
 
 					//update all edges that were having 'P' as their nearest candidate as well
+					if (!edges.empty())
 					{
 						std::vector<VertexIterator> removed;
 						std::multiset<Edge>::const_iterator lastValidIt = edges.end();
@@ -498,6 +499,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 								removed.push_back((*it).itA);
 							
 								edges.erase(it);
+								if (edges.empty())
+									break;
 								if (lastValidIt != edges.end())
 									it = lastValidIt;
 								else
@@ -599,7 +602,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				}
 			}
 		}
-		catch(...)
+		catch (...)
 		{
 			//not enough memory
 			return false;

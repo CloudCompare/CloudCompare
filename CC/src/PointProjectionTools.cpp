@@ -638,143 +638,169 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	bool somethingHasChanged = true;
 	while (somethingHasChanged)
 	{
-		somethingHasChanged = false;
-		++step;
-
-		////reset point flags
-		//for (size_t i=0; i<pointCount; ++i)
-		//{
-		//	if (pointFlags[i] != POINT_FROZEN)
-		//		pointFlags[i] = POINT_NOT_USED;
-		//}
-		
-		//build the initial edge list & flag the convex hull points
-		std::multiset<Edge> edges;
+		try
 		{
-			for (std::list<IndexedCCVector2*>::iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
-			{
-				std::list<IndexedCCVector2*>::iterator itB = itA; ++itB;
-				if (itB == hullPoints.end())
-					itB = hullPoints.begin();
+			somethingHasChanged = false;
+			++step;
 
-				//we will only process the edges that are longer than the maximum specified length
-				if ((**itB - **itA).norm2() > maxSquareEdgeLength)
-				{
-					unsigned nearestPointIndex = 0;
-					PointCoordinateType minSquareDist = FindNearestCandidate(
-															nearestPointIndex,
-															itA,
-															itB,
-															points,
-															pointFlags,
-															minSquareEdgeLength,
-															maxSquareEdgeLength,
-															step > 1);
-
-					if (minSquareDist >= 0)
-					{
-						Edge e(itA,nearestPointIndex,minSquareDist);
-						edges.insert(e);
-					}
-				}
-				
-				pointFlags[(*itA)->index] = POINT_USED;
-			}
-		}
-
-		while (!edges.empty())
-		{
-			//current edge (AB)
-			//this should be the edge with the nearest 'candidate'
-			Edge e = *edges.begin();
-			edges.erase(edges.begin());
-
-			VertexIterator itA = e.itA;
-			VertexIterator itB = itA; ++itB;
-			if (itB == hullPoints.end())
-				itB = hullPoints.begin();
-
-			//nearest point
-			const Vertex2D& P = points[e.nearestPointIndex];
-			assert(pointFlags[P.index] == POINT_NOT_USED); //we don't consider already used points!
-
-			//check that we don't create too small edges!
-			//CCVector2 AP = (P-**itA);
-			//CCVector2 PB = (**itB-P);
-			//PointCoordinateType squareLengthAP = (P-**itA).norm2();
-			//PointCoordinateType squareLengthPB = (**itB-P).norm2();
-			////at least one of the new segments must be smaller than the initial one!
-			//assert( squareLengthAP < e.squareLength || squareLengthPB < e.squareLength );
-			//if (squareLengthAP < minSquareEdgeLength || squareLengthPB < minSquareEdgeLength)
+			////reset point flags
+			//for (size_t i=0; i<pointCount; ++i)
 			//{
-			//	pointFlags[P.index] = POINT_IGNORED;
-			//	edges.push(e); //retest the edge!
+			//	if (pointFlags[i] != POINT_FROZEN)
+			//		pointFlags[i] = POINT_NOT_USED;
 			//}
-
-			//last check: the new segments must not intersect with the actual hull!
-			bool intersect = false;
-			//if (false)
+		
+			//build the initial edge list & flag the convex hull points
+			std::multiset<Edge> edges;
 			{
-				for (VertexIterator itJ = hullPoints.begin(), itI = itJ++; itI != hullPoints.end(); ++itI, ++itJ)
+				for (std::list<IndexedCCVector2*>::iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
 				{
-					if (itJ == hullPoints.end())
-						itJ = hullPoints.begin();
+					std::list<IndexedCCVector2*>::iterator itB = itA; ++itB;
+					if (itB == hullPoints.end())
+						itB = hullPoints.begin();
 
-					if (	((*itI)->index != (*itA)->index && (*itJ)->index != (*itA)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,**itA,P))
-						||	((*itI)->index != (*itB)->index && (*itJ)->index != (*itB)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,P,**itB)) )
+					//we will only process the edges that are longer than the maximum specified length
+					if ((**itB - **itA).norm2() > maxSquareEdgeLength)
 					{
-						intersect = true;
-						break;
-					}
-				}
-			}
-
-			if (!intersect)
-			{
-				//add point to concave hull
-				VertexIterator itP = hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[e.nearestPointIndex]);
-
-				//we won't use P anymore!
-				pointFlags[P.index] = POINT_USED;
-
-				somethingHasChanged = true;
-
-				//update all edges that were having 'P' as their nearest candidate as well
-				{
-					std::vector<VertexIterator> removed;
-					std::multiset<Edge>::const_iterator lastValidIt = edges.end();
-					for (std::multiset<Edge>::const_iterator it = edges.begin(); it != edges.end(); ++it)
-					{
-						if ((*it).nearestPointIndex == e.nearestPointIndex)
-						{
-							//we'll have to put them back afterwards!
-							removed.push_back((*it).itA);
-
-							edges.erase(it);
-							if (lastValidIt != edges.end())
-								it = lastValidIt;
-							else
-								it = edges.begin();
-						}
-						else
-						{
-							lastValidIt = it;
-						}
-					}
-
-					//update the removed edges info and put them back in the main list
-					for (size_t i=0; i<removed.size(); ++i)
-					{
-						VertexIterator itC = removed[i];
-						VertexIterator itD = itC; ++itD;
-						if (itD == hullPoints.end())
-							itD = hullPoints.begin();
-
 						unsigned nearestPointIndex = 0;
 						PointCoordinateType minSquareDist = FindNearestCandidate(
 																nearestPointIndex,
-																itC,
-																itD,
+																itA,
+																itB,
+																points,
+																pointFlags,
+																minSquareEdgeLength,
+																maxSquareEdgeLength,
+																step > 1);
+
+						if (minSquareDist >= 0)
+						{
+							Edge e(itA,nearestPointIndex,minSquareDist);
+							edges.insert(e);
+						}
+					}
+				
+					pointFlags[(*itA)->index] = POINT_USED;
+				}
+			}
+
+			while (!edges.empty())
+			{
+				//current edge (AB)
+				//this should be the edge with the nearest 'candidate'
+				Edge e = *edges.begin();
+				edges.erase(edges.begin());
+
+				VertexIterator itA = e.itA;
+				VertexIterator itB = itA; ++itB;
+				if (itB == hullPoints.end())
+					itB = hullPoints.begin();
+
+				//nearest point
+				const Vertex2D& P = points[e.nearestPointIndex];
+				assert(pointFlags[P.index] == POINT_NOT_USED); //we don't consider already used points!
+
+				//check that we don't create too small edges!
+				//CCVector2 AP = (P-**itA);
+				//CCVector2 PB = (**itB-P);
+				//PointCoordinateType squareLengthAP = (P-**itA).norm2();
+				//PointCoordinateType squareLengthPB = (**itB-P).norm2();
+				////at least one of the new segments must be smaller than the initial one!
+				//assert( squareLengthAP < e.squareLength || squareLengthPB < e.squareLength );
+				//if (squareLengthAP < minSquareEdgeLength || squareLengthPB < minSquareEdgeLength)
+				//{
+				//	pointFlags[P.index] = POINT_IGNORED;
+				//	edges.push(e); //retest the edge!
+				//}
+
+				//last check: the new segments must not intersect with the actual hull!
+				bool intersect = false;
+				//if (false)
+				{
+					for (VertexIterator itJ = hullPoints.begin(), itI = itJ++; itI != hullPoints.end(); ++itI, ++itJ)
+					{
+						if (itJ == hullPoints.end())
+							itJ = hullPoints.begin();
+
+						if (	((*itI)->index != (*itA)->index && (*itJ)->index != (*itA)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,**itA,P))
+							||	((*itI)->index != (*itB)->index && (*itJ)->index != (*itB)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,P,**itB)) )
+						{
+							intersect = true;
+							break;
+						}
+					}
+				}
+
+				if (!intersect)
+				{
+					//add point to concave hull
+					VertexIterator itP = hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[e.nearestPointIndex]);
+
+					//we won't use P anymore!
+					pointFlags[P.index] = POINT_USED;
+
+					somethingHasChanged = true;
+
+					//update all edges that were having 'P' as their nearest candidate as well
+					if (!edges.empty())
+					{
+						std::vector<VertexIterator> removed;
+						std::multiset<Edge>::const_iterator lastValidIt = edges.end();
+						for (std::multiset<Edge>::const_iterator it = edges.begin(); it != edges.end(); ++it)
+						{
+							if ((*it).nearestPointIndex == e.nearestPointIndex)
+							{
+								//we'll have to put them back afterwards!
+								removed.push_back((*it).itA);
+
+								edges.erase(it);
+								if (edges.empty())
+									break;
+								if (lastValidIt != edges.end())
+									it = lastValidIt;
+								else
+									it = edges.begin();
+							}
+							else
+							{
+								lastValidIt = it;
+							}
+						}
+
+						//update the removed edges info and put them back in the main list
+						for (size_t i=0; i<removed.size(); ++i)
+						{
+							VertexIterator itC = removed[i];
+							VertexIterator itD = itC; ++itD;
+							if (itD == hullPoints.end())
+								itD = hullPoints.begin();
+
+							unsigned nearestPointIndex = 0;
+							PointCoordinateType minSquareDist = FindNearestCandidate(
+																	nearestPointIndex,
+																	itC,
+																	itD,
+																	points,
+																	pointFlags,
+																	minSquareEdgeLength,
+																	maxSquareEdgeLength);
+
+							if (minSquareDist >= 0)
+							{
+								Edge e(itC,nearestPointIndex,minSquareDist);
+								edges.insert(e);
+							}
+						}
+					}
+
+					//we'll inspect the two new segments later (if necessary)
+					if ((P-**itA).norm2() > maxSquareEdgeLength)
+					{
+						unsigned nearestPointIndex = 0;
+						PointCoordinateType minSquareDist = FindNearestCandidate(
+																nearestPointIndex,
+																itA,
+																itP,
 																points,
 																pointFlags,
 																minSquareEdgeLength,
@@ -782,51 +808,36 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 
 						if (minSquareDist >= 0)
 						{
-							Edge e(itC,nearestPointIndex,minSquareDist);
+							Edge e(itA,nearestPointIndex,minSquareDist);
+							edges.insert(e);
+						}
+					}
+				
+					if ((**itB-P).norm2() > maxSquareEdgeLength)
+					{
+						unsigned nearestPointIndex = 0;
+						PointCoordinateType minSquareDist = FindNearestCandidate(
+																nearestPointIndex,
+																itP,
+																itB,
+																points,
+																pointFlags,
+																minSquareEdgeLength,
+																maxSquareEdgeLength);
+
+						if (minSquareDist >= 0)
+						{
+							Edge e(itP,nearestPointIndex,minSquareDist);
 							edges.insert(e);
 						}
 					}
 				}
-
-				//we'll inspect the two new segments later (if necessary)
-				if ((P-**itA).norm2() > maxSquareEdgeLength)
-				{
-					unsigned nearestPointIndex = 0;
-					PointCoordinateType minSquareDist = FindNearestCandidate(
-															nearestPointIndex,
-															itA,
-															itP,
-															points,
-															pointFlags,
-															minSquareEdgeLength,
-															maxSquareEdgeLength);
-
-					if (minSquareDist >= 0)
-					{
-						Edge e(itA,nearestPointIndex,minSquareDist);
-						edges.insert(e);
-					}
-				}
-				
-				if ((**itB-P).norm2() > maxSquareEdgeLength)
-				{
-					unsigned nearestPointIndex = 0;
-					PointCoordinateType minSquareDist = FindNearestCandidate(
-															nearestPointIndex,
-															itP,
-															itB,
-															points,
-															pointFlags,
-															minSquareEdgeLength,
-															maxSquareEdgeLength);
-
-					if (minSquareDist >= 0)
-					{
-						Edge e(itP,nearestPointIndex,minSquareDist);
-						edges.insert(e);
-					}
-				}
 			}
+		}
+		catch (...)
+		{
+			//not enough memory
+			return false;
 		}
 	}
 

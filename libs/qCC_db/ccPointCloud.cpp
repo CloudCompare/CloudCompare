@@ -447,7 +447,7 @@ void UpdateGridIndexes(const std::vector<int>& newIndexMap, std::vector<ccPointC
 		{
 			if (*_gridIndex >= 0)
 			{
-				assert(*_gridIndex < newIndexMap.size());
+				assert(static_cast<size_t>(*_gridIndex) < newIndexMap.size());
 				*_gridIndex = newIndexMap[*_gridIndex];
 				if (*_gridIndex >= 0)
 				{

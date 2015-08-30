@@ -568,6 +568,17 @@ public:
 #endif
 	}
 
+	//! Returns the begining of a given chunk (pointer)
+	inline const ElementType* chunkStartPtr(unsigned index) const
+	{
+		assert(index < chunksCount());
+#ifdef CC_ENV_64
+		return data() + (index * MAX_NUMBER_OF_ELEMENTS_PER_CHUNK * N);
+#else
+		return m_theChunks[index];
+#endif
+	}
+
 	//! Copy array data to another one
 	/** \param dest destination array (will be resize if necessary)
 		\return success
@@ -1121,6 +1132,17 @@ public:
 
 	//! Returns the begining of a given chunk (pointer)
 	inline ElementType* chunkStartPtr(unsigned index)
+	{
+		assert(index < chunksCount());
+#ifdef CC_ENV_64
+		return data() + (index * MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+#else
+		return m_theChunks[index];
+#endif
+	}
+
+	//! Returns the begining of a given chunk (pointer)
+	inline const ElementType* chunkStartPtr(unsigned index) const
 	{
 		assert(index < chunksCount());
 #ifdef CC_ENV_64

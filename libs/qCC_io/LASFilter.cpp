@@ -410,7 +410,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		
 		if (hasColor)
 		{
-			const colorType* rgb = theCloud->getPointColor(i);
+			const ColorCompType* rgb = theCloud->getPointColor(i);
 			point.SetColor(liblas::Color(rgb[0]<<8,rgb[1]<<8,rgb[2]<<8)); //DGM: LAS colors are stored on 16 bits!
 		}
 
@@ -685,7 +685,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//if we encounter values using 16 bits (16 bits is the standard!)
 		unsigned char colorCompBitShift = 0;
 		bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
-		colorType rgb[3] = {0,0,0};
+		ColorCompType rgb[3] = {0,0,0};
 
 		ccPointCloud* loadedCloud = 0;
 		std::vector< LasField::Shared > fieldsToLoad;
@@ -1015,9 +1015,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						}
 					}
 
-					rgb[0] = static_cast<colorType>(col[0] >> colorCompBitShift);
-					rgb[1] = static_cast<colorType>(col[1] >> colorCompBitShift);
-					rgb[2] = static_cast<colorType>(col[2] >> colorCompBitShift);
+					rgb[0] = static_cast<ColorCompType>(col[0] >> colorCompBitShift);
+					rgb[1] = static_cast<ColorCompType>(col[1] >> colorCompBitShift);
+					rgb[2] = static_cast<ColorCompType>(col[2] >> colorCompBitShift);
 
 					loadedCloud->addRGBColor(rgb);
 				}

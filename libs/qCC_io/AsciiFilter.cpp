@@ -276,7 +276,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 		if (writeColors)
 		{
 			//add rgb color
-			const colorType* col = cloud->getPointColor(i);
+			const ColorCompType* col = cloud->getPointColor(i);
 			if (saveFloatColors)
 			{
 				colorLine.append(separator);
@@ -865,24 +865,24 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 					if (cloudDesc.redIndex >= 0)
 					{
 						float multiplier = cloudDesc.hasFloatRGBColors[0] ? static_cast<float>(ccColor::MAX) : 1.0f;
-						col.r = static_cast<colorType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
+						col.r = static_cast<ColorCompType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
 					}
 					if (cloudDesc.greenIndex >= 0)
 					{
 						float multiplier = cloudDesc.hasFloatRGBColors[1] ? static_cast<float>(ccColor::MAX) : 1.0f;
-						col.g = static_cast<colorType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
+						col.g = static_cast<ColorCompType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
 					}
 					if (cloudDesc.blueIndex >= 0)
 					{
 						float multiplier = cloudDesc.hasFloatRGBColors[2] ? static_cast<float>(ccColor::MAX) : 1.0f;
-						col.b = static_cast<colorType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
+						col.b = static_cast<ColorCompType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
 					}
 				}
 				cloudDesc.cloud->addRGBColor(col.rgb);
 			}
 			else if (cloudDesc.greyIndex >= 0)
 			{
-				col.r = col.r = col.b = static_cast<colorType>(parts[cloudDesc.greyIndex].toInt());
+				col.r = col.r = col.b = static_cast<ColorCompType>(parts[cloudDesc.greyIndex].toInt());
 				cloudDesc.cloud->addRGBColor(col.rgb);
 			}
 

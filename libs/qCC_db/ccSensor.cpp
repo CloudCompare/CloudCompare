@@ -152,7 +152,7 @@ bool ccSensor::toFile_MeOnly(QFile& out) const
 	outStream << m_scale;			//scale
 
 	//color (dataVersion>=35)
-	if (out.write((const char*)&m_color.rgb,sizeof(colorType)*3) < 0)
+	if (out.write((const char*)&m_color.rgb,sizeof(ColorCompType)*3) < 0)
 		return WriteError();
 
 	//we can't save the associated position buffer (as it may be shared by multiple sensors)
@@ -184,7 +184,7 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_scale);
 
 	//color (dataVersion>=35)
-	if (in.read((char*)&m_color.rgb,sizeof(colorType)*3) < 0)
+	if (in.read((char*)&m_color.rgb,sizeof(ColorCompType)*3) < 0)
 		return ReadError();
 
 	//as the associated position buffer can't be saved directly (as it may be shared by multiple sensors)

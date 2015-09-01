@@ -1482,7 +1482,7 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 			//for each column
 			for (unsigned i=0; i<map->xSteps; ++i, ++cell)
 			{
-				const colorType* rgb = ccColor::lightGrey.rgba;
+				const ColorCompType* rgb = ccColor::lightGrey.rgba;
 
 				if (cell->count != 0)
 				{

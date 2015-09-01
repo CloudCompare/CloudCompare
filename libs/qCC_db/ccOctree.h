@@ -134,7 +134,7 @@ public: //RENDERING METHODS
 
 	static void ComputeAverageColor(CCLib::ReferenceCloud* subset,
 									ccGenericPointCloud* sourceCloud,
-									colorType meanCol[]);
+									ColorCompType meanCol[]);
 
 	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
 										ccGenericPointCloud* sourceCloud);

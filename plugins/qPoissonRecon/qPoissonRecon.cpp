@@ -113,7 +113,7 @@ public:
 
 		//color
 		assert(m_cloud->hasColors());
-		const colorType* rgb = m_cloud->getPointColor(m_index);
+		const ColorCompType* rgb = m_cloud->getPointColor(m_index);
 		d[0] = rgb[0];
 		d[1] = rgb[1];
 		d[2] = rgb[2];

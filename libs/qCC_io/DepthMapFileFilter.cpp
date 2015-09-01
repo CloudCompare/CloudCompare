@@ -177,13 +177,13 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 			//if possible, we create the array of projected colors
 			if (pc->hasColors())
 			{
-				GenericChunkedArray<3,colorType>* rgbColors = new GenericChunkedArray<3,colorType>();
+				GenericChunkedArray<3,ColorCompType>* rgbColors = new GenericChunkedArray<3,ColorCompType>();
 				rgbColors->reserve(nbPoints);
 
 				for (unsigned i=0; i<nbPoints; ++i)
 				{
-					//conversion from colorType[3] to unsigned char[3]
-					const colorType* col = pc->getPointColor(i);
+					//conversion from ColorCompType[3] to unsigned char[3]
+					const ColorCompType* col = pc->getPointColor(i);
 					rgbColors->addElement(col);
 				}
 
@@ -210,7 +210,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 			//color
 			if (theColors)
 			{
-				const colorType* C = theColors->getCurrentValue();
+				const ColorCompType* C = theColors->getCurrentValue();
 				fprintf(fp," %i %i %i",C[0],C[1],C[2]);
 				theColors->forwardIterator();
 			}

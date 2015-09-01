@@ -75,7 +75,7 @@ public:
 		assert(colorScale);
 		for (unsigned i=0; i<colorSteps; ++i)
 		{
-			const colorType* col = colorScale->getColorByRelativePos(static_cast<double>(i)/(colorSteps-1),colorSteps);
+			const ColorCompType* col = colorScale->getColorByRelativePos(static_cast<double>(i)/(colorSteps-1),colorSteps);
 			//set ramp colors as float-packed values
 			int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
 			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb)/(1<<24));

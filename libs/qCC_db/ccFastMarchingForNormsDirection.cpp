@@ -305,7 +305,7 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 			unsigned index = Yk.getPointGlobalIndex(k);
 			resolved.setValue(index,1);
 
-			const normsType& norm = theNorms->getValue(index);
+			const CompressedNormType& norm = theNorms->getValue(index);
 			const CCVector3& N = ccNormalVectors::GetNormal(norm);
 
 			//inverse point normal if necessary

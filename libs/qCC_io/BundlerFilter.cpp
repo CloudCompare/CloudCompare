@@ -413,9 +413,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						int R = tokens[0].toInt();
 						int G = tokens[1].toInt();
 						int B = tokens[2].toInt();
-						keypointsCloud->addRGBColor(static_cast<colorType>(std::min<int>(R,ccColor::MAX)),
-													static_cast<colorType>(std::min<int>(G,ccColor::MAX)),
-													static_cast<colorType>(std::min<int>(B,ccColor::MAX)));
+						keypointsCloud->addRGBColor(static_cast<ColorCompType>(std::min<int>(R,ccColor::MAX)),
+													static_cast<ColorCompType>(std::min<int>(G,ccColor::MAX)),
+													static_cast<ColorCompType>(std::min<int>(B,ccColor::MAX)));
 					}
 
 					currentLine = stream.readLine();
@@ -1141,9 +1141,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					if (col[3] > 0) //accum
 					{
 						const CCVector3* X = mntSamples->getPointPersistentPtr(i);
-						colorType avgCol[3]= {	static_cast<colorType>(col[0]/col[3]),
-												static_cast<colorType>(col[1]/col[3]),
-												static_cast<colorType>(col[2]/col[3]) };
+						ColorCompType avgCol[3]= {	static_cast<ColorCompType>(col[0]/col[3]),
+												static_cast<ColorCompType>(col[1]/col[3]),
+												static_cast<ColorCompType>(col[2]/col[3]) };
 						mntCloud->addPoint(*X);
 						mntCloud->addRGBColor(avgCol);
 						++realCount;

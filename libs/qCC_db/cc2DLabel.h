@@ -138,7 +138,7 @@ protected:
 		bool hasNormal;
 		CCVector3 normal;
 		bool hasRGB;
-		Vector3Tpl<colorType> rgb;
+		Vector3Tpl<ColorCompType> rgb;
 		bool hasSF;
 		ScalarType sfValue;
 		QString sfName;

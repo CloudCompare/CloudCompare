@@ -19,6 +19,7 @@
 
 //Local
 #include "ccSingleton.h"
+#include "ccNormalCompressor.h"
 
 //CCLib
 #include <CCGeom.h>
@@ -53,7 +54,7 @@ void ccNormalVectors::ReleaseUniqueInstance()
 ccNormalVectors::ccNormalVectors()
 	: m_theNormalHSVColors(0)
 {
-	init(QUANTIZE_LEVEL);
+	init(ccNormalCompressor::QUANTIZE_LEVEL);
 }
 
 ccNormalVectors::~ccNormalVectors()
@@ -61,6 +62,14 @@ ccNormalVectors::~ccNormalVectors()
 	if (m_theNormalHSVColors)
 		delete[] m_theNormalHSVColors;
 }
+
+CompressedNormType ccNormalVectors::GetNormIndex(const PointCoordinateType N[])
+{
+	unsigned index = ccNormalCompressor::Compress(N);
+
+	return static_cast<CompressedNormType>(index);
+}
+
 
 bool ccNormalVectors::enableNormalHSVColorsArray()
 {
@@ -73,34 +82,34 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 		return false;
 	}
 
-	m_theNormalHSVColors = new colorType[m_theNormalVectors.size()*3];
+	m_theNormalHSVColors = new ColorCompType[m_theNormalVectors.size()*3];
 	if (!m_theNormalHSVColors)
 	{
 		//not enough memory
 		return false;
 	}
 
-	colorType* rgb = m_theNormalHSVColors;
+	ColorCompType* rgb = m_theNormalHSVColors;
 	for (size_t i=0; i<m_theNormalVectors.size(); ++i, rgb+=3)
 		ccNormalVectors::ConvertNormalToRGB(m_theNormalVectors[i],rgb[0],rgb[1],rgb[2]);
 
 	return (m_theNormalHSVColors != 0);
 }
 
-const colorType* ccNormalVectors::getNormalHSVColor(unsigned index) const
+const ColorCompType* ccNormalVectors::getNormalHSVColor(unsigned index) const
 {
 	assert(m_theNormalHSVColors);
 	assert(index < m_theNormalVectors.size());
 	return m_theNormalHSVColors+3*index;
 }
 
-const colorType* ccNormalVectors::getNormalHSVColorArray() const
+const ColorCompType* ccNormalVectors::getNormalHSVColorArray() const
 {
 	assert(m_theNormalHSVColors);
 	return m_theNormalHSVColors;
 }
 
-bool ccNormalVectors::init(unsigned quantizeLevel)
+bool ccNormalVectors::init(unsigned char quantizeLevel)
 {
 	unsigned numberOfVectors = (1<<(quantizeLevel*2+3));
 	try
@@ -115,23 +124,11 @@ bool ccNormalVectors::init(unsigned quantizeLevel)
 
 	for (unsigned i=0; i<numberOfVectors; ++i)
 	{
-		Quant_dequantize_normal(i,quantizeLevel,m_theNormalVectors[i].u);
+		ccNormalCompressor::Decompress(i, m_theNormalVectors[i].u, quantizeLevel);
 		m_theNormalVectors[i].normalize();
 	}
 
 	return true;
-}
-
-void ccNormalVectors::InvertNormal(normsType &code)
-{
-	//See 'Quant_quantize_normal' for a better understanding
-	normsType mask = 1 << 2*QUANTIZE_LEVEL;
-
-	code += ((code & mask) ? -mask : mask);
-	mask <<= 1;
-	code += ((code & mask) ? -mask : mask);
-	mask <<= 1;
-	code += ((code & mask) ? -mask : mask);
 }
 
 bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
@@ -199,7 +196,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	//we check each normal orientation
 	for (unsigned i=0; i<theNormsCodes.currentSize(); i++)
 	{
-		const normsType& code = theNormsCodes.getValue(i);
+		const CompressedNormType& code = theNormsCodes.getValue(i);
 		CCVector3 N = GetNormal(code);
 
 		if (preferredOrientation == PREVIOUS)
@@ -523,7 +520,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	for (unsigned i=0; i<pointCount; i++)
 	{
 		const PointCoordinateType* N = theNorms->getCurrentValue();
-		normsType nCode = GetNormIndex(N);
+		CompressedNormType nCode = GetNormIndex(N);
 		theNormsCodes.setValue(i,nCode);
 		theNorms->forwardIterator();
 	}
@@ -814,180 +811,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 	return true;
 }
 
-/************************************************************************/
-/* Quantize a normal => 2D problem.                                     */
-/* input :																*/
-/*	n : a vector (normalized or not)[xyz]								*/
-/*	level : the level of the quantization result is 3+2*level bits		*/
-/* output :																*/
-/*	res : the result - least significant bits are filled !!!			*/
-/************************************************************************/
-unsigned ccNormalVectors::Quant_quantize_normal(const PointCoordinateType* n, unsigned level)
-{
-	if (level == 0)
-		return 0;
-
-	/// compute in which sector lie the elements
-	unsigned res = 0;
-	PointCoordinateType x,y,z;
-	if (n[0] >= 0) { x = n[0]; } else { res |= 4; x = -n[0]; }
-	if (n[1] >= 0) { y = n[1]; } else { res |= 2; y = -n[1]; }
-	if (n[2] >= 0) { z = n[2]; } else { res |= 1; z = -n[2]; }
-
-	/// scale the sectored vector - early return for null vector
-	PointCoordinateType psnorm = x + y + z;
-	if (psnorm == 0)
-	{
-		res <<= (level<<1);
-		return res;
-	}
-	psnorm = 1 / psnorm;
-	x *= psnorm; y *= psnorm; z *= psnorm;
-
-	/// compute the box
-	PointCoordinateType box[6] = { 0, 0, 0, 1, 1, 1 };
-	/// then for each required level, quantize...
-	bool flip = false;
-	while (level > 0)
-	{
-		//next level
-		res <<= 2;
-		--level;
-		PointCoordinateType halfBox[3] = {	(box[0] + box[3])/2,
-											(box[1] + box[4])/2,
-											(box[2] + box[5])/2 };
-
-		unsigned sector = 3;
-		if (flip)
-		{
-			     if (z < halfBox[2]) sector = 2;
-			else if (y < halfBox[1]) sector = 1;
-			else if (x < halfBox[0]) sector = 0;
-		}
-		else
-		{
-			     if (z > halfBox[2]) sector = 2;
-			else if (y > halfBox[1]) sector = 1;
-			else if (x > halfBox[0]) sector = 0;
-		}
-		res |= sector;
-		/// do not do the last operation ...
-		if (level == 0)
-			return res;
-		// fd : a little waste for less branching and smaller
-		// code.... which one will be fastest ???
-		if (flip)
-		{
-			if (sector != 3)
-				psnorm = box[sector];
-			box[0] = halfBox[0];
-			box[1] = halfBox[1];
-			box[2] = halfBox[2];
-			if (sector != 3)
-			{
-				box[3+sector] = box[sector];
-				box[sector] = psnorm;
-			}
-			else
-			{
-				flip = false;
-			}
-		}
-		else
-		{
-			if (sector != 3)
-				psnorm = box[3+sector];
-			box[3] = halfBox[0];
-			box[4] = halfBox[1];
-			box[5] = halfBox[2];
-			if (sector != 3)
-			{
-				box[sector] = box[3+sector];
-				box[3+sector] = psnorm;
-			}
-			else
-			{
-				flip = true;
-			}
-		}
-	}
-
-	return 0;
-}
-
-/************************************************************************/
-/* DeQuantize a normal => 2D problem.                                   */
-/* input :                                                              */
-/*		q : quantized normal                                            */
-/*		level : the level of the quantized normal has 3+2*level bits	*/
-/* output :																*/
-/*		res : the result : a NON-normalized normal is returned			*/
-/************************************************************************/
-void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res)
-{
-	/// special case for level = 0
-	if (level == 0)
-	{
-		res[0] = ((q & 4) != 0 ? -PC_ONE : PC_ONE);
-		res[1] = ((q & 2) != 0 ? -PC_ONE : PC_ONE);
-		res[2] = ((q & 1) != 0 ? -PC_ONE : PC_ONE);
-		return;
-	}
-
-	bool flip = false;
-
-	/// recompute the box in the sector...
-	PointCoordinateType box[6] = { 0, 0, 0, 1, 1, 1 };
-
-	unsigned l_shift = (level<<1);
-	for (unsigned k=0; k<level; ++k)
-	{
-		l_shift -= 2;
-		unsigned sector = (q >> l_shift) & 3;
-		if (flip)
-		{
-			PointCoordinateType tmp = box[sector];
-			box[0] = (box[0] + box[3]) / 2;
-			box[1] = (box[1] + box[4]) / 2;
-			box[2] = (box[2] + box[5]) / 2;
-			if (sector != 3)
-			{
-				box[3+sector] = box[sector];
-				box[sector] = tmp;
-			}
-			else
-			{
-				flip = false;
-			}
-		}
-		else
-		{
-			PointCoordinateType tmp = (sector != 3 ? box[3+sector] : 0);
-			
-			box[3] = (box[0] + box[3]) / 2;
-			box[4] = (box[1] + box[4]) / 2;
-			box[5] = (box[2] + box[5]) / 2;
-			
-			if (sector != 3)
-			{
-				box[sector] = box[3+sector];
-				box[3+sector] = tmp;
-			}
-			else
-			{
-				flip = true;
-			}
-		}
-	}
-
-	//get the sector
-	unsigned sector = q >> (level+level);
-
-	res[0] = ((sector & 4) != 0 ? -(box[3] + box[0]) : box[3] + box[0]);
-	res[1] = ((sector & 2) != 0 ? -(box[4] + box[1]) : box[4] + box[1]);
-	res[2] = ((sector & 1) != 0 ? -(box[5] + box[2]) : box[5] + box[2]);
-}
-
 QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike_deg, double& dip_deg)
 {
 	int iStrike = static_cast<int>(strike_deg);
@@ -1052,7 +875,7 @@ void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, double& H, double& 
 	V = 1.0;
 }
 
-void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R, colorType& G, colorType& B)
+void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, ColorCompType& R, ColorCompType& G, ColorCompType& B)
 {
 	int hi = ((static_cast<int>(H)/60) % 6);
 	double f = 0;
@@ -1087,12 +910,12 @@ void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R
 		break;
 	}
 
-	R = static_cast<colorType>(r * ccColor::MAX);
-	G = static_cast<colorType>(g * ccColor::MAX);
-	B = static_cast<colorType>(b * ccColor::MAX);
+	R = static_cast<ColorCompType>(r * ccColor::MAX);
+	G = static_cast<ColorCompType>(g * ccColor::MAX);
+	B = static_cast<ColorCompType>(b * ccColor::MAX);
 }
 
-void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, colorType& R, colorType& G, colorType& B)
+void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, ColorCompType& R, ColorCompType& G, ColorCompType& B)
 {
 	double H,S,V;
 	ConvertNormalToHSV(N,H,S,V);

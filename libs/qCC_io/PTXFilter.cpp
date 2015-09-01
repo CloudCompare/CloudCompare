@@ -331,7 +331,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						//color
 						if (loadColors)
 						{
-							colorType rgb[3];
+							ColorCompType rgb[3];
 							for (int c=0; c<3; ++c)
 							{
 								bool ok;
@@ -339,7 +339,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 								ok &= (temp <= static_cast<unsigned>(ccColor::MAX));
 								if (ok)
 								{
-									rgb[c] = static_cast<colorType>(temp);
+									rgb[c] = static_cast<ColorCompType>(temp);
 								}
 								else
 								{

@@ -120,14 +120,14 @@ public:
 		It may even be 0 if the value shouldn't be displayed.
 		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
-	virtual const colorType* geScalarValueColor(ScalarType d) const = 0;
+	virtual const ColorCompType* geScalarValueColor(ScalarType d) const = 0;
 
 	//! Returns color corresponding to a given point associated scalar value
 	/** The returned value depends on the current scalar field display parameters.
 		It may even be 0 if the value shouldn't be displayed.
 		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
-	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const = 0;
+	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const = 0;
 
 	//! Returns scalar value associated to a given point
 	/** The returned value is taken from the current displayed scalar field
@@ -138,12 +138,12 @@ public:
 	//! Returns color corresponding to a given point
 	/** WARNING: color array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
-	virtual const colorType* getPointColor(unsigned pointIndex) const = 0;
+	virtual const ColorCompType* getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
 	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
-	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const = 0;
+	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const = 0;
 
 	//! Returns normal corresponding to a given point
 	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)

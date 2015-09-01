@@ -2252,9 +2252,9 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 					//add point
 					proj->addPoint(P);
 					//and color
-					colorType C[3] = {	static_cast<colorType>(r),
-										static_cast<colorType>(g),
-										static_cast<colorType>(b) };
+					ColorCompType C[3] = {	static_cast<ColorCompType>(r),
+										static_cast<ColorCompType>(g),
+										static_cast<ColorCompType>(b) };
 					proj->addRGBColor(C);
 					++realCount;
 				}

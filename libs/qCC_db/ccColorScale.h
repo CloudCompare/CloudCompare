@@ -214,7 +214,7 @@ public:
 		\param outOfRangeColor default color to return if relativePos if out of [0;1]
 		\return corresponding color
 	**/
-	inline const colorType* getColorByValue(double value, const colorType* outOfRangeColor = 0) const
+	inline const ColorCompType* getColorByValue(double value, const ColorCompType* outOfRangeColor = 0) const
 	{
 		assert(m_updated && !m_relative);
 		double relativePos = getRelativePosition(value);
@@ -226,7 +226,7 @@ public:
 		\param outOfRangeColor default color to return if relativePos if out of [0;1]
 		\return corresponding color
 	**/
-	inline const colorType* getColorByRelativePos(double relativePos, const colorType* outOfRangeColor = 0) const
+	inline const ColorCompType* getColorByRelativePos(double relativePos, const ColorCompType* outOfRangeColor = 0) const
 	{
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)
@@ -241,7 +241,7 @@ public:
 		\param outOfRangeColor default color to return if relativePos if out of [0;1]
 		\return corresponding color
 	**/
-	inline const colorType* getColorByRelativePos(double relativePos, unsigned steps, const colorType* outOfRangeColor = 0) const
+	inline const ColorCompType* getColorByRelativePos(double relativePos, unsigned steps, const ColorCompType* outOfRangeColor = 0) const
 	{
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)

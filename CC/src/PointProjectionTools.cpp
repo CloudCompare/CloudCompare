@@ -118,7 +118,6 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 	float q = 1.0f/(1.0f+tan_alpha*tan_alpha);
 
 	cloud->placeIteratorAtBegining();
-	//normsType* _theNorms = theNorms.begin();
 
 	NormalizedProgress* nprogress = 0;
 	if (progressCb)

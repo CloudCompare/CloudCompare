@@ -334,7 +334,7 @@ void ccHistogramWindow::refreshBars()
 			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
 			valueData[i] = m_histoValues[i];
 
-			const colorType* col= m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
+			const ColorCompType* col= m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
 			if (!col) //hidden values may have no associated color!
 				col = ccColor::lightGrey.rgba;
 			colors[i] = QColor(col[0],col[1],col[2]);
@@ -465,7 +465,7 @@ void ccHistogramWindow::refresh()
 			//import color for the current bin
 			if (colorScheme != USE_SOLID_COLOR)
 			{
-				const colorType* col = 0;
+				const ColorCompType* col = 0;
 				if (colorScheme == USE_SF_SCALE)
 				{
 					//equivalent SF value
@@ -539,7 +539,7 @@ void ccHistogramWindow::refresh()
 		m_arrowLeft->setCurrentVal(satRange.start());
 		if (colorScale)
 		{
-			const colorType* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0,m_associatedSF->getColorRampSteps());
+			const ColorCompType* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0,m_associatedSF->getColorRampSteps());
 			if (col)
 				m_arrowLeft->setColor(col[0],col[1],col[2]);
 		}
@@ -550,7 +550,7 @@ void ccHistogramWindow::refresh()
 		m_arrowRight->setCurrentVal(satRange.stop());
 		if (colorScale)
 		{
-			const colorType* col = colorScale->getColorByRelativePos(1.0,m_associatedSF->getColorRampSteps());
+			const ColorCompType* col = colorScale->getColorByRelativePos(1.0,m_associatedSF->getColorRampSteps());
 			if (col)
 				m_arrowRight->setColor(col[0],col[1],col[2]);
 		}

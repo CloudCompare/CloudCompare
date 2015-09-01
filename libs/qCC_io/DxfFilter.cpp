@@ -258,8 +258,8 @@ public:
 						//We must also check that the color is the same (if any)
 						if (faceCol || vertices->hasColors())
 						{
-							const colorType* _faceCol = faceCol ? faceCol->rgb : ccColor::white.rgba;
-							const colorType* _vertCol = vertices->hasColors() ? vertices->getPointColor(j) : ccColor::white.rgba;
+							const ColorCompType* _faceCol = faceCol ? faceCol->rgb : ccColor::white.rgba;
+							const ColorCompType* _vertCol = vertices->hasColors() ? vertices->getPointColor(j) : ccColor::white.rgba;
 							useCurrentVertex = (_faceCol[0] == _vertCol[0] && _faceCol[1] == _vertCol[1] && _faceCol[2] == _vertCol[2]);
 						}
 
@@ -463,9 +463,9 @@ private:
 				return false;
 		}
 
-		ccColour.r = static_cast<colorType>( dxfColors[colourIndex][0] * ccColor::MAX );
-		ccColour.g = static_cast<colorType>( dxfColors[colourIndex][1] * ccColor::MAX );
-		ccColour.b = static_cast<colorType>( dxfColors[colourIndex][2] * ccColor::MAX );
+		ccColour.r = static_cast<ColorCompType>( dxfColors[colourIndex][0] * ccColor::MAX );
+		ccColour.g = static_cast<ColorCompType>( dxfColors[colourIndex][1] * ccColor::MAX );
+		ccColour.b = static_cast<ColorCompType>( dxfColors[colourIndex][2] * ccColor::MAX );
 
 		return true;
 	}

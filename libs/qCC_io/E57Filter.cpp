@@ -481,7 +481,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			if (hasColors)
 			{
 				//Normalize color to 0 - 255
-				const colorType* C = cloud->getPointColor(index);
+				const ColorCompType* C = cloud->getPointColor(index);
 				arrays.redData[i]	= static_cast<double>(C[0]);
 				arrays.greenData[i]	= static_cast<double>(C[1]);
 				arrays.blueData[i]	= static_cast<double>(C[2]);
@@ -1706,13 +1706,13 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			if (hasColors)
 			{
 				//Normalize color to 0 - 255
-				colorType C[3] = { 0, 0, 0 };
+				ColorCompType C[3] = { 0, 0, 0 };
 				if (!arrays.redData.empty())
-					C[0] = static_cast<colorType>(((arrays.redData[i] - colorRedOffset) * 255) / colorRedRange);
+					C[0] = static_cast<ColorCompType>(((arrays.redData[i] - colorRedOffset) * 255) / colorRedRange);
 				if (!arrays.greenData.empty())
-					C[1] = static_cast<colorType>(((arrays.greenData[i] - colorGreenOffset) * 255) / colorGreenRange);
+					C[1] = static_cast<ColorCompType>(((arrays.greenData[i] - colorGreenOffset) * 255) / colorGreenRange);
 				if (!arrays.blueData.empty())
-					C[2] = static_cast<colorType>(((arrays.blueData[i] - colorBlueOffset) * 255) / colorBlueRange);
+					C[2] = static_cast<ColorCompType>(((arrays.blueData[i] - colorBlueOffset) * 255) / colorBlueRange);
 				
 				cloud->addRGBColor(C);
 			}

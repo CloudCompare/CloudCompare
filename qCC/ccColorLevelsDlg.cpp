@@ -92,7 +92,7 @@ void ccColorLevelsDlg::updateHistogram()
 				if (	channelComboBox->currentIndex() == RGB
 					||	channelComboBox->currentIndex() == i+1 )
 				{
-					histoValues[i].resize(1 << (sizeof(colorType)*8),0);
+					histoValues[i].resize(1 << (sizeof(ColorCompType)*8),0);
 				}
 			}
 		}
@@ -134,7 +134,7 @@ void ccColorLevelsDlg::updateHistogram()
 		{
 			for (unsigned i=0; i<pointCount; ++i)
 			{
-				const colorType* rgb = m_cloud->getPointColor(i);
+				const ColorCompType* rgb = m_cloud->getPointColor(i);
 				if (histoValuesR)
 					histoValuesR->at(rgb[0])++;
 				if (histoValuesG)
@@ -190,8 +190,8 @@ void ccColorLevelsDlg::onApply()
 		int pOut = s_outputLevels[1] - s_outputLevels[0];
 		for (unsigned i=0; i<pointCount; ++i)
 		{
-			const colorType* rgb = m_cloud->getPointColor(i);
-			colorType newRgb[3];
+			const ColorCompType* rgb = m_cloud->getPointColor(i);
+			ColorCompType newRgb[3];
 			for (unsigned c=0; c<3; ++c)
 			{
 				if (applyRGB[c])
@@ -202,7 +202,7 @@ void ccColorLevelsDlg::onApply()
 						double u = (static_cast<double>(rgb[c]) - s_inputLevels[0]) / qIn;
 						newC = s_outputLevels[0] + u * pOut; 
 					}
-					newRgb[c] = static_cast<colorType>(std::max<double>(std::min<double>(newC,ccColor::MAX),0.0));
+					newRgb[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC,ccColor::MAX),0.0));
 				}
 				else
 				{
@@ -218,7 +218,7 @@ void ccColorLevelsDlg::onApply()
 			else
 			{
 				//DGM FIXME: dirty!
-				memcpy(const_cast<colorType*>(rgb),newRgb,sizeof(colorType)*3);
+				memcpy(const_cast<ColorCompType*>(rgb),newRgb,sizeof(ColorCompType)*3);
 			}
 		}
 

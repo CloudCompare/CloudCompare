@@ -2270,7 +2270,7 @@ void ccRasterizeTool::generateContours()
 							poly->setColor(ccColor::darkGrey);
 							if (colorize)
 							{
-								const colorType* col = activeLayer->getColor(v);
+								const ColorCompType* col = activeLayer->getColor(v);
 								if (col)
 									poly->setColor(ccColor::Rgb(col));
 							}

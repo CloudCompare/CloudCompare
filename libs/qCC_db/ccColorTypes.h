@@ -22,13 +22,13 @@
 #include <stdlib.h>
 
 //! Default color components type (R,G and B)
-typedef unsigned char colorType;
+typedef unsigned char ColorCompType;
 
 //! Colors namespace
 namespace ccColor
 {
 	//! Max value of a single color component (default type)
-	const colorType MAX = 255;
+	const ColorCompType MAX = 255;
 
 	//! RGB color structure
 	template <typename Type> class RgbTpl
@@ -68,7 +68,7 @@ namespace ccColor
 	//! 3 components, unsigned byte type
 	typedef RgbTpl<unsigned char> Rgbub;
 	//! 3 components, default type
-	typedef RgbTpl<colorType> Rgb;
+	typedef RgbTpl<ColorCompType> Rgb;
 
 	//! RGBA color structure
 	template <class Type> class RgbaTpl
@@ -117,11 +117,11 @@ namespace ccColor
 	//! 4 components, unsigned byte type
 	typedef RgbaTpl<unsigned char> Rgbaub;
 	//! 4 components, default type
-	typedef RgbaTpl<colorType> Rgba;
+	typedef RgbaTpl<ColorCompType> Rgba;
 
 	// Predefined colors (default type)
 	static const Rgba white						(MAX,MAX,MAX,MAX);
-	static const Rgba lightGrey					(static_cast<colorType>(MAX*0.8),static_cast<colorType>(MAX*0.8),static_cast<colorType>(MAX*0.8),MAX);
+	static const Rgba lightGrey					(static_cast<ColorCompType>(MAX*0.8),static_cast<ColorCompType>(MAX*0.8),static_cast<ColorCompType>(MAX*0.8),MAX);
 	static const Rgba darkGrey					(MAX/2,MAX/2,MAX/2,MAX);
 	static const Rgba red						(MAX,0,0,MAX);
 	static const Rgba green						(0,MAX,0,MAX);
@@ -160,15 +160,15 @@ namespace ccColor
 		static Rgb Random(bool lightOnly = true)
 		{
 			Rgb col;
-			col.r = static_cast<colorType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
-			col.g = static_cast<colorType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
+			col.r = static_cast<ColorCompType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
+			col.g = static_cast<ColorCompType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
 			if (lightOnly)
 			{
-				col.b = MAX - static_cast<colorType>((static_cast<double>(col.r)+static_cast<double>(col.g))/2); //cast to double to avoid overflow (whatever the type of colorType!!!)
+				col.b = MAX - static_cast<ColorCompType>((static_cast<double>(col.r)+static_cast<double>(col.g))/2); //cast to double to avoid overflow (whatever the type of ColorCompType!!!)
 			}
 			else
 			{
-				col.b = static_cast<colorType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
+				col.b = static_cast<ColorCompType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
 			}
 
 			return col;

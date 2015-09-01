@@ -192,7 +192,7 @@ protected:
 	//Static arrays for OpenGL drawing
 	static PointCoordinateType* GetVertexBuffer();
 	static PointCoordinateType* GetNormalsBuffer();
-	static colorType* GetColorsBuffer();
+	static ColorCompType* GetColorsBuffer();
 
 	//! Returns a pre-initialized array of vertex indexes for wired display
 	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default

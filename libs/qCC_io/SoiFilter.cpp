@@ -138,7 +138,7 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			fscanf(fp,"%f %f %f %i",P,P+1,P+2,&c);
 
 			loadedCloud->addPoint(CCVector3::fromArray(P));
-			loadedCloud->addGreyColor(static_cast<colorType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
+			loadedCloud->addGreyColor(static_cast<ColorCompType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
 
 			nprogress.oneStep();
 		}

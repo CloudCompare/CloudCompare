@@ -417,7 +417,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 	info.hasRGB = info.cloud->hasColors();
 	if (info.hasRGB)
 	{
-		const colorType* C = info.cloud->getPointColor(info.pointIndex);
+		const ColorCompType* C = info.cloud->getPointColor(info.pointIndex);
 		assert(C);
 		info.rgb[0] = C[0];
 		info.rgb[1] = C[1];

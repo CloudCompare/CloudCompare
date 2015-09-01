@@ -1165,7 +1165,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			if (header.colors)
 			{
 				unsigned char C[3];
-				if (in.read((char*)C,sizeof(colorType)*3) < 0)
+				if (in.read((char*)C,sizeof(ColorCompType)*3) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity colors !\n",k);
 					return CC_FERR_READING;

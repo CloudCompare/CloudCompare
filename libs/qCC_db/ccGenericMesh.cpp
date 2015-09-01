@@ -119,8 +119,8 @@ PointCoordinateType* ccGenericMesh::GetNormalsBuffer()
 }
 
 //Colors buffer
-colorType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
-colorType* ccGenericMesh::GetColorsBuffer()
+ColorCompType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
+ColorCompType* ccGenericMesh::GetColorsBuffer()
 {
 	return s_rgbBuffer;
 }
@@ -345,7 +345,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//we mimic the way ccMesh beahves by using virtual chunks!
 			unsigned chunks = static_cast<unsigned>(ceil(static_cast<double>(displayedTriNum)/MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
 			unsigned chunkStart = 0;
-			const colorType* col = 0;
+			const ColorCompType* col = 0;
 			for (unsigned k=0; k<chunks; ++k, chunkStart += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
 			{
 				//virtual chunk size
@@ -367,35 +367,35 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//scalar field
 				if (glParams.showSF)
 				{
-					colorType* _rgbColors = GetColorsBuffer();
+					ColorCompType* _rgbColors = GetColorsBuffer();
 					assert(colorScale);
 					for (unsigned n=0; n<chunkSize; n+=decimStep)
 					{
 						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
 						col = currentDisplayedScalarField->getValueColor(ti->i1);
-						memcpy(_rgbColors,col,sizeof(colorType)*3);
+						memcpy(_rgbColors,col,sizeof(ColorCompType)*3);
 						_rgbColors += 3;
 						col = currentDisplayedScalarField->getValueColor(ti->i2);
-						memcpy(_rgbColors,col,sizeof(colorType)*3);
+						memcpy(_rgbColors,col,sizeof(ColorCompType)*3);
 						_rgbColors += 3;
 						col = currentDisplayedScalarField->getValueColor(ti->i3);
-						memcpy(_rgbColors,col,sizeof(colorType)*3);
+						memcpy(_rgbColors,col,sizeof(ColorCompType)*3);
 						_rgbColors += 3;
 					}
 				}
 				//colors
 				else if (glParams.showColors)
 				{
-					colorType* _rgbColors = GetColorsBuffer();
+					ColorCompType* _rgbColors = GetColorsBuffer();
 
 					for (unsigned n=0; n<chunkSize; n+=decimStep)
 					{
 						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i1),sizeof(colorType)*3);
+						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i1),sizeof(ColorCompType)*3);
 						_rgbColors += 3;
-						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i2),sizeof(colorType)*3);
+						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i2),sizeof(ColorCompType)*3);
 						_rgbColors += 3;
-						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i3),sizeof(colorType)*3);
+						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i3),sizeof(ColorCompType)*3);
 						_rgbColors += 3;
 					}
 				}
@@ -453,7 +453,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else
 		{
 			//current vertex color
-			const colorType *col1=0,*col2=0,*col3=0;
+			const ColorCompType *col1=0,*col2=0,*col3=0;
 			//current vertex normal
 			const PointCoordinateType *N1=0,*N2=0,*N3=0;
 			//current vertex texture coordinates

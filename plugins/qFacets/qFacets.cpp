@@ -499,9 +499,9 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 					{
 						col = ccColor::Generator::Random();
 						assert(c_darkColorValue <= 1.0);
-						darkCol.r = static_cast<colorType>(static_cast<double>(col.r) * c_darkColorValue);
-						darkCol.g = static_cast<colorType>(static_cast<double>(col.g) * c_darkColorValue);
-						darkCol.b = static_cast<colorType>(static_cast<double>(col.b) * c_darkColorValue);
+						darkCol.r = static_cast<ColorCompType>(static_cast<double>(col.r) * c_darkColorValue);
+						darkCol.g = static_cast<ColorCompType>(static_cast<double>(col.g) * c_darkColorValue);
+						darkCol.b = static_cast<ColorCompType>(static_cast<double>(col.b) * c_darkColorValue);
 					}
 					else
 					{

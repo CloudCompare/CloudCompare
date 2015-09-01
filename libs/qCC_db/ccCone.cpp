@@ -104,7 +104,7 @@ bool ccCone::buildUp()
 	{
 		//bottom center
 		verts->addPoint(bottomCenter);
-		normsType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0,0,-1).u);
+		CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0,0,-1).u);
 		m_triNormals->addElement(nIndex);
 		//top center
 		verts->addPoint(topCenter);
@@ -149,7 +149,7 @@ bool ccCone::buildUp()
 				CCVector3 N = v.cross(u);
 				N.normalize();
 
-				normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+				CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
 				m_triNormals->addElement(nIndex);
 			}
 		}

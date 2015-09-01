@@ -463,7 +463,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 				if (*d != 0)
 				{
 					double relPos = static_cast<double>(*d)/static_cast<double>(m_densityGrid->minMaxDensity[1]);
-					const colorType* col = m_densityColorScale->getColorByRelativePos(relPos,m_densityColorScaleSteps);
+					const ColorCompType* col = m_densityColorScale->getColorByRelativePos(relPos,m_densityColorScaleSteps);
 					brush.setColor(QColor(	static_cast<int>(col[0]),
 						static_cast<int>(col[1]),
 						static_cast<int>(col[2]),

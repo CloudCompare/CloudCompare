@@ -381,11 +381,11 @@ public:
 	virtual void removeFromDisplay(const ccGenericGLDisplay* win); //for proper VBO release
 
 	//inherited from ccGenericPointCloud
-	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const;
-	virtual const colorType* geScalarValueColor(ScalarType d) const;
+	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const;
+	virtual const ColorCompType* geScalarValueColor(ScalarType d) const;
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
-	virtual const colorType* getPointColor(unsigned pointIndex) const;
-	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const;
+	virtual const ColorCompType* getPointColor(unsigned pointIndex) const;
+	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const;
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const;
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
 	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0));
@@ -403,12 +403,12 @@ public:
 	//! Sets a particular point color
 	/** WARNING: colors must be enabled.
 	**/
-	void setPointColor(unsigned pointIndex, const colorType* col);
+	void setPointColor(unsigned pointIndex, const ColorCompType* col);
 
 	//! Sets a particular point compressed normal
 	/** WARNING: normals must be enabled.
 	**/
-	void setPointNormalIndex(unsigned pointIndex, normsType norm);
+	void setPointNormalIndex(unsigned pointIndex, CompressedNormType norm);
 
 	//! Sets a particular point normal (shortcut)
 	/** WARNING: normals must be enabled.
@@ -419,7 +419,7 @@ public:
 	//! Pushes a compressed normal vector
 	/** \param index compressed normal vector
 	**/
-	void addNormIndex(normsType index);
+	void addNormIndex(CompressedNormType index);
 
 	//! Pushes a normal vector on stack (shortcut)
 	/** \param N normal vector
@@ -455,18 +455,18 @@ public:
         \param g green component
         \param b blue component
     **/
-	void addRGBColor(colorType r, colorType g, colorType b);
+	void addRGBColor(ColorCompType r, ColorCompType g, ColorCompType b);
 
 	//! Pushes an RGB color on stack
 	/** \param C RGB color (size: 3)
 	**/
-	void addRGBColor(const colorType* C);
+	void addRGBColor(const ColorCompType* C);
 
 	//! Pushes a grey color on stack
 	/** Shortcut: color is converted to RGB=(g,g,g).
         \param g grey component
 	**/
-	void addGreyColor(colorType g);
+	void addGreyColor(ColorCompType g);
 
     //! Multiplies all color components of all points by coefficients
     /** If the cloud has no color, all points are considered white and
@@ -508,7 +508,7 @@ public:
         \param b blue component
 		\return success
     **/
-	bool setRGBColor(colorType r, colorType g, colorType b);
+	bool setRGBColor(ColorCompType r, ColorCompType g, ColorCompType b);
 
 	//! Set a unique color for the whole cloud
 	/** Color array is automatically allocated if necessary.

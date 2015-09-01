@@ -803,7 +803,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 			{
 				//compress normal
 				index = static_cast<int>(normals->currentSize());
-				normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+				CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
 				normals->addElement(nIndex);
 			}
 			mesh->addTriangleNormalIndexes(index,index,index);
@@ -985,7 +985,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		{
 			//compress normal
 			int index = static_cast<int>(normals->currentSize());
-			normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+			CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
 			normals->addElement(nIndex);
 			mesh->addTriangleNormalIndexes(index,index,index);
 		}

@@ -188,7 +188,7 @@ public: //projection tools
 								double posIndex = 0 ) const;
 
 	//! 2D grid of colors
-	typedef GenericChunkedArray<3,colorType> ColorGrid;
+	typedef GenericChunkedArray<3,ColorCompType> ColorGrid;
 
 	//! Projects a set of point cloud colors in the sensor frame defined by this instance
 	/** WARNING: this method uses the cloud global iterator

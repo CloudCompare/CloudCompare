@@ -571,7 +571,7 @@ PointCoordinateType ccClipBox::computeArrowsScale() const
 	return scale;
 }
 
-const colorType c_lightComp = ccColor::MAX/2;
+const ColorCompType c_lightComp = ccColor::MAX/2;
 const ccColor::Rgb c_lightRed  (ccColor::MAX, c_lightComp , c_lightComp);
 const ccColor::Rgb c_lightGreen(c_lightComp,  ccColor::MAX, c_lightComp);
 const ccColor::Rgb c_lightBlue (c_lightComp,  c_lightComp , ccColor::MAX);

@@ -462,7 +462,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		{
 			for (unsigned i=0; i<numberOfVertexes; ++i)
 			{
-				const colorType* c = pc->getPointColor(i);
+				const ColorCompType* c = pc->getPointColor(i);
 				ccColor::Rgbf col(	static_cast<float>(c[0])/ccColor::MAX,
 									static_cast<float>(c[1])/ccColor::MAX,
 									static_cast<float>(c[2])/ccColor::MAX);

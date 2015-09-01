@@ -600,7 +600,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					objWarnings[INVALID_NORMALS] = true;
 					N.normalize();
 				}
-				normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+				CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
 
 				normals->addElement(nIndex); //we don't know yet if it's per-vertex or per-triangle normal...
 				++normsRead;

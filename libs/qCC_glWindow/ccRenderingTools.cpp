@@ -389,7 +389,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				double value = sortedKeyValues.front() + (j * maxRange) / scaleMaxHeight;
 				if (logScale)
 					value = exp(value*c_log10);
-				const colorType* col = sf->getColor(static_cast<ScalarType>(value));
+				const ColorCompType* col = sf->getColor(static_cast<ScalarType>(value));
 				glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 
 				glVertex2i(x,y+j);
@@ -425,7 +425,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			double value = sortedKeyValues.front();
 			if (logScale)
 				value = exp(value*c_log10);
-			const colorType* col = sf->getColor(static_cast<ScalarType>(value));
+			const ColorCompType* col = sf->getColor(static_cast<ScalarType>(value));
 			glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 			glBegin(GL_POLYGON);
 			glVertex2i(x,y);

@@ -399,12 +399,12 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 	if (glParams->showSF)
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
-		const colorType* col = theAssociatedCloud->geScalarValueColor(dist);
+		const ColorCompType* col = theAssociatedCloud->geScalarValueColor(dist);
 		glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 	}
 	else if (glParams->showColors)
 	{
-		colorType col[3];
+		ColorCompType col[3];
 		ComputeAverageColor(cell.points,theAssociatedCloud,col);
 		glColor3ubv(col);
 	}
@@ -466,7 +466,7 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 	return true;
 }
 
-void ccOctree::ComputeAverageColor(CCLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud, colorType meanCol[])
+void ccOctree::ComputeAverageColor(CCLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud, ColorCompType meanCol[])
 {
 	if (!subset || subset->size()==0 || !sourceCloud)
 		return;
@@ -481,15 +481,15 @@ void ccOctree::ComputeAverageColor(CCLib::ReferenceCloud* subset, ccGenericPoint
 	unsigned n=subset->size();
 	for (unsigned i=0;i<n;++i)
 	{
-		const colorType* _theColors = sourceCloud->getPointColor(subset->getPointGlobalIndex(i));
+		const ColorCompType* _theColors = sourceCloud->getPointColor(subset->getPointGlobalIndex(i));
 		Rsum += (double)*_theColors++;
 		Gsum += (double)*_theColors++;
 		Bsum += (double)*_theColors++;
 	}
 
-	meanCol[0] = colorType( Rsum/(double)n );
-	meanCol[1] = colorType( Gsum/(double)n );
-	meanCol[2] = colorType( Bsum/(double)n );
+	meanCol[0] = ColorCompType( Rsum/(double)n );
+	meanCol[1] = ColorCompType( Gsum/(double)n );
+	meanCol[2] = ColorCompType( Bsum/(double)n );
 }
 
 CCVector3 ccOctree::ComputeAverageNorm(CCLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud)

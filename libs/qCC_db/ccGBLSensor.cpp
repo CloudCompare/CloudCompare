@@ -354,7 +354,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 					unsigned index = y*m_depthBuffer.width+x;
 				
 					//accumulate color
-					const colorType* srcC = theColors.getValue(i);
+					const ColorCompType* srcC = theColors.getValue(i);
 					float* destC = colorAccumGrid->getValue(index);
 
 					destC[0] += srcC[0];
@@ -378,10 +378,10 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 			if (pointPerDMCell[i] != 0)
 			{
 				const float* srcC = colorAccumGrid->getValue(i);
-				colorType* destC = colorGrid->getValue(i);
-				destC[0] = static_cast<colorType>( srcC[0] / pointPerDMCell[i] );
-				destC[1] = static_cast<colorType>( srcC[1] / pointPerDMCell[i] );
-				destC[2] = static_cast<colorType>( srcC[2] / pointPerDMCell[i] );
+				ColorCompType* destC = colorGrid->getValue(i);
+				destC[0] = static_cast<ColorCompType>( srcC[0] / pointPerDMCell[i] );
+				destC[1] = static_cast<ColorCompType>( srcC[1] / pointPerDMCell[i] );
+				destC[2] = static_cast<ColorCompType>( srcC[2] / pointPerDMCell[i] );
 			}
 		}
 	}

@@ -55,23 +55,10 @@ public:
 	//! Returns the precomputed normal corresponding to a given compressed index
 	inline const CCVector3& getNormal(unsigned normIndex) const { return m_theNormalVectors[normIndex]; }
 
-	//! Compressed normals quantization level (number of directions/bits: 2^(2*N+3))
-	static const unsigned QUANTIZE_LEVEL = 6;
-
-	//! Computes the normal corresponding to a given compressed index
-	/** Warning: slower than 'GetNormal' (but avoids computation of the whole table)
-	**/
-	static inline void ComputeNormal(normsType normIndex, PointCoordinateType N[]) { Quant_dequantize_normal(normIndex,QUANTIZE_LEVEL,N); }
-
 	//! Returns the compressed index corresponding to a normal vector
-	static inline normsType GetNormIndex(const PointCoordinateType N[]) { unsigned index = Quant_quantize_normal(N,QUANTIZE_LEVEL); return static_cast<normsType>(index); }
+	static CompressedNormType GetNormIndex(const PointCoordinateType N[]);
 	//! Returns the compressed index corresponding to a normal vector (shortcut)
-	static inline normsType GetNormIndex(const CCVector3& N) { return GetNormIndex(N.u); }
-
-	//! Inverts normal corresponding to a given compressed index
-	/** Warning: compressed index is directly updated!
-	**/
-	static void InvertNormal(normsType &code);
+	static inline CompressedNormType GetNormIndex(const CCVector3& N) { return GetNormIndex(N.u); }
 
 	//! 'Default' orientations
 	enum Orientation {
@@ -182,7 +169,7 @@ public:
 		\param G [out] green [0;MAX_COLOR_COMP]
 		\param B [out] blue [0;MAX_COLOR_COMP]
 	**/
-	static void ConvertNormalToRGB(const CCVector3& N, colorType& R, colorType& G, colorType& B);
+	static void ConvertNormalToRGB(const CCVector3& N, ColorCompType& R, ColorCompType& G, ColorCompType& B);
 
 	//! Converts a HSV color to RGB color space
 	/** \param H [out] hue [0;360[
@@ -192,7 +179,7 @@ public:
 		\param G [out] green [0;MAX_COLOR_COMP]
 		\param B [out] blue [0;MAX_COLOR_COMP]
 	**/
-	static void ConvertHSVToRGB(double H, double S, double V, colorType& R, colorType& G, colorType& B);
+	static void ConvertHSVToRGB(double H, double S, double V, ColorCompType& R, ColorCompType& G, ColorCompType& B);
 
 public:
 
@@ -205,10 +192,10 @@ public:
 	bool enableNormalHSVColorsArray();
 
 	//! Returns the HSV color equivalent to a given compressed normal index
-	const colorType* getNormalHSVColor(unsigned index) const;
+	const ColorCompType* getNormalHSVColor(unsigned index) const;
 
 	//! Returns the HSV color array
-	const colorType* getNormalHSVColorArray() const;
+	const ColorCompType* getNormalHSVColorArray() const;
 
 	//! Helper: computes the normal (with best LS fit)
 	static bool ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
@@ -223,7 +210,6 @@ public:
 	**/
 	static bool ComputeNormalWithQuadric(CCLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N);
 
-
 protected:
 
 	//! Default constructor
@@ -232,7 +218,7 @@ protected:
 	ccNormalVectors();
 
 	//! Inits internal structures
-	bool init(unsigned quantizeLevel);
+	bool init(unsigned char quantizeLevel);
 
 	//! Compressed normal vectors
 	std::vector<CCVector3> m_theNormalVectors;
@@ -240,12 +226,7 @@ protected:
 	//! 'HSV' colors corresponding to each compressed normal index
 	/** In fact, HSV color has already been converted to RGB here for faster display.
 	**/
-	colorType* m_theNormalHSVColors;
-
-	//! Decompression algorithm
-	static void Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res);
-	//! Compression algorithm
-	static unsigned Quant_quantize_normal(const PointCoordinateType* n, unsigned level);
+	ColorCompType* m_theNormalHSVColors;
 
 	//! Cellular method for octree-based normal computation
 	static bool ComputeNormsAtLevelWithQuadric(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);

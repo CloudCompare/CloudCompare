@@ -1393,9 +1393,9 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		symbolCloud->setFontSize(fontSizeSpinBox->value());
 		symbolCloud->setVisible(true);
 		symbolCloud->setDisplay(m_window);
-		ccColor::Rgb rgb(	static_cast<colorType>(m_symbolColor.red()),
-							static_cast<colorType>(m_symbolColor.green()),
-							static_cast<colorType>(m_symbolColor.blue()) );
+		ccColor::Rgb rgb(	static_cast<ColorCompType>(m_symbolColor.red()),
+							static_cast<ColorCompType>(m_symbolColor.green()),
+							static_cast<ColorCompType>(m_symbolColor.blue()) );
 		symbolCloud->setTempColor(rgb,true);
 		m_window->addToOwnDB(symbolCloud,false);
 		m_window->redraw();
@@ -1455,9 +1455,9 @@ void DistanceMapGenerationDlg::overlaySymbolsColorChanged()
 	if (!m_window)
 		return;
 
-	ccColor::Rgb rgb(	static_cast<colorType>(m_symbolColor.red()),
-						static_cast<colorType>(m_symbolColor.green()),
-						static_cast<colorType>(m_symbolColor.blue()) );
+	ccColor::Rgb rgb(	static_cast<ColorCompType>(m_symbolColor.red()),
+						static_cast<ColorCompType>(m_symbolColor.green()),
+						static_cast<ColorCompType>(m_symbolColor.blue()) );
 
 	ccHObject* db = m_window->getOwnDB();
 	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
@@ -1480,9 +1480,9 @@ void DistanceMapGenerationDlg::overlayGridColorChanged()
 	if (!m_window)
 		return;
 
-	ccColor::Rgb rgb(	static_cast<colorType>(m_gridColor.red()),
-						static_cast<colorType>(m_gridColor.green()),
-						static_cast<colorType>(m_gridColor.blue()) );
+	ccColor::Rgb rgb(	static_cast<ColorCompType>(m_gridColor.red()),
+						static_cast<ColorCompType>(m_gridColor.green()),
+						static_cast<ColorCompType>(m_gridColor.blue()) );
 
 	ccHObject* db = m_window->getOwnDB();
 	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
@@ -1559,9 +1559,9 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 
 	if (state && m_map) //on
 	{
-		ccColor::Rgb rgb(	static_cast<colorType>(m_gridColor.red()),
-							static_cast<colorType>(m_gridColor.green()),
-							static_cast<colorType>(m_gridColor.blue()) );
+		ccColor::Rgb rgb(	static_cast<ColorCompType>(m_gridColor.red()),
+							static_cast<ColorCompType>(m_gridColor.green()),
+							static_cast<ColorCompType>(m_gridColor.blue()) );
 
 		//we reconstruct the grid and the corresponding labels
 		double xMin_rad, xMax_rad, xStep_rad;

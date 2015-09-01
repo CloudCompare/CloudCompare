@@ -28,6 +28,8 @@
 #include <stdlib.h>
 
 //! Compressed normals type
-typedef unsigned short normsType;
+/** Should be set accordingly to ccNormalCompressor::QUANTIZE_LEVEL
+**/
+typedef unsigned CompressedNormType;
 
 #endif //CC_BASIC_TYPES_HEADER

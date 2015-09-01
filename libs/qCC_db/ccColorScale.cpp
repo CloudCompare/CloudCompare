@@ -141,9 +141,9 @@ void ccColorScale::update()
 
 				CCVector3d interpCol = colBefore + (colNext-colBefore) * alpha;
 
-				m_rgbaScale[i] = ccColor::Rgba(	static_cast<colorType>(interpCol.x * ccColor::MAX),
-												static_cast<colorType>(interpCol.y * ccColor::MAX),
-												static_cast<colorType>(interpCol.z * ccColor::MAX),
+				m_rgbaScale[i] = ccColor::Rgba(	static_cast<ColorCompType>(interpCol.x * ccColor::MAX),
+												static_cast<ColorCompType>(interpCol.y * ccColor::MAX),
+												static_cast<ColorCompType>(interpCol.z * ccColor::MAX),
 												ccColor::MAX);
 			}
 		

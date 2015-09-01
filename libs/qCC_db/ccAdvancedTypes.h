@@ -19,19 +19,21 @@
 #define CC_ADVANCED_TYPES_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccBasicTypes.h"
 #include "ccChunkedArray.h"
+#include "ccNormalCompressor.h"
 
 /***************************************************
 	  Advanced cloudCompare types (containers)
 ***************************************************/
 
 //! Array of compressed 3D normals (single index)
-class NormsIndexesTableType : public ccChunkedArray<1,normsType>
+class QCC_DB_LIB_API NormsIndexesTableType : public ccChunkedArray<1,CompressedNormType>
 {
 public:
 	//! Default constructor
-	NormsIndexesTableType() : ccChunkedArray<1,normsType>("Compressed normals") {}
+	NormsIndexesTableType() : ccChunkedArray<1,CompressedNormType>("Compressed normals") {}
 
 	//inherited from ccChunkedArray/ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::NORMAL_INDEXES_ARRAY; }
@@ -49,10 +51,13 @@ public:
 		cloneArray->setName(getName());
 		return cloneArray;
 	}
+
+	//inherited from ccHObject/ccChunkedArray
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)
-class NormsTableType : public ccChunkedArray<3,PointCoordinateType>
+class QCC_DB_LIB_API NormsTableType : public ccChunkedArray<3,PointCoordinateType>
 {
 public:
 	//! Default constructor
@@ -77,11 +82,11 @@ public:
 };
 
 //! Array of RGB colors for each point
-class ColorsTableType : public ccChunkedArray<3,colorType>
+class QCC_DB_LIB_API ColorsTableType : public ccChunkedArray<3,ColorCompType>
 {
 public:
 	//! Default constructor
-	ColorsTableType() : ccChunkedArray<3,colorType>("RGB colors") {}
+	ColorsTableType() : ccChunkedArray<3,ColorCompType>("RGB colors") {}
 
 	//inherited from ccChunkedArray/ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::RGB_COLOR_ARRAY; }
@@ -102,7 +107,7 @@ public:
 };
 
 //! Array of 2D texture coordinates
-class TextureCoordsContainer : public ccChunkedArray<2,float>
+class QCC_DB_LIB_API TextureCoordsContainer : public ccChunkedArray<2,float>
 {
 public:
 	//! Default constructor

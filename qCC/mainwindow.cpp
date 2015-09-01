@@ -1083,9 +1083,9 @@ void MainWindow::doActionSetColor(bool colorize)
 			}
 			else
 			{
-				cloud->setRGBColor(	static_cast<colorType>(newCol.red()),
-									static_cast<colorType>(newCol.green()),
-									static_cast<colorType>(newCol.blue()) );
+				cloud->setRGBColor(	static_cast<ColorCompType>(newCol.red()),
+									static_cast<ColorCompType>(newCol.green()),
+									static_cast<ColorCompType>(newCol.blue()) );
 			}
 			cloud->showColors(true);
 			cloud->prepareDisplayForRefresh();
@@ -1098,9 +1098,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
-			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
-								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) );
+			ccColor::Rgb col(	static_cast<ColorCompType>(newCol.red()),
+								static_cast<ColorCompType>(newCol.green()),
+								static_cast<ColorCompType>(newCol.blue()) );
 			prim->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1108,9 +1108,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isA(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
-								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) );
+			ccColor::Rgb col(	static_cast<ColorCompType>(newCol.red()),
+								static_cast<ColorCompType>(newCol.green()),
+								static_cast<ColorCompType>(newCol.blue()) );
 			poly->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -1118,9 +1118,9 @@ void MainWindow::doActionSetColor(bool colorize)
 		else if (ent->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-			ccColor::Rgb col(	static_cast<colorType>(newCol.red()),
-								static_cast<colorType>(newCol.green()),
-								static_cast<colorType>(newCol.blue()) );
+			ccColor::Rgb col(	static_cast<ColorCompType>(newCol.red()),
+								static_cast<ColorCompType>(newCol.green()),
+								static_cast<ColorCompType>(newCol.blue()) );
 			facet->setColor(col);
 			ent->showColors(true);
 			ent->prepareDisplayForRefresh();
@@ -3286,7 +3286,7 @@ void MainWindow::doActionConvertTextureToColor()
 				}
 
 
-				//colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+				//ColorCompType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
 				//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
 				//cloud->addRGBColor(C);
 				if (mesh->convertMaterialsToVertexColors())
@@ -9315,7 +9315,7 @@ void MainWindow::doActionScalarFieldFromColor()
 		//export points
 		for (unsigned j=0; j<cloud->size(); ++j)
 		{
-			const colorType* rgb = cloud->getPointColor(j);
+			const ColorCompType* rgb = cloud->getPointColor(j);
 
 			if (fields[0])
 				fields[0]->setValue(j, rgb[0]);

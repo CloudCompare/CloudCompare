@@ -302,7 +302,7 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 		eTimer.start();
 		ccKdTree kdtree(pc);
 
-		if (kdtree.build(s_errorMaxPerFacet/2,errorMeasure,1000,&pDlg))
+		if (kdtree.build(s_errorMaxPerFacet/2,errorMeasure,s_minPointsPerFacet,1000,&pDlg))
 		{
 			qint64 elapsedTime_ms = eTimer.elapsed();
 			m_app->dispToConsole(QString("[qFacets] Kd-tree construction timing: %1 s").arg(static_cast<double>(elapsedTime_ms)/1.0e3,0,'f',3),ccMainAppInterface::STD_CONSOLE_MESSAGE);

@@ -698,7 +698,11 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 
 				//nearest point
 				const Vertex2D& P = points[e.nearestPointIndex];
-				assert(pointFlags[P.index] == POINT_NOT_USED); //we don't consider already used points!
+				if (pointFlags[P.index] != POINT_NOT_USED)
+				{
+					//assert(false); //DGM: in fact it happens!
+					break;
+				}
 
 				//check that we don't create too small edges!
 				//CCVector2 AP = (P-**itA);

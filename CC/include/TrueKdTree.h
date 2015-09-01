@@ -125,11 +125,13 @@ public:
 	//! Builds KD-tree
 	/** \param maxError maximum error per cell (relatively to the best LS plane fit)
 		\param errorMeasure error measurement
+		\param minPointCountPerCell minimum number of points per cell (can't be smaller than 3)
 		\param maxPointCountPerCell maximum number of points per cell (speed-up - ignored if < 6)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
 	bool build(	double maxError,
 				DistanceComputationTools::ERROR_MEASURES errorMeasure = DistanceComputationTools::RMS,
+				unsigned minPointCountPerCell = 3,
 				unsigned maxPointCountPerCell = 0,
 				GenericProgressCallback* progressCb = 0);
 
@@ -161,6 +163,11 @@ protected:
 
 	//! Error measurement
 	DistanceComputationTools::ERROR_MEASURES m_errorMeasure;
+
+	//! Min number of points per cell (speed-up)
+	/** Can't be < 3
+	**/
+	unsigned m_minPointCountPerCell;
 
 	//! Max number of points per cell (speed-up)
 	/** Ignored if < 6

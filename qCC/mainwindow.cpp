@@ -1469,7 +1469,7 @@ void MainWindow::doActionComputeKdTree()
 	eTimer.start();
 	ccKdTree* kdtree = new ccKdTree(cloud);
 
-	if (kdtree->build(s_kdTreeMaxErrorPerCell,CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT,1000,&pDlg))
+	if (kdtree->build(s_kdTreeMaxErrorPerCell,CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT,4,1000,&pDlg))
 	{
 		qint64 elapsedTime_ms = eTimer.elapsed();
 

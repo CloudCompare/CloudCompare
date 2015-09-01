@@ -38,6 +38,7 @@ TrueKdTree::TrueKdTree(GenericIndexedCloudPersist* cloud)
 	, m_associatedCloud(cloud)
 	, m_maxError(0.0)
 	, m_errorMeasure(DistanceComputationTools::RMS)
+	, m_minPointCountPerCell(3)
 	, m_maxPointCountPerCell(0)
 {
 	assert(m_associatedCloud);
@@ -110,21 +111,22 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	const PointCoordinateType* planeEquation = Neighbourhood(subset).getLSPlane();
 	if (!planeEquation)
 	{
-		//an error occurred during LS plane computation?!
+		//an error occurred during LS plane computation?! (maybe the (3) points are aligned) 
+		//we return an invalid Leaf (so as the above level understands that it's not a memory issue)
 		delete subset;
-		return 0;
+		PointCoordinateType fakePlaneEquation[4] = {0,0,0,0};
+		return new Leaf(0, fakePlaneEquation, static_cast<ScalarType>(-1));
 	}
 
-	//we always split sets larger than a given size (but we can't skip cells with less than 6 points!)
+	//we always split sets larger than a given size
 	ScalarType error = -1;
-	if (count < m_maxPointCountPerCell || m_maxPointCountPerCell < 6)
+	if (count < m_maxPointCountPerCell || count < 2 * m_minPointCountPerCell)
 	{
 		assert(fabs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
-		error = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, m_errorMeasure) : 0);
+		error = (count > 3 ? DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, m_errorMeasure) : 0);
 	
-		//if we have less than 6 points, then the subdivision would produce a subset with less than 3 points
-		//(and we can't fit a plane on less than 3 points!)
-		bool isLeaf = (count < 6 || error <= m_maxError);
+		//we can't split cells with less than twice the minimum number of points per cell! (and min >= 3 so as to fit a plane)
+		bool isLeaf = (error <= m_maxError || count < 2 * m_minPointCountPerCell);
 		if (isLeaf)
 		{
 			UpdateProgress(count);
@@ -188,7 +190,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 			if (error < 0)
 				error = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, m_errorMeasure) : 0);
 			//the Leaf class takes ownership of the subset!
-			return new Leaf(subset,planeEquation,error);
+			return new Leaf(subset, planeEquation, error);
 		}
 	}
 
@@ -219,23 +221,39 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		}
 	}
 
-	//release some memory before the next incursion!
-	delete subset;
-	subset = 0;
-
 	//process subsets (if any)
 	BaseNode* leftChild = split(leftSubset);
 	if (!leftChild)
 	{
+		delete subset;
 		delete rightSubset;
 		return 0;
 	}
+
 	BaseNode* rightChild = split(rightSubset);
 	if (!rightChild)
 	{
+		delete subset;
 		delete leftChild;
 		return 0;
 	}
+
+	if (	(leftChild->isLeaf() && static_cast<Leaf*>(leftChild)->points == 0)
+		||	(rightChild->isLeaf() && static_cast<Leaf*>(rightChild)->points == 0) )
+	{
+		//at least one of the subsets couldn't be fitted with a plane!
+		delete leftChild;
+		delete rightChild;
+
+		//this node will become a leaf!
+		UpdateProgress(count);
+		//the Leaf class takes ownership of the subset!
+		return new Leaf(subset, planeEquation, error);
+	}
+
+	//we can now delete the subset
+	delete subset;
+	subset = 0;
 
 	Node* node = new Node;
 	{
@@ -251,6 +269,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 
 bool TrueKdTree::build(	double maxError,
 						DistanceComputationTools::ERROR_MEASURES errorMeasure/*=DistanceComputationTools::RMS*/,
+						unsigned minPointCountPerCell/*=3*/,
 						unsigned maxPointCountPerCell/*=0*/,
 						GenericProgressCallback* progressCb/*=0*/)
 {
@@ -291,7 +310,8 @@ bool TrueKdTree::build(	double maxError,
 
 	//launch recursive process
 	m_maxError = maxError;
-	m_maxPointCountPerCell = maxPointCountPerCell;
+	m_minPointCountPerCell = std::max<unsigned>(3,minPointCountPerCell);
+	m_maxPointCountPerCell = std::max<unsigned>(2*minPointCountPerCell,maxPointCountPerCell); //the max number of point per cell can't be < 2*min
 	m_errorMeasure = errorMeasure;
 	m_root = split(subset);
 

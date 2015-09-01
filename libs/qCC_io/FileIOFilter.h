@@ -26,7 +26,6 @@
 //qCC_db
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
-#include <ccGriddedTools.h>
 
 //Local
 #include "qCC_io.h"
@@ -73,7 +72,7 @@ public: //initialization
 			, alwaysDisplayLoadDialog(true)
 			, coordinatesShiftEnabled(0)
 			, coordinatesShift(0)
-			, autoComputeNormals(ccGriddedTools::ASK_USER)
+			, autoComputeNormals(false)
 		{}
 
 		//! How to handle big coordinates
@@ -84,8 +83,8 @@ public: //initialization
 		bool* coordinatesShiftEnabled;
 		//! If applicable, applied shift on load (optional)
 		CCVector3d* coordinatesShift;
-		//! Normals computing at loading time
-		ccGriddedTools::ComputeNormalsBehavior autoComputeNormals;
+		//! Whether normals should be computed at loading time (if possible - e.g. for gridded clouds) or not
+		bool autoComputeNormals;
 	};
 
 	//! Generic saving parameters

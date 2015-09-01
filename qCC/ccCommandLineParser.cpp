@@ -177,7 +177,7 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 	}
 
 	//reset default behavior(s)
-	s_loadParameters.autoComputeNormals = ccGriddedTools::NEVER;
+	s_loadParameters.autoComputeNormals = false;
 	s_MeshExportFormat = s_CloudExportFormat = BinFilter::GetFileFilter();
 	s_MeshExportExt = s_CloudExportExt = BinFilter::GetDefaultExtension();
 	s_precision = 12;
@@ -3485,7 +3485,7 @@ bool ccCommandLineParser::commandChangePLYExportFormat(QStringList& arguments)
 bool ccCommandLineParser::commandForceNormalsComputation(QStringList& arguments)
 {
 	//simply change the default filter behavior
-	s_loadParameters.autoComputeNormals = ccGriddedTools::ALWAYS;
+	s_loadParameters.autoComputeNormals = true;
 
 	return true;
 }

@@ -99,9 +99,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 	QTextStream inFile(&file);
 
-	//by default we don't compute normals without asking the user
-	//bool computeNormals = (parameters.autoComputeNormals == ccGriddedTools::ALWAYS);
-
 	CCVector3d PshiftTrans(0,0,0);
 	CCVector3d PshiftCloud(0,0,0);
 
@@ -410,31 +407,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				//determine best sensor parameters (mainly yaw and pitch steps)
 				ccGLMatrix cloudToSensorTrans((sensorTransD.inverse() * cloudTransD).data());
 				sensor = ccGriddedTools::ComputeBestSensor(cloud,grid->indexes,width,height,&cloudToSensorTrans);
-
-//#ifndef _DEBUG
-//				if (cloudIndex == 0)
-//				{
-//					//shall we ask the user if he wants to compute normals or not?
-//					computeNormals = ccGriddedTools::HandleAutoComputeNormalsFeature(parameters.autoComputeNormals);
-//				}
-//#endif
-//				if (computeNormals)
-//				{
-//					//try to compute normals
-//					bool canceledByUser = false;
-//					if (!ccGriddedTools::ComputeNormals(cloud,grid->indexes,static_cast<int>(width),static_cast<int>(height),&canceledByUser))
-//					{
-//						if (canceledByUser)
-//						{
-//							//if the user cancelled the normal process, we cancel everything!
-//							result = CC_FERR_CANCELED_BY_USER;
-//						}
-//						else
-//						{
-//							computeNormals = false;
-//						}
-//					}
-//				}
 			}
 
 			//we apply the transformation
@@ -456,6 +428,13 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				grid->maxValidIndex = grid->validCount-1;
 				grid->sensorPosition = sensorTransD;
 				cloud->addGrid(grid);
+
+				//by default we don't compute normals without asking the user
+				if (parameters.autoComputeNormals)
+				{
+					ccProgressDialog pdlg(true);
+					cloud->computeNormalsWithGrids(LS, 2, true, &pdlg);
+				}
 			}
 
 			cloud->setVisible(true);

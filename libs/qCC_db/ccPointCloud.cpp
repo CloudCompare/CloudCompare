@@ -3531,7 +3531,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	//scalar field(s)
 	{
 		//number of scalar fields (dataVersion>=20)
-		uint32_t sfCount = (uint32_t)getNumberOfScalarFields();
+		uint32_t sfCount = static_cast<uint32_t>(getNumberOfScalarFields());
 		if (out.write((const char*)&sfCount,4) < 0)
 			return WriteError();
 
@@ -3556,6 +3556,44 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		int32_t displayedScalarFieldIndex = (int32_t)m_currentDisplayedScalarFieldIndex;
 		if (out.write((const char*)&displayedScalarFieldIndex,4) < 0)
 			return WriteError();
+	}
+
+	//grid structures (dataVersion>=41)
+	{
+		//number of grids
+		uint32_t count = static_cast<uint32_t>(this->gridCount());
+		if (out.write((const char*)&count,4) < 0)
+			return WriteError();
+
+		//save each grid
+		for (uint32_t i=0; i<count; ++i)
+		{
+			const Grid::Shared& g = grid(static_cast<unsigned>(i));
+			if (!g || g->indexes.empty())
+				continue;
+
+			//width
+			uint32_t w = static_cast<uint32_t>(g->w);
+			if (out.write((const char*)&w,4) < 0)
+				return WriteError();
+			//height
+			uint32_t h = static_cast<uint32_t>(g->h);
+			if (out.write((const char*)&h,4) < 0)
+				return WriteError();
+
+			//sensor matrix
+			if (!g->sensorPosition.toFile(out))
+				return WriteError();
+
+			//indexes
+			int* _index = &(g->indexes.front());
+			for (uint32_t j=0; j<w*h; ++j, ++_index)
+			{
+				int32_t index = static_cast<int32_t>(*_index);
+				if (out.write((const char*)&index,4) < 0)
+					return WriteError();
+			}
+		}
 	}
 
 	return true;
@@ -3704,6 +3742,73 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			setCurrentDisplayedScalarField(displayedScalarFieldIndex);
 	}
 
+	//grid structures (dataVersion>=41)
+	if (dataVersion >= 41)
+	{
+		//number of grids
+		uint32_t count = 0;
+		if (in.read((char*)&count,4) < 0)
+			return ReadError();
+
+		//load each grid
+		for (uint32_t i=0; i<count; ++i)
+		{
+			Grid::Shared g(new Grid);
+
+			//width
+			uint32_t w = 0;
+			if (in.read((char*)&w,4) < 0)
+				return ReadError();
+			//height
+			uint32_t h = 0;
+			if (in.read((char*)&h,4) < 0)
+				return ReadError();
+
+			g->w = static_cast<unsigned>(w);
+			g->h = static_cast<unsigned>(h);
+
+			//sensor matrix
+			if (!g->sensorPosition.fromFile(in,dataVersion,flags))
+				return WriteError();
+
+			try
+			{
+				g->indexes.resize(w*h);
+			}
+			catch (const std::bad_alloc&)
+			{
+				return MemoryError();
+			}
+
+			//indexes
+			int* _index = &(g->indexes.front());
+			for (uint32_t j=0; j<w*h; ++j, ++_index)
+			{
+				int32_t index = 0;
+				if (in.read((char*)&index,4) < 0)
+					return ReadError();
+
+				*_index = index;
+				if (index >= 0)
+				{
+					//update min, max and count for valid indexes
+					if (g->validCount)
+					{
+						g->minValidIndex = std::min(static_cast<unsigned>(index), g->minValidIndex);
+						g->maxValidIndex = std::max(static_cast<unsigned>(index), g->maxValidIndex);
+					}
+					else
+					{
+						g->minValidIndex = g->maxValidIndex = index;
+					}
+					++g->validCount;
+				}
+			}
+
+			addGrid(g);
+		}
+
+	}
 	//notifyGeometryUpdate(); //FIXME: we can't call it now as the dependent 'pointers' are not valid yet!
 
 	//We should update the VBOs (just in case)

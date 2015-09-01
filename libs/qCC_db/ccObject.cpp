@@ -53,8 +53,9 @@
 	v3.8 - 09/14/2014 - GBL and camera sensors structures have evolved
 	v3.9 - 01/30/2015 - Shift & scale information are now saved for polylines (+ separate interface)
 	v4.0 - 08/06/2015 - Custom labels added to color scales
+	v4.1 - 09/01/2015 - Scan grids added to point clouds
 **/
-const unsigned c_currentDBVersion = 40; //4.0
+const unsigned c_currentDBVersion = 41; //4.1
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

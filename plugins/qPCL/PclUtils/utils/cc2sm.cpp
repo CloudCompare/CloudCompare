@@ -271,10 +271,10 @@ PCLCloud::Ptr cc2smReader::getColors() const
 
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const colorType* rgb = m_cc_cloud->getPointColor(i);
-			pcl_cloud->at(i).r = rgb[0];
-			pcl_cloud->at(i).g = rgb[1];
-			pcl_cloud->at(i).b = rgb[2];
+			const ColorCompType* rgb = m_cc_cloud->getPointColor(i);
+			pcl_cloud->at(i).r = static_cast<uint8_t>(rgb[0]);
+			pcl_cloud->at(i).g = static_cast<uint8_t>(rgb[1]);
+			pcl_cloud->at(i).b = static_cast<uint8_t>(rgb[2]);
 		}
 
 		TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);

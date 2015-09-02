@@ -204,9 +204,9 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
 	{
-		colorType C[3] = {	(colorType)pcl_cloud_rgb->points[i].r,
-							(colorType)pcl_cloud_rgb->points[i].g,
-							(colorType)pcl_cloud_rgb->points[i].b};
+		ColorCompType C[3] = {	static_cast<ColorCompType>(pcl_cloud_rgb->points[i].r),
+								static_cast<ColorCompType>(pcl_cloud_rgb->points[i].g),
+								static_cast<ColorCompType>(pcl_cloud_rgb->points[i].b)};
 		cloud->addRGBColor(C);
 	}
 

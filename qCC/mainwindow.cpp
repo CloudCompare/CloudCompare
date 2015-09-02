@@ -1273,6 +1273,7 @@ void MainWindow::doActionInterpolateColors()
 	int value = QInputDialog::getInt(this,"Interpolate colors", "Octree level", s_defaultLevel, 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 1, &ok);
 	if (!ok)
 		return;
+	s_defaultLevel = static_cast<unsigned char>(value);
 
 	ccProgressDialog pDlg(true, this);
 	if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source,&pDlg,s_defaultLevel))

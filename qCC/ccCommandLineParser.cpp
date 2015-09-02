@@ -456,9 +456,11 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	if (!entDesc.path.isEmpty())
 		outputFilename.prepend(QString("%1/").arg(entDesc.path));
 
+	bool tempDependencyCreated = false;
+	ccGenericMesh* mesh = 0;
 	if (entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+		mesh = static_cast<ccGenericMesh*>(entity);
 		ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 		//we must save the vertices cloud as well if it's not a child of the mesh!
 		if (vertices && !mesh->isAncestorOf(vertices))
@@ -466,6 +468,7 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 			//we save the cloud first!
 			vertices->addChild(mesh,ccHObject::DP_NONE); //we simply add a fake dependency
 			entity = vertices;
+			tempDependencyCreated = true;
 		}
 	}
 
@@ -475,15 +478,26 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 		//no dialog by default for command line mode!
 		parameters.alwaysDisplaySaveDialog = false;
 	}
-	if (FileIOFilter::SaveToFile(	entity,
-									qPrintable(outputFilename),
-									parameters,
-									isCloud ? s_CloudExportFormat : s_MeshExportFormat) != CC_FERR_NO_ERROR)
+
+	CC_FILE_ERROR result = FileIOFilter::SaveToFile(entity,
+													qPrintable(outputFilename),
+													parameters,
+													isCloud ? s_CloudExportFormat : s_MeshExportFormat);
+
+	//restore input state!
+	if (tempDependencyCreated)
 	{
-		return QString("Failed to save result in file '%1'").arg(outputFilename);
+		if (mesh && entity)
+		{
+			entity->detachChild(mesh);
+		}
+		else
+		{
+			assert(false);
+		}
 	}
 
-	return QString();
+	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
 
 bool ccCommandLineParser::commandLoad(QStringList& arguments)
@@ -2896,11 +2910,14 @@ bool ccCommandLineParser::commandDelaunay(QStringList& arguments, QDialog* paren
 			meshDesc.path = m_clouds[i].path;
 			meshDesc.indexInFile = m_clouds[i].indexInFile;
 
-			//save plane as a BIN file
-			QString outputFilename;
-			QString errorStr = Export(meshDesc,"DELAUNAY",&outputFilename);
-			if (!errorStr.isEmpty())
-				ccConsole::Warning(errorStr);
+			//save mesh
+			if (s_autoSaveMode)
+			{
+				QString outputFilename;
+				QString errorStr = Export(meshDesc,"DELAUNAY",&outputFilename);
+				if (!errorStr.isEmpty())
+					ccConsole::Warning(errorStr);
+			}
 
 			//add the resulting mesh to the main set
 			m_meshes.push_back(meshDesc);

@@ -139,6 +139,8 @@ v2.6.2 XX/XX/2015
 	* Command line: when automatically saving a file, CC will now add the suffix after the last point of the origin filename
 	* qCork was crashing on Windows 8 (Cork also relies on the 'triangle' library ;)
 	* FBX files: the exported 'specular' component of materials was in fact the 'ambient' component (resulting a much brighter look)
+	* In command line mode, the Delaunay command was ignoring the 'AUTO_SAVE OFF' option and was creating a looping hierarchy
+		(potentially causing later infinite loops...)
 
 v2.6.1 02/20/2015
 - New features:

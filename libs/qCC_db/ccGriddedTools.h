@@ -20,11 +20,11 @@
 
 //Local
 #include "qCC_db.h"
+#include "ccPointCloud.h"
 
 //system
 #include <vector>
 
-class ccPointCloud;
 class ccGBLSensor;
 class ccGLMatrix;
 
@@ -35,16 +35,12 @@ public:
 
 	//! Determines the (TLS) sensor parameters from the relative position of gridded points
 	/** \param cloud cloud on which to compute the sensor parameters (should be a single grid)
-		\param indexes for each grid cell, this table gives the index of the corresponding point (or -1)
-		\param width grid width
-		\param height grid height
+		\param grid scan grid
 		\param cloudToSensorTrans transformation from cloud coordinate system to the sensor coordinate system (optional)
 		\return sensor (if successful) or 0 otherwise
 	**/
 	static ccGBLSensor* ComputeBestSensor(	ccPointCloud* cloud,
-											const std::vector<int>& indexGrid,
-											unsigned width,
-											unsigned height,
+											ccPointCloud::Grid::Shared grid,
 											ccGLMatrix* cloudToSensorTrans = 0);
 };
 

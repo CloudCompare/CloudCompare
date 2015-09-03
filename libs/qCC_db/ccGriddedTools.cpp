@@ -18,15 +18,20 @@
 #include "ccGriddedTools.h"
 
 //Local
-#include "ccPointCloud.h"
 #include "ccGBLSensor.h"
 #include "ccLog.h"
 
 //! Association of an angle and the corresponding number of rows/columns
 typedef std::pair<PointCoordinateType,unsigned> AngleAndSpan;
 
-ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::vector<int>& indexGrid, unsigned width, unsigned height, ccGLMatrix* cloudToSensorTrans/*=0*/)
+ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans/*=0*/)
 {
+	if (!cloud || !grid)
+	{
+		assert(false);
+		return 0;
+	}
+
 	PointCoordinateType minPhi = static_cast<PointCoordinateType>(M_PI), maxPhi = -minPhi;
 	PointCoordinateType minTheta = static_cast<PointCoordinateType>(M_PI), maxTheta = -minTheta;
 	PointCoordinateType deltaPhiRad = 0, deltaThetaRad = 0;
@@ -45,12 +50,12 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 			std::vector< AngleAndSpan > anglesShifted;
 
 			//for each LINE we determine the min and max valid grid point (i.e. != (0,0,0))
-			const int* _indexGrid = &(indexGrid[0]);
-			for (unsigned j=0; j<height; ++j)
+			const int* _indexGrid = &(grid->indexes[0]);
+			for (unsigned j=0; j<grid->h; ++j)
 			{
-				unsigned minIndex = width;
+				unsigned minIndex = grid->w;
 				unsigned maxIndex = 0;
-				for (unsigned i=0; i<width; ++i)
+				for (unsigned i=0; i<grid->w; ++i)
 				{
 					if (_indexGrid[i] >= 0)
 					{
@@ -118,7 +123,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 					anglesShifted.push_back(AngleAndSpan(angleShifted_rad,span));
 				}
 
-				_indexGrid += width;
+				_indexGrid += grid->w;
 			}
 
 			if (!angles.empty())
@@ -161,15 +166,15 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 			std::vector< AngleAndSpan > anglesShifted;
 
 			//for each COLUMN we determine the min and max valid grid point (i.e. != (0,0,0))
-			for (unsigned i=0; i<width; ++i)
+			for (unsigned i=0; i<grid->w; ++i)
 			{
-				const int* _indexGrid = &(indexGrid[i]);
+				const int* _indexGrid = &(grid->indexes[i]);
 
-				unsigned minIndex = height;
+				unsigned minIndex = grid->h;
 				unsigned maxIndex = 0;
-				for (unsigned j=0; j<height; ++j)
+				for (unsigned j=0; j<grid->h; ++j)
 				{
-					if (_indexGrid[j*width] >= 0)
+					if (_indexGrid[j*grid->w] >= 0)
 					{
 						if (j < minIndex)
 							minIndex = j;
@@ -184,7 +189,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, const std::v
 					PointCoordinateType minThetaCurrentColShifted = 0, maxThetaCurrentColShifted = 0;
 					for (unsigned k=minIndex; k<=maxIndex; ++k)
 					{
-						int index = _indexGrid[k*width];
+						int index = _indexGrid[k*grid->w];
 						if (index >= 0)
 						{
 							//warning: indexes are shifted (0 = no point)

@@ -70,11 +70,7 @@ ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor)
 
 void ccGBLSensor::clearDepthBuffer()
 {
-	if (m_depthBuffer.zBuff)
-		delete[] m_depthBuffer.zBuff;
-	m_depthBuffer.zBuff = 0;
-	m_depthBuffer.width = 0;
-	m_depthBuffer.height = 0;
+	m_depthBuffer.clear();
 }
 
 void ccGBLSensor::setPitchRange(PointCoordinateType minPhi, PointCoordinateType maxPhi)
@@ -170,8 +166,10 @@ void ccGBLSensor::projectPoint(	const CCVector3& sourcePoint,
 
 bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const
 {
-	if (!m_depthBuffer.zBuff)
+	if (m_depthBuffer.zBuff.empty())
+	{
 		return false;
+	}
 
 	assert(m_depthBuffer.deltaTheta != 0 && m_depthBuffer.deltaPhi != 0);
 
@@ -619,14 +617,16 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 		}
 
 		unsigned zBuffSize = width*height;
-		m_depthBuffer.zBuff = new PointCoordinateType[zBuffSize];
-		if (!m_depthBuffer.zBuff)
+		try
+		{
+			m_depthBuffer.zBuff.resize(zBuffSize,0);
+		}
+		catch (const std::bad_alloc&)
 		{
 			//not enough memory
 			errorCode = -4;
 			return false;
 		}
-		memset(m_depthBuffer.zBuff,0,zBuffSize*sizeof(PointCoordinateType));
 
 		m_depthBuffer.width = static_cast<unsigned>(width);
 		m_depthBuffer.height = static_cast<unsigned>(height);
@@ -664,6 +664,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 				{
 					PointCoordinateType& zBuf = m_depthBuffer.zBuff[y*m_depthBuffer.width + x];
 					zBuf = std::max(zBuf,depth);
+					m_sensorRange = std::max(m_sensorRange,depth);
 				}
 
 				if (projectedCloud)
@@ -675,13 +676,15 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 		}
 	}
 
+	m_depthBuffer.fillHoles();
+
 	errorCode = 0;
 	return true;
 }
 
 unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 {
-	if (!m_depthBuffer.zBuff) //no z-buffer?
+	if (m_depthBuffer.zBuff.empty()) //no z-buffer?
 		return POINT_VISIBLE;
 
 	//project point
@@ -1018,11 +1021,7 @@ ccGBLSensor::DepthBuffer::DepthBuffer()
 
 void ccGBLSensor::DepthBuffer::clear()
 {
-	if (zBuff)
-	{
-		delete[] zBuff;
-		zBuff = 0;
-	}
+	zBuff.clear();
 	width = height = 0;
 	deltaPhi = deltaTheta = 0;
 }
@@ -1034,8 +1033,11 @@ ccGBLSensor::DepthBuffer::~DepthBuffer()
 
 int ccGBLSensor::DepthBuffer::fillHoles()
 {
-	if (!zBuff)
-		return -1; //z-buffer not initialized!
+	if (zBuff.empty())
+	{
+		//z-buffer not initialized!
+		return -1;
+	}
 
 	//new temp buffer
 	int dx = width+2;
@@ -1055,7 +1057,7 @@ int ccGBLSensor::DepthBuffer::fillHoles()
 	//copy old zBuffer in temp one (with 1 pixel border)
 	{
 		PointCoordinateType *_zBuffTemp = &(zBuffTemp[0]) + (dx+1); //2nd line, 2nd column
-		PointCoordinateType *_zBuff = zBuff; //first line, first column of the true buffer
+		const PointCoordinateType *_zBuff = &(zBuff.front()); //first line, first column of the true buffer
 		for (unsigned y=0; y<height; ++y)
 		{
 			memcpy(_zBuffTemp,_zBuff,width*sizeof(PointCoordinateType));

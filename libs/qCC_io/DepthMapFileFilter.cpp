@@ -99,7 +99,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 
 	//the depth map associated to this sensor
 	const ccGBLSensor::DepthBuffer& db = sensor->getDepthBuffer();
-	if (!db.zBuff)
+	if (db.zBuff.empty())
 	{
 		ccLog::Warning(QString("[DepthMap] sensor '%1' has no associated depth map (you must compute it first)").arg(sensor->getName()));
 		return CC_FERR_NO_SAVE; //this is not a severe error (the process can go on)
@@ -195,7 +195,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 		}
 	}
 
-	ScalarType* _zBuff = db.zBuff;
+	const ScalarType* _zBuff = &(db.zBuff.front());
 	if (theNorms)
 		theNorms->placeIteratorAtBegining();
 	if (theColors)

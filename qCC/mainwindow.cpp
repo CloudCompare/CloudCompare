@@ -3176,7 +3176,7 @@ void MainWindow::doActionShowDepthBuffer()
 		if (ent->isKindOf(CC_TYPES::GBL_SENSOR))
 		{
 			ccGBLSensor* sensor = static_cast<ccGBLSensor*>(m_selectedEntities[0]);
-			if (!sensor->getDepthBuffer().zBuff)
+			if (sensor->getDepthBuffer().zBuff.empty())
 			{
 				//look for depending cloud
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent->getParent());

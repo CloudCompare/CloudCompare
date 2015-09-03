@@ -28,6 +28,9 @@
 #include <GenericCloud.h>
 #include <CCGeom.h>
 
+//System
+#include <vector>
+
 class ccPointCloud;
 
 //! Ground-based Laser sensor
@@ -209,7 +212,7 @@ public: //depth buffer management
 	struct DepthBuffer
 	{
 		//! Z-Buffer grid
-		PointCoordinateType* zBuff;
+		std::vector<PointCoordinateType> zBuff;
 		//! Pitch step (may differ from the sensor's)
 		PointCoordinateType deltaPhi;
 		//! Yaw step (may differ from the sensor's)

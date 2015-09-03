@@ -47,13 +47,13 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 		return;
 
 	const ccGBLSensor::DepthBuffer& depthBuffer = sensor->getDepthBuffer();
-	if (!depthBuffer.zBuff)
+	if (depthBuffer.zBuff.empty())
 		return;
 
 	//determine min and max depths
 	ScalarType minDist = 0, maxDist = 0;
 	{
-		const ScalarType *_zBuff = depthBuffer.zBuff;
+		const ScalarType* _zBuff = &(depthBuffer.zBuff.front());
 		double sumDist = 0;
 		double sumDist2 = 0;
 		unsigned count = 0;
@@ -92,7 +92,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 		assert(colorScale);
 		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS-1)/(maxDist-minDist);
 
-		const ScalarType* _zBuff = depthBuffer.zBuff;
+		const ScalarType* _zBuff = &(depthBuffer.zBuff.front());
 		for (unsigned y=0; y<depthBuffer.height; ++y)
 		{
 			for (unsigned x=0; x<depthBuffer.width; ++x,++_zBuff)

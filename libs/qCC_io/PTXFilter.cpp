@@ -406,7 +406,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			{
 				//determine best sensor parameters (mainly yaw and pitch steps)
 				ccGLMatrix cloudToSensorTrans((sensorTransD.inverse() * cloudTransD).data());
-				sensor = ccGriddedTools::ComputeBestSensor(cloud,grid->indexes,width,height,&cloudToSensorTrans);
+				sensor = ccGriddedTools::ComputeBestSensor(cloud, grid, &cloudToSensorTrans);
 			}
 
 			//we apply the transformation

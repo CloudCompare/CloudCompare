@@ -4722,3 +4722,30 @@ bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
 {
 	return ccFastMarchingForNormsDirection::OrientNormals(this, level, pDlg);
 }
+
+#ifdef ENABLE_VISIBILITY_TEST
+unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
+{
+	//if we have associated sensors, we can use them to check the visibility of other points 
+	for (size_t i=0; i<m_children.size(); ++i)
+	{
+		ccHObject* child = m_children[i];
+		unsigned char bestVisibility = 255;
+		if (child && child->isA(CC_TYPES::GBL_SENSOR))
+		{
+			ccGBLSensor* sensor = static_cast<ccGBLSensor*>(child);
+			unsigned char visibility = sensor->checkVisibility(P);
+
+			if (visibility == POINT_VISIBLE)
+				return POINT_VISIBLE;
+			else if (visibility < bestVisibility)
+				bestVisibility = visibility;
+		}
+
+		if (bestVisibility != 255)
+			return bestVisibility;
+	}
+	
+	return POINT_VISIBLE;
+}
+#endif

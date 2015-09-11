@@ -380,6 +380,12 @@ public:
 	virtual bool hasDisplayedScalarField() const;
 	virtual void removeFromDisplay(const ccGenericGLDisplay* win); //for proper VBO release
 
+//#define ENABLE_VISIBILITY_TEST
+#ifdef ENABLE_VISIBILITY_TEST
+	//inherited from CCLib::GenericCloud
+	virtual unsigned char testVisibility(const CCVector3& P) const;
+#endif
+
 	//inherited from ccGenericPointCloud
 	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const;
 	virtual const ColorCompType* geScalarValueColor(ScalarType d) const;

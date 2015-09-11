@@ -114,6 +114,8 @@ v2.6.2 XX/XX/2015
 	* Normals are now internally coded on 32 bytes (instead of 16 bytes) so as to increase the normals (direction) precision
 		(instead of 32K different directions - which is visually sufficient - 2M directions can now be coded - which
 		 is much better for normal-based computation, such as Dip/Dip direction computation or the new qFacet plugin)
+	* Fit Quadric:
+		- the matrix local quadric coordinate system is now displayed in the console along with its equation
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

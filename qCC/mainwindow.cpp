@@ -5984,9 +5984,40 @@ void MainWindow::doActionFitQuadric()
 				quadric->prepareDisplayForRefresh();
 				addToDB(quadric);
 
-				ccConsole::Print(QString("[doActionFitQuadric] Quadric equation: ") + quadric->getEquationString());
+				ccConsole::Print(QString("[doActionFitQuadric] Quadric local coordinate system:"));
+				ccConsole::Print(quadric->getTransformation().toString(12,' ')); //full precision
+				ccConsole::Print(QString("[doActionFitQuadric] Quadric equation (in local coordinate system): ") + quadric->getEquationString());
 				ccConsole::Print(QString("[doActionFitQuadric] RMS: %1").arg(rms));
 
+#if 0
+				//test: project the input cloud on the quadric
+				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+				{
+					ccPointCloud* newCloud = static_cast<ccPointCloud*>(cloud)->cloneThis();
+					if (newCloud)
+					{
+						const PointCoordinateType* eq = quadric->getEquationCoefs();
+						const Tuple3ub& dims = quadric->getEquationDims();
+					
+						const unsigned char dX = dims.x;
+						const unsigned char dY = dims.y;
+						const unsigned char dZ = dims.z;
+
+						const ccGLMatrix& trans = quadric->getTransformation();
+						ccGLMatrix invTrans = trans.inverse();
+						for (unsigned i=0; i<newCloud->size(); ++i)
+						{
+							CCVector3* P = const_cast<CCVector3*>(newCloud->getPoint(i));
+							CCVector3 Q = invTrans * (*P);
+							Q.u[dZ] = eq[0] + eq[1]*Q.u[dX] + eq[2]*Q.u[dY] + eq[3]*Q.u[dX]*Q.u[dX] + eq[4]*Q.u[dX]*Q.u[dY] + eq[5]*Q.u[dY]*Q.u[dY];
+							*P = trans * Q;
+						}
+						newCloud->invalidateBoundingBox();
+						newCloud->setName(newCloud->getName() + ".projection_on_quadric");
+						addToDB(newCloud);
+					}
+				}
+#endif
 			}
 			else
 			{

@@ -278,7 +278,7 @@ QString ccQuadric::getEquationString() const
 
 	QString equationStr = QString("%1 = %2 + %3 * %4").arg(dimChars[dZ]).arg(m_eq[0]).arg(m_eq[1]).arg(dimChars[dX]);
 	equationStr += QString(" + %1 * %2 + %3 * %4^2").arg(m_eq[2]).arg(dimChars[dY]).arg(m_eq[3]).arg(dimChars[dX]);
-	equationStr += QString(" + %1 * %2.%3 + %4 * %5^2").arg(m_eq[4]).arg(dimChars[dX]).arg(dimChars[dY]).arg(m_eq[5]).arg(dimChars[dY]);
+	equationStr += QString(" + %1 * %2*%3 + %4 * %5^2").arg(m_eq[4]).arg(dimChars[dX]).arg(dimChars[dY]).arg(m_eq[5]).arg(dimChars[dY]);
 
 	return equationStr;
 }

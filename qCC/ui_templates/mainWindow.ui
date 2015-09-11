@@ -585,6 +585,7 @@
    <addaction name="actionSetViewBottom"/>
    <addaction name="actionSetViewIso1"/>
    <addaction name="actionSetViewIso2"/>
+   <addaction name="actionEnableStereo"/>
   </widget>
   <widget class="QDockWidget" name="DockableConsole">
    <property name="sizePolicy">
@@ -2790,6 +2791,21 @@
    </property>
    <property name="toolTip">
     <string>Statistical Outlier Filter (remove the points far from their neighbors)</string>
+   </property>
+  </action>
+  <action name="actionEnableStereo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
+   </property>
+   <property name="text">
+    <string>actionEnableStereo</string>
+   </property>
+   <property name="toolTip">
+    <string>Enabale stereo mode (with red-blue or red-cyan glasses)</string>
    </property>
   </action>
  </widget>

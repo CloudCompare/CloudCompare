@@ -248,6 +248,7 @@ protected slots:
 	virtual void setRightView();
 	virtual void setIsoView1();
 	virtual void setIsoView2();
+	virtual void toggleActiveWindowStereoVision();
 	virtual void toggleActiveWindowCenteredPerspective();
 	virtual void toggleActiveWindowCustomLight();
 	virtual void toggleActiveWindowSunLight();
@@ -583,6 +584,9 @@ protected:
 
 	//! Updates the pivot visibility pop-menu based for a given window (or an absence of!)
 	virtual void updatePivotVisibilityPopUpMenu(ccGLWindow* win);
+
+	//! Checks whether stereo mode can be stopped (if necessary) or not
+	bool checkStereoMode(ccGLWindow* win);
 
 	//DB & DB Tree
 	ccDBRoot* m_ccRoot;

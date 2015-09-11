@@ -7,6 +7,10 @@ v2.6.2 XX/XX/2015
 	* New shortcuts:
 		- Zoom in (+)
 		- Zoom out (=)
+	* New 'stereo' mode for anaglyph-like rendering
+		- to be used with red-blue or red-cyan glasses
+		- only works in perspective mode
+		- Note that shaders (qEDL, qSSAO) are not supported in stereo mode
 	* qAnimation plugin (initiated by 2G Robotics - http://www.2grobotics.com/)
 		- prior to use the plugin, the user must create several viewport objects
 			(with CTRL+V or 'Display > Save viewport as object') corresponding to
@@ -32,6 +36,7 @@ v2.6.2 XX/XX/2015
 			'Use previous normal' to use the former normal (if any) to orient the new one
 		- all the orientation options can now be set in the dialog (gridded/preferred/Minimum Spanning Tree)
 			no more nagging about using the Minimum Spanning Tree and other questions...
+
 - Enhancements:
 	* Rasterize tool
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)

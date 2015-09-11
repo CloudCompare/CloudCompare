@@ -492,9 +492,36 @@ public:
 
 	//! Whether the middle-screen cross should be displayed or not
 	bool crossShouldBeDrawn() const;
-	
+
 	//! Main OpenGL display sequence
 	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross);
+
+public: //stereo mode
+
+	//! Enables the stereo display mode
+	inline void enableStereoMode(bool state) { m_stereoIsEnabled = state; }
+
+	//! Returns whether the stereo display mode is enabled or not
+	inline bool isStereoModeEnabled() const { return m_stereoIsEnabled; }
+	
+	//! Seterovision parameters
+	struct StereoParams
+	{
+		StereoParams();
+
+		enum GlassType { RED_BLUE = 1, RED_CYAN = 2 };
+		
+		bool autoFocal;
+		double focalDist;
+		double eyeSepFactor;
+		GlassType glassType;
+	};
+
+	//! Returns the current stereo mode parameters
+	inline const StereoParams& getStereoParams() const { return m_stereoParams; }
+
+	//! Sets the current stereo mode parameters
+	void setStereoParams(const StereoParams& params);
 
 public slots:
 
@@ -692,8 +719,10 @@ protected: //methods
 	void drawScale(const ccColor::Rgbub& color);
 
 	//Projections controls
-	void recalcModelViewMatrix();
-	void recalcProjectionMatrix();
+	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
+	ccGLMatrixd computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures) const;
+	void updateModelViewMatrix();
+	void updateProjectionMatrix();
 	void setStandardOrthoCenter();
 	void setStandardOrthoCorner();
 
@@ -1041,6 +1070,12 @@ protected: //members
 	QTimer m_scheduleTimer;
 	//! Scheduled full redraw (no LOD)
 	qint64 m_scheduledFullRedrawTime;
+
+	//! Seterovision mode parameters
+	StereoParams m_stereoParams;
+
+	//! Seterovision mode parameters
+	bool m_stereoIsEnabled;
 
 private:
 

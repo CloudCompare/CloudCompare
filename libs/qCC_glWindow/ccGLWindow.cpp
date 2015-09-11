@@ -99,6 +99,7 @@ static const char c_ps_objectMode[]			= "objectCenteredView";
 static const char c_ps_sunLight[]			= "sunLightEnabled";
 static const char c_ps_customLight[]		= "customLightEnabled";
 static const char c_ps_pivotVisibility[]	= "pivotVisibility";
+static const char c_ps_stereoGlassType[]	= "stereoGlassType";
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
@@ -187,6 +188,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_touchInProgress(false)
 	, m_touchBaseDist(0)
 	, m_scheduledFullRedrawTime(0)
+	, m_stereoIsEnabled(false)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -228,15 +230,19 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 		settings.beginGroup(c_ps_groupName);
 		
 		//load parameters
-		bool perspectiveView	= settings.value(c_ps_perspectiveView,	false				).toBool();
+		bool perspectiveView	= settings.value(c_ps_perspectiveView,	false								).toBool();
 		//DGM: we force object-centered view by default now, as the viewer-based perspective is too dependent
 		//on what is displayed (so restoring this parameter at next startup is rarely a good idea)
-		bool objectCenteredView	= /*settings.value(c_ps_objectMode,		true				).toBool()*/true;
-		m_sunLightEnabled		= settings.value(c_ps_sunLight,			true				).toBool();
-		m_customLightEnabled	= settings.value(c_ps_customLight,		false				).toBool();
-		int pivotVisibility		= settings.value(c_ps_pivotVisibility,	PIVOT_SHOW_ON_MOVE	).toInt();
-		
+		bool objectCenteredView	= /*settings.value(c_ps_objectMode,		true								).toBool()*/true;
+		m_sunLightEnabled		= settings.value(c_ps_sunLight,			true								).toBool();
+		m_customLightEnabled	= settings.value(c_ps_customLight,		false								).toBool();
+		int pivotVisibility		= settings.value(c_ps_pivotVisibility,	PIVOT_SHOW_ON_MOVE					).toInt();
+		int glassType			= settings.value(c_ps_stereoGlassType,	ccGLWindow::StereoParams::RED_BLUE	).toInt();
+
 		settings.endGroup();
+
+		//update stereo parameters
+		m_stereoParams.glassType = static_cast<ccGLWindow::StereoParams::GlassType>(glassType);
 
 		//report current perspective
 		if (!m_silentInitialization)
@@ -1513,7 +1519,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 		glDisable(GL_DEPTH_TEST);
 
 		//gradient color background
-		if (getDisplayParameters().drawBackgroundGradient)
+		if (getDisplayParameters().drawBackgroundGradient && !m_stereoIsEnabled)
 		{
 			drawGradientBackground();
 			//we clear background
@@ -1521,11 +1527,20 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 		}
 		else
 		{
-			const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
-			glClearColor(	bkgCol.r / 255.0f,
-							bkgCol.g / 255.0f,
-							bkgCol.b / 255.0f,
-							1.0f );
+			if (m_stereoIsEnabled)
+			{
+				//force black background and white points by default!
+				glClearColor(0, 0, 0, 1.0f);
+				CONTEXT.pointsDefaultCol = ccColor::Rgbub(255,255,255);
+			}
+			else
+			{
+				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
+				glClearColor(	bkgCol.r / 255.0f,
+								bkgCol.g / 255.0f,
+								bkgCol.b / 255.0f,
+								1.0f );
+			}
 
 			//we clear background
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1577,7 +1592,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 	glLoadMatrixd(getModelViewMatd());
 
 	//we enable relative custom light (if activated)
-	if (m_customLightEnabled)
+	if (m_customLightEnabled && !m_stereoIsEnabled)
 	{
 		glEnableCustomLight();
 		if (	!m_captureMode.enabled
@@ -1618,22 +1633,129 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 		}
 	}
 
-	//we draw 3D entities
-	if (m_globalDBRoot)
-	{
-		m_globalDBRoot->draw(CONTEXT);
-		if (m_globalDBRoot->getChildrenNumber())
-		{
-			//draw pivot
-			drawPivot();
-		}
-	}
-	if (m_winDBRoot)
-		m_winDBRoot->draw(CONTEXT);
+	unsigned renderingSteps = 1;
+	CCVector3d Rc,Lc;
 
-	//for connected items
-	if (m_currentLODLevel == 0)
-		emit drawing3D();
+	if (m_stereoIsEnabled)
+	{
+		//see http://paulbourke.net/stereographics/anaglyph/ for a lot of information!
+		CCVector3d C = getRealCameraCenter();
+
+		//update focal dist if necessary
+		if (m_stereoParams.autoFocal)
+		{
+			//Camera center to pivot vector
+			double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
+			double f = zoomEquivalentDist / 2;
+
+			//compute center of visible objects constellation
+			//double d = 1.0;
+			//if (m_globalDBRoot)
+			//{
+			//	//get whole bounding-box
+			//	ccBBox box;
+			//	getVisibleObjectsBB(box);
+			//	if (box.isValid())
+			//	{
+			//		//get half bbox diagonal length
+			//		d = box.getDiagNormd() / 2;
+			//	}
+			//}
+			//double f = d / (2 * tan(getFov() * CC_DEG_TO_RAD));
+
+			m_stereoParams.focalDist = f;
+		}
+
+		CCVector3d rightDir(-1,0,0);
+		if (!m_viewportParams.objectCenteredView)
+		{
+			m_viewportParams.viewMat.transposed().applyRotation(rightDir);
+		}
+
+		double eyeSep = m_stereoParams.focalDist * (m_stereoParams.eyeSepFactor / 100.0);
+		rightDir *= (eyeSep/2);
+
+		Rc = C + rightDir;
+		Lc = C - rightDir;
+
+		//we'll need two rendering steps!
+		renderingSteps = 2;
+	}
+
+	for (unsigned step = 0; step < renderingSteps; ++step)
+	{
+		if (m_stereoIsEnabled)
+		{
+			//change eye position (compute new projection parameters)
+			double zNear, zFar;
+			ccGLMatrixd projMat = computeProjectionMatrix(	step == 0 ? Lc : Rc, 
+															zNear,
+															zFar,
+															false );
+
+			ccGLMatrixd viewMat = computeModelViewMatrix( step == 0 ? Lc : Rc );
+
+
+			//relaod the new projection matrix
+			glMatrixMode(GL_PROJECTION);
+			glLoadMatrixd(projMat.data());
+
+			//relaod the new modelview matrix
+			glMatrixMode(GL_MODELVIEW);
+			glLoadMatrixd(viewMat.data());
+
+			if (step == 1)
+			{
+				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+
+			//change color filter
+			switch (m_stereoParams.glassType)
+			{
+			case StereoParams::RED_BLUE:
+				if (step == 0)
+					glColorMask(GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE);
+				else
+					glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
+				break;
+
+			case StereoParams::RED_CYAN:
+				if (step == 0)
+					glColorMask(GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE);
+				else
+					glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
+				break;
+
+			default:
+				assert(false);
+			} 
+		}
+
+		//we draw 3D entities
+		if (m_globalDBRoot)
+		{
+			m_globalDBRoot->draw(CONTEXT);
+			if (m_globalDBRoot->getChildrenNumber())
+			{
+				//draw pivot
+				drawPivot();
+			}
+		}
+		if (m_winDBRoot)
+		{
+			m_winDBRoot->draw(CONTEXT);
+		}
+
+		//for connected items
+		if (m_currentLODLevel == 0)
+			emit drawing3D();
+	}
+
+	if (m_stereoIsEnabled)
+	{
+		//restore default color mask
+		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+	}
 
 	//we disable shader (if any)
 	if (m_activeShader)
@@ -2292,7 +2414,7 @@ ccGLMatrixd ccGlOrtho(double w, double h, double d)
 	return matrix;
 }
 
-void ccGLWindow::recalcProjectionMatrix()
+ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures) const
 {
 	double bbHalfDiag = 1.0;
 	CCVector3d bbCenter(0,0,0);
@@ -2322,13 +2444,13 @@ void ccGLWindow::recalcProjectionMatrix()
 	//switching from perspective to ortho. view).
 	//While the user won't see the difference this has a great influence on GL filters
 	//(as normalized depth map values depends on it)
-	double CP = (getRealCameraCenter()-pivotPoint).norm();
+	double CP = (cameraCenter-pivotPoint).norm();
 		
 	//distance between pivot point and DB farthest point
 	double MP = (bbCenter - pivotPoint).norm() + bbHalfDiag;
 
 	//pivot symbol should always be (potentially) visible in object-based mode
-	if (m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
+	if (withGLfeatures && m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	//if (m_viewportParams.objectCenteredView)
 	{
 		double pivotActualRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * static_cast<double>(std::min(m_glWidth,m_glHeight)) / 2;
@@ -2337,7 +2459,7 @@ void ccGLWindow::recalcProjectionMatrix()
 	}
 	MP *= 1.01; //for round-off issues
 	
-	if (m_customLightEnabled)
+	if (withGLfeatures && m_customLightEnabled)
 	{
 		//distance from custom light to pivot point
 		double d = (pivotPoint - CCVector3d::fromArray(m_customLightPos)).norm();
@@ -2350,21 +2472,17 @@ void ccGLWindow::recalcProjectionMatrix()
 		//DGM: the 'zNearCoef' must not be too small, otherwise the loss in accuracy
 		//for the detph buffer is too high and the display is jeopardized, especially
 		//for entities with big coordinates)
-		double zNear = MP * m_viewportParams.zNearCoef;
+		zNear = MP * m_viewportParams.zNearCoef;
 		//DGM: what was the purpose of this?!
 		//if (m_viewportParams.objectCenteredView)
 		//	zNear = std::max<double>(CP-MP,zNear);
-		double zFar = std::max<double>(CP+MP,1.0);
+		zFar = std::max<double>(CP+MP,1.0);
 
-		//save actual zNear and zFar parameters
-		m_viewportParams.zNear = zNear;
-		m_viewportParams.zFar = zFar;
-
-		//and aspect ratio
+		//compute the aspect ratio
 		double ar = static_cast<double>(m_glWidth)/m_glHeight;
 
 		float currentFov_deg = getFov();
-		m_projMatd = ccGluPerspective(currentFov_deg,ar,zNear,zFar);
+		return ccGluPerspective(currentFov_deg,ar,zNear,zFar);
 	}
 	else
 	{
@@ -2378,11 +2496,19 @@ void ccGLWindow::recalcProjectionMatrix()
 		double halfH = static_cast<double>(m_glHeight)/2 * m_viewportParams.orthoAspectRatio;
 
 		//save actual zNear and zFar parameters
-		m_viewportParams.zNear = -maxDist_pix;
-		m_viewportParams.zFar = maxDist_pix;
+		zNear = -maxDist_pix;
+		zFar = maxDist_pix;
 
-		m_projMatd = ccGlOrtho(halfW,halfH,maxDist_pix);
+		return ccGlOrtho(halfW,halfH,maxDist_pix);
 	}
+}
+
+void ccGLWindow::updateProjectionMatrix()
+{
+	m_projMatd = computeProjectionMatrix(	getRealCameraCenter(), 
+											m_viewportParams.zNear,
+											m_viewportParams.zFar,
+											true );
 
 	m_validProjectionMatrix = true;
 }
@@ -2393,12 +2519,10 @@ void ccGLWindow::invalidateVisualization()
 	m_updateFBO = true;
 }
 
-void ccGLWindow::recalcModelViewMatrix()
+ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) const
 {
 	ccGLMatrixd viewMatd;
 	viewMatd.toIdentity();
-
-	CCVector3d cameraCenter = getRealCameraCenter();
 
 	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
 	if (m_viewportParams.objectCenteredView)
@@ -2445,8 +2569,13 @@ void ccGLWindow::recalcModelViewMatrix()
 		scaleMatd.data()[10] = totalZoom;
 	}
 
+	return scaleMatd * viewMatd;
+}
+
+void ccGLWindow::updateModelViewMatrix()
+{
 	//we save visualization matrix
-	m_viewMatd = scaleMatd * viewMatd;
+	m_viewMatd = computeModelViewMatrix( getRealCameraCenter() );
 
 	m_validModelviewMatrix = true;
 }
@@ -2469,7 +2598,7 @@ const void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 const double* ccGLWindow::getModelViewMatd()
 {
 	if (!m_validModelviewMatrix)
-		recalcModelViewMatrix();
+		updateModelViewMatrix();
 
 	return m_viewMatd.data();
 }
@@ -2477,7 +2606,7 @@ const double* ccGLWindow::getModelViewMatd()
 const double* ccGLWindow::getProjectionMatd()
 {
 	if (!m_validProjectionMatrix)
-		recalcProjectionMatrix();
+		updateProjectionMatrix();
 
 	return m_projMatd.data();
 }
@@ -5129,5 +5258,25 @@ void ccGLWindow::scheduleFullRedraw(unsigned maxDelay_ms)
 	if (!m_scheduleTimer.isActive())
 	{
 		m_scheduleTimer.start(500);
+	}
+}
+
+ccGLWindow::StereoParams::StereoParams()
+	: autoFocal(true)
+	, focalDist(5.0)
+	, eyeSepFactor(3.3)
+	, glassType(RED_CYAN)
+{}
+
+void ccGLWindow::setStereoParams(const StereoParams& params)
+{
+	m_stereoParams = params;
+	
+	//auto-save last glass type
+	{
+		QSettings settings;
+		settings.beginGroup(c_ps_groupName);
+		settings.setValue(c_ps_stereoGlassType,	m_stereoParams.glassType);
+		settings.endGroup();
 	}
 }

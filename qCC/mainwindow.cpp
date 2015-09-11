@@ -135,6 +135,7 @@
 #include "ccEntityPickerDlg.h"
 #include "ccRasterizeTool.h"
 #include "ccMatchScalesDlg.h"
+#include "ccStereoModeDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -602,6 +603,12 @@ void MainWindow::doEnableGLFilter()
 		return;
 	}
 
+	if (win->isStereoModeEnabled())
+	{
+		ccLog::Warning("[GL filter] Can't activate GL filters while the stereo mode is enabled!");
+		return;
+	}
+
 	QAction *action = qobject_cast<QAction*>(sender());
 	ccPluginInterface *ccPlugin = getValidPlugin(action ? action->parent() : 0);
 	if (!ccPlugin)
@@ -1022,6 +1029,7 @@ void MainWindow::connectActions()
 	connect(actionSetViewRight,					SIGNAL(triggered()),	this,		SLOT(setRightView()));
 	connect(actionSetViewIso1,					SIGNAL(triggered()),	this,		SLOT(setIsoView1()));
 	connect(actionSetViewIso2,					SIGNAL(triggered()),	this,		SLOT(setIsoView2()));
+	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision()));
 }
 
 void MainWindow::doActionColorize()
@@ -8516,6 +8524,10 @@ void MainWindow::setOrthoView(ccGLWindow* win)
 {
 	if (win)
 	{
+		if (!checkStereoMode(win))
+		{
+			return;
+		}
 		win->setPerspectiveState(false,true);
 		win->redraw();
 
@@ -10738,11 +10750,75 @@ void MainWindow::toggleActiveWindowCustomLight()
 	}
 }
 
+void MainWindow::toggleActiveWindowStereoVision()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		bool isActive = win->isStereoModeEnabled();
+		if (isActive)
+		{
+			win->enableStereoMode(false);
+		}
+		else
+		{
+			//display a parameters dialog
+			ccStereoModeDlg smDlg(this);
+			smDlg.setParameters(win->getStereoParams());
+			if (!smDlg.exec())
+			{
+				//cancelled by the user
+				actionEnableStereo->blockSignals(true);
+				actionEnableStereo->setChecked(false);
+				actionEnableStereo->blockSignals(false);
+				return;
+			}
+
+			//force perspective state!
+			setCenteredPerspectiveView(win);
+			//and disable GL filters :(
+			//FIXME
+			win->setGlFilter(0);
+
+			win->setStereoParams(smDlg.getParameters());
+			win->enableStereoMode(true);
+		}
+		win->redraw();
+	}
+}
+
+bool MainWindow::checkStereoMode(ccGLWindow* win)
+{
+	assert(win);
+		
+	if (win && win->getViewportParameters().perspectiveView && win->isStereoModeEnabled())
+	{
+		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+		else
+		{
+			win->enableStereoMode(false);
+			actionEnableStereo->blockSignals(true);
+			actionEnableStereo->setChecked(false);
+			actionEnableStereo->blockSignals(false);
+		}
+	}
+
+	return true;
+}
+
 void MainWindow::toggleActiveWindowCenteredPerspective()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
+		const ccViewportParameters& params = win->getViewportParameters();
+		if (params.perspectiveView && params.objectCenteredView && !checkStereoMode(win)) //we need to check this only if we are already in object-centered perspective mode
+		{
+			return;
+		}
 		win->togglePerspective(true);
 		win->redraw(false);
 		updateViewModePopUpMenu(win);
@@ -10755,6 +10831,11 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
+		const ccViewportParameters& params = win->getViewportParameters();
+		if (params.perspectiveView && !params.objectCenteredView && !checkStereoMode(win)) //we need to check this only if we are already in viewer-based perspective mode
+		{
+			return;
+		}
 		win->togglePerspective(false);
 		win->redraw(false);
 		updateViewModePopUpMenu(win);
@@ -11396,7 +11477,14 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		actionLockRotationVertAxis->blockSignals(true);
 		actionLockRotationVertAxis->setChecked(win->isVerticalRotationLocked());
 		actionLockRotationVertAxis->blockSignals(false);
+
+		actionEnableStereo->blockSignals(true);
+		actionEnableStereo->setChecked(win->isStereoModeEnabled());
+		actionEnableStereo->blockSignals(false);
 	}
+
+	actionLockRotationVertAxis->setEnabled(win != 0);
+	actionEnableStereo->setEnabled(win != 0);
 }
 
 void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)

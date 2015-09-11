@@ -5547,7 +5547,7 @@ void MainWindow::doActionExportCoordToSF()
 						sf->computeMinAndMax();
 						pc->setCurrentDisplayedScalarField(sfIndex);
 						m_selectedEntities[i]->showSF(true);
-						m_selectedEntities[i]->refreshDisplay_recursive();
+						m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
 					}
 				}
 			}

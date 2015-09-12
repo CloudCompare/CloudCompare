@@ -248,7 +248,7 @@ protected slots:
 	virtual void setRightView();
 	virtual void setIsoView1();
 	virtual void setIsoView2();
-	virtual void toggleActiveWindowStereoVision();
+	virtual void toggleActiveWindowStereoVision(bool);
 	virtual void toggleActiveWindowCenteredPerspective();
 	virtual void toggleActiveWindowCustomLight();
 	virtual void toggleActiveWindowSunLight();
@@ -504,7 +504,7 @@ protected:
 	void saveGUIElementsPos();
 
 	void setOrthoView(ccGLWindow* win);
-	void setCenteredPerspectiveView(ccGLWindow* win);
+	void setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw = true);
 	void setViewerPerspectiveView(ccGLWindow* win);
 
 	void closeEvent(QCloseEvent* event);

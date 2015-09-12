@@ -1634,7 +1634,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 	}
 
 	unsigned renderingSteps = 1;
-	CCVector3d Rc,Lc;
+	CCVector3d Rc,Lc,Fc;
 
 	if (m_stereoIsEnabled)
 	{
@@ -1669,14 +1669,19 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 		CCVector3d rightDir(-1,0,0);
 		if (!m_viewportParams.objectCenteredView)
 		{
-			m_viewportParams.viewMat.transposed().applyRotation(rightDir);
+			const double* M = m_viewportParams.viewMat.data();
+			rightDir = CCVector3d(M[0], M[4], M[8]);
 		}
 
 		double eyeSep = m_stereoParams.focalDist * (m_stereoParams.eyeSepFactor / 100.0);
 		rightDir *= (eyeSep/2);
 
+		//eyes positions
 		Rc = C + rightDir;
 		Lc = C - rightDir;
+
+		//focal point
+		Fc = C + getCurrentViewDir() * m_stereoParams.focalDist;
 
 		//we'll need two rendering steps!
 		renderingSteps = 2;
@@ -1686,23 +1691,33 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, bool doDrawCross)
 	{
 		if (m_stereoIsEnabled)
 		{
-			//change eye position (compute new projection parameters)
-			double zNear, zFar;
-			ccGLMatrixd projMat = computeProjectionMatrix(	step == 0 ? Lc : Rc, 
-															zNear,
-															zFar,
-															false );
+			//change eye position and orientation
+			{
+				//backup view matrix
+				ccGLMatrixd origViewMat = m_viewportParams.viewMat;
 
-			ccGLMatrixd viewMat = computeModelViewMatrix( step == 0 ? Lc : Rc );
+				CCVector3d forward = Fc - (step == 0 ? Lc : Rc);
+				m_viewportParams.viewMat = ccGLMatrixd::FromViewDirAndUpDir(forward,getCurrentUpDir());
 
+				double zNear, zFar;
+				ccGLMatrixd projMat = computeProjectionMatrix(	step == 0 ? Lc : Rc, 
+																zNear,
+																zFar,
+																false );
 
-			//relaod the new projection matrix
-			glMatrixMode(GL_PROJECTION);
-			glLoadMatrixd(projMat.data());
+				ccGLMatrixd viewMat = computeModelViewMatrix( step == 0 ? Lc : Rc );
 
-			//relaod the new modelview matrix
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixd(viewMat.data());
+				//relaod the new projection matrix
+				glMatrixMode(GL_PROJECTION);
+				glLoadMatrixd(projMat.data());
+
+				//relaod the new modelview matrix
+				glMatrixMode(GL_MODELVIEW);
+				glLoadMatrixd(viewMat.data());
+
+				//restore original view matrix
+				m_viewportParams.viewMat = origViewMat;
+			}
 
 			if (step == 1)
 			{

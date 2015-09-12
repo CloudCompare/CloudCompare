@@ -1029,7 +1029,7 @@ void MainWindow::connectActions()
 	connect(actionSetViewRight,					SIGNAL(triggered()),	this,		SLOT(setRightView()));
 	connect(actionSetViewIso1,					SIGNAL(triggered()),	this,		SLOT(setIsoView1()));
 	connect(actionSetViewIso2,					SIGNAL(triggered()),	this,		SLOT(setIsoView2()));
-	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision()));
+	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
 }
 
 void MainWindow::doActionColorize()
@@ -8544,12 +8544,13 @@ void MainWindow::setCenteredPerspectiveView()
 	setCenteredPerspectiveView(getActiveGLWindow());
 }
 
-void MainWindow::setCenteredPerspectiveView(ccGLWindow* win)
+void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=true*/)
 {
 	if (win)
 	{
 		win->setPerspectiveState(true,true);
-		win->redraw();
+		if (autoRedraw)
+			win->redraw();
 
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
@@ -10750,12 +10751,15 @@ void MainWindow::toggleActiveWindowCustomLight()
 	}
 }
 
-void MainWindow::toggleActiveWindowStereoVision()
+void MainWindow::toggleActiveWindowStereoVision(bool state)
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		bool isActive = win->isStereoModeEnabled();
+		if (isActive == state)
+			return;
+
 		if (isActive)
 		{
 			win->enableStereoMode(false);
@@ -10775,10 +10779,15 @@ void MainWindow::toggleActiveWindowStereoVision()
 			}
 
 			//force perspective state!
-			setCenteredPerspectiveView(win);
+			if (!win->getViewportParameters().perspectiveView)
+			{
+				setCenteredPerspectiveView(win,false);
+			}
 			//and disable GL filters :(
-			//FIXME
-			win->setGlFilter(0);
+			{
+				//FIXME
+				win->setGlFilter(0);
+			}
 
 			win->setStereoParams(smDlg.getParameters());
 			win->enableStereoMode(true);

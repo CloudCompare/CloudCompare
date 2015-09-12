@@ -11,6 +11,8 @@ v2.6.2 XX/XX/2015
 		- to be used with red-blue or red-cyan glasses
 		- only works in perspective mode
 		- Note that shaders (qEDL, qSSAO) are not supported in stereo mode
+		- Shortcut: F10
+		- Also supported by ccViewer
 	* qAnimation plugin (initiated by 2G Robotics - http://www.2grobotics.com/)
 		- prior to use the plugin, the user must create several viewport objects
 			(with CTRL+V or 'Display > Save viewport as object') corresponding to

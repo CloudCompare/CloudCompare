@@ -168,7 +168,7 @@ ccViewer::~ccViewer()
 	if (currentRoot)
 	{
 		m_glWindow->setSceneDB(0);
-		m_glWindow->redraw();
+		//m_glWindow->redraw();
 		delete currentRoot;
 	}
 }
@@ -915,7 +915,6 @@ void ccViewer::enable3DMouse(bool state)
 		m_3dMouseInput = new Mouse3DInput(this);
 		if (m_3dMouseInput->connect(this,"ccViewer"))
 		{
-			m_3dMouseInput = new Mouse3DInput(this);
 			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)),	this,	SLOT(on3DMouseMove(std::vector<float>&)));
 			QObject::connect(m_3dMouseInput, SIGNAL(sigReleased()),						this,	SLOT(on3DMouseReleased()));
 			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)),			this,	SLOT(on3DMouseKeyDown(int)));

@@ -21,9 +21,9 @@ set( VERSION_MAJOR 1 )
 set( VERSION_MINOR 32 )
 set( VERSION_PATCH 0 )
 
-set( QCC_HEADERS ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h )
-set( QCC_SOURCES ../qCC/ccOverlayDialog.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccMouse3DContextMenu.cpp )
-set( QCC_DIALOGS ../qCC/ui_templates/cameraParamDlg.ui ../qCC/ui_templates/displayOptionsDlg.ui )
+set( QCC_HEADERS ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h ../qCC/ccStereoModeDlg.h )
+set( QCC_SOURCES ../qCC/ccOverlayDialog.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccMouse3DContextMenu.cpp ../qCC/ccStereoModeDlg.cpp )
+set( QCC_DIALOGS ../qCC/ui_templates/cameraParamDlg.ui ../qCC/ui_templates/displayOptionsDlg.ui ../qCC/ui_templates/stereoModeDlg.ui )
 
 file( GLOB header_list *.h ${QCC_HEADERS} )
 file( GLOB source_list *.cpp ${QCC_SOURCES} )

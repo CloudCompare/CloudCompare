@@ -184,6 +184,7 @@ QStatusBar
     <addaction name="menu3DMouse"/>
     <addaction name="menuLights"/>
     <addaction name="actionGlobalZoom"/>
+    <addaction name="actionEnableStereo"/>
     <addaction name="actionFullScreen"/>
     <addaction name="actionLockRotationVertAxis"/>
     <addaction name="separator"/>
@@ -670,6 +671,24 @@ QStatusBar
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionEnableStereo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stereo mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Enabale stereo mode (with red-blue or red-cyan glasses)</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
    </property>
   </action>
  </widget>

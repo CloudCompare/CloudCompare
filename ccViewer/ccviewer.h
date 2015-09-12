@@ -79,6 +79,7 @@ protected slots:
 	void doActionEditCamera();
 	void toggleSunLight(bool);
 	void toggleCustomLight(bool);
+	void toggleStereoMode(bool);
 	void toggleFullScreen(bool);
 	void toggleRotationAboutVertAxis();
 	void doActionAbout();
@@ -120,7 +121,7 @@ protected slots:
 	void doEnableGLFilter();
 	void doDisableGLFilter();
 
-protected:
+protected: //methods
 
 	//! Loads plugins (from files)
 	void loadPlugins();
@@ -138,6 +139,11 @@ protected:
 
 	//! Updates lights UI elements
 	void reflectLightsState();
+
+	//! Checks whether stereo mode can be stopped (if necessary) or not
+	bool checkStereoMode();
+
+protected: //members
 
 	//! Releases any connected 3D mouse (if any)
 	void release3DMouse();

@@ -39,6 +39,7 @@
 //dialogs
 #include <ccDisplayOptionsDlg.h>
 #include <ccCameraParamEditDlg.h>
+#include <ccStereoModeDlg.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -132,6 +133,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	connect(ui.actionToggleCustomLight,				SIGNAL(toggled(bool)),						this,	SLOT(toggleCustomLight(bool)));
 	//"Options" menu
 	connect(ui.actionGlobalZoom,					SIGNAL(triggered()),						this,	SLOT(setGlobalZoom()));
+	connect(ui.actionEnableStereo,					SIGNAL(toggled(bool)),						this,	SLOT(toggleStereoMode(bool)));
 	connect(ui.actionFullScreen,					SIGNAL(toggled(bool)),						this,	SLOT(toggleFullScreen(bool)));
 	connect(ui.actionLockRotationVertAxis,			SIGNAL(triggered()),						this,	SLOT(toggleRotationAboutVertAxis()));
 
@@ -451,8 +453,10 @@ void ccViewer::updateDisplay()
 void ccViewer::updateGLFrameGradient()
 {
 	//display parameters
-	const ccColor::Rgbub& bkgCol = m_glWindow->getDisplayParameters().backgroundCol;
-	const ccColor::Rgbub& forCol = m_glWindow->getDisplayParameters().pointsDefaultCol;
+	static const ccColor::Rgbub s_black(0,0,0);
+	static const ccColor::Rgbub s_white(255,255,255);
+	const ccColor::Rgbub& bkgCol = m_glWindow->isStereoModeEnabled() ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
+	const ccColor::Rgbub& forCol = m_glWindow->isStereoModeEnabled() ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
 
 	glColor3ubv(bkgCol.rgb);
 	glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
@@ -588,10 +592,31 @@ void ccViewer::reflectPerspectiveState()
 	ui.actionSetViewerPerspectiveView->setChecked(perspectiveEnabled && !objectCentered);
 }
 
+
+bool ccViewer::checkStereoMode()
+{
+	if (m_glWindow && m_glWindow->getViewportParameters().perspectiveView && m_glWindow->isStereoModeEnabled())
+	{
+		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+		else
+		{
+			toggleStereoMode(false);
+		}
+	}
+
+	return true;
+}
+
+
 void ccViewer::setOrthoView()
 {
 	if (m_glWindow)
 	{
+		if (!checkStereoMode())
+			return;
 		m_glWindow->setPerspectiveState(false,true);
 		m_glWindow->redraw();
 	}
@@ -681,6 +706,54 @@ void ccViewer::toggleCustomLight(bool state)
 	if (m_glWindow)
 		m_glWindow->setCustomLight(state);
 	reflectLightsState();
+}
+
+void ccViewer::toggleStereoMode(bool state)
+{
+	if (!m_glWindow)
+		return;
+
+	bool isActive = m_glWindow->isStereoModeEnabled();
+	if (isActive == state)
+		return;
+
+	if (isActive)
+	{
+		m_glWindow->enableStereoMode(false);
+		ui.menuPlugins->setEnabled(true);
+	}
+	else
+	{
+		//display a parameters dialog
+		ccStereoModeDlg smDlg(this);
+		smDlg.setParameters(m_glWindow->getStereoParams());
+		if (!smDlg.exec())
+		{
+			//cancelled by the user
+			ui.actionEnableStereo->blockSignals(true);
+			ui.actionEnableStereo->setChecked(false);
+			ui.actionEnableStereo->blockSignals(false);
+			return;
+		}
+
+		//force perspective state!
+		if (!m_glWindow->getViewportParameters().perspectiveView)
+		{
+			m_glWindow->setPerspectiveState(true,true);
+			reflectPerspectiveState();
+		}
+		//and disable GL filters :(
+		{
+			//FIXME
+			m_glWindow->setGlFilter(0);
+			ui.menuPlugins->setEnabled(false);
+		}
+
+		m_glWindow->setStereoParams(smDlg.getParameters());
+		m_glWindow->enableStereoMode(true);
+	}
+
+	updateDisplay();
 }
 
 void ccViewer::toggleFullScreen(bool state)

@@ -84,11 +84,13 @@ v2.6.2 XX/XX/2015
 		- new options for ASCII export:
 			* 'ADD_HEADER' to add a header with each column's name to the saved file
 			* 'ADD_PTS_COUNT' to add the number of points at the beginning of the saved file
-	* Weighted ICP is now functional
-		- the user can use the currently active scalar field on the registered and/or the reference
-		clouds as weights. The bigger the weights, the more influence the points will have.
-		- weights are automatically normalized
-		- only absolute values are considered
+	* Fine registration (ICP)
+		- Weighted ICP is now functional
+			* the user can use the currently active scalar field on the registered and/or the reference
+			clouds as weights. The bigger the weights, the more influence the points will have.
+			* weights are automatically normalized
+			* only absolute values are considered
+		- Initial point selection (when using a final overlap below 80%) is now much faster
 	* 'Render to file' method:
 		- rendering zoom is now more properly taken into account when displaying 2D labels
 		- zoomed text size is estimated in a more accurate way

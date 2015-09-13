@@ -226,7 +226,7 @@ void ccComparisonDlg::updateOctreeLevel()
 		return;
 
 	//we only compute best octree level if "auto" mode is on or the user has set the level to "0"
-	if (!octreeLevelSpinBox->isEnabled() || octreeLevelSpinBox->value() == 0)
+	if (!octreeLevelCheckBox->isChecked() || octreeLevelSpinBox->value() == 0)
 	{
 		double maxDistance = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
 		
@@ -328,13 +328,11 @@ bool ccComparisonDlg::isValid()
 
 int ccComparisonDlg::computeApproxResults()
 {
-	int approxResult = -1;
-
 	histoButton->setEnabled(false);
 	preciseResultsTabWidget->widget(2)->setEnabled(false);
 
 	if (!isValid())
-		return approxResult;
+		return -1;
 
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx < 0)
@@ -342,7 +340,7 @@ int ccComparisonDlg::computeApproxResults()
 	if (sfIdx < 0)
 	{
 		ccLog::Error("Failed to allocate a new scalar field for computing approx. distances! Try to free some memory ...");
-		return approxResult;
+		return -1;
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
@@ -352,9 +350,10 @@ int ccComparisonDlg::computeApproxResults()
 	//prepare the octree structures
 	ccProgressDialog progressDlg(true,this);
 
+	int approxResult = -1;
 	QElapsedTimer eTimer;
 	eTimer.start();
-	switch(m_compType)
+	switch (m_compType)
 	{
 	case CLOUDCLOUD_DIST: //hausdroff
 		{
@@ -369,17 +368,20 @@ int ccComparisonDlg::computeApproxResults()
 																								m_refOctree);
 		}
 		break;
+	
 	case CLOUDMESH_DIST: //cloud-mesh
 		{
 			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
 		}
 		break;
+
+	default:
+		assert(false);
+		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
 
 	progressDlg.stop();
-
-	int guessedBestOctreeLevel = -1;
 
 	//if the approximate distances comptation failed...
 	if (approxResult < 0)
@@ -442,18 +444,8 @@ int ccComparisonDlg::computeApproxResults()
 		m_currentSFIsDistance = true;
 
 		//now find the best octree level for real dist. computation
-		guessedBestOctreeLevel = determineBestOctreeLevel(-1.0);
+		updateOctreeLevel();
 	}
-
-	if (guessedBestOctreeLevel < 0)
-	{
-		ccLog::Warning("[computeApproxResults] Can't evaluate best computation level! Try to set it manually ...");
-		octreeLevelCheckBox->setCheckState(Qt::Checked);
-		octreeLevelSpinBox->setEnabled(true);
-		guessedBestOctreeLevel = static_cast<int>(DEFAULT_OCTREE_LEVEL);
-	}
-	octreeLevelSpinBox->setValue(guessedBestOctreeLevel);
-	m_needToRecomputeBestLevel = false;
 
 	computeButton->setEnabled(true);
 	preciseGroupBox->setEnabled(true);
@@ -462,7 +454,7 @@ int ccComparisonDlg::computeApproxResults()
 
 	updateDisplay(sfIdx >= 0, false);
 
-	return guessedBestOctreeLevel;
+	return octreeLevelSpinBox->value();
 }
 
 int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)

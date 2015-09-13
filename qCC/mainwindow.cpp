@@ -3890,20 +3890,30 @@ void MainWindow::doActionAddIdField()
 	updateUI();
 }
 
-PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* cloud)
+PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn/*=0*/)
 {
 	assert(cloud);
-	if (cloud && cloud->size() > 0)
+	if (cloud && cloud->size() != 0)
 	{
 		//we get 1% of the cloud bounding box
 		//and we divide by the number of points / 10e6 (so that the kernel for a 20 M. points cloud is half the one of a 10 M. cloud)
-		return cloud->getOwnBB().getDiagNorm() * static_cast<PointCoordinateType>(0.01/std::max(1.0,1.0e-7*static_cast<double>(cloud->size())));
+		ccBBox box = cloud->getOwnBB();
+
+		//old way
+		//PointCoordinateType radius = box.getDiagNorm() * static_cast<PointCoordinateType>(0.01/std::max(1.0,1.0e-7*static_cast<double>(cloud->size())));
+
+		//new way
+		CCVector3 d = box.getDiagVec();
+		PointCoordinateType volume = d[0] * d[1] * d[2];
+		PointCoordinateType surface = pow(volume, static_cast<PointCoordinateType>(2.0/3.0));
+		PointCoordinateType surfacePerPoint = surface / cloud->size();
+		return sqrt(surfacePerPoint * knn);
 	}
 
 	return -PC_ONE;
 }
 
-PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities)
+PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=0*/)
 {
 	PointCoordinateType sigma = -PC_ONE;
 
@@ -10399,7 +10409,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					roughnessKernelSize = static_cast<PointCoordinateType>(val);
 				}
 
-				sfName = QString(CC_ROUGHNESS_FIELD_NAME)+QString("(%1)").arg(roughnessKernelSize);
+				sfName = QString(CC_ROUGHNESS_FIELD_NAME) + QString("(%1)").arg(roughnessKernelSize);
 			}
 			break;
 

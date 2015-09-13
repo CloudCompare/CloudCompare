@@ -488,9 +488,9 @@ protected:
 	static void RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects);
 
 	//! Returns a default first guess for algorithms kernel size (one cloud)
-	static PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud);
+	static PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn = 12);
 	//! Returns a default first guess for algorithms kernel size (several clouds)
-	static PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities);
+	static PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,

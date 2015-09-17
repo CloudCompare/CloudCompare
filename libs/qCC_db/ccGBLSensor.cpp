@@ -36,10 +36,10 @@
 //maximum depth buffer dimension (width or height)
 static const int s_MaxDepthBufferSize = (1 << 14); //16384
 
-static const enum Errors {	ERROR_BAD_INPUT      = -1,
-							ERROR_MEMORY         = -2,
-							ERROR_PROC_CANCELLED = -3,
-							ERROR_DB_TOO_SMALL   = -4,
+enum Errors {	ERROR_BAD_INPUT      = -1,
+				ERROR_MEMORY         = -2,
+				ERROR_PROC_CANCELLED = -3,
+				ERROR_DB_TOO_SMALL   = -4,
 };
 								
 QString ccGBLSensor::GetErrorString(int errorCode)

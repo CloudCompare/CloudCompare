@@ -90,6 +90,11 @@ public:
 	**/
 	bool computeAutoParameters(CCLib::GenericCloud* theCloud);
 
+	//! Returns the error string corresponding to an error code
+	/** Errors codes are returned by ccGBLSensor::computeDepthBuffer or DepthBuffer::fillHoles for instance.
+	**/
+	static QString GetErrorString(int errorCode);
+
 public: //setters and getters
 
 	//! Sets the pitch scanning limits

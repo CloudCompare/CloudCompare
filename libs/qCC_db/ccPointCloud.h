@@ -380,11 +380,8 @@ public:
 	virtual bool hasDisplayedScalarField() const;
 	virtual void removeFromDisplay(const ccGenericGLDisplay* win); //for proper VBO release
 
-//#define ENABLE_VISIBILITY_TEST
-#ifdef ENABLE_VISIBILITY_TEST
 	//inherited from CCLib::GenericCloud
 	virtual unsigned char testVisibility(const CCVector3& P) const;
-#endif
 
 	//inherited from ccGenericPointCloud
 	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const;
@@ -400,6 +397,14 @@ public:
 	virtual void applyRigidTransformation(const ccGLMatrix& trans);
 	//virtual bool isScalarFieldEnabled() const;
 	inline virtual void refreshBB() { invalidateBoundingBox(); }
+
+	//! Sets whether visibility check (during comparison) is enabled or not
+	/** See ccPointCloud::testVisibility.
+	**/
+	inline void enableVisibilityCheck(bool state) { m_visibilityCheckEnabled = state; }
+
+	//! Returns whether the mesh as an associated sensor or not
+	bool hasSensor() const;
 
 	//! Interpolate colors from another cloud
 	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
@@ -639,6 +644,11 @@ protected:
 	//! Associated grid structure
 	std::vector<Grid::Shared> m_grids;
 
+	//! Whether visibility check is available or not (during comparison)
+	/** See ccPointCloud::testVisibility
+	**/
+	bool m_visibilityCheckEnabled;
+
 protected: // VBO
 
 	//! Init/updates VBOs
@@ -699,8 +709,6 @@ protected: // VBO
 	void glChunkColorPointer (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkSFPointer    (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-
-public: //Level of Detail (LOD)
 
 public: //Level of Detail (LOD)
 

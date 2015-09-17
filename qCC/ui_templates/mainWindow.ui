@@ -250,8 +250,11 @@
       <string>Sensors</string>
      </property>
      <widget class="QMenu" name="menuGroundBasedLidar">
+      <property name="toolTip">
+       <string>Terrestrial Laser Sensor = Ground Based Lidar</string>
+      </property>
       <property name="title">
-       <string>Ground-Based Laser</string>
+       <string>TLS/GBL</string>
       </property>
       <property name="icon">
        <iconset resource="../icones.qrc">
@@ -261,6 +264,7 @@
       <addaction name="separator"/>
       <addaction name="actionShowDepthBuffer"/>
       <addaction name="actionExportDepthBuffer"/>
+      <addaction name="actionComputePointsVisibility"/>
      </widget>
      <widget class="QMenu" name="menuCameraSensor">
       <property name="title">
@@ -1830,7 +1834,7 @@
   </action>
   <action name="actionShowDepthBuffer">
    <property name="text">
-    <string>Show depth buffer</string>
+    <string>Create/show depth buffer</string>
    </property>
   </action>
   <action name="actionExportDepthBuffer">
@@ -2809,6 +2813,11 @@
    </property>
    <property name="shortcut">
     <string>F10</string>
+   </property>
+  </action>
+  <action name="actionComputePointsVisibility">
+   <property name="text">
+    <string>Compute points visibility (with depth buffer)</string>
    </property>
   </action>
  </widget>

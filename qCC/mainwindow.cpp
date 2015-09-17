@@ -868,6 +868,8 @@ void MainWindow::connectActions()
 	//"Edit > Sensor > Ground-Based lidar" menu
 	connect(actionShowDepthBuffer,				SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
 	connect(actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
+	connect(actionComputePointsVisibility,		SIGNAL(triggered()),	this,		SLOT(doActionComputePointsVisibility()));
+	
 	//"Edit > Sensor" menu
 	connect(actionCreateGBLSensor,				SIGNAL(triggered()),	this,		SLOT(doActionCreateGBLSensor()));
 	connect(actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
@@ -2520,27 +2522,6 @@ void MainWindow::doActionMeasureMeshSurface()
 	}
 }
 
-void displaySensorProjectErrorString(int errorCode)
-{
-	switch (errorCode)
-	{
-	case -1:
-		ccConsole::Error("Internal error: bad input!");
-		break;
-	case -2:
-		ccConsole::Error("Error: depth buffer is too big (try to reduce angular steps)");
-		break;
-	case -3:
-		ccConsole::Error("Error: depth buffer is too small (try to increase angular steps)");
-		break;
-	case -4:
-		ccConsole::Error("Error: not enough memory! (try to reduce angular steps)");
-		break;
-	default:
-		ccConsole::Error("An unknown error occurred while creating sensor (code: %i)",errorCode);
-	}
-}
-
 void MainWindow::doActionComputeDistancesFromSensor()
 {
 	//we support more than just one sensor in selection
@@ -2763,7 +2744,7 @@ void MainWindow::doActionCreateGBLSensor()
 				}
 				else
 				{
-					displaySensorProjectErrorString(errorCode);
+					ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
 				}
 
 				////DGM: test
@@ -2903,7 +2884,7 @@ void MainWindow::doActionModifySensor()
 			}
 			else
 			{
-				displaySensorProjectErrorString(errorCode);
+				ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
 			}
 		}
 		else
@@ -3157,18 +3138,19 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 				const ScalarType c_insideValue = static_cast<ScalarType>(1);
 
 				for (size_t i=0; i<inCameraFrustrum.size(); i++)
+				{
 					sf->setValue(inCameraFrustrum[i], c_insideValue);
+				}
 
 				sf->computeMinAndMax();
 				pointCloud->setCurrentDisplayedScalarField(sfIdx);
 				pointCloud->showSF(true);
 
-				pointCloud->refreshDisplay_recursive();
+				pointCloud->redrawDisplay();
 			}
 		}
 	}
 
-	refreshAll();
 	updateUI();
 }
 
@@ -3194,7 +3176,7 @@ void MainWindow::doActionShowDepthBuffer()
 					int errorCode;
 					if (!sensor->computeDepthBuffer(cloud,errorCode))
 					{
-						displaySensorProjectErrorString(errorCode);
+						ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
 					}
 				}
 				else
@@ -3264,6 +3246,120 @@ void MainWindow::doActionExportDepthBuffer()
 		delete toSave;
 		toSave = 0;
 	}
+}
+
+void MainWindow::doActionComputePointsVisibility()
+{
+	//there should be only one camera sensor in the current selection!
+	if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::GBL_SENSOR))
+	{
+		ccConsole::Error("Select one and only one GBL/TLS sensor!");
+		return;
+	}
+
+	ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_selectedEntities[0]);
+	if (!sensor)
+		return;
+
+	//we need a cloud to filter!
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
+	if (!pointCloud)
+	{
+		return;
+	}
+
+	if (sensor->getDepthBuffer().zBuff.empty())
+	{
+		if (defaultCloud)
+		{
+			//the sensor has no depth buffer, we'll ask the user if he wants to compute it first
+			if (QMessageBox::warning(	this,
+										"Depth buffer.",
+										"Sensor has no depth buffer: do you want to compute it now?",
+										QMessageBox::Yes | QMessageBox::No,
+										QMessageBox::Yes ) == QMessageBox::No)
+			{
+				//we can stop then...
+				return;
+			}
+		
+			int errorCode;
+			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud),errorCode))
+			{
+				ccRenderingTools::ShowDepthBuffer(sensor,this);
+			}
+			else
+			{
+				ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
+				return;
+			}
+		}
+		else
+		{
+			ccConsole::Error("Sensor has no depth buffer (and no associated cloud?)");
+			return;
+		}
+	}
+
+	// scalar field
+	const char sfName[] = "Sensor visibility";
+	int sfIdx = pointCloud->getScalarFieldIndexByName(sfName);
+	if (sfIdx < 0)
+		sfIdx = pointCloud->addScalarField(sfName);
+	if (sfIdx < 0)
+	{
+		ccLog::Error("Failed to allocate memory for output scalar field!");
+		return;
+	}
+
+	CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+	assert(sf);
+	if (sf)
+	{
+		sf->fill(0);
+
+		//progress bar
+		ccProgressDialog pdlg(true);
+		CCLib::NormalizedProgress nprogress(&pdlg,pointCloud->size());
+		pdlg.setMethodTitle("Compute visibility");
+		pdlg.setInfo(qPrintable(QString("Points: %1").arg(pointCloud->size())));
+		pdlg.start();
+		QApplication::processEvents();
+
+		for (unsigned i=0; i<pointCloud->size(); i++)
+		{
+			const CCVector3* P = pointCloud->getPoint(i);
+			unsigned char visibility = sensor->checkVisibility(*P);
+			ScalarType visValue = static_cast<ScalarType>(visibility);
+
+			sf->setValue(i, visValue);
+
+			if (!nprogress.oneStep())
+			{
+				//cancelled by user
+				pointCloud->deleteScalarField(sfIdx);
+				sf = 0;
+				break;
+			}
+		}
+		
+		if (sf)
+		{
+			sf->computeMinAndMax();
+			pointCloud->setCurrentDisplayedScalarField(sfIdx);
+			pointCloud->showSF(true);
+
+			ccConsole::Print(QString("Visibility computed for cloud '%1'").arg(pointCloud->getName()));
+			ccConsole::Print(QString("\tVisible = %1").arg(POINT_VISIBLE));
+			ccConsole::Print(QString("\tHidden = %1").arg(POINT_HIDDEN));
+			ccConsole::Print(QString("\tOut of range = %1").arg(POINT_OUT_OF_RANGE));
+			ccConsole::Print(QString("\tOut of fov = %1").arg(POINT_OUT_OF_FOV));
+		}
+		pointCloud->redrawDisplay();
+	}
+
+	updateUI();
 }
 
 void MainWindow::doActionConvertTextureToColor()
@@ -11764,6 +11860,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
 	actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);
 	actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);
+	actionComputePointsVisibility->setEnabled(atLeastOneGBLSensor);
 	actionResampleWithOctree->setEnabled(atLeastOneCloud);
 	actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
 	actionApplyTransformation->setEnabled(atLeastOneEntity);

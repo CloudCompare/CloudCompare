@@ -77,6 +77,7 @@ public:
 							OBJECT_CLOUD_SF_EDITOR					,
 							OBJECT_SENSOR_MATRIX_EDITOR				,
 							OBJECT_SENSOR_DISPLAY_SCALE				,
+							OBJECT_SENSOR_UNCERTAINTY				,
 							OBJECT_COLOR_RAMP_STEPS					,
 							OBJECT_MATERIALS						,
 							OBJECT_APPLY_LABEL_VIEWPORT				,
@@ -146,6 +147,7 @@ protected slots:
 	void objectDisplayChanged(const QString &);
 	void colorSourceChanged(const QString &);
 	void sensorScaleChanged(double);
+	void sensorUncertaintyChanged();
 	void sensorIndexChanged(double);
 	void cloudPointSizeChanged(int);
 	void polyineWidthChanged(int);

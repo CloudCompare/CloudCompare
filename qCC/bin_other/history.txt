@@ -38,6 +38,10 @@ v2.6.2 XX/XX/2015
 			'Use previous normal' to use the former normal (if any) to orient the new one
 		- all the orientation options can now be set in the dialog (gridded/preferred/Minimum Spanning Tree)
 			no more nagging about using the Minimum Spanning Tree and other questions...
+	* New method 'Edit > Sensor > TLS/GBL > Compute points visibility'
+		- if a TLS/GBL sensor is selected and this method called, the user can select any point cloud
+			and CC will classify its points in terms of 'visibility' relatively to the selected sensor
+			(classes are: VISIBLE / HIDDEN / OUT OF RANGE / OUT OF FIELD OF VIEW).
 
 - Enhancements:
 	* Rasterize tool
@@ -56,7 +60,6 @@ v2.6.2 XX/XX/2015
 		- CloudCompare now supports 'Level Of Detail' (LoD) display for big clouds
 		- if enabled, the clouds are now displayed first at a low octree level when moved
 			and are then regularly refined when the user doesn't interact with them.
-	* New 'Display options':
 		- the user can now specify the minimal number of points and the minimal number of
 			triangles necessary to activate LoD/decimated display
 	* The 'Edit > Crop' and 'Tools > Segmentation > Cross Section' tools can now be applied on
@@ -91,6 +94,11 @@ v2.6.2 XX/XX/2015
 			* weights are automatically normalized
 			* only absolute values are considered
 		- Initial point selection (when using a final overlap below 80%) is now much faster
+	* Distances computation tool:
+		- C2C: if the 'reference' cloud has one or several associated sensors, the user can now check the
+			new option 'use reference sensor to filter hidden points'. This will tell CC to use the sensor
+			information to determine whether the points of the compared cloud were hidden at the time of
+			the reference acquisition (and should therefore be ignored).
 	* 'Render to file' method:
 		- rendering zoom is now more properly taken into account when displaying 2D labels
 		- zoomed text size is estimated in a more accurate way

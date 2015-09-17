@@ -394,6 +394,7 @@ protected slots:
 	void doActionSetViewFromSensor();
 	void doActionShowDepthBuffer();
 	void doActionExportDepthBuffer();
+	void doActionComputePointsVisibility();
 	void doActionRasterize();
 	void doConvertPolylinesToMesh();
 	void doActionExportCoordToSF();

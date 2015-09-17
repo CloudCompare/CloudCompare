@@ -813,10 +813,10 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 {
 	assert(_obj && m_model);
 
-	addSeparator("GBL Sensor");
+	addSeparator("TLS/GBL Sensor");
 
 	//Uncertainty
-	appendRow( ITEM("Uncertainty"), ITEM(QString::number(_obj->getUncertainty())) );
+	appendRow( ITEM("Uncertainty"), PERSISTENT_EDITOR(OBJECT_SENSOR_UNCERTAINTY), true );
 
 	//angles
 	addSeparator("Angular viewport (degrees)");
@@ -1205,6 +1205,15 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			outputWidget = button;
 		}
 		break;
+	case OBJECT_SENSOR_UNCERTAINTY:
+		{
+			QLineEdit* lineEdit = new QLineEdit(parent);
+			lineEdit->setValidator(new QDoubleValidator(1.0e-8,1.0,8,lineEdit));
+			connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(sensorUncertaintyChanged()));
+
+			outputWidget = lineEdit;
+		}
+		break;
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 		{
 			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
@@ -1524,6 +1533,17 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 			assert(sensor);
 			SetDoubleSpinBoxValue(editor,sensor ? sensor->getActiveIndex() : 0.0);
+			break;
+		}
+	case OBJECT_SENSOR_UNCERTAINTY:
+		{
+			QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor);
+			if (!lineEdit)
+				return;
+
+			ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
+			assert(sensor);
+			lineEdit->setText(QString::number(sensor ? sensor->getUncertainty() : 0, 'g', 8));
 			break;
 		}
 	case OBJECT_SENSOR_DISPLAY_SCALE:
@@ -2042,6 +2062,28 @@ void ccPropertiesTreeDelegate::applyLabelViewport()
 
 	win->setViewportParameters(viewport->getParameters());
 	win->redraw();
+}
+
+void ccPropertiesTreeDelegate::sensorUncertaintyChanged()
+{
+	if (!m_currentObject)
+		return;
+
+	QLineEdit* lineEdit = qobject_cast<QLineEdit*>(QObject::sender());
+	if (!lineEdit)
+	{
+		assert(false);
+		return;
+	}
+
+	ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
+	assert(sensor);
+
+	PointCoordinateType uncertainty = static_cast<PointCoordinateType>(lineEdit->text().toDouble());
+	if (sensor && sensor->getUncertainty() != uncertainty)
+	{
+		sensor->setUncertainty(uncertainty);
+	}
 }
 
 void ccPropertiesTreeDelegate::sensorScaleChanged(double val)

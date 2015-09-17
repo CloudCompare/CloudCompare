@@ -19,6 +19,7 @@
 
 //Qt
 #include <QHeaderView>
+#include <QMessageBox>
 
 //CCLib
 #include <DistanceComputationTools.h>
@@ -34,6 +35,7 @@
 #include <ccGenericMesh.h>
 #include <ccOctree.h>
 #include <ccProgressDialog.h>
+#include <ccGBLSensor.h>
 
 //Local
 #include "ccDisplayOptionsDlg.h"
@@ -116,11 +118,14 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 		localModelingTab->setEnabled(false);
 		signedDistFrame->setEnabled(true);
 		signedDistCheckBox->setChecked(true);
+		filterVisibilityCheckBox->setEnabled(false);
+		filterVisibilityCheckBox->setVisible(false);
 	}
 	else
 	{
 		split3DCheckBox->setEnabled(true);
 		lmRadiusDoubleSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm())/200);
+		filterVisibilityCheckBox->setEnabled(m_refCloud && m_refCloud->isA(CC_TYPES::POINT_CLOUD) && static_cast<ccPointCloud*>(m_refCloud)->hasSensor());
 	}
 
 	//compute approximate results and unlock GUI
@@ -680,9 +685,6 @@ bool ccComparisonDlg::compute()
 	//multi-thread
 	bool multiThread = multiThreadedCheckBox->isChecked();
 
-	int result = -1;
-	ccProgressDialog progressDlg(true,this);
-
 	//for 3D splitting (cloud-cloud dist. only)
 	CCLib::ReferenceCloud* CPSet = 0;
 	if (split3D)
@@ -708,12 +710,63 @@ bool ccComparisonDlg::compute()
 	params.multiThread = multiThread;
 	params.CPSet = CPSet;
 
+	int result = -1;
+	ccProgressDialog progressDlg(true,this);
+
 	QElapsedTimer eTimer;
 	eTimer.start();
 	switch(m_compType)
 	{
-	case CLOUDCLOUD_DIST: //hausdorff
+	case CLOUDCLOUD_DIST: //cloud-cloud
+		
+		if (m_refCloud->isA(CC_TYPES::POINT_CLOUD))
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(m_refCloud);
 
+			//we enable the visibility checking if the use asked for it
+			bool filterVisibility = filterVisibilityCheckBox->isEnabled() && filterVisibilityCheckBox->isChecked();
+			if (filterVisibility)
+			{
+				size_t validDB = 0;
+				//we also make sure that the sensors have valid depth buffer!
+				for (unsigned i=0; i<pc->getChildrenNumber(); ++i)
+				{
+					ccHObject* child = pc->getChild(i);
+					if (child && child->isA(CC_TYPES::GBL_SENSOR))
+					{
+						ccGBLSensor* sensor = static_cast<ccGBLSensor*>(child);
+						if (sensor->getDepthBuffer().zBuff.empty())
+						{
+							int errorCode;
+							if (!sensor->computeDepthBuffer(pc,errorCode))
+							{
+								ccLog::Warning(QString("[ComputeDistances] ") + ccGBLSensor::GetErrorString(errorCode));
+							}
+							else
+							{
+								++validDB;
+							}
+						}
+						else
+						{
+							++validDB;
+						}
+					}
+				}
+
+				if (validDB == 0)
+				{
+					filterVisibilityCheckBox->setChecked(false);
+					if (QMessageBox::warning(this, "Error", "Failed to find/init the depth buffer(s) on the associated sensor! Do you want to continue?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					{
+						break;
+					}
+					filterVisibility = false;
+				}
+			}
+			pc->enableVisibilityCheck(filterVisibility);
+
+		}
 		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
 																				m_refCloud,
 																				params,

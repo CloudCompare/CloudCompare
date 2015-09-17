@@ -24,6 +24,10 @@
 #include "ccPointCloud.h"
 #include "ccSphere.h"
 #include "ccGenericGLDisplay.h"
+#include "ccProgressDialog.h"
+
+//Qt
+#include <QCoreApplication>
 
 //system
 #include <string.h>
@@ -32,8 +36,34 @@
 //maximum depth buffer dimension (width or height)
 static const int s_MaxDepthBufferSize = (1 << 14); //16384
 
+static const enum Errors {	ERROR_BAD_INPUT      = -1,
+							ERROR_MEMORY         = -2,
+							ERROR_PROC_CANCELLED = -3,
+							ERROR_DB_TOO_SMALL   = -4,
+};
+								
+QString ccGBLSensor::GetErrorString(int errorCode)
+{
+	switch (errorCode)
+	{
+	case ERROR_BAD_INPUT:
+		return "Internal error: bad input";
+	case ERROR_MEMORY:
+		return "Error: not enough memory";
+	case ERROR_PROC_CANCELLED:
+		return "Error: process cancelled by user";
+	case ERROR_DB_TOO_SMALL:
+		return "Error: depth buffer is void (check input cloud and angular steps)";
+	default:
+		assert(false);
+		break;
+	}
+
+	return QString("unknown error (code: %i)").arg(errorCode);
+}
+
 ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=YAW_THEN_PITCH*/)
-	: ccSensor("Ground Based Laser Scanner")
+	: ccSensor("TLS/GBL")
 	, m_phiMin(0)
 	, m_phiMax(0)
 	, m_deltaPhi(0)
@@ -44,7 +74,7 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=YAW_THEN_PITCH*/)
 	, m_yawAnglesAreShifted(false)
 	, m_rotationOrder(rotOrder)
 	, m_sensorRange(0)
-	, m_uncertainty(static_cast<PointCoordinateType>(ZERO_TOLERANCE))
+	, m_uncertainty(static_cast<PointCoordinateType>(0.005))
 {
 	//graphic representation
 	lockVisibility(false);
@@ -582,7 +612,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 	if (!theCloud)
 	{
 		//invlalid input parameter
-		errorCode = -1;
+		errorCode = ERROR_BAD_INPUT;
 		return false;
 	}
 
@@ -609,10 +639,10 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 			height = s_MaxDepthBufferSize;
 		}
 
-		if (width <= 0 || height <= 0/*|| std::max(width,height) > s_MaxDepthBufferSize*/)
+		if (width <= 0 || height <= 0)
 		{
-			//depth buffer dimensions are too big or... too small?!
-			errorCode = -2;
+			//depth buffer dimensions are too small?!
+			errorCode = ERROR_DB_TOO_SMALL;
 			return false;
 		}
 
@@ -624,7 +654,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 		catch (const std::bad_alloc&)
 		{
 			//not enough memory
-			errorCode = -4;
+			errorCode = ERROR_MEMORY;
 			return false;
 		}
 
@@ -644,14 +674,22 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 			if (!projectedCloud->reserve(pointCount) || !projectedCloud->enableScalarField())
 			{
 				//not enough memory
-				errorCode = -4;
+				errorCode = ERROR_MEMORY;
 				clearDepthBuffer();
-				return 0;
+				return false;
 			}
 		}
 
 		theCloud->placeIteratorAtBegining();
 		{
+			//progress bar
+			ccProgressDialog pdlg(true);
+			CCLib::NormalizedProgress nprogress(&pdlg,pointCount);
+			pdlg.setMethodTitle("Depth buffer");
+			pdlg.setInfo(qPrintable(QString("Points: %1").arg(pointCount)));
+			pdlg.start();
+			QCoreApplication::processEvents();
+
 			for (unsigned i=0; i<pointCount; ++i)
 			{
 				const CCVector3 *P = theCloud->getNextPoint();
@@ -672,6 +710,14 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 					projectedCloud->addPoint(CCVector3(Q.x,Q.y,0));
 					projectedCloud->setPointScalarValue(i,depth);
 				}
+
+				if (!nprogress.oneStep())
+				{
+					//cancelled by user
+					errorCode = ERROR_PROC_CANCELLED;
+					clearDepthBuffer();
+					return false;
+				}
 			}
 		}
 	}
@@ -685,7 +731,9 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 {
 	if (m_depthBuffer.zBuff.empty()) //no z-buffer?
+	{
 		return POINT_VISIBLE;
+	}
 
 	//project point
 	CCVector2 Q;
@@ -694,21 +742,22 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 
 	//out of sight
 	if (depth > m_sensorRange)
-		return POINT_OUT_OF_RANGE;
-
-	int x = static_cast<int>(floor((Q.x-m_thetaMin)/m_depthBuffer.deltaTheta));
-	int y = static_cast<int>(floor((Q.y-m_phiMin)/m_depthBuffer.deltaPhi));
-
-	//out of field
-	if (	x < 0 || static_cast<unsigned>(x) >= m_depthBuffer.width
-		||	y < 0 || static_cast<unsigned>(y) >= m_depthBuffer.height )
 	{
+		return POINT_OUT_OF_RANGE;
+	}
+
+	unsigned x,y;
+	if (!convertToDepthMapCoords(Q.x,Q.y,x,y))
+	{
+		//out of field of view
 		return POINT_OUT_OF_FOV;
 	}
 
 	//hidden?
-	if (depth > m_depthBuffer.zBuff[x+y*m_depthBuffer.width]*(1.0f+m_uncertainty))
+	if (depth > m_depthBuffer.zBuff[y*m_depthBuffer.width + x] * (1.0f + m_uncertainty))
+	{
 		return POINT_HIDDEN;
+	}
 
 	return POINT_VISIBLE;
 }
@@ -1036,7 +1085,7 @@ int ccGBLSensor::DepthBuffer::fillHoles()
 	if (zBuff.empty())
 	{
 		//z-buffer not initialized!
-		return -1;
+		return ERROR_BAD_INPUT;
 	}
 
 	//new temp buffer
@@ -1051,7 +1100,7 @@ int ccGBLSensor::DepthBuffer::fillHoles()
 	catch (const std::bad_alloc&)
 	{
 		//not enough memory
-		return -2;
+		return ERROR_MEMORY;
 	}
 
 	//copy old zBuffer in temp one (with 1 pixel border)

@@ -32,6 +32,7 @@ namespace CCLib
 
 class GenericProgressCallback;
 class GenericCloud;
+class GenericIndexedMesh;
 class GenericIndexedCloud;
 class ScalarField;
 
@@ -154,13 +155,16 @@ public:
 		ICP_ERROR_DIST_COMPUTATION		= 102,
 		ICP_ERROR_NOT_ENOUGH_MEMORY		= 103,
 		ICP_ERROR_CANCELED_BY_USER		= 104,
+		ICP_ERROR_INVALID_INPUT			= 105,
 	};
 
-	//! Registers two point clouds
+	//! Registers two clouds or a cloud and a mesh
 	/** This method implements the ICP algorithm (Besl et al.).
-		Warning: be sure to activate an INPUT/OUTPUT scalar field on the data cloud
-		\param modelCloud the reference cloud (won't move)
-		\param dataCloud the cloud to register (will move)
+		\warning Be sure to activate an INPUT/OUTPUT scalar field on the point cloud.
+		\warning The mesh is always the reference/model entity.
+		\param modelCloud the reference cloud or the vertices of the reference mesh --> won't move
+		\param modelMesh the reference mesh (optional) --> won't move
+		\param dataCloud the cloud to register --> will move
 		\param totalTrans the resulting transformation (once the algorithm has converged)
 		\param convType convergence type
 		\param minRMSDecrease the minimum error (RMS) reduction between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
@@ -171,27 +175,30 @@ public:
 		\param filterOutFarthestPoints if true, the algorithm will automatically ignore farthest points from the reference, for better convergence
 		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
 		\param finalOverlapRatio theoretical overlap ratio (at each iteration, only this percentage (between 0 and 1) will be used for registration
-		\param modelWeights weights for model points (optional)
+		\param modelWeights weights for model points (i.e. only if the model entity is a cloud) (optional)
 		\param dataWeights weights for data points (optional)
 		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see RegistrationTools::TRANSFORMATION_FILTERS flags
 		\return algorithm result
 	**/
-	static RESULT_TYPE RegisterClouds(	GenericIndexedCloudPersist* modelCloud,
-										GenericIndexedCloudPersist* dataCloud,
-										ScaledTransformation& totalTrans,
-										CONVERGENCE_TYPE convType,
-										double minRMSDecrease,
-										unsigned nbMaxIterations,
-										double& finalRMS,
-										unsigned& finalPointCount,
-										bool adjustScale = false,
-										GenericProgressCallback* progressCb = 0,
-										bool filterOutFarthestPoints = false,
-										unsigned samplingLimit = 20000,
-										double finalOverlapRatio = 1.0,
-										ScalarField* modelWeights = 0,
-										ScalarField* dataWeights = 0,
-										int transformationFilters = SKIP_NONE);
+	static RESULT_TYPE Register(	GenericIndexedCloudPersist* modelCloud,
+									GenericIndexedMesh* modelMesh,
+									GenericIndexedCloudPersist* dataCloud,
+									ScaledTransformation& totalTrans,
+									CONVERGENCE_TYPE convType,
+									double minRMSDecrease,
+									unsigned nbMaxIterations,
+									double& finalRMS,
+									unsigned& finalPointCount,
+									bool adjustScale = false,
+									GenericProgressCallback* progressCb = 0,
+									bool filterOutFarthestPoints = false,
+									unsigned samplingLimit = 20000,
+									double finalOverlapRatio = 1.0,
+									ScalarField* modelWeights = 0,
+									ScalarField* dataWeights = 0,
+									int transformationFilters = SKIP_NONE);
+
+
 };
 
 

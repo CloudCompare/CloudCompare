@@ -226,4 +226,5 @@ void ccRegistrationDlg::swapModelAndData()
 {
 	std::swap(dataEntity,modelEntity);
 	setColorsAndLabels();
+	checkBoxUseModelSFAsWeights->setDisabled(modelEntity->isKindOf(CC_TYPES::MESH));
 }

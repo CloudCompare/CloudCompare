@@ -10076,7 +10076,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					unsigned finalPointCount = 0;
 					CCLib::ICPRegistrationTools::RESULT_TYPE result;
 					CCLib::ICPRegistrationTools::ScaledTransformation registerTrans;
-					result = CCLib::ICPRegistrationTools::RegisterClouds(A,B,registerTrans,CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,1.0e-6,0,finalRMS,finalPointCount);
+					result = CCLib::ICPRegistrationTools::Register(A,0,B,registerTrans,CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,1.0e-6,0,finalRMS,finalPointCount);
 
 					if (result == CCLib::ICPRegistrationTools::ICP_ERROR)
 					{

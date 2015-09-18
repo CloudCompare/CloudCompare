@@ -33,6 +33,7 @@
 #include "GeometricalAnalysisTools.h"
 #include "KdTree.h"
 #include "SimpleCloud.h"
+#include "ChunkedPointCloud.h"
 #include "Garbage.h"
 
 //system
@@ -130,42 +131,49 @@ void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTran
 	}
 }
 
-struct Model
+struct ModelCloud
 {
-	Model() : cloud(0), weights(0) {}
-	Model(const Model& m) : cloud(m.cloud), weights(m.weights) {}
+	ModelCloud() : cloud(0), weights(0) {}
+	ModelCloud(const ModelCloud& m) : cloud(m.cloud), weights(m.weights) {}
 	GenericIndexedCloudPersist* cloud;
 	ScalarField* weights;
 };
 
-struct Data
+struct DataCloud
 {
-	Data() : cloud(0), rotatedCloud(0), weights(0), CPSet(0) {}
-	Data(const Data& d) : cloud(d.cloud), rotatedCloud(d.rotatedCloud), weights(d.weights), CPSet(d.CPSet) {}
+	DataCloud() : cloud(0), rotatedCloud(0), weights(0), CPSetRef(0), CPSetPlain(0) {}
+	DataCloud(const DataCloud& d) : cloud(d.cloud), rotatedCloud(d.rotatedCloud), weights(d.weights), CPSetRef(d.CPSetRef), CPSetPlain(d.CPSetPlain) {}
 	ReferenceCloud* cloud;
 	SimpleCloud* rotatedCloud;
 	ScalarField* weights;
-	ReferenceCloud* CPSet;
+	ReferenceCloud* CPSetRef;
+	ChunkedPointCloud* CPSetPlain;
 };
 
-ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericIndexedCloudPersist* inputModelCloud,
-																		GenericIndexedCloudPersist* inputDataCloud,
-																		ScaledTransformation& transform,
-																		CONVERGENCE_TYPE convType,
-																		double minRMSDecrease,
-																		unsigned nbMaxIterations,
-																		double& finalRMS,
-																		unsigned& finalPointCount,
-																		bool adjustScale/*=false*/,
-																		GenericProgressCallback* progressCb/*=0*/,
-																		bool filterOutFarthestPoints/*=false*/,
-																		unsigned samplingLimit/*=20000*/,
-																		double finalOverlapRatio/*=1.0*/,
-																		ScalarField* inputModelWeights/*=0*/,
-																		ScalarField* inputDataWeights/*=0*/,
-																		int filters/*=SKIP_NONE*/)
+ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexedCloudPersist* inputModelCloud,
+																	GenericIndexedMesh* inputModelMesh,
+																	GenericIndexedCloudPersist* inputDataCloud,
+																	ScaledTransformation& transform,
+																	CONVERGENCE_TYPE convType,
+																	double minRMSDecrease,
+																	unsigned nbMaxIterations,
+																	double& finalRMS,
+																	unsigned& finalPointCount,
+																	bool adjustScale/*=false*/,
+																	GenericProgressCallback* progressCb/*=0*/,
+																	bool filterOutFarthestPoints/*=false*/,
+																	unsigned samplingLimit/*=20000*/,
+																	double finalOverlapRatio/*=1.0*/,
+																	ScalarField* inputModelWeights/*=0*/,
+																	ScalarField* inputDataWeights/*=0*/,
+																	int filters/*=SKIP_NONE*/)
 {
-	assert(inputModelCloud && inputDataCloud);
+	if (!inputModelCloud || !inputDataCloud)
+	{
+		assert(false);
+		return ICP_ERROR_INVALID_INPUT;
+	}
+
 
 	//hopefully the user will understand it's not possible ;)
 	finalRMS = -1.0;
@@ -173,55 +181,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	Garbage<GenericIndexedCloudPersist> cloudGarbage;
 	Garbage<ScalarField> sfGarbage;
 
-	//MODEL CLOUD (reference, won't move)
-	Model model;
-	{
-		//we resample the cloud if it's too big (speed increase)
-		if (inputModelCloud->size() > samplingLimit)
-		{
-			ReferenceCloud* subModelCloud = CloudSamplingTools::subsampleCloudRandomly(inputModelCloud,samplingLimit);
-			if (!subModelCloud)
-			{
-				//not enough memory
-				return ICP_ERROR_NOT_ENOUGH_MEMORY;
-			}
-			cloudGarbage.add(subModelCloud);
-			
-			//if we need to resample the weights as well
-			if (inputModelWeights)
-			{
-				model.weights = new ScalarField("ResampledModelWeights");
-				sfGarbage.add(model.weights);
-
-				unsigned destCount = subModelCloud->size();
-				if (model.weights->resize(destCount))
-				{
-					for (unsigned i = 0; i < destCount; ++i)
-					{
-						unsigned pointIndex = subModelCloud->getPointGlobalIndex(i);
-						model.weights->setValue(i,inputModelWeights->getValue(pointIndex));
-					}
-					model.weights->computeMinAndMax();
-				}
-				else
-				{
-					//not enough memory
-					return ICP_ERROR_NOT_ENOUGH_MEMORY;
-				}
-			}
-			model.cloud = subModelCloud;
-		}
-		else
-		{
-			//we use the input cloud and weights
-			model.cloud = inputModelCloud;
-			model.weights = inputModelWeights;
-		}
-	}
-	assert(model.cloud);
-
 	//DATA CLOUD (will move)
-	Data data;
+	DataCloud data;
 	{
 		//we also want to use the same number of points for registration as initially defined by the user!
 		unsigned dataSamplingLimit = finalOverlapRatio != 1.0 ? static_cast<unsigned>(samplingLimit / finalOverlapRatio) : samplingLimit;
@@ -282,6 +243,73 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	}
 	assert(data.cloud);
 
+	//octree level for cloud/mesh distances computation
+	unsigned char meshDistOctreeLevel = 8;
+
+	//MODEL ENTITY (reference, won't move)
+	ModelCloud model;
+	if (inputModelMesh)
+	{
+		assert(!inputModelWeights);
+		inputModelWeights = 0; //just in case
+
+		//we'll use the mesh vertices to estimate the right octree level
+		DgmOctree dataOctree(data.cloud);
+		DgmOctree modelOctree(inputModelCloud);
+		if (dataOctree.build() < static_cast<int>(data.cloud->size()) || modelOctree.build() < static_cast<int>(inputModelCloud->size()))
+		{
+			//an error occurred during the octree computation: probably there's not enough memory
+			return ICP_ERROR_NOT_ENOUGH_MEMORY;
+		}
+
+		meshDistOctreeLevel = dataOctree.findBestLevelForComparisonWithOctree(&modelOctree);
+	}
+	else /*if (inputModelCloud)*/
+	{
+		//we resample the cloud if it's too big (speed increase)
+		if (inputModelCloud->size() > samplingLimit)
+		{
+			ReferenceCloud* subModelCloud = CloudSamplingTools::subsampleCloudRandomly(inputModelCloud,samplingLimit);
+			if (!subModelCloud)
+			{
+				//not enough memory
+				return ICP_ERROR_NOT_ENOUGH_MEMORY;
+			}
+			cloudGarbage.add(subModelCloud);
+			
+			//if we need to resample the weights as well
+			if (inputModelWeights)
+			{
+				model.weights = new ScalarField("ResampledModelWeights");
+				sfGarbage.add(model.weights);
+
+				unsigned destCount = subModelCloud->size();
+				if (model.weights->resize(destCount))
+				{
+					for (unsigned i = 0; i < destCount; ++i)
+					{
+						unsigned pointIndex = subModelCloud->getPointGlobalIndex(i);
+						model.weights->setValue(i,inputModelWeights->getValue(pointIndex));
+					}
+					model.weights->computeMinAndMax();
+				}
+				else
+				{
+					//not enough memory
+					return ICP_ERROR_NOT_ENOUGH_MEMORY;
+				}
+			}
+			model.cloud = subModelCloud;
+		}
+		else
+		{
+			//we use the input cloud and weights
+			model.cloud = inputModelCloud;
+			model.weights = inputModelWeights;
+		}
+		assert(model.cloud);
+	}
+
 	//for partial overlap
 	unsigned maxOverlapCount = 0;
 	std::vector<ScalarType> overlapDistances;
@@ -302,8 +330,16 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	}
 
 	//Closest Point Set (see ICP algorithm)
-	data.CPSet = new ReferenceCloud(model.cloud);
-	cloudGarbage.add(data.CPSet);
+	if (inputModelMesh)
+	{
+		data.CPSetPlain = new ChunkedPointCloud;
+		cloudGarbage.add(data.CPSetPlain);
+	}
+	else
+	{
+		data.CPSetRef = new ReferenceCloud(model.cloud);
+		cloudGarbage.add(data.CPSetRef);
+	}
 
 	//per-point couple weights
 	ScalarField* coupleWeights = 0;
@@ -314,15 +350,33 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	}
 
 	//we compute the initial distance between the two clouds (and the CPSet by the way)
+	//data.cloud->forEach(ScalarFieldTools::SetScalarValueToNaN); //DGM: done automatically in computeCloud2CloudDistance now
+	if (inputModelMesh)
 	{
-		//data.cloud->forEach(ScalarFieldTools::SetScalarValueToNaN); //DGM: done automatically in computeCloud2CloudDistance now
+		assert(data.CPSetPlain);
+		DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mDistParams;
+		c2mDistParams.octreeLevel = meshDistOctreeLevel;
+		c2mDistParams.CPSet = data.CPSetPlain;
+		if (DistanceComputationTools::computeCloud2MeshDistance(data.cloud,inputModelMesh,c2mDistParams,progressCb) < 0)
+		{
+			//an error occurred during distances computation...
+			return ICP_ERROR_DIST_COMPUTATION;
+		}
+	}
+	else if (inputModelCloud)
+	{
+		assert(data.CPSetRef);
 		DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cDistParams;
-		c2cDistParams.CPSet = data.CPSet;
+		c2cDistParams.CPSet = data.CPSetRef;
 		if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud,model.cloud,c2cDistParams,progressCb) < 0)
 		{
 			//an error occurred during distances computation...
 			return ICP_ERROR_DIST_COMPUTATION;
 		}
+	}
+	else
+	{
+		assert(false);
 	}
 
 	FILE* fTraceFile = 0;
@@ -356,11 +410,21 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				N.getParameters(mu,sigma2);
 				ScalarType maxDistance = static_cast<ScalarType>(mu + 2.5*sqrt(sigma2));
 
-				Data filteredData;
+				DataCloud filteredData;
 				filteredData.cloud = new ReferenceCloud(data.cloud->getAssociatedCloud());
-				filteredData.CPSet = new ReferenceCloud(data.CPSet->getAssociatedCloud()); //we must also update the CPSet!
 				cloudGarbage.add(filteredData.cloud);
-				cloudGarbage.add(filteredData.CPSet);
+
+				if (data.CPSetRef)
+				{
+					filteredData.CPSetRef = new ReferenceCloud(data.CPSetRef->getAssociatedCloud()); //we must also update the CPSet!
+					cloudGarbage.add(filteredData.CPSetRef);
+				}
+				else if (data.CPSetPlain)
+				{
+					filteredData.CPSetPlain = new ChunkedPointCloud; //we must also update the CPSet!
+					cloudGarbage.add(filteredData.CPSetPlain);
+				}
+
 				if (data.weights)
 				{
 					filteredData.weights = new ScalarField("ResampledDataWeights");
@@ -369,7 +433,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 				unsigned pointCount = data.cloud->size();
 				if (	!filteredData.cloud->reserve(pointCount)
-					||	!filteredData.CPSet->reserve(pointCount)
+					||	(filteredData.CPSetRef && !filteredData.CPSetRef->reserve(pointCount))
+					||	(filteredData.CPSetPlain && !filteredData.CPSetPlain->reserve(pointCount))
 					||	(filteredData.weights && !filteredData.weights->reserve(pointCount)))
 				{
 					//not enough memory
@@ -383,7 +448,10 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 					if (data.cloud->getPointScalarValue(i) <= maxDistance)
 					{
 						filteredData.cloud->addPointIndex(data.cloud->getPointGlobalIndex(i));
-						filteredData.CPSet->addPointIndex(data.CPSet->getPointGlobalIndex(i));
+						if (filteredData.CPSetRef)
+							filteredData.CPSetRef->addPointIndex(data.CPSetRef->getPointGlobalIndex(i));
+						else if (filteredData.CPSetPlain)
+							filteredData.CPSetPlain->addPoint(*(data.CPSetPlain->getPoint(i)));
 						if (filteredData.weights)
 							filteredData.weights->addElement(data.weights->getValue(i));
 					}
@@ -391,13 +459,19 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 				//resize should be ok as we have called reserve first
 				filteredData.cloud->resize(filteredData.cloud->size()); //should always be ok as current size < pointCount
-				filteredData.CPSet->resize(filteredData.CPSet->size());
+				if (filteredData.CPSetRef)
+					filteredData.CPSetRef->resize(filteredData.CPSetRef->size());
+				else if (filteredData.CPSetPlain)
+					filteredData.CPSetPlain->resize(filteredData.CPSetPlain->size());
 				if (filteredData.weights)
 					filteredData.weights->resize(filteredData.weights->currentSize());
 
 				//replace old structures by new ones
 				cloudGarbage.destroy(data.cloud);
-				cloudGarbage.destroy(data.CPSet);
+				if (data.CPSetRef)
+					cloudGarbage.destroy(data.CPSetRef);
+				else if (data.CPSetPlain)
+					cloudGarbage.destroy(data.CPSetPlain);
 				if (data.weights)
 					sfGarbage.destroy(data.weights);
 				data = filteredData;
@@ -407,7 +481,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 		}
 
 		//shall we ignore/remove some points based on their distance?
-		Data trueData;
+		DataCloud trueData;
 		unsigned pointCount = data.cloud->size();
 		if (maxOverlapCount != 0 && pointCount > maxOverlapCount)
 		{
@@ -422,11 +496,19 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			assert(maxOverlapCount != 0);
 			ScalarType maxOverlapDist = overlapDistances[maxOverlapCount-1];
 
-			Data filteredData;
+			DataCloud filteredData;
 			filteredData.cloud = new ReferenceCloud(data.cloud->getAssociatedCloud());
-			filteredData.CPSet = new ReferenceCloud(data.CPSet->getAssociatedCloud()); //we must also update the CPSet!
+			if (data.CPSetRef)
+			{
+				filteredData.CPSetRef = new ReferenceCloud(data.CPSetRef->getAssociatedCloud()); //we must also update the CPSet!
+				cloudGarbage.add(filteredData.CPSetRef);
+			}
+			else if (data.CPSetPlain)
+			{
+				filteredData.CPSetPlain = new ChunkedPointCloud; //we must also update the CPSet!
+				cloudGarbage.add(filteredData.CPSetPlain);
+			}
 			cloudGarbage.add(filteredData.cloud);
-			cloudGarbage.add(filteredData.CPSet);
 			if (data.weights)
 			{
 				filteredData.weights = new ScalarField("ResampledDataWeights");
@@ -434,7 +516,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			}
 
 			if (	!filteredData.cloud->reserve(pointCount) //should be maxOverlapCount in theory, but there may be several points with the same value as maxOverlapDist!
-				||	!filteredData.CPSet->reserve(pointCount)
+				||	(filteredData.CPSetRef && !filteredData.CPSetRef->reserve(pointCount))
+				||	(filteredData.CPSetPlain && !filteredData.CPSetPlain->reserve(pointCount))
 				||	(filteredData.weights && !filteredData.weights->reserve(pointCount)))
 			{
 				//not enough memory
@@ -448,7 +531,10 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 				if (data.cloud->getPointScalarValue(i) <= maxOverlapDist)
 				{
 					filteredData.cloud->addPointIndex(data.cloud->getPointGlobalIndex(i));
-					filteredData.CPSet->addPointIndex(data.CPSet->getPointGlobalIndex(i));
+					if (filteredData.CPSetRef)
+						filteredData.CPSetRef->addPointIndex(data.CPSetRef->getPointGlobalIndex(i));
+					else if (filteredData.CPSetPlain)
+						filteredData.CPSetPlain->addPoint(*(data.CPSetPlain->getPoint(i)));
 					if (filteredData.weights)
 						filteredData.weights->addElement(data.weights->getValue(i));
 				}
@@ -457,7 +543,10 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 			//resize should be ok as we have called reserve first
 			filteredData.cloud->resize(filteredData.cloud->size()); //should always be ok as current size < pointCount
-			filteredData.CPSet->resize(filteredData.CPSet->size());
+			if (filteredData.CPSetRef)
+				filteredData.CPSetRef->resize(filteredData.CPSetRef->size());
+			else if (filteredData.CPSetPlain)
+				filteredData.CPSetPlain->resize(filteredData.CPSetPlain->size());
 			if (filteredData.weights)
 				filteredData.weights->resize(filteredData.weights->currentSize());
 
@@ -482,7 +571,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			for (unsigned i = 0; i<count; ++i)
 			{
 				ScalarType wd = (data.weights ? data.weights->getValue(i) : static_cast<ScalarType>(1.0));
-				ScalarType wm = (model.weights ? model.weights->getValue(data.CPSet->getPointGlobalIndex(i)) : static_cast<ScalarType>(1.0));
+				ScalarType wm = (model.weights ? model.weights->getValue(data.CPSetRef->getPointGlobalIndex(i)) : static_cast<ScalarType>(1.0)); //model weights are only support with a reference cloud!
 				coupleWeights->setValue(i, wd*wm);
 			}
 			coupleWeights->computeMinAndMax();
@@ -619,7 +708,11 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 
 		//single iteration of the registration procedure
 		currentTrans = ScaledTransformation();
-		if (!RegistrationTools::RegistrationProcedure(data.cloud, data.CPSet, currentTrans, adjustScale, coupleWeights))
+		if (!RegistrationTools::RegistrationProcedure(	data.cloud,
+														data.CPSetRef ? static_cast<CCLib::GenericCloud*>(data.CPSetRef) : static_cast<CCLib::GenericCloud*>(data.CPSetPlain),
+														currentTrans,
+														adjustScale,
+														coupleWeights))
 		{
 			result = ICP_ERROR_REGISTRATION_STEP;
 			break;
@@ -629,7 +722,10 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 		if (trueData.cloud)
 		{
 			cloudGarbage.destroy(data.cloud);
-			cloudGarbage.destroy(data.CPSet);
+			if (data.CPSetRef)
+				cloudGarbage.destroy(data.CPSetRef);
+			else if (data.CPSetPlain)
+				cloudGarbage.destroy(data.CPSetPlain);
 			if (data.weights)
 				sfGarbage.destroy(data.weights);
 			data = trueData;
@@ -678,15 +774,32 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 		}
 
 		//compute (new) distances to model
+		if (inputModelMesh)
+		{
+			DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mDistParams;
+			c2mDistParams.octreeLevel = meshDistOctreeLevel;
+			c2mDistParams.CPSet = data.CPSetPlain;
+			if (DistanceComputationTools::computeCloud2MeshDistance(data.cloud,inputModelMesh,c2mDistParams) < 0)
+			{
+				//an error occurred during distances computation...
+				result = ICP_ERROR_REGISTRATION_STEP;
+				break;
+			}
+		}
+		else if (inputDataCloud)
 		{
 			DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cDistParams;
-			c2cDistParams.CPSet = data.CPSet;
+			c2cDistParams.CPSet = data.CPSetRef;
 			if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud,model.cloud,c2cDistParams) < 0)
 			{
 				//an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;
 				break;
 			}
+		}
+		else
+		{
+			assert(false);
 		}
 	}
 

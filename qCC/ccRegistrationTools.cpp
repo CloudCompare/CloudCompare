@@ -72,15 +72,11 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
 	//if the 'model' entity is a mesh, we need to sample points on it
 	CCLib::GenericIndexedCloudPersist* modelCloud = 0;
+	ccGenericMesh* modelMesh = 0;
 	if (model->isKindOf(CC_TYPES::MESH))
 	{
-		modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(model),s_defaultSampledPointsOnModelMesh,&pDlg);
-		if (!modelCloud)
-		{
-			ccLog::Error("[ICP] Failed to sample points on 'model' mesh!");
-			return false;
-		}
-		cloudGarbage.add(modelCloud);
+		modelMesh = ccHObjectCaster::ToGenericMesh(model);
+		modelCloud = modelMesh->getAssociatedCloud();
 	}
 	else
 	{
@@ -148,11 +144,26 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		//level = 9 if > 10.000.000
 		int gridLevel = static_cast<int>(floor(log10(static_cast<double>(std::max(dataCloud->size(), modelCloud->size()))))) + 2;
 		gridLevel = std::min(std::max(gridLevel,7),9);
-		int result = CCLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	dataCloud,
+		int result = -1;
+		if (modelMesh)
+		{
+			CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
+			c2mParams.octreeLevel = gridLevel;
+			c2mParams.maxSearchDist = 0;
+			c2mParams.useDistanceMap = true,
+			c2mParams.signedDistances = false;
+			c2mParams.flipNormals = false;
+			c2mParams.multiThread = false;
+			result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(dataCloud, modelMesh, c2mParams, &pDlg);
+		}
+		else
+		{
+			result = CCLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	dataCloud,
 																						modelCloud,
 																						gridLevel,
 																						-1,
 																						&pDlg);
+		}
 
 		if (result < 0)
 		{
@@ -219,7 +230,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	CCLib::ScalarField* modelWeights = 0;
 	CCLib::ScalarField* dataWeights = 0;
 	{
-		if (useModelSFAsWeights)
+		if (!modelMesh && useModelSFAsWeights)
 		{
 			if (modelCloud == dynamic_cast<CCLib::GenericIndexedCloudPersist*>(model) && model->isA(CC_TYPES::POINT_CLOUD))
 			{
@@ -251,22 +262,23 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	CCLib::ICPRegistrationTools::RESULT_TYPE result;
 	CCLib::PointProjectionTools::Transformation transform;
 
-	result = CCLib::ICPRegistrationTools::RegisterClouds(	modelCloud,
-															dataCloud,
-															transform,
-															method,
-															minRMSDecrease,
-															maxIterationCount,
-															finalRMS,
-															finalPointCount,
-															adjustScale,
-															static_cast<CCLib::GenericProgressCallback*>(&pDlg),
-															removeFarthestPoints,
-															randomSamplingLimit,
-															finalOverlapRatio,
-															modelWeights,
-															dataWeights,
-															filters);
+	result = CCLib::ICPRegistrationTools::Register(	modelCloud,
+													modelMesh,
+													dataCloud,
+													transform,
+													method,
+													minRMSDecrease,
+													maxIterationCount,
+													finalRMS,
+													finalPointCount,
+													adjustScale,
+													static_cast<CCLib::GenericProgressCallback*>(&pDlg),
+													removeFarthestPoints,
+													randomSamplingLimit,
+													finalOverlapRatio,
+													modelWeights,
+													dataWeights,
+													filters);
 
 	if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
 	{

@@ -117,16 +117,7 @@
       <property name="spacing">
        <number>6</number>
       </property>
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>0</number>
       </property>
       <item>
@@ -489,7 +480,7 @@
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>Model: use displayed S.F. as weights</string>
+            <string>Model: use displayed S.F. as weights (only for clouds)</string>
            </property>
           </widget>
          </item>

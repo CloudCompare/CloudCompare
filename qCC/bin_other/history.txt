@@ -88,6 +88,9 @@ v2.6.2 XX/XX/2015
 			* 'ADD_HEADER' to add a header with each column's name to the saved file
 			* 'ADD_PTS_COUNT' to add the number of points at the beginning of the saved file
 	* Fine registration (ICP)
+		- CC will now compute real cloud/mesh distances if the reference/model entity is a mesh
+			* the registration will be much more accurate
+			* (in this case the sampling parameter will only be used for the registered/data entity)
 		- Weighted ICP is now functional
 			* the user can use the currently active scalar field on the registered and/or the reference
 			clouds as weights. The bigger the weights, the more influence the points will have.

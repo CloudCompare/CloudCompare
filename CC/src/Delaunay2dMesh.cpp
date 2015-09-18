@@ -381,7 +381,7 @@ VerticesIndexes* Delaunay2dMesh::getNextTriangleVertIndexes()
 
 GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 {
-	assert(m_associatedCloud && triangleIndex<m_numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex < m_numberOfTriangles);
 
 	const int* tri = m_triIndexes + 3*triangleIndex;
 	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.A);
@@ -393,7 +393,7 @@ GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 
 void Delaunay2dMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
-	assert(m_associatedCloud && triangleIndex<m_numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex < m_numberOfTriangles);
 
 	const int* tri = m_triIndexes + 3*triangleIndex;
 	m_associatedCloud->getPoint(*tri++,A);

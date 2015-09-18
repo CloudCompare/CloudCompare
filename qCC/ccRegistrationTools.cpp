@@ -161,7 +161,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		}
 
 		//determine the max distance that (roughly) corresponds to the input overlap ratio
-		ScalarType maxSearchDist = static_cast<ScalarType>(-1.0);
+		ScalarType maxSearchDist = 0;
 		{
 			unsigned count = dataCloud->size();
 			std::vector<ScalarType> distances;

@@ -32,6 +32,7 @@ class GenericIndexedMesh;
 class GenericCloud;
 class GenericIndexedCloudPersist;
 class ReferenceCloud;
+class ChunkedPointCloud;
 class GenericProgressCallback;
 struct OctreeAndMeshIntersection;
 
@@ -55,7 +56,7 @@ public: //distance to clouds or meshes
 		ScalarType maxSearchDist;
 
 		//! Whether to use multi-thread or single thread mode
-		/** If maxSearchDist >= 0, single thread mode is forced.
+		/** If maxSearchDist > 0, single thread mode will be forced.
 		**/
 		bool multiThread;
 
@@ -102,7 +103,7 @@ public: //distance to clouds or meshes
 		//! Default constructor/initialization
 		Cloud2CloudDistanceComputationParams()
 			: octreeLevel(0)
-			, maxSearchDist(-1.0)
+			, maxSearchDist(0)
 			, multiThread(true)
 			, localModel(NO_MODEL)
 			, useSphericalSearchForLocalModel(false)
@@ -122,8 +123,8 @@ public: //distance to clouds or meshes
 		NAN_VALUE but one can avoid this by definining the Cloud2CloudDistanceComputationParams::resetFormerDistances
 		parameters to false. But even in this case, only values above Cloud2CloudDistanceComputationParams::maxSearchDist
 		will remain untouched.
-		\warning Max search distance (Cloud2CloudDistanceComputationParams::maxSearchDist) is not compatible with the
-		determination the closest point set (Cloud2CloudDistanceComputationParams::CPSet)
+		\warning Max search distance (Cloud2CloudDistanceComputationParams::maxSearchDist > 0) is not compatible with the
+		determination of the Closest Point Set (Cloud2CloudDistanceComputationParams::CPSet)
 		\param comparedCloud the compared cloud (the distances will be computed on these points)
 		\param referenceCloud the reference cloud (the distances will be computed relatively to these points)
 		\param params distance computation parameters
@@ -146,7 +147,7 @@ public: //distance to clouds or meshes
 		unsigned char octreeLevel;
 
 		//! Max search distance (acceleration)
-		/** Default value: -1. If greater than 0, then the algorithm won't compute distances over this value
+		/** Default value: 0. If greater than 0, then the algorithm won't compute distances over this value
 		**/
 		ScalarType maxSearchDist;
 
@@ -164,17 +165,24 @@ public: //distance to clouds or meshes
 		//! Whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
 		bool flipNormals;
 
-		//! Whether to use multi-thread or single thread mode (if maxSearchDist >= 0, single thread mode is forced)
+		//! Whether to use multi-thread or single thread mode (if maxSearchDist > 0, single thread mode is forced)
 		bool multiThread;
+
+		//! Cloud to store the Closest Point Set
+		/** The cloud should be initialized but empty on input. It will have the same size as the compared cloud on output.
+			\warning Not compatible with maxSearchDist > 0.
+		**/
+		ChunkedPointCloud* CPSet;
 
 		//! Default constructor
 		Cloud2MeshDistanceComputationParams()
 			: octreeLevel(0)
-			, maxSearchDist(-1.0)
+			, maxSearchDist(0)
 			, useDistanceMap(false)
 			, signedDistances(false)
 			, flipNormals(false)
 			, multiThread(true)
+			, CPSet(0)
 		{}
 	};
 
@@ -191,7 +199,7 @@ public: //distance to clouds or meshes
 	**/
 	static int computeCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
 											GenericIndexedMesh* mesh,
-											const Cloud2MeshDistanceComputationParams& params,
+											Cloud2MeshDistanceComputationParams& params,
 											GenericProgressCallback* progressCb = 0,
 											DgmOctree* cloudOctree = 0);
 
@@ -213,7 +221,7 @@ public: //approximate distances to clouds or meshes
 	static int computeApproxCloud2CloudDistance(GenericIndexedCloudPersist* comparedCloud,
 												GenericIndexedCloudPersist* referenceCloud,
 												unsigned char octreeLevel,
-												PointCoordinateType maxSearchDist = -PC_ONE,
+												PointCoordinateType maxSearchDist = 0,
 												GenericProgressCallback* progressCb = 0,
 												DgmOctree* compOctree = 0,
 												DgmOctree* refOctree = 0);
@@ -225,9 +233,13 @@ public: //distance to simple entities (triangles, planes, etc.)
 		\param P a 3D point
 		\param theTriangle a 3D triangle
 		\param signedDist whether to compute the signed or positive (SQUARED) distance
+		\param nearestP optional: returns the nearest point on the triangle
 		\return the distance between the point and the triangle
 	**/
-	static ScalarType computePoint2TriangleDistance(const CCVector3* P, const GenericTriangle* theTriangle, bool signedDist);
+	static ScalarType computePoint2TriangleDistance(const CCVector3* P,
+													const GenericTriangle* theTriangle,
+													bool signedDist,
+													CCVector3* nearestP = 0);
 
 	//! Computes the (signed) distance between a point and a plane
 	/** \param P a 3D point
@@ -350,7 +362,7 @@ public: //other methods
 											GenericIndexedCloudPersist* referenceCloud,
 											DgmOctree* &comparedOctree,
 											DgmOctree* &referenceOctree,
-											PointCoordinateType maxSearchDist = -PC_ONE,
+											PointCoordinateType maxSearchDist = 0,
 											GenericProgressCallback* progressCb = 0);
 
 	//! Returns whether multi-threading (parallel) computation is supported or not
@@ -376,7 +388,7 @@ protected:
 		\return -1 if an error occurred (e.g. not enough memory) and 0 otherwise
 	**/
 	static int computeCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* theIntersection,
-													const Cloud2MeshDistanceComputationParams& params,
+													Cloud2MeshDistanceComputationParams& params,
 													GenericProgressCallback* progressCb = 0);
 
 	//! Computes the "nearest neighbour distance" without local modeling for all points of an octree cell

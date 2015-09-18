@@ -233,7 +233,7 @@ void ccComparisonDlg::updateOctreeLevel()
 	//we only compute best octree level if "auto" mode is on or the user has set the level to "0"
 	if (!octreeLevelCheckBox->isChecked() || octreeLevelSpinBox->value() == 0)
 	{
-		double maxDistance = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+		double maxDistance = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : 0);
 		
 		int guessedBestOctreeLevel = determineBestOctreeLevel(static_cast<ScalarType>(maxDistance));
 		if (guessedBestOctreeLevel > 0)
@@ -363,7 +363,7 @@ int ccComparisonDlg::computeApproxResults()
 	case CLOUDCLOUD_DIST: //hausdroff
 		{
 			//Approximate distance can (and must) now take max search distance into account!
-			PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+			PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : 0);
 			approxResult = CCLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	m_compCloud,
 																								m_refCloud,
 																								DEFAULT_OCTREE_LEVEL,
@@ -378,7 +378,7 @@ int ccComparisonDlg::computeApproxResults()
 		{
 			CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
 			c2mParams.octreeLevel = DEFAULT_OCTREE_LEVEL;
-			c2mParams.maxSearchDist = -1.0;
+			c2mParams.maxSearchDist = 0;
 			c2mParams.useDistanceMap = true,
 			c2mParams.signedDistances = false;
 			c2mParams.flipNormals = false;
@@ -563,7 +563,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 				{
 					//if 'maxSearchDist' has been defined by the user, we must take it into account!
 					//(in this case we skip the cell if its approx. distance is superior)
-					if (maxSearchDist < 0 || cellDist <= maxSearchDist)
+					if (maxSearchDist <= 0 || cellDist <= maxSearchDist)
 					{
 						//approx. neighborhood radius
 						cellDist /= cellSize;
@@ -688,7 +688,7 @@ bool ccComparisonDlg::compute()
 	assert(sf);
 
 	//max search distance
-	ScalarType maxSearchDist = static_cast<ScalarType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+	ScalarType maxSearchDist = static_cast<ScalarType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : 0);
 	//multi-thread
 	bool multiThread = multiThreadedCheckBox->isChecked();
 
@@ -858,7 +858,7 @@ bool ccComparisonDlg::compute()
 
 		m_currentSFIsDistance = true;
 
-		if (maxSearchDist >= 0)
+		if (maxSearchDist > 0)
 		{
 			m_sfName += QString("[<%1]").arg(maxSearchDist);
 			m_currentSFIsDistance = false;

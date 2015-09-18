@@ -873,7 +873,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 											unsigned maxNumberOfNeighbors,
 											unsigned char level,
 											double &maxSquareDist,
-											double maxSearchDist/*=-1.0*/) const
+											double maxSearchDist/*=0*/) const
 {
 	assert(queryPoint);
 	NearestNeighboursSearchStruct nNSS;
@@ -885,7 +885,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 	nNSS.alreadyVisitedNeighbourhoodSize	= inbounds ? 0 : 1;
 
 	computeCellCenter(nNSS.cellPos,level,nNSS.cellCenter);
-	nNSS.maxSearchSquareDistd = (maxSearchDist >= 0 ? maxSearchDist*maxSearchDist : -1.0);
+	nNSS.maxSearchSquareDistd = (maxSearchDist > 0 ? maxSearchDist*maxSearchDist : 0);
 
 	//special case: N=1
 	if (maxNumberOfNeighbors == 1)
@@ -1524,7 +1524,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 			diagonalDistance = static_cast<int>(ceil(sqrt(static_cast<float>(diagonalDistance))));
 			eligibleCellDistance = std::max(diagonalDistance,1);
 
-			if (nNSS.maxSearchSquareDistd >= 0)
+			if (nNSS.maxSearchSquareDistd > 0)
 			{
 				//Distance to the nearest point
 				double minDist = static_cast<double>(eligibleCellDistance-1) * cs;
@@ -1605,7 +1605,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 		//if we have found an eligible point
 		if (minSquareDist >= 0 && minSquareDist <= squareEligibleDist)
 		{
-			if (nNSS.maxSearchSquareDistd < 0 || minSquareDist <= nNSS.maxSearchSquareDistd)
+			if (nNSS.maxSearchSquareDistd <= 0 || minSquareDist <= nNSS.maxSearchSquareDistd)
 				return minSquareDist;
 			else
 				return -1.0;
@@ -1613,7 +1613,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 		else
 		{
 			//no eligible point? Maybe we are already too far?
-			if (nNSS.maxSearchSquareDistd >= 0 && squareEligibleDist >= nNSS.maxSearchSquareDistd)
+			if (nNSS.maxSearchSquareDistd > 0 && squareEligibleDist >= nNSS.maxSearchSquareDistd)
 				return -1.0;
 		}
 
@@ -1703,7 +1703,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 			diagonalDistance = static_cast<int>(ceil(sqrt(static_cast<float>(diagonalDistance))));
 			eligibleCellDistance = std::max(diagonalDistance,1);
 
-			if (nNSS.maxSearchSquareDistd >= 0)
+			if (nNSS.maxSearchSquareDistd > 0)
 			{
 				//Distance of the nearest point
 				double minDist = static_cast<double>(eligibleCellDistance-1) * cs;
@@ -1779,7 +1779,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 		}
 
 		//Maybe we are already too far?
-		if (nNSS.maxSearchSquareDistd >= 0 && squareEligibleDist > nNSS.maxSearchSquareDistd)
+		if (nNSS.maxSearchSquareDistd > 0 && squareEligibleDist >= nNSS.maxSearchSquareDistd)
 			break;
 
 		//default strategy: increase neighbourhood size of +1 (for next step)

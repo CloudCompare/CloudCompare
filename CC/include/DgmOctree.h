@@ -215,7 +215,7 @@ public:
 		//! Maximum neihgbours distance
 		/** The NN search process will stop if it reaches this radius even if it
 			hasn't find any neighbour (acceleration). To disable this behavior,
-			set the maxSearchSquareDistd to -1.0).
+			set the maxSearchSquareDistd to something <= 0).
 		**/
 		double maxSearchSquareDistd;
 
@@ -259,7 +259,7 @@ public:
 			, minNumberOfNeighbors(1)
 			, cellPos(0,0,0)
 			, cellCenter(0,0,0)
-			, maxSearchSquareDistd(-1.0)
+			, maxSearchSquareDistd(0)
 			, alreadyVisitedNeighbourhoodSize(0)
 			, theNearestPointIndex(0)
 		{}
@@ -575,7 +575,7 @@ public:
 		\param maxNumberOfNeighbors the maximal number of points to find
 		\param level the subdivision level of the octree at which to perform the search
 		\param maxSquareDist the square distance between the farthest "nearest neighbour" and the query point
-		\param maxSearchDist the maximum search distance (ignored if -1)
+		\param maxSearchDist the maximum search distance (ignored if <= 0)
 		\return the number of neighbours found
 	**/
 	unsigned findPointNeighbourhood(const CCVector3* _queryPoint,
@@ -583,7 +583,7 @@ public:
 									unsigned maxNumberOfNeighbors,
 									unsigned char level,
 									double &maxSquareDist,
-									double maxSearchDist = -1.0) const;
+									double maxSearchDist = 0) const;
 
 	//! Advanced form of the nearest neighbour search algorithm (unique neighbour)
 	/** This version is optimized for a unique nearest-neighbour search.

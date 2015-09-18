@@ -376,7 +376,14 @@ int ccComparisonDlg::computeApproxResults()
 	
 	case CLOUDMESH_DIST: //cloud-mesh
 		{
-			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
+			CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
+			c2mParams.octreeLevel = DEFAULT_OCTREE_LEVEL;
+			c2mParams.maxSearchDist = -1.0;
+			c2mParams.useDistanceMap = true,
+			c2mParams.signedDistances = false;
+			c2mParams.flipNormals = false;
+			c2mParams.multiThread = false;
+			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,c2mParams,&progressDlg,m_compOctree);
 		}
 		break;
 
@@ -693,22 +700,8 @@ bool ccComparisonDlg::compute()
 		CPSet = new CCLib::ReferenceCloud(m_refCloud);
 	}
 
-	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
-	params.octreeLevel = static_cast<unsigned char>(bestOctreeLevel);
-	if (localModelingTab->isEnabled())
-	{
-		params.localModel = (CC_LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
-		if (params.localModel != NO_MODEL)
-		{
-			params.useSphericalSearchForLocalModel = lmRadiusRadioButton->isChecked();
-			params.kNNForLocalModel = static_cast<unsigned>(std::max(0,lmKNNSpinBox->value()));
-			params.radiusForLocalModel = static_cast<ScalarType>(lmRadiusDoubleSpinBox->value());
-			params.reuseExistingLocalModels = lmOptimizeCheckBox->isChecked();
-		}
-	}
-	params.maxSearchDist = maxSearchDist;
-	params.multiThread = multiThread;
-	params.CPSet = CPSet;
+	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cParams;
+	CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams  c2mParams;
 
 	int result = -1;
 	ccProgressDialog progressDlg(true,this);
@@ -765,11 +758,30 @@ bool ccComparisonDlg::compute()
 				}
 			}
 			pc->enableVisibilityCheck(filterVisibility);
-
 		}
+
+		//setup parameters
+		{
+			c2cParams.octreeLevel = static_cast<unsigned char>(bestOctreeLevel);
+			if (localModelingTab->isEnabled())
+			{
+				c2cParams.localModel = (CC_LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
+				if (c2cParams.localModel != NO_MODEL)
+				{
+					c2cParams.useSphericalSearchForLocalModel = lmRadiusRadioButton->isChecked();
+					c2cParams.kNNForLocalModel = static_cast<unsigned>(std::max(0,lmKNNSpinBox->value()));
+					c2cParams.radiusForLocalModel = static_cast<ScalarType>(lmRadiusDoubleSpinBox->value());
+					c2cParams.reuseExistingLocalModels = lmOptimizeCheckBox->isChecked();
+				}
+			}
+			c2cParams.maxSearchDist = maxSearchDist;
+			c2cParams.multiThread = multiThread;
+			c2cParams.CPSet = CPSet;
+		}
+		
 		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
 																				m_refCloud,
-																				params,
+																				c2cParams,
 																				&progressDlg,
 																				m_compOctree,
 																				m_refOctree);
@@ -778,16 +790,23 @@ bool ccComparisonDlg::compute()
 	case CLOUDMESH_DIST: //cloud-mesh
 
 		if (multiThread && maxSearchDistSpinBox->isEnabled())
+		{
 			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
+		}
+
+		//setup parameters
+		{
+			c2mParams.octreeLevel = static_cast<unsigned char>(bestOctreeLevel);
+			c2mParams.maxSearchDist = maxSearchDist;
+			c2mParams.useDistanceMap = false;
+			c2mParams.signedDistances = signedDistances;
+			c2mParams.flipNormals = flipNormals;
+			c2mParams.multiThread = multiThread;
+		}
 		
 		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
 																				m_refMesh,
-																				static_cast<unsigned char>(bestOctreeLevel),
-																				maxSearchDist,
-																				false,
-																				signedDistances,
-																				flipNormals,
-																				multiThread,
+																				c2mParams,
 																				&progressDlg,
 																				m_compOctree);
 		break;
@@ -823,14 +842,14 @@ bool ccComparisonDlg::compute()
 			break;
 		}
 
-		if (params.localModel != NO_MODEL)
+		if (c2cParams.localModel != NO_MODEL)
 		{
 			m_sfName += QString("[%1]").arg(localModelComboBox->currentText());
-			if (params.useSphericalSearchForLocalModel)
-				m_sfName += QString("[r=%1]").arg(params.radiusForLocalModel);
+			if (c2cParams.useSphericalSearchForLocalModel)
+				m_sfName += QString("[r=%1]").arg(c2cParams.radiusForLocalModel);
 			else
-				m_sfName += QString("[k=%1]").arg(params.kNNForLocalModel);
-			if (params.reuseExistingLocalModels)
+				m_sfName += QString("[k=%1]").arg(c2cParams.kNNForLocalModel);
+			if (c2cParams.reuseExistingLocalModels)
 				m_sfName += QString("[fast]");
 		}
 

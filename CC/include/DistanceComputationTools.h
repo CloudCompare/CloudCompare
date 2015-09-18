@@ -139,30 +139,59 @@ public: //distance to clouds or meshes
 											DgmOctree* compOctree = 0,
 											DgmOctree* refOctree = 0);
 
+	//! Cloud-to-mes distances computation parameters
+	struct Cloud2MeshDistanceComputationParams
+	{
+		//! The level of subdivision of the octree at witch to apply the algorithm
+		unsigned char octreeLevel;
+
+		//! Max search distance (acceleration)
+		/** Default value: -1. If greater than 0, then the algorithm won't compute distances over this value
+		**/
+		ScalarType maxSearchDist;
+
+		//! Use distance map (acceleration)
+		/** If true, the distances over "maxSearchDist" will be aproximated by a Distance Transform
+		**/
+		bool useDistanceMap;
+
+		//! Whether to compute signed distances or not
+		/** If true, the computed distances will be signed (in this case, the Distance Transform can't be used
+			and therefore useDistanceMap will be ignored)
+		**/
+		bool signedDistances;
+
+		//! Whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
+		bool flipNormals;
+
+		//! Whether to use multi-thread or single thread mode (if maxSearchDist >= 0, single thread mode is forced)
+		bool multiThread;
+
+		//! Default constructor
+		Cloud2MeshDistanceComputationParams()
+			: octreeLevel(0)
+			, maxSearchDist(-1.0)
+			, useDistanceMap(false)
+			, signedDistances(false)
+			, flipNormals(false)
+			, multiThread(true)
+		{}
+	};
+
 	//! Computes the distance between a point cloud and a mesh
 	/** The algorithm, inspired from METRO by Cignoni et al., is described
 		in Daniel Girardeau-Montaut's PhD manuscript (Chapter 2, section 2.2).
 		It is the general way to compare a point cloud with a triangular mesh.
 		\param pointCloud the compared cloud (the distances will be computed on these points)
-		\param theMesh the reference mesh (the distances will be computed relatively to its triangles)
-		\param octreeLevel the level of subdivision of the octree at witch to apply the algorithm
-		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value (acceleration)
-		\param useDistanceMap if true, the distances over "maxSearchDist" will be aproximated by a Distance Transform (acceleration)
-		\param signedDistances if true, the computed distances will be signed (in this case, the Distance Transform can't used computed and therefore useDistanceMap will be ignored)
-		\param flipNormals specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
-		\param multiThread specify whether to use multi-thread or single thread mode (if maxSearchDist>=0, single thread mode is forced)
+		\param mesh the reference mesh (the distances will be computed relatively to its triangles)
+		\param params parameters
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param cloudOctree the pre-computed octree of the compared cloud (warning: its bounding box should be equal to the union of both point cloud and mesh bbs and it should be cubical - it is automatically computed if 0)
 		\return 0 if ok, a negative value otherwise
 	**/
 	static int computeCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
-											GenericIndexedMesh* theMesh,
-											unsigned char octreeLevel,
-											ScalarType maxSearchDist = -1.0,
-											bool useDistanceMap = false,
-											bool signedDistances = false,
-											bool flipNormals = false,
-											bool multiThread = true,
+											GenericIndexedMesh* mesh,
+											const Cloud2MeshDistanceComputationParams& params,
 											GenericProgressCallback* progressCb = 0,
 											DgmOctree* cloudOctree = 0);
 
@@ -342,20 +371,12 @@ protected:
 	//! Computes the distances between a point cloud and a mesh projected into a grid structure
 	/** This method is used by computeCloud2MeshDistance, after intersectMeshWithOctree has been called.
 		\param theIntersection a specific structure corresponding the intersection of the mesh with the grid
-		\param octreeLevel the octree subdivision level corresponding to the grid
-		\param signedDistances specify whether to compute signed or positive (squared) distances
-		\param flipTriangleNormals if 'signedDistances' is true,  specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
-		\param multiThread whether to use parallel processing or not
-		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value (ignored if multiThread is true)
+		\param params parameters
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return -1 if an error occurred (e.g. not enough memory) and 0 otherwise
 	**/
 	static int computeCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* theIntersection,
-													unsigned char octreeLevel,
-													bool signedDistances,
-													bool flipTriangleNormals,
-													bool multiThread = false,
-													ScalarType maxSearchDist = -1.0,
+													const Cloud2MeshDistanceComputationParams& params,
 													GenericProgressCallback* progressCb = 0);
 
 	//! Computes the "nearest neighbour distance" without local modeling for all points of an octree cell

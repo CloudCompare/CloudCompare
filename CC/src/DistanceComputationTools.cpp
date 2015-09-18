@@ -1253,31 +1253,27 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 #endif
 
 int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMeshIntersection* intersection,
-																	unsigned char octreeLevel,
-																	bool signedDistances,
-																	bool flipTriangleNormals/*=false*/,
-																	bool multiThread/*=false*/,
-																	ScalarType maxSearchDist/*=-1.0*/,
+																	const Cloud2MeshDistanceComputationParams& params,
 																	GenericProgressCallback* progressCb/*=0*/)
 {
 	assert(intersection);
-	assert(!signedDistances || !intersection->distanceTransform); //signed distances are not compatible with Distance Transform acceleration
-	assert(!multiThread || maxSearchDist < 0); //maxSearchDist is not compatible with parallel processing
+	assert(!params.signedDistances || !intersection->distanceTransform); //signed distances are not compatible with Distance Transform acceleration
+	assert(!params.multiThread || params.maxSearchDist < 0); //maxSearchDist is not compatible with parallel processing
 
 	DgmOctree* octree = intersection->octree;
 
 #ifdef ENABLE_CLOUD2MESH_DIST_MT
-	if (!multiThread)
+	if (!params.multiThread)
 #endif
 	{
 		GenericIndexedMesh* mesh = intersection->mesh;
 
 		//dimension of an octree cell
-		PointCoordinateType cellLength = octree->getCellSize(octreeLevel);
+		PointCoordinateType cellLength = octree->getCellSize(params.octreeLevel);
 
 		//get the cell indexes at level "octreeLevel"
 		DgmOctree::cellsContainer cellCodesAndIndexes;
-		if (!octree->getCellCodesAndIndexes(octreeLevel, cellCodesAndIndexes, true))
+		if (!octree->getCellCodesAndIndexes(params.octreeLevel, cellCodesAndIndexes, true))
 		{
 			//not enough memory
 			return -1;
@@ -1289,11 +1285,11 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		ReferenceCloud Yk(octree->associatedCloud());
 
 		//bounded search
-		bool boundedSearch = (maxSearchDist >= 0);
+		bool boundedSearch = (params.maxSearchDist >= 0);
 		int maxNeighbourhoodLength = 0; //maximale neighbors search distance (if maxSearchDist is defined)
 		if (boundedSearch)
 		{
-			maxNeighbourhoodLength = static_cast<int>(ceil(maxSearchDist / cellLength + static_cast<ScalarType>((sqrt(2.0) - 1.0) / 2)));
+			maxNeighbourhoodLength = static_cast<int>(ceil(params.maxSearchDist / cellLength + static_cast<ScalarType>((sqrt(2.0) - 1.0) / 2)));
 		}
 
 		//if we only need approximate distances
@@ -1302,11 +1298,11 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 			//for each cell
 			for (unsigned i = 0; i < numberOfCells; ++i, ++pCodeAndIndex)
 			{
-				octree->getPointsInCellByCellIndex(&Yk, pCodeAndIndex->theIndex, octreeLevel);
+				octree->getPointsInCellByCellIndex(&Yk, pCodeAndIndex->theIndex, params.octreeLevel);
 
 				//get the cell pos
 				Tuple3i cellPos;
-				octree->getCellPos(pCodeAndIndex->theCode, octreeLevel, cellPos, true);
+				octree->getCellPos(pCodeAndIndex->theCode, params.octreeLevel, cellPos, true);
 				cellPos -= intersection->minFillIndexes;
 
 				//get the Distance Transform distance
@@ -1337,7 +1333,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 			sprintf(buffer, "Cells: %u", numberOfCells);
 			progressCb->reset();
 			progressCb->setInfo(buffer);
-			progressCb->setMethodTitle(signedDistances ? "Compute signed distances" : "Compute distances");
+			progressCb->setMethodTitle(params.signedDistances ? "Compute signed distances" : "Compute distances");
 			progressCb->start();
 		}
 
@@ -1345,7 +1341,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		std::vector<unsigned> trianglesToTest;
 		size_t trianglesToTestCount = 0;
 		size_t trianglesToTestCapacity = 0;
-		const ScalarType normalSign = static_cast<ScalarType>(flipTriangleNormals ? -1.0 : 1.0);
+		const ScalarType normalSign = static_cast<ScalarType>(params.flipNormals ? -1.0 : 1.0);
 		unsigned numberOfTriangles = mesh->size();
 
 		//acceleration structure
@@ -1362,14 +1358,16 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		//min distance array ('persistent' version to save some memory)
 		std::vector<ScalarType> minDists;
 
+		ScalarType maxSearchDist = params.maxSearchDist;
+
 		//for each cell
 		for (unsigned cellIndex = 1; cellIndex <= numberOfCells; ++cellIndex, ++pCodeAndIndex) //cellIndex = unique ID for the current cell
 		{
-			octree->getPointsInCellByCellIndex(&Yk, pCodeAndIndex->theIndex, octreeLevel);
+			octree->getPointsInCellByCellIndex(&Yk, pCodeAndIndex->theIndex, params.octreeLevel);
 
 			//get cell pos
 			Tuple3i startPos;
-			octree->getCellPos(pCodeAndIndex->theCode, octreeLevel, startPos, true);
+			octree->getCellPos(pCodeAndIndex->theCode, params.octreeLevel, startPos, true);
 
 			//get the distance to the nearest and farthest boundaries
 			int maxDistToBoundaries = 0;
@@ -1384,7 +1382,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 			//determine the cell center
 			CCVector3 cellCenter;
-			octree->computeCellCenter(startPos, octreeLevel, cellCenter);
+			octree->computeCellCenter(startPos, params.octreeLevel, cellCenter);
 
 			//express 'startPos' relatively to the grid borders
 			startPos -= intersection->minFillIndexes;
@@ -1579,7 +1577,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 					//for each point inside the current cell
 					Yk.placeIteratorAtBegining();
-					if (signedDistances)
+					if (params.signedDistances)
 					{
 						//we have to use absolute distances
 						for (unsigned j = 0; j < remainingPoints; ++j)
@@ -1616,7 +1614,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 						//eligibility distance
 						ScalarType eligibleDist = minDists[j] + maxRadius;
 						ScalarType dPTri = Yk.getPointScalarValue(j);
-						if (signedDistances)
+						if (params.signedDistances)
 						{
 							//need to get the square distance in all cases
 							dPTri *= dPTri;
@@ -1657,7 +1655,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 	{
 		//extraction des indexes et codes des cellules du niveau "octreeLevel"
 		DgmOctree::cellsContainer cellsDescs;
-		octree->getCellCodesAndIndexes(octreeLevel,cellsDescs,true);
+		octree->getCellCodesAndIndexes(params.octreeLevel,cellsDescs,true);
 
 		unsigned numberOfCells = (unsigned)cellsDescs.size();
 
@@ -1676,9 +1674,9 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		s_octree_MT = octree;
 		s_normProgressCb_MT = &nProgress;
 		s_cellFunc_MT_success = true;
-		s_signedDistances_MT = signedDistances;
-		s_normalSign_MT = (flipTriangleNormals ? -1.0f : 1.0f);
-		s_octreeLevel_MT = octreeLevel;
+		s_signedDistances_MT = params.signedDistances;
+		s_normalSign_MT = (params.flipNormals ? -1.0f : 1.0f);
+		s_octreeLevel_MT = params.octreeLevel;
 		s_intersection_MT = intersection;
 		//acceleration structure
 		s_useBitArrays_MT = true;
@@ -1714,12 +1712,7 @@ inline void applySqrtToPointDist(const CCVector3 &aPoint, ScalarType& aScalarVal
 
 int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPersist* pointCloud,
 															GenericIndexedMesh* mesh,
-															unsigned char octreeLevel,
-															ScalarType maxSearchDist,
-															bool useDistanceMap/*=false*/,
-															bool signedDistances/*=false*/,
-															bool flipNormals/*=false*/,
-															bool multiThread/*=true*/,
+															const Cloud2MeshDistanceComputationParams& inputParams,
 															GenericProgressCallback* progressCb/*=0*/,
 															DgmOctree* cloudOctree/*=0*/)
 {
@@ -1730,10 +1723,12 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		return -2;
 	}
 
+	Cloud2MeshDistanceComputationParams params = inputParams;
+
 	//signed distances are incompatible with Distance Transform based approximation
-	if (signedDistances)
+	if (params.signedDistances)
 	{
-		useDistanceMap = false;
+		params.useDistanceMap = false;
 	}
 
 	//compute the (cubical) bounding box that contains both the cloud and the mehs BBs
@@ -1797,7 +1792,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	intersection.mesh = mesh;
 
 	//we deduce the grid cell size very simply (as the bbox has been "cubified")
-	PointCoordinateType cellSize = (maxCubifiedBB.x - minCubifiedBB.x) / (1 << octreeLevel);
+	PointCoordinateType cellSize = (maxCubifiedBB.x - minCubifiedBB.x) / (1 << params.octreeLevel);
 	//we compute grid occupancy ... and we deduce the grid dimensions
 	Tuple3ui gridSize;
 	{
@@ -1809,9 +1804,9 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		}
 	}
 
-	bool boundedSearch = (maxSearchDist >= 0);
-	multiThread &= (!boundedSearch); //MT doesn't support boundedSearch yet!
-	if (!useDistanceMap || boundedSearch)
+	bool boundedSearch = (params.maxSearchDist >= 0);
+	params.multiThread &= (!boundedSearch); //MT doesn't support boundedSearch yet!
+	if (!params.useDistanceMap || boundedSearch)
 	{
 		//list of the triangles intersecting each cell of the 3D grid
 		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, 0))
@@ -1822,11 +1817,11 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	else
 	{
 		//we only compute approximate distances
-		multiThread = false; //not necessary/supported
+		params.multiThread = false; //not necessary/supported
 	}
 
 	//if the user (or the current cloud/mesh configuration) requires that we use a Distance Transform
-	if (useDistanceMap)
+	if (params.useDistanceMap)
 	{
 		intersection.distanceTransform = new SaitoSquaredDistanceTransform;
 		if ( !intersection.distanceTransform || !intersection.distanceTransform->initGrid(gridSize))
@@ -1836,7 +1831,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	}
 
 	//INTERSECT THE OCTREE WITH THE MESH
-	int result = intersectMeshWithOctree(&intersection,octreeLevel,progressCb);
+	int result = intersectMeshWithOctree(&intersection,params.octreeLevel,progressCb);
 	if (result < 0)
 	{
 		return -6;
@@ -1847,19 +1842,19 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	pointCloud->forEach(ScalarFieldTools::SetScalarValueToNaN);
 
     //acceleration by approximating the distance
-	if (useDistanceMap && intersection.distanceTransform)
+	if (params.useDistanceMap && intersection.distanceTransform)
 	{
         intersection.distanceTransform->propagateDistance(progressCb);
 	}
 
 	//WE CAN EVENTUALLY COMPUTE THE DISTANCES!
-	result = computeCloud2MeshDistanceWithOctree(&intersection, octreeLevel, signedDistances, flipNormals, multiThread, maxSearchDist, progressCb);
+	result = computeCloud2MeshDistanceWithOctree(&intersection, params, progressCb);
 
 	//special operation for non-signed distances
-	if (result == 0 && !signedDistances)
+	if (result == 0 && !params.signedDistances)
 	{
 		//don't forget to pass the result to the square root
-		if (!useDistanceMap || boundedSearch)
+		if (!params.useDistanceMap || boundedSearch)
 			pointCloud->forEach(applySqrtToPointDist);
 	}
 

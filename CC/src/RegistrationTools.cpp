@@ -560,7 +560,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		{
 			assert(model.weights || data.weights);
 			unsigned count = data.cloud->size();
-			assert(data.CPSet->size() == count);
+			assert(!model.weights || (data.CPSetRef && data.CPSetRef->size() == count));
 
 			if (coupleWeights->currentSize() != count && !coupleWeights->resize(count))
 			{

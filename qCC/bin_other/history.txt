@@ -163,6 +163,7 @@ v2.6.2 XX/XX/2015
 	* FBX files: the exported 'specular' component of materials was in fact the 'ambient' component (resulting a much brighter look)
 	* In command line mode, the Delaunay command was ignoring the 'AUTO_SAVE OFF' option and was creating a looping hierarchy
 		(potentially causing later infinite loops...)
+	* OBJ files: when merging multiple models with textures having the same (local) filename, the images could overwrite each other once saved
 
 v2.6.1 02/20/2015
 - New features:

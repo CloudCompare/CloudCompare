@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 2.8)
+
+option( INSTALL_QGMMREG_PLUGIN "Check to install qGMMREG plugin" OFF )
+
+if (INSTALL_QGMMREG_PLUGIN)
+
+#CloudCompare 'GMMREG' plugin
+project( QGMMREG_PLUGIN )
+
+find_package(VXL)
+
+# Whether FIND_PACKAGE(VXL) worked is stored in the variable
+# VXL_FOUND.  If VXL was found we then include `UseVXL.cmake'
+# which will set many variables prefixed with VXL_ that your project
+# can use to determine what parts of VXL are present and how to use
+# them.  `UseVXL.cmake' holds all the necessary definitions that
+# CMake needs to use VXL.
+
+if (VXL_FOUND)
+	include(${VXL_CMAKE_DIR}/UseVXL.cmake)
+else()
+	message( SEND_ERROR "VXL is required to compile qGMMReg (VXL_DIR)" )
+endif()
+
+#load necessary libraries (see qPCV for an example)
+add_subdirectory (GMMREG/C++)
+
+#if the plugin is an 'OpenGL filter', uncomment the line below
+#set( CC_OPENGL_FILTER ON BOOL)
+include( ../CMakePluginTpl.cmake )
+
+#set dependencies to necessary libraries (see qPCV for an example)
+include_directories( ${GMMREG_LIB_SOURCE_DIR} )
+
+target_link_libraries( ${PROJECT_NAME} GMMREG_LIB )
+target_link_libraries(${PROJECT_NAME} vnl_algo vnl vcl)
+if (UNIX)
+  target_link_libraries(${PROJECT_NAME} m port_ini)
+endif (UNIX)
+
+endif()

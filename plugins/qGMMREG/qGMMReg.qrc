@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qGMMRegPlugin" >
+    <file>icon.png</file>
+  </qresource>
+</RCC>

@@ -156,7 +156,7 @@ ccCylinder*	ccHObjectCaster::ToCylinder(ccHObject* obj)
 
 ccCone*		ccHObjectCaster::ToCone(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::CONE) ? static_cast<ccCone*>(obj) : 0;
+	return obj && obj->isKindOf(CC_TYPES::CONE) ? static_cast<ccCone*>(obj) : 0;
 }
 
 ccPlane*	ccHObjectCaster::ToPlane(ccHObject* obj)

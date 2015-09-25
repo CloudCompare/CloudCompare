@@ -80,7 +80,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	CCVector3 profileBBMin, profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
-	double yMin = std::max(map->yMin,static_cast<double>(profileBBMin.y));
+	double yMin = std::max(map->yMin, static_cast<double>(profileBBMin.y));
 	double yMax = std::min(map->yMin + static_cast<double>(map->ySteps) * map->yStep, static_cast<double>(profileBBMax.y));
 	const double ySpan = yMax - yMin;
 	//For the 'X' dimension, it's easier to stick with the th. profile
@@ -341,9 +341,8 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 			yLegend += c_textHeight_mm*2.0;
 
 			//units
-			QString unitsStr("mm");
 			dxf.writeText(	*dw,
-				DL_TextData(xLegend,yLegend,0.0,xLegend,yLegend,0.0,c_textHeight_mm,1.0,0,0,0,qPrintable(QString("Deviation units: ")+unitsStr),"STANDARD",0.0),
+				DL_TextData(xLegend,yLegend,0.0,xLegend,yLegend,0.0,c_textHeight_mm,1.0,0,0,0,qPrintable(QString("Deviation units: ")+params.scaledDevUnits),"STANDARD",0.0),
 				DefaultLegendMaterial);
 
 			//next line
@@ -830,9 +829,8 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 			yLegend += c_textHeight_mm*2.0;
 
 			//units
-			QString unitsStr("mm");
 			dxf.writeText(	*dw,
-				DL_TextData(xLegend,yLegend,0.0,xLegend,yLegend,0.0,c_textHeight_mm,1.0,0,0,0,qPrintable(QString("Deviation units: ")+unitsStr),"STANDARD",0.0), //DGM: warning, toStdString doesn't preserve "local" characters
+				DL_TextData(xLegend,yLegend,0.0,xLegend,yLegend,0.0,c_textHeight_mm,1.0,0,0,0,qPrintable(QString("Deviation units: ")+params.scaledDevUnits),"STANDARD",0.0), //DGM: warning, toStdString doesn't preserve "local" characters
 				DefaultLegendMaterial);
 
 			//next line

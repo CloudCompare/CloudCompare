@@ -49,13 +49,13 @@ public:
 protected slots:
 
 	//! Loads profile from a dedicated file
-	void loadProfile();
+	void loadProfile() const;
 
 	//! Computes cloud-to-profile radial distances
-	void computeCloud2ProfileRadialDist();
+	void computeCloud2ProfileRadialDist() const;
 
 	//! Projects the cloud distances into a 2D grid
-	void projectCloudDistsInGrid();
+	void projectCloudDistsInGrid() const;
 
 protected:
 
@@ -63,7 +63,10 @@ protected:
 	ccHObject::Container m_selectedEntities;
 
 	//! Projects the cloud distances into a 2D grid (needs the revolution profile)
-	void doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline);
+	void doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) const;
+
+	//! Computes cloud-to-profile radial distances
+	bool doComputeRadialDists(ccPointCloud* cloud, ccPolyline* polyline) const;
 
 	//! Associated action
 	QAction* m_doLoadProfile;

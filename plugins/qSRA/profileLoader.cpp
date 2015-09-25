@@ -29,7 +29,7 @@
 #include <QTextStream>
 #include <QFileInfo>
 
-ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
+ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppInterface* app/*=0*/)
 {
 	//load profile as a polyline
 	QFile file(filename);
@@ -48,14 +48,13 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 	bool error = false;
 	for (unsigned n=0; n<1; ++n) //fake loop for easy break ;)
 	{
-		//read center
-		CCVector3d G(0,0,0);
+		//read origin
 		{
 			QString headerLine = stream.readLine();
 			if (headerLine.isEmpty() || !headerLine.startsWith("X"))
 			{
 				if (app)
-					app->dispToConsole(QString("Malformed file (center header expected on first line)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+					app->dispToConsole(QString("Malformed file (origin header expected on first line)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				error = true;
 				break;
 			}
@@ -66,15 +65,15 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 				if (tokens.size() == 3)
 				{
 					bool ok[3] = {false, false, false};
-					G.x = tokens[0].toDouble(ok+0);
-					G.y = tokens[1].toDouble(ok+1);
-					G.z = tokens[2].toDouble(ok+2);
+					origin.x = static_cast<PointCoordinateType>(tokens[0].toDouble(ok+0));
+					origin.y = static_cast<PointCoordinateType>(tokens[1].toDouble(ok+1));
+					origin.z = static_cast<PointCoordinateType>(tokens[2].toDouble(ok+2));
 					validLine = ok[0] && ok[1] && ok[2];
 				}
 				if (!validLine)
 				{
 					if (app)
-						app->dispToConsole(QString("Malformed file (center coordinates expected on second line)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+						app->dispToConsole(QString("Malformed file (origin coordinates expected on second line)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 					error = true;
 					break;
 				}
@@ -150,8 +149,6 @@ ccPolyline* ProfileLoader::Load(QString filename, ccMainAppInterface* app/*=0*/)
 															static_cast<PointCoordinateType>(points[i].y),
 															0));
 						}
-
-						vertices->setGlobalShift(G);
 					}
 
 					//add segments

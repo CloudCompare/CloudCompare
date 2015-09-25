@@ -166,6 +166,9 @@ protected:
 	//! Associated cloud
 	ccPointCloud* m_cloud;
 
+	//! Transformation from the cloud coordinate system to the surface of revolution one
+	ccGLMatrix m_cloudToSurface;
+
 	//! Associated profile
 	ccPolyline* m_profile;
 

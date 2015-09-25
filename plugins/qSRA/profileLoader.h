@@ -24,23 +24,25 @@ class ccMainAppInterface;
 //Qt
 #include <QString>
 
+//CCLib
+#include <CCGeom.h>
+
 //! Loads a 2D profile form a custom (ASCII) file
 class ProfileLoader
 {
 public:
 
 	//! Loads a 2D profile from a file
-	/** The file must have a particular organization (see method for more detail).
-		The profile should be associated with an absolute 3D origin (and an axis,
-		specified outside). This origin will be saved as 'global shift' with the
-		polyline's vertices (see ccPointCloud::setOriginalShift).
+	/** The file must have a particular organization (see the code for more details).
+		Notably the profile is associated to a 3D origin.
 		Only the X and Y coordinates of the polyline's vertices will be used:
 		X = radius and Y = height (Z = 0).
-		\param filename filename
-		\param app main application handle for displaying messages
+		\param[in] filename filename
+		\param[out] origin profile origin
+		\param[in] app main application handle for displaying messages (optional)
 		\return loaded polyline (or 0 if an error occurred)
 	**/
-	static ccPolyline* Load(QString filename, ccMainAppInterface* app = 0);
+	static ccPolyline* Load(QString filename, CCVector3& origin, ccMainAppInterface* app = 0);
 
 };
 

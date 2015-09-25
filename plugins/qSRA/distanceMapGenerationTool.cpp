@@ -36,10 +36,12 @@
 #include <QTextStream>
 #include <QMainWindow>
 
+//Meta-data key for profile (polyline) origin
+const char PROFILE_ORIGIN_KEY[]  = "ProfileOrigin";
 //Meta-data key for profile (polyline) axis
 const char REVOLUTION_AXIS_KEY[]  = "RevolutionAxis";
-//Meta-data key for absolute heights flag
-const char ABSOLUTE_HEIGHTS_KEY[] = "AbsoluteHeights";
+//Meta-data key for the profile (polyline) height shift
+const char PROFILE_HEIGHT_SHIFT_KEY[] = "ProfileHeightShift";
 
 //shortcuts
 static const double M_PI_DIV_2 = M_PI/2;
@@ -60,23 +62,81 @@ static inline double ComputeLatitude_rad(	PointCoordinateType x,
 	return atan(z / sqrt(static_cast<double>(r)));
 }
 
-void DistanceMapGenerationTool::SetPoylineAxis(ccPolyline* polyline, int axisDim)
+//helper
+static bool GetPolylineMetaVector(const ccPolyline* polyline, const QString& key, CCVector3& P)
+{
+	assert(polyline);
+	if (polyline)
+	{
+		//we try to get the right meta-data 'vector'
+		QVariant x = polyline->getMetaData(key+QString(".x"));
+		QVariant y = polyline->getMetaData(key+QString(".y"));
+		QVariant z = polyline->getMetaData(key+QString(".z"));
+		if (x.isValid() && y.isValid() && z.isValid())
+		{
+			bool ok[3] = { true, true, true };
+			P.x = static_cast<PointCoordinateType>(x.toDouble(ok  ));
+			P.y = static_cast<PointCoordinateType>(y.toDouble(ok+1));
+			P.z = static_cast<PointCoordinateType>(z.toDouble(ok+2));
+			return (ok[0] && ok[1] && ok[2]);
+		}
+	}
+
+	return false;
+}
+
+//helper
+static void SetPoylineMetaVector(ccPolyline* polyline, const QString& key, const CCVector3& P)
 {
 	assert(polyline);
 	if (polyline)
 	{
 		//add revolution axis as meta-data
-		QVariant axis(axisDim);
-		polyline->setMetaData(REVOLUTION_AXIS_KEY,axis);
+		polyline->setMetaData(key+QString(".x"),QVariant(P.x));
+		polyline->setMetaData(key+QString(".y"),QVariant(P.y));
+		polyline->setMetaData(key+QString(".z"),QVariant(P.z));
 	}
 }
 
-int DistanceMapGenerationTool::GetPoylineAxis(const ccPolyline* polyline)
+//helper
+ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeProfileToSurfaceTrans() const
+{
+	ccGLMatrix cloudToSurface;
+	cloudToSurface.setTranslation(-origin);
+
+	//we must take the axis fo the Surface of Revolution into account (if any and if it is not colinear with X, Y or Z)
+	if (hasAxis && axis.u[revolDim] + std::numeric_limits<PointCoordinateType>::epsilon() < 1.0)
+	{
+		ccGLMatrix rotation;
+		CCVector3 Z(0,0,0);
+		Z.u[revolDim] = PC_ONE;
+		rotation = ccGLMatrix::FromToRotation(Z, axis);
+		cloudToSurface = rotation * cloudToSurface;
+	}
+
+	//don't forget the height shift along the revolution axis (if any)
+	cloudToSurface.getTranslation()[revolDim] += heightShift;
+
+	return cloudToSurface;
+}
+
+void DistanceMapGenerationTool::SetPoylineRevolDim(ccPolyline* polyline, int revolDim)
 {
 	assert(polyline);
 	if (polyline)
 	{
-		//we try to get the revolution axis from the polyline meta-data
+		//add revolution dimension as meta-data
+		QVariant dim(revolDim);
+		polyline->setMetaData(REVOLUTION_AXIS_KEY,dim);
+	}
+}
+
+int DistanceMapGenerationTool::GetPoylineRevolDim(const ccPolyline* polyline)
+{
+	assert(polyline);
+	if (polyline)
+	{
+		//we try to get the revolution dimension from the polyline meta-data
 		QVariant axis = polyline->getMetaData(REVOLUTION_AXIS_KEY);
 		if (axis.isValid())
 		{
@@ -90,30 +150,82 @@ int DistanceMapGenerationTool::GetPoylineAxis(const ccPolyline* polyline)
 	return -1;
 }
 
-void DistanceMapGenerationTool::SetAbsoluteHeights(ccPolyline* polyline, bool absolute)
+void DistanceMapGenerationTool::SetPoylineOrigin(ccPolyline* polyline, const CCVector3& origin)
+{
+	SetPoylineMetaVector(polyline, PROFILE_ORIGIN_KEY, origin);
+}
+
+bool DistanceMapGenerationTool::GetPoylineOrigin(const ccPolyline* polyline, CCVector3& origin)
+{
+	//we try to get the profile origin from the polyline meta-data
+	return GetPolylineMetaVector(polyline, PROFILE_ORIGIN_KEY, origin);
+}
+
+void DistanceMapGenerationTool::SetPoylineAxis(ccPolyline* polyline, const CCVector3& axis)
+{
+	SetPoylineMetaVector(polyline, REVOLUTION_AXIS_KEY, axis);
+}
+
+bool DistanceMapGenerationTool::GetPoylineAxis(const ccPolyline* polyline, CCVector3& axis)
+{
+	//we try to get the profile origin from the polyline meta-data
+	return GetPolylineMetaVector(polyline, REVOLUTION_AXIS_KEY, axis);
+}
+
+void DistanceMapGenerationTool::SetPolylineHeightShift(ccPolyline* polyline, PointCoordinateType heightShift)
 {
 	assert(polyline);
 	if (polyline)
 	{
-		//add 'absolute heights' as meta-data
-		polyline->setMetaData(ABSOLUTE_HEIGHTS_KEY,QVariant(absolute));
+		//add 'height shift' as meta-data
+		polyline->setMetaData(PROFILE_HEIGHT_SHIFT_KEY,QVariant(heightShift));
 	}
 }
 
-bool DistanceMapGenerationTool::HeightsAreAbsolute(const ccPolyline* polyline)
+bool DistanceMapGenerationTool::GetPolylineHeightShift(const ccPolyline* polyline, PointCoordinateType& heightShift)
 {
 	assert(polyline);
 	if (polyline)
 	{
 		//retrieve the right meta-data
-		QVariant absolute = polyline->getMetaData(ABSOLUTE_HEIGHTS_KEY);
-		if (absolute.isValid())
+		QVariant shift = polyline->getMetaData(PROFILE_HEIGHT_SHIFT_KEY);
+		if (shift.isValid())
 		{
-			return absolute.toBool();
+			bool ok;
+			heightShift = static_cast<PointCoordinateType>(shift.toDouble(&ok));
+			return ok;
 		}
 	}
 
-	//default guess?
+	return false;
+}
+
+bool DistanceMapGenerationTool::GetPoylineMetaData(	const ccPolyline* polyline, ProfileMetaData& data )
+{
+	if (!polyline)
+	{
+		assert(false);
+		return false;
+	}
+
+	data.revolDim = GetPoylineRevolDim(polyline);
+	if (data.revolDim < 0 || data.revolDim > 2)
+	{
+		return false;
+	}
+
+	if (!GetPoylineOrigin(polyline, data.origin))
+	{
+		return false;
+	}
+
+	if (!GetPolylineHeightShift(polyline, data.heightShift))
+	{
+		data.heightShift = 0;
+	}
+
+	data.hasAxis = GetPoylineAxis(polyline, data.axis);
+
 	return true;
 }
 
@@ -122,24 +234,33 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 													bool storeRadiiAsSF/*=false*/,
 													ccMainAppInterface* app/*=0*/)
 {
+	//check input cloud and profile/polyline
 	if (!cloud || !profile)
 	{
 		if (app)
-			app->dispToConsole(QString("Internal error: invalid input parameters!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("Internal error: invalid input parameters"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 	assert(cloud && profile);
 
+	//number of vertices for the profile
 	CCLib::GenericIndexedCloudPersist* vertices = profile->getAssociatedCloud();
 	unsigned vertexCount = vertices->size();
 	if (vertexCount < 2)
 	{
 		if (app)
-			app->dispToConsole(QString("Invalid polyline (not enough vertices?!)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("Invalid polyline (not enough vertices)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
-	unsigned pointCount = cloud->size();
+	//profile meta-data
+	ProfileMetaData profileDesc;
+	if (!GetPoylineMetaData(profile, profileDesc))
+	{
+		if (app)
+			app->dispToConsole(QString("Invalid polyline (bad or missing meta-data)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return false;
+	}
 
 	//reserve a new scalar field (or take the old one if it already exists)
 	int sfIdx = cloud->getScalarFieldIndexByName(RADIAL_DIST_SF_NAME);
@@ -152,6 +273,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		return false;
 	}
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+	unsigned pointCount = cloud->size();
 	sf->resize(pointCount); //should always be ok
 	assert(sf);
 
@@ -176,39 +298,11 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 
 	//now compute the distance between the cloud and the (implicit) surface of revolution
 	{
-		//we try to get the revolution axis (from the polyline meta-data)
-		int revolDim = GetPoylineAxis(profile);
-		if (revolDim >= 0 && revolDim <= 2 && app)
-		{
-			static const char dimStr[3] = {'X','Y','Z'};
-			app->dispToConsole(QString("Revolution axis defaulted to polyline's axis: %1").arg(dimStr[revolDim]),ccMainAppInterface::STD_CONSOLE_MESSAGE);
-		}
-		else
-		{
-			//we assume the surface axis is Z by default
-			revolDim = 2;
-			if (app)
-				app->dispToConsole("Revolution axis defaulted to 'Z' as no specific information was associated to the input polyline!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-		}
-		//we deduce the 2 other ('horizontal') dimensions
-		const unsigned char dim1 = static_cast<unsigned char>(revolDim < 2 ? revolDim+1 : 0);
-		const unsigned char dim2 = (dim1 < 2 ? dim1+1 : 0);
+		ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
 
-		//trick: we get the polyline origin from its 'original shift' field
-		CCVector3d profileOrigin(0,0,0);
-		{
-			ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(vertices);
-			if (pcVertices)
-			{
-				profileOrigin = pcVertices->getGlobalShift();
-				//we determine whether heights are absolute or not (from the polyline meta-data)
-				bool absoluteHeights = HeightsAreAbsolute(profile);
-				if (absoluteHeights)
-				{
-					profileOrigin.u[revolDim] = 0;
-				}
-			}
-		}
+		//we deduce the horizontal dimensions from the revolution axis
+		const unsigned char dim1 = static_cast<unsigned char>(profileDesc.revolDim < 2 ? profileDesc.revolDim+1 : 0);
+		const unsigned char dim2 = (dim1 < 2 ? dim1+1 : 0);
 
 		ccProgressDialog dlg(true, app ? app->getMainWindow() : 0);
 		dlg.setMethodTitle("Cloud to profile radial distance");
@@ -221,12 +315,10 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			const CCVector3* P = cloud->getPoint(i);
 
 			//relative point position
-			CCVector3d Prel(P->x - profileOrigin.x,
-							P->y - profileOrigin.y,
-							P->z - profileOrigin.z);
+			CCVector3 Prel = cloudToSurface * (*P);
 
-			//deduce point height and radius (i.e. in profile 2D 'frame')
-			double height = Prel.u[revolDim];
+			//deduce point height and radius (i.e. in profile 2D coordinate system)
+			double height = Prel.u[profileDesc.revolDim] - profileDesc.heightShift;
 			//TODO FIXME: we assume the surface of revolution is smooth!
 			double radius = sqrt(Prel.u[dim1]*Prel.u[dim1] + Prel.u[dim2]*Prel.u[dim2]);
 
@@ -268,7 +360,13 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 
 				break;
 			}
+
+			//TEST
+			//*const_cast<CCVector3*>(P) = Prel;
 		}
+		
+		//TEST
+		//cloud->invalidateBoundingBox();
 	}
 
 	sf->computeMinAndMax();
@@ -281,7 +379,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* cloud,
 																double& minLat_rad,
 																double& maxLat_rad,
-																const CCVector3d& revolutionOrigin,
+																const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 																unsigned char revolutionAxisDim)
 {
 	minLat_rad = maxLat_rad = 0.0;
@@ -304,9 +402,7 @@ bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* clou
 	for (unsigned n=0; n<count; ++n)
 	{
 		const CCVector3* P = cloud->getPoint(n);
-		CCVector3 relativePos(	P->x - static_cast<PointCoordinateType>(revolutionOrigin.x),
-								P->y - static_cast<PointCoordinateType>(revolutionOrigin.y),
-								P->z - static_cast<PointCoordinateType>(revolutionOrigin.z) );
+		CCVector3 relativePos = cloudToSurface * (*P);
 
 		//latitude between 0 and pi/2
 		double lat_rad = ComputeLatitude_rad(relativePos.u[X],relativePos.u[Y],relativePos.u[Z]);
@@ -353,7 +449,7 @@ double DistanceMapGenerationTool::ConicalProject(double phi, double phi1, double
 
 QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::CreateMap(ccPointCloud* cloud,
 																					ccScalarField* sf,
-																					const CCVector3d& revolutionOrigin,
+																					const ccGLMatrix& cloudToSurface,
 																					unsigned char revolutionAxisDim,
 																					double xStep_rad,
 																					double yStep,
@@ -459,9 +555,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 			continue;
 
 		const CCVector3* P = cloud->getPoint(n);
-		CCVector3 relativePos(	P->x - static_cast<PointCoordinateType>(revolutionOrigin.x),
-								P->y - static_cast<PointCoordinateType>(revolutionOrigin.y),
-								P->z - static_cast<PointCoordinateType>(revolutionOrigin.z) );
+		CCVector3 relativePos = cloudToSurface * (*P);
 
 		//convert to cylindrical or spherical coordinates
 		double x = ccw * atan2(relativePos.u[X],relativePos.u[Y]); //longitude
@@ -939,7 +1033,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 		volume.theoretical  = M_PI / 3.0 * volumeProd;
 	}
 
-	int revolDim = GetPoylineAxis(profile);
+	int revolDim = GetPoylineRevolDim(profile);
 	if (revolDim < 0)
 		return false;
 
@@ -1028,7 +1122,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 }
 
 bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
-															CCVector3d& revolutionCenter,
+															const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 															unsigned char revolutionAxisDim,
 															bool counterclockwise/*=false*/)
 {
@@ -1043,24 +1137,22 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 	const unsigned char Y = (X < 2 ? X+1 : 0);
 
 	//motion direction
-	double ccw = (counterclockwise ? -1.0 : 1.0);
+	PointCoordinateType ccw = (counterclockwise ? -PC_ONE : PC_ONE);
 
 	//get projection height
 	for (unsigned n=0; n<cloud->size(); ++n)
 	{
 		CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
-		CCVector3d relativePos(	static_cast<double>(P->x) - revolutionCenter.x,
-								static_cast<double>(P->y) - revolutionCenter.y,
-								static_cast<double>(P->z) - revolutionCenter.z );
+		CCVector3 relativePos = cloudToSurface * (*P);
 
 		//convert to cylindrical coordinates
-		double ang_rad = ccw * atan2(relativePos.u[X],relativePos.u[Y]);
-		if (ang_rad < 0.0)
-			ang_rad += 2.0 * M_PI;
-		double height = P->u[Z];
+		PointCoordinateType ang_rad = ccw * atan2(relativePos.u[X], relativePos.u[Y]);
+		if (ang_rad < 0)
+			ang_rad += static_cast<PointCoordinateType>(2.0 * M_PI);
+		PointCoordinateType height = P->u[Z];
 
-		P->x = static_cast<PointCoordinateType>(ang_rad);
-		P->y = static_cast<PointCoordinateType>(height);
+		P->x = ang_rad;
+		P->y = height;
 		P->z = 0;
 	}
 
@@ -1073,7 +1165,7 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 }
 
 bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
-														CCVector3d& revolutionCenter,
+														const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 														unsigned char revolutionAxisDim,
 														double latMin_rad,
 														double latMax_rad,
@@ -1091,7 +1183,7 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 	const unsigned char Y = (X < 2 ? X+1 : 0);
 
 	//motion direction
-	double ccw = (counterclockwise ? -1.0 : 1.0);
+	PointCoordinateType ccw = (counterclockwise ? -PC_ONE : PC_ONE);
 	//projection factor
 	double nProj = ConicalProjectN(latMin_rad,latMax_rad) * conicalSpanRatio;
 
@@ -1099,18 +1191,16 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 	for (unsigned n=0; n<cloud->size(); ++n)
 	{
 		CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
-		CCVector3d relativePos(	static_cast<double>(P->x) - revolutionCenter.x,
-								static_cast<double>(P->y) - revolutionCenter.y,
-								static_cast<double>(P->z) - revolutionCenter.z );
+		CCVector3 relativePos = cloudToSurface * (*P);
 
 		//convert to cylindrical coordinates
-		double ang_rad = ccw * atan2(relativePos.u[X],relativePos.u[Y]);
+		PointCoordinateType ang_rad = ccw * atan2(relativePos.u[X], relativePos.u[Y]);
 		if (ang_rad < 0.0)
-			ang_rad += 2.0 * M_PI;
+			ang_rad += static_cast<PointCoordinateType>(2.0 * M_PI);
 
-		double lat_rad = ComputeLatitude_rad(	static_cast<PointCoordinateType>(relativePos.u[X]),
-												static_cast<PointCoordinateType>(relativePos.u[Y]),
-												static_cast<PointCoordinateType>(relativePos.u[Z]) ); //between 0 and pi/2
+		double lat_rad = ComputeLatitude_rad(	relativePos.u[X],
+												relativePos.u[Y],
+												relativePos.u[Z] ); //between 0 and pi/2
 
 		*P = ProjectPointOnCone(ang_rad, lat_rad, latMin_rad, nProj, counterclockwise);
 	}
@@ -1192,19 +1282,33 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 }
 
 ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
+														const ccGLMatrix& cloudToSurface,
 														bool counterclockwise,
 														unsigned angularSteps/*=36*/,
 														QImage mapTexture/*=QImage()*/)
 {
 	if (!profile || angularSteps < 3)
+	{
 		return 0;
+	}
 
+	//profile vertices
 	CCLib::GenericIndexedCloudPersist* profileVertices = profile->getAssociatedCloud();
 	unsigned profVertCount = profileVertices->size();
 	if (profVertCount < 2)
+	{
 		return 0;
+	}
 
-	unsigned char Z = static_cast<unsigned char>(GetPoylineAxis(profile));
+	//profile meta-data
+	ProfileMetaData profileDesc;
+	if (!GetPoylineMetaData(profile, profileDesc))
+	{
+		assert(false);
+		return 0;
+	}
+
+	unsigned char Z = static_cast<unsigned char>(profileDesc.revolDim);
 	//we deduce the 2 other ('horizontal') dimensions
 	const unsigned char X = (Z < 2 ? Z+1 : 0);
 	const unsigned char Y = (X < 2 ? X+1 : 0);
@@ -1221,23 +1325,10 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		return 0;
 	}
 
+	ccGLMatrix surfaceToCloud = cloudToSurface.inverse();
+
 	//create vertices
 	{
-		//auto apply 3D shift
-		CCVector3d profileOrigin(0,0,0);
-		ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(profileVertices);
-		if (pcVertices)
-		{
-			profileOrigin = pcVertices->getGlobalShift();
-			bool absoluteHeights = HeightsAreAbsolute(profile);
-			if (absoluteHeights)
-			{
-				int revolDim = GetPoylineAxis(profile);
-				assert(revolDim >= 0 && revolDim < 3);
-				profileOrigin.u[revolDim] = 0;
-			}
-		}
-
 		double cwSign = (counterclockwise ? -1.0 : 1.0);
 		for (unsigned j=0; j<angularSteps; ++j)
 		{
@@ -1253,9 +1344,11 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 				double radius = static_cast<double>(P->x);
 
 				CCVector3 Pxyz;
-				Pxyz.u[X] = static_cast<PointCoordinateType>(radius * N.x + profileOrigin.x);
-				Pxyz.u[Y] = static_cast<PointCoordinateType>(radius * N.y + profileOrigin.y);
-				Pxyz.u[Z] = P->y + static_cast<PointCoordinateType>(profileOrigin.z);
+				Pxyz.u[X] = static_cast<PointCoordinateType>(radius * N.x);
+				Pxyz.u[Y] = static_cast<PointCoordinateType>(radius * N.y);
+				Pxyz.u[Z] = P->y + profileDesc.heightShift;
+
+				surfaceToCloud.apply(Pxyz);
 
 				cloud->addPoint(Pxyz);
 			}
@@ -1343,7 +1436,9 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 			return mesh;
 		}
 		for (unsigned i=0; i<meshFaceCount; ++i)
+		{
 			mesh->addTriangleMtlIndex(0);
+		}
 
 		//set material
 		{
@@ -1374,7 +1469,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	if (!map || !profile)
 		return 0;
 
-	unsigned count = map->ySteps*map->xSteps;
+	unsigned count = map->ySteps * map->xSteps;
 
 	ccPointCloud* cloud = new ccPointCloud("map");
 	ccScalarField* sf = new ccScalarField("values");
@@ -1386,27 +1481,15 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 		return 0;
 	}
 
+	//number of vertices
 	CCLib::GenericIndexedCloudPersist* polyVertices = profile->getAssociatedCloud();
 	unsigned polyVertCount = polyVertices->size();
 	if (polyVertCount < 2)
 		return 0;
 
-	//trick: we get the polyline origin from its 'original shift' field
-	CCVector3d profileOrigin(0,0,0);
-	{
-		ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(polyVertices);
-		if (pcVertices)
-		{
-			profileOrigin = pcVertices->getGlobalShift();
-			bool absoluteHeights = HeightsAreAbsolute(profile);
-			if (absoluteHeights)
-			{
-				int revolDim = GetPoylineAxis(profile);
-				assert(revolDim >= 0 && revolDim < 3);
-				profileOrigin.u[revolDim] = 0;
-			}
-		}
-	}
+	//profile meta-data (we only need the height shift)
+	PointCoordinateType heightShift = 0;
+	GetPolylineHeightShift(profile, heightShift);
 
 	const double xStep = baseRadius * (2.0*M_PI) / static_cast<double>(map->xSteps);
 
@@ -1428,7 +1511,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 					const CCVector3* A = polyVertices->getPoint(k-1);
 					const CCVector3* B = polyVertices->getPoint(k);
 
-					double alpha = (P.y - A->y)/(B->y - A->y);
+					double alpha = (P.y - heightShift - A->y)/(B->y - A->y);
 					if (alpha >= 0.0 && alpha <= 1.0)
 					{
 						//we deduce the right radius by linear interpolation

@@ -114,6 +114,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	setupUi(this);
 
 	assert(m_cloud && m_sf && m_profile);
+	m_cloudToSurface.toIdentity();
 
 	//add color ramp selector widget (before calling initFromPersistentSettings!)
 	if (m_sf)
@@ -143,26 +144,20 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 			m_colorScaleSelector->setSelectedScale(scale->getUuid());
 	}
 
-	int revolDim = -1;
+	//profile meta-data
+	DistanceMapGenerationTool::ProfileMetaData profileDesc;
+	bool validProfile = false;
+
 	//set default dialog values with polyline & cloud information
 	if (m_profile)
 	{
-		//we try to get the revolution axis from the polyline meta-data
-		revolDim = DistanceMapGenerationTool::GetPoylineAxis(m_profile);
-		if (revolDim < 0)
-			revolDim = 2; //we assume the surface axis is Z by default
-		axisDimComboBox->setCurrentIndex(revolDim);
-
-		//trick: we get the polyline referential from its 'original shift' field
-		ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(m_profile->getAssociatedCloud());
-		if (pcVertices)
+		validProfile = DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc);
+		if (validProfile)
 		{
-			CCVector3d profileOrigin = pcVertices->getGlobalShift();
-			xOriginDoubleSpinBox->setValue(profileOrigin.x);
-			yOriginDoubleSpinBox->setValue(profileOrigin.y);
-			zOriginDoubleSpinBox->setValue(profileOrigin.z);
+			axisDimComboBox->setCurrentIndex(profileDesc.revolDim);
 
-			bool absoluteHeights = DistanceMapGenerationTool::HeightsAreAbsolute(m_profile);
+			//compute transformation from cloud to the surface (of revolution)
+			m_cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
 
 			//compute mean 'radius'
 			//as well as min and max 'height'
@@ -173,11 +168,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 			{
 				const CCVector3* P = m_profile->getPoint(i);
 				double radius = P->x;
-				double height = P->y;
-				if (!absoluteHeights)
-				{
-					height += profileOrigin.u[revolDim];
-				}
+				double height = P->y + profileDesc.heightShift;
 				baseRadius += radius;
 
 				if (i != 0)
@@ -206,39 +197,41 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 
 			//do the same thing for conical projection
 			double minLat_rad = 0.0, maxLat_rad = 0.0;
-			if (absoluteHeights)
-			{
-				profileOrigin.u[revolDim] = 0;
-			}
+
 			if (   m_cloud
-				&& DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	cloud,
+				&& DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	m_cloud,
 																			minLat_rad,
 																			maxLat_rad,
-																			profileOrigin,
-																			static_cast<unsigned char>(revolDim)))
+																			m_cloudToSurface,
+																			static_cast<unsigned char>(profileDesc.revolDim)))
 			{
 				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad,m_angularUnits)); 
 				latMaxDoubleSpinBox->setValue(ConvertAngleFromRad(maxLat_rad,m_angularUnits));
 			}
 		}
+		else
+		{
+			if (m_app)
+				m_app->dispToConsole(QString("Invalid profile: can't generate a proper map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		}
 	}
 
 	//compute min and max height of the points
 	//we will 'lock" the max height value with that information
-	if (cloud)
+	if (m_cloud)
 	{
-		ccBBox bbox = cloud->getOwnBB();
+		ccBBox bbox = m_cloud->getOwnBB();
 		PointCoordinateType hMin = 0, hMax = 0;
 		if (bbox.isValid())
 		{
-			hMin = bbox.minCorner().u[revolDim];
-			hMax = bbox.maxCorner().u[revolDim];
+			hMin = bbox.minCorner().u[profileDesc.revolDim];
+			hMax = bbox.maxCorner().u[profileDesc.revolDim];
 		}
 
 		if (hMax - hMin <= 0)
 		{
 			if (m_app)
-				m_app->dispToConsole(QString("Cloud is flat?! Can't generate a proper map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				m_app->dispToConsole(QString("Cloud is flat: can't generate a proper map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 		else
 		{
@@ -1020,19 +1013,9 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 	if (!m_cloud || !m_sf)
 		return QSharedPointer<DistanceMapGenerationTool::Map>(0);
 
-	//revolution origin
-	CCVector3d C(xOriginDoubleSpinBox->value(),
-				 yOriginDoubleSpinBox->value(),
-				 zOriginDoubleSpinBox->value());
 	//revolution axis
 	assert(axisDimComboBox->currentIndex() < 3);
 	const unsigned char Z = static_cast<unsigned char>(axisDimComboBox->currentIndex());
-	//absolute heights?
-	bool absoluteHeights = DistanceMapGenerationTool::HeightsAreAbsolute(m_profile);
-	if (absoluteHeights)
-	{
-		C.u[Z] = 0;
-	}
 	//steps
 	double angStep_rad = getSpinboxAngularValue(xStepDoubleSpinBox,ANG_RAD);
 	//CW (clockwise) or CCW (counterclockwise)
@@ -1045,7 +1028,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 	//generate map
 	return DistanceMapGenerationTool::CreateMap(m_cloud,
 		m_sf,
-		C,
+		m_cloudToSurface,
 		Z,
 		angStep_rad,
 		yStep,
@@ -1107,7 +1090,7 @@ void DistanceMapGenerationDlg::exportMapAsMesh()
 		return;
 	}
 
-	ccMesh* mesh = DistanceMapGenerationTool::ConvertProfileToMesh(m_profile,m_map->counterclockwise,m_map->xSteps,mapImage);
+	ccMesh* mesh = DistanceMapGenerationTool::ConvertProfileToMesh(m_profile,m_cloudToSurface,m_map->counterclockwise,m_map->xSteps,mapImage);
 	if (mesh)
 	{
 		mesh->setDisplay_recursive(m_cloud->getDisplay());
@@ -1363,30 +1346,20 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		//unroll the symbol cloud the same way as the input cloud
 		if (m_window)
 		{
-			//revolution center
-			CCVector3d C(	xOriginDoubleSpinBox->value(),
-							yOriginDoubleSpinBox->value(),
-							zOriginDoubleSpinBox->value() );
 			//revolution axis
 			assert(axisDimComboBox->currentIndex() < 3);
 			const unsigned char Z = static_cast<unsigned char>(axisDimComboBox->currentIndex());
-			//absolute heights?
-			bool absoluteHeights = DistanceMapGenerationTool::HeightsAreAbsolute(m_profile);
-			if (absoluteHeights)
-			{
-				C.u[Z] = 0;
-			}
 			//CW (clockwise) or CCW (counterclockwise)
 			bool ccw = ccwCheckBox->isChecked();
 
 			if (getProjectionMode() == PROJ_CYLINDRICAL)
 			{
-				DistanceMapGenerationTool::ConvertCloudToCylindrical(symbolCloud,C,Z,ccw);
+				DistanceMapGenerationTool::ConvertCloudToCylindrical(symbolCloud,m_cloudToSurface,Z,ccw);
 			}
 			else /*if (getProjectionMode() == PROJ_CONICAL)*/
 			{
 				double conicalSpanRatio = conicSpanRatioDoubleSpinBox->value();
-				DistanceMapGenerationTool::ConvertCloudToConical(symbolCloud,C,Z,m_map->yMin,m_map->yMax,conicalSpanRatio,ccw);
+				DistanceMapGenerationTool::ConvertCloudToConical(symbolCloud,m_cloudToSurface,Z,m_map->yMin,m_map->yMax,conicalSpanRatio,ccw);
 			}
 		}
 		symbolCloud->setSymbolSize((double)symbolSizeSpinBox->value());

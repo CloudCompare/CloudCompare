@@ -27,6 +27,7 @@
 
 //qCC_db
 #include <ccColorScale.h>
+#include <ccGLMatrix.h>
 
 //system
 #include <vector>
@@ -47,26 +48,73 @@ class DistanceMapGenerationTool
 {
 public:
 
-	//! Sets the revolution axis of a given polyline
-	/** The revolution axis (dimension) is associated with a specific meta-data.
+	struct ProfileMetaData
+	{
+		ProfileMetaData()
+			: revolDim(2)
+			, origin(0,0,0)
+			, heightShift(0)
+			, hasAxis(false)
+			, axis(0,0,1)
+		{}
+
+		ccGLMatrix computeProfileToSurfaceTrans() const;
+
+		int revolDim;
+		CCVector3 origin;
+		PointCoordinateType heightShift;
+		bool hasAxis;
+		CCVector3 axis;
+	};
+
+	//! Returns the whole set of meta-data associated to a given polyline/profile
+	/** \retrun whether the profile is valid or not
 	**/
-	static void SetPoylineAxis(ccPolyline* polyline, int axisDim);
+	static bool GetPoylineMetaData(const ccPolyline* polyline, ProfileMetaData& data);
+
+//! Sets the origin of a given polyline/profile
+	/** The revolution axis is associated to a specific meta-data.
+	**/
+	static void SetPoylineOrigin(ccPolyline* polyline, const CCVector3& origin);
+
+	//! Returns the origin associated to a given polyline/profile
+	/** Requires the right meta-data to be set (see SetPoylineOrigin).
+		\retrun whether an origin is defined or not
+	**/
+	static bool GetPoylineOrigin(const ccPolyline* polyline, CCVector3& origin);
+
+	//! Sets the revolution dimension of a given polyline
+	/** The revolution dimension is associated to a specific meta-data.
+	**/
+	static void SetPoylineRevolDim(ccPolyline* polyline, int revolDim);
 
 	//! Returns the revolution 'dimension' associated to a given profile (polyline)
+	/** Requires the right meta-data to be set (see SetPoylineRevolDim).
+		\retrun 0 (X), 1 (Y), 2 (Z) or -1 if no revolution dimension is defined
+	**/
+	static int GetPoylineRevolDim(const ccPolyline* polyline);
+
+	//! Sets the revolution axis of a given polyline
+	/** The revolution axis is associated to a specific meta-data.
+	**/
+	static void SetPoylineAxis(ccPolyline* polyline, const CCVector3& axis);
+
+	//! Returns the revolution axis associated to a given profile (polyline)
 	/** Requires the right meta-data to be set (see SetPoylineAxis).
-		\retrun 0 (X), 1 (Y), 2 (Z) or -1 (no axis defined)
+		\retrun whether an axis is defined or not
 	**/
-	static int GetPoylineAxis(const ccPolyline* polyline);
+	static bool GetPoylineAxis(const ccPolyline* polyline, CCVector3& axis);
 
-	//! Sets whether the profile heights are absolute or relative to the center (along the revolution axis)
-	/** This information is associated with a specific meta-data.
+	//! Sets the profile 'height shift' (i.e. along the revolution axis)
+	/** This information is associated to a specific meta-data.
 	**/
-	static void SetAbsoluteHeights(ccPolyline* polyline, bool absolute);
+	static void SetPolylineHeightShift(ccPolyline* polyline, PointCoordinateType heightShift);
 
-	//! Returns whether the profile heights are absolute or relative to the center (along the revolution axis)
-	/** This information is associated with a specific meta-data.
+	//! Returns the profile 'height shift' (i.e. along the revolution axis)
+	/** Requires the right meta-data to be set (see SetPolylineHeightShift).
+		\retrun whether a height shift is defined or not
 	**/
-	static bool HeightsAreAbsolute(const ccPolyline* polyline);
+	static bool GetPolylineHeightShift(const ccPolyline* polyline, PointCoordinateType& heightShift);
 
 	//! Computes radial distance between cloud and a profile
 	static bool ComputeRadialDist(	ccPointCloud* cloud,
@@ -147,7 +195,7 @@ public:
 	**/
 	static QSharedPointer<Map> CreateMap(	ccPointCloud* cloud,
 											ccScalarField* sf,
-											const CCVector3d& revolutionOrigin,
+											const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 											unsigned char revolutionAxisDim,
 											double angStep_rad,
 											double yStep,
@@ -175,7 +223,7 @@ public:
 
 	//! Converts a point cloud coordinates to "cylindrical" ones (in place)
 	static bool ConvertCloudToCylindrical(	ccPointCloud* cloud,
-											CCVector3d& revolutionCenter,
+											const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 											unsigned char revolutionAxisDim,
 											bool counterclockwise = false);
 
@@ -183,7 +231,7 @@ public:
 	/** See ProjectPointOnCone.
 	**/
 	static bool ConvertCloudToConical(	ccPointCloud* cloud,
-										CCVector3d& revolutionCenter,
+										const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 										unsigned char revolutionAxisDim,
 										double latMin_rad,
 										double latMax_rad,
@@ -203,7 +251,7 @@ public:
 	static bool ComputeMinAndMaxLatitude_rad(	ccPointCloud* cloud,
 												double& minLat_rad,
 												double& maxLat_rad,
-												const CCVector3d& revolutionOrigin,
+												const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 												unsigned char revolutionAxisDim);
 
 	//! Saves a map as a CSV matrix
@@ -228,6 +276,7 @@ public:
 
 	//! Converts profile to a (textured) mesh
 	static ccMesh* ConvertProfileToMesh(ccPolyline* profile,
+										const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
 										bool counterclockwise,
 										unsigned angularSteps = 36,
 										QImage mapTexture = QImage());

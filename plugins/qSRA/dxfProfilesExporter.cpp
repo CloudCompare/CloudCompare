@@ -63,6 +63,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 												QString filename,
 												unsigned angularStepCount,
 												double heightStep,
+												double heightShift,
 												const Parameters& params,
 												ccMainAppInterface* app/*=0*/)
 {
@@ -80,8 +81,8 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	CCVector3 profileBBMin, profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
-	double yMin = std::max(map->yMin, static_cast<double>(profileBBMin.y));
-	double yMax = std::min(map->yMin + static_cast<double>(map->ySteps) * map->yStep, static_cast<double>(profileBBMax.y));
+	double yMin = std::max(map->yMin, static_cast<double>(profileBBMin.y)+heightShift);
+	double yMax = std::min(map->yMin + map->ySteps * map->yStep, static_cast<double>(profileBBMax.y)+heightShift);
 	const double ySpan = yMax - yMin;
 	//For the 'X' dimension, it's easier to stick with the th. profile
 	const double xMin = profileBBMin.x;
@@ -303,7 +304,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 			for (unsigned i=0; i<vertexCount; ++i)
 			{
 				const CCVector3* P = profile->getPoint(i);
-				dxf.writeVertex(*dw, DL_VertexData(x0+(P->x-xMin)*scale,y0+(P->y-yMin)*scale,0.0));
+				dxf.writeVertex(*dw, DL_VertexData(x0+(P->x-xMin)*scale,y0+(P->y+heightShift-yMin)*scale,0.0));
 			}
 
 			dxf.writePolylineEnd(*dw);
@@ -404,7 +405,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 						const CCVector3* A = profile->getPoint(i-1);
 						const CCVector3* B = profile->getPoint(i);
 
-						double alpha = static_cast<double>((step.height - A->y)/(B->y - A->y));
+						double alpha = static_cast<double>((step.height - A->y - heightShift)/(B->y - A->y));
 						if (alpha >= 0.0 && alpha <= 1.0)
 						{
 							//we deduce the right radius by linear interpolation

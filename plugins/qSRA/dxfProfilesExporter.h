@@ -55,6 +55,7 @@ public:
 										QString filename,
 										unsigned angularStepCount,
 										double heightStep,
+										double heightShift,
 										const Parameters& params,
 										ccMainAppInterface* app = 0 );
 

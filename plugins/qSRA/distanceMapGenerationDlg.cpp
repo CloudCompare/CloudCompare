@@ -1169,6 +1169,10 @@ void DistanceMapGenerationDlg::exportProfilesAsDXF()
 	if (!dpeDlg.exec())
 		return;
 
+	//profile meta-data (we only need the height shift)
+	PointCoordinateType heightShift = 0;
+	DistanceMapGenerationTool::GetPolylineHeightShift(m_profile, heightShift);
+
 	DxfProfilesExporter::Parameters params;
 	params.legendTheoProfileTitle = dpeDlg.theoNameLineEdit->text();
 	params.legendRealProfileTitle = dpeDlg.realNameLineEdit->text();
@@ -1196,7 +1200,7 @@ void DistanceMapGenerationDlg::exportProfilesAsDXF()
 		}
 
 		double heightStep = getScaleYStep();
-		if (!DxfProfilesExporter::SaveVerticalProfiles(m_map,m_profile,vertFilename,angularStepCount,heightStep,params,m_app))
+		if (!DxfProfilesExporter::SaveVerticalProfiles(m_map,m_profile,vertFilename,angularStepCount,heightStep,heightShift,params,m_app))
 		{
 			if (m_app)
 				m_app->dispToConsole(QString("Failed to save file '%1'!").arg(vertFilename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);

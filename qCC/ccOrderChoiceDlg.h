@@ -34,22 +34,27 @@ public:
 
 	//! Default constructor
 	ccOrderChoiceDlg(	ccHObject* firstEntity,
-						const char* firstRole,
+						QString firstRole,
 						ccHObject* secondEntity,
-						const char* secondRole,
+						QString secondRole,
 						ccMainAppInterface* app = 0);
 
 	//! Destructor
 	virtual ~ccOrderChoiceDlg();
 
+	//! Returns the first entity (new order)
 	ccHObject* getFirstEntity();
+	//! Returns the second entity (new order)
 	ccHObject* getSecondEntity();
 
 protected slots:
+
+	//! Swaps the entities
 	void swap();
 
 protected:
 
+	//! Sets the right colors to the entities and updates the dialog
 	void setColorsAndLabels();
 
 	Ui_RoleChoiceDialog* m_gui;

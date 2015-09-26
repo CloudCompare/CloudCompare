@@ -33,9 +33,9 @@
 #include <ui_roleChoiceDlg.h>
 
 ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
-									const char* firstRole,
+									QString firstRole,
 									ccHObject* secondEntity,
-									const char* secondRole,
+									QString secondRole,
 									ccMainAppInterface* app/*=0*/)
 	: QDialog(app ? app->getMainWindow() : 0)
 	, m_gui(new Ui_RoleChoiceDialog)

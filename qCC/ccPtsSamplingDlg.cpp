@@ -30,6 +30,11 @@ bool ccPtsSamplingDlg::generateNormals() const
 	return normalsCheckBox->isChecked();
 }
 
+void ccPtsSamplingDlg::setGenerateNormals(bool state)
+{
+	normalsCheckBox->setChecked(state);
+}
+
 bool ccPtsSamplingDlg::interpolateRGB() const
 {
 	return colorsCheckBox->isChecked();
@@ -43,6 +48,11 @@ bool ccPtsSamplingDlg::interpolateTexture() const
 bool ccPtsSamplingDlg::useDensity() const
 {
 	return dRadioButton->isChecked();
+}
+
+void ccPtsSamplingDlg::setUseDensity(bool state)
+{
+	dRadioButton->setChecked(state);
 }
 
 double ccPtsSamplingDlg::getDensityValue() const

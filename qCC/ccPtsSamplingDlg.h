@@ -38,6 +38,8 @@ public:
 
 	void setPointsNumber(int count);
 	void setDensityValue(double density);
+	void setGenerateNormals(bool state);
+	void setUseDensity(bool state);
 };
 
 #endif //CC_POINTS_SAMPLING_DLG_HEADER

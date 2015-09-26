@@ -3412,14 +3412,19 @@ void MainWindow::doActionConvertTextureToColor()
 	updateUI();
 }
 
-static unsigned s_ptsSamplingCount = 1000000;
-static double s_ptsSamplingDensity = 10.0;
 void MainWindow::doActionSamplePoints()
 {
+	static unsigned s_ptsSamplingCount = 1000000;
+	static double s_ptsSamplingDensity = 10.0;
+	static bool s_ptsSampleNormals = true;
+	static bool s_useDensity = false;
+	
 	ccPtsSamplingDlg dlg(this);
 	//restore last parameters
 	dlg.setPointsNumber(s_ptsSamplingCount);
 	dlg.setDensityValue(s_ptsSamplingDensity);
+	dlg.setGenerateNormals(s_ptsSampleNormals);
+	dlg.setUseDensity(s_useDensity);
 	if (!dlg.exec())
 		return;
 
@@ -3432,6 +3437,8 @@ void MainWindow::doActionSamplePoints()
 	assert(dlg.getPointsNumber() >= 0);
 	s_ptsSamplingCount = static_cast<unsigned>(dlg.getPointsNumber());
 	s_ptsSamplingDensity = dlg.getDensityValue();
+	s_ptsSampleNormals = withNormals;
+	s_useDensity = useDensity;
 
 	bool errors = false;
 

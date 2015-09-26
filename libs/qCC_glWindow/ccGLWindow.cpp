@@ -3932,7 +3932,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 								l2 /= l1l2;
 							}
 							GLdouble l3 = 1.0-l1-l2;
-							assert(l3 >= 0);
+							assert(l3 >= -1.0e-12);
 
 							//now deduce the 3D position
 							CCVector3d P(	l1 * A3D->x + l2 * B3D->x + l3 * C3D->x,
@@ -5241,7 +5241,7 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 		l2 /= l1l2;
 	}
 	GLdouble l3 = 1.0-l1-l2;
-	assert(l3 >= 0);
+	assert(l3 >= -1.0e-12);
 
 	//now deduce the 3D position
 	GLdouble G[3] = {	l1 * A3D.x + l2 * B3D.x + l3 * C3D.x,

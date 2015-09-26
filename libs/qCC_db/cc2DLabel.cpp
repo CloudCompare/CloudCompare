@@ -41,6 +41,7 @@ cc2DLabel::cc2DLabel(QString name/*=QString()*/)
 	, m_showFullBody(true)
 	, m_dispIn3D(false)
 	, m_dispIn2D(true)
+	, m_relMarkerScale(1.0f)
 {
 	m_screenPos[0] = m_screenPos[1] = 0.05f;
 
@@ -739,7 +740,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					glPushMatrix();
 					const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
 					ccGL::Translate(P->x,P->y,P->z);
-					glScalef(context.labelMarkerSize,context.labelMarkerSize,context.labelMarkerSize);
+					float scale = context.labelMarkerSize * m_relMarkerScale;
+					glScalef(scale,scale,scale);
 					c_unitPointMarker->draw(markerContext);
 					glPopMatrix();
 				}
@@ -752,10 +754,17 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
 
-				int VP[4];
-				context._win->getViewportArray(VP);
-				const double* MM = context._win->getModelViewMatd(); //viewMat
-				const double* MP = context._win->getProjectionMatd(); //projMat
+				//we can't use the context '_win' information (getViewport, getModelViewMatd, etc. )
+				//because it doesn't take the temporary 'GL transformation' into account!
+				//int VP[4];
+				//context._win->getViewportArray(VP2);
+				//const double* MM = context._win->getModelViewMatd(); //viewMat
+				//const double* MP = context._win->getProjectionMatd(); //projMat
+				GLint VP[4];
+				GLdouble MM[16], MP[16];
+				glGetIntegerv(GL_VIEWPORT, VP);
+				glGetDoublev(GL_PROJECTION_MATRIX, MP);
+				glGetDoublev(GL_MODELVIEW_MATRIX, MM);
 
 				//draw their name
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);

@@ -128,6 +128,11 @@ public:
 	//! Returns a given point
 	inline const PickedPoint& getPoint(unsigned index) const { return m_points[index]; }
 
+	//! Sets marker (relative) scale
+	/** Default value: 1.0
+	**/
+	inline void setRelativeMarkerScale(float scale) { m_relMarkerScale = scale; }
+
 protected:
 
 	//! One-point label info
@@ -250,6 +255,9 @@ protected:
 
 	//! Whether to display the label in 2D
 	bool m_dispIn2D;
+
+	//! Relative marker scale
+	float m_relMarkerScale;
 };
 
 #endif //CC_2D_LABEL_HEADER

@@ -168,6 +168,8 @@ v2.6.2 XX/XX/2015
 		(potentially causing later infinite loops...)
 	* OBJ files: when merging multiple models with textures having the same (local) filename, the images could overwrite each other once saved
 	* Rasterize: saving a raster with the currently displayed scalar field as additioanl layer would make CC crash (+ memory leak fixed)
+	* Point-pair based alignment: the markers picked on the aligned entity could become very big (or very small) when the scale was to be adjusted
+		and the scale of the aligned entity was very different from the reference one.
 
 v2.6.1 02/20/2015
 - New features:

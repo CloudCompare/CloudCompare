@@ -1192,6 +1192,15 @@ void ccPointPairRegistrationDlg::align()
 		//...virtually
 		m_aligned.entity->setGLTransformation(transMat);
 		m_alignedPoints.setGLTransformation(transMat);
+		//DGM: we have to 'counter-scale' the markers (otherwise they might appear very big or very small!)
+		for (unsigned i=0; i<m_alignedPoints.getChildrenNumber(); ++i)
+		{
+			ccHObject* child = m_alignedPoints.getChild(i);
+			if (child->isA(CC_TYPES::LABEL_2D))
+			{
+				static_cast<cc2DLabel*>(child)->setRelativeMarkerScale(1.0f/static_cast<float>(trans.s));
+			}
+		}
 
 		//force clouds visibility
 		{
@@ -1233,6 +1242,15 @@ void ccPointPairRegistrationDlg::reset()
 
 	m_aligned.entity->enableGLTransformation(false);
 	m_alignedPoints.enableGLTransformation(false);
+	//DGM: we have to reset the markers scale
+	for (unsigned i=0; i<m_alignedPoints.getChildrenNumber(); ++i)
+	{
+		ccHObject* child = m_alignedPoints.getChild(i);
+		if (child->isA(CC_TYPES::LABEL_2D))
+		{
+			static_cast<cc2DLabel*>(child)->setRelativeMarkerScale(1.0f);
+		}
+	}
 
 	if (m_associatedWin)
 	{

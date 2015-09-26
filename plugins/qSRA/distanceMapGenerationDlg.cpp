@@ -1200,7 +1200,14 @@ void DistanceMapGenerationDlg::exportProfilesAsDXF()
 		}
 
 		double heightStep = getScaleYStep();
-		if (!DxfProfilesExporter::SaveVerticalProfiles(m_map,m_profile,vertFilename,angularStepCount,heightStep,heightShift,params,m_app))
+		if (!DxfProfilesExporter::SaveVerticalProfiles(	m_map,
+														m_profile,
+														vertFilename,
+														angularStepCount,
+														heightStep,
+														heightShift,
+														params,
+														m_app))
 		{
 			if (m_app)
 				m_app->dispToConsole(QString("Failed to save file '%1'!").arg(vertFilename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -1227,7 +1234,16 @@ void DistanceMapGenerationDlg::exportProfilesAsDXF()
 		params.profileTitles << QString("%1 - %2 ").arg(horizProfileBaseTitle).arg("%1") + getHeightUnitString();
 
 		double angleStep_rad = getSpinboxAngularValue(scaleXStepDoubleSpinBox,ANG_RAD);
-		if (!DxfProfilesExporter::SaveHorizontalProfiles(m_map,m_profile,horizFilename,heightStepCount,angleStep_rad,ConvertAngleFromRad(1.0,m_angularUnits),getCondensedAngularUnitString(),params,m_app))
+		if (!DxfProfilesExporter::SaveHorizontalProfiles(	m_map,
+															m_profile,
+															horizFilename,
+															heightStepCount,
+															heightShift,
+															angleStep_rad,
+															ConvertAngleFromRad(1.0,m_angularUnits),
+															getCondensedAngularUnitString(),
+															params,
+															m_app))
 		{
 			if (m_app)
 				m_app->dispToConsole(QString("Failed to save file '%1'!").arg(horizFilename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);

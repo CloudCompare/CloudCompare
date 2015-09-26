@@ -558,6 +558,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 													ccPolyline* profile,
 													QString filename,
 													unsigned heightStepCount,
+													double heightShift,
 													double angularStep_rad,
 													double radToUnitConvFactor,
 													QString angleUnit,
@@ -579,9 +580,9 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
 	double yMin = std::max(	map->yMin + 0.5 * map->xStep, //central height of first row
-							static_cast<double>(profileBBMin.y));
+							static_cast<double>(profileBBMin.y)+heightShift);
 	double yMax = std::min(	map->yMin + (static_cast<double>(map->ySteps)-0.5) * map->yStep, //central height of last row
-							static_cast<double>(profileBBMax.y));
+							static_cast<double>(profileBBMax.y)+heightShift);
 	const double ySpan = yMax - yMin;
 
 	//For the 'X' dimension, it's easier to stick with the th. profile
@@ -765,12 +766,12 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 		dw->sectionEntities();
 
 		//we make the profile fit in the middle of the page (21.0 x 29.7 cm)
-		double scale = std::min((c_pageWidth_mm - 2.0 * c_profileMargin_mm)/(2.0*maxRadius),
-								(c_pageHeight_mm - 2.0 * c_profileMargin_mm)/(2.0*maxRadius));
+		double scale = std::min((c_pageWidth_mm - 2.0 * c_profileMargin_mm)  / (2.0 * maxRadius),
+								(c_pageHeight_mm - 2.0 * c_profileMargin_mm) / (2.0 * maxRadius));
 
 		//min corner of profile area
-//		const double x0 = (c_pageWidth_mm - 2.0*maxRadius*scale) / 2.0;
-		const double y0 = (c_pageHeight_mm - 2.0*maxRadius*scale) / 2.0;
+		//const double x0 = (c_pageWidth_mm  - 2.0 * maxRadius*scale) / 2.0;
+		const double y0 = (c_pageHeight_mm - 2.0 * maxRadius*scale) / 2.0;
 		//center of profile area
 		const double xc = c_pageWidth_mm / 2.0;
 		const double yc = c_pageHeight_mm / 2.0;
@@ -898,7 +899,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 					const CCVector3* A = profile->getPoint(i-1);
 					const CCVector3* B = profile->getPoint(i);
 
-					double alpha = static_cast<double>((height - A->y)/(B->y - A->y));
+					double alpha = static_cast<double>((height - A->y - heightShift)/(B->y - A->y));
 					if (alpha >= 0.0 && alpha <= 1.0)
 					{
 						//we deduce the right radius by linear interpolation

@@ -296,6 +296,8 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		}
 	}
 
+	bool success = true;
+
 	//now compute the distance between the cloud and the (implicit) surface of revolution
 	{
 		ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
@@ -358,6 +360,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 				for (unsigned j=i; j<pointCount; ++j)
 					sf->setValue(j,NAN_VALUE);
 
+				success = false;
 				break;
 			}
 
@@ -373,7 +376,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 	cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->showSF(true);
 
-	return true;
+	return success;
 }
 
 bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* cloud,

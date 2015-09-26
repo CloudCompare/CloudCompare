@@ -136,6 +136,8 @@ v2.6.2 XX/XX/2015
 		 is much better for normal-based computation, such as Dip/Dip direction computation or the new qFacet plugin)
 	* Fit Quadric:
 		- the matrix local quadric coordinate system is now displayed in the console along with its equation
+	* qSRA:
+		- the plugin can now be used directly with a cone or cylinder primitive (in place of a 'profile')
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
@@ -155,7 +157,8 @@ v2.6.2 XX/XX/2015
 	* Registration (either ICP or point-pair based picking) could crash in some particular cases
 	* qSRA:
 		- whether the profile origin is absolute or relative was not always taken into account!
-		- a flat profile (e.g. perfect cylinder) would prevent the plugin to export DXF files
+		- a flat profile (e.g. perfect cylinder) would prevent the plugin from exporting DXF files
+		- the 'units' field in the DXF export dialog was ignored
 	* PTX files: the sensor position was overlooked (as it's almost always the same as the scan position... almost ;)
 	* Section extraction: CC crashed when extracting section clouds from multiple clouds at the same time
 	* Command line: when automatically saving a file, CC will now add the suffix after the last point of the origin filename

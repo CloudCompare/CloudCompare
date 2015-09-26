@@ -59,9 +59,6 @@ protected slots:
 
 protected:
 
-	//! Currently selected entities
-	ccHObject::Container m_selectedEntities;
-
 	//! Projects the cloud distances into a 2D grid (needs the revolution profile)
 	void doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) const;
 

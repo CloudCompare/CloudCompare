@@ -59,7 +59,7 @@ void qSRA::getActions(QActionGroup& group)
 	if (!m_doLoadProfile)
 	{
 		m_doLoadProfile = new QAction("Load profile",this);
-		m_doLoadProfile->setToolTip("Loads the 2D profile of a surface of revolution from a dedicated ASCII file");
+		m_doLoadProfile->setToolTip("Loads the 2D profile of a Surface of Revolution (from a dedicated ASCII file)");
 		m_doLoadProfile->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qSRA/loadProfileIcon.png")));
 		//connect signal
 		connect(m_doLoadProfile, SIGNAL(triggered()), this, SLOT(loadProfile()));
@@ -68,8 +68,8 @@ void qSRA::getActions(QActionGroup& group)
 
 	if (!m_doCompareCloudToProfile)
 	{
-		m_doCompareCloudToProfile = new QAction("Cloud-profile radial distance",this);
-		m_doCompareCloudToProfile->setToolTip("Computes radial distances between a cloud and a surface of revolution (described by its profile polyline)");
+		m_doCompareCloudToProfile = new QAction("Cloud-SurfRev radial distance",this);
+		m_doCompareCloudToProfile->setToolTip("Computes the radial distances between a cloud and a Surface of Revolution (polyline/profile, cone or cylinder)");
 		m_doCompareCloudToProfile->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qSRA/distToProfileIcon.png")));
 		//connect signal
 		connect(m_doCompareCloudToProfile, SIGNAL(triggered()), this, SLOT(computeCloud2ProfileRadialDist()));
@@ -79,7 +79,7 @@ void qSRA::getActions(QActionGroup& group)
 	if (!m_doProjectCloudDists)
 	{
 		m_doProjectCloudDists = new QAction("2D distance map",this);
-		m_doProjectCloudDists->setToolTip("Creates the surface or revolution 2D distance map (unroll)");
+		m_doProjectCloudDists->setToolTip("Creates the 2D deviation map (radial distances) from a Surface or Revolution (unroll)");
 		m_doProjectCloudDists->setIcon(QIcon(QString::fromUtf8(":/CC/plugin/qSRA/createMapIcon.png")));
 		//connect signal
 		connect(m_doProjectCloudDists, SIGNAL(triggered()), this, SLOT(projectCloudDistsInGrid()));
@@ -94,34 +94,38 @@ void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)
 		//always active
 	}
 
-	bool cloudAndPolylineSelected = (	selectedEntities.size() == 2
-										&& (	(selectedEntities[0]->isA(CC_TYPES::POLY_LINE) && selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
-											||	(selectedEntities[1]->isA(CC_TYPES::POLY_LINE) && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD))) );
-	
+	bool validSelection = false;
+	if (selectedEntities.size() == 2)
+	{
+		//we expect a cloud...
+		int cloudIndex = selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD) ? 0 : selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD) ? 1 : -1;
+		if (cloudIndex != -1)
+		{
+			//... and either a polyline or a cone/ctlinder
+			validSelection = (selectedEntities[1-cloudIndex]->isA(CC_TYPES::POLY_LINE) || selectedEntities[1-cloudIndex]->isKindOf(CC_TYPES::CONE));
+		}
+	}
+
 	if (m_doCompareCloudToProfile)
 	{
-		m_doCompareCloudToProfile->setEnabled(cloudAndPolylineSelected);
+		m_doCompareCloudToProfile->setEnabled(validSelection);
 	}
 
 	if (m_doProjectCloudDists)
 	{
-		m_doProjectCloudDists->setEnabled(	cloudAndPolylineSelected 
-											|| (selectedEntities.size() == 2 && 
-												(  (selectedEntities[0]->isKindOf(CC_TYPES::CONE) && selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
-												|| (selectedEntities[1]->isKindOf(CC_TYPES::CONE) && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)))));
+		m_doProjectCloudDists->setEnabled(validSelection);
 	}
-
-	//backup selected entities
-	m_selectedEntities = selectedEntities;
 }
 
 //return (and create if necessary) the plugin default destination container
 const QString QSRA_DEFAULT_CONTAINER_NAME("Profile(s)");
 ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 {
-	assert(app);
 	if (!app || !app->dbRootObject())
+	{
+		assert(false);
 		return 0;
+	}
 
 	//we look in qCC database for a group with the right name (i.e. if it has already been created)
 	ccHObject::Container groups;
@@ -141,9 +145,11 @@ ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 
 void qSRA::loadProfile() const
 {
-	assert(m_app);
 	if (!m_app)
+	{
+		assert(false);
 		return;
+	}
 
 	//persistent settings (default import path)
 	QSettings settings;
@@ -220,51 +226,146 @@ void qSRA::loadProfile() const
 	//default destination container
 	ccHObject* defaultContainer = GetDefaultContainer(m_app);
 	if (defaultContainer)
+	{
 		defaultContainer->addChild(polyline);
+	}
 
 	m_app->addToDB(polyline,true,false,true);
 
 	m_app->dispToConsole(QString("[qSRA] File '%1' succesfully loaded").arg(filename),ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
+//helper
+static ccPolyline* GetConeProfile(ccCone* cone)
+{
+	if (!cone)
+	{
+		assert(false);
+		return 0;
+	}
+
+	//we deduce the profile orientation and position from the cone 4x4 transformation
+	ccGLMatrix& mat = cone->getTransformation();
+
+	CCVector3 axis = mat.getColumnAsVec3D(2);
+	CCVector3 origin = mat.getTranslationAsVec3D();
+	PointCoordinateType height = cone->getHeight();
+	//we'll use the 'largest' axis dimension as 'revolution dimension'
+	int revolDim = 0;
+	for (int i=1; i<3; ++i)
+		if (fabs(axis.u[i]) > fabs(axis.u[revolDim]))
+			revolDim = i;
+
+	//the profile has only one segment
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	{
+		if (!vertices->reserve(2))
+		{
+			delete vertices;
+			ccLog::Error("Not enough memory");
+			return 0;
+		}
+
+		vertices->addPoint(CCVector3(	cone->getBottomRadius(),
+			-height/2,
+			0 ));
+		vertices->addPoint(CCVector3(	cone->getTopRadius(),
+			height/2,
+			0 ));
+	}
+
+	ccPolyline* polyline = new ccPolyline(vertices);
+	{
+		polyline->addChild(vertices);
+		if (!polyline->reserve(2))
+		{
+			delete polyline;
+			ccLog::Error("Not enough memory");
+			return 0;
+		}
+		polyline->addPointIndex(0,2);
+		polyline->setClosed(false);
+	}
+
+	//set meta-data
+	DistanceMapGenerationTool::SetPoylineOrigin(polyline, origin);
+	DistanceMapGenerationTool::SetPoylineAxis(polyline, axis);
+	DistanceMapGenerationTool::SetPolylineHeightShift(polyline, height/2);
+	DistanceMapGenerationTool::SetPoylineRevolDim(polyline, revolDim);
+
+	return polyline;
+}
+
 void qSRA::computeCloud2ProfileRadialDist() const
 {
-	assert(m_app);
-
-	if (m_selectedEntities.size() != 2)
+	if (!m_app)
+	{
+		assert(false);
 		return;
+	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	if (selectedEntities.size() != 2)
+	{
+		assert(false);
+		return;
+	}
 
 	//retrieve input cloud and polyline
 	ccPointCloud* cloud = 0;
 	ccPolyline* polyline = 0;
+	bool tempPolyline = false;
 	{
 		for (unsigned i=0; i<2; ++i)
 		{
-			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
-				cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-			else if (m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
-				polyline = static_cast<ccPolyline*>(m_selectedEntities[i]);
+			if (selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+			{
+				cloud = static_cast<ccPointCloud*>(selectedEntities[i]);
+			}
+			else if (selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
+			{
+				polyline = static_cast<ccPolyline*>(selectedEntities[i]);
+			}
+			else if (!polyline && selectedEntities[i]->isKindOf(CC_TYPES::CONE))
+			{
+				//special case: we can deduce the polyline from the cone/cylinder parameters
+				ccCone* cone = static_cast<ccCone*>(selectedEntities[i]);
+				polyline = GetConeProfile(cone);
+				if (!polyline)
+				{
+					//the conversion failed?!
+					return;
+				}
+				tempPolyline = true;
+			}
 		}
 	}
 
-	if (!cloud || !polyline)
+	if (cloud && polyline)
+	{
+		if (doComputeRadialDists(cloud, polyline))
+		{
+			//automatically ask the user if he wants to generate a 2D map
+			if (QMessageBox::question(	m_app ? m_app->getMainWindow() : 0,
+										"Generate map",
+										"Do you want to generate a 2D deviation map?",
+										QMessageBox::Yes,
+										QMessageBox::No) == QMessageBox::Yes)
+			{
+				doProjectCloudDistsInGrid(cloud,polyline);
+			}
+		}
+	}
+	else
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("Select exactly one cloud and one polyline!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+			m_app->dispToConsole(QString("Select exactly one cloud and one Surface of Revolution (polyline/profile, cone or cylinder)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 
-	if (doComputeRadialDists(cloud, polyline))
+	if (polyline && tempPolyline)
 	{
-		//automatically ask the user if he wants to generate a 2D map
-		if (QMessageBox::question(	m_app ? m_app->getMainWindow() : 0,
-									"Generate map",
-									"Do you want to generate a 2D map?",
-									QMessageBox::Yes,
-									QMessageBox::No) == QMessageBox::Yes)
-		{
-			doProjectCloudDistsInGrid(cloud,polyline);
-		}
+		delete polyline;
+		polyline = 0;
 	}
 }
 
@@ -296,9 +397,19 @@ bool qSRA::doComputeRadialDists(ccPointCloud* cloud, ccPolyline* polyline) const
 
 void qSRA::projectCloudDistsInGrid() const
 {
-	size_t selectCount = m_selectedEntities.size();
-	if (selectCount != 1 && selectCount != 2)
+	if (!m_app)
+	{
+		assert(false);
 		return;
+	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	size_t selectCount = selectedEntities.size();
+	if (selectCount != 1 && selectCount != 2)
+	{
+		assert(false);
+		return;
+	}
 
 	//retrieve input cloud and polyline
 	ccPointCloud* cloud = 0;
@@ -307,55 +418,25 @@ void qSRA::projectCloudDistsInGrid() const
 	{
 		for (size_t i=0; i<selectCount; ++i)
 		{
-			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+			if (selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 			{
-				cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
+				cloud = static_cast<ccPointCloud*>(selectedEntities[i]);
 			}
-			else if (m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
+			else if (selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
 			{
-				polyline = static_cast<ccPolyline*>(m_selectedEntities[i]);
+				polyline = static_cast<ccPolyline*>(selectedEntities[i]);
 			}
-			else if (!polyline && m_selectedEntities[i]->isKindOf(CC_TYPES::CONE))
+			else if (!polyline && selectedEntities[i]->isKindOf(CC_TYPES::CONE))
 			{
 				//special case: we can deduce the polyline from the cone/cylinder parameters
-				ccCone* cone = static_cast<ccCone*>(m_selectedEntities[i]);
+				ccCone* cone = static_cast<ccCone*>(selectedEntities[i]);
+				polyline = GetConeProfile(cone);
+				if (!polyline)
 				{
-					ccGLMatrix& mat = cone->getTransformation();
-
-					CCVector3 axis = mat.getColumnAsVec3D(2);
-					CCVector3 origin = mat.getTranslationAsVec3D();
-					PointCoordinateType height = cone->getHeight();
-
-					ccPointCloud* vertices = new ccPointCloud("vertices");
-					vertices->reserve(2);
-					vertices->addPoint(CCVector3(	cone->getBottomRadius(),
-													-height/2,
-													0 ));
-					vertices->addPoint(CCVector3(	cone->getTopRadius(),
-													height/2,
-													0 ));
-
-
-					polyline = new ccPolyline(vertices);
-					polyline->addChild(vertices);
-					polyline->reserve(2);
-					polyline->addPointIndex(0,2);
-					polyline->setClosed(false);
-					tempPolyline = true;
-
-					//set meta-data
-					DistanceMapGenerationTool::SetPoylineOrigin(polyline, origin);
-					DistanceMapGenerationTool::SetPoylineAxis(polyline, axis);
-					DistanceMapGenerationTool::SetPolylineHeightShift(polyline, height/2);
-
-					//we'll use the 'largest' axis dimension as 'revolution dimension'
-					int revolDim = 0;
-					for (int i=1; i<3; ++i)
-						if (fabs(axis.u[i]) > fabs(axis.u[revolDim]))
-							revolDim = i;
-					DistanceMapGenerationTool::SetPoylineRevolDim(polyline, revolDim);
-
+					//the conversion failed?!
+					return;
 				}
+				tempPolyline = true;
 			}
 		}
 	}
@@ -378,48 +459,41 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 	if (!cloud)
 		return;
 
-	//get associated scalar field
-	ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
-	if (!sf)
+	//get the scalar field to map
+	ccScalarField* sf = 0;
 	{
 		int sfIdx = cloud->getScalarFieldIndexByName(RADIAL_DIST_SF_NAME);
 		if (sfIdx < 0)
 		{
-			QString message = QString("Cloud has no activated scalar field and no '%1' field!").arg(RADIAL_DIST_SF_NAME);
-			if (QMessageBox::question(	m_app->getMainWindow(),
-										"Distance field",
-										message + QString("\nDo you want to compute it now?"),
-										QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes )
+			sf = cloud->getCurrentDisplayedScalarField();
+			if (sf)
 			{
-				if (doComputeRadialDists(cloud, polyline))
+				if (QMessageBox::question(	m_app ? m_app->getMainWindow() : 0,
+											"Distance field",
+											QString("Cloud has no '%1' field. Do you want to use the active scalar field instead?").arg(RADIAL_DIST_SF_NAME),
+											QMessageBox::Yes,
+											QMessageBox::No) == QMessageBox::No )
 				{
-					sfIdx = cloud->getScalarFieldIndexByName(RADIAL_DIST_SF_NAME);
-					assert(sfIdx >= 0);
-					
-					//TEST
-					//return;
-				}
-				else
-				{
-					//radial dist. computation failed
+					//we can stop already
 					return;
 				}
 			}
 			else
 			{
-				//process is cancelled
+				QString message = QString("Cloud has no no '%1' field and no active scalar field!").arg(RADIAL_DIST_SF_NAME);
+				ccLog::Error(message);
+				
+				//additional indications
+				if (m_doCompareCloudToProfile)
+				{
+					ccLog::Warning(QString("You can compute the radial distances with the '%1' method").arg(m_doCompareCloudToProfile->text()));
+				}
 				return;
 			}
 		}
-		if (sfIdx >= 0)
-		{
-			sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
-		}
 		else
 		{
-			if (m_app)
-				m_app->dispToConsole("Internal error: no radial distances SF found!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			return;
+			sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
 		}
 	}
 	assert(sf);

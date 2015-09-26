@@ -64,6 +64,7 @@ public:
 										ccPolyline* profile,
 										QString filename,
 										unsigned heightStepCount,
+										double heightShift,
 										double angularStep_rad,
 										double radToUnitConvFactor,
 										QString angleUnit,

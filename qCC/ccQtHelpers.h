@@ -15,48 +15,23 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ORDER_CHOICE_DIALOG_HEADER
-#define CC_ORDER_CHOICE_DIALOG_HEADER
+#ifndef CC_QT_HELPERS_HEADER
+#define CC_QT_HELPERS_HEADER
 
 //Qt
-#include <QDialog>
+#include <QAbstractButton>
 
-class ccHObject;
-class ccMainAppInterface;
-class Ui_RoleChoiceDialog;
-
-//! Dialog to assign roles to two entities (e.g. compared/reference)
-class ccOrderChoiceDlg: public QDialog
+class ccQtHelpers
 {
-	Q_OBJECT
-
 public:
 
-	//! Default constructor
-	ccOrderChoiceDlg(	ccHObject* firstEntity,
-						const char* firstRole,
-						ccHObject* secondEntity,
-						const char* secondRole,
-						ccMainAppInterface* app = 0);
+	//! Sets a button background color
+	inline static void SetButtonColor(QAbstractButton* button, const QColor &col)
+	{
+		if (button)
+			button->setStyleSheet(QString("* { background-color: rgb(%1,%2,%3) }").arg(col.red()).arg(col.green()).arg(col.blue()));
+	}
 
-	//! Destructor
-	virtual ~ccOrderChoiceDlg();
-
-	ccHObject* getFirstEntity();
-	ccHObject* getSecondEntity();
-
-protected slots:
-	void swap();
-
-protected:
-
-	void setColorsAndLabels();
-
-	Ui_RoleChoiceDialog* m_gui;
-	ccMainAppInterface* m_app;
-	ccHObject* m_firstEnt;
-	ccHObject* m_secondEnt;
-	bool m_useInputOrder;
 };
 
-#endif // CC_ORDER_CHOICE_DIALOG_HEADER
+#endif //CC_QT_HELPERS_HEADER

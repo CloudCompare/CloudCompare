@@ -28,8 +28,7 @@ if (INSTALL_QSRA_PLUGIN)
 
 	#don't forget associated widgets(.ui)
 	set( CC_PLUGIN_CUSTOM_UI_LIST	${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
-									${CloudCompare_SOURCE_DIR}/ui_templates/renderToFileDialog.ui
-									${CloudCompare_SOURCE_DIR}/ui_templates/displayOptionsDlg.ui )
+									${CloudCompare_SOURCE_DIR}/ui_templates/renderToFileDialog.ui )
 
 	include( ../CMakePluginTpl.cmake )
 	

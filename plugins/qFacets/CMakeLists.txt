@@ -19,10 +19,8 @@ if (INSTALL_QFACETS_PLUGIN)
 	#we need Color Scale Manager and Editor importer
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.h )
 	file( GLOB CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.cpp )
+	set( CC_PLUGIN_CUSTOM_UI_LIST ${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui )
 
-	#don't forget associated widgets(.ui)
-	set( CC_PLUGIN_CUSTOM_UI_LIST	${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
-									${CloudCompare_SOURCE_DIR}/ui_templates/displayOptionsDlg.ui )
 	include( ../CMakePluginTpl.cmake )
 
 	#add IO support

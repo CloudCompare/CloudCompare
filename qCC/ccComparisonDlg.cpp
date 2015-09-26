@@ -38,7 +38,6 @@
 #include <ccGBLSensor.h>
 
 //Local
-#include "ccDisplayOptionsDlg.h"
 #include "mainwindow.h"
 #include "ccCommon.h"
 #include "ccHistogramWindow.h"

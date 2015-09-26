@@ -18,7 +18,7 @@
 #include "ccOrderChoiceDlg.h"
 
 //local
-#include "ccDisplayOptionsDlg.h"
+#include "ccQtHelpers.h"
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
@@ -29,30 +29,33 @@
 //Qt
 #include <QMainWindow>
 
+//ui template
+#include <ui_roleChoiceDlg.h>
+
 ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 									const char* firstRole,
 									ccHObject* secondEntity,
 									const char* secondRole,
 									ccMainAppInterface* app/*=0*/)
 	: QDialog(app ? app->getMainWindow() : 0)
-	, Ui::RoleChoiceDialog()
+	, m_gui(new Ui_RoleChoiceDialog)
 	, m_app(app)
 	, m_firstEnt(firstEntity)
 	, m_secondEnt(secondEntity)
-	, m_originalOrder(true)
+	, m_useInputOrder(true)
 {
-	setupUi(this);
+	m_gui->setupUi(this);
 	setWindowFlags(Qt::Tool);
 
-	connect(swapButton, SIGNAL(clicked()), this, SLOT(swap()));
+	connect(m_gui->swapButton, SIGNAL(clicked()), this, SLOT(swap()));
 
-	firstlabel->setText(firstRole);
-	secondlabel->setText(secondRole);
+	m_gui->firstlabel->setText(firstRole);
+	m_gui->secondlabel->setText(secondRole);
 
 	QColor qRed(255,0,0);
 	QColor qYellow(255,255,0);
-	ccDisplayOptionsDlg::SetButtonColor(firstColorButton,qRed);
-	ccDisplayOptionsDlg::SetButtonColor(secondColorButton,qYellow);
+	ccQtHelpers::SetButtonColor(m_gui->firstColorButton,qRed);
+	ccQtHelpers::SetButtonColor(m_gui->secondColorButton,qYellow);
 
 	setColorsAndLabels();
 }
@@ -69,18 +72,27 @@ ccOrderChoiceDlg::~ccOrderChoiceDlg()
 		m_secondEnt->enableTempColor(false);
 		m_secondEnt->prepareDisplayForRefresh_recursive();
 	}
+	
 	if (m_app)
+	{
 		m_app->refreshAll();
+	}
+	
+	if (m_gui)
+	{
+		delete m_gui;
+		m_gui = 0;
+	}
 }
 
 ccHObject* ccOrderChoiceDlg::getFirstEntity()
 {
-	return m_originalOrder ? m_firstEnt : m_secondEnt;
+	return m_useInputOrder ? m_firstEnt : m_secondEnt;
 }
 
 ccHObject* ccOrderChoiceDlg::getSecondEntity()
 {
-	return m_originalOrder ? m_secondEnt : m_firstEnt;
+	return m_useInputOrder ? m_secondEnt : m_firstEnt;
 }
 
 void ccOrderChoiceDlg::setColorsAndLabels()
@@ -88,7 +100,7 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 	ccHObject* o1 = getFirstEntity();
 	if (o1)
 	{
-		firstLineEdit->setText(o1->getName());
+		m_gui->firstLineEdit->setText(o1->getName());
 		o1->setEnabled(true);
 		o1->setVisible(true);
 		o1->setTempColor(ccColor::red);
@@ -96,13 +108,13 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 	}
 	else
 	{
-		firstLineEdit->setText("No entity!");
+		m_gui->firstLineEdit->setText("No entity!");
 	}
 
 	ccHObject* o2 = getSecondEntity();
 	if (o2)
 	{
-		secondLineEdit->setText(o2->getName());
+		m_gui->secondLineEdit->setText(o2->getName());
 		o2->setEnabled(true);
 		o2->setVisible(true);
 		o2->setTempColor(ccColor::yellow);
@@ -110,7 +122,7 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 	}
 	else
 	{
-		secondLineEdit->setText("No entity!");
+		m_gui->secondLineEdit->setText("No entity!");
 	}
 
 	if (m_app)
@@ -119,6 +131,6 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 
 void ccOrderChoiceDlg::swap()
 {
-	m_originalOrder = !m_originalOrder;
+	m_useInputOrder = !m_useInputOrder;
 	setColorsAndLabels();
 }

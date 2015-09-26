@@ -25,6 +25,11 @@ endif()
 #load necessary libraries (see qPCV for an example)
 add_subdirectory (GMMREG/C++)
 
+#we need the 'order choice' dialog
+file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccOrderChoiceDlg*.h )
+file( GLOB CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccOrderChoiceDlg*.cpp )
+set( CC_PLUGIN_CUSTOM_UI_LIST           ${CloudCompare_SOURCE_DIR}/ui_templates/roleChoiceDlg.ui )
+
 #if the plugin is an 'OpenGL filter', uncomment the line below
 #set( CC_OPENGL_FILTER ON BOOL)
 include( ../CMakePluginTpl.cmake )

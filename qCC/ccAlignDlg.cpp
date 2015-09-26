@@ -17,7 +17,7 @@
 
 #include "ccAlignDlg.h"
 #include "mainwindow.h"
-#include "ccDisplayOptionsDlg.h"
+#include "ccQtHelpers.h"
 
 //CCLib
 #include <CloudSamplingTools.h>
@@ -45,8 +45,8 @@ ccAlignDlg::ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QW
 
 	QColor qRed(255,0,0);
 	QColor qYellow(255,255,0);
-	ccDisplayOptionsDlg::SetButtonColor(dataColorButton,qRed);
-	ccDisplayOptionsDlg::SetButtonColor(modelColorButton,qYellow);
+	ccQtHelpers::SetButtonColor(dataColorButton,qRed);
+	ccQtHelpers::SetButtonColor(modelColorButton,qYellow);
 
 	dataObject = data;
 	modelObject = model;

@@ -18,7 +18,7 @@
 #include "ccColorGradientDlg.h"
 
 //Local
-#include "ccDisplayOptionsDlg.h"
+#include "ccQtHelpers.h"
 
 //Qt
 #include <QColorDialog>
@@ -44,8 +44,8 @@ ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	connect(secondColorButton, SIGNAL(clicked()), this, SLOT(changeSecondColor()));
 
 	//restore previous parameters
-	ccDisplayOptionsDlg::SetButtonColor(secondColorButton,s_secondColor);
-	ccDisplayOptionsDlg::SetButtonColor(firstColorButton,s_firstColor);
+	ccQtHelpers::SetButtonColor(secondColorButton,s_secondColor);
+	ccQtHelpers::SetButtonColor(firstColorButton,s_firstColor);
 	setType(s_lastType);
 	bandingFreqSpinBox->setValue(s_lastFreq);
 }
@@ -109,7 +109,7 @@ void ccColorGradientDlg::changeFirstColor()
 	if (newCol.isValid())
 	{
 		s_firstColor = newCol;
-		ccDisplayOptionsDlg::SetButtonColor(firstColorButton,s_firstColor);
+		ccQtHelpers::SetButtonColor(firstColorButton,s_firstColor);
 	}
 }
 
@@ -119,6 +119,6 @@ void ccColorGradientDlg::changeSecondColor()
 	if (newCol.isValid())
 	{
 		s_secondColor = newCol;
-		ccDisplayOptionsDlg::SetButtonColor(secondColorButton,s_secondColor);
+		ccQtHelpers::SetButtonColor(secondColorButton,s_secondColor);
 	}
 }

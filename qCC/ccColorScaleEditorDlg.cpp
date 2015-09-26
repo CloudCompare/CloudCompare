@@ -19,7 +19,7 @@
 
 //local
 #include "ccColorScaleEditorWidget.h"
-#include "ccDisplayOptionsDlg.h"
+#include "ccQtHelpers.h"
 #include "ccPersistentSettings.h"
 #include <ccMainAppInterface.h>
 
@@ -339,7 +339,7 @@ void ccColorScaleEditorDialog::onStepSelected(int index)
 		valueDoubleSpinBox->blockSignals(true);
 		valueDoubleSpinBox->setValue(0.0);
 		valueDoubleSpinBox->blockSignals(false);
-		ccDisplayOptionsDlg::SetButtonColor(colorToolButton,Qt::gray);
+		ccQtHelpers::SetButtonColor(colorToolButton,Qt::gray);
 		valueLabel->setVisible(false);
 	}
 	else
@@ -358,7 +358,7 @@ void ccColorScaleEditorDialog::onStepModified(int index)
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(index);
 	assert(slider);
 
-	ccDisplayOptionsDlg::SetButtonColor(colorToolButton,slider->getColor());
+	ccQtHelpers::SetButtonColor(colorToolButton,slider->getColor());
 	if (m_colorScale)
 	{
 		const double relativePos = slider->getRelativePos();

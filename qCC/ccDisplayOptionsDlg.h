@@ -26,9 +26,6 @@
 
 //Qt
 #include <QDialog>
-#include <QColor>
-#include <QAbstractButton>
-#include <QPalette>
 
 //system
 #include <assert.h>
@@ -44,20 +41,6 @@ public:
 
 	//! Default constructor
 	explicit ccDisplayOptionsDlg(QWidget* parent);
-
-	//! Sets a button background color
-	/** Support Windows XP style particularity.
-	**/
-	inline static void SetButtonColor(QAbstractButton* button, const QColor &col)
-	{
-		if (button)
-			button->setStyleSheet(QString("* { background-color: rgb(%1,%2,%3) }").arg(col.red()).arg(col.green()).arg(col.blue()));
-	}
-
-	//! Sets a button text color
-	/** Support Windows XP style particularity.
-	**/
-	static void SetButtonTextColor(QAbstractButton* button, const QColor &col);
 
 signals:
 	void aspectHasChanged();

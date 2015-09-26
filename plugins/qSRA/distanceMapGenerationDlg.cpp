@@ -31,7 +31,7 @@
 #include <ccColorScalesManager.h>
 #include <ccColorScaleEditorDlg.h>
 #include <ccCommon.h>
-#include <ccDisplayOptionsDlg.h>
+#include <ccQtHelpers.h>
 #include <ccRenderToFileDlg.h>
 
 //qCC_db
@@ -1521,7 +1521,7 @@ void DistanceMapGenerationDlg::overlaySymbolsSizeChanged(int size)
 
 void DistanceMapGenerationDlg::overlaySymbolsColorChanged()
 {
-	ccDisplayOptionsDlg::SetButtonColor(symbolColorButton,m_symbolColor);
+	ccQtHelpers::SetButtonColor(symbolColorButton,m_symbolColor);
 
 	if (!m_window)
 		return;
@@ -1546,7 +1546,7 @@ void DistanceMapGenerationDlg::overlaySymbolsColorChanged()
 
 void DistanceMapGenerationDlg::overlayGridColorChanged()
 {
-	ccDisplayOptionsDlg::SetButtonColor(gridColorButton,m_gridColor);
+	ccQtHelpers::SetButtonColor(gridColorButton,m_gridColor);
 
 	if (!m_window)
 		return;

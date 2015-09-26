@@ -18,7 +18,7 @@
 #include "ccRegistrationDlg.h"
 
 //Local
-#include "ccDisplayOptionsDlg.h"
+#include "ccQtHelpers.h"
 #include "mainwindow.h"
 
 //CCLib
@@ -59,8 +59,8 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 
 	QColor qRed(255,0,0);
 	QColor qYellow(255,255,0);
-	ccDisplayOptionsDlg::SetButtonColor(dataColorButton,qRed);
-	ccDisplayOptionsDlg::SetButtonColor(modelColorButton,qYellow);
+	ccQtHelpers::SetButtonColor(dataColorButton,qRed);
+	ccQtHelpers::SetButtonColor(modelColorButton,qYellow);
 
 	//restore semi-persistent settings
 	adjustScaleCheckBox->setChecked(s_adjustScale);

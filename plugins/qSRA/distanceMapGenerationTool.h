@@ -153,6 +153,7 @@ public:
 			, minVal(0.0)
 			, maxVal(0.0)
 			, counterclockwise(false)
+			, conicalSpanRatio(0)
 		{}
 
 		unsigned xSteps;
@@ -169,10 +170,14 @@ public:
 		double minVal;
 		double maxVal;
 
-		//motion direction
+		//! Motion direction
 		/** Counter-clockwise (true) or clockwise (false)
 		**/
 		bool counterclockwise;
+
+		//! Spanning ratio
+		/** (for conical projection only) **/
+		double conicalSpanRatio;
 	};
 
 	//! Grid filling strategy
@@ -211,7 +216,6 @@ public:
 	//! Creates a conical projection (textured) mesh
 	static ccMesh* ConvertConicalMapToMesh(	const QSharedPointer<Map>& map,
 											bool counterclockwise,
-											double conicalSpanRatio = 1.0,
 											QImage mapTexture = QImage());
 
 
@@ -224,6 +228,7 @@ public:
 	//! Converts a point cloud coordinates to "cylindrical" ones (in place)
 	static bool ConvertCloudToCylindrical(	ccPointCloud* cloud,
 											const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+											double heightShift,
 											unsigned char revolutionAxisDim,
 											bool counterclockwise = false);
 
@@ -232,6 +237,7 @@ public:
 	**/
 	static bool ConvertCloudToConical(	ccPointCloud* cloud,
 										const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+										double heightShift,
 										unsigned char revolutionAxisDim,
 										double latMin_rad,
 										double latMax_rad,

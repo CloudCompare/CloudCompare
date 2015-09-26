@@ -104,6 +104,8 @@ protected slots:
 	void projectionModeChanged(int);
 	void angularUnitChanged(int);
 	void updateGridSteps();
+	void updateProfileRevolDim(int);
+	void updateProfileOrigin();
 	void colorScaleChanged(int index);
 	void spawnColorScaleEditor();
 	void updateHeightUnits();
@@ -165,9 +167,6 @@ protected:
 
 	//! Associated cloud
 	ccPointCloud* m_cloud;
-
-	//! Transformation from the cloud coordinate system to the surface of revolution one
-	ccGLMatrix m_cloudToSurface;
 
 	//! Associated profile
 	ccPolyline* m_profile;

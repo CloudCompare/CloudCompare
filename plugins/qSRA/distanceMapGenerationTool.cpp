@@ -810,7 +810,6 @@ CCVector3 DistanceMapGenerationTool::ProjectPointOnCone(	double lon_rad,
 
 ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer<Map>& map,
 															bool counterclockwise,
-															double conicalSpanRatio/*=1.0*/,
 															QImage mapTexture/*=QImage()*/)
 {
 	if (!map)
@@ -829,7 +828,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 	}
 
 	//compute projection constant
-	double nProj = ConicalProjectN(map->yMin,map->yMax) * conicalSpanRatio;
+	double nProj = ConicalProjectN(map->yMin,map->yMax) * map->conicalSpanRatio;
 	assert(nProj >= -1.0 && nProj <= 1.0);
 
 	//create vertices
@@ -1126,6 +1125,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 
 bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 															const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+															double heightShift,
 															unsigned char revolutionAxisDim,
 															bool counterclockwise/*=false*/)
 {
@@ -1152,7 +1152,7 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 		PointCoordinateType ang_rad = ccw * atan2(relativePos.u[X], relativePos.u[Y]);
 		if (ang_rad < 0)
 			ang_rad += static_cast<PointCoordinateType>(2.0 * M_PI);
-		PointCoordinateType height = P->u[Z];
+		PointCoordinateType height = relativePos.u[Z] + heightShift;
 
 		P->x = ang_rad;
 		P->y = height;
@@ -1169,6 +1169,7 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 
 bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 														const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+														double heightShift,
 														unsigned char revolutionAxisDim,
 														double latMin_rad,
 														double latMax_rad,
@@ -1203,7 +1204,7 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 
 		double lat_rad = ComputeLatitude_rad(	relativePos.u[X],
 												relativePos.u[Y],
-												relativePos.u[Z] ); //between 0 and pi/2
+												relativePos.u[Z] + heightShift ); //between 0 and pi/2
 
 		*P = ProjectPointOnCone(ang_rad, lat_rad, latMin_rad, nProj, counterclockwise);
 	}

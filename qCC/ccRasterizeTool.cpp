@@ -1157,6 +1157,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		unsigned sfCount = pc->getNumberOfScalarFields();
 
 		bool memoryError = false;
+		size_t previousCount = m_grid.scalarFields.size();
 		try
 		{
 			m_grid.scalarFields.resize(sfCount,0);
@@ -1167,8 +1168,9 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 			memoryError = true;
 		}
 
-		for (unsigned i=0; i<sfCount; ++i)
+		for (size_t i=previousCount; i<sfCount; ++i)
 		{
+			assert(m_grid.scalarFields[i] == 0);
 			m_grid.scalarFields[i] = new double[gridTotalSize];
 			if (!m_grid.scalarFields[i])
 			{
@@ -1813,20 +1815,6 @@ void ccRasterizeTool::generateRaster() const
 		return;
 	}
 
-	QString outputFilename;
-	{
-		QSettings settings;
-		settings.beginGroup(ccPS::HeightGridGeneration());
-		QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
-		outputFilename = QFileDialog::getSaveFileName(0,"Save height grid raster",imageSavePath+QString("/raster.tif"),"geotiff (*.tif)");
-
-		if (outputFilename.isNull())
-			return;
-
-		//save current export path to persistent settings
-		settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
-	}
-
 	//which (and how many) bands shall we create?
 	bool heightBand = true; //height by default
 	bool densityBand = false;
@@ -1850,6 +1838,21 @@ void ccRasterizeTool::generateRaster() const
 	if (!reoDlg.exec())
 		return;
 
+	//we ask the output filename AFTER displaying the export parameters ;)
+	QString outputFilename;
+	{
+		QSettings settings;
+		settings.beginGroup(ccPS::HeightGridGeneration());
+		QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
+		outputFilename = QFileDialog::getSaveFileName(0,"Save height grid raster",imageSavePath+QString("/raster.tif"),"geotiff (*.tif)");
+
+		if (outputFilename.isNull())
+			return;
+
+		//save current export path to persistent settings
+		settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
+	}
+
 	heightBand = reoDlg.exportHeightsCheckBox->isChecked();
 	densityBand = reoDlg.exportDensityCheckBox->isChecked();
 	if (hasSF)
@@ -1866,13 +1869,19 @@ void ccRasterizeTool::generateRaster() const
 
 	totalBands = heightBand ? 1 : 0;
 	if (densityBand)
+	{
 		++totalBands;
+	}
 	if (allSFBands)
 	{
 		assert(hasSF);
 		for (size_t i=0; i<m_grid.scalarFields.size(); ++i)
 			if (m_grid.scalarFields[i])
-				totalBands++;
+				++totalBands;
+	}
+	else if (sfBandIndex >= 0)
+	{
+		++totalBands;
 	}
 	
 	if (totalBands == 0)
@@ -2155,15 +2164,18 @@ void ccRasterizeTool::generateContours()
 		xDim += 2;
 		yDim += 2;
 	}
-	double* grid = new double[xDim * yDim];
-	if (!grid)
+	std::vector<double> grid;
+	try
+	{
+		grid.resize(xDim * yDim, 0);
+	}
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
 		if (m_window)
 			m_window->redraw();
 		return;
 	}
-	memset(grid,0,sizeof(double)*(xDim*yDim));
 
 	//fill grid
 	{
@@ -2174,7 +2186,7 @@ void ccRasterizeTool::generateContours()
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
 			RasterCell* cell = m_grid.data[j];
-			double* row = grid + (j+margin)*xDim + margin;
+			double* row = &(grid[(j+margin)*xDim + margin]);
 			for (unsigned i=0; i<m_grid.width; ++i)
 			{
 				if (cell[i].nbPoints || !sparseLayer)
@@ -2196,7 +2208,7 @@ void ccRasterizeTool::generateContours()
 	{
 		Isolines<double> iso(static_cast<int>(xDim),static_cast<int>(yDim));
 		if (!ignoreBorders)
-			iso.createOnePixelBorder(grid,activeLayer->getMin()-1.0);
+			iso.createOnePixelBorder(&(grid.front()),activeLayer->getMin()-1.0);
 		//bounding box
 		ccBBox box = getCustomBBox();
 		assert(box.isValid());
@@ -2226,7 +2238,7 @@ void ccRasterizeTool::generateContours()
 		{
 			//extract contour lines for the current level
 			iso.setThreshold(v);
-			int lineCount = iso.find(grid);
+			int lineCount = iso.find(&(grid.front()));
 
 			ccLog::PrintDebug(QString("[Rasterize][Isolines] value=%1 : %2 lines").arg(v).arg(lineCount));
 
@@ -2327,12 +2339,6 @@ void ccRasterizeTool::generateContours()
 			exportContoursPushButton->setEnabled(true);
 			clearContoursPushButton->setEnabled(true);
 		}
-	}
-
-	if (grid)
-	{
-		delete[] grid;
-		grid = 0;
 	}
 
 	if (m_window)

@@ -48,13 +48,10 @@
 #include <unistd.h>
 #endif
 
-//Default constructor: should mainly be used to initialize
-//actions (pointers) and other members
 qGMMRegPlugin::qGMMRegPlugin(QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_action(0)
-{
-}
+{}
 
 void qGMMRegPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
 {
@@ -107,7 +104,6 @@ static bool CloudToVNLMatrix(const ccGenericPointCloud* cloud, vnl_matrix<double
 	return true;
 }
 
-//! Dialog for orientation-based classification of facets (qFacets plugin)
 class GMMRegDialog : public QDialog, public Ui::GMMRegDialog
 {
 public:
@@ -184,12 +180,15 @@ bool doPerformRegistration()
 void qGMMRegPlugin::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
-	//(--> pure internal check)
-	assert(m_app);
 	if (!m_app)
+	{
+		assert(false);
 		return;
+	}
 
 	/*** HERE STARTS THE ACTION ***/
+
+	//check the input selection
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	bool validSelection = true;
 	if (selectedEntities.size() == 2)
@@ -226,7 +225,7 @@ void qGMMRegPlugin::doAction()
 		std::swap(data, model);
 	}
 
-	//ask the user which one is the 'data' entity and which one is the 'model' entity
+	//ask the user which one is the 'data' entity and which one is the 'model/reference' entity
 	ccOrderChoiceDlg ocDlg(data, "data (deformed)", model, "reference (rigid)", m_app);
 	if (!ocDlg.exec())
 	{
@@ -566,9 +565,6 @@ void qGMMRegPlugin::doAction()
 	/*** HERE ENDS THE ACTION ***/
 }
 
-//This method should return the plugin icon (it will be used mainly
-//if your plugin as several actions in which case CC will create a
-//dedicated sub-menu entry with this icon.
 QIcon qGMMRegPlugin::getIcon() const
 {
 	return QIcon(":/CC/plugin/qGMMRegPlugin/icon.png");

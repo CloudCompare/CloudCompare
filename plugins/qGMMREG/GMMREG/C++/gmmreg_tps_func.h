@@ -43,7 +43,7 @@ class ThinPlateSplineFunc : public vnl_cost_function {
   inline void SetFixAffine(const bool fix_affine) {
     this->fix_affine_ = fix_affine;
     if (fix_affine) {
-      set_number_of_unknowns((n_ - static_cast<int>(d_) - 1) * d_); //dim = (n-d-1)*d;
+      set_number_of_unknowns((n_ - d_ - 1) * d_); //dim = (n-d-1)*d;
     } else {
       set_number_of_unknowns(n_ * d_); //dim = n*d;
     }

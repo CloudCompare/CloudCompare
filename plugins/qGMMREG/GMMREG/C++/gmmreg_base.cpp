@@ -61,7 +61,10 @@ int Base::Run()
 	vnl_vector<double> params;
 
 	//Registration
-	StartRegistration(params);
+	if (StartRegistration(params) < 0)
+	{
+		return -1;
+	}
 
 	//Finalizing results
 	PerformTransform(params);
@@ -79,7 +82,10 @@ int Base::Run(const char* f_config)
 
 	//Registration
 	vnl_vector<double> params;
-	StartRegistration(params);
+	if (StartRegistration(params) < 0)
+	{
+		return -1;
+	}
 
 	//Finalizing results
 	PerformTransform(params);
@@ -118,16 +124,17 @@ int Base::PrepareInput(const vnl_matrix<double>& model, const vnl_matrix<double>
 	return 0;
 }
 
-int Base::PrepareInput(const char* f_config) {
+int Base::PrepareInput(const char* f_config)
+{
 	char f_model[256] = {0}, f_scene[256] = {0};
-	GetPrivateProfileString(common_section_, "model", NULL,
-		f_model, 256, f_config);
-	if (LoadMatrixFromTxt(f_model, model_) < 0) {
+	GetPrivateProfileString(common_section_, "model", NULL, f_model, 256, f_config);
+	if (LoadMatrixFromTxt(f_model, model_) < 0)
+	{
 		return -1;
 	}
-	GetPrivateProfileString(common_section_, "scene", NULL,
-		f_scene, 256, f_config);
-	if (LoadMatrixFromTxt(f_scene, scene_) < 0) {
+	GetPrivateProfileString(common_section_, "scene", NULL, f_scene, 256, f_config);
+	if (LoadMatrixFromTxt(f_scene, scene_) < 0)
+	{
 		return -1;
 	}
 

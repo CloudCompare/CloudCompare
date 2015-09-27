@@ -29,7 +29,7 @@ class TpsRegistration: public Base {
   std::vector<float> v_lambda_;
   std::vector<int> v_affine_;
 
-  void StartRegistration(vnl_vector<double>&) override;
+  int StartRegistration(vnl_vector<double>&) override;
   int SetInitAffine(const char* filename);
   int SetInitTps(const char* filename);
   void SetParam(vnl_vector<double>& x0);

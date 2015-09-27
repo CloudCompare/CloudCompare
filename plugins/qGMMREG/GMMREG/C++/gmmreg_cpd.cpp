@@ -115,7 +115,7 @@ double CoherentPointDriftTps::UpdateParam() {
   return bending;
 }
 
-void CoherentPointDrift::StartRegistration(vnl_vector<double>& params) {
+int CoherentPointDrift::StartRegistration(vnl_vector<double>& params) {
   int EMiter, iter = 0;
   double Eu, E_old;
   double E = 1;
@@ -150,6 +150,7 @@ void CoherentPointDrift::StartRegistration(vnl_vector<double>& params) {
     ++iter;
     ntol = (moving_model - prev_model).array_two_norm();
   }
+  return 0;
 }
 
 int CoherentPointDrift::SetInitParams(const char* f_config) {

@@ -96,7 +96,7 @@ namespace gmmreg
 		virtual void PrepareBasisKernel() = 0;
 		virtual int SetInitParams(const char* filename) = 0;
 		virtual void SaveResults(const char* filename) = 0;
-		virtual void StartRegistration(vnl_vector<double>& params) = 0;
+		virtual int StartRegistration(vnl_vector<double>& params) = 0;
 	};
 
 }  // namespace gmmreg

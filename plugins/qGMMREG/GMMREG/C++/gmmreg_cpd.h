@@ -13,7 +13,7 @@ class CoherentPointDrift : public Base {
   virtual ~CoherentPointDrift() {}
 
  private:
-  void StartRegistration(vnl_vector<double>&) override;
+  int StartRegistration(vnl_vector<double>&) override;
   void SetParam(vnl_vector<double>&);
   int SetInitParams(const char*) override;
   void SaveResults(const char*) override;

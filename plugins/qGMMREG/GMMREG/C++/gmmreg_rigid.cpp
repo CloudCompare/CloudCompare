@@ -54,7 +54,7 @@ void SetRigidTransformBound(const int d, vnl_lbfgsb* minimizer) {
   minimizer->set_upper_bound(upper_bound);
 }
 
-void RigidRegistration::StartRegistration(vnl_vector<double>& params) {
+int RigidRegistration::StartRegistration(vnl_vector<double>& params) {
   vnl_lbfgsb minimizer(*func_);
   SetRigidTransformBound(this->d_, &minimizer);
   //double fxval;
@@ -74,7 +74,7 @@ void RigidRegistration::StartRegistration(vnl_vector<double>& params) {
         << "Evaluations: " << minimizer.get_num_evaluations() << vcl_endl;
       vcl_cout << params << vcl_endl;
       */
-      break;
+      return -1;
     }
     /*
     fxval = func->f( params );
@@ -84,6 +84,8 @@ void RigidRegistration::StartRegistration(vnl_vector<double>& params) {
     */
   }
   vcl_cout << "Solution: " << params << vcl_endl;
+
+  return 0;
 }
 
 int RigidRegistration::SetInitParams(const char* f_config) {

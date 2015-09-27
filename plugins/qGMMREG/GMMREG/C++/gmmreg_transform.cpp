@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream>
+#include <assert.h>
 
 #include <vnl/algo/vnl_qr.h>
 
 #ifdef WIN32
 #include <windows.h>
-#include <assert.h>
 #else
 #include "port_ini.h"
 #endif
@@ -16,24 +16,23 @@
 namespace gmmreg {
 
 int ThinPlateSplineTransform(const char* f_config) {
-  vnl_matrix<double> model, /*scene,*/ ctrl_pts, source, transformed_source;
+  vnl_matrix<double> model, scene, ctrl_pts, /*source,*/ transformed_source;
   char f_model[256] = {0}, f_scene[256] = {0};
   char common_section[80] = "FILES";
 
-  DWORD error = GetPrivateProfileString(common_section, "model", NULL,
+  GetPrivateProfileString(common_section, "model", NULL,
       f_model, 256, f_config);
-  printf("model file: %s (%i)\n", f_model, GetLastError());
   if (LoadMatrixFromTxt(f_model, model) < 0) {
     return -1;
   }
   int d = model.cols();
 
-  //GetPrivateProfileString(common_section, "scene", NULL,
-  //    f_scene, 256, f_config);
-  //if (LoadMatrixFromTxt(f_scene, scene) < 0) {
-  //  return -1;
-  //}
-  //assert(scene.cols() == d);
+  GetPrivateProfileString(common_section, "scene", NULL,
+      f_scene, 256, f_config);
+  if (LoadMatrixFromTxt(f_scene, scene) < 0) {
+    return -1;
+  }
+  assert(scene.cols() == d);
 
   char f_ctrl_pts[256] = {0};
   GetPrivateProfileString(common_section, "ctrl_pts", NULL,
@@ -44,14 +43,14 @@ int ThinPlateSplineTransform(const char* f_config) {
   assert(ctrl_pts.cols() == d);
   int n = ctrl_pts.rows();
 
-  char f_source[256] = {0};
-  GetPrivateProfileString(common_section, "source", NULL,
-      f_source, 256, f_config);
-  if (LoadMatrixFromTxt(f_source, source) < 0) {
-    return -1;
-  }
-  assert(source.cols() == d);
-  int m = source.rows();
+  //char f_source[256] = {0};
+  //GetPrivateProfileString(common_section, "source", NULL,
+  //    f_source, 256, f_config);
+  //if (LoadMatrixFromTxt(f_source, source) < 0) {
+  //  return -1;
+  //}
+  //assert(source.cols() == d);
+  //int m = source.rows();
 
   vnl_matrix<double> affine, tps;
   char f_init_affine[256] = {0}, f_init_tps[256] = {0};
@@ -88,9 +87,9 @@ int ThinPlateSplineTransform(const char* f_config) {
   if (b_normalize) {
     Normalize(ctrl_pts, ctrl_centroid, ctrl_scale);
     Normalize(model, model_centroid, model_scale);
-    //Normalize(scene, scene_centroid, scene_scale);
+    Normalize(scene, scene_centroid, scene_scale);
     // perform normalization to source w.r.t to model space
-    Denormalize(source, -model_centroid/model_scale, 1.0/model_scale);
+    //Denormalize(source, -model_centroid/model_scale, 1.0/model_scale);
   }
 
   vnl_matrix<double> K, U;

@@ -33,7 +33,7 @@ int GrbfRegistration::PrepareInput(const char* f_config) {
   return 0;
 }
 
-void GrbfRegistration::StartRegistration(vnl_vector<double>& params) {
+int GrbfRegistration::StartRegistration(vnl_vector<double>& params) {
   vnl_lbfgs minimizer(*func_);
   func_->SetBase(this);
   for (unsigned int k = 0; k < level_; ++k) {
@@ -46,10 +46,12 @@ void GrbfRegistration::StartRegistration(vnl_vector<double>& params) {
     // For more options, see
     // http://public.kitware.com/vxl/doc/release/core/vnl/html/vnl__nonlinear__minimizer_8h-source.html
     minimizer.minimize(params);
-    if (minimizer.get_failure_code() < 0) {
-      break;
+    if (minimizer.get_failure_code() < 0)
+	{
+      return -1;
     }
   }
+  return 0;
 }
 
 int GrbfRegistration::SetInitParams(const char* f_config) {

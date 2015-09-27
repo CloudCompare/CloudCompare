@@ -25,7 +25,7 @@ class RigidRegistration: public Base {
   vnl_vector<double> param_rigid_;
   RigidFunc* func_;
 
-  void StartRegistration(vnl_vector<double>&) override;
+  int StartRegistration(vnl_vector<double>&) override;
   int SetInitRigid(const char*);
   void SetParam(vnl_vector<double>&);
   int SetInitParams(const char*) override;

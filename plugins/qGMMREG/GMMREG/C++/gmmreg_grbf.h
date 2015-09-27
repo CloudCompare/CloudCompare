@@ -28,7 +28,7 @@ class GrbfRegistration: public Base {
   std::vector<float> v_lambda;
   std::vector<int> v_affine;
 
-  void StartRegistration(vnl_vector<double>&) override;
+  int StartRegistration(vnl_vector<double>&) override;
   int SetInitGrbf(const char* filename);
   void SetParam(vnl_vector<double>& x0);
   void SetGrbf(const vnl_vector<double>&);

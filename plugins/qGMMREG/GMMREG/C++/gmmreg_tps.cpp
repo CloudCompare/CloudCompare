@@ -30,10 +30,11 @@ namespace gmmreg {
 		return 0;
 	}
 
-	void TpsRegistration::StartRegistration(vnl_vector<double>& params) {
+	int TpsRegistration::StartRegistration(vnl_vector<double>& params) {
 		vnl_lbfgs minimizer(*func_);
 		func_->SetBase(this);
-		for (unsigned int k = 0; k < level_; ++k) {
+		for (unsigned int k = 0; k < level_; ++k)
+		{
 			func_->SetScale(v_scale_[k]);
 			func_->SetLambda(v_lambda_[k]);
 			bool b_fix_affine = (v_affine_[k] == 1);
@@ -46,10 +47,11 @@ namespace gmmreg {
 			// http://public.kitware.com/vxl/doc/release/core/vnl/html/vnl__nonlinear__minimizer_8h-source.html
 			minimizer.minimize(params);
 			if (minimizer.get_failure_code() < 0) {
-				break;
+				return -1;
 			}
 		}
 		vcl_cout << "registration done" << vcl_endl;
+		return 0;
 	}
 
 	int TpsRegistration::SetInitParams(const char* f_config) {

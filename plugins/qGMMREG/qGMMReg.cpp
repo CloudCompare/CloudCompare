@@ -30,6 +30,9 @@
 //GMMReg
 #include <gmmreg_tps.h>
 
+//dialog
+#include "ui_qGMMRegDialog.h"
+
 //Qt
 #include <QtGui>
 #include <QInputDialog>
@@ -93,6 +96,66 @@ static bool CloudToVNLMatrix(const ccGenericPointCloud* cloud, vnl_matrix<double
 	return true;
 }
 
+//! Dialog for orientation-based classification of facets (qFacets plugin)
+class GMMRegDialog : public QDialog, public Ui::GMMRegDialog
+{
+public:
+
+	//! Default constructor
+	GMMRegDialog(QWidget* parent = 0)
+		: QDialog(parent)
+		, Ui::GMMRegDialog()
+	{
+		setupUi(this);
+		setWindowFlags(Qt::Tool);
+
+		m_stepWidgets.push_back(StepWidgets(step1CheckBox, step1ScaleDoubleSpinBox, step1LambdaDoubleSpinBox, step1MaxIterSpinBox));
+		m_stepWidgets.push_back(StepWidgets(step2CheckBox, step2ScaleDoubleSpinBox, step2LambdaDoubleSpinBox, step2MaxIterSpinBox));
+		m_stepWidgets.push_back(StepWidgets(step3CheckBox, step3ScaleDoubleSpinBox, step3LambdaDoubleSpinBox, step3MaxIterSpinBox));
+	}
+
+	struct StepWidgets
+	{
+		StepWidgets(QCheckBox* c, QDoubleSpinBox*s, QDoubleSpinBox* l, QSpinBox* m) : checkbox(c), scale(s), lambda(l), maxIter(m) {}
+
+		QCheckBox* checkbox;
+		QDoubleSpinBox *scale, *lambda;
+		QSpinBox* maxIter;
+	};
+
+	struct StepValues
+	{
+		StepValues()
+			: enabled(false)
+			, scale(0)
+			, lambda(0)
+			, maxIter(0)
+		{}
+
+		StepValues(const StepWidgets& w)
+			: enabled(w.checkbox->isChecked())
+			, scale(w.scale->value())
+			, lambda(w.lambda->value())
+			, maxIter(w.maxIter->value())
+		{}
+
+		bool enabled;
+		double scale;
+		double lambda;
+		int maxIter;
+	};
+
+	static void SetWidgetValues(StepWidgets& w, const StepValues& v)
+	{
+		w.checkbox->setChecked(v.enabled);
+		w.scale->setValue(v.scale);
+		w.lambda->setValue(v.lambda);
+		w.maxIter->setValue(v.maxIter);
+	}
+
+	std::vector<StepWidgets> m_stepWidgets;
+};
+
 void qGMMRegPlugin::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
@@ -147,60 +210,103 @@ void qGMMRegPlugin::doAction()
 	data = ocDlg.getFirstEntity();
 	model = ocDlg.getSecondEntity();
 
+	ccGenericPointCloud* d = ccHObjectCaster::ToGenericPointCloud(data);
+	ccGenericPointCloud* m = ccHObjectCaster::ToGenericPointCloud(model);
+	if (!d || !m)
+	{
+		assert(false);
+		return;
+	}
+
+	GMMRegDialog regDlg(m_app ? m_app->getMainWindow() : 0);
+
+	//display a warning message if the clouds are too big
+	regDlg.cloudSizeWarningLabel->setVisible(std::max(d->size(), m->size()) > 5000);
+
+	//semi-persistent settings
+	size_t maxStepCount = regDlg.m_stepWidgets.size();
+	static std::vector<GMMRegDialog::StepValues> s_params(maxStepCount);
+	static bool s_firstTime = true;
+	static bool s_useControlPoints = true;
+	static int s_ctrlPtsCount = 500;
+	if (!s_firstTime)
+	{
+		//init dialog with last time parameters
+		for (size_t i=0; i<maxStepCount; ++i)
+			GMMRegDialog::SetWidgetValues(regDlg.m_stepWidgets[i], s_params[i]);
+		regDlg.useCtrlPtsCheckBox->setChecked(s_useControlPoints);
+		regDlg.ctrlPtsSpinBox->setValue(s_ctrlPtsCount);
+	}
+
+	if (!regDlg.exec())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	//save parameters for next time (and check some stuff ;)
+	{
+		size_t enabledSteps = 0;
+		for (size_t i=0; i<maxStepCount; ++i)
+		{
+			s_params[i] = GMMRegDialog::StepValues(regDlg.m_stepWidgets[i]);
+			if (s_params[i].enabled)
+				++enabledSteps;
+		}
+		s_useControlPoints = regDlg.useCtrlPtsCheckBox->isChecked();
+		s_ctrlPtsCount = regDlg.ctrlPtsSpinBox->value();
+		s_firstTime = false;
+
+		if (enabledSteps == 0)
+		{
+			if (m_app)
+				m_app->dispToConsole("You must enabled at least one step!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
+	}
+
 	//we can now prepare GMMReg
 	gmmreg::TpsRegistration_L2 reg;
-	CCVector3 C(0,0,0); 
 	//gmmreg::TpsRegistration_KC reg;
+	CCVector3 C(0,0,0); 
 	{
-		ccGenericPointCloud* d = ccHObjectCaster::ToGenericPointCloud(data);
-		ccGenericPointCloud* m = ccHObjectCaster::ToGenericPointCloud(model);
 		ccBBox box = d->getOwnBB();
 		box += m->getOwnBB();
-		C = box.getCenter();
+		//C = box.getCenter();
 
 		vnl_matrix<double> dataPts;
+		if (!CloudToVNLMatrix(d, dataPts, C))
 		{
-			if (!CloudToVNLMatrix(d, dataPts, C))
-			{
-				if (m_app)
-					m_app->dispToConsole("Failed to convert data entity to VNL matrix (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				return;
-			}
+			if (m_app)
+				m_app->dispToConsole("Failed to convert data entity to VNL matrix (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
 		}
 
 		vnl_matrix<double> modelPts;
+		if (!CloudToVNLMatrix(m, modelPts, C))
 		{
-			if (!CloudToVNLMatrix(m, modelPts, C))
-			{
-				if (m_app)
-					m_app->dispToConsole("Failed to convert model entity to VNL matrix (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				return;
-			}
+			if (m_app)
+				m_app->dispToConsole("Failed to convert model entity to VNL matrix (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
 		}
 
 		vnl_matrix<double> ctrlPts;
-		bool useControlPoints = true;
-		if (useControlPoints)
+		if (s_useControlPoints)
 		{
-			//ask for the control points number
-			bool ok = false;
-			int count = QInputDialog::getInt(m_app ? m_app->getMainWindow() : 0, "Control points", "Control points =", 500, 100, 1000000, 100, &ok);
-			if (!ok)
-				return;
-			
 			CCVector3 diag = box.getDiagVec();
 			CCVector3 bbMin = box.minCorner();
 
 			//try to get as close as possible with a regular grid
-			PointCoordinateType l = pow((diag.x * diag.y * diag.z) / count, 1.0/3.0);
+			assert(s_ctrlPtsCount >= 1);
+			PointCoordinateType l = pow((diag.x * diag.y * diag.z) / s_ctrlPtsCount, 1.0/3.0);
 			unsigned nx = std::max<unsigned>(2,static_cast<unsigned>(ceil(diag.x / l)));
 			unsigned ny = std::max<unsigned>(2,static_cast<unsigned>(ceil(diag.y / l)));
 			unsigned nz = std::max<unsigned>(2,static_cast<unsigned>(ceil(diag.z / l)));
-			count = nx * ny * nz;
+			unsigned realCount = nx * ny * nz;
 
 			try
 			{
-				ctrlPts.set_size(count,3);
+				ctrlPts.set_size(realCount,3);
 			}
 			catch (...)
 			{
@@ -225,9 +331,12 @@ void qGMMRegPlugin::doAction()
 					for (unsigned i=0; i<nx; ++i, ++n)
 					{
 						P.x = bbMin.x + i * diag.x / (nx-1);
+
+						assert(n < realCount);
 						ctrlPts(n,0) = P.x;
 						ctrlPts(n,1) = P.y;
 						ctrlPts(n,2) = P.z;
+
 #ifdef EXPORT_CONTROL_POINTS
 						if (test)
 							test->addPoint(P);
@@ -248,46 +357,28 @@ void qGMMRegPlugin::doAction()
 		}
 		
 		//parameters
-		unsigned level = 2; //<=3
-		{
-			bool ok = false;
-			level = QInputDialog::getInt(m_app ? m_app->getMainWindow() : 0, "Steps", "steps =", 2, 1, 3, 100, &ok);
-			if (!ok)
-				return;
-		}
+		int normalize = 1;
 		
+		unsigned level = 0; //<=3
 		std::vector<float> v_scale(3);
-		v_scale[0] = 0.5f;
-		v_scale[1] = 0.1f;
-		v_scale[2] = 0.02f;
 		std::vector<int> v_func_evals(3);
-		v_func_evals[0] = 50;
-		v_func_evals[1] = 50;
-		v_func_evals[2] = 100;
 		std::vector<float> v_lambda(3);
-		v_lambda[0] = 0.1;
-		v_lambda[1] = 0;
-		v_lambda[2] = 0;
 		std::vector<int> v_affine(3);
-		v_affine[0] = 0;
-		v_affine[1] = 0;
-		v_affine[2] = 0;
 
-		//ask for the scale(s)
-		for (unsigned i=0; i<level; ++i)
+		for (size_t i=0; i<maxStepCount; ++i)
 		{
-			bool ok = false;
-			double val = QInputDialog::getDouble(m_app ? m_app->getMainWindow() : 0, "Scale", QString("scale(%1) =").arg(i), v_scale[i], 1.0e-3, 10.0, 3, &ok);
-			if (!ok)
-				return;
-			v_scale[i] = static_cast<float>(val);
-
-			int eval = QInputDialog::getInt(m_app ? m_app->getMainWindow() : 0, "Eval. count", QString("eval(%1) =").arg(i), v_func_evals[i], 10, 1000, 100, &ok);
-			if (!ok)
-				return;
-			v_func_evals[i] = eval;
+			if (s_params[i].enabled)
+			{
+				v_scale     [level] = static_cast<float>(s_params[i].scale);
+				v_func_evals[level] = s_params[i].maxIter;
+				v_lambda    [level] = static_cast<float>(s_params[i].lambda);
+				v_affine    [level] = 0;
+				++level;
+			}
 		}
-		
+
+		assert(level >= 1); //see test above
+
 		//multi-scale options
 		if (reg.MultiScaleOptions(level, v_scale, v_func_evals) < 0)
 		{
@@ -305,7 +396,7 @@ void qGMMRegPlugin::doAction()
 		}
   
 		//initialization
-		if (reg.Initialize(dataPts, modelPts, useControlPoints ? &ctrlPts : 0, 0) < 0)
+		if (reg.Initialize(dataPts, modelPts, s_useControlPoints ? &ctrlPts : 0, normalize) < 0)
 		{
 			if (m_app)
 				m_app->dispToConsole("GMM initialization failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);

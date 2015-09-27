@@ -17,6 +17,9 @@ class TpsRegistration: public Base {
     delete func_;
   }
 
+  int PrepareOwnOptions(const std::vector<float>& v_lambda,
+						const std::vector<int>& v_affine);
+
  protected:
   ThinPlateSplineFunc* func_;
 
@@ -34,7 +37,6 @@ class TpsRegistration: public Base {
   int SetInitParams(const char* filename) override;
   void SaveResults(const char* f_config) override;
 
-  int PrepareInput(const vnl_matrix<double>& model, const vnl_matrix<double>& scene) override;
   int PrepareInput(const char* input_config) override;
   void PrepareBasisKernel() override;
   void PrepareParamGradient(bool);

@@ -35,6 +35,7 @@ set( CC_PLUGIN_CUSTOM_UI_LIST           ${CloudCompare_SOURCE_DIR}/ui_templates/
 include( ../CMakePluginTpl.cmake )
 
 #set dependencies to necessary libraries (see qPCV for an example)
+include_directories( ${CloudCompare_SOURCE_DIR} )
 include_directories( ${GMMREG_LIB_SOURCE_DIR} )
 
 target_link_libraries( ${PROJECT_NAME} GMMREG_LIB )

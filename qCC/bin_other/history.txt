@@ -14,6 +14,7 @@ v2.6.2 XX/XX/2015
 		- Shortcut: F10
 		- Also supported by ccViewer
 	* qAnimation plugin (initiated by 2G Robotics - http://www.2grobotics.com/)
+		- animation rendering
 		- prior to use the plugin, the user must create several viewport objects
 			(with CTRL+V or 'Display > Save viewport as object') corresponding to
 			the various 'keypoints' of the animation
@@ -24,6 +25,11 @@ v2.6.2 XX/XX/2015
 		- stereogram display
 		- stereogram based segmentation
 		- export to SHP files
+	* qGMMReg plugin
+		- non-rigid registration of clouds (or mesh vertices)
+		- based on the GMMReg library (https://github.com/bing-jian/gmmreg)
+			(see "Robust Point Set Registration Using Gaussian Mixture Models", B. Jian and B.C. Vemuri, PAMI 2011)
+		- meant to be used on small entities (i.e. a few thousand points)
 	* Gridded/structured clouds handling
 		- CC will now remember the structure of gridded clouds (PTX, DP, FARO, etc.)
 			(see the new 'Scan grid' section of the cloud properties)

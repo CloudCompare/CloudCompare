@@ -40,7 +40,7 @@ public:
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "qGMMRegPlugin"; }
-	virtual QString getDescription() const { return "GMMReg plugin (for non rigid registration)"; }
+	virtual QString getDescription() const { return "Non-rigid registration (based on the work by Jian and Vemuri)"; }
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface

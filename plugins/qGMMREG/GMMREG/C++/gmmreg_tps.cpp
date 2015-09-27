@@ -203,7 +203,7 @@ namespace gmmreg {
 	}
 
 	int TpsRegistration::PrepareOwnOptions(	const std::vector<float>& v_lambda,
-											const std::vector<int>& v_affine)
+		const std::vector<int>& v_affine)
 	{
 		try
 		{
@@ -223,8 +223,7 @@ namespace gmmreg {
 		}
 
 		return 0;
-  }
-
+	}
 
 	void TpsRegistration::SetParam(vnl_vector<double>& x0) {
 		int k = 0;

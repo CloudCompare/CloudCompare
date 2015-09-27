@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Non-rigid registration</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="qGMMReg.qrc">
+    <normaloff>:/CC/plugin/qGMMRegPlugin/icon.png</normaloff>:/CC/plugin/qGMMRegPlugin/icon.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTextEdit" name="textEdit">
@@ -336,6 +340,30 @@ or not (in which case the aligned points will be used)</string>
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>algorithm</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="algoComboBox">
+       <property name="toolTip">
+        <string>Choose between TPS (Thin Plate Splines) or GRBF (Gaussian Radial Basis Functions)</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>TPS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>GRBF</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -363,7 +391,9 @@ or not (in which case the aligned points will be used)</string>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="qGMMReg.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

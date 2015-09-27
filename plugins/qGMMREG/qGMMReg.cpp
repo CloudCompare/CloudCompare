@@ -29,13 +29,24 @@
 
 //GMMReg
 #include <gmmreg_tps.h>
+#include <gmmreg_grbf.h>
 
 //dialog
 #include "ui_qGMMRegDialog.h"
 
 //Qt
 #include <QtGui>
-#include <QInputDialog>
+#include <QElapsedTimer>
+#include <QProgressDialog>
+#include <QtConcurrentRun>
+
+//system
+#if defined(CC_WINDOWS)
+#include "Windows.h"
+#else
+#include <time.h>
+#include <unistd.h>
+#endif
 
 //Default constructor: should mainly be used to initialize
 //actions (pointers) and other members
@@ -156,6 +167,20 @@ public:
 	std::vector<StepWidgets> m_stepWidgets;
 };
 
+gmmreg::Base* s_reg = 0;
+bool doPerformRegistration()
+{
+	if (s_reg)
+	{
+		return (s_reg->Run() >= 0);
+	}
+	else
+	{
+		assert(false);
+		return false;
+	}
+}
+
 void qGMMRegPlugin::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
@@ -229,6 +254,7 @@ void qGMMRegPlugin::doAction()
 	static bool s_firstTime = true;
 	static bool s_useControlPoints = true;
 	static int s_ctrlPtsCount = 500;
+	static int s_algoIndex = 0;
 	if (!s_firstTime)
 	{
 		//init dialog with last time parameters
@@ -236,6 +262,7 @@ void qGMMRegPlugin::doAction()
 			GMMRegDialog::SetWidgetValues(regDlg.m_stepWidgets[i], s_params[i]);
 		regDlg.useCtrlPtsCheckBox->setChecked(s_useControlPoints);
 		regDlg.ctrlPtsSpinBox->setValue(s_ctrlPtsCount);
+		regDlg.algoComboBox->setCurrentIndex(s_algoIndex);
 	}
 
 	if (!regDlg.exec())
@@ -255,6 +282,7 @@ void qGMMRegPlugin::doAction()
 		}
 		s_useControlPoints = regDlg.useCtrlPtsCheckBox->isChecked();
 		s_ctrlPtsCount = regDlg.ctrlPtsSpinBox->value();
+		s_algoIndex = regDlg.algoComboBox->currentIndex();
 		s_firstTime = false;
 
 		if (enabledSteps == 0)
@@ -266,10 +294,20 @@ void qGMMRegPlugin::doAction()
 	}
 
 	//we can now prepare GMMReg
-	gmmreg::TpsRegistration_L2 reg;
-	//gmmreg::TpsRegistration_KC reg;
-	CCVector3 C(0,0,0); 
+	gmmreg::TpsRegistration_L2 tpsReg;
+	gmmreg::GrbfRegistration_L2 grbfReg;
+	gmmreg::Base* reg = s_algoIndex == 0 ? static_cast<gmmreg::Base*>(&tpsReg) : static_cast<gmmreg::Base*>(&grbfReg);
+
+	CCVector3 C(0,0,0);
 	{
+		QProgressDialog progressDlg("Initialization in progress...", QString(), 0, 0, m_app ? m_app->getMainWindow() : 0);
+		progressDlg.setWindowTitle("Non-rigid registration");
+		progressDlg.show();
+		QApplication::processEvents();
+
+		QElapsedTimer timer;
+		timer.start();
+
 		ccBBox box = d->getOwnBB();
 		box += m->getOwnBB();
 		//C = box.getCenter();
@@ -377,36 +415,74 @@ void qGMMRegPlugin::doAction()
 			}
 		}
 
-		assert(level >= 1); //see test above
+		assert(level >= 1 && level <= 3); //see previous tests
 
 		//multi-scale options
-		if (reg.MultiScaleOptions(level, v_scale, v_func_evals) < 0)
+		if (reg->MultiScaleOptions(level, v_scale, v_func_evals) < 0)
 		{
 			if (m_app)
 				m_app->dispToConsole("Mutli-scale options setting failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 
-		//TPS options
-		if (reg.PrepareOwnOptions(v_lambda, v_affine) < 0)
+		if (reg == &tpsReg)
 		{
-			if (m_app)
-				m_app->dispToConsole("TPS options setting failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return;
+			//TPS options
+			if (tpsReg.PrepareOwnOptions(v_lambda, v_affine) < 0)
+			{
+				if (m_app)
+					m_app->dispToConsole("TPS options setting failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				return;
+			}
+		}
+		else if (reg == &grbfReg)
+		{
+			//GRBF options
+			if (grbfReg.PrepareOwnOptions(v_lambda) < 0)
+			{
+				if (m_app)
+					m_app->dispToConsole("GRBF options setting failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				return;
+			}
 		}
   
 		//initialization
-		if (reg.Initialize(dataPts, modelPts, s_useControlPoints ? &ctrlPts : 0, normalize) < 0)
+		if (reg->Initialize(dataPts, modelPts, s_useControlPoints ? &ctrlPts : 0, normalize) < 0)
 		{
 			if (m_app)
 				m_app->dispToConsole("GMM initialization failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
+
+		qint64 intiTime_ms = timer.elapsed();
+		if (m_app)
+			m_app->dispToConsole(QString("[GMMReg] Initialization done (%1 msec)").arg(intiTime_ms), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 		
+		progressDlg.setLabelText("Registration in progress... please wait...");
+		QApplication::processEvents();
+
 		try
 		{
-			//eventually we can run the registration
-			if (reg.Run() < 0)
+			//eventually we can run the registration (in a separate thread)
+			s_reg = reg;
+			QFuture<bool> future = QtConcurrent::run(doPerformRegistration);
+
+			//wait until process is finished!
+			while (!future.isFinished())
+			{
+#if defined(CC_WINDOWS)
+				::Sleep(500);
+#else
+				usleep(500 * 1000);
+#endif
+
+				progressDlg.setValue(progressDlg.value()+1);
+				QApplication::processEvents();
+			}
+
+			s_reg = 0;
+
+			if (!future.result())
 			{
 				if (m_app)
 					m_app->dispToConsole("GMM registration failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -419,9 +495,16 @@ void qGMMRegPlugin::doAction()
 				m_app->dispToConsole("Unknown exception caught", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
+
+		qint64 endTime_ms = timer.elapsed();
+		if (m_app)
+		{
+			m_app->dispToConsole(QString("[GMMReg] Registration done (%1 msec)").arg(endTime_ms-intiTime_ms), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("[GMMReg] Total time: %1 s.").arg(endTime_ms / 1000.0), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
 	}
 	
-	const vnl_matrix<double>& outputMatrix = reg.transformedModel();
+	const vnl_matrix<double>& outputMatrix = reg->transformedModel();
 
 	ccHObject* clonedData = 0;
 	if (data->isKindOf(CC_TYPES::POINT_CLOUD))

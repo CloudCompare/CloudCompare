@@ -18,6 +18,17 @@
 
 namespace gmmreg {
 
+int GrbfRegistration::PrepareInput(const vnl_matrix<double>& model, const vnl_matrix<double>& scene, const vnl_matrix<double>* control)
+{
+	if (Base::PrepareInput(model, scene, control) < 0)
+		return -1;
+
+	//TODO: let the caller set this parameter!
+	beta_ = 1;
+
+	return 0;
+}
+
 int GrbfRegistration::PrepareInput(const char* f_config) {
   Base::PrepareInput(f_config);
   char f_ctrl_pts[80] = {0};
@@ -111,21 +122,42 @@ void GrbfRegistration::SaveResults(const char* f_config) {
   SaveMatrixToAsciiFile(f_final_grbf, param_grbf_);
 }
 
+int GrbfRegistration::PrepareOwnOptions(const std::vector<float>& lambda)
+{
+	try
+	{
+		v_lambda = lambda;
+	}
+	catch (const std::bad_alloc&)
+	{
+		std::cerr<< " not enough memory " << std::endl;
+		return -1;
+	}
+
+	if (v_lambda.size() < level_)
+	{
+		std::cerr<< " too many levels " << std::endl;
+		return -1;
+	}
+
+	return 0;
+}
+
+
 int GrbfRegistration::PrepareOwnOptions(const char* f_config)
 {
-  if (MultiScaleOptions(f_config) < 0)
-	  return -1;
-  char delims[] = " -,;";
-  char s_lambda[256] = {0};
-  GetPrivateProfileString(section_, "lambda", NULL, s_lambda, 255, f_config);
-  utils::parse_tokens(s_lambda, delims, v_lambda);
-  if (v_lambda.size() < level_)
-  {
-    std::cerr << " too many levels " << std::endl;
-    return -1;
-  }
+	assert(f_config);
+	if (MultiScaleOptions(f_config) < 0)
+		return -1;
 
-  return 0;
+	static char delims[] = " -,;";
+	char s_lambda[256] = {0};
+	GetPrivateProfileString(section_, "lambda", NULL, s_lambda, 255, f_config);
+
+	std::vector<float> lambda;
+	utils::parse_tokens(s_lambda, delims, lambda);
+
+	return PrepareOwnOptions(lambda);
 }
 
 void GrbfRegistration::SetParam(vnl_vector<double>& x0) {

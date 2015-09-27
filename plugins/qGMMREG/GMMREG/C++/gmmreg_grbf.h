@@ -17,6 +17,8 @@ class GrbfRegistration: public Base {
     delete func_;
   }
 
+  int PrepareOwnOptions(const std::vector<float>& v_lambda);
+
  protected:
   GaussianRadialBasisFunc *func_;
 
@@ -35,6 +37,7 @@ class GrbfRegistration: public Base {
   int SetInitParams(const char* filename) override;
   void SaveResults(const char* f_config) override;
 
+  int PrepareInput(const vnl_matrix<double>& model, const vnl_matrix<double>& scene, const vnl_matrix<double>* control) override;
   int PrepareInput(const char* input_config) override;
   void PrepareBasisKernel();
   void PrepareParamGradient(bool);

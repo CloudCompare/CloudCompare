@@ -2227,6 +2227,11 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	assert(!m_viewportParams.perspectiveView); //a scale is only valid in ortho. mode!
 
 	float scaleMaxW = static_cast<float>(m_glWidth) / 4; //25% of screen width
+	if (m_captureMode.enabled)
+	{
+		//DGM: we have to fall back to the case 'render zoom = 1' (otherwise we might not get the exact same aspect)
+		scaleMaxW /= m_captureMode.zoomFactor;
+	}
 	if (m_viewportParams.zoom < CC_GL_MIN_ZOOM_RATIO)
 	{
 		assert(false);
@@ -2243,6 +2248,11 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 
 	//we deduce the scale drawing width
 	float scaleW_pix = equivalentWidth / m_viewportParams.pixelSize * m_viewportParams.zoom;
+	if (m_captureMode.enabled)
+	{
+		//we can now safely apply the rendering zoom
+		scaleW_pix *= m_captureMode.zoomFactor;
+	}
 	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 	float dW = 2.0f * trihedronLength + 20.0f;
 	float dH = std::max<float>(fm.height() * 1.25f,trihedronLength + 5.0f);
@@ -2261,7 +2271,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glVertex3f(w,-h-tick,0.0);
 	glEnd();
 
-	QString text = QString::number(m_captureMode.enabled ? RoundScale(equivalentWidthRaw/m_captureMode.zoomFactor) : equivalentWidth);
+	QString text = QString::number(equivalentWidth);
 	glColor3ubv_safe(color.rgb);
 	renderText(m_glWidth-static_cast<int>(scaleW_pix/2+dW)-fm.width(text)/2, m_glHeight-static_cast<int>(dH/2)+fm.height()/3, text, font);
 }

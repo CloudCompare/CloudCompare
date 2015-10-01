@@ -179,6 +179,7 @@ v2.6.2 XX/XX/2015
 	* Rasterize: saving a raster with the currently displayed scalar field as additioanl layer would make CC crash (+ memory leak fixed)
 	* Point-pair based alignment: the markers picked on the aligned entity could become very big (or very small) when the scale was to be adjusted
 		and the scale of the aligned entity was very different from the reference one.
+	* The 'Apply Transformation' tool can now be applied on primitives
 
 v2.6.1 02/20/2015
 - New features:

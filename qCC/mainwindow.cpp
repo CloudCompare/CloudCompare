@@ -1747,110 +1747,114 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	{
 		ccHObject* ent = selectedEntities[i];
 
-		//specific test for locked vertices
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (cloud)
+		//we don't test primitives (it's always ok while the 'vertices lock' test would fail)
+		if (!ent->isKindOf(CC_TYPES::PRIMITIVE))
 		{
-			if (lockedVertices)
+			//specific test for locked vertices
+			bool lockedVertices;
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			if (cloud)
 			{
-				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-				continue;
-			}
-
-			if (firstCloud)
-			{
-				//test if the translated cloud was already "too big"
-				//(in which case we won't bother the user about the fact
-				//that the transformed cloud will be too big...)
-				ccBBox localBBox = ent->getOwnBB();
-				CCVector3d Pl = CCVector3d::fromArray(localBBox.minCorner().u);
-				double Dl = localBBox.getDiagNormd();
-
-				//the cloud was alright
-				if (	!ccGlobalShiftManager::NeedShift(Pl)
-					&&	!ccGlobalShiftManager::NeedRescale(Dl))
+				if (lockedVertices)
 				{
-					//test if the translated cloud is not "too big" (in local coordinate space)
-					ccBBox rotatedBox = ent->getOwnBB() * transMat;
-					double Dl2 = rotatedBox.getDiagNorm();
-					CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
-
-					bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
-					bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
-
-					if (needShift || needRescale)
-					{
-						//existing shift information
-						CCVector3d globalShift = cloud->getGlobalShift();
-						double globalScale = cloud->getGlobalScale();
-			
-						//we compute the transformation matrix in the global coordinate space
-						ccGLMatrixd globalTransMat = transMat;
-						globalTransMat.scale(1.0/globalScale);
-						globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
-						//and we apply it to the cloud bounding-box
-						ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
-						double Dg = rotatedBox.getDiagNorm();
-						CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
-
-						//ask the user the right values!
-						ccShiftAndScaleCloudDlg sasDlg(Pl2,Dl2,Pg,Dg,this);
-						sasDlg.showApplyAllButton(false);
-						sasDlg.showTitle(true);
-						sasDlg.setKeepGlobalPos(true);
-						sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
-
-						//add "original" entry
-						int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
-						//sasDlg.setCurrentProfile(index);
-						//add "suggested" entry
-						CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
-						double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-						index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
-						sasDlg.setCurrentProfile(index);
-						//add "last" entry (if available)
-						ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-						if (sasDlg.getLast(lastInfo))
-							sasDlg.addShiftInfo(lastInfo);
-						//add entries from file (if any)
-						sasDlg.addFileInfo();
-
-						if (sasDlg.exec())
-						{
-							//get the relative modification to existing global shift/scale info
-							assert(cloud->getGlobalScale() != 0);
-							scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
-							shiftChange =  (sasDlg.getShift() - cloud->getGlobalShift());
-
-							updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
-
-							//update transformation matrix accordingly
-							if (updateGlobalShiftAndScale)
-							{
-								transMat.scale(scaleChange);
-								transMat.setTranslation(transMat.getTranslationAsVec3D()+shiftChange*scaleChange);
-							}
-						}
-						else if (sasDlg.cancelled())
-						{
-							ccLog::Warning("[ApplyTransformation] Process cancelled by user");
-							return;
-						}
-					}
+					DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+					continue;
 				}
 
-				firstCloud = false;
-			}
+				if (firstCloud)
+				{
+					//test if the translated cloud was already "too big"
+					//(in which case we won't bother the user about the fact
+					//that the transformed cloud will be too big...)
+					ccBBox localBBox = ent->getOwnBB();
+					CCVector3d Pl = CCVector3d::fromArray(localBBox.minCorner().u);
+					double Dl = localBBox.getDiagNormd();
 
-			if (updateGlobalShiftAndScale)
-			{
-				//apply translation as global shift
-				cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
-				cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
-				const CCVector3d& T = cloud->getGlobalShift();
-				double scale = cloud->getGlobalScale();
-				ccLog::Warning(QString("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
+					//the cloud was alright
+					if (	!ccGlobalShiftManager::NeedShift(Pl)
+						&&	!ccGlobalShiftManager::NeedRescale(Dl))
+					{
+						//test if the translated cloud is not "too big" (in local coordinate space)
+						ccBBox rotatedBox = ent->getOwnBB() * transMat;
+						double Dl2 = rotatedBox.getDiagNorm();
+						CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
+
+						bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
+						bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
+
+						if (needShift || needRescale)
+						{
+							//existing shift information
+							CCVector3d globalShift = cloud->getGlobalShift();
+							double globalScale = cloud->getGlobalScale();
+			
+							//we compute the transformation matrix in the global coordinate space
+							ccGLMatrixd globalTransMat = transMat;
+							globalTransMat.scale(1.0/globalScale);
+							globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
+							//and we apply it to the cloud bounding-box
+							ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
+							double Dg = rotatedBox.getDiagNorm();
+							CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
+
+							//ask the user the right values!
+							ccShiftAndScaleCloudDlg sasDlg(Pl2,Dl2,Pg,Dg,this);
+							sasDlg.showApplyAllButton(false);
+							sasDlg.showTitle(true);
+							sasDlg.setKeepGlobalPos(true);
+							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
+
+							//add "original" entry
+							int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
+							//sasDlg.setCurrentProfile(index);
+							//add "suggested" entry
+							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
+							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
+							index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
+							sasDlg.setCurrentProfile(index);
+							//add "last" entry (if available)
+							ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
+							if (sasDlg.getLast(lastInfo))
+								sasDlg.addShiftInfo(lastInfo);
+							//add entries from file (if any)
+							sasDlg.addFileInfo();
+
+							if (sasDlg.exec())
+							{
+								//get the relative modification to existing global shift/scale info
+								assert(cloud->getGlobalScale() != 0);
+								scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
+								shiftChange =  (sasDlg.getShift() - cloud->getGlobalShift());
+
+								updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
+
+								//update transformation matrix accordingly
+								if (updateGlobalShiftAndScale)
+								{
+									transMat.scale(scaleChange);
+									transMat.setTranslation(transMat.getTranslationAsVec3D()+shiftChange*scaleChange);
+								}
+							}
+							else if (sasDlg.cancelled())
+							{
+								ccLog::Warning("[ApplyTransformation] Process cancelled by user");
+								return;
+							}
+						}
+					}
+
+					firstCloud = false;
+				}
+
+				if (updateGlobalShiftAndScale)
+				{
+					//apply translation as global shift
+					cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
+					cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
+					const CCVector3d& T = cloud->getGlobalShift();
+					double scale = cloud->getGlobalScale();
+					ccLog::Warning(QString("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
+				}
 			}
 		}
 

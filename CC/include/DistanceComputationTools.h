@@ -152,7 +152,8 @@ public: //distance to clouds or meshes
 		ScalarType maxSearchDist;
 
 		//! Use distance map (acceleration)
-		/** If true, the distances over "maxSearchDist" will be aproximated by a Distance Transform
+		/** If true the distances will be aproximated by a Distance Transform.
+			\warning Incompatible with signed distances or Closest Point Set.
 		**/
 		bool useDistanceMap;
 

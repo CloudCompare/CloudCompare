@@ -1017,6 +1017,12 @@ void ComparePointsAndTriangles(	ReferenceCloud& Yk,
 	}
 }
 
+
+int ComputeMaxNeighborhoodLength(ScalarType maxSearchDist, PointCoordinateType cellSize)
+{
+	return static_cast<int>(ceil(maxSearchDist / cellSize + static_cast<ScalarType>((sqrt(2.0) - 1.0) / 2)));
+}
+
 #ifdef ENABLE_CLOUD2MESH_DIST_MT
 
 #include <QtCore>
@@ -1088,6 +1094,24 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	}
 	int maxDist = maxDistToBoundaries;
 
+	if (s_params_MT.maxSearchDist > 0)
+	{
+		//no need to look farther than 'maxNeighbourhoodLength'
+		int maxNeighbourhoodLength = ComputeMaxNeighborhoodLength(s_params_MT.maxSearchDist, s_octree_MT->getCellSize(s_params_MT.octreeLevel));
+		if (maxNeighbourhoodLength < maxDist)
+			maxDist = maxNeighbourhoodLength;
+
+		ScalarType maxDistance = s_params_MT.maxSearchDist;
+		if (!s_params_MT.signedDistances)
+		{
+			//we compute squared distances when not in 'signed' mode!
+			maxDistance = s_params_MT.maxSearchDist*s_params_MT.maxSearchDist;
+		}
+
+		for (unsigned j = 0; j < remainingPoints; ++j)
+			Yk.setPointScalarValue(j, maxDistance);
+	}
+
 	//determine the cell center
 	CCVector3 cellCenter;
 	s_octree_MT->computeCellCenter(startPos, s_params_MT.octreeLevel, cellCenter);
@@ -1138,12 +1162,9 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	CCVector3 nearestPoint;
 	CCVector3* _nearestPoint = s_params_MT.CPSet ? &nearestPoint : 0;
 
-	//recurrence initialization
-	ScalarType maxRadius = 0;
-	int dist = 0;
-
 	//let's find the nearest triangles for each point in the neighborhood 'Yk'
-	while (remainingPoints != 0 && dist <= maxDist)
+	ScalarType maxRadius = 0;
+	for (int dist = 0; remainingPoints != 0 && dist <= maxDist; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
 	{
 		//test the neighbor cells at distance = 'dist'
 		//a,b,c,d,e,f are the extents of this neighborhood
@@ -1273,9 +1294,6 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		}
 
 		ComparePointsAndTriangles(Yk, remainingPoints, s_intersection_MT->mesh, trianglesToTest, trianglesToTestCount, minDists, maxRadius, s_params_MT);
-
-		++dist;
-		maxRadius += static_cast<ScalarType>(cellLength);
 	}
 
 	//release bit mask
@@ -1337,20 +1355,13 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		}
 
 		unsigned numberOfCells = static_cast<unsigned>(cellCodesAndIndexes.size());
+		bool boundedSearch = (params.maxSearchDist > 0);
 
 		DgmOctree::cellsContainer::const_iterator pCodeAndIndex = cellCodesAndIndexes.begin();
 		ReferenceCloud Yk(octree->associatedCloud());
 
-		//bounded search
-		bool boundedSearch = (params.maxSearchDist > 0);
-		int maxNeighbourhoodLength = 0; //maximale neighbors search distance (if maxSearchDist is defined)
-		if (boundedSearch)
-		{
-			maxNeighbourhoodLength = static_cast<int>(ceil(params.maxSearchDist / cellLength + static_cast<ScalarType>((sqrt(2.0) - 1.0) / 2)));
-		}
-
 		//if we only need approximate distances
-		if (intersection->distanceTransform && !boundedSearch)
+		if (intersection->distanceTransform)
 		{
 			//for each cell
 			for (unsigned i = 0; i < numberOfCells; ++i, ++pCodeAndIndex)
@@ -1367,6 +1378,11 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 				//assign the distance to all points inside this cell
 				ScalarType maxRadius = sqrt(static_cast<ScalarType>(squareDist)) * cellLength;
+
+				if (boundedSearch && maxRadius > params.maxSearchDist)
+				{
+					maxRadius = params.maxSearchDist;
+				}
 
 				unsigned count = Yk.size();
 				for (unsigned j = 0; j < count; ++j)
@@ -1418,7 +1434,12 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		CCVector3 nearestPoint;
 		CCVector3* _nearestPoint = params.CPSet ? &nearestPoint : 0;
 
-		ScalarType maxSearchDist = params.maxSearchDist;
+		//maximal neighbors search distance (if maxSearchDist is defined)
+		int maxNeighbourhoodLength = 0; 
+		if (boundedSearch)
+		{
+			maxNeighbourhoodLength = ComputeMaxNeighborhoodLength(params.maxSearchDist, cellLength);
+		}
 
 		//for each cell
 		for (unsigned cellIndex = 1; cellIndex <= numberOfCells; ++cellIndex, ++pCodeAndIndex) //cellIndex = unique ID for the current cell
@@ -1447,20 +1468,6 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 			//express 'startPos' relatively to the grid borders
 			startPos -= intersection->minFillIndexes;
 
-			ScalarType maxRadius = 0;
-			int dist = 0;
-			if (intersection->distanceTransform)
-			{
-				unsigned squareDist = intersection->distanceTransform->getValue(startPos);
-				maxRadius = sqrt(static_cast<ScalarType>(squareDist)) * cellLength;
-
-				//if (boundedSearch)  //should always be true if we are here!
-				{
-					if (maxRadius > maxSearchDist)
-						maxSearchDist = maxRadius;
-				}
-			}
-
 			//minDists.clear(); //not necessary 
 			unsigned remainingPoints = Yk.size();
 			if (minDists.size() < remainingPoints)
@@ -1484,19 +1491,27 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 				minDists[j] = static_cast<ScalarType>(DgmOctree::ComputeMinDistanceToCellBorder(*tempPt, cellLength, cellCenter));
 			}
 
-			//boundedSearch: compute the accurate distance below 'maxSearchDist'
-			//and use the Distance Transform above
 			if (boundedSearch)
 			{
 				//no need to look farther than 'maxNeighbourhoodLength'
-				maxDist = std::min(maxDistToBoundaries, maxNeighbourhoodLength);
+				if (maxNeighbourhoodLength < maxDist)
+					maxDist = maxNeighbourhoodLength;
 
+				//we compute squared distances when not in 'signed' mode!
+				ScalarType maxDistance = params.maxSearchDist;
+				if (!params.signedDistances)
+				{
+					//we compute squared distances when not in 'signed' mode!
+					maxDistance = params.maxSearchDist*params.maxSearchDist;
+				}
+				
 				for (unsigned j = 0; j < remainingPoints; ++j)
-					Yk.setPointScalarValue(j, maxSearchDist);
+					Yk.setPointScalarValue(j, maxDistance);
 			}
 
 			//let's find the nearest triangles for each point in the neighborhood 'Yk'
-			while (remainingPoints != 0 && dist <= maxDist)
+			ScalarType maxRadius = 0;
+			for (int dist = 0; dist <= maxDist && remainingPoints != 0; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
 			{
 				//test the neighbor cells at distance = 'dist'
 				//a,b,c,d,e,f are the extents of this neighborhood
@@ -1626,9 +1641,6 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 				}
 
 				ComparePointsAndTriangles(Yk, remainingPoints, mesh, trianglesToTest, trianglesToTestCount, minDists, maxRadius, params);
-
-				++dist;
-				maxRadius += static_cast<ScalarType>(cellLength);
 			}
 
 			//Yk.clear(); //not necessary
@@ -1798,22 +1810,6 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		}
 	}
 
-	bool boundedSearch = (params.maxSearchDist > 0);
-	params.multiThread &= (!boundedSearch); //MT doesn't support boundedSearch yet!
-	if (!params.useDistanceMap || boundedSearch)
-	{
-		//list of the triangles intersecting each cell of the 3D grid
-		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, 0))
-		{
-			return -4;
-		}
-	}
-	else
-	{
-		//we only compute approximate distances
-		params.multiThread = false; //not necessary/supported
-	}
-
 	//if the user (or the current cloud/mesh configuration) requires that we use a Distance Transform
 	if (params.useDistanceMap)
 	{
@@ -1821,6 +1817,15 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		if ( !intersection.distanceTransform || !intersection.distanceTransform->initGrid(gridSize))
 		{
 			return -5;
+		}
+		params.multiThread = false; //not necessary/supported
+	}
+	else
+	{
+		//we need to build the list of triangles intersecting each cell of the 3D grid
+		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, 0))
+		{
+			return -4;
 		}
 	}
 
@@ -1844,14 +1849,11 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	//WE CAN EVENTUALLY COMPUTE THE DISTANCES!
 	result = computeCloud2MeshDistanceWithOctree(&intersection, params, progressCb);
 
-	//special operation for non-signed distances
-	if (result == 0 && !params.signedDistances)
+	//don't forget to compute the square root of the (squared) unsigned distances
+	if (result == 0 && !params.signedDistances && !params.useDistanceMap)
 	{
-		//don't forget to pass the result to the square root
-		if (!params.useDistanceMap || boundedSearch)
-			pointCloud->forEach(applySqrtToPointDist);
+		pointCloud->forEach(applySqrtToPointDist);
 	}
-
 
 	if (result < 0)
 	{

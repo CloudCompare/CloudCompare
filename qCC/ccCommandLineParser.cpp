@@ -2626,8 +2626,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	}
 	if (octreeLevel > 0)
 	{
-		compDlg.octreeLevelCheckBox->setChecked(true);
-		compDlg.octreeLevelSpinBox->setValue(octreeLevel);
+		compDlg.octreeLevelComboBox->setCurrentIndex(octreeLevel);
 	}
 
 	//C2M-only parameters
@@ -2661,7 +2660,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 		}
 	}
 
-	if (!compDlg.compute())
+	if (!compDlg.computeDistances())
 	{
 		compDlg.cancelAndExit();
 		return Error("An error occured during distances computation!");

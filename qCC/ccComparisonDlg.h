@@ -60,23 +60,21 @@ public:
 	ccHObject* getReferenceEntity() { return m_refEnt; }
 
 public slots:
-	bool compute();
+	bool computeDistances();
 	void applyAndExit();
 	void cancelAndExit();
 
 protected slots:
 	void showHisto();
-	void split3DCheckboxToggled(bool);
 	void locaModelChanged(int);
-	void updateOctreeLevel();
 	void maxDistUpdated();
-	void octreeLevelCheckBoxToggled(bool);
 
 protected:
 
 	bool isValid();
 	bool prepareEntitiesForComparison();
-	int computeApproxResults();
+	bool computeApproxDistances();
+	int getBestOctreeLevel();
 	int determineBestOctreeLevel(double);
 	void updateDisplay(bool showSF, bool hideRef);
 	void releaseOctrees();
@@ -120,8 +118,8 @@ protected:
 	//! Whether a display is active (and should be refreshed) or not
 	bool m_noDisplay;
 
-	//! Best guessed level validity
-	bool m_needToRecomputeBestLevel;
+	//! Best octree level (or 0 if none has been guessed already)
+	int m_bestOctreeLevel;
 };
 
 #endif

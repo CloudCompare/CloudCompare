@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>350</height>
+    <width>420</width>
+    <height>380</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,36 +71,37 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <layout class="QHBoxLayout">
-            <item>
-             <widget class="QCheckBox" name="octreeLevelCheckBox">
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="toolTip">
+               <string>Level of subdivision used for computing the distances</string>
+              </property>
               <property name="text">
-               <string>Octree Level</string>
+               <string>Octree level</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QSpinBox" name="octreeLevelSpinBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-             </widget>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="octreeLevelComboBox"/>
             </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout">
-            <item>
+            <item row="1" column="0">
              <widget class="QCheckBox" name="maxDistCheckBox">
+              <property name="toolTip">
+               <string>Acceleration: distances above this limit won't be computed accurately</string>
+              </property>
               <property name="text">
-               <string>Max. dist</string>
+               <string>max. distance</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="1" column="1">
              <widget class="QDoubleSpinBox" name="maxSearchDistSpinBox">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Acceleration: distances above this limit won't be computed accurately</string>
               </property>
               <property name="decimals">
                <number>6</number>
@@ -113,101 +114,43 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QFrame" name="signedDistFrame">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <property name="spacing">
-              <number>6</number>
-             </property>
-             <property name="margin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QCheckBox" name="signedDistCheckBox">
-               <property name="toolTip">
-                <string>compute signed distances (slower)</string>
-               </property>
-               <property name="statusTip">
-                <string>compute signed distances (slower)</string>
-               </property>
-               <property name="text">
-                <string>signed distances</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="flipNormalsCheckBox">
-               <property name="text">
-                <string>flip normals</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="_2">
-            <item>
-             <widget class="QCheckBox" name="multiThreadedCheckBox">
-              <property name="text">
-               <string>multi-threaded</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="split3DCheckBox">
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="signedDistCheckBox">
               <property name="toolTip">
-               <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
+               <string>compute signed distances (slower)</string>
               </property>
               <property name="statusTip">
-               <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
+               <string>compute signed distances (slower)</string>
               </property>
               <property name="text">
-               <string>split X,Y and Z components</string>
+               <string>signed distances</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="flipNormalsCheckBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>flip normals</string>
               </property>
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="split3DCheckBox">
+            <property name="toolTip">
+             <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
+            </property>
+            <property name="statusTip">
+             <string>Generate 3 supplementary scalar fields with distances along each dimension</string>
+            </property>
+            <property name="text">
+             <string>split X,Y and Z components</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="filterVisibilityCheckBox">
@@ -217,6 +160,16 @@ that could not have been seen (hidden/out of range/out of field of view).</strin
             </property>
             <property name="text">
              <string>use reference sensor to filter hidden points</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="multiThreadedCheckBox">
+            <property name="text">
+             <string>multi-threaded</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -321,7 +274,7 @@ that could not have been seen (hidden/out of range/out of field of view).</strin
                 <string>faster but more ... approximate</string>
                </property>
                <property name="text">
-                <string>use the same model for all its points</string>
+                <string>use the same model for nearby points</string>
                </property>
               </widget>
              </item>
@@ -513,22 +466,6 @@ to help you set the general parameters</string>
    </hints>
   </connection>
   <connection>
-   <sender>octreeLevelCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>octreeLevelSpinBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>83</x>
-     <y>352</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>215</x>
-     <y>352</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>lmKNNRadioButton</sender>
    <signal>toggled(bool)</signal>
    <receiver>lmKNNSpinBox</receiver>
@@ -573,6 +510,22 @@ to help you set the general parameters</string>
     <hint type="destinationlabel">
      <x>240</x>
      <y>459</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>signedDistCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>flipNormalsCheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>81</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>180</y>
     </hint>
    </hints>
   </connection>

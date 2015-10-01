@@ -104,6 +104,9 @@ v2.6.2 XX/XX/2015
 			* only absolute values are considered
 		- Initial point selection (when using a final overlap below 80%) is now much faster
 	* Distances computation tool:
+		- the dialog has been slightly updated (simplified)
+		- the approx distances and the best octree level doesn't need to be automatically updated any time
+			a parameter is updated anymore
 		- C2C: if the 'reference' cloud has one or several associated sensors, the user can now check the
 			new option 'use reference sensor to filter hidden points'. This will tell CC to use the sensor
 			information to determine whether the points of the compared cloud were hidden at the time of

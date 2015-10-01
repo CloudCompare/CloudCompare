@@ -71,33 +71,30 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	, m_compType(cpType)
 	, m_currentSFIsDistance(false)
 	, m_noDisplay(noDisplay)
-	, m_needToRecomputeBestLevel(true)
+	, m_bestOctreeLevel(0)
 {
 	setupUi(this);
 	setWindowFlags(Qt::Tool);
 
-	localModelComboBox->addItem("NONE");
-	localModelComboBox->addItem("Least Square Plane");
-	localModelComboBox->addItem("2D1/2 Triangulation");
-	localModelComboBox->addItem("Height Function");
-	localModelComboBox->setCurrentIndex(0);
+	//populate the combo-boxes
+	{
+		//octree level
+		octreeLevelComboBox->addItem("AUTO");
+		for (int i=1; i<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++i)
+			octreeLevelComboBox->addItem(QString::number(i));
+
+		//local model
+		localModelComboBox->addItem("NONE");
+		localModelComboBox->addItem("Least Square Plane");
+		localModelComboBox->addItem("2D1/2 Triangulation");
+		localModelComboBox->addItem("Quadric");
+		localModelComboBox->setCurrentIndex(0);
+	}
 
 	signedDistCheckBox->setChecked(false);
 	split3DCheckBox->setEnabled(false);
-	signedDistFrame->setEnabled(false);
 	okButton->setEnabled(false);
 
-	connect(cancelButton,			SIGNAL(clicked()),					this,	SLOT(cancelAndExit()));
-	connect(okButton,				SIGNAL(clicked()),					this,	SLOT(applyAndExit()));
-	connect(computeButton,			SIGNAL(clicked()),					this,	SLOT(compute()));
-	connect(histoButton,			SIGNAL(clicked()),					this,	SLOT(showHisto()));
-	connect(localModelComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(locaModelChanged(int)));
-	connect(octreeLevelCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(octreeLevelCheckBoxToggled(bool)));
-	connect(maxDistCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(maxDistUpdated()));
-	connect(maxSearchDistSpinBox,	SIGNAL(editingFinished()),			this,	SLOT(maxDistUpdated()));
-	connect(split3DCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(split3DCheckboxToggled(bool)));
-
-	octreeLevelSpinBox->setRange(1,CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 	compName->setText(m_compEnt->getName());
 	refName->setText(m_refEnt->getName());
 	preciseResultsTabWidget->setCurrentIndex(0);
@@ -110,25 +107,34 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 
 	assert(compEntity);
 	ccBBox compEntBBox = compEntity->getOwnBB();
-	maxSearchDistSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm()));
+	maxSearchDistSpinBox->setValue(compEntBBox.getDiagNorm());
 
 	if (m_refMesh)
 	{
 		localModelingTab->setEnabled(false);
-		signedDistFrame->setEnabled(true);
+		signedDistCheckBox->setEnabled(true);
 		signedDistCheckBox->setChecked(true);
 		filterVisibilityCheckBox->setEnabled(false);
 		filterVisibilityCheckBox->setVisible(false);
 	}
 	else
 	{
+		signedDistCheckBox->setEnabled(false);
 		split3DCheckBox->setEnabled(true);
 		lmRadiusDoubleSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm())/200);
 		filterVisibilityCheckBox->setEnabled(m_refCloud && m_refCloud->isA(CC_TYPES::POINT_CLOUD) && static_cast<ccPointCloud*>(m_refCloud)->hasSensor());
 	}
 
+	connect(cancelButton,			SIGNAL(clicked()),					this,	SLOT(cancelAndExit()));
+	connect(okButton,				SIGNAL(clicked()),					this,	SLOT(applyAndExit()));
+	connect(computeButton,			SIGNAL(clicked()),					this,	SLOT(computeDistances()));
+	connect(histoButton,			SIGNAL(clicked()),					this,	SLOT(showHisto()));
+	connect(localModelComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(locaModelChanged(int)));
+	connect(maxDistCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(maxDistUpdated()));
+	connect(maxSearchDistSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(maxDistUpdated()));
+
 	//compute approximate results and unlock GUI
-	computeApproxResults();
+	computeApproxDistances();
 }
 
 ccComparisonDlg::~ccComparisonDlg()
@@ -201,66 +207,29 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	return true;
 }
 
-void ccComparisonDlg::octreeLevelCheckBoxToggled(bool state)
-{
-	if (!state) //automatic mode
-	{
-		//force best octree level computation
-		m_needToRecomputeBestLevel = true;
-
-		updateOctreeLevel();
-	}
-}
-
 void ccComparisonDlg::maxDistUpdated()
 {
-	//force best octree level computation
-	m_needToRecomputeBestLevel = true;
-	computeApproxResults();
-
-	//change the focus to another entity!
-	computeButton->setFocus();
-
-	updateOctreeLevel();
+	//the current 'best octree level' is depreacted
+	m_bestOctreeLevel = 0;
 }
 
-void ccComparisonDlg::updateOctreeLevel()
+int ccComparisonDlg::getBestOctreeLevel()
 {
-	if (!m_needToRecomputeBestLevel)
-		return;
-
-	//we only compute best octree level if "auto" mode is on or the user has set the level to "0"
-	if (!octreeLevelCheckBox->isChecked() || octreeLevelSpinBox->value() == 0)
+	if (m_bestOctreeLevel == 0)
 	{
-		double maxDistance = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : 0);
+		double maxDistance = (maxDistCheckBox->isChecked() ? maxSearchDistSpinBox->value() : 0);
 		
-		int guessedBestOctreeLevel = determineBestOctreeLevel(static_cast<ScalarType>(maxDistance));
-		if (guessedBestOctreeLevel > 0)
+		int bestOctreeLevel = determineBestOctreeLevel(maxDistance);
+		if (bestOctreeLevel <= 0)
 		{
-			octreeLevelSpinBox->setValue(guessedBestOctreeLevel);
-		}
-		else
-		{
-			ccLog::Error("Can't evaluate best computation level! Try to set it manually ...");
-			octreeLevelCheckBox->setCheckState(Qt::Checked);
-			octreeLevelSpinBox->setEnabled(true);
+			ccLog::Error("Can't evaluate best octree level! Try to set it manually ...");
+			return -1;
 		}
 
-		m_needToRecomputeBestLevel = false;
+		m_bestOctreeLevel = bestOctreeLevel;
 	}
-}
-
-void ccComparisonDlg::split3DCheckboxToggled(bool state)
-{
-	if (m_compType == CLOUDMESH_DIST)
-	{
-		signedDistFrame->setEnabled(state);
-		if (state && !signedDistCheckBox->isChecked())
-		{
-			signedDistCheckBox->setChecked(true);
-			flipNormalsCheckBox->setEnabled(false);
-		}
-	}
+	
+	return m_bestOctreeLevel;
 }
 
 void ccComparisonDlg::locaModelChanged(int index)
@@ -330,13 +299,13 @@ bool ccComparisonDlg::isValid()
 	return true;
 }
 
-int ccComparisonDlg::computeApproxResults()
+bool ccComparisonDlg::computeApproxDistances()
 {
 	histoButton->setEnabled(false);
 	preciseResultsTabWidget->widget(2)->setEnabled(false);
 
 	if (!isValid())
-		return -1;
+		return false;
 
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx < 0)
@@ -344,7 +313,7 @@ int ccComparisonDlg::computeApproxResults()
 	if (sfIdx < 0)
 	{
 		ccLog::Error("Failed to allocate a new scalar field for computing approx. distances! Try to free some memory ...");
-		return -1;
+		return false;
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
@@ -359,14 +328,12 @@ int ccComparisonDlg::computeApproxResults()
 	eTimer.start();
 	switch (m_compType)
 	{
-	case CLOUDCLOUD_DIST: //hausdroff
+	case CLOUDCLOUD_DIST: //cloud-cloud
 		{
-			//Approximate distance can (and must) now take max search distance into account!
-			PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : 0);
 			approxResult = CCLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	m_compCloud,
 																								m_refCloud,
 																								DEFAULT_OCTREE_LEVEL,
-																								maxDistance,
+																								0,
 																								&progressDlg,
 																								m_compOctree,
 																								m_refOctree);
@@ -397,14 +364,14 @@ int ccComparisonDlg::computeApproxResults()
 	//if the approximate distances comptation failed...
 	if (approxResult < 0)
 	{
-		ccLog::Warning("[computeApproxResults] Computation failed (error code %i)",approxResult);
+		ccLog::Warning("[computeApproxDistances] Computation failed (error code %i)",approxResult);
 		m_compCloud->deleteScalarField(sfIdx);
 		sfIdx = -1;
 		m_currentSFIsDistance = false;
 	}
 	else
 	{
-		ccLog::Print("[computeApproxResults] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
+		ccLog::Print("[computeApproxDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
 		//display approx. dist. statistics
 		ScalarType mean,variance;
@@ -448,14 +415,14 @@ int ccComparisonDlg::computeApproxResults()
 		preciseResultsTabWidget->widget(2)->setEnabled(true);
 		histoButton->setEnabled(true);
 
+		//init the max search distance
+		maxSearchDistSpinBox->setValue(sf->getMax());
+
 		//update display
 		m_compCloud->setCurrentDisplayedScalarField(sfIdx);
 		m_compCloud->showSF(sfIdx >= 0);
 
 		m_currentSFIsDistance = true;
-
-		//now find the best octree level for real dist. computation
-		updateOctreeLevel();
 	}
 
 	computeButton->setEnabled(true);
@@ -465,28 +432,33 @@ int ccComparisonDlg::computeApproxResults()
 
 	updateDisplay(sfIdx >= 0, false);
 
-	return octreeLevelSpinBox->value();
+	return true;
 }
 
 int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 {
 	if (!isValid())
+	{
 		return -1;
+	}
 
 	//make sure a valid SF is activated
 	if (!m_currentSFIsDistance || m_compCloud->getCurrentOutScalarFieldIndex() < 0)
 	{
 		//we must compute approx. results again
-		//(this method will be called again later)
-		return computeApproxResults();
+		if (!computeApproxDistances())
+		{
+			//failed to compute approx distances?!
+			return -1;
+		}
 	}
 
 	//evalutate the theoretical time for each octree level
-	const int MaxLevel = m_refMesh ? 9 : CCLib::DgmOctree::MAX_OCTREE_LEVEL; //DGM: can't go higher than level 9 with a mesh as the grid is 'plain' and would take too much memory!
+	const int MAX_OCTREE_LEVEL = m_refMesh ? 9 : CCLib::DgmOctree::MAX_OCTREE_LEVEL; //DGM: can't go higher than level 9 with a mesh as the grid is 'plain' and would take too much memory!
 	std::vector<double> timings;
 	try
 	{
-		timings.resize(MaxLevel,0);
+		timings.resize(MAX_OCTREE_LEVEL, 0);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -523,13 +495,16 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	//we don't test the very first and very last level
 	ccProgressDialog progressCb(false,this);
 	progressCb.setMethodTitle("Determining optimal octree level");
-	progressCb.setInfo(qPrintable(QString("Testing %1 levels...").arg(MaxLevel))); //we lie here ;)
-	CCLib::NormalizedProgress nProgress(&progressCb,MaxLevel-2);
+	progressCb.setInfo(qPrintable(QString("Testing %1 levels...").arg(MAX_OCTREE_LEVEL))); //we lie here ;)
+	CCLib::NormalizedProgress nProgress(&progressCb,MAX_OCTREE_LEVEL-2);
 	progressCb.start();
 	QApplication::processEvents();
 
+	bool maxDistanceDefined = maxDistCheckBox->isChecked();
+	PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxDistanceDefined ? maxSearchDistSpinBox->value() : 0);
+
 	//for each level
-	for (int level=2; level<MaxLevel; ++level)
+	for (int level=2; level<MAX_OCTREE_LEVEL; ++level)
 	{
 		const int bitDec = GET_BIT_SHIFT(level);
 		unsigned numberOfPointsInCell = 0;
@@ -613,6 +588,11 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			}
 
 			double pointDist = m_compCloud->getPointScalarValue(index);
+			if (maxDistanceDefined && pointDist > maxDistance)
+			{
+				pointDist = maxDistance;
+			}
+
 			//cellDist += pointDist;
 			cellDist = std::max(cellDist,pointDist);
 			++index;
@@ -624,7 +604,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		//	double levelModifier = level < 12 ? 1.0 : exp(-pow(level-12,2)/(20*20));
 		//	timings[level] /= levelModifier;
 
-		//	ccLog::PrintDebug(QString("[ccComparisonDlg] Level %1 - timing = %2 (modifier = %3)").arg(level).arg(timings[level]).arg(levelModifier));
+		//	ccLog::PrintDebug(QString("[Distances] Level %1 - timing = %2 (modifier = %3)").arg(level).arg(timings[level]).arg(levelModifier));
 		//}
 
 		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
@@ -635,26 +615,35 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		nProgress.oneStep();
 	}
 
-	ccLog::PrintDebug("[ccComparisonDlg] Best level: %i (maxSearchDist = %f)",theBestOctreeLevel,maxSearchDist);
+	ccLog::PrintDebug("[Distances] Best level: %i (maxSearchDist = %f)",theBestOctreeLevel,maxSearchDist);
 
 	return theBestOctreeLevel;
 }
 
-bool ccComparisonDlg::compute()
+bool ccComparisonDlg::computeDistances()
 {
 	if (!isValid())
 		return false;
 
-	//updates best octree level guess if necessary
-	updateOctreeLevel();
-	int bestOctreeLevel = octreeLevelSpinBox->value();
+	int octreeLevel = octreeLevelComboBox->currentIndex();
+	assert(octreeLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-	bool signedDistances = signedDistFrame->isEnabled() && signedDistCheckBox->isChecked();
+	if (octreeLevel == 0)
+	{
+		//we'll try to guess the best octree level
+		octreeLevel = getBestOctreeLevel();
+		if (octreeLevel <= 0)
+		{
+			//best octree level computation failed?!
+			return false;
+		}
+		ccLog::Print(QString("[Distances] Octree level (auto): %1").arg(octreeLevel));
+	}
+
+	//options
+	bool signedDistances = signedDistCheckBox->isEnabled() && signedDistCheckBox->isChecked();
 	bool flipNormals = (signedDistances ? flipNormalsCheckBox->isChecked() : false);
-
 	bool split3D = split3DCheckBox->isEnabled() && split3DCheckBox->isChecked();
-	//for cloud-cloud distance, 'signedDistances' is only used for 'split3D' mode
-	bool split3DSigned = signedDistances;
 
 	//does the cloud has already a temporary scalar field that we can use?
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
@@ -687,7 +676,7 @@ bool ccComparisonDlg::compute()
 	assert(sf);
 
 	//max search distance
-	ScalarType maxSearchDist = static_cast<ScalarType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : 0);
+	ScalarType maxSearchDist = static_cast<ScalarType>(maxDistCheckBox->isChecked() ? maxSearchDistSpinBox->value() : 0);
 	//multi-thread
 	bool multiThread = multiThreadedCheckBox->isChecked();
 
@@ -761,7 +750,7 @@ bool ccComparisonDlg::compute()
 
 		//setup parameters
 		{
-			c2cParams.octreeLevel = static_cast<unsigned char>(bestOctreeLevel);
+			c2cParams.octreeLevel = static_cast<unsigned char>(octreeLevel);
 			if (localModelingTab->isEnabled())
 			{
 				c2cParams.localModel = (CC_LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
@@ -788,14 +777,14 @@ bool ccComparisonDlg::compute()
 
 	case CLOUDMESH_DIST: //cloud-mesh
 
-		if (multiThread && maxSearchDistSpinBox->isEnabled())
+		if (multiThread && maxDistCheckBox->isChecked())
 		{
 			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
 		}
 
 		//setup parameters
 		{
-			c2mParams.octreeLevel = static_cast<unsigned char>(bestOctreeLevel);
+			c2mParams.octreeLevel = static_cast<unsigned char>(octreeLevel);
 			c2mParams.maxSearchDist = maxSearchDist;
 			c2mParams.useDistanceMap = false;
 			c2mParams.signedDistances = signedDistances;
@@ -886,10 +875,9 @@ bool ccComparisonDlg::compute()
 					const CCVector3* P = CPSet->getPoint(i);
 					const CCVector3* Q = m_compCloud->getPoint(i);
 					CCVector3 D = *Q-*P;
-
-					sfDims[0]->setValue(i,static_cast<ScalarType>(split3DSigned ? D.x : fabs(D.x)));
-					sfDims[1]->setValue(i,static_cast<ScalarType>(split3DSigned ? D.y : fabs(D.y)));
-					sfDims[2]->setValue(i,static_cast<ScalarType>(split3DSigned ? D.z : fabs(D.z)));
+					sfDims[0]->setValue(i,static_cast<ScalarType>(D.x));
+					sfDims[1]->setValue(i,static_cast<ScalarType>(D.y));
+					sfDims[2]->setValue(i,static_cast<ScalarType>(D.z));
 				}
 
 				for (unsigned j=0; j<3; ++j)

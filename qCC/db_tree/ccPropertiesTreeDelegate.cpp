@@ -155,6 +155,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 			return QSize(250,200);
 		case OBJECT_SENSOR_MATRIX_EDITOR:
 		case OBJECT_HISTORY_MATRIX_EDITOR:
+		case OBJECT_GLTRANS_MATRIX_EDITOR:
 			return QSize(250,120);
 		}
 	}
@@ -279,6 +280,13 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	{
 		addSeparator("Transformation history");
 		appendWideRow(PERSISTENT_EDITOR(OBJECT_HISTORY_MATRIX_EDITOR));
+
+		if (m_currentObject->isGLTransEnabled())
+		{
+			addSeparator("Display transformation");
+			appendWideRow(PERSISTENT_EDITOR(OBJECT_GLTRANS_MATRIX_EDITOR));
+		}
+
 		fillWithMetaData(m_currentObject);
 	}
 	
@@ -931,6 +939,7 @@ bool ccPropertiesTreeDelegate::isWideEditor(int itemData) const
 	case OBJECT_CLOUD_SF_EDITOR:
 	case OBJECT_SENSOR_MATRIX_EDITOR:
 	case OBJECT_HISTORY_MATRIX_EDITOR:
+	case OBJECT_GLTRANS_MATRIX_EDITOR:
 	case TREE_VIEW_HEADER:
 		return true;
 	default:
@@ -1035,6 +1044,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		}
 		break;
 	case OBJECT_HISTORY_MATRIX_EDITOR:
+	case OBJECT_GLTRANS_MATRIX_EDITOR:
 	case OBJECT_SENSOR_MATRIX_EDITOR:
 		{
 			MatrixDisplayDlg* mdd = new MatrixDisplayDlg(parent);
@@ -1437,6 +1447,15 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 				return;
 
 			mdd->fillDialogWith(m_currentObject->getGLTransformationHistory());
+			break;
+		}
+	case OBJECT_GLTRANS_MATRIX_EDITOR:
+		{
+			MatrixDisplayDlg *mdd = qobject_cast<MatrixDisplayDlg*>(editor);
+			if (!mdd)
+				return;
+
+			mdd->fillDialogWith(m_currentObject->getGLTransformation());
 			break;
 		}
 	case OBJECT_SENSOR_MATRIX_EDITOR:

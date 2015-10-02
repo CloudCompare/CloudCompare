@@ -1360,6 +1360,10 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		mesh->addChild(cloud);
 	}
 
+	PointCoordinateType h0 = profileVertices->getPoint(0)->y;
+	PointCoordinateType dH = profileVertices->getPoint(profVertCount-1)->y - h0;
+	bool invertedHeight = (dH < 0);
+
 	//create facets
 	{
 		for (unsigned j=0; j<angularSteps; ++j)
@@ -1372,8 +1376,16 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 				unsigned vertC = vertB+1;
 				unsigned vertD = vertA+1;
 
-				mesh->addTriangle(vertB,vertC,vertD);
-				mesh->addTriangle(vertB,vertD,vertA);
+				if (invertedHeight)
+				{
+					mesh->addTriangle(vertB,vertC,vertD);
+					mesh->addTriangle(vertB,vertD,vertA);
+				}
+				else
+				{
+					mesh->addTriangle(vertB,vertD,vertC);
+					mesh->addTriangle(vertB,vertA,vertD);
+				}
 			}
 		}
 	}
@@ -1389,10 +1401,6 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 			//not enough memory to finish the job!
 			return mesh;
 		}
-
-		PointCoordinateType h0 = profileVertices->getPoint(0)->y;
-		PointCoordinateType dH = profileVertices->getPoint(profVertCount-1)->y - h0;
-		bool invertedHeight = (dH < 0);
 
 		//create default texture coordinates
 		for (unsigned j=0; j<=angularSteps; ++j)
@@ -1425,8 +1433,16 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 					unsigned vertC = vertB+1;
 					unsigned vertD = vertA+1;
 
-					mesh->addTriangleTexCoordIndexes(vertB,vertC,vertD);
-					mesh->addTriangleTexCoordIndexes(vertB,vertD,vertA);
+					if (invertedHeight)
+					{
+						mesh->addTriangleTexCoordIndexes(vertB,vertC,vertD);
+						mesh->addTriangleTexCoordIndexes(vertB,vertD,vertA);
+					}
+					else
+					{
+						mesh->addTriangleTexCoordIndexes(vertB,vertD,vertC);
+						mesh->addTriangleTexCoordIndexes(vertB,vertA,vertD);
+					}
 				}
 			}
 		}

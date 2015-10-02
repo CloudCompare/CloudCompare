@@ -106,7 +106,7 @@ protected slots:
 	void updateGridSteps();
 	void updateProfileRevolDim(int);
 	void updateProfileOrigin();
-	void colorScaleChanged(int index);
+	void colorScaleChanged(int);
 	void spawnColorScaleEditor();
 	void updateHeightUnits();
 	void exportMapAsCloud();
@@ -116,13 +116,14 @@ protected slots:
 	void exportProfilesAsDXF();
 	void loadOverlaySymbols();
 	void clearOverlaySymbols();
-	void overlaySymbolsSizeChanged(int size);
+	void overlaySymbolsSizeChanged(int);
 	void overlaySymbolsColorChanged();
 	void overlayGridColorChanged();
-	void labelFontSizeChanged(int size);
-	void baseRadiusChanged(double radius);
+	void labelFontSizeChanged(int);
+	void labelPrecisionChanged(int);
+	void baseRadiusChanged(double);
 	void colorRampStepsChanged(int);
-	void toggleOverlayGrid(bool state);
+	void toggleOverlayGrid(bool);
 	void changeGridColor();
 	void changeSymbolColor();
 	void toggleColorScaleDisplay(bool);

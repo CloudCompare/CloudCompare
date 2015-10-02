@@ -265,6 +265,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		//add window to the right side layout
 		mapFrame->setLayout(new QHBoxLayout());
 		mapFrame->layout()->addWidget(m_window);
+		precisionSpinBox->setValue(params.displayedNumPrecision);
 	}
 
 	//create labels "clouds" (empty)
@@ -306,6 +307,8 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	connect(clearLabelsPushButton,			SIGNAL(clicked()),					this,	SLOT(clearOverlaySymbols()));
 	connect(symbolSizeSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(overlaySymbolsSizeChanged(int)));
 	connect(fontSizeSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(labelFontSizeChanged(int)));
+	connect(precisionSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(labelPrecisionChanged(int)));
+	
 	connect(colorScaleStepsSpinBox,			SIGNAL(valueChanged(int)),			this,	SLOT(colorRampStepsChanged(int)));
 	connect(overlayGridGroupBox,			SIGNAL(toggled(bool)),				this,	SLOT(toggleOverlayGrid(bool)));
 	connect(scaleXStepDoubleSpinBox,		SIGNAL(editingFinished()),			this,	SLOT(updateOverlayGrid()));
@@ -1591,6 +1594,19 @@ void DistanceMapGenerationDlg::labelFontSizeChanged(int)
 	//update window font-size
 	ccGui::ParamStruct params = m_window->getDisplayParameters();
 	params.defaultFontSize = fontSize;
+	m_window->setDisplayParameters(params,true);
+
+	m_window->redraw();
+}
+
+void DistanceMapGenerationDlg::labelPrecisionChanged(int prec)
+{
+	if (!m_window)
+		return;
+
+	//update numerical precision
+	ccGui::ParamStruct params = m_window->getDisplayParameters();
+	params.displayedNumPrecision = prec;
 	m_window->setDisplayParameters(params,true);
 
 	m_window->redraw();

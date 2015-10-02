@@ -1098,6 +1098,26 @@
               </property>
              </spacer>
             </item>
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="toolTip">
+               <string>Displayed numbers precision (digits)</string>
+              </property>
+              <property name="text">
+               <string>Precision</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="precisionSpinBox">
+              <property name="maximum">
+               <number>12</number>
+              </property>
+              <property name="value">
+               <number>6</number>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>

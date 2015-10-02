@@ -110,7 +110,7 @@ ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeProfileToSurfaceTr
 		ccGLMatrix rotation;
 		CCVector3 Z(0,0,0);
 		Z.u[revolDim] = PC_ONE;
-		rotation = ccGLMatrix::FromToRotation(Z, axis);
+		rotation = ccGLMatrix::FromToRotation(axis, Z);
 		cloudToSurface = rotation * cloudToSurface;
 	}
 

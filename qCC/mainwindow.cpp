@@ -9730,11 +9730,10 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				ccConsole::Print(QString("\t- %1").arg(dipAndDipDirStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z
-				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,1.0f));
+				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,PC_ONE));
 				CCVector3 Gt = C;
 				makeZPosMatrix.applyRotation(Gt);
 				makeZPosMatrix.setTranslation(C-Gt);
-				makeZPosMatrix.invert();
 				ccConsole::Print("[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:");
 				ccConsole::Print(makeZPosMatrix.toString(12,' ')); //full precision
 				ccConsole::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");

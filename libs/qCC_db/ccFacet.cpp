@@ -422,7 +422,7 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		ccGL::Translate(m_center.x,m_center.y,m_center.z);
-		ccGLMatrix mat = ccGLMatrix::FromToRotation(getNormal(),CCVector3(0,0,1));
+		ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0,0,PC_ONE),getNormal());
 		glMultMatrixf(mat.data());
 		ccGL::Scale(scale,scale,scale);
 		glTranslatef(0,0,0.45f);

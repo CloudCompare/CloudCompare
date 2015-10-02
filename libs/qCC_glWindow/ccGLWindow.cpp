@@ -3238,7 +3238,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			{
 				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
 
-				ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_currentMouseOrientation,m_lastMouseOrientation);
+				ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastMouseOrientation,m_currentMouseOrientation);
 				m_lastMouseOrientation = m_currentMouseOrientation;
 				m_updateFBO = true;
 

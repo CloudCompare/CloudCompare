@@ -1528,11 +1528,10 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			}
 
 			//compute the transformation matrix that would make this normal points towards +Z
-			ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,1.0f));
+			ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,PC_ONE));
 			CCVector3 Gt = C;
 			makeZPosMatrix.applyRotation(Gt);
 			makeZPosMatrix.setTranslation(C-Gt);
-			makeZPosMatrix.invert();
 
 			txtStream << "Orientation matrix:" << endl;
 			txtStream << makeZPosMatrix.toString(s_precision,' ') << endl;

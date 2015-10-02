@@ -588,7 +588,6 @@ void ccHObject::drawBB(const ccColor::Rgb& col)
 	
 	case SELECTION_FIT_BBOX:
 		{
-			assert(getChildrenNumber() == 0);
 			ccGLMatrix trans;
 			ccBBox box = getOwnFitBB(trans);
 			if (box.isValid())

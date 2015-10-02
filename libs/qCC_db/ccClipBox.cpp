@@ -86,7 +86,7 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 
 static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
-	if (ID>0)
+	if (ID > 0)
 		glLoadName(ID);
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -126,9 +126,8 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	glPopMatrix();
 }
 
-/* 
-  // Unused function
-static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+// Unused function
+/*static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	if (ID > 0)
 		glLoadName(ID);
@@ -147,11 +146,11 @@ static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType 
 
 	glPopMatrix();
 }
-*/
+//*/
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
-	if (ID>0)
+	if (ID > 0)
 		glLoadName(ID);
 	
 	scale /= 2;

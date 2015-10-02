@@ -256,7 +256,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
 					ccGL::Translate(P1->x,P1->y,P1->z);
-					ccGLMatrix rotMat = ccGLMatrix::FromToRotation(CCVector3(0,0,1),u);
+					ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u,CCVector3(0,0,PC_ONE));
 					glMultMatrixf(rotMat.inverse().data());
 					glScalef(m_arrowLength,m_arrowLength,m_arrowLength);
 					ccGL::Translate(0.0,0.0,-0.5);

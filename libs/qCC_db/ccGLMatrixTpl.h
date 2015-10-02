@@ -137,8 +137,8 @@ public:
 	**/
 	static ccGLMatrixTpl<T> FromToRotation(const Vector3Tpl<T>& from, const Vector3Tpl<T>& to)
 	{
-		T e = from.dot(to);
-		T f = (e < 0 ? -e : e);
+		T c = from.dot(to);
+		T f = (c < 0 ? -c : c);
 		ccGLMatrixTpl<T> result;
 
 		if (1.0-f < ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
@@ -181,9 +181,10 @@ public:
 		}
 		else  // the most common case, unless "from"="to", or "from"=-"to"
 		{
-			//hand optimized version (9 mults less)
+			//see Efficiently Building a Matrix to Rotate One Vector to Another
+			//T. Moller and J.F. Hugues (1999)
 			Vector3Tpl<T> v = from.cross(to);
-			T h = 1/(1 + e);
+			T h = 1 / (1 + c);
 			T hvx = h * v.x;
 			T hvz = h * v.z;
 			T hvxy = hvx * v.y;
@@ -191,17 +192,17 @@ public:
 			T hvyz = hvz * v.y;
 
 			T* mat = result.data();
-			mat[0]  = e + hvx * v.x;
-			mat[1]  = hvxy - v.z;
-			mat[2]  = hvxz + v.y;
+			mat[0]  = c + hvx * v.x;
+			mat[1]  = hvxy + v.z;
+			mat[2]  = hvxz - v.y;
 
-			mat[4]  = hvxy + v.z;
-			mat[5]  = e + h * v.y * v.y;
-			mat[6]  = hvyz - v.x;
+			mat[4]  = hvxy - v.z;
+			mat[5]  = c + h * v.y * v.y;
+			mat[6]  = hvyz + v.x;
 
-			mat[8]  = hvxz - v.y;
-			mat[9]  = hvyz + v.x;
-			mat[10] = e + hvz * v.z;
+			mat[8]  = hvxz + v.y;
+			mat[9]  = hvyz - v.x;
+			mat[10] = c + hvz * v.z;
 		}
 
 		return result;

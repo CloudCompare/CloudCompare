@@ -191,8 +191,6 @@ void qSRA::loadProfile() const
 		origin.u[axisDim] = 0;
 	
 	//apply a visual transformation to see the polyline in the right place
-	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(polyline->getAssociatedCloud());
-	if (vertices)
 	{
 		ccGLMatrix trans;
 		trans.setTranslation(origin);
@@ -245,10 +243,10 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	}
 
 	//we deduce the profile orientation and position from the cone 4x4 transformation
-	ccGLMatrix& mat = cone->getTransformation();
+	ccGLMatrix& coneTrans = cone->getTransformation();
 
-	CCVector3 axis = mat.getColumnAsVec3D(2);
-	CCVector3 origin = mat.getTranslationAsVec3D();
+	CCVector3 axis = coneTrans.getColumnAsVec3D(2);
+	CCVector3 origin = coneTrans.getTranslationAsVec3D();
 	PointCoordinateType height = cone->getHeight();
 	//we'll use the 'largest' axis dimension as 'revolution dimension'
 	int revolDim = 0;
@@ -266,12 +264,8 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 			return 0;
 		}
 
-		vertices->addPoint(CCVector3(	cone->getBottomRadius(),
-			-height/2,
-			0 ));
-		vertices->addPoint(CCVector3(	cone->getTopRadius(),
-			height/2,
-			0 ));
+		vertices->addPoint(CCVector3(cone->getBottomRadius(), -height/2, 0));
+		vertices->addPoint(CCVector3(cone->getTopRadius(),	   height/2, 0));
 	}
 
 	ccPolyline* polyline = new ccPolyline(vertices);
@@ -285,6 +279,17 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 		}
 		polyline->addPointIndex(0,2);
 		polyline->setClosed(false);
+	}
+
+	//apply a visual transformation to see the polyline in the right place
+	{
+		CCVector3 y(0,1,0);
+		CCVector3 Z(0,0,0);
+		Z.u[revolDim] = PC_ONE;
+		ccGLMatrix axisTrans = ccGLMatrix::FromToRotation(y,Z);
+		assert(((axisTrans * y) - Z).norm() < ZERO_TOLERANCE);
+		ccGLMatrix polyMat = coneTrans * axisTrans;
+		polyline->setGLTransformation(polyMat);
 	}
 
 	//set meta-data
@@ -337,6 +342,20 @@ void qSRA::computeCloud2ProfileRadialDist() const
 					return;
 				}
 				tempPolyline = true;
+
+#ifdef _DEBUG
+				//test: apply a visual transformation to see the polyline in the right place
+				{
+					polyline->set2DMode(false);
+					polyline->setWidth(2);
+					polyline->setColor(ccColor::green);
+					polyline->showColors(true);
+					cone->setVisible(false);
+					cone->addChild(polyline);
+					m_app->addToDB(polyline);
+					tempPolyline = false;
+				}
+#endif
 			}
 		}
 	}

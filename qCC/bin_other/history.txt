@@ -125,6 +125,8 @@ v2.6.2 XX/XX/2015
 	* Poisson Surface Reconstruction:
 		- now using version 7 (https://github.com/mkazhdan/PoissonRecon/)
 		- built-in color interpolation (faster & cleaner)
+	* Ransac Shape Detection:
+		- detected cones are now properly truncated so as to visually fit the associated subset of points
 	* Point list picking:
 		- label names are now preserved (if the user quits the tool, changes the labels name and restart the tool)
 		- labels title in 3D have now a semi-transparent background

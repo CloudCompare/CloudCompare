@@ -523,36 +523,55 @@ void qRansacSD::doAction()
 				float alpha = cone->Internal().Angle();
 
 				//compute max height
-				CCVector3 maxP = CCVector3::fromArray(CC.getValue());
-				float maxHeight = 0;
-				for (size_t j=0; j<shapePointsCount; ++j)
+				Vec3f minP, maxP;
+				float minHeight, maxHeight;
+				minP = maxP = cloud[0].pos;
+				minHeight = maxHeight = cone->Internal().Height(cloud[0].pos);
+				for (size_t j=1; j<shapePointsCount; ++j)
 				{
-					float h = cone->Internal().Height(cloud[count-1-j].pos);
-					if (h > maxHeight)
+					float h = cone->Internal().Height(cloud[j].pos);
+					if (h < minHeight)
+					{
+						minHeight = h;
+						minP = cloud[j].pos;
+					}
+					else if (h > maxHeight)
 					{
 						maxHeight = h;
-						maxP = CCVector3::fromArray(cloud[count-1-j].pos);
+						maxP = cloud[j].pos;
 					}
+
 				}
 
-				pcShape->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha,0,'f').arg(maxHeight,0,'f'));
+				pcShape->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha,0,'f').arg(maxHeight-minHeight,0,'f'));
 
-				float radius = tan(alpha)*maxHeight;
-				CCVector3 Z = CCVector3::fromArray(CA.getValue());
-				CCVector3 C = CCVector3::fromArray(CC.getValue()); //cone apex
+				float minRadius = tan(alpha)*minHeight;
+				float maxRadius = tan(alpha)*maxHeight;
 
-				//construct remaining of base
-				Z.normalize();
-				CCVector3 X = maxP - (C + maxHeight * Z);
-				X.normalize();
-				CCVector3 Y = Z * X;
+				//let's build the cone primitive
+				{
+					//the bottom should be the largest part so we inverse the axis direction
+					CCVector3 Z = -CCVector3::fromArray(CA.getValue());
+					Z.normalize();
+				
+					//the center is halfway between the min and max height
+					float midHeight = (minHeight + maxHeight)/2;
+					CCVector3 C = CCVector3::fromArray((CC + CA * midHeight).getValue());
 
-				//we build matrix from these vecctors
-				ccGLMatrix glMat(X,Y,Z,C+(maxHeight/2)*Z);
+					//radial axis
+					CCVector3 X = CCVector3::fromArray((maxP - (CC + maxHeight * CA)).getValue());
+					X.normalize();
+				
+					//orthogonal radial axis
+					CCVector3 Y = Z * X;
 
-				//cone primitive
-				prim = new ccCone(0,radius,maxHeight,0,0,&glMat);
-				prim->setEnabled(false);
+					//we build the transformation matrix from these vecctors
+					ccGLMatrix glMat(X,Y,Z,C);
+
+					//eventually create the cone primitive
+					prim = new ccCone(maxRadius, minRadius, maxHeight-minHeight, 0, 0, &glMat);
+					prim->setEnabled(false);
+				}
 
 				}
 				break;

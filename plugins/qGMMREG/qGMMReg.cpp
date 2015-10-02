@@ -39,6 +39,7 @@
 #include <QElapsedTimer>
 #include <QProgressDialog>
 #include <QtConcurrentRun>
+#include <QMainWindow>
 
 //system
 #if defined(CC_WINDOWS)

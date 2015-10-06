@@ -685,7 +685,7 @@ QStatusBar
     <string>Stereo mode</string>
    </property>
    <property name="toolTip">
-    <string>Enabale stereo mode (with red-blue or red-cyan glasses)</string>
+    <string>Enable stereo mode (with red-blue or red-cyan glasses)</string>
    </property>
    <property name="shortcut">
     <string>F10</string>

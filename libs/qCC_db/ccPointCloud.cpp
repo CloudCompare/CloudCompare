@@ -558,6 +558,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 					assert(currentScalarField);
 					if (currentScalarField->resize(n))
 					{
+						currentScalarField->setGlobalShift(sf->getGlobalShift());
+
 						//we copy data to new SF
 						for (unsigned i=0; i<n; i++)
 							currentScalarField->setValue(i,sf->getValue(selection->getPointGlobalIndex(i)));
@@ -875,12 +877,17 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				int sfIdx = getScalarFieldIndexByName(sf->getName());
 				if (sfIdx >= 0) //yes
 				{
-					CCLib::ScalarField* sameSF = getScalarField(sfIdx);
+					ccScalarField* sameSF = static_cast<ccScalarField*>(getScalarField(sfIdx));
 					assert(sameSF && sameSF->capacity() >= pointCountBefore + addedPoints);
 					//we fill it with new values (it should have been already 'reserved' (if necessary)
 					if (sameSF->currentSize() == pointCountBefore)
+					{
+						double shift = sf->getGlobalShift() - sameSF->getGlobalShift();
 						for (unsigned i=0; i<addedPoints; i++)
-							sameSF->addElement(sf->getValue(i));
+						{
+							sameSF->addElement(static_cast<ScalarType>(shift + sf->getValue(i))); //FIXME: we could have accuracy issues here
+						}
+					}
 					sameSF->computeMinAndMax();
 
 					//flag this SF as 'updated'
@@ -890,6 +897,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				else //otherwise we create a new SF
 				{
 					ccScalarField* newSF = new ccScalarField(sf->getName());
+					newSF->setGlobalShift(sf->getGlobalShift());
 					//we fill the begining with NaN (as there is no equivalent in the current cloud)
 					if (newSF->resize(pointCountBefore+addedPoints,true,NAN_VALUE))
 					{

@@ -248,7 +248,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 						//check bounds
 						if (sf->getMin() < lasFields[j].minValue || (lasFields[j].maxValue != -1.0 && sf->getMax() > lasFields[j].maxValue)) //outbounds?
 						{
-							ccLog::Warning(QString("[LASFilter] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(sf->getName()).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
+							ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(sf->getName()).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
 							outBounds = true;
 						}
 						else
@@ -264,7 +264,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				//no correspondance was found?
 				if (!outBounds && (fieldsToSave.empty() || fieldsToSave.back().sf != sf))
 				{
-					ccLog::Warning(QString("[LASFilter] Found a '%1' scalar field, but it doesn't match with any of the official LAS fields... we will ignore it!").arg(sf->getName()));
+					ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but it doesn't match with any of the official LAS fields... we will ignore it!").arg(sf->getName()));
 				}
 			}
 		}
@@ -464,7 +464,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				assert(false);
 				break;
 			case LAS_TIME:
-				point.SetTime(static_cast<double>(it->sf->getValue(i)));
+				point.SetTime(static_cast<double>(it->sf->getValue(i)) + it->sf->getGlobalShift());
 				break;
 			case LAS_CLASSIF_VALUE:
 				classif.SetClass(static_cast<boost::uint32_t>(it->sf->getValue(i)));
@@ -609,7 +609,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 								{
 									const EVLR* evlr = reinterpret_cast<const EVLR*>(vlrData + j*EB_RECORD_SIZE);
 									evlrs.push_back(*evlr);
-									ccLog::PrintDebug(QString("Extra bytes VLR found: %1 (%2)").arg(evlr->getName()).arg(evlr->getDescription()));
+									ccLog::PrintDebug(QString("[LAS] Extra bytes VLR found: %1 (%2)").arg(evlr->getName()).arg(evlr->getDescription()));
 								}
 							}
 						}
@@ -717,7 +717,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						bool thisChunkHasColors = loadedCloud->hasColors();
 						loadedCloud->showColors(thisChunkHasColors);
 						if (loadColor && !thisChunkHasColors)
-							ccLog::Warning("[LAS FILE] Color field was all black! We ignored it...");
+							ccLog::Warning("[LAS] Color field was all black! We ignored it...");
 
 						while (!fieldsToLoad.empty())
 						{
@@ -755,7 +755,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							}
 							else
 							{
-								ccLog::Warning(QString("[LAS FILE] All '%1' values were the same (%2)! We ignored them...").arg(field->type == LAS_EXTRA ? field->getName() : QString(LAS_FIELD_NAMES[field->type])).arg(field->firstValue));
+								ccLog::Warning(QString("[LAS] All '%1' values were the same (%2)! We ignored them...").arg(field->type == LAS_EXTRA ? field->getName() : QString(LAS_FIELD_NAMES[field->type])).arg(field->firstValue));
 							}
 
 							fieldsToLoad.pop_back();
@@ -799,7 +799,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				loadedCloud = new ccPointCloud();
 				if (!loadedCloud->reserveThePointsTable(fileChunkSize))
 				{
-					ccLog::Warning("[LASFilter::loadFile] Not enough memory!");
+					ccLog::Warning("[LAS] Not enough memory!");
 					delete loadedCloud;
 					ifs.close();
 					return CC_FERR_NOT_ENOUGH_MEMORY;
@@ -820,7 +820,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
 					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY,0,0,65535))); //16 bits: between 0 and 65536
 				if (s_lasOpenDlg->doLoad(LAS_TIME))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME,0,0,-1.0))); //8 bytes (double)
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME,0,0,-1.0))); //8 bytes (double) --> we use global shift!
 				if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
 					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER,1,1,7))); //3 bits: between 1 and 7
 				if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
@@ -864,7 +864,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							{
 								size_t dataOffset = extraBytesOffset + localOffset;
 
-								//move forward (and check that the byte count is ok!
+								//move forward (and check that the byte count is ok!)
 								assert(data_type <= ExtraLasField::EXTRA_DOUBLE);
 								ExtraLasField::Type type = static_cast<ExtraLasField::Type>(data_type);
 								localOffset += ExtraLasField::GetSizeBytes(type);
@@ -949,7 +949,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				if (HandleGlobalShift(P,Pshift,parameters,useLasShift))
 				{
 					loadedCloud->setGlobalShift(Pshift);
-					ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 				}
 
 				//restore previous parameters
@@ -985,7 +985,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						}
 						else
 						{
-							ccLog::Warning("[LAS FILE] Not enough memory: color field will be ignored!");
+							ccLog::Warning("[LAS] Not enough memory: color field will be ignored!");
 							loadColor = false; //no need to retry with the other chunks anyway
 							pushColor = false;
 						}
@@ -1007,7 +1007,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							||	(col[2] & 0xFF00))
 						{
 							//the color components are on 16 bits!
-							ccLog::Print("[LAS FILE] Color components are coded on 16 bits");
+							ccLog::Print("[LAS] Color components are coded on 16 bits");
 							colorCompBitShift = 8;
 							//we fix all the previously read colors
 							for (unsigned i=0; i<loadedCloud->size()-1; ++i)
@@ -1117,6 +1117,11 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					break;
 				case LAS_TIME:
 					value = p.GetTime();
+					if (field->sf)
+					{
+						//shift time values (so as to avoid losing accuracy)
+						value -= field->sf->getGlobalShift();
+					}
 					break;
 				case LAS_CLASSIF_VALUE:
 					value = static_cast<double>(p.GetClassification().GetClass() & 31); //5 bits
@@ -1155,17 +1160,29 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						if (field->sf->reserve(fileChunkSize))
 						{
 							field->sf->link();
-							//we must set the value (firstClassifValue) of all the previously skipped points
+
+							if (field->type == LAS_TIME)
+							{
+								//we use the first value as 'global shift' (otherwise we will lose accuracy)
+								field->sf->setGlobalShift(field->firstValue);
+								value -= field->firstValue;
+								ccLog::Warning("[LAS] Time SF has been shifted to prevent a loss of accuracy (%.2f)",field->firstValue);
+								field->firstValue = 0;
+							}
+
+							//we must set the value of all the previously skipped points
 							ScalarType firstValue = static_cast<ScalarType>(field->firstValue);
 							for (unsigned i=0; i<loadedCloud->size()-1; ++i)
+							{
 								field->sf->addElement(firstValue);
+							}
 
 							ScalarType s = static_cast<ScalarType>(value);
 							field->sf->addElement(s);
 						}
 						else
 						{
-							ccLog::Warning(QString("[LAS FILE] Not enough memory: '%1' field will be ignored!").arg(LAS_FIELD_NAMES[field->type]));
+							ccLog::Warning(QString("[LAS] Not enough memory: '%1' field will be ignored!").arg(LAS_FIELD_NAMES[field->type]));
 							field->sf->release();
 							field->sf = 0;
 						}

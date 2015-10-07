@@ -26,9 +26,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccLog.h>
 #include <ccMesh.h>
@@ -36,6 +33,7 @@
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
 #include <ccProgressDialog.h>
+#include <ccScalarField.h>
 
 //System
 #include <string.h>
@@ -291,7 +289,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	}
 
 	//Scalar fields
-	std::vector<CCLib::ScalarField*> scalarFields;
+	std::vector<ccScalarField*> scalarFields;
 	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(vertices);
@@ -304,12 +302,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			unsigned unnamedSF = 0;
 			for (unsigned i=0; i<sfCount; ++i)
 			{
-				scalarFields[i] = ccCloud->getScalarField(i);
+				scalarFields[i] = static_cast<ccScalarField*>(ccCloud->getScalarField(i));
 				const char* sfName = scalarFields[i]->getName();
 				QString propName;
 				if (!sfName)
 				{
-					if (unnamedSF++==0)
+					if (unnamedSF++ == 0)
 						propName = "scalar";
 					else
 						propName = QString("scalar_%1").arg(unnamedSF);
@@ -407,9 +405,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			ply_write(ply, static_cast<double>(N.z));
 		}
 
-		for (std::vector<CCLib::ScalarField*>::const_iterator sf =  scalarFields.begin(); sf != scalarFields.end(); ++sf)
+		for (std::vector<ccScalarField*>::const_iterator sf = scalarFields.begin(); sf != scalarFields.end(); ++sf)
 		{
-			ply_write(ply, static_cast<double>((*sf)->getValue(i)));
+			ply_write(ply, (*sf)->getGlobalShift() + (*sf)->getValue(i));
 		}
 	}
 

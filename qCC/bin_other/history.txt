@@ -149,6 +149,11 @@ v2.6.2 XX/XX/2015
 		- the matrix local quadric coordinate system is now displayed in the console along with its equation
 	* qSRA:
 		- the plugin can now be used directly with a cone or cylinder primitive (in place of a 'profile')
+	* LAS files:
+		- the 'time' field of LAS files is now automatically shifted at loading time so as to prevent any loss
+			of accuracy (as this field is originally coded on 64 bytes but then stored on 32 bytes once loaded)
+		- the original value of a single point can be queried anytime by spawning a label on this point
+		- the original value is restored automatically when saving the cloud
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool

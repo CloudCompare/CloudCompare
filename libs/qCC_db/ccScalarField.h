@@ -213,6 +213,11 @@ public:
 	virtual bool toFile(QFile& out) const;
 	virtual bool fromFile(QFile& in, short dataVersion, int flags);
 
+	//! Returns the global shift (if any)
+	inline double getGlobalShift() const { return m_globalShift; }
+	//! Sets the global shift
+	inline void setGlobalShift(double shift) { m_globalShift = shift; }
+
 protected:
 
 	//! Default destructor
@@ -270,6 +275,9 @@ protected:
 		will turn this flag on.
 	**/
 	bool m_modified;
+
+	//! Global shift
+	double m_globalShift;
 };
 
 #endif //CC_DB_SCALAR_FIELD_HEADER

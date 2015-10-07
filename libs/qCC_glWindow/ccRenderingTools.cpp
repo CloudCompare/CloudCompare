@@ -528,6 +528,8 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		{
 			//QString sfTitle = QString("[%1]").arg(sfName);
 			QString sfTitle(sfName);
+			if (sf->getGlobalShift() != 0)
+				sfTitle += QString("[Shifted]");
 			if (logScale)
 				sfTitle += QString("[Log scale]");
 			//we leave some (vertical) space for the top-most label!

@@ -73,6 +73,30 @@ double GetAngle_deg(CCVector3 AB, CCVector3 AC)
 	return acos(dotprod) * CC_RAD_TO_DEG;
 }
 
+QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
+{
+	if (info.hasSF)
+	{
+		if (!ccScalarField::ValidValue(info.sfValue))
+		{
+			return "NaN";
+		}
+		else
+		{
+			QString sfVal = QString::number(info.sfValue,'f',precision);
+			if (info.sfValueIsShifted)
+			{
+				sfVal = QString::number(info.sfShiftedValue,'f',precision) + QString(" (shifted: %1)").arg(sfVal);
+			}
+			return sfVal;
+		}
+	}
+	else
+	{
+		return QString();
+	}
+}
+
 QString cc2DLabel::getTitle(int precision) const
 {
 	QString title;
@@ -87,7 +111,8 @@ QString cc2DLabel::getTitle(int precision) const
 		getLabelInfo1(info);
 		if (info.hasSF)
 		{
-			title = QString("%1 = %2 (%3)").arg(info.sfName).arg(info.sfValue,0,'f',precision).arg(title);
+			QString sfVal = GetSFValueAsString(info, precision);
+			title = QString("%1 = %2").arg(info.sfName).arg(sfVal);
 		}
 	}
 	else if (count == 2)
@@ -429,13 +454,22 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 	if (info.hasSF)
 	{
 		info.sfValue = info.cloud->getPointScalarValue(info.pointIndex);
+
 		info.sfName = "Scalar";
 		//fetch the real scalar field name if possible
 		if (info.cloud->isA(CC_TYPES::POINT_CLOUD))
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(info.cloud);
 			if (pc->getCurrentDisplayedScalarField())
-				info.sfName = QString(pc->getCurrentDisplayedScalarField()->getName());
+			{
+				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+				info.sfName = QString(sf->getName());
+				if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
+				{
+					info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
+					info.sfValueIsShifted = true;
+				}
+			}
 		}
 	}
 }
@@ -534,7 +568,8 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//scalar field
 			if (info.hasSF)
 			{
-				QString sfStr = QString("%1 = %2").arg(info.sfName).arg(info.sfValue,0,'f',precision);
+				QString sfVal = GetSFValueAsString(info, precision);
+				QString sfStr = QString("%1 = %2").arg(info.sfName).arg(sfVal);
 				body << sfStr;
 			}
 		}

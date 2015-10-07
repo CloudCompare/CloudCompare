@@ -17,9 +17,6 @@
 
 #include "VTKFilter.h"
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
@@ -173,15 +170,17 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	{
 		ccPointCloud* pointCloud = static_cast<ccPointCloud*>(vertices);
 		unsigned sfCount = pointCloud->getNumberOfScalarFields();
-		for (unsigned i=0;i<sfCount;++i)
+		for (unsigned i=0; i<sfCount; ++i)
 		{
-			CCLib::ScalarField* sf = pointCloud->getScalarField(i);
+			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
 
 			outFile << "SCALARS " << QString(sf->getName()).replace(" ","_") << (sizeof(ScalarType)==4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
-			for (unsigned j=0;j<ptsCount; ++j)
-				outFile << sf->getValue(j) << endl;
+			for (unsigned j=0; j<ptsCount; ++j)
+			{
+				outFile << sf->getGlobalShift() + sf->getValue(j) << endl;
+			}
 		}
 	}
 	else //virtual point cloud, we only have access to its currently displayed scalar field
@@ -191,7 +190,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			outFile << "SCALARS ScalarField" << (sizeof(ScalarType)==4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
-			for (unsigned j=0;j<ptsCount; ++j)
+			for (unsigned j=0; j<ptsCount; ++j)
 				outFile << vertices->getPointDisplayedDistance(j) << endl;
 		}
 	}

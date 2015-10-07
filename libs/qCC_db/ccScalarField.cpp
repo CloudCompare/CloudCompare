@@ -41,6 +41,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 	, m_colorScale(0)
 	, m_colorRampSteps(0)
 	, m_modified(true)
+	, m_globalShift(0)
 {
 	setColorRampSteps(ccColorScale::DEFAULT_STEPS);
 	setColorScale(ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR));
@@ -357,7 +358,11 @@ bool ccScalarField::toFile(QFile& out) const
 
 	//color ramp steps (dataVersion>=20)
 	uint32_t colorRampSteps = (uint32_t)m_colorRampSteps;
-	if (out.write((const char*)&colorRampSteps,4) < 0)
+	if (out.write((const char*)&colorRampSteps, 4) < 0)
+		return WriteError();
+
+	//global shift (dataVersion>=42)
+	if (out.write((const char*)&m_globalShift, sizeof(double)) < 0)
 		return WriteError();
 
 	return true;
@@ -559,6 +564,13 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 		if (in.read((char*)&colorRampSteps,4) < 0)
 			return ReadError();
 		setColorRampSteps(static_cast<unsigned>(colorRampSteps));
+	}
+
+	if (dataVersion >= 42)
+	{
+		//global shift (dataVersion>=42)
+		if (in.read((char*)&m_globalShift,sizeof(double)) < 0)
+			return ReadError();
 	}
 
 	//update values

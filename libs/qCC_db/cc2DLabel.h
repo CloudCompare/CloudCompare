@@ -146,6 +146,8 @@ protected:
 		Vector3Tpl<ColorCompType> rgb;
 		bool hasSF;
 		ScalarType sfValue;
+		double sfShiftedValue;
+		bool sfValueIsShifted;
 		QString sfName;
 		//! Default constructor
 		LabelInfo1()
@@ -156,11 +158,21 @@ protected:
 			, hasRGB(false)
 			, rgb(0,0,0)
 			, hasSF(false)
-			, sfValue(NAN_VALUE)
+			, sfValue(0)
+			, sfShiftedValue(0)
+			, sfValueIsShifted(false)
 		{}
 	};
-	//! Gets one-point label info
+	
+	//! Returns one-point label info
 	void getLabelInfo1(LabelInfo1& info) const;
+	
+	//! Returns the SF value as a string
+	/** Handles:
+		- NaN values
+		- shifted SF
+	**/
+	static QString GetSFValueAsString(const LabelInfo1& info, int precision);
 
 	//! Two-points label info
 	struct LabelInfo2

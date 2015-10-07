@@ -170,12 +170,12 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	unsigned numberOfPoints = cloud->size();
 	bool writeColors = cloud->hasColors();
 	bool writeNorms = cloud->hasNormals();
-	std::vector<CCLib::ScalarField*> theScalarFields;
+	std::vector<ccScalarField*> theScalarFields;
 	if (cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
 		for (unsigned i=0; i<ccCloud->getNumberOfScalarFields(); ++i)
-			theScalarFields.push_back(ccCloud->getScalarField(i));
+			theScalarFields.push_back(static_cast<ccScalarField*>(ccCloud->getScalarField(i)));
 	}
 	bool writeSF = (theScalarFields.size() != 0);
 
@@ -220,7 +220,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 		if (writeSF)
 		{
 			//add each associated SF name
-			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
 				QString sfName((*it)->getName());
 				sfName.replace(separator,'_');
@@ -303,10 +303,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 		if (writeSF)
 		{
 			//add each associated SF values
-			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
 				line.append(separator);
-				line.append(QString::number((*it)->getValue(i),'f',s_sfPrecision));
+				double sfVal = (*it)->getGlobalShift() + (*it)->getValue(i);
+				line.append(QString::number(sfVal,'f',s_sfPrecision));
 			}
 		}
 

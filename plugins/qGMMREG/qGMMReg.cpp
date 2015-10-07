@@ -336,7 +336,7 @@ void qGMMRegPlugin::doAction()
 
 			//try to get as close as possible with a regular grid
 			assert(s_ctrlPtsCount >= 1);
-			PointCoordinateType l = pow((diag.x * diag.y * diag.z) / s_ctrlPtsCount, 1.0/3.0);
+			PointCoordinateType l = pow((diag.x * diag.y * diag.z) / s_ctrlPtsCount, static_cast<PointCoordinateType>(1.0/3.0));
 			unsigned nx = std::max<unsigned>(2,static_cast<unsigned>(ceil(diag.x / l)));
 			unsigned ny = std::max<unsigned>(2,static_cast<unsigned>(ceil(diag.y / l)));
 			unsigned nz = std::max<unsigned>(2,static_cast<unsigned>(ceil(diag.z / l)));

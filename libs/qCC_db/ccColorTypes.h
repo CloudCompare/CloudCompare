@@ -212,11 +212,11 @@ namespace ccColor
 		static Rgb hsv2rgb(float H, float S, float V)
 		{
 			int hi = ((static_cast<int>(H)/60) % 6);
-			float f = 0;
-			modf(H/60, &f);
-			float l = V*(1.0f-S);
-			float m = V*(1.0f-f*S);
-			float n = V*(1.0f-(1.0f-f)*S);
+			double f = 0;
+			modf(H/60.0, &f);
+			float l = static_cast<float>(V*(1.0-S));
+			float m = static_cast<float>(V*(1.0-f*S));
+			float n = static_cast<float>(V*(1.0-(1.0-f)*S));
 
 			Rgbf rgb(0,0,0);
 

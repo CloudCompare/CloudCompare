@@ -631,7 +631,9 @@ bool StereogramDialog::init(double angularStep_deg,
 	double meanDipDir_deg, meanDip_deg;
 	//set stereogram subtitle (i.e. mean direction)
 	m_classifWidget->getMeanDir(meanDip_deg, meanDipDir_deg);
-	meanDirLabel->setText(QString("[Mean] ")+ccNormalVectors::ConvertDipAndDipDirToString(static_cast<PointCoordinateType>(meanDip_deg),static_cast<PointCoordinateType>(meanDipDir_deg)));
+	meanDirLabel->setText(	QString("[Mean] ")
+						+	ccNormalVectors::ConvertDipAndDipDirToString(	static_cast<PointCoordinateType>(meanDip_deg),
+																			static_cast<PointCoordinateType>(meanDipDir_deg)) );
 
 	//restore any old set state before forgetting it!
 	bool filterModeEnabled = filterFacetsGroupBox->isChecked();

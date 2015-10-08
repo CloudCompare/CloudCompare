@@ -35,7 +35,8 @@ Big ones:
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Finish the Oculus Rift plugin
-[*] Release the qFacets plugin
+[*] Change Triangle lib by a GPL-compatible library
+[*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 Various:
 
@@ -49,19 +50,16 @@ Various:
 [*] Create a camera object at the current position of the OpenGL camera
 [*] Add a 'two-windows' mode to the point-pair based alignment tool (http://cloudcompare.org/forum/viewtopic.php?t=1043)
 [*] Handle 'Folded Normal Distribution' in the Compute Stats Params method (for positive scalar fields, e.g. unsigned C2C distances)
-[*] Change Triangle lib by a GPL-compatible library
 [*] Export primitives to a (simple, free) CAD format (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)
 [*] Enhance qCork so as to keep the mesh(es) properties (color, normals, etc.)
-[*] Properly segment meshes in both the graphical segmentation tool and the Cross section tool
+[*] Properly segment meshes in the graphical segmentation tool
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
-[*] Add touchpad support (http://www.cloudcompare.org/forum/viewtopic.php?t=671)
 [*] Reverse Unroll Feature (http://www.cloudcompare.org/forum/viewtopic.php?t=645)
 [*] Let the user select and handle multiple clouds in the 'Clipping box' tool
 [*] Per-point size based on SF values (http://www.cloudcompare.org/forum/viewtopic.php?t=507)
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
-[*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
@@ -100,9 +98,6 @@ From AdrienA
 From Chartzell
 [*] A limit box- Being able to hide portions of the clouds you are working on can make the registration process much quicker and easier. With a customizable limit box you can look at just a small cross section of the clouds to get a good view of how well they fit together and what adjustments need to be made. Ideally, you would be able to push and pull on the various sides of the box to change it's dimensions.
 [*] Ability to do fly around animations and export them to some type of video format? Something where you could set various viewpoints and and have the camera fly between each point. Google SketchUp has a great example of this function. (see 'flythrough mode' above)
-
-From Jean-Francois H.
-[*] Exporting histogram as image
 
 From Konrad W.
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel

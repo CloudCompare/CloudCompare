@@ -60,9 +60,10 @@ qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow
 
 	for ( size_t i=0; i<m_videoSteps.size(); ++i )
 	{
-		cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
+		const cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
+		const cc2DViewportObject* viewport2 = m_videoSteps[i].interpolator.view2();
 
-		stepSelectionList->addItem( viewport1->getName() );
+		stepSelectionList->addItem( QString("Step %1 (%2 - %3)").arg(i+1).arg(viewport1->getName()).arg(viewport2->getName()) );
 
 		//check if the (1st) viewport has a duration in meta data (from a previous run)
 		double duration_sec = 2.0;

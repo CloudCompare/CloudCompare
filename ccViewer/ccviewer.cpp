@@ -140,6 +140,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	//"Options > Selected" menu
 	connect(ui.actionShowColors,					SIGNAL(toggled(bool)),						this,	SLOT(toggleColorsShown(bool)));
 	connect(ui.actionShowNormals,					SIGNAL(toggled(bool)),						this,	SLOT(toggleNormalsShown(bool)));
+	connect(ui.actionShowMaterials,					SIGNAL(toggled(bool)),						this,	SLOT(toggleMaterialsShown(bool)));
 	connect(ui.actionShowScalarField,				SIGNAL(toggled(bool)),						this,	SLOT(toggleScalarShown(bool)));
 	connect(ui.actionShowColorRamp,					SIGNAL(toggled(bool)),						this,	SLOT(toggleColorbarShown(bool)));
 	connect(ui.actionZoomOnSelectedEntity,			SIGNAL(triggered()),						this,	SLOT(zoomOnSelectedEntity()));
@@ -377,6 +378,7 @@ void ccViewer::selectEntity(int uniqueID)
 
 		ui.actionShowColors->blockSignals(true);
 		ui.actionShowNormals->blockSignals(true);
+		ui.actionShowMaterials->blockSignals(true);
 		ui.actionShowScalarField->blockSignals(true);
 		ui.actionShowColorRamp->blockSignals(true);
 
@@ -384,6 +386,18 @@ void ccViewer::selectEntity(int uniqueID)
 		ui.actionShowColors->setChecked(toSelect->colorsShown());
 		ui.actionShowNormals->setEnabled(toSelect->hasNormals());
 		ui.actionShowNormals->setChecked(toSelect->normalsShown());
+
+		if (toSelect->isKindOf(CC_TYPES::MESH))
+		{
+			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(toSelect);
+			ui.actionShowMaterials->setEnabled(mesh->hasMaterials());
+			ui.actionShowMaterials->setChecked(mesh->materialsShown());
+		}
+		else
+		{
+			ui.actionShowMaterials->setEnabled(false);
+			ui.actionShowMaterials->setChecked(false);
+		}
 
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(toSelect);
 		bool hasSF = (cloud ? cloud->hasScalarFields() : false);
@@ -413,6 +427,7 @@ void ccViewer::selectEntity(int uniqueID)
 
 		ui.actionShowColors->blockSignals(false);
 		ui.actionShowNormals->blockSignals(false);
+		ui.actionShowMaterials->blockSignals(false);
 		ui.actionShowScalarField->blockSignals(false);
 		ui.actionShowColorRamp->blockSignals(false);
 
@@ -874,6 +889,15 @@ void ccViewer::toggleNormalsShown(bool state)
 
 	m_selectedObject->showNormals(state);
 	m_glWindow->redraw();
+}
+
+void ccViewer::toggleMaterialsShown(bool state)
+{
+	if (m_selectedObject && m_selectedObject->isKindOf(CC_TYPES::MESH))
+	{
+		static_cast<ccGenericMesh*>(m_selectedObject)->showMaterials(state);
+		m_glWindow->redraw();
+	}
 }
 
 void ccViewer::toggleScalarShown(bool state)

@@ -106,6 +106,7 @@ protected slots:
 	//selected entity properties
 	void toggleColorsShown(bool);
 	void toggleNormalsShown(bool);
+	void toggleMaterialsShown(bool);
 	void toggleScalarShown(bool);
 	void toggleColorbarShown(bool);
 	void changeCurrentScalarField(bool);

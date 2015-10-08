@@ -1,5 +1,10 @@
 *** CloudCompare versions history ***
 
+v2.7.beta ??/??/201?
+- New features:
+- Enhancements:
+- Bug fixes:
+
 v2.6.2 10/08/2015
 - New features:
 	* New option in the context menu of the DB tree (right click on an item)

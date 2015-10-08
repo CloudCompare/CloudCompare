@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project( CloudCompare )
 
 set( VERSION_MAJOR 2 )
-set( VERSION_MINOR 6 )
-set( VERSION_PATCH 2 )
+set( VERSION_MINOR 7 )
+set( VERSION_PATCH 0 )
 
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )

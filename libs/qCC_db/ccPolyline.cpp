@@ -134,7 +134,7 @@ ccBBox ccPolyline::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox emptyBox;
 	getBoundingBox(emptyBox.minCorner(), emptyBox.maxCorner());
-	emptyBox.setValidity(!is2DMode() && size() != 0);
+	emptyBox.setValidity(/*!is2DMode() && */size() != 0);
 	return emptyBox;
 }
 

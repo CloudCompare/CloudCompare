@@ -142,7 +142,7 @@ v2.6.2 10/08/2015
 			fields relying on this scale is now properly updated
 		- new 'Apply' button to apply the modifications without leaving the tool dialog
 	* the SOR and MLS filters of the qPCL plugin (Point Cloud Library wrapper) now preserve the global shift & scale information
-	* Normals are now internally coded on 32 bytes (instead of 16 bytes) so as to increase the normals (direction) precision
+	* Normals are now internally coded on 32 bits (instead of 16 bits) so as to increase the normals (direction) precision
 		(instead of 32K different directions - which is visually sufficient - 2M directions can now be coded - which
 		 is much better for normal-based computation, such as Dip/Dip direction computation or the new qFacet plugin)
 	* Fit Quadric:
@@ -151,20 +151,20 @@ v2.6.2 10/08/2015
 		- the plugin can now be used directly with a cone or cylinder primitive (in place of a 'profile')
 	* LAS files:
 		- the 'time' field of LAS files is now automatically shifted at loading time so as to prevent any loss
-			of accuracy (as this field is originally coded on 64 bytes but then stored on 32 bytes once loaded)
+			of accuracy (as this field is originally coded on 64 bits but then stored on 32 bits once loaded)
 		- the original value of a single point can be queried anytime by spawning a label on this point
 		- the original value is restored automatically when saving the cloud
 		
 - Bug fixes:
 	* The point size couldn't be modified in the 3D view of the 'Rasterize' tool
-	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (integer part was applied instead)
-	* If only one plugin was loaded (with mulitple methods such as qPCL) then the 'Plugins' was staying disabled
+	* The 'inverse (1/x)' function of the SF arithmetic tool was not accessible (the integer part was applied instead)
+	* If only one plugin was loaded (with mulitple methods such as qPCL) then the 'Plugins' menu was staying disabled
 	* The scale value displayed in the 3D views (under the scale bar) was wrong when the zoom of the 'Render to file'
 		method was greater than 1
 	* The 'Apply all' option of the 'Global shift & scale' dialog wasn't taken into account when loading LAS/LAZ files
 	* The main window could sometimes disappear in the background when the progress bar was appearing (Qt 5 issue)
 	* Some options of the context menu of the DB tree were incorrectly using the term 'siblings' instead of 'children'
-	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds was not displayed in the right place)
+	* The VBO was not always updated when the cloud was translated (as a consequence, the clouds were not displayed in the right place)
 	* While importing a Bundler file, if the images were to be 'kept in memory' but not the keypoints, then CC would crash
 	* When saving a mesh composed of multiple sub-meshes to OBJ format, the triangles and texture information could be inconsistent
 	* When merging two or more meshes, material were merged if their name were the same even if the texture or other parameters were different
@@ -176,12 +176,12 @@ v2.6.2 10/08/2015
 		- a flat profile (e.g. perfect cylinder) would prevent the plugin from exporting DXF files
 		- the 'units' field in the DXF export dialog was ignored
 	* PTX files: the sensor position was overlooked (as it's almost always the same as the scan position... almost ;)
-	* Section extraction: CC crashed when extracting section clouds from multiple clouds at the same time
+	* Section extraction: CC was crashing when extracting section clouds from multiple clouds at the same time
 	* Command line: when automatically saving a file, CC will now add the suffix after the last point of the origin filename
 	* qCork was crashing on Windows 8 (Cork also relies on the 'triangle' library ;)
-	* FBX files: the exported 'specular' component of materials was in fact the 'ambient' component (resulting a much brighter look)
+	* FBX files: the exported 'specular' component of materials was in fact the 'ambient' component (resulting in a much brighter look)
 	* In command line mode, the Delaunay command was ignoring the 'AUTO_SAVE OFF' option and was creating a looping hierarchy
-		(potentially causing later infinite loops...)
+		(potentially causing infinite loops later...)
 	* OBJ files: when merging multiple models with textures having the same (local) filename, the images could overwrite each other once saved
 	* Rasterize: saving a raster with the currently displayed scalar field as additioanl layer would make CC crash (+ memory leak fixed)
 	* Point-pair based alignment: the markers picked on the aligned entity could become very big (or very small) when the scale was to be adjusted

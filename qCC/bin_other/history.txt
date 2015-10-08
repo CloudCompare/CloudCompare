@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.6.2 XX/XX/2015
+v2.6.2 10/08/2015
 - New features:
 	* New option in the context menu of the DB tree (right click on an item)
 		- 'Select children by type and/or name' - to select items either by type and/or by name

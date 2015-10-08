@@ -30,8 +30,8 @@ static const QString s_OriFamilyKey = "orientation.family.index";
 static const QString s_OriFamilyNameKey = "orientation.family.name";
 static const QString s_OriSubFamilyKey = "orientation.subfamily.index";
 
-// default value (HSV) for the 'dark' version of a color
-const double c_darkColorValue = 0.25;
+// default ratio for the 'dark' version of a color
+const double c_darkColorRatio = 0.25;
 
 class FacetsClassifier
 {
@@ -60,20 +60,19 @@ public:
 		if (H == 360.0) //H is in [0;360[
 			H = 0;
 		double S = dip/90.0; //S is in [0;1]
-		double V = 0.75;
+		double L = 0.5;
 
 		if (subFamilyCount > 1)
 		{
-			assert(subFamilyIndex>=1);
+			assert(subFamilyIndex >= 1);
 			//FIXME: how could we do this?!
 			//V = 0.5 + 0.5 * static_cast<double>(subFamilyIndex-1)/static_cast<double>(subFamilyCount-1);
 		}
 
-		ccNormalVectors::ConvertHSVToRGB(H,S,V,col.r,col.g,col.b);
-
+		col = ccColor::Convert::hsl2rgb(H,S,L);
 		if (darkCol)
 		{
-			ccNormalVectors::ConvertHSVToRGB(H,S,c_darkColorValue,darkCol->r,darkCol->g,darkCol->b);
+			*darkCol = ccColor::Convert::hsl2rgb(H,S,c_darkColorRatio);
 		}
 	}
 

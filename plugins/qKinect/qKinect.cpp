@@ -18,9 +18,9 @@
 #include "qKinect.h"
 
 //qCC_db
+#include <ccColorTypes.h>
 #include <ccPointCloud.h>
 #include <ccGLMatrix.h>
-#include <ccNormalVectors.h>
 #include <ccGBLSensor.h>
 
 //dialog
@@ -318,11 +318,14 @@ void qKinect::updateRTView()
 				//see http://openkinect.org/wiki/Imaging_Information
 				float z = 12.36f * tanf((float)(*_depth) / 2842.5f + 1.1863f) - 3.7f;
 				//HSV --> V=1, S=1, H = cycling
-				ccNormalVectors::ConvertHSVToRGB((abs((int)z*10))%360,1.0,1.0,_bits[0],_bits[1],_bits[2]);
+				ccColor::Rgb rgb = ccColor::Convert::hsv2rgb((abs((int)z*10))%360,1.0,1.0);
+				_bits[0] = rgb.r;
+				_bits[1] = rgb.g;
+				_bits[2] = rgb.b;
 			}
 			else
 			{
-				_bits[0]=_bits[1]=_bits[2]=0;
+				_bits[0] = _bits[1] = _bits[2] = 0;
 			}
 		}
 

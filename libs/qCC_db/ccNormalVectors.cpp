@@ -91,7 +91,12 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 
 	ColorCompType* rgb = m_theNormalHSVColors;
 	for (size_t i=0; i<m_theNormalVectors.size(); ++i, rgb+=3)
-		ccNormalVectors::ConvertNormalToRGB(m_theNormalVectors[i],rgb[0],rgb[1],rgb[2]);
+	{
+		ccColor::Rgb col = ccNormalVectors::ConvertNormalToRGB(m_theNormalVectors[i]);
+		rgb[0] = col.r;
+		rgb[1] = col.g;
+		rgb[2] = col.b;
+	}
 
 	return (m_theNormalHSVColors != 0);
 }
@@ -863,61 +868,21 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 	dip_deg = static_cast<PointCoordinateType>(dip_rad * CC_RAD_TO_DEG);
 }
 
-void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, double& H, double& S, double& V)
+void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, float& H, float& S, float& V)
 {
 	PointCoordinateType dip = 0, dipDir = 0;
 	ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
-	H = dipDir;
-	if (H == 360.0) //H is in [0;360[
-		H = 0.0;
-	S = dip/90.0; //S is in [0;1]
-	V = 1.0;
+	H = static_cast<float>(dipDir);
+	if (H == 360.0f) //H is in [0;360[
+		H = 0;
+	S = static_cast<float>(dip / 90); //S is in [0;1]
+	V = 1.0f;
 }
 
-void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, ColorCompType& R, ColorCompType& G, ColorCompType& B)
+ccColor::Rgb ccNormalVectors::ConvertNormalToRGB(const CCVector3& N)
 {
-	int hi = ((static_cast<int>(H)/60) % 6);
-	double f = 0;
-	modf(H/60.0,&f);
-	double l = V*(1.0-S);
-	double m = V*(1.0-f*S);
-	double n = V*(1.0-(1.0-f)*S);
-
-	double r = 0.0;
-	double g = 0.0;
-	double b = 0.0;
-
-	switch(hi)
-	{
-	case 0:
-		r=V; g=n; b=l;
-		break;
-	case 1:
-		r=m; g=V; b=l;
-		break;
-	case 2:
-		r=l; g=V; b=n;
-		break;
-	case 3:
-		r=l; g=m; b=V;
-		break;
-	case 4:
-		r=n; g=l; b=V;
-		break;
-	case 5:
-		r=V; g=l; b=m;
-		break;
-	}
-
-	R = static_cast<ColorCompType>(r * ccColor::MAX);
-	G = static_cast<ColorCompType>(g * ccColor::MAX);
-	B = static_cast<ColorCompType>(b * ccColor::MAX);
-}
-
-void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, ColorCompType& R, ColorCompType& G, ColorCompType& B)
-{
-	double H,S,V;
+	float H,S,V;
 	ConvertNormalToHSV(N,H,S,V);
-	ConvertHSVToRGB(H,S,V,R,G,B);
+	return ccColor::Convert::hsv2rgb(H,S,V);
 }

@@ -155,31 +155,19 @@ public:
 
 	//! Converts a normal vector to HSV color space
 	/** Uses 'strike & dip' parameters (H=strike, S=dip, V=constant)
-		\param N [in] normal (should be normalized!)
-		\param H [out] hue [0;360[
-		\param S [out] saturation [0;1]
-		\param V [out] value [0;1]
+		\param[in]  N normal (should be normalized!)
+		\param[out] H hue [0;360[
+		\param[out] S saturation [0;1]
+		\param[out] V value [0;1]
 	**/
-	static void ConvertNormalToHSV(const CCVector3& N, double& H, double& S, double& V);
+	static void ConvertNormalToHSV(const CCVector3& N, float& H, float& S, float& V);
 
 	//! Converts a normal vector to RGB color space
 	/** Uses 'ConvertNormalToHSV' then converts HSV to RGB.
-		\param N [in] normal (should be normalized!)
-		\param R [out] red [0;MAX_COLOR_COMP]
-		\param G [out] green [0;MAX_COLOR_COMP]
-		\param B [out] blue [0;MAX_COLOR_COMP]
+		\param[in] N normal (should be normalized!)
+		\return RGB value (components betwen 0 and MAX_COLOR_COMP)
 	**/
-	static void ConvertNormalToRGB(const CCVector3& N, ColorCompType& R, ColorCompType& G, ColorCompType& B);
-
-	//! Converts a HSV color to RGB color space
-	/** \param H [out] hue [0;360[
-		\param S [out] saturation [0;1]
-		\param V [out] value [0;1]
-		\param R [out] red [0;MAX_COLOR_COMP]
-		\param G [out] green [0;MAX_COLOR_COMP]
-		\param B [out] blue [0;MAX_COLOR_COMP]
-	**/
-	static void ConvertHSVToRGB(double H, double S, double V, ColorCompType& R, ColorCompType& G, ColorCompType& B);
+	static ccColor::Rgb ConvertNormalToRGB(const CCVector3& N);
 
 public:
 

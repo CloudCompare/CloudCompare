@@ -272,6 +272,9 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 	case 3:
 		errorMeasure = CCLib::DistanceComputationTools::MAX_DIST_99_PERCENT;
 		break;
+	case 4:
+		errorMeasure = CCLib::DistanceComputationTools::MAX_DIST;
+		break;
 	default:
 		assert(false);
 		break;
@@ -498,10 +501,10 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 					if (randomColors)
 					{
 						col = ccColor::Generator::Random();
-						assert(c_darkColorValue <= 1.0);
-						darkCol.r = static_cast<ColorCompType>(static_cast<double>(col.r) * c_darkColorValue);
-						darkCol.g = static_cast<ColorCompType>(static_cast<double>(col.g) * c_darkColorValue);
-						darkCol.b = static_cast<ColorCompType>(static_cast<double>(col.b) * c_darkColorValue);
+						assert(c_darkColorRatio <= 1.0);
+						darkCol.r = static_cast<ColorCompType>(static_cast<double>(col.r) * c_darkColorRatio);
+						darkCol.g = static_cast<ColorCompType>(static_cast<double>(col.g) * c_darkColorRatio);
+						darkCol.b = static_cast<ColorCompType>(static_cast<double>(col.b) * c_darkColorRatio);
 					}
 					else
 					{

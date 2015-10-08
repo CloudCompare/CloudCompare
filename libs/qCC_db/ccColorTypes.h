@@ -20,6 +20,7 @@
 
 //system
 #include <stdlib.h>
+#include <math.h> //for modf
 
 //! Default color components type (R,G and B)
 typedef unsigned char ColorCompType;
@@ -173,6 +174,100 @@ namespace ccColor
 
 			return col;
 		}
+	};
+
+	//! Color space conversion
+	class Convert
+	{
+	public:
+
+		//! Converts a HSL color to RGB color space
+		/** \param H [out] hue [0;360[
+			\param S [out] saturation [0;1]
+			\param L [out] light [0;1]
+			\return RGB color (unsigned byte)
+		**/
+		static Rgb hsl2rgb(float H, float S, float L)
+		{
+			H /= 360;
+			float q = L < 0.5f ? L * (1.0f + S) : L + S - L * S;
+			float p = 2 * L - q;
+			
+			float r = hue2rgb(p, q, H + 1.0f/3.0f);
+			float g = hue2rgb(p, q, H);
+			float b = hue2rgb(p, q, H - 1.0f/3.0f);
+
+			return Rgb (static_cast<ColorCompType>(r * ccColor::MAX),
+						static_cast<ColorCompType>(g * ccColor::MAX),
+						static_cast<ColorCompType>(b * ccColor::MAX));
+
+		}
+
+		//! Converts a HSV color to RGB color space
+		/** \param H [out] hue [0;360[
+			\param S [out] saturation [0;1]
+			\param V [out] value [0;1]
+			\return RGB color (unsigned byte)
+		**/
+		static Rgb hsv2rgb(float H, float S, float V)
+		{
+			int hi = ((static_cast<int>(H)/60) % 6);
+			float f = 0;
+			modf(H/60, &f);
+			float l = V*(1.0f-S);
+			float m = V*(1.0f-f*S);
+			float n = V*(1.0f-(1.0f-f)*S);
+
+			Rgbf rgb(0,0,0);
+
+			switch (hi)
+			{
+			case 0:
+				rgb.r=V; rgb.g=n; rgb.b=l;
+				break;
+			case 1:
+				rgb.r=m; rgb.g=V; rgb.b=l;
+				break;
+			case 2:
+				rgb.r=l; rgb.g=V; rgb.b=n;
+				break;
+			case 3:
+				rgb.r=l; rgb.g=m; rgb.b=V;
+				break;
+			case 4:
+				rgb.r=n; rgb.g=l; rgb.b=V;
+				break;
+			case 5:
+				rgb.r=V; rgb.g=l; rgb.b=m;
+				break;
+			}
+
+			return Rgb (static_cast<ColorCompType>(rgb.r * ccColor::MAX),
+						static_cast<ColorCompType>(rgb.g * ccColor::MAX),
+						static_cast<ColorCompType>(rgb.b * ccColor::MAX));
+		}
+
+	protected:
+		
+		//! Method used by hsl2rgb
+		static float hue2rgb(float m1, float m2, float hue)
+		{
+			if (hue < 0)
+				hue += 1.0f;
+            else if (hue > 1.0f)
+				hue -= 1.0f;
+
+			if (6*hue < 1.0f)
+				return m1 + (m2 - m1) * hue * 6;
+            else if (2 * hue < 1.0f)
+				return m2;
+            else if (3 * hue < 2.0f)
+				return m1 + (m2 - m1) * (4.0f - hue * 6);
+			else
+				return m1;
+        }
+
+
 	};
 };
 

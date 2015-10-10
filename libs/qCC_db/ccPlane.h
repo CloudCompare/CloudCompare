@@ -83,6 +83,13 @@ public:
 	**/
 	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
 
+	//! Returns the equation of the plane
+	/** Equation:
+		N.P + constVal = 0
+		i.e. Nx.x + Ny.y + Nz.z + constVal = 0
+	**/
+	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
+
 protected:
 
 	//inherited from ccGenericPrimitive

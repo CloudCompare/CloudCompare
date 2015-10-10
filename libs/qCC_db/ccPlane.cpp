@@ -75,6 +75,14 @@ ccGenericPrimitive* ccPlane::clone() const
 	return finishCloneJob(new ccPlane(m_xWidth,m_yWidth,&m_transformation,getName()));
 }
 
+void ccPlane::getEquation(CCVector3& N, PointCoordinateType& constVal) const
+{
+	N = CCVector3(0, 0, 1);
+	m_transformation.applyRotation(N);
+
+	constVal = m_transformation.getTranslationAsVec3D().dot(N);
+}
+
 ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
 {
 	//number of points

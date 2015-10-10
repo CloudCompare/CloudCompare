@@ -301,10 +301,14 @@ ccGLWindow::~ccGLWindow()
 		assert(false);
 #endif
 
+	//we must unlink entities currently linked to this window
 	if (m_globalDBRoot)
 	{
-		//we must unlink entities currently linked to this window
 		m_globalDBRoot->removeFromDisplay_recursive(this);
+	}
+	if (m_winDBRoot)
+	{
+		m_winDBRoot->removeFromDisplay_recursive(this);
 	}
 
 #ifndef THREADED_GL_WIDGET
@@ -1996,9 +2000,9 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	{
 		zoomedBox = (*aBox);
 	}
-	else if (m_globalDBRoot) //otherwise we'll take the default one (if possible)
+	else //otherwise we'll take the default one (if possible)
 	{
-		zoomedBox = m_globalDBRoot->getDisplayBB_recursive(false, this);
+		getVisibleObjectsBB(zoomedBox);
 	}
 
 	if (!zoomedBox.isValid())
@@ -2445,7 +2449,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	CCVector3d bbCenter(0,0,0);
 
 	//compute center of visible objects constellation
-	if (m_globalDBRoot)
+	if (m_globalDBRoot || m_winDBRoot)
 	{
 		//get whole bounding-box
 		ccBBox box;

@@ -17,9 +17,6 @@
 
 #include "ccRegistrationTools.h"
 
-//Local
-#include "ccRegistrationDlg.h"
-
 //CCLib
 #include <MeshSamplingTools.h>
 #include <GenericIndexedCloudPersist.h>

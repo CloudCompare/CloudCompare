@@ -210,7 +210,7 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 	}
 
 	//if necessary we try to guess the best octree level for distances computation
-	if (params.octreeLevel == 0)
+	if (params.octreeLevel == 0 && referenceOctree) //DGM: referenceOctree can be 0 if the input entities bounding-boxes are disjoint!
 	{
 		params.octreeLevel = comparedOctree->findBestLevelForComparisonWithOctree(referenceOctree);
 	}
@@ -1759,7 +1759,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		CCMiscTools::MakeMinAndMaxCubical(minCubifiedBB,maxCubifiedBB);
 	}
 
-	//ccompute the octree if necessary
+	//compute the octree if necessary
 	DgmOctree tempOctree(pointCloud);
 	DgmOctree* octree = cloudOctree;
 	bool rebuildTheOctree = false;

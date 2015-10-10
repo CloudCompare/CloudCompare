@@ -280,7 +280,7 @@ DistanceComputationTools::SOReturnCode
 		}
 	}
 
-	if (maxDist >= 0)
+	if (maxDist > 0)
 	{
 		//we reduce the bouding box to the intersection of both bounding-boxes enlarged by 'maxDist'
 		for (unsigned char k=0; k<3; k++)
@@ -1092,14 +1092,14 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		maxDistToBoundaries = std::max(maxDistToBoundaries, distToLowerBorder.u[k]);
 		maxDistToBoundaries = std::max(maxDistToBoundaries, distToUpperBorder.u[k]);
 	}
-	int maxDist = maxDistToBoundaries;
+	int maxIntDist = maxDistToBoundaries;
 
 	if (s_params_MT.maxSearchDist > 0)
 	{
 		//no need to look farther than 'maxNeighbourhoodLength'
 		int maxNeighbourhoodLength = ComputeMaxNeighborhoodLength(s_params_MT.maxSearchDist, s_octree_MT->getCellSize(s_params_MT.octreeLevel));
-		if (maxNeighbourhoodLength < maxDist)
-			maxDist = maxNeighbourhoodLength;
+		if (maxNeighbourhoodLength < maxIntDist)
+			maxIntDist = maxNeighbourhoodLength;
 
 		ScalarType maxDistance = s_params_MT.maxSearchDist;
 		if (!s_params_MT.signedDistances)
@@ -1164,7 +1164,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 	//let's find the nearest triangles for each point in the neighborhood 'Yk'
 	ScalarType maxRadius = 0;
-	for (int dist = 0; remainingPoints != 0 && dist <= maxDist; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
+	for (int dist = 0; remainingPoints != 0 && dist <= maxIntDist; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
 	{
 		//test the neighbor cells at distance = 'dist'
 		//a,b,c,d,e,f are the extents of this neighborhood
@@ -1459,7 +1459,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 				maxDistToBoundaries = std::max(maxDistToBoundaries, distToLowerBorder.u[k]);
 				maxDistToBoundaries = std::max(maxDistToBoundaries, distToUpperBorder.u[k]);
 			}
-			int maxDist = maxDistToBoundaries;
+			int maxIntDist = maxDistToBoundaries;
 
 			//determine the cell center
 			CCVector3 cellCenter;
@@ -1494,8 +1494,8 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 			if (boundedSearch)
 			{
 				//no need to look farther than 'maxNeighbourhoodLength'
-				if (maxNeighbourhoodLength < maxDist)
-					maxDist = maxNeighbourhoodLength;
+				if (maxNeighbourhoodLength < maxIntDist)
+					maxIntDist = maxNeighbourhoodLength;
 
 				//we compute squared distances when not in 'signed' mode!
 				ScalarType maxDistance = params.maxSearchDist;
@@ -1511,7 +1511,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 			//let's find the nearest triangles for each point in the neighborhood 'Yk'
 			ScalarType maxRadius = 0;
-			for (int dist = 0; dist <= maxDist && remainingPoints != 0; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
+			for (int dist = 0; dist <= maxIntDist && remainingPoints != 0; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
 			{
 				//test the neighbor cells at distance = 'dist'
 				//a,b,c,d,e,f are the extents of this neighborhood

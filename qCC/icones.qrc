@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccSwapUpDown.png</file>
     <file>images/ccStereo.png</file>
     <file>images/ccSORFilter.png</file>
     <file>images/smallCSVFile.png</file>

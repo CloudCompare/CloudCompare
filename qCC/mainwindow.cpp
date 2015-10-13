@@ -134,6 +134,7 @@
 #include "ccDensityDlg.h"
 #include "ccEntityPickerDlg.h"
 #include "ccRasterizeTool.h"
+#include "ccVolumeCalcTool.h"
 #include "ccMatchScalesDlg.h"
 #include "ccStereoModeDlg.h"
 #include <ui_aboutDlg.h>
@@ -927,6 +928,8 @@ void MainWindow::connectActions()
 	connect(actionCloudCloudDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudCloudDist()));
 	connect(actionCloudMeshDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudMeshDist()));
 	connect(actionCPS,							SIGNAL(triggered()),	this,		SLOT(doActionComputeCPS()));
+	//"Tools > Volume" menu
+	connect(actionCompute2HalfDimVolume,		SIGNAL(triggered()),	this,		SLOT(doCompute2HalfDimVolume()));
 	//"Tools > Statistics" menu
 	connect(actionComputeStatParams2,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams())); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
 	connect(actionStatisticalTest,				SIGNAL(triggered()),	this,		SLOT(doActionStatisticalTest()));
@@ -5970,6 +5973,48 @@ void MainWindow::doConvertPolylinesToMesh()
 			delete vertices;
 		vertices = 0;
 	}
+}
+
+void MainWindow::doCompute2HalfDimVolume()
+{
+	size_t selNum = m_selectedEntities.size();
+	if (selNum < 1 || selNum > 2)
+	{
+		ccConsole::Error("Select only one point cloud!");
+		return;
+	}
+
+	ccGenericPointCloud* cloud1 = 0;
+	{
+		ccHObject* ent = m_selectedEntities[0];
+		if (!ent->isKindOf(CC_TYPES::POINT_CLOUD) )
+		{
+			ccConsole::Error("Select point clouds only!");
+			return;
+		}
+		else
+		{
+			cloud1 = ccHObjectCaster::ToGenericPointCloud(ent);
+		}
+	}
+
+	ccGenericPointCloud* cloud2 = 0;
+	if (m_selectedEntities.size() > 1)
+	{
+		ccHObject* ent = m_selectedEntities[1];
+		if (!ent->isKindOf(CC_TYPES::POINT_CLOUD) )
+		{
+			ccConsole::Error("Select point clouds only!");
+			return;
+		}
+		else
+		{
+			cloud2 = ccHObjectCaster::ToGenericPointCloud(ent);
+		}
+	}
+
+	ccVolumeCalcTool calcVolumeTool(cloud1, cloud2, this);
+	calcVolumeTool.exec();
 }
 
 void MainWindow::doActionRasterize()
@@ -11975,6 +12020,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionCrossSection->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionExtractSections->setEnabled(atLeastOneCloud);
 	actionRasterize->setEnabled(exactlyOneCloud);
+	actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!
 
 	actionPointListPicking->setEnabled(exactlyOneEntity);
 

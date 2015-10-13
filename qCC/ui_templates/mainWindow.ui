@@ -445,10 +445,17 @@
      <addaction name="actionSORFilter"/>
      <addaction name="actionNoiseFilter"/>
     </widget>
+    <widget class="QMenu" name="menuVolume">
+     <property name="title">
+      <string>Volume</string>
+     </property>
+     <addaction name="actionCompute2HalfDimVolume"/>
+    </widget>
     <addaction name="menuClean"/>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
     <addaction name="menuDistances"/>
+    <addaction name="menuVolume"/>
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
     <addaction name="menuFit"/>
@@ -459,6 +466,7 @@
     <addaction name="actionPointListPicking"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -2818,6 +2826,11 @@
   <action name="actionComputePointsVisibility">
    <property name="text">
     <string>Compute points visibility (with depth buffer)</string>
+   </property>
+  </action>
+  <action name="actionCompute2HalfDimVolume">
+   <property name="text">
+    <string>Compute 2.5D volume</string>
    </property>
   </action>
  </widget>

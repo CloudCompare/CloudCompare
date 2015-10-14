@@ -93,6 +93,12 @@ protected slots:
 	//! Ceil source changed
 	void ceilSourceChanged(int);
 
+	//! Exports info to clipboard
+	void exportToClipboard() const;
+
+	//! Sets the displayed number precision
+	void setDisplayedNumberPrecision(int);
+
 protected: //standard methods
 
 	//Inherited from cc2Point5DimEditor
@@ -104,8 +110,28 @@ protected: //standard methods
 	//! Updates the grid
 	bool updateGrid();
 
-	//! Outputs report
-	void outputReport(float coveragePercentage, double volume);
+	//! Report info
+	struct ReportInfo
+	{
+		ReportInfo()
+			: volume(0)
+			, surface(0)
+			, matchingPrecent(0)
+			, ceilNonMatchingPercent(0)
+			, groundNonMatchingPercent(0)
+			, averageNeighborsPerCell(0)
+		{}
+
+		double volume;
+		double surface;
+		float matchingPrecent;
+		float ceilNonMatchingPercent;
+		float groundNonMatchingPercent;
+		double averageNeighborsPerCell;
+	};
+
+	//! Outputs the report
+	void outputReport(const ReportInfo& info);
 
 protected: //members
 
@@ -113,6 +139,11 @@ protected: //members
 	ccGenericPointCloud* m_cloud1;
 	//! Second associated cloud
 	ccGenericPointCloud* m_cloud2;
+
+	//! Last report
+	/** Only valid if clipboardPushButton is enabled
+	**/
+	ReportInfo m_lastReport;
 };
 
 #endif //CC_VOLUME_CALC_TOOL_HEADER

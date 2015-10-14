@@ -33,149 +33,19 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QGroupBox" name="gridGroupBox">
-        <property name="title">
-         <string>Grid</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>step</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>size</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="gridWidthLabel">
-           <property name="text">
-            <string>640 x 480</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QDoubleSpinBox" name="gridStepDoubleSpinBox">
-             <property name="toolTip">
-              <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
-             </property>
-             <property name="decimals">
-              <number>6</number>
-             </property>
-             <property name="minimum">
-              <double>0.001000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>1000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.001000000000000</double>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="editGridToolButton">
-             <property name="text">
-              <string>Edit grid</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="projectionGroupBox">
-        <property name="title">
-         <string>Projection</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>direction</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="projDimComboBox">
-           <property name="currentIndex">
-            <number>2</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>X</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Z</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>cell height</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="heightProjectionComboBox">
-           <property name="toolTip">
-            <string>Per-cell height computation method:
- - minimum = lowest point in the cell
- - average = mean height of all points inside the cell
- - maximum = highest point in the cell</string>
-           </property>
-           <property name="currentIndex">
-            <number>1</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>minimum height</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>average height</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>maximum height</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
        <widget class="QGroupBox" name="groundGroupBox">
         <property name="title">
          <string>Ground / Before</string>
         </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
         <layout class="QFormLayout" name="formLayout_2">
          <property name="fieldGrowthPolicy">
           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_7">
@@ -285,8 +155,8 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>24</width>
-             <height>24</height>
+             <width>16</width>
+             <height>16</height>
             </size>
            </property>
            <property name="autoRaise">
@@ -301,6 +171,9 @@
        <widget class="QGroupBox" name="ceilGroupBox">
         <property name="title">
          <string>Ceil / After</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_3">
          <item row="0" column="0">
@@ -389,40 +262,231 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="updatePushButton">
-        <property name="styleSheet">
-         <string notr="true">color: white; background-color:red;</string>
+       <widget class="QGroupBox" name="gridGroupBox">
+        <property name="title">
+         <string>Grid</string>
         </property>
-        <property name="text">
-         <string>Update</string>
+        <property name="flat">
+         <bool>true</bool>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QFrame" name="gridParamsFrame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QFormLayout" name="formLayout_4">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>step</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QDoubleSpinBox" name="gridStepDoubleSpinBox">
+                <property name="toolTip">
+                 <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
+                </property>
+                <property name="decimals">
+                 <number>6</number>
+                </property>
+                <property name="minimum">
+                 <double>0.001000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.001000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="editGridToolButton">
+                <property name="text">
+                 <string>Edit grid</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="gridWidthLabel">
+              <property name="toolTip">
+               <string>Grid size corresponding to the current step / boundaries</string>
+              </property>
+              <property name="text">
+               <string>640 x 480</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>projection dir.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="projDimComboBox">
+              <property name="toolTip">
+               <string>Projection direction (X, Y or Z)</string>
+              </property>
+              <property name="currentIndex">
+               <number>2</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>X</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Y</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Z</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>cell height</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="heightProjectionComboBox">
+              <property name="toolTip">
+               <string>Per-cell height computation method:
+ - minimum = lowest point in the cell
+ - average = mean height of all points inside the cell
+ - maximum = highest point in the cell</string>
+              </property>
+              <property name="currentIndex">
+               <number>1</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>minimum height</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>average height</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>maximum height</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="updatePushButton">
+           <property name="toolTip">
+            <string>Update the grid / display / measurements</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: white; background-color:red;</string>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="currentIndex">
-         <number>0</number>
+       <widget class="QGroupBox" name="resultGroupBox">
+        <property name="title">
+         <string>Results</string>
         </property>
-        <widget class="QWidget" name="tabResult">
-         <attribute name="title">
-          <string>Results</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QPlainTextEdit" name="reportPlainTextEdit"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton">
-            <property name="enabled">
-             <bool>false</bool>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QPlainTextEdit" name="reportPlainTextEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clipboardPushButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Copy to clipboard</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="margin">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string>Copy to clipboard</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Num. precision</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="precisionSpinBox">
+              <property name="toolTip">
+               <string>Numerical precision (output measurements, etc.)</string>
+              </property>
+              <property name="maximum">
+               <number>12</number>
+              </property>
+              <property name="value">
+               <number>3</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>

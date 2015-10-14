@@ -47,6 +47,9 @@
 #include <QFileDialog>
 #include <QMap>
 #include <QComboBox>
+#include <QClipboard>
+#include <QApplication>
+#include <QLocale>
 
 //System
 #include <assert.h>
@@ -76,6 +79,8 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	connect(swapToolButton,					SIGNAL(clicked()),					this,	SLOT(swapRoles()));
 	connect(groundComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(groundSourceChanged(int)));
 	connect(ceilComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(ceilSourceChanged(int)));
+	connect(clipboardPushButton,			SIGNAL(clicked()),					this,	SLOT(clipboardPushButton()));
+	connect(precisionSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(setDisplayedNumberPrecision(int)));
 
 	if (m_cloud1 && !m_cloud2)
 	{
@@ -83,7 +88,6 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 		std::swap(m_cloud1, m_cloud2);
 	}
 	assert(m_cloud2);
-
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud1 ? m_cloud1->getOwnBB() : ccBBox(); 
@@ -119,6 +123,13 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 
 	//add window
 	create2DView(mapFrame);
+	if (m_window)
+	{
+		ccGui::ParamStruct params = m_window->getDisplayParameters();
+		params.colorScaleShowHistogram = false;
+		params.displayedNumPrecision = precisionSpinBox->value();
+		m_window->setDisplayParameters(params);
+	}
 
 	loadSettings();
 
@@ -129,6 +140,24 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 
 ccVolumeCalcTool::~ccVolumeCalcTool()
 {
+}
+
+void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
+{
+	//update window
+	if (m_window)
+	{
+		ccGui::ParamStruct params = m_window->getDisplayParameters();
+		params.displayedNumPrecision = precision;
+		m_window->setDisplayParameters(params);
+		m_window->redraw(true);
+	}
+
+	//update report
+	if (clipboardPushButton->isEnabled())
+	{
+		outputReport(m_lastReport);
+	}
 }
 
 void ccVolumeCalcTool::groundSourceChanged(int)
@@ -205,8 +234,7 @@ void ccVolumeCalcTool::groundFillEmptyCellStrategyChanged(int)
 	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox);
 
 	groundEmptyValueDoubleSpinBox->setEnabled(	groundComboBox->currentIndex() == 0
-											||	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT
-											||	fillEmptyCellsStrategy == INTERPOLATE );
+											||	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT);
 	gridIsUpToDate(false);
 }
 
@@ -215,8 +243,7 @@ void ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged(int)
 	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox);
 
 	ceilEmptyValueDoubleSpinBox->setEnabled(	ceilComboBox->currentIndex() == 0
-											||	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT
-											||	fillEmptyCellsStrategy == INTERPOLATE );
+											||	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT);
 	gridIsUpToDate(false);
 }
 
@@ -254,6 +281,7 @@ void ccVolumeCalcTool::loadSettings()
 	double step					= settings.value("GridStep",gridStepDoubleSpinBox->value()).toDouble();
 	double groundEmptyHeight	= settings.value("gEmptyCellsHeight",groundEmptyValueDoubleSpinBox->value()).toDouble();
 	double ceilEmptyHeight		= settings.value("cEmptyCellsHeight",ceilEmptyValueDoubleSpinBox->value()).toDouble();
+	int precision				= settings.value("NumPrecision",precisionSpinBox->value()).toInt();
 	settings.endGroup();
 
 	gridStepDoubleSpinBox->setValue(step);
@@ -263,6 +291,7 @@ void ccVolumeCalcTool::loadSettings()
 	groundEmptyValueDoubleSpinBox->setValue(groundEmptyHeight);
 	ceilEmptyValueDoubleSpinBox->setValue(ceilEmptyHeight);
 	projDimComboBox->setCurrentIndex(projDim);
+	precisionSpinBox->setValue(precision);
 }
 
 void ccVolumeCalcTool::saveSettingsAndAccept()
@@ -282,6 +311,7 @@ void ccVolumeCalcTool::saveSettings()
 	settings.setValue("GridStep",gridStepDoubleSpinBox->value());
 	settings.setValue("gEmptyCellsHeight",groundEmptyValueDoubleSpinBox->value());
 	settings.setValue("cEmptyCellsHeight",ceilEmptyValueDoubleSpinBox->value());
+	settings.setValue("NumPrecision",precisionSpinBox->value());
 	settings.endGroup();
 }
 
@@ -298,8 +328,11 @@ void ccVolumeCalcTool::gridIsUpToDate(bool state)
 		updatePushButton->setStyleSheet("color: white; background-color:red;");
 	}
 	updatePushButton->setDisabled(state);
-
-	tabWidget->setEnabled(state);
+	clipboardPushButton->setEnabled(state);
+	if (!state)
+	{
+		reportPlainTextEdit->setPlainText("Update the grid first");
+	}
 }
 
 void ccVolumeCalcTool::updateGridAndDisplay()
@@ -331,6 +364,8 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 			{
 				m_rasterCloud->showSF(true);
 				m_rasterCloud->setCurrentDisplayedScalarField(0);
+				m_rasterCloud->getScalarField(0)->setName("Height above ground");
+				m_rasterCloud->showSFColorsScale(true);
 			}
 		}
 		catch (const std::bad_alloc&)
@@ -354,12 +389,24 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 	gridIsUpToDate(success);
 }
 
-void ccVolumeCalcTool::outputReport(float coveragePercentage, double volume)
+void ccVolumeCalcTool::outputReport(const ReportInfo& info)
 {
+	int precision = precisionSpinBox->value();
+	QLocale locale(QLocale::English);
+
 	QStringList reportText;
-	reportText << QString("Volume: %1").arg(volume);
-	reportText << QString("Coverage: %1%").arg(coveragePercentage);
+	reportText << QString("Volume: %1").arg(locale.toString(info.volume, 'f', precision));
+	reportText << QString("Surface: %1").arg(locale.toString(info.surface, 'f', precision));
+	reportText << QString("----------------------");
+	reportText << QString("Matching cells: %1%").arg(info.matchingPrecent,0,'f',1);
+	reportText << QString("Non-matching cells:");
+	reportText << QString("    ground = %1%").arg(info.groundNonMatchingPercent,0,'f',1);
+	reportText << QString("    ceil = %1%").arg(info.ceilNonMatchingPercent,0,'f',1);
+	reportText << QString("Average neighbors per cell: %1 / 8.0").arg(info.averageNeighborsPerCell,0,'f',1);
 	reportPlainTextEdit->setPlainText(reportText.join("\n"));
+
+	m_lastReport = info;
+	clipboardPushButton->setEnabled(true);
 }
 
 bool ccVolumeCalcTool::updateGrid()
@@ -530,7 +577,10 @@ bool ccVolumeCalcTool::updateGrid()
 		QApplication::processEvents();
 		CCLib::NormalizedProgress nProgress(&pDlg, m_grid.width*m_grid.height);
 		
-		double volume = 0;
+		ReportInfo repotInfo;
+		size_t ceilNonMatchingCount = 0;
+		size_t groundNonMatchingCount = 0;
+		size_t cellCount = 0;
 
 		//at least one of the grid is based on a cloud
 		m_grid.nonEmptyCellCount = 0;
@@ -561,11 +611,23 @@ bool ccVolumeCalcTool::updateGrid()
 					cell.h = cell.maxHeight - cell.minHeight;
 					cell.nbPoints = 1;
 
-					volume += cell.h;
-					++m_grid.nonEmptyCellCount;
+					repotInfo.volume += cell.h;
+					repotInfo.surface += 1.0;
+					++m_grid.nonEmptyCellCount; //= matching count
+					++cellCount;
 				}
 				else
 				{
+					if (validGround)
+					{
+						++cellCount;
+						++groundNonMatchingCount;
+					}
+					else if (validCeil)
+					{
+						++cellCount;
+						++ceilNonMatchingCount;
+					}
 					cell.h = std::numeric_limits<double>::quiet_NaN();
 					cell.nbPoints = 0;
 				}
@@ -582,13 +644,63 @@ bool ccVolumeCalcTool::updateGrid()
 		}
 		m_grid.validCellCount = m_grid.nonEmptyCellCount;
 
-		float coverage = static_cast<float>(m_grid.validCellCount * 100) / (m_grid.height * m_grid.width);
-		volume *= (m_grid.gridStep * m_grid.gridStep);
+		//count the average number of valid neighbors
+		{
+			size_t validNeighborsCount = 0;
+			size_t count = 0;
+			for (unsigned i=1; i<m_grid.height-1; ++i)
+			{
+				for (unsigned j=1; j<m_grid.width-1; ++j)
+				{
+					RasterCell& cell = m_grid.data[i][j];
+					if (cell.h == cell.h)
+					{
+						for (unsigned k=i-1; k<=i+1; ++k)
+						{
+							for (unsigned l=j-1; l<=j+1; ++l)
+							{
+								if (k != i || l != j)
+								{
+									RasterCell& otherCell = m_grid.data[k][l];
+									if (otherCell.h == otherCell.h)
+									{
+										++validNeighborsCount;
+									}
+								}
+							}
+						}
 
-		outputReport(coverage, volume);
+						++count;
+					}
+				}
+			}
+
+			if (count)
+			{
+				repotInfo.averageNeighborsPerCell = static_cast<double>(validNeighborsCount) / count;
+			}
+		}
+
+		repotInfo.matchingPrecent = static_cast<float>(m_grid.validCellCount * 100) / cellCount;
+		repotInfo.groundNonMatchingPercent = static_cast<float>(groundNonMatchingCount * 100) / cellCount;
+		repotInfo.ceilNonMatchingPercent = static_cast<float>(ceilNonMatchingCount * 100) / cellCount;
+		float cellArea = (m_grid.gridStep * m_grid.gridStep);
+		repotInfo.volume *= cellArea;
+		repotInfo.surface *= cellArea;
+
+		outputReport(repotInfo);
 	}
 
 	m_grid.setValid(true);
 
 	return true;
+}
+
+void ccVolumeCalcTool::exportToClipboard() const
+{
+	QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		clipboard->setText(reportPlainTextEdit->toPlainText());
+	}
 }

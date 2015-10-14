@@ -2,7 +2,12 @@
 
 v2.7.beta ??/??/201?
 - New features:
+	* 2.5D volume calculation tool:
+		- can compute the volume of a single cloud (relatively to a constant height) or between two clouds
+		- the tool projects the points in a 2.5D grid (therefore the interface is similar to the 'Rasterize' tool)
+
 - Enhancements:
+
 - Bug fixes:
 
 v2.6.2 10/08/2015

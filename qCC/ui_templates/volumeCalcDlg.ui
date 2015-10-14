@@ -435,6 +435,20 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
+          <widget class="QLabel" name="spareseWarningLabel">
+           <property name="styleSheet">
+            <string notr="true">color:red;</string>
+           </property>
+           <property name="text">
+            <string>At least one of the cloud is sparse!
+You should fill the empty cells...</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPlainTextEdit" name="reportPlainTextEdit">
            <property name="readOnly">
             <bool>true</bool>

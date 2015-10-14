@@ -331,6 +331,7 @@ void ccVolumeCalcTool::gridIsUpToDate(bool state)
 	clipboardPushButton->setEnabled(state);
 	if (!state)
 	{
+		spareseWarningLabel->hide();
 		reportPlainTextEdit->setPlainText("Update the grid first");
 	}
 }
@@ -404,6 +405,9 @@ void ccVolumeCalcTool::outputReport(const ReportInfo& info)
 	reportText << QString("    ceil = %1%").arg(info.ceilNonMatchingPercent,0,'f',1);
 	reportText << QString("Average neighbors per cell: %1 / 8.0").arg(info.averageNeighborsPerCell,0,'f',1);
 	reportPlainTextEdit->setPlainText(reportText.join("\n"));
+
+	//below 7 neighbors per cell, at least one of the cloud is very sparse!
+	spareseWarningLabel->setVisible(info.averageNeighborsPerCell < 7.0f);
 
 	m_lastReport = info;
 	clipboardPushButton->setEnabled(true);

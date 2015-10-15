@@ -266,15 +266,16 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 	m_aligned = EntityContext(aligned);
 	m_reference = EntityContext(reference);
 
-	if (aligned->getDisplay())
-	{
-		const ccViewportParameters& vParams = aligned->getDisplay()->getViewportParameters();
-		m_associatedWin->setViewportParameters(vParams);
-	}
-
 	//add aligned entity to display
+	ccViewportParameters originViewportParams;
+	bool hasOriginViewportParams = false;
 	if (aligned)
 	{
+		if (aligned->getDisplay())
+		{
+			hasOriginViewportParams = true;
+			originViewportParams = aligned->getDisplay()->getViewportParameters();
+		}
 		m_associatedWin->addToOwnDB(aligned);
 		aligned->setVisible(true);
 		aligned->setSelected(false);
@@ -285,6 +286,11 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 	//add reference entity (if any) to display
 	if (reference)
 	{
+		if (!hasOriginViewportParams && reference->getDisplay())
+		{
+			hasOriginViewportParams = true;
+			originViewportParams = reference->getDisplay()->getViewportParameters();
+		}
 		m_associatedWin->addToOwnDB(reference);
 		reference->setVisible(true);
 		reference->setSelected(false);
@@ -298,8 +304,17 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 
 	m_associatedWin->showMaximized();
 	resetTitle();
-	m_associatedWin->zoomGlobal();
-	//m_associatedWin->redraw(); //already called by zoomGlobal
+
+	if (hasOriginViewportParams)
+	{
+		m_associatedWin->setViewportParameters(originViewportParams);
+		m_associatedWin->redraw();
+	}
+	else
+	{
+		m_associatedWin->zoomGlobal();
+		m_associatedWin->redraw(); //already called by zoomGlobal
+	}
 
 	onPointCountChanged();
 	

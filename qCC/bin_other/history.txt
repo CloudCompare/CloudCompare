@@ -8,6 +8,7 @@ v2.7.beta ??/??/201?
 		- the tool projects the points in a 2.5D grid (therefore the interface is similar to the 'Rasterize' tool)
 
 - Enhancements:
+	* Point-pair based alignment tool: the tool 3D view now has the same viewport/camera parameters as the source 3D view
 
 - Bug fixes:
 

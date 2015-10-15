@@ -7870,10 +7870,15 @@ void MainWindow::activateSectionExtractionMode()
 
 	//add clouds
 	unsigned validCount = 0;
+	ccGLWindow* firstDisplay = 0;
 	for (size_t i=0; i<selNum; ++i)
 		if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
 			if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(m_selectedEntities[i])))
+			{
+				if (!firstDisplay && m_selectedEntities[i]->getDisplay())
+					firstDisplay = static_cast<ccGLWindow*>(m_selectedEntities[i]->getDisplay());
 				++validCount;
+			}
 
 	if (validCount == 0)
 	{
@@ -7890,6 +7895,10 @@ void MainWindow::activateSectionExtractionMode()
 	{
 		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
 		return;
+	}
+	if (firstDisplay && firstDisplay->getGlFilter())
+	{
+		win->setGlFilter(firstDisplay->getGlFilter()->clone());
 	}
 	m_seTool->linkWith(win);
 

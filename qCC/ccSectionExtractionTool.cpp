@@ -41,6 +41,8 @@
 //Qt
 #include <QMessageBox>
 #include <QMdiSubWindow>
+#include <QInputDialog>
+#include <QCoreApplication>
 
 //System
 #include <assert.h>
@@ -82,6 +84,7 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 
 	connect(generateOrthoSectionsToolButton,	SIGNAL(clicked()),					this,	SLOT(generateOrthoSections()));
 	connect(extractPointsToolButton,			SIGNAL(clicked()),					this,	SLOT(extractPoints()));
+	connect(unfoldToolButton,					SIGNAL(clicked()),					this,	SLOT(unfoldPoints()));
 	connect(exportSectionsToolButton,			SIGNAL(clicked()),					this,	SLOT(exportSections()));
 
 	//add shortcuts
@@ -281,6 +284,7 @@ void ccSectionExtractionTool::selectPolyline(Section* poly, bool autoRefreshDisp
 	}
 
 	generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != 0);
+	unfoldToolButton->setEnabled(m_selectedPoly != 0);
 }
 
 void ccSectionExtractionTool::releasePolyline(Section* section)
@@ -1460,16 +1464,279 @@ bool ccSectionExtractionTool::extractSectionCloud(	const std::vector<CCLib::Refe
 	return true;
 }
 
-static double s_defaultSectionThickness = -1.0;
-static double s_contourMaxEdgeLength = 0;
-static bool s_extractSectionsAsClouds = false;
-static bool s_extractSectionsAsContours = true;
-static bool s_multiPass = false;
-static bool s_splitContour = false;
-static ccContourExtractor::ContourType s_extractSectionsType = ccContourExtractor::LOWER;
+struct Segment
+{
+	Segment()
+		: A(0,0)
+		, B(0,0)
+		, u(0,0)
+		, d(0)
+		, curvPos(0)
+	{}
+
+	CCVector2 A, B, u;
+	PointCoordinateType d, curvPos;
+};
+
+void ccSectionExtractionTool::unfoldPoints()
+{
+	if (!m_selectedPoly || !m_selectedPoly->entity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccPolyline* poly = m_selectedPoly->entity;
+	unsigned polyVertCount = poly->size();
+	if (polyVertCount < 2)
+	{
+		ccLog::Error("Invalid polyline?!");
+		assert(false);
+		return;
+	}
+
+	//compute loaded clouds bounding-box
+	ccBBox box;
+	unsigned totalPointCount = 0;
+	{
+		for (int i=0; i<m_clouds.size(); ++i)
+		{
+			if (m_clouds[i].entity)
+			{
+				box += m_clouds[i].entity->getOwnBB();
+				totalPointCount += m_clouds[i].entity->size();
+			}
+		}
+	}
+	
+	static double s_defaultThickness = -1.0;
+	if (s_defaultThickness <= 0)
+	{
+		s_defaultThickness = box.getMaxBoxDim() / 10;
+	}
+	
+	bool ok;
+	double thickness = QInputDialog::getDouble(MainWindow::TheInstance(), "Thickness", "Distance to polyline:", s_defaultThickness, 1.0e-6, 1.0e6, 6, &ok);
+	if (!ok)
+		return;
+	s_defaultThickness = thickness;
+
+	//projection direction
+	int vertDim = vertAxisComboBox->currentIndex();
+	int xDim = (vertDim < 2 ? vertDim+1 : 0);
+	int yDim = (xDim    < 2 ? xDim+1    : 0);
+
+	//we consider half of the total thickness as points can be on both sides!
+	double maxSquareDistToPolyline = (thickness/2) * (thickness/2);
+
+	//prepare the computation of 2D distances
+	std::vector<Segment> segments;
+	unsigned polyMaxCount = poly->isClosed() ? polyVertCount : polyVertCount-1;
+	{
+		try
+		{
+			segments.reserve(polyMaxCount);
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			ccLog::Error("Not enough memory");
+			return;
+		}
+
+		PointCoordinateType curvPos = 0;
+		for (unsigned j=0; j<polyMaxCount; ++j)
+		{
+			//current polyline segment
+			const CCVector3* A = poly->getPoint(j);
+			const CCVector3* B = poly->getPoint((j+1) % polyVertCount);
+
+			Segment s;
+			{
+				s.A = CCVector2(A->u[xDim],A->u[yDim]);
+				s.B = CCVector2(B->u[xDim],B->u[yDim]);
+				s.u = s.B - s.A;
+				s.d = s.u.norm();
+				if (s.d > ZERO_TOLERANCE)
+				{
+					s.curvPos = curvPos;
+					s.u /= s.d;
+					segments.push_back(s);
+				}
+			}
+
+			//update curvilinear pos
+			curvPos += (*B-*A).norm();
+		}
+	}
+
+	ccProgressDialog pdlg(true);
+	CCLib::NormalizedProgress nprogress(&pdlg, totalPointCount);
+	pdlg.setMethodTitle("Unfold cloud(s)");
+	pdlg.setInfo(qPrintable(QString("Number of segments: %1\nNumber of points: %2").arg(polyMaxCount).arg(totalPointCount)));
+	pdlg.start();
+	QCoreApplication::processEvents();
+
+	unsigned exportedClouds = 0;
+
+	//for each cloud
+	for (int c=0; c<m_clouds.size(); ++c)
+	{
+		ccGenericPointCloud* cloud = m_clouds[c].entity;
+		if (!cloud)
+		{
+			assert(false);
+			continue;
+		}
+
+		CCLib::ReferenceCloud unfoldedIndexes(cloud);
+		if (!unfoldedIndexes.reserve(cloud->size()))
+		{
+			ccLog::Error("Not enough memory");
+			return;
+		}
+		std::vector<CCVector3> unfoldedPoints;
+		try
+		{
+			unfoldedPoints.reserve(cloud->size());
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Error("Not enough memory");
+			return;
+		}
+
+		//now test each point and see if it's close to the current polyline (in 2D)
+		for (unsigned i=0; i<cloud->size(); ++i)
+		{
+			const CCVector3* P = cloud->getPoint(i);
+			CCVector2 P2D(P->u[xDim],P->u[yDim]);
+
+			//test each segment
+			int closestSegment = -1;
+			PointCoordinateType minSquareDist = -PC_ONE;
+			for (unsigned j=0; j<polyMaxCount; ++j)
+			{
+				const Segment& s = segments[j];
+				CCVector2 AP2D = P2D - s.A;
+
+				//longitudinal 'distance'
+				PointCoordinateType dotprod = s.u.dot(AP2D);
+
+				PointCoordinateType dist = 0;
+				if (dotprod < 0)
+				{
+					//dist to nearest vertex
+					dist = AP2D.norm();
+				}
+				else if (dotprod > s.d)
+				{
+					//dist to nearest vertex
+					dist = (P2D - s.B).norm();
+				}
+				else
+				{
+					//orthogonal distance
+					dist = (AP2D - s.u*dotprod).norm2();
+				}
+				if (dist <= maxSquareDistToPolyline)
+				{
+					if (closestSegment < 0 || dist < minSquareDist)
+					{
+						minSquareDist = dist;
+						closestSegment = static_cast<int>(j);
+					}
+				}
+			}
+
+			if (closestSegment >= 0)
+			{
+				const Segment& s = segments[closestSegment];
+
+				//we use the curvilinear position of the point in the X dimension (and Y is 0)
+				CCVector3 Q;
+				{
+					CCVector2 AP2D = P2D - s.A;
+					PointCoordinateType dotprod = s.u.dot(AP2D);
+					PointCoordinateType d = (AP2D - s.u*dotprod).norm();
+
+					//compute the sign of 'minDist'
+					PointCoordinateType crossprod = AP2D.y * s.u.x - AP2D.x * s.u.y;
+
+					Q.u[xDim]    = s.curvPos + dotprod;
+					Q.u[yDim]    = crossprod < 0 ? -d : d; //signed orthogonal distance to the polyline
+					Q.u[vertDim] = P->u[vertDim];
+				}
+
+				unfoldedIndexes.addPointIndex(i);
+				unfoldedPoints.push_back(Q);
+			}
+
+			if (!nprogress.oneStep())
+			{
+				ccLog::Warning("[Unfold] Process cancelled by the user");
+				return;
+			}
+
+		} //for each point
+
+		if (unfoldedIndexes.size() != 0)
+		{
+			//assign the default global shift & scale info
+			ccPointCloud* unfoldedCloud = 0;
+			{
+				if (cloud->isA(CC_TYPES::POINT_CLOUD))
+					unfoldedCloud = static_cast<ccPointCloud*>(cloud)->partialClone(&unfoldedIndexes);
+				else
+					unfoldedCloud = ccPointCloud::From(&unfoldedIndexes, cloud);
+			}
+			if (!unfoldedCloud)
+			{
+				ccLog::Error("Not enough memory");
+				return;
+			}
+
+			assert(unfoldedCloud->size() == unfoldedPoints.size());
+			CCVector3 C = box.minCorner();
+			C.u[vertDim] = 0;
+			box.minCorner().u[xDim]; //we start at the bounding-box limit
+			for (unsigned i=0; i<unfoldedCloud->size(); ++i)
+			{
+				//update the points positions
+				*const_cast<CCVector3*>(unfoldedCloud->getPoint(i)) = unfoldedPoints[i] + C;
+			}
+			unfoldedCloud->invalidateBoundingBox();
+
+			unfoldedCloud->setName(cloud->getName() + ".unfolded");
+			unfoldedCloud->setGlobalShift(cloud->getGlobalShift());
+			unfoldedCloud->setGlobalScale(cloud->getGlobalScale());
+
+			unfoldedCloud->shrinkToFit();
+			unfoldedCloud->setDisplay(m_clouds[c].originalDisplay);
+			MainWindow::TheInstance()->addToDB(unfoldedCloud);
+
+			++exportedClouds;
+		}
+		else
+		{
+			ccLog::Warning(QString("[Unfold] No point of the cloud '%1' were unfolded (check parameters)").arg(cloud->getName()));
+		}
+
+	} //for each cloud
+
+	ccLog::Print(QString("[Unfold] %i cloud(s) exported").arg(exportedClouds));
+}
 
 void ccSectionExtractionTool::extractPoints()
 {
+	static double s_defaultSectionThickness = -1.0;
+	static double s_contourMaxEdgeLength = 0;
+	static bool s_extractSectionsAsClouds = false;
+	static bool s_extractSectionsAsContours = true;
+	static bool s_multiPass = false;
+	static bool s_splitContour = false;
+	static ccContourExtractor::ContourType s_extractSectionsType = ccContourExtractor::LOWER;
+
 	//number of eligible sections
 	unsigned sectionCount = 0;
 	{
@@ -1537,6 +1804,7 @@ void ccSectionExtractionTool::extractPoints()
 		pdlg.setMethodTitle("Extract sections");
 		pdlg.setInfo(qPrintable(QString("Number of sections: %1\nNumber of points: %2").arg(sectionCount).arg(pointCount)));
 		pdlg.start();
+		QCoreApplication::processEvents();
 	}
 
 	int vertDim = vertAxisComboBox->currentIndex();
@@ -1544,7 +1812,7 @@ void ccSectionExtractionTool::extractPoints()
 	int yDim = (xDim    < 2 ? xDim+1    : 0);
 
 	//we consider half of the total thickness as points can be on both sides!
-	double sectioThicknessSq = pow(s_defaultSectionThickness/2,2.0);
+	double sectionThicknessSq = pow(s_defaultSectionThickness/2,2.0);
 	bool error = false;
 
 	unsigned generatedContours = 0;
@@ -1617,7 +1885,7 @@ void ccSectionExtractionTool::extractPoints()
 								continue;
 							u /= d;
 
-							//compute dist of each point to this poly's segment
+							//compute the distance of each point to the current polyline segment
 							for (unsigned i=0; i<cloud->size(); ++i)
 							{
 								const CCVector3* P = cloud->getPoint(i);
@@ -1625,13 +1893,13 @@ void ccSectionExtractionTool::extractPoints()
 								CCVector2 AP2D = P2D-A2D;
 								
 								//longitudinal 'distance'
-								PointCoordinateType ps = u.dot(AP2D);
-								if (ps < 0 || ps > d)
+								PointCoordinateType dotprod = u.dot(AP2D);
+								if (dotprod < 0 || dotprod > d)
 									continue;
 
 								//orthogonal distance
-								PointCoordinateType h = (AP2D - u*ps).norm2();
-								if (h <= sectioThicknessSq)
+								PointCoordinateType h = (AP2D - u*dotprod).norm2();
+								if (h <= sectionThicknessSq)
 								{
 									//if we extract the section as cloud(s), we add the point to the (current) ref. cloud
 									if (s_extractSectionsAsClouds)
@@ -1675,12 +1943,12 @@ void ccSectionExtractionTool::extractPoints()
 										//we project the 'real' 3D point in the section plane
 										CCVector3 Pproj3D;
 										{
-											Pproj3D.u[xDim]    = A2D.x + u.x * ps;
-											Pproj3D.u[yDim]    = A2D.y + u.y * ps;
+											Pproj3D.u[xDim]    = A2D.x + u.x * dotprod;
+											Pproj3D.u[yDim]    = A2D.y + u.y * dotprod;
 											Pproj3D.u[vertDim] = P->u[vertDim];
 										}
 										originalSlicePoints->addPoint(Pproj3D);
-										unrolledSlicePoints->addPoint(CCVector3(s+ps,P->u[vertDim],0));
+										unrolledSlicePoints->addPoint(CCVector3(s+dotprod,P->u[vertDim],0));
 									}
 								}
 							}

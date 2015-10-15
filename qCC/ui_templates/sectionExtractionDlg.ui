@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>304</width>
+    <width>329</width>
     <height>26</height>
    </rect>
   </property>
@@ -14,16 +14,7 @@
    <string>Section Extraction</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>2</number>
    </property>
    <item>
@@ -43,16 +34,7 @@
    <item>
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>0</number>
       </property>
       <item>
@@ -91,6 +73,20 @@
         <property name="icon">
          <iconset resource="../icones.qrc">
           <normaloff>:/CC/images/sectionExtraction.png</normaloff>:/CC/images/sectionExtraction.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="unfoldToolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Unfold the points along the selected polyline</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/unfoldSmall.png</normaloff>:/CC/images/unfoldSmall.png</iconset>
         </property>
        </widget>
       </item>

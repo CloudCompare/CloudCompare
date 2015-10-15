@@ -78,6 +78,7 @@ protected slots:
 	void entitySelected(int);
 	void generateOrthoSections();
 	void extractPoints();
+	void unfoldPoints();
 	void exportSections();
 
 	//! To capture overridden shortcuts (pause button, etc.)

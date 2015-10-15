@@ -9540,7 +9540,6 @@ void MainWindow::doActionScalarFieldFromColor()
 			{
 				if (fields[i])
 				{
-					fields[i]->computeMinAndMax();
 
 					int sfIdx = cloud->getScalarFieldIndexByName(fields[i]->getName());
 					if (sfIdx >= 0)
@@ -9563,6 +9562,9 @@ void MainWindow::doActionScalarFieldFromColor()
 						if (!fieldsStr.isEmpty())
 							fieldsStr.append(", ");
 						fieldsStr.append(fields[i]->getName());
+
+						fields[i]->computeMinAndMax();
+
 					}
 					else
 					{

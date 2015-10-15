@@ -79,7 +79,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	connect(swapToolButton,					SIGNAL(clicked()),					this,	SLOT(swapRoles()));
 	connect(groundComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(groundSourceChanged(int)));
 	connect(ceilComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(ceilSourceChanged(int)));
-	connect(clipboardPushButton,			SIGNAL(clicked()),					this,	SLOT(clipboardPushButton()));
+	connect(clipboardPushButton,			SIGNAL(clicked()),					this,	SLOT(exportToClipboard()));
 	connect(precisionSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(setDisplayedNumberPrecision(int)));
 
 	if (m_cloud1 && !m_cloud2)

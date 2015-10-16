@@ -28,6 +28,7 @@
 #include <QSettings>
 #include <QElapsedTimer>
 #include <QProgressDialog>
+#include <QMessageBox>
 
 //standard includes
 #include <vector>

@@ -16,6 +16,7 @@ v2.7.beta ??/??/201?
 		- the tool now keeps the active GL filter active (if any)
 
 - Bug fixes:
+	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 
 v2.6.2 10/08/2015
 - New features:

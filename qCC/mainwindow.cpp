@@ -9534,13 +9534,13 @@ void MainWindow::doActionScalarFieldFromColor()
 			const ColorCompType* rgb = cloud->getPointColor(j);
 
 			if (fields[0])
-				fields[0]->setValue(j, rgb[0]);
+				fields[0]->addElement(rgb[0]);
 			if (fields[1])
-				fields[1]->setValue(j, rgb[1]);
+				fields[1]->addElement(rgb[1]);
 			if (fields[2])
-				fields[2]->setValue(j, rgb[2]);
+				fields[2]->addElement(rgb[2]);
 			if (fields[3])
-				fields[3]->setValue(j, static_cast<ScalarType>(rgb[0] + rgb[1] + rgb[2])/3 );
+				fields[3]->addElement(static_cast<ScalarType>(rgb[0] + rgb[1] + rgb[2])/3);
 		}
 
 		QString fieldsStr;

@@ -7,7 +7,7 @@
 #include <ccMainAppInterface.h>
 
 //Qt
-#include <QMainwindow>
+#include <QMainWindow>
 
 //! Dialog for displaying the BRGM disclaimer
 class DisclaimerDialog : public QDialog, public Ui::DisclaimerDialog

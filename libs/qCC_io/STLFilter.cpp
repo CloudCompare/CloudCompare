@@ -673,7 +673,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 
 		//3rd to 5th lines: 'vertex vix viy viz'
 		unsigned vertIndexes[3];
-//		unsigned pointCountBefore = pointCount;
+		//unsigned pointCountBefore = pointCount;
 		for (unsigned i=0; i<3; ++i)
 		{
 			QString currentLine = stream.readLine();

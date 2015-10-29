@@ -73,14 +73,16 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	setWindowTitle(QString("ccViewer V%1").arg(CC_VIEWER_VERSION_STR));
 
 	//insert GL window in a vertical layout
-	QVBoxLayout* verticalLayout_2 = new QVBoxLayout(ui.GLframe);
-	verticalLayout_2->setSpacing(0);
-	const int margin = 10;
-	verticalLayout_2->setContentsMargins(margin,margin,margin,margin);
-	QGLFormat format = QGLFormat::defaultFormat();
-	format.setSwapInterval(0);
-	m_glWindow = new ccGLWindow(ui.GLframe,format);
-	verticalLayout_2->addWidget(m_glWindow);
+	{
+		QVBoxLayout* verticalLayout = new QVBoxLayout(ui.GLframe);
+		verticalLayout->setSpacing(0);
+		const int margin = 10;
+		verticalLayout->setContentsMargins(margin,margin,margin,margin);
+		QGLFormat format = QGLFormat::defaultFormat();
+		format.setSwapInterval(0);
+		m_glWindow = new ccGLWindow(ui.GLframe,format);
+		verticalLayout->addWidget(m_glWindow);
+	}
 
 	updateGLFrameGradient();
 
@@ -773,13 +775,28 @@ void ccViewer::toggleStereoMode(bool state)
 
 void ccViewer::toggleFullScreen(bool state)
 {
-	if (state)
-		showFullScreen();
-	else
-		showNormal();
+	if (!m_glWindow)
+	{
+		return;
+	}
 
-	if (m_glWindow)
-		m_glWindow->redraw();
+	if (state)
+	{
+		ui.GLframe->layout()->removeWidget(m_glWindow);
+		m_glWindow->setParent(0);
+		m_glWindow->showFullScreen();
+		m_glWindow->displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 10);
+		m_glWindow->setFocus();
+	}
+	else
+	{
+		ui.GLframe->layout()->addWidget(m_glWindow);
+		m_glWindow->showNormal();
+		setFocus();
+	}
+	QApplication::processEvents();
+
+	m_glWindow->redraw();
 }
 
 void ccViewer::toggleRotationAboutVertAxis()

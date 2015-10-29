@@ -342,7 +342,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 
 		//we deduce the number of points to generate on this face
 		double fPointsToAdd = S*samplingDensity;
-		unsigned pointsToAdd = static_cast<unsigned>(fPointsToAdd);
+		unsigned pointsToAdd = static_cast<unsigned>(ceil(fPointsToAdd));
 
         //if the face area is smaller than the surface/random point
 		if (pointsToAdd == 0)

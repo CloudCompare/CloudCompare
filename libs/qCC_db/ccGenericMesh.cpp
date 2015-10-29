@@ -864,9 +864,9 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 	const CCVector3 *C = tri->_getC();
 
 	//barcyentric intepolation weights
-	weights.x = sqrt(((P-*B).cross(*C-*B)).norm2d())/*/2*/;
-	weights.y = sqrt(((P-*C).cross(*A-*C)).norm2d())/*/2*/;
-	weights.z = sqrt(((P-*A).cross(*B-*A)).norm2d())/*/2*/;
+	weights.x = ((P-*B).cross(*C-*B)).normd()/*/2*/;
+	weights.y = ((P-*C).cross(*A-*C)).normd()/*/2*/;
+	weights.z = ((P-*A).cross(*B-*A)).normd()/*/2*/;
 
 	//normalize weights
 	double sum = weights.x + weights.y + weights.z;

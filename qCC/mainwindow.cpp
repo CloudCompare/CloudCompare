@@ -5768,9 +5768,8 @@ void MainWindow::doConvertPolylinesToMesh()
 		ccLog::Error("Not enough segments!");
 		return;
 	}
-
-#define USE_TRIANGLE_LIB
-#ifdef USE_TRIANGLE_LIB
+#define USE_CGAL_LIB
+#if defined(USE_TRIANGLE_LIB) || defined(USE_CGAL_LIB)
 	std::vector<CCVector2> points2D;
 	std::vector<int> segments2D;
 	try

@@ -104,15 +104,15 @@ public:
 
 	//! Samples points on a mesh
 	/** The points are sampled on each triangle randomly, by generating
-		two numbers between 0 and 1 (a and b). If a+b>1, then a=1-a and
-		b=1-b. Let ABC be the triangle, then the new point P will be as
+		two numbers between 0 and 1 (a and b). If a+b > 1, then a = 1-a and
+		b = 1-b. Let ABC be the triangle, then the new point P will be as
 		AP = a.AB+b.AC (AP,AB and AC are vectors here). The number of
 		points sampled on each triangle depends on the triangle's area.
 		Let s be this area, and µ the sampling density, then N = s*µ is
-		the theoric (floating) number of points to sample. The floating
+		the theoretic (floating) number of points to sample. The floating
 		part of N (let's call it Nf, and let Ni be the integer part) is
 		handled by generating another random number between 0 and 1.
-		If this number is less than Nf, then Ni=Ni+1. The number of points
+		If this number is less than Nf, then Ni = Ni+1. The number of points
 		sampled on the triangle will simply be Ni.
 		\param mesh the mesh to be sampled
 		\param samplingDensity the sampling surface density
@@ -122,8 +122,8 @@ public:
 	**/
 	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											double samplingDensity,
-											GenericProgressCallback* progressCb=0,
-											GenericChunkedArray<1,unsigned>* triIndices=0);
+											GenericProgressCallback* progressCb = 0,
+											GenericChunkedArray<1,unsigned>* triIndices = 0);
 
 	//! Samples points on a mesh
 	/** See the other version of this method. Instead of specifying a
@@ -137,8 +137,8 @@ public:
 	**/
 	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											unsigned numberOfPoints,
-											GenericProgressCallback* progressCb=0,
-											GenericChunkedArray<1,unsigned>* triIndices=0);
+											GenericProgressCallback* progressCb = 0,
+											GenericChunkedArray<1,unsigned>* triIndices = 0);
 
 protected:
 
@@ -146,16 +146,16 @@ protected:
 	/** See public methods descriptions
 		\param mesh the mesh to be sampled
 		\param samplingDensity the sampling surfacical density
-		\param theoricNumberOfPoints the approximated number of points that will be sampled
+		\param theoreticNumberOfPoints the approximated number of points that will be sampled
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param[out] triIndices triangle index for each samples point (output only - optional)
 		\return the sampled points
 	**/
 	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											double samplingDensity,
-											unsigned theoricNumberOfPoints,
-											GenericProgressCallback* progressCb=0,
-											GenericChunkedArray<1,unsigned>* triIndices=0);
+											unsigned theoreticNumberOfPoints,
+											GenericProgressCallback* progressCb = 0,
+											GenericChunkedArray<1,unsigned>* triIndices = 0);
 
 	//! Map used to count the number of triangles using each edge
 	/** Edges are represented by two 32 bits indexes merged as a 64 integer

@@ -726,15 +726,6 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	{
 		cloud = ccPointCloud::From(sampledCloud);
 
-		//import parameters from both the source vertices and the source mesh
-		ccGenericPointCloud* vertices = getAssociatedCloud();
-		if (vertices)
-		{
-			cloud->setGlobalShift(vertices->getGlobalShift());
-			cloud->setGlobalScale(vertices->getGlobalScale());
-		}
-		cloud->setGLTransformationHistory(getGLTransformationHistory());
-		
 		delete sampledCloud;
 		sampledCloud = 0;
 	}
@@ -818,23 +809,27 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		}
 	}
 
+	//release memory
+	if (triIndices)
+	{
+		triIndices->release();
+		triIndices = 0;
+	}
+
 	//we rename the resulting cloud
 	cloud->setName(getName()+QString(".sampled"));
 	cloud->setDisplay(getDisplay());
 	cloud->prepareDisplayForRefresh();
-	
-	//copy 'shift on load' information
-	if (getAssociatedCloud())
+
+	//import parameters from both the source vertices and the source mesh
+	ccGenericPointCloud* vertices = getAssociatedCloud();
+	if (vertices)
 	{
-		const CCVector3d& shift = getAssociatedCloud()->getGlobalShift();
-		cloud->setGlobalShift(shift);
-		double scale = getAssociatedCloud()->getGlobalScale();
-		cloud->setGlobalScale(scale);
+		cloud->setGlobalShift(vertices->getGlobalShift());
+		cloud->setGlobalScale(vertices->getGlobalScale());
 	}
-
-	if (triIndices)
-		triIndices->release();
-
+	cloud->setGLTransformationHistory(getGLTransformationHistory());
+		
 	return cloud;
 }
 

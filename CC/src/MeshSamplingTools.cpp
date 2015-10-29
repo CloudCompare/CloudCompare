@@ -267,14 +267,14 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 	//on commence par calculer la surface totale
 	double Stotal = computeMeshArea(mesh);
 
-	unsigned theoricNumberOfPoints = unsigned(Stotal * samplingDensity);
+	unsigned theoreticNumberOfPoints = unsigned(Stotal * samplingDensity);
 
-	return samplePointsOnMesh(mesh,samplingDensity,theoricNumberOfPoints,progressCb,triIndices);
+	return samplePointsOnMesh(mesh,samplingDensity,theoreticNumberOfPoints,progressCb,triIndices);
 }
 
 SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 													double samplingDensity,
-													unsigned theoricNumberOfPoints,
+													unsigned theoreticNumberOfPoints,
 													GenericProgressCallback* progressCb,
 													GenericChunkedArray<1,unsigned>* triIndices/*=0*/)
 {
@@ -283,12 +283,12 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 	if (triCount == 0)
 		return 0;
 
-	if (theoricNumberOfPoints < 1)
+	if (theoreticNumberOfPoints < 1)
         return 0;
 
 
 	SimpleCloud* sampledCloud = new SimpleCloud();
-	if (!sampledCloud->reserve(theoricNumberOfPoints)) //not enough memory
+	if (!sampledCloud->reserve(theoreticNumberOfPoints)) //not enough memory
 	{
 		delete sampledCloud;
 		return 0;
@@ -296,23 +296,24 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 
 	if (triIndices)
 	{
-	    triIndices->clear();
-		//not enough memory? DGM TODO: we should warn the caller
-		if (!triIndices->reserve(theoricNumberOfPoints) || triIndices->capacity() < theoricNumberOfPoints)
+	    triIndices->clear(); //just in case
+
+		if (!triIndices->reserve(theoreticNumberOfPoints) || triIndices->capacity() < theoreticNumberOfPoints)
 		{
+			//not enough memory? DGM TODO: we should warn the caller
 			delete sampledCloud;
 			triIndices->clear();
 			return 0;
 		}
 	}
 
-	NormalizedProgress* normProgress=0;
+	NormalizedProgress* normProgress = 0;
     if (progressCb)
     {
 		normProgress = new NormalizedProgress(progressCb,triCount);
 		progressCb->setMethodTitle("Mesh sampling");
 		char buffer[256];
-		sprintf(buffer,"Triangles: %u\nPoints: %u",triCount,theoricNumberOfPoints);
+		sprintf(buffer,"Triangles: %u\nPoints: %u",triCount,theoreticNumberOfPoints);
 		progressCb->setInfo(buffer);
         progressCb->reset();
 		progressCb->start();
@@ -337,7 +338,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 
 		//we compute the (twice) the triangle area
 		CCVector3 N = u.cross(v);
-		double S = N.norm()/2.0;
+		double S = N.normd() / 2;
 
 		//we deduce the number of points to generate on this face
 		double fPointsToAdd = S*samplingDensity;
@@ -353,11 +354,11 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 
 		if (pointsToAdd)
 		{
-			if (addedPoints + pointsToAdd >= theoricNumberOfPoints)
+			if (addedPoints + pointsToAdd >= theoreticNumberOfPoints)
 			{
-				theoricNumberOfPoints+=pointsToAdd;
-				if (!sampledCloud->reserve(theoricNumberOfPoints)
-					|| (triIndices && triIndices->capacity() < theoricNumberOfPoints && !triIndices->reserve(theoricNumberOfPoints))) //not enough memory
+				theoreticNumberOfPoints += pointsToAdd;
+				if (!sampledCloud->reserve(theoreticNumberOfPoints)
+					|| (triIndices && triIndices->capacity() < theoreticNumberOfPoints && !triIndices->reserve(theoreticNumberOfPoints))) //not enough memory
 				{
 					delete sampledCloud;
 					sampledCloud = 0;
@@ -368,7 +369,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 
 			for (unsigned i=0; i<pointsToAdd; ++i)
 			{
-				//we generates random points as in:
+				//we generate random points as in:
 				//'Greg Turk. Generating random points in triangles. In A. S. Glassner, editor,Graphics Gems, pages 24-28. Academic Press, 1990.'
 				double x = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 				double y = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
@@ -403,7 +404,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 	{
 		if (addedPoints)
 		{
-			sampledCloud->resize(addedPoints); //should always be ok as addedPoints<theoricNumberOfPoints
+			sampledCloud->resize(addedPoints); //should always be ok as addedPoints < theoreticNumberOfPoints
 			if (triIndices)
 				triIndices->resize(addedPoints);
 		}

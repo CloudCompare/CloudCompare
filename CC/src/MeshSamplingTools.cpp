@@ -250,10 +250,10 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 	if (Stotal < ZERO_TOLERANCE)
         return 0;
 
-	double samplingDensity = double(numberOfPoints)/Stotal;
+	double samplingDensity = numberOfPoints / Stotal;
 
     //no normal needs to be computed here
-	return samplePointsOnMesh(mesh,samplingDensity,numberOfPoints,progressCb,triIndices);
+	return samplePointsOnMesh(mesh, samplingDensity, numberOfPoints, progressCb, triIndices);
 }
 
 SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
@@ -264,28 +264,27 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 	if (!mesh)
         return 0;
 
-	//on commence par calculer la surface totale
+	//we must compute the total area to deduce the number of points
 	double Stotal = computeMeshArea(mesh);
 
-	unsigned theoreticNumberOfPoints = unsigned(Stotal * samplingDensity);
+	unsigned theoreticNumberOfPoints = static_cast<unsigned>(ceil(Stotal * samplingDensity));
 
-	return samplePointsOnMesh(mesh,samplingDensity,theoreticNumberOfPoints,progressCb,triIndices);
+	return samplePointsOnMesh(mesh, samplingDensity, theoreticNumberOfPoints, progressCb, triIndices);
 }
 
-SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
+SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 													double samplingDensity,
 													unsigned theoreticNumberOfPoints,
 													GenericProgressCallback* progressCb,
 													GenericChunkedArray<1,unsigned>* triIndices/*=0*/)
 {
+	if (theoreticNumberOfPoints < 1)
+        return 0;
+
 	assert(mesh);
 	unsigned triCount = (mesh ? mesh->size() : 0);
 	if (triCount == 0)
 		return 0;
-
-	if (theoreticNumberOfPoints < 1)
-        return 0;
-
 
 	SimpleCloud* sampledCloud = new SimpleCloud();
 	if (!sampledCloud->reserve(theoreticNumberOfPoints)) //not enough memory
@@ -342,14 +341,15 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 
 		//we deduce the number of points to generate on this face
 		double fPointsToAdd = S*samplingDensity;
-		unsigned pointsToAdd = static_cast<unsigned>(ceil(fPointsToAdd));
+		unsigned pointsToAdd = static_cast<unsigned>(fPointsToAdd);
 
-        //if the face area is smaller than the surface/random point
-		if (pointsToAdd == 0)
+        //take care of the remaining fractional part
+		double fracPart = fPointsToAdd - static_cast<double>(pointsToAdd);
+		if (fracPart > 0)
 		{
 			//we add a point with the same probability as its (relative) area
-			if (static_cast<double>(rand()) <= fPointsToAdd * static_cast<double>(RAND_MAX))
-                pointsToAdd = 1;
+			if (static_cast<double>(rand()) <= fracPart * static_cast<double>(RAND_MAX))
+                pointsToAdd += 1;
 		}
 
 		if (pointsToAdd)
@@ -370,7 +370,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 			for (unsigned i=0; i<pointsToAdd; ++i)
 			{
 				//we generate random points as in:
-				//'Greg Turk. Generating random points in triangles. In A. S. Glassner, editor,Graphics Gems, pages 24-28. Academic Press, 1990.'
+				//'Greg Turk. Generating random points in triangles. In A. S. Glassner, editor, Graphics Gems, pages 24-28. Academic Press, 1990.'
 				double x = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 				double y = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 
@@ -410,8 +410,6 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* mesh,
 		}
 		else
 		{
-			delete sampledCloud;
-			sampledCloud = 0;
 			if (triIndices)
 				triIndices->clear();
 		}

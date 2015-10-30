@@ -721,21 +721,34 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 
 	//convert to real point cloud
 	ccPointCloud* cloud = 0;
-	
+
 	if (sampledCloud)
 	{
-		cloud = ccPointCloud::From(sampledCloud);
-
+		if (sampledCloud->size() == 0)
+		{
+			ccLog::Warning("[ccGenericMesh::samplePoints] No point was generated (sampling density is too low?)");
+		}
+		else
+		{
+			cloud = ccPointCloud::From(sampledCloud);
+			if (!cloud)
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Not enough memory!");
+			}
+		}
+		
 		delete sampledCloud;
 		sampledCloud = 0;
+	}
+	else
+	{
+		ccLog::Warning("[ccGenericMesh::samplePoints] Not enough memory!");
 	}
 
 	if (!cloud)
 	{
 		if (triIndices)
 			triIndices->release();
-
-		ccLog::Warning("[ccGenericMesh::samplePoints] Not enough memory!");
 		return 0;
 	}
 

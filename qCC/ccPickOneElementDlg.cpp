@@ -17,33 +17,45 @@
 
 #include "ccPickOneElementDlg.h"
 
+//UI file
+#include <ui_pickOneElementDlg.h>
+
 ccPickOneElementDlg::ccPickOneElementDlg(	QString label,
 											QString windowTitle/*=QString()*/,
 											QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, Ui::PickOneElementDialog()
+	, m_ui(new Ui_PickOneElementDialog)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	if (!windowTitle.isNull())
 		setWindowTitle(windowTitle);
 
-	comboLabel->setText(label);
+	m_ui->comboLabel->setText(label);
+}
+
+ccPickOneElementDlg::~ccPickOneElementDlg()
+{
+	if (m_ui)
+	{
+		delete m_ui;
+		m_ui = 0;
+	}
 }
 
 void ccPickOneElementDlg::addElement(QString elementName)
 {
-	comboBox->addItem(elementName);
+	m_ui->comboBox->addItem(elementName);
 }
 
 void ccPickOneElementDlg::setDefaultIndex(int index)
 {
-	comboBox->setCurrentIndex(index);
+	m_ui->comboBox->setCurrentIndex(index);
 }
 
 int ccPickOneElementDlg::getSelectedIndex()
 {
-	return comboBox->currentIndex();
+	return m_ui->comboBox->currentIndex();
 }

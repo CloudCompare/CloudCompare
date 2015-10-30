@@ -18,17 +18,23 @@
 #ifndef CC_PICK_ONE_ELEMENT_DLG_HEADER
 #define CC_PICK_ONE_ELEMENT_DLG_HEADER
 
-#include <ui_pickOneElementDlg.h>
+//Qt
+#include <QDialog>
+
+class Ui_PickOneElementDialog;
 
 //! Minimal dialog to pick one element in a list (combox box)
-class ccPickOneElementDlg : public QDialog, public Ui::PickOneElementDialog
+class ccPickOneElementDlg : public QDialog
 {
 public:
 
 	//! Default constructor
 	ccPickOneElementDlg(QString label,
-						QString windowTitle=QString(),
+						QString windowTitle = QString(),
 						QWidget* parent = 0);
+
+	//! Destructor
+	~ccPickOneElementDlg();
 
 	//! Add an element to the combo box
 	void addElement(QString elementName);
@@ -36,6 +42,11 @@ public:
 	void setDefaultIndex(int index);
 	//! Returns the combo box current index (after completion)
 	int getSelectedIndex();
+
+protected:
+
+	//! Associated UI
+	Ui_PickOneElementDialog* m_ui;
 };
 
 #endif //CC_PICK_ONE_ELEMENT_DLG_HEADER

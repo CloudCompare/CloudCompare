@@ -17,6 +17,7 @@ v2.7.beta ??/??/201?
 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
+	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop
 
 v2.6.2 10/08/2015
 - New features:

@@ -3391,6 +3391,9 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		}
 		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_ADD_COL_HEADER))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
 			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
@@ -3403,6 +3406,9 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		}
 		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_ADD_PTS_COUNT))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
 			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 

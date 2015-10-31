@@ -3463,7 +3463,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		}
 	}
 
-    //update leafs
+    //update leaves
 	{
 		for (size_t i=0; i<numberOfCells; i++)
 		{

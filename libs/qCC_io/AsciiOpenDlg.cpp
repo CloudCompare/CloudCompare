@@ -72,12 +72,12 @@ struct AsciiOpenContext
 	{
 		ui->extractSFNamesFrom1stLineCheckBox->setChecked(extractSFNameFrom1stLine);
 		ui->maxCloudSizeDoubleSpinBox->setValue(maxPointCountPerCloud);
-		ui->lineEditSeparator->setEnabled(false);
+		ui->lineEditSeparator->blockSignals(true);
 		ui->lineEditSeparator->setText(separator);
-		ui->lineEditSeparator->setEnabled(true);
-		ui->spinBoxSkipLines->setEnabled(false);
+		ui->lineEditSeparator->blockSignals(false);
+		ui->spinBoxSkipLines->blockSignals(true);
 		ui->spinBoxSkipLines->setValue(skipLines);
-		ui->spinBoxSkipLines->setEnabled(true);
+		ui->spinBoxSkipLines->blockSignals(false);
 	}
 	
 	AsciiOpenDlg::Sequence sequence;
@@ -285,66 +285,54 @@ void AsciiOpenDlg::updateTable()
 		if (!currentLine.startsWith("//"))
 		{
 			QStringList parts = currentLine.trimmed().split(m_separator,QString::SkipEmptyParts);
-			unsigned partsCount = static_cast<unsigned>(parts.size());
-			if (partsCount > MAX_COLUMNS)
-				partsCount = MAX_COLUMNS;
-
 			if (lineCount < DISPLAYED_LINES)
 			{
+				unsigned partsCount = std::min( MAX_COLUMNS, static_cast<unsigned>(parts.size()) );
+				
 				//do we need to add one or several new columns?
+				if (partsCount > columnsCount)
 				{
-					if (partsCount > columnsCount)
+					//we also extend vectors
+					for (unsigned i = columnsCount; i < partsCount; ++i)
 					{
-						//we also extend vectors
-						for (unsigned i=columnsCount; i<partsCount; ++i)
-						{
-							valueIsNumber.push_back(true);
-							valueIsBelowOne.push_back(true);
-							valueIsBelow255.push_back(true);
-							valueIsInteger.push_back(true);
-						}
-
-						m_ui->tableWidget->setColumnCount(partsCount);
-						columnsCount = partsCount;
+						valueIsNumber.push_back(true);
+						valueIsBelowOne.push_back(true);
+						valueIsBelow255.push_back(true);
+						valueIsInteger.push_back(true);
 					}
+
+					m_ui->tableWidget->setColumnCount(partsCount);
+					columnsCount = partsCount;
 				}
 
 				//we fill the current row with extracted parts
+				for (unsigned i = 0; i < partsCount; ++i)
 				{
-					for (unsigned i=0; i<partsCount; ++i)
+					QTableWidgetItem *newItem = new QTableWidgetItem(parts[i]);
+
+					//test values
+					bool isANumber = false;
+					double value = parts[i].toDouble(&isANumber);
+					if (!isANumber)
 					{
-						QTableWidgetItem *newItem = new QTableWidgetItem(parts[i]);
-
-						//test values
-						bool isANumber = false;
-						double value = parts[i].toDouble(&isANumber);
-						if (!isANumber)
-						{
-							valueIsNumber[i]	= false;
-							valueIsBelowOne[i]	= false;
-							valueIsInteger[i]	= false;
-							valueIsBelow255[i]	= false;
-							newItem->setBackground(QBrush(QColor(255,160,160)));
-						}
-						else
-						{
-							double intPart, fracPart;
-							fracPart = modf(value,&intPart);
-
-							valueIsBelowOne[i] = valueIsBelowOne[i] && (fabs(value) <= 1.0);
-							char temp[2048];
-							strcpy(temp, qPrintable(parts[i]));
-							valueIsInteger[i]  = valueIsInteger[i] && /*(fracPart == 0.0)*/!parts[i].contains(decimalPoint);
-							valueIsBelow255[i] = valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value <= 255.0));
-						}
-
-						m_ui->tableWidget->setItem(lineCount+1, i, newItem); //+1 for first line shifting
+						valueIsNumber[i] = false;
+						valueIsBelowOne[i] = false;
+						valueIsInteger[i] = false;
+						valueIsBelow255[i] = false;
+						newItem->setBackground(QBrush(QColor(255, 160, 160)));
 					}
+					else
+					{
+						valueIsBelowOne[i] = valueIsBelowOne[i] && (fabs(value) <= 1.0);
+						valueIsInteger[i] = valueIsInteger[i] && !parts[i].contains(decimalPoint);
+						valueIsBelow255[i] = valueIsBelow255[i] && valueIsInteger[i] && (value >= 0.0 && value <= 255.0);
+					}
+
+					m_ui->tableWidget->setItem(lineCount + 1, i, newItem); //+1 for first line shifting
 				}
 			}
 
 			totalChars += currentLine.size() + 1; //+1 for return char at eol
-
 			++lineCount;
 		}
 		else
@@ -982,16 +970,25 @@ bool AsciiOpenDlg::safeSequence() const
 void AsciiOpenDlg::columnsTypeHasChanged(int index)
 {
 	if (!m_columnsCount)
+	{
 		return;
+	}
 
 	//we get the signal sender
 	QObject* obj = sender();
 	if (!obj)
+	{
+		assert(false);
 		return;
+	}
 
-	//it should be a QComboBox (could we test this?)
-	QComboBox* changedCombo = static_cast<QComboBox*>(obj);
-	assert(changedCombo);
+	//it should be a QComboBox
+	QComboBox* changedCombo = qobject_cast<QComboBox*>(obj);
+	if (!changedCombo)
+	{
+		assert(false);
+		return;
+	}
 
 	//now we look which column's combobox it is
 	for (unsigned i=0; i<m_columnsCount; i++)

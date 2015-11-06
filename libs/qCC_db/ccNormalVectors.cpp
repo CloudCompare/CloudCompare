@@ -855,8 +855,17 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 		return;
 	}
 
+	// The dip direction must be the same for parallel facets, regardless
+	// of whether their normals point upwards or downwards.
+	//
+	// The formula using atan2() with the swapped N.x and N.y already
+	// gives the correct results for facets with the normal pointing
+	// upwards, so just use the sign of N.z to invert the normals if they
+	// point downwards.
+	double Nsign = copysign(1.0, N.z);
+
 	//"Dip direction is measured in 360 degrees, generally clockwise from North"
-	double dipDir_rad = atan2(N.x,N.y); //result in [-pi,+pi]
+	double dipDir_rad = atan2(Nsign * N.x, Nsign * N.y); //result in [-pi,+pi]
 	if (dipDir_rad < 0)
 		dipDir_rad += 2.0*M_PI;
 

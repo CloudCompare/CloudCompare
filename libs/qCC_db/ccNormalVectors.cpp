@@ -869,9 +869,13 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 	if (dipDir_rad < 0)
 		dipDir_rad += 2.0*M_PI;
 
-	//Dip
-	double dip_rad = atan(fabs(N.z)/sqrt(r2)); //atan's result in [-pi/2,+pi/2] but |N.z|/r >= 0
-	dip_rad = (M_PI/2) - dip_rad; //DGM: we always measure the dip downward from horizontal
+	// Dip angle
+	//
+	// acos() returns values in [0, pi] but using fabs() all the normals
+	// are considered pointing upwards, so the actual result will be in
+	// [0, pi/2] as required by the definition of dip.
+	// We skip the division by r because the normal is a unit vector.
+	double dip_rad = acos(fabs(N.z));
 
 	dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CC_RAD_TO_DEG);
 	dip_deg = static_cast<PointCoordinateType>(dip_rad * CC_RAD_TO_DEG);

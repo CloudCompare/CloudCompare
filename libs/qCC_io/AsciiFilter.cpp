@@ -377,8 +377,12 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	if (	forceDialogDisplay
 		||	!AsciiOpenDlg::CheckOpenSequence(openDialog->getOpenSequence(),dummyStr) )
 	{
+		//show the dialog
 		if (!openDialog->exec())
+		{
+			//process was cancelled
 			return CC_FERR_CANCELED_BY_USER;
+		}
 	}
 
 	//we compute the approximate line number

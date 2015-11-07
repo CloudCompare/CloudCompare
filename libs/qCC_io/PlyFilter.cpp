@@ -778,7 +778,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	QStringList textureFileNames;
 	//texture coordinates
 	TextureCoordsContainer* texCoords = 0;
-	//texture ibdexes
+	//texture indexes
 	ccMesh::triangleMaterialIndexesSet* texIndexes = 0;
 
 	/******************/
@@ -1511,7 +1511,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 		else
 		{
-			s_maxTextureIndex = textureFileNames.size();
+			s_maxTextureIndex = textureFileNames.size()-1;
 			ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, texIndexes_cb, texIndexes, 0);
 		}
 	}

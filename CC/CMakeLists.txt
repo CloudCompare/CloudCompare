@@ -6,12 +6,25 @@ include ( ../CMakePolicies.cmake )
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
 option( COMPILE_CC_CORE_LIB_WITH_TRIANGLE "Check to compile CC_CORE_LIB with Triangle lib. (to enable Delaunay 2.5D triangulation)" ON )
+option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL lib. (to enable Delaunay 2.5D triangulation with a GPL compliant licence)" OFF )
 option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
 
 # to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
 project( CC_DUMMY_PROJECT )
 
-# CC_CORE_LIB only relies on 'triangle' library...
+# CGAL takes precedence over triangle
+if (COMPILE_CC_CORE_LIB_WITH_CGAL)
+	SET(COMPILE_CC_CORE_LIB_WITH_TRIANGLE OFF)
+	FIND_PACKAGE(CGAL QUIET COMPONENTS Core ) # implies findGMP
+	if(CGAL_FOUND)
+		include( ${CGAL_USE_FILE} )
+		include_directories(${CGAL_INCLUDE_DIR})
+	else()
+		Message(STATUS "Could not find CGAL")
+	endif()
+endif()
+
+# else CC_CORE_LIB only relies on 'triangle' library...
 if (COMPILE_CC_CORE_LIB_WITH_TRIANGLE)
 	add_subdirectory (triangle)
 endif()
@@ -20,6 +33,8 @@ endif()
 if (COMPILE_CC_CORE_LIB_WITH_QT)
 	include( ../CMakeExternalLibs.cmake )
 endif()
+
+
 
 project( CC_CORE_LIB )
 
@@ -32,6 +47,7 @@ if( MSVC )
 endif()
 include_directories( ${triangle_SOURCE_DIR} )
 
+
 file( GLOB header_list include/*.h)
 file( GLOB source_list src/*.cpp src/*.h)
 
@@ -41,10 +57,16 @@ else()
 	add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 endif()
 
-target_link_libraries( ${PROJECT_NAME} triangle )
 
 if (COMPILE_CC_CORE_LIB_WITH_TRIANGLE)
+	target_link_libraries( ${PROJECT_NAME} triangle )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TRIANGLE_LIB )
+endif()
+
+
+if (COMPILE_CC_CORE_LIB_WITH_CGAL)
+	target_link_libraries( ${PROJECT_NAME} ${CGAL_LIBRARIES} )
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_CGAL_LIB )
 endif()
 
 if ( COMPILE_CC_CORE_LIB_WITH_QT )

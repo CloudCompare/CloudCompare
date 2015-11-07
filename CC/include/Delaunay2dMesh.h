@@ -24,6 +24,7 @@
 #include "Neighbourhood.h"
 #include "SimpleTriangle.h"
 
+
 namespace CCLib
 {
 
@@ -48,7 +49,7 @@ public:
 
 	//! Associate this mesh to a point cloud
 	/** This particular mesh structure deals with point indexes instead of points.
-		Therefore, it is possible to change the associated point cloud (it the
+		Therefore, it is possible to change the associated point cloud (if the
 		new cloud has the same size). For example, it can be useful to compute
 		the mesh on 2D points corresponding to 3D points that have been projected
 		on a plane and then to link this structure with the 3D original	points.
@@ -60,7 +61,6 @@ public:
 	//! Build the Delaunay mesh on top a set of 2D points
 	/** \param points2D a set of 2D points
 		\param pointCountToUse number of points to use from the input set (0 = all)
-		\param forceInputPointsAsBorder if true, the input points are considered as ordered polyon vertices and 'outside' triangles will be removed
 		\param outputErrorStr error string as output by Triangle lib. (if any) [optional]
 		\return success
 	**/

@@ -35,7 +35,6 @@ Big ones:
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Finish the Oculus Rift plugin
-[*] Change Triangle lib by a GPL-compatible library
 [*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 Various:

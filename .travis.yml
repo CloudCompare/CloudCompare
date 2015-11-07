@@ -6,17 +6,18 @@ compiler:
     - gcc # 4.6
 
 install:
-    # We remove Postgis added by Travis since it prevent us from installing libgdal-dev
+    # We remove Postgis added by Travis since it prevents us from installing libgdal-dev
     - sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp/
     - sudo apt-get -qq remove postgis
     - sudo apt-get update -qq
     # Install dependencies
-    - sudo apt-get install -qy cmake libqt4-dev libqt4-opengl-dev libgdal-dev
+    - sudo apt-get install -qy cmake libqt4-dev libqt4-opengl-dev libgdal-dev libcgal-dev
 
 before_script:
     - mkdir build
     - cd build
     - cmake -DCMAKE_BUILD_TYPE=Release \
+      -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON \
       -DINSTALL_QHPR_PLUGIN=ON \
       -DINSTALL_QPCV_PLUGIN=ON \
       -DINSTALL_QPOISSON_RECON_PLUGIN=ON \

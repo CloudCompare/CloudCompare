@@ -862,7 +862,7 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 	// gives the correct results for facets with the normal pointing
 	// upwards, so just use the sign of N.z to invert the normals if they
 	// point downwards.
-	double Nsign = copysign(1.0, N.z);
+	double Nsign = N.z < 0 ? -1.0 : 1.0; //DGM: copysign is not available on VS2012
 
 	//"Dip direction is measured in 360 degrees, generally clockwise from North"
 	double dipDir_rad = atan2(Nsign * N.x, Nsign * N.y); //result in [-pi,+pi]

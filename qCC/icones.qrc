@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/nvidia.png</file>
     <file>images/ccSwapUpDown.png</file>
     <file>images/unfoldSmall.png</file>
     <file>images/ccStereo.png</file>

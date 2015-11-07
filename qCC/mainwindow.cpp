@@ -604,7 +604,7 @@ void MainWindow::doEnableGLFilter()
 		return;
 	}
 
-	if (win->isStereoModeEnabled())
+	if (win->stereoModeIsEnabled())
 	{
 		ccLog::Warning("[GL filter] Can't activate GL filters while the stereo mode is enabled!");
 		return;
@@ -10925,13 +10925,15 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		bool isActive = win->isStereoModeEnabled();
+		bool isActive = win->stereoModeIsEnabled();
 		if (isActive == state)
+		{
 			return;
+		}
 
 		if (isActive)
 		{
-			win->enableStereoMode(false);
+			win->disableStereoMode();
 		}
 		else
 		{
@@ -10952,14 +10954,20 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			{
 				setCenteredPerspectiveView(win,false);
 			}
-			//and disable GL filters :(
+
+			if (win->enableStereoMode(smDlg.getParameters()))
 			{
+				//we have to disable GL filters :(
 				//FIXME
 				win->setGlFilter(0);
 			}
-
-			win->setStereoParams(smDlg.getParameters());
-			win->enableStereoMode(true);
+			else
+			{
+				//cancel selection
+				actionEnableStereo->blockSignals(true);
+				actionEnableStereo->setChecked(false);
+				actionEnableStereo->blockSignals(false);
+			}
 		}
 		win->redraw();
 	}
@@ -10969,7 +10977,7 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 {
 	assert(win);
 		
-	if (win && win->getViewportParameters().perspectiveView && win->isStereoModeEnabled())
+	if (win && win->getViewportParameters().perspectiveView && win->stereoModeIsEnabled())
 	{
 		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
@@ -10977,7 +10985,7 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 		}
 		else
 		{
-			win->enableStereoMode(false);
+			win->disableStereoMode();
 			actionEnableStereo->blockSignals(true);
 			actionEnableStereo->setChecked(false);
 			actionEnableStereo->blockSignals(false);
@@ -11657,7 +11665,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		actionLockRotationVertAxis->blockSignals(false);
 
 		actionEnableStereo->blockSignals(true);
-		actionEnableStereo->setChecked(win->isStereoModeEnabled());
+		actionEnableStereo->setChecked(win->stereoModeIsEnabled());
 		actionEnableStereo->blockSignals(false);
 	}
 

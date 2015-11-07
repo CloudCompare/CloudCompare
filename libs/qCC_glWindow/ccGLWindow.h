@@ -496,20 +496,17 @@ public:
 	//! Main OpenGL display sequence
 	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross);
 
+	//! Toggles (exclusive) full-screen mode
+	void toggleFullScreen(bool state);
+
 public: //stereo mode
 
-	//! Enables the stereo display mode
-	inline void enableStereoMode(bool state) { m_stereoIsEnabled = state; }
-
-	//! Returns whether the stereo display mode is enabled or not
-	inline bool isStereoModeEnabled() const { return m_stereoIsEnabled; }
-	
 	//! Seterovision parameters
 	struct StereoParams
 	{
 		StereoParams();
 
-		enum GlassType { RED_BLUE = 1, RED_CYAN = 2 };
+		enum GlassType { RED_BLUE = 1, RED_CYAN = 2, NVIDIA_VISION = 3 };
 		
 		bool autoFocal;
 		double focalDist;
@@ -517,11 +514,17 @@ public: //stereo mode
 		GlassType glassType;
 	};
 
+	//! Enables stereo display mode
+	bool enableStereoMode(const StereoParams& params);
+
+	//! Disables stereo display mode
+	void disableStereoMode();
+
+	//! Returns whether the stereo display mode is enabled or not
+	inline bool stereoModeIsEnabled() const { return m_stereoModeEnabled; }
+	
 	//! Returns the current stereo mode parameters
 	inline const StereoParams& getStereoParams() const { return m_stereoParams; }
-
-	//! Sets the current stereo mode parameters
-	void setStereoParams(const StereoParams& params);
 
 public slots:
 
@@ -660,6 +663,9 @@ protected: //methods
 		Change 'defaultFontSize' with setDisplayParameters instead!
 	**/
 	void setFontPointSize(int pixelSize);
+
+	//! Clears the backrgound
+	void resetBackground(CC_DRAW_CONTEXT& CONTEXT);
 
 	//events handling
 	void mousePressEvent(QMouseEvent *event);
@@ -1074,8 +1080,11 @@ protected: //members
 	//! Seterovision mode parameters
 	StereoParams m_stereoParams;
 
-	//! Seterovision mode parameters
-	bool m_stereoIsEnabled;
+	//! Whether seterovision mode is enabled or not
+	bool m_stereoModeEnabled;
+
+	//! Former parent object (for exclusive full-screen display)
+	QWidget* m_formerParent;
 
 private:
 

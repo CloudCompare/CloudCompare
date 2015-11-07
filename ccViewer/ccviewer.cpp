@@ -79,7 +79,9 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		const int margin = 10;
 		verticalLayout->setContentsMargins(margin,margin,margin,margin);
 		QGLFormat format = QGLFormat::defaultFormat();
-		format.setSwapInterval(0);
+		format.setStereo(true);
+		format.setDoubleBuffer(true);
+		format.setSwapInterval(1);
 		m_glWindow = new ccGLWindow(ui.GLframe,format);
 		verticalLayout->addWidget(m_glWindow);
 	}
@@ -472,8 +474,9 @@ void ccViewer::updateGLFrameGradient()
 	//display parameters
 	static const ccColor::Rgbub s_black(0,0,0);
 	static const ccColor::Rgbub s_white(255,255,255);
-	const ccColor::Rgbub& bkgCol = m_glWindow->isStereoModeEnabled() ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
-	const ccColor::Rgbub& forCol = m_glWindow->isStereoModeEnabled() ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
+	bool stereoModeEnabled = m_glWindow->stereoModeIsEnabled();
+	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
+	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
 
 	glColor3ubv(bkgCol.rgb);
 	glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
@@ -612,7 +615,9 @@ void ccViewer::reflectPerspectiveState()
 
 bool ccViewer::checkStereoMode()
 {
-	if (m_glWindow && m_glWindow->getViewportParameters().perspectiveView && m_glWindow->isStereoModeEnabled())
+	if (	m_glWindow
+		&&	m_glWindow->getViewportParameters().perspectiveView
+		&&	m_glWindow->stereoModeIsEnabled())
 	{
 		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
@@ -730,13 +735,16 @@ void ccViewer::toggleStereoMode(bool state)
 	if (!m_glWindow)
 		return;
 
-	bool isActive = m_glWindow->isStereoModeEnabled();
+	bool isActive = m_glWindow->stereoModeIsEnabled();
 	if (isActive == state)
+	{
+		//nothing to do
 		return;
+	}
 
 	if (isActive)
 	{
-		m_glWindow->enableStereoMode(false);
+		m_glWindow->disableStereoMode();
 		ui.menuPlugins->setEnabled(true);
 	}
 	else
@@ -759,15 +767,29 @@ void ccViewer::toggleStereoMode(bool state)
 			m_glWindow->setPerspectiveState(true,true);
 			reflectPerspectiveState();
 		}
-		//and disable GL filters :(
+
+		ccGLWindow::StereoParams params = smDlg.getParameters();
+
+		if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 		{
+			//force full screen
+			ui.actionFullScreen->setChecked(true);
+		}
+
+		if (m_glWindow->enableStereoMode(params))
+		{
+			//we have to disable GL filters :(
 			//FIXME
 			m_glWindow->setGlFilter(0);
 			ui.menuPlugins->setEnabled(false);
 		}
-
-		m_glWindow->setStereoParams(smDlg.getParameters());
-		m_glWindow->enableStereoMode(true);
+		else
+		{
+			//cancel selection
+			ui.actionEnableStereo->blockSignals(true);
+			ui.actionEnableStereo->setChecked(false);
+			ui.actionEnableStereo->blockSignals(false);
+		}
 	}
 
 	updateDisplay();
@@ -775,28 +797,19 @@ void ccViewer::toggleStereoMode(bool state)
 
 void ccViewer::toggleFullScreen(bool state)
 {
-	if (!m_glWindow)
+	if (m_glWindow)
 	{
-		return;
-	}
+		if (m_glWindow->stereoModeIsEnabled() && m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+		{
+			//auto disable stereo mode as NVidia Vision only works in full screen mode!
+			ui.actionEnableStereo->setChecked(false);
+		}
 
-	if (state)
-	{
-		ui.GLframe->layout()->removeWidget(m_glWindow);
-		m_glWindow->setParent(0);
-		m_glWindow->showFullScreen();
-		m_glWindow->displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 10);
-		m_glWindow->setFocus();
-	}
-	else
-	{
-		ui.GLframe->layout()->addWidget(m_glWindow);
-		m_glWindow->showNormal();
-		setFocus();
-	}
-	QApplication::processEvents();
+		m_glWindow->toggleFullScreen(state);
 
-	m_glWindow->redraw();
+		QApplication::processEvents();
+		m_glWindow->redraw();
+	}
 }
 
 void ccViewer::toggleRotationAboutVertAxis()

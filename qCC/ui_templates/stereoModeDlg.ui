@@ -39,10 +39,27 @@
          <property name="text">
           <string>Red-Blue</string>
          </property>
+         <property name="icon">
+          <iconset resource="../icones.qrc">
+           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
+         </property>
         </item>
         <item>
          <property name="text">
           <string>Red-Cyan</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../icones.qrc">
+           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>NVidia Vision</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../icones.qrc">
+           <normaloff>:/CC/images/nvidia.png</normaloff>:/CC/images/nvidia.png</iconset>
          </property>
         </item>
        </widget>
@@ -158,7 +175,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

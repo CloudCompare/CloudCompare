@@ -44,6 +44,9 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	default:
 		params.glassType = ccGLWindow::StereoParams::RED_CYAN;
 		break;
+	case 2:
+		params.glassType = ccGLWindow::StereoParams::NVIDIA_VISION;
+		break;
 	}
 
 	//focal
@@ -66,6 +69,9 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 		break;
 	case ccGLWindow::StereoParams::RED_CYAN:
 		glassTypeComboBox->setCurrentIndex(1);
+		break;
+	case ccGLWindow::StereoParams::NVIDIA_VISION:
+		glassTypeComboBox->setCurrentIndex(2);
 		break;
 	default:
 		assert(false);

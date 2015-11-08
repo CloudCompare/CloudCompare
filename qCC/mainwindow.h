@@ -275,6 +275,7 @@ protected slots:
 	void showSelectedEntitiesHistogram();
 	void testFrameRate();
 	void toggleFullScreen(bool state);
+	void toggleVisualDebugTraces();
 	void toggleExclusiveFullScreen(bool state);
 	void update3DViewsMenu();
 	void updateMenus();

@@ -937,7 +937,7 @@ void ccViewer::toggleColorbarShown(bool state)
 	if (!cloud)
 		return;
 	cloud->showSFColorsScale(state);
-	m_glWindow->redraw(true);
+	m_glWindow->redraw(true, false);
 }
 
 void ccViewer::changeCurrentScalarField(bool state)

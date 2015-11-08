@@ -150,7 +150,7 @@ void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 		ccGui::ParamStruct params = m_window->getDisplayParameters();
 		params.displayedNumPrecision = precision;
 		m_window->setDisplayParameters(params);
-		m_window->redraw(true);
+		m_window->redraw(true, false);
 	}
 
 	//update report

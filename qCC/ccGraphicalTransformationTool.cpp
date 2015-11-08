@@ -94,7 +94,7 @@ void ccGraphicalTransformationTool::pause(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-	m_associatedWin->redraw(true);
+	m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalTransformationTool::clear()
@@ -202,7 +202,7 @@ bool ccGraphicalTransformationTool::start()
 	connect(m_associatedWin, SIGNAL(translation(const CCVector3d&)),	this, SLOT(glTranslate(const CCVector3d&)));
 	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
 	m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-	m_associatedWin->redraw(true);
+	m_associatedWin->redraw(true, false);
 
 	return ccOverlayDialog::start();
 }
@@ -218,7 +218,7 @@ void ccGraphicalTransformationTool::stop(bool state)
 		disconnect(m_associatedWin, SIGNAL(rotation(const ccGLMatrixd&)),	this, SLOT(glRotate(const ccGLMatrixd&)));
 		disconnect(m_associatedWin, SIGNAL(translation(const CCVector3d&)),	this, SLOT(glTranslate(const CCVector3d&)));
 		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]",ccGLWindow::UPPER_CENTER_MESSAGE,false,2,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 	}
 
 	ccOverlayDialog::stop(state);

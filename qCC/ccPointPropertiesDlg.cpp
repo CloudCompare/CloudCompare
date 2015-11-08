@@ -250,7 +250,7 @@ void ccPointPropertiesDlg::exportCurrentLabel()
 	if (m_associatedWin)
 	{
 		m_associatedWin->addToOwnDB(newLabelObject);
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 	}	
 }
 
@@ -325,7 +325,7 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }
 
 void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
@@ -344,7 +344,7 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 	m_rect2DLabel->setVisible(true);
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }
 
 static QString s_last2DLabelComment("");
@@ -371,5 +371,5 @@ void ccPointPropertiesDlg::close2DZone()
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }

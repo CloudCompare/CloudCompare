@@ -489,13 +489,23 @@ public:
 	inline bool isLODEnabled() const { return m_LODEnabled; }
 
 	//! Enables or disables LOD on this display
-	inline void setLODEnabled(bool state, bool autoDisable = false) { m_LODEnabled = state; m_LODAutoDisable = autoDisable; }
+	/** \return success
+	**/
+	bool setLODEnabled(bool state, bool autoDisable = false);
 
 	//! Toggles (exclusive) full-screen mode
 	void toggleExclusiveFullScreen(bool state);
 
 	//! Returns whether the window is in exclusive full screen mode or not
 	bool exclusiveFullScreen() const;
+
+public: //debug traces on screen
+
+	//! Shows debug info on screen
+	inline void enableDebugTrace(bool state) { m_showDebugTraces = state; }
+
+	//! Toggles debug info on screen
+	inline void toggleDebugTrace() { m_showDebugTraces = !m_showDebugTraces; }
 
 public: //stereo mode
 
@@ -537,7 +547,7 @@ public slots:
 	void zoomGlobal();
 
 	//inherited from ccGenericGLDisplay
-	virtual void redraw(bool only2D = false);
+	virtual void redraw(bool only2D = false, bool resetLOD = true);
 
 	//called when recieving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
@@ -1066,6 +1076,8 @@ protected: //members
 
 	//! Currently active FBO (frame buffer object)
 	ccFrameBufferObject* m_fbo;
+	//! Second currently active FBO (frame buffer object) - used for stereo rendering
+	ccFrameBufferObject* m_fbo2;
 	//! Whether to always use FBO or only for GL filters
 	bool m_alwaysUseFBO;
 	//! Whether FBO should be updated (or simply displayed as a texture = faster!)
@@ -1156,6 +1168,9 @@ protected: //members
 
 	//! Former parent object (for exclusive full-screen display)
 	QWidget* m_formerParent;
+
+	//! Debug traces visibility
+	bool m_showDebugTraces;
 
 private:
 

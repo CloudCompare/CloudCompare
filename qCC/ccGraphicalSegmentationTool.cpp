@@ -438,7 +438,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
@@ -521,7 +521,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 	}
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalSegmentationTool::closeRectangle()
@@ -550,7 +550,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalSegmentationTool::closePolyLine(int, int)
@@ -581,7 +581,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	allowPolylineExport(m_segmentationPoly->size() > 1);
 
 	if (m_associatedWin)
-		m_associatedWin->redraw(true);
+		m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalSegmentationTool::segmentIn()
@@ -822,7 +822,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				}
 
 				if (m_associatedWin)
-					m_associatedWin->redraw(true);
+					m_associatedWin->redraw(true, false);
 			}
 			else
 			{

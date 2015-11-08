@@ -604,12 +604,6 @@ void MainWindow::doEnableGLFilter()
 		return;
 	}
 
-	if (win->stereoModeIsEnabled())
-	{
-		ccLog::Warning("[GL filter] Can't activate GL filters while the stereo mode is enabled!");
-		return;
-	}
-
 	QAction *action = qobject_cast<QAction*>(sender());
 	ccPluginInterface *ccPlugin = getValidPlugin(action ? action->parent() : 0);
 	if (!ccPlugin)
@@ -1036,6 +1030,9 @@ void MainWindow::connectActions()
 	connect(actionSetViewIso1,					SIGNAL(triggered()),	this,		SLOT(setIsoView1()));
 	connect(actionSetViewIso2,					SIGNAL(triggered()),	this,		SLOT(setIsoView2()));
 	connect(actionEnableStereo,					SIGNAL(toggled(bool)),	this,		SLOT(toggleActiveWindowStereoVision(bool)));
+
+	//hidden
+	connect(actionEnableVisualDebugTraces,		SIGNAL(triggered()),	this,		SLOT(toggleVisualDebugTraces()));
 }
 
 void MainWindow::doActionColorize()
@@ -7709,6 +7706,16 @@ void MainWindow::updateMDIDialogsPlacement()
 		placeMDIDialog(m_mdiDialogs[i]);
 }
 
+void MainWindow::toggleVisualDebugTraces()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->toggleDebugTrace();
+		win->redraw(true, false);
+	}
+}
+
 void MainWindow::toggleFullScreen(bool state)
 {
 	if (state)
@@ -7722,7 +7729,7 @@ void MainWindow::toggleExclusiveFullScreen(bool state)
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		if (win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+		if (!state && win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 		{
 			//auto disable stereo mode as NVidia Vision only works in full screen mode!
 			actionEnableStereo->setChecked(false);
@@ -8804,7 +8811,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 	s_previousPickingMode = win->getPickingMode();
 	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
 	win->displayNewMessage(message,ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
-	win->redraw(true);
+	win->redraw(true, false);
 
 	freezeUI(true);
 }
@@ -11079,7 +11086,7 @@ void MainWindow::toggleRotationAboutVertAxis()
 		{
 			win->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
-		win->redraw(true);
+		win->redraw(true, false);
 	}
 }
 

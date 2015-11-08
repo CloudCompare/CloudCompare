@@ -105,7 +105,7 @@ class ccGenericGLDisplay
 public:
 
 	//! Redraws display immediately
-	virtual void redraw(bool only2D = false) = 0;
+	virtual void redraw(bool only2D = false, bool resetLOD = true) = 0;
 
 	//! Flags display as 'to be refreshed'
 	/** See ccGenericGLDisplay::refresh.

@@ -122,6 +122,49 @@ inline static void glColor4ubv_safe(const unsigned char* rgb)
 				rgb[3] / 255.0f );
 }
 
+void safeRemoveFBO(ccFrameBufferObject* &fbo)
+{
+	//we "disconnect" the current FBO to avoid wrong display/errors
+	//if QT tries to redraw window during object destruction
+	if (fbo)
+	{
+		ccFrameBufferObject* _fbo = fbo;
+		fbo = 0;
+		delete _fbo;
+	}
+}
+
+bool initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
+{
+	if (fbo && fbo->width() == w && fbo->height() == h)
+	{
+		//nothing to do
+		return true;
+	}
+
+	//we "disconnect" the current FBO to avoid wrong display/errors
+	//if QT tries to redraw window during initialization
+	ccFrameBufferObject* _fbo = fbo;
+	fbo = 0;
+
+	if (!_fbo)
+	{
+		_fbo = new ccFrameBufferObject();
+	}
+
+	if (	!_fbo->init(w,h)
+		||	!_fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_FLOAT)
+		||	!_fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D))
+	{
+		delete _fbo;
+		_fbo = 0;
+		return false;
+	}
+
+	fbo = _fbo;
+	return true;
+}
+
 ccGLWindow::ccGLWindow(	QWidget *parent,
 						const QGLFormat& format/*=QGLFormat::defaultFormat()*/,
 						QGLWidget* shareWidget/*=0*/,
@@ -161,6 +204,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_activeShader(0)
 	, m_shadersEnabled(false)
 	, m_fbo(0)
+	, m_fbo2(0)
 	, m_alwaysUseFBO(false)
 	, m_updateFBO(true)
 	, m_colorRampShader(0)
@@ -186,6 +230,11 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_scheduledFullRedrawTime(0)
 	, m_stereoModeEnabled(false)
 	, m_formerParent(0)
+#ifdef _DEBUG
+	, m_showDebugTraces(true)
+#else
+	, m_showDebugTraces(false)
+#endif
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -332,6 +381,8 @@ ccGLWindow::~ccGLWindow()
 
 	if (m_fbo)
 		delete m_fbo;
+	if (m_fbo2)
+		delete m_fbo2;
 }
 
 const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
@@ -873,6 +924,9 @@ void ccGLWindow::resizeGL2()
 		m_pivotGLList = GL_INVALID_LIST_ID;
 	}
 
+	setLODEnabled(true, true);
+	m_currentLODState.level = 0;
+
 	displayNewMessage(QString("New size = %1 * %2 (px)").arg(m_glWidth).arg(m_glHeight),
 						ccGLWindow::LOWER_LEFT_MESSAGE,
 						false,
@@ -884,6 +938,19 @@ void ccGLWindow::resizeGL2()
 #ifdef THREADED_GL_WIDGET
 	m_resized.store(0);
 #endif
+}
+
+bool ccGLWindow::setLODEnabled(bool state, bool autoDisable/*=false*/)
+{
+	if (state && (!m_fbo || (m_stereoModeEnabled && !m_stereoParams.isAnaglyph() && !m_fbo2)))
+	{
+		//we need a valid FBO (or two ;) for LOD!!!
+		return false;
+	}
+
+	m_LODEnabled = state;
+	m_LODAutoDisable = autoDisable;
+	return true;
 }
 
 //Framerate test
@@ -1181,9 +1248,9 @@ void ccGLWindow::refresh(bool only2D/*=false*/)
 	}
 }
 
-void ccGLWindow::redraw(bool only2D/*=false*/)
+void ccGLWindow::redraw(bool only2D/*=false*/, bool resetLOD/*=true*/)
 {
-	if (m_currentLODState.inProgress)
+	if (m_currentLODState.inProgress && resetLOD)
 	{
 		//reset current LOD cycle
 		m_LODPendingIgnore = true;
@@ -1192,7 +1259,9 @@ void ccGLWindow::redraw(bool only2D/*=false*/)
 	}
 	
 	if (!only2D)
+	{
 		m_updateFBO = true;
+	}
 
 #ifdef THREADED_GL_WIDGET
 	if (m_renderingThread)
@@ -1241,7 +1310,7 @@ void ccGLWindow::paint()
 	//here are all the reasons for which we would like to update the main 3D layer
 	if (	!m_fbo
 		||	(m_alwaysUseFBO && m_updateFBO)
-		||	(m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
+		//||	(m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
 		//||	m_activeGLFilter
 		||	m_captureMode.enabled
 		||	m_currentLODState.inProgress
@@ -1255,7 +1324,8 @@ void ccGLWindow::paint()
 	//other rendering options
 	renderingParams.useFBO =	!m_stereoModeEnabled
 							||	m_stereoParams.isAnaglyph()
-							||	m_activeGLFilter;
+							||	m_activeGLFilter
+							||	m_LODEnabled;
 	renderingParams.draw3DCross = getDisplayParameters().displayCross;
 	renderingParams.passCount = m_stereoModeEnabled ? 2 : 1;
 
@@ -1462,27 +1532,36 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& renderingParams)
 {
-#ifdef _DEBUG
-	//parameters
+	//visual traces
 	QStringList diagStrings;
+	if (m_showDebugTraces)
 	{
 		diagStrings << QString("Stereo mode %1 (pass %2)").arg(m_stereoModeEnabled && renderingParams.passCount == 2 ? "ON" : "OFF").arg(renderingParams.passIndex);
 		diagStrings << QString("FBO %1").arg(m_fbo && renderingParams.useFBO ? "ON" : "OFF");
+		diagStrings << QString("FBO2 %1").arg(m_fbo2 && renderingParams.useFBO ? "ON" : "OFF");
 		diagStrings << QString("GL filter %1").arg(m_fbo && renderingParams.useFBO && m_activeGLFilter ? "ON" : "OFF");
+		diagStrings << QString("LOD %1 (level %2)").arg(m_currentLODState.inProgress ? "ON" : "OFF").arg(m_currentLODState.level);
 	}
-#endif
+
+	ccFrameBufferObject* currentFBO = m_fbo;
+	if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::NVIDIA_VISION && renderingParams.passIndex == 1)
+	{
+		currentFBO = m_fbo2;
+	}
 
 	//if a FBO is activated
-	if (	m_fbo
+	if (	currentFBO
 		&&	renderingParams.useFBO
 		&&	(renderingParams.drawBackground || renderingParams.draw3DPass) )
 	{
-		m_fbo->start();
+		currentFBO->start();
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
 		ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO start)");
-#ifdef _DEBUG
-		diagStrings << "FBO updated";
-#endif
+	
+		if (m_showDebugTraces)
+		{
+			diagStrings << "FBO updated";
+		}
 	}
 	else
 	{
@@ -1502,9 +1581,11 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	/******************/
 	if (renderingParams.drawBackground)
 	{
-#ifdef _DEBUG
-		diagStrings << "draw background";
-#endif
+		if (m_showDebugTraces)
+		{
+			diagStrings << "draw background";
+		}
+
 		//shall we clear the background (depth and/or color)
 		if (m_currentLODState.level == 0)
 		{
@@ -1528,9 +1609,11 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	/*********************/
 	if (renderingParams.draw3DPass)
 	{
-#ifdef _DEBUG
-		diagStrings << "draw 3D";
-#endif
+		if (m_showDebugTraces)
+		{
+			diagStrings << "draw 3D";
+		}
+
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
 			//change color filter
@@ -1564,28 +1647,42 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		}
 	}
 
-#ifdef _DEBUG
 	//display traces
+	if (!diagStrings.isEmpty())
 	{
-		int x = (renderingParams.passIndex == 0 ? 10 : width()/2);
-		int y = 10;
+		int x = width()/2 * static_cast<int>(renderingParams.passIndex+1) - 100;
+		int y = 0;
+
+		setStandardOrthoCorner();
+		glPushAttrib(GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+
+		glColor3ubv(ccColor::black.rgba);
+		glBegin(GL_QUADS);
+		glVertex2i(x,m_glHeight-y);
+		glVertex2i(x,m_glHeight-(y+100));
+		glVertex2i(x+200,m_glHeight-(y+100));
+		glVertex2i(x+200,m_glHeight-y);
+		glEnd();
+
 		glColor3ubv_safe(ccColor::yellow.rgba);
 		for (int i=0; i<diagStrings.size(); ++i)
 		{
 			QString str = diagStrings[i];
-			renderText(x, y, str);
+			renderText(x+10, y+10, str);
 			y += 10;
 		}
+
+		glPopAttrib();
 	}
-#endif
 
 	//process and/or display the FBO (if any)
-	if (m_fbo && renderingParams.useFBO)
+	if (currentFBO && renderingParams.useFBO)
 	{
 		//we disable fbo (if any)
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
-			m_fbo->stop();
+			currentFBO->stop();
 			ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
 		}
@@ -1594,8 +1691,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		if (m_activeGLFilter)
 		{
 			//we apply the GL filter
-			GLuint depthTex = m_fbo->getDepthTexture();
-			GLuint colorTex = m_fbo->getColorTexture(0);
+			GLuint depthTex = currentFBO->getDepthTexture();
+			GLuint colorTex = currentFBO->getColorTexture(0);
 			//minimal set of viewport parameters necessary for GL filters
 			ccGlFilter::ViewportParameters parameters;
 			{
@@ -1618,8 +1715,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		}
 		else if (!m_captureMode.enabled)
 		{
-			//screenTex = m_fbo->getDepthTexture();
-			screenTex = m_fbo->getColorTexture(0);
+			//screenTex = currentFBO->getDepthTexture();
+			screenTex = currentFBO->getColorTexture(0);
 			ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
 		}
 
@@ -1657,6 +1754,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	{
 		drawForeground(context, renderingParams);
 	}
+
+	glFlush();
 }
 
 void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
@@ -2906,7 +3005,7 @@ void ccGLWindow::setStandardOrthoCorner()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0,0,static_cast<double>(m_glWidth),static_cast<double>(m_glHeight),0,1);
+	glOrtho(0,static_cast<double>(m_glWidth),0,static_cast<double>(m_glHeight),0,1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -3339,7 +3438,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			if (inZone != m_hotZoneActivated)
 			{
 				m_hotZoneActivated = inZone;
-				redraw(true);
+				redraw(true, false);
 			}
 			event->accept();
 		}
@@ -3523,7 +3622,9 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	event->accept();
 
 	if (m_interactionMode != TRANSFORM_ENTITY)
+	{
 		redraw(true);
+	}
 }
 
 bool ccGLWindow::processClickableItems(int x, int y)
@@ -3581,7 +3682,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool mouseHasMoved = m_mouseMoved;
 	bool acceptEvent = false;
-	setLODEnabled(false, false);
+	//setLODEnabled(false, false); //DGM: why?
 
 	//reset to default state
 	m_mouseButtonPressed = false;
@@ -3773,6 +3874,8 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	}
 
 	setLODEnabled(true, true);
+	m_currentLODState.level = 0;
+
 	redraw();
 
 	//scheduleFullRedraw(1000);
@@ -5280,41 +5383,40 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 void ccGLWindow::removeFBO()
 {
-	//we "disconnect" current FBO, to avoid wrong display/errors
-	//if QT tries to redraw window during object destruction
-	ccFrameBufferObject* _fbo = m_fbo;
-	m_fbo = 0;
-
-	if (_fbo)
-		delete _fbo;
+	safeRemoveFBO(m_fbo);
+	safeRemoveFBO(m_fbo2);
 }
 
 bool ccGLWindow::initFBO(int w, int h)
 {
-	//we "disconnect" current FBO, to avoid wrong display/errors
-	//if QT tries to redraw window during initialization
-	ccFrameBufferObject* _fbo = m_fbo;
-	m_fbo = 0;
-
-	if (!_fbo)
-		_fbo = new ccFrameBufferObject();
-
-	if (	!_fbo->init(w,h)
-		||	!_fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_FLOAT)
-		||	!_fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D))
+	if (!initFBOSafe(m_fbo, w, h))
 	{
 		ccLog::Warning("[FBO] Initialization failed!");
-		delete _fbo;
-		_fbo = 0;
 		m_alwaysUseFBO = false;
+		safeRemoveFBO(m_fbo2);
+		setLODEnabled(false, false);
 		return false;
 	}
 
-	//ccLog::Print("[FBO] Initialized");
+	if (!m_stereoModeEnabled || m_stereoParams.isAnaglyph())
+	{
+		//we don't need it anymore
+		if (m_fbo2)
+			safeRemoveFBO(m_fbo2);
+	}
+	else
+	{
+		if (!initFBOSafe(m_fbo2, w, h))
+		{
+			ccLog::Warning("[FBO] Failed to initialize secondary FBO!");
+			m_alwaysUseFBO = false;
+			safeRemoveFBO(m_fbo);
+			setLODEnabled(false, false);
+			return false;
+		}
+	}
 
-	m_fbo = _fbo;
 	m_updateFBO = true;
-
 	return true;
 }
 
@@ -5576,8 +5678,8 @@ void ccGLWindow::scheduleFullRedraw(unsigned maxDelay_ms)
 
 ccGLWindow::StereoParams::StereoParams()
 	: autoFocal(true)
-	, focalDist(5.0)
-	, eyeSepFactor(3.3)
+	, focalDist(0.5)
+	, eyeSepFactor(3.5)
 	, glassType(RED_CYAN)
 {}
 
@@ -5613,6 +5715,12 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 	m_stereoParams = params;
 	m_stereoModeEnabled = true;
 	
+	//In some cases we must init the secondary FBO
+	if (!initFBO(width(), height()))
+	{
+		//well, we only lose the LOD mechanism :(
+	}
+	
 	//auto-save last glass type
 	{
 		QSettings settings;
@@ -5627,7 +5735,9 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 void ccGLWindow::disableStereoMode()
 {
 	m_stereoModeEnabled = false;
-	//setAutoBufferSwap(true);
+
+	//we don't need it anymore
+	safeRemoveFBO(m_fbo2);
 }
 
 bool ccGLWindow::exclusiveFullScreen() const

@@ -429,6 +429,8 @@
      <addaction name="actionCreateCloudFromEntCenters"/>
      <addaction name="separator"/>
      <addaction name="actionComputeBestICPRmsMatrix"/>
+     <addaction name="separator"/>
+     <addaction name="actionEnableVisualDebugTraces"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -2856,6 +2858,17 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionEnableVisualDebugTraces">
+   <property name="text">
+    <string>Enable Visual Debug Traces</string>
+   </property>
+   <property name="toolTip">
+    <string>Enables visual debug traces (active 3D view)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

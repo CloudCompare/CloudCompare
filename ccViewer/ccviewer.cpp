@@ -81,7 +81,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		QGLFormat format = QGLFormat::defaultFormat();
 		format.setStereo(true);
 		format.setDoubleBuffer(true);
-		format.setSwapInterval(1);
+		//format.setSwapInterval(1);
 		m_glWindow = new ccGLWindow(ui.GLframe,format);
 		verticalLayout->addWidget(m_glWindow);
 	}
@@ -745,7 +745,6 @@ void ccViewer::toggleStereoMode(bool state)
 	if (isActive)
 	{
 		m_glWindow->disableStereoMode();
-		ui.menuPlugins->setEnabled(true);
 	}
 	else
 	{
@@ -798,10 +797,7 @@ void ccViewer::toggleFullScreen(bool state)
 			ui.actionEnableStereo->setChecked(false);
 		}
 
-		m_glWindow->toggleFullScreen(state);
-
-		QApplication::processEvents();
-		m_glWindow->redraw();
+		m_glWindow->toggleExclusiveFullScreen(state);
 	}
 }
 

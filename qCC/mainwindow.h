@@ -232,6 +232,9 @@ protected slots:
 	**/
 	void prepareWindowDeletion(QObject* glWindow);
 
+	//! Slot called when the exclusive fullscreen mode is toggled on a window
+	void onExclusiveFullScreenToggled(bool);
+
 	//inherited from ccMainAppInterface
 	virtual void freezeUI(bool state);
 	virtual void redrawAll(bool only2D = false);
@@ -272,6 +275,7 @@ protected slots:
 	void showSelectedEntitiesHistogram();
 	void testFrameRate();
 	void toggleFullScreen(bool state);
+	void toggleExclusiveFullScreen(bool state);
 	void update3DViewsMenu();
 	void updateMenus();
 	void on3DViewActivated(QMdiSubWindow*);

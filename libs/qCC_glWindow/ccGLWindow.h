@@ -491,11 +491,11 @@ public:
 	//! Enables or disables LOD on this display
 	inline void setLODEnabled(bool state, bool autoDisable = false) { m_LODEnabled = state; m_LODAutoDisable = autoDisable; }
 
-	//! Whether the middle-screen cross should be displayed or not
-	bool crossShouldBeDrawn() const;
-
 	//! Toggles (exclusive) full-screen mode
-	void toggleFullScreen(bool state);
+	void toggleExclusiveFullScreen(bool state);
+
+	//! Returns whether the window is in exclusive full screen mode or not
+	bool exclusiveFullScreen() const;
 
 public: //stereo mode
 
@@ -656,8 +656,30 @@ signals:
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject* obj);
 
+	//! Signal emitted when the exclusive fullscreen is toggled
+	void exclusiveFullScreenToggled(bool);
 
 protected: //rendering
+
+	//! LOD state
+	struct LODState
+	{
+		LODState()
+			: inProgress(false)
+			, level(0)
+			, startIndex(0)
+			, progressIndicator(0)
+		{}
+
+		//! LOD display in progress
+		bool inProgress;
+		//! Currently rendered LOD level
+		unsigned char level;
+		//! Currently rendered LOD start index
+		unsigned startIndex;
+		//! Currently LOD progress indicator
+		unsigned progressIndicator;
+	};
 
 	//! Rendering params
 	struct RenderingParams
@@ -686,7 +708,8 @@ protected: //rendering
 		bool draw3DPass;
 		bool useFBO;
 		bool draw3DCross;
-		CCVector3d Rc,Lc,Fc; //for stereo display
+		//! Next LOD state
+		LODState nextLODState;
 
 		//2D foreground
 		bool drawForeground;
@@ -698,15 +721,15 @@ protected: //rendering
 	//! Draws the background layer
 	/** Background + 2D background objects
 	**/
-	void drawBackground(CC_DRAW_CONTEXT& context, const RenderingParams& params);
+	void drawBackground(CC_DRAW_CONTEXT& context, RenderingParams& params);
 
 	//! Draws the main 3D layer
-	void draw3D(CC_DRAW_CONTEXT& context, const RenderingParams& params);
+	void draw3D(CC_DRAW_CONTEXT& context, RenderingParams& params);
 
 	//! Draws the foreground layer
 	/** 2D foreground objects / text
 	**/
-	void drawForeground(CC_DRAW_CONTEXT& context, const RenderingParams& params);
+	void drawForeground(CC_DRAW_CONTEXT& context, RenderingParams& params);
 
 protected: //other methods
 
@@ -1024,6 +1047,7 @@ protected: //members
 					INCREASE_POINT_SIZE,
 					DECREASE_POINT_SIZE,
 					LEAVE_BUBBLE_VIEW_MODE,
+					LEAVE_FULLSCREEN_MODE,
 		};
 
 		Role role;
@@ -1103,15 +1127,9 @@ protected: //members
 	//! Map of materials (unique id.) and texture identifier
 	QMap< QString, unsigned > m_materialTextures;
 
-	//! Currently rendered LOD level
-	unsigned char m_currentLODLevel;
-	//! Currently rendered LOD start index
-	unsigned m_currentLODStartIndex;
-	//! Currently LOD progress indicator
-	unsigned m_LODProgressIndicator;
+	//! Current LOD state
+	LODState m_currentLODState;
 
-	//! LOD display in progress
-	bool m_LODInProgress;
 	//! LOD refresh signal sent
 	bool m_LODPendingRefresh;
 	//! LOD refresh signal should be ignored

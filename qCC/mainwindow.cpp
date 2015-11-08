@@ -969,6 +969,7 @@ void MainWindow::connectActions()
 
 	//"Display" menu
 	connect(actionFullScreen,					SIGNAL(toggled(bool)),	this,		SLOT(toggleFullScreen(bool)));
+	connect(actionExclusiveFullScreen,			SIGNAL(toggled(bool)),	this,		SLOT(toggleExclusiveFullScreen(bool)));
 	connect(actionRefresh,						SIGNAL(triggered()),	this,		SLOT(refreshAll()));
 	connect(actionTestFrameRate,				SIGNAL(triggered()),	this,		SLOT(testFrameRate()));
 	connect(actionToggleCenteredPerspective,	SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCenteredPerspective()));
@@ -7462,16 +7463,22 @@ void MainWindow::doActionUnroll()
 ccGLWindow* MainWindow::getActiveGLWindow()
 {
 	if (!m_mdiArea)
+	{
 		return 0;
+	}
 
 	QMdiSubWindow *activeSubWindow = m_mdiArea->activeSubWindow();
 	if (activeSubWindow)
+	{
 		return static_cast<ccGLWindow*>(activeSubWindow->widget());
+	}
 	else
 	{
 		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 		if (!subWindowList.isEmpty())
+		{
 			return static_cast<ccGLWindow*>(subWindowList[0]->widget());
+		}
 	}
 
 	return 0;
@@ -7520,7 +7527,9 @@ ccGLWindow* MainWindow::new3DView()
 
 	QGLFormat format = QGLFormat::defaultFormat();
 	format.setStencil(false);
-	format.setSwapInterval(0);
+	format.setDoubleBuffer(true);
+	format.setStereo(true);
+	//format.setSwapInterval(1);
 	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
 
 	view3D->setMinimumSize(400,300);
@@ -7542,6 +7551,7 @@ ccGLWindow* MainWindow::new3DView()
 	connect(view3D,	SIGNAL(destroyed(QObject*)),						this,		SLOT(prepareWindowDeletion(QObject*)));
 	connect(view3D,	SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDBAuto(QStringList)), Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
 	connect(view3D,	SIGNAL(newLabel(ccHObject*)),						this,		SLOT(handleNewLabel(ccHObject*)));
+	connect(view3D,	SIGNAL(exclusiveFullScreenToggled(bool)),			this,		SLOT(onExclusiveFullScreenToggled(bool)));
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
 	view3D->setAttribute(Qt::WA_DeleteOnClose);
@@ -7705,6 +7715,21 @@ void MainWindow::toggleFullScreen(bool state)
 		showFullScreen();
 	else
 		showNormal();
+}
+
+void MainWindow::toggleExclusiveFullScreen(bool state)
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		if (win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+		{
+			//auto disable stereo mode as NVidia Vision only works in full screen mode!
+			actionEnableStereo->setChecked(false);
+		}
+
+		win->toggleExclusiveFullScreen(state);
+	}
 }
 
 void MainWindow::doActionShawAboutDialog()
@@ -10928,6 +10953,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 		bool isActive = win->stereoModeIsEnabled();
 		if (isActive == state)
 		{
+			//nothing to do
 			return;
 		}
 
@@ -10955,15 +10981,17 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				setCenteredPerspectiveView(win,false);
 			}
 
-			if (win->enableStereoMode(smDlg.getParameters()))
+			ccGLWindow::StereoParams params = smDlg.getParameters();
+
+			if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 			{
-				//we have to disable GL filters :(
-				//FIXME
-				win->setGlFilter(0);
+				//force (exclusive) full screen
+				actionExclusiveFullScreen->setChecked(true);
 			}
-			else
+
+			if (!win->enableStereoMode(params))
 			{
-				//cancel selection
+				//activation of the stereo mode failed: cancel selection
 				actionEnableStereo->blockSignals(true);
 				actionEnableStereo->setChecked(false);
 				actionEnableStereo->blockSignals(false);
@@ -11201,6 +11229,15 @@ void MainWindow::addToDB(	ccHObject* obj,
 	}
 }
 
+void MainWindow::onExclusiveFullScreenToggled(bool state)
+{
+	//we simply update the fullscreen action method icon (whatever the window)
+	ccGLWindow* win = getActiveGLWindow();
+	actionExclusiveFullScreen->blockSignals(true);
+	actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);
+	actionExclusiveFullScreen->blockSignals(false);
+}
+
 void MainWindow::addToDBAuto(QStringList filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
@@ -11242,9 +11279,14 @@ void MainWindow::addToDB(	const QStringList& filenames,
 
 void MainWindow::handleNewLabel(ccHObject* entity)
 {
-	assert(entity);
 	if (entity)
+	{
 		addToDB(entity);
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 void MainWindow::forceConsoleDisplay()
@@ -11667,10 +11709,15 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		actionEnableStereo->blockSignals(true);
 		actionEnableStereo->setChecked(win->stereoModeIsEnabled());
 		actionEnableStereo->blockSignals(false);
+
+		actionExclusiveFullScreen->blockSignals(true);
+		actionExclusiveFullScreen->setChecked(win->exclusiveFullScreen());
+		actionExclusiveFullScreen->blockSignals(false);
 	}
 
 	actionLockRotationVertAxis->setEnabled(win != 0);
 	actionEnableStereo->setEnabled(win != 0);
+	actionExclusiveFullScreen->setEnabled(win != 0);
 }
 
 void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
@@ -11741,7 +11788,6 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
 		m_pivotVisibilityPopupButton->setEnabled(false);
 	}
 }
-
 
 void MainWindow::updateMenus()
 {

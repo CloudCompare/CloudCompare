@@ -180,10 +180,6 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_verticalRotationLocked(false)
 	, m_bubbleViewModeEnabled(false)
 	, m_bubbleViewFov_deg(90.0f)
-	, m_currentLODLevel(0)
-	, m_currentLODStartIndex(0)
-	, m_LODProgressIndicator(0)
-	, m_LODInProgress(false)
 	, m_LODPendingRefresh(false)
 	, m_touchInProgress(false)
 	, m_touchBaseDist(0)
@@ -967,10 +963,17 @@ struct HotZone
 	int yTextBottomLineShift;
 	//default color
 	unsigned char color[3];
+
 	//bubble-view label rect.
 	QString bbv_label;
 	//bubble-view label rect.
 	QRect bbv_labelRect;
+
+	//fullscreen label rect.
+	QString fs_label;
+	//fullscreen label rect.
+	QRect fs_labelRect;
+
 	//point size label
 	QString psi_label;
 	//point size label rect.
@@ -985,6 +988,7 @@ struct HotZone
 		: textHeight(0)
 		, yTextBottomLineShift(0)
 		, bbv_label("bubble-view mode")
+		, fs_label("fullscreen mode")
 		, psi_label("default point size")
 	{
 		//default color ("greenish")
@@ -999,9 +1003,12 @@ struct HotZone
 
 		QFontMetrics metrics(font);
 		bbv_labelRect = metrics.boundingRect(bbv_label);
+		fs_labelRect = metrics.boundingRect(fs_label);
 		psi_labelRect = metrics.boundingRect(psi_label);
 
-		textHeight = std::max(psi_labelRect.height(),bbv_labelRect.height()) * 3/4; // --> factor: to recenter the baseline a little
+		textHeight = std::max(psi_labelRect.height(), bbv_labelRect.height());
+		textHeight = std::max(fs_labelRect.height(), textHeight);
+		textHeight = (3 * textHeight) / 4; // --> factor: to recenter the baseline a little
 		yTextBottomLineShift = (iconSize()/2) + (textHeight/2);
 	}
 };
@@ -1019,12 +1026,16 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 	//we init the necessary parameters the first time we need them
 	if (!s_hotZone)
 		s_hotZone = QSharedPointer<HotZone>(new HotZone(this));
+	//"exit" icon
+	static const QPixmap c_exitIcon(":/CC/images/ccExit.png");
 
 	int halfW = m_glWidth/2;
 	int halfH = m_glHeight/2;
 
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_BLEND);
+
+	bool fullScreenEnabled = exclusiveFullScreen();
 
 	//draw semi-transparent background
 	{
@@ -1035,16 +1046,26 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		int bbv_totalWidth = 0;
 		if (m_bubbleViewModeEnabled)
 			bbv_totalWidth = /*HotZone::margin() + */s_hotZone->bbv_labelRect.width() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
+		int fs_totalWidth = 0;
+		if (fullScreenEnabled)
+			fs_totalWidth = /*HotZone::margin() + */s_hotZone->fs_labelRect.width() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
 
 		int totalWidth = std::max(psi_totalWidth, bbv_totalWidth);
+		    totalWidth = std::max(fs_totalWidth, totalWidth);
 
 		QPoint minAreaCorner(xStart0 + HotZone::margin(),              yStart + HotZone::margin() + std::min(0, s_hotZone->yTextBottomLineShift - s_hotZone->textHeight));
 		QPoint maxAreaCorner(xStart0 + HotZone::margin() + totalWidth, yStart + HotZone::margin() + std::max(HotZone::iconSize(), s_hotZone->yTextBottomLineShift));
 		if (m_hotZoneActivated && m_bubbleViewModeEnabled)
+		{
 			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
+		}
+		if (m_hotZoneActivated && fullScreenEnabled)
+		{
+			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
+		}
 
-		QRect areaRect(	minAreaCorner - QPoint(HotZone::margin(),HotZone::margin())/2,
-						maxAreaCorner + QPoint(HotZone::margin(),HotZone::margin())/2 );
+		QRect areaRect(	minAreaCorner - QPoint(HotZone::margin(), HotZone::margin())/2,
+						maxAreaCorner + QPoint(HotZone::margin(), HotZone::margin())/2 );
 
 		//draw rectangle
 		glColor4ub(ccColor::darkGrey.r, ccColor::darkGrey.g, ccColor::darkGrey.b, 210);
@@ -1103,16 +1124,37 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		
 		//label
 		glColor3ubv_safe(s_hotZone->color);
-		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift,s_hotZone->bbv_label,s_hotZone->font);
+		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift, s_hotZone->bbv_label, s_hotZone->font);
 		
 		//icon
 		xStart += s_hotZone->bbv_labelRect.width() + HotZone::margin();
 
 		//"exit" icon
 		{
-			static const QPixmap c_bbv_exitPix(":/CC/images/ccExit.png");
-			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_bbv_exitPix),-halfW+xStart,halfH-(yStart+HotZone::iconSize()),HotZone::iconSize(),HotZone::iconSize());
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_exitIcon),-halfW+xStart,halfH-(yStart+HotZone::iconSize()),HotZone::iconSize(),HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE,QRect(xStart,yStart,HotZone::iconSize(),HotZone::iconSize())));
+			xStart += HotZone::iconSize();
+		}
+
+		yStart += HotZone::iconSize();
+	}
+
+	if (fullScreenEnabled)
+	{
+		yStart += HotZone::margin();
+		int xStart = xStart0 + HotZone::margin();
+		
+		//label
+		glColor3ubv_safe(s_hotZone->color);
+		renderText(xStart,yStart + s_hotZone->yTextBottomLineShift, s_hotZone->fs_label, s_hotZone->font);
+		
+		//icon
+		xStart += s_hotZone->fs_labelRect.width() + HotZone::margin();
+
+		//"full-screen" icon
+		{
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_exitIcon),-halfW+xStart,halfH-(yStart+HotZone::iconSize()),HotZone::iconSize(),HotZone::iconSize());
+			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_FULLSCREEN_MODE,QRect(xStart,yStart,HotZone::iconSize(),HotZone::iconSize())));
 			xStart += HotZone::iconSize();
 		}
 
@@ -1141,7 +1183,7 @@ void ccGLWindow::refresh(bool only2D/*=false*/)
 
 void ccGLWindow::redraw(bool only2D/*=false*/)
 {
-	if (m_LODInProgress)
+	if (m_currentLODState.inProgress)
 	{
 		//reset current LOD cycle
 		m_LODPendingIgnore = true;
@@ -1166,14 +1208,6 @@ void ccGLWindow::redraw(bool only2D/*=false*/)
 #endif
 }
 
-bool ccGLWindow::crossShouldBeDrawn() const
-{
-	return		getDisplayParameters().displayCross
-			&&	!m_captureMode.enabled
-			&&	!m_viewportParams.perspectiveView
-			&&	!(m_fbo && m_activeGLFilter);
-}
-
 void ccGLWindow::paintGL()
 {
 #ifdef THREADED_GL_WIDGET
@@ -1183,7 +1217,7 @@ void ccGLWindow::paintGL()
 void ccGLWindow::paint()
 {
 #endif
-	qint64 startTime_ms = m_LODInProgress ? m_timer.elapsed() : 0;
+	qint64 startTime_ms = m_currentLODState.inProgress ? m_timer.elapsed() : 0;
 
 	if (m_scheduledFullRedrawTime != 0)
 	{
@@ -1210,7 +1244,7 @@ void ccGLWindow::paint()
 		||	(m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
 		||	m_activeGLFilter
 		||	m_captureMode.enabled
-		||	m_LODInProgress
+		||	m_currentLODState.inProgress
 		)
 	{
 		//we must update the FBO (or display without FBO
@@ -1220,10 +1254,10 @@ void ccGLWindow::paint()
 
 	//other rendering options
 	renderingParams.useFBO = (m_fbo != 0);
-	renderingParams.draw3DCross = crossShouldBeDrawn();
+	renderingParams.draw3DCross = getDisplayParameters().displayCross;
 	renderingParams.passCount = m_stereoModeEnabled ? 2 : 1;
 
-	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(renderingParams.draw3DPass ? "yes" : "no").arg(m_LODInProgress ? "yes" : "no"));
+	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(renderingParams.draw3DPass ? "yes" : "no").arg(m_currentLODState.inProgress ? "yes" : "no"));
 
 	//clean the outdated messages
 	{
@@ -1253,41 +1287,19 @@ void ccGLWindow::paint()
 
 	m_shouldBeRefreshed = false;
 
-	//LOD
-	if (m_LODInProgress)
+	if (renderingParams.nextLODState.inProgress)
 	{
-		if (CONTEXT.moreLODPointsAvailable || CONTEXT.higherLODLevelsAvailable)
-		{
-			//we skip the lowest levels (should have already been drawn anyway)
-			if (m_currentLODLevel == 0)
-			{
-				m_currentLODLevel = CONTEXT.minLODLevel;
-				m_currentLODStartIndex = 0;
-			}
-			else
-			{
-				if (CONTEXT.moreLODPointsAvailable)
-				{
-					//either we increase the start index
-					m_currentLODStartIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
-				}
-				else
-				{
-					//or the level
-					++m_currentLODLevel;
-					m_currentLODStartIndex = 0;
-				}
-			}
-		}
-		else
-		{
-			//we reached the final level
-			stopLODCycle();
+		//if the LOD display process is not finished
+		m_currentLODState = renderingParams.nextLODState;
+	}
+	else
+	{
+		//we have reached the final level
+		stopLODCycle();
 
-			if (m_LODAutoDisable)
-			{
-				setLODEnabled(false);
-			}
+		if (m_LODAutoDisable)
+		{
+			setLODEnabled(false);
 		}
 	}
 
@@ -1314,7 +1326,7 @@ void ccGLWindow::paint()
 	else
 	{
 		//should we render a new LOD level?
-		if (m_LODInProgress)
+		if (m_currentLODState.inProgress)
 		{
 			if ((!m_LODPendingRefresh || m_LODPendingIgnore) && !m_mouseMoved && !m_mouseButtonPressed)
 			{
@@ -1324,8 +1336,8 @@ void ccGLWindow::paint()
 				if (CONTEXT.currentLODStartIndex == 0)
 				{
 					baseLODRefreshTime_ms = 250;
-					if (m_currentLODLevel > CONTEXT.minLODLevel)
-						baseLODRefreshTime_ms /= (m_currentLODLevel-CONTEXT.minLODLevel+1);
+					if (m_currentLODState.level > CONTEXT.minLODLevel)
+						baseLODRefreshTime_ms /= (m_currentLODState.level - CONTEXT.minLODLevel+1);
 				}
 
 				m_LODPendingRefresh = true;
@@ -1342,7 +1354,7 @@ void ccGLWindow::renderNextLODLevel()
 {
 	ccLog::PrintDebug(QString("[renderNextLODLevel] About to draw new LOD level?"));
 	m_LODPendingRefresh = false;
-	if (m_LODInProgress && m_currentLODLevel != 0 && !m_LODPendingIgnore)
+	if (m_currentLODState.inProgress && m_currentLODState.level != 0 && !m_LODPendingIgnore)
 	{
 		ccLog::PrintDebug(QString("[renderNextLODLevel] Confirmed"));
 		QApplication::processEvents();
@@ -1354,7 +1366,7 @@ void ccGLWindow::renderNextLODLevel()
 	}
 }
 
-void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderingParams)
+void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	/****************************************/
 	/****  PASS: 2D/BACKGROUND/NO LIGHT  ****/
@@ -1477,11 +1489,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		//select back left or back right buffer
 		glDrawBuffer(renderingParams.passIndex == 0 ? GL_BACK_LEFT : GL_BACK_RIGHT);
 	}
-	else
-	{
-		//select default (back) buffer
-		glDrawBuffer(GL_BACK);
-	}
 
 	/******************/
 	/*** BACKGROUND ***/
@@ -1489,7 +1496,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	if (renderingParams.drawBackground)
 	{
 		//shall we clear the background (depth and/or color)
-		if (m_currentLODLevel == 0)
+		if (m_currentLODState.level == 0)
 		{
 			if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 			{
@@ -1620,18 +1627,30 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	}
 }
 
-void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderingParams)
+void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
-	ccLog::PrintDebug(QString("[draw3D] LOD level: %1").arg(m_currentLODLevel));
+	ccLog::PrintDebug(QString("[draw3D] LOD level: %1").arg(m_currentLODState.level));
 
 	glPointSize(m_viewportParams.defaultPointSize);
 	glLineWidth(m_viewportParams.defaultLineWidth);
+
 	glEnable(GL_DEPTH_TEST);
 
 	CONTEXT.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
 	if (m_interactionMode == TRANSFORM_ENTITY)
 	{
 		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
+	}
+
+	//specific case: we display the cross BEFORE the camera projection (i.e. in orthographic mode)
+	if (	renderingParams.draw3DCross
+		&&	m_currentLODState.level == 0
+		&&	!m_captureMode.enabled
+		&&	!m_viewportParams.perspectiveView
+		&&	(!renderingParams.useFBO || !m_activeGLFilter) )
+	{
+		setStandardOrthoCenter();
+		drawCross();
 	}
 
 	//setup camera projection
@@ -1666,10 +1685,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderi
 	/****************************************/
 	/****  PASS: 3D/BACKGROUND/NO LIGHT  ****/
 	/****************************************/
-	if (renderingParams.draw3DCross && m_currentLODLevel == 0)
-	{
-		drawCross();
-	}
 
 	/****************************************/
 	/****    PASS: 3D/FOREGROUND/LIGHT   ****/
@@ -1691,7 +1706,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderi
 		glEnableCustomLight();
 		
 		if (	!m_captureMode.enabled
-			&&	m_currentLODLevel == 0
+			&&	m_currentLODState.level == 0
 			&&	(!m_stereoModeEnabled || !m_stereoParams.isAnaglyph()) )
 		{
 			//we display it as a litle 3D star
@@ -1725,10 +1740,10 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderi
 		//LOD rendering level (for clouds only)
 		if (CONTEXT.decimateCloudOnMove)
 		{
-			//ccLog::Print(QString("[LOD] Rendering level %1").arg(m_currentLODLevel));
-			m_LODInProgress = true;
-			CONTEXT.currentLODLevel = m_currentLODLevel;
-			CONTEXT.currentLODStartIndex = m_currentLODStartIndex;
+			//ccLog::Print(QString("[LOD] Rendering level %1").arg(m_currentLODState.level));
+			m_currentLODState.inProgress = true;
+			CONTEXT.currentLODLevel = m_currentLODState.level;
+			CONTEXT.currentLODStartIndex = m_currentLODState.startIndex;
 			CONTEXT.higherLODLevelsAvailable = false;
 			CONTEXT.moreLODPointsAvailable = false;
 		}
@@ -1751,9 +1766,44 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderi
 	}
 
 	//for connected items
-	if (m_currentLODLevel == 0)
+	if (m_currentLODState.level == 0)
 	{
 		emit drawing3D();
+	}
+
+	//update LOD information
+	renderingParams.nextLODState = LODState();
+	if (m_currentLODState.inProgress)
+	{
+		if (CONTEXT.moreLODPointsAvailable || CONTEXT.higherLODLevelsAvailable)
+		{
+			renderingParams.nextLODState = m_currentLODState;
+			
+			//we skip the lowest levels (they should have already been drawn anyway)
+			if (m_currentLODState.level == 0)
+			{
+				renderingParams.nextLODState.level = CONTEXT.minLODLevel;
+				renderingParams.nextLODState.startIndex = 0;
+			}
+			else
+			{
+				if (CONTEXT.moreLODPointsAvailable)
+				{
+					//either we increase the start index
+					renderingParams.nextLODState.startIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+				}
+				else
+				{
+					//or the level
+					renderingParams.nextLODState.level++;
+					renderingParams.nextLODState.startIndex = 0;
+				}
+			}
+		}
+		else
+		{
+			//no more geometry to display
+		}
 	}
 
 	//reset context
@@ -1779,7 +1829,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderi
 	ccGLUtils::CatchGLError("ccGLWindow::draw3D");
 }
 
-void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderingParams)
+void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	/****************************************/
 	/****  PASS: 2D/FOREGROUND/NO LIGHT  ****/
@@ -1828,7 +1878,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 
 			//transparent border at the top of the screen
 			bool showGLFilterRibbon = renderingParams.useFBO && m_activeGLFilter;
-			showGLFilterRibbon &= (parentWidget() != 0); //we hide it in fullscreen mode!
+			showGLFilterRibbon &= !exclusiveFullScreen(); //we hide it in fullscreen mode!
 			if (showGLFilterRibbon)
 			{
 				float w = m_glWidth/2.0f;
@@ -1908,12 +1958,9 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 				drawClickableItems(0, yStart);
 			}
 
-			if (m_LODInProgress)
+			if (renderingParams.nextLODState.inProgress)
 			{
-				if (renderingParams.passIndex == 0)
-				{
-					++m_LODProgressIndicator;
-				}
+				renderingParams.nextLODState.progressIndicator++;
 
 				//draw LOD in progress 'icon'
 				static const int lodIconSize = 32;
@@ -1937,17 +1984,16 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 				glBegin(GL_POINTS);
 				for (unsigned i=0; i<lodIconParts; ++i)
 				{
-					float intensity = static_cast<float>((i+m_LODProgressIndicator) % lodIconParts) / (lodIconParts-1);
+					float intensity = static_cast<float>((i + renderingParams.nextLODState.progressIndicator) % lodIconParts) / (lodIconParts-1);
 					intensity /= ccColor::MAX;
 					float col[3] = { textCol.rgb[0] * intensity,
 									 textCol.rgb[1] * intensity,
 									 textCol.rgb[2] * intensity };
 					glColor3fv(col);
-					glVertex3f(cx+radius*cos(i*alpha),static_cast<float>(cy)+radius*sin(i*alpha),0);
+					glVertex3f(cx+radius*cos(i*alpha), static_cast<float>(cy)+radius*sin(i*alpha), 0);
 				}
 				glEnd();
 
-				glPopAttrib();
 				glPopAttrib();
 
 				yStart += lodIconSize + margin;
@@ -1961,9 +2007,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 void ccGLWindow::stopLODCycle()
 {
 	//reset LOD rendering (if any)
-	m_currentLODLevel = 0;
-	m_LODProgressIndicator = 0;
-	m_LODInProgress = false;
+	m_currentLODState = LODState();
 }
 
 void ccGLWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -3485,6 +3529,11 @@ bool ccGLWindow::processClickableItems(int x, int y)
 		{
 			setBubbleViewMode(false);
 			redraw();
+		}
+		return true;
+	case ClickableItem::LEAVE_FULLSCREEN_MODE:
+		{
+			toggleExclusiveFullScreen(false);
 		}
 		return true;
 	default:
@@ -5520,7 +5569,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			}
 		}
 
-		if (parentWidget())
+		if (!exclusiveFullScreen())
 		{
 			ccLog::Error("3D window should be in exclusive full screen mode!");
 			return false;
@@ -5547,7 +5596,12 @@ void ccGLWindow::disableStereoMode()
 	//setAutoBufferSwap(true);
 }
 
-void ccGLWindow::toggleFullScreen(bool state)
+bool ccGLWindow::exclusiveFullScreen() const
+{
+	return parentWidget() == 0 && m_formerParent;
+}
+
+void ccGLWindow::toggleExclusiveFullScreen(bool state)
 {
 	if (state)
 	{
@@ -5582,4 +5636,7 @@ void ccGLWindow::toggleFullScreen(bool state)
 	}
 
 	setFocus();
+	redraw();
+
+	emit exclusiveFullScreenToggled(state);
 }

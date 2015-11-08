@@ -1242,7 +1242,7 @@ void ccGLWindow::paint()
 	if (	!m_fbo
 		||	(m_alwaysUseFBO && m_updateFBO)
 		||	(m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
-		||	m_activeGLFilter
+		//||	m_activeGLFilter
 		||	m_captureMode.enabled
 		||	m_currentLODState.inProgress
 		)
@@ -1253,7 +1253,9 @@ void ccGLWindow::paint()
 	}
 
 	//other rendering options
-	renderingParams.useFBO = (m_fbo != 0);
+	renderingParams.useFBO =	!m_stereoModeEnabled
+							||	m_stereoParams.isAnaglyph()
+							||	m_activeGLFilter;
 	renderingParams.draw3DCross = getDisplayParameters().displayCross;
 	renderingParams.passCount = m_stereoModeEnabled ? 2 : 1;
 
@@ -1474,6 +1476,14 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& renderingParams)
 {
+#ifdef _DEBUG
+	QStringList diagStrings;
+#endif
+
+#ifdef _DEBUG
+	diagStrings << QString("Stereo mode %1 (pass %2)").arg(m_stereoModeEnabled && renderingParams.passCount == 2 ? "ON" : "OFF").arg(renderingParams.passIndex);
+#endif
+
 	//if a FBO is activated
 	if (	m_fbo
 		&&	renderingParams.useFBO
@@ -1482,12 +1492,21 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		m_fbo->start();
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
 		ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO start)");
+#ifdef _DEBUG
+		diagStrings << "FBO started";
+#endif
 	}
-
-	if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
+	else
 	{
-		//select back left or back right buffer
-		glDrawBuffer(renderingParams.passIndex == 0 ? GL_BACK_LEFT : GL_BACK_RIGHT);
+		if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
+		{
+			//select back left or back right buffer
+			glDrawBuffer(renderingParams.passIndex == 0 ? GL_BACK_LEFT : GL_BACK_RIGHT);
+		}
+		else
+		{
+			glDrawBuffer(GL_BACK);
+		}
 	}
 
 	/******************/
@@ -1495,6 +1514,9 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	/******************/
 	if (renderingParams.drawBackground)
 	{
+#ifdef _DEBUG
+		diagStrings << "draw background";
+#endif
 		//shall we clear the background (depth and/or color)
 		if (m_currentLODState.level == 0)
 		{
@@ -1518,6 +1540,9 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	/*********************/
 	if (renderingParams.draw3DPass)
 	{
+#ifdef _DEBUG
+		diagStrings << "draw 3D";
+#endif
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
 			//change color filter
@@ -1560,6 +1585,10 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			m_fbo->stop();
 			ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
+
+#ifdef _DEBUG
+		diagStrings << "FBO stopped";
+#endif
 		}
 
 		GLuint screenTex = 0;
@@ -1581,6 +1610,9 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			m_activeGLFilter->shade(depthTex, colorTex, parameters); 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
+#ifdef _DEBUG
+			diagStrings << "GL filter applied";
+#endif
 			//if capture mode is ON: we only want to capture it, not to display it
 			if (!m_captureMode.enabled)
 			{
@@ -1603,18 +1635,25 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			glPushAttrib(GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_DEPTH_TEST);
 
-			//DGM: apparently we have to call this again before rendering the texture!
+			//DGM: as we couldn't call it before (because of the FBO) we have to do it now!
 			if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
 			{
 				//select back left or back right buffer
 				glDrawBuffer(renderingParams.passIndex == 0 ? GL_BACK_LEFT : GL_BACK_RIGHT);
+			}
+			else
+			{
+				glDrawBuffer(GL_BACK);
 			}
 			ccGLUtils::DisplayTexture2D(screenTex,m_glWidth,m_glHeight);
 
 			glPopAttrib();
 
 			//we don't need the depth info anymore!
-			glClear(GL_DEPTH_BUFFER_BIT);
+			//glClear(GL_DEPTH_BUFFER_BIT);
+#ifdef _DEBUG
+			diagStrings << "FBO displayed";
+#endif
 		}
 	}
 
@@ -1624,6 +1663,18 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	if (renderingParams.drawForeground)
 	{
 		drawForeground(context, renderingParams);
+
+#ifdef _DEBUG
+		int x = (renderingParams.passIndex == 0 ? 10 : width()/2);
+		int y = 10;
+		glColor3ubv_safe(ccColor::yellow.rgba);
+		for (int i=0; i<diagStrings.size(); ++i)
+		{
+			QString str = diagStrings[i];
+			renderText(x, y, str);
+			y += 10;
+		}
+#endif
 	}
 }
 
@@ -4619,7 +4670,9 @@ void ccGLWindow::setBubbleViewMode(bool state)
 	//Backup the camera center before entering this mode!
 	bool bubbleViewModeWasEnabled = m_bubbleViewModeEnabled;
 	if (!m_bubbleViewModeEnabled && state)
+	{
 		m_preBubbleViewParameters = m_viewportParams;
+	}
 
 	if (state)
 	{

@@ -101,6 +101,7 @@ public:
 						MANUAL_TRANSFORMATION_MESSAGE,
 						MANUAL_SEGMENTATION_MESSAGE,
 						ROTAION_LOCK_MESSAGE,
+						FULL_SCREEN_MESSAGE,
 	};
 
 	//! Pivot symbol visibility
@@ -671,9 +672,6 @@ protected: //rendering
 			, draw3DPass(true)
 			, draw3DCross(false)
 			, drawForeground(true)
-			, Rc(0,0,0)
-			, Lc(0,0,0)
-			, Fc(0,0,0)
 		{}
 
 		unsigned char passIndex;
@@ -709,12 +707,6 @@ protected: //rendering
 	/** 2D foreground objects / text
 	**/
 	void drawForeground(CC_DRAW_CONTEXT& context, const RenderingParams& params);
-
-protected: //stereo mode
-		
-	//! Computes the camera positions for stereo mode
-	void computeStereoCameraPositions(RenderingParams& params);
-
 
 protected: //other methods
 
@@ -787,7 +779,7 @@ protected: //other methods
 
 	//Projections controls
 	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
-	ccGLMatrixd computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures) const;
+	ccGLMatrixd computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures, double* eyeOffset = 0) const;
 	void updateModelViewMatrix();
 	void updateProjectionMatrix();
 	void setStandardOrthoCenter();

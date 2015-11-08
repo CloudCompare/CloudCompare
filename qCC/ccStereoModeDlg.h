@@ -29,6 +29,8 @@
 //! Dialog to define the parameters of the stereo mode (for 3D views)
 class ccStereoModeDlg : public QDialog, public Ui::StereoModeDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
@@ -39,6 +41,11 @@ public:
 
 	//! Sets the current parameters
 	void setParameters(const ccGLWindow::StereoParams& params);
+
+protected slots:
+
+	//! Slot called when the glass type is modified
+	void glassTypeChanged(int);
 };
 
 #endif //CC_STEREO_MODE_DLG_HEADER

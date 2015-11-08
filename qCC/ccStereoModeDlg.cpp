@@ -20,13 +20,26 @@
 //system
 #include <assert.h>
 
+//combo-box items order
+const int COMBO_INDEX_RED_BLUE  = 0;
+const int COMBO_INDEX_RED_CYAN  = 1;
+const int COMBO_INDEX_NV_VISION = 2;
+
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::StereoModeDialog()
 {
 	setupUi(this);
 
+	glassTypeChanged(glassTypeComboBox->currentIndex());
 	setWindowFlags(Qt::Tool);
+
+	connect(glassTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(glassTypeChanged(int)));
+}
+
+void ccStereoModeDlg::glassTypeChanged(int index)
+{
+	NVVisionWarningTextEdit->setVisible(index == COMBO_INDEX_NV_VISION);
 }
 
 ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
@@ -36,14 +49,14 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	//glass type
 	switch (glassTypeComboBox->currentIndex())
 	{
-	case 0:
+	case COMBO_INDEX_RED_BLUE:
 		params.glassType = ccGLWindow::StereoParams::RED_BLUE;
 		break;
-	case 1:
+	case COMBO_INDEX_RED_CYAN:
 	default:
 		params.glassType = ccGLWindow::StereoParams::RED_CYAN;
 		break;
-	case 2:
+	case COMBO_INDEX_NV_VISION:
 		params.glassType = ccGLWindow::StereoParams::NVIDIA_VISION;
 		break;
 	}
@@ -64,13 +77,13 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 	switch (params.glassType)
 	{
 	case ccGLWindow::StereoParams::RED_BLUE:
-		glassTypeComboBox->setCurrentIndex(0);
+		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_BLUE);
 		break;
 	case ccGLWindow::StereoParams::RED_CYAN:
-		glassTypeComboBox->setCurrentIndex(1);
+		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_CYAN);
 		break;
 	case ccGLWindow::StereoParams::NVIDIA_VISION:
-		glassTypeComboBox->setCurrentIndex(2);
+		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
 		break;
 	default:
 		assert(false);

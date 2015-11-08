@@ -1207,7 +1207,7 @@ void ccGLWindow::paint()
 	//here are all the reasons for which we would like to update the main 3D layer
 	if (	!m_fbo
 		||	(m_alwaysUseFBO && m_updateFBO)
-		||	m_stereoModeEnabled
+		||	(m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
 		||	m_activeGLFilter
 		||	m_captureMode.enabled
 		||	m_LODInProgress
@@ -1219,13 +1219,9 @@ void ccGLWindow::paint()
 	}
 
 	//other rendering options
-	renderingParams.useFBO = (!m_stereoModeEnabled || m_stereoParams.isAnaglyph());
+	renderingParams.useFBO = (m_fbo != 0);
 	renderingParams.draw3DCross = crossShouldBeDrawn();
-	if (m_stereoModeEnabled)
-	{
-		renderingParams.passCount = 2;
-		computeStereoCameraPositions(renderingParams);
-	}
+	renderingParams.passCount = m_stereoModeEnabled ? 2 : 1;
 
 	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(renderingParams.draw3DPass ? "yes" : "no").arg(m_LODInProgress ? "yes" : "no"));
 
@@ -1358,56 +1354,6 @@ void ccGLWindow::renderNextLODLevel()
 	}
 }
 
-//see http://paulbourke.net/stereographics/anaglyph/ for a lot of information!
-void ccGLWindow::computeStereoCameraPositions(RenderingParams& renderParams)
-{
-	assert(m_stereoModeEnabled && renderParams.passCount == 2);
-	
-	CCVector3d C = getRealCameraCenter();
-
-	//update focal dist if necessary
-	if (m_stereoParams.autoFocal)
-	{
-		//Camera center to pivot vector
-		double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
-		double f = zoomEquivalentDist / 2;
-
-		//compute center of visible objects constellation
-		//double d = 1.0;
-		//if (m_globalDBRoot)
-		//{
-		//	//get whole bounding-box
-		//	ccBBox box;
-		//	getVisibleObjectsBB(box);
-		//	if (box.isValid())
-		//	{
-		//		//get half bbox diagonal length
-		//		d = box.getDiagNormd() / 2;
-		//	}
-		//}
-		//double f = d / (2 * tan(getFov() * CC_DEG_TO_RAD));
-
-		m_stereoParams.focalDist = f;
-	}
-
-	CCVector3d rightDir(-1,0,0);
-	if (!m_viewportParams.objectCenteredView)
-	{
-		const double* M = m_viewportParams.viewMat.data();
-		rightDir = CCVector3d(M[0], M[4], M[8]);
-	}
-
-	double eyeSep = m_stereoParams.focalDist * (m_stereoParams.eyeSepFactor / 300.0);
-	rightDir *= (eyeSep/2);
-
-	//eyes positions
-	renderParams.Rc = C + rightDir;
-	renderParams.Lc = C - rightDir;
-
-	//focal point
-	renderParams.Fc = C + getCurrentViewDir() * m_stereoParams.focalDist;
-}
-
 void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderingParams)
 {
 	/****************************************/
@@ -1523,7 +1469,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	{
 		m_fbo->start();
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
-		ccGLUtils::CatchGLError("ccGLWindow::paintGL/FBO start");
+		ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO start)");
 	}
 
 	if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
@@ -1605,7 +1551,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			m_fbo->stop();
-			ccGLUtils::CatchGLError("ccGLWindow::paintGL/FBO stop");
+			ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
 		}
 
@@ -1649,7 +1595,15 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			
 			glPushAttrib(GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_DEPTH_TEST);
+
+			//DGM: apparently we have to call this again before rendering the texture!
+			if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
+			{
+				//select back left or back right buffer
+				glDrawBuffer(renderingParams.passIndex == 0 ? GL_BACK_LEFT : GL_BACK_RIGHT);
+			}
 			ccGLUtils::DisplayTexture2D(screenTex,m_glWidth,m_glHeight);
+
 			glPopAttrib();
 
 			//we don't need the depth info anymore!
@@ -1680,48 +1634,34 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams& renderi
 		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
-	//setup camera & projection
+	//setup camera projection
 	if (m_stereoModeEnabled && renderingParams.passCount == 2)
 	{
-		//change eye position and orientation
-		const CCVector3d& cameraCenter = (renderingParams.passIndex == 0 ? renderingParams.Lc : renderingParams.Rc);
-
-		//backup view matrix
-		ccGLMatrixd origViewMat = m_viewportParams.viewMat;
-
-		//compute the new projection and view matrices
-		CCVector3d forward = renderingParams.Fc - cameraCenter;
-		m_viewportParams.viewMat = ccGLMatrixd::FromViewDirAndUpDir(forward, getCurrentUpDir());
+		//change eye position
+		double eyeOffset = renderingParams.passIndex == 0 ? -1.0 : 1.0;
 
 		double zNear, zFar;
-		ccGLMatrixd projMat = computeProjectionMatrix(	cameraCenter, 
+		ccGLMatrixd projMat = computeProjectionMatrix(	getRealCameraCenter(), 
 														zNear,
 														zFar,
-														false );
+														false,
+														&eyeOffset); //eyeOffset will be scaled
 
-		ccGLMatrixd viewMat = computeModelViewMatrix(cameraCenter);
-
-		//reload the new projection matrix
+		//load the new projection matrix
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixd(projMat.data());
-
-		//reload the new modelview matrix
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixd(viewMat.data());
-
-		//restore original view matrix
-		m_viewportParams.viewMat = origViewMat;
+		glTranslatef(-static_cast<float>(eyeOffset), 0.0f, 0.0f);
 	}
 	else //mono vision mode
 	{
 		//we setup the projection matrix
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixd(getProjectionMatd());
-
-		//then, the modelview matrix
-		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixd(getModelViewMatd());
 	}
+
+	//setup the default view matrix
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixd(getModelViewMatd());
 
 	/****************************************/
 	/****  PASS: 3D/BACKGROUND/NO LIGHT  ****/
@@ -1887,7 +1827,9 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 			int yStart = 0;
 
 			//transparent border at the top of the screen
-			if (m_activeGLFilter)
+			bool showGLFilterRibbon = renderingParams.useFBO && m_activeGLFilter;
+			showGLFilterRibbon &= (parentWidget() != 0); //we hide it in fullscreen mode!
+			if (showGLFilterRibbon)
 			{
 				float w = m_glWidth/2.0f;
 				float h = m_glHeight/2.0f;
@@ -1909,7 +1851,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 				glColor3ubv_safe(ccColor::black.rgba);
 				renderText(	10,
 							borderHeight-CC_GL_FILTER_BANNER_MARGIN-CC_GL_FILTER_BANNER_MARGIN/2,
-							QString("[GL filter] ")+m_activeGLFilter->getDescription()
+							QString("[GL filter] ") + m_activeGLFilter->getDescription()
 							/*,m_font*/ ); //we ignore the custom font size
 
 				yStart += borderHeight;
@@ -1925,7 +1867,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 
 				for (std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin(); it != m_messagesToDisplay.end(); ++it)
 				{
-					switch(it->position)
+					switch (it->position)
 					{
 					case LOWER_LEFT_MESSAGE:
 						{
@@ -1940,8 +1882,10 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, const RenderingParams&
 							//take the GL filter banner into account!
 							int x = (m_glWidth-rect.width())/2;
 							int y = uc_currentHeight+rect.height();
-							if (m_activeGLFilter)
+							if (showGLFilterRibbon)
+							{
 								y += getGlFilterBannerHeight();
+							}
 							renderText(x, y, it->message,m_font);
 							uc_currentHeight += (rect.height()*5)/4; //add a 25% margin
 						}
@@ -2288,7 +2232,9 @@ void ccGLWindow::setGlFilter(ccGlFilter* filter)
 	}
 
 	if (!m_activeGLFilter && m_fbo && !m_alwaysUseFBO)
+	{
 		removeFBO();
+	}
 
 	redraw();
 }
@@ -2538,6 +2484,47 @@ void ccGLWindow::invalidateViewport()
 	m_updateFBO = true;
 }
 
+ccGLMatrixd ccGLFrustum(double left, double right, double bottom, double top, double znear, double zfar)
+{
+    // invalid for: n<=0, f<=0, l=r, b=t, or n=f
+    assert(znear > 0);
+    assert(zfar > 0);
+    assert(left != right);
+    assert(bottom != top);
+    assert(znear != zfar);
+
+	ccGLMatrixd outMatrix;
+	{
+		double* matrix = outMatrix.data();
+
+		double dX = right - left;
+		double dY = top - bottom;
+		double dZ = znear - zfar;
+
+		matrix[0]  =  2*znear / dX;
+		matrix[1]  =  0.0;
+		matrix[2]  =  0.0;
+		matrix[3]  =  0.0;
+
+		matrix[4]  =  0.0;
+		matrix[5]  =  2*znear / dY;
+		matrix[6]  =  0.0;
+		matrix[7]  =  0.0;
+
+		matrix[8]  =  (right + left)/dX;
+		matrix[9]  =  (top + bottom)/dY;
+		matrix[10] =  (zfar + znear)/dZ;
+		matrix[11] = -1.0;
+
+		matrix[12] =  0.0;
+		matrix[13] =  0.0;
+		matrix[14] =  2*znear*zfar / dZ;
+		matrix[15] =  0.0;
+	}
+
+	return outMatrix;
+}
+
 //inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
 ccGLMatrixd ccGluPerspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
 {
@@ -2545,7 +2532,7 @@ ccGLMatrixd ccGluPerspective(double fovyInDegrees, double aspectRatio, double zn
 	{
 		double* matrix = outMatrix.data();
 
-		double ymax = znear * tanf(fovyInDegrees * M_PI / 360.0);
+		double ymax = znear * tanf(fovyInDegrees/2 * CC_DEG_TO_RAD);
 		double xmax = ymax * aspectRatio;
 
 		double dZ = zfar - znear;
@@ -2608,7 +2595,7 @@ ccGLMatrixd ccGlOrtho(double w, double h, double d)
 	return matrix;
 }
 
-ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures) const
+ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures, double* eyeOffset/*=0*/) const
 {
 	double bbHalfDiag = 1.0;
 	CCVector3d bbCenter(0,0,0);
@@ -2638,7 +2625,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	//switching from perspective to ortho. view).
 	//While the user won't see the difference this has a great influence on GL filters
 	//(as normalized depth map values depends on it)
-	double CP = (cameraCenter-pivotPoint).norm();
+	double CP = (cameraCenter - pivotPoint).norm();
 		
 	//distance between pivot point and DB farthest point
 	double MP = (bbCenter - pivotPoint).norm() + bbHalfDiag;
@@ -2649,7 +2636,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	{
 		double pivotActualRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * static_cast<double>(std::min(m_glWidth,m_glHeight)) / 2;
 		double pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
-		MP = std::max<double>(MP,pivotSymbolScale);
+		MP = std::max<double>(MP, pivotSymbolScale);
 	}
 	MP *= 1.01; //for round-off issues
 	
@@ -2657,7 +2644,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	{
 		//distance from custom light to pivot point
 		double d = (pivotPoint - CCVector3d::fromArray(m_customLightPos)).norm();
-		MP = std::max<double>(MP,d);
+		MP = std::max<double>(MP, d);
 	}
 
 	if (m_viewportParams.perspectiveView)
@@ -2670,13 +2657,34 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		//DGM: what was the purpose of this?!
 		//if (m_viewportParams.objectCenteredView)
 		//	zNear = std::max<double>(CP-MP,zNear);
-		zFar = std::max<double>(CP+MP,1.0);
+		zFar = std::max(CP+MP, 1.0);
 
 		//compute the aspect ratio
 		double ar = static_cast<double>(m_glWidth)/m_glHeight;
 
 		float currentFov_deg = getFov();
-		return ccGluPerspective(currentFov_deg,ar,zNear,zFar);
+		
+		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
+		//return ccGluPerspective(currentFov_deg,ar,zNear,zFar);
+		double yMax = zNear * tanf(currentFov_deg/2 * CC_DEG_TO_RAD);
+		double xMax = yMax * ar;
+
+		double frustumAsymmetry = 0;
+		if (eyeOffset)
+		{
+			//see 'NVIDIA 3D VISION PRO AND STEREOSCOPIC 3D' White paper (Oct 2010, p. 12)
+			//on input 'eyeOffset' should be -1 or +1
+			frustumAsymmetry = *eyeOffset * (2*xMax) * (m_stereoParams.eyeSepFactor / 100.0);
+
+			double convergence = m_stereoParams.focalDist;
+			if (m_stereoParams.autoFocal)
+			{
+				convergence = fabs((cameraCenter - pivotPoint).dot(getCurrentViewDir())) / 2;
+			}
+			*eyeOffset = frustumAsymmetry * convergence / zNear;
+		}
+
+		return ccGLFrustum(-xMax-frustumAsymmetry, xMax-frustumAsymmetry, -yMax, yMax, zNear, zFar);
 	}
 	else
 	{
@@ -2702,7 +2710,8 @@ void ccGLWindow::updateProjectionMatrix()
 	m_projMatd = computeProjectionMatrix(	getRealCameraCenter(), 
 											m_viewportParams.zNear,
 											m_viewportParams.zFar,
-											true );
+											true,
+											0 ); //no stereo vision by default!
 
 	m_validProjectionMatrix = true;
 }
@@ -5133,7 +5142,9 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			ccGLUtils::CatchGLError("ccGLWindow::renderToFile");
 
 			if (m_activeGLFilter)
+			{
 				initGLFilter(width(),height());
+			}
 
 			//resizeGL(width(),height());
 			glViewport(0,0,width(),height());
@@ -5229,21 +5240,26 @@ void ccGLWindow::removeGLFilter()
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during object destruction
 	ccGlFilter* _filter = 0;
-	std::swap(_filter,m_activeGLFilter);
+	std::swap(_filter, m_activeGLFilter);
 
 	if (_filter)
+	{
 		delete _filter;
+		_filter = 0;
+	}
 }
 
 bool ccGLWindow::initGLFilter(int w, int h)
 {
 	if (!m_activeGLFilter)
+	{
 		return false;
+	}
 
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during initialization
 	ccGlFilter* _filter = 0;
-	std::swap(_filter,m_activeGLFilter);
+	std::swap(_filter, m_activeGLFilter);
 
 	QString shadersPath = ccGLWindow::getShadersPath();
 
@@ -5488,7 +5504,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 	{
 		if (!format().stereo() || !format().doubleBuffer())
 		{
-			ccLog::Error("Stereo vision + double buffering not supported!");
+			ccLog::Error("Quad buffering not supported!");
 			return false;
 		}
 
@@ -5522,9 +5538,6 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 		settings.endGroup();
 	}
 
-	//we have to control the buffer swapping in NV Vision stereo mode!
-	//setAutoBufferSwap(params.glassType != StereoParams::NVIDIA_VISION);
-
 	return true;
 }
 
@@ -5546,12 +5559,10 @@ void ccGLWindow::toggleFullScreen(bool state)
 				m_formerParent->layout()->removeWidget(this);
 			setParent(0);
 		}
-		
-		Qt::WindowFlags flags = windowFlags();
-		setWindowFlags(flags | Qt::WindowStaysOnTopHint);
-		//show();
+
+		//setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 		showFullScreen();
-		displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 10);
+		displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 30, FULL_SCREEN_MESSAGE);
 		QCoreApplication::processEvents();
 	}
 	else
@@ -5564,7 +5575,9 @@ void ccGLWindow::toggleFullScreen(bool state)
 			else
 				setParent(m_formerParent);
 		}
+		displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, FULL_SCREEN_MESSAGE); //remove any message
 		m_formerParent = 0;
+		//setWindowFlags(windowFlags() ^ Qt::WindowStaysOnTopHint);
 		showNormal();
 	}
 

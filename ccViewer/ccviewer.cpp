@@ -776,16 +776,9 @@ void ccViewer::toggleStereoMode(bool state)
 			ui.actionFullScreen->setChecked(true);
 		}
 
-		if (m_glWindow->enableStereoMode(params))
+		if (!m_glWindow->enableStereoMode(params))
 		{
-			//we have to disable GL filters :(
-			//FIXME
-			m_glWindow->setGlFilter(0);
-			ui.menuPlugins->setEnabled(false);
-		}
-		else
-		{
-			//cancel selection
+			//activation of the stereo mode failed: cancel selection
 			ui.actionEnableStereo->blockSignals(true);
 			ui.actionEnableStereo->setChecked(false);
 			ui.actionEnableStereo->blockSignals(false);

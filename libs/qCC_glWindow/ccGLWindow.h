@@ -493,9 +493,6 @@ public:
 	//! Whether the middle-screen cross should be displayed or not
 	bool crossShouldBeDrawn() const;
 
-	//! Main OpenGL display sequence
-	void draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross);
-
 	//! Toggles (exclusive) full-screen mode
 	void toggleFullScreen(bool state);
 
@@ -506,7 +503,14 @@ public: //stereo mode
 	{
 		StereoParams();
 
-		enum GlassType { RED_BLUE = 1, RED_CYAN = 2, NVIDIA_VISION = 3 };
+		//! Glass/HMD type
+		enum GlassType {	RED_BLUE = 1,
+							RED_CYAN = 2,
+							NVIDIA_VISION = 3
+		};
+
+		//! Whether stereo-mode is 'analgyph' or real stereo mode
+		inline bool isAnaglyph() const { return glassType == RED_BLUE || glassType == RED_CYAN; }
 		
 		bool autoFocal;
 		double focalDist;
@@ -651,7 +655,68 @@ signals:
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject* obj);
 
-protected: //methods
+
+protected: //rendering
+
+	//! Rendering params
+	struct RenderingParams
+	{
+		RenderingParams()
+			: passIndex(0)
+			, passCount(1)
+			, drawBackground(true)
+			, clearDepthLayer(true)
+			, clearColorLayer(true)
+			, useFBO(false)
+			, draw3DPass(true)
+			, draw3DCross(false)
+			, drawForeground(true)
+			, Rc(0,0,0)
+			, Lc(0,0,0)
+			, Fc(0,0,0)
+		{}
+
+		unsigned char passIndex;
+		unsigned char passCount;
+
+		//2D background
+		bool drawBackground;
+		bool clearDepthLayer;
+		bool clearColorLayer;
+
+		//3D central layer
+		bool draw3DPass;
+		bool useFBO;
+		bool draw3DCross;
+		CCVector3d Rc,Lc,Fc; //for stereo display
+
+		//2D foreground
+		bool drawForeground;
+	};
+
+	//! Full rendering pass (drawBackground + draw3D + drawForeground)
+	void fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& params);
+
+	//! Draws the background layer
+	/** Background + 2D background objects
+	**/
+	void drawBackground(CC_DRAW_CONTEXT& context, const RenderingParams& params);
+
+	//! Draws the main 3D layer
+	void draw3D(CC_DRAW_CONTEXT& context, const RenderingParams& params);
+
+	//! Draws the foreground layer
+	/** 2D foreground objects / text
+	**/
+	void drawForeground(CC_DRAW_CONTEXT& context, const RenderingParams& params);
+
+protected: //stereo mode
+		
+	//! Computes the camera positions for stereo mode
+	void computeStereoCameraPositions(RenderingParams& params);
+
+
+protected: //other methods
 
 	//! Processes the clickable items
 	/** \return true if an item has been clicked
@@ -663,9 +728,6 @@ protected: //methods
 		Change 'defaultFontSize' with setDisplayParameters instead!
 	**/
 	void setFontPointSize(int pixelSize);
-
-	//! Clears the backrgound
-	void resetBackground(CC_DRAW_CONTEXT& CONTEXT);
 
 	//events handling
 	void mousePressEvent(QMouseEvent *event);
@@ -721,7 +783,6 @@ protected: //methods
 	//Graphical features controls
 	void drawCross();
 	void drawTrihedron();
-	void drawGradientBackground();
 	void drawScale(const ccColor::Rgbub& color);
 
 	//Projections controls

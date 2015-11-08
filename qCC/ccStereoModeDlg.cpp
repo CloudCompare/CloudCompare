@@ -37,7 +37,6 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	switch (glassTypeComboBox->currentIndex())
 	{
 	case 0:
-
 		params.glassType = ccGLWindow::StereoParams::RED_BLUE;
 		break;
 	case 1:

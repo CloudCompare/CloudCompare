@@ -1395,29 +1395,8 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 		}
 		if (renderingParams.clearColorLayer)
 		{
-			bool showGradientBackground = true;
-			ccColor::Rgbaf backgroundColor(0,0,0,0);
-
 			const ccGui::ParamStruct& displayParams = getDisplayParameters();
-			if (!displayParams.drawBackgroundGradient)
-			{
-				//use plain color as specified by the user
-				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
-				backgroundColor = ccColor::Rgbaf(	bkgCol.r / 255.0f,
-													bkgCol.g / 255.0f,
-													bkgCol.b / 255.0f,
-													1.0f );
-				showGradientBackground = false;
-			}
-			else if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
-			{
-				//force black background and white points by default!
-				backgroundColor = ccColor::Rgbaf(0, 0, 0, 1.0f);
-				CONTEXT.pointsDefaultCol = ccColor::Rgbub(255,255,255);
-				showGradientBackground = false;
-			}
-
-			if (showGradientBackground)
+			if (displayParams.drawBackgroundGradient)
 			{
 				//draw the default gradient color background
 				int w = m_glWidth/2 + 1;
@@ -1444,6 +1423,13 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			}
 			else
 			{
+				//use plain color as specified by the user
+				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
+				ccColor::Rgbaf backgroundColor(	bkgCol.r / 255.0f,
+												bkgCol.g / 255.0f,
+												bkgCol.b / 255.0f,
+												1.0f );
+				
 				glClearColor(	backgroundColor.r,
 								backgroundColor.g,
 								backgroundColor.b,
@@ -1477,11 +1463,13 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& renderingParams)
 {
 #ifdef _DEBUG
+	//parameters
 	QStringList diagStrings;
-#endif
-
-#ifdef _DEBUG
-	diagStrings << QString("Stereo mode %1 (pass %2)").arg(m_stereoModeEnabled && renderingParams.passCount == 2 ? "ON" : "OFF").arg(renderingParams.passIndex);
+	{
+		diagStrings << QString("Stereo mode %1 (pass %2)").arg(m_stereoModeEnabled && renderingParams.passCount == 2 ? "ON" : "OFF").arg(renderingParams.passIndex);
+		diagStrings << QString("FBO %1").arg(m_fbo && renderingParams.useFBO ? "ON" : "OFF");
+		diagStrings << QString("GL filter %1").arg(m_fbo && renderingParams.useFBO && m_activeGLFilter ? "ON" : "OFF");
+	}
 #endif
 
 	//if a FBO is activated
@@ -1493,7 +1481,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
 		ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO start)");
 #ifdef _DEBUG
-		diagStrings << "FBO started";
+		diagStrings << "FBO updated";
 #endif
 	}
 	else
@@ -1576,6 +1564,21 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		}
 	}
 
+#ifdef _DEBUG
+	//display traces
+	{
+		int x = (renderingParams.passIndex == 0 ? 10 : width()/2);
+		int y = 10;
+		glColor3ubv_safe(ccColor::yellow.rgba);
+		for (int i=0; i<diagStrings.size(); ++i)
+		{
+			QString str = diagStrings[i];
+			renderText(x, y, str);
+			y += 10;
+		}
+	}
+#endif
+
 	//process and/or display the FBO (if any)
 	if (m_fbo && renderingParams.useFBO)
 	{
@@ -1585,10 +1588,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			m_fbo->stop();
 			ccGLUtils::CatchGLError("ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
-
-#ifdef _DEBUG
-		diagStrings << "FBO stopped";
-#endif
 		}
 
 		GLuint screenTex = 0;
@@ -1610,9 +1609,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			m_activeGLFilter->shade(depthTex, colorTex, parameters); 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
-#ifdef _DEBUG
-			diagStrings << "GL filter applied";
-#endif
 			//if capture mode is ON: we only want to capture it, not to display it
 			if (!m_captureMode.enabled)
 			{
@@ -1651,9 +1647,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 
 			//we don't need the depth info anymore!
 			//glClear(GL_DEPTH_BUFFER_BIT);
-#ifdef _DEBUG
-			diagStrings << "FBO displayed";
-#endif
 		}
 	}
 
@@ -1663,18 +1656,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	if (renderingParams.drawForeground)
 	{
 		drawForeground(context, renderingParams);
-
-#ifdef _DEBUG
-		int x = (renderingParams.passIndex == 0 ? 10 : width()/2);
-		int y = 10;
-		glColor3ubv_safe(ccColor::yellow.rgba);
-		for (int i=0; i<diagStrings.size(); ++i)
-		{
-			QString str = diagStrings[i];
-			renderText(x, y, str);
-			y += 10;
-		}
-#endif
 	}
 }
 

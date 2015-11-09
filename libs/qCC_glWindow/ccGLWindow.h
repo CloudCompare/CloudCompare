@@ -37,6 +37,7 @@
 #include <QMap>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QByteArray>
 //#define THREADED_GL_WIDGET
 #ifdef THREADED_GL_WIDGET
 #include <QThread>
@@ -1168,6 +1169,8 @@ protected: //members
 
 	//! Former parent object (for exclusive full-screen display)
 	QWidget* m_formerParent;
+	//! Former geometry (for exclusive full-screen display)
+	QByteArray m_formerGeometry;
 
 	//! Debug traces visibility
 	bool m_showDebugTraces;

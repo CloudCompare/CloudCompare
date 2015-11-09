@@ -7729,12 +7729,6 @@ void MainWindow::toggleExclusiveFullScreen(bool state)
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		if (!state && win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
-		{
-			//auto disable stereo mode as NVidia Vision only works in full screen mode!
-			actionEnableStereo->setChecked(false);
-		}
-
 		win->toggleExclusiveFullScreen(state);
 	}
 }
@@ -11240,9 +11234,16 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 {
 	//we simply update the fullscreen action method icon (whatever the window)
 	ccGLWindow* win = getActiveGLWindow();
+
 	actionExclusiveFullScreen->blockSignals(true);
 	actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);
 	actionExclusiveFullScreen->blockSignals(false);
+
+	if (!state && win->stereoModeIsEnabled() && win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+	{
+		//auto disable stereo mode as NVidia Vision only works in full screen mode!
+		actionEnableStereo->setChecked(false);
+	}
 }
 
 void MainWindow::addToDBAuto(QStringList filenames)

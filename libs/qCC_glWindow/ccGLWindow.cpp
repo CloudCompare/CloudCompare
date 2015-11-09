@@ -502,190 +502,201 @@ void ccGLWindow::initialize()
 	makeCurrent();
 #endif
 
-	if (m_initialized)
-		return;
-
-	//we init the model view and projection matrices with identity
-	m_viewMatd.toIdentity();
-	m_projMatd.toIdentity();
-
-	//we init the OpenGL ones with the same values
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_viewportParams.viewMat);
-
-	//set viewport and visu. as invalid
-	invalidateViewport();
-	invalidateVisualization();
-
-	//we initialize GLEW
-	InitGLEW();
-
-	//OpenGL version
-	const char* vendorName = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-	if (!m_silentInitialization)
+	//initializeGL can be called again when switching to exclusive full screen!
+	if (!m_initialized)
 	{
-		ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
-		ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
-	}
+		//we init the model view and projection matrices with identity
+		m_viewMatd.toIdentity();
+		m_projMatd.toIdentity();
 
-	ccGui::ParamStruct params = getDisplayParameters();
+		//we init the OpenGL ones with the same values
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 
-	//VBO support
-	if (ccFBOUtils::CheckVBOAvailability())
-	{
-		if (params.useVBOs && (!vendorName || QString(vendorName).toUpper().startsWith("ATI")))
-		{
-			if (!m_silentInitialization)
-				ccLog::Warning("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
-			params.useVBOs = false;
-		}
-		else if (!m_silentInitialization)
-		{
-			ccLog::Print("[3D View %i] VBOs available",m_uniqueID);
-		}
-	}
-	else
-	{
-		params.useVBOs = false;
-	}
+		//we emit the 'baseViewMatChanged' signal
+		emit baseViewMatChanged(m_viewportParams.viewMat);
 
-	//Shaders and other OpenGL extensions
-	m_shadersEnabled = ccFBOUtils::CheckShadersAvailability();
-	if (!m_shadersEnabled)
-	{
-		//if no shader, no GL filter!
+		//set viewport and visu. as invalid
+		invalidateViewport();
+		invalidateVisualization();
+
+		//we initialize GLEW
+		InitGLEW();
+
+		//OpenGL version
+		const char* vendorName = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 		if (!m_silentInitialization)
-			ccLog::Warning("[3D View %i] Shaders and GL filters unavailable",m_uniqueID);
-	}
-	else
-	{
-		if (!m_silentInitialization)
-			ccLog::Print("[3D View %i] Shaders available",m_uniqueID);
-
-		m_glFiltersEnabled = ccFBOUtils::CheckFBOAvailability();
-		if (m_glFiltersEnabled)
 		{
-			if (!m_silentInitialization)
-				ccLog::Print("[3D View %i] GL filters available",m_uniqueID);
-			m_alwaysUseFBO = true;
-		}
-		else if (!m_silentInitialization)
-		{
-			ccLog::Warning("[3D View %i] GL filters unavailable (FBO not supported)",m_uniqueID);
+			ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
+			ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
 		}
 
-		//color ramp shader
-		if (!m_colorRampShader)
+		ccGui::ParamStruct params = getDisplayParameters();
+
+		//VBO support
+		if (ccFBOUtils::CheckVBOAvailability())
 		{
-			//we will update global parameters
-			params.colorScaleShaderSupported = false;
-
-			GLint maxBytes = 0;
-			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
-
-			const GLint minRequiredBytes = ccColorRampShader::MinRequiredBytes();
-			if (maxBytes < minRequiredBytes)
+			if (params.useVBOs && (!vendorName || QString(vendorName).toUpper().startsWith("ATI")))
 			{
 				if (!m_silentInitialization)
-					ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
+					ccLog::Warning("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
+				params.useVBOs = false;
 			}
-			else
+			else if (!m_silentInitialization)
 			{
-				ccColorRampShader* colorRampShader = new ccColorRampShader();
-				QString shadersPath = ccGLWindow::getShadersPath();
-				QString error;
-				if (!colorRampShader->loadProgram(QString(),shadersPath+QString("/ColorRamp/color_ramp.frag"),error))
+				ccLog::Print("[3D View %i] VBOs available",m_uniqueID);
+			}
+		}
+		else
+		{
+			params.useVBOs = false;
+		}
+
+		//Shaders and other OpenGL extensions
+		m_shadersEnabled = ccFBOUtils::CheckShadersAvailability();
+		if (!m_shadersEnabled)
+		{
+			//if no shader, no GL filter!
+			if (!m_silentInitialization)
+				ccLog::Warning("[3D View %i] Shaders and GL filters unavailable",m_uniqueID);
+		}
+		else
+		{
+			if (!m_silentInitialization)
+				ccLog::Print("[3D View %i] Shaders available",m_uniqueID);
+
+			m_glFiltersEnabled = ccFBOUtils::CheckFBOAvailability();
+			if (m_glFiltersEnabled)
+			{
+				if (!m_silentInitialization)
+					ccLog::Print("[3D View %i] GL filters available",m_uniqueID);
+				m_alwaysUseFBO = true;
+			}
+			else if (!m_silentInitialization)
+			{
+				ccLog::Warning("[3D View %i] GL filters unavailable (FBO not supported)",m_uniqueID);
+			}
+
+			//color ramp shader
+			if (!m_colorRampShader)
+			{
+				//we will update global parameters
+				params.colorScaleShaderSupported = false;
+
+				GLint maxBytes = 0;
+				glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
+
+				const GLint minRequiredBytes = ccColorRampShader::MinRequiredBytes();
+				if (maxBytes < minRequiredBytes)
 				{
 					if (!m_silentInitialization)
-						ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
-					delete colorRampShader;
-					colorRampShader = 0;
+						ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
 				}
 				else
 				{
-					if (!m_silentInitialization)
-						ccLog::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
-					m_colorRampShader = colorRampShader;
-					params.colorScaleShaderSupported = true;
-
-					//if global parameter is not yet defined
-					if (!getDisplayParameters().isInPersistentSettings("colorScaleUseShader"))
+					ccColorRampShader* colorRampShader = new ccColorRampShader();
+					QString shadersPath = ccGLWindow::getShadersPath();
+					QString error;
+					if (!colorRampShader->loadProgram(QString(),shadersPath+QString("/ColorRamp/color_ramp.frag"),error))
 					{
-						bool shouldUseShader = true;
-						if (!vendorName || QString(vendorName).toUpper().startsWith("ATI") || QString(vendorName).toUpper().startsWith("VMWARE"))
+						if (!m_silentInitialization)
+							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
+						delete colorRampShader;
+						colorRampShader = 0;
+					}
+					else
+					{
+						if (!m_silentInitialization)
+							ccLog::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
+						m_colorRampShader = colorRampShader;
+						params.colorScaleShaderSupported = true;
+
+						//if global parameter is not yet defined
+						if (!getDisplayParameters().isInPersistentSettings("colorScaleUseShader"))
 						{
-							if (!m_silentInitialization)
-								ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
-							shouldUseShader = false;
+							bool shouldUseShader = true;
+							if (!vendorName || QString(vendorName).toUpper().startsWith("ATI") || QString(vendorName).toUpper().startsWith("VMWARE"))
+							{
+								if (!m_silentInitialization)
+									ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
+								shouldUseShader = false;
+							}
+							params.colorScaleUseShader = shouldUseShader;
 						}
-						params.colorScaleUseShader = shouldUseShader;
 					}
 				}
 			}
 		}
-	}
 
 
-#ifdef _DEBUG
-#if !defined(_MSC_VER) || _MSC_VER > 1600
-	//KHR extension (debug)
-	if (ccFBOUtils::CheckExtension("GL_KHR_debug"))
-	{
-		if (!m_silentInitialization)
-			ccLog::Print("[3D View %i] GL KHR (debug) extension available",m_uniqueID);
-
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	
-		//int value = 0;
-		//glGetIntegerv(GL_CONTEXT_FLAGS, &value);
-		//if ((value & GL_CONTEXT_FLAG_DEBUG_BIT) == 0)
-		//{
-		//	ccLog::Warning("[3D View %i] But GL_CONTEXT_FLAG_DEBUG_BIT is not set!");
-		//}
-
-		glDebugMessageControl(GL_DONT_CARE,GL_DONT_CARE,GL_DONT_CARE,0,NULL,GL_TRUE);
-		//glDebugMessageControl(GL_DONT_CARE,GL_DEBUG_TYPE_OTHER,GL_DONT_CARE,0,NULL,GL_FALSE); //deactivate 'other' messages
-		glDebugMessageCallback(&GLDebugCallback, this);
-	}
-#endif
-#endif
-
-	//apply (potentially) updated parameters;
-	setDisplayParameters(params,hasOverridenDisplayParameters());
-
-#if 0
-	//OpenGL 3.3+ rendering shader
-	if ( QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3 )
-	{
-		bool vaEnabled = ccFBOUtils::CheckVAAvailability();
-		if (vaEnabled && !m_customRenderingShader)
+	#ifdef _DEBUG
+	#if !defined(_MSC_VER) || _MSC_VER > 1600
+		//KHR extension (debug)
+		if (ccFBOUtils::CheckExtension("GL_KHR_debug"))
 		{
-			ccGui::ParamStruct params = getDisplayParameters();
+			if (!m_silentInitialization)
+				ccLog::Print("[3D View %i] GL KHR (debug) extension available",m_uniqueID);
 
-			ccShader* renderingShader = new ccShader();
-			QString shadersPath = ccGLWindow::getShadersPath();
-			QString error;
-			if (!renderingShader->fromFile(shadersPath+QString("/Rendering"),QString("rendering"),error))
-			{
-				if (!m_silentInitialization)
-					ccLog::Warning(QString("[3D View %i] Failed to load custom rendering shader: '%2'").arg(m_uniqueID).arg(error));
-				delete renderingShader;
-				renderingShader = 0;
-			}
-			else
-			{
-				m_customRenderingShader = renderingShader;
-			}
-			setDisplayParameters(params,hasOverridenDisplayParameters());
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	
+			//int value = 0;
+			//glGetIntegerv(GL_CONTEXT_FLAGS, &value);
+			//if ((value & GL_CONTEXT_FLAG_DEBUG_BIT) == 0)
+			//{
+			//	ccLog::Warning("[3D View %i] But GL_CONTEXT_FLAG_DEBUG_BIT is not set!");
+			//}
+
+			glDebugMessageControl(GL_DONT_CARE,GL_DONT_CARE,GL_DONT_CARE,0,NULL,GL_TRUE);
+			//glDebugMessageControl(GL_DONT_CARE,GL_DEBUG_TYPE_OTHER,GL_DONT_CARE,0,NULL,GL_FALSE); //deactivate 'other' messages
+			glDebugMessageCallback(&GLDebugCallback, this);
 		}
+	#endif
+	#endif
+
+		//apply (potentially) updated parameters;
+		setDisplayParameters(params,hasOverridenDisplayParameters());
+
+	#if 0
+		//OpenGL 3.3+ rendering shader
+		if ( QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3 )
+		{
+			bool vaEnabled = ccFBOUtils::CheckVAAvailability();
+			if (vaEnabled && !m_customRenderingShader)
+			{
+				ccGui::ParamStruct params = getDisplayParameters();
+
+				ccShader* renderingShader = new ccShader();
+				QString shadersPath = ccGLWindow::getShadersPath();
+				QString error;
+				if (!renderingShader->fromFile(shadersPath+QString("/Rendering"),QString("rendering"),error))
+				{
+					if (!m_silentInitialization)
+						ccLog::Warning(QString("[3D View %i] Failed to load custom rendering shader: '%2'").arg(m_uniqueID).arg(error));
+					delete renderingShader;
+					renderingShader = 0;
+				}
+				else
+				{
+					m_customRenderingShader = renderingShader;
+				}
+				setDisplayParameters(params,hasOverridenDisplayParameters());
+			}
+		}
+	#endif
+		
+		//start internal timer
+		m_timer.start();
+
+		if (!m_silentInitialization)
+		{
+			ccLog::Print("[ccGLWindow] 3D view initialized");
+		}
+
+		m_initialized = true;
 	}
-#endif
 
 	//transparency off by default
 	glDisable(GL_BLEND);
@@ -694,15 +705,8 @@ void ccGLWindow::initialize()
 	//no global ambient
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ccColor::night.rgba);
 
-	//start internal timer
-	m_timer.start();
-
 	ccGLUtils::CatchGLError("ccGLWindow::initializeGL");
 
-	m_initialized = true;
-
-	if (!m_silentInitialization)
-		ccLog::Print("[ccGLWindow] 3D view initialized");
 }
 
 void ccGLWindow::uninitializeGL()
@@ -5748,6 +5752,7 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 		//we are currently in normal screen mode
 		if (!m_formerParent)
 		{
+			m_formerGeometry = saveGeometry();
 			m_formerParent = parentWidget();
 			if (m_formerParent && m_formerParent->layout())
 				m_formerParent->layout()->removeWidget(this);
@@ -5757,7 +5762,6 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 		//setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 		showFullScreen();
 		displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 30, FULL_SCREEN_MESSAGE);
-		QCoreApplication::processEvents();
 	}
 	else
 	{
@@ -5768,13 +5772,22 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 				m_formerParent->layout()->addWidget(this);
 			else
 				setParent(m_formerParent);
+		
+			m_formerParent = 0;
 		}
-		displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, FULL_SCREEN_MESSAGE); //remove any message
-		m_formerParent = 0;
+
 		//setWindowFlags(windowFlags() ^ Qt::WindowStaysOnTopHint);
+		displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, FULL_SCREEN_MESSAGE); //remove any message
 		showNormal();
+
+		if (!m_formerGeometry.isNull())
+		{
+			restoreGeometry(m_formerGeometry);
+			m_formerGeometry.clear();
+		}
 	}
 
+	QCoreApplication::processEvents();
 	setFocus();
 	redraw();
 

@@ -106,6 +106,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	//Signals & slots connection
 	connect(m_glWindow,								SIGNAL(filesDropped(QStringList)),			this,		SLOT(addToDB(QStringList)));
 	connect(m_glWindow,								SIGNAL(entitySelectionChanged(int)),		this,		SLOT(selectEntity(int)));
+	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,		SLOT(onExclusiveFullScreenToggled(bool)));
 	//connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::set<int>)),	this,		SLOT(selectEntities(std::set<int>))); //not supported!
 	//connect(m_glWindow,							SIGNAL(newLabel(ccHObject*),						this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
 
@@ -798,6 +799,19 @@ void ccViewer::toggleFullScreen(bool state)
 		}
 
 		m_glWindow->toggleExclusiveFullScreen(state);
+	}
+}
+
+void ccViewer::onExclusiveFullScreenToggled(bool state)
+{
+	ui.actionFullScreen->blockSignals(true);
+	ui.actionFullScreen->setChecked(m_glWindow ? m_glWindow->exclusiveFullScreen() : false);
+	ui.actionFullScreen->blockSignals(false);
+
+	if (!state && m_glWindow && m_glWindow->stereoModeIsEnabled() && m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+	{
+		//auto disable stereo mode as NVidia Vision only works in full screen mode!
+		ui.actionEnableStereo->setChecked(false);
 	}
 }
 

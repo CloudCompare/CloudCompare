@@ -76,6 +76,9 @@ protected slots:
 	//! Delete selected entity
 	void doActionDeleteSelectedEntity();
 
+	//! Slot called when the exclusive full screen mode is called
+	void onExclusiveFullScreenToggled(bool);
+
 	void doActionEditCamera();
 	void toggleSunLight(bool);
 	void toggleCustomLight(bool);

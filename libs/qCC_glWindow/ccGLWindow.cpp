@@ -231,11 +231,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_scheduledFullRedrawTime(0)
 	, m_stereoModeEnabled(false)
 	, m_formerParent(0)
-#ifdef _DEBUG
-	, m_showDebugTraces(true)
-#else
 	, m_showDebugTraces(false)
-#endif
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -1330,8 +1326,6 @@ void ccGLWindow::paint()
 	renderingParams.draw3DCross = getDisplayParameters().displayCross;
 	renderingParams.passCount = m_stereoModeEnabled ? 2 : 1;
 
-	ccLog::PrintDebug(QString("[QPaintGL] New pass (3D = %1 / LOD in progress = %2)").arg(renderingParams.draw3DPass ? "yes" : "no").arg(m_currentLODState.inProgress ? "yes" : "no"));
-
 	//clean the outdated messages
 	{
 		std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin();
@@ -1711,14 +1705,14 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			if (!m_captureMode.enabled)
 			{
 				screenTex = m_activeGLFilter->getTexture();
-				ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
+				//ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
 			}
 		}
 		else if (!m_captureMode.enabled)
 		{
 			//screenTex = currentFBO->getDepthTexture();
 			screenTex = currentFBO->getColorTexture(0);
-			ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
+			//ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
 		}
 
 		//we display the FBO texture fullscreen (if any)
@@ -1761,8 +1755,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 
 void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
-	ccLog::PrintDebug(QString("[draw3D] LOD level: %1").arg(m_currentLODState.level));
-
 	glPointSize(m_viewportParams.defaultPointSize);
 	glLineWidth(m_viewportParams.defaultLineWidth);
 
@@ -1774,6 +1766,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
+	setStandardOrthoCenter();
+
 	//specific case: we display the cross BEFORE the camera projection (i.e. in orthographic mode)
 	if (	renderingParams.draw3DCross
 		&&	m_currentLODState.level == 0
@@ -1781,42 +1775,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		&&	!m_viewportParams.perspectiveView
 		&&	(!renderingParams.useFBO || !m_activeGLFilter) )
 	{
-		setStandardOrthoCenter();
 		drawCross();
 	}
-
-	//setup camera projection
-	if (m_stereoModeEnabled && renderingParams.passCount == 2)
-	{
-		//change eye position
-		double eyeOffset = renderingParams.passIndex == 0 ? -1.0 : 1.0;
-
-		double zNear, zFar;
-		ccGLMatrixd projMat = computeProjectionMatrix(	getRealCameraCenter(), 
-														zNear,
-														zFar,
-														false,
-														&eyeOffset); //eyeOffset will be scaled
-
-		//load the new projection matrix
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixd(projMat.data());
-		glTranslatef(-static_cast<float>(eyeOffset), 0.0f, 0.0f);
-	}
-	else //mono vision mode
-	{
-		//we setup the projection matrix
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixd(getProjectionMatd());
-	}
-
-	//setup the default view matrix
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(getModelViewMatd());
-
-	/****************************************/
-	/****  PASS: 3D/BACKGROUND/NO LIGHT  ****/
-	/****************************************/
 
 	/****************************************/
 	/****    PASS: 3D/FOREGROUND/LIGHT   ****/
@@ -1824,25 +1784,25 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	if (m_customLightEnabled || m_sunLightEnabled)
 	{
 		CONTEXT.flags |= CC_LIGHT_ENABLED;
-	}
 
-	//we enable absolute sun light (if activated)
-	if (m_sunLightEnabled)
-	{
-		glEnableSunLight();
-	}
-
-	//we enable relative custom light (if activated)
-	if (m_customLightEnabled)
-	{
-		glEnableCustomLight();
-		
-		if (	!m_captureMode.enabled
-			&&	m_currentLODState.level == 0
-			&&	(!m_stereoModeEnabled || !m_stereoParams.isAnaglyph()) )
+		//we enable absolute sun light (if activated)
+		if (m_sunLightEnabled)
 		{
-			//we display it as a litle 3D star
-			drawCustomLight();
+			glEnableSunLight();
+		}
+
+		//we enable relative custom light (if activated)
+		if (m_customLightEnabled)
+		{
+			glEnableCustomLight();
+		
+			if (	!m_captureMode.enabled
+				&&	m_currentLODState.level == 0
+				&&	(!m_stereoModeEnabled || !m_stereoParams.isAnaglyph()) )
+			{
+				//we display it as a litle 3D star
+				drawCustomLight();
+			}
 		}
 	}
 
@@ -1879,6 +1839,37 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 			CONTEXT.higherLODLevelsAvailable = false;
 			CONTEXT.moreLODPointsAvailable = false;
 		}
+	}
+
+	//setup camera projection (DGM: AFTER THE LIGHTS)
+	if (m_stereoModeEnabled && renderingParams.passCount == 2)
+	{
+		//change eye position
+		double eyeOffset = renderingParams.passIndex == 0 ? -1.0 : 1.0;
+
+		double zNear, zFar;
+		ccGLMatrixd projMat = computeProjectionMatrix(getRealCameraCenter(),
+			zNear,
+			zFar,
+			false,
+			&eyeOffset); //eyeOffset will be scaled
+
+		//load the new projection matrix
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixd(projMat.data());
+		glTranslatef(-static_cast<float>(eyeOffset), 0.0f, 0.0f);
+	}
+	else //mono vision mode
+	{
+		//we setup the projection matrix
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixd(getProjectionMatd());
+	}
+
+	//setup the default view matrix
+	{
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixd(getModelViewMatd());
 	}
 
 	//we draw 3D entities
@@ -2587,6 +2578,8 @@ void ccGLWindow::drawTrihedron()
 
 		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_LINE_SMOOTH);
+		glLineWidth(2.0f);
+		glClear(GL_DEPTH_BUFFER_BIT); //DGM: the trihedron is displayed in the foreground but still in 3D!
 		glEnable(GL_DEPTH_TEST);
 
 		//trihedron OpenGL drawing
@@ -4663,10 +4656,12 @@ void ccGLWindow::drawPivot()
 		}
 
 		//draw 3 circles
-		glPushAttrib(GL_COLOR_BUFFER_BIT);
+		glPushAttrib(GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
 		glEnable(GL_BLEND);
-		const float c_alpha = 0.6f;
 		glLineWidth(2.0f);
+
+		//default transparency
+		const float c_alpha = 0.6f;
 
 		//pivot symbol: 3 circles
 		glColor4f(1.0f,0.0f,0.0f,c_alpha);

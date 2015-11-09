@@ -57,6 +57,7 @@
 #include <QTimer>
 #include <QEventLoop>
 #include <QTouchEvent>
+#include <QLayout>
 
 #ifdef USE_VLD
 //VLD

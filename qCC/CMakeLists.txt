@@ -125,7 +125,8 @@ if( WIN32 )
 	install_Qt5_plugins( ${CLOUDCOMPARE_DEST_FOLDER} )
 
 	# Additional auxiliary file(s)
-	list( APPEND auxFiles bin_other/start.bat )
+	file( GLOB batch_list bin_other/*.bat )
+	list( APPEND auxFiles ${batch_list} )
 endif()
 
 # Install auxiliary files
@@ -138,7 +139,6 @@ file( GLOB tr_list tr/*.qm )
 foreach( filename ${tr_list} )
 	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /tr )
 endforeach()
-
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )

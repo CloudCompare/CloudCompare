@@ -16,14 +16,7 @@ if (WIN32 AND PCL_DIR)
 	
 	#release DLLs
 	file( GLOB pcl_release_dlls ${PCL_DIR}/bin/*${PCL_RELEASE_SUFFIX}.dll  )
-	foreach( filename ${pcl_release_dlls} )
-		if( NOT CMAKE_CONFIGURATION_TYPES )
-			install( FILES ${filename} DESTINATION ${ARGV0} )
-		else()
-			install( FILES ${filename} CONFIGURATIONS Release DESTINATION ${ARGV0} )
-			install( FILES ${filename} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
-		endif()
-	endforeach()
+	copy_files("${pcl_release_dlls}" ${ARGV0}) #mind the quotes!
 
 	#debug DLLs
 	if( CMAKE_CONFIGURATION_TYPES )

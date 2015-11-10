@@ -162,6 +162,22 @@ else()
 endif()
 endfunction()
 
+# Copy files to the specified directory and for the active configurations
+function( copy_files )	# 2 arguments:
+						# ARGV0 = files (if it's a list you have to provide the list alias quoted!)
+						# ARGV1 = target (directory)
+
+	message(STATUS "Files " ${ARGV0} " will be installed to dest. " ${ARGV1})
+	if( NOT CMAKE_CONFIGURATION_TYPES )
+		install( FILES ${ARGV0} DESTINATION ${ARGV1} )
+	else()
+		install( FILES ${ARGV0} CONFIGURATIONS Release DESTINATION ${ARGV1} )
+		install( FILES ${ARGV0} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
+		install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+	endif()
+
+endfunction()
+
 # Extended 'install' command depending on the build configuration and OS
 # 4 arguments:
 #   - ARGV0 = signature

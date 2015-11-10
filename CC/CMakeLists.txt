@@ -15,13 +15,7 @@ project( CC_DUMMY_PROJECT )
 # CGAL takes precedence over triangle
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
 	SET(COMPILE_CC_CORE_LIB_WITH_TRIANGLE OFF)
-	FIND_PACKAGE(CGAL QUIET COMPONENTS Core ) # implies findGMP
-	if(CGAL_FOUND)
-		include( ${CGAL_USE_FILE} )
-		include_directories(${CGAL_INCLUDE_DIR})
-	else()
-		Message(STATUS "Could not find CGAL")
-	endif()
+	include (CGALSupport.cmake)
 endif()
 
 # else CC_CORE_LIB only relies on 'triangle' library...
@@ -33,8 +27,6 @@ endif()
 if (COMPILE_CC_CORE_LIB_WITH_QT)
 	include( ../CMakeExternalLibs.cmake )
 endif()
-
-
 
 project( CC_CORE_LIB )
 

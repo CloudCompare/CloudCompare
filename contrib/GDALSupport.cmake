@@ -29,16 +29,8 @@ if( ${OPTION_USE_GDAL} )
 			
 			#install DLLs
 			if ( ARGV1 )
-				file( GLOB dll_files ${GDAL_INCLUDE_DIR}/../bin/*.dll )
-				foreach( gdalDLL ${dll_files} )
-					if( NOT CMAKE_CONFIGURATION_TYPES )
-						install( FILES ${gdalDLL} DESTINATION ${ARGV1} )
-					else()
-						install( FILES ${gdalDLL} CONFIGURATIONS Release DESTINATION ${ARGV1} )
-						install( FILES ${gdalDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
-						install( FILES ${gdalDLL} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
-					endif()
-				endforeach()
+				file( GLOB GDAL_DLL_FILES ${GDAL_INCLUDE_DIR}/../bin/*.dll )
+				copy_files("${GDAL_DLL_FILES}" ${ARGV1} ) #mind the quotes!
 			endif()
 			
 		endif()

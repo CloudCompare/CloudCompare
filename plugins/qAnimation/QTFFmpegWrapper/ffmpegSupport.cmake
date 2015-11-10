@@ -67,15 +67,7 @@ if (WIN32)
 
 		message(${FFMEG_DLL})
 		
-		if( NOT CMAKE_CONFIGURATION_TYPES )
-			install( FILES ${FFMEG_DLL} DESTINATION ${ARGV0} )
-		else()
-			#release DLL
-			install( FILES ${FFMEG_DLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
-			install( FILES ${FFMEG_DLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
-			#debug DLL
-			install( FILES ${FFMEG_DLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
-		endif()
+		copy_files("${FFMEG_DLL}" ${ARGV0}) #mind the quotes
 	
 	else()
 

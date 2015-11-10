@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>322</height>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,9 +41,6 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="text">
-             <string/>
-            </property>
            </widget>
           </item>
           <item>
@@ -56,10 +53,7 @@
           <item>
            <widget class="QLineEdit" name="dataCloud">
             <property name="toolTip">
-             <string>the model cloud is the reference: it won't move (red cloud)</string>
-            </property>
-            <property name="statusTip">
-             <string>the model cloud is the reference: it won't move (red cloud)</string>
+             <string>the data cloud is the entity to align with the model cloud: it will be displaced (green cloud)</string>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -75,9 +69,6 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="text">
-             <string/>
-            </property>
            </widget>
           </item>
           <item>
@@ -90,10 +81,7 @@
           <item>
            <widget class="QLineEdit" name="modelCloud">
             <property name="toolTip">
-             <string>the data cloud is the entity to align with the model cloud: it will be displaced (green cloud)</string>
-            </property>
-            <property name="statusTip">
-             <string>the data cloud is the entity to align with the model cloud: it will be displaced (green cloud)</string>
+             <string>the model cloud is the reference: it won't move (red cloud)</string>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -170,9 +158,6 @@
             <property name="toolTip">
              <string>Number of 4 points bases tested to find the best rigid transform. Great values may lead to long computation time.</string>
             </property>
-            <property name="statusTip">
-             <string>Number of 4 points bases tested to find the best rigid transform. Great values may lead to long computation time.</string>
-            </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
@@ -201,9 +186,6 @@
           <item>
            <widget class="QDoubleSpinBox" name="overlap">
             <property name="toolTip">
-             <string>Rough estimation of the two clouds overlap rate (between 0 and 1)</string>
-            </property>
-            <property name="statusTip">
              <string>Rough estimation of the two clouds overlap rate (between 0 and 1)</string>
             </property>
             <property name="alignment">
@@ -237,9 +219,6 @@
           <item>
            <widget class="QDoubleSpinBox" name="delta">
             <property name="toolTip">
-             <string>Estimation of the distance wished between the two clouds after registration.</string>
-            </property>
-            <property name="statusTip">
              <string>Estimation of the distance wished between the two clouds after registration.</string>
             </property>
             <property name="alignment">
@@ -278,9 +257,6 @@
             <property name="toolTip">
              <string>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the prorgamm may take a long time to finish. Check this box to bound the number of candidates.</string>
             </property>
-            <property name="statusTip">
-             <string>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the prorgamm may take a long time to finish. Check this box to bound the number of candidates.</string>
-            </property>
             <property name="text">
              <string>Limit max. number of candidates</string>
             </property>
@@ -289,12 +265,6 @@
           <item>
            <widget class="QSpinBox" name="nbMaxCandidates">
             <property name="toolTip">
-             <string>For each attempt (see above parameter), candidates bases are found. If there are too much candidates, the prorgamm may take a long time to finish.</string>
-            </property>
-            <property name="statusTip">
-             <string>Maximal number of candidates allowed (check the left box to use this parameter)</string>
-            </property>
-            <property name="whatsThis">
              <string>Maximal number of candidates allowed (check the left box to use this parameter)</string>
             </property>
             <property name="alignment">
@@ -351,123 +321,21 @@
          </layout>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox_4">
-          <property name="title">
-           <string>Model</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <property name="margin">
-            <number>6</number>
-           </property>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>None</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>All</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QSlider" name="modelSample">
-             <property name="toolTip">
-              <string>Move to the left (none) to decrease the number of points  to keep in the model cloud.</string>
-             </property>
-             <property name="statusTip">
-              <string>Move to the left (none) to decrease the number of points  to keep in the model cloud.</string>
-             </property>
-             <property name="maximum">
-              <number>10000000</number>
-             </property>
-             <property name="value">
-              <number>1000</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="modelSamplingRate">
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-               <property name="decimals">
-                <number>4</number>
-               </property>
-               <property name="maximum">
-                <double>100.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.010000000000000</double>
-               </property>
-               <property name="value">
-                <double>100.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="modelRemaining">
-               <property name="text">
-                <string>remaining points</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
          <widget class="QGroupBox" name="groupBox_3">
           <property name="title">
            <string>Data</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
-           <property name="margin">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
             <number>6</number>
            </property>
            <item>
@@ -562,6 +430,126 @@
              </item>
              <item>
               <widget class="QLabel" name="dataRemaining">
+               <property name="text">
+                <string>remaining points</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="title">
+           <string>Model</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>None</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>All</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QSlider" name="modelSample">
+             <property name="toolTip">
+              <string>Move to the left (none) to decrease the number of points  to keep in the model cloud.</string>
+             </property>
+             <property name="statusTip">
+              <string>Move to the left (none) to decrease the number of points  to keep in the model cloud.</string>
+             </property>
+             <property name="maximum">
+              <number>10000000</number>
+             </property>
+             <property name="value">
+              <number>1000</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="modelSamplingRate">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="maximum">
+                <double>100.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>100.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="modelRemaining">
                <property name="text">
                 <string>remaining points</string>
                </property>

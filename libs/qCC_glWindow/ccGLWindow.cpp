@@ -5689,7 +5689,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 	{
 		if (!format().stereo() || !format().doubleBuffer())
 		{
-			ccLog::Error("Quad buffering not supported!");
+			QMessageBox::critical(this, "Stereo", "Quad buffering not supported!");
 			return false;
 		}
 
@@ -5700,14 +5700,14 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			glGetBooleanv(GL_STEREO, &isStereoEnabled);
 			if (!isStereoEnabled)
 			{
-				ccLog::Error("Stereo vision not enabled!");
+				QMessageBox::critical(this, "Stereo", "OpenGL stereo mode not supported/enabled!");
 				return false;
 			}
 		}
 
 		if (!exclusiveFullScreen())
 		{
-			ccLog::Error("3D window should be in exclusive full screen mode!");
+			ccLog::Warning("3D window should be in exclusive full screen mode!");
 			return false;
 		}
 	}

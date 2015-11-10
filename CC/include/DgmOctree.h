@@ -74,8 +74,10 @@ public:
 	/**         STRUCTURES        **/
 	/*******************************/
 
-	//Max octree subdivision level
-	//Number of bits used to code cells position: 3*MAX_OCTREE_LEVEL
+	//! Max octree subdivision level
+	/** Number of bits used to code the cells position: 3*MAX_OCTREE_LEVEL
+		\warning Never pass a 'constant initializer' by reference
+	**/
 #ifdef OCTREE_CODES_64_BITS
 	static const int MAX_OCTREE_LEVEL = 21;
 #else
@@ -83,7 +85,8 @@ public:
 #endif
 
 	//! Type of the code of an octree cell
-	/** Warning: 3 bits per level are required.
+	/** \warning 3 bits per level are required.
+		\warning Never pass a 'constant initializer' by reference
 	**/
 #ifdef OCTREE_CODES_64_BITS
 	typedef unsigned long long OctreeCellCodeType; //max 21 levels (but twice more memory!)
@@ -92,9 +95,13 @@ public:
 #endif
 
 	//! Max octree length at last level of subdivision (number of cells)
-	static const int MAX_OCTREE_LENGTH = OCTREE_LENGTH(MAX_OCTREE_LEVEL)-1;
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
+	static const int MAX_OCTREE_LENGTH = OCTREE_LENGTH(MAX_OCTREE_LEVEL) - 1;
 
 	//! Invalid cell code
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const OctreeCellCodeType INVALID_CELL_CODE = (~(OctreeCellCodeType)0);
 
 	//! Octree cell codes container

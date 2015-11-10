@@ -89,6 +89,8 @@ class PCVContext
 		unsigned m_height;
 
 		//! Model view matrix size (OpenGL)
+		/** \warning Never pass a 'constant initializer' by reference
+		**/
 		static const unsigned OPENGL_MATRIX_SIZE = 16;
 
 		//! Current model view matrix

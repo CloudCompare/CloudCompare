@@ -60,6 +60,8 @@ public:
 	virtual inline bool hasDrawingPrecision() const { return false; }
 
 	//! Minimum drawing precision
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const int MIN_DRAWING_PRECISION = 4;
 
 	//! Sets drawing precision

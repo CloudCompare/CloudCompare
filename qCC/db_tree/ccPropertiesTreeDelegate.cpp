@@ -1020,7 +1020,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_COLOR_RAMP_STEPS:
 		{
 			QSpinBox *spinBox = new QSpinBox(parent);
-			spinBox->setRange(ccColorScale::MIN_STEPS,ccColorScale::MAX_STEPS);
+			spinBox->setRange(ccColorScale::MIN_STEPS, ccColorScale::MAX_STEPS);
 			spinBox->setSingleStep(4);
 
 			connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(colorRampStepsChanged(int)));

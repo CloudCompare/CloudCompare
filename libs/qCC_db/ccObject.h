@@ -93,7 +93,9 @@ typedef int64_t CC_CLASS_ENUM;
 class CC_TYPES
 {
 public:
-	static const CC_CLASS_ENUM OBJECT				=	0;
+
+	//Warning: never pass a 'constant initializer' by reference
+	static const CC_CLASS_ENUM OBJECT = 0;
 	static const CC_CLASS_ENUM HIERARCHY_OBJECT		=	CC_HIERARCH_BIT;
 	static const CC_CLASS_ENUM POINT_CLOUD			=	HIERARCHY_OBJECT	| CC_CLOUD_BIT;
 	static const CC_CLASS_ENUM MESH					=	HIERARCHY_OBJECT	| CC_MESH_BIT;

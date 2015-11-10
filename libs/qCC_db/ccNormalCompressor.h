@@ -31,6 +31,8 @@ class QCC_DB_LIB_API ccNormalCompressor
 public:
 
 	//! Compressed normals quantization level (number of directions: 2^(2*N+3))
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const unsigned char QUANTIZE_LEVEL = 9; //2097152 normals * 12 bytes = 24 Mb of memory
 
 	//! Compression algorithm

@@ -53,6 +53,8 @@ public:
 	
 protected:
 
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const int c_max_buff_size = 2048;
 
 	PdmsObjects::GenericItem *loadedObject;

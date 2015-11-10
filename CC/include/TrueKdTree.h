@@ -41,10 +41,10 @@ class CC_CORE_LIB_API TrueKdTree
 {
 public:
 
+	//Warning: never pass a 'constant initializer' by reference
 	static const uint8_t X_DIM = 0;
 	static const uint8_t Y_DIM = 1;
 	static const uint8_t Z_DIM = 2;
-
 	static const uint8_t NODE_TYPE = 0;
 	static const uint8_t LEAF_TYPE = 1;
 

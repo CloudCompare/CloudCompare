@@ -110,12 +110,18 @@ public:
 	virtual ~ccColorScale();
 
 	//! Minimum number of steps
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const unsigned MIN_STEPS = 2;
 
 	//! Default number of steps for display
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const unsigned DEFAULT_STEPS = 256;
 
 	//! Maximum number of steps (internal representation)
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const unsigned MAX_STEPS = 1024;
 
 	//! Returns name

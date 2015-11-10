@@ -30,6 +30,8 @@ class QCC_DB_LIB_API ccCylinder : public ccCone
 public:
 
 	//! Default drawing precision
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const unsigned DEFAULT_DRAWING_PRECISION = 24;
 
 	//! Default constructor

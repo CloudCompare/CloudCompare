@@ -578,6 +578,8 @@ void DgmOctree::computeCellsStatistics(unsigned char level)
 struct MonoDimensionalCellCodes
 {
 	//! Total number of positions/values (1024 at level 10, 2M. at level 21)
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const int VALUE_COUNT = OCTREE_LENGTH(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 	
 	//! Default initialization

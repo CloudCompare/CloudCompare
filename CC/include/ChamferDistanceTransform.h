@@ -39,6 +39,8 @@ class CC_CORE_LIB_API ChamferDistanceTransform : public Grid3D<unsigned short>, 
 public:
 
 	//! Max possible 'distance'
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
 	static const unsigned short MAX_DIST = 0xFAFA;
 
 	//! Initializes the grid

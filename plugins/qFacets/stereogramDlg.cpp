@@ -84,7 +84,7 @@ StereogramWidget::StereogramWidget(QWidget *parent)
 	, m_meanDipDir_deg(-1.0)
 	, m_meanDip_deg(-1.0)
 	, m_densityColorScale(0)
-	, m_densityColorScaleSteps(std::min<unsigned>(256,ccColorScale::MAX_STEPS))
+	, m_densityColorScaleSteps(ccColorScale::MAX_STEPS < 256 : ccColorScale::MAX_STEPS : 256) //DGM: we can't pass a constant initializer (MAX_STEPS) by reference
 	, m_ticksFreq(3)
 	, m_showHSVRing(false)
 	, m_trackMouseClick(false)

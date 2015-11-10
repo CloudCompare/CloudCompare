@@ -24,6 +24,7 @@
 #include <QMessageBox>
 #include <QLocale>
 #include <QTime>
+#include <QTranslator>
 
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
@@ -112,6 +113,28 @@ int main(int argc, char **argv)
 
 	//Command line mode?
 	bool commandLine = (argc > 1 && argv[1][0] == '-');
+	
+	//specific case: translation file selection
+	int lastArgumentIndex = 1;
+	QTranslator translator;
+	if (commandLine && QString(argv[1]).toUpper() == "-LANG")
+	{
+		QString langFilename = QString(argv[2]);
+		
+		//Load translation file
+		if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
+		{
+			qApp->installTranslator(&translator);
+		}
+		else
+		{
+			QMessageBox::warning(0, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
+		}
+		commandLine = false;
+		lastArgumentIndex = 3;
+	}
+
+	//command line mode
 	if (!commandLine)
 	{
 		//OpenGL?
@@ -154,14 +177,14 @@ int main(int argc, char **argv)
 		mainWindow->show();
 		QApplication::processEvents();
 
-		if (argc > 1)
+		if (argc > lastArgumentIndex)
 		{
 			if (splash)
 				splash->close();
 
 			//any additional argument is assumed to be a filename --> we try to load it/them
 			QStringList filenames;
-			for (int i=1; i<argc; ++i)
+			for (int i = lastArgumentIndex; i<argc; ++i)
 				filenames << QString(argv[i]);
 
 			mainWindow->addToDB(filenames);

@@ -42,7 +42,7 @@ endif()
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
 #file( GLOB rc_list *.rc )
-file( GLOB txt_list TODO.txt bin_other/history.txt )
+file( GLOB txt_list TODO.txt bin_other/history.txt tr/*.qm )
 
 if ( USE_QT5 )
 	qt5_wrap_ui( generated_ui_list ${ui_list} )
@@ -132,6 +132,13 @@ endif()
 foreach( filename ${auxFiles} )
 	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} )
 endforeach()
+
+# Translation files
+file( GLOB tr_list tr/*.qm )
+foreach( filename ${tr_list} )
+	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /tr )
+endforeach()
+
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )

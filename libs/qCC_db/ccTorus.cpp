@@ -68,32 +68,39 @@ bool ccTorus::buildUp()
 
 	const unsigned steps = m_drawPrecision;
 
-	unsigned sweepSteps = 4*(closed ? steps : (unsigned)ceil(m_angle_rad*(double)steps/(2.0*M_PI)));
+	unsigned sweepSteps = 4 * (closed ? steps : static_cast<unsigned>(ceil((m_angle_rad * steps)/(2.0*M_PI))));
 	unsigned sectSteps = (m_rectSection ? 4 : steps);
 
 	//vertices
-	unsigned vertCount = (sweepSteps+(closed ? 0 : 1))*sectSteps; //DGM: +1 row for non closed loops
+	unsigned vertCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; //DGM: +1 row for non closed loops
 	//faces
-	unsigned facesCount = sweepSteps*sectSteps*2;
+	unsigned facesCount = sweepSteps * sectSteps *2;
 	//faces normals
-	unsigned faceNormCount = (sweepSteps+(closed ? 0 : 1))*sectSteps; //DGM: +1 row for non closed loops
+	unsigned faceNormCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; //DGM: +1 row for non closed loops
 	if (!closed)
 		facesCount += (m_rectSection ? 2 : sectSteps)*2;
 
-	if (!init(vertCount+(closed || m_rectSection ? 0 : 2),false,facesCount,faceNormCount+(closed ? 0 : 2)))
+	if (!init(vertCount + (closed || m_rectSection ? 0 : 2), false, facesCount, faceNormCount + (closed ? 0 : 2)))
 	{
 		ccLog::Error("[ccTorus::buildUp] Not enough memory");
 		return false;
 	}
 
 	//2D section
-	CCVector3* sectPoints = new CCVector3[sectSteps];
-	if (!sectPoints)
+	std::vector<CCVector3> sectPoints;
+	try
+	{
+		sectPoints.resize(sectSteps);
+	}
+	catch (const std::bad_alloc&)
 	{
 		init(0,false,0,0);
 		ccLog::Error("[ccTorus::buildUp] Not enough memory");
 		return false;
 	}
+
+	double sweepStep_rad = m_angle_rad / sweepSteps;
+	double sectStep_rad = (2.0*M_PI) / sectSteps;
 
 	PointCoordinateType sectionRadius = (m_outsideRadius-m_insideRadius)/2;
 	if (m_rectSection)
@@ -111,11 +118,11 @@ bool ccTorus::buildUp()
 	else
 	{
 		//circular section
-		for (unsigned i=0;i<sectSteps;++i)
+		for (unsigned i=0; i<sectSteps; ++i)
 		{
-			float sect_angle_rad = (float)i/(float)sectSteps*(float)(2.0*M_PI);
-			sectPoints[i].x = cos(sect_angle_rad) * sectionRadius;
-			sectPoints[i].z = sin(sect_angle_rad) * sectionRadius;
+			double sect_angle_rad = i * sectStep_rad;
+			sectPoints[i].x = static_cast<PointCoordinateType>(cos(sect_angle_rad) * sectionRadius);
+			sectPoints[i].z = static_cast<PointCoordinateType>(sin(sect_angle_rad) * sectionRadius);
 		}
 	}
 
@@ -124,8 +131,7 @@ bool ccTorus::buildUp()
 	assert(m_triNormals);
 
 	//main sweep
-	PointCoordinateType sweepRadius = (m_insideRadius+m_outsideRadius)/(PointCoordinateType)2.0;
-	double sweepStep_rad = m_angle_rad/(double)sweepSteps;
+	PointCoordinateType sweepRadius = (m_insideRadius + m_outsideRadius)/2;
 	for (unsigned t=0; t<(closed ? sweepSteps : sweepSteps+1); ++t)
 	{
 		//unit director vector
@@ -134,7 +140,7 @@ bool ccTorus::buildUp()
 						 0);
 
 		//section points
-		for (unsigned i=0;i<sectSteps;++i)
+		for (unsigned i=0; i<sectSteps; ++i)
 		{
 			CCVector3 P(sweepU.x * (sweepRadius + sectPoints[i].x),
 						sweepU.y * (sweepRadius + sectPoints[i].x),
@@ -148,17 +154,17 @@ bool ccTorus::buildUp()
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,1.0).u));
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex((-sweepU).u));
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,-1.0).u));
-			m_triNormals->addElement(ccNormalVectors::GetNormIndex((-sweepU).u));
+			m_triNormals->addElement(ccNormalVectors::GetNormIndex(sweepU.u));
 		}
 		else //circular section
 		{
-			for (unsigned i=0;i<sectSteps;++i)
+			for (unsigned i=0; i<sectSteps; ++i)
 			{
-				float sectAngle_rad = (float)i/(float)sectSteps*(float)(2.0*M_PI);
-				CCVector3 sectU(cos(sectAngle_rad),0.0,sin(sectAngle_rad));
+				double sectAngle_rad = i * sectStep_rad;
+				CCVector3 sectU = CCVector3::fromArray(CCVector3(cos(sectAngle_rad), 0.0, sin(sectAngle_rad)).u);
 				CCVector3 N(sweepU.x * sectU.x,
-					sweepU.y * sectU.x,
-					sectU.z);
+							sweepU.y * sectU.x,
+							sectU.z);
 				m_triNormals->addElement(ccNormalVectors::GetNormIndex(N.u));
 			}
 		}
@@ -184,8 +190,7 @@ bool ccTorus::buildUp()
 																			0).u));
 	}
 
-	delete[] sectPoints;
-	sectPoints=0;
+	sectPoints.clear();
 
 	//mesh faces
 	{

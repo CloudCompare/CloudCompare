@@ -238,7 +238,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(QString filename,
 					}
 					else
 					{
-						ccLog::Warning("[CSVMatrixFilter] Not enough memory to map the texture on the cloud!");
+						ccLog::Warning("[CSVMatrixFilter] Not enough memory to map the texture on the mesh!");
 						texCoords->release();
 						texCoords = 0;
 					}

@@ -161,8 +161,6 @@ CC_FILE_ERROR OFFFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if (currentLine.isNull())
 			return CC_FERR_MALFORMED_FILE;
 
-		while (currentLine.startsWith("#") || currentLine.isEmpty());
-
 		//read the number of vertices/faces
 		tokens = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
 		if (tokens.size() < 2/*3*/) //should be 3 but we only use the 2 firsts...

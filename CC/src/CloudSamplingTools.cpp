@@ -28,6 +28,7 @@
 #include "DgmOctreeReferenceCloud.h"
 #include "DistanceComputationTools.h"
 #include "ScalarFieldTools.h"
+#include <random>
 
 //system
 #include <assert.h>
@@ -195,6 +196,9 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctreeAtLevel(GenericIndex
 
 ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPersist* inputCloud, unsigned newNumberOfPoints, GenericProgressCallback* progressCb/*=0*/)
 {
+	std::random_device rd;   // non-deterministic generator
+	std::mt19937 gen(rd());  // to seed mersenne twister.
+	
 	assert(inputCloud);
 
 	unsigned theCloudSize = inputCloud->size();
@@ -228,7 +232,9 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 	unsigned lastPointIndex = theCloudSize-1;
 	for (unsigned i=0; i<pointsToRemove; ++i)
 	{
-		unsigned index = (unsigned)floor((float)rand()/(float)RAND_MAX * (float)lastPointIndex);
+		//unsigned index = (unsigned)floor((float)rand()/(float)RAND_MAX * (float)lastPointIndex);
+		std::uniform_int_distribution<int> dist(0, lastPointIndex);
+		unsigned index = dist(gen);
 		newCloud->swap(index,lastPointIndex);
 		--lastPointIndex;
 

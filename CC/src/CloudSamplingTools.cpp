@@ -51,7 +51,7 @@ GenericIndexedCloud* CloudSamplingTools::resampleCloudWithOctree(	GenericIndexed
 			return 0;
 	}
 
-	//on cherche le niveau qui donne le nombre de points le plus proche de la consigne
+	//look for the Octree level that gives the number of cells (= points) closest to the desired value
 	unsigned char bestLevel=octree->findBestLevelForAGivenCellNumber(newNumberOfPoints);
 
 	GenericIndexedCloud* sampledCloud = resampleCloudWithOctreeAtLevel(inputCloud,bestLevel,resamplingMethod,progressCb,octree);

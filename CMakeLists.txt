@@ -28,9 +28,16 @@ if(MSVC)
   set( CMAKE_DEBUG_POSTFIX d )
 endif()
 
+# You need a c++11 Compiler to build CC
 if( UNIX )
-        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    if(COMPILER_SUPPORTS_CXX11)
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
         set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    else()
+        message(ERROR "Your compiler does not support C++11")
+    endif()
 endif()
 
 if( MSVC )

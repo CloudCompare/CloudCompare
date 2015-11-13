@@ -5,7 +5,10 @@
 FIND_PACKAGE(CGAL QUIET COMPONENTS Core ) # implies findGMP
 
 if (CGAL_FOUND)
-
+	if(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} LESS 4.3)
+		message(SEND_ERROR "CC Lib requires at least CGAL 4.3")
+	endif()
+	
 	include( ${CGAL_USE_FILE} )
 	include_directories(${CGAL_INCLUDE_DIR})
 	

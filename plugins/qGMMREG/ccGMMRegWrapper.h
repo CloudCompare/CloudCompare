@@ -24,6 +24,7 @@
 
 //System
 #include <vector>
+#include <stdlib.h>
 
 class ccMainAppInterface;
 class QWidget;

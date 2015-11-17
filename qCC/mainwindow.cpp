@@ -3998,7 +3998,7 @@ void MainWindow::doActionAddIdField()
 	updateUI();
 }
 
-PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn/*=0*/)
+PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn/*=12*/)
 {
 	assert(cloud);
 	if (cloud && cloud->size() != 0)
@@ -4021,7 +4021,7 @@ PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* c
 	return -PC_ONE;
 }
 
-PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=0*/)
+PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=12*/)
 {
 	PointCoordinateType sigma = -PC_ONE;
 

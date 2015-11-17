@@ -58,6 +58,7 @@
 #include <QEventLoop>
 #include <QTouchEvent>
 #include <QLayout>
+#include <QMessageBox>
 
 #ifdef USE_VLD
 //VLD

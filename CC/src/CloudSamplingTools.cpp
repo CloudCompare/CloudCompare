@@ -196,9 +196,6 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctreeAtLevel(GenericIndex
 
 ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPersist* inputCloud, unsigned newNumberOfPoints, GenericProgressCallback* progressCb/*=0*/)
 {
-	std::random_device rd;   // non-deterministic generator
-	std::mt19937 gen(rd());  // to seed mersenne twister.
-	
 	assert(inputCloud);
 
 	unsigned theCloudSize = inputCloud->size();
@@ -218,8 +215,10 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 	}
 
 	unsigned pointsToRemove = theCloudSize-newNumberOfPoints;
+	std::random_device rd;   // non-deterministic generator
+	std::mt19937 gen(rd());  // to seed mersenne twister.
 
-	NormalizedProgress* normProgress=0;
+	NormalizedProgress* normProgress = 0;
 	if (progressCb)
 	{
 		progressCb->setInfo("Random subsampling");

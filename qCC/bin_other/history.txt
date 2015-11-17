@@ -26,6 +26,8 @@ v2.7.beta ??/??/201?
 			(very useful to unwrap a cloud that has not a cylinder shape)
 		- the tool now keeps the active GL filter active (if any)
 
+	* qPoissonRecon now uses PoissonRecon V8.0 (https://github.com/mkazhdan/PoissonRecon)
+
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

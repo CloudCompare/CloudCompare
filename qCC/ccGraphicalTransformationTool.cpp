@@ -239,7 +239,7 @@ void ccGraphicalTransformationTool::glTranslate(const CCVector3d& realT)
 
 void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 {
-	switch(rotComboBox->currentIndex())
+	switch (rotComboBox->currentIndex())
 	{
 	case 0: //XYZ
 		m_rotation = rotMat * m_rotation;
@@ -278,7 +278,7 @@ void ccGraphicalTransformationTool::updateAllGLTransformations()
 {
 	//we recompute global GL transformation matrix
 	ccGLMatrixd newTrans = m_rotation;
-	newTrans += m_rotationCenter + m_translation - m_rotation*m_rotationCenter;
+	newTrans += m_rotationCenter + m_translation - m_rotation * m_rotationCenter;
 
 	ccGLMatrix newTransf(newTrans.data());
 	for (unsigned i=0; i<m_toTransform.getChildrenNumber(); ++i)

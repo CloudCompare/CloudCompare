@@ -78,7 +78,8 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 											const std::vector<HullPointFlags>& pointFlags,
 											PointCoordinateType minSquareEdgeLength,
 											PointCoordinateType maxSquareEdgeLength,
-											bool allowLongerChunks = false)
+											bool allowLongerChunks = false,
+											double minCosAngle = -1.0)
 {
 	//look for the nearest point in the input set
 	PointCoordinateType minDist2 = -1;
@@ -93,13 +94,27 @@ PointCoordinateType FindNearestCandidate(	unsigned& minIndex,
 
 		//skip the edge vertices!
 		if (P.index == (*itA)->index || P.index == (*itB)->index)
+		{
 			continue;
+		}
 
 		//we only consider 'inner' points
 		CCVector2 AP = P-**itA;
 		if (AB.x * AP.y - AB.y * AP.x < 0)
 		{
 			continue;
+		}
+
+		//check the angle
+		if (minCosAngle > -1.0)
+		{
+			CCVector2 PB = **itB - P;
+			PointCoordinateType dotProd = AP.x * PB.x + AP.y * PB.y;
+			PointCoordinateType minDotProd = static_cast<PointCoordinateType>(minCosAngle * sqrt(AP.norm2() * PB.norm2()));
+			if (dotProd < minDotProd)
+			{
+				continue;
+			}
 		}
 
 		PointCoordinateType dot = AB.dot(AP); // = cos(PAB) * ||AP|| * ||AB||
@@ -133,7 +148,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 												ContourType contourType,
 												bool allowMultiPass,
 												PointCoordinateType maxSquareEdgeLength/*=0*/,
-												bool enableVisualDebugMode/*=false*/)
+												bool enableVisualDebugMode/*=false*/,
+												double maxAngleDeg/*=0.0*/)
 {
 	//first compute the Convex hull
 	if (!CCLib::PointProjectionTools::extractConvexHull2D(points,hullPoints))
@@ -155,6 +171,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 		//not enough memory
 		return false;
 	}
+
+	double minCosAngle = cos(maxAngleDeg * M_PI / 180.0);
 
 	//hack: compute the theoretical 'minimal' edge length
 	PointCoordinateType minSquareEdgeLength = 0;
@@ -353,7 +371,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 						pointFlags,
 						minSquareEdgeLength,
 						maxSquareEdgeLength,
-						step > 1);
+						step > 1,
+						minCosAngle);
 
 					if (minSquareDist >= 0)
 					{
@@ -528,7 +547,9 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 								points,
 								pointFlags,
 								minSquareEdgeLength,
-								maxSquareEdgeLength);
+								maxSquareEdgeLength,
+								false,
+								minCosAngle);
 
 							if (minSquareDist >= 0)
 							{
@@ -549,7 +570,9 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 							points,
 							pointFlags,
 							minSquareEdgeLength,
-							maxSquareEdgeLength);
+							maxSquareEdgeLength,
+							false,
+							minCosAngle);
 
 						if (minSquareDist >= 0)
 						{
@@ -567,7 +590,9 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 							points,
 							pointFlags,
 							minSquareEdgeLength,
-							maxSquareEdgeLength);
+							maxSquareEdgeLength,
+							false,
+							minCosAngle);
 
 						if (minSquareDist >= 0)
 						{
@@ -624,7 +649,8 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 													const PointCoordinateType* preferredUpDir/*=0*/,
 													ContourType contourType/*=FULL*/,
 													std::vector<unsigned>* originalPointIndexes/*=0*/,
-													bool enableVisualDebugMode/*=false*/)
+													bool enableVisualDebugMode/*=false*/,
+													double maxAngleDeg/*=0.0*/)
 {
 	assert(points);
 	if (!points)
@@ -680,7 +706,8 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 								contourType,
 								allowMultiPass,
 								maxEdgeLength*maxEdgeLength,
-								enableVisualDebugMode) )
+								enableVisualDebugMode,
+								maxAngleDeg))
 	{
 		ccLog::Warning("[ExtractFlatContour] Failed to compute the convex hull of the input points!");
 		return 0;

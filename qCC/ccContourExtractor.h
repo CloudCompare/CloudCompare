@@ -44,6 +44,7 @@ public:
 		\param preferredUpDir to specifiy a preferred up direction for the polyline extraction (preferredNormDim must be defined as well and must be normal to this 'up' direction)
 		\param contourType to specify a type of contour (you should define a 'up' direction to get proper lower and upper contours)
 		\param[out] originalPointIndexes to get the indexes (relatively to the input cloud) of the output polyline vertices
+		\param maxAngleDeg max angle between segments (angle between 0 and 180, in degrees)
 		\return contour polyline (or 0 if an error occurred)
 	**/
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
@@ -53,7 +54,8 @@ public:
 											const PointCoordinateType* preferredUpDir = 0,
 											ContourType contourType = FULL,
 											std::vector<unsigned>* originalPointIndexes = 0,
-											bool enableVisualDebugMode = false);
+											bool enableVisualDebugMode = false,
+											double maxAngleDeg = 0.0);
 
 	//! Extracts one or several parts of the (2D) contour polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
@@ -86,6 +88,7 @@ protected:
 		\param hullPoints output points (on the convex hull)
 		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
 		\param maxSquareLength maximum square length (ignored if <= 0, in which case the method simply returns the convex hull!)
+		\param maxAngleDeg max angle between segments (angle between 0 and 180, in degrees)
 		\return success
 	**/
 	static bool ExtractConcaveHull2D(	std::vector<CCLib::PointProjectionTools::IndexedCCVector2>& points,
@@ -93,7 +96,8 @@ protected:
 										ContourType contourType,
 										bool allowMultiPass,
 										PointCoordinateType maxSquareLength = 0,
-										bool enableVisualDebugMode = false);
+										bool enableVisualDebugMode = false,
+										double maxAngleDeg = 90.0);
 
 
 };

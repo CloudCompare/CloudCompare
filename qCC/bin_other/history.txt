@@ -28,6 +28,8 @@ v2.7.beta ??/??/201?
 
 	* qPoissonRecon now uses PoissonRecon V8.0 (https://github.com/mkazhdan/PoissonRecon)
 
+	* Point sampling (on a mesh): maximum density is now 100 M. per square units
+
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

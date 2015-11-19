@@ -177,7 +177,10 @@ void ccPointListPickingDlg::cancelAndExit()
 	if (m_orderedLabelsContainer)
 	{
 		//Restore previous state
-		dbRoot->removeElements(m_toBeAdded);
+		if (!m_toBeAdded.empty())
+		{
+			dbRoot->removeElements(m_toBeAdded);
+		}
 
 		for (size_t j=0; j<m_toBeDeleted.size(); ++j)
 		{

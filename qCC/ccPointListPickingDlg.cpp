@@ -289,7 +289,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
 
 void ccPointListPickingDlg::applyAndExit()
 {
-	if (m_associatedCloud)
+	if (m_associatedCloud && !m_toBeDeleted.empty())
 	{
 		//apply modifications
 		MainWindow::TheInstance()->db()->removeElements(m_toBeDeleted); //no need to redraw as they should already be invisible

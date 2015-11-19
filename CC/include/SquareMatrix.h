@@ -29,11 +29,8 @@
 #include <algorithm>
 #include <vector>
 
-#define ROTATE(a,i,j,k,l) { Scalar g = a[i][j]; h = a[k][l]; a[i][j] = g-s*(h+g*tau); a[k][l] = h+s*(g-h*tau); }
-
 namespace CCLib
 {
-
 	//! Square matrix
 	/** Row-major ordered matrix (i.e. elements are accessed with 'values[row][column]')
 	**/
@@ -57,7 +54,9 @@ namespace CCLib
 		SquareMatrixTpl(const SquareMatrixTpl& mat)
 		{
 			if (init(mat.m_matrixSize))
+			{
 				*this = mat;
+			}
 		}
 
 		//! "From OpenGl" constructor (float version)
@@ -117,12 +116,6 @@ namespace CCLib
 		**/
 		void invalidate()
 		{
-			if (eigenValues)
-			{
-				delete[] eigenValues;
-				eigenValues = 0;
-			}
-
 			if (m_values)
 			{
 				for (unsigned i=0; i<m_matrixSize; i++)
@@ -167,12 +160,6 @@ namespace CCLib
 			for (unsigned r=0; r<m_matrixSize; r++)
 				for (unsigned c=0; c<m_matrixSize; c++)
 					m_values[r][c] = B.m_values[r][c];
-
-			if (B.eigenValues)
-			{
-				enableEigenValues();
-				memcpy(eigenValues,B.eigenValues,sizeof(Scalar)*m_matrixSize);
-			}
 
 			return *this;
 		}
@@ -320,10 +307,9 @@ namespace CCLib
 		void clear()
 		{
 			for (unsigned r=0; r<m_matrixSize; ++r)
-				memset(m_values[r],0,sizeof(Scalar)*m_matrixSize);
-
-			if (eigenValues)
-				memset(eigenValues,0,sizeof(Scalar)*m_matrixSize);
+			{
+				memset(m_values[r], 0, sizeof(Scalar)*m_matrixSize);
+			}
 		}
 
 		//! Returns inverse (Gauss)
@@ -644,150 +630,6 @@ namespace CCLib
 			return mat.computeDet();
 		}
 
-		//! Computes eigen vectors (and values) with the Jacobian method
-		/** See numerical recipes.
-		**/
-		SquareMatrixTpl computeJacobianEigenValuesAndVectors(unsigned maxIterationCount = 50) const
-		{
-			if (!isValid())
-				return SquareMatrixTpl();
-
-			SquareMatrixTpl eigenVectors(m_matrixSize);
-			eigenVectors.toIdentity();
-			if (!eigenVectors.enableEigenValues())
-			{
-				//not enough memory
-				return SquareMatrixTpl();
-			}
-			Scalar* d = eigenVectors.eigenValues;
-			
-			std::vector<Scalar> b,z;
-			try
-			{
-				b.resize(m_matrixSize);
-				z.resize(m_matrixSize);
-			}
-			catch (const std::bad_alloc&)
-			{
-				//not enough memory
-				return SquareMatrixTpl();
-			}
-
-			//init
-			{
-				for (unsigned ip=0; ip<m_matrixSize; ip++)
-				{
-					b[ip] = d[ip] = m_values[ip][ip]; //Initialize b and d to the diagonal of a.
-					z[ip] = 0; //This vector will accumulate terms of the form tapq as in equation (11.1.14)
-				}
-			}
-
-			//int j,iq,ip;
-			//Scalar tresh,theta,tau,t,sm,s,h,g,c,;
-
-			for (unsigned i=1; i<=maxIterationCount; i++)
-			{
-				//Sum off-diagonal elements
-				Scalar sm = 0;
-				{
-					for (unsigned ip=0; ip<m_matrixSize-1; ip++)
-					{
-						for (unsigned iq = ip+1; iq<m_matrixSize; iq++)
-							sm += fabs(m_values[ip][iq]);
-					}
-				}
-
-				if (sm == 0) //The normal return, which relies on quadratic convergence to machine underflow.
-				{
-					//we only need the absolute values of eigenvalues
-					for (unsigned ip=0; ip<m_matrixSize; ip++)
-						d[ip] = fabs(d[ip]);
-
-					return eigenVectors;
-				}
-
-				Scalar tresh = 0;
-				if (i < 4)
-					tresh = sm / static_cast<Scalar>(5*matrixSquareSize); //...on the first three sweeps.
-
-				for (unsigned ip=0; ip<m_matrixSize-1; ip++)
-				{
-					for (unsigned iq=ip+1; iq<m_matrixSize; iq++)
-					{
-						Scalar g = fabs(m_values[ip][iq]) * 100;
-						//After four sweeps, skip the rotation if the off-diagonal element is small.
-						if (	i > 4
-							&&	static_cast<float>(fabs(d[ip])+g) == static_cast<float>(fabs(d[ip]))
-							&&	static_cast<float>(fabs(d[iq])+g) == static_cast<float>(fabs(d[iq])) )
-						{
-							m_values[ip][iq] = 0;
-						}
-						else if (fabs(m_values[ip][iq]) > tresh)
-						{
-							Scalar h = d[iq]-d[ip];
-							Scalar t = 0;
-							if (static_cast<float>(fabs(h)+g) == static_cast<float>(fabs(h)))
-							{
-								t = m_values[ip][iq]/h; //t = 1/(2¦theta)
-							}
-							else
-							{
-								Scalar theta = h/(2*m_values[ip][iq]); //Equation (11.1.10).
-								t = 1/(fabs(theta)+sqrt(1+theta*theta));
-								if (theta < 0)
-									t = -t;
-							}
-
-							Scalar c = 1/sqrt(t*t+1);
-							Scalar s = t*c;
-							Scalar tau = s/(1+c);
-							h = t * m_values[ip][iq];
-							z[ip] -= h;
-							z[iq] += h;
-							d[ip] -= h;
-							d[iq] += h;
-							m_values[ip][iq] = 0;
-
-							//Case of rotations 1 <= j < p
-							{
-								for (unsigned j=0; j+1<=ip; j++)
-									ROTATE(m_values,j,ip,j,iq)
-							}
-							//Case of rotations p < j < q
-							{
-								for (unsigned j=ip+1; j+1<=iq; j++)
-									ROTATE(m_values,ip,j,j,iq)
-							}
-							//Case of rotations q < j <= n
-							{
-								for (unsigned j=iq+1; j<m_matrixSize; j++)
-									ROTATE(m_values,ip,j,iq,j)
-							}
-							//Last case
-							{
-								for (unsigned j=0; j<m_matrixSize; j++)
-									ROTATE(eigenVectors.m_values,j,ip,j,iq)
-							}
-						}
-
-					}
-
-				}
-
-				//update b, d and z
-				{
-					for (unsigned ip=0; ip<m_matrixSize; ip++)
-					{
-						b[ip] += z[ip];
-						d[ip] = b[ip];
-						z[ip] = 0;
-					}
-				}
-			}
-
-			//Too many iterations!
-			return SquareMatrixTpl();
-		}
 
 		//! Converts a 3*3 or 4*4 matrix to an OpenGL-style float matrix (float[16])
 		void toGlMatrix(float M16f[]) const
@@ -831,81 +673,6 @@ namespace CCLib
 			M16d[15] = 1.0;
 		}
 
-		//! Sorts the eigenvectors in the decreasing order of their associated eigenvalues
-		void sortEigenValuesAndVectors(bool absVal = false)
-		{
-			if (!eigenValues || m_matrixSize < 2)
-				return;
-
-			for (unsigned i=0; i<m_matrixSize-1; i++)
-			{
-				unsigned maxValIndex = i;
-				for (unsigned j=i+1; j<m_matrixSize; j++)
-					if (eigenValues[j] > eigenValues[maxValIndex]) //eigen values are always positive! (= square of singular values)
-						maxValIndex = j;
-
-				if (maxValIndex != i)
-				{
-					std::swap(eigenValues[i],eigenValues[maxValIndex]);
-					for (unsigned j=0; j<m_matrixSize; j++)
-						std::swap(m_values[j][i],m_values[j][maxValIndex]);
-				}
-			}
-		}
-
-
-		//! Returns the biggest eigenvalue and ist associated eigenvector
-		/** \param maxEigenVector output vector to store max eigen vector
-			\return max eigen value
-		**/
-		Scalar getMaxEigenValueAndVector(Scalar maxEigenVector[]) const
-		{
-			assert(eigenValues);
-
-			unsigned maxIndex = 0;
-			for (unsigned i=1; i<m_matrixSize; ++i)
-				if (eigenValues[i] > eigenValues[maxIndex])
-					maxIndex = i;
-
-			return getEigenValueAndVector(maxIndex,maxEigenVector);
-		}
-
-		//! Returns the smallest eigenvalue and ist associated eigenvector
-		/** \param minEigenVector output vector to store min eigen vector
-			\return min eigen value
-		**/
-		Scalar getMinEigenValueAndVector(Scalar minEigenVector[]) const
-		{
-			assert(eigenValues);
-
-			unsigned minIndex = 0;
-			for (unsigned i=1; i<m_matrixSize; ++i)
-				if (eigenValues[i] < eigenValues[minIndex])
-					minIndex = i;
-
-			return getEigenValueAndVector(minIndex,minEigenVector);
-		}
-
-		//! Returns the given eigenvalue and ist associated eigenvector
-		/** \param index eigen requested value/vector index (< matrix size)
-			\param eigenVector vector (size = matrix size) for output (or 0 if eigen vector is not requested)
-			\return requested eigen value
-		**/
-		Scalar getEigenValueAndVector(unsigned index, Scalar* eigenVector = 0) const
-		{
-			assert(eigenValues);
-			assert(index < m_matrixSize);
-
-			if (eigenVector)
-				for (unsigned i=0; i<m_matrixSize; ++i)
-					eigenVector[i] = m_values[i][index];
-
-			return eigenValues[index];
-		}
-
-		//! Returns the eigenvalues as an array
-		inline const Scalar* getEigenValues() const { return eigenValues; }
-
 	protected:
 
 		//! Internal initialization
@@ -917,7 +684,6 @@ namespace CCLib
 			matrixSquareSize = m_matrixSize*m_matrixSize;
 
 			m_values = 0;
-			eigenValues = 0; //no eigeinvalues associated by default
 
 			if (size != 0)
 			{
@@ -948,17 +714,6 @@ namespace CCLib
 			}
 
 			return true;
-		}
-
-		//! Instantiates an array to store eigen values
-		/** Warning: sets this array to zero, even if it was already instantiated!
-		**/
-		bool enableEigenValues()
-		{
-			if (!eigenValues && m_matrixSize != 0)
-				eigenValues = new Scalar[m_matrixSize];
-
-			return (eigenValues != 0);
 		}
 
 		//! Computes sub-matrix determinant
@@ -1001,11 +756,6 @@ namespace CCLib
 
 		//! Matrix square-size
 		unsigned matrixSquareSize;
-
-		//! Eigenvalues
-		/** Typically associated to an eigen matrix!
-		**/
-		Scalar* eigenValues;
 	};
 
 	//! Default CC square matrix type (PointCoordinateType)

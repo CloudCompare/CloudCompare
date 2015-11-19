@@ -34,6 +34,7 @@
 #include <SimpleCloud.h>
 #include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
+#include <Jacobi.h>
 
 //for tests
 #include <ChamferDistanceTransform.h>
@@ -2231,17 +2232,18 @@ void MainWindow::doComputeBestFitBB()
 			CCLib::SquareMatrixd covMat = Yk.computeCovarianceMatrix();
 			if (covMat.isValid())
 			{
-				CCLib::SquareMatrixd eig = covMat.computeJacobianEigenValuesAndVectors();
-				if (eig.isValid())
+				CCLib::SquareMatrixd eigVectors;
+				std::vector<double> eigValues;
+				if (Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues))
 				{
-					eig.sortEigenValuesAndVectors();
+					Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
 
 					ccGLMatrix trans;
 					GLfloat* rotMat = trans.data();
 					for (unsigned j=0; j<3; ++j)
 					{
 						double u[3];
-						eig.getEigenValueAndVector(j,u);
+						Jacobi<double>::GetEigenVector(eigVectors, j, u);
 						CCVector3 v(static_cast<PointCoordinateType>(u[0]),
 									static_cast<PointCoordinateType>(u[1]),
 									static_cast<PointCoordinateType>(u[2]));

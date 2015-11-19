@@ -99,7 +99,9 @@ protected:
 
 };
 
-//! Horn point cloud registration algorithm (Horn).
+//! Horn point cloud registration algorithm
+/** See 'Closed-form solution of absolute orientation using unit quaternions', B.K.P. Horn, 1987.
+**/
 class CC_CORE_LIB_API HornRegistrationTools : public RegistrationTools
 {
 public:

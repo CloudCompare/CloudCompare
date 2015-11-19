@@ -35,6 +35,7 @@
 #include "SimpleCloud.h"
 #include "ChunkedPointCloud.h"
 #include "Garbage.h"
+#include "Jacobi.h"
 
 //system
 #include <time.h>
@@ -1066,14 +1067,18 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		QSigma.m_values[3][3] = bottomMat.m_values[2][2];
 
 		//we compute its eigenvalues and eigenvectors
-		SquareMatrixd eig = QSigma.computeJacobianEigenValuesAndVectors();
-
-		if (!eig.isValid())
+		CCLib::SquareMatrixd eigVectors;
+		std::vector<double> eigValues;
+		if (!Jacobi<double>::ComputeEigenValuesAndVectors(QSigma, eigVectors, eigValues))
+		{
+			//failure
 			return false;
+		}
 
 		//as Besl says, the best rotation corresponds to the eigenvector associated to the biggest eigenvalue
 		double qR[4];
-		eig.getMaxEigenValueAndVector(qR);
+		double maxEigValue = 0;
+		Jacobi<double>::GetMaxEigenValueAndVector(eigVectors, eigValues, maxEigValue, qR);
 
 		//these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
 		trans.R.initFromQuaternion(qR);

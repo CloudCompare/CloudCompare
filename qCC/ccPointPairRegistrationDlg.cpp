@@ -1162,7 +1162,7 @@ void ccPointPairRegistrationDlg::autoUpdateAlignInfo()
 		m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
 	}
 
-	m_associatedWin->redraw(true, false);
+	m_associatedWin->redraw();
 }
 
 void ccPointPairRegistrationDlg::align()

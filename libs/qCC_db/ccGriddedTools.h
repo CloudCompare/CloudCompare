@@ -33,6 +33,38 @@ class QCC_DB_LIB_API ccGriddedTools
 {
 public:
 
+	//! Grid (angular) parameters
+	struct GridParameters
+	{
+		GridParameters()
+			: minPhi(0)
+			, maxPhi(0)
+			, minTheta(0)
+			, maxTheta(0)
+			, deltaPhiRad(0)
+			, deltaThetaRad(0)
+			, maxRange(0)
+		{}
+
+		PointCoordinateType minPhi, maxPhi;
+		PointCoordinateType minTheta, maxTheta;
+		PointCoordinateType deltaPhiRad, deltaThetaRad;
+		PointCoordinateType maxRange;
+	};
+
+	//! Detects the given grid parameters (angular span, etc.)
+	/** \param grid scan grid
+		\param cloud associated cloud
+		\param parameters output parameters
+		\param cloudToSensorTrans transformation from cloud coordinate system to the sensor coordinate system (optional)
+		\return success
+	**/
+	static bool DetectParameters(	const ccPointCloud* cloud,
+									const ccPointCloud::Grid::Shared grid,
+									GridParameters& parameters,
+									bool verbose = false,
+									ccGLMatrix* cloudToSensorTrans = 0);
+
 	//! Determines the (TLS) sensor parameters from the relative position of gridded points
 	/** \param cloud cloud on which to compute the sensor parameters (should be a single grid)
 		\param grid scan grid

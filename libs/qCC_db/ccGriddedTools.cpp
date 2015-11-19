@@ -24,23 +24,30 @@
 //! Association of an angle and the corresponding number of rows/columns
 typedef std::pair<PointCoordinateType,unsigned> AngleAndSpan;
 
-ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans/*=0*/)
+bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
+										const ccPointCloud::Grid::Shared grid,
+										GridParameters& parameters,
+										bool verbose/*=false*/,
+										ccGLMatrix* cloudToSensorTrans/*=0*/)
 {
 	if (!cloud || !grid)
 	{
 		assert(false);
-		return 0;
+		return false;
 	}
 
-	PointCoordinateType minPhi = static_cast<PointCoordinateType>(M_PI), maxPhi = -minPhi;
-	PointCoordinateType minTheta = static_cast<PointCoordinateType>(M_PI), maxTheta = -minTheta;
-	PointCoordinateType deltaPhiRad = 0, deltaThetaRad = 0;
-	PointCoordinateType maxRange = 0;
+	parameters.minPhi = static_cast<PointCoordinateType>(M_PI);
+	parameters.maxPhi = -parameters.minPhi;
+	parameters.minTheta = static_cast<PointCoordinateType>(M_PI);
+	parameters.maxTheta = -parameters.minTheta;
+	parameters.deltaPhiRad = 0;
+	parameters.deltaThetaRad = 0;
+	parameters.maxRange = 0;
 
 	//we must test if the angles are shifted (i.e the scan spans above theta = pi)
 	//we'll compute all parameters for both cases, and choose the best one at the end!
-	PointCoordinateType minPhiShifted = minPhi, maxPhiShifted = maxPhi;
-	PointCoordinateType minThetaShifted = minTheta, maxThetaShifted = maxTheta;
+	PointCoordinateType minPhiShifted = parameters.minPhi, maxPhiShifted = parameters.maxPhi;
+	PointCoordinateType minThetaShifted = parameters.minTheta, maxThetaShifted = parameters.maxTheta;
 
 	try
 	{
@@ -49,7 +56,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 			std::vector< AngleAndSpan > angles;
 			std::vector< AngleAndSpan > anglesShifted;
 
-			//for each LINE we determine the min and max valid grid point (i.e. != (0,0,0))
+			//for each ROW we determine the min and max valid grid point (i.e. index >= 0)
 			const int* _indexGrid = &(grid->indexes[0]);
 			for (unsigned j=0; j<grid->h; ++j)
 			{
@@ -100,15 +107,15 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 
 							//find max range
 							PointCoordinateType range = P.norm();
-							if (range > maxRange)
-								maxRange = range;
+							if (range > parameters.maxRange)
+								parameters.maxRange = range;
 						}
 					}
 
-					if (minPhi > minPhiCurrentLine)
-						minPhi = minPhiCurrentLine;
-					if (maxPhi < maxPhiCurrentLine)
-						maxPhi = maxPhiCurrentLine;
+					if (parameters.minPhi > minPhiCurrentLine)
+						parameters.minPhi = minPhiCurrentLine;
+					if (parameters.maxPhi < maxPhiCurrentLine)
+						parameters.maxPhi = maxPhiCurrentLine;
 
 					if (minPhiShifted > minPhiCurrentLineShifted)
 						minPhiShifted = minPhiCurrentLineShifted;
@@ -130,13 +137,13 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 			{
 				//check the 'shifted' hypothesis
 				PointCoordinateType spanShifted = maxPhiShifted - minPhiShifted;
-				PointCoordinateType span = maxPhi - minPhi;
+				PointCoordinateType span = parameters.maxPhi - parameters.minPhi;
 				if (spanShifted < 0.99 * span)
 				{
 					//we prefer the shifted version!
 					angles = anglesShifted;
-					minPhi = minPhiShifted;
-					maxPhi = maxPhiShifted;
+					parameters.minPhi = minPhiShifted;
+					parameters.maxPhi = maxPhiShifted;
 				}
 
 				//we simply take the biggest step evaluation for the widest span!
@@ -150,13 +157,16 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 					}
 				}
 
-				deltaPhiRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
-				ccLog::Print(QString("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])").arg(deltaPhiRad * CC_RAD_TO_DEG).arg(minPhi * CC_RAD_TO_DEG).arg(maxPhi * CC_RAD_TO_DEG));
+				parameters.deltaPhiRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
+				if (verbose)
+				{
+					ccLog::Print(QString("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])").arg(parameters.deltaPhiRad * CC_RAD_TO_DEG).arg(parameters.minPhi * CC_RAD_TO_DEG).arg(parameters.maxPhi * CC_RAD_TO_DEG));
+				}
 			}
 			else
 			{
-				ccLog::Warning("[Scan grid] Not enough valid points to compute sensor angular step (pitch)!");
-				return 0;
+				ccLog::Warning("[Scan grid] Not enough valid points to compute the scan angular step (pitch)!");
+				return false;
 			}
 		}
 
@@ -165,7 +175,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 			std::vector< AngleAndSpan > angles;
 			std::vector< AngleAndSpan > anglesShifted;
 
-			//for each COLUMN we determine the min and max valid grid point (i.e. != (0,0,0))
+			//for each COLUMN we determine the min and max valid grid point (i.e. index >= 0)
 			for (unsigned i=0; i<grid->w; ++i)
 			{
 				const int* _indexGrid = &(grid->indexes[i]);
@@ -218,10 +228,10 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 						}
 					}
 
-					if (minTheta > minThetaCurrentCol)
-						minTheta = minThetaCurrentCol;
-					if (maxTheta < maxThetaCurrentCol)
-						maxTheta = maxThetaCurrentCol;
+					if (parameters.minTheta > minThetaCurrentCol)
+						parameters.minTheta = minThetaCurrentCol;
+					if (parameters.maxTheta < maxThetaCurrentCol)
+						parameters.maxTheta = maxThetaCurrentCol;
 
 					if (minThetaShifted > minThetaCurrentColShifted)
 						minThetaShifted = minThetaCurrentColShifted;
@@ -241,13 +251,13 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 			{
 				//check the 'shifted' hypothesis
 				PointCoordinateType spanShifted = maxThetaShifted - minThetaShifted;
-				PointCoordinateType span = maxTheta - minTheta;
+				PointCoordinateType span = parameters.maxTheta - parameters.minTheta;
 				if (spanShifted < 0.99 * span)
 				{
 					//we prefer the shifted version!
 					angles = anglesShifted;
-					minTheta = minThetaShifted;
-					maxTheta = maxThetaShifted;
+					parameters.minTheta = minThetaShifted;
+					parameters.maxTheta = maxThetaShifted;
 				}
 
 				//we simply take the biggest step evaluation for the widest span!
@@ -261,31 +271,44 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 					}
 				}
 
-				deltaThetaRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
-				ccLog::Print(QString("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])").arg(deltaThetaRad * CC_RAD_TO_DEG).arg(minTheta * CC_RAD_TO_DEG).arg(maxTheta * CC_RAD_TO_DEG));
+				parameters.deltaThetaRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
+				if (verbose)
+				{
+					ccLog::Print(QString("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])").arg(parameters.deltaThetaRad * CC_RAD_TO_DEG).arg(parameters.minTheta * CC_RAD_TO_DEG).arg(parameters.maxTheta * CC_RAD_TO_DEG));
+				}
 			}
 			else
 			{
-				ccLog::Warning("[Scan grid] Not enough valid points to compute sensor angular steps!");
-				return 0;
+				ccLog::Warning("[Scan grid] Not enough valid points to compute the scan angular steps!");
+				return false;
 			}
 		}
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Warning("[Scan grid] Not enough memory to compute sensor angular steps!");
+		ccLog::Warning("[Scan grid] Not enough memory to compute the scan angular steps!");
+		return false;
+	}
+
+	return true;
+}
+
+ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans/*=0*/)
+{
+	GridParameters parameters;
+	if (!DetectParameters(cloud, grid, parameters, true, cloudToSensorTrans))
+	{
 		return 0;
 	}
 
 	ccGBLSensor* sensor = new ccGBLSensor(ccGBLSensor::YAW_THEN_PITCH);
 	if (sensor)
 	{
-		sensor->setPitchStep(deltaPhiRad);
-		sensor->setPitchRange(minPhi,maxPhi);
-		sensor->setYawStep(deltaThetaRad);
-		sensor->setYawRange(minTheta,maxTheta);
-		sensor->setSensorRange(maxRange);
-		//sensor->setRigidTransformation(cloudTrans/*sensorTrans*/); //will be called later by applyGLTransformation_recursive
+		sensor->setPitchStep(parameters.deltaPhiRad);
+		sensor->setPitchRange(parameters.minPhi,parameters.maxPhi);
+		sensor->setYawStep(parameters.deltaThetaRad);
+		sensor->setYawRange(parameters.minTheta,parameters.maxTheta);
+		sensor->setSensorRange(parameters.maxRange);
 		sensor->setGraphicScale(PC_ONE/2);
 		sensor->setVisible(true);
 		sensor->setEnabled(false);

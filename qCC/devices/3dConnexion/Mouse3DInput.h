@@ -47,7 +47,7 @@ public:
 	//! Attempts to connect with the 3DxWare driver
 	bool connect(QWidget* mainWidget, QString appName);
 	//! Disconnects from the 3DxWare driver
-	void disconnect();
+	void disconnectDriver();
 
 	//! Default key codes
 	enum VirtualKey

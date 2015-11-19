@@ -51,20 +51,26 @@ static const double c_3dmouseAngularVelocity = 1.0e-6;
 static Mouse3DInput* s_mouseInputInstance = 0;
 
 #ifdef CC_QT5
+
 #include <QAbstractNativeEventFilter>
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
 public:
 	virtual bool nativeEventFilter(const QByteArray& eventType, void* msg, long* result) Q_DECL_OVERRIDE
-#else
+
+#else //Qt 4
+
 class RawInputEventFilter
 {
 public:
 	static bool Filter(void* msg, long* result)
+
 #endif
 	{
 		if (!s_mouseInputInstance || !msg)
+		{
 			return false;
+		}
 
 		SiGetEventData eData;	//Platform-specific event data
 #ifdef CC_WINDOWS
@@ -96,7 +102,9 @@ Mouse3DInput::~Mouse3DInput()
 {
 	//unregister current instance
 	if (s_mouseInputInstance == this)
+	{
 		s_mouseInputInstance = 0;
+	}
 }
 
 bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
@@ -150,7 +158,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	return true;
 }
 
-void Mouse3DInput::disconnect()
+void Mouse3DInput::disconnectDriver()
 {
 	if (m_siHandle != SI_NO_HANDLE)
 	{
@@ -162,13 +170,17 @@ void Mouse3DInput::disconnect()
 
 bool Mouse3DInput::onSiEvent(void* siGetEventData)
 {
-	if (m_siHandle == SI_NO_HANDLE)
+	if (m_siHandle == SI_NO_HANDLE || !siGetEventData)
+	{
 		return false;
+	}
 
-	SiSpwEvent siEvent;		///3DxWare data event
+	SiSpwEvent siEvent; ///3DxWare data event
 	if (SiGetEvent (m_siHandle, 0, static_cast<SiGetEventData*>(siGetEventData), &siEvent) != SI_IS_EVENT)
+	{
 		return false;
-			
+	}
+
 	switch (siEvent.type)
 	{
 	case SI_MOTION_EVENT:
@@ -186,12 +198,12 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 				double ds = eventData.period * c_3dmouseAngularVelocity; //period is in ms
 				//translation data
 				axes[0] = - static_cast<float>(eventData.mData[SI_TX] * ds);
-				axes[1] = static_cast<float>(eventData.mData[SI_TY] * ds);
-				axes[2] = static_cast<float>(eventData.mData[SI_TZ] * ds);
+				axes[1] =   static_cast<float>(eventData.mData[SI_TY] * ds);
+				axes[2] =   static_cast<float>(eventData.mData[SI_TZ] * ds);
 				//rotation data
 				axes[3] = - static_cast<float>(eventData.mData[SI_RX] * ds);
-				axes[4] = static_cast<float>(eventData.mData[SI_RY] * ds);
-				axes[5] = static_cast<float>(eventData.mData[SI_RZ] * ds);
+				axes[4] =   static_cast<float>(eventData.mData[SI_RY] * ds);
+				axes[5] =   static_cast<float>(eventData.mData[SI_RZ] * ds);
 
 				move3d(axes);
 			}

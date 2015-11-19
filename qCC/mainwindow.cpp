@@ -636,8 +636,8 @@ void MainWindow::release3DMouse()
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_3dMouseInput)
 	{
-		m_3dMouseInput->disconnect(); //disconnect from the driver
-		disconnect(m_3dMouseInput); //disconnect from Qt ;)
+		m_3dMouseInput->disconnectDriver(); //disconnect from the driver
+		m_3dMouseInput->disconnect(this); //disconnect from Qt ;)
 		
 		delete m_3dMouseInput;
 		m_3dMouseInput = 0;
@@ -654,7 +654,9 @@ void MainWindow::enable3DMouse(bool state, bool silent)
 {
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_3dMouseInput)
+	{
 		release3DMouse();
+	}
 
 	if (state)
 	{
@@ -672,7 +674,9 @@ void MainWindow::enable3DMouse(bool state, bool silent)
 			m_3dMouseInput = 0;
 			
 			if (!silent)
+			{
 				ccLog::Error("[3D Mouse] No device found"); //warning message has already been issued by Mouse3DInput::connect
+			}
 			state = false;
 		}
 	}

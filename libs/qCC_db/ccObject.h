@@ -115,6 +115,7 @@ public:
 	static const CC_CLASS_ENUM SPHERE				=	PRIMITIVE			| CC_SPHERE_BIT;
 	static const CC_CLASS_ENUM TORUS				=	PRIMITIVE			| CC_TORUS_BIT;
 	static const CC_CLASS_ENUM CONE					=	PRIMITIVE			| CC_CONE_BIT;
+	static const CC_CLASS_ENUM OLD_CYLINDER_ID		=	PRIMITIVE			| CC_CYLINDER_BIT;							//for backward compatibility!
 	static const CC_CLASS_ENUM CYLINDER				=	PRIMITIVE			| CC_CYLINDER_BIT			| CC_CONE_BIT;	//cylinders are cones!
 	static const CC_CLASS_ENUM BOX					=	PRIMITIVE			| CC_BOX_BIT;
 	static const CC_CLASS_ENUM DISH					=	PRIMITIVE			| CC_DISH_BIT;

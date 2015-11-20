@@ -186,6 +186,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 	case CC_TYPES::TORUS:
 		return new ccTorus(name);
 	case CC_TYPES::CYLINDER:
+	case CC_TYPES::OLD_CYLINDER_ID:
 		return new ccCylinder(name);
 	case CC_TYPES::BOX:
 		return new ccBox(name);
@@ -910,6 +911,11 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 	if (!ccObject::fromFile(in, dataVersion, flags))
 		return false;
 
+#ifdef _DEBUG
+	char buffer[1024];
+	strcpy(buffer, qPrintable(getName()));
+#endif
+
 	//read own data
 	if (!fromFile_MeOnly(in, dataVersion, flags))
 		return false;
@@ -974,7 +980,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 			}
 			else
 			{
-				delete child;
+				//delete child; //we can't do this as the object might be invalid
 				return false;
 			}
 		}

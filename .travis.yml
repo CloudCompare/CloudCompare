@@ -1,36 +1,45 @@
+sudo: required
+dist: trusty
+
 language:
     cpp
 
 compiler:
-    - clang # 3.4
-    - gcc # 4.6
+    - clang # 3.5.0
+    - gcc # 4.8.4
 
 install:
-    # We remove Postgis added by Travis since it prevents us from installing libgdal-dev
-    - sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp/
-    - sudo apt-get -qq remove postgis
-    - sudo apt-get update -qq
     # Install dependencies
-    - sudo apt-get install -qy cmake libqt4-dev libqt4-opengl-dev libgdal-dev libcgal-dev
+    - sudo apt-get update -qq
+    - sudo apt-get install -qy cmake libqt4-dev libqt4-opengl-dev libgdal1-dev libcgal-dev libfreenect-dev
+    # libdxflib-dev libvx1-dev
+    # CC submodules
+    - git submodule init && git submodule update 
 
 before_script:
     - mkdir build
     - cd build
-    - cmake -DCMAKE_BUILD_TYPE=Release \
-      -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON \
-      -DINSTALL_QHPR_PLUGIN=ON \
-      -DINSTALL_QPCV_PLUGIN=ON \
-      -DINSTALL_QPOISSON_RECON_PLUGIN=ON \
-      -DINSTALL_QEDL_PLUGIN=ON \
-      -DINSTALL_QSRA_PLUGIN=ON \
-      -DINSTALL_QSSAO_PLUGIN=ON \
-      -DOPTION_USE_GDAL=ON \
-      -DOPTION_USE_SHLIB=ON ..
-
-    # For now, we do not use libfreenect, liblas and dxflib 
-    # since the versions of these libs in precise are too old to link with CC
-
+    - cmake -DCMAKE_BUILD_TYPE=Release 
+      -DINSTALL_QHPR_PLUGIN=ON 
+      -DINSTALL_QPCV_PLUGIN=ON 
+      -DINSTALL_QPOISSON_RECON_PLUGIN=ON 
+      -DINSTALL_QEDL_PLUGIN=ON 
+      -DINSTALL_QSRA_PLUGIN=ON 
+      -DINSTALL_QSSAO_PLUGIN=ON 
+      -DOPTION_USE_GDAL=ON 
+      -DINSTALL_QKINECT_PLUGIN=ON 
+      -DLIBFREENECT_INCLUDE_DIR="/usr/include" 
+      -DLIBFREENECT_LIBRARY_FILE="/usr/lib/x86_64-linux-gnu/libfreenect.so"
+      -DINSTALL_QFACETS_PLUGIN=ON
+      -DOPTION_USE_SHAPE_LIB=ON 
+      -DINSTALL_QANIMATION_PLUGIN=ON ..
+      
+      # For now :
+      # - qRansacSD fail on Clang
+      # - no libav/FFMPEG. Version in repos is < 10.7 (no frame.h)
+      # - qGMMReg code do not compile with GCC 
+      # - CGAL 2D triangulation in 4.2.1 is not API compatible with 4.7 (?)
+      # - DXFLIB need a better cmake to handle libdxflib from Ub
 script:
     # We use only 4 core because gcc and clang can be memory hungry
     - make -j4
-

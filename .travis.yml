@@ -11,8 +11,8 @@ compiler:
 install:
     # Install dependencies
     - sudo apt-get update -qq
-    - sudo apt-get install -qy cmake libqt4-dev libqt4-opengl-dev libgdal1-dev libcgal-dev libfreenect-dev
-    # libdxflib-dev libvx1-dev
+    - sudo apt-get install -qy cmake libqt4-dev libqt4-opengl-dev libgdal1-dev libcgal-dev libfreenect-dev libvxl1-dev 
+    # libdxflib-dev
     # CC submodules
     - git submodule init && git submodule update 
 
@@ -26,19 +26,20 @@ before_script:
       -DINSTALL_QEDL_PLUGIN=ON 
       -DINSTALL_QSRA_PLUGIN=ON 
       -DINSTALL_QSSAO_PLUGIN=ON 
+      -DINSTALL_QPCV_PLUGIN=ON 
       -DOPTION_USE_GDAL=ON 
       -DINSTALL_QKINECT_PLUGIN=ON 
       -DLIBFREENECT_INCLUDE_DIR="/usr/include" 
-      -DLIBFREENECT_LIBRARY_FILE="/usr/lib/x86_64-linux-gnu/libfreenect.so"
-      -DINSTALL_QFACETS_PLUGIN=ON
+      -DLIBFREENECT_LIBRARY_FILE="/usr/lib/x86_64-linux-gnu/libfreenect.so" 
+      -DINSTALL_QFACETS_PLUGIN=ON 
       -DOPTION_USE_SHAPE_LIB=ON 
+      -DINSTALL_QGMMREG_PLUGIN=ON 
       -DINSTALL_QANIMATION_PLUGIN=ON ..
       
       # For now :
       # - qRansacSD fail on Clang
       # - no libav/FFMPEG. Version in repos is < 10.7 (no frame.h)
-      # - qGMMReg code do not compile with GCC 
-      # - CGAL 2D triangulation in 4.2.1 is not API compatible with 4.7 (?)
+      # - could not use CGAL from Ubuntu (< 4.3)
       # - DXFLIB need a better cmake to handle libdxflib from Ub
 script:
     # We use only 4 core because gcc and clang can be memory hungry

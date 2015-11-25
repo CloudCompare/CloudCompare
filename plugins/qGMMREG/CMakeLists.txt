@@ -7,6 +7,9 @@ if (INSTALL_QGMMREG_PLUGIN)
 #CloudCompare 'GMMREG' plugin
 project( QGMMREG_PLUGIN )
 
+#As we are going to re-use several components of the main qCC project
+#we define its sources path relatively to the plugin's dir
+set(CloudCompare_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../qCC)
 find_package(VXL)
 
 # Whether FIND_PACKAGE(VXL) worked is stored in the variable

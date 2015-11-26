@@ -38,6 +38,8 @@ v2.7.beta ??/??/201?
 	* The point-pair based alignment tool could sometimes fail (especially when there were at least 4 picked
 		points almost all in a plane)
 	* CC 2.6.2 would crash when loading older BIN files containing primitive cylinders
+	* FARO files: the sensor position associated to each grid/scan structure was wrong. This could lead to
+		a wrong orientation when computing normals.
 
 v2.6.2 10/08/2015
 - New features:

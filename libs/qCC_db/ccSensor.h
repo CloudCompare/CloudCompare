@@ -125,14 +125,14 @@ public:
 	**/
 	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
 
+	//inherited from ccHObject
+	virtual void applyGLTransformation(const ccGLMatrix& trans);
+
 protected:
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-
-	//inherited from ccHObject
-	virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Positions buffer (optional)
 	ccIndexedTransformationBuffer* m_posBuffer;

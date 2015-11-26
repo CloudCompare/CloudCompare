@@ -1829,7 +1829,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 
 	//refreshBB();
 	{
-		//--> instead, we update BBox directly! (faster)
+		//--> instead, we update the bounding box directly! (faster)
 		PointCoordinateType* bbMin = m_points->getMin();
 		PointCoordinateType* bbMax = m_points->getMax();
 		CCVector3 f(fx,fy,fz);
@@ -1880,6 +1880,50 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 		for (size_t i=0; i<kdtrees.size(); ++i)
 		{
 			removeChild(kdtrees[i]);
+		}
+	}
+
+	//update the grids as well
+	{
+		for (size_t i=0; i<m_grids.size(); ++i)
+		{
+			if (m_grids[i])
+			{
+				//update scan translation
+				CCVector3d T = m_grids[i]->sensorPosition.getTranslationAsVec3D();
+				T.x *= fx;
+				T.y *= fy;
+				T.z *= fz;
+				m_grids[i]->sensorPosition.setTranslation(T);
+			}
+		}
+	}
+
+	//updates the sensors
+	{
+		for (size_t i=0; i<m_children.size(); ++i)
+		{
+			ccHObject* child = m_children[i];
+			if (child && child->isKindOf(CC_TYPES::SENSOR))
+			{
+				ccSensor* sensor = static_cast<ccSensor*>(child);
+
+				ccGLMatrix scaleTrans;
+				scaleTrans.toIdentity();
+				scaleTrans.data()[ 0] = fx;
+				scaleTrans.data()[ 5] = fy;
+				scaleTrans.data()[10] = fz;
+				sensor->applyGLTransformation(scaleTrans);
+
+				//update the graphic scale, etc.
+				PointCoordinateType meanScale = (fx + fy + fz)/3;
+				//sensor->setGraphicScale(sensor->getGraphicScale() * meanScale);
+				if (sensor->isA(CC_TYPES::GBL_SENSOR))
+				{
+					ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(sensor);
+					gblSensor->setSensorRange(gblSensor->getSensorRange() * meanScale);
+				}
+			}
 		}
 	}
 

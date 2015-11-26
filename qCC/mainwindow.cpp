@@ -1956,8 +1956,8 @@ void MainWindow::doActionApplyScale()
 
 				const double maxCoord = ccGlobalShiftManager::MaxCoordinateAbsValue();
 				bool oldCoordsWereTooBig = (	maxx > maxCoord
-					||	maxy > maxCoord
-					||	maxz > maxCoord );
+											||	maxy > maxCoord
+											||	maxz > maxCoord );
 
 				if (!oldCoordsWereTooBig)
 				{

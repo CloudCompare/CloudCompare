@@ -128,7 +128,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 		ccGui::ParamStruct params = m_window->getDisplayParameters();
 		params.colorScaleShowHistogram = false;
 		params.displayedNumPrecision = precisionSpinBox->value();
-		m_window->setDisplayParameters(params);
+		m_window->setDisplayParameters(params, true);
 	}
 
 	loadSettings();
@@ -149,7 +149,7 @@ void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 	{
 		ccGui::ParamStruct params = m_window->getDisplayParameters();
 		params.displayedNumPrecision = precision;
-		m_window->setDisplayParameters(params);
+		m_window->setDisplayParameters(params, true);
 		m_window->redraw(true, false);
 	}
 

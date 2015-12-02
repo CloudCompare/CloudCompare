@@ -39,6 +39,7 @@ Big ones:
 
 Various:
 
+[*] Volume calculation tool: make the resulting grid values available as a scalar field (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)
 [*] Import sensors from E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1168)
@@ -90,6 +91,9 @@ From Dimitri L.
 From Thomas D.
 [*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)
 [*] Show/hide points based on their normal (http://www.cloudcompare.org/forum/viewtopic.php?t=168)
+[*] Facets plugin:
+	- trace iso-density contour lines in the stereogram plot
+	- use a log scale for colors
 
 From AdrienA
 [*] Radiance scaling shader

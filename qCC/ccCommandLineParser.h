@@ -62,6 +62,7 @@ protected:
 	bool commandApplyTransformation			(QStringList& arguments);
 	bool commandLogFile						(QStringList& arguments);
 	bool commandSORFilter					(QStringList& arguments, ccProgressDialog* pDlg = 0);
+	bool commandOrientNormalsMST			(QStringList& arguments, ccProgressDialog* pDlg = 0);
 
 protected:
 

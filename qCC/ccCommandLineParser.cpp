@@ -3014,8 +3014,10 @@ bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
 		ccPointCloud* cloud = m_clouds[i].pc;
 		if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex))
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex, false))
+			{
 				return Error(QString("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
+			}
 			else if (s_autoSaveMode)
 			{
 				QString errorStr = Export(m_clouds[i],"SF_ARITHMETIC");
@@ -3033,7 +3035,7 @@ bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh,&isLocked);
 		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex))
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex, false))
 				return Error(QString("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
 			else if (s_autoSaveMode)
 			{

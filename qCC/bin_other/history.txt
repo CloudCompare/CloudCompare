@@ -35,6 +35,11 @@ v2.7.beta ??/??/201?
 	* Command line mode:
 		- new option '-ORIENT_NORMS_MST' (+ number of neighbors): to (re)orient the normals of the loaded clouds with a Minimum Spanning Tree
 
+	* SF Arithmetic tool:
+		- a constant value can now be used instead of a second scalar field
+		- the first scalar field (SF1) can now be updated directly (instead of creating a new SF)
+		- division by zero is now properly handled
+
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

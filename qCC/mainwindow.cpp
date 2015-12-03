@@ -9635,12 +9635,16 @@ void MainWindow::doActionScalarFieldArithmetic()
 		return;
 	}
 	if (!cloud)
+	{
 		return;
+	}
 
 	ccScalarFieldArithmeticsDlg sfaDlg(cloud,this);
 
 	if (!sfaDlg.exec())
+	{
 		return;
+	}
 
 	if (!sfaDlg.apply(cloud))
 	{

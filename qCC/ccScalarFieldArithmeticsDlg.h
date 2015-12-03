@@ -32,11 +32,6 @@ public:
 	//! Default constructor
 	ccScalarFieldArithmeticsDlg(ccPointCloud* cloud, QWidget* parent = 0);
 
-	//! Returns first selected SF index
-	int getSF1Index();
-	//! Returns second selected SF index
-	int getSF2Index();
-
 	//! Arithmetic operations
 	enum Operation {	/* Operations requiring two SFs */
 						PLUS		= 0,
@@ -79,23 +74,46 @@ public:
 	**/
 	bool apply(ccPointCloud* cloud);
 
+	//! Secondary SF descriptor
+	struct SF2
+	{
+		SF2()
+			: isConstantValue(true)
+			, constantValue(0)
+			, sfIndex(-1)
+		{}
+
+		bool isConstantValue;
+		double constantValue;
+		int sfIndex;
+	};
+
 	//! Applies operation on a given cloud
 	/** \param cloud cloud on which to apply the SF operation
 		\param op operation
 		\param sf1Idx first (or only) scalar field index
-		\param sf2Idx secondary scalar field (only for PLUS, MINUS, MULTIPLY and DIVIDE operations)
+		\param inplace whether the operation should be applied in place (SF1). Otherwise a new SF will be created.
+		\param sf2 secondary scalar field / value (only for PLUS, MINUS, MULTIPLY and DIVIDE operations)
 		\param parent parent widget (optional)
 		\return success
 	**/
-	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, int sf2Idx = -1, QWidget* parent = 0);
+	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, bool inplace, SF2* sf2 = 0, QWidget* parent = 0);
 
 protected slots:
 	
 	//! Called when the operation combo-box is modified
-	void onCurrentIndexChanged(int index);
+	void onOperationIndexChanged(int index);
+
+	//! Called when the SF2 combo-box is modified
+	void onSF2IndexChanged(int index);
 
 protected:
 	
+	//! Returns first selected SF index
+	int getSF1Index();
+	//! Returns second selected SF index
+	int getSF2Index();
+
 	//! Returns selected operation name
 	QString getOperationName(QString sf1, QString sf2 = QString()) const;
 

@@ -896,7 +896,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 	assert(box.isValid());
 
 	//we work with doubles as grid step can be much smaller than the cloud coordinates!
-	double Py = box.minCorner().u[Y];
+	double Py = box.minCorner().u[Y] + m_grid.gridStep / 2;
 
 	//as the 'non empty cells points' are already in the cloud
 	//we must take care of where we put the scalar fields values!
@@ -905,7 +905,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 	for (unsigned j=0; j<m_grid.height; ++j)
 	{
 		const RasterCell* aCell = m_grid.data[j];
-		double Px = box.minCorner().u[X];
+		double Px = box.minCorner().u[X] + m_grid.gridStep / 2;
 		for (unsigned i=0; i<m_grid.width; ++i,++aCell)
 		{
 			if (aCell->h == aCell->h) //valid cell

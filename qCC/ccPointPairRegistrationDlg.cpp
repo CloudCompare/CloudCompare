@@ -125,11 +125,11 @@ void ccPointPairRegistrationDlg::EntityContext::restore()
 		return;
 
 	entity->setDisplay(originalDisplay);
-	if (originalDisplay)
-		originalDisplay->redraw();
 	entity->setVisible(wasVisible);
 	entity->setEnabled(wasEnabled);
 	entity->setSelected(wasSelected);
+	if (originalDisplay)
+		originalDisplay->redraw();
 }
 
 void ccPointPairRegistrationDlg::clear()
@@ -792,11 +792,12 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDu
 		//reset global shift (if any)
 		m_alignedPoints.setGlobalShift(0,0,0);
 		m_alignedPoints.setGlobalScale(1.0);
-		return;
 	}
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	onPointCountChanged();
 
@@ -911,7 +912,9 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 	}
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	onPointCountChanged();
 
@@ -993,11 +996,12 @@ void ccPointPairRegistrationDlg::removeRefPoint(int index, bool autoRemoveDualPo
 		//reset global shift (if any)
 		m_refPoints.setGlobalShift(0,0,0);
 		m_refPoints.setGlobalScale(1.0);
-		return;
 	}
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	onPointCountChanged();
 

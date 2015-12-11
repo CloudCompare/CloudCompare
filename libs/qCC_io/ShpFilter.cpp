@@ -235,7 +235,7 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 					if (otherShapeType != shapeType)
 					{
 						if (child)
-							ccLog::Warning(QString("[SHP] Entity %1 has not the same type (%1) as the others in the selection (%2)! Can't mix types...")
+							ccLog::Warning(QString("[SHP] Entity %1 has not the same type (%2) as the others in the selection (%3)! Can't mix types...")
 								.arg(child->getName())
 								.arg(ToString(otherShapeType))
 								.arg(ToString(shapeType)));
@@ -940,7 +940,14 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 		singlePoints->setGlobalShift(PShift);
 	}
 	if (!singlePoints->reserve(singlePoints->size()+1))
+	{
+		if (singlePoints->size() == 0)
+		{
+			delete singlePoints;
+			singlePoints = 0;
+		}
 		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
 	
 	ScalarType s = NAN_VALUE;
 	if (	shapeTypeInt == SHP_POINT_Z
@@ -957,17 +964,15 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 				if (!singlePoints->hasScalarFields())
 				{
 					int sfIdx = singlePoints->addScalarField("Measures");
-					singlePoints->setCurrentScalarField(sfIdx);
-					//set the SF value for the previous points
-					if (singlePoints)
+					if (sfIdx >= 0)
 					{
+						//set the SF value for the previous points
+						singlePoints->setCurrentScalarField(sfIdx);
 						for (unsigned i=0; i<singlePoints->size(); ++i)
+						{
 							singlePoints->setPointScalarValue(i,NAN_VALUE);
+						}
 					}
-				}
-				else
-				{
-					ccLog::Warning("[SHP] Not enough memory to load scalar values on points");
 				}
 			}
 		}

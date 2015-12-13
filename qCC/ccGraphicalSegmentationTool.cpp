@@ -230,6 +230,17 @@ bool ccGraphicalSegmentationTool::start()
 	return ccOverlayDialog::start();
 }
 
+void ccGraphicalSegmentationTool::entityHasBeenDeleted(ccHObject* entity)
+{
+	if (!entity)
+	{
+		assert(false);
+		return;
+	}
+
+	m_toSegment.erase(entity);
+}
+
 void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArrays)
 {
 	if (unallocateVisibilityArrays)

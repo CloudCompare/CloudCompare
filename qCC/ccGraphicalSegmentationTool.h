@@ -71,7 +71,16 @@ public:
 	bool deleteHiddenParts() const { return m_deleteHiddenParts; }
 
 	//! Remove entities from the 'to be segmented' pool
+	/** \warning 'unallocateVisibilityArray' will be called on all point clouds
+		prior to be removed from the pool.
+	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
+
+	//! Notify the tool that a given entity has been deleted
+	/** The object will be removed from the 'to be segmented' pool
+		without any check or to a call to any of its method.
+	**/
+	void entityHasBeenDeleted(ccHObject* entity);
 
 protected slots:
 

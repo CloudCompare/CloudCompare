@@ -8039,7 +8039,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					//specific case: labels (do this before temporarily removing 'entity' from DB!)
 					ccHObject::Container labels;
 					if (m_ccRoot)
+					{
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_TYPES::LABEL_2D);
+					}
 					for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
 					{
 						if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
@@ -8059,7 +8061,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 							if (removeLabel && label->getParent())
 							{
-								ccLog::Warning(QString("[Segmentation] Label %1 is dependent on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
+								ccLog::Warning(QString("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
 								ccHObject* labelParent = label->getParent();
 								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);
@@ -8116,21 +8118,29 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									//remove the associated depth buffer of the original sensor (derpecated)
 									sensor->clearDepthBuffer();
 									if (deleteOriginalEntity)
+									{
 										//either transfer
-											entity->transferChild(sensor,*segmentationResult);
+										entity->transferChild(sensor,*segmentationResult);
+									}
 									else
+									{
 										//or copy
 										segmentationResult->addChild(new ccGBLSensor(*sensor));
+									}
 								}
 								else if (child->isA(CC_TYPES::CAMERA_SENSOR))
 								{
 									ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(entity->getChild(i));
 									if (deleteOriginalEntity)
+									{
 										//either transfer
-											entity->transferChild(sensor,*segmentationResult);
+										entity->transferChild(sensor,*segmentationResult);
+									}
 									else
+									{
 										//or copy
 										segmentationResult->addChild(new ccCameraSensor(*sensor));
+									}
 								}
 								else
 								{
@@ -8148,7 +8158,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						if (!deleteOriginalEntity)
 						{
 							entity->setName(entity->getName() + QString(".remaining"));
-							putObjectBackIntoDBTree(entity,objContext);
+							putObjectBackIntoDBTree(entity, objContext);
 						}
 					}
 					else
@@ -8163,7 +8173,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							//specific case: if the sub mesh is deleted afterwards (see below)
 							//then its associated vertices won't be 'reset' by the segmentation tool!
 							if (deleteHiddenParts && meshEntity->isA(CC_TYPES::SUB_MESH))
+							{
 								verticesToReset.insert(meshEntity->getAssociatedCloud());
+							}
 						}
 						assert(deleteOriginalEntity);
 						//deleteOriginalEntity = true;
@@ -8178,11 +8190,15 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					{
 						//otherwise we look for first non-mesh or non-cloud parent
 						while (objContext.parent && (objContext.parent->isKindOf(CC_TYPES::MESH) || objContext.parent->isKindOf(CC_TYPES::POINT_CLOUD)))
+						{
 							objContext.parent = objContext.parent->getParent();
+						}
 					}
 
 					if (objContext.parent)
+					{
 						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
+					}
 
 					segmentationResult->setDisplay_recursive(entity->getDisplay());
 					segmentationResult->prepareDisplayForRefresh_recursive();
@@ -8190,7 +8206,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					addToDB(segmentationResult);
 
 					if (!firstResult)
+					{
 						firstResult = segmentationResult;
+					}
 				}
 				else if (!deleteOriginalEntity)
 				{
@@ -8200,6 +8218,8 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				
 				if (deleteOriginalEntity)
 				{
+					m_gsTool->entityHasBeenDeleted(entity);
+
 					delete entity;
 					entity = 0;
 				}
@@ -8215,11 +8235,15 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		}
 
 		if (firstResult && m_ccRoot)
+		{
 			m_ccRoot->selectEntity(firstResult);
+		}
 	}
 
 	if (m_gsTool)
+	{
 		m_gsTool->removeAllEntities(!deleteHiddenParts);
+	}
 
 	//we enable all GL windows
 	enableAll();

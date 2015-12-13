@@ -1623,27 +1623,28 @@ void ccSectionExtractionTool::unfoldPoints()
 				//longitudinal 'distance'
 				PointCoordinateType dotprod = s.u.dot(AP2D);
 
-				PointCoordinateType dist = 0;
+				PointCoordinateType squareDist = 0;
 				if (dotprod < 0)
 				{
 					//dist to nearest vertex
-					dist = AP2D.norm();
+					squareDist = AP2D.norm2();
 				}
 				else if (dotprod > s.d)
 				{
 					//dist to nearest vertex
-					dist = (P2D - s.B).norm();
+					squareDist = (P2D - s.B).norm2();
 				}
 				else
 				{
 					//orthogonal distance
-					dist = (AP2D - s.u*dotprod).norm2();
+					squareDist = (AP2D - s.u*dotprod).norm2();
 				}
-				if (dist <= maxSquareDistToPolyline)
+				
+				if (squareDist <= maxSquareDistToPolyline)
 				{
-					if (closestSegment < 0 || dist < minSquareDist)
+					if (closestSegment < 0 || squareDist < minSquareDist)
 					{
-						minSquareDist = dist;
+						minSquareDist = squareDist;
 						closestSegment = static_cast<int>(j);
 					}
 				}

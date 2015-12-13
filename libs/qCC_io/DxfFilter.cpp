@@ -17,10 +17,6 @@
 
 #include "DxfFilter.h"
 
-//Qt
-#include <QApplication>
-#include <QFile>
-
 //CCLib
 #include <ScalarField.h>
 
@@ -129,14 +125,19 @@ public:
 			//RGB field already instantiated?
 			if (m_points->hasColors())
 			{
+				//simply add the new color
 				m_points->addRGBColor(col.rgb);
 			}
-			//otherwise, reserve memory and set all previous points to white by default
-			else if (m_points->setRGBColor(ccColor::white))
+			else
 			{
-				//then replace the last color by the current one
-				m_points->setPointColor(m_points->size()-1,col.rgb);
+				//reserve memory (and fill the previous points with a default color if necessary)
+				if (!m_points->setRGBColor(ccColor::white))
+				{
+					ccLog::Error("[DxfImporter] Not enough memory!");
+					return;
+				}
 				m_points->showColors(true);
+				m_points->setPointColor(m_points->size()-1, ccColor::white.rgba); //replace the last color
 			}
 		}
 		else if (m_points->hasColors())
@@ -506,7 +507,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	if (root->isKindOf(CC_TYPES::MESH))
 		meshes.push_back(root);
 
-	//only polylines are handled for now
+	//only polylines and meshes are handled for now
 	size_t polyCount = polylines.size();
 	size_t meshCount = meshes.size();
 	if (polyCount + meshCount == 0)
@@ -617,28 +618,6 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 			dxf.writeLineType(*dw, DL_LineTypeData("BYBLOCK", 0));
 			dxf.writeLineType(*dw, DL_LineTypeData("BYLAYER", 0));
 			dxf.writeLineType(*dw, DL_LineTypeData("CONTINUOUS", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO02W100", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO03W100", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO04W100", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO05W100", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("BORDER", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("BORDER2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("BORDERX2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("CENTER", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("CENTER2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("CENTERX2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DASHDOT", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DASHDOT2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DASHDOTX2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DASHED", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DASHED2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DASHEDX2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DIVIDE", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DIVIDE2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DIVIDEX2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DOT", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DOT2", 0));
-			dxf.writeLineType(*dw, DL_LineTypeData("DOTX2", 0));
 			dw->tableEnd();
 		}
 

@@ -3420,8 +3420,11 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	if (m_interactionMode == SEGMENT_ENTITY)
 	{
+		event->accept();
 		if (event->buttons() != Qt::NoButton || m_alwaysUseFBO) //fast!
+		{
 			emit mouseMoved(event->x()-width()/2,height()/2-event->y(),event->buttons());
+		}
 		return;
 	}
 
@@ -3690,6 +3693,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 	if (m_interactionMode == SEGMENT_ENTITY)
 	{
+		event->accept();
 		emit buttonReleased();
 		return;
 	}
@@ -3845,6 +3849,8 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 	onWheelEvent(wheelDelta_deg);
 
 	emit mouseWheelRotated(wheelDelta_deg);
+
+	event->accept();
 }
 
 void ccGLWindow::onWheelEvent(float wheelDelta_deg)

@@ -180,11 +180,7 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 
 	if (oldWin)
 	{
-		disconnect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
-		disconnect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
-		disconnect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
-		disconnect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
-
+		m_associatedWin->disconnect(this);
 		if (m_segmentationPoly)
 			m_segmentationPoly->setDisplay(0);
 	}

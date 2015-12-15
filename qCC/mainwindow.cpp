@@ -8022,9 +8022,10 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		//aditional vertices of which visibility array should be manually reset
 		std::set<ccGenericPointCloud*> verticesToReset;
 
-		for (std::set<ccHObject*>::const_iterator p = m_gsTool->entities().begin(); p != m_gsTool->entities().end(); ++p)
+		QSet<ccHObject*>& segmentedEntities = m_gsTool->entities();
+		for (QSet<ccHObject*>::iterator p = segmentedEntities.begin(); p != segmentedEntities.end(); )
 		{
-			ccHObject* entity = *p;
+			ccHObject* entity = (*p);
 
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
 			{
@@ -8218,10 +8219,14 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				
 				if (deleteOriginalEntity)
 				{
-					m_gsTool->entityHasBeenDeleted(entity);
+					p = segmentedEntities.erase(p);
 
 					delete entity;
 					entity = 0;
+				}
+				else
+				{
+					++p;
 				}
 			}
 		}

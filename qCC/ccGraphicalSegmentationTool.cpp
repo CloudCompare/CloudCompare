@@ -230,22 +230,11 @@ bool ccGraphicalSegmentationTool::start()
 	return ccOverlayDialog::start();
 }
 
-void ccGraphicalSegmentationTool::entityHasBeenDeleted(ccHObject* entity)
-{
-	if (!entity)
-	{
-		assert(false);
-		return;
-	}
-
-	m_toSegment.erase(entity);
-}
-
 void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArrays)
 {
 	if (unallocateVisibilityArrays)
 	{
-		for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+		for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 		{
 			ccHObjectCaster::ToGenericPointCloud(*p)->unallocateVisibilityArray();
 		}
@@ -279,7 +268,7 @@ void ccGraphicalSegmentationTool::reset()
 {
 	if (m_somethingHasChanged)
 	{
-		for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+		for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 		{
 			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
 		}
@@ -360,7 +349,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 
 			//first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
-			for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+			for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 			{
 				if ((*p)->isKindOf(CC_TYPES::MESH))
 				{
@@ -632,7 +621,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	m_associatedWin->getViewportArray(VP);
 
 	//for each selected entity
-	for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);

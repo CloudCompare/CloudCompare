@@ -24,8 +24,8 @@
 //qCC_db
 #include <ccHObject.h>
 
-//system
-#include <set>
+//Qt
+#include <QSet>
 
 //GUI
 #include <ui_graphicalSegmentationDlg.h>
@@ -60,7 +60,9 @@ public:
 	ccPolyline *getPolyLine() {return m_segmentationPoly;}
 
 	//! Returns the active 'to be segmented' set
-	const std::set<ccHObject*>& entities() const { return m_toSegment; }
+	QSet<ccHObject*>& entities() { return m_toSegment; }
+	//! Returns the active 'to be segmented' set (const version)
+	const QSet<ccHObject*>& entities() const { return m_toSegment; }
 
 	//inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindow* win);
@@ -75,12 +77,6 @@ public:
 		prior to be removed from the pool.
 	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
-
-	//! Notify the tool that a given entity has been deleted
-	/** The object will be removed from the 'to be segmented' pool
-		without any check or to a call to any of its method.
-	**/
-	void entityHasBeenDeleted(ccHObject* entity);
 
 protected slots:
 
@@ -109,8 +105,8 @@ protected:
 	//! Whether to allow or not to exort the current segmentation polyline
 	void allowPolylineExport(bool state);
 
-	//! To be segmented entities
-	std::set<ccHObject*> m_toSegment;
+	//! Set of entities to be segmented
+	QSet<ccHObject*> m_toSegment;
 
 	//! Whether something has changed or not (for proper 'cancel')
 	bool m_somethingHasChanged;

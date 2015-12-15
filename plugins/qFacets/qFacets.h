@@ -32,7 +32,7 @@
 #include <ReferenceCloud.h>
 
 //System
-#include <set>
+#include <unordered_set>
 
 class QAction;
 class ccHObject;
@@ -101,8 +101,11 @@ protected:
 							bool randomColors,
 							bool& error);
 
+	//! Set of facets (pointers)
+	typedef std::unordered_set<ccFacet*> FacetSet;
+
 	//! Returns all the facets in the current selection
-	void getFacetsInCurrentSelection(std::set<ccFacet*>& facets) const;
+	void getFacetsInCurrentSelection(FacetSet& facets) const;
 
 	//! Classifies facets by orientation
 	void classifyFacetsByAngle(	ccHObject* group,

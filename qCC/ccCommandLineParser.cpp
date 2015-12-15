@@ -43,7 +43,7 @@
 #include <QTextStream>
 
 //system
-#include <set>
+#include <unordered_set>
 
 static const char COMMAND_SILENT_MODE[]						= "SILENT";
 static const char COMMAND_OPEN[]							= "O";				//+file name
@@ -590,7 +590,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	if (!db)
 		return false/*Error(QString("Failed to open file '%1'").arg(filename))*/;
 
-	std::set<unsigned> verticesIDs;
+	std::unordered_set<unsigned> verticesIDs;
 	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
 	{
 		ccHObject::Container meshes;

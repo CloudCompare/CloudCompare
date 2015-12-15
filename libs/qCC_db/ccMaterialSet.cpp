@@ -383,10 +383,12 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 		{
 			ccMaterial::CShared mtl = *it;
 			if (addMaterial(mtl) <= 0)
+			{
 				ccLog::WarningDebug(QString("[ccMaterialSet::append] Material %1 couldn't be added to material set and will be ignored").arg(mtl->getName()));
+			}
 		}
 	}
-	catch(.../*const std::bad_alloc&*/) //out of memory
+	catch (.../*const std::bad_alloc&*/) //out of memory
 	{
 		ccLog::Warning("[ccMaterialSet::append] Not enough memory");
 		return false;

@@ -61,7 +61,7 @@
 #include <string.h>
 #include <algorithm>
 #include <vector>
-#include <set>
+#include <unordered_set>
 
 //semi-persistent dialog values
 static unsigned s_octreeLevel = 8;
@@ -542,7 +542,7 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 	return ccGroup;
 }
 
-void qFacets::getFacetsInCurrentSelection(std::set<ccFacet*>& facets) const
+void qFacets::getFacetsInCurrentSelection(FacetSet& facets) const
 {
 	facets.clear();
 
@@ -684,7 +684,7 @@ void qFacets::exportFacets()
 		return;
 
 	//Retrive selected facets
-	std::set<ccFacet*> facets;
+	FacetSet facets;
 	getFacetsInCurrentSelection(facets);
 
 	if (facets.empty())
@@ -778,7 +778,7 @@ void qFacets::exportFacets()
 		{
 			//we compute the mean orientation (weighted by each facet's surface)
 			CCVector3d Nsum(0,0,0);
-			for (std::set<ccFacet*>::iterator it = facets.begin(); it != facets.end(); ++it)
+			for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
 			{
 				double surf = (*it)->getSurface();
 				CCVector3 N = (*it)->getNormal();
@@ -807,7 +807,7 @@ void qFacets::exportFacets()
 	CCVector3 C(0,0,0);
 	{
 		double weightSum = 0;
-		for (std::set<ccFacet*>::iterator it = facets.begin(); it != facets.end(); ++it)
+		for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
 		{
 			double surf = (*it)->getSurface();
 			CCVector3 Ci = (*it)->getCenter();
@@ -841,7 +841,7 @@ void qFacets::exportFacets()
 	}
 
 	//for each facet
-	for (std::set<ccFacet*>::iterator it=facets.begin(); it!=facets.end(); ++it)
+	for (FacetSet::iterator it=facets.begin(); it!=facets.end(); ++it)
 	{
 		ccFacet* facet = *it;
 		ccPolyline* poly = facet->getContour();
@@ -1040,7 +1040,7 @@ void qFacets::exportFacetsInfo()
 		return;
 
 	//Retrive selected facets
-	std::set<ccFacet*> facets;
+	FacetSet facets;
 	getFacetsInCurrentSelection(facets);
 
 	if (facets.empty())
@@ -1103,7 +1103,7 @@ void qFacets::exportFacetsInfo()
 	outStream << " \n";
 
 	//write data (one line per facet)
-	for (std::set<ccFacet*>::iterator it=facets.begin(); it!=facets.end(); ++it)
+	for (FacetSet::iterator it=facets.begin(); it!=facets.end(); ++it)
 	{
 		ccFacet* facet = *it;
 		FacetMetaData data;

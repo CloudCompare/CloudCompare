@@ -171,6 +171,7 @@
 #include <assert.h>
 #include <cfloat>
 #include <iostream>
+#include <unordered_set>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
@@ -1524,7 +1525,7 @@ void MainWindow::doActionComputeKdTree()
 void MainWindow::doActionComputeOctree()
 {
 	ccBBox bbox;
-	std::set<ccGenericPointCloud*> clouds;
+	std::unordered_set<ccGenericPointCloud*> clouds;
 	size_t selNum = m_selectedEntities.size();
 	PointCoordinateType maxBoxSize = -1;
 	for (size_t i=0; i<selNum; ++i)
@@ -1572,7 +1573,7 @@ void MainWindow::doActionComputeOctree()
 	if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
 		bbox = coDlg.getCustomBBox();
 
-	for (std::set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
+	for (std::unordered_set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
 	{
 		ccGenericPointCloud* cloud = *it;
 
@@ -7540,8 +7541,8 @@ ccGLWindow* MainWindow::new3DView()
 
 	m_mdiArea->addSubWindow(view3D);
 
-	connect(view3D,	SIGNAL(entitySelectionChanged(int)),				m_ccRoot,	SLOT(selectEntity(int)));
-	connect(view3D,	SIGNAL(entitiesSelectionChanged(std::set<int>)),	m_ccRoot,	SLOT(selectEntities(std::set<int>)));
+	connect(view3D,	SIGNAL(entitySelectionChanged(int)),						m_ccRoot,	SLOT(selectEntity(int)));
+	connect(view3D,	SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	m_ccRoot,	SLOT(selectEntities(std::unordered_set<int>)));
 
 	//'echo' mode
 	connect(view3D,	SIGNAL(mouseWheelRotated(float)),					this,		SLOT(echoMouseWheelRotate(float)));
@@ -8020,7 +8021,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		deleteHiddenParts = m_gsTool->deleteHiddenParts();
 
 		//aditional vertices of which visibility array should be manually reset
-		std::set<ccGenericPointCloud*> verticesToReset;
+		std::unordered_set<ccGenericPointCloud*> verticesToReset;
 
 		QSet<ccHObject*>& segmentedEntities = m_gsTool->entities();
 		for (QSet<ccHObject*>::iterator p = segmentedEntities.begin(); p != segmentedEntities.end(); )
@@ -8233,7 +8234,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 		//specific actions
 		{
-			for (std::set<ccGenericPointCloud*>::iterator p = verticesToReset.begin(); p != verticesToReset.end(); ++p)
+			for (std::unordered_set<ccGenericPointCloud*>::const_iterator p = verticesToReset.begin(); p != verticesToReset.end(); ++p)
 			{
 				(*p)->resetVisibilityArray();
 			}
@@ -9541,7 +9542,7 @@ QString GetFirstAvailableSFName(ccPointCloud* cloud, const QString& baseName)
 void MainWindow::doActionScalarFieldFromColor()
 {
 	//candidates
-	std::set<ccPointCloud*> clouds;
+	std::unordered_set<ccPointCloud*> clouds;
 	{
 		for (size_t i=0; i<m_selectedEntities.size(); ++i)
 		{
@@ -9564,7 +9565,7 @@ void MainWindow::doActionScalarFieldFromColor()
 	bool exportB = dialog.getBStatus();
 	bool exportC = dialog.getCompositeStatus();
 
-	for (std::set<ccPointCloud*>::const_iterator it = clouds.begin(); it != clouds.end(); ++it)
+	for (std::unordered_set<ccPointCloud*>::const_iterator it = clouds.begin(); it != clouds.end(); ++it)
 	{
 		ccPointCloud* cloud = *it;
 

@@ -46,7 +46,7 @@
 #include <QAtomicInt>
 #endif
 //system
-#include <set>
+#include <unordered_set>
 #include <list>
 
 //! OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
@@ -575,7 +575,7 @@ signals:
 	//! Signal emitted when an entity is selected in the 3D view
 	void entitySelectionChanged(int uniqueID);
 	//! Signal emitted when multiple entities are selected in the 3D view
-	void entitiesSelectionChanged(std::set<int> entIDs);
+	void entitiesSelectionChanged(std::unordered_set<int> entIDs);
 
 	//! Signal emitted when a point (or a triangle) is picked
 	/** \param entityID entity unique ID
@@ -872,7 +872,7 @@ protected: //other methods
 	void startCPUBasedPointPicking(const PickingParameters& params);
 
 	//! Processes the picking process result and sends the corresponding signal
-	void processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::set<int>* selectedIDs = 0);
+	void processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::unordered_set<int>* selectedIDs = 0);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context

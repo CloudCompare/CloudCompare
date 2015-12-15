@@ -34,7 +34,7 @@
 
 //System
 #include <string.h>
-#include <set>
+#include <unordered_set>
 
 class QStandardItemModel;
 class QAction;
@@ -180,7 +180,7 @@ public slots:
 	//! Selects multiple entities at once (shortcut to the other version)
 	/** \param entIDs list of the IDs of the entities to select
 	**/
-	void selectEntities(std::set<int> entIDs);
+	void selectEntities(std::unordered_set<int> entIDs);
 
 	//! Selects multiple entities at once
 	/** \param entities set of the entities to 'select'

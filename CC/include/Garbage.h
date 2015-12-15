@@ -22,7 +22,7 @@
 #include "ScalarField.h"
 
 //STL
-#include <set>
+#include <unordered_set>
 
 //! Garbage container (automatically deletes pointers when destroyed)
 template<typename C> class Garbage
@@ -62,14 +62,14 @@ public:
 	~Garbage()
 	{
 		//dispose of left over
-		typedef typename std::set<C*>::iterator iterator;
+		typedef typename std::unordered_set<C*>::iterator iterator;
 		for (iterator it = m_items.begin(); it != m_items.end(); ++it)
 			delete *it;
 		m_items.clear();
 	}
 
 	//! Items to delete
-	std::set<C*> m_items;
+	std::unordered_set<C*> m_items;
 };
 
 //! Speciailization for ScalarFields
@@ -110,13 +110,15 @@ public:
 	~Garbage()
 	{
 		//dispose of left over
-		for (std::set<CCLib::ScalarField*>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+		for (std::unordered_set<CCLib::ScalarField*>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+		{
 			(*it)->release();
+		}
 		m_items.clear();
 	}
 
 	//! Items to delete
-	std::set<CCLib::ScalarField*> m_items;
+	std::unordered_set<CCLib::ScalarField*> m_items;
 };
 
 #endif //CC_GARBAGE_HEADER

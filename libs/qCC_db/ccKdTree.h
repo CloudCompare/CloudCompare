@@ -26,7 +26,7 @@
 #include "ccHObject.h"
 
 //System
-#include <set>
+#include <unordered_set>
 
 class ccGenericPointCloud;
 
@@ -72,7 +72,7 @@ public:
 	ccBBox getCellBBox(BaseNode* node) const;
 
 	//! A set of leaves
-	typedef std::set<Leaf*> LeafSet;
+	typedef std::unordered_set<Leaf*> LeafSet;
 
 	//! Returns the neighbor leaves around a given cell
 	bool getNeighborLeaves(BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter = 0);

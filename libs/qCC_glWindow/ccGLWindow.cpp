@@ -3947,7 +3947,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	}
 }
 
-void ccGLWindow::processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::set<int>* selectedIDs/*=0*/)
+void ccGLWindow::processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::unordered_set<int>* selectedIDs/*=0*/)
 {
 	//standard "entity" picking
 	if (params.mode == ENTITY_PICKING)
@@ -4133,7 +4133,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	}
 
 	//process hits
-	std::set<int> selectedIDs;
+	std::unordered_set<int> selectedIDs;
 	int subSelectedID = -1;
 	int selectedID = -1;
 	try

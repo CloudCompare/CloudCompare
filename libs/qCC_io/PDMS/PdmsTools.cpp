@@ -22,7 +22,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <assert.h>
-#include <set>
+#include <unordered_set>
 
 //qCC_db
 //#include <ccLog.h>
@@ -46,7 +46,7 @@ static GroupElement defaultWorld(PDMS_WORLD);
 ///////////////////////////////
 // ITEM STACK
 ///////////////////////////////
-typedef std::set<PdmsObjects::GenericItem*> ElementsStack;
+typedef std::unordered_set<PdmsObjects::GenericItem*> ElementsStack;
 ElementsStack s_elementsStack;
 
 void PdmsObjects::Stack::Init()

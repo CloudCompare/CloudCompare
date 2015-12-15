@@ -31,7 +31,7 @@
 #include <QSharedPointer>
 
 //system
-#include <set>
+#include <unordered_set>
 #include <assert.h>
 
 class ccPointCloud;
@@ -521,7 +521,7 @@ public:
 	{
 		assert(m_associatedOctree);
 
-		std::set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsInFrustum[level].find(truncatedCode);
+		std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsInFrustum[level].find(truncatedCode);
 		if (got != m_cellsInFrustum[level].end())
 			return CELL_INSIDE_FRUSTRUM;
 		got = m_cellsIntersectFrustum[level].find(truncatedCode);
@@ -587,11 +587,11 @@ protected:
 	CCLib::DgmOctree* m_associatedOctree;
 
 	// contains the truncated code of the cells built in the octree
-	std::set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsBuilt[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
+	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsBuilt[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
 	// contains the truncated code of the cells INSIDE the frustrum
-	std::set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsInFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
+	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsInFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
 	// contains the truncated code of the cells INTERSECTING the frustrum
-	std::set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsIntersectFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
+	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsIntersectFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
 };
 
 

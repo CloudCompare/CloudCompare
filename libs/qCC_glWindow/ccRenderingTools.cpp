@@ -168,13 +168,15 @@ static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 {
 	if (set.empty())
 	{
-		return vlabelPair(set.end(),set.end());
+		return vlabelPair(set.end(), set.end());
 	}
 	else
 	{
 		vlabelSet::iterator it1 = set.begin();
 		if (y < it1->yPos)
-			return vlabelPair(set.end(),it1);
+		{
+			return vlabelPair(set.end(), it1);
+		}
 		vlabelSet::iterator it2 = it1; ++it2;
 		for (; it2 != set.end(); ++it2, ++it1)
 		{
@@ -278,7 +280,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 
 	//magic fix (for infinite values!)
 	{
-		for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); ++it)
+		for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); ++it)
 		{
 #ifdef CC_WINDOWS
 			if (!_finite(*it))
@@ -305,11 +307,11 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		//remove 'hidden' values
 		if (!logScale)
 		{
-			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
+			for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
 				if (!sf->displayRange().isInRange(static_cast<ScalarType>(*it)) && (!alwaysShowZero || *it != 0)) //we keep zero if the user has explicitely asked for it!
 				{
-					std::set<double>::iterator toDelete = it;
+					ccColorScale::LabelSet::iterator toDelete = it;
 					++it;
 					keyValues.erase(toDelete);
 				}
@@ -327,7 +329,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			ScalarType dispMax = sf->displayRange().stop();
 			ConvertToLogScale(dispMin,dispMax);
 
-			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
+			for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
 				if (*it >= dispMin && *it <= dispMax)
 				{
@@ -335,7 +337,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				}
 				else
 				{
-					std::set<double>::iterator toDelete = it;
+					ccColorScale::LabelSet::iterator toDelete = it;
 					++it;
 					keyValues.erase(toDelete);
 				}

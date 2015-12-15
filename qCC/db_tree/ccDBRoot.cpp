@@ -799,7 +799,7 @@ void ccDBRoot::selectEntity(int uniqueID)
 	selectEntity(obj);
 }
 
-void ccDBRoot::selectEntities(std::set<int> entIDs)
+void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)
 {
 	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
 
@@ -816,7 +816,7 @@ void ccDBRoot::selectEntities(std::set<int> entIDs)
 			return;
 		}
 
-		for (std::set<int>::const_iterator it = entIDs.begin(); it != entIDs.end(); ++it)
+		for (std::unordered_set<int>::const_iterator it = entIDs.begin(); it != entIDs.end(); ++it)
 		{
 			ccHObject* obj = find(*it);
 			if (obj)

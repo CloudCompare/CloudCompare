@@ -42,7 +42,7 @@
 #include <ccImage.h>
 
 //system
-#include <set>
+#include <unordered_set>
 #include <assert.h>
 #include <string.h>
 #if defined(CC_WINDOWS)
@@ -234,7 +234,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		toCheck.pop_back();
 
 		//we check objects that have links to other entities (meshes, polylines, etc.)
-		std::set<const ccHObject*> dependencies;
+		std::unordered_set<const ccHObject*> dependencies;
 		if (currentObject->isA(CC_TYPES::MESH) || currentObject->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(currentObject);
@@ -294,7 +294,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(image->getAssociatedSensor());
 		}
 
-		for (std::set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
+		for (std::unordered_set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
 		{
 			if (!object->find((*it)->getUniqueID()))
 			{
@@ -936,7 +936,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 	//check for unique IDs duplicate (yes it happens :-( )
 	{
-		std::set<unsigned> uniqueIDs;
+		std::unordered_set<unsigned> uniqueIDs;
 		unsigned maxUniqueID = root->findMaxUniqueID_recursive();
 		assert(toCheck.empty());
 		toCheck.push_back(root);
@@ -960,7 +960,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			}
 
 			for (unsigned i=0; i<currentObject->getChildrenNumber() ;++i)
+			{
 				toCheck.push_back(currentObject->getChild(i));
+			}
 		}
 	}
 

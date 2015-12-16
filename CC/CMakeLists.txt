@@ -75,8 +75,7 @@ endif()
 # Load advanced scripts
 include( ../CMakeInclude.cmake )
 
-# Default preprocessors
-set_default_cc_preproc( ${PROJECT_NAME} )
+
 
 if ( COMPILE_CC_CORE_LIB_SHARED )
 	if (WIN32)

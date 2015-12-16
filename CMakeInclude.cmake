@@ -178,28 +178,7 @@ else()
 endif()
 endfunction()
 
-# Default preprocessors
-function( set_default_cc_preproc ) # 1 argument: ARGV0 = target
-    set( CC_DEFAULT_PREPROCESSORS NOMINMAX _CRT_SECURE_NO_WARNINGS ) #all configurations
-    set( CC_DEFAULT_PREPROCESSORS_RELEASE NDEBUG ) #release specific
-    set( CC_DEFAULT_PREPROCESSORS_DEBUG _DEBUG ) #debug specific
 
-    if(MSVC)
-            #disable SECURE_SCL (see http://channel9.msdn.com/shows/Going+Deep/STL-Iterator-Debugging-and-Secure-SCL/)
-            list( APPEND CC_DEFAULT_PREPROCESSORS_RELEASE _SECURE_SCL=0 )
-
-            #use VLD for mem leak checking
-            OPTION( OPTION_USE_VISUAL_LEAK_DETECTOR "Check to activate compilation (in debug) with Visual Leak Detector" OFF )
-        if( ${OPTION_USE_VISUAL_LEAK_DETECTOR} )
-                    list( APPEND CC_DEFAULT_PREPROCESSORS_DEBUG USE_VLD )
-        endif()
-    endif()
-
-        set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS ${CC_DEFAULT_PREPROCESSORS} )
-	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE ${CC_DEFAULT_PREPROCESSORS_RELEASE} )
-	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG ${CC_DEFAULT_PREPROCESSORS_DEBUG} )
-
-endfunction()
 
 if( APPLE )
    function( get_support_libs )  # 1 argument - return var

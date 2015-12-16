@@ -85,9 +85,6 @@ target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 # 3dConnexion devices support
 target_link_3DXWARE( ${PROJECT_NAME} )
 
-# Default preprocessors
-set_default_cc_preproc( ${PROJECT_NAME} )
-
 # Add custom preprocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if( WIN32 )

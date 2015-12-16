@@ -41,9 +41,6 @@ endif()
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )
 
-# Default preprocessors
-set_default_cc_preproc( ${PROJECT_NAME} )
-
 # Add custom prepocessor definitions
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_IO_USE_AS_DLL )

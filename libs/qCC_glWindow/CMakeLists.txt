@@ -29,9 +29,6 @@ else()
     target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES} ${OPENGL_LIBRARIES})
 endif()
 
-# Default preprocessors
-set_default_cc_preproc( ${PROJECT_NAME} )
-
 # Add custom prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if (WIN32)

@@ -40,9 +40,6 @@ qt_add_resources( generated_qrc_list ${qrc_list} )
 
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
 
-# Default preprocessors
-set_default_cc_preproc( ${PROJECT_NAME} )
-
 # Add custom default prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if( WIN32 )

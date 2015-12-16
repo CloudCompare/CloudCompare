@@ -9,7 +9,7 @@ if( MSVC )
 endif()
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
-include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
+
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
@@ -39,20 +39,8 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
 
-if ( NOT USE_QT5 )
-
-# find Qt mocable files
-find_mocable_files( mocable_list ${header_list} )
-qt4_wrap_cpp( moc_list ${mocable_list} )
-qt4_wrap_ui( generated_ui_list ${ui_list} )
-qt4_add_resources( generated_qrc_list ${qrc_list} )
-
-else()
-
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-qt5_add_resources( generated_qrc_list ${qrc_list} )
-
-endif()
+qt_wrap_ui( generated_ui_list ${ui_list} )
+qt_add_resources( generated_qrc_list ${qrc_list} )
 
 # App icon with MSVC
 if( MSVC )
@@ -74,7 +62,6 @@ target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
-target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
 
 if ( USE_QT5 )
 	if (WIN32)

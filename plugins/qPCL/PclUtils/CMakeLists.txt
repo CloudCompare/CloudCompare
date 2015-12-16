@@ -25,17 +25,9 @@ file( GLOB_RECURSE header_list *.h )
 file( GLOB_RECURSE source_list *.cpp )
 file( GLOB_RECURSE impl_list *.hpp)
 file( GLOB_RECURSE ui_list *.ui )
-#file( GLOB qrc_list icons/*.qrc )
-#file( GLOB rc_list *.rc )
 
-if ( USE_QT5 )
-	qt5_wrap_ui( generated_ui_list ${ui_list} )
-else()
-	# find Qt mocable files
-	find_mocable_files( mocable_list ${header_list} )
-	qt4_wrap_cpp( moc_list ${mocable_list} )
-	qt4_wrap_ui( generated_ui_list ${ui_list} )
-endif()
+
+qt_wrap_ui(generated_ui_list ${ui_list})
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} ${moc_list} ${generated_ui_list} )
 
@@ -59,7 +51,7 @@ endif()
 
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
-target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES} ${EXTERNAL_LIBS_LIBRARIES})
+target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES})
 
 if ( USE_QT5 )
 	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets)

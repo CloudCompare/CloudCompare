@@ -2,20 +2,18 @@
 # Qt
 # ------------------------------------------------------------------------------
 option( USE_QT5 "Check to use Qt5 instead of Qt4" OFF )
+## we will use cmake automoc feature
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 if ( USE_QT5 )
 
 	cmake_minimum_required(VERSION 2.8.8)
 
-	set( QT5_ROOT_PATH CACHE PATH "Qt5 root directory (i.e. where the 'bin' folder lies)" )
-	if ( QT5_ROOT_PATH )
-	
-		list( APPEND CMAKE_PREFIX_PATH ${QT5_ROOT_PATH} )
-	
-		#see http://www.kdab.com/using-cmake-with-qt-5/
-		# Find includes in corresponding build directories
-		set(CMAKE_INCLUDE_CURRENT_DIR ON)
-		# Instruct CMake to run moc automatically when needed.
-		set(CMAKE_AUTOMOC ON)
+	# go stright to find qt5
+        find_package(Qt5 COMPONENTS OpenGL Widgets Core Gui PrintSupport Concurrent REQUIRED)
+	# in the case in which no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
+	# thus no need to keep additional variables and checks
 		
 		if ( MSVC )
 			# Where to find opengl libraries
@@ -23,30 +21,18 @@ if ( USE_QT5 )
 			list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
 		endif()
 
-		# Find the Qt5 libraries
-		#set( DESIRED_QT_VERSION 5 )
-		find_package(Qt5OpenGL REQUIRED)
-		find_package(Qt5Widgets REQUIRED)
-		find_package(Qt5Core REQUIRED)
-		find_package(Qt5Gui REQUIRED)
-		find_package(Qt5Concurrent REQUIRED)
+	get_target_property(QT5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE})
+	get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
 		
-	else()
-		message(SEND_ERROR "Please specify the Qt5 installation root directory")
-	endif()
+	set(QT5_ROOT_PATH ${QT_BINARY_DIR}/../)
 
-	list( APPEND EXTERNAL_LIBS_INCLUDE_DIR ${Qt5OpenGL_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Concurrent_INCLUDE_DIRS} )
-	#list( APPEND EXTERNAL_LIBS_LIBRARIES ${Qt5OpenGL_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Concurrent_LIBRARIES} )
-
-	#for executables only!
-	#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5OpenGL_EXECUTABLE_COMPILE_FLAGS}")
-	#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
-	#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
-	#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Gui_EXECUTABLE_COMPILE_FLAGS}")
-
-	set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
-
-else()
+        include_directories(${Qt5OpenGL_INCLUDE_DIRS}
+                            ${Qt5Widgets_INCLUDE_DIRS}
+                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt5Gui_INCLUDE_DIRS}
+                            ${Qt5Concurrent_INCLUDE_DIRS}
+                            ${Qt5PrintSupport_INCLUDE_DIRS})
+else() # using qt4
 
 	set( DESIRED_QT_VERSION 4 )
 	set (QT_BINARY_DIR "") #to force CMake to update QT_BINARY_DIR!
@@ -62,11 +48,7 @@ else()
 		include( ${QT_USE_FILE} )
 	endif()
 	
-	list( APPEND EXTERNAL_LIBS_INCLUDE_DIR ${QT_INCLUDE_DIR} )
-	list( APPEND EXTERNAL_LIBS_LIBRARIES ${QT_LIBRARIES} )
-	
-	#message(${QT_BINARY_DIR})
-
+        include_directories(${QT_INCLUDE_DIR})
 endif()
 
 # ------------------------------------------------------------------------------
@@ -78,6 +60,7 @@ if( NOT OPENGL_FOUND )
     message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
 endif()
 
+include_directories(${OpenGL_INCLUDE_DIR})
 # ------------------------------------------------------------------------------
 # CUDA
 # ------------------------------------------------------------------------------
@@ -88,9 +71,23 @@ endif()
 #    endif()
 #endif()
 
-# ------------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------------
 
-list( APPEND EXTERNAL_LIBS_INCLUDE_DIR ${QT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR}  )
-list( APPEND EXTERNAL_LIBS_LIBRARIES ${QT_LIBRARIES} ${OPENGL_LIBRARIES} )
+# ------------------------------------------------------------------------------
+# Some macros for easily passing from qt4 to qt5 when we will be ready
+# ------------------------------------------------------------------------------
+macro(qt_wrap_ui)
+    if(USE_QT5)
+        qt5_wrap_ui(${ARGN})
+    else()
+        qt4_wrap_ui(${ARGN})
+    endif()
+endmacro()
+
+
+macro(qt_add_resources)
+    if(USE_QT5)
+        qt5_add_resources(${ARGN})
+    else()
+        qt4_add_resources(${ARGN})
+    endif()
+endmacro()

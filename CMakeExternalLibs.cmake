@@ -10,28 +10,33 @@ if ( USE_QT5 )
 
 	cmake_minimum_required(VERSION 2.8.8)
 
-	# go stright to find qt5
-        find_package(Qt5 COMPONENTS OpenGL Widgets Core Gui PrintSupport Concurrent REQUIRED)
-	# in the case in which no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
+	# go straight to find qt5
+    # find_package(Qt5 COMPONENTS OpenGL Widgets Core Gui PrintSupport Concurrent REQUIRED)
+	find_package(Qt5Widgets)
+	find_package(Qt5Core)
+	find_package(Qt5Gui)
+	find_package(Qt5PrintSupport)
+	find_package(Qt5Concurrent)
+	# in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 	# thus no need to keep additional variables and checks
-		
-		if ( MSVC )
-			# Where to find opengl libraries
-			set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
-			list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
-		endif()
+
+	if ( MSVC )
+		# Where to find OpenGL libraries
+		set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
+		list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
+	endif()
 
 	get_target_property(QT5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE})
 	get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
 		
 	set(QT5_ROOT_PATH ${QT_BINARY_DIR}/../)
 
-        include_directories(${Qt5OpenGL_INCLUDE_DIRS}
-                            ${Qt5Widgets_INCLUDE_DIRS}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Gui_INCLUDE_DIRS}
-                            ${Qt5Concurrent_INCLUDE_DIRS}
-                            ${Qt5PrintSupport_INCLUDE_DIRS})
+    include_directories(${Qt5OpenGL_INCLUDE_DIRS}
+                        ${Qt5Widgets_INCLUDE_DIRS}
+                        ${Qt5Core_INCLUDE_DIRS}
+                        ${Qt5Gui_INCLUDE_DIRS}
+                        ${Qt5Concurrent_INCLUDE_DIRS}
+                        ${Qt5PrintSupport_INCLUDE_DIRS})
 else() # using qt4
 
 	set( DESIRED_QT_VERSION 4 )

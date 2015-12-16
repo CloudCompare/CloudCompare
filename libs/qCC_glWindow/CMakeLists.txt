@@ -24,6 +24,7 @@ target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 
 if ( USE_QT5 )
 	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
+        target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES})
 else()
     target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES} ${OPENGL_LIBRARIES})
 endif()

@@ -15,7 +15,6 @@ if( MSVC )
 endif()
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
-include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
@@ -41,19 +40,11 @@ endif()
 
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
-#file( GLOB rc_list *.rc )
-file( GLOB txt_list TODO.txt bin_other/history.txt tr/*.qm )
 
-if ( USE_QT5 )
-	qt5_wrap_ui( generated_ui_list ${ui_list} )
-	qt5_add_resources( generated_qrc_list ${qrc_list} )
-else()
-	# find Qt mocable files
-	find_mocable_files( mocable_list ${header_list} )
-	qt4_wrap_cpp( moc_list ${mocable_list} )
-	qt4_wrap_ui( generated_ui_list ${ui_list} )
-	qt4_add_resources( generated_qrc_list ${qrc_list} )
-endif()
+file( GLOB txt_list TODO.txt bin_other/history.txt )
+
+qt_wrap_ui( generated_ui_list ${ui_list} )
+qt_add_resources( generated_qrc_list ${qrc_list} )
 
 # App icon with MSVC
 if( MSVC )
@@ -75,13 +66,17 @@ target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
-target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
+
 
 if ( USE_QT5 )
 	if (WIN32)
+        qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
 		target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
+    else()
+		qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
 	endif()
-	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
+else()
+    target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES})
 endif()
 
 # contrib. libraries support
@@ -132,12 +127,6 @@ endif()
 # Install auxiliary files
 foreach( filename ${auxFiles} )
 	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} )
-endforeach()
-
-# Translation files
-file( GLOB tr_list tr/*.qm )
-foreach( filename ${tr_list} )
-	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /tr )
 endforeach()
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory

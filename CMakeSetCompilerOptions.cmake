@@ -1,6 +1,3 @@
-# these are always defined
-add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
-
 # cmake should be smart enough to automatically append
 # the NDEBUG definition or _DEBUG in Release/Debug modes.
 # thus there should no need to force them somehow
@@ -19,6 +16,8 @@ if( UNIX )
 endif()
 
 if( MSVC )
+    add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
+
     OPTION( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" OFF )
     if( ${OPTION_MP_BUILD} )
        set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}\ /MP)

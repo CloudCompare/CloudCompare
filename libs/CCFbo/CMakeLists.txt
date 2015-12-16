@@ -24,9 +24,6 @@ if ( USE_QT5 )
 	qt5_use_modules(${PROJECT_NAME} Core ) # Widgets
 endif()
 
-# Default preprocessors
-set_default_cc_preproc( ${PROJECT_NAME} )
-
 # Add custom prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 

@@ -17,6 +17,8 @@ if ( USE_QT5 )
 	find_package(Qt5Gui)
 	find_package(Qt5PrintSupport)
 	find_package(Qt5Concurrent)
+        find_package(Qt5OpenGL)
+
 	# in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 	# thus no need to keep additional variables and checks
 

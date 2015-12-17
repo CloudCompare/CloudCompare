@@ -8,7 +8,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if ( USE_QT5 )
 
-	cmake_minimum_required(VERSION 2.8.8)
+	set( QT5_ROOT_PATH CACHE PATH "Qt5 root directory (i.e. where the 'bin' folder lies)" )
+	if ( QT5_ROOT_PATH )
+	
+		list( APPEND CMAKE_PREFIX_PATH ${QT5_ROOT_PATH} )
+		
+	endif()
 
 	# go straight to find qt5
     # find_package(Qt5 COMPONENTS OpenGL Widgets Core Gui PrintSupport Concurrent REQUIRED)
@@ -31,7 +36,9 @@ if ( USE_QT5 )
 	get_target_property(QT5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE})
 	get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
 		
-	set(QT5_ROOT_PATH ${QT_BINARY_DIR}/../)
+	if ( NOT QT5_ROOT_PATH )
+		set(QT5_ROOT_PATH ${QT_BINARY_DIR}/../)
+	endif()
 
     include_directories(${Qt5OpenGL_INCLUDE_DIRS}
                         ${Qt5Widgets_INCLUDE_DIRS}

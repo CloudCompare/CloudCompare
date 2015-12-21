@@ -356,11 +356,13 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 	ccGLWindow* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 
 	if (oldWin)
 	{
-		m_associatedWin->disconnect(this);
+		oldWin->disconnect(this);
 	}
 
 	if (m_associatedWin)

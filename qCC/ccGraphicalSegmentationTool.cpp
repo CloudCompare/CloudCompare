@@ -176,13 +176,17 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 	ccGLWindow* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 
 	if (oldWin)
 	{
-		m_associatedWin->disconnect(this);
+		oldWin->disconnect(this);
 		if (m_segmentationPoly)
+		{
 			m_segmentationPoly->setDisplay(0);
+		}
 	}
 	
 	if (m_associatedWin)
@@ -193,7 +197,9 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
 
 		if (m_segmentationPoly)
+		{
 			m_segmentationPoly->setDisplay(m_associatedWin);
+		}
 	}
 
 	return true;

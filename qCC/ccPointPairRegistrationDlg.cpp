@@ -160,7 +160,9 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 	if (oldWin)
 	{
 		if (oldWin != win)
-			disconnect(oldWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedItem(int, unsigned, int, int)));
+		{
+			oldWin->disconnect(this);
+		}
 
 		oldWin->removeFromOwnDB(&m_alignedPoints);
 		m_alignedPoints.setDisplay(0);
@@ -172,7 +174,9 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 	}
 
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 
 	m_aligned.restore();
 	m_reference.restore();

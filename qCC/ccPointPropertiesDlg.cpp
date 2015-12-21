@@ -81,7 +81,9 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 	ccGLWindow* oldWin = m_associatedWin;
 
 	if (!ccPointPickingGenericInterface::linkWith(win))
+	{
 		return false;
+	}
 
 	//old window?
 	if (oldWin)
@@ -89,9 +91,7 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 		oldWin->removeFromOwnDB(m_label);
 		oldWin->removeFromOwnDB(m_rect2DLabel);
 		oldWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-		disconnect(oldWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(update2DZone(int,int,Qt::MouseButtons)));
-		disconnect(oldWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(processClickedPoint(int,int)));
-		disconnect(oldWin, SIGNAL(buttonReleased()), this, SLOT(close2DZone()));
+		oldWin->disconnect(this);
 	}
 
 	m_rect2DLabel->setVisible(false);	//=invalid

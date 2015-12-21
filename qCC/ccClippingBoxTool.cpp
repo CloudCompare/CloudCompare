@@ -193,7 +193,9 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 	}
 
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 
 	if (win)
 	{

@@ -170,7 +170,9 @@ unsigned ccGraphicalTransformationTool::getNumberOfValidEntities() const
 bool ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
 {
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 	
 	assert(!win || m_toTransform.getChildrenNumber() == 0);
 	m_toTransform.setDisplay(win);

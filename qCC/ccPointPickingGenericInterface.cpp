@@ -28,15 +28,22 @@
 
 bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 {
+	if (win == m_associatedWin)
+	{
+		//nothing to do
+		return false;
+	}
 	ccGLWindow* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 
 	//if the dialog is already linked to a window, we must disconnect the 'point picked' signal
-	if (oldWin && win != oldWin)
+	if (oldWin)
 	{
-		disconnect(oldWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(handlePickedItem(int, unsigned, int, int)));
+		oldWin->disconnect(this);
 	}
 	//then we can connect the new window 'point picked' signal
 	if (m_associatedWin)

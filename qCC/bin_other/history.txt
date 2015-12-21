@@ -50,6 +50,9 @@ v2.7.beta ??/??/201?
 		a wrong orientation when computing normals.
 	* The rasterize tool was placing the points at the lower-left corners of the cells when exporting the grid
 		as a cloud (instead of the centers of the cells)
+	* The window picking slots were not properly disconnect after each session of the manual segmentation tool
+		(at least) causing an increasing slow down each time the tool is restarted
+
 
 v2.6.2 10/08/2015
 - New features:

@@ -155,17 +155,15 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 	ccGLWindow* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
+	{
 		return false;
+	}
 
 	selectPolyline(0);
 
 	if (oldWin)
 	{
-		disconnect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
-		disconnect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
-		disconnect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
-		disconnect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
-		disconnect(m_associatedWin, SIGNAL(entitySelectionChanged(int)), this, SLOT(entitySelected(int)));
+		m_associatedWin->disconnect(this);
 
 		//restore sections original display
 		{
@@ -195,14 +193,18 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		}
 
 		if (m_editedPoly)
+		{
 			m_editedPoly->setDisplay_recursive(0);
+		}
 
 		//auto-close formerly associated window
 		if (MainWindow::TheInstance())
 		{
 			QMdiSubWindow* subWindow = MainWindow::TheInstance()->getMDISubWindow(oldWin);
 			if (subWindow)
+			{
 				subWindow->close();
+			}
 		}
 	}
 	
@@ -238,13 +240,17 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 					cloud.originalDisplay = cloud.entity->getDisplay();
 					cloud.entity->setDisplay(m_associatedWin);
 					if (!cloud.isInDB)
+					{
 						m_associatedWin->addToOwnDB(cloud.entity);
+					}
 				}
 			}
 		}
 
 		if (m_editedPoly)
+		{
 			m_editedPoly->setDisplay_recursive(m_associatedWin);
+		}
 
 		//update view direction
 		setVertDimension(vertAxisComboBox->currentIndex());

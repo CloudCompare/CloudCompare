@@ -28,10 +28,10 @@
 #include "DgmOctreeReferenceCloud.h"
 #include "DistanceComputationTools.h"
 #include "ScalarFieldTools.h"
-#include <random>
 
 //system
 #include <assert.h>
+#include <random>
 
 using namespace CCLib;
 
@@ -52,9 +52,9 @@ GenericIndexedCloud* CloudSamplingTools::resampleCloudWithOctree(	GenericIndexed
 	}
 
 	//look for the Octree level that gives the number of cells (= points) closest to the desired value
-	unsigned char bestLevel=octree->findBestLevelForAGivenCellNumber(newNumberOfPoints);
+	unsigned char bestLevel = octree->findBestLevelForAGivenCellNumber(newNumberOfPoints);
 
-	GenericIndexedCloud* sampledCloud = resampleCloudWithOctreeAtLevel(inputCloud,bestLevel,resamplingMethod,progressCb,octree);
+	GenericIndexedCloud* sampledCloud = resampleCloudWithOctreeAtLevel(inputCloud, bestLevel, resamplingMethod, progressCb, octree);
 
 	if (!inputOctree)
 		delete octree;
@@ -214,7 +214,7 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 		return newCloud;
 	}
 
-	unsigned pointsToRemove = theCloudSize-newNumberOfPoints;
+	unsigned pointsToRemove = theCloudSize - newNumberOfPoints;
 	std::random_device rd;   // non-deterministic generator
 	std::mt19937 gen(rd());  // to seed mersenne twister.
 
@@ -222,7 +222,7 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 	if (progressCb)
 	{
 		progressCb->setInfo("Random subsampling");
-		normProgress = new NormalizedProgress(progressCb,pointsToRemove);
+		normProgress = new NormalizedProgress(progressCb, pointsToRemove);
 		progressCb->reset();
 		progressCb->start();
 	}
@@ -231,8 +231,7 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 	unsigned lastPointIndex = theCloudSize-1;
 	for (unsigned i=0; i<pointsToRemove; ++i)
 	{
-		//unsigned index = (unsigned)floor((float)rand()/(float)RAND_MAX * (float)lastPointIndex);
-		std::uniform_int_distribution<int> dist(0, lastPointIndex);
+		std::uniform_int_distribution<unsigned> dist(0, lastPointIndex);
 		unsigned index = dist(gen);
 		newCloud->swap(index,lastPointIndex);
 		--lastPointIndex;

@@ -29,6 +29,7 @@
 
 //system
 #include <assert.h>
+#include <random>
 
 using namespace CCLib;
 
@@ -319,6 +320,9 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 	}
 
 	unsigned addedPoints = 0;
+	std::random_device rd;   // non-deterministic generator
+	std::mt19937 gen(rd());  // to seed mersenne twister.
+	std::uniform_real_distribution<double> dist(0, 1);
 
 	//for each triangle
 	mesh->placeIteratorAtBegining();
@@ -348,7 +352,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 		if (fracPart > 0)
 		{
 			//we add a point with the same probability as its (relative) area
-			if (static_cast<double>(rand()) <= fracPart * static_cast<double>(RAND_MAX))
+			if (dist(gen) <= fracPart)
                 pointsToAdd += 1;
 		}
 
@@ -371,8 +375,8 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 			{
 				//we generate random points as in:
 				//'Greg Turk. Generating random points in triangles. In A. S. Glassner, editor, Graphics Gems, pages 24-28. Academic Press, 1990.'
-				double x = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
-				double y = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+				double x = dist(gen);
+				double y = dist(gen);
 
 				//we test if the generated point lies on the right side of (AB)
 				if (x+y > 1.0)

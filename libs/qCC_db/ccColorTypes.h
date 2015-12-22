@@ -20,6 +20,7 @@
 
 //system
 #include <stdlib.h>
+#include <random>
 #include <math.h> //for modf
 
 //! Default color components type (R,G and B)
@@ -160,16 +161,20 @@ namespace ccColor
 		//! Generates a random color
 		static Rgb Random(bool lightOnly = true)
 		{
+			std::random_device rd;   // non-deterministic generator
+			std::mt19937 gen(rd());  // to seed mersenne twister.
+			std::uniform_int_distribution<unsigned> dist(0, MAX);
+
 			Rgb col;
-			col.r = static_cast<ColorCompType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
-			col.g = static_cast<ColorCompType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
+			col.r = dist(gen);
+			col.g = dist(gen);
 			if (lightOnly)
 			{
-				col.b = MAX - static_cast<ColorCompType>((static_cast<double>(col.r)+static_cast<double>(col.g))/2); //cast to double to avoid overflow (whatever the type of ColorCompType!!!)
+				col.b = MAX - static_cast<ColorCompType>((static_cast<double>(col.r) + static_cast<double>(col.g)) / 2); //cast to double to avoid overflow (whatever the type of ColorCompType!!!)
 			}
 			else
 			{
-				col.b = static_cast<ColorCompType>(MAX * (static_cast<float>(rand()) / RAND_MAX));
+				col.b = dist(gen);
 			}
 
 			return col;

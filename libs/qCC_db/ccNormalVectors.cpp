@@ -28,6 +28,7 @@
 
 //System
 #include <assert.h>
+#include <random>
 
 //unique instance
 static ccSingleton<ccNormalVectors> s_uniqueInstance;
@@ -69,7 +70,6 @@ CompressedNormType ccNormalVectors::GetNormIndex(const PointCoordinateType N[])
 
 	return static_cast<CompressedNormType>(index);
 }
-
 
 bool ccNormalVectors::enableNormalHSVColorsArray()
 {
@@ -295,6 +295,10 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 		double bestMeanPop = 0;
 		double lastMeanPop = 0;
 
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_int_distribution<unsigned> dist(0, cloud->size()-1);
+
 		//we may have to do this several times
 		for (size_t attempt=0; attempt<10; ++attempt)
 		{
@@ -308,7 +312,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 
 			for (size_t i=0; i<sampleCount; ++i)
 			{
-				unsigned randomIndex = static_cast<unsigned>(floor((static_cast<double>(rand()) / (RAND_MAX+1)) * cloud->size()));
+				unsigned randomIndex = dist(gen);
 				assert(randomIndex < cloud->size());
 
 				const CCVector3* P = cloud->getPoint(randomIndex);

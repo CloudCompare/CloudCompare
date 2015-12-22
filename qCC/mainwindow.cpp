@@ -172,7 +172,7 @@
 #include <cfloat>
 #include <iostream>
 #include <unordered_set>
-
+#include <random>
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
 
@@ -9951,11 +9951,15 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 
 	//fill a unit cube with random points
 	{
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_real_distribution<double> dist(0, 1);
+
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
-			CCVector3 P(	static_cast<PointCoordinateType>(rand())/static_cast<PointCoordinateType>(RAND_MAX),
-							static_cast<PointCoordinateType>(rand())/static_cast<PointCoordinateType>(RAND_MAX),
-							static_cast<PointCoordinateType>(rand())/static_cast<PointCoordinateType>(RAND_MAX) );
+			CCVector3 P(	dist(gen),
+							dist(gen),
+							dist(gen) );
 
 			cloud->addPoint(P);
 		}
@@ -9986,19 +9990,24 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		unsigned long long extractedPoints = 0;
 		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(2.5*radius)); //2.5 = empirical
 		const unsigned samples = 1000;
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_real_distribution<PointCoordinateType> distAngle(0, static_cast<PointCoordinateType>(2*M_PI));
+		std::uniform_int_distribution<unsigned> distIndex(0, ptsCount-1);
+
 		for (unsigned j=0; j<samples; ++j)
 		{
 			//generate random normal vector
 			CCVector3 dir(0,0,1);
 			{
 				ccGLMatrix rot;
-				rot.initFromParameters(	static_cast<PointCoordinateType>( static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0*M_PI ),
-										static_cast<PointCoordinateType>( static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0*M_PI ),
-										static_cast<PointCoordinateType>( static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0*M_PI ),
+				rot.initFromParameters(	distAngle(gen),
+										distAngle(gen),
+										distAngle(gen),
 										CCVector3(0,0,0) );
 				rot.applyRotation(dir);
 			}
-			unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(ptsCount)/static_cast<double>(RAND_MAX)) % ptsCount);
+			unsigned randIndex = distIndex(gen);
 
 			CCLib::DgmOctree::CylindricalNeighbourhood cn;
 			cn.center = *cloud->getPoint(randIndex);
@@ -10012,7 +10021,9 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 			size_t neihgboursCount = cn.neighbours.size();
 			extractedPoints += static_cast<unsigned long long>(neihgboursCount);
 			for (size_t k=0; k<neihgboursCount; ++k)
-				cloud->setPointScalarValue(cn.neighbours[k].pointIndex,static_cast<ScalarType>(sqrt(cn.neighbours[k].squareDistd)));
+			{
+				cloud->setPointScalarValue(cn.neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(cn.neighbours[k].squareDistd)));
+			}
 		}
 		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),radius,height,static_cast<double>(extractedPoints)/static_cast<double>(samples));
 	}
@@ -10793,9 +10804,13 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					unsigned long long extractedPoints = 0;
 					unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(roughnessKernelSize);;
 					const unsigned samples = 1000;
+					std::random_device rd;   // non-deterministic generator
+					std::mt19937 gen(rd());  // to seed mersenne twister.
+					std::uniform_int_distribution<unsigned> dist(0, count-1);
+
 					for (unsigned j=0; j<samples; ++j)
 					{
-						unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(count)/static_cast<double>(RAND_MAX)) % count);
+						unsigned randIndex = dist(gen);
 						CCLib::DgmOctree::NeighboursSet neighbours;
 						octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours,level);
 						size_t neihgboursCount = neighbours.size();

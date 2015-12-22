@@ -30,6 +30,7 @@
 
 //system
 #include <assert.h>
+#include <random>
 
 using namespace CCLib;
 
@@ -930,6 +931,9 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	}
 
 	//now we are going to randomly extract a subset of 4 points and test the resulting sphere each time
+	std::random_device rd;   // non-deterministic generator
+	std::mt19937 gen(rd());  // to seed mersenne twister.
+	std::uniform_int_distribution<unsigned> dist(0, n - 1);
 	unsigned sampleCount = 0;
 	unsigned attempts = 0;
 	double minError = -1.0;
@@ -942,7 +946,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 			bool isOK = false;
 			while (!isOK)
 			{
-				indexes[j] = static_cast<unsigned>((n-1) * (static_cast<double>(rand()) / RAND_MAX));
+				indexes[j] = dist(gen);
 				isOK = true;
 				for (unsigned k=0; k<j && isOK; ++k)
 					if (indexes[j] == indexes[k])

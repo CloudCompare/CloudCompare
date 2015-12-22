@@ -75,8 +75,6 @@ endif()
 # Load advanced scripts
 include( ../CMakeInclude.cmake )
 
-
-
 if ( COMPILE_CC_CORE_LIB_SHARED )
 	if (WIN32)
 		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
@@ -90,6 +88,11 @@ if ( COMPILE_CC_CORE_LIB_SHARED )
 			install_shared( CC_CORE_LIB ${dest} 1 )
 		endforeach()
 	endif()
+endif()
+
+#For MSVC
+if (WIN32)
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS )
 endif()
 
 cmake_policy(POP)

@@ -78,25 +78,25 @@ void MakeSquare(ccBBox& box, int pivotType, int defaultDim = -1)
 		{
 			//we take the largest one!
 			defaultDim = 0;
-			if (W.u[1]>W.u[defaultDim])
+			if (W.u[1] > W.u[defaultDim])
 				defaultDim = 1;
-			if (W.u[2]>W.u[defaultDim])
+			if (W.u[2] > W.u[defaultDim])
 				defaultDim = 2;
 		}
 
-		CCVector3 newW(W.u[defaultDim],W.u[defaultDim],W.u[defaultDim]);
+		CCVector3 newW(W.u[defaultDim], W.u[defaultDim], W.u[defaultDim]);
 		switch(pivotType)
 		{
 		case 0: //min corner
 			{
 				CCVector3 A = box.minCorner();
-				box = ccBBox(A,A+newW);
+				box = ccBBox(A, A + newW);
 			}
 			break;
 		case 1: //center
 			{
 				CCVector3 C = box.getCenter();
-				box = ccBBox(C-newW/2.0,C+newW/2.0);
+				box = ccBBox(C - newW / 2.0, C + newW / 2.0);
 			}
 			break;
 		case 2: //max corner

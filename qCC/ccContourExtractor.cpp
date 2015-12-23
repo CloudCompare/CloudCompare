@@ -164,7 +164,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 	std::vector<HullPointFlags> pointFlags;
 	try
 	{
-		pointFlags.resize(pointCount,POINT_NOT_USED);
+		pointFlags.resize(pointCount, POINT_NOT_USED);
 	}
 	catch(...)
 	{
@@ -172,12 +172,12 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 		return false;
 	}
 
-	double minCosAngle = cos(maxAngleDeg * M_PI / 180.0);
+	double minCosAngle = maxAngleDeg <= 0 ? -1.0 : cos(maxAngleDeg * M_PI / 180.0);
 
 	//hack: compute the theoretical 'minimal' edge length
 	PointCoordinateType minSquareEdgeLength = 0;
 	{
-		CCVector2 minP,maxP;
+		CCVector2 minP, maxP;
 		for (size_t i=0; i<pointCount; ++i)
 		{
 			const Vertex2D& P = points[i];

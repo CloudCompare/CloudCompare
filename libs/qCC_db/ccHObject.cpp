@@ -990,7 +990,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 		}
 	}
 
-	//write current selection behavior (dataVersion>=23)
+	//read the selection behavior (dataVersion>=23)
 	if (dataVersion >= 23)
 	{
 		if (in.read((char*)&m_selectionBehavior,sizeof(SelectionBehavior)) < 0)

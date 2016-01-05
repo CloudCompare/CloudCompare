@@ -2885,7 +2885,7 @@
  <connections>
   <connection>
    <sender>actionConsole</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>DockableConsole</receiver>
    <slot>setVisible(bool)</slot>
    <hints>

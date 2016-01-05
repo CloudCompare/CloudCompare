@@ -52,7 +52,7 @@ v2.7.beta ??/??/201?
 		as a cloud (instead of the centers of the cells)
 	* The window picking slots were not properly disconnect after each session of the manual segmentation tool
 		(at least) causing an increasing slow down each time the tool is restarted
-
+	* Polylines vertices could be dragged and dropped or deleted (potentially causing a crash)
 
 v2.6.2 10/08/2015
 - New features:

@@ -58,6 +58,29 @@
 //Minimum width of the left column of the properties tree view
 static const int c_propViewLeftColumnWidth = 115;
 
+//test whether a cloud can be deleted or moved
+static bool CanDetachCloud(const ccHObject* obj)
+{
+	if (!obj)
+	{
+		assert(false);
+		return false;
+	}
+	
+	ccHObject* parent = obj->getParent();
+	if (!parent)
+	{
+		assert(false);
+		return true;
+	}
+
+	//can't deleted the vertices of a mesh or the verties of a polyline
+	bool blocked = (	(parent->isKindOf(CC_TYPES::MESH) && (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == obj))
+					||	(parent->isKindOf(CC_TYPES::POLY_LINE) && (dynamic_cast<ccPointCloud*>(ccHObjectCaster::ToPolyline(parent)->getAssociatedCloud()) == obj)) );
+	
+	return !blocked;
+}
+
 ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent) : QAbstractItemModel(parent)
 {
 	m_treeRoot = new ccHObject("DB Tree");
@@ -271,7 +294,7 @@ void ccDBRoot::removeElements(ccHObject::Container& objects)
 		ccHObject* parent = object->getParent();
 		if (!parent)
 		{
-			ccLog::Warning(QString("[ccDBRoot::removeElements] Internal error: object '%1' has no parent!").arg(object->getName()));
+			ccLog::Warning(QString("[ccDBRoot::removeElements] Internal error: object '%1' has no parent").arg(object->getName()));
 			continue;
 		}
 
@@ -310,7 +333,7 @@ void ccDBRoot::removeElement(ccHObject* object)
 	ccHObject* parent = object->getParent();
 	if (!parent)
 	{
-		ccLog::Warning("[ccDBRoot::removeElement] Internal error: object has no parent!");
+		ccLog::Warning("[ccDBRoot::removeElement] Internal error: object has no parent");
 		return;
 	}
 
@@ -359,7 +382,7 @@ void ccDBRoot::deleteSelectedEntities()
 		}
 
 		//we don't consider objects that are 'descendent' of others in the selection
-		bool isSibling = false;
+		bool isDescendent = false;
 		for (unsigned j=0; j<selCount; ++j)
 		{
 			if (i != j)
@@ -367,24 +390,23 @@ void ccDBRoot::deleteSelectedEntities()
 				ccHObject* otherObj = static_cast<ccHObject*>(selectedIndexes[j].internalPointer());
 				if (otherObj->isAncestorOf(obj))
 				{
-					isSibling = true;
+					isDescendent = true;
 					break;
 				}
 			}
 		}
 
-		if (!isSibling)
+		if (!isDescendent)
 		{
 			//last check: mesh vertices
-			if (obj->isKindOf(CC_TYPES::POINT_CLOUD) && obj->getParent()->isKindOf(CC_TYPES::MESH))
+			if (obj->isKindOf(CC_TYPES::POINT_CLOUD) && !CanDetachCloud(obj))
 			{
-				if (ccHObjectCaster::ToGenericMesh(obj->getParent())->getAssociatedCloud() == obj)
+				if (!verticesWarningIssued)
 				{
-					if (!verticesWarningIssued)
-						ccLog::Warning("Mesh vertices can't be deleted without their parent mesh!");
+					ccLog::Warning("Vertices can't be deleted without their parent mesh");
 					verticesWarningIssued = true;
-					continue;
 				}
+				continue;
 			}
 
 			toBeDeleted.push_back(obj);
@@ -625,7 +647,7 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	ccHObject* parent = object->getParent();
 	if (!parent)
 	{
-		ccLog::Error(QString("An error while creating DB tree index: object '%1' has no parent!").arg(object->getName()));
+		ccLog::Error(QString("An error while creating DB tree index: object '%1' has no parent").arg(object->getName()));
 		return QModelIndex();
 	}
 
@@ -761,7 +783,7 @@ void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/* = fals
 						//special case: labels can only be merged with labels!
 						if (obj->isA(CC_TYPES::LABEL_2D) != static_cast<ccHObject*>(selectedIndexes[0].internalPointer())->isA(CC_TYPES::LABEL_2D))
 						{
-							ccLog::Warning("[Selection] Labels and other entities can't be mixed! (release the CTRL key to start a new selection)");
+							ccLog::Warning("[Selection] Labels and other entities can't be mixed (release the CTRL key to start a new selection)");
 							return;
 						}
 					}
@@ -812,7 +834,7 @@ void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)
 		}
 		catch (const std::bad_alloc&)
 		{
-			ccLog::Warning("[ccDBRoot::selectEntities] Not enough memory!");
+			ccLog::Warning("[ccDBRoot::selectEntities] Not enough memory");
 			return;
 		}
 
@@ -1058,7 +1080,7 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
 		if (item->isA(CC_TYPES::HIERARCHY_OBJECT)								||
-			item->isKindOf(CC_TYPES::POINT_CLOUD)								||
+			(item->isKindOf(CC_TYPES::POINT_CLOUD) && CanDetachCloud(item))		|| //vertices can't be displaced
 			(item->isKindOf(CC_TYPES::MESH) && !item->isA(CC_TYPES::SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
 			item->isKindOf(CC_TYPES::IMAGE)										||
 			item->isKindOf(CC_TYPES::LABEL_2D)									||
@@ -1072,7 +1094,9 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 			//we can only displace a polyline if it is not dependant on it's father!
 			const ccHObject* polyVertices = dynamic_cast<const ccHObject*>(poly->getAssociatedCloud());
 			if (polyVertices != poly->getParent())
+			{
 				defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+			}
 		}
 		else if (item->isKindOf(CC_TYPES::VIEWPORT_2D_OBJECT))
 		{
@@ -1151,7 +1175,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				{
 					if (oldParent != newParent)
 					{
-						ccLog::Error("Vertices can't leave their parent mesh!");
+						ccLog::Error("Vertices can't leave their parent mesh");
 						return false;
 					}
 				}
@@ -1162,7 +1186,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				if (item->isA(CC_TYPES::SUB_MESH))
 				{
 					assert(false);
-					ccLog::Error("Sub-meshes can't leave their mesh group!");
+					ccLog::Error("Sub-meshes can't leave their mesh group");
 					return false;
 				}
 				//a mesh can't leave its associated cloud
@@ -1170,7 +1194,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				{
 					if (oldParent != newParent)
 					{
-						ccLog::Error("Sub-meshes can't leave their associated cloud!");
+						ccLog::Error("Meshes can't leave their associated cloud (vertices set)");
 						return false;
 					}
 				}
@@ -1179,7 +1203,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			{
 				if (oldParent != newParent)
 				{
-					ccLog::Error("This kind of entity can't leave their parent!");
+					ccLog::Error("This kind of entity can't leave their parent");
 					return false;
 				}
 			}
@@ -1214,7 +1238,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 
 						if (!canMove)
 						{
-							ccLog::Error("Labels (or group of) can't leave their parent!");
+							ccLog::Error("Labels (or group of) can't leave their parent");
 							return false;
 						}
 					}
@@ -1353,7 +1377,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	ccGenericGLDisplay* display = obj->getDisplay();
 	if (!display)
 	{
-		ccLog::Warning("[alignCameraWithEntity] Selected entity has no associated display!");
+		ccLog::Warning("[alignCameraWithEntity] Selected entity has no associated display");
 		return;
 	}
 	assert(display);
@@ -1465,7 +1489,7 @@ void ccDBRoot::gatherRecursiveInformation()
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Error("Not engough memory!");
+		ccLog::Error("Not engough memory");
 		return;
 	}
 	{
@@ -1531,7 +1555,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		}
 		catch (const std::bad_alloc&)
 		{
-			ccLog::Error("Not engough memory!");
+			ccLog::Error("Not engough memory");
 			return;
 		}
 	}
@@ -1755,7 +1779,7 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclus
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Warning("[selectChildrenByTypeAndName] Not enough memory!");
+		ccLog::Warning("[selectChildrenByTypeAndName] Not enough memory");
 		return;
 	}
 

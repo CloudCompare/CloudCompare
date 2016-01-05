@@ -53,6 +53,7 @@ v2.7.beta ??/??/201?
 	* The window picking slots were not properly disconnect after each session of the manual segmentation tool
 		(at least) causing an increasing slow down each time the tool is restarted
 	* Polylines vertices could be dragged and dropped or deleted (potentially causing a crash)
+	* For clouds with a number of points that is exactly a multiple of 65536, the last 65536 points were not displayed
 
 v2.6.2 10/08/2015
 - New features:

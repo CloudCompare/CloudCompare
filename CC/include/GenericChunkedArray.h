@@ -551,7 +551,7 @@ public:
 	{
 		assert(index < chunksCount());
 #ifdef CC_ENV_64
-		return  (index + 1 < chunksCount() ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : currentSize() % MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+		return  (index + 1 < chunksCount() ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : currentSize() - index * MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
 #else
 		return m_perChunkCount[index];
 #endif
@@ -1124,7 +1124,7 @@ public:
 	{
 		assert(index < chunksCount());
 #ifdef CC_ENV_64
-		return  (index + 1 < chunksCount() ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : currentSize() % MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
+		return  (index + 1 < chunksCount() ? MAX_NUMBER_OF_ELEMENTS_PER_CHUNK : currentSize() - index * MAX_NUMBER_OF_ELEMENTS_PER_CHUNK);
 #else
 		return m_perChunkCount[index];
 #endif

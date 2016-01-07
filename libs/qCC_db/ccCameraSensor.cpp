@@ -33,7 +33,7 @@
 #include <QTextStream>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
-	: focal_pix(1.0f)
+	: vertFocal_pix(1.0f)
 	, skew(0)
 	, vFOV_rad(0)
 	, zNear_mm(0.001f)
@@ -43,6 +43,9 @@ ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
 {
 	pixelSize_mm[0] = 1.0f;
 	pixelSize_mm[1] = 1.0f;
+
+	principal_point[0] = arrayWidth / 2.0f;
+	principal_point[1] = arrayHeight / 2.0f;
 }
 
 void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters& params)
@@ -50,17 +53,19 @@ void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters&
 	//default Kinect parameters from:
 	// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
 	// Kourosh Khoshelham and Sander Oude Elberink
-	float focal_mm         = static_cast<float>(5.45 * 1.0e-3);				// focal length (real distance in meter)
-	float pixelSize_mm     = static_cast<float>(9.3 * 1.0e-6);				// pixel size (real distance in meter)
-	params.focal_pix       = ConvertFocalMMToPix(focal_mm,pixelSize_mm);
-	params.pixelSize_mm[0] = pixelSize_mm;
-	params.pixelSize_mm[1] = pixelSize_mm;
-	params.skew            = static_cast<float>(0.0);						// skew in image
-	params.vFOV_rad        = static_cast<float>(43.0 * M_PI / 180.0);		// vertical field of view (in rad)
-	params.zNear_mm        = static_cast<float>(0.5);						// distance to the closest recordable depth
-	params.zFar_mm         = static_cast<float>(5.0);						// distance to the furthest recordable depth
-	params.arrayWidth      = 640;											// image width
-	params.arrayHeight     = 480;											// image height
+	float focal_mm            = static_cast<float>(5.45 * 1.0e-3);					// focal length (real distance in meter)
+	float pixelSize_mm        = static_cast<float>(9.3 * 1.0e-6);					// pixel size (real distance in meter)
+	params.vertFocal_pix      = ConvertFocalMMToPix(focal_mm, pixelSize_mm);
+	params.pixelSize_mm[0]    = pixelSize_mm;
+	params.pixelSize_mm[1]    = pixelSize_mm;
+	params.skew               = static_cast<float>(0.0);							// skew in image
+	params.vFOV_rad           = static_cast<float>(43.0 * M_PI / 180.0);			// vertical field of view (in rad)
+	params.zNear_mm           = static_cast<float>(0.5);							// distance to the closest recordable depth
+	params.zFar_mm            = static_cast<float>(5.0);							// distance to the furthest recordable depth
+	params.arrayWidth         = 640;												// image width
+	params.arrayHeight        = 480;												// image height
+	params.principal_point[0] = params.arrayWidth / 2.0f;
+	params.principal_point[1] = params.arrayHeight / 2.0f;
 }
 
 ccCameraSensor::BrownDistortionParameters::BrownDistortionParameters()
@@ -306,10 +311,10 @@ ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 	return ccBBox( -upperLeftPoint, CCVector3(upperLeftPoint.x,upperLeftPoint.x,0) );
 }
 
-void ccCameraSensor::setFocal_pix(float f_pix)
+void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)
 {
-	assert(f_pix > 0);
-	m_intrinsicParams.focal_pix = f_pix;
+	assert(vertFocal_pix > 0);
+	m_intrinsicParams.vertFocal_pix = vertFocal_pix;
 
 	//old frustrum is not valid anymore!
 	m_frustrumInfos.isComputed = false;
@@ -383,8 +388,8 @@ void ccCameraSensor::computeProjectionMatrix()
 	float* mat = m_projectionMatrix.data();
 
 	//diagonal
-	mat[0]  = m_intrinsicParams.focal_pix;
-	mat[5]  = m_intrinsicParams.focal_pix;
+	mat[0]  = getHorizFocal_pix();
+	mat[5]  = getVertFocal_pix();
 	mat[10] = 1.0f;
 	mat[15] = 1.0f;
 
@@ -392,8 +397,8 @@ void ccCameraSensor::computeProjectionMatrix()
 	mat[4]  = m_intrinsicParams.skew;
 
 	//translation from image (0,0)
-	mat[12] = static_cast<float>(m_intrinsicParams.arrayWidth) / 2;
-	mat[13] = static_cast<float>(m_intrinsicParams.arrayHeight) / 2;
+	mat[12] = m_intrinsicParams.principal_point[0];
+	mat[13] = m_intrinsicParams.principal_point[1];
 
 	m_projectionMatrixIsValid = true;
 }
@@ -411,7 +416,7 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 
 	//IntrinsicParameters
 	QDataStream outStream(&out);
-	outStream << m_intrinsicParams.focal_pix;
+	outStream << m_intrinsicParams.vertFocal_pix;
 	outStream << m_intrinsicParams.arrayWidth;
 	outStream << m_intrinsicParams.arrayHeight;
 	outStream << m_intrinsicParams.pixelSize_mm[0];
@@ -420,6 +425,8 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 	outStream << m_intrinsicParams.vFOV_rad;
 	outStream << m_intrinsicParams.zNear_mm;
 	outStream << m_intrinsicParams.zFar_mm;
+	outStream << m_intrinsicParams.principal_point[0];
+	outStream << m_intrinsicParams.principal_point[1];
 
 	//distortion parameters (dataVersion>=38)
 	DistortionModel distModel = m_distortionParams ? m_distortionParams->getModel() : NO_DISTORTION_MODEL;
@@ -481,7 +488,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		//we don't need to save/load this matrix as it is dynamically computed!
 		ccGLMatrix dummyMatrix;
-		if (!dummyMatrix.fromFile(in,dataVersion,flags))
+		if (!dummyMatrix.fromFile(in, dataVersion, flags))
 			return ReadError();
 	}
 	m_projectionMatrixIsValid = false;
@@ -490,7 +497,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//IntrinsicParameters
 	QDataStream inStream(&in);
-	inStream >> m_intrinsicParams.focal_pix;
+	inStream >> m_intrinsicParams.vertFocal_pix;
 	inStream >> m_intrinsicParams.arrayWidth;
 	inStream >> m_intrinsicParams.arrayHeight;
 	inStream >> m_intrinsicParams.pixelSize_mm[0];
@@ -499,6 +506,18 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	inStream >> m_intrinsicParams.vFOV_rad;
 	inStream >> m_intrinsicParams.zNear_mm;
 	inStream >> m_intrinsicParams.zFar_mm;
+	
+	if (dataVersion >= 43)
+	{
+		//since version 43, we added the principal point
+		inStream >> m_intrinsicParams.principal_point[0];
+		inStream >> m_intrinsicParams.principal_point[1];
+	}
+	else
+	{
+		m_intrinsicParams.principal_point[0] = m_intrinsicParams.arrayWidth / 2.0f;
+		m_intrinsicParams.principal_point[1] = m_intrinsicParams.arrayHeight / 2.0f;
+	}
 
 	//distortion parameters
 	DistortionModel distModel = NO_DISTORTION_MODEL;
@@ -647,7 +666,7 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	CCVector2d p(localCoord.x/depth, localCoord.y/depth);
 
 	//conversion to pixel coordinates
-	double factor = static_cast<double>(m_intrinsicParams.focal_pix);
+	double factor = m_intrinsicParams.vertFocal_pix;
 	
 	//apply radial distortion (if any)
 	if (withLensError && m_distortionParams && m_distortionParams->getModel() == SIMPLE_RADIAL_DISTORTION)
@@ -662,8 +681,8 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 
 	CCVector2d p2 = p * factor;
 
-	p2.x += m_intrinsicParams.arrayWidth / 2.0;
-	p2.y = m_intrinsicParams.arrayHeight / 2.0 - p2.y;
+	p2.x += m_intrinsicParams.principal_point[0];
+	p2.y = m_intrinsicParams.principal_point[1] - p2.y;
 
 	imageCoord.x = static_cast<PointCoordinateType>(p2.x);
 	imageCoord.y = static_cast<PointCoordinateType>(p2.y);
@@ -677,13 +696,13 @@ bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCV
 {
 	CCVector3d p2(imageCoord.x, imageCoord.y, 0.0);
 
-	p2.x -= m_intrinsicParams.arrayWidth / 2.0;
-	p2.y = m_intrinsicParams.arrayHeight / 2.0 - p2.y;
+	p2.x -= m_intrinsicParams.principal_point[0];
+	p2.y = m_intrinsicParams.principal_point[1] - p2.y;
 
 	//apply inverse radial distortion (if any)
 	//TODO
 
-	double factor = static_cast<double>(m_intrinsicParams.focal_pix);
+	double factor = static_cast<double>(m_intrinsicParams.vertFocal_pix);
 	CCVector3d p = p2 / factor;
 
 	//perspective
@@ -763,8 +782,8 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2& real, CCVect
 			const float& sY = m_intrinsicParams.pixelSize_mm[1];
 
 			// 1st correction : principal point correction
-			float cx = static_cast<float>(m_intrinsicParams.arrayWidth) / 2 + distParams->principalPointOffset[0] / sX; // in pixels
-			float cy = static_cast<float>(m_intrinsicParams.arrayHeight) / 2 + distParams->principalPointOffset[1] / sY; // in pixels
+			float cx = m_intrinsicParams.principal_point[0] + distParams->principalPointOffset[0] / sX; // in pixels
+			float cy = m_intrinsicParams.principal_point[1] + distParams->principalPointOffset[1] / sY; // in pixels
 
 			// 2nd correction : Brown's lens distortion correction
 			float dx = (static_cast<float>(real.x)-cx) * m_intrinsicParams.pixelSize_mm[0];	// real distance 
@@ -834,6 +853,7 @@ bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float dept
 
 			const int& width = m_intrinsicParams.arrayWidth;
 			const int& height = m_intrinsicParams.arrayHeight;
+			const float* c = m_intrinsicParams.principal_point;
 
 			// check validity 
 			if (	pixel.x < 0 || pixel.x > width
@@ -848,11 +868,12 @@ bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float dept
 			float factor = A * z2 / invSigmaD;
 
 			const float& mu = m_intrinsicParams.pixelSize_mm[0];
-			const float& f_pix = m_intrinsicParams.focal_pix;
+			const float verFocal_pix = getVertFocal_pix();
+			const float horizFocal_pix = getHorizFocal_pix();
 
 			// computes uncertainty
-			sigma.x = static_cast<ScalarType>(std::abs(factor * (pixel.x - width/2.0f) / f_pix));
-			sigma.y = static_cast<ScalarType>(std::abs(factor * (pixel.y - height/2.0f) / f_pix));
+			sigma.x = static_cast<ScalarType>(std::abs(factor * (pixel.x - c[0]) / horizFocal_pix));
+			sigma.y = static_cast<ScalarType>(std::abs(factor * (pixel.y - c[1]) / verFocal_pix));
 			sigma.z = static_cast<ScalarType>(std::abs(factor * mu));
 
 			return true;
@@ -957,24 +978,26 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 			}
 			newImage.fill(0);
 
-			float focal_pix = m_intrinsicParams.focal_pix;
-			float f2 = focal_pix * focal_pix;
-			float cx = width / 2.0f;
-			float cy = height / 2.0f;
+			float vertFocal_pix = getVertFocal_pix();
+			float horizFocal_pix = getHorizFocal_pix();
+			float vf2 = vertFocal_pix * vertFocal_pix;
+			float hf2 = horizFocal_pix * horizFocal_pix;
+			float cx = m_intrinsicParams.principal_point[0];
+			float cy = m_intrinsicParams.principal_point[1];
 
 			//image undistortion
 			{
 				for (int i=0; i<width; ++i)
 				{
-					float x = static_cast<float>(i-cx);
+					float x = static_cast<float>(i) - cx;
 					float x2 = x*x;
 					for (int j=0; j<height; ++j)
 					{
-						float y = static_cast<float>(j-cy);
+						float y = static_cast<float>(j) - cy;
 						float y2 = y*y;
 
-						float p2 = (x2+y2)/f2; //p = pix/f
-						float rp = 1.0f+p2*(k1+p2*k2); //r(p) = 1.0 + k1 * ||p||^2 + k2 * ||p||^4
+						float p2 = x2/hf2 + y2/vf2; //p = pix/f
+						float rp = 1.0f + p2 * (k1 + p2*k2); //r(p) = 1.0 + k1 * ||p||^2 + k2 * ||p||^4
 						float eqx = rp * x + cx;
 						float eqy = rp * y + cy;
 
@@ -985,7 +1008,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 							&&	pixy >= 0
 							&&	pixy < height)
 						{
-							newImage.setPixel(i,j,image.pixel(pixx,pixy));
+							newImage.setPixel(i, j, image.pixel(pixx, pixy));
 						}
 					}
 				}
@@ -1059,11 +1082,11 @@ CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 	if (m_intrinsicParams.arrayHeight == 0)
 		return CCVector3(0,0,0);
 
-	float ar = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / static_cast<float>(m_intrinsicParams.arrayHeight) : 1.0f;
+	float ar = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight : 1.0f;
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
 
 	CCVector3 upperLeftPoint;
-	upperLeftPoint.z = m_scale * ConvertFocalPixToMM(m_intrinsicParams.focal_pix,m_intrinsicParams.pixelSize_mm[1]);
+	upperLeftPoint.z = m_scale * ConvertFocalPixToMM(m_intrinsicParams.vertFocal_pix, m_intrinsicParams.pixelSize_mm[1]);
 	upperLeftPoint.y = upperLeftPoint.z * tan(halfFov);
 	upperLeftPoint.x = upperLeftPoint.z * tan(halfFov * ar);
 
@@ -1078,7 +1101,7 @@ bool ccCameraSensor::computeFrustumCorners()
 		return false;
 	}
 
-	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / static_cast<float>(m_intrinsicParams.arrayHeight);
+	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
 
 	float xIn = std::abs( tan(halfFov * ar) );
@@ -1440,48 +1463,48 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-float ccCameraSensor::ConvertFocalPixToMM(float focal_pix, float ccdPixelHeight_mm)
+float ccCameraSensor::ConvertFocalPixToMM(float focal_pix, float ccdPixelSize_mm)
 {
-	if (ccdPixelHeight_mm < FLT_EPSILON)
+	if (ccdPixelSize_mm < FLT_EPSILON)
 	{
-		ccLog::Warning("[ccCameraSensor::convertFocalPixToMM] Invalid CCD pixel height! (<= 0)");
+		ccLog::Warning("[ccCameraSensor::convertFocalPixToMM] Invalid CCD pixel size! (<= 0)");
 		return -1.0f;
 	}
 
-	return focal_pix * ccdPixelHeight_mm;
+	return focal_pix * ccdPixelSize_mm;
 }
 
-float ccCameraSensor::ConvertFocalMMToPix(float focal_mm, float ccdPixelHeight_mm)
+float ccCameraSensor::ConvertFocalMMToPix(float focal_mm, float ccdPixelSize_mm)
 {
-	if (ccdPixelHeight_mm < FLT_EPSILON)
+	if (ccdPixelSize_mm < FLT_EPSILON)
 	{
-		ccLog::Warning("[ccCameraSensor::convertFocalMMToPix] Invalid CCD pixel height! (<= 0)");
+		ccLog::Warning("[ccCameraSensor::convertFocalMMToPix] Invalid CCD pixel size! (<= 0)");
 		return -1.0f;
 	}
 
-	return focal_mm / ccdPixelHeight_mm;
+	return focal_mm / ccdPixelSize_mm;
 }
 
-float ccCameraSensor::ComputeFovRadFromFocalPix(float focal_pix, int imageHeight_pix)
+float ccCameraSensor::ComputeFovRadFromFocalPix(float focal_pix, int imageSize_pix)
 {
-	if (imageHeight_pix <= 0)
+	if (imageSize_pix <= 0)
 	{
 		//invalid image size
 		return -1.0f;
 	}
 
-	return 2 * atan( static_cast<float>(imageHeight_pix) / (2*focal_pix) );
+	return 2 * atan( imageSize_pix / (2*focal_pix) );
 }
 
-float ccCameraSensor::ComputeFovRadFromFocalMm(float focal_mm, float ccdHeight_mm)
+float ccCameraSensor::ComputeFovRadFromFocalMm(float focal_mm, float ccdSize_mm)
 {
-	if (ccdHeight_mm < FLT_EPSILON)
+	if (ccdSize_mm < FLT_EPSILON)
 	{
 		//invalid CDD size
 		return -1.0f;
 	}
 	
-	return 2 * atan( static_cast<float>(ccdHeight_mm) / (2 * focal_mm) );
+	return 2 * atan( ccdSize_mm / (2 * focal_mm) );
 }
 
 bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,

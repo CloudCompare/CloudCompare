@@ -1721,7 +1721,9 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 	unsigned count = size();
 	for (unsigned i=0; i<count; i++)
+	{
 		trans.apply(*point(i));
+	}
 
 	//we must also take care of the normals!
 	if (hasNormals())
@@ -1771,6 +1773,22 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 				*_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
 				m_normals->forwardIterator();
 			}
+		}
+	}
+
+	//and the scan grids!
+	if (!m_grids.empty())
+	{
+		ccGLMatrixd transd(trans.data());
+
+		for (size_t i=0; i<m_grids.size(); ++i)
+		{
+			Grid::Shared grid = m_grids[i];
+			if (!grid)
+			{
+				continue;
+			}
+			grid->sensorPosition = transd * grid->sensorPosition;
 		}
 	}
 

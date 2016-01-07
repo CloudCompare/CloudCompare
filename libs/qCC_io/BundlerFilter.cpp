@@ -722,10 +722,13 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			ccCameraSensor::IntrinsicParameters params;
 			params.arrayWidth = static_cast<int>(image->getW());
 			params.arrayHeight = static_cast<int>(image->getH());
-			//we use an arbitray 'pixel size'
-			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f / std::max(params.arrayWidth,params.arrayHeight);
-			params.focal_pix = cam.f_pix * scaleFactor;
-			params.vFOV_rad = ccCameraSensor::ComputeFovRadFromFocalPix(cam.f_pix,params.arrayHeight);
+			//we define an arbitrary principal point
+			params.principal_point[0] = params.arrayWidth / 2.0f;
+			params.principal_point[1] = params.arrayHeight / 2.0f;
+			//we use an arbitrary 'pixel size'
+			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f / std::max(params.arrayWidth, params.arrayHeight);
+			params.vertFocal_pix = cam.f_pix * scaleFactor;
+			params.vFOV_rad = ccCameraSensor::ComputeFovRadFromFocalPix(cam.f_pix, params.arrayHeight);
 
 			//camera position/orientation
 			ccGLMatrix transf(cameras[i].trans.inverse().data());

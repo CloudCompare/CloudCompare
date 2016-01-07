@@ -30,7 +30,10 @@ v2.7.beta ??/??/201?
 
 	* Point sampling (on a mesh): maximum density is now 100 M. per square units
 
-	* Sensors (camera, TLS) are now properly updated when their associated cloud is scaled
+	* Sensors:
+		- Sensors (camera, TLS) are now properly updated when their associated cloud is scaled
+		- principal point added to Camera sensor parameters
+		- differentiation of the vertical and horizontal focal lengths for Camera sensors
 
 	* Command line mode:
 		- new option '-ORIENT_NORMS_MST' (+ number of neighbors): to (re)orient the normals of the loaded clouds with a Minimum Spanning Tree
@@ -39,6 +42,9 @@ v2.7.beta ??/??/201?
 		- a constant value can now be used instead of a second scalar field
 		- the first scalar field (SF1) can now be updated directly (instead of creating a new SF)
 		- division by zero is now properly handled
+
+	* Structured point clouds:
+		- the sensor position of associated scans is now properly updated when the cloud is rotated
 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields

@@ -81,7 +81,7 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 	{
 		const ccCameraSensor::IntrinsicParameters& iParams = sensor->getIntrinsicParameters();
 
-		focalDoubleSpinBox->setValue(iParams.focal_pix);
+		focalDoubleSpinBox->setValue(iParams.vertFocal_pix);
 		fovDoubleSpinBox->setValue(iParams.vFOV_rad * CC_RAD_TO_DEG);
 		arrayWSpinBox->setValue(iParams.arrayWidth);
 		arrayHSpinBox->setValue(iParams.arrayHeight);
@@ -90,6 +90,8 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 		zNearDoubleSpinBox->setValue(iParams.zNear_mm);
 		zFarDoubleSpinBox->setValue(iParams.zFar_mm);
 		skewDoubleSpinBox->setValue(iParams.skew);
+		cxDoubleSpinBox->setValue(iParams.principal_point[0]);
+		cyDoubleSpinBox->setValue(iParams.principal_point[1]);
 	}
 
 	/*** Distortion / uncertainty ***/
@@ -173,7 +175,7 @@ void ccCamSensorProjectionDlg::updateCamSensor(ccCameraSensor* sensor)
 	{
 		ccCameraSensor::IntrinsicParameters iParams;
 
-		iParams.focal_pix = static_cast<float>(focalDoubleSpinBox->value());
+		iParams.vertFocal_pix = static_cast<float>(focalDoubleSpinBox->value());
 		iParams.vFOV_rad = static_cast<float>(fovDoubleSpinBox->value() * CC_DEG_TO_RAD);
 		iParams.arrayWidth = arrayWSpinBox->value();
 		iParams.arrayHeight = arrayHSpinBox->value();
@@ -182,6 +184,8 @@ void ccCamSensorProjectionDlg::updateCamSensor(ccCameraSensor* sensor)
 		iParams.zNear_mm = static_cast<float>(zNearDoubleSpinBox->value());
 		iParams.zFar_mm = static_cast<float>(zFarDoubleSpinBox->value());
 		iParams.skew = static_cast<float>(skewDoubleSpinBox->value());
+		iParams.principal_point[0] = static_cast<float>(cxDoubleSpinBox->value());
+		iParams.principal_point[1] = static_cast<float>(cyDoubleSpinBox->value());
 
 		sensor->setIntrinsicParameters(iParams);
 	}

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>272</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -171,14 +171,14 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>focal</string>
+          <string>vert. focal</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
         <widget class="QDoubleSpinBox" name="focalDoubleSpinBox">
          <property name="toolTip">
-          <string>Focal (in pixels)</string>
+          <string>vertical focal (in pixels)</string>
          </property>
          <property name="suffix">
           <string> pix</string>
@@ -231,6 +231,9 @@
            <property name="toolTip">
             <string>CCD array width (pixels)</string>
            </property>
+           <property name="suffix">
+            <string> pix.</string>
+           </property>
            <property name="maximum">
             <number>65536</number>
            </property>
@@ -253,6 +256,9 @@
           <widget class="QSpinBox" name="arrayHSpinBox">
            <property name="toolTip">
             <string>CCD array height (pixels)</string>
+           </property>
+           <property name="suffix">
+            <string> pix.</string>
            </property>
            <property name="maximum">
             <number>65536</number>
@@ -280,7 +286,7 @@
          </item>
         </layout>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="label_3">
          <property name="toolTip">
           <string>Pixel size (metric units)</string>
@@ -290,7 +296,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="4" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QDoubleSpinBox" name="pixWDoubleSpinBox">
@@ -346,14 +352,14 @@
          </item>
         </layout>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="label_11">
          <property name="text">
           <string>zNear</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="5" column="1">
         <widget class="QDoubleSpinBox" name="zNearDoubleSpinBox">
          <property name="toolTip">
           <string>Near cutting plane (CCD pixel width (metric units - for display)</string>
@@ -366,14 +372,14 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="label_12">
          <property name="text">
           <string>zFar</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="6" column="1">
         <widget class="QDoubleSpinBox" name="zFarDoubleSpinBox">
          <property name="toolTip">
           <string>Far cutting plane (CCD pixel width (metric units - for display)</string>
@@ -389,20 +395,95 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>skew</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
+       <item row="7" column="1">
         <widget class="QDoubleSpinBox" name="skewDoubleSpinBox">
          <property name="toolTip">
           <string>Skew parameter</string>
          </property>
          <property name="maximum">
           <double>1000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QDoubleSpinBox" name="cxDoubleSpinBox">
+           <property name="toolTip">
+            <string>Principal point X coordinate (in pixels)</string>
+           </property>
+           <property name="suffix">
+            <string> pix.</string>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-100000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>400.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>x</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="cyDoubleSpinBox">
+           <property name="toolTip">
+            <string>Principal point Y coordinate (in pixels)</string>
+           </property>
+           <property name="suffix">
+            <string> pix.</string>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-1000000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>10000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>300.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>principal point</string>
          </property>
         </widget>
        </item>

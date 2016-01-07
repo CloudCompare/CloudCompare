@@ -1984,12 +1984,14 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 			float ccdHeight_mm    = static_cast<float>(pinhole->imageHeight * pixelHeight_mm);
 			
 			ccCameraSensor::IntrinsicParameters params;
-			params.focal_pix       = ccCameraSensor::ConvertFocalMMToPix(focal_mm,pixelHeight_mm);
-			params.arrayWidth      = pinhole->imageSize;
-			params.arrayHeight     = pinhole->imageHeight;
-			params.pixelSize_mm[0] = pixelWidth_mm;
-			params.pixelSize_mm[1] = pixelHeight_mm;
-			params.vFOV_rad         = ccCameraSensor::ComputeFovRadFromFocalMm(pinhole->focalLength,ccdHeight_mm);
+			params.vertFocal_pix      = ccCameraSensor::ConvertFocalMMToPix(focal_mm, pixelHeight_mm);
+			params.arrayWidth         = pinhole->imageSize;
+			params.arrayHeight        = pinhole->imageHeight;
+			params.principal_point[0] = pinhole->principalPointX;
+			params.principal_point[1] = pinhole->principalPointY;
+			params.pixelSize_mm[0]    = pixelWidth_mm;
+			params.pixelSize_mm[1]    = pixelHeight_mm;
+			params.vFOV_rad           = ccCameraSensor::ComputeFovRadFromFocalMm(pinhole->focalLength, ccdHeight_mm);
 			
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 			if (validPoseMat)

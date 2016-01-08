@@ -101,7 +101,7 @@ void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)
 		int cloudIndex = selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD) ? 0 : selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD) ? 1 : -1;
 		if (cloudIndex != -1)
 		{
-			//... and either a polyline or a cone/ctlinder
+			//... and either a polyline or a cone/cylinder
 			validSelection = (selectedEntities[1-cloudIndex]->isA(CC_TYPES::POLY_LINE) || selectedEntities[1-cloudIndex]->isKindOf(CC_TYPES::CONE));
 		}
 	}

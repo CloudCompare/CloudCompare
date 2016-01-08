@@ -19,11 +19,10 @@
 #include "ccSensorComputeDistancesDlg.h"
 
 ccSensorComputeDistancesDlg::ccSensorComputeDistancesDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::sensorComputeDistancesDlg()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 bool ccSensorComputeDistancesDlg::computeSquaredDistances() const

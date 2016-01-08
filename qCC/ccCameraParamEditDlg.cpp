@@ -99,7 +99,7 @@ void ccCameraParamEditDlg::makeFrameless()
 void ccCameraParamEditDlg::iThetaValueChanged(int val)
 {
 	thetaSpinBox->blockSignals(true);
-	thetaSpinBox->setValue(static_cast<double>(val)/10);
+	thetaSpinBox->setValue(val / 10.0);
 	thetaSpinBox->blockSignals(false);
 
 	reflectParamChange();
@@ -108,7 +108,7 @@ void ccCameraParamEditDlg::iThetaValueChanged(int val)
 void ccCameraParamEditDlg::iPsiValueChanged(int val)
 {
 	psiSpinBox->blockSignals(true);
-	psiSpinBox->setValue(static_cast<double>(val)/10);
+	psiSpinBox->setValue(val / 10.0);
 	psiSpinBox->blockSignals(false);
 
 	reflectParamChange();
@@ -117,7 +117,7 @@ void ccCameraParamEditDlg::iPsiValueChanged(int val)
 void ccCameraParamEditDlg::iPhiValueChanged(int val)
 {
 	phiSpinBox->blockSignals(true);
-	phiSpinBox->setValue(static_cast<double>(val)/10);
+	phiSpinBox->setValue(val / 10.0);
 	phiSpinBox->blockSignals(false);
 
 	reflectParamChange();
@@ -126,7 +126,7 @@ void ccCameraParamEditDlg::iPhiValueChanged(int val)
 void ccCameraParamEditDlg::dThetaValueChanged(double val)
 {
 	thetaSlider->blockSignals(true);
-	thetaSlider->setValue(static_cast<int>(val*10.0));
+	thetaSlider->setValue(val * 10.0);
 	thetaSlider->blockSignals(false);
 	reflectParamChange();
 }
@@ -134,7 +134,7 @@ void ccCameraParamEditDlg::dThetaValueChanged(double val)
 void ccCameraParamEditDlg::dPsiValueChanged(double val)
 {
 	psiSlider->blockSignals(true);
-	psiSlider->setValue(static_cast<int>(val*10.0));
+	psiSlider->setValue(val * 10.0);
 	psiSlider->blockSignals(false);
 	reflectParamChange();
 }
@@ -142,7 +142,7 @@ void ccCameraParamEditDlg::dPsiValueChanged(double val)
 void ccCameraParamEditDlg::dPhiValueChanged(double val)
 {
 	phiSlider->blockSignals(true);
-	phiSlider->setValue(static_cast<int>(val*10.0));
+	phiSlider->setValue(val * 10.0);
 	phiSlider->blockSignals(false);
 	reflectParamChange();
 }
@@ -167,9 +167,10 @@ void ccCameraParamEditDlg::pivotChanged()
 		return;
 
 	m_associatedWin->blockSignals(true);
-	m_associatedWin->setPivotPoint(CCVector3d(	rcxDoubleSpinBox->value(),
-		rcyDoubleSpinBox->value(),
-		rczDoubleSpinBox->value() ));
+	m_associatedWin->setPivotPoint(
+		CCVector3d(	rcxDoubleSpinBox->value(),
+					rcyDoubleSpinBox->value(),
+					rczDoubleSpinBox->value() ));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -189,7 +190,7 @@ void ccCameraParamEditDlg::zNearSliderMoved(int i)
 	if (!m_associatedWin)
 		return;
 
-	double zNearCoef = SliderPosToZNearCoef(i,zNearHorizontalSlider->maximum());
+	double zNearCoef = SliderPosToZNearCoef(i, zNearHorizontalSlider->maximum());
 	m_associatedWin->setZNearCoef(zNearCoef);
 	m_associatedWin->redraw();
 }
@@ -201,7 +202,7 @@ void ccCameraParamEditDlg::pushCurrentMatrix()
 
 	ccGLMatrixd mat = m_associatedWin->getBaseViewMat();
 
-	std::pair<PushedMatricesMapType::iterator,bool> ret;
+	std::pair<PushedMatricesMapType::iterator, bool> ret;
 	ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin,mat));
 	if (ret.second == false) //already exists
 		ret.first->second = mat;

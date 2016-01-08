@@ -5769,7 +5769,6 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 			setParent(0);
 		}
 
-		//setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 		showFullScreen();
 		displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 30, FULL_SCREEN_MESSAGE);
 	}
@@ -5786,7 +5785,6 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 			m_formerParent = 0;
 		}
 
-		//setWindowFlags(windowFlags() ^ Qt::WindowStaysOnTopHint);
 		displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, FULL_SCREEN_MESSAGE); //remove any message
 		showNormal();
 

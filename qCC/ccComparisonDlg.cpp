@@ -55,7 +55,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 									CC_COMPARISON_TYPE cpType,
 									QWidget* parent/*=0*/,
 									bool noDisplay/*=false*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::ComparisonDialog()
 	, m_compEnt(compEntity)
 	, m_compCloud(0)
@@ -74,7 +74,6 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	, m_bestOctreeLevel(0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	//populate the combo-boxes
 	{

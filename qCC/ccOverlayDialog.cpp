@@ -32,7 +32,7 @@
 #include <assert.h>
 
 ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::FramelessWindowHint | Qt::Tool)
 	, m_associatedWin(0)
 	, m_processing(false)
 {

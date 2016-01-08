@@ -26,12 +26,10 @@ ccEntityPickerDlg::ccEntityPickerDlg(	const ccHObject::Container& entities,
 										int defaultSelectedIndex/*=0*/,
 										QWidget* parent/*=0*/,
 										QString labelStr/*=QString()*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::PickEntityDlg()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	//multi-selection mode
 	if (multiSelectionEnabled)

@@ -21,12 +21,11 @@
 #include "ccGLWindow.h"
 
 ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::AdjustZoomDialog()
 	, m_basePixelSize(1.0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	if (win)
 	{

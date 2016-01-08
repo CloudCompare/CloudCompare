@@ -38,11 +38,10 @@ class SaveMascaretFileDlg : public QDialog, public Ui::SaveMascaretFileDlg
 public:
 	//! Default constructor
 	SaveMascaretFileDlg(QWidget* parent = 0)
-		: QDialog(parent)
+		: QDialog(parent, Qt::Tool)
 		, Ui::SaveMascaretFileDlg()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 	}
 };
 

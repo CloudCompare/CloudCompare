@@ -55,15 +55,13 @@
 #include <assert.h>
 
 ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::WindowMaximizeButtonHint)
 	, cc2Point5DimEditor()
 	, Ui::VolumeCalcDialog()
 	, m_cloud1(cloud1)
 	, m_cloud2(cloud2)
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	connect(buttonBox,						SIGNAL(accepted()),					this,	SLOT(saveSettingsAndAccept()));
 	connect(buttonBox,						SIGNAL(rejected()),					this,	SLOT(reject()));

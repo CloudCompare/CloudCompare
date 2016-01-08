@@ -44,7 +44,7 @@ static int      s_rotComboIndex = 0;
 static bool     s_transCheckboxes[3] = {true, true, true};
 
 ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::RegistrationDialog()
 {
 	assert(data && model);
@@ -53,7 +53,6 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 
 	setupUi(this);
 	rmsDifferenceLineEdit->setValidator(new QDoubleValidator(rmsDifferenceLineEdit));
-	setWindowFlags(Qt::Tool);
 
 	setColorsAndLabels();
 

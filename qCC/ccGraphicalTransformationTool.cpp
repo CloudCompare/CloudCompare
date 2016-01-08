@@ -31,8 +31,6 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 {
 	setupUi(this);
 
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-
 	connect(pauseButton,	SIGNAL(toggled(bool)),	this, SLOT(pause(bool)));
 	connect(okButton,		SIGNAL(clicked()),		this, SLOT(apply()));
 	connect(razButton,		SIGNAL(clicked()),		this, SLOT(reset()));

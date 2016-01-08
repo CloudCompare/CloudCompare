@@ -23,13 +23,13 @@ static int    s_minSupport       = 500;		// this is the minimal numer of points 
 static double s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
 static double s_probability      = 0.01;	// probability that no better candidate was overlooked during sampling
 
-ccRansacSDDlg::ccRansacSDDlg(QWidget* parent) : QDialog(parent), Ui::RansacSDDialog()
+ccRansacSDDlg::ccRansacSDDlg(QWidget* parent)
+	: QDialog(parent, Qt::Tool)
+	, Ui::RansacSDDialog()
 {
 	setupUi(this);
 
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	supportPointsSpinBox->setValue(s_minSupport);
 	maxNormDevAngleSpinBox->setValue(s_maxNormalDev_deg);

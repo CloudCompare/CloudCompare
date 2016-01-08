@@ -36,7 +36,7 @@
 #endif
 
 ccContourExtractorDlg::ccContourExtractorDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::WindowMaximizeButtonHint)
 	, Ui::ContourExtractorDlg()
 	, m_skipped(false)
 	, m_glWindow(0)

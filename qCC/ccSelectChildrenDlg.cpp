@@ -24,12 +24,10 @@ static bool s_lastTypeState = true;
 static bool s_lastTypeStrictState = true;
 
 ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::SelectChildrenDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool);
 
 	typeCheckBox->setChecked(s_lastTypeState);
 	typeStrictCheckBox->setChecked(s_lastTypeStrictState);

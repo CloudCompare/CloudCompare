@@ -24,12 +24,10 @@
 #include <assert.h>
 
 ProfileImportDlg::ProfileImportDlg(QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::ProfileImportDlg()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool);
 
 	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(browseFile()));
 }

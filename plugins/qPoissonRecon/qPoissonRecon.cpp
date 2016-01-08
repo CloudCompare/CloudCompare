@@ -133,10 +133,11 @@ protected:
 class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
 {
 public:
-	explicit PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
+	explicit PoissonReconParamDlg(QWidget* parent = 0)
+		: QDialog(parent, Qt::Tool)
+		, Ui::PoissonReconParamDialog()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 	}
 };
 

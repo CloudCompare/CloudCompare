@@ -18,11 +18,10 @@
 #include "SIFTExtractDlg.h"
 
 SIFTExtractDlg::SIFTExtractDlg(QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::SIFTExtractDlg()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 }
 
 void SIFTExtractDlg::updateComboBox(const std::vector<std::string>& fields)

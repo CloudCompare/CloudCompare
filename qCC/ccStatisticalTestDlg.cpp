@@ -22,12 +22,10 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(	QString p1Label,
 											QString p3Label/*=QString()*/,
 											QString windowTitle/*=QString()*/,
 											QWidget* parent/*=0*/)
-											: QDialog(parent)
-											, Ui::StatisticalTestDialog()
+	: QDialog(parent, Qt::Tool)
+	, Ui::StatisticalTestDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	param1Label->setText(p1Label);
 	param2Label->setText(p2Label);

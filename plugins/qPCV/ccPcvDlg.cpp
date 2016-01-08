@@ -17,9 +17,9 @@
 
 #include "ccPcvDlg.h"
 
-ccPcvDlg::ccPcvDlg(QWidget* parent) : QDialog(parent), Ui::PCVDialog()
+ccPcvDlg::ccPcvDlg(QWidget* parent)
+	: QDialog(parent, Qt::Tool)
+	, Ui::PCVDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }

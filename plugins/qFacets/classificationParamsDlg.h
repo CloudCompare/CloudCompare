@@ -27,11 +27,10 @@ public:
 
 	//! Default constructor
 	ClassificationParamsDlg(QWidget* parent = 0)
-		: QDialog(parent)
+		: QDialog(parent, Qt::Tool)
 		, Ui::ClassificationParamsDlg()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 	}
 };
 

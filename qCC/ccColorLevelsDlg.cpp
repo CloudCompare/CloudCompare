@@ -39,14 +39,12 @@ static int s_outputLevels[2] = {0,255};
 static bool s_outputLevelsEnabled = false;
 
 ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::ColorLevelsDialog()
 	, m_histogram(0)
 	, m_cloud(pointCloud)
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	//connect GUI elements
 	connect(channelComboBox,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(onChannelChanged(int)));

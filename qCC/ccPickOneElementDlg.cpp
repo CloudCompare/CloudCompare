@@ -23,15 +23,15 @@
 ccPickOneElementDlg::ccPickOneElementDlg(	QString label,
 											QString windowTitle/*=QString()*/,
 											QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, m_ui(new Ui_PickOneElementDialog)
 {
 	m_ui->setupUi(this);
 
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
-
 	if (!windowTitle.isNull())
+	{
 		setWindowTitle(windowTitle);
+	}
 
 	m_ui->comboLabel->setText(label);
 }

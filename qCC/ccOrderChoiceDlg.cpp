@@ -37,7 +37,7 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 									ccHObject* secondEntity,
 									QString secondRole,
 									ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : 0, Qt::Tool)
 	, m_gui(new Ui_RoleChoiceDialog)
 	, m_app(app)
 	, m_firstEnt(firstEntity)
@@ -45,7 +45,6 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 	, m_useInputOrder(true)
 {
 	m_gui->setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	connect(m_gui->swapButton, SIGNAL(clicked()), this, SLOT(swap()));
 

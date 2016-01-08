@@ -73,7 +73,6 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	, m_editedPolyVertices(0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
 	connect(undoToolButton,						SIGNAL(clicked()),					this,	SLOT(undo()));
 	connect(validToolButton,					SIGNAL(clicked()),					this,	SLOT(apply()));

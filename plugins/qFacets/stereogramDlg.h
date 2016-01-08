@@ -45,11 +45,10 @@ public:
 
 	//! Default constructor
 	StereogramParamsDlg(QWidget* parent = 0)
-		: QDialog(parent)
+		: QDialog(parent, Qt::Tool)
 		, Ui::StereogramParamsDlg()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 	}
 };
 

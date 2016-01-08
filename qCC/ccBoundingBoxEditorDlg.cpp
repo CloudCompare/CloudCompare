@@ -22,14 +22,12 @@
 static ccBBox s_lastBBox;
 
 ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::BoundingBoxEditorDialog()
 	, m_baseBoxIsMinimal(false)
 	, m_showInclusionWarning(true)
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool);
 
 	xDoubleSpinBox->setMinimum(-1.0e9);
 	yDoubleSpinBox->setMinimum(-1.0e9);

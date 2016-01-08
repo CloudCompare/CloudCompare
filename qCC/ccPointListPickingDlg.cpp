@@ -60,7 +60,6 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	, m_orderedLabelsContainer(0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
 	exportToolButton->setPopupMode(QToolButton::MenuButtonPopup);
 	QMenu* menu = new QMenu(exportToolButton);

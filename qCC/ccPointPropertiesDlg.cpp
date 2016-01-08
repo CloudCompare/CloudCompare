@@ -43,7 +43,6 @@ ccPointPropertiesDlg::ccPointPropertiesDlg(QWidget* parent)
 	, m_pickingMode(POINT_INFO)
 {
 	setupUi(this);
-	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
 
 	connect(closeButton,				SIGNAL(clicked()), this, SLOT(onClose()));
 	connect(pointPropertiesButton,		SIGNAL(clicked()), this, SLOT(activatePointPropertiesDisplay()));

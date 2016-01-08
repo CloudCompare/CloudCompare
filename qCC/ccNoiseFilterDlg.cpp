@@ -18,10 +18,8 @@
 #include "ccNoiseFilterDlg.h"
 
 ccNoiseFilterDlg::ccNoiseFilterDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::NoiseFilterDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool);
 }

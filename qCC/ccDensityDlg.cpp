@@ -18,11 +18,10 @@
 #include "ccDensityDlg.h"
 
 ccDensityDlg::ccDensityDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::DensityDialog()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	connect(preciseRadioButton, SIGNAL(toggled(bool)), this, SLOT(onPreciseToggled(bool)));
 }

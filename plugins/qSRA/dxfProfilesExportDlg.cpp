@@ -26,12 +26,10 @@
 #include <assert.h>
 
 DxfProfilesExportDlg::DxfProfilesExportDlg(QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::DxfProfilesExportDlg()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool);
 
 	connect(vertBrowseToolButton, SIGNAL(clicked()), this, SLOT(browseVertFile()));
 	connect(horizBrowseToolButton, SIGNAL(clicked()), this, SLOT(browseHorizFile()));

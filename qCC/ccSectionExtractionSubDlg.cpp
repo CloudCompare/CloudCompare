@@ -21,11 +21,10 @@
 #include <assert.h>
 
 ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::SectionExtractionSubDlg()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 }
 
 void ccSectionExtractionSubDlg::setActiveSectionCount(int count)

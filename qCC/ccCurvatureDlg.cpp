@@ -17,11 +17,11 @@
 
 #include "ccCurvatureDlg.h"
 
-ccCurvatureDlg::ccCurvatureDlg(QWidget* parent/*=0*/) : QDialog(parent), Ui::CurvatureDialog()
+ccCurvatureDlg::ccCurvatureDlg(QWidget* parent/*=0*/)
+	: QDialog(parent, Qt::Tool)
+	, Ui::CurvatureDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 double ccCurvatureDlg::getKernelSize() const

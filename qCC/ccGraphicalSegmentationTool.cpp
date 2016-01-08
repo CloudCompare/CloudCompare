@@ -59,7 +59,6 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	//setAttribute(Qt::WA_NoSystemBackground);
 
 	setupUi(this);
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
 	connect(inButton,							SIGNAL(clicked()),		this,	SLOT(segmentIn()));
 	connect(outButton,							SIGNAL(clicked()),		this,	SLOT(segmentOut()));

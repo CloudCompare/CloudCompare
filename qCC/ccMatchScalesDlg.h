@@ -26,6 +26,9 @@
 //qCC_db
 #include <ccHObject.h>
 
+//Qt
+#include <QDialog>
+
 //system
 #include <vector>
 

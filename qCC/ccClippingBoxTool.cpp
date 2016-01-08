@@ -59,8 +59,6 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 {
 	setupUi(this);
 
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-
 	connect(editBoxToolButton,				SIGNAL(clicked()),				this, SLOT(editBox()));
 	connect(extractContourToolButton,		SIGNAL(clicked()),				this, SLOT(extractContour()));
 	connect(removeLastContourToolButton,	SIGNAL(clicked()),				this, SLOT(removeLastContour()));

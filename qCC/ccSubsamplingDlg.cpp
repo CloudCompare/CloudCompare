@@ -33,7 +33,7 @@
 static const double SPACE_RANGE_EXPONENT = 0.05;
 
 ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::SubsamplingDialog()
 	, m_maxPointCount(maxPointCount)
 	, m_maxRadius(maxCloudRadius)
@@ -42,7 +42,6 @@ ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius
 	, m_sfMax(0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	samplingMethod->addItem("Random");
 	samplingMethod->addItem("Space");

@@ -27,11 +27,11 @@
 //Default 'min cloud size' for LoD  when VBOs are activated
 static const double s_defaultMaxVBOCloudSizeM = 50.0;
 
-ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui::DisplayOptionsDlg()
+ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
+	: QDialog(parent, Qt::Tool)
+	, Ui::DisplayOptionsDlg()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	connect(ambientColorButton,              SIGNAL(clicked()),         this, SLOT(changeLightAmbientColor()));
 	connect(diffuseColorButton,              SIGNAL(clicked()),         this, SLOT(changeLightDiffuseColor()));

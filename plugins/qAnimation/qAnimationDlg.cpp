@@ -50,16 +50,14 @@
 static const QString s_stepDurationKey("StepDurationSec");
 
 qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow* view3d, QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::AnimationDialog()
 	, m_videoSteps(videoSteps)
 	, m_view3d(view3d)
 {
 	setupUi(this);
 
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
-
-	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	for (size_t i=0; i<m_videoSteps.size(); ++i)
 	{
 		const cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
 		const cc2DViewportObject* viewport2 = m_videoSteps[i].interpolator.view2();

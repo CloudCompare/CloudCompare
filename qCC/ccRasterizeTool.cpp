@@ -46,14 +46,12 @@
 #include <assert.h>
 
 ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::WindowMaximizeButtonHint)
 	, cc2Point5DimEditor()
 	, Ui::RasterizeToolDialog()
 	, m_cloud(cloud)
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 #ifndef CC_GDAL_SUPPORT
 	generateRasterPushButton->setDisabled(true);
@@ -711,16 +709,17 @@ void ccRasterizeTool::generateMesh() const
 //system
 #include <assert.h>
 
-class RasterExportOptionsDlg : public QDialog, public Ui::RasterExportOptionsDialog
+class RasterExportOptionsDlg
+	: public QDialog
+	, public Ui::RasterExportOptionsDialog
 {
 public:
 
 	explicit RasterExportOptionsDlg(QWidget* parent = 0)
-		: QDialog(parent)
+		: QDialog(parent, Qt::Tool)
 		, Ui::RasterExportOptionsDialog()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 	}
 };
 

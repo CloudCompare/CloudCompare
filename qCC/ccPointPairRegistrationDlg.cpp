@@ -64,7 +64,6 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	, m_paused(false)
 {
 	setupUi(this);
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
 	//restore from persistent settings
 	{

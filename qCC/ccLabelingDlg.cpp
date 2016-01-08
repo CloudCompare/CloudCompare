@@ -20,12 +20,12 @@
 #include <DgmOctree.h>
 
 ccLabelingDlg::ccLabelingDlg(QWidget* parent/*=0*/)
-	: QDialog(parent), Ui::LabelingDialog()
+	: QDialog(parent, Qt::Tool)
+	, Ui::LabelingDialog()
 {
 	setupUi(this);
-	octreeLevelSpinBox->setMaximum(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	octreeLevelSpinBox->setMaximum(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 }
 
 int ccLabelingDlg::getOctreeLevel()

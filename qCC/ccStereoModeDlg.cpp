@@ -26,13 +26,12 @@ const int COMBO_INDEX_RED_CYAN  = 1;
 const int COMBO_INDEX_NV_VISION = 2;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::StereoModeDialog()
 {
 	setupUi(this);
 
 	glassTypeChanged(glassTypeComboBox->currentIndex());
-	setWindowFlags(Qt::Tool);
 
 	connect(glassTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(glassTypeChanged(int)));
 }

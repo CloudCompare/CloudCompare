@@ -33,12 +33,10 @@ ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
 static int s_lastFreq = 5;
 
 ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::ColorGradientDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	connect(firstColorButton, SIGNAL(clicked()), this, SLOT(changeFirstColor()));
 	connect(secondColorButton, SIGNAL(clicked()), this, SLOT(changeSecondColor()));

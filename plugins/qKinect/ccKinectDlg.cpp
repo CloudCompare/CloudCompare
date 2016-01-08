@@ -19,11 +19,11 @@
 
 #include <ccOctree.h>
 
-ccKinectDlg::ccKinectDlg(QWidget* parent) : QDialog(parent), Ui::KinectDialog()
+ccKinectDlg::ccKinectDlg(QWidget* parent)
+	: QDialog(parent, Qt::Tool)
+	, Ui::KinectDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 QString ccKinectDlg::getCloudName() const

@@ -21,12 +21,11 @@
 #include <math.h>
 
 ccOrthoSectionGenerationDlg::ccOrthoSectionGenerationDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::OrthoSectionGenerationDlg()
 	, m_pathLength(0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	connect(stepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onStepChanged(double)));
 }

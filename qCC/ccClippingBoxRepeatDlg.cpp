@@ -28,8 +28,6 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 {
 	setupUi(this);
 
-	//setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-
 	if (!singleContourMode)
 	{
 		connect( xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));

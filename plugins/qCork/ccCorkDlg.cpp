@@ -18,14 +18,12 @@
 #include "ccCorkDlg.h"
 
 ccCorkDlg::ccCorkDlg(QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::CorkDialog()
 	, m_selectedOperation(UNION)
 	, m_isSwapped(false)
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	connect(unionPushButton,	SIGNAL(clicked()), this, SLOT(unionSelected()));
 	connect(interPushButton,	SIGNAL(clicked()), this, SLOT(intersectSelected()));

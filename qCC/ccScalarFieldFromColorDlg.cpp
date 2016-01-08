@@ -29,11 +29,10 @@
 #endif
 
 ccScalarFieldFromColorDlg::ccScalarFieldFromColorDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::scalarFieldFromColorDlg()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 bool ccScalarFieldFromColorDlg::getRStatus()

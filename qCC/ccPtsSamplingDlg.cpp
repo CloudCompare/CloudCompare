@@ -18,11 +18,10 @@
 #include "ccPtsSamplingDlg.h"
 
 ccPtsSamplingDlg::ccPtsSamplingDlg(QWidget* parent/*=0*/)
-	: QDialog(parent), Ui::PointsSamplingDialog()
+	: QDialog(parent, Qt::Tool)
+	, Ui::PointsSamplingDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 bool ccPtsSamplingDlg::generateNormals() const

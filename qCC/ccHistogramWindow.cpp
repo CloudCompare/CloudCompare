@@ -67,7 +67,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	setFocusPolicy(Qt::StrongFocus);
 
 	//setMinimumHeight(100);
-	setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+	setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
 	setAutoAddPlottableToLegend(false);
 
@@ -890,7 +890,7 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 }
 
 ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent,  Qt::WindowMaximizeButtonHint)
 	, m_win(new ccHistogramWindow(this))
 	, m_gui(new Ui_HistogramDialog)
 {

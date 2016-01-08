@@ -26,12 +26,10 @@ ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(	const char* vName1,
 													int precision/*=6*/,
 													const char* windowTitle/*=0*/,
 													QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::AskTwoDoubleValuesDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	label1->setText(vName1);
 	label2->setText(vName2);

@@ -31,11 +31,10 @@
 #include <ccProgressDialog.h>
 
 ccAlignDlg::ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::AlignDialog()
 {
 	setupUi(this);
-	setWindowFlags(Qt::Tool);
 
 	samplingMethod->addItem("None");
 	samplingMethod->addItem("Random");

@@ -28,12 +28,10 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
 														int precision/*=6*/,
 														const char* windowTitle/*=0*/,
 														QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::AskThreeDoubleValuesDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	checkBox->setVisible(false);
 

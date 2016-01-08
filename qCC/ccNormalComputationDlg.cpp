@@ -29,14 +29,12 @@
 #include <assert.h>
 
 ccNormalComputationDlg::ccNormalComputationDlg(SelectionMode selectionMode, QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::NormalComputationDlg()
 	, m_cloud(0)
 	, m_selectionMode(selectionMode)
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	//by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);

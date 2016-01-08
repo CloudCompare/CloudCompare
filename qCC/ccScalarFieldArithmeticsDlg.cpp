@@ -44,13 +44,12 @@ static double s_previousConstValue = 1.0;
 
 ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 															QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::SFArithmeticsDlg()
 {
 	assert(cloud);
 
 	setupUi(this);
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	QStringList sfLabels;
 	unsigned sfCount = cloud ? cloud->getNumberOfScalarFields() : 0;

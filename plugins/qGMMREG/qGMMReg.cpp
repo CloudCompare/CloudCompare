@@ -69,11 +69,10 @@ public:
 
 	//! Default constructor
 	GMMRegDialog(QWidget* parent = 0)
-		: QDialog(parent)
+		: QDialog(parent, Qt::Tool)
 		, Ui::GMMRegDialog()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 
 		m_stepWidgets.push_back(StepWidgets(step1CheckBox, step1ScaleDoubleSpinBox, step1LambdaDoubleSpinBox, step1MaxIterSpinBox));
 		m_stepWidgets.push_back(StepWidgets(step2CheckBox, step2ScaleDoubleSpinBox, step2LambdaDoubleSpinBox, step2MaxIterSpinBox));

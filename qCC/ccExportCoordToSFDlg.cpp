@@ -18,12 +18,10 @@
 #include "ccExportCoordToSFDlg.h"
 
 ccExportCoordToSFDlg::ccExportCoordToSFDlg(QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::ExportCoordToSFDlg()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool);
 }
 
 bool ccExportCoordToSFDlg::exportX() const

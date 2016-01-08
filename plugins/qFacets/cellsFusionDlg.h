@@ -30,11 +30,10 @@ public:
 
 	//! Default constructor
 	CellsFusionDlg(Algorithm algo, QWidget* parent = 0)
-		: QDialog(parent)
+		: QDialog(parent, Qt::Tool)
 		, Ui::CellsFusionDlg()
 	{
 		setupUi(this);
-		setWindowFlags(Qt::Tool);
 
 		switch(algo)
 		{

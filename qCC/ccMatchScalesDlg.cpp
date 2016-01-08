@@ -18,7 +18,6 @@
 #include "ccMatchScalesDlg.h"
 
 //Qt
-#include <QDialog>
 #include <QListWidgetItem>
 #include <QDoubleValidator>
 
@@ -28,12 +27,10 @@
 ccMatchScalesDlg::ccMatchScalesDlg(	const ccHObject::Container& entities,
 										int defaultSelectedIndex/*=0*/,
 										QWidget* parent/*=0*/)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Tool)
 	, Ui::MatchScalesDialog()
 {
 	setupUi(this);
-
-	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	for (size_t i=0; i<entities.size(); ++i)
 	{

@@ -39,9 +39,9 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 	**/
-	ccBox(const CCVector3& dims,
-				const ccGLMatrix* transMat = 0,
-				QString name = QString("Box"));
+	ccBox(	const CCVector3& dims,
+			const ccGLMatrix* transMat = 0,
+			QString name = QString("Box"));
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -54,6 +54,9 @@ public:
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Box"; }
 	virtual ccGenericPrimitive* clone() const;
+
+	//! Sets box dimensions
+	inline void setDimensions(CCVector3& dims) { m_dims = dims; updateRepresentation(); }
 
 	//! Returns box dimensions
 	const CCVector3& getDimensions() const { return m_dims; }

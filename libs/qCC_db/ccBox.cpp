@@ -21,18 +21,44 @@
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
-ccBox::ccBox(const CCVector3& dims, const ccGLMatrix* transMat/*= 0*/, QString name/*=QString("Box")*/)
+ccBox::ccBox(	const CCVector3& dims,
+				const ccGLMatrix* transMat/*= 0*/,
+				QString name/*=QString("Box")*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_dims(dims)
 {
 	updateRepresentation();
 }
 
+ccBox::ccBox(QString name/*=QString("Box")*/)
+	: ccGenericPrimitive(name)
+	, m_dims(0,0,0)
+{
+}
+
 bool ccBox::buildUp()
 {
+	//clear triangles indexes
+	if (m_triVertIndexes)
+	{
+		m_triVertIndexes->clear();
+	}
+	//clear per triangle normals
+	removePerTriangleNormalIndexes();
+	if (m_triNormals)
+	{
+		m_triNormals->clear();
+	}
+	//clear vertices
+	ccPointCloud* verts = vertices();
+	if (verts)
+	{
+		verts->clear();
+	}
+
 	//upper plane
 	ccGLMatrix upperMat;
-	upperMat.getTranslation()[2] = static_cast<float>(m_dims.z)/2;
+	upperMat.getTranslation()[2] = m_dims.z / 2.0f;
 	*this += ccPlane(m_dims.x,m_dims.y,&upperMat);
 	//lower plane
 	ccGLMatrix lowerMat;
@@ -55,13 +81,7 @@ bool ccBox::buildUp()
 	backMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI/2.0),CCVector3(1,0,0),CCVector3(0,m_dims.y/2,0));
 	*this += ccPlane(m_dims.x,m_dims.z,&backMat);
 
-	return (vertices() && vertices()->size() == 24 && vertices()->hasNormals() && this->size() == 12);
-}
-
-ccBox::ccBox(QString name/*=QString("Box")*/)
-	: ccGenericPrimitive(name)
-	, m_dims(0,0,0)
-{
+	return (vertices() && vertices()->size() == 24 && this->size() == 12);
 }
 
 ccGenericPrimitive* ccBox::clone() const
@@ -90,7 +110,7 @@ bool ccBox::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_dims.u,3);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_dims.u, 3);
 
 	return true;
 }

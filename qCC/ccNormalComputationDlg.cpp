@@ -224,7 +224,7 @@ void ccNormalComputationDlg::autoEstimateRadius()
 
 	if (!m_cloud->getOctree())
 	{
-		ccProgressDialog pDlg(true,this);
+		ccProgressDialog pDlg(true, this);
 		if (!m_cloud->computeOctree(&pDlg))
 		{
 			ccLog::Error(QString("Could not compute octree for cloud '%1'").arg(m_cloud->getName()));

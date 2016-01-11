@@ -46,6 +46,10 @@ v2.7.beta ??/??/201?
 	* Structured point clouds:
 		- the sensor position of associated scans is now properly updated when the cloud is rotated
 
+	* M3C2 plugin:
+		- new option to output the scalar fields (distance, confidence, etc.) on the original core point entity
+			(i.e. either the original cloud or the subsampled version).
+
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

@@ -64,6 +64,7 @@ v2.7.beta ??/??/201?
 		(at least) causing an increasing slow down each time the tool is restarted
 	* Polylines vertices could be dragged and dropped or deleted (potentially causing a crash)
 	* For clouds with a number of points that is exactly a multiple of 65536, the last 65536 points were not displayed
+	* OpenGL warning removed when rendering a 3D view to a file (or as an animation with the qAnimation plugin)
 
 v2.6.2 10/08/2015
 - New features:

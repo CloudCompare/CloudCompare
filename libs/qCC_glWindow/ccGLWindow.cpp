@@ -1563,8 +1563,9 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			diagStrings << "FBO updated";
 		}
 	}
-	else
+	else if (!m_captureMode.enabled) //capture mode doesn't use double buffering by default!
 	{
+	ccGLUtils::CatchGLError("test0");
 		if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
 		{
 			//select back left or back right buffer
@@ -1574,6 +1575,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		{
 			glDrawBuffer(GL_BACK);
 		}
+	ccGLUtils::CatchGLError("test1");
 	}
 
 	/******************/

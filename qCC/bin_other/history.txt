@@ -50,6 +50,10 @@ v2.7.beta ??/??/201?
 		- new option to output the scalar fields (distance, confidence, etc.) on the original core point entity
 			(i.e. either the original cloud or the subsampled version).
 
+	* CANUPO plugin:
+		- the statistics (Training mode) now takes the actual boundary into account (and not the default one)
+		- bug fix: the classes (labels) could be inversed in some cases
+
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

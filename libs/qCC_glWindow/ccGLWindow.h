@@ -38,6 +38,7 @@
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QByteArray>
+#include <QFlags>
 //#define THREADED_GL_WIDGET
 #ifdef THREADED_GL_WIDGET
 #include <QThread>
@@ -45,6 +46,7 @@
 #include <QWaitCondition>
 #include <QAtomicInt>
 #endif
+
 //system
 #include <unordered_set>
 #include <list>
@@ -80,12 +82,35 @@ public:
 						DEFAULT_PICKING,
 	};
 
-	//! Interaction mode (with the mouse!)
-	enum INTERACTION_MODE { TRANSFORM_CAMERA,
-							TRANSFORM_ENTITY,
-							SEGMENT_ENTITY,
-							PAN_ONLY,
+	//! Interaction flags (mostly with the mouse)
+	enum INTERACTION_FLAG {
+
+		//no interaction
+		INTERACT_NONE = 0,
+
+		//camera interactions
+		INTERACT_ROTATE          =  1,
+		INTERACT_PAN             =  2,
+		INTERACT_ZOOM_CAMERA     =  4,
+		INTERACT_2D_ITEMS        =  8, //labels, etc.
+		INTERACT_CLICKABLE_ITEMS = 16, //hot zone
+
+		//options / modifiers
+		INTERACT_TRANSFORM_ENTITIES = 64,
+		
+		//signals
+		INTERACT_SIG_RB_CLICKED  = 128,      //right button clicked
+		INTERACT_SIG_LB_CLICKED  = 256,      //left button clicked
+		INTERACT_SIG_MOUSE_MOVED = 512,      //mouse moved (only if a button is clicked)
+		INTERACT_SIG_BUTTON_RELEASED = 1024, //mouse button released
+		INTERACT_SEND_ALL_SIGNALS = INTERACT_SIG_RB_CLICKED | INTERACT_SIG_LB_CLICKED | INTERACT_SIG_MOUSE_MOVED | INTERACT_SIG_BUTTON_RELEASED,
 	};
+	Q_DECLARE_FLAGS(INTERACTION_FLAGS, INTERACTION_FLAG)
+
+	//Default interaction modes (with the mouse!)
+	static const INTERACTION_FLAGS PAN_ONLY()           { return INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; }
+	static const INTERACTION_FLAGS TRANSFORM_CAMERA()   { return INTERACT_ROTATE | PAN_ONLY(); }
+	static const INTERACTION_FLAGS TRANSFORM_ENTITIES() { return INTERACT_ROTATE | INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_TRANSFORM_ENTITIES | INTERACT_CLICKABLE_ITEMS; }
 
 	//! Default message positions on screen
 	enum MessagePosition {  LOWER_LEFT_MESSAGE,
@@ -306,7 +331,7 @@ public:
 	virtual void setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw = true);
 
 	//! Sets current interaction mode
-	virtual void setInteractionMode(INTERACTION_MODE mode);
+	virtual void setInteractionMode(INTERACTION_FLAGS flags);
 
 	//! Sets current picking mode
 	/** Picking can be applied to entities (default), points, triangles, etc.)
@@ -403,9 +428,6 @@ public:
 	virtual bool areShadersEnabled() const;
 	virtual bool areGLFiltersEnabled() const;
 
-	//! Enables "embedded icons"
-	virtual void enableEmbeddedIcons(bool state);
-
 	//! Returns the actual pixel size on screen (taking zoom or perspective parameters into account)
 	/** In perspective mode, this value is approximate.
 	**/
@@ -486,6 +508,11 @@ public:
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
 
+	//! Returns whether the display has an active FBO
+	inline bool hasFBO() const { return (m_fbo != 0); }
+
+public: //LOD
+
 	//! Returns whether LOD is enabled on this display or not
 	inline bool isLODEnabled() const { return m_LODEnabled; }
 
@@ -493,6 +520,8 @@ public:
 	/** \return success
 	**/
 	bool setLODEnabled(bool state, bool autoDisable = false);
+
+public: //fullscreen
 
 	//! Toggles (exclusive) full-screen mode
 	void toggleExclusiveFullScreen(bool state);
@@ -988,8 +1017,8 @@ protected: //members
 	bool m_mouseButtonPressed;
 	//! Whether this 3D window can be closed by the user or not
 	bool m_unclosable;
-	//! Current intercation mode (with mouse)
-	INTERACTION_MODE m_interactionMode;
+	//! Current intercation flags
+	INTERACTION_FLAGS m_interactionFlags;
 	//! Current picking mode
 	PICKING_MODE m_pickingMode;
 	//! Whether picking mode is locked or not
@@ -1046,11 +1075,6 @@ protected: //members
 	//! Whether custom light is enabled or not
 	bool m_customLightEnabled;
 
-	//! Whether embedded icons (point size, etc.) are enabled or not
-	bool m_embeddedIconsEnabled;
-	//! Hot zone (= where embedded icons lie) is activated (= mouse over)
-	bool m_hotZoneActivated;
-
 	//! Clickable item
 	struct ClickableItem
 	{
@@ -1069,6 +1093,9 @@ protected: //members
 	};
 	//! Currently displayed clickable items
 	std::vector<ClickableItem> m_clickableItems;
+
+	//! Whether clickable items are visible (= mouse over) or not
+	bool m_clickableItemsVisible;
 
 	//! Currently active shader
 	ccShader* m_activeShader;
@@ -1180,5 +1207,7 @@ private:
 	//! Returns shaders path
 	static QString getShadersPath();
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);
 
 #endif

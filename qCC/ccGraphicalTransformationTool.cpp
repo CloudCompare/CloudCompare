@@ -77,13 +77,13 @@ void ccGraphicalTransformationTool::pause(bool state)
 
 	if (state)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	else
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITY);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
 		m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 
@@ -194,7 +194,7 @@ bool ccGraphicalTransformationTool::start()
 	m_rotationCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u); //m_rotation center == selected entities center
 
 	//activate "moving mode" in associated GL window
-	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITY);
+	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
@@ -212,11 +212,10 @@ void ccGraphicalTransformationTool::stop(bool state)
 	if (m_associatedWin)
 	{
 		//deactivate "moving mode" in associated GL window
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
-		disconnect(m_associatedWin, SIGNAL(rotation(const ccGLMatrixd&)),	this, SLOT(glRotate(const ccGLMatrixd&)));
-		disconnect(m_associatedWin, SIGNAL(translation(const CCVector3d&)),	this, SLOT(glTranslate(const CCVector3d&)));
+		m_associatedWin->disconnect(this);
 		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]",ccGLWindow::UPPER_CENTER_MESSAGE,false,2,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->redraw(true, false);
 	}

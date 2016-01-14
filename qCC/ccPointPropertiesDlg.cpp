@@ -89,7 +89,7 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 	{
 		oldWin->removeFromOwnDB(m_label);
 		oldWin->removeFromOwnDB(m_rect2DLabel);
-		oldWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		oldWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		oldWin->disconnect(this);
 	}
 
@@ -126,7 +126,7 @@ void ccPointPropertiesDlg::stop(bool state)
 	m_rect2DLabel->setSelected(true);	//=closed
 
 	if (m_associatedWin)
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 
 	ccPointPickingGenericInterface::stop(state);
 }
@@ -139,7 +139,7 @@ void ccPointPropertiesDlg::onClose()
 void ccPointPropertiesDlg::activatePointPropertiesDisplay()
 {
 	if (m_associatedWin)
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 
 	m_pickingMode = POINT_INFO;
 	pointPropertiesButton->setDown(true);
@@ -162,7 +162,7 @@ void ccPointPropertiesDlg::activateDistanceDisplay()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->redraw(false);
 	}
 }
@@ -179,7 +179,7 @@ void ccPointPropertiesDlg::activateAngleDisplay()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->redraw(false);
 	}
 }
@@ -196,7 +196,7 @@ void ccPointPropertiesDlg::activate2DZonePicking()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::SEGMENT_ENTITY);
+		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 		m_associatedWin->redraw(false);
 	}
 }
@@ -330,10 +330,19 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 {
 	if (m_pickingMode != RECT_ZONE)
+	{
 		return;
+	}
 
 	if (m_rect2DLabel->isSelected())
+	{
 		return;
+	}
+
+	if (!m_associatedWin || !m_associatedWin->hasFBO()) //we need fast rendering (with FBO) for live update of the rectangle!
+	{
+		return;
+	}
 
 	float roi[4] = {m_rect2DLabel->roi()[0],
 					m_rect2DLabel->roi()[1],

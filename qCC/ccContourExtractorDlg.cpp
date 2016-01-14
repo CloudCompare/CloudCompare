@@ -72,9 +72,9 @@ void ccContourExtractorDlg::init()
 		params.colorScaleUseShader = false;
 		m_glWindow->setDisplayParameters(params,true);
 		m_glWindow->setPerspectiveState(false,true);
-		m_glWindow->setInteractionMode(ccGLWindow::PAN_ONLY);
-		m_glWindow->displayOverlayEntities(true);
+		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
+		m_glWindow->displayOverlayEntities(true);
 		viewFrame->setLayout(new QHBoxLayout);
 		viewFrame->layout()->addWidget(m_glWindow);
 	}

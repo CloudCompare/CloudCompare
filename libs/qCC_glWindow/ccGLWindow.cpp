@@ -195,14 +195,13 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_mouseMoved(false)
 	, m_mouseButtonPressed(false)
 	, m_unclosable(false)
-	, m_interactionMode(TRANSFORM_CAMERA)
+	, m_interactionFlags(TRANSFORM_CAMERA())
 	, m_pickingMode(NO_PICKING)
 	, m_pickingModeLocked(false)
 	, m_lastClickTime_ticks(0)
 	, m_sunLightEnabled(true)
 	, m_customLightEnabled(false)
-	, m_embeddedIconsEnabled(false)
-	, m_hotZoneActivated(false)
+	, m_clickableItemsVisible(false)
 	, m_activeShader(0)
 	, m_shadersEnabled(false)
 	, m_fbo(0)
@@ -260,13 +259,10 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 
 	//default modes
 	setPickingMode(DEFAULT_PICKING);
-	setInteractionMode(TRANSFORM_CAMERA);
+	setInteractionMode(TRANSFORM_CAMERA());
 
 	//drag & drop handling
 	setAcceptDrops(true);
-
-	//embedded icons (point size, etc.)
-	enableEmbeddedIcons(true);
 
 	//auto-load previous perspective settings
 	{
@@ -381,6 +377,20 @@ ccGLWindow::~ccGLWindow()
 		delete m_fbo;
 	if (m_fbo2)
 		delete m_fbo2;
+}
+
+void ccGLWindow::setInteractionMode(INTERACTION_FLAGS flags)
+{
+	m_interactionFlags = flags;
+
+	//we need to explicitely enable 'mouse tracking' to track the mouse when no button is clicked
+	setMouseTracking(flags & (INTERACT_CLICKABLE_ITEMS | INTERACT_SIG_MOUSE_MOVED));
+
+	if ((flags & INTERACT_CLICKABLE_ITEMS) == 0)
+	{
+		//auto-hide the embedded icons if they are disabled
+		m_clickableItemsVisible = false;
+	}
 }
 
 const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
@@ -1085,7 +1095,7 @@ QSharedPointer<HotZone> s_hotZone(0);
 
 void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 {
-	if (	!m_hotZoneActivated
+	if (	!m_clickableItemsVisible
 		&&	!m_bubbleViewModeEnabled )
 	{
 		//nothing to do
@@ -1110,7 +1120,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 	{
 		//total hot zone area size (without margin)
 		int psi_totalWidth = 0;
-		if (m_hotZoneActivated)
+		if (m_clickableItemsVisible)
 			psi_totalWidth = /*HotZone::margin() + */s_hotZone->psi_labelRect.width() + HotZone::margin() + HotZone::iconSize() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
 		int bbv_totalWidth = 0;
 		if (m_bubbleViewModeEnabled)
@@ -1124,11 +1134,11 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		QPoint minAreaCorner(xStart0 + HotZone::margin(),              yStart + HotZone::margin() + std::min(0, s_hotZone->yTextBottomLineShift - s_hotZone->textHeight));
 		QPoint maxAreaCorner(xStart0 + HotZone::margin() + totalWidth, yStart + HotZone::margin() + std::max(HotZone::iconSize(), s_hotZone->yTextBottomLineShift));
-		if (m_hotZoneActivated && m_bubbleViewModeEnabled)
+		if (m_clickableItemsVisible && m_bubbleViewModeEnabled)
 		{
 			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
 		}
-		if (m_hotZoneActivated && fullScreenEnabled)
+		if (m_clickableItemsVisible && fullScreenEnabled)
 		{
 			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
 		}
@@ -1146,7 +1156,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		glEnd();
 	}
 
-	if (m_hotZoneActivated)
+	if (m_clickableItemsVisible)
 	{
 		yStart += HotZone::margin();
 		int xStart = xStart0 + HotZone::margin();
@@ -1448,7 +1458,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	glDisable(GL_DEPTH_TEST);
 
 	CONTEXT.flags = CC_DRAW_2D;
-	if (m_interactionMode == TRANSFORM_ENTITY)
+	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
 		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
@@ -1565,7 +1575,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	}
 	else if (!m_captureMode.enabled) //capture mode doesn't use double buffering by default!
 	{
-	ccGLUtils::CatchGLError("test0");
 		if (m_stereoModeEnabled && renderingParams.passCount == 2 && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
 		{
 			//select back left or back right buffer
@@ -1575,7 +1584,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		{
 			glDrawBuffer(GL_BACK);
 		}
-	ccGLUtils::CatchGLError("test1");
 	}
 
 	/******************/
@@ -1768,7 +1776,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	glEnable(GL_DEPTH_TEST);
 
 	CONTEXT.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
-	if (m_interactionMode == TRANSFORM_ENTITY)
+	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
 		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
@@ -1968,7 +1976,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	glDisable(GL_DEPTH_TEST);
 
 	CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
-	if (m_interactionMode == TRANSFORM_ENTITY)
+	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
 		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
@@ -3182,11 +3190,6 @@ CCVector3d ccGLWindow::getCurrentUpDir() const
 	return axis;
 }
 
-void ccGLWindow::setInteractionMode(INTERACTION_MODE mode)
-{
-	m_interactionMode = mode;
-}
-
 void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 {
 	//is the picking mode locked?
@@ -3215,13 +3218,6 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	}
 
 	m_pickingMode = mode;
-}
-
-void ccGLWindow::enableEmbeddedIcons(bool state)
-{
-	m_embeddedIconsEnabled = state;
-	m_hotZoneActivated = false;
-	setMouseTracking(state);
 }
 
 CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
@@ -3291,9 +3287,6 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels/*=false*/)
 {
 	m_activeItems.clear();
-
-	if (m_interactionMode == TRANSFORM_ENTITY) //labels are ignored in 'Interactive Transformation' mode
-		return;
 
 	PickingParameters params(FAST_PICKING,x,y,2,2);
 
@@ -3382,6 +3375,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 {
 	m_mouseMoved = false;
 	m_mouseButtonPressed = true;
+	m_lastMousePos = event->pos();
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -3389,28 +3383,33 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 #endif
 		)
 	{
-		if (m_interactionMode != SEGMENT_ENTITY) //mouse movement = panning (2D translation)
+		//right click = panning (2D translation)
+		if (m_interactionFlags & INTERACT_PAN)
 		{
-			m_lastMousePos = event->pos();
-
 			QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
 		}
 
-		emit rightButtonClicked(event->x()-width()/2,height()/2-event->y());
+		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
+		{
+			emit rightButtonClicked(event->x()-width()/2, height()/2-event->y());
+		}
 	}
 	else if (event->buttons() & Qt::LeftButton)
 	{
-		if (m_interactionMode != SEGMENT_ENTITY) //mouse movement = rotation
-		{
-			m_lastClickTime_ticks = ccTimer::Msec();
+		m_lastClickTime_ticks = ccTimer::Msec();
 
+		//left click = rotation
+		if (m_interactionFlags & INTERACT_ROTATE)
+		{
 			m_lastMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
-			m_lastMousePos = event->pos();
 
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 		}
 
-		emit leftButtonClicked(event->x()-width()/2,height()/2-event->y());
+		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
+		{
+			emit leftButtonClicked(event->x()-width()/2, height()/2-event->y());
+		}
 	}
 	else
 	{
@@ -3420,14 +3419,10 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 {
-	if (m_interactionMode == SEGMENT_ENTITY)
+	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
+		emit mouseMoved(event->x()-width()/2, height()/2-event->y(), event->buttons());
 		event->accept();
-		if (event->buttons() != Qt::NoButton || m_alwaysUseFBO) //fast!
-		{
-			emit mouseMoved(event->x()-width()/2,height()/2-event->y(),event->buttons());
-		}
-		return;
 	}
 
 	const int x = event->x();
@@ -3436,21 +3431,16 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	//no button pressed
 	if (event->buttons() == Qt::NoButton)
 	{
-		if (m_embeddedIconsEnabled)
+		if (m_interactionFlags & INTERACT_CLICKABLE_ITEMS)
 		{
 			bool inZone = (x < CC_HOT_ZONE_TRIGGER_WIDTH && y < CC_HOT_ZONE_TRIGGER_HEIGHT);
-			if (inZone != m_hotZoneActivated)
+			if (inZone != m_clickableItemsVisible)
 			{
-				m_hotZoneActivated = inZone;
+				m_clickableItemsVisible = inZone;
 				redraw(true, false);
 			}
 			event->accept();
 		}
-		else
-		{
-			event->ignore();
-		}
-
 		//don't need to process any further
 		return;
 	}
@@ -3465,61 +3455,73 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 #endif
 		)
 	{
-		//displacement vector (in "3D")
-		double pixSize = computeActualPixelSize();
-		CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
-		if (!m_viewportParams.perspectiveView)
+		//right button = panning / translating
+		if (m_interactionFlags & INTERACT_PAN)
 		{
-			u.y *= m_viewportParams.orthoAspectRatio;
-		}
-
-		bool entityMovingMode =		(m_interactionMode == TRANSFORM_ENTITY)
-								||	((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
-		if (entityMovingMode)
-		{
-			//apply inverse view matrix
-			m_viewportParams.viewMat.transposed().applyRotation(u);
-
-			if (m_interactionMode == TRANSFORM_ENTITY)
+			//displacement vector (in "3D")
+			double pixSize = computeActualPixelSize();
+			CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
+			if (!m_viewportParams.perspectiveView)
 			{
-				emit translation(u);
+				u.y *= m_viewportParams.orthoAspectRatio;
 			}
-			else if (m_customLightEnabled)
+
+			bool entityMovingMode =		(m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
+									||	((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
+			if (entityMovingMode)
 			{
-				//update custom light position
-				m_customLightPos[0] += static_cast<float>(u.x);
-				m_customLightPos[1] += static_cast<float>(u.y);
-				m_customLightPos[2] += static_cast<float>(u.z);
-				invalidateViewport();
+				//apply inverse view matrix
+				m_viewportParams.viewMat.transposed().applyRotation(u);
+
+				if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
+				{
+					emit translation(u);
+				}
+				else if (m_customLightEnabled)
+				{
+					//update custom light position
+					m_customLightPos[0] += static_cast<float>(u.x);
+					m_customLightPos[1] += static_cast<float>(u.y);
+					m_customLightPos[2] += static_cast<float>(u.z);
+					invalidateViewport();
+				}
 			}
-		}
-		else //camera moving mode
-		{
-			if (m_viewportParams.objectCenteredView)
+			else //camera moving mode
 			{
-				//inverse displacement in object-based mode
-				u = -u;
-			}			
-			moveCamera(static_cast<float>(u.x),static_cast<float>(u.y),static_cast<float>(u.z));
-		}
+				if (m_viewportParams.objectCenteredView)
+				{
+					//inverse displacement in object-based mode
+					u = -u;
+				}			
+				moveCamera(static_cast<float>(u.x),static_cast<float>(u.y),static_cast<float>(u.z));
+			}
+
+		} //if (m_interactionFlags & INTERACT_PAN)
 	}
 	else if (event->buttons() & Qt::LeftButton) //rotation
 	{
-		//on the first time, let's check if the mouse is on a selected item
-		if (!m_mouseMoved)
+		if (m_interactionFlags & INTERACT_2D_ITEMS)
 		{
-			if (	m_pickingMode != NO_PICKING
-				/*//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
-				&&	m_pickingMode != POINT_PICKING
-				&&	m_pickingMode != TRIANGLE_PICKING
-				&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
-				//*/
-				&&
-				(	QApplication::keyboardModifiers () == Qt::NoModifier
-				||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )
+			//on the first time, let's check if the mouse is on a (selected) 2D item
+			if (!m_mouseMoved)
 			{
-				updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
+				if (	m_pickingMode != NO_PICKING
+					/*//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
+					&&	m_pickingMode != POINT_PICKING
+					&&	m_pickingMode != TRIANGLE_PICKING
+					&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
+					//*/
+					&&
+					(	QApplication::keyboardModifiers () == Qt::NoModifier
+					||	QApplication::keyboardModifiers () == Qt::ControlModifier ) )
+				{
+					updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
+				}
 			}
+		}
+		else
+		{
+			assert(m_activeItems.empty());
 		}
 
 		//specific case: move active item(s)
@@ -3591,7 +3593,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					C->y = D->y = static_cast<PointCoordinateType>(height()/2 - event->y());
 				}
 			}
-			else if (m_interactionMode != PAN_ONLY) //standard rotation around the current pivot
+			else if (m_interactionFlags & INTERACT_ROTATE) //standard rotation around the current pivot
 			{
 				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
 
@@ -3599,7 +3601,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 				m_lastMouseOrientation = m_currentMouseOrientation;
 				m_updateFBO = true;
 
-				if (m_interactionMode == TRANSFORM_ENTITY)
+				if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 				{
 					rotMat = m_viewportParams.viewMat.transposed() * rotMat * m_viewportParams.viewMat;
 
@@ -3625,7 +3627,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 	event->accept();
 
-	if (m_interactionMode != TRANSFORM_ENTITY)
+	if (m_interactionFlags != INTERACT_TRANSFORM_ENTITIES)
 	{
 		redraw(true);
 	}
@@ -3633,6 +3635,12 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 bool ccGLWindow::processClickableItems(int x, int y)
 {
+	if (m_clickableItems.empty())
+	{
+		//shortcut
+		return false;
+	}
+	
 	ClickableItem::Role clickedItem = ClickableItem::NO_ROLE;
 	for (std::vector<ClickableItem>::const_iterator it = m_clickableItems.begin(); it != m_clickableItems.end(); ++it)
 	{
@@ -3685,7 +3693,6 @@ bool ccGLWindow::processClickableItems(int x, int y)
 void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 	bool mouseHasMoved = m_mouseMoved;
-	bool acceptEvent = false;
 	//setLODEnabled(false, false); //DGM: why?
 
 	//reset to default state
@@ -3693,17 +3700,18 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	m_mouseMoved = false;
 	QApplication::restoreOverrideCursor();
 
-	if (m_interactionMode == SEGMENT_ENTITY)
+	if (m_interactionFlags & INTERACT_SIG_BUTTON_RELEASED)
 	{
 		event->accept();
 		emit buttonReleased();
-		return;
 	}
 
 	if (m_pivotSymbolShown)
 	{
 		if (m_pivotVisibility == PIVOT_SHOW_ON_MOVE)
+		{
 			toBeRefreshed();
+		}
 		showPivotSymbol(m_pivotVisibility == PIVOT_ALWAYS_SHOW);
 	}
 
@@ -3713,9 +3721,14 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 #endif
 		)
 	{
-		if (!mouseHasMoved)
+		if (mouseHasMoved)
 		{
-			//specific case: interaction with item(s)
+			event->accept();
+			toBeRefreshed();
+		}
+		else if (m_interactionFlags & INTERACT_2D_ITEMS)
+		{
+			//interaction with 2D item(s)
 			updateActiveItemsList(event->x(), event->y(), false);
 			if (!m_activeItems.empty())
 			{
@@ -3723,15 +3736,10 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				m_activeItems.clear();
 				if (item->acceptClick(event->x(),height()-1-event->y(),Qt::RightButton))
 				{
-					acceptEvent = true;
+					event->accept();
 					toBeRefreshed();
 				}
 			}
-		}
-		else
-		{
-			acceptEvent = true;
-			toBeRefreshed();
 		}
 	}
 	else if (event->button() == Qt::LeftButton)
@@ -3759,8 +3767,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				startPicking(params);
 			}
 
+			event->accept();
 			toBeRefreshed();
-			acceptEvent = true;
 		}
 		else
 		{
@@ -3773,54 +3781,61 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				//first test if the user has clicked on a particular item on the screen
 				if (processClickableItems(x,y))
 				{
-					acceptEvent = true;
+					event->accept();
 				}
-
-				if (!acceptEvent && m_pickingMode != NO_PICKING)
+				else if (	(m_pickingMode != NO_PICKING)
+						||	(m_interactionFlags & INTERACT_2D_ITEMS) )
 				{
-					//specific case: label selection
-					updateActiveItemsList(event->x(), event->y(), false);
-					if (!m_activeItems.empty())
+					if (m_interactionFlags & INTERACT_2D_ITEMS)
 					{
-						if (m_activeItems.size() == 1)
+						//label selection
+						updateActiveItemsList(event->x(), event->y(), false);
+						if (!m_activeItems.empty())
 						{
-							ccInteractor* pickedObj = m_activeItems.front();
-							cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
-							if (label && !label->isSelected())
+							if (m_activeItems.size() == 1)
 							{
-								emit entitySelectionChanged(label->getUniqueID());
-								QApplication::processEvents();
+								ccInteractor* pickedObj = m_activeItems.front();
+								cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
+								if (label && !label->isSelected())
+								{
+									emit entitySelectionChanged(label->getUniqueID());
+									QApplication::processEvents();
+								}
 							}
+
+							//interaction with item(s) such as labels, etc.
+							//DGM TODO: to activate only if some items take left clicks into account!
+							//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+							//if ((*it)->acceptClick(x,y,Qt::LeftButton))
+							//{
+							//	event->accept();
+							//	redraw();
+							//	return;
+							//}
+
+							event->accept();
 						}
-
-						//interaction with item(s) such as labels, etc.
-						//DGM TODO: to activate only if some items take left clicks into account!
-						//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
-						//if ((*it)->acceptClick(x,y,Qt::LeftButton))
-						//{
-						//	event->accept();
-						//	redraw();
-						//	return;
-						//}
-
-						acceptEvent = true;
 					}
 					else
+					{
+						assert(m_activeItems.empty());
+					}
+
+					if (m_activeItems.empty() && m_pickingMode != NO_PICKING)
 					{
 						//perform standard picking
 						PICKING_MODE pickingMode = m_pickingMode;
 
 						//shift+click = point/triangle picking
 						if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+						{
 							pickingMode = LABEL_PICKING;
+						}
 
 						PickingParameters params(pickingMode,event->x(),event->y());
 						startPicking(params);
 
-						//we also spread the news (if anyone is interested ;)
-						emit leftButtonClicked(event->x(), event->y());
-
-						acceptEvent = true;
+						event->accept();
 					}
 				}
 			}
@@ -3829,30 +3844,22 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		m_activeItems.clear();
 	}
 
-	if (acceptEvent)
-		event->accept();
-	else
-		event->ignore();
-
 	refresh(false);
 }
 
 void ccGLWindow::wheelEvent(QWheelEvent* event)
 {
-	if (m_interactionMode == SEGMENT_ENTITY)
+	if (m_interactionFlags & INTERACT_ZOOM_CAMERA)
 	{
-		event->ignore();
-		return;
+		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
+		float wheelDelta_deg = static_cast<float>(event->delta()) / 8;
+
+		onWheelEvent(wheelDelta_deg);
+
+		emit mouseWheelRotated(wheelDelta_deg);
+	
+		event->accept();
 	}
-
-	//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-	float wheelDelta_deg = static_cast<float>(event->delta()) / 8;
-
-	onWheelEvent(wheelDelta_deg);
-
-	emit mouseWheelRotated(wheelDelta_deg);
-
-	event->accept();
 }
 
 void ccGLWindow::onWheelEvent(float wheelDelta_deg)
@@ -5240,7 +5247,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			ccGLUtils::CatchGLError("ccGLWindow::renderToFile/FBO stop");
 
 			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
-			if (m_interactionMode == TRANSFORM_ENTITY)
+			if (m_interactionFlags == INTERACT_TRANSFORM_ENTITIES)
 			{
 				CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 			}

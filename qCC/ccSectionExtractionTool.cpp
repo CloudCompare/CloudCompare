@@ -520,7 +520,7 @@ void ccSectionExtractionTool::stop(bool accepted)
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 	}
@@ -704,7 +704,7 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 
 void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 {
-	if (!m_associatedWin)
+	if (!m_associatedWin || !m_associatedWin->hasFBO()) //we need fast rendering (with FBO) for live update of the polyline!
 		return;
 
 	//process not started yet?
@@ -896,7 +896,7 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 			m_editedPoly->clear();
 			m_editedPolyVertices->clear();
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY);
+		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY());
 		m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
 	}
@@ -911,7 +911,7 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 		m_state = STARTED;
 		
 		m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
-		m_associatedWin->setInteractionMode(ccGLWindow::SEGMENT_ENTITY);
+		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 		m_associatedWin->displayNewMessage("Section edition mode",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Left click: add section points / Right click: stop",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 	}

@@ -256,7 +256,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 											2,
 											ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->removeFromOwnDB(m_segmentationPoly);
@@ -391,7 +391,13 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 {
 	//process not started yet?
 	if ((m_state & RUNNING) == 0)
+	{
 		return;
+	}
+	if (!m_associatedWin || !m_associatedWin->hasFBO()) //we need fast rendering (with FBO) for live update of the polyline!
+	{
+		return;
+	}
 
 	assert(m_polyVertices);
 	assert(m_segmentationPoly);
@@ -439,7 +445,9 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	}
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw(true, false);
+	}
 }
 
 void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
@@ -678,14 +686,14 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 			m_polyVertices->clear();
 			allowPolylineExport(false);
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->displayNewMessage("Segmentation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to segment again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 	}
 	else
 	{
 		m_state = STARTED;
-		m_associatedWin->setInteractionMode(ccGLWindow::SEGMENT_ENTITY);
+		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 		if (m_rectangularSelection)
 		{
 			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);

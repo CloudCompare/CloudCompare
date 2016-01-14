@@ -3288,7 +3288,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 {
 	m_activeItems.clear();
 
-	PickingParameters params(FAST_PICKING,x,y,2,2);
+	PickingParameters params(FAST_PICKING, x, y, 2, 2);
 
 #ifdef THREADED_GL_WIDGET
 	//DGM TOOD: wait for the thread to finish the process!
@@ -3832,7 +3832,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 							pickingMode = LABEL_PICKING;
 						}
 
-						PickingParameters params(pickingMode,event->x(),event->y());
+						PickingParameters params(pickingMode, event->x(), event->y());
 						startPicking(params);
 
 						event->accept();
@@ -4070,7 +4070,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		gluPickMatrix(	static_cast<GLdouble>(params.centerX),
 						static_cast<GLdouble>(viewport[3]-params.centerY),
 						static_cast<GLdouble>(params.pickWidth),
-						static_cast<GLdouble>(params.pickHeight),
+						static_cast<GLdouble>(params.pickWidth),
 						viewport);
 		glMultMatrixd(getProjectionMatd());
 
@@ -4107,7 +4107,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		gluPickMatrix(	static_cast<GLdouble>(params.centerX),
 						static_cast<GLdouble>(viewport[3]-params.centerY),
 						static_cast<GLdouble>(params.pickWidth),
-						static_cast<GLdouble>(params.pickHeight),
+						static_cast<GLdouble>(params.pickWidth),
 						viewport);
 		glMultMatrixd(orthoProjMatd);
 		glMatrixMode(GL_MODELVIEW);
@@ -4200,21 +4200,15 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 {
-	int centerX = params.centerX;
-	int centerY = height()-1 - params.centerY;
+	CCVector2d clickedPos(params.centerX, height()-1 - params.centerY);
 	
-	//back project the clicked point in 3D
-	CCVector3d X(0,0,0);
 	int VP[4];
 	getViewportArray(VP);
 	const double* MM = getModelViewMatd();
 	const double* MP = getProjectionMatd();
-	{
-		gluUnProject(centerX,centerY,0,MM,MP,VP,X.u,X.u+1,X.u+2);
-	}
 
 	int nearestEntityID = -1;
-	int nearestPointIndex = -1;
+	int nearestElementIndex = -1;
 	try
 	{
 		ccHObject::Container toProcess;
@@ -4223,7 +4217,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 		if (m_winDBRoot)
 			toProcess.push_back(m_winDBRoot);
 
-		double nearestPointSquareDist = -1.0;
+		double nearestElementSquareDist = -1.0;
 
 		while (!toProcess.empty())
 		{
@@ -4242,104 +4236,42 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 				if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
-					ccGLMatrix trans;
-					bool noGLTrans = !cloud->getAbsoluteGLTransformation(trans);
 
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
-					//brute force works quite well in fact?!
-					for (unsigned i=0; i<cloud->size(); ++i)
+					int nearestPointIndex = -1;
+					double nearestSquareDist = 0;
+					if (cloud->isClicked(	clickedPos,
+											nearestPointIndex,
+											nearestSquareDist,
+											MM, MP, VP,
+											params.pickWidth,
+											params.pickHeight) )
 					{
-						const CCVector3* P = cloud->getPoint(i);
-						double xs,ys,zs;
-						if (noGLTrans)
+						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
-							gluProject(P->x,P->y,P->z,MM,MP,VP,&xs,&ys,&zs);
-						}
-						else
-						{
-							CCVector3 Q = *P;
-							trans.apply(Q);
-							gluProject(Q.x,Q.y,Q.z,MM,MP,VP,&xs,&ys,&zs);
-						}
-						if (fabs(xs-centerX) <= params.pickWidth && fabs(ys-centerY) <= params.pickHeight)
-						{
-							double squareDist = CCVector3d(X.x-P->x,X.y-P->y,X.z-P->z).norm2d();
-							if (nearestPointIndex < 0 || squareDist < nearestPointSquareDist)
-							{
-								nearestPointSquareDist = squareDist;
-								nearestPointIndex = static_cast<int>(i);
-								nearestEntityID = static_cast<int>(cloud->getUniqueID());
-							}
+							nearestElementSquareDist = nearestSquareDist;
+							nearestElementIndex = static_cast<int>(nearestPointIndex);
+							nearestEntityID = static_cast<int>(cloud->getUniqueID());
 						}
 					}
 				}
 				else if (ent->isKindOf(CC_TYPES::MESH))
 				{
-					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-					ccGLMatrix trans;
-					bool noGLTrans = !mesh->getAbsoluteGLTransformation(trans);
 					ignoreSubmeshes = true;
 
-					ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-					assert(vertices);
-					for (unsigned i=0; i<mesh->size(); ++i)
+					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+
+					int nearestTriIndex = -1;
+					double nearestSquareDist = 0;
+					if (mesh->isClicked(clickedPos,
+										nearestTriIndex,
+										nearestSquareDist,
+										MM, MP, VP) )
 					{
-						CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
-						const CCVector3* A3D = vertices->getPoint(tsi->i1);
-						const CCVector3* B3D = vertices->getPoint(tsi->i2);
-						const CCVector3* C3D = vertices->getPoint(tsi->i3);
-
-						CCVector3d A2D,B2D,C2D; 
-						if (noGLTrans)
+						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
-							gluProject(A3D->x,A3D->y,A3D->z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
-							gluProject(B3D->x,B3D->y,B3D->z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
-							gluProject(C3D->x,C3D->y,C3D->z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
-						}
-						else
-						{
-							CCVector3 A3Dp = *A3D;
-							CCVector3 B3Dp = *B3D;
-							CCVector3 C3Dp = *C3D;
-							trans.apply(A3Dp);
-							trans.apply(B3Dp);
-							trans.apply(C3Dp);
-							gluProject(A3Dp.x,A3Dp.y,A3Dp.z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
-							gluProject(B3Dp.x,B3Dp.y,B3Dp.z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
-							gluProject(C3Dp.x,C3Dp.y,C3Dp.z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
-						}
-
-						//barycentric coordinates
-						GLdouble detT =  (B2D.y-C2D.y) *   (A2D.x-C2D.x) + (C2D.x-B2D.x) *   (A2D.y-C2D.y);
-						GLdouble l1   = ((B2D.y-C2D.y) * (centerX-C2D.x) + (C2D.x-B2D.x) * (centerY-C2D.y)) / detT;
-						GLdouble l2   = ((C2D.y-A2D.y) * (centerX-C2D.x) + (A2D.x-C2D.x) * (centerY-C2D.y)) / detT;
-
-						//does the point falls inside the triangle?
-						if (l1 >= 0 && l1 <= 1.0 && l2 >= 0.0 && l2 <= 1.0)
-						{
-							double l1l2 = l1+l2;
-							assert(l1l2 >= 0);
-							if (l1l2 > 1.0)
-							{
-								l1 /= l1l2;
-								l2 /= l1l2;
-							}
-							GLdouble l3 = 1.0-l1-l2;
-							assert(l3 >= -1.0e-12);
-
-							//now deduce the 3D position
-							CCVector3d P(	l1 * A3D->x + l2 * B3D->x + l3 * C3D->x,
-											l1 * A3D->y + l2 * B3D->y + l3 * C3D->y,
-											l1 * A3D->z + l2 * B3D->z + l3 * C3D->z);
-							double squareDist = (X-P).norm2d();
-							if (nearestPointIndex < 0 || squareDist < nearestPointSquareDist)
-							{
-								nearestPointSquareDist = squareDist;
-								nearestPointIndex = static_cast<int>(i);
-								nearestEntityID = static_cast<int>(mesh->getUniqueID());
-							}
+							nearestElementSquareDist = nearestSquareDist;
+							nearestElementIndex = static_cast<int>(nearestTriIndex);
+							nearestEntityID = static_cast<int>(mesh->getUniqueID());
 						}
 					}
 				}
@@ -4368,7 +4300,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	}
 
 	//we must always emit a signal!
-	processPickingResult(params, nearestEntityID, nearestPointIndex);
+	processPickingResult(params, nearestEntityID, nearestElementIndex);
 }
 
 void ccGLWindow::displayNewMessage(	const QString& message,

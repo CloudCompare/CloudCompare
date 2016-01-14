@@ -330,8 +330,10 @@ public:
 	//! Sets camera to a custom view (forward and up directions must be specified)
 	virtual void setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw = true);
 
-	//! Sets current interaction mode
+	//! Sets current interaction flags
 	virtual void setInteractionMode(INTERACTION_FLAGS flags);
+	//! Returns the current interaction flags
+	inline virtual INTERACTION_FLAGS getInteractionMode() const { return m_interactionFlags; }
 
 	//! Sets current picking mode
 	/** Picking can be applied to entities (default), points, triangles, etc.)

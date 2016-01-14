@@ -303,3 +303,55 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 	//meta-data
 	setMetaData(cloud->metaData());
 }
+
+bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
+									int& nearestPointIndex,
+									double& nearestSquareDist,
+									const double* MM,
+									const double* MP,
+									const int* VP,
+									double pickWidth/*=2.0*/,
+									double pickHeight/*=2.0*/)
+{
+	ccGLMatrix trans;
+	bool noGLTrans = !getAbsoluteGLTransformation(trans);
+
+	//back project the clicked point in 3D
+	CCVector3d X(0,0,0);
+	gluUnProject(clickPos.x, clickPos.y, 0, MM, MP, VP, &X.x, &X.y, &X.z);
+
+	nearestPointIndex = -1;
+	nearestSquareDist = -1.0;
+
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+	//brute force works quite well in fact?!
+	for (unsigned i=0; i<size(); ++i)
+	{
+		const CCVector3* P = getPoint(i);
+		double xs,ys,zs;
+		if (noGLTrans)
+		{
+			gluProject(P->x,P->y,P->z,MM,MP,VP,&xs,&ys,&zs);
+		}
+		else
+		{
+			CCVector3 Q = *P;
+			trans.apply(Q);
+			gluProject(Q.x,Q.y,Q.z,MM,MP,VP,&xs,&ys,&zs);
+		}
+
+		if (fabs(xs-clickPos.x) <= pickWidth && fabs(ys-clickPos.y) <= pickHeight)
+		{
+			double squareDist = CCVector3d(X.x-P->x, X.y-P->y, X.z-P->z).norm2d();
+			if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
+			{
+				nearestSquareDist = squareDist;
+				nearestPointIndex = static_cast<int>(i);
+			}
+		}
+	}
+
+	return (nearestPointIndex >= 0);
+}

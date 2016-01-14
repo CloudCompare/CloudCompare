@@ -183,6 +183,14 @@ public:
 	**/
 	void importParametersFrom(const ccGenericMesh* mesh);
 
+	//! Brute force ray-cast intersection
+	bool isClicked(	const CCVector2d& clickPos,
+					int& nearestTriIndex,
+					double& nearestSquareDist,
+					const double* MM,
+					const double* MP,
+					const int* VP);
+
 protected:
 
 	//inherited from ccHObject

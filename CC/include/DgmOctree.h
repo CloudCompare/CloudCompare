@@ -479,7 +479,7 @@ public:
 		\param level the level of subdivision
 		\return the lowest cell position along X,Y and Z for a given level of subdivision
 	**/
-	inline const int* getMinFillIndexes(unsigned char level) const { return m_fillIndexes+6*level; }
+	inline const int* getMinFillIndexes(unsigned char level) const { return m_fillIndexes + 6*level; }
 
 	//! Returns the highest cell positions in the octree along all dimensions and for a given level of subdivision
 	/** For example, at a level	n, the octree length is 2^n cells along each
@@ -488,7 +488,7 @@ public:
 		\param level the level of subdivision
 		\return the highest cell position along X,Y and Z for a given level of subdivision
 	**/
-	inline const int* getMaxFillIndexes(unsigned char level) const { return getMinFillIndexes(level)+3; }
+	inline const int* getMaxFillIndexes(unsigned char level) const { return m_fillIndexes + 6*level + 3; }
 
 	//! Returns the octree cells length for a given level of subdivision
 	/** As the octree is cubical, cells are cubical.
@@ -627,6 +627,8 @@ public:
 												double radius,
 												bool sortValues = true) const;
 
+public: //extraction of points inside geometrical volumes (sphere, cylinder, box, etc.)
+
 	//deprecated
 	//int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours) const;
 
@@ -655,11 +657,11 @@ public:
 		PointCoordinateType radius;
 		//! Cylinder (half) length
 		PointCoordinateType maxHalfLength;
-		//! Neighbour points falling inside the sphere
+		//! Neighbour points falling inside the cylinder
 		NeighboursSet neighbours;
 		//! subdivision level at which to apply the extraction process
 		unsigned char level;
-		//! Whether to look in both directions or only 
+		//! Whether to look in both directions or only along the positive direction (i.e. half cylinder)
 		bool onlyPositiveDir;
 
 		//! Default constructor
@@ -714,7 +716,38 @@ public:
 	**/
 	size_t getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCylindricalNeighbourhood& params) const;
 
-	/***** CELLS POSITION HANDLING *****/
+	//! Input/output parameters structure for getPointsInBoxNeighbourhood
+	struct BoxNeighbourhood
+	{
+		//! Box center
+		CCVector3 center;
+		//! Box axes (optional)
+		CCVector3* axes;
+		//! Box dimensions
+		CCVector3 dimensions;
+		//! Neighbour points falling inside the box
+		NeighboursSet neighbours;
+		//! subdivision level at which to apply the extraction process
+		unsigned char level;
+
+		//! Default constructor
+		BoxNeighbourhood()
+			: center(0,0,0)
+			, axes(0)
+			, dimensions(0,0,0)
+			, level(0)
+		{}
+	};
+
+	//! Returns the points falling inside a box
+	/** \warning the 'squareDistd' field of each neighbour in the NeighboursSet
+		structure is not used/set
+		\return the number of extracted points
+	**/
+	size_t getPointsInBoxNeighbourhood(BoxNeighbourhood& params) const;
+
+
+public:	/***** CELLS POSITION HANDLING *****/
 
 	//! Generates the truncated cell code of a cell given its position at a given level of subdivision
 	/** For a given level of subdivision (lets call it N), the cell position

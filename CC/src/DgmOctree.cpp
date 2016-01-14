@@ -192,8 +192,8 @@ void DgmOctree::clear()
 	m_numberOfProjectedPoints = 0;
 	m_thePointsAndTheirCellCodes.clear();
 
-	memset(m_fillIndexes,0,sizeof(int)*(MAX_OCTREE_LEVEL+1)*6);
-	memset(m_cellSize,0,sizeof(PointCoordinateType)*(MAX_OCTREE_LEVEL+2));
+	memset(m_fillIndexes, 0, sizeof(int)*(MAX_OCTREE_LEVEL+1)*6);
+	memset(m_cellSize, 0, sizeof(PointCoordinateType)*(MAX_OCTREE_LEVEL+2));
 	updateCellCountTable();
 }
 
@@ -944,7 +944,7 @@ void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
 											int neighbourhoodLength,
 											int* limits) const
 {
-	const int* fillIndexes = m_fillIndexes+6*level;
+	const int* fillIndexes = m_fillIndexes + 6*level;
 
 	int* _limits = limits;
 	for (int dim=0; dim<3; ++dim)
@@ -1499,7 +1499,7 @@ double DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearch
 		else
 		{
 			//fill indexes for current level
-			const int* _fillIndexes = m_fillIndexes+6*nNSS.level;
+			const int* _fillIndexes = m_fillIndexes + 6*nNSS.level;
 			int diagonalDistance = 0;
 			for (int dim=0; dim<3; ++dim)
 			{
@@ -1678,7 +1678,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearc
 		else
 		{
 			//fill indexes for current level
-			const int* _fillIndexes = m_fillIndexes+6*nNSS.level;
+			const int* _fillIndexes = m_fillIndexes + 6*nNSS.level;
 			int diagonalDistance = 0;
 			for (int dim=0; dim<3; ++dim)
 			{
@@ -1894,6 +1894,174 @@ int DgmOctree::getPointsInSphericalNeighbourhood(	const CCVector3& sphereCenter,
 	}
 
 	return static_cast<int>(neighbours.size());
+}
+
+size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) const
+{
+	//cell size
+	const PointCoordinateType& cs = getCellSize(params.level);
+
+	//we are going to test all the cells that may intersect this box
+	//first we extract the box... bounding box ;)
+	CCVector3 minCorner, maxCorner;
+	if (params.axes)
+	{
+		//normalize axes (just in case)
+		params.axes[0].normalize();
+		params.axes[1].normalize();
+		params.axes[2].normalize();
+
+		const PointCoordinateType& dx = params.dimensions.x;
+		const PointCoordinateType& dy = params.dimensions.y;
+		const PointCoordinateType& dz = params.dimensions.z;
+		
+		CCVector3 corners[8] =
+		{
+			CCVector3(-dx/2, -dy/2, -dz/2),
+			CCVector3(-dx/2, -dy/2,  dz/2),
+			CCVector3(-dx/2,  dy/2,  dz/2),
+			CCVector3(-dx/2,  dy/2, -dz/2),
+			CCVector3( dx/2, -dy/2, -dz/2),
+			CCVector3( dx/2, -dy/2,  dz/2),
+			CCVector3( dx/2,  dy/2,  dz/2),
+			CCVector3( dx/2,  dy/2, -dz/2)
+		};
+
+		//position of the box vertices in the octree coordinate system
+		for (unsigned char i=0; i<8; ++i)
+		{
+			corners[i] = corners[i].x * params.axes[0] + corners[i].y * params.axes[1] + corners[i].z * params.axes[2];
+			if (i)
+			{
+				if (corners[i].x < minCorner.x)
+					minCorner.x = corners[i].x;
+				else if (corners[i].x > maxCorner.x)
+					maxCorner.x = corners[i].x;
+
+				if (corners[i].y < minCorner.y)
+					minCorner.y = corners[i].y;
+				else if (corners[i].y > maxCorner.y)
+					maxCorner.y = corners[i].y;
+
+				if (corners[i].z < minCorner.z)
+					minCorner.z = corners[i].z;
+				else if (corners[i].z > maxCorner.z)
+					maxCorner.z = corners[i].z;
+			}
+			else
+			{
+				minCorner = maxCorner = corners[0];
+			}
+		}
+
+		//up to now min and max corners where centered on (0,0,0)
+		minCorner = params.center + minCorner;
+		maxCorner = params.center + maxCorner;
+	}
+	else
+	{
+		minCorner = params.center - params.dimensions/2;
+		maxCorner = params.center + params.dimensions/2;
+	}
+
+	Tuple3i minCornerPos;
+	getTheCellPosWhichIncludesThePoint(&minCorner, minCornerPos, params.level);
+	Tuple3i maxCornerPos;
+	getTheCellPosWhichIncludesThePoint(&maxCorner, maxCornerPos, params.level);
+
+	const int* minFillIndexes = getMinFillIndexes(params.level);
+	const int* maxFillIndexes = getMaxFillIndexes(params.level);
+
+	//don't need to look outside the octree limits!
+	minCornerPos.x = std::max<int>(minCornerPos.x, minFillIndexes[0]);
+	minCornerPos.y = std::max<int>(minCornerPos.y, minFillIndexes[1]);
+	minCornerPos.z = std::max<int>(minCornerPos.z, minFillIndexes[2]);
+
+	maxCornerPos.x = std::min<int>(maxCornerPos.x, maxFillIndexes[0]);
+	maxCornerPos.y = std::min<int>(maxCornerPos.y, maxFillIndexes[1]);
+	maxCornerPos.z = std::min<int>(maxCornerPos.z, maxFillIndexes[2]);
+
+	//half cell diagonal
+	CCVector3 boxHalfDimensions = params.dimensions / 2;
+	CCVector3 maxHalfDist = boxHalfDimensions;
+	if (params.axes)
+	{
+		PointCoordinateType halfDiag = static_cast<PointCoordinateType>(cs * sqrt(3.0)/2.0);
+		maxHalfDist += CCVector3(halfDiag, halfDiag, halfDiag);
+	}
+
+	//binary shift for cell code truncation
+	unsigned char bitDec = GET_BIT_SHIFT(params.level);
+
+	for (int i=minCornerPos.x; i<=maxCornerPos.x; ++i)
+	{
+		for (int j=minCornerPos.y; j<=maxCornerPos.y; ++j)
+		{
+			for (int k=minCornerPos.z; k<=maxCornerPos.z; ++k)
+			{
+				//additional inclusion test
+				if (params.axes)
+				{
+					CCVector3 cellCenter = m_dimMin + CCVector3(static_cast<PointCoordinateType>(i + 0.5),
+																static_cast<PointCoordinateType>(j + 0.5),
+																static_cast<PointCoordinateType>(k + 0.5)) * cs;
+
+					//project the cell center in the box C.S.
+					CCVector3 Q = cellCenter - params.center;
+					Q = CCVector3(	params.axes[0].dot(Q),
+									params.axes[1].dot(Q),
+									params.axes[2].dot(Q) );
+
+					//rough inclusion test
+					if (	fabs(Q.x) > maxHalfDist.x
+						||	fabs(Q.y) > maxHalfDist.y
+						||	fabs(Q.z) > maxHalfDist.z )
+					{
+						//skip this cell
+						continue;
+					}
+				}
+
+				//test if this cell exists
+				Tuple3i cellPos(i, j, k);
+				OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos, params.level);
+				unsigned cellIndex = getCellIndex(truncatedCellCode,bitDec);
+
+				//if yes, we can test the corresponding points
+				if (cellIndex < m_numberOfProjectedPoints)
+				{
+					//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
+					cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
+					OctreeCellCodeType searchCode = (p->theCode >> bitDec);
+
+					//while the (partial) cell code matches this cell
+					for ( ; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode); ++p)
+					{
+						const CCVector3* P = m_theAssociatedCloud->getPoint(p->theIndex);
+						CCVector3 Q = *P - params.center;
+
+						if (params.axes)
+						{
+							//project the point in the box C.S.
+							Q = CCVector3(	params.axes[0].dot(Q),
+											params.axes[1].dot(Q),
+											params.axes[2].dot(Q) );
+						}
+
+						//we keep the points that fall inside the box
+						if (	fabs(Q.x) <= boxHalfDimensions.x
+							&&	fabs(Q.y) <= boxHalfDimensions.y
+							&&	fabs(Q.z) <= boxHalfDimensions.z )
+						{
+							params.neighbours.push_back(PointDescriptor(P, p->theIndex, 0));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return params.neighbours.size();
 }
 
 size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& params) const

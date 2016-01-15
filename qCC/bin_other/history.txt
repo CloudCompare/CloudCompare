@@ -17,6 +17,8 @@ v2.7.beta ??/??/201?
 		- (the 3D view is forced to exclusive full-screen mode)
 		- shaders (EDL, etc.) are supported
 
+	* New method: Edit > Colors > Convert to grey scale
+
 - Enhancements:
 	* Point-pair based alignment tool:
 		- the tool 3D view now has the same viewport/camera parameters as the source 3D view

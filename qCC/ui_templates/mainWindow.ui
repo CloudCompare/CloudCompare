@@ -183,6 +183,7 @@
      <addaction name="actionColorize"/>
      <addaction name="actionChangeColorLevels"/>
      <addaction name="actionSetColorGradient"/>
+     <addaction name="actionRGBToGreyScale"/>
      <addaction name="actionScalarFieldFromColor"/>
      <addaction name="actionInterpolateColors"/>
      <addaction name="separator"/>
@@ -2869,6 +2870,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionRGBToGreyScale">
+   <property name="text">
+    <string>Convert to grey scale</string>
+   </property>
+   <property name="toolTip">
+    <string>Convert RGB colors to grey scale colors</string>
    </property>
   </action>
  </widget>

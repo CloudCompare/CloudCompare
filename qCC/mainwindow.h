@@ -303,6 +303,7 @@ protected slots:
 	//menu action
 	void doActionSetUniqueColor();
 	void doActionColorize();
+	void doActionRGBToGreyScale();
 	void doActionSetColor(bool colorize);
 	void doActionSetColorGradient();
 	void doActionInterpolateColors();

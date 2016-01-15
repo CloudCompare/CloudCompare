@@ -1505,6 +1505,30 @@ bool ccPointCloud::convertNormalToRGB()
 	return true;
 }
 
+bool ccPointCloud::convertRGBToGreyScale()
+{
+	if (!hasColors())
+	{
+		return false;
+	}
+	assert(m_rgbColors);
+
+	unsigned count = size();
+	for (unsigned i=0; i<count; ++i)
+	{
+		ColorCompType* rgb = m_rgbColors->getValue(i);
+		//conversion from RGB to grey scale (see https://en.wikipedia.org/wiki/Luma_%28video%29)
+		double luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+		unsigned char g = static_cast<unsigned char>( std::max(std::min(luminance, 255.0), 0.0) );
+		rgb[0] = rgb[1] = rgb[2] = g;
+	}
+
+	//We must update the VBOs
+	releaseVBOs();
+
+	return true;
+}
+
 bool ccPointCloud::convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField* dipDirSF)
 {
 	if (!dipSF && !dipDirSF)

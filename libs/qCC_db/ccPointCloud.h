@@ -479,7 +479,12 @@ public:
 	**/
 	void addGreyColor(ColorCompType g);
 
-    //! Multiplies all color components of all points by coefficients
+	//! Converts RGB to grey scale colors
+	/** \return success
+	**/
+	bool convertRGBToGreyScale();
+
+	//! Multiplies all color components of all points by coefficients
     /** If the cloud has no color, all points are considered white and
         the color array is automatically allocated.
         \param r red component

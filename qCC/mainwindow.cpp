@@ -839,6 +839,7 @@ void MainWindow::connectActions()
 	connect(actionSetColorGradient,				SIGNAL(triggered()),	this,		SLOT(doActionSetColorGradient()));
 	connect(actionChangeColorLevels,			SIGNAL(triggered()),	this,		SLOT(doActionChangeColorLevels()));
 	connect(actionColorize,						SIGNAL(triggered()),	this,		SLOT(doActionColorize()));
+	connect(actionRGBToGreyScale,				SIGNAL(triggered()),	this,		SLOT(doActionRGBToGreyScale()));
 	connect(actionClearColor,					SIGNAL(triggered()),	this,		SLOT(doActionClearColor()));
 	connect(actionInterpolateColors,			SIGNAL(triggered()),	this,		SLOT(doActionInterpolateColors()));
 
@@ -1150,6 +1151,36 @@ void MainWindow::doActionSetColor(bool colorize)
 
 	refreshAll();
 	updateUI();
+}
+
+void MainWindow::doActionRGBToGreyScale()
+{
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+
+		bool lockedVertices;
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
+		if (lockedVertices)
+		{
+			DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+			continue;
+		}
+
+		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			if (pc->hasColors())
+			{
+				pc->convertRGBToGreyScale();
+				pc->showColors(true);
+				pc->prepareDisplayForRefresh();
+			}
+		}
+	}
+
+	refreshAll();
 }
 
 void MainWindow::doActionSetColorGradient()

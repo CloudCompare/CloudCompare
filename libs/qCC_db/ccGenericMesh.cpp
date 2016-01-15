@@ -34,9 +34,6 @@
 #include <MeshSamplingTools.h>
 #include <SimpleCloud.h>
 
-//GLU
-#include <GL/GLU.h>
-
 //system
 #include <assert.h>
 

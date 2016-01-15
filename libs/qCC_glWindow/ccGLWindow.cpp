@@ -3391,7 +3391,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
 		{
-			emit rightButtonClicked(event->x()-width()/2, height()/2-event->y());
+			emit rightButtonClicked(event->x(), event->y());
 		}
 	}
 	else if (event->buttons() & Qt::LeftButton)
@@ -3408,7 +3408,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
 		{
-			emit leftButtonClicked(event->x()-width()/2, height()/2-event->y());
+			emit leftButtonClicked(event->x(), event->y());
 		}
 	}
 	else
@@ -3419,14 +3419,14 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 {
-	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
-	{
-		emit mouseMoved(event->x()-width()/2, height()/2-event->y(), event->buttons());
-		event->accept();
-	}
-
 	const int x = event->x();
 	const int y = event->y();
+
+	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
+	{
+		emit mouseMoved(x, y, event->buttons());
+		event->accept();
+	}
 
 	//no button pressed
 	if (event->buttons() == Qt::NoButton)

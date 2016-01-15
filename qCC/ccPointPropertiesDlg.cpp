@@ -346,13 +346,12 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 
 	float roi[4] = {m_rect2DLabel->roi()[0],
 					m_rect2DLabel->roi()[1],
-					static_cast<float>(x),
-					static_cast<float>(y) };
+					static_cast<float>(x - m_associatedWin->width()/2),
+					static_cast<float>(m_associatedWin->height()/2 - y) };
 	m_rect2DLabel->setRoi(roi);
 	m_rect2DLabel->setVisible(true);
 
-	if (m_associatedWin)
-		m_associatedWin->redraw(true, false);
+	m_associatedWin->redraw(true, false);
 }
 
 static QString s_last2DLabelComment("");

@@ -718,22 +718,28 @@ void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons butt
 	if (vertCount < 2)
 		return;
 	
-	CCVector3 P = CCVector3(static_cast<PointCoordinateType>(x),
-							static_cast<PointCoordinateType>(y),
+	CCVector3 P = CCVector3(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
+							static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
 							0);
 
 	//we replace last point by the current one
 	CCVector3* lastP = const_cast<CCVector3*>(m_editedPolyVertices->getPointPersistentPtr(vertCount-1));
 	*lastP = P;
 
-	if (m_associatedWin)
-		m_associatedWin->redraw(true, false);
+	m_associatedWin->redraw(true, false);
 }
 
 void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 {
 	if ((m_state & STARTED) == 0)
+	{
 		return;
+	}
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return;
+	}
 
 	if (!m_editedPoly)
 	{
@@ -752,15 +758,14 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 			m_editedPoly->setGlobalShift(cloud->getGlobalShift());
 		}
 		m_editedPoly->addChild(m_editedPolyVertices);
-		if (m_associatedWin)
-			m_associatedWin->addToOwnDB(m_editedPoly);
+		m_associatedWin->addToOwnDB(m_editedPoly);
 	}
 
 	unsigned vertCount = m_editedPolyVertices->size();
 
 	//clicked point (2D)
-	CCVector3 P = CCVector3(static_cast<PointCoordinateType>(x),
-							static_cast<PointCoordinateType>(y),
+	CCVector3 P = CCVector3(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
+							static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
 							0);
 
 	//start new polyline?
@@ -810,8 +815,7 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 		m_editedPoly->showArrow(true,vertCount-1,defaultArrowSize);
 	}
 
-	if (m_associatedWin)
-		m_associatedWin->redraw(true, false);
+	m_associatedWin->redraw(true, false);
 }
 
 void ccSectionExtractionTool::closePolyLine(int, int)
@@ -856,7 +860,9 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw(true, false);
+	}
 }
 
 void ccSectionExtractionTool::cancelCurrentPolyline()

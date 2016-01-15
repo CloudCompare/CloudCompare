@@ -404,9 +404,9 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 
 	unsigned vertCount = m_polyVertices->size();
 
-	//new point
-	CCVector3 P(static_cast<PointCoordinateType>(x),
-				static_cast<PointCoordinateType>(y),
+	//new point (expressed relatively to the screen center)
+	CCVector3 P(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
+				static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
 				0);
 
 	if (m_state & RECTANGLE)
@@ -444,16 +444,20 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 		*lastP = P;
 	}
 
-	if (m_associatedWin)
-	{
-		m_associatedWin->redraw(true, false);
-	}
+	m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 {
 	if ((m_state & STARTED) == 0)
+	{
 		return;
+	}
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return;
+	}
 
 	assert(m_polyVertices);
 	assert(m_segmentationPoly);
@@ -464,8 +468,8 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		return;
 
 	//new point
-	CCVector3 P(static_cast<PointCoordinateType>(x),
-				static_cast<PointCoordinateType>(y),
+	CCVector3 P(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
+				static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
 				0);
 
 	//CTRL key pressed at the same time?
@@ -529,8 +533,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		}
 	}
 
-	if (m_associatedWin)
-		m_associatedWin->redraw(true, false);
+	m_associatedWin->redraw(true, false);
 }
 
 void ccGraphicalSegmentationTool::closeRectangle()
@@ -590,7 +593,9 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	allowPolylineExport(m_segmentationPoly->size() > 1);
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw(true, false);
+	}
 }
 
 void ccGraphicalSegmentationTool::segmentIn()

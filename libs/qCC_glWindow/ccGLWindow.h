@@ -663,26 +663,28 @@ signals:
 	void rotation(const ccGLMatrixd& rotMat);
 
 	//! Signal emitted when the left mouse button is cliked on the window
-	/** Arguments correspond to the clicked point coordinates (x,y) in
-		pixels and relatively to the window center.
+	/** See INTERACT_SIG_LB_CLICKED.
+		Arguments correspond to the clicked point coordinates (x,y) in
+		pixels and relatively to the window corner!
 	**/
 	void leftButtonClicked(int, int);
 
 	//! Signal emitted when the right mouse button is cliked on the window
-	/** Arguments correspond to the clicked point coordinates (x,y) in
-		pixels and relatively to the window center.
+	/** See INTERACT_SIG_RB_CLICKED.
+		Arguments correspond to the clicked point coordinates (x,y) in
+		pixels and relatively to the window corner!
 	**/
 	void rightButtonClicked(int, int);
 
 	//! Signal emitted when the mouse is moved
-	/** SEGMENT_ENTITY mode only with either a button pressed or m_alwaysUseFBO=true! (too slow otherwise)
-		Two first arguments correspond to the current cursor coordinates (x,y)
-		in pixels and relatively to the window center.
+	/** See INTERACT_SIG_MOUSE_MOVED.
+		The two first arguments correspond to the current cursor coordinates (x,y)
+		relatively to the window corner!
 	**/
 	void mouseMoved(int, int, Qt::MouseButtons);
 
 	//! Signal emitted when a mouse button is released (cursor on the window)
-	/** SEGMENT_ENTITY mode only!
+	/** See INTERACT_SIG_BUTTON_RELEASED.
 	**/
 	void buttonReleased();
 

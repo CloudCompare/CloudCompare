@@ -253,6 +253,9 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 
 		//update view direction
 		setVertDimension(vertAxisComboBox->currentIndex());
+
+		//section extraction only works in orthoraphic mode!
+		m_associatedWin->setPerspectiveState(false, true);
 	}
 
 	return true;

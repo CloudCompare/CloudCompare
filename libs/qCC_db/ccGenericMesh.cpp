@@ -897,8 +897,9 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 	bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 	//back project the clicked point in 3D
+	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
 	CCVector3d X(0,0,0);
-	gluUnProject(clickPos.x, clickPos.y, 0, MM, MP, VP, &X.x, &X.y, &X.z);
+	ccGL::Unproject<double, double>(clickPosd, MM, MP, VP, X);
 
 	nearestTriIndex = -1;
 	nearestSquareDist = -1.0;
@@ -919,9 +920,9 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 		CCVector3d A2D,B2D,C2D; 
 		if (noGLTrans)
 		{
-			gluProject(A3D->x,A3D->y,A3D->z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
-			gluProject(B3D->x,B3D->y,B3D->z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
-			gluProject(C3D->x,C3D->y,C3D->z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
+			ccGL::Project<PointCoordinateType, double>(*A3D,MM,MP,VP,A2D);
+			ccGL::Project<PointCoordinateType, double>(*B3D,MM,MP,VP,B2D);
+			ccGL::Project<PointCoordinateType, double>(*C3D,MM,MP,VP,C2D);
 		}
 		else
 		{
@@ -931,9 +932,9 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 			trans.apply(A3Dp);
 			trans.apply(B3Dp);
 			trans.apply(C3Dp);
-			gluProject(A3Dp.x,A3Dp.y,A3Dp.z,MM,MP,VP,&A2D.x,&A2D.y,&A2D.z);
-			gluProject(B3Dp.x,B3Dp.y,B3Dp.z,MM,MP,VP,&B2D.x,&B2D.y,&B2D.z);
-			gluProject(C3Dp.x,C3Dp.y,C3Dp.z,MM,MP,VP,&C2D.x,&C2D.y,&C2D.z);
+			ccGL::Project<PointCoordinateType, double>(A3Dp,MM,MP,VP,A2D);
+			ccGL::Project<PointCoordinateType, double>(B3Dp,MM,MP,VP,B2D);
+			ccGL::Project<PointCoordinateType, double>(C3Dp,MM,MP,VP,C2D);
 		}
 
 		//barycentric coordinates

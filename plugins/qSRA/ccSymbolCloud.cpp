@@ -203,8 +203,8 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const CCVector3* P = getPoint(i);
 
 				//project it in 2D screen coordinates
-				GLdouble xp,yp,zp;
-				gluProject(P->x,P->y,P->z,MM,MP,VP,&xp,&yp,&zp);
+				CCVector3d Q;
+				ccGL::Project<PointCoordinateType, double>(*P,MM,MP,VP,Q);
 
 				//apply point color (if any)
 				if (glParams.showColors)
@@ -216,14 +216,20 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//draw associated symbol
 				if (m_showSymbols && m_symbolSize > 0.0)
 				{
-					drawSymbolAt(xp-static_cast<double>(context.glW/2),yp-static_cast<double>(context.glH/2));
+					drawSymbolAt(Q.x- context.glW/2, Q.y - context.glH/2);
 				}
 
 				//draw associated label?
 				if (m_showLabels && hasLabels && m_labels.size() > i && !m_labels[i].isNull())
 				{
 					//draw label
-					context._win->displayText(m_labels[i],static_cast<int>(xp+xpShift),static_cast<int>(yp+ypShift),m_labelAlignFlags,0,color,&font);
+					context._win->displayText(	m_labels[i],
+												static_cast<int>(Q.x + xpShift),
+												static_cast<int>(Q.y + ypShift),
+												m_labelAlignFlags,
+												0,
+												color,
+												&font);
 				}
 
 			}

@@ -627,15 +627,14 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		int VP[4];
 		context._win->getViewportArray(VP);
 
-		GLdouble xp,yp,zp;
 		CCVector3 C = bBox.getCenter();
-		trans.apply(C);
-		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
+		CCVector3d Q;
+		ccGL::Project<PointCoordinateType, double>(C,MM,MP,VP,Q);
 
 		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
 		context._win->displayText(	getName(),
-									static_cast<int>(xp),
-									static_cast<int>(yp),
+									static_cast<int>(Q.x),
+									static_cast<int>(Q.y),
 									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
 									0.75f,
 									0,

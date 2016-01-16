@@ -2673,116 +2673,6 @@ void ccGLWindow::invalidateViewport()
 	m_updateFBO = true;
 }
 
-ccGLMatrixd ccGLFrustum(double left, double right, double bottom, double top, double znear, double zfar)
-{
-    // invalid for: n<=0, f<=0, l=r, b=t, or n=f
-    assert(znear > 0);
-    assert(zfar > 0);
-    assert(left != right);
-    assert(bottom != top);
-    assert(znear != zfar);
-
-	ccGLMatrixd outMatrix;
-	{
-		double* matrix = outMatrix.data();
-
-		double dX = right - left;
-		double dY = top - bottom;
-		double dZ = znear - zfar;
-
-		matrix[0]  =  2*znear / dX;
-		matrix[1]  =  0.0;
-		matrix[2]  =  0.0;
-		matrix[3]  =  0.0;
-
-		matrix[4]  =  0.0;
-		matrix[5]  =  2*znear / dY;
-		matrix[6]  =  0.0;
-		matrix[7]  =  0.0;
-
-		matrix[8]  =  (right + left)/dX;
-		matrix[9]  =  (top + bottom)/dY;
-		matrix[10] =  (zfar + znear)/dZ;
-		matrix[11] = -1.0;
-
-		matrix[12] =  0.0;
-		matrix[13] =  0.0;
-		matrix[14] =  2*znear*zfar / dZ;
-		matrix[15] =  0.0;
-	}
-
-	return outMatrix;
-}
-
-//inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
-ccGLMatrixd ccGluPerspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
-{
-	ccGLMatrixd outMatrix;
-	{
-		double* matrix = outMatrix.data();
-
-		double ymax = znear * tanf(fovyInDegrees/2 * CC_DEG_TO_RAD);
-		double xmax = ymax * aspectRatio;
-
-		double dZ = zfar - znear;
-		matrix[0]  =  znear / xmax;
-		matrix[1]  =  0.0;
-		matrix[2]  =  0.0;
-		matrix[3]  =  0.0;
-
-		matrix[4]  =  0.0;
-		matrix[5]  =  znear / ymax;
-		matrix[6]  =  0.0;
-		matrix[7]  =  0.0;
-
-		matrix[8]  =  0.0;
-		matrix[9]  =  0.0;
-		matrix[10] = -(zfar + znear) / dZ;
-		matrix[11] = -1.0;
-
-		matrix[12] =  0.0;
-		matrix[13] =  0.0;
-		matrix[14] =  -(2.0 * znear * zfar) / dZ;
-		matrix[15] =  0.0;
-	}
-
-	return outMatrix;
-}
-
-//inspired from http://www.songho.ca/opengl/gl_projectionmatrix.html
-ccGLMatrixd ccGlOrtho(double w, double h, double d)
-{
-	ccGLMatrixd matrix;
-	if (w != 0 && h != 0 && d != 0)
-	{
-		double* mat = matrix.data();
-		mat[0]  = 1.0 / w;
-		mat[1]  = 0.0;
-		mat[2]  = 0.0;
-		mat[3]  = 0.0;
-		
-		mat[4]  = 0.0;
-		mat[5]  = 1.0 / h;
-		mat[6]  = 0.0;
-		mat[7]  = 0.0;
-
-		mat[8]  = 0.0;
-		mat[9]  = 0.0;
-		mat[10] = - 1.0 / d;
-		mat[11] = 0.0;
-
-		mat[12] = 0.0;
-		mat[13] = 0.0;
-		mat[14] = 0.0;
-		mat[15] = 1.0;
-	}
-	else
-	{
-		matrix.toIdentity();
-	}
-
-	return matrix;
-}
 
 ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures, double* eyeOffset/*=0*/) const
 {
@@ -2854,7 +2744,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		float currentFov_deg = getFov();
 		
 		//DGM: take now 'frustumAsymmetry' into account (for stereo rendering)
-		//return ccGluPerspective(currentFov_deg,ar,zNear,zFar);
+		//return ccGLUtils::Perspective(currentFov_deg,ar,zNear,zFar);
 		double yMax = zNear * tanf(currentFov_deg/2 * CC_DEG_TO_RAD);
 		double xMax = yMax * ar;
 
@@ -2873,7 +2763,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 			*eyeOffset = frustumAsymmetry * convergence / zNear;
 		}
 
-		return ccGLFrustum(-xMax-frustumAsymmetry, xMax-frustumAsymmetry, -yMax, yMax, zNear, zFar);
+		return ccGL::Frustum(-xMax-frustumAsymmetry, xMax-frustumAsymmetry, -yMax, yMax, zNear, zFar);
 	}
 	else
 	{
@@ -2890,7 +2780,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		zNear = -maxDist_pix;
 		zFar = maxDist_pix;
 
-		return ccGlOrtho(halfW,halfH,maxDist_pix);
+		return ccGL::Ortho(halfW,halfH,maxDist_pix);
 	}
 }
 
@@ -3230,38 +3120,36 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	double xc = static_cast<double>(width()/2);
 	double yc = static_cast<double>(height()/2);
 
-	GLdouble xp,yp;
+	CCVector3d Q;
 	if (m_viewportParams.objectCenteredView)
 	{
 		//project the current pivot point on screen
 		int VP[4];
 		getViewportArray(VP);
-		GLdouble zp;
-		gluProject(	m_viewportParams.pivotPoint.x,
-					m_viewportParams.pivotPoint.y,
-					m_viewportParams.pivotPoint.z,
-					getModelViewMatd(),
-					getProjectionMatd(),
-					VP,
-					&xp,&yp,&zp);
+		
+		ccGL::Project<double, double>(	m_viewportParams.pivotPoint,
+										getModelViewMatd(),
+										getProjectionMatd(),
+										VP,
+										Q);
 
 		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
-		xp = std::min<GLdouble>(xp,3*width()/4);
-		xp = std::max<GLdouble>(xp,  width()/4);
+		Q.x = std::min<GLdouble>(Q.x,3*width()/4);
+		Q.x = std::max<GLdouble>(Q.x,  width()/4);
 
-		yp = std::min<GLdouble>(yp,3*height()/4);
-		yp = std::max<GLdouble>(yp,  height()/4);
+		Q.y = std::min<GLdouble>(Q.y,3*height()/4);
+		Q.y = std::max<GLdouble>(Q.y,  height()/4);
 	}
 	else
 	{
-		xp = static_cast<GLdouble>(xc);
-		yp = static_cast<GLdouble>(yc);
+		Q.x = static_cast<GLdouble>(xc);
+		Q.y = static_cast<GLdouble>(yc);
 	}
 
 	//invert y
 	y = height()-1 - y;
 
-	CCVector3d v(x - xp, y - yp, 0);
+	CCVector3d v(x - Q.x, y - Q.y, 0);
 
 	v.x = std::max<double>(std::min<double>(v.x/xc,1),-1);
 	v.y = std::max<double>(std::min<double>(v.y/yc,1),-1);
@@ -4071,12 +3959,16 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		//projection matrix
 		glMatrixMode(GL_PROJECTION);
 		//restrict drawing to the picking area
-		glLoadIdentity();
-		gluPickMatrix(	static_cast<GLdouble>(params.centerX),
-						static_cast<GLdouble>(viewport[3]-params.centerY),
-						static_cast<GLdouble>(params.pickWidth),
-						static_cast<GLdouble>(params.pickWidth),
-						viewport);
+		{
+			double pickMatrix[16];
+			ccGL::PickMatrix(	static_cast<GLdouble>(params.centerX),
+								static_cast<GLdouble>(viewport[3]-params.centerY),
+								static_cast<GLdouble>(params.pickWidth),
+								static_cast<GLdouble>(params.pickWidth),
+								viewport,
+								pickMatrix);
+			glLoadMatrixd(pickMatrix);
+		}
 		glMultMatrixd(getProjectionMatd());
 
 		//model view matrix
@@ -4108,12 +4000,16 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		double orthoProjMatd[OPENGL_MATRIX_SIZE];
 		glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
 		//restrict drawing to the picking area
-		glLoadIdentity();
-		gluPickMatrix(	static_cast<GLdouble>(params.centerX),
-						static_cast<GLdouble>(viewport[3]-params.centerY),
-						static_cast<GLdouble>(params.pickWidth),
-						static_cast<GLdouble>(params.pickWidth),
-						viewport);
+		{
+			double pickMatrix[16];
+			ccGL::PickMatrix(	static_cast<GLdouble>(params.centerX),
+								static_cast<GLdouble>(viewport[3]-params.centerY),
+								static_cast<GLdouble>(params.pickWidth),
+								static_cast<GLdouble>(params.pickWidth),
+								viewport,
+								pickMatrix);
+			glLoadMatrixd(pickMatrix);
+		}
 		glMultMatrixd(orthoProjMatd);
 		glMatrixMode(GL_MODELVIEW);
 
@@ -5566,19 +5462,19 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 	int VP[4];
 	getViewportArray(VP);
 
-	GLdouble A2Dx,A2Dy,A2Dz;
-	gluProject(A3D.x,A3D.y,A3D.z,MM,MP,VP,&A2Dx,&A2Dy,&A2Dz);
-	GLdouble B2Dx,B2Dy,B2Dz;
-	gluProject(B3D.x,B3D.y,B3D.z,MM,MP,VP,&B2Dx,&B2Dy,&B2Dz);
-	GLdouble C2Dx,C2Dy,C2Dz;
-	gluProject(C3D.x,C3D.y,C3D.z,MM,MP,VP,&C2Dx,&C2Dy,&C2Dz);
+	CCVector3d A2D;
+	ccGL::Project<PointCoordinateType, double>(A3D,MM,MP,VP,A2D);
+	CCVector3d B2D;
+	ccGL::Project<PointCoordinateType, double>(B3D,MM,MP,VP,B2D);
+	CCVector3d C2D;
+	ccGL::Project<PointCoordinateType, double>(C3D,MM,MP,VP,C2D);
 
 	//barycentric coordinates
 	GLdouble P2Dx = P2D.x;
 	GLdouble P2Dy = height()-1 - P2D.y;
-	GLdouble detT =  (B2Dy-C2Dy) * (A2Dx-C2Dx) + (C2Dx-B2Dx) * (A2Dy-C2Dy);
-	GLdouble l1   = ((B2Dy-C2Dy) * (P2Dx-C2Dx) + (C2Dx-B2Dx) * (P2Dy-C2Dy)) / detT;
-	GLdouble l2   = ((C2Dy-A2Dy) * (P2Dx-C2Dx) + (A2Dx-C2Dx) * (P2Dy-C2Dy)) / detT;
+	GLdouble detT =  (B2D.y-C2D.y) * (A2D.x-C2D.x) + (C2D.x-B2D.x) * (A2D.y-C2D.y);
+	GLdouble l1   = ((B2D.y-C2D.y) * (P2D.x-C2D.x) + (C2D.x-B2D.x) * (P2D.y-C2D.y)) / detT;
+	GLdouble l2   = ((C2D.y-A2D.y) * (P2D.x-C2D.x) + (A2D.x-C2D.x) * (P2D.y-C2D.y)) / detT;
 
 	//clamp everything between 0 and 1
 	if (l1 < 0)

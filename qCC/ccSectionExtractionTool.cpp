@@ -588,11 +588,10 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 			for (unsigned i=0; i<duplicateVertices->size(); ++i)
 			{
 				CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
-				GLdouble xp,yp,zp;
-				gluUnProject(half_w+P.x,half_h+P.y,0/*P.z*/,MM,MP,VP,&xp,&yp,&zp);
-				P.x = static_cast<PointCoordinateType>(xp);
-				P.y = static_cast<PointCoordinateType>(yp);
-				P.z = static_cast<PointCoordinateType>(zp);
+				CCVector3d Pd(half_w + P.x, half_h + P.y, 0/*P.z*/);
+				CCVector3d Q;
+				ccGL::Unproject<double, double>(Pd, MM, MP, VP, Q);
+				P = CCVector3::fromArray(Q.u);
 				P.u[vertDim] = defaultZ;
 			}
 
@@ -683,24 +682,6 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 
 	return true;
 }
-
-//CCVector3 ccSectionExtractionTool::project2Dto3D(int x, int y) const
-//{
-//	//get current display parameters
-//	const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
-//	const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-//	const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
-//	const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
-//	int VP[4];
-//	m_associatedWin->getViewportArray(VP);
-//
-//	GLdouble xp,yp,zp;
-//	gluUnProject(half_w+x,half_h+y,0/*z*/,MM,MP,VP,&xp,&yp,&zp);
-//
-//	return CCVector3(	static_cast<PointCoordinateType>(xp),
-//						static_cast<PointCoordinateType>(yp),
-//						static_cast<PointCoordinateType>(zp) );
-//}
 
 void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 {

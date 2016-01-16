@@ -205,10 +205,10 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		int VP[4];
 		context._win->getViewportArray(VP);
 
-		GLdouble xp,yp,zp;
 		CCVector3 C = bBox.getCenter();
+		CCVector3d Q;
 		trans.apply(C);
-		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
+		ccGL::Project<PointCoordinateType, double>(C,MM,MP,VP,Q);
 
 		//we want to display this name next to the sphere, and not above it!
 		const ccViewportParameters& params = context._win->getViewportParameters();
@@ -217,8 +217,8 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		int bkgBorder = QFontMetrics(context._win->getTextDisplayFont()).height()/4+4;
 		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
 		context._win->displayText(	getName(),
-									static_cast<int>(xp)+dPix+bkgBorder,
-									static_cast<int>(yp),
+									static_cast<int>(Q.x)+dPix+bkgBorder,
+									static_cast<int>(Q.y),
 									ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,
 									0.75f,
 									0,

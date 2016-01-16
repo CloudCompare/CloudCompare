@@ -656,12 +656,12 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				CCVector3 P;
 				cloud->getPoint(i,P);
 
-				GLdouble xp,yp,zp;
-				gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
+				CCVector3d Qd;
+				ccGL::Project<PointCoordinateType, double>(P, MM, MP, VP, Qd);
 
-				CCVector2 P2D(	static_cast<PointCoordinateType>(xp-half_w),
-								static_cast<PointCoordinateType>(yp-half_h) );
-				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,m_segmentationPoly);
+				CCVector2 P2D(	static_cast<PointCoordinateType>(Qd.x-half_w),
+								static_cast<PointCoordinateType>(Qd.y-half_h) );
+				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 
 				visibilityArray->setValue(i, keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE );
 			}
@@ -818,11 +818,11 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 					CCVector3 P = *vertices->getPoint(i);
 					if (mode3D)
 					{
-						GLdouble xp,yp,zp;
-						gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
+						CCVector3d Q;
+						ccGL::Project<PointCoordinateType, double>(P, MM, MP, VP, Q);
 
-						P.x = static_cast<PointCoordinateType>(xp-half_w);
-						P.y = static_cast<PointCoordinateType>(yp-half_h);
+						P.x = static_cast<PointCoordinateType>(Q.x-half_w);
+						P.y = static_cast<PointCoordinateType>(Q.y-half_h);
 						P.z = 0;
 					}
 					m_polyVertices->addPoint(P);
@@ -900,11 +900,10 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 				for (unsigned i=0; i<vertices->size(); ++i)
 				{
 					CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
-					GLdouble xp,yp,zp;
-					gluUnProject(half_w+Pscreen->x,half_h+Pscreen->y,0/*Pscreen->z*/,MM,MP,VP,&xp,&yp,&zp);
-					Pscreen->x = static_cast<PointCoordinateType>(xp);
-					Pscreen->y = static_cast<PointCoordinateType>(yp);
-					Pscreen->z = static_cast<PointCoordinateType>(zp);
+					CCVector3d Pd(half_w+Pscreen->x, half_h+Pscreen->y, 0/*Pscreen->z*/);
+					CCVector3d Q;
+					ccGL::Unproject<double, double>(Pd, MM, MP, VP, Q);
+					*Pscreen = CCVector3::fromArray(Q.u);
 				}
 				verticesPC->invalidateBoundingBox();
 			}

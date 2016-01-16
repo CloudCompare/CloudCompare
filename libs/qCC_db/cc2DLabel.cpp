@@ -816,14 +816,14 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 						title = QString("P#%0").arg(m_points[j].index); 
 
 					//project it in 2D screen coordinates
-					GLdouble xp,yp,zp;
-					gluProject(P->x,P->y,P->z,MM,MP,VP,&xp,&yp,&zp);
+					CCVector3d Q;
+					ccGL::Project<PointCoordinateType, double>(*P,MM,MP,VP,Q);
 
 					context._win->displayText(	title,
-												static_cast<int>(xp) + context.labelMarkerTextShift_pix,
-												static_cast<int>(yp) + context.labelMarkerTextShift_pix,
+												static_cast<int>(Q.x) + context.labelMarkerTextShift_pix,
+												static_cast<int>(Q.y) + context.labelMarkerTextShift_pix,
 												ccGenericGLDisplay::ALIGN_DEFAULT,
-												context.labelOpacity/100.0f,
+												context.labelOpacity / 100.0f,
 												ccColor::white.rgba,
 												&font );
 				}
@@ -963,12 +963,16 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		arrowDest /= static_cast<PointCoordinateType>(m_points.size());
 
 		//project it in 2D screen coordinates
-		int VP[4];
-		context._win->getViewportArray(VP);
-		const double* MM = context._win->getModelViewMatd(); //viewMat
-		const double* MP = context._win->getProjectionMatd(); //projMat
-		GLdouble zp;
-		gluProject(arrowDest.x,arrowDest.y,arrowDest.z,MM,MP,VP,&arrowDestX,&arrowDestY,&zp);
+		{
+			int VP[4];
+			context._win->getViewportArray(VP);
+			const double* MM = context._win->getModelViewMatd(); //viewMat
+			const double* MP = context._win->getProjectionMatd(); //projMat
+			CCVector3d Q;
+			ccGL::Project<PointCoordinateType, double>(arrowDest, MM, MP, VP, Q);
+			arrowDestX = Q.x;
+			arrowDestY = Q.y;
+		}
 
 		/*** label border ***/
 		bodyFont = context._win->getLabelDisplayFont(); //takes rendering zoom into account!

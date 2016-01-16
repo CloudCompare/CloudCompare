@@ -726,6 +726,11 @@ public:
 	//! Multiplication by a vector operator (double version)
 	inline Vector3Tpl<double> operator * (const Vector3Tpl<double>& vec) const { return Vector3Tpl<double>(applyX(vec),applyY(vec),applyZ(vec)); }
 
+	//! Multiplication by a 4D vector operator (float version)
+	inline Tuple4Tpl<float> operator * (const Tuple4Tpl<float>& vec) const { return Tuple4Tpl<float>(applyX(vec),applyY(vec),applyZ(vec),applyW(vec)); }
+	//! Multiplication by a 4D vector operator (double version)
+	inline Tuple4Tpl<double> operator * (const Tuple4Tpl<double>& vec) const { return Tuple4Tpl<double>(applyX(vec),applyY(vec),applyZ(vec),applyW(vec)); }
+
 	//! (in place) Addition operator
 	ccGLMatrixTpl<T>& operator += (const ccGLMatrixTpl<T>& mat)
 	{
@@ -791,6 +796,15 @@ public:
 	**/
 	inline void apply(Vector3Tpl<double>& vec) const	{ vec = (*this)*vec; }
 
+	//! Applies transformation to a 4D vector (in place) - float version
+	/** Input vector is directly modified after calling this method
+	**/
+	inline void apply(Tuple4Tpl<float>& vec) const	{ vec = (*this)*vec; }
+	//! Applies transformation to a 3D vector (in place) - double version
+	/** Input vector is directly modified after calling this method
+	**/
+	inline void apply(Tuple4Tpl<double>& vec) const	{ vec = (*this)*vec; }
+
 	//! Get the resulting transformation along X dimension (float version)
 	inline float applyX(const Vector3Tpl<float>& vec) const
 	{
@@ -840,6 +854,74 @@ public:
 				+ static_cast<double>(CC_MAT_R32) * vec.y
 				+ static_cast<double>(CC_MAT_R33) * vec.z
 				+ static_cast<double>(CC_MAT_R34);
+	}
+
+	//! Get the resulting transformation along X dimension (float version)
+	inline float applyX(const Tuple4Tpl<float>& vec) const
+	{
+		return    static_cast<float>(CC_MAT_R11) * vec.x
+				+ static_cast<float>(CC_MAT_R12) * vec.y
+				+ static_cast<float>(CC_MAT_R13) * vec.z
+				+ static_cast<float>(CC_MAT_R14) * vec.w;
+	}
+	//! Get the resulting transformation along X dimension (double version)
+	inline double applyX(const Tuple4Tpl<double>& vec) const
+	{
+		return    static_cast<double>(CC_MAT_R11) * vec.x
+				+ static_cast<double>(CC_MAT_R12) * vec.y
+				+ static_cast<double>(CC_MAT_R13) * vec.z
+				+ static_cast<double>(CC_MAT_R14) * vec.w;
+	}
+
+	//! Get the resulting transformation along Y dimension (float version)
+	inline float applyY(const Tuple4Tpl<float>& vec) const
+	{
+		return    static_cast<float>(CC_MAT_R21) * vec.x
+				+ static_cast<float>(CC_MAT_R22) * vec.y
+				+ static_cast<float>(CC_MAT_R23) * vec.z
+				+ static_cast<float>(CC_MAT_R24) * vec.w;
+	}
+	//! Get the resulting transformation along Y dimension (double version)
+	inline double applyY(const Tuple4Tpl<double>& vec) const
+	{
+		return    static_cast<double>(CC_MAT_R21) * vec.x
+				+ static_cast<double>(CC_MAT_R22) * vec.y
+				+ static_cast<double>(CC_MAT_R23) * vec.z
+				+ static_cast<double>(CC_MAT_R24) * vec.w;
+	}
+
+	//! Get the resulting transformation along Z dimension (float version)
+	inline float applyZ(const Tuple4Tpl<float>& vec) const
+	{
+		return    static_cast<float>(CC_MAT_R31) * vec.x
+				+ static_cast<float>(CC_MAT_R32) * vec.y
+				+ static_cast<float>(CC_MAT_R33) * vec.z
+				+ static_cast<float>(CC_MAT_R34) * vec.w;
+	}
+	//! Get the resulting transformation along Z dimension (double version)
+	inline double applyZ(const Tuple4Tpl<double>& vec) const
+	{
+		return    static_cast<double>(CC_MAT_R31) * vec.x
+				+ static_cast<double>(CC_MAT_R32) * vec.y
+				+ static_cast<double>(CC_MAT_R33) * vec.z
+				+ static_cast<double>(CC_MAT_R34) * vec.w;
+	}
+
+	//! Get the resulting transformation along the 4th dimension (float version)
+	inline float applyW(const Tuple4Tpl<float>& vec) const
+	{
+		return    static_cast<float>(CC_MAT_R41) * vec.x
+				+ static_cast<float>(CC_MAT_R42) * vec.y
+				+ static_cast<float>(CC_MAT_R43) * vec.z
+				+ static_cast<float>(CC_MAT_R44) * vec.w;
+	}
+	//! Get the resulting transformation along the 4th dimension (double version)
+	inline double applyW(const Tuple4Tpl<double>& vec) const
+	{
+		return    static_cast<double>(CC_MAT_R41) * vec.x
+				+ static_cast<double>(CC_MAT_R42) * vec.y
+				+ static_cast<double>(CC_MAT_R43) * vec.z
+				+ static_cast<double>(CC_MAT_R44) * vec.w;
 	}
 
 	//! Applies rotation only to a 3D vector (in place) - float version

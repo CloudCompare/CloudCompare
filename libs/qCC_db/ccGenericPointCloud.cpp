@@ -317,8 +317,9 @@ bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 	bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 	//back project the clicked point in 3D
+	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
 	CCVector3d X(0,0,0);
-	gluUnProject(clickPos.x, clickPos.y, 0, MM, MP, VP, &X.x, &X.y, &X.z);
+	ccGL::Unproject<double, double>(clickPosd, MM, MP, VP, X);
 
 	nearestPointIndex = -1;
 	nearestSquareDist = -1.0;
@@ -330,19 +331,19 @@ bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 	for (unsigned i=0; i<size(); ++i)
 	{
 		const CCVector3* P = getPoint(i);
-		double xs,ys,zs;
+		CCVector3d Qs;
 		if (noGLTrans)
 		{
-			gluProject(P->x,P->y,P->z,MM,MP,VP,&xs,&ys,&zs);
+			ccGL::Project<PointCoordinateType, double>(*P,MM,MP,VP,Qs);
 		}
 		else
 		{
 			CCVector3 Q = *P;
 			trans.apply(Q);
-			gluProject(Q.x,Q.y,Q.z,MM,MP,VP,&xs,&ys,&zs);
+			ccGL::Project<PointCoordinateType, double>(Q,MM,MP,VP,Qs);
 		}
 
-		if (fabs(xs-clickPos.x) <= pickWidth && fabs(ys-clickPos.y) <= pickHeight)
+		if (fabs(Qs.x-clickPos.x) <= pickWidth && fabs(Qs.y-clickPos.y) <= pickHeight)
 		{
 			double squareDist = CCVector3d(X.x-P->x, X.y-P->y, X.z-P->z).norm2d();
 			if (nearestPointIndex < 0 || squareDist < nearestSquareDist)

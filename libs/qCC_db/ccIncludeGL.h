@@ -21,6 +21,9 @@
 //CCLib
 #include <CCPlatform.h>
 
+//Local
+#include "ccGLMatrix.h"
+
 //GLEW (if needed, must be included first)
 #ifdef USE_GLEW
 #include <GL/glew.h>
@@ -32,10 +35,8 @@
 
 #ifdef CC_MAC_OS
 #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
 #else
 #include <GL/gl.h>
-#include <GL/glu.h>
 #endif
 
 #ifndef GL_INVALID_TEXTURE_ID
@@ -73,6 +74,395 @@ public:
 	//type-less glColor3Xv call (X=f,ub)
 	static inline void Color3v(const unsigned char* v) { glColor3ubv(v); }
 	static inline void Color3v(const float* v) { glColor3fv(v); }
+
+public: //GLU equivalent methods
+
+	static ccGLMatrixd Frustum(double left, double right, double bottom, double top, double znear, double zfar)
+	{
+		// invalid for: n<=0, f<=0, l=r, b=t, or n=f
+		assert(znear > 0);
+		assert(zfar > 0);
+		assert(left != right);
+		assert(bottom != top);
+		assert(znear != zfar);
+
+		ccGLMatrixd outMatrix;
+		{
+			double* matrix = outMatrix.data();
+
+			double dX = right - left;
+			double dY = top - bottom;
+			double dZ = znear - zfar;
+
+			matrix[0]  =  2*znear / dX;
+			matrix[1]  =  0.0;
+			matrix[2]  =  0.0;
+			matrix[3]  =  0.0;
+
+			matrix[4]  =  0.0;
+			matrix[5]  =  2*znear / dY;
+			matrix[6]  =  0.0;
+			matrix[7]  =  0.0;
+
+			matrix[8]  =  (right + left)/dX;
+			matrix[9]  =  (top + bottom)/dY;
+			matrix[10] =  (zfar + znear)/dZ;
+			matrix[11] = -1.0;
+
+			matrix[12] =  0.0;
+			matrix[13] =  0.0;
+			matrix[14] =  2*znear*zfar / dZ;
+			matrix[15] =  0.0;
+		}
+
+		return outMatrix;
+	}
+
+	//inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
+	static ccGLMatrixd Perspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
+	{
+		ccGLMatrixd outMatrix;
+		{
+			double* matrix = outMatrix.data();
+
+			double ymax = znear * tanf(fovyInDegrees/2 * CC_DEG_TO_RAD);
+			double xmax = ymax * aspectRatio;
+
+			double dZ = zfar - znear;
+			matrix[0]  =  znear / xmax;
+			matrix[1]  =  0.0;
+			matrix[2]  =  0.0;
+			matrix[3]  =  0.0;
+
+			matrix[4]  =  0.0;
+			matrix[5]  =  znear / ymax;
+			matrix[6]  =  0.0;
+			matrix[7]  =  0.0;
+
+			matrix[8]  =  0.0;
+			matrix[9]  =  0.0;
+			matrix[10] = -(zfar + znear) / dZ;
+			matrix[11] = -1.0;
+
+			matrix[12] =  0.0;
+			matrix[13] =  0.0;
+			matrix[14] =  -(2.0 * znear * zfar) / dZ;
+			matrix[15] =  0.0;
+		}
+
+		return outMatrix;
+	}
+
+	//inspired from http://www.songho.ca/opengl/gl_projectionmatrix.html
+	static ccGLMatrixd Ortho(double w, double h, double d)
+	{
+		ccGLMatrixd matrix;
+		if (w != 0 && h != 0 && d != 0)
+		{
+			double* mat = matrix.data();
+			mat[0]  = 1.0 / w;
+			mat[1]  = 0.0;
+			mat[2]  = 0.0;
+			mat[3]  = 0.0;
+
+			mat[4]  = 0.0;
+			mat[5]  = 1.0 / h;
+			mat[6]  = 0.0;
+			mat[7]  = 0.0;
+
+			mat[8]  = 0.0;
+			mat[9]  = 0.0;
+			mat[10] = - 1.0 / d;
+			mat[11] = 0.0;
+
+			mat[12] = 0.0;
+			mat[13] = 0.0;
+			mat[14] = 0.0;
+			mat[15] = 1.0;
+		}
+		else
+		{
+			matrix.toIdentity();
+		}
+
+		return matrix;
+	}
+
+	template <typename iType, typename oType>
+	static bool Project(const Vector3Tpl<iType>& input, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output)
+	{
+		//Modelview transform
+		oType mTempo[4] =
+		{
+			static_cast<oType>(modelview[0]*input.x + modelview[4]*input.y + modelview[ 8]*input.z + modelview[12]),
+			static_cast<oType>(modelview[1]*input.x + modelview[5]*input.y + modelview[ 9]*input.z + modelview[13]),
+			static_cast<oType>(modelview[2]*input.x + modelview[6]*input.y + modelview[10]*input.z + modelview[14]),
+			static_cast<oType>(modelview[3]*input.x + modelview[7]*input.y + modelview[11]*input.z + modelview[15])
+		};
+
+		//Projection transform
+		oType pTempo[4] =
+		{
+			static_cast<oType>(projection[0]*mTempo[0] + projection[4]*mTempo[1] + projection[ 8]*mTempo[2] + projection[12]*mTempo[3]),
+			static_cast<oType>(projection[1]*mTempo[0] + projection[5]*mTempo[1] + projection[ 9]*mTempo[2] + projection[13]*mTempo[3]),
+			static_cast<oType>(projection[2]*mTempo[0] + projection[6]*mTempo[1] + projection[10]*mTempo[2] + projection[14]*mTempo[3]),
+			static_cast<oType>(projection[3]*mTempo[0] + projection[7]*mTempo[1] + projection[11]*mTempo[2] + projection[15]*mTempo[3])
+		};
+		
+		//The result normalizes between -1 and 1
+		if (pTempo[3] == 0.0)	//The w value
+		{
+			assert(false);
+			return false;
+		}
+		//Perspective division
+		pTempo[0] /= pTempo[3];
+		pTempo[1] /= pTempo[3];
+		pTempo[2] /= pTempo[3];
+		//Window coordinates
+		//Map x, y to range 0-1
+		output.x = (1.0 + pTempo[0]) / 2 * viewport[2] + viewport[0];
+		output.y = (1.0 + pTempo[1]) / 2 * viewport[3] + viewport[1];
+		//This is only correct when glDepthRange(0.0, 1.0)
+		output.z = (1.0 + pTempo[2]) / 2;	//Between 0 and 1
+
+		return true;
+	}
+	
+	inline static double MAT(const double* m, int r, int c) { return m[c*4+r]; }
+	inline static float MAT(const float* m, int r, int c) { return m[c*4+r]; }
+
+	inline static double& MAT(double* m, int r, int c) { return m[c*4+r]; }
+	inline static float& MAT(float* m, int r, int c) { return m[c*4+r]; }
+	
+	template <typename Type>
+	static bool InvertMatrix(const Type* m, Type* out)
+	{
+		Type wtmp[4][8];
+		Type m0, m1, m2, m3, s;
+		Type *r0, *r1, *r2, *r3;
+		r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
+
+		r0[0] = MAT(m, 0, 0), r0[1] = MAT(m, 0, 1),
+		r0[2] = MAT(m, 0, 2), r0[3] = MAT(m, 0, 3),
+		r0[4] = 1.0, r0[5] = r0[6] = r0[7] = 0.0,
+		r1[0] = MAT(m, 1, 0), r1[1] = MAT(m, 1, 1),
+		r1[2] = MAT(m, 1, 2), r1[3] = MAT(m, 1, 3),
+		r1[5] = 1.0, r1[4] = r1[6] = r1[7] = 0.0,
+		r2[0] = MAT(m, 2, 0), r2[1] = MAT(m, 2, 1),
+		r2[2] = MAT(m, 2, 2), r2[3] = MAT(m, 2, 3),
+		r2[6] = 1.0, r2[4] = r2[5] = r2[7] = 0.0,
+		r3[0] = MAT(m, 3, 0), r3[1] = MAT(m, 3, 1),
+		r3[2] = MAT(m, 3, 2), r3[3] = MAT(m, 3, 3),
+		r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
+		
+		//choose pivot - or die
+		if (fabsf(r3[0]) > fabsf(r2[0]))
+			std::swap(r3, r2);
+		if (fabsf(r2[0]) > fabsf(r1[0]))
+			std::swap(r2, r1);
+		if (fabsf(r1[0]) > fabsf(r0[0]))
+			std::swap(r1, r0);
+		if (0.0 == r0[0])
+			return false;
+		
+		//eliminate first variable
+		m1 = r1[0] / r0[0];
+		m2 = r2[0] / r0[0];
+		m3 = r3[0] / r0[0];
+		s = r0[1];
+		r1[1] -= m1 * s;
+		r2[1] -= m2 * s;
+		r3[1] -= m3 * s;
+		s = r0[2];
+		r1[2] -= m1 * s;
+		r2[2] -= m2 * s;
+		r3[2] -= m3 * s;
+		s = r0[3];
+		r1[3] -= m1 * s;
+		r2[3] -= m2 * s;
+		r3[3] -= m3 * s;
+		s = r0[4];
+		if (s != 0.0)
+		{
+			r1[4] -= m1 * s;
+			r2[4] -= m2 * s;
+			r3[4] -= m3 * s;
+		}
+		s = r0[5];
+		if (s != 0.0)
+		{
+			r1[5] -= m1 * s;
+			r2[5] -= m2 * s;
+			r3[5] -= m3 * s;
+		}
+		s = r0[6];
+		if (s != 0.0)
+		{
+			r1[6] -= m1 * s;
+			r2[6] -= m2 * s;
+			r3[6] -= m3 * s;
+		}
+		s = r0[7];
+		if (s != 0.0)
+		{
+			r1[7] -= m1 * s;
+			r2[7] -= m2 * s;
+			r3[7] -= m3 * s;
+		}
+		
+		//choose pivot - or die
+		if (fabsf(r3[1]) > fabsf(r2[1]))
+			std::swap(r3, r2);
+		if (fabsf(r2[1]) > fabsf(r1[1]))
+			std::swap(r2, r1);
+		if (0.0 == r1[1])
+			return false;
+		
+		//eliminate second variable
+		m2 = r2[1] / r1[1];
+		m3 = r3[1] / r1[1];
+		r2[2] -= m2 * r1[2];
+		r3[2] -= m3 * r1[2];
+		r2[3] -= m2 * r1[3];
+		r3[3] -= m3 * r1[3];
+		s = r1[4];
+		if (0.0 != s)
+		{
+			r2[4] -= m2 * s;
+			r3[4] -= m3 * s;
+		}
+		s = r1[5];
+		if (0.0 != s)
+		{
+			r2[5] -= m2 * s;
+			r3[5] -= m3 * s;
+		}
+		s = r1[6];
+		if (0.0 != s)
+		{
+			r2[6] -= m2 * s;
+			r3[6] -= m3 * s;
+		}
+		s = r1[7];
+		if (0.0 != s)
+		{
+			r2[7] -= m2 * s;
+			r3[7] -= m3 * s;
+		}
+		
+		//choose pivot - or die
+		if (fabsf(r3[2]) > fabsf(r2[2]))
+			std::swap(r3, r2);
+		if (0.0 == r2[2])
+			return false;
+		
+		//eliminate third variable
+		m3 = r3[2] / r2[2];
+		r3[3] -= m3 * r2[3], r3[4] -= m3 * r2[4],
+		r3[5] -= m3 * r2[5], r3[6] -= m3 * r2[6], r3[7] -= m3 * r2[7];
+		
+		//last check
+		if (0.0 == r3[3])
+			return false;
+		
+		s = 1.0 / r3[3]; //now back substitute row 3
+		r3[4] *= s;
+		r3[5] *= s;
+		r3[6] *= s;
+		r3[7] *= s;
+		m2 = r2[3]; //now back substitute row 2
+		s = 1.0 / r2[2];
+		r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2),
+		r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
+		m1 = r1[3];
+		r1[4] -= r3[4] * m1, r1[5] -= r3[5] * m1,
+		r1[6] -= r3[6] * m1, r1[7] -= r3[7] * m1;
+		m0 = r0[3];
+		r0[4] -= r3[4] * m0, r0[5] -= r3[5] * m0,
+		r0[6] -= r3[6] * m0, r0[7] -= r3[7] * m0;
+		m1 = r1[2]; //now back substitute row 1
+		s = 1.0 / r1[1];
+		r1[4] = s * (r1[4] - r2[4] * m1), r1[5] = s * (r1[5] - r2[5] * m1),
+		r1[6] = s * (r1[6] - r2[6] * m1), r1[7] = s * (r1[7] - r2[7] * m1);
+		m0 = r0[2];
+		r0[4] -= r2[4] * m0, r0[5] -= r2[5] * m0,
+		r0[6] -= r2[6] * m0, r0[7] -= r2[7] * m0;
+		m0 = r0[1]; //now back substitute row 0
+		s = 1.0 / r0[0];
+		r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
+		r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
+		
+		MAT(out, 0, 0) = r0[4];
+		MAT(out, 0, 1) = r0[5], MAT(out, 0, 2) = r0[6];
+		MAT(out, 0, 3) = r0[7], MAT(out, 1, 0) = r1[4];
+		MAT(out, 1, 1) = r1[5], MAT(out, 1, 2) = r1[6];
+		MAT(out, 1, 3) = r1[7], MAT(out, 2, 0) = r2[4];
+		MAT(out, 2, 1) = r2[5], MAT(out, 2, 2) = r2[6];
+		MAT(out, 2, 3) = r2[7], MAT(out, 3, 0) = r3[4];
+		MAT(out, 3, 1) = r3[5], MAT(out, 3, 2) = r3[6];
+		MAT(out, 3, 3) = r3[7];
+		
+		return true;
+	}
+
+	template <typename iType, typename oType>
+	static bool Unproject(const Vector3Tpl<iType>& input, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output)
+	 {
+		 //compute projection x modelview
+		 ccGLMatrixTpl<oType> A = ccGLMatrixTpl<oType>(projection) * ccGLMatrixTpl<oType>(modelview);
+		 ccGLMatrixTpl<oType> m;
+
+		 InvertMatrix(A.data(), m.data());
+
+		 ccGLMatrixTpl<oType> mA = m * A;
+
+		 //Transformation of normalized coordinates between -1 and 1
+		 Tuple4Tpl<oType> in;
+		 in.x = static_cast<oType>((input.x - static_cast<iType>(viewport[0])) / viewport[2] * 2 - 1);
+		 in.y = static_cast<oType>((input.y - static_cast<iType>(viewport[1])) / viewport[3] * 2 - 1);
+		 in.z = static_cast<oType>(2*input.z - 1);
+		 in.w = 1;
+		 
+		 //Objects coordinates
+		 Tuple4Tpl<oType> out = m * in;
+		 if (out.w == 0)
+		 {
+			 assert(false);
+			 return false;
+		 }
+
+		 output.x = out.x / out.w;
+		 output.y = out.y / out.w;
+		 output.z = out.z / out.w;
+	
+		 return true;
+	 }
+
+	static void PickMatrix(double x, double y, double width, double height, int viewport[4], double m[16])
+	{
+		double sx = viewport[2] / width;
+		double sy = viewport[3] / height;
+		double tx = (viewport[2] + 2.0 * (viewport[0] - x)) / width;
+		double ty = (viewport[3] + 2.0 * (viewport[1] - y)) / height;
+
+		MAT(m, 0, 0) = sx;
+		MAT(m, 0, 1) = 0.0;
+		MAT(m, 0, 2) = 0.0;
+		MAT(m, 0, 3) = tx;
+		MAT(m, 1, 0) = 0.0;
+		MAT(m, 1, 1) = sy;
+		MAT(m, 1, 2) = 0.0;
+		MAT(m, 1, 3) = ty;
+		MAT(m, 2, 0) = 0.0;
+		MAT(m, 2, 1) = 0.0;
+		MAT(m, 2, 2) = 1.0;
+		MAT(m, 2, 3) = 0.0;
+		MAT(m, 3, 0) = 0.0;
+		MAT(m, 3, 1) = 0.0;
+		MAT(m, 3, 2) = 0.0;
+		MAT(m, 3, 3) = 1.0;
+	}
 };
 
 #endif //CC_INCLUDE_GL_HEADER

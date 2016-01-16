@@ -25,6 +25,57 @@
 //system
 #include <math.h> //for sqrt, fabs
 
+//! 4-Tuple structure (templated version)
+template <class Type> class Tuple4Tpl
+{
+public:
+	
+	// The 4 tuple values as a union (array/separate values)
+	union
+	{
+		struct
+		{
+			Type x,y,z,w;
+		};
+		Type u[4];
+	};
+
+	//! Default constructor
+	/** Inits tuple to (0,0,0,0).
+	**/
+	inline Tuple4Tpl() : x(0),y(0),z(0),w(0) {}
+
+	//! Constructor from a triplet of values
+	/** Inits typle to (a,b,c).
+	**/
+	inline Tuple4Tpl(Type a, Type b, Type c, Type d) : x(a), y(b), z(c), w(d) {}
+
+	//! Constructor from an array of 4 elements
+	inline explicit Tuple4Tpl(const Type p[]) : x(p[0]), y(p[1]), z(p[2]), w(p[3]) {}
+	
+	//! Copy constructor
+	inline Tuple4Tpl(const Tuple4Tpl& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
+
+	//! Inverse operator
+	inline Tuple4Tpl operator - () const { Tuple4Tpl V(-x,-y,-z, -w); return V; }
+	//! In-place addition operator
+	inline Tuple4Tpl& operator += (const Tuple4Tpl& v) { x+=v.x; y+=v.y; z+=v.z; w+=v.w; return *this; }
+	//! In-place substraction operator
+	inline Tuple4Tpl& operator -= (const Tuple4Tpl& v) { x-=v.x; y-=v.y; z-=v.z; w-=v.w; return *this; }
+	//! In-place multiplication (by a scalar) operator
+	inline Tuple4Tpl& operator *= (Type v) { x*=v; y*=v; z*=v; w*=v; return *this; }
+	//! In-place division (by a scalar) operator
+	inline Tuple4Tpl& operator /= (Type v) { x/=v; y/=v; z/=v; w/=v; return *this; }
+	//! Addition operator
+	inline Tuple4Tpl operator + (const Tuple4Tpl& v) const { return Tuple4Tpl(x+v.x, y+v.y, z+v.z, w+v.w); }
+	//! Substraction operator
+	inline Tuple4Tpl operator - (const Tuple4Tpl& v) const { return Tuple4Tpl(x-v.x, y-v.y, z-v.z, w-v.w); }
+	//! Multiplication operator
+	inline Tuple4Tpl operator * (Type s) const { return Tuple4Tpl(x*s, y*s, z*s, w*s); }
+	//! Division operator
+	inline Tuple4Tpl operator / (Type s) const { return Tuple4Tpl(x/s, y/s, z/s, w/s); }
+};
+
 //! 3-Tuple structure (templated version)
 template <class Type> class Tuple3Tpl
 {

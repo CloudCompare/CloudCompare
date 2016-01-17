@@ -49,6 +49,7 @@
 //Qt
 #include <QThread>
 #include <QElapsedTimer>
+#include <QSharedPointer>
 
 //system
 #include <assert.h>
@@ -102,9 +103,11 @@ protected:
 		timer.start();
 
 		//first we need an octree
-		ccOctree* originalOctree = m_cloud.getOctree();
-		ccOctree* octree = originalOctree ? originalOctree : m_cloud.computeOctree(0/*progressCallback*/,false);
-		if (!octree)
+		//DGM: we don't use the cloud's octree (if any)
+		//as we don't know when it will be deleted!
+		//(the user can do it anytime for instance)
+		QSharedPointer<ccOctree> octree(new ccOctree(&m_cloud));
+		if (octree->build(0/*progressCallback*/) <= 0)
 		{
 			//not enough memory
 			ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
@@ -121,10 +124,6 @@ protected:
 			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
 			lod.setState(ccPointCloud::LodStruct::BROKEN);
 			flags->release();
-			if (octree != originalOctree)
-			{
-				delete octree;
-			}
 			return;
 		}
 
@@ -136,8 +135,6 @@ protected:
 			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
 			lod.setState(ccPointCloud::LodStruct::BROKEN);
 			flags->release();
-			if (octree != originalOctree)
-				delete octree;
 			return;
 		}
 
@@ -269,9 +266,6 @@ protected:
 
 		flags->release();
 		flags = 0;
-
-		if (octree != originalOctree)
-			delete octree;
 
 		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / duration: %3 s.)").arg(m_cloud.getName()).arg(static_cast<int>(lod.maxLevel())-1).arg(timer.elapsed() / 1000.0,0,'f',1));
 	}

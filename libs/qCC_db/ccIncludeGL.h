@@ -192,39 +192,39 @@ public: //GLU equivalent methods
 	static bool Project(const Vector3Tpl<iType>& input, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output)
 	{
 		//Modelview transform
-		oType mTempo[4] =
+		Tuple4Tpl<oType> Pm;
 		{
-			static_cast<oType>(modelview[0]*input.x + modelview[4]*input.y + modelview[ 8]*input.z + modelview[12]),
-			static_cast<oType>(modelview[1]*input.x + modelview[5]*input.y + modelview[ 9]*input.z + modelview[13]),
-			static_cast<oType>(modelview[2]*input.x + modelview[6]*input.y + modelview[10]*input.z + modelview[14]),
-			static_cast<oType>(modelview[3]*input.x + modelview[7]*input.y + modelview[11]*input.z + modelview[15])
+			Pm.x = static_cast<oType>(modelview[0]*input.x + modelview[4]*input.y + modelview[ 8]*input.z + modelview[12]);
+			Pm.y = static_cast<oType>(modelview[1]*input.x + modelview[5]*input.y + modelview[ 9]*input.z + modelview[13]);
+			Pm.z = static_cast<oType>(modelview[2]*input.x + modelview[6]*input.y + modelview[10]*input.z + modelview[14]);
+			Pm.w = static_cast<oType>(modelview[3]*input.x + modelview[7]*input.y + modelview[11]*input.z + modelview[15]);
 		};
 
 		//Projection transform
-		oType pTempo[4] =
+		Tuple4Tpl<oType> Pp;
 		{
-			static_cast<oType>(projection[0]*mTempo[0] + projection[4]*mTempo[1] + projection[ 8]*mTempo[2] + projection[12]*mTempo[3]),
-			static_cast<oType>(projection[1]*mTempo[0] + projection[5]*mTempo[1] + projection[ 9]*mTempo[2] + projection[13]*mTempo[3]),
-			static_cast<oType>(projection[2]*mTempo[0] + projection[6]*mTempo[1] + projection[10]*mTempo[2] + projection[14]*mTempo[3]),
-			static_cast<oType>(projection[3]*mTempo[0] + projection[7]*mTempo[1] + projection[11]*mTempo[2] + projection[15]*mTempo[3])
+			Pp.x = static_cast<oType>(projection[0]*Pm.x + projection[4]*Pm.y + projection[ 8]*Pm.z + projection[12]*Pm.w);
+			Pp.y = static_cast<oType>(projection[1]*Pm.x + projection[5]*Pm.y + projection[ 9]*Pm.z + projection[13]*Pm.w);
+			Pp.z = static_cast<oType>(projection[2]*Pm.x + projection[6]*Pm.y + projection[10]*Pm.z + projection[14]*Pm.w);
+			Pp.w = static_cast<oType>(projection[3]*Pm.x + projection[7]*Pm.y + projection[11]*Pm.z + projection[15]*Pm.w);
 		};
 		
 		//The result normalizes between -1 and 1
-		if (pTempo[3] == 0.0)	//The w value
+		if (Pp.w == 0.0)
 		{
 			assert(false);
 			return false;
 		}
 		//Perspective division
-		pTempo[0] /= pTempo[3];
-		pTempo[1] /= pTempo[3];
-		pTempo[2] /= pTempo[3];
+		Pp.x /= Pp.w;
+		Pp.y /= Pp.w;
+		Pp.z /= Pp.w;
 		//Window coordinates
 		//Map x, y to range 0-1
-		output.x = (1.0 + pTempo[0]) / 2 * viewport[2] + viewport[0];
-		output.y = (1.0 + pTempo[1]) / 2 * viewport[3] + viewport[1];
+		output.x = (1.0 + Pp.x) / 2 * viewport[2] + viewport[0];
+		output.y = (1.0 + Pp.y) / 2 * viewport[3] + viewport[1];
 		//This is only correct when glDepthRange(0.0, 1.0)
-		output.z = (1.0 + pTempo[2]) / 2;	//Between 0 and 1
+		output.z = (1.0 + Pp.z) / 2;	//Between 0 and 1
 
 		return true;
 	}
@@ -413,7 +413,10 @@ public: //GLU equivalent methods
 		 ccGLMatrixTpl<oType> A = ccGLMatrixTpl<oType>(projection) * ccGLMatrixTpl<oType>(modelview);
 		 ccGLMatrixTpl<oType> m;
 
-		 InvertMatrix(A.data(), m.data());
+		 if (!InvertMatrix(A.data(), m.data()))
+		 {
+			 return false;
+		 }
 
 		 ccGLMatrixTpl<oType> mA = m * A;
 

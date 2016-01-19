@@ -21,6 +21,9 @@ Big ones:
 
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Command line mode could be extended
+	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
+	- save the plane orientation as a text file after best plane fitting
+	- option to apply the inverse transformation
 	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
 	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)

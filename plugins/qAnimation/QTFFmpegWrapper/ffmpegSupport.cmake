@@ -65,7 +65,7 @@ if (WIN32)
 		file (GLOB SW_DLLS ${FFMPEG_BINARY_DIR}/sw*.dll)
 		LIST( APPEND FFMEG_DLL ${SW_DLLS} )
 
-		message(${FFMEG_DLL})
+		message(STATUS "${FFMEG_DLL}")
 		
 		copy_files("${FFMEG_DLL}" ${ARGV0}) #mind the quotes
 	

@@ -52,6 +52,7 @@ qAnimation plugin:
 
 Various:
 
+[*] Rasterize tool: allow one to 'resample' the cloud with the average cell height (http://www.cloudcompare.org/forum/viewtopic.php?t=679)
 [*] Volume calculation tool: make the resulting grid values available as a scalar field (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)

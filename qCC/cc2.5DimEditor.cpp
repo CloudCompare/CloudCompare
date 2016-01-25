@@ -823,7 +823,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 			}
 
 			assert(refCloud.size() != 0);
-			cloudGrid = inputCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(inputCloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud,inputCloud);
+			cloudGrid = inputCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(inputCloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud, inputCloud);
 			cloudGrid->setPointSize(0); //to avoid display issues
 
 			//even if we have already resampled the original cloud we may have to create new points and/or scalar fields
@@ -846,7 +846,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 	std::vector<CCLib::ScalarField*> exportedSFs;
 	if (!exportedFields.empty())
 	{
-		exportedSFs.resize(exportedFields.size(),0);
+		exportedSFs.resize(exportedFields.size(), 0);
 		for (size_t i=0; i<exportedFields.size(); ++i)
 		{
 			int sfIndex = -1;
@@ -859,7 +859,18 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 			case PER_CELL_AVG_HEIGHT:
 			case PER_CELL_HEIGHT_STD_DEV:
 			case PER_CELL_HEIGHT_RANGE:
-				sfIndex = cloudGrid->addScalarField(qPrintable(GetDefaultFieldName(exportedFields[i])));
+				{
+					QString sfName = GetDefaultFieldName(exportedFields[i]);
+					sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
+					if (sfIndex >= 0)
+					{
+						ccLog::Warning(QString("[Rasterize] Scalar field '%1' already exists. It will be overwritten.").arg(sfName));
+					}
+					else
+					{
+						sfIndex = cloudGrid->addScalarField(qPrintable(sfName));
+					}
+				}
 				break;
 			default:
 				assert(false);
@@ -927,6 +938,11 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 				for (size_t i=0; i<exportedSFs.size(); ++i)
 				{
 					CCLib::ScalarField* sf = exportedSFs[i];
+					if (!sf)
+					{
+						continue;
+					}
+
 					ScalarType sVal = NAN_VALUE;
 					switch (exportedFields[i])
 					{

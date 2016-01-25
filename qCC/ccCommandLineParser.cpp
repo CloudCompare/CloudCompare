@@ -302,7 +302,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 		{
 			ccHObject tempContainer("Clouds");
 			{
-				for (unsigned i=0; i<m_clouds.size(); ++i)
+				for (size_t i=0; i<m_clouds.size(); ++i)
 					tempContainer.addChild(m_clouds[i].getEntity(),ccHObject::DP_NONE);
 			}
 			//save output
@@ -322,7 +322,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 
 	//standard way: one file per cloud
 	{
-		for (unsigned i=0; i<m_clouds.size(); ++i)
+		for (size_t i=0; i<m_clouds.size(); ++i)
 		{
 			//save output
 			QString errorStr = Export(m_clouds[i],suffix);
@@ -351,7 +351,7 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 		{
 			ccHObject tempContainer("Meshes");
 			{
-				for (unsigned i=0; i<m_meshes.size(); ++i)
+				for (size_t i=0; i<m_meshes.size(); ++i)
 					tempContainer.addChild(m_meshes[i].getEntity(),ccHObject::DP_NONE);
 			}
 			//save output
@@ -371,7 +371,7 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 
 	//standard way: one file per mesh
 	{
-		for (unsigned i=0; i<m_meshes.size(); ++i)
+		for (size_t i=0; i<m_meshes.size(); ++i)
 		{
 			//save output
 			QString errorStr = Export(m_meshes[i],suffix);
@@ -459,15 +459,16 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 
 	bool tempDependencyCreated = false;
 	ccGenericMesh* mesh = 0;
-	if (entity->isKindOf(CC_TYPES::MESH))
+	if (	entity->isKindOf(CC_TYPES::MESH)
+		&&	s_MeshExportFormat == BinFilter::GetFileFilter())
 	{
+		//in a BIN file we must save the vertices cloud as well if it's not a child of the mesh!
 		mesh = static_cast<ccGenericMesh*>(entity);
 		ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-		//we must save the vertices cloud as well if it's not a child of the mesh!
 		if (vertices && !mesh->isAncestorOf(vertices))
 		{
 			//we save the cloud first!
-			vertices->addChild(mesh,ccHObject::DP_NONE); //we simply add a fake dependency
+			vertices->addChild(mesh, ccHObject::DP_NONE); //we simply add a fake dependency
 			entity = vertices;
 			tempDependencyCreated = true;
 		}
@@ -695,17 +696,17 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 			return Error(QString("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
 
 		bool ok;
-		unsigned count = arguments.takeFirst().toInt(&ok);
+		unsigned count = arguments.takeFirst().toUInt(&ok);
 		if (!ok)
 			return Error("Invalid number of points for random resampling!");
 		Print(QString("\tOutput points: %1").arg(count));
 
-		for (unsigned i=0; i<m_clouds.size(); ++i)
+		for (size_t i=0; i<m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
-			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud,count,pDlg);
+			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud, count, pDlg);
 			if (!refCloud)
 				return Error("Subsampling process failed!");
 			Print(QString("\tResult: %1 points").arg(refCloud->size()));
@@ -752,7 +753,7 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 			return Error("Invalid step value for spatial resampling!");
 		Print(QString("\tSpatial step: %1").arg(step));
 
-		for (unsigned i=0; i<m_clouds.size(); ++i)
+		for (size_t i=0; i<m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
@@ -805,12 +806,15 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 			return Error("Invalid octree level!");
 		Print(QString("\tOctree level: %1").arg(octreeLevel));
 
-		for (unsigned i=0; i<m_clouds.size(); ++i)
+		for (size_t i=0; i<m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
-			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,static_cast<unsigned char>(octreeLevel),CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,pDlg);
+			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
+																											static_cast<unsigned char>(octreeLevel),
+																											CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																											pDlg);
 			if (!refCloud)
 				return Error("Subsampling process failed!");
 			Print(QString("\tResult: %1 points").arg(refCloud->size()));
@@ -893,7 +897,7 @@ bool ccCommandLineParser::commandCurvature(QStringList& arguments, QDialog* pare
 	void* additionalParameters[2] = {&curvType, &kernelSize};
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_CURVATURE,entities,parent,additionalParameters))
@@ -1009,7 +1013,7 @@ bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent
 	void* additionalParameters[] = { &kernelSize, &densityType };
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ACCURATE_DENSITY,entities,parent,additionalParameters))
@@ -1047,14 +1051,16 @@ bool ccCommandLineParser::commandSFGradient(QStringList& arguments, QDialog* par
 	void* additionalParameters[1] = {&euclidean};
 	ccHObject::Container entities;
 	entities.reserve(m_clouds.size());
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
 		unsigned sfCount = m_clouds[i].pc->getNumberOfScalarFields();
 		if (sfCount == 0)
+		{
 			ccConsole::Warning(QString("Warning: cloud '%1' has no scalar field (it will be ignored)").arg(m_clouds[i].pc->getName()));
+		}
 		else
 		{
-			if (sfCount>1)
+			if (sfCount > 1)
 				ccConsole::Warning(QString("Warning: cloud '%1' has several scalar fields (the active one will be used by default, or the first one if none is active)").arg(m_clouds[i].pc->getName()));
 
 			if (!m_clouds[i].pc->getCurrentDisplayedScalarField())
@@ -1095,7 +1101,7 @@ bool ccCommandLineParser::commandRoughness(QStringList& arguments, QDialog* pare
 	void* additionalParameters[1] = {&kernelSize};
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ROUGHNESS,entities,parent,additionalParameters))
@@ -1128,7 +1134,7 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	//apply transformation
 	if (!m_clouds.empty())
 	{
-		for (unsigned i=0; i<m_clouds.size(); ++i)
+		for (size_t i=0; i<m_clouds.size(); ++i)
 		{
 			m_clouds[i].pc->applyGLTransformation_recursive(&mat);
 			m_clouds[i].pc->setName(m_clouds[i].pc->getName()+".transformed");
@@ -1139,7 +1145,7 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	}
 	if (!m_meshes.empty())
 	{
-		for (unsigned i=0; i<m_meshes.size(); ++i)
+		for (size_t i=0; i<m_meshes.size(); ++i)
 		{
 			m_meshes[i].mesh->applyGLTransformation_recursive(&mat);
 			m_meshes[i].mesh->setName(m_meshes[i].mesh->getName()+".transformed");
@@ -1230,7 +1236,7 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 		return Error(QString("No point cloud on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_FILTER_SF_BY_VALUE));
 
 
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
 		CCLib::ScalarField* sf = m_clouds[i].pc->getCurrentOutScalarField();
 		if (sf)
@@ -1358,7 +1364,7 @@ bool ccCommandLineParser::setActiveSF(QStringList& arguments)
 	if (m_clouds.empty())
 		return Error(QString("No point cloud loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SET_ACTIVE_SF));
 
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
 		if (m_clouds[i].pc && m_clouds[i].pc->hasScalarFields())
 		{
@@ -1375,7 +1381,7 @@ bool ccCommandLineParser::setActiveSF(QStringList& arguments)
 bool ccCommandLineParser::removeAllSFs(QStringList& arguments)
 {
 	//no argument required
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
 		if (m_clouds[i].pc/* && m_clouds[i].pc->hasScalarFields()*/)
 		{
@@ -1384,7 +1390,7 @@ bool ccCommandLineParser::removeAllSFs(QStringList& arguments)
 		}
 	}
 
-	for (unsigned i=0; i<m_meshes.size(); ++i)
+	for (size_t i=0; i<m_meshes.size(); ++i)
 	{
 		if (m_meshes[i].mesh)
 		{
@@ -2172,7 +2178,7 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 	ccBBox cropBox(boxMin,boxMax);
 	//crop clouds
 	{
-		for (unsigned i=0; i<m_clouds.size(); ++i)
+		for (size_t i=0; i<m_clouds.size(); ++i)
 		{
 			ccHObject* croppedCloud = ccCropTool::Crop(m_clouds[i].pc, cropBox, inside);
 			if (croppedCloud)
@@ -2194,7 +2200,7 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 
 	//crop meshes
 	{
-		for (unsigned i=0; i<m_meshes.size(); ++i)
+		for (size_t i=0; i<m_meshes.size(); ++i)
 		{
 			ccHObject* croppedMesh = ccCropTool::Crop(m_meshes[i].mesh, cropBox, inside);
 			if (croppedMesh)
@@ -2304,7 +2310,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 	}
 
 	//now we can crop the loaded cloud(s)
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
 		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop2D(&poly,orthoDim,inside);
 		if (ref)
@@ -3060,7 +3066,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	double minErrorDiff = 1.0e-6;
 	unsigned iterationCount = 0;
 	unsigned randomSamplingLimit = 20000;
-	unsigned  overlap = 100;
+	unsigned overlap = 100;
 	int modelSFAsWeights = -1;
 	int dataSFAsWeights = -1;
 

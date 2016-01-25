@@ -86,6 +86,9 @@ protected slots:
 	//! Called when the projection type changes
 	void projectionTypeChanged(int);
 
+	//! Called when the 'resampled' option changes
+	void resampleOptionToggled(bool);
+
 	//! Called when the SF projection type changes
 	void sfProjectionTypeChanged(int);
 

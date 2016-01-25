@@ -307,6 +307,20 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QLabel" name="warningResampleWithAverageLabel">
+           <property name="styleSheet">
+            <string notr="true">color:red;</string>
+           </property>
+           <property name="text">
+            <string>Warning: the original points height will be
+replaced bythe cells average height!</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>

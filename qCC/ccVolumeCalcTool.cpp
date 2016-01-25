@@ -355,6 +355,7 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 			m_rasterCloud = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
 																	false,
 																	false,
+																	false,
 																	0,
 																	false,
 																	std::numeric_limits<double>::quiet_NaN());

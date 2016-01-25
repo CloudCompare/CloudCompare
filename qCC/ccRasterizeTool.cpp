@@ -63,7 +63,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateGridInfo()));
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
 	connect(emptyValueDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
-	connect(resampleCloudCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(gridOptionChanged()));
+	connect(resampleCloudCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(resampleOptionToggled(bool)));
 	connect(dimensionComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionDirChanged(int)));
 	connect(heightProjectionComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionTypeChanged(int)));
 	connect(scalarFieldProjection,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(sfProjectionTypeChanged(int)));
@@ -201,10 +201,18 @@ unsigned char ccRasterizeTool::getProjectionDimension() const
 	return static_cast<unsigned char>(dim);
 }
 
+void ccRasterizeTool::resampleOptionToggled(bool state)
+{
+	warningResampleWithAverageLabel->setVisible(resampleCloudCheckBox->isChecked() && getTypeOfProjection() == PROJ_AVERAGE_VALUE);
+	gridOptionChanged();
+}
+
 void ccRasterizeTool::projectionTypeChanged(int index)
 {
 	//we can't use the 'resample origin cloud' option with 'average height' projection
-	resampleCloudCheckBox->setEnabled(index != PROJ_AVERAGE_VALUE);
+	//resampleCloudCheckBox->setEnabled(index != PROJ_AVERAGE_VALUE);
+	//DGM: now we can! We simply display a warning message
+	warningResampleWithAverageLabel->setVisible(resampleCloudCheckBox->isChecked() && index == PROJ_AVERAGE_VALUE);
 	gridIsUpToDate(false);
 }
 
@@ -325,23 +333,23 @@ void ccRasterizeTool::loadSettings()
 {
 	QSettings settings;
 	settings.beginGroup(ccPS::HeightGridGeneration());
-	int projType				= settings.value("ProjectionType",heightProjectionComboBox->currentIndex()).toInt();
-	int projDim					= settings.value("ProjectionDim",dimensionComboBox->currentIndex()).toInt();
-	bool sfProj					= settings.value("SfProjEnabled",interpolateSFCheckBox->isChecked()).toBool();
-	int sfProjStrategy			= settings.value("SfProjStrategy",scalarFieldProjection->currentIndex()).toInt();
-	int fillStrategy			= settings.value("FillStrategy",fillEmptyCellsComboBox->currentIndex()).toInt();
-	double step					= settings.value("GridStep",gridStepDoubleSpinBox->value()).toDouble();
-	double emptyHeight			= settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
-	bool genCountSF				= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
-	bool resampleCloud			= settings.value("ResampleOrigCloud",resampleCloudCheckBox->isChecked()).toBool();
-	int minVertexCount			= settings.value("MinVertexCount",minVertexCountSpinBox->value()).toInt();
-	bool ignoreBorders			= settings.value("IgnoreBorders",ignoreContourBordersCheckBox->isChecked()).toBool();
-	bool generateCountSF		= settings.value("generateCountSF",generateCountSFcheckBox->isChecked()).toBool();
-	bool generateMinHeightSF	= settings.value("generateMinHeightSF",generateMinHeightSFcheckBox->isChecked()).toBool();
-	bool generateMaxHeightSF	= settings.value("generateMaxHeightSF",generateMinHeightSFcheckBox->isChecked()).toBool();
-	bool generateAbgHeightSF	= settings.value("generateAvgHeightSF",generateAvgHeightSFcheckBox->isChecked()).toBool();
+	int projType				= settings.value("ProjectionType",        heightProjectionComboBox->currentIndex()).toInt();
+	int projDim					= settings.value("ProjectionDim",         dimensionComboBox->currentIndex()).toInt();
+	bool sfProj					= settings.value("SfProjEnabled",         interpolateSFCheckBox->isChecked()).toBool();
+	int sfProjStrategy			= settings.value("SfProjStrategy",        scalarFieldProjection->currentIndex()).toInt();
+	int fillStrategy			= settings.value("FillStrategy",          fillEmptyCellsComboBox->currentIndex()).toInt();
+	double step					= settings.value("GridStep",              gridStepDoubleSpinBox->value()).toDouble();
+	double emptyHeight			= settings.value("EmptyCellsHeight",      emptyValueDoubleSpinBox->value()).toDouble();
+	bool genCountSF				= settings.value("GenerateCountSF",       generateCountSFcheckBox->isChecked()).toBool();
+	bool resampleCloud			= settings.value("ResampleOrigCloud",     resampleCloudCheckBox->isChecked()).toBool();
+	int minVertexCount			= settings.value("MinVertexCount",        minVertexCountSpinBox->value()).toInt();
+	bool ignoreBorders			= settings.value("IgnoreBorders",         ignoreContourBordersCheckBox->isChecked()).toBool();
+	bool generateCountSF		= settings.value("generateCountSF",       generateCountSFcheckBox->isChecked()).toBool();
+	bool generateMinHeightSF	= settings.value("generateMinHeightSF",   generateMinHeightSFcheckBox->isChecked()).toBool();
+	bool generateMaxHeightSF	= settings.value("generateMaxHeightSF",   generateMinHeightSFcheckBox->isChecked()).toBool();
+	bool generateAbgHeightSF	= settings.value("generateAvgHeightSF",   generateAvgHeightSFcheckBox->isChecked()).toBool();
 	bool generateStdDevHeightSF	= settings.value("generateStdDevHeightSF",generateStdDevHeightSFcheckBox->isChecked()).toBool();
-	bool generateHeightRangeSF	= settings.value("generateHeightRangeSF",generateHeightRangeSFcheckBox->isChecked()).toBool();
+	bool generateHeightRangeSF	= settings.value("generateHeightRangeSF", generateHeightRangeSFcheckBox->isChecked()).toBool();
 	
 	settings.endGroup();
 
@@ -453,6 +461,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
 																		interpolateSF,
 																		resampleOriginalCloud(),
+																		getTypeOfProjection() != PROJ_AVERAGE_VALUE,
 																		m_cloud,
 																		fillEmptyCellsStrategy != LEAVE_EMPTY,
 																		emptyCellsHeight);
@@ -465,7 +474,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 		cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
 		cloudGrid->showSF(true);
 
-		//don't forget original shift
+		//don't forget the original shift
 		cloudGrid->setGlobalShift(m_cloud->getGlobalShift());
 		cloudGrid->setGlobalScale(m_cloud->getGlobalScale());
 	}
@@ -496,7 +505,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 			exportedFields.push_back(PER_CELL_HEIGHT);
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = activeLayerComboBox->currentText();
-			m_rasterCloud = convertGridToCloud(exportedFields,activeLayerIsSF,activeLayerName);
+			m_rasterCloud = convertGridToCloud(exportedFields, activeLayerIsSF, activeLayerName);
 		}
 		catch (const std::bad_alloc&)
 		{

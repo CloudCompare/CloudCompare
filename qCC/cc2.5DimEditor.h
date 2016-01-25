@@ -124,7 +124,8 @@ protected: //raster grid related stuff
 	//! Converts the grid to a cloud with scalar field(s)
 	ccPointCloud* convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
 										bool interpolateSF,
-										bool resampleInputCloud,
+										bool resampleInputCloudXY,
+										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,
 										bool fillEmptyCells,
 										double emptyCellsHeight) const;

@@ -92,7 +92,7 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	size_t c = samples.size() / 2;
 	MiscLib::Vector< GfxTL::Vector4Df > planes(c);
 	#pragma omp parallel for schedule(static)
-	for(size_t i = 0; i < c; ++i)
+	for (int i = 0; i < static_cast<int>(c); ++i)
 	{
 		for(unsigned int j = 0; j < 3; ++j)
 			planes[i][j] = samples[i][j];
@@ -130,7 +130,7 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 
 	MiscLib::Vector< GfxTL::Vector3Df > spoints(c);
 	#pragma omp parallel for schedule(static)
-	for(size_t i = 0; i < c; ++i)
+	for (int i = 0; i < static_cast<int>(c); ++i)
 	{
 		spoints[i] = GfxTL::Vector3Df(samples[i] - m_center);
 		spoints[i].Normalize();
@@ -143,14 +143,14 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	// the axis is defined to point into the interior of the cone
 	float heightSum = 0;
 	#pragma omp parallel for schedule(static) reduction(+:heightSum)
-	for(size_t i = 0; i < c; ++i)
+	for(int i = 0; i < static_cast<int>(c); ++i)
 		heightSum += Height(samples[i]);
 	if(heightSum < 0)
 		m_axisDir *= -1;
 
 	float angleReduction = 0;
 	#pragma omp parallel for schedule(static) reduction(+:angleReduction)
-	for(size_t i = 0; i < c; ++i)
+	for(int i = 0; i < static_cast<int>(c); ++i)
 	{
 		float angle = m_axisDir.dot(samples[i + c]);
 		if(angle < -1) // clamp angle to [-1, 1]

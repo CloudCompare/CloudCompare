@@ -710,15 +710,16 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 
 				// reindex global octree
 				size_t minInvalidIndex = currentSize - numInvalid + beginIdx;
+				int j = 0;
 				#pragma omp parallel for schedule(static)
-				for(size_t i = 0, j = 0; i < globalOctreeIndices.size(); ++i)
+				for(int i = 0; i < static_cast<int>(globalOctreeIndices.size()); ++i)
 					if(shapeIndex[globalOctreeIndices[i]] < minInvalidIndex)
 						globalOctreeIndices[j++] = shapeIndex[globalOctreeIndices[i]];
 				globalOctreeIndices.resize(currentSize - numInvalid);
 
 				// reindex candidates (this also recomputes the bounds)
 				#pragma omp parallel for schedule(static)
-				for(size_t i = 0; i < candidates.size(); ++i)
+				for(int i = 0; i < static_cast<int>(candidates.size()); ++i)
 					candidates[i].Reindex(shapeIndex, minInvalidIndex, mergedSubsets,
 						subsetSizes, pc, currentSize - numInvalid, m_options.m_epsilon,
 						m_options.m_normalThresh, m_options.m_bitmapEpsilon);
@@ -754,12 +755,12 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 						reindex[shuffleIndices[i]] = i;
 					// reindex global octree
 					#pragma omp parallel for schedule(static)
-					for(size_t i = 0; i < globalOctreeIndices.size(); ++i)
+					for(int i = 0; i < static_cast<int>(globalOctreeIndices.size()); ++i)
 						if(globalOctreeIndices[i] < reindex.size())
 							globalOctreeIndices[i] = reindex[globalOctreeIndices[i]];
 					// reindex candidates
 					#pragma omp parallel for schedule(static, 100)
-					for(size_t i = 0; i < candidates.size(); ++i)
+					for(int i = 0; i < static_cast<int>(candidates.size()); ++i)
 						candidates[i].Reindex(reindex);
 					for(size_t i = 1, begin = subsetSizes[0] + beginIdx;
 						i < octrees.size(); begin += subsetSizes[i], ++i)
@@ -798,7 +799,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				// the bounds of the candidates have become invalid and have to be
 				// recomputed
 				#pragma omp parallel for schedule(static, 100)
-				for(size_t i = 0; i < candidates.size(); ++i)
+				for(int i = 0; i < static_cast<int>(candidates.size()); ++i)
 					candidates[i].RecomputeBounds(octrees, pc, subsetScoreVisitor,
 						currentSize - numInvalid, m_options.m_epsilon,
 						m_options.m_normalThresh, m_options.m_bitmapEpsilon);

@@ -23,6 +23,7 @@
 #include "GenericIndexedCloudPersist.h"
 #include "CCMiscTools.h"
 #include "ScalarField.h"
+#include "RayAndBox.h"
 
 //system
 #include <algorithm>
@@ -4577,91 +4578,6 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 #endif
 }
 
-//! Simple Ray structure
-template <typename T > struct Ray
-{
-	Ray(const Vector3Tpl<T>& rayAxis, const Vector3Tpl<T>& rayOrigin)
-		: dir(rayAxis)
-		, origin(rayOrigin)
-		, invDir(0,0,0)
-		, sign(0,0,0)
-	{
-		dir.normalize();
-		invDir = Vector3Tpl<T>(1/rayAxis.x, 1/rayAxis.y, 1/rayAxis.z); // +/-infinity is acceptable here because we are mainly interested in the sign
-		sign = Tuple3i(invDir.x < 0, invDir.y < 0, invDir.z < 0);
-	}
-
-	double radialSquareDistance(const Vector3Tpl<T>& P) const
-	{
-		Vector3Tpl<T> OP = P - origin;
-		return OP.cross(dir).norm2d();
-	}
-
-	double squareDistanceToOrigin(const Vector3Tpl<T>& P) const
-	{
-		Vector3Tpl<T> OP = P - origin;
-		return OP.norm2d();
-	}
-
-	Vector3Tpl<T> dir, origin;
-	Vector3Tpl<T> invDir;
-	Tuple3i sign;
-};
-
-//! Simple AABB structure
-template <typename T > struct AABB
-{
-	AABB(const Vector3Tpl<T>& minCorner, const Vector3Tpl<T>& maxCorner)
-	{
-		corners[0] = minCorner;
-		corners[1] = maxCorner;
-	}
-
-	/*
-	* Ray-box intersection using IEEE numerical properties to ensure that the
-	* test is both robust and efficient, as described in:
-	*
-	*      Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley
-	*      "An Efficient and Robust Ray-Box Intersection Algorithm"
-	*      Journal of graphics tools, 10(1):49-54, 2005
-	*
-	*/
-	bool intersects(const Ray<T> &r, T* t0 = 0, T* t1 = 0) const
-	{
-		T tmin  = (corners[  r.sign.x].x - r.origin.x) * r.invDir.x;
-		T tmax  = (corners[1-r.sign.x].x - r.origin.x) * r.invDir.x;
-		T tymin = (corners[  r.sign.y].y - r.origin.y) * r.invDir.y;
-		T tymax = (corners[1-r.sign.y].y - r.origin.y) * r.invDir.y;
-		
-		if (tmin > tymax || tymin > tmax) 
-			return false;
-		if (tymin > tmin)
-			tmin = tymin;
-		if (tymax < tmax)
-			tmax = tymax;
-		
-		T tzmin = (corners[  r.sign.z].z - r.origin.z) * r.invDir.z;
-		T tzmax = (corners[1-r.sign.z].z - r.origin.z) * r.invDir.z;
-		
-		if (tmin > tzmax || tzmin > tmax) 
-			return false;
-		if (tzmin > tmin)
-			tmin = tzmin;
-		if (tzmax < tmax)
-			tmax = tzmax;
-
-		//return (tmin < t1 && tmax > t0);
-
-		if (t0)
-			*t0 = tmin;
-		if (t1)
-			*t1 = tmax;
-		return true;
-	}
-
-	Vector3Tpl<T> corners[2];
-};
-
 bool DgmOctree::rayCast(const CCVector3& rayAxis,
 						const CCVector3& rayOrigin,
 						double maxRadiusOrFov,
@@ -4694,7 +4610,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	}
 
 	//no need to go too deep
-	const unsigned char maxLevel = findBestLevelForAGivenPopulationPerCell(5);
+	const unsigned char maxLevel = findBestLevelForAGivenPopulationPerCell(10);
 
 	//starting level of subdivision
 	unsigned char level = 1;
@@ -4705,7 +4621,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	//whether the current cell should be skipped or not
 	bool skipThisCell = false;
 	//smallest FOV (i.e. nearest point)
-	double smallestFOV = -1.0;
+	double smallestOrderDist = -1.0;
 
 #ifdef _DEBUG
 	m_theAssociatedCloud->enableScalarField();
@@ -4717,13 +4633,12 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	//let's sweep through the octree
 	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
 	{
-		//new cell?
 		OctreeCellCodeType truncatedCode = (it->theCode >> currentBitDec);
 		
-		//if (false)
+		//new cell?
 		if (truncatedCode != (currentCode >> currentBitDec))
 		{
-			//look for the biggest 'parent' cell that englobes both cells (if possible)
+			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
 			while (level > 1)
 			{
 				unsigned char bitDec = GET_BIT_SHIFT(level-1);
@@ -4753,8 +4668,8 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 
 				if (isFOV)
 				{
-					double radialSqDist = rayLocal.radialSquareDistance(cellCenter);
-					double sqDistToOrigin = rayLocal.squareDistanceToOrigin(cellCenter);
+					double radialSqDist, sqDistToOrigin;
+					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);
 					double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
@@ -4786,14 +4701,15 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 			const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
 
 			double radialSqDist = ray.radialSquareDistance(*P);
-			double fov_rad = -1.0;
+			double orderDist = -1.0;
 			bool isElligible = false;
 
 			if (isFOV)
 			{
 				double sqDist = ray.squareDistanceToOrigin(*P);
-				fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
+				double fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
 				isElligible = (fov_rad <= maxRadiusOrFov);
+				orderDist = fov_rad;
 #ifdef _DEBUG
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, fov_rad);
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(sqDist));
@@ -4815,27 +4731,25 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 					{
 					case RC_NEAREST_POINT:
 
-						//We use the 'FOV' even in orthographic mode (so as to give better
-						//chances to points that are closer to the viewer)
-						if (fov_rad < 0)
+						if (orderDist < 0)
 						{
-							//compute it only if necessary
+							//to give better chances to points that are closer to the viewer)
 							double sqDist = ray.squareDistanceToOrigin(*P);
-							fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
+							orderDist = sqrt(radialSqDist * sqDist);
 						}
 					
 						//keep only the 'nearest' point
 						if (output.empty())
 						{
 							output.resize(1, PointDescriptor(P, it->theIndex, radialSqDist));
-							smallestFOV = fov_rad;
+							smallestOrderDist = orderDist;
 						}
 						else
 						{
-							if (fov_rad < smallestFOV)
+							if (orderDist < smallestOrderDist)
 							{
 								output.back() = PointDescriptor(P, it->theIndex, radialSqDist);
-								smallestFOV = fov_rad;
+								smallestOrderDist = orderDist;
 							}
 						}
 						break;

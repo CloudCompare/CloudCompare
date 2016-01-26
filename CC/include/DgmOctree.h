@@ -387,7 +387,7 @@ public:
 		ReferenceCloud* points;
 
 		//! Default constructor
-		explicit octreeCell(DgmOctree* parentOctree);
+		explicit octreeCell(const DgmOctree* parentOctree);
 
 		//! Default destructor
 		virtual ~octreeCell();
@@ -1086,6 +1086,17 @@ public:	/***** CELLS POSITION HANDLING *****/
 												bool multiThread = false,
 												GenericProgressCallback* progressCb = 0,
 												const char* functionTitle = 0);
+
+	//! Ray casting processes
+	enum RayCastProcess { RC_NEAREST_POINT, RC_CLOSE_POINTS };
+
+	//! Ray casting algorithm
+	bool rayCast(	const CCVector3& rayAxis,
+					const CCVector3& rayOrigin,
+					double maxRadiusOrFov,
+					bool isFOV, //whether the previous parameter is a radius (distance) or a FOV (in radians)
+					RayCastProcess process,
+					std::vector<PointDescriptor>& output) const;
 
 	//! Returns the associated cloud
 	inline GenericIndexedCloudPersist* associatedCloud() const

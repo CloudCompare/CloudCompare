@@ -488,9 +488,11 @@ void DgmOctree::updateCellSizeTable()
 	//update the cell dimension for each subdivision level
 	m_cellSize[0] = m_dimMax.x - m_dimMin.x;
 
+	unsigned long long d = 1;
 	for (int k=1; k<=MAX_OCTREE_LEVEL; k++)
 	{
-		m_cellSize[k] = m_cellSize[k-1] / 2;
+		d <<= 1;
+		m_cellSize[k] = m_cellSize[0] / d;
 	}
 }
 
@@ -3706,15 +3708,21 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 
 /*** Octree-based cloud traversal mechanism ***/
 
-DgmOctree::octreeCell::octreeCell(DgmOctree* _parentOctree)
+DgmOctree::octreeCell::octreeCell(const DgmOctree* _parentOctree)
 	: parentOctree(_parentOctree)
 	, level(0)
 	, truncatedCode(0)
 	, index(0)
 	, points(0)
 {
-	assert(parentOctree && parentOctree->m_theAssociatedCloud);
-	points = new ReferenceCloud(parentOctree->m_theAssociatedCloud);
+	if (parentOctree && parentOctree->m_theAssociatedCloud)
+	{
+		points = new ReferenceCloud(parentOctree->m_theAssociatedCloud);
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 DgmOctree::octreeCell::octreeCell(const octreeCell& cell)
@@ -4388,11 +4396,11 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 									++elements;
 
 								//and we must stop point collection here
-								keepGoing=false;
+								keepGoing = false;
 
 #ifdef ENABLE_DOWN_TOP_TRAVERSAL_MT
 								//in this case, the next cell won't be the first sub-cell!
-								firstSubCell=false;
+								firstSubCell = false;
 #endif
 								break;
 							}
@@ -4567,4 +4575,290 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		return static_cast<unsigned>(cells.size());
 	}
 #endif
+}
+
+//! Simple Ray structure
+template <typename T > struct Ray
+{
+	Ray(const Vector3Tpl<T>& rayAxis, const Vector3Tpl<T>& rayOrigin)
+		: dir(rayAxis)
+		, origin(rayOrigin)
+		, invDir(0,0,0)
+		, sign(0,0,0)
+	{
+		dir.normalize();
+		invDir = Vector3Tpl<T>(1/rayAxis.x, 1/rayAxis.y, 1/rayAxis.z); // +/-infinity is acceptable here because we are mainly interested in the sign
+		sign = Tuple3i(invDir.x < 0, invDir.y < 0, invDir.z < 0);
+	}
+
+	double radialSquareDistance(const Vector3Tpl<T>& P) const
+	{
+		Vector3Tpl<T> OP = P - origin;
+		return OP.cross(dir).norm2d();
+	}
+
+	double squareDistanceToOrigin(const Vector3Tpl<T>& P) const
+	{
+		Vector3Tpl<T> OP = P - origin;
+		return OP.norm2d();
+	}
+
+	Vector3Tpl<T> dir, origin;
+	Vector3Tpl<T> invDir;
+	Tuple3i sign;
+};
+
+//! Simple AABB structure
+template <typename T > struct AABB
+{
+	AABB(const Vector3Tpl<T>& minCorner, const Vector3Tpl<T>& maxCorner)
+	{
+		corners[0] = minCorner;
+		corners[1] = maxCorner;
+	}
+
+	/*
+	* Ray-box intersection using IEEE numerical properties to ensure that the
+	* test is both robust and efficient, as described in:
+	*
+	*      Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley
+	*      "An Efficient and Robust Ray-Box Intersection Algorithm"
+	*      Journal of graphics tools, 10(1):49-54, 2005
+	*
+	*/
+	bool intersects(const Ray<T> &r, T* t0 = 0, T* t1 = 0) const
+	{
+		T tmin  = (corners[  r.sign.x].x - r.origin.x) * r.invDir.x;
+		T tmax  = (corners[1-r.sign.x].x - r.origin.x) * r.invDir.x;
+		T tymin = (corners[  r.sign.y].y - r.origin.y) * r.invDir.y;
+		T tymax = (corners[1-r.sign.y].y - r.origin.y) * r.invDir.y;
+		
+		if (tmin > tymax || tymin > tmax) 
+			return false;
+		if (tymin > tmin)
+			tmin = tymin;
+		if (tymax < tmax)
+			tmax = tymax;
+		
+		T tzmin = (corners[  r.sign.z].z - r.origin.z) * r.invDir.z;
+		T tzmax = (corners[1-r.sign.z].z - r.origin.z) * r.invDir.z;
+		
+		if (tmin > tzmax || tzmin > tmax) 
+			return false;
+		if (tzmin > tmin)
+			tmin = tzmin;
+		if (tzmax < tmax)
+			tmax = tzmax;
+
+		//return (tmin < t1 && tmax > t0);
+
+		if (t0)
+			*t0 = tmin;
+		if (t1)
+			*t1 = tmax;
+		return true;
+	}
+
+	Vector3Tpl<T> corners[2];
+};
+
+bool DgmOctree::rayCast(const CCVector3& rayAxis,
+						const CCVector3& rayOrigin,
+						double maxRadiusOrFov,
+						bool isFOV,
+						RayCastProcess process,
+						std::vector<PointDescriptor>& output) const
+{
+	if (m_thePointsAndTheirCellCodes.empty())
+	{
+		//nothing to do
+		assert(false);
+		return false;
+	}
+
+	CCVector3 margin(0, 0, 0);
+	double maxSqRadius = 0;
+	if (!isFOV)
+	{
+		margin = CCVector3(1, 1, 1) * static_cast<PointCoordinateType>(maxRadiusOrFov);
+		maxSqRadius = maxRadiusOrFov*maxRadiusOrFov;
+	}
+
+	//first test with the total bounding box
+	Ray<PointCoordinateType> ray(rayAxis, rayOrigin);
+	if (!AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
+	{
+		//no intersection
+		output.clear();
+		return true;
+	}
+
+	//no need to go too deep
+	const unsigned char maxLevel = findBestLevelForAGivenPopulationPerCell(5);
+
+	//starting level of subdivision
+	unsigned char level = 1;
+	//binary shift for cell code truncation at current level
+	unsigned char currentBitDec = GET_BIT_SHIFT(level);
+	//current cell code
+	OctreeCellCodeType currentCode = INVALID_CELL_CODE;
+	//whether the current cell should be skipped or not
+	bool skipThisCell = false;
+	//smallest FOV (i.e. nearest point)
+	double smallestFOV = -1.0;
+
+#ifdef _DEBUG
+	m_theAssociatedCloud->enableScalarField();
+#endif
+
+	//ray with origin expressed in the local coordinate system!
+	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
+
+	//let's sweep through the octree
+	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
+	{
+		//new cell?
+		OctreeCellCodeType truncatedCode = (it->theCode >> currentBitDec);
+		
+		//if (false)
+		if (truncatedCode != (currentCode >> currentBitDec))
+		{
+			//look for the biggest 'parent' cell that englobes both cells (if possible)
+			while (level > 1)
+			{
+				unsigned char bitDec = GET_BIT_SHIFT(level-1);
+				if ((it->theCode >> bitDec) == (currentCode >> bitDec))
+				{
+					//same parent cell, we can stop here
+					break;
+				}
+				--level;
+			}
+
+			currentCode = it->theCode;
+
+			//now try to go deeper with the new cell
+			while (level < maxLevel)
+			{
+				Tuple3i cellPos;
+				getCellPos(it->theCode, level, cellPos, false);
+
+				//first test with the total bounding box
+				const PointCoordinateType& halfCellSize = getCellSize(level) / 2;
+				CCVector3 cellCenter(	(2* cellPos.x + 1) * halfCellSize,
+										(2* cellPos.y + 1) * halfCellSize,
+										(2* cellPos.z + 1) * halfCellSize);
+
+				CCVector3 halfCell = CCVector3(halfCellSize, halfCellSize, halfCellSize);
+
+				if (isFOV)
+				{
+					double radialSqDist = rayLocal.radialSquareDistance(cellCenter);
+					double sqDistToOrigin = rayLocal.squareDistanceToOrigin(cellCenter);
+
+					double dx = sqrt(sqDistToOrigin);
+					double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
+					double fov_rad = atan2(dy, dx);
+
+					skipThisCell = (fov_rad > maxRadiusOrFov);
+				}
+				else
+				{
+					skipThisCell = !AABB<PointCoordinateType>(	cellCenter - halfCell - margin,
+																cellCenter + halfCell + margin).intersects(rayLocal);
+				}
+
+				if (skipThisCell)
+					break;
+				else
+					++level;
+			}
+			currentBitDec = GET_BIT_SHIFT(level);
+		}
+
+#ifdef _DEBUG
+		m_theAssociatedCloud->setPointScalarValue(it->theIndex, level);
+#endif
+
+		if (!skipThisCell)
+		{
+			//test the point
+			const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
+
+			double radialSqDist = ray.radialSquareDistance(*P);
+			double fov_rad = -1.0;
+			bool isElligible = false;
+
+			if (isFOV)
+			{
+				double sqDist = ray.squareDistanceToOrigin(*P);
+				fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
+				isElligible = (fov_rad <= maxRadiusOrFov);
+#ifdef _DEBUG
+				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, fov_rad);
+				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(sqDist));
+#endif
+			}
+			else
+			{
+				isElligible = (radialSqDist <= maxSqRadius);
+#ifdef _DEBUG
+				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(radialSqDist));
+#endif
+			}
+
+			if (isElligible)
+			{
+				try
+				{
+					switch (process)
+					{
+					case RC_NEAREST_POINT:
+
+						//We use the 'FOV' even in orthographic mode (so as to give better
+						//chances to points that are closer to the viewer)
+						if (fov_rad < 0)
+						{
+							//compute it only if necessary
+							double sqDist = ray.squareDistanceToOrigin(*P);
+							fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
+						}
+					
+						//keep only the 'nearest' point
+						if (output.empty())
+						{
+							output.resize(1, PointDescriptor(P, it->theIndex, radialSqDist));
+							smallestFOV = fov_rad;
+						}
+						else
+						{
+							if (fov_rad < smallestFOV)
+							{
+								output.back() = PointDescriptor(P, it->theIndex, radialSqDist);
+								smallestFOV = fov_rad;
+							}
+						}
+						break;
+
+					case RC_CLOSE_POINTS:
+					 
+						//store all the points that are close enough to the ray
+						output.push_back(PointDescriptor(P, it->theIndex, radialSqDist));
+						break;
+
+					default:
+						assert(false);
+						return false;
+					}
+				}
+				catch (const std::bad_alloc&)
+				{
+					//not enough memory
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
 }

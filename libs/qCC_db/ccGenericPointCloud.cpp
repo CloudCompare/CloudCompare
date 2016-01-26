@@ -21,8 +21,10 @@
 #include <Neighbourhood.h>
 #include <DistanceComputationTools.h>
 
+//Local
 #include "ccOctree.h"
 #include "ccSensor.h"
+#include "ccGenericGLDisplay.h"
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccShiftedObject(name)
@@ -304,6 +306,9 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 	setMetaData(cloud->metaData());
 }
 
+#include "ccPointCloud.h"
+#include <ScalarField.h>
+
 bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 									int& nearestPointIndex,
 									double& nearestSquareDist,
@@ -323,6 +328,82 @@ bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 
 	nearestPointIndex = -1;
 	nearestSquareDist = -1.0;
+	
+	ccOctree* octree = getOctree();
+	if (octree && pickWidth == pickHeight && getDisplay())
+	{
+		//we can now use the octree to do faster point picking
+		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
+		CCVector3d Y(0,0,0);
+		ccGL::Unproject<double, double>(clickPosd2, MM, MP, VP, Y);
+
+		CCVector3d dir = Y-X;
+		dir.normalize();
+		CCVector3 udir = CCVector3::fromArray(dir.u);
+		CCVector3 origin = CCVector3::fromArray(X.u);
+
+		if (!noGLTrans)
+		{
+			trans.invert();
+			trans.apply(origin);
+			trans.applyRotation(udir);
+		}
+
+		double fovOrRadius = 0;
+		const ccViewportParameters& viewParams = getDisplay()->getViewportParameters();
+		bool isFOV = viewParams.perspectiveView;
+		if (isFOV)
+		{
+			fovOrRadius = 0.002 * pickWidth; //empirical conversion from pixels to FOV angle (in radians)
+		}
+		else
+		{
+			fovOrRadius = pickWidth * viewParams.pixelSize / 2;
+		}
+
+#ifdef _DEBUG
+		CCLib::ScalarField* sf = 0;
+		if (getClassID() == CC_TYPES::POINT_CLOUD)
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(this);
+			int sfIdx = pc->getScalarFieldIndexByName("octree_picking");
+			if (sfIdx < 0)
+			{
+				sfIdx = pc->addScalarField("octree_picking");
+			}
+			if (sfIdx >= 0)
+			{
+				pc->setCurrentScalarField(sfIdx);
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				pc->showSF(true);
+				sf = pc->getScalarField(sfIdx);
+			}
+		}
+#endif
+
+		std::vector<CCLib::DgmOctree::PointDescriptor> points;
+		if (octree->rayCast(udir, origin, fovOrRadius, isFOV, CCLib::DgmOctree::RC_NEAREST_POINT, points))
+		{
+#ifdef _DEBUG
+			if (sf)
+			{
+				sf->computeMinAndMax();
+				getDisplay()->redraw();
+			}
+#endif
+			if (!points.empty())
+			{
+				nearestPointIndex = points.back().pointIndex;
+				nearestSquareDist = points.back().squareDistd;
+				return true;
+			}
+			return false;
+		}
+		else
+		{
+			ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
+		}
+	}
 
 #if defined(_OPENMP)
 #pragma omp parallel for

@@ -3871,12 +3871,12 @@ void ccGLWindow::processPickingResult(const PickingParameters& params, int selec
 	{
 		assert(selectedID < 0 || subSelectedID >= 0);
 
-		emit itemPicked(selectedID,static_cast<unsigned>(subSelectedID),params.centerX,params.centerY);
+		emit itemPicked(selectedID, static_cast<unsigned>(subSelectedID), params.centerX, params.centerY);
 	}
 	//fast picking (labels, interactors, etc.)
 	else if (params.mode == FAST_PICKING)
 	{
-		emit itemPickedFast(selectedID,subSelectedID,params.centerX,params.centerY);
+		emit itemPickedFast(selectedID, subSelectedID, params.centerX, params.centerY);
 	}
 	else if (params.mode == LABEL_PICKING)
 	{
@@ -4101,6 +4101,8 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 {
+	qint64 t0 = m_timer.elapsed();
+
 	CCVector2d clickedPos(params.centerX, height()-1 - params.centerY);
 	
 	int VP[4];
@@ -4199,6 +4201,9 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 		//not enough memory
 		ccLog::Warning("[Picking][CPU] Not enough memory!");
 	}
+
+	qint64 dt = m_timer.elapsed() - t0;
+	ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
 
 	//we must always emit a signal!
 	processPickingResult(params, nearestEntityID, nearestElementIndex);

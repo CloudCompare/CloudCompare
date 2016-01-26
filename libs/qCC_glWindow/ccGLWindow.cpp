@@ -4105,13 +4105,12 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 	CCVector2d clickedPos(params.centerX, height()-1 - params.centerY);
 	
-	int VP[4];
-	getViewportArray(VP);
-	const double* MM = getModelViewMatd();
-	const double* MP = getProjectionMatd();
-
 	int nearestEntityID = -1;
 	int nearestElementIndex = -1;
+
+	bool autoComputeOctree = false;
+	bool firstCloudWithoutOctree = true;
+
 	try
 	{
 		ccHObject::Container toProcess;
@@ -4140,14 +4139,72 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 				{
 					ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
 
+					if (firstCloudWithoutOctree && !cloud->getOctree())
+					{
+						//can we compute an octree for picking?
+						switch (ccGui::Parameters().autoComputeOctree)
+						{
+						case ccGui::ParamStruct::ALWAYS:
+							autoComputeOctree = true;
+							break;
+
+						case ccGui::ParamStruct::ASK_USER:
+							{
+								QMessageBox question(QMessageBox::Question, "Picking acceleration", "Compute octree to accelerate the picking process?\n(this behavior can be changed later in the Display Settings)", QMessageBox::NoButton, this);
+								QPushButton* yes = new QPushButton("Yes");
+								question.addButton(yes, QMessageBox::AcceptRole);
+								QPushButton* no = new QPushButton("No");
+								question.addButton(no, QMessageBox::RejectRole);
+								QPushButton* always = new QPushButton("Always");
+								question.addButton(always, QMessageBox::AcceptRole);
+								QPushButton* never = new QPushButton("Never");
+								question.addButton(never, QMessageBox::RejectRole);
+
+								question.exec();
+								QAbstractButton* clickedButton = question.clickedButton();
+								if (clickedButton == yes)
+								{
+									autoComputeOctree = true;
+								}
+								else if (clickedButton == always)
+								{
+									autoComputeOctree = true;
+									ccGui::ParamStruct params = ccGui::Parameters();
+									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
+									ccGui::Set(params);
+								}
+								else if (clickedButton == no)
+								{
+									autoComputeOctree = false;
+								}
+								else if (clickedButton == never)
+								{
+									autoComputeOctree = false;
+									ccGui::ParamStruct params = ccGui::Parameters();
+									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
+									ccGui::Set(params);
+								}
+							}
+							break;
+
+						case ccGui::ParamStruct::NEVER:
+							autoComputeOctree = true;
+							break;
+						}
+
+						firstCloudWithoutOctree = false;
+					}
+
 					int nearestPointIndex = -1;
 					double nearestSquareDist = 0;
 					if (cloud->isClicked(	clickedPos,
 											nearestPointIndex,
 											nearestSquareDist,
-											MM, MP, VP,
 											params.pickWidth,
-											params.pickHeight) )
+											params.pickHeight,
+											autoComputeOctree,
+											this
+											) )
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -4168,7 +4225,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					if (mesh->isClicked(clickedPos,
 										nearestTriIndex,
 										nearestSquareDist,
-										MM, MP, VP) )
+										this) )
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{

@@ -240,11 +240,10 @@ public:
 	bool isClicked(	const CCVector2d& clickPos,
 					int& nearestPointIndex,
 					double& nearestSquareDist,
-					const double* MM,
-					const double* MP,
-					const int* VP,
 					double pickWidth = 2.0,
-					double pickHeight = 2.0);
+					double pickHeight = 2.0,
+					bool autoComputeOctree = false,
+					ccGenericGLDisplay* display = 0);
 
 protected:
 

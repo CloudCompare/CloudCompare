@@ -27,7 +27,7 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>3</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>432</width>
-        <height>243</height>
+        <height>216</height>
        </rect>
       </property>
       <attribute name="label">
@@ -353,7 +353,7 @@
         <x>0</x>
         <y>0</y>
         <width>432</width>
-        <height>243</height>
+        <height>216</height>
        </rect>
       </property>
       <attribute name="label">
@@ -438,7 +438,7 @@
         <x>0</x>
         <y>0</y>
         <width>432</width>
-        <height>243</height>
+        <height>216</height>
        </rect>
       </property>
       <attribute name="label">
@@ -572,7 +572,7 @@
         <x>0</x>
         <y>0</y>
         <width>432</width>
-        <height>243</height>
+        <height>216</height>
        </rect>
       </property>
       <attribute name="label">
@@ -850,6 +850,75 @@
         </widget>
        </item>
        <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>16</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pickingPage">
+      <attribute name="label">
+       <string>Point picking</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QLabel" name="label_22">
+           <property name="text">
+            <string>Auto-compute octree for picking</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="autoComputeOctreeComboBox">
+           <property name="toolTip">
+            <string>Octree computation can be long but the picking is then much faster</string>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>Always</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Ask each time</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Never</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QCheckBox" name="openGLPickingCheckBox">
          <property name="toolTip">
           <string>To use OpenGL for point picking (no octree is required but it can be slow on low-end GPUs)</string>
@@ -860,14 +929,14 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
+        <spacer name="verticalSpacer_7">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>16</height>
+           <height>144</height>
           </size>
          </property>
         </spacer>
@@ -957,6 +1026,22 @@
     <hint type="destinationlabel">
      <x>224</x>
      <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openGLPickingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>autoComputeOctreeComboBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>224</x>
+     <y>189</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>163</y>
     </hint>
    </hints>
   </connection>

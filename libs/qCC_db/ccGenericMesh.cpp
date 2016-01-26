@@ -889,10 +889,23 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 							  int& nearestTriIndex,
 							  double& nearestSquareDist,
-							  const double* MM,
-							  const double* MP,
-							  const int* VP)
+							  ccGenericGLDisplay* display/*=0*/)
 {
+	if (!display)
+	{
+		display = getDisplay();
+		if (!display)
+		{
+			ccLog::Warning("[ccGenericMesh::isClicked] No default display available, and no display provided");
+			return false;
+		}
+	}
+
+	const double* MM = display->getModelViewMatd();
+	const double* MP = display->getProjectionMatd();
+	int VP[4];
+	display->getViewportArray(VP);
+
 	ccGLMatrix trans;
 	bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
@@ -910,7 +923,7 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 #if defined(_OPENMP)
 	#pragma omp parallel for
 #endif
-	for (unsigned i=0; i<size(); ++i)
+	for (int i=0; i<static_cast<int>(size()); ++i)
 	{
 		CCLib::VerticesIndexes* tsi = getTriangleVertIndexes(i);
 		const CCVector3* A3D = vertices->getPoint(tsi->i1);

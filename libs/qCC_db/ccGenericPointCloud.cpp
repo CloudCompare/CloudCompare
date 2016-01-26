@@ -25,6 +25,7 @@
 #include "ccOctree.h"
 #include "ccSensor.h"
 #include "ccGenericGLDisplay.h"
+#include "ccProgressDialog.h"
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccShiftedObject(name)
@@ -306,131 +307,152 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 	setMetaData(cloud->metaData());
 }
 
+#ifdef _DEBUG
+//for tests
 #include "ccPointCloud.h"
 #include <ScalarField.h>
+#endif
 
 bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 									int& nearestPointIndex,
 									double& nearestSquareDist,
-									const double* MM,
-									const double* MP,
-									const int* VP,
 									double pickWidth/*=2.0*/,
-									double pickHeight/*=2.0*/)
+									double pickHeight/*=2.0*/,
+									bool autoComputeOctree/*=false*/,
+									ccGenericGLDisplay* display/*=0*/)
 {
-	ccGLMatrix trans;
-	bool noGLTrans = !getAbsoluteGLTransformation(trans);
+	if (!display)
+	{
+		display = getDisplay();
+		if (!display)
+		{
+			ccLog::Warning("[ccGenericPointCloud::isClicked] No default display available, and no display provided");
+			return false;
+		}
+	}
 
-	//back project the clicked point in 3D
+	const double* MM = display->getModelViewMatd();
+	const double* MP = display->getProjectionMatd();
+	int VP[4];
+	display->getViewportArray(VP);
+
+	//back project the clicked point in 3D so as to get the picking direction
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
 	CCVector3d X(0,0,0);
 	ccGL::Unproject<double, double>(clickPosd, MM, MP, VP, X);
 
+	CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
+	CCVector3d Y(0,0,0);
+	ccGL::Unproject<double, double>(clickPosd2, MM, MP, VP, Y);
+
+	CCVector3d dir = Y-X;
+	dir.normalize();
+	CCVector3 udir = CCVector3::fromArray(dir.u);
+	CCVector3 origin = CCVector3::fromArray(X.u);
+
+	ccGLMatrix trans;
+	if (!getAbsoluteGLTransformation(trans))
+	{
+		trans.invert();
+		trans.apply(origin);
+		trans.applyRotation(udir);
+	}
+
 	nearestPointIndex = -1;
 	nearestSquareDist = -1.0;
-	
-	ccOctree* octree = getOctree();
-	if (octree && pickWidth == pickHeight && getDisplay())
+
+	const ccViewportParameters& viewParams = display->getViewportParameters();
+	bool isFOV = viewParams.perspectiveView;
+	double fovOrRadius = 0;
+	if (isFOV)
 	{
-		//we can now use the octree to do faster point picking
-		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
-		CCVector3d Y(0,0,0);
-		ccGL::Unproject<double, double>(clickPosd2, MM, MP, VP, Y);
+		fovOrRadius = 0.002 * pickWidth; //empirical conversion from pixels to FOV angle (in radians)
+	}
+	else
+	{
+		fovOrRadius = pickWidth * viewParams.pixelSize / 2;
+	}
 
-		CCVector3d dir = Y-X;
-		dir.normalize();
-		CCVector3 udir = CCVector3::fromArray(dir.u);
-		CCVector3 origin = CCVector3::fromArray(X.u);
-
-		if (!noGLTrans)
+	//can we use the octree to accelerate the point picking process?
+	if (pickWidth == pickHeight)
+	{
+		ccOctree* octree = getOctree();
+		if (!octree && autoComputeOctree)
 		{
-			trans.invert();
-			trans.apply(origin);
-			trans.applyRotation(udir);
+			ccProgressDialog pDlg(false, display->asWidget());
+			octree = computeOctree(&pDlg);
 		}
 
-		double fovOrRadius = 0;
-		const ccViewportParameters& viewParams = getDisplay()->getViewportParameters();
-		bool isFOV = viewParams.perspectiveView;
-		if (isFOV)
+		if (octree)
 		{
-			fovOrRadius = 0.002 * pickWidth; //empirical conversion from pixels to FOV angle (in radians)
-		}
-		else
-		{
-			fovOrRadius = pickWidth * viewParams.pixelSize / 2;
-		}
-
-#ifdef _DEBUG
-		CCLib::ScalarField* sf = 0;
-		if (getClassID() == CC_TYPES::POINT_CLOUD)
-		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(this);
-			int sfIdx = pc->getScalarFieldIndexByName("octree_picking");
-			if (sfIdx < 0)
+			//we can now use the octree to do faster point picking
+	#ifdef _DEBUG
+			CCLib::ScalarField* sf = 0;
+			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
-				sfIdx = pc->addScalarField("octree_picking");
+				ccPointCloud* pc = static_cast<ccPointCloud*>(this);
+				int sfIdx = pc->getScalarFieldIndexByName("octree_picking");
+				if (sfIdx < 0)
+				{
+					sfIdx = pc->addScalarField("octree_picking");
+				}
+				if (sfIdx >= 0)
+				{
+					pc->setCurrentScalarField(sfIdx);
+					pc->setCurrentDisplayedScalarField(sfIdx);
+					pc->showSF(true);
+					sf = pc->getScalarField(sfIdx);
+				}
 			}
-			if (sfIdx >= 0)
-			{
-				pc->setCurrentScalarField(sfIdx);
-				pc->setCurrentDisplayedScalarField(sfIdx);
-				pc->showSF(true);
-				sf = pc->getScalarField(sfIdx);
-			}
-		}
-#endif
+	#endif
 
-		std::vector<CCLib::DgmOctree::PointDescriptor> points;
-		if (octree->rayCast(udir, origin, fovOrRadius, isFOV, CCLib::DgmOctree::RC_NEAREST_POINT, points))
-		{
-#ifdef _DEBUG
-			if (sf)
+			std::vector<CCLib::DgmOctree::PointDescriptor> points;
+			if (octree->rayCast(udir, origin, fovOrRadius, isFOV, CCLib::DgmOctree::RC_NEAREST_POINT, points))
 			{
-				sf->computeMinAndMax();
-				getDisplay()->redraw();
+	#ifdef _DEBUG
+				if (sf)
+				{
+					sf->computeMinAndMax();
+					if (getDisplay())
+						getDisplay()->redraw();
+				}
+	#endif
+				if (!points.empty())
+				{
+					nearestPointIndex = points.back().pointIndex;
+					nearestSquareDist = points.back().squareDistd;
+					return true;
+				}
+				return false;
 			}
-#endif
-			if (!points.empty())
+			else
 			{
-				nearestPointIndex = points.back().pointIndex;
-				nearestSquareDist = points.back().squareDistd;
-				return true;
+				ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
 			}
-			return false;
-		}
-		else
-		{
-			ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
 		}
 	}
+
+	//otherwise we go 'brute force' (works quite well in fact?!)
+	{
+		double smallestFOV = -1.0;
 
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-	//brute force works quite well in fact?!
-	for (unsigned i=0; i<size(); ++i)
-	{
-		const CCVector3* P = getPoint(i);
-		CCVector3d Qs;
-		if (noGLTrans)
+		for (int i=0; i<static_cast<int>(size()); ++i)
 		{
-			ccGL::Project<PointCoordinateType, double>(*P,MM,MP,VP,Qs);
-		}
-		else
-		{
-			CCVector3 Q = *P;
-			trans.apply(Q);
-			ccGL::Project<PointCoordinateType, double>(Q,MM,MP,VP,Qs);
-		}
+			const CCVector3* P = getPoint(i);
 
-		if (fabs(Qs.x-clickPos.x) <= pickWidth && fabs(Qs.y-clickPos.y) <= pickHeight)
-		{
-			double squareDist = CCVector3d(X.x-P->x, X.y-P->y, X.z-P->z).norm2d();
-			if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
+			CCVector3 OP = *P - origin;
+			double radialSqDist = OP.cross(udir).norm2d();
+			double squareDist = OP.norm2d();
+			double fov_rad = atan2(sqrt(radialSqDist), sqrt(squareDist));
+
+			if (smallestFOV < 0 || fov_rad < smallestFOV)
 			{
 				nearestSquareDist = squareDist;
 				nearestPointIndex = static_cast<int>(i);
+				smallestFOV = fov_rad;
 			}
 		}
 	}

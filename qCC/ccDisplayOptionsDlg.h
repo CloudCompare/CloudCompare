@@ -78,6 +78,8 @@ protected slots:
 
 	void changeZoomSpeed(double);
 
+	void changeAutoComputeOctreeOption(int);
+
 	void doAccept();
 	void doReject();
 	void apply();

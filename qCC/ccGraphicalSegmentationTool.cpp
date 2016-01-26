@@ -645,11 +645,11 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 
 		unsigned cloudSize = cloud->size();
 
+		//we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-		//we project each point and we check if it falls inside the segmentation polyline
-		for (unsigned i=0; i<cloudSize; ++i)
+		for (int i=0; i<static_cast<int>(cloudSize); ++i)
 		{
 			if (visibilityArray->getValue(i) == POINT_VISIBLE)
 			{

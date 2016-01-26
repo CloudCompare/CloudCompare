@@ -187,9 +187,7 @@ public:
 	bool isClicked(	const CCVector2d& clickPos,
 					int& nearestTriIndex,
 					double& nearestSquareDist,
-					const double* MM,
-					const double* MP,
-					const int* VP);
+					ccGenericGLDisplay* display = 0);
 
 protected:
 

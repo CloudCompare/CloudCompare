@@ -99,6 +99,8 @@ void ccGui::ParamStruct::reset()
 	labelOpacity				= 75;
 
 	zoomSpeed					= 1.0;
+
+	autoComputeOctree			= ASK_USER;
 }
 
 static int c_fColorArraySize  = sizeof(float) * 4;
@@ -121,24 +123,25 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	labelMarkerCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("labelMarkerColor",		QByteArray((const char*)ccColor::defaultLabelMarkerColor.rgb,	c_ubColorArraySize)).toByteArray().data()));
 	bbDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("bbDefaultColor",			QByteArray((const char*)ccColor::yellow.rgba,					c_ubColorArraySize)).toByteArray().data()));
 
-	drawBackgroundGradient		=                                  settings.value("backgroundGradient",      true ).toBool();
-	decimateMeshOnMove			=                                  settings.value("meshDecimation",          true ).toBool();
-	minLoDMeshSize				=                                  settings.value("minLoDMeshSize",       2500000 ).toUInt();
-	decimateCloudOnMove			=                                  settings.value("cloudDecimation",         true ).toBool();
-	minLoDCloudSize				=                                  settings.value("minLoDCloudSize",     10000000 ).toUInt();
-	useVBOs						=                                  settings.value("useVBOs",                 true ).toBool();
-	useOpenGLPointPicking		=                                  settings.value("useOpenGLPointPicking",   false).toBool();
-	displayCross				=                                  settings.value("crossDisplayed",          true ).toBool();
-	labelMarkerSize				= static_cast<unsigned>(std::max(0,settings.value("labelMarkerSize",         5    ).toInt()));
-	colorScaleShowHistogram		=                                  settings.value("colorScaleShowHistogram", true ).toBool();
-	colorScaleUseShader			=                                  settings.value("colorScaleUseShader",     false).toBool();
+	drawBackgroundGradient		=                                      settings.value("backgroundGradient",      true ).toBool();
+	decimateMeshOnMove			=                                      settings.value("meshDecimation",          true ).toBool();
+	minLoDMeshSize				=                                      settings.value("minLoDMeshSize",       2500000 ).toUInt();
+	decimateCloudOnMove			=                                      settings.value("cloudDecimation",         true ).toBool();
+	minLoDCloudSize				=                                      settings.value("minLoDCloudSize",     10000000 ).toUInt();
+	useVBOs						=                                      settings.value("useVBOs",                 true ).toBool();
+	useOpenGLPointPicking		=                                      settings.value("useOpenGLPointPicking",   false).toBool();
+	displayCross				=                                      settings.value("crossDisplayed",          true ).toBool();
+	labelMarkerSize				= static_cast<unsigned>(std::max(0,    settings.value("labelMarkerSize",         5    ).toInt()));
+	colorScaleShowHistogram		=                                      settings.value("colorScaleShowHistogram", true ).toBool();
+	colorScaleUseShader			=                                      settings.value("colorScaleUseShader",     false).toBool();
 	//colorScaleShaderSupported	= not saved
-	colorScaleRampWidth			= static_cast<unsigned>(std::max(0,settings.value("colorScaleRampWidth",      50  ).toInt()));
-	defaultFontSize				= static_cast<unsigned>(std::max(0,settings.value("defaultFontSize",          10  ).toInt()));
-	labelFontSize				= static_cast<unsigned>(std::max(0,settings.value("labelFontSize",            8   ).toInt()));
-	displayedNumPrecision		= static_cast<unsigned>(std::max(0,settings.value("displayedNumPrecision",    6   ).toInt()));
-	labelOpacity				= static_cast<unsigned>(std::max(0,settings.value("labelOpacity",             75  ).toInt()));
-	zoomSpeed					= settings.value("zoomSpeed", 1.0).toDouble();
+	colorScaleRampWidth			= static_cast<unsigned>(std::max(0,    settings.value("colorScaleRampWidth",      50  ).toInt()));
+	defaultFontSize				= static_cast<unsigned>(std::max(0,    settings.value("defaultFontSize",          10  ).toInt()));
+	labelFontSize				= static_cast<unsigned>(std::max(0,    settings.value("labelFontSize",            8   ).toInt()));
+	displayedNumPrecision		= static_cast<unsigned>(std::max(0,    settings.value("displayedNumPrecision",    6   ).toInt()));
+	labelOpacity				= static_cast<unsigned>(std::max(0,    settings.value("labelOpacity",             75  ).toInt()));
+	zoomSpeed					=                                      settings.value("zoomSpeed",                1.0 ).toDouble();
+	autoComputeOctree			= static_cast<ComputeOctreeForPicking>(settings.value("autoComputeOctree",   ASK_USER ).toInt());
 
 	settings.endGroup();
 }
@@ -178,6 +181,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("displayedNumPrecision",    displayedNumPrecision);
 	settings.setValue("labelOpacity",             labelOpacity);
 	settings.setValue("zoomSpeed",                zoomSpeed);
+	settings.setValue("autoComputeOctree",        static_cast<int>(autoComputeOctree));
 
 	settings.endGroup();
 }

@@ -107,6 +107,12 @@ public:
 		//! Zoom speed (1.0 by default)
 		double zoomSpeed;
 
+		//! Octree computation (for picking) behaviors
+		enum ComputeOctreeForPicking { ALWAYS = 0, ASK_USER = 1, NEVER = 2 };
+
+		//! Octree computation (for picking) behavior
+		ComputeOctreeForPicking autoComputeOctree;
+
 		//! Default constructor
 		ParamStruct();
 

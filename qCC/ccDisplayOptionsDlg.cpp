@@ -66,6 +66,8 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(maxCloudSizeDoubleSpinBox,       SIGNAL(valueChanged(double)), this, SLOT(changeMaxCloudSize(double)));
 	connect(maxMeshSizeDoubleSpinBox,        SIGNAL(valueChanged(double)), this, SLOT(changeMaxMeshSize(double)));
 
+	connect(autoComputeOctreeComboBox,       SIGNAL(currentIndexChanged(int)), this, SLOT(changeAutoComputeOctreeOption(int)));
+
 	connect(okButton,                        SIGNAL(clicked()),         this, SLOT(doAccept()));
 	connect(applyButton,                     SIGNAL(clicked()),         this, SLOT(apply()));
 	connect(resetButton,                     SIGNAL(clicked()),         this, SLOT(reset()));
@@ -149,6 +151,8 @@ void ccDisplayOptionsDlg::refresh()
 	labelMarkerSizeSpinBox->setValue(parameters.labelMarkerSize);
 
 	zoomSpeedDoubleSpinBox->setValue(parameters.zoomSpeed);
+
+	autoComputeOctreeComboBox->setCurrentIndex(parameters.autoComputeOctree);
 
 	update();
 }
@@ -435,6 +439,12 @@ void ccDisplayOptionsDlg::changeNumberPrecision(int val)
 void ccDisplayOptionsDlg::changeZoomSpeed(double val)
 {
 	parameters.zoomSpeed = val;
+}
+
+void ccDisplayOptionsDlg::changeAutoComputeOctreeOption(int index)
+{
+	assert(index >= 0 && index < 3);
+	parameters.autoComputeOctree = static_cast<ccGui::ParamStruct::ComputeOctreeForPicking>(index);
 }
 
 void ccDisplayOptionsDlg::changeLabelOpacity(int val)

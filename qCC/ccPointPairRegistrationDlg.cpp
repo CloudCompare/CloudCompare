@@ -279,7 +279,9 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 			hasOriginViewportParams = true;
 			originViewportParams = aligned->getDisplay()->getViewportParameters();
 		}
-		m_associatedWin->addToOwnDB(aligned);
+		//DGM: it's already in the global DB!
+		//m_associatedWin->addToOwnDB(aligned);
+		aligned->setDisplay(m_associatedWin);
 		aligned->setVisible(true);
 		aligned->setSelected(false);
 		SetEnabled_recursive(aligned);
@@ -294,7 +296,9 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 			hasOriginViewportParams = true;
 			originViewportParams = reference->getDisplay()->getViewportParameters();
 		}
-		m_associatedWin->addToOwnDB(reference);
+		//DGM: it's already in the global DB!
+		//m_associatedWin->addToOwnDB(reference);
+		reference->setDisplay(m_associatedWin);
 		reference->setVisible(true);
 		reference->setSelected(false);
 		SetEnabled_recursive(reference);
@@ -488,7 +492,7 @@ void ccPointPairRegistrationDlg::processPickedItem(int entityID, unsigned itemIn
 	if (m_paused)
 		return;
 
-	ccHObject* db = m_associatedWin->getOwnDB();
+	ccHObject* db = m_associatedWin->getSceneDB();
 	if (!db)
 		return;
 

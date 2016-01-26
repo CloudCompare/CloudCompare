@@ -448,12 +448,6 @@ public: //misc
 	**/ 
 	bool isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, bool withLensCorrection*/);
 
-	//! Filters an octree : all the box visible in the frustum will be drawn in red.
-	/** \param octree Octree
-		\param inCameraFrustrum indices of points in the frustrum
-	**/
-	void filterOctree(ccOctree* octree, std::vector<unsigned>& inCameraFrustrum);
-	
 	//! Compute the coefficients of the 6 planes frustrum in the global coordinates system (normal vector are headed the frustrum inside), the edges direction vectors and the frustrum center
 	/** \param planeCoefficients coefficients of the six planes
 		\param edges direction vectors of the frustrum edges (there are 12 edges but some of them are colinear)

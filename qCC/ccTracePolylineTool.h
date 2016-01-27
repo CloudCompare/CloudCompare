@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_TRACE_POLY_LINE_TOOLS_HEADER
-#define CC_TRACE_POLY_LINE_TOOLS_HEADER
+#ifndef CC_TRACE_POLY_LINE_TOOL_HEADER
+#define CC_TRACE_POLY_LINE_TOOL_HEADER
 
 //Local
 #include <ccOverlayDialog.h>
@@ -34,8 +34,9 @@ class ccPolyline;
 class ccPointCloud;
 class ccGLWindow;
 
-//! Graphical segmentation mechanism (with polyline)
-class ccTracePolylineTool : public ccOverlayDialog, public Ui::TracePolyLineDlg {
+//! Graphical Polyline Tracing tool
+class ccTracePolylineTool : public ccOverlayDialog, public Ui::TracePolyLineDlg
+{
     Q_OBJECT
 
 public:
@@ -44,47 +45,47 @@ public:
     //! Destructor
     virtual ~ccTracePolylineTool();
 
-    //! Get a pointer to the polyline that has been traced
-    ccPolyline* getPolyLine() { return m_segmentationPoly; }
-
     //inherited from ccOverlayDialog
     virtual bool linkWith(ccGLWindow* win) override;
     virtual bool start() override;
     virtual void stop(bool accepted) override;
 
 protected slots:
-    void reset();
 
-    //! do the actual polyline projection from 2d to 3d
-    void projectPolyline(bool cpu = true);
     void apply();
     void cancel();
-
     void resetLine();
+	void exportLine();
 
-    void addPointToPolyline(int x, int y);
+	void handlePickedItem(int, unsigned, int, int);
+    //void addPointToPolyline(int x, int y);
     void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
-    void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
+    void updatePolyLineTip(int x, int y, Qt::MouseButtons buttons);
 
-    void linkSnapDimensions(const int status);
+	void onSnapSizeChanged(int);
+	void onWidthSizeChanged(int);
 
     //! To capture overridden shortcuts (pause button, etc.)
     void onShortcutTriggered(int);
 
 protected:
-    void doPolylineOverSampling(const int multiplicity);
 
-    //! Whether something has changed or not (for proper 'cancel')
-    bool m_somethingHasChanged;
+	//! Oversamples a polyline
+	static ccPolyline* PolylineOverSampling(ccPolyline* polyline, ccPointCloud* vertices, unsigned steps);
 
-    //! Segmentation polyline
-    ccPolyline* m_segmentationPoly;
-    //! Segmentation polyline vertices
-    ccPointCloud* m_polyVertices;
+    //! 2D polyline (for the currently edited part)
+    ccPolyline* m_polyTip;
+    //! 2D polyline vertices
+    ccPointCloud* m_polyTipVertices;
+
+    //! 3D polyline
+    ccPolyline* m_poly3D;
+    //! 3D polyline vertices
+    ccPointCloud* m_poly3DVertices;
 
     //! Current process state
-    bool m_done = false;
+    bool m_done;
 
 };
 
-#endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
+#endif //CC_TRACE_POLY_LINE_TOOL_HEADER

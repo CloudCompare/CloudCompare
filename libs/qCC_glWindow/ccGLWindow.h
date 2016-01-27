@@ -482,6 +482,14 @@ public:
 	//! Whether display parameters are overidden for this window
 	bool hasOverridenDisplayParameters() const { return m_overridenDisplayParametersEnabled; }
 
+	//! Default picking radius value
+	static const int DefaultPickRadius = 5;
+
+	//! Sets picking radius
+	inline void setPickingRadius(int radius) { m_pickRadius = radius; }
+	//! Returns the current picking radius
+	inline int getPickingRadius() const { return m_pickRadius; }
+
 	//! Sets whether overlay entities (scale, tetrahedron, etc.) should be displayed or not
 	void displayOverlayEntities(bool state) { m_displayOverlayEntities = state; }
 
@@ -1205,6 +1213,9 @@ protected: //members
 
 	//! Debug traces visibility
 	bool m_showDebugTraces;
+
+	//! Picking radius (pixels)
+	int m_pickRadius;
 
 private:
 

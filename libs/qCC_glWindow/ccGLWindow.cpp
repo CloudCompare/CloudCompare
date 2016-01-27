@@ -240,6 +240,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_stereoModeEnabled(false)
 	, m_formerParent(0)
 	, m_showDebugTraces(false)
+	, m_pickRadius(DefaultPickRadius)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -3728,7 +3729,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 							pickingMode = LABEL_PICKING;
 						}
 
-						PickingParameters params(pickingMode, event->x(), event->y());
+						PickingParameters params(pickingMode, event->x(), event->y(), m_pickRadius, m_pickRadius);
 						startPicking(params);
 
 						event->accept();
@@ -4175,6 +4176,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 									ccGui::ParamStruct params = ccGui::Parameters();
 									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
 									ccGui::Set(params);
+									params.toPersistentSettings();
 								}
 								else if (clickedButton == no)
 								{
@@ -4186,6 +4188,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 									ccGui::ParamStruct params = ccGui::Parameters();
 									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
 									ccGui::Set(params);
+									params.toPersistentSettings();
 								}
 							}
 							break;

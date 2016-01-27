@@ -2,6 +2,11 @@
 
 v2.7.beta ??/??/201?
 - New features:
+
+	* Polyline tracing/picking tool:
+		- accessible via a dedicated icon in the main tool bar ('Trace a polyline by point picking')
+		- allows to pick points on all the visible clouds in the active 3D view to define one or more 3D polylines
+
 	* 2.5D volume calculation tool:
 		- Tools > Volume > Compute 2.5D volume
 		- can compute the volume of a single cloud (relatively to a constant height) or between two clouds

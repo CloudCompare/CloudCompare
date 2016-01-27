@@ -127,6 +127,9 @@ public:
 	**/
 	bool initWith(ccPointCloud*& vertices, const ccPolyline& poly);
 
+	//! Copy the parameters from another polyline
+	void importParametersFrom(const ccPolyline& poly);
+
 	//! Shows an arrow in place of a given vertex
 	void showArrow(bool state, unsigned vertIndex, PointCoordinateType length);
 

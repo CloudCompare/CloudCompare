@@ -56,7 +56,7 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	, ccShiftedObject(poly)
 {
 	ccPointCloud* clone = 0;
-	initWith(clone,poly);
+	initWith(clone, poly);
 }
 
 bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
@@ -90,9 +90,22 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 		//vertices->setEnabled(false);
 		assert(m_theAssociatedCloud);
 		if (m_theAssociatedCloud)
-			addPointIndex(0,m_theAssociatedCloud->size());
+		{
+			if (!addPointIndex(0, m_theAssociatedCloud->size()))
+			{
+				ccLog::Warning("[ccPolyline::initWith] Not enough memory");
+				success = false;
+			}
+		}
 	}
 
+	importParametersFrom(poly);
+
+	return success;
+}
+
+void ccPolyline::importParametersFrom(const ccPolyline& poly)
+{
 	setClosed(poly.m_isClosed);
 	set2DMode(poly.m_mode2D);
 	setForeground(poly.m_foreground);
@@ -109,8 +122,6 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 	setGlobalShift(poly.getGlobalShift());
 	setGLTransformationHistory(poly.getGLTransformationHistory());
 	setMetaData(poly.metaData());
-	
-	return success;
 }
 
 void ccPolyline::set2DMode(bool state)
@@ -185,7 +196,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (pushName)
 			glPushName(getUniqueIDForDisplay());
 
-		if (colorsShown())
+		if (isColorOverriden())
+			ccGL::Color3v(m_tempColor.rgb);
+		else if (colorsShown())
 			ccGL::Color3v(m_rgbColor.rgb);
 
 		//display polyline

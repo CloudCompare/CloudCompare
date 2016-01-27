@@ -2870,7 +2870,7 @@ const ccGLMatrixd& ccGLWindow::getBaseViewMat()
 	return m_viewportParams.viewMat;
 }
 
-const void ccGLWindow::setBaseViewMat(const ccGLMatrixd& mat)
+const void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 {
 	m_viewportParams.viewMat = mat;
 
@@ -3852,7 +3852,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	}
 }
 
-void ccGLWindow::processPickingResult(const PickingParameters& params, const int &selectedID, const int &subSelectedID, const std::unordered_set<int>* selectedIDs /*= 0*/)
+void ccGLWindow::processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::unordered_set<int>* selectedIDs/*=0*/)
 {
 	//standard "entity" picking
 	if (params.mode == ENTITY_PICKING)
@@ -3933,7 +3933,7 @@ void ccGLWindow::processPickingResult(const PickingParameters& params, const int
 	}
 }
 
-void ccGLWindow::pickPointOpenGL(const PickingParameters& params,  int &selectedID, int &subSelectedID, std::unordered_set<int> &selectedIDs/*=0*/)
+void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 {
 	//OpenGL picking
 	makeCurrent();
@@ -4045,9 +4045,10 @@ void ccGLWindow::pickPointOpenGL(const PickingParameters& params,  int &selected
 		processPickingResult(params,-1,-1);
 	}
 
-	//process hits	
-	//	int subSelectedID = -1;
-	//	int selectedID = -1;
+	//process hits
+	std::unordered_set<int> selectedIDs;
+	int subSelectedID = -1;
+	int selectedID = -1;
 	try
 	{
 		GLuint minMinDepth = (~0);
@@ -4101,14 +4102,14 @@ void ccGLWindow::pickPointOpenGL(const PickingParameters& params,  int &selected
 	processPickingResult(params, selectedID, subSelectedID, &selectedIDs);
 }
 
-void ccGLWindow::pickPointCPU(const PickingParameters& params, int & nearestEntityID, int & nearestElementIndex)
+void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 {
 	//qint64 t0 = m_timer.elapsed();
 
 	CCVector2d clickedPos(params.centerX, height()-1 - params.centerY);
 	
-//	int nearestEntityID = -1;
-//	int nearestElementIndex = -1;
+	int nearestEntityID = -1;
+	int nearestElementIndex = -1;
 
 	bool autoComputeOctree = false;
 	bool firstCloudWithoutOctree = true;
@@ -4263,39 +4264,6 @@ void ccGLWindow::pickPointCPU(const PickingParameters& params, int & nearestEnti
 
 	//qint64 dt = m_timer.elapsed() - t0;
 	//ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
-
-}
-
-
-void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
-{
-
-    ccLog::PrintDebug("GPU picking");
-
-    int nearestEntityID = -1;
-    int nearestElementIndex = -1;
-
-    std::unordered_set<int> set;
-    // do the actual picking
-    pickPointOpenGL(params, nearestEntityID, nearestElementIndex, set);
-
-    //we must always emit a signal!
-    processPickingResult(params, nearestEntityID, nearestElementIndex, &set);
-}
-
-void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
-{
-
-    ccLog::Print("CPU picking started");
-
-    int nearestEntityID = -1;
-    int nearestElementIndex = -1;
-
-    // do the actual picking
-    pickPointCPU(params, nearestEntityID, nearestElementIndex);
-
-
-    ccLog::Print(QString("nearestElementIndex: %1, nearestEntityID %2").arg(nearestElementIndex).arg(nearestEntityID) );
 
 	//we must always emit a signal!
 	processPickingResult(params, nearestEntityID, nearestElementIndex);

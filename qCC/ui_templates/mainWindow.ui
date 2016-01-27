@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -468,6 +468,7 @@
     <addaction name="actionLevel"/>
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
+    <addaction name="actionTracePolyline"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
     <addaction name="separator"/>
@@ -483,8 +484,8 @@
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
     <size>
-     <width>135</width>
-     <height>172</height>
+     <width>146</width>
+     <height>175</height>
     </size>
    </property>
    <property name="floating">
@@ -575,8 +576,7 @@
    </property>
    <property name="windowIcon">
     <iconset>
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="toolTip">
     <string>Viewing tools</string>
@@ -685,6 +685,7 @@
    <addaction name="separator"/>
    <addaction name="actionPointPicking"/>
    <addaction name="actionPointListPicking"/>
+   <addaction name="actionTracePolyline"/>
    <addaction name="actionClone"/>
    <addaction name="actionMerge"/>
    <addaction name="actionDelete"/>
@@ -2084,6 +2085,9 @@
    <property name="toolTip">
     <string>Apply rotation and/or translation</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
   </action>
   <action name="actionSmoothMeshLaplacian">
    <property name="text">
@@ -2878,6 +2882,21 @@
    </property>
    <property name="toolTip">
     <string>Convert RGB colors to grey scale colors</string>
+   </property>
+  </action>
+  <action name="actionTracePolyline">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccTracePolyline.png</normaloff>:/CC/images/ccTracePolyline.png</iconset>
+   </property>
+   <property name="text">
+    <string>Trace Polyline</string>
+   </property>
+   <property name="toolTip">
+    <string>Trace a polyline by point picking</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

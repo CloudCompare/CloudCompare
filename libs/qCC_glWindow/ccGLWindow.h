@@ -136,6 +136,32 @@ public:
 							PIVOT_ALWAYS_SHOW,
 	};
 
+	//! Picking parameters
+	struct PickingParameters
+	{
+		//! Default constructor
+		PickingParameters(	PICKING_MODE _mode = NO_PICKING,
+							int _centerX = 0,
+							int _centerY = 0,
+							int _pickWidth = 5,
+							int _pickHeight = 5)
+			: mode(_mode)
+			, centerX(_centerX)
+			, centerY(_centerY)
+			, pickWidth(_pickWidth)
+			, pickHeight(_pickHeight)
+			, flags(0)
+		{}
+
+		PICKING_MODE mode;
+		int centerX;
+		int centerY;
+		int pickWidth;
+		int pickHeight;
+		unsigned short flags;
+	};
+
+
 	//! Default constructor
 	ccGLWindow(	QWidget *parent = 0,
 				const QGLFormat& format = QGLFormat::defaultFormat(),
@@ -313,7 +339,7 @@ public:
 		- the rotation around the camera center in viewer-centered mode
 		(see setPerspectiveState).
 	**/
-	virtual const void setBaseViewMat(ccGLMatrixd& mat);
+    virtual const void setBaseViewMat(const ccGLMatrixd &mat);
 
 	//! Returns the current (OpenGL) view matrix as a double array
 	/** Warning: different from 'view' matrix returned by getBaseViewMat.
@@ -573,6 +599,11 @@ public: //stereo mode
 	//! Returns the current stereo mode parameters
 	inline const StereoParams& getStereoParams() const { return m_stereoParams; }
 
+    //! a public method to pick points on clouds using the cpu
+    void pickPointCPU(const PickingParameters &params, int &nearestEntityID, int &nearestElementIndex);
+
+    //! a public method to pick points on clouds using OpenGL
+    void pickPointOpenGL(const PickingParameters &params, int &selectedID, int &subSelectedID, std::unordered_set<int> &selectedIDs);
 public slots:
 
 	//! Applies a 1:1 global zoom
@@ -866,31 +897,6 @@ protected: //other methods
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
-	//! Picking parameters
-	struct PickingParameters
-	{
-		//! Default constructor
-		PickingParameters(	PICKING_MODE _mode = NO_PICKING,
-							int _centerX = 0,
-							int _centerY = 0,
-							int _pickWidth = 5,
-							int _pickHeight = 5)
-			: mode(_mode)
-			, centerX(_centerX)
-			, centerY(_centerY)
-			, pickWidth(_pickWidth)
-			, pickHeight(_pickHeight)
-			, flags(0)
-		{}
-
-		PICKING_MODE mode;
-		int centerX;
-		int centerY;
-		int pickWidth;
-		int pickHeight;
-		unsigned short flags;
-	};
-
 	//! Starts picking process
 	/** OpenGL is used by default (unless ccGui::ParamStruct::useOpenGLPointPicking
 		is false in which case a CPU based approach will be used for point picking).
@@ -905,7 +911,7 @@ protected: //other methods
 	void startCPUBasedPointPicking(const PickingParameters& params);
 
 	//! Processes the picking process result and sends the corresponding signal
-	void processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::unordered_set<int>* selectedIDs = 0);
+    void processPickingResult(const PickingParameters& params, const int &selectedID, const int &subSelectedID, const std::unordered_set<int> * selectedIDs = 0);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context

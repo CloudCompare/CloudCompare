@@ -951,7 +951,7 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 		}
 
 		//barycentric coordinates
-		GLdouble detT =  (B2D.y-C2D.y) *   (A2D.x-C2D.x) + (C2D.x-B2D.x) *   (A2D.y-C2D.y);
+		GLdouble detT =  (B2D.y-C2D.y) *      (A2D.x-C2D.x) + (C2D.x-B2D.x) *      (A2D.y-C2D.y);
 		GLdouble l1   = ((B2D.y-C2D.y) * (clickPos.x-C2D.x) + (C2D.x-B2D.x) * (clickPos.y-C2D.y)) / detT;
 		GLdouble l2   = ((C2D.y-A2D.y) * (clickPos.x-C2D.x) + (A2D.x-C2D.x) * (clickPos.y-C2D.y)) / detT;
 

@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include <GL/glew.h>
+
 //CCLib
 #include <CCConst.h>
 #include <CCPlatform.h>
@@ -59,6 +61,7 @@
 #include <QTouchEvent>
 #include <QLayout>
 #include <QMessageBox>
+#include <QPushButton>
 
 #ifdef USE_VLD
 //VLD

@@ -93,6 +93,7 @@
 //dialogs
 #include "ccDisplayOptionsDlg.h"
 #include "ccGraphicalSegmentationTool.h"
+#include "ccTracePolylineTool.h"
 #include "ccGraphicalTransformationTool.h"
 #include "ccSectionExtractionTool.h"
 #include "ccClippingBoxTool.h"
@@ -199,6 +200,7 @@ MainWindow::MainWindow()
 	, m_pivotVisibilityPopupButton(0)
 	, m_cpeDlg(0)
 	, m_gsTool(0)
+    , m_tplTool(0)
 	, m_seTool(0)
 	, m_transTool(0)
 	, m_clipTool(0)
@@ -906,6 +908,8 @@ void MainWindow::connectActions()
 	connect(actionApplyScale,					SIGNAL(triggered()),	this,		SLOT(doActionApplyScale()));
 	connect(actionTranslateRotate,				SIGNAL(triggered()),	this,		SLOT(activateTranslateRotateMode()));
 	connect(actionSegment,						SIGNAL(triggered()),	this,		SLOT(activateSegmentationMode()));
+    connect(actionTracePolyline,                SIGNAL(triggered()),	this,		SLOT(activateTracePolylineMode()));
+
 	connect(actionCrop,							SIGNAL(triggered()),	this,		SLOT(doActionCrop()));
 	connect(actionEditGlobalShiftAndScale,		SIGNAL(triggered()),	this,		SLOT(doActionEditGlobalShiftAndScale()));
 	connect(actionSubsample,					SIGNAL(triggered()),	this,		SLOT(doActionSubsample()));
@@ -8291,7 +8295,48 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
-		win->redraw();
+        win->redraw();
+}
+
+void MainWindow::activateTracePolylineMode()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (!win)
+        return;
+
+    if (!m_tplTool)
+    {
+        m_tplTool = new ccTracePolylineTool(this);
+        connect(m_tplTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTracePolylineMode(bool)));
+        registerMDIDialog(m_tplTool,Qt::TopRightCorner);
+    }
+
+    m_tplTool->linkWith(win);
+
+    freezeUI(true);
+    toolBarView->setDisabled(false);
+
+    //we disable all other windows
+    disableAllBut(win);
+
+    if (!m_tplTool->start())
+        deactivateTracePolylineMode(false);
+    else
+        updateMDIDialogsPlacement();
+}
+
+void MainWindow::deactivateTracePolylineMode(bool)
+{
+    //we enable all GL windows
+    enableAll();
+
+    freezeUI(false);
+
+    updateUI();
+
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+        win->redraw();
 }
 
 void MainWindow::activatePointListPickingMode()

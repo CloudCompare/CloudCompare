@@ -28,7 +28,7 @@
 #include <set>
 
 //GUI
-#include <ui_tracePolyLineDlg.h>
+#include <ui_tracePolylineDlg.h>
 
 class ccPolyline;
 class ccPointCloud;

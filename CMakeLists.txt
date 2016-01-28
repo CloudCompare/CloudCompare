@@ -62,7 +62,7 @@ add_subdirectory( libs/CCFbo )
 add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependency)
 add_subdirectory( libs/qCC_io ) # must always be included after qCC_db (dependency)
 add_subdirectory( libs/qCC_glWindow ) # must always be included after qCC_db (dependency)
-
+add_subdirectory( libs/qcustomplot )
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
 #  Therefore the target folder is the same for Windows and Unix/Linux)

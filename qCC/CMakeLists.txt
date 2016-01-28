@@ -23,12 +23,8 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qxt )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-# QCustomPlot
-set( QCUSTOMPLOT_HEADERS ../libs/qcustomplot/qcustomplot.h )
-set( QCUSTOMPLOT_SOURCES ../libs/qcustomplot/qcustomplot.cpp )
-
-file( GLOB header_list *.h db_tree/*.h ${QXT_HEADERS} ${QCUSTOMPLOT_HEADERS} )
-file( GLOB source_list *.cpp db_tree/*.cpp ${QXT_SOURCES} ${QCUSTOMPLOT_SOURCES} )
+file( GLOB header_list *.h db_tree/*.h ${QXT_HEADERS} )
+file( GLOB source_list *.cpp db_tree/*.cpp ${QXT_SOURCES} )
 
 # 3DX support (3dConnexion devices)
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
@@ -66,6 +62,7 @@ target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
+target_link_libraries( ${PROJECT_NAME} qcustomplot )
 
 
 if ( USE_QT5 )

@@ -41,7 +41,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QProgressDialog.h>
+#include <QProgressDialog>
 
 //System
 #include <assert.h>

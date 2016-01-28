@@ -313,37 +313,28 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 #include <ScalarField.h>
 #endif
 
-bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
-									int& nearestPointIndex,
-									double& nearestSquareDist,
-									double pickWidth/*=2.0*/,
-									double pickHeight/*=2.0*/,
-									bool autoComputeOctree/*=false*/,
-									ccGenericGLDisplay* display/*=0*/)
+bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
+										const ccGLCameraParameters& camera,
+										int& nearestPointIndex,
+										double& nearestSquareDist,
+										double pickWidth/*=2.0*/,
+										double pickHeight/*=2.0*/,
+										bool autoComputeOctree/*=false*/)
 {
-	if (!display)
-	{
-		display = getDisplay();
-		if (!display)
-		{
-			ccLog::Warning("[ccGenericPointCloud::isClicked] No default display available, and no display provided");
-			return false;
-		}
-	}
-
-	const double* MM = display->getModelViewMatd();
-	const double* MP = display->getProjectionMatd();
-	int VP[4];
-	display->getViewportArray(VP);
-
 	//back project the clicked point in 3D so as to get the picking direction
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
 	CCVector3d X(0,0,0);
-	ccGL::Unproject<double, double>(clickPosd, MM, MP, VP, X);
+	if (!camera.unproject(clickPosd, X))
+	{
+		return false;
+	}
 
 	CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
 	CCVector3d Y(0,0,0);
-	ccGL::Unproject<double, double>(clickPosd2, MM, MP, VP, Y);
+	if (!camera.unproject(clickPosd2, Y))
+	{
+		return false;
+	}
 
 	CCVector3d dir = Y-X;
 	dir.normalize();
@@ -361,8 +352,7 @@ bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 	nearestPointIndex = -1;
 	nearestSquareDist = -1.0;
 
-	const ccViewportParameters& viewParams = display->getViewportParameters();
-	bool isFOV = viewParams.perspectiveView;
+	bool isFOV = camera.perspective;
 	double fovOrRadius = 0;
 	if (isFOV)
 	{
@@ -370,7 +360,7 @@ bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 	}
 	else
 	{
-		fovOrRadius = pickWidth * viewParams.pixelSize / 2;
+		fovOrRadius = pickWidth * camera.pixelSize / 2;
 	}
 
 	//can we use the octree to accelerate the point picking process?
@@ -379,7 +369,7 @@ bool ccGenericPointCloud::isClicked(const CCVector2d& clickPos,
 		ccOctree* octree = getOctree();
 		if (!octree && autoComputeOctree)
 		{
-			ccProgressDialog pDlg(false, display->asWidget());
+			ccProgressDialog pDlg(false, getDisplay() ? getDisplay()->asWidget() : 0);
 			octree = computeOctree(&pDlg);
 		}
 

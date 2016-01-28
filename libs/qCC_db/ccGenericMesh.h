@@ -25,6 +25,7 @@
 
 //Local
 #include "qCC_db.h"
+#include "ccGenericGLDisplay.h"
 #include "ccHObject.h"
 #include "ccAdvancedTypes.h"
 
@@ -183,11 +184,11 @@ public:
 	**/
 	void importParametersFrom(const ccGenericMesh* mesh);
 
-	//! Brute force ray-cast intersection
-	bool isClicked(	const CCVector2d& clickPos,
-					int& nearestTriIndex,
-					double& nearestSquareDist,
-					ccGenericGLDisplay* display = 0);
+	//! Brute force triangle picking
+	bool trianglePicking(	const CCVector2d& clickPos,
+							const ccGLCameraParameters& camera,
+							int& nearestTriIndex,
+							double& nearestSquareDist);
 
 protected:
 

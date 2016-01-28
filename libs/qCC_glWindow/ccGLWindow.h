@@ -165,7 +165,8 @@ public:
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
 	virtual unsigned getTextureID(const QImage& image);
 	virtual unsigned getTextureID( ccMaterial::CShared mtl);
-	virtual QWidget* asWidget() { return this; }
+	inline virtual QWidget* asWidget() { return this; }
+	inline virtual QSize getScreenSize() const { return size(); }
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -315,14 +316,8 @@ public:
 	**/
 	virtual const void setBaseViewMat(ccGLMatrixd& mat);
 
-	//! Returns the current (OpenGL) view matrix as a double array
-	/** Warning: different from 'view' matrix returned by getBaseViewMat.
-	**/
-	virtual const double* getModelViewMatd();
-	//! Returns the current (OpenGL) projection matrix as a double array
-	virtual const double* getProjectionMatd();
-	//! Returns the current viewport (OpenGL int[4] array)
-	virtual void getViewportArray(int vp[/*4*/]);
+	//! Returns the current OpenGL camera parameters
+	virtual void getGLCameraParameters(ccGLCameraParameters& params);
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -784,6 +779,15 @@ protected: //rendering
 	void drawForeground(CC_DRAW_CONTEXT& context, RenderingParams& params);
 
 protected: //other methods
+
+	//! Returns the current (OpenGL) view matrix as a double array
+	/** Warning: different from 'view' matrix returned by getBaseViewMat.
+	**/
+	virtual const double* getModelViewMatd();
+	//! Returns the current (OpenGL) projection matrix as a double array
+	virtual const double* getProjectionMatd();
+	//! Returns the current viewport (OpenGL int[4] array)
+	virtual void getViewportArray(int vp[/*4*/]);
 
 	//! Processes the clickable items
 	/** \return true if an item has been clicked

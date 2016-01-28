@@ -886,33 +886,21 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 	weights /= sum;
 }
 
-bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
-							  int& nearestTriIndex,
-							  double& nearestSquareDist,
-							  ccGenericGLDisplay* display/*=0*/)
+bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
+									const ccGLCameraParameters& camera,
+									int& nearestTriIndex,
+									double& nearestSquareDist)
 {
-	if (!display)
-	{
-		display = getDisplay();
-		if (!display)
-		{
-			ccLog::Warning("[ccGenericMesh::isClicked] No default display available, and no display provided");
-			return false;
-		}
-	}
-
-	const double* MM = display->getModelViewMatd();
-	const double* MP = display->getProjectionMatd();
-	int VP[4];
-	display->getViewportArray(VP);
-
 	ccGLMatrix trans;
 	bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 	//back project the clicked point in 3D
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
 	CCVector3d X(0,0,0);
-	ccGL::Unproject<double, double>(clickPosd, MM, MP, VP, X);
+	if (!camera.unproject(clickPosd, X))
+	{
+		return false;
+	}
 
 	nearestTriIndex = -1;
 	nearestSquareDist = -1.0;
@@ -933,9 +921,9 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 		CCVector3d A2D,B2D,C2D; 
 		if (noGLTrans)
 		{
-			ccGL::Project<PointCoordinateType, double>(*A3D,MM,MP,VP,A2D);
-			ccGL::Project<PointCoordinateType, double>(*B3D,MM,MP,VP,B2D);
-			ccGL::Project<PointCoordinateType, double>(*C3D,MM,MP,VP,C2D);
+			camera.project(*A3D, A2D);
+			camera.project(*B3D, B2D);
+			camera.project(*C3D, C2D);
 		}
 		else
 		{
@@ -945,9 +933,9 @@ bool ccGenericMesh::isClicked(const CCVector2d& clickPos,
 			trans.apply(A3Dp);
 			trans.apply(B3Dp);
 			trans.apply(C3Dp);
-			ccGL::Project<PointCoordinateType, double>(A3Dp,MM,MP,VP,A2D);
-			ccGL::Project<PointCoordinateType, double>(B3Dp,MM,MP,VP,B2D);
-			ccGL::Project<PointCoordinateType, double>(C3Dp,MM,MP,VP,C2D);
+			camera.project(A3Dp, A2D);
+			camera.project(B3Dp, B2D);
+			camera.project(C3Dp, C2D);
 		}
 
 		//barycentric coordinates

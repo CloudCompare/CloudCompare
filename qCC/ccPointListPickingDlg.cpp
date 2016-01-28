@@ -520,10 +520,9 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	if (display)
 	{
 		newLabel->setDisplay(display);
-		int vp[4];
-		display->getViewportArray(vp);
-		newLabel->setPosition(	static_cast<float>(x+20)/static_cast<float>(vp[2]-vp[0]),
-								static_cast<float>(y+20)/static_cast<float>(vp[3]-vp[1]) );
+		QSize size = display->getScreenSize();
+		newLabel->setPosition(	static_cast<float>(x+20) / size.width(),
+								static_cast<float>(y+20) / size.height() );
 	}
 
 	//add default container if necessary

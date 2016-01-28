@@ -6,6 +6,7 @@ v2.7.beta ??/??/201?
 	* Polyline tracing/picking tool:
 		- accessible via a dedicated icon in the main tool bar ('Trace a polyline by point picking')
 		- allows to pick points on all the visible clouds in the active 3D view to define one or more 3D polylines
+		- allows to generate a tight contour polyline by automatically picking several points between each vertex ('oversampling')
 
 	* 2.5D volume calculation tool:
 		- Tools > Volume > Compute 2.5D volume

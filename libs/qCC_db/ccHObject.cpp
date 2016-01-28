@@ -397,23 +397,27 @@ ccHObject* ccHObject::find(unsigned uniqueID)
 unsigned ccHObject::filterChildren(	Container& filteredChildren,
 									bool recursive/*=false*/,
 									CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
-									bool strict/*=false*/) const
+									bool strict/*=false*/,
+									ccGenericGLDisplay* inDisplay/*=0*/) const
 {
 	for (Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
 		if (	(!strict && (*it)->isKindOf(filter))
-			||	( strict && (*it)->isA(filter)) )
+			||	( strict && (*it)->isA(filter)))
 		{
-			//warning: we have to handle unicity as a sibling may be in the same container as its parent!
-			if (std::find(filteredChildren.begin(),filteredChildren.end(),*it) == filteredChildren.end()) //not yet in output vector?
+			if (!inDisplay || (*it)->getDisplay() == inDisplay)
 			{
-				filteredChildren.push_back(*it);
+				//warning: we have to handle unicity as a sibling may be in the same container as its parent!
+				if (std::find(filteredChildren.begin(), filteredChildren.end(), *it) == filteredChildren.end()) //not yet in output vector?
+				{
+					filteredChildren.push_back(*it);
+				}
 			}
 		}
 
 		if (recursive)
 		{
-			(*it)->filterChildren(filteredChildren, true, filter, strict);
+			(*it)->filterChildren(filteredChildren, true, filter, strict, inDisplay);
 		}
 	}
 
@@ -622,19 +626,17 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		ccGLMatrix trans;
 		getAbsoluteGLTransformation(trans);
 
-		const double* MM = context._win->getModelViewMatd(); //viewMat
-		const double* MP = context._win->getProjectionMatd(); //projMat
-		int VP[4];
-		context._win->getViewportArray(VP);
+		ccGLCameraParameters camera;
+		context._win->getGLCameraParameters(camera);
 
 		CCVector3 C = bBox.getCenter();
-		CCVector3d Q;
-		ccGL::Project<PointCoordinateType, double>(C,MM,MP,VP,Q);
+		CCVector3d Q2D;
+		camera.project(C, Q2D);
 
 		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
 		context._win->displayText(	getName(),
-									static_cast<int>(Q.x),
-									static_cast<int>(Q.y),
+									static_cast<int>(Q2D.x),
+									static_cast<int>(Q2D.y),
 									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
 									0.75f,
 									0,

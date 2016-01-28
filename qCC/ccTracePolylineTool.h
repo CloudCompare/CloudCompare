@@ -23,6 +23,7 @@
 
 //qCC_db
 #include <ccHObject.h>
+#include <ccGenericGLDisplay.h>
 
 //system
 #include <set>
@@ -70,8 +71,17 @@ protected slots:
 
 protected:
 
-	//! Oversamples a polyline
-	static ccPolyline* PolylineOverSampling(ccPolyline* polyline, ccPointCloud* vertices, unsigned steps);
+	//! Viewport parameters (used for picking)
+	struct SegmentGLParams
+	{
+		SegmentGLParams() {}
+		SegmentGLParams(ccGenericGLDisplay* display, int x , int y);
+		ccGLCameraParameters params;
+		CCVector2d clickPos;
+	};
+
+	//! Oversamples the active 3D polyline
+	ccPolyline* polylineOverSampling(unsigned steps) const;
 
     //! 2D polyline (for the currently edited part)
     ccPolyline* m_polyTip;
@@ -82,6 +92,9 @@ protected:
     ccPolyline* m_poly3D;
     //! 3D polyline vertices
     ccPointCloud* m_poly3DVertices;
+	
+	//! Viewport parameters use to draw each segment of the polyline
+	std::vector<SegmentGLParams> m_segmentParams;
 
     //! Current process state
     bool m_done;

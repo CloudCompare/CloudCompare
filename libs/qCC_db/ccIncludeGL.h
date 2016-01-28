@@ -189,15 +189,15 @@ public: //GLU equivalent methods
 	}
 
 	template <typename iType, typename oType>
-	static bool Project(const Vector3Tpl<iType>& input, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output)
+	static bool Project(const Vector3Tpl<iType>& input3D, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output2D)
 	{
 		//Modelview transform
 		Tuple4Tpl<oType> Pm;
 		{
-			Pm.x = static_cast<oType>(modelview[0]*input.x + modelview[4]*input.y + modelview[ 8]*input.z + modelview[12]);
-			Pm.y = static_cast<oType>(modelview[1]*input.x + modelview[5]*input.y + modelview[ 9]*input.z + modelview[13]);
-			Pm.z = static_cast<oType>(modelview[2]*input.x + modelview[6]*input.y + modelview[10]*input.z + modelview[14]);
-			Pm.w = static_cast<oType>(modelview[3]*input.x + modelview[7]*input.y + modelview[11]*input.z + modelview[15]);
+			Pm.x = static_cast<oType>(modelview[0]*input3D.x + modelview[4]*input3D.y + modelview[ 8]*input3D.z + modelview[12]);
+			Pm.y = static_cast<oType>(modelview[1]*input3D.x + modelview[5]*input3D.y + modelview[ 9]*input3D.z + modelview[13]);
+			Pm.z = static_cast<oType>(modelview[2]*input3D.x + modelview[6]*input3D.y + modelview[10]*input3D.z + modelview[14]);
+			Pm.w = static_cast<oType>(modelview[3]*input3D.x + modelview[7]*input3D.y + modelview[11]*input3D.z + modelview[15]);
 		};
 
 		//Projection transform
@@ -221,10 +221,10 @@ public: //GLU equivalent methods
 		Pp.z /= Pp.w;
 		//Window coordinates
 		//Map x, y to range 0-1
-		output.x = (1.0 + Pp.x) / 2 * viewport[2] + viewport[0];
-		output.y = (1.0 + Pp.y) / 2 * viewport[3] + viewport[1];
+		output2D.x = (1.0 + Pp.x) / 2 * viewport[2] + viewport[0];
+		output2D.y = (1.0 + Pp.y) / 2 * viewport[3] + viewport[1];
 		//This is only correct when glDepthRange(0.0, 1.0)
-		output.z = (1.0 + Pp.z) / 2;	//Between 0 and 1
+		output2D.z = (1.0 + Pp.z) / 2;	//Between 0 and 1
 
 		return true;
 	}
@@ -407,40 +407,38 @@ public: //GLU equivalent methods
 	}
 
 	template <typename iType, typename oType>
-	static bool Unproject(const Vector3Tpl<iType>& input, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output)
-	 {
-		 //compute projection x modelview
-		 ccGLMatrixTpl<oType> A = ccGLMatrixTpl<oType>(projection) * ccGLMatrixTpl<oType>(modelview);
-		 ccGLMatrixTpl<oType> m;
+	static bool Unproject(const Vector3Tpl<iType>& input2D, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output3D)
+	{
+		//compute projection x modelview
+		ccGLMatrixTpl<oType> A = ccGLMatrixTpl<oType>(projection) * ccGLMatrixTpl<oType>(modelview);
+		ccGLMatrixTpl<oType> m;
 
-		 if (!InvertMatrix(A.data(), m.data()))
-		 {
-			 return false;
-		 }
+		if (!InvertMatrix(A.data(), m.data()))
+		{
+			return false;
+		}
 
-		 ccGLMatrixTpl<oType> mA = m * A;
+		ccGLMatrixTpl<oType> mA = m * A;
 
-		 //Transformation of normalized coordinates between -1 and 1
-		 Tuple4Tpl<oType> in;
-		 in.x = static_cast<oType>((input.x - static_cast<iType>(viewport[0])) / viewport[2] * 2 - 1);
-		 in.y = static_cast<oType>((input.y - static_cast<iType>(viewport[1])) / viewport[3] * 2 - 1);
-		 in.z = static_cast<oType>(2*input.z - 1);
-		 in.w = 1;
-		 
-		 //Objects coordinates
-		 Tuple4Tpl<oType> out = m * in;
-		 if (out.w == 0)
-		 {
-			 assert(false);
-			 return false;
-		 }
+		//Transformation of normalized coordinates between -1 and 1
+		Tuple4Tpl<oType> in;
+		in.x = static_cast<oType>((input2D.x - static_cast<iType>(viewport[0])) / viewport[2] * 2 - 1);
+		in.y = static_cast<oType>((input2D.y - static_cast<iType>(viewport[1])) / viewport[3] * 2 - 1);
+		in.z = static_cast<oType>(2*input2D.z - 1);
+		in.w = 1;
 
-		 output.x = out.x / out.w;
-		 output.y = out.y / out.w;
-		 output.z = out.z / out.w;
-	
-		 return true;
-	 }
+		//Objects coordinates
+		Tuple4Tpl<oType> out = m * in;
+		if (out.w == 0)
+		{
+			assert(false);
+			return false;
+		}
+
+		output3D = Vector3Tpl<oType>(out.u) / out.w;
+
+		return true;
+	}
 
 	static void PickMatrix(double x, double y, double width, double height, int viewport[4], double m[16])
 	{

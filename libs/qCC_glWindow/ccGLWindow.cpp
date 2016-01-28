@@ -2881,6 +2881,31 @@ const void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 }
 
+void ccGLWindow::getGLCameraParameters(ccGLCameraParameters& params)
+{
+	//get/compute the modelview matrix
+	{
+		if (!m_validModelviewMatrix)
+			updateModelViewMatrix();
+
+		params.modelViewMat = m_viewMatd;
+	}
+
+	//get/compute the projection matrix
+	{
+		if (!m_validProjectionMatrix)
+			updateProjectionMatrix();
+
+		params.projectionMat = m_projMatd;
+	}
+
+	getViewportArray(params.viewport);
+
+	params.perspective = m_viewportParams.perspectiveView;
+	params.fov_deg = m_viewportParams.fov;
+	params.pixelSize = m_viewportParams.pixelSize;
+}
+
 const double* ccGLWindow::getModelViewMatd()
 {
 	if (!m_validModelviewMatrix)
@@ -3124,36 +3149,32 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	double xc = static_cast<double>(width()/2);
 	double yc = static_cast<double>(height()/2);
 
-	CCVector3d Q;
+	CCVector3d Q2D;
 	if (m_viewportParams.objectCenteredView)
 	{
 		//project the current pivot point on screen
-		int VP[4];
-		getViewportArray(VP);
-		
-		ccGL::Project<double, double>(	m_viewportParams.pivotPoint,
-										getModelViewMatd(),
-										getProjectionMatd(),
-										VP,
-										Q);
+		ccGLCameraParameters camera;
+		getGLCameraParameters(camera);
+
+		camera.project(m_viewportParams.pivotPoint, Q2D);
 
 		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
-		Q.x = std::min<GLdouble>(Q.x,3*width()/4);
-		Q.x = std::max<GLdouble>(Q.x,  width()/4);
+		Q2D.x = std::min<GLdouble>(Q2D.x,3*width()/4);
+		Q2D.x = std::max<GLdouble>(Q2D.x,  width()/4);
 
-		Q.y = std::min<GLdouble>(Q.y,3*height()/4);
-		Q.y = std::max<GLdouble>(Q.y,  height()/4);
+		Q2D.y = std::min<GLdouble>(Q2D.y,3*height()/4);
+		Q2D.y = std::max<GLdouble>(Q2D.y,  height()/4);
 	}
 	else
 	{
-		Q.x = static_cast<GLdouble>(xc);
-		Q.y = static_cast<GLdouble>(yc);
+		Q2D.x = static_cast<GLdouble>(xc);
+		Q2D.y = static_cast<GLdouble>(yc);
 	}
 
 	//invert y
 	y = height()-1 - y;
 
-	CCVector3d v(x - Q.x, y - Q.y, 0);
+	CCVector3d v(x - Q2D.x, y - Q2D.y, 0);
 
 	v.x = std::max<double>(std::min<double>(v.x/xc,1),-1);
 	v.y = std::max<double>(std::min<double>(v.y/yc,1),-1);
@@ -4111,9 +4132,13 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	
 	int nearestEntityID = -1;
 	int nearestElementIndex = -1;
+	double nearestElementSquareDist = -1.0;
 
 	bool autoComputeOctree = false;
 	bool firstCloudWithoutOctree = true;
+
+	ccGLCameraParameters camera;
+	getGLCameraParameters(camera);
 
 	try
 	{
@@ -4122,8 +4147,6 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 			toProcess.push_back(m_globalDBRoot);
 		if (m_winDBRoot)
 			toProcess.push_back(m_winDBRoot);
-
-		double nearestElementSquareDist = -1.0;
 
 		while (!toProcess.empty())
 		{
@@ -4203,19 +4226,20 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestPointIndex = -1;
 					double nearestSquareDist = 0;
-					if (cloud->isClicked(	clickedPos,
+
+					if (cloud->pointPicking(clickedPos,
+											camera,
 											nearestPointIndex,
 											nearestSquareDist,
 											params.pickWidth,
 											params.pickHeight,
-											autoComputeOctree,
-											this
+											autoComputeOctree
 											) )
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
 							nearestElementSquareDist = nearestSquareDist;
-							nearestElementIndex = static_cast<int>(nearestPointIndex);
+							nearestElementIndex = nearestPointIndex;
 							nearestEntityID = static_cast<int>(cloud->getUniqueID());
 						}
 					}
@@ -4228,15 +4252,15 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0;
-					if (mesh->isClicked(clickedPos,
-										nearestTriIndex,
-										nearestSquareDist,
-										this) )
+					if (mesh->trianglePicking(	clickedPos,
+												camera,
+												nearestTriIndex,
+												nearestSquareDist) )
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
 							nearestElementSquareDist = nearestSquareDist;
-							nearestElementIndex = static_cast<int>(nearestTriIndex);
+							nearestElementIndex = nearestTriIndex;
 							nearestEntityID = static_cast<int>(mesh->getUniqueID());
 						}
 					}
@@ -5524,18 +5548,15 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 													const CCVector3& C3D )
 {
 	//viewing parameters
-	const double* MM = getModelViewMatd(); //viewMat
-	const double* MP = getProjectionMatd(); //projMat
-
-	int VP[4];
-	getViewportArray(VP);
+	ccGLCameraParameters camera;
+	getGLCameraParameters(camera);
 
 	CCVector3d A2D;
-	ccGL::Project<PointCoordinateType, double>(A3D,MM,MP,VP,A2D);
 	CCVector3d B2D;
-	ccGL::Project<PointCoordinateType, double>(B3D,MM,MP,VP,B2D);
 	CCVector3d C2D;
-	ccGL::Project<PointCoordinateType, double>(C3D,MM,MP,VP,C2D);
+	camera.project(A3D, A2D);
+	camera.project(B3D, B2D);
+	camera.project(C3D, C2D);
 
 	//barycentric coordinates
 	GLdouble P2Dx = P2D.x;

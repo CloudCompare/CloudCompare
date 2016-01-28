@@ -41,11 +41,21 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QProgressDialog.h>
 
 //System
 #include <assert.h>
 
 #include <iostream>
+
+ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* display, int x , int y)
+{
+	if (display)
+	{
+		display->getGLCameraParameters(params);
+		clickPos = CCVector2d(x, params.viewport[3]-1 - y);
+	}
+}
 
 ccTracePolylineTool::ccTracePolylineTool(QWidget* parent)
     : ccOverlayDialog(parent)
@@ -122,9 +132,9 @@ void ccTracePolylineTool::onShortcutTriggered(int key)
     }
 }
 
-ccPolyline* ccTracePolylineTool::PolylineOverSampling(ccPolyline* polyline, ccPointCloud* vertices, unsigned steps)
+ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 {
-	if (!polyline || !vertices)
+	if (!m_poly3D || !m_poly3DVertices || m_segmentParams.size() != m_poly3DVertices->size())
 	{
 		assert(false);
 		return 0;
@@ -136,9 +146,16 @@ ccPolyline* ccTracePolylineTool::PolylineOverSampling(ccPolyline* polyline, ccPo
         return 0;
 	}
 
-    unsigned n_verts = vertices->size();
-	unsigned n_segments = polyline->size() - (polyline->isClosed() ? 0 : 1);
-    unsigned end_size = n_segments * steps + (polyline->isClosed() ? 0 : 1);
+	ccHObject::Container clouds;
+	if (m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin) == 0)
+	{
+		//no cloud is currently displayed?!
+		return 0;
+	}
+
+    unsigned n_verts = m_poly3DVertices->size();
+	unsigned n_segments = m_poly3D->size() - (m_poly3D->isClosed() ? 0 : 1);
+    unsigned end_size = n_segments * steps + (m_poly3D->isClosed() ? 0 : 1);
 
 	ccPointCloud* newVertices = new ccPointCloud();
 	ccPolyline* newPoly = new ccPolyline(newVertices);
@@ -151,37 +168,75 @@ ccPolyline* ccTracePolylineTool::PolylineOverSampling(ccPolyline* polyline, ccPo
 		delete newPoly;
 		return 0;
 	}
-	newVertices->importParametersFrom(vertices);
-	newVertices->setName(vertices->getName());
-	newPoly->importParametersFrom(*polyline);
-	newPoly->setDisplay_recursive(polyline->getDisplay());
+	newVertices->importParametersFrom(m_poly3DVertices);
+	newVertices->setName(m_poly3DVertices->getName());
+	newVertices->setEnabled(m_poly3DVertices->isEnabled());
+	newPoly->importParametersFrom(*m_poly3D);
+	newPoly->setDisplay_recursive(m_poly3D->getDisplay());
 
+	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin);
+	pDlg.show();
+	QCoreApplication::processEvents();
 
 	for (unsigned i = 0; i < n_segments; ++i)
 	{
-        const CCVector3* p1 = vertices->getPoint(i);
+        const CCVector3* p1 = m_poly3DVertices->getPoint(i);
         newVertices->addPoint(*p1);
 
-        const CCVector3* p2 = vertices->getPoint((i + 1) % n_verts); // the next point in polyline
-        CCVector3 v = *p2 - *p1;
+		unsigned i2 = (i + 1) % n_verts;
+		CCVector2d v = m_segmentParams[i2].clickPos - m_segmentParams[i].clickPos;
         v /= steps;
 
         for (unsigned j = 1; j < steps; j++)
 		{
-            CCVector3 newPoint = *p1 + j*v;
-			
-			//FIXME: find the nearest point in the cloud?
+            CCVector2d vj = m_segmentParams[i].clickPos + v * j;
 
-            newVertices->addPoint(newPoint);
+			const CCVector3* nearestPoint = 0;
+			double nearestElementSquareDist = -1.0;
+
+			//for each cloud
+			for (size_t c = 0; c < clouds.size(); ++c)
+			{
+				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[c]);
+				int nearestPointIndex = -1;
+				double nearestSquareDist = 0;
+				if (cloud->pointPicking(vj,
+										m_segmentParams[i2].params,
+										nearestPointIndex,
+										nearestSquareDist,
+										snapSizeSpinBox->value(),
+										snapSizeSpinBox->value(),
+										true))
+				{
+					if (!nearestPoint || nearestSquareDist < nearestElementSquareDist)
+					{
+						nearestElementSquareDist = nearestSquareDist;
+						nearestPoint = cloud->getPoint(nearestPointIndex);
+					}
+				}
+			}
+
+			if (nearestPoint)
+			{
+				newVertices->addPoint(*nearestPoint);
+			}
+
+			if (pDlg.wasCanceled())
+			{
+				steps = 0; //quick finish ;)
+				break;
+			}
+			pDlg.setValue(pDlg.value()+1);
         }
     }
 
 	//add last point
-	if (!polyline->isClosed())
+	if (!m_poly3D->isClosed())
 	{
-		newVertices->addPoint(*vertices->getPoint(n_verts - 1));
+		newVertices->addPoint(*m_poly3DVertices->getPoint(n_verts - 1));
 	}
 	
+	newVertices->shrinkToFit();
 	newPoly->addPointIndex(0, newVertices->size());
 
 	return newPoly;
@@ -316,10 +371,11 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 	{
 		const CCVector3* P3D = m_poly3DVertices->getPoint(m_poly3DVertices->size()-1);
 
-		int VP[4];
-		m_associatedWin->getViewportArray(VP);
+		ccGLCameraParameters camera;
+		m_associatedWin->getGLCameraParameters(camera);
+
 		CCVector3d A2D;
-		ccGL::Project<PointCoordinateType, double>(*P3D, m_associatedWin->getModelViewMatd(), m_associatedWin->getProjectionMatd(), VP, A2D);
+		camera.project(*P3D, A2D);
 
 		CCVector3* firstP = const_cast<CCVector3*>(m_polyTipVertices->getPointPersistentPtr(0));
 		*firstP = CCVector3(static_cast<PointCoordinateType>(A2D.x - m_associatedWin->width() / 2),
@@ -361,6 +417,8 @@ void ccTracePolylineTool::handlePickedItem(int entityID, unsigned itemIdx, int x
 		m_poly3D->addChild(m_poly3DVertices);
 		m_poly3D->setWidth(widthSpinBox->value());
 
+		m_segmentParams.clear(); //just in case
+
 		m_associatedWin->addToOwnDB(m_poly3D);
 	}
 
@@ -372,10 +430,21 @@ void ccTracePolylineTool::handlePickedItem(int entityID, unsigned itemIdx, int x
 		return;
 	}
 
+	try
+	{
+		m_segmentParams.reserve(m_segmentParams.size()+1);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("Not enough memory");
+		return;
+	}
+
 	const CCVector3* P = ccHObjectCaster::ToPointCloud(object)->getPoint(itemIdx);
 
 	m_poly3DVertices->addPoint(*P);
 	m_poly3D->addPointIndex(m_poly3DVertices->size()-1);
+	m_segmentParams.push_back(SegmentGLParams(m_associatedWin, x, y));
 
     //we replace the first point of the tip by this new point
 	{
@@ -441,6 +510,7 @@ void ccTracePolylineTool::resetLine()
 		}
 
 		delete m_poly3D;
+		m_segmentParams.clear();
 		//delete m_poly3DVertices;
 		m_poly3D = 0;
 		m_poly3DVertices = 0;
@@ -473,10 +543,11 @@ void ccTracePolylineTool::exportLine()
 	unsigned overSampling = static_cast<unsigned>(oversampleSpinBox->value());
 	if (overSampling > 1)
 	{
-		ccPolyline* poly = PolylineOverSampling(m_poly3D, m_poly3DVertices, overSampling);
+		ccPolyline* poly = polylineOverSampling(overSampling);
 		if (poly)
 		{
 			delete m_poly3D;
+			m_segmentParams.clear();
 			m_poly3DVertices = 0;
 			m_poly3D = poly;
 		}
@@ -486,6 +557,7 @@ void ccTracePolylineTool::exportLine()
 	MainWindow::TheInstance()->db()->addElement(m_poly3D, true);
 
 	m_poly3D = 0;
+	m_segmentParams.clear();
 	m_poly3DVertices = 0;
 
 	resetLine(); //to update the GUI

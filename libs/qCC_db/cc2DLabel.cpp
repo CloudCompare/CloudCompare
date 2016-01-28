@@ -789,17 +789,13 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
 
-				//we can't use the context '_win' information (getViewport, getModelViewMatd, etc. )
+				//we can't use the context 'ccGLCameraParameters' (viewport, modelView matrix, etc. )
 				//because it doesn't take the temporary 'GL transformation' into account!
-				//int VP[4];
-				//context._win->getViewportArray(VP2);
-				//const double* MM = context._win->getModelViewMatd(); //viewMat
-				//const double* MP = context._win->getProjectionMatd(); //projMat
-				GLint VP[4];
-				GLdouble MM[16], MP[16];
-				glGetIntegerv(GL_VIEWPORT, VP);
-				glGetDoublev(GL_PROJECTION_MATRIX, MP);
-				glGetDoublev(GL_MODELVIEW_MATRIX, MM);
+				ccGLCameraParameters camera;
+				//context._win->getGLCameraParameters(camera);
+				glGetIntegerv(GL_VIEWPORT, camera.viewport);
+				glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+				glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 				//draw their name
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
@@ -816,12 +812,12 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 						title = QString("P#%0").arg(m_points[j].index); 
 
 					//project it in 2D screen coordinates
-					CCVector3d Q;
-					ccGL::Project<PointCoordinateType, double>(*P,MM,MP,VP,Q);
+					CCVector3d Q2D;
+					camera.project(*P, Q2D);
 
 					context._win->displayText(	title,
-												static_cast<int>(Q.x) + context.labelMarkerTextShift_pix,
-												static_cast<int>(Q.y) + context.labelMarkerTextShift_pix,
+												static_cast<int>(Q2D.x) + context.labelMarkerTextShift_pix,
+												static_cast<int>(Q2D.y) + context.labelMarkerTextShift_pix,
 												ccGenericGLDisplay::ALIGN_DEFAULT,
 												context.labelOpacity / 100.0f,
 												ccColor::white.rgba,
@@ -964,14 +960,13 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 		//project it in 2D screen coordinates
 		{
-			int VP[4];
-			context._win->getViewportArray(VP);
-			const double* MM = context._win->getModelViewMatd(); //viewMat
-			const double* MP = context._win->getProjectionMatd(); //projMat
-			CCVector3d Q;
-			ccGL::Project<PointCoordinateType, double>(arrowDest, MM, MP, VP, Q);
-			arrowDestX = Q.x;
-			arrowDestY = Q.y;
+			ccGLCameraParameters camera;
+			context._win->getGLCameraParameters(camera);
+
+			CCVector3d Q2D;
+			camera.project(arrowDest, Q2D);
+			arrowDestX = Q2D.x;
+			arrowDestY = Q2D.y;
 		}
 
 		/*** label border ***/

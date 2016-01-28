@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>402</width>
+    <width>406</width>
     <height>26</height>
    </rect>
   </property>
@@ -78,7 +78,7 @@
       <number>1</number>
      </property>
      <property name="maximum">
-      <number>10</number>
+      <number>100</number>
      </property>
     </widget>
    </item>
@@ -106,6 +106,9 @@
     <widget class="QSpinBox" name="oversampleSpinBox">
      <property name="minimum">
       <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>100</number>
      </property>
     </widget>
    </item>

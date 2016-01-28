@@ -25,6 +25,7 @@
 
 //Local
 #include "qCC_db.h"
+#include "ccGenericGLDisplay.h"
 #include "ccShiftedObject.h"
 #include "ccGLMatrix.h"
 #include "ccAdvancedTypes.h"
@@ -236,14 +237,16 @@ public:
 	**/
 	void importParametersFrom(const ccGenericPointCloud* cloud);
 
-	//! Brute force ray-cast intersection
-	bool isClicked(	const CCVector2d& clickPos,
-					int& nearestPointIndex,
-					double& nearestSquareDist,
-					double pickWidth = 2.0,
-					double pickHeight = 2.0,
-					bool autoComputeOctree = false,
-					ccGenericGLDisplay* display = 0);
+	//! Point picking (brute force or octree-driven)
+	/** \warning the octree-driven method only works if pickWidth == pickHeight
+	**/
+	bool pointPicking(	const CCVector2d& clickPos,
+						const ccGLCameraParameters& camera,
+						int& nearestPointIndex,
+						double& nearestSquareDist,
+						double pickWidth = 2.0,
+						double pickHeight = 2.0,
+						bool autoComputeOctree = false);
 
 protected:
 

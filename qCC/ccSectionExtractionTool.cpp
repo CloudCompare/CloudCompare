@@ -564,12 +564,10 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	if (inputPoly->is2DMode())
 	{
 		//viewing parameters (for conversion from 2D to 3D)
-		const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
-		const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-		const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
-		const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
-		int VP[4];
-		m_associatedWin->getViewportArray(VP);
+		ccGLCameraParameters camera;
+		m_associatedWin->getGLCameraParameters(camera);
+		const double half_w = camera.viewport[2] / 2.0;
+		const double half_h = camera.viewport[3] / 2.0;
 
 		//working dimension
 		int vertDim = vertAxisComboBox->currentIndex();
@@ -592,9 +590,9 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 			{
 				CCVector3& P = const_cast<CCVector3&>(*duplicateVertices->getPoint(i));
 				CCVector3d Pd(half_w + P.x, half_h + P.y, 0/*P.z*/);
-				CCVector3d Q;
-				ccGL::Unproject<double, double>(Pd, MM, MP, VP, Q);
-				P = CCVector3::fromArray(Q.u);
+				CCVector3d Q3D;
+				camera.unproject(Pd, Q3D);
+				P = CCVector3::fromArray(Q3D.u);
 				P.u[vertDim] = defaultZ;
 			}
 

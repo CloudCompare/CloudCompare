@@ -626,13 +626,10 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	}
 
 	//viewing parameters
-	const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
-	const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-	const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
-	const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
-
-	int VP[4];
-	m_associatedWin->getViewportArray(VP);
+	ccGLCameraParameters camera;
+	m_associatedWin->getGLCameraParameters(camera);
+	const double half_w = camera.viewport[2] / 2.0;
+	const double half_h = camera.viewport[3] / 2.0;
 
 	//for each selected entity
 	for (QSet<ccHObject*>::const_iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
@@ -653,14 +650,14 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 		{
 			if (visibilityArray->getValue(i) == POINT_VISIBLE)
 			{
-				CCVector3 P;
-				cloud->getPoint(i,P);
+				const CCVector3* P3D = cloud->getPoint(i);
 
-				CCVector3d Qd;
-				ccGL::Project<PointCoordinateType, double>(P, MM, MP, VP, Qd);
+				CCVector3d Q2D;
+				camera.project(*P3D, Q2D);
 
-				CCVector2 P2D(	static_cast<PointCoordinateType>(Qd.x-half_w),
-								static_cast<PointCoordinateType>(Qd.y-half_h) );
+				CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x-half_w),
+								static_cast<PointCoordinateType>(Q2D.y-half_h) );
+				
 				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 
 				visibilityArray->setValue(i, keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE );
@@ -796,12 +793,10 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			bool mode3D = !poly->is2DMode();
 
 			//viewing parameters (for conversion from 3D to 2D)
-			const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
-			const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-			const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
-			const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
-			int VP[4];
-			m_associatedWin->getViewportArray(VP);
+			ccGLCameraParameters camera;
+			m_associatedWin->getGLCameraParameters(camera);
+			const double half_w = camera.viewport[2] / 2.0;
+			const double half_h = camera.viewport[3] / 2.0;
 
 			//force polygonal selection mode
 			doSetPolylineSelection();
@@ -818,17 +813,19 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 					CCVector3 P = *vertices->getPoint(i);
 					if (mode3D)
 					{
-						CCVector3d Q;
-						ccGL::Project<PointCoordinateType, double>(P, MM, MP, VP, Q);
+						CCVector3d Q2D;
+						camera.project(P, Q2D);
 
-						P.x = static_cast<PointCoordinateType>(Q.x-half_w);
-						P.y = static_cast<PointCoordinateType>(Q.y-half_h);
+						P.x = static_cast<PointCoordinateType>(Q2D.x-half_w);
+						P.y = static_cast<PointCoordinateType>(Q2D.y-half_h);
 						P.z = 0;
 					}
 					m_polyVertices->addPoint(P);
 				}
 				for (unsigned j=0; j<poly->size(); ++j)
+				{
 					m_segmentationPoly->addPointIndex(poly->getPointGlobalIndex(j));
+				}
 				
 				m_segmentationPoly->setClosed(poly->isClosed());
 				if (m_segmentationPoly->isClosed())
@@ -885,12 +882,10 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 		if (!mode2D)
 		{
 			//get current display parameters
-			const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
-			const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-			const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
-			const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
-			int VP[4];
-			m_associatedWin->getViewportArray(VP);
+			ccGLCameraParameters camera;
+			m_associatedWin->getGLCameraParameters(camera);
+			const double half_w = camera.viewport[2] / 2.0;
+			const double half_h = camera.viewport[3] / 2.0;
 
 			//project the 2D polyline in 3D
 			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
@@ -900,10 +895,10 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 				for (unsigned i=0; i<vertices->size(); ++i)
 				{
 					CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
-					CCVector3d Pd(half_w+Pscreen->x, half_h+Pscreen->y, 0/*Pscreen->z*/);
-					CCVector3d Q;
-					ccGL::Unproject<double, double>(Pd, MM, MP, VP, Q);
-					*Pscreen = CCVector3::fromArray(Q.u);
+					CCVector3d Pd(half_w + Pscreen->x, half_h + Pscreen->y, 0/*Pscreen->z*/);
+					CCVector3d Q3D;
+					camera.unproject(Pd, Q3D);
+					*Pscreen = CCVector3::fromArray(Q3D.u);
 				}
 				verticesPC->invalidateBoundingBox();
 			}

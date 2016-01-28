@@ -30,6 +30,7 @@
 #include <ScalarFieldTools.h>
 #include <Neighbourhood.h>
 #include <CCMiscTools.h>
+#include <RayAndBox.h>
 
 ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
 	: QSpinBox(parent)
@@ -544,6 +545,189 @@ bool ccOctree::intersectWithFrustrum(ccCameraSensor* sensor, std::vector<unsigne
 	{
 		if (sensor->isGlobalCoordInFrustrum(pointsToTest[i].second/*, false*/))
 			inCameraFrustrum.push_back(pointsToTest[i].first);
+	}
+
+	return true;
+}
+
+bool ccOctree::pointPicking(const CCVector2d& clickPos,
+							const ccGLCameraParameters& camera,
+							PointDescriptor& output,
+							double pickWidth_pix/*=3.0*/) const
+{
+	output.point = 0;
+	output.squareDistd = -1.0;
+
+	if (!m_theAssociatedCloudAsGPC)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_thePointsAndTheirCellCodes.empty())
+	{
+		//nothing to do
+		assert(false);
+		return false;
+	}
+	
+	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
+	CCVector3d X(0,0,0);
+	if (!camera.unproject(clickPosd, X))
+	{
+		return false;
+	}
+
+	//compute 3D picking 'ray'
+	CCVector3 rayAxis, rayOrigin;
+	{
+		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
+		CCVector3d Y(0,0,0);
+		if (!camera.unproject(clickPosd2, Y))
+		{
+			return false;
+		}
+
+		CCVector3d dir = Y-X;
+		dir.normalize();
+		rayAxis = CCVector3::fromArray(dir.u);
+		rayOrigin = CCVector3::fromArray(X.u);
+
+		ccGLMatrix trans;
+		if (m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans))
+		{
+			trans.invert();
+			trans.applyRotation(rayAxis);
+			trans.apply(rayOrigin);
+		}
+	}
+
+	CCVector3 margin(0, 0, 0);
+	double maxSqRadius = 0;
+	double maxFOV_rad = 0;
+	if (camera.perspective)
+	{
+		maxFOV_rad = 0.002 * pickWidth_pix; //empirical conversion from pixels to FOV angle (in radians)
+	}
+	else
+	{
+		double maxRadius = pickWidth_pix * camera.pixelSize / 2;
+		margin = CCVector3(1, 1, 1) * static_cast<PointCoordinateType>(maxRadius);
+		maxSqRadius = maxRadius*maxRadius;
+	}
+
+	//first test with the total bounding box
+	Ray<PointCoordinateType> ray(rayAxis, rayOrigin);
+	if (!AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
+	{
+		//no intersection
+		return false;
+	}
+
+	//no need to go too deep
+	const unsigned char maxLevel = findBestLevelForAGivenPopulationPerCell(10);
+
+	//starting level of subdivision
+	unsigned char level = 1;
+	//binary shift for cell code truncation at current level
+	unsigned char currentBitDec = GET_BIT_SHIFT(level);
+	//current cell code
+	OctreeCellCodeType currentCode = INVALID_CELL_CODE;
+	//whether the current cell should be skipped or not
+	bool skipThisCell = false;
+
+#ifdef _DEBUG
+	m_theAssociatedCloud->enableScalarField();
+#endif
+
+	//ray with origin expressed in the local coordinate system!
+	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
+
+	//let's sweep through the octree
+	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
+	{
+		OctreeCellCodeType truncatedCode = (it->theCode >> currentBitDec);
+		
+		//new cell?
+		if (truncatedCode != (currentCode >> currentBitDec))
+		{
+			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
+			while (level > 1)
+			{
+				unsigned char bitDec = GET_BIT_SHIFT(level-1);
+				if ((it->theCode >> bitDec) == (currentCode >> bitDec))
+				{
+					//same parent cell, we can stop here
+					break;
+				}
+				--level;
+			}
+
+			currentCode = it->theCode;
+
+			//now try to go deeper with the new cell
+			while (level < maxLevel)
+			{
+				Tuple3i cellPos;
+				getCellPos(it->theCode, level, cellPos, false);
+
+				//first test with the total bounding box
+				const PointCoordinateType& halfCellSize = getCellSize(level) / 2;
+				CCVector3 cellCenter(	(2* cellPos.x + 1) * halfCellSize,
+										(2* cellPos.y + 1) * halfCellSize,
+										(2* cellPos.z + 1) * halfCellSize);
+
+				CCVector3 halfCell = CCVector3(halfCellSize, halfCellSize, halfCellSize);
+
+				if (camera.perspective)
+				{
+					double radialSqDist, sqDistToOrigin;
+					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
+
+					double dx = sqrt(sqDistToOrigin);
+					double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
+					double fov_rad = atan2(dy, dx);
+
+					skipThisCell = (fov_rad > maxFOV_rad);
+				}
+				else
+				{
+					skipThisCell = !AABB<PointCoordinateType>(	cellCenter - halfCell - margin,
+																cellCenter + halfCell + margin).intersects(rayLocal);
+				}
+
+				if (skipThisCell)
+					break;
+				else
+					++level;
+			}
+			currentBitDec = GET_BIT_SHIFT(level);
+		}
+
+#ifdef _DEBUG
+		m_theAssociatedCloud->setPointScalarValue(it->theIndex, level);
+#endif
+
+		if (!skipThisCell)
+		{
+			//test the point
+			const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
+
+			CCVector3d Q2D;
+			camera.project(*P, Q2D);
+
+			if (	fabs(Q2D.x - clickPos.x) <= pickWidth_pix
+				&&	fabs(Q2D.y - clickPos.y) <= pickWidth_pix )
+			{
+				double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
+				if (!output.point || squareDist < output.squareDistd)
+				{
+					output.point = P;
+					output.pointIndex = it->theIndex;
+					output.squareDistd = squareDist;
+				}
+			}
+		}
 	}
 
 	return true;

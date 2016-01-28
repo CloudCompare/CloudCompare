@@ -4126,7 +4126,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 {
-	//qint64 t0 = m_timer.elapsed();
+	qint64 t0 = m_timer.elapsed();
 
 	CCVector2d clickedPos(params.centerX, height()-1 - params.centerY);
 	
@@ -4209,7 +4209,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 								{
 									autoComputeOctree = false;
 									ccGui::ParamStruct params = ccGui::Parameters();
-									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
+									params.autoComputeOctree = ccGui::ParamStruct::NEVER;
 									ccGui::Set(params);
 									params.toPersistentSettings();
 								}
@@ -4289,8 +4289,8 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 		ccLog::Warning("[Picking][CPU] Not enough memory!");
 	}
 
-	//qint64 dt = m_timer.elapsed() - t0;
-	//ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
+	qint64 dt = m_timer.elapsed() - t0;
+	ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
 
 	//we must always emit a signal!
 	processPickingResult(params, nearestEntityID, nearestElementIndex);

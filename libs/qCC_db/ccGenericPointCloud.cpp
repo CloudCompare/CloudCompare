@@ -321,48 +321,6 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 										double pickHeight/*=2.0*/,
 										bool autoComputeOctree/*=false*/)
 {
-	//back project the clicked point in 3D so as to get the picking direction
-	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
-	CCVector3d X(0,0,0);
-	if (!camera.unproject(clickPosd, X))
-	{
-		return false;
-	}
-
-	CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
-	CCVector3d Y(0,0,0);
-	if (!camera.unproject(clickPosd2, Y))
-	{
-		return false;
-	}
-
-	CCVector3d dir = Y-X;
-	dir.normalize();
-	CCVector3 udir = CCVector3::fromArray(dir.u);
-	CCVector3 origin = CCVector3::fromArray(X.u);
-
-	ccGLMatrix trans;
-	if (!getAbsoluteGLTransformation(trans))
-	{
-		trans.invert();
-		trans.apply(origin);
-		trans.applyRotation(udir);
-	}
-
-	nearestPointIndex = -1;
-	nearestSquareDist = -1.0;
-
-	bool isFOV = camera.perspective;
-	double fovOrRadius = 0;
-	if (isFOV)
-	{
-		fovOrRadius = 0.002 * pickWidth; //empirical conversion from pixels to FOV angle (in radians)
-	}
-	else
-	{
-		fovOrRadius = pickWidth * camera.pixelSize / 2;
-	}
-
 	//can we use the octree to accelerate the point picking process?
 	if (pickWidth == pickHeight)
 	{
@@ -376,7 +334,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		if (octree)
 		{
 			//we can now use the octree to do faster point picking
-	#ifdef _DEBUG
+#ifdef _DEBUG
 			CCLib::ScalarField* sf = 0;
 			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
@@ -394,10 +352,9 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 					sf = pc->getScalarField(sfIdx);
 				}
 			}
-	#endif
-
-			std::vector<CCLib::DgmOctree::PointDescriptor> points;
-			if (octree->rayCast(udir, origin, fovOrRadius, isFOV, CCLib::DgmOctree::RC_NEAREST_POINT, points))
+#endif
+			ccOctree::PointDescriptor point;
+			if (octree->pointPicking(clickPos, camera, point, pickWidth))
 			{
 	#ifdef _DEBUG
 				if (sf)
@@ -407,13 +364,17 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 						getDisplay()->redraw();
 				}
 	#endif
-				if (!points.empty())
+				if (point.point)
 				{
-					nearestPointIndex = points.back().pointIndex;
-					nearestSquareDist = points.back().squareDistd;
+					nearestPointIndex = point.pointIndex;
+					nearestSquareDist = point.squareDistd;
 					return true;
 				}
-				return false;
+				else
+				{
+					//nothing found
+					return false;
+				}
 			}
 			else
 			{
@@ -423,8 +384,19 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	}
 
 	//otherwise we go 'brute force' (works quite well in fact?!)
+	nearestPointIndex = -1;
+	nearestSquareDist = -1.0;
 	{
-		double smallestFOV = -1.0;
+		//back project the clicked point in 3D
+		CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
+		CCVector3d X(0,0,0);
+		if (!camera.unproject(clickPosd, X))
+		{
+			return false;
+		}
+
+		ccGLMatrix trans;
+		bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 #if defined(_OPENMP)
 #pragma omp parallel for
@@ -433,16 +405,27 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		{
 			const CCVector3* P = getPoint(i);
 
-			CCVector3 OP = *P - origin;
-			double radialSqDist = OP.cross(udir).norm2d();
-			double squareDist = OP.norm2d();
-			double fov_rad = atan2(sqrt(radialSqDist), sqrt(squareDist));
-
-			if (smallestFOV < 0 || fov_rad < smallestFOV)
+			CCVector3d Q2D;
+			if (noGLTrans)
 			{
-				nearestSquareDist = squareDist;
-				nearestPointIndex = static_cast<int>(i);
-				smallestFOV = fov_rad;
+				camera.project(*P, Q2D);
+			}
+			else
+			{
+				CCVector3 P3D = *P;
+				trans.apply(P3D);
+				camera.project(P3D, Q2D);
+			}
+
+			if (	fabs(Q2D.x-clickPos.x) <= pickWidth
+				&&	fabs(Q2D.y-clickPos.y) <= pickHeight)
+			{
+				double squareDist = CCVector3d(X.x-P->x, X.y-P->y, X.z-P->z).norm2d();
+				if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
+				{
+					nearestSquareDist = squareDist;
+					nearestPointIndex = static_cast<int>(i);
+				}
 			}
 		}
 	}

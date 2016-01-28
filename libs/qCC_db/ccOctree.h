@@ -21,6 +21,7 @@
 //Local
 #include "qCC_db.h"
 #include "ccHObject.h"
+#include "ccGenericGLDisplay.h"
 
 //CCLib
 #include <DgmOctree.h>
@@ -142,6 +143,12 @@ public: //RENDERING METHODS
 	//! Intersects octree with a camera sensor
 	bool intersectWithFrustrum(	ccCameraSensor* sensor,
 								std::vector<unsigned>& inCameraFrustrum);
+
+	//! Octree-driven point picking algorithm
+	bool pointPicking(	const CCVector2d& clickPos,
+						const ccGLCameraParameters& camera,
+						PointDescriptor& output,
+						double pickWidth_pix = 3.0) const;
 
 protected:
 

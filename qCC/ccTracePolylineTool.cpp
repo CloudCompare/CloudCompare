@@ -73,7 +73,6 @@ ccTracePolylineTool::ccTracePolylineTool(QWidget* parent)
     connect(resetToolButton, SIGNAL(clicked()), this, SLOT(resetLine()));
     connect(validButton, SIGNAL(clicked()), this, SLOT(apply()));
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
-	connect(snapSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSnapSizeChanged(int)));
 	connect(widthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onWidthSizeChanged(int)));
 
 	//add shortcuts
@@ -313,7 +312,6 @@ void ccTracePolylineTool::stop(bool accepted)
 			ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 
 		m_associatedWin->setUnclosable(false);
-		m_associatedWin->setPickingRadius(ccGLWindow::DefaultPickRadius);
 		m_associatedWin->removeFromOwnDB(m_polyTip);
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
@@ -574,14 +572,6 @@ void ccTracePolylineTool::cancel()
     resetLine();
 
 	stop(false);
-}
-
-void ccTracePolylineTool::onSnapSizeChanged(int size)
-{
-	if (m_associatedWin)
-	{
-		m_associatedWin->setPickingRadius(size);
-	}
 }
 
 void ccTracePolylineTool::onWidthSizeChanged(int width)

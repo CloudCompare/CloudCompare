@@ -63,7 +63,6 @@ protected slots:
     void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
     void updatePolyLineTip(int x, int y, Qt::MouseButtons buttons);
 
-	void onSnapSizeChanged(int);
 	void onWidthSizeChanged(int);
 
     //! To capture overridden shortcuts (pause button, etc.)

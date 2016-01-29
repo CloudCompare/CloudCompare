@@ -67,6 +67,9 @@ v2.7.beta ??/??/201?
 			only the coordinates of the original point are kept (the point which is the closest to the cell center)
 			and the height is replaced by the average cell height.
 
+	* Align tool:
+		- the user can now set the max RMS for sphere detection
+
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

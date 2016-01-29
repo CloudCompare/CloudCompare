@@ -71,12 +71,14 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 		settings.beginGroup("PointPairAlign");
 		bool pickSpheres    = settings.value("PickSpheres",  useSphereToolButton->isChecked()).toBool();
 		double sphereRadius = settings.value("SphereRadius", radiusDoubleSpinBox->value()).toDouble();
+		int maxRMS          = settings.value("MaxRMS",       maxRmsSpinBox->value()).toInt();
 		bool adjustScale    = settings.value("AdjustScale",  adjustScaleCheckBox->isChecked()).toBool();
 		bool autoUpdateZoom = settings.value("AutoUpdateZom",autoZoomCheckBox->isChecked()).toBool();
 		settings.endGroup();
 
 		useSphereToolButton->setChecked(pickSpheres);
 		radiusDoubleSpinBox->setValue(sphereRadius);
+		maxRmsSpinBox->setValue(maxRMS);
 		adjustScaleCheckBox->setChecked(adjustScale);
 		autoZoomCheckBox->setChecked(autoUpdateZoom);
 	}
@@ -415,6 +417,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 
 	//we'll now try to detect the sphere
 	double searchRadius = radiusDoubleSpinBox->value();
+	double maxRMSPercentage = maxRmsSpinBox->value() / 100.0;
 	ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 	assert(cloud);
 
@@ -455,7 +458,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 				{
 					ccLog::Warning("[ccPointPairRegistrationDlg] Sphere radius is too far from search radius!");
 				}
-				else if (rms / searchRadius > 0.1)
+				else if (rms / searchRadius >= maxRMSPercentage)
 				{
 					ccLog::Warning("[ccPointPairRegistrationDlg] RMS is too high!");
 				}
@@ -1366,6 +1369,7 @@ void ccPointPairRegistrationDlg::apply()
 		settings.beginGroup("PointPairAlign");
 		settings.setValue("PickSpheres",  useSphereToolButton->isChecked());
 		settings.setValue("SphereRadius", radiusDoubleSpinBox->value());
+		settings.setValue("MaxRMS", maxRmsSpinBox->value());
 		settings.setValue("AdjustScale",  adjustScaleCheckBox->isChecked());
 		settings.setValue("AutoUpdateZom",autoZoomCheckBox->isChecked());
 		settings.endGroup();

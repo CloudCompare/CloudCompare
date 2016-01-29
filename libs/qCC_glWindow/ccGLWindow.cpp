@@ -325,8 +325,8 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	}
 
 	//singal/slot connections
-	connect(this,				SIGNAL(itemPickedFast(int,int,int,int)),	this, SLOT(onItemPickedFast(int,int,int,int)), Qt::DirectConnection);
-	connect(&m_scheduleTimer,	SIGNAL(timeout()),							this, SLOT(checkScheduledRedraw()));
+	connect(this,				SIGNAL(itemPickedFast(ccHObject*,int,int,int)),	this, SLOT(onItemPickedFast(ccHObject*,int,int,int)), Qt::DirectConnection);
+	connect(&m_scheduleTimer,	SIGNAL(timeout()),								this, SLOT(checkScheduledRedraw()));
 
 #ifdef THREADED_GL_WIDGET
 	setAutoBufferSwap(false);
@@ -3229,7 +3229,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 			if (!label->isSelected() || !extendToSelectedLabels)
 			{
 				//select it?
-				//emit entitySelectionChanged(label->getUniqueID());
+				//emit entitySelectionChanged(label);
 				//QApplication::processEvents();
 			}
 			else
@@ -3257,32 +3257,22 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 	}
 }
 
-void ccGLWindow::onItemPickedFast(int itemID, int subID, int x, int y)
+void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, int x, int y)
 {
-	if (itemID >= 1)
+	if (pickedEntity)
 	{
-		//items can be in local or global DB
-		ccHObject* pickedObj = m_globalDBRoot ? m_globalDBRoot->find(itemID) : 0;
-		if (!pickedObj && m_winDBRoot)
+		if (pickedEntity->isA(CC_TYPES::LABEL_2D))
 		{
-			//if we don't find the object in the main DB, we look in the local one
-			pickedObj = m_winDBRoot->find(itemID);
+			cc2DLabel* label = static_cast<cc2DLabel*>(pickedEntity);
+			m_activeItems.push_back(label);
 		}
-		if (pickedObj)
+		else if (pickedEntity->isA(CC_TYPES::CLIPPING_BOX))
 		{
-			if (pickedObj->isA(CC_TYPES::LABEL_2D))
-			{
-				cc2DLabel* label = static_cast<cc2DLabel*>(pickedObj);
-				m_activeItems.push_back(label);
-			}
-			else if (pickedObj->isA(CC_TYPES::CLIPPING_BOX))
-			{
-				ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
-				cbox->setActiveComponent(subID);
-				cbox->setClickedPoint(x,y,width(),height(),m_viewportParams.viewMat);
+			ccClipBox* cbox = static_cast<ccClipBox*>(pickedEntity);
+			cbox->setActiveComponent(pickedItemIndex);
+			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
 
-				m_activeItems.push_back(cbox);
-			}
+			m_activeItems.push_back(cbox);
 		}
 	}
 
@@ -3716,7 +3706,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 								cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
 								if (label && !label->isSelected())
 								{
-									emit entitySelectionChanged(label->getUniqueID());
+									emit entitySelectionChanged(label);
 									QApplication::processEvents();
 								}
 							}
@@ -3818,7 +3808,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	if (!m_globalDBRoot && !m_winDBRoot)
 	{
 		//we must always emit a signal!
-		processPickingResult(params,-1,-1);
+		processPickingResult(params, 0, -1);
 		return;
 	}
 
@@ -3851,7 +3841,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	default:
 		assert(false);
 		//we must always emit a signal!
-		processPickingResult(params,-1,-1);
+		processPickingResult(params, 0, -1);
 		return;
 	}
 
@@ -3874,12 +3864,15 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	}
 }
 
-void ccGLWindow::processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::unordered_set<int>* selectedIDs/*=0*/)
+void ccGLWindow::processPickingResult(	const PickingParameters& params,
+										ccHObject* pickedEntity,
+										int pickedItemIndex,
+										const std::unordered_set<int>* selectedIDs/*=0*/)
 {
 	//standard "entity" picking
 	if (params.mode == ENTITY_PICKING)
 	{
-		emit entitySelectionChanged(selectedID);
+		emit entitySelectionChanged(pickedEntity);
 	}
 	//rectangular "entity" picking
 	else if (params.mode == ENTITY_RECT_PICKING)
@@ -3894,69 +3887,73 @@ void ccGLWindow::processPickingResult(const PickingParameters& params, int selec
 			||	params.mode == TRIANGLE_PICKING
 			||	params.mode == POINT_OR_TRIANGLE_PICKING)
 	{
-		assert(selectedID < 0 || subSelectedID >= 0);
+		assert(pickedEntity == 0 || pickedItemIndex >= 0);
 
-		emit itemPicked(selectedID, static_cast<unsigned>(subSelectedID), params.centerX, params.centerY);
+		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY);
 	}
 	//fast picking (labels, interactors, etc.)
 	else if (params.mode == FAST_PICKING)
 	{
-		emit itemPickedFast(selectedID, subSelectedID, params.centerX, params.centerY);
+		emit itemPickedFast(pickedEntity, pickedItemIndex, params.centerX, params.centerY);
 	}
 	else if (params.mode == LABEL_PICKING)
 	{
-		if (m_globalDBRoot && selectedID >= 0 && subSelectedID >= 0)
+		if (m_globalDBRoot && pickedEntity && pickedItemIndex >= 0)
 		{
 			//qint64 stopTime = m_timer.nsecsElapsed();
-			//ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(subSelectedID).arg((stopTime-startTime) / 1.0e6));
+			//ccLog::Print(QString("[Picking] entity ID %1 - item #%2 (time: %3 ms)").arg(selectedID).arg(pickedItemIndex).arg((stopTime-startTime) / 1.0e6));
 			
-			ccHObject* obj = m_globalDBRoot->find(selectedID);
-			if (obj)
+			//auto spawn the right label
+			cc2DLabel* label = 0;
+			if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				//auto spawn the right label
-				cc2DLabel* label = 0;
-				if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+				label = new cc2DLabel();
+				label->addPoint(ccHObjectCaster::ToGenericPointCloud(pickedEntity), pickedItemIndex);
+				pickedEntity->addChild(label);
+			}
+			else if (pickedEntity->isKindOf(CC_TYPES::MESH))
+			{
+				label = new cc2DLabel();
+				ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(pickedEntity);
+				ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
+				assert(cloud);
+				CCLib::VerticesIndexes *vertexIndexes = mesh->getTriangleVertIndexes(pickedItemIndex);
+				label->addPoint(cloud, vertexIndexes->i1);
+				label->addPoint(cloud, vertexIndexes->i2);
+				label->addPoint(cloud, vertexIndexes->i3);
+				cloud->addChild(label);
+				if (!cloud->isEnabled())
 				{
-					label = new cc2DLabel();
-					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
-					obj->addChild(label);
+					cloud->setVisible(false);
+					cloud->setEnabled(true);
 				}
-				else if (obj->isKindOf(CC_TYPES::MESH))
-				{
-					label = new cc2DLabel();
-					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);
-					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
-					assert(cloud);
-					CCLib::VerticesIndexes *vertexIndexes = mesh->getTriangleVertIndexes(subSelectedID);
-					label->addPoint(cloud, vertexIndexes->i1);
-					label->addPoint(cloud, vertexIndexes->i2);
-					label->addPoint(cloud, vertexIndexes->i3);
-					cloud->addChild(label);
-					if (!cloud->isEnabled())
-					{
-						cloud->setVisible(false);
-						cloud->setEnabled(true);
-					}
-				}
+			}
 
-				if (label)
-				{
-					label->setVisible(true);
-					label->setDisplay(obj->getDisplay());
-					label->setPosition(	static_cast<float>(params.centerX+20)/static_cast<float>(width()),
-										static_cast<float>(params.centerY+20)/static_cast<float>(height()) );
-					emit newLabel(static_cast<ccHObject*>(label));
-					QApplication::processEvents();
+			if (label)
+			{
+				label->setVisible(true);
+				label->setDisplay(pickedEntity->getDisplay());
+				label->setPosition(	static_cast<float>(params.centerX+20)/ width(),
+									static_cast<float>(params.centerY+20) / height() );
+				emit newLabel(static_cast<ccHObject*>(label));
+				QApplication::processEvents();
 
-					toBeRefreshed();
-				}
+				toBeRefreshed();
 			}
 		}
 	}
 }
 
+//DGM: warning, OpenGL picking with the picking buffer is depreacted.
+//We need to get rid of this code or change it to color-based selection...
 void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 {
+	if (!params.pickInLocalDB && !params.pickInSceneDB)
+	{
+		assert(false);
+		return;
+	}
+
 	//OpenGL picking
 	makeCurrent();
 
@@ -4004,6 +4001,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		glEnable(GL_DEPTH_TEST);
 
 		//display 3D objects
+		//DGM: all of them, even if we don't pick the own DB for instance, as they can hide the other objects!
 		if (m_globalDBRoot)
 			m_globalDBRoot->draw(CONTEXT);
 		if (m_winDBRoot)
@@ -4042,6 +4040,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		glDisable(GL_DEPTH_TEST);
 
 		//we display 2D objects
+		//DGM: all of them, even if we don't pick the own DB for instance, as they can hide the other objects!
 		if (m_globalDBRoot)
 			m_globalDBRoot->draw(CONTEXT);
 		if (m_winDBRoot)
@@ -4062,14 +4061,14 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	ccLog::PrintDebug("[Picking] hits: %i",hits);
 	if (hits < 0)
 	{
-		ccLog::Warning("[Picking] Too many items inside picking zone! Try to zoom in...");
+		ccLog::Warning("[Picking] Too many items inside the picking area! Try to zoom in...");
 		//we must always emit a signal!
-		processPickingResult(params,-1,-1);
+		processPickingResult(params, 0, -1);
 	}
 
 	//process hits
 	std::unordered_set<int> selectedIDs;
-	int subSelectedID = -1;
+	int pickedItemIndex = -1;
 	int selectedID = -1;
 	try
 	{
@@ -4098,7 +4097,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 					if (selectedID < 0 || minDepth < minMinDepth)
 					{
 						selectedID = currentID;
-						subSelectedID = (n>1 ? _selectBuf[4] : -1);
+						pickedItemIndex = (n>1 ? _selectBuf[4] : -1);
 						minMinDepth = minDepth;
 					}
 				}
@@ -4120,8 +4119,21 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		ccLog::Warning("[Picking] Not enough memory!");
 	}
 
+	ccHObject* pickedEntity = 0;
+	if (selectedID >= 0)
+	{
+		if (params.pickInSceneDB && m_globalDBRoot)
+		{
+			pickedEntity = m_globalDBRoot->find(selectedID);
+		}
+		if (!pickedEntity && params.pickInLocalDB && m_winDBRoot)
+		{
+			pickedEntity = m_winDBRoot->find(selectedID);
+		}
+	}
+
 	//we must always emit a signal!
-	processPickingResult(params, selectedID, subSelectedID, &selectedIDs);
+	processPickingResult(params, pickedEntity, pickedItemIndex, &selectedIDs);
 }
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
@@ -4130,10 +4142,11 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 	CCVector2d clickedPos(params.centerX, height()-1 - params.centerY);
 	
-	int nearestEntityID = -1;
+	ccHObject* nearestEntity = 0;
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
 
+	static ccGui::ParamStruct::ComputeOctreeForPicking autoComputeOctreeThisSession = ccGui::ParamStruct::ASK_USER;
 	bool autoComputeOctree = false;
 	bool firstCloudWithoutOctree = true;
 
@@ -4169,7 +4182,14 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					if (firstCloudWithoutOctree && !cloud->getOctree())
 					{
 						//can we compute an octree for picking?
-						switch (ccGui::Parameters().autoComputeOctree)
+						ccGui::ParamStruct::ComputeOctreeForPicking behavior = getDisplayParameters().autoComputeOctree;
+						if (behavior == ccGui::ParamStruct::ASK_USER)
+						{
+							//we use the persistent parameter for this session
+							behavior = autoComputeOctreeThisSession;
+						}
+						
+						switch (behavior)
 						{
 						case ccGui::ParamStruct::ALWAYS:
 							autoComputeOctree = true;
@@ -4177,7 +4197,12 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 						case ccGui::ParamStruct::ASK_USER:
 							{
-								QMessageBox question(QMessageBox::Question, "Picking acceleration", "Compute octree to accelerate the picking process?\n(this behavior can be changed later in the Display Settings)", QMessageBox::NoButton, this);
+								QMessageBox question(	QMessageBox::Question,
+														"Picking acceleration",
+														"Automatically compute octree(s) to accelerate the picking process?\n(this behavior can be changed later in the Display Settings)",
+														QMessageBox::NoButton,
+														this );
+								
 								QPushButton* yes = new QPushButton("Yes");
 								question.addButton(yes, QMessageBox::AcceptRole);
 								QPushButton* no = new QPushButton("No");
@@ -4192,24 +4217,19 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 								if (clickedButton == yes)
 								{
 									autoComputeOctree = true;
-								}
-								else if (clickedButton == always)
-								{
-									autoComputeOctree = true;
-									ccGui::ParamStruct params = ccGui::Parameters();
-									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
-									ccGui::Set(params);
-									params.toPersistentSettings();
+									autoComputeOctreeThisSession = ccGui::ParamStruct::ALWAYS;
 								}
 								else if (clickedButton == no)
 								{
 									autoComputeOctree = false;
+									autoComputeOctreeThisSession = ccGui::ParamStruct::NEVER;
 								}
-								else if (clickedButton == never)
+								else if (clickedButton == always || clickedButton == never)
 								{
-									autoComputeOctree = false;
+									autoComputeOctree = (clickedButton == always);
+									//update the global application parameters
 									ccGui::ParamStruct params = ccGui::Parameters();
-									params.autoComputeOctree = ccGui::ParamStruct::NEVER;
+									params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
 									ccGui::Set(params);
 									params.toPersistentSettings();
 								}
@@ -4217,7 +4237,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							break;
 
 						case ccGui::ParamStruct::NEVER:
-							autoComputeOctree = true;
+							autoComputeOctree = false;
 							break;
 						}
 
@@ -4240,7 +4260,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						{
 							nearestElementSquareDist = nearestSquareDist;
 							nearestElementIndex = nearestPointIndex;
-							nearestEntityID = static_cast<int>(cloud->getUniqueID());
+							nearestEntity = cloud;
 						}
 					}
 				}
@@ -4261,7 +4281,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						{
 							nearestElementSquareDist = nearestSquareDist;
 							nearestElementIndex = nearestTriIndex;
-							nearestEntityID = static_cast<int>(mesh->getUniqueID());
+							nearestEntity = mesh;
 						}
 					}
 				}
@@ -4293,7 +4313,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
 
 	//we must always emit a signal!
-	processPickingResult(params, nearestEntityID, nearestElementIndex);
+	processPickingResult(params, nearestEntity, nearestElementIndex);
 }
 
 void ccGLWindow::displayNewMessage(	const QString& message,

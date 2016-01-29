@@ -3608,7 +3608,7 @@ void MainWindow::doRemoveDuplicatePoints()
 							first = false;
 						}
 						cloud->setEnabled(false);
-						m_ccRoot->selectEntity(filteredCloud,true);
+						m_ccRoot->selectEntity(filteredCloud, true);
 					}
 				}
 			}
@@ -5454,7 +5454,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					ccGroup->addChild(compCloud);
 
 					if (selectComponents && m_ccRoot)
-						m_ccRoot->selectEntity(compCloud,true);
+						m_ccRoot->selectEntity(compCloud, true);
 				}
 				else
 				{
@@ -7304,7 +7304,7 @@ void MainWindow::doActionSORFilter()
 					{
 						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 						firstCloud = false;
-						m_ccRoot->selectEntity(cleanCloud,true);
+						m_ccRoot->selectEntity(cleanCloud, true);
 					}
 				}
 				else
@@ -7418,7 +7418,7 @@ void MainWindow::doActionFilterNoise()
 					{
 						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 						firstCloud = false;
-						m_ccRoot->selectEntity(cleanCloud,true);
+						m_ccRoot->selectEntity(cleanCloud, true);
 					}
 				}
 				else
@@ -7576,7 +7576,7 @@ ccGLWindow* MainWindow::new3DView()
 
 	m_mdiArea->addSubWindow(view3D);
 
-	connect(view3D,	SIGNAL(entitySelectionChanged(int)),						m_ccRoot,	SLOT(selectEntity(int)));
+	connect(view3D,	SIGNAL(entitySelectionChanged(ccHObject*)),					m_ccRoot,	SLOT(selectEntity(ccHObject*)));
 	connect(view3D,	SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	m_ccRoot,	SLOT(selectEntities(std::unordered_set<int>)));
 
 	//'echo' mode
@@ -7932,7 +7932,7 @@ void MainWindow::activateSectionExtractionMode()
 		m_seTool = new ccSectionExtractionTool(this);
 		connect(m_seTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSectionExtractionMode(bool)));
 
-		registerMDIDialog(m_seTool,Qt::TopRightCorner);
+		registerMDIDialog(m_seTool, Qt::TopRightCorner);
 	}
 
 	//add clouds
@@ -7963,6 +7963,10 @@ void MainWindow::activateSectionExtractionMode()
 		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
 		return;
 	}
+
+	//warning: we must disable the entity picking signal!
+	win->disconnect(m_ccRoot, SLOT(selectEntity(ccHObject*)));
+
 	if (firstDisplay && firstDisplay->getGlFilter())
 	{
 		win->setGlFilter(firstDisplay->getGlFilter()->clone());
@@ -8912,7 +8916,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 	if (m_pprDlg)
 		m_pprDlg->pause(true);
 
-	connect(win, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
+	connect(win, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int)));
 	s_pickingWindow = win;
 	s_previousPickingMode = win->getPickingMode();
 	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
@@ -8958,27 +8962,25 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 
 	freezeUI(false);
 
-	disconnect(s_pickingWindow, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
+	disconnect(s_pickingWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int)));
 	//restore previous picking mode
 	s_pickingWindow->setPickingMode(s_previousPickingMode);
 	s_pickingWindow = 0;
 	s_previousPickingOperation = NO_PICKING_OPERATION;
 }
 
-void MainWindow::processPickedPoint(int cloudUniqueID, unsigned itemIndex, int x, int y)
+void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x, int y)
 {
 	if (!s_pickingWindow)
 		return;
 
-	ccHObject* db = s_pickingWindow->getSceneDB();
-	ccHObject* obj = db ? db->find(cloudUniqueID) : 0;
-	if (!obj)
+	if (!entity)
 		return;
 
 	CCVector3 pickedPoint;
-	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		if (!cloud)
 		{
 			assert(false);
@@ -8986,21 +8988,21 @@ void MainWindow::processPickedPoint(int cloudUniqueID, unsigned itemIndex, int x
 		}
 		pickedPoint = *cloud->getPoint(itemIndex);
 	}
-	else if (obj->isKindOf(CC_TYPES::MESH))
+	else if (entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 		if (!mesh)
 		{
 			assert(false);
 			return;
 		}
 		CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-		pickedPoint = s_pickingWindow->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
+		pickedPoint = s_pickingWindow->backprojectPointOnTriangle(CCVector2i(x,y), *tri->_getA(), *tri->_getB(), *tri->_getC());
 	}
 	else
 	{
 		//unhandled entity
-		ccLog::Warning(QString("[Picking] Can't use points picked on this entity ('%1')!").arg(obj->getName()));
+		ccLog::Warning(QString("[Picking] Can't use points picked on this entity ('%1')!").arg(entity->getName()));
 		assert(false);
 		return;
 	}
@@ -9115,7 +9117,7 @@ void MainWindow::processPickedPoint(int cloudUniqueID, unsigned itemIndex, int x
 				if (!params.perspectiveView || params.objectCenteredView)
 				{
 					//apply current GL transformation (if any)
-					obj->getGLTransformation().apply(newPivot);
+					entity->getGLTransformation().apply(newPivot);
 					//compute the equivalent camera center
 					CCVector3d dP = params.pivotPoint - newPivot;
 					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
@@ -9515,7 +9517,9 @@ void MainWindow::doActionClone()
 	}
 
 	if (lastClone && m_ccRoot)
-		m_ccRoot->selectEntity(lastClone->getUniqueID());
+	{
+		m_ccRoot->selectEntity(lastClone);
+	}
 
 	updateUI();
 }
@@ -11049,7 +11053,9 @@ void MainWindow::deactivateComparisonMode(int result)
 	{
 		ccHObject* compEntity = m_compDlg->getComparedEntity();
 		if (compEntity)
+		{
 			m_ccRoot->selectEntity(compEntity);
+		}
 	}
 
 	freezeUI(false);

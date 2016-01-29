@@ -48,7 +48,7 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 	//then we can connect the new window 'point picked' signal
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(handlePickedItem(int, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int)));
 	}
 
 	return true;
@@ -86,20 +86,16 @@ void ccPointPickingGenericInterface::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
-void ccPointPickingGenericInterface::handlePickedItem(int entityID, unsigned itemIdx, int x, int y)
+void ccPointPickingGenericInterface::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y)
 {
-	if (!m_processing)
+	if (!m_processing || !entity)
 		return;
 
 	ccPointCloud* cloud = 0;
 
-	ccHObject* obj = MainWindow::TheInstance()->db()->find(entityID);
-	if (!obj)
-		return;
-	
-	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		cloud = static_cast<ccPointCloud*>(obj);
+		cloud = static_cast<ccPointCloud*>(entity);
 		if (!cloud)
 		{
 			assert(false);
@@ -117,7 +113,7 @@ void ccPointPickingGenericInterface::handlePickedItem(int entityID, unsigned ite
 			ccLog::Warning("[Item picking] Invalid point index!");
 		}
 	}
-	else if (obj->isKindOf(CC_TYPES::MESH))
+	else if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		//NOT HANDLED: 'POINT_PICKING' mode only for now
 		assert(false);

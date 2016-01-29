@@ -265,7 +265,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
     if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(handlePickedItem(int, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int)));
         //connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
         connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
         connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
@@ -389,7 +389,7 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 	m_associatedWin->redraw(true, false);
 }
 
-void ccTracePolylineTool::handlePickedItem(int entityID, unsigned itemIdx, int x, int y)
+void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y)
 {
 	if (!m_associatedWin)
 	{
@@ -397,8 +397,7 @@ void ccTracePolylineTool::handlePickedItem(int entityID, unsigned itemIdx, int x
 		return;
 	}
 
-	ccHObject* object = MainWindow::TheInstance()->db()->find(entityID);
-	if (!object || !object->isA(CC_TYPES::POINT_CLOUD))
+	if (!entity || !entity->isA(CC_TYPES::POINT_CLOUD))
 	{
 		//we ignore this object
 		return;
@@ -440,7 +439,7 @@ void ccTracePolylineTool::handlePickedItem(int entityID, unsigned itemIdx, int x
 		return;
 	}
 
-	const CCVector3* P = ccHObjectCaster::ToPointCloud(object)->getPoint(itemIdx);
+	const CCVector3* P = ccHObjectCaster::ToPointCloud(entity)->getPoint(itemIdx);
 
 	m_poly3DVertices->addPoint(*P);
 	m_poly3D->addPointIndex(m_poly3DVertices->size()-1);

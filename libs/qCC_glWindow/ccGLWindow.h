@@ -599,7 +599,7 @@ protected slots:
 	void stopFrameRateTest();
 
 	//! Reacts to the itemPickedFast signal
-	void onItemPickedFast(int entityID, int subEntityID, int x, int y);
+	void onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, int x, int y);
 
 	//! Checks for scheduled redraw
 	void checkScheduledRedraw();
@@ -607,25 +607,25 @@ protected slots:
 signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
-	void entitySelectionChanged(int uniqueID);
+	void entitySelectionChanged(ccHObject*);
 	//! Signal emitted when multiple entities are selected in the 3D view
 	void entitiesSelectionChanged(std::unordered_set<int> entIDs);
 
 	//! Signal emitted when a point (or a triangle) is picked
-	/** \param entityID entity unique ID
+	/** \param entity 'picked' entity
 		\param subEntityID point or triangle index in entity
 		\param x mouse cursor x position
 		\param y mouse cursor y position
 	**/
-	void itemPicked(int entityID, unsigned subEntityID, int x, int y);
+	void itemPicked(ccHObject* entity, unsigned subEntityID, int x, int y);
 
 	//! Signal emitted when an item is picked (FAST_PICKING mode only)
-	/** \param entityID entity unique ID
+	/** \param entity entity
 		\param subEntityID point or triangle index in entity
 		\param x mouse cursor x position
 		\param y mouse cursor y position
 	**/
-	void itemPickedFast(int entityID, int subEntityID, int x, int y);
+	void itemPickedFast(ccHObject* entity, int subEntityID, int x, int y);
 
 	//! Signal emitted when fast picking is finished (FAST_PICKING mode only)
 	void fastPickingFinished();
@@ -886,13 +886,17 @@ protected: //other methods
 							int _centerX = 0,
 							int _centerY = 0,
 							int _pickWidth = 5,
-							int _pickHeight = 5)
+							int _pickHeight = 5,
+							bool _pickInSceneDB = true,
+							bool _pickInLocalDB = true)
 			: mode(_mode)
 			, centerX(_centerX)
 			, centerY(_centerY)
 			, pickWidth(_pickWidth)
 			, pickHeight(_pickHeight)
 			, flags(0)
+			, pickInSceneDB(_pickInSceneDB)
+			, pickInLocalDB(_pickInLocalDB)
 		{}
 
 		PICKING_MODE mode;
@@ -901,6 +905,8 @@ protected: //other methods
 		int pickWidth;
 		int pickHeight;
 		unsigned short flags;
+		bool pickInSceneDB;
+		bool pickInLocalDB;
 	};
 
 	//! Starts picking process
@@ -917,7 +923,10 @@ protected: //other methods
 	void startCPUBasedPointPicking(const PickingParameters& params);
 
 	//! Processes the picking process result and sends the corresponding signal
-	void processPickingResult(const PickingParameters& params, int selectedID, int subSelectedID, const std::unordered_set<int>* selectedIDs = 0);
+	void processPickingResult(	const PickingParameters& params,
+								ccHObject* pickedEntity,
+								int pickedItemIndex,
+								const std::unordered_set<int>* selectedIDs = 0);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context

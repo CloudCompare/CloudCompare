@@ -647,7 +647,7 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	ccHObject* parent = object->getParent();
 	if (!parent)
 	{
-		ccLog::Error(QString("An error while creating DB tree index: object '%1' has no parent").arg(object->getName()));
+		ccLog::Error(QString("An error occurred while creating DB tree index: object '%1' has no parent").arg(object->getName()));
 		return QModelIndex();
 	}
 
@@ -758,7 +758,7 @@ void ccDBRoot::unselectAllEntities()
 	selectionModel->clear();
 }
 
-void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/* = false*/)
+void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*/)
 {
 	bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers () & Qt::ControlModifier);
 
@@ -809,16 +809,6 @@ void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/* = fals
 	{
 		selectionModel->clear();
 	}
-}
-
-void ccDBRoot::selectEntity(int uniqueID)
-{
-	ccHObject* obj = 0;
-	//minimum unqiue ID is 1 (0 means 'deselect')
-	if (uniqueID > 0)
-		obj = find(uniqueID);
-
-	selectEntity(obj);
 }
 
 void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)

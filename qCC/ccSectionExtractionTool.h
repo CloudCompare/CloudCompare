@@ -75,7 +75,7 @@ protected slots:
 	void enableSectionEditingMode(bool);
 	void doImportPolylinesFromDB();
 	void setVertDimension(int);
-	void entitySelected(int);
+	void entitySelected(ccHObject*);
 	void generateOrthoSections();
 	void extractPoints();
 	void unfoldPoints();

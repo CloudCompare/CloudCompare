@@ -71,7 +71,7 @@ protected slots:
 	void updateDisplay();
 
 	//! Selects entity
-	void selectEntity(int uniqueID);
+	void selectEntity(ccHObject* entity);
 
 	//! Delete selected entity
 	void doActionDeleteSelectedEntity();

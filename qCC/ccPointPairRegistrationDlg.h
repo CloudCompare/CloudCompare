@@ -93,7 +93,7 @@ protected slots:
 	//! Slot called when a "delete" button is pushed
 	void onDelButtonPushed();
 
-	void processPickedItem(int, unsigned, int, int);
+	void processPickedItem(ccHObject*, unsigned, int, int);
 
 	//! Updates the registration info and buttons states
 	void updateAlignInfo();

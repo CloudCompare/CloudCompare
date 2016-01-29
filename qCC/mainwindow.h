@@ -353,7 +353,7 @@ protected slots:
 	// Picking opeations
 	void enablePickingOperation(ccGLWindow* win, QString message);
 	void cancelPreviousPickingOperation(bool aborted);
-	void processPickedPoint(int, unsigned, int, int);
+	void processPickedPoint(ccHObject*, unsigned, int, int);
 
 	// For rotation center picking
 	void doPickRotationCenter();

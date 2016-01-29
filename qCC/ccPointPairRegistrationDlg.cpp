@@ -191,7 +191,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 	{
 		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
 		m_associatedWin->lockPickingMode(true);
-		connect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedItem(int, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int)));
 
 		m_associatedWin->addToOwnDB(&m_alignedPoints);
 		m_associatedWin->addToOwnDB(&m_refPoints);
@@ -484,26 +484,22 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 	return success;
 }
 
-void ccPointPairRegistrationDlg::processPickedItem(int entityID, unsigned itemIndex, int x, int y)
+void ccPointPairRegistrationDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y)
 {
 	if (!m_associatedWin)
 		return;
+	
 	//no point picking when paused!
 	if (m_paused)
 		return;
 
-	ccHObject* db = m_associatedWin->getSceneDB();
-	if (!db)
-		return;
-
-	ccHObject* obj = db->find(entityID);
-	if (obj)
+	if (entity)
 	{
 		CCVector3 P;
 
-		if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 			if (!cloud)
 			{
 				assert(false);
@@ -511,16 +507,16 @@ void ccPointPairRegistrationDlg::processPickedItem(int entityID, unsigned itemIn
 			}
 			P = *cloud->getPoint(itemIndex);
 		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
+		else if (entity->isKindOf(CC_TYPES::MESH))
 		{
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 			if (!mesh)
 			{
 				assert(false);
 				return;
 			}
 			CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
+			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y), *tri->_getA(), *tri->_getB(), *tri->_getC());
 		}
 		else
 		{
@@ -531,13 +527,13 @@ void ccPointPairRegistrationDlg::processPickedItem(int entityID, unsigned itemIn
 
 		CCVector3d pin = CCVector3d::fromArray(P.u);
 
-		if (obj == m_aligned.entity)
+		if (entity == m_aligned.entity)
 		{
-			addAlignedPoint(pin,m_aligned.entity,true); //picked points are always shifted by default
+			addAlignedPoint(pin, m_aligned.entity, true); //picked points are always shifted by default
 		}
-		else if (obj == m_reference.entity)
+		else if (entity == m_reference.entity)
 		{
-			addReferencePoint(pin,m_reference.entity,true); //picked points are always shifted by default
+			addReferencePoint(pin, m_reference.entity, true); //picked points are always shifted by default
 		}
 		else
 		{

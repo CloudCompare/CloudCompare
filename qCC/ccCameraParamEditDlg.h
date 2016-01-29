@@ -96,7 +96,7 @@ public slots:
 	void fovChanged(double);
 
 	void pickPointAsPivot();
-	void processPickedItem(int, unsigned, int, int);
+	void processPickedItem(ccHObject*, unsigned, int, int);
 
 protected slots:
 

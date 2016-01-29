@@ -228,25 +228,24 @@ void ccCameraParamEditDlg::pickPointAsPivot()
 	if (m_associatedWin)
 	{
 		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
-		connect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedItem(int, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int)));
 	}
 }
 
-void ccCameraParamEditDlg::processPickedItem(int entityID, unsigned itemIndex, int x, int y)
+void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y)
 {
 	if (!m_associatedWin)
+	{
+		assert(false);
 		return;
-
-	ccHObject* obj = 0;
-	ccHObject* db = m_associatedWin->getSceneDB();
-	if (db)
-		obj = db->find(entityID);
-	if (obj)
+	}
+	
+	if (entity)
 	{
 		CCVector3 P;
-		if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 			if (!cloud)
 			{
 				assert(false);
@@ -254,16 +253,16 @@ void ccCameraParamEditDlg::processPickedItem(int entityID, unsigned itemIndex, i
 			}
 			P = *cloud->getPoint(itemIndex);
 		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
+		else if (entity->isKindOf(CC_TYPES::MESH))
 		{
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(obj);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 			if (!mesh)
 			{
 				assert(false);
 				return;
 			}
 			CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y),*tri->_getA(),*tri->_getB(),*tri->_getC());
+			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y), *tri->_getA(), *tri->_getB(), *tri->_getC());
 		}
 		else
 		{
@@ -277,7 +276,7 @@ void ccCameraParamEditDlg::processPickedItem(int entityID, unsigned itemIndex, i
 	}
 
 	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-	disconnect(m_associatedWin, SIGNAL(itemPicked(int, unsigned, int, int)), this, SLOT(processPickedItem(int, unsigned, int, int)));
+	disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int)));
 }
 
 void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)

@@ -213,7 +213,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 		connect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
 		connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
 		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
-		connect(m_associatedWin, SIGNAL(entitySelectionChanged(int)), this, SLOT(entitySelected(int)));
+		connect(m_associatedWin, SIGNAL(entitySelectionChanged(ccHObject*)), this, SLOT(entitySelected(ccHObject*)));
 
 		//import sections in current display
 		{
@@ -342,13 +342,18 @@ void ccSectionExtractionTool::deleteSelectedPolyline()
 	}
 }
 
-void ccSectionExtractionTool::entitySelected(int uniqueID)
+void ccSectionExtractionTool::entitySelected(ccHObject* entity)
 {
-	//look if this unique ID corresponds to an active polyline
+	if (!entity)
+	{
+		return;
+	}
+	
+	//look if this selected entity corresponds to an active polyline
 	for (SectionPool::iterator it = m_sections.begin(); it != m_sections.end(); ++it)
 	{
 		Section& section = *it;
-		if (section.entity && section.entity->getUniqueID() == uniqueID)
+		if (section.entity == entity)
 		{
 			selectPolyline(&section);
 			break;
@@ -583,7 +588,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 		//duplicate polyline
 		ccPolyline* duplicatePoly = new ccPolyline(0);
 		ccPointCloud* duplicateVertices = 0;
-		if (duplicatePoly->initWith(duplicateVertices,*inputPoly))
+		if (duplicatePoly->initWith(duplicateVertices, *inputPoly))
 		{
 			assert(duplicateVertices);
 			for (unsigned i=0; i<duplicateVertices->size(); ++i)
@@ -597,6 +602,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 			}
 
 			duplicateVertices->invalidateBoundingBox();
+			duplicateVertices->setEnabled(false);
 			duplicatePoly->set2DMode(false);
 			duplicatePoly->setDisplay_recursive(inputPoly->getDisplay());
 			duplicatePoly->setName(inputPoly->getName());
@@ -885,7 +891,7 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 			m_editedPolyVertices->clear();
 		}
 		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY());
-		m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
 	}
 	else

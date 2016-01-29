@@ -133,14 +133,6 @@ public:
 	//! Expands tree at a given node
 	void expandElement(ccHObject* object, bool state);
 
-	//! Selects a given entity
-	/** If ctrl is pressed by the user at the same time,
-		previous selection will be simply updated accordingly.
-		\param obj entity to select
-		\param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
-	**/
-	void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);
-
 	//! Unselects a given entity
 	void unselectEntity(ccHObject* obj);
 
@@ -174,8 +166,13 @@ public slots:
 	void updateCCObject(ccHObject* object);
 	void deleteSelectedEntities();
 
-	//! Shortcut to selectEntity(ccHObject*)
-	void selectEntity(int uniqueID);
+	//! Selects a given entity
+	/** If ctrl is pressed by the user at the same time,
+		previous selection will be simply updated accordingly.
+		\param obj entity to select
+		\param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
+	**/
+	void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);
 
 	//! Selects multiple entities at once (shortcut to the other version)
 	/** \param entIDs list of the IDs of the entities to select

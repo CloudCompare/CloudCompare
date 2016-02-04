@@ -58,6 +58,9 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	generateRasterPushButton->setChecked(false);
 #endif
 
+	//force update
+	resampleOptionToggled(resampleCloudCheckBox->isChecked());
+
 	connect(buttonBox,					SIGNAL(accepted()),					this,	SLOT(testAndAccept()));
 	connect(buttonBox,					SIGNAL(rejected()),					this,	SLOT(testAndReject()));
 	connect(gridStepDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateGridInfo()));
@@ -251,7 +254,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 			if (activeLayer)
 			{
 				const ccScalarField::Range& layerValues = activeLayer->displayRange();
-				gridLayerRangeLabel->setText(QString("%1 (%2 - %3)").arg(layerValues.range()).arg(layerValues.min()).arg(layerValues.max()));
+				gridLayerRangeLabel->setText(QString("%1 [%2 ; %3]").arg(layerValues.range()).arg(layerValues.min()).arg(layerValues.max()));
 				contourStartDoubleSpinBox->setValue(layerValues.min());
 				contourStepDoubleSpinBox->setValue(layerValues.range() / 10.0);
 			}

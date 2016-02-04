@@ -521,7 +521,7 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			if (scalarFields[k])
 			{
 				double* _gridSF = scalarFields[k];
-				for (unsigned j=0;j<height;++j)
+				for (unsigned j=0; j<height; ++j)
 				{
 					RasterCell* cell = data[j];
 					for (unsigned i=0; i<width; ++i,++cell,++_gridSF)

@@ -299,11 +299,34 @@ public:
 			: w(grid.w)
 			, h(grid.h)
 			, indexes(grid.indexes)
+			, colors(grid.colors)
 			, validCount(grid.validCount)
 			, minValidIndex(grid.minValidIndex)
 			, maxValidIndex(grid.minValidIndex)
 			, sensorPosition(grid.sensorPosition)
 		{}
+
+		//! Converts the grid to an RGB image (needs colors)
+		QImage toImage() const
+		{
+			if (colors.size() == w*h)
+			{
+				QImage image(w, h, QImage::Format_ARGB32);
+				for (unsigned j=0; j<h; ++j)
+				{
+					for (unsigned i=0; i<w; ++i)
+					{
+						const ccColor::Rgb& col = colors[j*w + i];
+						image.setPixel(i, j, QColor(col.r, col.g, col.b).rgb());
+					}
+				}
+				return image;
+			}
+			else
+			{
+				return QImage();
+			}
+		}
 		
 		//! Grid width
 		unsigned w;
@@ -319,6 +342,8 @@ public:
 
 		//! Grid indexes (size: w x h)
 		std::vector<int> indexes;
+		//! Grid colors (size: w x h, or 0 = no color)
+		std::vector<ccColor::Rgb> colors;
 
 		//! Sensor position (expressed relatively to the cloud points)
 		ccGLMatrixd sensorPosition;

@@ -971,7 +971,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			{
 				try
 				{
-					//copy the grid date
+					//copy the grid data
 					Grid::Shared grid(new Grid(*otherGrid));
 					{
 						//then update the indexes
@@ -1118,6 +1118,15 @@ void ccPointCloud::unallocateColors()
 
 		//We should update the VBOs to gain some free space in VRAM
 		releaseVBOs();
+	}
+
+	//remove the grid colors as well!
+	for (size_t i=0; i<m_grids.size(); ++i)
+	{
+		if (m_grids[i])
+		{
+			m_grids[i]->colors.clear();
+		}
 	}
 
 	showColors(false);
@@ -1617,7 +1626,7 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, int freq)
 {
 	if (freq == 0 || dim > 2) //X=0, Y=1, Z=2
 	{
-		ccLog::Error("[ccPointCloud::setRGBColorByBanding] Invalid paramter!");
+		ccLog::Warning("[ccPointCloud::setRGBColorByBanding] Invalid paramter!");
 		return false;
 	}
 
@@ -1715,6 +1724,16 @@ bool ccPointCloud::setRGBColor(const ccColor::Rgb& col)
 
 	assert(m_rgbColors);
 	m_rgbColors->fill(col.rgb);
+
+	//update the grid colors as well!
+	for (size_t i=0; i<m_grids.size(); ++i)
+	{
+		if (m_grids[i] && !m_grids[i]->colors.empty())
+		{
+			std::fill(m_grids[i]->colors.begin(), m_grids[i]->colors.end(), col);
+		}
+	}
+
 
 	//We must update the VBOs
 	releaseVBOs();
@@ -3336,7 +3355,9 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		{
 			ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
 			if (!hadColors)
+			{
 				unallocateColors();
+			}
 			return false;
 		}
 
@@ -3667,7 +3688,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 				return WriteError();
 			//height
 			uint32_t h = static_cast<uint32_t>(g->h);
-			if (out.write((const char*)&h,4) < 0)
+			if (out.write((const char*)&h, 4) < 0)
 				return WriteError();
 
 			//sensor matrix
@@ -3679,8 +3700,22 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 			for (uint32_t j=0; j<w*h; ++j, ++_index)
 			{
 				int32_t index = static_cast<int32_t>(*_index);
-				if (out.write((const char*)&index,4) < 0)
+				if (out.write((const char*)&index, 4) < 0)
 					return WriteError();
+			}
+
+			//grid colors
+			bool hasColors = (g->colors.size() == g->indexes.size());
+			if (out.write((const char*)&hasColors, 1) < 0)
+				return WriteError();
+			
+			if (hasColors)
+			{
+				for (uint32_t j=0; j<g->colors.size(); ++j)
+				{
+					if (out.write((const char*)g->colors[j].rgb, 3) < 0)
+						return WriteError();
+				}
 			}
 		}
 	}
@@ -3715,7 +3750,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			result = ccSerializationHelper::GenericArrayFromFile(*m_points,in,dataVersion);
 		}
 		if (!result)
+		{
 			return false;
+		}
 
 #ifdef _DEBUG
 		//test: look for NaN values
@@ -3891,6 +3928,29 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 						g->minValidIndex = g->maxValidIndex = index;
 					}
 					++g->validCount;
+				}
+			}
+
+			//grid colors
+			bool hasColors = false;
+			if (in.read((char*)&hasColors, 1) < 0)
+				return ReadError();
+			
+			if (hasColors)
+			{
+				try
+				{
+					g->colors.resize(g->indexes.size());
+				}
+				catch (const std::bad_alloc&)
+				{
+					return MemoryError();
+				}
+
+				for (uint32_t j=0; j<g->colors.size(); ++j)
+				{
+					if (in.read((char*)g->colors[j].rgb, 3) < 0)
+						return ReadError();
 				}
 			}
 

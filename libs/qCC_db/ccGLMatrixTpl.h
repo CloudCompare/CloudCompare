@@ -705,6 +705,18 @@ public:
 	**/
 	inline Vector3Tpl<T> getColumnAsVec3D(unsigned index) const { return Vector3Tpl<T>::fromArray(getColumn(index)); }
 
+	//! Sets the content of a given column
+	/** \param index column index (between 0 and 3)
+		\param v new column values
+	**/
+	inline void setColumn(unsigned index, const Vector3Tpl<T>& v) { T* col = m_mat+(index<<2); col[0] = v.x; col[1] = v.y; col[2] = v.z; }
+
+	//! Sets the content of a given column
+	/** \param index column index (between 0 and 3)
+		\param v new column values
+	**/
+	inline void setColumn(unsigned index, const Tuple4Tpl<T>& v) { T* col = m_mat+(index<<2); col[0] = v.x; col[1] = v.y; col[2] = v.z; col[3] = v.w; }
+
 	//! Multiplication by a matrix operator
 	ccGLMatrixTpl<T> operator * (const ccGLMatrixTpl<T>& mat) const
 	{

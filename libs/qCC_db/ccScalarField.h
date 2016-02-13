@@ -41,6 +41,12 @@ public:
 	**/
 	explicit ccScalarField(const char* name = 0);
 
+	//! Copy constructor
+	/** \param sf scalar field to copy
+		\warning May throw a std::bad_alloc exception
+	**/
+	ccScalarField(const ccScalarField& sf);
+
 	/*** Scalar values display handling ***/
 
 	//! Scalar field range structure
@@ -49,7 +55,9 @@ public:
 	public:
 
 		//! Default constructor
-		Range() : m_min(0), m_start(0), m_stop(0), m_max(0) {}
+		Range() : m_min(0), m_start(0), m_stop(0), m_max(0), m_range(1) {}
+		//! Copy constructor
+		Range(const Range& range) : m_min(range.m_min), m_start(range.m_start), m_stop(range.m_stop), m_max(range.m_max), m_range(range.m_range) {}
 
 		//getters
 		inline ScalarType min()			const { return m_min;		}
@@ -188,7 +196,10 @@ public:
 		unsigned maxValue;
 
 		//! Default constructor
-		Histogram() { maxValue = 0; }
+		Histogram() : maxValue(0) {}
+
+		//! Copy constructor
+		Histogram(const Histogram& h) : std::vector<unsigned>(h), maxValue(h.maxValue) {}
 	};
 
 	//! Returns associated histogram values (for display)

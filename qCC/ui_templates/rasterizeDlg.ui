@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>720</height>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,16 @@
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -250,7 +259,16 @@
          <item>
           <widget class="QFrame" name="interpolateSFFrame">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
@@ -461,7 +479,16 @@ replaced bythe cells average height!</string>
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QFormLayout" name="formLayout_4">
-             <property name="margin">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
               <number>0</number>
              </property>
              <item row="0" column="0">
@@ -585,9 +612,24 @@ replaced bythe cells average height!</string>
         </widget>
         <widget class="QWidget" name="contourTab">
          <attribute name="title">
-          <string>Contour plot (active layer)</string>
+          <string>Contour plot</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="font">
+             <font>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: blue;</string>
+            </property>
+            <property name="text">
+             <string>The contour plot is computed on the active layer</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <layout class="QFormLayout" name="formLayout_3">
             <item row="0" column="0">
@@ -742,6 +784,104 @@ replaced bythe cells average height!</string>
              </widget>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="hillshadeTab">
+         <attribute name="title">
+          <string>Hillshade</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_16">
+            <property name="font">
+             <font>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: blue;</string>
+            </property>
+            <property name="text">
+             <string>Hillshade is computed on the height layer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QFormLayout" name="formLayout_5">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>Sun zenith</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="sunZenithSpinBox">
+              <property name="toolTip">
+               <string>Zenith angle (in degrees) = 90 - altitude angle</string>
+              </property>
+              <property name="suffix">
+               <string> deg.</string>
+              </property>
+              <property name="maximum">
+               <number>90</number>
+              </property>
+              <property name="singleStep">
+               <number>5</number>
+              </property>
+              <property name="value">
+               <number>45</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>Sun azimuth</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="sunAzimuthSpinBox">
+              <property name="toolTip">
+               <string>Azimuth angle (in degrees)</string>
+              </property>
+              <property name="suffix">
+               <string> deg.</string>
+              </property>
+              <property name="maximum">
+               <number>360</number>
+              </property>
+              <property name="singleStep">
+               <number>5</number>
+              </property>
+              <property name="value">
+               <number>315</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="generateHillshadePushButton">
+            <property name="text">
+             <string>Generate</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

@@ -29,6 +29,12 @@ ScalarField::ScalarField(const char* name/*=0*/)
 	setName(name);
 }
 
+ScalarField::ScalarField(const ScalarField& sf)
+	: GenericChunkedArray<1,ScalarType>(sf)
+{
+	setName(sf.m_name);
+}
+
 void ScalarField::setName(const char* name)
 {
 	if (name)

@@ -66,6 +66,9 @@ protected slots:
 	//! Generates a contour plot
 	void generateContours();
 
+	//! Generates hillshade
+	void generateHillshade();
+
 	//! Removes all displayed contour lines
 	void removeContourLines();
 
@@ -154,6 +157,7 @@ protected: //raster grid related stuff
 	//! Converts the grid to a cloud with scalar field(s)
 	ccPointCloud* convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
 										bool interpolateSF,
+										bool copyHillshadeSF,
 										QString activeSFName) const;
 
 protected: //members

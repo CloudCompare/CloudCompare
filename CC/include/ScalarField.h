@@ -34,7 +34,7 @@ namespace CCLib
 
 	Invalid values can be represented by NAN_VALUE.
 **/
-class CC_CORE_LIB_API ScalarField : public GenericChunkedArray<1,ScalarType>
+class CC_CORE_LIB_API ScalarField : public GenericChunkedArray<1, ScalarType>
 {
 public:
 
@@ -43,6 +43,12 @@ public:
 		\param name scalar field name
 	**/
 	explicit ScalarField(const char* name = 0);
+
+	//! Copy constructor
+	/** \param sf scalar field to copy
+		\warning May throw a std::bad_alloc exception
+	**/
+	ScalarField(const ScalarField& sf);
 
 	//! Sets scalar field name
 	void setName(const char* name);

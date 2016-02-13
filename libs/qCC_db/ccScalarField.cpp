@@ -47,6 +47,24 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 	setColorScale(ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR));
 }
 
+ccScalarField::ccScalarField(const ccScalarField& sf)
+	: ScalarField(sf)
+	, m_displayRange(sf.m_displayRange)
+	, m_saturationRange(sf.m_saturationRange)
+	, m_logSaturationRange(sf.m_logSaturationRange)
+	, m_showNaNValuesInGrey(sf.m_showNaNValuesInGrey)
+	, m_symmetricalScale(sf.m_symmetricalScale)
+	, m_logScale(sf.m_logScale)
+	, m_alwaysShowZero(sf.m_alwaysShowZero)
+	, m_colorScale(sf.m_colorScale)
+	, m_colorRampSteps(sf.m_colorRampSteps)
+	, m_histogram(sf.m_histogram)
+	, m_modified(sf.m_modified)
+	, m_globalShift(sf.m_globalShift)
+{
+	computeMinAndMax();
+}
+
 ScalarType ccScalarField::normalize(ScalarType d) const
 {
 	if (/*!ValidValue(d) || */!m_displayRange.isInRange(d)) //NaN values are also rejected by 'isInRange'!

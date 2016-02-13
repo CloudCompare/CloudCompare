@@ -30,6 +30,7 @@
 #include <ccProgressDialog.h>
 #include <ccPolyline.h>
 #include <ccMesh.h>
+#include <ccColorScalesManager.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
@@ -44,6 +45,8 @@
 
 //System
 #include <assert.h>
+
+static const char HILLSHADE_FIELD_NAME[] = "Hillshade";
 
 ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint)
@@ -81,6 +84,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 	connect(exportContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(exportContourLines()));
 	connect(clearContoursPushButton,	SIGNAL(clicked()),					this,	SLOT(removeContourLines()));
 	connect(activeLayerComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(activeLayerChanged(int)));
+	connect(generateHillshadePushButton,SIGNAL(clicked()),					this,	SLOT(generateHillshade()));
 
 	//custom bbox editor
 	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox(); 
@@ -106,7 +110,9 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			for (unsigned i=0; i<pc->getNumberOfScalarFields(); ++i)
+			{
 				activeLayerComboBox->addItem(pc->getScalarField(i)->getName());
+			}
 		}
 		else
 		{
@@ -270,7 +276,9 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 		}
 
 		if (m_window && autoRedraw)
+		{
 			m_window->redraw();
+		}
 	}
 }
 
@@ -446,6 +454,7 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 
 ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
 													bool interpolateSF,
+													bool copyHillshadeSF,
 													QString activeSFName) const
 {
 	if (!m_cloud || !m_grid.isValid())
@@ -472,6 +481,28 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 	//success?
 	if (cloudGrid)
 	{
+		//add the hillshade SF
+		if (copyHillshadeSF)
+		{
+			int hillshadeSFIdx = m_rasterCloud->getScalarFieldIndexByName(HILLSHADE_FIELD_NAME);
+			if (hillshadeSFIdx >= 0)
+			{
+				CCLib::ScalarField* hillshadeField = m_rasterCloud->getScalarField(hillshadeSFIdx);
+				if (hillshadeField->currentSize() == cloudGrid->size())
+				{
+					try
+					{
+						ccScalarField* hillshadeClone = new ccScalarField(*static_cast<ccScalarField*>(hillshadeField));
+						cloudGrid->addScalarField(hillshadeClone);
+					}
+					catch (const std::bad_alloc&)
+					{
+						ccLog::Warning("[Rasterize] Not enough memory to export the hillshade field");
+					}
+				}
+			}
+		}
+
 		//currently displayed SF
 		int activeSFIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(activeSFName));
 		cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
@@ -487,6 +518,16 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 
 void ccRasterizeTool::updateGridAndDisplay()
 {
+	//special case: remove the (temporary) hillshade field entry
+	int hillshadeIndex = activeLayerComboBox->findText(HILLSHADE_FIELD_NAME);
+	if (hillshadeIndex >= 0)
+	{
+		if (activeLayerComboBox->currentIndex() == hillshadeIndex && activeLayerComboBox->count() > 1)
+		{
+			activeLayerComboBox->setCurrentIndex(0);
+		}
+		activeLayerComboBox->removeItem(hillshadeIndex);
+	}
 	bool activeLayerIsSF = activeLayerComboBox->currentIndex() != 0;
 	bool interpolateSF = activeLayerIsSF || (getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
 	bool success = updateGrid(interpolateSF);
@@ -508,7 +549,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 			exportedFields.push_back(PER_CELL_HEIGHT);
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = activeLayerComboBox->currentText();
-			m_rasterCloud = convertGridToCloud(exportedFields, activeLayerIsSF, activeLayerName);
+			m_rasterCloud = convertGridToCloud(exportedFields, activeLayerIsSF, false, activeLayerName);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -518,11 +559,11 @@ void ccRasterizeTool::updateGridAndDisplay()
 		if (m_rasterCloud)
 		{
 			m_window->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false,m_window);
+			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_window);
 			update2DDisplayZoom(box);
 
 			//update 
-			activeLayerChanged(activeLayerComboBox->currentIndex(),false);
+			activeLayerChanged(activeLayerComboBox->currentIndex(), false);
 		}
 		else
 		{
@@ -645,6 +686,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	bool activeLayerIsSF = activeLayerComboBox->currentIndex() != 0;
 	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
 													getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE || activeLayerIsSF,
+													true,
 													activeLayerName);
 
 	if (rasterCloud && autoExport)
@@ -1029,6 +1071,151 @@ void ccRasterizeTool::generateRaster() const
 #endif
 }
 
+//See http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
+void ccRasterizeTool::generateHillshade()
+{
+	if (!m_grid.isValid() || !m_rasterCloud)
+	{
+		ccLog::Error("Need a valid raster/cloud to compute contours!");
+		return;
+	}
+	if (m_grid.height < 3 || m_grid.width < 3)
+	{
+		ccLog::Error("Grid is too small");
+		return;
+	}
+
+	//get/create layer
+	ccScalarField* hillshadeLayer = 0;
+	int sfIdx = m_rasterCloud->getScalarFieldIndexByName(HILLSHADE_FIELD_NAME);
+	if (sfIdx >= 0)
+	{
+		hillshadeLayer = static_cast<ccScalarField*>(m_rasterCloud->getScalarField(sfIdx));
+	}
+	else
+	{
+		hillshadeLayer = new ccScalarField(HILLSHADE_FIELD_NAME);
+		if (!hillshadeLayer->reserve(m_rasterCloud->size()))
+		{
+			ccLog::Error("Not enough memory!");
+			hillshadeLayer->release();
+			return;
+		}
+
+		sfIdx = m_rasterCloud->addScalarField(hillshadeLayer);
+		activeLayerComboBox->addItem(HILLSHADE_FIELD_NAME);
+		activeLayerComboBox->setEnabled(true);
+	}
+	assert(hillshadeLayer && hillshadeLayer->currentSize() == m_rasterCloud->size());
+	hillshadeLayer->fill(NAN_VALUE);
+
+	bool sparseSF = (hillshadeLayer->currentSize() != m_grid.height * m_grid.width);
+
+	//now we can compute the hillshade
+	int zenith_deg = sunZenithSpinBox->value();
+	double zenith_rad = zenith_deg * CC_DEG_TO_RAD;
+
+	double cos_zenith_rad = cos(zenith_rad);
+	double sin_zenith_rad = sin(zenith_rad);
+
+	int azimuth_deg = sunAzimuthSpinBox->value();
+	int azimuth_math = 360 - azimuth_deg + 90;
+	double azimuth_rad = azimuth_math * CC_DEG_TO_RAD;
+
+	//for all cells
+	unsigned validCellIndex = 0;
+	for (unsigned j=sparseSF ? 0 : 1; j<m_grid.height-1; ++j)
+	{
+		RasterCell* cell = m_grid.data[j];
+		
+		for (unsigned i=sparseSF ? 0 : 1; i<m_grid.width; ++i)
+		{
+			//valid height value
+			if (cell[i].h == cell[i].h)
+			{
+				if (i != 0 && i+1 != m_grid.width && j != 0)
+				{
+					double dz_dx = 0.0;
+					int dz_dx_count = 0;
+					double dz_dy = 0.0;
+					int dz_dy_count = 0;
+				
+					for (int di=-1; di<=1; ++di)
+					{
+						for (int dj=-1; dj<=1; ++dj)
+						{
+							const RasterCell& n = m_grid.data[j+dj][i+di];
+							if (n.h == n.h)
+							{
+								if (di != 0)
+								{
+									int dx_weight = (dj == 0 ? 2 : 1);
+									dz_dx += (di < 0 ? -1.0 : 1.0) * dx_weight * n.h;
+									dz_dx_count += dx_weight;
+								}
+
+								if (dj != 0)
+								{
+									int dy_weight = (di == 0 ? 2 : 1);
+									dz_dy += (dj < 0 ? -1.0 : 1.0) * dy_weight * n.h;
+									dz_dy_count += dy_weight;
+								}
+							}
+						}
+					}
+
+					//for now we only handle the cell that have 8 valid neighbors!
+					if (	dz_dx_count == 8
+						&&	dz_dy_count == 8)
+					{
+						dz_dx /= (8.0 * m_grid.gridStep);
+						dz_dy /= (8.0 * m_grid.gridStep);
+
+						 double slope_rad = atan( /*z_factor **/sqrt(dz_dx*dz_dx + dz_dy*dz_dy) );
+
+						 double aspect_rad = 0;
+						 static const double s_zero = 1.0e-8;
+						 if (fabs(dz_dx) > s_zero)
+						 {
+							 aspect_rad = atan2(dz_dy, -dz_dx);
+							 if (aspect_rad < 0)
+							 {
+								 aspect_rad += 2.0 * M_PI;
+							 }
+						 }
+						 else // dz_dx == 0
+						 {
+							 if (dz_dy > s_zero)
+							 {
+								 aspect_rad = 0.5 * M_PI;
+							 }
+							 else if (dz_dy < s_zero)
+							 {
+								 aspect_rad = 1.5 * M_PI;
+							 }
+						 }
+
+						 ScalarType hillshade = static_cast<ScalarType>(std::max(0.0, cos_zenith_rad * cos(slope_rad) + sin_zenith_rad * sin(slope_rad) * cos(azimuth_rad - aspect_rad)));
+						 hillshadeLayer->setValue(sparseSF ? validCellIndex : i + j * m_grid.width, hillshade);
+					}
+				}
+				++validCellIndex;
+			}
+		}
+	}
+
+	hillshadeLayer->computeMinAndMax();
+	hillshadeLayer->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+	m_rasterCloud->setCurrentDisplayedScalarField(sfIdx);
+	m_rasterCloud->showSF(true);
+	activeLayerComboBox->setCurrentIndex(activeLayerComboBox->findText(HILLSHADE_FIELD_NAME));
+
+	if (m_window)
+	{
+		m_window->redraw();
+	}
+}
+
 void ccRasterizeTool::generateContours()
 {
 	if (!m_grid.isValid() || !m_rasterCloud)
@@ -1244,7 +1431,9 @@ void ccRasterizeTool::generateContours()
 	}
 
 	if (m_window)
+	{
 		m_window->redraw();
+	}
 }
 
 void ccRasterizeTool::exportContourLines()

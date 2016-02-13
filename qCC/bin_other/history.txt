@@ -63,6 +63,7 @@ v2.7.beta ??/??/201?
 		- bug fix: the classes (labels) could be inversed in some cases
 
 	* Rasterize tool:
+		- the Rasterize tool can now compute Hillshade
 		- the 'interpolate' option can now be used with the 'average height' projection. In this case
 			only the coordinates of the original point are kept (the point which is the closest to the cell center)
 			and the height is replaced by the average cell height.

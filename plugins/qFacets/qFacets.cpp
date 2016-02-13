@@ -605,7 +605,7 @@ void GetFacetMetaData(ccFacet* facet, FacetMetaData& data)
 {
 	//try to get the facet index from the facet name!
 	{
-		QStringList tokens = facet->getName().split(" ",QString::SkipEmptyParts);
+		QStringList tokens = facet->getName().split(" ", QString::SkipEmptyParts);
 		if (tokens.size() > 1 && tokens[0] == QString("facet"))
 		{
 			bool ok = true;
@@ -631,7 +631,7 @@ void GetFacetMetaData(ccFacet* facet, FacetMetaData& data)
 	//compute dip direction & dip
 	{
 		PointCoordinateType dipDir = 0, dip = 0;
-		ccNormalVectors::ConvertNormalToDipAndDipDir(data.normal,dip,dipDir);
+		ccNormalVectors::ConvertNormalToDipAndDipDir(data.normal, dip, dipDir);
 		data.dipDir_deg = static_cast<int>(dipDir);
 		data.dip_deg = static_cast<int>(dip);
 	}
@@ -870,7 +870,7 @@ void qFacets::exportFacets()
 			poly = newPoly;
 		}
 
-		toSave.addChild(poly,useNativeOrientation ? ccHObject::DP_NONE : ccHObject::DP_PARENT_OF_OTHER);
+		toSave.addChild(poly, useNativeOrientation ? ccHObject::DP_NONE : ccHObject::DP_PARENT_OF_OTHER);
 
 		//save associated meta-data as 'shapefile' fields
 		{
@@ -1013,15 +1013,16 @@ void qFacets::classifyFacetsByAngle(	ccHObject* group,
 	{
 		if (group->getParent())
 		{
-			m_app->removeFromDB(group,false);
+			m_app->removeFromDB(group, false);
 		}
 
-		bool success = FacetsClassifier::ByOrientation(group,angleStep_deg,maxDist);
+		bool success = FacetsClassifier::ByOrientation(group, angleStep_deg, maxDist);
 		m_app->addToDB(group);
 
 		if (!success)
 		{
-			m_app->dispToConsole("An error occurred while classifying the facets! (not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(	"An error occurred while classifying the facets! (not enough memory?)",
+									ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 	}
@@ -1050,13 +1051,13 @@ void qFacets::exportFacetsInfo()
 	}
 	assert(!facets.empty());
 
-	FacetsExportDlg fDlg(FacetsExportDlg::ASCII_FILE_IO,m_app->getMainWindow());
+	FacetsExportDlg fDlg(FacetsExportDlg::ASCII_FILE_IO, m_app->getMainWindow());
 	fDlg.orientationGroupBox->setEnabled(false);
 
 	//persistent settings (default export path)
 	QSettings settings;
 	settings.beginGroup("qFacets");
-	QString facetsSavePath = settings.value("exportPath",QApplication::applicationDirPath()).toString();
+	QString facetsSavePath = settings.value("exportPath", QApplication::applicationDirPath()).toString();
 	fDlg.destinationPathLineEdit->setText(facetsSavePath + QString("/facets.csv"));
 
 	if (!fDlg.exec())
@@ -1065,20 +1066,24 @@ void qFacets::exportFacetsInfo()
 	QString filename = fDlg.destinationPathLineEdit->text();
 
 	//save current export path to persistent settings
-	settings.setValue("exportPath",QFileInfo(filename).absolutePath());
+	settings.setValue("exportPath", QFileInfo(filename).absolutePath());
 
 	QFile outFile(filename);
 	if (outFile.exists())
 	{
 		//if the file already exists, ask for confirmation!
-		if (QMessageBox::warning(m_app->getMainWindow(),"File already exists!","File already exists! Are you sure you want to overwrite it?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::warning(	m_app->getMainWindow(),
+									"Overwrite",
+									"File already exists! Are you sure you want to overwrite it?",
+									QMessageBox::Yes,
+									QMessageBox::No) == QMessageBox::No)
 			return;
 	}
 
 	//open CSV file
 	if (!outFile.open(QFile::WriteOnly | QFile::Text))
 	{
-		m_app->dispToConsole(QString("Failed to open file for writing! Check available space and access rights"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole(QString("Failed to open file for writing! Check available space and access rights"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -1110,7 +1115,7 @@ void qFacets::exportFacetsInfo()
 		GetFacetMetaData(facet, data);
 		//horizontal and vertical extensions
 		double horizExt = 0, vertExt = 0;
-		ComputeFacetExtensions(data.normal,facet->getContour(),horizExt,vertExt);
+		ComputeFacetExtensions(data.normal, facet->getContour(), horizExt, vertExt);
 
 		outStream << data.facetIndex << ";";
 		outStream << data.center.x << ";" << data.center.y << ";" << data.center.z << ";";

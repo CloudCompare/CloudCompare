@@ -111,9 +111,11 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget);
 	pdlg.setMethodTitle("Loading PTX file");
+	pdlg.setAutoClose(false);
 
 	//progress dialog (for normals computation)
-	ccProgressDialog normalsProgressdlg(true, parameters.parentWidget);
+	ccProgressDialog normalsProgressDlg(true, parameters.parentWidget);
+	normalsProgressDlg.setAutoClose(false);
 
 	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
 	{
@@ -469,7 +471,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				//by default we don't compute normals without asking the user
 				if (parameters.autoComputeNormals)
 				{
-					cloud->computeNormalsWithGrids(LS, 2, true, &normalsProgressdlg);
+					cloud->computeNormalsWithGrids(LS, 2, true, &normalsProgressDlg);
 				}
 			}
 

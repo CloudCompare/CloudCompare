@@ -81,7 +81,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 						static_cast<float>(s_defaultNorm.z) };
 
 	//progress dialog
-	ccProgressDialog pdlg(true); //cancel available
+	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save PN file");
 	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
@@ -149,7 +149,7 @@ CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, LoadPar
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
-	ccProgressDialog pdlg(true); //cancel available
+	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Open PN file");
 	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));

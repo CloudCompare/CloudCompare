@@ -158,7 +158,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	ccProgressDialog pDlg(false);
+	ccProgressDialog pDlg(false, parameters.parentWidget);
 	pDlg.setMethodTitle("BIN file");
 	pDlg.setInfo("Please wait... saving in progress");
 	pDlg.setRange(0,0);
@@ -364,7 +364,7 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		if (parameters.alwaysDisplayLoadDialog)
 		{
-			ccProgressDialog pDlg(false);
+			ccProgressDialog pDlg(false, parameters.parentWidget);
 			pDlg.setMethodTitle("BIN file");
 			pDlg.setInfo(qPrintable(QString("Loading: %1").arg(QFileInfo(filename).fileName())));
 			pDlg.setRange(0,0);

@@ -208,7 +208,8 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		Ui_commandLineDlg commandLineDlg;
 		commandLineDlg.setupUi(&consoleDlg);
 		consoleDlg.show();
-		ccConsole::Init(commandLineDlg.consoleWidget,&consoleDlg);
+		ccConsole::Init(commandLineDlg.consoleWidget, &consoleDlg);
+		s_loadParameters.parentWidget = &consoleDlg;
 	}
 
 	//parse input

@@ -1516,7 +1516,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 	}
 
-	ccProgressDialog pDlg(false);
+	ccProgressDialog pDlg(false, parameters.parentWidget);
 	if (parameters.alwaysDisplayLoadDialog)
 	{
 		pDlg.setInfo("Loading in progress...");

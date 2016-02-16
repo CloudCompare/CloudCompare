@@ -58,9 +58,9 @@ public:
 													LoadParameters& parameters);
 
 	//! Returns associated dialog (creates it if necessary)
-	static QSharedPointer<AsciiOpenDlg> GetOpenDialog();
+	static QSharedPointer<AsciiOpenDlg> GetOpenDialog(QWidget* parentWidget = 0);
 	//! Returns associated dialog (creates it if necessary)
-	static QSharedPointer<AsciiSaveDlg> GetSaveDialog();
+	static QSharedPointer<AsciiSaveDlg> GetSaveDialog(QWidget* parentWidget = 0);
 
 protected:
 

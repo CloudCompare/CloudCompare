@@ -51,8 +51,8 @@ public:
 protected:
 
 	//! Custom save method
-	CC_FILE_ERROR saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile);
-	CC_FILE_ERROR saveToBINFile(ccGenericMesh* mesh, FILE *theFile);
+	CC_FILE_ERROR saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWidget* parentWidget = 0);
+	CC_FILE_ERROR saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidget* parentWidget = 0);
 
 	//! Custom load method for ASCII files
 	CC_FILE_ERROR loadASCIIFile(QFile& fp,

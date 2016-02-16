@@ -388,7 +388,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	}
 
 	//progress dialog
-	ccProgressDialog pdlg(true); //cancel available
+	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save LAS file");
 	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
@@ -671,7 +671,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
 
 		//progress dialog
-		ccProgressDialog pdlg(true); //cancel available
+		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 		CCLib::NormalizedProgress nprogress(&pdlg,nbOfPoints);
 		pdlg.setMethodTitle("Open LAS file");
 		pdlg.setInfo(qPrintable(QString("Points: %1").arg(nbOfPoints)));

@@ -508,6 +508,7 @@ void ccViewer::addToDB(QStringList filenames)
 	FileIOFilter::LoadParameters parameters;
 	parameters.alwaysDisplayLoadDialog = false;
 	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+	parameters.parentWidget = this;
 
 	for (int i=0; i<filenames.size(); ++i)
 	{

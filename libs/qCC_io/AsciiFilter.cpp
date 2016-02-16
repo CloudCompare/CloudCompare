@@ -41,18 +41,18 @@
 QSharedPointer<AsciiSaveDlg> AsciiFilter::s_saveDialog(0);
 QSharedPointer<AsciiOpenDlg> AsciiFilter::s_openDialog(0);
 
-QSharedPointer<AsciiSaveDlg> AsciiFilter::GetSaveDialog()
+QSharedPointer<AsciiSaveDlg> AsciiFilter::GetSaveDialog(QWidget* parentWidget/*=0*/)
 {
 	if (!s_saveDialog)
-		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg());
+		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg(parentWidget));
 
 	return s_saveDialog;
 }
 
-QSharedPointer<AsciiOpenDlg> AsciiFilter::GetOpenDialog()
+QSharedPointer<AsciiOpenDlg> AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 {
 	if (!s_openDialog)
-		s_openDialog = QSharedPointer<AsciiOpenDlg>(new AsciiOpenDlg());
+		s_openDialog = QSharedPointer<AsciiOpenDlg>(new AsciiOpenDlg(parentWidget));
 
 	return s_openDialog;
 }
@@ -84,7 +84,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 {
 	assert(entity && !filename.isEmpty());
 
-	QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog();
+	QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog(parameters.parentWidget);
 	//if the dialog shouldn't be shown, we'll simply take the default values!
 	if (parameters.alwaysDisplaySaveDialog && saveDialog->autoShow() && !saveDialog->exec())
 		return CC_FERR_CANCELED_BY_USER;
@@ -354,7 +354,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	//column attribution dialog
 	//DGM: we ask for the semi-persistent dialog as it may have
 	//been already initialized (by the command-line for instance)
-	QSharedPointer<AsciiOpenDlg> openDialog = GetOpenDialog();
+	QSharedPointer<AsciiOpenDlg> openDialog = GetOpenDialog(parameters.parentWidget);
 	s_openDialog.clear(); //release the 'source' dialog (so as to be sure to reset it next time)
 	
 	assert(openDialog);

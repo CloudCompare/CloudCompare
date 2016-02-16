@@ -95,7 +95,9 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 	//open ASCII file for reading
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
 		return CC_FERR_READING;
+	}
 
 	QTextStream inFile(&file);
 
@@ -105,6 +107,14 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 	CC_FILE_ERROR result = CC_FERR_NO_LOAD;
 	ScalarType minIntensity = 0;
 	ScalarType maxIntensity = 0;
+
+	//progress dialog
+	ccProgressDialog pdlg(true, parameters.parentWidget);
+	pdlg.setMethodTitle("Loading PTX file");
+
+	//progress dialog (for normals computation)
+	ccProgressDialog normalsProgressdlg(true, parameters.parentWidget);
+
 	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
 	{
 		unsigned width = 0, height = 0;
@@ -245,10 +255,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 		//read points
 		{
-			//progress dialog
-			ccProgressDialog pdlg(true);
 			CCLib::NormalizedProgress nprogress(&pdlg, gridSize);
-			pdlg.setMethodTitle("Loading PTX file");
 			pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
 			pdlg.start();
 
@@ -462,8 +469,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				//by default we don't compute normals without asking the user
 				if (parameters.autoComputeNormals)
 				{
-					ccProgressDialog pdlg(true);
-					cloud->computeNormalsWithGrids(LS, 2, true, &pdlg);
+					cloud->computeNormalsWithGrids(LS, 2, true, &normalsProgressdlg);
 				}
 			}
 

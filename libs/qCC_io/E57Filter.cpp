@@ -2095,7 +2095,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 			unsigned scanCount = static_cast<unsigned>(data3D.childCount());
 
 			//global progress bar
-			ccProgressDialog pdlg(true);
+			ccProgressDialog pdlg(true, parameters.parentWidget);
 			CCLib::NormalizedProgress* nprogress = 0;
 			bool showGlobalProgress = (scanCount > 10);
 			if (showGlobalProgress)
@@ -2177,7 +2177,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 			if (imageCount)
 			{
 				//progress bar
-				ccProgressDialog pdlg(true);
+				ccProgressDialog pdlg(true, parameters.parentWidget);
 				CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
 				pdlg.setMethodTitle("Read E57 file");
 				pdlg.setInfo(qPrintable(QString("Images: %1").arg(imageCount)));

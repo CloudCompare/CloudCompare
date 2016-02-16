@@ -31,6 +31,8 @@
 #include "qCC_io.h"
 #include "ccGlobalShiftManager.h"
 
+class QWidget;
+
 //! Typical I/O filter errors
 enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
 					CC_FERR_BAD_ARGUMENT,
@@ -73,6 +75,7 @@ public: //initialization
 			, coordinatesShiftEnabled(0)
 			, coordinatesShift(0)
 			, autoComputeNormals(false)
+			, parentWidget(0)
 		{}
 
 		//! How to handle big coordinates
@@ -85,17 +88,23 @@ public: //initialization
 		CCVector3d* coordinatesShift;
 		//! Whether normals should be computed at loading time (if possible - e.g. for gridded clouds) or not
 		bool autoComputeNormals;
+		//! Parent widget (if any)
+		QWidget* parentWidget;
 	};
 
 	//! Generic saving parameters
 	struct SaveParameters
 	{
 		//! Default constructor
-		SaveParameters() : alwaysDisplaySaveDialog(true)
+		SaveParameters()
+			: alwaysDisplaySaveDialog(true)
+			, parentWidget(0)
 		{}
 
 		//! Wether to always display a dialog (if any), even if automatic guess is possible
 		bool alwaysDisplaySaveDialog;
+		//! Parent widget (if any)
+		QWidget* parentWidget;
 	};
 
 	//! Shared type

@@ -89,7 +89,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return CC_FERR_WRITING;
 
 	//progress
-	ccProgressDialog pdlg(true);
+	ccProgressDialog pdlg(true, parameters.parentWidget);
 	unsigned numberOfTriangles = mesh->size();
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfTriangles);
 	pdlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
@@ -443,7 +443,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	int maxTriNormIndex = -1;
 
 	//progress dialog
-	ccProgressDialog pDlg(true);
+	ccProgressDialog pDlg(true, parameters.parentWidget);
 	pDlg.setMethodTitle("OBJ file");
 	pDlg.setInfo("Loading in progress...");
 	pDlg.setRange(0,static_cast<int>(file.size()));

@@ -11399,17 +11399,20 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	bool loadCoordinatesTransEnabled = false;
 	
 	FileIOFilter::LoadParameters parameters;
-	parameters.alwaysDisplayLoadDialog = true;
-	parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
-	parameters.coordinatesShift = &loadCoordinatesShift;
-	parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+	{
+		parameters.alwaysDisplayLoadDialog = true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.coordinatesShift = &loadCoordinatesShift;
+		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters.parentWidget = this;
+	}
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0,0,0);
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],parameters,fileFilter);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, fileFilter);
 
 		if (newGroup)
 		{
@@ -11780,6 +11783,7 @@ void MainWindow::doActionSaveFile()
 	FileIOFilter::SaveParameters parameters;
 	{
 		parameters.alwaysDisplaySaveDialog = true;
+		parameters.parentWidget = this;
 	}
 	
 	//specific case: BIN format

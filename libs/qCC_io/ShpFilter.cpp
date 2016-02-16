@@ -1539,7 +1539,7 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	//progress bar
-	ccProgressDialog pdlg(true);
+	ccProgressDialog pdlg(true, parameters.parentWidget);
 	qint64 fileSize = file.size();
 	pdlg.setMaximum(static_cast<int>(fileSize));
 	pdlg.setMethodTitle("Load SHP file");

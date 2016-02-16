@@ -86,7 +86,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	float val = std::numeric_limits<float>::quiet_NaN();
 
 	//progress dialog
-	ccProgressDialog pdlg(true); //cancel available
+	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save PV file");
 	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
@@ -148,7 +148,7 @@ CC_FILE_ERROR PVFilter::loadFile(QString filename, ccHObject& container, LoadPar
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
-	ccProgressDialog pdlg(true); //cancel available
+	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Open PV file");
 	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));

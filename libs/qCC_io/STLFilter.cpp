@@ -95,13 +95,13 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	return result;
 }
 
-CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile)
+CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidget* parentWidget/*=0*/)
 {
 	assert(theFile && mesh && mesh->size()!=0);
 	unsigned faceCount = mesh->size();
 	
 	//progress
-	ccProgressDialog pDlg(true);
+	ccProgressDialog pDlg(true, parentWidget);
 	CCLib::NormalizedProgress nprogress(&pDlg,faceCount);
 	pDlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
 	pDlg.setInfo(qPrintable(QString("Number of facets: %1").arg(faceCount)));
@@ -178,13 +178,13 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
+CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWidget* parentWidget/*=0*/)
 {
 	assert(theFile && mesh && mesh->size()!=0);
 	unsigned faceCount = mesh->size();
 	
 	//progress
-	ccProgressDialog pDlg(true);
+	ccProgressDialog pDlg(true, parentWidget);
 	CCLib::NormalizedProgress nprogress(&pDlg,faceCount);
 	pDlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
 	pDlg.setInfo(qPrintable(QString("Number of facets: %1").arg(faceCount)));
@@ -406,7 +406,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		const int razValue = -1;
 		if (equivalentIndexes && equivalentIndexes->resize(vertCount,true,razValue))
 		{
-			ccProgressDialog pDlg(true);
+			ccProgressDialog pDlg(true, parameters.parentWidget);
 			ccOctree* octree = vertices->computeOctree(&pDlg);
 			if (octree)
 			{
@@ -576,7 +576,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(	QFile& fp,
 	mesh->setName(name);
 
 	//progress dialog
-	ccProgressDialog pDlg(true);
+	ccProgressDialog pDlg(true, parameters.parentWidget);
 	pDlg.setMethodTitle("(ASCII) STL file");
 	pDlg.setInfo("Loading in progress...");
 	pDlg.setRange(0,0);
@@ -889,7 +889,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	}
 
 	//progress dialog
-	ccProgressDialog pDlg(true);
+	ccProgressDialog pDlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nProgress(&pDlg,faceCount);
 	pDlg.setMethodTitle("Loading binary STL file");
 	pDlg.setInfo(qPrintable(QString("Loading %1 faces").arg(faceCount)));

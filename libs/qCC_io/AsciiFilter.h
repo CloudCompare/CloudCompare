@@ -27,6 +27,14 @@
 //Qt
 #include <QSharedPointer>
 
+template <class T> struct AutoDeletePtr
+{
+	AutoDeletePtr(T* _ptr = 0) : ptr(_ptr) {}
+	~AutoDeletePtr() { release(); }
+	inline void release() { if (ptr) { delete ptr; ptr = 0; } }
+	T* ptr;
+};
+
 //! ASCII point cloud I/O filter
 class QCC_IO_LIB_API AsciiFilter : public FileIOFilter
 {
@@ -58,9 +66,9 @@ public:
 													LoadParameters& parameters);
 
 	//! Returns associated dialog (creates it if necessary)
-	static QSharedPointer<AsciiOpenDlg> GetOpenDialog(QWidget* parentWidget = 0);
+	static AsciiOpenDlg* GetOpenDialog(QWidget* parentWidget = 0);
 	//! Returns associated dialog (creates it if necessary)
-	static QSharedPointer<AsciiSaveDlg> GetSaveDialog(QWidget* parentWidget = 0);
+	static AsciiSaveDlg* GetSaveDialog(QWidget* parentWidget = 0);
 
 protected:
 
@@ -68,9 +76,9 @@ protected:
 	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
 
 	//! Associated (export) dialog
-	static QSharedPointer<AsciiSaveDlg> s_saveDialog;
+	static AutoDeletePtr<AsciiSaveDlg> s_saveDialog;
 	//! Associated (import) dialog
-	static QSharedPointer<AsciiOpenDlg> s_openDialog;
+	static AutoDeletePtr<AsciiOpenDlg> s_openDialog;
 };
 
 #endif //CC_ASCII_FILTER_HEADER

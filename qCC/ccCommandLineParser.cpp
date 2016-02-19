@@ -579,7 +579,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 
 	if (skipLines > 0)
 	{
-		QSharedPointer<AsciiOpenDlg> openDialog = AsciiFilter::GetOpenDialog();
+		AsciiOpenDlg* openDialog = AsciiFilter::GetOpenDialog();
 		assert(openDialog);
 		openDialog->setSkippedLines(skipLines);
 	}
@@ -3360,7 +3360,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 	//default options for ASCII output
 	if (fileFilter == AsciiFilter::GetFileFilter())
 	{
-		QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+		AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 		assert(saveDialog);
 		saveDialog->setCoordsPrecision(s_precision);
 		saveDialog->setSfPrecision(s_precision);
@@ -3400,7 +3400,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
-			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
 			if (saveDialog)
 			{
@@ -3433,7 +3433,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			else
 				return Error(QString("Invalid separator! ('%1')").arg(separatorStr));
 
-			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
 			if (saveDialog)
 			{
@@ -3448,7 +3448,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
-			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
 			if (saveDialog)
 			{
@@ -3463,7 +3463,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (fileFilter != AsciiFilter::GetFileFilter())
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
-			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+			AsciiSaveDlg* saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
 			if (saveDialog)
 			{

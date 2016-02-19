@@ -38,23 +38,27 @@
 #include <assert.h>
 
 //declaration of static members
-QSharedPointer<AsciiSaveDlg> AsciiFilter::s_saveDialog(0);
-QSharedPointer<AsciiOpenDlg> AsciiFilter::s_openDialog(0);
+AutoDeletePtr<AsciiSaveDlg> AsciiFilter::s_saveDialog(0);
+AutoDeletePtr<AsciiOpenDlg> AsciiFilter::s_openDialog(0);
 
-QSharedPointer<AsciiSaveDlg> AsciiFilter::GetSaveDialog(QWidget* parentWidget/*=0*/)
+AsciiSaveDlg* AsciiFilter::GetSaveDialog(QWidget* parentWidget/*=0*/)
 {
-	if (!s_saveDialog)
-		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg(parentWidget));
+	if (!s_saveDialog.ptr)
+	{
+		s_saveDialog.ptr = new AsciiSaveDlg(parentWidget);
+	}
 
-	return s_saveDialog;
+	return s_saveDialog.ptr;
 }
 
-QSharedPointer<AsciiOpenDlg> AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
+AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
 {
-	if (!s_openDialog)
-		s_openDialog = QSharedPointer<AsciiOpenDlg>(new AsciiOpenDlg(parentWidget));
+	if (!s_openDialog.ptr)
+	{
+		s_openDialog.ptr = new AsciiOpenDlg(parentWidget);
+	}
 
-	return s_openDialog;
+	return s_openDialog.ptr;
 }
 
 bool AsciiFilter::canLoadExtension(QString upperCaseExt) const
@@ -84,10 +88,14 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 {
 	assert(entity && !filename.isEmpty());
 
-	QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog(parameters.parentWidget);
+	AsciiSaveDlg* saveDialog = GetSaveDialog(parameters.parentWidget);
+	assert(saveDialog);
+
 	//if the dialog shouldn't be shown, we'll simply take the default values!
 	if (parameters.alwaysDisplaySaveDialog && saveDialog->autoShow() && !saveDialog->exec())
+	{
 		return CC_FERR_CANCELED_BY_USER;
+	}
 
 	if (!entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
@@ -115,7 +123,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 			{
 				unsigned counter = 0;
 				//disable the save dialog so that it doesn't appear again!
-				QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog();
+				AsciiSaveDlg* saveDialog = GetSaveDialog();
+				assert(saveDialog);
+
 				bool autoShow = saveDialog->autoShow();
 				saveDialog->setAutoShow(false);
 
@@ -354,9 +364,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	//column attribution dialog
 	//DGM: we ask for the semi-persistent dialog as it may have
 	//been already initialized (by the command-line for instance)
-	QSharedPointer<AsciiOpenDlg> openDialog = GetOpenDialog(parameters.parentWidget);
-	s_openDialog.clear(); //release the 'source' dialog (so as to be sure to reset it next time)
-	
+	AsciiOpenDlg* openDialog = GetOpenDialog(parameters.parentWidget);
 	assert(openDialog);
 	openDialog->setFilename(filename);
 
@@ -380,6 +388,8 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 		//show the dialog
 		if (!openDialog->exec())
 		{
+			s_openDialog.release(); //release the 'source' dialog (so as to be sure to reset it next time)
+
 			//process was cancelled
 			return CC_FERR_CANCELED_BY_USER;
 		}
@@ -393,6 +403,8 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	char separator = static_cast<char>(openDialog->getSeparator());
 	unsigned maxCloudSize = openDialog->getMaxCloudSize();
 	unsigned skipLineCount = openDialog->getSkippedLinesCount();
+
+	s_openDialog.release(); //release the 'source' dialog (so as to be sure to reset it next time)
 
 	return loadCloudFromFormatedAsciiFile(	filename,
 											container,

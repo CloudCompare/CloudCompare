@@ -23,14 +23,14 @@ extern "C"
 struct FFmpegStuffEnc
 {
 	AVFormatContext *formatContext;
-	AVCodecContext *codexContext;
+	AVCodecContext *codecContext;
 	AVStream *videoStream;
 	AVFrame *frame;
 	SwsContext *swsContext;
 
 	FFmpegStuffEnc()
 		: formatContext(0)
-		, codexContext(0)
+		, codecContext(0)
 		, videoStream(0)
 		, frame(0)
 		, swsContext(0)
@@ -75,9 +75,10 @@ bool QVideoEncoder::initFrame()
 		return false;
 	}
 
-	m_ff->frame->format = m_ff->codexContext->pix_fmt;
-	m_ff->frame->width  = m_ff->codexContext->width;
-	m_ff->frame->height = m_ff->codexContext->height;
+	m_ff->frame->format = m_ff->codecContext->pix_fmt;
+	m_ff->frame->width  = m_ff->codecContext->width;
+	m_ff->frame->height = m_ff->codecContext->height;
+	m_ff->frame->pts = 0;
 
     /* allocate the buffers for the frame data */
     int ret = av_frame_get_buffer(m_ff->frame, 32);
@@ -144,7 +145,37 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 			*errorString = "Could not load the codec";
 		return false;
 	}
-	m_ff->codexContext = avcodec_alloc_context3(pCodec);
+	m_ff->codecContext = avcodec_alloc_context3(pCodec);
+
+	/* put sample parameters */
+	m_ff->codecContext->bit_rate = m_bitrate;
+	/* resolution must be a multiple of two */
+	m_ff->codecContext->width = m_width;
+	m_ff->codecContext->height = m_height;
+	/* frames per second */
+	m_ff->codecContext->time_base.num = 1;
+	m_ff->codecContext->time_base.den = m_fps;
+	m_ff->codecContext->gop_size = m_gop;
+	m_ff->codecContext->max_b_frames = 1;
+	m_ff->codecContext->pix_fmt = PIX_FMT_YUV420P;
+
+	if (codec_id == AV_CODEC_ID_H264)
+	{
+		av_opt_set(m_ff->codecContext->priv_data, "preset", "slow", 0);
+	}
+	else if (codec_id == AV_CODEC_ID_MPEG1VIDEO)
+	{
+		/* Needed to avoid using macroblocks in which some coeffs overflow.
+		* This does not happen with normal video, it just happens here as
+		* the motion of the chroma plane does not match the luma plane. */
+		m_ff->codecContext->mb_decision = 2;
+	}
+
+	//some formats want stream headers to be separate
+	if (m_ff->formatContext->oformat->flags & AVFMT_GLOBALHEADER)
+	{
+		m_ff->codecContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	}
 
 	// Add the video stream
 	m_ff->videoStream = avformat_new_stream(m_ff->formatContext, pCodec);
@@ -155,42 +186,12 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 		return false;
 	}
 	m_ff->videoStream->id = m_ff->formatContext->nb_streams-1;
-	m_ff->codexContext = m_ff->videoStream->codec;
-
-	/* put sample parameters */
-	m_ff->codexContext->bit_rate = m_bitrate;
-	/* resolution must be a multiple of two */
-	m_ff->codexContext->width = m_width;
-	m_ff->codexContext->height = m_height;
-	/* frames per second */
-	m_ff->codexContext->time_base.num = 1;
-	m_ff->codexContext->time_base.den = m_fps;
-	m_ff->codexContext->gop_size = m_gop;
-	m_ff->codexContext->max_b_frames = 1;
-	m_ff->codexContext->pix_fmt = PIX_FMT_YUV420P;
-
-	if (codec_id == AV_CODEC_ID_H264)
-	{
-		av_opt_set(m_ff->codexContext->priv_data, "preset", "slow", 0);
-	}
-	else if (codec_id == AV_CODEC_ID_MPEG1VIDEO)
-	{
-		/* Needed to avoid using macroblocks in which some coeffs overflow.
-		* This does not happen with normal video, it just happens here as
-		* the motion of the chroma plane does not match the luma plane. */
-		m_ff->codexContext->mb_decision = 2;
-	}
-
-	//some formats want stream headers to be separate
-	if (m_ff->formatContext->oformat->flags & AVFMT_GLOBALHEADER)
-	{
-		m_ff->codexContext->flags |= CODEC_FLAG_GLOBAL_HEADER;
-	}
+	m_ff->videoStream->codec = m_ff->codecContext;
 
 	//av_dump_format(m_ff->formatContext, 0, fileName.toStdString().c_str(), 1);
 
 	// open the codec
-	if (avcodec_open2(m_ff->codexContext, pCodec, 0) < 0)
+	if (avcodec_open2(m_ff->codecContext, pCodec, 0) < 0)
 	{
 		if (errorString)
 			*errorString = "Could not open the codec";
@@ -219,11 +220,50 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	return true;
 }
 
+static int write_frame(FFmpegStuffEnc* ff, AVPacket *pkt)
+{
+	if (!ff)
+	{
+		assert(ff);
+		return 0;
+	}
+	
+	//if (ff->codecContext->coded_frame->key_frame)
+	//{
+	//	pkt->flags |= AV_PKT_FLAG_KEY;
+	//}
+
+	// rescale output packet timestamp values from codec to stream timebase
+    av_packet_rescale_ts(pkt, ff->codecContext->time_base, ff->videoStream->time_base);
+    pkt->stream_index = ff->videoStream->index;
+
+    // write the compressed frame to the media file
+    return av_interleaved_write_frame(ff->formatContext, pkt);
+}
+
 bool QVideoEncoder::close()
 {
 	if (!m_isOpen)
 	{
 		return false;
+	}
+
+	// delayed frames?
+	while (true)
+	{
+		AVPacket pkt = { 0 };
+		av_init_packet(&pkt);
+
+		int got_packet = 0;
+		int ret = avcodec_encode_video2(m_ff->codecContext, &pkt, 0, &got_packet);
+		if (ret < 0 || !got_packet)
+		{
+			break;
+		}
+
+		write_frame(m_ff, &pkt);
+
+		av_free_packet(&pkt);
 	}
 
 	av_write_trailer(m_ff->formatContext);
@@ -250,17 +290,7 @@ bool QVideoEncoder::close()
 	return true;
 }
 
-static int write_frame(AVFormatContext *fmt_ctx, const AVRational *time_base, AVStream *st, AVPacket *pkt)
-{
-    // rescale output packet timestamp values from codec to stream timebase
-    av_packet_rescale_ts(pkt, *time_base, st->time_base);
-    pkt->stream_index = st->index;
-
-    // write the compressed frame to the media file
-    return av_interleaved_write_frame(fmt_ctx, pkt);
-}
-
-bool QVideoEncoder::encodeImage(const QImage &image, QString* errorString/*=0*/)
+bool QVideoEncoder::encodeImage(const QImage &image, int frameIndex, QString* errorString/*=0*/)
 {
 	if (!isOpen())
 	{
@@ -281,7 +311,11 @@ bool QVideoEncoder::encodeImage(const QImage &image, QString* errorString/*=0*/)
 	// encode the image
 	int got_packet = 0;
 	{
-		int ret = avcodec_encode_video2(m_ff->codexContext, &pkt, m_ff->frame, &got_packet);
+		//compute correct timestamp based on the input frame index
+		//int timestamp = ((m_ff->codecContext->time_base.num * 90000) / m_ff->codecContext->time_base.den) * frameIndex;
+		m_ff->frame->pts = frameIndex/*timestamp*/;
+
+		int ret = avcodec_encode_video2(m_ff->codecContext, &pkt, m_ff->frame, &got_packet);
 		if (ret < 0)
 		{
 			char errorStr[AV_ERROR_MAX_STRING_SIZE] = {0};
@@ -294,7 +328,7 @@ bool QVideoEncoder::encodeImage(const QImage &image, QString* errorString/*=0*/)
 
 	if (got_packet)
 	{
-		int ret = write_frame(m_ff->formatContext, &m_ff->codexContext->time_base, m_ff->videoStream, &pkt);
+		int ret = write_frame(m_ff, &pkt);
 		if (ret < 0)
 		{
 			char errorStr[AV_ERROR_MAX_STRING_SIZE] = {0};
@@ -304,6 +338,8 @@ bool QVideoEncoder::encodeImage(const QImage &image, QString* errorString/*=0*/)
 			return false;
 		}
 	}
+
+	av_free_packet(&pkt);
 	
 	return true;
 }
@@ -358,12 +394,12 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 	int srcStride[3] = { image.bytesPerLine(), 0, 0 };
 
 	sws_scale(	m_ff->swsContext,
-						srcSlice,
-						srcStride,
-						0,
-						m_height,
-						m_ff->frame->data,
-						m_ff->frame->linesize );
+				srcSlice,
+				srcStride,
+				0,
+				m_height,
+				m_ff->frame->data,
+				m_ff->frame->linesize );
 
 	return true;
 }

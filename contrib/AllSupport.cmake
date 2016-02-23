@@ -18,18 +18,20 @@ include( contrib/GDALSupport.cmake )
 include( contrib/FBXSupport.cmake )
 # SHP support
 include( contrib/ShapeLibSupport.cmake )
+# Oculus support
+include( contrib/OculusSupport.cmake )
 
 function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export base folder (optional - '_debug' will be appended for debug configuration)
 
-	# libraries with dynamic linkage can automatically 'install' their DLLs
+	#libraries with dynamic linkage can automatically 'install' their DLLs
 
-	# liblas support
+	#liblas support
 	target_link_liblas( ${ARGV0} ${ARGV1} )
-	# XIOT support
+	#XIOT support
 	target_link_XIOT( ${ARGV0} ${ARGV1} )
 	#GDAL support
 	target_link_GDAL( ${ARGV0} ${ARGV1} )
-	# E57 support
+	#E57 support
 	target_link_LIBE57( ${ARGV0} )
 	#DXF support
 	target_link_DXFLIB( ${ARGV0} )
@@ -37,6 +39,8 @@ function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = sh
 	target_link_FBX_SDK( ${ARGV0} )
 	#SHP support
 	target_link_SHAPE_LIB( ${ARGV0} )
+	#OCULUS support
+	#target_link_OCULUS_SDK( ${ARGV0} )
 	
 	# PDMS support (see qCC_io)
 	if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )

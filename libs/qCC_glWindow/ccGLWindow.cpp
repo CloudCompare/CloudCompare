@@ -63,6 +63,38 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+//Oculus
+#ifdef CC_OCULUS_SUPPORT
+#include <OVR_CAPI.h>
+
+//Oculus SDK 'session'
+struct OculusHMD
+{
+	OculusHMD() : session(0), lastOVRPos(0, 0, 0), hasLastOVRPos(false) {}
+	~OculusHMD() { stop(); }
+
+	void stop()
+	{
+		if (session)
+		{ 
+			ovr_Destroy(session);
+			session = 0;
+			ovr_Shutdown();
+		}
+	}
+
+	//! Session handle
+	ovrSession session;
+
+	//! Last sensor position
+	CCVector3d lastOVRPos;
+	//! Whether a position has been already recorded or not
+	bool hasLastOVRPos;
+};
+static OculusHMD s_oculus;
+
+#endif //CC_OCULUS_SUPPORT
+
 #ifdef USE_VLD
 //VLD
 #include <vld.h>
@@ -342,6 +374,12 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 ccGLWindow::~ccGLWindow()
 {
 	cancelScheduledRedraw();
+
+	//Oculus session is still active? Simply disable the stereo mode
+	//if (s_ovrSession)
+	//{
+	//	disableStereoMode();
+	//}
 
 #ifdef THREADED_GL_WIDGET
 	if (m_renderingThread)
@@ -1370,6 +1408,31 @@ void ccGLWindow::paint()
 		}
 	}
 
+#ifdef CC_OCULUS_SUPPORT
+	if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session)
+	{
+		//Query the HMD for the current tracking state.
+		ovrTrackingState ts = ovr_GetTrackingState(s_oculus.session, ovr_GetTimeInSeconds(), false);
+		if (ts.StatusFlags & (ovrStatus_OrientationTracked | ovrStatus_PositionTracked)) 
+		{
+			//convert Oculus pose (quaternion + translation) to ccGLMatrix
+			ovrPosef pose = ts.HeadPose.ThePose;
+			double q[4] = { pose.Orientation.w, pose.Orientation.x, pose.Orientation.y, pose.Orientation.z };
+			ccGLMatrixd rot = ccGLMatrixd::FromQuaternion(q).inverse();
+			setBaseViewMat(rot);
+
+			CCVector3d ovrPos(pose.Position.x, pose.Position.y, pose.Position.z);
+			if (s_oculus.hasLastOVRPos)
+			{
+				CCVector3d d = ovrPos - s_oculus.lastOVRPos;
+				moveCamera(d.x, d.y, d.z);
+			}
+			s_oculus.lastOVRPos = ovrPos;
+			s_oculus.hasLastOVRPos = true;
+		}
+	}
+#endif
+
 	//start the rendering passes
 	for (renderingParams.passIndex = 0; renderingParams.passIndex < renderingParams.passCount; ++renderingParams.passIndex)
 	{
@@ -1438,6 +1501,22 @@ void ccGLWindow::paint()
 				QTimer::singleShot(std::max<int>(baseLODRefreshTime_ms-displayTime_ms,0), this, SLOT(renderNextLODLevel()));
 			}
 		}
+		else
+		{
+			//just in case
+			m_LODPendingRefresh = false;
+		}
+
+#ifdef CC_OCULUS_SUPPORT
+		if (!m_LODPendingRefresh)
+		{
+			if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session)
+			{
+				//auto-redraw
+				QTimer::singleShot(5, this, SLOT(updateGL()));
+			}
+		}
+#endif
 	}
 }
 
@@ -2459,18 +2538,20 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 
 void ccGLWindow::moveCamera(float dx, float dy, float dz)
 {
-	if (dx != 0 || dy != 0) //camera movement? (dz doesn't count as ot only corresponds to a zoom)
+	if (dx != 0 || dy != 0) //camera movement? (dz doesn't count as it only corresponds to a zoom)
 	{
 		//feedback for echo mode
-		emit cameraDisplaced(dx,dy);
+		emit cameraDisplaced(dx, dy);
 	}
 
 	//current X, Y and Z viewing directions
 	//correspond to the 'model view' matrix
 	//lines.
-	CCVector3d V(dx,dy,dz);
+	CCVector3d V(dx, dy, dz);
 	if (!m_viewportParams.objectCenteredView)
+	{
 		m_viewportParams.viewMat.transposed().applyRotation(V);
+	}
 
 	setCameraPos(m_viewportParams.cameraCenter + V);
 }
@@ -5646,6 +5727,46 @@ ccGLWindow::StereoParams::StereoParams()
 
 bool ccGLWindow::enableStereoMode(const StereoParams& params)
 {
+	if (params.glassType == StereoParams::OCULUS)
+	{
+#ifdef CC_OCULUS_SUPPORT
+
+		if (!s_oculus.session)
+		{
+			ovrResult result = ovr_Initialize(nullptr);
+			if (OVR_FAILURE(result))
+			{
+				QMessageBox::critical(this, "Oculus", "Failed to initialize the Oculus SDK (ovr_Initialize)");
+				return false;
+			}
+
+			assert(!s_oculus.session);
+			ovrGraphicsLuid luid;
+			result = ovr_Create(&s_oculus.session, &luid);
+			if (OVR_FAILURE(result))
+			{
+				QMessageBox::critical(this, "Oculus", "Failed to initialize the Oculus SDK (ovr_Create)");
+				ovr_Shutdown();
+				s_oculus.session = 0;
+				return false;
+			}
+		}
+
+		ovrHmdDesc desc = ovr_GetHmdDesc(s_oculus.session);
+		ccLog::Print(QString("[Oculus] HMD '%0' detected (resolution: %1 x %2)").arg(desc.ProductName).arg(desc.Resolution.w).arg(desc.Resolution.h));
+
+		ovr_ConfigureTracking	(s_oculus.session,
+								/*requested = */ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position,
+								/*required  = */ovrTrackingCap_Orientation );
+
+		//reset tracking
+		s_oculus.hasLastOVRPos = false;
+
+#else
+		QMessageBox::critical(this, "Oculus", "Oculus devies are not supported by this version!");
+		return false;
+#endif
+	}
 	if (params.glassType == StereoParams::NVIDIA_VISION)
 	{
 		if (!format().stereo() || !format().doubleBuffer())

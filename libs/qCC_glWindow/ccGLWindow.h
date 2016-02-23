@@ -552,7 +552,8 @@ public: //stereo mode
 		//! Glass/HMD type
 		enum GlassType {	RED_BLUE = 1,
 							RED_CYAN = 2,
-							NVIDIA_VISION = 3
+							NVIDIA_VISION = 3,
+							OCULUS = 4
 		};
 
 		//! Whether stereo-mode is 'analgyph' or real stereo mode

@@ -24,6 +24,7 @@
 const int COMBO_INDEX_RED_BLUE  = 0;
 const int COMBO_INDEX_RED_CYAN  = 1;
 const int COMBO_INDEX_NV_VISION = 2;
+const int COMBO_INDEX_OCULUS    = 3;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
@@ -58,6 +59,9 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	case COMBO_INDEX_NV_VISION:
 		params.glassType = ccGLWindow::StereoParams::NVIDIA_VISION;
 		break;
+	case COMBO_INDEX_OCULUS:
+		params.glassType = ccGLWindow::StereoParams::OCULUS;
+		break;
 	}
 
 	//focal
@@ -83,6 +87,9 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 		break;
 	case ccGLWindow::StereoParams::NVIDIA_VISION:
 		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
+		break;
+	case ccGLWindow::StereoParams::OCULUS:
+		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_OCULUS);
 		break;
 	default:
 		assert(false);

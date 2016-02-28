@@ -6616,7 +6616,6 @@ void MainWindow::doActionComputeNormals()
 		//normals orientation
 		bool orientNormals = ncDlg.orientNormals();
 		bool orientNormalsWithGrids = cloudsWithScanGrids && ncDlg.useScanGridsForOrientation();
-		bool orientNormalsPreferred = ncDlg.usePreferredOrientation();
 		ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
 		bool orientNormalsMST = ncDlg.useMSTOrientation();
 		int mstNeighbors = s_lastMSTNeighborCount = ncDlg.getMSTNeighborCount();

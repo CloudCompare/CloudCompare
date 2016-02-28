@@ -483,11 +483,10 @@ void ccMesh::transformTriNormals(const ccGLMatrix& trans)
     //we must take care of the triangle normals!
 	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_TYPES::MESH)))
     {
-        bool recoded = false;
-
 		unsigned numTriNormals = m_triNormals->currentSize();
 
 #if 0 //no use to use memory for this!
+      bool recoded = false;
 
         //if there are more triangle normals than the size of the compressed
 		//normals array, we recompress the array instead of recompressing each normal

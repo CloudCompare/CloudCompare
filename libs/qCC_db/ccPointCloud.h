@@ -298,11 +298,11 @@ public:
 		Grid(const Grid& grid)
 			: w(grid.w)
 			, h(grid.h)
-			, indexes(grid.indexes)
-			, colors(grid.colors)
 			, validCount(grid.validCount)
 			, minValidIndex(grid.minValidIndex)
 			, maxValidIndex(grid.minValidIndex)
+			, indexes(grid.indexes)
+			, colors(grid.colors)
 			, sensorPosition(grid.sensorPosition)
 		{}
 

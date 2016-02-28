@@ -1699,7 +1699,7 @@ void ccSectionExtractionTool::unfoldPoints()
 			assert(unfoldedCloud->size() == unfoldedPoints.size());
 			CCVector3 C = box.minCorner();
 			C.u[vertDim] = 0;
-			box.minCorner().u[xDim]; //we start at the bounding-box limit
+			C.u[xDim]    = box.minCorner().u[xDim]; //we start at the bounding-box limit
 			for (unsigned i=0; i<unfoldedCloud->size(); ++i)
 			{
 				//update the points positions

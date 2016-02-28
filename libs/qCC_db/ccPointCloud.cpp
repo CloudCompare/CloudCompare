@@ -3468,6 +3468,9 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 
 	if (progressCb)
 		progressCb->stop();
+   
+	delete nprogress;
+	nprogress = NULL;
 }
 
 void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,

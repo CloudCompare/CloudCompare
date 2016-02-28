@@ -1062,6 +1062,9 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			{
 				if (in.read(cloudName+i,1) < 0)
 				{
+					delete nprogress;
+					nprogress = NULL;
+               
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the cloud name!\n");
 					return CC_FERR_READING;
 				}

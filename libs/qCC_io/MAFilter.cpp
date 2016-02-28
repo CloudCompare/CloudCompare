@@ -356,6 +356,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 			if (fprintf(fp,"\t\tf 3") < 0)
 			{
 				fclose(fp);
+				ReleaseEdgeList(theEdges, numberOfVertexes);
 				return CC_FERR_WRITING;
 			}
 

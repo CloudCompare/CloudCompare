@@ -107,14 +107,16 @@ bool ccSSAOFilter::init(int width,
 {
 	//in case of reinit
 	if (!m_fbo)
+	{
 		m_fbo = new ccFrameBufferObject();
-	if (!m_fbo->init(width,height))
+	}
+	if (!m_fbo->init(width, height))
 	{
 		error = "[SSAO] FrameBufferObject initialization failed!";
 		reset();
 		return false;
 	}
-	m_fbo->initTexture(0,GL_RGBA32F,GL_RGBA,GL_FLOAT,textureMinMagFilter);
+	m_fbo->initColor(GL_RGBA32F, GL_RGBA, GL_FLOAT, textureMinMagFilter);
 
 	if (!m_shader)
 	{
@@ -131,7 +133,7 @@ bool ccSSAOFilter::init(int width,
 	{
 		if (!m_bilateralFilter)
 			m_bilateralFilter = new ccBilateralFilter();
-		if (!m_bilateralFilter->init(width,height,shadersPath,error))
+		if (!m_bilateralFilter->init(width, height, shadersPath, error))
 		{
 			delete m_bilateralFilter;
 			m_bilateralFilter = 0;
@@ -158,7 +160,9 @@ bool ccSSAOFilter::init(int width,
 	else
 	{
 		if (m_texReflect != 0)
-			glDeleteTextures(1,&m_texReflect);
+		{
+			glDeleteTextures(1, &m_texReflect);
+		}
 		m_texReflect = 0;
 	}
 
@@ -214,13 +218,12 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0.0,(GLdouble)m_w,0.0,(GLdouble)m_h,0.0,1.0);
+	glOrtho(0.0, static_cast<GLdouble>(m_w), 0.0, static_cast<GLdouble>(m_h), 0.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 
 	m_fbo->start();
-	m_fbo->setDrawBuffers1();
 
 	m_shader->start();
 	m_shader->setUniform1i("s2_Z",0);
@@ -263,8 +266,8 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 
 	if (m_bilateralFilter)
 	{
-		m_bilateralFilter->setParams(m_bilateralGHalfSize,m_bilateralGSigma,m_bilateralGSigmaZ);
-		m_bilateralFilter->shade(texDepth,m_fbo->getColorTexture(0),parameters);
+		m_bilateralFilter->setParams(m_bilateralGHalfSize, m_bilateralGSigma, m_bilateralGSigmaZ);
+		m_bilateralFilter->shade(texDepth, m_fbo->getColorTexture(), parameters);
 	}
 
 	glMatrixMode(GL_PROJECTION);
@@ -278,9 +281,11 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 GLuint ccSSAOFilter::getTexture()
 {
 	if (m_bilateralFilter)
+	{
 		return m_bilateralFilter->getTexture();
+	}
 
-	return (m_fbo ? m_fbo->getColorTexture(0) : 0);
+	return (m_fbo ? m_fbo->getColorTexture() : 0);
 }
 
 void ccSSAOFilter::setParameters(int _N, float _Kz, float _R, float _F)

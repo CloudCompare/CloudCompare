@@ -138,8 +138,10 @@ bool ccEDLFilter::init(int width, int height, QString shadersPath, QString& erro
 bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minMagFilter, QString shadersPath, QString& error)
 {
 	if (!fbo_edl0)
+	{
 		fbo_edl0 = new ccFrameBufferObject();
-	if (!fbo_edl0->init(width,height))
+	}
+	if (!fbo_edl0->init(width, height))
 	{
 		error = "[EDL Filter] FBO 1:1 initialization failed!";
 		reset();
@@ -147,8 +149,10 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	}
 
 	if (!fbo_edl1)
+	{
 		fbo_edl1 = new ccFrameBufferObject();
-	if (!fbo_edl1->init(width/2,height/2))
+	}
+	if (!fbo_edl1->init(width/2, height/2))
 	{
 		error = "[EDL Filter] FBO 1:2 initialization failed!";
 		reset();
@@ -156,27 +160,31 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	}
 
 	if (!fbo_edl2)
+	{
 		fbo_edl2 = new ccFrameBufferObject();
-	if (!fbo_edl2->init(width/4,height/4))
+	}
+	if (!fbo_edl2->init(width/4, height/4))
 	{
 		error = "[EDL Filter] FBO 1:4 initialization failed!";
 		reset();
 		return false;
 	}
 
-	fbo_edl0->initTexture(0,internalFormat,GL_RGBA,GL_FLOAT,minMagFilter);
-	fbo_edl1->initTexture(0,internalFormat,GL_RGBA,GL_FLOAT,minMagFilter);
-	fbo_edl2->initTexture(0,internalFormat,GL_RGBA,GL_FLOAT,minMagFilter);
+	fbo_edl0->initColor(internalFormat, GL_RGBA, GL_FLOAT, minMagFilter);
+	fbo_edl1->initColor(internalFormat, GL_RGBA, GL_FLOAT, minMagFilter);
+	fbo_edl2->initColor(internalFormat, GL_RGBA, GL_FLOAT, minMagFilter);
 
 	if (!fbo_mix)
+	{
 		fbo_mix = new ccFrameBufferObject();
-	if (!fbo_mix->init(width,height))
+	}
+	if (!fbo_mix->init(width, height))
 	{
 		error = "[EDL Filter] FBO 'mix' initialization failed!";
 		reset();
 		return false;
 	}
-	fbo_mix->initTexture(0,internalFormat,GL_RGBA,GL_FLOAT);
+	fbo_mix->initColor(internalFormat, GL_RGBA, GL_FLOAT);
 
 	if (!shader_edl)
 	{
@@ -204,7 +212,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 		{
 			m_bilateralFilter0.filter = new ccBilateralFilter();
 		}
-		if (!m_bilateralFilter0.filter->init(width,height,shadersPath,error))
+		if (!m_bilateralFilter0.filter->init(width, height, shadersPath, error))
 		{
 			delete m_bilateralFilter0.filter;
 			m_bilateralFilter0.filter = 0;
@@ -227,7 +235,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 		{
 			m_bilateralFilter1.filter = new ccBilateralFilter();
 		}
-		if (!m_bilateralFilter1.filter->init(width/2,height/2,shadersPath,error))
+		if (!m_bilateralFilter1.filter->init(width/2, height/2, shadersPath, error))
 		{
 			delete m_bilateralFilter1.filter;
 			m_bilateralFilter1.filter = 0;
@@ -250,7 +258,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 		{
 			m_bilateralFilter2.filter = new ccBilateralFilter();
 		}
-		if (!m_bilateralFilter2.filter->init(width/4,height/4,shadersPath,error))
+		if (!m_bilateralFilter2.filter->init(width/4, height/4, shadersPath, error))
 		{
 			delete m_bilateralFilter2.filter;
 			m_bilateralFilter2.filter = 0;
@@ -306,7 +314,6 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	/***	FULL SIZE	***/
 	{
 		fbo_edl0->start();
-		fbo_edl0->setDrawBuffers1();
 
 		shader_edl->start();
 		shader_edl->setUniform1i("s1_color",1);
@@ -342,7 +349,6 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	/***	HALF SIZE	***/
 	{
 		fbo_edl1->start();
-		fbo_edl1->setDrawBuffers1();
 
 		shader_edl->start();
 		shader_edl->setUniform1i("s1_color",1);
@@ -379,7 +385,6 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	/***	QUARTER SIZE	***/
 	{
 		fbo_edl2->start();
-		fbo_edl2->setDrawBuffers1();
 
 		shader_edl->start();
 		shader_edl->setUniform1i("s1_color",1);
@@ -418,17 +423,17 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		if (m_bilateralFilter0.filter)
 		{
 			m_bilateralFilter0.filter->setParams(m_bilateralFilter0.halfSize,m_bilateralFilter0.sigma,m_bilateralFilter0.sigmaZ);
-			m_bilateralFilter0.filter->shade(texDepth,fbo_edl0->getColorTexture(0),parameters);
+			m_bilateralFilter0.filter->shade(texDepth, fbo_edl0->getColorTexture(), parameters);
 		}
 		if (m_bilateralFilter1.filter)
 		{
 			m_bilateralFilter1.filter->setParams(m_bilateralFilter1.halfSize,m_bilateralFilter1.sigma,m_bilateralFilter1.sigmaZ);
-			m_bilateralFilter1.filter->shade(texDepth,fbo_edl1->getColorTexture(0),parameters);
+			m_bilateralFilter1.filter->shade(texDepth, fbo_edl1->getColorTexture(), parameters);
 		}
 		if (m_bilateralFilter2.filter)
 		{
 			m_bilateralFilter2.filter->setParams(m_bilateralFilter2.halfSize,m_bilateralFilter2.sigma,m_bilateralFilter2.sigmaZ);
-			m_bilateralFilter2.filter->shade(texDepth,fbo_edl2->getColorTexture(0),parameters);
+			m_bilateralFilter2.filter->shade(texDepth, fbo_edl2->getColorTexture(), parameters);
 		}
 	}
 	/***	SMOOTH RESULTS	***/
@@ -436,7 +441,6 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	//***	COMPOSITING		***/
 	{
 		fbo_mix->start();
-		fbo_mix->setDrawBuffers1();
 
 		shader_mix->start();
 		shader_mix->setUniform1i("s2_I1",0);
@@ -454,16 +458,16 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 
 		glActiveTexture(GL_TEXTURE2);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_bilateralFilter2.filter ? m_bilateralFilter2.filter->getTexture() : fbo_edl2->getColorTexture(0));
+		glBindTexture(GL_TEXTURE_2D, m_bilateralFilter2.filter ? m_bilateralFilter2.filter->getTexture() : fbo_edl2->getColorTexture());
 
 		glActiveTexture(GL_TEXTURE1);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_bilateralFilter1.filter ? m_bilateralFilter1.filter->getTexture() : fbo_edl1->getColorTexture(0));
+		glBindTexture(GL_TEXTURE_2D, m_bilateralFilter1.filter ? m_bilateralFilter1.filter->getTexture() : fbo_edl1->getColorTexture());
 
 		glActiveTexture(GL_TEXTURE0);
 		//glEnable(GL_TEXTURE_2D);
 
-		ccFBOUtils::DisplayTexture2DCorner(m_bilateralFilter0.filter ? m_bilateralFilter0.filter->getTexture() : fbo_edl0->getColorTexture(0),m_screenWidth,m_screenHeight);
+		ccFBOUtils::DisplayTexture2DCorner(m_bilateralFilter0.filter ? m_bilateralFilter0.filter->getTexture() : fbo_edl0->getColorTexture(), m_screenWidth, m_screenHeight);
 
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_2D,0);
@@ -500,13 +504,13 @@ GLuint ccEDLFilter::getTexture(int index)
 	switch (index)
 	{
 	case 0:
-		return (fbo_mix ? fbo_mix->getColorTexture(0) : 0);
+		return (fbo_mix ? fbo_mix->getColorTexture() : 0);
 	case 1:
-		return (fbo_edl0 ? fbo_edl0->getColorTexture(0) : 0);
+		return (fbo_edl0 ? fbo_edl0->getColorTexture() : 0);
 	case 2:
-		return (fbo_edl1 ? fbo_edl1->getColorTexture(0) : 0);
+		return (fbo_edl1 ? fbo_edl1->getColorTexture() : 0);
 	case 3:
-		return (fbo_edl2 ? fbo_edl2->getColorTexture(0) : 0);
+		return (fbo_edl2 ? fbo_edl2->getColorTexture() : 0);
 	case 4:
 		return (m_bilateralFilter0.filter ? m_bilateralFilter0.filter->getTexture() : 0);
 	case 5:

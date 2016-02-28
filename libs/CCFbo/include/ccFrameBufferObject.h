@@ -20,11 +20,6 @@
 
 #include "ccGlew.h"
 
-const GLenum FBO_COLORS[] = {	GL_COLOR_ATTACHMENT0_EXT,
-								GL_COLOR_ATTACHMENT1_EXT,
-								GL_COLOR_ATTACHMENT2_EXT,
-								GL_COLOR_ATTACHMENT3_EXT};
-
 //! F.B.O. encapsulation
 class ccFrameBufferObject
 {
@@ -37,18 +32,14 @@ public:
 	void start();
 	void stop();
 
-	bool initTexture(	unsigned index,
-						GLint internalformat,
-						GLenum format,
-						GLenum type,
-						GLint minMagFilter = GL_LINEAR,
-						GLenum target = GL_TEXTURE_2D);
+	bool initColor(	GLint internalformat,
+					GLenum format,
+					GLenum type,
+					GLint minMagFilter = GL_LINEAR,
+					GLenum target = GL_TEXTURE_2D);
 
-	bool initTextures(	unsigned count,
-						GLint internalformat,
-						GLenum format,
-						GLenum type,
-						GLint minMagFilter = GL_LINEAR,
+	bool attachColor(	GLuint texID,
+						bool ownTexture = false,
 						GLenum target = GL_TEXTURE_2D);
 
 	bool initDepth(	GLint wrapParam = GL_CLAMP_TO_BORDER,
@@ -56,13 +47,9 @@ public:
 					GLint minMagFilter = GL_NEAREST,
 					GLenum textureTarget = GL_TEXTURE_2D);
 
-	void setDrawBuffers(GLsizei n, const GLenum* buffers);	//GLenum buffers[n]	= {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
-	void setDrawBuffers1();
-	void setDrawBuffersN(GLsizei n); //n=1..4
-
 	GLuint getID();
-	GLuint getColorTexture(unsigned i);
-	GLuint getDepthTexture();
+	inline GLuint getColorTexture() const { return m_colorTexture; }
+	inline GLuint getDepthTexture() const { return m_depthTexture; }
 
 	//! Returns width
 	inline unsigned width() const { return m_width; }
@@ -70,6 +57,9 @@ public:
 	inline unsigned height() const { return m_height; }
 
 protected:
+
+	//! Deletes/releases the color texture
+	void deleteColorTexture();
 
 	//! Width
 	unsigned m_width;
@@ -79,8 +69,11 @@ protected:
 	//! Depth texture GL ID
 	GLuint m_depthTexture;
 
-	//! Color textures GL IDs
-	GLuint m_colorTextures[4];
+	//! Color texture GL ID
+	GLuint m_colorTexture;
+
+	//! Whether the color texture is owned by this FBO or not
+	bool m_ownColorTexture;
 
 	//! ID
 	GLuint m_fboId;

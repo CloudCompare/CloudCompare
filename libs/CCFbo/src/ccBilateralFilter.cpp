@@ -98,7 +98,7 @@ bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString
 	}
 
 	m_fbo->start();
-	m_fbo->initTexture(0,GL_RGB/*GL_RGB32F*/,GL_RGB,GL_FLOAT);
+	m_fbo->initColor(GL_RGB/*GL_RGB32F*/, GL_RGB, GL_FLOAT);
 	m_fbo->stop();
 
 	if (!m_shader)
@@ -147,7 +147,6 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 
 	//	HORIZONTAL
 	m_fbo->start();
-	m_fbo->setDrawBuffers1();
 
 	m_shader->start();
 	m_shader->setUniform1i("s2_I",0);	// image to blur
@@ -196,7 +195,7 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 
 GLuint ccBilateralFilter::getTexture()
 {
-	return (m_fbo ? m_fbo->getColorTexture(0) : 0);
+	return (m_fbo ? m_fbo->getColorTexture() : 0);
 }
 
 void ccBilateralFilter::updateDampingTable()

@@ -20,20 +20,17 @@
 
 #include "ccFBOUtils.h"
 
+//system
 #include <assert.h>
 
 ccFrameBufferObject::ccFrameBufferObject()
 	: m_width(0)
 	, m_height(0)
 	, m_depthTexture(0)
+	, m_colorTexture(0)
+	, m_ownColorTexture(false)
 	, m_fboId(0)
-{
-	//color textures
-	m_colorTextures[0] = 0;
-	m_colorTextures[1] = 0;
-	m_colorTextures[2] = 0;
-	m_colorTextures[3] = 0;
-}
+{}
 
 ccFrameBufferObject::~ccFrameBufferObject()
 {
@@ -44,18 +41,11 @@ void ccFrameBufferObject::reset()
 {
 	if (m_depthTexture != 0)
 	{
-		glDeleteTextures(1,&m_depthTexture);
+		glDeleteTextures(1, &m_depthTexture);
 		m_depthTexture = 0;
 	}
 
-	for (int i=0; i<4; ++i)
-	{
-		if (m_colorTextures[i])
-		{
-			glDeleteTextures(1,m_colorTextures+i);
-			m_colorTextures[i] = 0;
-		}
-	}
+	deleteColorTexture();
 
 	if (m_fboId != 0)
 	{
@@ -70,7 +60,9 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 {
 	//we check if FBO extension is supported by video card
 	if (!ccFBOUtils::CheckExtension("GL_EXT_framebuffer_object"))
+	{
 		return false;
+	}
 
 	//to support reinit
 	reset();
@@ -86,12 +78,12 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 
 void ccFrameBufferObject::start()
 {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,m_fboId);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fboId);
 }
 
 void ccFrameBufferObject::stop()
 {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
 
 GLuint ccFrameBufferObject::getID()
@@ -99,59 +91,45 @@ GLuint ccFrameBufferObject::getID()
 	return m_fboId;
 }
 
-GLuint ccFrameBufferObject::getColorTexture(unsigned i)
+void ccFrameBufferObject::deleteColorTexture()
 {
-	assert(i<4);
-	return m_colorTextures[i];
-}
-
-GLuint ccFrameBufferObject::getDepthTexture()
-{
-	return m_depthTexture;
-}
-
-bool ccFrameBufferObject::initTexture(	unsigned index,
-										GLint internalformat,
-										GLenum format,
-										GLenum type,
-										GLint minMagFilter /*= GL_LINEAR*/,
-										GLenum target /*= GL_TEXTURE_2D*/)
-{
-	if (index >= 4)
+	if (m_colorTexture && glIsTexture(m_colorTexture))
 	{
-		//wrong index
-		return false;
+		if (m_ownColorTexture)
+		{
+			glDeleteTextures(1, &m_colorTexture);
+		}
 	}
+	m_colorTexture = 0;
+	m_ownColorTexture = false;
+}
 
+bool ccFrameBufferObject::attachColor(	GLuint texID,
+										bool ownTexture/*=false*/,
+										GLenum target/*=GL_TEXTURE_2D*/)
+{
 	if (m_fboId == 0)
 	{
-		//ccLog::Warning("[FBO::initTexture] Internal error: FBO not yet initialized!");
+		assert(false);
 		return false;
 	}
+
+	if (!glIsTexture(texID))
+	{
+		//error or simple warning?
+		assert(false);
+		//return false;
+	}
+
+	//remove the previous texture (if any)
+	deleteColorTexture();
+
+	m_colorTexture = texID;
+	m_ownColorTexture = ownTexture;
 
 	start();
 
-	if (glIsTexture(m_colorTextures[index]))
-		glDeleteTextures(1,m_colorTextures+index);
-
-	glGenTextures(1,m_colorTextures+index);
-	glBindTexture(target,m_colorTextures[index]);
-
-	/*INITIAL VERSION
-	glTexImage2D(target,0,GL_RGBA,width,height,0,GL_BGRA,GL_UNSIGNED_INT_8_8_8_8_REV,NULL);
-	glTexParameteri(target,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glBindTexture(target, 0);
-	//*/
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter );
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter );
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(target,0,internalformat,m_width,m_height,0,format,type,0);
-
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,target,m_colorTextures[index],0);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,m_colorTextures[index],0);
-
-	glBindTexture(target, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
 
 	bool success = false;
 	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
@@ -161,7 +139,7 @@ bool ccFrameBufferObject::initTexture(	unsigned index,
 		success = true;
 		break;
 	default:
-		//ccLog::Warning("[FBO] Color texture %i init. error: %i",index+1,status);
+		//ccLog::Warning("[FBO] Color texture %i init. error: %i", index+1, status);
 		break;
 	}
 
@@ -170,25 +148,35 @@ bool ccFrameBufferObject::initTexture(	unsigned index,
 	return success;
 }
 
-bool ccFrameBufferObject::initTextures(	unsigned count,
-										GLint internalformat,
+bool ccFrameBufferObject::initColor(	GLint internalformat,
 										GLenum format,
 										GLenum type,
 										GLint minMagFilter /*= GL_LINEAR*/,
 										GLenum target /*= GL_TEXTURE_2D*/)
 {
-	assert(count < 5);
-
 	if (m_fboId == 0)
 	{
-		//ccLog::Warning("[FBO::initTextures] Internal error: FBO not yet initialized!");
+		//ccLog::Warning("[FBO::initTexture] Internal error: FBO not yet initialized!");
 		return false;
 	}
 
-	for(unsigned i=0; i<count; ++i)
-		initTexture(i,internalformat,format,type,minMagFilter,target);
+	//even if 'attachTexture' can do this, we prefer to do it now
+	//so as to release memory before creating a new texture!
+	deleteColorTexture();
 
-	return true;
+	//create the new texture
+	GLuint texID = 0;
+	glGenTextures(1, &texID);
+
+	glBindTexture  (target, texID);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter );
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter );
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D   (target, 0, internalformat, m_width, m_height, 0, format, type, 0);
+	glBindTexture  (target, 0);
+
+	return attachColor(texID, true, target);
 }
 
 bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
@@ -196,7 +184,7 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 									GLint minMagFilter /*= GL_NEAREST*/,
 									GLenum target/*=GL_TEXTURE_2D*/)
 {
-	if (m_fboId==0)
+	if (m_fboId == 0)
 	{
 		//ccLog::Warning("[FBO::initDepth] Internal error: FBO not yet initialized!");
 		return false;
@@ -205,28 +193,23 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 	start();
 
 	if (glIsTexture(m_depthTexture))
-		glDeleteTextures(1,&m_depthTexture);
+	{
+		glDeleteTextures(1, &m_depthTexture);
+	}
+	glGenTextures(1, &m_depthTexture);
+	glBindTexture(target, m_depthTexture);
 
-	glGenTextures(1,&m_depthTexture);
-	glBindTexture(target,m_depthTexture);
-
-	/* INITIAL VERSION
-	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT24,width,height,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_INT,NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//*/
-	float border[] = { 1.0f,1.0f,1.0f,1.0f };
+	//float border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	//glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapParam);
-	glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
 	glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
 	glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
-	glTexImage2D(target,0,internalFormat,m_width,m_height,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,0);
+	glTexImage2D(target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 
-	//glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,m_depthTexture,0);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,target,m_depthTexture,0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
 
 	glBindTexture(target, 0);
 
@@ -246,21 +229,4 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 	stop();
 
 	return success;
-}
-
-void ccFrameBufferObject::setDrawBuffers(GLsizei n, const GLenum* buffers)
-{
-	assert(n>0 && n<5);
-	glDrawBuffers(n,buffers);
-	glReadBuffer(GL_NONE);
-}
-
-void ccFrameBufferObject::setDrawBuffers1()
-{
-	glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-}
-
-void ccFrameBufferObject::setDrawBuffersN(GLsizei n)
-{
-	setDrawBuffers(n,FBO_COLORS);
 }

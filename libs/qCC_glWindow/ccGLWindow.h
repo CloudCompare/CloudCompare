@@ -781,14 +781,15 @@ protected: //rendering
 
 protected: //other methods
 
-	//! Returns the current (OpenGL) view matrix as a double array
-	/** Warning: different from 'view' matrix returned by getBaseViewMat.
+	//! Returns the current (OpenGL) view matrix
+	/** Warning: may be different from the 'view' matrix returned by getBaseViewMat.
+		Will call automatically updateModelViewMatrix if necessary.
 	**/
-	virtual const double* getModelViewMatd();
-	//! Returns the current (OpenGL) projection matrix as a double array
-	virtual const double* getProjectionMatd();
-	//! Returns the current viewport (OpenGL int[4] array)
-	virtual void getViewportArray(int vp[/*4*/]);
+	virtual const ccGLMatrixd& getModelViewMatrix();
+	//! Returns the current (OpenGL) projection matrix
+	/** Will call automatically updateProjectionMatrix if necessary.
+	**/
+	virtual const ccGLMatrixd& getProjectionMatrix();
 
 	//! Processes the clickable items
 	/** \return true if an item has been clicked
@@ -982,6 +983,13 @@ protected: //other methods
 	**/
 	void cancelScheduledRedraw();
 
+	//! Sets the OpenGL viewport (shortut)
+	inline void setGLViewport(int x, int y, int w, int h) { setGLViewport(QRect(x, y, w, h)); }
+	//! Sets the OpenGL viewport
+	void setGLViewport(const QRect& rect);
+	//! Returns the current (OpenGL) viewport
+	inline const QRect& getGLViewport() const { return m_glViewport; }
+
 protected: //OpenGL Extensions
 
 	//! Loads OpenGL extensions
@@ -1026,10 +1034,8 @@ protected: //members
 	//! Whether the projection matrix is valid (or need to be recomputed)
 	bool m_validProjectionMatrix;
 
-	//! GL context width
-	int m_glWidth;
-	//! GL context height
-	int m_glHeight;
+	//! GL viewport
+	QRect m_glViewport;
 
 	//! Whether L.O.D. (level of detail) is enabled or not
 	bool m_LODEnabled;

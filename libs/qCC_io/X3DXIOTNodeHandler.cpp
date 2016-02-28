@@ -252,9 +252,9 @@ int X3DXIOTNodeHandler::startIndexedFaceSet(const X3DAttributes &attr)
 				if (it+1 == streamIndexes.end() || *(it+1)==-1)
 				{
 					//we must reserve some more space for storage!
-					if (mesh->size() == mesh->maxSize())
+					if (mesh->size() == mesh->capacity())
 					{
-						if (!mesh->reserve(mesh->maxSize() + 100))
+						if (!mesh->reserve(mesh->capacity() + 100))
 						{
 							delete mesh;
 							return ABORT; //not enough memory!

@@ -109,7 +109,9 @@ struct ccGLCameraParameters
 		: perspective(false)
 		, fov_deg(0)
 		, pixelSize(0)
-	{}
+	{
+	   memset(viewport, 0, 4 * sizeof( int ));
+	}
 
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
 	inline bool project(const CCVector3d& input3D, CCVector3d& output2D) const { return ccGL::Project<double, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D); }

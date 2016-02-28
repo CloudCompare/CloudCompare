@@ -86,6 +86,7 @@ ExtractSIFT::ExtractSIFT()
 	, m_nr_scales_per_octave(0)
 	, m_min_contrast(0)
 	, m_use_min_contrast(false)
+	, m_mode(RGB)
 {
 }
 

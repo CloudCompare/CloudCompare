@@ -437,7 +437,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	}
 
 	//starting index
-	int startIndex = startIndexSpinBox->value();
+	unsigned startIndex = static_cast<unsigned>(std::max(0, startIndexSpinBox->value()));
 
 	for (unsigned i=0; i<count; ++i)
 	{
@@ -446,7 +446,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 		const CCVector3* P = PP.cloud->getPoint(PP.index);
 
 		if (format == PLP_ASCII_EXPORT_IXYZ)
-			fprintf(fp,"%i,",i+startIndex);
+			fprintf(fp,"%u,",i+startIndex);
 		else if (format == PLP_ASCII_EXPORT_LXYZ)
 			fprintf(fp,"%s,",qPrintable(labels[i]->getName()));
 

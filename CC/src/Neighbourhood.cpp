@@ -75,7 +75,7 @@ void Neighbourhood::setLSPlane(	const PointCoordinateType eq[4],
 								const CCVector3& Y,
 								const CCVector3& N)
 {
-	memcpy(m_lsPlaneEquation,eq,sizeof(PointCoordinateType)*4);
+	memcpy(m_lsPlaneEquation, eq, sizeof(PointCoordinateType)*4);
 	m_lsPlaneVectors[0] = X;
 	m_lsPlaneVectors[1] = Y;
 	m_lsPlaneVectors[2] = N;

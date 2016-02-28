@@ -164,7 +164,9 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 		cell.points->setPointScalarValue(i,curv);
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -266,7 +268,9 @@ bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(	const DgmOctre
 		}
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -390,7 +394,9 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 		}
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -502,7 +508,9 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 		cell.points->setPointScalarValue(i,density);
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -613,7 +621,9 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 		cell.points->setPointScalarValue(i,d);
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -918,10 +928,9 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 		m = static_cast<unsigned>( log(1.0-confidence) / log(1.0-pow(1.0-outliersRatio,static_cast<double>(p))) );
 
 	//for progress notification
-	NormalizedProgress* nProgress = 0;
+	NormalizedProgress nProgress(progressCb, m);
 	if (progressCb)
 	{
-		nProgress = new NormalizedProgress(progressCb,m);
 		char buffer[64];
 		sprintf(buffer,"Least Median of Squares samples: %u",m);
 		progressCb->reset();
@@ -986,10 +995,9 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 
 		++sampleCount;
 
-		if (nProgress && !nProgress->oneStep())
+		if (progressCb && !nProgress.oneStep())
 		{
 			//progress canceled by the user
-			delete nProgress;
 			return false;
 		}
 	}
@@ -997,8 +1005,6 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	//too many failures?!
 	if (sampleCount < m)
 	{
-		if (nProgress)
-			delete nProgress;
 		return false;
 	}
 	
@@ -1050,12 +1056,6 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 		rms = sqrt(residuals/n);
 	}
 	
-	if (nProgress)
-	{
-		delete nProgress;
-		nProgress = 0;
-	}
-
 	return true;
 }
 

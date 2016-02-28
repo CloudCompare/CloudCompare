@@ -83,13 +83,12 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 		return false;
 
 	//progress notification
-	CCLib::NormalizedProgress* nProgress = 0;
+	CCLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(leaves.size()));
 	if (progressCb)
 	{
 		progressCb->reset();
 		progressCb->setMethodTitle("Fuse Kd-tree cells");
 		progressCb->setInfo(qPrintable(QString("Cells: %1\nMax error: %2").arg(leaves.size()).arg(maxError)));
-		nProgress = new CCLib::NormalizedProgress(progressCb,(unsigned)leaves.size());
 		progressCb->start();
 	}
 
@@ -125,7 +124,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 			//already fused?
 			if (currentCell->userData != -1)
 			{
-				if (nProgress && !nProgress->oneStep()) //process canceled by user
+				if (progressCb && !nProgress.oneStep()) //process canceled by user
 				{
 					cancelled = true;
 					break;
@@ -151,7 +150,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 			ccKdTree::LeafVector cellsToTest;
 			cellsToTest.push_back(currentCell);
 
-			if (nProgress && !nProgress->oneStep()) //process canceled by user
+			if (progressCb && !nProgress.oneStep()) //process canceled by user
 			{
 				cancelled = true;
 				break;
@@ -321,7 +320,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						//we will test this cell's neighbors as well
 						cellsToTest.push_back(bestIt->leaf);
 
-						if (nProgress && !nProgress->oneStep()) //process canceled by user
+						if (progressCb && !nProgress.oneStep()) //process canceled by user
 						{
 							//premature end!
 							candidates.clear();
@@ -377,8 +376,5 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 		//pc->setCurrentDisplayedScalarField(sfIdx);
 	}
 
-	delete nProgress;
-	nProgress = NULL;
-   
 	return !cancelled;
 }

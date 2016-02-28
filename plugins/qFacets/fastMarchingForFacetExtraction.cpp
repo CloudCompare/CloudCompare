@@ -134,11 +134,10 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 	theOctree->getCellCodes(level,cellCodes,true);
 	size_t cellCount = cellCodes.size();
 
-	CCLib::NormalizedProgress* nProgress = 0;
+	CCLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(cellCount));
 	if (progressCb)
 	{
 		progressCb->setInfo(qPrintable(QString("Level: %1\nCells: %2").arg(level).arg(cellCount)));
-		nProgress = new CCLib::NormalizedProgress(progressCb,static_cast<unsigned>(cellCount));
 	}
 
 	CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
@@ -174,20 +173,17 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 
 		cellCodes.pop_back();
 
-		if (nProgress && !nProgress->oneStep())
+		if (progressCb && !nProgress.oneStep())
 		{
 			//process cancelled by user
 			progressCb->stop();
-			delete nProgress;
 			return -1;
 		}
 	}
 
-	if (nProgress)
+	if (progressCb)
 	{
 		progressCb->stop();
-		delete nProgress;
-		nProgress = 0;
 	}
 		
 	m_initialized = true;

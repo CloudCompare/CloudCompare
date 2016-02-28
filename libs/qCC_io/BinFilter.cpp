@@ -334,7 +334,7 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	if (v1)
 	{
-		return LoadFileV1(in,container,static_cast<unsigned>(firstBytes),parameters); //firstBytes == number of scans for V1 files!
+		return LoadFileV1(in, container, static_cast<unsigned>(firstBytes), parameters); //firstBytes == number of scans for V1 files!
 	}
 	else
 	{
@@ -1029,9 +1029,11 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 	for (unsigned k=0; k<nbScansTotal; k++)
 	{
 		HeaderFlags header;
-		unsigned nbOfPoints=0;
+		unsigned nbOfPoints = 0;
 		if (ReadEntityHeader(in,nbOfPoints,header) < 0)
+		{
 			return CC_FERR_READING;
+		}
 
 		//Console::print("[BinFilter::loadModelFromBinaryFile] Entity %i : %i points, color=%i, norms=%i, dists=%i\n",k,nbOfPoints,color,norms,distances);
 
@@ -1042,14 +1044,11 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 
 		//progress for this cloud
-		CCLib::NormalizedProgress* nprogress = 0;
+		CCLib::NormalizedProgress nprogress(&pdlg, nbOfPoints);
 		if (parameters.alwaysDisplayLoadDialog)
 		{
-			nprogress = new CCLib::NormalizedProgress(&pdlg,nbOfPoints);
 			pdlg.reset();
-			char buffer[256];
-			sprintf(buffer,"cloud %u/%u (%u points)",k+1,nbScansTotal,nbOfPoints);
-			pdlg.setInfo(buffer);
+			pdlg.setInfo(qPrintable(QString("cloud %1/%2 (%3 points)").arg(k+1).arg(nbScansTotal).arg(nbOfPoints)));
 			pdlg.start();
 			QApplication::processEvents();
 		}
@@ -1062,14 +1061,13 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			{
 				if (in.read(cloudName+i,1) < 0)
 				{
-					delete nprogress;
-					nprogress = NULL;
-               
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the cloud name!\n");
 					return CC_FERR_READING;
 				}
 				if (cloudName[i] == 0)
+				{
 					break;
+				}
 			}
 			//we force the end of the name in case it is too long!
 			cloudName[255] = 0;
@@ -1203,7 +1201,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 			lineRead++;
 
-			if (nprogress && !nprogress->oneStep())
+			if (parameters.alwaysDisplayLoadDialog && !nprogress.oneStep())
 			{
 				loadedCloud->resize(i+1-fileChunkPos);
 				k=nbScansTotal;
@@ -1211,12 +1209,10 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			}
 		}
 
-		if (nprogress)
+		if (parameters.alwaysDisplayLoadDialog)
 		{
 			pdlg.stop();
 			QApplication::processEvents();
-			delete nprogress;
-			nprogress = 0;
 		}
 
 		if (header.scalarField)

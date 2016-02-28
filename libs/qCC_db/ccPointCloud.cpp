@@ -3406,11 +3406,10 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 
 	unsigned numberOfPoints = size();
 
-	CCLib::NormalizedProgress* nprogress = 0;
+	CCLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
 	if (progressCb)
 	{
 		progressCb->reset();
-		nprogress = new CCLib::NormalizedProgress(progressCb,numberOfPoints);
 		progressCb->setMethodTitle("Unroll (cylinder)");
 		progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
 		progressCb->start();
@@ -3460,17 +3459,18 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		}
 
 		//process canceled by user?
-		if (nprogress && !nprogress->oneStep())
+		if (progressCb && !nprogress.oneStep())
+		{
 			break;
+		}
 	}
 
 	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
 
 	if (progressCb)
+	{
 		progressCb->stop();
-   
-	delete nprogress;
-	nprogress = NULL;
+	}
 }
 
 void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,

@@ -255,10 +255,9 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 
 	/*** Main illumination loop ***/
 
-	CCLib::NormalizedProgress* nProgress = NULL;
+	CCLib::NormalizedProgress nProgress(progressCb, numberOfRays);
 	if (progressCb)
 	{
-		nProgress = new CCLib::NormalizedProgress(progressCb,numberOfRays);
 		progressCb->reset();
 		progressCb->setMethodTitle("ShadeVis");
 		QString infoStr = QString("Rays: %1").arg(numberOfRays);
@@ -284,7 +283,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 			//flag viewed vertices
 			win.GLAccumPixel(visibilityCount);
 
-			if (nProgress && !nProgress->oneStep())
+			if (progressCb && !nProgress.oneStep())
 			{
 				success = false;
 				break;
@@ -305,10 +304,6 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	{
 		success = false;
 	}
-
-	if (nProgress)
-		delete nProgress;
-	nProgress = 0;
 
 	return success;
 }

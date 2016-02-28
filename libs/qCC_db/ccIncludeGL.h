@@ -18,6 +18,8 @@
 #ifndef CC_INCLUDE_GL_HEADER
 #define CC_INCLUDE_GL_HEADER
 
+#include <cmath>
+
 //CCLib
 #include <CCPlatform.h>
 
@@ -257,11 +259,11 @@ public: //GLU equivalent methods
 		r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
 		
 		//choose pivot - or die
-		if (fabsf(r3[0]) > fabsf(r2[0]))
+		if (std::abs(r3[0]) > std::abs(r2[0]))
 			std::swap(r3, r2);
-		if (fabsf(r2[0]) > fabsf(r1[0]))
+		if (std::abs(r2[0]) > std::abs(r1[0]))
 			std::swap(r2, r1);
-		if (fabsf(r1[0]) > fabsf(r0[0]))
+		if (std::abs(r1[0]) > std::abs(r0[0]))
 			std::swap(r1, r0);
 		if (0.0 == r0[0])
 			return false;
@@ -312,9 +314,9 @@ public: //GLU equivalent methods
 		}
 		
 		//choose pivot - or die
-		if (fabsf(r3[1]) > fabsf(r2[1]))
+		if (std::abs(r3[1]) > std::abs(r2[1]))
 			std::swap(r3, r2);
-		if (fabsf(r2[1]) > fabsf(r1[1]))
+		if (std::abs(r2[1]) > std::abs(r1[1]))
 			std::swap(r2, r1);
 		if (0.0 == r1[1])
 			return false;
@@ -352,7 +354,7 @@ public: //GLU equivalent methods
 		}
 		
 		//choose pivot - or die
-		if (fabsf(r3[2]) > fabsf(r2[2]))
+		if (std::abs(r3[2]) > std::abs(r2[2]))
 			std::swap(r3, r2);
 		if (0.0 == r2[2])
 			return false;

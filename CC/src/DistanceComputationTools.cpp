@@ -1159,9 +1159,6 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 		Yk.forwardIterator();
 	}
 
-	CCVector3 nearestPoint;
-	CCVector3* _nearestPoint = s_params_MT.CPSet ? &nearestPoint : 0;
-
 	//let's find the nearest triangles for each point in the neighborhood 'Yk'
 	ScalarType maxRadius = 0;
 	for (int dist = 0; remainingPoints != 0 && dist <= maxIntDist; ++dist, maxRadius += static_cast<ScalarType>(cellLength))
@@ -1414,7 +1411,6 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		std::vector<unsigned> trianglesToTest;
 		size_t trianglesToTestCount = 0;
 		size_t trianglesToTestCapacity = 0;
-		const ScalarType normalSign = static_cast<ScalarType>(params.flipNormals ? -1.0 : 1.0);
 		unsigned numberOfTriangles = mesh->size();
 
 		//acceleration structure
@@ -1430,9 +1426,6 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 		//min distance array ('persistent' version to save some memory)
 		std::vector<ScalarType> minDists;
-
-		CCVector3 nearestPoint;
-		CCVector3* _nearestPoint = params.CPSet ? &nearestPoint : 0;
 
 		//maximal neighbors search distance (if maxSearchDist is defined)
 		int maxNeighbourhoodLength = 0; 

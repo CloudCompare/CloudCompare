@@ -5579,8 +5579,6 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 	camera.project(C3D, C2D);
 
 	//barycentric coordinates
-	GLdouble P2Dx = P2D.x;
-	GLdouble P2Dy = height()-1 - P2D.y;
 	GLdouble detT =  (B2D.y-C2D.y) * (A2D.x-C2D.x) + (C2D.x-B2D.x) * (A2D.y-C2D.y);
 	GLdouble l1   = ((B2D.y-C2D.y) * (P2D.x-C2D.x) + (C2D.x-B2D.x) * (P2D.y-C2D.y)) / detT;
 	GLdouble l2   = ((C2D.y-A2D.y) * (P2D.x-C2D.x) + (A2D.x-C2D.x) * (P2D.y-C2D.y)) / detT;

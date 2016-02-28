@@ -843,7 +843,6 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 												void** additionalParameters,
 												NormalizedProgress* nProgress/*=0*/)
 {
-	GenericIndexedCloudPersist* cloud				= static_cast<ReferenceCloud*>(additionalParameters[0]);
 	int knn											= *static_cast<int*>(additionalParameters[1]);
 	std::vector<PointCoordinateType>& meanDistances	= *static_cast<std::vector<PointCoordinateType>*>(additionalParameters[2]);
 

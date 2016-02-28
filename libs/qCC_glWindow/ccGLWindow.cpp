@@ -1987,7 +1987,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		modifiedViewport = false;
 	}
 
-	bool skipRendering = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session && renderingParams.passIndex == 0);
+	bool skipRendering = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS && renderingParams.passIndex == 0);
 	glFlush();
 
 	//process and/or display the FBO (if any)

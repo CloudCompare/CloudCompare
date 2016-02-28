@@ -941,9 +941,9 @@ public:
 	**/
 	inline void applyRotation(Vector3Tpl<float>& vec) const
 	{
-		register float vx = vec.x;
-		register float vy = vec.y;
-		register float vz = vec.z;
+		float vx = vec.x;
+		float vy = vec.y;
+		float vz = vec.z;
 
 		vec.x =   static_cast<float>(CC_MAT_R11) * vx
 				+ static_cast<float>(CC_MAT_R12) * vy
@@ -962,9 +962,9 @@ public:
 	**/
 	inline void applyRotation(Vector3Tpl<double>& vec) const
 	{
-		register double vx = vec.x;
-		register double vy = vec.y;
-		register double vz = vec.z;
+		double vx = vec.x;
+		double vy = vec.y;
+		double vz = vec.z;
 
 		vec.x =   static_cast<double>(CC_MAT_R11) * vx
 				+ static_cast<double>(CC_MAT_R12) * vy
@@ -984,9 +984,9 @@ public:
 	**/
 	inline void applyRotation(float vec[3]) const
 	{
-		register float vx = vec[0];
-		register float vy = vec[1];
-		register float vz = vec[2];
+		float vx = vec[0];
+		float vy = vec[1];
+		float vz = vec[2];
 
 		vec[0] =  static_cast<float>(CC_MAT_R11) * vx
 				+ static_cast<float>(CC_MAT_R12) * vy
@@ -1005,9 +1005,9 @@ public:
 	**/
 	inline void applyRotation(double vec[3]) const
 	{
-		register double vx = vec[0];
-		register double vy = vec[1];
-		register double vz = vec[2];
+		double vx = vec[0];
+		double vy = vec[1];
+		double vz = vec[2];
 
 		vec[0] =  static_cast<double>(CC_MAT_R11) * vx
 				+ static_cast<double>(CC_MAT_R12) * vy

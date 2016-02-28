@@ -738,8 +738,8 @@ protected: //rendering
 			, drawBackground(true)
 			, clearDepthLayer(true)
 			, clearColorLayer(true)
-			, useFBO(false)
 			, draw3DPass(true)
+			, useFBO(false)
 			, draw3DCross(false)
 			, drawForeground(true)
 		{}

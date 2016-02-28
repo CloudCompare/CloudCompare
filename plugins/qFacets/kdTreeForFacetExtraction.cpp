@@ -377,5 +377,8 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 		//pc->setCurrentDisplayedScalarField(sfIdx);
 	}
 
+	delete nProgress;
+	nProgress = NULL;
+   
 	return !cancelled;
 }

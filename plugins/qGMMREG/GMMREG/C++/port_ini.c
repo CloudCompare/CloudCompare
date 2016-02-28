@@ -224,6 +224,7 @@ int WritePrivateProfileString(char *section, char *entry, char *buffer,
 
    if (!(wfp = fopen(tmp_name, "w")))
    {
+      fclose(rfp);
       fclose(wfp);
       return 0;
    }

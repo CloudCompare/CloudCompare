@@ -2085,7 +2085,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			}
 		}
 	}
-#endif CC_OCULUS_SUPPORT
+#endif //CC_OCULUS_SUPPORT
 
 	/******************/
 	/*** FOREGROUND ***/

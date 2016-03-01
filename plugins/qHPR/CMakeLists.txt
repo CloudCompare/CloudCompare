@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 option( INSTALL_QHPR_PLUGIN "Check to install qHPR plugin" OFF )
 

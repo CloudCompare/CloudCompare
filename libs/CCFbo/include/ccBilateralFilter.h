@@ -56,8 +56,8 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
-	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
+	virtual bool init(QOpenGLFunctions_3_2_Compatibility* glFunc, int width, int height, QString shadersPath, QString& error);
+	virtual void shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
 	virtual GLuint getTexture();
 
 	//! Set parameters

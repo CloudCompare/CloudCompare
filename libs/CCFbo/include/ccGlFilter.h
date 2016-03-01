@@ -18,11 +18,9 @@
 #ifndef CC_GL_FILTER_HEADER
 #define CC_GL_FILTER_HEADER
 
-//local
-#include "ccGlew.h"
-
 //Qt
 #include <QString>
+#include <QOpenGLFunctions_3_2_Compatibility>
 
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to
@@ -52,7 +50,8 @@ public:
 		\param error error string (if an error occurred)
 		\return success
 		**/
-	virtual bool init(	int width,
+	virtual bool init(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+						int width,
 						int height,
 						QString shadersPath,
 						QString& error) = 0;
@@ -79,7 +78,8 @@ public:
 	};
 
 	//! Applies filter to texture (depth + color)
-	virtual void shade(	GLuint texDepth,
+	virtual void shade(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+						GLuint texDepth,
 						GLuint texColor,
 						ViewportParameters& parameters) = 0;
 

@@ -45,7 +45,7 @@ class ccColorRampShader : public ccShader
 public:
 
 	//! Default constructor
-	ccColorRampShader() : ccShader() {}
+	ccColorRampShader(QOpenGLFunctions_3_2_Compatibility* glFunc) : ccShader(glFunc) {}
 
 	//! Destructor
 	virtual ~ccColorRampShader() {}

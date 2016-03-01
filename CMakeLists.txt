@@ -57,7 +57,6 @@ include( CMakeExternalLibs.cmake )
 include( contrib/AllSupport.cmake )
 
 # Libs requested by both qCC & ccViewer
-add_subdirectory( libs/Glew )
 add_subdirectory( libs/CCFbo )
 add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependency)
 add_subdirectory( libs/qCC_io ) # must always be included after qCC_db (dependency)

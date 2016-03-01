@@ -242,7 +242,12 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		if (glParams.showNorms)
 		{
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
+			//DGM FIXME: is it still true with Qt5.4+?
+#ifndef USE_QtOpenGL_CLASSES
 			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+#else
+			glDisable(GL_RESCALE_NORMAL);
+#endif
 			glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba  );
 			glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba );
 			glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba  );
@@ -317,7 +322,12 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		if (glParams.showNorms)
 		{
 			glDisable(GL_COLOR_MATERIAL);
+			//DGM FIXME: is it still true with Qt5.4+?
+#ifndef USE_QtOpenGL_CLASSES
 			glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+#else
+			glDisable(GL_RESCALE_NORMAL);
+#endif
 			glDisable(GL_LIGHTING);
 		}
 	}

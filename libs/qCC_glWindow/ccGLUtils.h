@@ -22,6 +22,9 @@
 #include <ccIncludeGL.h> //Always first!
 #include <ccGLMatrix.h>
 
+//Qt
+#include <QPixmap>
+
 //! View orientation
 enum CC_VIEW_ORIENTATION {	CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
 							CC_BOTTOM_VIEW,	/**< Bottom view **/
@@ -41,8 +44,11 @@ public:
 					OpenGL Textures
 	***************************************************/
 
-	static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, unsigned char alpha = 255);
-	static void DisplayTexture2D(GLuint tex, int w, int h, unsigned char alpha = 255);
+	static void DisplayTexture2DPosition(ccQGLContext* context, QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha = 255);
+	static void DisplayTexture2D(ccQGLContext* context, QPixmap pixmap, int w, int h, unsigned char alpha = 255);
+
+	static void DisplayTexture2DPosition(ccQGLContext* context, GLuint texID, int x, int y, int w, int h, unsigned char alpha = 255);
+	static void DisplayTexture2D(ccQGLContext* context, GLuint texID, int w, int h, unsigned char alpha = 255);
 
 	/***************************************************
 					OpenGL Matrices
@@ -64,7 +70,7 @@ public:
 		\param context name of the method/object that try to catch the error
 		\return true if an error occurred, false otherwise
 	**/
-	static bool CatchGLError(const char* context);
+	static bool CatchGLError(GLenum error, const char* context);
 
 };
 

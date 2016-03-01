@@ -15,7 +15,6 @@ file( GLOB source_list *.cpp)
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES})
 

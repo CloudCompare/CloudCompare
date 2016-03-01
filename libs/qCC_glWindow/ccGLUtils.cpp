@@ -23,51 +23,77 @@
 //CCLib
 #include <CCConst.h>
 
+//system
+#include <assert.h>
+
 //*********** OPENGL TEXTURES ***********//
 
-void ccGLUtils::DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, unsigned char alpha/*=255*/)
+void _DisplayTexture2D(ccQOpenGLFunctions* glFunc, int x, int y, int w, int h, unsigned char alpha/*=255*/)
 {
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	assert(glFunc);
+	
+	glFunc->glPushAttrib(GL_ENABLE_BIT);
+	glFunc->glEnable(GL_TEXTURE_2D);
 
-	glColor4ub(255, 255, 255, alpha);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0,1.0);
-	glVertex2i(x, y+h);
-	glTexCoord2f(0.0,0.0);
-	glVertex2i(x, y);
-	glTexCoord2f(1.0,0.0);
-	glVertex2i(x+w, y);
-	glTexCoord2f(1.0,1.0);
-	glVertex2i(x+w, y+h);
-	glEnd();
+	glFunc->glColor4ub(255, 255, 255, alpha);
+	glFunc->glBegin(GL_QUADS);
+	glFunc->glTexCoord2f(0.0, 1.0);
+	glFunc->glVertex2i(x, y + h);
+	glFunc->glTexCoord2f(0.0, 0.0);
+	glFunc->glVertex2i(x, y);
+	glFunc->glTexCoord2f(1.0, 0.0);
+	glFunc->glVertex2i(x + w, y);
+	glFunc->glTexCoord2f(1.0, 1.0);
+	glFunc->glVertex2i(x + w, y + h);
+	glFunc->glEnd();
 
-	glBindTexture(GL_TEXTURE_2D,0);
-	glDisable(GL_TEXTURE_2D);
+	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+	glFunc->glPopAttrib();
 }
 
-void ccGLUtils::DisplayTexture2D(GLuint tex, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2DPosition(ccQGLContext* context, QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha/*=255*/)
 {
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	if (!context)
+	{
+		assert(false);
+		return;
+	}
 
-	float halfW = static_cast<float>(w)/2;
-	float halfH = static_cast<float>(h)/2;
+#ifndef USE_QtOpenGL_CLASSES
+	context->bindTexture(pixmap, GL_TEXTURE_2D);
+#else
+	QOpenGLTexture texture(pixmap.toImage());
+	texture.bind();
+#endif
 
-	glColor4ub(255, 255, 255, alpha);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0, 0);
-	glVertex2f(-halfW, -halfH);
-	glTexCoord2f(1, 0);
-	glVertex2f( halfW, -halfH);
-	glTexCoord2f(1, 1);
-	glVertex2f( halfW,  halfH);
-	glTexCoord2f(0, 1);
-	glVertex2f(-halfW,  halfH);
-	glEnd();
+	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
 
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_TEXTURE_2D);
+	_DisplayTexture2D(glFunc, x, y, w, h, alpha);
+}
+
+void ccGLUtils::DisplayTexture2D(ccQGLContext* context, QPixmap pixmap, int w, int h, unsigned char alpha/*=255*/)
+{
+	DisplayTexture2DPosition(context, pixmap, -w / 2, -h / 2, w, h, alpha);
+}
+
+void ccGLUtils::DisplayTexture2DPosition(ccQGLContext* context, GLuint texID, int x, int y, int w, int h, unsigned char alpha/*=255*/)
+{
+	if (!context)
+	{
+		assert(false);
+		return;
+	}
+	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
+	glFunc->glBindTexture(GL_TEXTURE_2D, texID);
+
+	_DisplayTexture2D(glFunc, x, y, w, h, alpha);
+
+	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void ccGLUtils::DisplayTexture2D(ccQGLContext* context, GLuint texID, int w, int h, unsigned char alpha/*=255*/)
+{
+	DisplayTexture2DPosition(context, texID, -w / 2, -h / 2, w, h, alpha);
 }
 
 //*********** OPENGL MATRICES ***********//
@@ -126,10 +152,8 @@ ccGLMatrixd ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 	return ccGLMatrixd::FromViewDirAndUpDir(center-eye,top);
 }
 
-bool ccGLUtils::CatchGLError(const char* context)
+bool ccGLUtils::CatchGLError(GLenum err, const char* context)
 {
-	GLenum err = glGetError();
-
 	//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
 	switch(err)
 	{

@@ -18,11 +18,10 @@
 #ifndef CC_SHADER_HEADER
 #define CC_SHADER_HEADER
 
-#include "ccGlew.h"
-
 //Qt
 #include <QString>
 #include <QByteArray>
+#include <QOpenGLFunctions_3_2_Compatibility>
 
 //! Generic shader class
 class ccShader
@@ -30,7 +29,7 @@ class ccShader
 public:
 
 	//! Default constructor
-	ccShader();
+	ccShader(QOpenGLFunctions_3_2_Compatibility* glFunc);
 
 	//! Destructor
 	virtual ~ccShader();
@@ -94,13 +93,16 @@ public:
 protected:
 
 	//! Loads a shader from a file
-	static GLuint LoadShader(GLenum type, QString filename, QString& error);
+	static GLuint LoadShader(QOpenGLFunctions_3_2_Compatibility* glFunc, GLenum type, QString filename, QString& error);
 
 	//! Bufferizes a shader file in memory
 	static QByteArray ReadShaderFile(QString filename);
 
 	//! Program ID
 	GLuint m_prog;
+
+	//! GL functions
+	QOpenGLFunctions_3_2_Compatibility* m_glFunc;
 };
 
 #endif

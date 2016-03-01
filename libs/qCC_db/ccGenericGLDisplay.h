@@ -110,7 +110,7 @@ struct ccGLCameraParameters
 		, fov_deg(0)
 		, pixelSize(0)
 	{
-	   memset(viewport, 0, 4 * sizeof( int ));
+	   memset(viewport, 0, 4 * sizeof(int));
 	}
 
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
@@ -250,6 +250,9 @@ public:
 
 	//! Returns this window as a proper Qt widget
 	virtual QWidget* asWidget() { return 0; }
+
+	//! Returns the set of OpenGL functions
+	virtual ccQOpenGLFunctions* functions() = 0;
 
 };
 

@@ -18,7 +18,8 @@
 #ifndef CC_FRAME_BUFFER_OBJECT
 #define CC_FRAME_BUFFER_OBJECT
 
-#include "ccGlew.h"
+//Qt
+#include <QOpenGLFunctions_3_2_Compatibility>
 
 //! F.B.O. encapsulation
 class ccFrameBufferObject
@@ -27,22 +28,25 @@ public:
 	ccFrameBufferObject();
 	~ccFrameBufferObject();
 
-	bool init(unsigned w, unsigned h);
-	void reset();
-	void start();
-	void stop();
+	bool init(QOpenGLFunctions_3_2_Compatibility* glFunc, unsigned w, unsigned h);
+	void reset(QOpenGLFunctions_3_2_Compatibility* glFunc);
+	void start(QOpenGLFunctions_3_2_Compatibility* glFunc);
+	void stop(QOpenGLFunctions_3_2_Compatibility* glFunc);
 
-	bool initColor(	GLint internalformat,
+	bool initColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+					GLint internalformat,
 					GLenum format,
 					GLenum type,
 					GLint minMagFilter = GL_LINEAR,
 					GLenum target = GL_TEXTURE_2D);
 
-	bool attachColor(	GLuint texID,
+	bool attachColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+						GLuint texID,
 						bool ownTexture = false,
 						GLenum target = GL_TEXTURE_2D);
 
-	bool initDepth(	GLint wrapParam = GL_CLAMP_TO_BORDER,
+	bool initDepth(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+					GLint wrapParam = GL_CLAMP_TO_BORDER,
 					GLenum internalFormat = GL_DEPTH_COMPONENT24,
 					GLint minMagFilter = GL_NEAREST,
 					GLenum textureTarget = GL_TEXTURE_2D);
@@ -59,7 +63,7 @@ public:
 protected:
 
 	//! Deletes/releases the color texture
-	void deleteColorTexture();
+	void deleteColorTexture(QOpenGLFunctions_3_2_Compatibility* glFunc);
 
 	//! Width
 	unsigned m_width;

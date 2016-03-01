@@ -19,7 +19,6 @@ add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${moc_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
-target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 
 # OCULUS support

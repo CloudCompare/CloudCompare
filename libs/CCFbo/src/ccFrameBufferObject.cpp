@@ -18,8 +18,6 @@
 #include "ccFrameBufferObject.h"
 #include "ccShader.h"
 
-#include "ccFBOUtils.h"
-
 //system
 #include <assert.h>
 
@@ -34,56 +32,64 @@ ccFrameBufferObject::ccFrameBufferObject()
 
 ccFrameBufferObject::~ccFrameBufferObject()
 {
-	reset();
+	//DGM FIXME
+	reset(0);
 }
 
-void ccFrameBufferObject::reset()
+void ccFrameBufferObject::reset(QOpenGLFunctions_3_2_Compatibility* glFunc)
 {
 	if (m_depthTexture != 0)
 	{
-		glDeleteTextures(1, &m_depthTexture);
+		if (glFunc)
+		{
+			glFunc->glDeleteTextures(1, &m_depthTexture);
+		}
 		m_depthTexture = 0;
 	}
 
-	deleteColorTexture();
+	deleteColorTexture(glFunc);
 
 	if (m_fboId != 0)
 	{
-		glDeleteFramebuffersEXT(1, &m_fboId);
+		if (glFunc)
+		{
+			glFunc->glDeleteFramebuffers(1, &m_fboId);
+		}
 		m_fboId = 0;
 	}
 
 	m_width = m_height = 0;
 }
 
-bool ccFrameBufferObject::init(unsigned w, unsigned h)
+bool ccFrameBufferObject::init(QOpenGLFunctions_3_2_Compatibility* glFunc, unsigned w, unsigned h)
 {
-	//we check if FBO extension is supported by video card
-	if (!ccFBOUtils::CheckExtension("GL_EXT_framebuffer_object"))
+	if (!glFunc)
 	{
 		return false;
 	}
 
 	//to support reinit
-	reset();
+	reset(glFunc);
 
 	m_width = w;
 	m_height = h;
 
 	// create a framebuffer object
-	glGenFramebuffersEXT(1, &m_fboId);
+	glFunc->glGenFramebuffers(1, &m_fboId);
 
 	return true;
 }
 
-void ccFrameBufferObject::start()
+void ccFrameBufferObject::start(QOpenGLFunctions_3_2_Compatibility* glFunc)
 {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fboId);
+	if (glFunc)
+		glFunc->glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_fboId);
 }
 
-void ccFrameBufferObject::stop()
+void ccFrameBufferObject::stop(QOpenGLFunctions_3_2_Compatibility* glFunc)
 {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	if (glFunc)
+		glFunc->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 }
 
 GLuint ccFrameBufferObject::getID()
@@ -91,30 +97,36 @@ GLuint ccFrameBufferObject::getID()
 	return m_fboId;
 }
 
-void ccFrameBufferObject::deleteColorTexture()
+void ccFrameBufferObject::deleteColorTexture(QOpenGLFunctions_3_2_Compatibility* glFunc)
 {
-	if (m_colorTexture && glIsTexture(m_colorTexture))
+	if (glFunc && m_colorTexture && glFunc->glIsTexture(m_colorTexture))
 	{
 		if (m_ownColorTexture)
 		{
-			glDeleteTextures(1, &m_colorTexture);
+			glFunc->glDeleteTextures(1, &m_colorTexture);
 		}
 	}
 	m_colorTexture = 0;
 	m_ownColorTexture = false;
 }
 
-bool ccFrameBufferObject::attachColor(	GLuint texID,
+bool ccFrameBufferObject::attachColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+										GLuint texID,
 										bool ownTexture/*=false*/,
 										GLenum target/*=GL_TEXTURE_2D*/)
 {
+	if (!glFunc)
+	{
+		assert(false);
+		return false;
+	}
 	if (m_fboId == 0)
 	{
 		assert(false);
 		return false;
 	}
 
-	if (!glIsTexture(texID))
+	if (!glFunc->glIsTexture(texID))
 	{
 		//error or simple warning?
 		assert(false);
@@ -122,17 +134,17 @@ bool ccFrameBufferObject::attachColor(	GLuint texID,
 	}
 
 	//remove the previous texture (if any)
-	deleteColorTexture();
+	deleteColorTexture(glFunc);
 
 	m_colorTexture = texID;
 	m_ownColorTexture = ownTexture;
 
-	start();
+	start(glFunc);
 
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
+	glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
 
 	bool success = false;
-	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	GLenum status = glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 	switch (status)
 	{
 	case GL_FRAMEBUFFER_COMPLETE_EXT:
@@ -143,17 +155,23 @@ bool ccFrameBufferObject::attachColor(	GLuint texID,
 		break;
 	}
 
-	stop();
+	stop(glFunc);
 
 	return success;
 }
 
-bool ccFrameBufferObject::initColor(	GLint internalformat,
+bool ccFrameBufferObject::initColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+										GLint internalformat,
 										GLenum format,
 										GLenum type,
 										GLint minMagFilter /*= GL_LINEAR*/,
 										GLenum target /*= GL_TEXTURE_2D*/)
 {
+	if (!glFunc)
+	{
+		assert(false);
+		return false;
+	}
 	if (m_fboId == 0)
 	{
 		//ccLog::Warning("[FBO::initTexture] Internal error: FBO not yet initialized!");
@@ -162,59 +180,65 @@ bool ccFrameBufferObject::initColor(	GLint internalformat,
 
 	//even if 'attachTexture' can do this, we prefer to do it now
 	//so as to release memory before creating a new texture!
-	deleteColorTexture();
+	deleteColorTexture(glFunc);
 
 	//create the new texture
 	GLuint texID = 0;
-	glGenTextures(1, &texID);
+	glFunc->glGenTextures(1, &texID);
 
-	glBindTexture  (target, texID);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter );
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter );
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D   (target, 0, internalformat, m_width, m_height, 0, format, type, 0);
-	glBindTexture  (target, 0);
+	glFunc->glBindTexture  (target, texID);
+	glFunc->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter );
+	glFunc->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter );
+	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFunc->glTexImage2D   (target, 0, internalformat, m_width, m_height, 0, format, type, 0);
+	glFunc->glBindTexture  (target, 0);
 
-	return attachColor(texID, true, target);
+	return attachColor(glFunc, texID, true, target);
 }
 
-bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
+bool ccFrameBufferObject::initDepth(QOpenGLFunctions_3_2_Compatibility* glFunc,
+									GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 									GLenum internalFormat /*=GL_DEPTH_COMPONENT24*/,
 									GLint minMagFilter /*= GL_NEAREST*/,
 									GLenum target/*=GL_TEXTURE_2D*/)
 {
+	if (!glFunc)
+	{
+		assert(false);
+		return false;
+	}
 	if (m_fboId == 0)
 	{
 		//ccLog::Warning("[FBO::initDepth] Internal error: FBO not yet initialized!");
 		return false;
 	}
 
-	start();
+	start(glFunc);
 
-	if (glIsTexture(m_depthTexture))
+	if (glFunc->glIsTexture(m_depthTexture))
 	{
-		glDeleteTextures(1, &m_depthTexture);
+		glFunc->glDeleteTextures(1, &m_depthTexture);
 	}
-	glGenTextures(1, &m_depthTexture);
-	glBindTexture(target, m_depthTexture);
+	glFunc->glGenTextures(1, &m_depthTexture);
+	glFunc->glBindTexture(target, m_depthTexture);
 
 	//float border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapParam);
-	glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
-	glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
-	glTexImage2D(target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+	//glFunc->glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
+	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
+	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapParam);
+	glFunc->glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
+	glFunc->glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	glFunc->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
+	glFunc->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
+	glFunc->glTexImage2D(target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
+	glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
 
 	glBindTexture(target, 0);
 
 	bool success = false;
-	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	GLenum status = glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 	switch (status)
 	{
 	case GL_FRAMEBUFFER_COMPLETE_EXT:
@@ -226,7 +250,7 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 		break;
 	}
 
-	stop();
+	stop(glFunc);
 
 	return success;
 }

@@ -32,20 +32,12 @@
 #include "ccGuiParameters.h"
 
 //Qt
-#include <QGLWidget>
 #include <QFont>
 #include <QMap>
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QByteArray>
 #include <QFlags>
-//#define THREADED_GL_WIDGET
-#ifdef THREADED_GL_WIDGET
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QAtomicInt>
-#endif
 
 //system
 #include <unordered_set>
@@ -64,7 +56,11 @@ class ccInteractor;
 class ccPolyline;
 
 //! OpenGL 3D view
+#ifndef USE_QtOpenGL_CLASSES
 class ccGLWindow : public QGLWidget, public ccGenericGLDisplay
+#else
+class ccGLWindow : public QOpenGLWidget, public ccGenericGLDisplay
+#endif
 {
 	Q_OBJECT
 
@@ -138,10 +134,12 @@ public:
 
 	//! Default constructor
 	ccGLWindow(	QWidget *parent = 0,
+#ifndef USE_QtOpenGL_CLASSES
 				const QGLFormat& format = QGLFormat::defaultFormat(),
 				QGLWidget* shareWidget = 0,
+#endif
 				bool silentInitialization = false);
-	
+
 	//! Destructor
 	virtual ~ccGLWindow();
 
@@ -150,6 +148,13 @@ public:
 
 	//! Returns current 'scene graph' root
 	ccHObject* getSceneDB();
+
+#ifdef USE_QtOpenGL_CLASSES
+	//replacement for the missing methods of QGLWidget
+	void renderText(int x, int y, const QString & str, const QFont & font = QFont());
+	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
+	inline void updateGL() { update(); }
+#endif
 
 	//inherited from ccGenericGLDisplay
 	virtual void toBeRefreshed();
@@ -167,6 +172,7 @@ public:
 	virtual unsigned getTextureID( ccMaterial::CShared mtl);
 	inline virtual QWidget* asWidget() { return this; }
 	inline virtual QSize getScreenSize() const { return size(); }
+	inline virtual ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -815,44 +821,6 @@ protected: //other methods
 	void paintGL();
 	bool event(QEvent* evt);
 
-#ifdef THREADED_GL_WIDGET
-	void initialize();
-	void resizeGL2();
-	void paint();
-	void resizeEvent(QResizeEvent* evt);
-	void glInit() { /*stop QGLWidget standard behavior*/ }
-	void glDraw() { /*stop QGLWidget standard behavior*/ }
-
-	//! Rendering thread
-	class RenderingThread : public QThread
-	{
-	public:
-
-		explicit RenderingThread(ccGLWindow* win);
-		~RenderingThread() { stop(); }
-		
-		void stop();
-		void redraw();
-
-	protected:
-
-		virtual void run();
-
-		ccGLWindow* m_window;
-		QWaitCondition m_waitCondition;
-		QAtomicInt m_abort;
-		QAtomicInt m_pendingRedraw;
-	};
-
-	friend RenderingThread;
-
-	RenderingThread* m_renderingThread;
-	QMutex m_mutex;
-	QGLFormat m_format;
-	const QGLWidget* m_shareWidget; 
-	QAtomicInt m_resized;
-#endif
-
 	//Graphical features controls
 	void drawCross();
 	void drawTrihedron();
@@ -996,7 +964,7 @@ protected: //OpenGL Extensions
 	/** Wrapper around ccFBOUtils::InitGLEW.
 		\return success
 	**/
-	static bool InitGLEW();
+	//static bool InitGLEW();
 
 protected: //members
 

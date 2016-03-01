@@ -26,19 +26,38 @@
 //Local
 #include "ccGLMatrix.h"
 
-//GLEW (if needed, must be included first)
-#ifdef USE_GLEW
-#include <GL/glew.h>
+//Default OpenGL functions set
+#include <QOpenGLFunctions_2_1>
+typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
+
+//temporary test for QOpenGLWidget integration
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+#define USE_QtOpenGL_CLASSES
 #endif
+
+#ifndef USE_QtOpenGL_CLASSES
 
 #include <QGLContext>
 #include <QGLWidget>
 #include <QGLFormat>
 
+#define ccQGLContext QGLContext 
+
 #ifdef CC_MAC_OS
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
+#endif
+
+#else
+
+#include <QOpenGLContext>
+#include <QOpenGLWidget>
+#include <QSurfaceFormat>
+#include <QOpenGLTexture>
+
+#define ccQGLContext QOpenGLContext
+
 #endif
 
 #ifndef GL_INVALID_TEXTURE_ID

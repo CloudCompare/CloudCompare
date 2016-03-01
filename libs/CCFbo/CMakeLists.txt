@@ -11,9 +11,7 @@ file( GLOB source_list src/*.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
-target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
-
-qt5_use_modules(${PROJECT_NAME} Core ) # Widgets
+qt5_use_modules(${PROJECT_NAME} Core OpenGL ) # Core + OpenGL
 
 # Add custom prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )

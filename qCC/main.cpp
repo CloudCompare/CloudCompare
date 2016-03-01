@@ -88,6 +88,20 @@ protected:
 
 int main(int argc, char **argv)
 {
+	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
+	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
+		on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
+		ensure that resource sharing between contexts stays functional as all internal contexts are created
+		using the correct version and profile.
+	**/
+	{
+		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+		format.setStereo(true);
+		format.setStencilBufferSize(0);
+		QSurfaceFormat::setDefaultFormat(format);
+	}
+
 	//QT initialiation
 	qccApplication app(argc, argv);
 
@@ -137,12 +151,15 @@ int main(int argc, char **argv)
 	//command line mode
 	if (!commandLine)
 	{
+		//DGM FIXME: do the same with Qt 5 + reject if Qt version is < 2.1
+#ifndef USE_QtOpenGL_CLASSES
 		//OpenGL?
 		if (!QGLFormat::hasOpenGL())
 		{
 			QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
 			return EXIT_FAILURE;
 		}
+#endif
 
 		//splash screen
 		splashStartTime.start();

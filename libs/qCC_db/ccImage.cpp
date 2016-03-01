@@ -98,8 +98,7 @@ void ccImage::setData(const QImage& image)
 	m_height = m_image.height();
 	updateAspectRatio();
 
-	//default behavior (this will be updated later, depending
-	//on the OpenGL version of the bound QGLWidget)
+	//default behavior (this will be updated later, depending on the actual OpenGL version)
 	m_texU = 1.0;
 	m_texV = 1.0;
 }
@@ -127,7 +126,9 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 	assert(win);
 
 	if (m_image.isNull())
+	{
 		return false;
+	}
 
 	if (!m_textureID || m_boundWin != win)
 	{
@@ -137,17 +138,19 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 		m_boundWin = win;
 		m_textureID = m_boundWin->getTextureID(m_image);
 
-		//OpenGL version < 2.0 require texture with 2^n width & height
-		if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0)
-			&& glewIsSupported("GL_ARB_texture_non_power_of_two") == 0)
-		{
-			// update nearest smaller power of 2 (for textures with old OpenGL versions)
-			unsigned paddedWidth = (m_width > 0 ? 1 << (unsigned)floor(log((double)m_width)/log(2.0)) : 0);
-			unsigned paddedHeight = (m_height > 0 ? 1 << (unsigned)floor(log((double)m_height)/log(2.0)) : 0);
-			m_texU = float(m_width)/float(paddedWidth);
-			m_texV = float(m_height)/float(paddedHeight);
-		}
-		else
+		//DGM FIXME: we shouldn't support Qt < 2.1 anymore in fact
+		//We should add a specific test before running CloudCompare
+		//OpenGL version < 2.0 requires textures with 2^n width & height
+		//if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0)
+		//	&& glewIsSupported("GL_ARB_texture_non_power_of_two") == 0)
+		//{
+		//	// update nearest smaller power of 2 (for textures with old OpenGL versions)
+		//	unsigned paddedWidth = (m_width > 0 ? 1 << (unsigned)floor(log((double)m_width)/log(2.0)) : 0);
+		//	unsigned paddedHeight = (m_height > 0 ? 1 << (unsigned)floor(log((double)m_height)/log(2.0)) : 0);
+		//	m_texU = float(m_width)/float(paddedWidth);
+		//	m_texV = float(m_height)/float(paddedHeight);
+		//}
+		//else
 		{
 			m_texU = 1.0;
 			m_texV = 1.0;

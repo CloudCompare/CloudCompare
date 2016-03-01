@@ -20,7 +20,6 @@
 //Local
 #include "ccFrameBufferObject.h"
 #include "ccShader.h"
-#include "ccFBOUtils.h"
 
 //system
 #include <math.h>
@@ -86,25 +85,25 @@ void ccBilateralFilter::reset()
 	m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString& error)
+bool ccBilateralFilter::init(QOpenGLFunctions_3_2_Compatibility* glFunc, int width, int height, QString shadersPath, QString& error)
 {
 	if (!m_fbo)
 		m_fbo = new ccFrameBufferObject();
-	if (!m_fbo->init(width,height))
+	if (!m_fbo->init(glFunc, width, height))
 	{
 		//ccLog::Warning("[Bilateral Filter] Can't initialize FBO!");
 		reset();
 		return false;
 	}
 
-	m_fbo->start();
-	m_fbo->initColor(GL_RGB/*GL_RGB32F*/, GL_RGB, GL_FLOAT);
-	m_fbo->stop();
+	m_fbo->start(glFunc);
+	m_fbo->initColor(glFunc, GL_RGB/*GL_RGB32F*/, GL_RGB, GL_FLOAT);
+	m_fbo->stop(glFunc);
 
 	if (!m_shader)
-		m_shader = new ccShader();
+		m_shader = new ccShader(glFunc);
 
-	if (!m_shader->fromFile(shadersPath, "bilateral",error))
+	if (!m_shader->fromFile(shadersPath, "bilateral", error))
 	{
 		//ccLog::Warning(QString("[Bilateral Filter] Can't load shader: %1").arg(error));
 		reset();
@@ -126,27 +125,27 @@ void ccBilateralFilter::setParams(unsigned halfSpatialSize, float spatialSigma, 
 	updateDampingTable();
 }
 
-void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
+void ccBilateralFilter::shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
 	if (!m_fbo || !m_shader)
 		return;
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glFunc->glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 	if (!m_useCurrentViewport)
 	{
 		//we must use corner-based screen coordinates
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0.0,(GLdouble)m_width,0.0,(GLdouble)m_height,0.0,1.0);
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
+		glFunc->glMatrixMode(GL_PROJECTION);
+		glFunc->glPushMatrix();
+		glFunc->glLoadIdentity();
+		glFunc->glOrtho(0.0,(GLdouble)m_width,0.0,(GLdouble)m_height,0.0,1.0);
+		glFunc->glMatrixMode(GL_MODELVIEW);
+		glFunc->glPushMatrix();
+		glFunc->glLoadIdentity();
 	}
 
 	//	HORIZONTAL
-	m_fbo->start();
+	m_fbo->start(glFunc);
 
 	m_shader->start();
 	m_shader->setUniform1i("s2_I",0);	// image to blur
@@ -158,16 +157,32 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 	m_shader->setUniform1f("SigmaDepth",m_depthSigma);
 
 	//Texture 1 --> 2D
-	glActiveTexture(GL_TEXTURE1);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,texDepth);
+	glFunc->glActiveTexture(GL_TEXTURE1);
+	glFunc->glEnable(GL_TEXTURE_2D);
+	glFunc->glBindTexture(GL_TEXTURE_2D,texDepth);
 
 	//Texture 0 --> 2D
-	glActiveTexture(GL_TEXTURE0);
+	glFunc->glActiveTexture(GL_TEXTURE0);
 	//glEnable(GL_TEXTURE_2D);
 	//glBindTexture(GL_TEXTURE_2D,texColor);
 
-	ccFBOUtils::DisplayTexture2DCorner(texColor,m_width,m_height);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texColor);
+
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2i(0, 0);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2i(m_width, 0);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2i(m_width, m_height);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2i(0, m_height);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_TEXTURE_2D);
 
 	//Texture 0 --> 2D
 	//glActiveTexture(GL_TEXTURE0);
@@ -175,22 +190,22 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 	//glDisable(GL_TEXTURE_2D);
 
 	//Texture 1 --> 2D
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,0);
-	glDisable(GL_TEXTURE_2D);
+	glFunc->glActiveTexture(GL_TEXTURE1);
+	glFunc->glBindTexture(GL_TEXTURE_2D,0);
+	glFunc->glDisable(GL_TEXTURE_2D);
 
 	m_shader->stop();
-	m_fbo->stop();
+	m_fbo->stop(glFunc);
 
 	if (!m_useCurrentViewport)
 	{
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
+		glFunc->glMatrixMode(GL_PROJECTION);
+		glFunc->glPopMatrix();
+		glFunc->glMatrixMode(GL_MODELVIEW);
+		glFunc->glPopMatrix();
 	}
 
-	glPopAttrib();
+	glFunc->glPopAttrib();
 }
 
 GLuint ccBilateralFilter::getTexture()

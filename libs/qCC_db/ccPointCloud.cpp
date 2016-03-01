@@ -4079,12 +4079,10 @@ CCLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned cha
 	return ref;
 }
 
-static bool CatchGLErrors(const char* context)
+static bool CatchGLErrors(GLenum err, const char* context)
 {
 	//catch GL errors
 	{
-		GLenum err = glGetError();
-
 		//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
 		switch(err)
 		{
@@ -4311,7 +4309,7 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 				m_vboManager.vbos[i]->release();
 
 				//if an error is detected
-				if (CatchGLErrors("ccPointCloud::updateVBOs"))
+				if (CatchGLErrors(glGetError(), "ccPointCloud::updateVBOs"))
 				{
 					vboSizeBytes = -1;
 				}
@@ -4420,7 +4418,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 
 	release();
 	
-	CatchGLErrors("ccPointCloud::vbo.init");
+	CatchGLErrors(glGetError(), "ccPointCloud::vbo.init");
 
 	return totalSizeBytes;
 }

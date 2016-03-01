@@ -1,10 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-project( CloudCompare )
-
-set( VERSION_MAJOR 2 )
-set( VERSION_MINOR 7 )
-set( VERSION_PATCH 0 )
+project( CloudCompare VERSION 2.7.0 )
 
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
@@ -124,9 +120,9 @@ if( APPLE )
    set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
 
    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
+   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
+   set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
 
    add_subdirectory( Mac )
 endif()

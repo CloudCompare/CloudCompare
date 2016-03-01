@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
 include ( ../CMakePolicies.cmake )
@@ -28,10 +28,7 @@ if (COMPILE_CC_CORE_LIB_WITH_QT)
 	include( ../CMakeExternalLibs.cmake )
 endif()
 
-project( CC_CORE_LIB )
-
-set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 0 )
+project( CC_CORE_LIB VERSION 1.0 )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 if( MSVC )

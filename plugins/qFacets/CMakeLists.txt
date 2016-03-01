@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 option( INSTALL_QFACETS_PLUGIN "Check to install qFACETS plugin" OFF )
 

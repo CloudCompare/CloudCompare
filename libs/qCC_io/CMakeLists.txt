@@ -31,12 +31,8 @@ target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 
-
-if ( USE_QT5 )
-	qt5_use_modules(${PROJECT_NAME} Core)	
-else()
-    target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES} )
-endif()
+# Qt
+qt5_use_modules(${PROJECT_NAME} Core)	
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )

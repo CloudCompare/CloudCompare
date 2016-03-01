@@ -60,9 +60,8 @@ target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
-if ( USE_QT5 )
-	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL Concurrent)
-endif()
+# Qt
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL Concurrent)
 
 if( APPLE )
 	install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins COMPONENT Runtime )

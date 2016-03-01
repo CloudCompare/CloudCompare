@@ -63,12 +63,11 @@ target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
-if ( USE_QT5 )
-	if (WIN32)
-		target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
-	endif()
-	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
+# Qt
+if (WIN32)
+	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
 endif()
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )

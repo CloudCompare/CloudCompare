@@ -17,14 +17,10 @@ if( WIN32 )
 		#All Qt Dlls (release mode)
 		set(QT_RELEASE_DLLS)
 		
-		if ( NOT USE_QT5 )
-			set( QT_RELEASE_DLLS_BASE_NAME QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
-		else()
-			#standard DLLs
-			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
-			#ICU DLLs
-			file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
-		endif()
+		#standard DLLs (Qt 5)
+		set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
+		#ICU DLLs
+		file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
 
 		#specific case for the MinGW version of Qts
 		if( MINGW )
@@ -58,14 +54,11 @@ if( WIN32 )
 			#debug version
 			set( QT_DEBUG_DLLS )
 			
-			if ( NOT USE_QT5 )
-				set( QT_DEBUG_DLLS_BASE_NAME QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
-			else()
-				#standard DLLs
-				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
-				#ICU DLLs
-				file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
-			endif()
+			#standard DLLs
+			set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
+			#ICU DLLs
+			file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
+
 			#specific case for the MinGW version of Qts
 			if( MINGW )
 				list( APPEND QT_DEBUG_DLLS_BASE_NAME libgcc )
@@ -92,16 +85,14 @@ endfunction()
 function( install_Qt5_plugins )
 
 if( WIN32 )		# 1 argument: ARGV0 = base destination
-	if( USE_QT5 )
-		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
-		set( platformPlugin qwindows )
-		if( NOT CMAKE_CONFIGURATION_TYPES )
-			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll DESTINATION ${ARGV0}/platforms )
-		else()
-			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/platforms )
-			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/platforms )
-			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}d.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/platforms )
-		endif()
+	set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
+	set( platformPlugin qwindows )
+	if( NOT CMAKE_CONFIGURATION_TYPES )
+		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll DESTINATION ${ARGV0}/platforms )
+	else()
+		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/platforms )
+		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/platforms )
+		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}d.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/platforms )
 	endif()
 endif()
 endfunction()
@@ -109,12 +100,8 @@ endfunction()
 # Export Qt imageformats DLLs to specified destinations
 function( install_Qt_ImageFormats )
 if( WIN32 )		# 1 argument: ARGV0 = base destination
-	if( USE_QT5 )
-		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
-		set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg )
-	else()
-		set( QT_VER_NUM "4")
-	endif()
+	set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
+	set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg )
 	foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
 		if( NOT CMAKE_CONFIGURATION_TYPES )
 			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll DESTINATION ${ARGV0}/imageformats )

@@ -64,16 +64,12 @@ target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 target_link_libraries( ${PROJECT_NAME} qcustomplot )
 
-
-if ( USE_QT5 )
-	if (WIN32)
-        qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
-		target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
-    else()
-		qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
-	endif()
+# Qt
+if (WIN32)
+    qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
+	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
 else()
-    target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES})
+	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
 endif()
 
 # contrib. libraries support

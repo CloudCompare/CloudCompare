@@ -5809,7 +5809,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		return;
 	}
 #define USE_CGAL_LIB
-#if defined(USE_TRIANGLE_LIB) || defined(USE_CGAL_LIB)
+#if defined(USE_CGAL_LIB)
 	std::vector<CCVector2> points2D;
 	std::vector<int> segments2D;
 	try

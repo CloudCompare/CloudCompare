@@ -23,11 +23,6 @@
 #include "Polyline.h"
 #include "ChunkedPointCloud.h"
 
-#ifdef USE_TRIANGLE_LIB
-//Triangle Lib
-#include <triangle.h>
-#endif
-
 #if USE_CGAL_LIB
 //CGAL Lib
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -62,7 +57,7 @@ Delaunay2dMesh::~Delaunay2dMesh()
 
 bool Delaunay2dMesh::Available()
 {
-#if defined(USE_TRIANGLE_LIB) ||  defined(USE_CGAL_LIB)
+#if defined(USE_CGAL_LIB)
 	return true;
 #else
 	return false;
@@ -86,81 +81,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 								const std::vector<int>& segments2D,
 								char* outputErrorStr/*=0*/)
 {
-#if defined(USE_TRIANGLE_LIB)
-	//we use the external library 'Triangle'
-	triangulateio in;
-	memset(&in,0,sizeof(triangulateio));
-
-	in.numberofpoints = static_cast<int>(points2D.size());
-	in.pointlist = (REAL*)(&points2D[0]);
-	in.segmentlist = (int*)(&segments2D[0]);
-	assert((segments2D.size() & 1) == 0);
-	in.numberofsegments = static_cast<int>(segments2D.size()/2);
-
-	triangulateio out;
-	memset(&out,0,sizeof(triangulateio));
-
-	try 
-	{ 
-		triangulate ( "pczBPNIOQY", &in, &out, 0 );
-	}
-	catch (std::exception& e)
-	{
-		if (outputErrorStr)
-			strcpy(outputErrorStr,e.what());
-		return false;
-	} 
-	catch (...) 
-	{
-		if (outputErrorStr)
-			strcpy(outputErrorStr,"Unknown error");
-		return false;
-	} 
-
-	m_numberOfTriangles = out.numberoftriangles;
-	if (m_numberOfTriangles > 0)
-	{
-		m_triIndexes = out.trianglelist;
-
-		//remove non existing points
-		int* _tri = out.trianglelist;
-		for (int i=0; i<out.numberoftriangles; )
-		{
-			if (	_tri[0] >= in.numberofpoints
-				||	_tri[1] >= in.numberofpoints
-				||	_tri[2] >= in.numberofpoints)
-			{
-				int lasTriIndex = (out.numberoftriangles-1) * 3;
-				_tri[0] = out.trianglelist[lasTriIndex + 0]; 
-				_tri[1] = out.trianglelist[lasTriIndex + 1]; 
-				_tri[2] = out.trianglelist[lasTriIndex + 2]; 
-				--out.numberoftriangles;
-			}
-			else
-			{
-				_tri += 3;
-				++i;
-			}
-		}
-
-		//Reduce memory size
-		if (out.numberoftriangles < static_cast<int>(m_numberOfTriangles))
-		{
-			assert(out.numberoftriangles > 0);
-			realloc(m_triIndexes, sizeof(int)*out.numberoftriangles*3);
-			m_numberOfTriangles = out.numberoftriangles;
-		}
-	}
-
-	trifree(out.segmentmarkerlist);
-	trifree(out.segmentlist);
-
-	m_globalIterator = m_triIndexes;
-	m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
-
-	return true;
-
-#elif defined(USE_CGAL_LIB)
+#if defined(USE_CGAL_LIB)
 
 	//CGAL boilerplate
 	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -216,7 +137,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 #else
 
 	if (outputErrorStr)
-		strcpy(outputErrorStr, "Triangle library not supported");
+		strcpy(outputErrorStr, "CGAL library not supported");
 	return false;
 
 #endif
@@ -226,66 +147,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 								size_t pointCountToUse/*=0*/,
 								char* outputErrorStr/*=0*/)
 {
-#if defined(USE_TRIANGLE_LIB)
-
-	size_t pointCount = points2D.size();
-	//we will use at most 'pointCountToUse' points (if not 0)
-	if (pointCountToUse > 0 && pointCountToUse < pointCount)
-	{
-		pointCount = pointCountToUse;
-	}
-	if (pointCount < 3)
-	{
-		if (outputErrorStr)
-			strcpy(outputErrorStr, "Not enough points");
-		return false;
-	}
-
-	//reset
-	m_numberOfTriangles = 0;
-	if (m_triIndexes)
-	{
-		delete[] m_triIndexes;
-		m_triIndexes = 0;
-	}
-
-	//we use the external library 'Triangle'
-	triangulateio in;
-	memset(&in,0,sizeof(triangulateio));
-
-	in.numberofpoints = static_cast<int>(pointCount);
-	in.pointlist = (REAL*)(&points2D[0]);
-
-	//set static variable for 'triunsuitable' (for Triangle lib with '-u' option)
-	//s_maxSquareEdgeLength = maxEdgeLength*maxEdgeLength;
-	//DGM: doesn't work this way --> triangle lib will simply add new points!
-	try 
-	{ 
-		triangulate ( "zQN", &in, &in, 0 );
-	}
-	catch (std::exception& e) 
-	{
-		if (outputErrorStr)
-			strcpy(outputErrorStr,e.what());
-		return false;
-	} 
-	catch (...) 
-	{
-		if (outputErrorStr)
-			strcpy(outputErrorStr,"Unknown error");
-		return false;
-	} 
-
-	m_numberOfTriangles = in.numberoftriangles;
-	if (m_numberOfTriangles > 0)
-		m_triIndexes = in.trianglelist;
-
-	m_globalIterator = m_triIndexes;
-	m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
-
-	return true;
-
-#elif defined(USE_CGAL_LIB)
+#if defined(USE_CGAL_LIB)
 
 	//CGAL boilerplate
 	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -356,7 +218,7 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 #else
 
 	if (outputErrorStr)
-		strcpy(outputErrorStr, "Please link CC lib with either Triangle or CGAL");
+		strcpy(outputErrorStr, "CGAL library not supported");
 	return false;
 
 #endif

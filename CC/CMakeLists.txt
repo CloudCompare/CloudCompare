@@ -5,7 +5,6 @@ include ( ../CMakePolicies.cmake )
 
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
-option( COMPILE_CC_CORE_LIB_WITH_TRIANGLE "Check to compile CC_CORE_LIB with Triangle lib. (to enable Delaunay 2.5D triangulation)" ON )
 option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL lib. (to enable Delaunay 2.5D triangulation with a GPL compliant licence)" OFF )
 option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
 
@@ -14,13 +13,7 @@ project( CC_DUMMY_PROJECT )
 
 # CGAL takes precedence over triangle
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
-	SET(COMPILE_CC_CORE_LIB_WITH_TRIANGLE OFF)
 	include (CGALSupport.cmake)
-endif()
-
-# else CC_CORE_LIB only relies on 'triangle' library...
-if (COMPILE_CC_CORE_LIB_WITH_TRIANGLE)
-	add_subdirectory (triangle)
 endif()
 
 # Additional dependencies (only Qt in fact)
@@ -45,13 +38,6 @@ if (COMPILE_CC_CORE_LIB_SHARED)
 else()
 	add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 endif()
-
-
-if (COMPILE_CC_CORE_LIB_WITH_TRIANGLE)
-	target_link_libraries( ${PROJECT_NAME} triangle )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TRIANGLE_LIB )
-endif()
-
 
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
 	target_link_libraries( ${PROJECT_NAME} ${CGAL_LIBRARIES} )

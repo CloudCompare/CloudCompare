@@ -2,12 +2,13 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.6.2"
+#define MyAppVersion "2.6.3.beta"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
-#define MyFaroRedistPath "E:\These\C++\Faro\FARO LS\redist"
+#define MyFaroRedistPath "E:\These\C++\Faro\redist"
+#define MyFaroRedistExe "FARO LS 5.5.3.0 x86 Setup.exe"
 #define MyCCPath "E:\These\C++\CloudCompare\bin_x86_msvc_2010\CloudCompare"
 #define MyOutputDir "E:\These\C++\CloudCompare\bin_x86_msvc_2010"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
@@ -51,7 +52,7 @@ Source: "{#MyVCRedistPath}\vcredist_2010_x86.exe"; DestDir: {tmp}; Flags: delete
 ; DotProduct support
 Source: "{#MyVCRedistPath}\vcredist_2013_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit;
 ; FARO LS support
-Source: "{#MyFaroRedistPath}\x86\FARO LS 5.3.3.38662 x86 Setup.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; Check: WithFaro
+Source: "{#MyFaroRedistPath}\x86\{#MyFaroRedistExe}"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; Check: WithFaro
 Source: "{#MyFaroRedistPath}\x86\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
 Source: "{#MyCCPath}\plugins\QFARO*.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithFaro
 
@@ -64,7 +65,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 Filename: "{tmp}\vcredist_2010_x86.exe"; Parameters: "/q"
 Filename: "{tmp}\vcredist_2013_x86.exe"; Parameters: "/q"
-Filename: "{tmp}\FARO LS 5.3.3.38662 x86 Setup.exe"; Check: WithFaro
+Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 
 [Code]
 var

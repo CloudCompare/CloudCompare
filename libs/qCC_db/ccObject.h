@@ -27,10 +27,6 @@
 #include <QString>
 #include <QVariant>
 #include <QSharedPointer>
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#define CC_QT5
-#endif
-
 
 //System
 #include <stdint.h>

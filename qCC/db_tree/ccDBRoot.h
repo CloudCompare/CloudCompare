@@ -154,9 +154,7 @@ public:
 	virtual Qt::DropActions supportedDropActions() const;
 	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
 	virtual QMap<int,QVariant> itemData(const QModelIndex& index) const;
-#ifdef CC_QT5
 	virtual Qt::DropActions supportedDragActions() const { return Qt::MoveAction; }
-#endif
 
 public slots:
 	void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);

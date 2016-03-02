@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )

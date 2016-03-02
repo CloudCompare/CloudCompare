@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 
-include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 if( MSVC )
@@ -22,7 +21,6 @@ target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES})
 qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 
 # Add custom prepocessor definitions
-set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 endif()

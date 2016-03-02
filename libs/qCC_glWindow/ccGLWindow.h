@@ -958,14 +958,6 @@ protected: //other methods
 	//! Returns the current (OpenGL) viewport
 	inline const QRect& getGLViewport() const { return m_glViewport; }
 
-protected: //OpenGL Extensions
-
-	//! Loads OpenGL extensions
-	/** Wrapper around ccFBOUtils::InitGLEW.
-		\return success
-	**/
-	//static bool InitGLEW();
-
 protected: //members
 
 	//! GL names picking buffer

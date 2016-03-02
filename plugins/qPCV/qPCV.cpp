@@ -31,7 +31,6 @@
 #include <ccScalarField.h>
 #include <ccColorScalesManager.h>
 
-//Qt (last so as to be sure that glew.h is included before gl.h
 #include <QtGui>
 #include <QMainWindow>
 

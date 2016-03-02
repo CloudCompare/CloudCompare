@@ -141,8 +141,7 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 		//DGM FIXME: we shouldn't support Qt < 2.1 anymore in fact
 		//We should add a specific test before running CloudCompare
 		//OpenGL version < 2.0 requires textures with 2^n width & height
-		//if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0)
-		//	&& glewIsSupported("GL_ARB_texture_non_power_of_two") == 0)
+		//if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0))
 		//{
 		//	// update nearest smaller power of 2 (for textures with old OpenGL versions)
 		//	unsigned paddedWidth = (m_width > 0 ? 1 << (unsigned)floor(log((double)m_width)/log(2.0)) : 0);

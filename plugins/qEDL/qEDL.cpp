@@ -15,7 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-//first so as to be sure to include 'glew.h' before 'gl.h'
 #include "ccEDLFilter.h"
 
 //Qt

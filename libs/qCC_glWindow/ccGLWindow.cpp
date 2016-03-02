@@ -42,7 +42,6 @@
 #include <ccSubMesh.h>
 
 //CCFbo
-//#include <ccGlew.h>
 #include <ccShader.h>
 #include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
@@ -706,9 +705,6 @@ void ccGLWindow::initializeGL()
 		//set viewport and visu. as invalid
 		invalidateViewport();
 		invalidateVisualization();
-
-		//we initialize GLEW
-		//InitGLEW();
 
 		//OpenGL version
 		const char* vendorName = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
@@ -5888,30 +5884,6 @@ QString ccGLWindow::getShadersPath()
 	return QApplication::applicationDirPath() + "/shaders";
 #endif
 }
-
-//! Loads all available OpenGL extensions
-//bool ccGLWindow::InitGLEW()
-//{
-//#ifdef USE_GLEW
-//
-//	// GLEW initialization
-//	if (!ccFBOUtils::InitGLEW())
-//	{
-//		ccLog::Warning("[Glew] An error occurred while initializing OpenGL extensions!");
-//		return false;
-//	}
-//	else
-//	{
-//		ccLog::Print("[Glew] Initialized!");
-//		return true;
-//	}
-//
-//#else
-//
-//	return false;
-//
-//#endif
-//}
 
 CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 													const CCVector3& A3D,

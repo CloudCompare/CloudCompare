@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.0)
 
 option( INSTALL_QEDL_PLUGIN "Check to install qEDL plugin" OFF )
 
+# CloudCompare 'EDL' plugin
 if (INSTALL_QEDL_PLUGIN)
 
-#CloudCompare 'EDL' plugin
-project( QEDL_PLUGIN )
-
-set( CC_SHADER_FOLDER EDL )
-include( ../CMakePluginTpl.cmake )
+    project( QEDL_PLUGIN )
+    
+    set( CC_SHADER_FOLDER EDL )
+    include( ../CMakePluginTpl.cmake )
 
 endif()

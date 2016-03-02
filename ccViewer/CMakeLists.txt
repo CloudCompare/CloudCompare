@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
@@ -14,11 +14,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-project( ccViewer )
-
-set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 35 )
-set( VERSION_PATCH 0 )
+project( ccViewer VERSION 1.35.0 )
 
 set( QCC_HEADERS ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h ../qCC/ccStereoModeDlg.h )
 set( QCC_SOURCES ../qCC/ccOverlayDialog.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccMouse3DContextMenu.cpp ../qCC/ccStereoModeDlg.cpp )
@@ -71,7 +67,9 @@ qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
 
 # 3dConnexion devices support
-target_link_3DXWARE( ${PROJECT_NAME} )
+if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
+	target_link_3DXWARE( ${PROJECT_NAME} )
+endif()
 
 # Add custom preprocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_VIEWER )
@@ -117,9 +115,9 @@ if( APPLE )
    set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
 
    set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
+   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
+   set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
 
    add_subdirectory( Mac )
 endif( APPLE )

@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
-include ( CMakePolicies.cmake )
 
-# Set a consistent MACOSX_RPATH default across all CMake versions.
-# When CMake 2.8.12 is required, change this default to 1.
-# When CMake 3.0.0 is required, remove this block (see CMP0042).
-if ( APPLE )
-    if ( NOT DEFINED CMAKE_MACOSX_RPATH )
-        set( CMAKE_MACOSX_RPATH 0 )
-    endif()
-endif()
+include ( CMakePolicies.cmake )
+include( CMakeSetCompilerOptions.cmake )
 
 project( CloudCompareProjects )
+
+# Default debug suffix for libraries.
+set( CMAKE_DEBUG_POSTFIX "d" )
 
 # One shouldn't generate the BUILD project directly in the SOURCES folder!
 if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -21,15 +17,6 @@ if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
 		set( SAME_BUILD_AND_SOURCE_FOLDER_WARNING_ALREADY_ISSUED TRUE )
 	endif()
 endif()
-
-
-# Default debug suffix for libraries.  it is ok for linux also
-# Not sure if it is ok on apple, but enabling by default
-# cause I suspect should be similar to linux
-set( CMAKE_DEBUG_POSTFIX "d" )
-
-
-include(CMakeSetCompilerOptions.cmake)
 
 if (WIN32) # this option is for win only. somebody should see if it makes sense to enable it on APPLE too.
     option(INSTALL_SYSTEM_LIBS "When installing needed system libs will be copied too" ON)
@@ -62,6 +49,7 @@ add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependenc
 add_subdirectory( libs/qCC_io ) # must always be included after qCC_db (dependency)
 add_subdirectory( libs/qCC_glWindow ) # must always be included after qCC_db (dependency)
 add_subdirectory( libs/qcustomplot )
+
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
 #  Therefore the target folder is the same for Windows and Unix/Linux)
@@ -72,7 +60,7 @@ if (APPLE)
 	set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/ccViewer.app CACHE INTERNAL "ccViewer bundle dir.")
 endif()
 
-#load plugins (potentially used by qCC and ccViewer below
+#load plugins (potentially used by qCC and ccViewer)
 add_subdirectory( plugins )
 
 # qCC

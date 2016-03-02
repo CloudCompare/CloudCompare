@@ -11,6 +11,7 @@ endif()
 
 option( INSTALL_QANIMATION_PLUGIN "Check to install qAnimation plugin" OFF )
 
+# CloudCompare 'ANIMATION' plugin
 if (INSTALL_QANIMATION_PLUGIN)
 
 	option( WITH_FFMPEG_SUPPORT "Check to setup FFMPEG support (to create movies instead of images with qAnimation)" OFF )
@@ -20,7 +21,6 @@ if (INSTALL_QANIMATION_PLUGIN)
 	
 	include_directories( ${QTFFMPEG_LIB_SOURCE_DIR} )
 
-	#CloudCompare 'ANIMATION' plugin
 	project( QANIMATION_PLUGIN )
 
 	include( ../CMakePluginTpl.cmake )

@@ -178,6 +178,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+			glPushAttrib(GL_ENABLE_BIT);
 			glEnable(GL_TEXTURE_2D);
 
 			if (bindToGlTexture(context._win))
@@ -199,7 +200,8 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glEnd();
 			}
 
-			glDisable(GL_TEXTURE_2D);
+			//glDisable(GL_TEXTURE_2D);
+			glPopAttrib();
 
 			glPopAttrib();
 		}

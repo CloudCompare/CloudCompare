@@ -38,6 +38,7 @@
 #include <QTimer>
 #include <QByteArray>
 #include <QFlags>
+#include <QOpenGLDebugLogger>
 
 //system
 #include <unordered_set>
@@ -162,7 +163,6 @@ public:
 	virtual void invalidateViewport();
 	virtual void releaseTexture(unsigned texID);
 	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
-	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag);
 	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
 	virtual QFont getLabelDisplayFont() const; //takes rendering zoom into account!
@@ -610,6 +610,9 @@ protected slots:
 
 	//! Checks for scheduled redraw
 	void checkScheduledRedraw();
+
+	//! OpenGL KHR debug log
+	void handleLoggedMessage(const QOpenGLDebugMessage&);
 
 signals:
 

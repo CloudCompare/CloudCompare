@@ -594,28 +594,23 @@ const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
 	return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters();
 }
 
-static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
+void ccGLWindow::handleLoggedMessage(const QOpenGLDebugMessage& message)
 {
-	ccGLWindow* win = reinterpret_cast<ccGLWindow*>(userParam);
-	assert(win);
-	if (!win)
-		return;
-
 	//Decode severity
 	QString sevStr;
-	switch (severity)
+	switch (message.severity())
 	{
-	case GL_DEBUG_SEVERITY_HIGH:
+	case QOpenGLDebugMessage::HighSeverity:
 		sevStr = "high";
 		break;
-	case GL_DEBUG_SEVERITY_MEDIUM:
+	case QOpenGLDebugMessage::MediumSeverity:
 		sevStr = "medium";
 		break;
-	case GL_DEBUG_SEVERITY_LOW:
+	case QOpenGLDebugMessage::LowSeverity:
 		sevStr = "low";
 		return; //don't care about them! they flood the console in Debug mode :(
 		break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION:
+	case QOpenGLDebugMessage::NotificationSeverity:
 	default:
 		sevStr = "notification";
 		break;
@@ -623,24 +618,24 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 
 	//Decode source
 	QString sourceStr;
-	switch (source)
+	switch (message.source())
 	{
-	case GL_DEBUG_SOURCE_API:
+	case QOpenGLDebugMessage::APISource:
 		sourceStr = "API";
 		break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+	case QOpenGLDebugMessage::WindowSystemSource:
 		sourceStr = "window system";
 		break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+	case QOpenGLDebugMessage::ShaderCompilerSource:
 		sourceStr = "shader compiler";
 		break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:
+	case QOpenGLDebugMessage::ThirdPartySource:
 		sourceStr = "third party";
 		break;
-	case GL_DEBUG_SOURCE_APPLICATION:
+	case QOpenGLDebugMessage::ApplicationSource:
 		sourceStr = "application";
 		break;
-	case GL_DEBUG_SOURCE_OTHER:
+	case QOpenGLDebugMessage::OtherSource:
 	default:
 		sourceStr = "other";
 		break;
@@ -648,40 +643,40 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 
 	//Decode type
 	QString typeStr;
-	switch (type)
+	switch (message.type())
 	{
-	case GL_DEBUG_TYPE_ERROR:
+	case QOpenGLDebugMessage::ErrorType:
 		typeStr = "error";
 		break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+	case QOpenGLDebugMessage::DeprecatedBehaviorType:
 		typeStr = "deprecated behavior";
 		break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+	case QOpenGLDebugMessage::UndefinedBehaviorType:
 		typeStr = "undefined behavior";
 		break;
-	case GL_DEBUG_TYPE_PORTABILITY:
+	case QOpenGLDebugMessage::PortabilityType:
 		typeStr = "portability";
 		break;
-	case GL_DEBUG_TYPE_PERFORMANCE:
+	case QOpenGLDebugMessage::PerformanceType:
 		typeStr = "performance";
 		break;
-	case GL_DEBUG_TYPE_OTHER:
+	case QOpenGLDebugMessage::OtherType:
 	default:
 		typeStr = "other";
 		break;
-	case GL_DEBUG_TYPE_MARKER:
+	case QOpenGLDebugMessage::MarkerType:
 		typeStr = "marker";
 		break;
 	}
 
-	QString msg = QString("[OpenGL][Win %0]").arg(win->getUniqueID());
+	QString msg = QString("[OpenGL][Win %0]").arg(getUniqueID());
 	msg += "[source: " + sourceStr + "]";
 	msg += "[type: " + typeStr + "]";
 	msg += "[severity: " + sevStr + "]";
 	msg += " ";
-	msg += message;
+	msg += message.message();
 
-	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+	if (message.severity() != QOpenGLDebugMessage::NotificationSeverity)
 		ccLog::Warning(msg);
 	else
 		ccLog::Print(msg);
@@ -723,8 +718,7 @@ void ccGLWindow::initializeGL()
 		ccGui::ParamStruct params = getDisplayParameters();
 
 		//VBO support
-		//DGM FIXME
-		if (false/*ccFBOUtils::CheckVBOAvailability()*/)
+		if (context()->hasExtension(QByteArrayLiteral("GL_ARB_vertex_buffer_object")))
 		{
 			if (params.useVBOs && (!vendorName || QString(vendorName).toUpper().startsWith("ATI")))
 			{
@@ -743,8 +737,10 @@ void ccGLWindow::initializeGL()
 		}
 
 		//Shaders and other OpenGL extensions
-		//DGM FIXME
-		m_shadersEnabled = false/*ccFBOUtils::CheckShadersAvailability()*/;
+		m_shadersEnabled =	context()->hasExtension(QByteArrayLiteral("GL_ARB_shading_language_100"))
+						&&	context()->hasExtension(QByteArrayLiteral("GL_ARB_shader_objects"))
+						&&	context()->hasExtension(QByteArrayLiteral("GL_ARB_vertex_shader"))
+						&&	context()->hasExtension(QByteArrayLiteral("GL_ARB_fragment_shader"));
 		if (!m_shadersEnabled)
 		{
 			//if no shader, no GL filter!
@@ -756,8 +752,7 @@ void ccGLWindow::initializeGL()
 			if (!m_silentInitialization)
 				ccLog::Print("[3D View %i] Shaders available", m_uniqueID);
 
-			//DGM FIXME
-			m_glFiltersEnabled = false/*ccFBOUtils::CheckFBOAvailability()*/;
+			m_glFiltersEnabled = context()->hasExtension(QByteArrayLiteral("GL_EXT_framebuffer_object"));
 			if (m_glFiltersEnabled)
 			{
 				if (!m_silentInitialization)
@@ -822,29 +817,24 @@ void ccGLWindow::initializeGL()
 
 
 #ifdef _DEBUG
-#if !defined(_MSC_VER) || _MSC_VER > 1600
 		//KHR extension (debug)
-		//DGM FIXME
-		if (false/*ccFBOUtils::CheckExtension("GL_KHR_debug")*/)
+		if (context()->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
 		{
 			if (!m_silentInitialization)
 				ccLog::Print("[3D View %i] GL KHR (debug) extension available", m_uniqueID);
 
-			glFunc->glEnable(GL_DEBUG_OUTPUT);
-			glFunc->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(this);
+			logger->initialize();
 
-			//int value = 0;
-			//glFunc->glGetIntegerv(GL_CONTEXT_FLAGS, &value);
-			//if ((value & GL_CONTEXT_FLAG_DEBUG_BIT) == 0)
-			//{
-			//	ccLog::Warning("[3D View %i] But GL_CONTEXT_FLAG_DEBUG_BIT is not set!");
-			//}
-
-			//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-			////glDebugMessageControl(GL_DONT_CARE,GL_DEBUG_TYPE_OTHER,GL_DONT_CARE,0,NULL,GL_FALSE); //deactivate 'other' messages
-			//glDebugMessageCallback(&GLDebugCallback, this);
+			connect(logger, SIGNAL(messageLogged(const QOpenGLDebugMessage&)), this, SLOT(handleLoggedMessage(const QOpenGLDebugMessage&)));
+			logger->enableMessages();
+			logger->disableMessages(QOpenGLDebugMessage::AnySource,
+									QOpenGLDebugMessage::DeprecatedBehaviorType
+									| QOpenGLDebugMessage::PortabilityType
+									| QOpenGLDebugMessage::PerformanceType
+									| QOpenGLDebugMessage::OtherType);
+			logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
 		}
-#endif
 #endif
 
 		//apply (potentially) updated parameters;
@@ -1258,7 +1248,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//separator
 		{
-			glFunc->glColor3ubv(s_hotZone->color);
+			glColor3ubv_safe(glFunc, s_hotZone->color);
 			glFunc->glBegin(GL_POINTS);
 			glFunc->glVertex2i(-halfW + xStart + HotZone::margin() / 2, halfH - (yStart + HotZone::iconSize() / 2));
 			glFunc->glEnd();
@@ -1573,7 +1563,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glFunc->glBegin(GL_QUADS);
 				{
 					//we use the default background color for gradient start
-					glFunc->glColor3ubv(bkgCol.rgb);
+					glColor3ubv_safe(glFunc, bkgCol.rgb);
 					glFunc->glVertex2i(-w, h);
 					glFunc->glVertex2i(w, h);
 					//and the inverse of the text color for gradient stop
@@ -1705,6 +1695,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 				context.glH = vp.Size.h;
 				modifiedViewport = true;
 				s_oculus.fbo->stop();
+				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 		}
 #endif //CC_OCULUS_SUPPORT
@@ -1733,7 +1724,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		}
 		else
 		{
-			glFunc->glDrawBuffer(GL_BACK);
+			//DGM FIXME: throws a GL_INVALID_OPERATION?!
+			//glFunc->glDrawBuffer(GL_BACK);
 		}
 	}
 
@@ -1818,7 +1810,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		glFunc->glDisable(GL_DEPTH_TEST);
 
-		glFunc->glColor3ubv(ccColor::black.rgba);
+		glColor3ubv_safe(glFunc, ccColor::black.rgba);
 		glFunc->glBegin(GL_QUADS);
 		glFunc->glVertex2i(x, m_glViewport.height() - y);
 		glFunc->glVertex2i(x, m_glViewport.height() - (y + 100));
@@ -1856,6 +1848,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			currentFBO->stop();
+			this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
 		}
@@ -1880,6 +1873,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 				//apply shader
 				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
 				m_activeGLFilter->shade(gl32Func, depthTex, colorTex, parameters);
+				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
 
 				//if capture mode is ON: we only want to capture it, not to display it
@@ -1912,7 +1906,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 				}
 				else
 				{
-					glFunc->glDrawBuffer(GL_BACK);
+					//DGM FIXME: throws a GL_INVALID_OPERATION?!
+					//glFunc->glDrawBuffer(GL_BACK);
 				}
 
 				ccGLUtils::DisplayTexture2D(this->context(), screenTex, m_glViewport.width(), m_glViewport.height());
@@ -2812,7 +2807,7 @@ void ccGLWindow::drawCross()
 	assert(glFunc);
 	
 	//cross OpenGL drawing
-	glFunc->glColor3ubv(ccColor::lightGrey.rgba);
+	glColor3ubv_safe(glFunc, ccColor::lightGrey.rgba);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(0.0, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0);
 	glFunc->glVertex3f(0.0, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0);
@@ -2834,7 +2829,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 {
 	assert(!m_viewportParams.perspectiveView); //a scale is only valid in ortho. mode!
 
-	float scaleMaxW = static_cast<float>(m_glViewport.width()) / 4; //25% of screen width
+	float scaleMaxW = m_glViewport.width() / 4.0f; //25% of screen width
 	if (m_captureMode.enabled)
 	{
 		//DGM: we have to fall back to the case 'render zoom = 1' (otherwise we might not get the exact same aspect)
@@ -2872,7 +2867,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	assert(glFunc);
 
 	//scale OpenGL drawing
-	glFunc->glColor3ubv(color.rgb);
+	glColor3ubv_safe(glFunc, color.rgb);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(w - scaleW_pix, -h, 0.0);
 	glFunc->glVertex3f(w, -h, 0.0);
@@ -5527,6 +5522,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			//disable the FBO
 			fbo->stop();
+			this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
 
 			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
@@ -5572,6 +5568,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				ccGLUtils::DisplayTexture2D(context(), filter->getTexture(), CONTEXT.glW, CONTEXT.glH);
 				//glClear(GL_DEPTH_BUFFER_BIT);
 				fbo->stop();
+				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 
 			fbo->start();
@@ -5618,6 +5615,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			glFunc->glReadBuffer(GL_NONE);
 
 			fbo->stop();
+			this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 
 			if (m_fbo != fbo)
 			{
@@ -5772,16 +5770,6 @@ bool ccGLWindow::initGLFilter(int w, int h)
 int ccGLWindow::getGlFilterBannerHeight() const
 {
 	return QFontMetrics(font()).height() + 2 * CC_GL_FILTER_BANNER_MARGIN;
-}
-
-bool ccGLWindow::supportOpenGLVersion(unsigned openGLVersionFlag)
-{
-#ifndef USE_QtOpenGL_CLASSES
-	return (format().openGLVersionFlags() & openGLVersionFlag);
-#else
-	//DGM FIXME: equivalent with Qt 5
-	return true;
-#endif
 }
 
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgb/*=0*/, const QFont& font/*=QFont()*/)
@@ -6199,9 +6187,6 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 
 void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
 {
-	//TODO FIMXE
-	return;
-
 	makeCurrent();
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
@@ -6231,23 +6216,8 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 	}
 
 	//and then we convert this QImage to a texture!
-	glFunc->glEnable(GL_TEXTURE_2D);
 	{
-		glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-		glFunc->glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-		glFunc->glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
-		glFunc->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glFunc->glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-		glFunc->glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-		glFunc->glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glFunc->glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
-		glFunc->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-		glFunc->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rect.width(), rect.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, textImage.constBits());
-
-		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
 		glFunc->glEnable(GL_BLEND);
 		glFunc->glDisable(GL_DEPTH_TEST);
 
@@ -6261,7 +6231,11 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		glFunc->glLoadIdentity();
 		{
 			//move to the right position on the screen
-			glFunc->glTranslatef(x, y, 0);
+			glFunc->glTranslatef(x, height() - 1 - y, 0);
+
+			glFunc->glEnable(GL_TEXTURE_2D);
+			QOpenGLTexture textTex(textImage);
+			textTex.bind();
 
 			glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //DGM: warning must be float colors to work properly?!
 			glFunc->glBegin(GL_QUADS);
@@ -6270,16 +6244,16 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 			glFunc->glTexCoord2f(1, 0); glFunc->glVertex3i(rect.width(), rect.height(), 0);
 			glFunc->glTexCoord2f(0, 0); glFunc->glVertex3i(0, rect.height(), 0);
 			glFunc->glEnd();
+
+			textTex.release();
 		}
 
 		glFunc->glMatrixMode(GL_PROJECTION);
 		glFunc->glPopMatrix();
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPopMatrix();
-
 		glFunc->glPopAttrib();
 	}
-	glFunc->glDisable(GL_TEXTURE_2D);
 }
 
 void ccGLWindow::renderText(double x, double y, double z, const QString & str, const QFont & font/*=QFont()*/)

@@ -471,6 +471,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glBlendFunc(context.sourceBlend, context.destBlend);
 #endif
 
+				glPushAttrib(GL_ENABLE_BIT);
 				glEnable(GL_TEXTURE_2D);
 			}
 
@@ -626,7 +627,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glPopAttrib(); //GL_COLOR_BUFFER_BIT 
 #endif
 				glBindTexture(GL_TEXTURE_2D, 0);
-				glDisable(GL_TEXTURE_2D);
+				glPopAttrib();
 			}
 		}
 

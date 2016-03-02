@@ -224,11 +224,6 @@ public:
 								const unsigned char* rgbColor = 0,
 								const QFont& font=QFont()) = 0;
 
-	//! Returns whether a given version of OpenGL is supported
-	/** \param openGLVersionFlag see QGLFormat::OpenGLVersionFlag
-	**/
-	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag) = 0;
-
 	//! Returns the current OpenGL camera parameters
 	virtual void getGLCameraParameters(ccGLCameraParameters& params) = 0;
 

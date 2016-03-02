@@ -1834,6 +1834,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glBlendFunc(context.sourceBlend, context.destBlend);
 #endif
 
+				glPushAttrib(GL_ENABLE_BIT);
 				glEnable(GL_TEXTURE_2D);
 			}
 
@@ -1917,7 +1918,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							GLuint texID = (newMatlIndex >= 0 ? context._win->getTextureID((*m_materials)[newMatlIndex]) : 0);
 							if (texID > 0)
+							{
 								assert(glIsTexture(texID));
+							}
 							glBindTexture(GL_TEXTURE_2D, texID);
 						}
 
@@ -1997,7 +2000,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glPopAttrib(); //GL_COLOR_BUFFER_BIT 
 #endif
 				glBindTexture(GL_TEXTURE_2D, 0);
-				glDisable(GL_TEXTURE_2D);
+				glPopAttrib();
+				//glDisable(GL_TEXTURE_2D);
 			}
 		}
 

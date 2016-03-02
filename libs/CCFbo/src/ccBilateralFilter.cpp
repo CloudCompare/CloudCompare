@@ -126,7 +126,7 @@ void ccBilateralFilter::shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint
 		glFunc->glMatrixMode(GL_PROJECTION);
 		glFunc->glPushMatrix();
 		glFunc->glLoadIdentity();
-		glFunc->glOrtho(0.0,(GLdouble)m_width,0.0,(GLdouble)m_height,0.0,1.0);
+		glFunc->glOrtho(0.0, static_cast<GLdouble>(m_width), 0.0, static_cast<GLdouble>(m_height), 0.0, 1.0);
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
 		glFunc->glLoadIdentity();
@@ -146,41 +146,44 @@ void ccBilateralFilter::shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint
 
 	//Texture 1 --> 2D
 	glFunc->glActiveTexture(GL_TEXTURE1);
+	glFunc->glPushAttrib(GL_ENABLE_BIT);
 	glFunc->glEnable(GL_TEXTURE_2D);
 	glFunc->glBindTexture(GL_TEXTURE_2D,texDepth);
 
 	//Texture 0 --> 2D
 	glFunc->glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
-	//glBindTexture(GL_TEXTURE_2D,texColor);
+	//glFunc->glEnable(GL_TEXTURE_2D);
+	//glFunc->glBindTexture(GL_TEXTURE_2D,texColor);
 
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texColor);
+	glFunc->glEnable(GL_TEXTURE_2D);
+	glFunc->glBindTexture(GL_TEXTURE_2D, texColor);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2i(0, 0);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2i(m_width, 0);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2i(m_width, m_height);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2i(0, m_height);
-	glEnd();
+	glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	glFunc->glBegin(GL_QUADS);
+	glFunc->glTexCoord2f(0.0f, 0.0f);
+	glFunc->glVertex2i(0, 0);
+	glFunc->glTexCoord2f(1.0f, 0.0f);
+	glFunc->glVertex2i(m_width, 0);
+	glFunc->glTexCoord2f(1.0f, 1.0f);
+	glFunc->glVertex2i(m_width, m_height);
+	glFunc->glTexCoord2f(0.0f, 1.0f);
+	glFunc->glVertex2i(0, m_height);
+	glFunc->glEnd();
 
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_TEXTURE_2D);
+	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+	//glFunc->glDisable(GL_TEXTURE_2D);
 
 	//Texture 0 --> 2D
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D,0);
-	//glDisable(GL_TEXTURE_2D);
+	//glFunc->glActiveTexture(GL_TEXTURE0);
+	//glFunc->glBindTexture(GL_TEXTURE_2D,0);
+	//glFunc->glDisable(GL_TEXTURE_2D);
 
 	//Texture 1 --> 2D
 	glFunc->glActiveTexture(GL_TEXTURE1);
-	glFunc->glBindTexture(GL_TEXTURE_2D,0);
-	glFunc->glDisable(GL_TEXTURE_2D);
+	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+	//glFunc->glDisable(GL_TEXTURE_2D);
+
+	glFunc->glPopAttrib();
 
 	m_shader.release();
 	m_fbo.stop();

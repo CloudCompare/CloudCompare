@@ -102,6 +102,9 @@ int main(int argc, char *argv[])
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 		format.setStereo(true);
 		format.setStencilBufferSize(0);
+#ifdef _DEBUG
+		format.setOption(QSurfaceFormat::DebugContext);
+#endif
 		QSurfaceFormat::setDefaultFormat(format);
 	}
 

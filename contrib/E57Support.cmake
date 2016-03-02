@@ -46,11 +46,6 @@ endif()
 function( target_link_LIBE57 ) # 1 argument: ARGV0 = project name
 
 if( ${OPTION_USE_LIBE57} )
-	# with 'find_package'
-	# if ( E57RefImpl_SCANLIB_LIBRARIES )
-	# 	target_link_libraries( ${ARGV0} ${E57RefImpl_SCANLIB_LIBRARIES} )
-	# endif()
-
 	# manual version
 	if( LIBE57_INSTALL_DIR )
 

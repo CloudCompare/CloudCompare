@@ -24,8 +24,6 @@ if( WIN32 )
 
 		#specific case for the MinGW version of Qts
 		if( MINGW )
-			# OLD: list( APPEND QT_RELEASE_DLLS_BASE_NAME libgcc )
-			# OLD: list( APPEND QT_RELEASE_DLLS_BASE_NAME mingwm )
 			file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libgcc*.dll )
 			file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libstdc++*.dll )
 		endif()
@@ -164,8 +162,6 @@ else()
 	install( ${ARGV0} ${ARGV1} CONFIGURATIONS Debug DESTINATION ${ARGV2}_debug${ARGV3} )
 endif()
 endfunction()
-
-
 
 if( APPLE )
    function( get_support_libs )  # 1 argument - return var

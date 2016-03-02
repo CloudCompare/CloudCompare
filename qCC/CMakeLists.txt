@@ -70,7 +70,9 @@ endif()
 target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 
 # 3dConnexion devices support
-target_link_3DXWARE( ${PROJECT_NAME} )
+if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
+	target_link_3DXWARE( ${PROJECT_NAME} )
+endif()
 
 # Add custom preprocessor definitions
 if( WIN32 )
@@ -79,9 +81,6 @@ if( WIN32 )
 		SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO")
 	endif()
 endif()
-
-#set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE XXX) #nothing right now
-#set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG XXX) #nothing right now
 
 # App icon with Code::Blocks/MinGW
 if( WIN32 )
@@ -129,12 +128,8 @@ if( APPLE )
    install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
    install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
    install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
-   #install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Rendering )
-   #install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Rendering )
 else()
    install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders )
    install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders )
    install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/ColorRamp )
-   #install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Rendering )
-   #install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Rendering )
 endif()

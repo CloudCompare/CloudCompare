@@ -2,7 +2,7 @@
 # CGAL+CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
-FIND_PACKAGE(CGAL QUIET COMPONENTS Core ) # implies findGMP
+FIND_PACKAGE( CGAL QUIET COMPONENTS Core ) # implies findGMP
 
 if (CGAL_FOUND)
 	if(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} LESS 4.3)

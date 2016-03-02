@@ -56,16 +56,6 @@ endif()
 include_directories(${OpenGL_INCLUDE_DIR})
 
 # ------------------------------------------------------------------------------
-# CUDA
-# ------------------------------------------------------------------------------
-#if( USE_CUDA )
-#    find_package( CUDA REQUIRED )
-#    if( NOT CUDA_FOUND )
-#        message( SEND_ERROR "CUDA required, but not found with 'find_package()'" )
-#    endif()
-#endif()
-
-# ------------------------------------------------------------------------------
 # OpenMP
 # ------------------------------------------------------------------------------
 find_package(OpenMP)
@@ -73,7 +63,6 @@ if (OPENMP_FOUND)
 	message("OpenMP found")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-	#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -lpthread" )
 endif()
 
 # ------------------------------------------------------------------------------

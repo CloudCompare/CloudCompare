@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Quick & dirty XIOT(X3D)+CMake support for CloudCompare
+# XIOT(X3D)+CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
 OPTION( OPTION_USE_XIOT "Build with XIOT (X3D support)" OFF )

@@ -911,8 +911,12 @@ protected: //other methods
 
 	//! Inits FBO (frame buffer object)
 	bool initFBO(int w, int h);
+	//! Inits FBO (safe)
+	bool initFBOSafe(ccFrameBufferObject* &fbo, int w, int h);
 	//! Releases any active FBO
 	void removeFBO();
+	//! Releases any active FBO (safe)
+	void removeFBOSafe(ccFrameBufferObject* &fbo);
 
 	//! Inits active GL filter (advanced shader)
 	bool initGLFilter(int w, int h);

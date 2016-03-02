@@ -20,7 +20,8 @@
 
 //Qt
 #include <QString>
-#include <QOpenGLFunctions_3_2_Compatibility>
+
+class QOpenGLFunctions_3_2_Compatibility;
 
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to
@@ -34,10 +35,14 @@ public:
 	//! Default constructor
 	ccGlFilter(QString description)
 		: m_description(description)
+		, m_glFunc(0)
 	{}
 
 	//! Default destructor
 	virtual ~ccGlFilter() {}
+
+	//! Returns filter name
+	inline virtual QString getDescription() const { return m_description; }
 
 	//! Cloning mechanism
 	virtual ccGlFilter* clone() const = 0;
@@ -79,20 +84,20 @@ public:
 
 	//! Applies filter to texture (depth + color)
 	virtual void shade(	QOpenGLFunctions_3_2_Compatibility* glFunc,
-						GLuint texDepth,
-						GLuint texColor,
+						unsigned texDepth,
+						unsigned texColor,
 						ViewportParameters& parameters) = 0;
 
 	//! Returns resulting texture
-	virtual GLuint getTexture() = 0;
-
-	//! Returns filter name
-	inline virtual QString getDescription() const { return m_description; }
+	virtual unsigned getTexture() = 0;
 
 protected:
 
 	//! Filter description
 	QString m_description;
+
+	//! Associated OpenGL functions
+	QOpenGLFunctions_3_2_Compatibility* m_glFunc;
 };
 
 #endif

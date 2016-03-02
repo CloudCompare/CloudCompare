@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include "ccFrameBufferObject.h"
-#include "ccShader.h"
 
 //system
 #include <assert.h>
@@ -28,32 +27,32 @@ ccFrameBufferObject::ccFrameBufferObject()
 	, m_colorTexture(0)
 	, m_ownColorTexture(false)
 	, m_fboId(0)
+	, m_glFunc(0)
 {}
 
 ccFrameBufferObject::~ccFrameBufferObject()
 {
-	//DGM FIXME
-	reset(0);
+	reset();
 }
 
-void ccFrameBufferObject::reset(QOpenGLFunctions_3_2_Compatibility* glFunc)
+void ccFrameBufferObject::reset()
 {
 	if (m_depthTexture != 0)
 	{
-		if (glFunc)
+		if (m_glFunc)
 		{
-			glFunc->glDeleteTextures(1, &m_depthTexture);
+			m_glFunc->glDeleteTextures(1, &m_depthTexture);
 		}
 		m_depthTexture = 0;
 	}
 
-	deleteColorTexture(glFunc);
+	deleteColorTexture();
 
 	if (m_fboId != 0)
 	{
-		if (glFunc)
+		if (m_glFunc)
 		{
-			glFunc->glDeleteFramebuffers(1, &m_fboId);
+			m_glFunc->glDeleteFramebuffers(1, &m_fboId);
 		}
 		m_fboId = 0;
 	}
@@ -61,7 +60,7 @@ void ccFrameBufferObject::reset(QOpenGLFunctions_3_2_Compatibility* glFunc)
 	m_width = m_height = 0;
 }
 
-bool ccFrameBufferObject::init(QOpenGLFunctions_3_2_Compatibility* glFunc, unsigned w, unsigned h)
+bool ccFrameBufferObject::init(unsigned w, unsigned h, QOpenGLFunctions_3_2_Compatibility* glFunc)
 {
 	if (!glFunc)
 	{
@@ -69,27 +68,28 @@ bool ccFrameBufferObject::init(QOpenGLFunctions_3_2_Compatibility* glFunc, unsig
 	}
 
 	//to support reinit
-	reset(glFunc);
+	reset();
 
 	m_width = w;
 	m_height = h;
+	m_glFunc = glFunc;
 
 	// create a framebuffer object
-	glFunc->glGenFramebuffers(1, &m_fboId);
+	m_glFunc->glGenFramebuffers(1, &m_fboId);
 
-	return true;
+	return m_fboId != 0;
 }
 
-void ccFrameBufferObject::start(QOpenGLFunctions_3_2_Compatibility* glFunc)
+void ccFrameBufferObject::start()
 {
-	if (glFunc)
-		glFunc->glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_fboId);
+	if (m_glFunc)
+		m_glFunc->glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_fboId);
 }
 
-void ccFrameBufferObject::stop(QOpenGLFunctions_3_2_Compatibility* glFunc)
+void ccFrameBufferObject::stop()
 {
-	if (glFunc)
-		glFunc->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+	if (m_glFunc)
+		m_glFunc->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 }
 
 GLuint ccFrameBufferObject::getID()
@@ -97,25 +97,24 @@ GLuint ccFrameBufferObject::getID()
 	return m_fboId;
 }
 
-void ccFrameBufferObject::deleteColorTexture(QOpenGLFunctions_3_2_Compatibility* glFunc)
+void ccFrameBufferObject::deleteColorTexture()
 {
-	if (glFunc && m_colorTexture && glFunc->glIsTexture(m_colorTexture))
+	if (m_glFunc && m_colorTexture && m_glFunc->glIsTexture(m_colorTexture))
 	{
 		if (m_ownColorTexture)
 		{
-			glFunc->glDeleteTextures(1, &m_colorTexture);
+			m_glFunc->glDeleteTextures(1, &m_colorTexture);
 		}
 	}
 	m_colorTexture = 0;
 	m_ownColorTexture = false;
 }
 
-bool ccFrameBufferObject::attachColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
-										GLuint texID,
+bool ccFrameBufferObject::attachColor(	GLuint texID,
 										bool ownTexture/*=false*/,
 										GLenum target/*=GL_TEXTURE_2D*/)
 {
-	if (!glFunc)
+	if (!m_glFunc)
 	{
 		assert(false);
 		return false;
@@ -126,7 +125,7 @@ bool ccFrameBufferObject::attachColor(	QOpenGLFunctions_3_2_Compatibility* glFun
 		return false;
 	}
 
-	if (!glFunc->glIsTexture(texID))
+	if (!m_glFunc->glIsTexture(texID))
 	{
 		//error or simple warning?
 		assert(false);
@@ -134,17 +133,17 @@ bool ccFrameBufferObject::attachColor(	QOpenGLFunctions_3_2_Compatibility* glFun
 	}
 
 	//remove the previous texture (if any)
-	deleteColorTexture(glFunc);
+	deleteColorTexture();
 
 	m_colorTexture = texID;
 	m_ownColorTexture = ownTexture;
 
-	start(glFunc);
+	start();
 
-	glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
+	m_glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
 
 	bool success = false;
-	GLenum status = glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
+	GLenum status = m_glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 	switch (status)
 	{
 	case GL_FRAMEBUFFER_COMPLETE_EXT:
@@ -155,19 +154,18 @@ bool ccFrameBufferObject::attachColor(	QOpenGLFunctions_3_2_Compatibility* glFun
 		break;
 	}
 
-	stop(glFunc);
+	stop();
 
 	return success;
 }
 
-bool ccFrameBufferObject::initColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
-										GLint internalformat,
+bool ccFrameBufferObject::initColor(	GLint internalformat,
 										GLenum format,
 										GLenum type,
 										GLint minMagFilter /*= GL_LINEAR*/,
 										GLenum target /*= GL_TEXTURE_2D*/)
 {
-	if (!glFunc)
+	if (!m_glFunc)
 	{
 		assert(false);
 		return false;
@@ -180,30 +178,29 @@ bool ccFrameBufferObject::initColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
 
 	//even if 'attachTexture' can do this, we prefer to do it now
 	//so as to release memory before creating a new texture!
-	deleteColorTexture(glFunc);
+	deleteColorTexture();
 
 	//create the new texture
 	GLuint texID = 0;
-	glFunc->glGenTextures(1, &texID);
+	m_glFunc->glGenTextures(1, &texID);
 
-	glFunc->glBindTexture  (target, texID);
-	glFunc->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter );
-	glFunc->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter );
-	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFunc->glTexImage2D   (target, 0, internalformat, m_width, m_height, 0, format, type, 0);
-	glFunc->glBindTexture  (target, 0);
+	m_glFunc->glBindTexture  (target, texID);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter );
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter );
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	m_glFunc->glTexImage2D   (target, 0, internalformat, m_width, m_height, 0, format, type, 0);
+	m_glFunc->glBindTexture  (target, 0);
 
-	return attachColor(glFunc, texID, true, target);
+	return attachColor(texID, true, target);
 }
 
-bool ccFrameBufferObject::initDepth(QOpenGLFunctions_3_2_Compatibility* glFunc,
-									GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
+bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 									GLenum internalFormat /*=GL_DEPTH_COMPONENT24*/,
 									GLint minMagFilter /*= GL_NEAREST*/,
 									GLenum target/*=GL_TEXTURE_2D*/)
 {
-	if (!glFunc)
+	if (!m_glFunc)
 	{
 		assert(false);
 		return false;
@@ -214,31 +211,31 @@ bool ccFrameBufferObject::initDepth(QOpenGLFunctions_3_2_Compatibility* glFunc,
 		return false;
 	}
 
-	start(glFunc);
+	start();
 
-	if (glFunc->glIsTexture(m_depthTexture))
+	if (m_glFunc->glIsTexture(m_depthTexture))
 	{
-		glFunc->glDeleteTextures(1, &m_depthTexture);
+		m_glFunc->glDeleteTextures(1, &m_depthTexture);
 	}
-	glFunc->glGenTextures(1, &m_depthTexture);
-	glFunc->glBindTexture(target, m_depthTexture);
+	m_glFunc->glGenTextures(1, &m_depthTexture);
+	m_glFunc->glBindTexture(target, m_depthTexture);
 
 	//float border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	//glFunc->glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
-	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
-	glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapParam);
-	glFunc->glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
-	glFunc->glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-	glFunc->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
-	glFunc->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
-	glFunc->glTexImage2D(target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapParam);
+	m_glFunc->glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
+	m_glFunc->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
+	m_glFunc->glTexImage2D(target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 
-	glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
+	m_glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
 
 	glBindTexture(target, 0);
 
 	bool success = false;
-	GLenum status = glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
+	GLenum status = m_glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 	switch (status)
 	{
 	case GL_FRAMEBUFFER_COMPLETE_EXT:
@@ -250,7 +247,7 @@ bool ccFrameBufferObject::initDepth(QOpenGLFunctions_3_2_Compatibility* glFunc,
 		break;
 	}
 
-	stop(glFunc);
+	stop();
 
 	return success;
 }

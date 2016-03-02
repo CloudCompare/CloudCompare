@@ -18,35 +18,37 @@
 #ifndef CC_FRAME_BUFFER_OBJECT
 #define CC_FRAME_BUFFER_OBJECT
 
-//Qt
 #include <QOpenGLFunctions_3_2_Compatibility>
 
 //! F.B.O. encapsulation
+/** Compared to the QOpenGLFramebufferObject class, this one offers the possibility to:
+	- get the attached depth texture ID
+	- attach a custom COLOR texture
+**/
 class ccFrameBufferObject
 {
 public:
 	ccFrameBufferObject();
 	~ccFrameBufferObject();
 
-	bool init(QOpenGLFunctions_3_2_Compatibility* glFunc, unsigned w, unsigned h);
-	void reset(QOpenGLFunctions_3_2_Compatibility* glFunc);
-	void start(QOpenGLFunctions_3_2_Compatibility* glFunc);
-	void stop(QOpenGLFunctions_3_2_Compatibility* glFunc);
+	bool init(unsigned w, unsigned h, QOpenGLFunctions_3_2_Compatibility* glFunc);
+	void reset();
+	void start();
+	void stop();
 
-	bool initColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
-					GLint internalformat,
+	inline bool isValid() const { return m_fboId; }
+
+	bool initColor(	GLint internalformat,
 					GLenum format,
 					GLenum type,
 					GLint minMagFilter = GL_LINEAR,
 					GLenum target = GL_TEXTURE_2D);
 
-	bool attachColor(	QOpenGLFunctions_3_2_Compatibility* glFunc,
-						GLuint texID,
+	bool attachColor(	GLuint texID,
 						bool ownTexture = false,
 						GLenum target = GL_TEXTURE_2D);
 
-	bool initDepth(	QOpenGLFunctions_3_2_Compatibility* glFunc,
-					GLint wrapParam = GL_CLAMP_TO_BORDER,
+	bool initDepth(	GLint wrapParam = GL_CLAMP_TO_BORDER,
 					GLenum internalFormat = GL_DEPTH_COMPONENT24,
 					GLint minMagFilter = GL_NEAREST,
 					GLenum textureTarget = GL_TEXTURE_2D);
@@ -63,7 +65,7 @@ public:
 protected:
 
 	//! Deletes/releases the color texture
-	void deleteColorTexture(QOpenGLFunctions_3_2_Compatibility* glFunc);
+	void deleteColorTexture();
 
 	//! Width
 	unsigned m_width;
@@ -81,6 +83,9 @@ protected:
 
 	//! ID
 	GLuint m_fboId;
+
+	//! Associated OpenGL functions
+	QOpenGLFunctions_3_2_Compatibility* m_glFunc;
 };
 
 #endif

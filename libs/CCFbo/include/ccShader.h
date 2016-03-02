@@ -20,16 +20,19 @@
 
 //Qt
 #include <QString>
-#include <QByteArray>
-#include <QOpenGLFunctions_3_2_Compatibility>
+#include <QOpenGLShaderProgram>
 
-//! Generic shader class
-class ccShader
+class QObject;
+
+//! Shader program
+/** Now a simple encapsulation of QOpenGLShaderProgram providing two helper functions.
+**/
+class ccShader : public QOpenGLShaderProgram
 {
 public:
 
 	//! Default constructor
-	ccShader(QOpenGLFunctions_3_2_Compatibility* glFunc);
+	ccShader(QObject* parent = 0);
 
 	//! Destructor
 	virtual ~ccShader();
@@ -51,58 +54,6 @@ public:
 		\param error error string (if any error occurred)
 	**/
 	virtual bool loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error);
-
-	virtual void reset();
-
-	virtual void start();
-	virtual void stop();
-
-	//! Returns program GL ID
-	inline GLuint getProgram() const { return m_prog; }
-
-	/** UNIFORMS **/
-
-	virtual void setUniform1i(int loc, int value);
-	virtual void setUniform1f(int loc, float value);
-	virtual void setUniform4fv(int loc, float* value);
-
-	virtual void setUniform1i(const char* variable, int val);
-	virtual void setUniform2iv(const char* variable, int* p_val);
-	virtual void setUniform3iv(const char* variable, int* p_val);
-	virtual void setUniform4iv(const char* variable, int* p_val);
-	virtual void setTabUniform4iv(const char* uniform, int size, int* p_val);
-
-	virtual void setUniform1f(const char* variable, float val);
-	virtual void setUniform2fv(const char* variable, float* p_val);
-	virtual void setUniform3fv(const char* variable, float* p_val);
-	virtual void setUniform4fv(const char* variable, float* p_val);
-	virtual void setTabUniform1fv(const char* uniform, int size, float* p_val);
-	virtual void setTabUniform2fv(const char* uniform, int size, float* p_val);
-	virtual void setTabUniform3fv(const char* uniform, int size, float* p_val);
-	virtual void setTabUniform4fv(const char* uniform, int size, float* p_val);
-	virtual void setUniformMatrix4fv(const char* variable, float* p_val, bool transpose = false);
-
-	/** ATTRIBUTES **/
-
-	virtual void setAttrib4iv(int loc, int* p_val);
-	virtual void setAttrib1f(int loc, float val);
-	virtual void setAttrib2fv(int loc, float* p_val);
-	virtual void setAttrib3fv(int loc, float* p_val);
-	virtual void setAttrib4fv(int loc, float* p_val);
-
-protected:
-
-	//! Loads a shader from a file
-	static GLuint LoadShader(QOpenGLFunctions_3_2_Compatibility* glFunc, GLenum type, QString filename, QString& error);
-
-	//! Bufferizes a shader file in memory
-	static QByteArray ReadShaderFile(QString filename);
-
-	//! Program ID
-	GLuint m_prog;
-
-	//! GL functions
-	QOpenGLFunctions_3_2_Compatibility* m_glFunc;
 };
 
 #endif

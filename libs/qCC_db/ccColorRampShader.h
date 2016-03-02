@@ -45,7 +45,7 @@ class ccColorRampShader : public ccShader
 public:
 
 	//! Default constructor
-	ccColorRampShader(QOpenGLFunctions_3_2_Compatibility* glFunc) : ccShader(glFunc) {}
+	ccColorRampShader() : ccShader() {}
 
 	//! Destructor
 	virtual ~ccColorRampShader() {}
@@ -60,27 +60,27 @@ public:
 			colorSteps = CC_MAX_SHADER_COLOR_RAMP_SIZE;
 		}
 
-		setUniform1f("uf_minSaturation",minSatRel);
-		setUniform1f("uf_maxSaturation",maxSatRel);
-		setUniform1f("uf_colormapSize",(float)colorSteps);
+		setUniformValue("uf_minSaturation", minSatRel);
+		setUniformValue("uf_maxSaturation", maxSatRel);
+		setUniformValue("uf_colormapSize", static_cast<float>(colorSteps));
 
 		//set 'grayed' points color as a float-packed value
 		{
 			int rgb = (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
-			float packedColorGray = static_cast<float>(static_cast<double>(rgb)/(1<<24));
-			setUniform1f("uf_colorGray",packedColorGray);
+			float packedColorGray = static_cast<float>(static_cast<double>(rgb) / (1 << 24));
+			setUniformValue("uf_colorGray", packedColorGray);
 		}
 
 		//send colormap to shader
 		assert(colorScale);
-		for (unsigned i=0; i<colorSteps; ++i)
+		for (unsigned i = 0; i < colorSteps; ++i)
 		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(static_cast<double>(i)/(colorSteps-1),colorSteps);
+			const ColorCompType* col = colorScale->getColorByRelativePos(static_cast<double>(i) / (colorSteps - 1), colorSteps);
 			//set ramp colors as float-packed values
 			int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
-			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb)/(1<<24));
+			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb) / (1 << 24));
 		}
-		setTabUniform1fv("uf_colormapTable",colorSteps,s_packedColormapf);
+		setUniformValueArray("uf_colormapTable", s_packedColormapf, colorSteps, 1);
 
 		return (glGetError() == 0);
 	}

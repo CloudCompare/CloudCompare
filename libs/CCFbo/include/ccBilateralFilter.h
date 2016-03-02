@@ -31,9 +31,13 @@
 #define	CC_BILATERAL_FILTER_HEADER
 
 #include "ccGlFilter.h"
+#include "ccShader.h"
+#include "ccFrameBufferObject.h"
 
-class ccShader;
-class ccFrameBufferObject;
+//system
+#include <vector>
+
+class QOpenGLFunctions_3_2_Compatibility;
 
 //! Bilateral filer (shader)
 /** See http://en.wikipedia.org/wiki/Bilateral_filter
@@ -52,13 +56,14 @@ public:
 	//! Destructor
 	virtual ~ccBilateralFilter();
 
+	//! Resets the filter
 	void reset();
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
 	virtual bool init(QOpenGLFunctions_3_2_Compatibility* glFunc, int width, int height, QString shadersPath, QString& error);
 	virtual void shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	virtual GLuint getTexture();
+	inline virtual GLuint getTexture() { return m_fbo.getColorTexture(); }
 
 	//! Set parameters
 	/** \param halfSpatialSize half spatial kernel size (between 1 and 7 - total size will be 2*h+1)
@@ -79,8 +84,8 @@ protected:
 	int m_width;
 	int	m_height;
 
-	ccFrameBufferObject* m_fbo;
-	ccShader* m_shader;
+	ccFrameBufferObject m_fbo;
+	ccShader m_shader;
 
 	//! Half spatial size (kernel width will be 2*h+1)
 	unsigned m_halfSpatialSize;
@@ -90,7 +95,7 @@ protected:
 	float m_depthSigma;
 
 	//! 'spatial' distribution (kernel values)
-	float* m_dampingPixelDist;
+	std::vector<float> m_dampingPixelDist;
 
 	//! Whether to use the current context (OpenGL) viewport or not
 	bool m_useCurrentViewport;

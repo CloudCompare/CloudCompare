@@ -2662,12 +2662,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						const ccColorScale::Shared& colorScale = m_currentDisplayedScalarField->getColorScale();
 						assert(colorScale);
 
-						colorRampShader->start();
+						colorRampShader->bind();
 						if (!colorRampShader->setup(sfMinSatRel, sfMaxSatRel, steps, colorScale))
 						{
 							//An error occurred during shader initialization?
 							ccLog::WarningDebug("Failed to init ColorRamp shader!");
-							colorRampShader->stop();
+							colorRampShader->release();
 							colorRampShader = 0;
 						}
 						else if (glParams.showNorms)
@@ -2913,7 +2913,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (colorRampShader)
 				{
-					colorRampShader->stop();
+					colorRampShader->release();
 
 					if (glParams.showNorms)
 						glPopAttrib(); //GL_LIGHTING_BIT

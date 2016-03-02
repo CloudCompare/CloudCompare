@@ -327,7 +327,7 @@ inline static void glColor4ubv_safe(ccQOpenGLFunctions* glFunc, const unsigned c
 						rgb[3] / 255.0f);
 }
 
-void safeRemoveFBO(ccFrameBufferObject* &fbo)
+void ccGLWindow::removeFBOSafe(ccFrameBufferObject* &fbo)
 {
 	//we "disconnect" the current FBO to avoid wrong display/errors
 	//if QT tries to redraw window during object destruction
@@ -339,12 +339,18 @@ void safeRemoveFBO(ccFrameBufferObject* &fbo)
 	}
 }
 
-bool initFBOSafe(QOpenGLFunctions_3_2_Compatibility* gl32Func, ccFrameBufferObject* &fbo, int w, int h)
+bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 {
 	if (fbo && fbo->width() == w && fbo->height() == h)
 	{
 		//nothing to do
 		return true;
+	}
+
+	QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+	if (!gl32Func)
+	{
+		return false;
 	}
 
 	//we "disconnect" the current FBO to avoid wrong display/errors
@@ -357,9 +363,9 @@ bool initFBOSafe(QOpenGLFunctions_3_2_Compatibility* gl32Func, ccFrameBufferObje
 		_fbo = new ccFrameBufferObject();
 	}
 
-	if (!_fbo->init(gl32Func, w, h)
-		|| !_fbo->initColor(gl32Func, GL_RGBA, GL_RGBA, GL_FLOAT)
-		|| !_fbo->initDepth(gl32Func, GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D))
+	if (	!_fbo->init(w, h, gl32Func)
+		||	!_fbo->initColor(GL_RGBA, GL_RGBA, GL_FLOAT)
+		||	!_fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D))
 	{
 		delete _fbo;
 		_fbo = 0;
@@ -780,8 +786,7 @@ void ccGLWindow::initializeGL()
 				}
 				else
 				{
-					QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
-					ccColorRampShader* colorRampShader = new ccColorRampShader(gl32Func);
+					ccColorRampShader* colorRampShader = new ccColorRampShader();
 					QString shadersPath = ccGLWindow::getShadersPath();
 					QString error;
 					if (!colorRampShader->loadProgram(QString(), shadersPath + QString("/ColorRamp/color_ramp.frag"), error))
@@ -1710,8 +1715,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 		&&	renderingParams.useFBO
 		&& (renderingParams.drawBackground || renderingParams.draw3DPass))
 	{
-		QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
-		currentFBO->start(gl32Func);
+		currentFBO->start();
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
 		ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO start)");
 
@@ -1848,12 +1852,10 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	//process and/or display the FBO (if any)
 	if (currentFBO && renderingParams.useFBO)
 	{
-		QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
-
 		//we disable fbo (if any)
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
-			currentFBO->stop(gl32Func);
+			currentFBO->stop();
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
 		}
@@ -1876,6 +1878,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 				}
 
 				//apply shader
+				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
 				m_activeGLFilter->shade(gl32Func, depthTex, colorTex, parameters);
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
 
@@ -2041,7 +2044,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	//we activate the current shader (if any)
 	if (m_activeShader)
 	{
-		m_activeShader->start();
+		m_activeShader->bind();
 	}
 
 	//color ramp shader for fast dynamic color ramp lookup-up
@@ -2259,7 +2262,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	//we disable shader (if any)
 	if (m_activeShader)
 	{
-		m_activeShader->stop();
+		m_activeShader->release();
 	}
 
 	//we disable lights
@@ -5452,9 +5455,9 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 		{
 			fbo = new ccFrameBufferObject();
 			QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
-			bool success = (fbo->init(gl32Func, Wp, Hp)
-				&& fbo->initColor(gl32Func, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
-				&& fbo->initDepth(gl32Func, GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D));
+			bool success = (	fbo->init(Wp, Hp, gl32Func)
+							&&	fbo->initColor(GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
+							&&	fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D));
 			if (!success)
 			{
 				if (!silent)
@@ -5477,7 +5480,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			makeCurrent();
 			ccQOpenGLFunctions* glFunc = functions();
 			assert(glFunc);
-			QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
 
 			//update viewport
 			setGLViewport(0, 0, Wp, Hp);
@@ -5487,6 +5489,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				QString shadersPath = ccGLWindow::getShadersPath();
 
 				QString error;
+				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
 				if (!m_activeGLFilter->init(gl32Func, Wp, Hp, shadersPath, error))
 				{
 					if (!silent)
@@ -5512,7 +5515,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			stopLODCycle();
 
 			//enable the FBO
-			fbo->start(gl32Func);
+			fbo->start();
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO start");
 
 			RenderingParams renderingParams;
@@ -5523,7 +5526,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			m_stereoModeEnabled = stereoModeWasEnabled;
 
 			//disable the FBO
-			fbo->stop(gl32Func);
+			fbo->stop();
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
 
 			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
@@ -5559,18 +5562,19 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				parameters.zNear = m_viewportParams.zNear;
 				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
 				//apply shader
+				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
 				filter->shade(gl32Func, depthTex, colorTex, parameters);
 
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
 
 				//if render mode is ON: we only want to capture it, not to display it
-				fbo->start(gl32Func);
+				fbo->start();
 				ccGLUtils::DisplayTexture2D(context(), filter->getTexture(), CONTEXT.glW, CONTEXT.glH);
 				//glClear(GL_DEPTH_BUFFER_BIT);
-				fbo->stop(gl32Func);
+				fbo->stop();
 			}
 
-			fbo->start(gl32Func);
+			fbo->start();
 
 			//we draw 2D entities (mainly for the color ramp!)
 			if (m_globalDBRoot)
@@ -5613,7 +5617,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			}
 			glFunc->glReadBuffer(GL_NONE);
 
-			fbo->stop(gl32Func);
+			fbo->stop();
 
 			if (m_fbo != fbo)
 			{
@@ -5680,18 +5684,17 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 void ccGLWindow::removeFBO()
 {
-	safeRemoveFBO(m_fbo);
-	safeRemoveFBO(m_fbo2);
+	removeFBOSafe(m_fbo);
+	removeFBOSafe(m_fbo2);
 }
 
 bool ccGLWindow::initFBO(int w, int h)
 {
-	QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
-	if (!initFBOSafe(gl32Func, m_fbo, w, h))
+	if (!initFBOSafe(m_fbo, w, h))
 	{
 		ccLog::Warning("[FBO] Initialization failed!");
 		m_alwaysUseFBO = false;
-		safeRemoveFBO(m_fbo2);
+		removeFBOSafe(m_fbo2);
 		setLODEnabled(false, false);
 		return false;
 	}
@@ -5700,15 +5703,15 @@ bool ccGLWindow::initFBO(int w, int h)
 	{
 		//we don't need it anymore
 		if (m_fbo2)
-			safeRemoveFBO(m_fbo2);
+			removeFBOSafe(m_fbo2);
 	}
 	else
 	{
-		if (!initFBOSafe(gl32Func, m_fbo2, w, h))
+		if (!initFBOSafe(m_fbo2, w, h))
 		{
 			ccLog::Warning("[FBO] Failed to initialize secondary FBO!");
 			m_alwaysUseFBO = false;
-			safeRemoveFBO(m_fbo);
+			removeFBOSafe(m_fbo);
 			setLODEnabled(false, false);
 			return false;
 		}
@@ -6137,7 +6140,7 @@ void ccGLWindow::disableStereoMode()
 	m_stereoModeEnabled = false;
 
 	//we don't need it anymore
-	safeRemoveFBO(m_fbo2);
+	removeFBOSafe(m_fbo2);
 }
 
 bool ccGLWindow::exclusiveFullScreen() const

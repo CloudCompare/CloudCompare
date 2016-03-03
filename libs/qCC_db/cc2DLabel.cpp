@@ -690,6 +690,15 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 {
 	assert(!m_points.empty());
 
+	//get the set of OpenGL functions (version 2.1)
+	if (!context.gl_21)
+	{
+		//this version might not supported
+		assert(false);
+		return;
+	}
+	ccQOpenGLFunctions* glFunc = context.gl_21;
+
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
@@ -697,7 +706,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		//not particularily fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
-		glPushName(getUniqueIDForDisplay());
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
 
 	const float c_sizeFactor = 4.0f;
@@ -708,43 +717,43 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	{
 	case 3:
 		{
-			glPushAttrib(GL_COLOR_BUFFER_BIT);
-			glEnable(GL_BLEND);
+			glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+			glFunc->glEnable(GL_BLEND);
 
 			//we draw the triangle
-			glColor4ub(255,255,0,128);
-			glBegin(GL_TRIANGLES);
-			ccGL::Vertex3v(m_points[0].cloud->getPoint(m_points[0].index)->u);
-			ccGL::Vertex3v(m_points[1].cloud->getPoint(m_points[1].index)->u);
-			ccGL::Vertex3v(m_points[2].cloud->getPoint(m_points[2].index)->u);
-			glEnd();
+			glFunc->glColor4ub(255,255,0,128);
+			glFunc->glBegin(GL_TRIANGLES);
+			ccGL::Vertex3v(glFunc, m_points[0].cloud->getPoint(m_points[0].index)->u);
+			ccGL::Vertex3v(glFunc, m_points[1].cloud->getPoint(m_points[1].index)->u);
+			ccGL::Vertex3v(glFunc, m_points[2].cloud->getPoint(m_points[2].index)->u);
+			glFunc->glEnd();
 
-			glPopAttrib();
+			glFunc->glPopAttrib();
 			loop = true;
 		}
 	case 2:
 		{
 			//segment width
-			glPushAttrib(GL_LINE_BIT);
-			glLineWidth(c_sizeFactor * context.renderZoom);
+			glFunc->glPushAttrib(GL_LINE_BIT);
+			glFunc->glLineWidth(c_sizeFactor * context.renderZoom);
 
 			//we draw the segments
 			if (isSelected())
-				ccGL::Color3v(ccColor::red.rgba);
+				ccGL::Color3v(glFunc, ccColor::red.rgba);
 			else
-				ccGL::Color3v(ccColor::green.rgba);
+				ccGL::Color3v(glFunc, ccColor::green.rgba);
 			
-			glBegin(GL_LINES);
+			glFunc->glBegin(GL_LINES);
 			for (unsigned i=0; i<count; i++)
 			{
 				if (i+1<count || loop)
 				{
-					ccGL::Vertex3v(m_points[i].cloud->getPoint(m_points[i].index)->u);
-					ccGL::Vertex3v(m_points[(i+1)%count].cloud->getPoint(m_points[(i+1)%count].index)->u);
+					ccGL::Vertex3v(glFunc, m_points[i].cloud->getPoint(m_points[i].index)->u);
+					ccGL::Vertex3v(glFunc, m_points[(i+1)%count].cloud->getPoint(m_points[(i+1)%count].index)->u);
 				}
 			}
-			glEnd();
-			glPopAttrib();
+			glFunc->glEnd();
+			glFunc->glPopAttrib();
 		}
 
 	case 1:
@@ -753,7 +762,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			{
 				if (!c_unitPointMarker)
 				{
-					c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f,0,"PointMarker",12));
+					c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 12));
 					c_unitPointMarker->showColors(true);
 					c_unitPointMarker->setVisible(true);
 					c_unitPointMarker->setEnabled(true);
@@ -771,14 +780,14 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 				for (unsigned i=0; i<count; i++)
 				{
-					glMatrixMode(GL_MODELVIEW);
-					glPushMatrix();
+					glFunc->glMatrixMode(GL_MODELVIEW);
+					glFunc->glPushMatrix();
 					const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
-					ccGL::Translate(P->x,P->y,P->z);
+					ccGL::Translate(glFunc, P->x, P->y, P->z);
 					float scale = context.labelMarkerSize * m_relMarkerScale;
-					glScalef(scale,scale,scale);
+					glFunc->glScalef(scale, scale, scale);
 					c_unitPointMarker->draw(markerContext);
-					glPopMatrix();
+					glFunc->glPopMatrix();
 				}
 			}
 
@@ -793,13 +802,13 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				//because it doesn't take the temporary 'GL transformation' into account!
 				ccGLCameraParameters camera;
 				//context._win->getGLCameraParameters(camera);
-				glGetIntegerv(GL_VIEWPORT, camera.viewport);
-				glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-				glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+				glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+				glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+				glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 				//draw their name
-				glPushAttrib(GL_DEPTH_BUFFER_BIT);
-				glDisable(GL_DEPTH_TEST);
+				glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
+				glFunc->glDisable(GL_DEPTH_TEST);
 				for (unsigned j=0; j<count; j++)
 				{
 					const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
@@ -823,13 +832,15 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 												ccColor::white.rgba,
 												&font );
 				}
-				glPopAttrib();
+				glFunc->glPopAttrib();
 			}
 		}
 	}
 
 	if (pushName)
-		glPopName();
+	{
+		glFunc->glPopName();
+	}
 }
 
 //display parameters
@@ -916,13 +927,24 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 	assert(!m_points.empty());
 
+	//get the set of OpenGL functions (version 2.1)
+	if (!context.gl_21)
+	{
+		//this version might not supported
+		assert(false);
+		return;
+	}
+	ccQOpenGLFunctions* glFunc = context.gl_21;
+
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
-		glPushName(getUniqueID());
+	{
+		glFunc->glPushName(getUniqueID());
+	}
 
 	//we should already be in orthoprojective & centered omde
-	//glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
+	//glFunc->glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
 
 	//label title
 	const int precision = context.dispNumberPrecision;
@@ -954,8 +976,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//compute arrow head position
 		CCVector3 arrowDest;
 		m_points[0].cloud->getPoint(m_points[0].index,arrowDest);
-		for (unsigned i=1; i<m_points.size(); ++i)
+		for (unsigned i = 1; i < m_points.size(); ++i)
+		{
 			arrowDest += *m_points[i].cloud->getPointPersistentPtr(m_points[i].index);
+		}
 		arrowDest /= static_cast<PointCoordinateType>(m_points.size());
 
 		//project it in 2D screen coordinates
@@ -1149,8 +1173,8 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	int halfH = (context.glH >> 1);
 
 	//draw label rectangle
-	int xStart = static_cast<int>(static_cast<float>(context.glW) * m_screenPos[0]);
-	int yStart = static_cast<int>(static_cast<float>(context.glH) * (1.0f-m_screenPos[1]));
+	int xStart = static_cast<int>(context.glW * m_screenPos[0]);
+	int yStart = static_cast<int>(context.glH * (1.0f - m_screenPos[1]));
 
 	m_lastScreenPos[0] = xStart;
 	m_lastScreenPos[1] = yStart - m_labelROI.height();
@@ -1169,12 +1193,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		defaultBorderColor = ccColor::Rgbaub(context.labelDefaultBkgCol,halfAlpha);
 	}
 
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_BLEND);
+	glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glFunc->glEnable(GL_BLEND);
 
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(static_cast<GLfloat>(-halfW+xStart),static_cast<GLfloat>(-halfH+yStart),0);
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+	glFunc->glTranslatef(static_cast<GLfloat>(-halfW + xStart), static_cast<GLfloat>(-halfH + yStart), 0);
 
 	if (!pushName)
 	{
@@ -1201,91 +1225,92 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//we make the arrow base start from the nearest corner
 		if (arrowBaseConfig != 4) //4 = label above point!
 		{
-			glColor4ubv(defaultBorderColor.rgba);
-			glBegin(GL_TRIANGLE_FAN);
-			glVertex2d(arrowDestX-xStart,arrowDestY-yStart);
+			glFunc->glColor4ubv(defaultBorderColor.rgba);
+			glFunc->glBegin(GL_TRIANGLE_FAN);
+			glFunc->glVertex2d(arrowDestX - xStart, arrowDestY - yStart);
 			switch(arrowBaseConfig)
 			{
 			case 0: //top-left corner
-				glVertex2i(m_labelROI.left(), -m_labelROI.top()-2*arrowBaseSize);
-				glVertex2i(m_labelROI.left(), -m_labelROI.top());
-				glVertex2i(m_labelROI.left()+2*arrowBaseSize, -m_labelROI.top());
+				glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.top()-2*arrowBaseSize);
+				glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.top());
+				glFunc->glVertex2i(m_labelROI.left()+2*arrowBaseSize, -m_labelROI.top());
 				break;
 			case 1: //top-middle edge
-				glVertex2i(std::max(m_labelROI.left(),iArrowDestX-arrowBaseSize), -m_labelROI.top());
-				glVertex2i(std::min(m_labelROI.right(),iArrowDestX+arrowBaseSize), -m_labelROI.top());
+				glFunc->glVertex2i(std::max(m_labelROI.left(),iArrowDestX-arrowBaseSize), -m_labelROI.top());
+				glFunc->glVertex2i(std::min(m_labelROI.right(),iArrowDestX+arrowBaseSize), -m_labelROI.top());
 				break;
 			case 2: //top-right corner
-				glVertex2i(m_labelROI.right(), -m_labelROI.top()-2*arrowBaseSize);
-				glVertex2i(m_labelROI.right(), -m_labelROI.top());
-				glVertex2i(m_labelROI.right()-2*arrowBaseSize, -m_labelROI.top());
+				glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.top()-2*arrowBaseSize);
+				glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.top());
+				glFunc->glVertex2i(m_labelROI.right()-2*arrowBaseSize, -m_labelROI.top());
 				break;
 			case 3: //middle-left edge
-				glVertex2i(m_labelROI.left(), std::min(-m_labelROI.top(),iArrowDestY+arrowBaseSize));
-				glVertex2i(m_labelROI.left(), std::max(-m_labelROI.bottom(),iArrowDestY-arrowBaseSize));
+				glFunc->glVertex2i(m_labelROI.left(), std::min(-m_labelROI.top(),iArrowDestY+arrowBaseSize));
+				glFunc->glVertex2i(m_labelROI.left(), std::max(-m_labelROI.bottom(),iArrowDestY-arrowBaseSize));
 				break;
 			case 4: //middle of rectangle!
 				break;
 			case 5: //middle-right edge
-				glVertex2i(m_labelROI.right(), std::min(-m_labelROI.top(),iArrowDestY+arrowBaseSize));
-				glVertex2i(m_labelROI.right(), std::max(-m_labelROI.bottom(),iArrowDestY-arrowBaseSize));
+				glFunc->glVertex2i(m_labelROI.right(), std::min(-m_labelROI.top(),iArrowDestY+arrowBaseSize));
+				glFunc->glVertex2i(m_labelROI.right(), std::max(-m_labelROI.bottom(),iArrowDestY-arrowBaseSize));
 				break;
 			case 6: //bottom-left corner
-				glVertex2i(m_labelROI.left(), -m_labelROI.bottom()+2*arrowBaseSize);
-				glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
-				glVertex2i(m_labelROI.left()+2*arrowBaseSize, -m_labelROI.bottom());
+				glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.bottom()+2*arrowBaseSize);
+				glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
+				glFunc->glVertex2i(m_labelROI.left()+2*arrowBaseSize, -m_labelROI.bottom());
 				break;
 			case 7: //bottom-middle edge
-				glVertex2i(std::max(m_labelROI.left(),iArrowDestX-arrowBaseSize), -m_labelROI.bottom());
-				glVertex2i(std::min(m_labelROI.right(),iArrowDestX+arrowBaseSize), -m_labelROI.bottom());
+				glFunc->glVertex2i(std::max(m_labelROI.left(),iArrowDestX-arrowBaseSize), -m_labelROI.bottom());
+				glFunc->glVertex2i(std::min(m_labelROI.right(),iArrowDestX+arrowBaseSize), -m_labelROI.bottom());
 				break;
 			case 8: //bottom-right corner
-				glVertex2i(m_labelROI.right(), -m_labelROI.bottom()+2*arrowBaseSize);
-				glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
-				glVertex2i(m_labelROI.right()-2*arrowBaseSize, -m_labelROI.bottom());
+				glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.bottom()+2*arrowBaseSize);
+				glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
+				glFunc->glVertex2i(m_labelROI.right()-2*arrowBaseSize, -m_labelROI.bottom());
 				break;
 			}
-			glEnd();
+			glFunc->glEnd();
 		}
 	}
 
 	//main rectangle
-	glColor4ubv(defaultBkgColor.rgba);
-	glBegin(GL_QUADS);
-	glVertex2i(m_labelROI.left(),  -m_labelROI.top());
-	glVertex2i(m_labelROI.left(),  -m_labelROI.bottom());
-	glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
-	glVertex2i(m_labelROI.right(), -m_labelROI.top());
-	glEnd();
+	glFunc->glColor4ubv(defaultBkgColor.rgba);
+	glFunc->glBegin(GL_QUADS);
+	glFunc->glVertex2i(m_labelROI.left(),  -m_labelROI.top());
+	glFunc->glVertex2i(m_labelROI.left(),  -m_labelROI.bottom());
+	glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
+	glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.top());
+	glFunc->glEnd();
 
 	//if (highlighted)
 	{
-		glPushAttrib(GL_LINE_BIT);
-		glLineWidth(3.0f * context.renderZoom);
-		glColor4ubv(defaultBorderColor.rgba);
-		glBegin(GL_LINE_LOOP);
-		glVertex2i(m_labelROI.left(),  -m_labelROI.top());
-		glVertex2i(m_labelROI.left(),  -m_labelROI.bottom());
-		glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
-		glVertex2i(m_labelROI.right(), -m_labelROI.top());
-		glEnd();
-		glPopAttrib();
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(3.0f * context.renderZoom);
+		glFunc->glColor4ubv(defaultBorderColor.rgba);
+		glFunc->glBegin(GL_LINE_LOOP);
+		glFunc->glVertex2i(m_labelROI.left(),  -m_labelROI.top());
+		glFunc->glVertex2i(m_labelROI.left(),  -m_labelROI.bottom());
+		glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
+		glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.top());
+		glFunc->glEnd();
+		glFunc->glPopAttrib();
 	}
 
 	//draw close button
-	/*glColor3ubv(ccColor::black);
-	glBegin(GL_LINE_LOOP);
-	glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.top());
-	glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.bottom());
-	glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.bottom());
-	glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.top());
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.top()+2);
-	glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.bottom()-2);
-	glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.top()+2);
-	glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.bottom()-2);
-	glEnd();
+	/*
+	glFunc->glColor3ubv(ccColor::black);
+	glFunc->glBegin(GL_LINE_LOOP);
+	glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.top());
+	glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.bottom());
+	glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.bottom());
+	glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.top());
+	glFunc->glEnd();
+	glFunc->glBegin(GL_LINES);
+	glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.top()+2);
+	glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.bottom()-2);
+	glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.top()+2);
+	glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.bottom()-2);
+	glFunc->glEnd();
 	//*/
 
 	//display text
@@ -1343,18 +1368,18 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//draw background
 						int rgbIndex = (r % 3);
 						if (rgbIndex == 0)
-							glColor3ubv(ccColor::red.rgba);
+							glFunc->glColor3ubv(ccColor::red.rgba);
 						else if (rgbIndex == 1)
-							glColor3ubv(c_darkGreen.rgba);
+							glFunc->glColor3ubv(c_darkGreen.rgba);
 						else if (rgbIndex == 2)
-							glColor3ubv(ccColor::blue.rgba);
+							glFunc->glColor3ubv(ccColor::blue.rgba);
 
-						glBegin(GL_QUADS);
-						glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);
-						glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow - height);
-						glVertex2i(m_labelROI.left() + xCol + width, -m_labelROI.top() + yRow - height);
-						glVertex2i(m_labelROI.left() + xCol + width, -m_labelROI.top() + yRow);
-						glEnd();
+						glFunc->glBegin(GL_QUADS);
+						glFunc->glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);
+						glFunc->glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow - height);
+						glFunc->glVertex2i(m_labelROI.left() + xCol + width, -m_labelROI.top() + yRow - height);
+						glFunc->glVertex2i(m_labelROI.left() + xCol + width, -m_labelROI.top() + yRow);
+						glFunc->glEnd();
 					}
 
 					const QString& str = tab.colContent[c][r];
@@ -1395,10 +1420,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-	glPopAttrib();
+	glFunc->glPopAttrib();
 
-	glPopMatrix();
+	glFunc->glPopMatrix();
 
 	if (pushName)
-		glPopName();
+	{
+		glFunc->glPopName();
+	}
 }

@@ -46,12 +46,22 @@ struct glDrawContext
 {
 	//! Drawing options (see below)
 	uint16_t flags;
+	
 	//! GL screen width
 	int glW;
 	//! GL screen height
 	int glH;
 	//! Corresponding GL window
 	ccGenericGLDisplay* _win;
+
+	//! OpenGL function set (version 2.1)
+	QOpenGLFunctions_2_1* gl_21;
+	//! OpenGL function set (version 3.2)
+	/** \warning May not be supported by the system!
+		(will be null in this case)
+	**/
+	QOpenGLFunctions_3_2_Compatibility* gl_32;
+
 	//! Current zoom (screen to file rendering mode)
 	float renderZoom;
 
@@ -124,6 +134,8 @@ struct glDrawContext
 		, glW(0)
 		, glH(0)
 		, _win(0)
+		, gl_21(0)
+		, gl_32(0)
 		, renderZoom(1.0f)
 		, defaultMat(new ccMaterial("default"))
 		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)

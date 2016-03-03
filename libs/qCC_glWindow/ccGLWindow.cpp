@@ -1612,7 +1612,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::drawBackground");
 }
 
-void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& renderingParams)
+void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	//visual traces
 	QStringList diagStrings;
@@ -1691,8 +1691,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 				glFunc->glEnable(GL_FRAMEBUFFER_SRGB);
 				const ovrRecti& vp = s_oculus.layer.Viewport[renderingParams.passIndex];
 				setGLViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
-				context.glW = vp.Size.w;
-				context.glH = vp.Size.h;
+				CONTEXT.glW = vp.Size.w;
+				CONTEXT.glH = vp.Size.h;
 				modifiedViewport = true;
 				s_oculus.fbo->stop();
 				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
@@ -1754,7 +1754,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			renderingParams.clearColorLayer = false;
 		}
 
-		drawBackground(context, renderingParams);
+		drawBackground(CONTEXT, renderingParams);
 	}
 
 	/*********************/
@@ -1791,7 +1791,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 			}
 		}
 
-		draw3D(context, renderingParams);
+		draw3D(CONTEXT, renderingParams);
 
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
@@ -1833,8 +1833,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	if (modifiedViewport)
 	{
 		setGLViewport(originViewport);
-		context.glW = m_glViewport.width();
-		context.glH = m_glViewport.height();
+		CONTEXT.glW = m_glViewport.width();
+		CONTEXT.glH = m_glViewport.height();
 		modifiedViewport = false;
 	}
 
@@ -1950,7 +1950,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& re
 	/******************/
 	if (renderingParams.drawForeground && !skipRendering)
 	{
-		drawForeground(context, renderingParams);
+		drawForeground(CONTEXT, renderingParams);
 	}
 
 	glFunc->glFlush();
@@ -3248,65 +3248,67 @@ void ccGLWindow::setStandardOrthoCorner()
 	glFunc->glLoadIdentity();
 }
 
-void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
+void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 {
 	//display size
-	context.glW = m_glViewport.width();
-	context.glH = m_glViewport.height();
-	context._win = this;
-	context.flags = 0;
+	CONTEXT.glW = m_glViewport.width();
+	CONTEXT.glH = m_glViewport.height();
+	CONTEXT._win = this;
+	CONTEXT.gl_21 = this->context()->versionFunctions<QOpenGLFunctions_2_1>();
+	CONTEXT.gl_32 = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+	CONTEXT.flags = 0;
 
 	const ccGui::ParamStruct& guiParams = getDisplayParameters();
 
 	//decimation options
-	context.decimateCloudOnMove = guiParams.decimateCloudOnMove;
-	context.minLODPointCount = guiParams.minLoDCloudSize;
-	context.decimateMeshOnMove = guiParams.decimateMeshOnMove;
-	context.minLODTriangleCount = guiParams.minLoDMeshSize;
-	context.higherLODLevelsAvailable = false;
-	context.moreLODPointsAvailable = false;
-	context.currentLODLevel = 0;
-	context.minLODLevel = 0;
+	CONTEXT.decimateCloudOnMove = guiParams.decimateCloudOnMove;
+	CONTEXT.minLODPointCount = guiParams.minLoDCloudSize;
+	CONTEXT.decimateMeshOnMove = guiParams.decimateMeshOnMove;
+	CONTEXT.minLODTriangleCount = guiParams.minLoDMeshSize;
+	CONTEXT.higherLODLevelsAvailable = false;
+	CONTEXT.moreLODPointsAvailable = false;
+	CONTEXT.currentLODLevel = 0;
+	CONTEXT.minLODLevel = 0;
 	if (guiParams.decimateCloudOnMove)
 	{
 		//we automatically deduce the minimal octree level for decimation
 		//(we make the hypothesis that couds are filling a (flat) 'square' portion of the octree (and not 'cubical'))
-		context.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000, guiParams.minLoDCloudSize))) / (2.0*log(2.0)));
-		//ccLog::Print(QString("context.minLODLevel = %1").arg(context.minLODLevel));
+		CONTEXT.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000, guiParams.minLoDCloudSize))) / (2.0*log(2.0)));
+		//ccLog::Print(QString("CONTEXT.minLODLevel = %1").arg(CONTEXT.minLODLevel));
 		//just in case...
-		assert(context.minLODLevel > 0);
-		context.minLODLevel = std::max<unsigned>(context.minLODLevel, 1);
+		assert(CONTEXT.minLODLevel > 0);
+		CONTEXT.minLODLevel = std::max<unsigned>(CONTEXT.minLODLevel, 1);
 	}
 
 	//scalar field color-bar
-	context.sfColorScaleToDisplay = 0;
+	CONTEXT.sfColorScaleToDisplay = 0;
 
 	//point picking
-	context.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * computeActualPixelSize());
-	context.labelMarkerTextShift_pix = 5; //5 pixels shift
+	CONTEXT.labelMarkerSize = static_cast<float>(guiParams.labelMarkerSize * computeActualPixelSize());
+	CONTEXT.labelMarkerTextShift_pix = 5; //5 pixels shift
 
 	//text display
-	context.dispNumberPrecision = guiParams.displayedNumPrecision;
+	CONTEXT.dispNumberPrecision = guiParams.displayedNumPrecision;
 	//label opacity
-	context.labelOpacity = guiParams.labelOpacity;
+	CONTEXT.labelOpacity = guiParams.labelOpacity;
 
 	//default materials
-	context.defaultMat->setDiffuseFront(guiParams.meshFrontDiff);
-	context.defaultMat->setDiffuseBack(guiParams.meshBackDiff);
-	context.defaultMat->setAmbient(ccColor::bright);
-	context.defaultMat->setSpecular(guiParams.meshSpecular);
-	context.defaultMat->setEmission(ccColor::night);
-	context.defaultMat->setShininessFront(30);
-	context.defaultMat->setShininessBack(50);
+	CONTEXT.defaultMat->setDiffuseFront(guiParams.meshFrontDiff);
+	CONTEXT.defaultMat->setDiffuseBack(guiParams.meshBackDiff);
+	CONTEXT.defaultMat->setAmbient(ccColor::bright);
+	CONTEXT.defaultMat->setSpecular(guiParams.meshSpecular);
+	CONTEXT.defaultMat->setEmission(ccColor::night);
+	CONTEXT.defaultMat->setShininessFront(30);
+	CONTEXT.defaultMat->setShininessBack(50);
 	//default colors
-	context.pointsDefaultCol = guiParams.pointsDefaultCol;
-	context.textDefaultCol = guiParams.textDefaultCol;
-	context.labelDefaultBkgCol = guiParams.labelBackgroundCol;
-	context.labelDefaultMarkerCol = guiParams.labelMarkerCol;
-	context.bbDefaultCol = guiParams.bbDefaultCol;
+	CONTEXT.pointsDefaultCol = guiParams.pointsDefaultCol;
+	CONTEXT.textDefaultCol = guiParams.textDefaultCol;
+	CONTEXT.labelDefaultBkgCol = guiParams.labelBackgroundCol;
+	CONTEXT.labelDefaultMarkerCol = guiParams.labelMarkerCol;
+	CONTEXT.bbDefaultCol = guiParams.bbDefaultCol;
 
 	//display acceleration
-	context.useVBOs = guiParams.useVBOs;
+	CONTEXT.useVBOs = guiParams.useVBOs;
 }
 
 unsigned ccGLWindow::getTextureID(const QImage& image)
@@ -3337,7 +3339,7 @@ unsigned ccGLWindow::getTextureID(const QImage& image)
 	if (image.width() <= maxTexSize && image.height() <= maxTexSize && cacheLimitBytes >= image.width()*image.height() * 4)
 	{
 #ifndef USE_QtOpenGL_CLASSES
-		texID = context->bindTexture(image, GL_TEXTURE_2D, GL_RGBA, QGLContext::NoBindOption);
+		texID = CONTEXT->bindTexture(image, GL_TEXTURE_2D, GL_RGBA, QGLContext::NoBindOption);
 #else
 		QOpenGLTexture texture(image);
 		texture.bind();
@@ -3369,7 +3371,7 @@ unsigned ccGLWindow::getTextureID(const QImage& image)
 		}
 
 #ifndef USE_QtOpenGL_CLASSES
-		texID = context->bindTexture(qImage, GL_TEXTURE_2D, GL_RGBA, QGLContext::NoBindOption);
+		texID = CONTEXT->bindTexture(qImage, GL_TEXTURE_2D, GL_RGBA, QGLContext::NoBindOption);
 #else
 		QOpenGLTexture texture(qImage);
 		texture.bind();

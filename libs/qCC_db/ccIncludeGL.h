@@ -26,8 +26,11 @@
 //Local
 #include "ccGLMatrix.h"
 
-//Default OpenGL functions set
+//Qt
 #include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions_3_2_Compatibility>
+
+//Default OpenGL functions set
 typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
 
 //temporary test for QOpenGLWidget integration
@@ -68,6 +71,9 @@ typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
 class ccGL
 {
 public:
+
+	//DGM TODO: REMOVE THE FUNCTION-LESS VERSIONS ONCE THE MIGRATION IS COMPLETE
+
 	//type-less glVertex3Xv call (X=f,d)
 	static inline void Vertex3v(const float* v) { glVertex3fv(v); }
 	static inline void Vertex3v(const double* v) { glVertex3dv(v); }
@@ -95,6 +101,64 @@ public:
 	//type-less glColor3Xv call (X=f,ub)
 	static inline void Color3v(const unsigned char* v) { glColor3ubv(v); }
 	static inline void Color3v(const float* v) { glColor3fv(v); }
+
+	//DGM TODO: HERE BELOW ARE THE NEW VERSIONS (TO BE KEPT ONCE THE MIGRATION IS COMPLETE)
+	
+	//type-less glVertex3Xv call (X=f,d)
+	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glVertex3fv(v); }
+	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glVertex3dv(v); }
+
+	//type-less glVertex3X call (X=f,d)
+	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glVertex3f(x, y, z); }
+	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glVertex3d(x, y, z); }
+
+	//type-less glScaleX call (X=f,d)
+	static inline void Scale(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glScalef(x, y, z); }
+	static inline void Scale(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glScaled(x, y, z); }
+
+	//type-less glNormal3Xv call (X=f,d)
+	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glNormal3fv(v); }
+	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glNormal3dv(v); }
+
+	//type-less glRotateX call (X=f,d)
+	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, float a, float x, float y, float z) { glFunc->glRotatef(a, x, y, z); }
+	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, double a, double x, double y, double z) { glFunc->glRotated(a, x, y, z); }
+
+	//type-less glTranslateX call (X=f,d)
+	static inline void Translate(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glTranslatef(x, y, z); }
+	static inline void Translate(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glTranslated(x, y, z); }
+
+	//type-less glColor3Xv call (X=f,ub)
+	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }
+	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glColor3fv(v); }
+
+	//type-less glVertex3Xv call (X=f,d)
+	static inline void Vertex3v(QOpenGLFunctions_3_2_Compatibility* glFunc, const float* v) { glFunc->glVertex3fv(v); }
+	static inline void Vertex3v(QOpenGLFunctions_3_2_Compatibility* glFunc, const double* v) { glFunc->glVertex3dv(v); }
+
+	//type-less glVertex3X call (X=f,d)
+	static inline void Vertex3(QOpenGLFunctions_3_2_Compatibility* glFunc, float x, float y, float z) { glFunc->glVertex3f(x, y, z); }
+	static inline void Vertex3(QOpenGLFunctions_3_2_Compatibility* glFunc, double x, double y, double z) { glFunc->glVertex3d(x, y, z); }
+
+	//type-less glScaleX call (X=f,d)
+	static inline void Scale(QOpenGLFunctions_3_2_Compatibility* glFunc, float x, float y, float z) { glFunc->glScalef(x, y, z); }
+	static inline void Scale(QOpenGLFunctions_3_2_Compatibility* glFunc, double x, double y, double z) { glFunc->glScaled(x, y, z); }
+
+	//type-less glNormal3Xv call (X=f,d)
+	static inline void Normal3v(QOpenGLFunctions_3_2_Compatibility* glFunc, const float* v) { glFunc->glNormal3fv(v); }
+	static inline void Normal3v(QOpenGLFunctions_3_2_Compatibility* glFunc, const double* v) { glFunc->glNormal3dv(v); }
+
+	//type-less glRotateX call (X=f,d)
+	static inline void Rotate(QOpenGLFunctions_3_2_Compatibility* glFunc, float a, float x, float y, float z) { glFunc->glRotatef(a, x, y, z); }
+	static inline void Rotate(QOpenGLFunctions_3_2_Compatibility* glFunc, double a, double x, double y, double z) { glFunc->glRotated(a, x, y, z); }
+
+	//type-less glTranslateX call (X=f,d)
+	static inline void Translate(QOpenGLFunctions_3_2_Compatibility* glFunc, float x, float y, float z) { glFunc->glTranslatef(x, y, z); }
+	static inline void Translate(QOpenGLFunctions_3_2_Compatibility* glFunc, double x, double y, double z) { glFunc->glTranslated(x, y, z); }
+
+	//type-less glColor3Xv call (X=f,ub)
+	static inline void Color3v(QOpenGLFunctions_3_2_Compatibility* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }
+	static inline void Color3v(QOpenGLFunctions_3_2_Compatibility* glFunc, const float* v) { glFunc->glColor3fv(v); }
 
 public: //GLU equivalent methods
 

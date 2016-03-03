@@ -5,7 +5,7 @@ cmake_policy(PUSH)
 include ( CMakePolicies.cmake )
 include( CMakeSetCompilerOptions.cmake )
 
-project( CloudCompareProjects )
+project( CloudCompareProjects CXX)
 
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )

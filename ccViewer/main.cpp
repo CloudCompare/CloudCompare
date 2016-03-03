@@ -52,6 +52,7 @@ public:
 	{
 		setOrganizationName("CCCorp");
 		setApplicationName("CloudCompareViewer");
+		setAttribute(Qt::AA_ShareOpenGLContexts);
 #ifdef Q_OS_MAC
 		mViewer = NULL;
 
@@ -102,6 +103,11 @@ int main(int argc, char *argv[])
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 		format.setStereo(true);
 		format.setStencilBufferSize(0);
+#ifdef Q_OS_MAC
+		format.setStereo(false);
+		format.setVersion( 2, 1 );
+		format.setProfile( QSurfaceFormat::CoreProfile );
+#endif
 #ifdef _DEBUG
 		format.setOption(QSurfaceFormat::DebugContext);
 #endif

@@ -57,6 +57,7 @@ public:
 	{
 		setOrganizationName("CCCorp");
 		setApplicationName("CloudCompare");
+		setAttribute( Qt::AA_ShareOpenGLContexts );
 #ifdef Q_OS_MAC
 		// Mac OS X apps don't show icons in menus
 		setAttribute( Qt::AA_DontShowIconsInMenus );
@@ -99,6 +100,11 @@ int main(int argc, char **argv)
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 		format.setStereo(true);
 		format.setStencilBufferSize(0);
+#ifdef Q_OS_MAC
+		format.setStereo(false);
+		format.setVersion( 2, 1 );
+		format.setProfile( QSurfaceFormat::CoreProfile );
+#endif
 #ifdef _DEBUG
 		format.setOption(QSurfaceFormat::DebugContext);
 #endif

@@ -711,8 +711,10 @@ void ccGLWindow::initializeGL()
 		const char* vendorName = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
 		if (!m_silentInitialization)
 		{
+			ccLog::Print("[3D View %i] Graphics card manufacturer: %s", m_uniqueID, vendorName);
+			ccLog::Print("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
 			ccLog::Print("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
-			ccLog::Print("[3D View %i] Graphic card manufacturer: %s", m_uniqueID, vendorName);
+			ccLog::Print("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
 		}
 
 		ccGui::ParamStruct params = getDisplayParameters();

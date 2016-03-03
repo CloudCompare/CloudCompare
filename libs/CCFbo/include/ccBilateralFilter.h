@@ -37,7 +37,7 @@
 //system
 #include <vector>
 
-class QOpenGLFunctions_3_2_Compatibility;
+class QOpenGLFunctions_3_0;
 
 //! Bilateral filer (shader)
 /** See http://en.wikipedia.org/wiki/Bilateral_filter
@@ -61,8 +61,8 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
-	virtual bool init(QOpenGLFunctions_3_2_Compatibility* glFunc, int width, int height, QString shadersPath, QString& error);
-	virtual void shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
+	virtual bool init(QOpenGLFunctions_3_0* glFunc, int width, int height, QString shadersPath, QString& error);
+	virtual void shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
 	inline virtual GLuint getTexture() { return m_fbo.getColorTexture(); }
 
 	//! Set parameters

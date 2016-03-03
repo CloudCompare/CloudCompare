@@ -21,7 +21,7 @@
 //Qt
 #include <QString>
 
-class QOpenGLFunctions_3_2_Compatibility;
+class QOpenGLFunctions_3_0;
 
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to
@@ -55,7 +55,7 @@ public:
 		\param error error string (if an error occurred)
 		\return success
 		**/
-	virtual bool init(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+	virtual bool init(	QOpenGLFunctions_3_0* glFunc,
 						int width,
 						int height,
 						QString shadersPath,
@@ -83,7 +83,7 @@ public:
 	};
 
 	//! Applies filter to texture (depth + color)
-	virtual void shade(	QOpenGLFunctions_3_2_Compatibility* glFunc,
+	virtual void shade(	QOpenGLFunctions_3_0* glFunc,
 						unsigned texDepth,
 						unsigned texColor,
 						ViewportParameters& parameters) = 0;
@@ -97,7 +97,7 @@ protected:
 	QString m_description;
 
 	//! Associated OpenGL functions
-	QOpenGLFunctions_3_2_Compatibility* m_glFunc;
+	QOpenGLFunctions_3_0* m_glFunc;
 };
 
 #endif

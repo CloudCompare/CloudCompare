@@ -60,7 +60,7 @@ void ccFrameBufferObject::reset()
 	m_width = m_height = 0;
 }
 
-bool ccFrameBufferObject::init(unsigned w, unsigned h, QOpenGLFunctions_3_2_Compatibility* glFunc)
+bool ccFrameBufferObject::init(unsigned w, unsigned h, QOpenGLFunctions_3_0* glFunc)
 {
 	if (!glFunc)
 	{

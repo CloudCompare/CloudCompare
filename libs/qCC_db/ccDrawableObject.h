@@ -60,7 +60,7 @@ struct glDrawContext
 	/** \warning May not be supported by the system!
 		(will be null in this case)
 	**/
-	QOpenGLFunctions_3_2_Compatibility* gl_32;
+	QOpenGLFunctions_3_0* gl_30;
 
 	//! Current zoom (screen to file rendering mode)
 	float renderZoom;
@@ -135,7 +135,7 @@ struct glDrawContext
 		, glH(0)
 		, _win(0)
 		, gl_21(0)
-		, gl_32(0)
+		, gl_30(0)
 		, renderZoom(1.0f)
 		, defaultMat(new ccMaterial("default"))
 		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)

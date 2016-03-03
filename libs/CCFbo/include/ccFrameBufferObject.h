@@ -18,7 +18,7 @@
 #ifndef CC_FRAME_BUFFER_OBJECT
 #define CC_FRAME_BUFFER_OBJECT
 
-#include <QOpenGLFunctions_3_2_Compatibility>
+#include <QOpenGLFunctions_3_0>
 
 //! F.B.O. encapsulation
 /** Compared to the QOpenGLFramebufferObject class, this one offers the possibility to:
@@ -31,7 +31,7 @@ public:
 	ccFrameBufferObject();
 	~ccFrameBufferObject();
 
-	bool init(unsigned w, unsigned h, QOpenGLFunctions_3_2_Compatibility* glFunc);
+	bool init(unsigned w, unsigned h, QOpenGLFunctions_3_0* glFunc);
 	void reset();
 	void start();
 	void stop();
@@ -85,7 +85,7 @@ protected:
 	GLuint m_fboId;
 
 	//! Associated OpenGL functions
-	QOpenGLFunctions_3_2_Compatibility* m_glFunc;
+	QOpenGLFunctions_3_0* m_glFunc;
 };
 
 #endif

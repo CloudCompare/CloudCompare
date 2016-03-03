@@ -60,7 +60,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 //DGM FIXME
-#include <QOpenGLFunctions_3_2_Compatibility>
+#include <QOpenGLFunctions_3_0>
 
 //Oculus
 #ifdef CC_OCULUS_SUPPORT
@@ -347,7 +347,7 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 		return true;
 	}
 
-	QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+	QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 	if (!gl32Func)
 	{
 		return false;
@@ -1695,7 +1695,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				CONTEXT.glH = vp.Size.h;
 				modifiedViewport = true;
 				s_oculus.fbo->stop();
-				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+				this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 		}
 #endif //CC_OCULUS_SUPPORT
@@ -1848,7 +1848,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			currentFBO->stop();
-			this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
 		}
@@ -1871,9 +1871,9 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				}
 
 				//apply shader
-				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+				QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 				m_activeGLFilter->shade(gl32Func, depthTex, colorTex, parameters);
-				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
+				this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
 
 				//if capture mode is ON: we only want to capture it, not to display it
@@ -3255,7 +3255,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.glH = m_glViewport.height();
 	CONTEXT._win = this;
 	CONTEXT.gl_21 = this->context()->versionFunctions<QOpenGLFunctions_2_1>();
-	CONTEXT.gl_32 = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+	CONTEXT.gl_30 = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 	CONTEXT.flags = 0;
 
 	const ccGui::ParamStruct& guiParams = getDisplayParameters();
@@ -5451,7 +5451,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 		else
 		{
 			fbo = new ccFrameBufferObject();
-			QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+			QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 			bool success = (	fbo->init(Wp, Hp, gl32Func)
 							&&	fbo->initColor(GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
 							&&	fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D));
@@ -5486,7 +5486,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				QString shadersPath = ccGLWindow::getShadersPath();
 
 				QString error;
-				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+				QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 				if (!m_activeGLFilter->init(gl32Func, Wp, Hp, shadersPath, error))
 				{
 					if (!silent)
@@ -5524,7 +5524,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			//disable the FBO
 			fbo->stop();
-			this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
 
 			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
@@ -5560,7 +5560,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				parameters.zNear = m_viewportParams.zNear;
 				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
 				//apply shader
-				QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+				QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 				filter->shade(gl32Func, depthTex, colorTex, parameters);
 
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
@@ -5570,7 +5570,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				ccGLUtils::DisplayTexture2D(context(), filter->getTexture(), CONTEXT.glW, CONTEXT.glH);
 				//glClear(GL_DEPTH_BUFFER_BIT);
 				fbo->stop();
-				this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+				this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 
 			fbo->start();
@@ -5617,7 +5617,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			glFunc->glReadBuffer(GL_NONE);
 
 			fbo->stop();
-			this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 
 			if (m_fbo != fbo)
 			{
@@ -5742,7 +5742,7 @@ bool ccGLWindow::initGLFilter(int w, int h)
 		return false;
 	}
 
-	QOpenGLFunctions_3_2_Compatibility* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+	QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
 	if (!gl32Func)
 	{
 		return false;

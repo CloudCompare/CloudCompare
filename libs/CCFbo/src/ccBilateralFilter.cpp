@@ -18,7 +18,7 @@
 #include "ccBilateralFilter.h"
 
 //Qt
-#include <QOpenGLFunctions_3_2_Compatibility>
+#include <QOpenGLFunctions_3_0>
 
 //system
 #include <math.h>
@@ -72,7 +72,7 @@ void ccBilateralFilter::reset()
 	m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(QOpenGLFunctions_3_2_Compatibility* glFunc, int width, int height, QString shadersPath, QString& error)
+bool ccBilateralFilter::init(QOpenGLFunctions_3_0* glFunc, int width, int height, QString shadersPath, QString& error)
 {
 	if (width <= 0 || height <= 0)
 	{
@@ -111,7 +111,7 @@ void ccBilateralFilter::setParams(unsigned halfSpatialSize, float spatialSigma, 
 	updateDampingTable();
 }
 
-void ccBilateralFilter::shade(QOpenGLFunctions_3_2_Compatibility* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
+void ccBilateralFilter::shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
 	if (!m_fbo.isValid() || !m_shader.isLinked())
 	{

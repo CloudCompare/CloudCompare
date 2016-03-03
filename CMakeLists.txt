@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
-
 include ( CMakePolicies.cmake )
-include( CMakeSetCompilerOptions.cmake )
 
-project( CloudCompareProjects CXX)
+project( CloudCompareProjects )
+
+include( CMakeSetCompilerOptions.cmake )
 
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )

@@ -850,7 +850,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			minCorner *= m_scale;
 			maxCorner *= m_scale;
 			ccBBox bbHead(minCorner,maxCorner);
-			bbHead.draw(m_color);
+			bbHead.draw(context, m_color);
 		}
 
 		//sensor legs

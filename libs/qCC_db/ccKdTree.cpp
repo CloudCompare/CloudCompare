@@ -103,7 +103,7 @@ public:
 	
 	DrawMeOnlyVisitor(const ccBBox& box) : m_drawCellBBox(box) {}
 
-	void visit(ccKdTree::BaseNode* node)
+	void visit(CC_DRAW_CONTEXT& context, ccKdTree::BaseNode* node)
 	{
 		if (!node)
 			return;
@@ -114,18 +114,18 @@ public:
 			//visit left child
 			PointCoordinateType oldBBPos = m_drawCellBBox.maxCorner().u[trueNode->splitDim];
 			m_drawCellBBox.maxCorner().u[trueNode->splitDim] = trueNode->splitValue;
-			visit(trueNode->leftChild);
+			visit(context, trueNode->leftChild);
 			m_drawCellBBox.maxCorner().u[trueNode->splitDim] = oldBBPos;  //restore old limit
 
 			//then visit right child
 			oldBBPos = m_drawCellBBox.minCorner().u[trueNode->splitDim];
 			m_drawCellBBox.minCorner().u[trueNode->splitDim] = trueNode->splitValue;
-			visit(trueNode->rightChild);
+			visit(context, trueNode->rightChild);
 			m_drawCellBBox.minCorner().u[trueNode->splitDim] = oldBBPos; //restore old limit
 		}
 		else //if (node->isLeaf())
 		{
-			m_drawCellBBox.draw(ccColor::green);
+			m_drawCellBBox.draw(context, ccColor::green);
 		}
 	}
 
@@ -151,7 +151,7 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glPushName(getUniqueIDForDisplay());
 		}
 
-		DrawMeOnlyVisitor(m_associatedGenericCloud->getOwnBB()).visit(m_root);
+		DrawMeOnlyVisitor(m_associatedGenericCloud->getOwnBB()).visit(context, m_root);
 
 		if (pushName)
 			glPopName();

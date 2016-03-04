@@ -249,7 +249,7 @@ public: //bouding-box
 	}
 
 	//! Draws the entity (and its children) bounding-box
-	virtual void drawBB(const ccColor::Rgb& col);
+	virtual void drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col);
 
 public: //display
 

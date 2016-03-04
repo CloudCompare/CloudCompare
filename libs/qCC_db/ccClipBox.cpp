@@ -39,14 +39,21 @@ static QSharedPointer<ccTorus> c_torus(0);
 
 void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+
 	if (ID > 0)
 		glLoadName(ID);
 	
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
 
-	ccGL::Translate(start.x,start.y,start.z);
-	ccGL::Scale(scale,scale,scale);
+	ccGL::Translate(glFunc,start.x,start.y,start.z);
+	ccGL::Scale(glFunc,scale,scale,scale);
 
 	//we compute scalar prod between the two vectors
 	CCVector3 Z(0.0,0.0,1.0);
@@ -66,7 +73,7 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 			axis = Z.cross(direction);
 		}
 		
-		ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
+		ccGL::Rotate(glFunc,angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_arrowShaft)
@@ -74,26 +81,33 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 	if (!c_arrowHead)
 		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0,0.4f,0,0,0,"ArrowHead",24));
 
-	glTranslatef(0,0,0.3f);
+	glFunc->glTranslatef(0,0,0.3f);
 	c_arrowShaft->setTempColor(col);
 	c_arrowShaft->draw(context);
-	glTranslatef(0,0,0.3f+0.2f);
+	glFunc->glTranslatef(0,0,0.3f+0.2f);
 	c_arrowHead->setTempColor(col);
 	c_arrowHead->draw(context);
 
-	glPopMatrix();
+	glFunc->glPopMatrix();
 }
 
 static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
-	if (ID > 0)
-		glLoadName(ID);
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
 	
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	if ( glFunc == nullptr )
+		return;
 
-	ccGL::Translate(center.x,center.y,center.z);
-	ccGL::Scale(scale,scale,scale);
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+	
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, center.x,center.y,center.z);
+	ccGL::Scale(glFunc, scale,scale,scale);
 
 	//we compute scalar prod between the two vectors
 	CCVector3 Z(0,0,1);
@@ -113,17 +127,17 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 			axis = Z.cross(direction);
 		}
 		
-		ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
+		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_torus)
 		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f,0.4f,2.0*M_PI,false,0,0,"Torus",12));
 
-	glTranslatef(0,0,0.3f);
+	glFunc->glTranslatef(0,0,0.3f);
 	c_torus->setTempColor(col);
 	c_torus->draw(context);
 
-	glPopMatrix();
+	glFunc->glPopMatrix();
 }
 
 // Unused function
@@ -582,21 +596,28 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (!m_box.isValid())
 		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
 
 	//m_box.draw(m_selected ? context.bbDefaultCol : ccColor::magenta);
-	m_box.draw(ccColor::yellow);
+	m_box.draw(context, ccColor::yellow);
 	
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
-		glPushName(getUniqueIDForDisplay());
+		glFunc->glPushName(getUniqueIDForDisplay());
 
 	if (m_selected)
 	{
 		//draw the interactors
 		const CCVector3& minC = m_box.minCorner();
 		const CCVector3& maxC = m_box.maxCorner();
-		CCVector3 center = m_box.getCenter();
+		const CCVector3  center = m_box.getCenter();
 	
 		PointCoordinateType scale = computeArrowsScale();
 
@@ -607,7 +628,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//1 if names shall be pushed, 0 otherwise
 		if (pushName)
-			glPushName(0); //fake ID, will be replaced by the arrows one if any
+			glFunc->glPushName(0); //fake ID, will be replaced by the arrows one if any
 
 		DrawUnitArrow(X_MINUS_ARROW*pushName,CCVector3(minC.x,center.y,center.z),CCVector3(-1.0, 0.0, 0.0),scale,ccColor::red,componentContext);
 		DrawUnitArrow(X_PLUS_ARROW*pushName,CCVector3(maxC.x,center.y,center.z),CCVector3( 1.0, 0.0, 0.0),scale,ccColor::red,componentContext);
@@ -625,9 +646,9 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		DrawUnitTorus(Z_PLUS_TORUS*pushName,CCVector3(center.x,center.y,maxC.z),CCVector3( 0.0, 0.0, 1.0),scale,c_lightBlue,componentContext);
 
 		if (pushName)
-			glPopName();
+			glFunc->glPopName();
 	}
 
 	if (pushName)
-		glPopName();
+		glFunc->glPopName();
 }

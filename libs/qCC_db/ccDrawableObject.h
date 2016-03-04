@@ -51,14 +51,9 @@ struct glDrawContext
 	int glH;
 	//! Corresponding GL window
 	ccGenericGLDisplay* _win;
-
-	//! OpenGL function set (version 2.1)
-	QOpenGLFunctions_2_1* gl_21;
-	//! OpenGL function set (version 3.2)
-	/** \warning May not be supported by the system!
-		(will be null in this case)
-	**/
-	QOpenGLFunctions_3_0* gl_30;
+   
+	//! OpenGL context used to access functions for particular profiles \see glFunctions()
+	QOpenGLContext *qGLContext;
 
 	//! Current zoom (screen to file rendering mode)
 	float renderZoom;
@@ -132,8 +127,7 @@ struct glDrawContext
 		, glW(0)
 		, glH(0)
 		, _win(0)
-		, gl_21(0)
-		, gl_30(0)
+		, qGLContext(nullptr)
 		, renderZoom(1.0f)
 		, defaultMat(new ccMaterial("default"))
 		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
@@ -163,6 +157,12 @@ struct glDrawContext
 		, sourceBlend(GL_SRC_ALPHA)
 		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
 	{}
+   
+	template<class TYPE>
+	TYPE *glFunctions() const
+	{				
+		return qGLContext->versionFunctions<TYPE>();
+	}   
 };
 typedef glDrawContext CC_DRAW_CONTEXT;
 

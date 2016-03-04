@@ -25,7 +25,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include <algorithm>
 #include <vector>
 
 namespace CCLib

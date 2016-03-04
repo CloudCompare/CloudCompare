@@ -21,6 +21,7 @@
 //Local
 #include "GenericIndexedMesh.h"
 #include "GenericProgressCallback.h"
+#include "GenericTriangle.h"
 #include "CCMiscTools.h"
 
 //System

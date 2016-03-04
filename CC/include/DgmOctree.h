@@ -21,7 +21,6 @@
 //Local
 #include "GenericOctree.h"
 #include "CCPlatform.h"
-#include "GenericProgressCallback.h"
 
 //system
 #include <vector>
@@ -41,6 +40,8 @@ namespace CCLib
 
 class ReferenceCloud;
 class GenericIndexedCloudPersist;
+class GenericProgressCallback;
+class NormalizedProgress;
 
 /*** MACROS ***/
 

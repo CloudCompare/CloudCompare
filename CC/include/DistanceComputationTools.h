@@ -19,6 +19,7 @@
 #define DISTANCE_COMPUTATION_TOOLS_HEADER
 
 //Local
+#include "CCConst.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 

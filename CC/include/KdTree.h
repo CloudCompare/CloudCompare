@@ -19,12 +19,13 @@
 #define KD_TREE_HEADER
 
 //Local
-#include "GenericIndexedCloud.h"
 #include "PointProjectionTools.h"
-#include "GenericProgressCallback.h"
 
 namespace CCLib
 {
+
+class GenericIndexedCloud;
+class GenericProgressCallback;
 
 //! A Kd Tree Class which implements functions related to point to point distance
 class CC_CORE_LIB_API KDTree

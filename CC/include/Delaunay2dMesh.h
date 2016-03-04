@@ -20,9 +20,10 @@
 
 //Local
 #include "GenericIndexedMesh.h"
-#include "Neighbourhood.h"
 #include "SimpleTriangle.h"
 
+#include <cstddef>
+#include <vector>
 
 namespace CCLib
 {

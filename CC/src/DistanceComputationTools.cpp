@@ -229,7 +229,8 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 															additionalParameters,
 															params.multiThread,
 															progressCb,
-															"Cloud-Cloud Distance") == 0)
+															"Cloud-Cloud Distance",
+															params.maxThreadCount) == 0)
 	{
 		//something went wrong
 		result = -2;
@@ -1680,6 +1681,12 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		//for (unsigned i=0; i<numberOfCells; ++i)
 		//	cloudMeshDistCellFunc_MT(cellsDescs[i]);
 
+		int maxThreadCount = params.maxThreadCount;
+		if (maxThreadCount == 0)
+		{
+			maxThreadCount = QThread::idealThreadCount();
+		}
+		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
 		QtConcurrent::blockingMap(cellsDescs, cloudMeshDistCellFunc_MT);
 
 		s_octree_MT = 0;

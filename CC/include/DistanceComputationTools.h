@@ -60,6 +60,9 @@ public: //distance to clouds or meshes
 		**/
 		bool multiThread;
 
+		//! Maximum number of threads to use (0 = max)
+		int maxThreadCount;
+
 		//! Type of local 3D modeling to use
 		/** Default: NO_MODEL. Otherwise see CC_LOCAL_MODEL_TYPES.
 		**/
@@ -105,6 +108,7 @@ public: //distance to clouds or meshes
 			: octreeLevel(0)
 			, maxSearchDist(0)
 			, multiThread(true)
+			, maxThreadCount(0)
 			, localModel(NO_MODEL)
 			, useSphericalSearchForLocalModel(false)
 			, kNNForLocalModel(0)
@@ -169,6 +173,9 @@ public: //distance to clouds or meshes
 		//! Whether to use multi-thread or single thread mode (if maxSearchDist > 0, single thread mode is forced)
 		bool multiThread;
 
+		//! Maximum number of threads to use (0 = max)
+		int maxThreadCount;
+
 		//! Cloud to store the Closest Point Set
 		/** The cloud should be initialized but empty on input. It will have the same size as the compared cloud on output.
 			\warning Not compatible with maxSearchDist > 0.
@@ -183,6 +190,7 @@ public: //distance to clouds or meshes
 			, signedDistances(false)
 			, flipNormals(false)
 			, multiThread(true)
+			, maxThreadCount(0)
 			, CPSet(0)
 		{}
 	};

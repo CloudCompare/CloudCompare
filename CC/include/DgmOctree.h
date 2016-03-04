@@ -1055,6 +1055,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param multiThread whether to use parallel processing or not
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param functionTitle function title
+		\param maxThreadCount the maximum number of threads to use (0 = all). Ignored if 'multiThread' is false.
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
 	unsigned executeFunctionForAllCellsStartingAtLevel(	unsigned char startingLevel,
@@ -1064,7 +1065,8 @@ public:	/***** CELLS POSITION HANDLING *****/
 														unsigned maxNumberOfPointsPerCell,
 														bool multiThread = true,
 														GenericProgressCallback* progressCb = 0,
-														const char* functionTitle = 0);
+														const char* functionTitle = 0,
+														int maxThreadCount = 0);
 
 	//! Method to apply automatically a specific function to each cell of the octree
 	/** The function to apply should be of the form DgmOctree::octreeCellFunc. In this case
@@ -1078,6 +1080,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param multiThread whether to use parallel processing or not
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param functionTitle function title
+		\param maxThreadCount the maximum number of threads to use (0 = all). Ignored if 'multiThread' is false.
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
 	unsigned executeFunctionForAllCellsAtLevel(	unsigned char level,
@@ -1085,7 +1088,8 @@ public:	/***** CELLS POSITION HANDLING *****/
 												void** additionalParameters,
 												bool multiThread = false,
 												GenericProgressCallback* progressCb = 0,
-												const char* functionTitle = 0);
+												const char* functionTitle = 0,
+												int maxThreadCount = 0);
 
 	//! Ray casting processes
 	enum RayCastProcess { RC_NEAREST_POINT, RC_CLOSE_POINTS };

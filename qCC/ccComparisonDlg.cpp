@@ -44,6 +44,7 @@
 
 //Qt
 #include <QElapsedTimer>
+#include <QThreadPool>
 
 //System
 #include <assert.h>
@@ -74,6 +75,11 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	, m_bestOctreeLevel(0)
 {
 	setupUi(this);
+
+	int maxThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, maxThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(maxThreadCount));
+	maxThreadCountSpinBox->setValue(QThreadPool::globalInstance()->maxThreadCount());
 
 	//populate the combo-boxes
 	{
@@ -348,7 +354,7 @@ bool ccComparisonDlg::computeApproxDistances()
 			c2mParams.signedDistances = false;
 			c2mParams.flipNormals = false;
 			c2mParams.multiThread = false;
-			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud,m_refMesh,c2mParams,&progressDlg,m_compOctree);
+			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud, m_refMesh, c2mParams, &progressDlg, m_compOctree);
 		}
 		break;
 
@@ -689,6 +695,7 @@ bool ccComparisonDlg::computeDistances()
 
 	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cParams;
 	CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams  c2mParams;
+	c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
 
 	int result = -1;
 	ccProgressDialog progressDlg(true,this);

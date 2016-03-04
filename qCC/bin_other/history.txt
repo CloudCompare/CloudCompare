@@ -64,6 +64,10 @@ v2.6.3.beta ??/??/2016
 	* CANUPO plugin:
 		- the statistics (Training mode) now takes the actual boundary into account (and not the default one)
 		- bug fix: the classes (labels) could be inversed in some cases
+		- the user can now set the maximum number of threads/core to use
+
+	* Distance computation tool:
+		- the user can now set the maximum number of threads/core to use
 
 	* Rasterize tool:
 		- the Rasterize tool can now compute Hillshade
@@ -75,6 +79,10 @@ v2.6.3.beta ??/??/2016
 		- the user can now set the max RMS for sphere detection
 
 	* the FARO I/O plugin now relies on the 5.5.3 FARO LS SDK
+
+	* The DP I/O plugin can now export DP files
+		- either to save original DP files
+		- or to convert other structured clouds (FARO or PTX for now) to the DP format
 
 	* File I/O
 		- E57: big coordinates are now properly handled (Global Shift & Scale mechanism)

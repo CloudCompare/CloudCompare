@@ -702,7 +702,7 @@ bool DgmOctree::getPointsInCell(OctreeCellCodeType cellCode,
 								unsigned char level,
 								ReferenceCloud* subset,
 								bool isCodeTruncated/*=false*/,
-								bool clearOutputCloud/*=true*/) const
+								bool clearOutputCloud/* = true*/) const
 {
 	unsigned char bitDec = GET_BIT_SHIFT(level);
 	if (!isCodeTruncated)
@@ -3160,7 +3160,7 @@ bool DgmOctree::getCellIndexes(unsigned char level, cellIndexesContainer& vec) c
 bool DgmOctree::getPointsInCellByCellIndex(	ReferenceCloud* cloud,
 											unsigned cellIndex,
 											unsigned char level,
-											bool clearOutputCloud/*=true*/) const
+											bool clearOutputCloud/* = true*/) const
 {
 	assert(cloud && cloud->getAssociatedCloud() == m_theAssociatedCloud);
 
@@ -3748,6 +3748,7 @@ DgmOctree::octreeCell::~octreeCell()
 #include <QtCore>
 #include <QApplication>
 #include <QtConcurrentMap>
+#include <QThreadPool>
 
 /*** FOR THE MULTI THREADING WRAPPER ***/
 struct octreeCellDesc
@@ -3812,12 +3813,13 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 
 #endif
 
-unsigned DgmOctree::executeFunctionForAllCellsAtLevel(unsigned char level,
+unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 														octreeCellFunc func,
 														void** additionalParameters,
 														bool multiThread/*=false*/,
 														GenericProgressCallback* progressCb/*=0*/,
-														const char* functionTitle/*=0*/)
+														const char* functionTitle/*=0*/,
+														int maxThreadCount/*=0*/)
 {
 	if (m_thePointsAndTheirCellCodes.empty())
 		return 0;
@@ -4010,6 +4012,11 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(unsigned char level,
 		s_binarySearchCount = 0.0;
 #endif
 
+		if (maxThreadCount == 0)
+		{
+			maxThreadCount = QThread::idealThreadCount();
+		}
+		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
 		QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
@@ -4058,9 +4065,10 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 	void** additionalParameters,
 	unsigned minNumberOfPointsPerCell,
 	unsigned maxNumberOfPointsPerCell,
-	bool multiThread/*=true*/,
+	bool multiThread/* = true*/,
 	GenericProgressCallback* progressCb/*=0*/,
-	const char* functionTitle/*=0*/)
+	const char* functionTitle/*=0*/,
+	int maxThreadCount/*=0*/)
 {
 	if (m_thePointsAndTheirCellCodes.empty())
 		return 0;
@@ -4291,7 +4299,9 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 			}
 			//*/
 			for (unsigned i = 0; i < elements; ++i)
+			{
 				cell.points->addPointIndex((startingElement++)->theIndex);
+			}
 
 			//call user method on current cell
 			result = (*func)(cell, additionalParameters,
@@ -4454,7 +4464,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 								//we 'add' the point to the cell descriptor
 								++elements;
 								//and we can continue collecting points
-								keepGoing=true;
+								keepGoing = true;
 							}
 
 							//as this cell and the next one share the same parent,
@@ -4465,13 +4475,13 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 						{
 							//as this cell and the next one have differnt parents,
 							//the next cell is the first sub-cell!
-							firstSubCell=true;
+							firstSubCell = true;
 						}
 					}
 					else
 					{
 						//at the ceiling level, all cells are considered as 'frist' sub-cells
-						firstSubCell=true;
+						firstSubCell = true;
 					}
 
 					//we must stop point collection here
@@ -4506,8 +4516,8 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		}
 
 		//statistics
-		double mean = static_cast<double>(popSum)/static_cast<double>(cells.size());
-		double stddev = sqrt(static_cast<double>(popSum2-popSum*popSum))/static_cast<double>(cells.size());
+		double mean = static_cast<double>(popSum) / cells.size();
+		double stddev = sqrt(static_cast<double>(popSum2 - popSum*popSum)) / cells.size();
 
 		//static wrap
 		s_octree_MT = this;
@@ -4540,6 +4550,11 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		s_binarySearchCount = 0.0;
 #endif
 
+		if (maxThreadCount == 0)
+		{
+			maxThreadCount = QThread::idealThreadCount();
+		}
+		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
 		QtConcurrent::blockingMap(cells, LaunchOctreeCellFunc_MT);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS

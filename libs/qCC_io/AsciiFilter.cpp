@@ -28,7 +28,6 @@
 
 //qCC_db
 #include <ccPointCloud.h>
-#include <ccHObject.h>
 #include <ccProgressDialog.h>
 #include <ccLog.h>
 #include <ccScalarField.h>

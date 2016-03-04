@@ -21,7 +21,6 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "ccGLMatrix.h"
 #include "ccMaterial.h"
 
 class ccGenericGLDisplay;

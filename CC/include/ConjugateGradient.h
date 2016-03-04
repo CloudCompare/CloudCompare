@@ -22,8 +22,6 @@
 #include "MathTools.h"
 #include "SquareMatrix.h"
 
-//System
-#include <string.h>
 
 namespace CCLib
 {

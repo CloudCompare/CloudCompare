@@ -67,10 +67,12 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 	assert(diagonal >= 0);
 
 	if (applyAll)
+	{
 		*applyAll = false;
+	}
 
 	//default scale
-	double scale = (coordinatesScale ? std::max(*coordinatesScale,ZERO_TOLERANCE) : 1.0);
+	double scale = (coordinatesScale ? std::max(*coordinatesScale, ZERO_TOLERANCE) : 1.0);
 
 	bool needShift = NeedShift(P);
 	bool needRescale = NeedRescale(diagonal);
@@ -80,7 +82,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 	{
 		coordinatesShift = CCVector3d(0,0,0);
 		if (coordinatesScale)
+		{
 			*coordinatesScale = 1.0;
+		}
 
 		if (needShift || needRescale)
 		{
@@ -112,18 +116,26 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		{
 			//guess best shift & scale info from input point/diagonal
 			if (needShift)
+			{
 				coordinatesShift = BestShift(P);
+			}
 			if (coordinatesScale && needRescale)
+			{
 				*coordinatesScale = BestScale(diagonal);
+			}
 			return true;
 		}
 
 		//otherwise let's ask the user for those values
-		ccShiftAndScaleCloudDlg sasDlg(P,diagonal);
+		ccShiftAndScaleCloudDlg sasDlg(P, diagonal);
 		if (!applyAll)
+		{
 			sasDlg.showApplyAllButton(false);
+		}
 		if (!coordinatesScale)
+		{
 			sasDlg.showScaleItems(false);
+		}
 
 		scale = 1.0;
 		CCVector3d shift(0,0,0);
@@ -132,27 +144,37 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			//shift on load already provided? (typically from a previous file)
 			shift = coordinatesShift;
 			if (coordinatesScale)
+			{
 				scale = *coordinatesScale;
+			}
 			if (mode != ALWAYS_DISPLAY_DIALOG)
+			{
 				sasDlg.showWarning(true); //if we are here, it means that the provided shift isn't concordant
+			}
 		}
 		else
 		{
 			//guess best shift & scale info from input point/diagonal
 			if (needShift)
+			{
 				shift = BestShift(P);
+			}
 			if (needRescale)
+			{
 				scale = BestScale(diagonal);
+			}
 		}
 
 		//add "suggested" entry
-		int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",shift,scale));
+		int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested", shift, scale));
 		sasDlg.setCurrentProfile(index);
 		//add "last" entry (if available)
 		{
 			ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
 			if (sasDlg.getLast(lastInfo))
+			{
 				sasDlg.addShiftInfo(lastInfo);
+			}
 		}
 		//add entries from file (if any)
 		sasDlg.addFileInfo();
@@ -179,16 +201,22 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		{
 			coordinatesShift = sasDlg.getShift();
 			if (coordinatesScale)
+			{
 				*coordinatesScale = sasDlg.getScale();
+			}
 			if (applyAll)
+			{
 				*applyAll = sasDlg.applyAll();
+			}
 			return true;
 		}
 	}
 
 	coordinatesShift = CCVector3d(0,0,0);
 	if (coordinatesScale)
+	{
 		*coordinatesScale = 1.0;
+	}
 
 	return false;
 }
@@ -196,7 +224,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 {
 	if (!NeedShift(P))
+	{
 		return CCVector3d(0,0,0);
+	}
 
 	CCVector3d shift(	fabs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
 						fabs(P[1]) >= MAX_COORDINATE_ABS_VALUE ? -P[1] : 0,

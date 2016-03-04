@@ -1023,7 +1023,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		return CC_FERR_NO_LOAD;
 	}
 
-	ccProgressDialog pdlg(true);
+	ccProgressDialog pdlg(true, parameters.parentWidget);
 	pdlg.setMethodTitle("Open Bin file (old style)");
 
 	for (unsigned k=0; k<nbScansTotal; k++)

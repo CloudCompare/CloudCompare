@@ -446,7 +446,10 @@ bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, Lo
 {
 	bool shiftAlreadyEnabled = (loadParameters.coordinatesShiftEnabled && *loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift);
 	if (shiftAlreadyEnabled)
+	{
 		Pshift = *loadParameters.coordinatesShift;
+	}
+	
 	bool applyAll = false;
 	if (	sizeof(PointCoordinateType) < 8
 		&&	ccGlobalShiftManager::Handle(	P,

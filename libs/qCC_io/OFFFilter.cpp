@@ -32,7 +32,6 @@
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
-#include <ccProgressDialog.h>
 #include <ccNormalVectors.h>
 #include <ccOctree.h>
 

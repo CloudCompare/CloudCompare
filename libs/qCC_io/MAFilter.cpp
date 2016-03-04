@@ -129,13 +129,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		return CC_FERR_WRITING;
 
 	//progress dialog
-	ccProgressDialog pdlg(true); //cancel available
-	unsigned palierModifier = (hasColors ? 1 : 0);
-	CCLib::NormalizedProgress nprogress(&pdlg,unsigned(float((2+palierModifier)*numberOfTriangles+(3+palierModifier)*numberOfVertexes)));
+	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
+	CCLib::NormalizedProgress nprogress(&pdlg, ((2 + hasColors ? 1 : 0) * numberOfTriangles + (3 + hasColors ? 1 : 0) * numberOfVertexes));
 	pdlg.setMethodTitle("Save MA file");
-	char buffer[256];
-	sprintf(buffer,"Triangles = %u",numberOfTriangles);
-	pdlg.setInfo(buffer);
+	pdlg.setInfo(qPrintable(QString("Triangles = %1").arg(numberOfTriangles)));
 	pdlg.start();
 
 	//we extract the (short) filename from the whole path

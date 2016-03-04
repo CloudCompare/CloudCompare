@@ -190,7 +190,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	bool writeSF = (theScalarFields.size() != 0);
 
 	//progress dialog
-	ccProgressDialog pdlg(true);
+	ccProgressDialog pdlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle(qPrintable(QString("Saving cloud [%1]").arg(cloud->getName())));
 	pdlg.setInfo(qPrintable(QString("Number of points: %1").arg(numberOfPoints)));
@@ -710,7 +710,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	}
 
 	//progress indicator
-	ccProgressDialog pdlg(true);
+	ccProgressDialog pdlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nprogress(&pdlg,approximateNumberOfLines);
 	pdlg.setMethodTitle(qPrintable(QString("Open ASCII file [%1]").arg(filename)));
 	pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(approximateNumberOfLines)));

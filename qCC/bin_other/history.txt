@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.7.beta ??/??/201?
+v2.6.3.beta ??/??/2016
 - New features:
 
 	* Polyline tracing/picking tool:
@@ -74,6 +74,10 @@ v2.7.beta ??/??/201?
 		- the user can now set the max RMS for sphere detection
 
 	* the FARO I/O plugin now relies on the 5.5.3 FARO LS SDK
+
+	* File I/O
+		- E57: big coordinates are now properly handled (Global Shift & Scale mechanism)
+		- Smarter progress dialogs
 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields

@@ -42,11 +42,11 @@
 #include "ccGenericGLDisplay.h"
 #include "ccGBLSensor.h"
 #include "ccProgressDialog.h"
-#include "ccAtomicBool.h"
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccMinimumSpanningTreeForNormsDirection.h"
 
 //Qt
+#include <QAtomicInt>
 #include <QThread>
 #include <QElapsedTimer>
 #include <QSharedPointer>
@@ -63,7 +63,7 @@ public:
 	LodStructThread(ccPointCloud& cloud)
 		: QThread()
 		, m_cloud(cloud)
-		, m_abort(false)
+		, m_abort(0)
 	{}
 	
 	//!Destructor
@@ -75,7 +75,7 @@ public:
 	//! Stops the thread
 	void stop(unsigned long timeout = ULONG_MAX)
 	{
-		m_abort = true;
+		m_abort = 1;
 		wait(timeout);
 	}
 
@@ -84,7 +84,7 @@ protected:
 	//reimplemented from QThread
 	virtual void run()
 	{
-		m_abort = false;
+		m_abort = 0;
 
 		ccPointCloud::LodStruct& lod = m_cloud.getLOD();
 
@@ -186,7 +186,7 @@ protected:
 						flags->setValue(nearestIndex,level);
 						levelDesc.count++;
 						//nProgress.oneStep();
-						if (m_abort)
+						if (m_abort.load() == 1)
 							break;
 					}
 
@@ -210,7 +210,7 @@ protected:
 				}
 			}
 
-			if (m_abort)
+			if (m_abort.load() == 1)
 				break;
 
 			//don't forget the last cell!
@@ -252,7 +252,7 @@ protected:
 			}
 		}
 
-		if (!m_abort)
+		if (m_abort.load() == 0)
 		{
 			assert(lod.indexes() && lod.indexes()->currentSize() == pointCount);
 			lod.shrink();
@@ -271,7 +271,8 @@ protected:
 	}
 
 	ccPointCloud& m_cloud;
-	ccAtomicBool m_abort;
+	
+	QAtomicInt	m_abort;
 };
 
 bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*/)

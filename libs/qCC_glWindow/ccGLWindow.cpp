@@ -3256,8 +3256,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.glW = m_glViewport.width();
 	CONTEXT.glH = m_glViewport.height();
 	CONTEXT._win = this;
-	CONTEXT.gl_21 = this->context()->versionFunctions<QOpenGLFunctions_2_1>();
-	CONTEXT.gl_30 = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
+	CONTEXT.qGLContext = this->context();
 	CONTEXT.flags = 0;
 
 	const ccGui::ParamStruct& guiParams = getDisplayParameters();

@@ -691,13 +691,11 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	assert(!m_points.empty());
 
 	//get the set of OpenGL functions (version 2.1)
-	if (!context.gl_21)
-	{
-		//this version might not supported
-		assert(false);
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
 		return;
-	}
-	ccQOpenGLFunctions* glFunc = context.gl_21;
 
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
@@ -928,13 +926,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	assert(!m_points.empty());
 
 	//get the set of OpenGL functions (version 2.1)
-	if (!context.gl_21)
-	{
-		//this version might not supported
-		assert(false);
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
 		return;
-	}
-	ccQOpenGLFunctions* glFunc = context.gl_21;
 
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);

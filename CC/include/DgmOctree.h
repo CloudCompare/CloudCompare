@@ -19,10 +19,7 @@
 #define DGM_OCTREE_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericOctree.h"
-#include "CCTypes.h"
-#include "CCConst.h"
 #include "CCPlatform.h"
 #include "GenericProgressCallback.h"
 

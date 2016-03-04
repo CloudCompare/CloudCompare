@@ -19,7 +19,6 @@
 #define CC_POLYLINE_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "ReferenceCloud.h"
 
 namespace CCLib

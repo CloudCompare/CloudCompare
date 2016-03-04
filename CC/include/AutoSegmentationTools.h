@@ -19,7 +19,6 @@
 #define AUTO_SEGMENTATION_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "ReferenceCloud.h"
 

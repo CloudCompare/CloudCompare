@@ -19,7 +19,6 @@
 #define SQUARE_MATRIX_HEADER
 
 //local
-#include "CCCoreLib.h"
 #include "CCGeom.h"
 
 //system

@@ -19,9 +19,7 @@
 #define SIMPLE_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
-#include "GenericChunkedArray.h"
 #include "PointProjectionTools.h"
 #include "ScalarField.h"
 

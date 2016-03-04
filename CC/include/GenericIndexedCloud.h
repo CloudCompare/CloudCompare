@@ -19,7 +19,6 @@
 #define GENERIC_INDEXED_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericCloud.h"
 
 namespace CCLib

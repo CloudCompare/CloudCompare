@@ -19,7 +19,6 @@
 #define GENERIC_MESH_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericTriangle.h"
 
 namespace CCLib

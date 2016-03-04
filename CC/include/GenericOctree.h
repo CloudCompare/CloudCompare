@@ -19,7 +19,6 @@
 #define GENERIC_OCTREE_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCGeom.h"
 
 namespace CCLib

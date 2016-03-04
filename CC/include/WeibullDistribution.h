@@ -19,7 +19,6 @@
 #define WEIBULL_DISTRIBUTION_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericDistribution.h"
 
 namespace CCLib

@@ -18,8 +18,6 @@
 #ifndef LOCAL_MODEL_HEADER
 #define LOCAL_MODEL_HEADER
 
-#include "CCConst.h"
-#include "CCGeom.h"
 #include "Neighbourhood.h"
 
 namespace CCLib

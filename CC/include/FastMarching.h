@@ -19,7 +19,6 @@
 #define FAST_MARCHING_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCConst.h"
 #include "CCGeom.h"
 

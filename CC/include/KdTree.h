@@ -19,14 +19,9 @@
 #define KD_TREE_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericIndexedCloud.h"
 #include "PointProjectionTools.h"
 #include "GenericProgressCallback.h"
-
-//system
-#include <math.h>
-#include <vector>
 
 namespace CCLib
 {

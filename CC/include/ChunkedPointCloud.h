@@ -19,13 +19,10 @@
 #define CHUNKED_POINT_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericChunkedArray.h"
 #include "GenericIndexedCloudPersist.h"
 #include "PointProjectionTools.h"
 
-//System
-#include <assert.h>
 
 namespace CCLib
 {

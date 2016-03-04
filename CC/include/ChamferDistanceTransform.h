@@ -19,7 +19,6 @@
 #define CHAMFER_DISTANCE_TRANSFORM_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "Grid3D.h"
 #include "MathTools.h"
 

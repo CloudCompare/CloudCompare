@@ -19,9 +19,7 @@
 #define DISTANCE_COMPUTATION_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCToolbox.h"
-#include "CCConst.h"
 #include "DgmOctree.h"
 
 namespace CCLib

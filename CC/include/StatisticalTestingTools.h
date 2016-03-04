@@ -19,8 +19,6 @@
 #define STATISTICAL_TESTING_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "CCConst.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 

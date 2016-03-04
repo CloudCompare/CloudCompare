@@ -19,7 +19,6 @@
 #define REFERENCE_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
 

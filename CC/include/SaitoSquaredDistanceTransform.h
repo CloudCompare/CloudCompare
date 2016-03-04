@@ -4,7 +4,6 @@
 // Inspired from bil_edt.cxx (VXL) by Ricardo Fabbri (rfabbri), Brown University  (rfabbri@lems.brown.edu)
 
 //Local
-#include "CCCoreLib.h"
 #include "Grid3D.h"
 #include "MathTools.h"
 

@@ -23,14 +23,7 @@
 //Local
 #include "mainwindow.h"
 
-//qCC_db
-#include <ccHObject.h>
 
-//Qt
-#include <QDialog>
-
-//system
-#include <vector>
 
 //! Scales matching tool dialog
 class ccMatchScalesDlg : public QDialog, public Ui::MatchScalesDialog

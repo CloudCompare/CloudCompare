@@ -22,7 +22,6 @@
 
 //Qt
 #include <QWidget>
-#include <QSharedPointer>
 
 //qCC_db
 #include <ccColorScale.h>

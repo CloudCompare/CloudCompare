@@ -21,9 +21,6 @@
 //Local
 #include "ccContourExtractor.h"
 
-//qCC_db
-#include <ccPolyline.h>
-
 //Qt
 #include <QDialog>
 

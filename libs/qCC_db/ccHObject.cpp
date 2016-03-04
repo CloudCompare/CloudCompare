@@ -583,12 +583,12 @@ bool ccHObject::isBranchEnabled() const
 	return true;
 }
 
-void ccHObject::drawBB(const ccColor::Rgb& col)
+void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 {
 	switch (m_selectionBehavior)
 	{
 	case SELECTION_AA_BBOX:
-		getDisplayBB_recursive(true,m_currentDisplay).draw(col);
+		getDisplayBB_recursive(true,m_currentDisplay).draw(context, col);
 		break;
 	
 	case SELECTION_FIT_BBOX:
@@ -600,7 +600,7 @@ void ccHObject::drawBB(const ccColor::Rgb& col)
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
 				glMultMatrixf(trans.data());
-				box.draw(col);
+				box.draw(context, col);
 				glPopMatrix();
 			}
 		}
@@ -702,7 +702,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	//if the entity is currently selected, we draw its bounding-box
 	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawNames(context) && context.currentLODLevel == 0)
 	{
-		drawBB(context.bbDefaultCol);
+		drawBB(context, context.bbDefaultCol);
 	}
 
 	if (draw3D && m_glTransEnabled)

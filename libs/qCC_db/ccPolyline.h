@@ -22,11 +22,8 @@
 #include <Polyline.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccShiftedObject.h"
 
-//system
-#include <vector>
 
 class ccPointCloud;
 

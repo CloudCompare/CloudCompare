@@ -22,18 +22,13 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "qCC_db.h"
 #include "ccSerializableObject.h"
 #include "ccGLMatrix.h"
 #include "ccMaterial.h"
 
 //Qt
-#include <QImage>
-#include <QString>
 #include <QFont>
 
-//CCLib
-#include <CCGeom.h>
 
 class QWidget;
 

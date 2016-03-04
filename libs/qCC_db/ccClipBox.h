@@ -19,11 +19,9 @@
 #define CC_CLIP_BOX_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccBBox.h"
 #include "ccHObject.h"
 #include "ccInteractor.h"
-#include "ccGLMatrix.h"
 
 //Qt
 #include <QObject>

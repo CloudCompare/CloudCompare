@@ -24,9 +24,7 @@
 #include <GenericProgressCallback.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericGLDisplay.h"
-#include "ccHObject.h"
 #include "ccAdvancedTypes.h"
 
 class ccGenericPointCloud;

@@ -19,7 +19,6 @@
 #define CC_OCTREE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccGenericGLDisplay.h"
 

@@ -19,12 +19,10 @@
 #define CC_EXTERNAL_FACTORY_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 
 //Qt
 #include <QMap>
-#include <QSharedPointer>
 
 /**  Provides new objects with an external factory
   *  This is intendend to be used into plugins.

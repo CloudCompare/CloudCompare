@@ -19,8 +19,6 @@
 #define CC_ADVANCED_TYPES_HEADER
 
 //Local
-#include "qCC_db.h"
-#include "ccBasicTypes.h"
 #include "ccChunkedArray.h"
 #include "ccNormalCompressor.h"
 

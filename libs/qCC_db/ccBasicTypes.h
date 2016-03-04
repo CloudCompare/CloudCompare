@@ -24,8 +24,6 @@
 //CCLib
 #include <CCGeom.h>
 
-//system
-#include <stdlib.h>
 
 //! Compressed normals type
 /** Should be set accordingly to ccNormalCompressor::QUANTIZE_LEVEL

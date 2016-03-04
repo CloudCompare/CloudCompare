@@ -19,17 +19,12 @@
 #define CC_GROUND_LIDAR_SENSOR_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccSensor.h"
-#include "ccGLMatrix.h"
 #include "ccAdvancedTypes.h"
 
 //CCLib
 #include <GenericCloud.h>
-#include <CCGeom.h>
 
-//System
-#include <vector>
 
 class ccPointCloud;
 

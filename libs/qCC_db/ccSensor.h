@@ -19,8 +19,6 @@
 #define CC_SENSOR_HEADER
 
 //Local
-#include "qCC_db.h"
-#include "ccHObject.h"
 #include "ccIndexedTransformationBuffer.h"
 
 //! Sensor types

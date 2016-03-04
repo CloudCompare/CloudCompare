@@ -19,20 +19,11 @@
 #define CC_CAMERA_SENSOR_HEADER
 
 //local
-#include "qCC_db.h"
 #include "ccSensor.h"
 #include "ccOctree.h"
 
-//CCLib
-#include <ReferenceCloud.h>
-#include <DgmOctree.h>
-
-//Qt
-#include <QSharedPointer>
-
 //system
 #include <unordered_set>
-#include <assert.h>
 
 class ccPointCloud;
 class ccMesh;

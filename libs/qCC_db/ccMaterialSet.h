@@ -18,12 +18,7 @@
 #ifndef CC_MATERIAL_SET_HEADER
 #define CC_MATERIAL_SET_HEADER
 
-//CCLib
-#include <CCShareable.h>
-
 //Local
-#include "qCC_db.h"
-#include "ccMaterial.h"
 #include "ccHObject.h"
 
 class ccGenericGLDisplay;

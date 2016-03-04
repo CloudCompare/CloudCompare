@@ -23,9 +23,7 @@
 #include <PointProjectionTools.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericMesh.h"
-#include "ccMaterial.h"
 
 //! Triangular mesh
 class QCC_DB_LIB_API ccMesh : public ccGenericMesh

@@ -19,11 +19,8 @@
 #define CC_SPHERE_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Sphere (primitive)
 /** 3D sphere primitive

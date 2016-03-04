@@ -19,13 +19,11 @@
 #define CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccIndexedTransformation.h"
 #include "ccHObject.h"
 
 //system
 #include <float.h>
-#include <vector>
 
 //! Indexed Transformation buffer
 class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >

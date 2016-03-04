@@ -19,15 +19,12 @@
 #define CC_GENERIC_POINT_CLOUD_HEADER
 
 //CCLib
-#include <GenericIndexedCloudPersist.h>
 #include <GenericProgressCallback.h>
 #include <ReferenceCloud.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericGLDisplay.h"
 #include "ccShiftedObject.h"
-#include "ccGLMatrix.h"
 #include "ccAdvancedTypes.h"
 
 class ccOctree;

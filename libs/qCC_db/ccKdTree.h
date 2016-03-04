@@ -22,7 +22,6 @@
 #include <TrueKdTree.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 
 //System

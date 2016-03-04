@@ -19,17 +19,13 @@
 #define CC_OBJECT_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccSerializableObject.h"
 
 //Qt
 #include <qglobal.h>
-#include <QString>
 #include <QVariant>
 #include <QSharedPointer>
 
-//System
-#include <stdint.h>
 
 //! Object state flag
 enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATHER_DEPENDENT)

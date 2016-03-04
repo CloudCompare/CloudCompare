@@ -19,13 +19,9 @@
 #define CC_HIERARCHY_OBJECT_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccObject.h"
 #include "ccDrawableObject.h"
 #include "ccBBox.h"
-
-//System
-#include <vector>
 
 class QIcon;
 

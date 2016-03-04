@@ -19,11 +19,9 @@
 #define CC_BBOX_HEADER
 
 //CCLib
-#include <CCGeom.h>
 #include <SquareMatrix.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGLMatrix.h"
 #include "ccBasicTypes.h"
 

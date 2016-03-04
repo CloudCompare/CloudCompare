@@ -19,13 +19,8 @@
 #define CC_2D_VIEWPORT_OBJECT_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
-#include "ccGLMatrix.h"
 #include "ccGenericGLDisplay.h"
-
-//Qt
-#include <QString>
 
 //! 2D viewport object
 class QCC_DB_LIB_API cc2DViewportObject : public ccHObject

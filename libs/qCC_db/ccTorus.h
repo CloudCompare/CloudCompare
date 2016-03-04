@@ -19,11 +19,8 @@
 #define CC_TORUS_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Torus (primitive)
 /** 3D torus primitive (with circular or rectangular section)

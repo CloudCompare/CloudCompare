@@ -19,13 +19,11 @@
 #define CC_MATERIAL_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccSerializableObject.h"
 #include "ccColorTypes.h"
 
 //Qt
 #include <QImage>
-#include <QString>
 #include <QStringList>
 #include <QSharedPointer>
 

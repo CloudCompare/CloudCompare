@@ -59,8 +59,6 @@
 #include <QLayout>
 #include <QMessageBox>
 #include <QPushButton>
-//DGM FIXME
-#include <QOpenGLFunctions_3_0>
 
 //Oculus
 #ifdef CC_OCULUS_SUPPORT

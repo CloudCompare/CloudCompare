@@ -19,13 +19,10 @@
 #define DGM_OCTREE_REFERENCE_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
 #include "DgmOctree.h"
 
-//system
-#include <assert.h>
 
 namespace CCLib
 {

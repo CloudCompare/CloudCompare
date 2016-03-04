@@ -19,12 +19,8 @@
 #define CC_IMAGE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 
-//Qt
-#include <QImage>
-#include <QString>
 
 class ccGenericGLDisplay;
 class ccCameraSensor;

@@ -19,7 +19,6 @@
 #define CC_SUB_MESH_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericMesh.h"
 #include "ccBBox.h"
 

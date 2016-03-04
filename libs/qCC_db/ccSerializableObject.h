@@ -26,7 +26,6 @@
 #include <CCTypes.h>
 
 //System
-#include <stdio.h>
 #include <stdint.h>
 
 //Qt

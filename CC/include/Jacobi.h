@@ -4,9 +4,6 @@
 //Local
 #include "SquareMatrix.h"
 
-//System
-#include <vector>
-#include <assert.h>
 
 //! Jacobi eigen vectors/values decomposition
 template <typename Scalar> class Jacobi

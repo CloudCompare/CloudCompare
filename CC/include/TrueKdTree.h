@@ -19,16 +19,11 @@
 #define TRUE_KD_TREE_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "CCTypes.h"
-#include "CCConst.h"
 #include "ReferenceCloud.h"
 #include "DistanceComputationTools.h"
 
 //system
-#include <assert.h>
 #include <stdint.h> //for uint fixed-sized types
-#include <string.h>
 
 namespace CCLib
 {

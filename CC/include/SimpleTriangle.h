@@ -19,7 +19,6 @@
 #define SIMPLE_TRIANGLE_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericTriangle.h"
 
 namespace CCLib

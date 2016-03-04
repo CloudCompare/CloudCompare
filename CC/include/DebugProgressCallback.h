@@ -19,7 +19,6 @@
 #define DEBUG_PROGRESS_CALLBACK_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericProgressCallback.h"
 
 namespace CCLib

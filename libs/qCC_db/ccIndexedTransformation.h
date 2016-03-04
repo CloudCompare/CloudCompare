@@ -19,7 +19,6 @@
 #define CC_INDEXED_TRANSFORMATION_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGLMatrix.h"
 
 //! A 4x4 'transformation' matrix (column major order) associated to an index (typically a timestamp)

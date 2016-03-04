@@ -19,12 +19,10 @@
 #define MESH_SAMPLING_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "GenericChunkedArray.h"
 
 //system
-#include <vector>
 #include <map>
 
 namespace CCLib

@@ -19,7 +19,6 @@
 #define GENERIC_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCGeom.h"
 #include "CCConst.h"
 

@@ -19,7 +19,6 @@
 #define CC_MESH_GROUP_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericMesh.h"
 
 //! [DEPRECATED] A group of meshes sharing vertices (and associated properties) in a unique cloud

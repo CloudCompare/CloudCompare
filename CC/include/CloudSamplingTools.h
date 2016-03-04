@@ -19,7 +19,6 @@
 #define CLOUD_SAMPLING_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 

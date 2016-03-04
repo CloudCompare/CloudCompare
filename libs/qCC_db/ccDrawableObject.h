@@ -21,7 +21,6 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "qCC_db.h"
 #include "ccGLMatrix.h"
 #include "ccMaterial.h"
 

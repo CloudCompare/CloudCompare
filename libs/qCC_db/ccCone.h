@@ -19,11 +19,8 @@
 #define CC_CONE_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Cone (primitive)
 /** 3D cone primitive

@@ -21,9 +21,6 @@
 //Local
 #include "qCC_db.h"
 
-//CCLib
-#include <CCConst.h>
-
 //Qt
 #include <QProgressDialog>
 #include <QMutex>

@@ -19,7 +19,6 @@
 #define CC_CYLINDER_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccCone.h"
 
 //! Cylinder (primitive)

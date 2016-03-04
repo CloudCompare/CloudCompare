@@ -25,11 +25,8 @@
 #include <ccShader.h>
 
 //Local
-#include "ccBasicTypes.h"
 #include "ccColorScale.h"
 
-//System
-#include <assert.h>
 
 //! Maximum color ramp size
 /** 252 so as to get 1024 bytes as total required memory

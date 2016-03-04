@@ -19,14 +19,8 @@
 #define CC_PLANE_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//Qt
-#include <QImage>
-
-//CCLib
-#include <CCGeom.h>
 
 //! Plane (primitive)
 /** 3D plane primitive

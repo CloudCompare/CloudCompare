@@ -19,7 +19,6 @@
 #define CC_2D_VIEWPORT_LABEL_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "cc2DViewportObject.h"
 
 //! 2D viewport label

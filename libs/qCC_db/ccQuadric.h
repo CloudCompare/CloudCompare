@@ -19,11 +19,8 @@
 #define CC_QUADRIC_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Quadric (primitive)
 /** 2D1/2 quadric primitive

@@ -27,6 +27,7 @@
 
 //CCLib
 #include <CCConst.h>
+#include <GenericTriangle.h>
 
 //Qt
 #include <QDoubleValidator>

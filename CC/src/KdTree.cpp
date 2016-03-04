@@ -16,6 +16,8 @@
 //##########################################################################
 
 #include "KdTree.h"
+#include "GenericIndexedCloud.h"
+#include "GenericProgressCallback.h"
 
 //system
 #include <algorithm>

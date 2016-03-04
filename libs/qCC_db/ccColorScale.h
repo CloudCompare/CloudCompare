@@ -19,18 +19,15 @@
 #define CC_COLOR_SCALE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccBasicTypes.h"
 #include "ccSerializableObject.h"
 
 //Qt
-#include <QString> 
 #include <QSharedPointer>
 #include <QColor>
 #include <QList>
 
 //System
-#include <assert.h>
 #include <set>
 
 //! Color scale element: one value + one color

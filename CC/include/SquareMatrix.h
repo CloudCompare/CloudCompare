@@ -19,14 +19,12 @@
 #define SQUARE_MATRIX_HEADER
 
 //local
-#include "CCCoreLib.h"
 #include "CCGeom.h"
 
 //system
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include <algorithm>
 #include <vector>
 
 namespace CCLib

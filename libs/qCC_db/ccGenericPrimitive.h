@@ -19,7 +19,6 @@
 #define CC_GENERIC_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccMesh.h"
 
 class ccPointCloud;

@@ -19,7 +19,6 @@
 #define CC_CUSTOM_OBJECT_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 
 //! Custom hierarchy object

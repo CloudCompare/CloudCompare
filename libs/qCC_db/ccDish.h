@@ -19,11 +19,8 @@
 #define CC_DISH_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Dish
 /** Either a section of a sphere, or half of an ellipsoid!

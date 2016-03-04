@@ -26,16 +26,10 @@
 #include <CCGeom.h>
 
 //Qt
-#include <QString>
 #include <QStringList>
 #include <QRegExp>
-#include <QFile>
 #include <QTextStream>
 
-//System
-#include <math.h>
-#include <string.h>
-#include <assert.h>
 
 //! Model view matrix size (OpenGL)
 static const unsigned OPENGL_MATRIX_SIZE = 16;
@@ -131,7 +125,7 @@ public:
 
 	//! Creates a transformation matrix that rotates a vector to another
 	/** Adapted from  "Efficiently Building a Matrix to Rotate One Vector to Another"
-		By Tomas Möller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
+		By Tomas MÃ¶ller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
 		\param from normalized non-zero source vector
 		\param to normalized non-zero destination vector
 	**/

@@ -19,14 +19,11 @@
 #define CC_EXTRU_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//system
-#include <vector>
 
 //! Profile extrusion (primitive)
-/** It is defined by sweeping a profile representing the extrusion’s shape (polyline)
+/** It is defined by sweeping a profile representing the extrusion's shape (polyline)
 	through a given distance (equivalent to the extrusion thickness).
 **/
 class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive

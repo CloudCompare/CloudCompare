@@ -19,10 +19,9 @@
 #define GRID_3D_HEADER
 
 //Local
-#include "CCGeom.h"
-#include "CCConst.h"
 #include "GenericIndexedMesh.h"
 #include "GenericProgressCallback.h"
+#include "GenericTriangle.h"
 #include "CCMiscTools.h"
 
 //System

@@ -22,12 +22,8 @@
 #include <ScalarField.h>
 
 //qCC_db
-#include "qCC_db.h"
-#include "ccSerializableObject.h"
 #include "ccColorScale.h"
 
-//System
-#include <assert.h>
 
 //! A scalar field associated to display-related parameters
 /** Extends the CCLib::ScalarField object.

@@ -19,13 +19,10 @@
 #define CC_2D_LABEL_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccInteractor.h"
 
 //Qt
-#include <QString>
-#include <QStringList>
 #include <QFontMetrics>
 
 class ccGenericPointCloud;

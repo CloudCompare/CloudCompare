@@ -24,21 +24,15 @@
 #endif
 
 //CCLib
-#include <ReferenceCloud.h>
 #include <ChunkedPointCloud.h>
-#include <GenericProgressCallback.h>
-#include <CCPlatform.h>
 
 //Local
-#include "qCC_db.h"
-#include "ccGenericPointCloud.h"
 #include "ccNormalVectors.h"
 #include "ccColorScale.h"
 
 //Qt
 #include <QGLBuffer>
 #include <QMutex>
-#include <QSharedPointer>
 
 class ccPointCloud;
 class ccScalarField;

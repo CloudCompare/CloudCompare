@@ -19,7 +19,6 @@
 #define SIMPLE_MESH_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericIndexedMesh.h"
 #include "GenericChunkedArray.h"
 #include "SimpleTriangle.h"

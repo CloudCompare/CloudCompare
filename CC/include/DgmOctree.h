@@ -19,12 +19,8 @@
 #define DGM_OCTREE_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericOctree.h"
-#include "CCTypes.h"
-#include "CCConst.h"
 #include "CCPlatform.h"
-#include "GenericProgressCallback.h"
 
 //system
 #include <vector>
@@ -44,6 +40,8 @@ namespace CCLib
 
 class ReferenceCloud;
 class GenericIndexedCloudPersist;
+class GenericProgressCallback;
+class NormalizedProgress;
 
 /*** MACROS ***/
 

@@ -18,11 +18,7 @@
 #ifndef CC_BOX_PRIMITIVE_HEADER
 #define CC_BOX_PRIMITIVE_HEADER
 
-//CCLib
-#include <CCGeom.h>
-
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //! Box (primitive)

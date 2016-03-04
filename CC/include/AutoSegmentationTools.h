@@ -19,9 +19,8 @@
 #define AUTO_SEGMENTATION_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCToolbox.h"
-#include "ReferenceCloud.h"
+#include "CCTypes.h"
 
 namespace CCLib
 {
@@ -29,6 +28,7 @@ namespace CCLib
 class GenericIndexedCloudPersist;
 class GenericProgressCallback;
 class DgmOctree;
+class ReferenceCloud;
 
 //! A standard container to store several subsets of points
 /** Several algorithms of the AutoSegmentationTools toolbox return a collection of subsets of points

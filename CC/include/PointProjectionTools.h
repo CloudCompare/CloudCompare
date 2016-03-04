@@ -19,13 +19,11 @@
 #define POINT_PROJECTION_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
+#include "CCConst.h"
 #include "CCToolbox.h"
 #include "SquareMatrix.h"
-#include "CCConst.h"
 
 //System
-#include <vector>
 #include <list>
 
 //! Triangulation types

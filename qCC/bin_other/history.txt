@@ -59,6 +59,7 @@ v2.6.3.beta ??/??/2016
 	* M3C2 plugin:
 		- new option to output the scalar fields (distance, confidence, etc.) on the original core point entity
 			(i.e. either the original cloud or the subsampled version).
+		- the user can now set the maximum number of threads/core to use
 
 	* CANUPO plugin:
 		- the statistics (Training mode) now takes the actual boundary into account (and not the default one)

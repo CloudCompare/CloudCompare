@@ -19,7 +19,6 @@
 #define REGISTRATION_TOOLS_HEADER
 
 //Local
-#include "CCToolbox.h"
 #include "PointProjectionTools.h"
 
 

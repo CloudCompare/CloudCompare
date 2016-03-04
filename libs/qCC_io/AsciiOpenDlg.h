@@ -27,7 +27,6 @@
 
 //system
 #include <vector>
-#include <algorithm>
 
 enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_X			= 1,

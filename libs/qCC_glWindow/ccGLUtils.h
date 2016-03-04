@@ -20,7 +20,6 @@
 
 //qCC_db
 #include <ccIncludeGL.h> //Always first!
-#include <ccGLMatrix.h>
 
 //Qt
 #include <QPixmap>

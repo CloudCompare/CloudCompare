@@ -20,9 +20,6 @@
 
 #include "FileIOFilter.h"
 
-//QT
-#include <QFile>
-
 class ccGenericMesh;
 class ccMesh;
 class ccPointCloud;

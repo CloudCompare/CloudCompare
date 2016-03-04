@@ -18,12 +18,7 @@
 #ifndef CC_GL_WINDOW_HEADER
 #define CC_GL_WINDOW_HEADER
 
-//CCLib
-#include <CCGeom.h>
-
 //qCC_db
-#include <ccIncludeGL.h>
-#include <ccGLMatrix.h>
 #include <ccDrawableObject.h>
 #include <ccGenericGLDisplay.h>
 #include <ccGLUtils.h>
@@ -32,12 +27,10 @@
 #include "ccGuiParameters.h"
 
 //Qt
-#include <QFont>
 #include <QMap>
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QByteArray>
-#include <QFlags>
 #include <QOpenGLDebugLogger>
 
 //system

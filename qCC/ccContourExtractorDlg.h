@@ -20,7 +20,6 @@
 
 //Qt
 #include <QDialog>
-#include <QString>
 #include <QEventLoop>
 
 //qCC_db

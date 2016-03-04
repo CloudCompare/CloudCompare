@@ -24,7 +24,6 @@
 #include <ui_graphicalTransformationDlg.h>
 
 //qCC_db
-#include <ccGLMatrix.h>
 #include <ccHObject.h>
 
 class ccGLWindow;

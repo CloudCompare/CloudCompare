@@ -23,8 +23,6 @@
 //qCC_db
 #include <ccNormalVectors.h>
 
-//CCLib
-#include <CCConst.h> //for CC_LOCAL_MODEL_TYPES
 
 class ccPointCloud;
 

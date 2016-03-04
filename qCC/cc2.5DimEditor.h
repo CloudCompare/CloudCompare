@@ -23,11 +23,7 @@
 //qCC_db
 #include <ccBBox.h>
 
-//Qt
-#include <QString>
-
 //system
-#include <vector>
 #include <limits>
 
 class ccBoundingBoxEditorDlg;

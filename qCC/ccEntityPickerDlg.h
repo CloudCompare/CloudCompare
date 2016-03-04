@@ -23,8 +23,6 @@
 //qCC_db
 #include <ccHObject.h>
 
-//system
-#include <vector>
 
 //! Dialog to select one or multiple entities
 class ccEntityPickerDlg : public QDialog, public Ui::PickEntityDlg

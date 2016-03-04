@@ -18,10 +18,6 @@
 #ifndef CC_CONSOLE_HEADER
 #define CC_CONSOLE_HEADER
 
-//system
-#include <stdio.h>
-#include <string.h>
-
 //qCC_db
 #include <ccLog.h>
 

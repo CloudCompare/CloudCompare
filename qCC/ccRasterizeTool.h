@@ -23,15 +23,9 @@
 //Local
 #include "cc2.5DimEditor.h"
 
-//qCC_db
-#include <ccBBox.h>
-
 //Qt
 #include <QString>
-#include <QDialog>
 
-//system
-#include <vector>
 
 class ccGenericPointCloud;
 class ccPointCloud;

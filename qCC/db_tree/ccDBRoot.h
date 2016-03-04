@@ -20,24 +20,18 @@
 
 //Qt
 #include <QAbstractItemModel>
-#include <QItemSelection>
 #include <QPoint>
 #include <QTreeView>
 
-//CCLib
-#include <CCConst.h>
-
 //qCC_db
-#include <ccObject.h>
 #include <ccHObject.h>
-#include <ccDrawableObject.h>
 
 //System
-#include <string.h>
 #include <unordered_set>
 
-class QStandardItemModel;
 class QAction;
+class QStandardItemModel;
+
 class ccPropertiesTreeDelegate;
 class ccHObject;
 

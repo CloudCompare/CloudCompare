@@ -22,15 +22,11 @@
 #include <ccIncludeGL.h>
 
 //Qt
-#include <QGLWidget>
 #include <QDialog>
-#include <QHBoxLayout>
 #include <QFont>
-#include <QString>
 
 //qCC_db
 #include <ccScalarField.h>
-#include <ccColorScale.h>
 
 //QCustomPlot
 #include <qcustomplot.h>

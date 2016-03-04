@@ -29,7 +29,6 @@
 #include <QActionGroup>
 
 //CCLib
-#include <PointProjectionTools.h>
 #include <AutoSegmentationTools.h>
 
 //GUI (generated with Qt Designer)
@@ -37,7 +36,6 @@
 
 //qCC_db
 #include <ccMesh.h>
-#include <ccGLMatrix.h>
 
 //qCC_io
 #include <FileIOFilter.h>

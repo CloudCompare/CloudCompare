@@ -24,8 +24,6 @@
 //CCLib
 #include <PointProjectionTools.h>
 
-//system
-#include <vector>
 
 //! Controur extractor (with debug GUI)
 class ccContourExtractor

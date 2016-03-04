@@ -18,21 +18,13 @@
 #include "mainwindow.h"
 
 //CCLib Includes
-#include <GenericChunkedArray.h>
 #include <CloudSamplingTools.h>
 #include <MeshSamplingTools.h>
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 #include <NormalDistribution.h>
-#include <GenericIndexedCloud.h>
-#include <Neighbourhood.h>
-#include <AutoSegmentationTools.h>
-#include <DistanceComputationTools.h>
-#include <PointProjectionTools.h>
-#include <GeometricalAnalysisTools.h>
 #include <SimpleCloud.h>
-#include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
 #include <Jacobi.h>
 
@@ -41,22 +33,15 @@
 #include <SaitoSquaredDistanceTransform.h>
 
 //qCC_db
-#include <ccHObjectCaster.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccPolyline.h>
 #include <ccSubMesh.h>
-#include <ccOctree.h>
 #include <ccKdTree.h>
 #include <ccGBLSensor.h>
 #include <ccCameraSensor.h>
-#include <ccNormalVectors.h>
 #include <ccProgressDialog.h>
 #include <ccPlane.h>
 #include <ccImage.h>
 #include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
-#include <ccColorScale.h>
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
 #include <ccQuadric.h>
@@ -64,17 +49,14 @@
 #include <ccSphere.h>
 
 //qCC_io
-#include <ccGlobalShiftManager.h>
 #include <ccShiftAndScaleCloudDlg.h>
 #include <BinFilter.h>
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
 #include <ccRenderingTools.h>
-#include <ccGLWindow.h>
 
 //local includes
-#include "ccCommon.h"
 #include "ccConsole.h"
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
@@ -151,29 +133,10 @@
 #include "devices/3dConnexion/Mouse3DInput.h"
 #endif
 
-//Qt Includes
-#include <QtGui>
-#include <QMdiArea>
-#include <QSignalMapper>
-#include <QMdiSubWindow>
-#include <QLCDNumber>
-#include <QFileDialog>
-#include <QActionGroup>
-#include <QSettings>
-#include <QMessageBox>
-#include <QElapsedTimer>
-#include <QInputDialog>
-#include <QTextStream>
-#include <QColorDialog>
-
 //System
-#include <string.h>
-#include <math.h>
-#include <assert.h>
-#include <cfloat>
 #include <iostream>
-#include <unordered_set>
 #include <random>
+
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
 

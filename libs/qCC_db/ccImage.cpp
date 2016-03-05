@@ -181,19 +181,19 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (bindToGlTexture(context))
 	{
 		//we make the texture fit inside viewport
-		int realWidth = (int)((float)m_height * m_aspectRatio); //take aspect ratio into account!
-		GLfloat cw = GLfloat(context.glW)/GLfloat(realWidth);
-		GLfloat ch = GLfloat(context.glH)/GLfloat(m_height);
-		GLfloat zoomFactor = (cw > ch ? ch : cw)*0.5f;
-		GLfloat dX = GLfloat(realWidth)*zoomFactor;
-		GLfloat dY = GLfloat(m_height)*zoomFactor;
+		int realWidth = static_cast<int>(m_height * m_aspectRatio); //take aspect ratio into account!
+		GLfloat cw = static_cast<GLfloat>(context.glW) /realWidth;
+		GLfloat ch = static_cast<GLfloat>(context.glH) /m_height;
+		GLfloat zoomFactor = (cw > ch ? ch : cw) / 2;
+		GLfloat dX = realWidth*zoomFactor;
+		GLfloat dY = m_height*zoomFactor;
 
 		glFunc->glColor4f(1, 1, 1, m_texAlpha);
 		glFunc->glBegin(GL_QUADS);
-		glFunc->glTexCoord2f(0,m_texV);			glVertex2f(-dX, -dY);
-		glFunc->glTexCoord2f(m_texU,m_texV);	glVertex2f(dX, -dY);
-		glFunc->glTexCoord2f(m_texU,0);			glVertex2f(dX, dY);
-		glFunc->glTexCoord2f(0,0);				glVertex2f(-dX, dY);
+		glFunc->glTexCoord2f(0,m_texV);			glFunc->glVertex2f(-dX, -dY);
+		glFunc->glTexCoord2f(m_texU,m_texV);	glFunc->glVertex2f(dX, -dY);
+		glFunc->glTexCoord2f(m_texU,0);			glFunc->glVertex2f(dX, dY);
+		glFunc->glTexCoord2f(0,0);				glFunc->glVertex2f(-dX, dY);
 		glFunc->glEnd();
 	}
 

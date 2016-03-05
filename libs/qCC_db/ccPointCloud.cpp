@@ -2704,7 +2704,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(colorScale);
 
 						colorRampShader->bind();
-						if (!colorRampShader->setup(sfMinSatRel, sfMaxSatRel, steps, colorScale))
+						if (!colorRampShader->setup(glFunc, sfMinSatRel, sfMaxSatRel, steps, colorScale))
 						{
 							//An error occurred during shader initialization?
 							ccLog::WarningDebug("Failed to init ColorRamp shader!");
@@ -3035,7 +3035,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else //special case: point names pushing (for picking) --> no need for colors, normals, etc.
 		{
-			glPushName(0);
+			glFunc->glPushName(0);
 			//however we must take hidden points into account!
 			if (isVisibilityTableInstantiated())
 			{
@@ -4298,7 +4298,14 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				m_vboManager.vbos[i] = new VBO();
 
 			//allocate memory for current VBO
-			int vboSizeBytes = m_vboManager.vbos[i]->init(chunkSize,m_vboManager.hasColors,m_vboManager.hasNormals,&reallocated);
+			int vboSizeBytes = m_vboManager.vbos[i]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
+
+			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>(); 
+			if (glFunc)
+			{
+				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
+			}
+
 			if (vboSizeBytes > 0)
 			{
 				//ccLog::Print(QString("[VBO] VBO #%1 initialized (ID=%2)").arg(i).arg(m_vboManager.vbos[i]->bufferId()));
@@ -4444,7 +4451,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 		if (!create())
 		{
 			//no message as it will probably happen on a lof of (old) graphic cards
-			return false;
+			return -1;
 		}
 		
 		setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
@@ -4479,8 +4486,6 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 
 	release();
 	
-	CatchGLErrors(glGetError(), "ccPointCloud::vbo.init");
-
 	return totalSizeBytes;
 }
 

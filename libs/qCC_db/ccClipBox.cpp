@@ -48,7 +48,7 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 
 	if (ID > 0)
 	{
-		glLoadName(ID);
+		glFunc->glLoadName(ID);
 	}
 	
 	glFunc->glMatrixMode(GL_MODELVIEW);
@@ -173,8 +173,15 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	if (ID > 0)
-		glLoadName(ID);
+		glFunc->glLoadName(ID);
 	
 	scale /= 2;
 	DrawUnitArrow(0, center, CCVector3(-1, 0, 0), scale, col, context);

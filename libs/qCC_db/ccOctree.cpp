@@ -132,8 +132,17 @@ void ccOctree::clear()
 {
 	if (m_glListID >= 0)
 	{
-		if (glIsList(m_glListID))
-			glDeleteLists(m_glListID,1);
+		QOpenGLContext* context = QOpenGLContext::currentContext();
+		if (context)
+		{
+			//get the set of OpenGL functions (version 2.1)
+			QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+			assert(glFunc != nullptr);
+			if (glFunc && glFunc->glIsList(static_cast<GLuint>(m_glListID)))
+			{
+				glFunc->glDeleteLists(static_cast<GLuint>(m_glListID), 1);
+			}
+		}
 		m_glListID = -1;
 	}
 
@@ -197,13 +206,13 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	assert(m_displayedLevel < 256);
-	RenderOctreeAs(context,
-						m_displayType,
-						this,
-						static_cast<unsigned char>(m_displayedLevel),
-						m_theAssociatedCloudAsGPC,
-						m_glListID,
-						m_shouldBeRefreshed);
+	RenderOctreeAs(	context,
+					m_displayType,
+					this,
+					static_cast<unsigned char>(m_displayedLevel),
+					m_theAssociatedCloudAsGPC,
+					m_glListID,
+					m_shouldBeRefreshed);
 
 	if (m_shouldBeRefreshed)
 		m_shouldBeRefreshed = false;
@@ -214,7 +223,7 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 /*** RENDERING METHODS ***/
 
-void ccOctree::RenderOctreeAs(CC_DRAW_CONTEXT& context,
+void ccOctree::RenderOctreeAs(	CC_DRAW_CONTEXT& context,
 								CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 								ccOctree* theOctree,
 								unsigned char level,
@@ -280,9 +289,9 @@ void ccOctree::RenderOctreeAs(CC_DRAW_CONTEXT& context,
 		if (updateOctreeGLDisplay || octreeGLListID < 0)
 		{
 			if (octreeGLListID < 0)
-				octreeGLListID = glGenLists(1);
-			else if (glIsList(octreeGLListID))
-				glDeleteLists(octreeGLListID,1);
+				octreeGLListID = glFunc->glGenLists(1);
+			else if (glFunc->glIsList(octreeGLListID))
+				glFunc->glDeleteLists(octreeGLListID, 1);
 			glFunc->glNewList(octreeGLListID,GL_COMPILE);
 
 			if (octreeDisplayType == MEAN_POINTS)
@@ -302,7 +311,7 @@ void ccOctree::RenderOctreeAs(CC_DRAW_CONTEXT& context,
 			{
 				//by default we use a box as primitive
 				PointCoordinateType cs = theOctree->getCellSize(level);
-				CCVector3 dims(cs,cs,cs);
+				CCVector3 dims(cs, cs, cs);
 				ccBox box(dims);
 				box.showColors(glParams.showColors || glParams.showSF);
 				box.showNormals(glParams.showNorms);
@@ -310,8 +319,8 @@ void ccOctree::RenderOctreeAs(CC_DRAW_CONTEXT& context,
 				//trick: replace all normal indexes so that they point on the first one
 				{
 					if (box.arePerTriangleNormalsEnabled())
-						for (unsigned i=0;i<box.size();++i)
-							box.setTriangleNormalIndexes(i,0,0,0);
+						for (unsigned i = 0; i < box.size(); ++i)
+							box.setTriangleNormalIndexes(i, 0, 0, 0);
 				}
 
 				//fake context
@@ -373,8 +382,8 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	}
 	else
 	{
-		glPushAttrib(GL_LINE_BIT);
-		glLineWidth(2.0f);
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(2.0f);
 		// inside
 		if (vis == ccOctreeFrustrumIntersector::CELL_INSIDE_FRUSTRUM)
 			ccGL::Color3v(glFunc, ccColor::magenta.rgba);

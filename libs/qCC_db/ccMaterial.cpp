@@ -197,7 +197,7 @@ void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 	
 	for (int i=0; i<maxLightCount; ++i)
 	{
-		if (glIsEnabled(GL_LIGHT0+i))
+		if (glFunc->glIsEnabled(GL_LIGHT0 + i))
 		{
 			float diffuse[4];
 			float ambiant[4];

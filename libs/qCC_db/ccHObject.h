@@ -61,7 +61,7 @@ public: //base members access
 	//! Returns class ID
 	/** \return class unique ID
 	**/
-	inline virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::HIERARCHY_OBJECT; }
+	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::HIERARCHY_OBJECT; }
 
 	//! Returns parent object
 	/** \return parent object (NULL if no parent)
@@ -254,7 +254,7 @@ public: //bouding-box
 public: //display
 
 	//Inherited from ccDrawableObject
-	virtual void draw(CC_DRAW_CONTEXT& context);
+	virtual void draw(CC_DRAW_CONTEXT& context) override;
 
 	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
 	/** \param[out] trans absolute transformation
@@ -319,19 +319,18 @@ public: //display
 	virtual void notifyGeometryUpdate();
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const;
-	virtual bool toFile(QFile& out) const;
-	virtual inline bool fromFile(QFile& in, short dataVersion, int flags) { return fromFile(in,dataVersion,flags,false); }
+	virtual bool isSerializable() const override;
+	virtual bool toFile(QFile& out) const override;
+	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Custom version of ccSerializableObject::fromFile
-	/** This version is used to load only the object own part of a stream (an not its children's)
+	/** This is used to load only the object's part of a stream (and not its children)
 		\param in input file (already opened)
 		\param dataVersion file version
 		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
-		\param omitChildren to omit loading the children's part of the stream
 		\return success
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion, int flags, bool omitChildren);
+	bool fromFileNoChildren(QFile& in, short dataVersion, int flags);
 
 	//! Returns whether object is shareable or not
 	/** If object is father dependent and 'shared', it won't

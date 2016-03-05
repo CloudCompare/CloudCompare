@@ -903,25 +903,10 @@ bool ccHObject::toFile(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChildren)
+bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 {
-	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
-
-	//read 'ccObject' header
-	if (!ccObject::fromFile(in, dataVersion, flags))
+	if (!fromFileNoChildren(in, dataVersion, flags))
 		return false;
-
-#ifdef _DEBUG
-	char buffer[1024];
-	strcpy(buffer, qPrintable(getName()));
-#endif
-
-	//read own data
-	if (!fromFile_MeOnly(in, dataVersion, flags))
-		return false;
-
-	if (omitChildren)
-		return true;
 
 	//(serializable) child count (dataVersion>=20)
 	uint32_t serializableCount = 0;
@@ -945,7 +930,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 			//store current position
 			size_t originalFilePos = in.pos();
 			//we need to load the custom object as plain ccCustomHobject
-			child->fromFile(in, dataVersion, flags, true);
+			child->fromFileNoChildren(in, dataVersion, flags);
 			//go back to original position
 			in.seek(originalFilePos);
 			//get custom object name and plugin name
@@ -1002,6 +987,18 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 	}
 
 	return true;
+}
+
+bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags)
+{
+	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
+
+	//read 'ccObject' header
+	if (!ccObject::fromFile(in, dataVersion, flags))
+		return false;
+
+	//read own data
+	return fromFile_MeOnly(in, dataVersion, flags);
 }
 
 bool ccHObject::toFile_MeOnly(QFile& out) const

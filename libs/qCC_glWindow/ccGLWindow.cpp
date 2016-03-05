@@ -2885,7 +2885,7 @@ void ccGLWindow::drawTrihedron()
 	//on first call, compile the GL list once and for all
 	if (m_trihedronGLList == GL_INVALID_LIST_ID)
 	{
-		m_trihedronGLList = glGenLists(1);
+		m_trihedronGLList = glFunc->glGenLists(1);
 		glFunc->glNewList(m_trihedronGLList, GL_COMPILE);
 
 		glFunc->glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
@@ -3310,7 +3310,7 @@ unsigned ccGLWindow::getTextureID(const QImage& image)
 
 	//check that image size is not too big!
 	GLint maxTexSize = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+	glFunc->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
 	
 #ifndef USE_QtOpenGL_CLASSES
 	int cacheLimitBytes = context()->textureCacheLimit() * 1024; //result in bytes
@@ -5624,7 +5624,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			outputImage = output;
 
-			glPopAttrib(); //GL_DEPTH_BUFFER_BIT
+			glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
 			//updateZoom(1.0/zoomFactor);
 		}
@@ -6211,7 +6211,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		glFunc->glMatrixMode(GL_PROJECTION);
 		glFunc->glPushMatrix();
 		glFunc->glLoadIdentity();
-		glOrtho(0, width(), 0, height(), -1, 1);
+		glFunc->glOrtho(0, width(), 0, height(), -1, 1);
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
 		glFunc->glLoadIdentity();

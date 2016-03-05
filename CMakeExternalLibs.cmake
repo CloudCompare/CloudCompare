@@ -48,12 +48,12 @@ include_directories(${Qt5OpenGL_INCLUDE_DIRS}
 # OpenGL
 # ------------------------------------------------------------------------------
 
-find_package( OpenGL REQUIRED )
-if( NOT OPENGL_FOUND )
-    message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
-endif()
+#find_package( OpenGL REQUIRED )
+#if( NOT OPENGL_FOUND )
+#    message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
+#endif()
 
-include_directories(${OpenGL_INCLUDE_DIR})
+#include_directories(${OpenGL_INCLUDE_DIR})
 
 # ------------------------------------------------------------------------------
 # OpenMP

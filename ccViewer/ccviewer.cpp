@@ -483,8 +483,14 @@ void ccViewer::updateGLFrameGradient()
 	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
 	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
 
-	glColor3ubv(bkgCol.rgb);
-	glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
+	//QOpenGLFunctions_2_1* glFunc = m_glWindow->context()->versionFunctions<QOpenGLFunctions_2_1>();
+	//if (!glFunc)
+	//{
+	//	return;
+	//}
+
+	//glFunc->glColor3ubv(bkgCol.rgb);
+	//glFunc->glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
 
 	QString styleSheet = QString("QFrame{border: 2px solid white; border-radius: 10px; background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(%1,%2,%3), stop:1 rgb(%4,%5,%6));}")
 								.arg(bkgCol.r)
@@ -493,6 +499,7 @@ void ccViewer::updateGLFrameGradient()
 								.arg(255-forCol.r)
 								.arg(255-forCol.g)
 								.arg(255-forCol.b);
+	
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 

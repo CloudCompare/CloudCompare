@@ -232,7 +232,7 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 
 	m_glFunc->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
 
-	glBindTexture(target, 0);
+	m_glFunc->glBindTexture(target, 0);
 
 	bool success = false;
 	GLenum status = m_glFunc->glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);

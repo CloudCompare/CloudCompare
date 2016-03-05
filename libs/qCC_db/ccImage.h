@@ -96,11 +96,10 @@ protected:
 	virtual bool unbindTexture();
 
 	//! Binds texture to a GL context (and creates texture if necessary)
-	/** \param win 3D display to which to bind the texture
-		\param pow2Texture whether a texture with power of 2 dimensions is requested (OpenGL version < 2.0)
+	/** \param context 3D context including display to which the texture will be bound
 		\return success
 	**/
-	virtual bool bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture = false);
+	virtual bool bindToGlTexture(CC_DRAW_CONTEXT& context);
 
 	//! Updates aspect ratio
 	void updateAspectRatio();

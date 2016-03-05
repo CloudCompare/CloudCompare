@@ -21,16 +21,12 @@
 #include "ccImage.h"
 
 //Local
-#include "ccGenericGLDisplay.h"
 #include "ccCameraSensor.h"
 
 //Qt
 #include <QImageReader>
 #include <QFileInfo>
-#include <QDataStream>
 
-//System
-#include <assert.h>
 
 ccImage::ccImage()
 	: ccHObject("Not loaded")
@@ -121,14 +117,23 @@ bool ccImage::unbindTexture()
 	return true;
 }
 
-bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*/)
+bool ccImage::bindToGlTexture(CC_DRAW_CONTEXT& context)
 {
-	assert(win);
+	ccGenericGLDisplay* win = context._win;
+	
+	assert(win != nullptr);
 
 	if (m_image.isNull())
 	{
 		return false;
 	}
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return false;
 
 	if (!m_textureID || m_boundWin != win)
 	{
@@ -137,28 +142,14 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 
 		m_boundWin = win;
 		m_textureID = m_boundWin->getTextureID(m_image);
-
-		//DGM FIXME: we shouldn't support Qt < 2.1 anymore in fact
-		//We should add a specific test before running CloudCompare
-		//OpenGL version < 2.0 requires textures with 2^n width & height
-		//if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0))
-		//{
-		//	// update nearest smaller power of 2 (for textures with old OpenGL versions)
-		//	unsigned paddedWidth = (m_width > 0 ? 1 << (unsigned)floor(log((double)m_width)/log(2.0)) : 0);
-		//	unsigned paddedHeight = (m_height > 0 ? 1 << (unsigned)floor(log((double)m_height)/log(2.0)) : 0);
-		//	m_texU = float(m_width)/float(paddedWidth);
-		//	m_texV = float(m_height)/float(paddedHeight);
-		//}
-		//else
-		{
-			m_texU = 1.0;
-			m_texV = 1.0;
-		}
+		
+		m_texU = 1.0;
+		m_texV = 1.0;
 	}
 
 	if (m_textureID != GL_INVALID_TEXTURE_ID)
 	{
-		glBindTexture( GL_TEXTURE_2D, m_textureID );
+		glFunc->glBindTexture( GL_TEXTURE_2D, m_textureID );
 		return true;
 	}
 
@@ -170,42 +161,46 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (m_image.isNull())
 		return;
 
-	if (MACRO_Draw2D(context))
+	if (!MACRO_Draw2D(context) || !MACRO_Foreground(context))
+		return;
+		
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+
+	glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glFunc->glEnable(GL_BLEND);
+	glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glFunc->glPushAttrib(GL_ENABLE_BIT);
+	glFunc->glEnable(GL_TEXTURE_2D);
+
+	if (bindToGlTexture(context))
 	{
-		if (MACRO_Foreground(context))
-		{
-			glPushAttrib(GL_COLOR_BUFFER_BIT);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//we make the texture fit inside viewport
+		int realWidth = (int)((float)m_height * m_aspectRatio); //take aspect ratio into account!
+		GLfloat cw = GLfloat(context.glW)/GLfloat(realWidth);
+		GLfloat ch = GLfloat(context.glH)/GLfloat(m_height);
+		GLfloat zoomFactor = (cw > ch ? ch : cw)*0.5f;
+		GLfloat dX = GLfloat(realWidth)*zoomFactor;
+		GLfloat dY = GLfloat(m_height)*zoomFactor;
 
-			glPushAttrib(GL_ENABLE_BIT);
-			glEnable(GL_TEXTURE_2D);
-
-			if (bindToGlTexture(context._win))
-			{
-				//we make the texture fit inside viewport
-				int realWidth = (int)((float)m_height * m_aspectRatio); //take aspect ratio into account!
-				GLfloat cw = GLfloat(context.glW)/GLfloat(realWidth);
-				GLfloat ch = GLfloat(context.glH)/GLfloat(m_height);
-				GLfloat zoomFactor = (cw > ch ? ch : cw)*0.5f;
-				GLfloat dX = GLfloat(realWidth)*zoomFactor;
-				GLfloat dY = GLfloat(m_height)*zoomFactor;
-
-				glColor4f(1, 1, 1, m_texAlpha);
-				glBegin(GL_QUADS);
-				glTexCoord2f(0,m_texV);			glVertex2f(-dX, -dY);
-				glTexCoord2f(m_texU,m_texV);	glVertex2f(dX, -dY);
-				glTexCoord2f(m_texU,0);			glVertex2f(dX, dY);
-				glTexCoord2f(0,0);				glVertex2f(-dX, dY);
-				glEnd();
-			}
-
-			//glDisable(GL_TEXTURE_2D);
-			glPopAttrib();
-
-			glPopAttrib();
-		}
+		glFunc->glColor4f(1, 1, 1, m_texAlpha);
+		glFunc->glBegin(GL_QUADS);
+		glFunc->glTexCoord2f(0,m_texV);			glVertex2f(-dX, -dY);
+		glFunc->glTexCoord2f(m_texU,m_texV);	glVertex2f(dX, -dY);
+		glFunc->glTexCoord2f(m_texU,0);			glVertex2f(dX, dY);
+		glFunc->glTexCoord2f(0,0);				glVertex2f(-dX, dY);
+		glFunc->glEnd();
 	}
+
+	//glFunc->glDisable(GL_TEXTURE_2D);
+	glFunc->glPopAttrib();
+
+	glFunc->glPopAttrib();	
 }
 
 void ccImage::setAlpha(float value)

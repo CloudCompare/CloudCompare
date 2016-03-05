@@ -37,10 +37,10 @@ public:
 	ccImage(const QImage& image, const QString& name = QString("unknown"));
 
 	//inherited methods (ccHObject)
-	virtual bool isSerializable() const { return true; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Returns unique class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::IMAGE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::IMAGE; }
 
 	//! Loads image from file
 	/** \param filename image filename
@@ -87,19 +87,19 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-	virtual void onDeletionOf(const ccHObject* obj);
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	virtual void onDeletionOf(const ccHObject* obj) override;
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Unbinds texture from currently associated GL context
-	virtual bool unbindTexture();
+	bool unbindTexture();
 
 	//! Binds texture to a GL context (and creates texture if necessary)
 	/** \param context 3D context including display to which the texture will be bound
 		\return success
 	**/
-	virtual bool bindToGlTexture(CC_DRAW_CONTEXT& context);
+	bool bindToGlTexture(CC_DRAW_CONTEXT& context);
 
 	//! Updates aspect ratio
 	void updateAspectRatio();

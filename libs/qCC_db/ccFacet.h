@@ -56,8 +56,8 @@ public:
 							const PointCoordinateType* planeEquation = 0);
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::FACET; }
-	virtual bool isSerializable() const { return true; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::FACET; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Sets the facet unique color
 	/** \param rgb RGB color
@@ -106,7 +106,7 @@ public:
 protected:
 
 	//inherited from ccDrawable
-	void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Creates internal representation (polygon, polyline, etc.)
 	bool createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
@@ -140,8 +140,8 @@ protected:
 	bool m_showNormalVector;
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 };
 
 #endif //CC_FACET_PRIMITIVE_HEADER

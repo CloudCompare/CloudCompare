@@ -51,15 +51,15 @@ public:
 	}
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CHUNKED_ARRAY; }
-	virtual bool isShareable() const { return true; }
-	virtual bool isSerializable() const { return true; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CHUNKED_ARRAY; }
+	virtual bool isShareable() const override { return true; }
+	virtual bool isSerializable() const override { return true; }
 
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const { return ccSerializationHelper::GenericArrayToFile(*this,out); }
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) { return ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion); }
+	virtual bool toFile_MeOnly(QFile& out) const override { return ccSerializationHelper::GenericArrayToFile(*this,out); }
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override { return ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion); }
 
 };
 

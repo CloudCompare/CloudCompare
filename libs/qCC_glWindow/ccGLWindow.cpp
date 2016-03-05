@@ -16,7 +16,6 @@
 //##########################################################################
 
 //CCLib
-#include <CCConst.h>
 #include <CCPlatform.h>
 
 //qCC
@@ -25,40 +24,30 @@
 #include "ccRenderingTools.h"
 
 //qCC_db
-#include <ccLog.h>
-#include <ccHObject.h>
 #include <ccHObjectCaster.h>
-#include <ccBBox.h>
 #include <cc2DLabel.h>
 #include <ccGenericPointCloud.h>
-#include <ccGenericMesh.h>
 #include <ccTimer.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
 #include <ccColorRampShader.h>
 #include <ccClipBox.h>
-#include <ccMesh.h>
 #include <ccSubMesh.h>
 
 //CCFbo
 #include <ccShader.h>
 #include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
-//#include <ccFBOUtils.h>
 
 //Qt
-#include <QtGui>
-#include <QWheelEvent>
-#include <QSettings>
 #include <QApplication>
-#include <QSharedPointer>
-#include <QTimer>
-#include <QEventLoop>
-#include <QTouchEvent>
 #include <QLayout>
 #include <QMessageBox>
+#include <QMimeData>
+#include <QMouseEvent>
 #include <QPushButton>
+#include <QSettings>
 
 //Oculus
 #ifdef CC_OCULUS_SUPPORT
@@ -259,10 +248,6 @@ static OculusHMD s_oculus;
 #include <vld.h>
 #endif
 
-//System
-#include <string.h>
-#include <math.h>
-#include <algorithm>
 
 //Min and max zoom ratio (relative)
 const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;

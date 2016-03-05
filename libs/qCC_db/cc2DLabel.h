@@ -36,10 +36,10 @@ public:
 	cc2DLabel(QString name = QString("label"));
 
 	//inherited from ccObject
-	virtual QString getName() const;
+	virtual QString getName() const override;
 	//inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::LABEL_2D; }
-	inline virtual bool isSerializable() const { return true; }
+	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::LABEL_2D; }
+	inline virtual bool isSerializable() const override { return true; }
 
 	//! Returns 'raw' name (no replacement of default keywords)
 	inline QString getRawName() const { return m_name; }
@@ -57,8 +57,8 @@ public:
 	QString getTitle(int precision) const;
 
 	//inherited from ccInteractor
-	virtual bool acceptClick(int x, int y, Qt::MouseButton button);
-	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight);
+	virtual bool acceptClick(int x, int y, Qt::MouseButton button) override;
+	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
 
 	//! Sets relative position
 	void setPosition(float x, float y);
@@ -222,15 +222,15 @@ protected:
 	void getLabelInfo3(LabelInfo3& info) const;
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-	virtual void onDeletionOf(const ccHObject* obj);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	virtual void onDeletionOf(const ccHObject* obj) override;
 
 	//! Draws the entity only (not its children) - 2D version
-	virtual void drawMeOnly2D(CC_DRAW_CONTEXT& context);
+	void drawMeOnly2D(CC_DRAW_CONTEXT& context);
 	//! Draws the entity only (not its children) - 3D version
-	virtual void drawMeOnly3D(CC_DRAW_CONTEXT& context);
+	void drawMeOnly3D(CC_DRAW_CONTEXT& context);
 
 	//! Picked points
 	std::vector<PickedPoint> m_points;

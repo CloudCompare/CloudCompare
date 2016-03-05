@@ -180,10 +180,10 @@ public:
 	***************************************************/
 
 	//Inherited from GenericCloud
-	virtual unsigned char testVisibility(const CCVector3& P) const;
+	virtual unsigned char testVisibility(const CCVector3& P) const override;
 
 	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	//! Forces bounding-box update
 	virtual void refreshBB() = 0;
@@ -215,7 +215,7 @@ public:
 	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) = 0;
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Sets point size
 	/** Overrides default value one if superior than 0
@@ -248,8 +248,8 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Per-point visibility table
 	/** If this table is allocated, only values set to POINT_VISIBLE

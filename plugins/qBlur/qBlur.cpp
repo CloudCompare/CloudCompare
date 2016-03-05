@@ -39,7 +39,7 @@ ccGlFilter* qBlur::getFilter()
 	unsigned halfFilterSize = static_cast<unsigned>(ceil(2.5*sigma));
 
 	ccBilateralFilter* filter = new ccBilateralFilter();
-	filter->setParams(halfFilterSize,static_cast<float>(sigma),0);
+	filter->setParams(halfFilterSize, static_cast<float>(sigma), 0);
 
 	return filter;
 }

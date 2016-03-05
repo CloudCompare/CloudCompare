@@ -56,9 +56,9 @@ public:
 	void clearLabelArray();
 
 	//! inherited from ccPointCloud
-	virtual bool reserve(unsigned numberOfPoints);
-	virtual bool resize(unsigned numberOfPoints);
-	virtual void clear();
+	virtual bool reserve(unsigned numberOfPoints) override;
+	virtual bool resize(unsigned numberOfPoints) override;
+	virtual void clear() override;
 
 	//! Sets symbol size
 	void setSymbolSize(double size) { m_symbolSize = size; }
@@ -90,10 +90,7 @@ public:
 protected:
 
 	//inherited from ccPointCloud
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-
-	//! Displays a symbol at a given (2D) position
-	void drawSymbolAt(const double& xp, const double& yp) const;
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Labels array
 	std::vector<QString> m_labels;

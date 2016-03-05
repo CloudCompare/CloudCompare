@@ -35,11 +35,15 @@
 #ifndef	CC_FILTER_SSAO_H
 #define	CC_FILTER_SSAO_H
 
+//CC_FBO
 #include <ccGlFilter.h>
+#include <ccFrameBufferObject.h>
+
+//system
+#include <vector>
 
 class ccShader;
 class ccBilateralFilter;
-class ccFrameBufferObject;
 
 class ccSSAOFilter : public ccGlFilter
 {
@@ -51,18 +55,18 @@ public:
 	void reset();
 
 	//inherited from ccGlFilter
-	virtual ccGlFilter* clone() const;
-	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	virtual GLuint getTexture();
+	virtual ccGlFilter* clone() const override;
+	virtual bool init(QOpenGLContext* context, int width, int height, QString shadersPath, QString& error) override;
+	virtual void shade(QOpenGLContext* context, GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual GLuint getTexture() override;
 
-	bool init(	int width,
+	bool init(	QOpenGLContext* context,
+				int width,
 				int height,
 				bool enableBilateralFilter,
 				bool useReflectTexture,
 				QString shadersPath,
-				QString& error,
-				GLenum textureMinMagFilter = GL_LINEAR);
+				QString& error);
 
 	void setParameters(int N, float Kz, float R, float F);
 
@@ -71,10 +75,9 @@ protected:
 	void initReflectTexture();
 	void sampleSphere();
 
-	GLuint m_texReflect;
-
 	int m_w;
 	int m_h;
+	std::vector<float> m_reflectTexture;
 
 	ccFrameBufferObject* m_fbo;
 	ccShader* m_shader;

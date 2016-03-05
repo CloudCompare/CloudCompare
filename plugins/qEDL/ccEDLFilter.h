@@ -56,16 +56,17 @@ public:
 	virtual ~ccEDLFilter();
 
 	//inherited from ccGlFilter
-	virtual ccGlFilter* clone() const;
-	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	virtual GLuint getTexture();
+	virtual ccGlFilter* clone() const override;
+	virtual bool init(QOpenGLContext* context, int width, int height, QString shadersPath, QString& error) override;
+	virtual void shade(QOpenGLContext* context, GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual GLuint getTexture() override;
 
 	//! Resets filter
 	void reset();
 
 	//! Inits filter
-	bool init(	int width,
+	bool init(	QOpenGLContext* context,
+				int width,
 				int height,
 				GLenum internalFormat,
 				GLenum minMagFilter,

@@ -18,20 +18,11 @@
 #include "ccFacet.h"
 
 //qCC_db
-#include "ccLog.h"
-#include "ccPointCloud.h"
-#include "ccMesh.h"
-#include "ccPolyline.h"
-#include "ccNormalVectors.h"
 #include "ccCylinder.h"
-#include "ccCone.h"
 
 //CCLib
-#include <Neighbourhood.h>
-#include <CCMiscTools.h>
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
-#include <PointProjectionTools.h>
 #include <MeshSamplingTools.h>
 #include <SimpleCloud.h>
 
@@ -392,6 +383,13 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!MACRO_Draw3D(context))
 		return;
 
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+
 	if (m_showNormalVector && m_contourPolyline)
 	{
 		if (!c_unitNormalSymbol)
@@ -419,17 +417,17 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
 		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();
 
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		ccGL::Translate(m_center.x,m_center.y,m_center.z);
+		glFunc->glMatrixMode(GL_MODELVIEW);
+		glFunc->glPushMatrix();
+		ccGL::Translate(glFunc,m_center.x,m_center.y,m_center.z);
 		ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0,0,PC_ONE),getNormal());
-		glMultMatrixf(mat.data());
-		ccGL::Scale(scale,scale,scale);
-		glTranslatef(0,0,0.45f);
+		glFunc->glMultMatrixf(mat.data());
+		ccGL::Scale(glFunc,scale,scale,scale);
+		glFunc->glTranslatef(0,0,0.45f);
 		c_unitNormalSymbol->draw(markerContext);
-		glTranslatef(0,0,0.45f);
+		glFunc->glTranslatef(0,0,0.45f);
 		c_unitNormalHeadSymbol->draw(markerContext);
-		glPopMatrix();
+		glFunc->glPopMatrix();
 	}
 }
 

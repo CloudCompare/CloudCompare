@@ -19,42 +19,27 @@
 
 //Local
 #include "ccIncludeGL.h"
-#include "ccLog.h"
 
 //Objects handled by factory
-#include "ccPointCloud.h"
-#include "ccMesh.h"
 #include "ccSubMesh.h"
 #include "ccMeshGroup.h"
-#include "ccPolyline.h"
 #include "ccFacet.h"
 #include "ccMaterialSet.h"
-#include "ccAdvancedTypes.h"
 #include "ccImage.h"
 #include "ccGBLSensor.h"
 #include "ccCameraSensor.h"
 #include "cc2DLabel.h"
 #include "cc2DViewportLabel.h"
-#include "cc2DViewportObject.h"
 #include "ccPlane.h"
 #include "ccSphere.h"
 #include "ccTorus.h"
 #include "ccCylinder.h"
 #include "ccBox.h"
-#include "ccCone.h"
 #include "ccDish.h"
 #include "ccExtru.h"
 #include "ccQuadric.h"
-#include "ccIndexedTransformationBuffer.h"
 #include "ccCustomObject.h"
 #include "ccExternalFactory.h"
-
-//CCLib
-#include <CCShareable.h>
-
-//System
-#include <stdint.h>
-#include <assert.h>
 
 //Qt
 #include <QIcon>
@@ -593,15 +578,22 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	
 	case SELECTION_FIT_BBOX:
 		{
+			//get the set of OpenGL functions (version 2.1)
+			QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+			assert( glFunc != nullptr );
+			
+			if ( glFunc == nullptr )
+				break;
+			
 			ccGLMatrix trans;
 			ccBBox box = getOwnFitBB(trans);
 			if (box.isValid())
 			{
-				glMatrixMode(GL_MODELVIEW);
-				glPushMatrix();
-				glMultMatrixf(trans.data());
+				glFunc->glMatrixMode(GL_MODELVIEW);
+				glFunc->glPushMatrix();
+				glFunc->glMultMatrixf(trans.data());
 				box.draw(context, col);
-				glPopMatrix();
+				glFunc->glPopMatrix();
 			}
 		}
 		break;
@@ -621,32 +613,39 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 
 	//we display it in the 2D layer in fact!
 	ccBBox bBox = getOwnBB();
-	if (bBox.isValid())
-	{
-		ccGLMatrix trans;
-		getAbsoluteGLTransformation(trans);
+	if (!bBox.isValid())
+		return;
+	
+	ccGLMatrix trans;
+	getAbsoluteGLTransformation(trans);
 
-		ccGLCameraParameters camera;
-		context._win->getGLCameraParameters(camera);
+	ccGLCameraParameters camera;
+	context._win->getGLCameraParameters(camera);
 
-		CCVector3 C = bBox.getCenter();
-		CCVector3d Q2D;
-		camera.project(C, Q2D);
+	CCVector3 C = bBox.getCenter();
+	CCVector3d Q2D;
+	camera.project(C, Q2D);
 
-		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
-		context._win->displayText(	getName(),
-									static_cast<int>(Q2D.x),
-									static_cast<int>(Q2D.y),
-									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
-									0.75f,
-									0,
-									&font);
-	}
+	QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
+	context._win->displayText(	getName(),
+								static_cast<int>(Q2D.x),
+								static_cast<int>(Q2D.y),
+								ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
+								0.75f,
+								0,
+								&font);
 }
 
 void ccHObject::draw(CC_DRAW_CONTEXT& context)
 {
 	if (!isEnabled())
+		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
 		return;
 
 	//are we currently drawing objects in 2D or 3D?
@@ -664,9 +663,9 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		//apply 3D 'temporary' transformation (for display only)
 		if (m_glTransEnabled)
 		{
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glMultMatrixf(m_glTrans.data());
+			glFunc->glMatrixMode(GL_MODELVIEW);
+			glFunc->glPushMatrix();
+			glFunc->glMultMatrixf(m_glTrans.data());
 		}
 
 		if (	context.decimateCloudOnMove						//LOD for clouds is enabled?
@@ -685,7 +684,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			(  m_selected || !MACRO_SkipUnselected(context) ))
 		{
 			//apply default color (in case of)
-			ccGL::Color3v(context.pointsDefaultCol.rgb);
+			ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
 
 			drawMeOnly(context);
 
@@ -706,7 +705,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	if (draw3D && m_glTransEnabled)
-		glPopMatrix();
+		glFunc->glPopMatrix();
 }
 
 void ccHObject::applyGLTransformation(const ccGLMatrix& trans)

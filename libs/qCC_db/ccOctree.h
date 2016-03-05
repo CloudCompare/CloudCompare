@@ -125,7 +125,8 @@ public: //GENERAL METHODS
 
 public: //RENDERING METHODS
 
-	static void RenderOctreeAs(	CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
+	static void RenderOctreeAs(CC_DRAW_CONTEXT& context,
+								CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 								ccOctree* theOctree,
 								unsigned char level,
 								ccGenericPointCloud* theAssociatedCloud,

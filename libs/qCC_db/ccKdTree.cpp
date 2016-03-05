@@ -139,23 +139,30 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!m_associatedGenericCloud || !m_root)
 		return;
 
-	if (MACRO_Draw3D(context))
+	if (!MACRO_Draw3D(context))
+		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+	
+	bool pushName = MACRO_DrawEntityNames(context);
+
+	if (pushName)
 	{
-		bool pushName = MACRO_DrawEntityNames(context);
-
-		if (pushName)
-		{
-			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
-				return;
-			glPushName(getUniqueIDForDisplay());
-		}
-
-		DrawMeOnlyVisitor(m_associatedGenericCloud->getOwnBB()).visit(context, m_root);
-
-		if (pushName)
-			glPopName();
+		//not fast at all!
+		if (MACRO_DrawFastNamesOnly(context))
+			return;
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
+
+	DrawMeOnlyVisitor(m_associatedGenericCloud->getOwnBB()).visit(context, m_root);
+
+	if (pushName)
+		glFunc->glPopName();
 }
 
 bool ccKdTree::convertCellIndexToSF()

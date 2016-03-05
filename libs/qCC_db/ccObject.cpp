@@ -26,8 +26,6 @@
 #endif
 
 //System
-#include <string.h>
-#include <assert.h>
 #include <stdint.h>
 
 /** Versions:

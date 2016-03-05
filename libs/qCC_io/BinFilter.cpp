@@ -507,8 +507,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	{
 		// store seeking position
 		size_t original_pos = in.pos();
-		// we need to lod it as plain ccCustomHobject
-		root->fromFile(in, static_cast<short>(binVersion), flags, true); // this will load it
+		// we need to load it as plain ccCustomHobject
+		root->fromFileNoChildren(in, static_cast<short>(binVersion), flags); // this will load it
 		in.seek(original_pos); // reseek back the file
 
 		QString classId = root->getMetaData("class_name").toString();

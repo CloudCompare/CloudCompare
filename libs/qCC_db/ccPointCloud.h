@@ -676,7 +676,7 @@ protected:
 protected: // VBO
 
 	//! Init/updates VBOs
-	bool updateVBOs(const glDrawParams& glParams);
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
 
 	//! Release VBOs
 	void releaseVBOs();
@@ -729,10 +729,10 @@ protected: // VBO
 	vboSet m_vboManager;
 
 	//per-block data transfer to the GPU (VBO or standard mode)
-	void glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer    (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 
 public: //Level of Detail (LOD)
 
@@ -845,12 +845,6 @@ public: //Level of Detail (LOD)
 	inline LodStruct& getLOD() { return m_lod; }
 
 protected:
-
-	//per-block data transfer to the GPU (LOD)
-	void glLODChunkVertexPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
-	void glLODChunkColorPointer (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
-	void glLODChunkSFPointer    (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
-	void glLODChunkNormalPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
 
 	//! L.O.D. structure
 	LodStruct m_lod;

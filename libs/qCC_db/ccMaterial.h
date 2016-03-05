@@ -27,6 +27,8 @@
 #include <QStringList>
 #include <QSharedPointer>
 
+class QOpenGLContext;
+
 //! Mesh (triangle) material
 class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 {
@@ -90,7 +92,7 @@ public:
 	void setTransparency(float val);
 
 	//! Apply parameters (OpenGL)
-	void applyGL(bool lightEnabled, bool skipDiffuse) const;
+	void applyGL(const QOpenGLContext* context, bool lightEnabled, bool skipDiffuse) const;
 
 	//! Returns whether the material has an associated texture or not
 	bool hasTexture() const;
@@ -112,7 +114,7 @@ public:
 	//! Helper: makes all active GL light sources neutral (i.e. 'gray')
 	/** WARNING: an OpenGL context must be active!
 	**/
-	static void MakeLightsNeutral();
+	static void MakeLightsNeutral(const QOpenGLContext* context);
 
 	//! Returns the texture image associated to a given name
 	static QImage GetTexture(QString absoluteFilename);

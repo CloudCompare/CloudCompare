@@ -828,21 +828,21 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glLineWidth(width+1);
 
 		PointCoordinateType axisLength = halfHeadSize * m_scale;
-		ccGL::Color3v(glFunc,ccColor::red.rgba);
-		CCVector3 C(0,0,0);
+		ccGL::Color3v(glFunc, ccColor::red.rgba);
+		CCVector3 C(0, 0, 0);
 		glFunc->glBegin(GL_LINES);
-		ccGL::Vertex3v(glFunc,C.u);
-		ccGL::Vertex3(glFunc,C.x+axisLength,C.y,C.z);
+		ccGL::Vertex3v(glFunc, C.u);
+		ccGL::Vertex3(glFunc, C.x + axisLength, C.y, C.z);
 		glFunc->glEnd();
-		ccGL::Color3v(glFunc,ccColor::green.rgba);
+		ccGL::Color3v(glFunc, ccColor::green.rgba);
 		glFunc->glBegin(GL_LINES);
-		ccGL::Vertex3v(glFunc,C.u);
-		ccGL::Vertex3(glFunc,C.x,C.y+axisLength,C.z);
+		ccGL::Vertex3v(glFunc, C.u);
+		ccGL::Vertex3(glFunc, C.x, C.y + axisLength, C.z);
 		glFunc->glEnd();
-		ccGL::Color3v(glFunc,ccColor::blue.rgba);
+		ccGL::Color3v(glFunc, ccColor::blue.rgba);
 		glFunc->glBegin(GL_LINES);
-		ccGL::Vertex3v(glFunc,C.u);
-		ccGL::Vertex3(glFunc,C.x,C.y,C.z+axisLength);
+		ccGL::Vertex3v(glFunc, C.u);
+		ccGL::Vertex3(glFunc, C.x, C.y, C.z + axisLength);
 		glFunc->glEnd();
 
 		glFunc->glPopAttrib();
@@ -860,15 +860,15 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//sensor legs
 	{
-		CCVector3 headConnect = /*headCenter*/ - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
-		ccGL::Color3v(glFunc,m_color.rgb);
+		CCVector3 headConnect = /*headCenter*/ -CCVector3(0, 0, static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+		ccGL::Color3v(glFunc, m_color.rgb);
 		glFunc->glBegin(GL_LINES);
-		ccGL::Vertex3v(glFunc,headConnect.u);
-		ccGL::Vertex3(glFunc,-m_scale,-m_scale,-m_scale);
-		ccGL::Vertex3v(glFunc,headConnect.u);
-		ccGL::Vertex3(glFunc,-m_scale,m_scale,-m_scale);
-		ccGL::Vertex3v(glFunc,headConnect.u);
-		ccGL::Vertex3(glFunc,m_scale,0,-m_scale);
+		ccGL::Vertex3v(glFunc, headConnect.u);
+		ccGL::Vertex3(glFunc, -m_scale, -m_scale, -m_scale);
+		ccGL::Vertex3v(glFunc, headConnect.u);
+		ccGL::Vertex3(glFunc, -m_scale, m_scale, -m_scale);
+		ccGL::Vertex3v(glFunc, headConnect.u);
+		ccGL::Vertex3(glFunc, m_scale, 0, -m_scale);
 		glFunc->glEnd();
 	}
 

@@ -1311,7 +1311,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	const PointCoordinateType baseHalfWidth	= 0.2f * upperLeftPoint.x;
 
 	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	ccGL::Color3v(glFunc,m_color.rgb);
+	ccGL::Color3v(glFunc, m_color.rgb);
 
 	//near plane
 	glFunc->glBegin(GL_LINE_LOOP);

@@ -87,31 +87,31 @@ void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 	if ( glFunc == nullptr )
 		return;
 
-	ccGL::Color3v(glFunc,col.rgb);
+	ccGL::Color3v(glFunc, col.rgb);
 
 	glFunc->glBegin(GL_LINE_LOOP);
-	ccGL::Vertex3v(glFunc,m_bbMin.u);
-	ccGL::Vertex3(glFunc,m_bbMax.x,m_bbMin.y,m_bbMin.z);
-	ccGL::Vertex3(glFunc,m_bbMax.x,m_bbMax.y,m_bbMin.z);
-	ccGL::Vertex3(glFunc,m_bbMin.x,m_bbMax.y,m_bbMin.z);
+	ccGL::Vertex3v(glFunc, m_bbMin.u);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMax.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMin.z);
 	glFunc->glEnd();
 
 	glFunc->glBegin(GL_LINE_LOOP);
-	ccGL::Vertex3(glFunc,m_bbMin.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3(glFunc,m_bbMax.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3v(glFunc,m_bbMax.u);
-	ccGL::Vertex3(glFunc,m_bbMin.x,m_bbMax.y,m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3v(glFunc, m_bbMax.u);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMax.z);
 	glFunc->glEnd();
 
 	glFunc->glBegin(GL_LINES);
-	ccGL::Vertex3v(glFunc,m_bbMin.u);
-	ccGL::Vertex3(glFunc,m_bbMin.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3(glFunc,m_bbMax.x,m_bbMin.y,m_bbMin.z);
-	ccGL::Vertex3(glFunc,m_bbMax.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3(glFunc,m_bbMax.x,m_bbMax.y,m_bbMin.z);
-	ccGL::Vertex3v(glFunc,m_bbMax.u);
-	ccGL::Vertex3(glFunc,m_bbMin.x,m_bbMax.y,m_bbMin.z);
-	ccGL::Vertex3(glFunc,m_bbMin.x,m_bbMax.y,m_bbMax.z);
+	ccGL::Vertex3v(glFunc, m_bbMin.u);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMax.y, m_bbMin.z);
+	ccGL::Vertex3v(glFunc, m_bbMax.u);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMax.z);
 	glFunc->glEnd();
 }
 

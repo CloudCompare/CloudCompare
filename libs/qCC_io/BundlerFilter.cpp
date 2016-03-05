@@ -30,10 +30,6 @@
 #include <ccGLMatrix.h>
 #include <ccHObjectCaster.h>
 #include <ccCameraSensor.h>
-//#define TEST_TEXTURED_BUNDLER_IMPORT
-#ifdef TEST_TEXTURED_BUNDLER_IMPORT
-#include <ccMaterialSet.h>
-#endif
 
 //Qt
 #include <QInputDialog>

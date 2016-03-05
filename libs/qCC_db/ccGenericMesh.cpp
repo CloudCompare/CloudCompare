@@ -92,16 +92,23 @@ static const GLubyte s_stippleMask[4*32] = {s_byte0,s_byte0,s_byte0,s_byte0,
 	s_byte0,s_byte0,s_byte0,s_byte0,
 	s_byte1,s_byte1,s_byte1,s_byte1};
 
-void ccGenericMesh::EnableGLStippleMask(bool state)
+void ccGenericMesh::EnableGLStippleMask(const QOpenGLContext* context, bool state)
 {
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	if (state)
 	{
-		glPolygonStipple(s_stippleMask);
-		glEnable(GL_POLYGON_STIPPLE);
+		glFunc->glPolygonStipple(s_stippleMask);
+		glFunc->glEnable(GL_POLYGON_STIPPLE);
 	}
 	else
 	{
-		glDisable(GL_POLYGON_STIPPLE);
+		glFunc->glDisable(GL_POLYGON_STIPPLE);
 	}
 }
 
@@ -186,6 +193,13 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	handleColorRamp(context);
 
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	//3D pass
 	if (MACRO_Draw3D(context))
 	{
@@ -231,7 +245,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-			glPushName(getUniqueIDForDisplay());
+			glFunc->glPushName(getUniqueIDForDisplay());
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -277,8 +291,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			applyMaterials = false;
 			colorMaterial = true;
-			glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-			glEnable(GL_COLOR_MATERIAL);
+			glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+			glFunc->glEnable(GL_COLOR_MATERIAL);
 		}
 
 		//in the case we need to display vertex colors
@@ -287,7 +301,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (isColorOverriden())
 			{
-				ccGL::Color3v(m_tempColor.rgb);
+				ccGL::Color3v(glFunc, m_tempColor.rgb);
 				glParams.showColors = false;
 			}
 			else
@@ -298,15 +312,15 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glColor3fv(context.defaultMat->getDiffuseFront().rgba);
+			glFunc->glColor3fv(context.defaultMat->getDiffuseFront().rgba);
 		}
 
 		if (glParams.showNorms)
 		{
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version can fall to 1.0!
-			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
-			glEnable(GL_LIGHTING);
-			context.defaultMat->applyGL(true,colorMaterial);
+			glFunc->glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glEnable(GL_LIGHTING);
+			context.defaultMat->applyGL(context.qGLContext, true, colorMaterial);
 		}
 
 		//in the case we need normals (i.e. lighting)
@@ -321,25 +335,27 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//stipple mask
 		if (stipplingEnabled())
-			EnableGLStippleMask(true);
+		{
+			EnableGLStippleMask(context.qGLContext, true);
+		}
 
 		if (!pushTriangleNames && !visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
 		{
 			//the GL type depends on the PointCoordinateType 'size' (float or double)
 			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 			
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3,GL_COORD_TYPE,0,GetVertexBuffer());
+			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
+			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
-				glEnableClientState(GL_NORMAL_ARRAY);
-				glNormalPointer(GL_COORD_TYPE,0,GetNormalsBuffer());
+				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
+				glFunc->glNormalPointer(GL_COORD_TYPE,0,GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
-				glEnableClientState(GL_COLOR_ARRAY);
-				glColorPointer(3,GL_UNSIGNED_BYTE,0,GetColorsBuffer());
+				glFunc->glEnableClientState(GL_COLOR_ARRAY);
+				glFunc->glColorPointer(3,GL_UNSIGNED_BYTE,0,GetColorsBuffer());
 			}
 
 			//we can scan and process each chunk separately in an optimized way
@@ -357,12 +373,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				for (unsigned n=0; n<chunkSize; n+=decimStep)
 				{
 					const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-					memcpy(_vertices,vertices->getPoint(ti->i1)->u,sizeof(PointCoordinateType)*3);
-					_vertices+=3;
-					memcpy(_vertices,vertices->getPoint(ti->i2)->u,sizeof(PointCoordinateType)*3);
-					_vertices+=3;
-					memcpy(_vertices,vertices->getPoint(ti->i3)->u,sizeof(PointCoordinateType)*3);
-					_vertices+=3;
+					memcpy(_vertices, vertices->getPoint(ti->i1)->u, sizeof(PointCoordinateType) * 3);
+					_vertices += 3;
+					memcpy(_vertices, vertices->getPoint(ti->i2)->u, sizeof(PointCoordinateType) * 3);
+					_vertices += 3;
+					memcpy(_vertices, vertices->getPoint(ti->i3)->u, sizeof(PointCoordinateType) * 3);
+					_vertices += 3;
 				}
 
 				//scalar field
@@ -374,13 +390,13 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
 						col = currentDisplayedScalarField->getValueColor(ti->i1);
-						memcpy(_rgbColors,col,sizeof(ColorCompType)*3);
+						memcpy(_rgbColors, col, sizeof(ColorCompType) * 3);
 						_rgbColors += 3;
 						col = currentDisplayedScalarField->getValueColor(ti->i2);
-						memcpy(_rgbColors,col,sizeof(ColorCompType)*3);
+						memcpy(_rgbColors, col, sizeof(ColorCompType) * 3);
 						_rgbColors += 3;
 						col = currentDisplayedScalarField->getValueColor(ti->i3);
-						memcpy(_rgbColors,col,sizeof(ColorCompType)*3);
+						memcpy(_rgbColors, col, sizeof(ColorCompType) * 3);
 						_rgbColors += 3;
 					}
 				}
@@ -392,11 +408,11 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					for (unsigned n=0; n<chunkSize; n+=decimStep)
 					{
 						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i1),sizeof(ColorCompType)*3);
+						memcpy(_rgbColors, rgbColorsTable->getValue(ti->i1), sizeof(ColorCompType) * 3);
 						_rgbColors += 3;
-						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i2),sizeof(ColorCompType)*3);
+						memcpy(_rgbColors, rgbColorsTable->getValue(ti->i2), sizeof(ColorCompType) * 3);
 						_rgbColors += 3;
-						memcpy(_rgbColors,rgbColorsTable->getValue(ti->i3),sizeof(ColorCompType)*3);
+						memcpy(_rgbColors, rgbColorsTable->getValue(ti->i3), sizeof(ColorCompType) * 3);
 						_rgbColors += 3;
 					}
 				}
@@ -411,12 +427,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							CCVector3 Na, Nb, Nc;
 							getTriangleNormals(chunkStart + n, Na, Nb, Nc);
-							memcpy(_normals,Na.u,sizeof(PointCoordinateType)*3);
-							_normals+=3;
-							memcpy(_normals,Nb.u,sizeof(PointCoordinateType)*3);
-							_normals+=3;
-							memcpy(_normals,Nc.u,sizeof(PointCoordinateType)*3);
-							_normals+=3;
+							memcpy(_normals, Na.u, sizeof(PointCoordinateType) * 3);
+							_normals += 3;
+							memcpy(_normals, Nb.u, sizeof(PointCoordinateType) * 3);
+							_normals += 3;
+							memcpy(_normals, Nc.u, sizeof(PointCoordinateType) * 3);
+							_normals += 3;
 						}
 					}
 					else
@@ -424,63 +440,58 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						for (unsigned n=0; n<chunkSize; n+=decimStep)
 						{
 							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(chunkStart + n);
-							memcpy(_normals,vertices->getPointNormal(ti->i1).u,sizeof(PointCoordinateType)*3);
-							_normals+=3;
-							memcpy(_normals,vertices->getPointNormal(ti->i2).u,sizeof(PointCoordinateType)*3);
-							_normals+=3;
-							memcpy(_normals,vertices->getPointNormal(ti->i3).u,sizeof(PointCoordinateType)*3);
-							_normals+=3;
+							memcpy(_normals, vertices->getPointNormal(ti->i1).u, sizeof(PointCoordinateType) * 3);
+							_normals += 3;
+							memcpy(_normals, vertices->getPointNormal(ti->i2).u, sizeof(PointCoordinateType) * 3);
+							_normals += 3;
+							memcpy(_normals, vertices->getPointNormal(ti->i3).u, sizeof(PointCoordinateType) * 3);
+							_normals += 3;
 						}
 					}
 				}
 
 				if (!showWired)
 				{
-					glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES,0,(chunkSize/decimStep)*3);
+					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (chunkSize / decimStep) * 3);
 				}
 				else
 				{
-					glDrawElements(GL_LINES,(chunkSize/decimStep)*6,GL_UNSIGNED_INT,GetWireVertexIndexes());
+					glFunc->glDrawElements(GL_LINES, (chunkSize / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
 				}
 			}
 
 			//disable arrays
-			glDisableClientState(GL_VERTEX_ARRAY);
+			glFunc->glDisableClientState(GL_VERTEX_ARRAY);
 			if (glParams.showNorms)
-				glDisableClientState(GL_NORMAL_ARRAY);
+				glFunc->glDisableClientState(GL_NORMAL_ARRAY);
 			if (glParams.showSF || glParams.showColors)
-				glDisableClientState(GL_COLOR_ARRAY);
+				glFunc->glDisableClientState(GL_COLOR_ARRAY);
 		}
 		else
 		{
 			//current vertex color
-			const ColorCompType *col1=0,*col2=0,*col3=0;
+			const ColorCompType *col1 = 0, *col2 = 0, *col3 = 0;
 			//current vertex normal
-			const PointCoordinateType *N1=0,*N2=0,*N3=0;
+			const PointCoordinateType *N1 = 0, *N2 = 0, *N3 = 0;
 			//current vertex texture coordinates
-			float *Tx1=0,*Tx2=0,*Tx3=0;
+			float *Tx1 = 0, *Tx2 = 0, *Tx3 = 0;
 
 			//loop on all triangles
 			int lasMtlIndex = -1;
 
 			if (showTextures)
 			{
-				//#define TEST_TEXTURED_BUNDLER_IMPORT
-#ifdef TEST_TEXTURED_BUNDLER_IMPORT
-				glPushAttrib(GL_COLOR_BUFFER_BIT);
-				glEnable(GL_BLEND);
-				glBlendFunc(context.sourceBlend, context.destBlend);
-#endif
-
-				glPushAttrib(GL_ENABLE_BIT);
-				glEnable(GL_TEXTURE_2D);
+				glFunc->glPushAttrib(GL_ENABLE_BIT);
+				glFunc->glEnable(GL_TEXTURE_2D);
 			}
 
 			if (pushTriangleNames)
-				glPushName(0);
+			{
+				glFunc->glPushName(0);
+			}
 
 			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES;
-			glBegin(triangleDisplayType);
+			glFunc->glBegin(triangleDisplayType);
 
 			//per-triangle normals
 			const NormsIndexesTableType* triNormals = getTriNormsTable();
@@ -530,11 +541,11 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (showTriNormals)
 					{
 						assert(triNormals);
-						int n1,n2,n3;
-						getTriangleNormalIndexes(n,n1,n2,n3);
-						N1 = (n1>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n1)).u : 0);
-						N2 = (n1==n2 ? N1 : n1>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n2)).u : 0);
-						N3 = (n1==n3 ? N1 : n3>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n3)).u : 0);
+						int n1, n2, n3;
+						getTriangleNormalIndexes(n, n1, n2, n3);
+						N1 = (n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->getValue(n1)).u : 0);
+						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->getValue(n2)).u : 0);
+						N3 = (n1 == n3 ? N1 : n3 >= 0 ? ccNormalVectors::GetNormal(triNormals->getValue(n3)).u : 0);
 
 					}
 					else
@@ -554,20 +565,20 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (lasMtlIndex != newMatlIndex)
 					{
 						assert(newMatlIndex < static_cast<int>(materials->size()));
-						glEnd();
+						glFunc->glEnd();
 						if (showTextures)
 						{
 							GLuint texID = (newMatlIndex >= 0 ? context._win->getTextureID((*materials)[newMatlIndex]) : 0);
-							assert(texID <= 0 || glIsTexture(texID));
-							glBindTexture(GL_TEXTURE_2D, texID);
+							assert(texID <= 0 || glFunc->glIsTexture(texID));
+							glFunc->glBindTexture(GL_TEXTURE_2D, texID);
 						}
 
 						//if we don't have any current material, we apply default one
 						if (newMatlIndex >= 0)
-							(*materials)[newMatlIndex]->applyGL(glParams.showNorms,false);
+							(*materials)[newMatlIndex]->applyGL(context.qGLContext, glParams.showNorms,false);
 						else
-							context.defaultMat->applyGL(glParams.showNorms,false);
-						glBegin(triangleDisplayType);
+							context.defaultMat->applyGL(context.qGLContext, glParams.showNorms, false);
+						glFunc->glBegin(triangleDisplayType);
 						lasMtlIndex = newMatlIndex;
 					}
 
@@ -579,73 +590,78 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (pushTriangleNames)
 				{
-					glEnd();
-					glLoadName(n);
-					glBegin(triangleDisplayType);
+					glFunc->glEnd();
+					glFunc->glLoadName(n);
+					glFunc->glBegin(triangleDisplayType);
 				}
 				else if (showWired)
 				{
-					glEnd();
-					glBegin(triangleDisplayType);
+					glFunc->glEnd();
+					glFunc->glBegin(triangleDisplayType);
 				}
 
 				//vertex 1
 				if (N1)
-					ccGL::Normal3v(N1);
+					ccGL::Normal3v(glFunc, N1);
 				if (col1)
-					glColor3ubv(col1);
+					glFunc->glColor3ubv(col1);
 				if (Tx1)
-					glTexCoord2fv(Tx1);
-				ccGL::Vertex3v(vertices->getPoint(tsi->i1)->u);
+					glFunc->glTexCoord2fv(Tx1);
+				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i1)->u);
 
 				//vertex 2
 				if (N2)
-					ccGL::Normal3v(N2);
+					ccGL::Normal3v(glFunc, N2);
 				if (col2)
-					glColor3ubv(col2);
+					glFunc->glColor3ubv(col2);
 				if (Tx2)
-					glTexCoord2fv(Tx2);
-				ccGL::Vertex3v(vertices->getPoint(tsi->i2)->u);
+					glFunc->glTexCoord2fv(Tx2);
+				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i2)->u);
 
 				//vertex 3
 				if (N3)
-					ccGL::Normal3v(N3);
+					ccGL::Normal3v(glFunc, N3);
 				if (col3)
-					glColor3ubv(col3);
+					glFunc->glColor3ubv(col3);
 				if (Tx3)
-					glTexCoord2fv(Tx3);
-				ccGL::Vertex3v(vertices->getPoint(tsi->i3)->u);
+					glFunc->glTexCoord2fv(Tx3);
+				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i3)->u);
 			}
 
-			glEnd();
+			glFunc->glEnd();
 
 			if (pushTriangleNames)
-				glPopName();
+			{
+				glFunc->glPopName();
+			}
 
 			if (showTextures)
 			{
-#ifdef TEST_TEXTURED_BUNDLER_IMPORT
-				glPopAttrib(); //GL_COLOR_BUFFER_BIT 
-#endif
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glPopAttrib();
+				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				glFunc->glPopAttrib();
 			}
 		}
 
 		if (stipplingEnabled())
-			EnableGLStippleMask(false);
+		{
+			EnableGLStippleMask(context.qGLContext, false);
+		}
 
 		if (colorMaterial)
-			glDisable(GL_COLOR_MATERIAL);
+		{
+			glFunc->glDisable(GL_COLOR_MATERIAL);
+		}
 
 		if (glParams.showNorms)
 		{
-			glDisable(GL_LIGHTING);
-			glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glDisable(GL_LIGHTING);
+			glFunc->glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
 		}
 
 		if (pushName)
-			glPopName();
+		{
+			glFunc->glPopName();
+		}
 	}
 }
 

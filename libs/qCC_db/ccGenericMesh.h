@@ -205,7 +205,7 @@ protected:
 	static unsigned* GetWireVertexIndexes();
 
 	//! Enables (OpenGL) stipple mask
-	static void EnableGLStippleMask(bool state);
+	static void EnableGLStippleMask(const QOpenGLContext* context, bool state);
 
 	//inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

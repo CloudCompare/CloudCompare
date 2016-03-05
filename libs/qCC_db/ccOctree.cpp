@@ -21,15 +21,12 @@
 #include "ccOctree.h"
 
 //Local
-#include "ccGenericPointCloud.h"
 #include "ccCameraSensor.h"
 #include "ccNormalVectors.h"
 #include "ccBox.h"
 
 //CCLib
 #include <ScalarFieldTools.h>
-#include <Neighbourhood.h>
-#include <CCMiscTools.h>
 #include <RayAndBox.h>
 
 ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
@@ -179,37 +176,46 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (m_thePointsAndTheirCellCodes.empty())
 		return;
 
-	if (MACRO_Draw3D(context))
+	if (!MACRO_Draw3D(context))
+		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+	
+	bool pushName = MACRO_DrawEntityNames(context);
+
+	if (pushName)
 	{
-		bool pushName = MACRO_DrawEntityNames(context);
+		//not fast at all!
+		if (MACRO_DrawFastNamesOnly(context))
+			return;
+		glFunc->glPushName(getUniqueIDForDisplay());
+	}
 
-		if (pushName)
-		{
-			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
-				return;
-			glPushName(getUniqueIDForDisplay());
-		}
-
-		assert(m_displayedLevel < 256);
-		RenderOctreeAs(	m_displayType,
+	assert(m_displayedLevel < 256);
+	RenderOctreeAs(context,
+						m_displayType,
 						this,
 						static_cast<unsigned char>(m_displayedLevel),
 						m_theAssociatedCloudAsGPC,
 						m_glListID,
 						m_shouldBeRefreshed);
 
-		if (m_shouldBeRefreshed)
-			m_shouldBeRefreshed = false;
+	if (m_shouldBeRefreshed)
+		m_shouldBeRefreshed = false;
 
-		if (pushName)
-			glPopName();
-	}
+	if (pushName)
+		glFunc->glPopName();
 }
 
 /*** RENDERING METHODS ***/
 
-void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
+void ccOctree::RenderOctreeAs(CC_DRAW_CONTEXT& context,
+								CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 								ccOctree* theOctree,
 								unsigned char level,
 								ccGenericPointCloud* theAssociatedCloud,
@@ -218,19 +224,26 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 {
 	if (!theOctree || !theAssociatedCloud)
 		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
 
-	glPushAttrib(GL_LIGHTING_BIT);
+	glFunc->glPushAttrib(GL_LIGHTING_BIT);
 
 	if (octreeDisplayType == WIRE)
 	{
 		//cet affichage demande trop de memoire pour le stocker sous forme de liste OpenGL
 		//donc on doit le generer dynamiquement
 		
-		glDisable(GL_LIGHTING); //au cas où la lumiere soit allumee
-		ccGL::Color3v(ccColor::green.rgba);
+		glFunc->glDisable(GL_LIGHTING); //au cas où la lumiere soit allumee
+		ccGL::Color3v(glFunc, ccColor::green.rgba);
 
 		void* additionalParameters[] = { theOctree->m_frustrumIntersector };
-		theOctree->executeFunctionForAllCellsAtLevel(	level,
+		theOctree->executeFunctionForAllCellsAtLevel(level,
 														&DrawCellAsABox,
 														additionalParameters);
 	}
@@ -244,23 +257,23 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
 			//DGM FIXME: is it still true with Qt5.4+?
 #ifndef USE_QtOpenGL_CLASSES
-			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
 #else
-			glDisable(GL_RESCALE_NORMAL);
+			glFunc->glDisable(GL_RESCALE_NORMAL);
 #endif
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba  );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba  );
-			glMaterialfv(GL_FRONT_AND_BACK,	GL_EMISSION,	CC_DEFAULT_CLOUD_EMISSION_COLOR.rgba );
-			glMaterialf (GL_FRONT_AND_BACK,	GL_SHININESS,	CC_DEFAULT_CLOUD_SHININESS);
-			glEnable(GL_LIGHTING);
+			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba  );
+			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba );
+			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba  );
+			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_EMISSION,	CC_DEFAULT_CLOUD_EMISSION_COLOR.rgba );
+			glFunc->glMaterialf (GL_FRONT_AND_BACK,	GL_SHININESS,	CC_DEFAULT_CLOUD_SHININESS);
+			glFunc->glEnable(GL_LIGHTING);
 
-			glEnable(GL_COLOR_MATERIAL);
-			glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+			glFunc->glEnable(GL_COLOR_MATERIAL);
+			glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 		}
 
 		if (!glParams.showColors)
-			ccGL::Color3v(ccColor::white.rgba);
+			ccGL::Color3v(glFunc, ccColor::white.rgba);
 
 		if (updateOctreeGLDisplay || octreeGLListID < 0)
 		{
@@ -268,19 +281,19 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 				octreeGLListID = glGenLists(1);
 			else if (glIsList(octreeGLListID))
 				glDeleteLists(octreeGLListID,1);
-			glNewList(octreeGLListID,GL_COMPILE);
+			glFunc->glNewList(octreeGLListID,GL_COMPILE);
 
 			if (octreeDisplayType == MEAN_POINTS)
 			{
-				void* additionalParameters[2] = {	reinterpret_cast<void*>(&glParams),
+				void* additionalParameters[2] = { reinterpret_cast<void*>(&glParams),
 													reinterpret_cast<void*>(theAssociatedCloud),
 				};
 
-				glBegin(GL_POINTS);
-				theOctree->executeFunctionForAllCellsAtLevel(	level,
+				glFunc->glBegin(GL_POINTS);
+				theOctree->executeFunctionForAllCellsAtLevel(level,
 																&DrawCellAsAPoint,
 																additionalParameters);
-				glEnd();
+				glFunc->glEnd();
 			}
 			else
 			{
@@ -303,36 +316,36 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 				context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND| CC_LIGHT_ENABLED;
 				context._win = 0;
 
-				void* additionalParameters[4] = {	reinterpret_cast<void*>(&glParams),
+				void* additionalParameters[4] = { reinterpret_cast<void*>(&glParams),
 													reinterpret_cast<void*>(theAssociatedCloud),
 													reinterpret_cast<void*>(&box),
 													reinterpret_cast<void*>(&context)
 				};
 
-				theOctree->executeFunctionForAllCellsAtLevel(	level,
+				theOctree->executeFunctionForAllCellsAtLevel(level,
 																&DrawCellAsAPrimitive,
 																additionalParameters);
 			}
 
-			glEndList();
+			glFunc->glEndList();
 		}
 
-		glCallList(octreeGLListID);
+		glFunc->glCallList(octreeGLListID);
 
 		if (glParams.showNorms)
 		{
-			glDisable(GL_COLOR_MATERIAL);
+			glFunc->glDisable(GL_COLOR_MATERIAL);
 			//DGM FIXME: is it still true with Qt5.4+?
 #ifndef USE_QtOpenGL_CLASSES
-			glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
 #else
-			glDisable(GL_RESCALE_NORMAL);
+			glFunc->glDisable(GL_RESCALE_NORMAL);
 #endif
-			glDisable(GL_LIGHTING);
+			glFunc->glDisable(GL_LIGHTING);
 		}
 	}
 
-	glPopAttrib();
+	glFunc->glPopAttrib();
 }
 
 //FONCTION "CELLULAIRE" D'AFFICHAGE "FIL DE FER"

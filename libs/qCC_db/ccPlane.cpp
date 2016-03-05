@@ -22,7 +22,6 @@
 
 //qCC_db
 #include "ccPointCloud.h"
-#include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
 
 //CCLIB

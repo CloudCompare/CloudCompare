@@ -21,8 +21,6 @@
 //Local
 #include "ccHObject.h"
 
-
-class ccGenericGLDisplay;
 class ccCameraSensor;
 
 //! Generic image
@@ -92,15 +90,6 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
-	//! Unbinds texture from currently associated GL context
-	bool unbindTexture();
-
-	//! Binds texture to a GL context (and creates texture if necessary)
-	/** \param context 3D context including display to which the texture will be bound
-		\return success
-	**/
-	bool bindToGlTexture(CC_DRAW_CONTEXT& context);
-
 	//! Updates aspect ratio
 	void updateAspectRatio();
 
@@ -115,19 +104,8 @@ protected:
 	**/
 	float m_aspectRatio;
 
-	//! Texture coordinate (width) of bottom-right pixel
-	float m_texU;
-	//! Texture coordinate (height) of bottom-right pixel
-	float m_texV;
-
 	//! Texture transparency
 	float m_texAlpha;
-
-	//! Texture GL ID
-	unsigned m_textureID;
-
-	//! Currently bound GL window
-	ccGenericGLDisplay* m_boundWin;
 
 	//! Image data
 	QImage m_image;

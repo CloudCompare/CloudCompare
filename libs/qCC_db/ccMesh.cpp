@@ -1848,7 +1848,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES;
 			glFunc->glBegin(triangleDisplayType);
 
-			for (n=0; n<triNum; ++n)
+			QSharedPointer<QOpenGLTexture> currentTexture(0);
+
+			for (n = 0; n < triNum; ++n)
 			{
 				//current triangle vertices
 				const CCLib::VerticesIndexes* tsi = (CCLib::VerticesIndexes*)m_triVertIndexes->getCurrentValue();
@@ -1920,12 +1922,17 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glFunc->glEnd();
 						if (showTextures)
 						{
-							GLuint texID = (newMatlIndex >= 0 ? context._win->getTextureID((*m_materials)[newMatlIndex]) : 0);
-							if (texID > 0)
+							if (currentTexture)
 							{
-								assert(glFunc->glIsTexture(texID));
+								currentTexture->release();
+								currentTexture.clear();
 							}
-							glFunc->glBindTexture(GL_TEXTURE_2D, texID);
+
+							if (newMatlIndex >= 0)
+							{
+								currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture((*m_materials)[newMatlIndex]->getTexture()));
+								currentTexture->bind();
+							}
 						}
 
 						//if we don't have any current material, we apply default one
@@ -2000,7 +2007,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (showTextures)
 			{
-				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				if (currentTexture)
+				{
+					currentTexture->release();
+					currentTexture.clear();
+				}
 				glFunc->glPopAttrib();
 				//glFunc->glDisable(GL_TEXTURE_2D);
 			}

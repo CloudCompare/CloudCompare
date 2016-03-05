@@ -151,21 +151,18 @@ public:
 #endif
 
 	//inherited from ccGenericGLDisplay
-	virtual void toBeRefreshed();
-	virtual void refresh(bool only2D = false);
-	virtual void invalidateViewport();
-	virtual void releaseTexture(unsigned texID);
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
-	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
-	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
-	virtual QFont getLabelDisplayFont() const; //takes rendering zoom into account!
-	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
-	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
-	virtual unsigned getTextureID(const QImage& image);
-	virtual unsigned getTextureID( ccMaterial::CShared mtl);
-	inline virtual QWidget* asWidget() { return this; }
-	inline virtual QSize getScreenSize() const { return size(); }
-	inline virtual ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
+	virtual void toBeRefreshed() override;
+	virtual void refresh(bool only2D = false) override;
+	virtual void invalidateViewport() override;
+	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont()) override;
+	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0) override;
+	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
+	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
+	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
+	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	inline virtual QWidget* asWidget() override { return this; }
+	inline virtual QSize getScreenSize() const override { return size(); }
+	inline virtual ccQOpenGLFunctions* functions() override { return context()->versionFunctions<ccQOpenGLFunctions>(); }
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE

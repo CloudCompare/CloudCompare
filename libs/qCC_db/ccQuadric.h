@@ -58,15 +58,15 @@ public:
 	ccQuadric(QString name = QString("Plane"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::QUADRIC; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::QUADRIC; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Quadric"; }
-	virtual bool hasDrawingPrecision() const { return true; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Quadric"; }
+	virtual bool hasDrawingPrecision() const override { return true; }
+	virtual ccGenericPrimitive* clone() const override;
 
-	//inherited from ccDrawableObject
-	virtual ccBBox getFitBB(ccGLMatrix& trans);
+	//inherited from ccHObject
+	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//! Returns min corner
 	const CCVector2& getMinCorner() const { return m_minCorner; }
@@ -100,9 +100,9 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Min corner
 	CCVector2 m_minCorner;

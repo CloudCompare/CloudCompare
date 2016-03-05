@@ -45,11 +45,11 @@ public:
 	bool setAssociatedEntity(ccHObject* associatedEntity);
 
 	//inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	//inherited from ccInteractor
-	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight);
-	virtual bool move3D(const CCVector3d& u);
+	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
+	virtual bool move3D(const CCVector3d& u) override;
 
 	//! Sets last clicked point (on screen)
 	void setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix);
@@ -78,8 +78,7 @@ public:
 	void setActiveComponent(int id);
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CLIPPING_BOX; }
-	//virtual bool isSerializable() const { return false; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX; }
 
 	//! Returns current box
 	const ccBBox& getBox() const { return m_box; }
@@ -109,7 +108,7 @@ signals:
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Computes arrows display scale
 	PointCoordinateType computeArrowsScale() const;

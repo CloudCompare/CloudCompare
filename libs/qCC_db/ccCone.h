@@ -60,7 +60,7 @@ public:
 	ccCone(QString name = QString("Cone"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CONE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CONE; }
 
 	//! Returns height
 	inline PointCoordinateType getHeight() const { return m_height; }
@@ -84,16 +84,16 @@ public:
 	virtual void setTopRadius(PointCoordinateType radius);
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Cone"; }
-	virtual bool hasDrawingPrecision() const { return true; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Cone"; }
+	virtual bool hasDrawingPrecision() const override { return true; }
+	virtual ccGenericPrimitive* clone() const override;
 
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Bottom radius
 	PointCoordinateType m_bottomRadius;

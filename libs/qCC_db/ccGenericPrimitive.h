@@ -43,7 +43,7 @@ public:
 	virtual ccGenericPrimitive* clone() const = 0;
 
 	//! Returns class ID
-	virtual inline CC_CLASS_ENUM getClassID() const { return CC_TYPES::PRIMITIVE; }
+	virtual inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::PRIMITIVE; }
 
 	//! Sets primitive color (shortcut)
 	/** \param col rgb color
@@ -83,16 +83,16 @@ public:
 	virtual inline const ccGLMatrix& getTransformation() const { return m_transformation; }
 
 	//inherited methods (ccHObject)
-	virtual const ccGLMatrix& getGLTransformationHistory() const;
+	virtual const ccGLMatrix& getGLTransformationHistory() const override;
 
 protected:
 
 	//! Inherited from ccGenericMesh
-	virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
 
 	//inherited from ccMesh
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Builds primitive
 	/** Transformation will be applied afterwards!

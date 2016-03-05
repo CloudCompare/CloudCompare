@@ -44,8 +44,8 @@ public:
 	ccSensor(const ccSensor &sensor);
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SENSOR; }
-	virtual bool isSerializable() const { return true; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SENSOR; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Returns the sensor type
 	/** Should be re-implemented by sub-classes
@@ -124,13 +124,13 @@ public:
 	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
 
 	//inherited from ccHObject
-	virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
 
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Positions buffer (optional)
 	ccIndexedTransformationBuffer* m_posBuffer;

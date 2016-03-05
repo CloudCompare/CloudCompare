@@ -184,7 +184,7 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
-ccBBox ccPlane::getFitBB(ccGLMatrix& trans)
+ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
 	return ccBBox( CCVector3(-m_xWidth/2,-m_yWidth/2, 0), CCVector3(m_xWidth/2,m_yWidth/2, 0) );

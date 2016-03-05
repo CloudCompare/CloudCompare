@@ -57,10 +57,10 @@ public:
 	void translateBoundingBox(const CCVector3& T);
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_KDTREE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_KDTREE; }
 
 	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	//! Flag points with cell index (as a scalar field)
 	bool convertCellIndexToSF();
@@ -82,7 +82,7 @@ public:
 protected:
 
 	//Inherited from ccHObject
-	void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Associated cloud
 	ccGenericPointCloud* m_associatedGenericCloud;

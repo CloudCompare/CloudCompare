@@ -60,13 +60,13 @@ public:
 	virtual ~ccGBLSensor() {};
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; }
-	virtual bool isSerializable() const { return true; }
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans);
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::GBL_SENSOR; }
+	virtual bool isSerializable() const override { return true; }
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
+	virtual bool applyViewport(ccGenericGLDisplay* win = 0) override;
 
 	//! Determines a 3D point "visibility" relatively to the sensor field of view
 	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).
@@ -78,7 +78,7 @@ public:
 		\param P the point to test
 		\return the point's visibility (POINT_VISIBLE, POINT_HIDDEN, POINT_OUT_OF_RANGE or POINT_OUT_OF_FOV)
 	**/
-	virtual unsigned char checkVisibility(const CCVector3& P) const;
+	virtual unsigned char checkVisibility(const CCVector3& P) const override;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
 	/** WARNING: this method uses the cloud global iterator.
@@ -257,9 +257,9 @@ public: //depth buffer management
 protected:
 
 	//Inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Converts 2D angular coordinates (yaw,pitch) in integer depth buffer coordinates
 	bool convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const;

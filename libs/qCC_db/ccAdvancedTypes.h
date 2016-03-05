@@ -34,10 +34,10 @@ public:
 	NormsIndexesTableType() : ccChunkedArray<1,CompressedNormType>("Compressed normals") {}
 
 	//inherited from ccChunkedArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::NORMAL_INDEXES_ARRAY; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMAL_INDEXES_ARRAY; }
 
-	//! Duplicates array (overloaded from ccChunkedArray::clone
-	virtual NormsIndexesTableType* clone()
+	//! Duplicates array (overloaded from ccChunkedArray::clone)
+	virtual NormsIndexesTableType* clone() override
 	{
 		NormsIndexesTableType* cloneArray = new NormsIndexesTableType();
 		if (!copy(*cloneArray))
@@ -51,7 +51,7 @@ public:
 	}
 
 	//inherited from ccHObject/ccChunkedArray
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)
@@ -62,10 +62,10 @@ public:
 	NormsTableType() : ccChunkedArray<3,PointCoordinateType>("Normals") {}
 
 	//inherited from ccChunkedArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::NORMALS_ARRAY; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::NORMALS_ARRAY; }
 
-	//! Duplicates array (overloaded from ccChunkedArray::clone
-	virtual NormsTableType* clone()
+	//! Duplicates array (overloaded from ccChunkedArray::clone)
+	virtual NormsTableType* clone() override
 	{
 		NormsTableType* cloneArray = new NormsTableType();
 		if (!copy(*cloneArray))
@@ -87,10 +87,10 @@ public:
 	ColorsTableType() : ccChunkedArray<3,ColorCompType>("RGB colors") {}
 
 	//inherited from ccChunkedArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::RGB_COLOR_ARRAY; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::RGB_COLOR_ARRAY; }
 
-	//! Duplicates array (overloaded from ccChunkedArray::clone
-	virtual ColorsTableType* clone()
+	//! Duplicates array (overloaded from ccChunkedArray::clone)
+	virtual ColorsTableType* clone() override
 	{
 		ColorsTableType* cloneArray = new ColorsTableType();
 		if (!copy(*cloneArray))
@@ -112,10 +112,10 @@ public:
 	TextureCoordsContainer() : ccChunkedArray<2,float>("Texture coordinates") {}
 
 	//inherited from ccChunkedArray/ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TEX_COORDS_ARRAY; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TEX_COORDS_ARRAY; }
 
-	//! Duplicates array (overloaded from ccChunkedArray::clone
-	virtual TextureCoordsContainer* clone()
+	//! Duplicates array (overloaded from ccChunkedArray::clone)
+	virtual TextureCoordsContainer* clone() override
 	{
 		TextureCoordsContainer* cloneArray = new TextureCoordsContainer();
 		if (!copy(*cloneArray))

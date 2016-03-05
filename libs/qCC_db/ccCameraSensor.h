@@ -165,13 +165,13 @@ public: //general
 	virtual ~ccCameraSensor();
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; }
-	virtual bool isSerializable() const { return true; }
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans);
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CAMERA_SENSOR; }
+	virtual bool isSerializable() const override { return true; }
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
+	virtual bool applyViewport(ccGenericGLDisplay* win = 0) override;
 
 public: //getters and setters
 
@@ -476,9 +476,9 @@ protected:
 	bool computeFrustumCorners();
 
 	//Inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Camera intrinsic parameters
 	IntrinsicParameters m_intrinsicParams;

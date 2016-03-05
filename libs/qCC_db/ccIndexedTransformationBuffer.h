@@ -36,8 +36,8 @@ public:
 	ccIndexedTransformationBuffer(const ccIndexedTransformationBuffer& buffer);
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TRANS_BUFFER; }
-	virtual bool isSerializable() const { return true; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TRANS_BUFFER; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Sorts transformations based on their index
 	/** Ascending sort.
@@ -95,14 +95,14 @@ public:
 	void invalidateBoundingBox();
 
 	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Bounding box
 	ccBBox m_bBox;

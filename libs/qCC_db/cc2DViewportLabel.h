@@ -30,8 +30,8 @@ public:
 	explicit cc2DViewportLabel(QString name = QString());
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_LABEL; }
-	virtual bool isSerializable() const { return true; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::VIEWPORT_2D_LABEL; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Returns ROI (relative to screen)
 	const float* roi() const { return m_roi; }
@@ -42,11 +42,11 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Draws the entity only (not its children)
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! label ROI
 	/** ROI is relative to screen

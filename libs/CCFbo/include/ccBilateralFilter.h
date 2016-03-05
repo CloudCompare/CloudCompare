@@ -60,10 +60,10 @@ public:
 	void reset();
 
 	//inherited from ccGlFilter
-	virtual ccGlFilter* clone() const;
-	virtual bool init(QOpenGLFunctions_3_0* glFunc, int width, int height, QString shadersPath, QString& error);
-	virtual void shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	inline virtual GLuint getTexture() { return m_fbo.getColorTexture(); }
+	virtual ccGlFilter* clone() const override;
+	virtual bool init(QOpenGLFunctions_3_0* glFunc, int width, int height, QString shadersPath, QString& error) override;
+	virtual void shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	inline virtual GLuint getTexture() override { return m_fbo.getColorTexture(); }
 
 	//! Set parameters
 	/** \param halfSpatialSize half spatial kernel size (between 1 and 7 - total size will be 2*h+1)

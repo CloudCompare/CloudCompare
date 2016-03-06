@@ -20,7 +20,6 @@
 
 //Qt
 #include <QtGui>
-#include <QElapsedTimer>
 #include <QMainWindow>
 
 //qCC_db
@@ -34,10 +33,6 @@
 
 //CCLib
 #include <CloudSamplingTools.h>
-#include <ReferenceCloud.h>
-
-//System
-#include <string.h>
 
 //Qhull
 extern "C"

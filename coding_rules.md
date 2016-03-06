@@ -57,6 +57,7 @@ Any new source file (```.h```, ```.cpp```, etc.) integrated to any CloudCompare 
 
 Here is the official header for LGPL modules (CCLib, etc.):
 
+```
 //##########################################################################
 //#                                                                        #
 //#                              MODULE NAME                               #
@@ -74,9 +75,11 @@ Here is the official header for LGPL modules (CCLib, etc.):
 //#                                                                        #
 //##########################################################################
 
+```
 
 And for official header for GPL modules (qCC, etc.):
 
+```
 //##########################################################################
 //#                                                                        #
 //#                            MODULE NAME                                 #
@@ -93,4 +96,4 @@ And for official header for GPL modules (qCC, etc.):
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
+```

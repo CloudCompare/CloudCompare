@@ -23,12 +23,13 @@ before_script:
     - cd build
     - cmake -DCMAKE_BUILD_TYPE=Release 
       -DQT5_ROOT_PATH=/opt/qt55 
-      # -DINSTALL_QHPR_PLUGIN=ON 
-      # -DINSTALL_QPOISSON_RECON_PLUGIN=ON 
+      -DINSTALL_QBLUR_PLUGIN=ON  
       -DINSTALL_QEDL_PLUGIN=ON 
       -DINSTALL_QSRA_PLUGIN=ON 
       -DINSTALL_QSSAO_PLUGIN=ON 
       -DINSTALL_QPCV_PLUGIN=ON .. 
+      # -DINSTALL_QHPR_PLUGIN=ON 
+      # -DINSTALL_QPOISSON_RECON_PLUGIN=ON 
       # -DOPTION_USE_GDAL=ON 
       # -DINSTALL_QKINECT_PLUGIN=ON 
       # -DLIBFREENECT_INCLUDE_DIR="/usr/include" 
@@ -39,7 +40,7 @@ before_script:
       # -DINSTALL_QANIMATION_PLUGIN=ON
       
       # For now:
-      # - qRansacSD fail on Clang
+      # - qRansacSD fails on Clang
       # - no libav/FFMPEG. Version in repos is < 10.7 (no frame.h)
       # - could not use CGAL from Ubuntu (< 4.3)
       # - DXFLIB need a better cmake to handle libdxflib from Ub

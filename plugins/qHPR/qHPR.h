@@ -42,13 +42,13 @@ public:
 	explicit qHPR(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Hidden Point Removal"; }
-	virtual QString getDescription() const { return "Hidden Point Removal (Katz et al.)"; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "Hidden Point Removal"; }
+	virtual QString getDescription() const override { return "Hidden Point Removal (Katz et al.)"; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 		format.setProfile( QSurfaceFormat::CoreProfile );
 #endif
 #ifdef _DEBUG
-		format.setOption(QSurfaceFormat::DebugContext);
+		format.setOption(QSurfaceFormat::DebugContext, true);
 #endif
 		QSurfaceFormat::setDefaultFormat(format);
 	}
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
     // Basically - from doc: - "On Unix/Linux Qt is configured to use the system locale settings by default.
     // This can cause a conflict when using POSIX functions, for instance,
     // when converting between data types such as floats and strings"
-    setlocale(LC_NUMERIC,"C");
+    setlocale(LC_NUMERIC, "C");
 #endif
 
 #ifdef USE_VLD

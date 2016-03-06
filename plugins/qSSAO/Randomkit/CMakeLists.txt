@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project( QSSAO_RANDOMKIT_LIB )
 
+set( CMAKE_AUTOMOC OFF )
+
 set( SAMPLE_PROJECT_VERSION_MAJOR 1 )
 set( SAMPLE_PROJECT_VERSION_MINOR 15 )
 

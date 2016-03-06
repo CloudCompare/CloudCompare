@@ -5,6 +5,8 @@ include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 
 project( PCV_LIB )
 
+set( CMAKE_AUTOMOC OFF )
+
 file( GLOB header_list *.h )
 file( GLOB source_list *.cpp )
 

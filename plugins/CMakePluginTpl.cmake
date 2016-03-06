@@ -8,7 +8,7 @@ include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
-include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
+	include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
 endif()
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
@@ -61,6 +61,16 @@ target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL Concurrent)
 
 if( APPLE )
+    # put all the plugins we build into one directory
+    set( PLUGINS_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/../../ccPlugins" )
+    
+    file( MAKE_DIRECTORY "${PLUGINS_OUTPUT_DIR}" )
+    
+    set_target_properties( ${PROJECT_NAME}
+        PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${PLUGINS_OUTPUT_DIR}"
+    )
+	
 	install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins COMPONENT Runtime )
 	set( CLOUDCOMPARE_PLUGINS ${CLOUDCOMPARE_PLUGINS} ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "CloudCompare plugin list")
 else()

@@ -74,7 +74,9 @@ bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString
 {
 	if (width <= 0 || height <= 0)
 	{
-		error = "Invalid texture size";
+		error = "[Bilateral] Texture sizes cannot be negative";
+		reset();
+		return false;
 	}
 
 	if (!m_glFuncIsValid)
@@ -90,7 +92,7 @@ bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString
 
 	if (!m_fbo.init(static_cast<unsigned>(width), static_cast<unsigned>(height)))
 	{
-		//ccLog::Warning("[Bilateral Filter] Can't initialize FBO!");
+		error = "[Bilateral] Can't initialize FBO";
 		reset();
 		return false;
 	}
@@ -108,7 +110,7 @@ bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString
 
 	if (!m_shader.fromFile(shadersPath, "bilateral", error))
 	{
-		//ccLog::Warning(QString("[Bilateral Filter] Can't load shader: %1").arg(error));
+		error = "[Bilateral] Can't load bilateral shaders";
 		reset();
 		return false;
 	}

@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0)
 # CC custom (external) CMake script for Ribbonsoft's DXF Lib
 project( DXF_LIB )
 
+set( CMAKE_AUTOMOC OFF )
+
 file( GLOB header_list ${DXF_LIB_SRC_DIR}/*.h)
 file( GLOB source_list ${DXF_LIB_SRC_DIR}/*.cpp)
 

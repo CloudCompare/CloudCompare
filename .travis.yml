@@ -13,7 +13,7 @@ install:
     - sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
     - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
     - sudo apt-get update -qq
-    - sudo apt-get install -qy cmake qt55base libgdal1-dev libcgal-dev libfreenect-dev libvxl1-dev 
+    - sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev libvxl1-dev 
     # libdxflib-dev
     # CC submodules
     - git submodule init && git submodule update 
@@ -22,14 +22,13 @@ before_script:
     - mkdir build
     - cd build
     - cmake -DCMAKE_BUILD_TYPE=Release 
-      -DQT5_ROOT_PATH=/opt/qt55 ..
+      -DQT5_ROOT_PATH=/opt/qt55 
       # -DINSTALL_QHPR_PLUGIN=ON 
-      # -DINSTALL_QPCV_PLUGIN=ON 
       # -DINSTALL_QPOISSON_RECON_PLUGIN=ON 
-      # -DINSTALL_QEDL_PLUGIN=ON 
-      # -DINSTALL_QSRA_PLUGIN=ON 
-      # -DINSTALL_QSSAO_PLUGIN=ON 
-      # -DINSTALL_QPCV_PLUGIN=ON 
+      -DINSTALL_QEDL_PLUGIN=ON 
+      -DINSTALL_QSRA_PLUGIN=ON 
+      -DINSTALL_QSSAO_PLUGIN=ON 
+      -DINSTALL_QPCV_PLUGIN=ON .. 
       # -DOPTION_USE_GDAL=ON 
       # -DINSTALL_QKINECT_PLUGIN=ON 
       # -DLIBFREENECT_INCLUDE_DIR="/usr/include" 
@@ -46,4 +45,4 @@ before_script:
       # - DXFLIB need a better cmake to handle libdxflib from Ub
 script:
     # We use only 4 core because gcc and clang can be memory hungry
-    - make -j4
+    - make -j2

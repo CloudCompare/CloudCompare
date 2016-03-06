@@ -38,13 +38,13 @@ public:
 	qAnimation(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "qAnimationPlugin"; }
-	virtual QString getDescription() const { return "Animation plugin, used to build a movie from a series of views."; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "qAnimationPlugin"; }
+	virtual QString getDescription() const override { return "Animation plugin, used to build a movie from a series of views."; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
-	void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 
@@ -53,7 +53,6 @@ protected slots:
 protected:
 
 	QAction* m_action;
-
 };
 
 #endif

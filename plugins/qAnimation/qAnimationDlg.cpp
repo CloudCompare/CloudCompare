@@ -17,7 +17,6 @@
 
 #include "qAnimationDlg.h"
 
-#include <cc2DViewportObject.h>
 #include <ccGLWindow.h>
 
 //Qt
@@ -26,12 +25,10 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
-#include <QElapsedTimer>
 #include <QProgressDialog>
 #include <QMessageBox>
 
 //standard includes
-#include <vector>
 #include <iomanip>
 
 #ifdef QFFMPEG_SUPPORT
@@ -91,7 +88,7 @@ qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow
 		settings.endGroup();
 	}
 
-	connect ( fpsSpinBox,				SIGNAL( valueChanged(double) ),		this, SLOT( onFPSChanged(double) ) );
+	connect ( fpsSpinBox,				SIGNAL( valueChanged(int) ),		this, SLOT( onFPSChanged(int) ) );
 	connect ( totalTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onTotalTimeChanged(double) ) );
 	connect ( stepTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onStepTimeChanged(double) ) );
 	connect ( stepSelectionList,		SIGNAL( currentRowChanged(int) ),	this, SLOT( onCurrentStepChanged(int) ) );
@@ -141,7 +138,7 @@ void qAnimationDlg::applyViewport( const cc2DViewportObject* viewport )
 	//QApplication::processEvents();
 }
 
-void qAnimationDlg::onFPSChanged(double fps)
+void qAnimationDlg::onFPSChanged(int fps)
 {
 	//nothing to do
 }

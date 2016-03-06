@@ -17,8 +17,6 @@
 
 #include "ViewInterpolate.h"
 
-//qCC_db
-#include <ccGenericGLDisplay.h>
 
 ViewInterpolate::ViewInterpolate()
     : m_view1 ( NULL )

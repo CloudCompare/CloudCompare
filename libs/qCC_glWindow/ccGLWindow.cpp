@@ -408,6 +408,7 @@ ccGLWindow::ccGLWindow(QWidget *parent,	bool silentInitialization/*=false*/)
 	, m_formerParent(0)
 	, m_showDebugTraces(false)
 	, m_pickRadius(DefaultPickRadius)
+	, m_glExtFuncSupported(false)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -675,7 +676,7 @@ void ccGLWindow::initializeGL()
 		invalidateVisualization();
 
 		//FBO support (TODO: catch error?)
-		m_glExtFunc.initializeOpenGLFunctions();
+		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
 
 		//OpenGL version
 		const char* vendorName = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
@@ -1653,6 +1654,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				CONTEXT.glH = vp.Size.h;
 				modifiedViewport = true;
 				s_oculus.fbo->stop();
+				assert(m_glExtFuncSupported);
 				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 		}
@@ -1806,6 +1808,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			currentFBO->stop();
+			assert(m_glExtFuncSupported);
 			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
@@ -1830,6 +1833,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
+				assert(m_glExtFuncSupported);
 				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
 
@@ -5215,13 +5219,15 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 		redraw();
 }
 
-bool ccGLWindow::renderToFile(QString filename,
-	float zoomFactor/*=1.0*/,
-	bool dontScaleFeatures/*=false*/,
-	bool renderOverlayItems/*=false*/)
+bool ccGLWindow::renderToFile(	QString filename,
+								float zoomFactor/*=1.0*/,
+								bool dontScaleFeatures/*=false*/,
+								bool renderOverlayItems/*=false*/)
 {
 	if (filename.isEmpty() || zoomFactor < 1.0e-2f)
+	{
 		return false;
+	}
 
 	QImage output = renderToImage(zoomFactor, dontScaleFeatures, renderOverlayItems);
 
@@ -5249,6 +5255,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 									bool renderOverlayItems/*=false*/,
 									bool silent/*=false*/)
 {
+	makeCurrent();
+
 	//current window size (in pixels)
 	int Wp = static_cast<int>(width() * zoomFactor);
 	int Hp = static_cast<int>(height() * zoomFactor);
@@ -5289,18 +5297,21 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 		setFontPointSize(getFontPointSize());
 	}
 
-	//setDisplayParameters(displayParams,true);
+	//setDisplayParameters(displayParams, true);
 
 	QImage outputImage;
-	if (m_fbo)
+	if (m_glExtFuncSupported)
 	{
 		if (!silent)
+		{
 			ccLog::Print("[Render screen via FBO]");
+		}
 
 		ccFrameBufferObject* fbo = 0;
 		ccGlFilter* filter = 0;
-		if (zoomFactor == 1.0f)
+		if (zoomFactor == 1.0f && m_fbo)
 		{
+			//we use the existing FBO
 			fbo = m_fbo;
 			filter = m_activeGLFilter;
 		}
@@ -5326,10 +5337,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			//WARNING: THIS IS A ***FRACKING*** TRICK!!!
 			//we must trick Qt painter that the widget has actually
 			//been resized, otherwise the 'renderText' won't work!
-			QRect backupRect = geometry();
-			QRect& ncRect = const_cast<QRect&>(geometry());
-			ncRect.setWidth(Wp);
-			ncRect.setHeight(Hp);
+			//QRect backupRect = geometry();
+			//QRect& ncRect = const_cast<QRect&>(geometry());
+			//ncRect.setWidth(Wp);
+			//ncRect.setHeight(Hp);
 
 			makeCurrent();
 			ccQOpenGLFunctions* glFunc = functions();
@@ -5367,21 +5378,25 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			//just to be sure
 			stopLODCycle();
 
-			//enable the FBO
-			fbo->start();
-			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO start");
-
 			RenderingParams renderingParams;
 			renderingParams.drawForeground = false;
 			bool stereoModeWasEnabled = m_stereoModeEnabled;
 			m_stereoModeEnabled = false;
+
+			//enable the FBO
+			fbo->start();
+			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO start");
+
 			fullRenderingPass(CONTEXT, renderingParams);
-			m_stereoModeEnabled = stereoModeWasEnabled;
 
 			//disable the FBO
 			fbo->stop();
-			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
+
+			//assert(m_glExtFuncSupported);
+			//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+
+			m_stereoModeEnabled = stereoModeWasEnabled;
 
 			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
 			if (m_interactionFlags == INTERACT_TRANSFORM_ENTITIES)
@@ -5423,7 +5438,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				ccGLUtils::DisplayTexture2DPosition(filter->getTexture(), 0, 0, CONTEXT.glW, CONTEXT.glH);
 				//glClear(GL_DEPTH_BUFFER_BIT);
 				fbo->stop();
-				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+				//assert(m_glExtFuncSupported);
+				//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 
 			fbo->start();
@@ -5453,7 +5469,9 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			{
 				//scale: only in ortho mode
 				if (!m_viewportParams.perspectiveView)
+				{
 					drawScale(getDisplayParameters().textDefaultCol);
+				}
 
 				//trihedron
 				drawTrihedron();
@@ -5471,7 +5489,11 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			glFunc->glReadBuffer(GL_NONE);
 
 			fbo->stop();
-			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			
+			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile");
+
+			//assert(m_glExtFuncSupported);
+			//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 
 			if (m_fbo != fbo)
 			{
@@ -5480,9 +5502,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			fbo = 0;
 
 			//don't forget to restore the right 'rect' or the widget will be broken!
-			ncRect = backupRect;
-
-			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile");
+			//ncRect = backupRect;
 
 			if (m_activeGLFilter)
 			{
@@ -5497,6 +5517,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
 			//updateZoom(1.0/zoomFactor);
+
+			//restore the default FBO
+			//assert(m_glExtFuncSupported);
+			//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 		}
 	}
 	else if (m_activeShader)

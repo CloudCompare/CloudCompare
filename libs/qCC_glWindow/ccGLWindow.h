@@ -1188,6 +1188,9 @@ protected: //members
 	//! FBO support
 	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
 
+	//! Whether FBO support is on
+	bool m_glExtFuncSupported;
+
 private:
 
 	//! Returns shaders path

@@ -145,6 +145,7 @@ bool ccSSAOFilter::init(int width,
 		m_shader = new ccShader();
 		if (!m_shader->fromFile(shadersPath, "SSAO/ssao", error))
 		{
+			error = "[SSAO] Can't load SSAO shaders";
 			reset();
 			return false;
 		}

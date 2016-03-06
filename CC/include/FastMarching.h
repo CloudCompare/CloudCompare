@@ -194,7 +194,7 @@ protected:
 	//! Initializes the TRIAL cells list
 	/** See the Fast Marching algorithm theory for more information
 	**/
-	void initTrialCells();
+	virtual void initTrialCells();
 
 	//! Instantiates grid in memory
 	/** Grid is also filled with zeros.

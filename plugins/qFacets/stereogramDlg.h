@@ -25,10 +25,7 @@
 #include <ccColorScale.h>
 
 // Qt
-#include <QLabel>
-#include <QPaintEvent>
 #include <QDialog>
-#include <QHBoxLayout>
 
 //system
 #include <utility>

@@ -115,6 +115,10 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 		message.prepend("[Qt FATAL] ");
 		ccLog::Warning(message);
 		break;
+	case QtInfoMsg:
+		message.prepend("[Qt INFO] ");
+		ccLog::Warning(message);
+		break;
 	}
 }
 

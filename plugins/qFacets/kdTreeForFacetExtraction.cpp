@@ -18,12 +18,7 @@
 #include "kdTreeForFacetExtraction.h"
 
 //qCC_db
-#include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
-
-//CCLib
-#include <Neighbourhood.h>
-#include <GenericProgressCallback.h>
 
 //Qt
 #include <QApplication>

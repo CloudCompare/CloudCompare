@@ -141,6 +141,9 @@ bool ccFrameBufferObject::initColor(GLint internalformat/*=GL_RGBA*/,
 	deleteColorTexture();
 
 	//create the new texture
+	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
+	m_glFunc.glEnable(GL_TEXTURE_2D);
+
 	GLuint texID = 0;
 	m_glFunc.glGenTextures(1, &texID);
 	m_glFunc.glBindTexture(target, texID);
@@ -150,6 +153,8 @@ bool ccFrameBufferObject::initColor(GLint internalformat/*=GL_RGBA*/,
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	m_glFunc.glTexImage2D(target, 0, internalformat, m_width, m_height, 0, format, type, 0);
 	m_glFunc.glBindTexture(target, 0);
+
+	m_glFunc.glPopAttrib();
 
 	if (!attachColor(texID, true, target))
 	{
@@ -226,6 +231,11 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
 	{
 		m_glFunc.glDeleteTextures(1, &m_depthTexture);
 	}
+
+	//create the depth texture
+	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
+	m_glFunc.glEnable(GL_TEXTURE_2D);
+
 	m_glFunc.glGenTextures  (1, &m_depthTexture);
 	m_glFunc.glBindTexture  (target, m_depthTexture);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
@@ -236,6 +246,8 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
 	m_glFunc.glTexImage2D   (target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	m_glFunc.glBindTexture  (target, 0);
+
+	m_glFunc.glPopAttrib();
 
 	m_glExtFunc.glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
 	GLenum status = m_glExtFunc.glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);

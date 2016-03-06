@@ -142,8 +142,6 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 		return;
 	}
 
-	m_glFunc.glPushAttrib(GL_ALL_ATTRIB_BITS);
-
 	if (!m_useCurrentViewport)
 	{
 		//we must use corner-based screen coordinates
@@ -154,6 +152,7 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 		m_glFunc.glMatrixMode(GL_MODELVIEW);
 		m_glFunc.glPushMatrix();
 		m_glFunc.glLoadIdentity();
+		assert(m_glFunc.glGetError() == GL_NO_ERROR);
 	}
 
 	//	HORIZONTAL
@@ -170,16 +169,10 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 
 	//Texture 1 --> 2D
 	m_glFunc.glActiveTexture(GL_TEXTURE1);
-	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
-	m_glFunc.glEnable(GL_TEXTURE_2D);
-	m_glFunc.glBindTexture(GL_TEXTURE_2D,texDepth);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, texDepth);
 
 	//Texture 0 --> 2D
 	m_glFunc.glActiveTexture(GL_TEXTURE0);
-	//m_glFunc.glEnable(GL_TEXTURE_2D);
-	//m_glFunc.glBindTexture(GL_TEXTURE_2D,texColor);
-
-	m_glFunc.glEnable(GL_TEXTURE_2D);
 	m_glFunc.glBindTexture(GL_TEXTURE_2D, texColor);
 
 	m_glFunc.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -195,19 +188,14 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 	m_glFunc.glEnd();
 
 	m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
-	//m_glFunc.glDisable(GL_TEXTURE_2D);
 
 	//Texture 0 --> 2D
 	//m_glFunc.glActiveTexture(GL_TEXTURE0);
-	//m_glFunc.glBindTexture(GL_TEXTURE_2D,0);
-	//m_glFunc.glDisable(GL_TEXTURE_2D);
+	//m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
 
 	//Texture 1 --> 2D
 	m_glFunc.glActiveTexture(GL_TEXTURE1);
 	m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
-	//m_glFunc.glDisable(GL_TEXTURE_2D);
-
-	m_glFunc.glPopAttrib();
 
 	m_shader.release();
 	m_fbo.stop();
@@ -219,8 +207,7 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 		m_glFunc.glMatrixMode(GL_MODELVIEW);
 		m_glFunc.glPopMatrix();
 	}
-
-	m_glFunc.glPopAttrib();
+	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 }
 
 void ccBilateralFilter::updateDampingTable()

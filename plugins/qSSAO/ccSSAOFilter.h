@@ -37,7 +37,6 @@
 
 //CC_FBO
 #include <ccGlFilter.h>
-#include <ccFrameBufferObject.h>
 
 //Qt
 #include <QOpenGLFunctions_2_1>
@@ -47,6 +46,7 @@
 
 class ccShader;
 class ccBilateralFilter;
+class ccFrameBufferObject;
 
 class ccSSAOFilter : public ccGlFilter
 {
@@ -79,10 +79,10 @@ protected:
 
 	int m_w;
 	int m_h;
-	std::vector<float> m_reflectTexture;
 
 	ccFrameBufferObject* m_fbo;
 	ccShader* m_shader;
+	GLuint m_texReflect;
 
 	int   m_N;								// nb of neighbours
 	float m_Kz;								// attenuation with distance
@@ -92,7 +92,8 @@ protected:
 	//! Maximum number of sampling directions
 	static const int MAX_N = 256;
 
-	float m_ssao_neighbours[3*MAX_N];	//	full sphere sampling
+	//!	Full sphere sampling
+	float m_ssao_neighbours[3 * MAX_N];
 
 	ccBilateralFilter* m_bilateralFilter;
 	bool               m_bilateralFilterEnabled;

@@ -103,18 +103,24 @@ void ccSSAOFilter::reset()
 	}
 }
 
-bool ccSSAOFilter::init(int width, int height, QString shadersPath, QString& error)
+bool ccSSAOFilter::init(unsigned width, unsigned height, QString shadersPath, QString& error)
 {
 	return init(width, height, true, true, shadersPath, error);
 }
 
-bool ccSSAOFilter::init(int width,
-						int height,
+bool ccSSAOFilter::init(unsigned width,
+						unsigned height,
 						bool enableBilateralFilter,
 						bool useReflectTexture,
 						QString shadersPath,
 						QString& error )
 {
+	if (width == 0 || height == 0)
+	{
+		error = "Invalid texture size";
+		return false;
+	}
+
 	if (!m_glFuncIsValid)
 	{
 		if (!m_glFunc.initializeOpenGLFunctions())

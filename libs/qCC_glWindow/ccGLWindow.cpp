@@ -132,7 +132,7 @@ struct OculusHMD
 			assert(!fbo);
 			fbo = new ccFrameBufferObject;
 			if (!fbo->init(	static_cast<unsigned>(bufferSize.w),
-				static_cast<unsigned>(bufferSize.h) ))
+							static_cast<unsigned>(bufferSize.h) ))
 			{
 				destroyTextureSet();
 				return false;
@@ -5601,7 +5601,7 @@ bool ccGLWindow::initGLFilter(int w, int h)
 	QString shadersPath = ccGLWindow::getShadersPath();
 
 	QString error;
-	if (!_filter->init(w, h, shadersPath, error))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), shadersPath, error))
 	{
 		ccLog::Warning(QString("[GL Filter] Initialization failed: ") + error.trimmed());
 		return false;

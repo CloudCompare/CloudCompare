@@ -53,8 +53,8 @@ public:
 		\param error error string (if an error occurred)
 		\return success
 		**/
-	virtual bool init(	int width,
-						int height,
+	virtual bool init(	unsigned width,
+						unsigned height,
 						QString shadersPath,
 						QString& error) = 0;
 

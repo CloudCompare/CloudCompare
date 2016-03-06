@@ -7840,7 +7840,7 @@ void MainWindow::activateRegisterPointPairTool()
 		return;
 	}
 
-	if (!m_pprDlg->init(win,aligned,reference))
+	if (!m_pprDlg->init(win, aligned, reference))
 		deactivateRegisterPointPairTool(false);
 
 	freezeUI(true);
@@ -10153,18 +10153,18 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	//init matrices
 	std::vector<double> rmsMatrix;
 	std::vector<ccGLMatrix> matrices;
-	std::vector< std::pair<double,double> > matrixAngles;
+	std::vector< std::pair<double, double> > matrixAngles;
 	try
 	{
 		rmsMatrix.resize(cloudCount*cloudCount,0);
 
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
-		unsigned phiSteps = static_cast<unsigned>(360.0/angularStep_deg);
+		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
 		assert(fabs(360.0 - phiSteps * angularStep_deg) < ZERO_TOLERANCE);
-		unsigned thetaSteps = static_cast<unsigned>(180.0/angularStep_deg);
+		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
 		assert(fabs(180.0 - thetaSteps * angularStep_deg) < ZERO_TOLERANCE);
-		unsigned rotCount = phiSteps * (thetaSteps-1) + 2;
+		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);
 

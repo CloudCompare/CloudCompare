@@ -46,7 +46,7 @@ ccEDLFilter::ccEDLFilter()
 	, m_expScale(100.0f)
 	, m_glFuncIsValid(false)
 {
-	for (int i = 0; i < FBO_COUNT; ++i)
+	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
 		m_fbos[i] = 0;
 	}
@@ -72,7 +72,7 @@ ccEDLFilter::ccEDLFilter()
 	setLightDir(static_cast<float>(M_PI / 2), static_cast<float>(M_PI / 2));
 
 	memset(m_neighbours, 0, sizeof(float) * 8 * 2);
-	for (int c = 0; c<8; c++)
+	for (unsigned c = 0; c < 8; c++)
 	{
 		m_neighbours[2 * c]     = static_cast<float>(cos(static_cast<double>(c) * M_PI / 4));
 		m_neighbours[2 * c + 1] = static_cast<float>(sin(static_cast<double>(c) * M_PI / 4));
@@ -99,7 +99,7 @@ ccGlFilter* ccEDLFilter::clone() const
 
 void ccEDLFilter::reset()
 {
-	for (int i = 0; i < FBO_COUNT; ++i)
+	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
 		if (m_fbos[i])
 		{
@@ -129,13 +129,19 @@ void ccEDLFilter::reset()
 	m_screenWidth = m_screenHeight = 0;
 }
 
-bool ccEDLFilter::init(int width, int height, QString shadersPath, QString& error)
+bool ccEDLFilter::init(unsigned width, unsigned height, QString shadersPath, QString& error)
 {
 	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath, error);
 }
 
-bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minMagFilter, QString shadersPath, QString& error)
+bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, GLenum minMagFilter, QString shadersPath, QString& error)
 {
+	if (width == 0 || height == 0)
+	{
+		error = "Invalid texture size";
+		return false;
+	}
+
 	if (!m_glFuncIsValid)
 	{
 		if (!m_glFunc.initializeOpenGLFunctions())
@@ -147,11 +153,11 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 
 	setValid(false);
 
-	for (int i = 0; i < FBO_COUNT; ++i)
+	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
-		int scale = (1 << i);
-		int w = width / scale;
-		int h = height / scale;
+		unsigned scale = (1 << i);
+		unsigned w = width / scale;
+		unsigned h = height / scale;
 
 		ccFrameBufferObject* &fbo = m_fbos[i];
 		if (!fbo)
@@ -259,10 +265,10 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
-	for (int i = 0; i < FBO_COUNT; ++i)
+	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
 		ccFrameBufferObject* fbo = m_fbos[i];
-		int scale = (1 << i); //1, 2, 4
+		unsigned scale = (1 << i); //1, 2, 4
 
 		fbo->start();
 

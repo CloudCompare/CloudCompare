@@ -63,7 +63,7 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(int width, int height, QString shadersPath, QString& error) override;
+	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
 	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	inline virtual GLuint getTexture() override { return m_fbo.getColorTexture(); }
 
@@ -85,8 +85,8 @@ protected: //methods
 
 protected: //members
 
-	int m_width;
-	int	m_height;
+	unsigned m_width;
+	unsigned m_height;
 
 	ccFrameBufferObject m_fbo;
 	ccShader m_shader;

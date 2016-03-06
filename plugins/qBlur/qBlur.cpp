@@ -31,7 +31,7 @@ QIcon qBlur::getIcon() const
 ccGlFilter* qBlur::getFilter()
 {
 	bool ok = false;
-	double sigma = QInputDialog::getDouble(0,"Bilateral filter","Sigma (pixel)",1.0,0.1,8.0,1,&ok);
+	double sigma = QInputDialog::getDouble(0, "Bilateral filter", "Sigma (pixel)", 1.0, 0.1, 8.0, 1, &ok);
 
 	if (!ok || sigma < 0)
 		return 0;

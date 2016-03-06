@@ -60,7 +60,7 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(int width, int height, QString shadersPath, QString& error) override;
+	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
 	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	virtual GLuint getTexture() override;
 
@@ -68,8 +68,8 @@ public:
 	void reset();
 
 	//! Inits filter
-	bool init(	int width,
-				int height,
+	bool init(	unsigned width,
+				unsigned height,
 				GLenum internalFormat,
 				GLenum minMagFilter,
 				QString shadersPath,
@@ -85,11 +85,11 @@ public:
 
 private:
 
-	int	m_screenWidth;
-	int	m_screenHeight;
+	unsigned m_screenWidth;
+	unsigned m_screenHeight;
 
 	//! Number of FBOs
-	static const int FBO_COUNT = 3;
+	static const unsigned FBO_COUNT = 3;
 
 	ccFrameBufferObject*	m_fbos[FBO_COUNT];
 	ccShader*				m_EDLShader;

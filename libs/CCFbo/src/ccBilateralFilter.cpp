@@ -70,12 +70,11 @@ void ccBilateralFilter::reset()
 	m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString& error)
+bool ccBilateralFilter::init(unsigned width, unsigned height, QString shadersPath, QString& error)
 {
-	if (width <= 0 || height <= 0)
+	if (width == 0 || height == 0)
 	{
-		error = "[Bilateral] Texture sizes cannot be negative";
-		reset();
+		error = "[Bilateral] Null texture size";
 		return false;
 	}
 
@@ -108,7 +107,7 @@ bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString
 	}
 	m_fbo.stop();
 
-	if (!m_shader.fromFile(shadersPath, "bilateral", error))
+	if (!m_shader.fromFile(shadersPath, "Bilateral/bilateral", error))
 	{
 		error = "[Bilateral] Can't load bilateral shaders";
 		reset();
@@ -201,6 +200,9 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParamete
 
 	m_shader.release();
 	m_fbo.stop();
+
+	//restore GL_TEXTURE_0 by default
+	m_glFunc.glActiveTexture(GL_TEXTURE0);
 
 	if (!m_useCurrentViewport)
 	{

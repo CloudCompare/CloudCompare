@@ -50,7 +50,7 @@ public:
 	virtual ~ccStdPluginInterface() {}
 
 	//inherited from ccPluginInterface
-	virtual CC_PLUGIN_TYPE getType() const { return CC_STD_PLUGIN; }
+	virtual CC_PLUGIN_TYPE getType() const override { return CC_STD_PLUGIN; }
 
 	//! Sets application entry point
 	/** Called just after plugin creation by qCC

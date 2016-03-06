@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -143,6 +143,8 @@
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
     <addaction name="actionAboutPlugins"/>
+    <addaction name="separator"/>
+    <addaction name="actionEnableQtWarnings"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -2897,6 +2899,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionEnableQtWarnings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable Qt warnings in Console</string>
    </property>
   </action>
  </widget>

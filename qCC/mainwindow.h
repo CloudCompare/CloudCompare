@@ -222,6 +222,8 @@ protected slots:
 	void doActionLoadFile();
 	//! Displays file save dialog
 	void doActionSaveFile();
+	//! Toggles the 'show Qt warnings in Console' option
+	void doEnableQtWarnings(bool);
 
 	//! Clones currently selected entities
 	void doActionClone();

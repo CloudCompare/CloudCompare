@@ -176,6 +176,11 @@ MainWindow::MainWindow()
 {
 	//Dialog "auto-construction"
 	setupUi(this);
+
+	//Console
+	ccConsole::Init(consoleWidget, this, this);
+	actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
+
 	QSettings settings;
 	restoreGeometry(settings.value(ccPS::MainWinGeom()).toByteArray());
 
@@ -217,9 +222,6 @@ MainWindow::MainWindow()
 	}
 
 	//tabifyDockWidget(DockableDBTree,DockableProperties);
-
-	//Console
-	ccConsole::Init(consoleWidget,this,this);
 
 	//db-tree link
 	m_ccRoot = new ccDBRoot(dbTreeView, propertiesTreeView, this);
@@ -560,6 +562,11 @@ void MainWindow::doActionShowAboutPluginsDialog()
 {
 	ccPluginDlg ccpDlg(m_pluginsPath, m_pluginFileNames, this);
 	ccpDlg.exec();
+}
+
+void MainWindow::doEnableQtWarnings(bool state)
+{
+	ccConsole::EnableQtMessages(state);
 }
 
 void MainWindow::doEnableGLFilter()
@@ -982,6 +989,7 @@ void MainWindow::connectActions()
 	connect(actionHelp,							SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
 	connect(actionAbout,						SIGNAL(triggered()),	this,		SLOT(doActionShawAboutDialog()));
 	connect(actionAboutPlugins,					SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
+	connect(actionEnableQtWarnings,				SIGNAL(toggled(bool)),	this,		SLOT(doEnableQtWarnings(bool)));
 
 	/*** Toolbars ***/
 

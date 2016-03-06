@@ -107,11 +107,14 @@ bool ccBilateralFilter::init(unsigned width, unsigned height, QString shadersPat
 	}
 	m_fbo.stop();
 
-	if (!m_shader.fromFile(shadersPath, "Bilateral/bilateral", error))
+	if (m_shader.shaders().isEmpty())
 	{
-		error = "[Bilateral] Can't load bilateral shaders";
-		reset();
-		return false;
+		if (!m_shader.fromFile(shadersPath, "Bilateral/bilateral", error))
+		{
+			error = "[Bilateral] Can't load bilateral shaders";
+			reset();
+			return false;
+		}
 	}
 
 	m_width = width;

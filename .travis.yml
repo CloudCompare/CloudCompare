@@ -23,6 +23,7 @@ before_script:
     - cd build
     - cmake -DCMAKE_BUILD_TYPE=Release
       -DQT5_ROOT_PATH=/opt/qt55
+      -DOPTION_USE_SHAPE_LIB=ON
       -DINSTALL_QBLUR_PLUGIN=ON
       -DINSTALL_QDUMMY_PLUGIN=ON
       -DINSTALL_QEDL_PLUGIN=ON
@@ -37,7 +38,6 @@ before_script:
       # -DINSTALL_QKINECT_PLUGIN=ON
       # -DLIBFREENECT_INCLUDE_DIR="/usr/include"
       # -DLIBFREENECT_LIBRARY_FILE="/usr/lib/x86_64-linux-gnu/libfreenect.so"
-      # -DOPTION_USE_SHAPE_LIB=ON
       # -DINSTALL_QGMMREG_PLUGIN=ON
       # -DINSTALL_QANIMATION_PLUGIN=ON
 

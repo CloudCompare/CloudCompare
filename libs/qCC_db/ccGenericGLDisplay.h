@@ -231,10 +231,6 @@ public:
 
 	//! Returns this window as a proper Qt widget
 	virtual QWidget* asWidget() { return 0; }
-
-	//! Returns the set of OpenGL functions
-	virtual ccQOpenGLFunctions* functions() = 0;
-
 };
 
 #endif //CC_GENERIC_GL_DISPLAY

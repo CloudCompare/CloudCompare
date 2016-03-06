@@ -46,6 +46,7 @@ ccSSAOFilter::ccSSAOFilter()
 	, m_h(0)
 	, m_fbo(0)
 	, m_shader(0)
+	, m_glFuncIsValid(0)
 {
 	setParameters(/*N=*/32,/*Kz=*/500.0f,/*R=*/0.05f,/*F=*/50.0f);
 
@@ -89,33 +90,36 @@ void ccSSAOFilter::reset()
 	m_bilateralFilter = 0;
 }
 
-bool ccSSAOFilter::init(QOpenGLContext* context, int width, int height, QString shadersPath, QString& error)
+bool ccSSAOFilter::init(int width, int height, QString shadersPath, QString& error)
 {
-	return init(context, width, height, true, true, shadersPath, error);
+	return init(width, height, true, true, shadersPath, error);
 }
 
-bool ccSSAOFilter::init(QOpenGLContext* context, 
-						int width,
+bool ccSSAOFilter::init(int width,
 						int height,
 						bool enableBilateralFilter,
 						bool useReflectTexture,
 						QString shadersPath,
 						QString& error )
 {
+	if (!m_glFuncIsValid)
+	{
+		if (!m_glFunc.initializeOpenGLFunctions())
+		{
+			return false;
+		}
+		m_glFuncIsValid = true;
+	}
+
+	setValid(false);
+
 	//in case of reinit
 	if (!m_fbo)
 	{
 		m_fbo = new ccFrameBufferObject();
 	}
 
-	QOpenGLFunctions_3_0* gl30Func = context->versionFunctions<QOpenGLFunctions_3_0>();
-	if (!gl30Func)
-	{
-		error = ccLog::Error("[SSAO] Initialization failed! (OpenGL 3.0 not supported)");
-		return false;
-	}
-
-	if (!m_fbo->init(width, height, gl30Func))
+	if (!m_fbo->init(width, height))
 	{
 		error = "[SSAO] FrameBufferObject initialization failed!";
 		reset();
@@ -140,7 +144,7 @@ bool ccSSAOFilter::init(QOpenGLContext* context,
 	{
 		if (!m_bilateralFilter)
 			m_bilateralFilter = new ccBilateralFilter();
-		if (!m_bilateralFilter->init(context, width, height, shadersPath, error))
+		if (!m_bilateralFilter->init(width, height, shadersPath, error))
 		{
 			delete m_bilateralFilter;
 			m_bilateralFilter = 0;
@@ -168,6 +172,8 @@ bool ccSSAOFilter::init(QOpenGLContext* context,
 	{
 		m_reflectTexture.clear();
 	}
+
+	setValid(true);
 
 	return true;
 }
@@ -207,30 +213,23 @@ void ccSSAOFilter::sampleSphere()
 	rk_sobol_free(&s);
 }
 
-void ccSSAOFilter::shade(QOpenGLContext* context, GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
+void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
-	if (!m_fbo || !m_shader || !context)
-	{
-		//ccLog::Warning("[ccSSAOFilter::shade] Internal error: structures not initialized!");
-		return;
-	}
-
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
-	if (!glFunc)
+	if (!isValid())
 	{
 		return;
 	}
 
-	glFunc->glPushAttrib(GL_ALL_ATTRIB_BITS);
+	m_glFunc.glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 	//we must use corner-based screen coordinates
-	glFunc->glMatrixMode(GL_PROJECTION);
-	glFunc->glPushMatrix();
-	glFunc->glLoadIdentity();
-	glFunc->glOrtho(0.0, static_cast<GLdouble>(m_w), 0.0, static_cast<GLdouble>(m_h), 0.0, 1.0);
-	glFunc->glMatrixMode(GL_MODELVIEW);
-	glFunc->glPushMatrix();
-	glFunc->glLoadIdentity();
+	m_glFunc.glMatrixMode(GL_PROJECTION);
+	m_glFunc.glPushMatrix();
+	m_glFunc.glLoadIdentity();
+	m_glFunc.glOrtho(0.0, static_cast<GLdouble>(m_w), 0.0, static_cast<GLdouble>(m_h), 0.0, 1.0);
+	m_glFunc.glMatrixMode(GL_MODELVIEW);
+	m_glFunc.glPushMatrix();
+	m_glFunc.glLoadIdentity();
 
 	m_fbo->start();
 
@@ -245,45 +244,45 @@ void ccSSAOFilter::shade(QOpenGLContext* context, GLuint texDepth, GLuint texCol
 	m_shader->setUniformValue("B_REF", m_reflectTexture.empty() ? 0 : 1);
 	m_shader->setUniformValueArray("P", m_ssao_neighbours, 1, MAX_N);
 
-	glFunc->glActiveTexture(GL_TEXTURE2);
-	glFunc->glEnable(GL_TEXTURE_2D);
-	glFunc->glBindTexture(GL_TEXTURE_2D, texColor);
+	m_glFunc.glActiveTexture(GL_TEXTURE2);
+	m_glFunc.glEnable(GL_TEXTURE_2D);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, texColor);
 
 	GLuint texReflect = 0;
 	if (!m_reflectTexture.empty())
 	{
-		glFunc->glActiveTexture(GL_TEXTURE1);
-		glFunc->glEnable(GL_TEXTURE_2D);
+		m_glFunc.glActiveTexture(GL_TEXTURE1);
+		m_glFunc.glEnable(GL_TEXTURE_2D);
 
-		glFunc->glGenTextures(1, &texReflect);
-		glFunc->glBindTexture(GL_TEXTURE_2D, texReflect);
-		glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFunc->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_w, m_h, 0, GL_RGB, GL_FLOAT, &m_reflectTexture[0]);
+		m_glFunc.glGenTextures(1, &texReflect);
+		m_glFunc.glBindTexture(GL_TEXTURE_2D, texReflect);
+		m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		m_glFunc.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_w, m_h, 0, GL_RGB, GL_FLOAT, &m_reflectTexture[0]);
 	}
 
-	glFunc->glActiveTexture(GL_TEXTURE0);
+	m_glFunc.glActiveTexture(GL_TEXTURE0);
 
-	ccGLUtils::DisplayTexture2DPosition(context, texDepth, 0, 0, m_w, m_h);
+	ccGLUtils::DisplayTexture2DPosition(texDepth, 0, 0, m_w, m_h);
 
 	if (!m_reflectTexture.empty())
 	{
-		glFunc->glActiveTexture(GL_TEXTURE1);
-		glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-		glFunc->glDisable(GL_TEXTURE_2D);
+		m_glFunc.glActiveTexture(GL_TEXTURE1);
+		m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
+		m_glFunc.glDisable(GL_TEXTURE_2D);
 
-		if (glFunc->glIsTexture(texReflect))
+		if (m_glFunc.glIsTexture(texReflect))
 		{
-			glFunc->glDeleteTextures(1, &texReflect);
+			m_glFunc.glDeleteTextures(1, &texReflect);
 			texReflect = 0;
 		}
 	}
 
-	glFunc->glActiveTexture(GL_TEXTURE2);
-	glFunc->glBindTexture(GL_TEXTURE_2D,0);
-	glFunc->glDisable(GL_TEXTURE_2D);
+	m_glFunc.glActiveTexture(GL_TEXTURE2);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D,0);
+	m_glFunc.glDisable(GL_TEXTURE_2D);
 
 	m_shader->release();
 	m_fbo->stop();
@@ -291,15 +290,15 @@ void ccSSAOFilter::shade(QOpenGLContext* context, GLuint texDepth, GLuint texCol
 	if (m_bilateralFilter)
 	{
 		m_bilateralFilter->setParams(m_bilateralGHalfSize, m_bilateralGSigma, m_bilateralGSigmaZ);
-		m_bilateralFilter->shade(context, texDepth, m_fbo->getColorTexture(), parameters);
+		m_bilateralFilter->shade(texDepth, m_fbo->getColorTexture(), parameters);
 	}
 
-	glFunc->glMatrixMode(GL_PROJECTION);
-	glFunc->glPopMatrix();
-	glFunc->glMatrixMode(GL_MODELVIEW);
-	glFunc->glPopMatrix();
+	m_glFunc.glMatrixMode(GL_PROJECTION);
+	m_glFunc.glPopMatrix();
+	m_glFunc.glMatrixMode(GL_MODELVIEW);
+	m_glFunc.glPopMatrix();
 
-	glFunc->glPopAttrib();
+	m_glFunc.glPopAttrib();
 }
 
 GLuint ccSSAOFilter::getTexture()

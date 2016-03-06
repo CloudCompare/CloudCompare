@@ -23,77 +23,55 @@
 //CCLib
 #include <CCConst.h>
 
+//Qt
+#include <QOpenGLContext>
+#include <QOpenGLFunctions_2_1>
+
 //system
 #include <assert.h>
 
 //*********** OPENGL TEXTURES ***********//
 
-void _DisplayTexture2D(ccQOpenGLFunctions* glFunc, int x, int y, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2DPosition(QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha/*=255*/)
 {
-	assert(glFunc);
-	
-	glFunc->glPushAttrib(GL_ENABLE_BIT);
-	glFunc->glEnable(GL_TEXTURE_2D);
-
-	glFunc->glColor4ub(255, 255, 255, alpha);
-	glFunc->glBegin(GL_QUADS);
-	glFunc->glTexCoord2f(0.0, 1.0);
-	glFunc->glVertex2i(x, y + h);
-	glFunc->glTexCoord2f(0.0, 0.0);
-	glFunc->glVertex2i(x, y);
-	glFunc->glTexCoord2f(1.0, 0.0);
-	glFunc->glVertex2i(x + w, y);
-	glFunc->glTexCoord2f(1.0, 1.0);
-	glFunc->glVertex2i(x + w, y + h);
-	glFunc->glEnd();
-
-	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-	glFunc->glPopAttrib();
-}
-
-void ccGLUtils::DisplayTexture2DPosition(ccQGLContext* context, QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha/*=255*/)
-{
-	if (!context)
-	{
-		assert(false);
-		return;
-	}
-
-#ifndef USE_QtOpenGL_CLASSES
-	context->bindTexture(pixmap, GL_TEXTURE_2D);
-#else
 	QOpenGLTexture texture(pixmap.toImage());
-	texture.bind();
-#endif
 
-	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
-
-	_DisplayTexture2D(glFunc, x, y, w, h, alpha);
+	DisplayTexture2DPosition(texture.textureId(), x, y, w, h, alpha);
 }
 
-void ccGLUtils::DisplayTexture2D(ccQGLContext* context, QPixmap pixmap, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int h, unsigned char alpha/*=255*/)
 {
-	DisplayTexture2DPosition(context, pixmap, -w / 2, -h / 2, w, h, alpha);
-}
-
-void ccGLUtils::DisplayTexture2DPosition(ccQGLContext* context, GLuint texID, int x, int y, int w, int h, unsigned char alpha/*=255*/)
-{
+	QOpenGLContext* context = QOpenGLContext::currentContext();
 	if (!context)
 	{
 		assert(false);
 		return;
 	}
-	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
-	glFunc->glBindTexture(GL_TEXTURE_2D, texID);
+	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	if (glFunc)
+	{
+		glFunc->glBindTexture(GL_TEXTURE_2D, texID);
 
-	_DisplayTexture2D(glFunc, x, y, w, h, alpha);
+		glFunc->glPushAttrib(GL_ENABLE_BIT);
+		glFunc->glEnable(GL_TEXTURE_2D);
 
-	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-}
+		glFunc->glColor4ub(255, 255, 255, alpha);
+		glFunc->glBegin(GL_QUADS);
+		glFunc->glTexCoord2f(0.0, 1.0);
+		glFunc->glVertex2i(x, y + h);
+		glFunc->glTexCoord2f(0.0, 0.0);
+		glFunc->glVertex2i(x, y);
+		glFunc->glTexCoord2f(1.0, 0.0);
+		glFunc->glVertex2i(x + w, y);
+		glFunc->glTexCoord2f(1.0, 1.0);
+		glFunc->glVertex2i(x + w, y + h);
+		glFunc->glEnd();
 
-void ccGLUtils::DisplayTexture2D(ccQGLContext* context, GLuint texID, int w, int h, unsigned char alpha/*=255*/)
-{
-	DisplayTexture2DPosition(context, texID, -w / 2, -h / 2, w, h, alpha);
+		glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+		glFunc->glPopAttrib();
+
+		glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 //*********** OPENGL MATRICES ***********//

@@ -39,6 +39,9 @@
 #include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
 
+//Qt
+#include <QOpenGLFunctions_2_1>
+
 //system
 #include <vector>
 
@@ -56,12 +59,11 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(QOpenGLContext* context, int width, int height, QString shadersPath, QString& error) override;
-	virtual void shade(QOpenGLContext* context, GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual bool init(int width, int height, QString shadersPath, QString& error) override;
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	virtual GLuint getTexture() override;
 
-	bool init(	QOpenGLContext* context,
-				int width,
+	bool init(	int width,
 				int height,
 				bool enableBilateralFilter,
 				bool useReflectTexture,
@@ -97,6 +99,11 @@ protected:
 	unsigned           m_bilateralGHalfSize;
 	float              m_bilateralGSigma;
 	float              m_bilateralGSigmaZ;
+
+	//! Associated OpenGL functions set
+	QOpenGLFunctions_2_1 m_glFunc;
+	//! Associated OpenGL functions set validity
+	bool m_glFuncIsValid;
 };
 
 #endif

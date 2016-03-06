@@ -42,6 +42,9 @@
 #include <ccGlFilter.h>
 #include <ccBilateralFilter.h>
 
+//Qt
+#include <QOpenGLFunctions_2_1>
+
 class ccShader;
 class ccFrameBufferObject;
 
@@ -57,16 +60,15 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(QOpenGLContext* context, int width, int height, QString shadersPath, QString& error) override;
-	virtual void shade(QOpenGLContext* context, GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual bool init(int width, int height, QString shadersPath, QString& error) override;
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	virtual GLuint getTexture() override;
 
 	//! Resets filter
 	void reset();
 
 	//! Inits filter
-	bool init(	QOpenGLContext* context,
-				int width,
+	bool init(	int width,
 				int height,
 				GLenum internalFormat,
 				GLenum minMagFilter,
@@ -132,13 +134,11 @@ private:
 
 	// Light direction
 	float	light_dir[3];
+
+	//! Associated OpenGL functions set
+	QOpenGLFunctions_2_1 m_glFunc;
+	//! Associated OpenGL functions set validity
+	bool m_glFuncIsValid;
 };
-//
-//	EyeDome Lighting
-//
-/////////////////////////////////////////////
-
-
-
 
 #endif

@@ -27,11 +27,11 @@
 #include "ccGuiParameters.h"
 
 //Qt
-#include <QMap>
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QByteArray>
 #include <QOpenGLDebugLogger>
+#include <QOpenGLExtensions>
 
 //system
 #include <unordered_set>
@@ -50,11 +50,7 @@ class ccInteractor;
 class ccPolyline;
 
 //! OpenGL 3D view
-#ifndef USE_QtOpenGL_CLASSES
-class ccGLWindow : public QGLWidget, public ccGenericGLDisplay
-#else
 class ccGLWindow : public QOpenGLWidget, public ccGenericGLDisplay
-#endif
 {
 	Q_OBJECT
 
@@ -127,12 +123,7 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(	QWidget *parent = 0,
-#ifndef USE_QtOpenGL_CLASSES
-				const QGLFormat& format = QGLFormat::defaultFormat(),
-				QGLWidget* shareWidget = 0,
-#endif
-				bool silentInitialization = false);
+	ccGLWindow(	QWidget *parent = 0, bool silentInitialization = false);
 
 	//! Destructor
 	virtual ~ccGLWindow();
@@ -143,12 +134,10 @@ public:
 	//! Returns current 'scene graph' root
 	ccHObject* getSceneDB();
 
-#ifdef USE_QtOpenGL_CLASSES
 	//replacement for the missing methods of QGLWidget
 	void renderText(int x, int y, const QString & str, const QFont & font = QFont());
 	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
 	inline void updateGL() { update(); }
-#endif
 
 	//inherited from ccGenericGLDisplay
 	virtual void toBeRefreshed() override;
@@ -162,7 +151,6 @@ public:
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
 	inline virtual QWidget* asWidget() override { return this; }
 	inline virtual QSize getScreenSize() const override { return size(); }
-	inline virtual ccQOpenGLFunctions* functions() override { return context()->versionFunctions<ccQOpenGLFunctions>(); }
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -955,6 +943,12 @@ protected: //other methods
 	//! Returns the current (OpenGL) viewport
 	inline const QRect& getGLViewport() const { return m_glViewport; }
 
+	//Default OpenGL functions set
+	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
+
+	//! Returns the set of OpenGL functions
+	inline ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
+
 protected: //members
 
 	//! GL names picking buffer
@@ -1153,9 +1147,6 @@ protected: //members
 	//! Pre-bubble-view camera parameters (backup)
 	ccViewportParameters m_preBubbleViewParameters;
 
-	//! Map of materials (unique id.) and texture identifier
-	QMap< QString, unsigned > m_materialTextures;
-
 	//! Current LOD state
 	LODState m_currentLODState;
 
@@ -1193,6 +1184,9 @@ protected: //members
 
 	//! Picking radius (pixels)
 	int m_pickRadius;
+
+	//! FBO support
+	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
 
 private:
 

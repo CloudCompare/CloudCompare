@@ -30,14 +30,16 @@
 #ifndef	CC_BILATERAL_FILTER_HEADER
 #define	CC_BILATERAL_FILTER_HEADER
 
+//Local
 #include "ccGlFilter.h"
 #include "ccShader.h"
 #include "ccFrameBufferObject.h"
 
+//Qt
+#include <QOpenGLFunctions_2_1>
+
 //system
 #include <vector>
-
-class QOpenGLFunctions_3_0;
 
 //! Bilateral filer (shader)
 /** See http://en.wikipedia.org/wiki/Bilateral_filter
@@ -61,8 +63,8 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(QOpenGLFunctions_3_0* glFunc, int width, int height, QString shadersPath, QString& error) override;
-	virtual void shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual bool init(int width, int height, QString shadersPath, QString& error) override;
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	inline virtual GLuint getTexture() override { return m_fbo.getColorTexture(); }
 
 	//! Set parameters
@@ -77,9 +79,11 @@ public:
 	//! Sets whether to use the current context (OpenGL) viewport or not
 	void useExistingViewport(bool state);
 
-protected:
+protected: //methods
 
 	void updateDampingTable();
+
+protected: //members
 
 	int m_width;
 	int	m_height;
@@ -99,6 +103,11 @@ protected:
 
 	//! Whether to use the current context (OpenGL) viewport or not
 	bool m_useCurrentViewport;
+
+	//! Associated OpenGL functions set
+	QOpenGLFunctions_2_1 m_glFunc;
+	//! Associated OpenGL functions set validity
+	bool m_glFuncIsValid;
 };
 
 #endif

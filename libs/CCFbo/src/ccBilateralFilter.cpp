@@ -17,9 +17,6 @@
 
 #include "ccBilateralFilter.h"
 
-//Qt
-#include <QOpenGLFunctions_3_0>
-
 //system
 #include <math.h>
 #include <assert.h>
@@ -42,6 +39,7 @@ ccBilateralFilter::ccBilateralFilter()
 	, m_depthSigma(0)
 	, m_dampingPixelDist(64, 0)
 	, m_useCurrentViewport(false)
+	, m_glFuncIsValid(false)
 {
 	setParams(2, 2.0f, 0.4f);
 }
@@ -72,21 +70,40 @@ void ccBilateralFilter::reset()
 	m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(QOpenGLFunctions_3_0* glFunc, int width, int height, QString shadersPath, QString& error)
+bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString& error)
 {
 	if (width <= 0 || height <= 0)
 	{
 		error = "Invalid texture size";
 	}
-	if (!m_fbo.init(static_cast<unsigned>(width), static_cast<unsigned>(height), glFunc))
+
+	if (!m_glFuncIsValid)
+	{
+		if (!m_glFunc.initializeOpenGLFunctions())
+		{
+			return false;
+		}
+		m_glFuncIsValid = true;
+	}
+
+	setValid(false);
+
+	if (!m_fbo.init(static_cast<unsigned>(width), static_cast<unsigned>(height)))
 	{
 		//ccLog::Warning("[Bilateral Filter] Can't initialize FBO!");
 		reset();
 		return false;
 	}
 
-	m_fbo.start();
-	m_fbo.initColor(GL_RGB/*GL_RGB32F*/, GL_RGB, GL_FLOAT);
+	if (!m_fbo.start())
+	{
+		return false;
+	}
+	
+	if (!m_fbo.initColor(GL_RGB, GL_RGB, GL_FLOAT))
+	{
+		return false;
+	}
 	m_fbo.stop();
 
 	if (!m_shader.fromFile(shadersPath, "bilateral", error))
@@ -98,6 +115,8 @@ bool ccBilateralFilter::init(QOpenGLFunctions_3_0* glFunc, int width, int height
 
 	m_width = width;
 	m_height = height;
+
+	setValid(true);
 
 	return true;
 }
@@ -111,25 +130,30 @@ void ccBilateralFilter::setParams(unsigned halfSpatialSize, float spatialSigma, 
 	updateDampingTable();
 }
 
-void ccBilateralFilter::shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
+void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
+	if (!isValid())
+	{
+		return;
+	}
+
 	if (!m_fbo.isValid() || !m_shader.isLinked())
 	{
 		return;
 	}
 
-	glFunc->glPushAttrib(GL_ALL_ATTRIB_BITS);
+	m_glFunc.glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 	if (!m_useCurrentViewport)
 	{
 		//we must use corner-based screen coordinates
-		glFunc->glMatrixMode(GL_PROJECTION);
-		glFunc->glPushMatrix();
-		glFunc->glLoadIdentity();
-		glFunc->glOrtho(0.0, static_cast<GLdouble>(m_width), 0.0, static_cast<GLdouble>(m_height), 0.0, 1.0);
-		glFunc->glMatrixMode(GL_MODELVIEW);
-		glFunc->glPushMatrix();
-		glFunc->glLoadIdentity();
+		m_glFunc.glMatrixMode(GL_PROJECTION);
+		m_glFunc.glPushMatrix();
+		m_glFunc.glLoadIdentity();
+		m_glFunc.glOrtho(0.0, static_cast<GLdouble>(m_width), 0.0, static_cast<GLdouble>(m_height), 0.0, 1.0);
+		m_glFunc.glMatrixMode(GL_MODELVIEW);
+		m_glFunc.glPushMatrix();
+		m_glFunc.glLoadIdentity();
 	}
 
 	//	HORIZONTAL
@@ -145,58 +169,58 @@ void ccBilateralFilter::shade(QOpenGLFunctions_3_0* glFunc, GLuint texDepth, GLu
 	m_shader.setUniformValue("SigmaDepth", m_depthSigma);
 
 	//Texture 1 --> 2D
-	glFunc->glActiveTexture(GL_TEXTURE1);
-	glFunc->glPushAttrib(GL_ENABLE_BIT);
-	glFunc->glEnable(GL_TEXTURE_2D);
-	glFunc->glBindTexture(GL_TEXTURE_2D,texDepth);
+	m_glFunc.glActiveTexture(GL_TEXTURE1);
+	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
+	m_glFunc.glEnable(GL_TEXTURE_2D);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D,texDepth);
 
 	//Texture 0 --> 2D
-	glFunc->glActiveTexture(GL_TEXTURE0);
-	//glFunc->glEnable(GL_TEXTURE_2D);
-	//glFunc->glBindTexture(GL_TEXTURE_2D,texColor);
+	m_glFunc.glActiveTexture(GL_TEXTURE0);
+	//m_glFunc.glEnable(GL_TEXTURE_2D);
+	//m_glFunc.glBindTexture(GL_TEXTURE_2D,texColor);
 
-	glFunc->glEnable(GL_TEXTURE_2D);
-	glFunc->glBindTexture(GL_TEXTURE_2D, texColor);
+	m_glFunc.glEnable(GL_TEXTURE_2D);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, texColor);
 
-	glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glFunc->glBegin(GL_QUADS);
-	glFunc->glTexCoord2f(0.0f, 0.0f);
-	glFunc->glVertex2i(0, 0);
-	glFunc->glTexCoord2f(1.0f, 0.0f);
-	glFunc->glVertex2i(m_width, 0);
-	glFunc->glTexCoord2f(1.0f, 1.0f);
-	glFunc->glVertex2i(m_width, m_height);
-	glFunc->glTexCoord2f(0.0f, 1.0f);
-	glFunc->glVertex2i(0, m_height);
-	glFunc->glEnd();
+	m_glFunc.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	m_glFunc.glBegin(GL_QUADS);
+	m_glFunc.glTexCoord2f(0.0f, 0.0f);
+	m_glFunc.glVertex2i(0, 0);
+	m_glFunc.glTexCoord2f(1.0f, 0.0f);
+	m_glFunc.glVertex2i(m_width, 0);
+	m_glFunc.glTexCoord2f(1.0f, 1.0f);
+	m_glFunc.glVertex2i(m_width, m_height);
+	m_glFunc.glTexCoord2f(0.0f, 1.0f);
+	m_glFunc.glVertex2i(0, m_height);
+	m_glFunc.glEnd();
 
-	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-	//glFunc->glDisable(GL_TEXTURE_2D);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
+	//m_glFunc.glDisable(GL_TEXTURE_2D);
 
 	//Texture 0 --> 2D
-	//glFunc->glActiveTexture(GL_TEXTURE0);
-	//glFunc->glBindTexture(GL_TEXTURE_2D,0);
-	//glFunc->glDisable(GL_TEXTURE_2D);
+	//m_glFunc.glActiveTexture(GL_TEXTURE0);
+	//m_glFunc.glBindTexture(GL_TEXTURE_2D,0);
+	//m_glFunc.glDisable(GL_TEXTURE_2D);
 
 	//Texture 1 --> 2D
-	glFunc->glActiveTexture(GL_TEXTURE1);
-	glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-	//glFunc->glDisable(GL_TEXTURE_2D);
+	m_glFunc.glActiveTexture(GL_TEXTURE1);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
+	//m_glFunc.glDisable(GL_TEXTURE_2D);
 
-	glFunc->glPopAttrib();
+	m_glFunc.glPopAttrib();
 
 	m_shader.release();
 	m_fbo.stop();
 
 	if (!m_useCurrentViewport)
 	{
-		glFunc->glMatrixMode(GL_PROJECTION);
-		glFunc->glPopMatrix();
-		glFunc->glMatrixMode(GL_MODELVIEW);
-		glFunc->glPopMatrix();
+		m_glFunc.glMatrixMode(GL_PROJECTION);
+		m_glFunc.glPopMatrix();
+		m_glFunc.glMatrixMode(GL_MODELVIEW);
+		m_glFunc.glPopMatrix();
 	}
 
-	glFunc->glPopAttrib();
+	m_glFunc.glPopAttrib();
 }
 
 void ccBilateralFilter::updateDampingTable()
@@ -205,11 +229,11 @@ void ccBilateralFilter::updateDampingTable()
 
 	//constant quotient
 	float q = m_halfSpatialSize * m_spatialSigma;
-	q = 2.0f * (q*q);
+	q = 2 * (q*q);
 
-	for (unsigned c=0; c<=m_halfSpatialSize; c++)
+	for (unsigned c = 0; c <= m_halfSpatialSize; c++)
 	{
-		for (unsigned d=0; d<=m_halfSpatialSize; d++)
+		for (unsigned d = 0; d <= m_halfSpatialSize; d++)
 		{
 			//pixel distance based damping
 			m_dampingPixelDist[c*(m_halfSpatialSize + 1) + d] = exp((c*c + d*d) / (-q));

@@ -7520,23 +7520,7 @@ ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
 
-#ifndef USE_QtOpenGL_CLASSES
-	//already existing window?
-	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	ccGLWindow* otherWin = 0;
-	if (!subWindowList.isEmpty())
-		otherWin = static_cast<ccGLWindow*>(subWindowList[0]->widget());
-
-	QGLFormat format = QGLFormat::defaultFormat();
-	format.setStencil(false);
-	format.setDoubleBuffer(true);
-	format.setStereo(true);
-	//format.setSwapInterval(1);
-
-	ccGLWindow *view3D = new ccGLWindow(this, format, otherWin); //We share OpenGL contexts between windows!
-#else
 	ccGLWindow *view3D = new ccGLWindow(this);
-#endif
 
 	view3D->setMinimumSize(400,300);
 	view3D->resize(500,400);

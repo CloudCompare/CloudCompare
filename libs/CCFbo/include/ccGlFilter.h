@@ -21,8 +21,6 @@
 //Qt
 #include <QString>
 
-class QOpenGLFunctions_3_0;
-
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to
 	textures (typically the rendered scene), typically
@@ -34,8 +32,8 @@ public:
 
 	//! Default constructor
 	ccGlFilter(QString description)
-		: m_description(description)
-		, m_glFunc(0)
+		: m_isValid(false)
+		, m_description(description)
 	{}
 
 	//! Default destructor
@@ -55,8 +53,7 @@ public:
 		\param error error string (if an error occurred)
 		\return success
 		**/
-	virtual bool init(	QOpenGLFunctions_3_0* glFunc,
-						int width,
+	virtual bool init(	int width,
 						int height,
 						QString shadersPath,
 						QString& error) = 0;
@@ -83,21 +80,28 @@ public:
 	};
 
 	//! Applies filter to texture (depth + color)
-	virtual void shade(	QOpenGLFunctions_3_0* glFunc,
-						unsigned texDepth,
+	virtual void shade(	unsigned texDepth,
 						unsigned texColor,
 						ViewportParameters& parameters) = 0;
 
 	//! Returns resulting texture
 	virtual unsigned getTexture() = 0;
 
+protected: //methods
+
+	//! Sets whether the filter is valid
+	inline void setValid(bool state) { m_isValid = state; }
+
+	//! Returns whether the filter is valid
+	inline bool isValid() const { return m_isValid; }
+
 protected:
+
+	//! Filter validity
+	bool m_isValid;
 
 	//! Filter description
 	QString m_description;
-
-	//! Associated OpenGL functions
-	QOpenGLFunctions_3_0* m_glFunc;
 };
 
 #endif

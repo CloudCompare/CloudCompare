@@ -292,7 +292,7 @@ static int s_GlWindowNumber = 0;
 
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
-inline static void glColor3ubv_safe(ccQOpenGLFunctions* glFunc, const unsigned char* rgb)
+template<class QOpenGLFunctions> inline static void glColor3ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
 {
 	assert(glFunc);
 	//glColor3ubv(rgb);
@@ -300,7 +300,7 @@ inline static void glColor3ubv_safe(ccQOpenGLFunctions* glFunc, const unsigned c
 						rgb[1] / 255.0f,
 						rgb[2] / 255.0f);
 }
-inline static void glColor4ubv_safe(ccQOpenGLFunctions* glFunc, const unsigned char* rgb)
+template<class QOpenGLFunctions> inline static void glColor4ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
 {
 	assert(glFunc);
 	//glColor4ubv(rgb);
@@ -330,12 +330,6 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 		return true;
 	}
 
-	QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
-	if (!gl32Func)
-	{
-		return false;
-	}
-
 	//we "disconnect" the current FBO to avoid wrong display/errors
 	//if QT tries to redraw window during initialization
 	ccFrameBufferObject* _fbo = fbo;
@@ -346,8 +340,8 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 		_fbo = new ccFrameBufferObject();
 	}
 
-	if (	!_fbo->init(w, h, gl32Func)
-		||	!_fbo->initColor(GL_RGBA, GL_RGBA, GL_FLOAT)
+	if (	!_fbo->init(w, h)
+		||	!_fbo->initColor()
 		||	!_fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D))
 	{
 		delete _fbo;
@@ -359,18 +353,8 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 	return true;
 }
 
-ccGLWindow::ccGLWindow(QWidget *parent,
-#ifndef USE_QtOpenGL_CLASSES
-	const QGLFormat& format/*=QGLFormat::defaultFormat()*/,
-	QGLWidget* shareWidget/*=0*/,
-#endif
-	bool silentInitialization/*=false*/)
-
-#ifndef USE_QtOpenGL_CLASSES
-	: QGLWidget(format, parent, shareWidget)
-#else
+ccGLWindow::ccGLWindow(QWidget *parent,	bool silentInitialization/*=false*/)
 	: QOpenGLWidget(parent)
-#endif
 	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
 	, m_initialized(false)
 	, m_trihedronGLList(GL_INVALID_LIST_ID)
@@ -690,6 +674,9 @@ void ccGLWindow::initializeGL()
 		invalidateViewport();
 		invalidateVisualization();
 
+		//FBO support (TODO: catch error?)
+		m_glExtFunc.initializeOpenGLFunctions();
+
 		//OpenGL version
 		const char* vendorName = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
 		if (!m_silentInitialization)
@@ -885,18 +872,6 @@ void ccGLWindow::uninitializeGL()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	//DGM FIXME: this is not necessary anymore?
-#ifndef USE_QtOpenGL_CLASSES
-	//release textures
-	{
-		for (QMap< QString, unsigned >::iterator it = m_materialTextures.begin(); it != m_materialTextures.end(); ++it)
-		{
-			deleteTexture(it.value());
-		}
-		m_materialTextures.clear();
-	}
-#endif
-
 	if (m_trihedronGLList != GL_INVALID_LIST_ID)
 	{
 		glFunc->glDeleteLists(m_trihedronGLList, 1);
@@ -956,11 +931,7 @@ bool ccGLWindow::event(QEvent* evt)
 		break;
 	}
 
-#ifndef USE_QtOpenGL_CLASSES
-	return QGLWidget::event(evt);
-#else
 	return QOpenGLWidget::event(evt);
-#endif
 }
 
 void ccGLWindow::setGLViewport(const QRect& rect)
@@ -968,7 +939,9 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 	m_glViewport = rect;
 
 	makeCurrent();
-	functions()->glViewport(rect.x(), rect.y(), rect.width(), rect.height());
+
+	const qreal retinaScale = devicePixelRatio();
+	functions()->glViewport(rect.x() * retinaScale, rect.y() * retinaScale, rect.width() * retinaScale, rect.height() * retinaScale);
 }
 
 void ccGLWindow::resizeGL(int w, int h)
@@ -1217,7 +1190,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		int xStart = xStart0 + HotZone::margin();
 
 		//label
-		glColor3ubv_safe(glFunc, s_hotZone->color);
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
 		renderText(xStart, yStart + s_hotZone->yTextBottomLineShift, s_hotZone->psi_label, s_hotZone->font);
 
 		//icons
@@ -1226,14 +1199,14 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		//"minus" icon
 		{
 			static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
-			ccGLUtils::DisplayTexture2DPosition(context(), c_psi_minusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
+			ccGLUtils::DisplayTexture2DPosition(c_psi_minusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
 			xStart += HotZone::iconSize();
 		}
 
 		//separator
 		{
-			glColor3ubv_safe(glFunc, s_hotZone->color);
+			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
 			glFunc->glBegin(GL_POINTS);
 			glFunc->glVertex2i(-halfW + xStart + HotZone::margin() / 2, halfH - (yStart + HotZone::iconSize() / 2));
 			glFunc->glEnd();
@@ -1243,7 +1216,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		//"plus" icon
 		{
 			static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
-			ccGLUtils::DisplayTexture2DPosition(context(), c_psi_plusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
+			ccGLUtils::DisplayTexture2DPosition(c_psi_plusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
 			xStart += HotZone::iconSize();
 		}
@@ -1257,7 +1230,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		int xStart = xStart0 + HotZone::margin();
 
 		//label
-		glColor3ubv_safe(glFunc, s_hotZone->color);
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
 		renderText(xStart, yStart + s_hotZone->yTextBottomLineShift, s_hotZone->bbv_label, s_hotZone->font);
 
 		//icon
@@ -1265,7 +1238,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//"exit" icon
 		{
-			ccGLUtils::DisplayTexture2DPosition(context(), c_exitIcon, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
+			ccGLUtils::DisplayTexture2DPosition(c_exitIcon, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
 			xStart += HotZone::iconSize();
 		}
@@ -1279,7 +1252,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 		int xStart = xStart0 + HotZone::margin();
 
 		//label
-		glColor3ubv_safe(glFunc, s_hotZone->color);
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
 		renderText(xStart, yStart + s_hotZone->yTextBottomLineShift, s_hotZone->fs_label, s_hotZone->font);
 
 		//icon
@@ -1287,7 +1260,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//"full-screen" icon
 		{
-			ccGLUtils::DisplayTexture2DPosition(context(), c_exitIcon, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
+			ccGLUtils::DisplayTexture2DPosition(c_exitIcon, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_FULLSCREEN_MODE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
 			xStart += HotZone::iconSize();
 		}
@@ -1548,7 +1521,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glFunc->glBegin(GL_QUADS);
 				{
 					//we use the default background color for gradient start
-					glColor3ubv_safe(glFunc, bkgCol.rgb);
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol.rgb);
 					glFunc->glVertex2i(-w, h);
 					glFunc->glVertex2i(w, h);
 					//and the inverse of the text color for gradient stop
@@ -1680,7 +1653,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				CONTEXT.glH = vp.Size.h;
 				modifiedViewport = true;
 				s_oculus.fbo->stop();
-				this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 		}
 #endif //CC_OCULUS_SUPPORT
@@ -1795,7 +1768,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		glFunc->glDisable(GL_DEPTH_TEST);
 
-		glColor3ubv_safe(glFunc, ccColor::black.rgba);
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 		glFunc->glBegin(GL_QUADS);
 		glFunc->glVertex2i(x, m_glViewport.height() - y);
 		glFunc->glVertex2i(x, m_glViewport.height() - (y + 100));
@@ -1803,7 +1776,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		glFunc->glVertex2i(x + 200, m_glViewport.height() - y);
 		glFunc->glEnd();
 
-		glColor3ubv_safe(glFunc, ccColor::yellow.rgba);
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow.rgba);
 		for (int i = 0; i < diagStrings.size(); ++i)
 		{
 			QString str = diagStrings[i];
@@ -1833,7 +1806,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			currentFBO->stop();
-			this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
 			m_updateFBO = false;
 		}
@@ -1856,9 +1829,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				}
 
 				//apply shader
-				QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
-				m_activeGLFilter->shade(gl32Func, depthTex, colorTex, parameters);
-				this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
+				m_activeGLFilter->shade(depthTex, colorTex, parameters);
+				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
 
 				//if capture mode is ON: we only want to capture it, not to display it
@@ -1878,7 +1850,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 			//we display the FBO texture fullscreen (if any)
 			if (glFunc->glIsTexture(screenTex))
 			{
-				setStandardOrthoCenter();
+				setStandardOrthoCorner();
 
 				glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 				glFunc->glDisable(GL_DEPTH_TEST);
@@ -1895,11 +1867,11 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 					//glFunc->glDrawBuffer(GL_BACK);
 				}
 
-				ccGLUtils::DisplayTexture2D(this->context(), screenTex, m_glViewport.width(), m_glViewport.height());
-#ifdef USE_QtOpenGL_CLASSES
+				ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, m_glViewport.width(), m_glViewport.height());
+
 				//warning: we must restore the original FBO with QOpenGLWidgets
 				glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultFramebufferObject());
-#endif
+
 				glFunc->glPopAttrib();
 
 				//we don't need the depth info anymore!
@@ -2330,7 +2302,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 				glFunc->glPopAttrib();
 
-				glColor3ubv_safe(glFunc, ccColor::black.rgba);
+				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 				renderText(	10,
 							borderHeight - CC_GL_FILTER_BANNER_MARGIN - CC_GL_FILTER_BANNER_MARGIN / 2,
 							QString("[GL filter] ") + m_activeGLFilter->getDescription()
@@ -2342,7 +2314,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			//current messages (if valid)
 			if (!m_messagesToDisplay.empty())
 			{
-				glColor3ubv_safe(glFunc, textCol.rgb);
+				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, textCol.rgb);
 
 				int ll_currentHeight = m_glViewport.height() - 10; //lower left
 				int uc_currentHeight = 10; //upper center
@@ -2792,7 +2764,7 @@ void ccGLWindow::drawCross()
 	assert(glFunc);
 	
 	//cross OpenGL drawing
-	glColor3ubv_safe(glFunc, ccColor::lightGrey.rgba);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(0.0, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0);
 	glFunc->glVertex3f(0.0, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0);
@@ -2852,7 +2824,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	assert(glFunc);
 
 	//scale OpenGL drawing
-	glColor3ubv_safe(glFunc, color.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(w - scaleW_pix, -h, 0.0);
 	glFunc->glVertex3f(w, -h, 0.0);
@@ -2863,7 +2835,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glFunc->glEnd();
 
 	QString text = QString::number(equivalentWidth);
-	glColor3ubv_safe(glFunc, color.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
 	renderText(m_glViewport.width() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2, m_glViewport.height() - static_cast<int>(dH / 2) + fm.height() / 3, text, font);
 }
 
@@ -3213,9 +3185,9 @@ void ccGLWindow::setStandardOrthoCenter()
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
-	float halfW = m_glViewport.width() / 2.0f;
-	float halfH = m_glViewport.height() / 2.0f;
-	float maxS = std::max(halfW, halfH);
+	double halfW = m_glViewport.width() / 2.0f;
+	double halfH = m_glViewport.height() / 2.0f;
+	double maxS = std::max(halfW, halfH);
 	glFunc->glOrtho(-halfW, halfW, -halfH, halfH, -maxS, maxS);
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glLoadIdentity();
@@ -4740,9 +4712,14 @@ void ccGLWindow::drawCustomLight()
 }
 
 //draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY) 
-static void glDrawUnitCircle(ccQOpenGLFunctions* glFunc, unsigned char dim, unsigned steps = 64)
+static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigned steps = 64)
 {
-	assert(glFunc);
+	assert(context);
+	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	if (!glFunc)
+	{
+		return;
+	}
 
 	double thetaStep = 2.0 * M_PI / static_cast<double>(steps);
 	unsigned char dimX = (dim < 2 ? dim + 1 : 0);
@@ -4844,21 +4821,21 @@ void ccGLWindow::drawPivot()
 
 		//pivot symbol: 3 circles
 		glFunc->glColor4f(1.0f, 0.0f, 0.0f, c_alpha);
-		glDrawUnitCircle(glFunc, 0);
+		glDrawUnitCircle(context(), 0);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(-1.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(1.0f, 0.0f, 0.0f);
 		glFunc->glEnd();
 
 		glFunc->glColor4f(0.0f, 1.0f, 0.0f, c_alpha);
-		glDrawUnitCircle(glFunc, 1);
+		glDrawUnitCircle(context(), 1);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, -1.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 1.0f, 0.0f);
 		glFunc->glEnd();
 
 		glFunc->glColor4f(0.0f, 0.7f, 1.0f, c_alpha);
-		glDrawUnitCircle(glFunc, 2);
+		glDrawUnitCircle(context(), 2);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, -1.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 1.0f);
@@ -5330,9 +5307,9 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 		else
 		{
 			fbo = new ccFrameBufferObject();
-			QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
-			bool success = (	fbo->init(Wp, Hp, gl32Func)
-							&&	fbo->initColor(GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
+
+			bool success = (	fbo->init(Wp, Hp)
+							&&	fbo->initColor()
 							&&	fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D));
 			if (!success)
 			{
@@ -5340,6 +5317,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 					ccLog::Error("[FBO] Initialization failed! (not enough memory?)");
 				delete fbo;
 				fbo = 0;
+				return QImage();
 			}
 		}
 
@@ -5365,8 +5343,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				QString shadersPath = ccGLWindow::getShadersPath();
 
 				QString error;
-				QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
-				if (!m_activeGLFilter->init(gl32Func, Wp, Hp, shadersPath, error))
+				if (!m_activeGLFilter->init(Wp, Hp, shadersPath, error))
 				{
 					if (!silent)
 					{
@@ -5403,7 +5380,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			//disable the FBO
 			fbo->stop();
-			this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
 
 			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
@@ -5412,17 +5389,14 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
 			}
 
-			//setStandardOrthoCenter();
-			{
-				glFunc->glMatrixMode(GL_PROJECTION);
-				glFunc->glLoadIdentity();
-				float halfW = Wp / 2.0f;
-				float halfH = Hp / 2.0f;
-				float maxS = std::max(halfW, halfH);
-				glFunc->glOrtho(-halfW, halfW, -halfH, halfH, -maxS, maxS);
-				glFunc->glMatrixMode(GL_MODELVIEW);
-				glFunc->glLoadIdentity();
-			}
+			//glFunc->glMatrixMode(GL_PROJECTION);
+			//glFunc->glLoadIdentity();
+			//float halfW = Wp / 2.0f;
+			//float halfH = Hp / 2.0f;
+			//float maxS = std::max(halfW, halfH);
+			//glFunc->glOrtho(-halfW, halfW, -halfH, halfH, -maxS, maxS);
+			//glFunc->glMatrixMode(GL_MODELVIEW);
+			//glFunc->glLoadIdentity();
 
 			glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 			glFunc->glDisable(GL_DEPTH_TEST);
@@ -5439,20 +5413,21 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				parameters.zNear = m_viewportParams.zNear;
 				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
 				//apply shader
-				QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
-				filter->shade(gl32Func, depthTex, colorTex, parameters);
+				filter->shade(depthTex, colorTex, parameters);
 
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
 
 				//if render mode is ON: we only want to capture it, not to display it
 				fbo->start();
-				ccGLUtils::DisplayTexture2D(context(), filter->getTexture(), CONTEXT.glW, CONTEXT.glH);
+				setStandardOrthoCorner();
+				ccGLUtils::DisplayTexture2DPosition(filter->getTexture(), 0, 0, CONTEXT.glW, CONTEXT.glH);
 				//glClear(GL_DEPTH_BUFFER_BIT);
 				fbo->stop();
-				this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			}
 
 			fbo->start();
+			setStandardOrthoCenter();
 
 			//we draw 2D entities (mainly for the color ramp!)
 			if (m_globalDBRoot)
@@ -5496,7 +5471,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			glFunc->glReadBuffer(GL_NONE);
 
 			fbo->stop();
-			this->context()->versionFunctions<QOpenGLFunctions_3_0>()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 
 			if (m_fbo != fbo)
 			{
@@ -5535,12 +5510,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 		if (!silent)
 			ccLog::Print("[Render screen via QT pixmap]");
 
-		//DGM FIXME: this is not necessary anymore?
-#ifdef USE_QtOpenGL_CLASSES
 		outputImage = grabFramebuffer();
-#else
-		outputImage = renderPixmap(Wp, Hp).toImage();
-#endif
 		if (outputImage.isNull())
 		{
 			if (!silent)
@@ -5621,11 +5591,7 @@ bool ccGLWindow::initGLFilter(int w, int h)
 		return false;
 	}
 
-	QOpenGLFunctions_3_0* gl32Func = this->context()->versionFunctions<QOpenGLFunctions_3_0>();
-	if (!gl32Func)
-	{
-		return false;
-	}
+	makeCurrent();
 
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during initialization
@@ -5635,7 +5601,7 @@ bool ccGLWindow::initGLFilter(int w, int h)
 	QString shadersPath = ccGLWindow::getShadersPath();
 
 	QString error;
-	if (!_filter->init(gl32Func, w, h, shadersPath, error))
+	if (!_filter->init(w, h, shadersPath, error))
 	{
 		ccLog::Warning(QString("[GL Filter] Initialization failed: ") + error.trimmed());
 		return false;
@@ -5655,7 +5621,7 @@ int ccGLWindow::getGlFilterBannerHeight() const
 
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgb/*=0*/, const QFont& font/*=QFont()*/)
 {
-	glColor3ubv_safe(functions(), rgb ? rgb : getDisplayParameters().textDefaultCol.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(functions(), rgb ? rgb : getDisplayParameters().textDefaultCol.rgb);
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
@@ -5741,7 +5707,7 @@ void ccGLWindow::displayText(	QString text,
 	else if (align & ALIGN_VMIDDLE)
 		y2 -= margin / 2; //empirical compensation
 
-	glColor3ubv_safe(glFunc, col);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, col);
 	renderText(x2, y2, text, textFont);
 }
 
@@ -5936,12 +5902,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 	if (params.glassType == StereoParams::NVIDIA_VISION)
 	{
 		if (	!format().stereo()
-#ifndef USE_QtOpenGL_CLASSES
-			||	!format().doubleBuffer()
-#else
-			|| format().swapBehavior() != QSurfaceFormat::DoubleBuffer
-#endif
-			)
+			||	format().swapBehavior() != QSurfaceFormat::DoubleBuffer )
 			
 		{
 			QMessageBox::critical(this, "Stereo", "Quad buffering not supported!");
@@ -6064,8 +6025,6 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 	emit exclusiveFullScreenToggled(state);
 }
 
-#ifdef USE_QtOpenGL_CLASSES
-
 void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
 {
 	makeCurrent();
@@ -6156,4 +6115,3 @@ void ccGLWindow::renderText(double x, double y, double z, const QString & str, c
 	}
 }
 
-#endif

@@ -20,6 +20,7 @@ find_package(Qt5Gui)
 find_package(Qt5PrintSupport)
 find_package(Qt5Concurrent)
 find_package(Qt5OpenGL)
+find_package(Qt5OpenGLExtensions)
 
 # in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 # thus no need to keep additional variables and checks
@@ -42,7 +43,8 @@ include_directories(${Qt5OpenGL_INCLUDE_DIRS}
                     ${Qt5Core_INCLUDE_DIRS}
                     ${Qt5Gui_INCLUDE_DIRS}
                     ${Qt5Concurrent_INCLUDE_DIRS}
-                    ${Qt5PrintSupport_INCLUDE_DIRS})
+                    ${Qt5PrintSupport_INCLUDE_DIRS}
+					)
 
 # ------------------------------------------------------------------------------
 # OpenGL

@@ -43,11 +43,11 @@ public:
 					OpenGL Textures
 	***************************************************/
 
-	static void DisplayTexture2DPosition(ccQGLContext* context, QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha = 255);
-	static void DisplayTexture2D(ccQGLContext* context, QPixmap pixmap, int w, int h, unsigned char alpha = 255);
+	static void DisplayTexture2DPosition(QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha = 255);
+	inline static void DisplayTexture2D(QPixmap pixmap, int w, int h, unsigned char alpha = 255) { DisplayTexture2DPosition(pixmap, -w / 2, -h / 2, w, h, alpha); }
 
-	static void DisplayTexture2DPosition(ccQGLContext* context, GLuint texID, int x, int y, int w, int h, unsigned char alpha = 255);
-	static void DisplayTexture2D(ccQGLContext* context, GLuint texID, int w, int h, unsigned char alpha = 255);
+	static void DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int h, unsigned char alpha = 255);
+	inline static void DisplayTexture2D(GLuint texID, int w, int h, unsigned char alpha = 255) { DisplayTexture2DPosition(texID, -w / 2, -h / 2, w, h, alpha); }
 
 	/***************************************************
 					OpenGL Matrices

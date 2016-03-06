@@ -15,7 +15,6 @@ add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
-target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES})
 
 # Qt
 qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)

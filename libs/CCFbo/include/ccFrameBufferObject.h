@@ -18,7 +18,9 @@
 #ifndef CC_FRAME_BUFFER_OBJECT
 #define CC_FRAME_BUFFER_OBJECT
 
-#include <QOpenGLFunctions_3_0>
+//Qt
+#include <QOpenGLExtensions>
+#include <QOpenGLFunctions_2_1>
 
 //! F.B.O. encapsulation
 /** Compared to the QOpenGLFramebufferObject class, this one offers the possibility to:
@@ -31,17 +33,17 @@ public:
 	ccFrameBufferObject();
 	~ccFrameBufferObject();
 
-	bool init(unsigned w, unsigned h, QOpenGLFunctions_3_0* glFunc);
+	bool init(unsigned w, unsigned h);
 	void reset();
-	void start();
+	bool start();
 	void stop();
 
 	inline bool isValid() const { return m_fboId; }
 
-	bool initColor(	GLint internalformat,
-					GLenum format,
-					GLenum type,
-					GLint minMagFilter = GL_LINEAR,
+	bool initColor(	GLint internalformat = GL_RGBA,
+					GLenum format = GL_RGBA,
+					GLenum type = GL_UNSIGNED_BYTE,
+					GLint minMagFilter = GL_NEAREST,
 					GLenum target = GL_TEXTURE_2D);
 
 	bool attachColor(	GLuint texID,
@@ -53,7 +55,7 @@ public:
 					GLint minMagFilter = GL_NEAREST,
 					GLenum textureTarget = GL_TEXTURE_2D);
 
-	GLuint getID();
+	inline GLuint getID() const { return m_fboId;  }
 	inline GLuint getColorTexture() const { return m_colorTexture; }
 	inline GLuint getDepthTexture() const { return m_depthTexture; }
 
@@ -62,10 +64,15 @@ public:
 	//! Returns height
 	inline unsigned height() const { return m_height; }
 
-protected:
+protected: //methods
 
 	//! Deletes/releases the color texture
 	void deleteColorTexture();
+
+protected: //members
+
+	//! FBO validity
+	bool m_isValid;
 
 	//! Width
 	unsigned m_width;
@@ -84,8 +91,9 @@ protected:
 	//! ID
 	GLuint m_fboId;
 
-	//! Associated OpenGL functions
-	QOpenGLFunctions_3_0* m_glFunc;
+	// For portability, we need to use 2.1 + extensions to get FBOs
+	QOpenGLFunctions_2_1 m_glFunc;
+	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
 };
 
 #endif

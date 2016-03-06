@@ -161,14 +161,11 @@ int main(int argc, char **argv)
 	if (!commandLine)
 	{
 		//DGM FIXME: do the same with Qt 5 + reject if Qt version is < 2.1
-#ifndef USE_QtOpenGL_CLASSES
-		//OpenGL?
-		if (!QGLFormat::hasOpenGL())
-		{
-			QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
-			return EXIT_FAILURE;
-		}
-#endif
+		//if (!QGLFormat::hasOpenGL())
+		//{
+		//	QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+		//	return EXIT_FAILURE;
+		//}
 
 		//splash screen
 		splashStartTime.start();

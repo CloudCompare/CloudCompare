@@ -31,7 +31,3 @@ ccGlFilter* qSSAO::getFilter()
 {
 	return new ccSSAOFilter();
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qSSAO,qSSAO);
-#endif

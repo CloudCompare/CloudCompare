@@ -525,7 +525,3 @@ QIcon qPoissonRecon::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qPoissonRecon/qPoissonRecon.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qPoissonRecon,qPoissonRecon);
-#endif

@@ -390,7 +390,3 @@ QIcon qHPR::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qHPR/cc_hpr.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qHPR,qHPR);
-#endif

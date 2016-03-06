@@ -1122,7 +1122,3 @@ QIcon qFacets::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qFacets/qFacets.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qFacets,qFacets);
-#endif

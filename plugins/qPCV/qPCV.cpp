@@ -234,7 +234,3 @@ QIcon qPCV::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qPCV/cc_ShadeVisIcon.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qPCV,qPCV);
-#endif

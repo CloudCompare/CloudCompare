@@ -156,8 +156,3 @@ QIcon qAnimation::getIcon() const
     //(eventually, remove the original qAnimation.qrc file!)
     return QIcon(":/CC/plugin/qAnimation/animation.png");
 }
-
-#ifndef CC_QT5
-//Don't forget to replace 'qAnimation' by your own plugin class name here also!
-Q_EXPORT_PLUGIN2(qAnimation,qAnimation);
-#endif

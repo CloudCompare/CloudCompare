@@ -43,7 +43,3 @@ ccGlFilter* qBlur::getFilter()
 
 	return filter;
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qBlur,qBlur);
-#endif

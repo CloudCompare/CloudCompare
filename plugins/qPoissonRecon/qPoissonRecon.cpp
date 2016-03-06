@@ -24,7 +24,6 @@
 #include <QtGui>
 #include <QInputDialog>
 #include <QtCore>
-#include <QProgressDialog>
 #include <QtConcurrentRun>
 #include <QDialog>
 #include <QMainWindow>
@@ -38,11 +37,7 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-//CCLib
-#include <CCPlatform.h>
-
 //System
-#include <algorithm>
 #if defined(CC_WINDOWS)
 #include "Windows.h"
 #else

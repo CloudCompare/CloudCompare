@@ -31,7 +31,7 @@
 
 //temporary test for QOpenGLWidget integration
 #if (QT_VERSION < QT_VERSION_CHECK(5, 4, 0))
-	Error: CloudCompare doesn't support versions of Qt prior to 5.4 anymore!
+#error	Error: CloudCompare does not support versions of Qt prior to 5.4 anymore!
 #endif
 
 #include <QOpenGLContext>

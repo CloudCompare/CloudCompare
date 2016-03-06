@@ -60,13 +60,13 @@ public:
 	virtual ~qFacets();
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Facet/fracture detection"; }
-	virtual QString getDescription() const { return "BRGM Fracture detection plugin"; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "Facet/fracture detection"; }
+	virtual QString getDescription() const override { return "BRGM Fracture detection plugin"; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

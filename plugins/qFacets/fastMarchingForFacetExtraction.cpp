@@ -18,17 +18,13 @@
 #include "fastMarchingForFacetExtraction.h"
 
 //qCC_db
-#include <ccNormalVectors.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccOctree.h>
-#include <ccLog.h>
 
 //Qt
 #include <QApplication>
 
-//system
-#include <assert.h>
 
 //! 26-connexity neighbouring cells positions (common edges)
 const int c_3dNeighboursPosShift[] = {-1,-1,-1,

@@ -24,7 +24,6 @@
 
 //qCC_db
 #include <ccFacet.h>
-#include <ccNormalVectors.h>
 
 static const QString s_OriFamilyKey = "orientation.family.index";
 static const QString s_OriFamilyNameKey = "orientation.family.name";

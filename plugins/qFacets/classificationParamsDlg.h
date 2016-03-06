@@ -18,6 +18,8 @@
 #ifndef QFACET_CLASSIFICATION_PARAMS_DLG_HEADER
 #define QFACET_CLASSIFICATION_PARAMS_DLG_HEADER
 
+#include <QDialog>
+
 #include "ui_classificationParamsDlg.h"
 
 //! Dialog for orientation-based classification of facets (qFacets plugin)

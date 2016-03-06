@@ -18,6 +18,8 @@
 #ifndef QFACET_FACETS_EXPORT_DLG_HEADER
 #define QFACET_FACETS_EXPORT_DLG_HEADER
 
+#include <QDialog>
+
 #include "ui_facetsExportDlg.h"
 
 //! Dialog for exporting facets or facets info (qFacets plugin)

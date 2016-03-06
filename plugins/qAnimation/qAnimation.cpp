@@ -18,8 +18,6 @@
 #include "qAnimation.h"
 
 //Local
-#include "ViewInterpolate.h"
-#include "VideoStepItem.h"
 #include "qAnimationDlg.h"
 
 //Qt
@@ -27,11 +25,7 @@
 #include <QApplication>
 #include <QListWidget>
 
-//qCC_db
-#include "qCC_db.h"
 
-//system
-#include <vector>
 
 //Default constructor: should mainly be used to initialize
 //actions (pointers) and other members

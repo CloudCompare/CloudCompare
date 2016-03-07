@@ -26,6 +26,7 @@
 #include <QImageWriter>
 #include <QList>
 #include <QSettings>
+#include <QStandardPaths>
 
 //we keep track of the zoom for the session only!
 static double s_renderZoom = 1.0;
@@ -52,14 +53,16 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 	for (int i=0; i<list.size(); ++i)
 	{
 		filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
-		if (i == 0)
+		if (i == 0 || list[i].data() == "jpg")
+		{
 			firstFilter = filters;
+		}
 	}
 
 	QSettings settings;
 	settings.beginGroup("RenderToFile");
 	selectedFilter				= settings.value("selectedFilter",firstFilter).toString();
-	QString currentPath			= settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	QString currentPath         = settings.value("currentPath", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
 	QString selectedExtension	= settings.value("selectedExtension",firstExtension).toString();
 	QString baseFilename		= settings.value("baseFilename","capture").toString();
 	bool dontScale				= settings.value("dontScaleFeatures",dontScalePoints()).toBool();
@@ -68,7 +71,7 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 
 	dontScaleFeaturesCheckBox->setChecked(dontScale);
 	renderOverlayItemsCheckBox->setChecked(doRenderOverlayItems);
-	filenameLineEdit->setText(currentPath+QString("/")+baseFilename+QString(".")+selectedExtension);
+	filenameLineEdit->setText(currentPath + QString("/") + baseFilename + QString(".") + selectedExtension);
 
 	zoomDoubleSpinBox->setValue(s_renderZoom);
 

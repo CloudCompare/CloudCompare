@@ -177,6 +177,11 @@ MainWindow::MainWindow()
 	//Dialog "auto-construction"
 	setupUi(this);
 
+#ifdef Q_OS_MAC
+	actionAbout->setMenuRole( QAction::AboutRole );
+	actionAboutPlugins->setMenuRole( QAction::NoRole );
+#endif
+	
 	//Console
 	ccConsole::Init(consoleWidget, this, this);
 	actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());

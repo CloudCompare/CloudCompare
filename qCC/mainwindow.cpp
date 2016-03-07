@@ -361,13 +361,27 @@ void MainWindow::loadPlugins()
 	// plugins are in the bundle
 	QString path = QCoreApplication::applicationDirPath();
 	path.remove( "MacOS" );
-	m_pluginsPath = path + "Plugins/ccPlugins";
+	m_pluginPaths += (path + "Plugins/ccPlugins");
+#if 0
+	// used for development only - this is the path where the plugins are built
+	// this avoids having to copy into the application bundle
+	m_pluginsPaths += (path + "../../../ccPlugins");
+#endif
 #else
 	//plugins are in bin/plugins
-	m_pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
+	m_pluginsPaths += (QCoreApplication::applicationDirPath()+QString("/plugins"));
 #endif
 
-	ccConsole::Print(QString("Plugins lookup dir.: %1").arg(m_pluginsPath));
+	// Add any app data paths
+	// Plugins in these directories take precendence over the included ones
+	QStringList	appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
+
+	for ( const QString &appDataPath : appDataPaths )
+	{
+		m_pluginPaths += (appDataPath + "/plugins");
+	}
+	
+	ccConsole::Print(QString("Plugin lookup dirs: %1").arg(m_pluginPaths.join( ", " )));
 
 	QStringList filters;
 #if defined(Q_OS_WIN)
@@ -377,34 +391,61 @@ void MainWindow::loadPlugins()
 #elif defined(Q_OS_MAC)
 	filters << "*.dylib";
 #endif
-	QDir pluginsDir(m_pluginsPath);
-	pluginsDir.setNameFilters(filters);
-	foreach (QString filename, pluginsDir.entryList(filters))
+	
+	// maps plugin name (from inside the plugin) to its path & pointer
+	//	This allows us to create a unique list (overridden by path)
+	QMap<QString, tPluginInfo>	pluginMap;
+	
+	for ( const QString &path : m_pluginPaths )
 	{
-		QPluginLoader loader(pluginsDir.absoluteFilePath(filename));
-		QObject* plugin = loader.instance();
-		if (plugin)
+		QDir pluginsDir( path );
+		pluginsDir.setNameFilters(filters);
+		
+		for (const QString &filename : pluginsDir.entryList(filters))
 		{
-			ccConsole::Print(QString("Found new plugin: '%1'").arg(filename));
-			if (dispatchPlugin(plugin))
+			const QString	pluginPath = pluginsDir.absoluteFilePath( filename );
+			QPluginLoader	loader( pluginPath );
+			
+			QObject	*plugin = loader.instance();
+			
+			if ( plugin == nullptr )
 			{
-				m_pluginFileNames += filename;
+				ccConsole::Warning(QString("[Plugin] %1").arg(loader.errorString()));
+				continue;
 			}
-			else
-			{
-				delete plugin;
-				plugin = 0;
-				ccConsole::Warning("\tUnsupported or invalid plugin type");
-			}
+			
+			ccPluginInterface	*ccPlugin = getValidPlugin( plugin );
+			
+			if ( ccPlugin == nullptr )
+				continue;
+		
+			QString name = ccPlugin->getName();
+			
+			pluginMap.insert( name, tPluginInfo( pluginPath, plugin ) );
+		}
+	}
+	
+	QList<tPluginInfo>	pluginList = pluginMap.values();
+	
+	// now iterate over plugins and process them
+	for ( tPluginInfo &info : pluginList )
+	{
+		const QString	fileName = info.first;
+		QObject			*pluginObject = info.second;
+		
+		ccConsole::Print(QString("Found plugin: %1").arg( fileName ));
+		if (dispatchPlugin( pluginObject ))
+		{
+			m_pluginInfoList += info;
 		}
 		else
 		{
-			delete plugin;
-			plugin = 0;
-			ccConsole::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
-		}
+			delete pluginObject;
+			pluginObject = nullptr;
+			ccConsole::Warning("\tUnsupported or invalid plugin type");
+		}		
 	}
-
+	
 	if (menuPlugins)
 	{
 		menuPlugins->setEnabled(!m_stdPlugins.empty());
@@ -446,7 +487,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 		ccLog::Warning("\tplugin has an invalid (empty) name!");
 		return false;
 	}
-	ccConsole::Print(QString("\tplugin name: [%1]").arg(pluginName));
+	ccConsole::Print(QString("\tname: \"%1\"").arg(pluginName));
 
 	CC_PLUGIN_TYPE type = ccPlugin->getType();
 
@@ -560,7 +601,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 
 void MainWindow::doActionShowAboutPluginsDialog()
 {
-	ccPluginDlg ccpDlg(m_pluginsPath, m_pluginFileNames, this);
+	ccPluginDlg ccpDlg(m_pluginPaths, m_pluginInfoList, this);
 	ccpDlg.exec();
 }
 

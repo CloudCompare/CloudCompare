@@ -31,8 +31,8 @@
 #include <QTreeWidgetItem>
 #include <QHeaderView>
 
-ccPluginDlg::ccPluginDlg(	const QString &path,
-							const QStringList &fileNames,
+ccPluginDlg::ccPluginDlg(	const QStringList &paths,
+							const tPluginInfoList &pluginInfoList,
 							QWidget *parent)
 	: QDialog(parent)
 	, label(new QLabel)
@@ -61,53 +61,62 @@ ccPluginDlg::ccPluginDlg(	const QString &path,
 	featureIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
 
 	setWindowTitle(QString("Plugin Information"));
-	findPlugins(path, fileNames);
+	
+	// because we are displaying these to the user, make the paths use native separators
+	QStringList	nativePaths;
+	
+	for ( const QString &path : paths )
+	{
+		nativePaths += QDir::toNativeSeparators( path );
+	}
+	
+	addPluginInfo(nativePaths, pluginInfoList);
 }
 
-void ccPluginDlg::findPlugins(	const QString &path,
-								const QStringList &fileNames)
+void ccPluginDlg::addPluginInfo( const QStringList &paths, const tPluginInfoList &pluginInfoList )
 {
-	label->setText(QString(	"Found plugins\n"
-							"(looked in %1):")
-							.arg(QDir::toNativeSeparators(path)));
-
-	const QDir dir(path);
-
-	foreach (QObject *plugin, QPluginLoader::staticInstances())
+	label->setText(QString(	"Paths Searched:\n%1" ).arg(paths.join( "\n" )));
+	
+	for ( QObject *plugin : QPluginLoader::staticInstances() )
 	{
 		populateTreeWidget(plugin, QString("%1 (Static Plugin)")
 			.arg(plugin->metaObject()->className()));
 	}
 
-	foreach (QString filename, fileNames)
+	for ( const tPluginInfo &info : pluginInfoList )
 	{
-		QPluginLoader loader(dir.absoluteFilePath(filename));
-		QObject *plugin = loader.instance();
-		if (plugin)
-			populateTreeWidget(plugin, filename);
+		QFileInfo	fileInfo( info.first );
+		
+		populateTreeWidget( info.second, fileInfo.fileName(), fileInfo.filePath() );
 	}
 }
 
-void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &text)
+void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &name, const QString &path)
 {
 	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(treeWidget);
-	pluginItem->setText(0, text);
+	pluginItem->setText(0, name);
 	treeWidget->setItemExpanded(pluginItem, true);
 
 	QFont boldFont = pluginItem->font(0);
 	boldFont.setBold(true);
 	pluginItem->setFont(0, boldFont);
 
-	if (plugin)
+	if ( !path.isEmpty() )
 	{
-		ccPluginInterface *ccPlugin = qobject_cast<ccPluginInterface*>(plugin);
-		if (ccPlugin)
-		{
-			QStringList features;
-			features += QString("name: %1").arg(ccPlugin->getName());
-			addItems(pluginItem, "CloudCompare Plugin", features);
-		}
+		pluginItem->setToolTip( 0, path );
 	}
+	
+	if ( plugin == nullptr )
+		return;
+	
+	ccPluginInterface *ccPlugin = qobject_cast<ccPluginInterface*>(plugin);
+	
+	if ( ccPlugin == nullptr )
+		return;
+
+	QStringList features;
+	features += QString("name: %1").arg(ccPlugin->getName());
+	addItems(pluginItem, "CloudCompare Plugin", features);
 }
 
 void ccPluginDlg::addItems(	QTreeWidgetItem *pluginItem,
@@ -118,9 +127,11 @@ void ccPluginDlg::addItems(	QTreeWidgetItem *pluginItem,
 	interfaceItem->setText(0, interfaceName);
 	interfaceItem->setIcon(0, interfaceIcon);
 
-	foreach (QString feature, features) {
+	for ( QString feature : features )
+	{
 		if (feature.endsWith("..."))
 			feature.chop(3);
+		
 		QTreeWidgetItem *featureItem = new QTreeWidgetItem(interfaceItem);
 		featureItem->setText(0, feature);
 		featureItem->setIcon(0, featureIcon);

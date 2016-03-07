@@ -11,46 +11,24 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: Andy Maloney                                       #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PLUGIN_DIALOG_HEADER
-#define CC_PLUGIN_DIALOG_HEADER
+#ifndef CC_PLUGIN_INFO
+#define CC_PLUGIN_INFO
 
-#include <QDialog>
-#include <QIcon>
+#include <QPair>
+#include <QVector>
 
-#include "ccPluginInfo.h"
+class QObject;
+class QString;
 
-class QLabel;
-class QPushButton;
-class QStringList;
-class QTreeWidget;
-class QTreeWidgetItem;
+//! This type is used to communicate information between the main window and the plugin dialog
+//! It is a pair - first is path to the plugin, second is an object pointer to the plugin
+typedef QPair<QString, QObject*>    tPluginInfo;
 
-//! Dialog to display the loaded plugin list
-class ccPluginDlg : public QDialog
-{
-	Q_OBJECT
+//! Simply a list of \see tPluginInfo
+typedef QVector<tPluginInfo>        tPluginInfoList;
 
-public:
-	ccPluginDlg(const QStringList &paths,
-				const tPluginInfoList &pluginInfoList,
-				QWidget *parent = 0);
-
-protected:
-	void addPluginInfo(const QStringList &paths, const tPluginInfoList &pluginInfoList);
-	void populateTreeWidget(QObject *plugin, const QString &name, const QString &path = QString());
-	void addItems(	QTreeWidgetItem *pluginItem,
-					const char *interfaceName,
-					const QStringList &features);
-
-	QLabel *label;
-	QTreeWidget *treeWidget;
-	QPushButton *okButton;
-	QIcon interfaceIcon;
-	QIcon featureIcon;
-};
-
-#endif
+#endif //CC_PLUGIN_INFO

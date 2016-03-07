@@ -20,13 +20,11 @@
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
+#include <ccPluginInfo.h>
 
 //Qt
 #include <QMainWindow>
-#include <QString>
-#include <QDialog>
 #include <QDir>
-#include <QActionGroup>
 
 //CCLib
 #include <AutoSegmentationTools.h>
@@ -679,8 +677,8 @@ protected:
 	ccPrimitiveFactoryDlg* m_pfDlg;
 
 	/*** plugins ***/
-	QString m_pluginsPath;
-	QStringList m_pluginFileNames;
+	QStringList m_pluginPaths;
+	tPluginInfoList m_pluginInfoList;
 	QList<ccStdPluginInterface*> m_stdPlugins;
 	QList<QToolBar*> m_stdPluginsToolbars;
 	QActionGroup m_glFilterActions;

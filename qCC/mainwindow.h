@@ -523,6 +523,7 @@ protected:
 	void resizeEvent(QResizeEvent* event);
 
 	void loadPlugins();
+	const tPluginInfoList findPlugins();
 	bool dispatchPlugin(QObject* plugin);
 	ccPluginInterface* getValidPlugin(QObject* plugin);
 

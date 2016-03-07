@@ -355,90 +355,23 @@ void MainWindow::loadPlugins()
 	menuShadersAndFilters->setEnabled(false);
 	toolBarPluginTools->setVisible(false);
 	toolBarGLFilters->setVisible(false);
-
+	
+	ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
+	
 	//"static" plugins
-	foreach (QObject *plugin, QPluginLoader::staticInstances())
+	for (QObject *plugin : QPluginLoader::staticInstances())
 		dispatchPlugin(plugin);
 
-	ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
-
-#if defined(Q_OS_MAC)
-	// plugins are in the bundle
-	QString path = QCoreApplication::applicationDirPath();
-	path.remove( "MacOS" );
-	m_pluginPaths += (path + "Plugins/ccPlugins");
-#if 0
-	// used for development only - this is the path where the plugins are built
-	// this avoids having to copy into the application bundle
-	m_pluginPaths += (path + "../../../ccPlugins");
-#endif
-#else
-	//plugins are in bin/plugins
-	m_pluginPaths += (QCoreApplication::applicationDirPath()+QString("/plugins"));
-#endif
-
-	// Add any app data paths
-	// Plugins in these directories take precendence over the included ones
-	QStringList	appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
-
-	for ( const QString &appDataPath : appDataPaths )
-	{
-		m_pluginPaths += (appDataPath + "/plugins");
-	}
-	
-	ccConsole::Print(QString("Plugin lookup dirs: %1").arg(m_pluginPaths.join( ", " )));
-
-	QStringList filters;
-#if defined(Q_OS_WIN)
-	filters << "*.dll";
-#elif defined(Q_OS_LINUX)
-	filters << "*.so";
-#elif defined(Q_OS_MAC)
-	filters << "*.dylib";
-#endif
-	
-	// maps plugin name (from inside the plugin) to its path & pointer
-	//	This allows us to create a unique list (overridden by path)
-	QMap<QString, tPluginInfo>	pluginMap;
-	
-	for ( const QString &path : m_pluginPaths )
-	{
-		QDir pluginsDir( path );
-		pluginsDir.setNameFilters(filters);
-		
-		for (const QString &filename : pluginsDir.entryList(filters))
-		{
-			const QString	pluginPath = pluginsDir.absoluteFilePath( filename );
-			QPluginLoader	loader( pluginPath );
-			
-			QObject	*plugin = loader.instance();
-			
-			if ( plugin == nullptr )
-			{
-				ccConsole::Warning(QString("[Plugin] %1").arg(loader.errorString()));
-				continue;
-			}
-			
-			ccPluginInterface	*ccPlugin = getValidPlugin( plugin );
-			
-			if ( ccPlugin == nullptr )
-				continue;
-		
-			QString name = ccPlugin->getName();
-			
-			pluginMap.insert( name, tPluginInfo( pluginPath, plugin ) );
-		}
-	}
-	
-	QList<tPluginInfo>	pluginList = pluginMap.values();
+	tPluginInfoList	plugins = findPlugins();
 	
 	// now iterate over plugins and process them
-	for ( tPluginInfo &info : pluginList )
+	for ( tPluginInfo &info : plugins )
 	{
 		const QString	fileName = info.first;
 		QObject			*pluginObject = info.second;
 		
 		ccConsole::Print(QString("Found plugin: %1").arg( fileName ));
+		
 		if (dispatchPlugin( pluginObject ))
 		{
 			m_pluginInfoList += info;
@@ -477,6 +410,83 @@ void MainWindow::loadPlugins()
 		//DGM: doesn't work :(
 		//actionDisplayGLFiltersTools->setChecked(false);
 	}
+}
+const tPluginInfoList MainWindow::findPlugins()
+{
+	QStringList dirFilters;
+	
+#if defined(Q_OS_MAC)
+	dirFilters << "*.dylib";
+
+	// plugins are in the bundle
+	QString path = QCoreApplication::applicationDirPath();
+	path.remove( "MacOS" );
+	m_pluginPaths += (path + "Plugins/ccPlugins");
+#if 0
+	// used for development only - this is the path where the plugins are built
+	// this avoids having to copy into the application bundle
+	m_pluginPaths += (path + "../../../ccPlugins");
+#endif
+#elif defined(Q_OS_WIN)
+	dirFilters << "*.dll";
+	
+	//plugins are in bin/plugins
+	m_pluginPaths += (QCoreApplication::applicationDirPath()+QString("/plugins"));
+#elif defined(Q_OS_LINUX)
+	dirFilters << "*.so";
+	
+	m_pluginPaths += "/usr/lib/cloudcompare/plugins/CloudCompare";
+#else
+#warning Need to specify the plugin path for this OS.
+#endif
+
+#ifndef Q_OS_LINUX
+	// Add any app data paths
+	// Plugins in these directories take precendence over the included ones
+	QStringList	appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
+
+	for ( const QString &appDataPath : appDataPaths )
+	{
+		m_pluginPaths += (appDataPath + "/plugins");
+	}
+#endif
+	
+	ccConsole::Print(QString("Plugin lookup dirs: %1").arg(m_pluginPaths.join( ", " )));
+	
+	// maps plugin name (from inside the plugin) to its path & pointer
+	//	This allows us to create a unique list (overridden by path)
+	QMap<QString, tPluginInfo>	pluginMap;
+	
+	for ( const QString &path : m_pluginPaths )
+	{
+		QDir pluginsDir( path );
+		pluginsDir.setNameFilters(dirFilters);
+		
+		for (const QString &filename : pluginsDir.entryList())
+		{
+			const QString	pluginPath = pluginsDir.absoluteFilePath( filename );
+			QPluginLoader	loader( pluginPath );
+			
+			QObject	*plugin = loader.instance();
+			
+			if ( plugin == nullptr )
+			{
+				ccConsole::Warning(QString("[Plugin] %1").arg(loader.errorString()));
+				continue;
+			}
+			
+			ccPluginInterface	*ccPlugin = getValidPlugin( plugin );
+			
+			if ( ccPlugin == nullptr )
+				continue;
+		
+			QString name = ccPlugin->getName();
+			
+			pluginMap.insert( name, tPluginInfo( pluginPath, plugin ) );
+		}
+	}
+	
+	return pluginMap.values().toVector();
 }
 
 bool MainWindow::dispatchPlugin(QObject *plugin)

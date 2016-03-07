@@ -869,7 +869,9 @@ void ccGLWindow::uninitializeGL()
 		return;
 	}
 
+	assert(!m_captureMode.enabled);
 	makeCurrent();
+
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
@@ -939,7 +941,10 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 {
 	m_glViewport = rect;
 
-	makeCurrent();
+	if (!m_captureMode.enabled)
+	{
+		makeCurrent(); //makes lose the FBO focus in render mode!
+	}
 
 	const qreal retinaScale = devicePixelRatio();
 	functions()->glViewport(rect.x() * retinaScale, rect.y() * retinaScale, rect.width() * retinaScale, rect.height() * retinaScale);
@@ -3204,7 +3209,7 @@ void ccGLWindow::setStandardOrthoCorner()
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
-	glFunc->glOrtho(0, static_cast<double>(m_glViewport.width()), 0, static_cast<double>(m_glViewport.height()), 0, 1);
+	glFunc->glOrtho(0, m_glViewport.width(), 0, m_glViewport.height(), 0, 1);
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glLoadIdentity();
 }
@@ -4125,6 +4130,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	}
 
 	//OpenGL picking
+	assert(!m_captureMode.enabled);
 	makeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
@@ -5342,9 +5348,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			//ncRect.setWidth(Wp);
 			//ncRect.setHeight(Hp);
 
-			m_captureMode.currentFbo = fbo;
-
-			makeCurrent();
 			ccQOpenGLFunctions* glFunc = functions();
 			assert(glFunc);
 
@@ -5520,7 +5523,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
-			m_captureMode.currentFbo = 0;
 			//updateZoom(1.0/zoomFactor);
 
 			//restore the default FBO
@@ -5620,6 +5622,7 @@ bool ccGLWindow::initGLFilter(int w, int h)
 		return false;
 	}
 
+	assert(!m_captureMode.enabled);
 	makeCurrent();
 
 	//we "disconnect" current glFilter, to avoid wrong display/errors
@@ -5662,8 +5665,6 @@ void ccGLWindow::displayText(	QString text,
 								const unsigned char* rgbColor/*=0*/,
 								const QFont* font/*=0*/)
 {
-	//DGM: the context should be already active!
-	//makeCurrent();
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
@@ -6056,13 +6057,13 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 
 void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
 {
-	makeCurrent();
-	//if (m_captureMode.currentFbo)
-	//{
-	//	m_captureMode.currentFbo->start();
-	//}
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
+
+	if (!m_captureMode.enabled)
+	{
+		makeCurrent(); //makes lose the FBO focus in render mode!
+	}
 
 	//compute the text bounding rect
 	QRect rect = QFontMetrics(font).boundingRect(str);
@@ -6088,14 +6089,9 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		painter.drawText(-rect.x(), -rect.y(), str);
 	}
 	
-	if (m_captureMode.currentFbo)
-	{
-		m_captureMode.currentFbo->start();
-	}
-
 	//and then we convert this QImage to a texture!
 	{
-		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
+		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
 		glFunc->glEnable(GL_BLEND);
 		glFunc->glDisable(GL_DEPTH_TEST);
 
@@ -6103,13 +6099,13 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		glFunc->glMatrixMode(GL_PROJECTION);
 		glFunc->glPushMatrix();
 		glFunc->glLoadIdentity();
-		glFunc->glOrtho(0, width(), 0, height(), -1, 1);
+		glFunc->glOrtho(0, m_glViewport.width(), 0, m_glViewport.height(), -1, 1);
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
 		glFunc->glLoadIdentity();
 		{
 			//move to the right position on the screen
-			glFunc->glTranslatef(x, height() - 1 - y, 0);
+			glFunc->glTranslatef(x, m_glViewport.height() - 1 - y, 0);
 
 			glFunc->glEnable(GL_TEXTURE_2D);
 			QOpenGLTexture textTex(textImage);
@@ -6136,7 +6132,11 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 
 void ccGLWindow::renderText(double x, double y, double z, const QString & str, const QFont & font/*=QFont()*/)
 {
-	makeCurrent();
+	if (!m_captureMode.enabled)
+	{
+		makeCurrent(); //makes lose the FBO focus in render mode!
+	}
+
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 	

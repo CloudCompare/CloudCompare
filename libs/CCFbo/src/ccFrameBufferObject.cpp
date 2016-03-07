@@ -164,7 +164,7 @@ bool ccFrameBufferObject::initColor(GLint internalformat/*=GL_RGBA*/,
 	return true;
 }
 
-bool ccFrameBufferObject::attachColor(GLuint texID,
+bool ccFrameBufferObject::attachColor(	GLuint texID,
 										bool ownTexture/*=false*/,
 										GLenum target/*=GL_TEXTURE_2D*/)
 {

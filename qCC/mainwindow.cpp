@@ -365,11 +365,11 @@ void MainWindow::loadPlugins()
 #if 0
 	// used for development only - this is the path where the plugins are built
 	// this avoids having to copy into the application bundle
-	m_pluginsPaths += (path + "../../../ccPlugins");
+	m_pluginPaths += (path + "../../../ccPlugins");
 #endif
 #else
 	//plugins are in bin/plugins
-	m_pluginsPaths += (QCoreApplication::applicationDirPath()+QString("/plugins"));
+	m_pluginPaths += (QCoreApplication::applicationDirPath()+QString("/plugins"));
 #endif
 
 	// Add any app data paths

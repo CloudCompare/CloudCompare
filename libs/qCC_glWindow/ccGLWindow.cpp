@@ -5342,6 +5342,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			//ncRect.setWidth(Wp);
 			//ncRect.setHeight(Hp);
 
+			m_captureMode.currentFbo = fbo;
+
 			makeCurrent();
 			ccQOpenGLFunctions* glFunc = functions();
 			assert(glFunc);
@@ -5380,6 +5382,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			RenderingParams renderingParams;
 			renderingParams.drawForeground = false;
+			renderingParams.useFBO = false; //DGM: make sure that no FBO is used internally!
 			bool stereoModeWasEnabled = m_stereoModeEnabled;
 			m_stereoModeEnabled = false;
 
@@ -5470,6 +5473,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				//scale: only in ortho mode
 				if (!m_viewportParams.perspectiveView)
 				{
+					//DGM FIXME: with a zoom > 1, the renderText call inside drawScale will result in the wrong FBO being used?!
 					drawScale(getDisplayParameters().textDefaultCol);
 				}
 
@@ -5516,6 +5520,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
+			m_captureMode.currentFbo = 0;
 			//updateZoom(1.0/zoomFactor);
 
 			//restore the default FBO
@@ -6052,6 +6057,10 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
 {
 	makeCurrent();
+	//if (m_captureMode.currentFbo)
+	//{
+	//	m_captureMode.currentFbo->start();
+	//}
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
@@ -6077,6 +6086,11 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		painter.setPen(pen);
 		painter.setFont(font);
 		painter.drawText(-rect.x(), -rect.y(), str);
+	}
+	
+	if (m_captureMode.currentFbo)
+	{
+		m_captureMode.currentFbo->start();
 	}
 
 	//and then we convert this QImage to a texture!

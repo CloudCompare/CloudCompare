@@ -8622,12 +8622,12 @@ void MainWindow::doActionRenderToFile()
 	if (!win)
 		return;
 
-	ccRenderToFileDlg rtfDlg(win->width(),win->height(),this);
+	ccRenderToFileDlg rtfDlg(win->width(), win->height(), this);
 
 	if (rtfDlg.exec())
 	{
 		QApplication::processEvents();
-		win->renderToFile(qPrintable(rtfDlg.getFilename()),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
+		win->renderToFile(rtfDlg.getFilename(), rtfDlg.getZoom(), rtfDlg.dontScalePoints(), rtfDlg.renderOverlayItems());
 	}
 }
 

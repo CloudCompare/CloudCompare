@@ -1013,12 +1013,14 @@ protected: //members
 		bool enabled;
 		float zoomFactor;
 		bool renderOverlayItems;
+		ccFrameBufferObject* currentFbo;
 
 		//! Default constructor
 		CaptureModeOptions()
 			: enabled(false)
 			, zoomFactor(1.0f)
 			, renderOverlayItems(false)
+			, currentFbo(0)
 		{}
 	};
 

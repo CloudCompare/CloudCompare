@@ -21,6 +21,7 @@
 #include <QApplication>
 
 #ifdef Q_OS_MAC
+#include <QDir>
 #include <QFileOpenEvent>
 #endif
 
@@ -127,7 +128,21 @@ int main(int argc, char *argv[])
 #ifdef USE_VLD
 	VLDEnable();
 #endif
-
+	
+#ifdef Q_OS_MAC	
+	// This makes sure that our "working directory" is not within the application bundle
+	QDir  appDir = QCoreApplication::applicationDirPath();
+	
+	if ( appDir.dirName() == "MacOS" )
+	{
+		appDir.cdUp();
+		appDir.cdUp();
+		appDir.cdUp();
+		
+		QDir::setCurrent( appDir.absolutePath() );
+	}
+#endif
+	
 	//DGM FIXME: do the same with Qt 5 + reject if Qt version is < 2.1
 	//if (!QGLFormat::hasOpenGL())
 	//{

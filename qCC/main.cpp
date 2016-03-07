@@ -127,6 +127,20 @@ int main(int argc, char **argv)
 	VLDEnable();
 #endif
 
+#ifdef Q_OS_MAC	
+	// This makes sure that our "working directory" is not within the application bundle
+	QDir  appDir = QCoreApplication::applicationDirPath();
+	
+	if ( appDir.dirName() == "MacOS" )
+	{
+		appDir.cdUp();
+		appDir.cdUp();
+		appDir.cdUp();
+		
+		QDir::setCurrent( appDir.absolutePath() );
+	}
+#endif
+	
 	//splash screen
 	QSplashScreen* splash = 0;
 	QTime splashStartTime;

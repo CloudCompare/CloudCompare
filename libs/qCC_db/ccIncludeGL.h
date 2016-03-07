@@ -209,7 +209,6 @@ public: //GLU equivalent methods
 		//The result normalizes between -1 and 1
 		if (Pp.w == 0.0)
 		{
-			assert(false);
 			return false;
 		}
 		//Perspective division
@@ -428,7 +427,6 @@ public: //GLU equivalent methods
 		Tuple4Tpl<oType> out = m * in;
 		if (out.w == 0)
 		{
-			assert(false);
 			return false;
 		}
 

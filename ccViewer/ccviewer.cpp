@@ -193,12 +193,16 @@ void ccViewer::loadPlugins()
 	QString  path = QCoreApplication::applicationDirPath();
 	path.remove( "MacOS" );
 	QString pluginsPath = path + "Plugins/ccViewerPlugins";
-#else
+#elif defined(Q_OS_WIN)
 	//plugins are in bin/plugins
 	QString pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
+#elif defined(Q_OS_LINUX)
+	QString pluginsPath = "/usr/lib/cloudcompare/plugins/ccViewer";
+#else
+#warning Need to specify the plugin path for this OS.
 #endif
 
-	ccLog::Print(QString("Plugins lookup dir.: %1").arg(pluginsPath));
+	ccLog::Print(QString("Plugin lookup dir.: %1").arg(pluginsPath));
 
 	QStringList filters;
 #if defined(Q_OS_WIN)

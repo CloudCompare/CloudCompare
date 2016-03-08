@@ -4,88 +4,82 @@ Building CloudCompare
 for up-to-date information, refer to the [wiki](http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake).
 
 ## 0) Prerequisites
-
-        - Checkout the sources from the Github repository:
-                ```git clone https://github.com/cloudcompare/trunk```
-        - Install CMake (2.8 or newer)
-        - Install all necessary dependencies:
-                - [WINDOWS] Qt (version 4.7 or newer)
-                - [LINUX] qt-dev, opengl
-                (refer to section A0 if your version of Qt is older than 4.7)
+  - Checkout the sources from the Github repository:```git clone https://github.com/cloudcompare/trunk```
+  - Install CMake (2.8 or newer)
+  - Install all necessary dependencies:
+    - [WINDOWS] Qt (version 4.7 or newer)
+    - [LINUX] qt-dev, opengl (refer to section A0 if your version of Qt is older than 4.7)
 
 ## 1) Generating the project
-
-        - Launch CMake (GUI)
-        - Make the 'Where is the source code' field point to your local CloudCompare SVN repository.
-        - Make the 'Where to build the binaries' field point to ... almost anywhere you want (apart from the same folder as above!)
-        - Click on the "Configure" button
-        - Select your generator [already tested: Visual 2008 (32 & 64 bits), Visual 2010 Express (64 bits - see appendix), Visual 2012, Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32 & 64 bits)]
-        - Wait for CMake configuration/tests to finish...
+  - Launch CMake (GUI)
+    - Make the ```Where is the source code``` field point to your local CloudCompare Git repository.
+    - Make the ```Where to build the binaries``` field point to ... almost anywhere you want (apart from the same folder as above!)
+    - Click on the ```Configure``` button
+    - Select your generator [already tested: Visual 2008 (32 & 64 bits), Visual 2010 Express (64 bits - see appendix), Visual 2012, Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32 & 64 bits)]
+    - Wait for CMake configuration/tests to finish...
 
 ## 2) Before clicking on the 'Generate' button, you may set some options:
-        - if you expand the "OPTION" group, you'll be able to set some general options:
-                - OPTION_BUILD_CC_VIEWER: whether to build or not the ccViewer side project (activated by default)
-                - OPTION_LP_PCL_PATCH_ENABLED: see section 2-5
-                - OPTION_MP_BUILD: for MSVC only (mutli-process build --> much faster, but takes almost all available CPU)
-                - OPTION_SUPPORT_3D_CONNEXION_DEVICES: for 3D mouses handling
-                - OPTION_SUPPORT_MAC_PDMS_FORMAT: to activate support for PDMS .mac scripts in qCC (CAD)
-                - OPTION_USE_DXFLIB: to activate support for DXF files in qCC (and ccViewer) with dxflib - see below
-                - OPTION_USE_LIBE57: to activate support for E57 files in qCC (and ccViewer) with libE57- see below
-                - OPTION_USE_LIBLAS: to activate support for LAS files in qCC (and ccViewer) with libLAS - see below
-                - OPTION_USE_QUICKHULL: to use the Qhull library (necessary for the qHPR plugin)
-                - OPTION_USE_XIOT: to activate support for X3D files in qCC (and ccViewer) with XIOT - see below
-        - if you expand the "INSTALL" group, you'll be able to select the plugin(s) you want to compile (NO PLUGIN IS REQUIRED TO USE CLOUDCOMPARE)
-		- qBlur
-                - qDummy (warning: does nothing, template for developers)
-                - qEDL
-                - qHPR
-                - qKinect (only tested on Windows for the moment) - see below
-                - qPCL (requires PCL - see below)
-                - qPCV
-                - qPoissonRecon
-                - qRansacSD (SD = Shape Detection)
-                - qSSAO
-		- qCork (CSG)
-        - eventually the "CMAKE" group contains a CMAKE_INSTALL_PREFIX which is where qCC (CloudCompare) and ccViewer will be installed (with the 'install' build configuration in your project)
-                Note: On Linux, default install dir is /usr/local (be sure to have administrative rights if you want to install CloudCompare there - or change the default path)
-                      On Windows Seven, you may not have the right to 'install' files in Program Files (x86)
+  - if you expand the ```OPTION``` group, you'll be able to set some general options:
+    - ```OPTION_BUILD_CC_VIEWER```: whether to build or not the ccViewer side project (activated by default)
+    - ```OPTION_LP_PCL_PATCH_ENABLED```: see section 2-5
+    - ```OPTION_MP_BUILD```: for MSVC only (mutli-process build --> much faster, but takes almost all available CPU)
+    - ```OPTION_SUPPORT_3D_CONNEXION_DEVICES```: for 3D mouses handling
+    - ```OPTION_SUPPORT_MAC_PDMS_FORMAT```: to activate support for PDMS .mac scripts in qCC (CAD)
+    - ```OPTION_USE_DXFLIB```: to activate support for DXF files in qCC (and ccViewer) with dxflib - see below
+    - ```OPTION_USE_LIBE57```: to activate support for E57 files in qCC (and ccViewer) with libE57- see below
+    - ```OPTION_USE_LIBLAS```: to activate support for LAS files in qCC (and ccViewer) with libLAS - see below
+    - ```OPTION_USE_QUICKHULL```: to use the Qhull library (necessary for the qHPR plugin)
+    - ```OPTION_USE_XIOT```: to activate support for X3D files in qCC (and ccViewer) with XIOT - see below
+  - if you expand the ```INSTALL``` group, you'll be able to select the plugin(s) you want to compile (NO PLUGIN IS REQUIRED TO USE CLOUDCOMPARE)
+    - qBlur
+    - qDummy (warning: does nothing, template for developers)
+    - qEDL
+    - qHPR
+    - qKinect (only tested on Windows for the moment) - see below
+    - qPCL (requires PCL - see below)
+    - qPCV
+    - qPoissonRecon
+    - qRansacSD (SD = Shape Detection)
+    - qSSAO
+    - qCork (CSG)
+  
+  - eventually the ```CMAKE``` group contains a ```CMAKE_INSTALL_PREFIX``` which is where qCC (CloudCompare) and ccViewer will be installed (with the 'install' build configuration in your project)  
+  Note: On Linux, default install dir is /usr/local (be sure to have administrative rights if you want to install CloudCompare there - or change the default path)  
+On Windows Seven, you may not have the right to 'install' files in Program Files (x86)
 
 
-2-1) [Optional] Setup for LibLAS support
+### 2-1) [Optional] Setup for LibLAS support
+If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
+  - LibLAS (last tested version: 1.7 on Windows)
+  - Boost multi-thread shared libraries
+    * make the ```BOOST_ROOT``` environment variable point to your Boost installation before launching CMake in order for the automatic 'find_package' script to work properly
+    * otherwise refer to LibLAS documentation for more directions
 
-	If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
-        - LibLAS (last tested version: 1.7 on Windows)
-        - Boost multi-thread shared libraries
-                * make the BOOST_ROOT environment variable point to your Boost installation before launching CMake in order for the automatic 'find_package' script to work properly
-                * otherwise refer to LibLAS documentation for more directions
-
-	The CMake project will request you to set the 3 following variables:
-        - LIBLAS_INCLUDE_DIR: LibLAS include directory (pretty straightforward ;)
-        - LIBLAS_RELEASE_LIBRARY_FILE: main LibLAS release library (the .lib or .a file itself!)
-        - [Windows] LIBLAS_SHARED_LIBRARY_FILE: full path to the liblas.dll file
+The CMake project will request you to set the 3 following variables:
+  - ```LIBLAS_INCLUDE_DIR```: LibLAS include directory (pretty straightforward ;)
+  - ```LIBLAS_RELEASE_LIBRARY_FILE```: main LibLAS release library (the .lib or .a file itself!)
+  - [Windows] ```LIBLAS_SHARED_LIBRARY_FILE```: full path to the liblas.dll file
 
 Note: For the moment, only the release version of CloudCompare supports LibLAS files
 
-2-2) [Optional] Setup for LibE57 support
+### 2-2) [Optional] Setup for LibE57 support
+If you want to compile CloudCompare (and ccViewer) with E57 files support, you'll need:
+  - LibE57 (last tested version: 1.0.224 on Windows)
+  - Boost multi-thread static libraries (same as libLAS)
+  - Xerces-C++ multi-thread static libraries
+    * only the XercesLib project must be compiled
+    * eventually, CMake will look for the resulting files in ```/include``` (instead of ```/src```) 
+      and ```/lib``` (instead of ```/Build/Win32/VCX/Static``` Debug or Release)
 
-	If you want to compile CloudCompare (and ccViewer) with E57 files support, you'll need:
-        - LibE57 (last tested version: 1.0.224 on Windows)
-        - Boost multi-thread static libraries (same as libLAS)
-        - Xerces-C++ multi-thread static libraries
-                * only the XercesLib project must be compiled
-                * eventually, CMake will look for the resulting files in '/include' (instead of /src)
-                  and /lib (instead of /Build/Win32/VCX/Static Debug or Release)
+WARNING: on Microsoft Visual (at least), you'll need the libraries compiled with ```/MD``` (=DLL Multithreaded)
+in release mode and ```/MD``` in debug mode. You may have to change this in both Xerces (change
+XercesLib project's options ```C/C++ > Code Generation > Runtime Library```) as well as in libE57
+         root CMake file (replace all ```/MT``` by ```/MD``` in it)
 
-	WARNING: on Microsoft Visual (at least), you'll need the libraries compiled with /MD (=DLL Multithreaded)
-         in release mode and /MDd in debug mode. You may have to change this in both Xerces (change
-         XercesLib project's options 'C/C++ > Code Generation > Runtime Library') as well as in libE57
-         root CMake file (replace all '/MT' by '/MD' in it)
+The CloudCompare CMake project will only require that you set the path where libE57 has been installed (```LIBE57_INSTALL_DIR```)
 
-The CloudCompare CMake project will only require that you set the path where libE57 has been installed (LIBE57_INSTALL_DIR)
-
-2-3) [Optional] Setup for libfreenect support
-
-	If you want to compile qKinect you'll need:
+### 2-3) [Optional] Setup for libfreenect support
+If you want to compile qKinect you'll need:
         - OpenKinect / libfreenect (last tested version: trunk @ 03/22/2012, compiled on Windows XP 32 & 64bits)
 
 	The CloudCompare CMake project will request you to set the 3 following variables:
@@ -93,7 +87,7 @@ The CloudCompare CMake project will only require that you set the path where lib
         - LIBFREENECT_LIBRARY_FILE: main libfreenect library (the freenect.lib or libfreenect.a file itself!)
         - [Windows] LIBFREENECT_SHARED_LIBRARY_FILE: full path to the freenect.dll file
 
-2-4) [Optional] Setup for XIOT support
+### 2-4) [Optional] Setup for XIOT support
 
 	(NOT READY YET)
 
@@ -104,7 +98,7 @@ The CloudCompare CMake project will only require that you set the path where lib
 	Then, the CloudCompare CMake project will request that you set the following variable:
         - XIOT_INSTALL_DIR: XIOT install directory (once CMAKE has run, and project "INSTALL" configuration properly run/compiled as well)
 
-2-5) [Optional] Setup for PCL support
+### 2-5) [Optional] Setup for PCL support
 
 	If you want to compile qPCL you'll need:
         - PCL (http://pointclouds.org/ - last tested version: 1.5.1 on Windows 32 & 64 bits)
@@ -117,7 +111,7 @@ The CloudCompare CMake project will only require that you set the path where lib
 	Note: if you have applied Luca Penasa' PCL patch (http://dev.pointclouds.org/issues/845), you must check the OPTION_LP_PCL_PATCH_ENABLED
 	option in CMake gui (otherwise just ignore this option).
 
-2-6) [Optional] Setup for Qhull support
+### 2-6) [Optional] Setup for Qhull support
 
 	If you want to compile qHPR you'll need:
         - Qhull (http://www.qhull.org/)
@@ -127,7 +121,7 @@ The CloudCompare CMake project will only require that you set the path where lib
         - QHULL_LIBRARY: main (release) qHull library (the qhull.lib or libqhull.a file itself!)
         - QHULL_LIBRARY_DEBUG: debug qHull library (the qhulld.lib or libqhulld.a file for instance)
 
-2-7) [Optional] Setup for dxflib support
+### 2-7) [Optional] Setup for dxflib support
 
 	If you want to compile CloudCompare (and ccViewer) with DXF files support, you'll need:
         - Ribbonsoft's dxflib (http://www.ribbonsoft.com/en/dxflib-downloads - last tested version: v2.5.0.0-1 on Windows)
@@ -138,28 +132,28 @@ The CloudCompare CMake project will only require that you set the path where lib
 
 	The CMake project will only require that you set the path where dxflib sources are (DXF_LIB_SRC_DIR)
 
-2-8) [Optional] Setup for Cork + MPIR support (qCork plugin)
+### 2-8) [Optional] Setup for Cork + MPIR support (qCork plugin)
 
 	If you want to compile the qCork plugin (on Windows only for now), you'll need
 		- MPIR 2.6.0 (http://www.mpir.org/)
 		- the forked version of the Cork library for CC: https://github.com/cloudcompare/cork
 			(see the VS2010 and VS2012 projects shipped with this fork)
 
-3) Generate the project files
+## 3) Generate the project files
 
 - Click multiple times on 'Configure' (and correct any error if necessary) until all red items have disappeared.
 - Click on the 'Generate' button to create the corresponding project files
 
-4) Compiling the project
+## 4) Compiling the project
 
 - Open the resulting project with the generator you have previously chosen (the file(s) should be where you told CMake to build the binaries).
 - You should (always?) found the two following configuration/sub-projects:
         - 'build all' should do all the compilation work (in the right order) but the binaries and libraries will be generated (by default) among all the other compilation files, in a somewhat complicated folder tree structure.
         - 'install' should export all these files to the CMAKE_INSTALL_PREFIX folder, placing everything where it should be (and almost exactly as the official binary build)
 
---- Appendix ---
+## --- Appendix ---
 
-A0) On Linux, you may encounter issues:
+### A0) On Linux, you may encounter issues:
 - with shared libraries (.so files). In this case you can:
         - set the LD_LIBRARY_PATH variable so that it points to the qCC and ccViewer installation folders (export LD_LIBRARY_PATH=...)
         - or call 'sudo /sbin/ldconfig -v' once with admin rights
@@ -175,7 +169,7 @@ A0) On Linux, you may encounter issues:
          in cloudcompare/libs/qCC/ccSubsamplingDlg.cpp , after //Qt
          in cloudcompare/libs/qCC/mainwindow.cpp , after #include <QMessageBox>)
 
-A1) Compiling the 64 bits version on Windows
+### A1) Compiling the 64 bits version on Windows
 
 Here are several "hints" regarding the compilation on Windows 64 bits:
 * if only Visual 2010 Express is installed, Cmake will require you to install Microsoft Windows SDK 7.1 (quite redundant?!)

@@ -27,7 +27,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 if( MSVC )
 	include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include/msvc )
 endif()
-include_directories( ${triangle_SOURCE_DIR} )
 
 
 file( GLOB header_list include/*.h)

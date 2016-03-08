@@ -301,7 +301,7 @@ public:
 	virtual const void setBaseViewMat(ccGLMatrixd& mat);
 
 	//! Returns the current OpenGL camera parameters
-	virtual void getGLCameraParameters(ccGLCameraParameters& params);
+	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -567,7 +567,7 @@ public slots:
 	void zoomGlobal();
 
 	//inherited from ccGenericGLDisplay
-	virtual void redraw(bool only2D = false, bool resetLOD = true);
+	virtual void redraw(bool only2D = false, bool resetLOD = true) override;
 
 	//called when recieving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
@@ -790,17 +790,17 @@ protected: //other methods
 	void setFontPointSize(int pixelSize);
 
 	//events handling
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void closeEvent(QCloseEvent *event);
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	void wheelEvent(QWheelEvent *event) override;
+	void closeEvent(QCloseEvent *event) override;
 
 	//inherited
-	void initializeGL();
-	void resizeGL(int w, int h);
-	void paintGL();
-	bool event(QEvent* evt);
+	void initializeGL() override;
+	void resizeGL(int w, int h) override;
+	void paintGL() override;
+	bool event(QEvent* evt) override;
 
 	//Graphical features controls
 	void drawCross();
@@ -826,8 +826,8 @@ protected: //other methods
 	void drawPivot();
 
 	//inherited from QWidget (drag & drop support)
-	virtual void dragEnterEvent(QDragEnterEvent* event);
-	virtual void dropEvent(QDropEvent* event);
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 	//! Picking parameters
 	struct PickingParameters

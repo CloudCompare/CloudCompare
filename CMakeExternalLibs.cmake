@@ -7,9 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set( QT5_ROOT_PATH CACHE PATH "Qt5 root directory (i.e. where the 'bin' folder lies)" )
 if ( QT5_ROOT_PATH )
-
 	list( APPEND CMAKE_PREFIX_PATH ${QT5_ROOT_PATH} )
-	
 endif()
 
 # find qt5 components
@@ -25,17 +23,20 @@ find_package(Qt5OpenGLExtensions)
 # in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 # thus no need to keep additional variables and checks
 
-if ( MSVC )
-	# Where to find OpenGL libraries
-	set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
-	list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
-endif()
-
+# Starting with the QtCore lib, find the bin and root directories
 get_target_property(QT5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE})
 get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
-	
+
+# Apple uses frameworks - move up until we get to the base directory to set the bin directory properly
+if ( APPLE )
+	get_filename_component(QT_BINARY_DIR ${QT_BINARY_DIR} DIRECTORY)
+	get_filename_component(QT_BINARY_DIR ${QT_BINARY_DIR} DIRECTORY)
+	set(QT_BINARY_DIR "${QT_BINARY_DIR}/bin")
+endif()
+
+# set QT5_ROOT_PATH if it wasn't set by the user
 if ( NOT QT5_ROOT_PATH )
-	set(QT5_ROOT_PATH ${QT_BINARY_DIR}/../)
+	get_filename_component(QT5_ROOT_PATH ${QT_BINARY_DIR} DIRECTORY)
 endif()
 
 include_directories(${Qt5OpenGL_INCLUDE_DIRS}
@@ -49,32 +50,18 @@ include_directories(${Qt5OpenGL_INCLUDE_DIRS}
 # ------------------------------------------------------------------------------
 # OpenGL
 # ------------------------------------------------------------------------------
-
-#find_package( OpenGL REQUIRED )
-#if( NOT OPENGL_FOUND )
-#    message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
-#endif()
-
-#include_directories(${OpenGL_INCLUDE_DIR})
-
+if ( MSVC )
+	# Where to find OpenGL libraries
+	set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
+	list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
+endif()
+				
 # ------------------------------------------------------------------------------
 # OpenMP
 # ------------------------------------------------------------------------------
-find_package(OpenMP)
+find_package(OpenMP QUIET)
 if (OPENMP_FOUND)
 	message("OpenMP found")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-
-# ------------------------------------------------------------------------------
-# Some macros for easily passing from qt4 to qt5 when we will be ready
-# ------------------------------------------------------------------------------
-macro(qt_wrap_ui)
-    qt5_wrap_ui(${ARGN})
-endmacro()
-
-
-macro(qt_add_resources)
-    qt5_add_resources(${ARGN})
-endmacro()

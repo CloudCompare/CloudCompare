@@ -34,8 +34,8 @@ file( GLOB qrc_list *.qrc )
 
 file( GLOB txt_list TODO.txt bin_other/history.txt )
 
-qt_wrap_ui( generated_ui_list ${ui_list} )
-qt_add_resources( generated_qrc_list ${qrc_list} )
+qt5_wrap_ui( generated_ui_list ${ui_list} )
+qt5_add_resources( generated_qrc_list ${qrc_list} )
 
 # App icon with MSVC
 if( MSVC )
@@ -59,11 +59,9 @@ target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 target_link_libraries( ${PROJECT_NAME} qcustomplot )
 
 # Qt
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
 if (WIN32)
-    qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
 	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
-else()
-	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
 endif()
 
 # contrib. libraries support

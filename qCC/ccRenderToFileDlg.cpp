@@ -53,7 +53,7 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 	for (int i=0; i<list.size(); ++i)
 	{
 		filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
-		if (i == 0 || list[i].data() == "jpg")
+		if (i == 0 || QString(list[i].data()) == "jpg")
 		{
 			firstFilter = filters;
 		}

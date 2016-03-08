@@ -60,7 +60,7 @@ include_directories(${Qt5OpenGL_INCLUDE_DIRS}
 # ------------------------------------------------------------------------------
 # OpenMP
 # ------------------------------------------------------------------------------
-find_package(OpenMP)
+find_package(OpenMP QUIET)
 if (OPENMP_FOUND)
 	message("OpenMP found")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")

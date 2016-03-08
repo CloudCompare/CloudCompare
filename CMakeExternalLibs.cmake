@@ -25,12 +25,6 @@ find_package(Qt5OpenGLExtensions)
 # in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 # thus no need to keep additional variables and checks
 
-if ( MSVC )
-	# Where to find OpenGL libraries
-	set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
-	list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
-endif()
-
 get_target_property(QT5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE})
 get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
 	
@@ -49,14 +43,12 @@ include_directories(${Qt5OpenGL_INCLUDE_DIRS}
 # ------------------------------------------------------------------------------
 # OpenGL
 # ------------------------------------------------------------------------------
-
-#find_package( OpenGL REQUIRED )
-#if( NOT OPENGL_FOUND )
-#    message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
-#endif()
-
-#include_directories(${OpenGL_INCLUDE_DIR})
-
+if ( MSVC )
+	# Where to find OpenGL libraries
+	set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
+	list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
+endif()
+				
 # ------------------------------------------------------------------------------
 # OpenMP
 # ------------------------------------------------------------------------------

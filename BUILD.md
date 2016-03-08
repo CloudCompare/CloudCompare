@@ -1,23 +1,20 @@
-********************************************
-*         COMPILATION WITH CMAKE           *
-*                                          *
-*    Last modification: 10/02/2014 (DGM)   *
-*                                          *
-********************************************
+Building CloudCompare
+=====================
 
-for up-to-date information, refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake).
+for up-to-date information, refer to the [wiki](http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake).
 
-0) Prerequisites
+## 0) Prerequisites
 
         - Checkout the sources from the Github repository:
-                https://github.com/cloudcompare/trunk
+                ```git clone https://github.com/cloudcompare/trunk```
         - Install CMake (2.8 or newer)
         - Install all necessary dependencies:
                 - [WINDOWS] Qt (version 4.7 or newer)
                 - [LINUX] qt-dev, opengl
                 (refer to section A0 if your version of Qt is older than 4.7)
 
-1) Generating the project
+## 1) Generating the project
+
         - Launch CMake (GUI)
         - Make the 'Where is the source code' field point to your local CloudCompare SVN repository.
         - Make the 'Where to build the binaries' field point to ... almost anywhere you want (apart from the same folder as above!)
@@ -25,7 +22,7 @@ for up-to-date information, refer to the wiki (http://www.cloudcompare.org/doc/w
         - Select your generator [already tested: Visual 2008 (32 & 64 bits), Visual 2010 Express (64 bits - see appendix), Visual 2012, Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32 & 64 bits)]
         - Wait for CMake configuration/tests to finish...
 
-2) Before clicking on the 'Generate' button, you may set some options:
+## 2) Before clicking on the 'Generate' button, you may set some options:
         - if you expand the "OPTION" group, you'll be able to set some general options:
                 - OPTION_BUILD_CC_VIEWER: whether to build or not the ccViewer side project (activated by default)
                 - OPTION_LP_PCL_PATCH_ENABLED: see section 2-5
@@ -48,7 +45,7 @@ for up-to-date information, refer to the wiki (http://www.cloudcompare.org/doc/w
                 - qPoissonRecon
                 - qRansacSD (SD = Shape Detection)
                 - qSSAO
-				- qCork (CSG)
+		- qCork (CSG)
         - eventually the "CMAKE" group contains a CMAKE_INSTALL_PREFIX which is where qCC (CloudCompare) and ccViewer will be installed (with the 'install' build configuration in your project)
                 Note: On Linux, default install dir is /usr/local (be sure to have administrative rights if you want to install CloudCompare there - or change the default path)
                       On Windows Seven, you may not have the right to 'install' files in Program Files (x86)

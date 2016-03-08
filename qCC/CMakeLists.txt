@@ -34,8 +34,8 @@ file( GLOB qrc_list *.qrc )
 
 file( GLOB txt_list TODO.txt bin_other/history.txt )
 
-qt_wrap_ui( generated_ui_list ${ui_list} )
-qt_add_resources( generated_qrc_list ${qrc_list} )
+qt5_wrap_ui( generated_ui_list ${ui_list} )
+qt5_add_resources( generated_qrc_list ${qrc_list} )
 
 # App icon with MSVC
 if( MSVC )

@@ -23,7 +23,7 @@ if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
 	list( APPEND source_list ${PDMS_source_list} )
 endif()
 
-qt_wrap_ui( generated_ui_list ${ui_list} )
+qt5_wrap_ui( generated_ui_list ${ui_list} )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )

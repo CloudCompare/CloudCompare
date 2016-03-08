@@ -66,15 +66,3 @@ if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-
-# ------------------------------------------------------------------------------
-# Some macros for easily passing from qt4 to qt5 when we will be ready
-# ------------------------------------------------------------------------------
-macro(qt_wrap_ui)
-    qt5_wrap_ui(${ARGN})
-endmacro()
-
-
-macro(qt_add_resources)
-    qt5_add_resources(${ARGN})
-endmacro()

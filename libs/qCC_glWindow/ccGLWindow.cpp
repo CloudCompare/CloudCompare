@@ -658,6 +658,8 @@ void ccGLWindow::initializeGL()
 	//initializeGL can be called again when switching to exclusive full screen!
 	if (!m_initialized)
 	{
+		glFunc->initializeOpenGLFunctions(); //DGM: seems to be necessary at least with Qt 5.4
+
 		//we init the model view and projection matrices with identity
 		m_viewMatd.toIdentity();
 		m_projMatd.toIdentity();

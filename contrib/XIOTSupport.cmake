@@ -15,27 +15,34 @@ endif()
 
 # Export XIOT Dlls to specified destinations
 function( target_link_XIOT ) # 2 arguments: ARGV0 = project name / ARGV1 = base lib export folder (optional)
-if( XIOT_INSTALL_DIR )
-	
-	string( REPLACE \\ / XIOT_LIBRARY_DIR ${XIOT_INSTALL_DIR}/lib )
-	file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.* )
-	target_link_libraries( ${ARGV0} ${lib_files} )
-	
-	if ( WIN32 )
-		if ( ARGV1 )
-			string( REPLACE \\ / XIOT_SHARED_LIBRARY_DIR ${XIOT_INSTALL_DIR}/bin )
-			set( dll_files ${XIOT_SHARED_LIBRARY_DIR}/xiot.dll ${XIOT_SHARED_LIBRARY_DIR}/openFI.dll )
-			foreach( dll_file ${dll_files} )
-				install( FILES ${dll_file} CONFIGURATIONS Release DESTINATION ${ARGV1} )
-				# for mutli-config compiler only
-				if( CMAKE_CONFIGURATION_TYPES )
-					install( FILES ${dll_file} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
-					install( FILES ${dll_file} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
-				endif()
-			endforeach()
+	if( ${OPTION_USE_XIOT} )
+		string( REPLACE \\ / XIOT_LIBRARY_DIR ${XIOT_INSTALL_DIR}/lib )
+		
+		if ( WIN32 )
+			file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.dll )
+		elseif( APPLE )
+			file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.dylib )
+		elseif()
+			file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.a )
 		endif()
+		
+		target_link_libraries( ${ARGV0} ${lib_files} )
+		
+		if ( WIN32 )
+			if ( ARGV1 )
+				string( REPLACE \\ / XIOT_SHARED_LIBRARY_DIR ${XIOT_INSTALL_DIR}/bin )
+				set( dll_files ${XIOT_SHARED_LIBRARY_DIR}/xiot.dll ${XIOT_SHARED_LIBRARY_DIR}/openFI.dll )
+				foreach( dll_file ${dll_files} )
+					install( FILES ${dll_file} CONFIGURATIONS Release DESTINATION ${ARGV1} )
+					# for mutli-config compiler only
+					if( CMAKE_CONFIGURATION_TYPES )
+						install( FILES ${dll_file} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
+						install( FILES ${dll_file} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+					endif()
+				endforeach()
+			endif()
+		endif()
+	
+		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_X3D_SUPPORT )
 	endif()
-
-	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_X3D_SUPPORT )
-endif()
 endfunction()

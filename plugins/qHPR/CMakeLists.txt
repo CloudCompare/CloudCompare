@@ -4,7 +4,6 @@ option( INSTALL_QHPR_PLUGIN "Check to install qHPR plugin" OFF )
 
 # CloudCompare 'HPR' plugin
 if (INSTALL_QHPR_PLUGIN)
-
     project( QHPR_PLUGIN )
     
     include( ../CMakePluginTpl.cmake )
@@ -13,5 +12,4 @@ if (INSTALL_QHPR_PLUGIN)
     
     target_link_libraries( ${PROJECT_NAME} qhull )
     include_directories( ${QHULL_LIB_INCLUDE_DIR} )
-
 endif()

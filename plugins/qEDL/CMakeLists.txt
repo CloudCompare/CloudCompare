@@ -4,10 +4,8 @@ option( INSTALL_QEDL_PLUGIN "Check to install qEDL plugin" OFF )
 
 # CloudCompare 'EDL' plugin
 if (INSTALL_QEDL_PLUGIN)
-
     project( QEDL_PLUGIN )
     
     set( CC_SHADER_FOLDER EDL )
     include( ../CMakePluginTpl.cmake )
-
 endif()

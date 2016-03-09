@@ -21,4 +21,3 @@ foreach(dir ${subdirectories})
 		endif()
 	endif()
 endforeach()
-

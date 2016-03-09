@@ -4,7 +4,6 @@ option( INSTALL_QGMMREG_PLUGIN "Check to install qGMMREG plugin" OFF )
 
 # CloudCompare 'GMMREG' plugin
 if (INSTALL_QGMMREG_PLUGIN)
-
 	project( QGMMREG_PLUGIN )
 	
 	#As we are going to re-use several components of the main qCC project
@@ -46,5 +45,4 @@ if (INSTALL_QGMMREG_PLUGIN)
 	if (UNIX)
 	  target_link_libraries(${PROJECT_NAME} m port_ini)
 	endif (UNIX)
-
 endif()

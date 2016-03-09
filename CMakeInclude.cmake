@@ -9,110 +9,103 @@ else()
 	set( SHARED_LIB_TYPE LIBRARY )
 endif()
 
-# Export Qt Dlls to specified destinations
-function( install_Qt_Dlls ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
 if( WIN32 )
-	if( ${ARGC} EQUAL 1 )
-		
-		#All Qt Dlls (release mode)
-		set(QT_RELEASE_DLLS)
-		
-		#standard DLLs (Qt 5)
-		set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
-		#ICU DLLs
-		file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
-
-		#specific case for the MinGW version of Qts
-		if( MINGW )
-			file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libgcc*.dll )
-			file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libstdc++*.dll )
-		endif()
-
-		#generate full path of release Dlls
-		foreach( element ${QT_RELEASE_DLLS_BASE_NAME} )
-			list( APPEND QT_RELEASE_DLLS ${QT_BINARY_DIR}/${element}.dll)
-		endforeach()
-
-		foreach( qtDLL ${QT_RELEASE_DLLS} )
-			if( NOT CMAKE_CONFIGURATION_TYPES )
-				install( FILES ${qtDLL} DESTINATION ${ARGV0} )
-			else()
-				install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
-			endif()
-		endforeach()
-		
-		# for mutli-config compiler only
-		if( CMAKE_CONFIGURATION_TYPES )
-		
-			#release with debug info version
-			foreach( qtDLL ${QT_RELEASE_DLLS} )
-				install( FILES ${qtDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
-			endforeach()
+	# Export Qt Dlls to specified destinations
+	function( install_Qt_Dlls ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
+		if( ${ARGC} EQUAL 1 )
 			
-			#debug version
-			set( QT_DEBUG_DLLS )
+			#All Qt Dlls (release mode)
+			set(QT_RELEASE_DLLS)
 			
-			#standard DLLs
-			set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
+			#standard DLLs (Qt 5)
+			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
 			#ICU DLLs
-			file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
-
+			file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
+	
 			#specific case for the MinGW version of Qts
 			if( MINGW )
-				list( APPEND QT_DEBUG_DLLS_BASE_NAME libgcc )
-				list( APPEND QT_DEBUG_DLLS_BASE_NAME mingwm )
+				file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libgcc*.dll )
+				file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libstdc++*.dll )
 			endif()
-		
+	
 			#generate full path of release Dlls
-			foreach( element ${QT_DEBUG_DLLS_BASE_NAME} )
-				list( APPEND QT_DEBUG_DLLS ${QT_BINARY_DIR}/${element}.dll)
+			foreach( element ${QT_RELEASE_DLLS_BASE_NAME} )
+				list( APPEND QT_RELEASE_DLLS ${QT_BINARY_DIR}/${element}.dll)
 			endforeach()
-
-			foreach( qtDLL ${QT_DEBUG_DLLS} )
-				install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
+	
+			foreach( qtDLL ${QT_RELEASE_DLLS} )
+				if( NOT CMAKE_CONFIGURATION_TYPES )
+					install( FILES ${qtDLL} DESTINATION ${ARGV0} )
+				else()
+					install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
+				endif()
 			endforeach()
-
-		endif()
-	else()
-		message( SEND_ERROR "function install_Qt_Dlls: invalid number of arguments! (need base destination)" )
-	endif()
-endif()
-endfunction()
-
-# Export Qt5 plugins to specified destinations
-function( install_Qt5_plugins )
-
-if( WIN32 )		# 1 argument: ARGV0 = base destination
-	set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
-	set( platformPlugin qwindows )
-	if( NOT CMAKE_CONFIGURATION_TYPES )
-		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll DESTINATION ${ARGV0}/platforms )
-	else()
-		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/platforms )
-		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/platforms )
-		install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}d.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/platforms )
-	endif()
-endif()
-endfunction()
-
-# Export Qt imageformats DLLs to specified destinations
-function( install_Qt_ImageFormats )
-if( WIN32 )		# 1 argument: ARGV0 = base destination
-	set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
-	set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg )
-	foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
-		if( NOT CMAKE_CONFIGURATION_TYPES )
-			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll DESTINATION ${ARGV0}/imageformats )
+			
+			# for mutli-config compiler only
+			if( CMAKE_CONFIGURATION_TYPES )
+			
+				#release with debug info version
+				foreach( qtDLL ${QT_RELEASE_DLLS} )
+					install( FILES ${qtDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
+				endforeach()
+				
+				#debug version
+				set( QT_DEBUG_DLLS )
+				
+				#standard DLLs
+				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
+				#ICU DLLs
+				file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
+	
+				#specific case for the MinGW version of Qts
+				if( MINGW )
+					list( APPEND QT_DEBUG_DLLS_BASE_NAME libgcc )
+					list( APPEND QT_DEBUG_DLLS_BASE_NAME mingwm )
+				endif()
+			
+				#generate full path of release Dlls
+				foreach( element ${QT_DEBUG_DLLS_BASE_NAME} )
+					list( APPEND QT_DEBUG_DLLS ${QT_BINARY_DIR}/${element}.dll)
+				endforeach()
+	
+				foreach( qtDLL ${QT_DEBUG_DLLS} )
+					install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
+				endforeach()
+	
+			endif()
 		else()
-			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/imageformats )
-			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/imageformats )
-			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}d${QT_VER_NUM}.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/imageformats )
+			message( SEND_ERROR "function install_Qt_Dlls: invalid number of arguments! (need base destination)" )
 		endif()
-	endforeach()
-elseif( APPLE )
-    message( SEND_ERROR "install_Qt_ImageFormats should not be called on Mac OS X.  This is handled by macdeployqt." )
+	endfunction()
+
+	# Export Qt5 plugins to specified destinations
+	function( install_Qt5_plugins )
+		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
+		set( platformPlugin qwindows )
+		if( NOT CMAKE_CONFIGURATION_TYPES )
+			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll DESTINATION ${ARGV0}/platforms )
+		else()
+			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/platforms )
+			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/platforms )
+			install( FILES ${QT_PLUGINS_DIR}/platforms/${platformPlugin}d.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/platforms )
+		endif()
+	endfunction()
+
+	# Export Qt imageformats DLLs to specified destinations
+	function( install_Qt_ImageFormats )
+		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
+		set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg )
+		foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
+			if( NOT CMAKE_CONFIGURATION_TYPES )
+				install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll DESTINATION ${ARGV0}/imageformats )
+			else()
+				install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/imageformats )
+				install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/imageformats )
+				install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}d${QT_VER_NUM}.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/imageformats )
+			endif()
+		endforeach()
+	endfunction()
 endif()
-endfunction()
 
 # Install shared libraries depending on the build configuration and OS
 function( install_shared )	# 3 arguments:
@@ -120,15 +113,15 @@ function( install_shared )	# 3 arguments:
 							# ARGV1 = release install destination
 							# ARGV2 = 1 for debug install (if available)
 							# ARGV3 = suffix (optional)
-if( NOT CMAKE_CONFIGURATION_TYPES )
-	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} DESTINATION ${ARGV1}${ARGV3} )
-else()
-	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Release DESTINATION ${ARGV1}${ARGV3} )
-	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo${ARGV3} )
-	if (${ARGV2} EQUAL 1)
-		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
+	if( NOT CMAKE_CONFIGURATION_TYPES )
+		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} DESTINATION ${ARGV1}${ARGV3} )
+	else()
+		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Release DESTINATION ${ARGV1}${ARGV3} )
+		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo${ARGV3} )
+		if (${ARGV2} EQUAL 1)
+			install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
+		endif()
 	endif()
-endif()
 endfunction()
 
 # Copy files to the specified directory and for the active configurations
@@ -144,7 +137,6 @@ function( copy_files )	# 2 arguments:
 		install( FILES ${ARGV0} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
 		install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
 	endif()
-
 endfunction()
 
 # Extended 'install' command depending on the build configuration and OS
@@ -154,13 +146,13 @@ endfunction()
 #   - ARGV2 = base install destination (_debug or _withDebInfo will be automatically appended if multi-conf is supported)
 #   - ARGV3 = install destination suffix (optional)
 function( install_ext )
-if( NOT CMAKE_CONFIGURATION_TYPES )
-	install( ${ARGV0} ${ARGV1} DESTINATION ${ARGV2}${ARGV3} )
-else()
-	install( ${ARGV0} ${ARGV1} CONFIGURATIONS Release DESTINATION ${ARGV2}${ARGV3} )
-	install( ${ARGV0} ${ARGV1} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV2}_withDebInfo${ARGV3} )
-	install( ${ARGV0} ${ARGV1} CONFIGURATIONS Debug DESTINATION ${ARGV2}_debug${ARGV3} )
-endif()
+	if( NOT CMAKE_CONFIGURATION_TYPES )
+		install( ${ARGV0} ${ARGV1} DESTINATION ${ARGV2}${ARGV3} )
+	else()
+		install( ${ARGV0} ${ARGV1} CONFIGURATIONS Release DESTINATION ${ARGV2}${ARGV3} )
+		install( ${ARGV0} ${ARGV1} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV2}_withDebInfo${ARGV3} )
+		install( ${ARGV0} ${ARGV1} CONFIGURATIONS Debug DESTINATION ${ARGV2}_debug${ARGV3} )
+	endif()
 endfunction()
 
 if( APPLE )

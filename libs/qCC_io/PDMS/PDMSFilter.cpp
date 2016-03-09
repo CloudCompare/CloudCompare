@@ -167,6 +167,9 @@ CC_FILE_ERROR PDMSFilter::loadFile(QString filename, ccHObject& container, LoadP
 				case PDMS_VERTEX:
 					unsupportedPrimitiveStr = "Vertex";
 					break;
+					
+				default:
+					break;
 				}
 
 				if (primitive)

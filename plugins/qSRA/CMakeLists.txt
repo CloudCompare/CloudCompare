@@ -4,7 +4,6 @@ option( INSTALL_QSRA_PLUGIN "Check to install qSRA (Surface of Revolution Analys
 
 # CloudCompare 'Surface of Revolution Analysis' plugin
 if (INSTALL_QSRA_PLUGIN)
-
 	#DXF support should be enabled for this plugin! (not mandatory though)
 	if(NOT OPTION_USE_DXF_LIB )
 		message( WARNING "qSRA plugin works best with dxflib support! (enable OPTION_USE_DXF_LIB)" )
@@ -34,5 +33,4 @@ if (INSTALL_QSRA_PLUGIN)
 	
 	#DXF support
 	target_link_DXFLIB( ${PROJECT_NAME} )
-
 endif()

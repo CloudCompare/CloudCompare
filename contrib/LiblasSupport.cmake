@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Quick & dirty LibLAS+CMake support for CloudCompare
+# LibLAS+CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
 OPTION( OPTION_USE_LIBLAS "Build with liblas support" OFF )
@@ -44,56 +44,48 @@ endif()
 
 # Link project with liblas library and export Dlls to specified destinations
 function( target_link_liblas ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export folder
-
-if( ${OPTION_USE_LIBLAS} )
-	
-	if( LIBLAS_RELEASE_LIBRARY_FILE )
-	
-		#Release mode only by default
-		target_link_libraries( ${ARGV0} optimized ${LIBLAS_RELEASE_LIBRARY_FILE} )
-		
-		#export DLL
-		if ( ARGV1 )
-			if ( LIBLAS_SHARED_LIBRARY_FILE )
-				string( REPLACE \\ / LIBLAS_SHARED_LIBRARY_FILE ${LIBLAS_SHARED_LIBRARY_FILE} )
-				install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS Release DESTINATION ${ARGV1} )
-				if ( CMAKE_CONFIGURATION_TYPES )
-					install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
-				endif()
-			elseif( WIN32 )
-				message( SEND_ERROR "No LibLAS DLL file specified (LIBLAS_SHARED_LIBRARY_FILE)" )
-			endif()
-		endif()
-
-		#optional: debug mode
-		if ( LIBLAS_DEBUG_LIBRARY_FILE )
-			target_link_libraries( ${ARGV0} debug ${LIBLAS_DEBUG_LIBRARY_FILE} )
+	if( ${OPTION_USE_LIBLAS} )
+		if( LIBLAS_RELEASE_LIBRARY_FILE )
+			#Release mode only by default
+			target_link_libraries( ${ARGV0} optimized ${LIBLAS_RELEASE_LIBRARY_FILE} )
+			
 			#export DLL
 			if ( ARGV1 )
-				if ( LIBLAS_SHARED_DEBUG_LIBRARY_FILE )
-					string( REPLACE \\ / LIBLAS_SHARED_DEBUG_LIBRARY_FILE ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} )
-					install( FILES ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+				if ( LIBLAS_SHARED_LIBRARY_FILE )
+					string( REPLACE \\ / LIBLAS_SHARED_LIBRARY_FILE ${LIBLAS_SHARED_LIBRARY_FILE} )
+					install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS Release DESTINATION ${ARGV1} )
+					if ( CMAKE_CONFIGURATION_TYPES )
+						install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
+					endif()
+				elseif( WIN32 )
+					message( SEND_ERROR "No LibLAS DLL file specified (LIBLAS_SHARED_LIBRARY_FILE)" )
 				endif()
 			endif()
-		endif()
-		
-		if ( CMAKE_CONFIGURATION_TYPES )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_LAS_SUPPORT )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO CC_LAS_SUPPORT )
-			
+	
+			#optional: debug mode
 			if ( LIBLAS_DEBUG_LIBRARY_FILE )
-				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_LAS_SUPPORT )
+				target_link_libraries( ${ARGV0} debug ${LIBLAS_DEBUG_LIBRARY_FILE} )
+				#export DLL
+				if ( ARGV1 )
+					if ( LIBLAS_SHARED_DEBUG_LIBRARY_FILE )
+						string( REPLACE \\ / LIBLAS_SHARED_DEBUG_LIBRARY_FILE ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} )
+						install( FILES ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+					endif()
+				endif()
 			endif()
-		else()
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_LAS_SUPPORT )
+			
+			if ( CMAKE_CONFIGURATION_TYPES )
+				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_LAS_SUPPORT )
+				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO CC_LAS_SUPPORT )
+				
+				if ( LIBLAS_DEBUG_LIBRARY_FILE )
+					set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_LAS_SUPPORT )
+				endif()
+			else()
+				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_LAS_SUPPORT )
+			endif()
+		else() #if( NOT LIBLAS_RELEASE_LIBRARY_FILE )
+			message( SEND_ERROR "No LibLAS release library file specified (LIBLAS_RELEASE_LIBRARY_FILE)" )
 		endif()
-	
-	else() #if( NOT LIBLAS_RELEASE_LIBRARY_FILE )
-	
-		message( SEND_ERROR "No LibLAS release library file specified (LIBLAS_RELEASE_LIBRARY_FILE)" )
-
 	endif()
-
-endif()
-
 endfunction()

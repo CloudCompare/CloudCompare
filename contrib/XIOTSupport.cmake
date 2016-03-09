@@ -4,7 +4,6 @@
 
 OPTION( OPTION_USE_XIOT "Build with XIOT (X3D support)" OFF )
 if( ${OPTION_USE_XIOT} )
-
 	# XIOT
 	set( XIOT_INSTALL_DIR "" CACHE PATH "XIOT CMAKE INSTALL directory" )
 	if ( NOT XIOT_INSTALL_DIR )
@@ -12,7 +11,6 @@ if( ${OPTION_USE_XIOT} )
 	else()
 		include_directories( ${XIOT_INSTALL_DIR}/include )
 	endif()
-
 endif()
 
 # Export XIOT Dlls to specified destinations
@@ -41,4 +39,3 @@ if( XIOT_INSTALL_DIR )
 	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_X3D_SUPPORT )
 endif()
 endfunction()
-

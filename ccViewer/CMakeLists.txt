@@ -37,12 +37,10 @@ endif()
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
-# App icon with MSVC
 if( MSVC )
+	# App icon with MSVC
 	set( rc_list images/icon/cc_viewer_icon.rc )
-endif()
 
-if( MSVC )
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 elseif( APPLE )

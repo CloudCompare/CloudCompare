@@ -4,7 +4,6 @@ option( INSTALL_QPOISSON_RECON_PLUGIN "Check to install qPoissonRecon plugin" OF
 
 # CloudCompare 'PoissonRecon' plugin
 if (INSTALL_QPOISSON_RECON_PLUGIN)
-
 	project( QPOISSON_RECON_PLUGIN )
 		
 	add_subdirectory (PoissonReconLib)
@@ -19,11 +18,11 @@ if (INSTALL_QPOISSON_RECON_PLUGIN)
 	
 	if ( POISSON_RECON_WITH_OPEN_MP )
 		find_package(OpenMP)
+		
 		if (OPENMP_FOUND)
 			set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 			set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 			set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS WITH_OPENMP )
 		endif()
 	endif ()
-
 endif()

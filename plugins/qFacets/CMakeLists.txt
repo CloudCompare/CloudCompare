@@ -4,7 +4,6 @@ option( INSTALL_QFACETS_PLUGIN "Check to install qFACETS plugin" OFF )
 
 # CloudCompare 'FACETS' plugin
 if (INSTALL_QFACETS_PLUGIN)
-
 	if (NOT SHAPELIB_SOURCE_DIR)
 		message( SEND_ERROR "ShapeLib is required to compile this plugin (enable OPTION_USE_SHAPE_LIB)" )
 	endif()
@@ -31,5 +30,4 @@ if (INSTALL_QFACETS_PLUGIN)
 	target_link_libraries( ${PROJECT_NAME} SHAPELIB )
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_SHP_SUPPORT )
-
 endif()

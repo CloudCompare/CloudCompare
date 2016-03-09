@@ -4,7 +4,6 @@ option( INSTALL_QPCL_PLUGIN "Check to install qPCL plugin" OFF )
 
 # CloudCompare 'PCL' bridge plugin
 if (INSTALL_QPCL_PLUGIN)
-
     #requires PCL
     find_package(PCL REQUIRED)
     
@@ -34,7 +33,4 @@ if (INSTALL_QPCL_PLUGIN)
     #import PCL dlls (if any, WIN32 only)
     include( ExportPCLDlls.cmake )
     export_PCL_dlls( ${CLOUDCOMPARE_DEST_FOLDER} )
-
 endif()
-
-

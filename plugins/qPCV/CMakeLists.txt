@@ -4,7 +4,6 @@ option( INSTALL_QPCV_PLUGIN "Check to install qPCV plugin" OFF )
 
 # CloudCompare 'PCV' plugin
 if (INSTALL_QPCV_PLUGIN)
-
     add_subdirectory (PCV)
 
     project( QPCV_PLUGIN )
@@ -21,5 +20,4 @@ if (INSTALL_QPCV_PLUGIN)
     
     target_link_libraries( ${PROJECT_NAME} PCV_LIB )
 	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
-
 endif()

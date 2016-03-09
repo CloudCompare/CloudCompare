@@ -188,16 +188,33 @@ void ccViewer::loadPlugins()
 
 	ccLog::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
 
+	QString	appPath = QCoreApplication::applicationDirPath();
+	QString	pluginsPath( appPath );
+	
 #if defined(Q_OS_MAC)
 	// plugins are in the bundle
-	QString  path = QCoreApplication::applicationDirPath();
-	path.remove( "MacOS" );
-	QString pluginsPath = path + "Plugins/ccViewerPlugins";
+	appPath.remove( "MacOS" );
+	
+	pluginsPath += "Plugins/ccViewerPlugins";
 #elif defined(Q_OS_WIN)
 	//plugins are in bin/plugins
-	QString pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
-#elif defined(Q_OS_LINUX)
-	QString pluginsPath = "/usr/lib/cloudcompare/plugins/ccViewer";
+	pluginsPath += "/plugins";
+#elif defined(Q_OS_LINUX)	
+	// Plugins are relative to the bin directory where the executable is found
+	QDir  binDir( appPath );
+	
+	if ( binDir.dirName() == "bin" )
+	{
+		binDir.cdUp();
+		
+		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+	}
+	else
+	{
+		// Choose a reasonable default to look in
+		pluginsPath = "/usr/lib/cloudcompare/plugins/CloudCompare";
+	}
+	
 #else
 #warning Need to specify the plugin path for this OS.
 #endif

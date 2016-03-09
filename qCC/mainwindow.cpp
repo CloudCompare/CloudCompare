@@ -413,29 +413,43 @@ void MainWindow::loadPlugins()
 }
 const tPluginInfoList MainWindow::findPlugins()
 {
-	QStringList dirFilters;
+	QStringList	dirFilters;
+	QString		appPath = QCoreApplication::applicationDirPath();
 	
 #if defined(Q_OS_MAC)
 	dirFilters << "*.dylib";
 
 	// plugins are in the bundle
-	QString path = QCoreApplication::applicationDirPath();
-	path.remove( "MacOS" );
-	m_pluginPaths += (path + "Plugins/ccPlugins");
+	appPath.remove( "MacOS" );
+	
+	m_pluginPaths += (appPath + "Plugins/ccPlugins");
 #if 0
 	// used for development only - this is the path where the plugins are built
 	// this avoids having to copy into the application bundle
-	m_pluginPaths += (path + "../../../ccPlugins");
+	m_pluginPaths += (appPath + "../../../ccPlugins");
 #endif
 #elif defined(Q_OS_WIN)
 	dirFilters << "*.dll";
 	
 	//plugins are in bin/plugins
-	m_pluginPaths += (QCoreApplication::applicationDirPath()+QString("/plugins"));
+	m_pluginPaths += (appPath + "/plugins");
 #elif defined(Q_OS_LINUX)
 	dirFilters << "*.so";
 	
-	m_pluginPaths += "/usr/lib/cloudcompare/plugins/CloudCompare";
+	// Plugins are relative to the bin directory where the executable is found
+	QDir  binDir( appPath );
+	
+	if ( binDir.dirName() == "bin" )
+	{
+		binDir.cdUp();
+		
+		m_pluginPaths += (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+	}
+	else
+	{
+		// Choose a reasonable default to look in
+		m_pluginPaths += "/usr/lib/cloudcompare/plugins/CloudCompare";
+	}
 #else
 #warning Need to specify the plugin path for this OS.
 #endif

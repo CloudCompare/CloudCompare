@@ -454,7 +454,7 @@ const tPluginInfoList MainWindow::findPlugins()
 #warning Need to specify the plugin path for this OS.
 #endif
 
-#ifndef Q_OS_LINUX
+#ifdef Q_OS_MAC
 	// Add any app data paths
 	// Plugins in these directories take precendence over the included ones
 	QStringList	appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );

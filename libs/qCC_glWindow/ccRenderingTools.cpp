@@ -225,7 +225,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	bool logScale = sf->logScale();
 	bool symmetricalScale = sf->symmetricalScale();
 	bool alwaysShowZero = sf->isZeroAlwaysShown();
-	
+
 	//set of particular values
 	//DGM: we work with doubles for maximum accuracy
 	ccColorScale::LabelSet keyValues;
@@ -289,7 +289,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	{
 		for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); ++it)
 		{
-#ifdef CC_WINDOWS
+#if defined(CC_WINDOWS) && defined(_MSC_VER)
 			if (!_finite(*it))
 #else
 			if (!std::isfinite(*it))
@@ -377,7 +377,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 
 	glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 	glFunc->glDisable(GL_DEPTH_TEST);
-	
+
 	std::vector<double> sortedKeyValues(keyValues.begin(),keyValues.end());
 	double maxRange = sortedKeyValues.back()-sortedKeyValues.front();
 
@@ -403,12 +403,12 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 
 				glFunc->glVertex2i(x,y+j);
 				glFunc->glVertex2i(x+scaleWidth,y+j);
-				
+
 				if (showHistogram)
 				{
 					double bind = (value-sf->displayRange().min())*(histogram.size()-1)/sf->displayRange().maxRange();
 					int bin = static_cast<int>(floor(bind));
-					
+
 					double hVal = 0.0;
 					if (bin >= 0 && bin < static_cast<int>(histogram.size())) //in symmetrical case we can get values outside of the real SF range
 					{

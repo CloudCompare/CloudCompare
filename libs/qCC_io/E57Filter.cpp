@@ -2080,23 +2080,11 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 	try
 	{
 		//for normals handling
-		try
+		static const e57::ustring normalsExtension("http://www.libe57.org/E57_NOR_surface_normals.txt");
+		e57::ustring _normalsExtension;
+		if (!imf.extensionsLookupPrefix("nor", _normalsExtension)) //the extension may already be registered
 		{
-			imf.extensionsAdd("nor", "http://www.libe57.org/E57_NOR_surface_normals.txt");
-		}
-		catch (const e57::E57Exception& e)
-		{
-			if (	e.errorCode() == e57::E57_ERROR_DUPLICATE_NAMESPACE_PREFIX
-				||	e.errorCode() == e57::E57_ERROR_DUPLICATE_NAMESPACE_URI)
-			{
-				//we can ignore this particular error
-				ccLog::Warning(QString("[E57] LibE57 has issued a warning: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
-			}
-			else
-			{
-				ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
-				return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
-			}
+			imf.extensionsAdd("nor", normalsExtension);
 		}
 
 		//get root

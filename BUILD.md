@@ -21,49 +21,46 @@ Generating the project
 ----------------------
 
 1.  Launch CMake GUI ('cmake-qt-gui' on linux)
-    1.  *(for more convenience, you should check the "Grouped" check-box)*
-    2.  make the `Where is the source code` field point to your local repository (for instance `C:\trunk_CC`).
-    3.  make the `Where to build the binaries` field point to ... almost anywhere you want (**apart from the same folder as above!**). For instance: `C:\trunk_CC\build`.
-    4.  click on the `Configure` button
-    5.  select your generator: already tested: Visual 2008 (32/64 bits), Visual 2010 Express (32/64 bits - see appendix), Visual 2012 Express (64 bits/Qt 5), Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32/64 bits, Mac OS X), 
-    6.  Wait for CMake configuration/tests to finish...
-    7.  ...and you should see something like this:
-
-![](Cmake_init.jpg "Cmake_init.jpg")
+  - *(for more convenience, you should check the "Grouped" check-box)*
+  - make the `Where is the source code` field point to your local repository (for instance `C:\trunk_CC`).
+  - make the `Where to build the binaries` field point to ... almost anywhere you want (**apart from the same folder as above!**). For instance: `C:\trunk_CC\build`.
+  - click on the `Configure` button
+  - select your generator: already tested: Visual 2008 (32/64 bits), Visual 2010 Express (32/64 bits - see appendix), Visual 2012 Express (64 bits/Qt 5), Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32/64 bits, Mac OS X)
+  - wait for CMake configuration/tests to finish...
 
 Before clicking on the 'Generate' button, you may want to set some options:
 
-1.  if you expand the "OPTION" group, you'll be able to set some general options:
-    1.  `OPTION_BUILD_CC_VIEWER```: whether to build or not the ccViewer side project (activated by default)
-    2.  `OPTION_EXPORT_TARGETS```: not documented
-    3.  `OPTION_MP_BUILD`: for MSVC only *(mutli-process build --> much faster, but takes almost all available CPU)*
-    4.  `OPTION_SUPPORT_3D_CONNEXION_DEVICES`: for 3D mouses handling
-    5.  `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to activate support for PDMS .mac scripts (CAD)
-    6.  `OPTION_USE_DXFLIB`: to activate support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#dxflib_setup)
-    7.  `OPTION_USE_FBX_SDK`: to activate support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#fbx_setup)
-    8.  `OPTION_USE_GDAL`: to activate support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup )
-    9.  `OPTION_USE_LIBE57`: to activate support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
-    10. `PTION_USE_LIBLAS`: to activate support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#liblas_setup)
-    11. `OPTION_USE_VISUAL_LEAK_DETECTOR`: to use the Visual Leak Detector library for MSVC (http://vld.codeplex.com/)
-    12. `OPTION_USE_XIOT`: to activate support for X3D files in qCC (and ccViewer) with **XIOT** - see [below](#xiot_setup)
+2.  If you expand the "OPTION" group, you'll be able to set some general options:
+  - `OPTION_BUILD_CC_VIEWER`: whether to build or not the ccViewer side project (activated by default)
+  - `OPTION_EXPORT_TARGETS`: not documented
+  - `OPTION_MP_BUILD`: for MSVC only *(mutli-process build --> much faster, but takes almost all available CPU)*
+  - `OPTION_SUPPORT_3D_CONNEXION_DEVICES`: for 3D mouses handling
+  - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to activate support for PDMS .mac scripts (CAD)
+  - `OPTION_USE_DXFLIB`: to activate support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#dxflib_setup)
+  - `OPTION_USE_FBX_SDK`: to activate support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#fbx_setup)
+  - `OPTION_USE_GDAL`: to activate support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup )
+  - `OPTION_USE_LIBE57`: to activate support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
+  - `PTION_USE_LIBLAS`: to activate support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#liblas_setup)
+  - `OPTION_USE_VISUAL_LEAK_DETECTOR`: to use the Visual Leak Detector library for MSVC (http://vld.codeplex.com/)
+  - `OPTION_USE_XIOT`: to activate support for X3D files in qCC (and ccViewer) with **XIOT** - see [below](#xiot_setup)
 
-2.  if you expand the "INSTALL" group, you'll be able to select which [plugin(s)|Plugins] you want to compile (by default, none are selected)
-    1.  qBLUR *(warning: does not compile with Code::Blocks on Windows for the moment)*
-    2.  qCork (see [below](#cork_setup))
-    3.  qDummy *(warning: does nothing, template for developers)*
-    4.  qEDL
-    5.  qHPR
-    6.  qKinect (see [below](#libfreenect_setup))
-    7.  qPCL (requires PCL - see [below](#PCL_setup))
-    8.  qPCV
-    9.  qPoissonRecon
-    10. qRansacSD *(only tested on Windows for the moment)*
-    11. qSRA
-    12. qSSAO
+3.  if you expand the `INSTALL` group, you'll be able to select which [plugin(s)|Plugins] you want to compile (by default, none are selected)
+  - qBLUR *(warning: does not compile with Code::Blocks on Windows for the moment)*
+  - qCork (see [below](#cork_setup))
+  - qDummy *(warning: does nothing, template for developers)*
+  - qEDL
+  - qHPR
+  - qKinect (see [below](#libfreenect_setup))
+  - qPCL (requires PCL - see [below](#PCL_setup))
+  - qPCV
+  - qPoissonRecon
+  - qRansacSD *(only tested on Windows for the moment)*
+  - qSRA
+  - qSSAO
 
-3.  eventually, the `CMAKE` group contains a `CMAKE_INSTALL_PREFIX` which is where CloudCompare and ccViewer will be installed (when you compile the `INSTALL` project)
-    1.  On Linux, default install dir is `/usr/local` (be sure to have administrative rights if you want to install CloudCompare there: once configured, you can call `# make install` from the sources directory)
-    2.  On Windows Seven, you may not have the right to 'install' files in the default `Program Files` folder
+5.  eventually, the `CMAKE` group contains a `CMAKE_INSTALL_PREFIX` which is where CloudCompare and ccViewer will be installed (when you compile the `INSTALL` project)
+  - On Linux, default install dir is `/usr/local` (be sure to have administrative rights if you want to install CloudCompare there: once configured, you can call `# make install` from the sources directory)
+  - On Windows Seven, you may not have the right to 'install' files in the default `Program Files` folder
 
 ### [Optional] Setup for LibLAS support
 
@@ -72,16 +69,16 @@ If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, y
 1.  [LibLAS](http://liblas.org) (*last tested version: 1.8 on Windows*)
 2.  and optionally [laszip](http://www.laszip.org/) for LAZ files support (*last tested version: 2.2.0 on Windows*) --> prefer the static version (`BUILD_STATIC` in LASzip CMake configuration) and mind the `WITH_STATIC_LASZIP` option in libLAS CMake configuration! (*only appears in 'Advanced' mode*)
 3.  [Boost](http://www.boost.org/) multi-thread static libraries
-    1.  make the `BOOST_ROOT` environment variable point to your Boost installation before launching CMake in order for the automatic `find_package` script to work properly
-    2.  otherwise refer to LibLAS [documentation](http://liblas.org/compilation.html) for more directions
+  - make the `BOOST_ROOT` environment variable point to your Boost installation before launching CMake in order for the automatic `find_package` script to work properly
+  - otherwise refer to LibLAS [documentation](http://liblas.org/compilation.html) for more directions
 
 Then, the CloudCompare CMake project will request that you set the 3 following variables:
 
 1.  `LIBLAS_INCLUDE_DIR`: LibLAS include directory (pretty straightforward ;)
 2.  `LIBLAS_RELEASE_LIBRARY_FILE`: main LibLAS release library (the .lib or .a file itself!)
-3.  [Windows] `LIBLAS_SHARED_LIBRARY_FILE`: full path to the <span style="color:#0000FF">*liblas.dll*</span> file
+3.  [Windows] `LIBLAS_SHARED_LIBRARY_FILE`: full path to the `liblas.dll` file
 
-<span style="color:#FF0000">*For the moment, only the release version of CloudCompare supports LibLAS files*</span>
+*For the moment, only the release version of CloudCompare supports LibLAS files*
 
 ### [Optional] Setup for LibE57 support
 

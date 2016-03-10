@@ -38,11 +38,34 @@ endif()
 qt_wrap_ui( generated_ui_list ${ui_list} )
 qt_add_resources( generated_qrc_list ${qrc_list} )
 
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
+if (QT_STATIC ) # when qt is static we must build static plugins! see here https://wiki.qt.io/Plugins#Static_plugins and define the right macro
+    add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
+    add_definitions(-DQT_STATICPLUGIN)
+
+    # do not know why by I need bot these calls \todo fixthis
+    list( APPEND STATIC_PLUGINS ${PROJECT_NAME} CACHE INTERNAL)
+    set(STATIC_PLUGINS ${STATIC_PLUGINS} ${PROJECT_NAME})
+
+
+    get_filename_component(class_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+
+    file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/../static_plugins.h"  "Q_IMPORT_PLUGIN(${class_name})\n" )
+
+    if(qrc_list)
+        file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/../static_plugins_resources.h"  "Q_INIT_RESOURCE(${class_name});\n" )
+
+    endif(qrc_list)
+
+
+
+
+else()
+    add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
+endif(QT_STATIC)
 
 # Add custom default prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
-if( WIN32 )
+if( WIN32 AND NOT QT_STATIC)
     set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
 endif()
 
@@ -64,26 +87,28 @@ if ( USE_QT5 )
 	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL Concurrent)
 endif()
 
-if( APPLE )
-	install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins COMPONENT Runtime )
-	set( CLOUDCOMPARE_PLUGINS ${CLOUDCOMPARE_PLUGINS} ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "CloudCompare plugin list")
-else()
-	install_shared( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} 1 /plugins )
-endif()
+if (NOT QT_STATIC)
+    if( APPLE )
+            install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins COMPONENT Runtime )
+            set( CLOUDCOMPARE_PLUGINS ${CLOUDCOMPARE_PLUGINS} ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Plugins/ccPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "CloudCompare plugin list")
+    else()
+            install_shared( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} 1 /plugins )
+    endif()
 
-#GL filters and IO plugins also go the the ccViewer 'plugins' sub-folder
-if( ${OPTION_BUILD_CCVIEWER} )
+    #GL filters and IO plugins also go the the ccViewer 'plugins' sub-folder
+    if( ${OPTION_BUILD_CCVIEWER} )
 
-	if( CC_SHADER_FOLDER OR CC_IS_IO_PLUGIN )
-		if( APPLE )
-			install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Plugins/ccViewerPlugins COMPONENT Runtime )
-			set( CCVIEWER_PLUGINS ${CCVIEWER_PLUGINS} ${CCVIEWER_MAC_BASE_DIR}/Contents/Plugins/ccViewerPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "ccViewer plugin list")
-		else()
-			install_shared( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} 1 /plugins )
-		endif()
-	endif()
+            if( CC_SHADER_FOLDER OR CC_IS_IO_PLUGIN )
+                    if( APPLE )
+                            install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Plugins/ccViewerPlugins COMPONENT Runtime )
+                            set( CCVIEWER_PLUGINS ${CCVIEWER_PLUGINS} ${CCVIEWER_MAC_BASE_DIR}/Contents/Plugins/ccViewerPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "ccViewer plugin list")
+                    else()
+                            install_shared( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} 1 /plugins )
+                    endif()
+            endif()
 
-endif()
+    endif()
+endif(NOT QT_STATIC)
 
 #'GL filter' plugins specifics
 if( CC_SHADER_FOLDER )
@@ -105,5 +130,8 @@ if( CC_SHADER_FOLDER )
 	endforeach()
 
 endif()
+
+
+
 
 ### END OF DEFAULT CC PLUGIN CMAKE SCRIPT ###

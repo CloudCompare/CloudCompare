@@ -4,6 +4,10 @@ option( INSTALL_QPCL_PLUGIN "Check to install qPCL plugin" OFF )
 
 if (INSTALL_QPCL_PLUGIN)
 
+    if(ON_MXE)
+        add_definitions(-DM_LOG2E=1.4426950408889634074) # there should be another solution for this
+    endif()
+
 #requires PCL
 find_package(PCL REQUIRED)
 

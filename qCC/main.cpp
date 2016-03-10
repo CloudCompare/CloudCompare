@@ -48,6 +48,11 @@
 #include <vld.h>
 #endif
 
+#ifdef ON_MXE
+    #include <QtPlugin>
+    #include "../plugins/static_plugins.h"
+#endif
+
 //! QApplication wrapper
 class qccApplication : public QApplication
 {
@@ -88,6 +93,11 @@ protected:
 
 int main(int argc, char **argv)
 {
+
+
+#ifdef ON_MXE
+#include "../plugins/static_plugins_resources.h"
+#endif
 	//QT initialiation
 	qccApplication app(argc, argv);
 

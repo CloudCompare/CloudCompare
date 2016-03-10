@@ -1,7 +1,7 @@
 function( export_PCL_dlls ) # 1 argument: ARGV0 = destination directory
 
 #export PCL dlls (if any)
-if (WIN32 AND PCL_DIR)
+if (WIN32 AND PCL_DIR AND NOT ON_MXE)
 
 	# first of all check if files are in ${PCL_DIR} or ${PCL_DIR}/cmake
 	# (not sure why but it happens on my win7 system)

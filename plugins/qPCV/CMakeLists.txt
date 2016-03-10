@@ -11,7 +11,7 @@ add_subdirectory (PCV)
 
 include( ../CMakePluginTpl.cmake )
 
-target_link_libraries( ${PROJECT_NAME} PCV_LIB )
+target_link_libraries( ${PROJECT_NAME} PCV_LIB)
 include_directories( ${PCV_LIB_SOURCE_DIR} )
 
 endif()

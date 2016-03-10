@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(PUSH)
 include ( CMakePolicies.cmake )
 
+option (ON_MXE "Wheter or not we are compiling CC from MXE" OFF)
+option (QT_STATIC "On when we are linking against static-qt" OFF )
+
+if (ON_MXE)
+    add_definitions(-DON_MXE) # adding this also as definition to be used in headers
+
+    set(STATIC_PLUGINS CACHE INTERNAL "" FORCE)
+endif()
+
 # Set a consistent MACOSX_RPATH default across all CMake versions.
 # When CMake 2.8.12 is required, change this default to 1.
 # When CMake 3.0.0 is required, remove this block (see CMP0042).

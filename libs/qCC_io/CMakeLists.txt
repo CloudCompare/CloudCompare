@@ -25,7 +25,12 @@ if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
 endif()
 
 qt_wrap_ui( generated_ui_list ${ui_list} )
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
+
+if (ON_MXE)
+    add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
+else()
+    add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
+endif(ON_MXE)
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
@@ -42,15 +47,18 @@ endif()
 target_link_contrib( ${PROJECT_NAME} )
 
 # Add custom prepocessor definitions
-if (WIN32)
+if (WIN32 AND NOT ON_MXE )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_IO_USE_AS_DLL )
 endif()
 
-# install (shared) lib to specified destinations
-if( UNIX )
-	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
-else()
-foreach( dest ${INSTALL_DESTINATIONS} )
-	install_shared( ${PROJECT_NAME} ${dest} 1 )
-endforeach()
+if (NOT ON_MXE) # when on mxe the lib is static, no need for installing
+    # install (shared) lib to specified destinations
+    if( UNIX )
+            install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
+    else()
+    foreach( dest ${INSTALL_DESTINATIONS} )
+            install_shared( ${PROJECT_NAME} ${dest} 1 )
+    endforeach()
+endif(NOT ON_MXE)
+
 endif()

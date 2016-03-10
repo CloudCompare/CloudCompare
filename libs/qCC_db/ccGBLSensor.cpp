@@ -1068,17 +1068,19 @@ ccGBLSensor::DepthBuffer::DepthBuffer()
 	, height(0)
 {}
 
-void ccGBLSensor::DepthBuffer::clear()
-{
-	zBuff.clear();
-	width = height = 0;
-	deltaPhi = deltaTheta = 0;
-}
-
 ccGBLSensor::DepthBuffer::~DepthBuffer()
 {
-	clear();
+    clear();
 }
+
+void ccGBLSensor::DepthBuffer::clear()
+{
+    zBuff.clear();
+    width = height = 0;
+    deltaPhi = deltaTheta = 0;
+}
+
+
 
 int ccGBLSensor::DepthBuffer::fillHoles()
 {

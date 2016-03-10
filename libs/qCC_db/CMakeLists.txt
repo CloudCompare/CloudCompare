@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+
+
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
@@ -12,12 +14,20 @@ project( QCC_DB_LIB )
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
 
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} )
+if(ON_MXE)
+    add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${moc_list} )
+else()
+    add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} )
+endif(ON_MXE)
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES})
+
+if (ON_MXE) # dont know why but withouth this it does not compile
+    target_link_libraries( ${PROJECT_NAME} gomp pthread)
+endif(ON_MXE)
 
 if ( USE_QT5 )
 	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
@@ -27,15 +37,19 @@ endif()
 
 # Add custom prepocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
-if (WIN32)
+if (WIN32 AND NOT ON_MXE)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 endif()
 
-# install (shared) lib to specified destinations
-if( UNIX )
-	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
-else()
-foreach( dest ${INSTALL_DESTINATIONS} )
-	install_shared( ${PROJECT_NAME} ${dest} 1 )
-endforeach()
+if (NOT ON_MXE)
+    # install (shared) lib to specified destinations
+    if( UNIX )
+            install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
+    else()
+    foreach( dest ${INSTALL_DESTINATIONS} )
+            install_shared( ${PROJECT_NAME} ${dest} 1 )
+    endforeach()
+
+endif (NOT ON_MXE)
+
 endif()

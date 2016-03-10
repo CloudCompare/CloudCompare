@@ -6,6 +6,10 @@
 #undef min
 #endif
 
+#ifdef ON_MXE
+#include <ctime>
+#endif
+
 namespace MiscLib
 {
 #ifdef WIN32
@@ -24,6 +28,8 @@ inline double GetPerformanceFreq()
 	return double(performance_freq);
 }
 #else
+
+
 typedef clock_t performance_t;
 inline performance_t GetPerformanceCounter()
 {

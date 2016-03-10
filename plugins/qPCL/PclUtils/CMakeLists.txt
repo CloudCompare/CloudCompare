@@ -32,7 +32,7 @@ qt_wrap_ui(generated_ui_list ${ui_list})
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} ${moc_list} ${generated_ui_list} )
 
 # Add custom prepocessor definitions
-if (WIN32)
+if (WIN32 AND NOT ON_MXE)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 endif()
 

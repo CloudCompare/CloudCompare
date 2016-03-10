@@ -11,7 +11,7 @@ endif()
 
 # Export Qt Dlls to specified destinations
 function( install_Qt_Dlls ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
-if( WIN32 )
+if( WIN32 AND NOT QT_STATIC)
 	if( ${ARGC} EQUAL 1 )
 		
 		#All Qt Dlls (release mode)
@@ -91,7 +91,7 @@ endfunction()
 # Export Qt5 plugins to specified destinations
 function( install_Qt5_plugins )
 
-if( WIN32 )		# 1 argument: ARGV0 = base destination
+if( WIN32 AND NOT QT_STATIC)		# 1 argument: ARGV0 = base destination
 	if( USE_QT5 )
 		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
 		set( platformPlugin qwindows )
@@ -108,7 +108,7 @@ endfunction()
 
 # Export Qt imageformats DLLs to specified destinations
 function( install_Qt_ImageFormats )
-if( WIN32 )		# 1 argument: ARGV0 = base destination
+if( WIN32 AND NOT QT_STATIC)		# 1 argument: ARGV0 = base destination
 	if( USE_QT5 )
 		set( QT_PLUGINS_DIR ${QT5_ROOT_PATH}/plugins )
 		set( QT_IMAGEFORMATS_PLUGINS qgif qico qjpeg )

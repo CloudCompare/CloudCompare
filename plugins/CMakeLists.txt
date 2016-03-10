@@ -9,6 +9,12 @@ set( CCVIEWER_PLUGINS CACHE INTERNAL "ccViewer plugin list" )
 # Auto add all subdirectories
 file(GLOB subdirectories *)
 
+if (QT_STATIC)
+    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/static_plugins.h")
+    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/static_plugins_resources.h")
+
+endif(QT_STATIC)
+
 foreach(dir ${subdirectories})
     if(IS_DIRECTORY ${dir})
 		#in case the user generates the BUILD project in the same folder as the sources!

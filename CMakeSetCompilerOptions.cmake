@@ -1,7 +1,19 @@
 # cmake should be smart enough to automatically append
 # the NDEBUG definition or _DEBUG in Release/Debug modes.
 # thus there should no need to force them somehow
-if( UNIX )
+
+if (ON_MXE)
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    if(COMPILER_SUPPORTS_CXX11)
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    else()
+        message(ERROR "Your compiler does not support C++11")
+    endif()
+
+endif()
+
+if( UNIX)
     add_definitions("-fPIC")    # is the easier way to add the flag. cmake will take care of everything
 
     # You need a c++11 Compiler to build CC

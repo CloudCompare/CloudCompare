@@ -20,7 +20,7 @@ Prerequisites
 Generating the project
 ----------------------
 
-1. Launch CMake GUI ('cmake-qt-gui' on linux)
+1. Launch CMake GUI (`cmake-qt-gui` on Linux)
   - *(for more convenience, you should check the "Grouped" check-box)*
   - make the `Where is the source code` field point to your local repository (for instance `C:\trunk_CC`).
   - make the `Where to build the binaries` field point to ... almost anywhere you want (**apart from the same folder as above!**). For instance: `C:\trunk_CC\build`.
@@ -34,22 +34,22 @@ Generating the project
   - `OPTION_MP_BUILD`: for MSVC only *(mutli-process build --> much faster, but takes almost all available CPU)*
   - `OPTION_SUPPORT_3D_CONNEXION_DEVICES`: for 3D mouses handling
   - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to activate support for PDMS .mac scripts (CAD)
-  - `OPTION_USE_DXFLIB`: to activate support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#dxflib_setup)
-  - `OPTION_USE_FBX_SDK`: to activate support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#fbx_setup)
-  - `OPTION_USE_GDAL`: to activate support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup )
+  - `OPTION_USE_DXFLIB`: to activate support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
+  - `OPTION_USE_FBX_SDK`: to activate support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
+  - `OPTION_USE_GDAL`: to activate support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup)
   - `OPTION_USE_LIBE57`: to activate support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
-  - `OPTION_USE_LIBLAS`: to activate support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#liblas_setup)
+  - `OPTION_USE_LIBLAS`: to activate support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#optional-setup-for-gdal-supportt)
   - `OPTION_USE_VISUAL_LEAK_DETECTOR`: to use the Visual Leak Detector library for MSVC (http://vld.codeplex.com/)
-  - `OPTION_USE_XIOT`: to activate support for X3D files in qCC (and ccViewer) with **XIOT** - see [below](#xiot_setup)
+  - `OPTION_USE_XIOT`: to activate support for X3D files in qCC (and ccViewer) with **XIOT** - see [below](#optional-setup-for-x3dxiot-support)
 
 3.  if you expand the `INSTALL` group, you'll be able to select which [plugin(s)|Plugins] you want to compile (by default, none are selected)
   - qBLUR *(warning: does not compile with Code::Blocks on Windows for the moment)*
-  - qCork (see [below](#cork_setup))
+  - qCork (see [below](#optional-setup-for-cork--mpir-support-for-qcork))
   - qDummy *(warning: does nothing, template for developers)*
   - qEDL
   - qHPR
-  - qKinect (see [below](#libfreenect_setup))
-  - qPCL (requires PCL - see [below](#PCL_setup))
+  - qKinect (see [below](#optional-setup-for-libfreenect-support))
+  - qPCL (requires PCL - see [below](#optional-setup-for-pcl-required-by-qpcl))
   - qPCV
   - qPoissonRecon
   - qRansacSD *(only tested on Windows for the moment)*
@@ -72,7 +72,7 @@ If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, y
 
 Then, the CloudCompare CMake project will request that you set the 3 following variables:
 
-1. `LIBLAS_INCLUDE_DIR`: LibLAS include directory (pretty straightforward ;)
+1. `LIBLAS_INCLUDE_DIR`: LibLAS include directory (pretty straightforward ;))
 2. `LIBLAS_RELEASE_LIBRARY_FILE`: main LibLAS release library (the .lib or .a file itself!)
 3. [Windows] `LIBLAS_SHARED_LIBRARY_FILE`: full path to the `liblas.dll` file
 

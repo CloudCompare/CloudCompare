@@ -267,8 +267,8 @@ public:
 	//! Returns the smallest eigenvalue and its associated eigenvector
 	/** \param eigenVectors eigenvectors (as a square matrix)
 		\param eigenValues eigenvalues
-		\param maxEigenValue smallest eigenvalue
-		\param maxEigenVector eigenvector vector corresponding to the smallest eigenvalue
+		\param minEigenValue smallest eigenvalue
+		\param minEigenVector eigenvector vector corresponding to the smallest eigenvalue
 		\return success
 	**/
 	static bool GetMinEigenValueAndVector(const SquareMatrix& eigenVectors, const EigenValues& eigenValues, Scalar& minEigenValue, Scalar minEigenVector[])

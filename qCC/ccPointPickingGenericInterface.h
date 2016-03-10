@@ -43,7 +43,7 @@ public:
 	//! Default constructor
 	explicit ccPointPickingGenericInterface(QWidget* parent = 0) : ccOverlayDialog(parent) {}
 	//! Destructor
-	virtual ~ccPointPickingGenericInterface() {};
+	virtual ~ccPointPickingGenericInterface() {}
 
 	//inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindow* win);

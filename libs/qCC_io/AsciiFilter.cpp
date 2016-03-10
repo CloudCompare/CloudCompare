@@ -459,7 +459,7 @@ struct cloudAttributesDescriptor
 		
 		scalarIndexes.clear();
 		scalarFields.clear();
-	};
+	}
 
 	void updateMaxIndex(int& maxIndex)
 	{
@@ -470,7 +470,7 @@ struct cloudAttributesDescriptor
 		for (size_t j=0; j<scalarIndexes.size(); ++j)
 			if (scalarIndexes[j] > maxIndex)
 				maxIndex = scalarIndexes[j];
-	};
+	}
 
 };
 

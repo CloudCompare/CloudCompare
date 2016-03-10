@@ -45,7 +45,7 @@ public:
 	ccPolyline(const ccPolyline& poly);
 
 	//! Destructor
-	virtual ~ccPolyline() {};
+	virtual ~ccPolyline() {}
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const {return CC_TYPES::POLY_LINE;}

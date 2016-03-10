@@ -37,7 +37,7 @@ public:
 
 	//inherited methods (ccGenericMesh)
 	virtual ccGenericPointCloud* getAssociatedCloud() const override { return 0; }
-	virtual void refreshBB() override {};
+	virtual void refreshBB() override {}
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override { return false; }
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override { return false; }
 	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override { return false; }
@@ -70,7 +70,7 @@ public:
 	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override { return 0; }
 	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override { return 0; }
 	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) override {}
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override {};
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override {}
 
 protected:
 

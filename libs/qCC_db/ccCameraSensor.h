@@ -344,7 +344,6 @@ public: //orthorectification tools
 		orthorectification 'altitude'.
 		\param image input image
 		\param altitude orthorectification altitude
-		\param keypointsImage corresponding keypoints in image
 		\param pixelSize pixel size (auto if -1)
 		\param undistortImages whether images should be undistorted or not
 		\param minCorner (optional) outputs 3D min corner (2 values)

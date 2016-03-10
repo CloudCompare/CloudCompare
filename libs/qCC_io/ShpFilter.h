@@ -127,6 +127,7 @@ public:
 
 		//! Default constructor
 		DoubleField3D(QString name) : GenericField(name) {}
+		virtual ~DoubleField3D() {}
 		
 		//inherited from GenericField
 		virtual bool is3D() const  { return true; }

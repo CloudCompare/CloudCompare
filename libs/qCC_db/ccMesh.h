@@ -413,7 +413,7 @@ protected:
 	} \
 
 	//recursive equivalents of some of ccGenericMesh methods (applied to sub-meshes as well)
-	ccMesh_extended_call1(showNormals,bool,showNormals_extended);
+	ccMesh_extended_call1(showNormals,bool,showNormals_extended)
 
 	//! associated cloud (vertices)
 	ccGenericPointCloud* m_associatedCloud;

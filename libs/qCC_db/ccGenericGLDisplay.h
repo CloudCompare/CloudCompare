@@ -136,7 +136,8 @@ struct ccGLCameraParameters
 class ccGenericGLDisplay
 {
 public:
-
+	virtual ~ccGenericGLDisplay() {}
+		
 	//! Returns the screen size
 	virtual QSize getScreenSize() const = 0;
 

@@ -83,7 +83,7 @@ public:
 		computation with this factor.
 		\param value the acceleration exageration factor
 	**/
-	void setJumpCoef(float value) { m_jumpCoef = value; };
+	void setJumpCoef(float value) { m_jumpCoef = value; }
 
 	//! Find peaks of local acceleration values
 	/** This method is useful when using this Fast Marching

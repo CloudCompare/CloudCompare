@@ -363,8 +363,8 @@ namespace CCLib
 						if (++j >= m_matrixSize)
 						{
 							//non inversible matrix!
-							for (unsigned j=0; j<m_matrixSize; j++)
-								delete[] tempM[j];
+							for (unsigned k=0; k<m_matrixSize; ++k)
+								delete[] tempM[k];
 							delete[] tempM;
 							return SquareMatrixTpl();
 						}
@@ -380,8 +380,8 @@ namespace CCLib
 					if (tempM[i][i] != 1.0)
 					{
 						const Scalar& tmpVal = tempM[i][i];
-						for (unsigned j=i; j<2*m_matrixSize; j++)
-							tempM[i][j] /= tmpVal;
+						for (unsigned k=i; k<2*m_matrixSize; ++k)
+							tempM[i][k] /= tmpVal;
 					}
 
 					//after the pivot value, all elements are set to zero
@@ -491,7 +491,6 @@ namespace CCLib
 		//! Creates a rotation matrix from a quaternion (float version)
 		/** Shortcut to double version of initFromQuaternion)
 			\param q normalized quaternion (4 float values)
-			\return a 3x3 rotation matrix
 		**/
 		void initFromQuaternion(const float q[])
 		{
@@ -507,7 +506,6 @@ namespace CCLib
 		/** Quaternion is composed of 4 values: an angle (cos(alpha/2))
 			and an axis (sin(alpha/2)*unit vector).
 			\param q normalized quaternion (w,x,y,z)
-			\return a 3x3 rotation matrix
 		**/
 		void initFromQuaternion(const double q[])
 		{

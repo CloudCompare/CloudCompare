@@ -665,18 +665,18 @@ public:
 	inline Vector3Tpl<T> getTranslationAsVec3D() const { return getColumnAsVec3D(3); }
 
 	//! Sets translation (float version)
-	/** \param T 3D vector **/
+	/** \param Tr 3D vector **/
 	inline void setTranslation(const Vector3Tpl<float>& Tr) { CC_MAT_R14 = static_cast<T>(Tr.x); CC_MAT_R24 = static_cast<T>(Tr.y); CC_MAT_R34 = static_cast<T>(Tr.z); }
 	//! Sets translation (double version)
-	/** \param T 3D vector **/
+	/** \param Tr 3D vector **/
 	inline void setTranslation(const Vector3Tpl<double>& Tr) { CC_MAT_R14 = static_cast<T>(Tr.x); CC_MAT_R24 = static_cast<T>(Tr.y); CC_MAT_R34 = static_cast<T>(Tr.z); }
 
 	//! Sets translation from a float array
-	/** \param T 3D vector as a float array
+	/** \param Tr 3D vector as a float array
 	**/
 	void setTranslation(const float Tr[3]) { CC_MAT_R14 = static_cast<T>(Tr[0]); CC_MAT_R24 = static_cast<T>(Tr[1]); CC_MAT_R34 = static_cast<T>(Tr[2]); }
 	//! Sets translation from a double array
-	/** \param T 3D vector as a double array
+	/** \param Tr 3D vector as a double array
 	**/
 	void setTranslation(const double Tr[3]) { CC_MAT_R14 = static_cast<T>(Tr[0]); CC_MAT_R24 = static_cast<T>(Tr[1]); CC_MAT_R34 = static_cast<T>(Tr[2]); }
 

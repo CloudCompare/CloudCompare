@@ -60,7 +60,7 @@ static const QString CLOUD_INDEX_2("ci2");
 
 //return angle between two vectors (in degrees)
 //warning: vectors will be normalized by default
-double GetAngle_deg(CCVector3 AB, CCVector3 AC)
+static double GetAngle_deg(CCVector3 AB, CCVector3 AC)
 {
 	AB.normalize();
 	AC.normalize();

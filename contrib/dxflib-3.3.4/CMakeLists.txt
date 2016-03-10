@@ -5,8 +5,8 @@ project( DXF_LIB )
 
 set( CMAKE_AUTOMOC OFF )
 
-file( GLOB header_list ${DXF_LIB_SRC_DIR}/*.h)
-file( GLOB source_list ${DXF_LIB_SRC_DIR}/*.cpp)
+file( GLOB header_list src/*.h)
+file( GLOB source_list src/*.cpp)
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 

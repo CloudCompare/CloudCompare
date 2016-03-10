@@ -278,7 +278,7 @@ public:
 	/*** Mesh materials ***/
 
 	//! Toggles material display state
-	virtual void toggleMaterials() {}; //does nothing by default!
+	virtual void toggleMaterials() {} //does nothing by default!
 
 	/*** Name display in 3D ***/
 

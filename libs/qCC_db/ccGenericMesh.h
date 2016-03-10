@@ -43,7 +43,7 @@ public:
 	ccGenericMesh(QString name = QString());
 
 	//! Destructor
-	virtual ~ccGenericMesh() {};
+	virtual ~ccGenericMesh() {}
 
 	//inherited methods (ccDrawableObject)
 	virtual void showNormals(bool state) override;

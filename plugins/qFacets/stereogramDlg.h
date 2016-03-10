@@ -86,7 +86,7 @@ public:
 	void setTicksFreq(int freq) { m_ticksFreq = freq; }
 
 	//! Whether to show the 'HSV' ring or not
-	void showHSVRing(bool state) { m_showHSVRing = state; };
+	void showHSVRing(bool state) { m_showHSVRing = state; }
 
 	//! Enables or not the mouse tracking mode
 	void enableMouseTracking(bool state, double dipSpan_deg = 30, double dipDirSpan_deg = 30);

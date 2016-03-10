@@ -57,7 +57,7 @@ public:
 	ccGBLSensor(const ccGBLSensor& sensor);
 
 	//! Destructor
-	virtual ~ccGBLSensor() {};
+	virtual ~ccGBLSensor() {}
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::GBL_SENSOR; }

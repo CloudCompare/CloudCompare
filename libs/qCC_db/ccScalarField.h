@@ -230,7 +230,7 @@ protected:
 	//! Default destructor
 	/** [SHAREABLE] Call 'release' to destroy this object properly.
 	**/
-	virtual ~ccScalarField() {};
+	virtual ~ccScalarField() {}
 
 	//! Updates saturation values
 	void updateSaturationBounds();

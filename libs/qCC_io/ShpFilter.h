@@ -76,7 +76,7 @@ public:
 		virtual int width() const = 0;
 		virtual int decimal() const = 0;
 		virtual bool save(DBFHandle handle, int fieldIndex) const { return false; } //1D version
-		virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const { return false; }; //3D version
+		virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const { return false; } //3D version
 
 	protected:
 

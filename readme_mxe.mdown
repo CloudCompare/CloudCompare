@@ -1,0 +1,65 @@
+CloudCompare - with mxe
+=======================
+
+To compile on linux with mxe:
+
+first you need an installed mxe with all packages compiled for your arch:
+	
+```bash
+git clone git@github.com:mxe/mxe.git mxe.git
+```
+
+now compile dependencies:
+
+	
+```bash
+cd mxe.git
+make MXE_TARGETS=x86_64-w64-mingw32.static pcl qt 
+```
+
+or for 32 bit win system targets:
+
+	
+```bash
+make MXE_TARGETS=i686-w64-mingw32.static pcl qt 
+```
+
+
+You need to put the mxe dir in your path before to go ahead. Refer to mxe page. Should be something like:
+
+```bash
+export PATH=/where MXE is installed/usr/bin:$PATH
+```
+
+
+NB: changing .static to .dynamic will switch between static or dynamic compilation.
+if qt5 is needed use qt5 instead than qt in the above lines.
+
+Once done is time to checkout CC and compile it
+
+	
+
+```bash
+git clone git@github.com:cloudcompare/trunk.git cloudcompare.git
+cd cloudcompare.git
+git checkout mxe
+mkdir build_win
+cd build_win
+
+x86_64-w64-mingw32.static-cmake ../ -DON_MXE=ON -DCOMPILE_CC_CORE_LIB_SHARED=OFF -DQT_STATIC=ON
+```
+
+or 
+
+```bash
+i686-w64-mingw32.static-cmake ../ -DON_MXE=ON -DCOMPILE_CC_CORE_LIB_SHARED=OFF -DQT_STATIC=ON
+```
+should do the trick. You can either add here plugins options or just (bu only after you called the last commad) call a regular ccmake in the folder:
+
+```bash
+ccamke ..
+```
+
+
+then make...
+

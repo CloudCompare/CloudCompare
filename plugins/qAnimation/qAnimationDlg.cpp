@@ -80,7 +80,9 @@ qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow
 #else
 		defaultDir = QDir::homePath();
 #endif
-		QString lastFilename = settings.value("filename", defaultDir + "/animation.mpg" ).toString();
+		
+		const QString	defaultFileName( defaultDir + "/animation.mpg" );
+		QString lastFilename = settings.value("filename", defaultFileName ).toString();
 #ifndef QFFMPEG_SUPPORT
 		lastFilename = QFileInfo(lastFilename).absolutePath();
 #endif

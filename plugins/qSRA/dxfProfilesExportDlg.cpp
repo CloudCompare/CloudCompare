@@ -43,11 +43,14 @@ void DxfProfilesExportDlg::initFromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("DxfProfilesExportDialog");
 
+	const QString	defaultVertProfile( QApplication::applicationDirPath() + "/vert_profiles.dxf" );
+	const QString	defaultHorizProfile( QApplication::applicationDirPath() + "/horiz_profiles.dxf" );
+	
 	//read parameters
 	bool vertEnabled		= settings.value("vertExportGroup",	true).toBool();
 	bool horizEnabled		= settings.value("horizExportGroup", true).toBool();
-	QString vertPath		= settings.value("vertExportPath",	QApplication::applicationDirPath()+QString("/vert_profiles.dxf")).toString();
-	QString horizPath		= settings.value("horizExportPath",	QApplication::applicationDirPath()+QString("/horiz_profiles.dxf")).toString();
+	QString vertPath		= settings.value("vertExportPath",	defaultVertProfile).toString();
+	QString horizPath		= settings.value("horizExportPath",	defaultHorizProfile).toString();
 	QString vertTitle		= settings.value("vertTitle",		vertTitleLineEdit->text()).toString();
 	QString horizTitle		= settings.value("horizTitle",		horizTitleLineEdit->text()).toString();
 	QString theoTitle		= settings.value("legendTheoTitle",	theoNameLineEdit->text()).toString();

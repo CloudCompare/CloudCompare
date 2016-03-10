@@ -49,6 +49,11 @@ include_directories(${Qt5OpenGL_INCLUDE_DIRS}
                     ${Qt5PrintSupport_INCLUDE_DIRS}
 					)
 
+# turn on QStringBuilder for more efficient string construction
+#	see https://doc.qt.io/qt-5/qstring.html#more-efficient-string-construction
+add_definitions( -DQT_USE_QSTRINGBUILDER )
+				
+
 # ------------------------------------------------------------------------------
 # OpenGL
 # ------------------------------------------------------------------------------

@@ -53,10 +53,11 @@ static int gcd(int num1, int num2)
 	\param[out] rays set of N points
 	\return success
 **/
-static const double c_eps = 2.2204e-16;
-static const double c_twist = 4.0;
 static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 {
+	static const double c_eps = 2.2204e-16;
+	static const double c_twist = 4.0;
+
 	if (N == 0)
 		return false;
 

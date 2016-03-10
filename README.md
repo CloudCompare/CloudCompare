@@ -23,7 +23,7 @@ Compilation
 
 Supported OS: Windows, Linux and Mac OS X
 
-Refer to the [wiki](http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
+Refer to the [BUILD.md file](BUILD.md) for up-to-date information.
 
 Basically, you have to:
 - clone this repository

@@ -35,9 +35,6 @@
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
 
-//Qt
-#include <QGLFormat>
-
 //System
 #include <string.h>
 #include <assert.h>
@@ -1558,8 +1555,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (glParams.showNorms)
 		{
-			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version can fall to 1.0!
-			glFunc->glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glEnable(GL_RESCALE_NORMAL);
 			glFunc->glEnable(GL_LIGHTING);
 			context.defaultMat->applyGL(context.qGLContext, true, colorMaterial);
 		}
@@ -2030,7 +2026,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (glParams.showNorms)
 		{
 			glFunc->glDisable(GL_LIGHTING);
-			glFunc->glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glDisable(GL_RESCALE_NORMAL);
 		}
 
 		if (pushName)

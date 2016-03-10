@@ -37,6 +37,9 @@
 //qCC_io
 #include <FileIOFilter.h>
 
+//Qt
+#include <QGLFormat>
+
 #ifdef USE_VLD
 //VLD
 #include <vld.h>
@@ -143,12 +146,16 @@ int main(int argc, char *argv[])
 	}
 #endif
 	
-	//DGM FIXME: do the same with Qt 5 + reject if Qt version is < 2.1
-	//if (!QGLFormat::hasOpenGL())
-	//{
-	//	QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
-	//	return EXIT_FAILURE;
-	//}
+	if (!QGLFormat::hasOpenGL())
+	{
+		QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+		return EXIT_FAILURE;
+	}
+	if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
+	{
+		QMessageBox::critical(0, "Error", "This application needs OpenGL 2.1 at least to run!");
+		return EXIT_FAILURE;
+	}
 
 	//common data initialization
 	ccTimer::Init();

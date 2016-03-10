@@ -2570,8 +2570,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//in the case we need normals (i.e. lighting)
 		if (glParams.showNorms)
 		{
-			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
-			glFunc->glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glEnable(GL_RESCALE_NORMAL);
 			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_AMBIENT,		CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba  );
 			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_SPECULAR,	CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba );
 			glFunc->glMaterialfv(GL_FRONT_AND_BACK,	GL_DIFFUSE,		CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba  );
@@ -3112,7 +3111,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glPopAttrib(); //GL_LIGHTING_BIT
 			}
 
-			glFunc->glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			glFunc->glDisable(GL_RESCALE_NORMAL);
 			glFunc->glDisable(GL_LIGHTING);
 		}
 

@@ -4453,10 +4453,10 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0;
-					if (mesh->trianglePicking(clickedPos,
-						camera,
-						nearestTriIndex,
-						nearestSquareDist))
+					if (mesh->trianglePicking(	clickedPos,
+												camera,
+												nearestTriIndex,
+												nearestSquareDist))
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -5772,9 +5772,9 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 	camera.project(C3D, C2D);
 
 	//barycentric coordinates
-	GLdouble detT = (B2D.y - C2D.y) * (A2D.x - C2D.x) + (C2D.x - B2D.x) * (A2D.y - C2D.y);
-	GLdouble l1 = ((B2D.y - C2D.y) * (P2D.x - C2D.x) + (C2D.x - B2D.x) * (P2D.y - C2D.y)) / detT;
-	GLdouble l2 = ((C2D.y - A2D.y) * (P2D.x - C2D.x) + (A2D.x - C2D.x) * (P2D.y - C2D.y)) / detT;
+	GLdouble detT =  (B2D.y - C2D.y) * (A2D.x - C2D.x) + (C2D.x - B2D.x) * (A2D.y - C2D.y);
+	GLdouble l1   = ((B2D.y - C2D.y) * (P2D.x - C2D.x) + (C2D.x - B2D.x) * (P2D.y - C2D.y)) / detT;
+	GLdouble l2   = ((C2D.y - A2D.y) * (P2D.x - C2D.x) + (A2D.x - C2D.x) * (P2D.y - C2D.y)) / detT;
 
 	//clamp everything between 0 and 1
 	if (l1 < 0)
@@ -5796,9 +5796,9 @@ CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
 	assert(l3 >= -1.0e-12);
 
 	//now deduce the 3D position
-	GLdouble G[3] = { l1 * A3D.x + l2 * B3D.x + l3 * C3D.x,
-		l1 * A3D.y + l2 * B3D.y + l3 * C3D.y,
-		l1 * A3D.z + l2 * B3D.z + l3 * C3D.z };
+	GLdouble G[3] = {	l1 * A3D.x + l2 * B3D.x + l3 * C3D.x,
+						l1 * A3D.y + l2 * B3D.y + l3 * C3D.y,
+						l1 * A3D.z + l2 * B3D.z + l3 * C3D.z };
 
 	return CCVector3::fromArray(G);
 

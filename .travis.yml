@@ -14,7 +14,6 @@ install:
     - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
     - sudo apt-get update -qq
     - sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev libvxl1-dev
-    # libdxflib-dev
     # CC submodules
     - git submodule init && git submodule update
 
@@ -23,6 +22,7 @@ before_script:
     - cd build
     - cmake -DCMAKE_BUILD_TYPE=Release
       -DQT5_ROOT_PATH=/opt/qt55
+      -DOPTION_USE_DXF_LIB=ON
       -DOPTION_USE_SHAPE_LIB=ON
       -DINSTALL_QANIMATION_PLUGIN=ON
       -DINSTALL_QBLUR_PLUGIN=ON
@@ -45,7 +45,7 @@ before_script:
       # - qRansacSD fails on Clang
       # - no libav/FFMPEG. Version in repos is < 10.7 (no frame.h)
       # - could not use CGAL from Ubuntu (< 4.3)
-      # - DXFLIB need a better cmake to handle libdxflib from Ub
+
 script:
     # We use only 4 core because gcc and clang can be memory hungry
     - make -j2

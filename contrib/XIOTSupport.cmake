@@ -21,7 +21,7 @@ function( target_link_XIOT ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 		if ( WIN32 )
 			file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.dll )
 		elseif( APPLE )
-			file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.dylib )
+			set( lib_files ${XIOT_LIBRARY_DIR}/libxiot.dylib ${XIOT_LIBRARY_DIR}/libopenFI.dylib )
 		elseif()
 			file( GLOB lib_files ${XIOT_LIBRARY_DIR}/*.a )
 		endif()

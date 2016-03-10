@@ -154,31 +154,3 @@ function( install_ext )
 		install( ${ARGV0} ${ARGV1} CONFIGURATIONS Debug DESTINATION ${ARGV2}_debug${ARGV3} )
 	endif()
 endfunction()
-
-if( APPLE )
-   function( get_support_libs )  # 1 argument - return var
-      # get a list of support libs based on configuration
-      #  we need this to install them properly when we are bundling the app
-      list( APPEND SUPPORT_LIB_NAMES libCC_CORE_LIB )
-      list( APPEND SUPPORT_LIB_NAMES libQCC_DB_LIB )
-      list( APPEND SUPPORT_LIB_NAMES libQCC_IO_LIB )
-
-      if( ${OPTION_USE_XIOT} )
-         list( APPEND SUPPORT_LIB_NAMES libxiot )
-      endif()
-      
-      if( ${OPTION_USE_LIBLAS} )
-         list( APPEND SUPPORT_LIB_NAMES liblas )
-      endif()
-
-      foreach( supportLib ${SUPPORT_LIB_NAMES} )
-         set( LIB_NAME ${CMAKE_INSTALL_PREFIX}/lib/${supportLib}${CMAKE_SHARED_LIBRARY_SUFFIX} )
-      
-         # resolve any symbolic links
-         get_filename_component( _resolvedFile ${LIB_NAME} REALPATH )
-         list( APPEND SUPPORT_LIBS ${_resolvedFile} )
-      endforeach()
-   
-      set( ${ARGV0} ${SUPPORT_LIBS} PARENT_SCOPE )
-   endfunction()
-endif()

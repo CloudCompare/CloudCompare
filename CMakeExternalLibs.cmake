@@ -31,7 +31,9 @@ get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
 if ( APPLE )
 	get_filename_component(QT_BINARY_DIR ${QT_BINARY_DIR} DIRECTORY)
 	get_filename_component(QT_BINARY_DIR ${QT_BINARY_DIR} DIRECTORY)
-	set(QT_BINARY_DIR "${QT_BINARY_DIR}/bin")
+	set(QT_BINARY_DIR "${QT_BINARY_DIR}/bin")	
+
+	set( MACDEPLOYQT "${QT_BINARY_DIR}/macdeployqt" )
 endif()
 
 # set QT5_ROOT_PATH if it wasn't set by the user

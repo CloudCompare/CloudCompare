@@ -58,12 +58,12 @@ if ( COMPILE_CC_CORE_LIB_SHARED )
 	endif()
 
 	# Install (shared) library to specified destinations
-	if( UNIX )
-		install_shared( CC_CORE_LIB lib 0 ) #default destination: /usr/lib
-	else()
+	if( WIN32 OR APPLE )
 		foreach( dest ${INSTALL_DESTINATIONS} )
 			install_shared( CC_CORE_LIB ${dest} 1 )
 		endforeach()
+	else()
+		install_shared( CC_CORE_LIB lib 0 ) #default destination: /usr/lib
 	endif()
 endif()
 

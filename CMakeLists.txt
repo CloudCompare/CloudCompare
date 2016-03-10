@@ -18,10 +18,6 @@ if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
 	endif()
 endif()
 
-if (WIN32) # this option is for win only. somebody should see if it makes sense to enable it on APPLE too.
-    option(INSTALL_SYSTEM_LIBS "When installing needed system libs will be copied too" ON)
-endif()
-
 # Default install folders
 # (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)
 set( INSTALL_DESTINATIONS CloudCompare )

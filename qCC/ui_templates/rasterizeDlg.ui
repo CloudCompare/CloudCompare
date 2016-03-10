@@ -29,16 +29,7 @@
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>0</number>
       </property>
       <item>
@@ -259,16 +250,7 @@
          <item>
           <widget class="QFrame" name="interpolateSFFrame">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
+            <property name="margin">
              <number>0</number>
             </property>
             <item>
@@ -318,7 +300,7 @@
             <string>Use the nearest point of the input cloud in each cell instead of the cell center</string>
            </property>
            <property name="text">
-            <string>resample input loud</string>
+            <string>resample input cloud</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -479,16 +461,7 @@ replaced bythe cells average height!</string>
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QFormLayout" name="formLayout_4">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
+             <property name="margin">
               <number>0</number>
              </property>
              <item row="0" column="0">

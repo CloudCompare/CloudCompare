@@ -191,7 +191,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		//we resample the cloud if it's too big (speed increase)
 		if (inputDataCloud->size() > dataSamplingLimit)
 		{
-			data.cloud = CloudSamplingTools::subsampleCloudRandomly(inputDataCloud,dataSamplingLimit);
+			data.cloud = CloudSamplingTools::subsampleCloudRandomly(inputDataCloud, dataSamplingLimit);
 			if (!data.cloud)
 			{
 				return ICP_ERROR_NOT_ENOUGH_MEMORY;
@@ -210,7 +210,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 					for (unsigned i = 0; i < destCount; ++i)
 					{
 						unsigned pointIndex = data.cloud->getPointGlobalIndex(i);
-						data.weights->setValue(i,inputDataWeights->getValue(pointIndex));
+						data.weights->setValue(i, inputDataWeights->getValue(pointIndex));
 					}
 					data.weights->computeMinAndMax();
 				}
@@ -226,7 +226,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 			//we still create a 'fake' reference cloud with all the points
 			data.cloud = new ReferenceCloud(inputDataCloud);
 			cloudGarbage.add(data.cloud);
-			if (!data.cloud->addPointIndex(0,inputDataCloud->size()))
+			if (!data.cloud->addPointIndex(0, inputDataCloud->size()))
 			{
 				//not enough memory
 				return ICP_ERROR_NOT_ENOUGH_MEMORY;
@@ -270,7 +270,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		//we resample the cloud if it's too big (speed increase)
 		if (inputModelCloud->size() > samplingLimit)
 		{
-			ReferenceCloud* subModelCloud = CloudSamplingTools::subsampleCloudRandomly(inputModelCloud,samplingLimit);
+			ReferenceCloud* subModelCloud = CloudSamplingTools::subsampleCloudRandomly(inputModelCloud, samplingLimit);
 			if (!subModelCloud)
 			{
 				//not enough memory
@@ -358,7 +358,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mDistParams;
 		c2mDistParams.octreeLevel = meshDistOctreeLevel;
 		c2mDistParams.CPSet = data.CPSetPlain;
-		if (DistanceComputationTools::computeCloud2MeshDistance(data.cloud,inputModelMesh,c2mDistParams,progressCb) < 0)
+		if (DistanceComputationTools::computeCloud2MeshDistance(data.cloud, inputModelMesh, c2mDistParams, progressCb) < 0)
 		{
 			//an error occurred during distances computation...
 			return ICP_ERROR_DIST_COMPUTATION;
@@ -369,7 +369,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		assert(data.CPSetRef);
 		DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cDistParams;
 		c2cDistParams.CPSet = data.CPSetRef;
-		if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud,model.cloud,c2cDistParams,progressCb) < 0)
+		if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud, model.cloud, c2cDistParams, progressCb) < 0)
 		{
 			//an error occurred during distances computation...
 			return ICP_ERROR_DIST_COMPUTATION;
@@ -492,7 +492,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				overlapDistances[i] = data.cloud->getPointScalarValue(i);
 				assert(overlapDistances[i] == overlapDistances[i]);
 			}
-			std::sort(overlapDistances.begin(),overlapDistances.begin()+pointCount);
+			std::sort(overlapDistances.begin(), overlapDistances.begin() + pointCount);
 
 			assert(maxOverlapCount != 0);
 			ScalarType maxOverlapDist = overlapDistances[maxOverlapCount-1];
@@ -598,9 +598,9 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 							continue;
 						wi = fabs(w);
 					}
-					double Vd = wi * static_cast<double>(V);
-					wiSum += wi*wi;
-					meanSquareValue += Vd*Vd;
+					double Vd = wi * V;
+					wiSum += wi * wi;
+					meanSquareValue += Vd * Vd;
 				}
 			}
 
@@ -611,7 +611,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 
 #ifdef _DEBUG
 			if (fTraceFile)
-				fprintf(fTraceFile,"%u; %f; %u;\n",iteration,rms,data.cloud->size());
+				fprintf(fTraceFile, "%u; %f; %u;\n", iteration, rms, data.cloud->size());
 #endif
 			if (iteration == 0)
 			{
@@ -698,7 +698,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 					else
 					{
 						assert(initialDeltaRMS >= 0.0);
-						float progressPercent = static_cast<float>((initialDeltaRMS-deltaRMS)/(initialDeltaRMS-minRMSDecrease)*100.0);
+						float progressPercent = static_cast<float>((initialDeltaRMS - deltaRMS) / (initialDeltaRMS - minRMSDecrease)*100.0);
 						progressCb->update(progressPercent);
 					}
 				}
@@ -736,7 +736,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		if (filters != SKIP_NONE)
 		{
 			//filter translation (in place)
-			FilterTransformation(currentTrans,filters,currentTrans);
+			FilterTransformation(currentTrans, filters, currentTrans);
 		}
 
 		//get rotated data cloud
@@ -759,7 +759,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 			//update data.cloud
 			data.cloud->clear(false);
 			data.cloud->setAssociatedCloud(data.rotatedCloud);
-			if (!data.cloud->addPointIndex(0,data.rotatedCloud->size()))
+			if (!data.cloud->addPointIndex(0, data.rotatedCloud->size()))
 			{
 				//not enough memory
 				result = ICP_ERROR_NOT_ENOUGH_MEMORY;
@@ -780,7 +780,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 			DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mDistParams;
 			c2mDistParams.octreeLevel = meshDistOctreeLevel;
 			c2mDistParams.CPSet = data.CPSetPlain;
-			if (DistanceComputationTools::computeCloud2MeshDistance(data.cloud,inputModelMesh,c2mDistParams) < 0)
+			if (DistanceComputationTools::computeCloud2MeshDistance(data.cloud, inputModelMesh, c2mDistParams) < 0)
 			{
 				//an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;
@@ -791,7 +791,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		{
 			DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cDistParams;
 			c2cDistParams.CPSet = data.CPSetRef;
-			if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud,model.cloud,c2cDistParams) < 0)
+			if (DistanceComputationTools::computeCloud2CloudDistance(data.cloud, model.cloud, c2cDistParams) < 0)
 			{
 				//an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;

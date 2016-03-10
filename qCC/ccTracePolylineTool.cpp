@@ -145,6 +145,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
         return 0;
 	}
 
+	//DGM FIXME: we are now able to do this over meshes as well!
 	ccHObject::Container clouds;
 	if (m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin) == 0)
 	{
@@ -264,7 +265,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
     if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
         //connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
         connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
         connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
@@ -387,17 +388,11 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 	m_associatedWin->redraw(true, false);
 }
 
-void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y)
+void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P)
 {
 	if (!m_associatedWin)
 	{
 		assert(false);
-		return;
-	}
-
-	if (!entity || !entity->isA(CC_TYPES::POINT_CLOUD))
-	{
-		//we ignore this object
 		return;
 	}
 
@@ -437,9 +432,7 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 		return;
 	}
 
-	const CCVector3* P = ccHObjectCaster::ToPointCloud(entity)->getPoint(itemIdx);
-
-	m_poly3DVertices->addPoint(*P);
+	m_poly3DVertices->addPoint(P);
 	m_poly3D->addPointIndex(m_poly3DVertices->size()-1);
 	m_segmentParams.push_back(SegmentGLParams(m_associatedWin, x, y));
 

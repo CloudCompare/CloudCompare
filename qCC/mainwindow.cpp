@@ -8915,7 +8915,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 	if (m_pprDlg)
 		m_pprDlg->pause(true);
 
-	connect(win, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int)));
+	connect(win, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&)));
 	s_pickingWindow = win;
 	s_previousPickingMode = win->getPickingMode();
 	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
@@ -8961,51 +8961,22 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 
 	freezeUI(false);
 
-	disconnect(s_pickingWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int)));
+	disconnect(s_pickingWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&)));
 	//restore previous picking mode
 	s_pickingWindow->setPickingMode(s_previousPickingMode);
 	s_pickingWindow = 0;
 	s_previousPickingOperation = NO_PICKING_OPERATION;
 }
 
-void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x, int y)
+void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P)
 {
 	if (!s_pickingWindow)
 		return;
 
 	if (!entity)
 		return;
-
-	CCVector3 pickedPoint;
-	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
-		if (!cloud)
-		{
-			assert(false);
-			return;
-		}
-		pickedPoint = *cloud->getPoint(itemIndex);
-	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
-	{
-		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-		if (!mesh)
-		{
-			assert(false);
-			return;
-		}
-		CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-		pickedPoint = s_pickingWindow->backprojectPointOnTriangle(CCVector2i(x,y), *tri->_getA(), *tri->_getB(), *tri->_getC());
-	}
-	else
-	{
-		//unhandled entity
-		ccLog::Warning(QString("[Picking] Can't use points picked on this entity ('%1')!").arg(entity->getName()));
-		assert(false);
-		return;
-	}
 	
+	CCVector3 pickedPoint = P;
 	switch(s_previousPickingOperation)
 	{
 	case PICKING_LEVEL_POINTS:
@@ -9037,7 +9008,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 			s_levelMarkersCloud->addPoint(pickedPoint);
 			unsigned markerCount = s_levelMarkersCloud->size();
 			cc2DLabel* label = new cc2DLabel();
-			label->addPoint(s_levelMarkersCloud,markerCount-1);
+			label->addPoint(s_levelMarkersCloud, markerCount-1);
 			label->setName(QString("P#%1").arg(markerCount));
 			label->setDisplayedIn2D(false);
 			label->setDisplay(s_pickingWindow);

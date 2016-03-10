@@ -617,8 +617,9 @@ signals:
 		\param subEntityID point or triangle index in entity
 		\param x mouse cursor x position
 		\param y mouse cursor y position
+		\param P the picked point
 	**/
-	void itemPicked(ccHObject* entity, unsigned subEntityID, int x, int y);
+	void itemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P);
 
 	//! Signal emitted when an item is picked (FAST_PICKING mode only)
 	/** \param entity entity
@@ -928,6 +929,7 @@ protected: //other methods
 	void processPickingResult(	const PickingParameters& params,
 								ccHObject* pickedEntity,
 								int pickedItemIndex,
+								const CCVector3* nearestPoint = 0,
 								const std::unordered_set<int>* selectedIDs = 0);
 	
 	//! Updates currently active items list (m_activeItems)

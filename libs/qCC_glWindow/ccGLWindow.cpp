@@ -4306,6 +4306,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 void ccGLWindow::processPickingResult(	const PickingParameters& params,
 										ccHObject* pickedEntity,
 										int pickedItemIndex,
+										const CCVector3* nearestPoint/*=0*/,
 										const std::unordered_set<int>* selectedIDs/*=0*/)
 {
 	//standard "entity" picking
@@ -4327,8 +4328,9 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 			||	params.mode == POINT_OR_TRIANGLE_PICKING)
 	{
 		assert(pickedEntity == 0 || pickedItemIndex >= 0);
+		assert(nearestPoint);
 
-		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY);
+		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint);
 	}
 	//fast picking (labels, interactors, etc.)
 	else if (params.mode == FAST_PICKING)
@@ -4400,8 +4402,8 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//setup selection buffers
-	memset(m_pickingBuffer,0,sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
-	glSelectBuffer(CC_PICKING_BUFFER_SIZE,m_pickingBuffer);
+	memset(m_pickingBuffer, 0, sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
+	glSelectBuffer(CC_PICKING_BUFFER_SIZE, m_pickingBuffer);
 	glRenderMode(GL_SELECT);
 	glInitNames();
 
@@ -4571,8 +4573,16 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		}
 	}
 
+	CCVector3 P(0, 0, 0);
+	CCVector3* pickedPoint = 0;
+	if (pickedEntity && pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
+		pickedPoint = &P;
+	}
+
 	//we must always emit a signal!
-	processPickingResult(params, pickedEntity, pickedItemIndex, &selectedIDs);
+	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, &selectedIDs);
 }
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
@@ -4584,6 +4594,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	ccHObject* nearestEntity = 0;
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
+	CCVector3 nearestPoint(0, 0, 0);
 
 	static ccGui::ParamStruct::ComputeOctreeForPicking autoComputeOctreeThisSession = ccGui::ParamStruct::ASK_USER;
 	bool autoComputeOctree = false;
@@ -4699,6 +4710,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						{
 							nearestElementSquareDist = nearestSquareDist;
 							nearestElementIndex = nearestPointIndex;
+							nearestPoint = *(cloud->getPoint(nearestPointIndex));
 							nearestEntity = cloud;
 						}
 					}
@@ -4711,15 +4723,18 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0;
+					CCVector3d P;
 					if (mesh->trianglePicking(	clickedPos,
 												camera,
 												nearestTriIndex,
-												nearestSquareDist) )
+												nearestSquareDist,
+												P) )
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
 							nearestElementSquareDist = nearestSquareDist;
 							nearestElementIndex = nearestTriIndex;
+							nearestPoint = CCVector3::fromArray(P.u);
 							nearestEntity = mesh;
 						}
 					}
@@ -4752,7 +4767,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	//ccLog::Print(QString("[Picking][CPU] Time: %1 ms").arg(dt));
 
 	//we must always emit a signal!
-	processPickingResult(params, nearestEntity, nearestElementIndex);
+	processPickingResult(params, nearestEntity, nearestElementIndex, &nearestPoint);
 }
 
 void ccGLWindow::displayNewMessage(	const QString& message,

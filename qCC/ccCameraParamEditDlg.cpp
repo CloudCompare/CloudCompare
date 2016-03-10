@@ -228,11 +228,11 @@ void ccCameraParamEditDlg::pickPointAsPivot()
 	if (m_associatedWin)
 	{
 		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int)));
+		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
 	}
 }
 
-void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y)
+void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P)
 {
 	if (!m_associatedWin)
 	{
@@ -242,41 +242,12 @@ void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemInd
 	
 	if (entity)
 	{
-		CCVector3 P;
-		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
-			if (!cloud)
-			{
-				assert(false);
-				return;
-			}
-			P = *cloud->getPoint(itemIndex);
-		}
-		else if (entity->isKindOf(CC_TYPES::MESH))
-		{
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-			if (!mesh)
-			{
-				assert(false);
-				return;
-			}
-			CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y), *tri->_getA(), *tri->_getB(), *tri->_getC());
-		}
-		else
-		{
-			//unhandled entity
-			assert(false);
-			return;
-		}
-
 		m_associatedWin->setPivotPoint(CCVector3d::fromArray(P.u));
 		m_associatedWin->redraw();
 	}
 
 	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-	disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int)));
+	disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
 }
 
 void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)

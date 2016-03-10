@@ -889,7 +889,8 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 									const ccGLCameraParameters& camera,
 									int& nearestTriIndex,
-									double& nearestSquareDist)
+									double& nearestSquareDist,
+									CCVector3d& nearestPoint)
 {
 	ccGLMatrix trans;
 	bool noGLTrans = !getAbsoluteGLTransformation(trans);
@@ -904,6 +905,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 
 	nearestTriIndex = -1;
 	nearestSquareDist = -1.0;
+	nearestPoint = CCVector3d(0, 0, 0);
 
 	ccGenericPointCloud* vertices = getAssociatedCloud();
 	assert(vertices);
@@ -965,6 +967,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 			{
 				nearestSquareDist = squareDist;
 				nearestTriIndex = static_cast<int>(i);
+				nearestPoint = P;
 			}
 		}
 	}

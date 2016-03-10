@@ -188,7 +188,8 @@ public:
 	bool trianglePicking(	const CCVector2d& clickPos,
 							const ccGLCameraParameters& camera,
 							int& nearestTriIndex,
-							double& nearestSquareDist);
+							double& nearestSquareDist,
+							CCVector3d& nearestPoint);
 
 protected:
 

@@ -53,7 +53,7 @@ public:
 protected slots:
 
 	//! Slot to handle directly a picked point (OpenGL based picking)
-	virtual void handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y);
+	virtual void handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3&);
 
 protected:
 

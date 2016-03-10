@@ -206,6 +206,8 @@ public:
 	ccDrawableObject();
 	//! Copy constructor
 	ccDrawableObject(const ccDrawableObject& object);
+	
+	virtual ~ccDrawableObject() {}
 
 	//! Draws entity and its children
 	virtual void draw(CC_DRAW_CONTEXT& context) = 0;

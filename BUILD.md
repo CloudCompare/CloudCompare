@@ -28,7 +28,7 @@ Generating the project
   - select your generator: already tested: Visual 2008 (32/64 bits), Visual 2010 Express (32/64 bits - see appendix), Visual 2012 Express (64 bits/Qt 5), Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32/64 bits, Mac OS X)
   - wait for CMake configuration/tests to finish...
 
-2. Before clicking on the 'Generate' button, you may want to set some options,  if you expand the "OPTION" group, you'll be able to set some general options:
+2. Before clicking on the 'Generate' button, you may want to set some options,  if you expand the `OPTION` group, you'll be able to set some general options:
   - `OPTION_BUILD_CC_VIEWER`: whether to build or not the ccViewer side project (activated by default)
   - `OPTION_EXPORT_TARGETS`: not documented
   - `OPTION_MP_BUILD`: for MSVC only *(mutli-process build --> much faster, but takes almost all available CPU)*
@@ -220,9 +220,9 @@ Here are several "hints" regarding the compilation on Windows 64 bits:
 1.  if only Visual 2010 Express is installed, Cmake will require you to install Microsoft Windows SDK 7.1
 2.  to compile with Visual 2010 you must then apply the following patch: [1](http://support.microsoft.com/kb/2280741) (this solves a bug from the MSVC 2010 compiler that prevents Qt from running correctly in release mode)
 3.  you'll also have to compile Qt 4.8 yourself, as Nokia never provided the corresponding binaries:
-    1.  download and decompress the Qt sources
-    2.  start the Microsoft Windows SDK 7.1 command line mode with the dedicated shortcut (you'll have to add `/Release` at the end of the shortcut - edit the shortcut properties for that). Something like: `C:\Windows\System32\cmd.exe /E:ON /V:ON /T:0E /K "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /Release`
-    3.  if you don't have perl installed, just delete the `bin/syncqt.bat` file
-    4.  And follow this [guide](http://www.holoborodko.com/pavel/2011/02/01/how-to-compile-qt-4-7-with-visual-studio-2010/)
+    - download and decompress the Qt sources
+    - start the Microsoft Windows SDK 7.1 command line mode with the dedicated shortcut (you'll have to add `/Release` at the end of the shortcut - edit the shortcut properties for that). Something like: `C:\Windows\System32\cmd.exe /E:ON /V:ON /T:0E /K "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /Release`
+    - if you don't have perl installed, just delete the `bin/syncqt.bat` file
+    - And follow this [guide](http://www.holoborodko.com/pavel/2011/02/01/how-to-compile-qt-4-7-with-visual-studio-2010/)
 
 Otherwise use Visual 2012 with Qt 5 64 bits ;)

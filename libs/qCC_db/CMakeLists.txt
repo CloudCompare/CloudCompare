@@ -25,10 +25,10 @@ if (WIN32)
 endif()
 
 # install (shared) lib to specified destinations
-if( UNIX )
-	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
-else()
+if( WIN32 OR APPLE )
 	foreach( dest ${INSTALL_DESTINATIONS} )
 		install_shared( ${PROJECT_NAME} ${dest} 1 )
 	endforeach()
+else()
+	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
 endif()

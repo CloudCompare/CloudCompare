@@ -836,12 +836,13 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 			case MEAN_CURV:
 				{
 					//to sign the curvature, we need a normal!
-					PointCoordinateType H = fabs( ((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx) ) / (2*sqrt(q)*q);
-					return static_cast<ScalarType>(H);
+					PointCoordinateType H2 = fabs( ((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx) ) / (2*sqrt(q)*q);
+					return static_cast<ScalarType>(H2);
 				}
 
 			default:
 				assert(false);
+				break;
 			}
 		}
 		break;

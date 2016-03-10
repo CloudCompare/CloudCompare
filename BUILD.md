@@ -85,11 +85,11 @@ If you want to compile CloudCompare (and ccViewer) with LibE57 files support, yo
 1. [Boost](http://www.boost.org/) multi-thread static libraries (same as [libLAS](#liblas_setup))
 2. [Xerces-C++](http://xerces.apache.org/xerces-c) multi-thread **static** libraries
     - On Visual C++ (Windows):
-        1. select the 'Static Debug' or 'Static Release' configurations
-        2. you'll have to manually modify the **XercesLib** project options so that the 'C/C++ > Code Generation > Runtime Library' are of DLL type in both release and debug modes (i.e. /MD in release or /MDd in debug)
-        3. for 64 bits version be sure to select the right platform (x64 instead of Win32). If you use Visual Studio Express 2010, be sure also that the 'toolset' (in the project properties) is set to something like *Windows7.1SDK*
+        1. select the `Static Debug` or `Static Release` configurations
+        2. you'll have to manually modify the `XercesLib` project options so that the `C/C++ > Code Generation > Runtime Library` are of DLL type in both release and debug modes (i.e. `/MD` in release or `/MDd` in debug)
+        3. for 64 bits version be sure to select the right platform (x64 instead of Win32). If you use Visual Studio Express 2010, be sure also that the `toolset` (in the project properties) is set to something like `Windows7.1SDK`
     - only the XercesLib project neet to be compiled
-    - eventually, CMake will look for the resulting files in '/include' (instead of /src) and /lib (without the Release or Debug subfolders). By default the visual project will put them in /Build/WinXX/VCXX/StaticXXX. Therefore you should create a custom folder with the right organization and copy the files there.
+    - eventually, CMake will look for the resulting files in `/include` (instead of `/src`) and `/lib` (without the Release or Debug subfolders). By default the visual project will put them in `/Build/WinXX/VCXX/StaticXXX`. Therefore you should create a custom folder with the right organization and copy the files there.
 
 3. [LibE57](http://libe57.org) (*last tested version: 1.1.312 on Windows*)
     - **WARNING**: with Visual Studio (at least), you'll need the libraries compiled with `/MD` (=DLL Multithreaded) in release mode and `/MDd` in debug mode. You may have to replace all `/MT` by `/MD` in the main libE57 root CMake file (or in `cmake/c_flag_overrides.cmake` and `cmake/cxx_flag_overrides.cmake` if there's no `/MT` in it)
@@ -102,7 +102,7 @@ The CloudCompare CMake project will only require that you set the path where lib
 
 ### [Optional] Setup for libfreenect support
 
-If you want to compile qKinect you'll need [OpenKinect / libfreenect](https://github.com/OpenKinect/libfreenect) (*last tested version: v0.5.0 Saturn, compiled on Windows 7 32 & 64 bits - you'll need [libusb](http://libusb.info/)*)
+If you want to compile qKinect you'll need [OpenKinect / libfreenect](https://github.com/OpenKinect/libfreenect) (*last tested version: v0.5.0 Saturn, compiled on Windows 7 32 & 64 bits - you'll need [libusb](http://libusb.info/)* too)
 
 Then, the CloudCompare CMake project will request that you set the 3 following variables:
 

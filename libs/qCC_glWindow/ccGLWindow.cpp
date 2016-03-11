@@ -4575,7 +4575,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 	CCVector3 P(0, 0, 0);
 	CCVector3* pickedPoint = 0;
-	if (pickedEntity && pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (pickedEntity && pickedItemIndex >= 0 && pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
 		pickedPoint = &P;

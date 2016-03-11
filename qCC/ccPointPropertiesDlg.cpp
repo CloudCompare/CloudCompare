@@ -339,8 +339,9 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 		return;
 	}
 
-	if (!m_associatedWin || !m_associatedWin->hasFBO()) //we need fast rendering (with FBO) for live update of the rectangle!
+	if (!m_associatedWin)
 	{
+		assert(false);
 		return;
 	}
 

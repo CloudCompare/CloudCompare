@@ -692,8 +692,11 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 
 void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 {
-	if (!m_associatedWin || !m_associatedWin->hasFBO()) //we need fast rendering (with FBO) for live update of the polyline!
+	if (!m_associatedWin)
+	{
+		assert(false);
 		return;
+	}
 
 	//process not started yet?
 	if ((m_state & RUNNING) == 0)

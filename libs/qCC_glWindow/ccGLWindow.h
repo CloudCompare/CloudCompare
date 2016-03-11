@@ -497,9 +497,6 @@ public:
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
 
-	//! Returns whether the display has an active FBO
-	inline bool hasFBO() const { return (m_fbo != 0); }
-
 public: //LOD
 
 	//! Returns whether LOD is enabled on this display or not
@@ -695,6 +692,18 @@ signals:
 	void exclusiveFullScreenToggled(bool);
 
 protected: //rendering
+
+	//reimplemented from QOpenGLWidget
+	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
+	//we need to automatically bind our own afterwards!
+	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
+	void makeCurrent();
+
+	//! Binds an FBO or releases the current one (if input is NULL)
+	/** This method must be called instead of the FBO's own 'start' and 'stop' methods
+		so as to properly handle the interactions with QOpenGLWidget's own FBO.
+	**/
+	bool bindFBO(ccFrameBufferObject* fbo);
 
 	//! LOD state
 	struct LODState
@@ -900,7 +909,7 @@ protected: //other methods
 	void removeFBOSafe(ccFrameBufferObject* &fbo);
 
 	//! Inits active GL filter (advanced shader)
-	bool initGLFilter(int w, int h);
+	bool initGLFilter(int w, int h, bool silent = false);
 	//! Releases active GL filter
 	void removeGLFilter();
 
@@ -1086,8 +1095,10 @@ protected: //members
 	bool m_shadersEnabled;
 
 	//! Currently active FBO (frame buffer object)
+	ccFrameBufferObject* m_activeFbo;
+	//! First default FBO (frame buffer object)
 	ccFrameBufferObject* m_fbo;
-	//! Second currently active FBO (frame buffer object) - used for stereo rendering
+	//! Second default FBO (frame buffer object) - used for stereo rendering
 	ccFrameBufferObject* m_fbo2;
 	//! Whether to always use FBO or only for GL filters
 	bool m_alwaysUseFBO;

@@ -379,6 +379,7 @@ ccGLWindow::ccGLWindow(QWidget *parent,	bool silentInitialization/*=false*/)
 	, m_clickableItemsVisible(false)
 	, m_activeShader(0)
 	, m_shadersEnabled(false)
+	, m_activeFbo(0)
 	, m_fbo(0)
 	, m_fbo2(0)
 	, m_alwaysUseFBO(false)
@@ -541,6 +542,44 @@ ccGLWindow::~ccGLWindow()
 		delete m_fbo;
 	if (m_fbo2)
 		delete m_fbo2;
+}
+
+void ccGLWindow::makeCurrent()
+{
+	QOpenGLWidget::makeCurrent();
+
+	if (m_activeFbo)
+	{
+		m_activeFbo->start();
+	}
+}
+
+bool ccGLWindow::bindFBO(ccFrameBufferObject* fbo)
+{
+	if (fbo) //bind
+	{
+		if (fbo->start())
+		{
+			m_activeFbo = fbo;
+			return true;
+		}
+		else
+		{
+			//failed to start the FBO?!
+			m_activeFbo = 0;
+			return false;
+
+		}
+	}
+	else //unbind
+	{
+		m_activeFbo = 0;
+
+		//we automatically enable the QOpenGLWidget's default FBO
+		assert(m_glExtFuncSupported);
+		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+		return true;
+	}
 }
 
 void ccGLWindow::setInteractionMode(INTERACTION_FLAGS flags)
@@ -943,10 +982,7 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 {
 	m_glViewport = rect;
 
-	if (!m_captureMode.enabled)
-	{
-		makeCurrent(); //makes lose the FBO focus in render mode!
-	}
+	makeCurrent();
 
 	const qreal retinaScale = devicePixelRatio();
 	functions()->glViewport(rect.x() * retinaScale, rect.y() * retinaScale, rect.width() * retinaScale, rect.height() * retinaScale);
@@ -964,7 +1000,7 @@ void ccGLWindow::resizeGL(int w, int h)
 	if (m_fbo || m_alwaysUseFBO)
 		initFBO(width(), height());
 	if (m_activeGLFilter)
-		initGLFilter(width(), height());
+		initGLFilter(width(), height(), true);
 
 	//pivot symbol is dependent on the screen size!
 	if (m_pivotGLList != GL_INVALID_LIST_ID)
@@ -1652,7 +1688,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 			//set the right viewport
 			{
-				s_oculus.fbo->start();
+				bindFBO(s_oculus.fbo);
+
 				//s_oculus.fbo->setDrawBuffer(renderingParams.passIndex);
 				glFunc->glEnable(GL_FRAMEBUFFER_SRGB);
 				const ovrRecti& vp = s_oculus.layer.Viewport[renderingParams.passIndex];
@@ -1660,9 +1697,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				CONTEXT.glW = vp.Size.w;
 				CONTEXT.glH = vp.Size.h;
 				modifiedViewport = true;
-				s_oculus.fbo->stop();
-				assert(m_glExtFuncSupported);
-				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+
+				bindFBO(0);
 			}
 		}
 #endif //CC_OCULUS_SUPPORT
@@ -1673,7 +1709,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		&&	renderingParams.useFBO
 		&& (renderingParams.drawBackground || renderingParams.draw3DPass))
 	{
-		currentFBO->start();
+		bindFBO(currentFBO);
+
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
 		ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO start)");
 
@@ -1814,10 +1851,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		//we disable fbo (if any)
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
-			currentFBO->stop();
-			assert(m_glExtFuncSupported);
-			m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
+			bindFBO(0);
 			m_updateFBO = false;
 		}
 
@@ -1840,9 +1875,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
-				assert(m_glExtFuncSupported);
-				m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject()); //the active filter can also enable/disable FBOs!
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
+				bindFBO(0); //in case the active filter has used a FBOs!
 
 				//if capture mode is ON: we only want to capture it, not to display it
 				if (!m_captureMode.enabled)
@@ -5342,14 +5376,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 		if (fbo)
 		{
-			//WARNING: THIS IS A ***FRACKING*** TRICK!!!
-			//we must trick Qt painter that the widget has actually
-			//been resized, otherwise the 'renderText' won't work!
-			//QRect backupRect = geometry();
-			//QRect& ncRect = const_cast<QRect&>(geometry());
-			//ncRect.setWidth(Wp);
-			//ncRect.setHeight(Hp);
-
 			ccQOpenGLFunctions* glFunc = functions();
 			assert(glFunc);
 
@@ -5392,17 +5418,14 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			m_stereoModeEnabled = false;
 
 			//enable the FBO
-			fbo->start();
+			bindFBO(fbo);
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO start");
 
 			fullRenderingPass(CONTEXT, renderingParams);
 
 			//disable the FBO
-			fbo->stop();
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
-
-			//assert(m_glExtFuncSupported);
-			//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			bindFBO(0);
 
 			m_stereoModeEnabled = stereoModeWasEnabled;
 
@@ -5437,20 +5460,18 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
 				//apply shader
 				filter->shade(depthTex, colorTex, parameters);
-
 				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
 
-				//if render mode is ON: we only want to capture it, not to display it
-				fbo->start();
+				//in render mode we only want to capture it, not to display it
+				bindFBO(fbo);
+				
 				setStandardOrthoCorner();
 				ccGLUtils::DisplayTexture2DPosition(filter->getTexture(), 0, 0, CONTEXT.glW, CONTEXT.glH);
-				//glClear(GL_DEPTH_BUFFER_BIT);
-				fbo->stop();
-				//assert(m_glExtFuncSupported);
-				//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+				
+				bindFBO(0);
 			}
 
-			fbo->start();
+			bindFBO(fbo);
 			setStandardOrthoCenter();
 
 			//we draw 2D entities (mainly for the color ramp!)
@@ -5497,12 +5518,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			}
 			glFunc->glReadBuffer(GL_NONE);
 
-			fbo->stop();
-			
 			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile");
 
-			//assert(m_glExtFuncSupported);
-			//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
+			//restore the default FBO
+			bindFBO(0);
 
 			if (m_fbo != fbo)
 			{
@@ -5510,12 +5529,9 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			}
 			fbo = 0;
 
-			//don't forget to restore the right 'rect' or the widget will be broken!
-			//ncRect = backupRect;
-
 			if (m_activeGLFilter)
 			{
-				initGLFilter(width(), height());
+				initGLFilter(width(), height(), true);
 			}
 
 			//restore original viewport
@@ -5526,28 +5542,24 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
 			//updateZoom(1.0/zoomFactor);
-
-			//restore the default FBO
-			//assert(m_glExtFuncSupported);
-			//m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultFramebufferObject());
 		}
 	}
-	else if (m_activeShader)
-	{
-		if (!silent)
-			ccLog::Error("Screen capture with shader not supported!");
-	}
-	//if no shader or fbo --> we grab screen directly
+	//if no shader or fbo --> we grab the screen directly
 	else
 	{
-		if (!silent)
-			ccLog::Print("[Render screen via QT pixmap]");
-
-		outputImage = grabFramebuffer();
-		if (outputImage.isNull())
+		if (m_activeShader)
 		{
 			if (!silent)
-				ccLog::Error("Direct screen capture failed! (not enough memory?)");
+				ccLog::Error("Direct screen capture with shader is not supported!");
+		}
+		else
+		{
+			outputImage = grabFramebuffer();
+			if (outputImage.isNull())
+			{
+				if (!silent)
+					ccLog::Error("Direct screen capture failed! (not enough memory?)");
+			}
 		}
 	}
 
@@ -5617,7 +5629,7 @@ void ccGLWindow::removeGLFilter()
 	}
 }
 
-bool ccGLWindow::initGLFilter(int w, int h)
+bool ccGLWindow::initGLFilter(int w, int h, bool silent/*=false*/)
 {
 	if (!m_activeGLFilter)
 	{
@@ -5637,11 +5649,17 @@ bool ccGLWindow::initGLFilter(int w, int h)
 	QString error;
 	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), shadersPath, error))
 	{
-		ccLog::Warning(QString("[GL Filter] Initialization failed: ") + error.trimmed());
+		if (!silent)
+		{
+			ccLog::Warning(QString("[GL Filter] Initialization failed: ") + error.trimmed());
+		}
 		return false;
 	}
 
-	ccLog::Print("[GL Filter] Filter initialized");
+	if (!silent)
+	{
+		ccLog::Print("[GL Filter] Filter initialized");
+	}
 
 	m_activeGLFilter = _filter;
 
@@ -6059,13 +6077,10 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 
 void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
 {
+	makeCurrent();
+
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
-
-	if (!m_captureMode.enabled)
-	{
-		makeCurrent(); //makes lose the FBO focus in render mode!
-	}
 
 	//compute the text bounding rect
 	QRect rect = QFontMetrics(font).boundingRect(str);
@@ -6134,10 +6149,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 
 void ccGLWindow::renderText(double x, double y, double z, const QString & str, const QFont & font/*=QFont()*/)
 {
-	if (!m_captureMode.enabled)
-	{
-		makeCurrent(); //makes lose the FBO focus in render mode!
-	}
+	makeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);

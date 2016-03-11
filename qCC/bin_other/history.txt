@@ -25,6 +25,12 @@ v2.7.beta ??/??/201?
 
 	* New method: Edit > Colors > Convert to grey scale
 
+	* Mac OS X adds support for the CSV Matrix I/O file format
+
+	* Mac OS X adds support for the following plugins:
+	   - qFacet
+	   - qAnimation
+
 - Enhancements:
 	* Point-pair based alignment tool:
 		- the tool 3D view now has the same viewport/camera parameters as the source 3D view
@@ -74,6 +80,8 @@ v2.7.beta ??/??/201?
 		- the user can now set the max RMS for sphere detection
 
 	* the FARO I/O plugin now relies on the 5.5.3 FARO LS SDK
+
+	* Mac OS X adds support for OpenGL Frame Buffer Objects (FBOs)
 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields

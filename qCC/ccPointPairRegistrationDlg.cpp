@@ -519,7 +519,7 @@ void ccPointPairRegistrationDlg::processPickedItem(ccHObject* entity, unsigned i
 				return;
 			}
 			CCLib::GenericTriangle* tri = mesh->_getTriangle(itemIndex);
-			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x,y), *tri->_getA(), *tri->_getB(), *tri->_getC());
+			P = m_associatedWin->backprojectPointOnTriangle(CCVector2i(x, m_associatedWin->height() - 1 - y), *tri->_getA(), *tri->_getB(), *tri->_getC());
 		}
 		else
 		{

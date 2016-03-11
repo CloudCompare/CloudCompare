@@ -84,8 +84,11 @@ v2.7.beta ??/??/201?
 	* Mac OS X adds support for OpenGL Frame Buffer Objects (FBOs)
 
 	* Triangulation: 
-		- due to licensing issue with Triangle lib (incompatibility with GPL/LGPL) CGAL is now the prefered library for 2.5D triangulation			CCLib can now be compiled with CGAL support using COMPILE_CC_CORE_LIB_WITH_CGAL. 
-		- please note that as CGAL 2D triangulation module is released under GPL license. A version of CCLib compiled with CGAL support is 		    no longer licensed under LGPL (GPL is "viral"). To keep CCLib original license scheme, you *must* compile it without CGAL.
+		- due to licensing issue with Triangle lib (incompatibility with GPL/LGPL) CGAL is now the prefered library for 2.5D 
+			triangulation CCLib can now be compiled with CGAL support using COMPILE_CC_CORE_LIB_WITH_CGAL. 
+		- please note that as CGAL 2D triangulation module is released under GPL license. A version of CCLib compiled with CGAL
+			support is no longer licensed under LGPL (GPL is "viral"). To keep CCLib original license scheme, you *must*
+			compile it without CGAL.
 		- as a positive side effect, micro benchmarks show that CGAL tends to offer better performances.
 
  
@@ -1030,7 +1033,7 @@ v2.5.2 12/19/2013
 	- 'Edit > Fuse' entry renamed 'Edit > Merge'
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
-		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
+		was inversed from the currently accepted definition (i.e. 0Â° for horizontal and 90Â° for vertical planes)
 	- blank lines or commentaries were causing an infinite loop when importing ASCII files
 	- primitives (sphere, cylinder, etc.) were not correctly loaded from BIN files (CC would crash when loading them)
 	- sub-meshes' bounding boxes were not updated when a transformation was applied to their parent mesh or its

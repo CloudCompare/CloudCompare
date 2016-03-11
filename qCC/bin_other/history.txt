@@ -83,6 +83,12 @@ v2.7.beta ??/??/201?
 
 	* Mac OS X adds support for OpenGL Frame Buffer Objects (FBOs)
 
+	* Triangulation: 
+		- due to licensing issue with Triangle lib (incompatibility with GPL/LGPL) CGAL is now the prefered library for 2.5D triangulation			CCLib can now be compiled with CGAL support using COMPILE_CC_CORE_LIB_WITH_CGAL. 
+		- please note that as CGAL 2D triangulation module is released under GPL license. A version of CCLib compiled with CGAL support is 		    no longer licensed under LGPL (GPL is "viral"). To keep CCLib original license scheme, you *must* compile it without CGAL.
+		- as a positive side effect, micro benchmarks show that CGAL tends to offer better performances.
+
+ 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop

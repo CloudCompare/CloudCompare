@@ -52,7 +52,9 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 	modelEntity = model;
 
 	setupUi(this);
-	rmsDifferenceLineEdit->setValidator(new QDoubleValidator(rmsDifferenceLineEdit));
+	QDoubleValidator* rmsValidator = new QDoubleValidator(rmsDifferenceLineEdit);
+	rmsValidator->setRange(1.0e-7, 1.0);
+	rmsDifferenceLineEdit->setValidator(rmsValidator);
 
 	setColorsAndLabels();
 

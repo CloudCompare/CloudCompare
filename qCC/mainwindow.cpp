@@ -173,8 +173,8 @@ MainWindow::MainWindow()
 	, m_pprDlg(0)
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
-{
-	//Dialog "auto-construction"
+	, m_FirstShow(true)
+{	
 	setupUi(this);
 
 #ifdef Q_OS_MAC
@@ -185,9 +185,6 @@ MainWindow::MainWindow()
 	//Console
 	ccConsole::Init(consoleWidget, this, this);
 	actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
-
-	QSettings settings;
-	restoreGeometry(settings.value(ccPS::MainWinGeom()).toByteArray());
 
 	setWindowTitle(QString("CloudCompare v")+ccCommon::GetCCVersion(false));
 
@@ -265,17 +262,10 @@ MainWindow::MainWindow()
 
 	freezeUI(false);
 
-	//updateMenus(); //the calls to 'new3DView' and 'freezeUI' already did that
 	updateUIWithSelection();
-
-	showMaximized();
 
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
-
-#ifndef Q_OS_MAC
-	restoreState(settings.value(ccPS::MainWinState()).toByteArray());
-#endif
 }
 
 MainWindow::~MainWindow()
@@ -7648,6 +7638,9 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 static bool s_autoSaveGuiElementPos = true;
 void MainWindow::doActionResetGUIElementsPos()
 {
+	// show the user it will be maximized
+	showMaximized();
+	
 	QSettings settings;
 	settings.remove(ccPS::MainWinGeom());
 	settings.remove(ccPS::MainWinState());
@@ -7656,6 +7649,30 @@ void MainWindow::doActionResetGUIElementsPos()
 
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{	
+	QMainWindow::showEvent( event );
+
+	if ( m_FirstShow )
+	{
+		QSettings	settings;
+		QVariant		geometry = settings.value(ccPS::MainWinGeom());
+		
+		if ( geometry.isValid() )
+		{
+			restoreGeometry(geometry.toByteArray());
+			restoreState(settings.value(ccPS::MainWinState()).toByteArray());
+		}
+		
+		m_FirstShow = false;
+		
+		if ( !geometry.isValid() )
+		{
+			showMaximized();
+		}
+	}
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

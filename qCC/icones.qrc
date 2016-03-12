@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/restore.png</file>
+    <file>images/square.png</file>
+    <file>images/interactors.png</file>
     <file>images/oculus.png</file>
     <file>images/nvidia.png</file>
     <file>images/ccSwapUpDown.png</file>

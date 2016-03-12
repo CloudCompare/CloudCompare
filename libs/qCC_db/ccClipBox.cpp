@@ -165,6 +165,7 @@ static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType s
 ccClipBox::ccClipBox(ccHObject* associatedEntity, QString name/*= QString("clipping box")*/)
 	: ccHObject(name)
 	, m_associatedEntity(0)
+	, m_showBox(true)
 	, m_activeComponent(NONE)
 {
 	setSelectionBehavior(SELECTION_IGNORED);
@@ -191,6 +192,31 @@ void ccClipBox::reset()
 
 	//send 'modified' signal
 	emit boxModified(&m_box);
+}
+
+void ccClipBox::set(const ccBBox& extents, const ccGLMatrix& transformation)
+{
+	m_box = extents;
+	setGLTransformation(transformation);
+
+	update();
+
+	//send 'modified' signal
+	emit boxModified(&m_box);
+}
+
+void ccClipBox::get(ccBBox& extents, ccGLMatrix& transformation)
+{
+	extents = m_box;
+
+	if (isGLTransEnabled())
+	{
+		transformation = m_glTrans;
+	}
+	else
+	{
+		transformation.toIdentity();
+	}
 }
 
 bool ccClipBox::setAssociatedEntity(ccHObject* entity)
@@ -341,7 +367,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 
 void ccClipBox::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix)
 {
-	m_lastOrientation = PointToVector(x,y,screenWidth,screenHeight);
+	m_lastOrientation = PointToVector(x, y, screenWidth, screenHeight);
 	m_viewMatrix = viewMatrix;
 }
 
@@ -583,17 +609,25 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!m_box.isValid())
 		return;
 
-	//m_box.draw(m_selected ? context.bbDefaultCol : ccColor::magenta);
-	m_box.draw(ccColor::yellow);
+	if (m_showBox)
+	{
+		//m_box.draw(m_selected ? context.bbDefaultCol : ccColor::magenta);
+		m_box.draw(ccColor::yellow);
+	}
 	
-	//standard case: list names pushing
+	if (!m_selected)
+	{
+		//nothing to show
+		return;
+	}
+
+	//standard case: list names pushing (1st level)
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
 		glPushName(getUniqueIDForDisplay());
 
-	if (m_selected)
+	//draw the interactors
 	{
-		//draw the interactors
 		const CCVector3& minC = m_box.minCorner();
 		const CCVector3& maxC = m_box.maxCorner();
 		CCVector3 center = m_box.getCenter();
@@ -605,9 +639,10 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		componentContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arows don't push their own!
 		componentContext._win = 0;
 
-		//1 if names shall be pushed, 0 otherwise
-		if (pushName)
+		if (pushName) //2nd level = sub-item
+		{
 			glPushName(0); //fake ID, will be replaced by the arrows one if any
+		}
 
 		DrawUnitArrow(X_MINUS_ARROW*pushName,CCVector3(minC.x,center.y,center.z),CCVector3(-1.0, 0.0, 0.0),scale,ccColor::red,componentContext);
 		DrawUnitArrow(X_PLUS_ARROW*pushName,CCVector3(maxC.x,center.y,center.z),CCVector3( 1.0, 0.0, 0.0),scale,ccColor::red,componentContext);
@@ -627,7 +662,4 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (pushName)
 			glPopName();
 	}
-
-	if (pushName)
-		glPopName();
 }

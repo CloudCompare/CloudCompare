@@ -57,13 +57,13 @@ public:
 	**/
 	bool setAssociatedEntity(ccHObject* anObject);
 
-public slots:
-
-	void toggleInteractors(bool);
-
 protected slots:
 
+	void toggleInteractors(bool);
+	void toggleBox(bool);
+
 	void editBox();
+	void restoreLastBox();
 	void reset();
 	void closeDialog();
 	void extractContour();
@@ -75,12 +75,12 @@ protected slots:
 
 	void thicknessChanged(double);
 
-	void shiftXMinus();
-	void shiftXPlus();
-	void shiftYMinus();
-	void shiftYPlus();
-	void shiftZMinus();
-	void shiftZPlus();
+	inline void shiftXMinus() { shiftBox(0, true);  }
+	inline void shiftXPlus()  { shiftBox(0, false); }
+	inline void shiftYMinus() { shiftBox(1, true);  }
+	inline void shiftYPlus()  { shiftBox(1, false); }
+	inline void shiftZMinus() { shiftBox(2, true);  }
+	inline void shiftZPlus()  { shiftBox(2, false); }
 
 	void setFrontView();
 	void setBottomView();

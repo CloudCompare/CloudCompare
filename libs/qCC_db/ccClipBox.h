@@ -80,11 +80,14 @@ public:
 	void setActiveComponent(int id);
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CLIPPING_BOX; }
+	inline virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CLIPPING_BOX; }
 	//virtual bool isSerializable() const { return false; }
 
 	//! Returns current box
-	const ccBBox& getBox() const { return m_box; }
+	inline const ccBBox& getBox() const { return m_box; }
+
+	//! Whether to show the box or not
+	inline void showBox(bool state) { m_showBox = state; }
 
 	//! Sets current box
 	void setBox(const ccBBox& box);
@@ -99,6 +102,12 @@ public:
 
 	//! Resets box
 	void reset();
+
+	//! Manually sets the box parameters
+	void set(const ccBBox& extents, const ccGLMatrix& transformation);
+
+	//! Returns the box parameters
+	void get(ccBBox& extents, ccGLMatrix& transformation);
 
 	//! Associated entity
 	ccHObject* getAssociatedEntity() const { return m_associatedEntity; }
@@ -121,6 +130,9 @@ protected:
 
 	//! Clipping box
 	ccBBox m_box;
+
+	//! Show box
+	bool m_showBox;
 
 	//! Active component
 	Components m_activeComponent;

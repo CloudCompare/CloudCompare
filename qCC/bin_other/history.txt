@@ -48,6 +48,8 @@ v2.6.3.beta ??/??/2016
 
 	* Command line mode:
 		- new option '-ORIENT_NORMS_MST' (+ number of neighbors): to (re)orient the normals of the loaded clouds with a Minimum Spanning Tree
+		- new option '-SF_OP' (+ SF index + operation + scalar value): to add / sub / multiply or divide a scalar field by a constant value
+		- new option '-DROP_GLOBAL_SHIFT': to drop the Global Shift information of all loaded entities
 
 	* SF Arithmetic tool:
 		- a constant value can now be used instead of a second scalar field
@@ -88,6 +90,10 @@ v2.6.3.beta ??/??/2016
 	* File I/O
 		- E57: big coordinates are now properly handled (Global Shift & Scale mechanism)
 		- Smarter progress dialogs
+
+	* Clipping-box tool
+		- new button to hide the clipping-box
+		- new button to restore the previous clipping-box settings (per-entity)
 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields

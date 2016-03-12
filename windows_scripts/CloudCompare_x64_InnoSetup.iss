@@ -72,7 +72,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 Filename: "{tmp}\vcredist_2012_x64.exe"; Parameters: "/q"
 Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/q"
-Filename: "{tmp}\FARO LS 5.3.3.38662 x64 Setup.exe"; Check: WithFaro
+Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 
 [Code]
 var

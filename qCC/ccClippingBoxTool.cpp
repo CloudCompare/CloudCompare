@@ -44,13 +44,22 @@
 #include <QInputDialog>
 #include <QElapsedTimer>
 
-//! Last contour unique ID
+//Last contour unique ID
 static std::vector<unsigned> s_lastContourUniqueIDs;
-//! Max edge length parameter (contour extraction)
+
+//Contour extraction parameters
 static double s_maxEdgeLength = -1.0;
 static bool s_splitContours = false;
 static bool s_multiPass = false;
 static double s_defaultGap = 0.0;
+
+// persistent map of the previous box used for each entity
+struct ccClipBoxParams
+{
+	ccBBox box;
+	ccGLMatrix trans;
+};
+static QMap< unsigned, ccClipBoxParams > s_lastBoxParams;
 
 ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -65,9 +74,11 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	connect(exportButton,					SIGNAL(clicked()),				this, SLOT(exportSlice()));
 	connect(exportMultButton,				SIGNAL(clicked()),				this, SLOT(exportMultSlices()));
 	connect(resetButton,					SIGNAL(clicked()),				this, SLOT(reset()));
+	connect(restoreToolButton,				SIGNAL(clicked()),				this, SLOT(restoreLastBox()));
 	connect(closeButton,					SIGNAL(clicked()),				this, SLOT(closeDialog()));
 
-	connect(showInteractorsCheckBox,		SIGNAL(toggled(bool)),			this, SLOT(toggleInteractors(bool)));
+	connect(showBoxToolButton,				SIGNAL(toggled(bool)),			this, SLOT(toggleBox(bool)));
+	connect(showInteractorsToolButton,		SIGNAL(toggled(bool)),			this, SLOT(toggleInteractors(bool)));
 
 	connect(thickXDoubleSpinBox,			SIGNAL(valueChanged(double)),	this, SLOT(thicknessChanged(double)));
 	connect(thickYDoubleSpinBox,			SIGNAL(valueChanged(double)),	this, SLOT(thicknessChanged(double)));
@@ -108,7 +119,7 @@ void ccClippingBoxTool::editBox()
 	ccBBox box = m_clipBox->getBox();
 
 	ccBoundingBoxEditorDlg bbeDlg(this);
-	bbeDlg.setBaseBBox(box,false);
+	bbeDlg.setBaseBBox(box, false);
 	bbeDlg.showInclusionWarning(false);
 	bbeDlg.setWindowTitle("Edit clipping box");
 
@@ -132,8 +143,17 @@ void ccClippingBoxTool::toggleInteractors(bool state)
 		m_associatedWin->redraw();
 }
 
+void ccClippingBoxTool::toggleBox(bool state)
+{
+	if (m_clipBox)
+		m_clipBox->showBox(state);
+	if (m_associatedWin)
+		m_associatedWin->redraw();
+}
+
 bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 {
+	restoreToolButton->setEnabled(false);
 	if (!m_associatedWin || !m_clipBox)
 	{
 		ccLog::Error(QString("[Clipping box] No associated 3D view or no valid clipping box!"));
@@ -154,6 +174,11 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 		return false;
 	}
 
+	if (s_lastBoxParams.contains(entity->getUniqueID()))
+	{
+		restoreToolButton->setEnabled(true);
+	}
+
 	contourGroupBox->setEnabled(entity->isKindOf(CC_TYPES::POINT_CLOUD));
 
 	//force visibility
@@ -161,7 +186,9 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 	entity->setEnabled(true);
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	//set proper "steps" value for slice thickness editors
 	{
@@ -202,7 +229,7 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 			m_clipBox = new ccClipBox();
 			m_clipBox->setVisible(true);
 			m_clipBox->setEnabled(true);
-			m_clipBox->setSelected(showInteractorsCheckBox->isChecked());
+			m_clipBox->setSelected(showInteractorsToolButton->isChecked());
 			connect(m_clipBox, SIGNAL(boxModified(const ccBBox*)), this, SLOT(onBoxModified(const ccBBox*)));
 		}
 		m_associatedWin->addToOwnDB(m_clipBox);
@@ -231,6 +258,14 @@ bool ccClippingBoxTool::start()
 
 void ccClippingBoxTool::stop(bool state)
 {
+	if (state && m_clipBox && m_clipBox->getAssociatedEntity())
+	{
+		//save clip box parameters
+		ccClipBoxParams params;
+		m_clipBox->get(params.box, params.trans);
+		s_lastBoxParams[m_clipBox->getAssociatedEntity()->getUniqueID()] = params;
+	}
+
 	if (m_associatedWin)
 	{
 		m_associatedWin->setUnclosable(false);
@@ -955,36 +990,6 @@ void ccClippingBoxTool::thicknessChanged(double)
 		m_associatedWin->redraw();
 }
 
-void ccClippingBoxTool::shiftXMinus()
-{
-	shiftBox(0,true);
-}
-
-void ccClippingBoxTool::shiftXPlus()
-{
-	shiftBox(0,false);
-}
-
-void ccClippingBoxTool::shiftYMinus()
-{
-	shiftBox(1,true);
-}
-
-void ccClippingBoxTool::shiftYPlus()
-{
-	shiftBox(1,false);
-}
-
-void ccClippingBoxTool::shiftZMinus()
-{
-	shiftBox(2,true);
-}
-
-void ccClippingBoxTool::shiftZPlus()
-{
-	shiftBox(2,false);
-}
-
 void ccClippingBoxTool::shiftBox(unsigned char dim, bool minus)
 {
 	if (!m_clipBox || !m_clipBox->getBox().isValid())
@@ -993,7 +998,7 @@ void ccClippingBoxTool::shiftBox(unsigned char dim, bool minus)
 	assert(dim<3);
 
 	PointCoordinateType width = (m_clipBox->getBox().maxCorner() - m_clipBox->getBox().minCorner()).u[dim];
-	CCVector3 shiftVec(0.0,0.0,0.0);
+	CCVector3 shiftVec(0, 0, 0);
 	shiftVec.u[dim] = (minus ? -width : width);
 	m_clipBox->shift(shiftVec);
 
@@ -1008,6 +1013,25 @@ void ccClippingBoxTool::reset()
 
 	if (m_associatedWin)
 		m_associatedWin->redraw();
+}
+
+void ccClippingBoxTool::restoreLastBox()
+{
+	if (!m_clipBox || !m_clipBox->getAssociatedEntity())
+	{
+		assert(false);
+		return;
+	}
+	
+	unsigned uniqueID = m_clipBox->getAssociatedEntity()->getUniqueID();
+	if (!s_lastBoxParams.contains(uniqueID))
+	{
+		assert(false);
+		return;
+	}
+
+	const ccClipBoxParams& params = s_lastBoxParams[uniqueID];
+	m_clipBox->set(params.box, params.trans);
 }
 
 void ccClippingBoxTool::closeDialog()

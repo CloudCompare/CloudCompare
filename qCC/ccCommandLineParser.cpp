@@ -120,8 +120,11 @@ static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_CROSS_SECTION[]					= "CROSS_SECTION";
 static const char COMMAND_LOG_FILE[]						= "LOG_FILE";
 static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
+static const char COMMAND_SF_OP[]							= "SF_OP";
 static const char COMMAND_SOR_FILTER[]						= "SOR";
 static const char COMMAND_ORIENT_NORMALS[]					= "ORIENT_NORMS_MST";
+static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
+
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -1154,6 +1157,37 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 		//save output
 		if (s_autoSaveMode && !saveMeshes("TRANSFORMED"))
 			return false;
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandDropGlobalShift(QStringList& arguments)
+{
+	Print("[DROP GLOBAL SHIFT]");
+
+	if (m_clouds.empty() && m_meshes.empty())
+		return Error(QString("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
+
+	//process clouds
+	if (!m_clouds.empty())
+	{
+		for (size_t i=0; i<m_clouds.size(); ++i)
+		{
+			m_clouds[i].pc->setGlobalShift(0, 0, 0);
+		}
+	}
+	if (!m_meshes.empty())
+	{
+		for (size_t i=0; i<m_meshes.size(); ++i)
+		{
+			bool isLocked = false;
+			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(m_meshes[i].mesh, &isLocked);
+			if (shifted && !isLocked)
+			{
+				shifted->setGlobalShift(0, 0, 0);
+			}
+		}
 	}
 
 	return true;
@@ -3013,6 +3047,10 @@ bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
 		{
 			return Error(QString("Unknown operation! (%1)").arg(opName));
 		}
+		else if (operation <= ccScalarFieldArithmeticsDlg::DIVIDE)
+		{
+			return Error(QString("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_ARITHMETIC));
+		}
 	}
 
 	//apply operation on clouds
@@ -3027,9 +3065,11 @@ bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
 			}
 			else if (s_autoSaveMode)
 			{
-				QString errorStr = Export(m_clouds[i],"SF_ARITHMETIC");
+				QString errorStr = Export(m_clouds[i], "SF_ARITHMETIC");
 				if (!errorStr.isEmpty())
+				{
 					return Error(errorStr);
+				}
 			}
 		}
 	}
@@ -3043,12 +3083,120 @@ bool ccCommandLineParser::commandSfArithmetic(QStringList& arguments)
 		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 		{
 			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex, false))
+			{
 				return Error(QString("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+			}
 			else if (s_autoSaveMode)
 			{
-				QString errorStr = Export(m_meshes[j],"SF_ARITHMETIC");
+				QString errorStr = Export(m_meshes[j], "SF_ARITHMETIC");
 				if (!errorStr.isEmpty())
+				{
 					return Error(errorStr);
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandSfOp(QStringList& arguments)
+{
+	Print("[SF OPERATION]");
+
+	if (arguments.size() < 3)
+	{
+		return Error(QString("Missing parameter(s): SF index and/or operation and/or scalar value after '%1' (3 values expected)").arg(COMMAND_SF_OP));
+	}
+
+	//read sf index
+	int sfIndex = -1;
+	{
+		bool ok = true;
+		QString sfIndex = arguments.takeFirst();
+		if (sfIndex.toUpper() == OPTION_LAST)
+			sfIndex = -2;
+		else
+			sfIndex = sfIndex.toInt(&ok);
+		
+		if (!ok || sfIndex < 0)
+		{
+			return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+		}
+	}
+
+	//read operation type
+	ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
+	{
+		QString opName = arguments.takeFirst();
+		operation = ccScalarFieldArithmeticsDlg::GetOperationByName(opName);
+		if (operation == ccScalarFieldArithmeticsDlg::INVALID)
+		{
+			return Error(QString("Unknown operation! (%1)").arg(opName));
+		}
+		else if (operation > ccScalarFieldArithmeticsDlg::DIVIDE)
+		{
+			return Error(QString("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
+		}
+	}
+
+	//read scalar value
+	double value = 1.0;
+	{
+		bool ok = true;
+		value = arguments.takeFirst().toDouble(&ok);
+		if (!ok)
+		{
+			return Error(QString("Invalid scalar value! (after %1)").arg(COMMAND_SF_OP));
+		}
+	}
+
+	ccScalarFieldArithmeticsDlg::SF2 sf2;
+	{
+		sf2.isConstantValue = true;
+		sf2.constantValue = value;
+	}
+
+	//apply operation on clouds
+	for (size_t i=0; i<m_clouds.size(); ++i)
+	{
+		ccPointCloud* cloud = m_clouds[i].pc;
+		if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex, true, &sf2))
+			{
+				return Error(QString("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
+			}
+			else if (s_autoSaveMode)
+			{
+				QString errorStr = Export(m_clouds[i], "SF_OP");
+				if (!errorStr.isEmpty())
+				{
+					return Error(errorStr);
+				}
+			}
+		}
+	}
+
+	//and meshes!
+	for (size_t j=0; j<m_meshes.size(); ++j)
+	{
+		bool isLocked = false;
+		ccGenericMesh* mesh = m_meshes[j].mesh;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields())-1 : sfIndex, true, &sf2))
+			{
+				return Error(QString("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+			}
+			else if (s_autoSaveMode)
+			{
+				QString errorStr = Export(m_meshes[j], "SF_OP");
+				if (!errorStr.isEmpty())
+				{
+					return Error(errorStr);
+				}
 			}
 		}
 	}
@@ -3751,6 +3899,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandSfArithmetic(arguments);
 		}
+		//SF Operation tool
+		else if (IsCommand(argument,COMMAND_SF_OP))
+		{
+			success = commandSfOp(arguments);
+		}
 		//ICP registration
 		else if (IsCommand(argument,COMMAND_ICP))
 		{
@@ -3813,6 +3966,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_COMPUTE_GRIDDED_NORMALS))
 		{
 			success = commandForceNormalsComputation(arguments);
+		}
+		//Drop the global shift information
+		else if (IsCommand(argument, COMMAND_DROP_GLOBAL_SHIFT))
+		{
+			success = commandDropGlobalShift(arguments);
 		}
 		//Set the current "active" scalar-field
 		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))

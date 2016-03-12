@@ -19,7 +19,6 @@ File I/O:
 
 Big ones:
 
-[*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Command line mode could be extended
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
@@ -37,7 +36,6 @@ Big ones:
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
-[*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Finish the Oculus Rift plugin
 [*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
@@ -52,6 +50,8 @@ qAnimation plugin:
 
 Various:
 
+[*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
+[*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Save the last clipbox parameters (maybe for each entity) and allow to restore them when restarting the clipping box tool
 [*] Volume calculation tool: make the resulting grid values available as a scalar field (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
@@ -114,7 +114,6 @@ From AdrienA
 
 From Chartzell
 [*] A limit box- Being able to hide portions of the clouds you are working on can make the registration process much quicker and easier. With a customizable limit box you can look at just a small cross section of the clouds to get a good view of how well they fit together and what adjustments need to be made. Ideally, you would be able to push and pull on the various sides of the box to change it's dimensions.
-[*] Ability to do fly around animations and export them to some type of video format? Something where you could set various viewpoints and and have the camera fly between each point. Google SketchUp has a great example of this function. (see 'flythrough mode' above)
 
 From Konrad W.
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel
@@ -126,6 +125,10 @@ From Rav M.
 
 From Gianluca C.
 [*] to overlay an image over the mesh with some common points and "drape" the photo on the surface
+
+From Eugene L.
+[*] To be able to transfer color from a jpg image to a mesh or point cloud. (same as Gianluca?)
+[*] Would it be possible to enter a % value like 95% and then obtain the exact value for the number of points that fall in that range?
 
 From Andrew O.
 [*] add some type of 3D eraser. Perhaps being able to select and clear an octree cell may be the place to start (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
@@ -145,6 +148,3 @@ From Andrew O.
 
 From 'dsims1980'
 [*] Spherical Parameterization of cloud or meshes is very useful for visual comparison of two models (http://www.cloudcompare.org/forum/viewtopic.php?t=581)
-
-From Eugene L.
-[*] To be able to transfer color from a jpg image to a mesh or point cloud.

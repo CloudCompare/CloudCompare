@@ -47,6 +47,7 @@ protected:
 	bool commandColorBanding				(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
 	bool commandSfArithmetic				(QStringList& arguments);
+	bool commandSfOp						(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandDelaunay					(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
@@ -63,6 +64,7 @@ protected:
 	bool commandLogFile						(QStringList& arguments);
 	bool commandSORFilter					(QStringList& arguments, ccProgressDialog* pDlg = 0);
 	bool commandOrientNormalsMST			(QStringList& arguments, ccProgressDialog* pDlg = 0);
+	bool commandDropGlobalShift				(QStringList& arguments);
 
 protected:
 

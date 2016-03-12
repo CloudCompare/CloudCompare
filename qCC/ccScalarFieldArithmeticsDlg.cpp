@@ -35,7 +35,7 @@
 //number of valid operations
 static const unsigned s_opCount = 18;
 //operation names
-static const char s_opNames[s_opCount][12] = {"+", "-", "*", "/", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse" };
+static const char s_opNames[s_opCount][12] = {"add", "sub", "mult", "div", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse" };
 
 //semi persitent
 static int s_previouslySelectedOperationIndex = 1;

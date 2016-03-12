@@ -115,6 +115,8 @@ protected: //standard methods
 	{
 		ReportInfo()
 			: volume(0)
+			, addedVolume(0)
+			, removedVolume(0)
 			, surface(0)
 			, matchingPrecent(0)
 			, ceilNonMatchingPercent(0)
@@ -123,6 +125,8 @@ protected: //standard methods
 		{}
 
 		double volume;
+		double addedVolume;
+		double removedVolume;
 		double surface;
 		float matchingPrecent;
 		float ceilNonMatchingPercent;

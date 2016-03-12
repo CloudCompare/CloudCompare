@@ -364,7 +364,7 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 			{
 				m_rasterCloud->showSF(true);
 				m_rasterCloud->setCurrentDisplayedScalarField(0);
-				m_rasterCloud->getScalarField(0)->setName("Height above ground");
+				m_rasterCloud->getScalarField(0)->setName("Relative height");
 				m_rasterCloud->showSFColorsScale(true);
 			}
 		}
@@ -397,6 +397,9 @@ void ccVolumeCalcTool::outputReport(const ReportInfo& info)
 	QStringList reportText;
 	reportText << QString("Volume: %1").arg(locale.toString(info.volume, 'f', precision));
 	reportText << QString("Surface: %1").arg(locale.toString(info.surface, 'f', precision));
+	reportText << QString("----------------------");
+	reportText << QString("Added volume: (+)%1").arg(locale.toString(info.addedVolume, 'f', precision));
+	reportText << QString("Removed volume: (-)%1").arg(locale.toString(info.removedVolume, 'f', precision));
 	reportText << QString("----------------------");
 	reportText << QString("Matching cells: %1%").arg(info.matchingPrecent,0,'f',1);
 	reportText << QString("Non-matching cells:");
@@ -615,6 +618,14 @@ bool ccVolumeCalcTool::updateGrid()
 					cell.nbPoints = 1;
 
 					repotInfo.volume += cell.h;
+					if (cell.h < 0)
+					{
+						repotInfo.removedVolume -= cell.h;
+					}
+					else if (cell.h > 0)
+					{
+						repotInfo.addedVolume += cell.h;
+					}
 					repotInfo.surface += 1.0;
 					++m_grid.nonEmptyCellCount; //= matching count
 					++cellCount;
@@ -689,6 +700,8 @@ bool ccVolumeCalcTool::updateGrid()
 		repotInfo.ceilNonMatchingPercent = static_cast<float>(ceilNonMatchingCount * 100) / cellCount;
 		float cellArea = static_cast<float>(m_grid.gridStep * m_grid.gridStep);
 		repotInfo.volume *= cellArea;
+		repotInfo.addedVolume *= cellArea;
+		repotInfo.removedVolume *= cellArea;
 		repotInfo.surface *= cellArea;
 
 		outputReport(repotInfo);

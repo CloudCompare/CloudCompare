@@ -12,6 +12,7 @@ v2.6.3.beta ??/??/2016
 		- Tools > Volume > Compute 2.5D volume
 		- can compute the volume of a single cloud (relatively to a constant height) or between two clouds
 		- the tool projects the points in a 2.5D grid (therefore the interface is similar to the 'Rasterize' tool)
+		- outputs several other statistics (added/removed volume, surface, etc.)
 
 	* Exclusive full screen mode for 3D views
 

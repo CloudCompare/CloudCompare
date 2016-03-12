@@ -29,7 +29,16 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -37,15 +46,9 @@
         <property name="title">
          <string>Ground / Before</string>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
         <layout class="QFormLayout" name="formLayout_2">
          <property name="fieldGrowthPolicy">
           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_7">
@@ -141,11 +144,23 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
           <widget class="QToolButton" name="swapToolButton">
+           <property name="toolTip">
+            <string>Swap</string>
+           </property>
            <property name="text">
             <string>swap</string>
            </property>
@@ -159,9 +174,6 @@
              <height>16</height>
             </size>
            </property>
-           <property name="autoRaise">
-            <bool>true</bool>
-           </property>
           </widget>
          </item>
         </layout>
@@ -171,9 +183,6 @@
        <widget class="QGroupBox" name="ceilGroupBox">
         <property name="title">
          <string>Ceil / After</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_3">
          <item row="0" column="0">
@@ -266,9 +275,6 @@
         <property name="title">
          <string>Grid</string>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QFrame" name="gridParamsFrame">
@@ -279,7 +285,16 @@
             <enum>QFrame::Raised</enum>
            </property>
            <layout class="QFormLayout" name="formLayout_4">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item row="0" column="0">
@@ -430,9 +445,6 @@
         <property name="title">
          <string>Results</string>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QLabel" name="spareseWarningLabel">
@@ -474,7 +486,16 @@ You should fill the empty cells...</string>
             <enum>QFrame::Raised</enum>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>

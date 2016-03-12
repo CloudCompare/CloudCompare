@@ -14,6 +14,7 @@ namespace CCLib
 	class GenericProgressCallback;
 	class NormalizedProgress;
 	class GenericIndexedMesh;
+	class GenericCloud;
 
 	//! Class to compute a Squared Distance Field with the Saito algorithm on a 3D grid
 	class CC_CORE_LIB_API SaitoSquaredDistanceTransform : public Grid3D<unsigned>, public MathTools
@@ -39,6 +40,15 @@ namespace CCLib
 							GenericProgressCallback* progressCb = 0)
 		{
 			return intersecthWith(mesh, cellLength, gridMinCorner, 1, progressCb);
+		}
+
+		//! Initializes the distance transform with a cloud
+		inline bool initDT(	GenericCloud* cloud,
+							PointCoordinateType cellLength,
+							const CCVector3& gridMinCorner,
+							GenericProgressCallback* progressCb = 0)
+		{
+			return intersecthWith(cloud, cellLength, gridMinCorner, 1, progressCb);
 		}
 
 		//! Computes the exact Squared Distance Transform on the whole grid

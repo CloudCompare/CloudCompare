@@ -21,6 +21,7 @@
 //Local
 #include "CCGeom.h"
 #include "CCConst.h"
+#include "GenericCloud.h"
 #include "GenericIndexedMesh.h"
 #include "GenericProgressCallback.h"
 #include "CCMiscTools.h"
@@ -318,6 +319,63 @@ public:
 						}
 					}
 				}
+			}
+
+			if (progressCb && !nProgress.oneStep())
+			{
+				//cancel by user
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	//! Intersects this grid with a mesh
+	bool intersecthWith(GenericCloud* cloud,
+						PointCoordinateType cellLength,
+						const CCVector3& gridMinCorner,
+						GridElement intersectValue = 0,
+						GenericProgressCallback* progressCb = 0)
+	{
+		if (!cloud || !isInitialized())
+		{
+			assert(false);
+			return false;
+		}
+
+		//cell dimension
+		CCVector3 halfCellDimensions(cellLength / 2, cellLength / 2, cellLength / 2);
+
+		//number of points
+		unsigned numberOfPoints = cloud->size();
+
+		//progress notification
+		NormalizedProgress nProgress(progressCb, numberOfPoints);
+		if (progressCb)
+		{
+			char buffer[64];
+			sprintf(buffer, "Points: %u", numberOfPoints);
+			progressCb->reset();
+			progressCb->setInfo(buffer);
+			progressCb->setMethodTitle("Intersect Grid/Cloud");
+			progressCb->start();
+		}
+
+		//for each point: look for the intersecting cell
+		cloud->placeIteratorAtBegining();
+		for (unsigned n = 0; n<numberOfPoints; ++n)
+		{
+			CCVector3 P = *cloud->getNextPoint() - gridMinCorner;
+			Tuple3i cellPos(std::min(static_cast<int>(P.x / cellLength), static_cast<int>(size().x) - 1),
+							std::min(static_cast<int>(P.y / cellLength), static_cast<int>(size().y) - 1),
+							std::min(static_cast<int>(P.z / cellLength), static_cast<int>(size().z) - 1) );
+
+			if ((cellPos.x >= 0 && cellPos.x < static_cast<int>(size().x)) &&
+				(cellPos.y >= 0 && cellPos.y < static_cast<int>(size().y)) &&
+				(cellPos.z >= 0 && cellPos.z < static_cast<int>(size().z)))
+			{
+				setValue(cellPos, intersectValue);
 			}
 
 			if (progressCb && !nProgress.oneStep())

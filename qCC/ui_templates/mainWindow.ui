@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -417,7 +417,7 @@
      <addaction name="separator"/>
      <addaction name="actionComputeBestFitBB"/>
      <addaction name="actionDistanceToBestFitQuadric3D"/>
-     <addaction name="actionDistanceMapToMesh"/>
+     <addaction name="actionDistanceMap"/>
      <addaction name="separator"/>
      <addaction name="actionAlign"/>
      <addaction name="separator"/>
@@ -2796,9 +2796,9 @@
     <string>=</string>
    </property>
   </action>
-  <action name="actionDistanceMapToMesh">
+  <action name="actionDistanceMap">
    <property name="text">
-    <string>Distance map to mesh</string>
+    <string>Distance map</string>
    </property>
   </action>
   <action name="actionSORFilter">

@@ -145,7 +145,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 			isChecked = vp->getMetaData(s_stepEnabledKey).toBool();
 		}
 
-		QString itemName = QString("Viewport %1 (%2)").arg(QString::number(i+1), vp->getName());
+		QString itemName = QString("step %1 (%2)").arg(QString::number(i+1), vp->getName());
 		QListWidgetItem* item = new QListWidgetItem(itemName, stepSelectionList);
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
 		item->setCheckState(isChecked ? Qt::Checked : Qt::Unchecked); // initialize check state

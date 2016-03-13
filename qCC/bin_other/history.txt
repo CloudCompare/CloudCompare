@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.6.3.beta ??/??/2016
+v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 - New features:
 
 	* Polyline tracing/picking tool:

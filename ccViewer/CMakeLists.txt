@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
+project( ccViewer VERSION 1.35.0 )
+
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
@@ -13,8 +15,6 @@ include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
-project( ccViewer VERSION 1.35.0 )
 
 set( QCC_HEADERS ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h ../qCC/ccStereoModeDlg.h )
 set( QCC_SOURCES ../qCC/ccOverlayDialog.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccMouse3DContextMenu.cpp ../qCC/ccStereoModeDlg.cpp )
@@ -56,10 +56,10 @@ target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
 # Qt
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 if (WIN32)
 	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
 endif()
-qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
@@ -107,12 +107,11 @@ endforeach()
 
 # Put together our App bundle on Mac OS X
 if( APPLE )
-   set( CCVIEWER_MAC_APP_NAME ${PROJECT_NAME}.app )
-   set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/${CCVIEWER_MAC_APP_NAME} CACHE INTERNAL "ccViewer bundle dir.")
+   set_target_properties( ${PROJECT_NAME} PROPERTIES
+       INSTALL_RPATH "@loader_path/../Frameworks"
+       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
 
-   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
-
-   set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
+   set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns )
    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
    set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )

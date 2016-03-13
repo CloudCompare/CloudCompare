@@ -354,8 +354,10 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 		return false;
 	}
 	
-	if (	image.format() != QImage::Format_RGB32
-		&&	image.format() != QImage::Format_ARGB32 )
+	QImage::Format format = image.format();
+	if (	format != QImage::Format_RGB32
+		&&	format != QImage::Format_ARGB32
+		&&	format != QImage::Format_ARGB32_Premultiplied )
 	{
 		if (errorString)
 			*errorString = "Wrong image format";
@@ -363,17 +365,17 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 	}
 
 	//Check if context can be reused, otherwise reallocate a new one
-	m_ff->swsContext = sws_getCachedContext(	m_ff->swsContext,
-													m_width,
-													m_height,
-													PIX_FMT_BGRA,
-													m_width,
-													m_height,
-													PIX_FMT_YUV420P,
-													SWS_BICUBIC,
-													NULL,
-													NULL,
-													NULL);
+	m_ff->swsContext = sws_getCachedContext(m_ff->swsContext,
+											m_width,
+											m_height,
+											PIX_FMT_BGRA,
+											m_width,
+											m_height,
+											PIX_FMT_YUV420P,
+											SWS_BICUBIC,
+											NULL,
+											NULL,
+											NULL);
 
 	if (m_ff->swsContext == NULL)
 	{

@@ -18,13 +18,17 @@
 #ifndef CC_ANIMATION_DLG_HEADER
 #define CC_ANIMATION_DLG_HEADER
 
-#include "ui_animationDlg.h"
-#include "VideoStepItem.h"
+//Qt
+#include <QDialog>
 
-//forward declare
+//System
+#include <vector>
+
+#include "ui_animationDlg.h"
+
 class ccGLWindow;
 class cc2DViewportObject;
-
+class QListWidgetItem;
 
 //! Dialog for qAnimation plugin
 class qAnimationDlg : public QDialog, public Ui::AnimationDialog
@@ -34,32 +38,31 @@ class qAnimationDlg : public QDialog, public Ui::AnimationDialog
 public:
 
 	//! Default constructor
-	qAnimationDlg( std::vector<VideoStepItem>& video_steps, ccGLWindow* view3d,  QWidget* parent = 0 );
+	qAnimationDlg(ccGLWindow* view3d,  QWidget* parent = 0);
+
+	//! Initialize the dialog with a set of viewports
+	bool init(const std::vector<cc2DViewportObject*>& viewports);
 
 protected slots:
 
 	void onFPSChanged(double);
-
 	void onTotalTimeChanged(double);
 	void onStepTimeChanged(double);
-
+	void onLoopToggled(bool);
 	void onCurrentStepChanged(int);
-
 	void onBrowseButtonClicked();
 
 	void preview();
 	void render();
 	void onAccept();
 
-protected:
+	void onItemChanged(QListWidgetItem*);
 
-	std::vector<VideoStepItem>& m_videoSteps;
-
-	ccGLWindow* m_view3d;
+protected: //methods
 
 	int getCurrentStepIndex();
 
-	int countFrameAndResetInterpolators();
+	int countFrames(size_t startIndex = 0);
 
 	void applyViewport( const cc2DViewportObject* viewport );
 
@@ -67,6 +70,23 @@ protected:
 
 	void updateCurrentStepDuration();
 	void updateTotalDuration();
+
+	bool getNextSegment(size_t& vp1, size_t& vp2) const;
+
+protected: //members
+
+	//! Simple step (viewport + time)
+	struct Step
+	{
+		cc2DViewportObject* viewport;
+		double duration_sec;
+
+		Step() : viewport(0), duration_sec(0) {}
+	};
+
+	std::vector<Step> m_videoSteps;
+
+	ccGLWindow* m_view3d;
 };
 
 #endif

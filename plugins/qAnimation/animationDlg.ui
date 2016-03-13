@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>400</height>
+    <width>550</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,6 +30,13 @@
          <widget class="QListWidget" name="stepSelectionList">
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="loopCheckBox">
+          <property name="text">
+           <string>Loop</string>
           </property>
          </widget>
         </item>
@@ -60,7 +67,7 @@
              <string> sec.</string>
             </property>
             <property name="minimum">
-             <double>1.000000000000000</double>
+             <double>0.100000000000000</double>
             </property>
             <property name="maximum">
              <double>3600.000000000000000</double>
@@ -74,7 +81,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="currentStepGroupBox">
          <property name="title">
           <string>Current step</string>
          </property>
@@ -163,18 +170,30 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>frame Rate</string>
+            <string>Frame Rate</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QSpinBox" name="fpsSpinBox">
+           <property name="toolTip">
+            <string>Number of frames per second</string>
+           </property>
            <property name="suffix">
             <string> fps</string>
            </property>
@@ -205,23 +224,68 @@
          <item>
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>bitrate</string>
+            <string>Bitrate</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QSpinBox" name="bitrateSpinBox">
+           <property name="toolTip">
+            <string>Bitrate (in kbits / s)
+The higher the better the quality (but the bigger the file)</string>
+           </property>
+           <property name="suffix">
+            <string> kbps</string>
+           </property>
            <property name="minimum">
-            <number>100000</number>
+            <number>100</number>
            </property>
            <property name="maximum">
-            <number>1000000000</number>
+            <number>1000000</number>
            </property>
            <property name="singleStep">
-            <number>100000</number>
+            <number>100</number>
            </property>
            <property name="value">
-            <number>1000000</number>
+            <number>1000</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Super resolution</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="superResolutionSpinBox">
+           <property name="toolTip">
+            <string>Render the frame out at a higher resolution (2, 3 or 4 times larger) and then shrink it back down to size.
+(this makes some noisy pixels drop off and reduce the flicker that is often present in animations)
+Super resolution is only applied on the output video (it's not visible in Preview mode)</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>4</number>
            </property>
           </widget>
          </item>
@@ -246,7 +310,7 @@
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>output file</string>
+           <string>Output file</string>
           </property>
          </widget>
         </item>
@@ -279,6 +343,16 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="previewFromSelectedCheckBox">
+        <property name="text">
+         <string>Start preview from selected step</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

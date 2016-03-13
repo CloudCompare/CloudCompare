@@ -24,10 +24,9 @@
 
 class ccViewportParameters;
 
-/**
- * @brief The ViewInterpolate class
- * This class takes pointers to two viewport objects, and returns intermediate viewports between over a set number of steps.
- */
+//! The ViewInterpolate class
+/** This class takes pointers to two viewport objects, and returns intermediate viewports between over a set number of steps.
+**/
 class ViewInterpolate
 {
 public:

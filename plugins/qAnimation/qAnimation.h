@@ -24,18 +24,16 @@
 //Qt
 #include <QObject>
 
-#include "VideoStepItem.h"
-
 class ccGLWindow;
 
 // Animation plugin
 class qAnimation : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(ccStdPluginInterface)
+
+	Q_INTERFACES(ccStdPluginInterface)
 #ifdef CC_QT5
-		//replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
-		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAnimation")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAnimation")
 #endif
 
 public:
@@ -52,16 +50,13 @@ public:
 	void onNewSelection(const ccHObject::Container& selectedEntities);
 	virtual void getActions(QActionGroup& group);
 
-	protected slots:
+protected slots:
 
-		void doAction();
+	void doAction();
 
 protected:
 
 	QAction* m_action;
-
-private:
-
 
 };
 

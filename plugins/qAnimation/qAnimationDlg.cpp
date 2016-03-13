@@ -17,7 +17,12 @@
 
 #include "qAnimationDlg.h"
 
+//Local
+#include "ViewInterpolate.h"
+
+//qCC_db
 #include <cc2DViewportObject.h>
+//qCC_gl
 #include <ccGLWindow.h>
 
 //Qt
@@ -48,81 +53,158 @@
 #endif
 
 static const QString s_stepDurationKey("StepDurationSec");
+static const QString s_stepEnabledKey("StepEnabled");
 
-qAnimationDlg::qAnimationDlg( std::vector<VideoStepItem>& videoSteps, ccGLWindow* view3d, QWidget* parent)
+qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AnimationDialog()
-	, m_videoSteps(videoSteps)
 	, m_view3d(view3d)
 {
 	setupUi(this);
 
-	for (size_t i=0; i<m_videoSteps.size(); ++i)
-	{
-		const cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
-		const cc2DViewportObject* viewport2 = m_videoSteps[i].interpolator.view2();
-
-		stepSelectionList->addItem( QString("Step %1 (%2 - %3)").arg(i+1).arg(viewport1->getName()).arg(viewport2->getName()) );
-
-		//check if the (1st) viewport has a duration in meta data (from a previous run)
-		double duration_sec = 2.0;
-		if (viewport1->hasMetaData(s_stepDurationKey))
-		{
-			duration_sec = viewport1->getMetaData(s_stepDurationKey).toDouble();
-		}
-		m_videoSteps[i].duration_sec = duration_sec;
-	}
-
-	//read persistent settings
+	//restore previous settings
 	{
 		QSettings settings;
 		settings.beginGroup("qAnimation");
-		QString defaultDir;
+		
+		//last filename
+		{
+			QString defaultDir;
 #ifdef _MSC_VER
-		defaultDir = QApplication::applicationDirPath();
+			defaultDir = QApplication::applicationDirPath();
 #else
-		defaultDir = QDir::homePath();
+			defaultDir = QDir::homePath();
 #endif
-		QString lastFilename = settings.value("filename", defaultDir + "/animation.mpg" ).toString();
+			QString lastFilename = settings.value("filename", defaultDir + "/animation.mp4" ).toString();
 #ifndef QFFMPEG_SUPPORT
-		lastFilename = QFileInfo(lastFilename).absolutePath();
+			lastFilename = QFileInfo(lastFilename).absolutePath();
 #endif
-		outputFileLineEdit->setText( lastFilename );
+			outputFileLineEdit->setText( lastFilename );
+		}
+
+		//other parameters
+		{
+			bool startPreviewFromSelectedStep = settings.value("previewFromSelected", previewFromSelectedCheckBox->isChecked()).toBool();
+			bool loop = settings.value("loop", loopCheckBox->isChecked()).toBool();
+			int frameRate = settings.value("frameRate", fpsSpinBox->value()).toInt();
+			int superRes = settings.value("superRes", superResolutionSpinBox->value()).toInt();
+			int bitRate = settings.value("bitRate", bitrateSpinBox->value()).toInt();
+
+			previewFromSelectedCheckBox->setChecked(startPreviewFromSelectedStep);
+			loopCheckBox->setChecked(loop);
+			fpsSpinBox->setValue(frameRate);
+			superResolutionSpinBox->setValue(superRes);
+			bitrateSpinBox->setValue(bitRate);
+		}
+		
 		settings.endGroup();
 	}
 
 	connect ( fpsSpinBox,				SIGNAL( valueChanged(double) ),		this, SLOT( onFPSChanged(double) ) );
 	connect ( totalTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onTotalTimeChanged(double) ) );
 	connect ( stepTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onStepTimeChanged(double) ) );
-	connect ( stepSelectionList,		SIGNAL( currentRowChanged(int) ),	this, SLOT( onCurrentStepChanged(int) ) );
+	connect ( loopCheckBox,				SIGNAL( toggled(bool) ),			this, SLOT( onLoopToggled(bool) ) );
+
 	connect ( browseButton,				SIGNAL( clicked() ),				this, SLOT( onBrowseButtonClicked() ) );
 	connect ( previewButton,			SIGNAL( clicked() ),				this, SLOT( preview() ) );
 	connect ( renderButton,				SIGNAL( clicked() ),				this, SLOT( render() ) );
 	connect ( buttonBox,				SIGNAL( accepted() ),				this, SLOT( onAccept() ) );
+}
+
+bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
+{
+	if (viewports.size() < 2)
+	{
+		assert(false);
+		return false;
+	}
+	
+	try
+	{
+		m_videoSteps.resize(viewports.size());
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+	
+	for (size_t i=0; i<viewports.size(); ++i)
+	{
+		cc2DViewportObject* vp = viewports[i];
+
+		//check if the (1st) viewport has a duration in meta data (from a previous run)
+		double duration_sec = 2.0;
+		if (vp->hasMetaData(s_stepDurationKey))
+		{
+			duration_sec = vp->getMetaData(s_stepDurationKey).toDouble();
+		}
+		bool isChecked = true;
+		if (vp->hasMetaData(s_stepEnabledKey))
+		{
+			isChecked = vp->getMetaData(s_stepEnabledKey).toBool();
+		}
+
+		QString itemName = QString("Viewport %1 (%2)").arg(QString::number(i+1), vp->getName());
+		QListWidgetItem* item = new QListWidgetItem(itemName, stepSelectionList);
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+		item->setCheckState(isChecked ? Qt::Checked : Qt::Unchecked); // initialize check state
+		stepSelectionList->addItem(item);
+
+		m_videoSteps[i].viewport = vp;
+		m_videoSteps[i].duration_sec = duration_sec;
+	}
+
+	connect ( stepSelectionList, SIGNAL( currentRowChanged(int) ),			this, SLOT( onCurrentStepChanged(int) ) );
+	connect ( stepSelectionList, SIGNAL( itemChanged(QListWidgetItem*) ),	this, SLOT( onItemChanged(QListWidgetItem*) ) );
 
 	stepSelectionList->setCurrentRow(0); //select the first one by default
-
 	onCurrentStepChanged(getCurrentStepIndex());
 	updateTotalDuration();
+
+	return true;
 }
 
 void qAnimationDlg::onAccept()
 {
+	assert(stepSelectionList->count() >= m_videoSteps.size());
 	for ( size_t i=0; i<m_videoSteps.size(); ++i )
 	{
-		cc2DViewportObject* viewport1 = m_videoSteps[i].interpolator.view1();
+		cc2DViewportObject* vp = m_videoSteps[i].viewport;
 
 		//save the step duration as meta data
-		viewport1->setMetaData(s_stepDurationKey, m_videoSteps[i].duration_sec);
+		vp->setMetaData(s_stepDurationKey, m_videoSteps[i].duration_sec);
+		vp->setMetaData(s_stepEnabledKey, (stepSelectionList->item(static_cast<int>(i))->checkState() == Qt::Checked));
+	}
+
+	//store settings
+	{
+		QSettings settings;
+		settings.beginGroup("qAnimation");
+		settings.setValue("previewFromSelected", previewFromSelectedCheckBox->isChecked());
+		settings.setValue("loop", loopCheckBox->isChecked());
+		settings.setValue("frameRate", fpsSpinBox->value());
+		settings.setValue("superRes", superResolutionSpinBox->value());
+		settings.setValue("bitRate", bitrateSpinBox->value());
+
+		settings.endGroup();
 	}
 }
 
 double qAnimationDlg::computeTotalTime()
 {
 	double totalDuration_sec = 0;
-	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	size_t vp1 = 0, vp2 = 0;
+	while (getNextSegment(vp1, vp2))
 	{
-		totalDuration_sec += m_videoSteps[i].duration_sec;
+		assert(vp1 < stepSelectionList->count());
+		totalDuration_sec += m_videoSteps[static_cast<int>(vp1)].duration_sec;
+		if (vp2 == 0)
+		{
+			//loop case
+			break;
+		}
+		vp1 = vp2;
 	}
 
 	return totalDuration_sec;
@@ -135,8 +217,11 @@ int qAnimationDlg::getCurrentStepIndex()
 
 void qAnimationDlg::applyViewport( const cc2DViewportObject* viewport )
 {
-	m_view3d->setViewportParameters( viewport->getParameters() );
-	m_view3d->redraw();
+	if (m_view3d)
+	{
+		m_view3d->setViewportParameters( viewport->getParameters() );
+		m_view3d->redraw();
+	}
 
 	//QApplication::processEvents();
 }
@@ -154,10 +239,18 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 		assert(previousTime_sec != 0);
 		double scale = newTime_sec / previousTime_sec;
 
-		//scale all the steps
-		for ( size_t i=0; i<m_videoSteps.size(); ++i )
+		size_t vp1 = 0, vp2 = 0;
+		while (getNextSegment(vp1, vp2))
 		{
-			m_videoSteps[i].duration_sec *= scale;
+			assert(vp1 < stepSelectionList->count());
+			m_videoSteps[vp1].duration_sec *= scale;
+
+			if (vp2 == 0)
+			{
+				//loop case
+				break;
+			}
+			vp1 = vp2;
 		}
 
 		//update current step
@@ -197,24 +290,91 @@ void qAnimationDlg::onBrowseButtonClicked()
 	outputFileLineEdit->setText(filename);
 }
 
-int qAnimationDlg::countFrameAndResetInterpolators()
+bool qAnimationDlg::getNextSegment(size_t& vp1, size_t& vp2) const
+{
+	if( vp1 >= m_videoSteps.size())
+	{
+		assert(false);
+		return false;
+	}
+
+	size_t inputVP1 = vp1;
+	while (stepSelectionList->item(static_cast<int>(vp1))->checkState() == Qt::Unchecked)
+	{
+		++vp1;
+		if (vp1 == m_videoSteps.size())
+		{
+			if (loopCheckBox->isChecked())
+			{
+				vp1 = 0;
+			}
+			else
+			{
+				//no more valid start (vp1)
+				return false;
+			}
+		}
+		if (vp1 == inputVP1)
+		{
+			return false;
+		}
+	}
+
+	//look for the next enabled viewport
+	for (vp2 = vp1+1; vp2 <= m_videoSteps.size(); ++vp2)
+	{
+		if (vp1 == vp2)
+		{
+			return false;
+		}
+
+		if (vp2 == m_videoSteps.size())
+		{
+			if (loopCheckBox->isChecked())
+			{
+				vp2 = 0;
+			}
+			else
+			{
+				//stop
+				break;
+			}
+		}
+		
+		if (stepSelectionList->item(static_cast<int>(vp2))->checkState() == Qt::Checked)
+		{
+			//we have found a valid couple (vp1, vp2)
+			return true;
+		}
+	}
+
+	//no more valid stop (vp2)
+	return false;
+}
+
+int qAnimationDlg::countFrames(size_t startIndex/*=0*/)
 {
 	//reset the interpolators and count the total number of frames
 	int totalFrameCount = 0;
 	{
 		double fps = fpsSpinBox->value();
 
-		for ( size_t i=0; i<m_videoSteps.size(); ++i )
+		size_t vp1 = startIndex;
+		size_t vp2 = vp1+1;
+
+		while (getNextSegment(vp1, vp2))
 		{
-			VideoStepItem& currentVideoStep = m_videoSteps[i];
-
-			cc2DViewportObject currentParams;
-			currentVideoStep.interpolator.reset();
-
-			int frameCount = static_cast<int>( fps * currentVideoStep.duration_sec );
-			currentVideoStep.interpolator.setMaxStep(static_cast<unsigned>(frameCount));
-
+			const Step& currentStep = m_videoSteps[vp1];
+			int frameCount = static_cast<int>( fps * currentStep.duration_sec );
 			totalFrameCount += frameCount;
+
+			//take care of the 'loop' case
+			if (vp2 == 0)
+			{
+				assert(loopCheckBox->isChecked());
+				break;
+			}
+			vp1 = vp2;
 		}
 	}
 
@@ -229,27 +389,37 @@ void qAnimationDlg::preview()
 
 	setEnabled(false);
 
-	//reset the interpolators and count the total number of frames
-	int frameCount = countFrameAndResetInterpolators();
+	size_t vp1 = previewFromSelectedCheckBox->isChecked() ? static_cast<size_t>(getCurrentStepIndex()) : 0;
+
+	//count the total number of frames
+	int frameCount = countFrames(loopCheckBox->isChecked() ? 0 : vp1);
+	int fps = fpsSpinBox->value();
 
 	//show progress dialog
 	QProgressDialog progressDialog(QString("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
 	progressDialog.setWindowTitle("Preview");
 	progressDialog.show();
+	progressDialog.setModal(true);
+	progressDialog.setAutoClose(false);
 	QApplication::processEvents();
 
-	double fps = fpsSpinBox->value();
-	
+	assert(stepSelectionList->count() >= m_videoSteps.size());
+
 	int frameIndex = 0;
-	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	size_t vp2 = 0;
+	while (getNextSegment(vp1, vp2))
 	{
-		VideoStepItem& currentVideoStep = m_videoSteps[i];
+		Step& step1 = m_videoSteps[vp1];
+		Step& step2 = m_videoSteps[vp2];
 
 		//theoretical waiting time per frame
-		qint64 delay_ms = static_cast<int>(1000 * currentVideoStep.duration_sec / fps);
+		qint64 delay_ms = static_cast<int>(1000 * step1.duration_sec / fps);
+		int frameCount = static_cast<int>( fps * step1.duration_sec );
 
+		ViewInterpolate interpolator(step1.viewport, step2.viewport);
+		interpolator.setMaxStep(frameCount);
 		cc2DViewportObject currentParams;
-		while ( currentVideoStep.interpolator.nextView( currentParams ) )
+		while ( interpolator.nextView( currentParams ) )
 		{
 			timer.restart();
 			applyViewport ( &currentParams );
@@ -273,16 +443,32 @@ void qAnimationDlg::preview()
 #endif
 			}
 		}
+		if (progressDialog.wasCanceled())
+		{
+			break;
+		}
+
+		if (vp2 == 0)
+		{
+			assert(loopCheckBox->isChecked());
+			frameIndex = 0;
+		}
+		vp1 = vp2;
 	}
 
 	//reset view
-	onCurrentStepChanged( getCurrentStepIndex() );
+	onCurrentStepChanged(getCurrentStepIndex());
 
 	setEnabled(true);
 }
 
 void qAnimationDlg::render()
 {
+	if (!m_view3d)
+	{
+		assert(false);
+		return;
+	}
 	QString outputFilename = outputFileLineEdit->text();
 
 	//save to persistent settings
@@ -295,8 +481,10 @@ void qAnimationDlg::render()
 
 	setEnabled(false);
 
-	//reset the interpolators and count the total number of frames
-	int frameCount = countFrameAndResetInterpolators();
+	//count the total number of frames
+	int frameCount = countFrames(0);
+	int fps = fpsSpinBox->value();
+	int superRes = superResolutionSpinBox->value();
 
 	//show progress dialog
 	QProgressDialog progressDialog(QString("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
@@ -323,8 +511,8 @@ void qAnimationDlg::render()
 		}
 	}
 
-	int bitrate = bitrateSpinBox->value();
-	int gop = fpsSpinBox->value();
+	int bitrate = bitrateSpinBox->value() * 1000;
+	int gop = fps;
 	QVideoEncoder encoder(outputFilename, m_view3d->width(), m_view3d->height(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value()));
 	QString errorString;
 	if (!encoder.open(&errorString))
@@ -337,23 +525,34 @@ void qAnimationDlg::render()
 
 	int frameIndex = 0;
 	bool success = true;
-	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	size_t vp1 = 0, vp2 = 0;
+	while (getNextSegment(vp1, vp2))
 	{
-		VideoStepItem& currentVideoStep = m_videoSteps[i];
+		Step& step1 = m_videoSteps[vp1];
+		Step& step2 = m_videoSteps[vp2];
+
+		ViewInterpolate interpolator(step1.viewport, step2.viewport);
+		int frameCount = static_cast<int>( fps * step1.duration_sec );
+		interpolator.setMaxStep(frameCount);
 
 		cc2DViewportObject current_params;
-		while ( currentVideoStep.interpolator.nextView( current_params ) )
+		while ( interpolator.nextView( current_params ) )
 		{
 			applyViewport ( &current_params );
 
 			//render to image
-			QImage image = m_view3d->renderToImage(1.0 , true, false, true );
+			QImage image = m_view3d->renderToImage(superRes, false, false, true );
 
 			if (image.isNull())
 			{
 				QMessageBox::critical(this, "Error", "Failed to grab the screen!");
 				success = false;
 				break;
+			}
+
+			if (superRes > 1)
+			{
+				image = image.scaled(image.width()/superRes, image.height()/superRes, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 			}
 
 #ifdef QFFMPEG_SUPPORT
@@ -388,6 +587,13 @@ void qAnimationDlg::render()
 		{
 			break;
 		}
+
+		if (vp2 == 0)
+		{
+			//stop loop here!
+			break;
+		}
+		vp1 = vp2;
 	}
 
 #ifdef QFFMPEG_SUPPORT
@@ -421,11 +627,18 @@ void qAnimationDlg::updateTotalDuration()
 void qAnimationDlg::updateCurrentStepDuration()
 {
 	int index = getCurrentStepIndex();
-	const VideoStepItem& currentVideoStep = m_videoSteps[index];
 
 	stepTimeDoubleSpinBox->blockSignals(true);
-	stepTimeDoubleSpinBox->setValue(currentVideoStep.duration_sec);
+	stepTimeDoubleSpinBox->setValue(m_videoSteps[index].duration_sec);
 	stepTimeDoubleSpinBox->blockSignals(false);
+}
+
+void qAnimationDlg::onItemChanged(QListWidgetItem*)
+{
+	//update total duration
+	updateTotalDuration();
+
+	onCurrentStepChanged(stepSelectionList->currentRow());
 }
 
 void qAnimationDlg::onCurrentStepChanged(int index)
@@ -435,5 +648,17 @@ void qAnimationDlg::onCurrentStepChanged(int index)
 
 	updateCurrentStepDuration();
 
-	applyViewport( m_videoSteps[index].interpolator.view1() );
+	applyViewport( m_videoSteps[index].viewport );
+
+	//check that the step is enabled
+	bool isEnabled = (stepSelectionList->item(index)->checkState() == Qt::Checked);
+	bool isLoop = loopCheckBox->isChecked();
+	currentStepGroupBox->setEnabled(isEnabled && (index+1 < m_videoSteps.size() || isLoop));
+}
+
+void qAnimationDlg::onLoopToggled(bool)
+{
+	updateTotalDuration();
+
+	onCurrentStepChanged(stepSelectionList->currentRow());
 }

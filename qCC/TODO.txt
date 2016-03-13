@@ -42,10 +42,6 @@ Big ones:
 qAnimation plugin:
 
 [*] It would be great to specify the resolution.  I saw your comment and it just seems to make sense as this way you are not guessing.
-[*] Would it be possible to start the preview from whatever “Step” you have selected?  I think this would minimize waiting through the whole animation in order to see some defect that is near the end. 
-[*] Sometimes it’s nice to be able to loop from the last frame back to the first frame.  This allows you to keep the animation looping constantly.  Would there be a way to make Steps between Viewports?
-[*] Would there be a way of picking the viewpoints or using checkboxes to disable or enable a “Step”?
-[*] There are other things like super sampling that FARO does which I really like.  Basically they render the frame out at a much higher resolution (3 or 4 times larger) and then they shrink it back down to size…this makes some noisy pixels drop off and stops that flicker that is often present in animations.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
 
 Various:

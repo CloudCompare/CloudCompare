@@ -18,53 +18,40 @@
 #include "qAnimation.h"
 
 //Local
-#include "ViewInterpolate.h"
-#include "VideoStepItem.h"
 #include "qAnimationDlg.h"
+
+//qCC_db
+#include <cc2DViewportObject.h>
 
 //Qt
 #include <QtGui>
 #include <QApplication>
-#include <QListWidget>
 
 //qCC_db
 #include "qCC_db.h"
 
-//system
-#include <vector>
-
-//Default constructor: should mainly be used to initialize
-//actions (pointers) and other members
 qAnimation::qAnimation(QObject* parent/*=0*/)
     : QObject(parent)
     , m_action(0)
 {
 }
 
-//This method should enable or disable each plugin action
-//depending on the currently selected entities ('selectedEntities').
-//For example: if none of the selected entities is a cloud, and your
-//plugin deals only with clouds, call 'm_action->setEnabled(false)'
 void qAnimation::onNewSelection(const ccHObject::Container& selectedEntities)
 {
     if (m_action)
         m_action->setEnabled( !selectedEntities.empty() );
 }
 
-//This method returns all 'actions' of your plugin.
-//It will be called only once, when plugin is loaded.
 void qAnimation::getActions(QActionGroup& group)
 {
     //default action (if it has not been already created, it's the moment to do it)
     if (!m_action)
     {
-        //here we use the default plugin name, description and icon,
-        //but each action can have its own!
         m_action = new QAction(getName(),this);
         m_action->setToolTip(getDescription());
         m_action->setIcon(getIcon());
-        //connect appropriate signal
-        connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
     }
 
     group.addAction(m_action);
@@ -79,21 +66,24 @@ void qAnimation::doAction()
     if (!m_app)
         return;
 
-    /*** HERE STARTS THE ACTION ***/
+	//get active GL window
+    ccGLWindow* glWindow = m_app->getActiveGLWindow();
+    if (!glWindow)
+    {
+        m_app->dispToConsole("No active 3D view!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+    }
 
-    //This is how you can output messages
-    m_app->dispToConsole("[qAnimation] Starting Animation plugin!",ccMainAppInterface::STD_CONSOLE_MESSAGE); //a standard message is displayed in the console
-
-    const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-
-    std::vector<cc2DViewportObject*> selectedViews;
+	//get the selected viewpots
+    std::vector<cc2DViewportObject*> selectedViewports;
 	try
 	{
+		const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 		for ( ccHObject::Container::const_iterator entity_iterator = selectedEntities.begin(); entity_iterator != selectedEntities.end() ; ++entity_iterator )
 		{
 			if ( (*(entity_iterator))->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT )
 			{
-				selectedViews.push_back ( static_cast<cc2DViewportObject*>(*entity_iterator) );
+				selectedViewports.push_back ( static_cast<cc2DViewportObject*>(*entity_iterator) );
 			}
 		}
 	}
@@ -103,61 +93,28 @@ void qAnimation::doAction()
 		return;
 	}
 
-    if ( selectedViews.size() < 2 )
+	//we need at least two viewports!
+    if ( selectedViewports.size() < 2 )
     {
-        m_app->dispToConsole("Animation plugin requires at least two selected viewports to function!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        m_app->dispToConsole("Animation plugin requires at least two selected viewports to function!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
     }
+    m_app->dispToConsole( QString("[qAnimation] Selected viewports: %1").arg(selectedViewports.size()) );
 
-    m_app->dispToConsole( QString("[qAnimation] Loaded %1 viewports").arg(selectedViews.size()) );
-
-	//get active GL window
-    ccGLWindow* glWindow( m_app->getActiveGLWindow() );
-    if ( !glWindow )
-    {
-        m_app->dispToConsole("No active 3D view!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-        return;
-    }
-
-    std::vector<VideoStepItem> videoSteps;
+    qAnimationDlg videoDlg ( glWindow, m_app->getMainWindow() );
+	if ( !videoDlg.init(selectedViewports) )
 	{
-		try
-		{
-			videoSteps.reserve( selectedViews.size() );
-		}
-		catch (const std::bad_alloc&)
-		{
-			m_app->dispToConsole("Not enough memory!");
-			return;
-		}
-
-		for (size_t i=0 ; i<selectedViews.size()-1; ++i )
-		{
-			videoSteps.push_back( VideoStepItem(selectedViews[i], selectedViews[i+1]) );
-		}
+        m_app->dispToConsole("Failed to initialize the plugin dialog (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
 	}
-
-    qAnimationDlg videoDlg ( videoSteps, glWindow );
-    if ( !videoDlg.exec() )
-    {
-        return;
-    }
-
-    /*** HERE ENDS THE ACTION ***/
+    videoDlg.exec();
 }
 
-//This method should return the plugin icon (it will be used mainly
-//if your plugin as several actions in which case CC will create a
-//dedicated sub-menu entry with this icon.
 QIcon qAnimation::getIcon() const
 {
-    //open qAnimation.qrc (text file), update the "prefix" and the
-    //icon(s) filename(s). Then save it with the right name (yourPlugin.qrc).
-    //(eventually, remove the original qAnimation.qrc file!)
     return QIcon(":/CC/plugin/qAnimation/animation.png");
 }
 
 #ifndef CC_QT5
-//Don't forget to replace 'qAnimation' by your own plugin class name here also!
 Q_EXPORT_PLUGIN2(qAnimation,qAnimation);
 #endif

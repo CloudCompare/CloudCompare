@@ -37,7 +37,12 @@ v2.6.3.beta ??/??/2016
 
 	* qPoissonRecon now uses PoissonRecon V8.0 (https://github.com/mkazhdan/PoissonRecon)
 
-	* qAnimation: the plugin has been fixed and can now output mp4 videos
+	* qAnimation:
+		- the plugin has been fixed and can now output mp4 videos
+		- the user now sees all the viewports in the list and can enable/disable each one separately
+		- new 'loop' option (to close the loop)
+		- the preview can be started from the selected step (see dedicated checkbox)
+		- new 'super resolution' option (to smooth the output video)
 
 	* Point sampling (on a mesh): maximum density is now 100 M. per square units
 

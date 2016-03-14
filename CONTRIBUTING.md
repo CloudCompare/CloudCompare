@@ -24,15 +24,15 @@ Example: `numberOfPoints`, `ptsCount` (or even `ptsNum` for the laziest ;-)
 
 ### Files
 
-- File naming follow the same rule as most CloudCompare elements (first letter in lower case, etc.)
+- File naming follows the same rule as most CloudCompare elements (first letter in lower case, etc.)
 - Each class should be saved alone in a header + source file couple. Exceptionally, very small classes that are used by a single class may be saved along with this class. The header + source filename should be the same as the main class. 
 
 Example: `ccConsole` saved in `ccConsole.h` and `ccConsole.cpp`
 
 - Filenames shouldn’t contain any space character. Use underscore instead.
 - All data-related classes (data models, database, etc) should be saved in `db` directory.
-- Images (icons) should all be saved in the `images` directory (or one of its subdirectory).
-- GUI templates (mainly `.ui` Qt files) should be saved in `ui_templates` directory 
+- Images (icons) should all be saved in the `images` directory (or one of its subdirectories).
+- GUI templates (mainly `.ui` Qt files) should be saved in the `ui_templates` directory 
 
 ### Summary
 Element | Example
@@ -46,7 +46,7 @@ Static method | `GetMethod()`
 Structure | `myStruct`
 Enumerator | `CC_MY_ENUMERATOR`
 Macro | `MACRO_myMethod`
-Const | `MY_CONSTANT`
+Const variables | `MY_CONSTANT`
 Const (`#define`) | `MY_CONSTANT`
 
 ## Unix compliance

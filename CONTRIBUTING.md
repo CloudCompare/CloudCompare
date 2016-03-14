@@ -12,10 +12,15 @@ Example: `numberOfPoints`, `ptsCount` (or even `ptsNum` for the laziest ;-)
 - static variables: should always begin with prefix `s_` (in lower case – like `s_defaultFilename`
 - static methods: should always begin with a upper case letter (like `InitGLEW`)
 - classes: should always begin with prefix `cc` (in lower case – like `ccConsole`)  
-- enumerators: all letters in upper case + should always begin with prefix `CC_` + words are separated by underscore (like `CC_OBJECT_FLAG`)
+- enumerators:
+  - all letters in upper case
+  - should always begin with prefix `CC_`
+  - words are separated by underscore (like `CC_OBJECT_FLAG`)
 - macros: begin with prefix `MACRO_` followed by a standard method name (like `MACRO_SkipUnselected`)
-- const (apart for `const char*`) : all letters in upper case and words are separated by underscore (like `NORMALS_QUANTIZE_LEVEL`)
-- `macro const` (`#define`): same as const
+- const variables:
+  - all letters in upper case
+  - words are separated by underscore (like `NORMALS_QUANTIZE_LEVEL`)
+- `macro const` (`#define`): should be avoided; same syntax as const
 
 ### Files
 

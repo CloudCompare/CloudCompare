@@ -71,7 +71,7 @@ Here is the official header for LGPL modules (CCLib, etc.):
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                             COPYRIGHT: XXX                             #
 //#                                                                        #
 //##########################################################################
 
@@ -93,7 +93,7 @@ And for official header for GPL modules (qCC, etc.):
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                             COPYRIGHT: XXX                             #
 //#                                                                        #
 //##########################################################################
 ```

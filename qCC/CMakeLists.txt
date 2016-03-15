@@ -112,14 +112,16 @@ endforeach()
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )
-   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
+    set_target_properties( ${PROJECT_NAME} PROPERTIES
+        INSTALL_RPATH "@loader_path/../Frameworks"
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
 
-   set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
-   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
-   set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
-
-   add_subdirectory( Mac )
+    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
+    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
+    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
+    set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
+    
+    add_subdirectory( Mac )
 endif()
 
 # Export common shader files to all install destinations

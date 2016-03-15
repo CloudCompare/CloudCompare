@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
+
+# set up rpaths before we do anything
+if (APPLE)
+	# see: https://cmake.org/Wiki/CMake_RPATH_handling
+	set( CMAKE_SKIP_BUILD_RPATH  FALSE )
+	set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE ) 
+	set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
+endif()
+
 include ( CMakePolicies.cmake )
 
 project( CloudCompareProjects )
@@ -32,8 +41,13 @@ set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
 set( CCVIEWER_DEST_FOLDER ccViewer )
 
 if (APPLE)
-	set( CLOUDCOMPARE_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app  CACHE INTERNAL "CloudCompare bundle dir.")
-	set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/ccViewer.app CACHE INTERNAL "ccViewer bundle dir.")
+	set( CLOUDCOMPARE_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app  CACHE INTERNAL "CloudCompare bundle dir")
+	set( CLOUDCOMPARE_MAC_FRAMEWORK_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CC framework dir" )
+	set( CLOUDCOMPARE_MAC_PLUGIN_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CC plugin dir" )
+	
+	set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/ccViewer.app CACHE INTERNAL "ccViewer bundle dir")
+	set( CCVIEWER_MAC_FRAMEWORK_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CCViewer framework dir" )
+	set( CCVIEWER_MAC_PLUGIN_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/PlugIns/ccViewerPlugins CACHE INTERNAL "CCViewer plugin dir" )
 endif()
 
 # set default install folders
@@ -45,10 +59,10 @@ if( WIN32 )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
     endif()
 else( APPLE )
-	set( INSTALL_DESTINATIONS "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/MacOS" )
+	set( INSTALL_DESTINATIONS "${CLOUDCOMPARE_MAC_FRAMEWORK_DIR}" )
     
     if( ${OPTION_BUILD_CCVIEWER} )
-        list( APPEND INSTALL_DESTINATIONS "${CCVIEWER_MAC_BASE_DIR}/Contents/MacOS" )
+        list( APPEND INSTALL_DESTINATIONS "${CCVIEWER_MAC_FRAMEWORK_DIR}" )
     endif()
 endif()
 

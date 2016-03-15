@@ -5,12 +5,9 @@ if( APPLE )
 
    # install icons
    install( FILES ../images/icon/cc_viewer_icon.icns DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )   
-   
-   set( PLUGINS ${QT_PLUGINS} ${CCVIEWER_PLUGINS} )
-       
-   # call fixup_bundles to change paths using otools
-   install( CODE "
-      include( BundleUtilities )
-      fixup_bundle( ${CCVIEWER_MAC_BASE_DIR} \"${PLUGINS}\" \"${DIRS}\" COMPONENT Runtime ) 
-      ")
+      
+   install( CODE "execute_process( COMMAND \"${CMAKE_SOURCE_DIR}/mac_scripts/delete_rpaths.sh\"
+       \"${CCVIEWER_MAC_BASE_DIR}/Contents/MacOS/${PROJECT_NAME}\"
+       \"${CCVIEWER_MAC_FRAMEWORK_DIR}\"
+       \"${CCVIEWER_MAC_PLUGIN_DIR}\" )" COMPONENT Runtime )
 endif( APPLE )

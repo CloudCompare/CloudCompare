@@ -55,6 +55,9 @@ include( ../CMakeInclude.cmake )
 if ( COMPILE_CC_CORE_LIB_SHARED )
 	if (WIN32)
 		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
+	elseif( APPLE )
+		set_target_properties( ${PROJECT_NAME} PROPERTIES
+			INSTALL_RPATH "." )
 	endif()
 
 	# Install (shared) library to specified destinations

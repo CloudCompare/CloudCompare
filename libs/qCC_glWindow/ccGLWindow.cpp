@@ -42,6 +42,7 @@
 
 //Qt
 #include <QApplication>
+#include <QDir>
 #include <QLayout>
 #include <QMessageBox>
 #include <QMimeData>
@@ -5763,14 +5764,39 @@ void ccGLWindow::displayText(	QString text,
 
 QString ccGLWindow::getShadersPath()
 {
+	QString  appPath = QCoreApplication::applicationDirPath();
+	QString	shaderPath;
+	
 #if defined(Q_OS_MAC)
-	// shaders are in the bundle
-	QString  path = QCoreApplication::applicationDirPath();
-	path.remove( "MacOS" );
-	return path + "Shaders";
+	appPath.remove( "MacOS" );
+	
+#if CC_MAC_DEV_PATHS
+	shaderPath = appPath + "/../../../shaders";
 #else
-	return QApplication::applicationDirPath() + "/shaders";
+	shaderPath = appPath + "/Shaders";
 #endif
+#elif defined(Q_OS_WIN)
+	shaderPath = appPath + "/shaders";
+#elif defined(Q_OS_LINUX)
+	// Shaders are relative to the bin directory where the executable is found
+	QDir  theDir( appPath );
+	
+	if ( theDir.dirName() == "bin" )
+	{
+		theDir.cdUp();
+		
+		shaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+	}
+	else
+	{
+		// Choose a reasonable default to look in
+		shaderPath = "/usr/share/cloudcompare/shaders";
+	}
+#else
+#warning Need to specify the shader path for this OS.	
+#endif
+	
+	return shaderPath;
 }
 
 CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,

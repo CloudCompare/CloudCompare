@@ -413,9 +413,9 @@ const tPluginInfoList MainWindow::findPlugins()
 	appPath.remove( "MacOS" );
 	
 	m_pluginPaths += (appPath + "Plugins/ccPlugins");
-#if 0
+#if CC_MAC_DEV_PATHS
 	// used for development only - this is the path where the plugins are built
-	// this avoids having to copy into the application bundle
+	// this avoids having to install into the application bundle when developing
 	m_pluginPaths += (appPath + "../../../ccPlugins");
 #endif
 #elif defined(Q_OS_WIN)

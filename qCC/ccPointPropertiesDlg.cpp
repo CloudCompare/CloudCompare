@@ -296,8 +296,13 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 	if (m_pickingMode != RECT_ZONE)
 		return;
 
-	assert(m_rect2DLabel);
-	assert(m_associatedWin);
+	if (!m_rect2DLabel || !m_associatedWin)
+	{
+		assert(false);
+		return;
+	}
+	x =  x - m_associatedWin->width()/2;
+	y =  m_associatedWin->height()/2 - y;
 
 	if (m_rect2DLabel->isSelected()) //already closed? we start a new label
 	{

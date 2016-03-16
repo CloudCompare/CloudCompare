@@ -3391,7 +3391,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	//decimation options
 	context.decimateCloudOnMove = guiParams.decimateCloudOnMove;
 	context.minLODPointCount    = guiParams.minLoDCloudSize;
-	context.decimateMeshOnMove  = guiParams.decimateMeshOnMove;
+	context.decimateMeshOnMove  = guiParams.decimateMeshOnMove && m_mouseMoved;
 	context.minLODTriangleCount = guiParams.minLoDMeshSize;
 	context.higherLODLevelsAvailable = false;
 	context.moreLODPointsAvailable = false;
@@ -3401,11 +3401,11 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	{
 		//we automatically deduce the minimal octree level for decimation
 		//(we make the hypothesis that couds are filling a (flat) 'square' portion of the octree (and not 'cubical'))
-		context.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000,guiParams.minLoDCloudSize)))/(2.0*log(2.0)));
+		context.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000, guiParams.minLoDCloudSize))) / (2 * log(2.0)));
 		//ccLog::Print(QString("context.minLODLevel = %1").arg(context.minLODLevel));
 		//just in case...
 		assert(context.minLODLevel > 0);
-		context.minLODLevel = std::max<unsigned>(context.minLODLevel,1);
+		context.minLODLevel = std::max<unsigned>(context.minLODLevel, 1);
 	}
 
 	//scalar field color-bar
@@ -4230,7 +4230,7 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	{
 		//convert degrees in zoom 'power'
 		static const float c_defaultDeg2Zoom = 20.0f;
-		float zoomFactor = pow(1.1f,wheelDelta_deg / c_defaultDeg2Zoom);
+		float zoomFactor = pow(1.1f, wheelDelta_deg / c_defaultDeg2Zoom);
 		updateZoom(zoomFactor);
 	}
 

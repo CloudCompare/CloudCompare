@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
+v2.X.X 03/??/2016
 - New features:
 
 	* Polyline tracing/picking tool:
@@ -118,6 +118,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 	* Command line mode: the mesh obtained with the -DELAUNAY command could only be saved as a BIN file
 	* Rasterize: applying the tool a second time on a cloud already generated with the rasterize tool could make CC crash
 	* E57: some files may be rejected due to a minor warning (about duplicate extensions) that was considered as a critical error
+	* The meshes over the user-specified limit (display options) were ALWAYS decimated (and not only when the mouse is moved)
 
 v2.6.2 10/08/2015
 - New features:

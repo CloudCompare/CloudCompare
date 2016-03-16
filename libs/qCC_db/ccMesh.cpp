@@ -1437,7 +1437,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (MACRO_Draw3D(context))
 	{
 		//any triangle?
-		unsigned n,triNum = m_triVertIndexes->currentSize();
+		unsigned n, triNum = m_triVertIndexes->currentSize();
 		if (triNum == 0)
 			return;
 

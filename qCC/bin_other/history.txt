@@ -5,6 +5,7 @@ v2.6.3.1 - 03/XX/2016
 Bug fixes:
 	* The meshes over the user-specified limit (display options) were ALWAYS decimated (and not only when the mouse is moved)
 	* 2D area label picking was broken (first corner was misplaced)
+	* 3D point picking on a cloud with a temporary GL transformation (e.g. in the Align tool) was not working properly
 
 v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 - New features:

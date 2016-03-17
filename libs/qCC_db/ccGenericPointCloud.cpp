@@ -395,6 +395,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			return false;
 		}
 
+		//warning: we have to handle the relative GL transformation!
 		ccGLMatrix trans;
 		bool noGLTrans = !getAbsoluteGLTransformation(trans);
 

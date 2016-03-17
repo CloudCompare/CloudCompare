@@ -578,6 +578,9 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		return false;
 	}
 
+	ccGLMatrix trans;
+	bool hasGLTrans = m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans);
+
 	//compute 3D picking 'ray'
 	CCVector3 rayAxis, rayOrigin;
 	{
@@ -588,18 +591,17 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 			return false;
 		}
 
-		CCVector3d dir = Y-X;
-		dir.normalize();
-		rayAxis = CCVector3::fromArray(dir.u);
+		rayAxis = CCVector3::fromArray((Y-X).u);
 		rayOrigin = CCVector3::fromArray(X.u);
 
-		ccGLMatrix trans;
-		if (m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans))
+		if (hasGLTrans)
 		{
-			trans.invert();
-			trans.applyRotation(rayAxis);
-			trans.apply(rayOrigin);
+			ccGLMatrix iTrans = trans.inverse();
+			iTrans.applyRotation(rayAxis);
+			iTrans.apply(rayOrigin);
 		}
+
+		rayAxis.normalize(); //normalize afterwards as the local transformation may have a scale != 1
 	}
 
 	CCVector3 margin(0, 0, 0);
@@ -712,14 +714,19 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		{
 			//test the point
 			const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
+			CCVector3 Q = *P;
+			if (hasGLTrans)
+			{
+				trans.apply(Q);
+			}
 
 			CCVector3d Q2D;
-			camera.project(*P, Q2D);
+			camera.project(Q, Q2D);
 
 			if (	fabs(Q2D.x - clickPos.x) <= pickWidth_pix
 				&&	fabs(Q2D.y - clickPos.y) <= pickWidth_pix )
 			{
-				double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
+				double squareDist = CCVector3d(X.x - Q.x, X.y - Q.y, X.z - Q.z).norm2d();
 				if (!output.point || squareDist < output.squareDistd)
 				{
 					output.point = P;

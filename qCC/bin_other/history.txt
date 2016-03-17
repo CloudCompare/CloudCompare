@@ -3,7 +3,10 @@
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:
+	
 	* Camera sensors can now be created 'freely' (i.e. not necessarily attached to a given entity) and moved freely in the DB tree
+
+	* The cross section box orientation can now be setup via the 'advanced' button
 
 - Bug fixes:
 	* The meshes over the user-specified limit (display options) were ALWAYS decimated (and not only when the mouse is moved)

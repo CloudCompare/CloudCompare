@@ -116,12 +116,21 @@ void ccClippingBoxTool::editBox()
 	if (!m_clipBox)
 		return;
 
-	ccBBox box = m_clipBox->getBox();
+	ccBBox box;
+	ccGLMatrix transformation;
+	m_clipBox->get(box, transformation);
 
 	ccBoundingBoxEditorDlg bbeDlg(this);
 	bbeDlg.setBaseBBox(box, false);
 	bbeDlg.showInclusionWarning(false);
 	bbeDlg.setWindowTitle("Edit clipping box");
+	
+	//show the box 'axes' (orientation)
+	bbeDlg.showBoxAxes(true);
+	//transformation.invert();
+	bbeDlg.setBoxAxes(	transformation.getColumnAsVec3D(0),
+						transformation.getColumnAsVec3D(1),
+						transformation.getColumnAsVec3D(2) );
 
 	if (!bbeDlg.exec())
 		return;
@@ -129,10 +138,37 @@ void ccClippingBoxTool::editBox()
 	box = bbeDlg.getBox();
 	m_clipBox->setBox(box);
 
+	//construct the local box orientation matrix
+	{
+		CCVector3 X, Y, Z;
+		bbeDlg.getBoxAxes(X, Y, Z);
+		//make sure the vectors define an orthogonal basis
+		Z = X.cross(Y);
+		Y = Z.cross(X);
+
+		X.normalize();
+		Y.normalize();
+		Z.normalize();
+		ccGLMatrix rotMat;
+		rotMat.setColumn(0, X);
+		rotMat.setColumn(1, Y);
+		rotMat.setColumn(2, Z);
+
+		CCVector3 C = box.getCenter();
+		ccGLMatrix transMat;
+		transMat.setTranslation(-C);
+		transMat = rotMat.inverse() * transMat;
+		transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
+
+		m_clipBox->setGLTransformation(transMat.inverse());
+	}
+
 	//onBoxModified(&box); //DGM: automatically called by 'm_clipBox'
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 }
 
 void ccClippingBoxTool::toggleInteractors(bool state)
@@ -355,7 +391,7 @@ void ccClippingBoxTool::exportSlice()
 	if (!obj)
 		return;
 
-	ccHObject* result = GetSlice(obj,m_clipBox,false);
+	ccHObject* result = GetSlice(obj, m_clipBox, false);
 
 	if (result)
 	{
@@ -537,7 +573,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			//single cloud: easy
 			assert(slices.size() == 1);
 
-			slices[0] = GetSlice(obj,m_clipBox,false);
+			slices[0] = GetSlice(obj, m_clipBox, false);
 			if (!slices[0])
 			{
 				//error message already issued

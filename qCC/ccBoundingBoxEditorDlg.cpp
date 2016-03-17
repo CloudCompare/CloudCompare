@@ -29,6 +29,8 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
+	showBoxAxes(false);
+
 	xDoubleSpinBox->setMinimum(-1.0e9);
 	yDoubleSpinBox->setMinimum(-1.0e9);
 	zDoubleSpinBox->setMinimum(-1.0e9);
@@ -57,6 +59,16 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	connect(dxDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(updateXWidth(double)));	
 	connect(dyDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(updateYWidth(double)));	
 	connect(dzDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(updateZWidth(double)));	
+
+	connect(xOriXDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(xOriYDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(xOriZDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(yOriXDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(yOriYDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(yOriZDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(zOriXDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(zOriYDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
+	connect(zOriZDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(onAxisValueChanged(double)));
 
 	defaultPushButton->setVisible(false);
 	lastPushButton->setVisible(s_lastBBox.isValid());
@@ -196,6 +208,30 @@ void ccBoundingBoxEditorDlg::resetToLast()
 
 void ccBoundingBoxEditorDlg::saveBoxAndAccept()
 {
+	if (oriGroupBox->isVisible())
+	{
+		CCVector3 X, Y, Z;
+		getBoxAxes(X, Y, Z);
+		X.normalize();
+		Y.normalize();
+		Z.normalize();
+		if (	X.norm2d() == 0
+			||	Y.norm2d() == 0
+			||	Z.norm2d() == 0 )
+		{
+			ccLog::Error("Invalid axes definition: at least two vectors are colinear");
+			return;
+		}
+
+		//if (	fabs(X.dot(Y)) > 1.0e-6 
+		//	||	fabs(Y.dot(Z)) > 1.0e-6 
+		//	||	fabs(Z.dot(X)) > 1.0e-6 )
+		//{
+		//	ccLog::Error("Invalid axes definition: vectors must be orthogonal");
+		//	return;
+		//}
+	}
+
 	s_lastBBox = m_currentBBox;
 	
 	accept();
@@ -347,5 +383,92 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 		dxDoubleSpinBox->blockSignals(false);
 		dyDoubleSpinBox->blockSignals(false);
 		dzDoubleSpinBox->blockSignals(false);
+	}
+}
+
+void ccBoundingBoxEditorDlg::showBoxAxes(bool state)
+{
+	oriGroupBox->setVisible(state);
+
+	resize(QSize(600, state ? 400 : 250));
+}
+
+void ccBoundingBoxEditorDlg::setBoxAxes(const CCVector3& X, const CCVector3& Y, const CCVector3& Z)
+{
+	//if (xOriFrame->isEnabled())
+	{
+		xOriXDoubleSpinBox->setValue(X.x);
+		xOriYDoubleSpinBox->setValue(X.y);
+		xOriZDoubleSpinBox->setValue(X.z);
+	}
+
+	//if (yOriFrame->isEnabled())
+	{
+		yOriXDoubleSpinBox->setValue(Y.x);
+		yOriYDoubleSpinBox->setValue(Y.y);
+		yOriZDoubleSpinBox->setValue(Y.z);
+	}
+
+	//if (zOriFrame->isEnabled())
+	{
+		zOriXDoubleSpinBox->setValue(Z.x);
+		zOriYDoubleSpinBox->setValue(Z.y);
+		zOriZDoubleSpinBox->setValue(Z.z);
+	}
+}
+
+void ccBoundingBoxEditorDlg::getBoxAxes(CCVector3& X, CCVector3& Y, CCVector3& Z)
+{
+	X = CCVector3(	static_cast<PointCoordinateType>(xOriXDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(xOriYDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(xOriZDoubleSpinBox->value()) );
+
+	Y = CCVector3(	static_cast<PointCoordinateType>(yOriXDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(yOriYDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(yOriZDoubleSpinBox->value()) );
+
+	Z = CCVector3(	static_cast<PointCoordinateType>(zOriXDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(zOriYDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(zOriZDoubleSpinBox->value()) );
+}
+
+void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
+{
+	CCVector3 X, Y, Z;
+	getBoxAxes(X, Y, Z);
+
+	QDoubleSpinBox* vecSpinBoxes[3] = { 0, 0, 0 };
+	CCVector3 N(0, 0, 0);
+	if (oriXCheckBox->isChecked())
+	{
+		N = Y.cross(Z);
+		vecSpinBoxes[0] = xOriXDoubleSpinBox;
+		vecSpinBoxes[1] = xOriYDoubleSpinBox;
+		vecSpinBoxes[2] = xOriZDoubleSpinBox;
+	}
+	else if (oriYCheckBox->isChecked())
+	{
+		N = Z.cross(X);
+		vecSpinBoxes[0] = yOriXDoubleSpinBox;
+		vecSpinBoxes[1] = yOriYDoubleSpinBox;
+		vecSpinBoxes[2] = yOriZDoubleSpinBox;
+	}
+	else if (oriZCheckBox->isChecked())
+	{
+		N = X.cross(Y);
+		vecSpinBoxes[0] = zOriXDoubleSpinBox;
+		vecSpinBoxes[1] = zOriYDoubleSpinBox;
+		vecSpinBoxes[2] = zOriZDoubleSpinBox;
+	}
+	else
+	{
+		assert(false);
+	}
+
+	for (int i=0; i<3; ++i)
+	{
+		vecSpinBoxes[i]->blockSignals(true);
+		vecSpinBoxes[i]->setValue(N.u[i]);
+		vecSpinBoxes[i]->blockSignals(false);
 	}
 }

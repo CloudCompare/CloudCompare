@@ -34,13 +34,19 @@ public:
 	explicit ccBoundingBoxEditorDlg(QWidget* parent = 0);
 
 	//! Returns bounding box
-	ccBBox getBox() const { return m_currentBBox; }
+	const ccBBox& getBox() const { return m_currentBBox; }
 
-	//! Sets (minimal) base box
+	//! Sets the (minimal) base box
 	/** \param box base box
 		\param isMinimal set whether the user must define a bounding-box at least as large as this one
 	**/
 	void setBaseBBox(const ccBBox& box, bool isMinimal = true);
+
+	//! Sets the box axes
+	void setBoxAxes(const CCVector3& X, const CCVector3& Y, const CCVector3& Z);
+
+	//! Returns the box axes
+	void getBoxAxes(CCVector3& X, CCVector3& Y, CCVector3& Z);
 
 	//! Whether the warning about bounding box inclusion in the base one should be displayed or not
 	/** True by default.
@@ -53,8 +59,11 @@ public:
 	//! Returns whether 'keep square' mode is enabled or not
 	bool keepSquare() const;
 
-	//! Sets 2D mode ('dim' line will be hidden)
+	//! Sets 2D mode (the line 'dim' will be hidden)
 	void set2DMode(bool state, unsigned char dim);
+
+	//! Whether to display or not the box axes
+	void showBoxAxes(bool state);
 
 public slots:
 
@@ -77,6 +86,9 @@ protected slots:
 	void updateCurrentBBox(double dummy = 0.0);
 	//! Reflects changes on bbox
 	void reflectChanges(int dummy = 0);
+	
+	//! Slot called anytime a component of the box axes is modified
+	void onAxisValueChanged(double);
 
 protected:
 

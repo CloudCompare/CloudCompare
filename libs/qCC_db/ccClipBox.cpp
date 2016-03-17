@@ -436,7 +436,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 	{
 		//we guess the rotation order by comparing the current screen 'normal'
 		//and the vector prod of u and the current rotation axis
-		CCVector3d Rb(0,0,0);
+		CCVector3d Rb(0, 0, 0);
 		switch(m_activeComponent)
 		{
 		case X_MINUS_TORUS:
@@ -464,7 +464,9 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		
 		CCVector3d R = Rb;
 		if (m_glTransEnabled)
+		{
 			m_glTrans.applyRotation(R);
+		}
 
 		CCVector3d RxU = R.cross(u);
 
@@ -480,12 +482,12 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		}
 
 		//angle is proportional to absolute displacement
-		double angle_rad = u.norm()/m_box.getDiagNorm() * M_PI;
+		double angle_rad = u.norm() / m_box.getDiagNorm() * M_PI;
 		if (maxDot < 0.0)
 			angle_rad = -angle_rad;
 
 		ccGLMatrixd rotMat;
-		rotMat.initFromParameters(angle_rad,Rb,CCVector3d(0,0,0));
+		rotMat.initFromParameters(angle_rad, Rb, CCVector3d(0, 0, 0));
 
 		CCVector3 C = m_box.getCenter();
 		ccGLMatrixd transMat;

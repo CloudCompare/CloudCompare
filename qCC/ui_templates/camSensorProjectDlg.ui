@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="propertiesTabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabOrientation">
       <attribute name="title">
@@ -153,7 +153,7 @@
           <string>sensor vertical direction (pitch = 0)</string>
          </property>
          <property name="text">
-          <string>Z (view dir.)</string>
+          <string>Z (inv. view dir.)</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -529,6 +529,33 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>propertiesTabWidget</tabstop>
+  <tabstop>posXEdit</tabstop>
+  <tabstop>posYEdit</tabstop>
+  <tabstop>posZEdit</tabstop>
+  <tabstop>x1rot</tabstop>
+  <tabstop>y1rot</tabstop>
+  <tabstop>z1rot</tabstop>
+  <tabstop>x2rot</tabstop>
+  <tabstop>y2rot</tabstop>
+  <tabstop>z2rot</tabstop>
+  <tabstop>x3rot</tabstop>
+  <tabstop>y3rot</tabstop>
+  <tabstop>z3rot</tabstop>
+  <tabstop>focalDoubleSpinBox</tabstop>
+  <tabstop>fovDoubleSpinBox</tabstop>
+  <tabstop>arrayWSpinBox</tabstop>
+  <tabstop>arrayHSpinBox</tabstop>
+  <tabstop>cxDoubleSpinBox</tabstop>
+  <tabstop>cyDoubleSpinBox</tabstop>
+  <tabstop>pixWDoubleSpinBox</tabstop>
+  <tabstop>pixHDoubleSpinBox</tabstop>
+  <tabstop>zNearDoubleSpinBox</tabstop>
+  <tabstop>zFarDoubleSpinBox</tabstop>
+  <tabstop>skewDoubleSpinBox</tabstop>
+  <tabstop>distInfoTextEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

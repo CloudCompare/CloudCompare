@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>450</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,100 +24,14 @@
        <string>Position + Orientation</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="toolTip">
-          <string>sensor front direction (yaw = 0)</string>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="x1rot">
-         <property name="text">
-          <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="x2rot">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLineEdit" name="x3rot">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_7">
-         <property name="toolTip">
-          <string>sensor lateral direction</string>
-         </property>
-         <property name="text">
-          <string>Y</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="y1rot">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="y2rot">
-         <property name="text">
-          <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLineEdit" name="y3rot">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="toolTip">
-          <string>sensor vertical direction (pitch = 0)</string>
-         </property>
-         <property name="text">
-          <string>Z</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
+       <item row="3" column="2">
         <widget class="QLineEdit" name="z1rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QLineEdit" name="z2rot">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLineEdit" name="z3rot">
-         <property name="text">
-          <string>1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
+       <item row="4" column="3">
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -130,34 +44,132 @@
          </property>
         </spacer>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="toolTip">
-          <string>sensor center</string>
-         </property>
+       <item row="2" column="4">
+        <widget class="QLineEdit" name="y3rot">
          <property name="text">
-          <string>C</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="3" column="4">
+        <widget class="QLineEdit" name="z3rot">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QLineEdit" name="x3rot">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="x1rot">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="y1rot">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="x2rot">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLineEdit" name="z2rot">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLineEdit" name="y2rot">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
         <widget class="QLineEdit" name="posXEdit">
          <property name="text">
           <string>0.0</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="posYEdit">
          <property name="text">
           <string>0.0</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
+       <item row="3" column="1">
         <widget class="QLineEdit" name="posZEdit">
          <property name="text">
           <string>0.0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_6">
+         <property name="toolTip">
+          <string>sensor front direction (yaw = 0)</string>
+         </property>
+         <property name="text">
+          <string>X (right)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="label_7">
+         <property name="toolTip">
+          <string>sensor lateral direction</string>
+         </property>
+         <property name="text">
+          <string>Y (up)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="label_8">
+         <property name="toolTip">
+          <string>sensor vertical direction (pitch = 0)</string>
+         </property>
+         <property name="text">
+          <string>Z (view dir.)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_2">
+         <property name="toolTip">
+          <string>sensor center</string>
+         </property>
+         <property name="text">
+          <string>Center</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>

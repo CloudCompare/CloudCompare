@@ -1074,6 +1074,7 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 			(item->isKindOf(CC_TYPES::MESH) && !item->isA(CC_TYPES::SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
 			item->isKindOf(CC_TYPES::IMAGE)										||
 			item->isKindOf(CC_TYPES::LABEL_2D)									||
+			item->isKindOf(CC_TYPES::CAMERA_SENSOR)								||
 			item->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);

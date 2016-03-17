@@ -2842,53 +2842,63 @@ void MainWindow::doActionCreateGBLSensor()
 
 void MainWindow::doActionCreateCameraSensor()
 {
-	ccCamSensorProjectionDlg spDlg(this);
-	if (!spDlg.exec())
-		return;
+	//we create the camera sensor
+	ccCameraSensor* sensor = new ccCameraSensor();
 
-	//We create the corresponding sensor for each input cloud
-	ccHObject::Container selectedEntities = m_selectedEntities;
-	size_t selNum = selectedEntities.size();
-
-	for (size_t i=0; i<selNum; ++i)
+	ccHObject* ent = 0;
+	if (!m_selectedEntities.empty())
 	{
-		ccHObject* ent = selectedEntities[i];
+		assert(m_selectedEntities.size() == 1);
+		ent = m_selectedEntities.front();
+	}
 
-		if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
+	//we try to guess the sensor relative size (dirty)
+	if (ent && ent->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+		ccBBox bb = cloud->getOwnBB();
+		double diag = bb.getDiagNorm();
+		if (diag < 1.0)
+			sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
+		else if (diag > 10000.0)
+			sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
+
+		//set position
+		ccIndexedTransformation trans;
+		sensor->addPosition(trans, 0);
+	}
+
+	ccCamSensorProjectionDlg spDlg(this);
+	spDlg.updateCamSensor(sensor);
+	if (!spDlg.exec())
+	{
+		delete sensor;
+		return;
+	}
+
+	ccGLWindow* win = 0;
+	if (ent)
+	{
+		ent->addChild(sensor);
+		win = static_cast<ccGLWindow*>(ent->getDisplay());
+	}
+	else
+	{
+		win = getActiveGLWindow();
+	}
+
+	if (win)
+	{
+		sensor->setDisplay(win);
+		sensor->setVisible(true);
+		if (ent)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
-
-			//we create a new sensor
-			ccCameraSensor* sensor = new ccCameraSensor();
-			cloud->addChild(sensor);
-
-			//we init its parameters with the dialog
-			spDlg.updateCamSensor(sensor);
-
-			//we try to guess the sensor relative size (dirty)
-			ccBBox bb = cloud->getOwnBB();
-			double diag = bb.getDiagNorm();
-			if (diag < 1.0)
-				sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
-			else if (diag > 10000.0)
-				sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
-
-			//set position
-			ccIndexedTransformation trans;
-			sensor->addPosition(trans,0);
-
-			ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
-			if (win)
-			{
-				sensor->setDisplay(win);
-				sensor->setVisible(true);
-				ccBBox box = cloud->getOwnBB();
-				win->updateConstellationCenterAndZoom(&box);
-			}
-
-			addToDB(sensor);
+			ccBBox box = ent->getOwnBB();
+			win->updateConstellationCenterAndZoom(&box);
 		}
 	}
+
+	addToDB(sensor);
 
 	updateUI();
 }
@@ -12201,7 +12211,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
 	actionViewFromSensor->setEnabled(exactlyOneSensor);
 	actionCreateGBLSensor->setEnabled(atLeastOneCloud);
-	actionCreateCameraSensor->setEnabled(atLeastOneCloud);
+	actionCreateCameraSensor->setEnabled(selInfo.selCount <= 1); //free now
 	actionProjectUncertainty->setEnabled(exactlyOneCameraSensor);
 	actionCheckPointsInsideFrustrum->setEnabled(exactlyOneCameraSensor);
 	actionLabelConnectedComponents->setEnabled(atLeastOneCloud);

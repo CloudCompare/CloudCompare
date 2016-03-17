@@ -68,7 +68,9 @@ ccScalarField::ccScalarField(const ccScalarField& sf)
 ScalarType ccScalarField::normalize(ScalarType d) const
 {
 	if (/*!ValidValue(d) || */!m_displayRange.isInRange(d)) //NaN values are also rejected by 'isInRange'!
+	{
 		return static_cast<ScalarType>(-1);
+	}
 
 	//most probable path first!
 	if (!m_logScale)
@@ -90,13 +92,13 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 			{
 				if (d >= m_saturationRange.stop())
 					return static_cast<ScalarType>(1);
-				return (static_cast<ScalarType>(1) + (d - m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
+				return (static_cast<ScalarType>(1) + (d - m_saturationRange.start()) / m_saturationRange.range()) / 2;
 			}
 			else
 			{
 				if (d <= -m_saturationRange.stop())
 					return 0;
-				return (static_cast<ScalarType>(1) + (d + m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
+				return (static_cast<ScalarType>(1) + (d + m_saturationRange.start()) / m_saturationRange.range()) / 2;
 			}
 		}
 	}

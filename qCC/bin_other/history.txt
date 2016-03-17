@@ -11,6 +11,7 @@ v2.6.3.1 - 03/XX/2016
 	* 3D point picking on a cloud with a temporary GL transformation (e.g. in the Align tool) was not working properly
 	* The camera sensor dialog was presenting the camera orientation vectors in the wrong order (horizontal instaed of vertical)
 	* OpenMP support disabled for Ransac Shape Detection on Windows (the process loops infinitely if enabled)
+	* When custom labels were defined for a custom color scale, the values that were not present in the active SF range were ignored
 
 v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 - New features:

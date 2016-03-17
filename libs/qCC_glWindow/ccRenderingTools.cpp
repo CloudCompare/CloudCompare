@@ -204,16 +204,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	const ccScalarField* sf = context.sfColorScaleToDisplay;
 	ccGLWindow* win = static_cast<ccGLWindow*>(context._win);
 
-	DrawColorRamp(sf,win,context.glW,context.glH,context.renderZoom);
+	DrawColorRamp(sf, win, context.glW, context.glH, context.renderZoom);
 }
 
 void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom/*=1.0f*/)
 {
-	if (!sf || !sf->getColorScale())
+	if (!sf || !sf->getColorScale() || !win)
+	{
 		return;
-
-	if (!win)
-		return;
+	}
 
 	bool logScale = sf->logScale();
 	bool symmetricalScale = sf->symmetricalScale();
@@ -231,7 +230,9 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			keyValues = colorScale->customLabels();
 
 			if (alwaysShowZero)
+			{
 				keyValues.insert(0.0);
+			}
 
 			customLabels = true;
 		}
@@ -300,9 +301,9 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	}
 
 	//Internally, the elements in a set are already sorted
-	//std::sort(keyValues.begin(),keyValues.end());
+	//std::sort(keyValues.begin(), keyValues.end());
 
-	if (!sf->areNaNValuesShownInGrey())
+	if (!customLabels && !sf->areNaNValuesShownInGrey())
 	{
 		//remove 'hidden' values
 		if (!logScale)
@@ -319,7 +320,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				{
 					++it;
 				}
-		}
+			}
 		}
 		else
 		{
@@ -327,7 +328,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			//(we can't do the opposite, otherwise we get accuracy/round-off issues!)
 			ScalarType dispMin = sf->displayRange().start();
 			ScalarType dispMax = sf->displayRange().stop();
-			ConvertToLogScale(dispMin,dispMax);
+			ConvertToLogScale(dispMin, dispMax);
 
 			for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
@@ -361,18 +362,18 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(glH-static_cast<int>(140 * renderZoom), 2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
 
 	//centered orthoprojective view (-halfW,-halfH,halfW,halfH)
-	int halfW = (glW>>1);
-	int halfH = (glH>>1);
+	int halfW = (glW >> 1);
+	int halfH = (glH >> 1);
 
 	//top-right corner of the scale ramp
-	const int xShift = static_cast<int>(20 * renderZoom) + (showHistogram ? scaleWidth/2 : 0);
-	const int yShift = halfH-scaleMaxHeight/2 - static_cast<int>(10 * renderZoom);
+	const int xShift = static_cast<int>(20 * renderZoom) + (showHistogram ? scaleWidth / 2 : 0);
+	const int yShift = halfH - scaleMaxHeight / 2 - static_cast<int>(10 * renderZoom);
 
 	glPushAttrib(GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	
-	std::vector<double> sortedKeyValues(keyValues.begin(),keyValues.end());
-	double maxRange = sortedKeyValues.back()-sortedKeyValues.front();
+	std::vector<double> sortedKeyValues(keyValues.begin(), keyValues.end());
+	double maxRange = sortedKeyValues.back() - sortedKeyValues.front();
 
 	//display color ramp
 	{
@@ -382,24 +383,41 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 
 		if (keyValues.size() > 1)
 		{
-			int histoStart = x+scaleWidth+std::min(std::max(scaleWidth/8,3),static_cast<int>(15 * renderZoom));
+			int histoStart = x + scaleWidth + std::min(std::max(scaleWidth / 8, 3), static_cast<int>(15 * renderZoom));
 
-			glLineWidth(1.0f * renderZoom);
+			glLineWidth(renderZoom);
 			glBegin(GL_LINES);
 			for (int j=0; j<scaleMaxHeight; ++j)
 			{
-				double value = sortedKeyValues.front() + (j * maxRange) / scaleMaxHeight;
+				double baseValue = sortedKeyValues.front() + (j * maxRange) / scaleMaxHeight;
+				double value = baseValue;
 				if (logScale)
+				{
 					value = exp(value*c_log10);
+				}
 				const ColorCompType* col = sf->getColor(static_cast<ScalarType>(value));
-				glColor3ubv(col ? col : ccColor::lightGrey.rgba);
+				if (!col)
+				{
+					//special case: if we have user-defined labels, we want all the labels to be displayed with their associated color
+					if (customLabels)
+					{
+						assert(sf->getColorScale() && !sf->getColorScale()->isRelative());
+						col = sf->getColorScale()->getColorByValue(value, ccColor::lightGrey.rgba);
+					}
+					else
+					{
+						col = ccColor::lightGrey.rgba;
+					}
+				}
+				assert(col);
+				glColor3ubv(col);
 
-				glVertex2i(x,y+j);
-				glVertex2i(x+scaleWidth,y+j);
+				glVertex2i(x, y+j);
+				glVertex2i(x+scaleWidth, y+j);
 				
 				if (showHistogram)
 				{
-					double bind = (value-sf->displayRange().min())*(histogram.size()-1)/sf->displayRange().maxRange();
+					double bind = (value - sf->displayRange().min())*(histogram.size() - 1) / sf->displayRange().maxRange();
 					int bin = static_cast<int>(floor(bind));
 					
 					double hVal = 0.0;

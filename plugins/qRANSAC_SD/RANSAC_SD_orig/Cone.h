@@ -102,7 +102,9 @@ private:
 			ScalarType cosPhi = std::cos(params[6]);
 			ScalarType sinPhi = std::sin(params[6]);
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				Vec3f s;
@@ -128,7 +130,9 @@ private:
 			ScalarType sinPhi = -std::sin(params[6]);
 			ScalarType cosPhi = std::cos(params[6]);
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				Vec3f s;
@@ -363,9 +367,11 @@ bool Cone::LeastSquaresFit(IteratorT begin, IteratorT end)
 	// the axis needs to be flipped.
 	float heightSum = 0;
 	intptr_t size = end - begin;
-#ifndef _WIN64 // for some reason the Microsoft x64 compiler crashes at the next line
-	#pragma omp parallel for schedule(static) reduction(+:heightSum) 
+//#ifndef _WIN64 // for some reason the Microsoft x64 compiler crashes at the next line
+#ifdef DOPARALLEL
+	#pragma omp parallel for schedule(static) reduction(+:heightSum)
 #endif
+//#endif
 	for(intptr_t i = 0; i < size; ++i)
 		heightSum += Height(begin[i]);
 	if(heightSum < 0)

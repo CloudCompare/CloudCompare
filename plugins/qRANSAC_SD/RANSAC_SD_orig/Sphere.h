@@ -85,7 +85,9 @@ private:
 		{
 			ScalarType chi = 0;
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				float s = begin[idx][0] - params[0];
@@ -106,7 +108,9 @@ private:
 			const ScalarType *values, const ScalarType *temp, ScalarType *matrix) const
 		{
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				float s[3];
@@ -152,7 +156,9 @@ private:
 			Vec3f center = -radius * Vec3f(params[0], params[1], params[2])
 				+ Vec3f(params[3], params[4], params[5]);
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				temp[idx] = (begin[idx] - center).length();
@@ -169,7 +175,9 @@ private:
 			Vec3f normal(params[0], params[1], params[2]);
 			Vec3f point(params[3], params[4], params[5]);
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				ScalarType denominator = -1.f / temp[idx] * params[6];

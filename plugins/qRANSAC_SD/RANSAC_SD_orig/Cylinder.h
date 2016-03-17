@@ -92,7 +92,9 @@ private:
 		{
 			ScalarType chi = 0;
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static) reduction(+:chi)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				Vec3f s;
@@ -116,7 +118,9 @@ private:
 			const ScalarType *values, const ScalarType *temp, ScalarType *matrix) const
 		{
 			int size = end - begin;
+#ifdef DOPARALLEL
 			#pragma omp parallel for schedule(static)
+#endif
 			for(int idx = 0; idx < size; ++idx)
 			{
 				Vec3f s;

@@ -78,7 +78,9 @@ float Candidate::WeightedScore(const PointCloud &pc, float epsilon,
 	float normalThresh) const
 {
 	float score = 0;
+#ifdef DOPARALLEL
 	#pragma omp parallel for schedule(static) reduction(+:score)
+#endif
 	for(intptr_t i = 0; i < (intptr_t)m_indices->size(); ++i)
 		score += weigh(m_shape->Distance(pc[(*m_indices)[i]].pos), epsilon);
 	return score;

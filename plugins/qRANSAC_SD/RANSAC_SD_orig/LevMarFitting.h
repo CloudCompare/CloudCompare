@@ -203,7 +203,9 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 				func.Derivatives(param, begin, begin + size, d, temp, F0);
 				// U = F0_t * F0
 				// v = F0_t * d(param) (d(param) = [d_i(param)])
+#ifdef DOPARALLEL
 				#pragma omp parallel for
+#endif
 				for(int i = 0; i < paramDim; ++i)
 				{
 					for(size_t j = i; j < paramDim; ++j) // j = i since only upper triangle is needed
@@ -217,7 +219,9 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 					}
 				}
 				ScalarType vmag = 0; // magnitude of v
+#ifdef DOPARALLEL
 				#pragma omp parallel for
+#endif
 				for(int i = 0; i < paramDim; ++i)
 				{
 					v[i] = 0;

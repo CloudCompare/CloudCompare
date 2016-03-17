@@ -115,7 +115,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 		message.prepend("[Qt FATAL] ");
 		ccLog::Warning(message);
 		break;
-#if (QT_VERSION > QT_VERSION_CHECK(5, 4, 0)) //DGM: QtInfoMsg is only defined since version 5.5
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)) //DGM: QtInfoMsg is only defined since version 5.5
 	case QtInfoMsg:
 		message.prepend("[Qt INFO] ");
 		ccLog::Warning(message);

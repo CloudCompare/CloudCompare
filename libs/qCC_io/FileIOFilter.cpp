@@ -33,7 +33,6 @@
 #include "E57Filter.h"
 #include "PTXFilter.h"
 //MESHES
-#include "X3DFilter.h"
 #include "ObjFilter.h"
 #include "PlyFilter.h"
 #include "MAFilter.h"
@@ -94,9 +93,6 @@ void FileIOFilter::InitInternalFilters()
 #endif
 #ifdef CC_SHP_SUPPORT
 	Register(Shared(new ShpFilter()));
-#endif
-#ifdef CC_X3D_SUPPORT
-	Register(Shared(new X3DFilter()));
 #endif
 #ifdef CC_PDMS_SUPPORT
 	Register(Shared(new PDMSFilter()));

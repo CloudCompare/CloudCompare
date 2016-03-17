@@ -36,7 +36,6 @@ for up-to-date information, refer to the wiki (http://www.cloudcompare.org/doc/w
                 - OPTION_USE_LIBE57: to activate support for E57 files in qCC (and ccViewer) with libE57- see below
                 - OPTION_USE_LIBLAS: to activate support for LAS files in qCC (and ccViewer) with libLAS - see below
                 - OPTION_USE_QUICKHULL: to use the Qhull library (necessary for the qHPR plugin)
-                - OPTION_USE_XIOT: to activate support for X3D files in qCC (and ccViewer) with XIOT - see below
         - if you expand the "INSTALL" group, you'll be able to select the plugin(s) you want to compile (NO PLUGIN IS REQUIRED TO USE CLOUDCOMPARE)
 		- qBlur
                 - qDummy (warning: does nothing, template for developers)
@@ -98,14 +97,7 @@ The CloudCompare CMake project will only require that you set the path where lib
 
 2-4) [Optional] Setup for XIOT support
 
-	(NOT READY YET)
-
-	If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
-        - XIOT (last tested version: 0.9.patched in trunk/contrib - on Windows)
-		* XIOT CMake makefile has been patched to let the user set its own version of Xerces and zlib!
-		
-	Then, the CloudCompare CMake project will request that you set the following variable:
-        - XIOT_INSTALL_DIR: XIOT install directory (once CMAKE has run, and project "INSTALL" configuration properly run/compiled as well)
+	(NOT SUPPORTED ANYMORE)
 
 2-5) [Optional] Setup for PCL support
 

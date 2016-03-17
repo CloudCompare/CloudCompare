@@ -63,7 +63,11 @@ if (WIN32)
 endif()
 
 # contrib. libraries support
-target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+if ( APPLE )
+	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
+else()
+	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+endif()
 
 # 3dConnexion devices support
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )

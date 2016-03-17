@@ -1,6 +1,0 @@
-<ParaViewReaders>
-  <Reader name="X3DReader"
-          extensions="x3d x3db"
-          file_description="X3D files (XML or binary encoded)">
-  </Reader>
-</ParaViewReaders>

@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
@@ -24,19 +23,15 @@ if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
 	list( APPEND source_list ${PDMS_source_list} )
 endif()
 
-qt_wrap_ui( generated_ui_list ${ui_list} )
+qt5_wrap_ui( generated_ui_list ${ui_list} )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 
-
-if ( USE_QT5 )
-	qt5_use_modules(${PROJECT_NAME} Core)	
-else()
-    target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES} )
-endif()
+# Qt
+qt5_use_modules(${PROJECT_NAME} Core)	
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )
@@ -44,13 +39,16 @@ target_link_contrib( ${PROJECT_NAME} )
 # Add custom prepocessor definitions
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_IO_USE_AS_DLL )
+elseif( APPLE )
+	set_target_properties( ${PROJECT_NAME} PROPERTIES
+		INSTALL_RPATH "." )
 endif()
 
 # install (shared) lib to specified destinations
-if( UNIX )
-	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
+if( WIN32 OR APPLE )
+	foreach( dest ${INSTALL_DESTINATIONS} )
+		install_shared( ${PROJECT_NAME} ${dest} 1 )
+	endforeach()
 else()
-foreach( dest ${INSTALL_DESTINATIONS} )
-	install_shared( ${PROJECT_NAME} ${dest} 1 )
-endforeach()
+	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
 endif()

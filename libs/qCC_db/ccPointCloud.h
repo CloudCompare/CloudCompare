@@ -24,21 +24,15 @@
 #endif
 
 //CCLib
-#include <ReferenceCloud.h>
 #include <ChunkedPointCloud.h>
-#include <GenericProgressCallback.h>
-#include <CCPlatform.h>
 
 //Local
-#include "qCC_db.h"
-#include "ccGenericPointCloud.h"
 #include "ccNormalVectors.h"
 #include "ccColorScale.h"
 
 //Qt
 #include <QGLBuffer>
 #include <QMutex>
-#include <QSharedPointer>
 
 class ccPointCloud;
 class ccScalarField;
@@ -88,10 +82,10 @@ public:
 	virtual ~ccPointCloud();
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_CLOUD; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_CLOUD; }
 
 	//inherited from ChunkedPointCloud
-	virtual void invalidateBoundingBox();
+	virtual void invalidateBoundingBox() override;
 
 	/***************************************************
 						Clone/Copy
@@ -142,10 +136,10 @@ public:
 		\param ignoreChildren [optional] whether to ignore the cloud's children or not (in which case they will be cloned as well)
 		\return a copy of this entity
 	**/
-	virtual ccPointCloud* cloneThis(ccPointCloud* destCloud = 0, bool ignoreChildren = false);
+	ccPointCloud* cloneThis(ccPointCloud* destCloud = 0, bool ignoreChildren = false);
 
 	//inherited from ccGenericPointCloud
-	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0, bool ignoreChildren = false);
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0, bool ignoreChildren = false) override;
 
 	//! Fuses another 3D entity with this one
 	/** All the main features of the given entity are added, except from the octree and
@@ -160,7 +154,7 @@ public:
 	//! Clears the entity from all its points and features
 	/** Display parameters are also reseted to their default values.
 	**/
-	virtual void clear();
+	virtual void clear() override;
 
 	//! Erases the cloud points
 	/** Prefer ccPointCloud::clear by default.
@@ -235,7 +229,7 @@ public:
 		population. Only the already allocated features will be re-reserved.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool reserve(unsigned numberOfPoints);
+	virtual bool reserve(unsigned numberOfPoints) override;
 
 	//! Resizes all the active features arrays
 	/** This method is meant to be called after having increased the cloud
@@ -243,7 +237,7 @@ public:
 		reserved size). Otherwise, it fills all new elements with blank values.
 		\return true if ok, false if there's not enough memory
 	**/
-	virtual bool resize(unsigned numberOfPoints);
+	virtual bool resize(unsigned numberOfPoints) override;
 
 	//! Removes unused capacity
 	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
@@ -259,12 +253,12 @@ public:
 	//! Sets the currently displayed scalar field
 	/** Warning: this scalar field will automatically be set as the OUTPUT one!
 	**/
-	virtual void setCurrentDisplayedScalarField(int index);
+	void setCurrentDisplayedScalarField(int index);
 
 	//inherited from ChunkedPointCloud
-	virtual void deleteScalarField(int index);
-	virtual void deleteAllScalarFields();
-	virtual int addScalarField(const char* uniqueName);
+	virtual void deleteScalarField(int index) override;
+	virtual void deleteAllScalarFields() override;
+	virtual int addScalarField(const char* uniqueName) override;
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;
@@ -395,33 +389,33 @@ public:
 	CCVector3 computeGravityCenter();
 
 	//inherited from ccHObject
-	virtual void getDrawingParameters(glDrawParams& params) const;
-	virtual unsigned getUniqueIDForDisplay() const;
+	virtual void getDrawingParameters(glDrawParams& params) const override;
+	virtual unsigned getUniqueIDForDisplay() const override;
 
 	//inherited from ccDrawableObject
-	virtual bool hasColors() const;
-	virtual bool hasNormals() const;
-	virtual bool hasScalarFields() const;
-	virtual bool hasDisplayedScalarField() const;
-	virtual void removeFromDisplay(const ccGenericGLDisplay* win); //for proper VBO release
+	virtual bool hasColors() const override;
+	virtual bool hasNormals() const override;
+	virtual bool hasScalarFields() const override;
+	virtual bool hasDisplayedScalarField() const override;
+	virtual void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
 
 	//inherited from CCLib::GenericCloud
-	virtual unsigned char testVisibility(const CCVector3& P) const;
+	virtual unsigned char testVisibility(const CCVector3& P) const override;
 
 	//inherited from ccGenericPointCloud
-	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const;
-	virtual const ColorCompType* geScalarValueColor(ScalarType d) const;
-	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
-	virtual const ColorCompType* getPointColor(unsigned pointIndex) const;
-	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const;
-	virtual const CCVector3& getPointNormal(unsigned pointIndex) const;
-	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
-	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0));
+	virtual const ColorCompType* getPointScalarValueColor(unsigned pointIndex) const override;
+	virtual const ColorCompType* geScalarValueColor(ScalarType d) const override;
+	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const override;
+	virtual const ColorCompType* getPointColor(unsigned pointIndex) const override;
+	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const override;
+	virtual const CCVector3& getPointNormal(unsigned pointIndex) const override;
+	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
+	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false);
-	virtual void applyRigidTransformation(const ccGLMatrix& trans);
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false) override;
+	virtual void applyRigidTransformation(const ccGLMatrix& trans) override;
 	//virtual bool isScalarFieldEnabled() const;
-	inline virtual void refreshBB() { invalidateBoundingBox(); }
+	inline virtual void refreshBB() override { invalidateBoundingBox(); }
 
 	//! Sets whether visibility check (during comparison) is enabled or not
 	/** See ccPointCloud::testVisibility.
@@ -610,7 +604,7 @@ public:
 						CCLib::GenericProgressCallback* progressCb = NULL);
 
 	//! Adds associated SF color ramp info to current GL context
-	virtual void addColorRampInfo(CC_DRAW_CONTEXT& context);
+	void addColorRampInfo(CC_DRAW_CONTEXT& context);
 
 	//! Adds an existing scalar field to this cloud
 	/** Warning: the cloud takes ownership of it!
@@ -646,16 +640,16 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-	virtual void applyGLTransformation(const ccGLMatrix& trans);
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual void notifyGeometryUpdate();
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual void notifyGeometryUpdate() override;
 
 	//inherited from ChunkedPointCloud
 	/** \warning Doesn't handle scan grids!
 	**/
-	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
+	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex) override;
 
 	//! Colors
 	ColorsTableType* m_rgbColors;
@@ -682,7 +676,7 @@ protected:
 protected: // VBO
 
 	//! Init/updates VBOs
-	bool updateVBOs(const glDrawParams& glParams);
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
 
 	//! Release VBOs
 	void releaseVBOs();
@@ -735,10 +729,10 @@ protected: // VBO
 	vboSet m_vboManager;
 
 	//per-block data transfer to the GPU (VBO or standard mode)
-	void glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer    (unsigned chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 
 public: //Level of Detail (LOD)
 
@@ -851,12 +845,6 @@ public: //Level of Detail (LOD)
 	inline LodStruct& getLOD() { return m_lod; }
 
 protected:
-
-	//per-block data transfer to the GPU (LOD)
-	void glLODChunkVertexPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
-	void glLODChunkColorPointer (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
-	void glLODChunkSFPointer    (const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
-	void glLODChunkNormalPointer(const LodStruct::IndexSet& indexMap, unsigned startIndex, unsigned stopIndex);
 
 	//! L.O.D. structure
 	LodStruct m_lod;

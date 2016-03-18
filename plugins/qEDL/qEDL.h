@@ -25,9 +25,7 @@ class qEDL : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLFilterPluginInterface)
-#ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL")
-#endif
 
 public:
 

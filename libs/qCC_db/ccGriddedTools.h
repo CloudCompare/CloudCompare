@@ -19,11 +19,8 @@
 #define CC_GRIDDED_CLOUD_TOOLS_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccPointCloud.h"
 
-//system
-#include <vector>
 
 class ccGBLSensor;
 class ccGLMatrix;

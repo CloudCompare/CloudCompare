@@ -19,6 +19,7 @@
 
 //CCLib
 #include <CCMiscTools.h>
+#include <GenericTriangle.h>
 
 //Qt
 #include <QGLPixelBuffer>
@@ -108,15 +109,15 @@ bool PCVContext::init(unsigned W,
 		if (!m_snapC)
 		{
 			delete m_pixBuffer;
-			m_pixBuffer=0;
+			m_pixBuffer = 0;
 			delete[] m_snapZ;
-			m_snapZ=0;
+			m_snapZ = 0;
 			return false;
 		}
 	}
 
-	m_width=W;
-	m_height=H;
+	m_width = W;
+	m_height = H;
 
 	associateToEntity(cloud, mesh);
 
@@ -274,7 +275,7 @@ int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 	m_pixBuffer->makeCurrent();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDepthRange(2.0f*ZTWIST,1.0f);
+	glDepthRange(2.0f*ZTWIST, 1.0f);
 
 	if (m_meshIsClosed)
 		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);

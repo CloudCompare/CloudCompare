@@ -19,14 +19,8 @@
 #define CC_SHIFTED_INTERFACE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 
-//CCLib
-#include <CCGeom.h>
-
-//Qt
-#include <QFile>
 
 //! Shifted entity interface
 /** Shifted entities are entities which coordinates can be
@@ -96,7 +90,7 @@ public:
 	}
 
 	//inherited from ccHObject
-	virtual bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner);
+	virtual bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
 
 protected:
 

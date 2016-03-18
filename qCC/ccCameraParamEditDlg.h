@@ -24,9 +24,6 @@
 
 #include <ui_cameraParamDlg.h>
 
-//qCC_db
-#include <ccGLMatrix.h>
-
 //system
 #include <map>
 

@@ -25,19 +25,17 @@ class qBlur : public QObject, public ccGLFilterPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLFilterPluginInterface)
-#ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBlur")
-#endif
 
 public:
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Blur (shader)"; }
-	virtual QString getDescription() const { return "Bilateral smoothing (OpenGL shader)"; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "Blur (shader)"; }
+	virtual QString getDescription() const override { return "Bilateral smoothing (OpenGL shader)"; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccGLFilterPluginInterface
-	ccGlFilter* getFilter();
+	ccGlFilter* getFilter() override;
 };
 
 #endif

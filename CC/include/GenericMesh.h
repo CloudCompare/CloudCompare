@@ -19,11 +19,12 @@
 #define GENERIC_MESH_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "GenericTriangle.h"
+#include "CCGeom.h"
 
 namespace CCLib
 {
+
+class GenericTriangle;
 
 //! A generic mesh interface for data communication between library and client applications
 class CC_CORE_LIB_API GenericMesh

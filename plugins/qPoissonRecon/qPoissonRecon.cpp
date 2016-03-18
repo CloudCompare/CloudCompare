@@ -24,7 +24,6 @@
 #include <QtGui>
 #include <QInputDialog>
 #include <QtCore>
-#include <QProgressDialog>
 #include <QtConcurrentRun>
 #include <QDialog>
 #include <QMainWindow>
@@ -38,11 +37,7 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-//CCLib
-#include <CCPlatform.h>
-
 //System
-#include <algorithm>
 #if defined(CC_WINDOWS)
 #include "Windows.h"
 #else
@@ -530,7 +525,3 @@ QIcon qPoissonRecon::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qPoissonRecon/qPoissonRecon.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qPoissonRecon,qPoissonRecon);
-#endif

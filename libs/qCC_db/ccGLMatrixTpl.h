@@ -26,16 +26,10 @@
 #include <CCGeom.h>
 
 //Qt
-#include <QString>
 #include <QStringList>
 #include <QRegExp>
-#include <QFile>
 #include <QTextStream>
 
-//System
-#include <math.h>
-#include <string.h>
-#include <assert.h>
 
 //! Model view matrix size (OpenGL)
 static const unsigned OPENGL_MATRIX_SIZE = 16;
@@ -131,7 +125,7 @@ public:
 
 	//! Creates a transformation matrix that rotates a vector to another
 	/** Adapted from  "Efficiently Building a Matrix to Rotate One Vector to Another"
-		By Tomas Möller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
+		By Tomas MÃ¶ller, John Hughes, Journal of Graphics Tools, 4(4):1-4, 1999
 		\param from normalized non-zero source vector
 		\param to normalized non-zero destination vector
 	**/
@@ -671,18 +665,18 @@ public:
 	inline Vector3Tpl<T> getTranslationAsVec3D() const { return getColumnAsVec3D(3); }
 
 	//! Sets translation (float version)
-	/** \param T 3D vector **/
+	/** \param Tr 3D vector **/
 	inline void setTranslation(const Vector3Tpl<float>& Tr) { CC_MAT_R14 = static_cast<T>(Tr.x); CC_MAT_R24 = static_cast<T>(Tr.y); CC_MAT_R34 = static_cast<T>(Tr.z); }
 	//! Sets translation (double version)
-	/** \param T 3D vector **/
+	/** \param Tr 3D vector **/
 	inline void setTranslation(const Vector3Tpl<double>& Tr) { CC_MAT_R14 = static_cast<T>(Tr.x); CC_MAT_R24 = static_cast<T>(Tr.y); CC_MAT_R34 = static_cast<T>(Tr.z); }
 
 	//! Sets translation from a float array
-	/** \param T 3D vector as a float array
+	/** \param Tr 3D vector as a float array
 	**/
 	void setTranslation(const float Tr[3]) { CC_MAT_R14 = static_cast<T>(Tr[0]); CC_MAT_R24 = static_cast<T>(Tr[1]); CC_MAT_R34 = static_cast<T>(Tr[2]); }
 	//! Sets translation from a double array
-	/** \param T 3D vector as a double array
+	/** \param Tr 3D vector as a double array
 	**/
 	void setTranslation(const double Tr[3]) { CC_MAT_R14 = static_cast<T>(Tr[0]); CC_MAT_R24 = static_cast<T>(Tr[1]); CC_MAT_R34 = static_cast<T>(Tr[2]); }
 

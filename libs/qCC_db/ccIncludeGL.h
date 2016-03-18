@@ -26,56 +26,51 @@
 //Local
 #include "ccGLMatrix.h"
 
-//GLEW (if needed, must be included first)
-#ifdef USE_GLEW
-#include <GL/glew.h>
+//Qt
+#include <QOpenGLFunctions_2_1>
+
+//temporary test for QOpenGLWidget integration
+#if (QT_VERSION < QT_VERSION_CHECK(5, 4, 0))
+#error	Error: CloudCompare does not support versions of Qt prior to 5.4 anymore!
 #endif
 
-#include <QGLContext>
-#include <QGLWidget>
-#include <QGLFormat>
-
-#ifdef CC_MAC_OS
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
-#ifndef GL_INVALID_TEXTURE_ID
-#define GL_INVALID_TEXTURE_ID 0xffffffff
-#endif
+#include <QOpenGLContext>
+#include <QOpenGLWidget>
+#include <QSurfaceFormat>
+#include <QOpenGLTexture>
 
 //! Shortcuts to OpenGL commands independent on the input type
 class ccGL
 {
 public:
+
 	//type-less glVertex3Xv call (X=f,d)
-	static inline void Vertex3v(const float* v) { glVertex3fv(v); }
-	static inline void Vertex3v(const double* v) { glVertex3dv(v); }
+	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glVertex3fv(v); }
+	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glVertex3dv(v); }
 
 	//type-less glVertex3X call (X=f,d)
-	static inline void Vertex3(float x, float y, float z) { glVertex3f(x,y,z); }
-	static inline void Vertex3(double x, double y, double z) { glVertex3d(x,y,z); }
+	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glVertex3f(x, y, z); }
+	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glVertex3d(x, y, z); }
 
 	//type-less glScaleX call (X=f,d)
-	static inline void Scale(float x, float y, float z) { glScalef(x,y,z); }
-	static inline void Scale(double x, double y, double z) { glScaled(x,y,z); }
+	static inline void Scale(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glScalef(x, y, z); }
+	static inline void Scale(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glScaled(x, y, z); }
 
 	//type-less glNormal3Xv call (X=f,d)
-	static inline void Normal3v(const float* v) { glNormal3fv(v); }
-	static inline void Normal3v(const double* v) { glNormal3dv(v); }
+	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glNormal3fv(v); }
+	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glNormal3dv(v); }
 
 	//type-less glRotateX call (X=f,d)
-	static inline void Rotate(float a, float x, float y, float z) { glRotatef(a,x,y,z); }
-	static inline void Rotate(double a, double x, double y, double z) { glRotated(a,x,y,z); }
+	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, float a, float x, float y, float z) { glFunc->glRotatef(a, x, y, z); }
+	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, double a, double x, double y, double z) { glFunc->glRotated(a, x, y, z); }
 
 	//type-less glTranslateX call (X=f,d)
-	static inline void Translate(float x, float y, float z) { glTranslatef(x,y,z); }
-	static inline void Translate(double x, double y, double z) { glTranslated(x,y,z); }
+	static inline void Translate(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glTranslatef(x, y, z); }
+	static inline void Translate(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glTranslated(x, y, z); }
 
 	//type-less glColor3Xv call (X=f,ub)
-	static inline void Color3v(const unsigned char* v) { glColor3ubv(v); }
-	static inline void Color3v(const float* v) { glColor3fv(v); }
+	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }
+	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glColor3fv(v); }
 
 public: //GLU equivalent methods
 
@@ -214,7 +209,6 @@ public: //GLU equivalent methods
 		//The result normalizes between -1 and 1
 		if (Pp.w == 0.0)
 		{
-			assert(false);
 			return false;
 		}
 		//Perspective division
@@ -433,7 +427,6 @@ public: //GLU equivalent methods
 		Tuple4Tpl<oType> out = m * in;
 		if (out.w == 0)
 		{
-			assert(false);
 			return false;
 		}
 

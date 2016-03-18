@@ -43,7 +43,7 @@ public:
 	static void DrawColorRamp(const CC_DRAW_CONTEXT& context);
 
 	//! See other version of DrawColorRamp
-	static void DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom = 1.0f);
+	static void DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom = 1.0f);
 };
 
 #endif //CC_RENDERING_TOOLS_HEADER

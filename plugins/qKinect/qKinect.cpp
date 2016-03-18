@@ -652,7 +652,3 @@ void qKinect::dialogClosed(int result)
 	s_last_rgb_data = 0;
 	s_rgb_count = 0;
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qKinect,qKinect);
-#endif

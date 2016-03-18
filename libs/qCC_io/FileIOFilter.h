@@ -18,17 +18,11 @@
 #ifndef CC_FILE_IO_FILTER_HEADER
 #define CC_FILE_IO_FILTER_HEADER
 
-//Qt
-#include <QString>
-#include <QStringList>
-#include <QSharedPointer>
-
 //qCC_db
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
 
 //Local
-#include "qCC_io.h"
 #include "ccGlobalShiftManager.h"
 
 class QWidget;

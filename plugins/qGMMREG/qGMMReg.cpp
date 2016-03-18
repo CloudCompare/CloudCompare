@@ -291,7 +291,3 @@ QIcon qGMMRegPlugin::getIcon() const
 {
 	return QIcon(":/CC/plugin/qGMMRegPlugin/icon.png");
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qGMMRegPlugin,qGMMRegPlugin);
-#endif

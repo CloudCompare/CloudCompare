@@ -39,14 +39,23 @@ static QSharedPointer<ccTorus> c_torus(0);
 
 void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
-	if (ID > 0)
-		glLoadName(ID);
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
 	
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	if ( glFunc == nullptr )
+		return;
 
-	ccGL::Translate(start.x,start.y,start.z);
-	ccGL::Scale(scale,scale,scale);
+	if (ID > 0)
+	{
+		glFunc->glLoadName(ID);
+	}
+	
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, start.x, start.y, start.z);
+	ccGL::Scale(glFunc, scale, scale, scale);
 
 	//we compute scalar prod between the two vectors
 	CCVector3 Z(0.0,0.0,1.0);
@@ -66,7 +75,7 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 			axis = Z.cross(direction);
 		}
 		
-		ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
+		ccGL::Rotate(glFunc,angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_arrowShaft)
@@ -74,26 +83,33 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 	if (!c_arrowHead)
 		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0,0.4f,0,0,0,"ArrowHead",24));
 
-	glTranslatef(0,0,0.3f);
+	glFunc->glTranslatef(0,0,0.3f);
 	c_arrowShaft->setTempColor(col);
 	c_arrowShaft->draw(context);
-	glTranslatef(0,0,0.3f+0.2f);
+	glFunc->glTranslatef(0,0,0.3f+0.2f);
 	c_arrowHead->setTempColor(col);
 	c_arrowHead->draw(context);
 
-	glPopMatrix();
+	glFunc->glPopMatrix();
 }
 
 static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
-	if (ID > 0)
-		glLoadName(ID);
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
 	
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	if ( glFunc == nullptr )
+		return;
 
-	ccGL::Translate(center.x,center.y,center.z);
-	ccGL::Scale(scale,scale,scale);
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+	
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, center.x, center.y, center.z);
+	ccGL::Scale(glFunc, scale, scale, scale);
 
 	//we compute scalar prod between the two vectors
 	CCVector3 Z(0,0,1);
@@ -113,45 +129,59 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 			axis = Z.cross(direction);
 		}
 		
-		ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
+		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_torus)
 		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f,0.4f,2.0*M_PI,false,0,0,"Torus",12));
 
-	glTranslatef(0,0,0.3f);
+	glFunc->glTranslatef(0,0,0.3f);
 	c_torus->setTempColor(col);
 	c_torus->draw(context);
 
-	glPopMatrix();
+	glFunc->glPopMatrix();
 }
 
 // Unused function
 /*static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
-	if (ID > 0)
-		glLoadName(ID);
-	
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
 
-	ccGL::Translate(center.x,center.y,center.z);
-	ccGL::Scale(radius,radius,radius);
+	if (glFunc == nullptr)
+		return;
+
+	if (ID > 0)
+		glFunc->glLoadName(ID);
+	
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+
+	ccGL::Translate(glFunc, center.x, center.y, center.z);
+	ccGL::Scale(glFunc, radius, radius, radius);
 
 	if (!c_centralSphere)
-		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1,0,"CentralSphere",24));
+		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
 	
 	c_centralSphere->setTempColor(col);
 	c_centralSphere->draw(context);
 
-	glPopMatrix();
+	glFunc->glPopMatrix();
 }
 //*/
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	if (ID > 0)
-		glLoadName(ID);
+		glFunc->glLoadName(ID);
 	
 	scale /= 2;
 	DrawUnitArrow(0, center, CCVector3(-1, 0, 0), scale, col, context);
@@ -610,11 +640,19 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (!m_box.isValid())
 		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+
 
 	if (m_showBox)
 	{
 		//m_box.draw(m_selected ? context.bbDefaultCol : ccColor::magenta);
-		m_box.draw(ccColor::yellow);
+		m_box.draw(context, ccColor::yellow);
 	}
 	
 	if (!m_selected)
@@ -626,13 +664,15 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//standard case: list names pushing (1st level)
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
-		glPushName(getUniqueIDForDisplay());
+	{
+		glFunc->glPushName(getUniqueIDForDisplay());
+	}
 
 	//draw the interactors
 	{
 		const CCVector3& minC = m_box.minCorner();
 		const CCVector3& maxC = m_box.maxCorner();
-		CCVector3 center = m_box.getCenter();
+		const CCVector3 center = m_box.getCenter();
 	
 		PointCoordinateType scale = computeArrowsScale();
 
@@ -643,25 +683,32 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (pushName) //2nd level = sub-item
 		{
-			glPushName(0); //fake ID, will be replaced by the arrows one if any
+			glFunc->glPushName(0); //fake ID, will be replaced by the arrows one if any
 		}
 
-		DrawUnitArrow(X_MINUS_ARROW*pushName,CCVector3(minC.x,center.y,center.z),CCVector3(-1.0, 0.0, 0.0),scale,ccColor::red,componentContext);
-		DrawUnitArrow(X_PLUS_ARROW*pushName,CCVector3(maxC.x,center.y,center.z),CCVector3( 1.0, 0.0, 0.0),scale,ccColor::red,componentContext);
-		DrawUnitArrow(Y_MINUS_ARROW*pushName,CCVector3(center.x,minC.y,center.z),CCVector3( 0.0,-1.0, 0.0),scale,ccColor::green,componentContext);
-		DrawUnitArrow(Y_PLUS_ARROW*pushName,CCVector3(center.x,maxC.y,center.z),CCVector3( 0.0, 1.0, 0.0),scale,ccColor::green,componentContext);
-		DrawUnitArrow(Z_MINUS_ARROW*pushName,CCVector3(center.x,center.y,minC.z),CCVector3( 0.0, 0.0,-1.0),scale,ccColor::blue,componentContext);
-		DrawUnitArrow(Z_PLUS_ARROW*pushName,CCVector3(center.x,center.y,maxC.z),CCVector3( 0.0, 0.0, 1.0),scale,ccColor::blue,componentContext);
-		DrawUnitCross(CROSS*pushName,minC-CCVector3(scale,scale,scale)/2.0,scale,ccColor::yellow,componentContext);
-		//DrawUnitSphere(SPHERE*pushName,maxC+CCVector3(scale,scale,scale)/2.0,scale/2.0,ccColor::yellow,componentContext);
-		DrawUnitTorus(X_MINUS_TORUS*pushName,CCVector3(minC.x,center.y,center.z),CCVector3(-1.0, 0.0, 0.0),scale,c_lightRed,componentContext);
-		DrawUnitTorus(Y_MINUS_TORUS*pushName,CCVector3(center.x,minC.y,center.z),CCVector3( 0.0,-1.0, 0.0),scale,c_lightGreen,componentContext);
-		DrawUnitTorus(Z_MINUS_TORUS*pushName,CCVector3(center.x,center.y,minC.z),CCVector3( 0.0, 0.0,-1.0),scale,c_lightBlue,componentContext);
-		DrawUnitTorus(X_PLUS_TORUS*pushName,CCVector3(maxC.x,center.y,center.z),CCVector3( 1.0, 0.0, 0.0),scale,c_lightRed,componentContext);
-		DrawUnitTorus(Y_PLUS_TORUS*pushName,CCVector3(center.x,maxC.y,center.z),CCVector3( 0.0, 1.0, 0.0),scale,c_lightGreen,componentContext);
-		DrawUnitTorus(Z_PLUS_TORUS*pushName,CCVector3(center.x,center.y,maxC.z),CCVector3( 0.0, 0.0, 1.0),scale,c_lightBlue,componentContext);
+		DrawUnitArrow(X_MINUS_ARROW*pushName, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, ccColor::red, componentContext);
+		DrawUnitArrow(X_PLUS_ARROW*pushName, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, ccColor::red, componentContext);
+		DrawUnitArrow(Y_MINUS_ARROW*pushName, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, ccColor::green, componentContext);
+		DrawUnitArrow(Y_PLUS_ARROW*pushName, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, ccColor::green, componentContext);
+		DrawUnitArrow(Z_MINUS_ARROW*pushName, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, ccColor::blue, componentContext);
+		DrawUnitArrow(Z_PLUS_ARROW*pushName, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, ccColor::blue, componentContext);
+		DrawUnitCross(CROSS*pushName, minC - CCVector3(scale, scale, scale) / 2.0, scale, ccColor::yellow, componentContext);
+		//DrawUnitSphere(SPHERE*pushName, maxC + CCVector3(scale, scale, scale) / 2.0, scale / 2.0, ccColor::yellow, componentContext);
+		DrawUnitTorus(X_MINUS_TORUS*pushName, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, c_lightRed, componentContext);
+		DrawUnitTorus(Y_MINUS_TORUS*pushName, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, c_lightGreen, componentContext);
+		DrawUnitTorus(Z_MINUS_TORUS*pushName, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, c_lightBlue, componentContext);
+		DrawUnitTorus(X_PLUS_TORUS*pushName, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, c_lightRed, componentContext);
+		DrawUnitTorus(Y_PLUS_TORUS*pushName, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, c_lightGreen, componentContext);
+		DrawUnitTorus(Z_PLUS_TORUS*pushName, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, c_lightBlue, componentContext);
 
 		if (pushName)
-			glPopName();
+		{
+			glFunc->glPopName();
+		}
+	}
+
+	if (pushName)
+	{
+		glFunc->glPopName();
 	}
 }

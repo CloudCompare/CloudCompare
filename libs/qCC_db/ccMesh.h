@@ -23,9 +23,7 @@
 #include <PointProjectionTools.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericMesh.h"
-#include "ccMaterial.h"
 
 //! Triangular mesh
 class QCC_DB_LIB_API ccMesh : public ccGenericMesh
@@ -48,10 +46,10 @@ public:
 	virtual ~ccMesh();
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
 
 	//! Sets the associated vertices cloud (warning)
-	virtual void setAssociatedCloud(ccGenericPointCloud* cloud);
+	void setAssociatedCloud(ccGenericPointCloud* cloud);
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree
@@ -61,7 +59,7 @@ public:
 		\param cloneTexCoords for internal use
 		\return a copy of this entity
 	**/
-	virtual ccMesh* cloneMesh(	ccGenericPointCloud* vertices = 0,
+	ccMesh* cloneMesh(	ccGenericPointCloud* vertices = 0,
 								ccMaterialSet* clonedMaterials = 0,
 								NormsIndexesTableType* clonedNormsTable = 0,
 								TextureCoordsContainer* cloneTexCoords = 0);
@@ -81,47 +79,47 @@ public:
 	bool merge(const ccMesh* mesh);
 
 	//inherited methods (ccHObject)
-	virtual unsigned getUniqueIDForDisplay() const;
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
-	virtual bool isSerializable() const { return true; }
-	virtual const ccGLMatrix& getGLTransformationHistory() const;
+	virtual unsigned getUniqueIDForDisplay() const override;
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	virtual bool isSerializable() const override { return true; }
+	virtual const ccGLMatrix& getGLTransformationHistory() const override;
 
 	//inherited methods (ccGenericMesh)
-	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }
-	virtual void refreshBB();
-	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C);
-	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture);
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture);
-	virtual unsigned capacity() const;
+	inline virtual ccGenericPointCloud* getAssociatedCloud() const override { return m_associatedCloud; }
+	virtual void refreshBB() override;
+	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) override;
+	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const override;
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture) override;
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture) override;
+	virtual unsigned capacity() const override;
 
 	//inherited methods (GenericIndexedMesh)
-	virtual void forEach(genericTriangleAction& action);
-	virtual void placeIteratorAtBegining();
-	virtual CCLib::GenericTriangle* _getNextTriangle(); //temporary
-	virtual CCLib::GenericTriangle* _getTriangle(unsigned triangleIndex); //temporary
-	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes();
-	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex);
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
-	virtual unsigned size() const;
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax);
+	virtual void forEach(genericTriangleAction& action) override;
+	virtual void placeIteratorAtBegining() override;
+	virtual CCLib::GenericTriangle* _getNextTriangle() override; //temporary
+	virtual CCLib::GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
+	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
+	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) override;
+	virtual unsigned size() const override;
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 
 	//const version of getTriangleVertIndexes
 	const virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) const;
 
 	//inherited methods (ccDrawableObject)
-	virtual bool hasColors() const;
-	virtual bool hasNormals() const;
-	virtual bool hasScalarFields() const;
-	virtual bool hasDisplayedScalarField() const;
-	virtual bool normalsShown() const;
-	virtual void toggleMaterials() { showMaterials(!materialsShown()); }
+	virtual bool hasColors() const override;
+	virtual bool hasNormals() const override;
+	virtual bool hasScalarFields() const override;
+	virtual bool hasDisplayedScalarField() const override;
+	virtual bool normalsShown() const override;
+	virtual void toggleMaterials() override { showMaterials(!materialsShown()); }
 
 	//! Shifts all triangles indexes
 	/** \param shift index shift (positive)
 	**/
-	virtual void shiftTriangleIndexes(unsigned shift);
+	void shiftTriangleIndexes(unsigned shift);
 
 	//! Adds a triangle to the mesh
 	/** \warning Bounding-box validity is broken after a call to this method.
@@ -155,16 +153,16 @@ public:
 	/*********************************************************/
 
 	//inherited from ccGenericMesh
-	virtual bool hasTriNormals() const;
-	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
-	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const;
-	virtual NormsIndexesTableType* getTriNormsTable() const { return m_triNormals; }
+	virtual bool hasTriNormals() const override;
+	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
+	virtual NormsIndexesTableType* getTriNormsTable() const override { return m_triNormals; }
 
 	//! Sets per-triangle normals array (may be shared)
-	virtual void setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable = true);
+	void setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable = true);
 
 	//! Removes per-triangle normals
-	virtual void clearTriNormals() { setTriNormsTable(0); }
+	void clearTriNormals() { setTriNormsTable(0); }
 
 	//! Returns whether per triangle normals are enabled
 	/** To enable per triangle normals, you should:
@@ -212,14 +210,14 @@ public:
 	/********************************************************/
 
 	//inherited from ccGenericMesh
-	virtual bool hasMaterials() const;
-	virtual const ccMaterialSet* getMaterialSet() const { return m_materials; }
-	virtual int getTriangleMtlIndex(unsigned triangleIndex) const;
+	virtual bool hasMaterials() const override;
+	virtual const ccMaterialSet* getMaterialSet() const override { return m_materials; }
+	virtual int getTriangleMtlIndex(unsigned triangleIndex) const override;
 
 	//! Converts materials to vertex colors
 	/** Warning: this method will overwrite colors (if any)
 	**/
-	virtual bool convertMaterialsToVertexColors();
+	bool convertMaterialsToVertexColors();
 
 	//! Returns whether this mesh as per-triangle material index
 	bool hasPerTriangleMtlIndexes() const { return m_triMtlIndexes && m_triMtlIndexes->isAllocated(); }
@@ -262,21 +260,21 @@ public:
 	void setTriangleMtlIndex(unsigned triangleIndex, int mtlIndex);
 
 	//! Sets associated material set (may be shared)
-	virtual void setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMaterialSet = true);
+	void setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMaterialSet = true);
 
 	/******************************************************************/
 	/************    PER-TRIANGLE TEXTURE COORDINATE    ***************/
 	/******************************************************************/
 
 	//inherited from ccGenericMesh
-	virtual bool hasTextures() const;
-	virtual TextureCoordsContainer* getTexCoordinatesTable() const { return m_texCoords; }
-	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const;
-	virtual bool hasPerTriangleTexCoordIndexes() const { return m_texCoordIndexes && m_texCoordIndexes->isAllocated(); }
-	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
+	virtual bool hasTextures() const override;
+	virtual TextureCoordsContainer* getTexCoordinatesTable() const override { return m_texCoords; }
+	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const override;
+	virtual bool hasPerTriangleTexCoordIndexes() const override { return m_texCoordIndexes && m_texCoordIndexes->isAllocated(); }
+	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
 
 	//! Sets per-triangle texture coordinates array (may be shared)
-	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
+	void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
 
 	//! Reserves memory to store per-triangle triplets of tex coords indexes
 	/** Before adding per-triangle tex coords indexes triplets to
@@ -314,13 +312,13 @@ public:
 	/** \param perVertex whether normals should be computed per-vertex or per-triangle
 		\return success
 	**/
-	virtual bool computeNormals(bool perVertex);
+	bool computeNormals(bool perVertex);
 
 	//! Computes per-vertex normals
-	virtual bool computePerVertexNormals();
+	bool computePerVertexNormals();
 
 	//! Computes per-triangle normals
-	virtual bool computePerTriangleNormals();
+	bool computePerTriangleNormals();
 
 	//! Laplacian smoothing
 	/** \param nbIteration smoothing iterations
@@ -361,7 +359,7 @@ public:
 
 		\param removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not
 	**/
-	virtual ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
+	ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
 
 	//! Swaps two triangles
 	/** Automatically updates internal structures (i.e. lookup tables for
@@ -375,12 +373,12 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual void applyGLTransformation(const ccGLMatrix& trans);
-	virtual void onUpdateOf(ccHObject* obj);
-	virtual void onDeletionOf(const ccHObject* obj);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
+	virtual void onUpdateOf(ccHObject* obj) override;
+	virtual void onDeletionOf(const ccHObject* obj) override;
 
 	//! Same as other 'computeInterpolationWeights' method with a set of 3 vertices indexes
 	void computeInterpolationWeights(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3d& weights) const;
@@ -415,7 +413,7 @@ protected:
 	} \
 
 	//recursive equivalents of some of ccGenericMesh methods (applied to sub-meshes as well)
-	ccMesh_extended_call1(showNormals,bool,showNormals_extended);
+	ccMesh_extended_call1(showNormals,bool,showNormals_extended)
 
 	//! associated cloud (vertices)
 	ccGenericPointCloud* m_associatedCloud;

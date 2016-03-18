@@ -18,21 +18,13 @@
 #include "mainwindow.h"
 
 //CCLib Includes
-#include <GenericChunkedArray.h>
 #include <CloudSamplingTools.h>
 #include <MeshSamplingTools.h>
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 #include <NormalDistribution.h>
-#include <GenericIndexedCloud.h>
-#include <Neighbourhood.h>
-#include <AutoSegmentationTools.h>
-#include <DistanceComputationTools.h>
-#include <PointProjectionTools.h>
-#include <GeometricalAnalysisTools.h>
 #include <SimpleCloud.h>
-#include <RegistrationTools.h> //Aurelien BEY
 #include <Delaunay2dMesh.h>
 #include <Jacobi.h>
 
@@ -41,22 +33,15 @@
 #include <SaitoSquaredDistanceTransform.h>
 
 //qCC_db
-#include <ccHObjectCaster.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccPolyline.h>
 #include <ccSubMesh.h>
-#include <ccOctree.h>
 #include <ccKdTree.h>
 #include <ccGBLSensor.h>
 #include <ccCameraSensor.h>
-#include <ccNormalVectors.h>
 #include <ccProgressDialog.h>
 #include <ccPlane.h>
 #include <ccImage.h>
 #include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
-#include <ccColorScale.h>
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
 #include <ccQuadric.h>
@@ -64,17 +49,14 @@
 #include <ccSphere.h>
 
 //qCC_io
-#include <ccGlobalShiftManager.h>
 #include <ccShiftAndScaleCloudDlg.h>
 #include <BinFilter.h>
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
 #include <ccRenderingTools.h>
-#include <ccGLWindow.h>
 
 //local includes
-#include "ccCommon.h"
 #include "ccConsole.h"
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
@@ -151,29 +133,10 @@
 #include "devices/3dConnexion/Mouse3DInput.h"
 #endif
 
-//Qt Includes
-#include <QtGui>
-#include <QMdiArea>
-#include <QSignalMapper>
-#include <QMdiSubWindow>
-#include <QLCDNumber>
-#include <QFileDialog>
-#include <QActionGroup>
-#include <QSettings>
-#include <QMessageBox>
-#include <QElapsedTimer>
-#include <QInputDialog>
-#include <QTextStream>
-#include <QColorDialog>
-
 //System
-#include <string.h>
-#include <math.h>
-#include <assert.h>
-#include <cfloat>
 #include <iostream>
-#include <unordered_set>
 #include <random>
+
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
 
@@ -210,11 +173,18 @@ MainWindow::MainWindow()
 	, m_pprDlg(0)
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
-{
-	//Dialog "auto-construction"
+	, m_FirstShow(true)
+{	
 	setupUi(this);
-	QSettings settings;
-	restoreGeometry(settings.value(ccPS::MainWinGeom()).toByteArray());
+
+#ifdef Q_OS_MAC
+	actionAbout->setMenuRole( QAction::AboutRole );
+	actionAboutPlugins->setMenuRole( QAction::NoRole );
+#endif
+	
+	//Console
+	ccConsole::Init(consoleWidget, this, this);
+	actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
 
 	setWindowTitle(QString("CloudCompare v")+ccCommon::GetCCVersion(false));
 
@@ -255,9 +225,6 @@ MainWindow::MainWindow()
 
 	//tabifyDockWidget(DockableDBTree,DockableProperties);
 
-	//Console
-	ccConsole::Init(consoleWidget,this,this);
-
 	//db-tree link
 	m_ccRoot = new ccDBRoot(dbTreeView, propertiesTreeView, this);
 	connect(m_ccRoot, SIGNAL(selectionChanged()), this, SLOT(updateUIWithSelection()));
@@ -295,17 +262,10 @@ MainWindow::MainWindow()
 
 	freezeUI(false);
 
-	//updateMenus(); //the calls to 'new3DView' and 'freezeUI' already did that
 	updateUIWithSelection();
-
-	showMaximized();
 
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
-
-#ifndef Q_OS_MAC
-	restoreState(settings.value(ccPS::MainWinState()).toByteArray());
-#endif
 }
 
 MainWindow::~MainWindow()
@@ -385,61 +345,35 @@ void MainWindow::loadPlugins()
 	menuShadersAndFilters->setEnabled(false);
 	toolBarPluginTools->setVisible(false);
 	toolBarGLFilters->setVisible(false);
-
+	
+	ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
+	
 	//"static" plugins
-	foreach (QObject *plugin, QPluginLoader::staticInstances())
+	for (QObject *plugin : QPluginLoader::staticInstances())
 		dispatchPlugin(plugin);
 
-	ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
-
-#if defined(Q_OS_MAC)
-	// plugins are in the bundle
-	QString path = QCoreApplication::applicationDirPath();
-	path.remove( "MacOS" );
-	m_pluginsPath = path + "Plugins/ccPlugins";
-#else
-	//plugins are in bin/plugins
-	m_pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
-#endif
-
-	ccConsole::Print(QString("Plugins lookup dir.: %1").arg(m_pluginsPath));
-
-	QStringList filters;
-#if defined(Q_OS_WIN)
-	filters << "*.dll";
-#elif defined(Q_OS_LINUX)
-	filters << "*.so";
-#elif defined(Q_OS_MAC)
-	filters << "*.dylib";
-#endif
-	QDir pluginsDir(m_pluginsPath);
-	pluginsDir.setNameFilters(filters);
-	foreach (QString filename, pluginsDir.entryList(filters))
+	tPluginInfoList	plugins = findPlugins();
+	
+	// now iterate over plugins and process them
+	for ( tPluginInfo &info : plugins )
 	{
-		QPluginLoader loader(pluginsDir.absoluteFilePath(filename));
-		QObject* plugin = loader.instance();
-		if (plugin)
+		const QString	fileName = info.first;
+		QObject			*pluginObject = info.second;
+		
+		ccConsole::Print(QString("Found plugin: %1").arg( fileName ));
+		
+		if (dispatchPlugin( pluginObject ))
 		{
-			ccConsole::Print(QString("Found new plugin: '%1'").arg(filename));
-			if (dispatchPlugin(plugin))
-			{
-				m_pluginFileNames += filename;
-			}
-			else
-			{
-				delete plugin;
-				plugin = 0;
-				ccConsole::Warning("\tUnsupported or invalid plugin type");
-			}
+			m_pluginInfoList += info;
 		}
 		else
 		{
-			delete plugin;
-			plugin = 0;
-			ccConsole::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
-		}
+			delete pluginObject;
+			pluginObject = nullptr;
+			ccConsole::Warning("\tUnsupported or invalid plugin type");
+		}		
 	}
-
+	
 	if (menuPlugins)
 	{
 		menuPlugins->setEnabled(!m_stdPlugins.empty());
@@ -467,6 +401,97 @@ void MainWindow::loadPlugins()
 		//actionDisplayGLFiltersTools->setChecked(false);
 	}
 }
+const tPluginInfoList MainWindow::findPlugins()
+{
+	QStringList	dirFilters;
+	QString		appPath = QCoreApplication::applicationDirPath();
+	
+#if defined(Q_OS_MAC)
+	dirFilters << "*.dylib";
+
+	// plugins are in the bundle
+	appPath.remove( "MacOS" );
+	
+	m_pluginPaths += (appPath + "Plugins/ccPlugins");
+#if CC_MAC_DEV_PATHS
+	// used for development only - this is the path where the plugins are built
+	// this avoids having to install into the application bundle when developing
+	m_pluginPaths += (appPath + "../../../ccPlugins");
+#endif
+#elif defined(Q_OS_WIN)
+	dirFilters << "*.dll";
+	
+	//plugins are in bin/plugins
+	m_pluginPaths += (appPath + "/plugins");
+#elif defined(Q_OS_LINUX)
+	dirFilters << "*.so";
+	
+	// Plugins are relative to the bin directory where the executable is found
+	QDir  binDir( appPath );
+	
+	if ( binDir.dirName() == "bin" )
+	{
+		binDir.cdUp();
+		
+		m_pluginPaths += (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+	}
+	else
+	{
+		// Choose a reasonable default to look in
+		m_pluginPaths += "/usr/lib/cloudcompare/plugins/CloudCompare";
+	}
+#else
+#warning Need to specify the plugin path for this OS.
+#endif
+
+#ifdef Q_OS_MAC
+	// Add any app data paths
+	// Plugins in these directories take precendence over the included ones
+	QStringList	appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
+
+	for ( const QString &appDataPath : appDataPaths )
+	{
+		m_pluginPaths += (appDataPath + "/plugins");
+	}
+#endif
+	
+	ccConsole::Print(QString("Plugin lookup dirs: %1").arg(m_pluginPaths.join( ", " )));
+	
+	// maps plugin name (from inside the plugin) to its path & pointer
+	//	This allows us to create a unique list (overridden by path)
+	QMap<QString, tPluginInfo>	pluginMap;
+	
+	for ( const QString &path : m_pluginPaths )
+	{
+		QDir pluginsDir( path );
+		pluginsDir.setNameFilters(dirFilters);
+		
+		for (const QString &filename : pluginsDir.entryList())
+		{
+			const QString	pluginPath = pluginsDir.absoluteFilePath( filename );
+			QPluginLoader	loader( pluginPath );
+			
+			QObject	*plugin = loader.instance();
+			
+			if ( plugin == nullptr )
+			{
+				ccConsole::Warning(QString("[Plugin] %1").arg(loader.errorString()));
+				continue;
+			}
+			
+			ccPluginInterface	*ccPlugin = getValidPlugin( plugin );
+			
+			if ( ccPlugin == nullptr )
+				continue;
+		
+			QString name = ccPlugin->getName();
+			
+			pluginMap.insert( name, tPluginInfo( pluginPath, plugin ) );
+		}
+	}
+	
+	return pluginMap.values().toVector();
+}
 
 bool MainWindow::dispatchPlugin(QObject *plugin)
 {
@@ -481,7 +506,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 		ccLog::Warning("\tplugin has an invalid (empty) name!");
 		return false;
 	}
-	ccConsole::Print(QString("\tplugin name: [%1]").arg(pluginName));
+	ccConsole::Print(QString("\tname: \"%1\"").arg(pluginName));
 
 	CC_PLUGIN_TYPE type = ccPlugin->getType();
 
@@ -595,8 +620,13 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 
 void MainWindow::doActionShowAboutPluginsDialog()
 {
-	ccPluginDlg ccpDlg(m_pluginsPath, m_pluginFileNames, this);
+	ccPluginDlg ccpDlg(m_pluginPaths, m_pluginInfoList, this);
 	ccpDlg.exec();
+}
+
+void MainWindow::doEnableQtWarnings(bool state)
+{
+	ccConsole::EnableQtMessages(state);
 }
 
 void MainWindow::doEnableGLFilter()
@@ -1019,6 +1049,7 @@ void MainWindow::connectActions()
 	connect(actionHelp,							SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
 	connect(actionAbout,						SIGNAL(triggered()),	this,		SLOT(doActionShawAboutDialog()));
 	connect(actionAboutPlugins,					SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
+	connect(actionEnableQtWarnings,				SIGNAL(toggled(bool)),	this,		SLOT(doEnableQtWarnings(bool)));
 
 	/*** Toolbars ***/
 
@@ -5819,7 +5850,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		return;
 	}
 #define USE_CGAL_LIB
-#if defined(USE_TRIANGLE_LIB) || defined(USE_CGAL_LIB)
+#if defined(USE_CGAL_LIB)
 	std::vector<CCVector2> points2D;
 	std::vector<int> segments2D;
 	try
@@ -7588,18 +7619,7 @@ ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
 
-	//already existing window?
-	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	ccGLWindow* otherWin = 0;
-	if (!subWindowList.isEmpty())
-		otherWin = static_cast<ccGLWindow*>(subWindowList[0]->widget());
-
-	QGLFormat format = QGLFormat::defaultFormat();
-	format.setStencil(false);
-	format.setDoubleBuffer(true);
-	format.setStereo(true);
-	//format.setSwapInterval(1);
-	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
+	ccGLWindow *view3D = new ccGLWindow(this);
 
 	view3D->setMinimumSize(400,300);
 	view3D->resize(500,400);
@@ -7649,6 +7669,9 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 static bool s_autoSaveGuiElementPos = true;
 void MainWindow::doActionResetGUIElementsPos()
 {
+	// show the user it will be maximized
+	showMaximized();
+	
 	QSettings settings;
 	settings.remove(ccPS::MainWinGeom());
 	settings.remove(ccPS::MainWinState());
@@ -7657,6 +7680,30 @@ void MainWindow::doActionResetGUIElementsPos()
 
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{	
+	QMainWindow::showEvent( event );
+
+	if ( m_FirstShow )
+	{
+		QSettings	settings;
+		QVariant		geometry = settings.value(ccPS::MainWinGeom());
+		
+		if ( geometry.isValid() )
+		{
+			restoreGeometry(geometry.toByteArray());
+			restoreState(settings.value(ccPS::MainWinState()).toByteArray());
+		}
+		
+		m_FirstShow = false;
+		
+		if ( !geometry.isValid() )
+		{
+			showMaximized();
+		}
+	}
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -7919,7 +7966,7 @@ void MainWindow::activateRegisterPointPairTool()
 		return;
 	}
 
-	if (!m_pprDlg->init(win,aligned,reference))
+	if (!m_pprDlg->init(win, aligned, reference))
 		deactivateRegisterPointPairTool(false);
 
 	freezeUI(true);
@@ -8693,12 +8740,12 @@ void MainWindow::doActionRenderToFile()
 	if (!win)
 		return;
 
-	ccRenderToFileDlg rtfDlg(win->width(),win->height(),this);
+	ccRenderToFileDlg rtfDlg(win->width(), win->height(), this);
 
 	if (rtfDlg.exec())
 	{
 		QApplication::processEvents();
-		win->renderToFile(qPrintable(rtfDlg.getFilename()),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
+		win->renderToFile(rtfDlg.getFilename(), rtfDlg.getZoom(), rtfDlg.dontScalePoints(), rtfDlg.renderOverlayItems());
 	}
 }
 
@@ -10203,18 +10250,18 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	//init matrices
 	std::vector<double> rmsMatrix;
 	std::vector<ccGLMatrix> matrices;
-	std::vector< std::pair<double,double> > matrixAngles;
+	std::vector< std::pair<double, double> > matrixAngles;
 	try
 	{
 		rmsMatrix.resize(cloudCount*cloudCount,0);
 
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
-		unsigned phiSteps = static_cast<unsigned>(360.0/angularStep_deg);
+		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
 		assert(fabs(360.0 - phiSteps * angularStep_deg) < ZERO_TOLERANCE);
-		unsigned thetaSteps = static_cast<unsigned>(180.0/angularStep_deg);
+		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
 		assert(fabs(180.0 - thetaSteps * angularStep_deg) < ZERO_TOLERANCE);
-		unsigned rotCount = phiSteps * (thetaSteps-1) + 2;
+		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);
 

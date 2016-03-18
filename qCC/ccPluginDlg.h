@@ -21,6 +21,8 @@
 #include <QDialog>
 #include <QIcon>
 
+#include "ccPluginInfo.h"
+
 class QLabel;
 class QPushButton;
 class QStringList;
@@ -33,13 +35,13 @@ class ccPluginDlg : public QDialog
 	Q_OBJECT
 
 public:
-	ccPluginDlg(const QString &path,
-				const QStringList &fileNames,
+	ccPluginDlg(const QStringList &paths,
+				const tPluginInfoList &pluginInfoList,
 				QWidget *parent = 0);
 
 protected:
-	void findPlugins(const QString &path, const QStringList &fileNames);
-	void populateTreeWidget(QObject *plugin, const QString &text);
+	void addPluginInfo(const QStringList &paths, const tPluginInfoList &pluginInfoList);
+	void populateTreeWidget(QObject *plugin, const QString &name, const QString &path = QString());
 	void addItems(	QTreeWidgetItem *pluginItem,
 					const char *interfaceName,
 					const QStringList &features);

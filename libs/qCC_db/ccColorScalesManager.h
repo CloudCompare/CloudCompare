@@ -19,7 +19,6 @@
 #define CC_COLOR_SCALES_MANAGER_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccColorScale.h"
 
 //Qt

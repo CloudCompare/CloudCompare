@@ -29,9 +29,7 @@ class qPoissonRecon : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-#ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPoissonRecon")
-#endif
 
 public:
 
@@ -39,13 +37,13 @@ public:
 	explicit qPoissonRecon(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Poisson Surface Reconstruction"; }
-	virtual QString getDescription() const { return "Poisson Surface Reconstruction (Kazhdan et al.)"; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "Poisson Surface Reconstruction"; }
+	virtual QString getDescription() const override { return "Poisson Surface Reconstruction (Kazhdan et al.)"; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

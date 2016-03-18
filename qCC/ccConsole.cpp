@@ -19,6 +19,7 @@
 
 //Local
 #include "mainwindow.h"
+#include "ccPersistentSettings.h"
 
 //qCC_db
 #include <ccSingleton.h>
@@ -31,6 +32,7 @@
 #include <QTime>
 #include <QThread>
 #include <QTextStream>
+#include <QSettings>
 
 //system
 #include <assert.h>
@@ -41,6 +43,8 @@
 
 //unique console instance
 static ccSingleton<ccConsole> s_console;
+
+bool ccConsole::s_showQtMessagesInConsole = false;
 
 ccConsole* ccConsole::TheInstance()
 {
@@ -77,6 +81,60 @@ ccConsole::~ccConsole()
 	setLogFile(QString()); //to close/delete any active stream
 }
 
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+	if (!ccConsole::QtMessagesEnabled())
+	{
+		return;
+	}
+
+#ifndef _DEBUG
+	if (type == QtDebugMsg)
+	{
+		return;
+	}
+#endif
+
+	QString message = QString("[%1] ").arg(context.function) + msg; // QString("%1 (%1:%1, %1)").arg(msg).arg(context.file).arg(context.line).arg(context.function);
+
+	//in this function, you can write the message to any stream!
+	switch (type)
+	{
+	case QtDebugMsg:
+		ccLog::PrintDebug(msg);
+		break;
+	case QtWarningMsg:
+		message.prepend("[Qt WARNING] ");
+		ccLog::Warning(message);
+		break;
+	case QtCriticalMsg:
+		message.prepend("[Qt CRITICAL] ");
+		ccLog::Warning(message);
+		break;
+	case QtFatalMsg:
+		message.prepend("[Qt FATAL] ");
+		ccLog::Warning(message);
+		break;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)) //DGM: QtInfoMsg is only defined since version 5.5
+	case QtInfoMsg:
+		message.prepend("[Qt INFO] ");
+		ccLog::Warning(message);
+		break;
+#endif
+	}
+}
+
+void ccConsole::EnableQtMessages(bool state)
+{
+	s_showQtMessagesInConsole = state;
+
+	//save to persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::Console());
+	settings.setValue("QtMessagesEnabled", s_showQtMessagesInConsole);
+	settings.endGroup();
+}
+
 void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 						QWidget* parentWidget/*=0*/,
 						MainWindow* parentWindow/*=0*/)
@@ -91,6 +149,15 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 	//auto-start
 	if (textDisplay)
 	{
+		//load from persistent settings
+		QSettings settings;
+		settings.beginGroup(ccPS::Console());
+		s_showQtMessagesInConsole = settings.value("QtMessagesEnabled", false).toBool();
+		settings.endGroup();
+
+		//install : set the callback for Qt messages
+		qInstallMessageHandler(myMessageOutput);
+
 		console->setAutoRefresh(true);
 	}
 }

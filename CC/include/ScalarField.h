@@ -19,9 +19,7 @@
 #define CC_SCALAR_FIELD_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCConst.h"
-#include "CCTypes.h"
 #include "GenericChunkedArray.h"
 
 namespace CCLib

@@ -19,14 +19,15 @@
 #define SIMPLE_CLOUD_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
+#include "GenericIndexedCloudPersist.h"
 #include "PointProjectionTools.h"
-#include "ScalarField.h"
 
 namespace CCLib
 {
+
+class PointsContainer;
+class ScalarField;
 
 //! A very simple point cloud (with point duplication mechanism)
 /** Implements the GenericIndexedCloud interface. A simple point cloud

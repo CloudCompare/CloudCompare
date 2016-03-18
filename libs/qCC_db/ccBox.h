@@ -18,11 +18,7 @@
 #ifndef CC_BOX_PRIMITIVE_HEADER
 #define CC_BOX_PRIMITIVE_HEADER
 
-//CCLib
-#include <CCGeom.h>
-
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //! Box (primitive)
@@ -49,11 +45,11 @@ public:
 	ccBox(QString name = QString("Box"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::BOX; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::BOX; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Box"; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Box"; }
+	virtual ccGenericPrimitive* clone() const override;
 
 	//! Sets box dimensions
 	inline void setDimensions(CCVector3& dims) { m_dims = dims; updateRepresentation(); }
@@ -64,9 +60,9 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Box dimensions
 	CCVector3 m_dims;

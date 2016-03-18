@@ -19,13 +19,8 @@
 #define REGISTRATION_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "CCToolbox.h"
 #include "PointProjectionTools.h"
-#include "KdTree.h"
 
-//system
-#include <vector>
 
 namespace CCLib
 {
@@ -34,6 +29,7 @@ class GenericProgressCallback;
 class GenericCloud;
 class GenericIndexedMesh;
 class GenericIndexedCloud;
+class KDTree;
 class ScalarField;
 
 //! Common point cloud registration algorithms

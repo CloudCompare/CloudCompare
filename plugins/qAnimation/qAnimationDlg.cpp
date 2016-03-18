@@ -75,7 +75,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 #else
 			defaultDir = QDir::homePath();
 #endif
-			QString lastFilename = settings.value("filename", defaultDir + "/animation.mp4" ).toString();
+			const QString defaultFileName( defaultDir + "/animation.mp4" );
+			QString lastFilename = settings.value("filename", defaultFileName ).toString();
 #ifndef QFFMPEG_SUPPORT
 			lastFilename = QFileInfo(lastFilename).absolutePath();
 #endif
@@ -100,7 +101,7 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 		settings.endGroup();
 	}
 
-	connect ( fpsSpinBox,				SIGNAL( valueChanged(double) ),		this, SLOT( onFPSChanged(double) ) );
+	connect ( fpsSpinBox,				SIGNAL( valueChanged(int) ),		this, SLOT( onFPSChanged(int) ) );
 	connect ( totalTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onTotalTimeChanged(double) ) );
 	connect ( stepTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onStepTimeChanged(double) ) );
 	connect ( loopCheckBox,				SIGNAL( toggled(bool) ),			this, SLOT( onLoopToggled(bool) ) );
@@ -226,7 +227,7 @@ void qAnimationDlg::applyViewport( const cc2DViewportObject* viewport )
 	//QApplication::processEvents();
 }
 
-void qAnimationDlg::onFPSChanged(double fps)
+void qAnimationDlg::onFPSChanged(int fps)
 {
 	//nothing to do
 }
@@ -511,7 +512,7 @@ void qAnimationDlg::render()
 		}
 	}
 
-	int bitrate = bitrateSpinBox->value() * 1000;
+	int bitrate = bitrateSpinBox->value() * 1024;
 	int gop = fps;
 	QVideoEncoder encoder(outputFilename, m_view3d->width(), m_view3d->height(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value()));
 	QString errorString;
@@ -563,7 +564,7 @@ void qAnimationDlg::render()
 				break;
 			}
 #else
-			QString filename = QString("frame_%1.png").arg(frameIndex,6,10,QChar('0'));
+			QString filename = QString("frame_%1.png").arg(frameIndex, 6, 10, QChar('0'));
 			QString fullPath = QDir(outputFilename).filePath(filename);
 			if (!image.save(fullPath))
 			{

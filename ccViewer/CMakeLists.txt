@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
+project( ccViewer VERSION 1.35.0 )
+
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
@@ -14,12 +15,6 @@ include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
-project( ccViewer )
-
-set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 35 )
-set( VERSION_PATCH 0 )
 
 set( QCC_HEADERS ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h ../qCC/ccStereoModeDlg.h )
 set( QCC_SOURCES ../qCC/ccOverlayDialog.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccMouse3DContextMenu.cpp ../qCC/ccStereoModeDlg.cpp )
@@ -39,15 +34,13 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
 
-qt_wrap_ui( generated_ui_list ${ui_list} )
-qt_add_resources( generated_qrc_list ${qrc_list} )
+qt5_wrap_ui( generated_ui_list ${ui_list} )
+qt5_add_resources( generated_qrc_list ${qrc_list} )
 
-# App icon with MSVC
 if( MSVC )
+	# App icon with MSVC
 	set( rc_list images/icon/cc_viewer_icon.rc )
-endif()
 
-if( MSVC )
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 elseif( APPLE )
@@ -56,28 +49,32 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 endif()
 
-target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
-if ( USE_QT5 )
-	if (WIN32)
-		target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
-	endif()
-	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
+# Qt
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
+if (WIN32)
+	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
 endif()
 
 # contrib. libraries support
-target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
+if ( APPLE )
+	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
+else()
+	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
+endif()
 
 # 3dConnexion devices support
-target_link_3DXWARE( ${PROJECT_NAME} )
+if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
+	target_link_3DXWARE( ${PROJECT_NAME} )
+endif()
 
 # Add custom preprocessor definitions
-set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_VIEWER USE_GLEW GLEW_STATIC )
+set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_VIEWER )
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
 	if (MSVC)
@@ -114,15 +111,14 @@ endforeach()
 
 # Put together our App bundle on Mac OS X
 if( APPLE )
-   set( CCVIEWER_MAC_APP_NAME ${PROJECT_NAME}.app )
-   set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/${CCVIEWER_MAC_APP_NAME} CACHE INTERNAL "ccViewer bundle dir.")
+   set_target_properties( ${PROJECT_NAME} PROPERTIES
+       INSTALL_RPATH "@loader_path/../Frameworks"
+       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
 
-   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
-
-   set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+   set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns )
+   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
+   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
+   set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
 
    add_subdirectory( Mac )
 endif( APPLE )

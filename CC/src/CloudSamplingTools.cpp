@@ -27,6 +27,7 @@
 #include "GenericProgressCallback.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "DistanceComputationTools.h"
+#include "ScalarField.h"
 #include "ScalarFieldTools.h"
 
 //system

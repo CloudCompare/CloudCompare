@@ -40,6 +40,7 @@ public:
 	static inline const QString DuplicatePointsMinDist      () { return "minDist"; }
 	static inline const QString HeightGridGeneration        () { return "HeightGridGeneration"; }
 	static inline const QString VolumeCalculation			() { return "VolumeCalculation"; }
+	static inline const QString Console                     () { return "Console"; }
 };
 
 #endif //CC_PERSISTENT_SETTINGS_HEADER

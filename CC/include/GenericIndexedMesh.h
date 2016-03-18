@@ -19,7 +19,6 @@
 #define GENERIC_INDEXED_MESH_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericMesh.h"
 
 namespace CCLib

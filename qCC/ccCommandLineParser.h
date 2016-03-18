@@ -5,16 +5,11 @@
 #include <FileIOFilter.h>
 
 //qCC_db
-#include <ccHObject.h>
 #include <ccGenericMesh.h>
 #include <ccPointCloud.h>
 
 //Qt
 #include <QString>
-#include <QStringList>
-
-//system
-#include <vector>
 
 class ccProgressDialog;
 class QDialog;

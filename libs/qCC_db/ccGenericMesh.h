@@ -24,9 +24,7 @@
 #include <GenericProgressCallback.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericGLDisplay.h"
-#include "ccHObject.h"
 #include "ccAdvancedTypes.h"
 
 class ccGenericPointCloud;
@@ -45,13 +43,13 @@ public:
 	ccGenericMesh(QString name = QString());
 
 	//! Destructor
-	virtual ~ccGenericMesh() {};
+	virtual ~ccGenericMesh() {}
 
 	//inherited methods (ccDrawableObject)
-	virtual void showNormals(bool state);
+	virtual void showNormals(bool state) override;
 
 	//inherited methods (ccHObject)
-	virtual bool isSerializable() const { return true; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Returns the vertices cloud
 	virtual ccGenericPointCloud* getAssociatedCloud() const = 0;
@@ -194,8 +192,8 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//Static arrays for OpenGL drawing
 	static PointCoordinateType* GetVertexBuffer();
@@ -208,10 +206,10 @@ protected:
 	static unsigned* GetWireVertexIndexes();
 
 	//! Enables (OpenGL) stipple mask
-	static void EnableGLStippleMask(bool state);
+	static void EnableGLStippleMask(const QOpenGLContext* context, bool state);
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Handles the color ramp display
 	void handleColorRamp(CC_DRAW_CONTEXT& context);

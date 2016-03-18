@@ -42,6 +42,9 @@
 #include <ccGlFilter.h>
 #include <ccBilateralFilter.h>
 
+//Qt
+#include <QOpenGLFunctions_2_1>
+
 class ccShader;
 class ccFrameBufferObject;
 
@@ -56,24 +59,21 @@ public:
 	virtual ~ccEDLFilter();
 
 	//inherited from ccGlFilter
-	virtual ccGlFilter* clone() const;
-	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	virtual GLuint getTexture();
+	virtual ccGlFilter* clone() const override;
+	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual GLuint getTexture() override;
 
 	//! Resets filter
 	void reset();
 
 	//! Inits filter
-	bool init(	int width,
-				int height,
+	bool init(	unsigned width,
+				unsigned height,
 				GLenum internalFormat,
 				GLenum minMagFilter,
 				QString shadersPath,
 				QString& error);
-
-	//! Returns given texture index
-	GLuint getTexture(int index);
 
 	//! Sets light direction
 	void setLightDir(float theta_rad, float phi_rad);
@@ -81,26 +81,27 @@ public:
 	//! Sets strength
 	/** \param value strength value (default: 100)
 	**/
-	void setStrength(float value) { exp_scale = value; }
+	inline void setStrength(float value) { m_expScale = value; }
 
 private:
 
-	int	m_screenWidth;
-	int	m_screenHeight;
+	unsigned m_screenWidth;
+	unsigned m_screenHeight;
 
-	ccFrameBufferObject*	fbo_edl0;
-	ccFrameBufferObject*	fbo_edl1;
-	ccFrameBufferObject*	fbo_edl2;
-	ccShader*				shader_edl;
+	//! Number of FBOs
+	static const unsigned FBO_COUNT = 3;
 
-	ccFrameBufferObject*	fbo_mix;
-	ccShader*				shader_mix;
+	ccFrameBufferObject*	m_fbos[FBO_COUNT];
+	ccShader*				m_EDLShader;
 
-	float	neighbours[8*2];
-	float	exp_scale;
+	ccFrameBufferObject*	m_fboMix;
+	ccShader*				m_mixShader;
 
-	//! Bilateral filter and its parameters
-	struct BilateralFilter
+	float	m_neighbours[8*2];
+	float	m_expScale;
+
+	//! Bilateral filter descriptor
+	struct BilateralFilterDesc
 	{
 		ccBilateralFilter* filter;
 		unsigned halfSize;
@@ -108,36 +109,32 @@ private:
 		float sigmaZ;
 		bool enabled;
 
-		BilateralFilter()
+		BilateralFilterDesc()
 			: filter(0)
 			, halfSize(0)
-			, sigma(0.0f)
-			, sigmaZ(0.0f)
+			, sigma(0)
+			, sigmaZ(0)
 			, enabled(false)
 		{
 		}
 
-		~BilateralFilter()
+		~BilateralFilterDesc()
 		{
 			if (filter)
 				delete filter;
 		}
 	};
 
-	//	Bilateral filtering
-	BilateralFilter m_bilateralFilter0;
-	BilateralFilter m_bilateralFilter1;
-	BilateralFilter m_bilateralFilter2;
+	//	Bilateral filters (one per FBO at most)
+	BilateralFilterDesc m_bilateralFilters[FBO_COUNT];
 
 	// Light direction
-	float	light_dir[3];
+	float m_lightDir[3];
+
+	//! Associated OpenGL functions set
+	QOpenGLFunctions_2_1 m_glFunc;
+	//! Associated OpenGL functions set validity
+	bool m_glFuncIsValid;
 };
-//
-//	EyeDome Lighting
-//
-/////////////////////////////////////////////
-
-
-
 
 #endif

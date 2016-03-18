@@ -27,7 +27,3 @@ FileIOFilter::Shared qCSVMatrixIO::getFilter(ccMainAppInterface* app)
 {
 	return FileIOFilter::Shared(new CSVMatrixFilter);
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qCSVMatrixIO,qCSVMatrixIO);
-#endif

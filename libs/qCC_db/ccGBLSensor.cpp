@@ -23,15 +23,11 @@
 //Local
 #include "ccPointCloud.h"
 #include "ccSphere.h"
-#include "ccGenericGLDisplay.h"
 #include "ccProgressDialog.h"
 
 //Qt
 #include <QCoreApplication>
 
-//system
-#include <string.h>
-#include <assert.h>
 
 //maximum depth buffer dimension (width or height)
 static const int s_MaxDepthBufferSize = (1 << 14); //16384
@@ -764,114 +760,122 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 
 void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	//we draw here a little 3d representation of the sensor
-	if (MACRO_Draw3D(context))
+	if (!MACRO_Draw3D(context))
+		return;
+	
+	//we draw a little 3d representation of the sensor
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+	
+	bool pushName = MACRO_DrawEntityNames(context);
+
+	if (pushName)
 	{
-		bool pushName = MACRO_DrawEntityNames(context);
-
-		if (pushName)
-		{
-			//not particulary fast
-			if (MACRO_DrawFastNamesOnly(context))
-				return;
-			glPushName(getUniqueIDForDisplay());
-		}
-
-		//DGM FIXME: this display routine is crap!
-
-		//apply rigid transformation
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		{
-			ccIndexedTransformation sensorPos;
-			if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-			{
-				//no visible position for this index!
-				glPopMatrix();
-				if (pushName)
-					glPopName();
-				return;
-			}
-
-			glMultMatrixf(sensorPos.data());
-		}
-
-		//test: center as sphere
-		/*{
-			ccSphere sphere(m_scale/10,0,"Center",12);
-			sphere.showColors(true);
-			sphere.setVisible(true);
-			sphere.setEnabled(true);
-
-			CC_DRAW_CONTEXT sphereContext = context;
-			sphereContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-			sphereContext._win = 0;
-
-			sphere.setTempColor(ccColor::magenta);
-			sphere.draw(sphereContext);
-		}
-		//*/
-
-		const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
-
-		//sensor axes
-		{
-			//increased width
-			glPushAttrib(GL_LINE_BIT);
-			GLfloat width;
-			glGetFloatv(GL_LINE_WIDTH,&width);
-			glLineWidth(width+1);
-
-			PointCoordinateType axisLength = halfHeadSize * m_scale;
-			ccGL::Color3v(ccColor::red.rgba);
-			CCVector3 C(0,0,0);
-			glBegin(GL_LINES);
-			ccGL::Vertex3v(C.u);
-			ccGL::Vertex3(C.x+axisLength,C.y,C.z);
-			glEnd();
-			ccGL::Color3v(ccColor::green.rgba);
-			glBegin(GL_LINES);
-			ccGL::Vertex3v(C.u);
-			ccGL::Vertex3(C.x,C.y+axisLength,C.z);
-			glEnd();
-			ccGL::Color3v(ccColor::blue.rgba);
-			glBegin(GL_LINES);
-			ccGL::Vertex3v(C.u);
-			ccGL::Vertex3(C.x,C.y,C.z+axisLength);
-			glEnd();
-
-			glPopAttrib();
-		}
-
-		//sensor head
-		{
-			CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
-			CCVector3 maxCorner( halfHeadSize, halfHeadSize, halfHeadSize);
-			minCorner *= m_scale;
-			maxCorner *= m_scale;
-			ccBBox bbHead(minCorner,maxCorner);
-			bbHead.draw(m_color);
-		}
-
-		//sensor legs
-		{
-			CCVector3 headConnect = /*headCenter*/ - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
-			ccGL::Color3v(m_color.rgb);
-			glBegin(GL_LINES);
-			ccGL::Vertex3v(headConnect.u);
-			ccGL::Vertex3(-m_scale,-m_scale,-m_scale);
-			ccGL::Vertex3v(headConnect.u);
-			ccGL::Vertex3(-m_scale,m_scale,-m_scale);
-			ccGL::Vertex3v(headConnect.u);
-			ccGL::Vertex3(m_scale,0,-m_scale);
-			glEnd();
-		}
-
-		if (pushName)
-			glPopName();
-
-		glPopMatrix();
+		//not particulary fast
+		if (MACRO_DrawFastNamesOnly(context))
+			return;
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
+
+	//DGM FIXME: this display routine is crap!
+
+	//apply rigid transformation
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+	{
+		ccIndexedTransformation sensorPos;
+		if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		{
+			//no visible position for this index!
+			glFunc->glPopMatrix();
+			if (pushName)
+				glFunc->glPopName();
+			return;
+		}
+
+		glFunc->glMultMatrixf(sensorPos.data());
+	}
+
+	//test: center as sphere
+	/*{
+		ccSphere sphere(m_scale/10,0,"Center",12);
+		sphere.showColors(true);
+		sphere.setVisible(true);
+		sphere.setEnabled(true);
+
+		CC_DRAW_CONTEXT sphereContext = context;
+		sphereContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+		sphereContext._win = 0;
+
+		sphere.setTempColor(ccColor::magenta);
+		sphere.draw(sphereContext);
+	}
+	//*/
+
+	const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
+
+	//sensor axes
+	{
+		//increased width
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		GLfloat width;
+		glFunc->glGetFloatv(GL_LINE_WIDTH,&width);
+		glFunc->glLineWidth(width+1);
+
+		PointCoordinateType axisLength = halfHeadSize * m_scale;
+		ccGL::Color3v(glFunc, ccColor::red.rgba);
+		CCVector3 C(0, 0, 0);
+		glFunc->glBegin(GL_LINES);
+		ccGL::Vertex3v(glFunc, C.u);
+		ccGL::Vertex3(glFunc, C.x + axisLength, C.y, C.z);
+		glFunc->glEnd();
+		ccGL::Color3v(glFunc, ccColor::green.rgba);
+		glFunc->glBegin(GL_LINES);
+		ccGL::Vertex3v(glFunc, C.u);
+		ccGL::Vertex3(glFunc, C.x, C.y + axisLength, C.z);
+		glFunc->glEnd();
+		ccGL::Color3v(glFunc, ccColor::blue.rgba);
+		glFunc->glBegin(GL_LINES);
+		ccGL::Vertex3v(glFunc, C.u);
+		ccGL::Vertex3(glFunc, C.x, C.y, C.z + axisLength);
+		glFunc->glEnd();
+
+		glFunc->glPopAttrib();
+	}
+
+	//sensor head
+	{
+		CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
+		CCVector3 maxCorner( halfHeadSize, halfHeadSize, halfHeadSize);
+		minCorner *= m_scale;
+		maxCorner *= m_scale;
+		ccBBox bbHead(minCorner,maxCorner);
+		bbHead.draw(context, m_color);
+	}
+
+	//sensor legs
+	{
+		CCVector3 headConnect = /*headCenter*/ -CCVector3(0, 0, static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+		ccGL::Color3v(glFunc, m_color.rgb);
+		glFunc->glBegin(GL_LINES);
+		ccGL::Vertex3v(glFunc, headConnect.u);
+		ccGL::Vertex3(glFunc, -m_scale, -m_scale, -m_scale);
+		ccGL::Vertex3v(glFunc, headConnect.u);
+		ccGL::Vertex3(glFunc, -m_scale, m_scale, -m_scale);
+		ccGL::Vertex3v(glFunc, headConnect.u);
+		ccGL::Vertex3(glFunc, m_scale, 0, -m_scale);
+		glFunc->glEnd();
+	}
+
+	if (pushName)
+		glFunc->glPopName();
+
+	glFunc->glPopMatrix();
 }
 
 ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures/*=false*/)

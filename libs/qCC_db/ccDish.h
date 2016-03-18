@@ -19,11 +19,8 @@
 #define CC_DISH_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Dish
 /** Either a section of a sphere, or half of an ellipsoid!
@@ -59,19 +56,19 @@ public:
 	ccDish(QString name = QString("Dish"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::DISH; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::DISH; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Dish"; }
-	virtual bool hasDrawingPrecision() const { return true; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Dish"; }
+	virtual bool hasDrawingPrecision() const override { return true; }
+	virtual ccGenericPrimitive* clone() const override;
 
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Base radius
 	PointCoordinateType m_baseRadius;

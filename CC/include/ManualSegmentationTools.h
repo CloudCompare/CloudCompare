@@ -19,8 +19,6 @@
 #define MANUAL_SEGMENTATION_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "CCToolbox.h"
 #include "Neighbourhood.h"
 
 namespace CCLib

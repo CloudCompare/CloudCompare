@@ -57,6 +57,7 @@ public:
 	{
 		setOrganizationName("CCCorp");
 		setApplicationName("CloudCompare");
+		//setAttribute( Qt::AA_ShareOpenGLContexts ); //DGM: too late
 #ifdef Q_OS_MAC
 		// Mac OS X apps don't show icons in menus
 		setAttribute( Qt::AA_DontShowIconsInMenus );
@@ -88,25 +89,62 @@ protected:
 
 int main(int argc, char **argv)
 {
+	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
+	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
+		on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
+		ensure that resource sharing between contexts stays functional as all internal contexts are created
+		using the correct version and profile.
+	**/
+	{
+		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+		format.setStereo(true);
+		format.setStencilBufferSize(0);
+#ifdef Q_OS_MAC
+		format.setStereo(false);
+		format.setVersion( 2, 1 );
+		format.setProfile( QSurfaceFormat::CoreProfile );
+#endif
+#ifdef _DEBUG
+		format.setOption(QSurfaceFormat::DebugContext, true);
+#endif
+		QSurfaceFormat::setDefaultFormat(format);
+	}
+
+	//The 'AA_ShareOpenGLContexts' attribute must be defined BEFORE the creation of the Q(Gui)Application
+	//DGM: this is mandatory to enable exclusive full screen for ccGLWidget (at least on Windows)
+	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
 	//QT initialiation
 	qccApplication app(argc, argv);
 
 	//Force 'english' local so as to get a consistent behavior everywhere
 	QLocale::setDefault(QLocale::English);
 
-#ifdef Q_OS_LINUX
-    // we reset the numeric locale. As suggested in documetation
-    // see http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
-    // Basically - from doc: - "On Unix/Linux Qt is configured to use the system locale settings by default.
-    // This can cause a conflict when using POSIX functions, for instance,
-    // when converting between data types such as floats and strings"
-    setlocale(LC_NUMERIC,"C");
-#endif
+	// We reset the numeric locale.
+	// See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
+	QLocale locale = QLocale::system();
+	locale.setNumberOptions( QLocale::c().numberOptions() );
+	QLocale::setDefault( locale );
 
 #ifdef USE_VLD
 	VLDEnable();
 #endif
 
+#ifdef Q_OS_MAC	
+	// This makes sure that our "working directory" is not within the application bundle
+	QDir  appDir = QCoreApplication::applicationDirPath();
+	
+	if ( appDir.dirName() == "MacOS" )
+	{
+		appDir.cdUp();
+		appDir.cdUp();
+		appDir.cdUp();
+		
+		QDir::setCurrent( appDir.absolutePath() );
+	}
+#endif
+	
 	//splash screen
 	QSplashScreen* splash = 0;
 	QTime splashStartTime;
@@ -137,12 +175,12 @@ int main(int argc, char **argv)
 	//command line mode
 	if (!commandLine)
 	{
-		//OpenGL?
-		if (!QGLFormat::hasOpenGL())
-		{
-			QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
-			return EXIT_FAILURE;
-		}
+		//DGM FIXME: do the same with Qt 5 + reject if Qt version is < 2.1
+		//if (!QGLFormat::hasOpenGL())
+		//{
+		//	QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+		//	return EXIT_FAILURE;
+		//}
 
 		//splash screen
 		splashStartTime.start();

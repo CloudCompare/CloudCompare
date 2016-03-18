@@ -652,7 +652,3 @@ QIcon qRansacSD::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qRansacSD,qRansacSD);
-#endif

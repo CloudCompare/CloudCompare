@@ -22,7 +22,6 @@
 
 //Qt
 #include <QWidget>
-#include <QSharedPointer>
 
 //qCC_db
 #include <ccColorScale.h>
@@ -207,10 +206,10 @@ public:
 	SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Sets text color
-	inline void setTextColor(QColor color) { m_textColor = color; };
+	inline void setTextColor(QColor color) { m_textColor = color; }
 
 	//! Sets displayed numbers precision
-	inline void setPrecision(int precision) { m_precision = precision; };
+	inline void setPrecision(int precision) { m_precision = precision; }
 
 protected:
 

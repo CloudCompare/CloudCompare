@@ -20,7 +20,6 @@ public:
 		\param bitrate bit rate (e.g. 400 000)
 		\param gop keyframe interval
 		\param fps frame rate
-		\return success
 	**/
 	QVideoEncoder(	QString filename,
 					unsigned width,

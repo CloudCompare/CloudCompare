@@ -19,14 +19,8 @@
 #define CC_PLANE_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//Qt
-#include <QImage>
-
-//CCLib
-#include <CCGeom.h>
 
 //! Plane (primitive)
 /** 3D plane primitive
@@ -53,14 +47,14 @@ public:
 	ccPlane(QString name = QString("Plane"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::PLANE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::PLANE; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Plane"; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Plane"; }
+	virtual ccGenericPrimitive* clone() const override;
 
-	//inherited from ccDrawableObject
-	virtual ccBBox getFitBB(ccGLMatrix& trans);
+	//inherited from ccHObject
+	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//! Returns 'X' width
 	PointCoordinateType getXWidth() const { return m_xWidth; }
@@ -93,9 +87,9 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Width along 'X' dimension
 	PointCoordinateType m_xWidth;

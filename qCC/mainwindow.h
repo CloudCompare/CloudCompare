@@ -20,16 +20,13 @@
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
+#include <ccPluginInfo.h>
 
 //Qt
 #include <QMainWindow>
-#include <QString>
-#include <QDialog>
 #include <QDir>
-#include <QActionGroup>
 
 //CCLib
-#include <PointProjectionTools.h>
 #include <AutoSegmentationTools.h>
 
 //GUI (generated with Qt Designer)
@@ -37,7 +34,6 @@
 
 //qCC_db
 #include <ccMesh.h>
-#include <ccGLMatrix.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -111,7 +107,7 @@ public:
 	static void DestroyInstance();
 
 	//! Returns active GL sub-window (if any)
-	virtual ccGLWindow* getActiveGLWindow();
+	virtual ccGLWindow* getActiveGLWindow() override;
 
 	//! Tries to load several files (and then pushes them into main DB)
 	/** \param filenames list of all filenames
@@ -127,18 +123,20 @@ public:
 							bool updateZoom = false,
 							bool autoExpandDBTree = true,
 							bool checkDimensions = false,
-							bool autoRedraw = true);
+							bool autoRedraw = true) override;
 
-	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true);
-	virtual void setSelectedInDB(ccHObject* obj, bool selected);
-	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE);
-	virtual void forceConsoleDisplay();
-	virtual ccHObject* dbRootObject();
-	inline virtual QMainWindow* getMainWindow() { return this; }
-	inline virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
-	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator();
-	virtual ccColorScalesManager* getColorScalesManager();
-	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues, double minVal, double maxVal, QString title, QString xAxisLabel);
+	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
+	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
+	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
+	virtual void forceConsoleDisplay() override;
+	virtual ccHObject* dbRootObject() override;
+	inline virtual QMainWindow* getMainWindow() override { return this; }
+	inline virtual const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
+	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
+	virtual ccColorScalesManager* getColorScalesManager() override;
+	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues,
+												 double minVal, double maxVal,
+												 QString title, QString xAxisLabel) override;
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
@@ -224,6 +222,8 @@ protected slots:
 	void doActionLoadFile();
 	//! Displays file save dialog
 	void doActionSaveFile();
+	//! Toggles the 'show Qt warnings in Console' option
+	void doEnableQtWarnings(bool);
 
 	//! Clones currently selected entities
 	void doActionClone();
@@ -237,36 +237,37 @@ protected slots:
 	void onExclusiveFullScreenToggled(bool);
 
 	//inherited from ccMainAppInterface
-	virtual void freezeUI(bool state);
-	virtual void redrawAll(bool only2D = false);
-	virtual void refreshAll(bool only2D = false);
-	virtual void enableAll();
-	virtual void disableAll();
-	virtual void disableAllBut(ccGLWindow* win);
-	virtual void updateUI();
-	virtual void setFrontView();
-	virtual void setBottomView();
-	virtual void setTopView();
-	virtual void setBackView();
-	virtual void setLeftView();
-	virtual void setRightView();
-	virtual void setIsoView1();
-	virtual void setIsoView2();
+	virtual void freezeUI(bool state) override;
+	virtual void redrawAll(bool only2D = false) override;
+	virtual void refreshAll(bool only2D = false) override;
+	virtual void enableAll() override;
+	virtual void disableAll() override;
+	virtual void disableAllBut(ccGLWindow* win) override;
+	virtual void updateUI() override;
+	virtual void setFrontView() override;
+	virtual void setBottomView() override;
+	virtual void setTopView() override;
+	virtual void setBackView() override;
+	virtual void setLeftView() override;
+	virtual void setRightView() override;
 	virtual void toggleActiveWindowStereoVision(bool);
-	virtual void toggleActiveWindowCenteredPerspective();
-	virtual void toggleActiveWindowCustomLight();
-	virtual void toggleActiveWindowSunLight();
-	virtual void toggleActiveWindowViewerBasedPerspective();
-	virtual void toggleRotationAboutVertAxis();
-	virtual void doActionEnableBubbleViewMode();
-	virtual void setGlobalZoom();
-	virtual void zoomOnSelectedEntities();
-	virtual void setPivotAlwaysOn();
-	virtual void setPivotRotationOnly();
-	virtual void setPivotOff();
-	virtual void setOrthoView();
-	virtual void setCenteredPerspectiveView();
-	virtual void setViewerPerspectiveView();
+	virtual void toggleActiveWindowCenteredPerspective() override;
+	virtual void toggleActiveWindowCustomLight() override;
+	virtual void toggleActiveWindowSunLight() override;
+	virtual void toggleActiveWindowViewerBasedPerspective() override;
+	virtual void zoomOnSelectedEntities() override;
+
+	void setIsoView1();
+	void setIsoView2();
+	void toggleRotationAboutVertAxis();
+	void doActionEnableBubbleViewMode();
+	void setGlobalZoom();
+	void setPivotAlwaysOn();
+	void setPivotRotationOnly();
+	void setPivotOff();
+	void setOrthoView();
+	void setCenteredPerspectiveView();
+	void setViewerPerspectiveView();
 
 	//! Handles new label
 	void handleNewLabel(ccHObject*);
@@ -520,11 +521,13 @@ protected:
 	void setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw = true);
 	void setViewerPerspectiveView(ccGLWindow* win);
 
-	void closeEvent(QCloseEvent* event);
-	void moveEvent(QMoveEvent* event);
-	void resizeEvent(QResizeEvent* event);
+	virtual void showEvent(QShowEvent* event) override;
+	virtual void closeEvent(QCloseEvent* event) override;
+	virtual void moveEvent(QMoveEvent* event) override;
+	virtual void resizeEvent(QResizeEvent* event) override;
 
 	void loadPlugins();
+	const tPluginInfoList findPlugins();
 	bool dispatchPlugin(QObject* plugin);
 	ccPluginInterface* getValidPlugin(QObject* plugin);
 
@@ -679,12 +682,13 @@ protected:
 	ccPrimitiveFactoryDlg* m_pfDlg;
 
 	/*** plugins ***/
-	QString m_pluginsPath;
-	QStringList m_pluginFileNames;
+	QStringList m_pluginPaths;
+	tPluginInfoList m_pluginInfoList;
 	QList<ccStdPluginInterface*> m_stdPlugins;
 	QList<QToolBar*> m_stdPluginsToolbars;
 	QActionGroup m_glFilterActions;
 
+	bool	m_FirstShow;
 };
 
 #endif

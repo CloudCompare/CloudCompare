@@ -24,10 +24,6 @@
 
 //qCC_db
 #include <ccHObject.h>
-#include <ccPolyline.h>
-
-//Qt
-#include <QList>
 
 //GUI
 #include <ui_sectionExtractionDlg.h>

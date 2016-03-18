@@ -20,8 +20,6 @@
 
 #include "FileIOFilter.h"
 
-//Qt
-#include <QFile>
 
 //! CloudCompare dedicated binary point cloud I/O filter
 class QCC_IO_LIB_API BinFilter : public FileIOFilter

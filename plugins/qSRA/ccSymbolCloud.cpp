@@ -106,22 +106,26 @@ void ccSymbolCloud::clear()
 	clearLabelArray();
 }
 
-void ccSymbolCloud::drawSymbolAt(const double& xp, const double& yp) const
+template <class QOpenGLFunctions> void drawSymbolAt(QOpenGLFunctions* glFunc, double xp, double yp, double symbolRadius)
 {
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 	//diamong with cross
-	glBegin(GL_LINES);
-	glVertex2d(xp, yp - m_symbolSize/2.0);
-	glVertex2d(xp, yp + m_symbolSize/2.0);
-	glVertex2d(xp - m_symbolSize/2.0, yp);
-	glVertex2d(xp + m_symbolSize/2.0, yp);
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	glVertex2d(xp, yp - m_symbolSize/2.0);
-	glVertex2d(xp + m_symbolSize/2.0, yp);
-	glVertex2d(xp, yp + m_symbolSize/2.0);
-	glVertex2d(xp - m_symbolSize/2.0, yp);
-	glEnd();
-
+	glFunc->glBegin(GL_LINES);
+	glFunc->glVertex2d(xp, yp - symbolRadius);
+	glFunc->glVertex2d(xp, yp + symbolRadius);
+	glFunc->glVertex2d(xp - symbolRadius, yp);
+	glFunc->glVertex2d(xp + symbolRadius, yp);
+	glFunc->glEnd();
+	glFunc->glBegin(GL_LINE_LOOP);
+	glFunc->glVertex2d(xp, yp - symbolRadius);
+	glFunc->glVertex2d(xp + symbolRadius, yp);
+	glFunc->glVertex2d(xp, yp + symbolRadius);
+	glFunc->glVertex2d(xp - symbolRadius, yp);
+	glFunc->glEnd();
 }
 
 void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -131,6 +135,13 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//nothing to do?!
 	if (!m_showSymbols && !m_showLabels)
+		return;
+
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
 		return;
 
 	if (MACRO_Draw2D(context) && MACRO_Foreground(context))
@@ -148,12 +159,12 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
 
-			glPushName(getUniqueID());
+			glFunc->glPushName(getUniqueID());
 			hasLabels = false; //no need to display labels in 'picking' mode
 		}
 
 		//we should already be in orthoprojective & centered omde
-		//glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
+		//glFunc->glOrtho(-halfW, halfW, -halfH, halfH, -maxS, maxS);
 
 		//default color
 		const unsigned char* color = context.pointsDefaultCol.rgb;
@@ -164,7 +175,9 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		
 		if (!glParams.showColors)
-			glColor3ubv(color);
+		{
+			glFunc->glColor3ubv(color);
+		}
 
 		unsigned numberOfPoints = size();
 
@@ -208,13 +221,13 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showColors)
 				{
 					color = getPointColor(i);
-					glColor3ubv(color);
+					glFunc->glColor3ubv(color);
 				}
 			
 				//draw associated symbol
 				if (m_showSymbols && m_symbolSize > 0.0)
 				{
-					drawSymbolAt(Q2D.x- context.glW/2, Q2D.y - context.glH/2);
+					drawSymbolAt<QOpenGLFunctions_2_1>(glFunc, Q2D.x - context.glW / 2, Q2D.y - context.glH / 2, m_symbolSize / 2);
 				}
 
 				//draw associated label?
@@ -237,6 +250,8 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		m_symbolSize = symbolSizeBackup;
 
 		if (pushName)
-			glPopName();
+		{
+			glFunc->glPopName();
+		}
 	}
 }

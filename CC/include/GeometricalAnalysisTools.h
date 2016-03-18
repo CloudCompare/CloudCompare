@@ -19,11 +19,8 @@
 #define GEOMETRICAL_ANALYSIS_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
-#include "CCToolbox.h"
 #include "Neighbourhood.h"
 #include "DgmOctree.h"
-#include "SquareMatrix.h"
 
 namespace CCLib
 {

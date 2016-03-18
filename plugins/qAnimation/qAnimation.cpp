@@ -26,6 +26,7 @@
 //Qt
 #include <QtGui>
 #include <QApplication>
+#include <QMainWindow>
 
 //qCC_db
 #include "qCC_db.h"
@@ -114,7 +115,3 @@ QIcon qAnimation::getIcon() const
 {
     return QIcon(":/CC/plugin/qAnimation/animation.png");
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qAnimation,qAnimation);
-#endif

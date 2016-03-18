@@ -27,6 +27,8 @@ function( target_link_ffmpeg ) # 1 argument: ARGV0 = project name
 		foreach( libfile ${FFMPEG_LIBRARIES_ROOT_NAME} )
 			if (WIN32)
 				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/${libfile}.lib )
+			elseif ( APPLE )
+				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.dylib )
 			else()
 				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.a )
 			endif()

@@ -19,11 +19,11 @@
 #define DELAUNAY2D_MESH_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "GenericIndexedMesh.h"
-#include "Neighbourhood.h"
 #include "SimpleTriangle.h"
 
+#include <cstddef>
+#include <vector>
 
 namespace CCLib
 {

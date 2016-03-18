@@ -28,7 +28,6 @@
 
 //qCC_db
 #include <ccPointCloud.h>
-#include <ccHObject.h>
 #include <ccProgressDialog.h>
 #include <ccLog.h>
 #include <ccScalarField.h>
@@ -460,7 +459,7 @@ struct cloudAttributesDescriptor
 		
 		scalarIndexes.clear();
 		scalarFields.clear();
-	};
+	}
 
 	void updateMaxIndex(int& maxIndex)
 	{
@@ -471,7 +470,7 @@ struct cloudAttributesDescriptor
 		for (size_t j=0; j<scalarIndexes.size(); ++j)
 			if (scalarIndexes[j] > maxIndex)
 				maxIndex = scalarIndexes[j];
-	};
+	}
 
 };
 

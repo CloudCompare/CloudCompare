@@ -19,7 +19,6 @@
 #define CC_CYLINDER_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccCone.h"
 
 //! Cylinder (primitive)
@@ -55,15 +54,15 @@ public:
 	ccCylinder(QString name = QString("Cylinder"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CYLINDER; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CYLINDER; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Cylinder"; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Cylinder"; }
+	virtual ccGenericPrimitive* clone() const override;
 
 	//inherited from ccCone
-	virtual void setBottomRadius(PointCoordinateType radius);
-	inline virtual void setTopRadius(PointCoordinateType radius) { return setBottomRadius(radius); }
+	virtual void setBottomRadius(PointCoordinateType radius) override;
+	inline virtual void setTopRadius(PointCoordinateType radius) override { return setBottomRadius(radius); }
 
 };
 

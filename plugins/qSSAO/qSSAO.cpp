@@ -15,7 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-//first so as to be sure to include 'glew.h' before 'gl.h'
 #include "ccSSAOFilter.h"
 
 //Qt
@@ -32,7 +31,3 @@ ccGlFilter* qSSAO::getFilter()
 {
 	return new ccSSAOFilter();
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qSSAO,qSSAO);
-#endif

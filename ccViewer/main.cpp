@@ -19,9 +19,9 @@
 
 //Qt
 #include <QApplication>
-#include <QMessageBox>
 
 #ifdef Q_OS_MAC
+#include <QDir>
 #include <QFileOpenEvent>
 #endif
 
@@ -36,6 +36,9 @@
 
 //qCC_io
 #include <FileIOFilter.h>
+
+//Qt
+#include <QGLFormat>
 
 #ifdef USE_VLD
 //VLD
@@ -52,6 +55,7 @@ public:
 	{
 		setOrganizationName("CCCorp");
 		setApplicationName("CloudCompareViewer");
+		setAttribute(Qt::AA_ShareOpenGLContexts);
 #ifdef Q_OS_MAC
 		mViewer = NULL;
 
@@ -91,16 +95,65 @@ private:
 
 int main(int argc, char *argv[])
 {
+	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
+	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
+	on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
+	ensure that resource sharing between contexts stays functional as all internal contexts are created
+	using the correct version and profile.
+	**/
+	{
+		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+		format.setStereo(true);
+		format.setStencilBufferSize(0);
+#ifdef Q_OS_MAC
+		format.setStereo(false);
+		format.setVersion( 2, 1 );
+		format.setProfile( QSurfaceFormat::CoreProfile );
+#endif
+#ifdef _DEBUG
+		format.setOption(QSurfaceFormat::DebugContext);
+#endif
+		QSurfaceFormat::setDefaultFormat(format);
+	}
+
 	ccApplication a(argc, argv);
+	
+	//Force 'english' local so as to get a consistent behavior everywhere
+	QLocale::setDefault(QLocale::English);
+
+	// We reset the numeric locale.
+	// See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
+	QLocale locale = QLocale::system();
+	locale.setNumberOptions( QLocale::c().numberOptions() );
+	QLocale::setDefault( locale );
 
 #ifdef USE_VLD
 	VLDEnable();
 #endif
-
-	//OpenGL?
+	
+#ifdef Q_OS_MAC	
+	// This makes sure that our "working directory" is not within the application bundle
+	QDir  appDir = QCoreApplication::applicationDirPath();
+	
+	if ( appDir.dirName() == "MacOS" )
+	{
+		appDir.cdUp();
+		appDir.cdUp();
+		appDir.cdUp();
+		
+		QDir::setCurrent( appDir.absolutePath() );
+	}
+#endif
+	
 	if (!QGLFormat::hasOpenGL())
 	{
 		QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+		return EXIT_FAILURE;
+	}
+	if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
+	{
+		QMessageBox::critical(0, "Error", "This application needs OpenGL 2.1 at least to run!");
 		return EXIT_FAILURE;
 	}
 

@@ -193,10 +193,10 @@ const double c_log10 = log(10.0);
 //Convert standard range to log scale
 void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
 {
-	ScalarType absDispMin = ( dispMax < 0 ? std::min(-dispMax,-dispMin) : std::max<ScalarType>(dispMin,0) );
-	ScalarType absDispMax = std::max(fabs(dispMin),fabs(dispMax));
-	dispMin = log10(std::max(absDispMin,static_cast<ScalarType>(ZERO_TOLERANCE)));
-	dispMax = log10(std::max(absDispMax,static_cast<ScalarType>(ZERO_TOLERANCE)));
+	ScalarType absDispMin = (dispMax < 0 ? std::min(-dispMax, -dispMin) : std::max<ScalarType>(dispMin, 0));
+	ScalarType absDispMax = std::max(fabs(dispMin), fabs(dispMax));
+	dispMin = log10(std::max(absDispMin, static_cast<ScalarType>(ZERO_TOLERANCE)));
+	dispMax = log10(std::max(absDispMax, static_cast<ScalarType>(ZERO_TOLERANCE)));
 }
 
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
@@ -204,20 +204,27 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	const ccScalarField* sf = context.sfColorScaleToDisplay;
 	ccGLWindow* win = static_cast<ccGLWindow*>(context._win);
 
-	DrawColorRamp(sf, win, context.glW, context.glH, context.renderZoom);
+	DrawColorRamp(context, sf, win, context.glW, context.glH, context.renderZoom);
 }
 
-void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom/*=1.0f*/)
+void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom/*=1.0f*/)
 {
 	if (!sf || !sf->getColorScale() || !win)
 	{
 		return;
 	}
 
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	bool logScale = sf->logScale();
 	bool symmetricalScale = sf->symmetricalScale();
 	bool alwaysShowZero = sf->isZeroAlwaysShown();
-	
+
 	//set of particular values
 	//DGM: we work with doubles for maximum accuracy
 	ccColorScale::LabelSet keyValues;
@@ -283,7 +290,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	{
 		for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); ++it)
 		{
-#ifdef CC_WINDOWS
+#if defined(CC_WINDOWS) && defined(_MSC_VER)
 			if (!_finite(*it))
 #else
 			if (!std::isfinite(*it))
@@ -359,7 +366,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	QFont font = win->getTextDisplayFont(); //takes rendering zoom into account!
 	const int strHeight = static_cast<int>(displayParams.defaultFontSize * renderZoom); //QFontMetrics(font).height() --> always returns the same value?!
 	const int scaleWidth = static_cast<int>(displayParams.colorScaleRampWidth * renderZoom);
-	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(glH-static_cast<int>(140 * renderZoom), 2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
+	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(glH - static_cast<int>(140 * renderZoom), 2 * strHeight) : scaleWidth); //if 1 value --> we draw a cube
 
 	//centered orthoprojective view (-halfW,-halfH,halfW,halfH)
 	int halfW = (glW >> 1);
@@ -369,11 +376,11 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 	const int xShift = static_cast<int>(20 * renderZoom) + (showHistogram ? scaleWidth / 2 : 0);
 	const int yShift = halfH - scaleMaxHeight / 2 - static_cast<int>(10 * renderZoom);
 
-	glPushAttrib(GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-	
-	std::vector<double> sortedKeyValues(keyValues.begin(), keyValues.end());
-	double maxRange = sortedKeyValues.back() - sortedKeyValues.front();
+	glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
+	glFunc->glDisable(GL_DEPTH_TEST);
+
+	std::vector<double> sortedKeyValues(keyValues.begin(),keyValues.end());
+	double maxRange = sortedKeyValues.back()-sortedKeyValues.front();
 
 	//display color ramp
 	{
@@ -385,8 +392,8 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		{
 			int histoStart = x + scaleWidth + std::min(std::max(scaleWidth / 8, 3), static_cast<int>(15 * renderZoom));
 
-			glLineWidth(renderZoom);
-			glBegin(GL_LINES);
+			glFunc->glLineWidth(renderZoom);
+			glFunc->glBegin(GL_LINES);
 			for (int j=0; j<scaleMaxHeight; ++j)
 			{
 				double baseValue = sortedKeyValues.front() + (j * maxRange) / scaleMaxHeight;
@@ -410,16 +417,16 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 					}
 				}
 				assert(col);
-				glColor3ubv(col);
+				glFunc->glColor3ubv(col);
 
-				glVertex2i(x, y+j);
-				glVertex2i(x+scaleWidth, y+j);
-				
+				glFunc->glVertex2i(x,y+j);
+				glFunc->glVertex2i(x+scaleWidth,y+j);
+
 				if (showHistogram)
 				{
 					double bind = (value - sf->displayRange().min())*(histogram.size() - 1) / sf->displayRange().maxRange();
 					int bin = static_cast<int>(floor(bind));
-					
+
 					double hVal = 0.0;
 					if (bin >= 0 && bin < static_cast<int>(histogram.size())) //in symmetrical case we can get values outside of the real SF range
 					{
@@ -433,11 +440,11 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 					}
 
 					int xSpan = std::max(static_cast<int>(hVal / histogram.maxValue * (scaleWidth/2)),1);
-					glVertex2i(histoStart,y+j);
-					glVertex2i(histoStart+xSpan,y+j);
+					glFunc->glVertex2i(histoStart,y+j);
+					glFunc->glVertex2i(histoStart+xSpan,y+j);
 				}
 			}
-			glEnd();
+			glFunc->glEnd();
 		}
 		else
 		{
@@ -446,28 +453,28 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			if (logScale)
 				value = exp(value*c_log10);
 			const ColorCompType* col = sf->getColor(static_cast<ScalarType>(value));
-			glColor3ubv(col ? col : ccColor::lightGrey.rgba);
-			glBegin(GL_POLYGON);
-			glVertex2i(x,y);
-			glVertex2i(x+scaleWidth,y);
-			glVertex2i(x+scaleWidth,y+scaleMaxHeight-1);
-			glVertex2i(x,y+scaleMaxHeight-1);
-			glEnd();
+			glFunc->glColor3ubv(col ? col : ccColor::lightGrey.rgba);
+			glFunc->glBegin(GL_POLYGON);
+			glFunc->glVertex2i(x,y);
+			glFunc->glVertex2i(x+scaleWidth,y);
+			glFunc->glVertex2i(x+scaleWidth,y+scaleMaxHeight-1);
+			glFunc->glVertex2i(x,y+scaleMaxHeight-1);
+			glFunc->glEnd();
 		}
 
 		//scale border
-		glLineWidth(2.0f * renderZoom);
+		glFunc->glLineWidth(2.0f * renderZoom);
 		const ccColor::Rgbub& lineColor = textColor;
-		glColor3ubv(lineColor.rgb);
-		glPushAttrib(GL_LINE_BIT);
-		glEnable(GL_LINE_SMOOTH);
-		glBegin(GL_LINE_LOOP);
-		glVertex2i(x,y);
-		glVertex2i(x+scaleWidth,y);
-		glVertex2i(x+scaleWidth,y+scaleMaxHeight);
-		glVertex2i(x,y+scaleMaxHeight);
-		glEnd();
-		glPopAttrib();
+		glFunc->glColor3ubv(lineColor.rgb);
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glEnable(GL_LINE_SMOOTH);
+		glFunc->glBegin(GL_LINE_LOOP);
+		glFunc->glVertex2i(x,y);
+		glFunc->glVertex2i(x+scaleWidth,y);
+		glFunc->glVertex2i(x+scaleWidth,y+scaleMaxHeight);
+		glFunc->glVertex2i(x,y+scaleMaxHeight);
+		glFunc->glEnd();
+		glFunc->glPopAttrib();
 	}
 
 	//display labels
@@ -476,12 +483,12 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		vlabelSet drawnLabels;
 
 		//add first label
-		drawnLabels.push_back(vlabel(0,0,strHeight,sortedKeyValues.front()));
+		drawnLabels.push_back(vlabel(0, 0, strHeight, sortedKeyValues.front()));
 
 		if (keyValues.size() > 1)
 		{
 			//add last label
-			drawnLabels.push_back(vlabel(scaleMaxHeight,scaleMaxHeight-strHeight,scaleMaxHeight,sortedKeyValues.back()));
+			drawnLabels.push_back(vlabel(scaleMaxHeight, scaleMaxHeight - strHeight, scaleMaxHeight, sortedKeyValues.back()));
 		}
 
 		//we try to display the other keyPoints (if any)
@@ -540,7 +547,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		//display labels
 
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f(textColor.r/255.0f,textColor.g/255.0f,textColor.b/255.0f);
+		glFunc->glColor3f(textColor.r / 255.0f, textColor.g / 255.0f, textColor.b / 255.0f);
 
 		//Scalar field name
 		const char* sfName = sf->getName();
@@ -587,12 +594,12 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 				value = exp(value*c_log10);
 
 			win->displayText(QString::number(value,format,precision), x, y+it->yPos, align, 0, 0, &font);
-			glBegin(GL_LINES);
-			glVertex2i(xTick,yTick+it->yPos);
-			glVertex2i(xTick+tickSize,yTick+it->yPos);
-			glEnd();
+			glFunc->glBegin(GL_LINES);
+			glFunc->glVertex2i(xTick,yTick+it->yPos);
+			glFunc->glVertex2i(xTick+tickSize,yTick+it->yPos);
+			glFunc->glEnd();
 		}
 	}
 
-	glPopAttrib();
+	glFunc->glPopAttrib();
 }

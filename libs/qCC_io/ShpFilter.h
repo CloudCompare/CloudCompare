@@ -76,7 +76,7 @@ public:
 		virtual int width() const = 0;
 		virtual int decimal() const = 0;
 		virtual bool save(DBFHandle handle, int fieldIndex) const { return false; } //1D version
-		virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const { return false; }; //3D version
+		virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const { return false; } //3D version
 
 	protected:
 
@@ -127,6 +127,7 @@ public:
 
 		//! Default constructor
 		DoubleField3D(QString name) : GenericField(name) {}
+		virtual ~DoubleField3D() {}
 		
 		//inherited from GenericField
 		virtual bool is3D() const  { return true; }

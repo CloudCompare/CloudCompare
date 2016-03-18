@@ -45,7 +45,8 @@ public:
 
 protected slots:
 
-	void onFPSChanged(double);
+	void onFPSChanged(int);
+
 	void onTotalTimeChanged(double);
 	void onStepTimeChanged(double);
 	void onLoopToggled(bool);

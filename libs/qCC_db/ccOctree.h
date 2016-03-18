@@ -19,7 +19,6 @@
 #define CC_OCTREE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccGenericGLDisplay.h"
 
@@ -110,7 +109,7 @@ public: //GENERAL METHODS
 	void translateBoundingBox(const CCVector3& T);
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_OCTREE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_OCTREE; }
 
 	int getDisplayedLevel() const { return m_displayedLevel; }
 	void setDisplayedLevel(int level);
@@ -119,14 +118,15 @@ public: //GENERAL METHODS
 	void setDisplayType(CC_OCTREE_DISPLAY_TYPE type);
 
 	//inherited from DgmOctree
-	virtual void clear();
+	virtual void clear() override;
 
 	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false);
+	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 public: //RENDERING METHODS
 
-	static void RenderOctreeAs(	CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
+	static void RenderOctreeAs(CC_DRAW_CONTEXT& context,
+								CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 								ccOctree* theOctree,
 								unsigned char level,
 								ccGenericPointCloud* theAssociatedCloud,
@@ -153,7 +153,7 @@ public: //RENDERING METHODS
 protected:
 
 	//Inherited from ccHObject
-	void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	/*** RENDERING METHODS ***/
 

@@ -18,12 +18,7 @@
 #ifndef CC_GL_WINDOW_HEADER
 #define CC_GL_WINDOW_HEADER
 
-//CCLib
-#include <CCGeom.h>
-
 //qCC_db
-#include <ccIncludeGL.h>
-#include <ccGLMatrix.h>
 #include <ccDrawableObject.h>
 #include <ccGenericGLDisplay.h>
 #include <ccGLUtils.h>
@@ -32,20 +27,11 @@
 #include "ccGuiParameters.h"
 
 //Qt
-#include <QGLWidget>
-#include <QFont>
-#include <QMap>
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QByteArray>
-#include <QFlags>
-//#define THREADED_GL_WIDGET
-#ifdef THREADED_GL_WIDGET
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QAtomicInt>
-#endif
+#include <QOpenGLDebugLogger>
+#include <QOpenGLExtensions>
 
 //system
 #include <unordered_set>
@@ -64,7 +50,7 @@ class ccInteractor;
 class ccPolyline;
 
 //! OpenGL 3D view
-class ccGLWindow : public QGLWidget, public ccGenericGLDisplay
+class ccGLWindow : public QOpenGLWidget, public ccGenericGLDisplay
 {
 	Q_OBJECT
 
@@ -137,11 +123,8 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(	QWidget *parent = 0,
-				const QGLFormat& format = QGLFormat::defaultFormat(),
-				QGLWidget* shareWidget = 0,
-				bool silentInitialization = false);
-	
+	ccGLWindow(	QWidget *parent = 0, bool silentInitialization = false);
+
 	//! Destructor
 	virtual ~ccGLWindow();
 
@@ -151,22 +134,23 @@ public:
 	//! Returns current 'scene graph' root
 	ccHObject* getSceneDB();
 
+	//replacement for the missing methods of QGLWidget
+	void renderText(int x, int y, const QString & str, const QFont & font = QFont());
+	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
+	inline void updateGL() { update(); }
+
 	//inherited from ccGenericGLDisplay
-	virtual void toBeRefreshed();
-	virtual void refresh(bool only2D = false);
-	virtual void invalidateViewport();
-	virtual void releaseTexture(unsigned texID);
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
-	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag);
-	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
-	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
-	virtual QFont getLabelDisplayFont() const; //takes rendering zoom into account!
-	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
-	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false);
-	virtual unsigned getTextureID(const QImage& image);
-	virtual unsigned getTextureID( ccMaterial::CShared mtl);
-	inline virtual QWidget* asWidget() { return this; }
-	inline virtual QSize getScreenSize() const { return size(); }
+	virtual void toBeRefreshed() override;
+	virtual void refresh(bool only2D = false) override;
+	virtual void invalidateViewport() override;
+	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont()) override;
+	virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0) override;
+	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
+	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
+	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
+	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	inline virtual QWidget* asWidget() override { return this; }
+	inline virtual QSize getScreenSize() const override { return size(); }
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -317,7 +301,7 @@ public:
 	virtual const void setBaseViewMat(ccGLMatrixd& mat);
 
 	//! Returns the current OpenGL camera parameters
-	virtual void getGLCameraParameters(ccGLCameraParameters& params);
+	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -513,9 +497,6 @@ public:
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
 
-	//! Returns whether the display has an active FBO
-	inline bool hasFBO() const { return (m_fbo != 0); }
-
 public: //LOD
 
 	//! Returns whether LOD is enabled on this display or not
@@ -583,7 +564,7 @@ public slots:
 	void zoomGlobal();
 
 	//inherited from ccGenericGLDisplay
-	virtual void redraw(bool only2D = false, bool resetLOD = true);
+	virtual void redraw(bool only2D = false, bool resetLOD = true) override;
 
 	//called when recieving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
@@ -604,6 +585,9 @@ protected slots:
 
 	//! Checks for scheduled redraw
 	void checkScheduledRedraw();
+
+	//! OpenGL KHR debug log
+	void handleLoggedMessage(const QOpenGLDebugMessage&);
 
 signals:
 
@@ -710,6 +694,18 @@ signals:
 
 protected: //rendering
 
+	//reimplemented from QOpenGLWidget
+	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
+	//we need to automatically bind our own afterwards!
+	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
+	void makeCurrent();
+
+	//! Binds an FBO or releases the current one (if input is NULL)
+	/** This method must be called instead of the FBO's own 'start' and 'stop' methods
+		so as to properly handle the interactions with QOpenGLWidget's own FBO.
+	**/
+	bool bindFBO(ccFrameBufferObject* fbo);
+
 	//! LOD state
 	struct LODState
 	{
@@ -804,55 +800,17 @@ protected: //other methods
 	void setFontPointSize(int pixelSize);
 
 	//events handling
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void closeEvent(QCloseEvent *event);
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	void wheelEvent(QWheelEvent *event) override;
+	void closeEvent(QCloseEvent *event) override;
 
 	//inherited
-	void initializeGL();
-	void resizeGL(int w, int h);
-	void paintGL();
-	bool event(QEvent* evt);
-
-#ifdef THREADED_GL_WIDGET
-	void initialize();
-	void resizeGL2();
-	void paint();
-	void resizeEvent(QResizeEvent* evt);
-	void glInit() { /*stop QGLWidget standard behavior*/ }
-	void glDraw() { /*stop QGLWidget standard behavior*/ }
-
-	//! Rendering thread
-	class RenderingThread : public QThread
-	{
-	public:
-
-		explicit RenderingThread(ccGLWindow* win);
-		~RenderingThread() { stop(); }
-		
-		void stop();
-		void redraw();
-
-	protected:
-
-		virtual void run();
-
-		ccGLWindow* m_window;
-		QWaitCondition m_waitCondition;
-		QAtomicInt m_abort;
-		QAtomicInt m_pendingRedraw;
-	};
-
-	friend RenderingThread;
-
-	RenderingThread* m_renderingThread;
-	QMutex m_mutex;
-	QGLFormat m_format;
-	const QGLWidget* m_shareWidget; 
-	QAtomicInt m_resized;
-#endif
+	void initializeGL() override;
+	void resizeGL(int w, int h) override;
+	void paintGL() override;
+	bool event(QEvent* evt) override;
 
 	//Graphical features controls
 	void drawCross();
@@ -878,8 +836,8 @@ protected: //other methods
 	void drawPivot();
 
 	//inherited from QWidget (drag & drop support)
-	virtual void dragEnterEvent(QDragEnterEvent* event);
-	virtual void dropEvent(QDropEvent* event);
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 	//! Picking parameters
 	struct PickingParameters
@@ -945,11 +903,15 @@ protected: //other methods
 
 	//! Inits FBO (frame buffer object)
 	bool initFBO(int w, int h);
+	//! Inits FBO (safe)
+	bool initFBOSafe(ccFrameBufferObject* &fbo, int w, int h);
 	//! Releases any active FBO
 	void removeFBO();
+	//! Releases any active FBO (safe)
+	void removeFBOSafe(ccFrameBufferObject* &fbo);
 
 	//! Inits active GL filter (advanced shader)
-	bool initGLFilter(int w, int h);
+	bool initGLFilter(int w, int h, bool silent = false);
 	//! Releases active GL filter
 	void removeGLFilter();
 
@@ -992,13 +954,11 @@ protected: //other methods
 	//! Returns the current (OpenGL) viewport
 	inline const QRect& getGLViewport() const { return m_glViewport; }
 
-protected: //OpenGL Extensions
+	//Default OpenGL functions set
+	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
 
-	//! Loads OpenGL extensions
-	/** Wrapper around ccFBOUtils::InitGLEW.
-		\return success
-	**/
-	static bool InitGLEW();
+	//! Returns the set of OpenGL functions
+	inline ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
 
 protected: //members
 
@@ -1137,8 +1097,10 @@ protected: //members
 	bool m_shadersEnabled;
 
 	//! Currently active FBO (frame buffer object)
+	ccFrameBufferObject* m_activeFbo;
+	//! First default FBO (frame buffer object)
 	ccFrameBufferObject* m_fbo;
-	//! Second currently active FBO (frame buffer object) - used for stereo rendering
+	//! Second default FBO (frame buffer object) - used for stereo rendering
 	ccFrameBufferObject* m_fbo2;
 	//! Whether to always use FBO or only for GL filters
 	bool m_alwaysUseFBO;
@@ -1198,9 +1160,6 @@ protected: //members
 	//! Pre-bubble-view camera parameters (backup)
 	ccViewportParameters m_preBubbleViewParameters;
 
-	//! Map of materials (unique id.) and texture identifier
-	QMap< QString, unsigned > m_materialTextures;
-
 	//! Current LOD state
 	LODState m_currentLODState;
 
@@ -1238,6 +1197,12 @@ protected: //members
 
 	//! Picking radius (pixels)
 	int m_pickRadius;
+
+	//! FBO support
+	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
+
+	//! Whether FBO support is on
+	bool m_glExtFuncSupported;
 
 private:
 

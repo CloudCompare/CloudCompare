@@ -30,6 +30,9 @@
 #include <stdio.h>
 #include <assert.h>
 
+//qCC_db
+#include <ccGLMatrix.h>
+
 BundlerImportDlg::BundlerImportDlg(QWidget* parent)
 	: QDialog(parent)
 {

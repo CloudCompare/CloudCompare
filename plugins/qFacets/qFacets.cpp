@@ -19,7 +19,6 @@
 
 //Local
 #include "facetsClassifier.h"
-#include "cellsFusionDlg.h"
 #include "classificationParamsDlg.h"
 #include "facetsExportDlg.h"
 #include "stereogramDlg.h"
@@ -33,35 +32,17 @@
 #include <QElapsedTimer>
 #include <QSettings>
 #include <QFileInfo>
-#include <QFile>
 #include <QMessageBox>
-#include <QTextStream>
 
 //qCC_db
-#include <ccFacet.h>
 #include <ccHObjectCaster.h>
-#include <ccKdTree.h>
-#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
-#include <ccMesh.h>
-#include <ccNormalVectors.h>
-#include <ccPolyline.h>
 #include <ccScalarField.h>
 #include <ccOctree.h> //for ComputeAverageNorm
 
 //qCC_io
 #include <ShpFilter.h>
 
-//CCLib
-#include <Neighbourhood.h>
-#include <CCMiscTools.h>
-#include <DistanceComputationTools.h>
-
-//System
-#include <string.h>
-#include <algorithm>
-#include <vector>
-#include <unordered_set>
 
 //semi-persistent dialog values
 static unsigned s_octreeLevel = 8;
@@ -1141,7 +1122,3 @@ QIcon qFacets::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/CC/plugin/qFacets/qFacets.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qFacets,qFacets);
-#endif

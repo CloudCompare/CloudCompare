@@ -19,14 +19,11 @@
 #define CC_EXTRU_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//system
-#include <vector>
 
 //! Profile extrusion (primitive)
-/** It is defined by sweeping a profile representing the extrusion’s shape (polyline)
+/** It is defined by sweeping a profile representing the extrusion's shape (polyline)
 	through a given distance (equivalent to the extrusion thickness).
 **/
 class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
@@ -52,11 +49,11 @@ public:
 	ccExtru(QString name = QString("Extrusion"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::EXTRU; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::EXTRU; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Extrusion"; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Extrusion"; }
+	virtual ccGenericPrimitive* clone() const override;
 
 	//! Returns extrusion thickness
 	const PointCoordinateType getThickness() const { return m_height; }
@@ -67,9 +64,9 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Extrusion thickness
 	PointCoordinateType m_height;

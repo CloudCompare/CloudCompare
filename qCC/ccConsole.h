@@ -18,10 +18,6 @@
 #ifndef CC_CONSOLE_HEADER
 #define CC_CONSOLE_HEADER
 
-//system
-#include <stdio.h>
-#include <string.h>
-
 //qCC_db
 #include <ccLog.h>
 
@@ -75,6 +71,12 @@ public:
 	//! Sets log file
 	bool setLogFile(QString filename);
 
+	//! Whether to show Qt messages (qDebug / qWarning / etc.) in Console
+	static void EnableQtMessages(bool state);
+
+	//! Returns whether to show Qt messages (qDebug / qWarning / etc.) in Console or not
+	static bool QtMessagesEnabled() { return s_showQtMessagesInConsole; }
+
 public slots:
 
 	//! Refreshes console (display all messages still in queue)
@@ -116,6 +118,8 @@ protected:
 	//! Log file stream
 	QTextStream* m_logStream;
 
+	//! Whether to show Qt messages (qDebug / qWarning / etc.) in Console
+	static bool s_showQtMessagesInConsole;
 };
 
 #endif

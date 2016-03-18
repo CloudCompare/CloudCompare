@@ -21,8 +21,6 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "qCC_db.h"
-#include "ccGLMatrix.h"
 #include "ccMaterial.h"
 
 class ccGenericGLDisplay;
@@ -46,12 +44,17 @@ struct glDrawContext
 {
 	//! Drawing options (see below)
 	uint16_t flags;
+	
 	//! GL screen width
 	int glW;
 	//! GL screen height
 	int glH;
 	//! Corresponding GL window
 	ccGenericGLDisplay* _win;
+   
+	//! OpenGL context used to access functions for particular profiles \see glFunctions()
+	QOpenGLContext *qGLContext;
+
 	//! Current zoom (screen to file rendering mode)
 	float renderZoom;
 
@@ -124,6 +127,7 @@ struct glDrawContext
 		, glW(0)
 		, glH(0)
 		, _win(0)
+		, qGLContext(nullptr)
 		, renderZoom(1.0f)
 		, defaultMat(new ccMaterial("default"))
 		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
@@ -153,6 +157,12 @@ struct glDrawContext
 		, sourceBlend(GL_SRC_ALPHA)
 		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
 	{}
+   
+	template<class TYPE>
+	TYPE *glFunctions() const
+	{				
+		return qGLContext->versionFunctions<TYPE>();
+	}   
 };
 typedef glDrawContext CC_DRAW_CONTEXT;
 
@@ -196,6 +206,8 @@ public:
 	ccDrawableObject();
 	//! Copy constructor
 	ccDrawableObject(const ccDrawableObject& object);
+	
+	virtual ~ccDrawableObject() {}
 
 	//! Draws entity and its children
 	virtual void draw(CC_DRAW_CONTEXT& context) = 0;
@@ -268,7 +280,7 @@ public:
 	/*** Mesh materials ***/
 
 	//! Toggles material display state
-	virtual void toggleMaterials() {}; //does nothing by default!
+	virtual void toggleMaterials() {} //does nothing by default!
 
 	/*** Name display in 3D ***/
 

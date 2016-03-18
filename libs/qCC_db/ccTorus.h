@@ -19,11 +19,8 @@
 #define CC_TORUS_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Torus (primitive)
 /** 3D torus primitive (with circular or rectangular section)
@@ -63,19 +60,19 @@ public:
 	ccTorus(QString name = QString("Torus"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TORUS; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TORUS; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Torus"; }
-	virtual bool hasDrawingPrecision() const { return true; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Torus"; }
+	virtual bool hasDrawingPrecision() const override { return true; }
+	virtual ccGenericPrimitive* clone() const override;
 
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//! Inside radius
 	PointCoordinateType m_insideRadius;

@@ -23,9 +23,6 @@
 //local
 #include "ccColorScaleEditorWidget.h"
 
-//qCC_db
-#include <ccColorScale.h>
-
 //Qt
 #include <QDialog>
 

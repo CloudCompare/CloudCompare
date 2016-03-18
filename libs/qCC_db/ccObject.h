@@ -19,21 +19,13 @@
 #define CC_OBJECT_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccSerializableObject.h"
 
 //Qt
 #include <qglobal.h>
-#include <QString>
 #include <QVariant>
 #include <QSharedPointer>
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#define CC_QT5
-#endif
 
-
-//System
-#include <stdint.h>
 
 //! Object state flag
 enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATHER_DEPENDENT)
@@ -313,14 +305,14 @@ protected:
 	virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
 
 	//inherited from ccSerializableObject
-	virtual bool toFile(QFile& out) const;
+	virtual bool toFile(QFile& out) const override;
 
 	//! Reimplemented from ccSerializableObject::fromFile
 	/** Be sure to call ccObject::ReadClassIDFromFile (once)
 		before calling this method, as the classID is voluntarily
 		skipped (in order to let the user instantiate the object first)
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Object name
 	QString m_name;

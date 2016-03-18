@@ -35,7 +35,14 @@
 #ifndef	CC_FILTER_SSAO_H
 #define	CC_FILTER_SSAO_H
 
+//CC_FBO
 #include <ccGlFilter.h>
+
+//Qt
+#include <QOpenGLFunctions_2_1>
+
+//system
+#include <vector>
 
 class ccShader;
 class ccBilateralFilter;
@@ -51,18 +58,17 @@ public:
 	void reset();
 
 	//inherited from ccGlFilter
-	virtual ccGlFilter* clone() const;
-	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	virtual GLuint getTexture();
+	virtual ccGlFilter* clone() const override;
+	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual GLuint getTexture() override;
 
-	bool init(	int width,
-				int height,
+	bool init(	unsigned width,
+				unsigned height,
 				bool enableBilateralFilter,
 				bool useReflectTexture,
 				QString shadersPath,
-				QString& error,
-				GLenum textureMinMagFilter = GL_LINEAR);
+				QString& error);
 
 	void setParameters(int N, float Kz, float R, float F);
 
@@ -71,13 +77,12 @@ protected:
 	void initReflectTexture();
 	void sampleSphere();
 
-	GLuint m_texReflect;
-
-	int m_w;
-	int m_h;
+	unsigned m_w;
+	unsigned m_h;
 
 	ccFrameBufferObject* m_fbo;
 	ccShader* m_shader;
+	GLuint m_texReflect;
 
 	int   m_N;								// nb of neighbours
 	float m_Kz;								// attenuation with distance
@@ -87,13 +92,19 @@ protected:
 	//! Maximum number of sampling directions
 	static const int MAX_N = 256;
 
-	float m_ssao_neighbours[3*MAX_N];	//	full sphere sampling
+	//!	Full sphere sampling
+	float m_ssao_neighbours[3 * MAX_N];
 
 	ccBilateralFilter* m_bilateralFilter;
 	bool               m_bilateralFilterEnabled;
 	unsigned           m_bilateralGHalfSize;
 	float              m_bilateralGSigma;
 	float              m_bilateralGSigmaZ;
+
+	//! Associated OpenGL functions set
+	QOpenGLFunctions_2_1 m_glFunc;
+	//! Associated OpenGL functions set validity
+	bool m_glFuncIsValid;
 };
 
 #endif

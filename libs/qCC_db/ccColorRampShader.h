@@ -25,11 +25,8 @@
 #include <ccShader.h>
 
 //Local
-#include "ccBasicTypes.h"
 #include "ccColorScale.h"
 
-//System
-#include <assert.h>
 
 //! Maximum color ramp size
 /** 252 so as to get 1024 bytes as total required memory
@@ -53,36 +50,40 @@ public:
 	//! Setups shader
 	/** Shader must have already been stared!
 	**/
-	bool setup(float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale)
+	bool setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale)
 	{
+		assert(glFunc);
+
 		if (colorSteps > CC_MAX_SHADER_COLOR_RAMP_SIZE)
 		{
 			colorSteps = CC_MAX_SHADER_COLOR_RAMP_SIZE;
 		}
 
-		setUniform1f("uf_minSaturation",minSatRel);
-		setUniform1f("uf_maxSaturation",maxSatRel);
-		setUniform1f("uf_colormapSize",(float)colorSteps);
+		setUniformValue("uf_minSaturation", minSatRel);
+		setUniformValue("uf_maxSaturation", maxSatRel);
+		setUniformValue("uf_colormapSize", static_cast<float>(colorSteps));
+
+		static const unsigned resolution = (1 << 24);
 
 		//set 'grayed' points color as a float-packed value
 		{
 			int rgb = (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
-			float packedColorGray = static_cast<float>(static_cast<double>(rgb)/(1<<24));
-			setUniform1f("uf_colorGray",packedColorGray);
+			float packedColorGray = static_cast<float>(static_cast<double>(rgb) / resolution);
+			setUniformValue("uf_colorGray", packedColorGray);
 		}
 
 		//send colormap to shader
 		assert(colorScale);
-		for (unsigned i=0; i<colorSteps; ++i)
+		for (unsigned i = 0; i < colorSteps; ++i)
 		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(static_cast<double>(i)/(colorSteps-1),colorSteps);
+			const ColorCompType* col = colorScale->getColorByRelativePos(static_cast<double>(i) / (colorSteps - 1), colorSteps);
 			//set ramp colors as float-packed values
 			int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
-			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb)/(1<<24));
+			s_packedColormapf[i] = static_cast<float>(static_cast<double>(rgb) / resolution);
 		}
-		setTabUniform1fv("uf_colormapTable",colorSteps,s_packedColormapf);
+		setUniformValueArray("uf_colormapTable", s_packedColormapf, colorSteps, 1);
 
-		return (glGetError() == 0);
+		return (glFunc->glGetError() == 0);
 	}
 
 	//! Returns the minimum memory required on the shader side

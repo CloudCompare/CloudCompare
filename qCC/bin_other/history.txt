@@ -42,6 +42,12 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 
 	* New method: Edit > Colors > Convert to grey scale
 
+	* Mac OS X adds support for the CSV Matrix I/O file format
+
+	* Mac OS X adds support for the following plugins:
+	   - qFacet
+	   - qAnimation
+
 - Enhancements:
 	* Point-pair based alignment tool:
 		- the tool 3D view now has the same viewport/camera parameters as the source 3D view
@@ -116,6 +122,17 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 		- new button to hide the clipping-box
 		- new button to restore the previous clipping-box settings (per-entity)
 
+	* Mac OS X adds support for OpenGL Frame Buffer Objects (FBOs)
+
+	* Triangulation: 
+		- due to licensing issue with Triangle lib (incompatibility with GPL/LGPL) CGAL is now the prefered library for 2.5D 
+			triangulation CCLib can now be compiled with CGAL support using COMPILE_CC_CORE_LIB_WITH_CGAL. 
+		- please note that as CGAL 2D triangulation module is released under GPL license. A version of CCLib compiled with CGAL
+			support is no longer licensed under LGPL (GPL is "viral"). To keep CCLib original license scheme, you *must*
+			compile it without CGAL.
+		- as a positive side effect, micro benchmarks show that CGAL tends to offer better performances.
+
+ 
 - Bug fixes:
 	* The 'Edit > Colors > Convert to Scalar Field' method was returning invalid scalar fields
 	* The 'ADD_HEADER' and 'ADD_PTS_COUNT' options of the command line mode were causing an infinite loop
@@ -134,6 +151,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 	* Command line mode: the mesh obtained with the -DELAUNAY command could only be saved as a BIN file
 	* Rasterize: applying the tool a second time on a cloud already generated with the rasterize tool could make CC crash
 	* E57: some files may be rejected due to a minor warning (about duplicate extensions) that was considered as a critical error
+	* Mac OS X properly saves and restores the main window's state & geometry
 
 v2.6.2 10/08/2015
 - New features:
@@ -1058,7 +1076,7 @@ v2.5.2 12/19/2013
 	- 'Edit > Fuse' entry renamed 'Edit > Merge'
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
-		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
+		was inversed from the currently accepted definition (i.e. 0Â° for horizontal and 90Â° for vertical planes)
 	- blank lines or commentaries were causing an infinite loop when importing ASCII files
 	- primitives (sphere, cylinder, etc.) were not correctly loaded from BIN files (CC would crash when loading them)
 	- sub-meshes' bounding boxes were not updated when a transformation was applied to their parent mesh or its

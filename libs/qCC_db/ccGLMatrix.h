@@ -19,7 +19,6 @@
 #define CC_GL_MATRIX_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGLMatrixTpl.h"
 
 //CCLib

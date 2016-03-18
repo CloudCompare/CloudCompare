@@ -19,13 +19,10 @@
 #define CC_BBOX_HEADER
 
 //CCLib
-#include <CCGeom.h>
 #include <SquareMatrix.h>
 
 //Local
-#include "qCC_db.h"
-#include "ccGLMatrix.h"
-#include "ccBasicTypes.h"
+#include "ccDrawableObject.h"
 
 //! Bounding box structure
 /** Supports several operators such addition (to a matrix or a vector) and
@@ -93,9 +90,10 @@ public:
 	double computeVolume() const;
 
 	//! Draws bounding box (OpenGL)
-	/** \param col (R,G,B) color
+	/** \param context OpenGL context
+	 *  \param col (R,G,B) color
 	**/
-	void draw(const ccColor::Rgb& col) const;
+	void draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const;
 
 	//! Sets bonding box validity
 	inline void setValidity(bool state) { m_valid = state; }

@@ -75,37 +75,44 @@ double ccBBox::computeVolume() const
 	return static_cast<double>(V.x) * static_cast<double>(V.y) * static_cast<double>(V.z);
 }
 
-void ccBBox::draw(const ccColor::Rgb& col) const
+void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 {
 	if (!m_valid)
 		return;
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
 
-	ccGL::Color3v(col.rgb);
+	ccGL::Color3v(glFunc, col.rgb);
 
-	glBegin(GL_LINE_LOOP);
-	ccGL::Vertex3v(m_bbMin.u);
-	ccGL::Vertex3(m_bbMax.x,m_bbMin.y,m_bbMin.z);
-	ccGL::Vertex3(m_bbMax.x,m_bbMax.y,m_bbMin.z);
-	ccGL::Vertex3(m_bbMin.x,m_bbMax.y,m_bbMin.z);
-	glEnd();
+	glFunc->glBegin(GL_LINE_LOOP);
+	ccGL::Vertex3v(glFunc, m_bbMin.u);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMax.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMin.z);
+	glFunc->glEnd();
 
-	glBegin(GL_LINE_LOOP);
-	ccGL::Vertex3(m_bbMin.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3(m_bbMax.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3v(m_bbMax.u);
-	ccGL::Vertex3(m_bbMin.x,m_bbMax.y,m_bbMax.z);
-	glEnd();
+	glFunc->glBegin(GL_LINE_LOOP);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3v(glFunc, m_bbMax.u);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMax.z);
+	glFunc->glEnd();
 
-	glBegin(GL_LINES);
-	ccGL::Vertex3v(m_bbMin.u);
-	ccGL::Vertex3(m_bbMin.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3(m_bbMax.x,m_bbMin.y,m_bbMin.z);
-	ccGL::Vertex3(m_bbMax.x,m_bbMin.y,m_bbMax.z);
-	ccGL::Vertex3(m_bbMax.x,m_bbMax.y,m_bbMin.z);
-	ccGL::Vertex3v(m_bbMax.u);
-	ccGL::Vertex3(m_bbMin.x,m_bbMax.y,m_bbMin.z);
-	ccGL::Vertex3(m_bbMin.x,m_bbMax.y,m_bbMax.z);
-	glEnd();
+	glFunc->glBegin(GL_LINES);
+	ccGL::Vertex3v(glFunc, m_bbMin.u);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMin.y, m_bbMax.z);
+	ccGL::Vertex3(glFunc, m_bbMax.x, m_bbMax.y, m_bbMin.z);
+	ccGL::Vertex3v(glFunc, m_bbMax.u);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMin.z);
+	ccGL::Vertex3(glFunc, m_bbMin.x, m_bbMax.y, m_bbMax.z);
+	glFunc->glEnd();
 }
 
 ccBBox ccBBox::operator + (const ccBBox& aBBox) const

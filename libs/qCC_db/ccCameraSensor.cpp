@@ -1264,203 +1264,211 @@ bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 
 void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	//we draw here a little 3d representation of the sensor and some of its attributes
-	if (MACRO_Draw3D(context))
+	if (!MACRO_Draw3D(context))
+		return;
+
+	//we draw a little 3d representation of the sensor and some of its attributes
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+
+	bool pushName = MACRO_DrawEntityNames(context);
+
+	if (pushName)
 	{
-		bool pushName = MACRO_DrawEntityNames(context);
-
-		if (pushName)
-		{
-			//not particulary fast
-			if (MACRO_DrawFastNamesOnly(context))
-				return;
-			glPushName(getUniqueID());
-		}
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		{
-			ccIndexedTransformation sensorPos;
-			if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-			{
-				//no visible position for this index!
-				glPopMatrix();
-				if (pushName)
-					glPopName();
-				return;
-			}
-				
-			glMultMatrixf(sensorPos.data());
-		}
-
-		CCVector3 upperLeftPoint = computeUpperLeftPoint();
-
-		//up arrow
-		const PointCoordinateType arrowHeight		= 1.5f * upperLeftPoint.y;
-		const PointCoordinateType baseHeight		= 1.2f * upperLeftPoint.y;
-		const PointCoordinateType arrowHalfWidth	= 0.4f * upperLeftPoint.x;
-		const PointCoordinateType baseHalfWidth		= 0.2f * upperLeftPoint.x;
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		ccGL::Color3v(m_color.rgb);
-
-		//near plane
-		glBegin(GL_LINE_LOOP);
-		ccGL::Vertex3( upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-		ccGL::Vertex3(-upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-		ccGL::Vertex3(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-		ccGL::Vertex3( upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-		glEnd();
-
-		//side lines
-		glBegin(GL_LINES);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		ccGL::Vertex3( upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		ccGL::Vertex3(-upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		ccGL::Vertex3(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		ccGL::Vertex3( upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-		glEnd();
-
-		//base
-		glBegin(GL_QUADS);
-		ccGL::Vertex3(-baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
-		ccGL::Vertex3( baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
-		ccGL::Vertex3( baseHalfWidth, baseHeight,       -upperLeftPoint.z);
-		ccGL::Vertex3(-baseHalfWidth, baseHeight,       -upperLeftPoint.z);
-		glEnd();
-
-		//arrow
-		glBegin(GL_TRIANGLES);
-		ccGL::Vertex3( 0,              arrowHeight, -upperLeftPoint.z);
-		ccGL::Vertex3(-arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
-		ccGL::Vertex3( arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
-		glEnd();
-
-		//frustrum
-		if (m_frustrumInfos.drawFrustum || m_frustrumInfos.drawSidePlanes)
-		{
-			if (!m_frustrumInfos.isComputed)
-				computeFrustumCorners();
-
-			if (m_frustrumInfos.frustumCorners && m_frustrumInfos.frustumCorners->size() >= 8)
-			{
-				//frustum area (lines)
-				if (m_frustrumInfos.drawFrustum)
-				{
-					const CCVector3* P0 = m_frustrumInfos.frustumCorners->getPoint(0);
-					const CCVector3* P1 = m_frustrumInfos.frustumCorners->getPoint(1);
-					const CCVector3* P2 = m_frustrumInfos.frustumCorners->getPoint(2);
-					const CCVector3* P3 = m_frustrumInfos.frustumCorners->getPoint(3);
-					const CCVector3* P4 = m_frustrumInfos.frustumCorners->getPoint(4);
-					const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
-					const CCVector3* P6 = m_frustrumInfos.frustumCorners->getPoint(6);
-					const CCVector3* P7 = m_frustrumInfos.frustumCorners->getPoint(7);
-				
-					glPushAttrib(GL_LINE_BIT);
-					glLineWidth(2.0);
-
-					glBegin(GL_LINE_LOOP);
-					ccGL::Vertex3v(P0->u);
-					ccGL::Vertex3v(P1->u);
-					ccGL::Vertex3v(P3->u);
-					ccGL::Vertex3v(P2->u);
-					glEnd();
-					glBegin(GL_LINE_LOOP);
-					ccGL::Vertex3v(P2->u);
-					ccGL::Vertex3v(P3->u);
-					ccGL::Vertex3v(P5->u);
-					ccGL::Vertex3v(P4->u);
-					glEnd();
-					glBegin(GL_LINE_LOOP);
-					ccGL::Vertex3v(P4->u);
-					ccGL::Vertex3v(P5->u);
-					ccGL::Vertex3v(P7->u);
-					ccGL::Vertex3v(P6->u);
-					glEnd();
-					glBegin(GL_LINE_LOOP);
-					ccGL::Vertex3v(P6->u);
-					ccGL::Vertex3v(P7->u);
-					ccGL::Vertex3v(P1->u);
-					ccGL::Vertex3v(P0->u);
-					glEnd();
-					glBegin(GL_LINE_LOOP);
-					ccGL::Vertex3v(P6->u);
-					ccGL::Vertex3v(P0->u);
-					ccGL::Vertex3v(P2->u);
-					ccGL::Vertex3v(P4->u);
-					glEnd();
-					glBegin(GL_LINE_LOOP);
-					ccGL::Vertex3v(P1->u);
-					ccGL::Vertex3v(P7->u);
-					ccGL::Vertex3v(P5->u);
-					ccGL::Vertex3v(P3->u);
-					glEnd();
-
-					glPopAttrib();
-				}
-
-				//frustum area (planes)
-				if (m_frustrumInfos.drawSidePlanes && m_frustrumInfos.initFrustrumHull())
-				{
-					//set the rigth display (just to be sure)
-					m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
-					m_frustrumInfos.frustrumHull->setTempColor(m_color);
-					
-					//glPushAttrib(GL_COLOR_BUFFER_BIT);
-					//glEnable(GL_BLEND);
-					//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-					//glColor4ub(m_color.x, m_color.y, m_color.z, 76);
-
-					m_frustrumInfos.frustrumHull->showWired(false);
-					m_frustrumInfos.frustrumHull->enableStippling(true);
-					m_frustrumInfos.frustrumHull->draw(context);
-
-					//glPopAttrib();
-				}
-			}
-			//*/
-		}
-
-		//axis (for test)
-		if (true && !pushName)
-		{
-			glPushAttrib(GL_LINE_BIT);
-			glLineWidth(2.0);
-
-			float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
-
-			// right vector
-			ccGL::Color3v(ccColor::red.rgba);
-			glBegin(GL_LINES);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(l, 0.0f, 0.0f);
-			glEnd();
-
-			// up vector
-			ccGL::Color3v(ccColor::green.rgba);
-			glBegin(GL_LINES);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(0.0f, l, 0.0f);
-			glEnd();
-
-			// view vector
-			ccGL::Color3v(ccColor::blue.rgba);
-			glBegin(GL_LINES);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(0.0f, 0.0f, -l);
-			glEnd();
-
-			glPopAttrib();
-		}
-
-		if (pushName)
-			glPopName();
-
-		glPopMatrix();
+		//not particulary fast
+		if (MACRO_DrawFastNamesOnly(context))
+			return;
+		glFunc->glPushName(getUniqueID());
 	}
+
+	glFunc->glMatrixMode(GL_MODELVIEW);
+	glFunc->glPushMatrix();
+	{
+		ccIndexedTransformation sensorPos;
+		if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		{
+			//no visible position for this index!
+			glFunc->glPopMatrix();
+			if (pushName)
+				glFunc->glPopName();
+			return;
+		}
+			
+		glFunc->glMultMatrixf(sensorPos.data());
+	}
+
+	CCVector3 upperLeftPoint = computeUpperLeftPoint();
+
+	//up arrow
+	const PointCoordinateType arrowHeight		= 1.5f * upperLeftPoint.y;
+	const PointCoordinateType baseHeight		= 1.2f * upperLeftPoint.y;
+	const PointCoordinateType arrowHalfWidth	= 0.4f * upperLeftPoint.x;
+	const PointCoordinateType baseHalfWidth	= 0.2f * upperLeftPoint.x;
+
+	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	ccGL::Color3v(glFunc, m_color.rgb);
+
+	//near plane
+	glFunc->glBegin(GL_LINE_LOOP);
+	ccGL::Vertex3(glFunc,  upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc, -upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc,  upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+	glFunc->glEnd();
+
+	//side lines
+	glFunc->glBegin(GL_LINES);
+	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+	ccGL::Vertex3(glFunc,  upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+	ccGL::Vertex3(glFunc, -upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+	ccGL::Vertex3(glFunc, -upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+	glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+	ccGL::Vertex3(glFunc,  upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+	glFunc->glEnd();
+
+	//base
+	glFunc->glBegin(GL_QUADS);
+	ccGL::Vertex3(glFunc, -baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc,  baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc,  baseHalfWidth, baseHeight,       -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc, -baseHalfWidth, baseHeight,       -upperLeftPoint.z);
+	glFunc->glEnd();
+
+	//arrow
+	glFunc->glBegin(GL_TRIANGLES);
+	ccGL::Vertex3(glFunc,  0,              arrowHeight, -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc, -arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
+	ccGL::Vertex3(glFunc,  arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
+	glFunc->glEnd();
+
+	//frustrum
+	if (m_frustrumInfos.drawFrustum || m_frustrumInfos.drawSidePlanes)
+	{
+		if (!m_frustrumInfos.isComputed)
+			computeFrustumCorners();
+
+		if (m_frustrumInfos.frustumCorners && m_frustrumInfos.frustumCorners->size() >= 8)
+		{
+			//frustum area (lines)
+			if (m_frustrumInfos.drawFrustum)
+			{
+				const CCVector3* P0 = m_frustrumInfos.frustumCorners->getPoint(0);
+				const CCVector3* P1 = m_frustrumInfos.frustumCorners->getPoint(1);
+				const CCVector3* P2 = m_frustrumInfos.frustumCorners->getPoint(2);
+				const CCVector3* P3 = m_frustrumInfos.frustumCorners->getPoint(3);
+				const CCVector3* P4 = m_frustrumInfos.frustumCorners->getPoint(4);
+				const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
+				const CCVector3* P6 = m_frustrumInfos.frustumCorners->getPoint(6);
+				const CCVector3* P7 = m_frustrumInfos.frustumCorners->getPoint(7);
+			
+				glFunc->glPushAttrib(GL_LINE_BIT);
+				glFunc->glLineWidth(2.0);
+
+				glFunc->glBegin(GL_LINE_LOOP);
+				ccGL::Vertex3v(glFunc, P0->u);
+				ccGL::Vertex3v(glFunc, P1->u);
+				ccGL::Vertex3v(glFunc, P3->u);
+				ccGL::Vertex3v(glFunc, P2->u);
+				glFunc->glEnd();
+				glFunc->glBegin(GL_LINE_LOOP);
+				ccGL::Vertex3v(glFunc, P2->u);
+				ccGL::Vertex3v(glFunc, P3->u);
+				ccGL::Vertex3v(glFunc, P5->u);
+				ccGL::Vertex3v(glFunc, P4->u);
+				glFunc->glEnd();
+				glFunc->glBegin(GL_LINE_LOOP);
+				ccGL::Vertex3v(glFunc, P4->u);
+				ccGL::Vertex3v(glFunc, P5->u);
+				ccGL::Vertex3v(glFunc, P7->u);
+				ccGL::Vertex3v(glFunc, P6->u);
+				glFunc->glEnd();
+				glFunc->glBegin(GL_LINE_LOOP);
+				ccGL::Vertex3v(glFunc, P6->u);
+				ccGL::Vertex3v(glFunc, P7->u);
+				ccGL::Vertex3v(glFunc, P1->u);
+				ccGL::Vertex3v(glFunc, P0->u);
+				glFunc->glEnd();
+				glFunc->glBegin(GL_LINE_LOOP);
+				ccGL::Vertex3v(glFunc, P6->u);
+				ccGL::Vertex3v(glFunc, P0->u);
+				ccGL::Vertex3v(glFunc, P2->u);
+				ccGL::Vertex3v(glFunc, P4->u);
+				glFunc->glEnd();
+				glFunc->glBegin(GL_LINE_LOOP);
+				ccGL::Vertex3v(glFunc, P1->u);
+				ccGL::Vertex3v(glFunc, P7->u);
+				ccGL::Vertex3v(glFunc, P5->u);
+				ccGL::Vertex3v(glFunc, P3->u);
+				glFunc->glEnd();
+
+				glFunc->glPopAttrib();
+			}
+
+			//frustum area (planes)
+			if (m_frustrumInfos.drawSidePlanes && m_frustrumInfos.initFrustrumHull())
+			{
+				//set the rigth display (just to be sure)
+				m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
+				m_frustrumInfos.frustrumHull->setTempColor(m_color);
+				
+				//glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+				//glFunc->glEnable(GL_BLEND);
+				//glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+				//glFunc->glColor4ub(m_color.x, m_color.y, m_color.z, 76);
+
+				m_frustrumInfos.frustrumHull->showWired(false);
+				m_frustrumInfos.frustrumHull->enableStippling(true);
+				m_frustrumInfos.frustrumHull->draw(context);
+
+				//glFunc->glPopAttrib();
+			}
+		}
+		//*/
+	}
+
+	//axis (for test)
+	if (!pushName)
+	{
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(2.0);
+
+		float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
+
+		// right vector
+		ccGL::Color3v(glFunc, ccColor::red.rgba);
+		glFunc->glBegin(GL_LINES);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		glFunc->glVertex3f(l, 0.0f, 0.0f);
+		glFunc->glEnd();
+
+		// up vector
+		ccGL::Color3v(glFunc, ccColor::green.rgba);
+		glFunc->glBegin(GL_LINES);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		glFunc->glVertex3f(0.0f, l, 0.0f);
+		glFunc->glEnd();
+
+		// view vector
+		ccGL::Color3v(glFunc, ccColor::blue.rgba);
+		glFunc->glBegin(GL_LINES);
+		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+		glFunc->glVertex3f(0.0f, 0.0f, -l);
+		glFunc->glEnd();
+
+		glFunc->glPopAttrib();
+	}
+
+	if (pushName)
+		glFunc->glPopName();
+
+	glFunc->glPopMatrix();
 }
 
 float ccCameraSensor::ConvertFocalPixToMM(float focal_pix, float ccdPixelSize_mm)

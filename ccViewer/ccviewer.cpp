@@ -77,12 +77,9 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		QVBoxLayout* verticalLayout = new QVBoxLayout(ui.GLframe);
 		verticalLayout->setSpacing(0);
 		const int margin = 10;
-		verticalLayout->setContentsMargins(margin,margin,margin,margin);
-		QGLFormat format = QGLFormat::defaultFormat();
-		format.setStereo(true);
-		format.setDoubleBuffer(true);
-		//format.setSwapInterval(1);
-		m_glWindow = new ccGLWindow(ui.GLframe,format);
+		verticalLayout->setContentsMargins(margin, margin, margin, margin);
+
+		m_glWindow = new ccGLWindow(ui.GLframe);
 		verticalLayout->addWidget(m_glWindow);
 	}
 
@@ -191,17 +188,38 @@ void ccViewer::loadPlugins()
 
 	ccLog::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
 
+	QString	appPath = QCoreApplication::applicationDirPath();
+	QString	pluginsPath( appPath );
+	
 #if defined(Q_OS_MAC)
 	// plugins are in the bundle
-	QString  path = QCoreApplication::applicationDirPath();
-	path.remove( "MacOS" );
-	QString pluginsPath = path + "Plugins/ccViewerPlugins";
-#else
+	appPath.remove( "MacOS" );
+	
+	pluginsPath += "Plugins/ccViewerPlugins";
+#elif defined(Q_OS_WIN)
 	//plugins are in bin/plugins
-	QString pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
+	pluginsPath += "/plugins";
+#elif defined(Q_OS_LINUX)	
+	// Plugins are relative to the bin directory where the executable is found
+	QDir  binDir( appPath );
+	
+	if ( binDir.dirName() == "bin" )
+	{
+		binDir.cdUp();
+		
+		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+	}
+	else
+	{
+		// Choose a reasonable default to look in
+		pluginsPath = "/usr/lib/cloudcompare/plugins/CloudCompare";
+	}
+	
+#else
+#warning Need to specify the plugin path for this OS.
 #endif
 
-	ccLog::Print(QString("Plugins lookup dir.: %1").arg(pluginsPath));
+	ccLog::Print(QString("Plugin lookup dir.: %1").arg(pluginsPath));
 
 	QStringList filters;
 #if defined(Q_OS_WIN)
@@ -478,8 +496,14 @@ void ccViewer::updateGLFrameGradient()
 	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
 	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
 
-	glColor3ubv(bkgCol.rgb);
-	glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
+	//QOpenGLFunctions_2_1* glFunc = m_glWindow->context()->versionFunctions<QOpenGLFunctions_2_1>();
+	//if (!glFunc)
+	//{
+	//	return;
+	//}
+
+	//glFunc->glColor3ubv(bkgCol.rgb);
+	//glFunc->glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
 
 	QString styleSheet = QString("QFrame{border: 2px solid white; border-radius: 10px; background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(%1,%2,%3), stop:1 rgb(%4,%5,%6));}")
 								.arg(bkgCol.r)
@@ -488,6 +512,7 @@ void ccViewer::updateGLFrameGradient()
 								.arg(255-forCol.r)
 								.arg(255-forCol.g)
 								.arg(255-forCol.b);
+	
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 

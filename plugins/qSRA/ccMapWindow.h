@@ -31,7 +31,7 @@ public:
 
 	//! Default constructor
 	explicit ccMapWindow(QWidget *parent = 0)
-		: ccGLWindow(parent,QGLFormat::defaultFormat(),0,true)
+		: ccGLWindow(parent, true)
 		, m_sfForRampDisplay(0)
 		, m_showSF(true)
 	{}

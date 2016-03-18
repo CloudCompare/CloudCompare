@@ -19,14 +19,8 @@
 #define CC_IMAGE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccHObject.h"
 
-//Qt
-#include <QImage>
-#include <QString>
-
-class ccGenericGLDisplay;
 class ccCameraSensor;
 
 //! Generic image
@@ -41,10 +35,10 @@ public:
 	ccImage(const QImage& image, const QString& name = QString("unknown"));
 
 	//inherited methods (ccHObject)
-	virtual bool isSerializable() const { return true; }
+	virtual bool isSerializable() const override { return true; }
 
 	//! Returns unique class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::IMAGE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::IMAGE; }
 
 	//! Loads image from file
 	/** \param filename image filename
@@ -91,20 +85,10 @@ public:
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-	virtual void onDeletionOf(const ccHObject* obj);
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-
-	//! Unbinds texture from currently associated GL context
-	virtual bool unbindTexture();
-
-	//! Binds texture to a GL context (and creates texture if necessary)
-	/** \param win 3D display to which to bind the texture
-		\param pow2Texture whether a texture with power of 2 dimensions is requested (OpenGL version < 2.0)
-		\return success
-	**/
-	virtual bool bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture = false);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	virtual void onDeletionOf(const ccHObject* obj) override;
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//! Updates aspect ratio
 	void updateAspectRatio();
@@ -120,19 +104,8 @@ protected:
 	**/
 	float m_aspectRatio;
 
-	//! Texture coordinate (width) of bottom-right pixel
-	float m_texU;
-	//! Texture coordinate (height) of bottom-right pixel
-	float m_texV;
-
 	//! Texture transparency
 	float m_texAlpha;
-
-	//! Texture GL ID
-	unsigned m_textureID;
-
-	//! Currently bound GL window
-	ccGenericGLDisplay* m_boundWin;
 
 	//! Image data
 	QImage m_image;

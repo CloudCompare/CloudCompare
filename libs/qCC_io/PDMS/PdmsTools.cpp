@@ -740,6 +740,9 @@ const char* ElementCreation::GetDefaultElementName(Token token)
 		return "Loop";
 	case PDMS_VERTEX:
 		return "Vertex";
+		
+	default:
+		break;
 	}
 
 	return 0;

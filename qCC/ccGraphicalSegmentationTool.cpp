@@ -394,8 +394,9 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	{
 		return;
 	}
-	if (!m_associatedWin || !m_associatedWin->hasFBO()) //we need fast rendering (with FBO) for live update of the polyline!
+	if (!m_associatedWin)
 	{
+		assert(false);
 		return;
 	}
 

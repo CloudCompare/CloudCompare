@@ -1,12 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-project( CloudCompare )
+project( CloudCompare VERSION 2.7.0 )
 
-set( VERSION_MAJOR 2 )
-set( VERSION_MINOR 6 )
-set( VERSION_PATCH 3 )
-
-include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
@@ -39,15 +34,13 @@ file( GLOB qrc_list *.qrc )
 
 file( GLOB txt_list TODO.txt bin_other/history.txt )
 
-qt_wrap_ui( generated_ui_list ${ui_list} )
-qt_add_resources( generated_qrc_list ${qrc_list} )
+qt5_wrap_ui( generated_ui_list ${ui_list} )
+qt5_add_resources( generated_qrc_list ${qrc_list} )
 
-# App icon with MSVC
 if( MSVC )
+	# App icon with MSVC
 	set( rc_list images/icon/cc_icon.rc )
-endif()
 
-if( MSVC )
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${resource_list} ${txt_list} )
 elseif( APPLE )
@@ -56,7 +49,6 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${resource_list} ${txt_list} )
 endif()
 
-target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
@@ -64,26 +56,25 @@ target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 target_link_libraries( ${PROJECT_NAME} qcustomplot )
 
-
-if ( USE_QT5 )
-	if (WIN32)
-        qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
-		target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
-    else()
-		qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
-	endif()
-else()
-    target_link_libraries( ${PROJECT_NAME} ${QT_LIBRARIES})
+# Qt
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL PrintSupport)
+if (WIN32)
+	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
 endif()
 
 # contrib. libraries support
-target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+if ( APPLE )
+	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
+else()
+	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+endif()
 
 # 3dConnexion devices support
-target_link_3DXWARE( ${PROJECT_NAME} )
+if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
+	target_link_3DXWARE( ${PROJECT_NAME} )
+endif()
 
 # Add custom preprocessor definitions
-set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if( WIN32 )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
 	if (MSVC)
@@ -91,13 +82,13 @@ if( WIN32 )
 	endif()
 endif()
 
-#set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE XXX) #nothing right now
-#set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG XXX) #nothing right now
-
 # App icon with Code::Blocks/MinGW
 if( WIN32 )
 	if( MINGW )
-		add_custom_command( TARGET ${PROJECT_NAME} PRE_BUILD COMMAND windres -i ${CMAKE_CURRENT_SOURCE_DIR}/images/icon/cc_icon.rc --input-format=rc -o ${CMAKE_CURRENT_BINARY_DIR}/cc_icon.res -O coff )
+		if (NOT CMAKE_RC_COMPILER)
+			set( CMAKE_RC_COMPILER windres )
+		endif()
+		add_custom_command( TARGET ${PROJECT_NAME} PRE_BUILD COMMAND ${CMAKE_RC_COMPILER} -i ${CMAKE_CURRENT_SOURCE_DIR}/images/icon/cc_icon.rc --input-format=rc -o ${CMAKE_CURRENT_BINARY_DIR}/cc_icon.res -O coff )
 	endif()
 endif()
 
@@ -125,27 +116,25 @@ endforeach()
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )
-   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
+    set_target_properties( ${PROJECT_NAME} PROPERTIES
+        INSTALL_RPATH "@loader_path/../Frameworks"
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
 
-   set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-   set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-
-   add_subdirectory( Mac )
+    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
+    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
+    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
+    set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
+    
+    add_subdirectory( Mac )
 endif()
 
 # Export common shader files to all install destinations
 if( APPLE )
-   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
-   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
+   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Bilateral )
+   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Bilateral )
    install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
-   #install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Rendering )
-   #install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Rendering )
 else()
-   install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders )
-   install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders )
+   install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
+   install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
    install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/ColorRamp )
-   #install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Rendering )
-   #install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/Rendering/rendering.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Rendering )
 endif()

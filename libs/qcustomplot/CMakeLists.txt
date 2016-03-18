@@ -1,5 +1,5 @@
 PROJECT(qcustomplot)
-# QCustomPlot
+
 set( QCUSTOMPLOT_HEADERS qcustomplot.h )
 set( QCUSTOMPLOT_SOURCES qcustomplot.cpp )
 

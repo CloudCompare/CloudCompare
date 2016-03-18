@@ -22,7 +22,6 @@
 #include <FastMarching.h>
 #include <GenericProgressCallback.h>
 #include <DistanceComputationTools.h>
-#include <DgmOctree.h>
 
 //qCC_db
 #include <ccAdvancedTypes.h>
@@ -80,8 +79,8 @@ public:
 								unsigned facetIndex);
 
 	//inherited methods (see FastMarchingAlgorithm)
-	int propagate();
-	bool setSeedCell(const Tuple3i& pos);
+	virtual int propagate() override;
+	virtual bool setSeedCell(const Tuple3i& pos) override;
 
 protected:
 
@@ -112,10 +111,10 @@ protected:
 	};
 
 	//inherited methods (see FastMarchingAlgorithm)
-	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const;
-	virtual int step();
-	virtual void initTrialCells();
-	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<PlanarCell*>(size); }
+	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const override;
+	virtual int step() override;
+	virtual void initTrialCells() override;
+	virtual bool instantiateGrid(unsigned size) override { return instantiateGridTpl<PlanarCell*>(size); }
 
 	//! Sets the propagation timings as distances for each point
 	/** \return true if ok, false otherwise

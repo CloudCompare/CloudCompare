@@ -22,18 +22,13 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "qCC_db.h"
 #include "ccSerializableObject.h"
 #include "ccGLMatrix.h"
 #include "ccMaterial.h"
 
 //Qt
-#include <QImage>
-#include <QString>
 #include <QFont>
 
-//CCLib
-#include <CCGeom.h>
 
 class QWidget;
 
@@ -110,7 +105,7 @@ struct ccGLCameraParameters
 		, fov_deg(0)
 		, pixelSize(0)
 	{
-	   memset(viewport, 0, 4 * sizeof( int ));
+	   memset(viewport, 0, 4 * sizeof(int));
 	}
 
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
@@ -141,7 +136,8 @@ struct ccGLCameraParameters
 class ccGenericGLDisplay
 {
 public:
-
+	virtual ~ccGenericGLDisplay() {}
+		
 	//! Returns the screen size
 	virtual QSize getScreenSize() const = 0;
 
@@ -164,15 +160,6 @@ public:
 	/** On next redraw, viewport information will be recomputed.
 	**/
 	virtual void invalidateViewport() = 0;
-
-	//! Returns the texture ID corresponding to an image
-	virtual unsigned getTextureID(const QImage& image) = 0;
-	
-	//! Returns the texture ID corresponding to a material
-	virtual unsigned getTextureID( ccMaterial::CShared mtl) = 0;
-
-	//! Release texture from context
-	virtual void releaseTexture(unsigned texID) = 0;
 
 	//! Returns defaul text display font
 	/** Warning: already takes rendering zoom into account!
@@ -224,11 +211,6 @@ public:
 								const unsigned char* rgbColor = 0,
 								const QFont& font=QFont()) = 0;
 
-	//! Returns whether a given version of OpenGL is supported
-	/** \param openGLVersionFlag see QGLFormat::OpenGLVersionFlag
-	**/
-	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag) = 0;
-
 	//! Returns the current OpenGL camera parameters
 	virtual void getGLCameraParameters(ccGLCameraParameters& params) = 0;
 
@@ -250,7 +232,6 @@ public:
 
 	//! Returns this window as a proper Qt widget
 	virtual QWidget* asWidget() { return 0; }
-
 };
 
 #endif //CC_GENERIC_GL_DISPLAY

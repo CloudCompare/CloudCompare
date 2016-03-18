@@ -1,21 +1,29 @@
 # cmake should be smart enough to automatically append
 # the NDEBUG definition or _DEBUG in Release/Debug modes.
 # thus there should no need to force them somehow
-if( UNIX )
-    add_definitions("-fPIC")    # is the easier way to add the flag. cmake will take care of everything
-
+if( UNIX OR MINGW )
     # You need a c++11 Compiler to build CC
+    # When we require cmake 3.1, we can use a cleaner method:
+    #   CXX_STANDARD & CXX_STANDARD_REQUIRED
+    #   https://cmake.org/cmake/help/v3.1/prop_tgt/CXX_STANDARD.html
     include(CheckCXXCompilerFlag)
+    
     CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-    if(COMPILER_SUPPORTS_CXX11)
-        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
-        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-    else()
+    
+    if (NOT COMPILER_SUPPORTS_CXX11)
         message(ERROR "Your compiler does not support C++11")
     endif()
-endif()
-
-if( MSVC )
+    
+    set( CXX11_FLAG "-std=c++11")
+    
+    # MinGW doesn't use fPIC
+    if( UNIX )
+        set( FPIC_FLAG  "-fPIC")
+    endif()
+    
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG} ${FPIC_FLAG}")
+    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FPIC_FLAG}")
+elseif( MSVC )
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
 
     OPTION( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" OFF )
@@ -31,4 +39,4 @@ if( MSVC )
     if( ${OPTION_USE_VISUAL_LEAK_DETECTOR} )
        list( APPEND CCMAKE_CXX_FLAGS_DEBUG USE_VLD )
     endif()
-endif(MSVC)
+endif()

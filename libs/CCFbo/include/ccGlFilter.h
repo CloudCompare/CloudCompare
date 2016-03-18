@@ -18,9 +18,6 @@
 #ifndef CC_GL_FILTER_HEADER
 #define CC_GL_FILTER_HEADER
 
-//local
-#include "ccGlew.h"
-
 //Qt
 #include <QString>
 
@@ -35,11 +32,15 @@ public:
 
 	//! Default constructor
 	ccGlFilter(QString description)
-		: m_description(description)
+		: m_isValid(false)
+		, m_description(description)
 	{}
 
 	//! Default destructor
 	virtual ~ccGlFilter() {}
+
+	//! Returns filter name
+	inline virtual QString getDescription() const { return m_description; }
 
 	//! Cloning mechanism
 	virtual ccGlFilter* clone() const = 0;
@@ -52,8 +53,8 @@ public:
 		\param error error string (if an error occurred)
 		\return success
 		**/
-	virtual bool init(	int width,
-						int height,
+	virtual bool init(	unsigned width,
+						unsigned height,
 						QString shadersPath,
 						QString& error) = 0;
 
@@ -79,17 +80,25 @@ public:
 	};
 
 	//! Applies filter to texture (depth + color)
-	virtual void shade(	GLuint texDepth,
-						GLuint texColor,
+	virtual void shade(	unsigned texDepth,
+						unsigned texColor,
 						ViewportParameters& parameters) = 0;
 
 	//! Returns resulting texture
-	virtual GLuint getTexture() = 0;
+	virtual unsigned getTexture() = 0;
 
-	//! Returns filter name
-	inline virtual QString getDescription() const { return m_description; }
+protected: //methods
+
+	//! Sets whether the filter is valid
+	inline void setValid(bool state) { m_isValid = state; }
+
+	//! Returns whether the filter is valid
+	inline bool isValid() const { return m_isValid; }
 
 protected:
+
+	//! Filter validity
+	bool m_isValid;
 
 	//! Filter description
 	QString m_description;

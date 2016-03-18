@@ -30,10 +30,16 @@
 #ifndef	CC_BILATERAL_FILTER_HEADER
 #define	CC_BILATERAL_FILTER_HEADER
 
+//Local
 #include "ccGlFilter.h"
+#include "ccShader.h"
+#include "ccFrameBufferObject.h"
 
-class ccShader;
-class ccFrameBufferObject;
+//Qt
+#include <QOpenGLFunctions_2_1>
+
+//system
+#include <vector>
 
 //! Bilateral filer (shader)
 /** See http://en.wikipedia.org/wiki/Bilateral_filter
@@ -52,13 +58,14 @@ public:
 	//! Destructor
 	virtual ~ccBilateralFilter();
 
+	//! Resets the filter
 	void reset();
 
 	//inherited from ccGlFilter
-	virtual ccGlFilter* clone() const;
-	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
-	virtual GLuint getTexture();
+	virtual ccGlFilter* clone() const override;
+	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	inline virtual GLuint getTexture() override { return m_fbo.getColorTexture(); }
 
 	//! Set parameters
 	/** \param halfSpatialSize half spatial kernel size (between 1 and 7 - total size will be 2*h+1)
@@ -72,15 +79,17 @@ public:
 	//! Sets whether to use the current context (OpenGL) viewport or not
 	void useExistingViewport(bool state);
 
-protected:
+protected: //methods
 
 	void updateDampingTable();
 
-	int m_width;
-	int	m_height;
+protected: //members
 
-	ccFrameBufferObject* m_fbo;
-	ccShader* m_shader;
+	unsigned m_width;
+	unsigned m_height;
+
+	ccFrameBufferObject m_fbo;
+	ccShader m_shader;
 
 	//! Half spatial size (kernel width will be 2*h+1)
 	unsigned m_halfSpatialSize;
@@ -90,10 +99,15 @@ protected:
 	float m_depthSigma;
 
 	//! 'spatial' distribution (kernel values)
-	float* m_dampingPixelDist;
+	std::vector<float> m_dampingPixelDist;
 
 	//! Whether to use the current context (OpenGL) viewport or not
 	bool m_useCurrentViewport;
+
+	//! Associated OpenGL functions set
+	QOpenGLFunctions_2_1 m_glFunc;
+	//! Associated OpenGL functions set validity
+	bool m_glFuncIsValid;
 };
 
 #endif

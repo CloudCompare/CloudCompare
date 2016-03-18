@@ -50,6 +50,6 @@ link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
 target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES})
 
-if ( USE_QT5 )
-	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets)
-endif()
+# Qt
+qt5_use_modules(${PROJECT_NAME} Core Gui Widgets)
+

@@ -24,7 +24,6 @@
 #include <ui_clippingBoxDlg.h>
 
 //qCC_db
-#include <ccGLMatrix.h>
 #include <ccGLUtils.h>
 
 class ccGLWindow;

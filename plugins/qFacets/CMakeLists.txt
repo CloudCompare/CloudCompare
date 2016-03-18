@@ -1,14 +1,13 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 option( INSTALL_QFACETS_PLUGIN "Check to install qFACETS plugin" OFF )
 
+# CloudCompare 'FACETS' plugin
 if (INSTALL_QFACETS_PLUGIN)
-
 	if (NOT SHAPELIB_SOURCE_DIR)
 		message( SEND_ERROR "ShapeLib is required to compile this plugin (enable OPTION_USE_SHAPE_LIB)" )
 	endif()
 
-	#CloudCompare 'FACETS' plugin
 	project( QFACETS_PLUGIN_DLL )
 
 	#As we are going to re-use several components of the main qCC project
@@ -31,5 +30,4 @@ if (INSTALL_QFACETS_PLUGIN)
 	target_link_libraries( ${PROJECT_NAME} SHAPELIB )
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_SHP_SUPPORT )
-
 endif()

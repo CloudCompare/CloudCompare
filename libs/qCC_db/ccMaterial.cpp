@@ -82,24 +82,31 @@ void ccMaterial::setTransparency(float val)
 	m_emission.a     = val;
 }
 
-void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
+void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool skipDiffuse) const
 {
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	if (lightEnabled)
 	{
 		if (!skipDiffuse)
 		{
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFront.rgba);
-			glMaterialfv(GL_BACK,  GL_DIFFUSE, m_diffuseBack.rgba);
+			glFunc->glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFront.rgba);
+			glFunc->glMaterialfv(GL_BACK,  GL_DIFFUSE, m_diffuseBack.rgba);
 		}
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient.rgba);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular.rgba);
-		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission.rgba);
-		glMaterialf (GL_FRONT,          GL_SHININESS, m_shininessFront);
-		glMaterialf (GL_BACK,           GL_SHININESS, m_shininessBack);
+		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient.rgba);
+		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular.rgba);
+		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission.rgba);
+		glFunc->glMaterialf (GL_FRONT,          GL_SHININESS, m_shininessFront);
+		glFunc->glMaterialf (GL_BACK,           GL_SHININESS, m_shininessBack);
 	}
 	else
 	{
-		glColor4fv(m_diffuseFront.rgba);
+		glFunc->glColor4fv(m_diffuseFront.rgba);
 	}
 }
 
@@ -176,30 +183,37 @@ bool ccMaterial::hasTexture() const
 	return m_textureFilename.isEmpty() ? false : !s_textureDB[m_textureFilename].isNull();
 }
 
-void ccMaterial::MakeLightsNeutral()
+void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 {
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
 	GLint maxLightCount;
-	glGetIntegerv(GL_MAX_LIGHTS,&maxLightCount);
+	glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);
 	
 	for (int i=0; i<maxLightCount; ++i)
 	{
-		if (glIsEnabled(GL_LIGHT0+i))
+		if (glFunc->glIsEnabled(GL_LIGHT0 + i))
 		{
 			float diffuse[4];
 			float ambiant[4];
 			float specular[4];
 
-			glGetLightfv(GL_LIGHT0+i,GL_DIFFUSE,diffuse);
-			glGetLightfv(GL_LIGHT0+i,GL_AMBIENT,ambiant);
-			glGetLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
+			glFunc->glGetLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
+			glFunc->glGetLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
+			glFunc->glGetLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
 
-			 diffuse[0] =  diffuse[1] =  diffuse[2] = ( diffuse[0] +  diffuse[1] +  diffuse[2]) / 3.0f;	//'mean' (gray) value
-			 ambiant[0] =  ambiant[1] =  ambiant[2] = ( ambiant[0] +  ambiant[1] +  ambiant[2]) / 3.0f;	//'mean' (gray) value
-			specular[0] = specular[1] = specular[2] = (specular[0] + specular[1] + specular[2]) / 3.0f;	//'mean' (gray) value
+			 diffuse[0] =  diffuse[1] =  diffuse[2] = ( diffuse[0] +  diffuse[1] +  diffuse[2]) / 3;	//'mean' (gray) value
+			 ambiant[0] =  ambiant[1] =  ambiant[2] = ( ambiant[0] +  ambiant[1] +  ambiant[2]) / 3;	//'mean' (gray) value
+			specular[0] = specular[1] = specular[2] = (specular[0] + specular[1] + specular[2]) / 3;	//'mean' (gray) value
 
-			glLightfv(GL_LIGHT0+i, GL_DIFFUSE, diffuse);
-			glLightfv(GL_LIGHT0+i, GL_AMBIENT, ambiant);
-			glLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
+			glFunc->glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
+			glFunc->glLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
+			glFunc->glLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
 		}
 	}
 }

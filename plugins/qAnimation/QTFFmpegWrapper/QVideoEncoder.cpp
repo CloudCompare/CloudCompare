@@ -157,7 +157,11 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	m_ff->codecContext->time_base.den = m_fps;
 	m_ff->codecContext->gop_size = m_gop;
 	m_ff->codecContext->max_b_frames = 1;
-	m_ff->codecContext->pix_fmt = PIX_FMT_YUV420P;
+	m_ff->codecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+
+	//DGM: doesn't really change anything. We only get different warnings if we enabled this :(
+	//m_ff->codecContext->rc_buffer_size = m_bitrate * 2;
+	//m_ff->codecContext->rc_max_rate = m_bitrate;
 
 	if (codec_id == AV_CODEC_ID_H264)
 	{
@@ -187,6 +191,8 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	}
 	m_ff->videoStream->id = m_ff->formatContext->nb_streams-1;
 	m_ff->videoStream->codec = m_ff->codecContext;
+	m_ff->videoStream->time_base.num = 1;
+	m_ff->videoStream->time_base.den = m_fps;
 
 	//av_dump_format(m_ff->formatContext, 0, fileName.toStdString().c_str(), 1);
 
@@ -368,10 +374,10 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 	m_ff->swsContext = sws_getCachedContext(m_ff->swsContext,
 											m_width,
 											m_height,
-											PIX_FMT_BGRA,
+											AV_PIX_FMT_BGRA,
 											m_width,
 											m_height,
-											PIX_FMT_YUV420P,
+											AV_PIX_FMT_YUV420P,
 											SWS_BICUBIC,
 											NULL,
 											NULL,
@@ -384,7 +390,7 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 		return false;
 	}
 
-	int num_bytes = avpicture_get_size(PIX_FMT_BGRA, m_width, m_height);
+	int num_bytes = avpicture_get_size(AV_PIX_FMT_BGRA, m_width, m_height);
 	if (num_bytes != image.byteCount())
 	{
 		if (errorString)

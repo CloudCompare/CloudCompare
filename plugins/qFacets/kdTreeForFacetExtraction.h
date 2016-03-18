@@ -21,9 +21,6 @@
 //qCC_db
 #include <ccKdTree.h>
 
-//CCLib
-#include <DistanceComputationTools.h>
-
 class ccKdTreeForFacetExtraction
 {
 public:

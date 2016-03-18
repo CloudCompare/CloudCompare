@@ -76,7 +76,14 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//2D foreground only
 	if (!MACRO_Foreground(context) || !MACRO_Draw2D(context))
 		return;
-
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert( glFunc != nullptr );
+	
+	if ( glFunc == nullptr )
+		return;
+	
 	//test viewport parameters
 	const ccViewportParameters& params = context._win->getViewportParameters();
 
@@ -106,7 +113,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 	}
 
-	glPushAttrib(GL_LINE_BIT);
+	glFunc->glPushAttrib(GL_LINE_BIT);
 
 	float relativeZoom = 1.0f;
 	float dx = 0, dy = 0;
@@ -130,21 +137,21 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	//thick dotted line
-	glLineWidth(2);
-	glLineStipple(1, 0xAAAA);
-	glEnable(GL_LINE_STIPPLE);
+	glFunc->glLineWidth(2);
+	glFunc->glLineStipple(1, 0xAAAA);
+	glFunc->glEnable(GL_LINE_STIPPLE);
 
 	const unsigned char* defaultColor = m_selected ? ccColor::red.rgba : context.textDefaultCol.rgb;
-	glColor3ubv(defaultColor); 
+	glFunc->glColor3ubv(defaultColor); 
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(dx+m_roi[0]*relativeZoom,dy+m_roi[1]*relativeZoom);
-	glVertex2f(dx+m_roi[2]*relativeZoom,dy+m_roi[1]*relativeZoom);
-	glVertex2f(dx+m_roi[2]*relativeZoom,dy+m_roi[3]*relativeZoom);
-	glVertex2f(dx+m_roi[0]*relativeZoom,dy+m_roi[3]*relativeZoom);
-	glEnd();
+	glFunc->glBegin(GL_LINE_LOOP);
+	glFunc->glVertex2f(dx+m_roi[0]*relativeZoom,dy+m_roi[1]*relativeZoom);
+	glFunc->glVertex2f(dx+m_roi[2]*relativeZoom,dy+m_roi[1]*relativeZoom);
+	glFunc->glVertex2f(dx+m_roi[2]*relativeZoom,dy+m_roi[3]*relativeZoom);
+	glFunc->glVertex2f(dx+m_roi[0]*relativeZoom,dy+m_roi[3]*relativeZoom);
+	glFunc->glEnd();
 
-	glPopAttrib();
+	glFunc->glPopAttrib();
 
 	//title
 	QString title(getName());

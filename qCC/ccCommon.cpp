@@ -22,8 +22,8 @@
 //CCLib
 #include <CCPlatform.h>
 
-#define CC_VER_NUM "2.6"
-#define CC_SUB_VER "3" //2016-03-13
+#define CC_VER_NUM "2.7"
+#define CC_SUB_VER "0.beta" //201?-??-??
 
 //! Returns current version as a string
 QString ccCommon::GetCCVersion(bool full/*=true*/)

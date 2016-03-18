@@ -21,9 +21,6 @@
 //qCC
 #include "../ccStdPluginInterface.h"
 
-//Qt
-#include <QObject>
-
 //! Dummy qCC plugin
 /** Replace the 'qDummyPlugin' string by your own plugin class name
 	and then check 'qDummyPlugin.cpp' for more directions (you
@@ -42,10 +39,8 @@ class qDummyPlugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-#ifdef CC_QT5
 	//replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qDummy")
-#endif
 
 public:
 
@@ -53,13 +48,13 @@ public:
 	explicit qDummyPlugin(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "qDummyPlugin"; }
-	virtual QString getDescription() const { return "Dummy plugin (add description here)"; }
-	virtual QIcon getIcon() const;
+	virtual QString getName() const override { return "qDummyPlugin"; }
+	virtual QString getDescription() const override { return "Dummy plugin (add description here)"; }
+	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface
-	void onNewSelection(const ccHObject::Container& selectedEntities);
-	virtual void getActions(QActionGroup& group);
+	void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
 
 protected slots:
 

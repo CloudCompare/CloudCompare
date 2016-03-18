@@ -19,7 +19,6 @@
 #define CC_MESH_GROUP_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericMesh.h"
 
 //! [DEPRECATED] A group of meshes sharing vertices (and associated properties) in a unique cloud
@@ -34,50 +33,49 @@ public:
 	ccMeshGroup() : ccGenericMesh("[Deprecated] Mesh Group") {}
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH_GROUP; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH_GROUP; }
 
 	//inherited methods (ccGenericMesh)
-	virtual ccGenericPointCloud* getAssociatedCloud() const { return 0; }
-	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0, ccMaterialSet* clonedMaterials = 0, NormsIndexesTableType* clonedNormsTable = 0, TextureCoordsContainer* cloneTexCoords = 0) { return 0; }
-	virtual void refreshBB() {};
-	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) { return false; }
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) { return false; }
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) { return false; }
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) { return false; }
-	virtual bool hasMaterials() const { return false; }
-	const ccMaterialSet* getMaterialSet() const { return 0; }
-	virtual int getTriangleMtlIndex(unsigned triangleIndex) const { return -1; }
-	virtual bool hasTextures() const { return false; }
-	virtual TextureCoordsContainer* getTexCoordinatesTable() const { return 0; }
-	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const { tx1 = tx2 = tx3 = 0; }
-	virtual bool hasPerTriangleTexCoordIndexes() const { return false; }
-	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const { i1 = i2 = i3 = -1; }
-	virtual bool hasTriNormals() const { return false; }
-	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const { i1 = i2 = i3 = -1; }
-	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const { return false; }
-	virtual NormsIndexesTableType* getTriNormsTable() const { return 0; }
-	virtual unsigned capacity() const { return 0; }
+	virtual ccGenericPointCloud* getAssociatedCloud() const override { return 0; }
+	virtual void refreshBB() override {}
+	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override { return false; }
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override { return false; }
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override { return false; }
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) override { return false; }
+	virtual bool hasMaterials() const override { return false; }
+	virtual const ccMaterialSet* getMaterialSet() const override { return 0; }
+	virtual int getTriangleMtlIndex(unsigned triangleIndex) const override { return -1; }
+	virtual bool hasTextures() const override { return false; }
+	virtual TextureCoordsContainer* getTexCoordinatesTable() const override { return 0; }
+	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const override { tx1 = tx2 = tx3 = 0; }
+	virtual bool hasPerTriangleTexCoordIndexes() const override { return false; }
+	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override { i1 = i2 = i3 = -1; }
+	virtual bool hasTriNormals() const override { return false; }
+	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override { i1 = i2 = i3 = -1; }
+	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override { return false; }
+	virtual NormsIndexesTableType* getTriNormsTable() const override { return 0; }
+	virtual unsigned capacity() const override { return 0; }
 
 	//inherited methods (ccHObject)
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool isSerializable() const override { return true; }
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
 	//inherited methods (GenericIndexedMesh)
-	virtual unsigned size() const { return 0; }
-	virtual void forEach(genericTriangleAction& action) {}
-	virtual void placeIteratorAtBegining() {}
-	virtual CCLib::GenericTriangle* _getNextTriangle() { return 0; }
-	virtual CCLib::GenericTriangle* _getTriangle(unsigned index) { return 0; }
-	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() { return 0; }
-	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) { return 0; }
-	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) {}
-	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) {};
+	virtual unsigned size() const override { return 0; }
+	virtual void forEach(genericTriangleAction& action) override {}
+	virtual void placeIteratorAtBegining() override {}
+	virtual CCLib::GenericTriangle* _getNextTriangle() override { return 0; }
+	virtual CCLib::GenericTriangle* _getTriangle(unsigned index) override { return 0; }
+	virtual CCLib::VerticesIndexes* getNextTriangleVertIndexes() override { return 0; }
+	virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override { return 0; }
+	virtual void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) override {}
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override {}
 
 protected:
 
 	//inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 };
 
 #endif //CC_MESH_GROUP_HEADER

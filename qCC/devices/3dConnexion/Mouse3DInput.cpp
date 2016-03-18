@@ -23,7 +23,6 @@
 
 //qCC_db
 #include <ccLog.h>
-#include <ccObject.h> //for CC_QT5 def
 //qCC_gl
 #include <ccGLWindow.h>
 //CCLib
@@ -50,22 +49,11 @@ static const double c_3dmouseAngularVelocity = 1.0e-6;
 //unique instance
 static Mouse3DInput* s_mouseInputInstance = 0;
 
-#ifdef CC_QT5
-
 #include <QAbstractNativeEventFilter>
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
 public:
 	virtual bool nativeEventFilter(const QByteArray& eventType, void* msg, long* result) Q_DECL_OVERRIDE
-
-#else //Qt 4
-
-class RawInputEventFilter
-{
-public:
-	static bool Filter(void* msg, long* result)
-
-#endif
 	{
 		if (!s_mouseInputInstance || !msg)
 		{
@@ -90,12 +78,8 @@ Mouse3DInput::Mouse3DInput(QWidget* widget)
 	s_mouseInputInstance = this;
 
 	//setup event filter
-#ifdef CC_QT5
 	static RawInputEventFilter s_rawInputEventFilter;
 	qApp->installNativeEventFilter(&s_rawInputEventFilter);
-#else
-	qApp->setEventFilter(RawInputEventFilter::Filter);
-#endif
 }
 
 Mouse3DInput::~Mouse3DInput()

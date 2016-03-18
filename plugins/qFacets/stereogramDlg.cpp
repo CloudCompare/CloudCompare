@@ -29,9 +29,6 @@
 #include <ccMainAppInterface.h>
 
 //qCC_db
-#include <ccHObject.h>
-#include <ccFacet.h>
-#include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 #include <ccColorScaleSelector.h>
 #include <ccColorScaleEditorDlg.h>

@@ -19,12 +19,9 @@
 #define SCALAR_FIELD_TOOLS_HEADER
 
 //Local
-#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 
-//system
-#include <vector>
 
 namespace CCLib
 {

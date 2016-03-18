@@ -19,11 +19,8 @@
 #define CC_SPHERE_PRIMITIVE_HEADER
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <CCGeom.h>
 
 //! Sphere (primitive)
 /** 3D sphere primitive
@@ -49,12 +46,12 @@ public:
 	ccSphere(QString name = QString("Sphere"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SPHERE; }
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SPHERE; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const { return "Sphere"; }
-	virtual bool hasDrawingPrecision() const { return true; }
-	virtual ccGenericPrimitive* clone() const;
+	virtual QString getTypeName() const override { return "Sphere"; }
+	virtual bool hasDrawingPrecision() const override { return true; }
+	virtual ccGenericPrimitive* clone() const override;
 
 	//! Returns radius
 	inline PointCoordinateType getRadius() const { return m_radius; }
@@ -66,12 +63,12 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-	virtual bool buildUp();
+	virtual bool toFile_MeOnly(QFile& out) const override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool buildUp() override;
 
 	//inherited from ccHObject
-	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context);
+	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context) override;
 
 	//! Radius
 	PointCoordinateType m_radius;

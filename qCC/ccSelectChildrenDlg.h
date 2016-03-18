@@ -22,7 +22,6 @@
 
 //Qt
 #include <QDialog>
-#include <QString>
 
 //qCC_db
 #include <ccObject.h>

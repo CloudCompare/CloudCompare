@@ -24,9 +24,6 @@
 #include "AsciiOpenDlg.h"
 #include "AsciiSaveDlg.h"
 
-//Qt
-#include <QSharedPointer>
-
 template <class T> struct AutoDeletePtr
 {
 	AutoDeletePtr(T* _ptr = 0) : ptr(_ptr) {}

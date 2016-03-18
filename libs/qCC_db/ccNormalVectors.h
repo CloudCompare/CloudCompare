@@ -19,19 +19,13 @@
 #define CC_NORMAL_VECTORS_HEADER
 
 //CCLib
-#include <CCGeom.h>
 #include <GenericIndexedMesh.h>
-#include <GenericProgressCallback.h>
 #include <DgmOctree.h>
 #include <GeometricalAnalysisTools.h>
 
 //Local
-#include "qCC_db.h"
 #include "ccGenericPointCloud.h"
 
-//system
-#include <math.h>
-#include <vector>
 
 //! Compressed normal vectors handler
 class QCC_DB_LIB_API ccNormalVectors

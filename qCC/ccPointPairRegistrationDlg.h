@@ -24,13 +24,9 @@
 //qCC_db
 #include <ccPointCloud.h>
 
-
 //Qt generated dialog
 #include <ui_pointPairRegistrationDlg.h>
 
-//CCLib
-#include <CCGeom.h>
-#include <PointProjectionTools.h>
 
 class ccGenericPointCloud;
 class ccGenericGLDisplay;

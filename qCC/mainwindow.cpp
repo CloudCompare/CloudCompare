@@ -163,7 +163,7 @@ MainWindow::MainWindow()
 	, m_pivotVisibilityPopupButton(0)
 	, m_cpeDlg(0)
 	, m_gsTool(0)
-    , m_tplTool(0)
+	, m_tplTool(0)
 	, m_seTool(0)
 	, m_transTool(0)
 	, m_clipTool(0)
@@ -180,6 +180,9 @@ MainWindow::MainWindow()
 #ifdef Q_OS_MAC
 	actionAbout->setMenuRole( QAction::AboutRole );
 	actionAboutPlugins->setMenuRole( QAction::NoRole );
+	
+	actionFullScreen->setText( tr( "Enter Full Screen" ) );
+	actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
 	
 	//Console
@@ -7672,6 +7675,22 @@ void MainWindow::showEvent(QShowEvent* event)
 		{
 			showMaximized();
 		}
+		
+		if ( isFullScreen() )
+		{			
+			actionFullScreen->setChecked( true );
+		}
+	
+#ifdef Q_OS_MAC
+		if ( isFullScreen() )
+		{
+			actionFullScreen->setText( tr( "Exit Full Screen" ) );
+		}
+		else
+		{
+			actionFullScreen->setText( tr( "Enter Full Screen" ) );
+		}
+#endif
 	}
 }
 
@@ -7810,6 +7829,17 @@ void MainWindow::toggleFullScreen(bool state)
 		showFullScreen();
 	else
 		showNormal();
+	
+#ifdef Q_OS_MAC
+	if ( state )
+	{
+		actionFullScreen->setText( tr( "Exit Full Screen" ) );
+	}
+	else
+	{
+		actionFullScreen->setText( tr( "Enter Full Screen" ) );
+	}
+#endif
 }
 
 void MainWindow::toggleExclusiveFullScreen(bool state)

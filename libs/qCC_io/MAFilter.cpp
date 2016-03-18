@@ -130,7 +130,8 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress nprogress(&pdlg, ((2 + hasColors ? 1 : 0) * numberOfTriangles + (3 + hasColors ? 1 : 0) * numberOfVertexes));
+	const int	coloursAdjustment = (hasColors ? 1 : 0);
+	CCLib::NormalizedProgress nprogress(&pdlg, ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
 	pdlg.setMethodTitle("Save MA file");
 	pdlg.setInfo(qPrintable(QString("Triangles = %1").arg(numberOfTriangles)));
 	pdlg.start();

@@ -13,6 +13,7 @@ extern "C"
 	#include "libavutil/rational.h"
 	#include "libavutil/frame.h"
 	#include "libavutil/avstring.h"
+	#include "libavutil/imgutils.h"
 
 	#include "libswscale/swscale.h"
 }
@@ -219,7 +220,14 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 		return false;
 	}
 
-	avformat_write_header(m_ff->formatContext, NULL);
+	int	err = avformat_write_header(m_ff->formatContext, NULL);
+	
+	if ( err != 0 )
+	{
+		if (errorString)
+			*errorString = QString("Could not write header for '%1'").arg(m_filename);
+		return false;
+	}
 
 	m_isOpen = true;
 
@@ -269,7 +277,7 @@ bool QVideoEncoder::close()
 
 		write_frame(m_ff, &pkt);
 
-		av_free_packet(&pkt);
+		av_packet_unref(&pkt);
 	}
 
 	av_write_trailer(m_ff->formatContext);
@@ -345,7 +353,7 @@ bool QVideoEncoder::encodeImage(const QImage &image, int frameIndex, QString* er
 		}
 	}
 
-	av_free_packet(&pkt);
+	av_packet_unref(&pkt);
 	
 	return true;
 }
@@ -390,7 +398,7 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 		return false;
 	}
 
-	int num_bytes = avpicture_get_size(AV_PIX_FMT_BGRA, m_width, m_height);
+	int num_bytes = av_image_get_buffer_size(AV_PIX_FMT_BGRA, m_width, m_height, 1);
 	if (num_bytes != image.byteCount())
 	{
 		if (errorString)

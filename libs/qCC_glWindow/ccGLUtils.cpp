@@ -32,9 +32,9 @@
 
 //*********** OPENGL TEXTURES ***********//
 
-void ccGLUtils::DisplayTexture2DPosition(QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2DPosition(QImage image, int x, int y, int w, int h, unsigned char alpha/*=255*/)
 {
-	QOpenGLTexture texture(pixmap.toImage());
+	QOpenGLTexture texture(image);
 
 	DisplayTexture2DPosition(texture.textureId(), x, y, w, h, alpha);
 }

@@ -22,7 +22,7 @@
 #include <ccIncludeGL.h> //Always first!
 
 //Qt
-#include <QPixmap>
+#include <QImage>
 
 //! View orientation
 enum CC_VIEW_ORIENTATION {	CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
@@ -43,8 +43,8 @@ public:
 					OpenGL Textures
 	***************************************************/
 
-	static void DisplayTexture2DPosition(QPixmap pixmap, int x, int y, int w, int h, unsigned char alpha = 255);
-	inline static void DisplayTexture2D(QPixmap pixmap, int w, int h, unsigned char alpha = 255) { DisplayTexture2DPosition(pixmap, -w / 2, -h / 2, w, h, alpha); }
+	static void DisplayTexture2DPosition(QImage image, int x, int y, int w, int h, unsigned char alpha = 255);
+	inline static void DisplayTexture2D(QImage image, int w, int h, unsigned char alpha = 255) { DisplayTexture2DPosition(image, -w / 2, -h / 2, w, h, alpha); }
 
 	static void DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int h, unsigned char alpha = 255);
 	inline static void DisplayTexture2D(GLuint texID, int w, int h, unsigned char alpha = 255) { DisplayTexture2DPosition(texID, -w / 2, -h / 2, w, h, alpha); }

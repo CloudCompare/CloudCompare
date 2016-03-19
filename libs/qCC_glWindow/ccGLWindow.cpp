@@ -1179,7 +1179,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 	if (!s_hotZone)
 		s_hotZone = QSharedPointer<HotZone>(new HotZone(this));
 	//"exit" icon
-	static const QPixmap c_exitIcon(":/CC/images/ccExit.png");
+	static const QImage c_exitIcon = QImage(":/CC/images/ccExit.png").mirrored();
 
 	int halfW = m_glViewport.width() / 2;
 	int halfH = m_glViewport.height() / 2;
@@ -1243,7 +1243,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//"minus" icon
 		{
-			static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
+			static const QImage c_psi_minusPix = QImage(":/CC/images/ccMinus.png").mirrored();
 			ccGLUtils::DisplayTexture2DPosition(c_psi_minusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
 			xStart += HotZone::iconSize();
@@ -1260,7 +1260,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//"plus" icon
 		{
-			static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
+			static const QImage c_psi_plusPix = QImage(":/CC/images/ccPlus.png").mirrored();
 			ccGLUtils::DisplayTexture2DPosition(c_psi_plusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
 			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
 			xStart += HotZone::iconSize();

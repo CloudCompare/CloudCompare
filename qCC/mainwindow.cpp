@@ -11289,11 +11289,11 @@ void MainWindow::toggleRotationAboutVertAxis()
 
 		if (isLocked)
 		{
-			win->displayNewMessage(QString("[ROTATION LOCKED]"),ccGLWindow::UPPER_CENTER_MESSAGE,false,24*3600,ccGLWindow::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(QString("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
 		else
 		{
-			win->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
 		win->redraw(true, false);
 	}
@@ -11301,6 +11301,39 @@ void MainWindow::toggleRotationAboutVertAxis()
 
 void MainWindow::doActionEnableBubbleViewMode()
 {
+	//special case: the selected entity is a TLS sensor or a cloud with a TLS sensor
+	if (m_ccRoot)
+	{
+		ccHObject::Container selectedEntities;
+		m_ccRoot->getSelectedEntities(selectedEntities);
+
+		if (selectedEntities.size() == 1)
+		{
+			ccHObject* ent = selectedEntities.front();
+			ccGBLSensor* sensor = 0;
+			if (ent->isA(CC_TYPES::GBL_SENSOR))
+			{
+				sensor = static_cast<ccGBLSensor*>(ent);
+			}
+			else if (ent->isA(CC_TYPES::POINT_CLOUD))
+			{
+				ccHObject::Container sensors;
+				ent->filterChildren(sensors, false, CC_TYPES::GBL_SENSOR, true);
+				if (sensors.size() >= 1)
+				{
+					sensor = static_cast<ccGBLSensor*>(sensors.front());
+				}
+			}
+
+			if (sensor)
+			{
+				sensor->applyViewport();
+				return;
+			}
+		}
+	}
+
+	//otherwise we simply enable the bubble view mode in the active 3D view
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
@@ -11370,7 +11403,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 		double scale = 1.0;
 		//here we must test that coordinates are not too big whatever the case because OpenGL
 		//really doesn't like big ones (even if we work with GLdoubles :( ).
-		if (ccGlobalShiftManager::Handle(P,diag,ccGlobalShiftManager::DIALOG_IF_NECESSARY,false,Pshift,&scale))
+		if (ccGlobalShiftManager::Handle(P, diag, ccGlobalShiftManager::DIALOG_IF_NECESSARY, false, Pshift, &scale))
 		{
 			bool needRescale = (scale != 1.0);
 			bool needShift = (Pshift.norm2() > 0);

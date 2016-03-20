@@ -32,12 +32,12 @@ public:
 	static inline QString GetDefaultExtension() { return "txt"; }
 
 	//inherited from FileIOFilter
-	virtual bool exportSupported() const { return true; }
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
-	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
+	virtual bool exportSupported() const override { return true; }
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
+	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const override;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
 	//direct method to save a sensor (depth map)
 	CC_FILE_ERROR saveToFile(QString filename, ccGBLSensor* sensor);

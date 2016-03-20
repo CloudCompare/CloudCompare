@@ -32,13 +32,13 @@ public:
 	static inline QString GetDefaultExtension() { return "georef"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return false; }
-	virtual bool exportSupported() const { return true; }
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters);
-	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const { return false; }
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
+	virtual bool importSupported() const override { return false; }
+	virtual bool exportSupported() const override { return true; }
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
+	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const override { return false; }
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
 #endif //CC_MASCARET_FILTER_HEADER

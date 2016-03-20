@@ -163,17 +163,16 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 					result = fprintf(mainFile,"#END_POV\n");
 			}
 
-			/*if (++n==palier)
-			{
-				//cancel requested
-				if (pwin->isCancelRequested())
-					result=-1;
+			//if (++n == palier)
+			//{
+			//	//cancel requested
+			//	if (pwin->isCancelRequested())
+			//		result = -1;
 
-				percent += 1.0;
-				pwin->update(percent);
-				n = 0;
-			}
-			//*/
+			//	percent += 1.0;
+			//	pwin->update(percent);
+			//	n = 0;
+			//}
 		}
 	}
 

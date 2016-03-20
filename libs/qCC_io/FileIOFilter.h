@@ -130,6 +130,7 @@ public: //public interface (to be reimplemented by each I/O filter)
 	/** This method must be implemented by children classes.
 		\param entity entity (or group of) to save
 		\param filename filename
+		\param parameters generic saving parameters
 		\return error
 	**/
 	virtual CC_FILE_ERROR saveToFile(	ccHObject* entity,
@@ -184,6 +185,7 @@ public: //static methods
 
 	//! Loads one or more entities from a file with known type
 	/** Shortcut to the other version of FileIOFilter::LoadFromFile
+		\param filename filename
 		\param parameters generic loading parameters
 		\param fileFilter input filter 'file filter' (if empty, the best I/O filter will be guessed from the file extension)
 		\return loaded entities (or 0 if an error occurred)

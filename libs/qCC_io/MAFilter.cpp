@@ -113,14 +113,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		static_cast<ccPointCloud*>(theCloud)->hasColors();
 
 	//and its scalar field
-	/*CCLib::ScalarField* sf = 0;
-	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
-	sf = static_cast<ccPointCloud*>(theCloud)->getCurrentDisplayedScalarField();
+	//ccScalarField* sf = 0;
+	//if (theCloud->isA(CC_TYPES::POINT_CLOUD))
+	//	sf = static_cast<ccPointCloud*>(theCloud)->getCurrentDisplayedScalarField();
 
-	if (!sf)
-		ccLog::Warning("No displayed scalar field! Values will all be 0!\n");
-
-	//*/
+	//if (!sf)
+	//	ccLog::Warning("No displayed scalar field! Values will all be 0!\n");
 
 	//open ASCII file for writing
 	FILE* fp = fopen(qPrintable(filename) , "wt");

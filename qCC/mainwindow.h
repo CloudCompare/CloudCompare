@@ -111,7 +111,7 @@ public:
 
 	//! Tries to load several files (and then pushes them into main DB)
 	/** \param filenames list of all filenames
-		\param fType file type
+		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
 	**/
 	virtual void addToDB(	const QStringList& filenames,

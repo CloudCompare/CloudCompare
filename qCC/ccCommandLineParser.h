@@ -169,12 +169,14 @@ protected:
 
 	//! Saves all clouds
 	/** \param suffix optional suffix
+		\param allAtOnce whether to save all clouds in the same file or one cloud per file
 		\return success
 	**/
 	bool saveClouds(QString suffix = QString(), bool allAtOnce = false);
 
 	//! Saves all meshes
 	/** \param suffix optional suffix
+		\param allAtOnce whether to save all meshes in the same file or one mesh per file
 		\return success
 	**/
 	bool saveMeshes(QString suffix = QString(), bool allAtOnce = false);

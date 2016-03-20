@@ -10404,14 +10404,13 @@ void MainWindow::doActionSaveFile()
 	else if (entitiesToSave.getChildrenNumber() != 0)
 	{
 		//ignored items
-		/*if (hasSerializable)
-		{
-			if (!hasOther)
-				ccConsole::Warning("[I/O] The following selected entites won't be saved:"); //display this warning only if not already done
-			for (unsigned i=0; i<otherSerializable.getChildrenNumber(); ++i)
-				ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
-		}
-		//*/
+		//if (hasSerializable)
+		//{
+		//	if (!hasOther)
+		//		ccConsole::Warning("[I/O] The following selected entites won't be saved:"); //display this warning only if not already done
+		//	for (unsigned i = 0; i < otherSerializable.getChildrenNumber(); ++i)
+		//		ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
+		//}
 
 		result = FileIOFilter::SaveToFile(	entitiesToSave.getChildrenNumber() > 1 ? &entitiesToSave : entitiesToSave.getChild(0),
 											selectedFilename,
@@ -11148,39 +11147,39 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 }
 
 //For primitives test
-/*#include <ccBox.h>
-#include <ccCone.h>
-#include <ccCylinder.h>
-#include <ccTorus.h>
-#include <ccSphere.h>
-#include <ccDish.h>
-#include <ccExtru.h>
+//#include <ccBox.h>
+//#include <ccCone.h>
+//#include <ccCylinder.h>
+//#include <ccTorus.h>
+//#include <ccSphere.h>
+//#include <ccDish.h>
+//#include <ccExtru.h>
+//
+//void doTestPrimitives()
+//{
+//	//PRIMITIVES TEST
+//	addToDB(new ccBox(CCVector3(10, 20, 30)));
+//	addToDB(new ccCone(10, 20, 30));
+//	addToDB(new ccCylinder(20, 30));
+//	addToDB(new ccCone(10, 20, 30, 5, 10));
+//	addToDB(new ccTorus(50, 60, M_PI / 3, false));
+//	addToDB(new ccTorus(50, 60, M_PI / 3, true, 20));
+//	addToDB(new ccSphere(35));
+//	addToDB(new ccDish(35, 15, 0));
+//	addToDB(new ccDish(35, 25, 0));
+//	addToDB(new ccDish(35, 35, 0));
+//	addToDB(new ccDish(35, 15, 15));
+//
+//	std::vector<CCVector2> contour;
+//	contour.push_back(CCVector2(10, 00));
+//	contour.push_back(CCVector2(00, 20));
+//	contour.push_back(CCVector2(15, 25));
+//	contour.push_back(CCVector2(20, 10));
+//	contour.push_back(CCVector2(25, 27));
+//	contour.push_back(CCVector2(18, 35));
+//	contour.push_back(CCVector2(22, 40));
+//	contour.push_back(CCVector2(30, 30));
+//	contour.push_back(CCVector2(27, 05));
+//	addToDB(new ccExtru(contour, 10));
+//}
 
-void doTestPrimitives()
-{
-	//PRIMITIVES TEST
-	addToDB(new ccBox(CCVector3(10,20,30)));
-	addToDB(new ccCone(10,20,30));
-	addToDB(new ccCylinder(20,30));
-	addToDB(new ccCone(10,20,30,5,10));
-	addToDB(new ccTorus(50,60,M_PI/3,false));
-	addToDB(new ccTorus(50,60,M_PI/3,true,20));
-	addToDB(new ccSphere(35));
-	addToDB(new ccDish(35,15,0));
-	addToDB(new ccDish(35,25,0));
-	addToDB(new ccDish(35,35,0));
-	addToDB(new ccDish(35,15,15));
-
-	std::vector<CCVector2> contour;
-	contour.push_back(CCVector2(10,00));
-	contour.push_back(CCVector2(00,20));
-	contour.push_back(CCVector2(15,25));
-	contour.push_back(CCVector2(20,10));
-	contour.push_back(CCVector2(25,27));
-	contour.push_back(CCVector2(18,35));
-	contour.push_back(CCVector2(22,40));
-	contour.push_back(CCVector2(30,30));
-	contour.push_back(CCVector2(27,05));
-	addToDB(new ccExtru(contour,10));
-}
-//*/

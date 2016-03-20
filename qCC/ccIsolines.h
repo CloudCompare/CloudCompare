@@ -573,37 +573,36 @@ protected:
 					continue;
 				}
 
-				/*if (m_contourLength.back() > 1)
-				{
-					size_t vertCount = m_contourX.size();
-					const double& x0 = m_contourX[vertCount-2];
-					const double& y0 = m_contourY[vertCount-2];
-					double& x1 = m_contourX.back();
-					double& y1 = m_contourY.back();
-					double ux = x1 - x0;
-					double uy = y1 - y0;
-					double vx = x2 - x0;
-					double vy = y2 - y0;
-					//test colinearity so as to merge both segments if possible
-					double dotprod = (ux*vx + uy*vy)/ sqrt((vx*vx+vy*vy) * (ux*ux+uy*uy));
-					if (fabsl(dotprod - 1.0) < 1.0e-6)
-					{
-						//merge: we replace the last vertex by this one
-						x1 = x2;
-						y1 = y2;
-						m_contourIndexes.back() = currentCellIndex;
-					}
-					else
-					{
-						//new vertex
-						m_contourX.push_back(x2);
-						m_contourY.push_back(y2);
-						m_contourIndexes.push_back(currentCellIndex);
-						m_contourLength.back()++;
-					}
-				}
-				else
-				//*/
+				//if (m_contourLength.back() > 1)
+				//{
+				//	size_t vertCount = m_contourX.size();
+				//	const double& x0 = m_contourX[vertCount - 2];
+				//	const double& y0 = m_contourY[vertCount - 2];
+				//	double& x1 = m_contourX.back();
+				//	double& y1 = m_contourY.back();
+				//	double ux = x1 - x0;
+				//	double uy = y1 - y0;
+				//	double vx = x2 - x0;
+				//	double vy = y2 - y0;
+				//	//test colinearity so as to merge both segments if possible
+				//	double dotprod = (ux*vx + uy*vy) / sqrt((vx*vx + vy*vy) * (ux*ux + uy*uy));
+				//	if (fabsl(dotprod - 1.0) < 1.0e-6)
+				//	{
+				//		//merge: we replace the last vertex by this one
+				//		x1 = x2;
+				//		y1 = y2;
+				//		m_contourIndexes.back() = currentCellIndex;
+				//	}
+				//	else
+				//	{
+				//		//new vertex
+				//		m_contourX.push_back(x2);
+				//		m_contourY.push_back(y2);
+				//		m_contourIndexes.push_back(currentCellIndex);
+				//		m_contourLength.back()++;
+				//	}
+				//}
+				//else
 				{
 					//new vertex
 					m_contourX.push_back(x2);

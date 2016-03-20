@@ -96,13 +96,12 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_dbTreeWidget->setAcceptDrops(true);
 	m_dbTreeWidget->setDropIndicatorShown(true);
 
-	/*//already done in ui file!
-	m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
-	m_dbTreeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
-	m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
-	m_dbTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	m_dbTreeWidget->setUniformRowHeights(true);
-	//*/
+	//already done in ui file!
+	//m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
+	//m_dbTreeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
+	//m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
+	//m_dbTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	//m_dbTreeWidget->setUniformRowHeights(true);
 
 	//context menu on DB tree elements
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -157,11 +156,10 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	assert(propertiesTreeWidget);
 	m_propertiesTreeWidget = propertiesTreeWidget;
 	m_propertiesModel = new QStandardItemModel(0, 2, parent);
-	/*//already done in ui file!
-	m_propertiesTreeWidget->header()->hide();
-	m_propertiesTreeWidget->setSelectionMode(QAbstractItemView::NoSelection);
-	m_propertiesTreeWidget->setAllColumnsShowFocus(true);
-	//*/
+	//already done in ui file!
+	//m_propertiesTreeWidget->header()->hide();
+	//m_propertiesTreeWidget->setSelectionMode(QAbstractItemView::NoSelection);
+	//m_propertiesTreeWidget->setAllColumnsShowFocus(true);
 	m_ccPropDelegate = new ccPropertiesTreeDelegate(m_propertiesModel, m_propertiesTreeWidget);
 	m_propertiesTreeWidget->setItemDelegate(m_ccPropDelegate);
 	m_propertiesTreeWidget->setModel(m_propertiesModel);
@@ -684,11 +682,10 @@ int ccDBRoot::rowCount(const QModelIndex &parent) const
 int ccDBRoot::columnCount(const QModelIndex &parent) const
 {
 	return 1;
-	/*if (parent.isValid())
-		return static_cast<ccHObject*>(parent.internalPointer())->columnCount();
-	else
-		return m_treeRoot->columnCount();
-	//*/
+	//if (parent.isValid())
+	//	return static_cast<ccHObject*>(parent.internalPointer())->columnCount();
+	//else
+	//	return m_treeRoot->columnCount();
 }
 
 void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelection & deselected)
@@ -1195,40 +1192,39 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			else if (oldParent != newParent)
 			{
 				//a label or a group of labels can't be moved to another cloud!
-				/*ccHObject::Container labels;
-				if (item->isA(CC_TYPES::LABEL_2D))
-					labels.push_back(item);
-				else
-					item->filterChildren(labels,true,CC_TYPES::LABEL_2D);
+				//ccHObject::Container labels;
+				//if (item->isA(CC_TYPES::LABEL_2D))
+				//	labels.push_back(item);
+				//else
+				//	item->filterChildren(labels, true, CC_TYPES::LABEL_2D);
 
-				//for all labels in the sub-tree
-				for (ccHObject::Container::const_iterator it = labels.begin(); it != labels.end(); ++it)
-				{
-					if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
-					{
-						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
-						bool canMove = false;
-						for (unsigned j=0;j<label->size();++j)
-						{
-							assert(label->getPoint(j).cloud);
-							//3 options to allow moving a label:
-							if (item->isAncestorOf(label->getPoint(j).cloud) //label's cloud is inside sub-tree
-								|| newParent == label->getPoint(j).cloud //destination is label's cloud
-								|| label->getPoint(j).cloud->isAncestorOf(newParent)) //destination is below label's cloud
-							{
-								canMove = true;
-								break;
-							}
-						}
+				////for all labels in the sub-tree
+				//for (ccHObject::Container::const_iterator it = labels.begin(); it != labels.end(); ++it)
+				//{
+				//	if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
+				//	{
+				//		cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+				//		bool canMove = false;
+				//		for (unsigned j = 0; j < label->size(); ++j)
+				//		{
+				//			assert(label->getPoint(j).cloud);
+				//			//3 options to allow moving a label:
+				//			if (item->isAncestorOf(label->getPoint(j).cloud) //label's cloud is inside sub-tree
+				//				|| newParent == label->getPoint(j).cloud //destination is label's cloud
+				//				|| label->getPoint(j).cloud->isAncestorOf(newParent)) //destination is below label's cloud
+				//			{
+				//				canMove = true;
+				//				break;
+				//			}
+				//		}
 
-						if (!canMove)
-						{
-							ccLog::Error("Labels (or group of) can't leave their parent");
-							return false;
-						}
-					}
-				}
-				//*/
+				//		if (!canMove)
+				//		{
+				//			ccLog::Error("Labels (or group of) can't leave their parent");
+				//			return false;
+				//		}
+				//	}
+				//}
 			}
 		}
 

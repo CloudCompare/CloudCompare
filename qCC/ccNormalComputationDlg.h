@@ -33,10 +33,11 @@ class ccNormalComputationDlg : public QDialog, public Ui::NormalComputationDlg
 
 public:
 
+	//! Types of the clouds in the current selection (i.e. with or without scan grids)
 	enum SelectionMode { WITH_SCAN_GRIDS = 1, WITHOUT_SCAN_GRIDS = 2, MIXED = 3 };
 
 	//! Default constructor
-	/** \param selectionModes selection modes (see Modes)
+	/** \param selectionMode selection mode
 		\param parent parent widget
 	**/
 	explicit ccNormalComputationDlg(SelectionMode selectionMode, QWidget* parent = 0);

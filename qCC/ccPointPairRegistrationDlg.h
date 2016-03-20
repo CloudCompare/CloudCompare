@@ -115,7 +115,7 @@ protected:
 
 	//! Converts a picked point to a sphere center (if necessary)
 	/** \param P input point (may be converted to a sphere center)
-		\param associated entity
+		\param entity associated entity
 		\param sphereRadius the detected spherer radius (or -1 if no sphere)
 		\return whether the point can be used or not
 	**/

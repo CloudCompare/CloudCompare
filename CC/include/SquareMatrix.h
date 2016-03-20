@@ -250,25 +250,6 @@ namespace CCLib
 			return *this;
 		}
 
-		//! In-place multiplication by a vector
-		/** Vec must have the same size as matrix. Returns Vec = M.Vec.
-		**/
-		//DGM: deprecated, too slow!
-		/*inline void apply(Scalar Vec[]) const
-		{
-			//we apply matrix to Vec and get the result in a (temporary) vector
-			Scalar* V = new Scalar[m_matrixSize];
-			if (V)
-			{
-				apply(Vec,V);
-				//we copy the result to Vec
-				memcpy(Vec,V,sizeof(Scalar)*m_matrixSize);
-				//we release temp vector
-				delete[] V;
-			}
-		}
-		//*/
-
 		//! Multiplication by a vector
 		/** Vec must have the same size as matrix.
 			Returns result = M.Vec.

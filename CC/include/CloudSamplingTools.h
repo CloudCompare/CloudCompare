@@ -148,6 +148,7 @@ public:
 		It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
 		\param cloud the point cloud to resample
 		\param minDistance the distance under which a point in the resulting cloud cannot have any neighbour
+		\param modParams parameters of the subsampling behavior modulation with a scalar field (optional)
 		\param octree associated octree if available
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return a reference cloud corresponding to the resampling 'selection'

@@ -391,18 +391,20 @@ public:
 	/** \param i the cell coordinate along the X dimension
 		\param j the cell coordinate along the Y dimension
 		\param k the cell coordinate along the Z dimension
+		\param value new cell value
 	**/
 	inline void setValue(int i, int j, int k, GridElement value)
 	{
-		m_grid[pos2index(i,j,k)] = value;
+		m_grid[pos2index(i, j, k)] = value;
 	}
 
 	//! Sets the value of a given cell
 	/** \param cellPos the cell position
+		\param value new cell value
 	**/
 	inline void setValue(Tuple3i& cellPos, GridElement value)
 	{
-		m_grid[pos2index(cellPos.x,cellPos.y,cellPos.z)] = value;
+		m_grid[pos2index(cellPos.x, cellPos.y, cellPos.z)] = value;
 	}
 
 	//! Returns the value of a given cell (const version)
@@ -413,7 +415,7 @@ public:
 	**/
 	inline const GridElement& getValue(int i, int j, int k) const
 	{
-		return m_grid[pos2index(i,j,k)];
+		return m_grid[pos2index(i, j, k)];
 	}
 	//! Returns the value of a given cell
 	/** \param i the cell coordinate along the X dimension

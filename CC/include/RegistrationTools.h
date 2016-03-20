@@ -163,11 +163,12 @@ public:
 		\param modelCloud the reference cloud or the vertices of the reference mesh --> won't move
 		\param modelMesh the reference mesh (optional) --> won't move
 		\param dataCloud the cloud to register --> will move
-		\param totalTrans the resulting transformation (once the algorithm has converged)
+		\param[out] totalTrans the resulting transformation (once the algorithm has converged)
 		\param convType convergence type
 		\param minRMSDecrease the minimum error (RMS) reduction between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
 		\param nbMaxIterations the maximum number of iteration (ignored if convType is not MAX_ITER_CONVERGENCE)
-		\param finalRMS [output] final error (RMS)
+		\param[out] finalRMS final error (RMS)
+		\param[out] finalPointCount number of points used to compute the final RMS
 		\param adjustScale release the scale during the registration procedure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param filterOutFarthestPoints if true, the algorithm will automatically ignore farthest points from the reference, for better convergence

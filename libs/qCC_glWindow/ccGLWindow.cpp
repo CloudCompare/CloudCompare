@@ -901,7 +901,7 @@ void ccGLWindow::initializeGL()
 	//no global ambient
 	glFunc->glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ccColor::night.rgba);
 
-	ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::initializeGL");
+	LogGLError(glFunc->glGetError(), "ccGLWindow::initializeGL");
 }
 
 void ccGLWindow::uninitializeGL()
@@ -1019,7 +1019,7 @@ void ccGLWindow::resizeGL(int w, int h)
 						2,
 						SCREEN_SIZE_MESSAGE);
 
-	ccGLUtils::CatchGLError(functions()->glGetError(), "ccGLWindow::resizeGL");
+	LogGLError(functions()->glGetError(), "ccGLWindow::resizeGL");
 }
 
 bool ccGLWindow::setLODEnabled(bool state, bool autoDisable/*=false*/)
@@ -1612,7 +1612,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			m_winDBRoot->draw(CONTEXT);
 	}
 
-	ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::drawBackground");
+	LogGLError(glFunc->glGetError(), "ccGLWindow::drawBackground");
 }
 
 void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
@@ -1713,7 +1713,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		bindFBO(currentFBO);
 
 		renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
-		ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO start)");
+		LogGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO start)");
 
 		if (m_showDebugTraces)
 		{
@@ -1852,7 +1852,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		//we disable fbo (if any)
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
-			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
+			LogGLError(glFunc->glGetError(), "ccGLWindow::fullRenderingPass (FBO stop)");
 			bindFBO(0);
 			m_updateFBO = false;
 		}
@@ -1876,7 +1876,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
-				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
+				LogGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
 				bindFBO(0); //in case the active filter has used a FBOs!
 
 				//if capture mode is ON: we only want to capture it, not to display it
@@ -2273,7 +2273,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		glDisableSunLight();
 	}
 
-	ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::draw3D");
+	LogGLError(glFunc->glGetError(), "ccGLWindow::draw3D");
 }
 
 void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
@@ -2451,7 +2451,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 		}
 	}
 
-	ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::drawForeground");
+	LogGLError(glFunc->glGetError(), "ccGLWindow::drawForeground");
 }
 
 void ccGLWindow::stopLODCycle()
@@ -3630,14 +3630,12 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			if (!m_mouseMoved)
 			{
 				if (m_pickingMode != NO_PICKING
-					/*//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
-					&&	m_pickingMode != POINT_PICKING
-					&&	m_pickingMode != TRIANGLE_PICKING
-					&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
-					//*/
-					&&
-					(QApplication::keyboardModifiers() == Qt::NoModifier
-					|| QApplication::keyboardModifiers() == Qt::ControlModifier))
+					//DGM: in fact we still need to move labels in those modes below (see the 'Point Picking' tool of CloudCompare for instance)
+					//&&	m_pickingMode != POINT_PICKING
+					//&&	m_pickingMode != TRIANGLE_PICKING
+					//&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
+					&& (	QApplication::keyboardModifiers() == Qt::NoModifier
+						||	QApplication::keyboardModifiers() == Qt::ControlModifier) )
 				{
 					updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
 				}
@@ -4227,7 +4225,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
-		ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::startPicking.draw(3D)");
+		LogGLError(glFunc->glGetError(), "ccGLWindow::startPicking.draw(3D)");
 	}
 
 	//2D objects picking
@@ -4266,7 +4264,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
 
-		ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::startPicking.draw(2D)");
+		LogGLError(glFunc->glGetError(), "ccGLWindow::startPicking.draw(2D)");
 	}
 
 	glFunc->glFlush();
@@ -4274,7 +4272,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	// returning to normal rendering mode
 	int hits = glFunc->glRenderMode(GL_RENDER);
 
-	ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::startPicking.render");
+	LogGLError(glFunc->glGetError(), "ccGLWindow::startPicking.render");
 
 	ccLog::PrintDebug("[Picking] hits: %i", hits);
 	if (hits < 0)
@@ -5437,14 +5435,14 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			//enable the FBO
 			bindFBO(fbo);
-			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO start");
+			LogGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO start");
 
 			fullRenderingPass(CONTEXT, renderingParams);
 
 			setZoom(originalZoom);
 
 			//disable the FBO
-			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
+			LogGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/FBO stop");
 			bindFBO(0);
 
 			m_stereoModeEnabled = stereoModeWasEnabled;
@@ -5480,7 +5478,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom * zoomFactor; //TODO: doesn't work well with EDL in perspective mode!
 				//apply shader
 				filter->shade(depthTex, colorTex, parameters);
-				ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
+				LogGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
 
 				//in render mode we only want to capture it, not to display it
 				bindFBO(fbo);
@@ -5538,7 +5536,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			}
 			glFunc->glReadBuffer(GL_NONE);
 
-			ccGLUtils::CatchGLError(glFunc->glGetError(), "ccGLWindow::renderToFile");
+			LogGLError(glFunc->glGetError(), "ccGLWindow::renderToFile");
 
 			//restore the default FBO
 			bindFBO(0);
@@ -6223,6 +6221,37 @@ void ccGLWindow::renderText(double x, double y, double z, const QString & str, c
 	if (camera.project(CCVector3d(x, y, z), Q2D))
 	{
 		renderText(Q2D.x, Q2D.z, str, font);
+	}
+}
+
+void ccGLWindow::LogGLError(GLenum err, const char* context)
+{
+	//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
+	switch (err)
+	{
+	case GL_NO_ERROR:
+		break;
+	case GL_INVALID_ENUM:
+		ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
+		break;
+	case GL_INVALID_VALUE:
+		ccLog::Warning("[%s] OpenGL error: invalid value", context);
+		break;
+	case GL_INVALID_OPERATION:
+		ccLog::Warning("[%s] OpenGL error: invalid operation", context);
+		break;
+	case GL_STACK_OVERFLOW:
+		ccLog::Error("[%s] OpenGL error: stack overflow", context);
+		break;
+	case GL_STACK_UNDERFLOW:
+		ccLog::Error("[%s] OpenGL error: stack underflow", context);
+		break;
+	case GL_OUT_OF_MEMORY:
+		ccLog::Error("[%s] OpenGL error: out of memory", context);
+		break;
+	case GL_INVALID_FRAMEBUFFER_OPERATION:
+		ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
+		break;
 	}
 }
 

@@ -59,18 +59,6 @@ public:
 	**/
 	static ccGLMatrixd GenerateViewMat(CC_VIEW_ORIENTATION orientation);
 
-	/***************************************************
-					OpenGL Helpers
-	***************************************************/
-
-	//! Catches last GL error (if any)
-	/** Displays an error message. In debug mode, pauses execution
-		and then exits.
-		\param context name of the method/object that try to catch the error
-		\return true if an error occurred, false otherwise
-	**/
-	static bool CatchGLError(GLenum error, const char* context);
-
 };
 
 #endif //CC_GL_UTILS_HEADER

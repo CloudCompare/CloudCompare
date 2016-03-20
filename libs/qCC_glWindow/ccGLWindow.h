@@ -960,6 +960,16 @@ protected: //other methods
 	//! Returns the set of OpenGL functions
 	inline ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
 
+	//! Logs a GL error
+	/** Logs a warning or error message corresponding to the input GL error.
+		If error == GL_NO_ERROR, nothing is logged.
+
+		\param error GL error code
+		\param context name of the method/object that catched the error
+		\return true if an error occurred, false otherwise
+	**/
+	static void LogGLError(GLenum error, const char* context);
+
 protected: //members
 
 	//! GL names picking buffer

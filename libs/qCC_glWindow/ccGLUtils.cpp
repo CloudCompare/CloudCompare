@@ -129,38 +129,3 @@ ccGLMatrixd ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 
 	return ccGLMatrixd::FromViewDirAndUpDir(center-eye,top);
 }
-
-bool ccGLUtils::CatchGLError(GLenum err, const char* context)
-{
-	//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
-	switch(err)
-	{
-	case GL_NO_ERROR:
-		return false;
-		break;
-	case GL_INVALID_ENUM:
-		ccLog::Warning("[%s] OpenGL error: invalid enumerator",context);
-		break;
-	case GL_INVALID_VALUE:
-		ccLog::Warning("[%s] OpenGL error: invalid value",context);
-		break;
-	case GL_INVALID_OPERATION:
-		ccLog::Warning("[%s] OpenGL error: invalid operation",context);
-		break;
-	case GL_STACK_OVERFLOW:
-		ccLog::Error("[%s] OpenGL error: stack overflow",context);
-		break;
-	case GL_STACK_UNDERFLOW:
-		ccLog::Error("[%s] OpenGL error: stack underflow",context);
-		break;
-	case GL_OUT_OF_MEMORY:
-		ccLog::Error("[%s] OpenGL error: out of memory",context);
-		break;
-	case GL_INVALID_FRAMEBUFFER_OPERATION:
-		ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation",context);
-		break;
-	}
-
-	return true;
-}
-

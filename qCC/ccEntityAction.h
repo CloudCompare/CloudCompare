@@ -25,11 +25,23 @@ class QWidget;
 
 namespace ccEntityAction
 {
+	// Colours
 	void	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent = nullptr);
 	void	rgbToGreyScale(ccHObject::Container &selectedEntities);
 	void	setColorGradient(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
 	void	changeColorLevels(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
 	void	interpolateColors(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	
+	// Scalar Fields
+	void	sfGaussianFilter(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfBilateralFilter(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfConvertToRGB(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfConvertToRandomRGB(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfRename(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfAddIdField(ccHObject::Container &selectedEntities);
+	void	sfAsCoord(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	
+	// Normals
 	void	invertNormals(ccHObject::Container &selectedEntities);
 	
 	//! Normals conversion destinations

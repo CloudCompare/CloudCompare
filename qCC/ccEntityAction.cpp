@@ -16,32 +16,37 @@
 //##########################################################################
 
 #include <QColorDialog>
+#include <QElapsedTimer>
 #include <QInputDialog>
+#include <QMessageBox>
 
-#include "ScalarField.h"
+#include "ScalarFieldTools.h"
 
 #include "ccCommon.h"
 #include "ccConsole.h"
 #include "ccGenericPrimitive.h"
 #include "ccHObjectCaster.h"
-#include "ccPointCloud.h"
-#include "ccMesh.h"
+#include "ccOctree.h"
 #include "ccScalarField.h"
 
 #include "ccColorScalesManager.h"
 #include "ccFacet.h"
-#include "ccPolyline.h"
 
+#include "ccAskTwoDoubleValuesDlg.h"
 #include "ccColorGradientDlg.h"
 #include "ccColorLevelsDlg.h"
+#include "ccExportCoordToSFDlg.h"
 #include "ccProgressDialog.h"
 
 #include "ccEntityAction.h"
+#include "ccLibAlgorithms.h"
 #include "ccUtils.h"
 
 
 namespace ccEntityAction
 {
+	//////////
+	// Colours
 	void setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
 	{
 		QColor colour = QColorDialog::getColor(Qt::white, parent);
@@ -303,11 +308,9 @@ namespace ccEntityAction
 		bool ok = false;
 		unsigned char defaultLevel = 7;
 		int value = QInputDialog::getInt(parent,
-													"Interpolate colors",
-													"Octree level",
+													"Interpolate colors", "Octree level",
 													defaultLevel,
-													1,
-													CCLib::DgmOctree::MAX_OCTREE_LEVEL,
+													1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
 													1,
 													&ok);
 		if (!ok)
@@ -328,6 +331,489 @@ namespace ccEntityAction
 		
 		ent2->prepareDisplayForRefresh_recursive();
 	}
+	
+	//////////
+	// Scalar Fields
+	
+	void sfGaussianFilter(ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		size_t selNum = selectedEntities.size();
+		if (selNum == 0)
+			return;
+		
+		double sigma = ccLibAlgorithms::GetDefaultCloudKernelSize(selectedEntities);
+		if (sigma < 0.0)
+		{
+			ccConsole::Error("No eligible point cloud in selection!");
+			return;
+		}
+		
+		bool ok = false;
+		sigma = QInputDialog::getDouble(parent,
+												  "Gaussian filter", "sigma:",
+												  sigma,
+												  DBL_MIN,1.0e9,
+												  8,
+												  &ok);
+		if (!ok)
+			return;
+		
+		for (size_t i=0; i<selNum; ++i)
+		{
+			bool lockedVertices = false;
+			ccHObject* ent = selectedEntities[i];
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			if (!pc || lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
+			}
+			
+			//la methode est activee sur le champ scalaire affiche
+			CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			if (sf != nullptr)
+			{
+				//on met en lecture (OUT) le champ scalaire actuellement affiche
+				int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+				Q_ASSERT(outSfIdx >= 0);
+				
+				pc->setCurrentOutScalarField(outSfIdx);
+				CCLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+				Q_ASSERT(sf != nullptr);
+				
+				QString sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(sigma);
+				int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+				if (sfIdx < 0)
+					sfIdx = pc->addScalarField(qPrintable(sfName)); //output SF has same type as input SF
+				if (sfIdx >= 0)
+					pc->setCurrentInScalarField(sfIdx);
+				else
+				{
+					ccConsole::Error(QString("Failed to create scalar field for cloud '%1' (not enough memory?)").arg(pc->getName()));
+					continue;
+				}
+				
+				ccOctree* octree = pc->getOctree();
+				if (!octree)
+				{
+					ccProgressDialog pDlg(true, parent);
+					octree = pc->computeOctree(&pDlg);
+					if (!octree)
+					{
+						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+						continue;
+					}
+				}
+				
+				if (octree)
+				{
+					ccProgressDialog pDlg(true, parent);
+					QElapsedTimer eTimer;
+					eTimer.start();
+					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
+																							  pc,
+																							  -1,
+																							  &pDlg,
+																							  octree);
+					ccConsole::Print("[GaussianFilter] Timing: %3.2f s.",static_cast<double>(eTimer.elapsed())/1.0e3);
+					pc->setCurrentDisplayedScalarField(sfIdx);
+					pc->showSF(sfIdx >= 0);
+					sf = pc->getCurrentDisplayedScalarField();
+					if (sf)
+						sf->computeMinAndMax();
+					pc->prepareDisplayForRefresh_recursive();
+				}
+				else
+				{
+					ccConsole::Error(QString("Failed to compute entity [%1] octree! (not enough memory?)").arg(pc->getName()));
+				}
+			}
+			else
+			{
+				ccConsole::Warning(QString("Entity [%1] has no active scalar field!").arg(pc->getName()));
+			}
+		}
+	}
+	
+	void	sfBilateralFilter(ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		size_t selNum = selectedEntities.size();
+		if (selNum == 0)
+			return;
+		
+		double sigma = ccLibAlgorithms::GetDefaultCloudKernelSize(selectedEntities);
+		if (sigma < 0.0)
+		{
+			ccConsole::Error("No eligible point cloud in selection!");
+			return;
+		}
+		
+		//estimate a good value for scalar field sigma, based on the first cloud
+		//and its displayed scalar field
+		ccPointCloud* pc_test = ccHObjectCaster::ToPointCloud(selectedEntities[0]);
+		CCLib::ScalarField* sf_test = pc_test->getCurrentDisplayedScalarField();
+		ScalarType range = sf_test->getMax() - sf_test->getMin();
+		double scalarFieldSigma = range / 4; // using 1/4 of total range
+		
+		
+		ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma",
+											 DBL_MIN, 1.0e9,
+											 sigma, scalarFieldSigma,
+											 8, nullptr, parent);
+		dlg.doubleSpinBox1->setStatusTip("3*sigma = 98% attenuation");
+		dlg.doubleSpinBox2->setStatusTip("Scalar field's sigma controls how much the filter behaves as a Gaussian Filter\n sigma at +inf uses the whole range of scalars ");
+		if (!dlg.exec())
+			return;
+		
+		//get values
+		sigma = dlg.doubleSpinBox1->value();
+		scalarFieldSigma = dlg.doubleSpinBox2->value();
+		
+		for (size_t i=0; i<selNum; ++i)
+		{
+			bool lockedVertices = false;
+			ccHObject* ent = selectedEntities[i];
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			if (!pc || lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
+			}
+			
+			//the algorithm will use the currently displayed SF
+			CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			if (sf)
+			{
+				//we set the displayed SF as "OUT" SF
+				int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+				assert(outSfIdx >= 0);
+				
+				pc->setCurrentOutScalarField(outSfIdx);
+				CCLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+				assert(sf);
+				
+				QString sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(sigma).arg(scalarFieldSigma);
+				int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+				if (sfIdx < 0)
+					sfIdx = pc->addScalarField(qPrintable(sfName)); //output SF has same type as input SF
+				if (sfIdx >= 0)
+					pc->setCurrentInScalarField(sfIdx);
+				else
+				{
+					ccConsole::Error(QString("Failed to create scalar field for cloud '%1' (not enough memory?)").arg(pc->getName()));
+					continue;
+				}
+				
+				ccOctree* octree = pc->getOctree();
+				if (!octree)
+				{
+					ccProgressDialog pDlg(true,parent);
+					octree = pc->computeOctree(&pDlg);
+					if (!octree)
+					{
+						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+						continue;
+					}
+				}
+				
+				assert(octree);
+				{
+					ccProgressDialog pDlg(true,parent);
+					QElapsedTimer eTimer;
+					eTimer.start();
+					
+					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
+																							  pc,
+																							  static_cast<PointCoordinateType>(scalarFieldSigma),
+																							  &pDlg,
+																							  octree);
+					ccConsole::Print("[BilateralFilter] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
+					pc->setCurrentDisplayedScalarField(sfIdx);
+					pc->showSF(sfIdx >= 0);
+					sf = pc->getCurrentDisplayedScalarField();
+					if (sf)
+						sf->computeMinAndMax();
+					pc->prepareDisplayForRefresh_recursive();
+				}
+			}
+			else
+			{
+				ccConsole::Warning(QString("Entity [%1] has no active scalar field!").arg(pc->getName()));
+			}
+		}
+	}
+	
+	void sfConvertToRGB(ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		//we first ask the user if the SF colors should be mixed with existing colors
+		bool mixWithExistingColors = false;
+		
+		QMessageBox::StandardButton answer = QMessageBox::warning(parent,
+																					 "Scalar Field to RGB",
+																					 "Mix with existing colors (if any)?",
+																					 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+																					 QMessageBox::Yes );
+		if (answer == QMessageBox::Yes)
+			mixWithExistingColors = true;
+		else if (answer == QMessageBox::Cancel)
+			return;
+		
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccGenericPointCloud* cloud = nullptr;
+			ccHObject* ent = selectedEntities[i];
+			
+			bool lockedVertices = false;
+			cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			if (lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
+			}
+			if (cloud != nullptr) //TODO
+			{
+				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+				//if there is no displayed SF --> nothing to do!
+				if (pc->getCurrentDisplayedScalarField())
+				{
+					if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+					{
+						ent->showColors(true);
+						ent->showSF(false);
+					}
+				}
+				
+				cloud->prepareDisplayForRefresh_recursive();
+			}
+		}
+	}
+	
+	void	sfConvertToRandomRGB(ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		static int s_randomColorsNumber = 256;
+		
+		bool ok = false;
+		s_randomColorsNumber = QInputDialog::getInt(parent,
+																  "Random colors",
+																  "Number of random colors (will be regularly sampled over the SF interval):",
+																  s_randomColorsNumber,
+																  2, 2147483647,
+																  16,
+																  &ok);
+		if (!ok)
+			return;
+		Q_ASSERT(s_randomColorsNumber > 1);
+		
+		ColorsTableType* randomColors = new ColorsTableType;
+		if (!randomColors->reserve(static_cast<unsigned>(s_randomColorsNumber)))
+		{
+			ccConsole::Error("Not enough memory!");
+			return;
+		}
+		
+		//generate random colors
+		for (int i=0; i<s_randomColorsNumber; ++i)
+		{
+			ccColor::Rgb col = ccColor::Generator::Random();
+			randomColors->addElement(col.rgb);
+		}
+		
+		//apply random colors
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccGenericPointCloud* cloud = nullptr;
+			ccHObject* ent = selectedEntities[i];
+			
+			bool lockedVertices = false;
+			cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			if (lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
+			}
+			if (cloud != nullptr) //TODO
+			{
+				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+				//if there is no displayed SF --> nothing to do!
+				if (sf && sf->currentSize() >= pc->size())
+				{
+					if (!pc->resizeTheRGBTable(false))
+					{
+						ccConsole::Error("Not enough memory!");
+						break;
+					}
+					else
+					{
+						ScalarType minSF = sf->getMin();
+						ScalarType maxSF = sf->getMax();
+						
+						ScalarType step = (maxSF-minSF)/(s_randomColorsNumber-1);
+						if (step == 0)
+							step = static_cast<ScalarType>(1.0);
+						
+						for (unsigned i=0; i<pc->size(); ++i)
+						{
+							ScalarType val = sf->getValue(i);
+							unsigned colIndex = static_cast<unsigned>((val-minSF)/step);
+							if (colIndex == s_randomColorsNumber)
+								--colIndex;
+							
+							pc->setPointColor(i,randomColors->getValue(colIndex));
+						}
+						
+						pc->showColors(true);
+						pc->showSF(false);
+					}
+				}
+				
+				cloud->prepareDisplayForRefresh_recursive();
+			}
+		}
+	}
+	
+	void sfRename(ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+			if (cloud != nullptr) //TODO
+			{
+				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+				//if there is no displayed SF --> nothing to do!
+				if (sf == nullptr)
+				{
+					ccConsole::Warning(QString("Cloud %1 has no displayed scalar field!").arg(pc->getName()));
+				}
+				else
+				{
+					const char* sfName = sf->getName();
+					bool ok = false;
+					QString newName = QInputDialog::getText(parent,
+																		 "SF name", "name:",
+																		 QLineEdit::Normal,
+																		 QString(sfName ? sfName : "unknown"),
+																		 &ok);
+					if (ok)
+						sf->setName(qPrintable(newName));
+				}
+			}
+		}
+	}
+	
+	void	sfAddIdField(ccHObject::Container &selectedEntities)
+	{
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+			if (cloud != nullptr) //TODO
+			{
+				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+	
+				int sfIdx = pc->getScalarFieldIndexByName(CC_DEFAULT_ID_SF_NAME);
+				if (sfIdx < 0)
+					sfIdx = pc->addScalarField(CC_DEFAULT_ID_SF_NAME);
+				if (sfIdx < 0)
+				{
+					ccLog::Warning("Not enough memory!");
+					return;
+				}
+	
+				CCLib::ScalarField* sf = pc->getScalarField(sfIdx);
+				Q_ASSERT(sf->currentSize() == pc->size());
+	
+				for (unsigned j=0 ; j<cloud->size(); j++)
+				{
+					ScalarType idValue = static_cast<ScalarType>(j);
+					sf->setValue(j, idValue);
+				}
+	
+				sf->computeMinAndMax();
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				pc->showSF(true);
+				pc->prepareDisplayForRefresh();
+			}
+		}
+	}
+	
+	void	sfAsCoord(ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		ccExportCoordToSFDlg ectsDlg(parent);
+		ectsDlg.warningLabel->setVisible(false);
+		ectsDlg.setWindowTitle("Export SF to coordinate(s)");
+	
+		if (!ectsDlg.exec())
+			return;
+	
+		bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
+		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+			return;
+	
+		//for each selected cloud (or vertices set)
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(selectedEntities[i]);
+			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+			{
+				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+	
+				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+				if (sf != nullptr)
+				{
+					unsigned ptsCount = pc->size();
+					bool hasDefaultValueForNaN = false;
+					ScalarType defaultValueForNaN = sf->getMin();
+	
+					for (unsigned i=0; i<ptsCount; ++i)
+					{
+						ScalarType s = sf->getValue(i);
+	
+						//handle NaN values
+						if (!CCLib::ScalarField::ValidValue(s))
+						{
+							if (!hasDefaultValueForNaN)
+							{
+								bool ok = false;
+								double out = QInputDialog::getDouble(parent,
+																				 "SF --> coordinate",
+																				 "Enter the coordinate equivalent for NaN values:",
+																				 defaultValueForNaN, -1.0e9,
+																				 1.0e9, 6,
+																				 &ok);
+								if (ok)
+									defaultValueForNaN = static_cast<ScalarType>(out);
+								else
+									ccLog::Warning("[SetSFAsCoord] By default the coordinate equivalent for NaN values will be the minimum SF value");
+								hasDefaultValueForNaN = true;
+							}
+							s = defaultValueForNaN;
+						}
+	
+						CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
+	
+						//test each dimension
+						if (exportDim[0])
+							P->x = s;
+						if (exportDim[1])
+							P->y = s;
+						if (exportDim[2])
+							P->z = s;
+					}
+	
+					pc->invalidateBoundingBox();
+				}
+			}
+		}
+	}
+	
+	//////////
+	// Normals
 	
 	void	invertNormals(ccHObject::Container &selectedEntities)
 	{

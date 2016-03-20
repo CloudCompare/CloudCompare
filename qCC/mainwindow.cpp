@@ -1197,7 +1197,7 @@ void MainWindow::doActionRGBToGreyScale()
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 			continue;
 		}
 
@@ -1249,7 +1249,7 @@ void MainWindow::doActionSetColorGradient()
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -1288,7 +1288,7 @@ void MainWindow::doActionChangeColorLevels()
 	if (!pointCloud || lockedVertices)
 	{
 		if (lockedVertices)
-			DisplayLockedVerticesWarning(pointCloud->getName(),true);
+			ccUtils::DisplayLockedVerticesWarning(pointCloud->getName(),true);
 		return;
 	}
 
@@ -1381,7 +1381,7 @@ void MainWindow::doActionInvertNormals()
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -1422,7 +1422,7 @@ void MainWindow::doActionConvertNormalsTo(NORMAL_CONVERSION_DEST dest)
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 

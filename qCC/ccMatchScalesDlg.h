@@ -21,7 +21,7 @@
 #include <ui_matchScalesDlg.h>
 
 //Local
-#include "mainwindow.h"
+#include "ccLibAlgorithms.h"
 
 
 
@@ -38,12 +38,10 @@ public:
 	int getSelectedIndex() const;
 
 	//! Sets the selected matching algorithm
-	void setSelectedAlgorithm(MainWindow::ScaleMatchingAlgorithm algorithm);
+	void setSelectedAlgorithm(ccLibAlgorithms::ScaleMatchingAlgorithm algorithm);
 
 	//! Returns the selected matching algorithm
-	MainWindow::ScaleMatchingAlgorithm getSelectedAlgorithm() const;
-
-
+	ccLibAlgorithms::ScaleMatchingAlgorithm getSelectedAlgorithm() const;
 };
 
 #endif //CC_ENTITY_PICKER_DIALOG_HEADER

@@ -58,6 +58,7 @@
 
 //local includes
 #include "ccConsole.h"
+#include "ccEntityAction.h"
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
 #include "ccLibAlgorithms.h"
@@ -83,7 +84,6 @@
 #include "ccClippingBoxTool.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccComparisonDlg.h"
-#include "ccColorGradientDlg.h"
 #include "ccAskTwoDoubleValuesDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccPtsSamplingDlg.h"
@@ -113,7 +113,6 @@
 #include "ccComputeOctreeDlg.h"
 #include "ccAdjustZoomDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
-#include "ccColorLevelsDlg.h"
 #include "ccSORFilterDlg.h"
 #include "ccNoiseFilterDlg.h"
 #include "ccEntityPickerDlg.h"
@@ -123,9 +122,9 @@
 #include "ccStereoModeDlg.h"
 
 //other
-#include "ccRegistrationTools.h"
-#include "ccPersistentSettings.h"
 #include "ccCropTool.h"
+#include "ccPersistentSettings.h"
+#include "ccRegistrationTools.h"
 #include "ccUtils.h"
 
 //3D mouse handler
@@ -1087,100 +1086,7 @@ void MainWindow::doActionSetUniqueColor()
 
 void MainWindow::doActionSetColor(bool colorize)
 {
-	//ask for color choice
-	QColor newCol = QColorDialog::getColor(Qt::white, this);
-
-	if (!newCol.isValid())
-		return;
-
-	ccHObject::Container selectedEntities = m_selectedEntities;
-	while (!selectedEntities.empty())
-	{
-		ccHObject* ent = selectedEntities.back();
-		selectedEntities.pop_back();
-		if (ent->isA(CC_TYPES::HIERARCHY_OBJECT))
-		{
-			//automatically parse a group's children set
-			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
-				selectedEntities.push_back(ent->getChild(i));
-		}
-		else if (ent->isA(CC_TYPES::POINT_CLOUD) || ent->isA(CC_TYPES::MESH))
-		{
-			ccPointCloud* cloud = 0;
-			if (ent->isA(CC_TYPES::POINT_CLOUD))
-			{
-				cloud = static_cast<ccPointCloud*>(ent);
-			}
-			else
-			{
-				ccMesh* mesh = static_cast<ccMesh*>(ent);
-				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-				if (	!vertices
-					||	!vertices->isA(CC_TYPES::POINT_CLOUD)
-					||	(vertices->isLocked() && !mesh->isAncestorOf(vertices)) )
-				{
-					ccLog::Warning(QString("[SetColor] Can't set color for mesh '%1' (vertices are not accessible)").arg(ent->getName()));
-					continue;
-				}
-
-				cloud = static_cast<ccPointCloud*>(vertices);
-			}
-
-			if (colorize)
-			{
-				cloud->colorize(static_cast<float>(newCol.redF()),
-								static_cast<float>(newCol.greenF()),
-								static_cast<float>(newCol.blueF()) );
-			}
-			else
-			{
-				cloud->setRGBColor(	static_cast<ColorCompType>(newCol.red()),
-									static_cast<ColorCompType>(newCol.green()),
-									static_cast<ColorCompType>(newCol.blue()) );
-			}
-			cloud->showColors(true);
-			cloud->prepareDisplayForRefresh();
-
-			if (ent != cloud)
-				ent->showColors(true);
-			else if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
-				cloud->getParent()->showColors(true);
-		}
-		else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
-		{
-			ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
-			ccColor::Rgb col(	static_cast<ColorCompType>(newCol.red()),
-								static_cast<ColorCompType>(newCol.green()),
-								static_cast<ColorCompType>(newCol.blue()) );
-			prim->setColor(col);
-			ent->showColors(true);
-			ent->prepareDisplayForRefresh();
-		}
-		else if (ent->isA(CC_TYPES::POLY_LINE))
-		{
-			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
-			ccColor::Rgb col(	static_cast<ColorCompType>(newCol.red()),
-								static_cast<ColorCompType>(newCol.green()),
-								static_cast<ColorCompType>(newCol.blue()) );
-			poly->setColor(col);
-			ent->showColors(true);
-			ent->prepareDisplayForRefresh();
-		}
-		else if (ent->isA(CC_TYPES::FACET))
-		{
-			ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-			ccColor::Rgb col(	static_cast<ColorCompType>(newCol.red()),
-								static_cast<ColorCompType>(newCol.green()),
-								static_cast<ColorCompType>(newCol.blue()) );
-			facet->setColor(col);
-			ent->showColors(true);
-			ent->prepareDisplayForRefresh();
-		}
-		else
-		{
-			ccLog::Warning(QString("[SetColor] Can't change color of entity '%1'").arg(ent->getName()));
-		}
-	}
+	ccEntityAction::setColor(m_selectedEntities, colorize, this);
 
 	refreshAll();
 	updateUI();
@@ -1188,88 +1094,14 @@ void MainWindow::doActionSetColor(bool colorize)
 
 void MainWindow::doActionRGBToGreyScale()
 {
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-		if (lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
-		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-			if (pc->hasColors())
-			{
-				pc->convertRGBToGreyScale();
-				pc->showColors(true);
-				pc->prepareDisplayForRefresh();
-			}
-		}
-	}
+	ccEntityAction::rgbToGreyScale( m_selectedEntities );
 
 	refreshAll();
 }
 
 void MainWindow::doActionSetColorGradient()
 {
-	ccColorGradientDlg dlg(this);
-	if (!dlg.exec())
-		return;
-
-	unsigned char dim = dlg.getDimension();
-	ccColorGradientDlg::GradientType ramp = dlg.getType();
-
-	ccColorScale::Shared colorScale(0);
-	if (ramp == ccColorGradientDlg::Default)
-	{
-		colorScale = ccColorScalesManager::GetDefaultScale();
-	}
-	else if (ramp == ccColorGradientDlg::TwoColors)
-	{
-		colorScale = ccColorScale::Create("Temp scale");
-		QColor first,second;
-		dlg.getColors(first,second);
-		colorScale->insert(ccColorScaleElement(0.0,first),false);
-		colorScale->insert(ccColorScaleElement(1.0,second),true);
-	}
-	assert(colorScale || ramp == ccColorGradientDlg::Banding);
-
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
-		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-
-			bool success = false;
-			if (ramp == ccColorGradientDlg::Banding)
-				success = pc->setRGBColorByBanding(dim, dlg.getBandingFrequency());
-			else
-				success = pc->setRGBColorByHeight(dim, colorScale);
-
-			if (success)
-			{
-				ent->showColors(true);
-				ent->prepareDisplayForRefresh();
-			}
-		}
-	}
+	ccEntityAction::setColorGradient(m_selectedEntities, this);
 
 	refreshAll();
 	updateUI();
@@ -1277,246 +1109,35 @@ void MainWindow::doActionSetColorGradient()
 
 void MainWindow::doActionChangeColorLevels()
 {
-	if (m_selectedEntities.size() != 1)
-	{
-		ccConsole::Error("Select one and only one colored cloud or mesh!");
-		return;
-	}
-
-	bool lockedVertices;
-	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[0],&lockedVertices);
-	if (!pointCloud || lockedVertices)
-	{
-		if (lockedVertices)
-			ccUtils::DisplayLockedVerticesWarning(pointCloud->getName(),true);
-		return;
-	}
-
-	if (!pointCloud->hasColors())
-	{
-		ccConsole::Error("Selected entity has no colors!");
-		return;
-	}
-
-	ccColorLevelsDlg dlg(this,pointCloud);
-	dlg.exec();
+	ccEntityAction::changeColorLevels(m_selectedEntities, this);
 }
 
 void MainWindow::doActionInterpolateColors()
 {
-	if (m_selectedEntities.size() != 2)
-	{
-		ccConsole::Error("Select 2 entities (clouds or meshes)!");
-		return;
-	}
+	ccEntityAction::interpolateColors(m_selectedEntities, this);
 
-	ccHObject* ent1 = m_selectedEntities[0];
-	ccHObject* ent2 = m_selectedEntities[1];
-
-	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(ent1);
-	ccGenericPointCloud* cloud2 = ccHObjectCaster::ToGenericPointCloud(ent2);
-
-	if (!cloud1 || !cloud2)
-	{
-		ccConsole::Error("Select 2 entities (clouds or meshes)!");
-		return;
-	}
-
-	if (!cloud1->hasColors() && !cloud2->hasColors())
-	{
-		ccConsole::Error("None of the selected entities has per-point or per-vertex colors!");
-		return;
-	}
-	else if (cloud1->hasColors() && cloud2->hasColors())
-	{
-		ccConsole::Error("Both entities have colors! Remove the colors on the entity you wish to import the colors to!");
-		return;
-	}
-
-	ccGenericPointCloud* source = cloud1;
-	ccGenericPointCloud* dest = cloud2;
-
-	if ( cloud2->hasColors())
-	{
-		std::swap(source,dest);
-		std::swap(cloud1,cloud2);
-		std::swap(ent1,ent2);
-	}
-
-	if (!dest->isA(CC_TYPES::POINT_CLOUD))
-	{
-		ccConsole::Error("Destination cloud (or vertices) must be a real point cloud!");
-		return;
-	}
-
-	bool ok;
-	unsigned char s_defaultLevel = 7;
-	int value = QInputDialog::getInt(this,"Interpolate colors", "Octree level", s_defaultLevel, 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 1, &ok);
-	if (!ok)
-		return;
-	s_defaultLevel = static_cast<unsigned char>(value);
-
-	ccProgressDialog pDlg(true, this);
-	if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source,&pDlg,s_defaultLevel))
-	{
-		ent2->showColors(true);
-	}
-	else
-	{
-		ccConsole::Error("An error occurred! (see console)");
-	}
-
-	ent2->prepareDisplayForRefresh_recursive();
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionInvertNormals()
 {
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
-		{
-			ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
-			if (ccCloud->hasNormals())
-			{
-				ccCloud->invertNormals();
-				ccCloud->showNormals(true);
-				ccCloud->prepareDisplayForRefresh_recursive();
-			}
-		}
-	}
+	ccEntityAction::invertNormals(m_selectedEntities);
 
 	refreshAll();
 }
 
 void MainWindow::doActionConvertNormalsToDipDir()
 {
-	doActionConvertNormalsTo(DIP_DIR_SFS);
+	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::DIP_DIR_SFS);
+
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-	doActionConvertNormalsTo(HSV_COLORS);
-}
-
-void MainWindow::doActionConvertNormalsTo(NORMAL_CONVERSION_DEST dest)
-{
-	unsigned errorCount = 0;
-
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
-		{
-			ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
-			if (ccCloud->hasNormals())
-			{
-				bool success = true;
-				switch(dest)
-				{
-				case HSV_COLORS:
-					{
-						success = ccCloud->convertNormalToRGB();
-						if (success)
-						{
-							ccCloud->showSF(false);
-							ccCloud->showNormals(false);
-							ccCloud->showColors(true);
-						}
-					}
-					break;
-				case DIP_DIR_SFS:
-					{
-						//get/create 'dip' scalar field
-						int dipSFIndex = ccCloud->getScalarFieldIndexByName(CC_DEFAULT_DIP_SF_NAME);
-						if (dipSFIndex < 0)
-							dipSFIndex = ccCloud->addScalarField(CC_DEFAULT_DIP_SF_NAME);
-						if (dipSFIndex < 0)
-						{
-							ccLog::Warning("[MainWindow::doActionConvertNormalsTo] Not enough memory!");
-							success = false;
-							break;
-						}
-
-						//get/create 'dip direction' scalar field
-						int dipDirSFIndex = ccCloud->getScalarFieldIndexByName(CC_DEFAULT_DIP_DIR_SF_NAME);
-						if (dipDirSFIndex < 0)
-							dipDirSFIndex = ccCloud->addScalarField(CC_DEFAULT_DIP_DIR_SF_NAME);
-						if (dipDirSFIndex < 0)
-						{
-							ccCloud->deleteScalarField(dipSFIndex);
-							ccLog::Warning("[MainWindow::doActionConvertNormalsTo] Not enough memory!");
-							success = false;
-							break;
-						}
-
-						ccScalarField* dipSF = static_cast<ccScalarField*>(ccCloud->getScalarField(dipSFIndex));
-						ccScalarField* dipDirSF = static_cast<ccScalarField*>(ccCloud->getScalarField(dipDirSFIndex));
-						assert(dipSF && dipDirSF);
-
-						success = ccCloud->convertNormalToDipDirSFs(dipSF, dipDirSF);
-
-						if (success)
-						{
-							//apply default 360 degrees color scale!
-							ccColorScale::Shared scale = ccColorScalesManager::GetDefaultScale(ccColorScalesManager::HSV_360_DEG);
-							dipSF->setColorScale(scale);
-							dipDirSF->setColorScale(scale);
-							ccCloud->setCurrentDisplayedScalarField(dipDirSFIndex); //dip dir. seems more interesting by default
-							ccCloud->showSF(true);
-						}
-						else
-						{
-							ccCloud->deleteScalarField(dipSFIndex);
-							ccCloud->deleteScalarField(dipDirSFIndex);
-						}
-					}
-					break;
-				default:
-					assert(false);
-					ccLog::Warning("[MainWindow::doActionConvertNormalsTo] Internal error: unhandled destination!");
-					success = false;
-					i = selNum; //no need to process the selected entities anymore!
-					break;
-				}
-
-				if (success)
-				{
-					ccCloud->prepareDisplayForRefresh_recursive();
-				}
-				else
-				{
-					++errorCount;
-				}
-			}
-		}
-	}
-
-	//errors should have been sent to console as warnings
-	if (errorCount)
-	{
-		ccConsole::Error("Error(s) occurred! (see console)");
-	}
+	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::HSV_COLORS);
 
 	refreshAll();
 	updateUI();

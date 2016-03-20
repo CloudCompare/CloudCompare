@@ -19,15 +19,12 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-#include "GeometricalAnalysisTools.h"
 #include "ScalarField.h"
 #include "ScalarFieldTools.h"
 
 #include "ccCommon.h"
 #include "ccConsole.h"
 
-#include "ccHObject.h"
-#include "ccHObjectCaster.h"
 #include "ccOctree.h"
 #include "ccPointCloud.h"
 

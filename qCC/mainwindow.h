@@ -461,11 +461,6 @@ protected:
 	//! Apply transformation to the selected entities
 	void applyTransformation(const ccGLMatrixd& transMat);
 
-	//! Normals conversion destinations
-	enum NORMAL_CONVERSION_DEST	{ HSV_COLORS, DIP_DIR_SFS };
-	//! Converts a cloud's normals
-	void doActionConvertNormalsTo(NORMAL_CONVERSION_DEST dest);
-
 	//! Removes from a list all elements that are sibling of others
 	/** List is updated in place.
 	**/

@@ -26,17 +26,16 @@
 #include "ccCommon.h"
 #include <ui_commandLineDlg.h>
 #include "ccConsole.h"
-#include "mainwindow.h"
 #include "ccComparisonDlg.h"
-#include "ccRegistrationTools.h"
 #include "ccCropTool.h"
+#include "ccLibAlgorithms.h"
+#include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 
 //Qt
 #include <QMessageBox>
 #include <QDialog>
-#include <QFile>
-#include <QFileInfo>
+#include <QDir>
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QStringList>
@@ -904,7 +903,7 @@ bool ccCommandLineParser::commandCurvature(QStringList& arguments, QDialog* pare
 	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_CURVATURE,entities,parent,additionalParameters))
+	if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE,entities,parent,additionalParameters))
 	{
 		//save output
 		if (s_autoSaveMode && !saveClouds(QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
@@ -969,7 +968,7 @@ bool ccCommandLineParser::commandApproxDensity(QStringList& arguments, QDialog* 
 	}
 	void* additionalParameters[] = { &densityType };
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_APPROX_DENSITY,entities,parent,additionalParameters))
+	if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_APPROX_DENSITY,entities,parent,additionalParameters))
 	{
 		//save output
 		if (s_autoSaveMode && !saveClouds("APPROX_DENSITY"))
@@ -1020,7 +1019,7 @@ bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent
 	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ACCURATE_DENSITY,entities,parent,additionalParameters))
+	if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ACCURATE_DENSITY,entities,parent,additionalParameters))
 	{
 		//save output
 		if (s_autoSaveMode && !saveClouds("DENSITY"))
@@ -1074,7 +1073,7 @@ bool ccCommandLineParser::commandSFGradient(QStringList& arguments, QDialog* par
 		}
 	}
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_SF_GRADIENT,entities,parent,additionalParameters))
+	if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT,entities,parent,additionalParameters))
 	{
 		//save output
 		if (s_autoSaveMode && !saveClouds(euclidean ? "EUCLIDEAN_SF_GRAD" : "SF_GRAD"))
@@ -1108,7 +1107,7 @@ bool ccCommandLineParser::commandRoughness(QStringList& arguments, QDialog* pare
 	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ROUGHNESS,entities,parent,additionalParameters))
+	if (ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS,entities,parent,additionalParameters))
 	{
 		//save output
 		if (s_autoSaveMode && !saveClouds(QString("ROUGHNESS_KERNEL_%2").arg(kernelSize)))

@@ -52,20 +52,20 @@ int ccMatchScalesDlg::getSelectedIndex() const
 	return list.empty() ? -1 : listWidget->row(list.front());
 }
 
-void ccMatchScalesDlg::setSelectedAlgorithm(MainWindow::ScaleMatchingAlgorithm algorithm)
+void ccMatchScalesDlg::setSelectedAlgorithm(ccLibAlgorithms::ScaleMatchingAlgorithm algorithm)
 {
 	switch(algorithm)
 	{
-	case MainWindow::BB_MAX_DIM:
+	case ccLibAlgorithms::BB_MAX_DIM:
 		bbMaxDimRadioButton->setChecked(true);
 		return;
-	case MainWindow::BB_VOLUME:
+	case ccLibAlgorithms::BB_VOLUME:
 		bbVolumeRadioButton->setChecked(true);
 		return;
-	case MainWindow::PCA_MAX_DIM:
+	case ccLibAlgorithms::PCA_MAX_DIM:
 		pcaRadioButton->setChecked(true);
 		return;
-	case MainWindow::ICP_SCALE:
+	case ccLibAlgorithms::ICP_SCALE:
 		icpRadioButton->setChecked(true);
 		return;
 	default:
@@ -74,25 +74,25 @@ void ccMatchScalesDlg::setSelectedAlgorithm(MainWindow::ScaleMatchingAlgorithm a
 	}
 }
 
-MainWindow::ScaleMatchingAlgorithm ccMatchScalesDlg::getSelectedAlgorithm() const
+ccLibAlgorithms::ScaleMatchingAlgorithm ccMatchScalesDlg::getSelectedAlgorithm() const
 {
 	if (bbMaxDimRadioButton->isChecked())
 	{
-		return MainWindow::BB_MAX_DIM;
+		return ccLibAlgorithms::BB_MAX_DIM;
 	}
 	else if (bbVolumeRadioButton->isChecked())
 	{
-		return MainWindow::BB_VOLUME;
+		return ccLibAlgorithms::BB_VOLUME;
 	}
 	else if (pcaRadioButton->isChecked())
 	{
-		return MainWindow::PCA_MAX_DIM;
+		return ccLibAlgorithms::PCA_MAX_DIM;
 	}
 	else if (icpRadioButton->isChecked())
 	{
-		return MainWindow::ICP_SCALE;
+		return ccLibAlgorithms::ICP_SCALE;
 	}
 
 	assert(false);
-	return MainWindow::PCA_MAX_DIM;
+	return ccLibAlgorithms::PCA_MAX_DIM;
 }

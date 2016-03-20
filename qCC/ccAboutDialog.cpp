@@ -11,37 +11,44 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MATCH_SCALES_DIALOG_HEADER
-#define CC_MATCH_SCALES_DIALOG_HEADER
+#include "ccCommon.h"
 
-#include <ui_matchScalesDlg.h>
+#include "ccAboutDialog.h"
 
-//Local
-#include "ccLibAlgorithms.h"
+#include "ui_aboutDlg.h"
 
 
-
-//! Scales matching tool dialog
-class ccMatchScalesDlg : public QDialog, public Ui::MatchScalesDialog
+ccAboutDialog::ccAboutDialog( QWidget *parent )
+	: QDialog( parent )
+	, mUI( new Ui::AboutDialog )
 {
-public:
-	//! Default constructor
-	ccMatchScalesDlg(	const ccHObject::Container& entities,
-						int defaultSelectedIndex = 0,
-						QWidget* parent = 0);
+	setAttribute( Qt::WA_DeleteOnClose );
+	
+	mUI->setupUi(this);
+	
+	QString compilationInfo;
 
-	//! Returns selected index
-	int getSelectedIndex() const;
+	compilationInfo = ccCommon::GetCCVersion();
+	compilationInfo += QString("<br><i>Compiled with");
 
-	//! Sets the selected matching algorithm
-	void setSelectedAlgorithm(ccLibAlgorithms::ScaleMatchingAlgorithm algorithm);
+#if defined(_MSC_VER)
+	compilationInfo += QString(" MSVC %1 and").arg(_MSC_VER);
+#endif
 
-	//! Returns the selected matching algorithm
-	ccLibAlgorithms::ScaleMatchingAlgorithm getSelectedAlgorithm() const;
-};
+	compilationInfo += QString(" Qt %1").arg(QT_VERSION_STR);
+	compilationInfo += QString("</i>");
+	
+	QString htmlText = mUI->textEdit->toHtml();
+	QString enrichedHtmlText = htmlText.arg(compilationInfo);
+	
+	mUI->textEdit->setHtml(enrichedHtmlText);
+}
 
-#endif //CC_ENTITY_PICKER_DIALOG_HEADER
+ccAboutDialog::~ccAboutDialog()
+{	
+	delete mUI;
+}

@@ -1,3 +1,6 @@
+#ifndef CCABOUTDIALOG_H
+#define CCABOUTDIALOG_H
+
 //##########################################################################
 //#                                                                        #
 //#                            CLOUDCOMPARE                                #
@@ -11,37 +14,24 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MATCH_SCALES_DIALOG_HEADER
-#define CC_MATCH_SCALES_DIALOG_HEADER
+#include <QDialog>
 
-#include <ui_matchScalesDlg.h>
+namespace Ui {
+    class AboutDialog;
+}
 
-//Local
-#include "ccLibAlgorithms.h"
-
-
-
-//! Scales matching tool dialog
-class ccMatchScalesDlg : public QDialog, public Ui::MatchScalesDialog
+class ccAboutDialog : public QDialog
 {
-public:
-	//! Default constructor
-	ccMatchScalesDlg(	const ccHObject::Container& entities,
-						int defaultSelectedIndex = 0,
-						QWidget* parent = 0);
+   public:
+      ccAboutDialog( QWidget *parent = nullptr );
+      ~ccAboutDialog();
 
-	//! Returns selected index
-	int getSelectedIndex() const;
-
-	//! Sets the selected matching algorithm
-	void setSelectedAlgorithm(ccLibAlgorithms::ScaleMatchingAlgorithm algorithm);
-
-	//! Returns the selected matching algorithm
-	ccLibAlgorithms::ScaleMatchingAlgorithm getSelectedAlgorithm() const;
+    private:
+      Ui::AboutDialog   *mUI;
 };
 
-#endif //CC_ENTITY_PICKER_DIALOG_HEADER
+#endif // CCABOUTDIALOG_H

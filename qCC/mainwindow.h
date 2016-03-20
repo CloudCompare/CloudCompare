@@ -141,34 +141,6 @@ public:
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
 
-	/*** CCLib "standalone" algorithms ***/
-	
-	//CCLib algorithms handled by the 'ApplyCCLibAlgortihm' method
-	enum CC_LIB_ALGORITHM { CCLIB_ALGO_CURVATURE		= 1,
-							CCLIB_ALGO_SF_GRADIENT		= 2,
-							CCLIB_ALGO_ROUGHNESS		= 3,
-							CCLIB_ALGO_APPROX_DENSITY	= 4,
-							CCLIB_ALGO_ACCURATE_DENSITY	= 5,
-							CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST = 255,
-	};
-
-	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
-	static bool ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo,
-									ccHObject::Container& entities,
-									QWidget* parent = 0,
-									void** additionalParameters = 0);
-
-	//! Scale matching algorithms
-	enum ScaleMatchingAlgorithm { BB_MAX_DIM, BB_VOLUME, PCA_MAX_DIM, ICP_SCALE };
-
-	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
-	static bool ApplyScaleMatchingAlgortihm(ScaleMatchingAlgorithm algo,
-											ccHObject::Container& entities,
-											double icpRmsDiff,
-											int icpFinalOverlap,
-											unsigned refEntityIndex = 0,
-											QWidget* parent = 0);
-
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
@@ -202,6 +174,8 @@ public:
 	**/
 	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
 
+	static void DisplayLockedVerticesWarning(QString meshName, bool displayAsError);
+	
 protected slots:
 
 	//! Creates a new 3D GL sub-window
@@ -212,8 +186,6 @@ protected slots:
 	//! Zooms out (current 3D view)
 	void zoomOut();
 
-	//! Displays 'about' dialog
-	void doActionShawAboutDialog();
 	//! Displays 'help' dialog
 	void doActionShowHelpDialog();
 	//! Displays 'about plugins' dialog
@@ -500,11 +472,6 @@ protected:
 	/** List is updated in place.
 	**/
 	static void RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects);
-
-	//! Returns a default first guess for algorithms kernel size (one cloud)
-	static PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn = 12);
-	//! Returns a default first guess for algorithms kernel size (several clouds)
-	static PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,

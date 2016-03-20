@@ -73,6 +73,7 @@
 #include <ccGlFilter.h>
 
 //dialogs
+#include "ccAboutDialog.h"
 #include "ccDisplayOptionsDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccTracePolylineTool.h"
@@ -121,7 +122,6 @@
 #include "ccVolumeCalcTool.h"
 #include "ccMatchScalesDlg.h"
 #include "ccStereoModeDlg.h"
-#include <ui_aboutDlg.h>
 
 //other
 #include "ccRegistrationTools.h"
@@ -1050,9 +1050,13 @@ void MainWindow::connectActions()
 
 	//"About" menu entry
 	connect(actionHelp,							SIGNAL(triggered()),	this,		SLOT(doActionShowHelpDialog()));
-	connect(actionAbout,						SIGNAL(triggered()),	this,		SLOT(doActionShawAboutDialog()));
 	connect(actionAboutPlugins,					SIGNAL(triggered()),	this,		SLOT(doActionShowAboutPluginsDialog()));
 	connect(actionEnableQtWarnings,				SIGNAL(toggled(bool)),	this,		SLOT(doEnableQtWarnings(bool)));
+
+	connect(actionAbout,	&QAction::triggered, [this] () {
+		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
+		aboutDialog->exec();
+	});
 
 	/*** Toolbars ***/
 
@@ -7880,34 +7884,6 @@ void MainWindow::toggleExclusiveFullScreen(bool state)
 	{
 		win->toggleExclusiveFullScreen(state);
 	}
-}
-
-void MainWindow::doActionShawAboutDialog()
-{
-	QDialog* aboutDialog = new QDialog(this);
-
-	Ui::AboutDialog ui;
-	ui.setupUi(aboutDialog);
-
-	QString ccVer = ccCommon::GetCCVersion();
-	//add compilation info
-	ccVer += QString("<br><i>Compiled with");
-#if defined(_MSC_VER)
-	ccVer += QString(" MSVC %1 and").arg(_MSC_VER);
-#endif
-	ccVer += QString(" Qt %1").arg(QT_VERSION_STR);
-	ccVer += QString("</i>");
-	QString htmlText = ui.textEdit->toHtml();
-	QString enrichedHtmlText = htmlText.arg(ccVer);
-	//ccLog::PrintDebug(htmlText);
-	//ccLog::PrintDebug(ccVer);
-	//ccLog::PrintDebug(enrichedHtmlText);
-
-	ui.textEdit->setHtml(enrichedHtmlText);
-
-	aboutDialog->exec();
-
-	//delete aboutDialog; //Qt will take care of it? Anyway CC crash if we try to delete it now!
 }
 
 void MainWindow::doActionShowHelpDialog()

@@ -212,8 +212,6 @@ protected slots:
 	//! Zooms out (current 3D view)
 	void zoomOut();
 
-	//! Displays 'about' dialog
-	void doActionShawAboutDialog();
 	//! Displays 'help' dialog
 	void doActionShowHelpDialog();
 	//! Displays 'about plugins' dialog

@@ -382,6 +382,7 @@ public: //orthorectification tools
 		Collinearity equation:
 		* x'i = (a0+a1.xi+a2.yi)/(1+c1.xi+c2.yi)
 		* y'i = (b0+b1.xi+b2.yi)/(1+c1.xi+c2.yi)
+		\param image input image
 		\param keypoints3D keypoints in 3D
 		\param keypointsImage corresponding keypoints in image
 		\param a a0, a1 & a2 parameters

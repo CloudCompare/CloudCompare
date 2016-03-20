@@ -1293,21 +1293,19 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw close button
-	/*
-	glFunc->glColor3ubv(ccColor::black);
-	glFunc->glBegin(GL_LINE_LOOP);
-	glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.top());
-	glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.bottom());
-	glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.bottom());
-	glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.top());
-	glFunc->glEnd();
-	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.top()+2);
-	glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.bottom()-2);
-	glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.top()+2);
-	glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.bottom()-2);
-	glFunc->glEnd();
-	//*/
+	//glFunc->glColor3ubv(ccColor::black);
+	//glFunc->glBegin(GL_LINE_LOOP);
+	//glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.top());
+	//glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.bottom());
+	//glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.bottom());
+	//glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.top());
+	//glFunc->glEnd();
+	//glFunc->glBegin(GL_LINES);
+	//glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.top()+2);
+	//glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.bottom()-2);
+	//glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.top()+2);
+	//glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.bottom()-2);
+	//glFunc->glEnd();
 
 	//display text
 	if (!pushName)

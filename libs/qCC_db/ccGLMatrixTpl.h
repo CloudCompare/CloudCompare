@@ -610,15 +610,14 @@ public:
 		{
 			theta_rad = -asin(CC_MAT_R31);
 			T cos_theta = cos(theta_rad);
-			psi_rad = atan2(CC_MAT_R32/cos_theta, CC_MAT_R33/cos_theta);
-			phi_rad = atan2(CC_MAT_R21/cos_theta, CC_MAT_R11/cos_theta);
+			psi_rad = atan2(CC_MAT_R32 / cos_theta, CC_MAT_R33 / cos_theta);
+			phi_rad = atan2(CC_MAT_R21 / cos_theta, CC_MAT_R11 / cos_theta);
 
 			//Other solution
-			/*theta = M_PI+asin(CC_MAT_R31);
-			T cos_theta = cos(theta);
-			psi = atan2(CC_MAT_R32/cos_theta,CC_MAT_R33/cos_theta);
-			phi = atan2(CC_MAT_R21/cos_theta,CC_MAT_R11/cos_theta);
-			//*/
+			//theta = M_PI + asin(CC_MAT_R31);
+			//T cos_theta = cos(theta);
+			//psi = atan2(CC_MAT_R32 / cos_theta, CC_MAT_R33 / cos_theta);
+			//phi = atan2(CC_MAT_R21 / cos_theta, CC_MAT_R11 / cos_theta);
 		}
 		else
 		{
@@ -627,12 +626,12 @@ public:
 			if (CC_MAT_R31 == -1)
 			{
 				theta_rad = static_cast<T>(M_PI_2);
-				psi_rad = atan2(CC_MAT_R12,CC_MAT_R13);
+				psi_rad = atan2(CC_MAT_R12, CC_MAT_R13);
 			}
 			else
 			{
 				theta_rad = -static_cast<T>(M_PI_2);
-				psi_rad = -atan2(CC_MAT_R12,CC_MAT_R13);
+				psi_rad = -atan2(CC_MAT_R12, CC_MAT_R13);
 			}
 		}
 

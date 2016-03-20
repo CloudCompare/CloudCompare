@@ -807,10 +807,9 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2& real, CCVect
 			ideal.y = static_cast<PointCoordinateType>(correctedY / sY);
 
 			// We test if the new pixel falls inside the image boundaries
-			/*return (	ideal.x >= 0 && ideal.x < m_intrinsicParams.arrayWidth
-					&&	ideal.y >= 0 && ideal.y < m_intrinsicParams.arrayHeight );
-			//*/
-			//DGM: the ideal pixel can be out of the original of course!!!
+			//return (	ideal.x >= 0 && ideal.x < m_intrinsicParams.arrayWidth
+			//		&&	ideal.y >= 0 && ideal.y < m_intrinsicParams.arrayHeight );
+			//DGM: the ideal pixel can be outside of the original image of course!!!
 			return true;
 		}
 
@@ -1430,7 +1429,6 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//glFunc->glPopAttrib();
 			}
 		}
-		//*/
 	}
 
 	//axis (for test)

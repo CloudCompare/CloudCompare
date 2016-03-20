@@ -802,20 +802,19 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	//test: center as sphere
-	/*{
-		ccSphere sphere(m_scale/10,0,"Center",12);
-		sphere.showColors(true);
-		sphere.setVisible(true);
-		sphere.setEnabled(true);
+	//{
+	//	ccSphere sphere(m_scale / 10, 0, "Center", 12);
+	//	sphere.showColors(true);
+	//	sphere.setVisible(true);
+	//	sphere.setEnabled(true);
 
-		CC_DRAW_CONTEXT sphereContext = context;
-		sphereContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		sphereContext._win = 0;
+	//	CC_DRAW_CONTEXT sphereContext = context;
+	//	sphereContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+	//	sphereContext._win = 0;
 
-		sphere.setTempColor(ccColor::magenta);
-		sphere.draw(sphereContext);
-	}
-	//*/
+	//	sphere.setTempColor(ccColor::magenta);
+	//	sphere.draw(sphereContext);
+	//}
 
 	const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
 

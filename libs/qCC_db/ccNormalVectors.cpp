@@ -838,14 +838,13 @@ QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip_deg
 
 void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike_deg, double& dip_deg)
 {
-	/** Adapted from Andy Michael's 'stridip.c':
-	Finds strike and dip of plane given normal vector having components n, e, and u
-	output is in degrees north of east and then
-	uses a right hand rule for the dip of the plane
-	//*/
-	strike_deg = 180.0 - atan2(N.y,N.x)*CC_RAD_TO_DEG;	//atan2 output is between -180 and 180! So strike is always positive here
-	PointCoordinateType x = sqrt(N.x*N.x+N.y*N.y);		//x is the horizontal magnitude
-	dip_deg = atan2(x,N.z)*CC_RAD_TO_DEG;
+	// Adapted from Andy Michael's 'stridip.c':
+	// Finds strike and dip of plane given normal vector having components n, e, and u
+	// output is in degrees north of east and then
+	// uses a right hand rule for the dip of the plane
+	strike_deg = 180.0 - atan2(N.y, N.x)*CC_RAD_TO_DEG;		//atan2 output is between -180 and 180! So strike is always positive here
+	PointCoordinateType x = sqrt(N.x*N.x + N.y*N.y);		//x is the horizontal magnitude
+	dip_deg = atan2(x, N.z)*CC_RAD_TO_DEG;
 }
 
 void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip_deg, PointCoordinateType& dipDir_deg)

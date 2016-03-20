@@ -287,8 +287,6 @@ public: //display
 			(*it)->recursiveName(p); \
 	} \
 
-	/*****************************/
-
 	//recursive equivalents of some of ccDrawableObject methods
 	ccHObject_recursive_call1(setSelected,bool,setSelected_recursive)
 	ccHObject_recursive_call1(setDisplay,ccGenericGLDisplay*,setDisplay_recursive)

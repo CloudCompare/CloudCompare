@@ -50,9 +50,10 @@ public:
 	};
 
 	//! Detects the given grid parameters (angular span, etc.)
-	/** \param grid scan grid
-		\param cloud associated cloud
+	/** \param cloud associated cloud
+		\param grid scan grid
 		\param parameters output parameters
+		\param verbose whether the process should output some detailed information in the log/console or not
 		\param cloudToSensorTrans transformation from cloud coordinate system to the sensor coordinate system (optional)
 		\return success
 	**/

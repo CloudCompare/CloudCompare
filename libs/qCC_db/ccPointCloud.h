@@ -631,8 +631,8 @@ public:
 	//! Appends a cloud to this one
 	/** Same as the += operator with pointCountBefore == size()
 		\param cloud cloud to be added
-		\parm pointCountBefore the number of points previously contained in this cloud
-		\param whether to copy clouds's children or not
+		\param pointCountBefore the number of points previously contained in this cloud
+		\param ignoreChildren whether to copy input cloud's children or not
 		\return the resulting point cloud
 	**/
 	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);

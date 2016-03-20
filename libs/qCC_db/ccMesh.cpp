@@ -3278,14 +3278,13 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				CCVector3 G1 = (*A+*B)/(PointCoordinateType)2.0;
 				vertices->addPoint(G1);
 				//interpolate other features?
-				/*if (vertices->hasNormals())
-				{
-				//vertices->reserveTheNormsTable();
-				CCVector3 N(0.0,0.0,1.0);
-				<(indexA,indexB,indexC,G1,N);
-				vertices->addNorm(N);
-				}
-				//*/
+				//if (vertices->hasNormals())
+				//{
+				//	//vertices->reserveTheNormsTable();
+				//	CCVector3 N(0.0, 0.0, 1.0);
+				//	interpolateNormals(indexA, indexB, indexC, G1, N);
+				//	vertices->addNorm(N);
+				//}
 				if (vertices->hasColors())
 				{
 					ccColor::Rgb C;
@@ -3311,14 +3310,13 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				CCVector3 G2 = (*B+*C)/(PointCoordinateType)2.0;
 				vertices->addPoint(G2);
 				//interpolate other features?
-				/*if (vertices->hasNormals())
-				{
-				//vertices->reserveTheNormsTable();
-				CCVector3 N(0.0,0.0,1.0);
-				interpolateNormals(indexA,indexB,indexC,G2,N);
-				vertices->addNorm(N);
-				}
-				//*/
+				//if (vertices->hasNormals())
+				//{
+				//	//vertices->reserveTheNormsTable();
+				//	CCVector3 N(0.0, 0.0, 1.0);
+				//	interpolateNormals(indexA, indexB, indexC, G2, N);
+				//	vertices->addNorm(N);
+				//}
 				if (vertices->hasColors())
 				{
 					ccColor::Rgb C;
@@ -3344,14 +3342,13 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				CCVector3 G3 = (*C+*A)/(PointCoordinateType)2.0;
 				vertices->addPoint(G3);
 				//interpolate other features?
-				/*if (vertices->hasNormals())
-				{
-				//vertices->reserveTheNormsTable();
-				CCVector3 N(0.0,0.0,1.0);
-				interpolateNormals(indexA,indexB,indexC,G3,N);
-				vertices->addNorm(N);
-				}
-				//*/
+				//if (vertices->hasNormals())
+				//{
+				//	//vertices->reserveTheNormsTable();
+				//	CCVector3 N(0.0, 0.0, 1.0);
+				//	interpolateNormals(indexA, indexB, indexC, G3, N);
+				//	vertices->addNorm(N);
+				//}
 				if (vertices->hasColors())
 				{
 					ccColor::Rgb C;

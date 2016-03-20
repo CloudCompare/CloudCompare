@@ -142,34 +142,33 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	glFunc->glPopMatrix();
 }
 
-// Unused function
-/*static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
-{
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
-	if (glFunc == nullptr)
-		return;
-
-	if (ID > 0)
-		glFunc->glLoadName(ID);
-	
-	glFunc->glMatrixMode(GL_MODELVIEW);
-	glFunc->glPushMatrix();
-
-	ccGL::Translate(glFunc, center.x, center.y, center.z);
-	ccGL::Scale(glFunc, radius, radius, radius);
-
-	if (!c_centralSphere)
-		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
-	
-	c_centralSphere->setTempColor(col);
-	c_centralSphere->draw(context);
-
-	glFunc->glPopMatrix();
-}
-//*/
+//Unused function
+//static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+//{
+//	//get the set of OpenGL functions (version 2.1)
+//	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+//	assert(glFunc != nullptr);
+//
+//	if (glFunc == nullptr)
+//		return;
+//
+//	if (ID > 0)
+//		glFunc->glLoadName(ID);
+//
+//	glFunc->glMatrixMode(GL_MODELVIEW);
+//	glFunc->glPushMatrix();
+//
+//	ccGL::Translate(glFunc, center.x, center.y, center.z);
+//	ccGL::Scale(glFunc, radius, radius, radius);
+//
+//	if (!c_centralSphere)
+//		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
+//
+//	c_centralSphere->setTempColor(col);
+//	c_centralSphere->draw(context);
+//
+//	glFunc->glPopMatrix();
+//}
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {

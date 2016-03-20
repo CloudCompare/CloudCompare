@@ -173,8 +173,6 @@ public:
 		\return the selected cloud (or null if the user cancelled the operation)
 	**/
 	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
-
-	static void DisplayLockedVerticesWarning(QString meshName, bool displayAsError);
 	
 protected slots:
 

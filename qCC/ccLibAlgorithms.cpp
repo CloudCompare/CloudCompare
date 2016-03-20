@@ -37,6 +37,7 @@
 #include "ccRegistrationTools.h"
 
 #include "ccLibAlgorithms.h"
+#include "ccUtils.h"
 
 #include "mainwindow.h"
 
@@ -308,7 +309,7 @@ namespace ccLibAlgorithms
 					cloud = ccHObjectCaster::ToGenericPointCloud(entities[i],&lockedVertices);
 					if (lockedVertices)
 					{
-						MainWindow::DisplayLockedVerticesWarning(entities[i]->getName(),selNum == 1);
+						ccUtils::DisplayLockedVerticesWarning(entities[i]->getName(),selNum == 1);
 						cloud = 0;
 					}
 					if (cloud)
@@ -640,7 +641,7 @@ namespace ccLibAlgorithms
 			else if (cloud && lockedVertices)
 			{
 				//locked entities
-				MainWindow::DisplayLockedVerticesWarning(ent->getName(),false);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),false);
 			}
 			else
 			{

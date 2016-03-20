@@ -126,6 +126,7 @@
 #include "ccRegistrationTools.h"
 #include "ccPersistentSettings.h"
 #include "ccCropTool.h"
+#include "ccUtils.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -1533,7 +1534,7 @@ void MainWindow::doActionComputeKdTree()
 		cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),true);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),true);
 			return;
 		}
 	}
@@ -1600,7 +1601,7 @@ void MainWindow::doActionComputeOctree()
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (cloud && lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 		clouds.insert(cloud);
@@ -1827,7 +1828,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 			{
 				if (lockedVertices)
 				{
-					DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+					ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 					continue;
 				}
 
@@ -1998,7 +1999,7 @@ void MainWindow::doActionApplyScale()
 			}
 			if (lockedVertices)
 			{
-				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 				//++processNum;
 				continue;
 			}
@@ -2145,7 +2146,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(ent)->getAssociatedCloud();
 				if (!vertices || !ent->isAncestorOf(vertices))
 				{
-					DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+					ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 					continue;
 				}
 				ent = vertices;
@@ -2407,7 +2408,7 @@ void MainWindow::doActionClearProperty(int prop)
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -3037,16 +3038,6 @@ ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=
 
 	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < clouds.size());
 	return ccHObjectCaster::ToPointCloud(clouds[selectedIndex]);
-}
-
-//standard message in case of locked vertices
-void MainWindow::DisplayLockedVerticesWarning(QString meshName, bool displayAsError)
-{
-	QString message = QString("Vertices of mesh '%1' are locked (they may be shared by multiple entities for instance).\nYou should call this method directly on the vertices cloud.\n(warning: all entities depending on this cloud will be impacted!)").arg(meshName);
-	if (displayAsError)
-		ccConsole::Error(message);
-	else
-		ccConsole::Warning(message);
 }
 
 void MainWindow::doActionProjectUncertainty()
@@ -3837,7 +3828,7 @@ void MainWindow::doActionSFConvertToRandomRGB()
 		cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 		if (cloud) //TODO
@@ -3910,7 +3901,7 @@ void MainWindow::doActionSFConvertToRGB()
 		cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 		if (cloud) //TODO
@@ -3969,7 +3960,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 	if (lockedVertices && !ent->isAncestorOf(cloud))
 	{
 		//see ccPropertiesTreeDelegate::fillWithMesh
-		DisplayLockedVerticesWarning(ent->getName(),true);
+		ccUtils::DisplayLockedVerticesWarning(ent->getName(),true);
 		return;
 	}
 
@@ -4113,7 +4104,7 @@ void MainWindow::doActionSFGaussianFilter()
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
 		if (!pc || lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -4224,7 +4215,7 @@ void MainWindow::doActionSFBilateralFilter()
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
 		if (!pc || lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -7068,7 +7059,7 @@ void MainWindow::doActionSORFilter()
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
 		if (cloud && lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -7177,7 +7168,7 @@ void MainWindow::doActionFilterNoise()
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
 		if (cloud && lockedVertices)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
 			continue;
 		}
 
@@ -7252,7 +7243,7 @@ void MainWindow::doActionUnroll()
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0],&lockedVertices);
 	if (lockedVertices)
 	{
-		DisplayLockedVerticesWarning(m_selectedEntities[0]->getName(),true);
+		ccUtils::DisplayLockedVerticesWarning(m_selectedEntities[0]->getName(),true);
 		return;
 	}
 
@@ -9328,7 +9319,7 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	if (lockedVertices && !ent->isAncestorOf(cloud))
 	{
-		DisplayLockedVerticesWarning(ent->getName(),true);
+		ccUtils::DisplayLockedVerticesWarning(ent->getName(),true);
 		return;
 	}
 
@@ -9524,7 +9515,7 @@ void MainWindow::doActionScalarFieldArithmetic()
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity,&lockedVertices);
 	if (lockedVertices)
 	{
-		DisplayLockedVerticesWarning(entity->getName(),true);
+		ccUtils::DisplayLockedVerticesWarning(entity->getName(),true);
 		return;
 	}
 	if (!cloud)

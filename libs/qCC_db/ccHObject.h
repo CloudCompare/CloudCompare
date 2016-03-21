@@ -197,7 +197,7 @@ public: //children management
 	//! Returns true if the current object is an ancestor of the specified one
 	bool isAncestorOf(const ccHObject *anObject) const;
 
-public: //bouding-box
+public: //bounding-box
 
 	//! Returns the entity's own bounding-box
 	/** Children bboxes are ignored.

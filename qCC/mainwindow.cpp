@@ -888,7 +888,7 @@ void MainWindow::connectActions()
 	connect(actionSubdivideMesh,				SIGNAL(triggered()),	this,		SLOT(doActionSubdivideMesh()));
 	connect(actionMeasureMeshSurface,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshSurface()));
 	connect(actionMeasureMeshVolume,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshVolume()));
-	connect(actionFlagMeshVetices,				SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVetices()));
+	connect(actionFlagMeshVertices,				SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVertices()));
 	//"Edit > Mesh > Scalar Field" menu
 	connect(actionSmoothMeshSF,					SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
 	connect(actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
@@ -2116,7 +2116,7 @@ void MainWindow::doActionMeasureMeshVolume()
 	}
 }
 
-void MainWindow::doActionFlagMeshVetices()
+void MainWindow::doActionFlagMeshVertices()
 {
 	size_t selNum = m_selectedEntities.size();
 	bool errors = false;
@@ -10767,7 +10767,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionSamplePoints->setEnabled(atLeastOneMesh);
 	actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
 	actionMeasureMeshVolume->setEnabled(atLeastOneMesh);
-	actionFlagMeshVetices->setEnabled(atLeastOneMesh);
+	actionFlagMeshVertices->setEnabled(atLeastOneMesh);
 	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
 	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
 	actionSubdivideMesh->setEnabled(atLeastOneMesh);
@@ -11182,4 +11182,3 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 //	contour.push_back(CCVector2(27, 05));
 //	addToDB(new ccExtru(contour, 10));
 //}
-

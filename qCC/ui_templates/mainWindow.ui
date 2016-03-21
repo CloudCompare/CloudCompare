@@ -245,7 +245,7 @@
      <addaction name="separator"/>
      <addaction name="actionMeasureMeshSurface"/>
      <addaction name="actionMeasureMeshVolume"/>
-     <addaction name="actionFlagMeshVetices"/>
+     <addaction name="actionFlagMeshVertices"/>
      <addaction name="separator"/>
      <addaction name="menuMeshScalarField"/>
     </widget>
@@ -2671,7 +2671,7 @@
     <string>Measure volume</string>
    </property>
   </action>
-  <action name="actionFlagMeshVetices">
+  <action name="actionFlagMeshVertices">
    <property name="text">
     <string>Flag vertices by type</string>
    </property>

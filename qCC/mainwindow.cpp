@@ -87,7 +87,6 @@
 #include "ccClippingBoxTool.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
-#include "ccComputeOctreeDlg.h"
 #include "ccDisplayOptionsDlg.h"
 #include "ccEntityPickerDlg.h"
 #include "ccExportCoordToSFDlg.h"
@@ -97,7 +96,6 @@
 #include "ccLabelingDlg.h"
 #include "ccMatchScalesDlg.h"
 #include "ccNoiseFilterDlg.h"
-#include "ccNormalComputationDlg.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccPickOneElementDlg.h"
 #include "ccPointListPickingDlg.h"
@@ -888,7 +886,7 @@ void MainWindow::connectActions()
 	connect(actionSubdivideMesh,				SIGNAL(triggered()),	this,		SLOT(doActionSubdivideMesh()));
 	connect(actionMeasureMeshSurface,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshSurface()));
 	connect(actionMeasureMeshVolume,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshVolume()));
-	connect(actionFlagMeshVetices,				SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVetices()));
+	connect(actionFlagMeshVertices,				SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVertices()));
 	//"Edit > Mesh > Scalar Field" menu
 	connect(actionSmoothMeshSF,					SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
 	connect(actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
@@ -1129,7 +1127,7 @@ void MainWindow::doActionInvertNormals()
 
 void MainWindow::doActionConvertNormalsToDipDir()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::DIP_DIR_SFS);
+	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS);
 
 	refreshAll();
 	updateUI();
@@ -1137,7 +1135,7 @@ void MainWindow::doActionConvertNormalsToDipDir()
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::HSV_COLORS);
+	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS);
 
 	refreshAll();
 	updateUI();
@@ -1209,119 +1207,7 @@ void MainWindow::doActionComputeKdTree()
 
 void MainWindow::doActionComputeOctree()
 {
-	ccBBox bbox;
-	std::unordered_set<ccGenericPointCloud*> clouds;
-	size_t selNum = m_selectedEntities.size();
-	PointCoordinateType maxBoxSize = -1;
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-
-		//specific test for locked vertices
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (cloud && lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-		clouds.insert(cloud);
-
-		//we look for the biggest box so as to define the "minimum cell size"
-		ccBBox thisBBox = cloud->getOwnBB();
-		if (thisBBox.isValid())
-		{
-			CCVector3 dd = thisBBox.maxCorner()-thisBBox.minCorner();
-			PointCoordinateType maxd = std::max(dd.x,std::max(dd.y,dd.z));
-			if (maxBoxSize < 0.0 || maxd > maxBoxSize)
-				maxBoxSize = maxd;
-		}
-		bbox += thisBBox;
-	}
-
-	if (clouds.empty() || maxBoxSize < 0.0)
-	{
-		ccLog::Warning("[doActionComputeOctree] No eligible entities in selection!");
-		return;
-	}
-
-	//min(cellSize) = max(dim)/2^N with N = max subidivision level
-	double minCellSize = static_cast<double>(maxBoxSize)/(1 << ccOctree::MAX_OCTREE_LEVEL);
-
-	ccComputeOctreeDlg coDlg(bbox,minCellSize,this);
-	if (!coDlg.exec())
-		return;
-
-	ccProgressDialog pDlg(true,this);
-
-	//if we must use a custom bounding box, we update 'bbox'
-	if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
-		bbox = coDlg.getCustomBBox();
-
-	for (std::unordered_set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
-	{
-		ccGenericPointCloud* cloud = *it;
-
-		//we temporarily detach entity, as it may undergo
-		//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
-		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
-
-		//computation
-		QElapsedTimer eTimer;
-		eTimer.start();
-		ccOctree* octree = 0;
-		switch(coDlg.getMode())
-		{
-		case ccComputeOctreeDlg::DEFAULT:
-			octree = cloud->computeOctree(&pDlg);
-			break;
-		case ccComputeOctreeDlg::MIN_CELL_SIZE:
-		case ccComputeOctreeDlg::CUSTOM_BBOX:
-			{
-				//for a cell-size based custom box, we must update it for each cloud!
-				if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
-				{
-					double cellSize = coDlg.getMinCellSize();
-					PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
-					CCVector3 C = cloud->getOwnBB().getCenter();
-					bbox = ccBBox(	C-CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth),
-									C+CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth));
-				}
-				cloud->deleteOctree();
-				octree = new ccOctree(cloud);
-				if (octree->build(bbox.minCorner(),bbox.maxCorner(),0,0,&pDlg) > 0)
-				{
-					octree->setDisplay(cloud->getDisplay());
-					cloud->addChild(octree);
-				}
-				else
-				{
-					delete octree;
-					octree = 0;
-				}
-			}
-			break;
-		default:
-			assert(false);
-			return;
-		}
-		qint64 elapsedTime_ms = eTimer.elapsed();
-
-		//put object back in tree
-		putObjectBackIntoDBTree(cloud,objContext);
-
-		if (octree)
-		{
-			ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
-			cloud->setEnabled(true); //for mesh vertices!
-			octree->setVisible(true);
-			octree->prepareDisplayForRefresh();
-		}
-		else
-		{
-			ccConsole::Warning(QString("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
-		}
-	}
+	ccEntityAction::computeOctree(m_selectedEntities, this);
 
 	refreshAll();
 	updateUI();
@@ -1963,113 +1849,36 @@ void MainWindow::doComputeBestFitBB()
 
 void MainWindow::doActionClearColor()
 {
-	doActionClearProperty(0);
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::COLORS,
+											 this);
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionClearNormals()
 {
-	doActionClearProperty(1);
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::NORMALS,
+											 this);
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionDeleteScalarField()
 {
-	doActionClearProperty(2);
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
+											 this);
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionDeleteAllSF()
 {
-	doActionClearProperty(3);
-}
-
-void MainWindow::doActionClearProperty(int prop)
-{
-	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
-	ccHObject::Container selectedEntities = m_selectedEntities;
-
-	size_t selNum = selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = selectedEntities[i];
-
-		//specific case: clear normals on a mesh
-		if (prop == 1 && ( ent->isA(CC_TYPES::MESH) /*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/ )) //TODO
-		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-			if (mesh->hasTriNormals())
-			{
-				mesh->showNormals(false);
-				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(mesh);
-				mesh->clearTriNormals();
-				putObjectBackIntoDBTree(mesh,objContext);
-				ent->prepareDisplayForRefresh();
-				continue;
-			}
-			else if (mesh->hasNormals()) //per-vertex normals?
-			{
-				if (mesh->getParent()
-					&& (mesh->getParent()->isA(CC_TYPES::MESH)/*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-					&& ccHObjectCaster::ToMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
-				{
-					ccLog::Warning("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!");
-				}
-				else //mesh is alone, we can freely remove normals
-				{
-					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
-					{
-						mesh->showNormals(false);
-						static_cast<ccPointCloud*>(mesh->getAssociatedCloud())->unallocateNorms();
-						mesh->prepareDisplayForRefresh();
-						continue;
-					}
-				}
-			}
-		}
-
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
-		{
-			switch (prop)
-			{
-			case 0: //colors
-				if (cloud->hasColors())
-				{
-					static_cast<ccPointCloud*>(cloud)->unallocateColors();
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			case 1: //normals
-				if (cloud->hasNormals())
-				{
-					static_cast<ccPointCloud*>(cloud)->unallocateNorms();
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			case 2: //current sf
-				if (cloud->hasDisplayedScalarField())
-				{
-					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-					pc->deleteScalarField(pc->getCurrentDisplayedScalarFieldIndex());
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			case 3: //all sf
-				if (cloud->hasScalarFields())
-				{
-					static_cast<ccPointCloud*>(cloud)->deleteAllScalarFields();
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			}
-		}
-	}
-
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
+											 this);
 	refreshAll();
 	updateUI();
 }
@@ -2116,7 +1925,7 @@ void MainWindow::doActionMeasureMeshVolume()
 	}
 }
 
-void MainWindow::doActionFlagMeshVetices()
+void MainWindow::doActionFlagMeshVertices()
 {
 	size_t selNum = m_selectedEntities.size();
 	bool errors = false;
@@ -5736,230 +5545,7 @@ void MainWindow::doActionComputeCPS()
 
 void MainWindow::doActionComputeNormals()
 {
-	if (m_selectedEntities.empty())
-	{
-		ccConsole::Error("Select at least one point cloud");
-		return;
-	}
-
-	//look for clouds and meshes
-	std::vector<ccPointCloud*> clouds;
-	size_t cloudsWithScanGrids = 0;
-	std::vector<ccMesh*> meshes;
-	PointCoordinateType defaultRadius = 0;
-	try
-	{
-		for (size_t i=0; i<m_selectedEntities.size(); ++i)
-		{
-			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
-			{
-				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-				clouds.push_back(cloud);
-
-				if (cloud->gridCount() != 0)
-					++cloudsWithScanGrids;
-
-				if (defaultRadius == 0)
-				{
-					//default radius
-					defaultRadius = ccNormalVectors::GuessNaiveRadius(cloud);
-				}
-			}
-			else if (m_selectedEntities[i]->isKindOf(CC_TYPES::MESH))
-			{
-				if (m_selectedEntities[i]->isA(CC_TYPES::MESH))
-				{
-					ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
-					meshes.push_back(mesh);
-				}
-				else
-				{
-					ccConsole::Error(QString("Can't compute normals on sub-meshes! Select the parent mesh instead"));
-					return;
-				}
-			}
-		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccConsole::Error("Not enough memory!");
-		return;
-	}
-
-	//compute normals for each selected cloud
-	if (!clouds.empty())
-	{
-		ccNormalComputationDlg::SelectionMode selectionMode = ccNormalComputationDlg::WITHOUT_SCAN_GRIDS;
-		if (cloudsWithScanGrids)
-		{
-			if (clouds.size() == cloudsWithScanGrids)
-			{
-				//all clouds have an associated grid
-				selectionMode = ccNormalComputationDlg::WITH_SCAN_GRIDS;
-			}
-			else
-			{
-				//only a part of the clouds have an associated grid
-				selectionMode = ccNormalComputationDlg::MIXED;
-			}
-		}
-
-		static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
-		static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
-		static int s_lastMSTNeighborCount = 6;
-		static int s_lastKernelSize = 2;
-
-		ccNormalComputationDlg ncDlg(selectionMode, this);
-		ncDlg.setLocalModel(s_lastModelType);
-		ncDlg.setRadius(defaultRadius);
-		ncDlg.setPreferredOrientation(s_lastNormalOrientation);
-		ncDlg.setMSTNeighborCount(s_lastMSTNeighborCount);
-		ncDlg.setGridKernelSize(s_lastKernelSize);
-		if (clouds.size() == 1)
-		{
-			ncDlg.setCloud(clouds.front());
-		}
-
-		if (!ncDlg.exec())
-			return;
-
-		//normals computation
-		CC_LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
-		bool useGridStructure = cloudsWithScanGrids && ncDlg.useScanGridsForComputation();
-		defaultRadius = ncDlg.getRadius();
-		int kernelSize = s_lastKernelSize = ncDlg.getGridKernelSize();
-
-		//normals orientation
-		bool orientNormals = ncDlg.orientNormals();
-		bool orientNormalsWithGrids = cloudsWithScanGrids && ncDlg.useScanGridsForOrientation();
-		ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
-		bool orientNormalsMST = ncDlg.useMSTOrientation();
-		int mstNeighbors = s_lastMSTNeighborCount = ncDlg.getMSTNeighborCount();
-		
-		size_t errors = 0;
-		for (size_t i=0; i<clouds.size(); i++)
-		{
-			ccPointCloud* cloud = clouds[i];
-			assert(cloud);
-
-			ccProgressDialog pDlg(true,this);
-
-			bool result = false;
-			bool orientNormalsForThisCloud = false;
-			if (useGridStructure && cloud->gridCount())
-			{
-#if 0
-				ccPointCloud* newCloud = new ccPointCloud("temp");
-				newCloud->reserve(cloud->size());
-				for (size_t gi=0; gi<cloud->gridCount(); ++gi)
-				{
-					const ccPointCloud::Grid::Shared& scanGrid = cloud->grid(gi);
-					if (scanGrid && scanGrid->indexes.empty())
-					{
-						//empty grid, we skip it
-						continue;
-					}
-					ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
-
-					const int* _indexGrid = &(scanGrid->indexes[0]);
-					for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
-					{
-						for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
-						{
-							if (*_indexGrid >= 0)
-							{
-								unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
-								const CCVector3* P = cloud->getPoint(pointIndex);
-								CCVector3 Q = toSensor * (*P);
-								newCloud->addPoint(Q);
-							}
-						}
-					}
-
-					addToDB(newCloud);
-				}
-#endif
-
-
-				//compute normals with the associated scan grid(s)
-				orientNormalsForThisCloud = orientNormals && orientNormalsWithGrids;
-				result = cloud->computeNormalsWithGrids(model, kernelSize, orientNormalsForThisCloud, &pDlg);
-			}
-			else
-			{
-				//compute normals with the octree
-				orientNormalsForThisCloud = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
-				result = cloud->computeNormalsWithOctree(model, orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
-			}
-
-			//do we need to orient the normals? (this may have been already done if 'orientNormalsForThisCloud' is true)
-			if (result && orientNormals && !orientNormalsForThisCloud)
-			{
-				if (cloud->gridCount() && orientNormalsWithGrids)
-				{
-					//we can still use the grid structure(s) to orient the normals!
-					result = cloud->orientNormalsWithGrids();
-				}
-				else if (orientNormalsMST)
-				{
-					//use Minimum Spanning Tree to resolve normals direction
-					result = cloud->orientNormalsWithMST(mstNeighbors, &pDlg);
-				}
-			}
-
-			if (!result)
-			{
-				++errors;
-			}
-
-			cloud->prepareDisplayForRefresh();
-		}
-
-		if (errors != 0)
-		{
-			if (errors < clouds.size())
-				ccConsole::Error("Failed to compute or orient the normals on some clouds! (see console)");
-			else
-				ccConsole::Error("Failed to compute or orient the normals! (see console)");
-		}
-	}
-
-	//compute normals for each selected mesh
-	if (!meshes.empty())
-	{
-		QMessageBox question(	QMessageBox::Question,
-								"Mesh normals",
-								"Compute per-vertex normals (smooth) or per-triangle (faceted)?",
-								QMessageBox::NoButton,
-								this);
-
-		QPushButton* perVertexButton   = question.addButton("Per-vertex", QMessageBox::YesRole);
-		QPushButton* perTriangleButton = question.addButton("Per-triangle", QMessageBox::NoRole);
-
-		question.exec();
-		
-		bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
-
-		for (size_t i=0; i<meshes.size(); i++)
-		{
-			ccMesh* mesh = meshes[i];
-			assert(mesh);
-			
-			//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
-			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(mesh);
-			mesh->clearTriNormals();
-			mesh->showNormals(false);
-			bool result = mesh->computeNormals(computePerVertexNormals);
-			putObjectBackIntoDBTree(mesh,objContext);
-
-			if (!result)
-			{
-				ccConsole::Error(QString("Failed to compute normals on mesh '%1'").arg(mesh->getName()));
-				continue;
-			}
-			mesh->prepareDisplayForRefresh_recursive();
-		}
-	}
+	ccEntityAction::computeNormals(m_selectedEntities, this);
 
 	refreshAll();
 	updateUI();
@@ -8202,88 +7788,58 @@ void MainWindow::doPickRotationCenter()
 	enablePickingOperation(win,"Pick a point to be used as rotation center (click on icon again to cancel)");
 }
 
-enum ToggleEntityState
-{
-	TOGGLE_ENT_ACTIVATION = 0,
-	TOGGLE_ENT_VISIBILITY,
-	TOGGLE_ENT_COLORS,
-	TOGGLE_ENT_NORMALS,
-	TOGGLE_ENT_SF,
-	TOGGLE_ENT_MAT,
-	TOGGLE_ENT_3D_NAME,
-};
-
 void MainWindow::toggleSelectedEntitiesActivation()
-{
-	toggleSelectedEntitiesProp(TOGGLE_ENT_ACTIVATION);
+{	
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::ACTIVE);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_VISIBILITY);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::VISIBLE);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_COLORS);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::COLOR);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_NORMALS);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NORMALS);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_SF);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesMaterials()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_MAT);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::MATERIAL);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_3D_NAME);
-}
-
-void MainWindow::toggleSelectedEntitiesProp(int prop)
-{
-	ccHObject baseEntities;
-	ConvertToGroup(m_selectedEntities,baseEntities,ccHObject::DP_NONE);
-	for (unsigned i=0; i<baseEntities.getChildrenNumber(); ++i)
-	{
-		ccHObject* child = baseEntities.getChild(i);
-		switch(prop)
-		{
-		case TOGGLE_ENT_ACTIVATION:
-			child->toggleActivation/*_recursive*/();
-			break;
-		case TOGGLE_ENT_VISIBILITY:
-			child->toggleVisibility_recursive();
-			break;
-		case TOGGLE_ENT_COLORS:
-			child->toggleColors_recursive();
-			break;
-		case TOGGLE_ENT_NORMALS:
-			child->toggleNormals_recursive();
-			break;
-		case TOGGLE_ENT_SF:
-			child->toggleSF_recursive();
-			break;
-		case TOGGLE_ENT_MAT:
-			child->toggleMaterials_recursive();
-			break;
-		case TOGGLE_ENT_3D_NAME:
-			child->toggleShowName_recursive();
-			break;
-		default:
-			assert(false);
-		}
-		child->prepareDisplayForRefresh_recursive();
-	}
-
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NAME);
+	
 	refreshAll();
 	updateUI();
 }
@@ -10767,7 +10323,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionSamplePoints->setEnabled(atLeastOneMesh);
 	actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
 	actionMeasureMeshVolume->setEnabled(atLeastOneMesh);
-	actionFlagMeshVetices->setEnabled(atLeastOneMesh);
+	actionFlagMeshVertices->setEnabled(atLeastOneMesh);
 	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
 	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
 	actionSubdivideMesh->setEnabled(atLeastOneMesh);
@@ -11182,4 +10738,3 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 //	contour.push_back(CCVector2(27, 05));
 //	addToDB(new ccExtru(contour, 10));
 //}
-

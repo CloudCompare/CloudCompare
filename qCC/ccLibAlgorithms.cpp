@@ -36,6 +36,8 @@
 #include "ccLibAlgorithms.h"
 #include "ccUtils.h"
 
+// This is included only for temporarily removing an object from the tree.
+//	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
 #include "mainwindow.h"
 
 

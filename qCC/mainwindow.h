@@ -494,26 +494,6 @@ protected:
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);
 
-	//! Clear property process fork
-	/** - prop=0 : COLOR
-		- prop=1 : NORMALS
-		- prop=2 : SCALAR FIELD
-		- prop=3 : ALL SCALAR FIELDS
-		\param prop property id
-	**/
-	void doActionClearProperty(int prop);
-
-	//! Toggles selected entities properties
-	/** - prop=0 : VISIBILITY
-		- prop=1 : COLOR
-		- prop=2 : NORMALS
-		- prop=3 : SCALAR FIELD
-		- prop=4 : MATERIAL/TEXTURE
-		- prop=5 : NAME (IN 3D)
-		\param prop property id
-	**/
-	void toggleSelectedEntitiesProp(int prop);
-
 	//! Active SF action fork
 	/** - action=0 : toggle SF color scale
 		- action=1 : activate previous SF

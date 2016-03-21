@@ -1105,7 +1105,7 @@ namespace ccEntityAction
 					bool success = true;
 					switch(dest)
 					{
-						case HSV_COLORS:
+						case NORMAL_CONVERSION_DEST::HSV_COLORS:
 						{
 							success = ccCloud->convertNormalToRGB();
 							if (success)
@@ -1116,7 +1116,7 @@ namespace ccEntityAction
 							}
 						}
 							break;
-						case DIP_DIR_SFS:
+						case NORMAL_CONVERSION_DEST::DIP_DIR_SFS:
 						{
 							//get/create 'dip' scalar field
 							int dipSFIndex = ccCloud->getScalarFieldIndexByName(CC_DEFAULT_DIP_SF_NAME);
@@ -1311,6 +1311,140 @@ namespace ccEntityAction
 			{
 				ccConsole::Warning(QString("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
 			}
+		}
+	}
+	
+	//////////
+	// Properties
+	
+	void	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget *parent)
+	{	
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+	
+			//specific case: clear normals on a mesh
+			if (property == CLEAR_PROPERTY::NORMALS && ( ent->isA(CC_TYPES::MESH) /*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/ )) //TODO
+			{
+				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+				if (mesh->hasTriNormals())
+				{
+					mesh->showNormals(false);
+					
+					MainWindow* instance = dynamic_cast<MainWindow*>(parent);
+					MainWindow::ccHObjectContext objContext;
+					if (instance)
+						objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
+					mesh->clearTriNormals();
+					if (instance)
+						instance->putObjectBackIntoDBTree(mesh,objContext);
+					
+					ent->prepareDisplayForRefresh();
+					continue;
+				}
+				else if (mesh->hasNormals()) //per-vertex normals?
+				{
+					if (mesh->getParent()
+						&& (mesh->getParent()->isA(CC_TYPES::MESH)/*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
+						&& ccHObjectCaster::ToMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
+					{
+						ccLog::Warning("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!");
+					}
+					else //mesh is alone, we can freely remove normals
+					{
+						if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
+						{
+							mesh->showNormals(false);
+							static_cast<ccPointCloud*>(mesh->getAssociatedCloud())->unallocateNorms();
+							mesh->prepareDisplayForRefresh();
+							continue;
+						}
+					}
+				}
+			}
+	
+			bool lockedVertices;
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			if (lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
+			}
+	
+			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
+			{
+				switch (property)
+				{
+				case CLEAR_PROPERTY::COLORS: //colors
+					if (cloud->hasColors())
+					{
+						static_cast<ccPointCloud*>(cloud)->unallocateColors();
+						ent->prepareDisplayForRefresh();
+					}
+					break;
+				case CLEAR_PROPERTY::NORMALS: //normals
+					if (cloud->hasNormals())
+					{
+						static_cast<ccPointCloud*>(cloud)->unallocateNorms();
+						ent->prepareDisplayForRefresh();
+					}
+					break;
+				case CLEAR_PROPERTY::CURRENT_SCALAR_FIELD: //current sf
+					if (cloud->hasDisplayedScalarField())
+					{
+						ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+						pc->deleteScalarField(pc->getCurrentDisplayedScalarFieldIndex());
+						ent->prepareDisplayForRefresh();
+					}
+					break;
+				case CLEAR_PROPERTY::ALL_SCALAR_FIELDS: //all sf
+					if (cloud->hasScalarFields())
+					{
+						static_cast<ccPointCloud*>(cloud)->deleteAllScalarFields();
+						ent->prepareDisplayForRefresh();
+					}
+					break;
+				}
+			}
+		}
+	}
+	
+	void	toggleProperty(const ccHObject::Container &selectedEntities, TOGGLE_PROPERTY property)
+	{
+		ccHObject baseEntities;
+		ConvertToGroup(selectedEntities,baseEntities,ccHObject::DP_NONE);
+		
+		for (unsigned i=0; i<baseEntities.getChildrenNumber(); ++i)
+		{
+			ccHObject* child = baseEntities.getChild(i);
+			switch(property)
+			{
+			case TOGGLE_PROPERTY::ACTIVE:
+				child->toggleActivation/*_recursive*/();
+				break;
+			case TOGGLE_PROPERTY::VISIBLE:
+				child->toggleVisibility_recursive();
+				break;
+			case TOGGLE_PROPERTY::COLOR:
+				child->toggleColors_recursive();
+				break;
+			case TOGGLE_PROPERTY::NORMALS:
+				child->toggleNormals_recursive();
+				break;
+			case TOGGLE_PROPERTY::SCALAR_FIELD:
+				child->toggleSF_recursive();
+				break;
+			case TOGGLE_PROPERTY::MATERIAL:
+				child->toggleMaterials_recursive();
+				break;
+			case TOGGLE_PROPERTY::NAME:
+				child->toggleShowName_recursive();
+				break;
+			default:
+				Q_ASSERT(false);
+			}
+			child->prepareDisplayForRefresh_recursive();
 		}
 	}
 }

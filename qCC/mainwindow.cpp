@@ -1127,7 +1127,7 @@ void MainWindow::doActionInvertNormals()
 
 void MainWindow::doActionConvertNormalsToDipDir()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::DIP_DIR_SFS);
+	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS);
 
 	refreshAll();
 	updateUI();
@@ -1135,7 +1135,7 @@ void MainWindow::doActionConvertNormalsToDipDir()
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::HSV_COLORS);
+	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS);
 
 	refreshAll();
 	updateUI();
@@ -1849,113 +1849,36 @@ void MainWindow::doComputeBestFitBB()
 
 void MainWindow::doActionClearColor()
 {
-	doActionClearProperty(0);
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::COLORS,
+											 this);
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionClearNormals()
 {
-	doActionClearProperty(1);
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::NORMALS,
+											 this);
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionDeleteScalarField()
 {
-	doActionClearProperty(2);
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
+											 this);
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionDeleteAllSF()
 {
-	doActionClearProperty(3);
-}
-
-void MainWindow::doActionClearProperty(int prop)
-{
-	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
-	ccHObject::Container selectedEntities = m_selectedEntities;
-
-	size_t selNum = selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = selectedEntities[i];
-
-		//specific case: clear normals on a mesh
-		if (prop == 1 && ( ent->isA(CC_TYPES::MESH) /*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/ )) //TODO
-		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-			if (mesh->hasTriNormals())
-			{
-				mesh->showNormals(false);
-				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(mesh);
-				mesh->clearTriNormals();
-				putObjectBackIntoDBTree(mesh,objContext);
-				ent->prepareDisplayForRefresh();
-				continue;
-			}
-			else if (mesh->hasNormals()) //per-vertex normals?
-			{
-				if (mesh->getParent()
-					&& (mesh->getParent()->isA(CC_TYPES::MESH)/*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-					&& ccHObjectCaster::ToMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
-				{
-					ccLog::Warning("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!");
-				}
-				else //mesh is alone, we can freely remove normals
-				{
-					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
-					{
-						mesh->showNormals(false);
-						static_cast<ccPointCloud*>(mesh->getAssociatedCloud())->unallocateNorms();
-						mesh->prepareDisplayForRefresh();
-						continue;
-					}
-				}
-			}
-		}
-
-		bool lockedVertices;
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices)
-		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
-		{
-			switch (prop)
-			{
-			case 0: //colors
-				if (cloud->hasColors())
-				{
-					static_cast<ccPointCloud*>(cloud)->unallocateColors();
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			case 1: //normals
-				if (cloud->hasNormals())
-				{
-					static_cast<ccPointCloud*>(cloud)->unallocateNorms();
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			case 2: //current sf
-				if (cloud->hasDisplayedScalarField())
-				{
-					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-					pc->deleteScalarField(pc->getCurrentDisplayedScalarFieldIndex());
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			case 3: //all sf
-				if (cloud->hasScalarFields())
-				{
-					static_cast<ccPointCloud*>(cloud)->deleteAllScalarFields();
-					ent->prepareDisplayForRefresh();
-				}
-				break;
-			}
-		}
-	}
-
+	ccEntityAction::clearProperty( m_selectedEntities,
+											 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
+											 this);
 	refreshAll();
 	updateUI();
 }
@@ -7865,88 +7788,58 @@ void MainWindow::doPickRotationCenter()
 	enablePickingOperation(win,"Pick a point to be used as rotation center (click on icon again to cancel)");
 }
 
-enum ToggleEntityState
-{
-	TOGGLE_ENT_ACTIVATION = 0,
-	TOGGLE_ENT_VISIBILITY,
-	TOGGLE_ENT_COLORS,
-	TOGGLE_ENT_NORMALS,
-	TOGGLE_ENT_SF,
-	TOGGLE_ENT_MAT,
-	TOGGLE_ENT_3D_NAME,
-};
-
 void MainWindow::toggleSelectedEntitiesActivation()
-{
-	toggleSelectedEntitiesProp(TOGGLE_ENT_ACTIVATION);
+{	
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::ACTIVE);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_VISIBILITY);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::VISIBLE);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_COLORS);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::COLOR);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_NORMALS);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NORMALS);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_SF);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntitiesMaterials()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_MAT);
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::MATERIAL);
+	
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	toggleSelectedEntitiesProp(TOGGLE_ENT_3D_NAME);
-}
-
-void MainWindow::toggleSelectedEntitiesProp(int prop)
-{
-	ccHObject baseEntities;
-	ConvertToGroup(m_selectedEntities,baseEntities,ccHObject::DP_NONE);
-	for (unsigned i=0; i<baseEntities.getChildrenNumber(); ++i)
-	{
-		ccHObject* child = baseEntities.getChild(i);
-		switch(prop)
-		{
-		case TOGGLE_ENT_ACTIVATION:
-			child->toggleActivation/*_recursive*/();
-			break;
-		case TOGGLE_ENT_VISIBILITY:
-			child->toggleVisibility_recursive();
-			break;
-		case TOGGLE_ENT_COLORS:
-			child->toggleColors_recursive();
-			break;
-		case TOGGLE_ENT_NORMALS:
-			child->toggleNormals_recursive();
-			break;
-		case TOGGLE_ENT_SF:
-			child->toggleSF_recursive();
-			break;
-		case TOGGLE_ENT_MAT:
-			child->toggleMaterials_recursive();
-			break;
-		case TOGGLE_ENT_3D_NAME:
-			child->toggleShowName_recursive();
-			break;
-		default:
-			assert(false);
-		}
-		child->prepareDisplayForRefresh_recursive();
-	}
-
+	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NAME);
+	
 	refreshAll();
 	updateUI();
 }

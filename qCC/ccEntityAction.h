@@ -27,22 +27,23 @@ namespace ccEntityAction
 {
 	// Colours
 	void	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent = nullptr);
-	void	rgbToGreyScale(ccHObject::Container &selectedEntities);
-	void	setColorGradient(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	changeColorLevels(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	interpolateColors(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	rgbToGreyScale(const ccHObject::Container &selectedEntities);
+	void	setColorGradient(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	interpolateColors(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
 	
 	// Scalar Fields
-	void	sfGaussianFilter(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	sfBilateralFilter(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	sfConvertToRGB(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	sfConvertToRandomRGB(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	sfRename(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
-	void	sfAddIdField(ccHObject::Container &selectedEntities);
-	void	sfAsCoord(ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfRename(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
+	void	sfAddIdField(const ccHObject::Container &selectedEntities);
+	void	sfAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent = nullptr);
 	
 	// Normals
-	void	invertNormals(ccHObject::Container &selectedEntities);
+	void	computeNormals(const ccHObject::Container &selectedEntities, QWidget *parent);
+	void	invertNormals(const ccHObject::Container &selectedEntities);
 	
 	//! Normals conversion destinations
 	enum NORMAL_CONVERSION_DEST {
@@ -50,7 +51,10 @@ namespace ccEntityAction
 		DIP_DIR_SFS
 	};
 	//! Converts a cloud's normals
-	void	convertNormalsTo(ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest);
+	void	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest);
+
+	// Octrees
+	void	computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent);
 }
 
 #endif

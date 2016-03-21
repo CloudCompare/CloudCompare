@@ -19,6 +19,7 @@
 #include <QElapsedTimer>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QPushButton>
 
 #include "ScalarFieldTools.h"
 
@@ -35,12 +36,18 @@
 #include "ccAskTwoDoubleValuesDlg.h"
 #include "ccColorGradientDlg.h"
 #include "ccColorLevelsDlg.h"
+#include "ccComputeOctreeDlg.h"
 #include "ccExportCoordToSFDlg.h"
+#include "ccNormalComputationDlg.h"
 #include "ccProgressDialog.h"
 
 #include "ccEntityAction.h"
 #include "ccLibAlgorithms.h"
 #include "ccUtils.h"
+
+// This is included only for temporarily removing an object from the tree.
+//	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
+#include "mainwindow.h"
 
 
 namespace ccEntityAction
@@ -143,7 +150,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	rgbToGreyScale(ccHObject::Container &selectedEntities)
+	void	rgbToGreyScale(const ccHObject::Container &selectedEntities)
 	{
 		size_t selNum = selectedEntities.size();
 		
@@ -172,7 +179,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void setColorGradient(ccHObject::Container &selectedEntities, QWidget *parent)
+	void setColorGradient(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{	
 		ccColorGradientDlg dlg(parent);
 		if (!dlg.exec())
@@ -231,7 +238,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	changeColorLevels(ccHObject::Container &selectedEntities, QWidget *parent)
+	void	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		if (selectedEntities.size() != 1)
 		{
@@ -258,7 +265,7 @@ namespace ccEntityAction
 		dlg.exec();
 	}
 	
-	void	interpolateColors(ccHObject::Container &selectedEntities, QWidget *parent)
+	void	interpolateColors(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		if (selectedEntities.size() != 2)
 		{
@@ -335,7 +342,7 @@ namespace ccEntityAction
 	//////////
 	// Scalar Fields
 	
-	void sfGaussianFilter(ccHObject::Container &selectedEntities, QWidget *parent)
+	void sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		size_t selNum = selectedEntities.size();
 		if (selNum == 0)
@@ -435,7 +442,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	sfBilateralFilter(ccHObject::Container &selectedEntities, QWidget *parent)
+	void	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		size_t selNum = selectedEntities.size();
 		if (selNum == 0)
@@ -543,7 +550,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void sfConvertToRGB(ccHObject::Container &selectedEntities, QWidget *parent)
+	void sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		//we first ask the user if the SF colors should be mixed with existing colors
 		bool mixWithExistingColors = false;
@@ -589,7 +596,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	sfConvertToRandomRGB(ccHObject::Container &selectedEntities, QWidget *parent)
+	void	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		static int s_randomColorsNumber = 256;
 		
@@ -674,7 +681,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void sfRename(ccHObject::Container &selectedEntities, QWidget *parent)
+	void sfRename(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)
@@ -705,7 +712,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	sfAddIdField(ccHObject::Container &selectedEntities)
+	void	sfAddIdField(const ccHObject::Container &selectedEntities)
 	{
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)
@@ -714,7 +721,7 @@ namespace ccEntityAction
 			if (cloud != nullptr) //TODO
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-	
+				
 				int sfIdx = pc->getScalarFieldIndexByName(CC_DEFAULT_ID_SF_NAME);
 				if (sfIdx < 0)
 					sfIdx = pc->addScalarField(CC_DEFAULT_ID_SF_NAME);
@@ -723,16 +730,16 @@ namespace ccEntityAction
 					ccLog::Warning("Not enough memory!");
 					return;
 				}
-	
+				
 				CCLib::ScalarField* sf = pc->getScalarField(sfIdx);
 				Q_ASSERT(sf->currentSize() == pc->size());
-	
+				
 				for (unsigned j=0 ; j<cloud->size(); j++)
 				{
 					ScalarType idValue = static_cast<ScalarType>(j);
 					sf->setValue(j, idValue);
 				}
-	
+				
 				sf->computeMinAndMax();
 				pc->setCurrentDisplayedScalarField(sfIdx);
 				pc->showSF(true);
@@ -741,19 +748,19 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	sfAsCoord(ccHObject::Container &selectedEntities, QWidget *parent)
+	void	sfAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
 		ectsDlg.warningLabel->setVisible(false);
 		ectsDlg.setWindowTitle("Export SF to coordinate(s)");
-	
+		
 		if (!ectsDlg.exec())
 			return;
-	
+		
 		bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
 		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
 			return;
-	
+		
 		//for each selected cloud (or vertices set)
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)
@@ -762,18 +769,18 @@ namespace ccEntityAction
 			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-	
+				
 				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
 				if (sf != nullptr)
 				{
 					unsigned ptsCount = pc->size();
 					bool hasDefaultValueForNaN = false;
 					ScalarType defaultValueForNaN = sf->getMin();
-	
+					
 					for (unsigned i=0; i<ptsCount; ++i)
 					{
 						ScalarType s = sf->getValue(i);
-	
+						
 						//handle NaN values
 						if (!CCLib::ScalarField::ValidValue(s))
 						{
@@ -794,9 +801,9 @@ namespace ccEntityAction
 							}
 							s = defaultValueForNaN;
 						}
-	
+						
 						CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
-	
+						
 						//test each dimension
 						if (exportDim[0])
 							P->x = s;
@@ -805,7 +812,7 @@ namespace ccEntityAction
 						if (exportDim[2])
 							P->z = s;
 					}
-	
+					
 					pc->invalidateBoundingBox();
 				}
 			}
@@ -815,7 +822,239 @@ namespace ccEntityAction
 	//////////
 	// Normals
 	
-	void	invertNormals(ccHObject::Container &selectedEntities)
+	void	computeNormals(const ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		if (selectedEntities.empty())
+		{
+			ccConsole::Error("Select at least one point cloud");
+			return;
+		}
+		
+		//look for clouds and meshes
+		std::vector<ccPointCloud*> clouds;
+		size_t cloudsWithScanGrids = 0;
+		std::vector<ccMesh*> meshes;
+		PointCoordinateType defaultRadius = 0;
+		try
+		{
+			for (size_t i=0; i<selectedEntities.size(); ++i)
+			{
+				ccHObject	*entity = selectedEntities[i];
+				if (entity->isA(CC_TYPES::POINT_CLOUD))
+				{
+					ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+					clouds.push_back(cloud);
+					
+					if (cloud->gridCount() != 0)
+						++cloudsWithScanGrids;
+					
+					if (defaultRadius == 0)
+					{
+						//default radius
+						defaultRadius = ccNormalVectors::GuessNaiveRadius(cloud);
+					}
+				}
+				else if (entity->isKindOf(CC_TYPES::MESH))
+				{
+					if (entity->isA(CC_TYPES::MESH))
+					{
+						ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
+						meshes.push_back(mesh);
+					}
+					else
+					{
+						ccConsole::Error(QString("Can't compute normals on sub-meshes! Select the parent mesh instead"));
+						return;
+					}
+				}
+			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccConsole::Error("Not enough memory!");
+			return;
+		}
+		
+		//compute normals for each selected cloud
+		if (!clouds.empty())
+		{
+			ccNormalComputationDlg::SelectionMode selectionMode = ccNormalComputationDlg::WITHOUT_SCAN_GRIDS;
+			if (cloudsWithScanGrids)
+			{
+				if (clouds.size() == cloudsWithScanGrids)
+				{
+					//all clouds have an associated grid
+					selectionMode = ccNormalComputationDlg::WITH_SCAN_GRIDS;
+				}
+				else
+				{
+					//only a part of the clouds have an associated grid
+					selectionMode = ccNormalComputationDlg::MIXED;
+				}
+			}
+			
+			static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
+			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
+			static int s_lastMSTNeighborCount = 6;
+			static int s_lastKernelSize = 2;
+			
+			ccNormalComputationDlg ncDlg(selectionMode, parent);
+			ncDlg.setLocalModel(s_lastModelType);
+			ncDlg.setRadius(defaultRadius);
+			ncDlg.setPreferredOrientation(s_lastNormalOrientation);
+			ncDlg.setMSTNeighborCount(s_lastMSTNeighborCount);
+			ncDlg.setGridKernelSize(s_lastKernelSize);
+			if (clouds.size() == 1)
+			{
+				ncDlg.setCloud(clouds.front());
+			}
+			
+			if (!ncDlg.exec())
+				return;
+			
+			//normals computation
+			CC_LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
+			bool useGridStructure = cloudsWithScanGrids && ncDlg.useScanGridsForComputation();
+			defaultRadius = ncDlg.getRadius();
+			int kernelSize = s_lastKernelSize = ncDlg.getGridKernelSize();
+			
+			//normals orientation
+			bool orientNormals = ncDlg.orientNormals();
+			bool orientNormalsWithGrids = cloudsWithScanGrids && ncDlg.useScanGridsForOrientation();
+			ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
+			bool orientNormalsMST = ncDlg.useMSTOrientation();
+			int mstNeighbors = s_lastMSTNeighborCount = ncDlg.getMSTNeighborCount();
+			
+			size_t errors = 0;
+			for (size_t i=0; i<clouds.size(); i++)
+			{
+				ccPointCloud* cloud = clouds[i];
+				Q_ASSERT(cloud != nullptr);
+				
+				ccProgressDialog pDlg(true,parent);
+				
+				bool result = false;
+				bool orientNormalsForThisCloud = false;
+				if (useGridStructure && cloud->gridCount())
+				{
+#if 0
+					ccPointCloud* newCloud = new ccPointCloud("temp");
+					newCloud->reserve(cloud->size());
+					for (size_t gi=0; gi<cloud->gridCount(); ++gi)
+					{
+						const ccPointCloud::Grid::Shared& scanGrid = cloud->grid(gi);
+						if (scanGrid && scanGrid->indexes.empty())
+						{
+							//empty grid, we skip it
+							continue;
+						}
+						ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
+						
+						const int* _indexGrid = &(scanGrid->indexes[0]);
+						for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
+						{
+							for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+							{
+								if (*_indexGrid >= 0)
+								{
+									unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
+									const CCVector3* P = cloud->getPoint(pointIndex);
+									CCVector3 Q = toSensor * (*P);
+									newCloud->addPoint(Q);
+								}
+							}
+						}
+						
+						addToDB(newCloud);
+					}
+#endif
+					
+					//compute normals with the associated scan grid(s)
+					orientNormalsForThisCloud = orientNormals && orientNormalsWithGrids;
+					result = cloud->computeNormalsWithGrids(model, kernelSize, orientNormalsForThisCloud, &pDlg);
+				}
+				else
+				{
+					//compute normals with the octree
+					orientNormalsForThisCloud = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
+					result = cloud->computeNormalsWithOctree(model, orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
+				}
+				
+				//do we need to orient the normals? (this may have been already done if 'orientNormalsForThisCloud' is true)
+				if (result && orientNormals && !orientNormalsForThisCloud)
+				{
+					if (cloud->gridCount() && orientNormalsWithGrids)
+					{
+						//we can still use the grid structure(s) to orient the normals!
+						result = cloud->orientNormalsWithGrids();
+					}
+					else if (orientNormalsMST)
+					{
+						//use Minimum Spanning Tree to resolve normals direction
+						result = cloud->orientNormalsWithMST(mstNeighbors, &pDlg);
+					}
+				}
+				
+				if (!result)
+				{
+					++errors;
+				}
+				
+				cloud->prepareDisplayForRefresh();
+			}
+			
+			if (errors != 0)
+			{
+				if (errors < clouds.size())
+					ccConsole::Error("Failed to compute or orient the normals on some clouds! (see console)");
+				else
+					ccConsole::Error("Failed to compute or orient the normals! (see console)");
+			}
+		}
+		
+		//compute normals for each selected mesh
+		if (!meshes.empty())
+		{
+			QMessageBox question( QMessageBox::Question,
+										 "Mesh normals",
+										 "Compute per-vertex normals (smooth) or per-triangle (faceted)?",
+										 QMessageBox::NoButton,
+										 parent);
+			
+			QPushButton* perVertexButton   = question.addButton("Per-vertex", QMessageBox::YesRole);
+			QPushButton* perTriangleButton = question.addButton("Per-triangle", QMessageBox::NoRole);
+			
+			question.exec();
+			
+			bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
+			
+			for (size_t i=0; i<meshes.size(); i++)
+			{
+				ccMesh* mesh = meshes[i];
+				Q_ASSERT(mesh != nullptr);
+				
+				//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
+				MainWindow* instance = dynamic_cast<MainWindow*>(parent);
+				MainWindow::ccHObjectContext objContext;
+				if (instance)
+					objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
+				mesh->clearTriNormals();
+				mesh->showNormals(false);
+				bool result = mesh->computeNormals(computePerVertexNormals);
+				if (instance)
+					instance->putObjectBackIntoDBTree(mesh,objContext);
+				
+				if (!result)
+				{
+					ccConsole::Error(QString("Failed to compute normals on mesh '%1'").arg(mesh->getName()));
+					continue;
+				}
+				mesh->prepareDisplayForRefresh_recursive();
+			}
+		}
+	}
+	
+	void	invertNormals(const ccHObject::Container &selectedEntities)
 	{
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)
@@ -842,7 +1081,7 @@ namespace ccEntityAction
 		}
 	}
 	
-	void	convertNormalsTo(ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest)
+	void	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest)
 	{
 		unsigned errorCount = 0;
 		
@@ -948,6 +1187,130 @@ namespace ccEntityAction
 		if (errorCount)
 		{
 			ccConsole::Error("Error(s) occurred! (see console)");
+		}
+	}
+	
+	//////////
+	// Octree
+	
+	void computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		ccBBox bbox;
+		std::unordered_set<ccGenericPointCloud*> clouds;
+		size_t selNum = selectedEntities.size();
+		PointCoordinateType maxBoxSize = -1;
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+			
+			//specific test for locked vertices
+			bool lockedVertices = false;
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			if (cloud && lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
+			}
+			clouds.insert(cloud);
+			
+			//we look for the biggest box so as to define the "minimum cell size"
+			const ccBBox thisBBox = cloud->getOwnBB();
+			if (thisBBox.isValid())
+			{
+				CCVector3 dd = thisBBox.maxCorner()-thisBBox.minCorner();
+				PointCoordinateType maxd = std::max(dd.x,std::max(dd.y,dd.z));
+				if (maxBoxSize < 0.0 || maxd > maxBoxSize)
+					maxBoxSize = maxd;
+			}
+			bbox += thisBBox;
+		}
+		
+		if (clouds.empty() || maxBoxSize < 0.0)
+		{
+			ccLog::Warning("[doActionComputeOctree] No eligible entities in selection!");
+			return;
+		}
+		
+		//min(cellSize) = max(dim)/2^N with N = max subidivision level
+		const double minCellSize = static_cast<double>(maxBoxSize)/(1 << ccOctree::MAX_OCTREE_LEVEL);
+		
+		ccComputeOctreeDlg coDlg(bbox,minCellSize,parent);
+		if (!coDlg.exec())
+			return;
+		
+		ccProgressDialog pDlg(true,parent);
+		
+		//if we must use a custom bounding box, we update 'bbox'
+		if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
+			bbox = coDlg.getCustomBBox();
+		
+		for (std::unordered_set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
+		{
+			ccGenericPointCloud* cloud = *it;
+			
+			//we temporarily detach entity, as it may undergo
+			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
+			MainWindow* instance = dynamic_cast<MainWindow*>(parent);
+			MainWindow::ccHObjectContext objContext;
+			if (instance)
+				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
+			
+			//computation
+			QElapsedTimer eTimer;
+			eTimer.start();
+			ccOctree* octree = nullptr;
+			switch(coDlg.getMode())
+			{
+				case ccComputeOctreeDlg::DEFAULT:
+					octree = cloud->computeOctree(&pDlg);
+					break;
+				case ccComputeOctreeDlg::MIN_CELL_SIZE:
+				case ccComputeOctreeDlg::CUSTOM_BBOX:
+				{
+					//for a cell-size based custom box, we must update it for each cloud!
+					if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
+					{
+						double cellSize = coDlg.getMinCellSize();
+						PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
+						CCVector3 C = cloud->getOwnBB().getCenter();
+						bbox = ccBBox(	C-CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth),
+											C+CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth));
+					}
+					cloud->deleteOctree();
+					octree = new ccOctree(cloud);
+					if (octree->build(bbox.minCorner(),bbox.maxCorner(),0,0,&pDlg) > 0)
+					{
+						octree->setDisplay(cloud->getDisplay());
+						cloud->addChild(octree);
+					}
+					else
+					{
+						delete octree;
+						octree = nullptr;
+					}
+				}
+					break;
+				default:
+					Q_ASSERT(false);
+					return;
+			}
+			qint64 elapsedTime_ms = eTimer.elapsed();
+			
+			//put object back in tree
+			if (instance)
+				instance->putObjectBackIntoDBTree(cloud,objContext);
+			
+			if (octree)
+			{
+				ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
+				cloud->setEnabled(true); //for mesh vertices!
+				octree->setVisible(true);
+				octree->prepareDisplayForRefresh();
+			}
+			else
+			{
+				ccConsole::Warning(QString("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
+			}
 		}
 	}
 }

@@ -43,12 +43,16 @@ namespace ccEntityAction
 	bool	sfAddIdField(const ccHObject::Container &selectedEntities);
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent);
+	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent);
+	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget *parent);
 	
 	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent);
 	
 	// Normals
 	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	invertNormals(const ccHObject::Container &selectedEntities);
+	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget *parent);
+	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget *parent);
 	
 	//! Normals conversion destinations
 	enum class NORMAL_CONVERSION_DEST {

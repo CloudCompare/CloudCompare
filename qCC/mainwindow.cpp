@@ -1082,7 +1082,8 @@ void MainWindow::doActionSetUniqueColor()
 
 void MainWindow::doActionSetColor(bool colorize)
 {
-	ccEntityAction::setColor(m_selectedEntities, colorize, this);
+	if ( !ccEntityAction::setColor(m_selectedEntities, colorize, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1090,14 +1091,16 @@ void MainWindow::doActionSetColor(bool colorize)
 
 void MainWindow::doActionRGBToGreyScale()
 {
-	ccEntityAction::rgbToGreyScale( m_selectedEntities );
+	if ( !ccEntityAction::rgbToGreyScale( m_selectedEntities ) )
+		return;
 
 	refreshAll();
 }
 
 void MainWindow::doActionSetColorGradient()
 {
-	ccEntityAction::setColorGradient(m_selectedEntities, this);
+	if ( !ccEntityAction::setColorGradient(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1110,7 +1113,8 @@ void MainWindow::doActionChangeColorLevels()
 
 void MainWindow::doActionInterpolateColors()
 {
-	ccEntityAction::interpolateColors(m_selectedEntities, this);
+	if ( !ccEntityAction::interpolateColors(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1118,14 +1122,19 @@ void MainWindow::doActionInterpolateColors()
 
 void MainWindow::doActionInvertNormals()
 {
-	ccEntityAction::invertNormals(m_selectedEntities);
+	if ( !ccEntityAction::invertNormals(m_selectedEntities) )
+		return;
 
 	refreshAll();
 }
 
 void MainWindow::doActionConvertNormalsToDipDir()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS);
+	if ( !ccEntityAction::convertNormalsTo(m_selectedEntities,
+														ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS) )
+	{
+		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -1133,7 +1142,11 @@ void MainWindow::doActionConvertNormalsToDipDir()
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS);
+	if ( !ccEntityAction::convertNormalsTo(m_selectedEntities,
+														ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS) )
+	{
+		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -1205,7 +1218,8 @@ void MainWindow::doActionComputeKdTree()
 
 void MainWindow::doActionComputeOctree()
 {
-	ccEntityAction::computeOctree(m_selectedEntities, this);
+	if ( !ccEntityAction::computeOctree(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1847,36 +1861,52 @@ void MainWindow::doComputeBestFitBB()
 
 void MainWindow::doActionClearColor()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::COLORS,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::COLORS,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionClearNormals()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::NORMALS,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::NORMALS,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionDeleteScalarField()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionDeleteAllSF()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
@@ -2878,7 +2908,8 @@ void MainWindow::doActionComputePointsVisibility()
 
 void MainWindow::doActionConvertTextureToColor()
 {
-	ccEntityAction::convertTextureToColor(m_selectedEntities, this);
+	if ( !ccEntityAction::convertTextureToColor(m_selectedEntities, this) )
+		return;
 	
 	refreshAll();
 	updateUI();
@@ -3180,7 +3211,8 @@ void MainWindow::doActionFilterByValue()
 
 void MainWindow::doActionSFConvertToRandomRGB()
 {
-	ccEntityAction::sfConvertToRandomRGB(m_selectedEntities, this);
+	if ( !ccEntityAction::sfConvertToRandomRGB(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -3188,7 +3220,8 @@ void MainWindow::doActionSFConvertToRandomRGB()
 
 void MainWindow::doActionSFConvertToRGB()
 {
-	ccEntityAction::sfConvertToRGB(m_selectedEntities, this);
+	if ( !ccEntityAction::sfConvertToRGB(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -3268,7 +3301,8 @@ void MainWindow::doApplyActiveSFAction(int action)
 
 void MainWindow::doActionRenameSF()
 {
-	ccEntityAction::sfRename(m_selectedEntities, this);
+	if ( !ccEntityAction::sfRename(m_selectedEntities, this) )
+		return;
 
 	updateUI();
 }
@@ -3288,7 +3322,8 @@ void MainWindow::doActionOpenColorScalesManager()
 
 void MainWindow::doActionAddIdField()
 {
-	ccEntityAction::sfAddIdField(m_selectedEntities);
+	if ( !ccEntityAction::sfAddIdField(m_selectedEntities) )
+		return;
 	
 	refreshAll();
 	updateUI();
@@ -3296,7 +3331,8 @@ void MainWindow::doActionAddIdField()
 
 void MainWindow::doActionSFGaussianFilter()
 {
-	ccEntityAction::sfGaussianFilter(m_selectedEntities, this);
+	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -3304,7 +3340,8 @@ void MainWindow::doActionSFGaussianFilter()
 
 void MainWindow::doActionSFBilateralFilter()
 {
-	ccEntityAction::sfBilateralFilter(m_selectedEntities, this);
+	if ( !ccEntityAction::sfBilateralFilter(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -4126,7 +4163,8 @@ void MainWindow::doActionSubsample()
 
 void MainWindow::doActionStatisticalTest()
 {
-	ccEntityAction::statisticalTest(m_selectedEntities, this );
+	if ( !ccEntityAction::statisticalTest(m_selectedEntities, this ) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -4372,7 +4410,8 @@ void MainWindow::doActionLabelConnectedComponents()
 
 void MainWindow::doActionSetSFAsCoord()
 {
-	ccEntityAction::sfSetAsCoord(m_selectedEntities, this);
+	if ( !ccEntityAction::sfSetAsCoord(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -4380,7 +4419,8 @@ void MainWindow::doActionSetSFAsCoord()
 
 void MainWindow::doActionExportCoordToSF()
 {
-	ccEntityAction::exportCoordToSF(m_selectedEntities, this);
+	if ( !ccEntityAction::exportCoordToSF(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -5201,7 +5241,8 @@ void MainWindow::doActionComputeCPS()
 
 void MainWindow::doActionComputeNormals()
 {
-	ccEntityAction::computeNormals(m_selectedEntities, this);
+	if ( !ccEntityAction::computeNormals(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -7446,7 +7487,11 @@ void MainWindow::doPickRotationCenter()
 
 void MainWindow::toggleSelectedEntitiesActivation()
 {	
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::ACTIVE);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::ACTIVE) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7454,7 +7499,11 @@ void MainWindow::toggleSelectedEntitiesActivation()
 
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::VISIBLE);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::VISIBLE) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7462,7 +7511,11 @@ void MainWindow::toggleSelectedEntitiesVisibility()
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::COLOR);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::COLOR) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7470,7 +7523,11 @@ void MainWindow::toggleSelectedEntitiesColors()
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NORMALS);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::NORMALS) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7478,7 +7535,11 @@ void MainWindow::toggleSelectedEntitiesNormals()
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7486,7 +7547,11 @@ void MainWindow::toggleSelectedEntitiesSF()
 
 void MainWindow::toggleSelectedEntitiesMaterials()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::MATERIAL);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::MATERIAL) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7494,7 +7559,11 @@ void MainWindow::toggleSelectedEntitiesMaterials()
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NAME);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::NAME) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();

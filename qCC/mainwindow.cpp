@@ -89,7 +89,6 @@
 #include "ccComparisonDlg.h"
 #include "ccDisplayOptionsDlg.h"
 #include "ccEntityPickerDlg.h"
-#include "ccExportCoordToSFDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
@@ -112,7 +111,6 @@
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccSORFilterDlg.h"
-#include "ccStatisticalTestDlg.h"
 #include "ccStereoModeDlg.h"
 #include "ccSubsamplingDlg.h" //Aurelien BEY
 #include "ccTracePolylineTool.h"
@@ -1084,7 +1082,8 @@ void MainWindow::doActionSetUniqueColor()
 
 void MainWindow::doActionSetColor(bool colorize)
 {
-	ccEntityAction::setColor(m_selectedEntities, colorize, this);
+	if ( !ccEntityAction::setColor(m_selectedEntities, colorize, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1092,14 +1091,16 @@ void MainWindow::doActionSetColor(bool colorize)
 
 void MainWindow::doActionRGBToGreyScale()
 {
-	ccEntityAction::rgbToGreyScale( m_selectedEntities );
+	if ( !ccEntityAction::rgbToGreyScale( m_selectedEntities ) )
+		return;
 
 	refreshAll();
 }
 
 void MainWindow::doActionSetColorGradient()
 {
-	ccEntityAction::setColorGradient(m_selectedEntities, this);
+	if ( !ccEntityAction::setColorGradient(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1112,7 +1113,8 @@ void MainWindow::doActionChangeColorLevels()
 
 void MainWindow::doActionInterpolateColors()
 {
-	ccEntityAction::interpolateColors(m_selectedEntities, this);
+	if ( !ccEntityAction::interpolateColors(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1120,14 +1122,19 @@ void MainWindow::doActionInterpolateColors()
 
 void MainWindow::doActionInvertNormals()
 {
-	ccEntityAction::invertNormals(m_selectedEntities);
+	if ( !ccEntityAction::invertNormals(m_selectedEntities) )
+		return;
 
 	refreshAll();
 }
 
 void MainWindow::doActionConvertNormalsToDipDir()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS);
+	if ( !ccEntityAction::convertNormalsTo(m_selectedEntities,
+														ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS) )
+	{
+		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -1135,7 +1142,11 @@ void MainWindow::doActionConvertNormalsToDipDir()
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-	ccEntityAction::convertNormalsTo(m_selectedEntities, ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS);
+	if ( !ccEntityAction::convertNormalsTo(m_selectedEntities,
+														ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS) )
+	{
+		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -1207,7 +1218,8 @@ void MainWindow::doActionComputeKdTree()
 
 void MainWindow::doActionComputeOctree()
 {
-	ccEntityAction::computeOctree(m_selectedEntities, this);
+	if ( !ccEntityAction::computeOctree(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -1849,36 +1861,52 @@ void MainWindow::doComputeBestFitBB()
 
 void MainWindow::doActionClearColor()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::COLORS,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::COLORS,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionClearNormals()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::NORMALS,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::NORMALS,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionDeleteScalarField()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
 
 void MainWindow::doActionDeleteAllSF()
 {
-	ccEntityAction::clearProperty( m_selectedEntities,
-											 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
-											 this);
+	if ( !ccEntityAction::clearProperty( m_selectedEntities,
+													 ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS,
+													 this) )
+	{
+		return;
+	}
+	
 	refreshAll();
 	updateUI();
 }
@@ -2880,50 +2908,9 @@ void MainWindow::doActionComputePointsVisibility()
 
 void MainWindow::doActionConvertTextureToColor()
 {
-	ccHObject::Container selectedEntities = m_selectedEntities;
-
-	for (size_t i=0; i<selectedEntities.size(); ++i)
-	{
-		ccHObject* ent = selectedEntities[i];
-		if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-			assert(mesh);
-
-			if (!mesh->hasMaterials())
-			{
-				ccLog::Warning(QString("[doActionConvertTextureToColor] Mesh '%1' has no material/texture!").arg(mesh->getName()));
-				continue;
-			}
-			else
-			{
-				if (QMessageBox::warning(	this,
-											"Mesh already has colors",
-											QString("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
-											QMessageBox::Yes | QMessageBox::No,
-											QMessageBox::No ) != QMessageBox::Yes)
-				{
-					continue;
-				}
-
-
-				//ColorCompType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-				//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
-				//cloud->addRGBColor(C);
-				if (mesh->convertMaterialsToVertexColors())
-				{
-					mesh->showColors(true);
-					mesh->showMaterials(false);
-					mesh->prepareDisplayForRefresh_recursive();
-				}
-				else
-				{
-					ccLog::Warning(QString("[doActionConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
-				}
-			}
-		}
-	}
-
+	if ( !ccEntityAction::convertTextureToColor(m_selectedEntities, this) )
+		return;
+	
 	refreshAll();
 	updateUI();
 }
@@ -3224,7 +3211,8 @@ void MainWindow::doActionFilterByValue()
 
 void MainWindow::doActionSFConvertToRandomRGB()
 {
-	ccEntityAction::sfConvertToRandomRGB(m_selectedEntities, this);
+	if ( !ccEntityAction::sfConvertToRandomRGB(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -3232,7 +3220,8 @@ void MainWindow::doActionSFConvertToRandomRGB()
 
 void MainWindow::doActionSFConvertToRGB()
 {
-	ccEntityAction::sfConvertToRGB(m_selectedEntities, this);
+	if ( !ccEntityAction::sfConvertToRGB(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -3312,7 +3301,8 @@ void MainWindow::doApplyActiveSFAction(int action)
 
 void MainWindow::doActionRenameSF()
 {
-	ccEntityAction::sfRename(m_selectedEntities, this);
+	if ( !ccEntityAction::sfRename(m_selectedEntities, this) )
+		return;
 
 	updateUI();
 }
@@ -3332,7 +3322,8 @@ void MainWindow::doActionOpenColorScalesManager()
 
 void MainWindow::doActionAddIdField()
 {
-	ccEntityAction::sfAddIdField(m_selectedEntities);
+	if ( !ccEntityAction::sfAddIdField(m_selectedEntities) )
+		return;
 	
 	refreshAll();
 	updateUI();
@@ -3340,7 +3331,8 @@ void MainWindow::doActionAddIdField()
 
 void MainWindow::doActionSFGaussianFilter()
 {
-	ccEntityAction::sfGaussianFilter(m_selectedEntities, this);
+	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -3348,7 +3340,8 @@ void MainWindow::doActionSFGaussianFilter()
 
 void MainWindow::doActionSFBilateralFilter()
 {
-	ccEntityAction::sfBilateralFilter(m_selectedEntities, this);
+	if ( !ccEntityAction::sfBilateralFilter(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -4170,132 +4163,8 @@ void MainWindow::doActionSubsample()
 
 void MainWindow::doActionStatisticalTest()
 {
-	ccPickOneElementDlg pDlg("Distribution","Choose distribution",this);
-	pDlg.addElement("Gauss");
-	pDlg.addElement("Weibull");
-	pDlg.setDefaultIndex(0);
-	if (!pDlg.exec())
+	if ( !ccEntityAction::statisticalTest(m_selectedEntities, this ) )
 		return;
-
-	int distribIndex = pDlg.getSelectedIndex();
-
-	ccStatisticalTestDlg* sDlg = 0;
-	switch (distribIndex)
-	{
-	case 0: //Gauss
-		sDlg = new ccStatisticalTestDlg("mu","sigma",QString(),"Local Statistical Test (Gauss)",this);
-		break;
-	case 1: //Weibull
-		sDlg = new ccStatisticalTestDlg("a","b","shift","Local Statistical Test (Weibull)",this);
-		break;
-	default:
-		ccConsole::Error("Invalid distribution!");
-		return;
-	}
-
-	if (sDlg->exec())
-	{
-		//build up corresponding distribution
-		CCLib::GenericDistribution* distrib = 0;
-		{
-			ScalarType a = static_cast<ScalarType>(sDlg->getParam1());
-			ScalarType b = static_cast<ScalarType>(sDlg->getParam2());
-			ScalarType c = static_cast<ScalarType>(sDlg->getParam3());
-
-			switch (distribIndex)
-			{
-			case 0: //Gauss
-			{
-				CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
-				N->setParameters(a,b*b); //warning: we input sigma2 here (not sigma)
-				distrib = static_cast<CCLib::GenericDistribution*>(N);
-				break;
-			}
-			case 1: //Weibull
-				CCLib::WeibullDistribution* W = new CCLib::WeibullDistribution();
-				W->setParameters(a,b,c);
-				distrib = static_cast<CCLib::GenericDistribution*>(W);
-				break;
-			}
-		}
-
-		double pChi2 = sDlg->getProba();
-		int nn = sDlg->getNeighborsNumber();
-
-		size_t selNum = m_selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
-		{
-			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]); //TODO
-			if (pc)
-			{
-				//we apply method on currently displayed SF
-				ccScalarField* inSF = pc->getCurrentDisplayedScalarField();
-				if (inSF)
-				{
-					assert(inSF->isAllocated());
-
-					//force SF as 'OUT' field (in case of)
-					int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
-					pc->setCurrentOutScalarField(outSfIdx);
-
-					//force Chi2 Distances field as 'IN' field (create it by the way if necessary)
-					int chi2SfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
-					if (chi2SfIdx < 0)
-						chi2SfIdx = pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
-					if (chi2SfIdx < 0)
-					{
-						ccConsole::Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
-						break;
-					}
-					pc->setCurrentInScalarField(chi2SfIdx);
-
-					//compute octree if necessary
-					ccOctree* theOctree=pc->getOctree();
-					if (!theOctree)
-					{
-						ccProgressDialog pDlg(true,this);
-						theOctree = pc->computeOctree(&pDlg);
-						if (!theOctree)
-						{
-							ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
-							break;
-						}
-					}
-
-					ccProgressDialog pDlg(true,this);
-
-					QElapsedTimer eTimer;
-					eTimer.start();
-
-					double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,&pDlg,theOctree);
-
-					ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
-					ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
-
-					//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
-					{
-						ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
-						assert(chi2SF);
-						chi2SF->computeMinAndMax();
-						chi2dist *= chi2dist;
-						chi2SF->setMinDisplayed(static_cast<ScalarType>(chi2dist));
-						chi2SF->setSymmetricalScale(false);
-						chi2SF->setSaturationStart(static_cast<ScalarType>(chi2dist));
-						//chi2SF->setSaturationStop(chi2dist);
-						pc->setCurrentDisplayedScalarField(chi2SfIdx);
-						pc->showSF(true);
-						pc->prepareDisplayForRefresh_recursive();
-					}
-				}
-			}
-		}
-
-		delete distrib;
-		distrib = 0;
-	}
-
-	delete sDlg;
-	sDlg = 0;
 
 	refreshAll();
 	updateUI();
@@ -4303,130 +4172,7 @@ void MainWindow::doActionStatisticalTest()
 
 void MainWindow::doActionComputeStatParams()
 {
-	ccPickOneElementDlg pDlg("Distribution","Distribution Fitting",this);
-	pDlg.addElement("Gauss");
-	pDlg.addElement("Weibull");
-	pDlg.setDefaultIndex(0);
-	if (!pDlg.exec())
-		return;
-
-	CCLib::GenericDistribution* distrib = 0;
-	{
-		switch (pDlg.getSelectedIndex())
-		{
-		case 0: //GAUSS
-			distrib = new CCLib::NormalDistribution();
-			break;
-		case 1: //WEIBULL
-			distrib = new CCLib::WeibullDistribution();
-			break;
-		default:
-			assert(false);
-			return;
-		}
-	}
-	assert(distrib);
-
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]); //TODO
-		if (pc)
-		{
-			//we apply method on currently displayed SF
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
-			if (sf)
-			{
-				assert(sf->isAllocated());
-
-				//force SF as 'OUT' field (in case of)
-				int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
-				assert(outSfIdx >= 0);
-				pc->setCurrentOutScalarField(outSfIdx);
-
-				if (distrib->computeParameters(pc))
-				{
-					QString description;
-
-					unsigned precision = ccGui::Parameters().displayedNumPrecision;
-					switch (pDlg.getSelectedIndex())
-					{
-					case 0: //GAUSS
-						{
-							CCLib::NormalDistribution* normal = static_cast<CCLib::NormalDistribution*>(distrib);
-							description = QString("mean = %1 / std.dev. = %2").arg(normal->getMu(),0,'f',precision).arg(sqrt(normal->getSigma2()),0,'f',precision);
-						}
-						break;
-					case 1: //WEIBULL
-						{
-							CCLib::WeibullDistribution* weibull = static_cast<CCLib::WeibullDistribution*>(distrib);
-							ScalarType a,b;
-							weibull->getParameters(a,b);
-							description = QString("a = %1 / b = %2 / shift = %3").arg(a,0,'f',precision).arg(b,0,'f',precision).arg(weibull->getValueShift(),0,'f',precision);
-						}
-						break;
-					default:
-						assert(false);
-						return;
-					}
-					description.prepend(QString("%1: ").arg(distrib->getName()));
-					ccConsole::Print(QString("[Distribution fitting] %1").arg(description));
-
-					//Auto Chi2
-					unsigned numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(pc->size()))));
-					std::vector<unsigned> histo;
-					std::vector<double> npis;
-					try
-					{
-						histo.resize(numberOfClasses,0);
-						npis.resize(numberOfClasses,0.0);
-					}
-					catch (const std::bad_alloc&)
-					{
-						ccConsole::Warning("[Distribution fitting] Not enough memory!");
-						continue;
-					}
-
-					unsigned finalNumberOfClasses = 0;
-					double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,0,0,&(histo[0]),&(npis[0]));
-
-					if (chi2dist >= 0.0)
-					{
-						ccConsole::Print("[Distribution fitting] %s: Chi2 Distance = %f",distrib->getName(),chi2dist);
-					}
-					else
-					{
-						ccConsole::Warning("[Distribution fitting] Failed to compute Chi2 distance?!");
-						continue;
-					}
-
-					//show histogram
-					ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
-					hDlg->setWindowTitle("[Distribution fitting]");
-					{
-						ccHistogramWindow* histogram = hDlg->window();
-						histogram->fromBinArray(histo,sf->getMin(),sf->getMax());
-						histo.clear();
-						histogram->setCurveValues(npis);
-						npis.clear();
-						histogram->setTitle(description);
-						histogram->setColorScheme(ccHistogramWindow::USE_CUSTOM_COLOR_SCALE);
-						histogram->setColorScale(sf->getColorScale());
-						histogram->setAxisLabels(sf->getName(),"Count");
-						histogram->refresh();
-					}
-					hDlg->show();
-				}
-				else
-				{
-					ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName()).arg(pc->getScalarFieldName(outSfIdx)));
-				}
-			}
-		}
-	}
-
-	delete distrib;
-	distrib = 0;
+	ccEntityAction::computeStatParams(m_selectedEntities, this );
 }
 
 struct ComponentIndexAndSize
@@ -4664,7 +4410,8 @@ void MainWindow::doActionLabelConnectedComponents()
 
 void MainWindow::doActionSetSFAsCoord()
 {
-	ccEntityAction::sfAsCoord(m_selectedEntities, this);
+	if ( !ccEntityAction::sfSetAsCoord(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -4672,59 +4419,8 @@ void MainWindow::doActionSetSFAsCoord()
 
 void MainWindow::doActionExportCoordToSF()
 {
-	ccExportCoordToSFDlg ectsDlg(this);
-
-	if (!ectsDlg.exec())
+	if ( !ccEntityAction::exportCoordToSF(m_selectedEntities, this) )
 		return;
-
-	bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
-	const QString defaultSFName[3] = {"Coord. X", "Coord. Y", "Coord. Z"};
-
-	if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
-		return;
-
-	//for each selected cloud (or vertices set)
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
-		if (pc)
-		{
-			unsigned ptsCount = pc->size();
-
-			//test each dimension
-			for (unsigned d=0; d<3; ++d)
-			{
-				if (exportDim[d])
-				{
-					int sfIndex = pc->getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
-					if (sfIndex < 0)
-						sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]));
-					if (sfIndex < 0)
-					{
-						ccLog::Error("Not enough memory!");
-						i = selNum;
-						break;
-					}
-
-					CCLib::ScalarField* sf = pc->getScalarField(sfIndex);
-					assert(sf && sf->currentSize() == ptsCount);
-					if (sf)
-					{
-						for (unsigned k=0; k<ptsCount; ++k)
-						{
-							ScalarType s = static_cast<ScalarType>(pc->getPoint(k)->u[d]);
-							sf->setValue(k,s);
-						}
-						sf->computeMinAndMax();
-						pc->setCurrentDisplayedScalarField(sfIndex);
-						m_selectedEntities[i]->showSF(true);
-						m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
-					}
-				}
-			}
-		}
-	}
 
 	refreshAll();
 	updateUI();
@@ -5545,7 +5241,8 @@ void MainWindow::doActionComputeCPS()
 
 void MainWindow::doActionComputeNormals()
 {
-	ccEntityAction::computeNormals(m_selectedEntities, this);
+	if ( !ccEntityAction::computeNormals(m_selectedEntities, this) )
+		return;
 
 	refreshAll();
 	updateUI();
@@ -7790,7 +7487,11 @@ void MainWindow::doPickRotationCenter()
 
 void MainWindow::toggleSelectedEntitiesActivation()
 {	
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::ACTIVE);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::ACTIVE) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7798,7 +7499,11 @@ void MainWindow::toggleSelectedEntitiesActivation()
 
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::VISIBLE);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::VISIBLE) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7806,7 +7511,11 @@ void MainWindow::toggleSelectedEntitiesVisibility()
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::COLOR);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::COLOR) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7814,7 +7523,11 @@ void MainWindow::toggleSelectedEntitiesColors()
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NORMALS);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::NORMALS) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7822,7 +7535,11 @@ void MainWindow::toggleSelectedEntitiesNormals()
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7830,7 +7547,11 @@ void MainWindow::toggleSelectedEntitiesSF()
 
 void MainWindow::toggleSelectedEntitiesMaterials()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::MATERIAL);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::MATERIAL) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();
@@ -7838,7 +7559,11 @@ void MainWindow::toggleSelectedEntitiesMaterials()
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	ccEntityAction::toggleProperty(m_selectedEntities, ccEntityAction::TOGGLE_PROPERTY::NAME);
+	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
+													 ccEntityAction::TOGGLE_PROPERTY::NAME) )
+	{
+		return;
+	}
 	
 	refreshAll();
 	updateUI();

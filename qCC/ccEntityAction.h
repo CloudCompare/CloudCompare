@@ -31,6 +31,7 @@ namespace ccEntityAction
 	void	setColorGradient(const ccHObject::Container &selectedEntities, QWidget *parent);
 	void	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget *parent);
 	void	interpolateColors(const ccHObject::Container &selectedEntities, QWidget *parent);
+	void	convertTextureToColor(ccHObject::Container selectedEntities, QWidget *parent);
 	
 	// Scalar Fields
 	void	sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget *parent);
@@ -39,7 +40,8 @@ namespace ccEntityAction
 	void	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget *parent);
 	void	sfRename(const ccHObject::Container &selectedEntities, QWidget *parent);
 	void	sfAddIdField(const ccHObject::Container &selectedEntities);
-	void	sfAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent);
+	void	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent);
+	void	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent);
 	
 	// Normals
 	void	computeNormals(const ccHObject::Container &selectedEntities, QWidget *parent);
@@ -75,6 +77,10 @@ namespace ccEntityAction
 		NAME
 	};
 	void	toggleProperty(const ccHObject::Container &selectedEntities, TOGGLE_PROPERTY property);
+	
+	// Stats
+	void	statisticalTest(const ccHObject::Container &selectedEntities, QWidget *parent);
+	void	computeStatParams(const ccHObject::Container &selectedEntities, QWidget *parent);
 }
 
 #endif

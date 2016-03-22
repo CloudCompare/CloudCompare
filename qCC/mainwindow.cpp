@@ -61,10 +61,8 @@
 #include "ccEntityAction.h"
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
-#include "ccLibAlgorithms.h"
 
 //plugins handling
-#include <ccPluginInterface.h>
 #include <ccStdPluginInterface.h>
 #include <ccGLFilterPluginInterface.h>
 #include <ccIOFilterPluginInterface.h>
@@ -72,7 +70,6 @@
 
 //shaders & Filters
 #include <ccShader.h>
-#include <ccGlFilter.h>
 
 //dialogs
 #include "ccAboutDialog.h"
@@ -3348,51 +3345,18 @@ void MainWindow::doActionSFBilateralFilter()
 }
 
 void MainWindow::doActionSmoothMeshSF()
-{
-	doMeshSFAction(ccMesh::SMOOTH_MESH_SF);
+{	
+	if ( !ccEntityAction::processMeshSF(m_selectedEntities, ccMesh::SMOOTH_MESH_SF, this) )
+		return;
+
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionEnhanceMeshSF()
 {
-	doMeshSFAction(ccMesh::ENHANCE_MESH_SF);
-}
-
-void MainWindow::doMeshSFAction(ccMesh::MESH_SCALAR_FIELD_PROCESS process)
-{
-	ccProgressDialog pDlg(false,this);
-
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-		if (ent->isKindOf(CC_TYPES::MESH) || ent->isKindOf(CC_TYPES::PRIMITIVE)) //TODO
-		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-			if (mesh)
-			{
-				ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
-
-				if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
-				{
-					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-
-					//on active le champ scalaire actuellement affiche
-					int sfIdx = pc->getCurrentDisplayedScalarFieldIndex();
-					if (sfIdx >= 0)
-					{
-						pc->setCurrentScalarField(sfIdx);
-						mesh->processScalarField(process);
-						pc->getCurrentInScalarField()->computeMinAndMax();
-						mesh->prepareDisplayForRefresh_recursive();
-					}
-					else
-					{
-						ccConsole::Warning(QString("Mesh [%1] vertices have no activated scalar field!").arg(mesh->getName()));
-					}
-				}
-			}
-		}
-	}
+	if ( !ccEntityAction::processMeshSF(m_selectedEntities, ccMesh::ENHANCE_MESH_SF, this) )
+		return;
 
 	refreshAll();
 	updateUI();

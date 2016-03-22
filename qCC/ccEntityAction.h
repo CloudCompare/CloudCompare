@@ -19,6 +19,7 @@
 
 #include "ccColorScale.h"
 #include "ccHObject.h"
+#include "ccMesh.h"
 
 class QWidget;
 
@@ -43,6 +44,8 @@ namespace ccEntityAction
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent);
 	
+	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent);
+	
 	// Normals
 	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	invertNormals(const ccHObject::Container &selectedEntities);
@@ -54,10 +57,10 @@ namespace ccEntityAction
 	};
 	//! Converts a cloud's normals
 	bool	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest);
-
+	
 	// Octrees
 	bool	computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent);
-
+	
 	// Properties
 	enum class CLEAR_PROPERTY {
 		COLORS = 0,
@@ -66,7 +69,7 @@ namespace ccEntityAction
 		ALL_SCALAR_FIELDS
 	};
 	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget *parent);	
-
+	
 	enum class TOGGLE_PROPERTY {
 		ACTIVE = 0,
 		VISIBLE,

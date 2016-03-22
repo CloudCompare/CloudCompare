@@ -17,6 +17,8 @@
 
 #include "ccGraphicalTransformationTool.h"
 
+#include "ccMesh.h"
+
 #include "ccGLWindow.h"
 #include "mainwindow.h"
 

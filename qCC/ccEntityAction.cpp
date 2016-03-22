@@ -29,9 +29,7 @@
 #include "ccColorScalesManager.h"
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
-#include "ccHObjectCaster.h"
 #include "ccOctree.h"
-#include "ccScalarField.h"
 
 #include "ccGuiParameters.h"
 
@@ -276,7 +274,7 @@ namespace ccEntityAction
 		
 		ccColorLevelsDlg dlg(parent,pointCloud);
 		dlg.exec();
-
+		
 		return true;
 	}
 	
@@ -352,7 +350,7 @@ namespace ccEntityAction
 		}
 		
 		ent2->prepareDisplayForRefresh_recursive();
-
+		
 		return true;
 	}
 	
@@ -398,7 +396,7 @@ namespace ccEntityAction
 				}
 			}
 		}
-
+		
 		return true;
 	}
 	
@@ -953,6 +951,48 @@ namespace ccEntityAction
 					pc->setCurrentDisplayedScalarField(sfIndex);
 					entity->showSF(true);
 					entity->prepareDisplayForRefresh_recursive();
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent)
+	{
+		ccProgressDialog pDlg(false,parent);
+		
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+			if (ent->isKindOf(CC_TYPES::MESH) || ent->isKindOf(CC_TYPES::PRIMITIVE)) //TODO
+			{
+				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+				if (mesh == nullptr)
+					continue;
+				
+				ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
+				if (cloud == nullptr)
+					continue;
+				
+				if (cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
+				{
+					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+					
+					//on active le champ scalaire actuellement affiche
+					int sfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+					if (sfIdx >= 0)
+					{
+						pc->setCurrentScalarField(sfIdx);
+						mesh->processScalarField(process);
+						pc->getCurrentInScalarField()->computeMinAndMax();
+						mesh->prepareDisplayForRefresh_recursive();
+					}
+					else
+					{
+						ccConsole::Warning(QString("Mesh [%1] vertices have no activated scalar field!").arg(mesh->getName()));
+					}
 				}
 			}
 		}

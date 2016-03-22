@@ -28,12 +28,10 @@
 
 //CCLib
 #include <AutoSegmentationTools.h>
+#include <PointProjectionTools.h>
 
 //GUI (generated with Qt Designer)
 #include <ui_mainWindow.h>
-
-//qCC_db
-#include <ccMesh.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -506,11 +504,6 @@ protected:
 	/** \param type triangulation type
 	**/
 	void doActionComputeMesh(CC_TRIANGULATION_TYPES type);
-
-	//! Apply a specific process to a mesh scalar field
-	/** \param process process
-	**/
-	void doMeshSFAction(ccMesh::MESH_SCALAR_FIELD_PROCESS process);
 
 	//! Computes the orientation of an entity
 	/** Either fit a plane or a 'facet' (2D polygon)

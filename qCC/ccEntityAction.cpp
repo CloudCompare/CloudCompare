@@ -29,9 +29,7 @@
 #include "ccColorScalesManager.h"
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
-#include "ccHObjectCaster.h"
 #include "ccOctree.h"
-#include "ccScalarField.h"
 
 #include "ccGuiParameters.h"
 
@@ -43,6 +41,8 @@
 #include "ccNormalComputationDlg.h"
 #include "ccPickOneElementDlg.h"
 #include "ccProgressDialog.h"
+#include "ccScalarFieldArithmeticsDlg.h"
+#include "ccScalarFieldFromColorDlg.h"
 #include "ccStatisticalTestDlg.h"
 
 #include "ccCommon.h"
@@ -59,6 +59,26 @@
 
 namespace ccEntityAction
 {
+	static QString GetFirstAvailableSFName(const ccPointCloud* cloud, const QString& baseName)
+	{
+		if (cloud == nullptr)
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+		
+		QString name = baseName;
+		int tries = 0;
+		
+		while (cloud->getScalarFieldIndexByName(qPrintable(name)) >= 0 || tries > 99)
+			name = QString("%1 #%2").arg(baseName).arg(++tries);
+		
+		if (tries > 99)
+			return QString();
+		
+		return name;
+	}
+	
 	//////////
 	// Colours
 	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
@@ -276,7 +296,7 @@ namespace ccEntityAction
 		
 		ccColorLevelsDlg dlg(parent,pointCloud);
 		dlg.exec();
-
+		
 		return true;
 	}
 	
@@ -352,7 +372,7 @@ namespace ccEntityAction
 		}
 		
 		ent2->prepareDisplayForRefresh_recursive();
-
+		
 		return true;
 	}
 	
@@ -398,7 +418,7 @@ namespace ccEntityAction
 				}
 			}
 		}
-
+		
 		return true;
 	}
 	
@@ -960,6 +980,192 @@ namespace ccEntityAction
 		return true;
 	}
 	
+	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		Q_ASSERT(!selectedEntities.empty());
+		
+		ccHObject* entity = selectedEntities[0];
+		bool lockedVertices;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity,&lockedVertices);
+		if (lockedVertices)
+		{
+			ccUtils::DisplayLockedVerticesWarning(entity->getName(),true);
+			return false;
+		}
+		if (cloud == nullptr)
+		{
+			return false;
+		}
+		
+		ccScalarFieldArithmeticsDlg sfaDlg(cloud,parent);
+		
+		if (!sfaDlg.exec())
+		{
+			return false;
+		}
+		
+		if (!sfaDlg.apply(cloud))
+		{
+			ccConsole::Error("An error occurred (see Console for more details)");
+		}
+		
+		cloud->showSF(true);
+		cloud->prepareDisplayForRefresh_recursive();
+		
+		return true;
+	}
+	
+	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		//candidates
+		std::unordered_set<ccPointCloud*> clouds;
+		
+		for (size_t i=0; i<selectedEntities.size(); ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+			if (cloud && ent->hasColors()) //only for clouds (or vertices)
+				clouds.insert( cloud );
+		}
+		
+		if (clouds.empty())
+			return false;
+		
+		ccScalarFieldFromColorDlg dialog(parent);
+		if (!dialog.exec())
+			return false;
+		
+		const bool exportR = dialog.getRStatus();
+		const bool exportG = dialog.getGStatus();
+		const bool exportB = dialog.getBStatus();
+		const bool exportC = dialog.getCompositeStatus();
+		
+		for (std::unordered_set<ccPointCloud*>::const_iterator it = clouds.begin(); it != clouds.end(); ++it)
+		{
+			ccPointCloud* cloud = *it;
+			
+			std::vector<ccScalarField*> fields(4);
+			fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : 0);
+			fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : 0);
+			fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"B"))) : 0);
+			fields[3] = (exportC ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"Composite"))) : 0);
+			
+			//try to instantiate memory for each field
+			unsigned count = cloud->size();
+			for (size_t i=0; i<fields.size(); ++i)
+			{
+				if (fields[i] && !fields[i]->reserve(count))
+				{
+					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(fields[i]->getName()).arg(cloud->getName()));
+					fields[i]->release();
+					fields[i] = nullptr;
+				}
+			}
+			
+			//export points
+			for (unsigned j=0; j<cloud->size(); ++j)
+			{
+				const ColorCompType* rgb = cloud->getPointColor(j);
+				
+				if (fields[0])
+					fields[0]->addElement(rgb[0]);
+				if (fields[1])
+					fields[1]->addElement(rgb[1]);
+				if (fields[2])
+					fields[2]->addElement(rgb[2]);
+				if (fields[3])
+					fields[3]->addElement(static_cast<ScalarType>(rgb[0] + rgb[1] + rgb[2])/3);
+			}
+			
+			QString fieldsStr;
+			
+			for (size_t i=0; i<fields.size(); ++i)
+			{
+				if (fields[i] == nullptr)
+					continue;
+				
+				fields[i]->computeMinAndMax();
+				
+				int sfIdx = cloud->getScalarFieldIndexByName(fields[i]->getName());
+				if (sfIdx >= 0)
+					cloud->deleteScalarField(sfIdx);
+				sfIdx = cloud->addScalarField(fields[i]);
+				Q_ASSERT(sfIdx >= 0);
+				
+				if (sfIdx >= 0)
+				{
+					cloud->setCurrentDisplayedScalarField(sfIdx);
+					cloud->showSF(true);
+					cloud->refreshDisplay();
+					
+					//mesh vertices?
+					if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
+					{
+						cloud->getParent()->showSF(true);
+						cloud->getParent()->refreshDisplay();
+					}
+					
+					if (!fieldsStr.isEmpty())
+						fieldsStr.append(", ");
+					fieldsStr.append(fields[i]->getName());
+				}
+				else
+				{
+					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(fields[i]->getName()).arg(cloud->getName()));
+					fields[i]->release();
+					fields[i] = nullptr;
+				}
+			}
+			
+			if (!fieldsStr.isEmpty())
+				ccLog::Print(QString("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr).arg(cloud->getName()));
+		}
+		
+		return true;
+	}
+	
+	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent)
+	{
+		ccProgressDialog pDlg(false,parent);
+		
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+			if (ent->isKindOf(CC_TYPES::MESH) || ent->isKindOf(CC_TYPES::PRIMITIVE)) //TODO
+			{
+				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+				if (mesh == nullptr)
+					continue;
+				
+				ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
+				if (cloud == nullptr)
+					continue;
+				
+				if (cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
+				{
+					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+					
+					//on active le champ scalaire actuellement affiche
+					int sfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+					if (sfIdx >= 0)
+					{
+						pc->setCurrentScalarField(sfIdx);
+						mesh->processScalarField(process);
+						pc->getCurrentInScalarField()->computeMinAndMax();
+						mesh->prepareDisplayForRefresh_recursive();
+					}
+					else
+					{
+						ccConsole::Warning(QString("Mesh [%1] vertices have no activated scalar field!").arg(mesh->getName()));
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	//////////
 	// Normals
 	
@@ -1221,6 +1427,134 @@ namespace ccEntityAction
 					ccCloud->prepareDisplayForRefresh_recursive();
 				}
 			}
+		}
+		
+		return true;
+	}
+	
+	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		if (selectedEntities.empty())
+		{
+			ccConsole::Error("Select at least one point cloud");
+			return false;
+		}
+		
+		bool ok = false;
+		unsigned char s_defaultLevel = 6;
+		int value = QInputDialog::getInt(parent,
+													"Orient normals (FM)", "Octree level",
+													s_defaultLevel,
+													1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
+													1,
+													&ok);
+		if (!ok)
+			return false;
+		
+		Q_ASSERT(value >= 0 && value <= 255);
+		
+		unsigned char level = static_cast<unsigned char>(value);
+		s_defaultLevel = level;
+		
+		ccProgressDialog pDlg(false,parent);
+		
+		size_t errors = 0;
+		for (size_t i=0; i<selectedEntities.size(); i++)
+		{
+			ccHObject* entity = selectedEntities[i];
+			
+			if (!entity->isA(CC_TYPES::POINT_CLOUD))
+				continue;
+			
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+			
+			if (!cloud->hasNormals())
+			{
+				ccConsole::Warning(QString("Cloud '%1' has no normals!").arg(cloud->getName()));
+				continue;
+			}
+			
+			//orient normals with Fast Marching
+			if (cloud->orientNormalsWithFM(level, &pDlg))
+			{
+				cloud->prepareDisplayForRefresh();
+			}
+			else
+			{
+				++errors;
+			}
+		}
+		
+		if (errors)
+		{
+			ccConsole::Error(QString("Process failed (check console)"));
+		}
+		else
+		{
+			ccLog::Warning("Normals have been oriented: you may still have to globally invert the cloud normals however (Edit > Normals > Invert).");
+		}
+		
+		return true;
+	}
+	
+	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget *parent)
+	{
+		if (selectedEntities.empty())
+		{
+			ccConsole::Error("Select at least one point cloud");
+			return false;
+		}
+		
+		bool ok = false;
+		static unsigned s_defaultKNN = 6;
+		unsigned kNN = static_cast<unsigned>(QInputDialog::getInt(parent,
+																					 "Neighborhood size", "Neighbors",
+																					 s_defaultKNN ,
+																					 1, 1000,
+																					 1,
+																					 &ok));
+		if (!ok)
+			return false;
+		
+		s_defaultKNN = kNN;
+		
+		ccProgressDialog pDlg(true,parent);
+		
+		size_t errors = 0;
+		for (size_t i=0; i<selectedEntities.size(); i++)
+		{
+			ccHObject* entity = selectedEntities[i];
+			
+			if (!entity->isA(CC_TYPES::POINT_CLOUD))
+				continue;
+			
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+			
+			if (!cloud->hasNormals())
+			{
+				ccConsole::Warning(QString("Cloud '%1' has no normals!").arg(cloud->getName()));
+				continue;
+			}
+			
+			//use Minimum Spanning Tree to resolve normals direction
+			if (cloud->orientNormalsWithMST(kNN, &pDlg))
+			{
+				cloud->prepareDisplayForRefresh();
+			}
+			else
+			{
+				ccConsole::Warning(QString("Process failed on cloud '%1'").arg(cloud->getName()));
+				++errors;
+			}
+		}
+		
+		if (errors)
+		{
+			ccConsole::Error(QString("Process failed (check console)"));
+		}
+		else
+		{
+			ccLog::Warning("Normals have been oriented: you may still have to globally invert the cloud normals however (Edit > Normals > Invert).");
 		}
 		
 		return true;

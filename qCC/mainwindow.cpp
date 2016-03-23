@@ -4939,7 +4939,6 @@ void MainWindow::doActionComputeDistanceMap()
 			return;
 		}
 
-
 		ccBBox box = ent->getOwnBB();
 		PointCoordinateType largestDim = box.getMaxBoxDim() + static_cast<PointCoordinateType>(margin);
 		PointCoordinateType cellDim = largestDim / steps;
@@ -4995,7 +4994,7 @@ void MainWindow::doActionComputeDistanceMap()
 					for (unsigned k = 0; k < steps; ++k)
 					{
 						gridCloud->addPoint(minCorner + CCVector3(i + 0.5, j + 0.5, k + 0.5) * cellDim);
-						ScalarType s = static_cast<ScalarType>(cdt.getValue(i, j, k));
+						ScalarType s = static_cast<ScalarType>(cdt.getValue(i, j, k) * cellDim);
 						//sf->addElement(s < maxDist ? s : NAN_VALUE);
 						sf->addElement(sqrt(s));
 					}

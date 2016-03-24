@@ -342,24 +342,24 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			//the GL type depends on the PointCoordinateType 'size' (float or double)
 			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
-			
+
 			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
 			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
 				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-				glFunc->glNormalPointer(GL_COORD_TYPE,0,GetNormalsBuffer());
+				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
 				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				glFunc->glColorPointer(3,GL_UNSIGNED_BYTE,0,GetColorsBuffer());
+				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
 			}
 
 			//we can scan and process each chunk separately in an optimized way
 			//we mimic the way ccMesh beahves by using virtual chunks!
-			unsigned chunks = static_cast<unsigned>(ceil(static_cast<double>(displayedTriNum)/MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
+			unsigned chunks = static_cast<unsigned>(ceil(static_cast<double>(displayedTriNum) / MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
 			unsigned chunkStart = 0;
 			const ColorCompType* col = 0;
 			for (unsigned k=0; k<chunks; ++k, chunkStart += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
@@ -577,8 +577,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 							if (newMatlIndex >= 0)
 							{
-								currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture((*materials)[newMatlIndex]->getTexture()));
-								currentTexture->bind();
+								QImage texImage = materials->at(newMatlIndex)->getTexture();
+								if (!texImage.isNull())
+								{
+									currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(texImage));
+									currentTexture->bind();
+								}
 							}
 						}
 

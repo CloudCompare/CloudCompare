@@ -52,194 +52,8 @@
 
 //Oculus
 #ifdef CC_OCULUS_SUPPORT
-#include <OVR_CAPI.h>
-#include <OVR_CAPI_GL.h>
-#include <Extras/OVR_Math.h>
 
-//Oculus SDK 'session'
-struct OculusHMD
-{
-	OculusHMD()
-		: session(0)
-		, fbo(0)
-		, textureSet(0)
-		, lastOVRPos(0, 0, 0)
-		, hasLastOVRPos(false)
-		//, winWasMaximized(false)
-		//, winPreviousSize(0,0)
-	{
-		textureSize.w = textureSize.h = 0;
-	}
-
-	~OculusHMD()
-	{
-		stop(true);
-	}
-
-	void setSesion(ovrSession s)
-	{
-		if (session && session != s)
-		{
-			//auto-stop
-			stop(false);
-		}
-
-		session = s;
-		if (session)
-		{
-			ovrHmdDesc hmdDesc    = ovr_GetHmdDesc(session);
-			eyeRenderDesc[0]      = ovr_GetRenderDesc(session, ovrEye_Left, hmdDesc.DefaultEyeFov[0]);
-			eyeRenderDesc[1]      = ovr_GetRenderDesc(session, ovrEye_Right, hmdDesc.DefaultEyeFov[1]);
-			hmdToEyeViewOffset[0] = eyeRenderDesc[0].HmdToEyeViewOffset;
-			hmdToEyeViewOffset[1] = eyeRenderDesc[1].HmdToEyeViewOffset;
-		}
-	}
-
-	bool initTextureSet()
-	{
-		if (!session)
-		{
-			assert(false);
-			return false;
-		}
-
-		ovrHmdDesc hmdDesc = ovr_GetHmdDesc(session);
-		ovrSizei recommendedTex0Size = ovr_GetFovTextureSize(session, ovrEye_Left, hmdDesc.DefaultEyeFov[0], 1.0f);
-		ovrSizei recommendedTex1Size = ovr_GetFovTextureSize(session, ovrEye_Right, hmdDesc.DefaultEyeFov[1], 1.0f);
-
-		//determine the rendering FOV and allocate the required ovrSwapTextureSet (see https://developer.oculus.com/documentation/pcsdk/latest/concepts/dg-render/)
-		ovrSizei bufferSize;
-		{
-			bufferSize.w  = recommendedTex0Size.w + recommendedTex1Size.w;
-			bufferSize.h = std::max(recommendedTex0Size.h, recommendedTex1Size.h);
-		}
-
-		if (	!textureSet
-			||	!fbo
-			||	textureSize.w != bufferSize.w
-			||	textureSize.h != bufferSize.h )
-		{
-			destroyTextureSet();
-
-			if (!ovr_CreateSwapTextureSetGL(session,
-				GL_SRGB8_ALPHA8,
-				bufferSize.w,
-				bufferSize.h,
-				&textureSet) == ovrSuccess)
-			{
-				return false;
-			}
-
-			assert(!fbo);
-			fbo = new ccFrameBufferObject;
-			if (!fbo->init(	static_cast<unsigned>(bufferSize.w),
-							static_cast<unsigned>(bufferSize.h) ))
-			{
-				destroyTextureSet();
-				return false;
-			}
-
-			//assert(textureSet->TextureCount <= 4);
-			//for (int i=0; i<textureSet->TextureCount; ++i)
-			//{
-			//	GLuint texID = ((ovrGLTexture*)&textureSet->Textures[i])->OGL.TexId;
-
-			//FIXME
-			ccQOpenGLFunctions* glFunc = functions();
-			assert(glFunc);
-
-			//	glBindTexture(GL_TEXTURE_2D, texID);
-			//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-			//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR/*GL_LINEAR_MIPMAP_LINEAR*/);
-			//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			//	if (false) //TODO: test if 'GLE_EXT_texture_filter_anisotropic' is present
-			//	{
-			//     			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
-			//	}
-			//	glBindTexture(GL_TEXTURE_2D, 0);
-			//}
-
-			textureSize = bufferSize;
-		}
-
-		// Initialize our single full screen Fov layer.
-		layer.Header.Type      = ovrLayerType_EyeFov;
-		layer.Header.Flags     = ovrLayerFlag_TextureOriginAtBottomLeft;
-		layer.ColorTexture[0]  = textureSet;
-		layer.ColorTexture[1]  = textureSet;
-		layer.Fov[0]           = eyeRenderDesc[0].Fov;
-		layer.Fov[1]           = eyeRenderDesc[1].Fov;
-		layer.Viewport[0].Pos.x = 0;
-		layer.Viewport[0].Pos.y = 0;
-		layer.Viewport[0].Size  = recommendedTex0Size;
-		layer.Viewport[1].Pos.x = recommendedTex0Size.w;
-		layer.Viewport[1].Pos.y = 0;
-		layer.Viewport[1].Size  = recommendedTex1Size;
-
-		return true;
-	}
-
-	void stop(bool autoShutdown = true)
-	{
-		if (session)
-		{ 
-			//destroy the textures (if any)
-			destroyTextureSet();
-
-			//then destroy the session
-			ovr_Destroy(session);
-			session = 0;
-		}
-
-		if (autoShutdown)
-		{
-			ovr_Shutdown();
-		}
-	}
-
-	//! Destroy the textures (if any)
-	void destroyTextureSet()
-	{
-		if (fbo)
-		{
-			delete fbo;
-			fbo = 0;
-		}
-
-		if (textureSet)
-		{
-			ovr_DestroySwapTextureSet(session, textureSet);
-			textureSet = 0;
-		}
-		textureSize.w = textureSize.h = 0;
-	}
-
-	//! Session handle
-	ovrSession session;
-
-	//! Dedicated FBO
-	ccFrameBufferObject* fbo;
-
-	//! Texture(s)
-	ovrSwapTextureSet* textureSet;
-	ovrSizei textureSize;
-
-	//stereo pair rendering parameters
-	ovrEyeRenderDesc eyeRenderDesc[2];
-	ovrVector3f      hmdToEyeViewOffset[2];
-	ovrLayerEyeFov   layer;
-
-	//! Last sensor position
-	CCVector3d lastOVRPos;
-	//! Whether a position has been already recorded or not
-	bool hasLastOVRPos;
-
-	//previous window state
-	//bool winWasMaximized;
-	//QSize winPreviousSize;
-
-};
+#include "oculus/ccOculus.h"
 static OculusHMD s_oculus;
 
 #endif //CC_OCULUS_SUPPORT
@@ -248,7 +62,6 @@ static OculusHMD s_oculus;
 //VLD
 #include <vld.h>
 #endif
-
 
 //Min and max zoom ratio (relative)
 const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
@@ -343,7 +156,7 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 
 	if (	!_fbo->init(w, h)
 		||	!_fbo->initColor()
-		||	!_fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D))
+		||	!_fbo->initDepth())
 	{
 		delete _fbo;
 		_fbo = 0;
@@ -411,6 +224,7 @@ ccGLWindow::ccGLWindow(QWidget *parent,	bool silentInitialization/*=false*/)
 	, m_showDebugTraces(false)
 	, m_pickRadius(DefaultPickRadius)
 	, m_glExtFuncSupported(false)
+	, m_autoRefresh(false)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -497,19 +311,18 @@ ccGLWindow::ccGLWindow(QWidget *parent,	bool silentInitialization/*=false*/)
 	//singal/slot connections
 	connect(this, SIGNAL(itemPickedFast(ccHObject*, int, int, int)), this, SLOT(onItemPickedFast(ccHObject*, int, int, int)), Qt::DirectConnection);
 	connect(&m_scheduleTimer, SIGNAL(timeout()), this, SLOT(checkScheduledRedraw()));
+	connect(&m_autoRefreshTimer, SIGNAL(timeout()), this, SLOT(update()));
 
 	setAttribute(Qt::WA_AcceptTouchEvents, true);
+	setAttribute(Qt::WA_OpaquePaintEvent, true);
 }
 
 ccGLWindow::~ccGLWindow()
 {
 	cancelScheduledRedraw();
 
-	//Oculus session is still active? Simply disable the stereo mode
-	//if (s_ovrSession)
-	//{
-	//	disableStereoMode();
-	//}
+	//disable the stereo mode (mainly to release the Oculus FBO ;)
+	disableStereoMode();
 
 	//we must unlink entities currently linked to this window
 	if (m_globalDBRoot)
@@ -1348,7 +1161,10 @@ void ccGLWindow::redraw(bool only2D/*=false*/, bool resetLOD/*=true*/)
 		m_updateFBO = true;
 	}
 
-	updateGL();
+	if (!m_autoRefresh)
+	{
+		update();
+	}
 }
 
 void ccGLWindow::paintGL()
@@ -1492,17 +1308,6 @@ void ccGLWindow::paintGL()
 			//just in case
 			m_LODPendingRefresh = false;
 		}
-
-#ifdef CC_OCULUS_SUPPORT
-		if (!m_LODPendingRefresh)
-		{
-			if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session)
-			{
-				//auto-redraw
-				QTimer::singleShot(0, this, SLOT(updateGL()));
-			}
-		}
-#endif //CC_OCULUS_SUPPORT
 	}
 }
 
@@ -1514,7 +1319,7 @@ void ccGLWindow::renderNextLODLevel()
 	{
 		ccLog::PrintDebug(QString("[renderNextLODLevel] Confirmed"));
 		QApplication::processEvents();
-		updateGL();
+		update();
 	}
 	else
 	{
@@ -1657,23 +1462,9 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				ovrTrackingState hmdState = ovr_GetTrackingState(s_oculus.session, displayMidpointSeconds, ovrTrue);
 				if (hmdState.StatusFlags & (ovrStatus_OrientationTracked | ovrStatus_PositionTracked)) 
 				{
-					//convert Oculus pose (quaternion + translation) to ccGLMatrix
-					//ovrPosef pose = hmdState.HeadPose.ThePose;
-					//double q[4] = { pose.Orientation.w, pose.Orientation.x, pose.Orientation.y, pose.Orientation.z };
-					//ccGLMatrixd rot = ccGLMatrixd::FromQuaternion(q).inverse();
-					//setBaseViewMat(rot);
-
-					//CCVector3d ovrPos(pose.Position.x, pose.Position.y, pose.Position.z);
-					//if (s_oculus.hasLastOVRPos)
-					//{
-					//	CCVector3d d = ovrPos - s_oculus.lastOVRPos;
-					//	moveCamera(d.x, d.y, d.z);
-					//}
-					//s_oculus.lastOVRPos = ovrPos;
-					s_oculus.hasLastOVRPos = true;
-
 					//compute the eye positions
 					ovr_CalcEyePoses(hmdState.HeadPose.ThePose, s_oculus.hmdToEyeViewOffset, s_oculus.layer.RenderPose);
+					s_oculus.hasLastOVRPos = true;
 				}
 				else
 				{
@@ -1683,8 +1474,12 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				//Increment to use next texture, just before writing
 				s_oculus.textureSet->CurrentIndex = (s_oculus.textureSet->CurrentIndex + 1) % s_oculus.textureSet->TextureCount;
 
-				GLuint texID = ((ovrGLTexture*)&s_oculus.textureSet->Textures[s_oculus.textureSet->CurrentIndex])->OGL.TexId;
-				s_oculus.fbo->attachColor(texID);
+				GLuint colorTexID = ((ovrGLTexture*)&s_oculus.textureSet->Textures[s_oculus.textureSet->CurrentIndex])->OGL.TexId;
+				s_oculus.fbo->attachColor(colorTexID);
+
+				assert(s_oculus.depthTextures.size() > s_oculus.textureSet->CurrentIndex);
+				GLuint depthTexID = s_oculus.depthTextures[s_oculus.textureSet->CurrentIndex];
+				s_oculus.fbo->attachDepth(depthTexID);
 			}
 
 			//set the right viewport
@@ -1808,8 +1603,14 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 	//display traces
 	if (!diagStrings.isEmpty())
 	{
-		int x = width() / 2 * static_cast<int>(renderingParams.passIndex + 1) - 100;
+		int x = width() / 2 - 100;
 		int y = 0;
+
+		if (m_stereoModeEnabled && m_stereoParams.glassType != StereoParams::OCULUS)
+		{
+			if (renderingParams.passIndex == 1)
+				x += width() / 2;
+		}
 
 		setStandardOrthoCorner();
 		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
@@ -1838,8 +1639,8 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 	if (modifiedViewport)
 	{
 		setGLViewport(originViewport);
-		CONTEXT.glW = m_glViewport.width();
-		CONTEXT.glH = m_glViewport.height();
+		CONTEXT.glW = originViewport.width();
+		CONTEXT.glH = originViewport.height();
 		modifiedViewport = false;
 	}
 
@@ -1860,7 +1661,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (!skipRendering)
 		{
 			GLuint screenTex = 0;
-			if (m_activeGLFilter)
+			if (m_activeGLFilter && !m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS) //not supported with Oculus right now!
 			{
 				//we apply the GL filter
 				GLuint depthTex = currentFBO->getDepthTexture();
@@ -1873,7 +1674,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 					parameters.zNear = m_viewportParams.zNear;
 					parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
 				}
-
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
 				LogGLError(glFunc->glGetError(), "ccGLWindow::paintGL/glFilter shade");
@@ -1915,7 +1715,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 				ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, m_glViewport.width(), m_glViewport.height());
 
-				//warning: we must restore the original FBO with QOpenGLWidgets
+				//warning: we must set the original FBO texture as default
 				glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultFramebufferObject());
 
 				glFunc->glPopAttrib();
@@ -1958,30 +1758,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 	glFunc->glFlush();
 }
-
-#ifdef CC_OCULUS_SUPPORT
-
-static ccGLMatrixd FromOVRMat(const OVR::Matrix4f& ovrMat)
-{
-	ccGLMatrixd ccMat;
-	double* data = ccMat.data();
-	data[0] = ovrMat.M[0][0]; data[4] = ovrMat.M[0][1]; data[ 8] = ovrMat.M[0][2]; data[12] = ovrMat.M[0][3];
-	data[1] = ovrMat.M[1][0]; data[5] = ovrMat.M[1][1];	data[ 9] = ovrMat.M[1][2]; data[13] = ovrMat.M[1][3];
-	data[2] = ovrMat.M[2][0]; data[6] = ovrMat.M[2][1];	data[10] = ovrMat.M[2][2]; data[14] = ovrMat.M[2][3];
-	data[3] = ovrMat.M[3][0]; data[7] = ovrMat.M[3][1];	data[11] = ovrMat.M[3][2]; data[15] = ovrMat.M[3][3];
-
-	return ccMat;
-}
-
-static OVR::Matrix4f ToOVRMat(const ccGLMatrixd& ccMat)
-{
-	const double* M = ccMat.data();
-	return OVR::Matrix4f(	M[0], M[4], M[ 8], M[12],
-		M[1], M[5], M[ 9], M[13],
-		M[2], M[6], M[10], M[14],
-		M[3], M[7], M[11], M[15]);
-}
-#endif
 
 void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
@@ -2084,74 +1860,37 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 
 		if (m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session)
 		{
-#define FOLLOW_OCULUS_DOC
-#ifdef FOLLOW_OCULUS_DOC
-			// Get view and projection matrices for the Rift camera
-			const CCVector3d& C = m_viewportParams.cameraCenter;
-			OVR::Vector3f originPos(static_cast<float>(C.x),
-				static_cast<float>(C.y),
-				static_cast<float>(C.z) );
+			//we use the standard modelview matrix
+			modelViewMat = getModelViewMatrix();
 
-			OVR::Matrix4f originRot = ToOVRMat(m_viewportParams.viewMat);
-
-			OVR::Vector3f pos = originPos;
-			OVR::Matrix4f rot = originRot;
 			if (s_oculus.hasLastOVRPos)
 			{
-				pos = originPos + originRot.Transform(s_oculus.layer.RenderPose[renderingParams.passIndex].Position);
+				s_oculus.layer.RenderPose[renderingParams.passIndex].Position;
 				OVR::Quatf q(s_oculus.layer.RenderPose[renderingParams.passIndex].Orientation);
-				OVR::Matrix4f sensorRot(q);
 #ifdef _DEBUG
 				float hmdYaw, hmdPitch, hmdRoll;
 				q.GetEulerAngles<OVR::Axis::Axis_Y, OVR::Axis::Axis_X, OVR::Axis::Axis_Z>(&hmdYaw, &hmdPitch, &hmdRoll);
 				hmdYaw = OVR::RadToDegree(hmdYaw);
 				hmdPitch = OVR::RadToDegree(hmdPitch);
 				hmdRoll = OVR::RadToDegree(hmdRoll);
-#endif
-				rot = originRot * sensorRot;
-			}
+#endif //_DEBUG
+				OVR::Matrix4f sensorRot(q);
 
-			OVR::Vector3f finalUp      = rot.Transform(OVR::Vector3f(0, 1, 0));
-			OVR::Vector3f finalForward = rot.Transform(OVR::Vector3f(0, 0, -1));
-			OVR::Matrix4f view         = OVR::Matrix4f::LookAtRH(pos, pos + finalForward, finalUp);
-			modelViewMat = FromOVRMat(view);
-#else
-			//modelview
-			ccGLMatrixd trueViewMat = m_viewportParams.viewMat;
-			CCVector3d cameraCenter = getRealCameraCenter();
-			if (s_oculus.hasLastOVRPos)
-			{
+				ccGLMatrixd sensorMat = FromOVRMat(sensorRot);
 				const ovrVector3f& P = s_oculus.layer.RenderPose[renderingParams.passIndex].Position;
-				cameraCenter += trueViewMat * CCVector3d(P.x, P.y, P.z);
+				sensorMat.setTranslation(sensorMat.getTranslationAsVec3D() + CCVector3d(P.x, P.y, P.z));
 
-				m_viewportParams.viewMat = m_viewportParams.viewMat * FromOVRMat(OVR::Matrix4f(s_oculus.layer.RenderPose[renderingParams.passIndex].Orientation));
+				modelViewMat = sensorMat.inverse() * modelViewMat;
 			}
-			modelViewMat = computeModelViewMatrix( cameraCenter );
-			m_viewportParams.viewMat = trueViewMat;
-#endif //not FOLLOW_OCULUS_DOC
 
-#if 1
-			//#ifdef FOLLOW_OCULUS_DOC
-			OVR::Matrix4f proj = ovrMatrix4f_Projection(s_oculus.layer.Fov[renderingParams.passIndex], 0.2f, 1000.0f, ovrProjection_RightHanded | ovrProjection_ClipRangeOpenGL);
-			//proj.Invert();
+			//projection matrix
+			m_viewportParams.zNear = 0.001;
+			m_viewportParams.zFar = 1000.0;
+			OVR::Matrix4f proj = ovrMatrix4f_Projection(s_oculus.layer.Fov[renderingParams.passIndex],
+														static_cast<float>(m_viewportParams.zNear),
+														static_cast<float>(m_viewportParams.zFar),
+														ovrProjection_RightHanded | ovrProjection_ClipRangeOpenGL);
 			projectionMat = FromOVRMat(proj);
-#else
-			//projection
-			double eyeOffset = renderingParams.passIndex == 0 ? -1.0 : 1.0;
-			//DGM FIME: we need to set the eye separation factor correctly!
-			//m_stereoParams.eyeSepFactor = 
-			projectionMat = computeProjectionMatrix(	cameraCenter, 
-				m_viewportParams.zNear,
-				m_viewportParams.zFar,
-				true,
-				&eyeOffset );
-
-			//apply the eye shift
-			ccGLMatrixd eyeShiftMatrix; //identity by default
-			const ovrVector3f& E = s_oculus.hmdToEyeViewOffset[renderingParams.passIndex];
-			eyeShiftMatrix.setTranslation(CCVector3d(E.x, E.y, E.z));
-			projectionMat = projectionMat * eyeShiftMatrix;
-#endif //not FOLLOW_OCULUS_DOC
 		}
 		else
 #endif //CC_OCULUS_SUPPORT
@@ -3095,11 +2834,14 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 
 void ccGLWindow::updateProjectionMatrix()
 {
-	m_projMatd = computeProjectionMatrix(getRealCameraCenter(),
+	m_projMatd = computeProjectionMatrix
+	(
+		getRealCameraCenter(),
 		m_viewportParams.zNear,
 		m_viewportParams.zFar,
 		true,
-		0); //no stereo vision by default!
+		0
+	); //no stereo vision by default!
 
 	m_validProjectionMatrix = true;
 }
@@ -5377,7 +5119,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			bool success = (	fbo->init(Wp, Hp)
 							&&	fbo->initColor()
-							&&	fbo->initDepth(GL_CLAMP_TO_BORDER, GL_DEPTH_COMPONENT32, GL_NEAREST, GL_TEXTURE_2D));
+							&&	fbo->initDepth());
 			if (!success)
 			{
 				if (!silent)
@@ -5472,10 +5214,12 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 				GLuint colorTex = fbo->getColorTexture();
 				//minimal set of viewport parameters necessary for GL filters
 				ccGlFilter::ViewportParameters parameters;
-				parameters.perspectiveMode = m_viewportParams.perspectiveView;
-				parameters.zFar = m_viewportParams.zFar;
-				parameters.zNear = m_viewportParams.zNear;
-				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom * zoomFactor; //TODO: doesn't work well with EDL in perspective mode!
+				{
+					parameters.perspectiveMode = m_viewportParams.perspectiveView;
+					parameters.zFar = m_viewportParams.zFar;
+					parameters.zNear = m_viewportParams.zNear;
+					parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom * zoomFactor; //TODO: doesn't work well with EDL in perspective mode!
+				}
 				//apply shader
 				filter->shade(depthTex, colorTex, parameters);
 				LogGLError(glFunc->glGetError(), "ccGLWindow::renderToFile/glFilter shade");
@@ -5610,7 +5354,7 @@ bool ccGLWindow::initFBO(int w, int h)
 		return false;
 	}
 
-	if (!m_stereoModeEnabled || m_stereoParams.isAnaglyph())
+	if (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::NVIDIA_VISION)
 	{
 		//we don't need it anymore
 		if (m_fbo2)
@@ -5894,29 +5638,6 @@ ccGLWindow::StereoParams::StereoParams()
 	, glassType(RED_CYAN)
 {}
 
-#ifdef CC_OCULUS_SUPPORT
-
-static void OVR_CDECL LogCallback(uintptr_t /*userData*/, int level, const char* message)
-{
-	switch (level)
-	{
-	case ovrLogLevel_Debug:
-		ccLog::PrintDebug(QString("[oculus] ") + message);
-		break;
-	case ovrLogLevel_Info:
-		ccLog::Print(QString("[oculus] ") + message);
-		break;
-	case ovrLogLevel_Error:
-		ccLog::Warning(QString("[oculus] ") + message);
-		break;
-	default:
-		assert(false);
-		break;
-	}
-}
-
-#endif //CC_OCULUS_SUPPORT
-
 bool ccGLWindow::enableStereoMode(const StereoParams& params)
 {
 	if (params.glassType == StereoParams::OCULUS)
@@ -5954,38 +5675,29 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			assert(s_oculus.session);
 		}
 
-		if (!s_oculus.initTextureSet())
+		if (!s_oculus.initTextureSet(context()))
 		{
 			QMessageBox::critical(this, "Oculus", "Failed to initialize the swap texture set (ovr_CreateSwapTextureSetGL)");
 			s_oculus.stop(true);
 			return false;
 		}
 
-		//resize the GL window to the right texture size (simpler)
-		//QWidget* pWidget = parentWidget();
-		//if (pWidget)
-		//{
-		//	s_oculus.winWasMaximized = pWidget->isMaximized();
-		//	s_oculus.winPreviousSize = pWidget->size();
-		//	pWidget->showNormal();
-		//	pWidget->resize(s_oculus.textureSize.w, s_oculus.textureSize.h);
-		//	QApplication::processEvents();
-		//}
-
 		//configure tracking
 		{
-			ovr_ConfigureTracking	(s_oculus.session,
-				/*requested = */ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position,
-				/*required  = */ovrTrackingCap_Orientation );
+			ovr_ConfigureTracking(	s_oculus.session,
+									/*requested = */ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position,
+									/*required  = */ovrTrackingCap_Orientation );
 
 			//reset tracking
 			s_oculus.hasLastOVRPos = false;
 			ovr_RecenterPose(s_oculus.session);
 		}
 
+		toggleAutoRefresh(true);
+
 #else //no CC_OCULUS_SUPPORT
 
-		QMessageBox::critical(this, "Oculus", "Oculus devies are not supported by this version!");
+		QMessageBox::critical(this, "Oculus", "The Oculus device is not supported by this version!");
 		return false;
 
 #endif //no CC_OCULUS_SUPPORT
@@ -6045,6 +5757,10 @@ void ccGLWindow::disableStereoMode()
 
 	if (m_stereoModeEnabled && s_oculus.session)
 	{
+		toggleAutoRefresh(false);
+
+		s_oculus.stop(false);
+
 		//QWidget* pWidget = parentWidget();
 		//if (s_oculus.winWasMaximized)
 		//{
@@ -6255,3 +5971,21 @@ void ccGLWindow::LogGLError(GLenum err, const char* context)
 	}
 }
 
+void ccGLWindow::toggleAutoRefresh(bool state, int period_ms/*=0*/)
+{
+	if (state == m_autoRefresh)
+	{
+		//nothing to do
+		return;
+	}
+	
+	m_autoRefresh = state;
+	if (m_autoRefresh)
+	{
+		m_autoRefreshTimer.start(period_ms);
+	}
+	else
+	{
+		m_autoRefreshTimer.stop();
+	}
+}

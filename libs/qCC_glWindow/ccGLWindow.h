@@ -137,7 +137,6 @@ public:
 	//replacement for the missing methods of QGLWidget
 	void renderText(int x, int y, const QString & str, const QFont & font = QFont());
 	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
-	inline void updateGL() { update(); }
 
 	//inherited from ccGenericGLDisplay
 	virtual void toBeRefreshed() override;
@@ -805,6 +804,7 @@ protected: //other methods
 	void mouseReleaseEvent(QMouseEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
 	void closeEvent(QCloseEvent *event) override;
+	//void paintEvent(QPaintEvent *event) override;
 
 	//inherited
 	void initializeGL() override;
@@ -937,7 +937,7 @@ protected: //other methods
 
 	//! Schedules a full redraw
 	/** Any previously scheduled redraw will be cancelled.
-		\warning The redraw will be cancelled if redraw/updateGL is called before.
+		\warning The redraw will be cancelled if redraw/update is called before.
 		\param maxDelay_ms the maximum delay for the call to redraw (in ms)
 	**/
 	void scheduleFullRedraw(unsigned maxDelay_ms);
@@ -969,6 +969,9 @@ protected: //other methods
 		\return true if an error occurred, false otherwise
 	**/
 	static void LogGLError(GLenum error, const char* context);
+
+	//! Toggles auto-refresh mode
+	void toggleAutoRefresh(bool state, int period_ms = 0);
 
 protected: //members
 
@@ -1213,6 +1216,11 @@ protected: //members
 
 	//! Whether FBO support is on
 	bool m_glExtFuncSupported;
+
+	//! Auto-refresh mode
+	bool m_autoRefresh;
+	//! Auto-refresh timer
+	QTimer m_autoRefreshTimer;
 
 private:
 

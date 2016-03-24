@@ -28,6 +28,7 @@ ccFrameBufferObject::ccFrameBufferObject()
 	, m_width(0)
 	, m_height(0)
 	, m_depthTexture(0)
+	, m_ownDepthTexture(false)
 	, m_colorTexture(0)
 	, m_ownColorTexture(false)
 	, m_fboId(0)
@@ -45,12 +46,7 @@ void ccFrameBufferObject::reset()
 		return;
 	}
 	
-	if (m_glFunc.glIsTexture(m_depthTexture))
-	{
-		m_glFunc.glDeleteTextures(1, &m_depthTexture);
-		m_depthTexture = 0;
-	}
-
+	deleteDepthTexture();
 	deleteColorTexture();
 
 	if (m_fboId != 0)
@@ -124,21 +120,27 @@ void ccFrameBufferObject::deleteColorTexture()
 	m_ownColorTexture = false;
 }
 
+void ccFrameBufferObject::deleteDepthTexture()
+{
+	if (m_isValid && m_ownDepthTexture && m_glFunc.glIsTexture(m_depthTexture))
+	{
+		m_glFunc.glDeleteTextures(1, &m_depthTexture);
+	}
+	m_depthTexture = 0;
+	m_ownDepthTexture = false;
+}
+
 bool ccFrameBufferObject::initColor(GLint internalformat/*=GL_RGBA*/,
-	GLenum format/*=GL_RGBA*/,
-	GLenum type/*=GL_UNSIGNED_BYTE*/,
-	GLint minMagFilter/*=GL_NEAREST*/,
-	GLenum target/*=GL_TEXTURE_2D*/)
+									GLenum format/*=GL_RGBA*/,
+									GLenum type/*=GL_UNSIGNED_BYTE*/,
+									GLint minMagFilter/*=GL_NEAREST*/,
+									GLenum target/*=GL_TEXTURE_2D*/)
 {
 	if (!m_isValid || m_fboId == 0)
 	{
 		assert(false);
 		return false;
 	}
-
-	//even if 'attachTexture' can do this, we prefer to do it now
-	//so as to release memory before creating a new texture!
-	deleteColorTexture();
 
 	//create the new texture
 	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
@@ -156,12 +158,15 @@ bool ccFrameBufferObject::initColor(GLint internalformat/*=GL_RGBA*/,
 
 	m_glFunc.glPopAttrib();
 
-	if (!attachColor(texID, true, target))
+	if (attachColor(texID, true, target))
+	{
+		return true;
+	}
+	else
 	{
 		m_glFunc.glDeleteTextures(1, &texID);
+		return false;
 	}
-
-	return true;
 }
 
 bool ccFrameBufferObject::attachColor(	GLuint texID,
@@ -212,7 +217,7 @@ bool ccFrameBufferObject::attachColor(	GLuint texID,
 }
 
 bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
-									GLenum internalFormat/*=GL_DEPTH_COMPONENT24*/,
+									GLenum internalFormat/*=GL_DEPTH_COMPONENT32*/,
 									GLint minMagFilter/*=GL_NEAREST*/,
 									GLenum target/*=GL_TEXTURE_2D*/)
 {
@@ -227,17 +232,13 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
 		return false;
 	}
 
-	if (m_glFunc.glIsTexture(m_depthTexture))
-	{
-		m_glFunc.glDeleteTextures(1, &m_depthTexture);
-	}
-
 	//create the depth texture
 	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
 	m_glFunc.glEnable(GL_TEXTURE_2D);
 
-	m_glFunc.glGenTextures  (1, &m_depthTexture);
-	m_glFunc.glBindTexture  (target, m_depthTexture);
+	GLuint texID = 0;
+	m_glFunc.glGenTextures(1, &texID);
+	m_glFunc.glBindTexture(target, texID);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapParam);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapParam);
 	m_glFunc.glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
@@ -249,7 +250,40 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
 
 	m_glFunc.glPopAttrib();
 
-	m_glExtFunc.glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, m_depthTexture, 0);
+	if (attachDepth(texID, true, target))
+	{
+		return true;
+	}
+	else
+	{
+		m_glFunc.glDeleteTextures(1, &texID);
+		return false;
+	}
+}
+
+bool ccFrameBufferObject::attachDepth(	GLuint texID,
+										bool ownTexture/*=false*/,
+										GLenum target/*=GL_TEXTURE_2D*/)
+{
+	if (!m_isValid || m_fboId == 0)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (!m_glFunc.glIsTexture(texID))
+	{
+		//error or simple warning?
+		assert(false);
+		//return false;
+	}
+
+	if (!start())
+	{
+		return false;
+	}
+
+	m_glExtFunc.glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, texID, 0);
 	GLenum status = m_glExtFunc.glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 
 	stop();
@@ -258,7 +292,11 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
 	switch (status)
 	{
 	case GL_FRAMEBUFFER_COMPLETE_EXT:
-		success = true;
+		//remove the previous texture (if any)
+		deleteDepthTexture();
+		//save the new one
+		m_depthTexture = texID;
+		m_ownDepthTexture = ownTexture;
 		break;
 	
 	default:

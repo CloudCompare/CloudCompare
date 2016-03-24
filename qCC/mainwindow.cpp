@@ -7011,7 +7011,7 @@ void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=t
 {
 	if (win)
 	{
-		win->setPerspectiveState(true,true);
+		win->setPerspectiveState(true, true);
 		if (autoRedraw)
 			win->redraw();
 
@@ -8674,7 +8674,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			//force perspective state!
 			if (!win->getViewportParameters().perspectiveView)
 			{
-				setCenteredPerspectiveView(win,false);
+				setCenteredPerspectiveView(win, false);
 			}
 
 			ccGLWindow::StereoParams params = smDlg.getParameters();
@@ -8687,6 +8687,12 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 
 			if (!win->enableStereoMode(params))
 			{
+				if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+				{
+					//disable (exclusive) full screen
+					actionExclusiveFullScreen->setChecked(false);
+				}
+
 				//activation of the stereo mode failed: cancel selection
 				actionEnableStereo->blockSignals(true);
 				actionEnableStereo->setChecked(false);

@@ -39,7 +39,45 @@ ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 
 void ccStereoModeDlg::glassTypeChanged(int index)
 {
-	NVVisionWarningTextEdit->setVisible(index == COMBO_INDEX_NV_VISION);
+	switch (index)
+	{
+	case COMBO_INDEX_RED_BLUE:
+	case COMBO_INDEX_RED_CYAN:
+		paramsGroupBox->setEnabled(true);
+		warningTextEdit->setVisible(false);
+		break;
+	case COMBO_INDEX_NV_VISION:
+		paramsGroupBox->setEnabled(true);
+		warningTextEdit->setVisible(true);
+		warningTextEdit->setHtml(
+			"To make this mode work properly make sure that:\
+			<ul>\
+			<li>the NVidia Vision IR emitter is plugged and enabled (<i>dim green light</i>)</li>\
+			<li>3D stereo mode is activated in the NVidia Control Pannel</li>\
+			<li><b>the screen frequency is set to 120Hz</b></li>\
+			<li>the glasses are switched on</li>\
+			</ul>\
+			Note: the current 3D view will be automatically displayed in exclusive full screen mode (<i>press F11 to quit this mode</i>)"
+			);
+		break;
+	case COMBO_INDEX_OCULUS:
+		paramsGroupBox->setEnabled(false);
+		warningTextEdit->setVisible(true);
+		warningTextEdit->setText(
+			"To use the Oculus Rift make sure that:\
+			<ul>\
+			<li>the entities units are expressed in <b>meters</b> (<i>use the 'Edit > Scale' tool if necessary</i>)</li>\
+			<li>position the headset in a neutral position before clicking on 'OK'</li>\
+			</ul>\
+			Note: this mode works best in 'bubble view' mode"
+			);
+		break;
+	default:
+		assert(false);
+		paramsGroupBox->setEnabled(false);
+		warningTextEdit->setVisible(false);
+		break;
+	}
 }
 
 ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const

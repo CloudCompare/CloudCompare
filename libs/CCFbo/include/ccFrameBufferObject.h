@@ -51,9 +51,13 @@ public:
 						GLenum target = GL_TEXTURE_2D);
 
 	bool initDepth(	GLint wrapParam = GL_CLAMP_TO_BORDER,
-					GLenum internalFormat = GL_DEPTH_COMPONENT24,
+					GLenum internalFormat = GL_DEPTH_COMPONENT32,
 					GLint minMagFilter = GL_NEAREST,
 					GLenum textureTarget = GL_TEXTURE_2D);
+
+	bool attachDepth(	GLuint texID,
+						bool ownTexture = false,
+						GLenum target = GL_TEXTURE_2D);
 
 	inline GLuint getID() const { return m_fboId;  }
 	inline GLuint getColorTexture() const { return m_colorTexture; }
@@ -69,6 +73,9 @@ protected: //methods
 	//! Deletes/releases the color texture
 	void deleteColorTexture();
 
+	//! Deletes/releases the depth texture
+	void deleteDepthTexture();
+
 protected: //members
 
 	//! FBO validity
@@ -81,6 +88,9 @@ protected: //members
 
 	//! Depth texture GL ID
 	GLuint m_depthTexture;
+
+	//! Whether the depth texture is owned by this FBO or not
+	bool m_ownDepthTexture;
 
 	//! Color texture GL ID
 	GLuint m_colorTexture;

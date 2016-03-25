@@ -22,7 +22,7 @@
 #include <DistanceComputationTools.h>
 
 //Local
-#include "ccOctree.h"
+#include "ccOctreeProxy.h"
 #include "ccSensor.h"
 #include "ccGenericGLDisplay.h"
 #include "ccProgressDialog.h"
@@ -112,40 +112,56 @@ unsigned char ccGenericPointCloud::testVisibility(const CCVector3& P) const
 
 void ccGenericPointCloud::deleteOctree()
 {
-	ccOctree* oct = getOctree();
-	if (oct)
+	ccOctreeProxy* oct = getOctreeProxy();
+	if (oct != nullptr)
+	{
 		removeChild(oct);
+	}
 }
 
-ccOctree* ccGenericPointCloud::getOctree()
+ccOctreeProxy* ccGenericPointCloud::getOctreeProxy() const
 {
 	for (size_t i=0; i<m_children.size(); ++i)
 	{
 		if (m_children[i]->isA(CC_TYPES::POINT_OCTREE))
-			return static_cast<ccOctree*>(m_children[i]);
+			return static_cast<ccOctreeProxy*>(m_children[i]);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
+ccOctree::Shared ccGenericPointCloud::getOctree() const
+{
+	ccOctreeProxy* proxy = getOctreeProxy();
+	if (proxy != nullptr)
+	{
+		return proxy->getOctree();
+	}
+	else
+	{
+		return ccOctree::Shared(0);
+	}
+}
+
+ccOctree::Shared ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
 {
 	deleteOctree();
-	ccOctree* octree = new ccOctree(this);
+	
+	ccOctree::Shared octree = ccOctree::Shared(new ccOctree(this));
 	if (octree->build(progressCb) > 0)
 	{
-		octree->setDisplay(getDisplay());
-		octree->setVisible(true);
-		octree->setEnabled(false);
+		ccOctreeProxy* proxy = new ccOctreeProxy(octree);
+		proxy->setDisplay(getDisplay());
+		proxy->setVisible(true);
+		proxy->setEnabled(false);
 		if (autoAddChild)
 		{
-			addChild(octree);
+			addChild(proxy);
 		}
 	}
 	else
 	{
-		delete octree;
-		octree = NULL;
+		octree.clear();
 	}
 
 	return octree;
@@ -324,7 +340,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	//can we use the octree to accelerate the point picking process?
 	if (pickWidth == pickHeight)
 	{
-		ccOctree* octree = getOctree();
+		ccOctree::Shared octree = getOctree();
 		if (!octree && autoComputeOctree)
 		{
 			ccProgressDialog pDlg(false, getDisplay() ? getDisplay()->asWidget() : 0);

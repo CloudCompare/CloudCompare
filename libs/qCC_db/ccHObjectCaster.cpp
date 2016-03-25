@@ -28,6 +28,7 @@
 #include "ccFacet.h"
 #include "ccPolyline.h"
 #include "ccOctree.h"
+#include "ccOctreeProxy.h"
 #include "ccKdTree.h"
 #include "ccImage.h"
 #include "ccGBLSensor.h"
@@ -181,7 +182,7 @@ ccTorus*	ccHObjectCaster::ToTorus(ccHObject* obj)
 
 ccOctree* ccHObjectCaster::ToOctree(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::POINT_OCTREE) ? static_cast<ccOctree*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::POINT_OCTREE) ? static_cast<ccOctreeProxy*>(obj)->getOctree().data() : 0;
 }
 
 ccKdTree* ccHObjectCaster::ToKdTree(ccHObject* obj)

@@ -1071,20 +1071,21 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		break;
 	case OBJECT_OCTREE_TYPE:
 		{
-			QComboBox *comboBox = new QComboBox(parent);
+			QComboBox* comboBox = new QComboBox(parent);
 
-			for (unsigned char i=0; i<OCTREE_DISPLAY_TYPE_NUMBERS; ++i)
-				comboBox->addItem(COCTREE_DISPLAY_TYPE_TITLES[i]);
+			comboBox->addItem("Wire", QVariant(ccOctree::WIRE));
+			comboBox->addItem("Points", QVariant(ccOctree::MEAN_POINTS));
+			comboBox->addItem("Plain cubes", QVariant(ccOctree::MEAN_CUBES));
 
-			connect(comboBox, SIGNAL(activated(int)), this, SLOT(octreeDisplayTypeChanged(int)));
+			connect(comboBox, SIGNAL(activated(int)), this, SLOT(octreeDisplayModeChanged(int)));
 
 			outputWidget = comboBox;
 		}
 		break;
 	case OBJECT_OCTREE_LEVEL:
 		{
-			QSpinBox *spinBox = new QSpinBox(parent);
-			spinBox->setRange(1,CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+			QSpinBox* spinBox = new QSpinBox(parent);
+			spinBox->setRange(1, CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 			connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(octreeDisplayedLevelChanged(int)));
 
@@ -1093,8 +1094,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		break;
 	case OBJECT_PRIMITIVE_PRECISION:
 		{
-			QSpinBox *spinBox = new QSpinBox(parent);
-			spinBox->setRange(4,360);
+			QSpinBox* spinBox = new QSpinBox(parent);
+			spinBox->setRange(4, 360);
 			spinBox->setSingleStep(4);
 
 			connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(primitivePrecisionChanged(int)));
@@ -1104,9 +1105,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		break;
 	case OBJECT_SPHERE_RADIUS:
 		{
-			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
 			spinBox->setDecimals(6);
-			spinBox->setRange(0,1.0e6);
+			spinBox->setRange(0, 1.0e6);
 			spinBox->setSingleStep(1.0);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sphereRadiusChanged(double)));
@@ -1116,9 +1117,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		break;
 	case OBJECT_CONE_HEIGHT:
 		{
-			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
 			spinBox->setDecimals(6);
-			spinBox->setRange(0,1.0e6);
+			spinBox->setRange(0, 1.0e6);
 			spinBox->setSingleStep(1.0);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(coneHeightChanged(double)));
@@ -1128,9 +1129,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		break;
 	case OBJECT_CONE_BOTTOM_RADIUS:
 		{
-			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
 			spinBox->setDecimals(6);
-			spinBox->setRange(0,1.0e6);
+			spinBox->setRange(0, 1.0e6);
 			spinBox->setSingleStep(1.0);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(coneBottomRadiusChanged(double)));
@@ -1140,9 +1141,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		break;
 	case OBJECT_CONE_TOP_RADIUS:
 		{
-			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
 			spinBox->setDecimals(6);
-			spinBox->setRange(0,1.0e6);
+			spinBox->setRange(0, 1.0e6);
 			spinBox->setSingleStep(1.0);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(coneTopRadiusChanged(double)));
@@ -1153,7 +1154,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_IMAGE_ALPHA:
 		{
 			QSlider* slider = new QSlider(Qt::Horizontal,parent);
-			slider->setRange(0,255);
+			slider->setRange(0, 255);
 			slider->setSingleStep(1);
 			slider->setPageStep(16);
 			slider->setTickPosition(QSlider::NoTicks);
@@ -1172,7 +1173,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
 			spinBox->setRange(minIndex, maxIndex);
-			spinBox->setSingleStep((maxIndex-minIndex)/1000.0);
+			spinBox->setSingleStep((maxIndex - minIndex) / 1000.0);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorIndexChanged(double)));
 
@@ -1495,7 +1496,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		{
 			ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 			assert(octree);
-			SetComboBoxIndex(editor,static_cast<int>(octree->getDisplayType()));
+			SetComboBoxIndex(editor, static_cast<int>(octree->getDisplayMode()));
 			break;
 		}
 	case OBJECT_OCTREE_LEVEL:
@@ -1896,17 +1897,21 @@ void ccPropertiesTreeDelegate::colorRampStepsChanged(int pos)
 	}
 }
 
-void ccPropertiesTreeDelegate::octreeDisplayTypeChanged(int pos)
+void ccPropertiesTreeDelegate::octreeDisplayModeChanged(int pos)
 {
 	if (!m_currentObject)
+		return;
+	QComboBox* comboBox = dynamic_cast<QComboBox*>(QObject::sender());
+	if (!comboBox)
 		return;
 
 	ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 	assert(octree);
 
-	if (octree->getDisplayType() != OCTREE_DISPLAY_TYPE_ENUMS[pos])
+	int mode = comboBox->itemData(pos, Qt::UserRole).toInt();
+	if (octree->getDisplayMode() != mode)
 	{
-		octree->setDisplayType(OCTREE_DISPLAY_TYPE_ENUMS[pos]);
+		octree->setDisplayMode(static_cast<ccOctree::DisplayMode>(mode));
 		updateDisplay();
 	}
 }

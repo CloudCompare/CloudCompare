@@ -77,7 +77,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 
 	case SPACE:
 		{
-			ccOctree* octree = cloud->getOctree();
+			ccOctree::Shared octree = cloud->getOctree();
 			if (!octree)
 				octree = cloud->computeOctree(progressCb);
 			if (octree)
@@ -105,7 +105,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 				return CCLib::CloudSamplingTools::resampleCloudSpatially(	cloud, 
 																			minDist,
 																			modParams,
-																			octree,
+																			octree.data(),
 																			progressCb);
 			}
 			else
@@ -117,7 +117,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 
 	case OCTREE:
 		{
-			ccOctree* octree = cloud->getOctree();
+			ccOctree::Shared octree = cloud->getOctree();
 			if (!octree)
 				octree = cloud->computeOctree(progressCb);
 			if (octree)
@@ -128,7 +128,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 																					level,
 																					CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																					progressCb,
-																					octree);
+																					octree.data());
 			}
 			else
 			{

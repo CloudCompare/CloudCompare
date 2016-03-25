@@ -396,7 +396,7 @@ bool ccMinimumSpanningTreeForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 			return false;
 		}
 	}
-	ccOctree* octree = cloud->getOctree();
+	ccOctree::Shared octree = cloud->getOctree();
 	assert(octree);
 
 	unsigned char level = octree->findBestLevelForAGivenPopulationPerCell(kNN*2);

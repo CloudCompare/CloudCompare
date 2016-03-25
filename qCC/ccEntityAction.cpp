@@ -15,24 +15,29 @@
 //#                                                                        #
 //##########################################################################
 
+//Qt
 #include <QColorDialog>
 #include <QElapsedTimer>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QPushButton>
 
-#include "NormalDistribution.h"
-#include "ScalarFieldTools.h"
-#include "StatisticalTestingTools.h"
-#include "WeibullDistribution.h"
+//CCLib
+#include <NormalDistribution.h>
+#include <ScalarFieldTools.h>
+#include <StatisticalTestingTools.h>
+#include <WeibullDistribution.h>
 
+//qCC_db
 #include "ccColorScalesManager.h"
 #include "ccFacet.h"
 #include "ccGenericPrimitive.h"
-#include "ccOctree.h"
+#include "ccOctreeProxy.h"
 
+//qCC_gl
 #include "ccGuiParameters.h"
 
+//Local
 #include "ccAskTwoDoubleValuesDlg.h"
 #include "ccColorGradientDlg.h"
 #include "ccColorLevelsDlg.h"
@@ -123,14 +128,14 @@ namespace ccEntityAction
 				if (colorize)
 				{
 					cloud->colorize(static_cast<float>(colour.redF()),
-										 static_cast<float>(colour.greenF()),
-										 static_cast<float>(colour.blueF()) );
+									static_cast<float>(colour.greenF()),
+									static_cast<float>(colour.blueF()) );
 				}
 				else
 				{
 					cloud->setRGBColor(	static_cast<ColorCompType>(colour.red()),
-												static_cast<ColorCompType>(colour.green()),
-												static_cast<ColorCompType>(colour.blue()) );
+										static_cast<ColorCompType>(colour.green()),
+										static_cast<ColorCompType>(colour.blue()) );
 				}
 				cloud->showColors(true);
 				cloud->prepareDisplayForRefresh();
@@ -154,8 +159,8 @@ namespace ccEntityAction
 			{
 				ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
 				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-										static_cast<ColorCompType>(colour.green()),
-										static_cast<ColorCompType>(colour.blue()) );
+									static_cast<ColorCompType>(colour.green()),
+									static_cast<ColorCompType>(colour.blue()) );
 				poly->setColor(col);
 				ent->showColors(true);
 				ent->prepareDisplayForRefresh();
@@ -164,8 +169,8 @@ namespace ccEntityAction
 			{
 				ccFacet* facet = ccHObjectCaster::ToFacet(ent);
 				ccColor::Rgb col(	static_cast<ColorCompType>(colour.red()),
-										static_cast<ColorCompType>(colour.green()),
-										static_cast<ColorCompType>(colour.blue()) );
+									static_cast<ColorCompType>(colour.green()),
+									static_cast<ColorCompType>(colour.blue()) );
 				facet->setColor(col);
 				ent->showColors(true);
 				ent->prepareDisplayForRefresh();
@@ -229,8 +234,8 @@ namespace ccEntityAction
 			colorScale = ccColorScale::Create("Temp scale");
 			QColor first,second;
 			dlg.getColors(first,second);
-			colorScale->insert(ccColorScaleElement(0.0,first),false);
-			colorScale->insert(ccColorScaleElement(1.0,second),true);
+			colorScale->insert(ccColorScaleElement(0.0, first), false);
+			colorScale->insert(ccColorScaleElement(1.0, second), true);
 		}
 		
 		Q_ASSERT(colorScale || ramp == ccColorGradientDlg::Banding);
@@ -280,11 +285,11 @@ namespace ccEntityAction
 		}
 		
 		bool lockedVertices;
-		ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(selectedEntities[0],&lockedVertices);
+		ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(selectedEntities[0], &lockedVertices);
 		if (!pointCloud || lockedVertices)
 		{
 			if (lockedVertices)
-				ccUtils::DisplayLockedVerticesWarning(pointCloud->getName(),true);
+				ccUtils::DisplayLockedVerticesWarning(pointCloud->getName(), true);
 			return false;
 		}
 		
@@ -294,7 +299,7 @@ namespace ccEntityAction
 			return false;
 		}
 		
-		ccColorLevelsDlg dlg(parent,pointCloud);
+		ccColorLevelsDlg dlg(parent, pointCloud);
 		dlg.exec();
 		
 		return true;
@@ -336,9 +341,9 @@ namespace ccEntityAction
 		
 		if ( cloud2->hasColors())
 		{
-			std::swap(source,dest);
-			std::swap(cloud1,cloud2);
-			std::swap(ent1,ent2);
+			std::swap(source, dest);
+			std::swap(cloud1, cloud2);
+			std::swap(ent1, ent2);
 		}
 		
 		if (!dest->isA(CC_TYPES::POINT_CLOUD))
@@ -349,12 +354,12 @@ namespace ccEntityAction
 		
 		bool ok = false;
 		unsigned char defaultLevel = 7;
-		int value = QInputDialog::getInt(parent,
-													"Interpolate colors", "Octree level",
-													defaultLevel,
-													1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
-													1,
-													&ok);
+		int value = QInputDialog::getInt(	parent,
+											"Interpolate colors", "Octree level",
+											defaultLevel,
+											1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
+											1,
+											&ok);
 		if (!ok)
 			return false;
 		
@@ -362,7 +367,7 @@ namespace ccEntityAction
 		
 		ccProgressDialog pDlg(true, parent);
 		
-		if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source,&pDlg,defaultLevel))
+		if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source, &pDlg, defaultLevel))
 		{
 			ent2->showColors(true);
 		}
@@ -394,10 +399,10 @@ namespace ccEntityAction
 				else
 				{
 					if (QMessageBox::warning( parent,
-													  "Mesh already has colors",
-													  QString("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
-													  QMessageBox::Yes | QMessageBox::No,
-													  QMessageBox::No ) != QMessageBox::Yes)
+											  "Mesh already has colors",
+											  QString("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
+											  QMessageBox::Yes | QMessageBox::No,
+											  QMessageBox::No ) != QMessageBox::Yes)
 					{
 						continue;
 					}
@@ -440,11 +445,13 @@ namespace ccEntityAction
 		
 		bool ok = false;
 		sigma = QInputDialog::getDouble(parent,
-												  "Gaussian filter", "sigma:",
-												  sigma,
-												  DBL_MIN,1.0e9,
-												  8,
-												  &ok);
+										"Gaussian filter",
+										"sigma:",
+										sigma,
+										DBL_MIN,
+										1.0e9,
+										8,
+										&ok);
 		if (!ok)
 			return false;
 		
@@ -452,10 +459,10 @@ namespace ccEntityAction
 		{
 			bool lockedVertices = false;
 			ccHObject* ent = selectedEntities[i];
-			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (!pc || lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 				continue;
 			}
 			
@@ -483,7 +490,7 @@ namespace ccEntityAction
 					continue;
 				}
 				
-				ccOctree* octree = pc->getOctree();
+				ccOctree::Shared octree = pc->getOctree();
 				if (!octree)
 				{
 					ccProgressDialog pDlg(true, parent);
@@ -501,11 +508,12 @@ namespace ccEntityAction
 					QElapsedTimer eTimer;
 					eTimer.start();
 					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
-																							  pc,
-																							  -1,
-																							  &pDlg,
-																							  octree);
-					ccConsole::Print("[GaussianFilter] Timing: %3.2f s.",static_cast<double>(eTimer.elapsed())/1.0e3);
+																			pc,
+																			-1,
+																			&pDlg,
+																			octree.data());
+					
+					ccConsole::Print("[GaussianFilter] Timing: %3.2f s.", static_cast<double>(eTimer.elapsed()) / 1000.0);
 					pc->setCurrentDisplayedScalarField(sfIdx);
 					pc->showSF(sfIdx >= 0);
 					sf = pc->getCurrentDisplayedScalarField();
@@ -548,10 +556,16 @@ namespace ccEntityAction
 		double scalarFieldSigma = range / 4; // using 1/4 of total range
 		
 		
-		ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma",
-											 DBL_MIN, 1.0e9,
-											 sigma, scalarFieldSigma,
-											 8, nullptr, parent);
+		ccAskTwoDoubleValuesDlg dlg("Spatial sigma",
+									"Scalar sigma",
+									DBL_MIN,
+									1.0e9,
+									sigma,
+									scalarFieldSigma,
+									8,
+									nullptr,
+									parent);
+		
 		dlg.doubleSpinBox1->setStatusTip("3*sigma = 98% attenuation");
 		dlg.doubleSpinBox2->setStatusTip("Scalar field's sigma controls how much the filter behaves as a Gaussian Filter\n sigma at +inf uses the whole range of scalars ");
 		if (!dlg.exec())
@@ -565,10 +579,10 @@ namespace ccEntityAction
 		{
 			bool lockedVertices = false;
 			ccHObject* ent = selectedEntities[i];
-			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (!pc || lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 				continue;
 			}
 			
@@ -596,10 +610,10 @@ namespace ccEntityAction
 					continue;
 				}
 				
-				ccOctree* octree = pc->getOctree();
+				ccOctree::Shared octree = pc->getOctree();
 				if (!octree)
 				{
-					ccProgressDialog pDlg(true,parent);
+					ccProgressDialog pDlg(true, parent);
 					octree = pc->computeOctree(&pDlg);
 					if (!octree)
 					{
@@ -608,18 +622,19 @@ namespace ccEntityAction
 					}
 				}
 				
-				Q_ASSERT(octree != nullptr);
+				Q_ASSERT(octree != 0);
 				{
-					ccProgressDialog pDlg(true,parent);
+					ccProgressDialog pDlg(true, parent);
 					QElapsedTimer eTimer;
 					eTimer.start();
 					
 					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
-																							  pc,
-																							  static_cast<PointCoordinateType>(scalarFieldSigma),
-																							  &pDlg,
-																							  octree);
-					ccConsole::Print("[BilateralFilter] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
+																			pc,
+																			static_cast<PointCoordinateType>(scalarFieldSigma),
+																			&pDlg,
+																			octree.data());
+					
+					ccConsole::Print("[BilateralFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 					pc->setCurrentDisplayedScalarField(sfIdx);
 					pc->showSF(sfIdx >= 0);
 					sf = pc->getCurrentDisplayedScalarField();
@@ -642,11 +657,11 @@ namespace ccEntityAction
 		//we first ask the user if the SF colors should be mixed with existing colors
 		bool mixWithExistingColors = false;
 		
-		QMessageBox::StandardButton answer = QMessageBox::warning(parent,
-																					 "Scalar Field to RGB",
-																					 "Mix with existing colors (if any)?",
-																					 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
-																					 QMessageBox::Yes );
+		QMessageBox::StandardButton answer = QMessageBox::warning(	parent,
+																	"Scalar Field to RGB",
+																	"Mix with existing colors (if any)?",
+																	QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+																	QMessageBox::Yes );
 		if (answer == QMessageBox::Yes)
 			mixWithExistingColors = true;
 		else if (answer == QMessageBox::Cancel)
@@ -659,10 +674,10 @@ namespace ccEntityAction
 			ccHObject* ent = selectedEntities[i];
 			
 			bool lockedVertices = false;
-			cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 				continue;
 			}
 			if (cloud != nullptr) //TODO
@@ -691,12 +706,13 @@ namespace ccEntityAction
 		
 		bool ok = false;
 		s_randomColorsNumber = QInputDialog::getInt(parent,
-																  "Random colors",
-																  "Number of random colors (will be regularly sampled over the SF interval):",
-																  s_randomColorsNumber,
-																  2, 2147483647,
-																  16,
-																  &ok);
+													"Random colors",
+													"Number of random colors (will be regularly sampled over the SF interval):",
+													s_randomColorsNumber,
+													2,
+													INT_MAX,
+													16,
+													&ok);
 		if (!ok)
 			return false;
 		Q_ASSERT(s_randomColorsNumber > 1);
@@ -746,14 +762,14 @@ namespace ccEntityAction
 						ScalarType minSF = sf->getMin();
 						ScalarType maxSF = sf->getMax();
 						
-						ScalarType step = (maxSF-minSF)/(s_randomColorsNumber-1);
+						ScalarType step = (maxSF - minSF) / (s_randomColorsNumber - 1);
 						if (step == 0)
 							step = static_cast<ScalarType>(1.0);
 						
 						for (unsigned i=0; i<pc->size(); ++i)
 						{
 							ScalarType val = sf->getValue(i);
-							unsigned colIndex = static_cast<unsigned>((val-minSF)/step);
+							unsigned colIndex = static_cast<unsigned>((val - minSF) / step);
 							if (colIndex == s_randomColorsNumber)
 								--colIndex;
 							
@@ -792,10 +808,11 @@ namespace ccEntityAction
 					const char* sfName = sf->getName();
 					bool ok = false;
 					QString newName = QInputDialog::getText(parent,
-																		 "SF name", "name:",
-																		 QLineEdit::Normal,
-																		 QString(sfName ? sfName : "unknown"),
-																		 &ok);
+															"SF name",
+															"name:",
+															QLineEdit::Normal,
+															QString(sfName ? sfName : "unknown"),
+															&ok);
 					if (ok)
 						sf->setName(qPrintable(newName));
 				}
@@ -852,7 +869,7 @@ namespace ccEntityAction
 		if (!ectsDlg.exec())
 			return false;
 		
-		bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
+		bool exportDim[3] = { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
 		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
 			return false;
 		
@@ -882,12 +899,14 @@ namespace ccEntityAction
 							if (!hasDefaultValueForNaN)
 							{
 								bool ok = false;
-								double out = QInputDialog::getDouble(parent,
-																				 "SF --> coordinate",
-																				 "Enter the coordinate equivalent for NaN values:",
-																				 defaultValueForNaN, -1.0e9,
-																				 1.0e9, 6,
-																				 &ok);
+								double out = QInputDialog::getDouble(	parent,
+																		"SF --> coordinate",
+																		"Enter the coordinate equivalent for NaN values:",
+																		defaultValueForNaN,
+																		-1.0e9,
+																		1.0e9,
+																		6,
+																		&ok);
 								if (ok)
 									defaultValueForNaN = static_cast<ScalarType>(out);
 								else
@@ -923,7 +942,7 @@ namespace ccEntityAction
 		if (!ectsDlg.exec())
 			return false;
 		
-		bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
+		bool exportDim[3] = { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
 		
 		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
 			return false;
@@ -1673,127 +1692,129 @@ namespace ccEntityAction
 	
 	//////////
 	// Octree
-	
+
 	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		ccBBox bbox;
 		std::unordered_set<ccGenericPointCloud*> clouds;
 		size_t selNum = selectedEntities.size();
 		PointCoordinateType maxBoxSize = -1;
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
-			
+
 			//specific test for locked vertices
 			bool lockedVertices = false;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (cloud && lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 				continue;
 			}
 			clouds.insert(cloud);
-			
+
 			//we look for the biggest box so as to define the "minimum cell size"
 			const ccBBox thisBBox = cloud->getOwnBB();
 			if (thisBBox.isValid())
 			{
-				CCVector3 dd = thisBBox.maxCorner()-thisBBox.minCorner();
-				PointCoordinateType maxd = std::max(dd.x,std::max(dd.y,dd.z));
+				CCVector3 dd = thisBBox.maxCorner() - thisBBox.minCorner();
+				PointCoordinateType maxd = std::max(dd.x, std::max(dd.y, dd.z));
 				if (maxBoxSize < 0.0 || maxd > maxBoxSize)
 					maxBoxSize = maxd;
 			}
 			bbox += thisBBox;
 		}
-		
+
 		if (clouds.empty() || maxBoxSize < 0.0)
 		{
 			ccLog::Warning("[doActionComputeOctree] No eligible entities in selection!");
 			return false;
 		}
-		
+
 		//min(cellSize) = max(dim)/2^N with N = max subidivision level
-		const double minCellSize = static_cast<double>(maxBoxSize)/(1 << ccOctree::MAX_OCTREE_LEVEL);
-		
-		ccComputeOctreeDlg coDlg(bbox,minCellSize,parent);
+		const double minCellSize = static_cast<double>(maxBoxSize) / (1 << ccOctree::MAX_OCTREE_LEVEL);
+
+		ccComputeOctreeDlg coDlg(bbox, minCellSize, parent);
 		if (!coDlg.exec())
 			return false;
-		
-		ccProgressDialog pDlg(true,parent);
-		
+
+		ccProgressDialog pDlg(true, parent);
+
 		//if we must use a custom bounding box, we update 'bbox'
 		if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
 			bbox = coDlg.getCustomBBox();
-		
+
 		for (std::unordered_set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
 		{
 			ccGenericPointCloud* cloud = *it;
-			
+
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
 			MainWindow* instance = dynamic_cast<MainWindow*>(parent);
 			MainWindow::ccHObjectContext objContext;
 			if (instance)
 				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
-			
+
 			//computation
 			QElapsedTimer eTimer;
 			eTimer.start();
-			ccOctree* octree = nullptr;
-			switch(coDlg.getMode())
+			ccOctree::Shared octree(0);
+			switch (coDlg.getMode())
 			{
-				case ccComputeOctreeDlg::DEFAULT:
-					octree = cloud->computeOctree(&pDlg);
-					break;
-				case ccComputeOctreeDlg::MIN_CELL_SIZE:
-				case ccComputeOctreeDlg::CUSTOM_BBOX:
+			case ccComputeOctreeDlg::DEFAULT:
+				octree = cloud->computeOctree(&pDlg);
+				break;
+			case ccComputeOctreeDlg::MIN_CELL_SIZE:
+			case ccComputeOctreeDlg::CUSTOM_BBOX:
+			{
+				//for a cell-size based custom box, we must update it for each cloud!
+				if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
 				{
-					//for a cell-size based custom box, we must update it for each cloud!
-					if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
-					{
-						double cellSize = coDlg.getMinCellSize();
-						PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
-						CCVector3 C = cloud->getOwnBB().getCenter();
-						bbox = ccBBox(	C-CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth),
-											C+CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth));
-					}
-					cloud->deleteOctree();
-					octree = new ccOctree(cloud);
-					if (octree->build(bbox.minCorner(),bbox.maxCorner(),0,0,&pDlg) > 0)
-					{
-						octree->setDisplay(cloud->getDisplay());
-						cloud->addChild(octree);
-					}
-					else
-					{
-						delete octree;
-						octree = nullptr;
-					}
+					double cellSize = coDlg.getMinCellSize();
+					PointCoordinateType halfBoxWidth = static_cast<PointCoordinateType>(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
+					CCVector3 C = cloud->getOwnBB().getCenter();
+					bbox = ccBBox(	C - CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
+									C + CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth));
 				}
-					break;
-				default:
-					Q_ASSERT(false);
-					return false;
+				cloud->deleteOctree();
+				octree = ccOctree::Shared(new ccOctree(cloud));
+				if (octree->build(bbox.minCorner(), bbox.maxCorner(), 0, 0, &pDlg) > 0)
+				{
+					ccOctreeProxy* proxy = new ccOctreeProxy(octree);
+					proxy->setDisplay(cloud->getDisplay());
+					cloud->addChild(proxy);
+				}
+				else
+				{
+					octree.clear();
+				}
+			}
+			break;
+			default:
+				Q_ASSERT(false);
+				return false;
 			}
 			qint64 elapsedTime_ms = eTimer.elapsed();
-			
+
 			//put object back in tree
 			if (instance)
-				instance->putObjectBackIntoDBTree(cloud,objContext);
-			
+				instance->putObjectBackIntoDBTree(cloud, objContext);
+
 			if (octree)
 			{
-				ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
+				ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1000.0);
 				cloud->setEnabled(true); //for mesh vertices!
-				octree->setVisible(true);
-				octree->prepareDisplayForRefresh();
+				ccOctreeProxy* proxy = cloud->getOctreeProxy();
+				assert(proxy);
+				proxy->setVisible(true);
+				proxy->prepareDisplayForRefresh();
 			}
 			else
 			{
 				ccConsole::Warning(QString("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
 			}
 		}
-		
+
 		return true;
 	}
 	
@@ -1898,7 +1919,7 @@ namespace ccEntityAction
 	bool	toggleProperty(const ccHObject::Container &selectedEntities, TOGGLE_PROPERTY property)
 	{
 		ccHObject baseEntities;
-		ConvertToGroup(selectedEntities,baseEntities,ccHObject::DP_NONE);
+		ConvertToGroup(selectedEntities, baseEntities, ccHObject::DP_NONE);
 		
 		for (unsigned i=0; i<baseEntities.getChildrenNumber(); ++i)
 		{
@@ -2035,12 +2056,12 @@ namespace ccEntityAction
 			pc->setCurrentInScalarField(chi2SfIdx);
 			
 			//compute octree if necessary
-			ccOctree* theOctree=pc->getOctree();
-			if (theOctree == nullptr)
+			ccOctree::Shared theOctree = pc->getOctree();
+			if (!theOctree)
 			{
-				ccProgressDialog pDlg(true,parent);
+				ccProgressDialog pDlg(true, parent);
 				theOctree = pc->computeOctree(&pDlg);
-				if (theOctree == nullptr)
+				if (!theOctree)
 				{
 					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
 					break;
@@ -2052,10 +2073,10 @@ namespace ccEntityAction
 			QElapsedTimer eTimer;
 			eTimer.start();
 			
-			double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,&pDlg,theOctree);
+			double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, nn, pChi2, &pDlg, theOctree.data());
 			
-			ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
-			ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
+			ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.", eTimer.elapsed() / 1000.0);
+			ccConsole::Print("[Chi2 Test] %s test result = %f", distrib->getName(), chi2dist);
 			
 			//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
 			{

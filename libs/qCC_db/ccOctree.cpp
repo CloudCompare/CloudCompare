@@ -29,76 +29,13 @@
 #include <ScalarFieldTools.h>
 #include <RayAndBox.h>
 
-ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
-	: QSpinBox(parent)
-	, m_octreeBoxWidth(0)
-{
-	setRange(0,CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-	//we'll catch any modification of the spinbox value and update the suffix consequently
-	connect(this, SIGNAL(valueChanged(int)), this, SLOT(onValueChange(int)));
-}
-
-void ccOctreeSpinBox::setCloud(ccGenericPointCloud* cloud)
-{
-	if (!cloud)
-		return;
-
-	if (cloud->getOctree())
-	{
-		setOctree(cloud->getOctree());
-	}
-	else
-	{
-		ccBBox box = cloud->getOwnBB(false);
-		CCLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(),box.maxCorner());
-		m_octreeBoxWidth = box.getMaxBoxDim();
-		onValueChange(value());
-	}
-}
-
-void ccOctreeSpinBox::setOctree(CCLib::DgmOctree* octree)
-{
-	if (octree)
-	{
-		m_octreeBoxWidth = static_cast<double>(octree->getCellSize(0));
-		onValueChange(value());
-	}
-	else
-	{
-		m_octreeBoxWidth = 0;
-		setSuffix(QString());
-	}
-}
-
-void ccOctreeSpinBox::onValueChange(int level)
-{
-	if (m_octreeBoxWidth > 0)
-	{
-		if (level >= 0/* && level <= CCLib::DgmOctree::MAX_OCTREE_LEVEL*/)
-		{
-			double cs = m_octreeBoxWidth / pow(2.0,static_cast<double>(level));
-			setSuffix(QString(" (grid step = %1)").arg(cs));
-		}
-		else
-		{
-			//invalid level?!
-			setSuffix(QString());
-		}
-	}
-}
-
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	: CCLib::DgmOctree(aCloud)
-	, ccHObject("Octree")
 	, m_theAssociatedCloudAsGPC(aCloud)
-	, m_displayType(DEFAULT_OCTREE_DISPLAY_TYPE)
-	, m_displayedLevel(1)
-	, m_glListID(-1)
-	, m_shouldBeRefreshed(true)
+	, m_glListID(0)
+	, m_glListIsDeprecated(true)
 	, m_frustrumIntersector(0)
 {
-	setVisible(false);
-	lockVisibility(false);
 }
 
 ccOctree::~ccOctree()
@@ -115,50 +52,48 @@ void ccOctree::setDisplayedLevel(int level)
 	if (level != m_displayedLevel)
 	{
 		m_displayedLevel = level;
-		m_shouldBeRefreshed = true;
+		m_glListIsDeprecated = true;
 	}
 }
 
-void ccOctree::setDisplayType(CC_OCTREE_DISPLAY_TYPE type)
+void ccOctree::setDisplayMode(DisplayMode mode)
 {
-	if (m_displayType != type)
+	if (m_displayMode != mode)
 	{
-		m_displayType = type;
-		m_shouldBeRefreshed = true;
+		m_displayMode = mode;
+		m_glListIsDeprecated = true;
 	}
 }
 
 void ccOctree::clear()
 {
-	if (m_glListID >= 0)
+	QOpenGLContext* context = QOpenGLContext::currentContext();
+	if (context)
 	{
-		QOpenGLContext* context = QOpenGLContext::currentContext();
-		if (context)
+		//get the set of OpenGL functions (version 2.1)
+		QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+		assert(glFunc != nullptr);
+
+		if (glFunc && glFunc->glIsList(m_glListID))
 		{
-			//get the set of OpenGL functions (version 2.1)
-			QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
-			assert(glFunc != nullptr);
-			if (glFunc && glFunc->glIsList(static_cast<GLuint>(m_glListID)))
-			{
-				glFunc->glDeleteLists(static_cast<GLuint>(m_glListID), 1);
-			}
+			glFunc->glDeleteLists(m_glListID, 1);
 		}
-		m_glListID = -1;
 	}
+
+	m_glListID = 0;
+	m_glListIsDeprecated = true;
 
 	DgmOctree::clear();
 }
 
-ccBBox ccOctree::getOwnBB(bool withGLFeatures/*=false*/)
+ccBBox ccOctree::getSquareBB() const
 {
-	if (withGLFeatures)
-	{
-		return ccBBox(m_dimMin,m_dimMax);
-	}
-	else
-	{
-		return ccBBox(m_pointsMin,m_pointsMax);
-	}
+	return ccBBox(m_dimMin, m_dimMax);
+}
+
+ccBBox ccOctree::getPointsBB() const
+{
+	return ccBBox(m_pointsMin, m_pointsMax);
 }
 
 void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)
@@ -180,59 +115,15 @@ void ccOctree::translateBoundingBox(const CCVector3& T)
 	m_pointsMax += T;
 }
 
-void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
-{
-	if (m_thePointsAndTheirCellCodes.empty())
-		return;
-
-	if (!MACRO_Draw3D(context))
-		return;
-	
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
-		return;
-	
-	bool pushName = MACRO_DrawEntityNames(context);
-
-	if (pushName)
-	{
-		//not fast at all!
-		if (MACRO_DrawFastNamesOnly(context))
-			return;
-		glFunc->glPushName(getUniqueIDForDisplay());
-	}
-
-	assert(m_displayedLevel < 256);
-	RenderOctreeAs(	context,
-					m_displayType,
-					this,
-					static_cast<unsigned char>(m_displayedLevel),
-					m_theAssociatedCloudAsGPC,
-					m_glListID,
-					m_shouldBeRefreshed);
-
-	if (m_shouldBeRefreshed)
-		m_shouldBeRefreshed = false;
-
-	if (pushName)
-		glFunc->glPopName();
-}
-
 /*** RENDERING METHODS ***/
 
-void ccOctree::RenderOctreeAs(	CC_DRAW_CONTEXT& context,
-								CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
-								ccOctree* theOctree,
-								unsigned char level,
-								ccGenericPointCloud* theAssociatedCloud,
-								int &octreeGLListID,
-								bool updateOctreeGLDisplay)
+void ccOctree::draw(CC_DRAW_CONTEXT& context)
 {
-	if (!theOctree || !theAssociatedCloud)
+	if (	m_theAssociatedCloudAsGPC
+		||	m_thePointsAndTheirCellCodes.empty() )
+	{
 		return;
+	}
 	
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -243,25 +134,25 @@ void ccOctree::RenderOctreeAs(	CC_DRAW_CONTEXT& context,
 
 	glFunc->glPushAttrib(GL_LIGHTING_BIT);
 
-	if (octreeDisplayType == WIRE)
+	if (m_displayMode == WIRE)
 	{
-		//cet affichage demande trop de memoire pour le stocker sous forme de liste OpenGL
-		//donc on doit le generer dynamiquement
+		//this display mode is too heavy to be stored as a GL list
+		//(therefore we always render it dynamically)
 		
-		glFunc->glDisable(GL_LIGHTING); //au cas où la lumiere soit allumee
+		glFunc->glDisable(GL_LIGHTING);
 		ccGL::Color3v(glFunc, ccColor::green.rgba);
 
-		void* additionalParameters[] = {	reinterpret_cast<void*>(theOctree->m_frustrumIntersector),
+		void* additionalParameters[] = {	reinterpret_cast<void*>(m_frustrumIntersector),
 											reinterpret_cast<void*>(glFunc)
 		};
-		theOctree->executeFunctionForAllCellsAtLevel(	level,
-														&DrawCellAsABox,
-														additionalParameters);
+		executeFunctionForAllCellsAtLevel(	m_displayedLevel,
+											&DrawCellAsABox,
+											additionalParameters);
 	}
 	else
 	{
 		glDrawParams glParams;
-		theAssociatedCloud->getDrawingParameters(glParams);
+		m_theAssociatedCloudAsGPC->getDrawingParameters(glParams);
 
 		if (glParams.showNorms)
 		{
@@ -278,33 +169,36 @@ void ccOctree::RenderOctreeAs(	CC_DRAW_CONTEXT& context,
 		}
 
 		if (!glParams.showColors)
-			ccGL::Color3v(glFunc, ccColor::white.rgba);
-
-		if (updateOctreeGLDisplay || octreeGLListID < 0)
 		{
-			if (octreeGLListID < 0)
-				octreeGLListID = glFunc->glGenLists(1);
-			else if (glFunc->glIsList(octreeGLListID))
-				glFunc->glDeleteLists(octreeGLListID, 1);
-			glFunc->glNewList(octreeGLListID,GL_COMPILE);
+			ccGL::Color3v(glFunc, ccColor::white.rgba);
+		}
 
-			if (octreeDisplayType == MEAN_POINTS)
+		//shall we recompile the GL list?
+		if (m_glListIsDeprecated)
+		{
+			if (m_glListID == 0)
+			{
+				m_glListID = glFunc->glGenLists(1);
+			}
+			glFunc->glNewList(m_glListID, GL_COMPILE);
+
+			if (m_displayMode == MEAN_POINTS)
 			{
 				void* additionalParameters[] = {	reinterpret_cast<void*>(&glParams),
-													reinterpret_cast<void*>(theAssociatedCloud),
+													reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
 													reinterpret_cast<void*>(glFunc)
 				};
 
 				glFunc->glBegin(GL_POINTS);
-				theOctree->executeFunctionForAllCellsAtLevel(	level,
-																&DrawCellAsAPoint,
-																additionalParameters);
+				executeFunctionForAllCellsAtLevel(	m_displayedLevel,
+													&DrawCellAsAPoint,
+													additionalParameters);
 				glFunc->glEnd();
 			}
-			else
+			else if (m_displayMode == MEAN_CUBES)
 			{
 				//by default we use a box as primitive
-				PointCoordinateType cs = theOctree->getCellSize(level);
+				PointCoordinateType cs = getCellSize(m_displayedLevel);
 				CCVector3 dims(cs, cs, cs);
 				ccBox box(dims);
 				box.showColors(glParams.showColors || glParams.showSF);
@@ -319,24 +213,29 @@ void ccOctree::RenderOctreeAs(	CC_DRAW_CONTEXT& context,
 
 				//fake context
 				CC_DRAW_CONTEXT context;
-				context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND| CC_LIGHT_ENABLED;
+				context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
 				context._win = 0;
 
 				void* additionalParameters[] = {	reinterpret_cast<void*>(&glParams),
-													reinterpret_cast<void*>(theAssociatedCloud),
+													reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
 													reinterpret_cast<void*>(&box),
 													reinterpret_cast<void*>(&context)
 				};
 
-				theOctree->executeFunctionForAllCellsAtLevel(	level,
-																&DrawCellAsAPrimitive,
-																additionalParameters);
+				executeFunctionForAllCellsAtLevel(	m_displayedLevel,
+													&DrawCellAsAPrimitive,
+													additionalParameters);
+			}
+			else
+			{
+				assert(false);
 			}
 
 			glFunc->glEndList();
+			m_glListIsDeprecated = false;
 		}
 
-		glFunc->glCallList(octreeGLListID);
+		glFunc->glCallList(m_glListID);
 
 		if (glParams.showNorms)
 		{
@@ -421,27 +320,27 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 								CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	glDrawParams* glParams						= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
-	ccGenericPointCloud* theAssociatedCloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
-	QOpenGLFunctions_2_1* glFunc                = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[2]);
+	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
+	ccGenericPointCloud* cloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
+	QOpenGLFunctions_2_1* glFunc	= static_cast<QOpenGLFunctions_2_1*>(additionalParameters[2]);
 	assert(glFunc != nullptr);
 
 	if (glParams->showSF)
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
-		const ColorCompType* col = theAssociatedCloud->geScalarValueColor(dist);
+		const ColorCompType* col = cloud->geScalarValueColor(dist);
 		glFunc->glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 	}
 	else if (glParams->showColors)
 	{
 		ColorCompType col[3];
-		ComputeAverageColor(cell.points, theAssociatedCloud, col);
+		ComputeAverageColor(cell.points, cloud, col);
 		glFunc->glColor3ubv(col);
 	}
 
 	if (glParams->showNorms)
 	{
-		CCVector3 N = ComputeAverageNorm(cell.points, theAssociatedCloud);
+		CCVector3 N = ComputeAverageNorm(cell.points, cloud);
 		ccGL::Normal3v(glFunc, N.u);
 	}
 
@@ -456,10 +355,10 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 									CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	glDrawParams* glParams						= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
-	ccGenericPointCloud* theAssociatedCloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
-	ccGenericPrimitive*	primitive				= reinterpret_cast<ccGenericPrimitive*>(additionalParameters[2]);
-	CC_DRAW_CONTEXT* context					= reinterpret_cast<CC_DRAW_CONTEXT*>(additionalParameters[3]);
+	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
+	ccGenericPointCloud* cloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
+	ccGenericPrimitive*	primitive	= reinterpret_cast<ccGenericPrimitive*>(additionalParameters[2]);
+	CC_DRAW_CONTEXT* context		= reinterpret_cast<CC_DRAW_CONTEXT*>(additionalParameters[3]);
 
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context->glFunctions<QOpenGLFunctions_2_1>();
@@ -474,19 +373,19 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 	if (glParams->showSF)
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
-		ccColor::Rgba rgb(theAssociatedCloud->geScalarValueColor(dist));
+		ccColor::Rgba rgb(cloud->geScalarValueColor(dist));
 		primitive->setColor(rgb);
 	}
 	else if (glParams->showColors)
 	{
 		ccColor::Rgb col;
-		ComputeAverageColor(cell.points, theAssociatedCloud, col.rgb);
+		ComputeAverageColor(cell.points, cloud, col.rgb);
 		primitive->setColor(col);
 	}
 
 	if (glParams->showNorms)
 	{
-		CCVector3 N = ComputeAverageNorm(cell.points,theAssociatedCloud);
+		CCVector3 N = ComputeAverageNorm(cell.points, cloud);
 		if (primitive->getTriNormsTable())
 		{
 			//only one normal!

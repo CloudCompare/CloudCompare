@@ -233,7 +233,7 @@ void ccNormalComputationDlg::autoEstimateRadius()
 		}
 	}
 
-	PointCoordinateType radius = ccNormalVectors::GuessBestRadius(m_cloud,m_cloud->getOctree());
+	PointCoordinateType radius = ccNormalVectors::GuessBestRadius(m_cloud, m_cloud->getOctree().data());
 	if (radius > 0)
 	{
 		radiusDoubleSpinBox->setValue(radius);

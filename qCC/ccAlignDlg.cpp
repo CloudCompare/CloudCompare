@@ -119,7 +119,9 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 	case SPACE:
 		{
 			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
-			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(modelObject, static_cast<PointCoordinateType>(modelSamplingRate->value()),modParams);
+			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(	modelObject,
+																				static_cast<PointCoordinateType>(modelSamplingRate->value()),
+																				modParams);
 		}
 		break;
 	case OCTREE:
@@ -129,7 +131,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 																						static_cast<unsigned char>(modelSamplingRate->value()),
 																						CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																						NULL,
-																						(CCLib::DgmOctree*)modelObject->getOctree());
+																						modelObject->getOctree().data());
 		}
 		else
 		{
@@ -138,13 +140,14 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 		break;
 	case RANDOM:
 		{
-			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(modelObject, (unsigned)(modelSamplingRate->value()));
+			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(	modelObject,
+																				static_cast<unsigned>(modelSamplingRate->value()));
 		}
 		break;
 	default:
 		{
 			sampledCloud = new CCLib::ReferenceCloud(modelObject);
-			if (!sampledCloud->addPointIndex(0,modelObject->size()))
+			if (!sampledCloud->addPointIndex(0, modelObject->size()))
 			{
 				delete sampledCloud;
 				sampledCloud = 0;
@@ -176,7 +179,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 																						static_cast<unsigned char>(dataSamplingRate->value()),
 																						CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																						NULL,
-																						(CCLib::DgmOctree*)dataObject->getOctree());
+																						dataObject->getOctree().data());
 		}
 		else
 		{

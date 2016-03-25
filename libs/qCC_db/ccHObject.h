@@ -138,8 +138,14 @@ public: //children management
 	**/
 	ccHObject* find(unsigned uniqueID);
 
-	//! standard ccHObject container (for children, etc.)
+	//! Standard instances container (for children, etc.)
 	typedef std::vector<ccHObject*> Container;
+
+	//! Shared pointer
+	typedef QSharedPointer<ccHObject> Shared;
+
+	//! Shared instances container (for children, etc.)
+	typedef std::vector<Shared> SharedContainer;
 
 	//! Collects the children corresponding to a certain pattern
 	/** \param filteredChildren result container
@@ -404,10 +410,10 @@ protected:
 	**/
 	virtual void onUpdateOf(ccHObject* obj) { /*does nothing by default*/ }
 
-	//! Object's parent
+	//! Parent
 	ccHObject* m_parent;
 
-	//! Object's children
+	//! Children
 	Container m_children;
 
 	//! Selection behavior
@@ -455,7 +461,7 @@ inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, 
 
 		if (!isSiblingOfAnotherOne)
 		{
-			dest.addChild(origin[i],dependencyFlags);
+			dest.addChild(origin[i], dependencyFlags);
 		}
 	}
 }

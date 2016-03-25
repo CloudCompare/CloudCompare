@@ -363,9 +363,9 @@ namespace ccLibAlgorithms
 					}
 				}
 				
-				ccProgressDialog pDlg(true,parent);
+				ccProgressDialog pDlg(true, parent);
 				
-				ccOctree* octree = cloud->getOctree();
+				ccOctree::Shared octree = cloud->getOctree();
 				if (!octree)
 				{
 					pDlg.show();
@@ -384,34 +384,34 @@ namespace ccLibAlgorithms
 				{
 					case CCLIB_ALGO_APPROX_DENSITY:
 						result = CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud,
-																												  densityType,
-																												  &pDlg,
-																												  octree);
+																							densityType,
+																							&pDlg,
+																							octree.data());
 						break;
 						
 					case CCLIB_ALGO_ACCURATE_DENSITY:
 						result = CCLib::GeometricalAnalysisTools::computeLocalDensity(	cloud,
-																											densityType,
-																											densityKernelSize,
-																											&pDlg,
-																											octree);
+																						densityType,
+																						densityKernelSize,
+																						&pDlg,
+																						octree.data());
 						break;
 						
 					case CCLIB_ALGO_CURVATURE:
 						result = CCLib::GeometricalAnalysisTools::computeCurvature(	cloud,
-																										curvType,
-																										curvKernelSize,
-																										&pDlg,
-																										octree);
+																					curvType,
+																					curvKernelSize,
+																					&pDlg,
+																					octree.data());
 						break;
 						
 					case CCLIB_ALGO_SF_GRADIENT:
 						result = CCLib::ScalarFieldTools::computeScalarFieldGradient(	cloud,
-																											0, //auto --> FIXME: should be properly set by the user!
-																											euclidean,
-																											false,
-																											&pDlg,
-																											octree);
+																						0, //auto --> FIXME: should be properly set by the user!
+																						euclidean,
+																						false,
+																						&pDlg,
+																						octree.data());
 						
 						//rename output scalar field
 						if (result == 0)
@@ -419,16 +419,16 @@ namespace ccLibAlgorithms
 							int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
 							assert(outSfIdx >= 0);
 							sfName = QString("%1.gradient").arg(pc->getScalarFieldName(outSfIdx));
-							pc->renameScalarField(outSfIdx,qPrintable(sfName));
+							pc->renameScalarField(outSfIdx, qPrintable(sfName));
 						}
 						//*/
 						break;
 						
 					case CCLIB_ALGO_ROUGHNESS:
 						result = CCLib::GeometricalAnalysisTools::computeRoughness(	cloud,
-																										roughnessKernelSize,
-																										&pDlg,
-																										octree);
+																					roughnessKernelSize,
+																					&pDlg,
+																					octree.data());
 						break;
 						
 						//TEST
@@ -438,9 +438,9 @@ namespace ccLibAlgorithms
 						cloud->enableScalarField();
 						{
 							for (unsigned j=0; j<count; ++j)
-								cloud->setPointScalarValue(j,NAN_VALUE);
+								cloud->setPointScalarValue(j, NAN_VALUE);
 						}
-						
+
 						QElapsedTimer subTimer;
 						subTimer.start();
 						unsigned long long extractedPoints = 0;
@@ -448,20 +448,20 @@ namespace ccLibAlgorithms
 						const unsigned samples = 1000;
 						std::random_device rd;   // non-deterministic generator
 						std::mt19937 gen(rd());  // to seed mersenne twister.
-						std::uniform_int_distribution<unsigned> dist(0, count-1);
-						
-						for (unsigned j=0; j<samples; ++j)
+						std::uniform_int_distribution<unsigned> dist(0, count - 1);
+
+						for (unsigned j = 0; j < samples; ++j)
 						{
 							unsigned randIndex = dist(gen);
 							CCLib::DgmOctree::NeighboursSet neighbours;
-							octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours,level);
+							octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex), roughnessKernelSize, neighbours, level);
 							size_t neihgboursCount = neighbours.size();
 							extractedPoints += static_cast<unsigned long long>(neihgboursCount);
-							for (size_t k=0; k<neihgboursCount; ++k)
-								cloud->setPointScalarValue(neighbours[k].pointIndex,static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
+							for (size_t k = 0; k < neihgboursCount; ++k)
+								cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
 						}
-						ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),roughnessKernelSize,static_cast<double>(extractedPoints)/static_cast<double>(samples));
-						
+						ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)", subTimer.elapsed(), roughnessKernelSize, static_cast<double>(extractedPoints) / static_cast<double>(samples));
+
 						result = 0;
 					}
 						break;
@@ -481,7 +481,7 @@ namespace ccLibAlgorithms
 						pc->getCurrentInScalarField()->computeMinAndMax();
 					}
 					cloud->prepareDisplayForRefresh();
-					ccConsole::Print("[Algortihm] Timing: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
+					ccConsole::Print("[Algortihm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
 				}
 				else
 				{

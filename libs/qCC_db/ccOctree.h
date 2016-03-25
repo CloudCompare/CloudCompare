@@ -27,7 +27,7 @@
 #include <ReferenceCloud.h>
 
 //Qt
-#include <QSpinBox>
+#include <QSharedPointer>
 
 //system
 #include <vector>
@@ -36,66 +36,27 @@ class ccGenericPointCloud;
 class ccOctreeFrustrumIntersector;
 class ccCameraSensor;
 
-//! Octree displaying methods
-enum CC_OCTREE_DISPLAY_TYPE {	WIRE				=	0,					/**< The octree is displayed as wired boxes (one box per cell) */
-								MEAN_POINTS			=	1,					/**< The octree is displayed as points (one point per cell = the center of gravity of the points lying in it) */
-								MEAN_CUBES			=	2					/**< The octree is displayed as plain 3D cubes (one cube per cell) */
-};
-const unsigned char OCTREE_DISPLAY_TYPE_NUMBERS										=	3;
-const CC_OCTREE_DISPLAY_TYPE DEFAULT_OCTREE_DISPLAY_TYPE							=	WIRE;
-const CC_OCTREE_DISPLAY_TYPE OCTREE_DISPLAY_TYPE_ENUMS[OCTREE_DISPLAY_TYPE_NUMBERS] =	{WIRE, MEAN_POINTS, MEAN_CUBES};
-const char COCTREE_DISPLAY_TYPE_TITLES[OCTREE_DISPLAY_TYPE_NUMBERS][18]				=	{"Wire","Points","Plain cubes"};
-
-//! Octree level editor dialog
-class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
-{
-	Q_OBJECT
-
-public:
-
-	//! Default constructor
-	explicit ccOctreeSpinBox(QWidget* parent = 0);
-
-	//! Sets associated cloud on which the octree will be computed
-	/** Alternative to ccOctreeSpinBox::setOctree
-	**/
-	void setCloud(ccGenericPointCloud* cloud);
-
-	//! Sets associated octree
-	/** Alternative to ccOctreeSpinBox::setCloud
-	**/
-	void setOctree(CCLib::DgmOctree* octree);
-
-protected slots:
-
-	//! Called each time the spinbox value changes
-	void onValueChange(int);
-
-protected:
-
-	//! Corresponding octree base size
-	double m_octreeBoxWidth;
-
-};
-
 //! Octree structure
 /** Extends the CCLib::DgmOctree class.
 **/
-class QCC_DB_LIB_API ccOctree : public CCLib::DgmOctree, public ccHObject
+class QCC_DB_LIB_API ccOctree : public CCLib::DgmOctree
 {
 public: //GENERAL METHODS
 
+	//! Shared pointer
+	typedef QSharedPointer<ccOctree> Shared;
+
 	//! Default constructor
-	/** \param aCloud a point cloud
+	/** \param cloud a point cloud
 	**/
-	explicit ccOctree(ccGenericPointCloud* aCloud);
+	explicit ccOctree(ccGenericPointCloud* cloud);
 
 	//! Destructor
 	virtual ~ccOctree();
 
 	//! Multiplies the bounding-box of the octree
 	/** If the cloud coordinates are simply multiplied by the same factor,
-		there is no use to recompute the octree structure. It's sufficient
+		there is no use in recomputing the octree structure. It's sufficient
 		to update its bounding-box.
 		\param  multFactor multiplication factor
 	**/
@@ -108,37 +69,34 @@ public: //GENERAL METHODS
 	**/
 	void translateBoundingBox(const CCVector3& T);
 
-	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POINT_OCTREE; }
-
-	int getDisplayedLevel() const { return m_displayedLevel; }
-	void setDisplayedLevel(int level);
-
-	CC_OCTREE_DISPLAY_TYPE getDisplayType() const { return m_displayType; }
-	void setDisplayType(CC_OCTREE_DISPLAY_TYPE type);
+	//! Returns the octree (square) bounding-box
+	ccBBox getSquareBB() const;
+	//! Returns the points bounding-box
+	ccBBox getPointsBB() const;
 
 	//inherited from DgmOctree
 	virtual void clear() override;
 
-	//Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+public: //RENDERING
+	
+	//! Returns the currently displayed octree level
+	int getDisplayedLevel() const { return m_displayedLevel; }
+	//! Sets the currently displayed octree level
+	void setDisplayedLevel(int level);
 
-public: //RENDERING METHODS
+	//! Octree displaying methods
+	enum DisplayMode {
+		WIRE = 0,					/**< The octree is displayed as wired boxes (one box per cell) */
+		MEAN_POINTS = 1,			/**< The octree is displayed as points (one point per cell = the center of gravity of the points lying in it) */
+		MEAN_CUBES = 2				/**< The octree is displayed as plain 3D cubes (one cube per cell) */
+	};
+	//! Returns the currently display mode
+	DisplayMode getDisplayMode() const { return m_displayMode; }
+	//! Sets the currently display mode
+	void setDisplayMode(DisplayMode mode);
 
-	static void RenderOctreeAs(CC_DRAW_CONTEXT& context,
-								CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
-								ccOctree* theOctree,
-								unsigned char level,
-								ccGenericPointCloud* theAssociatedCloud,
-								int &octreeGLListID,
-								bool updateOctreeGLDisplay = true);
-
-	static void ComputeAverageColor(CCLib::ReferenceCloud* subset,
-									ccGenericPointCloud* sourceCloud,
-									ColorCompType meanCol[]);
-
-	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
-										ccGenericPointCloud* sourceCloud);
+	//! Draws the octree
+	void draw(CC_DRAW_CONTEXT& context);
 
 	//! Intersects octree with a camera sensor
 	bool intersectWithFrustrum(	ccCameraSensor* sensor,
@@ -150,12 +108,18 @@ public: //RENDERING METHODS
 						PointDescriptor& output,
 						double pickWidth_pix = 3.0) const;
 
-protected:
+public: //HELPERS
+	
+	//! Computes the average color of a set of points
+	static void ComputeAverageColor(CCLib::ReferenceCloud* subset,
+									ccGenericPointCloud* sourceCloud,
+									ColorCompType meanCol[]);
 
-	//Inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	//! Computes the average normal of a set of points
+	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
+										ccGenericPointCloud* sourceCloud);
 
-	/*** RENDERING METHODS ***/
+protected: ////RENDERING
 
 	static bool DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
@@ -169,13 +133,25 @@ protected:
 										void** additionalParameters,
 										CCLib::NormalizedProgress* nProgress = 0);
 
-	ccGenericPointCloud* m_theAssociatedCloudAsGPC;
-	CC_OCTREE_DISPLAY_TYPE m_displayType;
-	int m_displayedLevel;
-	int m_glListID;
-	bool m_shouldBeRefreshed;
+protected: //MEMBERS
 
+	//! Associated cloud (as a ccGenericPointCloud)
+	ccGenericPointCloud* m_theAssociatedCloudAsGPC;
+
+	//! Displayed level
+	int m_displayedLevel;
+
+	//! Display mode
+	DisplayMode m_displayMode;
+
+	//! OpenGL display list
+	GLuint m_glListID;
+	//! Whether the display (list) should be refreshed or not
+	bool m_glListIsDeprecated;
+
+	//! For frustrum intersection
 	ccOctreeFrustrumIntersector* m_frustrumIntersector;
+
 };
 
 #endif //CC_OCTREE_HEADER

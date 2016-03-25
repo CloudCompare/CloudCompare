@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qHPR                        #
+//#                            CLOUDCOMPARE                                #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,19 +11,54 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Daniel Girardeau-Montaut                      #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include "ccHprDlg.h"
+#ifndef CC_OCTREE_SPIN_BOX_HEADER
+#define CC_OCTREE_SPIN_BOX_HEADER
 
-#include <ccOctree.h>
+//Local
+#include "qCC_db.h"
 
-ccHprDlg::ccHprDlg(QWidget* parent)
-	: QDialog(parent, Qt::Tool)
-	, Ui::HPRDialog()
+//CCLib
+#include <DgmOctree.h>
+
+//Qt
+#include <QSpinBox>
+
+class ccGenericPointCloud;
+
+//! Octree level editor dialog
+class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
 {
-	setupUi(this);
+	Q_OBJECT
 
-	octreeLevelSpinBox->setRange(2, CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-}
+public:
+
+	//! Default constructor
+	explicit ccOctreeSpinBox(QWidget* parent = 0);
+
+	//! Inits the dialog with a cloud (on which the octree has been or will be computed)
+	/** Alternative to ccOctreeSpinBox::setOctree
+	**/
+	void setCloud(ccGenericPointCloud* cloud);
+
+	//! Inits the dialog with an octree
+	/** Alternative to ccOctreeSpinBox::setCloud
+	**/
+	void setOctree(CCLib::DgmOctree* octree);
+
+protected slots:
+
+	//! Called each time the spinbox value changes
+	void onValueChange(int);
+
+protected:
+
+	//! Corresponding octree base size
+	double m_octreeBoxWidth;
+
+};
+
+#endif //CC_OCTREE_SPIN_BOX_HEADER

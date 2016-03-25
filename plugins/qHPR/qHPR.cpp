@@ -25,6 +25,7 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccOctree.h>
+#include <ccOctreeProxy.h>
 #include <ccProgressDialog.h>
 #include <cc2DViewportObject.h>
 
@@ -249,12 +250,18 @@ void qHPR::doAction()
 
 	//unique parameter: the octree subdivision level
 	int octreeLevel = dlg.octreeLevelSpinBox->value();
-	assert(octreeLevel >= 0 && octreeLevel <= 255);
+	assert(octreeLevel >= 0 && octreeLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	//compute octree if cloud hasn't any
-	ccOctree* theOctree = cloud->getOctree();
+	ccOctree::Shared theOctree = cloud->getOctree();
 	if (!theOctree)
+	{
 		theOctree = cloud->computeOctree(&progressCb);
+		if (theOctree)
+		{
+			m_app->addToDB(cloud->getOctreeProxy());
+		}
+	}
 
 	if (!theOctree)
 	{
@@ -280,7 +287,7 @@ void qHPR::doAction()
 																											static_cast<unsigned char>(octreeLevel),
 																											CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																											&progressCb,
-																											theOctree);
+																											theOctree.data());
 		if (!theCellCenters)
 		{
 			m_app->dispToConsole("Error while simplifying point cloud with octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);

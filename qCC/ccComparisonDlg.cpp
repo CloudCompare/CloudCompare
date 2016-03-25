@@ -174,9 +174,11 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	}
 
 	//whatever the case, we always need the compared cloud's octree
-	m_compOctree = static_cast<CCLib::DgmOctree*>(m_compCloud->getOctree());
+	m_compOctree = m_compCloud->getOctree();
 	if (!m_compOctree)
-		m_compOctree = new CCLib::DgmOctree(m_compCloud);
+	{
+		m_compOctree = ccOctree::Shared(new ccOctree(m_compCloud));
+	}
 	m_compOctreeIsPartial = false;
 
 	//backup currently displayed SF (on compared cloud)
@@ -196,16 +198,18 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	{
 		m_refMesh = ccHObjectCaster::ToGenericMesh(m_refEnt);
 		m_refCloud = m_refMesh->getAssociatedCloud();
-		m_refOctree = 0;
+		m_refOctree.clear();
 	}
 	else /*if (m_compType == CLOUDCLOUD_DIST)*/
 	{
 		m_refCloud = ccHObjectCaster::ToGenericPointCloud(m_refEnt);
 
 		//for computing cloud/cloud distances we need also the reference cloud's octree
-		m_refOctree = static_cast<CCLib::DgmOctree*>(m_refCloud->getOctree());
+		m_refOctree = m_refCloud->getOctree();
 		if (!m_refOctree)
-			m_refOctree = new CCLib::DgmOctree(m_refCloud);
+		{
+			m_refOctree = ccOctree::Shared(new ccOctree(m_refCloud));
+		}
 	}
 	m_refOctreeIsPartial = false;
 
@@ -252,17 +256,13 @@ void ccComparisonDlg::releaseOctrees()
 {
 	if (m_compOctree && m_compCloud)
 	{
-		if (m_compCloud->getOctree() != m_compOctree)
-			delete m_compOctree;
-		m_compOctree = 0;
+		m_compOctree.clear();
 		m_compOctreeIsPartial = false;
 	}
 
 	if (m_refOctree && m_refCloud)
 	{
-		if (m_refCloud->getOctree() != m_refOctree)
-			delete m_refOctree;
-		m_refOctree = 0;
+		m_refOctree.clear();
 		m_refOctreeIsPartial = false;
 	}
 }
@@ -340,21 +340,27 @@ bool ccComparisonDlg::computeApproxDistances()
 																								DEFAULT_OCTREE_LEVEL,
 																								0,
 																								&progressDlg,
-																								m_compOctree,
-																								m_refOctree);
+																								m_compOctree.data(),
+																								m_refOctree.data());
 		}
 		break;
 	
 	case CLOUDMESH_DIST: //cloud-mesh
 		{
 			CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
-			c2mParams.octreeLevel = DEFAULT_OCTREE_LEVEL;
-			c2mParams.maxSearchDist = 0;
-			c2mParams.useDistanceMap = true,
-			c2mParams.signedDistances = false;
-			c2mParams.flipNormals = false;
-			c2mParams.multiThread = false;
-			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(m_compCloud, m_refMesh, c2mParams, &progressDlg, m_compOctree);
+			{
+				c2mParams.octreeLevel = DEFAULT_OCTREE_LEVEL;
+				c2mParams.maxSearchDist = 0;
+				c2mParams.useDistanceMap = true;
+				c2mParams.signedDistances = false;
+				c2mParams.flipNormals = false;
+				c2mParams.multiThread = false;
+			}
+			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
+																						m_refMesh,
+																						c2mParams,
+																						&progressDlg,
+																						m_compOctree.data());
 		}
 		break;
 
@@ -777,8 +783,8 @@ bool ccComparisonDlg::computeDistances()
 																				m_refCloud,
 																				c2cParams,
 																				&progressDlg,
-																				m_compOctree,
-																				m_refOctree);
+																				m_compOctree.data(),
+																				m_refOctree.data());
 		break;
 
 	case CLOUDMESH_DIST: //cloud-mesh
@@ -802,7 +808,7 @@ bool ccComparisonDlg::computeDistances()
 																				m_refMesh,
 																				c2mParams,
 																				&progressDlg,
-																				m_compOctree);
+																				m_compOctree.data());
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();

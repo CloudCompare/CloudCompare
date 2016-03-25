@@ -106,19 +106,23 @@ protected:
 		//DGM: we don't use the cloud's octree (if any)
 		//as we don't know when it will be deleted!
 		//(the user can do it anytime for instance)
-		QSharedPointer<ccOctree> octree(new ccOctree(&m_cloud));
-		if (octree->build(0/*progressCallback*/) <= 0)
+		ccOctree::Shared octree = m_cloud.getOctree();
+		if (!octree)
 		{
-			//not enough memory
-			ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
-			lod.setState(ccPointCloud::LodStruct::BROKEN);
-			return;
+			octree = ccOctree::Shared(new ccOctree(&m_cloud));
+			if (octree->build(0/*progressCallback*/) <= 0)
+			{
+				//not enough memory
+				ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
+				lod.setState(ccPointCloud::LodStruct::BROKEN);
+				return;
+			}
 		}
 
 		//flags
-		GenericChunkedArray<1,unsigned char>* flags = new GenericChunkedArray<1,unsigned char>;
+		GenericChunkedArray<1, unsigned char>* flags = new GenericChunkedArray<1, unsigned char>();
 		static const unsigned char NoFlag = 0;
-		if (!flags->resize(pointCount,true,NoFlag))
+		if (!flags->resize(pointCount, true, NoFlag))
 		{
 			//not enough memory
 			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
@@ -1857,16 +1861,20 @@ void ccPointCloud::translate(const CCVector3& T)
 	CCVector3::vadd(bbMax,T.u,bbMax);
 
 	//same thing for the octree
-	ccOctree* oct = getOctree();
-	if (oct)
-		oct->translateBoundingBox(T);
+	ccOctree::Shared octree = getOctree();
+	if (octree)
+	{
+		octree->translateBoundingBox(T);
+	}
 
 	//and same thing for the Kd-tree(s)!
 	ccHObject::Container kdtrees;
 	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
 	{
-		for (size_t i=0; i<kdtrees.size(); ++i)
+		for (size_t i = 0; i < kdtrees.size(); ++i)
+		{
 			static_cast<ccKdTree*>(kdtrees[i])->translateBoundingBox(T);
+		}
 	}
 }
 
@@ -1899,15 +1907,15 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 	}
 
 	//same thing for the octree
-	ccOctree* oct = getOctree();
-	if (oct)
+	ccOctree::Shared octree = getOctree();
+	if (octree)
 	{
 		if (fx == fy && fx == fz && fx > 0)
 		{
 			CCVector3 centerInv = -center;
-			oct->translateBoundingBox(centerInv);
-			oct->multiplyBoundingBox(fx);
-			oct->translateBoundingBox(center);
+			octree->translateBoundingBox(centerInv);
+			octree->multiplyBoundingBox(fx);
+			octree->translateBoundingBox(center);
 		}
 		else
 		{
@@ -4886,8 +4894,8 @@ bool ccPointCloud::computeNormalsWithOctree(CC_LOCAL_MODEL_TYPES model,
 												model,
 												defaultRadius,
 												preferredOrientation,
-												(CCLib::GenericProgressCallback*)pDlg,
-												getOctree()))
+												static_cast<CCLib::GenericProgressCallback*>(pDlg),
+												getOctree().data()))
 	{
 		ccLog::Warning(QString("[computeNormals] Failed to compute normals on cloud '%1'").arg(getName()));
 		return false;

@@ -26,8 +26,9 @@
 #include "ccGenericGLDisplay.h"
 #include "ccShiftedObject.h"
 #include "ccAdvancedTypes.h"
+#include "ccOctree.h"
 
-class ccOctree;
+class ccOctreeProxy;
 
 /***************************************************
 				ccGenericPointCloud
@@ -93,17 +94,19 @@ public:
 
 	//! Computes the cloud octree
 	/** The octree bounding-box is automatically defined as the smallest
-		3D cube that encloses totally the cloud.
+		3D cube that totally encloses the cloud.
 		WARNING: any previously attached octree will be deleted,
-				 even if new octree computation failed.
+				 even if the new octree computation failed.
 		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCLib documentation)
 		\param autoAddChild whether to automatically add the computed octree as child of this cloud or not
 		\return the computed octree
 	**/
-	virtual ccOctree* computeOctree(CCLib::GenericProgressCallback* progressCb = 0, bool autoAddChild = true);
+	virtual ccOctree::Shared computeOctree(CCLib::GenericProgressCallback* progressCb = 0, bool autoAddChild = true);
 
-	//! Returns associated octree
-	virtual ccOctree* getOctree();
+	//! Returns the associated octree (if any)
+	virtual ccOctree::Shared getOctree() const;
+	//! Returns the associated octree proxy (if any)
+	virtual ccOctreeProxy* getOctreeProxy() const;
 
 	//! Erases the octree
 	virtual void deleteOctree();

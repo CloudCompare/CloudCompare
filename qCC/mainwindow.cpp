@@ -1246,7 +1246,7 @@ void MainWindow::doActionResampleWithOctree()
 
 		if (cloud)
 		{
-			ccOctree* octree = cloud->getOctree();
+			ccOctree::Shared octree = cloud->getOctree();
 			if (!octree)
 			{
 				octree = cloud->computeOctree(&pDlg);
@@ -1260,11 +1260,14 @@ void MainWindow::doActionResampleWithOctree()
 			cloud->setEnabled(false);
 			QElapsedTimer eTimer;
 			eTimer.start();
-			CCLib::GenericIndexedCloud* result = CCLib::CloudSamplingTools::resampleCloudWithOctree(cloud,
+			CCLib::GenericIndexedCloud* result = CCLib::CloudSamplingTools::resampleCloudWithOctree
+			(
+				cloud,
 				aimedPoints,
 				CCLib::CloudSamplingTools::CELL_GRAVITY_CENTER,
 				&pDlg,
-				octree);
+				octree.data()
+			);
 
 			if (result)
 			{
@@ -2628,7 +2631,7 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 	}
 
 	//comupte/get the point cloud's octree
-	ccOctree* octree = pointCloud->getOctree();
+	ccOctree::Shared octree = pointCloud->getOctree();
 	if (!octree)
 	{
 		octree = pointCloud->computeOctree();
@@ -2642,7 +2645,7 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 
 	// filter octree then project the points
 	std::vector<unsigned> inCameraFrustrum;
-	if (!octree->intersectWithFrustrum(sensor,inCameraFrustrum))
+	if (!octree->intersectWithFrustrum(sensor, inCameraFrustrum))
 	{
 		ccConsole::Error("Failed to intersect sensor frustrum with octree!");
 	}
@@ -2676,7 +2679,7 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 
 				const ScalarType c_insideValue = static_cast<ScalarType>(1);
 
-				for (size_t i=0; i<inCameraFrustrum.size(); i++)
+				for (size_t i = 0; i < inCameraFrustrum.size(); i++)
 				{
 					sf->setValue(inCameraFrustrum[i], c_insideValue);
 				}
@@ -3017,10 +3020,13 @@ void MainWindow::doRemoveDuplicatePoints()
 				break;
 			}
 
-			ccOctree* octree = cloud->getOctree();
+			ccOctree::Shared octree = cloud->getOctree();
 			ccProgressDialog pDlg(true,this);
 
-			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,minDistanceBetweenPoints,&pDlg,octree);
+			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(	cloud,
+																				minDistanceBetweenPoints,
+																				&pDlg,
+																				octree.data());
 
 			if (result >= 0)
 			{
@@ -4311,10 +4317,10 @@ void MainWindow::doActionLabelConnectedComponents()
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-			ccOctree* theOctree = cloud->getOctree();
+			ccOctree::Shared theOctree = cloud->getOctree();
 			if (!theOctree)
 			{
-				ccProgressDialog pDlg(true,this);
+				ccProgressDialog pDlg(true, this);
 				theOctree = cloud->computeOctree(&pDlg);
 				if (!theOctree)
 				{
@@ -4340,7 +4346,7 @@ void MainWindow::doActionLabelConnectedComponents()
 																		static_cast<unsigned char>(octreeLevel),
 																		false,
 																		&pDlg,
-																		theOctree) >= 0)
+																		theOctree.data()) >= 0)
 			{
 				//if successfull, we extract each CC (stored in "components")
 				pc->getCurrentInScalarField()->computeMinAndMax();
@@ -8033,7 +8039,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	cloud->getScalarField(sfIdx)->fill(NAN_VALUE);
 
 	ccProgressDialog pDlg(true,this);
-	ccOctree* octree = cloud->computeOctree(&pDlg);
+	ccOctree::Shared octree = cloud->computeOctree(&pDlg);
 	if (octree)
 	{
 		QElapsedTimer subTimer;
@@ -8043,8 +8049,8 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		const unsigned samples = 1000;
 		std::random_device rd;   // non-deterministic generator
 		std::mt19937 gen(rd());  // to seed mersenne twister.
-		std::uniform_real_distribution<PointCoordinateType> distAngle(0, static_cast<PointCoordinateType>(2*M_PI));
-		std::uniform_int_distribution<unsigned> distIndex(0, ptsCount-1);
+		std::uniform_real_distribution<PointCoordinateType> distAngle(0, static_cast<PointCoordinateType>(2 * M_PI));
+		std::uniform_int_distribution<unsigned> distIndex(0, ptsCount - 1);
 
 		for (unsigned j=0; j<samples; ++j)
 		{
@@ -8076,7 +8082,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 				cloud->setPointScalarValue(cn.neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(cn.neighbours[k].squareDistd)));
 			}
 		}
-		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),radius,height,static_cast<double>(extractedPoints)/static_cast<double>(samples));
+		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)", subTimer.elapsed(), radius, height, static_cast<double>(extractedPoints) / samples);
 	}
 	else
 	{
@@ -9394,10 +9400,10 @@ void MainWindow::doActionSaveFile()
 		{
 			//we'll regroup all selected entities in a temporary group
 			ccHObject tempContainer;
-			ConvertToGroup(m_selectedEntities,tempContainer,ccHObject::DP_NONE);
+			ConvertToGroup(m_selectedEntities, tempContainer, ccHObject::DP_NONE);
 			if (tempContainer.getChildrenNumber())
 			{
-				result = FileIOFilter::SaveToFile(&tempContainer,selectedFilename,parameters,selectedFilter);
+				result = FileIOFilter::SaveToFile(&tempContainer, selectedFilename, parameters, selectedFilter);
 			}
 			else
 			{

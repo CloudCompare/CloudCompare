@@ -18,10 +18,12 @@
 #ifndef CC_COMPARISON_DIALOG_HEADER
 #define CC_COMPARISON_DIALOG_HEADER
 
+//qCC_db
+#include <ccOctree.h>
+
+//Qt
 #include <QDialog>
 #include <QString>
-
-#include <DgmOctree.h>
 
 #include <ui_comparisonDlg.h>
 
@@ -84,7 +86,7 @@ protected:
 	//! Compared entity equivalent cloud
 	ccPointCloud* m_compCloud;
 	//! Compared entity's octree
-	CCLib::DgmOctree* m_compOctree;
+	ccOctree::Shared m_compOctree;
 	//! Whether the compared entity octree is partial or not
 	bool m_compOctreeIsPartial;
 	//! Initial compared entity visibility
@@ -97,7 +99,7 @@ protected:
 	//! Reference entity equivalent mesh (if any)
 	ccGenericMesh* m_refMesh;
 	//! Reference entity's octree
-	CCLib::DgmOctree* m_refOctree;
+	ccOctree::Shared m_refOctree;
 	//! Whether the reference entity octree is partial or not
 	bool m_refOctreeIsPartial;
 	//! Initial reference entity visibility

@@ -315,7 +315,7 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 			errorMeasure,
 			s_fmUseRetroProjectionError,
 			&pDlg,
-			pc->getOctree());
+			pc->getOctree().data());
 
 		success = (result >= 0);
 	}

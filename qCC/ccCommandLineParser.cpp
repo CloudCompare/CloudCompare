@@ -2880,7 +2880,7 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 			pc->setCurrentInScalarField(chi2SfIdx);
 
 			//compute octree if necessary
-			ccOctree* theOctree=pc->getOctree();
+			ccOctree::Shared theOctree = pc->getOctree();
 			if (!theOctree)
 			{
 				theOctree = pc->computeOctree(pDlg);
@@ -2893,7 +2893,7 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 				}
 			}
 
-			double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,kNN,pValue,pDlg,theOctree);
+			double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, kNN, pValue, pDlg, theOctree.data());
 
 			Print(QString("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
 

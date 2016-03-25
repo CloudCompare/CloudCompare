@@ -133,7 +133,7 @@ protected slots:
 	void colorScaleChanged(int);
 	void colorRampStepsChanged(int);
 	void spawnColorRampEditor();
-	void octreeDisplayTypeChanged(int);
+	void octreeDisplayModeChanged(int);
 	void octreeDisplayedLevelChanged(int);
 	void primitivePrecisionChanged(int);
 	void sphereRadiusChanged(double);

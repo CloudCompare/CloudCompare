@@ -384,7 +384,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 			return false;
 		}
 	}
-	ccOctree* octree = cloud->getOctree();
+	ccOctree::Shared octree = cloud->getOctree();
 	assert(octree);
 
 	//temporary SF
@@ -425,7 +425,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 	//Fast Marching propagation
 	ccFastMarchingForNormsDirection fm;
 
-	int result = fm.init(cloud, theNorms, octree, octreeLevel);
+	int result = fm.init(cloud, theNorms, octree.data(), octreeLevel);
 	if (result < 0)
 	{
 		ccLog::Error("[orientNormalsWithFM] Something went wrong during initialization...");

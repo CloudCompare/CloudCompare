@@ -407,7 +407,11 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if (equivalentIndexes && equivalentIndexes->resize(vertCount,true,razValue))
 		{
 			ccProgressDialog pDlg(true, parameters.parentWidget);
-			ccOctree* octree = vertices->computeOctree(&pDlg);
+			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(vertices));
+			if (!octree->build(&pDlg))
+			{
+				octree.clear();
+			}
 			if (octree)
 			{
 				void* additionalParameters[] = { static_cast<void*>(equivalentIndexes) };
@@ -417,8 +421,8 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 																			false,
 																			&pDlg,
 																			"Tag duplicated vertices");
-				vertices->deleteOctree();
-				octree = 0;
+
+				octree.clear();
 
 				if (result != 0)
 				{

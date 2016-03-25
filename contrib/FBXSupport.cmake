@@ -25,6 +25,10 @@ function( target_link_FBX_SDK ) # 2 arguments: ARGV0 = project name
 
 if( ${OPTION_USE_FBX_SDK} )
 	
+	#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
+	#(and setting it outside of the function/file doesn't seem to work...)
+	cmake_policy(SET CMP0043 OLD)
+
 	#release/general
 	if( FBX_SDK_LIBRARY_FILE )
 

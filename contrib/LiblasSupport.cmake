@@ -45,6 +45,7 @@ endif()
 # Link project with liblas library and export Dlls to specified destinations
 function( target_link_liblas ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export folder
 	if( ${OPTION_USE_LIBLAS} )
+
 		if( LIBLAS_RELEASE_LIBRARY_FILE )
 			#Release mode only by default
 			target_link_libraries( ${ARGV0} optimized ${LIBLAS_RELEASE_LIBRARY_FILE} )
@@ -75,6 +76,11 @@ function( target_link_liblas ) # 2 arguments: ARGV0 = project name / ARGV1 = sha
 			endif()
 			
 			if ( CMAKE_CONFIGURATION_TYPES )
+
+				#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
+				#(and setting it outside of the function/file doesn't seem to work...)
+				cmake_policy(SET CMP0043 OLD)
+
 				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_LAS_SUPPORT )
 				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO CC_LAS_SUPPORT )
 				

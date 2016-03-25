@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
+#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
+#(and setting it outside of this file doesn't seem to work...)
+cmake_policy(SET CMP0043 OLD)
+
 add_subdirectory( MiscLib )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )

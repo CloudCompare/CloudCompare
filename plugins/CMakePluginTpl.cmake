@@ -48,6 +48,10 @@ endif()
 if( NOT CMAKE_CONFIGURATION_TYPES )
     set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QT_NO_DEBUG )
 else()
+	#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
+	#(and setting it outside of the function/file doesn't seem to work...)
+	cmake_policy(SET CMP0043 OLD)
+
     set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE QT_NO_DEBUG)
 endif()
 

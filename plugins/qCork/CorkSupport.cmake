@@ -40,16 +40,21 @@ function( target_link_cork ) # 1 argument: ARGV0 = project name
 			target_link_libraries( ${ARGV0} debug ${CORK_DEBUG_LIBRARY_FILE} ${MPIR_DEBUG_LIBRARY_FILE} )
 		endif()
 		
-		if ( CMAKE_CONFIGURATION_TYPES )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_CORK_SUPPORT )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO CC_CORK_SUPPORT )
-			
-			if ( CORK_DEBUG_LIBRARY_FILE )
-				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_CORK_SUPPORT )
-			endif()
-		else()
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_CORK_SUPPORT )
-		endif()
+		# DGM: CC_CORK_SUPPORT preproc is not used
+		#if ( CMAKE_CONFIGURATION_TYPES )
+		#	#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
+		#	#(and setting it outside of the function/file doesn't seem to work...)
+		#	cmake_policy(SET CMP0043 OLD)
+		#
+		#	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_CORK_SUPPORT )
+		#	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO CC_CORK_SUPPORT )
+		#	
+		#	if ( CORK_DEBUG_LIBRARY_FILE )
+		#		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_CORK_SUPPORT )
+		#	endif()
+		#else()
+		#	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_CORK_SUPPORT )
+		#endif()
 	
 	else() #if ( NOT CORK_RELEASE_LIBRARY_FILE )
 	

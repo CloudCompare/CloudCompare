@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                             COPYRIGHT: XXX                             #
+//#                     COPYRIGHT: CloudCompare project                    #
 //#                                                                        #
 //##########################################################################
 
@@ -59,4 +59,4 @@ public:
 									QWidget* parentWidget = 0);
 };
 
-#endif
+#endif //CC_GMMREG_WRAPPER_HEADER

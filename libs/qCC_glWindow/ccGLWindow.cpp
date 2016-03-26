@@ -1661,7 +1661,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (!skipRendering)
 		{
 			GLuint screenTex = 0;
-			if (m_activeGLFilter && !m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS) //not supported with Oculus right now!
+			if (m_activeGLFilter && (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS)) //not supported with Oculus right now!
 			{
 				//we apply the GL filter
 				GLuint depthTex = currentFBO->getDepthTexture();

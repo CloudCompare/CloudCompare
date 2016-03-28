@@ -1,6 +1,3 @@
-# cmake should be smart enough to automatically append
-# the NDEBUG definition or _DEBUG in Release/Debug modes.
-# thus there should no need to force them somehow
 if( UNIX OR MINGW )
     # You need a c++11 Compiler to build CC
     # When we require cmake 3.1, we can use a cleaner method:

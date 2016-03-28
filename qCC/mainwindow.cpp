@@ -1192,7 +1192,7 @@ void MainWindow::doActionComputeKdTree()
 		kdtree->setDisplay(cloud->getDisplay());
 		kdtree->setVisible(true);
 		kdtree->prepareDisplayForRefresh();
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		kdtree->convertCellIndexToSF();
 #else
 		kdtree->convertCellIndexToRandomColor();
@@ -4635,7 +4635,7 @@ void MainWindow::doConvertPolylinesToMesh()
 
 #endif
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	//Test delaunay output
 	{
 		unsigned vertCount = vertices->size();
@@ -9114,7 +9114,7 @@ void MainWindow::doActionLoadFile()
 																currentPath,
 																fileFilters.join(s_fileFilterSeparator),
 																&currentOpenDlgFilter
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 																,QFileDialog::DontUseNativeDialog
 #endif
 															);

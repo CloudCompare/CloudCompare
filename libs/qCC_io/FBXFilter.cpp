@@ -1301,7 +1301,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					nodes.pop_back();
 
 					const char* nodeName = lNode->GetName();
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 					ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(lNode->GetNodeAttributeCount()));
 #endif
 					// scan the node's attributes.
@@ -1309,7 +1309,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					{
 						FbxNodeAttribute* pAttribute = lNode->GetNodeAttributeByIndex(i);
 						FbxNodeAttribute::EType type = pAttribute->GetAttributeType();
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 						ccLog::Print(QString("\tProp. #%1").arg(GetAttributeTypeName(type)));
 #endif
 

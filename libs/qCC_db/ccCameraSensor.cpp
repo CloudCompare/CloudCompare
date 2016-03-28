@@ -1682,7 +1682,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xTopLeft,P3D,Z0))
 			return 0;
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//internal check
 		CCVector2 check(0,0);
 		fromGlobalCoordToImageCoord(P3D,check,false);
@@ -1698,7 +1698,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xTopRight,P3D,Z0))
 			return 0;
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//internal check
 		CCVector2 check(0,0);
 		fromGlobalCoordToImageCoord(P3D,check,false);
@@ -1714,7 +1714,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xBottomRight,P3D,Z0))
 			return 0;
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//internal check
 		CCVector2 check(0,0);
 		fromGlobalCoordToImageCoord(P3D,check,false);
@@ -1730,7 +1730,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 		CCVector3 P3D;
 		if (!fromImageCoordToGlobalCoord(xBottomLeft,P3D,Z0))
 			return 0;
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//internal check
 		CCVector2 check(0,0);
 		fromGlobalCoordToImageCoord(P3D,check,false);

@@ -570,7 +570,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	//whether the current cell should be skipped or not
 	bool skipThisCell = false;
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	m_theAssociatedCloud->enableScalarField();
 #endif
 
@@ -638,7 +638,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 			currentBitDec = GET_BIT_SHIFT(level);
 		}
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		m_theAssociatedCloud->setPointScalarValue(it->theIndex, level);
 #endif
 

@@ -3823,7 +3823,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			return false;
 		}
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//test: look for NaN values
 		{
 			unsigned nanPointsCount = 0;

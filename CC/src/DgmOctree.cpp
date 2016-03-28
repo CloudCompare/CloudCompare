@@ -150,7 +150,7 @@ void getPointsInTreeCell(octreeTreeCell* cell, CCLib::DgmOctree::NeighboursSet& 
 #endif
 
 #ifdef USE_QT
-#ifndef _DEBUG
+#ifndef QT_DEBUG
 //enables multi-threading handling
 #define ENABLE_MT_OCTREE
 #endif
@@ -462,7 +462,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		//root = 0;
 
 		//check
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		for (it=m_thePointsAndTheirCellCodes.begin();it!=m_thePointsAndTheirCellCodes.end();++it)
 			assert(getCell(it->theCode,MAX_OCTREE_LEVEL));
 #endif
@@ -4638,7 +4638,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 	//smallest FOV (i.e. nearest point)
 	double smallestOrderDist = -1.0;
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	m_theAssociatedCloud->enableScalarField();
 #endif
 
@@ -4706,7 +4706,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 			currentBitDec = GET_BIT_SHIFT(level);
 		}
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		m_theAssociatedCloud->setPointScalarValue(it->theIndex, level);
 #endif
 
@@ -4725,7 +4725,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 				double fov_rad = atan2(sqrt(radialSqDist), sqrt(sqDist));
 				isElligible = (fov_rad <= maxRadiusOrFov);
 				orderDist = fov_rad;
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, fov_rad);
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(sqDist));
 #endif
@@ -4733,7 +4733,7 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 			else
 			{
 				isElligible = (radialSqDist <= maxSqRadius);
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 				//m_theAssociatedCloud->setPointScalarValue(it->theIndex, sqrt(radialSqDist));
 #endif
 			}

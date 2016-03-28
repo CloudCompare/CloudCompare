@@ -310,15 +310,15 @@ void ccGraphicalTransformationTool::apply()
 		finalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
 		finalTransCorrected.initFromParameters(phi_rad,theta_rad,psi_rad,t3D);
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		ccLog::Print("[GraphicalTransformationTool] Final transformation (before correction):");
 		ccLog::Print(finalTrans.toString(12,' ')); //full precision
 		ccLog::Print(QString("Angles(%1,%2,%3) T(%5,%6,%7)").arg(phi_rad).arg(theta_rad).arg(psi_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));
-#endif //_DEBUG
+#endif
 	}
 #endif //NORMALIZE_TRANSFORMATION_MATRIX_WITH_EULER
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	//test: compute rotation "norm" (as it may not be exactly 1 due to numerical (in)accuracy!)
 	{
 		ccGLMatrixd finalRotation = finalTransCorrected;
@@ -330,7 +330,7 @@ void ccGraphicalTransformationTool::apply()
 		ccLog::PrintDebug(idTrans.toString(12,' ')); //full precision
 		ccLog::PrintDebug(QString("Rotation norm = %1").arg(norm,0,'f',12));
 	}
-#endif //_DEBUG
+#endif
 
 	//update GL transformation for all entities
 	ccGLMatrix correctedFinalTrans(finalTransCorrected.data());
@@ -364,7 +364,7 @@ void ccGraphicalTransformationTool::apply()
 	//output resulting transformation matrix
 	ccLog::Print("[GraphicalTransformationTool] Applied transformation:");
 	ccLog::Print(correctedFinalTrans.toString(12,' ')); //full precision
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	{
 		float phi_rad,theta_rad,psi_rad;
 		Vector3Tpl<float> t3D;

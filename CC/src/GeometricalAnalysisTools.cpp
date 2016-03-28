@@ -838,7 +838,6 @@ bool GeometricalAnalysisTools::refineSphereLS(	GenericIndexedCloudPersist* cloud
 	}
 	
 	CCVector3d c = CCVector3d::fromArray(center.u);
-	double r = radius;
 
 	unsigned count = cloud->size();
 
@@ -880,7 +879,7 @@ bool GeometricalAnalysisTools::refineSphereLS(	GenericIndexedCloudPersist* cloud
 		CCVector3d c0 = c;
 		//deduce new center
 		c = G - derivatives * meanNorm;
-		r = meanNorm;
+		double r = meanNorm;
 
 		double shift = (c-c0).norm();
 		double relativeShift = shift/r;

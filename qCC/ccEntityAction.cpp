@@ -1460,7 +1460,7 @@ namespace ccEntityAction
 		}
 		
 		bool ok = false;
-		unsigned char s_defaultLevel = 6;
+		const int s_defaultLevel = 6;
 		int value = QInputDialog::getInt(parent,
 													"Orient normals (FM)", "Octree level",
 													s_defaultLevel,
@@ -1473,7 +1473,6 @@ namespace ccEntityAction
 		Q_ASSERT(value >= 0 && value <= 255);
 		
 		unsigned char level = static_cast<unsigned char>(value);
-		s_defaultLevel = level;
 		
 		ccProgressDialog pDlg(false,parent);
 		

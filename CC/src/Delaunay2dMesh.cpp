@@ -23,7 +23,7 @@
 #include "Polyline.h"
 #include "ChunkedPointCloud.h"
 
-#if USE_CGAL_LIB
+#if defined(USE_CGAL_LIB)
 //CGAL Lib
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>

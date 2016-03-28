@@ -25,7 +25,7 @@
 #include <assert.h>
 
 //Activate shared objects tracking (for debug purposes)
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 //#define CC_TRACK_ALIVE_SHARED_OBJECTS
 #endif
 

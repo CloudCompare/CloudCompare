@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 		format.setVersion( 2, 1 );
 		format.setProfile( QSurfaceFormat::CoreProfile );
 #endif
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		format.setOption(QSurfaceFormat::DebugContext);
 #endif
 		QSurfaceFormat::setDefaultFormat(format);

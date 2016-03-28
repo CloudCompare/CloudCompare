@@ -189,7 +189,7 @@ void ccFastMarchingForNormsDirection::resolveCellOrientation(unsigned index)
 	assert(theCell->signConfidence > 0);
 }
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 //for debug purposes only
 static unsigned s_cellIndex = 0;
 #endif
@@ -208,7 +208,7 @@ int ccFastMarchingForNormsDirection::step()
 
 	if (minTCell->T < Cell::T_INF())
 	{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		if (s_cellIndex == 0)
 		{
 			//process seed cells first!
@@ -314,7 +314,7 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 				theNorms->setValue(index,ccNormalVectors::GetNormIndex(-N));
 			}
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			cloud->setPointScalarValue(index,aCell->T);
 			//cloud->setPointScalarValue(index,aCell->signConfidence);
 			//cloud->setPointScalarValue(index,aCell->scalar);
@@ -512,7 +512,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 	resolved = 0;
 
 	cloud->showNormals(true);
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->getCurrentDisplayedScalarField()->computeMinAndMax();
 	cloud->showSF(true);

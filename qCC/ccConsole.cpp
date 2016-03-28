@@ -88,7 +88,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 		return;
 	}
 
-#ifndef _DEBUG
+#ifndef QT_DEBUG
 	if (type == QtDebugMsg)
 	{
 		return;
@@ -186,7 +186,7 @@ void ccConsole::refresh()
 		{
 			 //it->second = message severity
 			bool debugMessage = (it->second & LOG_DEBUG);
-#ifndef _DEBUG
+#ifndef QT_DEBUG
 			//skip debug message in release mode
 			if (debugMessage)
 				continue;
@@ -221,7 +221,7 @@ void ccConsole::refresh()
 				//Standard
 				else
 				{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 					if (debugMessage)
 						item->setForeground(Qt::blue);
 					else
@@ -247,7 +247,7 @@ void ccConsole::refresh()
 
 void ccConsole::displayMessage(const QString& message, int level)
 {
-#ifndef _DEBUG
+#ifndef QT_DEBUG
 	//skip debug messages in release mode
 	if (level & LOG_DEBUG)
 		return;
@@ -261,7 +261,7 @@ void ccConsole::displayMessage(const QString& message, int level)
 		m_queue.push_back(ConsoleItemType(formatedMessage,level));
 		m_mutex.unlock();
 	}
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	else
 	{
 		//Error

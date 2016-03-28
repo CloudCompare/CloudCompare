@@ -323,7 +323,7 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 	setMetaData(cloud->metaData());
 }
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 //for tests
 #include "ccPointCloud.h"
 #include <ScalarField.h>
@@ -350,7 +350,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		if (octree)
 		{
 			//we can now use the octree to do faster point picking
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			CCLib::ScalarField* sf = 0;
 			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
@@ -372,7 +372,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			ccOctree::PointDescriptor point;
 			if (octree->pointPicking(clickPos, camera, point, pickWidth))
 			{
-	#ifdef _DEBUG
+	#ifdef QT_DEBUG
 				if (sf)
 				{
 					sf->computeMinAndMax();

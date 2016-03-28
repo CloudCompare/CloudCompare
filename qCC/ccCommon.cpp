@@ -57,7 +57,7 @@ QString ccCommon::GetCCVersion(bool full/*=true*/)
 		verStr += QString(" [%1]").arg(arch);
 	}
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	verStr += QString(" [DEBUG]");
 #endif
 

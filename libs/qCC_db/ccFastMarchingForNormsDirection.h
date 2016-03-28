@@ -83,7 +83,7 @@ protected:
 			, C(0,0,0)
 			, cellCode(0)
 			, signConfidence(1)
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			, scalar(0)
 #endif
 		{}
@@ -99,7 +99,7 @@ protected:
 		CCLib::DgmOctree::OctreeCellCodeType cellCode;
 		//! Confidence value
 		float signConfidence;
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//! Undefined scalar for debug purposes
 		float scalar;
 #endif

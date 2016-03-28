@@ -1305,7 +1305,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 		std::vector<ccPolyline*> parts;
 		if (splitContour)
 		{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			//compute some stats on the contour
 			{
 				double minLength = 0;

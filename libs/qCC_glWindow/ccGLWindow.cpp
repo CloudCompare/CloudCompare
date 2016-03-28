@@ -644,7 +644,7 @@ void ccGLWindow::initializeGL()
 		}
 
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 		//KHR extension (debug)
 		if (context()->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
 		{
@@ -1867,13 +1867,13 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 			{
 				s_oculus.layer.RenderPose[renderingParams.passIndex].Position;
 				OVR::Quatf q(s_oculus.layer.RenderPose[renderingParams.passIndex].Orientation);
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 				float hmdYaw, hmdPitch, hmdRoll;
 				q.GetEulerAngles<OVR::Axis::Axis_Y, OVR::Axis::Axis_X, OVR::Axis::Axis_Z>(&hmdYaw, &hmdPitch, &hmdRoll);
 				hmdYaw = OVR::RadToDegree(hmdYaw);
 				hmdPitch = OVR::RadToDegree(hmdPitch);
 				hmdRoll = OVR::RadToDegree(hmdRoll);
-#endif //_DEBUG
+#endif
 				OVR::Matrix4f sensorRot(q);
 
 				ccGLMatrixd sensorMat = FromOVRMat(sensorRot);
@@ -2241,7 +2241,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 			fileNames[i].remove("file://");
 #endif
 			//fileNames[i] = QUrl(fileNames[i].trimmed()).toLocalFile(); //toLocalFile removes the end of filenames sometimes!
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			ccLog::Print(QString("File dropped: %1").arg(fileNames[i]));
 #endif
 		}

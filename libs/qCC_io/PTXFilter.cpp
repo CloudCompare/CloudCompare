@@ -52,7 +52,7 @@ void CleanMatrix(ccGLMatrixd& mat)
 {
 	//make the transform a little bit cleaner (necessary as it's read from ASCII!)
 	{
-//#ifdef _DEBUG
+//#ifdef QT_DEBUG
 //		//test the matrix quality
 //		ccGLMatrixd before = mat;
 //		CCVector3d X0(before.getColumn(0));
@@ -72,7 +72,7 @@ void CleanMatrix(ccGLMatrixd& mat)
 		Y.normalize();
 		Z.normalize();
 		mat = ccGLMatrixd(X,Y,Z,T);
-//#ifdef _DEBUG
+//#ifdef QT_DEBUG
 //		double dot = CCVector3d(X).dot(X0);
 //		dot /= (normX0 * CCVector3d(X).norm());
 //		double alpha = acos(dot);
@@ -481,7 +481,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 			container.addChild(cloud);
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			//break;
 #endif
 		}

@@ -1958,7 +1958,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 			assert(cameraRepresentationNode.isDefined("jpegImage"));
 			e57::BlobNode jpegImage(cameraRepresentationNode.get("jpegImage"));
 			jpegImage.read(imageBits, 0, (size_t)visualRefRepresentation->imageSize);
-//#ifdef _DEBUG
+//#ifdef QT_DEBUG
 //			FILE* fp = fopen("test_e57.jpg","wb");
 //			fwrite(imageBits,visualRefRepresentation->imageSize,1,fp);
 //			fclose(fp);

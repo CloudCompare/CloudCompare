@@ -12,6 +12,10 @@ v2.7.0 - 04/XX/2016
 	* The 'Global Shift & Scale' mechanism now allows for shifting values above 1.0e9
 		(for georeferenced clouds expressed in millimeters!)
 
+	* New 'Distance Map' tool (in 'Tools > Sand-box')
+		* allows to compute distance maps for clouds (= distances from regularly sampled positions around the points)
+		* the output points can be filtered inside a specified distance range
+
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:

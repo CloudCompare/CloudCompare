@@ -4912,24 +4912,43 @@ void MainWindow::doActionFitQuadric()
 	refreshAll();
 }
 
+#include <ui_distanceMapDlg.h>
+
 void MainWindow::doActionComputeDistanceMap()
 {
-	ccHObject::Container selectedEntities = m_selectedEntities;
+	static unsigned steps = 128;
+	static double margin = 0.0;
+	static bool filterRange = false;
+	static double range[2] = { 0.0, 1.0 };
 
-	bool ok = true;
-	unsigned steps = static_cast<unsigned>(QInputDialog::getInt(this, "Distance map", "Distance map resolution", 128, 16, 1024, 16, &ok));
-	if (!ok)
-		return;
+	//show dialog
+	{
+		QDialog dialog(this);
+		Ui_DistanceMapDialog ui;
+		ui.setupUi(&dialog);
 
-	ok = true;
-	double margin = QInputDialog::getDouble(this, "Distance map", "Margin", 0.0, 0.0, 1000000.0, 3, &ok);
-	if (!ok)
-		return;
+		ui.stepsSpinBox->setValue(static_cast<int>(steps));
+		ui.marginDoubleSpinBox->setValue(margin);
+		ui.rangeCheckBox->setChecked(filterRange);
+		ui.minDistDoubleSpinBox->setValue(range[0]);
+		ui.maxDistDoubleSpinBox->setValue(range[1]);
 
-	size_t selNum = selectedEntities.size();
+		if (!dialog.exec())
+		{
+			return;
+		}
+
+		steps = static_cast<unsigned>(ui.stepsSpinBox->value());
+		margin = ui.marginDoubleSpinBox->value();
+		filterRange = ui.rangeCheckBox->isChecked();
+		range[0] = ui.minDistDoubleSpinBox->value();
+		range[1] = ui.maxDistDoubleSpinBox->value();
+	}
+
+	size_t selNum = m_selectedEntities.size();
 	for (size_t i = 0; i < selNum; ++i)
 	{
-		ccHObject* ent = selectedEntities[i];
+		ccHObject* ent = m_selectedEntities[i];
 		if (!ent->isKindOf(CC_TYPES::MESH) && !ent->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
 			//non handled entity type
@@ -4999,21 +5018,35 @@ void MainWindow::doActionComputeDistanceMap()
 				{
 					for (unsigned k = 0; k < steps; ++k)
 					{
-						gridCloud->addPoint(minCorner + CCVector3(i + 0.5, j + 0.5, k + 0.5) * cellDim);
-						ScalarType s = static_cast<ScalarType>(cdt.getValue(i, j, k) * cellDim);
-						//sf->addElement(s < maxDist ? s : NAN_VALUE);
-						sf->addElement(sqrt(s));
+						ScalarType d = sqrt(static_cast<ScalarType>(cdt.getValue(i, j, k))) * cellDim;
+
+						if (!filterRange || (d >= range[0] && d <= range[1]))
+						{
+							gridCloud->addPoint(minCorner + CCVector3(i + 0.5, j + 0.5, k + 0.5) * cellDim);
+							sf->addElement(d);
+						}
 					}
 				}
 			}
 
 			sf->computeMinAndMax();
 			int sfIdx = gridCloud->addScalarField(sf);
-			gridCloud->setCurrentDisplayedScalarField(sfIdx);
-			gridCloud->showSF(true);
-			gridCloud->setDisplay(ent->getDisplay());
-			ent->prepareDisplayForRefresh();
-			addToDB(gridCloud);
+
+			if (gridCloud->size() == 0)
+			{
+				ccLog::Warning(QString("[DistanceMap] Cloud '%1': no point falls inside the specified range").arg(ent->getName()));
+				delete gridCloud;
+				gridCloud = 0;
+			}
+			else
+			{
+				gridCloud->setCurrentDisplayedScalarField(sfIdx);
+				gridCloud->showSF(true);
+				gridCloud->setDisplay(ent->getDisplay());
+				gridCloud->shrinkToFit();
+				ent->prepareDisplayForRefresh();
+				addToDB(gridCloud);
+			}
 		}
 	}
 

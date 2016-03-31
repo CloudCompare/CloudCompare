@@ -3144,7 +3144,7 @@ void MainWindow::doActionFilterByValue()
 		}
 	}
 
-	ccAskTwoDoubleValuesDlg dlg("Min","Max",-1.0e9,1.0e9,minVald,maxVald,8,"Filter by scalar value",this);
+	ccAskTwoDoubleValuesDlg dlg("Min", "Max", -1.0e9, 1.0e9, minVald, maxVald, 8, "Filter by scalar value", this);
 	if (!dlg.exec())
 		return;
 
@@ -4759,7 +4759,7 @@ static double s_meshMaxEdgeLength = 0;
 void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 {
 	bool ok = true;
-	double maxEdgeLength = QInputDialog::getDouble(this,"Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
+	double maxEdgeLength = QInputDialog::getDouble(this, "Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
 	if (!ok)
 		return;
 	s_meshMaxEdgeLength = maxEdgeLength;
@@ -7698,7 +7698,7 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	}
 
-	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this,"Add constant value", "value", s_constantSFValue, -1.0e9, 1.0e9, 8, &ok));
+	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this, "Add constant value", "value", s_constantSFValue, -1.0e9, 1.0e9, 8, &ok));
 	if (!ok)
 		return;
 
@@ -7818,7 +7818,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	if (fitFacet)
 	{
 		bool ok = true;
-		maxEdgeLength = QInputDialog::getDouble(this,"Fit facet", "Max edge length (0 = no limit)", s_polygonMaxEdgeLength, 0, 1.0e9, 8, &ok);
+		maxEdgeLength = QInputDialog::getDouble(this, "Fit facet", "Max edge length (0 = no limit)", s_polygonMaxEdgeLength, 0, 1.0e9, 8, &ok);
 		if (!ok)
 			return;
 		s_polygonMaxEdgeLength = maxEdgeLength;

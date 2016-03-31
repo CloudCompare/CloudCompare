@@ -123,9 +123,10 @@ void ccShiftAndScaleCloudDlg::init()
 	m_ui = new Ui_GlobalShiftAndScaleDlg;
 	m_ui->setupUi(this);
 
-	m_ui->shiftX->setRange(-1.0e9,1.0e9);
-	m_ui->shiftY->setRange(-1.0e9,1.0e9);
-	m_ui->shiftZ->setRange(-1.0e9,1.0e9);
+	//DGM: we sometimes need to input values > 1.0e9 (for georeferenced clouds expressed in mm!)
+	m_ui->shiftX->setRange(-1.0e12, 1.0e12);
+	m_ui->shiftY->setRange(-1.0e12, 1.0e12);
+	m_ui->shiftZ->setRange(-1.0e12, 1.0e12);
 
 	updateGlobalAndLocalSystems();
 

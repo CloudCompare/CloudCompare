@@ -337,7 +337,7 @@ static double  s_last_az = 0;
 static bool    s_last_a_isGlobal = true;
 void ccPointPairRegistrationDlg::addManualAlignedPoint()
 {
-	ccAskThreeDoubleValuesDlg ptsDlg("x","y","z",-1.0e9,1.0e9,s_last_ax,s_last_ay,s_last_az,8,"Add aligned point",this);
+	ccAskThreeDoubleValuesDlg ptsDlg("x", "y", "z", -1.0e12, 1.0e12, s_last_ax, s_last_ay, s_last_az, 8, "Add aligned point", this);
 
 	//if the aligned entity is shifted, the user has the choice to input virtual point either
 	//in the original coordinate system or the shifted one
@@ -370,7 +370,7 @@ static double s_last_rz = 0;
 static bool s_last_r_isGlobal = true;
 void ccPointPairRegistrationDlg::addManualRefPoint()
 {
-	ccAskThreeDoubleValuesDlg ptsDlg("x","y","z",-1.0e9,1.0e9,s_last_rx,s_last_ry,s_last_rz,8,"Add reference point",this);
+	ccAskThreeDoubleValuesDlg ptsDlg("x", "y", "z", -1.0e12, 1.0e12, s_last_rx, s_last_ry, s_last_rz, 8, "Add reference point", this);
 
 	//if the reference entity is shifted, the user has the choice to input virtual
 	//points either in the original coordinate system or the shifted one

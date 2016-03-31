@@ -9,6 +9,9 @@ v2.7.0 - 04/XX/2016
 		- Raster export dialog updated
 		- The 'Cancel' button of the grid update progress bar is now handled properly
 
+	* The 'Global Shift & Scale' mechanism now allows for shifting values above 1.0e9
+		(for georeferenced clouds expressed in millimeters!)
+
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:

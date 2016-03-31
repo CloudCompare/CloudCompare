@@ -318,9 +318,9 @@ void ccColorScaleEditorDialog::setScaleModeToRelative(bool isRelative)
 	valueDoubleSpinBox->setSuffix(isRelative ? QString(" %") : QString());
 	valueDoubleSpinBox->blockSignals(true);
 	if (isRelative)
-		valueDoubleSpinBox->setRange(0.0,100.0); //between 0 and 100%
+		valueDoubleSpinBox->setRange(0.0, 100.0); //between 0 and 100%
 	else
-		valueDoubleSpinBox->setRange(-1.0e9,1.0e9);
+		valueDoubleSpinBox->setRange(-1.0e9, 1.0e9);
 	valueDoubleSpinBox->blockSignals(false);
 
 	//update selected slider frame

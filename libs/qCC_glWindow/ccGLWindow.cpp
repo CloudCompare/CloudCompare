@@ -4140,7 +4140,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 			bool ignoreSubmeshes = false;
 
 			//we look for point cloud displayed in this window
-			if (ent->isVisible() && ent->getDisplay() == this)
+			if (ent->isVisible() && ent->isEnabled() && ent->getDisplay() == this)
 			{
 				if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
@@ -4196,7 +4196,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 								autoComputeOctree = (clickedButton == always);
 								//update the global application parameters
 								ccGui::ParamStruct params = ccGui::Parameters();
-								params.autoComputeOctree = ccGui::ParamStruct::ALWAYS;
+								params.autoComputeOctree = autoComputeOctree ? ccGui::ParamStruct::ALWAYS : ccGui::ParamStruct::NEVER;
 								ccGui::Set(params);
 								params.toPersistentSettings();
 							}

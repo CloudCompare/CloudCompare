@@ -23,6 +23,8 @@
 //Local
 #include "ccCameraSensor.h"
 #include "ccNormalVectors.h"
+#include "ccPointCloud.h"
+#include "ccScalarField.h"
 #include "ccBox.h"
 
 //CCLib
@@ -503,7 +505,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		return false;
 	}
 	
-	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
+	CCVector3d clickPosd(clickPos.x, clickPos.y, 0.0);
 	CCVector3d X(0,0,0);
 	if (!camera.unproject(clickPosd, X))
 	{
@@ -516,7 +518,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	//compute 3D picking 'ray'
 	CCVector3 rayAxis, rayOrigin;
 	{
-		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1);
+		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1.0);
 		CCVector3d Y(0,0,0);
 		if (!camera.unproject(clickPosd2, Y))
 		{
@@ -576,6 +578,22 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 
 	//ray with origin expressed in the local coordinate system!
 	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
+
+	//visibility table (if any)
+	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->getTheVisibilityArray();
+
+	//scalar field with hidden values (if any)
+	ccScalarField* activeSF = 0;
+	if (m_theAssociatedCloudAsGPC->sfShown() && m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccPointCloud* pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
+		ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+		if (sf && !sf->areNaNValuesShownInGrey() && sf->getColorScale())
+		{
+			//we must take this SF display parameters into account some points may be hidden!
+			activeSF = sf;
+		}
+	}
 
 	//let's sweep through the octree
 	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
@@ -644,26 +662,32 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 
 		if (!skipThisCell)
 		{
-			//test the point
-			const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
-			CCVector3 Q = *P;
-			if (hasGLTrans)
+			//we shouldn't test points that are actually hidden!
+			if (	(!visTable || visTable->getValue(it->theIndex) == POINT_VISIBLE)
+				&&	(!activeSF || activeSF->getColor(activeSF->getValue(it->theIndex)))
+				)
 			{
-				trans.apply(Q);
-			}
-
-			CCVector3d Q2D;
-			camera.project(Q, Q2D);
-
-			if (	fabs(Q2D.x - clickPos.x) <= pickWidth_pix
-				&&	fabs(Q2D.y - clickPos.y) <= pickWidth_pix )
-			{
-				double squareDist = CCVector3d(X.x - Q.x, X.y - Q.y, X.z - Q.z).norm2d();
-				if (!output.point || squareDist < output.squareDistd)
+				//test the point
+				const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
+				CCVector3 Q = *P;
+				if (hasGLTrans)
 				{
-					output.point = P;
-					output.pointIndex = it->theIndex;
-					output.squareDistd = squareDist;
+					trans.apply(Q);
+				}
+
+				CCVector3d Q2D;
+				camera.project(Q, Q2D);
+
+				if (	fabs(Q2D.x - clickPos.x) <= pickWidth_pix
+					&&	fabs(Q2D.y - clickPos.y) <= pickWidth_pix )
+				{
+					double squareDist = CCVector3d(X.x - Q.x, X.y - Q.y, X.z - Q.z).norm2d();
+					if (!output.point || squareDist < output.squareDistd)
+					{
+						output.point = P;
+						output.pointIndex = it->theIndex;
+						output.squareDistd = squareDist;
+					}
 				}
 			}
 		}

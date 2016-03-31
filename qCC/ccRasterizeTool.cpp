@@ -105,19 +105,21 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 		interpolateSFFrame->setEnabled(cloud->hasScalarFields());
 
 		//populate layer box
-		activeLayerComboBox->addItem(GetDefaultFieldName(PER_CELL_HEIGHT));
+		activeLayerComboBox->addItem(GetDefaultFieldName(PER_CELL_HEIGHT), QVariant(LAYER_HEIGHT));
+		if (m_cloud->hasColors())
+		{
+			activeLayerComboBox->addItem("RGB", QVariant(LAYER_RGB));
+		}
 		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			for (unsigned i=0; i<pc->getNumberOfScalarFields(); ++i)
 			{
-				activeLayerComboBox->addItem(pc->getScalarField(i)->getName());
+				activeLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
 			}
 		}
-		else
-		{
-			activeLayerComboBox->setEnabled(false);
-		}
+
+		activeLayerComboBox->setEnabled(activeLayerComboBox->count() > 1);
 
 		//add window
 		create2DView(mapFrame);
@@ -250,29 +252,47 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 
 	if (m_rasterCloud)
 	{
-		//does the selected 'layer' exist?
-		int sfIndex = m_rasterCloud->getScalarFieldIndexByName(qPrintable(activeLayerComboBox->itemText(layerIndex)));
-		m_rasterCloud->setCurrentDisplayedScalarField(sfIndex);
-
-		if (sfIndex >= 0)
+		//active layer = RGB colors
+		if (activeLayerComboBox->currentData().toInt() == LAYER_RGB)
 		{
-			ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
-			if (activeLayer)
+			if (!m_rasterCloud->hasColors())
 			{
-				const ccScalarField::Range& layerValues = activeLayer->displayRange();
-				gridLayerRangeLabel->setText(QString("%1 [%2 ; %3]").arg(layerValues.range()).arg(layerValues.min()).arg(layerValues.max()));
-				contourStartDoubleSpinBox->setValue(layerValues.min());
-				contourStepDoubleSpinBox->setValue(layerValues.range() / 10.0);
+				gridIsUpToDate(false);
 			}
-			else
-			{
-				assert(false);
-				gridLayerRangeLabel->setText("no active layer?!");
-			}
+			gridLayerRangeLabel->setText("[0 ; 255]");
+
+			m_rasterCloud->showColors(true);
+			m_rasterCloud->showSF(false);
 		}
 		else
 		{
-			gridIsUpToDate(false);
+			//does the selected 'layer' exist?
+			int sfIndex = m_rasterCloud->getScalarFieldIndexByName(qPrintable(activeLayerComboBox->itemText(layerIndex)));
+			m_rasterCloud->setCurrentDisplayedScalarField(sfIndex);
+			m_rasterCloud->showSF(true);
+			m_rasterCloud->showColors(false);
+
+			if (sfIndex >= 0)
+			{
+				ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
+				if (activeLayer)
+				{
+					const ccScalarField::Range& layerValues = activeLayer->displayRange();
+					gridLayerRangeLabel->setText(QString("%1 [%2 ; %3]").arg(layerValues.range()).arg(layerValues.min()).arg(layerValues.max()));
+					contourStartDoubleSpinBox->setValue(layerValues.min());
+					contourStepDoubleSpinBox->setValue(layerValues.range() / 10.0);
+				}
+				else
+				{
+					assert(false);
+					gridLayerRangeLabel->setText("no active layer?!");
+				}
+			}
+			else
+			{
+				gridLayerRangeLabel->setText("invalid layer?!");
+				gridIsUpToDate(false);
+			}
 		}
 
 		if (m_window && autoRedraw)
@@ -454,6 +474,7 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 
 ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
 													bool interpolateSF,
+													bool interpolateColors,
 													bool copyHillshadeSF,
 													QString activeSFName) const
 {
@@ -472,10 +493,11 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 	//call parent method
 	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
 																		interpolateSF,
-																		resampleOriginalCloud(),
-																		getTypeOfProjection() != PROJ_AVERAGE_VALUE,
-																		m_cloud,
-																		fillEmptyCellsStrategy != LEAVE_EMPTY,
+																		interpolateColors,
+																		/*resampleInputCloudXY=*/resampleOriginalCloud(),
+																		/*resampleInputCloudZ=*/getTypeOfProjection() != PROJ_AVERAGE_VALUE,
+																		/*inputCloud=*/m_cloud,
+																		/*fillEmptyCells=*/fillEmptyCellsStrategy != LEAVE_EMPTY,
 																		emptyCellsHeight);
 
 	//success?
@@ -505,8 +527,15 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 
 		//currently displayed SF
 		int activeSFIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(activeSFName));
+		cloudGrid->showSF(activeSFIndex >= 0);
+		if (activeSFIndex < 0 && cloudGrid->getNumberOfScalarFields() != 0)
+		{
+			//if no SF is displayed, we should at least set a valid one (for later)
+			activeSFIndex = static_cast<int>(cloudGrid->getNumberOfScalarFields()) - 1;
+		}
 		cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
-		cloudGrid->showSF(true);
+
+		cloudGrid->showColors(interpolateColors);
 
 		//don't forget the original shift
 		cloudGrid->setGlobalShift(m_cloud->getGlobalShift());
@@ -528,20 +557,28 @@ void ccRasterizeTool::updateGridAndDisplay()
 		}
 		activeLayerComboBox->removeItem(hillshadeIndex);
 	}
-	bool activeLayerIsSF = activeLayerComboBox->currentIndex() != 0;
+
+	//remove the previous cloud
+	if (m_rasterCloud)
+	{
+		if (m_window)
+		{
+			m_window->removeFromOwnDB(m_rasterCloud);
+			m_window->redraw();
+		}
+		
+		delete m_rasterCloud;
+		m_rasterCloud = 0;
+	}
+
+	bool activeLayerIsSF = (activeLayerComboBox->currentData().toInt() == LAYER_SF);
+	bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
 	bool interpolateSF = activeLayerIsSF || (getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
 	bool success = updateGrid(interpolateSF);
 
 	if (success && m_window)
 	{
 		//convert grid to point cloud
-		if (m_rasterCloud)
-		{
-			m_window->removeFromOwnDB(m_rasterCloud);
-			delete m_rasterCloud;
-			m_rasterCloud = 0;
-		}
-
 		std::vector<ExportableFields> exportedFields;
 		try
 		{
@@ -549,7 +586,11 @@ void ccRasterizeTool::updateGridAndDisplay()
 			exportedFields.push_back(PER_CELL_HEIGHT);
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = activeLayerComboBox->currentText();
-			m_rasterCloud = convertGridToCloud(exportedFields, activeLayerIsSF, false, activeLayerName);
+			m_rasterCloud = convertGridToCloud(	exportedFields,
+												/*interpolateSF=*/activeLayerIsSF,
+												/*interpolateColors=*/activeLayerIsRGB,
+												/*copyHillshadeSF=*/false,
+												activeLayerName);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -585,7 +626,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 
 	//main parameters
 	ProjectionType projectionType = getTypeOfProjection();
-	ProjectionType sfInterpolation = interpolateSF ? getTypeOfSFInterpolation() : INVALID_PROJECTION_TYPE;
+	ProjectionType interpolateSFs = interpolateSF ? getTypeOfSFInterpolation() : INVALID_PROJECTION_TYPE;
+	bool fillEmptyCells = (getFillEmptyCellsStrategy(fillEmptyCellsComboBox) == INTERPOLATE);
 
 	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
@@ -618,46 +660,47 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	unsigned gridTotalSize = gridWidth * gridHeight;
 	if (gridTotalSize == 1)
 	{
-		if (QMessageBox::question(0,"Unexpected grid size","The generated grid will only have 1 cell! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(0, "Unexpected grid size", "The generated grid will only have 1 cell! Do you want to proceed anyway?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 	else if (gridTotalSize > 10000000)
 	{
-		if (QMessageBox::question(0,"Big grid size","The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(0, "Big grid size", "The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 
 	removeContourLines();
 
 	//memory allocation
-	if (!m_grid.init(gridWidth,gridHeight))
+	CCVector3d minCorner = CCVector3d::fromArray(box.minCorner().u);
+	if (!m_grid.init(gridWidth, gridHeight, gridStep, minCorner))
 	{
 		//not enough memory
 		ccLog::Error("Not enough memory");
 		return false;
 	}
 	
-	m_grid.gridStep = gridStep;
-	m_grid.minCorner = CCVector3d::fromArray(box.minCorner().u);
-
-	ccProgressDialog pDlg(true,this);
-	if (m_grid.fillWith(m_cloud,
-						Z,
-						projectionType,
-						getFillEmptyCellsStrategy(fillEmptyCellsComboBox) == INTERPOLATE,
-						sfInterpolation,
-						&pDlg))
+	ccProgressDialog pDlg(true, this);
+	if (!m_grid.fillWith(	m_cloud,
+							Z,
+							projectionType,
+							fillEmptyCells,
+							interpolateSFs,
+							&pDlg))
 	{
-		ccLog::Print(QString("[Rasterize] Current raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(m_grid.width).arg(m_grid.height).arg(m_grid.minHeight).arg(m_grid.maxHeight));
+		return false;
 	}
 
+	ccLog::Print(QString("[Rasterize] Current raster grid:\n\tSize: %1 x %2\n\tHeight values: [%3 ; %4]").arg(m_grid.width).arg(m_grid.height).arg(m_grid.minHeight).arg(m_grid.maxHeight));
 	return true;
 }
 
 ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 {
 	if (!m_cloud || !m_grid.isValid())
+	{
 		return 0;
+	}
 
 	//look for fields to be exported
 	std::vector<ExportableFields> exportedFields;
@@ -683,10 +726,12 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 		return 0;
 	}
 	QString activeLayerName = activeLayerComboBox->currentText();
-	bool activeLayerIsSF = activeLayerComboBox->currentIndex() != 0;
-	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
-													getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE || activeLayerIsSF,
-													true,
+	bool activeLayerIsSF = (activeLayerComboBox->currentData().toInt() == LAYER_SF);
+	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
+	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,
+													/*interpolateSF=*/(getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE) || activeLayerIsSF,
+													/*interpolateColors=*/true,
+													/*copyHillshadeSF=*/true,
 													activeLayerName);
 
 	if (rasterCloud && autoExport)
@@ -738,6 +783,8 @@ void ccRasterizeTool::generateMesh() const
 			rasterMesh->addChild(rasterCloud);
 			rasterMesh->setDisplay_recursive(m_cloud->getDisplay());
 			rasterMesh->setName(m_cloud->getName() + ".mesh");
+			rasterMesh->showSF(rasterCloud->sfShown());
+			rasterMesh->showColors(rasterCloud->colorsShown());
 
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -784,7 +831,9 @@ void ccRasterizeTool::generateRaster() const
 #ifdef CC_GDAL_SUPPORT
 
 	if (!m_cloud || !m_grid.isValid())
+	{
 		return;
+	}
 
 	GDALAllRegister();
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
@@ -804,24 +853,30 @@ void ccRasterizeTool::generateRaster() const
 		return;
 	}
 
+	bool hasScalarFields = !m_grid.scalarFields.empty();
+	int visibleSfIndex = -1;
+	if (activeLayerComboBox->currentData().toInt() == LAYER_SF && m_cloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		//the indexes in the 'm_grid.scalarFields' are the same as in the cloud
+		visibleSfIndex = static_cast<ccPointCloud*>(m_cloud)->getScalarFieldIndexByName(qPrintable(activeLayerComboBox->currentText()));
+	}
+
 	//which (and how many) bands shall we create?
-	bool heightBand = true; //height by default
-	bool densityBand = false;
-	bool allSFBands = false;
-	int sfBandIndex = -1; //scalar field index
-	int totalBands = 0;
+	static bool heightBand = true; //height by default
+	static bool rgbBand = true;
+	static bool densityBand = false;
+	static bool visibleSFBand = false;
+	static bool allSFBands = false;
 
-	bool interpolateSF = (getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
-	ccPointCloud* pc = m_cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(m_cloud) : 0;
-
-	bool hasSF =  interpolateSF && pc && !m_grid.scalarFields.empty();
-	
 	RasterExportOptionsDlg reoDlg;
 	reoDlg.dimensionsLabel->setText(QString("%1 x %2").arg(m_grid.width).arg(m_grid.height));
+	reoDlg.exportRGBCheckBox->setEnabled(m_grid.hasColors);
+	reoDlg.exportRGBCheckBox->setChecked(rgbBand);
 	reoDlg.exportHeightsCheckBox->setChecked(heightBand);
 	reoDlg.exportDensityCheckBox->setChecked(densityBand);
-	reoDlg.exportDisplayedSFCheckBox->setEnabled(hasSF);
-	reoDlg.exportAllSFCheckBox->setEnabled(hasSF);
+	reoDlg.exportActiveLayerCheckBox->setChecked(visibleSFBand);
+	reoDlg.exportActiveLayerCheckBox->setEnabled(visibleSfIndex >= 0);
+	reoDlg.exportAllSFCheckBox->setEnabled(hasScalarFields);
 	reoDlg.exportAllSFCheckBox->setChecked(allSFBands);
 
 	if (!reoDlg.exec())
@@ -832,62 +887,70 @@ void ccRasterizeTool::generateRaster() const
 	{
 		QSettings settings;
 		settings.beginGroup(ccPS::HeightGridGeneration());
-		QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
-		outputFilename = QFileDialog::getSaveFileName(0,"Save height grid raster",imageSavePath+QString("/raster.tif"),"geotiff (*.tif)");
+		QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
+		outputFilename = QFileDialog::getSaveFileName(0, "Save height grid raster", imageSavePath + QString("/raster.tif"), "geotiff (*.tif)");
 
 		if (outputFilename.isNull())
 			return;
 
 		//save current export path to persistent settings
-		settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
+		settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
 	}
 
-	heightBand = reoDlg.exportHeightsCheckBox->isChecked();
-	densityBand = reoDlg.exportDensityCheckBox->isChecked();
-	if (hasSF)
+	heightBand    = reoDlg.exportHeightsCheckBox->isChecked();
+	rgbBand       = reoDlg.exportRGBCheckBox->isChecked();
+	densityBand   = reoDlg.exportDensityCheckBox->isChecked();
+	allSFBands    = reoDlg.exportAllSFCheckBox->isChecked();
+	visibleSFBand = reoDlg.exportActiveLayerCheckBox->isChecked();
+
+	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillEmptyCellsComboBox);
+
+	int totalBands = 0;
+	
+	if (heightBand)
 	{
-		assert(pc);
-		allSFBands = reoDlg.exportAllSFCheckBox->isChecked() && hasSF;
-		if (!allSFBands && reoDlg.exportDisplayedSFCheckBox->isChecked())
+		++totalBands;
+	}
+	
+	bool rgbaMode = false;
+	if (rgbBand)
+	{
+		totalBands += 3; //one per component
+		if (fillEmptyCellsStrategy == LEAVE_EMPTY && m_grid.validCellCount < m_grid.height * m_grid.width)
 		{
-			sfBandIndex = pc->getCurrentDisplayedScalarFieldIndex();
-			if (sfBandIndex < 0)
-				ccLog::Warning("[Rasterize] Cloud has no active (displayed) SF!");
+			rgbaMode = true;
+			++totalBands; //alpha
 		}
 	}
-
-	totalBands = heightBand ? 1 : 0;
+	
 	if (densityBand)
 	{
 		++totalBands;
 	}
+	
 	if (allSFBands)
 	{
-		assert(hasSF);
-		for (size_t i=0; i<m_grid.scalarFields.size(); ++i)
-			if (m_grid.scalarFields[i])
+		for (size_t i = 0; i < m_grid.scalarFields.size(); ++i)
+			if (!m_grid.scalarFields[i].empty())
 				++totalBands;
 	}
-	else if (sfBandIndex >= 0)
+	else if (visibleSFBand && visibleSfIndex >= 0)
 	{
 		++totalBands;
 	}
 	
 	if (totalBands == 0)
 	{
-		ccLog::Warning("[Rasterize] Warning, can't output a raster with no band! (check export parameters)");
+		ccLog::Error("Can't output a raster with no band! (check export parameters)");
 		return;
 	}
-
-	//data type
-	GDALDataType dataType = (std::max(sizeof(PointCoordinateType),sizeof(ScalarType)) > 4 ? GDT_Float64 : GDT_Float32);
 
 	char **papszOptions = NULL;
 	GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
 											static_cast<int>(m_grid.width),
 											static_cast<int>(m_grid.height),
 											totalBands,
-											dataType, 
+											GDT_Float64, 
 											papszOptions);
 
 	if (!poDstDS)
@@ -910,13 +973,13 @@ void ccRasterizeTool::generateRaster() const
 
 	double stepX = m_grid.gridStep;
 	double stepY = m_grid.gridStep;
-	if (pc)
+	if (m_cloud)
 	{
-		const CCVector3d& shift = pc->getGlobalShift();
+		const CCVector3d& shift = m_cloud->getGlobalShift();
 		shiftX -= shift.u[X];
 		shiftY -= shift.u[Y];
 
-		double scale = pc->getGlobalScale();
+		double scale = m_cloud->getGlobalScale();
 		assert(scale != 0);
 		stepX /= scale;
 		stepY /= scale;
@@ -940,8 +1003,87 @@ void ccRasterizeTool::generateRaster() const
 	//poDstDS->SetProjection( pszSRS_WKT );
 	//CPLFree( pszSRS_WKT );
 
-	double* scanline = (double*) CPLMalloc(sizeof(double)*m_grid.width);
 	int currentBand = 0;
+
+	//exort RGB band?
+	if (rgbBand)
+	{
+		GDALRasterBand* rgbBands[3] = { poDstDS->GetRasterBand(++currentBand),
+										poDstDS->GetRasterBand(++currentBand),
+										poDstDS->GetRasterBand(++currentBand) };
+		rgbBands[0]->SetColorInterpretation(GCI_RedBand);
+		rgbBands[1]->SetColorInterpretation(GCI_GreenBand);
+		rgbBands[2]->SetColorInterpretation(GCI_BlueBand);
+
+		unsigned char* cLine = (unsigned char*)CPLMalloc(sizeof(unsigned char)*m_grid.width);
+		if (!cLine)
+		{
+			ccLog::Error("[GDAL] Not enough memory");
+			GDALClose((GDALDatasetH)poDstDS);
+			return;
+		}
+
+		bool error = false;
+		
+		//export the R, G and B components
+		for (unsigned k = 0; k < 3; ++k)
+		{
+			for (unsigned j = 0; j<m_grid.height; ++j)
+			{
+				const RasterGrid::Row& row = m_grid.rows[j];
+				for (unsigned i = 0; i<m_grid.width; ++i)
+				{
+					cLine[i] = (std::isfinite(row[i].h) ? static_cast<unsigned char>(std::max(0.0, std::min(255.0, row[i].color.u[k]))) : 0);
+				}
+
+				if (rgbBands[k]->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, cLine, static_cast<int>(m_grid.width), 1, GDT_Byte, 0, 0) != CE_None)
+				{
+					error = true;
+					k = 3; //early stop
+					break;
+				}
+			}
+		}
+
+		//export the alpha band (if necessary)
+		if (!error && rgbaMode)
+		{
+			GDALRasterBand* aBand = poDstDS->GetRasterBand(++currentBand);
+			aBand->SetColorInterpretation(GCI_AlphaBand);
+
+			for (unsigned j = 0; j<m_grid.height; ++j)
+			{
+				const RasterGrid::Row& row = m_grid.rows[j];
+				for (unsigned i = 0; i<m_grid.width; ++i)
+				{
+					cLine[i] = (std::isfinite(row[i].h) ? 255 : 0);
+				}
+
+				if (aBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, cLine, static_cast<int>(m_grid.width), 1, GDT_Byte, 0, 0) != CE_None)
+				{
+					error = true;
+					break;
+				}
+			}
+		}
+
+		CPLFree(cLine);
+
+		if (error)
+		{
+			ccLog::Error("[GDAL] An error occurred while writing the color bands!");
+			GDALClose((GDALDatasetH)poDstDS);
+			return;
+		}
+	}
+
+	double* scanline = (double*)CPLMalloc(sizeof(double)*m_grid.width);
+	if (!scanline)
+	{
+		ccLog::Error("[GDAL] Not enough memory");
+		GDALClose((GDALDatasetH)poDstDS);
+		return;
+	}
 
 	//exort height band?
 	if (heightBand)
@@ -950,13 +1092,11 @@ void ccRasterizeTool::generateRaster() const
 		assert(poBand);
 		poBand->SetColorInterpretation(GCI_Undefined);
 
-		EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillEmptyCellsComboBox);
-
 		double emptyCellHeight = 0;
 		switch (fillEmptyCellsStrategy)
 		{
 		case LEAVE_EMPTY:
-			emptyCellHeight = m_grid.minHeight-1.0;
+			emptyCellHeight = m_grid.minHeight - 1.0;
 			poBand->SetNoDataValue(emptyCellHeight); //should be transparent!
 			break;
 		case FILL_MINIMUM_HEIGHT:
@@ -975,20 +1115,20 @@ void ccRasterizeTool::generateRaster() const
 			assert(false);
 		}
 
-		for (unsigned j=0; j<m_grid.height; ++j)
+		for (unsigned j = 0; j<m_grid.height; ++j)
 		{
-			const RasterCell* aCell = m_grid.data[j];
-			for (unsigned i=0; i<m_grid.width; ++i,++aCell)
+			const RasterGrid::Row& row = m_grid.rows[j];
+			for (unsigned i = 0; i<m_grid.width; ++i)
 			{
-				scanline[i] = aCell->h == aCell->h ? aCell->h : emptyCellHeight;
+				scanline[i] = std::isfinite(row[i].h) ? row[i].h : emptyCellHeight;
 			}
 
-			if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0 ) != CE_None)
+			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0) != CE_None)
 			{
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
 					CPLFree(scanline);
-				GDALClose( (GDALDatasetH) poDstDS );
+				GDALClose((GDALDatasetH)poDstDS);
 				return;
 			}
 		}
@@ -1002,13 +1142,13 @@ void ccRasterizeTool::generateRaster() const
 		poBand->SetColorInterpretation(GCI_Undefined);
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
-			const RasterCell* aCell = m_grid.data[j];
-			for (unsigned i=0; i<m_grid.width; ++i,++aCell)
+			const RasterGrid::Row& row = m_grid.rows[j];
+			for (unsigned i = 0; i<m_grid.width; ++i)
 			{
-				scanline[i] = aCell->nbPoints;
+				scanline[i] = row[i].nbPoints;
 			}
 
-			if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0 ) != CE_None)
+			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0) != CE_None)
 			{
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
@@ -1020,34 +1160,41 @@ void ccRasterizeTool::generateRaster() const
 	}
 
 	//export SF bands
-	if (allSFBands || sfBandIndex >= 0)
+	if (allSFBands || (visibleSFBand && visibleSfIndex >= 0))
 	{
 		for (size_t k=0; k<m_grid.scalarFields.size(); ++k)
 		{
-			double* _sfGrid = m_grid.scalarFields[k];
-			if (_sfGrid && (allSFBands || sfBandIndex == static_cast<int>(k))) //valid SF grid
+			assert(!m_grid.scalarFields[k].empty());
+			if (allSFBands || (visibleSFBand && visibleSfIndex == static_cast<int>(k)))
 			{
+				const double* _sfGrid = &(m_grid.scalarFields[k].front());
 				GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
 
-				double sfNanValue = static_cast<double>(CCLib::ScalarField::NaN());
+				double sfNanValue = std::numeric_limits<RasterGrid::SF::value_type>::quiet_NaN();
 				poBand->SetNoDataValue(sfNanValue); //should be transparent!
 				assert(poBand);
 				poBand->SetColorInterpretation(GCI_Undefined);
 
 				for (unsigned j=0; j<m_grid.height; ++j)
 				{
-					const RasterCell* aCell = m_grid.data[j];
-					for (unsigned i=0; i<m_grid.width; ++i,++_sfGrid,++aCell)
+					const RasterGrid::Row& row = m_grid.rows[j];
+					for (unsigned i = 0; i < m_grid.width; ++i, ++_sfGrid)
 					{
-						scanline[i] = aCell->nbPoints ? *_sfGrid : sfNanValue;
+						scanline[i] = row[i].nbPoints ? *_sfGrid : sfNanValue;
 					}
 
-					if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0 ) != CE_None)
+					if (poBand->RasterIO(	GF_Write,
+											0,
+											static_cast<int>(j),
+											static_cast<int>(m_grid.width),
+											1,
+											scanline,
+											static_cast<int>(m_grid.width),
+											1,
+											GDT_Float64, 0, 0 ) != CE_None)
 					{
 						//the corresponding SF should exist on the input cloud
-						CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
-						assert(formerSf);
-						ccLog::Error(QString("[GDAL] An error occurred while writing the '%1' scalar field band!").arg(formerSf->getName()));
+						ccLog::Error(QString("[GDAL] An error occurred while writing a scalar field band!"));
 						k = m_grid.scalarFields.size(); //quick stop
 						break;
 					}
@@ -1103,7 +1250,7 @@ void ccRasterizeTool::generateHillshade()
 		}
 
 		sfIdx = m_rasterCloud->addScalarField(hillshadeLayer);
-		activeLayerComboBox->addItem(HILLSHADE_FIELD_NAME);
+		activeLayerComboBox->addItem(HILLSHADE_FIELD_NAME, QVariant(LAYER_SF));
 		activeLayerComboBox->setEnabled(true);
 	}
 	assert(hillshadeLayer && hillshadeLayer->currentSize() == m_rasterCloud->size());
@@ -1126,12 +1273,12 @@ void ccRasterizeTool::generateHillshade()
 	unsigned validCellIndex = 0;
 	for (unsigned j=sparseSF ? 0 : 1; j<m_grid.height-1; ++j)
 	{
-		RasterCell* cell = m_grid.data[j];
+		const RasterGrid::Row& row = m_grid.rows[j];
 		
 		for (unsigned i=sparseSF ? 0 : 1; i<m_grid.width; ++i)
 		{
 			//valid height value
-			if (cell[i].h == cell[i].h)
+			if (std::isfinite(row[i].h))
 			{
 				if (i != 0 && i+1 != m_grid.width && j != 0)
 				{
@@ -1144,7 +1291,7 @@ void ccRasterizeTool::generateHillshade()
 					{
 						for (int dj=-1; dj<=1; ++dj)
 						{
-							const RasterCell& n = m_grid.data[j+dj][i+di];
+							const RasterCell& n = m_grid.rows[j+dj][i+di];
 							if (n.h == n.h)
 							{
 								if (di != 0)
@@ -1224,6 +1371,12 @@ void ccRasterizeTool::generateContours()
 		return;
 	}
 
+	if (activeLayerComboBox->currentData().toInt() == LAYER_RGB)
+	{
+		ccLog::Error("Can't generate contours from RGB colors");
+		return;
+	}
+
 	ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
 	if (!activeLayer)
 	{
@@ -1274,11 +1427,11 @@ void ccRasterizeTool::generateContours()
 		unsigned layerIndex = 0;
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
-			RasterCell* cell = m_grid.data[j];
-			double* row = &(grid[(j+margin)*xDim + margin]);
-			for (unsigned i=0; i<m_grid.width; ++i)
+			RasterGrid::Row& cellRow = m_grid.rows[j];
+			double* row = &(grid[(j + margin)*xDim + margin]);
+			for (unsigned i = 0; i < m_grid.width; ++i)
 			{
-				if (cell[i].nbPoints || !sparseLayer)
+				if (cellRow[i].nbPoints || !sparseLayer)
 				{
 					ScalarType value = activeLayer->getValue(layerIndex++);
 					row[i] = ccScalarField::ValidValue(value) ? value : emptyCellsValue;
@@ -1579,19 +1732,19 @@ void ccRasterizeTool::generateImage() const
 		// Filling the image with grid values
 		for (unsigned j=0; j<m_grid.height; ++j)
 		{
-			const RasterCell* aCell = m_grid.data[j];
-			for (unsigned i=0; i<m_grid.width; ++i,++aCell)
+			const RasterGrid::Row& row = m_grid.rows[j];
+			for (unsigned i = 0; i < m_grid.width; ++i)
 			{
-				if (aCell->h == aCell->h)
+				if (std::isfinite(row[i].h))
 				{
-					double normalizedHeight = (aCell->h - minHeight)/range;
+					double normalizedHeight = (row[i].h - minHeight) / range;
 					assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
 					unsigned char val = static_cast<unsigned char>(floor(normalizedHeight*maxColorComp));
-					bitmap8.setPixel(i,m_grid.height-1-j,val);
+					bitmap8.setPixel(i, m_grid.height - 1 - j, val);
 				}
 				else //NaN
 				{
-					bitmap8.setPixel(i,m_grid.height-1-j,emptyCellColorIndex);
+					bitmap8.setPixel(i, m_grid.height - 1 - j, emptyCellColorIndex);
 				}
 			}
 		}
@@ -1669,9 +1822,9 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	getFillEmptyCellsStrategyExt(emptyCellsHeight, minHeight, maxHeight);
 	for (unsigned j=0; j<m_grid.height; ++j)
 	{
-		const RasterCell* aCell = m_grid.data[j];
-		for (unsigned i=0; i<m_grid.width; ++i,++aCell)
-			fprintf(pFile,"%.8f ", aCell->h == aCell->h ? aCell->h : emptyCellsHeight);
+		const RasterGrid::Row& row = m_grid.rows[j];
+		for (unsigned i = 0; i < m_grid.width; ++i)
+			fprintf(pFile, "%.8f ", std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight);
 
 		fprintf(pFile,"\n");
 	}

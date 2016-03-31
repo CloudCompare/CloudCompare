@@ -356,6 +356,7 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 																	false,
 																	false,
 																	false,
+																	false,
 																	0,
 																	false,
 																	std::numeric_limits<double>::quiet_NaN());
@@ -468,15 +469,15 @@ bool ccVolumeCalcTool::updateGrid()
 			return false;
 	}
 
+	CCVector3d minCorner = CCVector3d::fromArray(box.minCorner().u);
+
 	//memory allocation
-	if (!m_grid.init(gridWidth,gridHeight))
+	if (!m_grid.init(gridWidth, gridHeight, gridStep, minCorner))
 	{
 		//not enough memory
 		ccLog::Error("Not enough memory");
 		return false;
 	}
-	m_grid.gridStep = gridStep;
-	m_grid.minCorner = CCVector3d::fromArray(box.minCorner().u);
 
 	//ground
 	ccGenericPointCloud* groundCloud = 0;
@@ -497,19 +498,17 @@ bool ccVolumeCalcTool::updateGrid()
 		return false;
 	}
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
 
 	RasterGrid groundRaster;
 	if (groundCloud)
 	{
-		if (!groundRaster.init(gridWidth,gridHeight))
+		if (!groundRaster.init(gridWidth, gridHeight, gridStep, minCorner))
 		{
 			//not enough memory
 			ccLog::Error("Not enough memory");
 			return false;
 		}
-		groundRaster.gridStep = m_grid.gridStep;
-		groundRaster.minCorner = m_grid.minCorner;
 
 		if (groundRaster.fillWith(	groundCloud,
 									Z,
@@ -549,14 +548,12 @@ bool ccVolumeCalcTool::updateGrid()
 	RasterGrid ceilRaster;
 	if (ceilCloud)
 	{
-		if (!ceilRaster.init(gridWidth,gridHeight))
+		if (!ceilRaster.init(gridWidth, gridHeight, gridStep, minCorner))
 		{
 			//not enough memory
 			ccLog::Error("Not enough memory");
 			return false;
 		}
-		ceilRaster.gridStep = m_grid.gridStep;
-		ceilRaster.minCorner = m_grid.minCorner;
 
 		if (ceilRaster.fillWith(ceilCloud,
 								Z,
@@ -594,22 +591,22 @@ bool ccVolumeCalcTool::updateGrid()
 		{
 			for (unsigned j=0; j<m_grid.width; ++j)
 			{
-				RasterCell& cell = m_grid.data[i][j];
+				RasterCell& cell = m_grid.rows[i][j];
 
 				bool validGround = true;
 				cell.minHeight = groundHeight;
 				if (groundCloud)
 				{
-					cell.minHeight = groundRaster.data[i][j].h;
-					validGround = (cell.minHeight == cell.minHeight);
+					cell.minHeight = groundRaster.rows[i][j].h;
+					validGround = std::isfinite(cell.minHeight);
 				}
 
 				bool validCeil = true;
 				cell.maxHeight = ceilHeight;
 				if (ceilCloud)
 				{
-					cell.maxHeight = ceilRaster.data[i][j].h;
-					validCeil = (cell.maxHeight == cell.maxHeight);
+					cell.maxHeight = ceilRaster.rows[i][j].h;
+					validCeil = std::isfinite(cell.maxHeight);
 				}
 
 				if (validGround && validCeil)
@@ -666,7 +663,7 @@ bool ccVolumeCalcTool::updateGrid()
 			{
 				for (unsigned j=1; j<m_grid.width-1; ++j)
 				{
-					RasterCell& cell = m_grid.data[i][j];
+					RasterCell& cell = m_grid.rows[i][j];
 					if (cell.h == cell.h)
 					{
 						for (unsigned k=i-1; k<=i+1; ++k)
@@ -675,8 +672,8 @@ bool ccVolumeCalcTool::updateGrid()
 							{
 								if (k != i || l != j)
 								{
-									RasterCell& otherCell = m_grid.data[k][l];
-									if (otherCell.h == otherCell.h)
+									RasterCell& otherCell = m_grid.rows[k][l];
+									if (std::isfinite(otherCell.h))
 									{
 										++validNeighborsCount;
 									}

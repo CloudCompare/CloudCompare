@@ -54,7 +54,6 @@ public:
 							PER_CELL_HEIGHT_STD_DEV,
 							PER_CELL_HEIGHT_RANGE,
 							PER_CELL_INVALID,
-							EXISTING_SF
 	};
 
 	//! Returns the default name of a given field
@@ -120,6 +119,7 @@ protected: //raster grid related stuff
 	//! Converts the grid to a cloud with scalar field(s)
 	ccPointCloud* convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
 										bool interpolateSF,
+										bool interpolateColors,
 										bool resampleInputCloudXY,
 										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,
@@ -138,6 +138,7 @@ protected: //raster grid related stuff
 			, maxHeight(0)
 			, nbPoints(0)
 			, pointIndex(0)
+			, color(0, 0, 0)
 		{}
 
 		//! Height value
@@ -154,6 +155,8 @@ protected: //raster grid related stuff
 		unsigned nbPoints;
 		//! Nearest point index (if any)
 		unsigned pointIndex;
+		//! Color
+		CCVector3d color;
 	};
 
 	//! Raster grid type
@@ -170,17 +173,20 @@ protected: //raster grid related stuff
 			, meanHeight(0)
 			, nonEmptyCellCount(0)
 			, validCellCount(0)
+			, hasColors(false)
 			, valid(false)
 		{}
 		//! Destructor
 		virtual ~RasterGrid() { clear(); }
 
-		//! Initialiazes and reset the grid
-		bool init(unsigned w, unsigned h);
-		//! Release memory
+		//! Initializes / resets the grid
+		bool init(	unsigned w,
+					unsigned h,
+					double gridStep,
+					const CCVector3d& minCorner);
+
+		//! Clears the grid
 		void clear();
-		//! Reset all cells
-		void reset();
 
 		//! Fills the grid with a point cloud
 		bool fillWith(	ccGenericPointCloud* cloud,
@@ -199,11 +205,17 @@ protected: //raster grid related stuff
 		//! Returns whether the grid is 'valid' or not
 		inline bool isValid() const { return valid; }
 
-		//! Cells
-		std::vector<RasterCell*> data;
+		//! Row
+		typedef std::vector<RasterCell> Row;
+		
+		//! All cells
+		std::vector<Row> rows;
+
+		//! Scalar field
+		typedef std::vector<double> SF;
 
 		//! Associated scalar fields
-		std::vector<double*> scalarFields;
+		std::vector<SF> scalarFields;
 		
 		//! Number of columns
 		unsigned width;
@@ -224,6 +236,9 @@ protected: //raster grid related stuff
 		unsigned nonEmptyCellCount;
 		//! Number of VALID cells
 		unsigned validCellCount;
+
+		//! Whether the (average) colors are available or not
+		bool hasColors;
 		
 		//! Whether the grid is valid/up-to-date
 		bool valid;

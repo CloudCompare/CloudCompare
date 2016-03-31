@@ -151,10 +151,17 @@ protected: //raster grid related stuff
 	//! Converts the grid to a cloud with scalar field(s)
 	ccPointCloud* convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
 										bool interpolateSF,
+										bool interpolateColors,
 										bool copyHillshadeSF,
 										QString activeSFName) const;
 
 protected: //members
+
+	//! Layer types
+	enum LayerType {	LAYER_HEIGHT = 0,
+						LAYER_RGB = 1,
+						LAYER_SF = 2
+	};
 
 	//! Associated cloud
 	ccGenericPointCloud* m_cloud;

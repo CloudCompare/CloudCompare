@@ -1471,13 +1471,13 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	refreshAll();
 }
 
-static CCVector3d s_lastMultFactors(1.0,1.0,1.0);
+static CCVector3d s_lastMultFactors(1.0, 1.0, 1.0);
 static bool s_lastMultKeepInPlace = true;
-typedef std::pair<ccHObject*,ccGenericPointCloud*> EntityCloudAssociation;
+typedef std::pair<ccHObject*, ccGenericPointCloud*> EntityCloudAssociation;
 void MainWindow::doActionApplyScale()
 {
-	ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactors.x,s_lastMultFactors.y,s_lastMultFactors.z,8,"Scaling",this);
-	dlg.showCheckbox("Keep in place",s_lastMultKeepInPlace,"Whether the cloud (center) should stay at the same place or not (i.e. coordinates are multiplied directly)");
+	ccAskThreeDoubleValuesDlg dlg("fx", "fy", "fz", -1.0e6, 1.0e6, s_lastMultFactors.x, s_lastMultFactors.y, s_lastMultFactors.z, 8, "Scaling", this);
+	dlg.showCheckbox("Keep in place", s_lastMultKeepInPlace, "Whether the cloud (center) should stay at the same place or not (i.e. coordinates are multiplied directly)");
 	if (!dlg.exec())
 		return;
 
@@ -1548,12 +1548,13 @@ void MainWindow::doActionApplyScale()
 					maxz = std::max( fabs((bbMin.z - C.z) * sZ + C.z), fabs( (bbMax.z - C.z) * sZ + C.z) );
 
 					bool newCoordsAreTooBig = (	maxx > maxCoord
-						||	maxy > maxCoord
-						||	maxz > maxCoord );
+											||	maxy > maxCoord
+											||	maxz > maxCoord );
 
 					if (newCoordsAreTooBig)
 					{
-						if (QMessageBox::question(	this,
+						if (QMessageBox::question(
+							this,
 							"Big coordinates",
 							"Resutling coordinates will be too big (original precision may be lost!). Proceeed anyway?",
 							QMessageBox::Yes,
@@ -1572,7 +1573,7 @@ void MainWindow::doActionApplyScale()
 			}
 
 			assert(cloud);
-			candidates.push_back(EntityCloudAssociation(ent,cloud));
+			candidates.push_back(EntityCloudAssociation(ent, cloud));
 		}
 	}
 
@@ -1591,7 +1592,9 @@ void MainWindow::doActionApplyScale()
 
 			CCVector3 C(0,0,0);
 			if (keepInPlace)
+			{
 				C = cloud->getOwnBB().getCenter();
+			}
 
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
@@ -1602,7 +1605,7 @@ void MainWindow::doActionApplyScale()
 							static_cast<PointCoordinateType>(sZ),
 							C );
 
-			putObjectBackIntoDBTree(cloud,objContext);
+			putObjectBackIntoDBTree(cloud, objContext);
 			cloud->prepareDisplayForRefresh_recursive();
 
 			//don't forget the 'global shift'!

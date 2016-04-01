@@ -1880,8 +1880,9 @@ void ccPointCloud::translate(const CCVector3& T)
 
 void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center)
 {
-	unsigned count = size();
+	//transform the points
 	{
+		unsigned count = size();
 		for (unsigned i=0; i<count; i++)
 		{
 			CCVector3* P = point(i);
@@ -1891,18 +1892,20 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 		}
 	}
 
-	//refreshBB();
+	//update the bounding-box
 	{
-		//--> instead, we update the bounding box directly! (faster)
+		//refreshBB(); //--> it's faster to update the bounding box directly!
 		PointCoordinateType* bbMin = m_points->getMin();
 		PointCoordinateType* bbMax = m_points->getMax();
-		CCVector3 f(fx,fy,fz);
+		CCVector3 f(fx, fy, fz);
 		for (int d=0; d<3; ++d)
 		{
 			bbMin[d] = (bbMin[d] - center.u[d]) * f.u[d] + center.u[d];
 			bbMax[d] = (bbMax[d] - center.u[d]) * f.u[d] + center.u[d];
 			if (f.u[d] < 0)
-				std::swap(bbMin[d],bbMax[d]);
+			{
+				std::swap(bbMin[d], bbMax[d]);
+			}
 		}
 	}
 
@@ -1925,26 +1928,45 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 	}
 
 	//and same thing for the Kd-tree(s)!
-	ccHObject::Container kdtrees;
-	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
-	if (fx == fy && fx == fz && fx > 0)
 	{
-		for (size_t i=0; i<kdtrees.size(); ++i)
+		ccHObject::Container kdtrees;
+		filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
+		if (fx == fy && fx == fz && fx > 0)
 		{
-			ccKdTree* kdTree = static_cast<ccKdTree*>(kdtrees[i]);
-			CCVector3 centerInv = -center;
-			kdTree->translateBoundingBox(centerInv);
-			kdTree->multiplyBoundingBox(fx);
-			kdTree->translateBoundingBox(center);
+			for (size_t i = 0; i < kdtrees.size(); ++i)
+			{
+				ccKdTree* kdTree = static_cast<ccKdTree*>(kdtrees[i]);
+				CCVector3 centerInv = -center;
+				kdTree->translateBoundingBox(centerInv);
+				kdTree->multiplyBoundingBox(fx);
+				kdTree->translateBoundingBox(center);
+			}
 		}
+		else
+		{
+			//we can't keep the kd-trees
+			for (size_t i = 0; i < kdtrees.size(); ++i)
+			{
+				removeChild(kdtrees[kdtrees.size() - 1 - i]); //faster to remove the last objects
+			}
+		}
+		kdtrees.clear();
 	}
-	else
+
+	//new we have to compute a proper transformation matrix
+	ccGLMatrix scaleTrans;
 	{
-		//we can't keep the kd-trees
-		for (size_t i=0; i<kdtrees.size(); ++i)
-		{
-			removeChild(kdtrees[i]);
-		}
+		ccGLMatrix transToCenter;
+		transToCenter.setTranslation(-center);
+
+		ccGLMatrix scaleAndReposition;
+		scaleAndReposition.data()[0] = fx;
+		scaleAndReposition.data()[5] = fy;
+		scaleAndReposition.data()[10] = fz;
+		//go back to the original position
+		scaleAndReposition.setTranslation(center);
+
+		scaleTrans = scaleAndReposition * transToCenter;
 	}
 
 	//update the grids as well
@@ -1953,12 +1975,8 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 		{
 			if (m_grids[i])
 			{
-				//update scan translation
-				CCVector3d T = m_grids[i]->sensorPosition.getTranslationAsVec3D();
-				T.x *= fx;
-				T.y *= fy;
-				T.z *= fz;
-				m_grids[i]->sensorPosition.setTranslation(T);
+				//update the scan position
+				m_grids[i]->sensorPosition = ccGLMatrixd(scaleTrans.data()) * m_grids[i]->sensorPosition;
 			}
 		}
 	}
@@ -1972,15 +1990,10 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 			{
 				ccSensor* sensor = static_cast<ccSensor*>(child);
 
-				ccGLMatrix scaleTrans;
-				scaleTrans.toIdentity();
-				scaleTrans.data()[ 0] = fx;
-				scaleTrans.data()[ 5] = fy;
-				scaleTrans.data()[10] = fz;
 				sensor->applyGLTransformation(scaleTrans);
 
 				//update the graphic scale, etc.
-				PointCoordinateType meanScale = (fx + fy + fz)/3;
+				PointCoordinateType meanScale = (fx + fy + fz) / 3;
 				//sensor->setGraphicScale(sensor->getGraphicScale() * meanScale);
 				if (sensor->isA(CC_TYPES::GBL_SENSOR))
 				{
@@ -1989,6 +2002,11 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 				}
 			}
 		}
+	}
+
+	//update the transformation history
+	{
+		m_glTransHistory = scaleTrans * m_glTransHistory;
 	}
 
 	notifyGeometryUpdate(); //calls releaseVBOs()

@@ -16,6 +16,8 @@ v2.7.0 - 04/XX/2016
 		* allows to compute distance maps for clouds (= distances from regularly sampled positions around the points)
 		* the output points can be filtered inside a specified distance range
 
+	* The 'Edit > Multiply / scale' method now updates the entitie's 'transformation history matrix'
+
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:

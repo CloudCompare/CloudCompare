@@ -550,14 +550,14 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 					{
 						bool inbounds = false;
 						Tuple3i cellPos;
-						referenceOctree->getTheCellPosWhichIncludesThePoint(&nearestPoint,cellPos,cell.level,inbounds);
+						referenceOctree->getTheCellPosWhichIncludesThePoint(&nearestPoint, cellPos, cell.level, inbounds);
 						//if the cell is different or the structure has not yet been initialized, we reset it!
 						if (	cellPos.x != nNSS_Model.cellPos.x
 							||	cellPos.y != nNSS_Model.cellPos.y
 							||	cellPos.z != nNSS_Model.cellPos.z)
 						{
 							nNSS_Model.cellPos = cellPos;
-							referenceOctree->computeCellCenter(nNSS_Model.cellPos,nNSS_Model.level,nNSS_Model.cellCenter);
+							referenceOctree->computeCellCenter(nNSS_Model.cellPos, nNSS_Model.level, nNSS_Model.cellCenter);
 							assert(inbounds);
 							nNSS_Model.minimalCellsSetToVisit.clear();
 							nNSS_Model.pointsInNeighbourhood.clear();
@@ -805,7 +805,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 								if (!triList)
 								{
 									triList = new TriangleList();
-									//triList->cellCode = octree->generateTruncatedCellCode(currentCellPos,octreeLevel);
+									//triList->cellCode = DgmOctree::GenerateTruncatedCellCode(currentCellPos, octreeLevel);
 								}
 
 								//add the triangle to the current 'intersecting triangles' list
@@ -2273,7 +2273,7 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 
 	//on cherche la cellule de l'octree qui englobe le "seedPoint"
 	Tuple3i cellPos;
-	octree->getTheCellPosWhichIncludesThePoint(cloud->getPoint(seedPointIndex),cellPos,octreeLevel);
+	octree->getTheCellPosWhichIncludesThePoint(cloud->getPoint(seedPointIndex), cellPos, octreeLevel);
 	fm.setSeedCell(cellPos);
 
 	bool result = false;

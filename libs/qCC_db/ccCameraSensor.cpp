@@ -102,16 +102,16 @@ ccCameraSensor::FrustumInformation::FrustumInformation()
 	, drawFrustum(false) 
 	, drawSidePlanes(false)
 	, frustumCorners(0)
-	, frustrumHull(0)
+	, frustumHull(0)
 {}
 
 ccCameraSensor::FrustumInformation::~FrustumInformation()
 {
 	//always delete the hull before the corners, are it depends on them!
-	if (frustrumHull)
+	if (frustumHull)
 	{
-		delete frustrumHull;
-		frustrumHull = 0;
+		delete frustumHull;
+		frustumHull = 0;
 	}
 	if (frustumCorners)
 	{
@@ -120,11 +120,11 @@ ccCameraSensor::FrustumInformation::~FrustumInformation()
 	}
 }
 
-bool ccCameraSensor::FrustumInformation::initFrustrumCorners()
+bool ccCameraSensor::FrustumInformation::initFrustumCorners()
 {
 	if (!frustumCorners)
 	{
-		frustumCorners = new ccPointCloud("Frustrum corners");
+		frustumCorners = new ccPointCloud("Frustum corners");
 	}
 	else
 	{
@@ -141,46 +141,46 @@ bool ccCameraSensor::FrustumInformation::initFrustrumCorners()
 	return true;
 }
 
-bool ccCameraSensor::FrustumInformation::initFrustrumHull()
+bool ccCameraSensor::FrustumInformation::initFrustumHull()
 {
 	//we only need to do this once!
-	if (frustrumHull)
+	if (frustumHull)
 		return true;
 
 	if (!frustumCorners || frustumCorners->size() < 8)
 	{
-		ccLog::Warning("[ccCameraSensor::FrustumInformation::initFrustrumHull] Corners are not initialized!");
+		ccLog::Warning("[ccCameraSensor::FrustumInformation::initFrustumHull] Corners are not initialized!");
 		return false;
 	}
 
-	frustrumHull = new ccMesh(frustumCorners);
-	if (!frustrumHull->reserve(6*2))
+	frustumHull = new ccMesh(frustumCorners);
+	if (!frustumHull->reserve(6 * 2))
 	{
-		ccLog::Warning("[ccCameraSensor::FrustumInformation::initFrustrumHull] Not enough memory!");
-		delete frustrumHull;
-		frustrumHull = 0;
+		ccLog::Warning("[ccCameraSensor::FrustumInformation::initFrustumHull] Not enough memory!");
+		delete frustumHull;
+		frustumHull = 0;
 		return false;
 	}
 
-	frustrumHull->addTriangle(0,2,3);
-	frustrumHull->addTriangle(0,3,1);
+	frustumHull->addTriangle(0, 2, 3);
+	frustumHull->addTriangle(0, 3, 1);
 
-	frustrumHull->addTriangle(2,4,5);
-	frustrumHull->addTriangle(2,5,3);
+	frustumHull->addTriangle(2,4,5);
+	frustumHull->addTriangle(2,5,3);
 
-	frustrumHull->addTriangle(4,6,7);
-	frustrumHull->addTriangle(4,7,5);
+	frustumHull->addTriangle(4,6,7);
+	frustumHull->addTriangle(4,7,5);
 
-	frustrumHull->addTriangle(6,0,1);
-	frustrumHull->addTriangle(6,1,7);
+	frustumHull->addTriangle(6,0,1);
+	frustumHull->addTriangle(6,1,7);
 
-	frustrumHull->addTriangle(6,4,2);
-	frustrumHull->addTriangle(6,2,0);
+	frustumHull->addTriangle(6,4,2);
+	frustumHull->addTriangle(6,2,0);
 
-	frustrumHull->addTriangle(1,3,5);
-	frustrumHull->addTriangle(1,5,7);
+	frustumHull->addTriangle(1,3,5);
+	frustumHull->addTriangle(1,5,7);
 
-	frustrumHull->setVisible(true);
+	frustumHull->setVisible(true);
 
 	return true;
 }
@@ -280,15 +280,15 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 	cloud.addPoint(CCVector3( upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
 
 	//add frustum corners if necessary
-	if (	m_frustrumInfos.isComputed
-		&&	(m_frustrumInfos.drawFrustum || m_frustrumInfos.drawSidePlanes)
-		&&	m_frustrumInfos.frustumCorners )
+	if (m_frustumInfos.isComputed
+		&& (m_frustumInfos.drawFrustum || m_frustumInfos.drawSidePlanes)
+		&& m_frustumInfos.frustumCorners)
 	{
-		unsigned cornerCount = m_frustrumInfos.frustumCorners->size();
+		unsigned cornerCount = m_frustumInfos.frustumCorners->size();
 		if (cloud.reserve(cloud.size() + cornerCount))
 		{
 			for (unsigned i=0; i<cornerCount; ++i)
-				cloud.addPoint(*m_frustrumInfos.frustumCorners->getPoint(i));
+				cloud.addPoint(*m_frustumInfos.frustumCorners->getPoint(i));
 		}
 	}
 
@@ -316,8 +316,8 @@ void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)
 	assert(vertFocal_pix > 0);
 	m_intrinsicParams.vertFocal_pix = vertFocal_pix;
 
-	//old frustrum is not valid anymore!
-	m_frustrumInfos.isComputed = false;
+	//old frustum is not valid anymore!
+	m_frustumInfos.isComputed = false;
 	//same thing for the projection matrix
 	m_projectionMatrixIsValid = false;
 }
@@ -331,8 +331,8 @@ void ccCameraSensor::setVerticalFov_rad(float fov_rad)
 void ccCameraSensor::setIntrinsicParameters(const IntrinsicParameters& params)
 {
 	m_intrinsicParams = params;
-	//old frustrum is not valid anymore!
-	m_frustrumInfos.isComputed = false;
+	//old frustum is not valid anymore!
+	m_frustumInfos.isComputed = false;
 	//same thing for the projection matrix
 	m_projectionMatrixIsValid = false;
 }
@@ -465,11 +465,11 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 	}
 	
 	//FrustumInformation
-	outStream << m_frustrumInfos.drawFrustum;
-	outStream << m_frustrumInfos.drawSidePlanes;
-	outStream << m_frustrumInfos.center.x;
-	outStream << m_frustrumInfos.center.y;
-	outStream << m_frustrumInfos.center.z;
+	outStream << m_frustumInfos.drawFrustum;
+	outStream << m_frustumInfos.drawSidePlanes;
+	outStream << m_frustumInfos.center.x;
+	outStream << m_frustumInfos.center.y;
+	outStream << m_frustumInfos.center.z;
 
 	return true;
 }
@@ -571,17 +571,17 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//FrustumInformation
 	if (dataVersion < 38)
 	{
-		bool dummyBool; //formerly: m_frustrumInfos.isComputed (no need to save/load it!)
+		bool dummyBool; //formerly: m_frustumInfos.isComputed (no need to save/load it!)
 		inStream >> dummyBool;
 	}
-	m_frustrumInfos.isComputed = false;
-	inStream >> m_frustrumInfos.drawFrustum;
-	inStream >> m_frustrumInfos.drawSidePlanes;
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_frustrumInfos.center.u,3);
+	m_frustumInfos.isComputed = false;
+	inStream >> m_frustumInfos.drawFrustum;
+	inStream >> m_frustumInfos.drawSidePlanes;
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_frustumInfos.center.u, 3);
 
 	if (dataVersion < 38)
 	{
-		//frustrum corners: no need to save/load them!
+		//frustum corners: no need to save/load them!
 		for (unsigned i=0; i<8; ++i)
 		{
 			CCVector3 P;
@@ -1060,7 +1060,7 @@ ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace/*=true*/) const
 }
 
 
-bool ccCameraSensor::isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, bool withLensCorrection*/)
+bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/)
 {
 	CCVector3 localCoord;
 
@@ -1109,54 +1109,54 @@ bool ccCameraSensor::computeFrustumCorners()
 	const float& zFar  = m_intrinsicParams.zFar_mm;
 
 	// compute points of frustum in image coordinate system (warning: in the system, z=-z)
-	if (!m_frustrumInfos.initFrustrumCorners())
+	if (!m_frustumInfos.initFrustumCorners())
 	{
 		ccLog::Warning("[ccCameraSensor::computeFrustumCorners] Not enough memory!");
 		return false;
 	}
 
 	// DO NOT MODIFY THE ORDER OF THE CORNERS!! A LOT OF CODE DEPENDS OF THIS ORDER!! 
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn,-PC_ONE) * zNear);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn,-PC_ONE) * zFar);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn,-PC_ONE) * zNear);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn,-PC_ONE) * zFar);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn,-PC_ONE) * zNear);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn,-PC_ONE) * zFar);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn,-PC_ONE) * zNear);
-	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn,-PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(xIn, yIn, -PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(xIn, yIn, -PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn,-PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn,-PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn,-PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn,-PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn,-PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn,-PC_ONE) * zFar);
 
 	// compute center of the circumscribed sphere 
-	const CCVector3* P0 = m_frustrumInfos.frustumCorners->getPoint(0);
-	const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
+	const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);
+	const CCVector3* P5 = m_frustumInfos.frustumCorners->getPoint(5);
 
 	float dz = P0->z-P5->z;
 	float z = (std::abs(dz) < FLT_EPSILON ? P0->z : (P0->norm2() - P5->norm2()) / (2*dz));
 	
-	m_frustrumInfos.center = CCVector3(0, 0, z);
+	m_frustumInfos.center = CCVector3(0, 0, z);
 
-	// frustrum corners are now computed
-	m_frustrumInfos.isComputed = true;
+	// frustum corners are now computed
+	m_frustumInfos.isComputed = true;
 
 	return true;
 }
 
-bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 frustrumCorners[8], CCVector3 edges[6], CCVector3& center)
+bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 frustumCorners[8], CCVector3 edges[6], CCVector3& center)
 {
-	if (!m_frustrumInfos.isComputed)
+	if (!m_frustumInfos.isComputed)
 		if (!computeFrustumCorners())
 			return false;
 
-	assert(m_frustrumInfos.frustumCorners && m_frustrumInfos.frustumCorners->size() == 8);
+	assert(m_frustumInfos.frustumCorners && m_frustumInfos.frustumCorners->size() == 8);
 
-	// compute frustrum corners in the global coordinates system
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(0), frustrumCorners[0]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(1), frustrumCorners[1]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(2), frustrumCorners[2]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(3), frustrumCorners[3]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(4), frustrumCorners[4]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(5), frustrumCorners[5]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(6), frustrumCorners[6]);
-	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(7), frustrumCorners[7]);
+	// compute frustum corners in the global coordinates system
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(0), frustumCorners[0]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(1), frustumCorners[1]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(2), frustumCorners[2]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(3), frustumCorners[3]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(4), frustumCorners[4]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(5), frustumCorners[5]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(6), frustumCorners[6]);
+	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(7), frustumCorners[7]);
 
 	/*
 	//-- METHOD 1 --//
@@ -1220,43 +1220,43 @@ bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 	// compute equations for side planes
 	for (int i=0 ; i<4 ; i++)
 	{
-		CCVector3 v1 = frustrumCorners[i*2+1] - frustrumCorners[i*2];
-		CCVector3 v2 = frustrumCorners[((i+1)*2)%8] - frustrumCorners[i*2];
+		CCVector3 v1 = frustumCorners[i * 2 + 1] - frustumCorners[i * 2];
+		CCVector3 v2 = frustumCorners[((i + 1) * 2) % 8] - frustumCorners[i * 2];
 		CCVector3 n = v1.cross(v2); n.normalize();
 		planeCoefficients[i][0] = n.x;
 		planeCoefficients[i][1] = n.y;
 		planeCoefficients[i][2] = n.z;
-		planeCoefficients[i][3] = -frustrumCorners[i*2].dot(n);
+		planeCoefficients[i][3] = -frustumCorners[i * 2].dot(n);
 	}
 	// compute equations for near and far planes
 	{
-		CCVector3 v1 = frustrumCorners[0] - frustrumCorners[6];
-		CCVector3 v2 = frustrumCorners[4] - frustrumCorners[6];
+		CCVector3 v1 = frustumCorners[0] - frustumCorners[6];
+		CCVector3 v2 = frustumCorners[4] - frustumCorners[6];
 		CCVector3 n = v1.cross(v2); n.normalize();
 		planeCoefficients[4][0] = n.x;
 		planeCoefficients[4][1] = n.y;
 		planeCoefficients[4][2] = n.z;
-		planeCoefficients[4][3] = -frustrumCorners[6].dot(n);
+		planeCoefficients[4][3] = -frustumCorners[6].dot(n);
 		planeCoefficients[5][0] = -n.x;
 		planeCoefficients[5][1] = -n.y;
 		planeCoefficients[5][2] = -n.z;
-		planeCoefficients[5][3] = -frustrumCorners[7].dot(-n);
+		planeCoefficients[5][3] = -frustumCorners[7].dot(-n);
 	}	
 
-	// compute frustrum edges
+	// compute frustum edges
 	{
-		edges[0] = frustrumCorners[1] - frustrumCorners[0];
-		edges[1] = frustrumCorners[3] - frustrumCorners[2];
-		edges[2] = frustrumCorners[5] - frustrumCorners[4];
-		edges[3] = frustrumCorners[7] - frustrumCorners[6];
-		edges[4] = frustrumCorners[6] - frustrumCorners[0];
-		edges[5] = frustrumCorners[2] - frustrumCorners[0];
+		edges[0] = frustumCorners[1] - frustumCorners[0];
+		edges[1] = frustumCorners[3] - frustumCorners[2];
+		edges[2] = frustumCorners[5] - frustumCorners[4];
+		edges[3] = frustumCorners[7] - frustumCorners[6];
+		edges[4] = frustumCorners[6] - frustumCorners[0];
+		edges[5] = frustumCorners[2] - frustumCorners[0];
 		for (unsigned i=0 ; i<6 ; i++)
 			edges[i].normalize();
 	}
 
-	// compute frustrum center in the global coordinates system
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.center, center);
+	// compute frustum center in the global coordinates system
+	fromLocalCoordToGlobalCoord(m_frustumInfos.center, center);
 
 	return true;
 }
@@ -1347,25 +1347,25 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	ccGL::Vertex3(glFunc,  arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
 	glFunc->glEnd();
 
-	//frustrum
-	if (m_frustrumInfos.drawFrustum || m_frustrumInfos.drawSidePlanes)
+	//frustum
+	if (m_frustumInfos.drawFrustum || m_frustumInfos.drawSidePlanes)
 	{
-		if (!m_frustrumInfos.isComputed)
+		if (!m_frustumInfos.isComputed)
 			computeFrustumCorners();
 
-		if (m_frustrumInfos.frustumCorners && m_frustrumInfos.frustumCorners->size() >= 8)
+		if (m_frustumInfos.frustumCorners && m_frustumInfos.frustumCorners->size() >= 8)
 		{
 			//frustum area (lines)
-			if (m_frustrumInfos.drawFrustum)
+			if (m_frustumInfos.drawFrustum)
 			{
-				const CCVector3* P0 = m_frustrumInfos.frustumCorners->getPoint(0);
-				const CCVector3* P1 = m_frustrumInfos.frustumCorners->getPoint(1);
-				const CCVector3* P2 = m_frustrumInfos.frustumCorners->getPoint(2);
-				const CCVector3* P3 = m_frustrumInfos.frustumCorners->getPoint(3);
-				const CCVector3* P4 = m_frustrumInfos.frustumCorners->getPoint(4);
-				const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
-				const CCVector3* P6 = m_frustrumInfos.frustumCorners->getPoint(6);
-				const CCVector3* P7 = m_frustrumInfos.frustumCorners->getPoint(7);
+				const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);
+				const CCVector3* P1 = m_frustumInfos.frustumCorners->getPoint(1);
+				const CCVector3* P2 = m_frustumInfos.frustumCorners->getPoint(2);
+				const CCVector3* P3 = m_frustumInfos.frustumCorners->getPoint(3);
+				const CCVector3* P4 = m_frustumInfos.frustumCorners->getPoint(4);
+				const CCVector3* P5 = m_frustumInfos.frustumCorners->getPoint(5);
+				const CCVector3* P6 = m_frustumInfos.frustumCorners->getPoint(6);
+				const CCVector3* P7 = m_frustumInfos.frustumCorners->getPoint(7);
 			
 				glFunc->glPushAttrib(GL_LINE_BIT);
 				glFunc->glLineWidth(2.0);
@@ -1411,20 +1411,20 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			//frustum area (planes)
-			if (m_frustrumInfos.drawSidePlanes && m_frustrumInfos.initFrustrumHull())
+			if (m_frustumInfos.drawSidePlanes && m_frustumInfos.initFrustumHull())
 			{
 				//set the rigth display (just to be sure)
-				m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
-				m_frustrumInfos.frustrumHull->setTempColor(m_color);
+				m_frustumInfos.frustumHull->setDisplay(getDisplay());
+				m_frustumInfos.frustumHull->setTempColor(m_color);
 				
 				//glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
 				//glFunc->glEnable(GL_BLEND);
 				//glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 				//glFunc->glColor4ub(m_color.x, m_color.y, m_color.z, 76);
 
-				m_frustrumInfos.frustrumHull->showWired(false);
-				m_frustrumInfos.frustrumHull->enableStippling(true);
-				m_frustrumInfos.frustrumHull->draw(context);
+				m_frustumInfos.frustumHull->showWired(false);
+				m_frustumInfos.frustumHull->enableStippling(true);
+				m_frustumInfos.frustumHull->draw(context);
 
 				//glFunc->glPopAttrib();
 			}
@@ -2305,13 +2305,13 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 	return proj;
 }
 
-/*********************************************************************/
-/*******************                               *******************/
-/*******************  ccOctreeFrustrumIntersector  *******************/
-/*******************                               *******************/
-/*********************************************************************/
+/********************************************************************/
+/*******************                              *******************/
+/*******************  ccOctreeFrustumIntersector  *******************/
+/*******************                              *******************/
+/********************************************************************/
 
-bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
+bool ccOctreeFrustumIntersector::build(CCLib::DgmOctree* octree)
 {
 	if (!octree)
 		return false;
@@ -2329,7 +2329,7 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 			CCLib::DgmOctree::OctreeCellCodeType completeCode = it->theCode;
 			for (unsigned char level=1; level<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
 			{
-				unsigned char bitDec = GET_BIT_SHIFT(level);
+				unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 				m_cellsBuilt[level].insert(completeCode >> bitDec);
 			}
 		}
@@ -2337,8 +2337,10 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccCameraSensor::prepareOctree] Not enough memory!");
-		for (int i=0; i<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
+		for (int i = 0; i <= CCLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
+		{
 			m_cellsBuilt[i].clear();
+		}
 		return false;
 	}
 
@@ -2347,7 +2349,7 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 	return true;
 }
 
-//// an other method to compute frustrum cell intersection (not used)
+//// an other method to compute frustum cell intersection (not used)
 //
 //unsigned char boxIntersectPlane(const CCVector3& minCorner, const CCVector3& maxCorner, const float planeCoefficient[4])
 //{
@@ -2361,10 +2363,10 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 //	float s = c.dot(n) + d;
 //
 //	if ((s-e) > 0.0)
-//		return CELL_OUTSIDE_FRUSTRUM;
+//		return CELL_OUTSIDE_FRUSTUM;
 //	if ((s+e) < 0.0)
-//		return CELL_INSIDE_FRUSTRUM;
-//	return CELL_INTERSECT_FRUSTRUM;
+//		return CELL_INSIDE_FRUSTUM;
+//	return CELL_INTERSECT_FRUSTUM;
 //}
 //
 //unsigned char boxIntersectFrustum(const CCVector3& minCorner, const CCVector3& maxCorner, const float planesCoefficients[6][4])
@@ -2380,34 +2382,34 @@ bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 //		int result = boxIntersectPlane(minCorner, maxCorner, onePlaneCoefficients);
 //
 //		//pay attention to the signification of OUTSIDE and INSIDE there : INSIDE means that the box is in the positive half space delimited by the plane, OUTSIDE means that the box is in the negative half space !!
-//		if (result == CELL_OUTSIDE_FRUSTRUM)
-//			return CELL_OUTSIDE_FRUSTRUM;
-//		if (result == CELL_INTERSECT_FRUSTRUM)
+//		if (result == CELL_OUTSIDE_FRUSTUM)
+//			return CELL_OUTSIDE_FRUSTUM;
+//		if (result == CELL_INTERSECT_FRUSTUM)
 //			intersecting = true;
 //	}
 //
 //	if (intersecting == true)
-//		return CELL_INTERSECT_FRUSTRUM;
-//	return CELL_INSIDE_FRUSTRUM;
+//		return CELL_INTERSECT_FRUSTUM;
+//	return CELL_INSIDE_FRUSTUM;
 //}
 
-ccOctreeFrustrumIntersector::OctreeCellVisibility
-	ccOctreeFrustrumIntersector::separatingAxisTest(	const CCVector3& bbMin,
+ccOctreeFrustumIntersector::OctreeCellVisibility
+ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 														const CCVector3& bbMax,
 														const float planesCoefficients[6][4],
-														const CCVector3 frustrumCorners[8],
-														const CCVector3 frustrumEdges[6],
-														const CCVector3& frustrumCenter)
+														const CCVector3 frustumCorners[8],
+														const CCVector3 frustumEdges[6],
+														const CCVector3& frustumCenter)
 {
-	// first test : if the box is too far from the frustrum, there is no intersection
+	// first test : if the box is too far from the frustum, there is no intersection
 	CCVector3 boxCenter = (bbMax + bbMin) / 2;
-	PointCoordinateType dCenter = (boxCenter - frustrumCenter).norm();
+	PointCoordinateType dCenter = (boxCenter - frustumCenter).norm();
 	PointCoordinateType boxRadius = (bbMax - bbMin).norm();
-	PointCoordinateType frustrumRadius = (frustrumCorners[0] - frustrumCenter).norm();
-	if (dCenter > boxRadius + frustrumRadius)
-		return CELL_OUTSIDE_FRUSTRUM;
+	PointCoordinateType frustumRadius = (frustumCorners[0] - frustumCenter).norm();
+	if (dCenter > boxRadius + frustumRadius)
+		return CELL_OUTSIDE_FRUSTUM;
 
-	// We could add a test : is the cell circumscribed circle in the frustrum incircle frustrum ?
+	// We could add a test : is the cell circumscribed circle in the frustum incircle frustum ?
 	// --> if we are lucky, it could save a lot of time !...
 
 	//box corners
@@ -2421,10 +2423,10 @@ ccOctreeFrustrumIntersector::OctreeCellVisibility
 
 	//There are 28 tests to perform:
 	//	nbFacesCube = n1 = 3;
-	//	nbFacesFrustrum = n2 = 5;
+	//	nbFacesFrustum = n2 = 5;
 	//	nbEdgesCube = n3 = 3;
-	//	nbEdgesFrustrum = n4 = 6;
-	//	nbOtherFrustrumCombinations = n5 = 2
+	//	nbEdgesFrustum = n4 = 6;
+	//	nbOtherFrustumCombinations = n5 = 2
 	//	nbVecToTest = n1 + n2 + n3*n4 = 3 + 5 + 3*6 + n5 = 28;
 	static const unsigned nbVecToTest = 28;
 	CCVector3 VecToTest[nbVecToTest];
@@ -2432,34 +2434,34 @@ ccOctreeFrustrumIntersector::OctreeCellVisibility
 	VecToTest[0]  = CCVector3(1, 0, 0);
 	VecToTest[1]  = CCVector3(0, 1, 0);
 	VecToTest[2]  = CCVector3(0, 0, 1);
-	// vectors orthogonals to frustrum planes
+	// vectors orthogonals to frustum planes
 	VecToTest[3]  = CCVector3(planesCoefficients[0][0], planesCoefficients[0][1], planesCoefficients[0][2]);
 	VecToTest[4]  = CCVector3(planesCoefficients[1][0], planesCoefficients[1][1], planesCoefficients[1][2]);
 	VecToTest[5]  = CCVector3(planesCoefficients[2][0], planesCoefficients[2][1], planesCoefficients[2][2]);
 	VecToTest[6]  = CCVector3(planesCoefficients[3][0], planesCoefficients[3][1], planesCoefficients[3][2]);
 	VecToTest[7]  = CCVector3(planesCoefficients[4][0], planesCoefficients[4][1], planesCoefficients[4][2]);	
-	// combinations box and frustrum
-	VecToTest[8]  = VecToTest[0].cross(frustrumEdges[0]);
-	VecToTest[9]  = VecToTest[0].cross(frustrumEdges[1]);
-	VecToTest[10] = VecToTest[0].cross(frustrumEdges[2]);
-	VecToTest[11] = VecToTest[0].cross(frustrumEdges[3]);
-	VecToTest[12] = VecToTest[0].cross(frustrumEdges[4]);
-	VecToTest[13] = VecToTest[0].cross(frustrumEdges[5]);
-	VecToTest[14] = VecToTest[1].cross(frustrumEdges[0]);
-	VecToTest[15] = VecToTest[1].cross(frustrumEdges[1]);
-	VecToTest[16] = VecToTest[1].cross(frustrumEdges[2]);
-	VecToTest[17] = VecToTest[1].cross(frustrumEdges[3]);
-	VecToTest[18] = VecToTest[1].cross(frustrumEdges[4]);
-	VecToTest[19] = VecToTest[1].cross(frustrumEdges[5]);
-	VecToTest[20] = VecToTest[2].cross(frustrumEdges[0]);
-	VecToTest[21] = VecToTest[2].cross(frustrumEdges[1]);
-	VecToTest[22] = VecToTest[2].cross(frustrumEdges[2]);
-	VecToTest[23] = VecToTest[2].cross(frustrumEdges[3]);
-	VecToTest[24] = VecToTest[2].cross(frustrumEdges[4]);
-	VecToTest[25] = VecToTest[2].cross(frustrumEdges[5]);
-	// combinations frustrum
-	VecToTest[26] = frustrumEdges[0].cross(frustrumEdges[2]);
-	VecToTest[27] = frustrumEdges[1].cross(frustrumEdges[3]);
+	// combinations box and frustum
+	VecToTest[8]  = VecToTest[0].cross(frustumEdges[0]);
+	VecToTest[9]  = VecToTest[0].cross(frustumEdges[1]);
+	VecToTest[10] = VecToTest[0].cross(frustumEdges[2]);
+	VecToTest[11] = VecToTest[0].cross(frustumEdges[3]);
+	VecToTest[12] = VecToTest[0].cross(frustumEdges[4]);
+	VecToTest[13] = VecToTest[0].cross(frustumEdges[5]);
+	VecToTest[14] = VecToTest[1].cross(frustumEdges[0]);
+	VecToTest[15] = VecToTest[1].cross(frustumEdges[1]);
+	VecToTest[16] = VecToTest[1].cross(frustumEdges[2]);
+	VecToTest[17] = VecToTest[1].cross(frustumEdges[3]);
+	VecToTest[18] = VecToTest[1].cross(frustumEdges[4]);
+	VecToTest[19] = VecToTest[1].cross(frustumEdges[5]);
+	VecToTest[20] = VecToTest[2].cross(frustumEdges[0]);
+	VecToTest[21] = VecToTest[2].cross(frustumEdges[1]);
+	VecToTest[22] = VecToTest[2].cross(frustumEdges[2]);
+	VecToTest[23] = VecToTest[2].cross(frustumEdges[3]);
+	VecToTest[24] = VecToTest[2].cross(frustumEdges[4]);
+	VecToTest[25] = VecToTest[2].cross(frustumEdges[5]);
+	// combinations frustum
+	VecToTest[26] = frustumEdges[0].cross(frustumEdges[2]);
+	VecToTest[27] = frustumEdges[1].cross(frustumEdges[3]);
 
 	// normalization
 	{
@@ -2489,13 +2491,13 @@ ccOctreeFrustrumIntersector::OctreeCellVisibility
 				}
 			}
 		
-			//frustrum points
-			float dMinFru = testVec.dot(frustrumCorners[0]);
+			//frustum points
+			float dMinFru = testVec.dot(frustumCorners[0]);
 			float dMaxFru = dMinFru;
 			{
 				for (unsigned j=1; j<8; j++)
 				{
-					float d = testVec.dot(frustrumCorners[j]);
+					float d = testVec.dot(frustumCorners[j]);
 					if (d > dMaxFru)
 						dMaxFru = d;
 					if (d < dMinFru)
@@ -2503,32 +2505,32 @@ ccOctreeFrustrumIntersector::OctreeCellVisibility
 				}
 			}
 
-			//if this plane is a separating plane, the cell is outside the frustrum
+			//if this plane is a separating plane, the cell is outside the frustum
 			if (dMaxBox < dMinFru || dMaxFru < dMinBox)
-				return CELL_OUTSIDE_FRUSTRUM;
+				return CELL_OUTSIDE_FRUSTUM;
 
-			// if this plane is NOT a separating plane, the cell is at least intersecting the frustrum
+			// if this plane is NOT a separating plane, the cell is at least intersecting the frustum
 			else 
 			{
-				// moreover, the cell can be completely inside the frustrum...
+				// moreover, the cell can be completely inside the frustum...
 				if (dMaxBox>dMaxFru || dMinBox<dMinFru)
 					boxInside = false;
 			}
 		}
 	}
 
-	return boxInside ? CELL_INSIDE_FRUSTRUM : CELL_INTERSECT_FRUSTRUM;
+	return boxInside ? CELL_INSIDE_FRUSTUM : CELL_INTERSECT_FRUSTUM;
 }
 
-void ccOctreeFrustrumIntersector::computeFrustumIntersectionByLevel(unsigned char level,
+void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char level,
 																	CCLib::DgmOctree::OctreeCellCodeType parentTruncatedCode,
 																	OctreeCellVisibility parentResult,
 																	const float planesCoefficients[6][4],
-																	const CCVector3 ptsFrustrum[8],
+																	const CCVector3 ptsFrustum[8],
 																	const CCVector3 edges[6],
 																	const CCVector3& center)
 {
-	if (parentResult == CELL_OUTSIDE_FRUSTRUM)
+	if (parentResult == CELL_OUTSIDE_FRUSTUM)
 		return;
 
 	// move code to the left
@@ -2540,7 +2542,7 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionByLevel(unsigned cha
 		// set truncated code of the current cell
 		CCLib::DgmOctree::OctreeCellCodeType truncatedCode = baseTruncatedCode + i;
 
-		// if the cell current has not been built (contains no 3D points), we skip
+		// if the current cell has not been built (contains no 3D points), we skip it
 		std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
 		if (got != m_cellsBuilt[level].end())
 		{
@@ -2549,28 +2551,28 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionByLevel(unsigned cha
 			m_associatedOctree->computeCellLimits(truncatedCode, level, bbMin, bbMax, true);
 
 			// look if there is a separating plane
-			OctreeCellVisibility result = (parentResult == CELL_INSIDE_FRUSTRUM ? CELL_INSIDE_FRUSTRUM : separatingAxisTest(bbMin, bbMax, planesCoefficients, ptsFrustrum, edges, center));
+			OctreeCellVisibility result = (parentResult == CELL_INSIDE_FRUSTUM ? CELL_INSIDE_FRUSTUM : separatingAxisTest(bbMin, bbMax, planesCoefficients, ptsFrustum, edges, center));
 
-			// if the cell is not outside the frustrum, there is a kind of intersection (inside or intesecting)
-			if (result != CELL_OUTSIDE_FRUSTRUM)
+			// if the cell is not outside the frustum, there is a kind of intersection (inside or intesecting)
+			if (result != CELL_OUTSIDE_FRUSTUM)
 			{
-				if (result == CELL_INSIDE_FRUSTRUM)
+				if (result == CELL_INSIDE_FRUSTUM)
 					m_cellsInFrustum[level].insert(truncatedCode);
 				else
 					m_cellsIntersectFrustum[level].insert(truncatedCode);
 				
 				// we do the same for the children (if we have not already reached the end of the tree)
 				if (level < CCLib::DgmOctree::MAX_OCTREE_LEVEL)
-					computeFrustumIntersectionByLevel(level+1, truncatedCode, result, planesCoefficients, ptsFrustrum, edges, center);
+					computeFrustumIntersectionByLevel(level+1, truncatedCode, result, planesCoefficients, ptsFrustum, edges, center);
 			}
 		} 
 	}
 }
 
-void ccOctreeFrustrumIntersector::computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3> >& pointsToTest,
-																		std::vector<unsigned>& inCameraFrustrum,
+void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3> >& pointsToTest,
+																		std::vector<unsigned>& inCameraFrustum,
 																		const float planesCoefficients[6][4],
-																		const CCVector3 ptsFrustrum[8],
+																		const CCVector3 ptsFrustum[8],
 																		const CCVector3 edges[6],
 																		const CCVector3& center)
 {
@@ -2584,12 +2586,12 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionWithOctree(	std::vec
 	}
 
 	// find intersecting cells
-	computeFrustumIntersectionByLevel(1, 0, CELL_INTERSECT_FRUSTRUM, planesCoefficients, ptsFrustrum, edges, center);
+	computeFrustumIntersectionByLevel(1, 0, CELL_INTERSECT_FRUSTUM, planesCoefficients, ptsFrustum, edges, center);
 
 	// get points
 	unsigned char level = static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-	// dealing with cells completely inside the frustrum
+	// dealing with cells completely inside the frustum
 	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator it;
 	CCLib::ReferenceCloud pointsInCell(m_associatedOctree->associatedCloud());
 	for (it = m_cellsInFrustum[level].begin(); it != m_cellsInFrustum[level].end(); ++it)
@@ -2597,19 +2599,19 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionWithOctree(	std::vec
 		// get all points in cell
 		if (m_associatedOctree->getPointsInCell(*it, level, &pointsInCell, true))
 		{
-			// all points are inside the frustrum since the cell itself is completely inside
+			// all points are inside the frustum since the cell itself is completely inside
 			for (size_t i=0 ; i<pointsInCell.size() ; i++)
-				inCameraFrustrum.push_back(pointsInCell.getPointGlobalIndex(static_cast<unsigned>(i)));			
+				inCameraFrustum.push_back(pointsInCell.getPointGlobalIndex(static_cast<unsigned>(i)));
 		}
 	}
 
-	// dealing with cells intersecting the frustrum (not completely inside)
+	// dealing with cells intersecting the frustum (not completely inside)
 	for (it = m_cellsIntersectFrustum[level].begin(); it != m_cellsIntersectFrustum[level].end(); ++it)
 	{
 		// get all points in cell
 		if (m_associatedOctree->getPointsInCell(*it, level, &pointsInCell, true))
 		{		
-			// all points may not be inside the frustrum since the cell itself is not completely inside
+			// all points may not be inside the frustum since the cell itself is not completely inside
 			size_t pointCount = pointsInCell.size();
 			size_t sizeBefore = pointsToTest.size();
 			pointsToTest.resize(pointCount + sizeBefore);

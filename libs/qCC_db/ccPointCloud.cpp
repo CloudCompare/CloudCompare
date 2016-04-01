@@ -157,7 +157,7 @@ protected:
 		//and the next ones
 		for (unsigned char level=1; level<=static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL); ++level)
 		{
-			const int bitDec = GET_BIT_SHIFT(level);
+			const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 
 			//for each cell we'll look for the (not-yet-flagged) point which is closest to the cell center
 			static const unsigned INVALID_INDEX = 0xFFFFFFFF;
@@ -2416,6 +2416,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (MACRO_Draw3D(context))
 	{
+		//DGM TEST
+		//ccOctree::Shared octree = getOctree();
+		//if (octree)
+		//{
+		//	octree->drawLOD(context);
+		//	return;
+		//}
+
 		//we get display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
@@ -2449,7 +2457,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		// L.O.D. display
-		DisplayDesc toDisplay(0,size());
+		DisplayDesc toDisplay(0, size());
 		if (!pushName)
 		{
 			if (	context.decimateCloudOnMove
@@ -2572,7 +2580,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glFunc->glColor3ubv(context.pointsDefaultCol.rgb);
+			ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
 		}
 
 		//in the case we need normals (i.e. lighting)

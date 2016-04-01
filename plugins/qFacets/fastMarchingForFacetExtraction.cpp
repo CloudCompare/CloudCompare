@@ -578,12 +578,12 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 		//its corresponding cell in fact ;)
 		const CCVector3 *thePoint = theCloud->getPoint(lastProcessedPoint);
 		Tuple3i pos;
-		theOctree->getTheCellPosWhichIncludesThePoint(thePoint,pos,octreeLevel);
+		theOctree->getTheCellPosWhichIncludesThePoint(thePoint, pos, octreeLevel);
 
 		//clipping (in case the octree is not 'complete')
-		pos.x = std::min(octreeWidth,pos.x);
-		pos.y = std::min(octreeWidth,pos.y);
-		pos.z = std::min(octreeWidth,pos.z);
+		pos.x = std::min(octreeWidth, pos.x);
+		pos.y = std::min(octreeWidth, pos.y);
+		pos.z = std::min(octreeWidth, pos.z);
 
 		//set corresponding FM cell as 'seed'
 		if (!fm.setSeedCell(pos))

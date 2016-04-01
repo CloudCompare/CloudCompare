@@ -517,7 +517,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	//for each level
 	for (int level=2; level<MAX_OCTREE_LEVEL; ++level)
 	{
-		const int bitDec = GET_BIT_SHIFT(level);
+		const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 		unsigned numberOfPointsInCell = 0;
 		unsigned index = 0;
 		double cellDist = -1;

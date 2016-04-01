@@ -881,11 +881,11 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
 	//Skewness
 	appendRow( ITEM("Skew"), ITEM(QString::number(params.skew)) );
 
-	addSeparator("Frustrum display");
+	addSeparator("Frustum display");
 
-	//Draw frustrum
-	appendRow( ITEM("Show lines"), CHECKABLE_ITEM(_obj->frustrumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM) );
-	appendRow( ITEM("Show side planes"), CHECKABLE_ITEM(_obj->frustrumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES) );
+	//Draw frustum
+	appendRow( ITEM("Show lines"), CHECKABLE_ITEM(_obj->frustumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM) );
+	appendRow( ITEM("Show side planes"), CHECKABLE_ITEM(_obj->frustumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTUM_PLANES) );
 
 	//Positions
 	fillWithSensor(_obj);
@@ -1742,17 +1742,17 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		redraw = true;
 		break;
-	case OBJECT_SENSOR_DRAW_FRUSTRUM:
+	case OBJECT_SENSOR_DRAW_FRUSTUM:
 		{
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawFrustrum(item->checkState() == Qt::Checked);
+			sensor->drawFrustum(item->checkState() == Qt::Checked);
 		}
 		redraw = true;
 		break;
-	case OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES:
+	case OBJECT_SENSOR_DRAW_FRUSTUM_PLANES:
 		{
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			sensor->drawFrustrumPlanes(item->checkState() == Qt::Checked);
+			sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
 		}
 		redraw = true;
 		break;

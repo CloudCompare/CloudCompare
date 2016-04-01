@@ -43,22 +43,6 @@ class GenericIndexedCloudPersist;
 class GenericProgressCallback;
 class NormalizedProgress;
 
-/*** MACROS ***/
-
-//! Returns the binary shift for a given level of subdivision
-/** This binary shift is used to truncate a full cell code in order
-	to deduce the cell code for a given level of subdivision.
-	\param level the level of subdivision
-	\return the binary shift
-**/
-#define GET_BIT_SHIFT(level) (3*(CCLib::DgmOctree::MAX_OCTREE_LEVEL-level))
-
-//! Returns the octree length (in term of cells) for a given level of subdivision
-/** \param level the level of subdivision
-	\return 2^level
-**/
-#define OCTREE_LENGTH(level) (1<<level)
-
 //! The octree structure used throughout the library
 /** Implements the GenericOctree interface.
 	Corresponds to the octree structure developed during Daniel
@@ -67,6 +51,20 @@ class NormalizedProgress;
 class CC_CORE_LIB_API DgmOctree : public GenericOctree
 {
 public:
+
+	//! Returns the binary shift for a given level of subdivision
+	/** This binary shift is used to truncate a full cell code in order
+		to deduce the cell code for a given level of subdivision.
+		\param level the level of subdivision
+		\return the binary shift
+	**/
+	static unsigned char GET_BIT_SHIFT(unsigned char level);
+
+	//! Returns the octree length (in term of cells) for a given level of subdivision
+	/** \param level the level of subdivision
+		\return 2^level
+	**/
+	static int OCTREE_LENGTH(int level);
 
 	/*******************************/
 	/**         STRUCTURES        **/
@@ -95,7 +93,7 @@ public:
 	//! Max octree length at last level of subdivision (number of cells)
 	/** \warning Never pass a 'constant initializer' by reference
 	**/
-	static const int MAX_OCTREE_LENGTH = OCTREE_LENGTH(MAX_OCTREE_LEVEL) - 1;
+	static const int MAX_OCTREE_LENGTH = (1 << MAX_OCTREE_LEVEL);
 
 	//! Invalid cell code
 	/** \warning Never pass a 'constant initializer' by reference
@@ -757,11 +755,11 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param level the level of subdivision
 		\return the truncated cell code
 	**/
-	OctreeCellCodeType generateTruncatedCellCode(const Tuple3i& cellPos, unsigned char level) const;
+	static OctreeCellCodeType GenerateTruncatedCellCode(const Tuple3i& cellPos, unsigned char level);
 
 #ifndef OCTREE_CODES_64_BITS
-	//! Short version of generateTruncatedCellCode
-	OctreeCellCodeType generateTruncatedCellCode(const Tuple3s& pos, unsigned char level) const;
+	//! Short version of GenerateTruncatedCellCode
+	static OctreeCellCodeType GenerateTruncatedCellCode(const Tuple3s& pos, unsigned char level);
 #endif
 
 	//! Returns the position FOR THE DEEPEST LEVEL OF SUBDIVISION of the cell that includes a given point
@@ -791,9 +789,9 @@ public:	/***** CELLS POSITION HANDLING *****/
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 
-		getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
+		getTheCellPosWhichIncludesThePoint(thePoint, cellPos);
 
-		const unsigned char dec = MAX_OCTREE_LEVEL-level;
+		const unsigned char dec = MAX_OCTREE_LEVEL - level;
 		cellPos.x >>= dec;
 		cellPos.y >>= dec;
 		cellPos.z >>= dec;
@@ -813,13 +811,13 @@ public:	/***** CELLS POSITION HANDLING *****/
 	{
 		assert(level <= MAX_OCTREE_LEVEL);
 
-		getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
+		getTheCellPosWhichIncludesThePoint(thePoint, cellPos);
 
 		inBounds =	(	cellPos.x >= 0 && cellPos.x < MAX_OCTREE_LENGTH
 					 && cellPos.y >= 0 && cellPos.y < MAX_OCTREE_LENGTH
 					 && cellPos.z >= 0 && cellPos.z < MAX_OCTREE_LENGTH );
 
-		const unsigned char dec = MAX_OCTREE_LEVEL-level;
+		const unsigned char dec = MAX_OCTREE_LEVEL - level;
 		cellPos.x >>= dec;
 		cellPos.y >>= dec;
 		cellPos.z >>= dec;

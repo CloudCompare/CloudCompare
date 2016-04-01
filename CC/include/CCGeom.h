@@ -334,6 +334,8 @@ public:
 typedef Vector3Tpl<PointCoordinateType> CCVector3;
 
 //! Double 3D Vector
+typedef Vector3Tpl<float> CCVector3f;
+//! Double 3D Vector
 typedef Vector3Tpl<double> CCVector3d;
 
 //! Default 2D Vector

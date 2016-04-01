@@ -26,6 +26,7 @@
 #include "ccPointCloud.h"
 #include "ccScalarField.h"
 #include "ccBox.h"
+#include "ccFrustum.h"
 
 //CCLib
 #include <ScalarFieldTools.h>
@@ -36,16 +37,16 @@ ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	, m_theAssociatedCloudAsGPC(aCloud)
 	, m_glListID(0)
 	, m_glListIsDeprecated(true)
-	, m_frustrumIntersector(0)
+	, m_frustumIntersector(0)
 {
 }
 
 ccOctree::~ccOctree()
 {
-	if (m_frustrumIntersector)
+	if (m_frustumIntersector)
 	{
-		delete m_frustrumIntersector;
-		m_frustrumIntersector = 0;
+		delete m_frustumIntersector;
+		m_frustumIntersector = 0;
 	}
 }
 
@@ -119,9 +120,206 @@ void ccOctree::translateBoundingBox(const CCVector3& T)
 
 /*** RENDERING METHODS ***/
 
+void ccOctree::drawLOD(CC_DRAW_CONTEXT& context)
+{
+	if (!m_theAssociatedCloudAsGPC
+		|| m_thePointsAndTheirCellCodes.empty())
+	{
+		return;
+	}
+
+	if (!MACRO_Draw3D(context))
+	{
+		assert(false);
+		return;
+	}
+
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	//get the current viewport and OpenGL matrices
+	ccGLCameraParameters camera;
+	glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+	glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+
+	//construct the corresponding frustum object
+	Frustum frustum(camera.modelViewMat, camera.projectionMat);
+
+	if (frustum.boxInFrustum(AABox(m_pointsMin, m_pointsMax)) == Frustum::OUTSIDE)
+	{
+		//the cloud is totally outside of the frustum!
+		return;
+	}
+
+	//get the display parameters
+	glDrawParams glParams;
+	m_theAssociatedCloudAsGPC->getDrawingParameters(glParams);
+
+	//visibility table (if any)
+	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->getTheVisibilityArray();
+
+	//scalar field (if any)
+	ccScalarField* activeSF = 0;
+	if (glParams.showSF && m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccPointCloud* pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
+		ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+		if (sf && sf->getColorScale())
+		{
+			activeSF = sf;
+		}
+	}
+
+	if (!glParams.showColors && !activeSF)
+	{
+		ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
+	}
+
+	//assert(MAX_OCTREE_LEVEL >= 0 && MAX_OCTREE_LEVEL < 256);
+	//const unsigned char maxLevel = static_cast<unsigned char>(MAX_OCTREE_LEVEL);
+
+	//no need to go too deep
+	const unsigned char maxLevel = 6; //TODO: make it depend on the number of points!
+
+	//starting level of subdivision
+	unsigned char level = 1;
+	//binary shift for cell code truncation at current level
+	unsigned char currentBitDec = GET_BIT_SHIFT(level);
+	//current cell code
+	OctreeCellCodeType currentCellCode = INVALID_CELL_CODE;
+	OctreeCellCodeType currentCellTruncatedCode = INVALID_CELL_CODE;
+	//whether the current cell should be skipped or not
+	bool skipThisCell = false;
+
+	glFunc->glBegin(GL_POINTS);
+
+	//let's sweep through the octree
+	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
+	{
+		//new cell?
+		if ((it->theCode >> currentBitDec) != currentCellTruncatedCode)
+		{
+			skipThisCell = false;
+			
+			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
+			for (; level > 1; --level)
+			{
+				unsigned char bitDec = GET_BIT_SHIFT(level - 1);
+				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
+				{
+					//same parent cell, we can stop here
+					break;
+				}
+			}
+
+			currentCellCode = it->theCode;
+
+			//now try to go deeper with the new cell
+			for (; level < maxLevel; ++level)
+			{
+				Tuple3i cellPos;
+				getCellPos(it->theCode, level, cellPos, false);
+
+				//first test with the total bounding box
+				const PointCoordinateType& cellSize = getCellSize(level);
+				CCVector3 A = m_dimMin + CCVector3(	cellPos.x * cellSize,
+													cellPos.y * cellSize,
+													cellPos.z * cellSize);
+
+				//check intersection with the frustum
+				Frustum::Intersection inter = frustum.boxInFrustum(AACube(A, cellSize));
+				
+				if (inter == Frustum::OUTSIDE)
+				{
+					skipThisCell = true;
+					break;
+				}
+				else if (inter == Frustum::INSIDE)
+				{
+					break;
+				}
+				else
+				{
+					//for test
+					//if (level + 1 == maxLevel)
+					//{
+					//	skipThisCell = true;
+					//	break;
+					//}
+
+					//we can continue
+				}
+
+				//PointCoordinateType halfCellSize = getCellSize(level) / 2;
+				//CCVector3 cellCenter(	(2 * cellPos.x + 1) * halfCellSize,
+				//						(2 * cellPos.y + 1) * halfCellSize,
+				//						(2 * cellPos.z + 1) * halfCellSize );
+
+				//CCVector3 halfCell = CCVector3(halfCellSize, halfCellSize, halfCellSize);
+
+				//if (camera.perspective)
+				//{
+				//	double radialSqDist, sqDistToOrigin;
+				//	rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
+
+				//	double dx = sqrt(sqDistToOrigin);
+				//	double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
+				//	double fov_rad = atan2(dy, dx);
+
+				//	skipThisCell = (fov_rad > maxFOV_rad);
+				//}
+				//else
+				//{
+				//	skipThisCell = !AABB<PointCoordinateType>(cellCenter - halfCell - margin,
+				//		cellCenter + halfCell + margin).intersects(rayLocal);
+				//}
+			}
+			currentBitDec = GET_BIT_SHIFT(level);
+			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
+		}
+
+		if (!skipThisCell)
+		{
+			//we shouldn't test points that are actually hidden!
+			if (visTable && visTable->getValue(it->theIndex) != POINT_VISIBLE)
+			{
+				//point is hidden
+				continue;
+			}
+
+			if (activeSF)
+			{
+				const ColorCompType* col = activeSF->getColor(activeSF->getValue(it->theIndex));
+				if (!col)
+				{
+					//point is hidden
+					continue;
+				}
+				ccGL::Color3v(glFunc, col);
+			}
+			else if (glParams.showColors)
+			{
+				const ColorCompType* col = m_theAssociatedCloudAsGPC->getPointColor(it->theIndex);
+				ccGL::Color3v(glFunc, col);
+			}
+
+			//show the point
+			const CCVector3* P = m_theAssociatedCloudAsGPC->getPoint(it->theIndex);
+			ccGL::Vertex3v(glFunc, P->u);
+		}
+	}
+
+	glFunc->glEnd();
+}
+
 void ccOctree::draw(CC_DRAW_CONTEXT& context)
 {
-	if (	m_theAssociatedCloudAsGPC
+	if (	!m_theAssociatedCloudAsGPC
 		||	m_thePointsAndTheirCellCodes.empty() )
 	{
 		return;
@@ -144,7 +342,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 		glFunc->glDisable(GL_LIGHTING);
 		ccGL::Color3v(glFunc, ccColor::green.rgba);
 
-		void* additionalParameters[] = {	reinterpret_cast<void*>(m_frustrumIntersector),
+		void* additionalParameters[] = {	reinterpret_cast<void*>(m_frustumIntersector),
 											reinterpret_cast<void*>(glFunc)
 		};
 		executeFunctionForAllCellsAtLevel(	m_displayedLevel,
@@ -255,19 +453,19 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
 								CCLib::NormalizedProgress* nProgress/*=0*/)
 {
-	ccOctreeFrustrumIntersector* ofi = static_cast<ccOctreeFrustrumIntersector*>(additionalParameters[0]);
+	ccOctreeFrustumIntersector* ofi = static_cast<ccOctreeFrustumIntersector*>(additionalParameters[0]);
 	QOpenGLFunctions_2_1* glFunc     = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[1]);
 	assert(glFunc != nullptr);
 
 	CCVector3 bbMin, bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode, cell.level, bbMin, bbMax, true);
 
-	ccOctreeFrustrumIntersector::OctreeCellVisibility vis = ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM;
+	ccOctreeFrustumIntersector::OctreeCellVisibility vis = ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM;
 	if (ofi)
 		vis = ofi->positionFromFrustum(cell.truncatedCode, cell.level);
 
 	// outside
-	if (vis == ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
+	if (vis == ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM)
 	{
 		ccGL::Color3v(glFunc, ccColor::green.rgba);
 	}
@@ -276,7 +474,7 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(2.0f);
 		// inside
-		if (vis == ccOctreeFrustrumIntersector::CELL_INSIDE_FRUSTRUM)
+		if (vis == ccOctreeFrustumIntersector::CELL_INSIDE_FRUSTUM)
 			ccGL::Color3v(glFunc, ccColor::magenta.rgba);
 		// intersecting
 		else
@@ -309,7 +507,7 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	glFunc->glEnd();
 
 	// not outside
-	if (vis != ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
+	if (vis != ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM)
 	{
 		glFunc->glPopAttrib();
 	}
@@ -448,7 +646,7 @@ CCVector3 ccOctree::ComputeAverageNorm(CCLib::ReferenceCloud* subset, ccGenericP
 	return N;
 }
 
-bool ccOctree::intersectWithFrustrum(ccCameraSensor* sensor, std::vector<unsigned>& inCameraFrustrum)
+bool ccOctree::intersectWithFrustum(ccCameraSensor* sensor, std::vector<unsigned>& inCameraFrustum)
 {
 	if (!sensor)
 		return false;
@@ -460,25 +658,25 @@ bool ccOctree::intersectWithFrustrum(ccCameraSensor* sensor, std::vector<unsigne
 	CCVector3 globalCenter; 
 	sensor->computeGlobalPlaneCoefficients(globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 
-	if (!m_frustrumIntersector)
+	if (!m_frustumIntersector)
 	{
-		m_frustrumIntersector = new ccOctreeFrustrumIntersector();
-		if (!m_frustrumIntersector->build(this))
+		m_frustumIntersector = new ccOctreeFrustumIntersector();
+		if (!m_frustumIntersector->build(this))
 		{
-			ccLog::Warning("[ccOctree::intersectWithFrustrum] Not enough memory!");
+			ccLog::Warning("[ccOctree::intersectWithFrustum] Not enough memory!");
 			return false;
 		}
 	}
 
-	// get points of cells in frustrum
+	// get points of cells in frustum
 	std::vector< std::pair<unsigned, CCVector3> > pointsToTest;
-	m_frustrumIntersector->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustrum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
+	m_frustumIntersector->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 	
 	// project points
 	for (size_t i=0; i<pointsToTest.size(); i++)
 	{
-		if (sensor->isGlobalCoordInFrustrum(pointsToTest[i].second/*, false*/))
-			inCameraFrustrum.push_back(pointsToTest[i].first);
+		if (sensor->isGlobalCoordInFrustum(pointsToTest[i].second/*, false*/))
+			inCameraFrustum.push_back(pointsToTest[i].first);
 	}
 
 	return true;
@@ -501,7 +699,6 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	if (m_thePointsAndTheirCellCodes.empty())
 	{
 		//nothing to do
-		assert(false);
 		return false;
 	}
 	
@@ -624,7 +821,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 				getCellPos(it->theCode, level, cellPos, false);
 
 				//first test with the total bounding box
-				const PointCoordinateType& halfCellSize = getCellSize(level) / 2;
+				PointCoordinateType halfCellSize = getCellSize(level) / 2;
 				CCVector3 cellCenter(	(2* cellPos.x + 1) * halfCellSize,
 										(2* cellPos.y + 1) * halfCellSize,
 										(2* cellPos.z + 1) * halfCellSize);

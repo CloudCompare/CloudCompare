@@ -281,7 +281,7 @@
       <addaction name="actionCreateCameraSensor"/>
       <addaction name="separator"/>
       <addaction name="actionProjectUncertainty"/>
-      <addaction name="actionCheckPointsInsideFrustrum"/>
+      <addaction name="actionCheckPointsInsideFrustum"/>
      </widget>
      <addaction name="actionModifySensor"/>
      <addaction name="separator"/>
@@ -2537,7 +2537,7 @@
     <string>Create</string>
    </property>
   </action>
-  <action name="actionCheckPointsInsideFrustrum">
+  <action name="actionCheckPointsInsideFrustum">
    <property name="text">
     <string>Compute points visibility (with octree)</string>
    </property>

@@ -367,7 +367,7 @@ void ccGraphicalTransformationTool::apply()
 #ifdef QT_DEBUG
 	{
 		float phi_rad,theta_rad,psi_rad;
-		Vector3Tpl<float> t3D;
+		CCVector3f t3D;
 		correctedFinalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
 		ccLog::Print(QString("Angles(%1,%2,%3) T(%5,%6,%7)").arg(phi_rad).arg(theta_rad).arg(psi_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));
 	}

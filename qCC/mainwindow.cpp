@@ -893,7 +893,7 @@ void MainWindow::connectActions()
 	connect(actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
 	connect(actionModifySensor,					SIGNAL(triggered()),	this,		SLOT(doActionModifySensor()));
 	connect(actionProjectUncertainty,			SIGNAL(triggered()),	this,		SLOT(doActionProjectUncertainty()));
-	connect(actionCheckPointsInsideFrustrum,	SIGNAL(triggered()),	this,		SLOT(doActionCheckPointsInsideFrustrum()));
+	connect(actionCheckPointsInsideFrustum,		SIGNAL(triggered()),	this,		SLOT(doActionCheckPointsInsideFrustum()));
 	connect(actionComputeDistancesFromSensor,	SIGNAL(triggered()),	this,		SLOT(doActionComputeDistancesFromSensor()));
 	connect(actionComputeScatteringAngles,		SIGNAL(triggered()),	this,		SLOT(doActionComputeScatteringAngles()));
 	connect(actionViewFromSensor,				SIGNAL(triggered()),	this,		SLOT(doActionSetViewFromSensor()));
@@ -2609,7 +2609,7 @@ void MainWindow::doActionProjectUncertainty()
 	refreshAll();
 }
 
-void MainWindow::doActionCheckPointsInsideFrustrum()
+void MainWindow::doActionCheckPointsInsideFrustum()
 {
 	//there should be only one camera sensor in the current selection!
 	if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::CAMERA_SENSOR))
@@ -2644,20 +2644,20 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 	assert(octree);
 
 	// filter octree then project the points
-	std::vector<unsigned> inCameraFrustrum;
-	if (!octree->intersectWithFrustrum(sensor, inCameraFrustrum))
+	std::vector<unsigned> inCameraFrustum;
+	if (!octree->intersectWithFrustum(sensor, inCameraFrustum))
 	{
-		ccConsole::Error("Failed to intersect sensor frustrum with octree!");
+		ccConsole::Error("Failed to intersect sensor frustum with octree!");
 	}
 	else
 	{
 		// scalar field
-		const char sfName[] = "Frustrum visibility";
+		const char sfName[] = "Frustum visibility";
 		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName);
 
-		if (inCameraFrustrum.empty())
+		if (inCameraFrustum.empty())
 		{
-			ccConsole::Error("No point fell inside the frustrum!");
+			ccConsole::Error("No point fell inside the frustum!");
 			if (sfIdx >= 0)
 				pointCloud->deleteScalarField(sfIdx);
 		}
@@ -2679,9 +2679,9 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 
 				const ScalarType c_insideValue = static_cast<ScalarType>(1);
 
-				for (size_t i = 0; i < inCameraFrustrum.size(); i++)
+				for (size_t i = 0; i < inCameraFrustum.size(); i++)
 				{
-					sf->setValue(inCameraFrustrum[i], c_insideValue);
+					sf->setValue(inCameraFrustum[i], c_insideValue);
 				}
 
 				sf->computeMinAndMax();
@@ -9847,7 +9847,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionCreateGBLSensor->setEnabled(atLeastOneCloud);
 	actionCreateCameraSensor->setEnabled(selInfo.selCount <= 1); //free now
 	actionProjectUncertainty->setEnabled(exactlyOneCameraSensor);
-	actionCheckPointsInsideFrustrum->setEnabled(exactlyOneCameraSensor);
+	actionCheckPointsInsideFrustum->setEnabled(exactlyOneCameraSensor);
 	actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
 	actionSORFilter->setEnabled(atLeastOneCloud);
 	actionNoiseFilter->setEnabled(atLeastOneCloud);

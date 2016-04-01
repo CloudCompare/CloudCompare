@@ -792,6 +792,12 @@ public:
 		return (*this);
 	}
 
+	//! Returns the value at a given position
+	T operator () (unsigned row, unsigned col) const
+	{
+		return m_mat[(col << 2) + row];
+	}
+
 	//! Applies transformation to a 3D vector (in place) - float version
 	/** Input vector is directly modified after calling this method
 	**/

@@ -647,7 +647,9 @@ protected:
 	virtual void notifyGeometryUpdate() override;
 
 	//! Draws the cloud with the octree
-	void drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctree& octree);
+	void drawWithOctree(CC_DRAW_CONTEXT& context,
+						const CCLib::DgmOctree& octree,
+						const glDrawParams& glParams);
 
 	//inherited from ChunkedPointCloud
 	/** \warning Doesn't handle scan grids!

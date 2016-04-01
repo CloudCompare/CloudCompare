@@ -2421,7 +2421,9 @@ struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 	unsigned decimStep;
 };
 
-void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctree& octree)
+void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
+									const CCLib::DgmOctree& octree,
+									const glDrawParams& glParams)
 {
 	if (!MACRO_Draw3D(context))
 	{
@@ -2438,57 +2440,77 @@ void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctr
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
 		return;
+	}
 
 	//get the current viewport and OpenGL matrices
 	ccGLCameraParameters camera;
+	context._win->getGLCameraParameters(camera);
+	//relpace the viewport and matrices by the real ones
 	glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
 	glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
+	if (camera.viewport[2] < 2 || camera.viewport[3] < 2)
+	{
+		//screen is too small!
+		return;
+	}
+
 	//construct the corresponding frustum object
 	Frustum frustum(camera.modelViewMat, camera.projectionMat);
+	ccGLMatrixd PM = camera.projectionMat * camera.modelViewMat;
+	const double* _PM = PM.data();
+	double pixW = 1.0 / camera.viewport[2];
+	double pixH = 1.0 / camera.viewport[3];
+
+	//starting level of subdivision
+	unsigned char minLevel = 1;
+
+	//ending level of subdivision (no need to go too deep!)
+	//assert(MAX_OCTREE_LEVEL >= 0 && MAX_OCTREE_LEVEL < 256);
+	//const unsigned char maxLevel = static_cast<unsigned char>(MAX_OCTREE_LEVEL);
+	//const unsigned char maxLevel = octree.findBestLevelForAGivenPopulationPerCell(256);
+	unsigned char maxLevel = 12;
+
+	if (!camera.perspective)
+	{
+		//compute the max octree level below which the cells are too small (i.e. < 1 pixel)
+		for (; maxLevel > minLevel; --maxLevel)
+		{
+			double cellSize = octree.getCellSize(maxLevel);
+			//compute the cell width in 2D
+			double dx = (_PM[0] + _PM[4] + _PM[8]) * cellSize;
+			double dy = (_PM[1] + _PM[5] + _PM[9]) * cellSize;
+
+			//if the cell is too small, we only need to display the first point
+			if (fabs(dx) >= pixW || fabs(dy) >= pixH)
+			{
+				break;
+			}
+		}
+	}
 
 	//check if the cloud is actually visible with this frustum
 	{
 		CCVector3 bbMin, bbMax;
 		getBoundingBox(bbMin, bbMax);
-		if (frustum.boxInFrustum(AABox(bbMin, bbMax)) == Frustum::OUTSIDE)
+		Frustum::Intersection cloudIntersect = frustum.boxInFrustum(AABox(bbMin, bbMax));
+		if (cloudIntersect == Frustum::OUTSIDE)
 		{
 			return;
 		}
-	}
-
-	//get the display parameters
-	glDrawParams glParams;
-	getDrawingParameters(glParams);
-
-	//scalar field (if any)
-	ccScalarField* activeSF = 0;
-	if (glParams.showSF)
-	{
-		ccScalarField* sf = getCurrentDisplayedScalarField();
-		if (sf && sf->getColorScale())
+		else if (cloudIntersect == Frustum::INSIDE && !camera.perspective)
 		{
-			activeSF = sf;
+			//we don't need to bother filetering the cells
+			//(we can display all of them at the max level!)
+			minLevel = maxLevel;
 		}
 	}
 
-	if (!glParams.showColors && !activeSF)
-	{
-		ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
-	}
-
-	//assert(MAX_OCTREE_LEVEL >= 0 && MAX_OCTREE_LEVEL < 256);
-	//const unsigned char maxLevel = static_cast<unsigned char>(MAX_OCTREE_LEVEL);
-
-	//no need to go too deep
-	const unsigned char maxLevel = 6; //TODO: make it depend on the number of points!
-
-	//starting level of subdivision
-	unsigned char level = 1;
+	unsigned char level = minLevel;
 	//binary shift for cell code truncation at current level
 	unsigned char currentBitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 	//current cell code
@@ -2497,7 +2519,28 @@ void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctr
 	//whether the current cell should be skipped or not
 	bool skipThisCell = false;
 
-	glFunc->glBegin(GL_POINTS);
+	//active scalar field (if any)
+	ccScalarField* activeSF = glParams.showSF ? m_currentDisplayedScalarField : 0;
+	assert(!glParams.showSF || activeSF);
+	//compressed normals set
+	const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+	assert(compressedNormals);
+
+	//we use buffers for faster display
+	PointCoordinateType* _points = s_pointBuffer;
+	PointCoordinateType* _normals = s_normalBuffer;
+	ColorCompType* _rgb = s_rgbBuffer3ub;
+	GLsizei bufferCount = 0;
+
+	glFunc->glEnableClientState(GL_VERTEX_ARRAY);
+	if (glParams.showColors || glParams.showSF)
+	{
+		glFunc->glEnableClientState(GL_COLOR_ARRAY);
+	}
+	if (glParams.showNorms)
+	{
+		glFunc->glEnableClientState(GL_NORMAL_ARRAY);
+	}
 
 	//let's sweep through the octree
 	for (CCLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin(); it != thePointsAndTheirCellCodes.end(); ++it)
@@ -2508,7 +2551,7 @@ void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctr
 			skipThisCell = false;
 
 			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
-			for (; level > 1; --level)
+			for (; level > minLevel; --level)
 			{
 				unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level - 1);
 				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
@@ -2521,65 +2564,70 @@ void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctr
 			currentCellCode = it->theCode;
 
 			//now try to go deeper with the new cell
-			for (; level < maxLevel; ++level)
+			if (level != maxLevel)
 			{
-				Tuple3i cellPos;
-				octree.getCellPos(it->theCode, level, cellPos, false);
-
-				//first test with the total bounding box
-				const PointCoordinateType& cellSize = octree.getCellSize(level);
-				CCVector3 A = octree.getOctreeMins() + CCVector3(	cellPos.x * cellSize,
-																	cellPos.y * cellSize,
-																	cellPos.z * cellSize);
-
-				//check intersection with the frustum
-				Frustum::Intersection inter = frustum.boxInFrustum(AACube(A, cellSize));
-
-				if (inter == Frustum::OUTSIDE)
+				for (; level <= maxLevel; ++level)
 				{
-					skipThisCell = true;
-					break;
+					Tuple3i cellPos;
+					octree.getCellPos(it->theCode, level, cellPos, false);
+
+					//first test with the total bounding box
+					const PointCoordinateType& cellSize = octree.getCellSize(level);
+					CCVector3 A = octree.getOctreeMins() + CCVector3(	cellPos.x * cellSize,
+																		cellPos.y * cellSize,
+																		cellPos.z * cellSize);
+
+					CCVector3 B = A + CCVector3(cellSize, cellSize, cellSize);
+
+					//check intersection with the frustum
+					Frustum::Intersection inter = frustum.boxInFrustum(AABox(A, B));
+
+					if (inter == Frustum::OUTSIDE)
+					{
+						skipThisCell = true;
+						break;
+					}
+					else if (level == maxLevel)
+					{
+						break;
+					}
+					else if (inter == Frustum::INSIDE)
+					{
+						//in perspective mode, we have to check the cell size
+						//(if it's small enough, we can draw the first point and skip the rest)
+						if (camera.perspective)
+						{
+							//compute the cell width in 2D
+							double aw = _PM[3] * A.x + _PM[7] * A.y + _PM[11] * A.z + _PM[15];
+							double bw = _PM[3] * B.x + _PM[7] * B.y + _PM[11] * B.z + _PM[15];
+
+							//double ax = _PM[0] * A.x + _PM[4] * A.y + _PM[8] * A.z + _PM[12];
+							//double ay = _PM[1] * A.x + _PM[5] * A.y + _PM[9] * A.z + _PM[13];
+							//
+							//double bx = _PM[0] * B.x + _PM[4] * B.y + _PM[8] * B.z + _PM[12];
+							//double by = _PM[1] * B.x + _PM[5] * B.y + _PM[9] * B.z + _PM[13];
+
+							//double dx = bx / bw - ax / aw; // * (width / 2) = width in pixels
+							//double dy = by / bw - ay / aw; // * (height / 2) = height in pixels
+						
+							Tuple4Tpl<double> Q(B.x / bw - A.x / aw,
+												B.y / bw - A.y / aw,
+												B.z / bw - A.z / aw,
+												1.0 / bw - 1.0 / aw);
+
+							double dx = _PM[0] * Q.x + _PM[4] * Q.y + _PM[8] * Q.z + _PM[12] * Q.w;
+							double dy = _PM[1] * Q.x + _PM[5] * Q.y + _PM[9] * Q.z + _PM[13] * Q.w;
+
+							//if the cell is too small, we display the first point and then we skip the others
+							if (fabs(dx) <= pixW && fabs(dy) <= pixH)
+							{
+								break;
+							}
+						}
+					}
 				}
-				else if (inter == Frustum::INSIDE)
-				{
-					break;
-				}
-				else
-				{
-					//for test
-					//if (level + 1 == maxLevel)
-					//{
-					//	skipThisCell = true;
-					//	break;
-					//}
-
-					//we can continue
-				}
-
-				//PointCoordinateType halfCellSize = getCellSize(level) / 2;
-				//CCVector3 cellCenter(	(2 * cellPos.x + 1) * halfCellSize,
-				//						(2 * cellPos.y + 1) * halfCellSize,
-				//						(2 * cellPos.z + 1) * halfCellSize );
-
-				//CCVector3 halfCell = CCVector3(halfCellSize, halfCellSize, halfCellSize);
-
-				//if (camera.perspective)
-				//{
-				//	double radialSqDist, sqDistToOrigin;
-				//	rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
-
-				//	double dx = sqrt(sqDistToOrigin);
-				//	double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
-				//	double fov_rad = atan2(dy, dx);
-
-				//	skipThisCell = (fov_rad > maxFOV_rad);
-				//}
-				//else
-				//{
-				//	skipThisCell = !AABB<PointCoordinateType>(cellCenter - halfCell - margin,
-				//		cellCenter + halfCell + margin).intersects(rayLocal);
-				//}
 			}
+			
 			currentBitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
 		}
@@ -2598,24 +2646,106 @@ void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctr
 				const ColorCompType* col = activeSF->getColor(activeSF->getValue(it->theIndex));
 				if (!col)
 				{
-					//point is hidden
-					continue;
+					if (m_pointsVisibility)
+					{
+						//we force display of points hidden because of their scalar field value
+						//to be sure that the user doesn't miss them (during manual segmentation for instance)
+						col = ccColor::lightGrey.rgba;
+					}
+					else
+					{
+						//point is hidden
+						continue;
+					}
 				}
-				ccGL::Color3v(glFunc, col);
+
+				//ccGL::Color3v(glFunc, col);
+				*_rgb++ = col[0];
+				*_rgb++ = col[1];
+				*_rgb++ = col[2];
 			}
 			else if (glParams.showColors)
 			{
 				const ColorCompType* col = getPointColor(it->theIndex);
-				ccGL::Color3v(glFunc, col);
+
+				//ccGL::Color3v(glFunc, col);
+				*_rgb++ = col[0];
+				*_rgb++ = col[1];
+				*_rgb++ = col[2];
+			}
+			if (glParams.showNorms)
+			{
+				const CCVector3& N = compressedNormals->getNormal(m_normals->getValue(it->theIndex));
+				//ccGL::Normal3v(glFunc, N.u);
+				*_normals++ = N.x;
+				*_normals++ = N.y;
+				*_normals++ = N.z;
 			}
 
-			//show the point
 			const CCVector3* P = getPoint(it->theIndex);
-			ccGL::Vertex3v(glFunc, P->u);
+			//ccGL::Vertex3v(glFunc, P->u);
+			*_points++ = P->x;
+			*_points++ = P->y;
+			*_points++ = P->z;
+
+			++bufferCount;
+
+			//buffer is full, we can send it to the GPU
+			if (bufferCount == MAX_POINT_COUNT_PER_LOD_RENDER_PASS)
+			{
+				glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, s_pointBuffer);
+				if (_rgb != s_rgbBuffer3ub)
+				{
+					glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, s_rgbBuffer3ub);
+				}
+				if (_normals != s_normalBuffer)
+				{
+					glFunc->glNormalPointer(GL_COORD_TYPE, 0, s_normalBuffer);
+				}
+				glFunc->glDrawArrays(GL_POINTS, 0, bufferCount);
+
+				//reset buffer
+				_points = s_pointBuffer;
+				_normals = s_normalBuffer;
+				_rgb = s_rgbBuffer3ub;
+				bufferCount = 0;
+			}
+
+			//auto disable the remaining part of the cell
+			skipThisCell = true;
 		}
 	}
 
-	glFunc->glEnd();
+	//buffer is not empty? we send the remaining data to the GPU
+	if (bufferCount != 0)
+	{
+		glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, s_pointBuffer);
+		if (_rgb != s_rgbBuffer3ub)
+		{
+			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, s_rgbBuffer3ub);
+		}
+		if (_normals != s_normalBuffer)
+		{
+			glFunc->glNormalPointer(GL_COORD_TYPE, 0, s_normalBuffer);
+		}
+		glFunc->glDrawArrays(GL_POINTS, 0, bufferCount);
+
+		//reset buffer
+		_points = s_pointBuffer;
+		_normals = s_normalBuffer;
+		_rgb = s_rgbBuffer3ub;
+		bufferCount = 0;
+	}
+
+	glFunc->glDisableClientState(GL_VERTEX_ARRAY);
+	if (glParams.showColors || glParams.showSF)
+	{
+		glFunc->glDisableClientState(GL_COLOR_ARRAY);
+	}
+	if (glParams.showNorms)
+	{
+		glFunc->glDisableClientState(GL_NORMAL_ARRAY);
+	}
 }
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -2632,20 +2762,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (MACRO_Draw3D(context))
 	{
-		//DGM TEST
-		//ccOctree::Shared octree = getOctree();
-		//if (octree)
-		//{
-		//	octree->drawLOD(context);
-		//	return;
-		//}
-
 		//we get display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
 		//no normals shading without light!
 		if (!MACRO_LightIsEnabled(context))
+		{
 			glParams.showNorms = false;
+		}
 
 		//can't display a SF without... a SF... and an active color scale!
 		assert(!glParams.showSF || hasDisplayedScalarField());
@@ -2656,7 +2780,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
+			{
 				return;
+			}
 
 			glFunc->glPushName(getUniqueIDForDisplay());
 			//minimal display for picking mode!
@@ -2722,7 +2848,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								toDisplay.count = 0;
 								{
 									for (unsigned char l = 1; l < context.minLODLevel; ++l)
+									{
 										toDisplay.count += m_lod.level(l).count;
+									}
 								}
 								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
 
@@ -2823,7 +2951,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));
 		}
 
-		//standard "full" display
+		//DGM TEST
+		//ccOctree::Shared octree = getOctree();
+		//if (octree)
+		//{
+		//	drawWithOctree(context, *octree, glParams);
+		//}
+		//else
 		{
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
@@ -2901,7 +3035,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					//max available space for frament's shader uniforms
 					GLint maxBytes = 0;
 					glFunc->glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &maxBytes);
-					GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
+					GLint maxComponents = (maxBytes >> 2) - 4; //leave space for the other uniforms!
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps != 0);
 
@@ -2916,14 +3050,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						float sfMaxSatRel = 1.0f;
 						if (!m_currentDisplayedScalarField->symmetricalScale())
 						{
-							sfMinSatRel = GetNormalizedValue(sfSaturationRange.start(),sfDisplayRange);	//doesn't need to be between 0 and 1!
-							sfMaxSatRel = GetNormalizedValue(sfSaturationRange.stop(),sfDisplayRange);	//doesn't need to be between 0 and 1!
+							sfMinSatRel = GetNormalizedValue(sfSaturationRange.start(), sfDisplayRange);	//doesn't need to be between 0 and 1!
+							sfMaxSatRel = GetNormalizedValue(sfSaturationRange.stop(), sfDisplayRange);		//doesn't need to be between 0 and 1!
 						}
 						else
 						{
 							//we can only handle 'maximum' saturation
-							sfMinSatRel = GetSymmetricalNormalizedValue(-sfSaturationRange.stop(),sfSaturationRange);
-							sfMaxSatRel = GetSymmetricalNormalizedValue(sfSaturationRange.stop(),sfSaturationRange);
+							sfMinSatRel = GetSymmetricalNormalizedValue(-sfSaturationRange.stop(), sfSaturationRange);
+							sfMaxSatRel = GetSymmetricalNormalizedValue(sfSaturationRange.stop(), sfSaturationRange);
 							//we'll have to handle the 'minimum' saturation manually!
 						}
 
@@ -2952,7 +3086,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 							GLint maxLightCount;
 							glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);
-							for (GLint i=0; i<maxLightCount; ++i)
+							for (GLint i = 0; i < maxLightCount; ++i)
 							{
 								if (glFunc->glIsEnabled(GL_LIGHT0 + i))
 								{
@@ -2962,8 +3096,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									glFunc->glGetLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
 									glFunc->glGetLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
 
-									ambiant[0]  = ambiant[1]  = 1.0f;
-									diffuse[0]  = diffuse[1]  = 0.0f;
+									ambiant[0] = ambiant[1] = 1.0f;
+									diffuse[0] = diffuse[1] = 0.0f;
 									specular[0] = specular[1] = 0.0f;
 
 									glFunc->glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
@@ -2990,8 +3124,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						unsigned s = toDisplay.startIndex;
 						while (s < toDisplay.endIndex)
 						{
-							unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS,toDisplay.endIndex-s);
-							unsigned e = s+count;
+							unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS, toDisplay.endIndex - s);
+							unsigned e = s + count;
 
 							//points
 							glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e);
@@ -3005,12 +3139,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							{
 								float* _sfColors = s_rgbBuffer3f;
 								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
-								for (unsigned j=s; j<e; j++,_sfColors+=3)
+								for (unsigned j = s; j < e; j++, _sfColors += 3)
 								{
 									unsigned pointIndex = toDisplay.indexMap->getValue(j);
 									ScalarType sfVal = m_currentDisplayedScalarField->getValue(pointIndex);
 									//normalized sf value
-									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(sfVal,sfSaturationRange) : GetNormalizedValue(sfVal,sfDisplayRange);
+									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(sfVal, sfSaturationRange) : GetNormalizedValue(sfVal, sfDisplayRange);
 									//flag: whether point is grayed out or not (NaN values are also rejected!)
 									_sfColors[1] = sfDisplayRange.isInRange(sfVal) ? 1.0f : 0.0f;
 									//reference value (to get the true lighting value)
@@ -3031,7 +3165,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else
 					{
 						unsigned chunks = m_points->chunksCount();
-						for (unsigned k=0; k<chunks; ++k)
+						for (unsigned k = 0; k < chunks; ++k)
 						{
 							unsigned chunkSize = m_points->chunkSize(k);
 
@@ -3039,17 +3173,19 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							glChunkVertexPointer(context, k, toDisplay.decimStep, useVBOs);
 							//normals
 							if (glParams.showNorms)
+							{
 								glChunkNormalPointer(context, k, toDisplay.decimStep, useVBOs);
+							}
 							//SF colors
 							if (colorRampShader)
 							{
 								ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(k);
 								float* _sfColors = s_rgbBuffer3f;
 								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
-								for (unsigned j=0; j<chunkSize; j+=toDisplay.decimStep,_sf+=toDisplay.decimStep,_sfColors+=3)
+								for (unsigned j = 0; j < chunkSize; j += toDisplay.decimStep, _sf += toDisplay.decimStep, _sfColors += 3)
 								{
 									//normalized sf value
-									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(*_sf,sfSaturationRange) : GetNormalizedValue(*_sf,sfDisplayRange);
+									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(*_sf, sfSaturationRange) : GetNormalizedValue(*_sf, sfDisplayRange);
 									//flag: whether point is grayed out or not (NaN values are also rejected!)
 									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;
 									//reference value (to get the true lighting value)
@@ -3091,7 +3227,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
+								for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -3106,7 +3242,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
+								for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -3122,7 +3258,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 							{
 								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -3142,7 +3278,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
+								for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -3156,7 +3292,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
+								for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 								{
 									unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 									assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -3171,7 +3307,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 							{
 								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
 								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
@@ -3214,8 +3350,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned s = toDisplay.startIndex;
 					while (s < toDisplay.endIndex)
 					{
-						unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS,toDisplay.endIndex-s);
-						unsigned e = s+count;
+						unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS, toDisplay.endIndex - s);
+						unsigned e = s + count;
 
 						//points
 						glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e);
@@ -3232,7 +3368,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 				else
 				{
-					for (unsigned k=0; k<chunks; ++k)
+					for (unsigned k = 0; k < chunks; ++k)
 					{
 						unsigned chunkSize = m_points->chunkSize(k);
 

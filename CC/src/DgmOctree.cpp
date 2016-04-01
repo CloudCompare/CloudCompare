@@ -2437,12 +2437,14 @@ unsigned char DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indica
 	double density = 0, prevDensity = 0;
 
 	unsigned char level = MAX_OCTREE_LEVEL;
-	for (level=MAX_OCTREE_LEVEL; level>0; --level)
+	for (level = MAX_OCTREE_LEVEL; level > 0; --level)
 	{
 		prevDensity = density;
-		density = static_cast<double>(m_numberOfProjectedPoints)/getCellNumber(level);
+		density = static_cast<double>(m_numberOfProjectedPoints) / getCellNumber(level);
 		if (density >= indicativeNumberOfPointsPerCell)
+		{
 			break;
+		}
 	}
 
 	if (level < MAX_OCTREE_LEVEL)
@@ -2454,8 +2456,10 @@ unsigned char DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indica
 		}
 
 		//we take the closest match
-		if (density-indicativeNumberOfPointsPerCell > indicativeNumberOfPointsPerCell-prevDensity)
+		if (density - indicativeNumberOfPointsPerCell > indicativeNumberOfPointsPerCell - prevDensity)
+		{
 			++level;
+		}
 	}
 
 	return level;

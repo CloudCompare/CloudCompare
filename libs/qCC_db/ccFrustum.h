@@ -64,8 +64,8 @@ public:
 		return CCVector3f
 		(
 			corners[normal.x > 0 ? 1 : 0].x,
-			corners[normal.x > 0 ? 1 : 0].y,
-			corners[normal.x > 0 ? 1 : 0].z
+			corners[normal.y > 0 ? 1 : 0].y,
+			corners[normal.z > 0 ? 1 : 0].z
 		);
 	}
 	CCVector3f getVertexN(const CCVector3f& normal) const
@@ -73,8 +73,8 @@ public:
 		return CCVector3f
 		(
 			corners[normal.x < 0 ? 1 : 0].x,
-			corners[normal.x < 0 ? 1 : 0].y,
-			corners[normal.x < 0 ? 1 : 0].z
+			corners[normal.y < 0 ? 1 : 0].y,
+			corners[normal.z < 0 ? 1 : 0].z
 		);
 	}
 };

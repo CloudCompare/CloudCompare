@@ -654,10 +654,6 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	//the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
 
-	//no need to display anything but clouds and meshes in "element picking mode"
-	drawInThisContext &= (	( !MACRO_DrawPointNames(context)	|| isKindOf(CC_TYPES::POINT_CLOUD) ) || 
-							( !MACRO_DrawTriangleNames(context)	|| isKindOf(CC_TYPES::MESH) ));
-
 	if (draw3D)
 	{
 		//apply 3D 'temporary' transformation (for display only)
@@ -689,7 +685,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			drawMeOnly(context);
 
 			//draw name in 3D (we display it in the 2D foreground layer in fact!)
-			if (m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawNames(context))
+			if (m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))
 				drawNameIn3D(context);
 		}
 	}
@@ -699,7 +695,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		(*it)->draw(context);
 
 	//if the entity is currently selected, we draw its bounding-box
-	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawNames(context) && context.currentLODLevel == 0)
+	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawEntityNames(context) && context.currentLODLevel == 0)
 	{
 		drawBB(context, context.bbDefaultCol);
 	}

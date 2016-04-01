@@ -165,10 +165,6 @@ static QSharedPointer<ccCone> c_unitArrow(0);
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	//no picking enabled on polylines
-	if (MACRO_DrawPointNames(context))
-		return;
-
 	unsigned vertCount = size();
 	if (vertCount < 2)
 		return;

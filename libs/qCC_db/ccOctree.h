@@ -97,7 +97,6 @@ public: //RENDERING
 
 	//! Draws the octree
 	void draw(CC_DRAW_CONTEXT& context);
-	void drawLOD(CC_DRAW_CONTEXT& context);
 
 	//! Intersects octree with a camera sensor
 	bool intersectWithFrustum(	ccCameraSensor* sensor,

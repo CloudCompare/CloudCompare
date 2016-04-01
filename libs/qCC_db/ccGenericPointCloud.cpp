@@ -418,17 +418,20 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 		//visibility table (if any)
-		const ccGenericPointCloud::VisibilityTableType* visTable = getTheVisibilityArray();
+		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? getTheVisibilityArray() : 0;
 
 		//scalar field with hidden values (if any)
 		ccScalarField* activeSF = 0;
-		if (sfShown() && isA(CC_TYPES::POINT_CLOUD))
+		if (	sfShown()
+			&&	isA(CC_TYPES::POINT_CLOUD)
+			&&	!visTable //if the visibility table is instantiated, we always display ALL points
+			)
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(this);
 			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
-			if (sf && !sf->areNaNValuesShownInGrey() && sf->getColorScale())
+			if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 			{
-				//we must take this SF display parameters into account some points may be hidden!
+				//we must take this SF display parameters into account as some points may be hidden!
 				activeSF = sf;
 			}
 		}

@@ -23,10 +23,9 @@
 //Local
 #include "ccCameraSensor.h"
 #include "ccNormalVectors.h"
-#include "ccPointCloud.h"
 #include "ccScalarField.h"
+#include "ccPointCloud.h"
 #include "ccBox.h"
-#include "ccFrustum.h"
 
 //CCLib
 #include <ScalarFieldTools.h>
@@ -119,203 +118,6 @@ void ccOctree::translateBoundingBox(const CCVector3& T)
 }
 
 /*** RENDERING METHODS ***/
-
-void ccOctree::drawLOD(CC_DRAW_CONTEXT& context)
-{
-	if (!m_theAssociatedCloudAsGPC
-		|| m_thePointsAndTheirCellCodes.empty())
-	{
-		return;
-	}
-
-	if (!MACRO_Draw3D(context))
-	{
-		assert(false);
-		return;
-	}
-
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
-	if (glFunc == nullptr)
-		return;
-
-	//get the current viewport and OpenGL matrices
-	ccGLCameraParameters camera;
-	glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
-	glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
-
-	//construct the corresponding frustum object
-	Frustum frustum(camera.modelViewMat, camera.projectionMat);
-
-	if (frustum.boxInFrustum(AABox(m_pointsMin, m_pointsMax)) == Frustum::OUTSIDE)
-	{
-		//the cloud is totally outside of the frustum!
-		return;
-	}
-
-	//get the display parameters
-	glDrawParams glParams;
-	m_theAssociatedCloudAsGPC->getDrawingParameters(glParams);
-
-	//visibility table (if any)
-	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->getTheVisibilityArray();
-
-	//scalar field (if any)
-	ccScalarField* activeSF = 0;
-	if (glParams.showSF && m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD))
-	{
-		ccPointCloud* pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
-		ccScalarField* sf = pc->getCurrentDisplayedScalarField();
-		if (sf && sf->getColorScale())
-		{
-			activeSF = sf;
-		}
-	}
-
-	if (!glParams.showColors && !activeSF)
-	{
-		ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
-	}
-
-	//assert(MAX_OCTREE_LEVEL >= 0 && MAX_OCTREE_LEVEL < 256);
-	//const unsigned char maxLevel = static_cast<unsigned char>(MAX_OCTREE_LEVEL);
-
-	//no need to go too deep
-	const unsigned char maxLevel = 6; //TODO: make it depend on the number of points!
-
-	//starting level of subdivision
-	unsigned char level = 1;
-	//binary shift for cell code truncation at current level
-	unsigned char currentBitDec = GET_BIT_SHIFT(level);
-	//current cell code
-	OctreeCellCodeType currentCellCode = INVALID_CELL_CODE;
-	OctreeCellCodeType currentCellTruncatedCode = INVALID_CELL_CODE;
-	//whether the current cell should be skipped or not
-	bool skipThisCell = false;
-
-	glFunc->glBegin(GL_POINTS);
-
-	//let's sweep through the octree
-	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
-	{
-		//new cell?
-		if ((it->theCode >> currentBitDec) != currentCellTruncatedCode)
-		{
-			skipThisCell = false;
-			
-			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
-			for (; level > 1; --level)
-			{
-				unsigned char bitDec = GET_BIT_SHIFT(level - 1);
-				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
-				{
-					//same parent cell, we can stop here
-					break;
-				}
-			}
-
-			currentCellCode = it->theCode;
-
-			//now try to go deeper with the new cell
-			for (; level < maxLevel; ++level)
-			{
-				Tuple3i cellPos;
-				getCellPos(it->theCode, level, cellPos, false);
-
-				//first test with the total bounding box
-				const PointCoordinateType& cellSize = getCellSize(level);
-				CCVector3 A = m_dimMin + CCVector3(	cellPos.x * cellSize,
-													cellPos.y * cellSize,
-													cellPos.z * cellSize);
-
-				//check intersection with the frustum
-				Frustum::Intersection inter = frustum.boxInFrustum(AACube(A, cellSize));
-				
-				if (inter == Frustum::OUTSIDE)
-				{
-					skipThisCell = true;
-					break;
-				}
-				else if (inter == Frustum::INSIDE)
-				{
-					break;
-				}
-				else
-				{
-					//for test
-					//if (level + 1 == maxLevel)
-					//{
-					//	skipThisCell = true;
-					//	break;
-					//}
-
-					//we can continue
-				}
-
-				//PointCoordinateType halfCellSize = getCellSize(level) / 2;
-				//CCVector3 cellCenter(	(2 * cellPos.x + 1) * halfCellSize,
-				//						(2 * cellPos.y + 1) * halfCellSize,
-				//						(2 * cellPos.z + 1) * halfCellSize );
-
-				//CCVector3 halfCell = CCVector3(halfCellSize, halfCellSize, halfCellSize);
-
-				//if (camera.perspective)
-				//{
-				//	double radialSqDist, sqDistToOrigin;
-				//	rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
-
-				//	double dx = sqrt(sqDistToOrigin);
-				//	double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
-				//	double fov_rad = atan2(dy, dx);
-
-				//	skipThisCell = (fov_rad > maxFOV_rad);
-				//}
-				//else
-				//{
-				//	skipThisCell = !AABB<PointCoordinateType>(cellCenter - halfCell - margin,
-				//		cellCenter + halfCell + margin).intersects(rayLocal);
-				//}
-			}
-			currentBitDec = GET_BIT_SHIFT(level);
-			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
-		}
-
-		if (!skipThisCell)
-		{
-			//we shouldn't test points that are actually hidden!
-			if (visTable && visTable->getValue(it->theIndex) != POINT_VISIBLE)
-			{
-				//point is hidden
-				continue;
-			}
-
-			if (activeSF)
-			{
-				const ColorCompType* col = activeSF->getColor(activeSF->getValue(it->theIndex));
-				if (!col)
-				{
-					//point is hidden
-					continue;
-				}
-				ccGL::Color3v(glFunc, col);
-			}
-			else if (glParams.showColors)
-			{
-				const ColorCompType* col = m_theAssociatedCloudAsGPC->getPointColor(it->theIndex);
-				ccGL::Color3v(glFunc, col);
-			}
-
-			//show the point
-			const CCVector3* P = m_theAssociatedCloudAsGPC->getPoint(it->theIndex);
-			ccGL::Vertex3v(glFunc, P->u);
-		}
-	}
-
-	glFunc->glEnd();
-}
 
 void ccOctree::draw(CC_DRAW_CONTEXT& context)
 {
@@ -765,7 +567,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	//binary shift for cell code truncation at current level
 	unsigned char currentBitDec = GET_BIT_SHIFT(level);
 	//current cell code
-	OctreeCellCodeType currentCode = INVALID_CELL_CODE;
+	OctreeCellCodeType currentCellCode = INVALID_CELL_CODE;
+	OctreeCellCodeType currentCellTruncatedCode = INVALID_CELL_CODE;
 	//whether the current cell should be skipped or not
 	bool skipThisCell = false;
 
@@ -777,17 +580,20 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
 
 	//visibility table (if any)
-	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->getTheVisibilityArray();
+	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? m_theAssociatedCloudAsGPC->getTheVisibilityArray() : 0;
 
 	//scalar field with hidden values (if any)
 	ccScalarField* activeSF = 0;
-	if (m_theAssociatedCloudAsGPC->sfShown() && m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD))
+	if (	m_theAssociatedCloudAsGPC->sfShown()
+		&&	m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD)
+		&&	!visTable //if the visibility table is instantiated, we always display ALL points
+		)
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
 		ccScalarField* sf = pc->getCurrentDisplayedScalarField();
-		if (sf && !sf->areNaNValuesShownInGrey() && sf->getColorScale())
+		if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 		{
-			//we must take this SF display parameters into account some points may be hidden!
+			//we must take this SF display parameters into account as some points may be hidden!
 			activeSF = sf;
 		}
 	}
@@ -798,13 +604,13 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		OctreeCellCodeType truncatedCode = (it->theCode >> currentBitDec);
 		
 		//new cell?
-		if (truncatedCode != (currentCode >> currentBitDec))
+		if (truncatedCode != currentCellTruncatedCode)
 		{
 			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
 			while (level > 1)
 			{
 				unsigned char bitDec = GET_BIT_SHIFT(level-1);
-				if ((it->theCode >> bitDec) == (currentCode >> bitDec))
+				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
 				{
 					//same parent cell, we can stop here
 					break;
@@ -812,7 +618,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 				--level;
 			}
 
-			currentCode = it->theCode;
+			currentCellCode = it->theCode;
 
 			//now try to go deeper with the new cell
 			while (level < maxLevel)
@@ -850,7 +656,9 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 				else
 					++level;
 			}
+			
 			currentBitDec = GET_BIT_SHIFT(level);
+			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
 		}
 
 #ifdef QT_DEBUG

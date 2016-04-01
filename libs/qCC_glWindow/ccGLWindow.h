@@ -855,7 +855,6 @@ protected: //other methods
 			, centerY(_centerY)
 			, pickWidth(_pickWidth)
 			, pickHeight(_pickHeight)
-			, flags(0)
 			, pickInSceneDB(_pickInSceneDB)
 			, pickInLocalDB(_pickInLocalDB)
 		{}
@@ -865,15 +864,12 @@ protected: //other methods
 		int centerY;
 		int pickWidth;
 		int pickHeight;
-		unsigned short flags;
 		bool pickInSceneDB;
 		bool pickInLocalDB;
 	};
 
 	//! Starts picking process
-	/** OpenGL is used by default (unless ccGui::ParamStruct::useOpenGLPointPicking
-		is false in which case a CPU based approach will be used for point picking).
-		\param params picking parameters
+	/** \param params picking parameters
 	**/
 	void startPicking(PickingParameters& params);
 

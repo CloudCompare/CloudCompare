@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>400</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,8 +34,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>364</width>
-        <height>187</height>
+        <width>432</width>
+        <height>263</height>
        </rect>
       </property>
       <attribute name="label">
@@ -361,8 +361,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>362</width>
-        <height>92</height>
+        <width>432</width>
+        <height>263</height>
        </rect>
       </property>
       <attribute name="label">
@@ -446,8 +446,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>286</width>
-        <height>98</height>
+        <width>432</width>
+        <height>263</height>
        </rect>
       </property>
       <attribute name="label">
@@ -590,11 +590,11 @@
         <x>0</x>
         <y>0</y>
         <width>432</width>
-        <height>216</height>
+        <height>263</height>
        </rect>
       </property>
       <attribute name="label">
-       <string>Other display options</string>
+       <string>Other options</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
@@ -868,34 +868,6 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>16</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="pickingPage">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>432</width>
-        <height>216</height>
-       </rect>
-      </property>
-      <attribute name="label">
-       <string>Point picking</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
           <widget class="QLabel" name="label_22">
@@ -945,24 +917,14 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="openGLPickingCheckBox">
-         <property name="toolTip">
-          <string>To use OpenGL for point picking (no octree is required but it can be slow on low-end GPUs)</string>
-         </property>
-         <property name="text">
-          <string>Use OpenGL for point picking</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_7">
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>144</height>
+           <height>16</height>
           </size>
          </property>
         </spacer>
@@ -1052,22 +1014,6 @@
     <hint type="destinationlabel">
      <x>224</x>
      <y>248</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openGLPickingCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>autoComputeOctreeComboBox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>224</x>
-     <y>189</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>163</y>
     </hint>
    </hints>
   </connection>

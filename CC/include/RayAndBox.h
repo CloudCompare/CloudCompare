@@ -58,11 +58,15 @@ template <typename T > struct Ray
 	Tuple3i sign;
 };
 
-//! Simple axis aligned bounding-box structure
+//! Simple axis aligned box structure
 template <typename T > struct AABB
 {
 	AABB(const Vector3Tpl<T>& minCorner, const Vector3Tpl<T>& maxCorner)
 	{
+		assert(minCorner.x <= maxCorner.x);
+		assert(minCorner.y <= maxCorner.y);
+		assert(minCorner.z <= maxCorner.z);
+
 		corners[0] = minCorner;
 		corners[1] = maxCorner;
 	}

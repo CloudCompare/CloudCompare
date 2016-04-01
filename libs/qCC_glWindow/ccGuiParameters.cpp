@@ -83,7 +83,6 @@ void ccGui::ParamStruct::reset()
 	decimateCloudOnMove			= true;
 	minLoDCloudSize				= 10000000;
 	useVBOs						= true;
-	useOpenGLPointPicking		= false;
 	displayCross				= true;
 
 	labelMarkerSize				= 5;
@@ -129,7 +128,6 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	decimateCloudOnMove			=                                      settings.value("cloudDecimation",         true ).toBool();
 	minLoDCloudSize				=                                      settings.value("minLoDCloudSize",     10000000 ).toUInt();
 	useVBOs						=                                      settings.value("useVBOs",                 true ).toBool();
-	useOpenGLPointPicking		=                                      settings.value("useOpenGLPointPicking",   false).toBool();
 	displayCross				=                                      settings.value("crossDisplayed",          true ).toBool();
 	labelMarkerSize				= static_cast<unsigned>(std::max(0,    settings.value("labelMarkerSize",         5    ).toInt()));
 	colorScaleShowHistogram		=                                      settings.value("colorScaleShowHistogram", true ).toBool();
@@ -169,7 +167,6 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("cloudDecimation",          decimateCloudOnMove);
 	settings.setValue("minLoDCloudSize",	      minLoDCloudSize);
 	settings.setValue("useVBOs",                  useVBOs);
-	settings.setValue("useOpenGLPointPicking",    useOpenGLPointPicking);
 	settings.setValue("crossDisplayed",           displayCross);
 	settings.setValue("labelMarkerSize",          labelMarkerSize);
 	settings.setValue("colorScaleShowHistogram",  colorScaleShowHistogram);

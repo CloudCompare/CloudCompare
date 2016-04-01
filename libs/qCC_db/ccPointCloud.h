@@ -646,6 +646,9 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual void notifyGeometryUpdate() override;
 
+	//! Draws the cloud with the octree
+	void drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctree& octree);
+
 	//inherited from ChunkedPointCloud
 	/** \warning Doesn't handle scan grids!
 	**/

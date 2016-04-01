@@ -3768,44 +3768,11 @@ void ccGLWindow::startPicking(PickingParameters& params)
 		return;
 	}
 
-	//setup rendering context
-	params.flags = CC_DRAW_FOREGROUND;
-	qint64 startTime = 0;
-
-	switch (params.mode)
-	{
-	case ENTITY_PICKING:
-	case ENTITY_RECT_PICKING:
-		params.flags |= CC_DRAW_ENTITY_NAMES;
-		break;
-	case FAST_PICKING:
-		params.flags |= CC_DRAW_ENTITY_NAMES;
-		params.flags |= CC_DRAW_FAST_NAMES_ONLY;
-		break;
-	case POINT_PICKING:
-		params.flags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
-		break;
-	case TRIANGLE_PICKING:
-		params.flags |= CC_DRAW_TRI_NAMES;		//automatically push entity names as well!
-		break;
-	case POINT_OR_TRIANGLE_PICKING:
-	case LABEL_PICKING:
-		params.flags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
-		params.flags |= CC_DRAW_TRI_NAMES;
-		startTime = m_timer.nsecsElapsed();
-		break;
-	default:
-		assert(false);
-		//we must always emit a signal!
-		processPickingResult(params, 0, -1);
-		return;
-	}
-
-	if (!getDisplayParameters().useOpenGLPointPicking &&
-		(params.mode == LABEL_PICKING
-		|| params.mode == POINT_OR_TRIANGLE_PICKING
-		|| params.mode == POINT_PICKING
-		|| params.mode == TRIANGLE_PICKING))
+	if (	params.mode == POINT_OR_TRIANGLE_PICKING
+		||	params.mode == POINT_PICKING
+		||	params.mode == TRIANGLE_PICKING
+		||	params.mode == LABEL_PICKING // = spawn a label on the clicked point or triangle
+		)
 	{
 		//CPU-based point picking
 		startCPUBasedPointPicking(params);
@@ -3908,6 +3875,26 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		return;
 	}
 
+	//setup rendering context
+	unsigned short flags = CC_DRAW_FOREGROUND;
+
+	switch (params.mode)
+	{
+	case ENTITY_PICKING:
+	case ENTITY_RECT_PICKING:
+		flags |= CC_DRAW_ENTITY_NAMES;
+		break;
+	case FAST_PICKING:
+		flags |= CC_DRAW_ENTITY_NAMES;
+		flags |= CC_DRAW_FAST_NAMES_ONLY;
+		break;
+	default:
+		assert(false);
+		//we must always emit a signal!
+		processPickingResult(params, 0, -1);
+		return;
+	}
+
 	//OpenGL picking
 	assert(!m_captureMode.enabled);
 	makeCurrent();
@@ -3934,7 +3921,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 	//3D objects picking
 	{
-		CONTEXT.flags = CC_DRAW_3D | params.flags;
+		CONTEXT.flags = CC_DRAW_3D | flags;
 
 		//projection matrix
 		glFunc->glMatrixMode(GL_PROJECTION);
@@ -3973,7 +3960,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	//2D objects picking
 	if (params.mode == ENTITY_PICKING || params.mode == ENTITY_RECT_PICKING || params.mode == FAST_PICKING)
 	{
-		CONTEXT.flags = CC_DRAW_2D | params.flags;
+		CONTEXT.flags = CC_DRAW_2D | flags;
 
 		//we must first grab the 2D ortho view projection matrix
 		setStandardOrthoCenter();
@@ -4220,8 +4207,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						nearestSquareDist,
 						params.pickWidth,
 						params.pickHeight,
-						autoComputeOctree
-						))
+						autoComputeOctree))
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{

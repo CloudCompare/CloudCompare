@@ -280,7 +280,7 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	//no picking enabled on trans. buffers
-	if (MACRO_DrawNames(context))
+	if (MACRO_DrawEntityNames(context))
 		return;
 	//only in 3D
 	if (!MACRO_Draw3D(context))

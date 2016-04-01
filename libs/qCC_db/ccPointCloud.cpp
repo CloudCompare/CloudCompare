@@ -44,6 +44,7 @@
 #include "ccProgressDialog.h"
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccMinimumSpanningTreeForNormsDirection.h"
+#include "ccFrustum.h"
 
 //Qt
 #include <QAtomicInt>
@@ -2420,6 +2421,203 @@ struct DisplayDesc : ccPointCloud::LodStruct::LevelDesc
 	unsigned decimStep;
 };
 
+void ccPointCloud::drawWithOctree(CC_DRAW_CONTEXT& context, const CCLib::DgmOctree& octree)
+{
+	if (!MACRO_Draw3D(context))
+	{
+		assert(false);
+		return;
+	}
+
+	const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree.pointsAndTheirCellCodes();
+	if (thePointsAndTheirCellCodes.empty())
+	{
+		return;
+	}
+
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	//get the current viewport and OpenGL matrices
+	ccGLCameraParameters camera;
+	glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+	glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+
+	//construct the corresponding frustum object
+	Frustum frustum(camera.modelViewMat, camera.projectionMat);
+
+	//check if the cloud is actually visible with this frustum
+	{
+		CCVector3 bbMin, bbMax;
+		getBoundingBox(bbMin, bbMax);
+		if (frustum.boxInFrustum(AABox(bbMin, bbMax)) == Frustum::OUTSIDE)
+		{
+			return;
+		}
+	}
+
+	//get the display parameters
+	glDrawParams glParams;
+	getDrawingParameters(glParams);
+
+	//scalar field (if any)
+	ccScalarField* activeSF = 0;
+	if (glParams.showSF)
+	{
+		ccScalarField* sf = getCurrentDisplayedScalarField();
+		if (sf && sf->getColorScale())
+		{
+			activeSF = sf;
+		}
+	}
+
+	if (!glParams.showColors && !activeSF)
+	{
+		ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
+	}
+
+	//assert(MAX_OCTREE_LEVEL >= 0 && MAX_OCTREE_LEVEL < 256);
+	//const unsigned char maxLevel = static_cast<unsigned char>(MAX_OCTREE_LEVEL);
+
+	//no need to go too deep
+	const unsigned char maxLevel = 6; //TODO: make it depend on the number of points!
+
+	//starting level of subdivision
+	unsigned char level = 1;
+	//binary shift for cell code truncation at current level
+	unsigned char currentBitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
+	//current cell code
+	CCLib::DgmOctree::OctreeCellCodeType currentCellCode = CCLib::DgmOctree::INVALID_CELL_CODE;
+	CCLib::DgmOctree::OctreeCellCodeType currentCellTruncatedCode = CCLib::DgmOctree::INVALID_CELL_CODE;
+	//whether the current cell should be skipped or not
+	bool skipThisCell = false;
+
+	glFunc->glBegin(GL_POINTS);
+
+	//let's sweep through the octree
+	for (CCLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin(); it != thePointsAndTheirCellCodes.end(); ++it)
+	{
+		//new cell?
+		if ((it->theCode >> currentBitDec) != currentCellTruncatedCode)
+		{
+			skipThisCell = false;
+
+			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
+			for (; level > 1; --level)
+			{
+				unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level - 1);
+				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
+				{
+					//same parent cell, we can stop here
+					break;
+				}
+			}
+
+			currentCellCode = it->theCode;
+
+			//now try to go deeper with the new cell
+			for (; level < maxLevel; ++level)
+			{
+				Tuple3i cellPos;
+				octree.getCellPos(it->theCode, level, cellPos, false);
+
+				//first test with the total bounding box
+				const PointCoordinateType& cellSize = octree.getCellSize(level);
+				CCVector3 A = octree.getOctreeMins() + CCVector3(	cellPos.x * cellSize,
+																	cellPos.y * cellSize,
+																	cellPos.z * cellSize);
+
+				//check intersection with the frustum
+				Frustum::Intersection inter = frustum.boxInFrustum(AACube(A, cellSize));
+
+				if (inter == Frustum::OUTSIDE)
+				{
+					skipThisCell = true;
+					break;
+				}
+				else if (inter == Frustum::INSIDE)
+				{
+					break;
+				}
+				else
+				{
+					//for test
+					//if (level + 1 == maxLevel)
+					//{
+					//	skipThisCell = true;
+					//	break;
+					//}
+
+					//we can continue
+				}
+
+				//PointCoordinateType halfCellSize = getCellSize(level) / 2;
+				//CCVector3 cellCenter(	(2 * cellPos.x + 1) * halfCellSize,
+				//						(2 * cellPos.y + 1) * halfCellSize,
+				//						(2 * cellPos.z + 1) * halfCellSize );
+
+				//CCVector3 halfCell = CCVector3(halfCellSize, halfCellSize, halfCellSize);
+
+				//if (camera.perspective)
+				//{
+				//	double radialSqDist, sqDistToOrigin;
+				//	rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
+
+				//	double dx = sqrt(sqDistToOrigin);
+				//	double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
+				//	double fov_rad = atan2(dy, dx);
+
+				//	skipThisCell = (fov_rad > maxFOV_rad);
+				//}
+				//else
+				//{
+				//	skipThisCell = !AABB<PointCoordinateType>(cellCenter - halfCell - margin,
+				//		cellCenter + halfCell + margin).intersects(rayLocal);
+				//}
+			}
+			currentBitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
+			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
+		}
+
+		if (!skipThisCell)
+		{
+			//we shouldn't test points that are actually hidden!
+			if (m_pointsVisibility && m_pointsVisibility->getValue(it->theIndex) != POINT_VISIBLE)
+			{
+				//point is hidden
+				continue;
+			}
+
+			if (activeSF)
+			{
+				const ColorCompType* col = activeSF->getColor(activeSF->getValue(it->theIndex));
+				if (!col)
+				{
+					//point is hidden
+					continue;
+				}
+				ccGL::Color3v(glFunc, col);
+			}
+			else if (glParams.showColors)
+			{
+				const ColorCompType* col = getPointColor(it->theIndex);
+				ccGL::Color3v(glFunc, col);
+			}
+
+			//show the point
+			const CCVector3* P = getPoint(it->theIndex);
+			ccGL::Vertex3v(glFunc, P->u);
+		}
+	}
+
+	glFunc->glEnd();
+}
+
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!m_points->isAllocated())
@@ -2454,10 +2652,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//standard case: list names pushing
 		bool pushName = MACRO_DrawEntityNames(context);
-		//special case: point names pushing (for picking)
-		bool pushPointNames = MACRO_DrawPointNames(context);
-		pushName |= pushPointNames;
-
 		if (pushName)
 		{
 			//not fast at all!
@@ -2629,7 +2823,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));
 		}
 
-		if (!pushPointNames) //standard "full" display
+		//standard "full" display
 		{
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
@@ -2652,7 +2846,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
 							const ColorCompType* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 							//we force display of points hidden because of their scalar field value
-							//to be sure that the user don't miss them (during manual segmentation for instance)
+							//to be sure that the user doesn't miss them (during manual segmentation for instance)
 							glFunc->glColor3ubv(col ? col : ccColor::lightGrey.rgba);
 						}
 						else if (glParams.showColors)
@@ -3065,67 +3259,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showColors)
 					glFunc->glDisableClientState(GL_COLOR_ARRAY);
 			}
-		}
-		else //special case: point names pushing (for picking) --> no need for colors, normals, etc.
-		{
-			glFunc->glPushName(0);
-			//however we must take hidden points into account!
-			if (isVisibilityTableInstantiated())
-			{
-				for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
-				{
-					unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
-					if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
-					{
-						glFunc->glLoadName(pointIndex);
-						glFunc->glBegin(GL_POINTS);
-						ccGL::Vertex3v(glFunc, m_points->getValue(pointIndex));
-						glFunc->glEnd();
-					}
-				}
-			}
-			else //no visibility table instantiated...
-			{
-				//... but potentially points with NAN SF values (also hidden!)
-				bool hiddenPoints = false;
-				if (glParams.showSF)
-				{
-					assert(m_currentDisplayedScalarField);
-					hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues() && m_currentDisplayedScalarField->getColorScale();
-				}
-				
-				if (hiddenPoints) //potentially hidden points
-				{
-					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
-					{
-						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
-						//we must generate the synthetic "color" of each point
-						const ColorCompType* col = getPointScalarValueColor(pointIndex);
-						if (col)
-						{
-							glFunc->glLoadName(pointIndex);
-							glFunc->glBegin(GL_POINTS);
-							ccGL::Vertex3v(glFunc, m_points->getValue(pointIndex));
-							glFunc->glEnd();
-						}
-					}
-				}
-				else
-				{
-					//no hidden point
-					for (unsigned j=toDisplay.startIndex; j<toDisplay.endIndex; j+=toDisplay.decimStep)
-					{
-						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->getValue(j) : j);
-						glFunc->glLoadName(pointIndex);
-						glFunc->glBegin(GL_POINTS);
-						ccGL::Vertex3v(glFunc, m_points->getValue(pointIndex));
-						glFunc->glEnd();
-					}
-				}
-			}
-
-			//glFunc->glEnd();
-			glFunc->glPopName();
 		}
 
 		/*** END DISPLAY ***/

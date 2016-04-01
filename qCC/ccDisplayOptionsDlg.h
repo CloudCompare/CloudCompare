@@ -65,7 +65,6 @@ protected slots:
 	void changeMaxCloudSize(double);
 	void changeVBOUsage();
 	void changeCrossDisplayed();
-	void changeOpenGLPicking();
 	void changeColorScaleShowHistogram();
 	void changeColorScaleUseShader();
 	void changeColorScaleRampWidth(int);

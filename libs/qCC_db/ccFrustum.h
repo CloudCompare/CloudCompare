@@ -3,6 +3,7 @@
 
 //CCLib
 #include <CCGeom.h>
+#include <RayAndBox.h>
 
 //Local
 #include "ccGLMatrix.h"
@@ -50,28 +51,11 @@ public: //members
 	float constCoef;
 };
 
-class AABox
+class AABox : public AABB<float>
 {
 public:
 
-	AABox()
-		: A(0, 0, 0)
-		, B(0, 0, 0)
-	{}
-
-	AABox(const CCVector3f& minCorner, const CCVector3f& maxCorner)
-		: A(minCorner)
-		, B(maxCorner)
-	{
-		if (A.x > B.x)
-			std::swap(A.x, B.x);
-		if (A.y > B.y)
-			std::swap(A.y, B.y);
-		if (A.z > B.z)
-			std::swap(A.z, B.z);
-	}
-
-	virtual ~AABox()
+	AABox(const CCVector3f& A, const CCVector3f& B) : AABB<float>(A, B)
 	{
 	}
 
@@ -79,24 +63,20 @@ public:
 	{
 		return CCVector3f
 		(
-			normal.x > 0 ? B.x : A.x,
-			normal.y > 0 ? B.y : A.y,
-			normal.z > 0 ? B.z : A.z
+			corners[normal.x > 0 ? 1 : 0].x,
+			corners[normal.x > 0 ? 1 : 0].y,
+			corners[normal.x > 0 ? 1 : 0].z
 		);
 	}
 	CCVector3f getVertexN(const CCVector3f& normal) const
 	{
 		return CCVector3f
 		(
-			normal.x < 0 ? B.x : A.x,
-			normal.y < 0 ? B.y : A.y,
-			normal.z < 0 ? B.z : A.z
+			corners[normal.x < 0 ? 1 : 0].x,
+			corners[normal.x < 0 ? 1 : 0].y,
+			corners[normal.x < 0 ? 1 : 0].z
 		);
 	}
-
-public: //members
-
-	CCVector3f A, B;
 };
 
 class AACube

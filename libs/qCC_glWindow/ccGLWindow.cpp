@@ -178,6 +178,8 @@ ccGLWindow::ccGLWindow(QWidget *parent,	bool silentInitialization/*=false*/)
 	, m_currentMouseOrientation(1, 0, 0)
 	, m_validModelviewMatrix(false)
 	, m_validProjectionMatrix(false)
+	, m_pivotCameraDist(0)
+	, m_pivotBorderDist(0)
 	, m_LODEnabled(true)
 	, m_LODAutoDisable(false)
 	, m_shouldBeRefreshed(false)
@@ -1593,6 +1595,15 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 		draw3D(CONTEXT, renderingParams);
 
+#ifdef DGM_OCTREE_LOD_TESTS
+		if (m_showDebugTraces)
+		{
+			diagStrings << QString("Displayed points: %1").arg(CONTEXT.displayedPointCount);
+			diagStrings << QString("Skipped points: %1").arg(CONTEXT.skippedPointCount);
+			diagStrings << QString("Tested cells: %1").arg(CONTEXT.cellInclusionTestCount);
+		}
+#endif
+
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
 			//restore default color mask
@@ -1616,13 +1627,17 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		glFunc->glDisable(GL_DEPTH_TEST);
 
-		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
-		glFunc->glBegin(GL_QUADS);
-		glFunc->glVertex2i(x, m_glViewport.height() - y);
-		glFunc->glVertex2i(x, m_glViewport.height() - (y + 100));
-		glFunc->glVertex2i(x + 200, m_glViewport.height() - (y + 100));
-		glFunc->glVertex2i(x + 200, m_glViewport.height() - y);
-		glFunc->glEnd();
+		//draw black background
+		{
+			int heigth = (diagStrings.size() + 1) * 10;
+			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
+			glFunc->glBegin(GL_QUADS);
+			glFunc->glVertex2i(x, m_glViewport.height() - y);
+			glFunc->glVertex2i(x, m_glViewport.height() - (y + heigth));
+			glFunc->glVertex2i(x + 200, m_glViewport.height() - (y + heigth));
+			glFunc->glVertex2i(x + 200, m_glViewport.height() - y);
+			glFunc->glEnd();
+		}
 
 		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow.rgba);
 		for (int i = 0; i < diagStrings.size(); ++i)
@@ -1902,13 +1917,11 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 			double eyeOffset = renderingParams.passIndex == 0 ? -1.0 : 1.0;
 
 			//update the projection matrix
-			double zNear, zFar;
 			projectionMat = computeProjectionMatrix
 				(
 				getRealCameraCenter(),
-				zNear,
-				zFar,
 				false,
+				0,
 				&eyeOffset
 				); //eyeOffset will be scaled
 
@@ -2722,7 +2735,7 @@ void ccGLWindow::invalidateViewport()
 	m_updateFBO = true;
 }
 
-ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures, double* eyeOffset/*=0*/) const
+ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, bool withGLfeatures, ProjectionMetrics* metrics/*=0*/, double* eyeOffset/*=0*/) const
 {
 	double bbHalfDiag = 1.0;
 	CCVector3d bbCenter(0, 0, 0);
@@ -2751,11 +2764,17 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 	//and the displayed objects if the camera has been shifted in the Z direction (e.g. after
 	//switching from perspective to ortho. view).
 	//While the user won't see the difference this has a great influence on GL filters
-	//(as normalized depth map values depends on it)
+	//(as normalized depth map values depend on it)
 	double CP = (cameraCenter - pivotPoint).norm();
 
 	//distance between pivot point and DB farthest point
 	double MP = (bbCenter - pivotPoint).norm() + bbHalfDiag;
+
+	if (metrics)
+	{
+		metrics->pivotBorderDist = MP;
+		metrics->pivotCameraDist = CP;
+	}
 
 	//pivot symbol should always be (potentially) visible in object-based mode
 	if (withGLfeatures && m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
@@ -2780,11 +2799,17 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		//DGM: the 'zNearCoef' must not be too small, otherwise the loss in accuracy
 		//for the detph buffer is too high and the display is jeopardized, especially
 		//for entities with big coordinates)
-		zNear = MP * m_viewportParams.zNearCoef;
+		double zNear = MP * m_viewportParams.zNearCoef;
 		//DGM: what was the purpose of this?!
 		//if (m_viewportParams.objectCenteredView)
 		//	zNear = std::max<double>(CP-MP,zNear);
-		zFar = std::max(CP + MP, 1.0);
+		double zFar = std::max(CP + MP, 1.0);
+
+		if (metrics)
+		{
+			metrics->zNear = zNear;
+			metrics->zFar = zFar;
+		}
 
 		//compute the aspect ratio
 		double ar = static_cast<double>(m_glViewport.width()) / m_glViewport.height();
@@ -2825,8 +2850,14 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		double halfH = m_glViewport.height() / 2.0 * m_viewportParams.orthoAspectRatio;
 
 		//save actual zNear and zFar parameters
-		zNear = -maxDist_pix;
-		zFar = maxDist_pix;
+		double zNear = -maxDist_pix;
+		double zFar = maxDist_pix;
+
+		if (metrics)
+		{
+			metrics->zNear = zNear;
+			metrics->zFar = zFar;
+		}
 
 		return ccGL::Ortho(halfW, halfH, maxDist_pix);
 	}
@@ -2834,14 +2865,20 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 
 void ccGLWindow::updateProjectionMatrix()
 {
+	ProjectionMetrics metrics;
+
 	m_projMatd = computeProjectionMatrix
 	(
 		getRealCameraCenter(),
-		m_viewportParams.zNear,
-		m_viewportParams.zFar,
 		true,
+		&metrics,
 		0
 	); //no stereo vision by default!
+
+	m_viewportParams.zNear = metrics.zNear;
+	m_viewportParams.zFar = metrics.zFar;
+	m_pivotCameraDist = metrics.pivotCameraDist;
+	m_pivotBorderDist = metrics.pivotBorderDist;
 
 	m_validProjectionMatrix = true;
 }
@@ -2861,7 +2898,7 @@ ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) c
 	if (m_viewportParams.objectCenteredView)
 	{
 		//place origin on pivot point
-		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() - m_viewportParams.pivotPoint);
+		viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ - m_viewportParams.pivotPoint);
 
 		//rotation (viewMat is simply a rotation matrix around the pivot here!)
 		viewMatd = m_viewportParams.viewMat * viewMatd;
@@ -2873,7 +2910,7 @@ ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) c
 	else
 	{
 		//place origin on camera center
-		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() - cameraCenter);
+		viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ - cameraCenter);
 
 		//rotation (viewMat is the rotation around the camera center here - no pivot)
 		viewMatd = m_viewportParams.viewMat * viewMatd;
@@ -3740,7 +3777,15 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 		{
 			//convert degrees in 'constant' walking speed in ... pixels ;)
 			const double& deg2PixConversion = getDisplayParameters().zoomSpeed;
-			moveCamera(0, 0, -static_cast<float>(deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
+			double delta = static_cast<float>(deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize;
+
+			if (m_pivotCameraDist > m_pivotBorderDist)
+			{
+				//we go faster if we are far from the entities
+				delta *= 1.0 + log(m_pivotCameraDist / m_pivotBorderDist);
+			}
+
+			moveCamera(0, 0, -delta);
 		}
 	}
 	else //ortho. mode

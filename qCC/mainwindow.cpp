@@ -5926,7 +5926,7 @@ void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
 	if (!mdiDlg.dialog || !mdiDlg.dialog->isVisible() || !m_mdiArea)
 		return;
 
-	int dx=0,dy=0;
+	int dx = 0, dy = 0;
 	switch (mdiDlg.position)
 	{
 	case Qt::TopLeftCorner:
@@ -5934,16 +5934,16 @@ void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
 		dy = 5;
 		break;
 	case Qt::TopRightCorner:
-		dx = std::max(5,m_mdiArea->width() - mdiDlg.dialog->width() - 5);
+		dx = std::max(5, m_mdiArea->width() - mdiDlg.dialog->width() - 5);
 		dy = 5;
 		break;
 	case Qt::BottomLeftCorner:
 		dx = 5;
-		dy = std::max(5,m_mdiArea->height() - mdiDlg.dialog->height() - 5);
+		dy = std::max(5, m_mdiArea->height() - mdiDlg.dialog->height() - 5);
 		break;
 	case Qt::BottomRightCorner:
-		dx = std::max(5,m_mdiArea->width() - mdiDlg.dialog->width() - 5);
-		dy = std::max(5,m_mdiArea->height() - mdiDlg.dialog->height() - 5);
+		dx = std::max(5, m_mdiArea->width() - mdiDlg.dialog->width() - 5);
+		dy = std::max(5, m_mdiArea->height() - mdiDlg.dialog->height() - 5);
 		break;
 	}
 
@@ -5964,7 +5964,7 @@ void MainWindow::toggleVisualDebugTraces()
 	if (win)
 	{
 		win->toggleDebugTrace();
-		win->redraw(true, false);
+		win->redraw(false, false);
 	}
 }
 

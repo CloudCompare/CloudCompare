@@ -2377,16 +2377,16 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		//project the (filled) cells of octree B in the DT grid
 		{
 			DgmOctree::cellCodesContainer theCodes;
-			octreeB->getCellCodes(octreeLevel,theCodes,true);
+			octreeB->getCellCodes(octreeLevel, theCodes, true);
 
 			while (!theCodes.empty())
 			{
-				DgmOctree::OctreeCellCodeType theCode = theCodes.back();
+				DgmOctree::CellCode theCode = theCodes.back();
 				theCodes.pop_back();
 				Tuple3i cellPos;
-				octreeB->getCellPos(theCode,octreeLevel,cellPos,true);
+				octreeB->getCellPos(theCode, octreeLevel, cellPos, true);
 				cellPos -= minIndexes;
-				dtGrid.setValue(cellPos,1);
+				dtGrid.setValue(cellPos, 1);
 			}
 		}
 
@@ -2398,7 +2398,7 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		ScalarType cellSize = static_cast<ScalarType>(octreeA->getCellSize(octreeLevel));
 
 		DgmOctree::cellIndexesContainer theIndexes;
-		if (!octreeA->getCellIndexes(octreeLevel,theIndexes))
+		if (!octreeA->getCellIndexes(octreeLevel, theIndexes))
 		{
 			//not enough memory
 			if (!compOctree)

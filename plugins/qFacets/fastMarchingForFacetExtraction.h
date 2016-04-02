@@ -105,7 +105,7 @@ protected:
 		//! The local cell center
 		CCVector3 C;
 		//! the code of the equivalent cell in the octree
-		CCLib::DgmOctree::OctreeCellCodeType cellCode;
+		CCLib::DgmOctree::CellCode cellCode;
 		//! Cell planarity error
 		ScalarType planarError;
 	};

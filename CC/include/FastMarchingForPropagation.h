@@ -114,7 +114,7 @@ protected:
 		//! Local front acceleration
 		float f;
 		//! Equivalent cell code in the octree
-		DgmOctree::OctreeCellCodeType cellCode;
+		DgmOctree::CellCode cellCode;
 	};
 
 	//inherited methods (see FastMarching)

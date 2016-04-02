@@ -121,6 +121,13 @@ struct glDrawContext
 	//! Blending strategy (destination)
 	GLenum destBlend;
 
+//#define DGM_OCTREE_LOD_TESTS
+#ifdef DGM_OCTREE_LOD_TESTS
+	size_t displayedPointCount;
+	size_t skippedPointCount;
+	size_t cellInclusionTestCount;
+#endif
+
 	//Default constructor
 	glDrawContext()
 		: flags(0)
@@ -156,6 +163,11 @@ struct glDrawContext
 		, labelOpacity(100)
 		, sourceBlend(GL_SRC_ALPHA)
 		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
+#ifdef DGM_OCTREE_LOD_TESTS
+		, displayedPointCount(0)
+		, skippedPointCount(0)
+		, cellInclusionTestCount(0)
+#endif
 	{}
    
 	template<class TYPE>

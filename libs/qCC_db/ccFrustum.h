@@ -84,12 +84,12 @@ class AACube
 public:
 
 	AACube()
-		: A(0, 0, 0)
+		: O(0, 0, 0)
 		, d(0)
 	{}
 
-	AACube(const CCVector3f& minCorner, float size)
-		: A(minCorner)
+	AACube(const CCVector3f& origin, float size)
+		: O(origin)
 		, d(size)
 	{
 	}
@@ -100,29 +100,27 @@ public:
 
 	CCVector3f getVertexP(const CCVector3f& normal) const
 	{
-		CCVector3f P = A;
-
-		if (normal.x > 0) P.x += d;
-		if (normal.y > 0) P.y += d;
-		if (normal.z > 0) P.z += d;
-		
-		return P;
+		return CCVector3f
+			(
+			normal.x > 0 ? O.x + d : O.x,
+			normal.y > 0 ? O.y + d : O.y,
+			normal.z > 0 ? O.z + d : O.z
+			);
 	}
 	
 	CCVector3f getVertexN(const CCVector3f& normal) const
 	{
-		CCVector3f P = A;
-
-		if (normal.x < 0) P.x += d;
-		if (normal.y < 0) P.y += d;
-		if (normal.z < 0) P.z += d;
-
-		return P;
+		return CCVector3f
+			(
+			normal.x < 0 ? O.x + d : O.x,
+			normal.y < 0 ? O.y + d : O.y,
+			normal.z < 0 ? O.z + d : O.z
+			);
 	}
 
 public: //members
 
-	CCVector3f A;
+	CCVector3f O;
 	float d;
 };
 

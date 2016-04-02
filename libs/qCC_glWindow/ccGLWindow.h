@@ -817,9 +817,21 @@ protected: //other methods
 	void drawTrihedron();
 	void drawScale(const ccColor::Rgbub& color);
 
-	//Projections controls
+	//! Computes the model view matrix
 	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
-	ccGLMatrixd computeProjectionMatrix(const CCVector3d& cameraCenter, double& zNear, double& zFar, bool withGLfeatures, double* eyeOffset = 0) const;
+
+	//! Optional output metrics (from computeProjectionMatrix)
+	struct ProjectionMetrics
+	{
+		ProjectionMetrics() : zNear(0), zFar(0), pivotCameraDist(0), pivotBorderDist(0) {}
+		double zNear, zFar, pivotCameraDist, pivotBorderDist;
+	};
+
+	//! Computes the projection matrix
+	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
+											bool withGLfeatures, 
+											ProjectionMetrics* metrics = 0, 
+											double* eyeOffset = 0) const;
 	void updateModelViewMatrix();
 	void updateProjectionMatrix();
 	void setStandardOrthoCenter();
@@ -1004,6 +1016,10 @@ protected: //members
 	ccGLMatrixd m_projMatd;
 	//! Whether the projection matrix is valid (or need to be recomputed)
 	bool m_validProjectionMatrix;
+	//! Distance between the camera and the pivot point
+	double m_pivotCameraDist;
+	//! Distance between the pivot and the farthest (theoretical) point in DB
+	double m_pivotBorderDist;
 
 	//! GL viewport
 	QRect m_glViewport;

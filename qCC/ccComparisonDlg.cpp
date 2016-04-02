@@ -532,13 +532,13 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		if (m_refOctree)
 			refListDensity = m_refOctree->computeMeanOctreeDensity(static_cast<unsigned char>(level));
 
-		CCLib::DgmOctree::OctreeCellCodeType tempCode = 0xFFFFFFFF;
+		CCLib::DgmOctree::CellCode tempCode = 0xFFFFFFFF;
 
 		//scan the octree structure
 		const CCLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
 		for (CCLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin(); c!=compCodes.end(); ++c)
 		{
-			CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
+			CCLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
 
 			//new cell?
 			if (truncatedCode != tempCode)
@@ -554,7 +554,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 						cellDist /= cellSize;
 
 						//approx. neighborhood width (in terms of cells)
-						double neighbourSize = 2.0*cellDist+1.0;
+						double neighbourSize = 2.0*cellDist + 1.0;
 
 						//if the reference is a mesh
 						if (mesh)

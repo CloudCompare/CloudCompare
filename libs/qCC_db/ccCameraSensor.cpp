@@ -2326,7 +2326,7 @@ bool ccOctreeFrustumIntersector::build(CCLib::DgmOctree* octree)
 	{
 		for (it=thePointsAndTheirCellCodes.begin(); it!=thePointsAndTheirCellCodes.end(); ++it)
 		{
-			CCLib::DgmOctree::OctreeCellCodeType completeCode = it->theCode;
+			CCLib::DgmOctree::CellCode completeCode = it->theCode;
 			for (unsigned char level=1; level<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
 			{
 				unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
@@ -2523,7 +2523,7 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 }
 
 void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char level,
-																	CCLib::DgmOctree::OctreeCellCodeType parentTruncatedCode,
+																	CCLib::DgmOctree::CellCode parentTruncatedCode,
 																	OctreeCellVisibility parentResult,
 																	const float planesCoefficients[6][4],
 																	const CCVector3 ptsFrustum[8],
@@ -2534,16 +2534,16 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 		return;
 
 	// move code to the left
-	CCLib::DgmOctree::OctreeCellCodeType baseTruncatedCode = (parentTruncatedCode << 3);
+	CCLib::DgmOctree::CellCode baseTruncatedCode = (parentTruncatedCode << 3);
 
 	// test to do on the 8 child cells
 	for (unsigned i=0; i<8; i++)
 	{
 		// set truncated code of the current cell
-		CCLib::DgmOctree::OctreeCellCodeType truncatedCode = baseTruncatedCode + i;
+		CCLib::DgmOctree::CellCode truncatedCode = baseTruncatedCode + i;
 
 		// if the current cell has not been built (contains no 3D points), we skip it
-		std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
+		std::unordered_set<CCLib::DgmOctree::CellCode>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
 		if (got != m_cellsBuilt[level].end())
 		{
 			// get extrema of the current cell
@@ -2592,7 +2592,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 	unsigned char level = static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	// dealing with cells completely inside the frustum
-	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator it;
+	std::unordered_set<CCLib::DgmOctree::CellCode>::const_iterator it;
 	CCLib::ReferenceCloud pointsInCell(m_associatedOctree->associatedCloud());
 	for (it = m_cellsInFrustum[level].begin(); it != m_cellsInFrustum[level].end(); ++it)
 	{

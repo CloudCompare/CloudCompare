@@ -522,11 +522,11 @@ public:
 	bool build(CCLib::DgmOctree* octree);
 
 	//! Returns the cell visibility
-	OctreeCellVisibility positionFromFrustum(CCLib::DgmOctree::OctreeCellCodeType truncatedCode, unsigned char level) const
+	OctreeCellVisibility positionFromFrustum(CCLib::DgmOctree::CellCode truncatedCode, unsigned char level) const
 	{
 		assert(m_associatedOctree);
 
-		std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsInFrustum[level].find(truncatedCode);
+		std::unordered_set<CCLib::DgmOctree::CellCode>::const_iterator got = m_cellsInFrustum[level].find(truncatedCode);
 		if (got != m_cellsInFrustum[level].end())
 			return CELL_INSIDE_FRUSTUM;
 		got = m_cellsIntersectFrustum[level].find(truncatedCode);
@@ -563,7 +563,7 @@ public:
 		\param center 3D coordinates of the frustum center (global coordinates sytem) ; this is the center of the circumscribed sphere
 	**/
 	void computeFrustumIntersectionByLevel(	unsigned char level,
-											CCLib::DgmOctree::OctreeCellCodeType parentTruncatedCode,
+											CCLib::DgmOctree::CellCode parentTruncatedCode,
 											OctreeCellVisibility parentResult,
 											const float planesCoefficients[6][4],
 											const CCVector3 ptsFrustum[8],
@@ -592,11 +592,11 @@ protected:
 	CCLib::DgmOctree* m_associatedOctree;
 
 	// contains the truncated code of the cells built in the octree
-	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsBuilt[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
+	std::unordered_set<CCLib::DgmOctree::CellCode> m_cellsBuilt[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
 	// contains the truncated code of the cells INSIDE the frustum
-	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsInFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
+	std::unordered_set<CCLib::DgmOctree::CellCode> m_cellsInFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
 	// contains the truncated code of the cells INTERSECTING the frustum
-	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType> m_cellsIntersectFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
+	std::unordered_set<CCLib::DgmOctree::CellCode> m_cellsIntersectFrustum[CCLib::DgmOctree::MAX_OCTREE_LEVEL+1];
 };
 
 

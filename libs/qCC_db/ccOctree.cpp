@@ -567,8 +567,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	//binary shift for cell code truncation at current level
 	unsigned char currentBitDec = GET_BIT_SHIFT(level);
 	//current cell code
-	OctreeCellCodeType currentCellCode = INVALID_CELL_CODE;
-	OctreeCellCodeType currentCellTruncatedCode = INVALID_CELL_CODE;
+	CellCode currentCellCode = INVALID_CELL_CODE;
+	CellCode currentCellTruncatedCode = INVALID_CELL_CODE;
 	//whether the current cell should be skipped or not
 	bool skipThisCell = false;
 
@@ -601,7 +601,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	//let's sweep through the octree
 	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
 	{
-		OctreeCellCodeType truncatedCode = (it->theCode >> currentBitDec);
+		CellCode truncatedCode = (it->theCode >> currentBitDec);
 		
 		//new cell?
 		if (truncatedCode != currentCellTruncatedCode)

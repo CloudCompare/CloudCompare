@@ -172,13 +172,13 @@ protected:
 			assert(indexes);
 			levelDesc.startIndex = indexes->currentSize();
 		
-			CCLib::DgmOctree::OctreeCellCodeType currentTruncatedCellCode = 0xFFFFFFFF;
+			CCLib::DgmOctree::CellCode currentTruncatedCellCode = 0xFFFFFFFF;
 
 			//scan the octree structure
 			const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
 			for (CCLib::DgmOctree::cellsContainer::const_iterator c=thePointsAndTheirCellCodes.begin(); c!=thePointsAndTheirCellCodes.end(); ++c)
 			{
-				CCLib::DgmOctree::OctreeCellCodeType truncatedCode = (c->theCode >> bitDec);
+				CCLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
 
 				//new cell?
 				if (truncatedCode != currentTruncatedCellCode)
@@ -2459,34 +2459,52 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 		return;
 	}
 
-	//construct the corresponding frustum object
-	Frustum frustum(camera.modelViewMat, camera.projectionMat);
-	ccGLMatrixd PM = camera.projectionMat * camera.modelViewMat;
-	const double* _PM = PM.data();
-	double pixW = 1.0 / camera.viewport[2];
-	double pixH = 1.0 / camera.viewport[3];
+	//actual point size
+	float pointSize = 1.0f;
+	glFunc->glGetFloatv(GL_POINT_SIZE, &pointSize);
+
+	//'scale' of the model view matrix
+	double mvScale = camera.modelViewMat.getColumnAsVec3D(0).norm();
+	assert(	camera.modelViewMat.data()[ 3] == 0
+		&&	camera.modelViewMat.data()[ 7] == 0
+		&&	camera.modelViewMat.data()[11] == 0
+		&&	camera.modelViewMat.data()[15] == 1.0);
 
 	//starting level of subdivision
 	unsigned char minLevel = 1;
 
 	//ending level of subdivision (no need to go too deep!)
-	//assert(MAX_OCTREE_LEVEL >= 0 && MAX_OCTREE_LEVEL < 256);
-	//const unsigned char maxLevel = static_cast<unsigned char>(MAX_OCTREE_LEVEL);
-	//const unsigned char maxLevel = octree.findBestLevelForAGivenPopulationPerCell(256);
-	unsigned char maxLevel = 12;
+	assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL >= 0 && CCLib::DgmOctree::MAX_OCTREE_LEVEL < 256);
+	unsigned char maxLevel = static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
+	//find the max level for which all cells have one and only one point
+	for (; maxLevel > 1; --maxLevel)
+	{
+		if (octree.getCellNumber(maxLevel) != octree.getCellNumber(maxLevel - 1))
+		{
+			break;
+		}
+	}
+
+	//in orthographic mode, the cell size doesn't depend on its depth!
+	//therefore we can already determine the deepest octree depth that
+	//correspond to (too) small cells (i.e. <= 1 pixel)
 	if (!camera.perspective)
 	{
-		//compute the max octree level below which the cells are too small (i.e. < 1 pixel)
+		const double* _P = camera.projectionMat.data();
+
 		for (; maxLevel > minLevel; --maxLevel)
 		{
-			double cellSize = octree.getCellSize(maxLevel);
-			//compute the cell width in 2D
-			double dx = (_PM[0] + _PM[4] + _PM[8]) * cellSize;
-			double dy = (_PM[1] + _PM[5] + _PM[9]) * cellSize;
+			PointCoordinateType cellSize = octree.getCellSize(maxLevel) * mvScale;
 
-			//if the cell is too small, we only need to display the first point
-			if (fabs(dx) >= pixW || fabs(dy) >= pixH)
+			double deltaX = (_P[0] + _P[4] + _P[8]) * cellSize;
+			double deltaY = (_P[1] + _P[5] + _P[9]) * cellSize;
+
+			double deltaXPix = deltaX * camera.viewport[2];
+			double deltaYPix = deltaY * camera.viewport[3];
+
+			//we stop as soon as the cell size is > 1 pixel
+			if (fabs(deltaXPix) > pointSize || fabs(deltaYPix) > pointSize)
 			{
 				break;
 			}
@@ -2497,27 +2515,38 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 	{
 		CCVector3 bbMin, bbMax;
 		getBoundingBox(bbMin, bbMax);
-		Frustum::Intersection cloudIntersect = frustum.boxInFrustum(AABox(bbMin, bbMax));
+
+		Frustum::Intersection cloudIntersect = Frustum(camera.modelViewMat, camera.projectionMat).boxInFrustum(AABox(bbMin, bbMax));
 		if (cloudIntersect == Frustum::OUTSIDE)
 		{
 			return;
 		}
-		else if (cloudIntersect == Frustum::INSIDE && !camera.perspective)
-		{
-			//we don't need to bother filetering the cells
-			//(we can display all of them at the max level!)
-			minLevel = maxLevel;
-		}
+		//else if (cloudIntersect == Frustum::INSIDE && !camera.perspective)
+		//{
+		//	//we don't need to bother filetering the cells
+		//	//(we can display all of them at the max level!)
+		//	minLevel = maxLevel;
+		//}
 	}
 
+	//construct the LOCAL frustum
+	ccGLMatrixd localModelViewMat = camera.modelViewMat;
+	{
+		ccGLMatrixd transToOctreeMin;
+		transToOctreeMin.setTranslation(octree.getOctreeMins());
+		
+		localModelViewMat = localModelViewMat * transToOctreeMin;
+	}
+	Frustum localFrustum(localModelViewMat, camera.projectionMat);
+
 	unsigned char level = minLevel;
-	//binary shift for cell code truncation at current level
-	unsigned char currentBitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 	//current cell code
-	CCLib::DgmOctree::OctreeCellCodeType currentCellCode = CCLib::DgmOctree::INVALID_CELL_CODE;
-	CCLib::DgmOctree::OctreeCellCodeType currentCellTruncatedCode = CCLib::DgmOctree::INVALID_CELL_CODE;
+	CCLib::DgmOctree::CellCode previousCellCode = CCLib::DgmOctree::INVALID_CELL_CODE;
 	//whether the current cell should be skipped or not
-	bool skipThisCell = false;
+	//bool skipThisCell = false;
+	//no need to split the cells below a given level
+	unsigned char maxSplitLevel = octree.findBestLevelForAGivenPopulationPerCell(128);
+	maxSplitLevel = std::min<unsigned char>(maxSplitLevel, (maxLevel > 2 ? maxLevel - 2 : 1));
 
 	//active scalar field (if any)
 	ccScalarField* activeSF = glParams.showSF ? m_currentDisplayedScalarField : 0;
@@ -2525,6 +2554,41 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 	//compressed normals set
 	const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
 	assert(compressedNormals);
+
+	//acceleration structures (perspective mode)
+	double cellRadius[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1] = { 0 };
+	double squareCellRadius[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1] = { 0 };
+	if (camera.perspective)
+	{
+		for (int i = 1/*0*/; i <= maxLevel/*CCLib::DgmOctree::MAX_OCTREE_LEVEL*/; ++i)
+		{
+			double halfCellSize = octree.getCellSize(i) / 2;
+			//cellRadius[i] = halfCellSize * 1.73 * mvScale; //~ sqrt(3)
+			cellRadius[i] = halfCellSize * 1.25 * mvScale; //empiricial
+			squareCellRadius[i] = cellRadius[i] * cellRadius[i];
+		}
+	}
+
+	//mask for each level
+	const CCLib::DgmOctree::CellCode FULL_CELL_MASK = (~static_cast<CCLib::DgmOctree::CellCode>(0));
+	CCLib::DgmOctree::CellCode levelMask[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1] = { 0 };
+	{
+		CCLib::DgmOctree::CellCode antiMask = 0;
+
+		for (int i = CCLib::DgmOctree::MAX_OCTREE_LEVEL; i > 0; --i)
+		{
+			levelMask[i] = (FULL_CELL_MASK ^ antiMask);
+			antiMask <<= 3;
+			antiMask |= 7;
+		}
+	}
+
+	//cell (center) position at the given level
+	CCVector3 cellOrigin[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1];
+	cellOrigin[0] = CCVector3(0, 0, 0);
+
+	//mask for the displayed points (may be different than the cell mask
+	CCLib::DgmOctree::CellCode displayMask = levelMask[maxLevel];
 
 	//we use buffers for faster display
 	PointCoordinateType* _points = s_pointBuffer;
@@ -2546,93 +2610,123 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 	for (CCLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin(); it != thePointsAndTheirCellCodes.end(); ++it)
 	{
 		//new cell?
-		if ((it->theCode >> currentBitDec) != currentCellTruncatedCode)
+		if ((it->theCode & levelMask[level]) != (previousCellCode & levelMask[level]))
 		{
-			skipThisCell = false;
-
 			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
 			for (; level > minLevel; --level)
 			{
-				unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level - 1);
-				if ((it->theCode >> bitDec) == (currentCellCode >> bitDec))
+				if ((it->theCode & levelMask[level - 1]) == (previousCellCode & levelMask[level - 1]))
 				{
-					//same parent cell, we can stop here
+					//same parent cell, we can continue at this level
 					break;
 				}
 			}
 
-			currentCellCode = it->theCode;
+			//default behavior: display all the points at 'max level'
+			displayMask = levelMask[maxLevel];
 
-			//now try to go deeper with the new cell
-			if (level != maxLevel)
+			//shall we go deeper?
+			if (level < maxLevel)
 			{
-				for (; level <= maxLevel; ++level)
+				Frustum::Intersection inter = Frustum::OUTSIDE;
+				for (; level < maxLevel; ++level)	//we could go up to maxLevel (to test if the cell is outside)
+													//but it would represent a lot of wasted computation for cells
+													//that are already very small anyway
 				{
-					Tuple3i cellPos;
-					octree.getCellPos(it->theCode, level, cellPos, false);
+					//whether the cell should be tested for intersection with the frustum
+					bool splitCell = (inter != Frustum::INSIDE && level <= maxSplitLevel);
 
-					//first test with the total bounding box
-					const PointCoordinateType& cellSize = octree.getCellSize(level);
-					CCVector3 A = octree.getOctreeMins() + CCVector3(	cellPos.x * cellSize,
-																		cellPos.y * cellSize,
-																		cellPos.z * cellSize);
-
-					CCVector3 B = A + CCVector3(cellSize, cellSize, cellSize);
-
-					//check intersection with the frustum
-					Frustum::Intersection inter = frustum.boxInFrustum(AABox(A, B));
-
-					if (inter == Frustum::OUTSIDE)
+					//update cell origin
+					if (	splitCell
+#ifdef FILTER_SMALL_CELLS
+						||	camera.perspective //we need to know the cell center (to test the cell visibility)
+#endif
+						)
 					{
-						skipThisCell = true;
-						break;
-					}
-					else if (level == maxLevel)
-					{
-						break;
-					}
-					else if (inter == Frustum::INSIDE)
-					{
-						//in perspective mode, we have to check the cell size
-						//(if it's small enough, we can draw the first point and skip the rest)
-						if (camera.perspective)
+						const PointCoordinateType& cellSize = octree.getCellSize(level);
+
+						CCVector3 O = cellOrigin[level - 1];
 						{
-							//compute the cell width in 2D
-							double aw = _PM[3] * A.x + _PM[7] * A.y + _PM[11] * A.z + _PM[15];
-							double bw = _PM[3] * B.x + _PM[7] * B.y + _PM[11] * B.z + _PM[15];
+							unsigned char levelBits = static_cast<unsigned char>((it->theCode >> CCLib::DgmOctree::GET_BIT_SHIFT(level)) & 7);
+							if (levelBits & 1)
+								O.x += cellSize;
+							if (levelBits & 2)
+								O.y += cellSize;
+							if (levelBits & 4)
+								O.z += cellSize;
+						}
+						cellOrigin[level] = O;
 
-							//double ax = _PM[0] * A.x + _PM[4] * A.y + _PM[8] * A.z + _PM[12];
-							//double ay = _PM[1] * A.x + _PM[5] * A.y + _PM[9] * A.z + _PM[13];
-							//
-							//double bx = _PM[0] * B.x + _PM[4] * B.y + _PM[8] * B.z + _PM[12];
-							//double by = _PM[1] * B.x + _PM[5] * B.y + _PM[9] * B.z + _PM[13];
+#ifdef FILTER_SMALL_CELLS
+						if (splitCell)
+#endif
+						{
+#ifdef DGM_OCTREE_LOD_TESTS
+							++context.cellInclusionTestCount;
+#endif
 
-							//double dx = bx / bw - ax / aw; // * (width / 2) = width in pixels
-							//double dy = by / bw - ay / aw; // * (height / 2) = height in pixels
-						
-							Tuple4Tpl<double> Q(B.x / bw - A.x / aw,
-												B.y / bw - A.y / aw,
-												B.z / bw - A.z / aw,
-												1.0 / bw - 1.0 / aw);
-
-							double dx = _PM[0] * Q.x + _PM[4] * Q.y + _PM[8] * Q.z + _PM[12] * Q.w;
-							double dy = _PM[1] * Q.x + _PM[5] * Q.y + _PM[9] * Q.z + _PM[13] * Q.w;
-
-							//if the cell is too small, we display the first point and then we skip the others
-							if (fabs(dx) <= pixW && fabs(dy) <= pixH)
+							//test: check the intersection of the cell with the frustum
+							inter = localFrustum.boxInFrustum(AACube(cellOrigin[level], cellSize));
+							if (inter == Frustum::OUTSIDE)
 							{
+								//the cell is not visible (we can skip this cell)
+								displayMask = 0;
 								break;
 							}
+							else if (inter == Frustum::INTERSECT && level == maxSplitLevel)
+							{
+								//we consider this cell as beeing fully INSIDE so as to stop splitting it!
+								inter = Frustum::INSIDE;
+							}
+						}
+					}
+
+					if (inter == Frustum::INSIDE)
+					{
+						//in perspective mode, we have to check the cell size
+						//(if it's small enough, we can draw the first point and skip the remaining part)
+						if (camera.perspective)
+						{
+#ifdef FILTER_SMALL_CELLS
+							if (level > 10)
+							{
+								//compute the cell center
+								const double& halfCellSize = octree.getCellSize(level + 1); //level < maxLevel, i.e. level < DgmOctree::MAX_OCTREE_LEVEL
+								CCVector3 C = cellOrigin[level] + CCVector3(halfCellSize, halfCellSize, halfCellSize);
+
+								localModelViewMat.apply(C);
+								double squareDistToCamera = C.norm2();
+
+								if (squareDistToCamera > squareCellRadius[level])
+								{
+									//cellHeight ~ radius / (tan(fov/2) * sqrt(distance^2 - radius^2)) 
+									//and projMat[5] = 1 / tan(fov/2) !!!
+									double cellHeightPr = camera.projectionMat.data()[5] * cellRadius[level] / sqrt(squareDistToCamera - squareCellRadius[level]);
+									double cellRadiusPix = cellHeightPr * camera.viewport[3];
+									if (cellRadiusPix <= pointSize)
+									{
+										//no need to go deeper
+										displayMask = levelMask[level];
+										break;
+									}
+								}
+							}
+#else
+							break;
+#endif
+						}
+						else //orthographic mode
+						{
+							//we can stop going deeper and display the points at max level
+							break;
 						}
 					}
 				}
 			}
-			
-			currentBitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
-			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
 		}
 
-		if (!skipThisCell)
+		//shall we display this cell?
+		if ((it->theCode & displayMask) != (previousCellCode & displayMask))
 		{
 			//we shouldn't test points that are actually hidden!
 			if (m_pointsVisibility && m_pointsVisibility->getValue(it->theIndex) != POINT_VISIBLE)
@@ -2648,7 +2742,7 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 				{
 					if (m_pointsVisibility)
 					{
-						//we force display of points hidden because of their scalar field value
+						//we force the display of points hidden because of their scalar field value
 						//to be sure that the user doesn't miss them (during manual segmentation for instance)
 						col = ccColor::lightGrey.rgba;
 					}
@@ -2688,10 +2782,18 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 			*_points++ = P->y;
 			*_points++ = P->z;
 
-			++bufferCount;
+			//test
+			//Tuple3i cellPos;
+			//octree.getCellPos(it->theCode, level, cellPos, false);
+			//CCVector3 C;
+			//octree.computeCellCenter(cellPos, level, C);
+			//*_points++ = C.x;
+			//*_points++ = C.y;
+			//*_points++ = C.z;
+
 
 			//buffer is full, we can send it to the GPU
-			if (bufferCount == MAX_POINT_COUNT_PER_LOD_RENDER_PASS)
+			if (++bufferCount == MAX_POINT_COUNT_PER_LOD_RENDER_PASS)
 			{
 				glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, s_pointBuffer);
 				if (_rgb != s_rgbBuffer3ub)
@@ -2704,16 +2806,24 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 				}
 				glFunc->glDrawArrays(GL_POINTS, 0, bufferCount);
 
+#ifdef DGM_OCTREE_LOD_TESTS
+				context.displayedPointCount += bufferCount;
+#endif
 				//reset buffer
 				_points = s_pointBuffer;
 				_normals = s_normalBuffer;
 				_rgb = s_rgbBuffer3ub;
 				bufferCount = 0;
 			}
-
-			//auto disable the remaining part of the cell
-			skipThisCell = true;
 		}
+		else
+		{
+#ifdef DGM_OCTREE_LOD_TESTS
+			++context.skippedPointCount;
+#endif
+		}
+
+		previousCellCode = it->theCode;
 	}
 
 	//buffer is not empty? we send the remaining data to the GPU
@@ -2730,6 +2840,9 @@ void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
 		}
 		glFunc->glDrawArrays(GL_POINTS, 0, bufferCount);
 
+#ifdef DGM_OCTREE_LOD_TESTS
+		context.displayedPointCount += bufferCount;
+#endif
 		//reset buffer
 		_points = s_pointBuffer;
 		_normals = s_normalBuffer;

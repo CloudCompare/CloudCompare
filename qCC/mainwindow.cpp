@@ -55,6 +55,7 @@
 
 //QCC_glWindow
 #include <ccRenderingTools.h>
+#include <ccGLWidget.h>
 
 //local includes
 #include "ccConsole.h"
@@ -265,11 +266,9 @@ MainWindow::~MainWindow()
 	//we don't want any other dialog/function to use the following structures
 	ccDBRoot* ccRoot = m_ccRoot;
 	m_ccRoot = 0;
-	if (m_mdiArea)
+	for (int i = 0; i < getGLWindowCount(); ++i)
 	{
-		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-		for (int i=0; i<subWindowList.size(); ++i)
-			static_cast<ccGLWindow*>(subWindowList[i]->widget())->setSceneDB(0);
+		getGLWindow(i)->setSceneDB(0);
 	}
 	m_cpeDlg = 0;
 	m_gsTool = 0;
@@ -5687,26 +5686,49 @@ ccGLWindow* MainWindow::getActiveGLWindow()
 	QMdiSubWindow *activeSubWindow = m_mdiArea->activeSubWindow();
 	if (activeSubWindow)
 	{
-		return static_cast<ccGLWindow*>(activeSubWindow->widget());
+		return ccGLWidget::FromWidget(activeSubWindow->widget());
 	}
 	else
 	{
 		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 		if (!subWindowList.isEmpty())
 		{
-			return static_cast<ccGLWindow*>(subWindowList[0]->widget());
+			return ccGLWidget::FromWidget(subWindowList[0]->widget());
 		}
 	}
 
 	return 0;
 }
 
+int MainWindow::getGLWindowCount() const
+{
+	return m_mdiArea ? m_mdiArea->subWindowList().size() : 0;
+}
+
+ccGLWindow* MainWindow::getGLWindow(int index) const
+{
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	if (index >= 0 && index < subWindowList.size())
+	{
+		ccGLWindow* win = ccGLWidget::FromWidget(subWindowList[index]->widget());
+		assert(win);
+		return win;
+	}
+	else
+	{
+		assert(false);
+		return 0;
+	}
+}
+
 QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	for (int i=0; i<subWindowList.size(); ++i)
-		if (static_cast<ccGLWindow*>(subWindowList[i]->widget()) == win)
+	for (int i = 0; i < subWindowList.size(); ++i)
+	{
+		if (ccGLWidget::FromWidget(subWindowList[i]->widget()) == win)
 			return subWindowList[i];
+	}
 
 	//not found!
 	return 0;
@@ -5736,12 +5758,13 @@ ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
 
-	ccGLWindow *view3D = new ccGLWindow(this);
+	ccGLWidget* viewWidget = ccGLWidget::Create(true, false);
+	ccGLWindow *view3D = viewWidget->associatedWindow();
 
-	view3D->setMinimumSize(400,300);
-	view3D->resize(500,400);
+	viewWidget->setMinimumSize(400, 300);
+	viewWidget->resize(500, 400);
 
-	m_mdiArea->addSubWindow(view3D);
+	m_mdiArea->addSubWindow(viewWidget);
 
 	connect(view3D,	SIGNAL(entitySelectionChanged(ccHObject*)),					m_ccRoot,	SLOT(selectEntity(ccHObject*)));
 	connect(view3D,	SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	m_ccRoot,	SLOT(selectEntities(std::unordered_set<int>)));
@@ -5760,12 +5783,12 @@ ccGLWindow* MainWindow::new3DView()
 	connect(view3D,	SIGNAL(exclusiveFullScreenToggled(bool)),			this,		SLOT(onExclusiveFullScreenToggled(bool)));
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
-	view3D->setAttribute(Qt::WA_DeleteOnClose);
+	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
 	m_ccRoot->updatePropertiesView();
 
 	QMainWindow::statusBar()->showMessage(QString("New 3D View"), 2000);
 
-	view3D->showMaximized();
+	viewWidget->showMaximized();
 
 	return view3D;
 }
@@ -8698,6 +8721,12 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 		if (isActive)
 		{
 			win->disableStereoMode();
+
+			if (win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+			{
+				//disable (exclusive) full screen
+				actionExclusiveFullScreen->setChecked(false);
+			}
 		}
 		else
 		{
@@ -8751,13 +8780,30 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 		
 	if (win && win->getViewportParameters().perspectiveView && win->stereoModeIsEnabled())
 	{
-		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(	this,
+									"Stereo mode",
+									"Stereo-mode only works in perspective mode. Do you want to disable it?",
+									QMessageBox::Yes,
+									QMessageBox::No) == QMessageBox::No )
 		{
 			return false;
 		}
 		else
 		{
-			win->disableStereoMode();
+			if (win == getActiveGLWindow())
+			{
+				actionEnableStereo->setChecked(false);
+			}
+			else
+			{
+				assert(false);
+				win->disableStereoMode();
+				if (win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+				{
+					//disable (exclusive) full screen
+					win->toggleExclusiveFullScreen(false);
+				}
+			}
 			actionEnableStereo->blockSignals(true);
 			actionEnableStereo->setChecked(false);
 			actionEnableStereo->blockSignals(false);
@@ -9271,7 +9317,7 @@ void MainWindow::doActionSaveFile()
 			{
 				bool isExclusive = true;
 				bool multiple = false;
-				canExportClouds = (		filter->canSave(CC_TYPES::POINT_CLOUD,multiple,isExclusive)
+				canExportClouds = (		filter->canSave(CC_TYPES::POINT_CLOUD, multiple, isExclusive)
 									&&	(multiple || clouds.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
 			}
@@ -9282,7 +9328,7 @@ void MainWindow::doActionSaveFile()
 			{
 				bool isExclusive = true;
 				bool multiple = false;
-				canExportMeshes = (		filter->canSave(CC_TYPES::MESH,multiple,isExclusive)
+				canExportMeshes = (		filter->canSave(CC_TYPES::MESH, multiple, isExclusive)
 									&&	(multiple || meshes.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
 			}
@@ -9293,7 +9339,7 @@ void MainWindow::doActionSaveFile()
 			{
 				bool isExclusive = true;
 				bool multiple = false;
-				canExportPolylines = (	filter->canSave(CC_TYPES::POLY_LINE,multiple,isExclusive)
+				canExportPolylines = (	filter->canSave(CC_TYPES::POLY_LINE, multiple, isExclusive)
 									&&	(multiple || polylines.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
 			}
@@ -9304,7 +9350,7 @@ void MainWindow::doActionSaveFile()
 			{
 				bool isExclusive = true;
 				bool multiple = false;
-				canExportImages = (		filter->canSave(CC_TYPES::IMAGE,multiple,isExclusive)
+				canExportImages = (		filter->canSave(CC_TYPES::IMAGE, multiple, isExclusive)
 									&&	(multiple || images.getChildrenNumber() == 1) );
 				atLeastOneExclusive |= isExclusive;
 			}
@@ -9332,7 +9378,7 @@ void MainWindow::doActionSaveFile()
 					ccHObject* child = otherSerializable.getChild(j);
 					bool isExclusive = true;
 					bool multiple = false;
-					canExportSerializables &= (		filter->canSave(child->getUniqueID(),multiple,isExclusive)
+					canExportSerializables &= (		filter->canSave(child->getUniqueID(), multiple, isExclusive)
 												&&	(multiple || otherSerializable.getChildrenNumber() == 1) );
 					atLeastOneExclusive |= isExclusive;
 				}
@@ -9483,7 +9529,7 @@ void MainWindow::doActionSaveFile()
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 {
-	ccGLWindow* win = mdiWin ? static_cast<ccGLWindow*>(mdiWin->widget()) : 0;
+	ccGLWindow* win = mdiWin ? ccGLWidget::FromWidget(mdiWin->widget()) : 0;
 	if (win)
 	{
 		updateViewModePopUpMenu(win);
@@ -9580,7 +9626,7 @@ void MainWindow::updateMenus()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	bool hasMdiChild = (win != 0);
-	int mdiChildCount = m_mdiArea->subWindowList().size();
+	int mdiChildCount = getGLWindowCount();
 	bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities() > 0);
 
 	//General Menu
@@ -9650,9 +9696,9 @@ void MainWindow::update3DViewsMenu()
 
 		for (int i=0; i<windows.size(); ++i)
 		{
-			QWidget *child = windows.at(i)->widget();
+			ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 
-			QString text = QString("&%1 %2").arg(i + 1).arg(child->windowTitle());
+			QString text = QString("&%1 %2").arg(i + 1).arg(child->title());
 			QAction *action = menu3DViews->addAction(text);
 			action->setCheckable(true);
 			action ->setChecked(child == getActiveGLWindow());
@@ -9673,14 +9719,14 @@ void MainWindow::redrawAll(bool only2D/*=false*/)
 {
 	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
-		static_cast<ccGLWindow*>(windows.at(i)->widget())->redraw(only2D);
+		ccGLWidget::FromWidget(windows.at(i)->widget())->redraw(only2D);
 }
 
 void MainWindow::refreshAll(bool only2D/*=false*/)
 {
 	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
-		static_cast<ccGLWindow*>(windows.at(i)->widget())->refresh(only2D);
+		ccGLWidget::FromWidget(windows.at(i)->widget())->refresh(only2D);
 }
 
 void MainWindow::updateUI()
@@ -9733,7 +9779,7 @@ void MainWindow::disableAllBut(ccGLWindow* win)
 	//we disable all other windows
 	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
-		if (static_cast<ccGLWindow*>(windows.at(i)->widget()) != win)
+		if (ccGLWidget::FromWidget(windows.at(i)->widget()) != win)
 			windows.at(i)->setEnabled(false);
 }
 
@@ -9911,7 +9957,7 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
 	{
-		ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+		ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 		if (child != sendingWindow)
 		{
 			child->blockSignals(true);
@@ -9934,11 +9980,11 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
 	{
-		ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+		ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 		if (child != sendingWindow)
 		{
 			child->blockSignals(true);
-			child->moveCamera(ddx,ddy,0.0f);
+			child->moveCamera(ddx, ddy, 0.0f);
 			child->blockSignals(false);
 			child->redraw();
 		}
@@ -9957,7 +10003,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	for (int i=0; i<windows.size(); ++i)
 	{
-		ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+		ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 		if (child != sendingWindow)
 		{
 			child->blockSignals(true);
@@ -9980,7 +10026,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	 for (int i=0; i<windows.size(); ++i)
 	 {
-		 ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+		 ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 		 if (child != sendingWindow)
 		 {
 			 child->blockSignals(true);
@@ -10003,7 +10049,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	 for (int i=0; i<windows.size(); ++i)
 	 {
-		 ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+		 ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 		 if (child != sendingWindow)
 		 {
 			 child->blockSignals(true);
@@ -10026,7 +10072,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
 	 for (int i=0; i<windows.size(); ++i)
 	 {
-		 ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+		 ccGLWindow *child = ccGLWidget::FromWidget(windows.at(i)->widget());
 		 if (child != sendingWindow)
 		 {
 			 child->blockSignals(true);
@@ -10095,8 +10141,10 @@ void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
 	glWindows.clear();
 	glWindows.reserve(winNum);
 
-	for (int i=0; i<winNum; ++i)
-		glWindows.push_back(static_cast<ccGLWindow*>(windows.at(i)->widget()));
+	for (int i = 0; i < winNum; ++i)
+	{
+		glWindows.push_back(ccGLWidget::FromWidget(windows.at(i)->widget()));
+	}
 }
 
 ccGLWindow* MainWindow::GetActiveGLWindow()
@@ -10114,8 +10162,8 @@ ccGLWindow* MainWindow::GetGLWindow(const QString& title)
 
 	for (int i=0; i<winNum; ++i)
 	{
-		ccGLWindow* win = static_cast<ccGLWindow*>(windows.at(i)->widget());
-		if (win->windowTitle() == title)
+		ccGLWindow* win = ccGLWidget::FromWidget(windows.at(i)->widget());
+		if (win->title() == title)
 			return win;
 	}
 

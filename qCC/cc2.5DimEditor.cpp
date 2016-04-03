@@ -34,7 +34,7 @@
 #include <ccProgressDialog.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWidget.h>
 
 //Qt
 #include <QFrame>
@@ -118,7 +118,8 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 {
 	if (!m_window)
 	{
-		m_window = new ccGLWindow(parentFrame);
+		ccGLWidget* glWidget = ccGLWidget::Create(false, true);
+		m_window = glWidget->associatedWindow();
 		
 		ccGui::ParamStruct params = m_window->getDisplayParameters();
 		//black (text) & white (background) display by default
@@ -138,7 +139,7 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 		if (parentFrame)
 		{
 			parentFrame->setLayout(new QHBoxLayout());
-			parentFrame->layout()->addWidget(m_window);
+			parentFrame->layout()->addWidget(glWidget);
 		}
 	}
 }

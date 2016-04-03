@@ -783,7 +783,11 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			if (poly->filterChildren(viewports,false,CC_TYPES::VIEWPORT_2D_OBJECT,true) == 1)
 			{
 				//shall we apply this viewport?
-				if (QMessageBox::question(m_associatedWin,"Associated viewport","The selected polyline has an associated viewport: do you want to apply it?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+				if (QMessageBox::question(	m_associatedWin ? m_associatedWin->asWidget() : 0,
+											"Associated viewport",
+											"The selected polyline has an associated viewport: do you want to apply it?",
+											QMessageBox::Yes,
+											QMessageBox::No) == QMessageBox::Yes)
 				{
 					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject*>(viewports.front())->getParameters());
 					m_associatedWin->redraw(false);

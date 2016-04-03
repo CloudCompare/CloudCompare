@@ -142,6 +142,12 @@ public:
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
+	//! Returns a given views
+	ccGLWindow* getGLWindow(int index) const;
+
+	//! Returns the number of 3D views
+	int getGLWindowCount() const;
+
 	//! Backup "context" for an object
 	/** Used with removeObjectTemporarilyFromDBTree/putObjectBackIntoDBTree.
 	**/

@@ -32,6 +32,9 @@
 #include <QByteArray>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLExtensions>
+#include <QWindow>
+#include <QWidget>
+#include <QHBoxLayout>
 
 //system
 #include <unordered_set>
@@ -50,7 +53,7 @@ class ccInteractor;
 class ccPolyline;
 
 //! OpenGL 3D view
-class ccGLWindow : public QOpenGLWidget, public ccGenericGLDisplay
+class ccGLWindow : public QWindow, public ccGenericGLDisplay
 {
 	Q_OBJECT
 
@@ -123,10 +126,13 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(	QWidget *parent = 0, bool silentInitialization = false);
+	ccGLWindow(QSurfaceFormat* format = 0, QWindow *parent = 0, bool silentInitialization = false);
 
 	//! Destructor
 	virtual ~ccGLWindow();
+
+	//! Sets 'parent' widget
+	void setParentWidget(QWidget* widget);
 
 	//! Sets 'scene graph' root
 	void setSceneDB(ccHObject* root);
@@ -148,8 +154,9 @@ public:
 	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
-	inline virtual QWidget* asWidget() override { return this; }
+	inline virtual QWidget* asWidget() override { return m_parentWidget; }
 	inline virtual QSize getScreenSize() const override { return size(); }
+	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -298,9 +305,6 @@ public:
 		(see setPerspectiveState).
 	**/
 	virtual const void setBaseViewMat(ccGLMatrixd& mat);
-
-	//! Returns the current OpenGL camera parameters
-	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -496,6 +500,9 @@ public:
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
 
+	//! Returns the font
+	inline const QFont& font() const { return m_font; }
+
 public: //LOD
 
 	//! Returns whether LOD is enabled on this display or not
@@ -512,7 +519,7 @@ public: //fullscreen
 	void toggleExclusiveFullScreen(bool state);
 
 	//! Returns whether the window is in exclusive full screen mode or not
-	bool exclusiveFullScreen() const;
+	inline bool exclusiveFullScreen() const { return m_exclusiveFullscreen; }
 
 public: //debug traces on screen
 
@@ -693,6 +700,18 @@ signals:
 
 protected: //rendering
 
+	//Default OpenGL functions set
+	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
+
+	//! Returns the set of OpenGL functions
+	inline ccQOpenGLFunctions* functions() const { return m_context ? m_context->versionFunctions<ccQOpenGLFunctions>() : 0; }
+
+	//! Updates the display
+	inline void update() { paintGL(); }
+
+	//! Returns the context (if any)
+	inline QOpenGLContext* context() const { return m_context; }
+
 	//reimplemented from QOpenGLWidget
 	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
 	//we need to automatically bind our own afterwards!
@@ -803,14 +822,15 @@ protected: //other methods
 	void mouseMoveEvent(QMouseEvent *event) override;
 	void mouseReleaseEvent(QMouseEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
-	void closeEvent(QCloseEvent *event) override;
-	//void paintEvent(QPaintEvent *event) override;
-
-	//inherited
-	void initializeGL() override;
-	void resizeGL(int w, int h) override;
-	void paintGL() override;
+	void exposeEvent(QExposeEvent *event) override;
 	bool event(QEvent* evt) override;
+
+	virtual void dragEnterEvent(QDragEnterEvent* event);
+	virtual void dropEvent(QDropEvent* event);
+
+	bool initializeGL();
+	void resizeGL(int w, int h);
+	void paintGL();
 
 	//Graphical features controls
 	void drawCross();
@@ -846,10 +866,6 @@ protected: //other methods
 
 	//! Draws pivot point symbol in 3D
 	void drawPivot();
-
-	//inherited from QWidget (drag & drop support)
-	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-	virtual void dropEvent(QDropEvent* event) override;
 
 	//! Picking parameters
 	struct PickingParameters
@@ -962,12 +978,6 @@ protected: //other methods
 	//! Returns the current (OpenGL) viewport
 	inline const QRect& getGLViewport() const { return m_glViewport; }
 
-	//Default OpenGL functions set
-	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
-
-	//! Returns the set of OpenGL functions
-	inline ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
-
 	//! Logs a GL error
 	/** Logs a warning or error message corresponding to the input GL error.
 		If error == GL_NO_ERROR, nothing is logged.
@@ -977,6 +987,9 @@ protected: //other methods
 		\return true if an error occurred, false otherwise
 	**/
 	static void LogGLError(GLenum error, const char* context);
+
+	//! Logs a GL error (shortcut)
+	void logGLError(const char* context) const;
 
 	//! Toggles auto-refresh mode
 	void toggleAutoRefresh(bool state, int period_ms = 0);
@@ -1212,8 +1225,14 @@ protected: //members
 	//! Whether seterovision mode is enabled or not
 	bool m_stereoModeEnabled;
 
+	//! Associated widget (we use the WidgetContainer mechanism)
+	QWidget* m_parentWidget;
 	//! Former parent object (for exclusive full-screen display)
 	QWidget* m_formerParent;
+
+	//! Wether exclusive full screen is enabled or not
+	bool m_exclusiveFullscreen;
+	
 	//! Former geometry (for exclusive full-screen display)
 	QByteArray m_formerGeometry;
 
@@ -1234,6 +1253,15 @@ protected: //members
 	//! Auto-refresh timer
 	QTimer m_autoRefreshTimer;
 
+	//! Associated OpenGL context
+	QOpenGLContext *m_context;
+
+	//! OpenGL device
+	QOpenGLPaintDevice *m_device;
+
+	//! Format
+	QSurfaceFormat m_format;
+
 private:
 
 	//! Returns shaders path
@@ -1242,4 +1270,4 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);
 
-#endif
+#endif //CC_GL_WINDOW_HEADER

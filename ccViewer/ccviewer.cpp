@@ -31,6 +31,7 @@
 
 //qCC_glWindow
 #include <ccGLWindow.h>
+#include <ccGLWidget.h>
 #include <ccGuiParameters.h>
 
 //qCC_io
@@ -79,8 +80,9 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		const int margin = 10;
 		verticalLayout->setContentsMargins(margin, margin, margin, margin);
 
-		m_glWindow = new ccGLWindow(ui.GLframe);
-		verticalLayout->addWidget(m_glWindow);
+		ccGLWidget* widget = ccGLWidget::Create(true, true);
+		m_glWindow = widget->associatedWindow();
+		verticalLayout->addWidget(widget);
 	}
 
 	updateGLFrameGradient();
@@ -771,6 +773,11 @@ void ccViewer::toggleStereoMode(bool state)
 	if (isActive)
 	{
 		m_glWindow->disableStereoMode();
+		if (m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+		{
+			//disable full screen
+			ui.actionFullScreen->setChecked(false);
+		}
 	}
 	else
 	{

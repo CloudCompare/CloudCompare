@@ -98,6 +98,7 @@ int main(int argc, char **argv)
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+		format.setOption(QSurfaceFormat::StereoBuffers, true);
 		format.setStereo(true);
 		format.setStencilBufferSize(0);
 #ifdef Q_OS_MAC
@@ -119,7 +120,7 @@ int main(int argc, char **argv)
 	qccApplication app(argc, argv);
 
 	//Force 'english' local so as to get a consistent behavior everywhere
-	QLocale::setDefault(QLocale::English);
+	//QLocale::setDefault(QLocale::English); //DGM: useless? (see below)
 
 	// We reset the numeric locale.
 	// See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
@@ -185,7 +186,7 @@ int main(int argc, char **argv)
 		//splash screen
 		splashStartTime.start();
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
+		splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
 		splash->show();
 		QApplication::processEvents();
 	}

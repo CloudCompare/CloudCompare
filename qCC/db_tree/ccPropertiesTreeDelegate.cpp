@@ -986,8 +986,10 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			comboBox->addItem(c_noneString);
 
-			for (unsigned i=0; i<glWindows.size(); ++i)
-				comboBox->addItem(glWindows[i]->windowTitle());
+			for (unsigned i = 0; i < glWindows.size(); ++i)
+			{
+				comboBox->addItem(glWindows[i]->title());
+			}
 
 			connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(objectDisplayChanged(const QString&)));
 
@@ -1389,7 +1391,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			}
 
 			ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
-			int pos = (win ? comboBox->findText(win->windowTitle()) : 0);
+			int pos = (win ? comboBox->findText(win->title()) : 0);
 
 			comboBox->setCurrentIndex(std::max(pos,0)); //0 = "NONE"
 			break;
@@ -1827,10 +1829,11 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : 0);
 	if (sf)
 	{
+		ccGLWindow* glWindow = static_cast<ccGLWindow*>(cloud->getDisplay());
 		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(	ccColorScalesManager::GetUniqueInstance(),
 																				MainWindow::TheInstance(),
 																				sf->getColorScale(),
-																				static_cast<ccGLWindow*>(cloud->getDisplay()));
+																				glWindow ? glWindow->asWidget() : 0);
 		editorDialog->setAssociatedScalarField(sf);
 		if (editorDialog->exec())
 		{
@@ -2200,7 +2203,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 
 	ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
 	if (win)
-		actualDisplayTitle = win->windowTitle();
+		actualDisplayTitle = win->title();
 	else
 		actualDisplayTitle = c_noneString;
 

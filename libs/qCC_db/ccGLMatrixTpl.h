@@ -139,16 +139,16 @@ public:
 		{
 			// "to" vector most nearly orthogonal to "from"
 			Vector3Tpl<T> x(0,0,0);
-			if (x.x < x.y)
+			if (fabs(from.x) < fabs(from.y))
 			{
-				if (x.x < x.z)
+				if (fabs(from.x) < fabs(from.z))
 					x.x = static_cast<T>(1);
 				else
 					x.z = static_cast<T>(1);
 			}
 			else
 			{
-				if (x.y < x.z)
+				if (fabs(from.y) < fabs(from.z))
 					x.y = static_cast<T>(1);
 				else
 					x.z = static_cast<T>(1);
@@ -166,9 +166,9 @@ public:
 			{
 				for (unsigned j=0; j<3; j++)
 				{
-					mat[i*4+j] =	  c3 * v.u[i] * u.u[j]
-									- c2 * v.u[i] * v.u[j]
-									- c1 * u.u[i] * u.u[j];
+					mat[i*4+j] =  c3 * v.u[i] * u.u[j]
+								- c2 * v.u[i] * v.u[j]
+								- c1 * u.u[i] * u.u[j];
 				}
 				mat[i*4+i] += static_cast<T>(1);
 			}

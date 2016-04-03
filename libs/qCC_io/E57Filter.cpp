@@ -2057,7 +2057,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		cameraType == E57_SPHERICAL)
 	{
 		SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
-		imageObj->setAspectRatio(static_cast<float>(spherical->pixelWidth/spherical->pixelHeight) * imageObj->getAspectRatio());
+		imageObj->setAspectRatio(static_cast<float>(spherical->pixelWidth / spherical->pixelHeight) * imageObj->getAspectRatio());
 	}
 
 	if (cameraRepresentation)

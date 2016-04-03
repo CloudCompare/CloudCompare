@@ -85,7 +85,7 @@ void ccImage::setData(const QImage& image)
 
 void ccImage::updateAspectRatio()
 {
-	setAspectRatio(m_height != 0 ? static_cast<float>(m_width)/m_height : 1.0f);
+	setAspectRatio(m_height != 0 ? static_cast<float>(m_width) / m_height : 1.0f);
 }
 
 void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)

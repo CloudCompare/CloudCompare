@@ -367,7 +367,7 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 	float fov_deg = static_cast<float>(m_intrinsicParams.vFOV_rad * CC_RAD_TO_DEG);
 	//camera position/orientation
 	ccGLMatrixd transd(trans.data());
-	win->setupProjectiveViewport(transd,fov_deg,ar);
+	win->setupProjectiveViewport(transd, fov_deg, ar);
 
 	return true;
 }

@@ -308,6 +308,20 @@ public: //display
 	ccHObject_recursive_call0(toggleShowName,toggleShowName_recursive)
 	ccHObject_recursive_call0(toggleMaterials,toggleMaterials_recursive)
 
+	//! Transfers the entity from one display to the other
+	inline virtual void transferDisplay(ccGenericGLDisplay* oldDisplay, ccGenericGLDisplay* newDisplay)
+	{
+		if (getDisplay() == oldDisplay)
+		{
+			setDisplay(newDisplay);
+		}
+	
+		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+		{
+			(*it)->transferDisplay(oldDisplay, newDisplay);
+		}
+	} 
+
 	//! Returns the max 'unique ID' of this entity and its siblings
 	unsigned findMaxUniqueID_recursive() const;
 

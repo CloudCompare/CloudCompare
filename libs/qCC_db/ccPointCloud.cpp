@@ -1877,6 +1877,13 @@ void ccPointCloud::translate(const CCVector3& T)
 			static_cast<ccKdTree*>(kdtrees[i])->translateBoundingBox(T);
 		}
 	}
+
+	//update the transformation history
+	{
+		ccGLMatrix trans;
+		trans.setTranslation(T);
+		m_glTransHistory = trans * m_glTransHistory;
+	}
 }
 
 void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center)

@@ -499,15 +499,15 @@ namespace ccLibAlgorithms
 	}
 	
 	
-	bool ApplyScaleMatchingAlgorithm(ScaleMatchingAlgorithm algo,
-												ccHObject::Container& entities,
-												double icpRmsDiff,
-												int icpFinalOverlap,
-												unsigned refEntityIndex/*=0*/,
-												QWidget* parent/*=0*/)
+	bool ApplyScaleMatchingAlgorithm(	ScaleMatchingAlgorithm algo,
+										ccHObject::Container& entities,
+										double icpRmsDiff,
+										int icpFinalOverlap,
+										unsigned refEntityIndex/*=0*/,
+										QWidget* parent/*=0*/)
 	{
 		if (	entities.size() < 2
-				||	refEntityIndex >= entities.size())
+			||	refEntityIndex >= entities.size())
 		{
 			ccLog::Error("[ApplyScaleMatchingAlgorithm] Invalid input parameter(s)");
 			return false;
@@ -516,7 +516,7 @@ namespace ccLibAlgorithms
 		std::vector<double> scales;
 		try
 		{
-			scales.resize(entities.size(),-1.0);
+			scales.resize(entities.size(), -1.0);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -527,7 +527,7 @@ namespace ccLibAlgorithms
 		//check the reference entity
 		ccHObject* refEntity = entities[refEntityIndex];
 		if (	!refEntity->isKindOf(CC_TYPES::POINT_CLOUD)
-				&&	!refEntity->isKindOf(CC_TYPES::MESH))
+			&&	!refEntity->isKindOf(CC_TYPES::MESH))
 		{
 			ccLog::Warning("[Scale Matching] The reference entity must be a cloud or a mesh!");
 			return false;
@@ -593,7 +593,7 @@ namespace ccLibAlgorithms
 							scales[i] = maxX-minX;
 						}
 					}
-						break;
+					break;
 						
 					case ICP_SCALE:
 					{
@@ -630,7 +630,7 @@ namespace ccLibAlgorithms
 						}
 						
 					}
-						break;
+					break;
 						
 					default:
 						assert(false);
@@ -649,7 +649,7 @@ namespace ccLibAlgorithms
 			}
 			
 			//if the reference entity is invalid!
-			if (scales[i] <= 0 &&  i == refEntityIndex)
+			if (scales[i] <= 0 && i == refEntityIndex)
 			{
 				ccLog::Error("Reference entity has an invalid scale! Can't proceed.");
 				return false;
@@ -692,7 +692,8 @@ namespace ccLibAlgorithms
 				if (algo == ICP_SCALE)
 					scaled = scales[i];
 				else
-					scaled = scales[refEntityIndex]/scales[i];
+					scaled = scales[refEntityIndex] / scales[i];
+				
 				PointCoordinateType scale_pc = static_cast<PointCoordinateType>(scaled);
 				
 				//we temporarily detach entity, as it may undergo
@@ -700,14 +701,16 @@ namespace ccLibAlgorithms
 				MainWindow* instance = dynamic_cast<MainWindow*>(parent);
 				MainWindow::ccHObjectContext objContext;
 				if (instance)
+				{
 					objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
+				}
 				
 				CCVector3 C = cloud->getOwnBB().getCenter();
 				
 				cloud->scale(	scale_pc,
-									scale_pc,
-									scale_pc,
-									C );
+								scale_pc,
+								scale_pc,
+								C );
 				
 				if (instance)
 					instance->putObjectBackIntoDBTree(cloud,objContext);

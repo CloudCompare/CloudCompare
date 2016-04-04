@@ -5402,12 +5402,12 @@ void MainWindow::doActionMatchScales()
 		s_msFinalOverlap = msDlg.overlapSpinBox->value();
 	}
 
-	ccLibAlgorithms::ApplyScaleMatchingAlgorithm(s_msAlgorithm,
-																selectedEntities,
-																s_msRmsDiff,
-																s_msFinalOverlap,
-																msDlg.getSelectedIndex(),
-																this);
+	ccLibAlgorithms::ApplyScaleMatchingAlgorithm(	s_msAlgorithm,
+													selectedEntities,
+													s_msRmsDiff,
+													s_msFinalOverlap,
+													msDlg.getSelectedIndex(),
+													this);
 	
 	//reselect previously selected entities!
 	if (m_ccRoot)

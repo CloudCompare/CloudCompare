@@ -51,6 +51,7 @@ class ccGlFilter;
 class ccFrameBufferObject;
 class ccInteractor;
 class ccPolyline;
+class QOpenGLPaintDevice;
 
 //! OpenGL 3D view
 class ccGLWindow : public QWindow, public ccGenericGLDisplay
@@ -1253,10 +1254,10 @@ protected: //members
 	QTimer m_autoRefreshTimer;
 
 	//! Associated OpenGL context
-	QOpenGLContext *m_context;
+	QOpenGLContext* m_context;
 
 	//! OpenGL device
-	QOpenGLPaintDevice *m_device;
+	QOpenGLPaintDevice* m_device;
 
 	//! Format
 	QSurfaceFormat m_format;

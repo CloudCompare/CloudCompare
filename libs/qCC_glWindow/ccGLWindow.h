@@ -40,9 +40,6 @@
 #include <unordered_set>
 #include <list>
 
-//! OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
-#define CC_PICKING_BUFFER_SIZE 65536
-
 class ccHObject;
 class ccBBox;
 class ccShader;
@@ -995,9 +992,6 @@ protected: //other methods
 	void toggleAutoRefresh(bool state, int period_ms = 0);
 
 protected: //members
-
-	//! GL names picking buffer
-	GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];
 
 	//! Unique ID
 	int m_uniqueID;

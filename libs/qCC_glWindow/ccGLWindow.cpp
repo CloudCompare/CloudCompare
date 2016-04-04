@@ -4124,9 +4124,14 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	//no need to clear display, we don't draw anything new!
 	//glFunc->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
+	static const GLsizei CC_PICKING_BUFFER_SIZE = 65536;
+	//GL names picking buffer
+	static GLuint s_pickingBuffer[CC_PICKING_BUFFER_SIZE];
+
 	//setup selection buffers
-	memset(m_pickingBuffer, 0, sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
-	glFunc->glSelectBuffer(CC_PICKING_BUFFER_SIZE, m_pickingBuffer);
+	memset(s_pickingBuffer, 0, sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
+	glFunc->glSelectBuffer(CC_PICKING_BUFFER_SIZE, s_pickingBuffer);
 	glFunc->glRenderMode(GL_SELECT);
 	glFunc->glInitNames();
 
@@ -4237,7 +4242,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	try
 	{
 		GLuint minMinDepth = (~0);
-		const GLuint* _selectBuf = m_pickingBuffer;
+		const GLuint* _selectBuf = s_pickingBuffer;
 
 		for (int i = 0; i < hits; ++i)
 		{

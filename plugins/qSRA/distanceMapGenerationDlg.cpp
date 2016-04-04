@@ -247,7 +247,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 
 	//add window
 	{
-		m_window = new ccMapWindow(this);
+		m_window = new ccMapWindow();
 		ccGui::ParamStruct params = m_window->getDisplayParameters();
 		params.backgroundCol = ccColor::white;
 		params.textDefaultCol = ccColor::black;
@@ -264,7 +264,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->showSF(displayColorScaleCheckBox->isChecked());
 		//add window to the right side layout
 		mapFrame->setLayout(new QHBoxLayout());
-		mapFrame->layout()->addWidget(m_window);
+		mapFrame->layout()->addWidget(QWidget::createWindowContainer(m_window));
 		precisionSpinBox->setValue(params.displayedNumPrecision);
 	}
 

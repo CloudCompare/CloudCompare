@@ -578,6 +578,9 @@ public slots:
 	//! Tests frame rate
 	void startFrameRateTest();
 
+	//! Updates the display
+	inline void update() { paintGL(); }
+
 protected slots:
 
 	//! Renders the next L.O.D. level
@@ -706,9 +709,6 @@ protected: //rendering
 	//! Returns the set of OpenGL functions
 	inline ccQOpenGLFunctions* functions() const { return m_context ? m_context->versionFunctions<ccQOpenGLFunctions>() : 0; }
 
-	//! Updates the display
-	inline void update() { paintGL(); }
-
 	//! Returns the context (if any)
 	inline QOpenGLContext* context() const { return m_context; }
 
@@ -822,7 +822,6 @@ protected: //other methods
 	void mouseMoveEvent(QMouseEvent *event) override;
 	void mouseReleaseEvent(QMouseEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
-	void exposeEvent(QExposeEvent *event) override;
 	bool event(QEvent* evt) override;
 
 	virtual void dragEnterEvent(QDragEnterEvent* event);

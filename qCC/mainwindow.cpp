@@ -7056,7 +7056,7 @@ void MainWindow::setOrthoView(ccGLWindow* win)
 		{
 			return;
 		}
-		win->setPerspectiveState(false,true);
+		win->setPerspectiveState(false, true);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -8780,12 +8780,25 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 		
 	if (win && win->getViewportParameters().perspectiveView && win->stereoModeIsEnabled())
 	{
+		ccGLWindow::StereoParams params = win->getStereoParams();
+		bool wasExclusiveFullScreen = win->exclusiveFullScreen();
+		if (wasExclusiveFullScreen)
+		{
+			win->toggleExclusiveFullScreen(false);
+		}
+		win->disableStereoMode();
+		
 		if (QMessageBox::question(	this,
 									"Stereo mode",
 									"Stereo-mode only works in perspective mode. Do you want to disable it?",
 									QMessageBox::Yes,
 									QMessageBox::No) == QMessageBox::No )
 		{
+			if (wasExclusiveFullScreen)
+			{
+				win->toggleExclusiveFullScreen(true);
+				win->enableStereoMode(params);
+			}
 			return false;
 		}
 		else
@@ -8797,16 +8810,10 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 			else
 			{
 				assert(false);
-				win->disableStereoMode();
-				if (win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
-				{
-					//disable (exclusive) full screen
-					win->toggleExclusiveFullScreen(false);
-				}
+				actionEnableStereo->blockSignals(true);
+				actionEnableStereo->setChecked(false);
+				actionEnableStereo->blockSignals(false);
 			}
-			actionEnableStereo->blockSignals(true);
-			actionEnableStereo->setChecked(false);
-			actionEnableStereo->blockSignals(false);
 		}
 	}
 
@@ -9008,8 +9015,10 @@ void MainWindow::addToDB(	ccHObject* obj,
 					pc->setGlobalScale(pc->getGlobalScale() * scale);
 				}
 
-				for (unsigned i=0; i<child->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < child->getChildrenNumber(); ++i)
+				{
 					children.push_back(child->getChild(i));
+				}
 			}
 		}
 	}
@@ -9019,8 +9028,10 @@ void MainWindow::addToDB(	ccHObject* obj,
 	{
 		//force a 'global zoom' if the DB was emtpy!
 		if (!m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0)
+		{
 			updateZoom = true;
-		m_ccRoot->addElement(obj,autoExpandDBTree);
+		}
+		m_ccRoot->addElement(obj, autoExpandDBTree);
 	}
 	else
 	{

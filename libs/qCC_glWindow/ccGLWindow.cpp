@@ -815,14 +815,6 @@ void ccGLWindow::uninitializeGL()
 	m_initialized = false;
 }
 
-void ccGLWindow::exposeEvent(QExposeEvent *event)
-{
-	if (isExposed())
-	{
-		paintGL();
-	}
-}
-
 bool ccGLWindow::event(QEvent* evt)
 {
 	switch (evt->type())
@@ -904,8 +896,39 @@ bool ccGLWindow::event(QEvent* evt)
 	}
 	break;
 
+	case QEvent::Expose:
+	{
+		if (isExposed())
+		{
+			paintGL();
+		}
+
+		return true;
+	}
+	break;
+
+	//case QEvent::Move:
+	//{
+	//}
+	//break;
+
+	case QEvent::Show:
+	{
+		paintGL();
+	}
+	break;
+
+	//case QEvent::MouseMove:
+	//{
+	//}
+	//break;
+
 	default:
-		break;
+	{
+		//ccLog::Print("Unhandled event: %i", evt->type());
+	}
+	break;
+	
 	}
 
 	return QWindow::event(evt);
@@ -958,6 +981,8 @@ void ccGLWindow::resizeGL(int w, int h)
 						false,
 						2,
 						SCREEN_SIZE_MESSAGE);
+
+	paintGL();
 }
 
 bool ccGLWindow::setLODEnabled(bool state, bool autoDisable/*=false*/)
@@ -1304,12 +1329,15 @@ void ccGLWindow::paintGL()
 	{
 		return;
 	}
-	
+
 	assert(m_context);
 	makeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
+
+	const qreal retinaScale = devicePixelRatio();
+	glFunc->glViewport(m_glViewport.x() * retinaScale, m_glViewport.y() * retinaScale, m_glViewport.width() * retinaScale, m_glViewport.height() * retinaScale);
 
 	qint64 startTime_ms = m_currentLODState.inProgress ? m_timer.elapsed() : 0;
 
@@ -1661,7 +1689,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 	{
 		GLboolean isStereoEnabled = 0;
 		glFunc->glGetBooleanv(GL_STEREO, &isStereoEnabled);
-		ccLog::Warning(QString("[fullRenderingPass:%0][NO FBO] Stereo test: %1").arg(renderingParams.passIndex).arg(isStereoEnabled));
+		//ccLog::Warning(QString("[fullRenderingPass:%0][NO FBO] Stereo test: %1").arg(renderingParams.passIndex).arg(isStereoEnabled));
 
 		if (isStereoEnabled)
 		{
@@ -1865,7 +1893,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				//DGM: as we couldn't call it before (because of the FBO) we have to do it now!
 				GLboolean isStereoEnabled = 0;
 				glFunc->glGetBooleanv(GL_STEREO, &isStereoEnabled);
-				ccLog::Warning(QString("[fullRenderingPass:%0][FBO] Stereo test: %1").arg(renderingParams.passIndex).arg(isStereoEnabled));
+				//ccLog::Warning(QString("[fullRenderingPass:%0][FBO] Stereo test: %1").arg(renderingParams.passIndex).arg(isStereoEnabled));
 				if (isStereoEnabled)
 				{
 					if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)

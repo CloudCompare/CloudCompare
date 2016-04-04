@@ -1381,7 +1381,7 @@ void ccPointCloud::setPointColor(unsigned pointIndex, const ColorCompType* col)
 	m_rgbColors->setValue(pointIndex, col);
 
 	//We must update the VBOs
-	releaseVBOs();
+	m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 }
 
 void ccPointCloud::setPointNormalIndex(unsigned pointIndex, CompressedNormType norm)
@@ -1391,7 +1391,7 @@ void ccPointCloud::setPointNormalIndex(unsigned pointIndex, CompressedNormType n
 	m_normals->setValue(pointIndex, norm);
 
 	//We must update the VBOs
-	releaseVBOs();
+	m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS;
 }
 
 void ccPointCloud::setPointNormal(unsigned pointIndex, const CCVector3& N)
@@ -4613,19 +4613,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		return false;
 	}
 
-	//fiels to init/update
-	enum UPDATE_FIELDS {	UPDATE_POINTS	= 1,
-							UPDATE_COLORS	= 2,
-							UPDATE_NORMALS	= 4,
-	};
-	int updateFlags = 0;
-
 	if (m_vboManager.state == vboSet::INITIALIZED)
 	{
 		//let's check if something has changed
 		if ( glParams.showColors && ( !m_vboManager.hasColors || m_vboManager.colorIsSF ) )
 		{
-			updateFlags |= UPDATE_COLORS;
+			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 		}
 		
 		if (	glParams.showSF
@@ -4634,7 +4627,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				||	 m_vboManager.sourceSF != m_currentDisplayedScalarField
 				||	 m_currentDisplayedScalarField->getModificationFlag() == true ) )
 		{
-			updateFlags |= UPDATE_COLORS;
+			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 		}
 
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
@@ -4644,12 +4637,14 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		}
 #endif
 		//nothing to do?
-		if (updateFlags == 0)
+		if (m_vboManager.updateFlags == 0)
+		{
 			return true;
+		}
 	}
 	else
 	{
-		updateFlags = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS;
+		m_vboManager.updateFlags = vboSet::UPDATE_ALL;
 	}
 
 	size_t chunksCount = m_points->chunksCount();
@@ -4707,10 +4702,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
 
-			int chunkUpdateFlags = updateFlags;
+			int chunkUpdateFlags = m_vboManager.updateFlags;
 			bool reallocated = false;
 			if (!m_vboManager.vbos[i])
+			{
 				m_vboManager.vbos[i] = new VBO();
+			}
 
 			//allocate memory for current VBO
 			int vboSizeBytes = m_vboManager.vbos[i]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
@@ -4728,18 +4725,18 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				if (reallocated)
 				{
 					//if the vbo is reallocated, then all its content has been cleared!
-					chunkUpdateFlags = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS;
+					chunkUpdateFlags = vboSet::UPDATE_ALL;
 				}
 
 				m_vboManager.vbos[i]->bind();
 
 				//load points
-				if (chunkUpdateFlags & UPDATE_POINTS)
+				if (chunkUpdateFlags & vboSet::UPDATE_POINTS)
 				{
 					m_vboManager.vbos[i]->write(0, m_points->chunkStartPtr(i), sizeof(PointCoordinateType)*chunkSize * 3);
 				}
 				//load colors
-				if (chunkUpdateFlags & UPDATE_COLORS)
+				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
 				{
 					if (glParams.showSF)
 					{
@@ -4842,6 +4839,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			.arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
 
 	m_vboManager.state = vboSet::INITIALIZED;
+	m_vboManager.updateFlags = 0;
 
 	return true;
 }
@@ -4939,7 +4937,9 @@ void ccPointCloud::releaseVBOs()
 void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 {
 	if (win == m_currentDisplay)
+	{
 		releaseVBOs();
+	}
 
 	//call parent's method
 	ccGenericPointCloud::removeFromDisplay(win);

@@ -710,6 +710,14 @@ protected: // VBO
 		//! States of th VBO(s)
 		enum STATES { NEW, INITIALIZED, FAILED };
 
+		//! Update flags
+		enum UPDATE_FLAGS {
+			UPDATE_POINTS = 1,
+			UPDATE_COLORS = 2,
+			UPDATE_NORMALS = 4,
+			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
+		};
+		
 		vboSet()
 			: hasColors(false)
 			, colorIsSF(false)
@@ -717,6 +725,7 @@ protected: // VBO
 			, hasNormals(false)
 			, totalMemSizeBytes(0)
 			, state(NEW)
+			, updateFlags(0)
 		{}
 
 		std::vector<VBO*> vbos;
@@ -725,6 +734,7 @@ protected: // VBO
 		ccScalarField* sourceSF;
 		bool hasNormals;
 		int totalMemSizeBytes;
+		int updateFlags;
 
 		//! Current state
 		STATES state;

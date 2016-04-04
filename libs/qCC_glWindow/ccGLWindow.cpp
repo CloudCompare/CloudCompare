@@ -369,7 +369,7 @@ ccGLWindow::~ccGLWindow()
 		delete m_fbo2;
 
 	if (m_context)
-		delete m_context;
+		m_context->doneCurrent();
 
 	if (m_device)
 		delete m_device;

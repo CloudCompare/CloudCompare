@@ -58,6 +58,15 @@ public:
 		}
 	}
 
+	virtual ~ccGLWidget()
+	{
+		if (m_associatedWindow)
+		{
+			m_associatedWindow->setParent(0);
+			m_associatedWindow->close();
+		}
+	}
+
 	inline ccGLWindow* associatedWindow() const { return m_associatedWindow; }
 
 	static ccGLWindow* FromWidget(const QWidget* widget)

@@ -793,7 +793,7 @@ void ccRasterizeTool::generateMesh() const
 		}
 		else
 		{
-			ccLog::Error(QString("Failed to create mesh (Triangle lib error: '%1')").arg(errorStr));
+			ccLog::Error(QString("Failed to create mesh ('%1')").arg(errorStr));
 		}
 	}
 }

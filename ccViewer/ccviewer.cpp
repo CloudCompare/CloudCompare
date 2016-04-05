@@ -80,7 +80,13 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		const int margin = 10;
 		verticalLayout->setContentsMargins(margin, margin, margin, margin);
 
-		ccGLWidget* widget = ccGLWidget::Create(true, true);
+#ifdef CC_WINDOWS
+		bool stereoMode = true;
+#else
+		bool stereoMode = false;
+#endif
+
+		ccGLWidget* widget = ccGLWidget::Create(stereoMode, true);
 		m_glWindow = widget->associatedWindow();
 		verticalLayout->addWidget(widget);
 	}

@@ -5758,7 +5758,13 @@ ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
 
-	ccGLWidget* viewWidget = ccGLWidget::Create(true, false);
+#ifdef CC_WINDOWS
+	bool stereoMode = true;
+#else
+	bool stereoMode = false;
+#endif
+
+	ccGLWidget* viewWidget = ccGLWidget::Create(stereoMode, false);
 	ccGLWindow *view3D = viewWidget->associatedWindow();
 
 	viewWidget->setMinimumSize(400, 300);

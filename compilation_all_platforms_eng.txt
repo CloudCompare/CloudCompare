@@ -5,7 +5,7 @@
 *                                          *
 ********************************************
 
-For the latest version (version 2.7 and earlier) refer to the https://github.com/cloudcompare/trunk/blob/master/BUILD.md file.
+For the latest version (version 2.7 and later) refer to the http://github.com/cloudcompare/trunk/blob/master/BUILD.md file.
 
 Instructions below are for the 2.6 versions and earlier.
 

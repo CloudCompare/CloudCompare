@@ -20,9 +20,8 @@
 
 1. Launch CMake GUI (`cmake-qt-gui` on Linux)
   - *(for more convenience, you should check the "Grouped" check-box)*
-  - make the `Where is the source code` field point to your local repository (for instance `C:\CloudCompare\trunk`).
-  - make the `Where to build the binaries` field point to ... almost anywhere you want **apart from the same folder as above!** (and the *'Program Files'* folder on Windows). For instance: `C:\CloudCompare\build`.
-  - 
+  - make the `Where is the source code` field point to your local repository (for instance `C:\CloudCompare\trunk`)
+  - make the `Where to build the binaries` field point to ... almost anywhere you want **apart from the same folder as above or the *Program Files* folder (on Windows)**. For instance: `C:\CloudCompare\build`.
   - click on the `Configure` button
   - select your generator. Already tested:
       - Visual 2013 (32/64 bits)
@@ -69,6 +68,34 @@
   - On Linux, default install dir is `/usr/local` (be sure to have administrative rights if you want to install CloudCompare there: once configured, you can call `# make install` from the sources directory)
   - On Windows 7/8/10 CMake doesn't have the rights to 'install' files in the `Program Files` folder (even though it's CMake's default installation destination!)
 
+## Generate the project files
+
+Once all CMake errors have been resolved (you may to click multiple times on `Configure` if necessary)  be sure to click on the 'Generate' at least once at the end. This will create the project files for the compiler/IDE you have selected at the beginning. **This means that at this point the project still needs to be compiled**.
+
+## Compiling the project
+
+Eventually you can run the compiler on the generated cmake file or open the compilation project (e.g. for Visual). The file(s) should be where you told CMake to *build the binaries* (e.g. `C:\CloudCompare\build`).
+
+*You should always found the two following configuration/sub-projects*:
+
+1. `build all`: does all the compilation work (in the right order) but the binaries and libraries will be generated (by default) among all the other compilation files, in a somewhat complicated folder tree structure.
+2.  `install`: copies all the necessary files (executable, resources, plugins, DLLs etc.) to the `CMAKE_INSTALL_PREFIX` folder. **This is mandatory to actually launch CloudCompare or ccViewer.**
+
+### Working with Visual Studio on Windows
+
+As all the files (executables, plugins and other DLLs) are copied in the `CMAKE_INSTALL_PREFIX` directory, the standard project launch/debug mechanism is broken. Therefore by default you won't be able to 'run' the CloudCompare or ccViewer projects as is (with F5 or Ctrl + F5 for instance). See [this post](http://www.danielgm.net/cc/forum/viewtopic.php?t=992) on the forum to setup Visual correctly.
+
+# Appendix
+
+## Common issues
+
+On Linux, you may encounter issues with shared libraries (.so files) if the project is not installed in `/usr`. In this case:
+
+1. either set the `LD_LIBRARY_PATH` variable so that it points to the qCC and ccViewer installation folders (`export LD_LIBRARY_PATH=...`).
+2. or call  `# /sbin/ldconfig -v` once as suggested [here](http://www.danielgm.net/cc/forum/viewtopic.php?f=10&t=195&p=602#p600)
+
+## Additional optional CMake setup steps
+
 ### [Optional] Setup for LibLAS support
 
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, you'll need:
@@ -111,7 +138,7 @@ The CloudCompare CMake project will only require that you set the path where lib
 
 ### [Optional] Setup for PCL (required by qPCL)
 
-If you want to compile qPCL you'll need [PCL](http://pointclouds.org/) (*last tested version: 1.7 on Windows and 1.6 on Linux*)
+If you want to compile qPCL you'll need [PCL](http://pointclouds.org/) (*last tested version: 1.8 on Windows and 1.6 on Linux*)
 
 Follow the online instructions/tutorials. Basically, you'll need Boost, Qt, Flann and Eigen.
 
@@ -132,7 +159,7 @@ The CMake project will only require that you set the path where dxflib sources a
 
 ### [Optional] Setup for FBX SDK support
 
-If you want to compile CloudCompare (and ccViewer) with FBX files support, you'll need: The official [Autodesk's FBX SDK](http://usa.autodesk.com/adsk/servlet/pc/item?siteID=123112&id=10775847) (last tested version: 2014.2 Windows)
+If you want to compile CloudCompare (and ccViewer) with FBX files support, you'll need: The official [Autodesk's FBX SDK](http://usa.autodesk.com/adsk/servlet/pc/item?siteID=123112&id=10775847) (last tested version: 2015.1 on Windows)
 
 Then, the CloudCompare CMake project will request that you set the 3 following variables:
 
@@ -154,8 +181,7 @@ If you want to compile the qCork plugin (**on Windows only for now**), you'll ne
 
 1. [MPIR 2.6.0](http://www.mpir.org/)
 2. the forked version of the Cork library for CC: [<https://github.com/cloudcompare/cork>](https://github.com/cloudcompare/cork)
-    - on Windows see the VS2010, VS2012 and VS2013 projects shipped with this fork
-    - for VS2010 and VS2012 you'll have to edit the `wincork` project and update the include path for MPIR (for all configurations/platforms)
+    - on Windows see the Visual project shipped with this fork and corresponding to your version (if any ;)
     - for VS2013 just edit the `mpir` property sheet (in the Properties manager) and update the MPIR macro (in the `User macros` tab)
 
 Then, the CloudCompare CMake project will request that you set the following variables:
@@ -164,60 +190,3 @@ Then, the CloudCompare CMake project will request that you set the following var
 2. `CORK_RELEASE_LIBRARY_FILE` and `MPIR_RELEASE_LIBRARY_FILE`: both main library files
 3. and optionally `CORK_DEBUG_LIBRARY_FILE` and `MPIR_DEBUG_LIBRARY_FILE`: both main library files (for debug mode)
 
-### Generate the project files
-
-Once all red items have disappeared (click multiple times on `Configure` if necessary), you can go ahead! Click on the `Generate button to create the corresponding project files.
-
-Compiling the project
----------------------
-
-Open the resulting project with the generator you have previously chosen (the file(s) should be where you told CMake to *build the binaries* - e.g. `C:\trunk_CC\build`).
-
-You should (always?) found the two following configuration/sub-projects:
-
-1. `build all` should do all the compilation work (in the right order) but the binaries and libraries will be generated (by default) among all the other compilation files, in a somewhat complicated folder tree structure.
-2.  `install` should export all these files to the `CMAKE_INSTALL_PREFIX` folder, placing everything where it should be (and almost exactly as the official binary build)
-
-### Working with Visual Studio on Windows
-
-As all the files (executables, plugins and other DLLs) are copied in the `CMAKE_INSTALL_PREFIX` directory, the standard Visual Studio mechanism is broken and you won't be able to 'run' the CloudCompare or ccViewer projects as is. See [this post](http://www.danielgm.net/cc/forum/viewtopic.php?t=992) on the forum to setup Visual correctly.
-
-Appendix
-========
-
-Common issues
--------------
-
-On Linux, you may encounter issues with shared libraries (.so files) if the project is not installed in `/usr`. In this case:
-
-1. either set the `LD_LIBRARY_PATH` variable so that it points to the qCC and ccViewer installation folders (`export LD_LIBRARY_PATH=...`).
-2. or call  `# /sbin/ldconfig -v` once as suggested [here](http://www.danielgm.net/cc/forum/viewtopic.php?f=10&t=195&p=602#p600)
-
-If you use a version of Qt older than 4.7, you'll get issues with `QElapsedTimer` (for instance with Ubuntu Lucid or Scientific Linux). In this case you'll have to replace the `#include <QElapsedTimer>` lines by:
-
-```
-//#include  <QElapsedTimer>
-#include `<QTime>
-typedef QTime QElapsedTimer;
-```
-- in `cloudcompare/libs/qCC_db/ccTimer.h`, after `//Qt`
-- in `cloudcompare/libs/qCC/ccCommandLineParse.cpp`, after `#include <QDateTime>`
-- in `cloudcompare/libs/qCC/ccComparisonDlg.cpp`, after `//Qt`
-- in `cloudcompare/libs/qCC/ccGLWindow.cpp`, after `#include <QWheelEvent>`
-- in `cloudcompare/libs/qCC/ccSubsamplingDlg.cpp`, after `//Qt`
-- in `cloudcompare/libs/qCC/mainwindow.cpp`, after `#include <QMessageBox>`
-
-Compiling the 64 bits version with Qt 4.8 on Windows
-----------------------------------------------------
-
-Here are several "hints" regarding the compilation on Windows 64 bits:
-
-1.  if only Visual 2010 Express is installed, Cmake will require you to install Microsoft Windows SDK 7.1
-2.  to compile with Visual 2010 you must then apply the following patch: [1](http://support.microsoft.com/kb/2280741) (this solves a bug from the MSVC 2010 compiler that prevents Qt from running correctly in release mode)
-3.  you'll also have to compile Qt 4.8 yourself, as Nokia never provided the corresponding binaries:
-    - download and decompress the Qt sources
-    - start the Microsoft Windows SDK 7.1 command line mode with the dedicated shortcut (you'll have to add `/Release` at the end of the shortcut - edit the shortcut properties for that). Something like: `C:\Windows\System32\cmd.exe /E:ON /V:ON /T:0E /K "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /Release`
-    - if you don't have perl installed, just delete the `bin/syncqt.bat` file
-    - And follow this [guide](http://www.holoborodko.com/pavel/2011/02/01/how-to-compile-qt-4-7-with-visual-studio-2010/)
-
-Otherwise use Visual 2012 with Qt 5 64 bits ;)

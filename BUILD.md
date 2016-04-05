@@ -1,64 +1,73 @@
-Compilation with CMake!
-=======================
+# Compilation of the 2.7+ version (with CMake)
 
 **WARNING**: if you already have a clone of the CloudCompare git repository (prior to July 2015), you may want to update/checkout the submodules with ```git submodule update --init --recursive```
 
-Prerequisites
--------------
+## Prerequisites
 
 1.  Clone the main repository and its submodules from the main git(hub) server: <https://github.com/cloudcompare/trunk>
       
     `git clone --recursive https://github.com/cloudcompare/trunk.git`
 
-2.  Install [CMake](http://www.cmake.org) (2.8 or newer)
-3.  Install all necessary dependencies:
-    - [*WINDOWS*] [Qt](http://qt-project.org/) (**version 5 WITH OPENGL** preferably but the version 4.8 is still supported)
-    - [*LINUX/MAC OS X*] qt-sdk, opengl
+2.  Install [CMake](http://www.cmake.org) (3.0 or newer)
+3.  Install Qt (http://www.qt.io/ - for *Linux/Mac OS X*: qt-sdk)
+      * CloudCompare 2.7 requires **Qt version 5.5** or newer
 
-*(refer to the [Appendix](#appendix) section if your version of Qt is older than 4.8 or if you need to compile with Qt 4.8 in 64 bits mode on Windows)*
+4. Make sure to have a C++11 compliant compiler (gcc 4.7+ / clang / Visual 2013 and newer)
 
-Generating the project
-----------------------
+*To compile the project with older versions of Qt (from 4.8 to 5.4) or with a non C++11 compliant compiler, you'll have to stick with the https://github.com/cloudcompare/trunk/releases/tag/v2.6.3.1 version*
+
+## Generating the project
 
 1. Launch CMake GUI (`cmake-qt-gui` on Linux)
   - *(for more convenience, you should check the "Grouped" check-box)*
-  - make the `Where is the source code` field point to your local repository (for instance `C:\trunk_CC`).
-  - make the `Where to build the binaries` field point to ... almost anywhere you want (**apart from the same folder as above!**). For instance: `C:\trunk_CC\build`.
+  - make the `Where is the source code` field point to your local repository (for instance `C:\CloudCompare\trunk`).
+  - make the `Where to build the binaries` field point to ... almost anywhere you want **apart from the same folder as above!** (and the *'Program Files'* folder on Windows). For instance: `C:\CloudCompare\build`.
+  - 
   - click on the `Configure` button
-  - select your generator: already tested: Visual 2008 (32/64 bits), Visual 2010 Express (32/64 bits - see appendix), Visual 2012 Express (64 bits/Qt 5), Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32/64 bits, Mac OS X)
+  - select your generator. Already tested:
+      - Visual 2013 (32/64 bits)
+      - Visual 2015 (64 bits)
+      - Code::Blocks + gcc 4.9.2 (Windows 32 bits)
+      - gcc (Linux 64 bits)
+      - clang (Mac OS X)
   - wait for CMake configuration/tests to finish...
+  - on the first run you may have to manually set the **QT5_ROOT_PATH** variable. Make it point to your installation of Qt (on Windows it's where the 'bin' folder lies - e.g. *Qt\5.6\msvc2013_64*)
 
-2. Before clicking on the 'Generate' button, you may want to set some options,  if you expand the `OPTION` group, you'll be able to set some general options:
+2. Before clicking on the 'Generate' button, you may want to set some more options. If you expand the `OPTION` group, you'll be able to set some general options:
   - `OPTION_BUILD_CC_VIEWER`: whether to build or not the ccViewer side project (activated by default)
-  - `OPTION_EXPORT_TARGETS`: not documented
-  - `OPTION_MP_BUILD`: for MSVC only *(mutli-process build --> much faster, but takes almost all available CPU)*
-  - `OPTION_SUPPORT_3D_CONNEXION_DEVICES`: for 3D mouses handling
-  - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to activate support for PDMS .mac scripts (CAD)
+  - `OPTION_MP_BUILD`: for Visual only *(mutli-process build --> much faster but uses a lof ot CPU power)*
+  - `OPTION_SUPPORT_3D_CONNEXION_DEVICES`: for 3D mouses handling (*Windows only for now*)
+  - `OPTION_SUPPORT_MAC_PDMS_FORMAT`: to activate support for PDMS .mac scripts (*CAD format*)
   - `OPTION_USE_DXFLIB`: to activate support for DXF files in CloudCompare/ccViewer with **dxflib** - see [below](#optional-setup-for-dxflib-support)
   - `OPTION_USE_FBX_SDK`: to activate support for FBX files in CloudCompare/ccViewer with the official **FBX SDK** - see [below](#optional-setup-for-fbx-sdk-support)
   - `OPTION_USE_GDAL`: to activate support for a lot of raster files in CloudCompare/ccViewer with **GDAL** libray - see [below](#gdal_setup)
   - `OPTION_USE_LIBE57`: to activate support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#libE57_setup)
   - `OPTION_USE_LIBLAS`: to activate support for LAS files in CloudCompare/ccViewer with **libLAS** - see [below](#optional-setup-for-gdal-supportt)
+  - `OPTION_USE_OCULUS_SDK`: to activate support for the Oculus Rift SDK in CloudCompare/ccViewer (*work in progres*)
+  - `OPTION_USE_SHAPE_LIB`: to activate support for SHP files in CloudCompare/ccViewer
   - `OPTION_USE_VISUAL_LEAK_DETECTOR`: to use the Visual Leak Detector library for MSVC (http://vld.codeplex.com/)
-  - `OPTION_USE_XIOT`: to activate support for X3D files in qCC (and ccViewer) with **XIOT** - see [below](#optional-setup-for-x3dxiot-support)
 
-3.  if you expand the `INSTALL` group, you'll be able to select which [plugin(s)|Plugins] you want to compile (by default, none are selected)
-  - qBLUR *(warning: does not compile with Code::Blocks on Windows for the moment)*
+3.  if you expand the `INSTALL` group, you'll be able to select the plugin(s) you want to compile (by default, none are selected and **none are required** to work with CloudCompare). See http://www.cloudcompare.org/doc/wiki/index.php?title=Plugins.
+  - qAnimation *(relies on ffmpeg - https://www.ffmpeg.org/ - to generate video files)*
+  - qBlur
   - qCork (see [below](#optional-setup-for-cork--mpir-support-for-qcork))
   - qDummy *(warning: does nothing, template for developers)*
+  - qCSV_MATRIX_IO *(to load CSV matrix files)*
   - qEDL
+  - qFacets
+  - qGMMReg *(relies on VXL)*
   - qHPR
-  - qKinect (see [below](#optional-setup-for-libfreenect-support))
+  - qKinect *(warning: discontinued)*
   - qPCL (requires PCL - see [below](#optional-setup-for-pcl-required-by-qpcl))
   - qPCV
-  - qPoissonRecon
+  - qPoissonRecon *(be sure to update the PoissonRecon submodule - see above)*
   - qRansacSD *(only tested on Windows for the moment)*
   - qSRA
   - qSSAO
 
-5.  eventually, the `CMAKE` group contains a `CMAKE_INSTALL_PREFIX` which is where CloudCompare and ccViewer will be installed (when you compile the `INSTALL` project)
+5.  last but not least, the `CMAKE` group contains a `CMAKE_INSTALL_PREFIX` variable which is where CloudCompare and ccViewer will be installed (when you compile the `INSTALL` project)
   - On Linux, default install dir is `/usr/local` (be sure to have administrative rights if you want to install CloudCompare there: once configured, you can call `# make install` from the sources directory)
-  - On Windows Seven, you may not have the right to 'install' files in the default `Program Files` folder
+  - On Windows 7/8/10 CMake doesn't have the rights to 'install' files in the `Program Files` folder (even though it's CMake's default installation destination!)
 
 ### [Optional] Setup for LibLAS support
 
@@ -99,20 +108,6 @@ If you want to compile CloudCompare (and ccViewer) with LibE57 files support, yo
         2.  set the output precision to 8 instead of 7! (otherwise the interal checks for precision loss may fail and libE57 will throw an exception)
 
 The CloudCompare CMake project will only require that you set the path where libE57 has been installed (`LIBE57_INSTALL_DIR`)
-
-### [Optional] Setup for libfreenect support
-
-If you want to compile qKinect you'll need [OpenKinect / libfreenect](https://github.com/OpenKinect/libfreenect) (*last tested version: v0.5.0 Saturn, compiled on Windows 7 32 & 64 bits - you'll need [libusb](http://libusb.info/)* too)
-
-Then, the CloudCompare CMake project will request that you set the 3 following variables:
-
-1. `LIBFREENECT_INCLUDE_DIR`: libfreenect include directory (pretty straightforward ;)
-2. `LIBFREENECT_LIBRARY_FILE`: main libfreenect library (the `freenect.lib` or `libfreenect.a` file itself!)
-3. [Windows] ``LIBFREENECT_SHARED_LIBRARY_FILE`: full path to the `freenect.dll` file
-
-### [Optional] Setup for X3D/XIOT support
-
-Not ready yet.
 
 ### [Optional] Setup for PCL (required by qPCL)
 

@@ -689,10 +689,13 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				//progress notification
 				if (progressCb)
 				{
-					char buffer[256];
 
-					sprintf(buffer,"RMS = %f [-%f]\n",rms,deltaRMS);
-					progressCb->setInfo(buffer);
+					if (progressCb->textCanBeEdited())
+					{
+						char buffer[256];
+						sprintf(buffer, "RMS = %f [-%f]\n", rms, deltaRMS);
+						progressCb->setInfo(buffer);
+					}
 					if (iteration == 1)
 					{
 						initialDeltaRMS = deltaRMS;
@@ -1244,10 +1247,13 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 
 		if (progressCb)
 		{
-			char buffer[256];
-			sprintf(buffer,"Trial %u/%u [best score = %u]\n",i+1,nbBases,bestScore);
-			progressCb->setInfo(buffer);
-			progressCb->update(((float)(i+1)*100.0f)/(float)nbBases);
+			if (progressCb->textCanBeEdited())
+			{
+				char buffer[256];
+				sprintf(buffer, "Trial %u/%u [best score = %u]\n", i + 1, nbBases, bestScore);
+				progressCb->setInfo(buffer);
+				progressCb->update(((i + 1)*100.0f) / nbBases);
+			}
 
 			if (progressCb->isCancelRequested())
 			{
@@ -1263,7 +1269,9 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 	delete modelTree;
 
 	if (progressCb)
+	{
 		progressCb->stop();
+	}
 
 	return (bestScore > 0);
 }

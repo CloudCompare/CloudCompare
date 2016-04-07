@@ -110,7 +110,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget);
-	pdlg.setMethodTitle("Loading PTX file");
+	pdlg.setMethodTitle(QObject::tr("Loading PTX file"));
 	pdlg.setAutoClose(false);
 
 	//progress dialog (for normals computation)

@@ -35,17 +35,12 @@ public:
 	//! Default destructor
 	virtual ~GenericProgressCallback() {}
 
-	//! Resets the progress status
-	/** The progress (percentage) is set to 0, and the title/infos are cleared.
-	**/
-	virtual void reset() = 0;
-
 	//! Notifies the algorithm progress
-	/** The notification is sent by the ongoing algorithm (on the library side).
+	/** The notification is sent by the running algorithm (on the library side).
         This virtual method shouldn't be called too often, as the real process
-        behind it is unspecified and may be time consuming. Typically it shouldn't
-        be called more than once per percent.
-		\param percent the current progress, between 0 and 100%
+        behind it is unspecified and may be time consuming. Ideally it shouldn't
+        be called more than a few hundreds time.
+		\param percent current progress, between 0.0 and 100.0
 	**/
 	virtual void update(float percent) = 0;
 
@@ -80,6 +75,9 @@ public:
 		client application).
 	**/
 	virtual bool isCancelRequested() = 0;
+
+	//! Returns whether the dialog title and info can be updated or not
+	virtual bool textCanBeEdited() const { return true; }
 
 };
 

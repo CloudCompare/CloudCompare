@@ -930,11 +930,14 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	NormalizedProgress nProgress(progressCb, m);
 	if (progressCb)
 	{
-		char buffer[64];
-		sprintf(buffer,"Least Median of Squares samples: %u",m);
-		progressCb->reset();
-		progressCb->setInfo(buffer);
-		progressCb->setMethodTitle("Detect sphere");
+		if (!progressCb->textCanBeEdited())
+		{
+			char buffer[64];
+			sprintf(buffer, "Least Median of Squares samples: %u", m);
+			progressCb->setInfo(buffer);
+			progressCb->setMethodTitle("Detect sphere");
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 

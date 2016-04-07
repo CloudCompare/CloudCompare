@@ -81,9 +81,12 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	CCLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(leaves.size()));
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Fuse Kd-tree cells");
-		progressCb->setInfo(qPrintable(QString("Cells: %1\nMax error: %2").arg(leaves.size()).arg(maxError)));
+		progressCb->update(0);
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Fuse Kd-tree cells");
+			progressCb->setInfo(qPrintable(QString("Cells: %1\nMax error: %2").arg(leaves.size()).arg(maxError)));
+		}
 		progressCb->start();
 	}
 

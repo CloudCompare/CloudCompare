@@ -269,11 +269,14 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Gaussian filter");
-		char infos[256];
-		sprintf(infos,"Level: %i\n",level);
-		progressCb->setInfo(infos);
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Gaussian filter");
+			char infos[256];
+			sprintf(infos, "Level: %i\n", level);
+			progressCb->setInfo(infos);
+		}
+		progressCb->update(0);
 	}
 
     void* additionalParameters[2] = {	reinterpret_cast<void*>(&sigma),
@@ -683,12 +686,15 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 		{
 			if (iteration == 1)
 			{
-				progressCb->reset();
-				progressCb->setMethodTitle("KMeans");
-				char buffer[256];
-				sprintf(buffer,"K=%i",K);
-				progressCb->setInfo(buffer);
-				progressCb->start();
+				if (!progressCb->textCanBeEdited())
+				{
+					progressCb->setMethodTitle("KMeans");
+					char buffer[256];
+					sprintf(buffer, "K=%i", K);
+					progressCb->setInfo(buffer);
+					progressCb->start();
+				}
+				progressCb->update(0);
 				initialCMD = classMovingDist;
 			}
 			else

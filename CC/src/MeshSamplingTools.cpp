@@ -307,15 +307,17 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 		}
 	}
 
-	NormalizedProgress* normProgress = 0;
+	NormalizedProgress normProgress(progressCb, triCount);
     if (progressCb)
     {
-		normProgress = new NormalizedProgress(progressCb,triCount);
-		progressCb->setMethodTitle("Mesh sampling");
-		char buffer[256];
-		sprintf(buffer,"Triangles: %u\nPoints: %u",triCount,theoreticNumberOfPoints);
-		progressCb->setInfo(buffer);
-        progressCb->reset();
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Mesh sampling");
+			char buffer[256];
+			sprintf(buffer, "Triangles: %u\nPoints: %u", triCount, theoreticNumberOfPoints);
+			progressCb->setInfo(buffer);
+		}
+        progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -394,14 +396,8 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 			}
 		}
 
-		if (normProgress && !normProgress->oneStep())
+		if (progressCb && !normProgress.oneStep())
 			break;
-	}
-
-	if (normProgress)
-	{
-        delete normProgress;
-		normProgress = 0;
 	}
 
 	if (sampledCloud) //can be in case of memory overflow!

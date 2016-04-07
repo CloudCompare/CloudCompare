@@ -48,16 +48,6 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh())/*, Qt::DirectConnection*/); //can't use DirectConnection here!
 }
 
-void ccProgressDialog::reset()
-{
-	QProgressDialog::reset();
-
-	setValue(0);
-	m_currentValue = 0;
-	m_lastValue = -1;
-	QApplication::processEvents();
-}
-
 void ccProgressDialog::refresh()
 {
 	if (m_mutex.tryLock())
@@ -107,16 +97,19 @@ void ccProgressDialog::setMinRefreshInterval(int i)
 	m_mutex.unlock();
 }
 
-void ccProgressDialog::setMethodTitle(const char* methodTitle)
+void ccProgressDialog::setMethodTitle(QString methodTitle)
 {
-	setWindowTitle(QString(methodTitle));
+	setWindowTitle(methodTitle);
 }
 
-void ccProgressDialog::setInfo(const char* infoStr)
+void ccProgressDialog::setInfo(QString infoStr)
 {
 	setLabelText(infoStr);
 	if (isVisible())
-		QApplication::processEvents();
+	{
+		QProgressDialog::update();
+		QCoreApplication::processEvents();
+	}
 }
 
 void ccProgressDialog::start()

@@ -119,8 +119,8 @@ bool StereogramWidget::init(double angularStep_deg,
 		return false;
 
 	ccProgressDialog pDlg(true);
-	pDlg.setMethodTitle("Stereogram");
-	pDlg.setInfo("Preparing polar display...");
+	pDlg.setMethodTitle(QObject::tr("Stereogram"));
+	pDlg.setInfo(QObject::tr("Preparing polar display..."));
 	pDlg.start();
 	QApplication::processEvents();
 

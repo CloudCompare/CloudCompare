@@ -30,6 +30,7 @@
 #include "ccScalarField.h"
 #include "ccColorScalesManager.h"
 #include "ccGenericGLDisplay.h"
+#include "ccProgressDialog.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -540,7 +541,7 @@ void ccMesh::transformTriNormals(const ccGLMatrix& trans)
 
 bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 								PointCoordinateType factor,
-								CCLib::GenericProgressCallback* progressCb/*=0*/)
+								ccProgressDialog* progressCb/*=0*/)
 {
 	if (!m_associatedCloud)
 		return false;
@@ -552,7 +553,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	if (!vertCount || !faceCount)
 		return false;
 
-	GenericChunkedArray<3,PointCoordinateType>* verticesDisplacement = new GenericChunkedArray<3,PointCoordinateType>;
+	GenericChunkedArray<3, PointCoordinateType>* verticesDisplacement = new GenericChunkedArray < 3, PointCoordinateType > ;
 	if (!verticesDisplacement->resize(vertCount))
 	{
 		//not enough memory
@@ -586,8 +587,8 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	CCLib::NormalizedProgress nProgress(progressCb, nbIteration);
 	if (progressCb)
 	{
-		progressCb->setMethodTitle("Laplacian smooth");
-		progressCb->setInfo(qPrintable(QString("Iterations: %1\nVertices: %2\nFaces: %3").arg(nbIteration).arg(vertCount).arg(faceCount)));
+		progressCb->setMethodTitle(QObject::tr("Laplacian smooth"));
+		progressCb->setInfo(QObject::tr("Iterations: %1\nVertices: %2\nFaces: %3").arg(nbIteration).arg(vertCount).arg(faceCount));
 		progressCb->start();
 	}
 

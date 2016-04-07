@@ -61,14 +61,17 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 		center = &C;
 	}
 
-	NormalizedProgress nprogress(progressCb,count);
+	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Develop");
-		char buffer[256];
-		sprintf(buffer,"Number of points = %u",count);
-		progressCb->setInfo(buffer);
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Develop");
+			char buffer[256];
+			sprintf(buffer, "Number of points = %u", count);
+			progressCb->setInfo(buffer);
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -119,15 +122,17 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 
 	cloud->placeIteratorAtBegining();
 
-	NormalizedProgress* nprogress = 0;
+	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("DevelopOnCone");
-		char buffer[256];
-		sprintf(buffer,"Number of points = %u",count);
-		nprogress = new NormalizedProgress(progressCb,count);
-		progressCb->setInfo(buffer);
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("DevelopOnCone");
+			char buffer[256];
+			sprintf(buffer, "Number of points = %u", count);
+			progressCb->setInfo(buffer);
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -161,15 +166,12 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 
 		outCloud->addPoint(CCVector3(lon*baseRadius,lat+center[dim],alt));
 
-		if (nprogress && !nprogress->oneStep())
+		if (progressCb && !nprogress.oneStep())
+		{
 			break;
+		}
 	}
 
-	if (nprogress)
-	{
-		delete nprogress;
-		nprogress = 0;
-	}
 	if (progressCb)
 	{
 		progressCb->stop();
@@ -188,15 +190,17 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Tran
 	if (!transformedCloud->reserve(count))
 		return 0; //not enough memory
 
-	NormalizedProgress* nprogress = 0;
+	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("ApplyTransformation");
-		nprogress = new NormalizedProgress(progressCb,count);
-		char buffer[256];
-		sprintf(buffer,"Number of points = %u",count);
-		progressCb->setInfo(buffer);
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("ApplyTransformation");
+			char buffer[256];
+			sprintf(buffer, "Number of points = %u", count);
+			progressCb->setInfo(buffer);
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -212,8 +216,10 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Tran
 
 			transformedCloud->addPoint(newP);
 
-			if (nprogress && !nprogress->oneStep())
+			if (progressCb && !nprogress.oneStep())
+			{
 				break;
+			}
 		}
 	}
 	else
@@ -225,13 +231,17 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* cloud, Tran
 
 			transformedCloud->addPoint(newP);
 
-			if (nprogress && !nprogress->oneStep())
+			if (progressCb && !nprogress.oneStep())
+			{
 				break;
+			}
 		}
 	}
 
 	if (progressCb)
+	{
 		progressCb->stop();
+	}
 
 	return transformedCloud;
 }

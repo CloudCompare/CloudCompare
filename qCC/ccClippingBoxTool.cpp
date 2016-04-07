@@ -602,8 +602,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			{
 				unsigned pointCount = cloud->size(); 
 
-				ccProgressDialog pDlg(false,this);
-				pDlg.setInfo(qPrintable(QString("Points: %1").arg(pointCount)));
+				ccProgressDialog pDlg(false, this);
+				pDlg.setInfo(tr("Points: %1").arg(pointCount));
 				pDlg.start();
 				pDlg.show();
 				QApplication::processEvents();
@@ -657,9 +657,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			{
 				sliceGroup = new ccHObject(QString("%1.slices").arg(cloud->getName()));
 
-				ccProgressDialog pDlg(true,this);
+				ccProgressDialog pDlg(true, this);
 				pDlg.setWindowTitle("Section extraction");
-				pDlg.setInfo(qPrintable(QString("Section(s): %1").arg(subCloudsCount)));
+				pDlg.setInfo(tr("Section(s): %1").arg(subCloudsCount));
 				pDlg.setMaximum(static_cast<int>(subCloudsCount));
 				pDlg.show();
 				QApplication::processEvents();
@@ -752,9 +752,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 
 			sliceGroup = new ccHObject(QString("%1.slices").arg(obj->getName()));
 			
-			ccProgressDialog pDlg(true,this);
+			ccProgressDialog pDlg(true, this);
 			pDlg.setWindowTitle("Section extraction");
-			pDlg.setInfo(qPrintable(QString("Up to (%1 x %2 x %3) = %4 section(s)").arg(gridDim[0]).arg(gridDim[1]).arg(gridDim[2]).arg(cellCount)));
+			pDlg.setInfo(tr("Up to (%1 x %2 x %3) = %4 section(s)").arg(gridDim[0]).arg(gridDim[1]).arg(gridDim[2]).arg(cellCount));
 			pDlg.setMaximum(static_cast<int>(cellCount));
 			pDlg.show();
 			QApplication::processEvents();
@@ -832,9 +832,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 
 			ccHObject* contourGroup = new ccHObject(obj->getName() + QString(".contours"));
 
-			ccProgressDialog pDlg(true,this);
+			ccProgressDialog pDlg(true, this);
 			pDlg.setWindowTitle("Contour extraction");
-			pDlg.setInfo(qPrintable(QString("Contour(s): %1").arg(subCloudsCount)));
+			pDlg.setInfo(tr("Contour(s): %1").arg(subCloudsCount));
 			pDlg.setMaximum(static_cast<int>(subCloudsCount));
 			if (!visualDebugMode)
 			{

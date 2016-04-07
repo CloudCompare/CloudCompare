@@ -266,11 +266,14 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	//progress notification (optional)
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Build Octree");
-		char infosBuffer[256];
-		sprintf(infosBuffer, "Projecting %u points\nMax. depth: %i", pointCount, MAX_OCTREE_LEVEL);
-		progressCb->setInfo(infosBuffer);
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Build Octree");
+			char infosBuffer[256];
+			sprintf(infosBuffer, "Projecting %u points\nMax. depth: %i", pointCount, MAX_OCTREE_LEVEL);
+			progressCb->setInfo(infosBuffer);
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 	NormalizedProgress nprogress(progressCb,pointCount,90); //first phase: 90% (we keep 10% for sort)
@@ -2889,11 +2892,14 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
     //progress notification
     if (progressCb)
     {
-        progressCb->reset();
-        progressCb->setMethodTitle("Components Labeling");
-        char buffer[256];
-		sprintf(buffer,"Box: [%i*%i*%i]",gridSize.x,gridSize.y,gridSize.z);
-        progressCb->setInfo(buffer);
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Components Labeling");
+			char buffer[256];
+			sprintf(buffer, "Box: [%i*%i*%i]", gridSize.x, gridSize.y, gridSize.z);
+			progressCb->setInfo(buffer);
+		}
+        progressCb->update(0);
         progressCb->start();
     }
 
@@ -3096,11 +3102,14 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	{
 		if (progressCb)
 		{
-			progressCb->reset();
-			char buffer[256];
-			sprintf(buffer,"Components: %i",numberOfComponents);
-			progressCb->setMethodTitle("Connected Components Extraction");
-			progressCb->setInfo(buffer);
+			if (!progressCb->textCanBeEdited())
+			{
+				char buffer[256];
+				sprintf(buffer, "Components: %i", numberOfComponents);
+				progressCb->setMethodTitle("Connected Components Extraction");
+				progressCb->setInfo(buffer);
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 		NormalizedProgress nprogress(progressCb,static_cast<unsigned>(numberOfCells));
@@ -3218,7 +3227,7 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 
 	if (!s_cellFunc_MT_success)
 	{
-		//TODO: display a message to make clear that the cancel order has been understood!
+		//TODO: display a message to make clear that the cancel order has been acknowledged!
 		if (s_progressCb_MT)
 		{
 			s_progressCb_MT->setInfo("Cancelling...");
@@ -3300,12 +3309,17 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		//progress bar
 		if (progressCb)
 		{
-			progressCb->reset();
-			if (functionTitle)
-				progressCb->setMethodTitle(functionTitle);
-			char buffer[512];
-			sprintf(buffer, "Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %u", level, cellCount, m_averageCellPopulation[level], m_stdDevCellPopulation[level], m_maxCellPopulation[level]);
-			progressCb->setInfo(buffer);
+			if (!progressCb->textCanBeEdited())
+			{
+				if (functionTitle)
+				{
+					progressCb->setMethodTitle(functionTitle);
+				}
+				char buffer[512];
+				sprintf(buffer, "Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %u", level, cellCount, m_averageCellPopulation[level], m_stdDevCellPopulation[level], m_maxCellPopulation[level]);
+				progressCb->setInfo(buffer);
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 		NormalizedProgress nprogress(progressCb, m_theAssociatedCloud->size());
@@ -3421,12 +3435,17 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		//progress notification
 		if (progressCb)
 		{
-			progressCb->reset();
-			if (functionTitle)
-				progressCb->setMethodTitle(functionTitle);
-			char buffer[512];
-			sprintf(buffer,"Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %u",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
-			progressCb->setInfo(buffer);
+			if (!progressCb->textCanBeEdited())
+			{
+				if (functionTitle)
+				{
+					progressCb->setMethodTitle(functionTitle);
+				}
+				char buffer[512];
+				sprintf(buffer, "Octree level %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %u", level, static_cast<int>(cells.size()), m_averageCellPopulation[level], m_stdDevCellPopulation[level], m_maxCellPopulation[level]);
+				progressCb->setInfo(buffer);
+			}
+			progressCb->update(0);
 			s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
 			progressCb->start();
 		}
@@ -3535,17 +3554,22 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		//progress notification
 		if (progressCb)
 		{
-			progressCb->reset();
-			if (functionTitle)
-				progressCb->setMethodTitle(functionTitle);
-			char buffer[1024];
-			sprintf(buffer, "Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %u - %u",
-				startingLevel, MAX_OCTREE_LEVEL,
-				getCellNumber(startingLevel), getCellNumber(MAX_OCTREE_LEVEL),
-				m_averageCellPopulation[startingLevel], m_stdDevCellPopulation[startingLevel],
-				m_averageCellPopulation[MAX_OCTREE_LEVEL], m_stdDevCellPopulation[MAX_OCTREE_LEVEL],
-				m_maxCellPopulation[startingLevel], m_maxCellPopulation[MAX_OCTREE_LEVEL]);
-			progressCb->setInfo(buffer);
+			if (!progressCb->textCanBeEdited())
+			{
+				if (functionTitle)
+				{
+					progressCb->setMethodTitle(functionTitle);
+				}
+				char buffer[1024];
+				sprintf(buffer, "Octree levels %i - %i\nCells: %i - %i\nAverage population: %3.2f (+/-%3.2f) - %3.2f (+/-%3.2f)\nMax population: %u - %u",
+					startingLevel, MAX_OCTREE_LEVEL,
+					getCellNumber(startingLevel), getCellNumber(MAX_OCTREE_LEVEL),
+					m_averageCellPopulation[startingLevel], m_stdDevCellPopulation[startingLevel],
+					m_averageCellPopulation[MAX_OCTREE_LEVEL], m_stdDevCellPopulation[MAX_OCTREE_LEVEL],
+					m_maxCellPopulation[startingLevel], m_maxCellPopulation[MAX_OCTREE_LEVEL]);
+				progressCb->setInfo(buffer);
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL
@@ -3957,15 +3981,22 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		//progress notification
 		if (progressCb)
 		{
-			progressCb->reset();
-			if (functionTitle)
-				progressCb->setMethodTitle(functionTitle);
-			char buffer[1024];
-			sprintf(buffer,"Octree levels %i - %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %llu",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
-			progressCb->setInfo(buffer);
+			if (!progressCb->textCanBeEdited())
+			{
+				if (functionTitle)
+				{
+					progressCb->setMethodTitle(functionTitle);
+				}
+				char buffer[1024];
+				sprintf(buffer, "Octree levels %i - %i\nCells: %i\nAverage population: %3.2f (+/-%3.2f)\nMax population: %llu", startingLevel, MAX_OCTREE_LEVEL, static_cast<int>(cells.size()), mean, stddev, maxPop);
+				progressCb->setInfo(buffer);
+			}
 			if (s_normProgressCb_MT)
+			{
 				delete s_normProgressCb_MT;
+			}
 			s_normProgressCb_MT = new NormalizedProgress(progressCb,static_cast<unsigned>(cells.size()));
+			progressCb->update(0);
 			progressCb->start();
 		}
 

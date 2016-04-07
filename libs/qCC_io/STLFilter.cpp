@@ -103,8 +103,8 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 	//progress
 	ccProgressDialog pDlg(true, parentWidget);
 	CCLib::NormalizedProgress nprogress(&pDlg, faceCount);
-	pDlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
-	pDlg.setInfo(qPrintable(QString("Number of facets: %1").arg(faceCount)));
+	pDlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+	pDlg.setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
 	pDlg.start();
 	QApplication::processEvents();
 
@@ -186,8 +186,8 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	//progress
 	ccProgressDialog pDlg(true, parentWidget);
 	CCLib::NormalizedProgress nprogress(&pDlg, faceCount);
-	pDlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
-	pDlg.setInfo(qPrintable(QString("Number of facets: %1").arg(faceCount)));
+	pDlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+	pDlg.setInfo(QObject::tr("Number of facets: %1").arg(faceCount));
 	pDlg.start();
 	QApplication::processEvents();
 
@@ -581,8 +581,8 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 	//progress dialog
 	ccProgressDialog pDlg(true, parameters.parentWidget);
-	pDlg.setMethodTitle("(ASCII) STL file");
-	pDlg.setInfo("Loading in progress...");
+	pDlg.setMethodTitle(QObject::tr("(ASCII) STL file"));
+	pDlg.setInfo(QObject::tr("Loading in progress..."));
 	pDlg.setRange(0, 0);
 	pDlg.show();
 	QApplication::processEvents();
@@ -895,8 +895,8 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	//progress dialog
 	ccProgressDialog pDlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nProgress(&pDlg, faceCount);
-	pDlg.setMethodTitle("Loading binary STL file");
-	pDlg.setInfo(qPrintable(QString("Loading %1 faces").arg(faceCount)));
+	pDlg.setMethodTitle(QObject::tr("Loading binary STL file"));
+	pDlg.setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
 	pDlg.start();
 	QApplication::processEvents();
 

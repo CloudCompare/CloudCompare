@@ -88,8 +88,8 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-	pdlg.setMethodTitle("Save PV file");
-	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
+	pdlg.setMethodTitle(QObject::tr("Save PV file"));
+	pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
 	pdlg.start();
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -150,8 +150,8 @@ CC_FILE_ERROR PVFilter::loadFile(QString filename, ccHObject& container, LoadPar
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-	pdlg.setMethodTitle("Open PV file");
-	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
+	pdlg.setMethodTitle(QObject::tr("Open PV file"));
+	pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
 	pdlg.start();
 
 	ccPointCloud* loadedCloud = 0;

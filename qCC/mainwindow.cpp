@@ -2866,8 +2866,8 @@ void MainWindow::doActionComputePointsVisibility()
 		//progress bar
 		ccProgressDialog pdlg(true);
 		CCLib::NormalizedProgress nprogress(&pdlg,pointCloud->size());
-		pdlg.setMethodTitle("Compute visibility");
-		pdlg.setInfo(qPrintable(QString("Points: %1").arg(pointCloud->size())));
+		pdlg.setMethodTitle(tr("Compute visibility"));
+		pdlg.setInfo(tr("Points: %1").arg(pointCloud->size()));
 		pdlg.start();
 		QApplication::processEvents();
 
@@ -3818,7 +3818,7 @@ void MainWindow::doActionRegister()
 
 		//overlap
 		summary << "----------------";
-		QString overlapString = QString("Theorical overlap: %1%").arg(finalOverlap);
+		QString overlapString = QString("Theoretical overlap: %1%").arg(finalOverlap);
 		ccLog::Print(QString("[Register] ")+overlapString);
 		summary << overlapString;
 
@@ -4064,7 +4064,7 @@ void MainWindow::doActionSubsample()
 	ccHObject::Container resultingClouds;
 	{
 		ccProgressDialog pDlg(false,this);
-		pDlg.setMethodTitle("Subsampling");
+		pDlg.setMethodTitle(tr("Subsampling"));
 
 		bool errors = false;
 
@@ -4793,10 +4793,10 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 												QMessageBox::No ) == QMessageBox::Yes);
 	}
 
-	ccProgressDialog pDlg(false,this);
-	pDlg.setWindowTitle("Triangulation");
-	pDlg.setInfo("Triangulation in progress...");
-	pDlg.setRange(0,0);
+	ccProgressDialog pDlg(false, this);
+	pDlg.setWindowTitle(tr("Triangulation"));
+	pDlg.setInfo(tr("Triangulation in progress..."));
+	pDlg.setRange(0, 0);
 	pDlg.show();
 	QApplication::processEvents();
 
@@ -8289,9 +8289,9 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	//let's start!
 	{
 		ccProgressDialog pDlg(true,this);
-		pDlg.setMethodTitle("Testing all possible positions");
-		pDlg.setInfo(qPrintable(QString("%1 clouds and %2 positions").arg(cloudCount).arg(matrices.size())));
-		CCLib::NormalizedProgress nProgress(&pDlg,static_cast<unsigned>(((cloudCount*(cloudCount-1))/2)*matrices.size()));
+		pDlg.setMethodTitle(tr("Testing all possible positions"));
+		pDlg.setInfo(tr("%1 clouds and %2 positions").arg(cloudCount).arg(matrices.size()));
+		CCLib::NormalizedProgress nProgress(&pDlg, static_cast<unsigned>(((cloudCount*(cloudCount - 1)) / 2)*matrices.size()));
 		pDlg.start();
 		QApplication::processEvents();
 

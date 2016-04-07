@@ -537,9 +537,9 @@ namespace ccLibAlgorithms
 		
 		//now compute the scales
 		ccProgressDialog pDlg(true,parent);
-		pDlg.setMethodTitle("Computing entities scales");
-		pDlg.setInfo(qPrintable(QString("Entities: %1").arg(count)));
-		CCLib::NormalizedProgress nProgress(&pDlg,2*count-1);
+		pDlg.setMethodTitle(QObject::tr("Computing entities scales"));
+		pDlg.setInfo(QObject::tr("Entities: %1").arg(count));
+		CCLib::NormalizedProgress nProgress(&pDlg, 2 * count - 1);
 		pDlg.start();
 		QApplication::processEvents();
 		
@@ -665,7 +665,7 @@ namespace ccLibAlgorithms
 		ccLog::Print(QString("[Scale Matching] Reference entity scale: %1").arg(scales[refEntityIndex]));
 		
 		//now we can rescale
-		pDlg.setMethodTitle("Rescaling entities");
+		pDlg.setMethodTitle(QObject::tr("Rescaling entities"));
 		{
 			for (unsigned i=0; i<count; ++i)
 			{

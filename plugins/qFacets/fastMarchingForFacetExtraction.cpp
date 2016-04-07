@@ -115,9 +115,12 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Fast Marching grid initialization");
-		progressCb->setInfo(qPrintable(QString("Level: %1").arg(level)));
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Fast Marching grid initialization");
+			progressCb->setInfo(qPrintable(QString("Level: %1").arg(level)));
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -493,8 +496,11 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 	if (progressCb)
 	{
-		progressCb->setMethodTitle("Fast Marching for facets extraction");
-		progressCb->setInfo("Initializing...");
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Fast Marching for facets extraction");
+			progressCb->setInfo("Initializing...");
+		}
 		progressCb->start();
 		QApplication::processEvents();
 	}
@@ -545,9 +551,12 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	//progress notification
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Facets extraction");
-		progressCb->setInfo(qPrintable(QString("Octree level: %1\nPoints: %2").arg(octreeLevel).arg(numberOfPoints)));
+		progressCb->update(0);
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Facets extraction");
+			progressCb->setInfo(qPrintable(QString("Octree level: %1\nPoints: %2").arg(octreeLevel).arg(numberOfPoints)));
+		}
 		progressCb->start();
 		QApplication::processEvents();
 	}

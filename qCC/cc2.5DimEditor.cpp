@@ -335,8 +335,8 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 	if (progressDialog)
 	{
-		progressDialog->setMethodTitle("Grid generation");
-		progressDialog->setInfo(qPrintable(QString("Points: %1\nCells: %2 x %3").arg(pointCount).arg(width).arg(height)));
+		progressDialog->setMethodTitle(QObject::tr("Grid generation"));
+		progressDialog->setInfo(QObject::tr("Points: %1\nCells: %2 x %3").arg(pointCount).arg(width).arg(height));
 		progressDialog->start();
 		progressDialog->show();
 		QCoreApplication::processEvents();

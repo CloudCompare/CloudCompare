@@ -619,11 +619,14 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				if (progressCb)
 				{
 					//on the first iteration, we init/show the dialog
-					progressCb->reset();
-					progressCb->setMethodTitle("Clouds registration");
-					char buffer[256];
-					sprintf(buffer,"Initial RMS = %f\n",rms);
-					progressCb->setInfo(buffer);
+					if (!progressCb->textCanBeEdited())
+					{
+						progressCb->setMethodTitle("Clouds registration");
+						char buffer[256];
+						sprintf(buffer, "Initial RMS = %f\n", rms);
+						progressCb->setInfo(buffer);
+					}
+					progressCb->update(0);
 					progressCb->start();
 				}
 
@@ -1129,15 +1132,17 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 											GenericProgressCallback* progressCb,
 											unsigned nbMaxCandidates)
 {
-	/*DGM: KDTree::buildFromCloud will call reset right away!
-	if (progressCb)
-	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Clouds registration");
-		progressCb->setInfo("Starting 4PCS");
-		progressCb->start();
-	}
-	//*/
+	//DGM: KDTree::buildFromCloud will call reset right away!
+	//if (progressCb)
+	//{
+	//	if (!progressCb->textCanBeEdited())
+	//	{
+	//		progressCb->setMethodTitle("Clouds registration");
+	//		progressCb->setInfo("Starting 4PCS");
+	//	}
+	//	progressCb->update(0);
+	//	progressCb->start();
+	//}
 
 	//Initialize random seed with current time
 	srand(static_cast<unsigned>(time(0)));

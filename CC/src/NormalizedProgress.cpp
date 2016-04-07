@@ -74,7 +74,9 @@ NormalizedProgress::NormalizedProgress(	GenericProgressCallback* callback,
 NormalizedProgress::~NormalizedProgress()
 {
 	if (m_counter)
+	{
 		delete m_counter;
+	}
 }
 
 void NormalizedProgress::scale(	unsigned totalSteps,
@@ -118,13 +120,17 @@ void NormalizedProgress::reset()
 	m_percent = 0;
 	m_counter->store(0);
 	if (progressCallback)
+	{
 		progressCallback->update(0);
+	}
 }
 
 bool NormalizedProgress::oneStep()
 {
 	if (!progressCallback)
+	{
 		return true;
+	}
 
 	unsigned currentCount = static_cast<unsigned>(m_counter->fetchAndAddRelaxed(1)) + 1;
 	if ((currentCount % m_step) == 0)
@@ -139,7 +145,9 @@ bool NormalizedProgress::oneStep()
 bool NormalizedProgress::steps(unsigned n)
 {
 	if (!progressCallback)
+	{
 		return true;
+	}
 
 	unsigned currentCount = static_cast<unsigned>(m_counter->fetchAndAddRelaxed(n)) + n;
 	unsigned d1 = currentCount / m_step;

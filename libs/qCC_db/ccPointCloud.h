@@ -851,7 +851,7 @@ public: //Level of Detail (LOD)
 	//! Intializes the LOD structure
 	/** \return success
 	**/
-	bool initLOD(CCLib::GenericProgressCallback* progressCallback = 0);
+	bool initLOD();
 
 	//! Clears the LOD structure
 	inline void clearLOD() { m_lod.clear(); }

@@ -136,11 +136,14 @@ public:
 		NormalizedProgress nProgress(progressCb, numberOfTriangles);
 		if (progressCb)
 		{
-			char buffer[64];
-			sprintf(buffer, "Triangles: %u", numberOfTriangles);
-			progressCb->reset();
-			progressCb->setInfo(buffer);
-			progressCb->setMethodTitle("Intersect Grid/Mesh");
+			if (!progressCb->textCanBeEdited())
+			{
+				char buffer[64];
+				sprintf(buffer, "Triangles: %u", numberOfTriangles);
+				progressCb->setInfo(buffer);
+				progressCb->setMethodTitle("Intersect Grid/Mesh");
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 
@@ -353,11 +356,14 @@ public:
 		NormalizedProgress nProgress(progressCb, numberOfPoints);
 		if (progressCb)
 		{
-			char buffer[64];
-			sprintf(buffer, "Points: %u", numberOfPoints);
-			progressCb->reset();
-			progressCb->setInfo(buffer);
-			progressCb->setMethodTitle("Intersect Grid/Cloud");
+			if (!progressCb->textCanBeEdited())
+			{
+				char buffer[64];
+				sprintf(buffer, "Points: %u", numberOfPoints);
+				progressCb->setInfo(buffer);
+				progressCb->setMethodTitle("Intersect Grid/Cloud");
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 

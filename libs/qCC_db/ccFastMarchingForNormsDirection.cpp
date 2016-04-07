@@ -438,9 +438,12 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 	//progress notification
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Norms direction");
-		progressCb->setInfo(qPrintable(QString("Octree level: %1\nPoints: %2").arg(octreeLevel).arg(numberOfPoints)));
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Norms direction");
+			progressCb->setInfo(qPrintable(QString("Octree level: %1\nPoints: %2").arg(octreeLevel).arg(numberOfPoints)));
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 

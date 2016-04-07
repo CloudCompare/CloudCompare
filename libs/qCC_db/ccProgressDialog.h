@@ -58,13 +58,17 @@ public:
 	virtual ~ccProgressDialog() {}
 
 	//inherited method
-	virtual void reset();
-	virtual void update(float percent);
-	virtual void setMethodTitle(const char* methodTitle);
-	virtual void setInfo(const char* infoStr);
-	inline virtual bool isCancelRequested() { return wasCanceled(); }
-	virtual void start();
-	virtual void stop();
+	virtual void update(float percent) override;
+	inline virtual void setMethodTitle(const char* methodTitle) override { setMethodTitle(QString(methodTitle)); }
+	inline virtual void setInfo(const char* infoStr) override { setInfo(QString(infoStr)); }
+	inline virtual bool isCancelRequested() override { return wasCanceled(); }
+	virtual void start() override;
+	virtual void stop() override;
+
+	//! setMethodTitle with a QString as argument
+	virtual void setMethodTitle(QString methodTitle);
+	//! setInfo with a QString as argument
+	virtual void setInfo(QString infoStr);
 
 	//! Sets base 'refresh' interval (in percents - strictly positive)
 	void setMinRefreshInterval(int i);

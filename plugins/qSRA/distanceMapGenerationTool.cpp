@@ -307,10 +307,10 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		const unsigned char dim2 = (dim1 < 2 ? dim1+1 : 0);
 
 		ccProgressDialog dlg(true, app ? app->getMainWindow() : 0);
-		dlg.setMethodTitle("Cloud to profile radial distance");
-		dlg.setInfo(qPrintable(QString("Polyline: %1 vertices\nCloud: %2 points").arg(vertexCount).arg(pointCount)));
+		dlg.setMethodTitle(QObject::tr("Cloud to profile radial distance"));
+		dlg.setInfo(QObject::tr("Polyline: %1 vertices\nCloud: %2 points").arg(vertexCount).arg(pointCount));
 		dlg.start();
-		CCLib::NormalizedProgress nProgress(static_cast<CCLib::GenericProgressCallback*>(&dlg),pointCount);
+		CCLib::NormalizedProgress nProgress(static_cast<CCLib::GenericProgressCallback*>(&dlg), pointCount);
 
 		for (unsigned i=0; i<pointCount; ++i)
 		{

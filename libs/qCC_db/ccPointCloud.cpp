@@ -145,8 +145,8 @@ protected:
 
 		//if (progressCallback)
 		//{
-		//	progressCallback->setMethodTitle("L.O.D. display");
-		//	progressCallback->setInfo("Preparing L.O.D. structure to speed-up the display...");
+		//	progressCallback->setMethodTitle(QObject::tr("L.O.D. display"));
+		//	progressCallback->setInfo(QObject::tr("Preparing L.O.D. structure to speed-up the display..."));
 		//	progressCallback->start();
 		//}
 		//CCLib::NormalizedProgress nProgress(progressCallback,pointCount);
@@ -280,7 +280,7 @@ protected:
 	QAtomicInt	m_abort;
 };
 
-bool ccPointCloud::initLOD(CCLib::GenericProgressCallback* progressCallback/*=0*/)
+bool ccPointCloud::initLOD()
 {
 	return m_lod.init(*this);
 }
@@ -2932,7 +2932,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						//auto-init LoD structure
 						//ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
-						initLOD(0/*&pDlg*/);
+						initLOD(/*&pDlg*/);
 					}
 					else
 					{
@@ -3890,9 +3890,12 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 	CCLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Unroll (cylinder)");
-		progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Unroll (cylinder)");
+			progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -3966,13 +3969,15 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 
 	unsigned numberOfPoints = size();
 
-	CCLib::NormalizedProgress* nprogress = 0;
+	CCLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
 	if (progressCb)
 	{
-		progressCb->reset();
-		nprogress = new CCLib::NormalizedProgress(progressCb,numberOfPoints);
-		progressCb->setMethodTitle("Unroll (cone)");
-		progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Unroll (cone)");
+			progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -4018,17 +4023,13 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 		}
 
 		//process canceled by user?
-		if (nprogress && !nprogress->oneStep())
+		if (progressCb && !nprogress.oneStep())
+		{
 			break;
+		}
 	}
 
 	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
-
-	if (nprogress)
-	{
-		delete nprogress;
-		nprogress = 0;
-	}
 }
 
 int ccPointCloud::addScalarField(const char* uniqueName)

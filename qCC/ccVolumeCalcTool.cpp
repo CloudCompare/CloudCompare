@@ -573,8 +573,8 @@ bool ccVolumeCalcTool::updateGrid()
 
 	//update grid and compute volume
 	{
-		pDlg.setMethodTitle("Volume computation");
-		pDlg.setInfo(qPrintable(QString("Cells: %1 x %2").arg(m_grid.width).arg(m_grid.height)));
+		pDlg.setMethodTitle(tr("Volume computation"));
+		pDlg.setInfo(tr("Cells: %1 x %2").arg(m_grid.width).arg(m_grid.height));
 		pDlg.start();
 		pDlg.show();
 		QApplication::processEvents();

@@ -1465,8 +1465,8 @@ void ccRasterizeTool::generateContours()
 		assert(minVertexCount >= 3);
 
 		ccProgressDialog pDlg(true,this);
-		pDlg.setMethodTitle("Contour plot");
-		pDlg.setInfo(qPrintable(QString("Levels: %1\nCells: %2 x %3").arg(levelCount).arg(m_grid.width).arg(m_grid.height)));
+		pDlg.setMethodTitle(tr("Contour plot"));
+		pDlg.setInfo(tr("Levels: %1\nCells: %2 x %3").arg(levelCount).arg(m_grid.width).arg(m_grid.height));
 		pDlg.start();
 		pDlg.show();
 		QApplication::processEvents();

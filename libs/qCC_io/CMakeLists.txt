@@ -50,5 +50,5 @@ if( WIN32 OR APPLE )
 		install_shared( ${PROJECT_NAME} ${dest} 1 )
 	endforeach()
 else()
-	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
+	install_shared( ${PROJECT_NAME} lib/cloudcompare 0 ) #default destination: /usr/lib
 endif()

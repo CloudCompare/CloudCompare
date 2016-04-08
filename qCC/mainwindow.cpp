@@ -416,12 +416,12 @@ const tPluginInfoList MainWindow::findPlugins()
 	{
 		binDir.cdUp();
 		
-		m_pluginPaths += (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+		m_pluginPaths += (binDir.absolutePath() + "/lib/cloudcompare/plugins");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
-		m_pluginPaths += "/usr/lib/cloudcompare/plugins/CloudCompare";
+		m_pluginPaths += "/usr/lib/cloudcompare/plugins";
 	}
 #else
 #warning Need to specify the plugin path for this OS.

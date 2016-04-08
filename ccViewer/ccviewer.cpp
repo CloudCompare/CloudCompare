@@ -215,12 +215,12 @@ void ccViewer::loadPlugins()
 	{
 		binDir.cdUp();
 		
-		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
-		pluginsPath = "/usr/lib/cloudcompare/plugins/CloudCompare";
+		pluginsPath = "/usr/lib/cloudcompare/plugins";
 	}
 	
 #else

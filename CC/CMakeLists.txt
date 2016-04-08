@@ -66,7 +66,7 @@ if ( COMPILE_CC_CORE_LIB_SHARED )
 			install_shared( CC_CORE_LIB ${dest} 1 )
 		endforeach()
 	else()
-		install_shared( CC_CORE_LIB lib 0 ) #default destination: /usr/lib
+		install_shared( CC_CORE_LIB lib/cloudcompare 0 ) #default destination: /usr/lib/cloudcompare
 	endif()
 endif()
 

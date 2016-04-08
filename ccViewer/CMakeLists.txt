@@ -64,6 +64,8 @@ endif()
 # contrib. libraries support
 if ( APPLE )
 	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
+elseif( UNIX )
+  target_link_contrib( ${PROJECT_NAME} lib/cloudcompare )
 else()
 	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
 endif()
@@ -105,9 +107,11 @@ if( WIN32 )
 endif()
 
 # Install auxiliary files
+if(APPLE OR WIN32) # For Linux it's already installed in by qCC
 foreach( filename ${auxFiles} )
 	install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} )
 endforeach()
+endif()
 
 # Put together our App bundle on Mac OS X
 if( APPLE )
@@ -126,6 +130,6 @@ endif( APPLE )
 # Export common shader files to all install destinations
 if( APPLE )
    install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
-else()
+elseif( WIN32 ) # For Linux it's already installed in by qCC
    install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER} /shaders/ColorRamp )
 endif()

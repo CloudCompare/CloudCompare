@@ -196,6 +196,8 @@ protected slots:
 	void doActionLoadFile();
 	//! Displays file save dialog
 	void doActionSaveFile();
+	//! Displays the Global Shift settings dialog
+	void doActionGlobalShiftSeetings();
 	//! Toggles the 'show Qt warnings in Console' option
 	void doEnableQtWarnings(bool);
 

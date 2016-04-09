@@ -124,6 +124,10 @@
 #include "devices/3dConnexion/Mouse3DInput.h"
 #endif
 
+//Qt UI files
+#include <ui_distanceMapDlg.h>
+#include <ui_globalShiftSettingsDlg.h>
+
 //System
 #include <iostream>
 #include <random>
@@ -844,6 +848,7 @@ void MainWindow::connectActions()
 	//"File" menu
 	connect(actionOpen,							SIGNAL(triggered()),	this,		SLOT(doActionLoadFile()));
 	connect(actionSave,							SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
+	connect(actionGlobalShiftSettings,			SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
 	connect(actionPrimitiveFactory,				SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
 	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
 	connect(actionCloseAll,						SIGNAL(triggered()),	this,		SLOT(closeAll()));
@@ -4913,8 +4918,6 @@ void MainWindow::doActionFitQuadric()
 
 	refreshAll();
 }
-
-#include <ui_distanceMapDlg.h>
 
 void MainWindow::doActionComputeDistanceMap()
 {
@@ -10258,39 +10261,36 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 	m_ccRoot->addElement(obj,false);
 }
 
-//For primitives test
-//#include <ccBox.h>
-//#include <ccCone.h>
-//#include <ccCylinder.h>
-//#include <ccTorus.h>
-//#include <ccSphere.h>
-//#include <ccDish.h>
-//#include <ccExtru.h>
-//
-//void doTestPrimitives()
-//{
-//	//PRIMITIVES TEST
-//	addToDB(new ccBox(CCVector3(10, 20, 30)));
-//	addToDB(new ccCone(10, 20, 30));
-//	addToDB(new ccCylinder(20, 30));
-//	addToDB(new ccCone(10, 20, 30, 5, 10));
-//	addToDB(new ccTorus(50, 60, M_PI / 3, false));
-//	addToDB(new ccTorus(50, 60, M_PI / 3, true, 20));
-//	addToDB(new ccSphere(35));
-//	addToDB(new ccDish(35, 15, 0));
-//	addToDB(new ccDish(35, 25, 0));
-//	addToDB(new ccDish(35, 35, 0));
-//	addToDB(new ccDish(35, 15, 15));
-//
-//	std::vector<CCVector2> contour;
-//	contour.push_back(CCVector2(10, 00));
-//	contour.push_back(CCVector2(00, 20));
-//	contour.push_back(CCVector2(15, 25));
-//	contour.push_back(CCVector2(20, 10));
-//	contour.push_back(CCVector2(25, 27));
-//	contour.push_back(CCVector2(18, 35));
-//	contour.push_back(CCVector2(22, 40));
-//	contour.push_back(CCVector2(30, 30));
-//	contour.push_back(CCVector2(27, 05));
-//	addToDB(new ccExtru(contour, 10));
-//}
+void MainWindow::doActionGlobalShiftSeetings()
+{
+	QDialog dialog(this);
+	Ui_GlobalShiftSettingsDialog ui;
+	ui.setupUi(&dialog);
+
+	ui.maxAbsCoordSpinBox->setValue(static_cast<int>(log10(ccGlobalShiftManager::MaxCoordinateAbsValue())));
+	ui.maxAbsDiagSpinBox->setValue(static_cast<int>(log10(ccGlobalShiftManager::MaxBoundgBoxDiagonal())));
+
+	if (!dialog.exec())
+	{
+		return;
+	}
+
+	double maxAbsCoord = pow<double>(10.0, ui.maxAbsCoordSpinBox->value());
+	double maxAbsDiag = pow<double>(10.0, ui.maxAbsDiagSpinBox->value());
+
+	ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
+	ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
+
+	ccLog::Print(QString("[Global Shift] Max abs. coord = %1 / max abs. diag = %2")
+		.arg(ccGlobalShiftManager::MaxCoordinateAbsValue(), 0, 'e', 0)
+		.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
+
+	//save to persistent settings
+	{
+		QSettings settings;
+		settings.beginGroup(ccPS::GlobalShift());
+		settings.setValue(ccPS::MaxAbsCoord(), maxAbsCoord);
+		settings.setValue(ccPS::MaxAbsDiag(), maxAbsDiag);
+		settings.endGroup();
+	}
+}

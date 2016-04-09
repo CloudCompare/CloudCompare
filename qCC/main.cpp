@@ -25,6 +25,7 @@
 #include <QLocale>
 #include <QTime>
 #include <QTranslator>
+#include <QSettings>
 
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
@@ -37,11 +38,13 @@
 
 //qCC_io
 #include <FileIOFilter.h>
+#include <ccGlobalShiftManager.h>
 
 //local
 #include "mainwindow.h"
 #include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
+#include "ccPersistentSettings.h"
 
 #ifdef USE_VLD
 //VLD
@@ -150,6 +153,20 @@ int main(int argc, char **argv)
 	QSplashScreen* splash = 0;
 	QTime splashStartTime;
 
+	//restore some global parameters
+	{
+		QSettings settings;
+		settings.beginGroup(ccPS::GlobalShift());
+		double maxAbsCoord = settings.value(ccPS::MaxAbsCoord(), ccGlobalShiftManager::MaxCoordinateAbsValue()).toDouble();
+		double maxAbsDiag = settings.value(ccPS::MaxAbsDiag(), ccGlobalShiftManager::MaxBoundgBoxDiagonal()).toDouble();
+		settings.endGroup();
+
+		ccLog::Print(QString("[Global Shift] Max abs. coord = %1 / max abs. diag = %2").arg(maxAbsCoord, 0, 'e', 0).arg(maxAbsDiag, 0, 'e', 0));
+		
+		ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
+		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
+	}
+	
 	//Command line mode?
 	bool commandLine = (argc > 1 && argv[1][0] == '-');
 	
@@ -215,6 +232,14 @@ int main(int argc, char **argv)
 		}
 		mainWindow->show();
 		QApplication::processEvents();
+
+		//show current Global Shift parameters in Console
+		{
+			ccLog::Print(QString("[Global Shift] Max abs. coord = %1 / max abs. diag = %2")
+				.arg(ccGlobalShiftManager::MaxCoordinateAbsValue(), 0, 'e', 0)
+				.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
+		}
+
 
 		if (argc > lastArgumentIndex)
 		{

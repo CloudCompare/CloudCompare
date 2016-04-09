@@ -275,7 +275,7 @@ bool ccViewer::loadPlugin(QObject *plugin)
 		ccLog::Print("Plugin name: [%s] (GL filter)",qPrintable(pluginName));
 
 		//(auto)create action
-		QAction* action = new QAction(pluginName,plugin);
+		QAction* action = new QAction(pluginName, plugin);
 		action->setToolTip(glPlugin->getDescription());
 		action->setIcon(glPlugin->getIcon());
 		//connect default signal

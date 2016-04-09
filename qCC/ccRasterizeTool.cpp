@@ -1680,20 +1680,20 @@ void ccRasterizeTool::generateImage() const
 																				minHeight,
 																				maxHeight);
 
-	QImage bitmap8(m_grid.width,m_grid.height,QImage::Format_Indexed8);
+	QImage bitmap8(m_grid.width, m_grid.height, QImage::Format_Indexed8);
 	if (!bitmap8.isNull())
 	{
 		// Build a custom palette (gray scale)
 		QVector<QRgb> palette(256);
 		{
 			for (unsigned i = 0; i < 256; i++)
-				palette[i] = qRgba(i,i,i,255);
+				palette[i] = qRgba(i, i, i, 255);
 		}
 		double maxColorComp = 255.99; //.99 --> to avoid round-off issues later!
 
 		if (fillEmptyCellsStrategy == LEAVE_EMPTY)
 		{
-			palette[255] = qRgba(255,0,255,0); //magenta/transparent color for empty cells (in place of pure white)
+			palette[255] = qRgba(255, 0, 255, 0); //magenta/transparent color for empty cells (in place of pure white)
 			maxColorComp = 254.99;
 		}
 
@@ -1763,13 +1763,28 @@ void ccRasterizeTool::generateImage() const
 			else
 			{
 				//we convert this list into a proper "filters" string
-				for (int i=0; i<formats.size(); ++i)
-					filters.append(QString("%1 image (*.%2)\n").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
+				QString pngFilter;
+				for (int i = 0; i < formats.size(); ++i)
+				{
+					QString ext = QString(formats[i].data()).toUpper();
+					QString filter = QString("%1 image (*.%2)").arg(ext).arg(formats[i].data());
+					filters.append(filter + QString("\n"));
+
+					//find PNG by default
+					if (pngFilter.isEmpty() && ext == "PNG")
+					{
+						pngFilter = filter;
+					}
+				}
 
 				QSettings settings;
 				settings.beginGroup(ccPS::HeightGridGeneration());
-				QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
-				QString outputFilename = QFileDialog::getSaveFileName(0,"Save raster image",imageSavePath+QString("/raster_image.%1").arg(formats[0].data()),filters);
+				QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
+				QString outputFilename = QFileDialog::getSaveFileName(	0,
+																		"Save raster image",
+																		imageSavePath + QString("/raster_image.%1").arg(pngFilter.isEmpty() ? QString(formats[0].data()) : QString("png")),
+																		filters,
+																		pngFilter.isEmpty() ? static_cast<QString*>(0) : &pngFilter);
 
 				if (!outputFilename.isNull())
 				{
@@ -1777,7 +1792,7 @@ void ccRasterizeTool::generateImage() const
 					{
 						ccLog::Print(QString("[Rasterize] Image '%1' succesfully saved").arg(outputFilename));
 						//save current export path to persistent settings
-						settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
+						settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
 					}
 					else
 					{
@@ -1800,15 +1815,15 @@ void ccRasterizeTool::generateASCIIMatrix() const
 
 	QSettings settings;
 	settings.beginGroup(ccPS::HeightGridGeneration());
-	QString asciiGridSavePath = settings.value("savePathASCIIGrid",QApplication::applicationDirPath()).toString();
+	QString asciiGridSavePath = settings.value("savePathASCIIGrid", QApplication::applicationDirPath()).toString();
 
 	//open file saving dialog
 	QString filter("ASCII file (*.txt)");
-	QString outputFilename = QFileDialog::getSaveFileName(0,"Save grid as ASCII file",asciiGridSavePath+QString("/raster_matrix.txt"),filter);
+	QString outputFilename = QFileDialog::getSaveFileName(0, "Save grid as ASCII file", asciiGridSavePath + QString("/raster_matrix.txt"), filter);
 	if (outputFilename.isNull())
 		return;
 
-	FILE* pFile = fopen(qPrintable(outputFilename),"wt");
+	FILE* pFile = fopen(qPrintable(outputFilename), "wt");
 	if (!pFile)
 	{
 		ccLog::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilename));
@@ -1820,20 +1835,20 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	double maxHeight = m_grid.maxHeight;
 	//get real values
 	getFillEmptyCellsStrategyExt(emptyCellsHeight, minHeight, maxHeight);
-	for (unsigned j=0; j<m_grid.height; ++j)
+	for (unsigned j = 0; j < m_grid.height; ++j)
 	{
 		const RasterGrid::Row& row = m_grid.rows[j];
 		for (unsigned i = 0; i < m_grid.width; ++i)
 			fprintf(pFile, "%.8f ", std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight);
 
-		fprintf(pFile,"\n");
+		fprintf(pFile, "\n");
 	}
 
 	fclose(pFile);
 	pFile = 0;
 
 	//save current export path to persistent settings
-	settings.setValue("savePathASCIIGrid",QFileInfo(outputFilename).absolutePath());
+	settings.setValue("savePathASCIIGrid", QFileInfo(outputFilename).absolutePath());
 
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
 }

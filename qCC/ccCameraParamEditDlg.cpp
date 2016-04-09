@@ -321,7 +321,7 @@ bool ccCameraParamEditDlg::start()
 void ccCameraParamEditDlg::linkWith(QMdiSubWindow* qWin)
 {
 	//corresponding ccGLWindow
-	ccGLWindow* associatedWin = (qWin ? ccGLWidget::FromWidget(qWin->widget()) : 0);
+	ccGLWindow* associatedWin = (qWin ? GLWindowFromWidget(qWin->widget()) : 0);
 
 	linkWith(associatedWin);
 }

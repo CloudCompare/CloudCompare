@@ -59,10 +59,11 @@ void ccContourExtractorDlg::init()
 	nextPushButton->setFocus();
 
 	//create 3D window
-	ccGLWidget* glWidget = ccGLWidget::Create(false, true);
-	m_glWindow = glWidget->associatedWindow();
-
 	{
+		QWidget* glWidget = 0;
+		CreateGLWindow(m_glWindow, glWidget, false, true);
+		assert(m_glWindow && glWidget);
+
 		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 		//black (text) & white (background) display by default
 		params.backgroundCol = ccColor::white;

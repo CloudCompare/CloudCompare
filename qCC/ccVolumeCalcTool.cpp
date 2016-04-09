@@ -121,12 +121,12 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 
 	//add window
 	create2DView(mapFrame);
-	if (m_window)
+	if (m_glWindow)
 	{
-		ccGui::ParamStruct params = m_window->getDisplayParameters();
+		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 		params.colorScaleShowHistogram = false;
 		params.displayedNumPrecision = precisionSpinBox->value();
-		m_window->setDisplayParameters(params, true);
+		m_glWindow->setDisplayParameters(params, true);
 	}
 
 	loadSettings();
@@ -143,12 +143,12 @@ ccVolumeCalcTool::~ccVolumeCalcTool()
 void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 {
 	//update window
-	if (m_window)
+	if (m_glWindow)
 	{
-		ccGui::ParamStruct params = m_window->getDisplayParameters();
+		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 		params.displayedNumPrecision = precision;
-		m_window->setDisplayParameters(params, true);
-		m_window->redraw(true, false);
+		m_glWindow->setDisplayParameters(params, true);
+		m_glWindow->redraw(true, false);
 	}
 
 	//update report
@@ -337,12 +337,12 @@ void ccVolumeCalcTool::gridIsUpToDate(bool state)
 void ccVolumeCalcTool::updateGridAndDisplay()
 {
 	bool success = updateGrid();
-	if (success && m_window)
+	if (success && m_glWindow)
 	{
 		//convert grid to point cloud
 		if (m_rasterCloud)
 		{
-			m_window->removeFromOwnDB(m_rasterCloud);
+			m_glWindow->removeFromOwnDB(m_rasterCloud);
 			delete m_rasterCloud;
 			m_rasterCloud = 0;
 		}
@@ -376,14 +376,14 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 
 		if (m_rasterCloud)
 		{
-			m_window->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false,m_window);
+			m_glWindow->addToOwnDB(m_rasterCloud);
+			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false,m_glWindow);
 			update2DDisplayZoom(box);
 		}
 		else
 		{
 			ccLog::Error("Not enough memory!");
-			m_window->redraw();
+			m_glWindow->redraw();
 		}
 	}
 

@@ -264,7 +264,11 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->showSF(displayColorScaleCheckBox->isChecked());
 		//add window to the right side layout
 		mapFrame->setLayout(new QHBoxLayout());
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 		mapFrame->layout()->addWidget(QWidget::createWindowContainer(m_window));
+#else
+		mapFrame->layout()->addWidget(m_window);
+#endif
 		precisionSpinBox->setValue(params.displayedNumPrecision);
 	}
 

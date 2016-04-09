@@ -988,7 +988,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			for (unsigned i = 0; i < glWindows.size(); ++i)
 			{
-				comboBox->addItem(glWindows[i]->title());
+				comboBox->addItem(glWindows[i]->windowTitle());
 			}
 
 			connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(objectDisplayChanged(const QString&)));
@@ -1391,9 +1391,9 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			}
 
 			ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
-			int pos = (win ? comboBox->findText(win->title()) : 0);
+			int pos = (win ? comboBox->findText(win->windowTitle()) : 0);
 
-			comboBox->setCurrentIndex(std::max(pos,0)); //0 = "NONE"
+			comboBox->setCurrentIndex(std::max(pos, 0)); //0 = "NONE"
 			break;
 		}
 	case OBJECT_CURRENT_SCALAR_FIELD:
@@ -2203,7 +2203,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 
 	ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
 	if (win)
-		actualDisplayTitle = win->title();
+		actualDisplayTitle = win->windowTitle();
 	else
 		actualDisplayTitle = c_noneString;
 

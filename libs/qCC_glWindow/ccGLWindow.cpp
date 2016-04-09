@@ -49,7 +49,9 @@
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QSettings>
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 #include <QOpenGLPaintDevice>
+#endif
 
 //Oculus
 #ifdef CC_OCULUS_SUPPORT
@@ -168,8 +170,15 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 	return true;
 }
 
-ccGLWindow::ccGLWindow(QSurfaceFormat* format/*=0*/, QWindow * parent/*=0*/, bool silentInitialization/*=false*/)
-	: QWindow(parent)
+ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
+						ccGLWindowParent* parent/*=0*/,
+						bool silentInitialization/*=false*/)
+	: ccGLWindowParent(parent)
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	, m_context(0)
+	, m_device(new QOpenGLPaintDevice)
+	, m_parentWidget(0)
+#endif
 	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
 	, m_initialized(false)
 	, m_trihedronGLList(GL_INVALID_LIST_ID)
@@ -207,7 +216,11 @@ ccGLWindow::ccGLWindow(QSurfaceFormat* format/*=0*/, QWindow * parent/*=0*/, boo
 	, m_glFiltersEnabled(false)
 	, m_winDBRoot(0)
 	, m_globalDBRoot(0) //external DB
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	, m_font(QFont())
+#else
+	, m_font(font())
+#endif
 	, m_pivotVisibility(PIVOT_SHOW_ON_MOVE)
 	, m_pivotSymbolShown(false)
 	, m_allowRectangularEntityPicking(true)
@@ -223,22 +236,25 @@ ccGLWindow::ccGLWindow(QSurfaceFormat* format/*=0*/, QWindow * parent/*=0*/, boo
 	, m_touchBaseDist(0)
 	, m_scheduledFullRedrawTime(0)
 	, m_stereoModeEnabled(false)
-	, m_parentWidget(0)
 	, m_formerParent(0)
 	, m_exclusiveFullscreen(false)
 	, m_showDebugTraces(false)
 	, m_pickRadius(DefaultPickRadius)
 	, m_glExtFuncSupported(false)
 	, m_autoRefresh(false)
-	, m_context(0)
-	, m_device(new QOpenGLPaintDevice)
 {
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	setSurfaceType(QWindow::OpenGLSurface);
 
 	m_format = format ? *format : requestedFormat();
-
+#else
+	if (format)
+	{
+		setFormat(*format);
+	}
+#endif
 	//GL window title
-	setTitle(QString("3D View %1").arg(m_uniqueID));
+	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
 
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
@@ -265,6 +281,11 @@ ccGLWindow::ccGLWindow(QSurfaceFormat* format/*=0*/, QWindow * parent/*=0*/, boo
 	//default modes
 	setPickingMode(DEFAULT_PICKING);
 	setInteractionMode(TRANSFORM_CAMERA());
+
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+	//drag & drop handling
+	setAcceptDrops(true);
+#endif
 
 	//auto-load previous perspective settings
 	{
@@ -322,10 +343,11 @@ ccGLWindow::ccGLWindow(QSurfaceFormat* format/*=0*/, QWindow * parent/*=0*/, boo
 	connect(&m_scheduleTimer, SIGNAL(timeout()), this, SLOT(checkScheduledRedraw()));
 	connect(&m_autoRefreshTimer, SIGNAL(timeout()), this, SLOT(update()));
 
-	//@QWINDOW MIGRATION
-	//setAcceptDrops(true);
-	//setAttribute(Qt::WA_AcceptTouchEvents, true);
-	//setAttribute(Qt::WA_OpaquePaintEvent, true);
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+	setAcceptDrops(true);
+	setAttribute(Qt::WA_AcceptTouchEvents, true);
+	setAttribute(Qt::WA_OpaquePaintEvent, true);
+#endif
 }
 
 ccGLWindow::~ccGLWindow()
@@ -368,14 +390,17 @@ ccGLWindow::~ccGLWindow()
 	if (m_fbo2)
 		delete m_fbo2;
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (m_context)
 		m_context->doneCurrent();
 
 	if (m_device)
 		delete m_device;
+#endif
 }
 
-//@QWINDOW MIGRATION
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+
 void ccGLWindow::setParentWidget(QWidget* widget)
 {
 	m_parentWidget = widget;
@@ -389,12 +414,18 @@ void ccGLWindow::setParentWidget(QWidget* widget)
 	}
 }
 
+#endif
+
 void ccGLWindow::makeCurrent()
 {
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (m_context)
 	{
 		m_context->makeCurrent(this);
 	}
+#else
+	QOpenGLWidget::makeCurrent();
+#endif
 
 	if (m_activeFbo)
 	{
@@ -424,7 +455,12 @@ bool ccGLWindow::bindFBO(ccFrameBufferObject* fbo)
 		m_activeFbo = 0;
 
 		assert(m_glExtFuncSupported);
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+#else
+		//we automatically enable the QOpenGLWidget's default FBO
+		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultQtFBO());
+#endif
 
 		return true;
 	}
@@ -434,12 +470,15 @@ void ccGLWindow::setInteractionMode(INTERACTION_FLAGS flags)
 {
 	m_interactionFlags = flags;
 
-	//@QWINDOW MIGRATION
+	//we need to explicitely enable 'mouse tracking' to track the mouse when no button is clicked
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (m_parentWidget)
 	{
-		//we need to explicitely enable 'mouse tracking' to track the mouse when no button is clicked
 		m_parentWidget->setMouseTracking(flags & (INTERACT_CLICKABLE_ITEMS | INTERACT_SIG_MOUSE_MOVED));
 	}
+#else
+	setMouseTracking(flags & (INTERACT_CLICKABLE_ITEMS | INTERACT_SIG_MOUSE_MOVED));
+#endif
 
 	if ((flags & INTERACT_CLICKABLE_ITEMS) == 0)
 	{
@@ -541,8 +580,9 @@ void ccGLWindow::handleLoggedMessage(const QOpenGLDebugMessage& message)
 		ccLog::Print(msg);
 }
 
-bool ccGLWindow::initializeGL()
+bool ccGLWindow::initialize()
 {
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (!m_context)
 	{
 		m_context = new QOpenGLContext(this);
@@ -558,12 +598,13 @@ bool ccGLWindow::initializeGL()
 	{
 		return false;
 	}
-	
 	m_context->makeCurrent(this);
+#endif
+
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	//initializeGL can be called again when switching to exclusive full screen!
+	//initialize can be called again when switching to exclusive full screen!
 	if (!m_initialized)
 	{
 		if (!glFunc->initializeOpenGLFunctions()) //DGM: seems to be necessary at least with Qt 5.4
@@ -783,7 +824,7 @@ bool ccGLWindow::initializeGL()
 	//no global ambient
 	glFunc->glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ccColor::night.rgba);
 
-	logGLError("ccGLWindow::initializeGL");
+	logGLError("ccGLWindow::initialize");
 
 	return true;
 }
@@ -856,21 +897,6 @@ bool ccGLWindow::event(QEvent* evt)
 	}
 	return true;
 
-	case QEvent::Resize:
-	{
-		QSize newSize = static_cast<QResizeEvent*>(evt)->size();
-		resizeGL(newSize.width(), newSize.height());
-		evt->accept();
-	}
-	return true;
-
-	case QEvent::UpdateRequest:
-	{
-		paintGL();
-		evt->accept();
-	}
-	return true;
-
 	case QEvent::TouchUpdate:
 	{
 		//Gesture update
@@ -896,32 +922,38 @@ bool ccGLWindow::event(QEvent* evt)
 	}
 	break;
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	case QEvent::Resize:
+	{
+		QSize newSize = static_cast<QResizeEvent*>(evt)->size();
+		resizeGL(newSize.width(), newSize.height());
+		evt->accept();
+	}
+	return true;
+
+	case QEvent::UpdateRequest:
+	{
+		paintGL();
+		evt->accept();
+	}
+	return true;
+
 	case QEvent::Expose:
 	{
 		if (isExposed())
 		{
 			paintGL();
 		}
-
-		return true;
 	}
-	break;
-
-	//case QEvent::Move:
-	//{
-	//}
-	//break;
+	return true;
 
 	case QEvent::Show:
 	{
 		paintGL();
 	}
-	break;
+	return true;
 
-	//case QEvent::MouseMove:
-	//{
-	//}
-	//break;
+#endif
 
 	default:
 	{
@@ -931,14 +963,18 @@ bool ccGLWindow::event(QEvent* evt)
 	
 	}
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	return QWindow::event(evt);
+#else
+	return QOpenGLWidget::event(evt);
+#endif
 }
 
 void ccGLWindow::setGLViewport(const QRect& rect)
 {
 	m_glViewport = rect;
 
-	if (m_context && m_context->isValid())
+	if (context() && context()->isValid())
 	{
 		makeCurrent();
 
@@ -982,7 +1018,11 @@ void ccGLWindow::resizeGL(int w, int h)
 						2,
 						SCREEN_SIZE_MESSAGE);
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	paintGL();
+#else
+	logGLError("ccGLWindow::resizeGL");
+#endif
 }
 
 bool ccGLWindow::setLODEnabled(bool state, bool autoDisable/*=false*/)
@@ -1319,25 +1359,45 @@ void ccGLWindow::redraw(bool only2D/*=false*/, bool resetLOD/*=true*/)
 	}
 }
 
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+
+GLuint ccGLWindow::defaultQtFBO() const
+{
+	if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::NVIDIA_VISION)
+	{
+		return 0;
+	}
+	else
+	{
+		return defaultFramebufferObject();
+	}
+}
+
+#endif
+
 void ccGLWindow::paintGL()
 {
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (!isExposed())
 	{
 		return;
 	}
-	if (!m_initialized && !initializeGL())
+	if (!m_initialized && !initialize())
 	{
 		return;
 	}
-
 	assert(m_context);
+#endif
+
 	makeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	const qreal retinaScale = devicePixelRatio();
 	glFunc->glViewport(m_glViewport.x() * retinaScale, m_glViewport.y() * retinaScale, m_glViewport.width() * retinaScale, m_glViewport.height() * retinaScale);
+#endif
 
 	qint64 startTime_ms = m_currentLODState.inProgress ? m_timer.elapsed() : 0;
 
@@ -1473,7 +1533,9 @@ void ccGLWindow::paintGL()
 		}
 	}
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	m_context->swapBuffers(this);
+#endif
 }
 
 void ccGLWindow::renderNextLODLevel()
@@ -1909,7 +1971,11 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, m_glViewport.width(), m_glViewport.height());
 
 				//warning: we must set the original FBO texture as default
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+#else
+				glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
+#endif
 
 				glFunc->glPopAttrib();
 
@@ -4379,7 +4445,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 								"Picking acceleration",
 								"Automatically compute octree(s) to accelerate the picking process?\n(this behavior can be changed later in the Display Settings)",
 								QMessageBox::NoButton,
-								m_parentWidget);
+								asWidget());
 
 							QPushButton* yes = new QPushButton("Yes");
 							question.addButton(yes, QMessageBox::AcceptRole);
@@ -5522,10 +5588,30 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 		}
 	}
-	else if (!silent)
+	else
 	{
-		
-		ccLog::Error("Direct screen capture without FBO is not supported anymore!");
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+		if (!silent)
+		{
+			ccLog::Error("Direct screen capture without FBO is not supported anymore!");
+		}
+#else
+		//if no shader or fbo --> we grab the screen directly
+		if (m_activeShader)
+		{
+			if (!silent)
+				ccLog::Error("Direct screen capture with shader is not supported!");
+		}
+		else
+		{
+			outputImage = grabFramebuffer();
+			if (outputImage.isNull())
+			{
+				if (!silent)
+					ccLog::Error("Direct screen capture failed! (not enough memory?)");
+			}
+		}
+#endif
 	}
 
 	//for the sake of code symmetry ;)
@@ -5859,7 +5945,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			ovrResult result = ovr_Initialize(nullptr);
 			if (OVR_FAILURE(result))
 			{
-				QMessageBox::critical(m_parentWidget, "Oculus", "Failed to initialize the Oculus SDK (ovr_Initialize)");
+				QMessageBox::critical(asWidget(), "Oculus", "Failed to initialize the Oculus SDK (ovr_Initialize)");
 				return false;
 			}
 
@@ -5868,7 +5954,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			result = ovr_Create(&session, &luid);
 			if (OVR_FAILURE(result))
 			{
-				QMessageBox::critical(m_parentWidget, "Oculus", "Failed to initialize the Oculus SDK (ovr_Create)");
+				QMessageBox::critical(asWidget(), "Oculus", "Failed to initialize the Oculus SDK (ovr_Create)");
 				ovr_Shutdown();
 				return false;
 			}
@@ -5883,7 +5969,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 
 		if (!s_oculus.initTextureSet(context()))
 		{
-			QMessageBox::critical(m_parentWidget, "Oculus", "Failed to initialize the swap texture set (ovr_CreateSwapTextureSetGL)");
+			QMessageBox::critical(asWidget(), "Oculus", "Failed to initialize the swap texture set (ovr_CreateSwapTextureSetGL)");
 			s_oculus.stop(true);
 			return false;
 		}
@@ -5914,7 +6000,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			||	format().swapBehavior() != QSurfaceFormat::DoubleBuffer )
 			
 		{
-			QMessageBox::critical(m_parentWidget, "Stereo", "Quad buffering not supported!");
+			QMessageBox::critical(asWidget(), "Stereo", "Quad buffering not supported!");
 			return false;
 		}
 
@@ -5924,7 +6010,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			functions()->glGetBooleanv(GL_STEREO, &isStereoEnabled);
 			if (isStereoEnabled == 0)
 			{
-				QMessageBox::critical(m_parentWidget, "Stereo", "OpenGL stereo mode not supported/enabled!");
+				QMessageBox::critical(asWidget(), "Stereo", "OpenGL stereo mode not supported/enabled!");
 				return false;
 			}
 		}
@@ -5985,25 +6071,27 @@ void ccGLWindow::disableStereoMode()
 
 void ccGLWindow::toggleExclusiveFullScreen(bool state)
 {
+	QWidget* widget = asWidget();
+
 	if (state)
 	{
 		//we are currently in normal screen mode
 		if (!m_exclusiveFullscreen)
 		{
-			if (m_parentWidget)
+			if (widget)
 			{
-				m_formerGeometry = m_parentWidget->saveGeometry();
-				m_formerParent = m_parentWidget->parentWidget();
+				m_formerGeometry = widget->saveGeometry();
+				m_formerParent = widget->parentWidget();
 				if (m_formerParent && m_formerParent->layout())
 				{
-					m_formerParent->layout()->removeWidget(m_parentWidget);
+					m_formerParent->layout()->removeWidget(widget);
 				}
-				m_parentWidget->setParent(0);
+				widget->setParent(0);
 			}
 
 			m_exclusiveFullscreen = true;
-			if (m_parentWidget)
-				m_parentWidget->showFullScreen();
+			if (widget)
+				widget->showFullScreen();
 			else
 				showFullScreen();
 			displayNewMessage("Press F11 to disable full-screen mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 30, FULL_SCREEN_MESSAGE);
@@ -6020,27 +6108,27 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 		//if we are currently in full-screen mode
 		if (m_exclusiveFullscreen)
 		{
-			if (m_formerParent && m_parentWidget)
+			if (m_formerParent && widget)
 			{
 				if (m_formerParent->layout())
 				{
-					m_formerParent->layout()->addWidget(m_parentWidget);
+					m_formerParent->layout()->addWidget(widget);
 				}
 				else
 				{
-					m_parentWidget->setParent(m_formerParent);
+					widget->setParent(m_formerParent);
 				}
 				m_formerParent = 0;
 			}
 			m_exclusiveFullscreen = false;
 
 			displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, FULL_SCREEN_MESSAGE); //remove any message
-			if (m_parentWidget)
+			if (widget)
 			{
-				m_parentWidget->showNormal();
+				widget->showNormal();
 				if (!m_formerGeometry.isNull())
 				{
-					m_parentWidget->restoreGeometry(m_formerGeometry);
+					widget->restoreGeometry(m_formerGeometry);
 					m_formerGeometry.clear();
 				}
 			}
@@ -6052,10 +6140,9 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 	}
 
 	QCoreApplication::processEvents();
-	if (m_parentWidget)
+	if (widget)
 	{
-		//@QWINDOW MIGRATION
-		m_parentWidget->setFocus();
+		widget->setFocus();
 	}
 	redraw();
 

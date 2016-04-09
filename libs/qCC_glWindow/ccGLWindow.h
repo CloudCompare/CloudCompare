@@ -32,9 +32,12 @@
 #include <QByteArray>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLExtensions>
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 #include <QWindow>
 #include <QWidget>
-#include <QHBoxLayout>
+#else
+#include <QOpenGLWidget>
+#endif
 
 //system
 #include <unordered_set>
@@ -48,10 +51,17 @@ class ccGlFilter;
 class ccFrameBufferObject;
 class ccInteractor;
 class ccPolyline;
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 class QOpenGLPaintDevice;
+typedef QWindow ccGLWindowParent;
+#else
+typedef QOpenGLWidget ccGLWindowParent;
+#endif
+
 
 //! OpenGL 3D view
-class ccGLWindow : public QWindow, public ccGenericGLDisplay
+class ccGLWindow : public ccGLWindowParent, public ccGenericGLDisplay
 {
 	Q_OBJECT
 
@@ -124,13 +134,26 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(QSurfaceFormat* format = 0, QWindow *parent = 0, bool silentInitialization = false);
+	ccGLWindow(QSurfaceFormat* format = 0, ccGLWindowParent* parent = 0, bool silentInitialization = false);
 
 	//! Destructor
 	virtual ~ccGLWindow();
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	//! Returns the parent widget
+	QWidget* parentWidget() const { return m_parentWidget; }
+
 	//! Sets 'parent' widget
 	void setParentWidget(QWidget* widget);
+
+	//! Returns the font
+	inline const QFont& font() const { return m_font; }
+
+	//shortcuts
+	void setWindowTitle(QString title) { setTitle(title); }
+	QString windowTitle() const { return title(); }
+
+#endif
 
 	//! Sets 'scene graph' root
 	void setSceneDB(ccHObject* root);
@@ -152,7 +175,11 @@ public:
 	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	inline virtual QWidget* asWidget() override { return m_parentWidget; }
+#else
+	inline virtual QWidget* asWidget() override { return this; }
+#endif
 	inline virtual QSize getScreenSize() const override { return size(); }
 	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
@@ -498,9 +525,6 @@ public:
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
 
-	//! Returns the font
-	inline const QFont& font() const { return m_font; }
-
 public: //LOD
 
 	//! Returns whether LOD is enabled on this display or not
@@ -576,8 +600,10 @@ public slots:
 	//! Tests frame rate
 	void startFrameRateTest();
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Updates the display
 	inline void update() { paintGL(); }
+#endif
 
 protected slots:
 
@@ -705,10 +731,12 @@ protected: //rendering
 	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
 
 	//! Returns the set of OpenGL functions
-	inline ccQOpenGLFunctions* functions() const { return m_context ? m_context->versionFunctions<ccQOpenGLFunctions>() : 0; }
+	inline ccQOpenGLFunctions* functions() const { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : 0; }
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Returns the context (if any)
 	inline QOpenGLContext* context() const { return m_context; }
+#endif
 
 	//reimplemented from QOpenGLWidget
 	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
@@ -825,9 +853,17 @@ protected: //other methods
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
-	bool initializeGL();
+	bool initialize();
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
 	void resizeGL(int w, int h);
 	void paintGL();
+#else
+	void initializeGL() override { initialize(); }
+	void resizeGL(int w, int h) override;
+	void paintGL() override;
+	GLuint defaultQtFBO() const;
+#endif
 
 	//Graphical features controls
 	void drawCross();
@@ -992,6 +1028,22 @@ protected: //other methods
 	void toggleAutoRefresh(bool state, int period_ms = 0);
 
 protected: //members
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+
+	//! Associated OpenGL context
+	QOpenGLContext* m_context;
+
+	//! OpenGL device
+	QOpenGLPaintDevice* m_device;
+
+	//! Format
+	QSurfaceFormat m_format;
+
+	//! Associated widget (we use the WidgetContainer mechanism)
+	QWidget* m_parentWidget;
+
+#endif
 
 	//! Unique ID
 	int m_uniqueID;
@@ -1219,8 +1271,6 @@ protected: //members
 	//! Whether seterovision mode is enabled or not
 	bool m_stereoModeEnabled;
 
-	//! Associated widget (we use the WidgetContainer mechanism)
-	QWidget* m_parentWidget;
 	//! Former parent object (for exclusive full-screen display)
 	QWidget* m_formerParent;
 
@@ -1246,15 +1296,6 @@ protected: //members
 	bool m_autoRefresh;
 	//! Auto-refresh timer
 	QTimer m_autoRefreshTimer;
-
-	//! Associated OpenGL context
-	QOpenGLContext* m_context;
-
-	//! OpenGL device
-	QOpenGLPaintDevice* m_device;
-
-	//! Format
-	QSurfaceFormat m_format;
 
 private:
 

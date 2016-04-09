@@ -24,6 +24,11 @@
 //Qt
 #include <QWidget>
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+
+//Qt
+#include <QHBoxLayout>
+
 //System
 #include <assert.h>
 
@@ -34,23 +39,11 @@ class ccGLWidget : public QWidget
 
 public:
 
-	static ccGLWidget* Create(bool stereoMode = false, bool silentInitialization = false)
-	{
-		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-		format.setStereo(stereoMode);
-
-		ccGLWindow* glWindow = new ccGLWindow(&format, 0, silentInitialization);
-
-		return new ccGLWidget(glWindow);
-	}
-
 	ccGLWidget(ccGLWindow* window, QWidget* parent = 0)
 		: QWidget(parent)
-		, m_layout(0)
 	{
-		m_layout = new QHBoxLayout(this);
-		m_layout->setContentsMargins(0, 0, 0, 0);
+		setLayout(new QHBoxLayout);
+		layout()->setContentsMargins(0, 0, 0, 0);
 
 		if (window)
 		{
@@ -87,9 +80,9 @@ public:
 	{
 		if (window)
 		{
-			assert(m_layout->count() == 0);
-			QWidget* container = QWidget::createWindowContainer(window);
-			m_layout->addWidget(container);
+			assert(layout() && layout()->count() == 0);
+			QWidget* container = QWidget::createWindowContainer(window, this);
+			layout()->addWidget(container);
 
 			m_associatedWindow = window;
 			m_associatedWindow->setParentWidget(container);
@@ -103,7 +96,47 @@ public:
 protected:
 	
 	ccGLWindow* m_associatedWindow;
-	QHBoxLayout* m_layout;
 };
+
+#endif
+
+static void CreateGLWindow(ccGLWindow* &window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
+{
+	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	format.setStereo(stereoMode);
+
+	window = new ccGLWindow(&format, 0, silentInitialization);
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	widget = new ccGLWidget(window);
+#else
+	widget = window;
+#endif
+}
+
+static ccGLWindow* GLWindowFromWidget(QWidget* widget)
+{
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	ccGLWidget* myWidget = qobject_cast<ccGLWidget*>(widget);
+	if (myWidget)
+	{
+		return myWidget->associatedWindow();
+	}
+#else
+	ccGLWindow* myWidget = qobject_cast<ccGLWindow*>(widget);
+	if (myWidget)
+	{
+		return myWidget;
+	}
+#endif
+	else
+	{
+		assert(false);
+		return 0;
+	}
+}
+
+
 
 #endif //CC_GL_WIDGET_HEADER

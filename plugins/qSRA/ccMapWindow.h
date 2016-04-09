@@ -30,7 +30,7 @@ class ccMapWindow : public ccGLWindow
 public:
 
 	//! Default constructor
-	explicit ccMapWindow(QWindow* parent = 0)
+	explicit ccMapWindow(ccGLWindowParent* parent = 0)
 		: ccGLWindow(0, parent, true)
 		, m_sfForRampDisplay(0)
 		, m_showSF(true)

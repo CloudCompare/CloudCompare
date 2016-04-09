@@ -142,8 +142,8 @@ void ccRasterizeTool::removeContourLines()
 	while (!m_contourLines.empty())
 	{
 		ccPolyline* poly = m_contourLines.back();
-		if (m_window)
-			m_window->removeFromOwnDB(poly);
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(poly);
 		delete poly;
 		m_contourLines.pop_back();
 	}
@@ -151,8 +151,8 @@ void ccRasterizeTool::removeContourLines()
 	exportContoursPushButton->setEnabled(false);
 	clearContoursPushButton->setEnabled(false);
 
-	if (m_window)
-		m_window->redraw();
+	if (m_glWindow)
+		m_glWindow->redraw();
 }
 
 bool ccRasterizeTool::showGridBoxEditor()
@@ -295,9 +295,9 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 			}
 		}
 
-		if (m_window && autoRedraw)
+		if (m_glWindow && autoRedraw)
 		{
-			m_window->redraw();
+			m_glWindow->redraw();
 		}
 	}
 }
@@ -561,10 +561,10 @@ void ccRasterizeTool::updateGridAndDisplay()
 	//remove the previous cloud
 	if (m_rasterCloud)
 	{
-		if (m_window)
+		if (m_glWindow)
 		{
-			m_window->removeFromOwnDB(m_rasterCloud);
-			m_window->redraw();
+			m_glWindow->removeFromOwnDB(m_rasterCloud);
+			m_glWindow->redraw();
 		}
 		
 		delete m_rasterCloud;
@@ -576,7 +576,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 	bool interpolateSF = activeLayerIsSF || (getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
 	bool success = updateGrid(interpolateSF);
 
-	if (success && m_window)
+	if (success && m_glWindow)
 	{
 		//convert grid to point cloud
 		std::vector<ExportableFields> exportedFields;
@@ -599,8 +599,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 
 		if (m_rasterCloud)
 		{
-			m_window->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_window);
+			m_glWindow->addToOwnDB(m_rasterCloud);
+			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_glWindow);
 			update2DDisplayZoom(box);
 
 			//update 
@@ -609,7 +609,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 		else
 		{
 			ccLog::Error("Not enough memory!");
-			m_window->redraw();
+			m_glWindow->redraw();
 		}
 	}
 
@@ -1357,9 +1357,9 @@ void ccRasterizeTool::generateHillshade()
 	m_rasterCloud->showSF(true);
 	activeLayerComboBox->setCurrentIndex(activeLayerComboBox->findText(HILLSHADE_FIELD_NAME));
 
-	if (m_window)
+	if (m_glWindow)
 	{
-		m_window->redraw();
+		m_glWindow->redraw();
 	}
 }
 
@@ -1414,8 +1414,8 @@ void ccRasterizeTool::generateContours()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
-		if (m_window)
-			m_window->redraw();
+		if (m_glWindow)
+			m_glWindow->redraw();
 		return;
 	}
 
@@ -1533,8 +1533,8 @@ void ccRasterizeTool::generateContours()
 							//add the 'const altitude' meta-data as well
 							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(v));
 						
-							if (m_window)
-								m_window->addToOwnDB(poly);
+							if (m_glWindow)
+								m_glWindow->addToOwnDB(poly);
 
 							m_contourLines.push_back(poly);
 						}
@@ -1583,9 +1583,9 @@ void ccRasterizeTool::generateContours()
 		}
 	}
 
-	if (m_window)
+	if (m_glWindow)
 	{
-		m_window->redraw();
+		m_glWindow->redraw();
 	}
 }
 
@@ -1607,8 +1607,8 @@ void ccRasterizeTool::exportContourLines()
 		if (!colorize)
 			poly->showColors(false);
 		group->addChild(poly);
-		if (m_window)
-			m_window->removeFromOwnDB(poly);
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(poly);
 	}
 	m_contourLines.clear();
 

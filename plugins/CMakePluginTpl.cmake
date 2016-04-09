@@ -39,7 +39,10 @@ qt5_add_resources( generated_qrc_list ${qrc_list} )
 
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
 
-# Add custom default prepocessor definitions
+# Add custom default preprocessor definitions
+if (OPTION_GL_QUAD_BUFFER_SUPPORT)
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
+endif()
 if( WIN32 )
     set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL QCC_IO_USE_AS_DLL )
 endif()

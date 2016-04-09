@@ -19,7 +19,7 @@ target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 # Qt
 qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 
-# Add custom prepocessor definitions
+# Add custom preprocessor definitions
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 elseif( APPLE )

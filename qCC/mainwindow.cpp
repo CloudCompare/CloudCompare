@@ -10275,8 +10275,8 @@ void MainWindow::doActionGlobalShiftSeetings()
 		return;
 	}
 
-	double maxAbsCoord = pow<double>(10.0, ui.maxAbsCoordSpinBox->value());
-	double maxAbsDiag = pow<double>(10.0, ui.maxAbsDiagSpinBox->value());
+	double maxAbsCoord = pow(10.0, static_cast<double>(ui.maxAbsCoordSpinBox->value()));
+	double maxAbsDiag = pow(10.0, static_cast<double>(ui.maxAbsDiagSpinBox->value()));
 
 	ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
 	ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);

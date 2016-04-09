@@ -34,6 +34,8 @@
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	: CCLib::DgmOctree(aCloud)
 	, m_theAssociatedCloudAsGPC(aCloud)
+	, m_displayedLevel(1)
+	, m_displayMode(WIRE)
 	, m_glListID(0)
 	, m_glListIsDeprecated(true)
 	, m_frustumIntersector(0)

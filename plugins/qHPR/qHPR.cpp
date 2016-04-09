@@ -257,11 +257,10 @@ void qHPR::doAction()
 	if (!theOctree)
 	{
 		theOctree = cloud->computeOctree(&progressCb);
-		//DGM FIXME: it seems the Octree proxy's shared pointer doesn't cross the plugin DLL boundary?!
-		//if (theOctree && cloud->getParent())
-		//{
-		//	m_app->addToDB(cloud->getOctreeProxy());
-		//}
+		if (theOctree && cloud->getParent())
+		{
+			m_app->addToDB(cloud->getOctreeProxy());
+		}
 	}
 
 	if (!theOctree)

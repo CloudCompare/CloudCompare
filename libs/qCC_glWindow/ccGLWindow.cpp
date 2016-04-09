@@ -5989,7 +5989,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 
 #else //no CC_OCULUS_SUPPORT
 
-		QMessageBox::critical(m_parentWidget, "Oculus", "The Oculus device is not supported by this version!");
+		QMessageBox::critical(asWidget(), "Oculus", "The Oculus device is not supported by this version!");
 		return false;
 
 #endif //no CC_OCULUS_SUPPORT

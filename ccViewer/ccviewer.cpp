@@ -31,6 +31,7 @@
 
 //qCC_glWindow
 #include <ccGLWindow.h>
+#include <ccGLWidget.h>
 #include <ccGuiParameters.h>
 
 //qCC_io
@@ -79,8 +80,13 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		const int margin = 10;
 		verticalLayout->setContentsMargins(margin, margin, margin, margin);
 
-		m_glWindow = new ccGLWindow(ui.GLframe);
-		verticalLayout->addWidget(m_glWindow);
+		bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
+
+		QWidget* glWidget = 0;
+		CreateGLWindow(m_glWindow, glWidget, true);
+		assert(m_glWindow && glWidget);
+
+		verticalLayout->addWidget(glWidget);
 	}
 
 	updateGLFrameGradient();
@@ -207,12 +213,12 @@ void ccViewer::loadPlugins()
 	{
 		binDir.cdUp();
 		
-		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins/CloudCompare");
+		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
-		pluginsPath = "/usr/lib/cloudcompare/plugins/CloudCompare";
+		pluginsPath = "/usr/lib/cloudcompare/plugins";
 	}
 	
 #else
@@ -267,7 +273,7 @@ bool ccViewer::loadPlugin(QObject *plugin)
 		ccLog::Print("Plugin name: [%s] (GL filter)",qPrintable(pluginName));
 
 		//(auto)create action
-		QAction* action = new QAction(pluginName,plugin);
+		QAction* action = new QAction(pluginName, plugin);
 		action->setToolTip(glPlugin->getDescription());
 		action->setIcon(glPlugin->getIcon());
 		//connect default signal
@@ -771,6 +777,11 @@ void ccViewer::toggleStereoMode(bool state)
 	if (isActive)
 	{
 		m_glWindow->disableStereoMode();
+		if (m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
+		{
+			//disable full screen
+			ui.actionFullScreen->setChecked(false);
+		}
 	}
 	else
 	{

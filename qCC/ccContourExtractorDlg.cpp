@@ -21,7 +21,7 @@
 #include <CCPlatform.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWidget.h>
 
 //Qt
 #include <QCoreApplication>
@@ -59,8 +59,11 @@ void ccContourExtractorDlg::init()
 	nextPushButton->setFocus();
 
 	//create 3D window
-	m_glWindow = new ccGLWindow(this);
 	{
+		QWidget* glWidget = 0;
+		CreateGLWindow(m_glWindow, glWidget, false, true);
+		assert(m_glWindow && glWidget);
+
 		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 		//black (text) & white (background) display by default
 		params.backgroundCol = ccColor::white;
@@ -76,7 +79,7 @@ void ccContourExtractorDlg::init()
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true);
 		viewFrame->setLayout(new QHBoxLayout);
-		viewFrame->layout()->addWidget(m_glWindow);
+		viewFrame->layout()->addWidget(glWidget);
 	}
 }
 

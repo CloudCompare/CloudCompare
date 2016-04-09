@@ -390,8 +390,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-	pdlg.setMethodTitle("Save LAS file");
-	pdlg.setInfo(qPrintable(QString("Points: %1").arg(numberOfPoints)));
+	pdlg.setMethodTitle(QObject::tr("Save LAS file"));
+	pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
 	pdlg.start();
 
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(writer->GetHeader())));
@@ -672,9 +672,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//progress dialog
 		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-		CCLib::NormalizedProgress nprogress(&pdlg,nbOfPoints);
-		pdlg.setMethodTitle("Open LAS file");
-		pdlg.setInfo(qPrintable(QString("Points: %1").arg(nbOfPoints)));
+		CCLib::NormalizedProgress nprogress(&pdlg, nbOfPoints);
+		pdlg.setMethodTitle(QObject::tr("Open LAS file"));
+		pdlg.setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
 		pdlg.start();
 
 		//number of points read from the begining of the current cloud part

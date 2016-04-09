@@ -505,9 +505,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 	//we don't test the very first and very last level
 	ccProgressDialog progressCb(false,this);
-	progressCb.setMethodTitle("Determining optimal octree level");
-	progressCb.setInfo(qPrintable(QString("Testing %1 levels...").arg(MAX_OCTREE_LEVEL))); //we lie here ;)
-	CCLib::NormalizedProgress nProgress(&progressCb,MAX_OCTREE_LEVEL-2);
+	progressCb.setMethodTitle(tr("Determining optimal octree level"));
+	progressCb.setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); //we lie here ;)
+	CCLib::NormalizedProgress nProgress(&progressCb, MAX_OCTREE_LEVEL - 2);
 	progressCb.start();
 	QApplication::processEvents();
 

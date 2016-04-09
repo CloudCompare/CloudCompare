@@ -64,6 +64,8 @@
     </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionGlobalShiftSettings"/>
+    <addaction name="separator"/>
     <addaction name="actionPrimitiveFactory"/>
     <addaction name="separator"/>
     <addaction name="menu3DMouse"/>
@@ -2907,6 +2909,14 @@
    </property>
    <property name="text">
     <string>Enable Qt warnings in Console</string>
+   </property>
+  </action>
+  <action name="actionGlobalShiftSettings">
+   <property name="text">
+    <string>Global Shift settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Set Global Shift &amp; Scale mechanism parameters</string>
    </property>
   </action>
  </widget>

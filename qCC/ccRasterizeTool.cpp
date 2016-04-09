@@ -142,8 +142,8 @@ void ccRasterizeTool::removeContourLines()
 	while (!m_contourLines.empty())
 	{
 		ccPolyline* poly = m_contourLines.back();
-		if (m_window)
-			m_window->removeFromOwnDB(poly);
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(poly);
 		delete poly;
 		m_contourLines.pop_back();
 	}
@@ -151,8 +151,8 @@ void ccRasterizeTool::removeContourLines()
 	exportContoursPushButton->setEnabled(false);
 	clearContoursPushButton->setEnabled(false);
 
-	if (m_window)
-		m_window->redraw();
+	if (m_glWindow)
+		m_glWindow->redraw();
 }
 
 bool ccRasterizeTool::showGridBoxEditor()
@@ -295,9 +295,9 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 			}
 		}
 
-		if (m_window && autoRedraw)
+		if (m_glWindow && autoRedraw)
 		{
-			m_window->redraw();
+			m_glWindow->redraw();
 		}
 	}
 }
@@ -561,10 +561,10 @@ void ccRasterizeTool::updateGridAndDisplay()
 	//remove the previous cloud
 	if (m_rasterCloud)
 	{
-		if (m_window)
+		if (m_glWindow)
 		{
-			m_window->removeFromOwnDB(m_rasterCloud);
-			m_window->redraw();
+			m_glWindow->removeFromOwnDB(m_rasterCloud);
+			m_glWindow->redraw();
 		}
 		
 		delete m_rasterCloud;
@@ -576,7 +576,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 	bool interpolateSF = activeLayerIsSF || (getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE);
 	bool success = updateGrid(interpolateSF);
 
-	if (success && m_window)
+	if (success && m_glWindow)
 	{
 		//convert grid to point cloud
 		std::vector<ExportableFields> exportedFields;
@@ -599,8 +599,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 
 		if (m_rasterCloud)
 		{
-			m_window->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_window);
+			m_glWindow->addToOwnDB(m_rasterCloud);
+			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_glWindow);
 			update2DDisplayZoom(box);
 
 			//update 
@@ -609,7 +609,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 		else
 		{
 			ccLog::Error("Not enough memory!");
-			m_window->redraw();
+			m_glWindow->redraw();
 		}
 	}
 
@@ -793,7 +793,7 @@ void ccRasterizeTool::generateMesh() const
 		}
 		else
 		{
-			ccLog::Error(QString("Failed to create mesh (Triangle lib error: '%1')").arg(errorStr));
+			ccLog::Error(QString("Failed to create mesh ('%1')").arg(errorStr));
 		}
 	}
 }
@@ -1357,9 +1357,9 @@ void ccRasterizeTool::generateHillshade()
 	m_rasterCloud->showSF(true);
 	activeLayerComboBox->setCurrentIndex(activeLayerComboBox->findText(HILLSHADE_FIELD_NAME));
 
-	if (m_window)
+	if (m_glWindow)
 	{
-		m_window->redraw();
+		m_glWindow->redraw();
 	}
 }
 
@@ -1414,8 +1414,8 @@ void ccRasterizeTool::generateContours()
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory!");
-		if (m_window)
-			m_window->redraw();
+		if (m_glWindow)
+			m_glWindow->redraw();
 		return;
 	}
 
@@ -1465,8 +1465,8 @@ void ccRasterizeTool::generateContours()
 		assert(minVertexCount >= 3);
 
 		ccProgressDialog pDlg(true,this);
-		pDlg.setMethodTitle("Contour plot");
-		pDlg.setInfo(qPrintable(QString("Levels: %1\nCells: %2 x %3").arg(levelCount).arg(m_grid.width).arg(m_grid.height)));
+		pDlg.setMethodTitle(tr("Contour plot"));
+		pDlg.setInfo(tr("Levels: %1\nCells: %2 x %3").arg(levelCount).arg(m_grid.width).arg(m_grid.height));
 		pDlg.start();
 		pDlg.show();
 		QApplication::processEvents();
@@ -1533,8 +1533,8 @@ void ccRasterizeTool::generateContours()
 							//add the 'const altitude' meta-data as well
 							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(v));
 						
-							if (m_window)
-								m_window->addToOwnDB(poly);
+							if (m_glWindow)
+								m_glWindow->addToOwnDB(poly);
 
 							m_contourLines.push_back(poly);
 						}
@@ -1583,9 +1583,9 @@ void ccRasterizeTool::generateContours()
 		}
 	}
 
-	if (m_window)
+	if (m_glWindow)
 	{
-		m_window->redraw();
+		m_glWindow->redraw();
 	}
 }
 
@@ -1607,8 +1607,8 @@ void ccRasterizeTool::exportContourLines()
 		if (!colorize)
 			poly->showColors(false);
 		group->addChild(poly);
-		if (m_window)
-			m_window->removeFromOwnDB(poly);
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(poly);
 	}
 	m_contourLines.clear();
 
@@ -1680,20 +1680,20 @@ void ccRasterizeTool::generateImage() const
 																				minHeight,
 																				maxHeight);
 
-	QImage bitmap8(m_grid.width,m_grid.height,QImage::Format_Indexed8);
+	QImage bitmap8(m_grid.width, m_grid.height, QImage::Format_Indexed8);
 	if (!bitmap8.isNull())
 	{
 		// Build a custom palette (gray scale)
 		QVector<QRgb> palette(256);
 		{
 			for (unsigned i = 0; i < 256; i++)
-				palette[i] = qRgba(i,i,i,255);
+				palette[i] = qRgba(i, i, i, 255);
 		}
 		double maxColorComp = 255.99; //.99 --> to avoid round-off issues later!
 
 		if (fillEmptyCellsStrategy == LEAVE_EMPTY)
 		{
-			palette[255] = qRgba(255,0,255,0); //magenta/transparent color for empty cells (in place of pure white)
+			palette[255] = qRgba(255, 0, 255, 0); //magenta/transparent color for empty cells (in place of pure white)
 			maxColorComp = 254.99;
 		}
 
@@ -1763,13 +1763,28 @@ void ccRasterizeTool::generateImage() const
 			else
 			{
 				//we convert this list into a proper "filters" string
-				for (int i=0; i<formats.size(); ++i)
-					filters.append(QString("%1 image (*.%2)\n").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
+				QString pngFilter;
+				for (int i = 0; i < formats.size(); ++i)
+				{
+					QString ext = QString(formats[i].data()).toUpper();
+					QString filter = QString("%1 image (*.%2)").arg(ext).arg(formats[i].data());
+					filters.append(filter + QString("\n"));
+
+					//find PNG by default
+					if (pngFilter.isEmpty() && ext == "PNG")
+					{
+						pngFilter = filter;
+					}
+				}
 
 				QSettings settings;
 				settings.beginGroup(ccPS::HeightGridGeneration());
-				QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
-				QString outputFilename = QFileDialog::getSaveFileName(0,"Save raster image",imageSavePath+QString("/raster_image.%1").arg(formats[0].data()),filters);
+				QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
+				QString outputFilename = QFileDialog::getSaveFileName(	0,
+																		"Save raster image",
+																		imageSavePath + QString("/raster_image.%1").arg(pngFilter.isEmpty() ? QString(formats[0].data()) : QString("png")),
+																		filters,
+																		pngFilter.isEmpty() ? static_cast<QString*>(0) : &pngFilter);
 
 				if (!outputFilename.isNull())
 				{
@@ -1777,7 +1792,7 @@ void ccRasterizeTool::generateImage() const
 					{
 						ccLog::Print(QString("[Rasterize] Image '%1' succesfully saved").arg(outputFilename));
 						//save current export path to persistent settings
-						settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
+						settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
 					}
 					else
 					{
@@ -1800,15 +1815,15 @@ void ccRasterizeTool::generateASCIIMatrix() const
 
 	QSettings settings;
 	settings.beginGroup(ccPS::HeightGridGeneration());
-	QString asciiGridSavePath = settings.value("savePathASCIIGrid",QApplication::applicationDirPath()).toString();
+	QString asciiGridSavePath = settings.value("savePathASCIIGrid", QApplication::applicationDirPath()).toString();
 
 	//open file saving dialog
 	QString filter("ASCII file (*.txt)");
-	QString outputFilename = QFileDialog::getSaveFileName(0,"Save grid as ASCII file",asciiGridSavePath+QString("/raster_matrix.txt"),filter);
+	QString outputFilename = QFileDialog::getSaveFileName(0, "Save grid as ASCII file", asciiGridSavePath + QString("/raster_matrix.txt"), filter);
 	if (outputFilename.isNull())
 		return;
 
-	FILE* pFile = fopen(qPrintable(outputFilename),"wt");
+	FILE* pFile = fopen(qPrintable(outputFilename), "wt");
 	if (!pFile)
 	{
 		ccLog::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilename));
@@ -1820,20 +1835,20 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	double maxHeight = m_grid.maxHeight;
 	//get real values
 	getFillEmptyCellsStrategyExt(emptyCellsHeight, minHeight, maxHeight);
-	for (unsigned j=0; j<m_grid.height; ++j)
+	for (unsigned j = 0; j < m_grid.height; ++j)
 	{
 		const RasterGrid::Row& row = m_grid.rows[j];
 		for (unsigned i = 0; i < m_grid.width; ++i)
 			fprintf(pFile, "%.8f ", std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight);
 
-		fprintf(pFile,"\n");
+		fprintf(pFile, "\n");
 	}
 
 	fclose(pFile);
 	pFile = 0;
 
 	//save current export path to persistent settings
-	settings.setValue("savePathASCIIGrid",QFileInfo(outputFilename).absolutePath());
+	settings.setValue("savePathASCIIGrid", QFileInfo(outputFilename).absolutePath());
 
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
 }

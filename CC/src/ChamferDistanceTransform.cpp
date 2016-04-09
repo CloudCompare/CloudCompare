@@ -199,11 +199,14 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 	NormalizedProgress normProgress(progressCb,m_innerSize.y*m_innerSize.z*2);
 	if (progressCb)
 	{
-		progressCb->setMethodTitle("Chamfer distance");
-		char buffer[256];
-		sprintf(buffer,"Box: [%u x %u x %u]",m_innerSize.x,m_innerSize.y,m_innerSize.z);
-		progressCb->setInfo(buffer);
-        progressCb->reset();
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Chamfer distance");
+			char buffer[256];
+			sprintf(buffer, "Box: [%u x %u x %u]", m_innerSize.x, m_innerSize.y, m_innerSize.z);
+			progressCb->setInfo(buffer);
+		}
+        progressCb->update(0);
 		progressCb->start();
 	}
 

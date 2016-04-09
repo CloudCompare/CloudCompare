@@ -25,6 +25,8 @@
 //Local
 #include "ccGenericMesh.h"
 
+class ccProgressDialog;
+
 //! Triangular mesh
 class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 {
@@ -327,7 +329,7 @@ public:
 	**/
 	bool laplacianSmooth(	unsigned nbIteration = 100,
 							PointCoordinateType factor = static_cast<PointCoordinateType>(0.01),
-							CCLib::GenericProgressCallback* progressCb = 0);
+							ccProgressDialog* progressCb = 0);
 
 	//! Mesh scalar field processes
 	enum MESH_SCALAR_FIELD_PROCESS {	SMOOTH_MESH_SF,		/**< Smooth **/

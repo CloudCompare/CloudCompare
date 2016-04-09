@@ -1574,8 +1574,8 @@ void ccSectionExtractionTool::unfoldPoints()
 
 	ccProgressDialog pdlg(true);
 	CCLib::NormalizedProgress nprogress(&pdlg, totalPointCount);
-	pdlg.setMethodTitle("Unfold cloud(s)");
-	pdlg.setInfo(qPrintable(QString("Number of segments: %1\nNumber of points: %2").arg(polyMaxCount).arg(totalPointCount)));
+	pdlg.setMethodTitle(tr("Unfold cloud(s)"));
+	pdlg.setInfo(tr("Number of segments: %1\nNumber of points: %2").arg(polyMaxCount).arg(totalPointCount));
 	pdlg.start();
 	QCoreApplication::processEvents();
 
@@ -1800,12 +1800,11 @@ void ccSectionExtractionTool::extractPoints()
 
 	//progress dialog
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress* nprogress = 0;
+	CCLib::NormalizedProgress nprogress(&pdlg, static_cast<unsigned>(sectionCount));
 	if (!visualDebugMode)
 	{
-		nprogress = new CCLib::NormalizedProgress(&pdlg,static_cast<unsigned>(sectionCount));
-		pdlg.setMethodTitle("Extract sections");
-		pdlg.setInfo(qPrintable(QString("Number of sections: %1\nNumber of points: %2").arg(sectionCount).arg(pointCount)));
+		pdlg.setMethodTitle(tr("Extract sections"));
+		pdlg.setInfo(tr("Number of sections: %1\nNumber of points: %2").arg(sectionCount).arg(pointCount));
 		pdlg.start();
 		QCoreApplication::processEvents();
 	}
@@ -2041,7 +2040,7 @@ void ccSectionExtractionTool::extractPoints()
 				}
 			} //if (poly)
 
-			if (nprogress && !nprogress->oneStep())
+			if (!nprogress.oneStep())
 			{
 				ccLog::Warning("[ccSectionExtractionTool] Canceled by user");
 				error = true;
@@ -2054,12 +2053,6 @@ void ccSectionExtractionTool::extractPoints()
 	catch (const std::bad_alloc&)
 	{
 		error = true;
-	}
-
-	if (nprogress)
-	{
-		delete nprogress;
-		nprogress = 0;
 	}
 
 	if (error)

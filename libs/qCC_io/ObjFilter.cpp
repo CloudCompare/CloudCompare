@@ -92,8 +92,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	ccProgressDialog pdlg(true, parameters.parentWidget);
 	unsigned numberOfTriangles = mesh->size();
 	CCLib::NormalizedProgress nprogress(&pdlg, numberOfTriangles);
-	pdlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
-	pdlg.setInfo(qPrintable(QString("Triangles: %1").arg(numberOfTriangles)));
+	pdlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+	pdlg.setInfo(QObject::tr("Triangles: %1").arg(numberOfTriangles));
 	pdlg.start();
 	
 	QTextStream stream(&file);
@@ -444,8 +444,8 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	//progress dialog
 	ccProgressDialog pDlg(true, parameters.parentWidget);
-	pDlg.setMethodTitle("OBJ file");
-	pDlg.setInfo("Loading in progress...");
+	pDlg.setMethodTitle(QObject::tr("OBJ file"));
+	pDlg.setInfo(QObject::tr("Loading in progress..."));
 	pDlg.setRange(0, static_cast<int>(file.size()));
 	pDlg.show();
 	QApplication::processEvents();

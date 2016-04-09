@@ -8,6 +8,8 @@ if (APPLE)
 	set( CMAKE_SKIP_BUILD_RPATH  FALSE )
 	set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE ) 
 	set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
+elseif( UNIX )
+  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/cloudcompare")
 endif()
 
 include ( CMakePolicies.cmake )
@@ -34,11 +36,18 @@ set( INSTALL_DESTINATIONS CloudCompare )
 # CCViewer
 OPTION( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
 
+# Quad buffer stereo support
+OPTION( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
+
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
-#  Therefore the target folder is the same for Windows and Unix/Linux)
-set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
-set( CCVIEWER_DEST_FOLDER ccViewer )
+if(WIN32 OR APPLE) 
+  set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
+  set( CCVIEWER_DEST_FOLDER ccViewer )
+else()
+  set( CLOUDCOMPARE_DEST_FOLDER bin )
+  set( CCVIEWER_DEST_FOLDER bin )
+endif()
 
 if (APPLE)
 	set( CLOUDCOMPARE_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app  CACHE INTERNAL "CloudCompare bundle dir")
@@ -64,6 +73,8 @@ else( APPLE )
     if( ${OPTION_BUILD_CCVIEWER} )
         list( APPEND INSTALL_DESTINATIONS "${CCVIEWER_MAC_FRAMEWORK_DIR}" )
     endif()
+else( UNIX )
+  set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX}/bin )
 endif()
 
 # Load advanced scripts

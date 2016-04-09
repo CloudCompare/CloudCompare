@@ -20,7 +20,7 @@ file( GLOB source_list *.cpp GfxTL/*.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
-# Add prepocessor definitions
+# Add preprocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _SCL_SECURE_NO_WARNINGS TIMINGLEVEL0 _LIB )
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE TIMINGLEVEL1)
 

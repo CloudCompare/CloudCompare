@@ -1519,9 +1519,9 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	ccProgressDialog pDlg(false, parameters.parentWidget);
 	if (parameters.alwaysDisplayLoadDialog)
 	{
-		pDlg.setInfo("Loading in progress...");
-		pDlg.setMethodTitle("PLY file");
-		pDlg.setRange(0,0);
+		pDlg.setInfo(QObject::tr("Loading in progress..."));
+		pDlg.setMethodTitle(QObject::tr("PLY file"));
+		pDlg.setRange(0, 0);
 		pDlg.show();
 		QApplication::processEvents();
 	}

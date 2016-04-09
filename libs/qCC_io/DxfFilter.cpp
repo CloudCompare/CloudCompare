@@ -531,19 +531,19 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				}
 				else
 				{
-					bbMinCorner.x = std::min(bbMinCorner.x,minC.x);
-					bbMinCorner.y = std::min(bbMinCorner.y,minC.y);
-					bbMinCorner.z = std::min(bbMinCorner.z,minC.z);
-					bbMaxCorner.x = std::max(bbMaxCorner.x,maxC.x);
-					bbMaxCorner.y = std::max(bbMaxCorner.y,maxC.y);
-					bbMaxCorner.z = std::max(bbMaxCorner.z,maxC.z);
+					bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
+					bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
+					bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
+					bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
+					bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
+					bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
 				}
 			}
 		}
 		for (size_t j=0; j<meshCount; ++j)
 		{
 			CCVector3d minC, maxC;
-			if (meshes[j]->getGlobalBB(minC,maxC))
+			if (meshes[j]->getGlobalBB(minC, maxC))
 			{
 				//update global BB
 				if (firstEntity)
@@ -554,12 +554,12 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				}
 				else
 				{
-					bbMinCorner.x = std::min(bbMinCorner.x,minC.x);
-					bbMinCorner.y = std::min(bbMinCorner.y,minC.y);
-					bbMinCorner.z = std::min(bbMinCorner.z,minC.z);
-					bbMaxCorner.x = std::max(bbMaxCorner.x,maxC.x);
-					bbMaxCorner.y = std::max(bbMaxCorner.y,maxC.y);
-					bbMaxCorner.z = std::max(bbMaxCorner.z,maxC.z);
+					bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
+					bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
+					bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
+					bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
+					bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
+					bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
 				}
 			}
 		}
@@ -586,23 +586,23 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 
 		//add dimensions
 		dw->dxfString(9, "$INSBASE");
-		dw->dxfReal(10,0.0);
-		dw->dxfReal(20,0.0);
-		dw->dxfReal(30,0.0);
+		dw->dxfReal(10, 0.0);
+		dw->dxfReal(20, 0.0);
+		dw->dxfReal(30, 0.0);
 		dw->dxfString(9, "$EXTMIN");
-		dw->dxfReal(10,bbMinCorner.x-pageMargin);
-		dw->dxfReal(20,bbMinCorner.y-pageMargin);
-		dw->dxfReal(30,bbMinCorner.z-pageMargin);
+		dw->dxfReal(10, bbMinCorner.x - pageMargin);
+		dw->dxfReal(20, bbMinCorner.y - pageMargin);
+		dw->dxfReal(30, bbMinCorner.z - pageMargin);
 		dw->dxfString(9, "$EXTMAX");
-		dw->dxfReal(10,bbMaxCorner.x+pageMargin);
-		dw->dxfReal(20,bbMaxCorner.y+pageMargin);
-		dw->dxfReal(30,bbMaxCorner.z+pageMargin);
+		dw->dxfReal(10, bbMaxCorner.x + pageMargin);
+		dw->dxfReal(20, bbMaxCorner.y + pageMargin);
+		dw->dxfReal(30, bbMaxCorner.z + pageMargin);
 		dw->dxfString(9, "$LIMMIN");
-		dw->dxfReal(10,bbMinCorner.x-pageMargin);
-		dw->dxfReal(20,bbMinCorner.y-pageMargin);
+		dw->dxfReal(10, bbMinCorner.x - pageMargin);
+		dw->dxfReal(20, bbMinCorner.y - pageMargin);
 		dw->dxfString(9, "$LIMMAX");
-		dw->dxfReal(10,bbMaxCorner.x+pageMargin);
-		dw->dxfReal(20,bbMaxCorner.y+pageMargin);
+		dw->dxfReal(10, bbMaxCorner.x + pageMargin);
+		dw->dxfReal(20, bbMaxCorner.y + pageMargin);
 
 		//close header
 		dw->sectionEnd();
@@ -641,7 +641,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				//default layer name
 				//TODO: would be better to use the polyline name!
 				//but it can't be longer than 31 characters (R14 limit)
-				QString layerName = QString("POLYLINE_%1").arg(i+1,3,10,QChar('0'));
+				QString layerName = QString("POLYLINE_%1").arg(i + 1, 3, 10, QChar('0'));
 
 				polyLayerNames << layerName;
 				dxf.writeLayer(*dw, 
@@ -659,7 +659,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				//default layer name
 				//TODO: would be better to use the mesh name!
 				//but it can't be longer than 31 characters (R14 limit)
-				QString layerName = QString("MESH_%1").arg(j+1,3,10,QChar('0'));
+				QString layerName = QString("MESH_%1").arg(j + 1, 3, 10, QChar('0'));
 
 				meshLayerNames << layerName;
 				dxf.writeLayer(*dw, 

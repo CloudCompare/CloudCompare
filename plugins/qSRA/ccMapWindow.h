@@ -30,8 +30,8 @@ class ccMapWindow : public ccGLWindow
 public:
 
 	//! Default constructor
-	explicit ccMapWindow(QWidget *parent = 0)
-		: ccGLWindow(parent, true)
+	explicit ccMapWindow(ccGLWindowParent* parent = 0)
+		: ccGLWindow(0, parent, true)
 		, m_sfForRampDisplay(0)
 		, m_showSF(true)
 	{}

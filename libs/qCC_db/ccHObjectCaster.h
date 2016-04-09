@@ -29,6 +29,7 @@ class ccMesh;
 class ccSubMesh;
 class ccGenericPrimitive;
 class ccOctree;
+class ccOctreeProxy;
 class ccKdTree;
 class ccSensor;
 class ccGBLSensor;
@@ -104,6 +105,8 @@ public:
 	//! Converts current object to ccTorus (if possible)
 	static ccTorus* ToTorus(ccHObject* obj);
 
+	//! Converts current object to ccOctreeProxy (if possible)
+	static ccOctreeProxy* ToOctreeProxy(ccHObject* obj);
 	//! Converts current object to ccOctree (if possible)
 	static ccOctree* ToOctree(ccHObject* obj);
 

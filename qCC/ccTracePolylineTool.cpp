@@ -174,7 +174,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	newPoly->importParametersFrom(*m_poly3D);
 	newPoly->setDisplay_recursive(m_poly3D->getDisplay());
 
-	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin);
+	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin ? m_associatedWin->asWidget() : 0);
 	pDlg.show();
 	QCoreApplication::processEvents();
 

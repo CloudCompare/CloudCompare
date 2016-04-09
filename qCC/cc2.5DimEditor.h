@@ -250,7 +250,7 @@ protected: //members
 	ccBoundingBoxEditorDlg* m_bbEditorDlg;
 
 	//! 2D display
-	ccGLWindow* m_window;
+	ccGLWindow* m_glWindow;
 
 	//! Grid
 	RasterGrid m_grid;

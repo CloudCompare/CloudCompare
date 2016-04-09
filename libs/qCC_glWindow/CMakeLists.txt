@@ -26,8 +26,11 @@ target_link_OCULUS_SDK( ${PROJECT_NAME} )
 # Qt
 qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL OpenGLExtensions)
 
-# Add custom prepocessor definitions
-set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS )
+# Add custom preprocessor definitions
+# set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS )
+if (OPTION_GL_QUAD_BUFFER_SUPPORT)
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
+endif()
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 endif()

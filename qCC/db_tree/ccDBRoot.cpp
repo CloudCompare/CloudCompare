@@ -896,7 +896,7 @@ void ccDBRoot::showPropertiesView(ccHObject* obj)
 	m_ccPropDelegate->fillModel(obj);
 
 	m_propertiesTreeWidget->setEnabled(true);
-	m_propertiesTreeWidget->setColumnWidth(0,c_propViewLeftColumnWidth);
+	m_propertiesTreeWidget->setColumnWidth(0, c_propViewLeftColumnWidth);
 }
 
 void ccDBRoot::hidePropertiesView()

@@ -710,11 +710,14 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 	NormalizedProgress nProgress(progressCb,numberOfTriangles);
 	if (progressCb)
 	{
-		char buffer[64];
-		sprintf(buffer,"Triangles: %u",numberOfTriangles);
-		progressCb->reset();
-		progressCb->setInfo(buffer);
-		progressCb->setMethodTitle("Intersect Grid/Mesh");
+		if (!progressCb->textCanBeEdited())
+		{
+			char buffer[64];
+			sprintf(buffer, "Triangles: %u", numberOfTriangles);
+			progressCb->setInfo(buffer);
+			progressCb->setMethodTitle("Intersect Grid/Mesh");
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -1402,11 +1405,14 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		NormalizedProgress nProgress(progressCb, numberOfCells);
 		if (progressCb)
 		{
-			char buffer[256];
-			sprintf(buffer, "Cells: %u", numberOfCells);
-			progressCb->reset();
-			progressCb->setInfo(buffer);
-			progressCb->setMethodTitle(params.signedDistances ? "Compute signed distances" : "Compute distances");
+			if (!progressCb->textCanBeEdited())
+			{
+				char buffer[256];
+				sprintf(buffer, "Cells: %u", numberOfCells);
+				progressCb->setInfo(buffer);
+				progressCb->setMethodTitle(params.signedDistances ? "Compute signed distances" : "Compute distances");
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 
@@ -1663,11 +1669,14 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		NormalizedProgress nProgress(progressCb,numberOfCells);
 		if (progressCb)
 		{
-			char buffer[256];
-			sprintf(buffer,"Cells=%u",numberOfCells);
-			progressCb->reset();
-			progressCb->setInfo(buffer);
-			progressCb->setMethodTitle("Compute signed distances");
+			if (!progressCb->textCanBeEdited())
+			{
+				char buffer[256];
+				sprintf(buffer, "Cells: %u", numberOfCells);
+				progressCb->setInfo(buffer);
+				progressCb->setMethodTitle("Compute signed distances");
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 

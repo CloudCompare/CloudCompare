@@ -34,7 +34,7 @@
 #include <ccProgressDialog.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWidget.h>
 
 //Qt
 #include <QFrame>
@@ -70,7 +70,7 @@ QString cc2Point5DimEditor::GetDefaultFieldName(ExportableFields field)
 
 cc2Point5DimEditor::cc2Point5DimEditor()
 	: m_bbEditorDlg(0)
-	, m_window(0)
+	, m_glWindow(0)
 	, m_rasterCloud(0)
 {
 }
@@ -79,8 +79,8 @@ cc2Point5DimEditor::~cc2Point5DimEditor()
 {
 	if (m_rasterCloud)
 	{
-		if (m_window)
-			m_window->removeFromOwnDB(m_rasterCloud);
+		if (m_glWindow)
+			m_glWindow->removeFromOwnDB(m_rasterCloud);
 		delete m_rasterCloud;
 		m_rasterCloud = 0;
 	}
@@ -116,11 +116,13 @@ void cc2Point5DimEditor::createBoundingBoxEditor(const ccBBox& gridBBox, QWidget
 
 void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 {
-	if (!m_window)
+	if (!m_glWindow)
 	{
-		m_window = new ccGLWindow(parentFrame);
+		QWidget* glWidget = 0;
+		CreateGLWindow(m_glWindow, glWidget, false, true);
+		assert(m_glWindow && glWidget);
 		
-		ccGui::ParamStruct params = m_window->getDisplayParameters();
+		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 		//black (text) & white (background) display by default
 		params.backgroundCol = ccColor::white;
 		params.textDefaultCol = ccColor::black;
@@ -128,17 +130,17 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 		params.decimateMeshOnMove = false;
 		params.displayCross = false;
 		params.colorScaleUseShader = false;
-		m_window->setDisplayParameters(params,true);
-		m_window->setPerspectiveState(false,true);
-		m_window->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
-		m_window->setPickingMode(ccGLWindow::NO_PICKING);
-		m_window->displayOverlayEntities(true);
+		m_glWindow->setDisplayParameters(params,true);
+		m_glWindow->setPerspectiveState(false,true);
+		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
+		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
+		m_glWindow->displayOverlayEntities(true);
 		
 		//add window to the input frame (if any)
 		if (parentFrame)
 		{
 			parentFrame->setLayout(new QHBoxLayout());
-			parentFrame->layout()->addWidget(m_window);
+			parentFrame->layout()->addWidget(glWidget);
 		}
 	}
 }
@@ -178,21 +180,21 @@ ccBBox cc2Point5DimEditor::getCustomBBox() const
 
 void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 {
-	if (!m_window || !m_grid.isValid())
+	if (!m_glWindow || !m_grid.isValid())
 		return;
 
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
 	//we compute the pixel size (in world coordinates)
 	{
-		ccViewportParameters params = m_window->getViewportParameters();
+		ccViewportParameters params = m_glWindow->getViewportParameters();
 
 		double realGridWidth  = m_grid.width  * m_grid.gridStep;
 		double realGridHeight = m_grid.height * m_grid.gridStep;
 
 		static const int screnMargin = 20;
-		int screenWidth  = std::max(1,m_window->width()  - 2*screnMargin);
-		int screenHeight = std::max(1,m_window->height() - 2*screnMargin);
+		int screenWidth  = std::max(1,m_glWindow->width()  - 2*screnMargin);
+		int screenHeight = std::max(1,m_glWindow->height() - 2*screnMargin);
 
 		int pointSize = 1;
 		if (	static_cast<int>(m_grid.width)  < screenWidth
@@ -214,18 +216,18 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		params.pixelSize = static_cast<float>( std::max( realGridWidth/screenWidth, realGridHeight/screenHeight ) );
 		params.zoom = 1.0f;
 
-		m_window->setViewportParameters(params);
-		m_window->setPointSize(pointSize);
+		m_glWindow->setViewportParameters(params);
+		m_glWindow->setPointSize(pointSize);
 	}
 	
 	//we set the pivot point on the box center
 	CCVector3 P = box.getCenter();
-	m_window->setPivotPoint(CCVector3d::fromArray(P.u));
-	m_window->setCameraPos(CCVector3d::fromArray(P.u));
+	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
+	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
 
-	m_window->invalidateViewport();
-	m_window->invalidateVisualization();
-	m_window->redraw();
+	m_glWindow->invalidateViewport();
+	m_glWindow->invalidateVisualization();
+	m_glWindow->redraw();
 }
 
 void cc2Point5DimEditor::RasterGrid::clear()
@@ -334,8 +336,8 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 	if (progressDialog)
 	{
-		progressDialog->setMethodTitle("Grid generation");
-		progressDialog->setInfo(qPrintable(QString("Points: %1\nCells: %2 x %3").arg(pointCount).arg(width).arg(height)));
+		progressDialog->setMethodTitle(QObject::tr("Grid generation"));
+		progressDialog->setInfo(QObject::tr("Points: %1\nCells: %2 x %3").arg(pointCount).arg(width).arg(height));
 		progressDialog->start();
 		progressDialog->show();
 		QCoreApplication::processEvents();

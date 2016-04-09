@@ -180,9 +180,15 @@ ccTorus*	ccHObjectCaster::ToTorus(ccHObject* obj)
 	return obj && obj->isA(CC_TYPES::TORUS) ? static_cast<ccTorus*>(obj) : 0;
 }
 
+ccOctreeProxy* ccHObjectCaster::ToOctreeProxy(ccHObject* obj)
+{
+	return obj && obj->isA(CC_TYPES::POINT_OCTREE) ? static_cast<ccOctreeProxy*>(obj) : 0;
+}
+
 ccOctree* ccHObjectCaster::ToOctree(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::POINT_OCTREE) ? static_cast<ccOctreeProxy*>(obj)->getOctree().data() : 0;
+	ccOctreeProxy* proxy = ToOctreeProxy(obj);
+	return proxy ? proxy->getOctree().data() : 0;
 }
 
 ccKdTree* ccHObjectCaster::ToKdTree(ccHObject* obj)

@@ -41,6 +41,9 @@ public:
 	static inline const QString HeightGridGeneration        () { return "HeightGridGeneration"; }
 	static inline const QString VolumeCalculation			() { return "VolumeCalculation"; }
 	static inline const QString Console                     () { return "Console"; }
+	static inline const QString GlobalShift                 () { return "GlobalShift"; }
+	static inline const QString MaxAbsCoord                 () { return "MaxAbsCoord"; }
+	static inline const QString MaxAbsDiag                  () { return "MaxAbsDiag"; }
 };
 
 #endif //CC_PERSISTENT_SETTINGS_HEADER

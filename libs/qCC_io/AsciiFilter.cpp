@@ -190,9 +190,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget);
-	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-	pdlg.setMethodTitle(qPrintable(QString("Saving cloud [%1]").arg(cloud->getName())));
-	pdlg.setInfo(qPrintable(QString("Number of points: %1").arg(numberOfPoints)));
+	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
+	pdlg.setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
+	pdlg.setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
 	pdlg.start();
 
 	//output precision
@@ -710,9 +710,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 	//progress indicator
 	ccProgressDialog pdlg(true, parameters.parentWidget);
-	CCLib::NormalizedProgress nprogress(&pdlg,approximateNumberOfLines);
-	pdlg.setMethodTitle(qPrintable(QString("Open ASCII file [%1]").arg(filename)));
-	pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(approximateNumberOfLines)));
+	CCLib::NormalizedProgress nprogress(&pdlg, approximateNumberOfLines);
+	pdlg.setMethodTitle(QObject::tr("Open ASCII file [%1]").arg(filename));
+	pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 	pdlg.start();
 
 	//buffers
@@ -813,7 +813,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 			//we update the progress info
 			nprogress.scale(approximateNumberOfLines,100,true);
-			pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(approximateNumberOfLines)));
+			pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 
 			nextLimit = cloudChunkPos+cloudChunkSize;
 		}

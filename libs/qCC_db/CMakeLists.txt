@@ -19,7 +19,7 @@ target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 # Qt
 qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 
-# Add custom prepocessor definitions
+# Add custom preprocessor definitions
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 elseif( APPLE )
@@ -33,5 +33,5 @@ if( WIN32 OR APPLE )
 		install_shared( ${PROJECT_NAME} ${dest} 1 )
 	endforeach()
 else()
-	install_shared( ${PROJECT_NAME} lib 0 ) #default destination: /usr/lib
+	install_shared( ${PROJECT_NAME} lib/cloudcompare 0 ) #default destination: /usr/lib
 endif()

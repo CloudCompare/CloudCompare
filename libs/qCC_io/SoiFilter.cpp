@@ -81,11 +81,9 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	//Progress dialog
 	ccProgressDialog pdlg(false, parameters.parentWidget); //cancel is not supported
-	pdlg.setMethodTitle("Open SOI file");
-	char buffer[256];
-	sprintf(buffer,"%u scans / %u points\n",nbScansTotal,nbPointsTotal);
-	CCLib::NormalizedProgress nprogress(&pdlg,nbPointsTotal);
-	pdlg.setInfo(buffer);
+	CCLib::NormalizedProgress nprogress(&pdlg, nbPointsTotal);
+	pdlg.setMethodTitle(QObject::tr("Open SOI file"));
+	pdlg.setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
 	pdlg.start();
 
 	//Scan by scan

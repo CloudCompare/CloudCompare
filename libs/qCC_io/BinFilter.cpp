@@ -159,9 +159,9 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		return CC_FERR_WRITING;
 
 	ccProgressDialog pDlg(false, parameters.parentWidget);
-	pDlg.setMethodTitle("BIN file");
-	pDlg.setInfo("Please wait... saving in progress");
-	pDlg.setRange(0,0);
+	pDlg.setMethodTitle(QObject::tr("BIN file"));
+	pDlg.setInfo(QObject::tr("Please wait... saving in progress"));
+	pDlg.setRange(0, 0);
 	pDlg.setModal(true);
 	pDlg.show();
 
@@ -365,9 +365,9 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if (parameters.alwaysDisplayLoadDialog)
 		{
 			ccProgressDialog pDlg(false, parameters.parentWidget);
-			pDlg.setMethodTitle("BIN file");
-			pDlg.setInfo(qPrintable(QString("Loading: %1").arg(QFileInfo(filename).fileName())));
-			pDlg.setRange(0,0);
+			pDlg.setMethodTitle(QObject::tr("BIN file"));
+			pDlg.setInfo(QObject::tr("Loading: %1").arg(QFileInfo(filename).fileName()));
+			pDlg.setRange(0, 0);
 			pDlg.show();
 
 			//concurrent call in a separate thread
@@ -1024,13 +1024,13 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 	}
 
 	ccProgressDialog pdlg(true, parameters.parentWidget);
-	pdlg.setMethodTitle("Open Bin file (old style)");
+	pdlg.setMethodTitle(QObject::tr("Open Bin file (old style)"));
 
 	for (unsigned k=0; k<nbScansTotal; k++)
 	{
 		HeaderFlags header;
 		unsigned nbOfPoints = 0;
-		if (ReadEntityHeader(in,nbOfPoints,header) < 0)
+		if (ReadEntityHeader(in, nbOfPoints, header) < 0)
 		{
 			return CC_FERR_READING;
 		}
@@ -1048,7 +1048,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		if (parameters.alwaysDisplayLoadDialog)
 		{
 			pdlg.reset();
-			pdlg.setInfo(qPrintable(QString("cloud %1/%2 (%3 points)").arg(k+1).arg(nbScansTotal).arg(nbOfPoints)));
+			pdlg.setInfo(QObject::tr("cloud %1/%2 (%3 points)").arg(k + 1).arg(nbScansTotal).arg(nbOfPoints));
 			pdlg.start();
 			QApplication::processEvents();
 		}

@@ -210,15 +210,17 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		unsigned numberOfTriangles = theMesh->size();
 
 		//progress notification
-		NormalizedProgress* nprogress = 0;
+		NormalizedProgress nprogress(progressCb, numberOfTriangles);
 		if (progressCb)
 		{
-			progressCb->reset();
-			progressCb->setMethodTitle("Extract mesh");
-			char buffer[256];
-			sprintf(buffer,"New vertex number: %u",numberOfIndexes);
-			nprogress = new NormalizedProgress(progressCb,numberOfTriangles);
-			progressCb->setInfo(buffer);
+			if (!progressCb->textCanBeEdited())
+			{
+				progressCb->setMethodTitle("Extract mesh");
+				char buffer[256];
+				sprintf(buffer, "New vertex number: %u", numberOfIndexes);
+				progressCb->setInfo(buffer);
+			}
+			progressCb->update(0);
 			progressCb->start();
 		}
 
@@ -264,17 +266,11 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 										indexShift + newVertexIndexes[2] );
 			}
 
-			if (nprogress && !nprogress->oneStep())
+			if (progressCb && !nprogress.oneStep())
 			{
 				//cancel process
 				break;
 			}
-		}
-
-		if (nprogress)
-		{
-			delete nprogress;
-			nprogress = 0;
 		}
 
 		if (newMesh)

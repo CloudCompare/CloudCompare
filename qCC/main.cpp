@@ -25,6 +25,7 @@
 #include <QLocale>
 #include <QTime>
 #include <QTranslator>
+#include <QSettings>
 
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
@@ -37,11 +38,13 @@
 
 //qCC_io
 #include <FileIOFilter.h>
+#include <ccGlobalShiftManager.h>
 
 //local
 #include "mainwindow.h"
 #include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
+#include "ccPersistentSettings.h"
 
 #ifdef USE_VLD
 //VLD
@@ -98,8 +101,11 @@ int main(int argc, char **argv)
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-		format.setStereo(true);
+		format.setOption(QSurfaceFormat::StereoBuffers, true);
 		format.setStencilBufferSize(0);
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+		format.setStereo(true);
+#endif
 #ifdef Q_OS_MAC
 		format.setStereo(false);
 		format.setVersion( 2, 1 );
@@ -119,7 +125,7 @@ int main(int argc, char **argv)
 	qccApplication app(argc, argv);
 
 	//Force 'english' local so as to get a consistent behavior everywhere
-	QLocale::setDefault(QLocale::English);
+	//QLocale::setDefault(QLocale::English); //DGM: useless? (see below)
 
 	// We reset the numeric locale.
 	// See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
@@ -149,6 +155,20 @@ int main(int argc, char **argv)
 	QSplashScreen* splash = 0;
 	QTime splashStartTime;
 
+	//restore some global parameters
+	{
+		QSettings settings;
+		settings.beginGroup(ccPS::GlobalShift());
+		double maxAbsCoord = settings.value(ccPS::MaxAbsCoord(), ccGlobalShiftManager::MaxCoordinateAbsValue()).toDouble();
+		double maxAbsDiag = settings.value(ccPS::MaxAbsDiag(), ccGlobalShiftManager::MaxBoundgBoxDiagonal()).toDouble();
+		settings.endGroup();
+
+		ccLog::Print(QString("[Global Shift] Max abs. coord = %1 / max abs. diag = %2").arg(maxAbsCoord, 0, 'e', 0).arg(maxAbsDiag, 0, 'e', 0));
+		
+		ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
+		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
+	}
+	
 	//Command line mode?
 	bool commandLine = (argc > 1 && argv[1][0] == '-');
 	
@@ -185,7 +205,7 @@ int main(int argc, char **argv)
 		//splash screen
 		splashStartTime.start();
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
+		splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
 		splash->show();
 		QApplication::processEvents();
 	}
@@ -214,6 +234,14 @@ int main(int argc, char **argv)
 		}
 		mainWindow->show();
 		QApplication::processEvents();
+
+		//show current Global Shift parameters in Console
+		{
+			ccLog::Print(QString("[Global Shift] Max abs. coord = %1 / max abs. diag = %2")
+				.arg(ccGlobalShiftManager::MaxCoordinateAbsValue(), 0, 'e', 0)
+				.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
+		}
+
 
 		if (argc > lastArgumentIndex)
 		{

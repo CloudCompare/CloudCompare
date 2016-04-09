@@ -25,6 +25,9 @@
 #include <ccHObjectCaster.h>
 #include <ccGenericMesh.h>
 
+//qCC_gl
+#include <ccGLWidget.h>
+
 //CCLib
 #include <CCConst.h>
 #include <GenericTriangle.h>
@@ -318,7 +321,7 @@ bool ccCameraParamEditDlg::start()
 void ccCameraParamEditDlg::linkWith(QMdiSubWindow* qWin)
 {
 	//corresponding ccGLWindow
-	ccGLWindow* associatedWin = (qWin ? static_cast<ccGLWindow*>(qWin->widget()) : 0);
+	ccGLWindow* associatedWin = (qWin ? GLWindowFromWidget(qWin->widget()) : 0);
 
 	linkWith(associatedWin);
 }

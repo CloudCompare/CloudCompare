@@ -26,20 +26,8 @@
 #include <string.h>
 #include <assert.h>
 
-// Max acceptable coordinate value
-#define MAX_COORDINATE_ABS_VALUE 1.0e5
-// Max acceptable diagonal length
-#define MAX_DIAGONAL_LENGTH 1.0e6
-
-double ccGlobalShiftManager::MaxCoordinateAbsValue()
-{
-	return MAX_COORDINATE_ABS_VALUE;
-}
-
-double ccGlobalShiftManager::MaxBoundgBoxDiagonal()
-{
-	return MAX_DIAGONAL_LENGTH;
-}
+double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
+double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH = 1.0e6;
 
 bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
 {

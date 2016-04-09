@@ -422,8 +422,8 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 
 	//progress notification
 	ccProgressDialog pDlg(true,m_app->getMainWindow());
-	pDlg.setMethodTitle("Facets creation");
-	pDlg.setInfo(qPrintable(QString("Components: %1").arg(componentCount)));
+	pDlg.setMethodTitle(QObject::tr("Facets creation"));
+	pDlg.setInfo(QObject::tr("Components: %1").arg(componentCount));
 	pDlg.setMaximum(static_cast<int>(componentCount));
 	pDlg.show();
 	QApplication::processEvents();

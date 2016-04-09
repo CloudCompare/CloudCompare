@@ -259,14 +259,17 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	CCLib::NormalizedProgress nProgress(progressCb, numberOfRays);
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("ShadeVis");
-		QString infoStr = QString("Rays: %1").arg(numberOfRays);
-		if (mesh)
-			infoStr.append(QString("\nFaces: %1").arg(mesh->size()));
-		else
-			infoStr.append(QString("\nVertices: %1").arg(numberOfPoints));
-		progressCb->setInfo(qPrintable(infoStr));
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("ShadeVis");
+			QString infoStr = QString("Rays: %1").arg(numberOfRays);
+			if (mesh)
+				infoStr.append(QString("\nFaces: %1").arg(mesh->size()));
+			else
+				infoStr.append(QString("\nVertices: %1").arg(numberOfPoints));
+			progressCb->setInfo(qPrintable(infoStr));
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 

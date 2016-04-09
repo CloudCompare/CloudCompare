@@ -219,12 +219,11 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 	std::random_device rd;   // non-deterministic generator
 	std::mt19937 gen(rd());  // to seed mersenne twister.
 
-	NormalizedProgress* normProgress = 0;
+	NormalizedProgress normProgress(progressCb, pointsToRemove);
 	if (progressCb)
 	{
 		progressCb->setInfo("Random subsampling");
-		normProgress = new NormalizedProgress(progressCb, pointsToRemove);
-		progressCb->reset();
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -237,19 +236,15 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 		newCloud->swap(index,lastPointIndex);
 		--lastPointIndex;
 
-		if (normProgress && !normProgress->oneStep())
+		if (progressCb && !normProgress.oneStep())
 		{
 			//cancel process
-			delete normProgress;
 			delete newCloud;
 			return 0;
 		}
 	}
 
 	newCloud->resize(newNumberOfPoints); //always smaller, so it should be ok!
-
-	if (normProgress)
-		delete normProgress;
 
 	return newCloud;
 }
@@ -348,21 +343,25 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		//not enough memory
 		markers->release();
 		if (!inputOctree)
+		{
 			delete octree;
+		}
 		delete sampledCloud;
 		return 0;
 	}
 
 	//progress notification
-	NormalizedProgress* normProgress = 0;
+	NormalizedProgress normProgress(progressCb, cloudSize);
 	if (progressCb)
 	{
-		progressCb->setMethodTitle("Spatial resampling");
-		char buffer[256];
-		sprintf(buffer,"Points: %u\nMin dist.: %f",cloudSize,minDistance);
-		progressCb->setInfo(buffer);
-		normProgress = new NormalizedProgress(progressCb,cloudSize);
-		progressCb->reset();
+		if (!progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Spatial resampling");
+			char buffer[256];
+			sprintf(buffer, "Points: %u\nMin dist.: %f", cloudSize, minDistance);
+			progressCb->setInfo(buffer);
+		}
+		progressCb->update(0);
 		progressCb->start();
 	}
 
@@ -430,7 +429,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		}
 			
 		//progress indicator
-		if (normProgress && !normProgress->oneStep())
+		if (progressCb && !normProgress.oneStep())
 		{
 			//cancel process
 			error = true;
@@ -450,10 +449,8 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		sampledCloud = 0;
 	}
 
-	if(normProgress)
+	if (progressCb)
 	{
-		delete normProgress;
-		normProgress = 0;
 		progressCb->stop();
 	}
 

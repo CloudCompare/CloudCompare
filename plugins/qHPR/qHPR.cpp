@@ -257,7 +257,7 @@ void qHPR::doAction()
 	if (!theOctree)
 	{
 		theOctree = cloud->computeOctree(&progressCb);
-		if (theOctree)
+		if (theOctree && cloud->getParent())
 		{
 			m_app->addToDB(cloud->getOctreeProxy());
 		}

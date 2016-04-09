@@ -146,7 +146,7 @@ protected:
 	std::vector<std::set<size_t> > m_vertexNeighbors;
 };
 
-static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib::GenericProgressCallback* progressCb = 0)
+static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, ccProgressDialog* progressCb = 0)
 {
 	assert(cloud && cloud->hasNormals());
 
@@ -184,12 +184,12 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 	}
 
 	//progress notification
-	CCLib::NormalizedProgress nProgress(progressCb,static_cast<unsigned>(vertexCount));
+	CCLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(vertexCount));
 	if (progressCb)
 	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Orient normals (MST)");
-		progressCb->setInfo(qPrintable(QString("Compute Minimum spanning tree\nPoints: %1\nEdges: %2").arg(vertexCount).arg(graph.edgeCount())));
+		progressCb->update(0);
+		progressCb->setMethodTitle(QObject::tr("Orient normals (MST)"));
+		progressCb->setInfo(QObject::tr("Compute Minimum spanning tree\nPoints: %1\nEdges: %2").arg(vertexCount).arg(graph.edgeCount()));
 		progressCb->start();
 	}
 

@@ -32,13 +32,16 @@
 #include <QByteArray>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLExtensions>
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+#include <QWindow>
+#include <QWidget>
+#else
+#include <QOpenGLWidget>
+#endif
 
 //system
 #include <unordered_set>
 #include <list>
-
-//! OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
-#define CC_PICKING_BUFFER_SIZE 65536
 
 class ccHObject;
 class ccBBox;
@@ -49,8 +52,16 @@ class ccFrameBufferObject;
 class ccInteractor;
 class ccPolyline;
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+class QOpenGLPaintDevice;
+typedef QWindow ccGLWindowParent;
+#else
+typedef QOpenGLWidget ccGLWindowParent;
+#endif
+
+
 //! OpenGL 3D view
-class ccGLWindow : public QOpenGLWidget, public ccGenericGLDisplay
+class ccGLWindow : public ccGLWindowParent, public ccGenericGLDisplay
 {
 	Q_OBJECT
 
@@ -123,10 +134,26 @@ public:
 	};
 
 	//! Default constructor
-	ccGLWindow(	QWidget *parent = 0, bool silentInitialization = false);
+	ccGLWindow(QSurfaceFormat* format = 0, ccGLWindowParent* parent = 0, bool silentInitialization = false);
 
 	//! Destructor
 	virtual ~ccGLWindow();
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	//! Returns the parent widget
+	QWidget* parentWidget() const { return m_parentWidget; }
+
+	//! Sets 'parent' widget
+	void setParentWidget(QWidget* widget);
+
+	//! Returns the font
+	inline const QFont& font() const { return m_font; }
+
+	//shortcuts
+	void setWindowTitle(QString title) { setTitle(title); }
+	QString windowTitle() const { return title(); }
+
+#endif
 
 	//! Sets 'scene graph' root
 	void setSceneDB(ccHObject* root);
@@ -148,8 +175,13 @@ public:
 	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	inline virtual QWidget* asWidget() override { return m_parentWidget; }
+#else
 	inline virtual QWidget* asWidget() override { return this; }
+#endif
 	inline virtual QSize getScreenSize() const override { return size(); }
+	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -298,9 +330,6 @@ public:
 		(see setPerspectiveState).
 	**/
 	virtual const void setBaseViewMat(ccGLMatrixd& mat);
-
-	//! Returns the current OpenGL camera parameters
-	virtual void getGLCameraParameters(ccGLCameraParameters& params) override;
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
 	virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
@@ -512,7 +541,7 @@ public: //fullscreen
 	void toggleExclusiveFullScreen(bool state);
 
 	//! Returns whether the window is in exclusive full screen mode or not
-	bool exclusiveFullScreen() const;
+	inline bool exclusiveFullScreen() const { return m_exclusiveFullscreen; }
 
 public: //debug traces on screen
 
@@ -570,6 +599,11 @@ public slots:
 
 	//! Tests frame rate
 	void startFrameRateTest();
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	//! Updates the display
+	inline void update() { paintGL(); }
+#endif
 
 protected slots:
 
@@ -693,6 +727,17 @@ signals:
 
 protected: //rendering
 
+	//Default OpenGL functions set
+	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
+
+	//! Returns the set of OpenGL functions
+	inline ccQOpenGLFunctions* functions() const { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : 0; }
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	//! Returns the context (if any)
+	inline QOpenGLContext* context() const { return m_context; }
+#endif
+
 	//reimplemented from QOpenGLWidget
 	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
 	//we need to automatically bind our own afterwards!
@@ -803,14 +848,22 @@ protected: //other methods
 	void mouseMoveEvent(QMouseEvent *event) override;
 	void mouseReleaseEvent(QMouseEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
-	void closeEvent(QCloseEvent *event) override;
-	//void paintEvent(QPaintEvent *event) override;
+	bool event(QEvent* evt) override;
 
-	//inherited
-	void initializeGL() override;
+	virtual void dragEnterEvent(QDragEnterEvent* event);
+	virtual void dropEvent(QDropEvent* event);
+
+	bool initialize();
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	void resizeGL(int w, int h);
+	void paintGL();
+#else
+	void initializeGL() override { initialize(); }
 	void resizeGL(int w, int h) override;
 	void paintGL() override;
-	bool event(QEvent* evt) override;
+	GLuint defaultQtFBO() const;
+#endif
 
 	//Graphical features controls
 	void drawCross();
@@ -846,10 +899,6 @@ protected: //other methods
 
 	//! Draws pivot point symbol in 3D
 	void drawPivot();
-
-	//inherited from QWidget (drag & drop support)
-	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-	virtual void dropEvent(QDropEvent* event) override;
 
 	//! Picking parameters
 	struct PickingParameters
@@ -962,12 +1011,6 @@ protected: //other methods
 	//! Returns the current (OpenGL) viewport
 	inline const QRect& getGLViewport() const { return m_glViewport; }
 
-	//Default OpenGL functions set
-	typedef QOpenGLFunctions_2_1 ccQOpenGLFunctions;
-
-	//! Returns the set of OpenGL functions
-	inline ccQOpenGLFunctions* functions() { return context()->versionFunctions<ccQOpenGLFunctions>(); }
-
 	//! Logs a GL error
 	/** Logs a warning or error message corresponding to the input GL error.
 		If error == GL_NO_ERROR, nothing is logged.
@@ -978,13 +1021,29 @@ protected: //other methods
 	**/
 	static void LogGLError(GLenum error, const char* context);
 
+	//! Logs a GL error (shortcut)
+	void logGLError(const char* context) const;
+
 	//! Toggles auto-refresh mode
 	void toggleAutoRefresh(bool state, int period_ms = 0);
 
 protected: //members
 
-	//! GL names picking buffer
-	GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+
+	//! Associated OpenGL context
+	QOpenGLContext* m_context;
+
+	//! OpenGL device
+	QOpenGLPaintDevice* m_device;
+
+	//! Format
+	QSurfaceFormat m_format;
+
+	//! Associated widget (we use the WidgetContainer mechanism)
+	QWidget* m_parentWidget;
+
+#endif
 
 	//! Unique ID
 	int m_uniqueID;
@@ -1214,6 +1273,10 @@ protected: //members
 
 	//! Former parent object (for exclusive full-screen display)
 	QWidget* m_formerParent;
+
+	//! Wether exclusive full screen is enabled or not
+	bool m_exclusiveFullscreen;
+	
 	//! Former geometry (for exclusive full-screen display)
 	QByteArray m_formerGeometry;
 
@@ -1242,4 +1305,4 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);
 
-#endif
+#endif //CC_GL_WINDOW_HEADER

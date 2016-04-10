@@ -800,7 +800,7 @@ void ccViewer::toggleStereoMode(bool state)
 		//force perspective state!
 		if (!m_glWindow->getViewportParameters().perspectiveView)
 		{
-			m_glWindow->setPerspectiveState(true,true);
+			m_glWindow->setPerspectiveState(true, true);
 			reflectPerspectiveState();
 		}
 
@@ -808,6 +808,10 @@ void ccViewer::toggleStereoMode(bool state)
 
 		if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 		{
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+			ccLog::Error("This version of ccViewer doesn't handle Quad Buffer mode");
+			return;
+#endif
 			//force full screen
 			ui.actionFullScreen->setChecked(true);
 		}
@@ -867,11 +871,11 @@ void ccViewer::toggleRotationAboutVertAxis()
 
 	if (isLocked)
 	{
-		m_glWindow->displayNewMessage(QString("[ROTATION LOCKED]"),ccGLWindow::UPPER_CENTER_MESSAGE,false,24*3600,ccGLWindow::ROTAION_LOCK_MESSAGE);
+		m_glWindow->displayNewMessage(QString("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
 	}
 	else
 	{
-		m_glWindow->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::ROTAION_LOCK_MESSAGE);
+		m_glWindow->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::ROTAION_LOCK_MESSAGE);
 	}
 	m_glWindow->redraw();
 }
@@ -886,17 +890,27 @@ void ccViewer::doActionDisplayShortcuts()
 	text += "F4 : Set viewer-based perspective\n";
 	text += "F6 : Toggle sun light\n";
 	text += "F7 : Toggle custom light\n";
-	text += "F11: Toggle full screen\n";
-	text += "Z: Zoom on selected entity\n";
+	text += "F8 : Toggle Console display\n";
+	text += "F9 : Toggle full screen\n";
+	text += "F11: Toggle exclusive full screen\n";
+	text += "Z  : Zoom on selected entity\n";
+	text += "L  : Lock rotation around Z\n";
+	text += "B  : Enter/leave bubble view mode\n";
 	text += "DEL: Delete selected entity\n";
+	text += "+  : Zoom in\n";
+	text += "-  : Zoom out\n";
 	text += "\n";
-	text += "Ctrl+D: Display parameters\n";
-	text += "Ctrl+C: Camera parameters\n";
+	text += "Shift + C: Toggle color ramp visibility\n";
+	text += "Shift + up arrow: activate previous SF\n";
+	text += "Shift + down arrow: activate next SF\n";
+	text += "\n";
+	text += "Ctrl + D: Display parameters\n";
+	text += "Ctrl + C: Camera parameters\n";
 	text += "\n";
 	text += "Left click: Select entity\n";
 	//text += "Ctrl + left click: Select multiple entities (toggle)\n";
 	//text += "Alt + left button hold: Select multiple entities (rectangular area)\n";
-	text += "Shift + left click (on a point): create and display label\n";
+	text += "Shift + left click (on a point/triangle): spawn a label\n";
 	text += "Right click (on a label): expand/collapse\n";
 	msgBox.setText(text);
 	msgBox.exec();

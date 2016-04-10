@@ -8759,6 +8759,10 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 
 			if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 			{
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+				ccLog::Error("This version of CloudCompare doesn't handle Quad Buffer mode");
+				return;
+#endif
 				//force (exclusive) full screen
 				actionExclusiveFullScreen->setChecked(true);
 			}

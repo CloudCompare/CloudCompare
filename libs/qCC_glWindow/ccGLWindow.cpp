@@ -1170,7 +1170,7 @@ QSharedPointer<HotZone> s_hotZone(0);
 
 void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 {
-	if (!m_clickableItemsVisible
+	if (	!m_clickableItemsVisible
 		&&	!m_bubbleViewModeEnabled)
 	{
 		//nothing to do
@@ -3738,7 +3738,32 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			{
 				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
 
-				ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastMouseOrientation, m_currentMouseOrientation);
+				ccGLMatrixd rotMat;
+				if (m_bubbleViewModeEnabled)
+				{
+					QPoint posDelta = m_lastMousePos - event->pos();
+
+					if (abs(posDelta.x()) != 0)
+					{
+						double delta_deg = (posDelta.x() * static_cast<double>(m_bubbleViewFov_deg)) / height();
+						//rotation about the sensor Z axis
+						CCVector3d axis = m_viewportParams.viewMat.getColumnAsVec3D(2);
+						rotMat.initFromParameters(delta_deg * CC_DEG_TO_RAD, axis, CCVector3d(0, 0, 0));
+					}
+					//else if (m_bubbleViewDirection == VERT)
+					if (abs(posDelta.y()) != 0)
+					{
+						double delta_deg = (posDelta.y() * static_cast<double>(m_bubbleViewFov_deg)) / height();
+						//rotation about the local X axis
+						ccGLMatrixd rotX;
+						rotX.initFromParameters(delta_deg * CC_DEG_TO_RAD, CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
+						rotMat = rotX * rotMat;
+					}
+				}
+				else
+				{
+					rotMat = ccGLMatrixd::FromToRotation(m_lastMouseOrientation, m_currentMouseOrientation);
+				}
 				m_lastMouseOrientation = m_currentMouseOrientation;
 				m_updateFBO = true;
 

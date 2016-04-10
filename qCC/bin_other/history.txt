@@ -21,6 +21,8 @@ v2.7.0 - 04/XX/2016
 	* The 'Edit > Multiply / Scale', 'Tools > Registration > Match bounding-box centers'
 		and 'Tools > Registration > Match scales' methods now update the 'transformation history matrix' of the entities
 
+	* The Bubble View mode nows allows for horizontal AND vertical rotation
+
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:

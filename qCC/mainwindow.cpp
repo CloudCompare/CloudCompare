@@ -242,7 +242,7 @@ MainWindow::MainWindow()
 	loadPlugins();
 
 #ifdef CC_3DXWARE_SUPPORT
-	enable3DMouse(true,true);
+	enable3DMouse(true, true);
 #else
 	actionEnable3DMouse->setEnabled(false);
 #endif
@@ -815,7 +815,9 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 
 	//active window?
 	if (win)
-		Mouse3DInput::Apply(vec,win);
+	{
+		Mouse3DInput::Apply(vec, win);
+	}
 
 #endif
 }

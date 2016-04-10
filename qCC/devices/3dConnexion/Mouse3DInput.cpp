@@ -249,7 +249,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 	float axis[3] = { -vec[3], vec[4], -vec[5] };
 
 	Matrix Rd;
-	SPW_ArbitraryAxisToMatrix(Rd,axis,1.0f);
+	SPW_ArbitraryAxisToMatrix(Rd, axis, 1.0f);
 
 	for (unsigned i=0; i<3; ++i)
 	{
@@ -261,28 +261,24 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 
 void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 {
+	assert(motionData.size() >= 6);
+
 	//no active window?
 	if (!win)
+	{
 		return;
+	}
 
 	//copy input parameters
-	std::vector<float> vec;
-	try
-	{
-		vec = motionData;
-	}
-	catch (const std::bad_alloc&)
-	{
-		//not enough memory
-		return;
-	}
-	assert(vec.size() >= 6);
+	std::vector<float> vec = motionData;
 
 	//view parameters
 	bool objectMode = true; 
 	bool perspectiveView = win->getPerspectiveState(objectMode); //note: viewer based perspective IS 'camera mode'
+	bool bubbleViewMode = win->bubbleViewModeEnabled();
 
 	//panning or zooming
+	if (!bubbleViewMode)
 	{
 		float& X = vec[0];
 		float& Y = vec[1];
@@ -293,7 +289,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		//Zoom: object moves closer/away (only for ortho. mode)
 		if (!perspectiveView && fabs(Z) > ZERO_TOLERANCE)
 		{
-			win->updateZoom(1.0f - Z/1.5f);
+			win->updateZoom(1.0f - Z / 1.5f);
 			Z = 0;
 		}
 
@@ -304,10 +300,10 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 
-			float scale = static_cast<float>(std::min(win->width(),win->height()) * viewParams.pixelSize);
+			float scale = static_cast<float>(std::min(win->width(), win->height()) * viewParams.pixelSize);
 			if (perspectiveView)
 			{
-				float tanFOV = tan(viewParams.fov*static_cast<float>(CC_DEG_TO_RAD)/*/2*/);
+				float tanFOV = tan(static_cast<float>(viewParams.fov * CC_DEG_TO_RAD)/*/2*/);
 				X *= tanFOV;
 				Y *= tanFOV;
 				scale /= win->computePerspectiveZoom();
@@ -318,30 +314,49 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 			}
 
 			if (objectMode)
+			{
 				scale = -scale;
+			}
 			win->moveCamera(-X*scale, Y*scale, -Z*scale);
 		}
 	}
 
 	//rotation
+	if (	fabs(vec[3]) > ZERO_TOLERANCE
+		||	fabs(vec[4]) > ZERO_TOLERANCE
+		||	fabs(vec[5]) > ZERO_TOLERANCE)
 	{
-		if (	fabs(vec[3]) > ZERO_TOLERANCE
-			||	fabs(vec[4]) > ZERO_TOLERANCE
-			||	fabs(vec[5]) > ZERO_TOLERANCE)
+		//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
+
+		//get corresponding rotation matrix
+		ccGLMatrixd rotMat;
+		if (!bubbleViewMode)
 		{
-			//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
-
-			//get corresponding rotation matrix
-			ccGLMatrixd rotMat;
-			Mouse3DInput::GetMatrix(vec,rotMat);
-
+			Mouse3DInput::GetMatrix(vec, rotMat);
 			win->rotateBaseViewMat(objectMode ? rotMat : rotMat.inverse());
-			win->showPivotSymbol(true);
 		}
 		else
 		{
-			win->showPivotSymbol(false);
+			//Ry = horizontal
+			//Rx = vertical
+
+			//rotation about the sensor Z axis
+			const ccGLMatrixd& viewMat = win->getViewportParameters().viewMat;
+			CCVector3d axis = viewMat.getColumnAsVec3D(2);
+			rotMat.initFromParameters(-vec[4], axis, CCVector3d(0, 0, 0));
+
+			//rotation about the local X axis
+			ccGLMatrixd rotX;
+			rotX.initFromParameters(vec[3], CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
+			rotMat = rotX * rotMat;
+			win->rotateBaseViewMat(rotMat);
 		}
+
+		win->showPivotSymbol(true);
+	}
+	else
+	{
+		win->showPivotSymbol(false);
 	}
 
 	win->redraw();

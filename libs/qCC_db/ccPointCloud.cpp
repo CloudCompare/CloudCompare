@@ -1775,7 +1775,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 		//if there is more points than the size of the compressed normals array,
 		//we recompress the array instead of recompressing each normal
-		if (count>ccNormalVectors::GetNumberOfVectors())
+		if (count > ccNormalVectors::GetNumberOfVectors())
 		{
 			NormsIndexesTableType* newNorms = new NormsIndexesTableType;
 			if (newNorms->reserve(ccNormalVectors::GetNumberOfVectors()))

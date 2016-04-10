@@ -64,7 +64,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* cloud,
 	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Develop");
 			char buffer[256];
@@ -125,7 +125,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 	NormalizedProgress nprogress(progressCb, count);
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("DevelopOnCone");
 			char buffer[256];

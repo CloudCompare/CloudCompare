@@ -136,7 +136,7 @@ public:
 		NormalizedProgress nProgress(progressCb, numberOfTriangles);
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				char buffer[64];
 				sprintf(buffer, "Triangles: %u", numberOfTriangles);
@@ -356,7 +356,7 @@ public:
 		NormalizedProgress nProgress(progressCb, numberOfPoints);
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				char buffer[64];
 				sprintf(buffer, "Points: %u", numberOfPoints);

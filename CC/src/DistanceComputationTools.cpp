@@ -710,7 +710,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 	NormalizedProgress nProgress(progressCb,numberOfTriangles);
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			char buffer[64];
 			sprintf(buffer, "Triangles: %u", numberOfTriangles);
@@ -1405,7 +1405,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		NormalizedProgress nProgress(progressCb, numberOfCells);
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				char buffer[256];
 				sprintf(buffer, "Cells: %u", numberOfCells);
@@ -1669,7 +1669,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		NormalizedProgress nProgress(progressCb,numberOfCells);
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				char buffer[256];
 				sprintf(buffer, "Cells: %u", numberOfCells);

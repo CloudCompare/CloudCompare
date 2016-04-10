@@ -266,7 +266,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	//progress notification (optional)
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Build Octree");
 			char infosBuffer[256];
@@ -2892,7 +2892,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
     //progress notification
     if (progressCb)
     {
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Components Labeling");
 			char buffer[256];
@@ -3102,7 +3102,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	{
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				char buffer[256];
 				sprintf(buffer, "Components: %i", numberOfComponents);
@@ -3309,7 +3309,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		//progress bar
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				if (functionTitle)
 				{
@@ -3435,7 +3435,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		//progress notification
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				if (functionTitle)
 				{
@@ -3554,7 +3554,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		//progress notification
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				if (functionTitle)
 				{
@@ -3981,7 +3981,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		//progress notification
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				if (functionTitle)
 				{

@@ -619,7 +619,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				if (progressCb)
 				{
 					//on the first iteration, we init/show the dialog
-					if (!progressCb->textCanBeEdited())
+					if (progressCb->textCanBeEdited())
 					{
 						progressCb->setMethodTitle("Clouds registration");
 						char buffer[256];
@@ -1138,7 +1138,7 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 	//DGM: KDTree::buildFromCloud will call reset right away!
 	//if (progressCb)
 	//{
-	//	if (!progressCb->textCanBeEdited())
+	//	if (progressCb->textCanBeEdited())
 	//	{
 	//		progressCb->setMethodTitle("Clouds registration");
 	//		progressCb->setInfo("Starting 4PCS");

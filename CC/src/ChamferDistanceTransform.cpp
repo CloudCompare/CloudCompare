@@ -199,7 +199,7 @@ int ChamferDistanceTransform::propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, G
 	NormalizedProgress normProgress(progressCb,m_innerSize.y*m_innerSize.z*2);
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Chamfer distance");
 			char buffer[256];

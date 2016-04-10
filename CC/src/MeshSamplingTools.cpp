@@ -310,7 +310,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 	NormalizedProgress normProgress(progressCb, triCount);
     if (progressCb)
     {
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Mesh sampling");
 			char buffer[256];

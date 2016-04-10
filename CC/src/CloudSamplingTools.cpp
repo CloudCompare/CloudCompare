@@ -354,7 +354,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	NormalizedProgress normProgress(progressCb, cloudSize);
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Spatial resampling");
 			char buffer[256];

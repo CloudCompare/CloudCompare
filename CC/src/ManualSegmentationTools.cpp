@@ -213,7 +213,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 		NormalizedProgress nprogress(progressCb, numberOfTriangles);
 		if (progressCb)
 		{
-			if (!progressCb->textCanBeEdited())
+			if (progressCb->textCanBeEdited())
 			{
 				progressCb->setMethodTitle("Extract mesh");
 				char buffer[256];

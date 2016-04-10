@@ -72,7 +72,7 @@ static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCoun
 
 	if (s_progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			s_progressCb->setMethodTitle("Kd-tree computation");
 			char info[256];

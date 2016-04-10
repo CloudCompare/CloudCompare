@@ -182,7 +182,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("FM Propagation");
 			char buffer[256];

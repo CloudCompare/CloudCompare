@@ -269,7 +269,7 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Gaussian filter");
 			char infos[256];
@@ -686,7 +686,7 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 		{
 			if (iteration == 1)
 			{
-				if (!progressCb->textCanBeEdited())
+				if (progressCb->textCanBeEdited())
 				{
 					progressCb->setMethodTitle("KMeans");
 					char buffer[256];

@@ -930,7 +930,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 	NormalizedProgress nProgress(progressCb, m);
 	if (progressCb)
 	{
-		if (!progressCb->textCanBeEdited())
+		if (progressCb->textCanBeEdited())
 		{
 			char buffer[64];
 			sprintf(buffer, "Least Median of Squares samples: %u", m);

@@ -51,7 +51,6 @@ Various:
 [*] Compute vertical distances (http://www.cloudcompare.org/forum/viewtopic.php?t=1245)
 [*] Clipping box tool and Segmentation tool improvements (https://github.com/cloudcompare/trunk/issues/215)
 [*] Import sensors from E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1168)
-[*] Look up and down in bubbleview mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1169)
 [*] Save polylines color and thickness in DXF files (http://www.danielgm.net/cc/forum/viewtopic.php?t=1086)
 [*] Add a filter to the DB tree (http://www.danielgm.net/cc/forum/viewtopic.php?t=1055)
 [*] Selection of planar area based on region growing would be nice (http://www.cloudcompare.org/forum/viewtopic.php?t=1046)

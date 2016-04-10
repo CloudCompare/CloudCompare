@@ -105,6 +105,8 @@ public:
 
 	//! Returns the associated octree (if any)
 	virtual ccOctree::Shared getOctree() const;
+	//! Sets the associated octree
+	virtual void setOctree(ccOctree::Shared octree, bool autoAddChild = true);
 	//! Returns the associated octree proxy (if any)
 	virtual ccOctreeProxy* getOctreeProxy() const;
 

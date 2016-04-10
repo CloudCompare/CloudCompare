@@ -963,11 +963,7 @@ bool ccGLWindow::event(QEvent* evt)
 	
 	}
 
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-	return QWindow::event(evt);
-#else
-	return QOpenGLWidget::event(evt);
-#endif
+	return ccGLWindowParent::event(evt);
 }
 
 void ccGLWindow::setGLViewport(const QRect& rect)
@@ -1387,9 +1383,8 @@ void ccGLWindow::paintGL()
 		return;
 	}
 	assert(m_context);
-#endif
-
 	makeCurrent();
+#endif
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
@@ -1464,6 +1459,10 @@ void ccGLWindow::paintGL()
 		fullRenderingPass(CONTEXT, renderingParams);
 	}
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	m_context->swapBuffers(this);
+#endif
+
 	m_shouldBeRefreshed = false;
 
 	if (renderingParams.nextLODState.inProgress)
@@ -1493,13 +1492,10 @@ void ccGLWindow::paintGL()
 		else
 		{
 			//rotate base view matrix
-			glFunc->glMatrixMode(GL_MODELVIEW);
-			glFunc->glPushMatrix();
-			glFunc->glLoadMatrixd(m_viewportParams.viewMat.data());
-			glFunc->glRotated(360.0 / FRAMERATE_TEST_MIN_FRAMES, 0.0, 1.0, 0.0);
-			glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
+			ccGLMatrixd rotMat;
+			rotMat.initFromParameters(2 * M_PI / FRAMERATE_TEST_MIN_FRAMES, CCVector3d(0, 1, 0), CCVector3d(0, 0, 0));
+			m_viewportParams.viewMat = rotMat * m_viewportParams.viewMat;
 			invalidateVisualization();
-			glFunc->glPopMatrix();
 		}
 	}
 	else
@@ -1532,10 +1528,6 @@ void ccGLWindow::paintGL()
 			m_LODPendingRefresh = false;
 		}
 	}
-
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-	m_context->swapBuffers(this);
-#endif
 }
 
 void ccGLWindow::renderNextLODLevel()
@@ -1737,9 +1729,17 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			bindFBO(currentFBO);
-
-			renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
 			logGLError("ccGLWindow::fullRenderingPass (FBO start)");
+
+			if (!m_currentLODState.inProgress || m_currentLODState.level == 0)
+			{
+				renderingParams.drawBackground = renderingParams.draw3DPass = true; //DGM: we must update the FBO completely!
+			}
+			else
+			{
+				renderingParams.drawBackground = false;
+				assert(renderingParams.draw3DPass);
+			}
 
 			if (m_showDebugTraces)
 			{

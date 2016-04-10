@@ -118,6 +118,11 @@ protected:
 				lod.setState(ccPointCloud::LodStruct::BROKEN);
 				return;
 			}
+
+			if (!m_cloud.getOctree())
+			{
+				m_cloud.setOctree(octree);
+			}
 		}
 
 		//flags
@@ -155,55 +160,64 @@ protected:
 		//first level (default)
 		lod.addLevel(ccPointCloud::LodStruct::LevelDesc(0, 0));
 
+		unsigned remainingCount = pointCount;
+
 		//and the next ones
 		for (unsigned char level=1; level<=static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL); ++level)
 		{
-			const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
-
-			//for each cell we'll look for the (not-yet-flagged) point which is closest to the cell center
-			static const unsigned INVALID_INDEX = 0xFFFFFFFF;
-			unsigned nearestIndex = INVALID_INDEX;
-			PointCoordinateType nearestSquareDist = 0;
-			CCVector3 cellCenter(0,0,0);
-
 			//current level descriptor
 			ccPointCloud::LodStruct::LevelDesc levelDesc;
 			ccPointCloud::LodStruct::IndexSet* indexes = lod.indexes();
 			assert(indexes);
 			levelDesc.startIndex = indexes->currentSize();
-		
-			CCLib::DgmOctree::CellCode currentTruncatedCellCode = 0xFFFFFFFF;
 
-			//scan the octree structure
-			const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
-			for (CCLib::DgmOctree::cellsContainer::const_iterator c=thePointsAndTheirCellCodes.begin(); c!=thePointsAndTheirCellCodes.end(); ++c)
+			//no need to process the points if there are less points remaining than the previous level
+			if (remainingCount > lod.level(level - 1).count)
 			{
-				CCLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
+				const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
 
-				//new cell?
-				if (truncatedCode != currentTruncatedCellCode)
+				//for each cell we'll look for the (not-yet-flagged) point which is closest to the cell center
+				static const unsigned INVALID_INDEX = (~static_cast<unsigned>(0));
+				unsigned nearestIndex = INVALID_INDEX;
+				PointCoordinateType nearestSquareDist = 0;
+				CCVector3 cellCenter(0, 0, 0);
+
+				CCLib::DgmOctree::CellCode currentTruncatedCellCode = (~static_cast<CCLib::DgmOctree::CellCode>(0));
+
+				//scan the octree structure
+				const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
+				for (CCLib::DgmOctree::cellsContainer::const_iterator c = thePointsAndTheirCellCodes.begin(); c != thePointsAndTheirCellCodes.end(); ++c)
 				{
-					//process the previous cell
-					if (nearestIndex != INVALID_INDEX)
+					if (flags->getValue(c->theIndex) != NoFlag)
 					{
-						indexes->addElement(nearestIndex);
-						assert(flags->getValue(nearestIndex) == NoFlag);
-						flags->setValue(nearestIndex,level);
-						levelDesc.count++;
-						//nProgress.oneStep();
-						if (m_abort.load() == 1)
-							break;
+						//we can skip already flagged points!
+						continue;
+					}
+					CCLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
+
+					//new cell?
+					if (truncatedCode != currentTruncatedCellCode)
+					{
+						//process the previous cell
+						if (nearestIndex != INVALID_INDEX)
+						{
+							indexes->addElement(nearestIndex);
+							assert(flags->getValue(nearestIndex) == NoFlag);
+							flags->setValue(nearestIndex, level);
+							levelDesc.count++;
+							assert(remainingCount);
+							--remainingCount;
+							//nProgress.oneStep();
+							if (m_abort.load() == 1)
+								break;
+							nearestIndex = INVALID_INDEX;
+						}
+
+						//prepare new cell
+						currentTruncatedCellCode = truncatedCode;
+						octree->computeCellCenter(currentTruncatedCellCode, level, cellCenter, true);
 					}
 
-					//prepare new cell
-					currentTruncatedCellCode = truncatedCode;
-					octree->computeCellCenter(currentTruncatedCellCode,level,cellCenter,true);
-				
-					nearestIndex = INVALID_INDEX;
-				}
-
-				if (flags->getValue(c->theIndex) == NoFlag)
-				{
 					//compute distance to the cell center
 					const CCVector3* P = m_cloud.getPoint(c->theIndex);
 					PointCoordinateType squareDist = (*P - cellCenter).norm2();
@@ -213,42 +227,57 @@ protected:
 						nearestIndex = c->theIndex;
 					}
 				}
-			}
 
-			if (m_abort.load() == 1)
-				break;
-
-			//don't forget the last cell!
-			if (nearestIndex != INVALID_INDEX)
-			{
-				indexes->addElement(nearestIndex);
-				assert(flags->getValue(nearestIndex) == NoFlag);
-				flags->setValue(nearestIndex,level);
-				levelDesc.count++;
-				//nProgress.oneStep();
-			}
-
-			//no new point was flagged during this round? Then we have reached the maximum level
-			if (levelDesc.count == 0 || level == CCLib::DgmOctree::MAX_OCTREE_LEVEL)
-			{
-				//assert(indexes->currentSize() == levelDesc.startIndex);
-
-				//flag the remaining points with the current level
-				for (unsigned i=0; i<pointCount; ++i)
+				if (m_abort.load() == 1)
 				{
-					if (flags->getValue(i) == NoFlag)
+					break;
+				}
+
+				//don't forget the last cell!
+				if (nearestIndex != INVALID_INDEX)
+				{
+					indexes->addElement(nearestIndex);
+					assert(flags->getValue(nearestIndex) == NoFlag);
+					flags->setValue(nearestIndex, level);
+					levelDesc.count++;
+					assert(remainingCount);
+					--remainingCount;
+					//nProgress.oneStep();
+					nearestIndex = INVALID_INDEX;
+				}
+			}
+
+			if (remainingCount)
+			{
+				//no new point was flagged during this round? Then we have reached the maximum level
+				if (levelDesc.count == 0 || level == CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+				{
+					//assert(indexes->currentSize() == levelDesc.startIndex);
+
+					//flag the remaining points with the current level
+					for (unsigned i=0; i<pointCount; ++i)
 					{
-						indexes->addElement(i);
-						levelDesc.count++;
-						//nProgress.oneStep();
+						if (flags->getValue(i) == NoFlag)
+						{
+							indexes->addElement(i);
+							levelDesc.count++;
+							assert(remainingCount);
+							--remainingCount;
+							//nProgress.oneStep();
+						}
 					}
 				}
 			}
 
-			assert(levelDesc.count != 0);
-			lod.addLevel(levelDesc);
-
-			ccLog::PrintDebug(QString("[LoD] Cloud %1 - level %2: %3 points").arg(m_cloud.getName()).arg(level).arg(levelDesc.count));
+			if (levelDesc.count)
+			{
+				lod.addLevel(levelDesc);
+				ccLog::PrintDebug(QString("[LoD] Cloud %1 - level %2: %3 points").arg(m_cloud.getName()).arg(level).arg(levelDesc.count));
+			}
+			else
+			{
+				assert(remainingCount == 0);
+			}
 
 			if (indexes->currentSize() == pointCount)
 			{
@@ -3018,7 +3047,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (toDisplay.count > context.minLODPointCount && context.minLODPointCount != 0)
 					{
+						GLint maxStride = 1;
+						glFunc->glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &maxStride);
+						//maxStride == decimStep * 3 * sizeof(PointCoordinateType)
 						toDisplay.decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / context.minLODPointCount));
+						toDisplay.decimStep = std::min<unsigned>(toDisplay.decimStep, maxStride / (3 * sizeof(PointCoordinateType)));
 					}
 				}
 			}
@@ -4571,25 +4604,25 @@ static bool CatchGLErrors(GLenum err, const char* context)
 		case GL_NO_ERROR:
 			return false;
 		case GL_INVALID_ENUM:
-			ccLog::Warning("[%s] OpenGL error: invalid enumerator",context);
+			ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
 			break;
 		case GL_INVALID_VALUE:
-			ccLog::Warning("[%s] OpenGL error: invalid value",context);
+			ccLog::Warning("[%s] OpenGL error: invalid value", context);
 			break;
 		case GL_INVALID_OPERATION:
-			ccLog::Warning("[%s] OpenGL error: invalid operation",context);
+			ccLog::Warning("[%s] OpenGL error: invalid operation", context);
 			break;
 		case GL_STACK_OVERFLOW:
-			ccLog::Warning("[%s] OpenGL error: stack overflow",context);
+			ccLog::Warning("[%s] OpenGL error: stack overflow", context);
 			break;
 		case GL_STACK_UNDERFLOW:
-			ccLog::Warning("[%s] OpenGL error: stack underflow",context);
+			ccLog::Warning("[%s] OpenGL error: stack underflow", context);
 			break;
 		case GL_OUT_OF_MEMORY:
-			ccLog::Warning("[%s] OpenGL error: out of memory",context);
+			ccLog::Warning("[%s] OpenGL error: out of memory", context);
 			break;
 		case GL_INVALID_FRAMEBUFFER_OPERATION:
-			ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation",context);
+			ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
 			break;
 		}
 	}

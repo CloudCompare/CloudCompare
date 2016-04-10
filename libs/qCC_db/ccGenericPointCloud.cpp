@@ -145,6 +145,26 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	}
 }
 
+void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild/*=true*/)
+{
+	if (!octree || octree->getNumberOfProjectedPoints() == 0)
+	{
+		assert(false);
+		return;
+	}
+
+	deleteOctree();
+
+	ccOctreeProxy* proxy = new ccOctreeProxy(octree);
+	proxy->setDisplay(getDisplay());
+	proxy->setVisible(true);
+	proxy->setEnabled(false);
+	if (autoAddChild)
+	{
+		addChild(proxy);
+	}
+}
+
 ccOctree::Shared ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
 {
 	deleteOctree();
@@ -152,14 +172,7 @@ ccOctree::Shared ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallba
 	ccOctree::Shared octree = ccOctree::Shared(new ccOctree(this));
 	if (octree->build(progressCb) > 0)
 	{
-		ccOctreeProxy* proxy = new ccOctreeProxy(octree);
-		proxy->setDisplay(getDisplay());
-		proxy->setVisible(true);
-		proxy->setEnabled(false);
-		if (autoAddChild)
-		{
-			addChild(proxy);
-		}
+		setOctree(octree, autoAddChild);
 	}
 	else
 	{

@@ -132,7 +132,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 
 		SiDeviceName name;
 		SiGetDeviceName(m_siHandle, &name);
-		ccLog::Print(QString("[3D Mouse] Device: %1 (%2 buttons) - firmware v%2.%3").arg(name.name).arg(info.numButtons).arg(info.majorVersion).arg(info.minorVersion));
+		ccLog::Print(QString("[3D Mouse] Device: %1 (%2 buttons) - firmware v%3.%4").arg(name.name).arg(info.numButtons).arg(info.majorVersion).arg(info.minorVersion));
 	}
 	else
 	{

@@ -37,9 +37,9 @@
 class ccExternalFactory;
 
 //! Plugin type
-enum  CC_PLUGIN_TYPE {	CC_STD_PLUGIN               = 0,
-						CC_GL_FILTER_PLUGIN         = 1,
-						CC_IO_FILTER_PLUGIN         = 2,
+enum  CC_PLUGIN_TYPE {	CC_STD_PLUGIN               = 1,
+						CC_GL_FILTER_PLUGIN         = 2,
+						CC_IO_FILTER_PLUGIN         = 4,
 };
 
 //! Standard CC plugin interface

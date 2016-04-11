@@ -25,6 +25,9 @@ v2.7.0 - 04/XX/2016
 		- nows allows for horizontal AND vertical rotation
 		- the 3D mouse is now properly handled
 
+	* Command line mode
+		- I/O plugins are now loaded in command line mode (i.e. the FARO, DP and PCD formats can now be used)
+
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:

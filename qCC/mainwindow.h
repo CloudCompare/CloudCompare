@@ -493,9 +493,7 @@ protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
 
 	void loadPlugins();
-	const tPluginInfoList findPlugins();
 	bool dispatchPlugin(QObject* plugin);
-	ccPluginInterface* getValidPlugin(QObject* plugin);
 
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);

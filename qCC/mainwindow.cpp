@@ -63,12 +63,6 @@
 #include "ccInnerRect2DFinder.h"
 #include "ccHistogramWindow.h"
 
-//plugins handling
-#include <ccStdPluginInterface.h>
-#include <ccGLFilterPluginInterface.h>
-#include <ccIOFilterPluginInterface.h>
-#include "ccPluginDlg.h"
-
 //shaders & Filters
 #include <ccShader.h>
 
@@ -112,6 +106,7 @@
 #include "ccTracePolylineTool.h"
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
+#include "ccPluginDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -303,29 +298,6 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-ccPluginInterface* MainWindow::getValidPlugin(QObject* plugin)
-{
-	if (plugin)
-	{
-		//standard plugin?
-		ccStdPluginInterface* ccStdPlugin = qobject_cast<ccStdPluginInterface*>(plugin);
-		if (ccStdPlugin)
-			return static_cast<ccPluginInterface*>(ccStdPlugin);
-
-		//GL (shader) plugin
-		ccGLFilterPluginInterface* ccGLPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
-		if (ccGLPlugin)
-			return static_cast<ccPluginInterface*>(ccGLPlugin);
-
-		//I/O filter plugin
-		ccIOFilterPluginInterface* ccIOPlugin = qobject_cast<ccIOFilterPluginInterface*>(plugin);
-		if (ccIOPlugin)
-			return static_cast<ccPluginInterface*>(ccIOPlugin);
-	}
-
-	return 0;
-}
-
 void MainWindow::loadPlugins()
 {
 	menuPlugins->setEnabled(false);
@@ -333,13 +305,15 @@ void MainWindow::loadPlugins()
 	toolBarPluginTools->setVisible(false);
 	toolBarGLFilters->setVisible(false);
 	
-	ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
+	ccConsole::Print(QString("Application path: ") + QCoreApplication::applicationDirPath());
 	
 	//"static" plugins
 	for (QObject *plugin : QPluginLoader::staticInstances())
+	{
 		dispatchPlugin(plugin);
+	}
 
-	tPluginInfoList	plugins = findPlugins();
+	tPluginInfoList	plugins = ccPlugins::Find(m_pluginPaths);
 	
 	// now iterate over plugins and process them
 	for ( tPluginInfo &info : plugins )
@@ -349,7 +323,7 @@ void MainWindow::loadPlugins()
 		
 		ccConsole::Print(QString("Found plugin: %1").arg( fileName ));
 		
-		if (dispatchPlugin( pluginObject ))
+		if (dispatchPlugin(pluginObject))
 		{
 			m_pluginInfoList += info;
 		}
@@ -388,101 +362,9 @@ void MainWindow::loadPlugins()
 		//actionDisplayGLFiltersTools->setChecked(false);
 	}
 }
-const tPluginInfoList MainWindow::findPlugins()
-{
-	QStringList	dirFilters;
-	QString		appPath = QCoreApplication::applicationDirPath();
-	
-#if defined(Q_OS_MAC)
-	dirFilters << "*.dylib";
-
-	// plugins are in the bundle
-	appPath.remove( "MacOS" );
-	
-	m_pluginPaths += (appPath + "Plugins/ccPlugins");
-#if CC_MAC_DEV_PATHS
-	// used for development only - this is the path where the plugins are built
-	// this avoids having to install into the application bundle when developing
-	m_pluginPaths += (appPath + "../../../ccPlugins");
-#endif
-#elif defined(Q_OS_WIN)
-	dirFilters << "*.dll";
-	
-	//plugins are in bin/plugins
-	m_pluginPaths += (appPath + "/plugins");
-#elif defined(Q_OS_LINUX)
-	dirFilters << "*.so";
-	
-	// Plugins are relative to the bin directory where the executable is found
-	QDir  binDir( appPath );
-	
-	if ( binDir.dirName() == "bin" )
-	{
-		binDir.cdUp();
-		
-		m_pluginPaths += (binDir.absolutePath() + "/lib/cloudcompare/plugins");
-	}
-	else
-	{
-		// Choose a reasonable default to look in
-		m_pluginPaths += "/usr/lib/cloudcompare/plugins";
-	}
-#else
-#warning Need to specify the plugin path for this OS.
-#endif
-
-#ifdef Q_OS_MAC
-	// Add any app data paths
-	// Plugins in these directories take precendence over the included ones
-	QStringList	appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
-
-	for ( const QString &appDataPath : appDataPaths )
-	{
-		m_pluginPaths += (appDataPath + "/plugins");
-	}
-#endif
-	
-	ccConsole::Print(QString("Plugin lookup dirs: %1").arg(m_pluginPaths.join( ", " )));
-	
-	// maps plugin name (from inside the plugin) to its path & pointer
-	//	This allows us to create a unique list (overridden by path)
-	QMap<QString, tPluginInfo>	pluginMap;
-	
-	for ( const QString &path : m_pluginPaths )
-	{
-		QDir pluginsDir( path );
-		pluginsDir.setNameFilters(dirFilters);
-		
-		for (const QString &filename : pluginsDir.entryList())
-		{
-			const QString	pluginPath = pluginsDir.absoluteFilePath( filename );
-			QPluginLoader	loader( pluginPath );
-			
-			QObject	*plugin = loader.instance();
-			
-			if ( plugin == nullptr )
-			{
-				ccConsole::Warning(QString("[Plugin] %1").arg(loader.errorString()));
-				continue;
-			}
-			
-			ccPluginInterface	*ccPlugin = getValidPlugin( plugin );
-			
-			if ( ccPlugin == nullptr )
-				continue;
-		
-			QString name = ccPlugin->getName();
-			
-			pluginMap.insert( name, tPluginInfo( pluginPath, plugin ) );
-		}
-	}
-	
-	return pluginMap.values().toVector();
-}
-
 bool MainWindow::dispatchPlugin(QObject *plugin)
 {
-	ccPluginInterface* ccPlugin = getValidPlugin(plugin);
+	ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(plugin);
 	if (!ccPlugin)
 		return false;
 	plugin->setParent(this);
@@ -626,7 +508,7 @@ void MainWindow::doEnableGLFilter()
 	}
 
 	QAction *action = qobject_cast<QAction*>(sender());
-	ccPluginInterface *ccPlugin = getValidPlugin(action ? action->parent() : 0);
+	ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(action ? action->parent() : 0);
 	if (!ccPlugin)
 		return;
 

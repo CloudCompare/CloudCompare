@@ -31,6 +31,7 @@
 #include "ccLibAlgorithms.h"
 #include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
+#include "ccPluginInfo.h"
 
 //Qt
 #include <QMessageBox>
@@ -191,13 +192,42 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 	//load arguments
 	QStringList arguments;
 	{
-		for (int i=1; i<nargs; ++i) //'i=1' because first argument is always program executable file!
+		for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
+		{
 			arguments.push_back(QString(args[i]));
+		}
 	}
 	assert(!arguments.empty());
 
+	//load I/O plugins
+	{
+		QStringList pluginPaths;
+		tPluginInfoList	plugins = ccPlugins::Find(pluginPaths, CC_IO_FILTER_PLUGIN);
+
+		// now iterate over plugins and process them
+		for (tPluginInfo &info : plugins)
+		{
+			const QString	fileName = info.first;
+			QObject			*pluginObject = info.second;
+
+			ccLog::Print(QString("Found plugin: %1").arg(fileName));
+
+			ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(pluginObject, CC_IO_FILTER_PLUGIN);
+			assert(ccPlugin);
+
+			//load plugin and register the corresponding I/O filter
+			ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(ccPlugin);
+			FileIOFilter::Shared filter = ioPlugin->getFilter(0);
+			if (filter)
+			{
+				FileIOFilter::Register(filter);
+				ccConsole::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
+			}
+		}
+	}
+
 	//specific command: silent mode (will prevent the console dialog from appearing!
-	if (IsCommand(arguments.front(),COMMAND_SILENT_MODE))
+	if (IsCommand(arguments.front(), COMMAND_SILENT_MODE))
 	{
 		arguments.pop_front();
 		s_silentMode = true;

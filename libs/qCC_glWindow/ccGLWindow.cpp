@@ -583,6 +583,7 @@ void ccGLWindow::handleLoggedMessage(const QOpenGLDebugMessage& message)
 bool ccGLWindow::initialize()
 {
 #ifdef CC_GL_WINDOW_USE_QWINDOW
+	bool firstTime = false;
 	if (!m_context)
 	{
 		m_context = new QOpenGLContext(this);
@@ -593,6 +594,7 @@ bool ccGLWindow::initialize()
 			ccLog::Error("Failed to create the OpenGL context");
 			return false;
 		}
+		firstTime = true;
 	}
 	else if (!m_context->isValid())
 	{
@@ -826,6 +828,13 @@ bool ccGLWindow::initialize()
 
 	logGLError("ccGLWindow::initialize");
 
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	if (firstTime)
+	{
+		resizeGL(width(), height());
+	}
+#endif
+
 	return true;
 }
 
@@ -991,9 +1000,9 @@ void ccGLWindow::resizeGL(int w, int h)
 	{
 		//filters
 		if (m_fbo || m_alwaysUseFBO)
-			initFBO(width(), height());
+			initFBO(w, h);
 		if (m_activeGLFilter)
-			initGLFilter(width(), height(), true);
+			initGLFilter(w, h, true);
 
 		//pivot symbol is dependent on the screen size!
 		if (m_pivotGLList != GL_INVALID_LIST_ID)

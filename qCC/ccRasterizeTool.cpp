@@ -35,11 +35,13 @@
 //qCC_gl
 #include <ccGLWindow.h>
 
+//qCC_io
+#include <ImageFileFilter.h>
+
 //Qt
 #include <QSettings>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QImageWriter>
 #include <QFileDialog>
 #include <QMap>
 
@@ -49,7 +51,7 @@
 static const char HILLSHADE_FIELD_NAME[] = "Hillshade";
 
 ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0*/)
-	: QDialog(parent, Qt::WindowMaximizeButtonHint)
+	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, cc2Point5DimEditor()
 	, Ui::RasterizeToolDialog()
 	, m_cloud(cloud)
@@ -240,14 +242,18 @@ void ccRasterizeTool::projectionDirChanged(int dir)
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
 {
-	if (layerIndex != 0)
+	if (layerIndex != 0) //0 is always the cell height
 	{
 		interpolateSFCheckBox->setChecked(true);
 		interpolateSFCheckBox->setEnabled(false);
+		generateImagePushButton->setEnabled(false);
+		generateASCIIPushButton->setEnabled(false);
 	}
 	else
 	{
+		generateImagePushButton->setEnabled(true);
 		interpolateSFCheckBox->setEnabled(true);
+		generateASCIIPushButton->setEnabled(true);
 	}
 
 	if (m_rasterCloud)
@@ -408,7 +414,11 @@ bool ccRasterizeTool::canClose()
 	if (!m_contourLines.empty())
 	{
 		//ask the user to confirm before it's tool late!
-		if (QMessageBox::question(this,"Unsaved contour lines","Contour lines have not been exported! Do you really want to close the tool?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(	this,
+									"Unsaved contour lines",
+									"Contour lines have not been exported! Do you really want to close the tool?",
+									QMessageBox::Yes,
+									QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 	return true;
@@ -660,12 +670,20 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	unsigned gridTotalSize = gridWidth * gridHeight;
 	if (gridTotalSize == 1)
 	{
-		if (QMessageBox::question(0, "Unexpected grid size", "The generated grid will only have 1 cell! Do you want to proceed anyway?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(	this,
+									"Unexpected grid size",
+									"The generated grid will only have 1 cell! Do you want to proceed anyway?",
+									QMessageBox::Yes,
+									QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 	else if (gridTotalSize > 10000000)
 	{
-		if (QMessageBox::question(0, "Big grid size", "The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(	this,
+									"Big grid size",
+									"The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?",
+									QMessageBox::Yes,
+									QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 
@@ -888,7 +906,10 @@ void ccRasterizeTool::generateRaster() const
 		QSettings settings;
 		settings.beginGroup(ccPS::HeightGridGeneration());
 		QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
-		outputFilename = QFileDialog::getSaveFileName(0, "Save height grid raster", imageSavePath + QString("/raster.tif"), "geotiff (*.tif)");
+		outputFilename = QFileDialog::getSaveFileName(	const_cast<ccRasterizeTool*>(this),
+														"Save height grid raster",
+														imageSavePath + QString("/raster.tif"),
+														"geotiff (*.tif)");
 
 		if (outputFilename.isNull())
 			return;
@@ -1683,15 +1704,32 @@ void ccRasterizeTool::generateImage() const
 	QImage bitmap8(m_grid.width, m_grid.height, QImage::Format_Indexed8);
 	if (!bitmap8.isNull())
 	{
-		// Build a custom palette (gray scale)
+		bool addTransparentColor = (fillEmptyCellsStrategy == LEAVE_EMPTY);
+
+		//build a custom palette
 		QVector<QRgb> palette(256);
+		if (	m_rasterCloud
+			&&	m_rasterCloud->getCurrentDisplayedScalarField()
+			&&	m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale())
+		{
+			const ccColorScale::Shared& colorScale = m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale();
+			unsigned steps = (addTransparentColor ? 255 : 256);
+			for (unsigned i = 0; i < steps; i++)
+			{
+				const ColorCompType* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, ccColor::lightGrey.rgba);
+				palette[i] = qRgba(col[0], col[1], col[2], 255);
+			}
+		}
+		else
 		{
 			for (unsigned i = 0; i < 256; i++)
+			{
 				palette[i] = qRgba(i, i, i, 255);
+			}
 		}
+		
 		double maxColorComp = 255.99; //.99 --> to avoid round-off issues later!
-
-		if (fillEmptyCellsStrategy == LEAVE_EMPTY)
+		if (addTransparentColor)
 		{
 			palette[255] = qRgba(255, 0, 255, 0); //magenta/transparent color for empty cells (in place of pure white)
 			maxColorComp = 254.99;
@@ -1714,7 +1752,7 @@ void ccRasterizeTool::generateImage() const
 			break;
 		case FILL_CUSTOM_HEIGHT:
 			{
-				double normalizedHeight = (emptyCellsHeight-minHeight)/(maxHeight-minHeight);
+				double normalizedHeight = (emptyCellsHeight - minHeight) / (maxHeight - minHeight);
 				//min and max should have already been updated with custom empty cell height!
 				assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
 				emptyCellColorIndex = static_cast<unsigned>(floor(normalizedHeight*maxColorComp));
@@ -1727,7 +1765,9 @@ void ccRasterizeTool::generateImage() const
 
 		double range = maxHeight - minHeight;
 		if (range < ZERO_TOLERANCE)
+		{
 			range = 1.0;
+		}
 
 		// Filling the image with grid values
 		for (unsigned j=0; j<m_grid.height; ++j)
@@ -1751,53 +1791,28 @@ void ccRasterizeTool::generateImage() const
 
 		//open file saving dialog
 		{
-			//add images output file filters
-			QString filters;
+			QSettings settings;
+			settings.beginGroup(ccPS::HeightGridGeneration());
+			QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
 
-			//we grab the list of supported image file formats (writing)
-			QList<QByteArray> formats = QImageWriter::supportedImageFormats();
-			if (formats.empty())
+			QString outputFilename = ImageFileFilter::GetSaveFilename(	"Save raster image",
+																		"raster_image",
+																		imageSavePath,
+																		const_cast<ccRasterizeTool*>(this));
+
+			if (!outputFilename.isNull())
 			{
-				ccLog::Error("No image format supported by your system?!\n(check that the 'imageformats' directory is alongside CC executable)");
-			}
-			else
-			{
-				//we convert this list into a proper "filters" string
-				QString pngFilter;
-				for (int i = 0; i < formats.size(); ++i)
+				//save current export path to persistent settings
+				settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
+				settings.endGroup();
+
+				if (bitmap8.save(outputFilename))
 				{
-					QString ext = QString(formats[i].data()).toUpper();
-					QString filter = QString("%1 image (*.%2)").arg(ext).arg(formats[i].data());
-					filters.append(filter + QString("\n"));
-
-					//find PNG by default
-					if (pngFilter.isEmpty() && ext == "PNG")
-					{
-						pngFilter = filter;
-					}
+					ccLog::Print(QString("[Rasterize] Image '%1' succesfully saved").arg(outputFilename));
 				}
-
-				QSettings settings;
-				settings.beginGroup(ccPS::HeightGridGeneration());
-				QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
-				QString outputFilename = QFileDialog::getSaveFileName(	0,
-																		"Save raster image",
-																		imageSavePath + QString("/raster_image.%1").arg(pngFilter.isEmpty() ? QString(formats[0].data()) : QString("png")),
-																		filters,
-																		pngFilter.isEmpty() ? static_cast<QString*>(0) : &pngFilter);
-
-				if (!outputFilename.isNull())
+				else
 				{
-					if (bitmap8.save(outputFilename))
-					{
-						ccLog::Print(QString("[Rasterize] Image '%1' succesfully saved").arg(outputFilename));
-						//save current export path to persistent settings
-						settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
-					}
-					else
-					{
-						ccLog::Error("Failed to save image file!");
-					}
+					ccLog::Error("Failed to save image file!");
 				}
 			}
 		}

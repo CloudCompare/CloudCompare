@@ -24,14 +24,15 @@
 
 //qCC_db
 #include <ccColorScalesManager.h>
+//qCC_io
+#include <ImageFileFilter.h>
 
 //Qt
 #include <QCloseEvent>
 #include <QFile>
 #include <QTextStream>
-#include <QFileDialog>
 #include <QSettings>
-#include <QImageWriter>
+#include <QFileDialog>
 
 //System
 #include <assert.h>
@@ -890,7 +891,7 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 }
 
 ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
-	: QDialog(parent,  Qt::WindowMaximizeButtonHint)
+	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, m_win(new ccHistogramWindow(this))
 	, m_gui(new Ui_HistogramDialog)
 {
@@ -980,7 +981,7 @@ void ccHistogramWindowDlg::onExportToCSV()
 	currentPath += QString("/") + m_win->windowTitle() + ".csv";
 
 	//ask for a filename
-	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,"*.csv");
+	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (filename.isEmpty())
 	{
 		//process cancelled by user
@@ -1003,47 +1004,34 @@ void ccHistogramWindowDlg::onExportToImage()
 		return;
 	}
 
-	//we grab the list of supported image file formats (output)
-	QList<QByteArray> list = QImageWriter::supportedImageFormats();
-	if (list.size() < 1)
-	{
-		ccLog::Error("No supported image format on this platform?!");
-		return;
-	}
-
-	//we convert this list into a proper "filters" string
-	QString firstFilter;
-	QString filters;
-	for (int i=0; i<list.size(); ++i)
-	{
-		filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
-		if (i == 0)
-			firstFilter = filters;
-	}
-
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), QApplication::applicationDirPath()).toString();
 
-	currentPath += QString("/") + m_win->windowTitle();
+	QString outputFilename = ImageFileFilter::GetSaveFilename(	"Select output file",
+																m_win->windowTitle(),
+																currentPath,
+																this);
 
-	//ask for a filename
-	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,filters);
-	if (filename.isEmpty())
+	if (outputFilename.isEmpty())
 	{
-		//process cancelled by user
+		//process cancelled by user (or error)
 		return;
 	}
 
-	//save last saving location
-	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
+	//save current export path to persistent settings
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(outputFilename).absolutePath());
 	settings.endGroup();
 
-	//save widget as an image file
-	QPixmap image = QPixmap::grabWidget(m_win);
-	if (!image.save(filename))
+	//save the widget as an image file
+	QPixmap image = m_win->grab();
+	if (image.save(outputFilename))
 	{
-		ccLog::Error(QString("Failed to save file '%1'").arg(filename));
+		ccLog::Print(QString("[Histogram] Image '%1' succesfully saved").arg(outputFilename));
+	}
+	else
+	{
+		ccLog::Error(QString("Failed to save file '%1'").arg(outputFilename));
 	}
 }

@@ -61,12 +61,12 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 
 	QSettings settings;
 	settings.beginGroup("RenderToFile");
-	selectedFilter				= settings.value("selectedFilter",firstFilter).toString();
+	selectedFilter				= settings.value("selectedFilter", firstFilter).toString();
 	QString currentPath         = settings.value("currentPath", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
-	QString selectedExtension	= settings.value("selectedExtension",firstExtension).toString();
-	QString baseFilename		= settings.value("baseFilename","capture").toString();
-	bool dontScale				= settings.value("dontScaleFeatures",dontScalePoints()).toBool();
-	bool doRenderOverlayItems	= settings.value("renderOverlayItems",renderOverlayItems()).toBool();
+	QString selectedExtension	= settings.value("selectedExtension", firstExtension).toString();
+	QString baseFilename		= settings.value("baseFilename", "capture").toString();
+	bool dontScale				= settings.value("dontScaleFeatures", dontScalePoints()).toBool();
+	bool doRenderOverlayItems	= settings.value("renderOverlayItems", renderOverlayItems()).toBool();
 	settings.endGroup();
 
 	dontScaleFeaturesCheckBox->setChecked(dontScale);
@@ -140,8 +140,8 @@ void ccRenderToFileDlg::updateInfo()
 {
 	s_renderZoom = getZoom();
 
-	unsigned w2 = (unsigned)(double(w)*s_renderZoom);
-	unsigned h2 = (unsigned)(double(h)*s_renderZoom);
+	unsigned w2 = static_cast<unsigned>(w*s_renderZoom);
+	unsigned h2 = static_cast<unsigned>(h*s_renderZoom);
 
 	finalSizeLabel->setText(QString("(%1 x %2)").arg(w2).arg(h2));
 }

@@ -138,6 +138,11 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	connect(maxDistCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(maxDistUpdated()));
 	connect(maxSearchDistSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(maxDistUpdated()));
 
+	//be sure to show the dialog before computing the approx distances
+	//(otherwise the progress bars appear anywhere!)
+	show();
+	QCoreApplication::processEvents();
+
 	//compute approximate results and unlock GUI
 	computeApproxDistances();
 }
@@ -326,7 +331,8 @@ bool ccComparisonDlg::computeApproxDistances()
 	assert(sf);
 
 	//prepare the octree structures
-	ccProgressDialog progressDlg(true,this);
+	ccProgressDialog progressDlg(true, this);
+	progressDlg.show();
 
 	int approxResult = -1;
 	QElapsedTimer eTimer;
@@ -375,14 +381,14 @@ bool ccComparisonDlg::computeApproxDistances()
 	//if the approximate distances comptation failed...
 	if (approxResult < 0)
 	{
-		ccLog::Warning("[computeApproxDistances] Computation failed (error code %i)",approxResult);
+		ccLog::Warning("[computeApproxDistances] Computation failed (error code %i)", approxResult);
 		m_compCloud->deleteScalarField(sfIdx);
 		sfIdx = -1;
 		m_currentSFIsDistance = false;
 	}
 	else
 	{
-		ccLog::Print("[computeApproxDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
+		ccLog::Print("[computeApproxDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 
 		//display approx. dist. statistics
 		ScalarType mean,variance;
@@ -417,8 +423,10 @@ bool ccComparisonDlg::computeApproxDistances()
 		approxStats->setItem(curRow, 0, new QTableWidgetItem("Max error"));
 		approxStats->setItem(curRow++, 1, new QTableWidgetItem(QString("%1").arg(e)));
 
-		for (int i=0; i<curRow; ++i)
-			approxStats->setRowHeight(i,20);
+		for (int i = 0; i < curRow; ++i)
+		{
+			approxStats->setRowHeight(i, 20);
+		}
 
 		approxStats->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -504,7 +512,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	int theBestOctreeLevel = 2;
 
 	//we don't test the very first and very last level
-	ccProgressDialog progressCb(false,this);
+	ccProgressDialog progressCb(false, this);
 	progressCb.setMethodTitle(tr("Determining optimal octree level"));
 	progressCb.setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); //we lie here ;)
 	CCLib::NormalizedProgress nProgress(&progressCb, MAX_OCTREE_LEVEL - 2);
@@ -530,7 +538,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		//we also use the reference cloud density (points/cell) if we have the info
 		double refListDensity = 1.0;
 		if (m_refOctree)
+		{
 			refListDensity = m_refOctree->computeMeanOctreeDensity(static_cast<unsigned char>(level));
+		}
 
 		CCLib::DgmOctree::CellCode tempCode = 0xFFFFFFFF;
 
@@ -621,12 +631,14 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
 		//timings[level] += (static_cast<qreal>(skippedCells)/1000)*skippedCells; //empirical correction for skipped cells (not taken into account while they actually require some processing time!)
 		if (timings[level] < timings[theBestOctreeLevel])
+		{
 			theBestOctreeLevel = level;
+		}
 
 		nProgress.oneStep();
 	}
 
-	ccLog::PrintDebug("[Distances] Best level: %i (maxSearchDist = %f)",theBestOctreeLevel,maxSearchDist);
+	ccLog::PrintDebug("[Distances] Best level: %i (maxSearchDist = %f)", theBestOctreeLevel, maxSearchDist);
 
 	return theBestOctreeLevel;
 }
@@ -731,7 +743,7 @@ bool ccComparisonDlg::computeDistances()
 						if (sensor->getDepthBuffer().zBuff.empty())
 						{
 							int errorCode;
-							if (!sensor->computeDepthBuffer(pc,errorCode))
+							if (!sensor->computeDepthBuffer(pc, errorCode))
 							{
 								ccLog::Warning(QString("[ComputeDistances] ") + ccGBLSensor::GetErrorString(errorCode));
 							}

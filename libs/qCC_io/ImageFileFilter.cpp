@@ -25,6 +25,7 @@
 #include <QImageWriter>
 #include <QFileInfo>
 #include <QImage>
+#include <QFileDialog>
 
 //System
 #include <assert.h>
@@ -37,8 +38,10 @@ ImageFileFilter::ImageFileFilter()
 		//we grab the list of supported image file formats (for writing)
 		QList<QByteArray> formats = QImageWriter::supportedImageFormats();
 		//we convert this list into a proper "filters" string
-		for (int i=0; i<formats.size(); ++i)
+		for (int i = 0; i < formats.size(); ++i)
+		{
 			m_outputFilters.append(QString("%1 image (*.%2)").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
+		}
 	}
 
 	//input filters
@@ -46,7 +49,7 @@ ImageFileFilter::ImageFileFilter()
 		//we grab the list of supported image file formats (for reading)
 		QList<QByteArray> formats = QImageReader::supportedImageFormats();
 		QStringList imageExts;
-		for (int i=0; i<formats.size(); ++i)
+		for (int i = 0; i < formats.size(); ++i)
 		{
 			imageExts.append(QString("*.%1").arg(formats[i].data()));
 		}
@@ -58,6 +61,42 @@ ImageFileFilter::ImageFileFilter()
 	}
 }
 
+QString ImageFileFilter::GetSaveFilename(QString dialogTitle, QString baseName, QString imageSavePath, QWidget* parentWidget/*=0*/)
+{
+	//add images output file filters
+	QString filters;
+
+	//we grab the list of supported image file formats (writing)
+	QList<QByteArray> formats = QImageWriter::supportedImageFormats();
+	if (formats.empty())
+	{
+		ccLog::Error("No image format supported by your system?!\n(check that the 'imageformats' directory is alongside the application executable)");
+		return QString();
+	}
+
+	//we convert this list into a proper "filters" string
+	QString pngFilter;
+	for (int i = 0; i < formats.size(); ++i)
+	{
+		QString ext = QString(formats[i].data()).toUpper();
+		QString filter = QString("%1 image (*.%2)").arg(ext).arg(formats[i].data());
+		filters.append(filter + QString("\n"));
+
+		//find PNG by default
+		if (pngFilter.isEmpty() && ext == "PNG")
+		{
+			pngFilter = filter;
+		}
+	}
+
+	QString outputFilename = QFileDialog::getSaveFileName(	parentWidget,
+															dialogTitle,
+															imageSavePath + QString("/%1.%2").arg(baseName).arg(pngFilter.isEmpty() ? QString(formats[0].data()) : QString("png")),
+															filters,
+															pngFilter.isEmpty() ? static_cast<QString*>(0) : &pngFilter);
+
+	return outputFilename;
+}
 
 QStringList ImageFileFilter::getFileFilters(bool onImport) const
 {

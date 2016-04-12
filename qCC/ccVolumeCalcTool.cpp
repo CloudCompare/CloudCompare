@@ -43,9 +43,6 @@
 #include <QSettings>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QImageWriter>
-#include <QFileDialog>
-#include <QMap>
 #include <QComboBox>
 #include <QClipboard>
 #include <QApplication>
@@ -55,7 +52,7 @@
 #include <assert.h>
 
 ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent/*=0*/)
-	: QDialog(parent, Qt::WindowMaximizeButtonHint)
+	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, cc2Point5DimEditor()
 	, Ui::VolumeCalcDialog()
 	, m_cloud1(cloud1)
@@ -460,12 +457,12 @@ bool ccVolumeCalcTool::updateGrid()
 	unsigned gridTotalSize = gridWidth * gridHeight;
 	if (gridTotalSize == 1)
 	{
-		if (QMessageBox::question(0,"Unexpected grid size","The generated grid will only have 1 cell! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(this, "Unexpected grid size", "The generated grid will only have 1 cell! Do you want to proceed anyway?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 	else if (gridTotalSize > 10000000)
 	{
-		if (QMessageBox::question(0,"Big grid size","The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(this, "Big grid size", "The generated grid will have more than 10.000.000 cells! Do you want to proceed anyway?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return false;
 	}
 
@@ -577,7 +574,7 @@ bool ccVolumeCalcTool::updateGrid()
 		pDlg.setInfo(tr("Cells: %1 x %2").arg(m_grid.width).arg(m_grid.height));
 		pDlg.start();
 		pDlg.show();
-		QApplication::processEvents();
+		QCoreApplication::processEvents();
 		CCLib::NormalizedProgress nProgress(&pDlg, m_grid.width*m_grid.height);
 		
 		ReportInfo repotInfo;

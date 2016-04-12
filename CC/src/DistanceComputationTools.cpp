@@ -269,17 +269,17 @@ DistanceComputationTools::SOReturnCode
 		return EMPTY_CLOUD;
 
 	//we compute the bounding box of BOTH clouds
-	CCVector3 minsA,minsB,maxsA,maxsB;
-	comparedCloud->getBoundingBox(minsA,maxsA);
-	referenceCloud->getBoundingBox(minsB,maxsB);
+	CCVector3 minsA, minsB, maxsA, maxsB;
+	comparedCloud->getBoundingBox(minsA, maxsA);
+	referenceCloud->getBoundingBox(minsB, maxsB);
 
 	//we compute the union of both bounding-boxes
 	CCVector3 maxD,minD;
 	{
 		for (unsigned char k=0; k<3; k++)
 		{
-			minD.u[k] = std::min(minsA.u[k],minsB.u[k]);
-			maxD.u[k] = std::max(maxsA.u[k],maxsB.u[k]);
+			minD.u[k] = std::min(minsA.u[k], minsB.u[k]);
+			maxD.u[k] = std::max(maxsA.u[k], maxsB.u[k]);
 		}
 	}
 
@@ -288,8 +288,8 @@ DistanceComputationTools::SOReturnCode
 		//we reduce the bouding box to the intersection of both bounding-boxes enlarged by 'maxDist'
 		for (unsigned char k=0; k<3; k++)
 		{
-			minD.u[k] = std::max(minD.u[k],std::max(minsA.u[k],minsB.u[k])-maxDist);
-			maxD.u[k] = std::min(maxD.u[k],std::min(maxsA.u[k],maxsB.u[k])+maxDist);
+			minD.u[k] = std::max(minD.u[k], std::max(minsA.u[k], minsB.u[k]) - maxDist);
+			maxD.u[k] = std::min(maxD.u[k], std::min(maxsA.u[k], maxsB.u[k]) + maxDist);
 			if (minD.u[k] > maxD.u[k])
 			{
 				return DISJOINT;
@@ -301,7 +301,7 @@ DistanceComputationTools::SOReturnCode
 	CCVector3 maxPoints = maxD;
 
 	//we make this bounding-box cubical (+1% growth to avoid round-off issues)
-	CCMiscTools::MakeMinAndMaxCubical(minD,maxD,0.01);
+	CCMiscTools::MakeMinAndMaxCubical(minD, maxD, 0.01);
 
 	//then we (re)compute octree A if necessary
 	bool needToRecalculateOctreeA = true;
@@ -332,7 +332,7 @@ DistanceComputationTools::SOReturnCode
 			octreeACreated = true;
 		}
 
-		if (comparedOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb) < 1)
+		if (comparedOctree->build(minD, maxD, &minPoints, &maxPoints, progressCb) < 1)
 		{
 			if (octreeACreated)
 			{
@@ -372,7 +372,7 @@ DistanceComputationTools::SOReturnCode
 			octreeBCreated = true;
 		}
 
-		if (referenceOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb) < 1)
+		if (referenceOctree->build(minD, maxD, &minPoints, &maxPoints, progressCb) < 1)
 		{
 			if (octreeACreated)
 			{
@@ -2346,7 +2346,7 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 
 	//compute octrees with the same bounding-box
 	DgmOctree *octreeA = compOctree, *octreeB = refOctree;
-	if (synchronizeOctrees(comparedCloud,referenceCloud,octreeA,octreeB,maxSearchDist,progressCb) != SYNCHRONIZED)
+	if (synchronizeOctrees(comparedCloud, referenceCloud, octreeA, octreeB, maxSearchDist, progressCb) != SYNCHRONIZED)
 		return -3;
 
 	const int* minIndexesA = octreeA->getMinFillIndexes(octreeLevel);
@@ -2375,8 +2375,10 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		//if maxSearchDist is defined, we might skip some points
 		//so we set a default distance for all of them
 		const ScalarType resetValue = static_cast<ScalarType>(maxSearchDist);
-		for (unsigned i=0; i<comparedCloud->size(); ++i)
-			comparedCloud->setPointScalarValue(i,resetValue);
+		for (unsigned i = 0; i < comparedCloud->size(); ++i)
+		{
+			comparedCloud->setPointScalarValue(i, resetValue);
+		}
 	}
 
 	int result = 0;

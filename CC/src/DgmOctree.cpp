@@ -276,7 +276,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		progressCb->update(0);
 		progressCb->start();
 	}
-	NormalizedProgress nprogress(progressCb,pointCount,90); //first phase: 90% (we keep 10% for sort)
+	NormalizedProgress nprogress(progressCb, pointCount, 90); //first phase: 90% (we keep 10% for sort)
 
 	//fill indexes table (we'll fill the max. level, then deduce the others from this one)
 	int* fillIndexesAtMaxLevel = m_fillIndexes + (MAX_OCTREE_LEVEL * 6);

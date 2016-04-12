@@ -39,8 +39,6 @@
 //Qt
 #include <QFrame>
 #include <QSettings>
-#include <QImageWriter>
-#include <QFileDialog>
 #include <QCoreApplication>
 #include <QMap>
 

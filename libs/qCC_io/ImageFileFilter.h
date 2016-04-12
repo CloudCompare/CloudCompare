@@ -41,6 +41,12 @@ public:
 	virtual bool canLoadExtension(QString upperCaseExt) const override;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
+	//! Helper: select an output image filename
+	static QString GetSaveFilename(	QString dialogTitle,
+									QString baseName,
+									QString imageSavePath,
+									QWidget* parentWidget = 0);
+
 protected:
 
 	//! Supported (output) filters

@@ -34,6 +34,7 @@ class ReferenceCloud;
 class ChunkedPointCloud;
 class GenericProgressCallback;
 struct OctreeAndMeshIntersection;
+class ScalarField;
 
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
 class CC_CORE_LIB_API DistanceComputationTools : public CCToolbox
@@ -96,6 +97,9 @@ public: //distance to clouds or meshes
 		**/
 		ReferenceCloud* CPSet;
 
+		//! Split distances (one scalar field per dimension: X, Y and Z)
+		ScalarField* splitDistances[3];
+
 		//! Whether to keep the existing distances as is (if any) or not
 		/** By default, any previous distances/scalar values stored in the 'enabled' scalar field will be
 			reset before computing them again.
@@ -115,7 +119,9 @@ public: //distance to clouds or meshes
 			, reuseExistingLocalModels(false)
 			, CPSet(0)
 			, resetFormerDistances(true)
-		{}
+		{
+			splitDistances[0] = splitDistances[1] = splitDistances[2] = 0;
+		}
 	};
 
 	//! Computes the "nearest neighbour distance" between two point clouds (formerly named "Hausdorff distance")

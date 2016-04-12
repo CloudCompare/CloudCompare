@@ -575,22 +575,6 @@ to help you set the general parameters</string>
    </hints>
   </connection>
   <connection>
-   <sender>maxDistCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>split3DCheckBox</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>100</x>
-     <y>405</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>240</x>
-     <y>459</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>signedDistCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>flipNormalsCheckBox</receiver>

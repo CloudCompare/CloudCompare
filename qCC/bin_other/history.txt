@@ -32,6 +32,10 @@ v2.7.0 - 04/XX/2016
 	* Default light position
 		- the default (sun) light position is now in the middle of the screen so as to get a brighter visualization of meshes
 
+	* Distance computation
+		- C2C distance can now be split along the 3 dimensions (X, Y, Z) even when using local models or a maximum distance
+			(in which case some values may be NaN)
+
 - Bug fix:
 	
 	* The HSV to RGB method was broken

@@ -1586,12 +1586,12 @@ bool ccPointCloud::convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField*
 	for (unsigned i=0; i<count; ++i)
 	{
 		CCVector3 N(this->getPointNormal(i));
-		PointCoordinateType dip,dipDir;
-		ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+		PointCoordinateType dip, dipDir;
+		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 		if (dipSF)
-			dipSF->setValue(i,static_cast<ScalarType>(dip));
+			dipSF->setValue(i, static_cast<ScalarType>(dip));
 		if (dipDirSF)
-			dipDirSF->setValue(i,static_cast<ScalarType>(dipDir));
+			dipDirSF->setValue(i, static_cast<ScalarType>(dipDir));
 	}
 
 	if (dipSF)

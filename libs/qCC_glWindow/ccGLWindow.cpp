@@ -262,7 +262,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	//lights
 	m_sunLightEnabled = true;
 	m_sunLightPos[0] = 0;
-	m_sunLightPos[1] = 1;
+	m_sunLightPos[1] = 0;
 	m_sunLightPos[2] = 1;
 	m_sunLightPos[3] = 0;
 

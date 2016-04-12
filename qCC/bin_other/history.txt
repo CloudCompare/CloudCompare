@@ -28,6 +28,15 @@ v2.7.0 - 04/XX/2016
 	* Command line mode
 		- I/O plugins are now loaded in command line mode (i.e. the FARO, DP and PCD formats can now be used)
 
+	* Default light position
+		- the default (sun) light position is now in the middle of the screen so as to get a brighter visualization of meshes
+
+- Bug fix:
+	
+	* The HSV to RGB method was broken
+	* The 'Convert normals to HSV colors' mehod doesn't rely on the Dip / Dip direction anymore as the way these values
+		are computed have been changed recently (with a symmetry about the plane Z = 0)
+
 v2.6.3.1 - 03/XX/2016
 
 - Enhancements:

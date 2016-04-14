@@ -91,6 +91,9 @@ public:
 	**/
 	int getTransformationFilters() const;
 
+	//! Returns the maximum number of threads
+	int getMaxThreadCount() const;
+
 	//! Saves parameters for next call
 	void saveParameters() const;
 

@@ -28,6 +28,8 @@ v2.7.0 - 04/XX/2016
 
 	* Command line mode
 		- I/O plugins are now loaded in command line mode (i.e. the FARO, DP and PCD formats can now be used)
+		- new option 'MAX_TCOUNT' to specify the maximum number of threads to be used for computing distances (C2C or C2M)
+			as well as for ICP registration
 
 	* Default light position
 		- the default (sun) light position is now in the middle of the screen so as to get a brighter visualization of meshes
@@ -35,6 +37,9 @@ v2.7.0 - 04/XX/2016
 	* Distance computation
 		- C2C distance can now be split along the 3 dimensions (X, Y, Z) even when using local models or a maximum distance
 			(in which case some values may be NaN)
+
+	* ICP registration
+		- the user can now set the maximum number of threads/core to use
 
 - Bug fix:
 	

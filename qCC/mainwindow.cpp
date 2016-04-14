@@ -3647,6 +3647,7 @@ void MainWindow::doActionRegister()
 	int transformationFilters									= rDlg.getTransformationFilters();
 	unsigned finalOverlap										= rDlg.getFinalOverlap();
 	CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
+	int maxThreadCount											= rDlg.getMaxThreadCount();
 
 	//semi-persistent storage (for next call)
 	rDlg.saveParameters();
@@ -3668,10 +3669,11 @@ void MainWindow::doActionRegister()
 									removeFarthestPoints,
 									method,
 									adjustScale,
-									finalOverlap/100.0,
+									finalOverlap / 100.0,
 									useDataSFAsWeights,
 									useModelSFAsWeights,
 									transformationFilters,
+									maxThreadCount,
 									this))
 	{
 		QString rmsString = QString("Final RMS: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
@@ -8223,7 +8225,13 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					unsigned finalPointCount = 0;
 					CCLib::ICPRegistrationTools::RESULT_TYPE result;
 					CCLib::ICPRegistrationTools::ScaledTransformation registerTrans;
-					result = CCLib::ICPRegistrationTools::Register(A,0,B,registerTrans,CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,1.0e-6,0,finalRMS,finalPointCount);
+					CCLib::ICPRegistrationTools::Parameters params;
+					{
+						params.convType = CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
+						params.minRMSDecrease = 1.0e-6;
+					}
+
+					result = CCLib::ICPRegistrationTools::Register(A, 0, B, params, registerTrans, finalRMS, finalPointCount);
 
 					if (result == CCLib::ICPRegistrationTools::ICP_ERROR)
 					{

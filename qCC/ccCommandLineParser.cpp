@@ -124,7 +124,7 @@ static const char COMMAND_SF_OP[]							= "SF_OP";
 static const char COMMAND_SOR_FILTER[]						= "SOR";
 static const char COMMAND_ORIENT_NORMALS[]					= "ORIENT_NORMS_MST";
 static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
-
+static const char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -2610,6 +2610,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	bool flipNormals = false;
 	double maxDist = 0.0;
 	unsigned octreeLevel = 0;
+	int maxThreadCount = 0;
 
 	bool splitXYZ = false;
 	int modelIndex = 0;
@@ -2619,7 +2620,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	while (!arguments.empty())
 	{
 		QString argument = arguments.front();
-		if (IsCommand(argument,COMMAND_C2M_DIST_FLIP_NORMALS))
+		if (IsCommand(argument, COMMAND_C2M_DIST_FLIP_NORMALS))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2629,7 +2630,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 			if (!cloud2meshDist)
 				ccConsole::Warning("Parameter \"-%1\" ignored: only for C2M distance!");
 		}
-		else if (IsCommand(argument,COMMAND_MAX_DISTANCE))
+		else if (IsCommand(argument, COMMAND_MAX_DISTANCE))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2644,7 +2645,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 			if (!cloud2meshDist)
 				ccConsole::Warning("Parameter \"-%1\" ignored: only for C2M distance!");
 		}
-		else if (IsCommand(argument,COMMAND_OCTREE_LEVEL))
+		else if (IsCommand(argument, COMMAND_OCTREE_LEVEL))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2656,7 +2657,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 			if (!conversionOk)
 				return Error(QString("Invalid parameter: value after \"-%1\"").arg(COMMAND_OCTREE_LEVEL));
 		}
-		else if (IsCommand(argument,COMMAND_C2C_SPLIT_XYZ))
+		else if (IsCommand(argument, COMMAND_C2C_SPLIT_XYZ))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2666,7 +2667,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 			if (cloud2meshDist)
 				ccConsole::Warning("Parameter \"-%1\" ignored: only for C2C distance!");
 		}
-		else if (IsCommand(argument,COMMAND_C2C_LOCAL_MODEL))
+		else if (IsCommand(argument, COMMAND_C2C_LOCAL_MODEL))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2716,6 +2717,19 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 				return Error(QString("Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)"));
 			}
 		}
+		else if (IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
+
+			bool ok;
+			maxThreadCount = arguments.takeFirst().toInt(&ok);
+			if (!ok || maxThreadCount < 0)
+				return Error(QString("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
+		}
 		else
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
@@ -2738,6 +2752,10 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	if (octreeLevel > 0)
 	{
 		compDlg.octreeLevelComboBox->setCurrentIndex(octreeLevel);
+	}
+	if (maxThreadCount != 0)
+	{
+		compDlg.maxThreadCountSpinBox->setValue(maxThreadCount);
 	}
 
 	//C2M-only parameters
@@ -3247,32 +3265,33 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	unsigned overlap = 100;
 	int modelSFAsWeights = -1;
 	int dataSFAsWeights = -1;
+	int maxThreadCount = 0;
 
 	while (!arguments.empty())
 	{
 		QString argument = arguments.front();
-		if (IsCommand(argument,COMMAND_ICP_REFERENCE_IS_FIRST))
+		if (IsCommand(argument, COMMAND_ICP_REFERENCE_IS_FIRST))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
 			referenceIsFirst = true;
 		}
-		else if (IsCommand(argument,COMMAND_ICP_ADJUST_SCALE))
+		else if (IsCommand(argument, COMMAND_ICP_ADJUST_SCALE))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
 			adjustScale = true;
 		}
-		else if (IsCommand(argument,COMMAND_ICP_ENABLE_FARTHEST_REMOVAL))
+		else if (IsCommand(argument, COMMAND_ICP_ENABLE_FARTHEST_REMOVAL))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
 			enableFarthestPointRemoval = true;
 		}
-		else if (IsCommand(argument,COMMAND_ICP_MIN_ERROR_DIIF))
+		else if (IsCommand(argument, COMMAND_ICP_MIN_ERROR_DIIF))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -3284,7 +3303,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (!ok || minErrorDiff <= 0)
 				return Error(QString("Invalid value for min. error difference! (after %1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
 		}
-		else if (IsCommand(argument,COMMAND_ICP_ITERATION_COUNT))
+		else if (IsCommand(argument, COMMAND_ICP_ITERATION_COUNT))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -3297,7 +3316,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (!ok || iterationCount == 0)
 				return Error(QString("Invalid number of iterations! (%1)").arg(arg));
 		}
-		else if (IsCommand(argument,COMMAND_ICP_OVERLAP))
+		else if (IsCommand(argument, COMMAND_ICP_OVERLAP))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -3310,7 +3329,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (!ok || overlap < 10 || overlap > 100)
 				return Error(QString("Invalid overlap value! (%1 --> should be between 10 and 100)").arg(arg));
 		}
-		else if (IsCommand(argument,COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
+		else if (IsCommand(argument, COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -3322,7 +3341,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			if (!ok || randomSamplingLimit < 3)
 				return Error(QString("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
 		}
-		else if (IsCommand(argument,COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
+		else if (IsCommand(argument, COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -3342,7 +3361,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 					return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
 			}
 		}
-		else if (IsCommand(argument,COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
+		else if (IsCommand(argument, COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -3361,6 +3380,19 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 				if (!ok || dataSFAsWeights < 0)
 					return Error(QString("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
 			}
+		}
+		else if (IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
+			
+			bool ok;
+			maxThreadCount = arguments.takeFirst().toInt(&ok);
+			if (!ok || maxThreadCount < 0)
+				return Error(QString("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
 		}
 		else
 		{
@@ -3392,7 +3424,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 	//put them in the right order (data first, model next)
 	if (referenceIsFirst)
 	{
-		std::swap(dataAndModel[0],dataAndModel[1]);
+		std::swap(dataAndModel[0], dataAndModel[1]);
 	}
 
 	//check that the scalar fields (weights) exist
@@ -3422,7 +3454,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 		else
 		{
 			if (modelSFAsWeights < 0) //last SF
-				modelSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields())-1;
+				modelSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
 			Print(QString("[ICP] SF #%1 (model entity) will be used as weights").arg(modelSFAsWeights));
 			cloud->setCurrentDisplayedScalarField(modelSFAsWeights);
 		}
@@ -3448,6 +3480,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 									dataSFAsWeights >= 0,
 									modelSFAsWeights >= 0,
 									CCLib::ICPRegistrationTools::SKIP_NONE,
+									maxThreadCount,
 									parent ))
 	{
 		ccHObject* data = dataAndModel[0]->getEntity();
@@ -3828,7 +3861,7 @@ bool ccCommandLineParser::commandLogFile(QStringList& arguments)
 
 int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 {
-	ccProgressDialog progressDlg(false,parent);
+	ccProgressDialog progressDlg(false, parent);
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -3839,160 +3872,160 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		QString argument = arguments.takeFirst();
 
 		// "O" OPEN FILE
-		if (IsCommand(argument,COMMAND_OPEN))
+		if (IsCommand(argument, COMMAND_OPEN))
 		{
 			success = commandLoad(arguments);
 		}
 		// "SS" SUBSAMPLING
-		else if (IsCommand(argument,COMMAND_SUBSAMPLE))
+		else if (IsCommand(argument, COMMAND_SUBSAMPLE))
 		{
-			success = commandSubsample(arguments,&progressDlg);
+			success = commandSubsample(arguments, &progressDlg);
 		}
 		// "CURV" CURVATURE
-		else if (IsCommand(argument,COMMAND_CURVATURE))
+		else if (IsCommand(argument, COMMAND_CURVATURE))
 		{
-			success = commandCurvature(arguments,parent);
+			success = commandCurvature(arguments, parent);
 		}
 		// "DENSITY"
-		else if (IsCommand(argument,COMMAND_DENSITY))
+		else if (IsCommand(argument, COMMAND_DENSITY))
 		{
-			success = commandDensity(arguments,parent);
+			success = commandDensity(arguments, parent);
 		}
 		// "APPROX DENSITY"
-		else if (IsCommand(argument,COMMAND_APPROX_DENSITY))
+		else if (IsCommand(argument, COMMAND_APPROX_DENSITY))
 		{
-			success = commandApproxDensity(arguments,parent);
+			success = commandApproxDensity(arguments, parent);
 		}
 		// "SF_GRAD" SF GRADIENT
-		else if (IsCommand(argument,COMMAND_SF_GRADIENT))
+		else if (IsCommand(argument, COMMAND_SF_GRADIENT))
 		{
-			success = commandSFGradient(arguments,parent);
+			success = commandSFGradient(arguments, parent);
 		}
 		// "ROUGH" ROUGHNESS
-		else if (IsCommand(argument,COMMAND_ROUGHNESS))
+		else if (IsCommand(argument, COMMAND_ROUGHNESS))
 		{
-			success = commandRoughness(arguments,parent);
+			success = commandRoughness(arguments, parent);
 		}
 		// "APPLY_TRANSFO" (APPLY 4x4 TRANSFORMATION)
-		else if (IsCommand(argument,COMMAND_APPLY_TRANSFORMATION))
+		else if (IsCommand(argument, COMMAND_APPLY_TRANSFORMATION))
 		{
 			success = commandApplyTransformation(arguments);
 		}
 		//Import Bundler file + orthorectification
-		else if (IsCommand(argument,COMMAND_BUNDLER))
+		else if (IsCommand(argument, COMMAND_BUNDLER))
 		{
 			success = commandBundler(arguments);
 		}
 		//Cloud-Mesh distance
-		else if (IsCommand(argument,COMMAND_C2M_DIST))
+		else if (IsCommand(argument, COMMAND_C2M_DIST))
 		{
-			success = commandDist(arguments,true,parent);
+			success = commandDist(arguments, true, parent);
 		}
 		//Cloud-Cloud distance
-		else if (IsCommand(argument,COMMAND_C2C_DIST))
+		else if (IsCommand(argument, COMMAND_C2C_DIST))
 		{
-			success = commandDist(arguments,false,parent);
+			success = commandDist(arguments, false, parent);
 		}
 		//Mesh sampling
-		else if (IsCommand(argument,COMMAND_SAMPLE_MESH))
+		else if (IsCommand(argument, COMMAND_SAMPLE_MESH))
 		{
-			success = commandSampleMesh(arguments,&progressDlg);
+			success = commandSampleMesh(arguments, &progressDlg);
 		}
 		//Best fit plane
-		else if (IsCommand(argument,COMMAND_BEST_FIT_PLANE))
+		else if (IsCommand(argument, COMMAND_BEST_FIT_PLANE))
 		{
 			success = commandBestFitPlane(arguments);
 		}
 		//Match b.b. centers
-		else if (IsCommand(argument,COMMAND_MATCH_BB_CENTERS))
+		else if (IsCommand(argument, COMMAND_MATCH_BB_CENTERS))
 		{
 			success = matchBBCenters(arguments);
 		}
 		//Filter SF by values
-		else if (IsCommand(argument,COMMAND_FILTER_SF_BY_VALUE))
+		else if (IsCommand(argument, COMMAND_FILTER_SF_BY_VALUE))
 		{
 			success = commandFilterSFByValue(arguments);
 		}
 		//Merge clouds
-		else if (IsCommand(argument,COMMAND_MERGE_CLOUDS))
+		else if (IsCommand(argument, COMMAND_MERGE_CLOUDS))
 		{
 			success = commandMergeClouds(arguments);
 		}
 		//Perform statistical test
-		else if (IsCommand(argument,COMMAND_STAT_TEST))
+		else if (IsCommand(argument, COMMAND_STAT_TEST))
 		{
-			success = commandStatTest(arguments,&progressDlg);
+			success = commandStatTest(arguments, &progressDlg);
 		}
 		//SF Arithmetic tool
-		else if (IsCommand(argument,COMMAND_SF_ARITHMETIC))
+		else if (IsCommand(argument, COMMAND_SF_ARITHMETIC))
 		{
 			success = commandSfArithmetic(arguments);
 		}
 		//SF Operation tool
-		else if (IsCommand(argument,COMMAND_SF_OP))
+		else if (IsCommand(argument, COMMAND_SF_OP))
 		{
 			success = commandSfOp(arguments);
 		}
 		//ICP registration
-		else if (IsCommand(argument,COMMAND_ICP))
+		else if (IsCommand(argument, COMMAND_ICP))
 		{
-			success = commandICP(arguments,parent);
+			success = commandICP(arguments, parent);
 		}
 		//Delaunay 2.5D triangulation
-		else if (IsCommand(argument,COMMAND_DELAUNAY))
+		else if (IsCommand(argument, COMMAND_DELAUNAY))
 		{
-			success = commandDelaunay(arguments,parent);
+			success = commandDelaunay(arguments, parent);
 		}
 		//Crop
-		else if (IsCommand(argument,COMMAND_CROP))
+		else if (IsCommand(argument, COMMAND_CROP))
 		{
 			success = commandCrop(arguments);
 		}
 		//Crop 2D
-		else if (IsCommand(argument,COMMAND_CROP_2D))
+		else if (IsCommand(argument, COMMAND_CROP_2D))
 		{
 			success = commandCrop2D(arguments);
 		}
 		//Cross section
-		else if (IsCommand(argument,COMMAND_CROSS_SECTION))
+		else if (IsCommand(argument, COMMAND_CROSS_SECTION))
 		{
 			success = commandCrossSection(arguments);
 		}
 		//Color banding
-		else if (IsCommand(argument,COMMAND_COLOR_BANDING))
+		else if (IsCommand(argument, COMMAND_COLOR_BANDING))
 		{
 			success = commandColorBanding(arguments);
 		}
 		// "SOR" FILTER
-		else if (IsCommand(argument,COMMAND_SOR_FILTER))
+		else if (IsCommand(argument, COMMAND_SOR_FILTER))
 		{
-			success = commandSORFilter(arguments,&progressDlg);
+			success = commandSORFilter(arguments, &progressDlg);
 		}
-		else if (IsCommand(argument,COMMAND_ORIENT_NORMALS))
+		else if (IsCommand(argument, COMMAND_ORIENT_NORMALS))
 		{
-			success = commandOrientNormalsMST(arguments,&progressDlg);
+			success = commandOrientNormalsMST(arguments, &progressDlg);
 		}
 		//Change default cloud output format
-		else if (IsCommand(argument,COMMAND_CLOUD_EXPORT_FORMAT))
+		else if (IsCommand(argument, COMMAND_CLOUD_EXPORT_FORMAT))
 		{
 			success = commandChangeCloudOutputFormat(arguments);
 		}
 		//Change default mesh output format
-		else if (IsCommand(argument,COMMAND_MESH_EXPORT_FORMAT))
+		else if (IsCommand(argument, COMMAND_MESH_EXPORT_FORMAT))
 		{
 			success = commandChangeMeshOutputFormat(arguments);
 		}
-		else if (IsCommand(argument,COMMAND_PLY_EXPORT_FORMAT))
+		else if (IsCommand(argument, COMMAND_PLY_EXPORT_FORMAT))
 		{
 			success = commandChangePLYExportFormat(arguments);
 		}
 		//Set default FBX output format
-		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))
+		else if (IsCommand(argument, COMMAND_FBX_EXPORT_FORMAT))
 		{
 			success = commandChangeFBXOutputFormat(arguments);
 		}
 		//Force normal computation when importing gridded clouds
-		else if (IsCommand(argument,COMMAND_COMPUTE_GRIDDED_NORMALS))
+		else if (IsCommand(argument, COMMAND_COMPUTE_GRIDDED_NORMALS))
 		{
 			success = commandForceNormalsComputation(arguments);
 		}
@@ -4002,68 +4035,68 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 			success = commandDropGlobalShift(arguments);
 		}
 		//Set the current "active" scalar-field
-		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))
+		else if (IsCommand(argument, COMMAND_SET_ACTIVE_SF))
 		{
 			success = setActiveSF(arguments);
 		}
 		//Removes all scalar-fields
-		else if (IsCommand(argument,COMMAND_REMOVE_ALL_SFS))
+		else if (IsCommand(argument, COMMAND_REMOVE_ALL_SFS))
 		{
 			success = removeAllSFs(arguments);
 		}
 		//save all loaded clouds
-		else if (IsCommand(argument,COMMAND_SAVE_CLOUDS))
+		else if (IsCommand(argument, COMMAND_SAVE_CLOUDS))
 		{
 			success = commandSaveClouds(arguments);
 		}
 		//save all loaded meshes
-		else if (IsCommand(argument,COMMAND_SAVE_MESHES))
+		else if (IsCommand(argument, COMMAND_SAVE_MESHES))
 		{
 			success = commandSaveMeshes(arguments);
 		}
 		//auto-save mode
-		else if (IsCommand(argument,COMMAND_AUTO_SAVE))
+		else if (IsCommand(argument, COMMAND_AUTO_SAVE))
 		{
 			success = commandAutoSave(arguments);
 		}
 		//unload all loaded clouds
-		else if (IsCommand(argument,COMMAND_CLEAR_CLOUDS))
+		else if (IsCommand(argument, COMMAND_CLEAR_CLOUDS))
 		{
 			removeClouds();
 		}
 		//unload the last loaded cloud
-		else if (IsCommand(argument,COMMAND_POP_CLOUDS))
+		else if (IsCommand(argument, COMMAND_POP_CLOUDS))
 		{
 			removeClouds(true);
 		}
 		//unload all loaded meshes
-		else if (IsCommand(argument,COMMAND_CLEAR_MESHES))
+		else if (IsCommand(argument, COMMAND_CLEAR_MESHES))
 		{
 			removeMeshes();
 		}
 		//unload the last loaded cloud
-		else if (IsCommand(argument,COMMAND_POP_MESHES))
+		else if (IsCommand(argument, COMMAND_POP_MESHES))
 		{
 			removeMeshes(true);
 		}
 		//unload all loaded entities
-		else if (IsCommand(argument,COMMAND_CLEAR))
+		else if (IsCommand(argument, COMMAND_CLEAR))
 		{
 			removeClouds();
 			removeMeshes();
 		}
 		//no timestamp for output filenames
-		else if (IsCommand(argument,COMMAND_NO_TIMESTAMP))
+		else if (IsCommand(argument, COMMAND_NO_TIMESTAMP))
 		{
 			s_addTimestamp = false;
 		}
 		//log file
-		else if (IsCommand(argument,COMMAND_LOG_FILE))
+		else if (IsCommand(argument, COMMAND_LOG_FILE))
 		{
 			success = commandLogFile(arguments);
 		}
 		//silent mode (i.e. no console)
-		else if (IsCommand(argument,COMMAND_SILENT_MODE))
+		else if (IsCommand(argument, COMMAND_SILENT_MODE))
 		{
 			ccConsole::Warning(QString("Misplaced command: '%1' (must be first)").arg(COMMAND_SILENT_MODE));
 		}
@@ -4074,7 +4107,7 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		}
 	}
 
-	ccConsole::Print("Processed finished in %.2f s.",eTimer.elapsed()/1.0e3);
+	ccConsole::Print("Processed finished in %.2f s.", eTimer.elapsed() / 1.0e3);
 
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -616,10 +616,11 @@ namespace ccLibAlgorithms
 								 false,
 								 CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
 								 true,
-								 icpFinalOverlap/100.0,
+								 icpFinalOverlap / 100.0,
 								 false,
 								 false,
 								 transformationFilters,
+								 0,
 								 parent))
 						{
 							scales[i] = finalScale;

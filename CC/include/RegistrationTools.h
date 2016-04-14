@@ -156,6 +156,57 @@ public:
 		ICP_ERROR_INVALID_INPUT			= 105,
 	};
 
+	//! ICP Parameters
+	struct Parameters
+	{
+		Parameters()
+			: convType(MAX_ERROR_CONVERGENCE)
+			, minRMSDecrease(1.0e-5)
+			, nbMaxIterations(20)
+			, adjustScale(false)
+			, filterOutFarthestPoints(false)
+			, samplingLimit(50000)
+			, finalOverlapRatio(1.0)
+			, modelWeights(0)
+			, dataWeights(0)
+			, transformationFilters(SKIP_NONE)
+			, maxThreadCount(0)
+		{}
+
+		//! Convergence type
+		CONVERGENCE_TYPE convType;
+
+		//! The minimum error (RMS) reduction between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
+		double minRMSDecrease;
+
+		//! The maximum number of iteration (ignored if convType is not MAX_ITER_CONVERGENCE)
+		unsigned nbMaxIterations;
+
+		//! Whether to release the scale parameter during the registration procedure or not
+		bool adjustScale;
+
+		//! If true, the algorithm will automatically ignore farthest points from the reference, for better convergence
+		bool filterOutFarthestPoints;
+
+		//! Maximum number of points per cloud (they are randomly resampled below this limit otherwise)
+		unsigned samplingLimit;
+
+		//! Theoretical overlap ratio (at each iteration, only this percentage (between 0 and 1) will be used for registration
+		double finalOverlapRatio;
+
+		//! Weights for model points (i.e. only if the model entity is a cloud) (optional)
+		ScalarField* modelWeights;
+
+		//! Weights for data points (optional)
+		ScalarField* dataWeights;
+
+		//! Filters to be applied on the resulting transformation at each step (experimental) - see RegistrationTools::TRANSFORMATION_FILTERS flags
+		int transformationFilters;
+
+		//! Maximum number of threads to use (0 = max)
+		int maxThreadCount;
+	};
+
 	//! Registers two clouds or a cloud and a mesh
 	/** This method implements the ICP algorithm (Besl et al.).
 		\warning Be sure to activate an INPUT/OUTPUT scalar field on the point cloud.
@@ -163,39 +214,21 @@ public:
 		\param modelCloud the reference cloud or the vertices of the reference mesh --> won't move
 		\param modelMesh the reference mesh (optional) --> won't move
 		\param dataCloud the cloud to register --> will move
+		\param params ICP parameters
 		\param[out] totalTrans the resulting transformation (once the algorithm has converged)
-		\param convType convergence type
-		\param minRMSDecrease the minimum error (RMS) reduction between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
-		\param nbMaxIterations the maximum number of iteration (ignored if convType is not MAX_ITER_CONVERGENCE)
 		\param[out] finalRMS final error (RMS)
 		\param[out] finalPointCount number of points used to compute the final RMS
-		\param adjustScale release the scale during the registration procedure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param filterOutFarthestPoints if true, the algorithm will automatically ignore farthest points from the reference, for better convergence
-		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
-		\param finalOverlapRatio theoretical overlap ratio (at each iteration, only this percentage (between 0 and 1) will be used for registration
-		\param modelWeights weights for model points (i.e. only if the model entity is a cloud) (optional)
-		\param dataWeights weights for data points (optional)
-		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see RegistrationTools::TRANSFORMATION_FILTERS flags
 		\return algorithm result
 	**/
 	static RESULT_TYPE Register(	GenericIndexedCloudPersist* modelCloud,
 									GenericIndexedMesh* modelMesh,
 									GenericIndexedCloudPersist* dataCloud,
+									const Parameters& params,
 									ScaledTransformation& totalTrans,
-									CONVERGENCE_TYPE convType,
-									double minRMSDecrease,
-									unsigned nbMaxIterations,
 									double& finalRMS,
 									unsigned& finalPointCount,
-									bool adjustScale = false,
-									GenericProgressCallback* progressCb = 0,
-									bool filterOutFarthestPoints = false,
-									unsigned samplingLimit = 20000,
-									double finalOverlapRatio = 1.0,
-									ScalarField* modelWeights = 0,
-									ScalarField* dataWeights = 0,
-									int transformationFilters = SKIP_NONE);
+									GenericProgressCallback* progressCb = 0);
 
 
 };

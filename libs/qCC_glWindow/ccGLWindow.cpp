@@ -6271,7 +6271,8 @@ void ccGLWindow::renderText(double x, double y, double z, const QString & str, c
 	CCVector3d Q2D(0, 0, 0);
 	if (camera.project(CCVector3d(x, y, z), Q2D))
 	{
-		renderText(Q2D.x, Q2D.z, str, font);
+		Q2D.y = m_glViewport.height() - 1 - Q2D.y;
+		renderText(Q2D.x, Q2D.y, str, font);
 	}
 }
 

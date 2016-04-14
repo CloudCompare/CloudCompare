@@ -33,6 +33,9 @@
 #include <QPluginLoader>
 #include <QCoreApplication>
 #include <QDir>
+#ifdef Q_OS_MAC
+#include <QStandardPaths>
+#endif
 
 class QObject;
 

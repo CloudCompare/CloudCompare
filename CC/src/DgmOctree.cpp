@@ -3117,7 +3117,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 			progressCb->update(0);
 			progressCb->start();
 		}
-		NormalizedProgress nprogress(progressCb,static_cast<unsigned>(numberOfCells));
+		NormalizedProgress nprogress(progressCb, static_cast<unsigned>(numberOfCells));
 
 		ReferenceCloud Y(m_theAssociatedCloud);
 		for (size_t i=0; i<numberOfCells; i++)

@@ -31,7 +31,7 @@
 #include <ccHObject.h>
 
 //Qt
-#include <QThreadPool>
+#include <QThread>
 
 //system
 #include <assert.h>
@@ -67,16 +67,16 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 	ccQtHelpers::SetButtonColor(dataColorButton,qRed);
 	ccQtHelpers::SetButtonColor(modelColorButton,qYellow);
 
-	int maxThreadCount = QThread::idealThreadCount();
-	maxThreadCountSpinBox->setRange(1, maxThreadCount);
-	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(maxThreadCount));
+	int idealThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, idealThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(idealThreadCount));
 
 	//restore semi-persistent settings
 	{
 		//semi-persistent options
 		if (s_maxThreadCount == 0)
 		{
-			s_maxThreadCount = QThreadPool::globalInstance()->maxThreadCount();
+			s_maxThreadCount = idealThreadCount;
 		}
 		maxThreadCountSpinBox->setValue(s_maxThreadCount);
 		adjustScaleCheckBox->setChecked(s_adjustScale);

@@ -96,7 +96,7 @@ public:
 		appPath.remove("MacOS");
 
 		pluginPaths += (appPath + "Plugins/ccPlugins");
-#if CC_MAC_DEV_PATHS
+#if defined(CC_MAC_DEV_PATHS)
 		// used for development only - this is the path where the plugins are built
 		// this avoids having to install into the application bundle when developing
 		pluginPaths += (appPath + "../../../ccPlugins");

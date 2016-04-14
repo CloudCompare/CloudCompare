@@ -846,7 +846,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 			//we import colors (if necessary)
 			if (hasColors() && m_rgbColors->currentSize() == pointCountBefore)
-				for (unsigned i=0; i<addedPoints; i++)
+				for (unsigned i = 0; i < addedPoints; i++)
 					addRGBColor(addedCloud->m_rgbColors->getValue(i));
 		}
 	}
@@ -1156,7 +1156,7 @@ void ccPointCloud::unallocateColors()
 	}
 
 	//remove the grid colors as well!
-	for (size_t i=0; i<m_grids.size(); ++i)
+	for (size_t i = 0; i < m_grids.size(); ++i)
 	{
 		if (m_grids[i])
 		{
@@ -3047,8 +3047,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (toDisplay.count > context.minLODPointCount && context.minLODPointCount != 0)
 					{
-						GLint maxStride = 1;
+						GLint maxStride = 2048;
+#ifdef GL_MAX_VERTEX_ATTRIB_STRIDE
 						glFunc->glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &maxStride);
+#endif
 						//maxStride == decimStep * 3 * sizeof(PointCoordinateType)
 						toDisplay.decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / context.minLODPointCount));
 						toDisplay.decimStep = std::min<unsigned>(toDisplay.decimStep, maxStride / (3 * sizeof(PointCoordinateType)));
@@ -3893,14 +3895,14 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 		unallocateColors();
 		return false;
 	}
-		
+
 	//import colors
 	unsigned CPsize = CPSet.size();
 	assert(CPsize == size());
-	for (unsigned i=0; i<CPsize; ++i)
+	for (unsigned i = 0; i < CPsize; ++i)
 	{
 		unsigned index = CPSet.getPointGlobalIndex(i);
-		setPointColor(i,otherCloud->getPointColor(index));
+		setPointColor(i, otherCloud->getPointColor(index));
 	}
 
 	//We must update the VBOs
@@ -4127,13 +4129,13 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	//points array (dataVersion>=20)
 	if (!m_points)
 		return ccLog::Error("Internal error - point cloud has no valid points array? (not enough memory?)");
-	if (!ccSerializationHelper::GenericArrayToFile(*m_points,out))
+	if (!ccSerializationHelper::GenericArrayToFile(*m_points, out))
 		return false;
 
 	//colors array (dataVersion>=20)
 	{
 		bool hasColorsArray = hasColors();
-		if (out.write((const char*)&hasColorsArray,sizeof(bool)) < 0)
+		if (out.write((const char*)&hasColorsArray, sizeof(bool)) < 0)
 			return WriteError();
 		if (hasColorsArray)
 		{
@@ -4146,7 +4148,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	//normals array (dataVersion>=20)
 	{
 		bool hasNormalsArray = hasNormals();
-		if (out.write((const char*)&hasNormalsArray,sizeof(bool)) < 0)
+		if (out.write((const char*)&hasNormalsArray, sizeof(bool)) < 0)
 			return WriteError();
 		if (hasNormalsArray)
 		{
@@ -4160,11 +4162,11 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	{
 		//number of scalar fields (dataVersion>=20)
 		uint32_t sfCount = static_cast<uint32_t>(getNumberOfScalarFields());
-		if (out.write((const char*)&sfCount,4) < 0)
+		if (out.write((const char*)&sfCount, 4) < 0)
 			return WriteError();
 
 		//scalar fields (dataVersion>=20)
-		for (uint32_t i=0; i<sfCount; ++i)
+		for (uint32_t i = 0; i < sfCount; ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(i));
 			assert(sf);
@@ -4177,12 +4179,12 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		//	return WriteError();
 
 		//'show current sf color scale' state (dataVersion>=20)
-		if (out.write((const char*)&m_sfColorScaleDisplayed,sizeof(bool)) < 0)
+		if (out.write((const char*)&m_sfColorScaleDisplayed, sizeof(bool)) < 0)
 			return WriteError();
 
 		//Displayed scalar field index (dataVersion>=20)
 		int32_t displayedScalarFieldIndex = (int32_t)m_currentDisplayedScalarFieldIndex;
-		if (out.write((const char*)&displayedScalarFieldIndex,4) < 0)
+		if (out.write((const char*)&displayedScalarFieldIndex, 4) < 0)
 			return WriteError();
 	}
 
@@ -4190,11 +4192,11 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	{
 		//number of grids
 		uint32_t count = static_cast<uint32_t>(this->gridCount());
-		if (out.write((const char*)&count,4) < 0)
+		if (out.write((const char*)&count, 4) < 0)
 			return WriteError();
 
 		//save each grid
-		for (uint32_t i=0; i<count; ++i)
+		for (uint32_t i = 0; i < count; ++i)
 		{
 			const Grid::Shared& g = grid(static_cast<unsigned>(i));
 			if (!g || g->indexes.empty())
@@ -4202,7 +4204,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 
 			//width
 			uint32_t w = static_cast<uint32_t>(g->w);
-			if (out.write((const char*)&w,4) < 0)
+			if (out.write((const char*)&w, 4) < 0)
 				return WriteError();
 			//height
 			uint32_t h = static_cast<uint32_t>(g->h);
@@ -4215,7 +4217,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 
 			//indexes
 			int* _index = &(g->indexes.front());
-			for (uint32_t j=0; j<w*h; ++j, ++_index)
+			for (uint32_t j = 0; j < w*h; ++j, ++_index)
 			{
 				int32_t index = static_cast<int32_t>(*_index);
 				if (out.write((const char*)&index, 4) < 0)
@@ -4226,10 +4228,10 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 			bool hasColors = (g->colors.size() == g->indexes.size());
 			if (out.write((const char*)&hasColors, 1) < 0)
 				return WriteError();
-			
+
 			if (hasColors)
 			{
-				for (uint32_t j=0; j<g->colors.size(); ++j)
+				for (uint32_t j = 0; j < g->colors.size(); ++j)
 				{
 					if (out.write((const char*)g->colors[j].rgb, 3) < 0)
 						return WriteError();
@@ -4257,15 +4259,15 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		bool fileCoordIsDouble = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS);
 		if (!fileCoordIsDouble && sizeof(PointCoordinateType) == 8) //file is 'float' and current type is 'double'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<3,PointCoordinateType,float>(*m_points,in,dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<3, PointCoordinateType, float>(*m_points, in, dataVersion);
 		}
 		else if (fileCoordIsDouble && sizeof(PointCoordinateType) == 4) //file is 'double' and current type is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<3,PointCoordinateType,double>(*m_points,in,dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<3, PointCoordinateType, double>(*m_points, in, dataVersion);
 		}
 		else
 		{
-			result = ccSerializationHelper::GenericArrayFromFile(*m_points,in,dataVersion);
+			result = ccSerializationHelper::GenericArrayFromFile(*m_points, in, dataVersion);
 		}
 		if (!result)
 		{
@@ -4298,7 +4300,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//colors array (dataVersion>=20)
 	{
 		bool hasColorsArray = false;
-		if (in.read((char*)&hasColorsArray,sizeof(bool)) < 0)
+		if (in.read((char*)&hasColorsArray, sizeof(bool)) < 0)
 			return ReadError();
 		if (hasColorsArray)
 		{
@@ -4321,7 +4323,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//normals array (dataVersion>=20)
 	{
 		bool hasNormalsArray = false;
-		if (in.read((char*)&hasNormalsArray,sizeof(bool)) < 0)
+		if (in.read((char*)&hasNormalsArray, sizeof(bool)) < 0)
 			return ReadError();
 		if (hasNormalsArray)
 		{
@@ -4345,11 +4347,11 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		//number of scalar fields (dataVersion>=20)
 		uint32_t sfCount = 0;
-		if (in.read((char*)&sfCount,4) < 0)
+		if (in.read((char*)&sfCount, 4) < 0)
 			return ReadError();
 
 		//scalar fields (dataVersion>=20)
-		for (uint32_t i=0; i<sfCount; ++i)
+		for (uint32_t i = 0; i < sfCount; ++i)
 		{
 			ccScalarField* sf = new ccScalarField();
 			if (!sf->fromFile(in, dataVersion, flags))
@@ -4364,25 +4366,25 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		{
 			//'show NaN values in grey' state (27>dataVersion>=20)
 			bool greyForNanScalarValues = true;
-			if (in.read((char*)&greyForNanScalarValues,sizeof(bool)) < 0)
+			if (in.read((char*)&greyForNanScalarValues, sizeof(bool)) < 0)
 				return ReadError();
 
 			//update all scalar fields accordingly (old way)
-			for (unsigned i=0; i<getNumberOfScalarFields(); ++i)
+			for (unsigned i = 0; i < getNumberOfScalarFields(); ++i)
 			{
 				static_cast<ccScalarField*>(getScalarField(i))->showNaNValuesInGrey(greyForNanScalarValues);
 			}
 		}
 
 		//'show current sf color scale' state (dataVersion>=20)
-		if (in.read((char*)&m_sfColorScaleDisplayed,sizeof(bool)) < 0)
+		if (in.read((char*)&m_sfColorScaleDisplayed, sizeof(bool)) < 0)
 			return ReadError();
 
 		//Displayed scalar field index (dataVersion>=20)
 		int32_t displayedScalarFieldIndex = 0;
-		if (in.read((char*)&displayedScalarFieldIndex,4) < 0)
+		if (in.read((char*)&displayedScalarFieldIndex, 4) < 0)
 			return ReadError();
-		if (displayedScalarFieldIndex<(int32_t)sfCount)
+		if (displayedScalarFieldIndex < (int32_t)sfCount)
 			setCurrentDisplayedScalarField(displayedScalarFieldIndex);
 	}
 
@@ -4391,28 +4393,28 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		//number of grids
 		uint32_t count = 0;
-		if (in.read((char*)&count,4) < 0)
+		if (in.read((char*)&count, 4) < 0)
 			return ReadError();
 
 		//load each grid
-		for (uint32_t i=0; i<count; ++i)
+		for (uint32_t i = 0; i < count; ++i)
 		{
 			Grid::Shared g(new Grid);
 
 			//width
 			uint32_t w = 0;
-			if (in.read((char*)&w,4) < 0)
+			if (in.read((char*)&w, 4) < 0)
 				return ReadError();
 			//height
 			uint32_t h = 0;
-			if (in.read((char*)&h,4) < 0)
+			if (in.read((char*)&h, 4) < 0)
 				return ReadError();
 
 			g->w = static_cast<unsigned>(w);
 			g->h = static_cast<unsigned>(h);
 
 			//sensor matrix
-			if (!g->sensorPosition.fromFile(in,dataVersion,flags))
+			if (!g->sensorPosition.fromFile(in, dataVersion, flags))
 				return WriteError();
 
 			try
@@ -4426,10 +4428,10 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 			//indexes
 			int* _index = &(g->indexes.front());
-			for (uint32_t j=0; j<w*h; ++j, ++_index)
+			for (uint32_t j = 0; j < w*h; ++j, ++_index)
 			{
 				int32_t index = 0;
-				if (in.read((char*)&index,4) < 0)
+				if (in.read((char*)&index, 4) < 0)
 					return ReadError();
 
 				*_index = index;
@@ -4453,7 +4455,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			bool hasColors = false;
 			if (in.read((char*)&hasColors, 1) < 0)
 				return ReadError();
-			
+
 			if (hasColors)
 			{
 				try
@@ -4465,7 +4467,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 					return MemoryError();
 				}
 
-				for (uint32_t j=0; j<g->colors.size(); ++j)
+				for (uint32_t j = 0; j < g->colors.size(); ++j)
 				{
 					if (in.read((char*)g->colors[j].rgb, 3) < 0)
 						return ReadError();

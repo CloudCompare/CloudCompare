@@ -5855,8 +5855,8 @@ QString ccGLWindow::getShadersPath()
 #if defined(Q_OS_MAC)
 	appPath.remove( "MacOS" );
 	
-#if CC_MAC_DEV_PATHS
-	shaderPath = appPath + "/../../../shaders";
+#if defined(CC_MAC_DEV_PATHS)
+	shaderPath = appPath + "../../../shaders";
 #else
 	shaderPath = appPath + "/Shaders";
 #endif

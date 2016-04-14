@@ -368,11 +368,13 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	if (m_numberOfProjectedPoints < pointCount)
 		m_thePointsAndTheirCellCodes.resize(m_numberOfProjectedPoints); //smaller --> should always be ok
 
-	if (progressCb)
+	if (progressCb && progressCb->textCanBeEdited())
+	{
 		progressCb->setInfo("Sorting cells...");
+	}
 
 	//we sort the 'cells' by ascending code order
-	std::sort(m_thePointsAndTheirCellCodes.begin(),m_thePointsAndTheirCellCodes.end(),IndexAndCode::codeComp);
+	std::sort(m_thePointsAndTheirCellCodes.begin(), m_thePointsAndTheirCellCodes.end(), IndexAndCode::codeComp);
 
 	//update the pre-computed 'number of cells per level of subdivision' array
 	updateCellCountTable();
@@ -380,22 +382,25 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	//end of process notification
 	if (progressCb)
 	{
-		progressCb->update(100.0f);
-
-		char buffer[256];
-		if (m_numberOfProjectedPoints == pointCount)
+		if (progressCb->textCanBeEdited())
 		{
-			sprintf(buffer,"[Octree::build] Octree successfully built... %u points (ok)!",m_numberOfProjectedPoints);
-		}
-		else
-		{
-			if (m_numberOfProjectedPoints == 0)
-				sprintf(buffer,"[Octree::build] Warning : no point projected in the Octree!");
+			char buffer[256];
+			if (m_numberOfProjectedPoints == pointCount)
+			{
+				sprintf(buffer, "[Octree::build] Octree successfully built... %u points (ok)!", m_numberOfProjectedPoints);
+			}
 			else
-				sprintf(buffer,"[Octree::build] Warning: some points have been filtered out (%u/%u)",pointCount-m_numberOfProjectedPoints,pointCount);
+			{
+				if (m_numberOfProjectedPoints == 0)
+					sprintf(buffer, "[Octree::build] Warning : no point projected in the Octree!");
+				else
+					sprintf(buffer, "[Octree::build] Warning: some points have been filtered out (%u/%u)", pointCount - m_numberOfProjectedPoints, pointCount);
+			}
+			progressCb->setInfo(buffer);
 		}
 
-		progressCb->setInfo(buffer);
+		//DGM: the dialog may close itself once we set the progress to 100% (hiding the above information!)
+		progressCb->update(100.0f);
 		progressCb->stop();
 	}
 
@@ -3230,7 +3235,10 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 		//TODO: display a message to make clear that the cancel order has been acknowledged!
 		if (s_progressCb_MT)
 		{
-			s_progressCb_MT->setInfo("Cancelling...");
+			if (s_progressCb_MT->textCanBeEdited())
+			{
+				s_progressCb_MT->setInfo("Cancelling...");
+			}
 			QApplication::processEvents();
 		}
 

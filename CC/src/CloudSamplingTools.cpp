@@ -222,7 +222,10 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 	NormalizedProgress normProgress(progressCb, pointsToRemove);
 	if (progressCb)
 	{
-		progressCb->setInfo("Random subsampling");
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setInfo("Random subsampling");
+		}
 		progressCb->update(0);
 		progressCb->start();
 	}

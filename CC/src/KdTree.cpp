@@ -64,9 +64,12 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 
     if (progressCb)
     {
-        progressCb->update(0);
-        progressCb->setInfo("Building KD-tree");
-        progressCb->start();
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setInfo("Building KD-tree");
+		}
+		progressCb->update(0);
+		progressCb->start();
     }
 
     m_root = buildSubTree(0, cloudsize-1, (KdCell*)0, m_cellCount, progressCb);

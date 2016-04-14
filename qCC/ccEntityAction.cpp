@@ -455,7 +455,10 @@ namespace ccEntityAction
 		if (!ok)
 			return false;
 		
-		for (size_t i=0; i<selNum; ++i)
+		ccProgressDialog pDlg(true, parent);
+		pDlg.setAutoClose(false);
+
+		for (size_t i = 0; i<selNum; ++i)
 		{
 			bool lockedVertices = false;
 			ccHObject* ent = selectedEntities[i];
@@ -493,7 +496,6 @@ namespace ccEntityAction
 				ccOctree::Shared octree = pc->getOctree();
 				if (!octree)
 				{
-					ccProgressDialog pDlg(true, parent);
 					octree = pc->computeOctree(&pDlg);
 					if (!octree)
 					{
@@ -504,7 +506,6 @@ namespace ccEntityAction
 				
 				if (octree)
 				{
-					ccProgressDialog pDlg(true, parent);
 					QElapsedTimer eTimer;
 					eTimer.start();
 					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
@@ -575,7 +576,10 @@ namespace ccEntityAction
 		sigma = dlg.doubleSpinBox1->value();
 		scalarFieldSigma = dlg.doubleSpinBox2->value();
 		
-		for (size_t i=0; i<selNum; ++i)
+		ccProgressDialog pDlg(true, parent);
+		pDlg.setAutoClose(false);
+
+		for (size_t i = 0; i<selNum; ++i)
 		{
 			bool lockedVertices = false;
 			ccHObject* ent = selectedEntities[i];
@@ -613,7 +617,6 @@ namespace ccEntityAction
 				ccOctree::Shared octree = pc->getOctree();
 				if (!octree)
 				{
-					ccProgressDialog pDlg(true, parent);
 					octree = pc->computeOctree(&pDlg);
 					if (!octree)
 					{
@@ -624,7 +627,6 @@ namespace ccEntityAction
 				
 				Q_ASSERT(octree != 0);
 				{
-					ccProgressDialog pDlg(true, parent);
 					QElapsedTimer eTimer;
 					eTimer.start();
 					
@@ -1145,8 +1147,6 @@ namespace ccEntityAction
 	
 	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent)
 	{
-		ccProgressDialog pDlg(false,parent);
-		
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)
 		{
@@ -1291,13 +1291,14 @@ namespace ccEntityAction
 			bool orientNormalsMST = ncDlg.useMSTOrientation();
 			int mstNeighbors = s_lastMSTNeighborCount = ncDlg.getMSTNeighborCount();
 			
+			ccProgressDialog pDlg(true, parent);
+			pDlg.setAutoClose(false);
+
 			size_t errors = 0;
 			for (size_t i=0; i<clouds.size(); i++)
 			{
 				ccPointCloud* cloud = clouds[i];
 				Q_ASSERT(cloud != nullptr);
-				
-				ccProgressDialog pDlg(true,parent);
 				
 				bool result = false;
 				bool orientNormalsForThisCloud = false;
@@ -1474,8 +1475,9 @@ namespace ccEntityAction
 		
 		unsigned char level = static_cast<unsigned char>(value);
 		
-		ccProgressDialog pDlg(false,parent);
-		
+		ccProgressDialog pDlg(false, parent);
+		pDlg.setAutoClose(false);
+
 		size_t errors = 0;
 		for (size_t i=0; i<selectedEntities.size(); i++)
 		{
@@ -1536,7 +1538,8 @@ namespace ccEntityAction
 		
 		s_defaultKNN = kNN;
 		
-		ccProgressDialog pDlg(true,parent);
+		ccProgressDialog pDlg(true, parent);
+		pDlg.setAutoClose(false);
 		
 		size_t errors = 0;
 		for (size_t i=0; i<selectedEntities.size(); i++)
@@ -1738,6 +1741,7 @@ namespace ccEntityAction
 			return false;
 
 		ccProgressDialog pDlg(true, parent);
+		pDlg.setAutoClose(false);
 
 		//if we must use a custom bounding box, we update 'bbox'
 		if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
@@ -1961,14 +1965,16 @@ namespace ccEntityAction
 	
 	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
-		ccPickOneElementDlg pDlg("Distribution","Choose distribution",parent);
-		pDlg.addElement("Gauss");
-		pDlg.addElement("Weibull");
-		pDlg.setDefaultIndex(0);
-		if (!pDlg.exec())
+		ccPickOneElementDlg poeDlg("Distribution","Choose distribution",parent);
+		poeDlg.addElement("Gauss");
+		poeDlg.addElement("Weibull");
+		poeDlg.setDefaultIndex(0);
+		if (!poeDlg.exec())
+		{
 			return false;
+		}
 		
-		int distribIndex = pDlg.getSelectedIndex();
+		int distribIndex = poeDlg.getSelectedIndex();
 		
 		ccStatisticalTestDlg* sDlg = nullptr;
 		switch (distribIndex)
@@ -2017,6 +2023,9 @@ namespace ccEntityAction
 		const double pChi2 = sDlg->getProba();
 		const int nn = sDlg->getNeighborsNumber();
 		
+		ccProgressDialog pDlg(true, parent);
+		pDlg.setAutoClose(false);
+		
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)
 		{
@@ -2058,7 +2067,6 @@ namespace ccEntityAction
 			ccOctree::Shared theOctree = pc->getOctree();
 			if (!theOctree)
 			{
-				ccProgressDialog pDlg(true, parent);
 				theOctree = pc->computeOctree(&pDlg);
 				if (!theOctree)
 				{
@@ -2066,8 +2074,6 @@ namespace ccEntityAction
 					break;
 				}
 			}
-			
-			ccProgressDialog pDlg(true,parent);
 			
 			QElapsedTimer eTimer;
 			eTimer.start();

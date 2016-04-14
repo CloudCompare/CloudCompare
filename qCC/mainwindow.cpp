@@ -1063,7 +1063,7 @@ void MainWindow::doActionComputeKdTree()
 	if (!ok)
 		return;
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
 
 	//computation
 	QElapsedTimer eTimer;
@@ -1115,7 +1115,9 @@ void MainWindow::doActionResampleWithOctree()
 	if (!ok)
 		return;
 
-	ccProgressDialog pDlg(false,this);
+	ccProgressDialog pDlg(false, this);
+	pDlg.setAutoClose(false);
+
 	assert(pointCount > 0);
 	unsigned aimedPoints = static_cast<unsigned>(pointCount);
 
@@ -2820,7 +2822,8 @@ void MainWindow::doActionSamplePoints()
 	if (!dlg.exec())
 		return;
 
-	ccProgressDialog pDlg(false,this);
+	ccProgressDialog pDlg(false, this);
+	pDlg.setAutoClose(false);
 
 	bool withNormals = dlg.generateNormals();
 	bool withRGB = dlg.interpolateRGB();
@@ -2892,7 +2895,10 @@ void MainWindow::doRemoveDuplicatePoints()
 
 	static const char DEFAULT_DUPLICATE_TEMP_SF_NAME[] = "DuplicateFlags";
 
-	for (size_t i=0; i<selNum; ++i)
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
+	for (size_t i = 0; i<selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 
@@ -2912,7 +2918,6 @@ void MainWindow::doRemoveDuplicatePoints()
 			}
 
 			ccOctree::Shared octree = cloud->getOctree();
-			ccProgressDialog pDlg(true,this);
 
 			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(	cloud,
 																				minDistanceBetweenPoints,
@@ -3265,7 +3270,8 @@ void MainWindow::doActionSubdivideMesh()
 	if (!ok)
 		return;
 
-	//ccProgressDialog pDlg(true,this);
+	//ccProgressDialog pDlg(true, this);
+	//pDlg.setAutoClose(false);
 
 	size_t selNum = m_selectedEntities.size();
 	for (size_t i=0; i<selNum; ++i)
@@ -3324,7 +3330,8 @@ void MainWindow::doActionSmoothMeshLaplacian()
 	if (!ok)
 		return;
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
 
 	size_t selNum = m_selectedEntities.size();
 	for (size_t i=0; i<selNum; ++i)
@@ -3854,7 +3861,7 @@ void MainWindow::doAction4pcsRegister()
 
 	unsigned nbMaxCandidates = aDlg.isNumberOfCandidatesLimited() ? aDlg.getMaxNumberOfCandidates() : 0;
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
 
 	CCLib::PointProjectionTools::Transformation transform;
 	if (CCLib::FPCSRegistrationTools::RegisterClouds(	subModel,
@@ -3954,7 +3961,9 @@ void MainWindow::doActionSubsample()
 	//process clouds
 	ccHObject::Container resultingClouds;
 	{
-		ccProgressDialog pDlg(false,this);
+		ccProgressDialog pDlg(false, this);
+		pDlg.setAutoClose(false);
+
 		pDlg.setMethodTitle(tr("Subsampling"));
 
 		bool errors = false;
@@ -4195,7 +4204,8 @@ void MainWindow::doActionLabelConnectedComponents()
 	int minComponentSize = dlg.getMinPointsNb();
 	bool randColors = dlg.randomColors();
 
-	ccProgressDialog pDlg(false,this);
+	ccProgressDialog pDlg(false, this);
+	pDlg.setAutoClose(false);
 
 	//we unselect all entities as we are going to automatically select the created components
 	//(otherwise the user won't percieve the change!)
@@ -4213,8 +4223,8 @@ void MainWindow::doActionLabelConnectedComponents()
 			ccOctree::Shared theOctree = cloud->getOctree();
 			if (!theOctree)
 			{
-				ccProgressDialog pDlg(true, this);
-				theOctree = cloud->computeOctree(&pDlg);
+				ccProgressDialog pOctreeDlg(true, this);
+				theOctree = cloud->computeOctree(&pOctreeDlg);
 				if (!theOctree)
 				{
 					ccConsole::Error(QString("Couldn't compute octree for cloud '%s'!").arg(cloud->getName()));
@@ -4685,6 +4695,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	}
 
 	ccProgressDialog pDlg(false, this);
+	pDlg.setAutoClose(false);
 	pDlg.setWindowTitle(tr("Triangulation"));
 	pDlg.setInfo(tr("Triangulation in progress..."));
 	pDlg.setRange(0, 0);
@@ -4836,6 +4847,9 @@ void MainWindow::doActionComputeDistanceMap()
 		range[1] = ui.maxDistDoubleSpinBox->value();
 	}
 
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
 	size_t selNum = m_selectedEntities.size();
 	for (size_t i = 0; i < selNum; ++i)
 	{
@@ -4859,8 +4873,6 @@ void MainWindow::doActionComputeDistanceMap()
 		PointCoordinateType largestDim = box.getMaxBoxDim() + static_cast<PointCoordinateType>(margin);
 		PointCoordinateType cellDim = largestDim / steps;
 		CCVector3 minCorner = box.getCenter() - CCVector3(1, 1, 1) * (largestDim / 2);
-
-		ccProgressDialog pDlg(true, this);
 
 		bool result = false;
 		if (ent->isKindOf(CC_TYPES::MESH))
@@ -5104,7 +5116,7 @@ void MainWindow::doActionComputeCPS()
 	//cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
 
 	CCLib::ReferenceCloud CPSet(srcCloud);
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
 	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 	params.CPSet = &CPSet;
 	int result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(compCloud,srcCloud,params,&pDlg);
@@ -5323,7 +5335,8 @@ void MainWindow::doActionSORFilter()
 	s_sorFilterKnn = sorDlg.knnSpinBox->value();
 	s_sorFilterNSigma = sorDlg.nSigmaDoubleSpinBox->value();
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
 
 	size_t selNum = m_selectedEntities.size();
 	bool firstCloud = true;
@@ -5334,7 +5347,7 @@ void MainWindow::doActionSORFilter()
 
 		//specific test for locked vertices
 		bool lockedVertices;
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 		if (cloud && lockedVertices)
 		{
 			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
@@ -5432,7 +5445,8 @@ void MainWindow::doActionFilterNoise()
 	s_noiseFilterAbsError = noiseDlg.absErrorDoubleSpinBox->value();
 	s_noiseFilterRemoveIsolatedPoints = noiseDlg.removeIsolatedPointsCheckBox->isChecked();
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
 
 	size_t selNum = m_selectedEntities.size();
 	bool firstCloud = true;
@@ -5540,7 +5554,7 @@ void MainWindow::doActionUnroll()
 	int mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
 	double angle = unrollDlg.getAngle();
-	unsigned char dim = (unsigned char)unrollDlg.getAxisDimension();
+	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
 	CCVector3* pCenter = 0;
 	CCVector3 center;
 	if (mode == 1 || !unrollDlg.isAxisPositionAuto())
@@ -5550,12 +5564,12 @@ void MainWindow::doActionUnroll()
 	}
 
 	//We apply unrolling method
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
 
 	if (mode == 0)
-		pc->unrollOnCylinder(radius,pCenter,dim,(CCLib::GenericProgressCallback*)&pDlg);
+		pc->unrollOnCylinder(radius, pCenter, dim, (CCLib::GenericProgressCallback*)&pDlg);
 	else if (mode == 1)
-		pc->unrollOnCone(radius,angle,center,dim,(CCLib::GenericProgressCallback*)&pDlg);
+		pc->unrollOnCone(radius, angle, center, dim, (CCLib::GenericProgressCallback*)&pDlg);
 	else
 		assert(false);
 
@@ -7704,8 +7718,10 @@ void MainWindow::doActionFitSphere()
 	double outliersRatio = 0.5;
 	double confidence = 0.99;
 
-	ccProgressDialog pDlg(true,this);
-	for (size_t i=0; i<selNum; ++i)
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
+	for (size_t i = 0; i<selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 
@@ -7990,7 +8006,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	//reset scalar field
 	cloud->getScalarField(sfIdx)->fill(NAN_VALUE);
 
-	ccProgressDialog pDlg(true,this);
+	ccProgressDialog pDlg(true, this);
 	ccOctree::Shared octree = cloud->computeOctree(&pDlg);
 	if (octree)
 	{
@@ -8175,7 +8191,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 
 	//let's start!
 	{
-		ccProgressDialog pDlg(true,this);
+		ccProgressDialog pDlg(true, this);
 		pDlg.setMethodTitle(tr("Testing all possible positions"));
 		pDlg.setInfo(tr("%1 clouds and %2 positions").arg(cloudCount).arg(matrices.size()));
 		CCLib::NormalizedProgress nProgress(&pDlg, static_cast<unsigned>(((cloudCount*(cloudCount - 1)) / 2)*matrices.size()));

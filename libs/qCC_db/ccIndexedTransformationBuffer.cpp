@@ -17,6 +17,8 @@
 
 #include "ccIndexedTransformationBuffer.h"
 
+//CCLib
+#include <SortAlgo.h>
 
 ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
 	: ccHObject(name)
@@ -58,7 +60,7 @@ static bool IndexCompOperator(const ccIndexedTransformation& a, double index)
 
 void ccIndexedTransformationBuffer::sort()
 {
-	std::sort(begin(), end(), IndexedSortOperator);
+	SortAlgo(begin(), end(), IndexedSortOperator);
 }
 
 bool ccIndexedTransformationBuffer::findNearest(double index,

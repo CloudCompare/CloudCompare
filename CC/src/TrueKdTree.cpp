@@ -21,6 +21,7 @@
 #include "GenericProgressCallback.h"
 #include "GenericIndexedCloudPersist.h"
 #include "Neighbourhood.h"
+#include "SortAlgo.h"
 
 //system
 #include <algorithm>
@@ -162,7 +163,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		const CCVector3* P = subset->getPoint(i);
 		s_sortedCoordsForSplit[i] = P->u[splitDim];
 	}
-	std::sort(s_sortedCoordsForSplit.begin(),s_sortedCoordsForSplit.begin()+count);
+	SortAlgo(s_sortedCoordsForSplit.begin(), s_sortedCoordsForSplit.begin() + count);
 
 	unsigned splitCount = count/2;
 	assert(splitCount >= 3); //count >= 6 (see above)

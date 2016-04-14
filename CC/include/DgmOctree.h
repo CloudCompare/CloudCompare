@@ -343,7 +343,19 @@ public:
 		{
 		}
 
-		//! Code-based comparison operator
+		//! Code-based 'less than' comparison operator
+		inline bool operator < (const IndexAndCode& iac) const
+		{
+			return theCode < iac.theCode;
+		}
+
+		//! Code-based 'greater than' comparison operator
+		inline bool operator > (const IndexAndCode& iac) const
+		{
+			return theCode > iac.theCode;
+		}
+
+		//! Compares two IndexAndCode instances based on their code
 		/** \param a first IndexAndCode structure
 			\param b second IndexAndCode structure
 			\return whether the code of 'a' is smaller than the code of 'b'
@@ -353,7 +365,7 @@ public:
 			return a.theCode < b.theCode;
 		}
 
-		//! Index-based comparison operator
+		//! Compares two IndexAndCode instances based on their index
 		/** \param a first IndexAndCode structure
 			\param b second IndexAndCode structure
 			\return whether the index of 'a' is smaller than the index of 'b'

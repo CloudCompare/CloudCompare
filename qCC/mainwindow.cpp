@@ -27,6 +27,7 @@
 #include <SimpleCloud.h>
 #include <Delaunay2dMesh.h>
 #include <Jacobi.h>
+#include <SortAlgo.h>
 
 //for tests
 #include <ChamferDistanceTransform.h>
@@ -4090,7 +4091,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 				sortedIndexes.push_back(ComponentIndexAndSize(i,components[i]->size()));
 			}
 
-			std::sort(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
+			SortAlgo(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
 			_sortedIndexes = &sortedIndexes;
 		}
 	}

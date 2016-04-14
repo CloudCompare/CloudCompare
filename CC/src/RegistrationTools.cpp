@@ -36,6 +36,7 @@
 #include "ChunkedPointCloud.h"
 #include "Garbage.h"
 #include "Jacobi.h"
+#include "SortAlgo.h"
 
 //system
 #include <time.h>
@@ -484,7 +485,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 				overlapDistances[i] = data.cloud->getPointScalarValue(i);
 				assert(overlapDistances[i] == overlapDistances[i]);
 			}
-			std::sort(overlapDistances.begin(), overlapDistances.begin() + pointCount);
+			SortAlgo(overlapDistances.begin(), overlapDistances.begin() + pointCount);
 
 			assert(maxOverlapCount != 0);
 			ScalarType maxOverlapDist = overlapDistances[maxOverlapCount-1];

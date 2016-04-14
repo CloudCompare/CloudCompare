@@ -850,19 +850,20 @@ protected: //other methods
 	void wheelEvent(QWheelEvent *event) override;
 	bool event(QEvent* evt) override;
 
-	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-	virtual void dropEvent(QDropEvent* event) override;
-
 	bool initialize();
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	void resizeGL(int w, int h);
 	void paintGL();
+	virtual void dragEnterEvent(QDragEnterEvent* event);
+	virtual void dropEvent(QDropEvent* event);
 #else
 	void initializeGL() override { initialize(); }
 	void resizeGL(int w, int h) override;
 	void paintGL() override;
 	GLuint defaultQtFBO() const;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 #endif
 
 	//Graphical features controls

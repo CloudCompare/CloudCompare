@@ -17,6 +17,9 @@
 
 #include "kdTreeForFacetExtraction.h"
 
+//CCLib
+#include <SortAlgo.h>
+
 //qCC_db
 #include <ccPointCloud.h>
 
@@ -93,7 +96,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	ccPointCloud* pc = static_cast<ccPointCloud*>(associatedGenericCloud);
 
 	//sort cells based on their population size (we start by the biggest ones)
-	std::sort(leaves.begin(),leaves.end(),DescendingLeafSizeComparison);
+	SortAlgo(leaves.begin(), leaves.end(), DescendingLeafSizeComparison);
 
 	//set all 'userData' to -1 (i.e. unfused cells)
 	{

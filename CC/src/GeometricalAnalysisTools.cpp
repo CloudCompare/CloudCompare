@@ -982,7 +982,7 @@ bool GeometricalAnalysisTools::detectSphereRobust(	GenericIndexedCloudPersist* c
 			PointCoordinateType error = (*cloud->getPoint(i) - thisCenter).norm() - thisRadius;
 			values[i] = error*error;
 		}
-		std::sort(values.begin(),values.end());
+		std::sort(values.begin(), values.end());
 
 		//the error is the median of the squared residuals
 		double error = values[n/2];

@@ -24,7 +24,7 @@ if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
 endif()
 
 qt5_wrap_ui( generated_ui_list ${ui_list} )
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} )
+add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
 
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )

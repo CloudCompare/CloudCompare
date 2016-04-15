@@ -120,15 +120,12 @@ int main(int argc, char *argv[])
 	}
 
 	ccApplication a(argc, argv);
-	
-	//Force 'english' local so as to get a consistent behavior everywhere
-	QLocale::setDefault(QLocale::English);
 
 	// We reset the numeric locale.
 	// See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
-	QLocale locale = QLocale::system();
-	locale.setNumberOptions( QLocale::c().numberOptions() );
-	QLocale::setDefault( locale );
+#ifdef Q_OS_UNIX
+	setlocale(LC_NUMERIC, "C");
+#endif
 
 #ifdef USE_VLD
 	VLDEnable();

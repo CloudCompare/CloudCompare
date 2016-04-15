@@ -124,15 +124,11 @@ int main(int argc, char **argv)
 	//QT initialiation
 	qccApplication app(argc, argv);
 
-	//Force 'english' local so as to get a consistent behavior everywhere
-	//QLocale::setDefault(QLocale::English); //DGM: useless? (see below)
-
 	// We reset the numeric locale.
 	// See http://qt-project.org/doc/qt-5/qcoreapplication.html#locale-settings
-	QLocale locale = QLocale::system();
-	locale.setNumberOptions( QLocale::c().numberOptions() );
-	QLocale::setDefault( locale );
-
+#ifdef Q_OS_LINUX
+	setlocale(LC_NUMERIC, "C");
+#endif
 #ifdef USE_VLD
 	VLDEnable();
 #endif
@@ -195,7 +191,7 @@ int main(int argc, char **argv)
 	//command line mode
 	if (!commandLine)
 	{
-		//DGM FIXME: do the same with Qt 5 + reject if Qt version is < 2.1
+		//DGM FIXME: do the same with Qt 5 + reject if OpenGL version is < 2.1
 		//if (!QGLFormat::hasOpenGL())
 		//{
 		//	QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");

@@ -1,4 +1,4 @@
-CloudCompare v2.6
+CloudCompare v2.7
 =================
 
 Homepage: http://www.cloudcompare.org/
@@ -9,10 +9,10 @@ Introduction
 ------------
 
 CloudCompare is a 3D point cloud (and triangular mesh) processing software.
-It has been originally designed to perform comparison between two 3D points clouds
+It was originally designed to perform comparison between two 3D points clouds
 (such as the ones obtained with a laser scanner) or between a point cloud and a
-triangular mesh. It relies on a specific octree structure that enables great
-performances in this particular function. It was also meant to deal with huge point
+triangular mesh. It relies on an octree structure that is highly optimized for
+this particular use-case. It was also meant to deal with huge point
 clouds (typically more than 10 millions points, and up to 120 millions with 2 Gb
 of memory).
 
@@ -21,7 +21,7 @@ More on CloudCompare [here](http://en.wikipedia.org/wiki/CloudCompare)
 Compilation
 -----------
 
-Supported OS: Windows, Linux and Mac OS X
+Supported OS: Windows, Linux, and Mac OS X
 
 Refer to the [BUILD.md file](BUILD.md) for up-to-date information.
 
@@ -47,4 +47,3 @@ Thanks!
 <a href='https://pledgie.com/campaigns/19052'>
     <img alt='Click here to lend your support to: CloudCompare and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/19052.png?skin_name=chrome' border='0'>
 </a>
-

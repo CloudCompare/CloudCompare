@@ -1,5 +1,5 @@
-CloudCompare v2.7
-=================
+CloudCompare
+============
 
 Homepage: http://www.cloudcompare.org/
 

@@ -46,6 +46,8 @@ v2.7.0 - 04/XX/2016
 	* The HSV to RGB method was broken
 	* The 'Convert normals to HSV colors' mehod doesn't rely on the Dip / Dip direction anymore as the way these values
 		are computed have been changed recently (with a symmetry about the plane Z = 0)
+	* When playing with the 'skip lines' parameter of the ASCII file loading dialog, the roles assignments could be cleared
+		(when a line was reappearing while it had less elements than the other lines)
 
 v2.6.3.1 - 03/XX/2016
 

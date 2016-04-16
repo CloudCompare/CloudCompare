@@ -36,7 +36,25 @@
        </item>
        <item>
         <property name="text">
+         <string>Blue-Red</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Red-Cyan</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icones.qrc">
+          <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cyan-Red</string>
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">

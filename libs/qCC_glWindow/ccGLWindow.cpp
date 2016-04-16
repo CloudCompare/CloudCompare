@@ -1816,24 +1816,35 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
 			//change color filter
+			static GLboolean RED[3]  = { GL_TRUE, GL_FALSE, GL_FALSE };
+			static GLboolean BLUE[3] = { GL_FALSE, GL_FALSE, GL_TRUE };
+			static GLboolean CYAN[3] = { GL_FALSE, GL_TRUE, GL_TRUE };
+			const GLboolean* RGB = 0;
 			switch (m_stereoParams.glassType)
 			{
 			case StereoParams::RED_BLUE:
-				if (renderingParams.passIndex == 0)
-					glFunc->glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
-				else
-					glFunc->glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_TRUE);
+				RGB = (renderingParams.passIndex == 0 ? RED : BLUE);
+				break;
+			
+			case StereoParams::BLUE_RED:
+				RGB = (renderingParams.passIndex == 0 ? BLUE : RED);
 				break;
 
 			case StereoParams::RED_CYAN:
-				if (renderingParams.passIndex == 0)
-					glFunc->glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
-				else
-					glFunc->glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+				RGB = (renderingParams.passIndex == 0 ? RED : CYAN);
+				break;
+
+			case StereoParams::CYAN_RED:
+				RGB = (renderingParams.passIndex == 0 ? CYAN : RED);
 				break;
 
 			default:
 				assert(false);
+			}
+
+			if (RGB)
+			{
+				glFunc->glColorMask(RGB[0], RGB[1], RGB[2], GL_TRUE);
 			}
 		}
 

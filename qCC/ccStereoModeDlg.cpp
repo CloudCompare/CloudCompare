@@ -22,9 +22,11 @@
 
 //combo-box items order
 const int COMBO_INDEX_RED_BLUE  = 0;
-const int COMBO_INDEX_RED_CYAN  = 1;
-const int COMBO_INDEX_NV_VISION = 2;
-const int COMBO_INDEX_OCULUS    = 3;
+const int COMBO_INDEX_BLUE_RED  = 1;
+const int COMBO_INDEX_RED_CYAN  = 2;
+const int COMBO_INDEX_CYAN_RED  = 3;
+const int COMBO_INDEX_NV_VISION = 4;
+const int COMBO_INDEX_OCULUS    = 5;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
@@ -43,6 +45,8 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 	{
 	case COMBO_INDEX_RED_BLUE:
 	case COMBO_INDEX_RED_CYAN:
+	case COMBO_INDEX_BLUE_RED:
+	case COMBO_INDEX_CYAN_RED:
 		paramsGroupBox->setEnabled(true);
 		warningTextEdit->setVisible(false);
 		break;
@@ -90,9 +94,15 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	case COMBO_INDEX_RED_BLUE:
 		params.glassType = ccGLWindow::StereoParams::RED_BLUE;
 		break;
+	case COMBO_INDEX_BLUE_RED:
+		params.glassType = ccGLWindow::StereoParams::BLUE_RED;
+		break;
 	case COMBO_INDEX_RED_CYAN:
 	default:
 		params.glassType = ccGLWindow::StereoParams::RED_CYAN;
+		break;
+	case COMBO_INDEX_CYAN_RED:
+		params.glassType = ccGLWindow::StereoParams::CYAN_RED;
 		break;
 	case COMBO_INDEX_NV_VISION:
 		params.glassType = ccGLWindow::StereoParams::NVIDIA_VISION;
@@ -120,8 +130,14 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 	case ccGLWindow::StereoParams::RED_BLUE:
 		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_BLUE);
 		break;
+	case ccGLWindow::StereoParams::BLUE_RED:
+		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_BLUE_RED);
+		break;
 	case ccGLWindow::StereoParams::RED_CYAN:
 		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_CYAN);
+		break;
+	case ccGLWindow::StereoParams::CYAN_RED:
+		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_CYAN_RED);
 		break;
 	case ccGLWindow::StereoParams::NVIDIA_VISION:
 		glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);

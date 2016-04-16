@@ -253,24 +253,24 @@ namespace ccColor
 		}
 
 	protected:
-		
+
 		//! Method used by hsl2rgb
 		static float hue2rgb(float m1, float m2, float hue)
 		{
 			if (hue < 0)
 				hue += 1.0f;
-            else if (hue > 1.0f)
+			else if (hue > 1.0f)
 				hue -= 1.0f;
 
-			if (6*hue < 1.0f)
+			if (6 * hue < 1.0f)
 				return m1 + (m2 - m1) * hue * 6;
-            else if (2 * hue < 1.0f)
+			else if (2 * hue < 1.0f)
 				return m2;
-            else if (3 * hue < 2.0f)
+			else if (3 * hue < 2.0f)
 				return m1 + (m2 - m1) * (4.0f - hue * 6);
 			else
 				return m1;
-        }
+		}
 
 
 	};

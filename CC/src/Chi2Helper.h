@@ -1,22 +1,19 @@
-//############################################################################
-//#                                                                          #
-//#                            CLOUDCOMPARE                                  #
-//#                                                                          #
-//#  AUTEUR   : Daniel Girardeau-Montaut, doctorant (2003-2006)              #
-//#  COPYRIGHT 2006 : EDF R&D / TELECOM PARISTECH (TSI)                      #
-//#                                                                          #
-//#  ATTENTION, CE CODE CORRESPOND A L'IMPLEMENTATION D'ALGORITHMES ET       #
-//#  DE TRAITEMENTS SPECIFIQUES DE DONNEES DEVELOPPEES DANS LE CADRE         #
-//#  D'UNE THESE (CONVENTION CIFRE) FINANCEE PAR EDF R&D ET ENCADREE PAR     #
-//#  TELCOM PARISTECH (LABORATOIRE TSI). SA CONSULTATION ET SON UTILISATION  #
-//#  SONT LIMITEES AUX SEULES PERSONNES AUTORISEES D'EDF R&D ET TELECOM      #
-//#  PARISTECH. DE PLUS, SA DIFFUSION EST FORTEMENT DECONSEILLEE ETANT DONNE #
-//#  SON CARACTERE EXPERIMENTAL ET PARFOIS INCOMPLET. CE N'EST QU'UN PRO-    #
-//#  TOTYPE ATTENDANT UNE STRUCTURATION ET UNE INSTRUMENTATION PROPRE,       #
-//#  EN PARTICULIER AU NIVEAU DU MODELE OBJET ET DE LA DOCUMENTATION.        #
-//#  LE COMPORTEMENT DES ALGORITHMES N'EST PAS GARANTI EN L'ETAT.            #
-//#                                                                          #
-//############################################################################
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
 
 #ifndef CHI2_HELPER_HEADER
 #define CHI2_HELPER_HEADER
@@ -24,13 +21,20 @@
 //system
 #include <math.h>
 
+#ifndef LOG_SQRT_PI
+#define LOG_SQRT_PI 0.5723649429247000870717135 /* log(sqrt(pi)) */
+#endif
+#ifndef I_SQRT_PI
+#define I_SQRT_PI 0.5641895835477562869480795   /* 1 / sqrt(pi) */
+#endif
+
 //! Package of methods to compute Chi2 related stuff
 /**  The following JavaScript functions for calculating normal and
-chi-square probabilities and critical values were adapted by
-John Walker from C implementations
-written by Gary Perlman of Wang Institute, Tyngsboro, MA
-01879.  Both the original C code and this JavaScript edition
-are in the public domain.
+	chi-square probabilities and critical values were adapted by
+	John Walker from C implementations
+	written by Gary Perlman of Wang Institute, Tyngsboro, MA
+	01879.  Both the original C code and this JavaScript edition
+	are in the public domain.
 **/
 class Chi2Helper
 {
@@ -88,20 +92,13 @@ public:
 
 	//! Probability of chi-square value
 	/** Adapted from:
-	Hill, I. D. and Pike, M. C.  Algorithm 299
-	Collected Algorithms for the CACM 1967 p. 243
-	Updated for rounding errors based on remark in
-	ACM TOMS June 1985, page 185
+		Hill, I. D. and Pike, M. C.  Algorithm 299
+		Collected Algorithms for the CACM 1967 p. 243
+		Updated for rounding errors based on remark in
+		ACM TOMS June 1985, page 185
 	**/
 	static double pochisq(double x, int df)
 	{
-#ifndef LOG_SQRT_PI
-#define LOG_SQRT_PI 0.5723649429247000870717135 /* log(sqrt(pi)) */
-#endif
-#ifndef I_SQRT_PI
-#define I_SQRT_PI 0.5641895835477562869480795   /* 1 / sqrt(pi) */
-#endif
-
 		if (x <= 0.0 || df < 1)
 			return 1.0;
 
@@ -145,12 +142,12 @@ public:
 
 	//! Compute critical chi-square value toproduce given p.
 	/** We just do a bisection search for a value within CHI_EPSILON,
-	relying on the monotonicity of pochisq().
+		relying on the monotonicity of pochisq().
 	**/
 	static double critchi(double p, int df)
 	{
-		double CHI_EPSILON = 0.000001;   /* Accuracy of critchi approximation */
-		double CHI_MAX = 99999.0;        /* Maximum chi-square value */
+		double CHI_EPSILON = 0.000001;	/* Accuracy of critchi approximation */
+		double CHI_MAX = 99999.0;		/* Maximum chi-square value */
 		double minchisq = 0.0;
 		double maxchisq = CHI_MAX;
 		double chisqval;

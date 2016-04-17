@@ -470,11 +470,11 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	return sampledCloud;
 }
 
-ReferenceCloud* CloudSamplingTools::sorFilter(GenericIndexedCloudPersist* inputCloud,
-											  int knn/*=6*/,
-											  double nSigma/*=1.0*/,
-											  DgmOctree* inputOctree/*=0*/,
-											  GenericProgressCallback* progressCb/*=0*/)
+ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* inputCloud,
+												int knn/*=6*/,
+												double nSigma/*=1.0*/,
+												DgmOctree* inputOctree/*=0*/,
+												GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!inputCloud || knn <= 0 || inputCloud->size() <= static_cast<unsigned>(knn))
 	{
@@ -528,7 +528,7 @@ ReferenceCloud* CloudSamplingTools::sorFilter(GenericIndexedCloudPersist* inputC
 															additionalParameters,
 															true,
 															progressCb,
-															"SOR filter" ) == 0)
+															"SOR filter") == 0)
 			{
 				//something went wrong
 				break;

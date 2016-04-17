@@ -29,7 +29,6 @@
 //Local
 #include "ccNormalVectors.h"
 #include "ccColorScale.h"
-#include "ccPointCloudLOD.h"
 
 //Qt
 #include <QGLBuffer>
@@ -39,6 +38,7 @@ class ccScalarField;
 class ccPolyline;
 class QGLBuffer;
 class ccProgressDialog;
+class ccPointCloudLOD;
 
 //! Maximum number of points (per cloud) displayed in a single LOD iteration
 /** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
@@ -756,15 +756,12 @@ public: //Level of Detail (LOD)
 	bool initLOD();
 
 	//! Clears the LOD structure
-	inline void clearLOD() { m_lod.clear(); }
+	void clearLOD();
 
-	//! Returns the LOD structure
-	inline ccPointCloudLOD& getLOD() { return m_lod; }
-
-protected:
+protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
-	ccPointCloudLOD m_lod;
+	ccPointCloudLOD* m_lod;
 };
 
 #endif //CC_POINT_CLOUD_HEADER

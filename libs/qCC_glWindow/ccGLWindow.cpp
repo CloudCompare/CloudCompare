@@ -1517,12 +1517,12 @@ void ccGLWindow::paintGL()
 				qint64 displayTime_ms = m_timer.elapsed() - startTime_ms;
 				//we try to refresh LOD levels at a regular pace
 				qint64 baseLODRefreshTime_ms = 50;
-				if (CONTEXT.currentLODStartIndex == 0)
-				{
-					baseLODRefreshTime_ms = 250;
-					if (m_currentLODState.level > CONTEXT.minLODLevel)
-						baseLODRefreshTime_ms /= (m_currentLODState.level - CONTEXT.minLODLevel + 1);
-				}
+				//if (CONTEXT.currentLODStartIndex == 0)
+				//{
+				//	baseLODRefreshTime_ms = 250;
+				//	if (m_currentLODState.level > CONTEXT.minLODLevel)
+				//		baseLODRefreshTime_ms /= (m_currentLODState.level - CONTEXT.minLODLevel + 1);
+				//}
 
 				m_LODPendingRefresh = true;
 				m_LODPendingIgnore = false;
@@ -2248,17 +2248,17 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 			renderingParams.nextLODState = m_currentLODState;
 
 			//we skip the lowest levels (they should have already been drawn anyway)
-			if (m_currentLODState.level == 0)
-			{
-				renderingParams.nextLODState.level = CONTEXT.minLODLevel;
-				renderingParams.nextLODState.startIndex = 0;
-			}
-			else
+			//if (m_currentLODState.level == 0)
+			//{
+			//	renderingParams.nextLODState.level = CONTEXT.minLODLevel;
+			//	renderingParams.nextLODState.startIndex = 0;
+			//}
+			//else
 			{
 				if (CONTEXT.moreLODPointsAvailable)
 				{
 					//either we increase the start index
-					renderingParams.nextLODState.startIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+					//renderingParams.nextLODState.startIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
 				}
 				else
 				{
@@ -3309,12 +3309,13 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.higherLODLevelsAvailable = false;
 	CONTEXT.moreLODPointsAvailable = false;
 	CONTEXT.currentLODLevel = 0;
-	CONTEXT.minLODLevel = 0;
+	CONTEXT.minLODLevel = 1;
 	if (guiParams.decimateCloudOnMove)
 	{
 		//we automatically deduce the minimal octree level for decimation
-		//(we make the hypothesis that couds are filling a (flat) 'square' portion of the octree (and not 'cubical'))
-		CONTEXT.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000, guiParams.minLoDCloudSize))) / (2 * log(2.0)));
+		//(we make the hypothesis that clouds are filling a (flat) 'square' portion of the octree (and not 'cubical'))
+		//CONTEXT.minLODLevel = static_cast<unsigned>(log(static_cast<double>(std::max<unsigned>(1000, guiParams.minLoDCloudSize))) / (2 * log(2.0)));
+		
 		//ccLog::Print(QString("CONTEXT.minLODLevel = %1").arg(CONTEXT.minLODLevel));
 		//just in case...
 		assert(CONTEXT.minLODLevel > 0);

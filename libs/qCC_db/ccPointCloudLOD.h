@@ -102,34 +102,34 @@ public:
 	//! Sets the maximum level
 	void setMaxLevel(unsigned char maxLevel);
 
+	//! Undefined visibility flag
 	static const unsigned char UNDEFINED = 255;
 	
+	//! Octree 'tree' node
 	struct Node
 	{
-		uint8_t					level;						//  1 byte
+		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
 		uint32_t				pointCount;					//  4 bytes
 		float					radius;						//  4 bytes
 		CCVector3f				center;						// 12 bytes
 		std::array<int32_t, 8>	childIndexes;				// 32 bytes
-		uint8_t					childCount;					//  1 byte
 		uint32_t				firstCodeIndex;				//  4 bytes
-
 		uint32_t				displayedPointCount;		//  4 bytes
+		uint8_t					level;						//  1 byte
+		uint8_t					childCount;					//  1 byte
 		uint8_t					intersection;				//  1 byte
 
-		//Total												// 63 bytes
+		//Total												// 63 bytes (64 with alignment)
 
-		uint8_t					dummy[1];					//  1 bytes
-		//Real total										// 64 bytes
-
+		//! Default constructor
 		Node(uint8_t _level = 0)
-			: level(_level)
-			, pointCount(0)
+			: pointCount(0)
 			, radius(0)
 			, center(0, 0, 0)
 			, firstCodeIndex(0)
-			, childCount(0)
 			, displayedPointCount(0)
+			, level(_level)
+			, childCount(0)
 			, intersection(UNDEFINED)
 		{
 			childIndexes.fill(-1);
@@ -152,18 +152,25 @@ public:
 
 	inline const Node& root() const { return node(0, 0); }
 
-	inline float maxRadius(unsigned char level) const
-	{
-		assert(level < m_levels.size());
-		return (level < m_levels.size() ? m_levels[level].maxRadius : 0);
-	}
+	//inline float maxRadius(unsigned char level) const
+	//{
+	//	assert(level < m_levels.size());
+	//	return (level < m_levels.size() ? m_levels[level].maxRadius : 0);
+	//}
 
+	//! Test all cells visibility with a given frustum
+	/** Automatically calls resetVisibility
+	**/
 	uint32_t flagVisibility(const Frustum& frustum);
 
-	LODIndexSet* getIndexMap(unsigned char depth, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);
+	//! Builds an index map with the remaining visible points
+	LODIndexSet* getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);
 
 	//! Returns whether all points have been displayed or not
-	inline bool allDisplayed() const { return m_displayedPoints >= m_visiblePoints; }
+	inline bool allDisplayed() const { return m_currentState.displayedPoints >= m_currentState.visiblePoints; }
+
+	//! Returns the memory used by the structure (in bytes)
+	size_t memory() const;
 
 protected: //methods
 
@@ -182,7 +189,7 @@ protected: //methods
 	void clearData();
 
 	//! Reserves a new cell at a given level
-	/** \return the new cell index
+	/** \return the new cell index in the array corresponding to this level (see m_levels)
 	**/
 	int32_t newCell(unsigned char level);
 
@@ -190,24 +197,26 @@ protected: //methods
 	void shrink_to_fit();
 
 	//! Updates the max radius per level FOR ALL CELLS
-	void updateMaxRadii();
+	//void updateMaxRadii();
 
 	//! Resets the internal visibility flags and returns the maximum accessible level
+	/** All nodes are flagged as 'INSIDE' (= visible) and their 'visibleCount' attribute is set to 0.
+	**/
 	unsigned char resetVisibility();
 
-	//! Displays a given number of points (should be dispatched among the children cells)
-	uint32_t displayNPoints(Node& node, uint32_t count);
+	//! Adds a given number of points to the active index map (should be dispatched among the children cells)
+	uint32_t addNPointsToIndexMap(Node& node, uint32_t count);
 
 protected: //members
 
 	struct Level
 	{
 		Level()
-			: maxRadius(0)
+			//: maxRadius(0)
 		{}
 		
 		std::vector<Node> data;
-		float maxRadius;
+		//float maxRadius;
 	};
 
 	//! Per-level cells data
@@ -216,14 +225,28 @@ protected: //members
 	//! Maximum level (ready)
 	unsigned char m_maxLevel;
 
-	//! Number of visible points (for the last visibility test)
-	uint32_t m_visiblePoints;
-	//! Number of already displayed points
-	uint32_t m_displayedPoints;
-	//! Previously unfinished level
-	int m_unfinishedLevel;
-	//! Previously unfinished level
-	unsigned m_unfinishedPoints;
+	//! Parameters of the current render state
+	struct RenderParams
+	{
+		RenderParams()
+			: visiblePoints(0)
+			, displayedPoints(0)
+			, unfinishedLevel(-1)
+			, unfinishedPoints(0)
+		{}
+
+		//! Number of visible points (for the last visibility test)
+		uint32_t visiblePoints;
+		//! Number of already displayed points
+		uint32_t displayedPoints;
+		//! Previously unfinished level
+		int unfinishedLevel;
+		//! Previously unfinished level
+		unsigned unfinishedPoints;
+	};
+
+	//! Current rendering state
+	RenderParams m_currentState;
 
 	//! Last index map
 	LODIndexSet* m_lastIndexMap;
@@ -277,7 +300,6 @@ public:
 		}
 
 		//go on with the display of the children first
-		bool hasChildren = false;
 		if (node.childCount && node.level < m_maxLevel)
 		{
 			for (int i = 0; i < 8; ++i)
@@ -286,12 +308,10 @@ public:
 				{
 					const ccPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
 					render(childNode, testVisibility);
-					hasChildren = true;
 				}
 			}
 		}
-
-		if (!hasChildren)
+		else
 		{
 			m_func(node);
 		}

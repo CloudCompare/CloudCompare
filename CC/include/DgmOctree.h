@@ -383,16 +383,20 @@ public:
 	//! Octree cell descriptor
 	struct octreeCell
 	{
+		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+
 		//! Octree to which the cell belongs
-		const DgmOctree* parentOctree;
-		//! Cell level of subdivision
-		unsigned char level;
+		const DgmOctree* parentOctree;												//8 bytes
 		//! Truncated cell code
-		CellCode truncatedCode;
+		CellCode truncatedCode;														//8 bytes
 		//! Cell index in octree structure (see m_thePointsAndTheirCellCodes)
-		unsigned index;
+		unsigned index;																//4 bytes
 		//! Set of points lying inside this cell
-		ReferenceCloud* points;
+		ReferenceCloud* points;														//8 bytes
+		//! Cell level of subdivision
+		unsigned char level;														//1 byte (+ 3 for alignment)
+
+		//Total																		//32 bytes (for 64 bits arch.)
 
 		//! Default constructor
 		explicit octreeCell(const DgmOctree* parentOctree);
@@ -1134,12 +1138,16 @@ protected:
 	//! Internal structure used to perform a top-down scan of the octree
 	struct octreeTopDownScanStruct
 	{
+		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+
 		//! Cell position inside subdivision level
-		unsigned pos;
+		unsigned pos;									//4 bytes
 		//! Number of points in cell
-		unsigned elements;
+		unsigned elements;								//4 bytes
 		//! Subdivision level
-		unsigned char level;
+		unsigned char level;							//1 byte (+ 3 for alignment)
+
+		//Total											//12 bytes
 	};
 
 	/********************************/

@@ -202,7 +202,7 @@ protected:
 		fillNode(m_lod.root());
 
 		m_lod.shrink_to_fit();
-		m_lod.updateMaxRadii();
+		//m_lod.updateMaxRadii();
 		m_lod.setMaxLevel(static_cast<unsigned char>(m_lod.m_levels.size()));
 
 		for (size_t i = 1; i < m_lod.m_levels.size(); ++i)
@@ -223,17 +223,17 @@ protected:
 			}
 
 			//update maxRadius for the previous level
-			{
-				float maxRadius = 0;
-				for (ccPointCloudLOD::Node& n : level.data)
-				{
-					if (n.radius > maxRadius)
-					{
-						maxRadius = n.radius;
-					}
-				}
-				level.maxRadius = maxRadius;
-			}
+			//{
+			//	float maxRadius = 0;
+			//	for (ccPointCloudLOD::Node& n : level.data)
+			//	{
+			//		if (n.radius > maxRadius)
+			//		{
+			//			maxRadius = n.radius;
+			//		}
+			//	}
+			//	level.maxRadius = maxRadius;
+			//}
 
 			//the previous level is now ready!
 			m_lod.setMaxLevel(currentLevel);
@@ -268,7 +268,11 @@ protected:
 
 		m_lod.setState(ccPointCloudLOD::INITIALIZED);
 
-		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / duration: %3 s.)").arg(m_cloud.getName()).arg(m_lod.maxLevel()).arg(timer.elapsed() / 1000.0,0,'f',1));
+		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / mem. = %3 Mb / duration: %4 s.)")
+			.arg(m_cloud.getName())
+			.arg(m_lod.maxLevel())
+			.arg(m_lod.memory() / static_cast<double>(1 << 20), 0, 'f', 2)
+			.arg(timer.elapsed() / 1000.0,0,'f',1));
 	}
 
 	ccPointCloud& m_cloud;
@@ -279,10 +283,6 @@ protected:
 
 ccPointCloudLOD::ccPointCloudLOD()
 	: m_maxLevel(0)
-	, m_visiblePoints(0)
-	, m_displayedPoints(0)
-	, m_unfinishedLevel(-1)
-	, m_unfinishedPoints(0)
 	, m_lastIndexMap(0)
 	, m_octree(0)
 	, m_thread(0)
@@ -299,6 +299,21 @@ ccPointCloudLOD::~ccPointCloudLOD()
 	{
 		m_lastIndexMap->release();
 	}
+}
+
+size_t ccPointCloudLOD::memory() const
+{
+	size_t thisSize = sizeof(ccPointCloudLOD);
+	
+	size_t totalNodeCount = 0;
+	for (size_t i = 0; i < m_levels.size(); ++i)
+	{
+		totalNodeCount += m_levels[i].data.size();
+	}
+	size_t nodeSize = sizeof(Node);	
+	size_t nodesSize = totalNodeCount * nodeSize;
+
+	return nodesSize + thisSize;
 }
 
 bool ccPointCloudLOD::init(ccPointCloud* cloud)
@@ -396,26 +411,26 @@ int32_t ccPointCloudLOD::newCell(unsigned char level)
 	return static_cast<int32_t>(l.data.size()) - 1;
 }
 
-void ccPointCloudLOD::updateMaxRadii()
-{
-	QMutexLocker locker(&m_mutex);
-
-	for (size_t i = 0; i < m_levels.size(); ++i)
-	{
-		if (!m_levels[i].data.empty())
-		{
-			float maxRadius = 0;
-			for (Node& n : m_levels[i].data)
-			{
-				if (n.radius > maxRadius)
-				{
-					maxRadius = n.radius;
-				}
-			}
-			m_levels[i].maxRadius = m_levels[i].data.front().radius;
-		}
-	}
-}
+//void ccPointCloudLOD::updateMaxRadii()
+//{
+//	QMutexLocker locker(&m_mutex);
+//
+//	for (size_t i = 0; i < m_levels.size(); ++i)
+//	{
+//		if (!m_levels[i].data.empty())
+//		{
+//			float maxRadius = 0;
+//			for (Node& n : m_levels[i].data)
+//			{
+//				if (n.radius > maxRadius)
+//				{
+//					maxRadius = n.radius;
+//				}
+//			}
+//			m_levels[i].maxRadius = m_levels[i].data.front().radius;
+//		}
+//	}
+//}
 
 void ccPointCloudLOD::shrink_to_fit()
 {
@@ -456,10 +471,7 @@ void ccPointCloudLOD::clear()
 unsigned char ccPointCloudLOD::resetVisibility()
 {
 	unsigned char _maxLevel = m_maxLevel;
-	m_visiblePoints = 0;
-	m_displayedPoints = 0;
-	m_unfinishedLevel = -1;
-	m_unfinishedPoints = 0;
+	m_currentState = RenderParams();
 
 	for (unsigned char i = 0; i <= _maxLevel; ++i)
 	{
@@ -510,6 +522,7 @@ public:
 		{
 		case Frustum::INSIDE:
 			visibleCount = node.pointCount;
+			//no need to propagate the visibility to the children as the default value should already be 'INSIDE'
 			break;
 
 		case Frustum::INTERSECT:
@@ -527,16 +540,23 @@ public:
 							hasChildren = true;
 						}
 					}
-				}
 
-				if (!hasChildren)
+					if (visibleCount == 0)
+					{
+						//as no point is visible we can flag this node as being outside/invisible
+						node.intersection = Frustum::OUTSIDE;
+					}
+				}
+				else
 				{
+					//we have to consider that all points are visible
 					visibleCount = node.pointCount;
 				}
 			}
 			break;
 
 		case Frustum::OUTSIDE:
+			//be sure that all children nodes are flagged as outside!
 			propagateFlag(node, Frustum::OUTSIDE);
 			break;
 		}
@@ -553,13 +573,19 @@ uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum)
 {
 	unsigned char _maxLevel = resetVisibility();
 
-	m_visiblePoints = PointCloudLODVisibilityFlagger(*this, frustum, _maxLevel).flag(root());
+	m_currentState.visiblePoints = PointCloudLODVisibilityFlagger(*this, frustum, _maxLevel).flag(root());
 
-	return m_visiblePoints;
+	return m_currentState.visiblePoints;
 }
 
-uint32_t ccPointCloudLOD::displayNPoints(Node& node, uint32_t count)
+uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 {
+	if (!m_lastIndexMap)
+	{
+		assert(false);
+		return 0;
+	}
+	
 	uint32_t displayedCount = 0;
 	uint32_t thisNodeRemainingCount = (node.pointCount - node.displayedPointCount);
 
@@ -578,7 +604,7 @@ uint32_t ccPointCloudLOD::displayNPoints(Node& node, uint32_t count)
 				uint32_t childDisplayedCount = 0;
 				if (thisNodeRemainingCount < count)
 				{
-					childDisplayedCount = displayNPoints(childNode, count);
+					childDisplayedCount = addNPointsToIndexMap(childNode, count);
 					assert(childDisplayedCount < count);
 				}
 				else
@@ -591,7 +617,7 @@ uint32_t ccPointCloudLOD::displayNPoints(Node& node, uint32_t count)
 						assert(count >= displayedCount);
 						childMaxCount = count - displayedCount;
 					}
-					childDisplayedCount = displayNPoints(childNode, childMaxCount);
+					childDisplayedCount = addNPointsToIndexMap(childNode, childMaxCount);
 					assert(childDisplayedCount <= childMaxCount);
 				}
 
@@ -634,13 +660,13 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 
 	unsigned char _maxLevel = maxLevel();
 
-	if (m_displayedPoints >= m_visiblePoints)
+	if (m_currentState.displayedPoints >= m_currentState.visiblePoints)
 	{
 		//assert(false);
 		maxCount = 0;
 		return 0;
 	}
-	unsigned totalRemainingCount = m_visiblePoints - m_displayedPoints;
+	unsigned totalRemainingCount = m_currentState.visiblePoints - m_currentState.displayedPoints;
 
 	if (totalRemainingCount == 0)
 	{
@@ -657,11 +683,11 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 
 	bool priorityToLeafNodes = false;
 	bool onlyLeafNodes = false;
-	if (m_unfinishedLevel == level)
+	if (m_currentState.unfinishedLevel == level)
 	{
-		if (m_unfinishedPoints > maxCount)
+		if (m_currentState.unfinishedPoints > maxCount)
 		{
-			totalRemainingCount = m_unfinishedPoints;
+			totalRemainingCount = m_currentState.unfinishedPoints;
 			onlyLeafNodes = true;
 		}
 		else
@@ -740,7 +766,7 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 			}
 		}
 
-		uint32_t nodeDisplayCount = displayNPoints(node, nodeMaxCount);
+		uint32_t nodeDisplayCount = addNPointsToIndexMap(node, nodeMaxCount);
 		assert(nodeDisplayCount <= nodeMaxCount);
 		thisPassDisplayCount += nodeDisplayCount;
 
@@ -758,17 +784,17 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 	assert(thisPassDisplayCount == m_lastIndexMap->currentSize());
 
 	maxCount = thisPassDisplayCount;
-	m_displayedPoints += thisPassDisplayCount;
+	m_currentState.displayedPoints += thisPassDisplayCount;
 
 	if (remainingPointsAtThisLevel)
 	{
-		m_unfinishedLevel = static_cast<int>(level);
-		m_unfinishedPoints = remainingPointsAtThisLevel;
+		m_currentState.unfinishedLevel = static_cast<int>(level);
+		m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
 	}
 	else
 	{
-		m_unfinishedLevel = -1;
-		m_unfinishedPoints = 0;
+		m_currentState.unfinishedLevel = -1;
+		m_currentState.unfinishedPoints = 0;
 	}
 	
 	return m_lastIndexMap;

@@ -38,6 +38,7 @@ public:
 		, m_lod(lod)
 		, m_octree(0)
 		, m_maxCountPerCell(maxCountPerCell)
+		, m_maxLevel(0)
 	{
 	}
 	
@@ -89,7 +90,7 @@ protected:
 		}
 
 		//do we need to subdivide this cell?
-		if (node.pointCount > m_maxCountPerCell && node.level+1 < m_lod.m_levels.size())
+		if (node.pointCount > m_maxCountPerCell && node.level+1 <= m_maxLevel)
 		{
 			for (uint32_t i = 0; i < node.pointCount; )
 			{
@@ -196,6 +197,8 @@ protected:
 			m_lod.setState(ccPointCloudLOD::BROKEN);
 			return;
 		}
+		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
+		assert(m_maxLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 #if 0
 		//recursive
@@ -203,7 +206,7 @@ protected:
 
 		m_lod.shrink_to_fit();
 		//m_lod.updateMaxRadii();
-		m_lod.setMaxLevel(static_cast<unsigned char>(m_lod.m_levels.size()));
+		//m_lod.setMaxLevel(m_maxLevel);
 
 		for (size_t i = 1; i < m_lod.m_levels.size(); ++i)
 		{
@@ -211,10 +214,12 @@ protected:
 		}
 
 #else
+
 		//init with root node
 		fillNode_flat(m_lod.root());
 
-		for (unsigned char currentLevel = 0; currentLevel < m_lod.m_levels.size(); ++currentLevel)
+		//first we allow the division of nodes as deep as possible but with a minimum number of points per cell
+		for (uint8_t currentLevel = 0; currentLevel < m_maxLevel; ++currentLevel)
 		{
 			ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
 			if (level.data.empty())
@@ -236,11 +241,10 @@ protected:
 			//}
 
 			//the previous level is now ready!
-			m_lod.setMaxLevel(currentLevel);
 			ccLog::Print(QString("[LoD] Level %1: %2 cells").arg(currentLevel).arg(level.data.size()));
 
 			//now we can create the next level
-			if (currentLevel + 1 < m_lod.m_levels.size())
+			if (currentLevel + 1 < m_maxLevel)
 			{
 				for (ccPointCloudLOD::Node& node : level.data)
 				{
@@ -264,26 +268,88 @@ protected:
 		}
 
 		m_lod.shrink_to_fit();
+		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
+
+		//refinement step
+		if (true)
+		{
+			//we look at the 'main' depth level (with the most point)
+			uint8_t biggestLevel = 0;
+			for (uint8_t i = 1; i <= m_maxLevel; ++i)
+			{
+				if (m_lod.m_levels[i].data.size() > m_lod.m_levels[biggestLevel].data.size())
+				{
+					biggestLevel = i;
+				}
+			}
+
+			//now compute the mean radius for this level
+			//double meanRadius = 0;
+			//{
+			//	const ccPointCloudLOD::Level& level = m_lod.m_levels[biggestLevel];
+			//	size_t cellCount = level.data.size();
+			//	for (size_t i = 0; i < cellCount; ++i)
+			//	{
+			//		meanRadius += level.data[i].radius;
+			//	}
+
+			//	meanRadius /= cellCount;
+			//}
+
+			//and divide again the cells (with a lower limit on the number of points)
+			biggestLevel = std::min<uint8_t>(biggestLevel, 10);
+			for (uint8_t currentLevel = 0; currentLevel < biggestLevel; ++currentLevel)
+			{
+				ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
+				assert(!level.data.empty());
+
+				size_t cellCountBefore = m_lod.m_levels[currentLevel+1].data.size();
+				for (ccPointCloudLOD::Node& node : level.data)
+				{
+					//do we need to subdivide this cell?
+					if (node.childCount == 0 && node.pointCount > 16)
+					{
+						for (uint32_t i = 0; i < node.pointCount;)
+						{
+							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
+							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
+							childNode.firstCodeIndex = node.firstCodeIndex + i;
+
+							uint8_t childIndex = fillNode_flat(childNode);
+							node.childIndexes[childIndex] = childNodeIndex;
+							node.childCount++;
+							i += childNode.pointCount;
+						}
+					}
+				}
+
+				size_t cellCountAfter = m_lod.m_levels[currentLevel+1].data.size();
+				ccLog::Print(QString("[LoD][pass 2] Level %1: %2 cells (+%3)").arg(currentLevel+1).arg(cellCountAfter).arg(cellCountAfter - cellCountBefore));
+			}
+
+			m_lod.shrink_to_fit();
+			m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size()))-1;
+		}
 #endif
 
 		m_lod.setState(ccPointCloudLOD::INITIALIZED);
 
 		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / mem. = %3 Mb / duration: %4 s.)")
 			.arg(m_cloud.getName())
-			.arg(m_lod.maxLevel())
+			.arg(m_maxLevel)
 			.arg(m_lod.memory() / static_cast<double>(1 << 20), 0, 'f', 2)
-			.arg(timer.elapsed() / 1000.0,0,'f',1));
+			.arg(timer.elapsed() / 1000.0, 0, 'f', 1));
 	}
 
 	ccPointCloud& m_cloud;
 	ccPointCloudLOD& m_lod;
 	ccOctree::Shared m_octree;
 	uint32_t m_maxCountPerCell;
+	uint8_t m_maxLevel;
 };
 
 ccPointCloudLOD::ccPointCloudLOD()
-	: m_maxLevel(0)
-	, m_lastIndexMap(0)
+	: m_lastIndexMap(0)
 	, m_octree(0)
 	, m_thread(0)
 	, m_state(NOT_INITIALIZED)
@@ -310,7 +376,7 @@ size_t ccPointCloudLOD::memory() const
 	{
 		totalNodeCount += m_levels[i].data.size();
 	}
-	size_t nodeSize = sizeof(Node);	
+	size_t nodeSize = sizeof(Node);
 	size_t nodesSize = totalNodeCount * nodeSize;
 
 	return nodesSize + thisSize;
@@ -344,28 +410,26 @@ bool ccPointCloudLOD::init(ccPointCloud* cloud)
 	return true;
 }
 
-unsigned char ccPointCloudLOD::maxLevel()
-{
-	lock();
-	unsigned char maxLevel = m_maxLevel;
-	assert(maxLevel <= m_levels.size());
-	unlock();
-	
-	return maxLevel;
-}
+//unsigned char ccPointCloudLOD::maxLevel()
+//{
+//	lock();
+//	unsigned char maxLevel = m_maxLevel;
+//	assert(maxLevel <= m_levels.size());
+//	unlock();
+//	
+//	return maxLevel;
+//}
 
-void ccPointCloudLOD::setMaxLevel(unsigned char maxLevel)
-{
-	lock();
-	m_maxLevel = maxLevel;
-	assert(maxLevel <= m_levels.size());
-	unlock();
-}
+//void ccPointCloudLOD::setMaxLevel(unsigned char maxLevel)
+//{
+//	lock();
+//	m_maxLevel = maxLevel;
+//	assert(maxLevel <= m_levels.size());
+//	unlock();
+//}
 
 void ccPointCloudLOD::clearData()
 {
-	setMaxLevel(0);
-	
 	//1 empty (root) node
 	m_levels.resize(1);
 	m_levels.front().data.resize(1);
@@ -468,21 +532,23 @@ void ccPointCloudLOD::clear()
 	m_mutex.unlock();
 }
 
-unsigned char ccPointCloudLOD::resetVisibility()
+void ccPointCloudLOD::resetVisibility()
 {
-	unsigned char _maxLevel = m_maxLevel;
+	if (m_state != INITIALIZED)
+	{
+		return;
+	}
+
 	m_currentState = RenderParams();
 
-	for (unsigned char i = 0; i <= _maxLevel; ++i)
+	for (size_t l = 0; l < m_levels.size(); ++l)
 	{
-		for (Node& n : m_levels[i].data)
+		for (Node& n : m_levels[l].data)
 		{
 			n.displayedPointCount = 0;
 			n.intersection = Frustum::INSIDE;
 		}
 	}
-
-	return _maxLevel;
 }
 
 class PointCloudLODVisibilityFlagger
@@ -571,12 +637,40 @@ public:
 
 uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum)
 {
-	unsigned char _maxLevel = resetVisibility();
+	if (m_state != INITIALIZED)
+	{
+		assert(false);
+		m_currentState = RenderParams();
+		return 0;
+	}
 
-	m_currentState.visiblePoints = PointCloudLODVisibilityFlagger(*this, frustum, _maxLevel).flag(root());
+	resetVisibility();
+
+	m_currentState.visiblePoints = PointCloudLODVisibilityFlagger(*this, frustum, static_cast<unsigned char>(m_levels.size())).flag(root());
 
 	return m_currentState.visiblePoints;
 }
+
+//void ccPointCloudLOD::flagAsDisplayed(ccPointCloudLOD::Node& node)
+//{
+//	node.displayedPointCount = node.pointCount;
+//
+//	if (node.childCount)
+//	{
+//		for (int i = 0; i < 8; ++i)
+//		{
+//			if (node.childIndexes[i] >= 0)
+//			{
+//				Node& childNode = this->node(node.childIndexes[i], node.level + 1);
+//				if (childNode.intersection == Frustum::OUTSIDE)
+//					continue;
+//				if (childNode.pointCount == childNode.displayedPointCount)
+//					continue;
+//				flagAsDisplayed(childNode);
+//			}
+//		}
+//	}
+//}
 
 uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 {
@@ -587,10 +681,13 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 	}
 	
 	uint32_t displayedCount = 0;
-	uint32_t thisNodeRemainingCount = (node.pointCount - node.displayedPointCount);
 
 	if (node.childCount)
 	{
+		uint32_t thisNodeRemainingCount = (node.pointCount - node.displayedPointCount);
+		assert(count <= thisNodeRemainingCount);
+		bool displayAll = (count >= thisNodeRemainingCount);
+		
 		for (int i = 0; i < 8; ++i)
 		{
 			if (node.childIndexes[i] >= 0)
@@ -600,26 +697,28 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 					continue;
 				if (childNode.pointCount == childNode.displayedPointCount)
 					continue;
+				uint32_t childNodeRemainingCount = (childNode.pointCount - childNode.displayedPointCount);
 
-				uint32_t childDisplayedCount = 0;
-				if (thisNodeRemainingCount < count)
+				uint32_t childMaxCount = 0;
+				if (displayAll)
 				{
-					childDisplayedCount = addNPointsToIndexMap(childNode, count);
-					assert(childDisplayedCount < count);
+					childMaxCount = childNodeRemainingCount;
 				}
 				else
 				{
-					uint32_t childNodeRemainingCount = (childNode.pointCount - childNode.displayedPointCount);
 					double ratio = static_cast<double>(childNodeRemainingCount) / thisNodeRemainingCount;
-					unsigned childMaxCount = static_cast<unsigned>(floor(ratio * count + 0.5));
+					childMaxCount = static_cast<uint32_t>(ceil(ratio * count));
 					if (displayedCount + childMaxCount > count)
 					{
 						assert(count >= displayedCount);
 						childMaxCount = count - displayedCount;
+						i = 8; //we can stop right now
 					}
-					childDisplayedCount = addNPointsToIndexMap(childNode, childMaxCount);
-					assert(childDisplayedCount <= childMaxCount);
 				}
+				
+				uint32_t childDisplayedCount = addNPointsToIndexMap(childNode, childMaxCount);
+				//assert(childDisplayedCount == childMaxCount || !displayAll || childNode.intersection != Frustum::INSIDE);
+				assert(childDisplayedCount <= childMaxCount);
 
 				displayedCount += childDisplayedCount;
 				assert(displayedCount <= count);
@@ -628,18 +727,19 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 	}
 	else
 	{
-		//we can display the points
-		uint32_t iStart = node.displayedPointCount;
+		//we can display all the points
+		//uint32_t iStart = node.displayedPointCount;
 		uint32_t iStop = std::min(node.displayedPointCount + count, node.pointCount);
 
+		displayedCount = iStop - node.displayedPointCount;
+		assert(m_lastIndexMap->currentSize() + displayedCount <= m_lastIndexMap->capacity());
+
 		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
-		for (uint32_t i = iStart; i < iStop; ++i)
+		for (uint32_t i = node.displayedPointCount; i < iStop; ++i)
 		{
 			unsigned pointIndex = cellCodes[node.firstCodeIndex + i].theIndex;
 			m_lastIndexMap->addElement(pointIndex);
 		}
-
-		displayedCount = iStop - iStart;
 	}
 
 	node.displayedPointCount += displayedCount;
@@ -651,14 +751,18 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 {
 	remainingPointsAtThisLevel = 0;
 	
-	if (!m_octree)
+	if (!m_octree || level >= m_levels.size())
 	{
 		assert(false);
 		maxCount = 0;
 		return 0;
 	}
 
-	unsigned char _maxLevel = maxLevel();
+	if (m_state != INITIALIZED)
+	{
+		maxCount = 0;
+		return 0;
+	}
 
 	if (m_currentState.displayedPoints >= m_currentState.visiblePoints)
 	{
@@ -666,125 +770,165 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 		maxCount = 0;
 		return 0;
 	}
-	unsigned totalRemainingCount = m_currentState.visiblePoints - m_currentState.displayedPoints;
-
-	if (totalRemainingCount == 0)
-	{
-		//nothing to do
-		maxCount = 0;
-		return 0;
-	}
-
-	if (level > _maxLevel)
-	{
-		assert(false);
-		return 0;
-	}
-
-	bool priorityToLeafNodes = false;
-	bool onlyLeafNodes = false;
-	if (m_currentState.unfinishedLevel == level)
-	{
-		if (m_currentState.unfinishedPoints > maxCount)
-		{
-			totalRemainingCount = m_currentState.unfinishedPoints;
-			onlyLeafNodes = true;
-		}
-		else
-		{
-			priorityToLeafNodes = true;
-		}
-	}
-
-	bool displayAll = false;
-	if (maxCount > totalRemainingCount)
-	{
-		maxCount = totalRemainingCount;
-		displayAll = true;
-	}
 
 	if (!m_lastIndexMap || m_lastIndexMap->currentSize() < maxCount)
 	{
-		if (m_lastIndexMap)
+		if (!m_lastIndexMap)
 		{
-			m_lastIndexMap->release();
+			m_lastIndexMap = new LODIndexSet;
 		}
-		m_lastIndexMap = new LODIndexSet;
 		if (!m_lastIndexMap->resize(maxCount, 0))
 		{
 			//not enough memory
 			m_lastIndexMap->release();
+			m_lastIndexMap = 0;
 			return 0;
 		}
 	}
 	m_lastIndexMap->setCurrentSize(0);
 
-	const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
-
-	//for all cells of the input level
+	Level& l = m_levels[level];
 	uint32_t thisPassDisplayCount = 0;
-	for (Node& node : m_levels[level].data)
-	{
-		assert(node.intersection != UNDEFINED);
-		if (node.intersection == Frustum::OUTSIDE)
-			continue;
-		if (node.pointCount == node.displayedPointCount)
-			continue;
 
-		unsigned nodeMaxCount = 0;
-		if (displayAll)
+	bool earlyStop = false;
+	size_t earlyStopIndex = 0;
+
+	//special case: we have to finish/continue at the same level than the previous run
+	if (m_currentState.unfinishedLevel == level)
+	{
+		bool displayAll = (m_currentState.unfinishedPoints <= maxCount);
+
+		//display all leaf cells of the current level
+		for (size_t i = 0; i < l.data.size(); ++i)
 		{
-			nodeMaxCount = node.pointCount;
-		}
-		else
-		{
-			if (priorityToLeafNodes)
+			Node& node = l.data[i];
+
+			if (node.childCount) //skip non leaf cells
+				continue;
+			assert(node.intersection != UNDEFINED);
+			if (node.intersection == Frustum::OUTSIDE)
+				continue;
+			if (node.pointCount == node.displayedPointCount)
+				continue;
+
+			uint32_t nodeMaxCount = 0;
+			uint32_t nodeRemainingCount = (node.pointCount - node.displayedPointCount);
+			if (displayAll)
 			{
-				//we draw all the points of this (leaf) node
-				nodeMaxCount = node.pointCount;
-				if (m_lastIndexMap->currentSize() + nodeMaxCount > maxCount)
-				{
-					assert(maxCount >= m_lastIndexMap->currentSize());
-					nodeMaxCount = maxCount - m_lastIndexMap->currentSize();
-				}
-			}
-			else if (!onlyLeafNodes || node.childCount == 0)
-			{
-				unsigned nodeRemainingCount = (node.pointCount - node.displayedPointCount);
-				double ratio = static_cast<double>(nodeRemainingCount) / totalRemainingCount;
-				nodeMaxCount = static_cast<unsigned>(floor(ratio * maxCount + 0.5));
-				//mainly for safety
-				if (m_lastIndexMap->currentSize() + nodeMaxCount > maxCount)
-				{
-					assert(maxCount >= m_lastIndexMap->currentSize());
-					nodeMaxCount = maxCount - m_lastIndexMap->currentSize();
-				}
+				nodeMaxCount = nodeRemainingCount;
 			}
 			else
 			{
-				continue;
+				double ratio = static_cast<double>(nodeRemainingCount) / m_currentState.unfinishedPoints;
+				nodeMaxCount = static_cast<uint32_t>(ceil(ratio * maxCount));
+				//safety check
+				if (m_lastIndexMap->currentSize() + nodeMaxCount >= maxCount)
+				{
+					assert(maxCount >= m_lastIndexMap->currentSize());
+					nodeMaxCount = maxCount - m_lastIndexMap->currentSize();
+
+					earlyStop = true;
+					earlyStopIndex = i;
+
+					i = l.data.size(); //we can stop after this node!
+				}
 			}
-		}
 
-		uint32_t nodeDisplayCount = addNPointsToIndexMap(node, nodeMaxCount);
-		assert(nodeDisplayCount <= nodeMaxCount);
-		thisPassDisplayCount += nodeDisplayCount;
-
-		if (node.childCount == 0)
-		{
+			uint32_t nodeDisplayCount = addNPointsToIndexMap(node, nodeMaxCount);
+			assert(nodeDisplayCount <= nodeMaxCount);
+			
+			thisPassDisplayCount += nodeDisplayCount;
+			assert(thisPassDisplayCount == m_lastIndexMap->currentSize());
 			remainingPointsAtThisLevel += (node.pointCount - node.displayedPointCount);
 		}
 
-		if (thisPassDisplayCount == maxCount)
+		//m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
+		//m_currentState.displayedPoints += thisPassDisplayCount;
+	}
+	
+	uint32_t totalRemainingCount = m_currentState.visiblePoints - m_currentState.displayedPoints;
+	//remove the already displayed points (= unfinished from previous run)
+	assert(totalRemainingCount >= thisPassDisplayCount);
+	totalRemainingCount -= thisPassDisplayCount;
+	
+	//do we still have data to display AND can we display it?
+	if (totalRemainingCount != 0 && thisPassDisplayCount < maxCount)
+	{
+		//we shouldn't have any unfinished work at this point!
+		assert(!earlyStop && remainingPointsAtThisLevel == 0);
+
+		uint32_t mapFreeSize = maxCount - thisPassDisplayCount;
+
+		bool displayAll = (mapFreeSize > totalRemainingCount);
+
+		//for all cells of the input level
+		for (size_t i = 0; i < l.data.size(); ++i)
 		{
-			break;
+			Node& node = l.data[i];
+
+			assert(node.intersection != UNDEFINED);
+			if (node.intersection == Frustum::OUTSIDE)
+				continue;
+			if (node.pointCount == node.displayedPointCount)
+				continue;
+
+			uint32_t nodeMaxCount = 0;
+			uint32_t nodeRemainingCount = (node.pointCount - node.displayedPointCount);
+			if (displayAll)
+			{
+				nodeMaxCount = nodeRemainingCount;
+			}
+			else if (node.childCount)
+			{
+				double ratio = static_cast<double>(nodeRemainingCount) / totalRemainingCount;
+				nodeMaxCount = static_cast<uint32_t>(ceil(ratio * mapFreeSize));
+				//safety check
+				if (m_lastIndexMap->currentSize() + nodeMaxCount >= maxCount)
+				{
+					assert(maxCount >= m_lastIndexMap->currentSize());
+					nodeMaxCount = maxCount - m_lastIndexMap->currentSize();
+
+					earlyStop = true;
+					earlyStopIndex = i;
+
+					i = l.data.size(); //we can stop after this node!
+				}
+			}
+
+			uint32_t nodeDisplayCount = addNPointsToIndexMap(node, nodeMaxCount);
+			assert(nodeDisplayCount <= nodeMaxCount);
+
+			thisPassDisplayCount += nodeDisplayCount;
+			assert(thisPassDisplayCount == m_lastIndexMap->currentSize());
+
+			if (node.childCount == 0)
+			{
+				remainingPointsAtThisLevel += (node.pointCount - node.displayedPointCount);
+			}
 		}
 	}
 
-	assert(thisPassDisplayCount == m_lastIndexMap->currentSize());
+	maxCount = m_lastIndexMap->currentSize();
+	m_currentState.displayedPoints += m_lastIndexMap->currentSize();
 
-	maxCount = thisPassDisplayCount;
-	m_currentState.displayedPoints += thisPassDisplayCount;
+	if (earlyStop)
+	{
+		//be sure to properly finish to count the number of 'unfinished' points!
+		for (size_t i = earlyStopIndex+1; i < l.data.size(); ++i)
+		{
+			Node& node = l.data[i];
+
+			if (node.childCount) //skip non leaf nodes
+				continue;
+			assert(node.intersection != UNDEFINED);
+			if (node.intersection == Frustum::OUTSIDE)
+				continue;
+			if (node.pointCount == node.displayedPointCount)
+				continue;
+			uint32_t nodeRemainingCount = (node.pointCount - node.displayedPointCount);
+			remainingPointsAtThisLevel += nodeRemainingCount;
+		}
+	}
 
 	if (remainingPointsAtThisLevel)
 	{

@@ -1849,6 +1849,15 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, unsigned
 	}
 }
 
+//Maximum number of points (per cloud) displayed in a single LOD iteration
+//warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+#ifdef _DEBUG
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 0); //~ 65K
+#else
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 3); //~ 65K * 8 = 512K
+//static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 4); //~ 65K * 16 = 1024K
+#endif
+
 //Vertex indexes for OpenGL "arrays" drawing
 static PointCoordinateType s_pointBuffer [MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
 static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
@@ -2658,48 +2667,35 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						assert(m_lod);
 
-						if (context.currentLODLevel == 0)
-						{
-							//get the current viewport and OpenGL matrices
-							ccGLCameraParameters camera;
-							context._win->getGLCameraParameters(camera);
-							//relpace the viewport and matrices by the real ones
-							glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
-							glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-							glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
-							//camera frustum
-							Frustum frustum(camera.modelViewMat, camera.projectionMat);
-
-							//first time: we flag the cells visibility and count the number of visible points
-							m_lod->flagVisibility(frustum);
-						}
-
-						//uint32_t visibleCOunt = m_lod->visiblePoints();
-						//uint32_t stride = (visibleCOunt / MAX_POINT_COUNT_PER_LOD_RENDER_PASS) + 1;
-						////nearest power of 2
-						//static const double LOG_NAT_2 = log(2.0);
-						//int n = static_cast<int>(ceil(log(static_cast<double>(stride)) / LOG_NAT_2));
-						//assert(n < 256);
-						//unsigned char maxLevel = static_cast<unsigned char>(n);
-
-						////unsigned char maxLevel = m_lod->maxLevel();
-						//bool underConstruction = m_lod->isUnderConstruction();
-
-						//toDisplay.indexMap = m_lod->getIndexMap(context.currentLODLevel);
-						//assert(toDisplay.indexMap);
-
 						unsigned char maxLevel = m_lod->maxLevel();
 						bool underConstruction = m_lod->isUnderConstruction();
-						unsigned remainingPointsAtThisLevel = 0;
 
 						//if the cloud has less LOD levels than the minimum to display
 						if (maxLevel == 0 || underConstruction)
 						{
 							//not yet ready
 							context.moreLODPointsAvailable = underConstruction;
+							context.higherLODLevelsAvailable = false;
 						}
 						else
 						{
+							if (context.currentLODLevel == 0)
+							{
+								//get the current viewport and OpenGL matrices
+								ccGLCameraParameters camera;
+								context._win->getGLCameraParameters(camera);
+								//relpace the viewport and matrices by the real ones
+								glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+								glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+								glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+								//camera frustum
+								Frustum frustum(camera.modelViewMat, camera.projectionMat);
+
+								//first time: we flag the cells visibility and count the number of visible points
+								m_lod->flagVisibility(frustum);
+							}
+
+							unsigned remainingPointsAtThisLevel = 0;
 							toDisplay.startIndex = 0;
 							toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
 							toDisplay.indexMap = m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
@@ -2716,7 +2712,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 							//could we draw more points at the next level?
 							context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
-							context.higherLODLevelsAvailable = (underConstruction || (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel));
+							context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
 						}
 					}
 #else

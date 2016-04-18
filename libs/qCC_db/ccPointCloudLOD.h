@@ -96,11 +96,8 @@ public:
 	//! Returns whether the structure is broken or not
 	inline bool isBroken() { return getState() == BROKEN; }
 
-	//! Returns the maximum level
-	unsigned char maxLevel();
-
-	//! Sets the maximum level
-	void setMaxLevel(unsigned char maxLevel);
+	//! Returns the maximum accessible level
+	inline unsigned char maxLevel() { QMutexLocker locker(&m_mutex); return (m_state == INITIALIZED ? static_cast<unsigned char>(std::max<size_t>(1, m_levels.size()))-1 : 0); }
 
 	//! Undefined visibility flag
 	static const unsigned char UNDEFINED = 255;
@@ -199,13 +196,16 @@ protected: //methods
 	//! Updates the max radius per level FOR ALL CELLS
 	//void updateMaxRadii();
 
-	//! Resets the internal visibility flags and returns the maximum accessible level
+	//! Resets the internal visibility flags
 	/** All nodes are flagged as 'INSIDE' (= visible) and their 'visibleCount' attribute is set to 0.
 	**/
-	unsigned char resetVisibility();
+	void resetVisibility();
 
 	//! Adds a given number of points to the active index map (should be dispatched among the children cells)
 	uint32_t addNPointsToIndexMap(Node& node, uint32_t count);
+
+	//! Flags this node and its children as being fully 'displayed'
+	//void flagAsDisplayed(Node& node);
 
 protected: //members
 
@@ -221,9 +221,6 @@ protected: //members
 
 	//! Per-level cells data
 	std::vector<Level> m_levels;
-
-	//! Maximum level (ready)
-	unsigned char m_maxLevel;
 
 	//! Parameters of the current render state
 	struct RenderParams

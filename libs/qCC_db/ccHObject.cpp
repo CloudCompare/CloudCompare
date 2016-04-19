@@ -664,9 +664,8 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			glFunc->glMultMatrixf(m_glTrans.data());
 		}
 
-		if (	context.decimateCloudOnMove						//LOD for clouds is enabled?
-			&&	context.currentLODLevel >= context.minLODLevel	//and we are currently rendering higher levels?
-			)
+		//LOD for clouds is enabled?
+		if (context.decimateCloudOnMove)
 		{
 			//only for real clouds
 			drawInThisContext &= isA(CC_TYPES::POINT_CLOUD);

@@ -77,14 +77,10 @@ struct glDrawContext
 
 	//! Whether to decimate big clouds when updating the 3D view
 	bool decimateCloudOnMove;
-	//! Minimum level for LOD display
-	unsigned char minLODLevel;
 	//! Minimum number of points for activating LOD display
 	unsigned minLODPointCount;
 	//! Current level for LOD display
 	unsigned char currentLODLevel;
-	//! Start index for current LOD level
-	unsigned currentLODStartIndex;
 	//! Wheter more points are available or not at the current level
 	bool moreLODPointsAvailable;
 	//! Wheter higher levels are available or not
@@ -145,10 +141,8 @@ struct glDrawContext
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
 		, bbDefaultCol(ccColor::yellow)
 		, decimateCloudOnMove(true)
-		, minLODLevel(11)
 		, minLODPointCount(10000000)
 		, currentLODLevel(0)
-		, currentLODStartIndex(0)
 		, moreLODPointsAvailable(false)
 		, higherLODLevelsAvailable(false)
 		, decimateMeshOnMove(true)

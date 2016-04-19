@@ -52,9 +52,6 @@ struct LODLevelDesc
 //! L.O.D. indexes set
 typedef GenericChunkedArray<1, unsigned> LODIndexSet;
 
-#define USE_LOD_2
-#ifdef USE_LOD_2
-
 //! L.O.D. (Level of Detail) structure
 class ccPointCloudLOD
 {
@@ -204,9 +201,6 @@ protected: //methods
 	//! Adds a given number of points to the active index map (should be dispatched among the children cells)
 	uint32_t addNPointsToIndexMap(Node& node, uint32_t count);
 
-	//! Flags this node and its children as being fully 'displayed'
-	//void flagAsDisplayed(Node& node);
-
 protected: //members
 
 	struct Level
@@ -319,90 +313,5 @@ public:
 	ccPointCloudLOD& m_lod;
 	unsigned char m_maxLevel;
 };
-
-#else
-
-//! L.O.D. (Level of Detail) structure
-class ccPointCloudLOD
-{
-public:
-	//! Structure initialization state
-	enum State { NOT_INITIALIZED, UNDER_CONSTRUCTION, INITIALIZED, BROKEN };
-
-	//! Default constructor
-	ccPointCloudLOD() : m_indexes(0), m_thread(0), m_state(NOT_INITIALIZED) {}
-	//! Destructor
-	virtual ~ccPointCloudLOD() { clear(); }
-
-	//! Initializes the construction process (asynchronous)
-	bool init(ccPointCloud* cloud);
-
-	//! Locks the structure
-	inline void lock() { m_mutex.lock(); }
-	//! Unlocks the structure
-	inline void unlock() { m_mutex.unlock(); }
-
-	//! Returns the current state
-	inline State getState() { lock(); State state = m_state; unlock(); return state; }
-
-	//! Sets the current state
-	inline void setState(State state) { lock(); m_state = state; unlock(); }
-
-	//! Clears the structure
-	inline void clear() { clearExtended(true, NOT_INITIALIZED); }
-	//! Clears the structure (extended version)
-	void clearExtended(bool autoStopThread, State newState);
-
-	//! Reserves memory for the indexes
-	bool reserve(unsigned pointCount, int levelCount);
-
-	//! Returns whether the structure is null (i.e. not under construction or initialized) or not
-	inline bool isNull() { return getState() == NOT_INITIALIZED; }
-
-	//! Returns whether the structure is initialized or not
-	inline bool isInitialized() { return getState() == INITIALIZED; }
-
-	//! Returns whether the structure is initialized or not
-	inline bool isUnderConstruction() { return getState() == UNDER_CONSTRUCTION; }
-
-	//! Returns whether the structure is broken or not
-	inline bool isBroken() { return getState() == BROKEN; }
-
-	//! Returns the indexes (if any)
-	inline LODIndexSet* indexes() { return m_indexes; }
-	//! Returns the indexes (if any) - const version
-	inline const LODIndexSet* indexes() const { return m_indexes; }
-
-	//! Adds a level descriptor
-	inline void addLevel(const LODLevelDesc& desc) { lock(); m_levels.push_back(desc); unlock(); }
-	//! Shrinks the level descriptor set to its minimal size
-	inline void shrink() { lock(); m_levels.resize(m_levels.size()); unlock(); } //DGM: shrink_to_fit is a C++11 method
-
-	//! Returns the maximum level
-	inline unsigned char maxLevel() { lock(); size_t count = m_levels.size(); unlock(); return static_cast<unsigned char>(std::min<size_t>(count, 256)); }
-	//! Returns a given level descriptor
-	inline LODLevelDesc level(unsigned char index) { lock(); LODLevelDesc desc = m_levels[index]; unlock(); return desc; }
-
-protected:
-
-	//! L.O.D. indexes
-	/** Point indexes that should be displayed at each level of detail.
-	**/
-	LODIndexSet* m_indexes;
-
-	//! Actual levels
-	std::vector<LODLevelDesc> m_levels;
-
-	//! Computing thread
-	ccPointCloudLODThread* m_thread;
-
-	//! For concurrent access
-	QMutex m_mutex;
-
-	//! State
-	State m_state;
-};
-
-#endif
 
 #endif //CC_POINT_CLOUD_LOD

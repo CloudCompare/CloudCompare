@@ -720,12 +720,16 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 //Internal structure used by DistanceComputationTools::computeCloud2MeshDistance
 struct CellToTest
 {
+	//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+
 	//! Cell position
-	Tuple3i pos;
+	Tuple3i pos;				//12 bytes
 	//! Cell size
-	int cellSize;
+	int cellSize;				// 4 bytes
 	//! Subdivision level
-	unsigned char level;
+	unsigned char level;		// 1 byte (+ 3 for alignment)
+
+	//Total						//20 bytes
 };
 
 int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection* intersection,

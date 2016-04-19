@@ -54,22 +54,37 @@ public:
 		bool isLeaf() const { return type == LEAF_TYPE; }
 
 	public:
-		BaseNode* parent;
+
+		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+		BaseNode* parent;					//8 bytes
 
 	protected:
-		const uint8_t type;
+		const uint8_t type;					//1 byte (+ 3 for alignment)
+
+		//Total								//12 bytes
 	};
 
 	//! Tree node
 	struct Node : public BaseNode
 	{
 	public:
-		uint8_t splitDim;
-		PointCoordinateType splitValue;
-		BaseNode* leftChild;
-		BaseNode* rightChild;
+
+		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+		PointCoordinateType splitValue;		//4 bytes
+		BaseNode* leftChild;				//8 bytes
+		BaseNode* rightChild;				//8 bytes
+		uint8_t splitDim;					//1 byte (+ 3 bytes for alignment)
+
+		//Total								//24 bytes (+ 12 for father)
 		
-		Node() : BaseNode(NODE_TYPE), splitDim(X_DIM), splitValue(0), leftChild(0), rightChild(0) {}
+		Node()
+			: BaseNode(NODE_TYPE)
+			, splitValue(0)
+			, leftChild(0)
+			, rightChild(0)
+			, splitDim(X_DIM)
+		{}
+
 		virtual ~Node()
 		{
 			if (leftChild) delete leftChild;
@@ -81,10 +96,14 @@ public:
 	struct Leaf : public BaseNode
 	{
 	public:
-		ReferenceCloud* points;
-		PointCoordinateType planeEq[4];
-		ScalarType error;
-		int userData;
+
+		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+		ReferenceCloud* points;				// 8 bytes
+		PointCoordinateType planeEq[4];		//16 bytes
+		ScalarType error;					// 4 bytes
+		int userData;						// 4 bytes
+
+		//Total								//32 bytes (+ 12 for father)
 
 		//! Constructor
 		/** The Leaf class takes ownership of its associated subset
@@ -95,7 +114,7 @@ public:
 			, error(_error)
 			, userData(0)
 		{ 
-			memcpy(planeEq, planeEquation, sizeof(PointCoordinateType)*4);
+			memcpy(planeEq, planeEquation, sizeof(PointCoordinateType) * 4);
 		}
 
 		virtual ~Leaf()
@@ -134,10 +153,10 @@ public:
 	void clear();
 
 	//! Returns max error threshold used for planarity-based split strategy
-	double getMaxError() const { return m_maxError; }
+	inline double getMaxError() const { return m_maxError; }
 
 	//! Returns max error estimator used for planarity-based split strategy
-	DistanceComputationTools::ERROR_MEASURES getMaxErrorType() const { return m_errorMeasure; }
+	inline DistanceComputationTools::ERROR_MEASURES getMaxErrorType() const { return m_errorMeasure; }
 
 	//! Returns all leaf nodes
 	bool getLeaves(LeafVector& leaves) const;

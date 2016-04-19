@@ -3154,10 +3154,10 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 
 DgmOctree::octreeCell::octreeCell(const DgmOctree* _parentOctree)
 	: parentOctree(_parentOctree)
-	, level(0)
 	, truncatedCode(0)
 	, index(0)
 	, points(0)
+	, level(0)
 {
 	if (parentOctree && parentOctree->m_theAssociatedCloud)
 	{

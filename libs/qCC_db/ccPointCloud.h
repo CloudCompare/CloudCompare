@@ -29,7 +29,6 @@
 //Local
 #include "ccNormalVectors.h"
 #include "ccColorScale.h"
-#include "ccPointCloudLOD.h"
 
 //Qt
 #include <QGLBuffer>
@@ -39,11 +38,7 @@ class ccScalarField;
 class ccPolyline;
 class QGLBuffer;
 class ccProgressDialog;
-
-//! Maximum number of points (per cloud) displayed in a single LOD iteration
-/** \warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
-**/
-static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 3); //~ 65K * 8 = 512K
+class ccPointCloudLOD;
 
 /***************************************************
 				ccPointCloud
@@ -645,11 +640,6 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 	virtual void notifyGeometryUpdate() override;
 
-	//! Draws the cloud with the octree
-	void drawWithOctree(CC_DRAW_CONTEXT& context,
-						const CCLib::DgmOctree& octree,
-						const glDrawParams& glParams);
-
 	//inherited from ChunkedPointCloud
 	/** \warning Doesn't handle scan grids!
 	**/
@@ -756,15 +746,12 @@ public: //Level of Detail (LOD)
 	bool initLOD();
 
 	//! Clears the LOD structure
-	inline void clearLOD() { m_lod.clear(); }
+	void clearLOD();
 
-	//! Returns the LOD structure
-	inline ccPointCloudLOD& getLOD() { return m_lod; }
-
-protected:
+protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
-	ccPointCloudLOD m_lod;
+	ccPointCloudLOD* m_lod;
 };
 
 #endif //CC_POINT_CLOUD_HEADER

@@ -45,6 +45,7 @@
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccMinimumSpanningTreeForNormsDirection.h"
 #include "ccFrustum.h"
+#include "ccPointCloudLOD.h"
 
 //Qt
 #include <QElapsedTimer>
@@ -52,11 +53,6 @@
 
 //system
 #include <assert.h>
-
-bool ccPointCloud::initLOD()
-{
-	return m_lod.init(this);
-}
 
 ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
@@ -67,6 +63,7 @@ ccPointCloud::ccPointCloud(QString name) throw()
 	, m_currentDisplayedScalarField(0)
 	, m_currentDisplayedScalarFieldIndex(-1)
 	, m_visibilityCheckEnabled(false)
+	, m_lod(0)
 {
 	showSF(false);
 }
@@ -386,6 +383,12 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 ccPointCloud::~ccPointCloud()
 {
 	clear();
+
+	if (m_lod)
+	{
+		delete m_lod;
+		m_lod = 0;
+	}
 }
 
 void ccPointCloud::clear()
@@ -398,7 +401,7 @@ void ccPointCloud::clear()
 
 void ccPointCloud::unalloactePoints()
 {
-	m_lod.clear();
+	clearLOD();
 	showSFColorsScale(false); //SFs will be destroyed
 	ChunkedPointCloud::clear();
 	ccGenericPointCloud::clear();
@@ -411,7 +414,7 @@ void ccPointCloud::notifyGeometryUpdate()
 	ccHObject::notifyGeometryUpdate();
 
 	releaseVBOs();
-	m_lod.clear();
+	clearLOD();
 }
 
 ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
@@ -1846,6 +1849,15 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, unsigned
 	}
 }
 
+//Maximum number of points (per cloud) displayed in a single LOD iteration
+//warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+#ifdef _DEBUG
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 0); //~ 65K
+#else
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 3); //~ 65K * 8 = 512K
+//static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (MAX_NUMBER_OF_ELEMENTS_PER_CHUNK << 4); //~ 65K * 16 = 1024K
+#endif
+
 //Vertex indexes for OpenGL "arrays" drawing
 static PointCoordinateType s_pointBuffer [MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
 static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS*3];
@@ -1998,7 +2010,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, unsigned chu
 
 template <class QOpenGLFunctions> void glLODChunkVertexPointer(	ccPointCloud* cloud,
 																QOpenGLFunctions* glFunc,
-																const ccPointCloudLOD::IndexSet& indexMap,
+																const LODIndexSet& indexMap,
 																unsigned startIndex,
 																unsigned stopIndex)
 {
@@ -2020,7 +2032,7 @@ template <class QOpenGLFunctions> void glLODChunkVertexPointer(	ccPointCloud* cl
 
 template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTableType* normals,
 																QOpenGLFunctions* glFunc,
-																const ccPointCloudLOD::IndexSet& indexMap,
+																const LODIndexSet& indexMap,
 																unsigned startIndex,
 																unsigned stopIndex)
 {
@@ -2047,7 +2059,7 @@ template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTabl
 
 template <class QOpenGLFunctions> void glLODChunkColorPointer(	ColorsTableType* colors,
 																QOpenGLFunctions* glFunc, 
-																const ccPointCloudLOD::IndexSet& indexMap,
+																const LODIndexSet& indexMap,
 																unsigned startIndex,
 																unsigned stopIndex)
 {
@@ -2071,7 +2083,7 @@ template <class QOpenGLFunctions> void glLODChunkColorPointer(	ColorsTableType* 
 
 template <class QOpenGLFunctions> void glLODChunkSFPointer(	ccScalarField* sf,
 															QOpenGLFunctions* glFunc,
-															const ccPointCloudLOD::IndexSet& indexMap,
+															const LODIndexSet& indexMap,
 															unsigned startIndex,
 															unsigned stopIndex)
 {
@@ -2096,11 +2108,11 @@ template <class QOpenGLFunctions> void glLODChunkSFPointer(	ccScalarField* sf,
 }
 
 //description of the (sub)set of points to display
-struct DisplayDesc : ccPointCloudLOD::LevelDesc
+struct DisplayDesc : LODLevelDesc
 {
 	//! Default constructor
 	DisplayDesc()
-		: LevelDesc()
+		: LODLevelDesc()
 		, endIndex(0)
 		, indexMap(0)
 		, decimStep(1)
@@ -2108,14 +2120,14 @@ struct DisplayDesc : ccPointCloudLOD::LevelDesc
 
 	//! Constructor from a start index and a count value
 	DisplayDesc(unsigned startIndex, unsigned count)
-		: LevelDesc(startIndex, count)
+		: LODLevelDesc(startIndex, count)
 		, endIndex(startIndex+count)
 		, indexMap(0)
 		, decimStep(1)
 	{}
 
 	//! Set operator
-	DisplayDesc& operator = (const LevelDesc& desc)
+	DisplayDesc& operator = (const LODLevelDesc& desc)
 	{
 		startIndex = desc.startIndex;
 		count = desc.count;
@@ -2127,451 +2139,22 @@ struct DisplayDesc : ccPointCloudLOD::LevelDesc
 	unsigned endIndex;
 
 	//! Map of indexes (to invert the natural order)
-	ccPointCloudLOD::IndexSet* indexMap;
+	LODIndexSet* indexMap;
 
 	//! Decimation step (for non-octree based LoD)
 	unsigned decimStep;
 };
 
-void ccPointCloud::drawWithOctree(	CC_DRAW_CONTEXT& context,
-									const CCLib::DgmOctree& octree,
-									const glDrawParams& glParams)
+struct LODBasedRenderingParams
 {
-	if (!MACRO_Draw3D(context))
-	{
-		assert(false);
-		return;
-	}
-
-	const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree.pointsAndTheirCellCodes();
-	if (thePointsAndTheirCellCodes.empty())
-	{
-		return;
-	}
-
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-	if (glFunc == nullptr)
-	{
-		return;
-	}
-
-	//get the current viewport and OpenGL matrices
-	ccGLCameraParameters camera;
-	context._win->getGLCameraParameters(camera);
-	//relpace the viewport and matrices by the real ones
-	glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
-	glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
-	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
-
-	if (camera.viewport[2] < 2 || camera.viewport[3] < 2)
-	{
-		//screen is too small!
-		return;
-	}
-
-	//actual point size
-	float pointSize = 1.0f;
-	glFunc->glGetFloatv(GL_POINT_SIZE, &pointSize);
-
-	//'scale' of the model view matrix
-	double mvScale = camera.modelViewMat.getColumnAsVec3D(0).norm();
-	assert(	camera.modelViewMat.data()[ 3] == 0
-		&&	camera.modelViewMat.data()[ 7] == 0
-		&&	camera.modelViewMat.data()[11] == 0
-		&&	camera.modelViewMat.data()[15] == 1.0);
-
-	//starting level of subdivision
-	unsigned char minLevel = 1;
-
-	//ending level of subdivision (no need to go too deep!)
-	assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL >= 0 && CCLib::DgmOctree::MAX_OCTREE_LEVEL < 256);
-	unsigned char maxLevel = static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-
-	//find the max level for which all cells have one and only one point
-	for (; maxLevel > 1; --maxLevel)
-	{
-		if (octree.getCellNumber(maxLevel) != octree.getCellNumber(maxLevel - 1))
-		{
-			break;
-		}
-	}
-
-	//in orthographic mode, the cell size doesn't depend on its depth!
-	//therefore we can already determine the deepest octree depth that
-	//correspond to (too) small cells (i.e. <= 1 pixel)
-	if (!camera.perspective)
-	{
-		const double* _P = camera.projectionMat.data();
-
-		for (; maxLevel > minLevel; --maxLevel)
-		{
-			PointCoordinateType cellSize = octree.getCellSize(maxLevel) * mvScale;
-
-			double deltaX = (_P[0] + _P[4] + _P[8]) * cellSize;
-			double deltaY = (_P[1] + _P[5] + _P[9]) * cellSize;
-
-			double deltaXPix = deltaX * camera.viewport[2];
-			double deltaYPix = deltaY * camera.viewport[3];
-
-			//we stop as soon as the cell size is > 1 pixel
-			if (fabs(deltaXPix) > pointSize || fabs(deltaYPix) > pointSize)
-			{
-				break;
-			}
-		}
-	}
-
-	//check if the cloud is actually visible with this frustum
-	{
-		CCVector3 bbMin, bbMax;
-		getBoundingBox(bbMin, bbMax);
-
-		Frustum::Intersection cloudIntersect = Frustum(camera.modelViewMat, camera.projectionMat).boxInFrustum(AABox(bbMin, bbMax));
-		if (cloudIntersect == Frustum::OUTSIDE)
-		{
-			return;
-		}
-		//else if (cloudIntersect == Frustum::INSIDE && !camera.perspective)
-		//{
-		//	//we don't need to bother filetering the cells
-		//	//(we can display all of them at the max level!)
-		//	minLevel = maxLevel;
-		//}
-	}
-
-	//construct the LOCAL frustum
-	ccGLMatrixd localModelViewMat = camera.modelViewMat;
-	{
-		ccGLMatrixd transToOctreeMin;
-		transToOctreeMin.setTranslation(octree.getOctreeMins());
-		
-		localModelViewMat = localModelViewMat * transToOctreeMin;
-	}
-	Frustum localFrustum(localModelViewMat, camera.projectionMat);
-
-	unsigned char level = minLevel;
-	//current cell code
-	CCLib::DgmOctree::CellCode previousCellCode = CCLib::DgmOctree::INVALID_CELL_CODE;
-	//whether the current cell should be skipped or not
-	//bool skipThisCell = false;
-	//no need to split the cells below a given level
-	unsigned char maxSplitLevel = octree.findBestLevelForAGivenPopulationPerCell(128);
-	maxSplitLevel = std::min<unsigned char>(maxSplitLevel, (maxLevel > 2 ? maxLevel - 2 : 1));
-
-	//active scalar field (if any)
-	ccScalarField* activeSF = glParams.showSF ? m_currentDisplayedScalarField : 0;
-	assert(!glParams.showSF || activeSF);
-	//compressed normals set
-	const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
-	assert(compressedNormals);
-
-	//acceleration structures (perspective mode)
-	double cellRadius[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1] = { 0 };
-	double squareCellRadius[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1] = { 0 };
-	if (camera.perspective)
-	{
-		for (int i = 1/*0*/; i <= maxLevel/*CCLib::DgmOctree::MAX_OCTREE_LEVEL*/; ++i)
-		{
-			double halfCellSize = octree.getCellSize(i) / 2;
-			//cellRadius[i] = halfCellSize * 1.73 * mvScale; //~ sqrt(3)
-			cellRadius[i] = halfCellSize * 1.25 * mvScale; //empiricial
-			squareCellRadius[i] = cellRadius[i] * cellRadius[i];
-		}
-	}
-
-	//mask for each level
-	const CCLib::DgmOctree::CellCode FULL_CELL_MASK = (~static_cast<CCLib::DgmOctree::CellCode>(0));
-	CCLib::DgmOctree::CellCode levelMask[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1] = { 0 };
-	{
-		CCLib::DgmOctree::CellCode antiMask = 0;
-
-		for (int i = CCLib::DgmOctree::MAX_OCTREE_LEVEL; i > 0; --i)
-		{
-			levelMask[i] = (FULL_CELL_MASK ^ antiMask);
-			antiMask <<= 3;
-			antiMask |= 7;
-		}
-	}
-
-	//cell (center) position at the given level
-	CCVector3 cellOrigin[CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1];
-	cellOrigin[0] = CCVector3(0, 0, 0);
-
-	//mask for the displayed points (may be different than the cell mask
-	CCLib::DgmOctree::CellCode displayMask = levelMask[maxLevel];
-
-	//we use buffers for faster display
-	PointCoordinateType* _points = s_pointBuffer;
-	PointCoordinateType* _normals = s_normalBuffer;
-	ColorCompType* _rgb = s_rgbBuffer3ub;
-	GLsizei bufferCount = 0;
-
-	glFunc->glEnableClientState(GL_VERTEX_ARRAY);
-	if (glParams.showColors || glParams.showSF)
-	{
-		glFunc->glEnableClientState(GL_COLOR_ARRAY);
-	}
-	if (glParams.showNorms)
-	{
-		glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-	}
-
-	//let's sweep through the octree
-	for (CCLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin(); it != thePointsAndTheirCellCodes.end(); ++it)
-	{
-		//new cell?
-		if ((it->theCode & levelMask[level]) != (previousCellCode & levelMask[level]))
-		{
-			//look for the biggest 'parent' cell that englobes this cell and the previous one (if any)
-			for (; level > minLevel; --level)
-			{
-				if ((it->theCode & levelMask[level - 1]) == (previousCellCode & levelMask[level - 1]))
-				{
-					//same parent cell, we can continue at this level
-					break;
-				}
-			}
-
-			//default behavior: display all the points at 'max level'
-			displayMask = levelMask[maxLevel];
-
-			//shall we go deeper?
-			if (level < maxLevel)
-			{
-				Frustum::Intersection inter = Frustum::OUTSIDE;
-				for (; level < maxLevel; ++level)	//we could go up to maxLevel (to test if the cell is outside)
-													//but it would represent a lot of wasted computation for cells
-													//that are already very small anyway
-				{
-					//whether the cell should be tested for intersection with the frustum
-					bool splitCell = (inter != Frustum::INSIDE && level <= maxSplitLevel);
-
-					//update cell origin
-					if (	splitCell
-#ifdef FILTER_SMALL_CELLS
-						||	camera.perspective //we need to know the cell center (to test the cell visibility)
-#endif
-						)
-					{
-						const PointCoordinateType& cellSize = octree.getCellSize(level);
-
-						CCVector3 O = cellOrigin[level - 1];
-						{
-							unsigned char levelBits = static_cast<unsigned char>((it->theCode >> CCLib::DgmOctree::GET_BIT_SHIFT(level)) & 7);
-							if (levelBits & 1)
-								O.x += cellSize;
-							if (levelBits & 2)
-								O.y += cellSize;
-							if (levelBits & 4)
-								O.z += cellSize;
-						}
-						cellOrigin[level] = O;
-
-#ifdef FILTER_SMALL_CELLS
-						if (splitCell)
-#endif
-						{
-#ifdef DGM_OCTREE_LOD_TESTS
-							++context.cellInclusionTestCount;
-#endif
-
-							//test: check the intersection of the cell with the frustum
-							inter = localFrustum.boxInFrustum(AACube(cellOrigin[level], cellSize));
-							if (inter == Frustum::OUTSIDE)
-							{
-								//the cell is not visible (we can skip this cell)
-								displayMask = 0;
-								break;
-							}
-							else if (inter == Frustum::INTERSECT && level == maxSplitLevel)
-							{
-								//we consider this cell as beeing fully INSIDE so as to stop splitting it!
-								inter = Frustum::INSIDE;
-							}
-						}
-					}
-
-					if (inter == Frustum::INSIDE)
-					{
-						//in perspective mode, we have to check the cell size
-						//(if it's small enough, we can draw the first point and skip the remaining part)
-						if (camera.perspective)
-						{
-#ifdef FILTER_SMALL_CELLS
-							if (level > 10)
-							{
-								//compute the cell center
-								const double& halfCellSize = octree.getCellSize(level + 1); //level < maxLevel, i.e. level < DgmOctree::MAX_OCTREE_LEVEL
-								CCVector3 C = cellOrigin[level] + CCVector3(halfCellSize, halfCellSize, halfCellSize);
-
-								localModelViewMat.apply(C);
-								double squareDistToCamera = C.norm2();
-
-								if (squareDistToCamera > squareCellRadius[level])
-								{
-									//cellHeight ~ radius / (tan(fov/2) * sqrt(distance^2 - radius^2)) 
-									//and projMat[5] = 1 / tan(fov/2) !!!
-									double cellHeightPr = camera.projectionMat.data()[5] * cellRadius[level] / sqrt(squareDistToCamera - squareCellRadius[level]);
-									double cellRadiusPix = cellHeightPr * camera.viewport[3];
-									if (cellRadiusPix <= pointSize)
-									{
-										//no need to go deeper
-										displayMask = levelMask[level];
-										break;
-									}
-								}
-							}
-#else
-							break;
-#endif
-						}
-						else //orthographic mode
-						{
-							//we can stop going deeper and display the points at max level
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		//shall we display this cell?
-		if ((it->theCode & displayMask) != (previousCellCode & displayMask))
-		{
-			//we shouldn't test points that are actually hidden!
-			if (m_pointsVisibility && m_pointsVisibility->getValue(it->theIndex) != POINT_VISIBLE)
-			{
-				//point is hidden
-				continue;
-			}
-
-			if (activeSF)
-			{
-				const ColorCompType* col = activeSF->getColor(activeSF->getValue(it->theIndex));
-				if (!col)
-				{
-					if (m_pointsVisibility)
-					{
-						//we force the display of points hidden because of their scalar field value
-						//to be sure that the user doesn't miss them (during manual segmentation for instance)
-						col = ccColor::lightGrey.rgba;
-					}
-					else
-					{
-						//point is hidden
-						continue;
-					}
-				}
-
-				//ccGL::Color3v(glFunc, col);
-				*_rgb++ = col[0];
-				*_rgb++ = col[1];
-				*_rgb++ = col[2];
-			}
-			else if (glParams.showColors)
-			{
-				const ColorCompType* col = getPointColor(it->theIndex);
-
-				//ccGL::Color3v(glFunc, col);
-				*_rgb++ = col[0];
-				*_rgb++ = col[1];
-				*_rgb++ = col[2];
-			}
-			if (glParams.showNorms)
-			{
-				const CCVector3& N = compressedNormals->getNormal(m_normals->getValue(it->theIndex));
-				//ccGL::Normal3v(glFunc, N.u);
-				*_normals++ = N.x;
-				*_normals++ = N.y;
-				*_normals++ = N.z;
-			}
-
-			const CCVector3* P = getPoint(it->theIndex);
-			//ccGL::Vertex3v(glFunc, P->u);
-			*_points++ = P->x;
-			*_points++ = P->y;
-			*_points++ = P->z;
-
-			//test
-			//Tuple3i cellPos;
-			//octree.getCellPos(it->theCode, level, cellPos, false);
-			//CCVector3 C;
-			//octree.computeCellCenter(cellPos, level, C);
-			//*_points++ = C.x;
-			//*_points++ = C.y;
-			//*_points++ = C.z;
-
-
-			//buffer is full, we can send it to the GPU
-			if (++bufferCount == MAX_POINT_COUNT_PER_LOD_RENDER_PASS)
-			{
-				glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, s_pointBuffer);
-				if (_rgb != s_rgbBuffer3ub)
-				{
-					glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, s_rgbBuffer3ub);
-				}
-				if (_normals != s_normalBuffer)
-				{
-					glFunc->glNormalPointer(GL_COORD_TYPE, 0, s_normalBuffer);
-				}
-				glFunc->glDrawArrays(GL_POINTS, 0, bufferCount);
-
-#ifdef DGM_OCTREE_LOD_TESTS
-				context.displayedPointCount += bufferCount;
-#endif
-				//reset buffer
-				_points = s_pointBuffer;
-				_normals = s_normalBuffer;
-				_rgb = s_rgbBuffer3ub;
-				bufferCount = 0;
-			}
-		}
-		else
-		{
-#ifdef DGM_OCTREE_LOD_TESTS
-			++context.skippedPointCount;
-#endif
-		}
-
-		previousCellCode = it->theCode;
-	}
-
-	//buffer is not empty? we send the remaining data to the GPU
-	if (bufferCount != 0)
-	{
-		glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, s_pointBuffer);
-		if (_rgb != s_rgbBuffer3ub)
-		{
-			glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, s_rgbBuffer3ub);
-		}
-		if (_normals != s_normalBuffer)
-		{
-			glFunc->glNormalPointer(GL_COORD_TYPE, 0, s_normalBuffer);
-		}
-		glFunc->glDrawArrays(GL_POINTS, 0, bufferCount);
-
-#ifdef DGM_OCTREE_LOD_TESTS
-		context.displayedPointCount += bufferCount;
-#endif
-		//reset buffer
-		_points = s_pointBuffer;
-		_normals = s_normalBuffer;
-		_rgb = s_rgbBuffer3ub;
-		bufferCount = 0;
-	}
-
-	glFunc->glDisableClientState(GL_VERTEX_ARRAY);
-	if (glParams.showColors || glParams.showSF)
-	{
-		glFunc->glDisableClientState(GL_COLOR_ARRAY);
-	}
-	if (glParams.showNorms)
-	{
-		glFunc->glDisableClientState(GL_NORMAL_ARRAY);
-	}
-}
+	ccScalarField* activeSF;
+	const ccNormalVectors* compressedNormals;
+	PointCoordinateType* _points;
+	PointCoordinateType* _normals;
+	ColorCompType* _rgb;
+	GLsizei bufferCount;
+	QOpenGLFunctions_2_1* glFunc;
+};
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -2631,84 +2214,65 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				bool skipLoD = false;
 
 				//is there a LoD structure associated yet?
-				if (!m_lod.isBroken())
+				if (!m_lod || !m_lod->isBroken())
 				{
-					if (m_lod.isNull())
+					if (!m_lod || m_lod->isNull())
 					{
 						//auto-init LoD structure
+						//DGM: can't spawn a progress dialog here as the process will be async
 						//ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
 						initLOD(/*&pDlg*/);
 					}
 					else
 					{
-						unsigned char maxLevel = m_lod.maxLevel();
-						bool underConstruction = m_lod.isUnderConstruction();
+						assert(m_lod);
+
+						unsigned char maxLevel = m_lod->maxLevel();
+						bool underConstruction = m_lod->isUnderConstruction();
 
 						//if the cloud has less LOD levels than the minimum to display
-						if (maxLevel <= context.minLODLevel)
+						if (underConstruction || maxLevel == 0)
 						{
-							if (context.currentLODLevel == 0)
-							{
-								//we can display the cloud in fill resolution
-								if (!underConstruction)
-								{
-									//no need for LOD display
-									skipLoD = true;
-								}
-							}
-							else
-							{
-								//already displayed!
-								return;
-							}
+							//not yet ready
+							context.moreLODPointsAvailable = underConstruction;
+							context.higherLODLevelsAvailable = false;
 						}
 						else
 						{
 							if (context.currentLODLevel == 0)
 							{
-								toDisplay.indexMap = m_lod.indexes();
-								assert(toDisplay.indexMap);
-								//the first time (LoD level = 0), we display all the small levels at once
-								toDisplay.startIndex = 0;
-								toDisplay.count = 0;
-								{
-									for (unsigned char l = 1; l < context.minLODLevel; ++l)
-									{
-										toDisplay.count += m_lod.level(l).count;
-									}
-								}
-								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
+								//get the current viewport and OpenGL matrices
+								ccGLCameraParameters camera;
+								context._win->getGLCameraParameters(camera);
+								//relpace the viewport and matrices by the real ones
+								glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
+								glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
+								glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
+								//camera frustum
+								Frustum frustum(camera.modelViewMat, camera.projectionMat);
 
-								//could we draw more points? yes (we know that lod.levels.size() > context.minLODLevel)
-								context.higherLODLevelsAvailable = true;
+								//first time: we flag the cells visibility and count the number of visible points
+								m_lod->flagVisibility(frustum);
 							}
-							else if (context.currentLODLevel < maxLevel)
+
+							unsigned remainingPointsAtThisLevel = 0;
+							toDisplay.startIndex = 0;
+							toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+							toDisplay.indexMap = m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
+							if (toDisplay.count == 0)
 							{
-								toDisplay = m_lod.level(context.currentLODLevel);
-
-								if (toDisplay.count < context.currentLODStartIndex)
-								{
-									//nothing to do at this level
-									toDisplay.indexMap = 0;
-								}
-								else
-								{
-									toDisplay.indexMap = m_lod.indexes();
-									assert(toDisplay.indexMap);
-									//shift current draw range
-									toDisplay.startIndex += context.currentLODStartIndex;
-									toDisplay.count -= context.currentLODStartIndex;
-
-									if (toDisplay.count > MAX_POINT_COUNT_PER_LOD_RENDER_PASS)
-									{
-										toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
-										context.moreLODPointsAvailable = true;
-									}
-								}
-
-								//could we draw more points at the next level?
-								context.higherLODLevelsAvailable = underConstruction || (context.currentLODLevel + 1 < maxLevel);
+								//nothing to draw at this level
+								toDisplay.indexMap = 0;
 							}
+							else
+							{
+								assert(toDisplay.count == toDisplay.indexMap->currentSize());
+								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
+							}
+
+							//could we draw more points at the next level?
+							context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
+							context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
 						}
 					}
 				}
@@ -2721,7 +2285,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						return;
 					}
 
-					if (toDisplay.count > context.minLODPointCount && context.minLODPointCount != 0)
+					//we wait for the LOD to be ready
+					//meanwhile we will display less points
+					if (context.minLODPointCount && toDisplay.count > context.minLODPointCount)
 					{
 						GLint maxStride = 2048;
 #ifdef GL_MAX_VERTEX_ATTRIB_STRIDE
@@ -2734,6 +2300,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 		}
+
 		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
 		bool colorMaterialEnabled = false;
 
@@ -2782,13 +2349,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glPointSize(static_cast<GLfloat>(m_pointSize));
 		}
 
-		//DGM TEST
-		//ccOctree::Shared octree = getOctree();
-		//if (octree)
-		//{
-		//	drawWithOctree(context, *octree, glParams);
-		//}
-		//else
+		//main display procedure
 		{
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
@@ -5112,4 +4673,21 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 	}
 
 	return POINT_VISIBLE;
+}
+
+bool ccPointCloud::initLOD()
+{
+	if (!m_lod)
+	{
+		m_lod = new ccPointCloudLOD;
+	}
+	return m_lod->init(this);
+}
+
+void ccPointCloud::clearLOD()
+{
+	if (m_lod)
+	{
+		m_lod->clear();
+	}
 }

@@ -41,6 +41,8 @@ v2.7.0 - 04/XX/2016
 	* ICP registration
 		- the user can now set the maximum number of threads/core to use
 
+	* LOD mechanims enhanced (faster and smarter)
+
 - Bug fix:
 	
 	* The HSV to RGB method was broken

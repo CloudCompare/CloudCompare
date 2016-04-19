@@ -60,15 +60,24 @@ protected:
 		//first count the number of points and compute their center
 		{
 			node.pointCount = 0;
+#ifdef COMPUTE_REAL_RADIUS
 			CCVector3d sumP(0, 0, 0);
+#else //otherwise we use the bounding box
+			ccBBox bbox;
+#endif
 			for (uint32_t codeIndex = node.firstCodeIndex; codeIndex < cellCodes.size() && (cellCodes[codeIndex].theCode >> bitDec) == currentTruncatedCellCode; ++codeIndex)
 			{
 				++node.pointCount;
 				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
+#ifdef COMPUTE_REAL_RADIUS
 				sumP += CCVector3d::fromArray(P->u);
+#else
+				bbox.add(*P);
+#endif
 			}
 
 			//compute the radius
+#ifdef COMPUTE_REAL_RADIUS
 			if (node.pointCount > 1)
 			{
 				sumP /= node.pointCount;
@@ -84,9 +93,15 @@ protected:
 				}
 				node.radius = static_cast<float>(sqrt(maxSquareRadius));
 			}
-
 			//update the center
 			node.center = CCVector3f::fromArray(sumP.u);
+#else
+			if (node.pointCount > 1)
+			{
+				node.radius = static_cast<float>(bbox.getDiagNormd());
+			}
+			node.center = CCVector3f::fromArray(bbox.getCenter().u);
+#endif
 		}
 
 		//do we need to subdivide this cell?

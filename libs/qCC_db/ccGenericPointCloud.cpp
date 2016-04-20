@@ -182,13 +182,17 @@ ccOctree::Shared ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallba
 	return octree;
 }
 
-CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
+CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(VisibilityTableType* visTable/*=0*/) const
 {
-	unsigned count = size();
-	assert(count == m_pointsVisibility->currentSize());
-
-	if (!m_pointsVisibility || m_pointsVisibility->currentSize() != count)
+	if (!visTable)
 	{
+		visTable = m_pointsVisibility;
+	}
+
+	unsigned count = size();
+	if (!visTable || visTable->currentSize() != count)
+	{
+		assert(false);
 		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No visibility table instantiated!");
 		return 0;
 	}
@@ -197,7 +201,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 	unsigned pointCount = 0;
 	{
 		for (unsigned i=0; i<count; ++i)
-			if (m_pointsVisibility->getValue(i) == POINT_VISIBLE)
+			if (visTable->getValue(i) == POINT_VISIBLE)
 				++pointCount;
 	}
 
@@ -212,7 +216,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 	if (rc->reserve(pointCount))
 	{
 		for (unsigned i=0; i<count; ++i)
-			if (m_pointsVisibility->getValue(i) == POINT_VISIBLE)
+			if (visTable->getValue(i) == POINT_VISIBLE)
 				rc->addPointIndex(i); //can't fail (see above)
 	}
 	else

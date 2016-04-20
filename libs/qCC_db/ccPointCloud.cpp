@@ -2252,7 +2252,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								Frustum frustum(camera.modelViewMat, camera.projectionMat);
 
 								//first time: we flag the cells visibility and count the number of visible points
-								m_lod->flagVisibility(frustum);
+								m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? 0 : &m_clipPlanes);
 							}
 
 							unsigned remainingPointsAtThisLevel = 0;
@@ -2872,23 +2872,35 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 }
 
-ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints)
+ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=0*/)
 {
-	if (!isVisibilityTableInstantiated())
+	if (!visTable)
 	{
-		ccLog::Error(QString("[Cloud %1] Visibility table not instantiated!").arg(getName()));
-		return 0;
+		if (!isVisibilityTableInstantiated())
+		{
+			ccLog::Error(QString("[Cloud %1] Visibility table not instantiated!").arg(getName()));
+			return 0;
+		}
+		visTable = m_pointsVisibility;
+	}
+	else
+	{
+		if (visTable->currentSize() != size())
+		{
+			ccLog::Error(QString("[Cloud %1] Invalid input visibility table").arg(getName()));
+			return 0;
+		}
 	}
 
 	//we create a new cloud with the "visible" points
 	ccPointCloud* result = 0;
 	{
 		//we create a temporary entity with the visible points only
-		CCLib::ReferenceCloud* rc = getTheVisiblePoints();
+		CCLib::ReferenceCloud* rc = getTheVisiblePoints(visTable);
 		if (!rc)
 		{
 			//a warning message has already been issued by getTheVisiblePoints!
-			//ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during points selection!");
+			//ccLog::Warning("[ccPointCloud] An error occurred during points selection!");
 			return 0;
 		}
 		assert(rc->size() != 0);
@@ -2903,11 +2915,11 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 	if (!result)
 	{
-		ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during segmentation!");
+		ccLog::Warning("[ccPointCloud] Failed to generate a subset cloud");
 		return 0;
 	}
 
-	result->setName(getName()+QString(".segmented"));
+	result->setName(getName() + QString(".segmented"));
 
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints && !isLocked())

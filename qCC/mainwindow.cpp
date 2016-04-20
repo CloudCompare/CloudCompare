@@ -3299,7 +3299,7 @@ void MainWindow::doActionSubdivideMesh()
 				{
 					subdividedMesh->setName(QString("%1.subdivided(S<%2)").arg(mesh->getName()).arg(s_subdivideMaxArea));
 					subdividedMesh->setDisplay(mesh->getDisplay());
-					mesh->refreshDisplay_recursive();
+					mesh->redrawDisplay();
 					mesh->setEnabled(false);
 					addToDB(subdividedMesh);
 				}
@@ -4001,7 +4001,7 @@ void MainWindow::doActionSubsample()
 				cloud->setEnabled(false);
 				addToDB(newPointCloud);
 
-				newPointCloud->refreshDisplay();
+				newPointCloud->prepareDisplayForRefresh();
 				resultingClouds.push_back(newPointCloud);
 
 				if (warnings)

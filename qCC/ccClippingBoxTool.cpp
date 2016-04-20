@@ -229,9 +229,9 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 	//set proper "steps" value for slice thickness editors
 	{
 		CCVector3 diag = entity->getOwnBB().getDiagVec();
-		thickXDoubleSpinBox->setSingleStep(static_cast<double>(diag.x) / 100.0);
-		thickYDoubleSpinBox->setSingleStep(static_cast<double>(diag.y) / 100.0);
-		thickZDoubleSpinBox->setSingleStep(static_cast<double>(diag.z) / 100.0);
+		thickXDoubleSpinBox->setSingleStep(diag.x / 100.0);
+		thickYDoubleSpinBox->setSingleStep(diag.y / 100.0);
+		thickZDoubleSpinBox->setSingleStep(diag.z / 100.0);
 	}
 
 	s_maxEdgeLength = -1.0;
@@ -349,14 +349,33 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 
 	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
-		if (!cloud)
+		ccGenericPointCloud* inputCloud = ccHObjectCaster::ToGenericPointCloud(obj);
+
+		ccGenericPointCloud::VisibilityTableType* selectionTable = new ccGenericPointCloud::VisibilityTableType;
+		if (!selectionTable->resize(inputCloud->size()))
 		{
+			selectionTable->release();
+			selectionTable = 0;
+			
 			if (!silent)
+			{
 				ccLog::Error("Not enough memory!");
+			}
 			return 0;
 		}
-		return cloud;
+		clipBox->flagPointsInside(inputCloud, selectionTable);
+		
+		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, selectionTable);
+		
+		//we don't need the table anymore
+		selectionTable->release();
+		selectionTable = 0;
+
+		if (!sliceCloud && !silent)
+		{
+			ccLog::Error("Not enough memory!");
+		}
+		return sliceCloud;
 	}
 	else if (obj->isKindOf(CC_TYPES::MESH))
 	{
@@ -369,7 +388,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 
 		const ccBBox& cropBox = clipBox->getBox();
-		ccHObject* mesh = ccCropTool::Crop(obj,cropBox,true,_transformation);
+		ccHObject* mesh = ccCropTool::Crop(obj, cropBox, true, _transformation);
 		if (!mesh)
 		{
 			if (!silent)
@@ -531,12 +550,12 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 					return;
 				}
 
-				PointCoordinateType a = (localBox.minCorner().u[d] - gridOrigin.u[d])/cellSizePlusGap.u[d]; //don't forget the user defined gap between 'cells'
-				PointCoordinateType b = (localBox.maxCorner().u[d] - gridOrigin.u[d])/cellSizePlusGap.u[d];
+				PointCoordinateType a = (localBox.minCorner().u[d] - gridOrigin.u[d]) / cellSizePlusGap.u[d]; //don't forget the user defined gap between 'cells'
+				PointCoordinateType b = (localBox.maxCorner().u[d] - gridOrigin.u[d]) / cellSizePlusGap.u[d];
 
-				indexMins[d] = static_cast<int>(floor(a+static_cast<PointCoordinateType>(1.0e-6)));
-				indexMaxs[d] = static_cast<int>(ceil(b-static_cast<PointCoordinateType>(1.0e-6)))-1;
-				
+				indexMins[d] = static_cast<int>(floor(a + static_cast<PointCoordinateType>(1.0e-6)));
+				indexMaxs[d] = static_cast<int>(ceil(b - static_cast<PointCoordinateType>(1.0e-6))) - 1;
+
 				assert(indexMaxs[d] >= indexMins[d]);
 				gridDim[d] = std::max(indexMaxs[d] - indexMins[d] + 1, 1);
 				cellCount *= static_cast<unsigned>(gridDim[d]);
@@ -608,7 +627,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 				pDlg.show();
 				QApplication::processEvents();
 
-				CCLib::NormalizedProgress nProgress(&pDlg,pointCount);
+				CCLib::NormalizedProgress nProgress(&pDlg, pointCount);
 				for (unsigned i=0; i<pointCount; ++i)
 				{
 					CCVector3 P = *cloud->getPoint(i);
@@ -632,7 +651,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						&&	(P.y-static_cast<PointCoordinateType>(yi))*cellSizePlusGap.y <= cellSize.y
 						&&	(P.z-static_cast<PointCoordinateType>(zi))*cellSizePlusGap.z <= cellSize.z) )
 					{
-						int cloudIndex = ((zi-indexMins[2]) * static_cast<int>(gridDim[1]) + (yi-indexMins[1])) * static_cast<int>(gridDim[0]) + (xi-indexMins[0]);
+						int cloudIndex = ((zi - indexMins[2]) * static_cast<int>(gridDim[1]) + (yi - indexMins[1])) * static_cast<int>(gridDim[0]) + (xi - indexMins[0]);
 						assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) < refClouds.size());
 
 						if (!refClouds[cloudIndex])
@@ -672,16 +691,16 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 					{
 						for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
 						{
-							int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
+							int cloudIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
 							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) < refClouds.size());
 
 							if (refClouds[cloudIndex]) //some slices can be empty due to rounding issues!
 							{
 								//generate slice from previous selection
 								int warnings = 0;
-								ccPointCloud* sliceCloud = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud)->partialClone(refClouds[cloudIndex],&warnings) : ccPointCloud::From(refClouds[cloudIndex],cloud);
+								ccPointCloud* sliceCloud = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud)->partialClone(refClouds[cloudIndex], &warnings) : ccPointCloud::From(refClouds[cloudIndex], cloud);
 								warningsIssued |= (warnings != 0);
-							
+
 								if (sliceCloud)
 								{
 									if (generateRandomColors)
@@ -760,16 +779,16 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			QApplication::processEvents();
 			
 			//now extract the slices
-			for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
+			for (int i = indexMins[0]; i <= indexMaxs[0]; ++i)
 			{
-				for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
+				for (int j = indexMins[1]; j <= indexMaxs[1]; ++j)
 				{
-					for (int k=indexMins[1]; k<=indexMaxs[2]; ++k)
+					for (int k = indexMins[1]; k <= indexMaxs[2]; ++k)
 					{
-						int sliceIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
-						
-						CCVector3 C = gridOrigin + CCVector3(i*cellSizePlusGap.x,j*cellSizePlusGap.y,k*cellSizePlusGap.z);
-						ccBBox cropBox(C,C+cellSize);
+						int sliceIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
+
+						CCVector3 C = gridOrigin + CCVector3(i*cellSizePlusGap.x, j*cellSizePlusGap.y, k*cellSizePlusGap.z);
+						ccBBox cropBox(C, C + cellSize);
 
 						ccHObject* croppedEnt = ccCropTool::Crop(obj, cropBox, true, _transformation);
 						if (croppedEnt)
@@ -797,14 +816,14 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 							croppedEnt->setDisplay(cloud->getDisplay());
 
 							QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(C.x).arg(C.y).arg(C.z);
-							croppedEnt->setName(QString("slice @ ")+slicePosStr);
+							croppedEnt->setName(QString("slice @ ") + slicePosStr);
 
 							//add slice to group
 							sliceGroup->addChild(croppedEnt);
 							assert(sliceIndex >= 0 && static_cast<size_t>(sliceIndex) < slices.size());
 							slices[sliceIndex] = croppedEnt;
 						}
-						
+
 						if (pDlg.wasCanceled())
 						{
 							error = true;

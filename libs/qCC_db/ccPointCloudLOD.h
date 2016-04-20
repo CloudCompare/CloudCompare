@@ -155,7 +155,7 @@ public:
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
 	**/
-	uint32_t flagVisibility(const Frustum& frustum);
+	uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = 0);
 
 	//! Builds an index map with the remaining visible points
 	LODIndexSet* getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);

@@ -558,6 +558,20 @@ public:
 		, m_maxLevel(maxLevel)
 	{}
 
+	void setClipPlanes(const ccClipPlaneSet& clipPlanes)
+	{
+		try
+		{
+			m_clipPlanes = clipPlanes;
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			m_hasClipPlanes = false;
+		}
+		m_hasClipPlanes = !m_clipPlanes.empty();
+	}
+
 	void propagateFlag(ccPointCloudLOD::Node& node, uint8_t flag)
 	{
 		node.intersection = flag;
@@ -577,6 +591,29 @@ public:
 	uint32_t flag(ccPointCloudLOD::Node& node)
 	{
 		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
+		if (m_hasClipPlanes && node.intersection != Frustum::OUTSIDE)
+		{
+			for (size_t i = 0; i < m_clipPlanes.size(); ++i)
+			{
+				//distance from center to clip plane
+				//we assume the plane normal (= 3 first coefficients) is normalized!
+				const Tuple4Tpl<double>& eq = m_clipPlanes[i].equation;
+				double dist = eq.x * node.center.x + eq.y * node.center.y + eq.z * node.center.z + eq.w /* / CCVector3d::vnorm(eq.u) */;
+
+				if (dist < node.radius)
+				{
+					if (dist <= -node.radius)
+					{
+						node.intersection = Frustum::OUTSIDE;
+						break;
+					}
+					else
+					{
+						node.intersection = Frustum::INTERSECT;
+					}
+				}
+			}
+		}
 
 		uint32_t visibleCount = 0;
 		switch (node.intersection)
@@ -628,9 +665,11 @@ public:
 	ccPointCloudLOD& m_lod;
 	const Frustum& m_frustum;
 	unsigned char m_maxLevel;
+	ccClipPlaneSet m_clipPlanes;
+	bool m_hasClipPlanes;
 };
 
-uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum)
+uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes/*=0*/)
 {
 	if (m_state != INITIALIZED)
 	{
@@ -641,7 +680,13 @@ uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum)
 
 	resetVisibility();
 
-	m_currentState.visiblePoints = PointCloudLODVisibilityFlagger(*this, frustum, static_cast<unsigned char>(m_levels.size())).flag(root());
+	PointCloudLODVisibilityFlagger lodVisibility(*this, frustum, static_cast<unsigned char>(m_levels.size()));
+	if (clipPlanes)
+	{
+		lodVisibility.setClipPlanes(*clipPlanes);
+	}
+
+	m_currentState.visiblePoints = lodVisibility.flag(root());
 
 	return m_currentState.visiblePoints;
 }

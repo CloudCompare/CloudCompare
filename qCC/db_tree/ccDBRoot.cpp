@@ -947,7 +947,7 @@ void ccDBRoot::redrawCCObjectAndChildren(ccHObject* object)
 	assert(object);
 
 	object->prepareDisplayForRefresh_recursive();
-	object->refreshDisplay_recursive();
+	object->refreshDisplay_recursive(/*only2D=*/false);
 }
 
 int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)

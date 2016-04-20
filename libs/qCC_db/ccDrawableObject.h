@@ -36,6 +36,7 @@ struct ccClipPlane
 {
 	Tuple4Tpl<double> equation;
 };
+typedef std::vector<ccClipPlane> ccClipPlaneSet;
 
 //! Generic interface for (3D) drawable entities
 class QCC_DB_LIB_API ccDrawableObject
@@ -176,9 +177,10 @@ public: //associated display management
 	virtual void prepareDisplayForRefresh();
 
 	//! Refreshes associated GL display
-	/** See ccGenericGLDisplay::refresh.
+	/** See ccGenericGLDisplay::refresh. The display will only be updated
+		if it has been 'prepared for refresh' (see prepareDisplayForRefresh).
 	**/
-	virtual void refreshDisplay();
+	virtual void refreshDisplay(bool only2D = false);
 
 public: //Transformation matrix management (for display only)
 
@@ -283,7 +285,7 @@ protected: //members
 	ccGenericGLDisplay* m_currentDisplay;
 
 	//! Active clipping planes (used for display only)
-	std::vector<ccClipPlane> m_clipPlanes;
+	ccClipPlaneSet m_clipPlanes;
 };
 
 #endif //CC_DRAWABLE_OBJECT_HEADER

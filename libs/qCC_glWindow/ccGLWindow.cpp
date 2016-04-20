@@ -1358,7 +1358,7 @@ void ccGLWindow::redraw(bool only2D/*=false*/, bool resetLOD/*=true*/)
 		m_updateFBO = true;
 	}
 
-	if (!m_autoRefresh)
+	if (isVisible() && !m_autoRefresh)
 	{
 		update();
 	}

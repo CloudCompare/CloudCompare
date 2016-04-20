@@ -57,10 +57,10 @@ void ccDrawableObject::redrawDisplay()
 		m_currentDisplay->redraw();
 }
 
-void ccDrawableObject::refreshDisplay()
+void ccDrawableObject::refreshDisplay(bool only2D/*=false*/)
 {
 	if (m_currentDisplay)
-		m_currentDisplay->refresh();
+		m_currentDisplay->refresh(only2D);
 }
 
 void ccDrawableObject::prepareDisplayForRefresh()

@@ -1117,13 +1117,13 @@ namespace ccEntityAction
 				{
 					cloud->setCurrentDisplayedScalarField(sfIdx);
 					cloud->showSF(true);
-					cloud->refreshDisplay();
+					cloud->prepareDisplayForRefresh();
 					
 					//mesh vertices?
 					if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
 					{
 						cloud->getParent()->showSF(true);
-						cloud->getParent()->refreshDisplay();
+						cloud->getParent()->prepareDisplayForRefresh();
 					}
 					
 					if (!fieldsStr.isEmpty())
@@ -1141,7 +1141,7 @@ namespace ccEntityAction
 			if (!fieldsStr.isEmpty())
 				ccLog::Print(QString("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr).arg(cloud->getName()));
 		}
-		
+
 		return true;
 	}
 	

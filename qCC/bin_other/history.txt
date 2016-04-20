@@ -4,6 +4,9 @@ v2.7.0 - 04/XX/2016
 
 - Enhancements:
 	
+	* Clipping-box tool
+		- Now based on OpenGL for a much faster display (+ proper integration in the new LOD mechanism)
+
 	* Rasterize tool improved
 		- Now handles RGB colors
 		- Raster export dialog updated

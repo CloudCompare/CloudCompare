@@ -36,6 +36,8 @@ static QSharedPointer<ccCone> c_arrowHead(0);
 static QSharedPointer<ccSphere> c_centralSphere(0);
 static QSharedPointer<ccTorus> c_torus(0);
 
+#define USE_OPENGL
+
 void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
@@ -221,7 +223,7 @@ void ccClipBox::update()
 	ccGLMatrix transformation;
 	get(extents, transformation);
 
-	CCVector3 C = extents.getCenter();
+	CCVector3 C = transformation * extents.getCenter();
 	CCVector3 halfDim = extents.getDiagVec() / 2;
 
 	//for each dimension
@@ -229,28 +231,31 @@ void ccClipBox::update()
 	{
 		CCVector3 N = transformation.getColumnAsVec3D(d);
 		//positive side
+		if (true)
 		{
 			ccClipPlane posPlane;
 			posPlane.equation.x = N.x;
 			posPlane.equation.y = N.y;
 			posPlane.equation.z = N.z;
 
-			//compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C + half_dim * N)).N = 0
-			posPlane.equation.w = -(static_cast<double>(C.dot(N)) + halfDim.u[d]);
+			//compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C - half_dim * N)).N = 0
+			posPlane.equation.w = -static_cast<double>(C.dot(N)) + halfDim.u[d];
 			m_associatedEntity->addClipPlanes(posPlane);
 		}
 
 		//negative side
-		//{
-		//	ccClipPlane negPlane;
-		//	negPlane.equation.x = -N.x;
-		//	negPlane.equation.y = -N.y;
-		//	negPlane.equation.z = -N.z;
+		if (true)
+		{
+			ccClipPlane negPlane;
+			negPlane.equation.x = -N.x;
+			negPlane.equation.y = -N.y;
+			negPlane.equation.z = -N.z;
 
-		//	//compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C + half_dim * N)).N = 0
-		//	negPlane.equation.w = (static_cast<double>(C.dot(N)) + halfDim.u[d]);
-		//	m_associatedEntity->addClipPlanes(negPlane);
-		//}
+			//compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C + half_dim * N)).N = 0
+			//negPlane.equation.w = -(static_cast<double>(C.dot(N)) + halfDim.u[d]);
+			negPlane.equation.w = static_cast<double>(C.dot(N)) + halfDim.u[d];
+			m_associatedEntity->addClipPlanes(negPlane);
+		}
 	}
 #else
 	flagPointsInside();

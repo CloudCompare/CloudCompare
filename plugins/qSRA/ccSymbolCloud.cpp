@@ -183,10 +183,10 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//viewport parameters (will be used to project 3D positions to 2D)
 		ccGLCameraParameters camera;
-		context._win->getGLCameraParameters(camera);
+		context.display->getGLCameraParameters(camera);
 
 		//only usefull when displaying labels!
-		QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
+		QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
 		font.setPointSize(static_cast<int>(m_fontSize * context.renderZoom));
 		//font.setBold(true);
 		QFontMetrics fontMetrics(font);
@@ -234,13 +234,13 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (m_showLabels && hasLabels && m_labels.size() > i && !m_labels[i].isNull())
 				{
 					//draw label
-					context._win->displayText(	m_labels[i],
-												static_cast<int>(Q2D.x + xpShift),
-												static_cast<int>(Q2D.y + ypShift),
-												m_labelAlignFlags,
-												0,
-												color,
-												&font);
+					context.display->displayText(	m_labels[i],
+													static_cast<int>(Q2D.x + xpShift),
+													static_cast<int>(Q2D.y + ypShift),
+													m_labelAlignFlags,
+													0,
+													color,
+													&font);
 				}
 
 			}

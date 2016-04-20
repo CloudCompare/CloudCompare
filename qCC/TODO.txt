@@ -45,6 +45,7 @@ qAnimation plugin:
 
 Various:
 
+[*] Export 3D shapefiles (http://www.cloudcompare.org/forum/viewtopic.php?t=1400)
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Volume calculation tool: make the resulting grid values available as a scalar field (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)

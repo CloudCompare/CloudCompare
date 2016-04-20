@@ -573,7 +573,7 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	switch (m_selectionBehavior)
 	{
 	case SELECTION_AA_BBOX:
-		getDisplayBB_recursive(true,m_currentDisplay).draw(context, col);
+		getDisplayBB_recursive(true, m_currentDisplay).draw(context, col);
 		break;
 	
 	case SELECTION_FIT_BBOX:
@@ -608,7 +608,7 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 
 void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 {
-	if (!context._win)
+	if (!context.display)
 		return;
 
 	//we display it in the 2D layer in fact!
@@ -620,20 +620,20 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	getAbsoluteGLTransformation(trans);
 
 	ccGLCameraParameters camera;
-	context._win->getGLCameraParameters(camera);
+	context.display->getGLCameraParameters(camera);
 
 	CCVector3 C = bBox.getCenter();
 	CCVector3d Q2D;
 	camera.project(C, Q2D);
 
-	QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
-	context._win->displayText(	getName(),
-								static_cast<int>(Q2D.x),
-								static_cast<int>(Q2D.y),
-								ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
-								0.75f,
-								0,
-								&font);
+	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
+	context.display->displayText(	getName(),
+									static_cast<int>(Q2D.x),
+									static_cast<int>(Q2D.y),
+									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
+									0.75f,
+									0,
+									&font);
 }
 
 void ccHObject::draw(CC_DRAW_CONTEXT& context)
@@ -652,7 +652,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	bool draw3D = MACRO_Draw3D(context);
 	
 	//the entity must be either visible or selected, and of course it should be displayed in this context
-	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
+	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context.display);
 
 	if (draw3D)
 	{
@@ -665,7 +665,8 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		}
 
 		//LOD for clouds is enabled?
-		if (context.decimateCloudOnMove)
+		if (	context.decimateCloudOnMove
+			&&	context.currentLODLevel > 0)
 		{
 			//only for real clouds
 			drawInThisContext &= isA(CC_TYPES::POINT_CLOUD);
@@ -681,7 +682,20 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			//apply default color (in case of)
 			ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
 
+			//enable clipping planes (if any)
+			bool useClipPlanes = (draw3D && !m_clipPlanes.empty());
+			if (useClipPlanes)
+			{
+				toggleClipPlanes(context, true);
+			}
+
 			drawMeOnly(context);
+
+			//disable clipping planes (if any)
+			if (useClipPlanes)
+			{
+				toggleClipPlanes(context, false);
+			}
 
 			//draw name in 3D (we display it in the 2D foreground layer in fact!)
 			if (m_showNameIn3D && MACRO_Draw2D(context) && MACRO_Foreground(context) && !MACRO_DrawEntityNames(context))

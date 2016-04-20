@@ -202,9 +202,9 @@ void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 {
 	const ccScalarField* sf = context.sfColorScaleToDisplay;
-	ccGLWindow* win = static_cast<ccGLWindow*>(context._win);
+	ccGLWindow* display = static_cast<ccGLWindow*>(context.display);
 
-	DrawColorRamp(context, sf, win, context.glW, context.glH, context.renderZoom);
+	DrawColorRamp(context, sf, display, context.glW, context.glH, context.renderZoom);
 }
 
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom/*=1.0f*/)

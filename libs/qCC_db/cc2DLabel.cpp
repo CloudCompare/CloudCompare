@@ -768,8 +768,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			
 				//build-up point maker own 'context'
 				CC_DRAW_CONTEXT markerContext = context;
-				markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-				markerContext._win = 0;
+				markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+				markerContext.display = 0;
 
 				if (isSelected() && !pushName)
 					c_unitPointMarker->setTempColor(ccColor::red);
@@ -791,7 +791,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 			if (m_dispIn3D && !pushName) //no need to display label in point picking mode
 			{
-				QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
+				QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
 				//font.setPointSize(font.pointSize()+2);
 				font.setBold(true);
 				static const QChar ABC[3] = {'A','B','C'};
@@ -799,7 +799,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				//we can't use the context 'ccGLCameraParameters' (viewport, modelView matrix, etc. )
 				//because it doesn't take the temporary 'GL transformation' into account!
 				ccGLCameraParameters camera;
-				//context._win->getGLCameraParameters(camera);
+				//context.display->getGLCameraParameters(camera);
 				glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
 				glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 				glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
@@ -822,13 +822,13 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					CCVector3d Q2D;
 					camera.project(*P, Q2D);
 
-					context._win->displayText(	title,
-												static_cast<int>(Q2D.x) + context.labelMarkerTextShift_pix,
-												static_cast<int>(Q2D.y) + context.labelMarkerTextShift_pix,
-												ccGenericGLDisplay::ALIGN_DEFAULT,
-												context.labelOpacity / 100.0f,
-												ccColor::white.rgba,
-												&font );
+					context.display->displayText(	title,
+													static_cast<int>(Q2D.x) + context.labelMarkerTextShift_pix,
+													static_cast<int>(Q2D.y) + context.labelMarkerTextShift_pix,
+													ccGenericGLDisplay::ALIGN_DEFAULT,
+													context.labelOpacity / 100.0f,
+													ccColor::white.rgba,
+													&font );
 				}
 				glFunc->glPopAttrib();
 			}
@@ -981,7 +981,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//project it in 2D screen coordinates
 		{
 			ccGLCameraParameters camera;
-			context._win->getGLCameraParameters(camera);
+			context.display->getGLCameraParameters(camera);
 
 			CCVector3d Q2D;
 			camera.project(arrowDest, Q2D);
@@ -990,7 +990,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 
 		/*** label border ***/
-		bodyFont = context._win->getLabelDisplayFont(); //takes rendering zoom into account!
+		bodyFont = context.display->getLabelDisplayFont(); //takes rendering zoom into account!
 		titleFont = bodyFont; //takes rendering zoom into account!
 		//titleFont.setBold(true);
 
@@ -1328,13 +1328,13 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 
 		//label title
-		context._win->displayText(	title,
-									xStart+xStartRel,
-									yStart+yStartRel,
-									ccGenericGLDisplay::ALIGN_DEFAULT,
-									0,
-									defaultTextColor.rgb,
-									&titleFont);
+		context.display->displayText(	title,
+										xStart+xStartRel,
+										yStart+yStartRel,
+										ccGenericGLDisplay::ALIGN_DEFAULT,
+										0,
+										defaultTextColor.rgb,
+										&titleFont);
 		yStartRel -= margin;
 		
 		if (m_showFullBody)
@@ -1390,9 +1390,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
 					}
 
-					context._win->displayText(	str,
-												xStart+xCol+tabMarginX+xShift,
-												yStart+yRow-rowHeight,ccGenericGLDisplay::ALIGN_DEFAULT,0,textColor,&bodyFont);
+					context.display->displayText(	str,
+													xStart + xCol + tabMarginX + xShift,
+													yStart + yRow - rowHeight, ccGenericGLDisplay::ALIGN_DEFAULT, 0, textColor, &bodyFont);
 
 					yRow -= height;
 				}
@@ -1407,7 +1407,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				for (int i=0; i<body.size(); ++i)
 				{
 					yStartRel -= rowHeight;
-					context._win->displayText(body[i],xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor.rgb,&bodyFont);
+					context.display->displayText(body[i],xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor.rgb,&bodyFont);
 				}
 			}
 #endif //DRAW_CONTENT_AS_TAB

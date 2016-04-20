@@ -217,8 +217,8 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 
 				//fake context
 				CC_DRAW_CONTEXT context;
-				context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
-				context._win = 0;
+				context.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+				context.display = 0;
 
 				void* additionalParameters[] = {	reinterpret_cast<void*>(&glParams),
 													reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),

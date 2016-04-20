@@ -1561,10 +1561,10 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	glFunc->glLineWidth(m_viewportParams.defaultLineWidth);
 	glFunc->glDisable(GL_DEPTH_TEST);
 
-	CONTEXT.flags = CC_DRAW_2D;
+	CONTEXT.drawingFlags = CC_DRAW_2D;
 	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
-		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
+		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
 	setStandardOrthoCenter();
@@ -1844,15 +1844,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 		draw3D(CONTEXT, renderingParams);
 
-#ifdef DGM_OCTREE_LOD_TESTS
-		if (m_showDebugTraces)
-		{
-			diagStrings << QString("Displayed points: %1").arg(CONTEXT.displayedPointCount);
-			diagStrings << QString("Skipped points: %1").arg(CONTEXT.skippedPointCount);
-			diagStrings << QString("Tested cells: %1").arg(CONTEXT.cellInclusionTestCount);
-		}
-#endif
-
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
 			//restore default color mask
@@ -2047,10 +2038,10 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 
 	glFunc->glEnable(GL_DEPTH_TEST);
 
-	CONTEXT.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
+	CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND;
 	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
-		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
+		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
 	setStandardOrthoCenter();
@@ -2070,7 +2061,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	/****************************************/
 	if (m_customLightEnabled || m_sunLightEnabled)
 	{
-		CONTEXT.flags |= CC_LIGHT_ENABLED;
+		CONTEXT.drawingFlags |= CC_LIGHT_ENABLED;
 
 		//we enable absolute sun light (if activated)
 		if (m_sunLightEnabled)
@@ -2114,7 +2105,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	//LOD
 	if (isLODEnabled() && !s_frameRateTestInProgress)
 	{
-		CONTEXT.flags |= CC_LOD_ACTIVATED;
+		CONTEXT.drawingFlags |= CC_LOD_ACTIVATED;
 
 		//LOD rendering level (for clouds only)
 		if (CONTEXT.decimateCloudOnMove)
@@ -2292,10 +2283,10 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	setStandardOrthoCenter();
 	glFunc->glDisable(GL_DEPTH_TEST);
 
-	CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
+	CONTEXT.drawingFlags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
 	if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 	{
-		CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
+		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
 	//we draw 2D entities
@@ -3279,9 +3270,9 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	//display size
 	CONTEXT.glW = m_glViewport.width();
 	CONTEXT.glH = m_glViewport.height();
-	CONTEXT._win = this;
+	CONTEXT.display = this;
 	CONTEXT.qGLContext = this->context();
-	CONTEXT.flags = 0;
+	CONTEXT.drawingFlags = 0;
 
 	const ccGui::ParamStruct& guiParams = getDisplayParameters();
 
@@ -4229,7 +4220,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 	//3D objects picking
 	{
-		CONTEXT.flags = CC_DRAW_3D | flags;
+		CONTEXT.drawingFlags = CC_DRAW_3D | flags;
 
 		//projection matrix
 		glFunc->glMatrixMode(GL_PROJECTION);
@@ -4268,7 +4259,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	//2D objects picking
 	if (params.mode == ENTITY_PICKING || params.mode == ENTITY_RECT_PICKING || params.mode == FAST_PICKING)
 	{
-		CONTEXT.flags = CC_DRAW_2D | flags;
+		CONTEXT.drawingFlags = CC_DRAW_2D | flags;
 
 		//we must first grab the 2D ortho view projection matrix
 		setStandardOrthoCenter();
@@ -4901,8 +4892,8 @@ void ccGLWindow::drawPivot()
 			glEnableSunLight();
 			CC_DRAW_CONTEXT CONTEXT;
 			getContext(CONTEXT);
-			CONTEXT.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
-			CONTEXT._win = 0;
+			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+			CONTEXT.display = 0;
 			sphere.draw(CONTEXT);
 			glFunc->glPopAttrib();
 		}
@@ -5490,10 +5481,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 
 			m_stereoModeEnabled = stereoModeWasEnabled;
 
-			CONTEXT.flags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
+			CONTEXT.drawingFlags = CC_DRAW_2D | CC_DRAW_FOREGROUND;
 			if (m_interactionFlags == INTERACT_TRANSFORM_ENTITIES)
 			{
-				CONTEXT.flags |= CC_VIRTUAL_TRANS_ENABLED;
+				CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 			}
 
 			//glFunc->glMatrixMode(GL_PROJECTION);

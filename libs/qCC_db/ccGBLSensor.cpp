@@ -809,8 +809,8 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//	sphere.setEnabled(true);
 
 	//	CC_DRAW_CONTEXT sphereContext = context;
-	//	sphereContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-	//	sphereContext._win = 0;
+	//	sphereContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+	//	sphereContext.display = 0;
 
 	//	sphere.setTempColor(ccColor::magenta);
 	//	sphere.draw(sphereContext);

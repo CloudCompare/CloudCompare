@@ -2220,7 +2220,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						//auto-init LoD structure
 						//DGM: can't spawn a progress dialog here as the process will be async
-						//ccProgressDialog pDlg(false,context._win ? context._win->asWidget() : 0);
+						//ccProgressDialog pDlg(false, context.display ? context.display->asWidget() : 0);
 						initLOD(/*&pDlg*/);
 					}
 					else
@@ -2243,7 +2243,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							{
 								//get the current viewport and OpenGL matrices
 								ccGLCameraParameters camera;
-								context._win->getGLCameraParameters(camera);
+								context.display->getGLCameraParameters(camera);
 								//relpace the viewport and matrices by the real ones
 								glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
 								glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());

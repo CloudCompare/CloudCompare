@@ -21,7 +21,6 @@
 #include "ccClipBox.h"
 
 //Local
-#include "ccGenericPointCloud.h"
 #include "ccCylinder.h"
 #include "ccCone.h"
 #include "ccSphere.h"
@@ -133,7 +132,7 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	}
 
 	if (!c_torus)
-		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f,0.4f,2.0*M_PI,false,0,0,"Torus",12));
+		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, 0, "Torus", 12));
 
 	glFunc->glTranslatef(0,0,0.3f);
 	c_torus->setTempColor(col);
@@ -207,6 +206,57 @@ ccClipBox::~ccClipBox()
 	setAssociatedEntity(0);
 }
 
+void ccClipBox::update()
+{
+	if (!m_associatedEntity)
+	{
+		return;
+	}
+
+#ifdef USE_OPENGL
+	m_associatedEntity->removeAllClipPlanes();
+	
+	//now add the 6 box clipping planes
+	ccBBox extents;
+	ccGLMatrix transformation;
+	get(extents, transformation);
+
+	CCVector3 C = extents.getCenter();
+	CCVector3 halfDim = extents.getDiagVec() / 2;
+
+	//for each dimension
+	for (unsigned d = 0; d < 3; ++d)
+	{
+		CCVector3 N = transformation.getColumnAsVec3D(d);
+		//positive side
+		{
+			ccClipPlane posPlane;
+			posPlane.equation.x = N.x;
+			posPlane.equation.y = N.y;
+			posPlane.equation.z = N.z;
+
+			//compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C + half_dim * N)).N = 0
+			posPlane.equation.w = -(static_cast<double>(C.dot(N)) + halfDim.u[d]);
+			m_associatedEntity->addClipPlanes(posPlane);
+		}
+
+		//negative side
+		//{
+		//	ccClipPlane negPlane;
+		//	negPlane.equation.x = -N.x;
+		//	negPlane.equation.y = -N.y;
+		//	negPlane.equation.z = -N.z;
+
+		//	//compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C + half_dim * N)).N = 0
+		//	negPlane.equation.w = (static_cast<double>(C.dot(N)) + halfDim.u[d]);
+		//	m_associatedEntity->addClipPlanes(negPlane);
+		//}
+	}
+#else
+	flagPointsInside();
+#endif
+}
+
 void ccClipBox::reset()
 {
 	m_box.clear();
@@ -253,15 +303,22 @@ bool ccClipBox::setAssociatedEntity(ccHObject* entity)
 	//release previous one
 	if (m_associatedEntity)
 	{
+#ifdef USE_OPENGL
+		m_associatedEntity->removeAllClipPlanes();
+#else
 		ccGenericPointCloud* points = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
 		if (points)
 			points->unallocateVisibilityArray();
+#endif
 	}
 	m_associatedEntity = 0;
 
 	//try to initialize new one
 	if (entity)
 	{
+#ifdef USE_OPENGL
+		m_associatedEntity = entity;
+#else
 		if (!entity->isKindOf(CC_TYPES::POINT_CLOUD) && !entity->isKindOf(CC_TYPES::MESH))
 		{
 			ccLog::Warning("[Clipping box] Unhandled type of entity");
@@ -283,6 +340,7 @@ bool ccClipBox::setAssociatedEntity(ccHObject* entity)
 				}
 			}
 		}
+#endif
 	}
 
 	reset();
@@ -559,20 +617,42 @@ void ccClipBox::shift(const CCVector3& v)
 	emit boxModified(&m_box);
 }
 
-void ccClipBox::update(bool shrink/*=false*/)
+void ccClipBox::flagPointsInside(bool shrink/*=false*/)
 {
-	ccGenericPointCloud* cloud = m_associatedEntity ? ccHObjectCaster::ToGenericPointCloud(m_associatedEntity) : 0;
-	if (!cloud)
+	if (!m_associatedEntity->isKindOf(CC_TYPES::POINT_CLOUD) && !m_associatedEntity->isKindOf(CC_TYPES::MESH))
+	{
+		ccLog::Warning("[ccClipBox::update] Unhandled type of entity");
 		return;
+	}
 
-	unsigned count = cloud->size();
-	if (count == 0 || !cloud->isVisibilityTableInstantiated())
+	ccGenericPointCloud* cloud = m_associatedEntity ? ccHObjectCaster::ToGenericPointCloud(m_associatedEntity) : 0;
+	if (!cloud || !cloud->isVisibilityTableInstantiated())
 	{
 		assert(false);
 		return;
 	}
 
-	ccGenericPointCloud::VisibilityTableType* visTable = cloud->getTheVisibilityArray();
+	flagPointsInside(cloud, cloud->getTheVisibilityArray(), shrink);
+}
+
+void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
+									ccGenericPointCloud::VisibilityTableType* visTable,
+									bool shrink/*=false*/) const
+{
+	if (!cloud || !visTable)
+	{
+		//invalid input
+		assert(false);
+		return;
+	}
+	if (cloud->size() != visTable->currentSize())
+	{
+		///size mismatch
+		assert(false);
+		return;
+	}
+
+	int count = static_cast<int>(cloud->size());
 
 	if (m_glTransEnabled)
 	{
@@ -623,11 +703,11 @@ ccBBox ccClipBox::getOwnBB(bool withGLFeatures/*=false*/)
 
 PointCoordinateType ccClipBox::computeArrowsScale() const
 {
-	PointCoordinateType scale = m_box.getDiagNorm()/10;
+	PointCoordinateType scale = m_box.getDiagNorm() / 10;
 
 	if (m_associatedEntity)
 	{
-		scale = std::max<PointCoordinateType>(scale,m_associatedEntity->getOwnBB().getDiagNorm()/100);
+		scale = std::max<PointCoordinateType>(scale, m_associatedEntity->getOwnBB().getDiagNorm() / 100);
 	}
 
 	return scale;
@@ -683,8 +763,8 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//custom arrow 'context'
 		CC_DRAW_CONTEXT componentContext = context;
-		componentContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arows don't push their own!
-		componentContext._win = 0;
+		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arows don't push their own!
+		componentContext.display = 0;
 
 		if (pushName) //2nd level = sub-item
 		{

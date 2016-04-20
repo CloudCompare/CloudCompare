@@ -18,187 +18,24 @@
 #ifndef CC_DRAWABLE_OBJECT_HEADER
 #define CC_DRAWABLE_OBJECT_HEADER
 
-#include "ccIncludeGL.h"
-
 //Local
-#include "ccMaterial.h"
+#include "ccGLDrawContext.h"
+#include "qCC_db.h"
+#include "ccColorTypes.h"
+
+//CCLib
+#include <CCGeom.h>
+
+//system
+#include <vector>
 
 class ccGenericGLDisplay;
-class ccScalarField;
-class ccColorRampShader;
-class ccShader;
 
-//! Display parameters of a 3D entity
-struct glDrawParams
+//! Simple (clipping) plane equation
+struct ccClipPlane
 {
-	//! Display scalar field (prioritary on colors)
-	bool showSF;
-	//! Display colors
-	bool showColors;
-	//! Display normals
-	bool showNorms;
+	Tuple4Tpl<double> equation;
 };
-
-//! Display context
-struct glDrawContext
-{
-	//! Drawing options (see below)
-	uint16_t flags;
-	
-	//! GL screen width
-	int glW;
-	//! GL screen height
-	int glH;
-	//! Corresponding GL window
-	ccGenericGLDisplay* _win;
-   
-	//! OpenGL context used to access functions for particular profiles \see glFunctions()
-	QOpenGLContext *qGLContext;
-
-	//! Current zoom (screen to file rendering mode)
-	float renderZoom;
-
-	//! Default material
-	ccMaterial::Shared defaultMat;
-	//! Default color for mesh (front side)
-	ccColor::Rgbaf defaultMeshFrontDiff;
-	//! Default color for mesh (back side)
-	ccColor::Rgbaf defaultMeshBackDiff;
-	//! Default point color
-	ccColor::Rgbub pointsDefaultCol;
-	//! Default text color
-	ccColor::Rgbub textDefaultCol;
-	//! Default label background color
-	ccColor::Rgbub labelDefaultBkgCol;
-	//! Default label marker color
-	ccColor::Rgbub labelDefaultMarkerCol;
-	//! Default bounding-box color
-	ccColor::Rgbub bbDefaultCol;
-
-	//! Whether to decimate big clouds when updating the 3D view
-	bool decimateCloudOnMove;
-	//! Minimum number of points for activating LOD display
-	unsigned minLODPointCount;
-	//! Current level for LOD display
-	unsigned char currentLODLevel;
-	//! Wheter more points are available or not at the current level
-	bool moreLODPointsAvailable;
-	//! Wheter higher levels are available or not
-	bool higherLODLevelsAvailable;
-
-	//! Whether to decimate big meshes when rotating the camera
-	bool decimateMeshOnMove;
-	//! Minimum number of triangles for activating LOD display
-	unsigned minLODTriangleCount;
-
-	//! Currently displayed color scale (the corresponding scalar field in fact)
-	ccScalarField* sfColorScaleToDisplay;
-	
-	//! Shader for fast dynamic color ramp lookup
-	ccColorRampShader* colorRampShader;
-	//! Custom rendering shader (OpenGL 3.3+)
-	ccShader* customRenderingShader;
-	//! Use VBOs for faster display
-	bool useVBOs;
-
-	//! Label marker size (radius)
-	float labelMarkerSize;
-	//! Shift for 3D label marker display (around the marker, in pixels)
-	float labelMarkerTextShift_pix;
-
-	//! Numerical precision (for displaying text)
-	unsigned dispNumberPrecision;
-
-	//! Label background opacity
-	unsigned labelOpacity;
-
-	//! Blending strategy (source)
-	GLenum sourceBlend;
-	//! Blending strategy (destination)
-	GLenum destBlend;
-
-//#define DGM_OCTREE_LOD_TESTS
-#ifdef DGM_OCTREE_LOD_TESTS
-	size_t displayedPointCount;
-	size_t skippedPointCount;
-	size_t cellInclusionTestCount;
-#endif
-
-	//Default constructor
-	glDrawContext()
-		: flags(0)
-		, glW(0)
-		, glH(0)
-		, _win(0)
-		, qGLContext(nullptr)
-		, renderZoom(1.0f)
-		, defaultMat(new ccMaterial("default"))
-		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
-		, defaultMeshBackDiff(ccColor::defaultMeshBackDiff)
-		, pointsDefaultCol(ccColor::defaultColor)
-		, textDefaultCol(ccColor::defaultColor)
-		, labelDefaultBkgCol(ccColor::defaultLabelBkgColor)
-		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
-		, bbDefaultCol(ccColor::yellow)
-		, decimateCloudOnMove(true)
-		, minLODPointCount(10000000)
-		, currentLODLevel(0)
-		, moreLODPointsAvailable(false)
-		, higherLODLevelsAvailable(false)
-		, decimateMeshOnMove(true)
-		, minLODTriangleCount(2500000)
-		, sfColorScaleToDisplay(0)
-		, colorRampShader(0)
-		, customRenderingShader(0)
-		, useVBOs(true)
-		, labelMarkerSize(5)
-		, labelMarkerTextShift_pix(5)
-		, dispNumberPrecision(6)
-		, labelOpacity(100)
-		, sourceBlend(GL_SRC_ALPHA)
-		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
-#ifdef DGM_OCTREE_LOD_TESTS
-		, displayedPointCount(0)
-		, skippedPointCount(0)
-		, cellInclusionTestCount(0)
-#endif
-	{}
-   
-	template<class TYPE>
-	TYPE *glFunctions() const
-	{				
-		return qGLContext->versionFunctions<TYPE>();
-	}   
-};
-typedef glDrawContext CC_DRAW_CONTEXT;
-
-// Drawing flags (type: short)
-#define CC_DRAW_2D								0x0001
-#define CC_DRAW_3D								0x0002
-#define CC_DRAW_FOREGROUND						0x0004
-#define CC_LIGHT_ENABLED						0x0008
-#define CC_SKIP_UNSELECTED						0x0010
-#define CC_SKIP_SELECTED						0x0020
-#define CC_SKIP_ALL								0x0030		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
-#define CC_DRAW_ENTITY_NAMES					0x0040
-//#define CC_FREE_FLAG							0x0080		// UNUSED (formerly CC_DRAW_POINT_NAMES)
-//#define CC_FREE_FLAG							0x0100		// UNUSED (formerly CC_DRAW_TRI_NAMES)
-#define CC_DRAW_FAST_NAMES_ONLY					0x0200
-//#define CC_FREE_FLAG							0x03C0		// UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
-#define CC_LOD_ACTIVATED						0x0400
-#define CC_VIRTUAL_TRANS_ENABLED				0x0800
-
-// Drawing flags testing macros (see ccDrawableObject)
-#define MACRO_Draw2D(context) (context.flags & CC_DRAW_2D)
-#define MACRO_Draw3D(context) (context.flags & CC_DRAW_3D)
-#define MACRO_DrawEntityNames(context) (context.flags & CC_DRAW_ENTITY_NAMES)
-#define MACRO_DrawFastNamesOnly(context) (context.flags & CC_DRAW_FAST_NAMES_ONLY)
-#define MACRO_SkipUnselected(context) (context.flags & CC_SKIP_UNSELECTED)
-#define MACRO_SkipSelected(context) (context.flags & CC_SKIP_SELECTED)
-#define MACRO_LightIsEnabled(context) (context.flags & CC_LIGHT_ENABLED)
-#define MACRO_Foreground(context) (context.flags & CC_DRAW_FOREGROUND)
-#define MACRO_LODActivated(context) (context.flags & CC_LOD_ACTIVATED)
-#define MACRO_VirtualTransEnabled(context) (context.flags & CC_VIRTUAL_TRANS_ENABLED)
 
 //! Generic interface for (3D) drawable entities
 class QCC_DB_LIB_API ccDrawableObject
@@ -211,6 +48,8 @@ public:
 	ccDrawableObject(const ccDrawableObject& object);
 	
 	virtual ~ccDrawableObject() {}
+
+public:  //drawing and drawing options
 
 	//! Draws entity and its children
 	virtual void draw(CC_DRAW_CONTEXT& context) = 0;
@@ -260,7 +99,7 @@ public:
 	//! Toggles normals display state
 	inline virtual void toggleNormals() { showNormals(!normalsShown()); }
 
-	/*** scalar fields ***/
+public: //scalar fields
 
 	//! Returns whether an active scalar field is available or not
 	inline virtual bool hasDisplayedScalarField() const { return false; }
@@ -280,12 +119,12 @@ public:
 	//! Returns whether active scalar field is visible
 	inline virtual bool sfShown() const { return m_sfDisplayed; }
 
-	/*** Mesh materials ***/
+public: //(Mesh) materials
 
 	//! Toggles material display state
 	virtual void toggleMaterials() {} //does nothing by default!
 
-	/*** Name display in 3D ***/
+public: //Name display in 3D
 
 	//! Sets whether name should be displayed in 3D
 	inline virtual void showNameIn3D(bool state) { m_showNameIn3D = state; }
@@ -296,7 +135,7 @@ public:
 	//! Toggles name in 3D display state
 	inline virtual void toggleShowName() { showNameIn3D(!nameShownIn3D()); }
 
-	/*** temporary color ***/
+public: //Temporary color
 
 	//! Returns whether colors are currently overriden by a temporary (unique) color
 	/** See ccDrawableObject::setTempColor.
@@ -315,7 +154,7 @@ public:
 	//! Set temporary color activation state
 	inline virtual void enableTempColor(bool state) { m_colorIsOverriden = state; }
 
-	/*** associated display management ***/
+public: //associated display management
 
 	//! Unlinks entity from a GL display (only if it belongs to it of course)
 	virtual void removeFromDisplay(const ccGenericGLDisplay* win);
@@ -341,7 +180,7 @@ public:
 	**/
 	virtual void refreshDisplay();
 
-	/*** Transformation matrix management (for display only) ***/
+public: //Transformation matrix management (for display only)
 
 	//! Associates entity with a GL transformation (rotation + translation)
 	/** \warning FOR DISPLAY PURPOSE ONLY (i.e. should only be temporary)
@@ -388,7 +227,22 @@ public:
 	**/
 	virtual void translateGL(const CCVector3& trans);
 
-protected:
+public: //clipping planes
+
+	//! Removes all clipping planes (if any)
+	virtual void removeAllClipPlanes() { m_clipPlanes.clear(); }
+
+	//! Registers a new clipping plane
+	/** \return false if the planes couldn't be added (not enough memory)
+	**/
+	virtual bool addClipPlanes(const ccClipPlane& plane);
+
+	//! Enables or disables clipping planes (OpenGL)
+	/** \warning If enabling the clipping planes, be sure to call this method AFTER the modelview matrix has been set.
+	**/
+	virtual void toggleClipPlanes(CC_DRAW_CONTEXT& context, bool enable);
+
+protected: //members
 
 	//! Specifies whether the object is visible or not
 	/** Note: this does not influence the children visibility
@@ -400,8 +254,6 @@ protected:
 
 	//! Specifies whether the visibility can be changed by user or not
 	bool m_lockedVisibility;
-
-	/*** OpenGL display parameters ***/
 
 	//! Specifies whether colors should be displayed
 	bool m_colorsDisplayed;
@@ -429,6 +281,9 @@ protected:
 
 	//! Currently associated GL display
 	ccGenericGLDisplay* m_currentDisplay;
+
+	//! Active clipping planes (used for display only)
+	std::vector<ccClipPlane> m_clipPlanes;
 };
 
 #endif //CC_DRAWABLE_OBJECT_HEADER

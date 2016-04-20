@@ -20,10 +20,6 @@
 //Local
 #include "ccGenericGLDisplay.h"
 
-/******************************/
-/*      ccDrawableObject      */
-/******************************/
-
 ccDrawableObject::ccDrawableObject()
 	: m_currentDisplay(0)
 {
@@ -134,5 +130,61 @@ void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 		params.showSF = hasDisplayedScalarField() && sfShown();
 		//colors are not displayed if scalar field is displayed
 		params.showColors = !params.showSF && hasColors() && colorsShown();
+	}
+}
+
+bool ccDrawableObject::addClipPlanes(const ccClipPlane& plane)
+{
+	try
+	{
+		m_clipPlanes.push_back(plane);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+
+	return true;
+}
+
+void ccDrawableObject::toggleClipPlanes(CC_DRAW_CONTEXT& context, bool enable)
+{
+	if (m_clipPlanes.empty())
+	{
+		return;
+	}
+	
+	//get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
+		return;
+
+	GLint maxPlaneCount = 0;
+	glFunc->glGetIntegerv(GL_MAX_CLIP_PLANES, &maxPlaneCount);
+
+	GLint planeCount = static_cast<GLint>(m_clipPlanes.size());
+	if (planeCount > maxPlaneCount)
+	{
+		if (enable)
+		{
+			ccLog::Warning("[ccDrawableObject::enableClipPlanes] Clipping planes count exceeds the maximum supported number");
+		}
+		planeCount = maxPlaneCount;
+	}
+	for (GLint i=0; i<planeCount; ++i)
+	{
+		GLenum planeIndex = GL_CLIP_PLANE0 + i;
+		if (enable)
+		{
+			glFunc->glClipPlane(planeIndex, m_clipPlanes[i].equation.u);
+			glFunc->glEnable(planeIndex);
+		}
+		else
+		{
+			glFunc->glDisable(planeIndex);
+		}
 	}
 }

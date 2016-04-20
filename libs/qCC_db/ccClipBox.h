@@ -21,6 +21,7 @@
 //Local
 #include "ccBBox.h"
 #include "ccHObject.h"
+#include "ccGenericPointCloud.h"
 #include "ccInteractor.h"
 
 //Qt
@@ -80,22 +81,32 @@ public:
 	//inherited from ccHObject
 	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX; }
 
-	//! Returns current box
+	//! Returns the box extents
 	inline const ccBBox& getBox() const { return m_box; }
 
 	//! Whether to show the box or not
 	inline void showBox(bool state) { m_showBox = state; }
 
-	//! Sets current box
+	//! Sets the box extents
 	void setBox(const ccBBox& box);
 
-	//! Shifts current box
+	//! Shifts the current box
 	void shift(const CCVector3& v);
 
-	//! Updates associated entity 'visibility'
-	/** \param shrink Whether box is shrinking (faster) or not
+	//! Flags the points of the associated entity (cloud or mesh)
+	/** \warning The points entity should already have a valid visibility table instantiated!
+		\param shrink Whether the box is shrinking (faster) or not
 	**/
-	void update(bool shrink = false);
+	void flagPointsInside(bool shrink = false);
+
+	//! Flags the points of a given cloud depending on whether they are inside or outside of this clipping box
+	/** \param cloud point cloud
+		\param visTable visibility flags
+		\param shrink Whether the box is shrinking (faster) or not
+	**/
+	void flagPointsInside(	ccGenericPointCloud* cloud,
+							ccGenericPointCloud::VisibilityTableType* visTable,
+							bool shrink = false) const;
 
 	//! Resets box
 	void reset();
@@ -107,14 +118,17 @@ public:
 	void get(ccBBox& extents, ccGLMatrix& transformation);
 
 	//! Associated entity
-	ccHObject* getAssociatedEntity() const { return m_associatedEntity; }
+	inline ccHObject* getAssociatedEntity() const { return m_associatedEntity; }
 
 signals:
 
 	//! Signal sent each time the box is modified
 	void boxModified(const ccBBox* box);
 
-protected:
+protected: //methods
+
+	//! Updates the associated entity clipping planes
+	void update();
 
 	//inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
@@ -122,6 +136,8 @@ protected:
 	//! Computes arrows display scale
 	PointCoordinateType computeArrowsScale() const;
 
+protected: //members
+	
 	//! Associated entity
 	ccHObject* m_associatedEntity;
 

@@ -411,8 +411,8 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//build-up point maker own 'context'
 		CC_DRAW_CONTEXT markerContext = context;
-		markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		markerContext._win = 0;
+		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+		markerContext.display = 0;
 
 		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
 		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();

@@ -8,10 +8,13 @@ if (CGAL_FOUND)
 	if(${CGAL_MAJOR_VERSION}.${CGAL_MINOR_VERSION} LESS 4.3)
 		message(SEND_ERROR "CC Lib requires at least CGAL 4.3")
 	endif()
-	
+
+  	# We need to get ride of CGAL CXX flags
+  	set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS ON CACHE INTERNAL "override CGAL flags" FORCE)
+
 	include( ${CGAL_USE_FILE} )
 	include_directories(${CGAL_INCLUDE_DIR})
-	
+
 	# Take care of GMP and MPFR DLLs on Windows!
 	if( WIN32 )
 		# message(${GMP_LIBRARIES})

@@ -1921,7 +1921,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 								QImage texImage = m_materials->at(newMatlIndex)->getTexture();
 								if (!texImage.isNull())
 								{
-									currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(texImage));
+									currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(texImage, QOpenGLTexture::DontGenerateMipMaps));
 									currentTexture->bind();
 								}
 							}

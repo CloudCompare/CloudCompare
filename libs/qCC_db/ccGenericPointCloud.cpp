@@ -387,14 +387,14 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			ccOctree::PointDescriptor point;
 			if (octree->pointPicking(clickPos, camera, point, pickWidth))
 			{
-	#ifdef QT_DEBUG
+#ifdef QT_DEBUG
 				if (sf)
 				{
 					sf->computeMinAndMax();
 					if (getDisplay())
 						getDisplay()->redraw();
 				}
-	#endif
+#endif
 				if (point.point)
 				{
 					nearestPointIndex = point.pointIndex;

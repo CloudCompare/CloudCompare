@@ -578,24 +578,30 @@ void ccClipBox::update(bool shrink/*=false*/)
 	{
 		ccGLMatrix transMat = m_glTrans.inverse();
 
-		for (unsigned i=0; i<count; ++i)
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < count; ++i)
 		{
-			if (!shrink || visTable->getValue(i) == POINT_VISIBLE)
+			if (!shrink || visTable->getValue(static_cast<unsigned>(i)) == POINT_VISIBLE)
 			{
-				CCVector3 P = *cloud->getPoint(i);
+				CCVector3 P = *cloud->getPoint(static_cast<unsigned>(i));
 				transMat.apply(P);
-				visTable->setValue(i,m_box.contains(P) ? POINT_VISIBLE : POINT_HIDDEN);
+				visTable->setValue(static_cast<unsigned>(i), m_box.contains(P) ? POINT_VISIBLE : POINT_HIDDEN);
 			}
 		}
 	}
 	else
 	{
-		for (unsigned i=0; i<count; ++i)
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < count; ++i)
 		{
-			if (!shrink || visTable->getValue(i) == POINT_VISIBLE)
+			if (!shrink || visTable->getValue(static_cast<unsigned>(i)) == POINT_VISIBLE)
 			{
-				const CCVector3* P = cloud->getPoint(i);
-				visTable->setValue(i,m_box.contains(*P) ? POINT_VISIBLE : POINT_HIDDEN);
+				const CCVector3* P = cloud->getPoint(static_cast<unsigned>(i));
+				visTable->setValue(static_cast<unsigned>(i), m_box.contains(*P) ? POINT_VISIBLE : POINT_HIDDEN);
 			}
 		}
 	}
@@ -608,8 +614,8 @@ ccBBox ccClipBox::getOwnBB(bool withGLFeatures/*=false*/)
 	if (withGLFeatures)
 	{
 		PointCoordinateType scale = computeArrowsScale();
-		bbox.minCorner() -= CCVector3(scale,scale,scale);
-		bbox.maxCorner() += CCVector3(scale,scale,scale);
+		bbox.minCorner() -= CCVector3(scale, scale, scale);
+		bbox.maxCorner() += CCVector3(scale, scale, scale);
 	}
 
 	return bbox;

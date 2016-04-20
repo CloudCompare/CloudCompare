@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.7.0 - 04/XX/2016
+v2.7.0 - 04/22/2016
 
 - Enhancements:
 	

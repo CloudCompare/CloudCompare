@@ -231,7 +231,6 @@ void ccClipBox::update()
 	{
 		CCVector3 N = transformation.getColumnAsVec3D(d);
 		//positive side
-		if (true)
 		{
 			ccClipPlane posPlane;
 			posPlane.equation.x = N.x;
@@ -244,7 +243,6 @@ void ccClipBox::update()
 		}
 
 		//negative side
-		if (true)
 		{
 			ccClipPlane negPlane;
 			negPlane.equation.x = -N.x;

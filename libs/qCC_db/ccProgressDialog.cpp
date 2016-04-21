@@ -18,7 +18,7 @@
 #include "ccProgressDialog.h"
 
 //Qt
-#include <QApplication>
+#include <QCoreApplication>
 #include <QPushButton>
 #include <QProgressBar>
 
@@ -28,12 +28,12 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	, m_currentValue(0)
 	, m_lastValue(-1)
 	, m_timer(this)
-	, m_refreshInterval(1)
+	, m_refreshInterval(5)
 {
 	setAutoClose(true);
 	setWindowModality(Qt::ApplicationModal);
 
-	setRange(0,100);
+	setRange(0, 100);
 	setMinimumDuration(0);
 
 	QPushButton* cancelButton = 0;
@@ -46,6 +46,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	setCancelButton(cancelButton);
 
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh())/*, Qt::DirectConnection*/); //can't use DirectConnection here!
+	connect(this, &ccProgressDialog::scheduleRepaint, this, [this](){ QProgressDialog::repaint(); }, Qt::QueuedConnection); //can't use DirectConnection here!
 }
 
 void ccProgressDialog::refresh()
@@ -78,11 +79,14 @@ void ccProgressDialog::update(float percent)
 		m_currentValue = value;
 
 		//every now and then we let the dialog (and more generally the GUI) re-display itself and process events!
-		bool refresh = (abs(m_lastValue-m_currentValue) >= m_refreshInterval);
+		bool refresh = (abs(m_lastValue - m_currentValue) >= m_refreshInterval);
 		m_mutex.unlock();
 
 		if (refresh)
-			QApplication::processEvents();
+		{
+			emit scheduleRepaint();
+			QCoreApplication::processEvents();
+		}
 	}
 	else
 	{
@@ -93,7 +97,7 @@ void ccProgressDialog::update(float percent)
 void ccProgressDialog::setMinRefreshInterval(int i)
 {
 	m_mutex.lock();
-	m_refreshInterval = std::max(1,i);
+	m_refreshInterval = std::max(1, i);
 	m_mutex.unlock();
 }
 

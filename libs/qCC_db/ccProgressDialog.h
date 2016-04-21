@@ -81,6 +81,11 @@ public slots:
 	**/
 	void refresh();
 
+signals:
+
+	//! Schedules a repaint
+	void scheduleRepaint();
+
 protected:
 
 	//! Current progress value (percent)

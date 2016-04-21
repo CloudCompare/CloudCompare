@@ -2224,28 +2224,32 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	}
 
 	//update LOD information
-	renderingParams.nextLODState = LODState();
-	if (m_currentLODState.inProgress)
+	if (renderingParams.passIndex == 0) //only the first pass is meaningful
+										//(the second one is just a duplicate of the first)
 	{
-		if (CONTEXT.moreLODPointsAvailable || CONTEXT.higherLODLevelsAvailable)
+		renderingParams.nextLODState = LODState();
+		if (m_currentLODState.inProgress)
 		{
-			renderingParams.nextLODState = m_currentLODState;
-
-			if (CONTEXT.moreLODPointsAvailable)
+			if (CONTEXT.moreLODPointsAvailable || CONTEXT.higherLODLevelsAvailable)
 			{
-				//either we increase the start index
-				//renderingParams.nextLODState.startIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+				renderingParams.nextLODState = m_currentLODState;
+
+				if (CONTEXT.moreLODPointsAvailable)
+				{
+					//either we increase the start index
+					//renderingParams.nextLODState.startIndex += MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+				}
+				else
+				{
+					//or the level
+					renderingParams.nextLODState.level++;
+					renderingParams.nextLODState.startIndex = 0;
+				}
 			}
 			else
 			{
-				//or the level
-				renderingParams.nextLODState.level++;
-				renderingParams.nextLODState.startIndex = 0;
+				//no more geometry to display
 			}
-		}
-		else
-		{
-			//no more geometry to display
 		}
 	}
 
@@ -5663,7 +5667,9 @@ bool ccGLWindow::initFBO(int w, int h)
 	{
 		//we don't need it anymore
 		if (m_fbo2)
+		{
 			removeFBOSafe(m_fbo2);
+		}
 	}
 	else
 	{

@@ -8660,15 +8660,15 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 
 			ccGLWindow::StereoParams params = smDlg.getParameters();
 #ifndef CC_GL_WINDOW_USE_QWINDOW
-		if (!params.isAnaglyph())
-		{
-			ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
-			//activation of the stereo mode failed: cancel selection
-			actionEnableStereo->blockSignals(true);
-			actionEnableStereo->setChecked(false);
-			actionEnableStereo->blockSignals(false);
-			return;
-		}
+			if (!params.isAnaglyph())
+			{
+				ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
+				//activation of the stereo mode failed: cancel selection
+				actionEnableStereo->blockSignals(true);
+				actionEnableStereo->setChecked(false);
+				actionEnableStereo->blockSignals(false);
+				return;
+			}
 #endif
 
 			//force perspective state!

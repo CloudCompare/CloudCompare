@@ -316,6 +316,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	if (!isValid())
 		return false;
 
+	//create the approximate dist. SF if necessary
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx < 0)
 	{

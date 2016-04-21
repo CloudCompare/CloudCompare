@@ -797,6 +797,19 @@ void ccViewer::toggleStereoMode(bool state)
 			return;
 		}
 
+		ccGLWindow::StereoParams params = smDlg.getParameters();
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+		if (!params.isAnaglyph())
+		{
+			ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
+			//activation of the stereo mode failed: cancel selection
+			ui.actionEnableStereo->blockSignals(true);
+			ui.actionEnableStereo->setChecked(false);
+			ui.actionEnableStereo->blockSignals(false);
+			return;
+		}
+#endif
+
 		//force perspective state!
 		if (!m_glWindow->getViewportParameters().perspectiveView)
 		{
@@ -804,14 +817,8 @@ void ccViewer::toggleStereoMode(bool state)
 			reflectPerspectiveState();
 		}
 
-		ccGLWindow::StereoParams params = smDlg.getParameters();
-
 		if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 		{
-#ifndef CC_GL_WINDOW_USE_QWINDOW
-			ccLog::Error("This version of ccViewer doesn't handle Quad Buffer mode");
-			return;
-#endif
 			//force full screen
 			ui.actionFullScreen->setChecked(true);
 		}

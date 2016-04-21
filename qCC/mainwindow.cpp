@@ -8658,20 +8658,27 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				return;
 			}
 
+			ccGLWindow::StereoParams params = smDlg.getParameters();
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+		if (!params.isAnaglyph())
+		{
+			ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
+			//activation of the stereo mode failed: cancel selection
+			actionEnableStereo->blockSignals(true);
+			actionEnableStereo->setChecked(false);
+			actionEnableStereo->blockSignals(false);
+			return;
+		}
+#endif
+
 			//force perspective state!
 			if (!win->getViewportParameters().perspectiveView)
 			{
 				setCenteredPerspectiveView(win, false);
 			}
 
-			ccGLWindow::StereoParams params = smDlg.getParameters();
-
 			if (params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION)
 			{
-#ifndef CC_GL_WINDOW_USE_QWINDOW
-				ccLog::Error("This version of CloudCompare doesn't handle Quad Buffer mode");
-				return;
-#endif
 				//force (exclusive) full screen
 				actionExclusiveFullScreen->setChecked(true);
 			}

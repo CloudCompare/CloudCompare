@@ -9,7 +9,7 @@ option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL li
 option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
 
 # to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
-project( CC_DUMMY_PROJECT )
+project( CC_CORE_LIB VERSION 1.0 )
 
 # CGAL takes precedence over triangle
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
@@ -20,8 +20,6 @@ endif()
 if (COMPILE_CC_CORE_LIB_WITH_QT)
 	include( ../CMakeExternalLibs.cmake )
 endif()
-
-project( CC_CORE_LIB VERSION 1.0 )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 if( MSVC )

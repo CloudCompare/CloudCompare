@@ -524,6 +524,9 @@ void qAnimationDlg::render()
 	}
 #endif
 
+	bool lodWasEnabled = m_view3d->isLODEnabled();
+	m_view3d->setLODEnabled(false);
+
 	int frameIndex = 0;
 	bool success = true;
 	size_t vp1 = 0, vp2 = 0;
@@ -596,6 +599,8 @@ void qAnimationDlg::render()
 		}
 		vp1 = vp2;
 	}
+
+	m_view3d->setLODEnabled(lodWasEnabled);
 
 #ifdef QFFMPEG_SUPPORT
 	encoder.close();

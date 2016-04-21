@@ -70,7 +70,6 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	, m_refOctreeIsPartial(false)
 	, m_refVisibility(false)
 	, m_compType(cpType)
-	, m_currentSFIsDistance(false)
 	, m_noDisplay(noDisplay)
 	, m_bestOctreeLevel(0)
 {
@@ -319,11 +318,13 @@ bool ccComparisonDlg::computeApproxDistances()
 
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx < 0)
-		sfIdx = m_compCloud->addScalarField(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
-	if (sfIdx < 0)
 	{
-		ccLog::Error("Failed to allocate a new scalar field for computing approx. distances! Try to free some memory ...");
-		return false;
+		sfIdx = m_compCloud->addScalarField(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
+		if (sfIdx < 0)
+		{
+			ccLog::Error("Failed to allocate a new scalar field for computing approx. distances! Try to free some memory ...");
+			return false;
+		}
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
@@ -384,7 +385,6 @@ bool ccComparisonDlg::computeApproxDistances()
 		ccLog::Warning("[computeApproxDistances] Computation failed (error code %i)", approxResult);
 		m_compCloud->deleteScalarField(sfIdx);
 		sfIdx = -1;
-		m_currentSFIsDistance = false;
 	}
 	else
 	{
@@ -440,8 +440,6 @@ bool ccComparisonDlg::computeApproxDistances()
 		//update display
 		m_compCloud->setCurrentDisplayedScalarField(sfIdx);
 		m_compCloud->showSF(sfIdx >= 0);
-
-		m_currentSFIsDistance = true;
 	}
 
 	computeButton->setEnabled(true);
@@ -461,8 +459,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		return -1;
 	}
 
-	//make sure a valid SF is activated
-	if (!m_currentSFIsDistance || m_compCloud->getCurrentOutScalarFieldIndex() < 0)
+	//make sure a the temporary dist. SF is activated
+	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
+	if (sfIdx < 0)
 	{
 		//we must compute approx. results again
 		if (!computeApproxDistances())
@@ -470,6 +469,14 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			//failed to compute approx distances?!
 			return -1;
 		}
+		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
+	}
+
+	const CCLib::ScalarField* approxDistances = m_compCloud->getScalarField(sfIdx);
+	if (!approxDistances)
+	{
+		assert(sfIdx >= 0);
+		return -1;
 	}
 
 	//evalutate the theoretical time for each octree level
@@ -505,7 +512,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		double meshSurface = CCLib::MeshSamplingTools::computeMeshArea(mesh);
 		//average triangle surface
 		if (meshSurface > 0)
+		{
 			meanTriangleSurface = meshSurface / mesh->size();
+		}
 	}
 
 	//we skip the lowest subdivision levels (useless + incompatible with below formulas ;)
@@ -608,14 +617,14 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 				tempCode = truncatedCode;
 			}
 
-			double pointDist = m_compCloud->getPointScalarValue(index);
+			ScalarType pointDist = approxDistances->getValue(index);
 			if (maxDistanceDefined && pointDist > maxDistance)
 			{
 				pointDist = maxDistance;
 			}
 
 			//cellDist += pointDist;
-			cellDist = std::max(cellDist,pointDist);
+			cellDist = std::max<double>(cellDist, pointDist);
 			++index;
 			++numberOfPointsInCell;
 		}
@@ -669,22 +678,9 @@ bool ccComparisonDlg::computeDistances()
 	bool split3D = split3DCheckBox->isEnabled() && split3DCheckBox->isChecked();
 
 	//does the cloud has already a temporary scalar field that we can use?
-	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
+	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx < 0)
 	{
-		//or maybe a real one?
-		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
-	}
-	if (sfIdx >= 0)
-	{
-		CCLib::ScalarField* sf = m_compCloud->getScalarField(sfIdx);
-		assert(sf);
-		//we recycle an existing scalar field, we must rename it
-		sf->setName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
-	}
-	else
-	{
-		assert(!m_currentSFIsDistance);
 		//we need to create a new scalar field
 		sfIdx = m_compCloud->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 		if (sfIdx < 0)
@@ -902,12 +898,9 @@ bool ccComparisonDlg::computeDistances()
 			m_sfName += QString("[-]");
 		}
 
-		m_currentSFIsDistance = true;
-
 		if (maxSearchDist > 0)
 		{
 			m_sfName += QString("[<%1]").arg(maxSearchDist);
-			m_currentSFIsDistance = false;
 		}
 
 		if (split3D)
@@ -939,7 +932,6 @@ bool ccComparisonDlg::computeDistances()
 		m_compCloud->deleteScalarField(sfIdx);
 		m_compCloud->showSF(false);
 		sfIdx = -1;
-		m_currentSFIsDistance = false;
 	}
 
 	for (unsigned j = 0; j < 3; ++j)
@@ -984,7 +976,7 @@ void ccComparisonDlg::applyAndExit()
 		//m_compCloud->setCurrentDisplayedScalarField(-1);
 		//m_compCloud->showSF(false);
 
-		//this SF shouldn't be here, but in any case, we get rid of it!
+		//remove the approximate dist. SF
 		int tmpSfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 		if (tmpSfIdx >= 0)
 		{
@@ -1040,7 +1032,7 @@ void ccComparisonDlg::cancelAndExit()
 		m_compCloud->setCurrentDisplayedScalarField(-1);
 		m_compCloud->showSF(false);
 
-		//we get rid of any temporary scalar field
+		//remove the approximate dist. SF
 		int tmpSfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 		if (tmpSfIdx >= 0)
 		{

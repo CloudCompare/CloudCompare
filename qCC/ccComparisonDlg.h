@@ -114,9 +114,6 @@ protected:
 	//! Initial SF name enabled on the compared entity
 	QString m_oldSfName;
 
-	//! Whether the current SF is a distance field or not
-	bool m_currentSFIsDistance;
-
 	//! Whether a display is active (and should be refreshed) or not
 	bool m_noDisplay;
 

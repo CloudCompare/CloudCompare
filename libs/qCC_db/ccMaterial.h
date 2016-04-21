@@ -125,6 +125,11 @@ public:
 	//! Adds a texture to the global texture DB
 	static void AddTexture(QImage image, QString absoluteFilename);
 
+	//! Release all texture objects
+	/** Should be called BEFORE the global shared context is destroyed.
+	**/
+	static void ReleaseTextures();
+
 	//! Compares this material with another one
 	/** \return true if both materials are equivalent or false otherwise
 	**/

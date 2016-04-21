@@ -36,6 +36,7 @@
 #include <ccTimer.h>
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
+#include <ccMaterial.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -66,6 +67,7 @@ public:
 		// Mac OS X apps don't show icons in menus
 		setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif
+		connect(this, &qccApplication::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); });
 	}
 
 #ifdef Q_OS_MAC
@@ -284,7 +286,7 @@ int main(int argc, char **argv)
 		}
 		catch(...)
 		{
-			QMessageBox::warning(0, "CC crashed!","Hum, it seems that CC has crashed... Sorry about that :)");
+			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
 		}
 	}
 

@@ -259,27 +259,38 @@ void ccMaterial::AddTexture(QImage image, QString absoluteFilename)
 	s_textureDB[absoluteFilename] = image;
 }
 
+void ccMaterial::ReleaseTextures()
+{
+	if (!QOpenGLContext::currentContext())
+	{
+		ccLog::Warning("[ccMaterial::ReleaseTextures] No valid OpenGL context");
+		return;
+	}
+
+	s_openGLTextureDB.clear();
+}
+
 bool ccMaterial::toFile(QFile& out) const
 {
 	QDataStream outStream(&out);
 
-	//material name (dataVersion>=20)
+	//material name (dataVersion >= 20)
 	outStream << m_name;
-	//texture (dataVersion>=20)
+	//texture (dataVersion >= 20)
 	outStream << m_textureFilename;
-	//material colors (dataVersion>=20)
+	//material colors (dataVersion >= 20)
 	//we don't use QByteArray here as it has its own versions!
-	if (out.write((const char*)m_diffuseFront.rgba,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_diffuseFront.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
-	if (out.write((const char*)m_diffuseBack.rgba,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_diffuseBack.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
-	if (out.write((const char*)m_ambient.rgba,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_ambient.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
-	if (out.write((const char*)m_specular.rgba,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_specular.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
-	if (out.write((const char*)m_emission.rgba,sizeof(float)*4) < 0) 
+	if (out.write((const char*)m_emission.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
-	//material shininess (dataVersion>=20)
+	//material shininess (dataVersion >= 20)
 	outStream << m_shininessFront;
 	outStream << m_shininessBack;
 

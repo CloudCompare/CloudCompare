@@ -33,6 +33,7 @@
 #include <ccTimer.h>
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
+#include <ccMaterial.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -59,6 +60,7 @@ public:
 		// Mac OS X apps don't show icons in menus
 		setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif
+		connect(this, &ccApplication::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); });
 	}
 
 #ifdef Q_OS_MAC

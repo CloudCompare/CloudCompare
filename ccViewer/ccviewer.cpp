@@ -172,7 +172,7 @@ ccViewer::~ccViewer()
 	if (s_cpeDlg)
 	{
 		delete s_cpeDlg;
-		s_cpeDlg=0;
+		s_cpeDlg = 0;
 	}
 
 	ccHObject* currentRoot = m_glWindow->getSceneDB();

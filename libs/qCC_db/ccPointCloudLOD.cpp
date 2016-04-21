@@ -362,7 +362,8 @@ protected:
 };
 
 ccPointCloudLOD::ccPointCloudLOD()
-	: m_lastIndexMap(0)
+	: m_indexMap(0)
+	, m_lastIndexMap(0)
 	, m_octree(0)
 	, m_thread(0)
 	, m_state(NOT_INITIALIZED)
@@ -374,9 +375,10 @@ ccPointCloudLOD::~ccPointCloudLOD()
 {
 	clear();
 
-	if (m_lastIndexMap)
+	if (m_indexMap)
 	{
-		m_lastIndexMap->release();
+		m_indexMap->release();
+		m_lastIndexMap = m_indexMap = 0;
 	}
 }
 
@@ -693,7 +695,7 @@ uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet*
 
 uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 {
-	if (!m_lastIndexMap)
+	if (!m_indexMap)
 	{
 		assert(false);
 		return 0;
@@ -751,13 +753,13 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 		uint32_t iStop = std::min(node.displayedPointCount + count, node.pointCount);
 
 		displayedCount = iStop - node.displayedPointCount;
-		assert(m_lastIndexMap->currentSize() + displayedCount <= m_lastIndexMap->capacity());
+		assert(m_indexMap->currentSize() + displayedCount <= m_indexMap->capacity());
 
 		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
 		for (uint32_t i = node.displayedPointCount; i < iStop; ++i)
 		{
 			unsigned pointIndex = cellCodes[node.firstCodeIndex + i].theIndex;
-			m_lastIndexMap->addElement(pointIndex);
+			m_indexMap->addElement(pointIndex);
 		}
 	}
 
@@ -769,7 +771,8 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel)
 {
 	remainingPointsAtThisLevel = 0;
-	
+	m_lastIndexMap = 0;
+
 	if (!m_octree || level >= m_levels.size())
 	{
 		assert(false);
@@ -790,21 +793,21 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 		return 0;
 	}
 
-	if (!m_lastIndexMap || m_lastIndexMap->currentSize() < maxCount)
+	if (!m_indexMap || m_indexMap->currentSize() < maxCount)
 	{
-		if (!m_lastIndexMap)
+		if (!m_indexMap)
 		{
-			m_lastIndexMap = new LODIndexSet;
+			m_indexMap = new LODIndexSet;
 		}
-		if (!m_lastIndexMap->resize(maxCount, 0))
+		if (!m_indexMap->resize(maxCount, 0))
 		{
 			//not enough memory
-			m_lastIndexMap->release();
-			m_lastIndexMap = 0;
+			m_indexMap->release();
+			m_indexMap = 0;
 			return 0;
 		}
 	}
-	m_lastIndexMap->setCurrentSize(0);
+	m_indexMap->setCurrentSize(0);
 
 	Level& l = m_levels[level];
 	uint32_t thisPassDisplayCount = 0;
@@ -841,10 +844,10 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 				double ratio = static_cast<double>(nodeRemainingCount) / m_currentState.unfinishedPoints;
 				nodeMaxCount = static_cast<uint32_t>(ceil(ratio * maxCount));
 				//safety check
-				if (m_lastIndexMap->currentSize() + nodeMaxCount >= maxCount)
+				if (m_indexMap->currentSize() + nodeMaxCount >= maxCount)
 				{
-					assert(maxCount >= m_lastIndexMap->currentSize());
-					nodeMaxCount = maxCount - m_lastIndexMap->currentSize();
+					assert(maxCount >= m_indexMap->currentSize());
+					nodeMaxCount = maxCount - m_indexMap->currentSize();
 
 					earlyStop = true;
 					earlyStopIndex = i;
@@ -857,7 +860,7 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 			assert(nodeDisplayCount <= nodeMaxCount);
 			
 			thisPassDisplayCount += nodeDisplayCount;
-			assert(thisPassDisplayCount == m_lastIndexMap->currentSize());
+			assert(thisPassDisplayCount == m_indexMap->currentSize());
 			remainingPointsAtThisLevel += (node.pointCount - node.displayedPointCount);
 		}
 	}
@@ -899,10 +902,10 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 				double ratio = static_cast<double>(nodeRemainingCount) / totalRemainingCount;
 				nodeMaxCount = static_cast<uint32_t>(ceil(ratio * mapFreeSize));
 				//safety check
-				if (m_lastIndexMap->currentSize() + nodeMaxCount >= maxCount)
+				if (m_indexMap->currentSize() + nodeMaxCount >= maxCount)
 				{
-					assert(maxCount >= m_lastIndexMap->currentSize());
-					nodeMaxCount = maxCount - m_lastIndexMap->currentSize();
+					assert(maxCount >= m_indexMap->currentSize());
+					nodeMaxCount = maxCount - m_indexMap->currentSize();
 
 					earlyStop = true;
 					earlyStopIndex = i;
@@ -915,7 +918,7 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 			assert(nodeDisplayCount <= nodeMaxCount);
 
 			thisPassDisplayCount += nodeDisplayCount;
-			assert(thisPassDisplayCount == m_lastIndexMap->currentSize());
+			assert(thisPassDisplayCount == m_indexMap->currentSize());
 
 			if (node.childCount == 0)
 			{
@@ -924,8 +927,8 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 		}
 	}
 
-	maxCount = m_lastIndexMap->currentSize();
-	m_currentState.displayedPoints += m_lastIndexMap->currentSize();
+	maxCount = m_indexMap->currentSize();
+	m_currentState.displayedPoints += m_indexMap->currentSize();
 
 	if (earlyStop)
 	{
@@ -957,5 +960,6 @@ LODIndexSet* ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 		m_currentState.unfinishedPoints = 0;
 	}
 	
-	return m_lastIndexMap;
+	m_lastIndexMap = m_indexMap;
+	return m_indexMap;
 }

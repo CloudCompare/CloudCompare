@@ -82,7 +82,7 @@ struct ccGLDrawContext
 	int glH;
 	//! Corresponding GL window
 	ccGenericGLDisplay* display;
-   
+
 	//! OpenGL context used to access functions for particular profiles \see glFunctions()
 	QOpenGLContext *qGLContext;
 
@@ -148,6 +148,9 @@ struct ccGLDrawContext
 	//! Blending strategy (destination)
 	GLenum destBlend;
 
+	//! Stereo pass index
+	unsigned stereoPassIndex;
+
 	//Default constructor
 	ccGLDrawContext()
 		: drawingFlags(0)
@@ -181,6 +184,7 @@ struct ccGLDrawContext
 		, labelOpacity(100)
 		, sourceBlend(GL_SRC_ALPHA)
 		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
+		, stereoPassIndex(0)
 	{}
    
 	template<class TYPE>

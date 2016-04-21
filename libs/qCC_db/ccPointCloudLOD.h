@@ -160,6 +160,9 @@ public:
 	//! Builds an index map with the remaining visible points
 	LODIndexSet* getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);
 
+	//! Returns the last index map
+	inline LODIndexSet* getLasIndexMap() const { return m_lastIndexMap; }
+
 	//! Returns whether all points have been displayed or not
 	inline bool allDisplayed() const { return m_currentState.displayedPoints >= m_currentState.visiblePoints; }
 
@@ -239,7 +242,10 @@ protected: //members
 	//! Current rendering state
 	RenderParams m_currentState;
 
-	//! Last index map
+	//! Index map
+	LODIndexSet* m_indexMap;
+
+	//! Last index map (pointer on)
 	LODIndexSet* m_lastIndexMap;
 
 	//! Associated octree

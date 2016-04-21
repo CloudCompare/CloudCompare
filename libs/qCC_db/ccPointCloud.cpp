@@ -2237,7 +2237,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							context.moreLODPointsAvailable = underConstruction;
 							context.higherLODLevelsAvailable = false;
 						}
-						else
+						else if (context.stereoPassIndex == 0)
 						{
 							if (context.currentLODLevel == 0)
 							{
@@ -2273,6 +2273,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							//could we draw more points at the next level?
 							context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
 							context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
+						}
+						else
+						{
 						}
 					}
 				}

@@ -141,7 +141,7 @@ ccBBox ccPolyline::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	ccBBox emptyBox;
 	getBoundingBox(emptyBox.minCorner(), emptyBox.maxCorner());
-	emptyBox.setValidity(/*!is2DMode() && */size() != 0);
+	emptyBox.setValidity((!is2DMode() || !withGLFeatures) && size() != 0); //a 2D polyline is considered as a purely 'GL' fature
 	return emptyBox;
 }
 

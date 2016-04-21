@@ -445,7 +445,7 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 
 	//update zNearCoef
 	zNearHorizontalSlider->blockSignals(true);
-	zNearHorizontalSlider->setValue(ZNearCoefToSliderPos(params.zNearCoef,zNearHorizontalSlider->maximum()));
+	zNearHorizontalSlider->setValue(ZNearCoefToSliderPos(params.zNearCoef, zNearHorizontalSlider->maximum()));
 	zNearHorizontalSlider->blockSignals(false);
 }
 

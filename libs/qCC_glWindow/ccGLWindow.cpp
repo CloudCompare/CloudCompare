@@ -5465,6 +5465,10 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			float originalZoom = m_viewportParams.zoom;
 			setZoom(m_viewportParams.zoom * zoomFactor);
 
+			//disable LOD!
+			bool wasLODEnabled = isLODEnabled();
+			setLODEnabled(false);
+
 			//enable the FBO
 			bindFBO(fbo);
 			logGLError("ccGLWindow::renderToFile/FBO start");
@@ -5476,6 +5480,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0*/,
 			//disable the FBO
 			logGLError("ccGLWindow::renderToFile/FBO stop");
 			bindFBO(0);
+
+			setLODEnabled(wasLODEnabled);
 
 			m_stereoModeEnabled = stereoModeWasEnabled;
 

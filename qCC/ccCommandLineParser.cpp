@@ -2767,12 +2767,13 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	//C2C-only parameters
 	else
 	{
-		if (splitXYZ)
-		{
-			if (maxDist > 0)
-				ccConsole::Warning("'Split XYZ' option is ignored if max distance is defined!");
-			compDlg.split3DCheckBox->setChecked(true);
-		}
+		//DGM: not true anymore
+		//if (splitXYZ)
+		//{
+		//	if (maxDist > 0)
+		//		ccConsole::Warning("'Split XYZ' option is ignored if max distance is defined!");
+		//	compDlg.split3DCheckBox->setChecked(true);
+		//}
 		if (modelIndex != 0)
 		{
 			compDlg.localModelComboBox->setCurrentIndex(modelIndex);

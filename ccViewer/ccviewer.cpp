@@ -83,7 +83,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
 		QWidget* glWidget = 0;
-		CreateGLWindow(m_glWindow, glWidget, true);
+		CreateGLWindow(m_glWindow, glWidget, stereoMode);
 		assert(m_glWindow && glWidget);
 
 		verticalLayout->addWidget(glWidget);

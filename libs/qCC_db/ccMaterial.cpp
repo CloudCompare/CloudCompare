@@ -28,12 +28,14 @@
 #include <QUuid>
 #include <QFileInfo>
 #include <QDataStream>
+#include <QOpenGLTexture>
 
 //System
 #include <assert.h>
 
 //Textures DB
 QMap<QString, QImage> s_textureDB;
+QMap<QString, QSharedPointer<QOpenGLTexture>> s_openGLTextureDB;
 
 ccMaterial::ccMaterial(QString name)
 	: m_name(name)
@@ -176,6 +178,35 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/
 const QImage ccMaterial::getTexture() const
 {
 	return s_textureDB[m_textureFilename];
+}
+
+GLuint ccMaterial::getTextureID() const
+{
+	if (QOpenGLContext::currentContext())
+	{
+		const QImage image = getTexture();
+		if (image.isNull())
+		{
+			return 0;
+		}
+		QSharedPointer<QOpenGLTexture> tex = s_openGLTextureDB[m_textureFilename];
+		if (!tex)
+		{
+			tex = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(QOpenGLTexture::Target2D));
+			tex->setAutoMipMapGenerationEnabled(false);
+			tex->setMinMagFilters(QOpenGLTexture::Nearest, QOpenGLTexture::Linear);
+			tex->setFormat(QOpenGLTexture::RGB8_UNorm);
+			tex->setData(getTexture(), QOpenGLTexture::DontGenerateMipMaps);
+			tex->create();
+			s_openGLTextureDB[m_textureFilename] = tex;
+		}
+		return tex->textureId();
+	}
+	else
+	{
+		return 0;
+	}
+
 }
 
 bool ccMaterial::hasTexture() const

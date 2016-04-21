@@ -1836,7 +1836,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES;
 			glFunc->glBegin(triangleDisplayType);
 
-			QSharedPointer<QOpenGLTexture> currentTexture(0);
+			GLuint currentTexID = 0;
 
 			for (n = 0; n < triNum; ++n)
 			{
@@ -1910,19 +1910,20 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glFunc->glEnd();
 						if (showTextures)
 						{
-							if (currentTexture)
+							if (currentTexID)
 							{
-								currentTexture->release();
-								currentTexture.clear();
+								glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+								currentTexID = 0;
+								glFunc->glDisable(GL_TEXTURE_2D);
 							}
 
 							if (newMatlIndex >= 0)
 							{
-								QImage texImage = m_materials->at(newMatlIndex)->getTexture();
-								if (!texImage.isNull())
+								currentTexID = m_materials->at(newMatlIndex)->getTextureID();
+								if (currentTexID)
 								{
-									currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(texImage, QOpenGLTexture::DontGenerateMipMaps));
-									currentTexture->bind();
+									glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
+									glFunc->glEnable(GL_TEXTURE_2D);
 								}
 							}
 						}
@@ -1988,13 +1989,13 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (showTextures)
 			{
-				if (currentTexture)
+				if (currentTexID)
 				{
-					currentTexture->release();
-					currentTexture.clear();
+					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+					currentTexID = 0;
+					glFunc->glDisable(GL_TEXTURE_2D);
 				}
 				glFunc->glPopAttrib();
-				//glFunc->glDisable(GL_TEXTURE_2D);
 			}
 		}
 

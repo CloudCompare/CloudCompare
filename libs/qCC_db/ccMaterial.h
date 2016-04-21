@@ -111,6 +111,9 @@ public:
 	//! Returns the texture (if any)
 	const QImage getTexture() const;
 
+	//! Returns the texture ID (if any)
+	GLuint getTextureID() const;
+
 	//! Helper: makes all active GL light sources neutral (i.e. 'gray')
 	/** WARNING: an OpenGL context must be active!
 	**/

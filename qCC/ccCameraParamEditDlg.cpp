@@ -244,11 +244,13 @@ void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemInd
 		return;
 	}
 	
-	if (entity)
+	if (!entity)
 	{
-		m_associatedWin->setPivotPoint(CCVector3d::fromArray(P.u));
-		m_associatedWin->redraw();
+		return;
 	}
+
+	m_associatedWin->setPivotPoint(CCVector3d::fromArray(P.u));
+	m_associatedWin->redraw();
 
 	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 	disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));

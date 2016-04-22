@@ -9885,7 +9885,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 {
-	if (checkBoxCameraLink->checkState() != Qt::Checked)
+	if (!actionEnableCameraLink->isChecked())
 		return;
 
 	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9908,7 +9908,7 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 
 void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 {
-	if (checkBoxCameraLink->checkState() != Qt::Checked)
+	if (!actionEnableCameraLink->isChecked())
 		return;
 
 	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9931,7 +9931,7 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 
 void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 {
-	if (checkBoxCameraLink->checkState() != Qt::Checked)
+	if (!actionEnableCameraLink->isChecked())
 		return;
 
 	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9954,7 +9954,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
  void MainWindow::echoCameraPosChanged(const CCVector3d& P)
  {
-	 if (checkBoxCameraLink->checkState() != Qt::Checked)
+	 if (!actionEnableCameraLink->isChecked())
 		 return;
 
 	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -9977,7 +9977,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
  void MainWindow::echoPivotPointChanged(const CCVector3d& P)
  {
-	 if (checkBoxCameraLink->checkState() != Qt::Checked)
+	 if (!actionEnableCameraLink->isChecked())
 		 return;
 
 	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
@@ -10000,7 +10000,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
  void MainWindow::echoPixelSizeChanged(float pixelSize)
  {
-	 if (checkBoxCameraLink->checkState() != Qt::Checked)
+	 if (!actionEnableCameraLink->isChecked())
 		 return;
 
 	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());

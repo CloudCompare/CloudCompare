@@ -122,6 +122,7 @@
     <addaction name="actionToggleViewerBasedPerspective"/>
     <addaction name="actionLockRotationVertAxis"/>
     <addaction name="actionEnterBubbleViewMode"/>
+    <addaction name="actionEnableCameraLink"/>
     <addaction name="separator"/>
     <addaction name="actionRenderToFile"/>
     <addaction name="actionDisplayOptions"/>
@@ -520,54 +521,6 @@
        <property name="uniformRowHeights">
         <bool>true</bool>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox">
-       <layout class="QVBoxLayout">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>3</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>3</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout">
-          <item>
-           <spacer>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="checkBoxCameraLink">
-            <property name="toolTip">
-             <string>Link all 3D views cameras</string>
-            </property>
-            <property name="text">
-             <string>Camera Link</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
       </widget>
      </item>
     </layout>
@@ -2917,6 +2870,18 @@
    </property>
    <property name="toolTip">
     <string>Set Global Shift &amp; Scale mechanism parameters</string>
+   </property>
+  </action>
+  <action name="actionEnableCameraLink">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Camera link</string>
+   </property>
+   <property name="toolTip">
+    <string>Link the cameras of all 3D views
+(so that they all move in the same way and at the same time)</string>
    </property>
   </action>
  </widget>

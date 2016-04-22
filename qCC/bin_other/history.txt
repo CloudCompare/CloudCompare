@@ -47,6 +47,8 @@ v2.7.0 - 04/22/2016
 
 	* LOD mechanims enhanced (faster and smarter)
 
+	* The 'Link camera' checkbox has been moved to the 'Display menu'
+
 - Bug fix:
 	
 	* The HSV to RGB method was broken

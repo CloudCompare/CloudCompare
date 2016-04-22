@@ -4,7 +4,7 @@ v2.7.0 - 04/22/2016
 
 - Enhancements:
 	
-	* Clipping-box tool
+	* Cross section tool
 		- Now based on OpenGL for a much faster display (+ proper integration in the new LOD mechanism)
 
 	* Rasterize tool improved
@@ -16,7 +16,11 @@ v2.7.0 - 04/22/2016
 	* The 'Global Shift & Scale' mechanism now allows for shifting values above 1.0e9
 		(for georeferenced clouds expressed in millimeters!)
 
-	* New 'File > Global Shift settings' dialog to set the limits that trigger the 'Global Shift & Scale' mechanism
+	* New 'File > Global Shift settings' dialog
+		- can be used to set the limits that trigger the 'Global Shift & Scale' mechanism
+		- settings are persistant
+		- settings are used for both the standard application and the command line mode
+		- default triggering value (for the coordinates) have been lowered to 10^4 
 
 	* New 'Tools > Sand-box > Distance Map' tool
 		* allows to compute distance maps for clouds (= distances from regularly sampled positions around the points)
@@ -45,7 +49,7 @@ v2.7.0 - 04/22/2016
 	* ICP registration
 		- the user can now set the maximum number of threads/core to use
 
-	* LOD mechanims enhanced (faster and smarter)
+	* LOD mechanism enhanced (faster and smarter)
 
 	* The 'Link camera' checkbox has been moved to the 'Display menu'
 
@@ -102,8 +106,8 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 	* Mac OS X adds support for the CSV Matrix I/O file format
 
 	* Mac OS X adds support for the following plugins:
-	   - qFacet
-	   - qAnimation
+		- qFacet
+		- qAnimation
 
 - Enhancements:
 	* Point-pair based alignment tool:
@@ -158,7 +162,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 
 	* Rasterize tool:
 		- the Rasterize tool can now compute Hillshade
-		- the 'interpolate' option can now be used with the 'average height' projection. In this case
+		- the 'resample' option can now be used with the 'average height' projection. In this case
 			only the coordinates of the original point are kept (the point which is the closest to the cell center)
 			and the height is replaced by the average cell height.
 
@@ -175,7 +179,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 		- E57: big coordinates are now properly handled (Global Shift & Scale mechanism)
 		- Smarter progress dialogs
 
-	* Clipping-box tool
+	* Cross section tool
 		- new button to hide the clipping-box
 		- new button to restore the previous clipping-box settings (per-entity)
 

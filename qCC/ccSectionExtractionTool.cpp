@@ -209,10 +209,10 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 	
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
-		connect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
-		connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
-		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
+		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
+		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLine(int, int, Qt::MouseButtons)));
+		//connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
 		connect(m_associatedWin, SIGNAL(entitySelectionChanged(ccHObject*)), this, SLOT(entitySelected(ccHObject*)));
 
 		//import sections in current display
@@ -1727,7 +1727,7 @@ void ccSectionExtractionTool::unfoldPoints()
 
 	} //for each cloud
 
-	ccLog::Print(QString("[Unfold] %i cloud(s) exported").arg(exportedClouds));
+	ccLog::Print(QString("[Unfold] %1 cloud(s) exported").arg(exportedClouds));
 }
 
 void ccSectionExtractionTool::extractPoints()

@@ -275,6 +275,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 }
 
 static int s_defaultPickingRadius = 1;
+static int s_overSamplingCount = 1;
 bool ccTracePolylineTool::start()
 {
 	assert(m_polyTip);
@@ -295,6 +296,10 @@ bool ccTracePolylineTool::start()
 	snapSizeSpinBox->blockSignals(true);
 	snapSizeSpinBox->setValue(s_defaultPickingRadius);
 	snapSizeSpinBox->blockSignals(false);
+
+	oversampleSpinBox->blockSignals(true);
+	oversampleSpinBox->setValue(s_overSamplingCount);
+	oversampleSpinBox->blockSignals(false);
 
 	resetLine(); //to reset the GUI
 
@@ -321,6 +326,7 @@ void ccTracePolylineTool::stop(bool accepted)
 	}
 
 	s_defaultPickingRadius = snapSizeSpinBox->value();
+	s_overSamplingCount = oversampleSpinBox->value();
 
 	ccOverlayDialog::stop(accepted);
 }
@@ -350,15 +356,15 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 		return;
 	}
 
-    if (m_done)
+	if (m_done)
 	{
 		// when it is done do nothing
-        return;
+		return;
 	}
 
-    assert(m_polyTip && m_polyTipVertices && m_polyTipVertices->size() == 2);
+	assert(m_polyTip && m_polyTipVertices && m_polyTipVertices->size() == 2);
 
-    //we replace the last point by the new one
+	//we replace the last point by the new one
 	{
 		CCVector3 P2D(	static_cast<PointCoordinateType>(x - m_associatedWin->width() / 2),
 						static_cast<PointCoordinateType>(m_associatedWin->height() / 2 - y),

@@ -2641,9 +2641,6 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 			maxDist = arguments.takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 				return Error(QString("Invalid parameter: value after \"-%1\"").arg(COMMAND_MAX_DISTANCE));
-
-			if (!cloud2meshDist)
-				ccConsole::Warning("Parameter \"-%1\" ignored: only for C2M distance!");
 		}
 		else if (IsCommand(argument, COMMAND_OCTREE_LEVEL))
 		{
@@ -2767,13 +2764,13 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	//C2C-only parameters
 	else
 	{
-		//DGM: not true anymore
-		//if (splitXYZ)
-		//{
-		//	if (maxDist > 0)
-		//		ccConsole::Warning("'Split XYZ' option is ignored if max distance is defined!");
-		//	compDlg.split3DCheckBox->setChecked(true);
-		//}
+		if (splitXYZ)
+		{
+			//DGM: not true anymore
+			//if (maxDist > 0)
+			//	ccConsole::Warning("'Split XYZ' option is ignored if max distance is defined!");
+			compDlg.split3DCheckBox->setChecked(true);
+		}
 		if (modelIndex != 0)
 		{
 			compDlg.localModelComboBox->setCurrentIndex(modelIndex);

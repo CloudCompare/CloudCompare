@@ -33,6 +33,7 @@ v2.7.0 - 04/22/2016
 		- I/O plugins are now loaded in command line mode (i.e. the FARO, DP and PCD formats can now be used)
 		- new option 'MAX_TCOUNT' to specify the maximum number of threads to be used for computing distances (C2C or C2M)
 			as well as for ICP registration
+		- the SPLIT_XYZ and MAX_DIST options can now be used together for C2C distance
 
 	* Default light position
 		- the default (sun) light position is now in the middle of the screen so as to get a brighter visualization of meshes

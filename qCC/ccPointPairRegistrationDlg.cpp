@@ -198,9 +198,9 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		m_associatedWin->addToOwnDB(&m_alignedPoints);
 		m_associatedWin->addToOwnDB(&m_refPoints);
 
-		m_associatedWin->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE);
-		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
-		m_associatedWin->displayNewMessage(QString("Pick equivalent points on both clouds (at least %1 pairs - mind the order)").arg(MIN_PAIRS_COUNT),ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
+		m_associatedWin->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE);
+		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)", ccGLWindow::LOWER_LEFT_MESSAGE, true, 3600);
+		m_associatedWin->displayNewMessage(QString("Pick equivalent points on both clouds (at least %1 pairs - mind the order)").arg(MIN_PAIRS_COUNT), ccGLWindow::LOWER_LEFT_MESSAGE, true, 3600);
 	}
 
 	return true;
@@ -496,25 +496,25 @@ void ccPointPairRegistrationDlg::processPickedItem(ccHObject* entity, unsigned i
 	if (m_paused)
 		return;
 
-	if (entity)
-	{
-		CCVector3d pin = CCVector3d::fromArray(P.u);
+	if (!entity)
+		return;
 
-		if (entity == m_aligned.entity)
-		{
-			addAlignedPoint(pin, m_aligned.entity, true); //picked points are always shifted by default
-		}
-		else if (entity == m_reference.entity)
-		{
-			addReferencePoint(pin, m_reference.entity, true); //picked points are always shifted by default
-		}
-		else
-		{
-			assert(false);
-			return;
-		}
-		m_associatedWin->redraw();
+	CCVector3d pin = CCVector3d::fromArray(P.u);
+
+	if (entity == m_aligned.entity)
+	{
+		addAlignedPoint(pin, m_aligned.entity, true); //picked points are always shifted by default
 	}
+	else if (entity == m_reference.entity)
+	{
+		addReferencePoint(pin, m_reference.entity, true); //picked points are always shifted by default
+	}
+	else
+	{
+		assert(false);
+		return;
+	}
+	m_associatedWin->redraw();
 }
 
 void ccPointPairRegistrationDlg::onPointCountChanged()

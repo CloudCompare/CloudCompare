@@ -558,7 +558,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	if (!AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
 	{
 		//no intersection
-		return false;
+		return true; //DGM: false would mean that an error occurred! (output.point == 0 means that nothing has been found)
 	}
 
 	//no need to go too deep

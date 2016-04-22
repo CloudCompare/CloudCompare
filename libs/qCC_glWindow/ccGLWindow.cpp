@@ -4103,9 +4103,9 @@ void ccGLWindow::processPickingResult(const PickingParameters& params,
 			assert(false);
 	}
 	//3D point or triangle picking
-	else if (params.mode == POINT_PICKING
-		|| params.mode == TRIANGLE_PICKING
-		|| params.mode == POINT_OR_TRIANGLE_PICKING)
+	else if (	params.mode == POINT_PICKING
+			||	params.mode == TRIANGLE_PICKING
+			||	params.mode == POINT_OR_TRIANGLE_PICKING)
 	{
 		assert(pickedEntity == 0 || pickedItemIndex >= 0);
 		assert(nearestPoint);

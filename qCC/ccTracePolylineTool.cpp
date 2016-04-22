@@ -226,16 +226,16 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 				steps = 0; //quick finish ;)
 				break;
 			}
-			pDlg.setValue(pDlg.value()+1);
-        }
-    }
+			pDlg.setValue(pDlg.value() + 1);
+		}
+	}
 
 	//add last point
 	if (!m_poly3D->isClosed())
 	{
 		newVertices->addPoint(*m_poly3DVertices->getPoint(n_verts - 1));
 	}
-	
+
 	newVertices->shrinkToFit();
 	newPoly->addPointIndex(0, newVertices->size());
 
@@ -244,65 +244,66 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 
 bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 {
-    assert(m_polyTip);
+	assert(m_polyTip);
 	assert(!m_poly3D);
 
-    ccGLWindow* oldWin = m_associatedWin;
+	ccGLWindow* oldWin = m_associatedWin;
 
-    if (!ccOverlayDialog::linkWith(win))
+	if (!ccOverlayDialog::linkWith(win))
 	{
-        return false;
+		return false;
 	}
 
-    if (oldWin)
+	if (oldWin)
 	{
 		oldWin->removeFromOwnDB(m_polyTip);
-        oldWin->disconnect(this);
+		oldWin->disconnect(this);
 
 		if (m_polyTip)
-            m_polyTip->setDisplay(0);
-    }
+			m_polyTip->setDisplay(0);
+	}
 
-    if (m_associatedWin)
+	if (m_associatedWin)
 	{
 		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
-        //connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
-        connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
-        connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
-    }
+		//connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
+		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
+		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
+	}
 
-    return true;
+	return true;
 }
 
+static int s_defaultPickingRadius = 1;
 bool ccTracePolylineTool::start()
 {
-    assert(m_polyTip);
+	assert(m_polyTip);
 	assert(!m_poly3D);
 
-    if (!m_associatedWin)
+	if (!m_associatedWin)
 	{
-        ccLog::Warning("[Trace Polyline Tool] No associated window!");
-        return false;
-    }
+		ccLog::Warning("[Trace Polyline Tool] No associated window!");
+		return false;
+	}
 
-    m_associatedWin->setUnclosable(true);
+	m_associatedWin->setUnclosable(true);
 	m_associatedWin->addToOwnDB(m_polyTip);
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA() | ccGLWindow::INTERACT_SIG_RB_CLICKED | ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
-    m_associatedWin->setCursor(Qt::CrossCursor);
+	m_associatedWin->setCursor(Qt::CrossCursor);
 
 	snapSizeSpinBox->blockSignals(true);
-	snapSizeSpinBox->setValue(m_associatedWin->getPickingRadius());
+	snapSizeSpinBox->setValue(s_defaultPickingRadius);
 	snapSizeSpinBox->blockSignals(false);
-	
+
 	resetLine(); //to reset the GUI
 
-    return ccOverlayDialog::start();
+	return ccOverlayDialog::start();
 }
 
 void ccTracePolylineTool::stop(bool accepted)
 {
-    assert(m_polyTip);
+	assert(m_polyTip);
 
 	if (m_associatedWin)
 	{
@@ -319,7 +320,9 @@ void ccTracePolylineTool::stop(bool accepted)
 		m_associatedWin->setCursor(Qt::ArrowCursor);
 	}
 
-    ccOverlayDialog::stop(accepted);
+	s_defaultPickingRadius = snapSizeSpinBox->value();
+
+	ccOverlayDialog::stop(accepted);
 }
 
 void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons buttons)
@@ -393,6 +396,12 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 	if (!m_associatedWin)
 	{
 		assert(false);
+		return;
+	}
+
+	if (!entity)
+	{
+		//means that the mouse has been clicked but no point was found!
 		return;
 	}
 

@@ -2692,10 +2692,10 @@
      <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
    </property>
    <property name="text">
-    <string>Extract sections</string>
+    <string>Extract sections / Unfold</string>
    </property>
    <property name="toolTip">
-    <string>Extract cloud sections along polylines</string>
+    <string>Extract cloud sections along polylines/nor unfold a cloud along a polyline</string>
    </property>
   </action>
   <action name="actionConvertPolylinesToMesh">

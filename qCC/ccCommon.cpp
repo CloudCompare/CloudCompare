@@ -29,6 +29,9 @@
 QString ccCommon::GetCCVersion(bool full/*=true*/)
 {
 	QString verStr = QString("%1.%2").arg(CC_VER_NUM).arg(CC_SUB_VER);
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	verStr += " Stereo";
+#endif
 
 #if defined(CC_ENV_64)
 	QString arch = "64 bits";

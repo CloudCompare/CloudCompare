@@ -22,6 +22,7 @@
 //Qt
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QString>
 
 //plugins handling
 #include <QPluginLoader>
@@ -57,8 +58,22 @@
 #include <assert.h>
 
 //! Current version
-const double CC_VIEWER_VERSION = 1.35;
-const QString CC_VIEWER_VERSION_STR = QString::number(CC_VIEWER_VERSION,'f',2);
+struct VerInfo
+{
+	VerInfo()
+		: number(1.35)
+	{
+		title = QString::number(number,'f',2);
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+		title += " Stereo";
+#endif
+	}
+
+	double number;
+	QString title;
+
+};
+static const VerInfo CC_VIEWER_VERSION;
 
 //Camera parameters dialog
 ccCameraParamEditDlg* s_cpeDlg = 0;
@@ -71,7 +86,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 {
 	ui.setupUi(this);
 
-	setWindowTitle(QString("ccViewer V%1").arg(CC_VIEWER_VERSION_STR));
+	setWindowTitle(QString("ccViewer V%1").arg(CC_VIEWER_VERSION.title));
 
 	//insert GL window in a vertical layout
 	{
@@ -182,6 +197,9 @@ ccViewer::~ccViewer()
 		//m_glWindow->redraw();
 		delete currentRoot;
 	}
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	m_glWindow->setParent(0);
+#endif
 }
 
 void ccViewer::loadPlugins()
@@ -1070,7 +1088,7 @@ void ccViewer::doActionAbout()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(&aboutDialog);
-	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(CC_VIEWER_VERSION_STR));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(CC_VIEWER_VERSION.title));
 
 	aboutDialog.exec();
 }

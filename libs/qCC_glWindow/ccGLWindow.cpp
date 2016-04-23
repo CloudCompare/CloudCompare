@@ -6194,9 +6194,12 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 }
 
 void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
-{
-	makeCurrent();
-
+{   
+	if (m_activeFbo)
+	{
+		m_activeFbo->start();
+	}
+   
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
@@ -6207,6 +6210,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 	QImage textImage(rect.width(), rect.height(), QImage::Format::Format_RGBA8888);
 	{
 		QPainter painter(&textImage);
+		painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 		textImage.fill(Qt::transparent);
 
 		float glColor[4];
@@ -6242,7 +6246,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 			//move to the right position on the screen
 			glFunc->glTranslatef(x, m_glViewport.height() - 1 - y, 0);
 
-			glFunc->glEnable(GL_TEXTURE_2D);
+			glFunc->glEnable(GL_TEXTURE_2D);         
 			QOpenGLTexture textTex(textImage);
 			textTex.bind();
 

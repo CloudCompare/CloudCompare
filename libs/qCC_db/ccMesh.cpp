@@ -1914,7 +1914,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 							{
 								glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 								currentTexID = 0;
-								glFunc->glDisable(GL_TEXTURE_2D);
 							}
 
 							if (newMatlIndex >= 0)
@@ -1923,7 +1922,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 								if (currentTexID)
 								{
 									glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
-									glFunc->glEnable(GL_TEXTURE_2D);
 								}
 							}
 						}
@@ -1993,7 +1991,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 					currentTexID = 0;
-					glFunc->glDisable(GL_TEXTURE_2D);
 				}
 				glFunc->glPopAttrib();
 			}

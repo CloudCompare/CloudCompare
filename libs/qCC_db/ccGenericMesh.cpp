@@ -488,7 +488,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//materials
 			const ccMaterialSet* materials = getMaterialSet();
 
-			QSharedPointer<QOpenGLTexture> currentTexture(0);
+			GLuint currentTexID = 0;
 
 			for (unsigned n = 0; n < triNum; ++n)
 			{
@@ -560,19 +560,18 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glFunc->glEnd();
 						if (showTextures)
 						{
-							if (currentTexture)
+							if (currentTexID)
 							{
-								currentTexture->release();
-								currentTexture.clear();
+								glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+								currentTexID = 0;
 							}
 
 							if (newMatlIndex >= 0)
 							{
-								QImage texImage = materials->at(newMatlIndex)->getTexture();
-								if (!texImage.isNull())
+								currentTexID = materials->at(newMatlIndex)->getTextureID();
+								if (currentTexID)
 								{
-									currentTexture = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(texImage));
-									currentTexture->bind();
+									glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
 								}
 							}
 						}
@@ -588,7 +587,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (showTextures)
 					{
-						getTriangleTexCoordinates(n,Tx1,Tx2,Tx3);
+						getTriangleTexCoordinates(n, Tx1, Tx2, Tx3);
 					}
 				}
 
@@ -630,10 +629,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (showTextures)
 			{
-				if (currentTexture)
+				if (currentTexID)
 				{
-					currentTexture->release();
-					currentTexture.clear();
+					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+					currentTexID = 0;
 				}
 				glFunc->glPopAttrib();
 			}

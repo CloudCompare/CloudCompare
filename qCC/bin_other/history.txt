@@ -13,12 +13,19 @@ v2.7.0 - 04/22/2016
 		- The 'Cancel' button of the grid update progress bar is now handled properly
 		- Now exports images with the active (default) color scale
 
+	* Support for the Oculus Rift device
+		- new option of the 'Stereo' mode (you have to use the 'Stereo' version of CloudCompare)
+		- development is still in 'alpha' state
+		- units must be expressed in meters
+		- works best with a 3D mouse
+		- works best in 'bubble view' mode (i.e. with FARO or PTX files)
+
 	* The 'Global Shift & Scale' mechanism now allows for shifting values above 1.0e9
 		(for georeferenced clouds expressed in millimeters!)
 
 	* New 'File > Global Shift settings' dialog
 		- can be used to set the limits that trigger the 'Global Shift & Scale' mechanism
-		- settings are persistant
+		- settings are persistent
 		- settings are used for both the standard application and the command line mode
 		- default triggering value (for the coordinates) have been lowered to 10^4 
 
@@ -30,7 +37,7 @@ v2.7.0 - 04/22/2016
 		and 'Tools > Registration > Match scales' methods now update the 'transformation history matrix' of the entities
 
 	* Bubble View mode
-		- nows allows for horizontal AND vertical rotation
+		- now allows for horizontal AND vertical rotation
 		- the 3D mouse is now properly handled
 
 	* Command line mode
@@ -83,7 +90,7 @@ v2.6.3.1 - 03/XX/2016
 	* The meshes over the user-specified limit (display options) were ALWAYS decimated (and not only when the mouse is moved)
 	* 2D area label picking was broken (first corner was misplaced)
 	* 3D point picking on a cloud with a temporary GL transformation (e.g. in the Align tool) was not working properly
-	* The camera sensor dialog was presenting the camera orientation vectors in the wrong order (horizontal instaed of vertical)
+	* The camera sensor dialog was presenting the camera orientation vectors in the wrong order (horizontal instead of vertical)
 	* OpenMP support disabled for Ransac Shape Detection on Windows (the process loops infinitely if enabled)
 	* When custom labels were defined for a custom color scale, the values that were not present in the active SF range were ignored
 
@@ -103,7 +110,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 
 	* Exclusive full screen mode for 3D views
 
-	* Support of the NVidia 3D Vision glasses (thanks to Amfax (UK) - www.amfax.co.uk)
+	* Support for the NVidia 3D Vision glasses (thanks to Amfax (UK) - www.amfax.co.uk)
 		- new option of the 'Stereo' mode
 		- the graphic card must support OpenGL quad buffering (i.e. latest GeForce or Quadro cards)
 		- the 3D stereo mode must be enabled in the NVidia Control Pannel
@@ -158,7 +165,7 @@ v2.6.3 (= pre 2.7.0 for systems that don't support Qt5) - 03/13/2016
 
 	* CANUPO plugin:
 		- the statistics (Training mode) now takes the actual boundary into account (and not the default one)
-		- bug fix: the classes (labels) could be inversed in some cases
+		- bug fix: the classes (labels) could be inverted in some cases
 		- the user can now set the maximum number of threads/core to use
 
 	* Distance computation tool:
@@ -1138,7 +1145,7 @@ v2.5.2 12/19/2013
 	- 'Edit > Fuse' entry renamed 'Edit > Merge'
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
-		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
+		was inverted from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
 	- blank lines or commentaries were causing an infinite loop when importing ASCII files
 	- primitives (sphere, cylinder, etc.) were not correctly loaded from BIN files (CC would crash when loading them)
 	- sub-meshes' bounding boxes were not updated when a transformation was applied to their parent mesh or its
@@ -1256,7 +1263,7 @@ v2.5.0 07/12/2013
 	* global shift information is now kept by qRansacSD plugin (shape detection)
 	* qHPR (Hidden Point Removal) plugin now generates a new cloud with the visible points only
 		(instead of hacking the points visibility) along with the corresponding viewport
-	* scaled transformation matrix are now properly inversed (i.e. scale is taken into account)
+	* scaled transformation matrix are now properly inverted (i.e. scale is taken into account)
 	* point-pair based alignment tool outputs a summary on completion (RMS, scale, etc.)
 	* scale estimation during point-pair based alignment has been enhanced
 - Bug fixes:

@@ -30,7 +30,7 @@ function( target_link_ffmpeg ) # 1 argument: ARGV0 = project name
 			elseif ( APPLE )
 				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.dylib )
 			else()
-				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.a )
+				LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_LIBRARY_DIR}/lib${libfile}.so )
 			endif()
 		endforeach()
 

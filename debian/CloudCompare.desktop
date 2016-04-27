@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=2.4
+Type=Application
+Name=CloudCompare
+Comment=Point cloud processing
+Categories=Graphics;3DGraphics;Viewer;
+TryExec=CloudCompare
+Exec=CloudCompare %F
+Icon=cc_icon
+MimeType=model/mesh;

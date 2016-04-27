@@ -1,0 +1,249 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: cloudcompare
+Upstream-Contact: cloudcompare at danielgm.net
+Source: https://github.com/cloudcompare/trunk/ 
+
+Files: *
+Copyright: 2004-2016 EDF R&D / TELECOM ParisTech
+Author: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+Files: CC
+Copyright: 2004-2016 EDF R&D / TELECOM ParisTech
+Author: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: LGPL-2.1
+
+Files: CC/triangle/triangle.*
+Copyright: 1993-2005, Jonathan Richard Shewchuk, jrs at cs.berkeley.edu
+License: Triangle
+ These programs may be freely redistributed under the condition that the
+ copyright notices (including the copy of this notice in the code comments
+ and the copyright notice printed when the ‘-h’ switch is selected) 
+ are not removed, and no compensation is received. Private, research,
+ and institutional use is free. You may distribute modified versions of 
+ this code UNDER THE CONDITION THAT THIS CODE AND ANY MODIFICATIONS MADE
+ TO IT IN THE SAME FILE REMAIN UNDER COPYRIGHT OF THE ORIGINAL AUTHOR,
+ BOTH SOURCE AND OBJECT CODE ARE MADE FREELY AVAILABLE WITHOUT CHARGE,
+ AND CLEAR NOTICE IS GIVEN OF THE MODIFICATIONS. Distribution of this code
+ as part of a commercial system is permissible ONLY BY DIRECT ARRANGEMENT
+ WITH THE AUTHOR. (If you are not directly supplying this code to a
+ customer, and you are instead telling them how they can obtain it for
+ free, then you are not required to make any arrangement with me.) 
+
+Files: contrib/cmake/Modules/*
+Copyright: 2010, Roland Scharz, Riegle LMS GmbH
+License: GPL-2.0+
+Comment: not used in this package
+
+Files: contrib/xiot-0.9.0-src.patched/*
+Copyright: 2008-2009 EDF R&D
+Author: Kristian Sons, xiot at actor3d.com
+Comment: not used in this package
+License: GPL-2.0+
+
+Files: libs/CCFbo/*
+Copyright: EDF R&D / TELECOM ParisTech
+License: GPL-2.0+
+Author: Christian Boucheny (EDF R&D / INRIA)
+Comment: Modification, Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+
+Files: libs/qcustomplot/*
+copyright: 2011-2015 Emmanuel Eichhammer
+License: GPL-3.0+
+
+Files: qCC/fileIO/rply*
+Copyright: Diego Nehab, IMPA
+License: MIT
+ Copyright (C) 2003-2011 Diego Nehab.  All rights reserved.
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Files: qCC/plugins/qAnimation/*
+Copyright: 2015 Ryan Wicks, 2G. Robotics Inc.
+Author: Ryan Wicks 
+License: GPL-2.0+
+
+Files: qCC/plugins/qAnimation/QTFFmpegWrapper/win/*
+Copyright: 2006 Alexander Chemeris
+Author: Alexander Chemeris
+License: BSD
+
+Files: qCC/plugins/qEDL/*
+Copyright: EDF R&D / TELECOM ParisTech (ENST-TSI)
+Author: Christian Boucheny, (EDF R&D / INRIA)
+License: GPL-2.0+
+
+Files: qCC/plugins/qFacets/*
+Copyright: BRGM
+License: GPL-2.0+
+
+Files: qCC/plugins/qGMMREG/*
+Copyright: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+Files: qCC/plugins/qGMMREG/GMMREG/*
+Copyright: 2008, Bing Jian and Baba C. Vemuri 
+License: GPL-3.0+
+
+Files: qCC/plugins/qHPR/*
+Copyright: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+Files: qCC/plugins/qHPR/qhull/*
+Copyright: 1993-2012, C.B Barber
+ 1993-2012, The National Science and Technology Research Center for
+ Computation and Visualization of Geometric Structures 
+ (The Geometry Center) - University of Minnesota, qhull at qhull.org
+License: Qhull
+                     Qhull, Copyright (c) 1993-2012
+ .                   
+                             C.B. Barber
+                            Arlington, MA 
+ .                          
+                                and
+ .
+        The National Science and Technology Research Center for
+         Computation and Visualization of Geometric Structures
+                         (The Geometry Center)
+                         University of Minnesota
+ .
+                        email: qhull@qhull.org
+ .
+ This software includes Qhull from C.B. Barber and The Geometry Center.  
+ Qhull is copyrighted as noted above.  Qhull is free software and may 
+ be obtained via http from www.qhull.org.  It may be freely copied, modified, 
+ and redistributed under the following conditions:
+ .
+ 1. All copyright notices must remain intact in all files.
+ .
+ 2. A copy of this text file must be distributed along with any copies 
+    of Qhull that you redistribute; this includes copies that you have 
+    modified, or copies of programs or other software products that 
+    include Qhull.
+ .
+ 3. If you modify Qhull, you must include a notice giving the
+    name of the person performing the modification, the date of
+    modification, and the reason for such modification.
+ .
+ 4. When distributing modified versions of Qhull, or other software 
+    products that include Qhull, you must provide notice that the original 
+    source code may be obtained as noted above.
+ .
+ 5. There is no warranty or other guarantee of fitness for Qhull, it is 
+    provided solely "as is".  Bug reports or fixes may be sent to 
+    qhull_bug@qhull.org; the authors may or may not act on them as 
+    they desire.
+
+Files: qCC/plugins/qKinect/*
+Copyright: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+fILES: qCC/plugins/qPCL/*
+Copyright: Luca Penasa
+License: GPL-2.0+
+Comment: not used in this package
+
+Files: qCC/plugins/qPCV/*
+Copyright: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+Files: qCC/plugins/qPoissonRecon/*
+Copyright: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+Files: qCC/plugins/qPoissonRecon/PoissonReconLib/Src/*
+Copyright: Copyright 2006-2016, Michael Kazhdan and Matthew Bolitho
+License: BSD
+ Copyright (c) 2006-2016, Michael Kazhdan and Matthew Bolitho
+ All rights reserved.
+ .
+ Redistribution and use in source and binary forms, with or without modification,
+ are permitted provided that the following conditions are met:
+ .
+ Redistributions of source code must retain the above copyright notice, this list of
+ conditions and the following disclaimer. Redistributions in binary form must reproduce
+ the above copyright notice, this list of conditions and the following disclaimer
+ in the documentation and/or other materials provided with the distribution.
+ .
+ Neither the name of the Johns Hopkins University nor the names of its contributors
+ may be used to endorse or promote products derived from this software without specific
+ prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ TO, PROCUREMENT OF SUBSTITUTE  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+ DAMAGE.
+
+Files: qCC/plugins/qRANSAC_SD/*
+Copyright: Daniel Girardeau-Montaut, daniel dot girardeau at gmail.com
+License: GPL-2.0+
+
+Files: qCC/plugins/qRANSAC_SD/RANSAC_SD_orig/*
+Copyright: 2006-2009, Ruwen Schnabel, schnabel at cs.uni-bonn.de
+ 2006-2009, Roland Wahl, wahl at cs.uni-bonn.de  
+License: RANSAC_SD
+ Copyright 2009 Ruwen Schnabel (schnabel@cs.uni-bonn.de),
+                 Roland Wahl (wahl@cs.uni-bonn.de).
+ .
+ This software may be used for research purposes only.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: qCC/plugins/qSSAO/*
+Copyright: EDF R&D / TELECOM ParisTech (ENST-TSI)
+Author: Christian Boucheny (EDF R&D / INRIA)
+License: GPL-2.0+
+Comment: Adapted from Crytek and Inigo Quilez
+
+Files: debian/*
+Copyright: 2013-2016, Romain Janvier <romain.janvier@univ-orleans.fr>
+License: GPL-2.0+
+
+License: GPL-2.0+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".

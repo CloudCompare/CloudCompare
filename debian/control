@@ -1,0 +1,28 @@
+Source: cloudcompare
+Section: graphics
+Priority: extra
+Maintainer: Romain Janvier <romain.janvier@univ-orleans.fr>
+Build-Depends: debhelper (>= 9.0.0), cmake, qtbase5-dev, libqt5opengl5-dev, libfreenect-dev, 
+ libcgal-dev, libcgal-qt5-dev, liblas-dev (>= 1.7.0), liblas-c-dev (>= 1.7.0), libboost-thread-dev, 
+ libboost-program-options-dev, libvxl1-dev, libavutil-dev, libavcodec-dev, 
+ libavformat-dev, libswscale-dev
+Standards-Version: 3.9.4
+Homepage:http://www.danielgm.net/cc/
+Vcs-Git: git://github.com/archeos/cloudcompare-archeos.git
+Vcs-Browser: https://github.com/archeos/cloudcompare-archeos
+
+Package: cloudcompare
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: 3D point cloud and mesh processing software
+ CloudCompare is 3D point cloud (and triangular mesh) 
+ processing software. It has been designed to 
+ perform comparisons between two 3D points clouds 
+ (such as the ones obtained with a laser scanner) 
+ or between a point cloud and a triangular mesh. 
+ .
+ It relies on a specific octree structure that enables 
+ great performance in this particular function and is 
+ intended to deal with huge point clouds 
+ (typically more than 10 million points, 
+ and up to 120 million with 2 Gb of memory)

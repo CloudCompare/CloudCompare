@@ -1,0 +1,198 @@
+cloudcompare (2.7.0-0xenial1) UNRELEASED; urgency=medium
+
+  * Removed patch 01-05 & 08-09 (Fixed upstream)
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 25 Apr 2016 20:05:00 +0100
+
+cloudcompare (2.6.3.1-0xenial2) xenial; urgency=medium
+
+  * Fix a build bug related to multi-arch
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Thu, 24 Mar 2016 16:58:45 +0100
+
+cloudcompare (2.6.3.1-0xenial1) xenial; urgency=medium
+
+  * Imported Upstream version 2.6.3.1
+  * Added qPCL plugin
+  * Added FFMPEG to qAnimation 
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Thu, 17 Mar 2016 22:31:02 +0100
+
+cloudcompare (2.6.3-0xenial1) xenial; urgency=medium
+
+  * Imported Upstream version 2.6.3
+  * Usual refresh of debian files
+  * Add new plugins
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 13 Mar 2016 13:18:54 +0100
+
+cloudcompare (2.6.3+git20160304-0archeos1) hypatia; urgency=medium
+
+  * Imported Upstream version 2.6.3+git20160304
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 06 Mar 2016 12:25:03 +0100
+
+cloudcompare (2.6.0-archeos2) theodoric; urgency=medium
+
+  * Merges Wookey changes in the control file (closes #18)
+  * Reformat patches
+  * Few corrections on Debian files
+  * Patch 0005: fix libqCC_io install dir
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Wed, 05 Nov 2014 19:04:35 +0100
+
+cloudcompare (2.6.0-0archeos1) theodoric; urgency=medium
+
+  * Imported Upstream version 2.6.0
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 25 Oct 2014 21:02:55 +0200
+
+cloudcompare (2.5.6~git20140801-0archeos1) theodoric; urgency=medium
+
+  * Imported Upstream version 2.5.6~git20140801
+  * Switch back to dynamic parallel builds
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 03 Aug 2014 17:49:28 +0200
+
+cloudcompare (2.5.5-0archeos2) theodoric; urgency=low
+
+  * Fix a bug with rpath (patch #05)
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 14 Jul 2014 20:13:00 +0100
+
+cloudcompare (2.5.5-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.5.5
+    upstream changes are in the history.txt file.
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 12 Jul 2014 18:52:23 +0100
+
+cloudcompare (2.5.4.1-0archeos1) UNRELEASED; urgency=low
+
+  * New upstream version 2.5.4.1
+    upstream changes are in the history.txt file.
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 24 May 2014 19:00:00 +0100
+
+cloudcompare (2.5.3-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.5.3
+    upstream changes are in the history.txt file.
+  * This version was *not* the upstream 2.5.3 version. The 2.5.2 + bugfixes
+    Sorry for the inconvenience
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 23 Dec 2013 00:31:43 +0100
+
+cloudcompare (2.5.2-0archeos4) theodoric; urgency=low
+
+  * Release script
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 21 Dec 2013 17:52:11 +0100
+
+cloudcompare (2.5.2-0archeos3) theodoric; urgency=low
+
+  * OpenMP fix
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 21 Dec 2013 16:45:38 +0100
+
+cloudcompare (2.5.2-0archeos2) theodoric; urgency=low
+
+  * Release script
+  * Proper libfreenect handling
+  * Build PoissonRecon with openMP support
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 21 Dec 2013 11:40:43 +0100
+
+cloudcompare (2.5.2-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.5.2
+    As usual, upstream changes are in the history.txt file.
+  * Depend now on libfreekinect-dev instead of freenect
+  * DXF support is still not enabled in this version.
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Fri, 20 Dec 2013 17:51:34 +0100
+
+cloudcompare (2.5.1-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.5.1
+    upstream changes are in the history.txt file.
+    please note that DXF support is not enabled in this version.
+    for further information refer to the README.debian file.
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 19 Oct 2013 12:00:00 +0200
+
+cloudcompare (2.5.0-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.5.0
+    upstream changes are in the history.txt file
+  * Removed patch 04 for hardening (fixed upstream)
+  * Removed StyleSheet in ccViewer (patch 06)
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sat, 13 Jul 2013 10:36:30 +0200
+
+cloudcompare (2.4+git20130310-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.4+git20130310
+    see upstream changes in the history.txt file
+  * Use date as version number instead of SHA-1
+  * Added Plugins (fix #8):
+    - qKinect (not tested yet)
+    - qBlut
+    - qEDL
+    - qPCV
+    - qPoissonRecon
+    - qSSAO
+  * Removed liblas support (it never worked on this package because
+    liblas in Debian repositories is too old). Note that other CC module 
+    depends on libraries that are not yet packaged for Debian 
+    (so it close #6 for now).
+  * Dynamic libraries now live in lib/<packagename> (patch 06) 
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 11 Mar 2013 09:40:47 +0100
+
+cloudcompare (2.4+git8336b3-0archeos1) theodoric; urgency=low
+
+  * New upstream version 2.4+git8336b3
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 10 Mar 2013 11:31:38 +0100
+
+cloudcompare (2.4+gitfaa33637a8-0archeos1) theodoric; urgency=low
+
+  * Imported Upstream version 2.4+gitfaa33637a8
+  * A better copyright file (WIP)
+  * Use new upstream icons
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Wed, 30 Jan 2013 10:16:54 +0100
+
+cloudcompare (2.4+gitab9c37f-0archeos1) theodoric; urgency=low
+
+  * Imported Upstream version 2.4+gitab9c37f
+  * Decimal separator is now always a dot (fixes: #9)
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Wed, 30 Jan 2013 10:16:54 +0100
+
+cloudcompare (2.4+git85774862592-0archeos3) theodoric; urgency=low
+
+  * Dynamic directory for shaders
+  * Use LibGLEW from repos (closes #3)
+  * Added (dummy) desktop files and icons
+  * Added liblas support
+  * Update build dependencies
+  * Hardening
+  * Minor modifications to debian files
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 21 Jan 2013 17:56:07 +0100
+
+cloudcompare (2.4+git85774862592-0archeos2) theodoric; urgency=low
+
+  * Fixed bad path for 'docs'
+  * Test package with pbuilder and update build-deps
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 14 Jan 2013 02:41:02 +0100
+
+cloudcompare (2.4+git85774862592-0archeos1) theodoric; urgency=low
+
+  * Initial release (Closes: #35 ArcheOS)
+  * Now compile with gcc-4.7
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 13 Jan 2013 06:22:02 +0100

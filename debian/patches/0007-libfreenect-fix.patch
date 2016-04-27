@@ -1,0 +1,28 @@
+From: Romain Janvier <romain.janvier@hotmail.fr>
+Date: Mon, 3 Nov 2014 00:27:37 +0100
+Subject: libfreenect-fix
+
+---
+ plugins/qKinect/LibfreenectSupport.cmake | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/qKinect/LibfreenectSupport.cmake b/plugins/qKinect/LibfreenectSupport.cmake
+index b507938..d3397a2 100644
+--- a/plugins/qKinect/LibfreenectSupport.cmake
++++ b/plugins/qKinect/LibfreenectSupport.cmake
+@@ -3,7 +3,7 @@
+ # ------------------------------------------------------------------------------
+ 
+ set( LIBFREENECT_INCLUDE_DIR "" CACHE PATH "Include directory of libfreenect" )
+-set( LIBFREENECT_LIBRARY_FILE "" CACHE FILEPATH "Library file of libfreenect" )
++set( LIBFREENECT_LIBRARY_FILE "" CACHE FILE "Library file of libfreenect" )
+ if (WIN32)
+ 	set( LIBFREENECT_SHARED_LIBRARY_FILE "" CACHE FILEPATH "Shared library file of libfreenect (dll)" )
+ endif()
+@@ -39,4 +39,4 @@ function( target_link_libfreenect ) # 2 arguments: ARGV0 = project name / ARGV1
+ 
+ 	endif()
+ 
+-endfunction()
+\ No newline at end of file
++endfunction()

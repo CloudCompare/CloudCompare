@@ -1,0 +1,4 @@
+?package(cloudcompare):needs="X11" section="Applications/Graphics"\
+  title="CloudCompare" command="/usr/bin/CloudCompare"
+?package(cloudcompare):needs="X11" section="Applications/Graphics"\
+  title="CloudCompare Viewer" command="/usr/bin/ccViewer"

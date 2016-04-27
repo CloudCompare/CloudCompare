@@ -1,0 +1,4 @@
+debian/CloudCompare.desktop /usr/share/applications
+debian/ccViewer.desktop /usr/share/applications
+qCC/images/icon/cc_icon.svg /usr/share/icons/hicolor/scalable/apps
+qCC/images/icon/cc_viewer_icon.svg /usr/share/icons/hicolor/scalable/apps

@@ -1,0 +1,11 @@
+--- a/plugins/qPoissonRecon/PoissonReconLib/Src/MultiGridOctreeData.inl
++++ b/plugins/qPoissonRecon/PoissonReconLib/Src/MultiGridOctreeData.inl
+@@ -45,7 +45,7 @@ const double ROUND_EPS            = 1e-5
+ #else
+ 
+ #include <cmath>
+-#define ISNAN isnan
++#define ISNAN std::isnan
+ #define ISFINITE std::isfinite
+ 
+ #endif

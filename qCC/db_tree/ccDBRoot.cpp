@@ -26,6 +26,7 @@
 #include <QHeaderView>
 #include <QMimeData>
 #include <QMessageBox>
+#include <QRegExp>
 
 //qCC_db
 #include <ccLog.h>
@@ -66,7 +67,7 @@ static bool CanDetachCloud(const ccHObject* obj)
 		assert(false);
 		return false;
 	}
-	
+
 	ccHObject* parent = obj->getParent();
 	if (!parent)
 	{
@@ -76,8 +77,8 @@ static bool CanDetachCloud(const ccHObject* obj)
 
 	//can't deleted the vertices of a mesh or the verties of a polyline
 	bool blocked = (	(parent->isKindOf(CC_TYPES::MESH) && (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == obj))
-					||	(parent->isKindOf(CC_TYPES::POLY_LINE) && (dynamic_cast<ccPointCloud*>(ccHObjectCaster::ToPolyline(parent)->getAssociatedCloud()) == obj)) );
-	
+						||	(parent->isKindOf(CC_TYPES::POLY_LINE) && (dynamic_cast<ccPointCloud*>(ccHObjectCaster::ToPolyline(parent)->getAssociatedCloud()) == obj)) );
+
 	return !blocked;
 }
 
@@ -487,12 +488,12 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			//all primitives
 		case CC_TYPES::PLANE:
 		case CC_TYPES::SPHERE:
-		case CC_TYPES::TORUS:	
+		case CC_TYPES::TORUS:
 		case CC_TYPES::CYLINDER:
-		case CC_TYPES::CONE:	
-		case CC_TYPES::BOX:	
-		case CC_TYPES::DISH:	
-		case CC_TYPES::EXTRU:	
+		case CC_TYPES::CONE:
+		case CC_TYPES::BOX:
+		case CC_TYPES::DISH:
+		case CC_TYPES::EXTRU:
 		case CC_TYPES::FACET:
 		case CC_TYPES::QUADRIC:
 			if (locked)
@@ -975,7 +976,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 										dbTreeSelectionInfo* info/*=NULL*/ )
 {
 	selectedEntities.clear();
-	
+
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 
@@ -1042,7 +1043,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 
 Qt::DropActions ccDBRoot::supportedDropActions() const
 {
-	return Qt::MoveAction; 
+	return Qt::MoveAction;
 }
 
 Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
@@ -1061,12 +1062,14 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
 		if (item->isA(CC_TYPES::HIERARCHY_OBJECT)								||
-			(item->isKindOf(CC_TYPES::POINT_CLOUD) && CanDetachCloud(item))		|| //vertices can't be displaced
-			(item->isKindOf(CC_TYPES::MESH) && !item->isA(CC_TYPES::SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
-			item->isKindOf(CC_TYPES::IMAGE)										||
-			item->isKindOf(CC_TYPES::LABEL_2D)									||
-			item->isKindOf(CC_TYPES::CAMERA_SENSOR)								||
-			item->isKindOf(CC_TYPES::PRIMITIVE))
+				(item->isKindOf(CC_TYPES::POINT_CLOUD) && CanDetachCloud(item))		|| //vertices can't be displaced
+				(item->isKindOf(CC_TYPES::MESH) && !item->isA(CC_TYPES::SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
+				item->isKindOf(CC_TYPES::IMAGE)										||
+				item->isKindOf(CC_TYPES::LABEL_2D)									||
+				item->isKindOf(CC_TYPES::CAMERA_SENSOR)								||
+				item->isKindOf(CC_TYPES::PRIMITIVE)                                 ||
+				item->isKindOf(CC_TYPES::CUSTOM_H_OBJECT))
+
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 		}
@@ -1099,7 +1102,7 @@ QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
 		if (object)
 			map.insert(Qt::UserRole,QVariant(object->getUniqueID()));
 	}
-	
+
 	return map;
 }
 
@@ -1310,7 +1313,7 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 
 	if (!item || item->getChildrenNumber() == 0)
 		return;
-	
+
 	//we recursively expand sub-branches
 	ccHObject::Container toExpand;
 	try
@@ -1493,7 +1496,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		{
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
 			info.cloudCount++;
-			
+
 			unsigned cloudSize = cloud->size();
 			info.pointCount += cloudSize;
 			info.colorCount += (cloud->hasColors() ? cloudSize : 0);
@@ -1527,7 +1530,7 @@ void ccDBRoot::gatherRecursiveInformation()
 			info.imageCount++;
 		}
 
-		//we can add its children to the 'toProcess' list and itself to the 'processed' list 
+		//we can add its children to the 'toProcess' list and itself to the 'processed' list
 		try
 		{
 			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
@@ -1574,8 +1577,8 @@ void ccDBRoot::gatherRecursiveInformation()
 
 		//display info box
 		QMessageBox::information(MainWindow::TheInstance(),
-								"Information",
-								infoStr.join("\n"));
+								 "Information",
+								 infoStr.join("\n"));
 	}
 }
 
@@ -1687,37 +1690,58 @@ void ccDBRoot::selectByTypeAndName()
 	scDlg.addType("Octree",            CC_TYPES::POINT_OCTREE);
 	scDlg.addType("Kd-tree",           CC_TYPES::POINT_KDTREE);
 	scDlg.addType("Viewport",          CC_TYPES::VIEWPORT_2D_OBJECT);
+	scDlg.addType("Custom Types",      CC_TYPES::CUSTOM_H_OBJECT);
 
 	if (!scDlg.exec())
 		return;
 
-	CC_CLASS_ENUM type = scDlg.getSelectedType();
-	QString name = scDlg.getSelectedName();
+	// for type checking
+	CC_CLASS_ENUM type = CC_TYPES::OBJECT; // all objects are matched by def
+	bool exclusive = false;
 
-	//some types are exclusive, some are generic, and some can be both
-	//(e.g. Meshes)
-	//
-	//For generic-only types the match type gets overridden and forced to
-	//false because exclusive match makes no sense!
-	bool exclusive;
-	switch (type)
+	if (scDlg.getTypeIsUsed()) // we are using type checking
 	{
-	case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
-	case CC_TYPES::PRIMITIVE:
-	case CC_TYPES::SENSOR:
-	case CC_TYPES::IMAGE:
-		exclusive = false;
-		break;
-	default:
-		exclusive = scDlg.getStrictMatchState();
-		break;
+		type = scDlg.getSelectedType();
+
+		//some types are exclusive, some are generic, and some can be both
+		//(e.g. Meshes)
+		//
+		//For generic-only types the match type gets overridden and forced to
+		//false because exclusive match makes no sense!
+		switch (type)
+		{
+		case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
+		case CC_TYPES::PRIMITIVE:
+		case CC_TYPES::SENSOR:
+		case CC_TYPES::IMAGE:
+			exclusive = false;
+			break;
+		default:
+			exclusive = scDlg.getStrictMatchState();
+			break;
+		}
 	}
 
-	selectChildrenByTypeAndName(type, exclusive, name);
+
+	// for name matching - def values
+	bool regex = false;
+	QString name = "";
+
+	if (scDlg.getNameMatchIsUsed())
+	{
+		regex = scDlg.getNameIsRegex();
+		name = scDlg.getSelectedName();
+	}
+
+
+	selectChildrenByTypeAndName(type, exclusive, name, regex);
 }
 
 /* name is optional, if passed it is used to restrict the selection by type */
-void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive/*=true*/, QString name/*=QString()*/)
+void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
+										   bool typeIsExclusive/*=true*/,
+										   QString name/*=QString()*/,
+										   bool nameIsRegex/*= false*/)
 {
 	//not initialized?
 	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
@@ -1739,7 +1763,6 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclus
 	// the ctrlPushed behavior below more consistent (i.e. when no object
 	// is found and Control was NOT pressed the selection will still be
 	// cleared).
-
 	ccHObject::Container toSelect;
 	try
 	{
@@ -1753,7 +1776,18 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclus
 			{
 				ccHObject* child = filteredByType[i];
 
-				if (child->getName().compare(name) == 0)
+				if (nameIsRegex) // regex matching
+				{
+
+					QRegularExpression re(name);
+					QRegularExpressionMatch match = re.match(child->getName());
+					bool hasMatch = match.hasMatch(); // true
+					if (hasMatch)
+						toSelect.push_back(child);
+
+				}
+
+				else if (child->getName().compare(name) == 0) // simple comparison
 					toSelect.push_back(child);
 			}
 		}
@@ -1869,7 +1903,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 	if (index.isValid())
 	{
 		QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
-		
+
 		//selected items?
 		QModelIndexList selectedIndexes = qism->selectedIndexes();
 		int selCount = selectedIndexes.size();
@@ -1907,7 +1941,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						toggleMaterials = true;
 						toggleOtherProperties = true;
 					}
-					
+
 					if (selCount == 1)
 					{
 						if (item->isA(CC_TYPES::LABEL_2D))

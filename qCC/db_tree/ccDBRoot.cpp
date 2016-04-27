@@ -26,6 +26,7 @@
 #include <QHeaderView>
 #include <QMimeData>
 #include <QMessageBox>
+#include <QRegExp>
 
 //qCC_db
 #include <ccLog.h>
@@ -1066,7 +1067,9 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 			item->isKindOf(CC_TYPES::IMAGE)										||
 			item->isKindOf(CC_TYPES::LABEL_2D)									||
 			item->isKindOf(CC_TYPES::CAMERA_SENSOR)								||
-			item->isKindOf(CC_TYPES::PRIMITIVE))
+            item->isKindOf(CC_TYPES::PRIMITIVE)                                 ||
+            item->isKindOf(CC_TYPES::CUSTOM_H_OBJECT))
+
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 		}
@@ -1687,6 +1690,7 @@ void ccDBRoot::selectByTypeAndName()
 	scDlg.addType("Octree",            CC_TYPES::POINT_OCTREE);
 	scDlg.addType("Kd-tree",           CC_TYPES::POINT_KDTREE);
 	scDlg.addType("Viewport",          CC_TYPES::VIEWPORT_2D_OBJECT);
+    scDlg.addType("Custom Types",      CC_TYPES::CUSTOM_H_OBJECT);
 
 	if (!scDlg.exec())
 		return;
@@ -1700,6 +1704,7 @@ void ccDBRoot::selectByTypeAndName()
 	//For generic-only types the match type gets overridden and forced to
 	//false because exclusive match makes no sense!
 	bool exclusive;
+    bool regex;
 	switch (type)
 	{
 	case CC_TYPES::HIERARCHY_OBJECT: //returned if no type is selected (i.e. all objects are selected!)
@@ -1710,14 +1715,18 @@ void ccDBRoot::selectByTypeAndName()
 		break;
 	default:
 		exclusive = scDlg.getStrictMatchState();
+        regex = scDlg.getNameIsRegex();
 		break;
 	}
 
-	selectChildrenByTypeAndName(type, exclusive, name);
+    selectChildrenByTypeAndName(type, exclusive, name, regex);
 }
 
 /* name is optional, if passed it is used to restrict the selection by type */
-void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive/*=true*/, QString name/*=QString()*/)
+void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
+                                           bool typeIsExclusive/*=true*/,
+                                           QString name/*=QString()*/,
+                                           bool nameIsRegex/*= false*/)
 {
 	//not initialized?
 	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
@@ -1753,7 +1762,17 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclus
 			{
 				ccHObject* child = filteredByType[i];
 
-				if (child->getName().compare(name) == 0)
+                if (nameIsRegex) // regex matching
+                {
+                    QRegularExpression re(name);
+                    QRegularExpressionMatch match = re.match(child->getName());
+                    bool hasMatch = match.hasMatch(); // true
+                    if (hasMatch)
+                        toSelect.push_back(child);
+
+                }
+
+                else if (child->getName().compare(name) == 0) // simple comparison
 					toSelect.push_back(child);
 			}
 		}

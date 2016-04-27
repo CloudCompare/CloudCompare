@@ -74,5 +74,11 @@ QString ccSelectChildrenDlg::getSelectedName()
 
 bool ccSelectChildrenDlg::getStrictMatchState()
 {
-	return typeStrictCheckBox->isChecked();
+    return typeStrictCheckBox->isChecked();
+}
+
+bool ccSelectChildrenDlg::getNameIsRegex() const
+{
+
+    return checkBoxRegex->isChecked();
 }

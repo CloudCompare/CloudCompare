@@ -41,10 +41,15 @@ public:
 
 	//! Returns the selected type
 	CC_CLASS_ENUM getSelectedType();
+
 	//! Returns the selected name (if any)
 	QString getSelectedName();
+
 	//! Returns the state of the strict type checkbox
 	bool getStrictMatchState();
+
+    //! if the name must be considerd as regex
+    bool getNameIsRegex() const;
 
 protected slots:
 

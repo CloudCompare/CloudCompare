@@ -44,7 +44,17 @@ public:
 	//! Returns the selected name (if any)
 	QString getSelectedName();
 	//! Returns the state of the strict type checkbox
-	bool getStrictMatchState();
+	bool getStrictMatchState() const;
+
+	//! if the type checkbox is checked the children are filtered
+	//! before checking the name for matches
+	bool getTypeIsUsed() const;
+
+	//! if the name must be considerd as regex
+	bool getNameIsRegex() const;
+
+	//! if performing name-match (regex or not)
+	bool getNameMatchIsUsed() const;
 
 protected slots:
 

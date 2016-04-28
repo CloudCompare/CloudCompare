@@ -1725,7 +1725,7 @@ void ccDBRoot::selectByTypeAndName()
 
 	// for name matching - def values
 	bool regex = false;
-	QString name (""); // an empty string by default
+	QString name; // an empty string by default
 
 	if (scDlg.getNameMatchIsUsed())
 	{

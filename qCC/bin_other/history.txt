@@ -1,9 +1,16 @@
 *** CloudCompare versions history ***
 
+v2.8.beta - XX/XX/2016
+
+- Enhancements:
+
+	* DB Tree (select children by type and/or by name)
+		- regular expressions can now be used to select entities in the DB tree
+
 v2.7.0 - 04/22/2016
 
 - Enhancements:
-	
+
 	* Cross section tool
 		- Now based on OpenGL for a much faster display (+ proper integration in the new LOD mechanism)
 

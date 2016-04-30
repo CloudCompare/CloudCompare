@@ -32,7 +32,7 @@ endif()
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
 
-file( GLOB txt_list TODO.txt bin_other/history.txt )
+file( GLOB txt_list TODO.txt ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md )
 
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
@@ -101,7 +101,7 @@ endif()
 install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 
 # Auxiliary files
-set( auxFiles bin_other/history.txt bin_other/license.txt bin_other/global_shift_list_template.txt )
+set( auxFiles  ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md bin_other/license.txt bin_other/global_shift_list_template.txt )
 
 if( WIN32 )
 	# Export Qt dlls

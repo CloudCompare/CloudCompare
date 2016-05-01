@@ -1,4 +1,12 @@
-cloudcompare (2.7.0-0xenial1) UNRELEASED; urgency=medium
+cloudcompare (2.8.0beta-0xenial1) UNRELEASED; urgency=medium
+
+  * Remove all patch (Fixed upstream)
+  * Format is now 3.0 (native)
+  * Remove qKinect	
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 1 May 2016 21:52:00 +0100
+
+cloudcompare (2.7.0-0xenial1) xenial; urgency=medium
 
   * Removed patch 01-05 & 08-09 (Fixed upstream)
 

@@ -3,7 +3,8 @@ CloudCompare
 
 Homepage: http://www.cloudcompare.org/
 
-[![Build Status](https://travis-ci.org/cloudcompare/trunk.svg)](https://travis-ci.org/cloudcompare/trunk)
+[![GitHub release](https://img.shields.io/github/release/cloudcompare/trunk.svg)](https://github.com/cloudcompare/trunk/releases)
+[![Build Status](https://travis-ci.org/cloudcompare/trunk.svg)](https://travis-ci.org/cloudcompare/trunk) 
 
 Introduction
 ------------

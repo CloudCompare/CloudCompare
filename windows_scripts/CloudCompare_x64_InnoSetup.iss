@@ -2,15 +2,15 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.6.3.beta"
+#define MyAppVersion "2.7.0"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
 #define MyFaroRedistPath "E:\These\C++\Faro\redist"
 #define MyFaroRedistExe "FARO LS 5.5.3.16 x64 Setup.exe"
-#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2012\CloudCompare"
-#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2012"
+#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2013\CloudCompare"
+#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2013"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]
@@ -54,8 +54,6 @@ Name: "StartMenuEntry" ; Description: "Install Faro I/O plugin (to load FWS/FLS 
 [Files]
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "{#MyVCRedistPath}\vcredist_2012_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
 ; DotProduct support
 Source: "{#MyVCRedistPath}\vcredist_2013_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
 ; FARO LS support
@@ -70,7 +68,6 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-Filename: "{tmp}\vcredist_2012_x64.exe"; Parameters: "/q"
 Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/q"
 Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 

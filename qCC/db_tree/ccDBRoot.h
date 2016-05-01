@@ -238,7 +238,10 @@ protected:
 	void expandOrCollapseHoveredBranch(bool expand);
 
 	//! Selects objects by type and/or name
-	void selectChildrenByTypeAndName(CC_CLASS_ENUM type, bool typeIsExclusive = true, QString name = QString());
+    void selectChildrenByTypeAndName(CC_CLASS_ENUM type,
+                                     bool typeIsExclusive = true,
+                                     QString name = QString(),
+                                     bool nameIsRegex = false);
 
 	//! Associated DB root
 	ccHObject* m_treeRoot;

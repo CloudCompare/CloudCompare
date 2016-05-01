@@ -102,8 +102,8 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 	{
 		m_associatedWin->addToOwnDB(m_label);
 		m_associatedWin->addToOwnDB(m_rect2DLabel);
-		connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(update2DZone(int,int,Qt::MouseButtons)));
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(processClickedPoint(int,int)));
+		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(update2DZone(int, int, Qt::MouseButtons)));
+		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(processClickedPoint(int, int)));
 		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(close2DZone()));
 	}
 

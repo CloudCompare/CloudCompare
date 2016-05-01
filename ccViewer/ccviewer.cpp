@@ -86,6 +86,12 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 {
 	ui.setupUi(this);
 
+#ifdef Q_OS_LINUX
+	 //we reset the whole stylesheet but we keep the StatusBar style
+	setStyleSheet("");	
+	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
+#endif
+	
 	setWindowTitle(QString("ccViewer V%1").arg(CC_VIEWER_VERSION.title));
 
 	//insert GL window in a vertical layout

@@ -2637,7 +2637,7 @@ void MainWindow::doActionExportDepthBuffer()
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
-	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,DepthMapFileFilter::GetFileFilter());
+	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, DepthMapFileFilter::GetFileFilter());
 	if (filename.isEmpty())
 	{
 		//process cancelled by user
@@ -9136,9 +9136,9 @@ void MainWindow::doActionLoadFile()
 																currentPath,
 																fileFilters.join(s_fileFilterSeparator),
 																&currentOpenDlgFilter
-#ifdef QT_DEBUG
-																,QFileDialog::DontUseNativeDialog
-#endif
+//#ifdef QT_DEBUG
+																, QFileDialog::DontUseNativeDialog
+//#endif
 															);
 	if (selectedFiles.isEmpty())
 		return;
@@ -9400,8 +9400,10 @@ void MainWindow::doActionSaveFile()
 	if (hasOther)
 	{
 		ccConsole::Warning("[I/O] The following selected entites won't be saved:");
-		for (unsigned i=0; i<other.getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < other.getChildrenNumber(); ++i)
+		{
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
+		}
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -9449,6 +9451,11 @@ void MainWindow::doActionSaveFile()
 											selectedFilename,
 											parameters,
 											selectedFilter);
+
+		if (result == CC_FERR_NO_ERROR && m_ccRoot)
+		{
+			m_ccRoot->unselectAllEntities();
+		}
 	}
 
 	//update default filters

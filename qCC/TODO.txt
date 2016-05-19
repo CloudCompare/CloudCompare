@@ -18,7 +18,12 @@ File I/O:
 
 Big ones:
 
+[*] Out of core support
+	- editable
+	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
+[*] Undo mechanism
 [*] Command line mode could be extended
+	- use plugins through the command line
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
 	- option to apply the inverse transformation
@@ -45,7 +50,16 @@ qAnimation plugin:
 
 Various:
 
+[*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
+[*] Add the distance 'units' as a parameter for the color ramp
+[*] Select points by color (https://github.com/cloudcompare/trunk/issues/363)
+[*] Divert the command line console to the system console (https://github.com/cloudcompare/trunk/issues/362)
+[*] Support cloud transparency
+[*] Median Calculation in Rasterize (http://www.cloudcompare.org/forum/viewtopic.php?t=1610)
+[*] Add key bindings to pan the active 3D view (so as to be able to pan even in segmentation / polyline tracing mode - http://www.cloudcompare.org/forum/viewtopic.php?t=1714)
+[*] Choose the columns to export for ASCII files (http://www.cloudcompare.org/forum/viewtopic.php?t=1449)
 [*] Export 3D shapefiles (http://www.cloudcompare.org/forum/viewtopic.php?t=1400)
+[*] Handle arc-polylines (Autocad - http://www.cloudcompare.org/forum/viewtopic.php?t=1413)
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Use the LEAP device to interact with point clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1090)
 [*] Volume calculation tool: make the resulting grid values available as a scalar field (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)

@@ -23,13 +23,13 @@ Big ones:
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
 [*] Command line mode could be extended
+	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- use plugins through the command line
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
 	- option to apply the inverse transformation
 	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
 	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
-	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- Clean filter
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
@@ -50,6 +50,7 @@ qAnimation plugin:
 
 Various:
 
+[*] Interpolate SFs over two clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1725)
 [*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp
 [*] Select points by color (https://github.com/cloudcompare/trunk/issues/363)

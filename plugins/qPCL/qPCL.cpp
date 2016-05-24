@@ -24,12 +24,9 @@
 #include <BaseFilter.h>
 
 //FILTERS
-//#include <LoadPCD.h>
-//#include <SavePCD.h>
 #include <ExtractSIFT.h>
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
-//#include <StatisticalOutliersRemover.h>
 
 qPCL::~qPCL()
 {
@@ -99,7 +96,6 @@ int qPCL::addFilter(BaseFilter* filter)
 	return 1;
 }
 
-
 void qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	for (size_t i=0; i<m_filters.size(); ++i)
@@ -110,7 +106,3 @@ QIcon qPCL::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/toolbar/pcl.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qPCL,qPCL);
-#endif

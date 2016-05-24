@@ -27,7 +27,3 @@ FileIOFilter::Shared qPclIO::getFilter(ccMainAppInterface* app)
 {
 	return FileIOFilter::Shared(new PcdFilter);
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qPclIO,qPclIO);
-#endif

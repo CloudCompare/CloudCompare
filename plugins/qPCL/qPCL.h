@@ -31,9 +31,7 @@ class qPCL : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-#ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPCL")
-#endif
 
 public:
 
@@ -67,6 +65,5 @@ protected:
 	//! Loaded filters
 	std::vector<BaseFilter*> m_filters;
 };
-
 
 #endif//END Q_PCL_PLUGIN_HEADER

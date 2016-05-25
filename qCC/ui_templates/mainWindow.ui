@@ -1249,10 +1249,10 @@
     <string>SF arithmetic</string>
    </property>
    <property name="toolTip">
-    <string>Add, substract, multiply or divide two scalar fields</string>
+    <string>Add, subtract, multiply or divide two scalar fields</string>
    </property>
    <property name="statusTip">
-    <string>Add, substract, multiply or divide two scalar fields</string>
+    <string>Add, subtract, multiply or divide two scalar fields</string>
    </property>
   </action>
   <action name="actionColorize">

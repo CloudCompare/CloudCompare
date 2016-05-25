@@ -3263,7 +3263,7 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1293"/>
         <location filename="../ui_templates/mainWindow.ui" line="1296"/>
-        <source>Add, substract, multiply or divide two scalar fields</source>
+        <source>Add, subtract, multiply or divide two scalar fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

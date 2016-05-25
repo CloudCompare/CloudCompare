@@ -183,7 +183,7 @@ namespace CCLib
 			return *this;
 		}
 
-		//! Substraction
+		//! Subtraction
 		SquareMatrixTpl operator - (const SquareMatrixTpl& B) const
 		{
 			SquareMatrixTpl C = *this;
@@ -192,7 +192,7 @@ namespace CCLib
 			return C;
 		}
 
-		//! In-place substraction
+		//! In-place subtraction
 		const SquareMatrixTpl& operator -= (const SquareMatrixTpl& B)
 		{
 			assert(B.size() == m_matrixSize);

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Contour Extractor Visaul Debug</string>
+   <string>Contour Extractor Visual Debug</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

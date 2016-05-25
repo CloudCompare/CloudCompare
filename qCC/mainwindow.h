@@ -450,7 +450,7 @@ protected slots:
 	//! Setups 3D mouse (if any)
 	void setup3DMouse(bool);
 
-	//! Removes all entiites currently loaded in the DB tree
+	//! Removes all entities currently loaded in the DB tree
 	void closeAll();
 
 	//! Batch export some pieces of info from a set of selected clouds

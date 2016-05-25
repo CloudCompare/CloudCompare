@@ -63,7 +63,7 @@
          <string>Pause segmentation</string>
         </property>
         <property name="statusTip">
-         <string>Pause transformation  (allow rotation/panning of 3D view)</string>
+         <string>Pause transformation (allow rotation/panning of 3D view)</string>
         </property>
         <property name="text">
          <string>pause</string>

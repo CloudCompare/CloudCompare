@@ -285,7 +285,7 @@ v2.6.2 10/08/2015
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
 		- the input cloud SFs can now be properly interpolated in empty cells
 		- the contour lines are now computed on the active layer
-		- the user can set the default width for the countour lines
+		- the user can set the default width for the contour lines
 		- the contour lines can be colored (according to the layer associated scalar field settings)
 	* SOR filter:
 		- the PCL Statistical Outlier filter (for noise cleaning) has been integrated in CloudCompare

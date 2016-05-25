@@ -42,7 +42,7 @@ p, li { white-space: pre-wrap; }
       <string notr="true">color:red;</string>
      </property>
      <property name="text">
-      <string>Warning: this algorithm is not meant to be used on more than a few thousands points!</string>
+      <string>Warning: this algorithm is not meant to be used on more than a few thousand points!</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

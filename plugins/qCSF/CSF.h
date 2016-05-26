@@ -11,29 +11,24 @@ using namespace wl;
 class CSF
 {
 public:
-	CSF();
-	~CSF();
+	CSF(wl::PointCloud& cloud);
+	virtual ~CSF();
 
-	//input PC from vectors 
-	void setPointCloud(vector< LASPoint > points);
 	//input PC from files
 	void readPointsFromFile(string filename);
 	//save the ground points to file
-	void saveGroundPoints(vector<int> grp, string path = "");
-	void saveOffGroundPoints(vector<int> grp, string path = "");
+	void saveGroundPoints(const vector<int>& grp, string path = "");
+	void saveOffGroundPoints(const vector<int>& grp, string path = "");
 	//get size of point cloud
-	size_t size(){return point_cloud.size();}
+	size_t size() const { return point_cloud.size(); }
 
-	LASPoint index(int i){return point_cloud[i];}
-
-
-	//从已有的PointCloud中输入
-	void setPointCloud(PointCloud &pc);
+	inline const LASPoint& index(int i) { return point_cloud[i]; }
 
 	//执行滤波处理 得到地面点的在PointCloud 中的序号
-	vector<vector<int>> do_filtering(unsigned pcsize);
+	bool do_filtering(unsigned pcsize, vector< vector<int> >& output);
+
 private:
-	  wl::PointCloud point_cloud;
+	wl::PointCloud& point_cloud;
 
 public:
 
@@ -59,7 +54,7 @@ public:
 
 		//最大迭代次数
 		int interations;
-	}params;
+	} params;
 };
 
 #endif

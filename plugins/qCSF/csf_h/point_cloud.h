@@ -21,24 +21,6 @@ namespace wl
         _pheader (), _points ()
       {}
 
-      /** \brief Copy constructor (needed by compilers such as Intel C++)
-        * \param[in] pc the cloud to copy into this
-        */
-      PointCloud (PointCloud  &pc) : 
-        _pheader (), _points ()
-      {
-        *this = pc;
-      }
-
-      /** \brief Copy constructor (needed by compilers such as Intel C++)
-        * \param[in] pc the cloud to copy into this
-        */
-      PointCloud (const PointCloud  &pc) : 
-        _pheader (), _points ()
-      {
-        *this = pc;
-      }
-
       /** \brief Copy constructor from point cloud subset
         * \param[in] pc the cloud to copy into this
         * \param[in] indices the subset to copy
@@ -118,7 +100,6 @@ namespace wl
 
       //capacity
       inline size_t size () const { return (_points.size ()); }
-      inline void reserve (size_t n) { _points.reserve (n); }
       inline bool empty () const { return _points.empty (); }
 
       /** \brief Resize the cloud
@@ -127,6 +108,14 @@ namespace wl
       inline void resize (size_t n) 
       { 
         _points.resize (n);
+      }
+
+      /** \brief Reserve the cloud
+        * \param[in] n the new cloud capacity
+        */
+      inline void reserve (size_t n) 
+      { 
+        _points.reserve (n);
       }
 
       //element access

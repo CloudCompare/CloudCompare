@@ -18,18 +18,14 @@
 #ifndef Q_CSF_PLUGIN_HEADER
 #define Q_CSF_PLUGIN_HEADER
 
-
 #include "../ccStdPluginInterface.h"
-
 
 //! A point-clouds filtering algorithm utilize cloth simulation process. 
 class qCSF : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-#ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSF")
-#endif
 
 public:
 

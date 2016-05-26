@@ -23,9 +23,7 @@
 #include <QMainWindow>
 #include <QComboBox>
 
-
 //Dialog
-
 #include "ccCSFDlg.h"
 
 //System
@@ -44,33 +42,22 @@
 //CSF
 #include <CSF.h>
 
-//Default constructor: should mainly be used to initialize
-//actions (pointers) and other members
 qCSF::qCSF(QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_action(0)
 {
 }	
 
-//This method should enable or disable each plugin action
-//depending on the currently selected entities ('selectedEntities').
-//For example: if none of the selected entities is a cloud, and your
-//plugin deals only with clouds, call 'm_action->setEnabled(false)'
 void qCSF::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_action)
 		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
 }
 
-//This method returns all 'actions' of your plugin.
-//It will be called only once, when plugin is loaded.
 void qCSF::getActions(QActionGroup& group)
 {
-	//default action (if it has not been already created, it's the moment to do it)
 	if (!m_action)
 	{
-		//here we use the default plugin name, description and icon,
-		//but each action can have its own!
 		m_action = new QAction(getName(),this);
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
@@ -81,12 +68,6 @@ void qCSF::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-//This is an example of an action's slot called when the corresponding action
-//is triggered (i.e. the corresponding icon or menu entry is clicked in CC
-//main's interface). You can access to most of CC components (database,
-//3D views, console, etc.) via the 'm_app' attribute (ccMainAppInterface
-//object).
-
 //initialize the dialog state.
 static bool csf_postprocessing = false;
 static bool csf_rig1=false;
@@ -96,7 +77,6 @@ static int MaxIteration = 500;
 static double cloth_resolution = 2;
 static double class_threshold = 0.5;
 
-//main function of CSF
 void qCSF::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
@@ -123,22 +103,32 @@ void qCSF::doAction()
 
 	//to get the point cloud from selected entity.
 	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
-	
 
-	////Convert CC point cloud to CSF type
+	//Convert CC point cloud to CSF type
 	unsigned count = pc->size();
 	PointCloud csfPC;
-	for(int i=0;i<count;i++)
+	try
 	{
-            wl:LASPoint tmpPoint;
-			const CCVector3* P = pc->getPoint(i);
-			tmpPoint.x = P->x;
-			tmpPoint.y = P->y;
-			tmpPoint.z = P->z;
-			csfPC.push_back(tmpPoint);
+		csfPC.reserve(count);
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	for (int i = 0; i < count; i++)
+	{
+		const CCVector3* P = pc->getPoint(i);
+		wl:LASPoint tmpPoint;
+		//tmpPoint.x = P->x;
+		//tmpPoint.y = P->y;
+		//tmpPoint.z = P->z;
+		tmpPoint.x =  P->x;
+		tmpPoint.y = -P->z;
+		tmpPoint.z =  P->y;
+		csfPC.push_back(tmpPoint);
 	}
 
-	/*** HERE STARTS THE ACTION ***/
 	// display the dialog
 	ccCSFDlg csfDlg(m_app->getMainWindow());
 	csfDlg.rig1->setChecked(csf_rig1);
@@ -159,13 +149,11 @@ void qCSF::doAction()
 	QApplication::processEvents();
 
 	//instantiation a CSF class
-	CSF csf;
-	csf.setPointCloud(csfPC);//Class PointCloud csfPC
+	CSF csf(csfPC);
 
 	// setup parameter
 	csf.params.bSloopSmooth = csfDlg.postprocessingcheckbox->isChecked();
 	csf.params.class_threshold = csfDlg.class_thresholdSpinBox->value();
-	
 	csf.params.cloth_resolution = csfDlg.cloth_resolutionSpinBox->value();
 	csf.params.interations = csfDlg.MaxIterationSpinBox->value();
 	csf.params.k_nearest_points = 1;
@@ -181,65 +169,84 @@ void qCSF::doAction()
 	{
 		csf.params.rigidness = 3;
 	}
-	csf.params.time_step = 0.75;  
+	csf.params.time_step = 0.75;
 
 	//to do filtering
-	std::vector<vector<int>> segIndex = csf.do_filtering(count);
-
-	//输出地面点和非地面点
-	CCLib::ReferenceCloud* groundpc = new CCLib::ReferenceCloud(pc);
-	CCLib::ReferenceCloud* offgroundpc = new CCLib::ReferenceCloud(pc);
-
-	  //输出地面点
-	for (unsigned j=0; j<segIndex[1].size(); ++j)
+	std::vector< vector<int> > segIndex;
+	if (!csf.do_filtering(count, segIndex))
 	{
-		groundpc->addPointIndex(segIndex[1][j]);	
+		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
 	}
 
-	  //输出非地面点
-	for (unsigned k=0;k<segIndex[2].size();++k)
+	//extract ground subset
+	ccPointCloud* groundpoint = 0;
 	{
-			offgroundpc->addPointIndex(segIndex[2][k]);
-	}	
-	ccPointCloud* groundpoint = pc->partialClone(groundpc);
-	ccPointCloud* offgroundpoint = pc->partialClone(offgroundpc);
+		CCLib::ReferenceCloud groundpc(pc);
+		if (groundpc.reserve(static_cast<unsigned>(segIndex[1].size())))
+		{
+			for (unsigned j = 0; j < segIndex[1].size(); ++j)
+			{
+				groundpc.addPointIndex(segIndex[1][j]);
+			}
+			groundpoint = pc->partialClone(&groundpc);
+		}
+	}
+	if (!groundpoint)
+	{
+		m_app->dispToConsole("Failed to extract the ground subset (not enough memory)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+	}
 
-	//新建点云容器
-	ccHObject* cloudContainer = new ccHObject(pc->getName()+QString("_csf"));
+	//extract off-ground subset
+	ccPointCloud* offgroundpoint = 0;
+	{
+		CCLib::ReferenceCloud offgroundpc(pc);
+		if (offgroundpc.reserve(static_cast<unsigned>(segIndex[2].size())))
+		{
+			for (unsigned k = 0; k < segIndex[2].size(); ++k)
+			{
+				offgroundpc.addPointIndex(segIndex[2][k]);
+			}
+			offgroundpoint = pc->partialClone(&offgroundpc);
+		}
+	}
+	if (!offgroundpoint)
+	{
+		m_app->dispToConsole("Failed to extract the off-ground subset (not enough memory)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		if (!groundpoint)
+		{
+			//nothing to do!
+			return;
+		}
+	}
 
 	pDlg.hide();
 	QApplication::processEvents();
 	
-	//隐藏原始点云
+	//hide the original cloud
 	pc->setEnabled(false);
 
-	//we add new group to DB/display（滤波结果显示）
-	groundpoint->setVisible(true);
-	groundpoint->setName("ground points");
+	//we add new group to DB/display
+	ccHObject* cloudContainer = new ccHObject(pc->getName() + QString("_csf"));
+	if (groundpoint)
+	{
+		groundpoint->setVisible(true);
+		groundpoint->setName("ground points");
+		cloudContainer->addChild(groundpoint);
+	}
 
-	offgroundpoint->setVisible(true);
-	offgroundpoint->setName("off-ground points");
-
-	cloudContainer->addChild(groundpoint);
-	cloudContainer->addChild(offgroundpoint);
+	if (offgroundpoint)
+	{
+		offgroundpoint->setVisible(true);
+		offgroundpoint->setName("off-ground points");
+		cloudContainer->addChild(offgroundpoint);
+	}
 
 	m_app->addToDB(cloudContainer);
 	m_app->refreshAll();
-	/*** HERE ENDS THE ACTION ***/
 }
 
-
-//This method should return the plugin icon (it will be used mainly
-//if your plugin as several actions in which case CC will create a
-//dedicated sub-menu entry with this icon.
 QIcon qCSF::getIcon() const
 {
-	//open qCSF.qrc (text file), update the "prefix" and the
-	//icon(s) filename(s). Then save it with the right name (yourPlugin.qrc).
-	//(eventually, remove the original qCSF.qrc file!)
 	return QIcon(":/CC/plugin/qCSF/icon.png");
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qCSF,qCSF);
-#endif

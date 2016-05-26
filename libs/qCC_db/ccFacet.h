@@ -121,7 +121,7 @@ protected:
 	//! Origin points
 	ccPointCloud* m_originPoints;
 
-	//! Plane equation
+    //! Plane equation - as usual in CC plane equation is ax + by + cz = d
 	PointCoordinateType m_planeEquation[4];
 	
 	//! Facet centroid
@@ -142,6 +142,9 @@ protected:
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+
+    // ccHObject interface
+    virtual void applyGLTransformation(const ccGLMatrix &trans) override;
 };
 
 #endif //CC_FACET_PRIMITIVE_HEADER

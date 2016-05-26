@@ -415,7 +415,11 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		markerContext.display = 0;
 
 		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
-		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();
+
+        //		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();
+
+        // maybe using surface sqrt is better?
+        PointCoordinateType scale = sqrt(m_contourPolyline->computeLength());
 
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
@@ -567,7 +571,22 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (in.read((char*)&m_maxEdgeLength,sizeof(PointCoordinateType)) < 0)
 		return WriteError();
 
-	return true;
+    return true;
+}
+
+void ccFacet::applyGLTransformation(const ccGLMatrix &trans)
+{
+    ccHObject::applyGLTransformation(trans);
+
+    // move/rotate the center to its new location
+    trans.apply(m_center);
+
+    // apply the rotation to the normal of the plane equation
+    trans.applyRotation(m_planeEquation);
+
+    // compute new d-parameter from the updated values
+    CCVector3 n(m_planeEquation);
+    m_planeEquation[3] = n.dot(m_center);
 }
 
 void ccFacet::invertNormal()

@@ -26,7 +26,7 @@
 
 //! Facet
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh
-**/
+	**/
 class QCC_DB_LIB_API ccFacet : public ccHObject
 {
 public:
@@ -112,7 +112,7 @@ protected:
 	bool createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
 										const PointCoordinateType* planeEquation = 0);
 
-	//! Facet 
+	//! Facet
 	ccMesh* m_polygonMesh;
 	//! Facet contour
 	ccPolyline* m_contourPolyline;
@@ -121,9 +121,9 @@ protected:
 	//! Origin points
 	ccPointCloud* m_originPoints;
 
-    //! Plane equation - as usual in CC plane equation is ax + by + cz = d
+	//! Plane equation - as usual in CC plane equation is ax + by + cz = d
 	PointCoordinateType m_planeEquation[4];
-	
+
 	//! Facet centroid
 	CCVector3 m_center;
 
@@ -143,8 +143,8 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
 
-    // ccHObject interface
-    virtual void applyGLTransformation(const ccGLMatrix &trans) override;
+	// ccHObject interface
+	virtual void applyGLTransformation(const ccGLMatrix &trans) override;
 };
 
 #endif //CC_FACET_PRIMITIVE_HEADER

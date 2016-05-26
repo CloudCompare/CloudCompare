@@ -120,10 +120,10 @@
          <item row="0" column="0">
           <widget class="QRadioButton" name="iterationsCriterion">
            <property name="toolTip">
-            <string>By chosing this criterion, you can control the computation time.</string>
+            <string>By choosing this criterion, you can control the computation time.</string>
            </property>
            <property name="statusTip">
-            <string>By chosing this criterion, you can control the computation time.</string>
+            <string>By choosing this criterion, you can control the computation time.</string>
            </property>
            <property name="text">
             <string>Number of iterations</string>
@@ -155,7 +155,7 @@
          <item row="1" column="0">
           <widget class="QRadioButton" name="errorCriterion">
            <property name="toolTip">
-            <string>By chosing this criterion, you can control the quality of the result.</string>
+            <string>By choosing this criterion, you can control the quality of the result.</string>
            </property>
            <property name="text">
             <string>RMS difference</string>

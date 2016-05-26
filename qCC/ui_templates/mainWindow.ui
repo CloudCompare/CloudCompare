@@ -1249,10 +1249,10 @@
     <string>SF arithmetic</string>
    </property>
    <property name="toolTip">
-    <string>Add, substract, multiply or divide two scalar fields</string>
+    <string>Add, subtract, multiply or divide two scalar fields</string>
    </property>
    <property name="statusTip">
-    <string>Add, substract, multiply or divide two scalar fields</string>
+    <string>Add, subtract, multiply or divide two scalar fields</string>
    </property>
   </action>
   <action name="actionColorize">
@@ -2280,7 +2280,7 @@
     <string>Set viewer-based perspective for current 3D View</string>
    </property>
    <property name="statusTip">
-    <string>Set viewer-based perspectivefor current 3D View</string>
+    <string>Set viewer-based perspective for current 3D View</string>
    </property>
   </action>
   <action name="actionSetPivotAlwaysOn">
@@ -2460,7 +2460,7 @@
     <string>Close all</string>
    </property>
    <property name="toolTip">
-    <string>Remove all entiites currently loaded in the DB tree</string>
+    <string>Remove all entities currently loaded in the DB tree</string>
    </property>
   </action>
   <action name="actionEditGlobalScale">
@@ -2631,7 +2631,7 @@
     <string>Flag vertices by type</string>
    </property>
    <property name="toolTip">
-    <string>Flag vertices by type: normal (0), border (1), non manifold (2)</string>
+    <string>Flag vertices by type: normal (0), border (1), non-manifold (2)</string>
    </property>
   </action>
   <action name="actionToggleActivation">
@@ -2695,7 +2695,7 @@
     <string>Extract sections / Unfold</string>
    </property>
    <property name="toolTip">
-    <string>Extract cloud sections along polylines/nor unfold a cloud along a polyline</string>
+    <string>Extract cloud sections along polylines or unfold a cloud along a polyline</string>
    </property>
   </action>
   <action name="actionConvertPolylinesToMesh">

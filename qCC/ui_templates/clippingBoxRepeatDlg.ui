@@ -65,7 +65,7 @@ color: white;</string>
    <item>
     <widget class="QGroupBox" name="extractContoursGroupBox">
      <property name="toolTip">
-      <string>Check that option if you whish to extract contour(s) form each slice</string>
+      <string>Check that option if you wish to extract contour(s) form each slice</string>
      </property>
      <property name="title">
       <string>Extract contour(s)</string>
@@ -104,7 +104,7 @@ color: white;</string>
       <item>
        <widget class="QCheckBox" name="multiPassCheckBox">
         <property name="toolTip">
-         <string>Multi-pass process where longer edges may be temporarilly created to obtain a better fit... or a worst one ;)</string>
+         <string>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</string>
         </property>
         <property name="text">
          <string>multi-pass</string>

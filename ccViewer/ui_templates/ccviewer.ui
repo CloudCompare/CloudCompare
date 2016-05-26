@@ -525,7 +525,7 @@ QStatusBar
     <string>Set viewer-based perspective for current 3D View</string>
    </property>
    <property name="statusTip">
-    <string>Set viewer-based perspectivefor current 3D View</string>
+    <string>Set viewer-based perspective for current 3D View</string>
    </property>
    <property name="shortcut">
     <string>F4</string>

@@ -76,7 +76,7 @@ public:
 	//! Computes some statistics on the edges connectivty of a mesh
 	/** This methods counts the number of edges shared by 1, 2 or more faces.
 		One ore more edges used only by 1 face each indicates the presence of
-		at least one hole. Edges used by more than two faces are non manifold.
+		at least one hole. Edges used by more than two faces are non-manifold.
 		\param[in] mesh triangular mesh
 		\param[out] stats output statistics
 		\return false if an error occurred (invalid input or not enough memory)

@@ -255,7 +255,7 @@
           <item>
            <widget class="QCheckBox" name="isNbCandLimited">
             <property name="toolTip">
-             <string>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the prorgamm may take a long time to finish. Check this box to bound the number of candidates.</string>
+             <string>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the program may take a long time to finish. Check this box to bound the number of candidates.</string>
             </property>
             <property name="text">
              <string>Limit max. number of candidates</string>

@@ -71,7 +71,7 @@ ccFacet* ccFacet::clone() const
 		if (!facet->m_contourPolyline || !facet->m_contourVertices)
 		{
 			//not enough memory?!
-			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone contour!").arg(getName()));
+			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone countour!").arg(getName()));
 			delete facet;
 			return 0;
 		}
@@ -415,7 +415,9 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		markerContext.display = 0;
 
 		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
-		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();
+
+		// maybe using surface sqrt is better? but it requires to use cgal
+		PointCoordinateType scale = sqrt(m_contourPolyline->computeLength());
 
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
@@ -568,6 +570,21 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return WriteError();
 
 	return true;
+}
+
+void ccFacet::applyGLTransformation(const ccGLMatrix &trans)
+{
+	ccHObject::applyGLTransformation(trans);
+
+	// move/rotate the center to its new location
+	trans.apply(m_center);
+
+	// apply the rotation to the normal of the plane equation
+	trans.applyRotation(m_planeEquation);
+
+	// compute new d-parameter from the updated values
+	CCVector3 n(m_planeEquation);
+	m_planeEquation[3] = n.dot(m_center);
 }
 
 void ccFacet::invertNormal()

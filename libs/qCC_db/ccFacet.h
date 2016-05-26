@@ -26,7 +26,7 @@
 
 //! Facet
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh
-	**/
+**/
 class QCC_DB_LIB_API ccFacet : public ccHObject
 {
 public:

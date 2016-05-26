@@ -305,7 +305,9 @@ Output facet normals may be randomly oriented
    <header location="global">ccOctreeSpinBox.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="qFacets.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

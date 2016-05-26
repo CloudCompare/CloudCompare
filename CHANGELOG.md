@@ -4,6 +4,12 @@ CloudCompare versions history
 v2.8.beta - XX/XX/2016
 ----------------------
 
+- New features:
+
+	* New plugin: qCSF (Cloth Simulation Filtering)
+		- automatic ground / non-ground classification of aerial LIDAR point clouds
+		- based on the article: "An Easy-to-Use Airborne LIDAR Data Filtering Method Based on Cloth Simulation", Qi Jianbo, Wan Peng, 2015
+
 - Enhancements:
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree

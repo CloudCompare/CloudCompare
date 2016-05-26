@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>437</height>
+    <width>451</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,8 +89,14 @@ The bigger the farther the merged cells can be.</string>
       </item>
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="maxRelativeDistDoubleSpinBox">
+        <property name="decimals">
+         <number>3</number>
+        </property>
         <property name="minimum">
-         <double>0.050000000000000</double>
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>10000.000000000000000</double>
         </property>
         <property name="singleStep">
          <double>0.050000000000000</double>

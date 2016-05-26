@@ -87,9 +87,9 @@ void qCSF::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-	if (selNum!=1)
+	if (selNum != 1)
 	{
-		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Select only one cloud!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -97,7 +97,7 @@ void qCSF::doAction()
 	assert(ent);
 	if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
 	{
-		m_app->dispToConsole("Select a real point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Select a real point cloud!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -116,10 +116,10 @@ void qCSF::doAction()
 		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	for (int i = 0; i < count; i++)
+	for (unsigned i = 0; i < count; i++)
 	{
 		const CCVector3* P = pc->getPoint(i);
-		wl:LASPoint tmpPoint;
+		wl::LASPoint tmpPoint;
 		//tmpPoint.x = P->x;
 		//tmpPoint.y = P->y;
 		//tmpPoint.z = P->z;
@@ -155,7 +155,7 @@ void qCSF::doAction()
 	csf.params.bSloopSmooth = csfDlg.postprocessingcheckbox->isChecked();
 	csf.params.class_threshold = csfDlg.class_thresholdSpinBox->value();
 	csf.params.cloth_resolution = csfDlg.cloth_resolutionSpinBox->value();
-	csf.params.interations = csfDlg.MaxIterationSpinBox->value();
+	csf.params.iterations = csfDlg.MaxIterationSpinBox->value();
 	csf.params.k_nearest_points = 1;
 	if (csfDlg.rig1->isChecked())
 	{
@@ -172,22 +172,23 @@ void qCSF::doAction()
 	csf.params.time_step = 0.75;
 
 	//to do filtering
-	std::vector< vector<int> > segIndex;
+	std::vector< std::vector<int> > segIndex;
 	if (!csf.do_filtering(count, segIndex))
 	{
 		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
+	assert(segIndex.size() == 2);
 
 	//extract ground subset
 	ccPointCloud* groundpoint = 0;
 	{
 		CCLib::ReferenceCloud groundpc(pc);
-		if (groundpc.reserve(static_cast<unsigned>(segIndex[1].size())))
+		if (groundpc.reserve(static_cast<unsigned>(segIndex[0].size())))
 		{
-			for (unsigned j = 0; j < segIndex[1].size(); ++j)
+			for (unsigned j = 0; j < segIndex[0].size(); ++j)
 			{
-				groundpc.addPointIndex(segIndex[1][j]);
+				groundpc.addPointIndex(segIndex[0][j]);
 			}
 			groundpoint = pc->partialClone(&groundpc);
 		}
@@ -201,11 +202,11 @@ void qCSF::doAction()
 	ccPointCloud* offgroundpoint = 0;
 	{
 		CCLib::ReferenceCloud offgroundpc(pc);
-		if (offgroundpc.reserve(static_cast<unsigned>(segIndex[2].size())))
+		if (offgroundpc.reserve(static_cast<unsigned>(segIndex[1].size())))
 		{
-			for (unsigned k = 0; k < segIndex[2].size(); ++k)
+			for (unsigned k = 0; k < segIndex[1].size(); ++k)
 			{
-				offgroundpc.addPointIndex(segIndex[2][k]);
+				offgroundpc.addPointIndex(segIndex[1][k]);
 			}
 			offgroundpoint = pc->partialClone(&offgroundpc);
 		}

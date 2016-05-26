@@ -43,10 +43,8 @@ have been added to the original source code, including
 #include <list>
 #include <queue>
 #include <cmath>
-using namespace std;
 
 #include "Vec3.h"
-#include "Terrian.h"
 #include "Particle.h"
 #include "Constraint.h"
 #include <boost/progress.hpp>
@@ -57,14 +55,13 @@ typedef CGAL::Search_traits_2<K> TreeTraits;
 typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
 typedef Neighbor_search::Tree Tree;
 
-
-
-
 struct XY{
 	XY(int x1, int y1){ x = x1; y = y1; }
 	int x;
 	int y;
 };
+
+class Terrain;
 
 class Cloth
 {
@@ -90,29 +87,39 @@ private:
 	double heightThreshold;
 
 	//heightvalues
-	vector<double> heightvals;
+	std::vector<double> heightvals;
 
 	//movable particle index
-	vector<int> movableIndex;
-	vector<vector<int> > particle_edges;
-	
+	std::vector<int> movableIndex;
+	std::vector< std::vector<int> > particle_edges;
 
 	Particle* getParticle(int x, int y) { return &particles[y*num_particles_width + x]; }
+	const Particle* getParticle(int x, int y) const { return &particles[y*num_particles_width + x]; }
+	
 	void makeConstraint(Particle *p1, Particle *p2) { constraints.push_back(Constraint(p1, p2)); }
+
 public:
-	int getSize()
-	{
-		return num_particles_width*num_particles_height;
-	}
+	
+	inline int getSize() const { return num_particles_width * num_particles_height; }
 	//获取第index个particle
-	Particle* getParticle1d(int index) { return &particles[index]; }
+	const Particle* getParticle1d(int index) const { return &particles[index]; }
 
 public:
-	Cloth(){}
+	
+	Cloth() {}
+	
 	/* This is a important constructor for the entire system of particles and constraints*/
-	Cloth(double width, double height, int num_particles_width, int num_particles_height, Vec3 origin_pos1, double smoothThreshold, double heightThreshold,int rigidness,double time_step);
+	Cloth(	double width,
+			double height,
+			int num_particles_width,
+			int num_particles_height,
+			const Vec3& origin_pos1,
+			double smoothThreshold,
+			double heightThreshold,
+			int rigidness,
+			double time_step);
 
-	void setheightvals(vector<double> heightvals)
+	void setheightvals(const std::vector<double>& heightvals)
 	{
 		this->heightvals = heightvals;
 	}
@@ -127,19 +134,25 @@ public:
 
 
 	//检测布料是否与地形碰撞
-	void terrCollision(vector<double> &heightvals,Terrian * terr,bool &flag);
+	void terrCollision(const std::vector<double>& heightvals, Terrain* terr, bool &flag);
 
 	//对可移动的点进行边坡处理
 	void movableFilter();
 	//找到每组可移动点，这个连通分量周围的不可移动点。从四周向中间逼近
-	vector<int> findUnmovablePoint(vector<XY> connected,vector<double> &heightvals);
+	void findUnmovablePoint(const std::vector<XY>& connected,
+							const std::vector<double>& heightvals,
+							std::vector<int>& edgePoints);
+	
 	//直接对联通分量进行边坡处理
-	void handle_slop_connected(vector<int> edgePoints, vector<XY> connected, vector<vector<int> >neibors, vector<double> &heightvals);
+	void handle_slop_connected(	const std::vector<int>& edgePoints,
+								const std::vector<XY>& connected,
+								const std::vector< std::vector<int> >& neibors,
+								const std::vector<double> &heightvals);
 
 	//将布料点保存到文件
-	void saveToFile(string path = "");
+	void saveToFile(std::string path = "");
 	//将可移动点保存到文件
-	void saveMovableToFile(string path = "");
+	void saveMovableToFile(std::string path = "");
 
 };
 

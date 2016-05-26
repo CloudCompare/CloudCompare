@@ -15,17 +15,17 @@ public:
 	virtual ~CSF();
 
 	//input PC from files
-	void readPointsFromFile(string filename);
+	void readPointsFromFile(std::string filename);
 	//save the ground points to file
-	void saveGroundPoints(const vector<int>& grp, string path = "");
-	void saveOffGroundPoints(const vector<int>& grp, string path = "");
+	void saveGroundPoints(const std::vector<int>& grp, std::string path = "");
+	void saveOffGroundPoints(const std::vector<int>& grp, std::string path = "");
 	//get size of point cloud
 	size_t size() const { return point_cloud.size(); }
 
 	inline const LASPoint& index(int i) { return point_cloud[i]; }
 
 	//执行滤波处理 得到地面点的在PointCloud 中的序号
-	bool do_filtering(unsigned pcsize, vector< vector<int> >& output);
+	bool do_filtering(unsigned pcsize, std::vector< std::vector<int> >& output);
 
 private:
 	wl::PointCloud& point_cloud;
@@ -53,7 +53,7 @@ public:
 		int rigidness;
 
 		//最大迭代次数
-		int interations;
+		int iterations;
 	} params;
 };
 

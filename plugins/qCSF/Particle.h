@@ -35,10 +35,9 @@ public:
 		c_pos = 0;
 	}
 
-	Particle(){}
-	bool isMovable(){ return movable;}
-
-	void addForce(Vec3 f){acceleration += f / mass;}
+	Particle() {}
+	bool isMovable() const { return movable; }
+	void addForce(const Vec3& f) { acceleration += f / mass; }
 
 
 	/* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
@@ -46,6 +45,7 @@ public:
 	void timeStep();
 
 	Vec3& getPos() { return pos; }
+	const Vec3& getPos() const { return pos; }
 
 	void resetAcceleration() { acceleration = Vec3(0, 0, 0); }
 
@@ -61,9 +61,10 @@ public:
 	Vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
 
 	void resetNormal() { accumulated_normal = Vec3(0, 0, 0); }
-	void printself(string s = "")
+	
+	void printself(std::string s = "")
 	{
-		cout << s << ": " << this->getPos().f[0] <<" movable:  "<<this->movable<<endl;
+		std::cout << s << ": " << this->getPos().f[0] << " movable:  " << this->movable << std::endl;
 	}
 
 };

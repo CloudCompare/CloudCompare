@@ -4,10 +4,6 @@
 #include "point_types.h"
 #include "lasdefinitions.h"
 
-
-using namespace wl;
-using namespace std;
-
 namespace wl
 {
   class PointCloud

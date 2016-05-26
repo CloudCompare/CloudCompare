@@ -6,9 +6,16 @@ namespace wl
 
 	struct LASPoint
 	{
-		float x;
-		float y;
-		float z;
+		union
+		{
+			struct
+			{
+				float x;
+				float y;
+				float z;
+			};
+			float u[3];
+		};
 
 		float intensity;
 		unsigned char return_number : 3;

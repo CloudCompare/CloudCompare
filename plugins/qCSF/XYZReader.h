@@ -2,14 +2,11 @@
 #define XYZ_READER_H_
 
 #include <string>
-#include <vector>
-using namespace std;
 
-#include "point_cloud.h"
-using namespace wl;
+#include "csf_h/point_cloud.h"
 
 //从fname文件中读取点云，将点云数据存储在pointcloud中
-void read_xyz(string fname, PointCloud &pointcloud);
+void read_xyz(std::string fname, wl::PointCloud &pointcloud);
 
 
 #endif

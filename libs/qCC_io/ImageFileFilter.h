@@ -41,6 +41,11 @@ public:
 	virtual bool canLoadExtension(QString upperCaseExt) const override;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
+	//! Helper: select an input image filename
+	static QString GetLoadFilename(	QString dialogTitle,
+									QString imageLoadPath,
+									QWidget* parentWidget = 0);
+
 	//! Helper: select an output image filename
 	static QString GetSaveFilename(	QString dialogTitle,
 									QString baseName,

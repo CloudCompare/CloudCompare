@@ -183,14 +183,14 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (!draw)
 		return;
-	
+
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
 		return;
-	
+
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
@@ -214,7 +214,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//on one on my graphic card with this mode!
 		//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
 		glFunc->glBegin(GL_LINE_STRIP);
-		for (unsigned i=0; i<vertCount; ++i)
+		for (unsigned i = 0; i < vertCount; ++i)
 		{
 			ccGL::Vertex3v(glFunc, getPoint(i)->u);
 		}
@@ -227,7 +227,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//display arrow
 		if (m_showArrow && m_arrowIndex < vertCount && (m_arrowIndex > 0 || m_isClosed))
 		{
-			const CCVector3* P0 = getPoint(m_arrowIndex == 0 ? vertCount-1 : m_arrowIndex-1);
+			const CCVector3* P0 = getPoint(m_arrowIndex == 0 ? vertCount - 1 : m_arrowIndex - 1);
 			const CCVector3* P1 = getPoint(m_arrowIndex);
 			//direction of the last polyline chunk
 			CCVector3 u = *P1 - *P0;
@@ -239,19 +239,19 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 				static const PointCoordinateType s_defaultArrowAngle = static_cast<PointCoordinateType>(15.0 * CC_DEG_TO_RAD);
 				static const PointCoordinateType cost = cos(s_defaultArrowAngle);
 				static const PointCoordinateType sint = sin(s_defaultArrowAngle);
-				CCVector3 A(cost * u.x - sint * u.y,  sint * u.x + cost * u.y, 0);
+				CCVector3 A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);
 				CCVector3 B(cost * u.x + sint * u.y, -sint * u.x + cost * u.y, 0);
 				glFunc->glBegin(GL_POLYGON);
-				ccGL::Vertex3v(glFunc, (A+*P1).u);
-				ccGL::Vertex3v(glFunc, (B+*P1).u);
-				ccGL::Vertex3v(glFunc, (  *P1).u);
+				ccGL::Vertex3v(glFunc, (A + *P1).u);
+				ccGL::Vertex3v(glFunc, (B + *P1).u);
+				ccGL::Vertex3v(glFunc, (*P1).u);
 				glFunc->glEnd();
 			}
 			else
 			{
 				if (!c_unitArrow)
 				{
-					c_unitArrow = QSharedPointer<ccCone>(new ccCone(0.5,0.0,1.0));
+					c_unitArrow = QSharedPointer<ccCone>(new ccCone(0.5, 0.0, 1.0));
 					c_unitArrow->showColors(true);
 					c_unitArrow->showNormals(false);
 					c_unitArrow->setVisible(true);
@@ -268,11 +268,11 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				glFunc->glMatrixMode(GL_MODELVIEW);
 				glFunc->glPushMatrix();
-				ccGL::Translate(glFunc,P1->x,P1->y,P1->z);
-				ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u,CCVector3(0,0,PC_ONE));
+				ccGL::Translate(glFunc, P1->x, P1->y, P1->z);
+				ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u, CCVector3(0, 0, PC_ONE));
 				glFunc->glMultMatrixf(rotMat.inverse().data());
-				glFunc->glScalef(m_arrowLength,m_arrowLength,m_arrowLength);
-				ccGL::Translate(glFunc,0.0,0.0,-0.5);
+				glFunc->glScalef(m_arrowLength, m_arrowLength, m_arrowLength);
+				ccGL::Translate(glFunc, 0.0, 0.0, -0.5);
 				c_unitArrow->draw(markerContext);
 				glFunc->glPopMatrix();
 			}
@@ -291,7 +291,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPointSize((GLfloat)m_vertMarkWidth);
 
 		glFunc->glBegin(GL_POINTS);
-		for (unsigned i=0; i<vertCount; ++i)
+		for (unsigned i = 0; i < vertCount; ++i)
 		{
 			ccGL::Vertex3v(glFunc, getPoint(i)->u);
 		}
@@ -324,25 +324,25 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 		return false;
 	}
 	uint32_t vertUniqueID = (m_theAssociatedCloud ? (uint32_t)vertices->getUniqueID() : 0);
-	if (out.write((const char*)&vertUniqueID,4) < 0)
+	if (out.write((const char*)&vertUniqueID, 4) < 0)
 		return WriteError();
 
 	//number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = size();
-	if (out.write((const char*)&pointCount,4) < 0)
+	if (out.write((const char*)&pointCount, 4) < 0)
 		return WriteError();
 
 	//points (references to) (dataVersion>=28)
-	for (uint32_t i=0; i<pointCount; ++i)
+	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = getPointGlobalIndex(i);
-		if (out.write((const char*)&pointIndex,4) < 0)
+		if (out.write((const char*)&pointIndex, 4) < 0)
 			return WriteError();
 	}
 
 	//'global shift & scale' (dataVersion>=39)
 	saveShiftInfoToFile(out);
-	
+
 	QDataStream outStream(&out);
 
 	//Closing state (dataVersion>=28)
@@ -370,30 +370,30 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	if (dataVersion<28)
+	if (dataVersion < 28)
 		return false;
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple polylines)
 	//we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t vertUniqueID = 0;
-	if (in.read((char*)&vertUniqueID,4) < 0)
+	if (in.read((char*)&vertUniqueID, 4) < 0)
 		return ReadError();
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
 	*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
 
 	//number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = 0;
-	if (in.read((char*)&pointCount,4) < 0)
+	if (in.read((char*)&pointCount, 4) < 0)
 		return ReadError();
 	if (!reserve(pointCount))
 		return false;
 
 	//points (references to) (dataVersion>=28)
-	for (uint32_t i=0; i<pointCount; ++i)
+	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = 0;
-		if (in.read((char*)&pointIndex,4) < 0)
+		if (in.read((char*)&pointIndex, 4) < 0)
 			return ReadError();
 		addPointIndex(pointIndex);
 	}
@@ -514,7 +514,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
 			ccPointCloud* subset = vertices ? vertices->partialClone(&ref) : ccPointCloud::From(&ref);
 			ccPolyline* part = new ccPolyline(subset);
-			part->initWith(subset,*this);
+			part->initWith(subset, *this);
 			part->setClosed(false); //by definition!
 			parts.push_back(part);
 		}
@@ -537,11 +537,11 @@ PointCoordinateType ccPolyline::computeLength() const
 		for (unsigned i=0; i<lastVert; ++i)
 		{
 			CCVector3 A;
-			getPoint(i,A);
+			getPoint(i, A);
 			CCVector3 B;
-			getPoint((i+1)%vertCount,B);
+			getPoint((i + 1) % vertCount, B);
 
-			length += (B-A).norm();
+			length += (B - A).norm();
 		}
 	}
 

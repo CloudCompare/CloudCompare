@@ -14,6 +14,10 @@ v2.8.beta - XX/XX/2016
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree
 
+	* Facets
+		- meta-data (normals, dip/direction, etc.) is now updated when the facet is rotated / transformed
+		- the 3D representation of the normal vector now depends on the facet size and not on its min. bounding-box size
+
 v2.7.0 - 04/22/2016
 -------------------
 

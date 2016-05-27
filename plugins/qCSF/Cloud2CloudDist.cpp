@@ -1,4 +1,4 @@
-#include "c2cdist.h"
+#include "Cloud2CloudDist.h"
  
 //CGAL
 #include <CGAL/Simple_cartesian.h>
@@ -15,12 +15,14 @@ typedef Neighbor_search::Tree Tree;
 //system
 #include <cmath>
 
-bool c2cdist::calCloud2CloudDist(const Cloth& cloth, const wl::PointCloud& pc, std::vector< std::vector<int> >& c2cre)
+bool Cloud2CloudDist::Compute(	const Cloth& cloth,
+								const wl::PointCloud& pc,
+								double class_threshold,
+								std::vector<int>& groundIndexes,
+								std::vector<int>& offGroundIndexes)
 {
 	try
 	{
-		c2cre.resize(2);
-
 		const unsigned int N = 3;
 		std::list<Point_d> points_2d;
 		std::map<std::string, double >mapstring;
@@ -28,11 +30,12 @@ bool c2cdist::calCloud2CloudDist(const Cloth& cloth, const wl::PointCloud& pc, s
 		// maping coordinates xy->z  to query the height value of each point
 		for (int i = 0; i < cloth.getSize(); i++)
 		{
+			const Particle& particle = cloth.getParticleByIndex(i);
 			std::ostringstream ostrx, ostrz;
-			ostrx << cloth.getParticle1d(i)->getPos().f[0];
-			ostrz << cloth.getParticle1d(i)->getPos().f[2];
-			mapstring.insert(std::pair<std::string, double>(ostrx.str() + ostrz.str(), cloth.getParticle1d(i)->getPos().f[1]));
-			points_2d.push_back(Point_d( cloth.getParticle1d(i)->getPos().f[0], cloth.getParticle1d(i)->getPos().f[2]));
+			ostrx << particle.pos.x;
+			ostrz << particle.pos.z;
+			mapstring.insert(std::pair<std::string, double>(ostrx.str() + ostrz.str(), particle.pos.y));
+			points_2d.push_back(Point_d(particle.pos.x, particle.pos.z));
 		}
 
 		Tree tree(points_2d.begin(), points_2d.end());
@@ -54,13 +57,13 @@ bool c2cdist::calCloud2CloudDist(const Cloth& cloth, const wl::PointCloud& pc, s
 				//	search_min = y;
 				//}
 			}
-			if (std::fabs(search_min - pc[i].y) < class_treshold)
+			if (std::fabs(search_min - pc[i].y) < class_threshold)
 			{
-				c2cre[0].push_back(i);
+				groundIndexes.push_back(i);
 			}
 			else
 			{
-				c2cre[1].push_back(i);
+				offGroundIndexes.push_back(i);
 			}
 		}
 	}

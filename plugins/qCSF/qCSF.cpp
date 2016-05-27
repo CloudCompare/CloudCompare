@@ -68,15 +68,6 @@ void qCSF::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-//initialize the dialog state.
-static bool csf_postprocessing = false;
-static bool csf_rig1=false;
-static bool csf_rig2=false;
-static bool csf_rig3=true;
-static int MaxIteration = 500;
-static double cloth_resolution = 2;
-static double class_threshold = 0.5;
-
 void qCSF::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
@@ -129,16 +120,41 @@ void qCSF::doAction()
 		csfPC.push_back(tmpPoint);
 	}
 
+	//initial dialog parameters
+	static bool csf_postprocessing = false;
+	static double cloth_resolution = 2;
+	static double class_threshold = 0.5;
+	static int csf_rigidness = 2;
+	static int MaxIteration = 500;
+
 	// display the dialog
-	ccCSFDlg csfDlg(m_app->getMainWindow());
-	csfDlg.rig1->setChecked(csf_rig1);
-	csfDlg.rig2->setChecked(csf_rig2);
-	csfDlg.rig3->setChecked(csf_rig3);
-	csfDlg.MaxIterationSpinBox->setValue(MaxIteration);
-	csfDlg.cloth_resolutionSpinBox->setValue(cloth_resolution);
-	csfDlg.class_thresholdSpinBox->setValue(class_threshold);
-	if (!csfDlg.exec())
-		return;
+	{
+		ccCSFDlg csfDlg(m_app->getMainWindow());
+		csfDlg.postprocessingcheckbox->setChecked(csf_postprocessing);
+		csfDlg.rig1->setChecked(csf_rigidness == 1);
+		csfDlg.rig2->setChecked(csf_rigidness == 2);
+		csfDlg.rig3->setChecked(csf_rigidness == 3);
+		csfDlg.MaxIterationSpinBox->setValue(MaxIteration);
+		csfDlg.cloth_resolutionSpinBox->setValue(cloth_resolution);
+		csfDlg.class_thresholdSpinBox->setValue(class_threshold);
+
+		if (!csfDlg.exec())
+		{
+			return;
+		}
+
+		//save the parameters for next time
+		csf_postprocessing = csfDlg.postprocessingcheckbox->isChecked();
+		if (csfDlg.rig1->isChecked())
+			csf_rigidness = 1;
+		else if (csfDlg.rig2->isChecked())
+			csf_rigidness = 2;
+		else
+			csf_rigidness = 3;
+		MaxIteration = csfDlg.MaxIterationSpinBox->value();
+		cloth_resolution = csfDlg.cloth_resolutionSpinBox->value();
+		class_threshold = csfDlg.class_thresholdSpinBox->value();
+	}
 
 	//display the progress dialog
 	QProgressDialog pDlg;
@@ -152,43 +168,33 @@ void qCSF::doAction()
 	CSF csf(csfPC);
 
 	// setup parameter
-	csf.params.bSloopSmooth = csfDlg.postprocessingcheckbox->isChecked();
-	csf.params.class_threshold = csfDlg.class_thresholdSpinBox->value();
-	csf.params.cloth_resolution = csfDlg.cloth_resolutionSpinBox->value();
-	csf.params.iterations = csfDlg.MaxIterationSpinBox->value();
 	csf.params.k_nearest_points = 1;
-	if (csfDlg.rig1->isChecked())
-	{
-		csf.params.rigidness = 1;
-	}
-	else if (csfDlg.rig2->isChecked())
-	{
-		csf.params.rigidness = 2;
-	}
-	else 
-	{
-		csf.params.rigidness = 3;
-	}
+	csf.params.bSloopSmooth = csf_postprocessing;
 	csf.params.time_step = 0.75;
+	csf.params.class_threshold = class_threshold;
+	csf.params.cloth_resolution = cloth_resolution;
+	csf.params.rigidness = csf_rigidness;
+	csf.params.iterations = MaxIteration;
 
 	//to do filtering
-	std::vector< std::vector<int> > segIndex;
-	if (!csf.do_filtering(segIndex))
+	std::vector<int> groundIndexes, offGroundIndexes;
+	if (!csf.do_filtering(groundIndexes, offGroundIndexes))
 	{
 		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	assert(segIndex.size() == 2);
+
+	m_app->dispToConsole(QString("[CSF] %1% of points classified as ground points").arg((groundIndexes.size() * 100.0) / count, 0, 'f', 2), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	//extract ground subset
 	ccPointCloud* groundpoint = 0;
 	{
 		CCLib::ReferenceCloud groundpc(pc);
-		if (groundpc.reserve(static_cast<unsigned>(segIndex[0].size())))
+		if (groundpc.reserve(static_cast<unsigned>(groundIndexes.size())))
 		{
-			for (unsigned j = 0; j < segIndex[0].size(); ++j)
+			for (unsigned j = 0; j < groundIndexes.size(); ++j)
 			{
-				groundpc.addPointIndex(segIndex[0][j]);
+				groundpc.addPointIndex(groundIndexes[j]);
 			}
 			groundpoint = pc->partialClone(&groundpc);
 		}
@@ -202,11 +208,11 @@ void qCSF::doAction()
 	ccPointCloud* offgroundpoint = 0;
 	{
 		CCLib::ReferenceCloud offgroundpc(pc);
-		if (offgroundpc.reserve(static_cast<unsigned>(segIndex[1].size())))
+		if (offgroundpc.reserve(static_cast<unsigned>(offGroundIndexes.size())))
 		{
-			for (unsigned k = 0; k < segIndex[1].size(); ++k)
+			for (unsigned k = 0; k < offGroundIndexes.size(); ++k)
 			{
-				offgroundpc.addPointIndex(segIndex[1][k]);
+				offgroundpc.addPointIndex(offGroundIndexes[k]);
 			}
 			offgroundpoint = pc->partialClone(&offgroundpc);
 		}

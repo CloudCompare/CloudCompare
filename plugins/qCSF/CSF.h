@@ -16,21 +16,21 @@ public:
 	virtual ~CSF();
 
 	//input PC from files
-	void readPointsFromFile(std::string filename);
+	bool readPointsFromFile(std::string filename);
 
 	//save the ground points to file
 	void saveGroundPoints(const std::vector<int>& grp, std::string path = "");
 	void saveOffGroundPoints(const std::vector<int>& grp, std::string path = "");
 	
 	//执行滤波处理 得到地面点的在PointCloud 中的序号
-	bool do_filtering(std::vector< std::vector<int> >& output);
+	bool do_filtering(std::vector<int>& groundIndexes, std::vector<int>& offGroundIndexes);
 
 private:
 	wl::PointCloud& point_cloud;
 
 public:
 
-	struct
+	struct Parameters
 	{
 		//parameters
 		//最临近搜索是的点数，一般设置为1
@@ -53,7 +53,9 @@ public:
 
 		//最大迭代次数
 		int iterations;
-	} params;
+	};
+	
+	Parameters params;
 };
 
 #endif

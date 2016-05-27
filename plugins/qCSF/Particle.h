@@ -6,19 +6,19 @@
 /* Some physics constants */
 #define DAMPING 0.01 // how much to damp the cloth simulation each frame
 
-/* The particle class represents a particle of mass that can move around in 3D space*/
+/* The particle class represents a particle that can move around in 3D space*/
 class Particle
 {
 private:
 	bool movable; // can the particle move or not ? used to pin parts of the cloth
-	double mass; // the mass of the particle (is always 1 in this example)
+	//double mass; // the mass of the particle (is always 1 in this example)
 	Vec3 acceleration; // a vector representing the current acceleration of the particle
-	Vec3 accumulated_normal; // an accumulated normal (i.e. non normalized), used for OpenGL soft shading
+	//Vec3 accumulated_normal; // an accumulated normal (i.e. non normalized), used for OpenGL soft shading
 	double time_step2;
 public:
 	//this two memeber is used in the process of edge smoothing after the cloth simulation step.
-	bool isVisited;  
-	int neibor_count;
+	bool isVisited;
+	//int neibor_count;
 	int pos_x; //position in the cloth grid
 	int pos_y;
 	int c_pos;//在联通分量中的位置
@@ -29,14 +29,20 @@ public:
 
 	Particle() {}
 
-	Particle(Vec3 pos, double time_step) : pos(pos), old_pos(pos), acceleration(Vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(Vec3(0, 0, 0)), time_step2(time_step)
-	{
-		isVisited = false;
-		neibor_count = 0;
-		pos_x = 0;
-		pos_y = 0;
-		c_pos = 0;
-	}
+	Particle(Vec3 pos, double time_step)
+		: movable(true)
+		//, mass(1)
+		, acceleration(0, 0, 0)
+		//, accumulated_normal(0, 0, 0)
+		, time_step2(time_step)
+		, isVisited(false)
+		//, neibor_count(0)
+		, pos_x(0)
+		, pos_y(0)
+		, c_pos(0)
+		, pos(pos)
+		, old_pos(pos)
+	{}
 
 	/* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
 	The method is called by Cloth.time_step()*/
@@ -44,11 +50,7 @@ public:
 
 	inline bool isMovable() const { return movable; }
 
-	inline void addForce(const Vec3& f) { acceleration += f / mass; }
-
-	inline Vec3& getPos() { return pos; }
-
-	inline const Vec3& getPos() const { return pos; }
+	inline void addForce(const Vec3& f) { acceleration += f/*/ mass*/; }
 
 	inline void resetAcceleration() { acceleration = Vec3(0, 0, 0); }
 
@@ -56,11 +58,11 @@ public:
 
 	inline void makeUnmovable() { movable = false; }
 
-	inline void addToNormal(Vec3 normal) { accumulated_normal += normal.normalized(); }
+	//inline void addToNormal(Vec3 normal) { accumulated_normal += normal.normalized(); }
 
-	inline const Vec3& getNormal() const { return accumulated_normal; } // notice, the normal is not unit length
+	//inline const Vec3& getNormal() const { return accumulated_normal; } // notice, the normal is not unit length
 
-	inline void resetNormal() { accumulated_normal = Vec3(0, 0, 0); }
+	//inline void resetNormal() { accumulated_normal = Vec3(0, 0, 0); }
 };
 
 #endif

@@ -32,8 +32,6 @@ have been added to the original source code, including
 #include <vector>
 #include <string>
 
-class Terrain;
-
 struct XY
 {
 	XY(int x1, int y1)
@@ -74,20 +72,21 @@ private:
 	std::vector<int> movableIndex;
 	std::vector< std::vector<int> > particle_edges;
 
-	inline Particle* getParticle(int x, int y) { return &particles[y*num_particles_width + x]; }
-	inline const Particle* getParticle(int x, int y) const { return &particles[y*num_particles_width + x]; }
+	inline Particle& getParticle(int x, int y) { return particles[y*num_particles_width + x]; }
+	inline const Particle& getParticle(int x, int y) const { return particles[y*num_particles_width + x]; }
 	
 	inline void addConstraint(Particle *p1, Particle *p2) { constraints.push_back(Constraint(p1, p2)); }
 
 public:
 	
+	inline Particle getParticleByIndex(int index) { return particles[index]; }
+	inline const Particle getParticleByIndex(int index) const { return particles[index]; }
+
 	inline int getSize() const { return num_particles_width * num_particles_height; }
 
-	inline const Particle* getParticle1d(int index) const { return &particles[index]; }
+	inline std::vector<double>& getHeightvals() { return heightvals; }
 
 public:
-	
-	Cloth() {}
 	
 	/* This is a important constructor for the entire system of particles and constraints */
 	Cloth(	double width,
@@ -114,7 +113,7 @@ public:
 	void addForce(const Vec3& direction);
 
 	//检测布料是否与地形碰撞
-	void terrCollision(const std::vector<double>& heightvals, Terrain* terr, bool &flag);
+	void terrainCollision();
 
 	//对可移动的点进行边坡处理
 	void movableFilter();
@@ -126,7 +125,7 @@ public:
 	//直接对联通分量进行边坡处理
 	void handle_slop_connected(	const std::vector<int>& edgePoints,
 								const std::vector<XY>& connected,
-								const std::vector< std::vector<int> >& neibors,
+								const std::vector< std::vector<int> >& neighbors,
 								const std::vector<double> &heightvals);
 
 	//将布料点保存到文件

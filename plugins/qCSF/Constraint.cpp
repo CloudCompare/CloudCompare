@@ -2,7 +2,7 @@
 
 void Constraint::satisfyConstraint()
 {
-	Vec3 correctionVector(0, p2->getPos().f[1] - p1->getPos().f[1], 0);
+	Vec3 correctionVector(0, p2->pos.y - p1->pos.y, 0);
 	
 	Vec3 correctionVectorHalf = correctionVector * 0.3; // Lets make it half that length, so that we can move BOTH p1 and p2.
 	if (p1->isMovable())

@@ -271,7 +271,7 @@ p, li { white-space: pre-wrap; }
             <number>10</number>
            </property>
            <property name="maximum">
-            <number>500</number>
+            <number>1000</number>
            </property>
           </widget>
          </item>

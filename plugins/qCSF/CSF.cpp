@@ -1,16 +1,16 @@
 //CSF
 #include "CSF.h"
-#include "XYZReader.h"
-#include "Terrain.h"
 #include "Vec3.h"
 #include "Cloth.h"
 #include "Rasterization.h"
-#include "c2cdist.h"
+#include "Cloud2CloudDist.h"
 
 //system
 #include <cmath>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
+#include <iostream>
 
 //Qt
 #include <QProgressDialog>
@@ -32,14 +32,45 @@ CSF::~CSF()
 {
 }
 
-//从文件中读取点云，该程序中未用到此函数
-void CSF::readPointsFromFile(std::string filename)
+bool CSF::readPointsFromFile(std::string filename)
 {
-	read_xyz(filename, this->point_cloud);
+	point_cloud.clear();
+	
+	try
+	{
+		std::ifstream fin(filename.c_str(), std::ios::in);
+
+		char line[500];
+		std::string x, y, z;
+		while (fin.getline(line, sizeof(line)))
+		{
+			std::stringstream words(line);
+			words >> x;
+			words >> y;
+			words >> z;
+			wl::Point P;
+			P.x = static_cast<float>(atof(x.c_str()));
+			P.y = static_cast<float>(-atof(z.c_str()));
+			P.z = static_cast<float>(atof(y.c_str()));
+			point_cloud.push_back(P);
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+	catch (...)
+	{
+		//other error
+		return false;
+	}
+
+	return true;
 }
 
 //CSF主程序 dofiltering
-bool CSF::do_filtering(std::vector< std::vector<int> >& output)
+bool CSF::do_filtering(std::vector<int>& groundIndexes, std::vector<int>& offGroundIndexes)
 {
 	//constants
 	static const double cloth_y_height = 0.05; //origin cloth height
@@ -48,20 +79,21 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 
 	try
 	{
-		//build the terrain
-		Terrain terr(point_cloud);
+		//compute the terrain (cloud) bounding-box
+		wl::Point bbMin, bbMax;
+		point_cloud.computeBoundingBox(bbMin, bbMax);
 
 		//computing the number of cloth node
-		Vec3 origin_pos1(	terr.bbMin.x - clothbuffer_d,
-							terr.bbMax.y + cloth_y_height,
-							terr.bbMin.z - clothbuffer_d);
+		Vec3 origin_pos1(	bbMin.x - clothbuffer_d,
+							bbMax.y + cloth_y_height,
+							bbMin.z - clothbuffer_d);
 	
-		int width_num  = (terr.bbMax.x - terr.bbMin.x + clothbuffer_d * 2) / params.cloth_resolution;
-		int height_num = (terr.bbMax.z - terr.bbMin.z + clothbuffer_d * 2) / params.cloth_resolution;
+		int width_num  = (bbMax.x - bbMin.x + clothbuffer_d * 2) / params.cloth_resolution;
+		int height_num = (bbMax.z - bbMin.z + clothbuffer_d * 2) / params.cloth_resolution;
 	
 		//one Cloth object of the Cloth class
-		Cloth cloth1(	terr.bbMax.x - terr.bbMin.x + clothbuffer_d * 2,
-						terr.bbMax.z - terr.bbMin.z + clothbuffer_d * 2,
+		Cloth cloth1(	bbMax.x - bbMin.x + clothbuffer_d * 2,
+						bbMax.z - bbMin.z + clothbuffer_d * 2,
 						width_num,
 						height_num,
 						origin_pos1,
@@ -70,16 +102,12 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 						params.rigidness,
 						params.time_step);
 
-		std::vector<double> heightvals;
-		if (!Rasterization::RasterTerrian(cloth1, point_cloud, heightvals, params.k_nearest_points))
+		if (!Rasterization::RasterTerrain(cloth1, point_cloud, cloth1.getHeightvals(), params.k_nearest_points))
 		{
 			return false;
 		}
 	
-		cloth1.setheightvals(heightvals);
-
 		double time_step2 = params.time_step * params.time_step;
-		bool flag = false;
 
 		//do the filtering
 		//显示进度条
@@ -105,7 +133,7 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 			//滤波主过程
 			cloth1.addForce(Vec3(0, -gravity, 0) * time_step2);
 			double maxheight = cloth1.timeStep();
-			cloth1.terrCollision(heightvals, &terr, flag);
+			cloth1.terrainCollision();
 
 	#ifdef _DEBUG
 			fout.setf(ios::app);
@@ -118,7 +146,7 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 				pDlg2.setValue(params.iterations);
 				break;
 			}
-			pDlg2.setValue(pDlg2.value()+1);
+			pDlg2.setValue(pDlg2.value() + 1);
 			QCoreApplication::processEvents();
 		}
 		pDlg2.hide();
@@ -131,7 +159,7 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 		}
 	
 		//classification of the points
-		return c2cdist(params.class_threshold).calCloud2CloudDist(cloth1, point_cloud, output);
+		return Cloud2CloudDist::Compute(cloth1, point_cloud, params.class_threshold, groundIndexes, offGroundIndexes);
 	}
 	catch (const std::bad_alloc&)
 	{

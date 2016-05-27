@@ -118,16 +118,6 @@ bool CSF::do_filtering(std::vector<int>& groundIndexes, std::vector<int>& offGro
 		pDlg2.show();
 		QCoreApplication::processEvents();
 
-	#ifdef _DEBUG
-		//滤波主循环
-		ofstream fout("clothDistDiffMax.txt");
-		if(!fout)
-		{
-			cerr<<"File of clothdist.txt not open!"<<endl;
-			exit(1);
-		}
-	#endif
-
 		for (int i = 0; i < params.iterations; i++)
 		{
 			//滤波主过程
@@ -135,11 +125,6 @@ bool CSF::do_filtering(std::vector<int>& groundIndexes, std::vector<int>& offGro
 			double maxheight = cloth1.timeStep();
 			cloth1.terrainCollision();
 
-	#ifdef _DEBUG
-			fout.setf(ios::app);
-			fout.precision(3);  
-			fout<<i<<" "<<maxheight<<endl;
-	#endif
 			//判断循环终止条件
 			if (maxheight != 0 && maxheight < params.class_threshold / 100)
 			{

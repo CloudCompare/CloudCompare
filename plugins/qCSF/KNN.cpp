@@ -1,5 +1,17 @@
 #include "KNN.h"
 
+//CGAL
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/Orthogonal_k_neighbor_search.h>
+#include <CGAL/Search_traits_2.h>
+
+typedef CGAL::Simple_cartesian<double> K;
+typedef K::Point_2 Point_d;
+typedef CGAL::Search_traits_2<K> TreeTraits;
+typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
+typedef Neighbor_search::Tree Tree;
+
 bool Rasterlization::RasterTerrian(Cloth cloth, const wl::PointCloud& pc, std::vector<double>& heightVal)
 {
 	try

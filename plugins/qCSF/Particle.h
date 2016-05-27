@@ -26,6 +26,9 @@ public:
 	Vec3 old_pos; // the position of the particle in the previous time step, used as part of the verlet numerical integration scheme
 	
 public:
+
+	Particle() {}
+
 	Particle(Vec3 pos, double time_step) : pos(pos), old_pos(pos), acceleration(Vec3(0, 0, 0)), mass(1), movable(true), accumulated_normal(Vec3(0, 0, 0)), time_step2(time_step)
 	{
 		isVisited = false;
@@ -35,38 +38,29 @@ public:
 		c_pos = 0;
 	}
 
-	Particle() {}
-	bool isMovable() const { return movable; }
-	void addForce(const Vec3& f) { acceleration += f / mass; }
-
-
 	/* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
 	The method is called by Cloth.time_step()*/
 	void timeStep();
 
-	Vec3& getPos() { return pos; }
-	const Vec3& getPos() const { return pos; }
+	inline bool isMovable() const { return movable; }
 
-	void resetAcceleration() { acceleration = Vec3(0, 0, 0); }
+	inline void addForce(const Vec3& f) { acceleration += f / mass; }
 
-	void offsetPos(const Vec3 v) { if (movable) pos += v; }
+	inline Vec3& getPos() { return pos; }
 
-	void makeUnmovable() { movable = false; }
+	inline const Vec3& getPos() const { return pos; }
 
-	void addToNormal(Vec3 normal)
-	{
-		accumulated_normal += normal.normalized();
-	}
+	inline void resetAcceleration() { acceleration = Vec3(0, 0, 0); }
 
-	Vec3& getNormal() { return accumulated_normal; } // notice, the normal is not unit length
+	inline void offsetPos(const Vec3 v) { if (movable) pos += v; }
 
-	void resetNormal() { accumulated_normal = Vec3(0, 0, 0); }
-	
-	void printself(std::string s = "")
-	{
-		std::cout << s << ": " << this->getPos().f[0] << " movable:  " << this->movable << std::endl;
-	}
+	inline void makeUnmovable() { movable = false; }
 
+	inline void addToNormal(Vec3 normal) { accumulated_normal += normal.normalized(); }
+
+	inline const Vec3& getNormal() const { return accumulated_normal; } // notice, the normal is not unit length
+
+	inline void resetNormal() { accumulated_normal = Vec3(0, 0, 0); }
 };
 
 #endif

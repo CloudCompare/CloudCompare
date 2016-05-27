@@ -38,7 +38,7 @@ void CSF::readPointsFromFile(std::string filename)
 }
 
 //CSFÖ÷³ÌÐò dofiltering
-bool CSF::do_filtering(unsigned pcsize, std::vector< std::vector<int> >& output)
+bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 {
 	try
 	{

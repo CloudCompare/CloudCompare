@@ -1,5 +1,17 @@
 #include "Terrain.h"
 
+//CGAL
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/Orthogonal_k_neighbor_search.h>
+#include <CGAL/Search_traits_2.h>
+
+typedef CGAL::Simple_cartesian<double> K;
+typedef K::Point_2 Point_d;
+typedef CGAL::Search_traits_2<K> TreeTraits;
+typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
+typedef Neighbor_search::Tree Tree;
+
 //system
 #include <assert.h>
 
@@ -67,7 +79,7 @@ void Terrain::bound_box()
 	cube[7] = (cube[4] + cube[5]) / 2;
 }
 
-void Terrain::saveToFile(wl::LASPoint offset, std::string path)
+void Terrain::saveToFile(const wl::Point& offset, std::string path)
 {
 	std::string filepath = "terr_nodes.txt";
 	if (path != "")

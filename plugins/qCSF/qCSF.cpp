@@ -106,7 +106,7 @@ void qCSF::doAction()
 
 	//Convert CC point cloud to CSF type
 	unsigned count = pc->size();
-	PointCloud csfPC;
+	wl::PointCloud csfPC;
 	try
 	{
 		csfPC.reserve(count);
@@ -119,7 +119,7 @@ void qCSF::doAction()
 	for (unsigned i = 0; i < count; i++)
 	{
 		const CCVector3* P = pc->getPoint(i);
-		wl::LASPoint tmpPoint;
+		wl::Point tmpPoint;
 		//tmpPoint.x = P->x;
 		//tmpPoint.y = P->y;
 		//tmpPoint.z = P->z;
@@ -173,7 +173,7 @@ void qCSF::doAction()
 
 	//to do filtering
 	std::vector< std::vector<int> > segIndex;
-	if (!csf.do_filtering(count, segIndex))
+	if (!csf.do_filtering(segIndex))
 	{
 		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;

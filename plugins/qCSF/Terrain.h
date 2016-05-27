@@ -21,7 +21,7 @@ public:
 	double off_avg_x, off_avg_z;//自动shift算法
 
 	//将点云保存到文件
-	void saveToFile(wl::LASPoint offset, std::string path = "");
+	void saveToFile(const wl::Point& offset, std::string path = "");
 
 protected:
 	

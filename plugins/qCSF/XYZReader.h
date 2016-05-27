@@ -6,7 +6,7 @@
 #include "csf_h/point_cloud.h"
 
 //从fname文件中读取点云，将点云数据存储在pointcloud中
-void read_xyz(std::string fname, wl::PointCloud &pointcloud);
+bool read_xyz(std::string fname, wl::PointCloud &pointcloud);
 
 
 #endif

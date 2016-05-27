@@ -10,17 +10,14 @@ class c2cdist
 public:
 	
 	c2cdist(double threshold) : class_treshold(threshold) {}
+
 	virtual ~c2cdist() {}
 
-public:
 	bool c2cdist::calCloud2CloudDist(const Cloth& cloth, const wl::PointCloud& pc, std::vector< std::vector<int> >& output);
 
-private:
+protected:
 	
 	double class_treshold;
 };
-
-
-
 
 #endif

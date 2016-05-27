@@ -14,69 +14,46 @@ typedef Neighbor_search::Tree Tree;
 
 //system
 #include <assert.h>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
 
 Terrain::Terrain(wl::PointCloud &cloud)
 	: pc(cloud)
 	, off_avg_x(0)
 	, off_avg_z(0)
 {
-	bound_box();
+	computeBoundingBox();
 }
 
 Terrain::~Terrain()
 {
 }
 
-double Terrain::getMin(int direction)
+void Terrain::computeBoundingBox()
 {
-	assert(direction >= 0 && direction < 3);
-
 	if (pc.empty())
 	{
-		return 0.0;
+		bbMin = bbMax = Vec3(0, 0, 0);
+		return;
 	}
 
-	double minval = pc[0].u[direction];
+	bbMin = bbMax = Vec3(pc[0].x, pc[0].y, pc[0].z);
 	for (size_t i = 1; i < pc.size(); i++)
 	{
-		if (pc[i].u[direction] < minval)
+		const wl::Point& P = pc[i];
+		for (int d = 0; d < 3; ++d)
 		{
-			minval = pc[i].u[direction];
+			if (P.u[d] < bbMin.f[d])
+			{
+				bbMin.f[d] = P.u[d];
+			}
+			else if (P.u[d] > bbMax.f[d])
+			{
+				bbMax.f[d] = P.u[d];
+			}
 		}
 	}
-	return minval;
-}
-
-double Terrain::getMax(int direction)
-{
-	assert(direction >= 0 && direction < 3);
-
-	if (pc.empty())
-	{
-		return 0.0;
-	}
-
-	double maxval = pc[0].u[direction];
-	for (size_t i = 1; i < pc.size(); i++)
-	{
-		if (pc[i].u[direction] > maxval)
-		{
-			maxval = pc[i].u[direction];
-		}
-	}
-	return maxval;
-}
-
-void Terrain::bound_box()
-{
-	cube[0] = getMin(0);
-	cube[1] = getMax(0);
-	cube[2] = getMin(1);
-	cube[3] = getMax(1);
-	cube[4] = getMin(2);
-	cube[5] = getMax(2);
-	cube[6] = (cube[0] + cube[1]) / 2;
-	cube[7] = (cube[4] + cube[5]) / 2;
 }
 
 void Terrain::saveToFile(const wl::Point& offset, std::string path)

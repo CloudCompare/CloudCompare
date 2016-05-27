@@ -11,8 +11,6 @@ project( QCSF_PLUGIN )
 
 include( ../CMakePluginTpl.cmake )
 
-include_directories( ${QCSF_PLUGIN_SOURCE_DIR}/csf_h )
-
 target_link_libraries( ${PROJECT_NAME} ${CGAL_LIBRARIES} )
 
 endif()

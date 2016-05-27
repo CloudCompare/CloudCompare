@@ -6,14 +6,15 @@
 #include "Cloth.h"
 #include "Rasterization.h"
 #include "c2cdist.h"
+
+//system
 #include <cmath>
+#include <iomanip>
+#include <fstream>
 
 //Qt
 #include <QProgressDialog>
-#include <QApplication>
-
-//CC
-#include <DistanceComputationTools.h>
+#include <QCoreApplication>
 
 CSF::CSF(wl::PointCloud& cloud)
 	: point_cloud(cloud)
@@ -40,26 +41,27 @@ void CSF::readPointsFromFile(std::string filename)
 //CSF主程序 dofiltering
 bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 {
+	//constants
+	static const double cloth_y_height = 0.05; //origin cloth height
+	static const double clothbuffer_d = 4.0;//set the cloth buffer
+	static const double gravity = 0.2;
+
 	try
 	{
 		//build the terrain
 		Terrain terr(point_cloud);
 
-		//origin cloth height
-		double cloth_y_height = 0.05;
-
 		//computing the number of cloth node
-		double clothbuffer_d = 4.0;//set the cloth buffer
-		Vec3 origin_pos1(	terr.cube[0] - clothbuffer_d,
-							terr.cube[3] + cloth_y_height,
-							terr.cube[4] - clothbuffer_d);
+		Vec3 origin_pos1(	terr.bbMin.x - clothbuffer_d,
+							terr.bbMax.y + cloth_y_height,
+							terr.bbMin.z - clothbuffer_d);
 	
-		int width_num = (terr.cube[1] - terr.cube[0] + clothbuffer_d * 2) / params.cloth_resolution;
-		int height_num = (terr.cube[5] - terr.cube[4] + clothbuffer_d * 2) /params.cloth_resolution;
+		int width_num  = (terr.bbMax.x - terr.bbMin.x + clothbuffer_d * 2) / params.cloth_resolution;
+		int height_num = (terr.bbMax.z - terr.bbMin.z + clothbuffer_d * 2) / params.cloth_resolution;
 	
 		//one Cloth object of the Cloth class
-		Cloth cloth1(	terr.cube[1] - terr.cube[0] + clothbuffer_d * 2,
-						terr.cube[5] - terr.cube[4] + clothbuffer_d * 2,
+		Cloth cloth1(	terr.bbMax.x - terr.bbMin.x + clothbuffer_d * 2,
+						terr.bbMax.z - terr.bbMin.z + clothbuffer_d * 2,
 						width_num,
 						height_num,
 						origin_pos1,
@@ -69,7 +71,7 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 						params.time_step);
 
 		std::vector<double> heightvals;
-		if (!Rasterization(params.k_nearest_points).RasterTerrian(cloth1, point_cloud, heightvals))
+		if (!Rasterization::RasterTerrian(cloth1, point_cloud, heightvals, params.k_nearest_points))
 		{
 			return false;
 		}
@@ -77,7 +79,6 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 		cloth1.setheightvals(heightvals);
 
 		double time_step2 = params.time_step * params.time_step;
-		double gravity = 0.2;
 		bool flag = false;
 
 		//do the filtering
@@ -87,7 +88,7 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 		pDlg2.setLabelText("Do filtering....");
 		pDlg2.setRange(0, params.iterations);
 		pDlg2.show();
-		QApplication::processEvents();
+		QCoreApplication::processEvents();
 
 	#ifdef _DEBUG
 		//滤波主循环
@@ -118,10 +119,10 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 				break;
 			}
 			pDlg2.setValue(pDlg2.value()+1);
-			QApplication::processEvents();
+			QCoreApplication::processEvents();
 		}
 		pDlg2.hide();
-		QApplication::processEvents();
+		QCoreApplication::processEvents();
 
 		//slope processing
 		if (params.bSloopSmooth)

@@ -2,9 +2,12 @@
 #ifndef _CSF_H_
 #define _CSF_H_
 
-#include "point_cloud.h"
-#include <iostream>
+#include "PointCloud.h"
 #include "Cloth.h"
+
+//system
+#include <vector>
+#include <string>
 
 class CSF
 {

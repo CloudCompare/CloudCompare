@@ -1,13 +1,11 @@
 #ifndef _TERRIAN_H_
 #define _TERRIAN_H_
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+#include "PointCloud.h"
+#include "Vec3.h"
 
-#include "csf_h/point_cloud.h"
+//system
+#include <string>
 
 class Terrain
 {
@@ -16,8 +14,8 @@ public:
 	Terrain(wl::PointCloud &pc);
 	virtual ~Terrain();
 
-	wl::PointCloud& pc; //点云
-	double cube[8];//  包围所有点云的立方体坐标
+	wl::PointCloud& pc; //associated cloud
+	Vec3 bbMin, bbMax;//bounding-box
 	double off_avg_x, off_avg_z;//自动shift算法
 
 	//将点云保存到文件
@@ -26,11 +24,8 @@ public:
 protected:
 	
 	//计算点云的外包围立方体
-	void bound_box();
+	void computeBoundingBox();
 
-	//计算点云的最大值，最小值
-	double getMin(int direction);
-	double getMax(int direction);
 };
 
 

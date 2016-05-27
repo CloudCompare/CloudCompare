@@ -9,6 +9,8 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+#include <fstream>
 #include <queue>
 
 Cloth::Cloth(double width,
@@ -122,7 +124,7 @@ double Cloth::timeStep()
 	{
 		if (particles[i].isMovable())
 		{
-			double diff = abs(particles[i].old_pos.f[1] - particles[i].pos.f[1]);
+			double diff = abs(particles[i].old_pos.y - particles[i].pos.y);
 			if (diff > maxH)
 				maxH = diff;
 		}
@@ -154,12 +156,12 @@ void Cloth::terrCollision(const std::vector<double>& heightvals, Terrain* terr, 
 	{
 		Particle& particle = particles[i];
 		const Vec3& v = particle.getPos();
-		if (v.f[1] < heightvals[i]) // if the particle is inside the ball
+		if (v.y < heightvals[i]) // if the particle is inside the ball
 		{
-			particle.offsetPos(Vec3(0, heightvals[i] - v.f[1], 0));
+			particle.offsetPos(Vec3(0, heightvals[i] - v.y, 0));
 			particle.makeUnmovable();
 		}
-		if (v.f[1] <= terr->cube[2])
+		if (v.y <= terr->bbMin.y)
 		{
 			flag = true;
 		}
@@ -307,9 +309,9 @@ void Cloth::findUnmovablePoint(	const std::vector<XY>& connected,
 			if (!ptc_x->isMovable())
 			{
 				int index_ref = y*num_particles_width + x - 1;
-				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().f[1] - heightvals[index] < heightThreshold)
+				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().y - heightvals[index] < heightThreshold)
 				{
-					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().f[1], 0);
+					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().y, 0);
 					particles[index].offsetPos(offsetVec);
 					ptc->makeUnmovable();
 					edgePoints.push_back(static_cast<int>(i));
@@ -324,9 +326,9 @@ void Cloth::findUnmovablePoint(	const std::vector<XY>& connected,
 			if (!ptc_x->isMovable())
 			{
 				int index_ref = y*num_particles_width + x + 1;
-				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().f[1] - heightvals[index] < heightThreshold)
+				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().y - heightvals[index] < heightThreshold)
 				{
-					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().f[1], 0);
+					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().y, 0);
 					particles[index].offsetPos(offsetVec);
 					ptc->makeUnmovable();
 					edgePoints.push_back(static_cast<int>(i));
@@ -341,9 +343,9 @@ void Cloth::findUnmovablePoint(	const std::vector<XY>& connected,
 			if (!ptc_y->isMovable())
 			{
 				int index_ref = (y - 1)*num_particles_width + x;
-				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().f[1] - heightvals[index] < heightThreshold)
+				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().y - heightvals[index] < heightThreshold)
 				{
-					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().f[1], 0);
+					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().y, 0);
 					particles[index].offsetPos(offsetVec);
 					ptc->makeUnmovable();
 					edgePoints.push_back(static_cast<int>(i));
@@ -359,9 +361,9 @@ void Cloth::findUnmovablePoint(	const std::vector<XY>& connected,
 			if (!ptc_y->isMovable())
 			{
 				int index_ref = (y + 1)*num_particles_width + x;
-				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().f[1] - heightvals[index] < heightThreshold)
+				if (fabs(heightvals[index] - heightvals[index_ref]) < smoothThreshold && ptc->getPos().y - heightvals[index] < heightThreshold)
 				{
-					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().f[1], 0);
+					Vec3 offsetVec(0, heightvals[index] - ptc->getPos().y, 0);
 					particles[index].offsetPos(offsetVec);
 					ptc->makeUnmovable();
 					edgePoints.push_back(static_cast<int>(i));
@@ -396,9 +398,9 @@ void Cloth::handle_slop_connected(	const std::vector<int>& edgePoints,
 		for (size_t i = 0; i < neibors[index].size(); i++)
 		{
 			int index_neibor = connected[neibors[index][i]].y*num_particles_width + connected[neibors[index][i]].x;
-			if (fabs(heightvals[index_center] - heightvals[index_neibor]) < smoothThreshold && fabs(particles[index_neibor].getPos().f[1] - heightvals[index_neibor]) < heightThreshold)
+			if (fabs(heightvals[index_center] - heightvals[index_neibor]) < smoothThreshold && fabs(particles[index_neibor].getPos().y - heightvals[index_neibor]) < heightThreshold)
 			{
-				Vec3 offsetVec(0, heightvals[index_neibor] - particles[index_neibor].getPos().f[1], 0);
+				Vec3 offsetVec(0, heightvals[index_neibor] - particles[index_neibor].getPos().y, 0);
 				particles[index_neibor].offsetPos(offsetVec);
 				particles[index_neibor].makeUnmovable();
 				if (visited[neibors[index][i]] == false)
@@ -428,7 +430,7 @@ void Cloth::saveToFile(std::string path)
 	for (size_t i = 0; i < particles.size(); i++)
 	{
 		//if (!particles[i].isMovable())
-		f1 << std::fixed << std::setprecision(8) << particles[i].getPos().f[0] << "	" << particles[i].getPos().f[2] << "	" << -particles[i].getPos().f[1] << std::endl;
+		f1 << std::fixed << std::setprecision(8) << particles[i].getPos().f[0] << "	" << particles[i].getPos().f[2] << "	" << -particles[i].getPos().y << std::endl;
 	}
 	f1.close();
 }
@@ -450,7 +452,7 @@ void Cloth::saveMovableToFile(std::string path)
 	for (size_t i = 0; i < particles.size(); i++)
 	{
 		if (particles[i].isMovable())
-			f1 << std::fixed << std::setprecision(8) << particles[i].getPos().f[0] << "	" << particles[i].getPos().f[2] << "	" << -particles[i].getPos().f[1] << std::endl;
+			f1 << std::fixed << std::setprecision(8) << particles[i].getPos().f[0] << "	" << particles[i].getPos().f[2] << "	" << -particles[i].getPos().y << std::endl;
 	}
 	f1.close();
 }

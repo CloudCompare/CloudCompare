@@ -12,7 +12,7 @@ typedef CGAL::Search_traits_2<K> TreeTraits;
 typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
 typedef Neighbor_search::Tree Tree;
 
-bool Rasterization::RasterTerrian(const Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal)
+bool Rasterization::RasterTerrian(const Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, int KNN)
 {
 	try
 	{
@@ -34,7 +34,7 @@ bool Rasterization::RasterTerrian(const Cloth& cloth, const wl::PointCloud& pc, 
 		for (int i = 0; i < cloth.getSize(); i++)
 		{
 			Point_d query(cloth.getParticle1d(i)->getPos().f[0], cloth.getParticle1d(i)->getPos().f[2]);
-			Neighbor_search search(tree, query, N);
+			Neighbor_search search(tree, query, KNN);
 			double search_max = 0;
 			for (Neighbor_search::iterator it = search.begin(); it != search.end(); it++)
 			{

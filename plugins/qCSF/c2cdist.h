@@ -2,7 +2,7 @@
 #define _C2CDIST_H_
 
 #include "Cloth.h"
-#include "csf_h/point_cloud.h"
+#include "PointCloud.h"
 
 //计算点云与点云之间的距离
 class c2cdist

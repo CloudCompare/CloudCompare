@@ -24,9 +24,7 @@ bool c2cdist::calCloud2CloudDist(const Cloth& cloth, const wl::PointCloud& pc, s
 		}
 
 		Tree tree(points_2d.begin(), points_2d.end());
-		// step two  query the nearest point of cloth for each terr point
-		double height_var = 0;
-
+		// step two  query the nearest point of cloth for each terrain point
 		for (int i = 0; i < pc.size(); i++)
 		{
 			Point_d query(pc[i].x, pc[i].z);
@@ -44,8 +42,7 @@ bool c2cdist::calCloud2CloudDist(const Cloth& cloth, const wl::PointCloud& pc, s
 				//	search_min = y;
 				//}
 			}
-			height_var = search_min - pc[i].y;
-			if (std::fabs(height_var) < class_treshold)
+			if (std::fabs(search_min - pc[i].y) < class_treshold)
 			{
 				c2cre[0].push_back(i);
 			}

@@ -1,4 +1,4 @@
-#include "Terrian.h"
+#include "Terrain.h"
 
 //system
 #include <assert.h>

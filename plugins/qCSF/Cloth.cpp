@@ -1,6 +1,6 @@
 #include "Cloth.h"
 
-#include "Terrian.h"
+#include "Terrain.h"
 
 Cloth::Cloth(	double width,
 				double height,

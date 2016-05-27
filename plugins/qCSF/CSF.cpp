@@ -1,7 +1,7 @@
 //CSF
 #include "CSF.h"
 #include "XYZReader.h"
-#include "Terrian.h"
+#include "Terrain.h"
 #include "Vec3.h"
 #include "Cloth.h"
 #include "KNN.h"

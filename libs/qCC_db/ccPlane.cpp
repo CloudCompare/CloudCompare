@@ -190,7 +190,7 @@ ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 	return ccBBox( CCVector3(-m_xWidth/2,-m_yWidth/2, 0), CCVector3(m_xWidth/2,m_yWidth/2, 0) );
 }
 
-bool ccPlane::setAsTexture(QImage image)
+bool ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)
 {
 	if (image.isNull())
 	{
@@ -266,7 +266,7 @@ bool ccPlane::setAsTexture(QImage image)
 	//add new material
 	{
 		ccMaterial::Shared material(new ccMaterial("texture"));
-		material->setTexture(image,QString(),false);
+		material->setTexture(image, imageFilename, false);
 		materialSet->addMaterial(material);
 	}
 

@@ -137,7 +137,7 @@ bool ccMaterial::loadAndSetTexture(QString absoluteFilename)
 		}
 		else
 		{
-			setTexture(image,absoluteFilename,true);
+			setTexture(image, absoluteFilename, true);
 		}
 	}
 
@@ -146,7 +146,7 @@ bool ccMaterial::loadAndSetTexture(QString absoluteFilename)
 
 void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/, bool mirrorImage/*=true*/)
 {
-	ccLog::PrintDebug(QString("[ccMaterial::setTexture] absoluteFilename = %1 (+ image(%2,%3)").arg(absoluteFilename).arg(image.width()).arg(image.height()));
+	ccLog::PrintDebug(QString("[ccMaterial::setTexture] absoluteFilename = '%1' / size = %2 x %3").arg(absoluteFilename).arg(image.width()).arg(image.height()));
 
 	if (absoluteFilename.isEmpty())
 	{
@@ -192,7 +192,7 @@ GLuint ccMaterial::getTextureID() const
 		QSharedPointer<QOpenGLTexture> tex = s_openGLTextureDB[m_textureFilename];
 		if (!tex)
 		{
-			tex = QSharedPointer<QOpenGLTexture>(new QOpenGLTexture(QOpenGLTexture::Target2D));
+			tex = QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target2D);
 			tex->setAutoMipMapGenerationEnabled(false);
 			tex->setMinMagFilters(QOpenGLTexture::Nearest, QOpenGLTexture::Linear);
 			tex->setFormat(QOpenGLTexture::RGB8_UNorm);
@@ -268,6 +268,21 @@ void ccMaterial::ReleaseTextures()
 	}
 
 	s_openGLTextureDB.clear();
+}
+
+void ccMaterial::releaseTexture()
+{
+	if (m_textureFilename.isEmpty())
+	{
+		//nothing to do
+		return;
+	}
+
+	assert(QOpenGLContext::currentContext());
+
+	s_textureDB.remove(m_textureFilename);
+	s_openGLTextureDB.remove(m_textureFilename);
+	m_textureFilename.clear();
 }
 
 bool ccMaterial::toFile(QFile& out) const

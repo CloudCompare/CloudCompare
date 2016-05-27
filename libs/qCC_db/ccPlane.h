@@ -66,7 +66,7 @@ public:
 	CCVector3 getNormal() const { return m_transformation.getColumnAsVec3D(2); }
 
 	//! Sets an image as texture
-	bool setAsTexture(QImage image);
+	bool setAsTexture(QImage image, QString imageFilename = QString());
 
 	//! Fits a plane primitive on a cloud
 	/** The cloud can be any CCLib::GenericIndexedCloudPersist-derived object,

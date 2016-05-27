@@ -130,6 +130,11 @@ public:
 	**/
 	static void ReleaseTextures();
 
+	//! Release the texture
+	/** \warning Make sure no more materials are using this texture!
+	**/
+	void releaseTexture();
+
 	//! Compares this material with another one
 	/** \return true if both materials are equivalent or false otherwise
 	**/

@@ -1,4 +1,4 @@
-#include "KNN.h"
+#include "Rasterization.h"
 
 //CGAL
 #include <CGAL/Simple_cartesian.h>
@@ -12,7 +12,7 @@ typedef CGAL::Search_traits_2<K> TreeTraits;
 typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
 typedef Neighbor_search::Tree Tree;
 
-bool Rasterlization::RasterTerrian(Cloth cloth, const wl::PointCloud& pc, std::vector<double>& heightVal)
+bool Rasterization::RasterTerrian(const Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal)
 {
 	try
 	{

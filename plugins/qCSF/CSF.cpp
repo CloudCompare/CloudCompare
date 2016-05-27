@@ -4,7 +4,7 @@
 #include "Terrain.h"
 #include "Vec3.h"
 #include "Cloth.h"
-#include "KNN.h"
+#include "Rasterization.h"
 #include "c2cdist.h"
 #include <cmath>
 
@@ -69,7 +69,7 @@ bool CSF::do_filtering(std::vector< std::vector<int> >& output)
 						params.time_step);
 
 		std::vector<double> heightvals;
-		if (!Rasterlization(params.k_nearest_points).RasterTerrian(cloth1, point_cloud, heightvals))
+		if (!Rasterization(params.k_nearest_points).RasterTerrian(cloth1, point_cloud, heightvals))
 		{
 			return false;
 		}

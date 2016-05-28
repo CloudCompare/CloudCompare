@@ -330,6 +330,17 @@ p, li { white-space: pre-wrap; }
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QCheckBox" name="exportClothMeshCheckBox">
+           <property name="toolTip">
+            <string>Exports the cloth in its final state as a mesh
+(WARNING: ONLY FOR DEBUG PURPOSE - THIS IS NOT A DTM)</string>
+           </property>
+           <property name="text">
+            <string>Export cloth mesh</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>

@@ -1,5 +1,9 @@
 #include "Cloth.h"
 
+//qCC_db
+#include <ccPointCloud.h>
+#include <ccMesh.h>
+
 //system
 #include <assert.h>
 #include <math.h>
@@ -96,6 +100,52 @@ Cloth::Cloth(double width,
 	}
 }
 
+ccMesh* Cloth::toMesh() const
+{
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->addChild(vertices);
+	vertices->setEnabled(false);
+	unsigned vertCount = static_cast<unsigned>(getSize());
+	unsigned triCount = static_cast<unsigned>((num_particles_height - 1) * (num_particles_width - 1) * 2);
+	if (!vertices->reserve(vertCount)
+		|| !mesh->reserve(triCount))
+	{
+		//not enough memory to generate the cloth mesh
+		delete mesh;
+		mesh = 0;
+		return 0;
+	}
+
+	//copy the vertices (particles)
+	for (int i = 0; i < getSize(); ++i)
+	{
+		const Particle& particle = particles[i];
+		vertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(particle.pos.x),
+										static_cast<PointCoordinateType>(particle.pos.z),
+										static_cast<PointCoordinateType>(-particle.pos.y)));
+	}
+
+	//and create the triangles
+	for (int x = 0; x < num_particles_width - 1; ++x)
+	{
+		for (int y = 0; y < num_particles_height-1; ++y)
+		{
+			// A ---------- B
+			// |            |
+			// D ---------- C
+			int iA = y * num_particles_width + x;
+			int iD = iA + num_particles_width;
+			int iB = iA + 1;
+			int iC = iD + 1;
+			mesh->addTriangle(iA, iB, iD);
+			mesh->addTriangle(iD, iB, iC);
+		}
+	}
+
+	return mesh;
+}
+
 double Cloth::timeStep()
 {
 	int particleCount = static_cast<int>(particles.size());
@@ -115,19 +165,19 @@ double Cloth::timeStep()
 		}
 	}
 
-	double maxH = -99999;
+	double maxDiff = 0;
 #pragma omp parallel for
 	for (int i = 0; i < particleCount; i++)
 	{
 		if (particles[i].isMovable())
 		{
-			double diff = abs(particles[i].old_pos.y - particles[i].pos.y);
-			if (diff > maxH)
-				maxH = diff;
+			double diff = fabs(particles[i].old_pos.y - particles[i].pos.y);
+			if (diff > maxDiff)
+				maxDiff = diff;
 		}
 	}
 
-	return maxH;
+	return maxDiff;
 }
 
 void Cloth::addForce(const Vec3& direction)

@@ -22,6 +22,7 @@
 #include <QProgressDialog>
 #include <QMainWindow>
 #include <QComboBox>
+#include <QElapsedTimer>
 
 //Dialog
 #include "ccCSFDlg.h"
@@ -38,6 +39,7 @@
 #include <ccProgressDialog.h>
 #include <ccHObjectCaster.h>
 #include <ccOctree.h>
+#include <ccMesh.h>
 
 //CSF
 #include <CSF.h>
@@ -126,6 +128,7 @@ void qCSF::doAction()
 	static double class_threshold = 0.5;
 	static int csf_rigidness = 2;
 	static int MaxIteration = 500;
+	static bool ExportClothMesh = false;
 
 	// display the dialog
 	{
@@ -137,6 +140,7 @@ void qCSF::doAction()
 		csfDlg.MaxIterationSpinBox->setValue(MaxIteration);
 		csfDlg.cloth_resolutionSpinBox->setValue(cloth_resolution);
 		csfDlg.class_thresholdSpinBox->setValue(class_threshold);
+		csfDlg.exportClothMeshCheckBox->setChecked(ExportClothMesh);
 
 		if (!csfDlg.exec())
 		{
@@ -154,6 +158,7 @@ void qCSF::doAction()
 		MaxIteration = csfDlg.MaxIterationSpinBox->value();
 		cloth_resolution = csfDlg.cloth_resolutionSpinBox->value();
 		class_threshold = csfDlg.class_thresholdSpinBox->value();
+		ExportClothMesh = csfDlg.exportClothMeshCheckBox->isChecked();
 	}
 
 	//display the progress dialog
@@ -163,6 +168,9 @@ void qCSF::doAction()
 	pDlg.setCancelButton(0);
 	pDlg.show();
 	QApplication::processEvents();
+
+	QElapsedTimer timer;
+	timer.start();
 
 	//instantiation a CSF class
 	CSF csf(csfPC);
@@ -178,13 +186,15 @@ void qCSF::doAction()
 
 	//to do filtering
 	std::vector<int> groundIndexes, offGroundIndexes;
-	if (!csf.do_filtering(groundIndexes, offGroundIndexes))
+	ccMesh* clothMesh = 0;
+	if (!csf.do_filtering(groundIndexes, offGroundIndexes, ExportClothMesh, clothMesh, m_app))
 	{
-		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Process failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	m_app->dispToConsole(QString("[CSF] %1% of points classified as ground points").arg((groundIndexes.size() * 100.0) / count, 0, 'f', 2), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole(QString("[CSF] Timing: %1 s.").arg(timer.elapsed() / 1000.0, 0, 'f', 1), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	//extract ground subset
 	ccPointCloud* groundpoint = 0;
@@ -247,6 +257,13 @@ void qCSF::doAction()
 		offgroundpoint->setVisible(true);
 		offgroundpoint->setName("off-ground points");
 		cloudContainer->addChild(offgroundpoint);
+	}
+
+	if (clothMesh)
+	{
+		clothMesh->computePerVertexNormals();
+		clothMesh->showNormals(true);
+		cloudContainer->addChild(clothMesh);
 	}
 
 	m_app->addToDB(cloudContainer);

@@ -9,6 +9,10 @@
 #include <vector>
 #include <string>
 
+class ccMainAppInterface;
+class QWidget;
+class ccMesh;
+
 class CSF
 {
 public:
@@ -23,7 +27,12 @@ public:
 	void saveOffGroundPoints(const std::vector<int>& grp, std::string path = "");
 	
 	//执行滤波处理 得到地面点的在PointCloud 中的序号
-	bool do_filtering(std::vector<int>& groundIndexes, std::vector<int>& offGroundIndexes);
+	bool do_filtering(	std::vector<int>& groundIndexes,
+						std::vector<int>& offGroundIndexes,
+						bool exportClothMesh,
+						ccMesh* &clothMesh,
+						ccMainAppInterface* app = 0,
+						QWidget* parent = 0);
 
 private:
 	wl::PointCloud& point_cloud;

@@ -5,16 +5,20 @@
 #include "Rasterization.h"
 #include "Cloud2CloudDist.h"
 
+//CC (for debug)
+#include <ccMainAppInterface.h>
+
+//Qt
+#include <QProgressDialog>
+#include <QCoreApplication>
+#include <QElapsedTimer>
+
 //system
 #include <cmath>
 #include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
-//Qt
-#include <QProgressDialog>
-#include <QCoreApplication>
 
 CSF::CSF(wl::PointCloud& cloud)
 	: point_cloud(cloud)
@@ -70,81 +74,138 @@ bool CSF::readPointsFromFile(std::string filename)
 }
 
 //CSF主程序 dofiltering
-bool CSF::do_filtering(std::vector<int>& groundIndexes, std::vector<int>& offGroundIndexes)
+bool CSF::do_filtering(	std::vector<int>& groundIndexes,
+						std::vector<int>& offGroundIndexes,
+						bool exportClothMesh,
+						ccMesh* &clothMesh,
+						ccMainAppInterface* app/*=0*/,
+						QWidget* parent/*=0*/)
 {
 	//constants
 	static const double cloth_y_height = 0.05; //origin cloth height
-	static const double clothbuffer_d = 4.0;//set the cloth buffer
+	static const double clothbuffer_d = 4.0; //set the cloth buffer
 	static const double gravity = 0.2;
 
 	try
 	{
+		QElapsedTimer timer;
+		timer.start();
+
 		//compute the terrain (cloud) bounding-box
 		wl::Point bbMin, bbMax;
 		point_cloud.computeBoundingBox(bbMin, bbMax);
 
 		//computing the number of cloth node
-		Vec3 origin_pos1(	bbMin.x - clothbuffer_d,
+		Vec3 origin_pos(	bbMin.x - clothbuffer_d,
 							bbMax.y + cloth_y_height,
 							bbMin.z - clothbuffer_d);
 	
 		int width_num  = (bbMax.x - bbMin.x + clothbuffer_d * 2) / params.cloth_resolution;
 		int height_num = (bbMax.z - bbMin.z + clothbuffer_d * 2) / params.cloth_resolution;
-	
-		//one Cloth object of the Cloth class
-		Cloth cloth1(	bbMax.x - bbMin.x + clothbuffer_d * 2,
+
+		//Cloth object
+		Cloth cloth(	bbMax.x - bbMin.x + clothbuffer_d * 2,
 						bbMax.z - bbMin.z + clothbuffer_d * 2,
 						width_num,
 						height_num,
-						origin_pos1,
+						origin_pos,
 						0.3,
 						9999,
 						params.rigidness,
 						params.time_step);
 
-		if (!Rasterization::RasterTerrain(cloth1, point_cloud, cloth1.getHeightvals(), params.k_nearest_points))
+		if (app)
+		{
+			app->dispToConsole(QString("[CSF] Cloth creation: %1 ms").arg(timer.restart()));
+		}
+
+		if (!Rasterization::RasterTerrain(cloth, point_cloud, cloth.getHeightvals(), params.k_nearest_points))
 		{
 			return false;
 		}
 	
+		if (app)
+		{
+			app->dispToConsole(QString("[CSF] Rasterization: %1 ms").arg(timer.restart()));
+		}
+
 		double time_step2 = params.time_step * params.time_step;
 
 		//do the filtering
-		//显示进度条
-		QProgressDialog pDlg2;
-		pDlg2.setWindowTitle("CSF");
-		pDlg2.setLabelText("Do filtering....");
-		pDlg2.setRange(0, params.iterations);
-		pDlg2.show();
+		QProgressDialog pDlg(parent);
+		pDlg.setWindowTitle("CSF");
+		pDlg.setLabelText(QString("Cloth deformation\n%1 x %2 particles").arg(cloth.num_particles_width).arg(cloth.num_particles_height));
+		pDlg.setRange(0, params.iterations);
+		pDlg.show();
 		QCoreApplication::processEvents();
 
+		bool wasCancelled = false;
 		for (int i = 0; i < params.iterations; i++)
 		{
 			//滤波主过程
-			cloth1.addForce(Vec3(0, -gravity, 0) * time_step2);
-			double maxheight = cloth1.timeStep();
-			cloth1.terrainCollision();
+			cloth.addForce(Vec3(0, -gravity, 0) * time_step2);
+			double maxDiff = cloth.timeStep();
+			cloth.terrainCollision();
+
+			//if (app && (i % 50) == 0)
+			//{
+			//	app->dispToConsole(QString("[CSF] Iteration %1: max delta = %2").arg(i+1).arg(maxDiff));
+			//}
 
 			//判断循环终止条件
-			if (maxheight != 0 && maxheight < params.class_threshold / 100)
+			if (maxDiff != 0 && maxDiff < params.class_threshold / 100)
 			{
-				pDlg2.setValue(params.iterations);
+				//early stop
 				break;
 			}
-			pDlg2.setValue(pDlg2.value() + 1);
+
+			pDlg.setValue(i);
 			QCoreApplication::processEvents();
+
+			if (pDlg.wasCanceled())
+			{
+				wasCancelled = true;
+				break;
+			}
 		}
-		pDlg2.hide();
+		
+		pDlg.close();
 		QCoreApplication::processEvents();
+
+		if (app)
+		{
+			app->dispToConsole(QString("[CSF] Iterations: %1 ms").arg(timer.restart()));
+		}
+
+		if (wasCancelled)
+		{
+			return false;
+		}
 
 		//slope processing
 		if (params.bSloopSmooth)
 		{
-			cloth1.movableFilter();
+			cloth.movableFilter();
+
+			if (app)
+			{
+				app->dispToConsole(QString("[CSF] Movable filter: %1 ms").arg(timer.restart()));
+			}
 		}
 	
 		//classification of the points
-		return Cloud2CloudDist::Compute(cloth1, point_cloud, params.class_threshold, groundIndexes, offGroundIndexes);
+		bool result = Cloud2CloudDist::Compute(cloth, point_cloud, params.class_threshold, groundIndexes, offGroundIndexes);
+		if (app)
+		{
+			app->dispToConsole(QString("[CSF] Distance computation: %1 ms").arg(timer.restart()));
+		}
+
+		if (exportClothMesh)
+		{
+			clothMesh = cloth.toMesh();
+		}
+
+		return result;
 	}
 	catch (const std::bad_alloc&)
 	{

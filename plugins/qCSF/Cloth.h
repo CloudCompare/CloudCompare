@@ -32,6 +32,8 @@ have been added to the original source code, including
 #include <vector>
 #include <string>
 
+class ccMesh;
+
 struct XY
 {
 	XY(int x1, int y1)
@@ -46,8 +48,6 @@ class Cloth
 {
 private:
 
-	int num_particles_width; // number of particles in "width" direction
-	int num_particles_height; // number of particles in "height" direction
 	// total number of particles is num_particles_width*num_particles_height
 	int constraint_iterations;
 
@@ -81,6 +81,9 @@ public:
 	
 	inline Particle getParticleByIndex(int index) { return particles[index]; }
 	inline const Particle getParticleByIndex(int index) const { return particles[index]; }
+
+	int num_particles_width; // number of particles in "width" direction
+	int num_particles_height; // number of particles in "height" direction
 
 	inline int getSize() const { return num_particles_width * num_particles_height; }
 
@@ -132,6 +135,9 @@ public:
 	void saveToFile(std::string path = "");
 	//将可移动点保存到文件
 	void saveMovableToFile(std::string path = "");
+
+	//! Converts the cloth to a CC mesh structure
+	ccMesh* toMesh() const;
 
 };
 

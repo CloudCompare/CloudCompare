@@ -13,7 +13,8 @@ public:
 						const wl::PointCloud& pc,
 						double class_threshold,
 						std::vector<int>& groundIndexes,
-						std::vector<int>& offGroundIndexes);
+						std::vector<int>& offGroundIndexes,
+						unsigned N = 3);
 };
 
 #endif

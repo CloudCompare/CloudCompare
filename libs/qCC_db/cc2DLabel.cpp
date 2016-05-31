@@ -776,13 +776,25 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				else
 					c_unitPointMarker->setTempColor(context.labelDefaultMarkerCol);
 
-				for (unsigned i=0; i<count; i++)
+				const ccViewportParameters& viewPortParams = context.display->getViewportParameters();
+				ccGLCameraParameters camera;
+				context.display->getGLCameraParameters(camera);
+
+				for (unsigned i = 0; i<count; i++)
 				{
 					glFunc->glMatrixMode(GL_MODELVIEW);
 					glFunc->glPushMatrix();
 					const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
 					ccGL::Translate(glFunc, P->x, P->y, P->z);
 					float scale = context.labelMarkerSize * m_relMarkerScale;
+					if (viewPortParams.perspectiveView && viewPortParams.zFar > 0)
+					{
+						//in perspective view, the actual scale depends on the distance to the camera!
+						const double* M = camera.modelViewMat.data();
+						double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+						double unitD = viewPortParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
+						scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
+					}
 					glFunc->glScalef(scale, scale, scale);
 					c_unitPointMarker->draw(markerContext);
 					glFunc->glPopMatrix();

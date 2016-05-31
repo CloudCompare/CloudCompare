@@ -51,15 +51,10 @@ private:
 	// total number of particles is num_particles_width*num_particles_height
 	int constraint_iterations;
 
-	int rigidness;
 	double time_step;
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
 	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth
-
-
-	//初始平面位置
-	Vec3 origin_pos1; //左上角顶点  平面均为水平
 
 	//滤波边坡处理参数
 	double smoothThreshold;
@@ -84,6 +79,8 @@ public:
 
 	int num_particles_width; // number of particles in "width" direction
 	int num_particles_height; // number of particles in "height" direction
+	Vec3 origin_pos;
+	double step_x, step_y;
 
 	inline int getSize() const { return num_particles_width * num_particles_height; }
 
@@ -92,11 +89,11 @@ public:
 public:
 	
 	/* This is a important constructor for the entire system of particles and constraints */
-	Cloth(	double width,
-			double height,
+	Cloth(	const Vec3& origin_pos,
 			int num_particles_width,
 			int num_particles_height,
-			const Vec3& origin_pos1,
+			double step_x,
+			double step_y,
 			double smoothThreshold,
 			double heightThreshold,
 			int rigidness,

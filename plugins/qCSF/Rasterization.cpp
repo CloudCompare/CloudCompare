@@ -1,6 +1,7 @@
 #include "Rasterization.h"
 
-#ifdef WITH_CGAL
+//#ifdef WITH_CGAL
+#if 1 //CGAL is slow but more stable, especially when the point cloud is sparse (relatively to the rectangular raster grid!)
 
 //CGAL
 #include <CGAL/Simple_cartesian.h>
@@ -14,7 +15,7 @@ typedef CGAL::Search_traits_2<K> TreeTraits;
 typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
 typedef Neighbor_search::Tree Tree;
 
-bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
+bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
 {
 	try
 	{
@@ -62,7 +63,7 @@ bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, 
 	return true;
 }
 
-#else //we use CC_CORE_LIB (much faster)
+#else //we use CC_CORE_LIB --> potentially much faster but very slow when the the point cloud is sparse (relatively to the rectangular raster grid!)
 
 //CC_CORE_LIB
 #include <SimpleCloud.h>
@@ -88,7 +89,8 @@ static bool ComputeMaxNeighborAltitude(	const CCLib::DgmOctree::octreeCell& cell
 	cloudOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 	cloudOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 
-	//for each point of the current cell ('particles' octree) we look for its nearest neighbours in the point cloud
+	//for each point of the current cell ('particles' octree) we look for its
+	//nearest neighbours in the point cloud (not too far!)
 	unsigned pointCount = cell.points->size();
 	for (unsigned i = 0; i < pointCount; i++)
 	{
@@ -97,25 +99,25 @@ static bool ComputeMaxNeighborAltitude(	const CCLib::DgmOctree::octreeCell& cell
 		
 		unsigned n = cloudOctree->findNearestNeighborsStartingFromCell(nNSS);
 
+		unsigned particleIndex = cell.points->getPointGlobalIndex(i);
+
 		//determine the (highest) neighbor altitude
-		double search_max = 0;
+		double search_max = heightVal[particleIndex];
 		for (unsigned k = 0; k < std::min(KNN, n); ++k)
 		{
 			unsigned pointIndex = nNSS.pointsInNeighbourhood[k].pointIndex;
-			if (pc[pointIndex].y > search_max || k == 0)
+			if (std::isnan(search_max) || pc[pointIndex].y > search_max)
 			{
 				search_max = pc[pointIndex].y;
 			}
 		}
-
-		unsigned particleIndex = cell.points->getPointGlobalIndex(i);
 		heightVal[particleIndex] = search_max;
 	}
 
 	return true;
 }
 
-bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
+bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
 {
 	CCLib::SimpleCloud particlePoints;
 	if (!particlePoints.reserve(static_cast<unsigned>(cloth.getSize())))
@@ -127,6 +129,18 @@ bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, 
 	{
 		const Particle& particle = cloth.getParticleByIndex(i);
 		particlePoints.addPoint(CCVector3(static_cast<PointCoordinateType>(particle.pos.x), 0, static_cast<PointCoordinateType>(particle.pos.z)));
+	}
+
+	//test
+	if (false)
+	{
+		FILE* fp = fopen("particle.asc", "wt");
+		for (unsigned i = 0; i < particlePoints.size(); i++)
+		{
+			const CCVector3* P = particlePoints.getPoint(i);
+			fprintf(fp, "%f %f %f\n", P->x, P->y, P->z);
+		}
+		fclose(fp);
 	}
 
 	CCLib::SimpleCloud pcPoints;
@@ -141,9 +155,21 @@ bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, 
 		pcPoints.addPoint(CCVector3(P.x, 0, P.z));
 	}
 
+	//test
+	if (false)
+	{
+		FILE* fp = fopen("points.asc", "wt");
+		for (unsigned i = 0; i < pcPoints.size(); i++)
+		{
+			const CCVector3* P = pcPoints.getPoint(i);
+			fprintf(fp, "%f %f %f\n", P->x, P->y, P->z);
+		}
+		fclose(fp);
+	}
+
 	try
 	{
-		heightVal.resize(cloth.getSize());
+		heightVal.resize(cloth.getSize(), std::numeric_limits<double>::quiet_NaN());
 
 		//we spatially 'synchronize' the cloud and particles octrees
 		CCLib::DgmOctree *cloudOctree = 0, *particleOctree = 0;
@@ -172,7 +198,7 @@ bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, 
 		};
 
 		int octreeLevel = particleOctree->findBestLevelForAGivenPopulationPerCell(std::max<unsigned>(2, KNN));
-		//int octreeLevel = cloudOctree->findBestLevelForComparisonWithOctree(particleOctree);
+		//int octreeLevel2 = cloudOctree->findBestLevelForComparisonWithOctree(particleOctree);
 
 		int result = particleOctree->executeFunctionForAllCellsAtLevel(
 							octreeLevel,
@@ -182,7 +208,7 @@ bool Rasterization::RasterTerrain(const Cloth& cloth, const wl::PointCloud& pc, 
 							0,
 							"Rasterization",
 							QThread::idealThreadCount());
-		
+
 		delete cloudOctree;
 		cloudOctree = 0;
 

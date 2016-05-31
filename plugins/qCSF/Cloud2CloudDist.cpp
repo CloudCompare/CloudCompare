@@ -3,7 +3,8 @@
 //system
 #include <cmath>
 
-#ifdef WITH_CGAL
+//#ifdef WITH_CGAL
+#if 0 //CGAL is much slower for this operation
 
 //CGAL
 #include <CGAL/Simple_cartesian.h>
@@ -78,7 +79,7 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 	return true;
 }
 
-#else
+#else //CCLib is always much faster
 
 //CC_CORE_LIB
 #include <SimpleCloud.h>

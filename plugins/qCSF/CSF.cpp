@@ -83,7 +83,7 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 {
 	//constants
 	static const double cloth_y_height = 0.05; //origin cloth height
-	static const double clothbuffer_d = 4.0; //set the cloth buffer
+	static const int clothbuffer = 2; //set the cloth buffer (grid margin size)
 	static const double gravity = 0.2;
 
 	try
@@ -96,23 +96,23 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		point_cloud.computeBoundingBox(bbMin, bbMax);
 
 		//computing the number of cloth node
-		Vec3 origin_pos(	bbMin.x - clothbuffer_d,
+		Vec3 origin_pos(	bbMin.x - clothbuffer * params.cloth_resolution,
 							bbMax.y + cloth_y_height,
-							bbMin.z - clothbuffer_d);
+							bbMin.z - clothbuffer * params.cloth_resolution);
 	
-		int width_num  = (bbMax.x - bbMin.x + clothbuffer_d * 2) / params.cloth_resolution;
-		int height_num = (bbMax.z - bbMin.z + clothbuffer_d * 2) / params.cloth_resolution;
+		int width_num = static_cast<int>(floor((bbMax.x - bbMin.x) / params.cloth_resolution)) + 2;
+		int height_num = static_cast<int>(floor((bbMax.z - bbMin.z) / params.cloth_resolution)) + 2;
 
 		//Cloth object
-		Cloth cloth(	bbMax.x - bbMin.x + clothbuffer_d * 2,
-						bbMax.z - bbMin.z + clothbuffer_d * 2,
-						width_num,
-						height_num,
-						origin_pos,
-						0.3,
-						9999,
-						params.rigidness,
-						params.time_step);
+		Cloth cloth(origin_pos, 
+					width_num,
+					height_num,
+					params.cloth_resolution,
+					params.cloth_resolution,
+					0.3,
+					9999,
+					params.rigidness,
+					params.time_step);
 
 		if (app)
 		{

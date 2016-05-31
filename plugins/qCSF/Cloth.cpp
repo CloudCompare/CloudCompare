@@ -14,40 +14,41 @@
 #include <fstream>
 #include <queue>
 
-Cloth::Cloth(double width,
-				double height,
-				int num_particles_width,
-				int num_particles_height,
-				const Vec3& origin_pos1,
-				double smoothThreshold,
-				double heightThreshold,
+Cloth::Cloth(	const Vec3& _origin_pos,
+				int _num_particles_width,
+				int _num_particles_height,
+				double _step_x,
+				double _step_y,
+				double _smoothThreshold,
+				double _heightThreshold,
 				int rigidness,
 				double time_step)
-	: num_particles_width(num_particles_width)
-	, num_particles_height(num_particles_height)
-	, origin_pos1(origin_pos1)
-	, smoothThreshold(smoothThreshold)
-	, heightThreshold(heightThreshold)
-	, rigidness(rigidness)
+	: constraint_iterations(rigidness)
 	, time_step(time_step)
+	, smoothThreshold(_smoothThreshold)
+	, heightThreshold(_heightThreshold)
+	, num_particles_width(_num_particles_width)
+	, num_particles_height(_num_particles_height)
+	, origin_pos(_origin_pos)
+	, step_x(_step_x)
+	, step_y(_step_y)
 {
-	constraint_iterations = rigidness;
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 
 	double time_step2 = time_step*time_step;
 
-	// creating particles in a grid of particles from (0,0,0) to (width,-height,0)
-	for (int x = 0; x<num_particles_width; x++)
+	// creating particles in a grid
+	for (int i = 0; i < num_particles_width; i++)
 	{
-		for (int y = 0; y<num_particles_height; y++)
+		for (int j = 0; j < num_particles_height; j++)
 		{
-			Vec3 pos = Vec3(width * (x / (double)num_particles_width),
-							0,
-							height * (y / (double)num_particles_height));
-			pos = pos + origin_pos1;
-			particles[y*num_particles_width + x] = Particle(pos, time_step2); // insert particle in column x at y'th row
-			particles[y*num_particles_width + x].pos_x = x;
-			particles[y*num_particles_width + x].pos_y = y;
+			Vec3 pos(	origin_pos.x + i * step_x,
+						origin_pos.y,
+						origin_pos.z + j * step_y);
+
+			particles[j*num_particles_width + i] = Particle(pos, time_step2); // insert particle in column i at j'th row
+			particles[j*num_particles_width + i].pos_x = i;
+			particles[j*num_particles_width + i].pos_y = j;
 		}
 	}
 

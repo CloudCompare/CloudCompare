@@ -18,6 +18,10 @@ v2.8.beta - XX/XX/2016
 		- meta-data (normals, dip/direction, etc.) is now updated when the facet is rotated / transformed
 		- the 3D representation of the normal vector now depends on the facet size and not on its min. bounding-box size
 
+- Bug fixes:
+	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
+	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
+
 v2.7.0 - 04/22/2016
 -------------------
 

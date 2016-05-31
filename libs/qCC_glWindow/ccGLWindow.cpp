@@ -2067,20 +2067,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		{
 			glEnableSunLight();
 		}
-
-		//we enable relative custom light (if activated)
-		if (m_customLightEnabled)
-		{
-			glEnableCustomLight();
-
-			if (	!m_captureMode.enabled
-				&&	m_currentLODState.level == 0
-				&&	(!m_stereoModeEnabled || !m_stereoParams.isAnaglyph()))
-			{
-				//we display it as a litle 3D star
-				drawCustomLight();
-			}
-		}
 	}
 
 	//we activate the current shader (if any)
@@ -2203,6 +2189,21 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	{
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glLoadMatrixd(modelViewMat.data());
+	}
+
+	//we enable relative custom light (if activated)
+	if (m_customLightEnabled)
+	{
+		//DGM: warning, must be enabled/displayed AFTER the 3D MV and MP matrices have been set!)
+		glEnableCustomLight();
+
+		if (!m_captureMode.enabled
+			&&	m_currentLODState.level == 0
+			&& (!m_stereoModeEnabled || !m_stereoParams.isAnaglyph()))
+		{
+			//we display it as a litle 3D star
+			drawCustomLight();
+		}
 	}
 
 	//we draw 3D entities
@@ -3596,7 +3597,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		{
 			//displacement vector (in "3D")
 			double pixSize = computeActualPixelSize();
-			CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
+			CCVector3d u(dx * pixSize, -dy * pixSize, 0);
 			if (!m_viewportParams.perspectiveView)
 			{
 				u.y *= m_viewportParams.orthoAspectRatio;

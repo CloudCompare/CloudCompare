@@ -141,6 +141,10 @@ void ccGLWindow::removeFBOSafe(ccFrameBufferObject* &fbo)
 
 bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 {
+	const qreal retinaScale = devicePixelRatio();
+	w *= retinaScale;
+	h *= retinaScale;
+
 	if (fbo && fbo->width() == w && fbo->height() == h)
 	{
 		//nothing to do
@@ -5709,6 +5713,9 @@ bool ccGLWindow::initGLFilter(int w, int h, bool silent/*=false*/)
 	}
 
 	makeCurrent();
+	const qreal retinaScale = devicePixelRatio();
+	w *= retinaScale;
+	h *= retinaScale;
 
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during initialization

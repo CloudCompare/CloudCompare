@@ -180,6 +180,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	bool writeColors = cloud->hasColors();
 	bool writeNorms = cloud->hasNormals();
 	std::vector<ccScalarField*> theScalarFields;
+
 	if (cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
@@ -210,6 +211,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	if (saveColumnsHeader)
 	{
 		QString header("//");
+		// We append the cloud name to the header
+		header.append(cloud->getName());
+		header.append("\n");
+
+		header.append("//");
 		header.append(AsciiHeaderColumns::X());
 		header.append(separator);
 		header.append(AsciiHeaderColumns::Y());
@@ -257,7 +263,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 			header.append(separator);
 			header.append(AsciiHeaderColumns::Nz());
 		}
-		
+
 		stream << header << "\n";
 	}
 

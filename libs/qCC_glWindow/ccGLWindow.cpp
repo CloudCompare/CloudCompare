@@ -246,6 +246,9 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_glExtFuncSupported(false)
 	, m_autoRefresh(false)
 {
+	//start internal timer
+	m_timer.start();
+
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	setSurfaceType(QWindow::OpenGLSurface);
 
@@ -806,9 +809,6 @@ bool ccGLWindow::initialize()
 			}
 		}
 #endif
-
-		//start internal timer
-		m_timer.start();
 
 		if (!m_silentInitialization)
 		{
@@ -1455,7 +1455,7 @@ void ccGLWindow::paintGL()
 	//clean the outdated messages
 	{
 		std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin();
-		int currentTime_sec = m_timer.elapsed() * 1000;
+		qint64 currentTime_sec = m_timer.elapsed() / 1000;
 		//ccLog::PrintDebug(QString("[paintGL] Current time: %1 s.").arg(currentTime_sec));
 
 		while (it != m_messagesToDisplay.end())
@@ -4690,7 +4690,7 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 
 	MessageToDisplay mess;
 	mess.message = message;
-	mess.messageValidity_sec = m_timer.elapsed() * 1000 + displayMaxDelay_sec;
+	mess.messageValidity_sec = m_timer.elapsed() / 1000 + displayMaxDelay_sec;
 	mess.position = pos;
 	mess.type = type;
 	m_messagesToDisplay.push_back(mess);

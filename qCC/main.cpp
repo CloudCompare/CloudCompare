@@ -161,6 +161,9 @@ int main(int argc, char **argv)
 		QDir::setCurrent( appDir.absolutePath() );
 	}
 #endif
+
+	//store the log message until a valid logging instance is registered
+	ccLog::EnableMessageBackup(true);
 	
 	//restore some global parameters
 	{

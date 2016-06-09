@@ -38,7 +38,6 @@ class QTextStream;
 //! Console
 class ccConsole : public QObject, public ccLog
 {
-
 	Q_OBJECT
 
 public:
@@ -90,7 +89,7 @@ protected:
 	ccConsole();
 
 	//inherited from ccLog
-	virtual void displayMessage(const QString& message, int level);
+	virtual void logMessage(const QString& message, int level);
 
 	//! Associated text display widget
 	QListWidget* m_textDisplay;

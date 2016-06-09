@@ -17,8 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCVIEWER_LOG_H
-#define CCVIEWER_LOG_H
+#ifndef CCVIEWER_LOG_HEADER
+#define CCVIEWER_LOG_HEADER
 
 //Qt
 #include <QMessageBox>
@@ -36,14 +36,16 @@ public:
 
 protected:
 	//inherited from ccLog
-	virtual void displayMessage(const QString& message, int level)
+	virtual void logMessage(const QString& message, int level)
 	{
 		if (level & LOG_ERROR)
+		{
 			QMessageBox::warning(m_parentWindow, "Error", message);
+		}
 	}
 
 	//! Associated window
 	QMainWindow* m_parentWindow;
 };
 
-#endif // CCVIEWER_LOG_H
+#endif // CCVIEWER_LOG_HEADER

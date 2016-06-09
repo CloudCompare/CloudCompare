@@ -23,7 +23,7 @@
 //Qt
 #include <QtPlugin>
 
-FileIOFilter::Shared qPclIO::getFilter(ccMainAppInterface* app)
+FileIOFilter::Shared qPclIO::getFilter()
 {
 	return FileIOFilter::Shared(new PcdFilter);
 }

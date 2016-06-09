@@ -41,7 +41,7 @@ public:
 	virtual QString getDescription() const { return "Interface to open PCL clouds (*.pcd)"; }
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter(ccMainAppInterface* app);
+	FileIOFilter::Shared getFilter();
 };
 
 #endif //Q_PCL_IO_PLUGIN_HEADER

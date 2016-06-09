@@ -30,7 +30,6 @@
 
 //qCC_db
 #include <ccIncludeGL.h>
-#include <ccTimer.h>
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 #include <ccMaterial.h>
@@ -164,7 +163,6 @@ int main(int argc, char *argv[])
 	}
 
 	//common data initialization
-	ccTimer::Init();
 	FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization

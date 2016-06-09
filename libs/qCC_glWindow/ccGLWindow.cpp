@@ -27,7 +27,6 @@
 #include <ccHObjectCaster.h>
 #include <cc2DLabel.h>
 #include <ccGenericPointCloud.h>
-#include <ccTimer.h>
 #include <ccSphere.h> //for the pivot symbol
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
@@ -1456,7 +1455,7 @@ void ccGLWindow::paintGL()
 	//clean the outdated messages
 	{
 		std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin();
-		int currentTime_sec = ccTimer::Sec();
+		int currentTime_sec = m_timer.elapsed() * 1000;
 		//ccLog::PrintDebug(QString("[paintGL] Current time: %1 s.").arg(currentTime_sec));
 
 		while (it != m_messagesToDisplay.end())
@@ -3533,7 +3532,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 	}
 	else if (event->buttons() & Qt::LeftButton)
 	{
-		m_lastClickTime_ticks = ccTimer::Msec();
+		m_lastClickTime_ticks = m_timer.elapsed(); //in msec
 
 		//left click = rotation
 		if (m_interactionFlags & INTERACT_ROTATE)
@@ -3931,7 +3930,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		else
 		{
 			//picking?
-			if (ccTimer::Msec() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS)
+			if (m_timer.elapsed() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS) //in msec
 			{
 				int x = event->x();
 				int y = event->y();
@@ -4691,7 +4690,7 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 
 	MessageToDisplay mess;
 	mess.message = message;
-	mess.messageValidity_sec = ccTimer::Sec() + displayMaxDelay_sec;
+	mess.messageValidity_sec = m_timer.elapsed() * 1000 + displayMaxDelay_sec;
 	mess.position = pos;
 	mess.type = type;
 	m_messagesToDisplay.push_back(mess);

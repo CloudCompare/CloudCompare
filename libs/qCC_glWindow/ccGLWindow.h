@@ -1141,7 +1141,7 @@ protected: //members
 		//! Message
 		QString message;
 		//! Message end time (sec)
-		int messageValidity_sec;
+		qint64 messageValidity_sec;
 		//! Message position on screen
 		MessagePosition position;
 		//! Message type

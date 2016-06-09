@@ -190,9 +190,9 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 	
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
-		connect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
-		connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
+		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
+		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
+		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLine(int, int, Qt::MouseButtons)));
 		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
 
 		if (m_segmentationPoly)
@@ -757,6 +757,12 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 
 void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 {
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return;
+	}
+
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
@@ -764,12 +770,12 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 		ccHObject::Container polylines;
 		if (root)
 		{
-			root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
+			root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
 		}
 
 		if (!polylines.empty())
 		{
-			ccEntityPickerDlg epDlg(polylines,false,0,this);
+			ccEntityPickerDlg epDlg(polylines, false, 0, this);
 			if (!epDlg.exec())
 				return;
 
@@ -780,10 +786,10 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 
 			//look for an asociated viewport
 			ccHObject::Container viewports;
-			if (poly->filterChildren(viewports,false,CC_TYPES::VIEWPORT_2D_OBJECT,true) == 1)
+			if (poly->filterChildren(viewports, false, CC_TYPES::VIEWPORT_2D_OBJECT, true) == 1)
 			{
 				//shall we apply this viewport?
-				if (QMessageBox::question(	m_associatedWin ? m_associatedWin->asWidget() : 0,
+				if (QMessageBox::question(	m_associatedWin->asWidget(),
 											"Associated viewport",
 											"The selected polyline has an associated viewport: do you want to apply it?",
 											QMessageBox::Yes,
@@ -840,8 +846,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 					allowPolylineExport(m_segmentationPoly->size() > 1);
 				}
 
-				if (m_associatedWin)
-					m_associatedWin->redraw(true, false);
+				m_associatedWin->redraw(true, false);
 			}
 			else
 			{

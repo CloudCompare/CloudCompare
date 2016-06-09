@@ -77,21 +77,22 @@ void ccPluginDlg::addPluginInfo( const QStringList &paths, const tPluginInfoList
 {
 	label->setText(QString(	"Paths Searched:\n%1" ).arg(paths.join( "\n" )));
 	
-	for ( QObject *plugin : QPluginLoader::staticInstances() )
-	{
-		populateTreeWidget(plugin, QString("%1 (Static Plugin)")
-			.arg(plugin->metaObject()->className()));
-	}
-
 	for ( const tPluginInfo &info : pluginInfoList )
 	{
-		QFileInfo	fileInfo( info.first );
-		
-		populateTreeWidget( info.second, fileInfo.fileName(), fileInfo.filePath() );
+		if (info.filename.isEmpty())
+		{
+			//static plugins have no associated filename
+			populateTreeWidget(info.qObject, QString("%1 (Static Plugin)").arg(info.object->getName()));
+		}
+		else
+		{
+			QFileInfo fileInfo( info.filename );
+			populateTreeWidget( info.qObject, fileInfo.fileName(), fileInfo.filePath() );
+		}
 	}
 }
 
-void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &name, const QString &path)
+void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &name, const QString &path/*=QString()*/)
 {
 	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(treeWidget);
 	pluginItem->setText(0, name);

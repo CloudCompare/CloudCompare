@@ -18,9 +18,15 @@ v2.8.beta - XX/XX/2016
 		- meta-data (normals, dip/direction, etc.) is now updated when the facet is rotated / transformed
 		- the 3D representation of the normal vector now depends on the facet size and not on its min. bounding-box size
 
+	* New shortcus 'a la Meshlb':
+		- CC now supports the 'CTRL + mouse wheel' shortcut to change the point size
+		- CC now supports the 'ALT + mouse wheel' shortcut to change the zNear value (perspective mode)
+		- CC now supports the 'SHIFT + mouse wheel' shortcut to change the field of view (perspective mode)
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
+	* the fields named 'intensity', 'grey', 'gray' or 'col***i' in PLY files are now automatically loaded as scalar fields (instead of 'intensity', i.e. grey level RGB)
 
 v2.7.0 - 04/22/2016
 -------------------

@@ -682,6 +682,9 @@ signals:
 	//! Signal emitted when the f.o.v. changes
 	void fovChanged(float);
 
+	//! Signal emitted when the zNear coef changes
+	void zNearCoefChanged(float);
+
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3d&);
 

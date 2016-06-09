@@ -23,7 +23,7 @@
 //Qt
 #include <QtPlugin>
 
-FileIOFilter::Shared qCSVMatrixIO::getFilter(ccMainAppInterface* app)
+FileIOFilter::Shared qCSVMatrixIO::getFilter()
 {
 	return FileIOFilter::Shared(new CSVMatrixFilter);
 }

@@ -661,7 +661,7 @@ static int face_cb(p_ply_argument argument)
 
 	if (value_index == 2)
 	{
-		mesh->addTriangle(s_tri[0],s_tri[1],s_tri[2]);
+		mesh->addTriangle(s_tri[0], s_tri[1], s_tri[2]);
 		++s_triCount;
 
 		if ((s_triCount % PROCESS_EVENTS_FREQ) == 0)
@@ -697,7 +697,7 @@ static int texCoords_cb(p_ply_argument argument)
 
 	if (((value_index+1) % 2) == 0)
 	{
-		texCoords->addElement(s_texCoord+value_index-1);
+		texCoords->addElement(s_texCoord + value_index - 1);
 		++s_texCoordCount;
 
 		if ((s_texCoordCount % PROCESS_EVENTS_FREQ) == 0)
@@ -789,7 +789,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		const char* lastComment = NULL;
 		while ((lastComment = ply_get_next_comment(ply, lastComment)))
 		{
-			ccLog::Print("[PLY][Comment] %s",lastComment);
+			ccLog::Print("[PLY][Comment] %s", lastComment);
 
 			//specific case: TextureFile 'filename.ext'
 			if (QString(lastComment).toUpper().startsWith("TEXTUREFILE "))
@@ -827,7 +827,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 			if (lastElement.elementInstances == 0)
 			{
-				ccLog::Warning("[PLY] Element '%s' was ignored as it has 0 instance!",lastElement.elementName);
+				ccLog::Warning("[PLY] Element '%s' was ignored as it has 0 instance!", lastElement.elementName);
 				continue;
 			}
 
@@ -972,7 +972,8 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			else if (bIndex == 0 && (propName.contains("BLUE") || (elementName.contains("COL") && propName.endsWith("B"))))
 				bIndex = i;
 			else if (iIndex == 0 && (propName.contains("INTENSITY") || propName.contains("GRAY") || propName.contains("GREY") || (elementName.contains("COL") && propName.endsWith("I"))))
-				iIndex = i;
+				//iIndex = i; //DGM: we don't load the intensities as RGB colors anymore!
+				sfPropIndexes.push_back(i);
 			else if (elementName.contains("VERT") || elementName.contains("POINT"))
 			{
 				if (propName.contains("SCAL"))
@@ -993,7 +994,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	QStringList listPropsText;
 	{
 		listPropsText << QString("None");
-		for (int i=0; i<static_cast<int>(listProperties.size()); ++i)
+		for (int i = 0; i < static_cast<int>(listProperties.size()); ++i)
 		{
 			plyProperty& pp = listProperties[i];
 			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
@@ -1017,7 +1018,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	QStringList singlePropsText;
 	{
 		singlePropsText << QString("None");
-		for (int i=0; i<static_cast<int>(singleProperties.size()); ++i)
+		for (int i = 0; i < static_cast<int>(singleProperties.size()); ++i)
 		{
 			plyProperty& pp = singleProperties[i];
 			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
@@ -1061,21 +1062,21 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//we count all assigned properties
 		int assignedStdProperties = 0;
 		{
-			for (unsigned i=0; i<nStdProp; ++i)
+			for (unsigned i = 0; i < nStdProp; ++i)
 				if (stdPropIndexes[i] > 0)
 					++assignedStdProperties;
 		}
 
 		int assignedListProperties = 0;
 		{
-			for (unsigned i=0; i<nListProp; ++i)
+			for (unsigned i = 0; i < nListProp; ++i)
 				if (listPropIndexes[i] > 0)
 					++assignedListProperties;
 		}
 
 		int assignedSingleProperties = 0;
 		{
-			for (unsigned i=0; i<nSingleProp; ++i)
+			for (unsigned i = 0; i < nSingleProp; ++i)
 				if (singlePropIndexes[i] > 0)
 					++assignedSingleProperties;
 		}

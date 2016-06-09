@@ -177,6 +177,9 @@ public:
 		\return the selected cloud (or null if the user cancelled the operation)
 	**/
 	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
+
+	//! Dispatches the (loaded) plugins in the UI
+	void dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths);
 	
 protected slots:
 
@@ -491,9 +494,6 @@ protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 	virtual void moveEvent(QMoveEvent* event) override;
 	virtual void resizeEvent(QResizeEvent* event) override;
-
-	void loadPlugins();
-	bool dispatchPlugin(QObject* plugin);
 
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);

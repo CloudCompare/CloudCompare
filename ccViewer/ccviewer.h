@@ -129,8 +129,6 @@ protected: //methods
 
 	//! Loads plugins (from files)
 	void loadPlugins();
-	//! Loads a specific plugin
-	bool loadPlugin(QObject* plugin);
 
 	//! Makes the GL frame background gradient match the OpenGL window one
 	void updateGLFrameGradient();

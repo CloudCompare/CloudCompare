@@ -3516,7 +3516,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
-		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
+		|| (QApplication::keyboardModifiers() & Qt::MetaModifier)
 #endif
 		)
 	{
@@ -3588,7 +3588,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
-		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
+		|| (QApplication::keyboardModifiers() & Qt::MetaModifier)
 #endif
 		)
 	{
@@ -3817,16 +3817,14 @@ bool ccGLWindow::processClickableItems(int x, int y)
 		//nothing to do
 		break;
 	case ClickableItem::INCREASE_POINT_SIZE:
-		if (m_viewportParams.defaultPointSize < MAX_POINT_SIZE)
 		{
-			setPointSize(m_viewportParams.defaultPointSize + 1);
+			setPointSize(m_viewportParams.defaultPointSize + 1.0f);
 			redraw();
 		}
 		return true;
 	case ClickableItem::DECREASE_POINT_SIZE:
-		if (m_viewportParams.defaultPointSize > MIN_POINT_SIZE)
 		{
-			setPointSize(m_viewportParams.defaultPointSize - 1);
+			setPointSize(m_viewportParams.defaultPointSize - 1.0f);
 			redraw();
 		}
 		return true;
@@ -4009,16 +4007,72 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 void ccGLWindow::wheelEvent(QWheelEvent* event)
 {
-	if (m_interactionFlags & INTERACT_ZOOM_CAMERA)
+	bool doRedraw = false;
+
+	Qt::KeyboardModifiers keyboardModifiers = QApplication::keyboardModifiers();
+	if (keyboardModifiers & Qt::AltModifier)
 	{
+		event->accept();
+
+		//same shortcut as Meshlab: change the point size
+		float sizeModifier = (event->delta() < 0 ? -1.0f : 1.0f);
+		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
+
+		doRedraw = true;
+	}
+	else if (keyboardModifiers & Qt::ControlModifier)
+	{
+		event->accept();
+
+		if (m_viewportParams.perspectiveView)
+		{
+			//same shortcut as Meshlab: change the zNear value
+			static const int MAX_INCREMENT = 150;
+			int increment = ccViewportParameters::ZNearCoefToIncrement(m_viewportParams.zNearCoef, MAX_INCREMENT+1);
+			int newIncrement = std::min(std::max(0, increment + (event->delta() < 0 ? -1 : 1)), MAX_INCREMENT); //the zNearCoef must be < 1! 
+			if (newIncrement != increment)
+			{
+				float newCoef = ccViewportParameters::IncrementToZNearCoef(newIncrement, MAX_INCREMENT+1);
+				setZNearCoef(newCoef);
+				doRedraw = true;
+			}
+		}
+	}
+	else if (keyboardModifiers & Qt::ShiftModifier)
+	{
+		event->accept();
+		
+		if (m_viewportParams.perspectiveView)
+		{
+			//same shortcut as Meshlab: change the fov value
+			float newFOV = (m_viewportParams.fov + (event->delta() < 0 ? -1.0f : 1.0f));
+			newFOV = std::min(std::max(1.0f, newFOV), 180.0f);
+			if (newFOV != m_viewportParams.fov)
+			{
+				setFov(newFOV);
+				doRedraw = true;
+			}
+		}
+	}
+	else if (m_interactionFlags & INTERACT_ZOOM_CAMERA)
+	{
+		event->accept();
+
 		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
 		float wheelDelta_deg = static_cast<float>(event->delta()) / 8;
-
 		onWheelEvent(wheelDelta_deg);
 
 		emit mouseWheelRotated(wheelDelta_deg);
 
-		event->accept();
+		doRedraw = true;
+	}
+
+	if (doRedraw)
+	{
+		setLODEnabled(true, true);
+		m_currentLODState.level = 0;
+
+		redraw();
 	}
 }
 
@@ -4647,10 +4701,18 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 
 void ccGLWindow::setPointSize(float size)
 {
-	if (size >= static_cast<float>(MIN_POINT_SIZE) && size <= static_cast<float>(MAX_POINT_SIZE))
+	float newSize = std::max<float>(std::min<float>(size, MAX_POINT_SIZE), MIN_POINT_SIZE);
+	ccLog::Print(QString("New point size: %1").arg(newSize));
+	if (m_viewportParams.defaultPointSize != newSize)
 	{
-		m_viewportParams.defaultPointSize = size;
+		m_viewportParams.defaultPointSize = newSize;
 		m_updateFBO = true;
+	
+		displayNewMessage(	QString("New default point size: %1").arg(newSize),
+							ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+							false,
+							2,
+							SCREEN_SIZE_MESSAGE);
 	}
 }
 
@@ -5145,10 +5207,8 @@ void ccGLWindow::setFov(float fov_deg)
 	if (m_bubbleViewModeEnabled)
 	{
 		setBubbleViewFov(fov_deg);
-		return;
 	}
-
-	if (m_viewportParams.fov != fov_deg)
+	else if (m_viewportParams.fov != fov_deg)
 	{
 		//update param
 		m_viewportParams.fov = fov_deg;
@@ -5157,6 +5217,12 @@ void ccGLWindow::setFov(float fov_deg)
 		{
 			invalidateViewport();
 			invalidateVisualization();
+
+			displayNewMessage(	QString("F.O.V. = %1 deg.").arg(fov_deg, 0, 'f', 1),
+								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+								false,
+								2,
+								SCREEN_SIZE_MESSAGE);
 		}
 
 		emit fovChanged(m_viewportParams.fov);
@@ -5188,7 +5254,7 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 
 void ccGLWindow::setZNearCoef(double coef)
 {
-	if (coef <= 0)
+	if (coef <= 0 || coef >= 1.0)
 	{
 		ccLog::Warning("[ccGLWindow::setZNearCoef] Invalid coef. value!");
 		return;
@@ -5201,9 +5267,20 @@ void ccGLWindow::setZNearCoef(double coef)
 		//and camera state (if perspective view is 'on')
 		if (m_viewportParams.perspectiveView)
 		{
-			invalidateViewport();
-			invalidateVisualization();
+			//invalidateViewport();
+			//invalidateVisualization();
+
+			//DGM: we update the projection matrix directly so as to get an up-to-date estimation of zNear
+			updateProjectionMatrix();
+
+			displayNewMessage(	QString("Near clipping = %1% of max depth (= %2)").arg(m_viewportParams.zNearCoef * 100.0, 0, 'f', 1).arg(m_viewportParams.zNear),
+								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+								false,
+								2,
+								SCREEN_SIZE_MESSAGE);
 		}
+
+		emit zNearCoefChanged(coef);
 	}
 }
 

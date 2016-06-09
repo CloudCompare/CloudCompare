@@ -21,7 +21,7 @@
 #include <QDialog>
 #include <QIcon>
 
-#include "ccPluginInfo.h"
+#include <ccPluginInfo.h>
 
 class QLabel;
 class QPushButton;

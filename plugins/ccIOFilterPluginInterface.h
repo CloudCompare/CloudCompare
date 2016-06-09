@@ -36,7 +36,7 @@ public:
 	virtual CC_PLUGIN_TYPE getType() const { return CC_IO_FILTER_PLUGIN; }
 
 	//! Returns an I/O filter instance
-	virtual FileIOFilter::Shared getFilter(ccMainAppInterface* app) = 0;
+	virtual FileIOFilter::Shared getFilter() = 0;
 };
 
 Q_DECLARE_INTERFACE(ccIOFilterPluginInterface,

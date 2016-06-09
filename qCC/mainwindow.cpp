@@ -46,7 +46,6 @@
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
 #include <ccQuadric.h>
-#include <ccExternalFactory.h>
 #include <ccSphere.h>
 
 //qCC_io
@@ -235,8 +234,6 @@ MainWindow::MainWindow()
 
 	connectActions();
 
-	loadPlugins();
-
 #ifdef CC_3DXWARE_SUPPORT
 	enable3DMouse(true, true);
 #else
@@ -299,43 +296,125 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::loadPlugins()
+void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths)
 {
 	menuPlugins->setEnabled(false);
 	menuShadersAndFilters->setEnabled(false);
 	toolBarPluginTools->setVisible(false);
 	toolBarGLFilters->setVisible(false);
 	
-	ccConsole::Print(QString("Application path: ") + QCoreApplication::applicationDirPath());
+	m_pluginInfoList = plugins;
+	m_pluginPaths = pluginPaths;
 	
-	//"static" plugins
-	for (QObject *plugin : QPluginLoader::staticInstances())
+	for ( const tPluginInfo &plugin : plugins )
 	{
-		dispatchPlugin(plugin);
+		if (!plugin.object)
+		{
+			assert(false);
+			continue;
+		}
+
+		QString pluginName = plugin.object->getName();
+		if (pluginName.isEmpty())
+		{
+			ccLog::Warning(QString("[Plugin] Plugin '%1' has an invalid (empty) name!").arg(plugin.filename));
+			continue;
+		}
+
+		CC_PLUGIN_TYPE type = plugin.object->getType();
+		switch (type)
+		{
+
+		case CC_STD_PLUGIN: //standard plugin
+		{
+			plugin.qObject->setParent(this);
+			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.object);
+			stdPlugin->setMainAppInterface(this);
+
+			QMenu* destMenu = 0;
+			QToolBar* destToolBar = 0;
+
+			QActionGroup actions(this);
+			stdPlugin->getActions(actions);
+			if (actions.actions().size() > 1) //more than one action? We create it's own menu and toolbar
+			{
+				destMenu = (menuPlugins ? menuPlugins->addMenu(pluginName) : 0);
+				if (destMenu)
+					destMenu->setIcon(stdPlugin->getIcon());
+				destToolBar = addToolBar(pluginName + QString(" toolbar"));
+
+				if (destToolBar)
+				{
+					m_stdPluginsToolbars.push_back(destToolBar);
+					//not sure why but it seems that we must specifically set the object name.
+					//if not the QSettings thing will complain about a not-setted name
+					//when saving settings of qCC mainwindow
+					destToolBar->setObjectName(pluginName);
+				}
+			}
+			else //default destination
+			{
+				destMenu = menuPlugins;
+				destToolBar = toolBarPluginTools;
+			}
+
+			//add actions
+			foreach (QAction* action, actions.actions())
+			{
+				//add to menu (if any)
+				if (destMenu)
+				{
+					destMenu->addAction(action);
+					destMenu->setEnabled(true);
+				}
+				//add to toolbar
+				if (destToolBar)
+				{
+					destToolBar->addAction(action);
+					destToolBar->setVisible(true);
+					destToolBar->setEnabled(true);
+				}
+			}
+
+			//add to std. plugins list
+			m_stdPlugins.push_back(stdPlugin);
+		}
+		break;
+
+		case CC_GL_FILTER_PLUGIN: //GL filter
+		{
+			//(auto)create action
+			plugin.qObject->setParent(this);
+			QAction* action = new QAction(pluginName, plugin.qObject);
+			action->setToolTip(plugin.object->getDescription());
+			action->setIcon(plugin.object->getIcon());
+			//connect default signal
+			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+
+			menuShadersAndFilters->addAction(action);
+			menuShadersAndFilters->setEnabled(true);
+			toolBarGLFilters->addAction(action);
+			toolBarGLFilters->setVisible(true);
+			toolBarGLFilters->setEnabled(true);
+
+			//add to GL filter (actions) list
+			m_glFilterActions.addAction(action);
+		}
+		break;
+
+		case CC_IO_FILTER_PLUGIN: //I/O filter
+		{
+			//not handled by the MainWindow instance
+			continue;
+		}
+		break;
+
+		default:
+			assert(false);
+			continue;
+		}
 	}
 
-	tPluginInfoList	plugins = ccPlugins::Find(m_pluginPaths);
-	
-	// now iterate over plugins and process them
-	for ( tPluginInfo &info : plugins )
-	{
-		const QString	fileName = info.first;
-		QObject			*pluginObject = info.second;
-		
-		ccConsole::Print(QString("Found plugin: %1").arg( fileName ));
-		
-		if (dispatchPlugin(pluginObject))
-		{
-			m_pluginInfoList += info;
-		}
-		else
-		{
-			delete pluginObject;
-			pluginObject = nullptr;
-			ccConsole::Warning("\tUnsupported or invalid plugin type");
-		}		
-	}
-	
 	if (menuPlugins)
 	{
 		menuPlugins->setEnabled(!m_stdPlugins.empty());
@@ -363,130 +442,6 @@ void MainWindow::loadPlugins()
 		//actionDisplayGLFiltersTools->setChecked(false);
 	}
 }
-bool MainWindow::dispatchPlugin(QObject *plugin)
-{
-	ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(plugin);
-	if (!ccPlugin)
-		return false;
-	plugin->setParent(this);
-
-	QString pluginName = ccPlugin->getName();
-	if (pluginName.isEmpty())
-	{
-		ccLog::Warning("\tplugin has an invalid (empty) name!");
-		return false;
-	}
-	ccConsole::Print(QString("\tname: \"%1\"").arg(pluginName));
-
-	CC_PLUGIN_TYPE type = ccPlugin->getType();
-
-	switch(type)
-	{
-
-	case CC_STD_PLUGIN: //standard plugin
-		{
-			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
-			stdPlugin->setMainAppInterface(this);
-
-			QMenu* destMenu = 0;
-			QToolBar* destToolBar = 0;
-
-			QActionGroup actions(this);
-			stdPlugin->getActions(actions);
-			if (actions.actions().size() > 1) //more than one action? We create it's own menu and toolbar
-			{
-				destMenu = (menuPlugins ? menuPlugins->addMenu(pluginName) : 0);
-				if (destMenu)
-					destMenu->setIcon(stdPlugin->getIcon());
-				destToolBar = addToolBar(pluginName+QString(" toolbar"));
-
-				if (destToolBar)
-				{
-					m_stdPluginsToolbars.push_back(destToolBar);
-					//not sure why but it seems that we must specifically set the object name.
-					//if not the QSettings thing will complain about a not-setted name
-					//when saving settings of qCC mainwindow
-					destToolBar->setObjectName(pluginName);
-				}
-			}
-			else //default destination
-			{
-				destMenu = menuPlugins;
-				destToolBar = toolBarPluginTools;
-			}
-
-			//add actions
-			foreach(QAction* action,actions.actions())
-			{
-				//add to menu (if any)
-				if (destMenu)
-				{
-					destMenu->addAction(action);
-					destMenu->setEnabled(true);
-				}
-				//add to toolbar
-				if (destToolBar)
-				{
-					destToolBar->addAction(action);
-					destToolBar->setVisible(true);
-					destToolBar->setEnabled(true);
-				}
-			}
-
-			//add to std. plugins list
-			m_stdPlugins.push_back(stdPlugin);
-
-			// see if this plugin can give back an additional factory for objects
-			ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
-			if (factory) // if it is valid add to the plugin_factories
-			{
-				assert(ccExternalFactory::Container::GetUniqueInstance());
-				ccExternalFactory::Container::GetUniqueInstance()->addFactory(factory);
-			}
-		}
-		break;
-
-	case CC_GL_FILTER_PLUGIN: //GL filter
-		{
-			//(auto)create action
-			QAction* action = new QAction(pluginName,plugin);
-			action->setToolTip(ccPlugin->getDescription());
-			action->setIcon(ccPlugin->getIcon());
-			//connect default signal
-			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
-
-			menuShadersAndFilters->addAction(action);
-			menuShadersAndFilters->setEnabled(true);
-			toolBarGLFilters->addAction(action);
-			toolBarGLFilters->setVisible(true);
-			toolBarGLFilters->setEnabled(true);
-
-			//add to GL filter (actions) list
-			m_glFilterActions.addAction(action);
-
-		}
-		break;
-
-	case CC_IO_FILTER_PLUGIN: //I/O filter
-		{
-			ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(ccPlugin);
-			FileIOFilter::Shared filter = ioPlugin->getFilter(this);
-			if (filter)
-			{
-				FileIOFilter::Register(filter);
-				ccConsole::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
-			}
-		}
-		break;
-
-	default:
-		assert(false);
-		ccLog::Warning("\tunhandled plugin type!");
-		return false;
-	}
-
-	return true;
-}
 
 void MainWindow::doActionShowAboutPluginsDialog()
 {
@@ -509,7 +464,7 @@ void MainWindow::doEnableGLFilter()
 	}
 
 	QAction *action = qobject_cast<QAction*>(sender());
-	ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(action ? action->parent() : 0);
+	ccPluginInterface* ccPlugin = ccPlugins::ToValidPlugin(action ? action->parent() : 0);
 	if (!ccPlugin)
 		return;
 
@@ -9889,7 +9844,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	//standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
+	{
 		plugin->onNewSelection(m_selectedEntities);
+	}
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)

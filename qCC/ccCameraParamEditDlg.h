@@ -69,6 +69,8 @@ public slots:
 	void updateViewMode();
 	//! Updates view f.o.v.
 	void updateWinFov(float fov_deg);
+	//! Update the zNear coef.
+	void updateZNearCoef(float zNearCoef);
 
 	void setFrontView();
 	void setBottomView();

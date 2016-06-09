@@ -49,6 +49,9 @@
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
 
+//plugins
+#include <ccPluginInfo.h>
+
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
 #include <devices/3dConnexion/Mouse3DInput.h>
@@ -212,24 +215,29 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	//"static" plugins
-	foreach (QObject *plugin, QPluginLoader::staticInstances())
-		loadPlugin(plugin);
-
-	ccLog::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
-
 	QString	appPath = QCoreApplication::applicationDirPath();
-	QString	pluginsPath( appPath );
+	QStringList	filters;
 	
 #if defined(Q_OS_MAC)
+
+	filters << "*.dylib";
+
 	// plugins are in the bundle
 	appPath.remove( "MacOS" );
 	
 	pluginsPath += "Plugins/ccViewerPlugins";
+
 #elif defined(Q_OS_WIN)
+
+	filters << "*.dll";
+
 	//plugins are in bin/plugins
-	pluginsPath += "/plugins";
+	appPath += "/plugins";
+
 #elif defined(Q_OS_LINUX)	
+
+	filters << "*.so";
+
 	// Plugins are relative to the bin directory where the executable is found
 	QDir  binDir( appPath );
 	
@@ -237,102 +245,59 @@ void ccViewer::loadPlugins()
 	{
 		binDir.cdUp();
 		
-		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
+		appPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
-		pluginsPath = "/usr/lib/cloudcompare/plugins";
+		appPath = "/usr/lib/cloudcompare/plugins";
 	}
 	
 #else
 #warning Need to specify the plugin path for this OS.
 #endif
 
-	ccLog::Print(QString("Plugin lookup dir.: %1").arg(pluginsPath));
+	tPluginInfoList	plugins;
+	ccPlugins::LoadPlugins(plugins, QStringList(appPath), filters);
 
-	QStringList filters;
-#if defined(Q_OS_WIN)
-	filters << "*.dll";
-#elif defined(Q_OS_LINUX)
-	filters << "*.so";
-#elif defined(Q_OS_MAC)
-	filters << "*.dylib";
-#endif
-	QDir pluginsDir(pluginsPath);
-	pluginsDir.setNameFilters(filters);
-	foreach (QString filename, pluginsDir.entryList(filters))
+	for ( const tPluginInfo &plugin : plugins )
 	{
-		QPluginLoader loader(pluginsDir.absoluteFilePath(filename));
-		QObject* plugin = loader.instance();
-		if (plugin)
+		if (!plugin.object)
 		{
-			ccLog::Print(QString("Found new plugin! ('%1')").arg(filename));
-			if (!loadPlugin(plugin))
+			assert(false);
+			continue;
+		}
+		
+		assert(plugin.qObject);
+		plugin.qObject->setParent(this);
+
+		//is this a GL plugin?
+		if (plugin.object->getType() == CC_GL_FILTER_PLUGIN)
+		{
+			QString pluginName = plugin.object->getName();
+			if (pluginName.isEmpty())
 			{
-				ccLog::Warning("Unsupported or invalid plugin type");
+				ccLog::Warning("Plugin has an invalid (empty) name!");
+				continue;
 			}
+			ccLog::Print(QString("Plugin name: [%1] (GL filter)").arg(pluginName));
+
+			//(auto)create action
+			QAction* action = new QAction(pluginName, plugin.qObject);
+			action->setToolTip(plugin.object->getDescription());
+			action->setIcon(plugin.object->getIcon());
+			//connect default signal
+			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+
+			ui.menuPlugins->addAction(action);
+			ui.menuPlugins->setEnabled(true);
+			ui.menuPlugins->setVisible(true);
 		}
 		else
 		{
-			ccLog::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
+			//ignored
 		}
 	}
-}
-
-bool ccViewer::loadPlugin(QObject *plugin)
-{
-	//is this a GL plugin?
-	ccGLFilterPluginInterface* glPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
-	if (glPlugin)
-	{
-		plugin->setParent(this);
-
-		QString pluginName = glPlugin->getName();
-		if (pluginName.isEmpty())
-		{
-			ccLog::Warning("Plugin has an invalid (empty) name!");
-			return false;
-		}
-		ccLog::Print("Plugin name: [%s] (GL filter)",qPrintable(pluginName));
-
-		//(auto)create action
-		QAction* action = new QAction(pluginName, plugin);
-		action->setToolTip(glPlugin->getDescription());
-		action->setIcon(glPlugin->getIcon());
-		//connect default signal
-		connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
-
-		ui.menuPlugins->addAction(action);
-		ui.menuPlugins->setEnabled(true);
-		ui.menuPlugins->setVisible(true);
-		return true;
-	}
-
-	//is this an IO plugin?
-	ccIOFilterPluginInterface* ioPlugin = qobject_cast<ccIOFilterPluginInterface*>(plugin);
-	if (ioPlugin)
-	{
-		plugin->setParent(this);
-
-		QString pluginName = ioPlugin->getName();
-		if (pluginName.isEmpty())
-		{
-			ccLog::Warning("Plugin has an invalid (empty) name!");
-			return false;
-		}
-		ccLog::Print("Plugin name: [%s] (I/O filter)",qPrintable(pluginName));
-
-		FileIOFilter::Shared filter = ioPlugin->getFilter(0);
-		if (filter)
-		{
-			FileIOFilter::Register(filter);
-			ccLog::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
-		}
-	}
-
-	ccLog::Warning("Only 'GL filter' and 'I/O' plugins are supported for now!");
-	return false;
 }
 
 void ccViewer::doDisableGLFilter()

@@ -34,7 +34,7 @@ public:
 	virtual QString getDescription() const { return "2.5D CSV matrix I/O filter"; }
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter(ccMainAppInterface* app);
+	FileIOFilter::Shared getFilter();
 };
 
 #endif //Q_CSV_MATRIX_IO_PLUGIN_HEADER

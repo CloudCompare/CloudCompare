@@ -48,6 +48,9 @@
 #include "ccCommandLineParser.h"
 #include "ccPersistentSettings.h"
 
+//plugins
+#include <ccPluginInfo.h>
+
 #ifdef USE_VLD
 //VLD
 #include <vld.h>
@@ -159,10 +162,6 @@ int main(int argc, char **argv)
 	}
 #endif
 	
-	//splash screen
-	QSplashScreen* splash = 0;
-	QTime splashStartTime;
-
 	//restore some global parameters
 	{
 		QSettings settings;
@@ -176,7 +175,7 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
-	
+
 	//Command line mode?
 	bool commandLine = (argc > 1 && argv[1][0] == '-');
 	
@@ -200,7 +199,11 @@ int main(int argc, char **argv)
 		lastArgumentIndex = 3;
 	}
 
-	//command line mode
+	//splash screen
+	QSplashScreen* splash = 0;
+	QTime splashStartTime;
+
+	//standard mode
 	if (!commandLine)
 	{
 		if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
@@ -223,8 +226,67 @@ int main(int argc, char **argv)
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
+	//load the plugins
+	tPluginInfoList	plugins;
+	QStringList	dirFilters;
+	QStringList pluginPaths;
+	{
+		QString appPath = QCoreApplication::applicationDirPath();
+
+#if defined(Q_OS_MAC)
+		dirFilters << "*.dylib";
+
+		// plugins are in the bundle
+		appPath.remove("MacOS");
+
+		pluginPaths += (appPath + "Plugins/ccPlugins");
+#if defined(CC_MAC_DEV_PATHS)
+		// used for development only - this is the path where the plugins are built
+		// this avoids having to install into the application bundle when developing
+		pluginPaths += (appPath + "../../../ccPlugins");
+#endif
+#elif defined(Q_OS_WIN)
+		dirFilters << "*.dll";
+
+		//plugins are in bin/plugins
+		pluginPaths << (appPath + "/plugins");
+#elif defined(Q_OS_LINUX)
+		dirFilters << "*.so";
+
+		// Plugins are relative to the bin directory where the executable is found
+		QDir  binDir(appPath);
+
+		if (binDir.dirName() == "bin")
+		{
+			binDir.cdUp();
+
+			pluginPaths << (binDir.absolutePath() + "/lib/cloudcompare/plugins");
+		}
+		else
+		{
+			// Choose a reasonable default to look in
+			pluginPaths << "/usr/lib/cloudcompare/plugins";
+		}
+#else
+		#warning Need to specify the plugin path for this OS.
+#endif
+
+#ifdef Q_OS_MAC
+		// Add any app data paths
+		// Plugins in these directories take precendence over the included ones
+		QStringList	appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+
+		for (const QString &appDataPath : appDataPaths)
+		{
+			pluginPaths << (appDataPath + "/plugins");
+		}
+#endif
+	}
+	ccPlugins::LoadPlugins(plugins, pluginPaths, dirFilters);
+	
 	int result = 0;
 
+	//command line mode
 	if (commandLine)
 	{
 		//command line processing (no GUI)
@@ -239,6 +301,7 @@ int main(int argc, char **argv)
 			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
 			return EXIT_FAILURE;
 		}
+		mainWindow->dispatchPlugins(plugins, pluginPaths);
 		mainWindow->show();
 		QApplication::processEvents();
 

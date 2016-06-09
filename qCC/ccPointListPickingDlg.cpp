@@ -509,7 +509,7 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	newLabel->addPoint(cloud,pointIndex);
 	newLabel->setVisible(true);
 	newLabel->setDisplayedIn2D(false);
-	newLabel->setDisplayedIn3D(true);
+	newLabel->displayPointLegend(true);
 	newLabel->setCollapsed(true);
 	ccGenericGLDisplay* display = m_associatedCloud->getDisplay();
 	if (display)

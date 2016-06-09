@@ -744,13 +744,13 @@ void ccPropertiesTreeDelegate::fillWithLabel(cc2DLabel* _obj)
 
 	//Body
 	QStringList body = _obj->getLabelContent(ccGui::Parameters().displayedNumPrecision);
-	appendRow( ITEM("Body"), ITEM(body.join("\n")) );
+	appendRow(ITEM("Body"), ITEM(body.join("\n")));
 
 	//Show label in 2D
-	appendRow( ITEM("Show 2D label"), CHECKABLE_ITEM(_obj->isDisplayedIn2D(),OBJECT_LABEL_DISP_2D) );
+	appendRow(ITEM("Show 2D label"), CHECKABLE_ITEM(_obj->isDisplayedIn2D(), OBJECT_LABEL_DISP_2D));
 
 	//Show label in 3D
-	appendRow( ITEM("Show 3D legend(s)"), CHECKABLE_ITEM(_obj->isDisplayedIn3D(),OBJECT_LABEL_DISP_3D) );
+	appendRow(ITEM("Show legend(s)"), CHECKABLE_ITEM(_obj->isPointLegendDisplayed(), OBJECT_LABEL_POINT_LEGEND));
 }
 
 void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
@@ -1716,11 +1716,11 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		redraw = true;
 		break;
-	case OBJECT_LABEL_DISP_3D:
+	case OBJECT_LABEL_POINT_LEGEND:
 		{
 			cc2DLabel* label = ccHObjectCaster::To2DLabel(m_currentObject);
 			assert(label);
-			label->setDisplayedIn3D(item->checkState() == Qt::Checked);
+			label->displayPointLegend(item->checkState() == Qt::Checked);
 		}
 		redraw = true;
 		break;

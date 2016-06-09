@@ -782,7 +782,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					else
 						newLabel->addPoint(P.cloud,P.index);
 				}
-				newLabel->setDisplayedIn3D(label->isDisplayedIn3D());
+				newLabel->displayPointLegend(label->isPointLegendDisplayed());
 				newLabel->setDisplayedIn2D(label->isDisplayedIn2D());
 				newLabel->setCollapsed(label->isCollapsed());
 				newLabel->setPosition(label->getPosition()[0],label->getPosition()[1]);

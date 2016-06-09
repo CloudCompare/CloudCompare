@@ -543,7 +543,7 @@ static cc2DLabel* CreateLabel(ccPointCloud* cloud, unsigned pointIndex, QString 
 	label->setName(pointName);
 	label->setVisible(true);
 	label->setDisplayedIn2D(false);
-	label->setDisplayedIn3D(true);
+	label->displayPointLegend(true);
 	label->setDisplay(display);
 
 	return label;

@@ -23,6 +23,10 @@ v2.8.beta - XX/XX/2016
 		- CC now supports the 'ALT + mouse wheel' shortcut to change the zNear value (perspective mode)
 		- CC now supports the 'SHIFT + mouse wheel' shortcut to change the field of view (perspective mode)
 
+	* 2D labels:
+		- most of the 2D labels parts (segment, point legend, etc.) are now displayed in 2D
+			(this way they always appear above the entities and be always visible).
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position

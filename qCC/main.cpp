@@ -182,24 +182,28 @@ int main(int argc, char **argv)
 	//Command line mode?
 	bool commandLine = (argc > 1 && argv[1][0] == '-');
 	
-	//specific case: translation file selection
+	//specific commands
 	int lastArgumentIndex = 1;
 	QTranslator translator;
-	if (commandLine && QString(argv[1]).toUpper() == "-LANG")
+	if (commandLine)
 	{
-		QString langFilename = QString(argv[2]);
-		
-		//Load translation file
-		if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
+		//translation file selection
+		if (QString(argv[lastArgumentIndex]).toUpper() == "-LANG")
 		{
-			qApp->installTranslator(&translator);
+			QString langFilename = QString(argv[2]);
+
+			//Load translation file
+			if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
+			{
+				qApp->installTranslator(&translator);
+			}
+			else
+			{
+				QMessageBox::warning(0, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
+			}
+			commandLine = false;
+			lastArgumentIndex += 2;
 		}
-		else
-		{
-			QMessageBox::warning(0, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
-		}
-		commandLine = false;
-		lastArgumentIndex = 3;
 	}
 
 	//splash screen
@@ -315,7 +319,6 @@ int main(int argc, char **argv)
 				.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
 		}
 
-
 		if (argc > lastArgumentIndex)
 		{
 			if (splash)
@@ -323,8 +326,40 @@ int main(int argc, char **argv)
 
 			//any additional argument is assumed to be a filename --> we try to load it/them
 			QStringList filenames;
-			for (int i = lastArgumentIndex; i<argc; ++i)
-				filenames << QString(argv[i]);
+			for (int i = lastArgumentIndex; i < argc; ++i)
+			{
+				QString arg(argv[i]);
+				//special command: auto start a plugin
+				if (arg.startsWith(":start-plugin:"))
+				{
+					QString pluginName = arg.mid(14);
+					QString pluginNameUpper = pluginName.toUpper();
+					//look for this plugin
+					bool found = false;
+					for (const tPluginInfo &plugin : plugins)
+					{
+						if (plugin.object->getName().replace(' ', '_').toUpper() == pluginNameUpper)
+						{
+							found = true;
+							bool success = plugin.object->start();
+							if (!success)
+							{
+								ccLog::Error(QString("Failed to start the plugin '%1'").arg(plugin.object->getName()));
+							}
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						ccLog::Error(QString("Couldn't find the plugin '%1'").arg(pluginName.replace('_', ' ')));
+					}
+				}
+				else
+				{
+					filenames << arg;
+				}
+			}
 
 			mainWindow->addToDB(filenames);
 		}
@@ -354,6 +389,19 @@ int main(int argc, char **argv)
 		{
 			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
 		}
+
+		//release the plugins
+		for (tPluginInfo &plugin : plugins)
+		{
+			plugin.object->stop(); //just in case
+			if (!plugin.qObject->parent())
+			{
+				delete plugin.object;
+				plugin.object = 0;
+				plugin.qObject = 0;
+			}
+		}
+
 	}
 
 	//release global structures

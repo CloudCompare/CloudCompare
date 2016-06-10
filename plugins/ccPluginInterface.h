@@ -43,7 +43,7 @@ enum  CC_PLUGIN_TYPE {	CC_STD_PLUGIN               = 1,
 };
 
 //! Standard CC plugin interface
-/** Version 2.0
+/** Version 3.0
 **/
 class ccPluginInterface
 {
@@ -65,6 +65,19 @@ public:
 	/** Should be reimplemented if necessary
 	**/
 	virtual QIcon getIcon() const { return QIcon(); }
+
+	//! Starts the plugin
+	/** Should be reimplemented if necessary.
+		Used when 'starting' a plugin from the command line
+		(to start a background service, a thread, etc.)
+	**/
+	virtual bool start() { return true; }
+
+	//! Stops the plugin
+	/** Should be reimplemented if necessary.
+		Used to stop a plugin previously started (see ccPluginInterface::start).
+	**/
+	virtual void stop() { }
 
 	//! Returns the plugin's custom object factory (if any)
 	/** Plugins may provide a factory to build custom objects.

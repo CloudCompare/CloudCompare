@@ -18,7 +18,7 @@ v2.8.beta - XX/XX/2016
 		- meta-data (normals, dip/direction, etc.) is now updated when the facet is rotated / transformed
 		- the 3D representation of the normal vector now depends on the facet size and not on its min. bounding-box size
 
-	* New shortcus 'a la Meshlb':
+	* New shortcus 'a la Meshlab':
 		- CC now supports the 'CTRL + mouse wheel' shortcut to change the point size
 		- CC now supports the 'ALT + mouse wheel' shortcut to change the zNear value (perspective mode)
 		- CC now supports the 'SHIFT + mouse wheel' shortcut to change the field of view (perspective mode)

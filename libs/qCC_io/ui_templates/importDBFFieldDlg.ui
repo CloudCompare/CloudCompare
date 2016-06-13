@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Do you wish to use one of the DBF field as altitude for 2D polylines?</string>
+      <string>Do you wish to use one of the DBF field as altitude?</string>
      </property>
     </widget>
    </item>

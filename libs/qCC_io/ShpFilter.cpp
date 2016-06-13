@@ -219,26 +219,26 @@ void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESR
 			}
 
 			//call the same method on the first child so as to get its type
-			GetSupportedShapes(child,shapes,shapeType/*,closedPolylinesAsPolygons*/);
+			GetSupportedShapes(child, shapes, shapeType/*,closedPolylinesAsPolygons*/);
 			if (shapeType == SHP_NULL_SHAPE)
 				return;
 
 			//then add the remaining children
 			{
-				for (unsigned i=1; i<baseEntity->getChildrenNumber(); ++i)
+				for (unsigned i = 1; i < baseEntity->getChildrenNumber(); ++i)
 				{
 					ESRI_SHAPE_TYPE otherShapeType = SHP_NULL_SHAPE;
 					ccHObject* child = baseEntity->getChild(i);
 					if (child)
-						GetSupportedShapes(child,shapes,otherShapeType);
-					
+						GetSupportedShapes(child, shapes, otherShapeType);
+
 					if (otherShapeType != shapeType)
 					{
 						if (child)
 							ccLog::Warning(QString("[SHP] Entity %1 has not the same type (%2) as the others in the selection (%3)! Can't mix types...")
-								.arg(child->getName())
-								.arg(ToString(otherShapeType))
-								.arg(ToString(shapeType)));
+							.arg(child->getName())
+							.arg(ToString(otherShapeType))
+							.arg(ToString(shapeType)));
 						//mixed shapes are not allowed in shape files (yet?)
 						shapes.clear();
 						return;
@@ -277,10 +277,10 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	}
 
 	//Byte 32: NumParts (The number of parts in the PolyLine)
-	int32_t numParts = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header+32));
+	int32_t numParts = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header + 32));
 
 	//Byte 36: NumPoints (The total number of points for all parts)
-	int32_t numPoints = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header+36));
+	int32_t numPoints = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header + 36));
 
 	//Byte 40: Parts (An array of length NumParts)
 	//for each part, the index of its first point in the points array
@@ -288,15 +288,15 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	{
 		try
 		{
-			startIndexes.resize(numParts,0);
+			startIndexes.resize(numParts, 0);
 		}
 		catch (const std::bad_alloc&)
 		{
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		for (int32_t i=0; i!=numParts; ++i)
+		for (int32_t i = 0; i != numParts; ++i)
 		{
-			file.read(header,4);
+			file.read(header, 4);
 			startIndexes[i] = qFromLittleEndian<int32_t>(*reinterpret_cast<int32_t*>(header));
 		}
 		//FIXME: we should use this information and create as many polylines as necessary!
@@ -334,7 +334,7 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	{
 		//Z boundaries
 		{
-			file.read(header,16);
+			file.read(header, 16);
 			//DGM: ignored
 			//double zMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header  ));
 			//double zMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+8));
@@ -342,9 +342,9 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 
 		//Z coordinates (an array of length NumPoints)
 		{
-			for (int32_t i=0; i<numPoints; ++i)
+			for (int32_t i = 0; i < numPoints; ++i)
 			{
-				file.read(header,8);
+				file.read(header, 8);
 				//check for errors
 				if (file.error() != QFile::NoError)
 					return CC_FERR_READING;
@@ -360,12 +360,12 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	{
 		//M boundaries
 		{
-			file.read(header,16);
+			file.read(header, 16);
 			//check for errors
 			if (file.error() != QFile::NoError)
 				return CC_FERR_READING;
-			double mMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header  ));
-			double mMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header+8));
+			double mMin = qFromLittleEndian<double>(*reinterpret_cast<double*>(header));
+			double mMax = qFromLittleEndian<double>(*reinterpret_cast<double*>(header + 8));
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
@@ -384,9 +384,9 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 		//M values (an array of length NumPoints)
 		if (!scalarValues.empty())
 		{
-			for (int32_t i=0; i<numPoints; ++i)
+			for (int32_t i = 0; i < numPoints; ++i)
 			{
-				file.read(header,8);
+				file.read(header, 8);
 				//check for errors
 				if (file.error() != QFile::NoError)
 					return CC_FERR_READING;
@@ -397,10 +397,10 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 	}
 
 	//and of course the polyline(s)
-	for (int32_t i=0; i<numParts; ++i)
+	for (int32_t i = 0; i < numParts; ++i)
 	{
 		const int32_t& firstIndex = startIndexes[i];
-		const int32_t& lastIndex = (i+1<numParts ? startIndexes[i+1] : numPoints) - 1;
+		const int32_t& lastIndex = (i + 1 < numParts ? startIndexes[i + 1] : numPoints) - 1;
 		int32_t vertCount = lastIndex - firstIndex + 1;
 
 		//test if the polyline is closed
@@ -418,9 +418,9 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 			delete vertices;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		for (int32_t j=0; j<vertCount; ++j)
+		for (int32_t j = 0; j < vertCount; ++j)
 		{
-			vertices->addPoint(points[firstIndex+j]);
+			vertices->addPoint(points[firstIndex + j]);
 		}
 		vertices->setEnabled(false);
 		vertices->setGlobalShift(PShift);
@@ -435,27 +435,27 @@ CC_FILE_ERROR LoadPolyline(	QFile& file,
 			delete poly;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		poly->addPointIndex(0,static_cast<unsigned>(vertCount));
+		poly->addPointIndex(0, static_cast<unsigned>(vertCount));
 		poly->showSF(vertices->sfShown());
 		QString name = QString("Polyline #%1").arg(index);
 		if (numParts != 1)
-			name += QString(".%1").arg(i+1);
+			name += QString(".%1").arg(i + 1);
 		poly->setName(name);
 		poly->setClosed(isClosed);
 		poly->set2DMode(!is3D && !load2DPolyAs3DPoly);
-		
+
 		if (!scalarValues.empty())
 		{
 			ccScalarField* sf = new ccScalarField("Measures");
 			if (!sf->reserve(vertCount))
 			{
-				ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i+1));
+				ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
 				sf->release();
 				sf = 0;
 			}
-			for (int32_t j=0; j<vertCount; ++j)
+			for (int32_t j = 0; j < vertCount; ++j)
 			{
-				sf->addElement(scalarValues[j+firstIndex]);
+				sf->addElement(scalarValues[j + firstIndex]);
 			}
 			sf->computeMinAndMax();
 			int sfIdx = vertices->addScalarField(sf);
@@ -981,7 +981,7 @@ CC_FILE_ERROR LoadSinglePoint(QFile& file, ccPointCloud* &singlePoints, ESRI_SHA
 	singlePoints->addPoint(P);
 
 	if (singlePoints->hasScalarFields())
-		singlePoints->setPointScalarValue(singlePoints->size()-1,s);
+		singlePoints->setPointScalarValue(singlePoints->size() - 1, s);
 
 	return CC_FERR_NO_ERROR;
 }
@@ -1438,6 +1438,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	return result;
 }
 
+typedef QPair<int, QString> FieldIndexAndName;
+
 //semi-persistent settings
 static double s_dbfFielImportScale = 1.0;
 CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
@@ -1511,10 +1513,16 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//double zMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 
-		CCVector3d Pmin(xMin,yMin,zMin);
-		if (HandleGlobalShift(Pmin,Pshift,parameters))
+		if (isnan(zMin))
 		{
-			ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+			//for 2D entities, the zMin value might be NaN!!!
+			zMin = 0;
+		}
+
+		CCVector3d Pmin(xMin, yMin, zMin);
+		if (HandleGlobalShift(Pmin, Pshift, parameters))
+		{
+			ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
 		}
 
 		//M bounaries (M = measures)
@@ -1552,23 +1560,25 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	ccPointCloud* singlePoints = 0;
 	qint64 pos = file.pos();
 	//we also keep track of the polylines 'record number' (if any)
-	QMap<ccPolyline*,int32_t> polyIDs;
+	QMap<ccPolyline*, int32_t> polyIDs;
 	int32_t maxPolyID = 0;
+	int32_t maxPointID = 0;
+	bool is3DShape = false;
 	while (fileLength >= 12)
 	{
 		file.seek(pos);
 		assert(pos + fileLength == fileSize);
 		//load shape record in main SHP file
 		{
-			file.read(header,8);
+			file.read(header, 8);
 			//Byte 0: Record Number
 			int32_t recordNumber = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(header)); //Record numbers begin at 1
 			//Byte 4: Content Length
-			int32_t recordSize = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(header+4)); //Record numbers begin at 1
+			int32_t recordSize = qFromBigEndian<int32_t>(*reinterpret_cast<const int32_t*>(header + 4)); //Record numbers begin at 1
 			recordSize *= 2; //recordSize is measured in 16-bit words
 			fileLength -= 8;
 			pos += 8;
-			
+
 			if (fileLength < recordSize)
 			{
 				assert(false);
@@ -1585,48 +1595,55 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				error = CC_FERR_MALFORMED_FILE;
 				break;
 			}
-			file.read(header,4);
+			file.read(header, 4);
 			recordSize -= 4;
 			int32_t shapeTypeInt = qToLittleEndian<int32_t>(*reinterpret_cast<const int32_t*>(header));
 			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt))).arg(recordSize));
 
 			switch (shapeTypeInt)
 			{
-			case SHP_POLYLINE:
 			case SHP_POLYLINE_Z:
-			case SHP_POLYGON:
 			case SHP_POLYGON_Z:
+				is3DShape = true;
+			case SHP_POLYLINE:
+			case SHP_POLYGON:
+			{
+				unsigned childCountBefore = container.getChildrenNumber();
+				error = LoadPolyline(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift);
+				if (error == CC_FERR_NO_ERROR && shapeTypeInt == SHP_POLYLINE)
 				{
-					unsigned childCountBefore = container.getChildrenNumber();
-					error = LoadPolyline(file,container,recordNumber,static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt),Pshift);
-					if (error == CC_FERR_NO_ERROR && shapeTypeInt == SHP_POLYLINE)
+					unsigned childCountAfter = container.getChildrenNumber();
+					//warning: we can load mutliple polylines for a single record!
+					for (unsigned i = childCountBefore; i < childCountAfter; ++i)
 					{
-						unsigned childCountAfter = container.getChildrenNumber();
-						//warning: we can load mutliple polylines for a single record!
-						for (unsigned i=childCountBefore; i<childCountAfter; ++i)
-						{
-							ccHObject* child = container.getChild(i);
-							assert(child && child->isA(CC_TYPES::POLY_LINE));
-							polyIDs[static_cast<ccPolyline*>(child)] = recordNumber;
-							if (recordNumber > maxPolyID)
-								maxPolyID = recordNumber;
-						}
+						ccHObject* child = container.getChild(i);
+						assert(child && child->isA(CC_TYPES::POLY_LINE));
+						polyIDs[static_cast<ccPolyline*>(child)] = recordNumber;
+						if (recordNumber > maxPolyID)
+							maxPolyID = recordNumber;
 					}
 				}
-				break;
-			case SHP_MULTI_POINT:
+			}
+			break;
 			case SHP_MULTI_POINT_Z:
 			case SHP_MULTI_POINT_M:
-				error = LoadCloud(file,container,recordNumber,static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt),Pshift);
+				is3DShape = true;
+			case SHP_MULTI_POINT:
+				error = LoadCloud(file, container, recordNumber, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift);
 				break;
-			case SHP_POINT:
 			case SHP_POINT_Z:
 			case SHP_POINT_M:
-				error = LoadSinglePoint(file,singlePoints,static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt),Pshift);
+				is3DShape = true;
+			case SHP_POINT:
+				error = LoadSinglePoint(file, singlePoints, static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt), Pshift);
+				if (error == CC_FERR_NO_ERROR && recordNumber > maxPointID)
+				{
+					maxPointID = recordNumber;
+				}
 				break;
 			//case SHP_MULTI_PATCH:
-			//	error = LoadMesh(file,recordSize);
-			//	break;
+				//error = LoadMesh(file, recordSize);
+				//break;
 			case SHP_NULL_SHAPE:
 				//ignored
 				break;
@@ -1638,7 +1655,9 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 
 		if (error != CC_FERR_NO_ERROR)
+		{
 			break;
+		}
 
 		pdlg.setValue(fileSize - (pos + fileLength));
 		if (pdlg.wasCanceled())
@@ -1649,13 +1668,18 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	//try to load the DBF to see if there's a 'height' field or something similar for polylines
-	if (error == CC_FERR_NO_ERROR && !polyIDs.empty())
+	bool hasPolylines = (!polyIDs.empty());
+	bool hasPoints = (singlePoints && singlePoints->size() != 0 && maxPointID == static_cast<int32_t>(singlePoints->size()));
+	if (	!is3DShape
+		&&	error == CC_FERR_NO_ERROR
+		&&	(hasPolylines || hasPoints)
+		)
 	{
 		QFileInfo fi(filename);
 		QString baseFileName = fi.path() + QString("/") + fi.completeBaseName();
 		//try to load the DB file (suffix should be ".dbf")
 		QString dbfFilename = baseFileName + QString(".dbf");
-		DBFHandle dbfHandle = DBFOpen(qPrintable(dbfFilename),"rb");
+		DBFHandle dbfHandle = DBFOpen(qPrintable(dbfFilename), "rb");
 		if (dbfHandle)
 		{
 			int fieldCount = DBFGetFieldCount(dbfHandle);
@@ -1664,30 +1688,34 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			{
 				ccLog::Warning("[SHP] No field in the associated DBF file!");
 			}
-			else if (recordCount < static_cast<int>(maxPolyID))
+			else if (hasPolylines && recordCount < static_cast<int>(maxPolyID))
+			{
+				ccLog::Warning("[SHP] No enough records in the associated DBF file!");
+			}
+			else if (hasPoints && recordCount < static_cast<int>(singlePoints->size()))
 			{
 				ccLog::Warning("[SHP] No enough records in the associated DBF file!");
 			}
 			else
 			{
-				QMap<int,QString> candidateFields;
-				for (int i=0; i<fieldCount; ++i)
+				QList<FieldIndexAndName> candidateFields;
+				for (int i = 0; i < fieldCount; ++i)
 				{
 					char fieldName[256];
-					DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle,i,fieldName,0,0);
+					DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, i, fieldName, 0, 0);
 					if (fieldType == FTDouble || fieldType == FTInteger)
 					{
-						candidateFields[i] = QString(fieldName);
+						candidateFields.push_back(FieldIndexAndName(i, QString(fieldName)));
 					}
 				}
-			
+
 				if (!candidateFields.empty())
 				{
 					//create a list of available fields
 					ImportDBFFieldDialog lsfDlg(0);
-					for (QMap<int,QString>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
+					for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
 					{
-						lsfDlg.listWidget->addItem(it.value());
+						lsfDlg.listWidget->addItem(it->second);
 					}
 					lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFielImportScale);
 					lsfDlg.okPushButton->setVisible(false);
@@ -1699,11 +1727,11 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 						//look for the selected index
 						int index = -1;
-						for (int i=0; i<candidateFields.size(); ++i)
+						for (int i = 0; i < candidateFields.size(); ++i)
 						{
 							if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i)))
 							{
-								index = i;
+								index = candidateFields[i].first;
 								break;
 							}
 						}
@@ -1712,29 +1740,55 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						{
 							double scale = s_dbfFielImportScale;
 							//read values
-							DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle,index,0,0,0);
-							//for each poyline
-							for (QMap<ccPolyline*,int32_t>::iterator it = polyIDs.begin(); it != polyIDs.end(); ++it)
-							{
-								//get the height
-								double z = 0.0;
-								if (fieldType == FTDouble)
-									z = DBFReadDoubleAttribute(dbfHandle,it.value()-1,index);
-								else //if (fieldType == FTInteger)
-									z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle,it.value()-1,index));
-								z *= scale;
+							DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, index, 0, 0, 0);
 
-								//translate the polyline
-								CCVector3 T(0,0,static_cast<PointCoordinateType>(z));
-								ccGLMatrix trans;
-								trans.setTranslation(T);
-								ccPolyline* poly = it.key();
-								if (poly)
+							if (hasPolylines)
+							{
+								//for each poyline
+								for (QMap<ccPolyline*, int32_t>::iterator it = polyIDs.begin(); it != polyIDs.end(); ++it)
 								{
-									poly->applyGLTransformation_recursive(&trans);
-									//add the 'const altitude' meta-data as well
-									poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(z));
+									//get the height
+									double z = 0.0;
+									if (fieldType == FTDouble)
+										z = DBFReadDoubleAttribute(dbfHandle, it.value() - 1, index);
+									else //if (fieldType == FTInteger)
+										z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle, it.value() - 1, index));
+									z *= scale;
+
+									//translate the polyline
+									CCVector3 T(0, 0, static_cast<PointCoordinateType>(z));
+									ccGLMatrix trans;
+									trans.setTranslation(T);
+									ccPolyline* poly = it.key();
+									if (poly)
+									{
+										poly->applyGLTransformation_recursive(&trans);
+										//add the 'const altitude' meta-data as well
+										poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(z));
+									}
 								}
+							}
+							else if (hasPoints)
+							{
+								//for each point
+								for (unsigned i = 0; i < singlePoints->size(); ++i)
+								{
+									//get the height
+									double z = 0.0;
+									if (fieldType == FTDouble)
+										z = DBFReadDoubleAttribute(dbfHandle, static_cast<int>(i), index);
+									else //if (fieldType == FTInteger)
+										z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle, static_cast<int>(i), index));
+									z *= scale;
+
+									//set the point height
+									const_cast<CCVector3*>(singlePoints->getPoint(i))->z = z;
+								}
+								singlePoints->invalidateBoundingBox();
+							}
+							else
+							{
+								assert(false);
 							}
 						}
 					}

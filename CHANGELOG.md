@@ -27,10 +27,14 @@ v2.8.beta - XX/XX/2016
 		- most of the 2D labels parts (segment, point legend, etc.) are now displayed in 2D
 			(this way they always appear above the entities and be always visible).
 
+	* SHP files:
+		- when loading 2D points, the Z coordinate can now be exported from an associated DBF field
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
 	* the fields named 'intensity', 'grey', 'gray' or 'col***i' in PLY files are now automatically loaded as scalar fields (instead of 'intensity', i.e. grey level RGB)
+	* when using a DBF field as height for polylines (in SHP files), the height value could be read from the wrong field
 
 v2.7.0 - 04/22/2016
 -------------------

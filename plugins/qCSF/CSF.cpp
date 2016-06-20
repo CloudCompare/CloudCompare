@@ -152,7 +152,6 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 			//	app->dispToConsole(QString("[CSF] Iteration %1: max delta = %2").arg(i+1).arg(maxDiff));
 			//}
 
-			//判断循环终止条件
 			if (maxDiff != 0 && maxDiff < params.class_threshold / 100)
 			{
 				//early stop
@@ -214,7 +213,7 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 	}
 }
 
-//输出地面点
+//Exporting the ground points to file.
 void CSF::saveGroundPoints(const std::vector<int>& grp, std::string path)
 {
 	std::string filepath = "terr_ground.txt";

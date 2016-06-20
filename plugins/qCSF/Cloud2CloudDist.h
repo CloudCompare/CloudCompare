@@ -4,7 +4,7 @@
 #include "Cloth.h"
 #include "PointCloud.h"
 
-//计算点云与点云之间的距离
+//computing distance between clouds
 class Cloud2CloudDist
 {
 public:

@@ -2,7 +2,7 @@
 This source code is about a ground filtering algorithm for airborn LiDAR data
 based on physical process simulations, specifically cloth simulation.
 
-this code is based on a Cloth Simulation Tutorial at the cg.alexandra.dk blog.
+This code is based on a Cloth Simulation Tutorial at the cg.alexandra.dk blog.
 Thanks to Jesper Mosegaard (clothTutorial@jespermosegaard.dk)
 
 
@@ -18,7 +18,7 @@ have been added to the original source code, including
 
 */
 //using discrete steps (drop and pull) to approximate the physical process
-//test merge 在每个不料点周围找最邻近的N个点，以高程最大值作为所能到达的最低点。
+//Finding the max height value in nearest N points aroud every particles, as the lowest position where the particles can get.在每个不料点周围找最邻近的N个点，以高程最大值作为所能到达的最低点。
 
 #ifndef _CLOTH_H_
 #define _CLOTH_H_
@@ -56,7 +56,7 @@ private:
 	std::vector<Particle> particles; // all particles that are part of this cloth
 	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth
 
-	//滤波边坡处理参数
+	//parameters of slope postpocessing
 	double smoothThreshold;
 	double heightThreshold;
 
@@ -112,10 +112,10 @@ public:
 	/* used to add gravity (or any other arbitrary vector) to all particles */
 	void addForce(const Vec3& direction);
 
-	//检测布料是否与地形碰撞
+	//detecting collision of cloth and terrain
 	void terrainCollision();
 
-	//对可移动的点进行边坡处理
+	//implementing postpocessing to movable particles
 	void movableFilter();
 	//找到每组可移动点，这个连通分量周围的不可移动点。从四周向中间逼近
 	void findUnmovablePoint(const std::vector<XY>& connected,
@@ -128,9 +128,9 @@ public:
 								const std::vector< std::vector<int> >& neighbors,
 								const std::vector<double> &heightvals);
 
-	//将布料点保存到文件
+	//saving the cloth to file
 	void saveToFile(std::string path = "");
-	//将可移动点保存到文件
+	//saving the movable particles to file
 	void saveMovableToFile(std::string path = "");
 
 	//! Converts the cloth to a CC mesh structure

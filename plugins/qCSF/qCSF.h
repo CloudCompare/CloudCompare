@@ -1,19 +1,21 @@
-//##########################################################################
-//#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qCSF                        #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                      COPYRIGHT: Qi jianbo ; Wan peng                   #
-//#                                                                        #
-//##########################################################################
+﻿//#######################################################################################
+//#                                                                                     #
+//#                              CLOUDCOMPARE PLUGIN: qCSF                              #
+//#                                                                                     #
+//#  Please cite the following paper, If you use this plugin in your work.              #
+//#                                                                                     #
+//#  Zhang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR  #
+//#  Data Filtering Method Based on Cloth Simulation. Remote Sensing. 2016; 8(6):501.   #
+//#                                                                                     #
+//#                                     Copyright ©                                     #
+//#               RAMM laboratory, School of Geography, Beijing Normal University       #
+//#                               (http://ramm.bnu.edu.cn/)                             #
+//#                                                                                     #
+//#                      Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang                #
+//#                                                                                     #
+//#                      contact us: 2009zwm@gmail.com; wpqjbzwm@126.com                #
+//#                                                                                     #
+//#######################################################################################
 
 #ifndef Q_CSF_PLUGIN_HEADER
 #define Q_CSF_PLUGIN_HEADER
@@ -34,7 +36,7 @@ public:
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "CSF Filter"; }
-	virtual QString getDescription() const { return "A point-clouds filtering algorithm utilize cloth simulation process(Qi jianbo,Wan peng,2015)."; }
+	virtual QString getDescription() const { return "A pointclouds filtering algorithm utilize cloth simulation process(Wuming Zhang; Jianbo Qi; Peng Wan,2015)."; }
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface

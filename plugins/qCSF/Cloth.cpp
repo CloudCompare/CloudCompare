@@ -193,7 +193,7 @@ void Cloth::addForce(const Vec3& direction)
 	}
 }
 
-//检测布料是否与地形碰撞
+//testing the collision
 void Cloth::terrainCollision()
 {
 	assert(particles.size() == heightvals.size());
@@ -324,7 +324,7 @@ void Cloth::movableFilter()
 					neibors.push_back(neighbor);
 				}
 
-				//处理边坡
+				//Slope postprocessing
 				if (sum > 100)
 				{
 					std::vector<int> edgePoints;
@@ -417,7 +417,7 @@ void Cloth::findUnmovablePoint(	const std::vector<XY>& connected,
 	}
 }
 
-//直接对联通分量进行边坡处理
+//implementing postprocessing to every group of movable points
 void Cloth::handle_slop_connected(	const std::vector<int>& edgePoints,
 									const std::vector<XY>& connected,
 									const std::vector< std::vector<int> >& neibors,
@@ -436,7 +436,7 @@ void Cloth::handle_slop_connected(	const std::vector<int>& edgePoints,
 	{
 		int index = que.front();
 		que.pop();
-		//判断周边点是否需要处理
+		//脜脨露脧脰脺卤脽碌茫脢脟路帽脨猫脪陋麓娄脌铆
 		int index_center = connected[index].y*num_particles_width + connected[index].x;
 		for (size_t i = 0; i < neibors[index].size(); i++)
 		{

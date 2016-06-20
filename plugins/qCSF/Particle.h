@@ -21,7 +21,7 @@ public:
 	//int neibor_count;
 	int pos_x; //position in the cloth grid
 	int pos_y;
-	int c_pos;//在联通分量中的位置
+	int c_pos;//position in the group of movable points
 	Vec3 pos; // the current position of the particle in 3D space
 	Vec3 old_pos; // the position of the particle in the previous time step, used as part of the verlet numerical integration scheme
 	

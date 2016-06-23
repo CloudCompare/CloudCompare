@@ -194,8 +194,8 @@ void qSRA::loadProfile() const
 	{
 		ccGLMatrix trans;
 		CCVector3 T = origin;
-		origin.u[axisDim] += heightShift;
-		trans.setTranslation(origin);
+		T.u[axisDim] += heightShift;
+		trans.setTranslation(T);
 		float* mat = trans.data();
 		switch (axisDim)
 		{

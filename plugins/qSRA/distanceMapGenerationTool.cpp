@@ -186,7 +186,7 @@ void DistanceMapGenerationTool::SetPolylineHeightShift(ccPolyline* polyline, Poi
 	if (polyline)
 	{
 		//add 'height shift' as meta-data
-		polyline->setMetaData(PROFILE_HEIGHT_SHIFT_KEY,QVariant(heightShift));
+		polyline->setMetaData(PROFILE_HEIGHT_SHIFT_KEY, QVariant(heightShift));
 	}
 }
 
@@ -466,7 +466,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 																					double yStep,
 																					double yMin,
 																					double yMax,
-																					bool spherical,
+																					bool conical,
 																					bool counterclockwise,
 																					FillStrategyType fillStrategy,
 																					EmptyCellFillOption emptyCellfillOption,
@@ -553,6 +553,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	grid->yMin = yMin;
 	grid->yMax = yMax;
 	grid->yStep = yStep;
+	grid->conical = conical;
 
 	//motion direction
 	grid->counterclockwise = counterclockwise;
@@ -568,13 +569,15 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		const CCVector3* P = cloud->getPoint(n);
 		CCVector3 relativePos = cloudToSurface * (*P);
 
-		//convert to cylindrical or spherical coordinates
+		//convert to cylindrical or conical (spherical) coordinates
 		double x = ccw * atan2(relativePos.u[X], relativePos.u[Y]); //longitude
 		if (x < 0.0)
+		{
 			x += 2.0 * M_PI;
+		}
 
 		double y = 0.0;
-		if (spherical)
+		if (conical)
 		{
 			y = ComputeLatitude_rad(relativePos.u[X], relativePos.u[Y], relativePos.u[Z]); //latitude between 0 and pi/2
 		}
@@ -713,7 +716,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 						const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
 						//get the triangle bounding box (in grid coordinates)
 						int P[3][2];
-						int xMin=0,yMin=0,xMax=0,yMax=0;
+						int xMin = 0, yMin = 0, xMax = 0, yMax = 0;
 						{
 							for (unsigned j=0; j<3; ++j)
 							{
@@ -721,10 +724,10 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 								P[j][0] = static_cast<int>(P2D.x);
 								P[j][1] = static_cast<int>(P2D.y);
 							}
-							xMin = std::min(std::min(P[0][0],P[1][0]),P[2][0]);
-							yMin = std::min(std::min(P[0][1],P[1][1]),P[2][1]);
-							xMax = std::max(std::max(P[0][0],P[1][0]),P[2][0]);
-							yMax = std::max(std::max(P[0][1],P[1][1]),P[2][1]);
+							xMin = std::min(std::min(P[0][0], P[1][0]), P[2][0]);
+							yMin = std::min(std::min(P[0][1], P[1][1]), P[2][1]);
+							xMax = std::max(std::max(P[0][0], P[1][0]), P[2][0]);
+							yMax = std::max(std::max(P[0][1], P[1][1]), P[2][1]);
 						}
 						//now scan the cells
 						{
@@ -732,7 +735,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 							const double& valA = cells[P[0][0] + P[0][1] * grid->xSteps].value;
 							const double& valB = cells[P[1][0] + P[1][1] * grid->xSteps].value;
 							const double& valC = cells[P[2][0] + P[2][1] * grid->xSteps].value;
-							int det = (P[1][1]-P[2][1])*(P[0][0]-P[2][0]) + (P[2][0]-P[1][0])*(P[0][1]-P[2][1]);
+							int det = (P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]);
 
 							for (int j=yMin; j<=yMax; ++j)
 							{
@@ -752,7 +755,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 											const int* P2 = P[(ti+1)%3];
 											if ((P2[1] <= j &&j < P1[1]) || (P1[1] <= j && j < P2[1]))
 											{
-												int t = (i-P2[0])*(P1[1]-P2[1])-(P1[0]-P2[0])*(j-P2[1]);
+												int t = (i - P2[0])*(P1[1] - P2[1]) - (P1[0] - P2[0])*(j - P2[1]);
 												if (P1[1] < P2[1])
 													t = -t;
 												if (t < 0)
@@ -762,8 +765,8 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 										//can we interpolate?
 										if (inside)
 										{
-											double l1 = static_cast<double>((P[1][1]-P[2][1])*(i-P[2][0])+(P[2][0]-P[1][0])*(j-P[2][1]))/det;
-											double l2 = static_cast<double>((P[2][1]-P[0][1])*(i-P[2][0])+(P[0][0]-P[2][0])*(j-P[2][1]))/det;
+											double l1 = static_cast<double>((P[1][1] - P[2][1])*(i - P[2][0]) + (P[2][0] - P[1][0])*(j - P[2][1])) / det;
+											double l2 = static_cast<double>((P[2][1] - P[0][1])*(i - P[2][0]) + (P[0][0] - P[2][0])*(j - P[2][1])) / det;
 											double l3 = 1.0-l1-l2;
 
 											cell[i].count = 1;
@@ -845,7 +848,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 		for (unsigned j=0; j<map->xSteps; ++j)
 		{
 			//longitude
-			double lon_rad = static_cast<double>(j)/static_cast<double>(map->xSteps) * (2.0*M_PI);
+			double lon_rad = static_cast<double>(j) / map->xSteps * (2.0 * M_PI);
 
 			double theta = nProj * (lon_rad - M_PI); //-Pi shift so that the map is well centered
 			double sin_theta = sin(theta);
@@ -866,17 +869,17 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 
 	//create facets
 	{
-		for (unsigned j=0; j+1<map->xSteps; ++j)
+		for (unsigned j = 0; j + 1 < map->xSteps; ++j)
 		{
-			for (unsigned i=0; i+1<map->ySteps; ++i)
+			for (unsigned i = 0; i + 1 < map->ySteps; ++i)
 			{
 				unsigned vertA = j*map->ySteps + i;
 				unsigned vertB = vertA + map->ySteps;
 				unsigned vertC = vertB + 1;
 				unsigned vertD = vertA + 1;
 
-				mesh->addTriangle(vertB,vertC,vertD);
-				mesh->addTriangle(vertB,vertD,vertA);
+				mesh->addTriangle(vertB, vertC, vertD);
+				mesh->addTriangle(vertB, vertD, vertA);
 			}
 		}
 	}
@@ -894,12 +897,12 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 		}
 
 		//create default texture coordinates
-		for (unsigned j=0; j<map->xSteps; ++j)
+		for (unsigned j = 0; j < map->xSteps; ++j)
 		{
-			float T[2] = { static_cast<float>(j)/static_cast<float>(map->xSteps-1), 0.0f };
-			for (unsigned i=0; i<map->ySteps; ++i)
+			float T[2] = { static_cast<float>(j) / (map->xSteps - 1), 0.0f };
+			for (unsigned i = 0; i < map->ySteps; ++i)
 			{
-				T[1] = static_cast<float>(i)/static_cast<float>(map->ySteps-1);
+				T[1] = static_cast<float>(i) / (map->ySteps - 1);
 				texCoords->addElement(T);
 			}
 		}
@@ -913,17 +916,17 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 		
 		//set texture indexes
 		{
-			for (unsigned j=0; j+1<map->xSteps; ++j)
+			for (unsigned j = 0; j + 1 < map->xSteps; ++j)
 			{
-				for (unsigned i=0; i+1<map->ySteps; ++i)
+				for (unsigned i = 0; i + 1 < map->ySteps; ++i)
 				{
 					unsigned vertA = j*map->ySteps + i;
 					unsigned vertB = vertA + map->ySteps;
 					unsigned vertC = vertB + 1;
 					unsigned vertD = vertA + 1;
 
-					mesh->addTriangleTexCoordIndexes(vertB,vertC,vertD);
-					mesh->addTriangleTexCoordIndexes(vertB,vertD,vertA);
+					mesh->addTriangleTexCoordIndexes(vertB, vertC, vertD);
+					mesh->addTriangleTexCoordIndexes(vertB, vertD, vertA);
 				}
 			}
 		}
@@ -936,8 +939,10 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 			mesh->removePerTriangleTexCoordIndexes();
 			return mesh;
 		}
-		for (unsigned i=0; i<meshFaceCount; ++i)
+		for (unsigned i = 0; i < meshFaceCount; ++i)
+		{
 			mesh->addTriangleMtlIndex(0);
+		}
 
 		//set material
 		{
@@ -977,7 +982,9 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 
 	const ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(profile->getAssociatedCloud());
 	if (!pcVertices)
+	{
 		return false;
+	}
 
 	//surface measures
 	surface = Measures();
@@ -988,7 +995,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 	{
 		double surfaceProd = 0.0;
 		double volumeProd = 0.0;
-		const double yMax = map->yMin + map->yStep * (double)map->ySteps;
+		const double yMax = map->yMin + map->yStep * map->ySteps;
 		for (unsigned i=1; i<pcVertices->size(); ++i)
 		{
 			const CCVector3* P0 = pcVertices->getPoint(i-1);
@@ -1003,8 +1010,8 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 			//without loss of generality ;)
 			if (y0 > y1)
 			{
-				std::swap(y0,y1);
-				std::swap(r0,r1);
+				std::swap(y0, y1);
+				std::swap(r0, r1);
 			}
 
 			//segment is totally outside the map?
@@ -1017,7 +1024,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 			if (y0 < map->yMin)
 			{
 				//interpolate r0 @ map->yMin
-				double alpha = (map->yMin - y0)/(y1 - y0);
+				double alpha = (map->yMin - y0) / (y1 - y0);
 				assert(alpha >= 0.0 && alpha <= 1.0);
 				r0 = r0 + alpha * (r1 - r0);
 				y0 = map->yMin;
@@ -1032,7 +1039,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 			}
 
 			//product for truncated cone surface (see http://en.wikipedia.org/wiki/Frustum)
-			double segmentLength = sqrt((r1-r0)*(r1-r0) + (y1-y0)*(y1-y0));
+			double segmentLength = sqrt((r1 - r0)*(r1 - r0) + (y1 - y0)*(y1 - y0));
 			surfaceProd += (r0 + r1) * segmentLength;
 
 			//product for truncated cone volume (see http://en.wikipedia.org/wiki/Frustum)
@@ -1056,13 +1063,13 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 	for (unsigned j=0; j<map->ySteps; ++j)
 	{
 		//corresponding heights
-		double height1 = map->yMin + (double)j * map->yStep;
+		double height1 = map->yMin + j * map->yStep;
 		double height2 = height1 + map->yStep;
 		double r_th1 = -1.0;
 		double r_th2 = -1.0;
 		
 		//search nearest "segment" in polyline
-		double height_middle = (height1 + height2)/2.0;
+		double height_middle = (height1 + height2) / 2.0;
 		for (unsigned k=1; k<vertexCount; ++k)
 		{
 			const CCVector3* A = vertices->getPoint(k-1);
@@ -1133,7 +1140,6 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 
 bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 															const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
-															double heightShift,
 															unsigned char revolutionAxisDim,
 															bool counterclockwise/*=false*/)
 {
@@ -1151,25 +1157,30 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 	PointCoordinateType ccw = (counterclockwise ? -PC_ONE : PC_ONE);
 
 	//get projection height
-	for (unsigned n=0; n<cloud->size(); ++n)
+	for (unsigned n = 0; n < cloud->size(); ++n)
 	{
 		CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
 		CCVector3 relativePos = cloudToSurface * (*P);
 
 		//convert to cylindrical coordinates
-		PointCoordinateType ang_rad = ccw * atan2(relativePos.u[X], relativePos.u[Y]);
-		if (ang_rad < 0)
-			ang_rad += static_cast<PointCoordinateType>(2.0 * M_PI);
-		PointCoordinateType height = relativePos.u[Z] + heightShift;
+		double lon_rad = ccw * atan2(relativePos.u[X], relativePos.u[Y]); //longitude
+		if (lon_rad < 0.0)
+		{
+			lon_rad += 2.0 * M_PI;
+		}
+		
+		PointCoordinateType height = relativePos.u[Z];
 
-		P->x = ang_rad;
+		P->x = static_cast<PointCoordinateType>(lon_rad);
 		P->y = height;
 		P->z = 0;
 	}
 
 	cloud->refreshBB();
 	if (cloud->getOctree())
+	{
 		cloud->deleteOctree();
+	}
 	//TODO FIXME: and kd-trees? etc. We need a better way to handle those cases...
 
 	return true;
@@ -1177,7 +1188,6 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 
 bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 														const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
-														double heightShift,
 														unsigned char revolutionAxisDim,
 														double latMin_rad,
 														double latMax_rad,
@@ -1212,14 +1222,16 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 
 		double lat_rad = ComputeLatitude_rad(	relativePos.u[X],
 												relativePos.u[Y],
-												relativePos.u[Z] + heightShift ); //between 0 and pi/2
+												relativePos.u[Z] ); //between 0 and pi/2
 
 		*P = ProjectPointOnCone(ang_rad, lat_rad, latMin_rad, nProj, counterclockwise);
 	}
 
 	cloud->refreshBB();
 	if (cloud->getOctree())
+	{
 		cloud->deleteOctree();
+	}
 	//TODO FIXME: and kd-trees? etc. We need a better way to handle those cases...
 
 	return true;
@@ -1236,7 +1248,7 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 	if (!map)
 	{
 		if (app)
-			app->dispToConsole(QString("[SaveMapAsCSVMatrix] Internal error: invalid input map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("[SaveMapAsCSVMatrix] Internal error: invalid input map!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -1245,7 +1257,7 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 	if (!file.open(QFile::WriteOnly | QFile::Text))
 	{
 		if (app)
-			app->dispToConsole(QString("[SaveMapAsCSVMatrix] Failed to open file for writing! Check access rights"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("[SaveMapAsCSVMatrix] Failed to open file for writing! Check access rights"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 	QTextStream stream(&file);
@@ -1260,8 +1272,8 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 		for (unsigned i=0; i<map->xSteps; ++i)
 		{
 			//min and max angle for the current column
-			double minX = xConversionFactor * (map->xMin + (double)i*map->xStep);
-			double maxX = xConversionFactor * (map->xMin + (double)(i+1)*map->xStep);
+			double minX = xConversionFactor * (map->xMin + i*map->xStep);
+			double maxX = xConversionFactor * (map->xMin + (i + 1)*map->xStep);
 			stream << QString("%1-%2 (%3);").arg(minX).arg(maxX).arg(xUnit);
 		}
 
@@ -1270,16 +1282,16 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 	}
 
 	//for each line
-	for (unsigned j=0; j<map->ySteps; ++j)
+	for (unsigned j = 0; j < map->ySteps; ++j)
 	{
 		//min and max height (for the current line)
-		double minY = yConversionFactor * (map->yMin + (double)(map->ySteps-1-j)*map->yStep);
-		double maxY = yConversionFactor * (map->yMin + (double)(map->ySteps-j)*map->yStep);
+		double minY = yConversionFactor * (map->yMin + (map->ySteps - 1 - j)*map->yStep);
+		double maxY = yConversionFactor * (map->yMin + (map->ySteps - j)*map->yStep);
 		stream << QString::number(minY) << QString(";");
 		stream << QString::number(maxY) << QString(";");
 
 		//for each column
-		for (unsigned i=0; i<map->xSteps; ++i)
+		for (unsigned i = 0; i < map->xSteps; ++i)
 		{
 			//write the grid value
 			stream << QString::number(map->at(i + j*map->xSteps).value) << QString(";");
@@ -1488,7 +1500,6 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 	return mesh;
 }
 
-
 ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer<Map>& map,
 															ccPolyline* profile,
 															double baseRadius/*=1.0*/,
@@ -1513,45 +1524,56 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	CCLib::GenericIndexedCloudPersist* polyVertices = profile->getAssociatedCloud();
 	unsigned polyVertCount = polyVertices->size();
 	if (polyVertCount < 2)
+	{
 		return 0;
+	}
 
-	//profile meta-data (we only need the height shift)
-	PointCoordinateType heightShift = 0;
-	GetPolylineHeightShift(profile, heightShift);
+	//profile meta-data
+	ProfileMetaData profileDesc;
+	if (!GetPoylineMetaData(profile, profileDesc))
+	{
+		return 0;
+	}
+
+	unsigned char Z = static_cast<unsigned char>(profileDesc.revolDim);
+	//we deduce the 2 other ('horizontal') dimensions
+	const unsigned char X = (Z < 2 ? Z + 1 : 0);
+	const unsigned char Y = (X < 2 ? X + 1 : 0);
 
 	const double xStep = baseRadius * (2.0*M_PI) / static_cast<double>(map->xSteps);
 
 	const MapCell* cell = &map->at(0);
-	for (unsigned j=0; j<map->ySteps; ++j)
+	for (unsigned j = 0; j < map->ySteps; ++j)
 	{
-		CCVector3 P(0,static_cast<PointCoordinateType>(map->yMin + (static_cast<double>(j) + 0.5) * map->yStep),0);
+		CCVector3 P(0, 0, 0);
+		P.u[Z] = static_cast<PointCoordinateType>(map->yMin + (j + 0.5) * map->yStep);
 
 		//for each column
 		for (unsigned i=0; i<map->xSteps; ++i, ++cell)
 		{
 			if (keepNaNPoints || cell->count != 0)
 			{
-				P.x = static_cast<PointCoordinateType>(map->xMin + (static_cast<double>(i) + 0.5) * xStep);
+				P.u[X] = static_cast<PointCoordinateType>(map->xMin + (i + 0.5) * xStep);
 
 				//search nearest "segment" in polyline
-				for (unsigned k=1; k<polyVertCount; ++k)
+				for (unsigned k = 1; k < polyVertCount; ++k)
 				{
-					const CCVector3* A = polyVertices->getPoint(k-1);
+					const CCVector3* A = polyVertices->getPoint(k - 1);
 					const CCVector3* B = polyVertices->getPoint(k);
 
-					double alpha = (P.y - heightShift - A->y)/(B->y - A->y);
+					double alpha = (P.u[Z] - profileDesc.heightShift - A->y) / (B->y - A->y);
 					if (alpha >= 0.0 && alpha <= 1.0)
 					{
 						//we deduce the right radius by linear interpolation
 						double radius_th = A->x + alpha * (B->x - A->x);
 						//TODO: we take the first radius (even if there are other segments at
 						//this particular height, because we can't guess which one is the 'right' one!
-						P.z = static_cast<PointCoordinateType>(radius_th);
+						P.u[Y] = static_cast<PointCoordinateType>(radius_th);
 						break;
 					}
 				}
 
-				cloud->addPoint(P);
+				cloud->addPoint(profileDesc.origin + P);
 
 				ScalarType val = cell->count ? static_cast<ScalarType>(cell->value) : NAN_VALUE;
 				sf->addElement(val);
@@ -1588,10 +1610,10 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 		bool csIsRelative = colorScale->isRelative();
 
 		const MapCell* cell = &map->at(0);
-		for (unsigned j=0; j<map->ySteps; ++j)
+		for (unsigned j = 0; j < map->ySteps; ++j)
 		{
 			//for each column
-			for (unsigned i=0; i<map->xSteps; ++i, ++cell)
+			for (unsigned i = 0; i < map->xSteps; ++i, ++cell)
 			{
 				const ColorCompType* rgb = ccColor::lightGrey.rgba;
 
@@ -1602,13 +1624,13 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 						relativePos = 0.0;
 					else if (relativePos > 1.0)
 						relativePos = 1.0;
-					rgb = colorScale->getColorByRelativePos(relativePos,colorScaleSteps,ccColor::lightGrey.rgba);
+					rgb = colorScale->getColorByRelativePos(relativePos, colorScaleSteps, ccColor::lightGrey.rgba);
 				}
 
 				//DGM FIXME: QImage::sePixel is quite slow!
 				image.setPixel(	static_cast<int>(i),
 								static_cast<int>(j),
-								qRgb(rgb[0],rgb[1],rgb[2]) );
+								qRgb(rgb[0], rgb[1], rgb[2]));
 			}
 		}
 	}

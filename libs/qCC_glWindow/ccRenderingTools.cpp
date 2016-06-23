@@ -384,6 +384,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 
 	//display color ramp
 	{
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(renderZoom);
+
 		//(x,y): current display area coordinates (top-left corner)
 		int x = halfW-xShift-scaleWidth;
 		int y = halfH-yShift-scaleMaxHeight;
@@ -392,7 +395,6 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		{
 			int histoStart = x + scaleWidth + std::min(std::max(scaleWidth / 8, 3), static_cast<int>(15 * renderZoom));
 
-			glFunc->glLineWidth(renderZoom);
 			glFunc->glBegin(GL_LINES);
 			for (int j=0; j<scaleMaxHeight; ++j)
 			{
@@ -463,10 +465,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		}
 
 		//scale border
-		glFunc->glLineWidth(2.0f * renderZoom);
 		const ccColor::Rgbub& lineColor = textColor;
 		glFunc->glColor3ubv(lineColor.rgb);
-		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(2.0f * renderZoom);
 		glFunc->glEnable(GL_LINE_SMOOTH);
 		glFunc->glBegin(GL_LINE_LOOP);
 		glFunc->glVertex2i(x,y);
@@ -474,6 +475,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		glFunc->glVertex2i(x+scaleWidth,y+scaleMaxHeight);
 		glFunc->glVertex2i(x,y+scaleMaxHeight);
 		glFunc->glEnd();
+
 		glFunc->glPopAttrib();
 	}
 

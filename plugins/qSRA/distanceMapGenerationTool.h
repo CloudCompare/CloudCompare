@@ -151,6 +151,7 @@ public:
 			, yMin(0.0)
 			, yMax(0.0)
 			, yStep(1.0)
+			, conical(false)
 			, minVal(0.0)
 			, maxVal(0.0)
 			, counterclockwise(false)
@@ -166,6 +167,9 @@ public:
 		double yMin;
 		double yMax;
 		double yStep;
+
+		//conical (true) or cylindrical (false) projection
+		bool conical;
 
 		//min and max values
 		double minVal;
@@ -207,7 +211,7 @@ public:
 											double yStep,
 											double yMin,
 											double yMax,
-											bool spherical,
+											bool conical,
 											bool counterclockwise,
 											FillStrategyType fillStrategy,
 											EmptyCellFillOption emptyCellfillOption,
@@ -229,7 +233,6 @@ public:
 	//! Converts a point cloud coordinates to "cylindrical" ones (in place)
 	static bool ConvertCloudToCylindrical(	ccPointCloud* cloud,
 											const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
-											double heightShift,
 											unsigned char revolutionAxisDim,
 											bool counterclockwise = false);
 
@@ -238,7 +241,6 @@ public:
 	**/
 	static bool ConvertCloudToConical(	ccPointCloud* cloud,
 										const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
-										double heightShift,
 										unsigned char revolutionAxisDim,
 										double latMin_rad,
 										double latMax_rad,

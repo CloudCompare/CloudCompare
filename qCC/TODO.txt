@@ -48,8 +48,13 @@ qAnimation plugin:
 [*] It would be great to specify the resolution.  I saw your comment and it just seems to make sense as this way you are not guessing.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
 
+qFacets plugin:
+[*] Option to export 3D polygons (facets) in SHP files
+[*] Add the facet perimeter to the set of exported values
+
 Various:
 
+[*] To be able to load a (geotiff) raster
 [*] Interpolate SFs over two clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1725)
 [*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp

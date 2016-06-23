@@ -43,13 +43,13 @@ public:
 	//! Returns the unique ID generator
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() = 0;
 
-	//! Adds an entity to main db
+	//! Adds an entity to the main db
 	/** \param obj entity
-			\param updateZoom updates active GL display zoom to fit the whole scene, including this new entity (addToDisplay must be true)
-			\param autoExpandDBTree whether DB tree should automatically be expanded
-			\param checkDimensions whether to check entity's dimensions (and potentially asking the user to shift/rescale it) or not
-			\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
-			**/
+		\param updateZoom updates active GL display zoom to fit the whole scene, including this new entity (addToDisplay must be true)
+		\param autoExpandDBTree whether DB tree should automatically be expanded
+		\param checkDimensions whether to check entity's dimensions (and potentially asking the user to shift/rescale it) or not
+		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
+	**/
 	virtual void addToDB(	ccHObject* obj,
 							bool updateZoom = false,
 							bool autoExpandDBTree = true,

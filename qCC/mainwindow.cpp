@@ -8974,7 +8974,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
 							ccGLWindow* destWin/*=0*/)
 {
-	//to handle same 'shift on load' for multiple files
+	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
 	bool loadCoordinatesTransEnabled = false;
 	
@@ -8988,17 +8988,19 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	}
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
-	CCVector3d addCoordinatesShift(0,0,0);
+	CCVector3d addCoordinatesShift(0, 0, 0);
 
-	for (int i=0; i<filenames.size(); ++i)
+	for (int i = 0; i < filenames.size(); ++i)
 	{
 		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, fileFilter);
 
 		if (newGroup)
 		{
 			if (destWin)
+			{
 				newGroup->setDisplay_recursive(destWin);
-			addToDB(newGroup,true,true,false);
+			}
+			addToDB(newGroup, true, true, false);
 		}
 	}
 

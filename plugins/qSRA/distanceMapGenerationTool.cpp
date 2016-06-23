@@ -99,25 +99,33 @@ static void SetPoylineMetaVector(ccPolyline* polyline, const QString& key, const
 }
 
 //helper
-ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeProfileToSurfaceTrans() const
+ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeCloudToSurfaceOriginTrans() const
 {
-	ccGLMatrix cloudToSurface;
-	cloudToSurface.setTranslation(-origin);
+	ccGLMatrix cloudToSurfaceOrigin;
+	cloudToSurfaceOrigin.setTranslation(-origin);
 
-	//we must take the axis fo the Surface of Revolution into account (if any and if it is not colinear with X, Y or Z)
+	//we must take the axis of the Surface of Revolution into account (if any and if it is not colinear with X, Y or Z)
 	if (hasAxis && axis.u[revolDim] + std::numeric_limits<PointCoordinateType>::epsilon() < 1.0)
 	{
 		ccGLMatrix rotation;
-		CCVector3 Z(0,0,0);
+		CCVector3 Z(0, 0, 0);
 		Z.u[revolDim] = PC_ONE;
 		rotation = ccGLMatrix::FromToRotation(axis, Z);
-		cloudToSurface = rotation * cloudToSurface;
+		cloudToSurfaceOrigin = rotation * cloudToSurfaceOrigin;
 	}
 
-	//don't forget the height shift along the revolution axis (if any)
-	cloudToSurface.getTranslation()[revolDim] += heightShift;
+	return cloudToSurfaceOrigin;
+}
 
-	return cloudToSurface;
+//helper
+ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeCloudToProfileOriginTrans() const
+{
+	ccGLMatrix cloudToPolylineOrigin = computeCloudToSurfaceOriginTrans();
+	
+	//add the height shift along the revolution axis (if any)
+	cloudToPolylineOrigin.getTranslation()[revolDim] -= heightShift;
+
+	return cloudToPolylineOrigin;
 }
 
 void DistanceMapGenerationTool::SetPoylineRevolDim(ccPolyline* polyline, int revolDim)
@@ -300,7 +308,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 
 	//now compute the distance between the cloud and the (implicit) surface of revolution
 	{
-		ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
+		ccGLMatrix cloudToProfile = profileDesc.computeCloudToProfileOriginTrans();
 
 		//we deduce the horizontal dimensions from the revolution axis
 		const unsigned char dim1 = static_cast<unsigned char>(profileDesc.revolDim < 2 ? profileDesc.revolDim+1 : 0);
@@ -317,10 +325,10 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			const CCVector3* P = cloud->getPoint(i);
 
 			//relative point position
-			CCVector3 Prel = cloudToSurface * (*P);
+			CCVector3 Prel = cloudToProfile * (*P);
 
 			//deduce point height and radius (i.e. in profile 2D coordinate system)
-			double height = Prel.u[profileDesc.revolDim] - profileDesc.heightShift;
+			double height = Prel.u[profileDesc.revolDim];
 			//TODO FIXME: we assume the surface of revolution is smooth!
 			double radius = sqrt(Prel.u[dim1]*Prel.u[dim1] + Prel.u[dim2]*Prel.u[dim2]);
 
@@ -382,7 +390,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* cloud,
 																double& minLat_rad,
 																double& maxLat_rad,
-																const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+																const ccGLMatrix& cloudToSurfaceOrigin, //e.g. translation to the revolution origin
 																unsigned char revolutionAxisDim)
 {
 	minLat_rad = maxLat_rad = 0.0;
@@ -405,10 +413,10 @@ bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* clou
 	for (unsigned n=0; n<count; ++n)
 	{
 		const CCVector3* P = cloud->getPoint(n);
-		CCVector3 relativePos = cloudToSurface * (*P);
+		CCVector3 relativePos = cloudToSurfaceOrigin * (*P);
 
 		//latitude between 0 and pi/2
-		double lat_rad = ComputeLatitude_rad(relativePos.u[X],relativePos.u[Y],relativePos.u[Z]);
+		double lat_rad = ComputeLatitude_rad(relativePos.u[X], relativePos.u[Y], relativePos.u[Z]);
 
 		if (n)
 		{
@@ -561,22 +569,22 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		CCVector3 relativePos = cloudToSurface * (*P);
 
 		//convert to cylindrical or spherical coordinates
-		double x = ccw * atan2(relativePos.u[X],relativePos.u[Y]); //longitude
+		double x = ccw * atan2(relativePos.u[X], relativePos.u[Y]); //longitude
 		if (x < 0.0)
 			x += 2.0 * M_PI;
-		
+
 		double y = 0.0;
 		if (spherical)
 		{
-			y = ComputeLatitude_rad(relativePos.u[X],relativePos.u[Y],relativePos.u[Z]); //latitude between 0 and pi/2
+			y = ComputeLatitude_rad(relativePos.u[X], relativePos.u[Y], relativePos.u[Z]); //latitude between 0 and pi/2
 		}
 		else
 		{
 			y = relativePos.u[Z]; //height
 		}
 
-		int i = static_cast<int>((x-grid->xMin)/grid->xStep);
-		int j = static_cast<int>((y-grid->yMin)/grid->yStep);
+		int i = static_cast<int>((x - grid->xMin) / grid->xStep);
+		int j = static_cast<int>((y - grid->yMin) / grid->yStep);
 
 		//if we fall exactly on the max corner of the grid box
 		if (i == static_cast<int>(grid->xSteps))
@@ -592,7 +600,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		}
 		assert(i >= 0 && j >= 0);
 
-		MapCell& cell = (*grid)[j*static_cast<int>(grid->xSteps)+i];
+		MapCell& cell = (*grid)[j*static_cast<int>(grid->xSteps) + i];
 		if (cell.count) //if there's already values projected in this cell
 		{
 			switch (fillStrategy)
@@ -633,7 +641,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		MapCell* cell = &grid->at(0);
 		for (unsigned i=0; i<cellCount; ++i, ++cell)
 			if (cell->count > 1)
-				cell->value /= (double)cell->count;
+				cell->value /= static_cast<double>(cell->count);
 	}
 
 	//fill empty cells with zero?
@@ -1286,7 +1294,7 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 }
 
 ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
-														const ccGLMatrix& cloudToSurface,
+														const ccGLMatrix& cloudToProfile,
 														bool counterclockwise,
 														unsigned angularSteps/*=36*/,
 														QImage mapTexture/*=QImage()*/)
@@ -1329,14 +1337,14 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		return 0;
 	}
 
-	ccGLMatrix surfaceToCloud = cloudToSurface.inverse();
+	ccGLMatrix profileToCloud = cloudToProfile.inverse();
 
 	//create vertices
 	{
 		double cwSign = (counterclockwise ? -1.0 : 1.0);
 		for (unsigned j=0; j<angularSteps; ++j)
 		{
-			double angle_rad = static_cast<double>(j)/angularSteps * (2*M_PI);
+			double angle_rad = static_cast<double>(j) / angularSteps * (2 * M_PI);
 
 			CCVector3d N(sin(angle_rad) * cwSign,
 						 cos(angle_rad),
@@ -1350,9 +1358,9 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 				CCVector3 Pxyz;
 				Pxyz.u[X] = static_cast<PointCoordinateType>(radius * N.x);
 				Pxyz.u[Y] = static_cast<PointCoordinateType>(radius * N.y);
-				Pxyz.u[Z] = P->y + profileDesc.heightShift;
+				Pxyz.u[Z] = P->y;
 
-				surfaceToCloud.apply(Pxyz);
+				profileToCloud.apply(Pxyz);
 
 				cloud->addPoint(Pxyz);
 			}
@@ -1366,25 +1374,25 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 
 	//create facets
 	{
-		for (unsigned j=0; j<angularSteps; ++j)
+		for (unsigned j = 0; j < angularSteps; ++j)
 		{
-			unsigned nextJ = ((j+1) % angularSteps);
-			for (unsigned i=0; i+1<profVertCount; ++i)
+			unsigned nextJ = ((j + 1) % angularSteps);
+			for (unsigned i = 0; i + 1 < profVertCount; ++i)
 			{
-				unsigned vertA = j*profVertCount+i;
-				unsigned vertB = nextJ*profVertCount+i;
-				unsigned vertC = vertB+1;
-				unsigned vertD = vertA+1;
+				unsigned vertA = j*profVertCount + i;
+				unsigned vertB = nextJ*profVertCount + i;
+				unsigned vertC = vertB + 1;
+				unsigned vertD = vertA + 1;
 
 				if (invertedHeight)
 				{
-					mesh->addTriangle(vertB,vertC,vertD);
-					mesh->addTriangle(vertB,vertD,vertA);
+					mesh->addTriangle(vertB, vertC, vertD);
+					mesh->addTriangle(vertB, vertD, vertA);
 				}
 				else
 				{
-					mesh->addTriangle(vertB,vertD,vertC);
-					mesh->addTriangle(vertB,vertA,vertD);
+					mesh->addTriangle(vertB, vertD, vertC);
+					mesh->addTriangle(vertB, vertA, vertD);
 				}
 			}
 		}
@@ -1405,7 +1413,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		//create default texture coordinates
 		for (unsigned j=0; j<=angularSteps; ++j)
 		{
-			float T[2] = {static_cast<float>(j)/static_cast<float>(angularSteps), 0.0f};
+			float T[2] = { static_cast<float>(j) / angularSteps, 0.0f };
 			for (unsigned i=0; i<profVertCount; ++i)
 			{
 				T[1] = (profileVertices->getPoint(i)->y - h0) / dH;
@@ -1423,25 +1431,25 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		
 		//set texture indexes
 		{
-			for (unsigned j=0; j<angularSteps; ++j)
+			for (unsigned j = 0; j < angularSteps; ++j)
 			{
-				unsigned nextJ = ((j+1)/*% angularSteps*/);
-				for (unsigned i=0; i+1<profVertCount; ++i)
+				unsigned nextJ = ((j + 1)/*% angularSteps*/);
+				for (unsigned i = 0; i + 1 < profVertCount; ++i)
 				{
-					unsigned vertA = j*profVertCount+i;
-					unsigned vertB = nextJ*profVertCount+i;
-					unsigned vertC = vertB+1;
-					unsigned vertD = vertA+1;
+					unsigned vertA = j*profVertCount + i;
+					unsigned vertB = nextJ*profVertCount + i;
+					unsigned vertC = vertB + 1;
+					unsigned vertD = vertA + 1;
 
 					if (invertedHeight)
 					{
-						mesh->addTriangleTexCoordIndexes(vertB,vertC,vertD);
-						mesh->addTriangleTexCoordIndexes(vertB,vertD,vertA);
+						mesh->addTriangleTexCoordIndexes(vertB, vertC, vertD);
+						mesh->addTriangleTexCoordIndexes(vertB, vertD, vertA);
 					}
 					else
 					{
-						mesh->addTriangleTexCoordIndexes(vertB,vertD,vertC);
-						mesh->addTriangleTexCoordIndexes(vertB,vertA,vertD);
+						mesh->addTriangleTexCoordIndexes(vertB, vertD, vertC);
+						mesh->addTriangleTexCoordIndexes(vertB, vertA, vertD);
 					}
 				}
 			}

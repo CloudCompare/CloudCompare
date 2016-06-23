@@ -35,6 +35,8 @@ v2.8.beta - XX/XX/2016
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
 	* the fields named 'intensity', 'grey', 'gray' or 'col***i' in PLY files are now automatically loaded as scalar fields (instead of 'intensity', i.e. grey level RGB)
 	* when using a DBF field as height for polylines (in SHP files), the height value could be read from the wrong field
+	* qSRA (Surface or Revolution Analysis): the profile origin was not always properly take into account. The latitude angles were not always computed relatively to
+		the profile origin and changing the origin via the distance map dialog could be misleading.
 
 v2.7.0 - 04/22/2016
 -------------------

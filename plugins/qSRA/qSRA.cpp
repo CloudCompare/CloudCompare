@@ -185,14 +185,16 @@ void qSRA::loadProfile() const
 
 	//DGM: the following works only because the axis is colinear with X, Y or Z!
 	PointCoordinateType heightShift = 0;
-	if (!piDlg.absoluteHeightValues())
-		heightShift = origin.u[axisDim]; //the profile height values are relative to the origin!
-	else
-		origin.u[axisDim] = 0;
+	if (piDlg.absoluteHeightValues())
+	{
+		heightShift = -origin.u[axisDim];
+	}
 	
 	//apply a visual transformation to see the polyline in the right place
 	{
 		ccGLMatrix trans;
+		CCVector3 T = origin;
+		origin.u[axisDim] += heightShift;
 		trans.setTranslation(origin);
 		float* mat = trans.data();
 		switch (axisDim)

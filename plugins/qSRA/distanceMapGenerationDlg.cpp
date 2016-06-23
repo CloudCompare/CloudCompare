@@ -162,58 +162,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 				zOriginDoubleSpinBox->setValue(profileDesc.origin.z);
 			}
 
-			//compute transformation from cloud to the surface (of revolution)
-			ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
-
-			//compute mean 'radius'
-			//as well as min and max 'height'
-			double baseRadius = 0.0;
-			double minHeight = 0.0;
-			double maxHeight = 0.0;
-			for (unsigned i=0; i<m_profile->size(); ++i)
-			{
-				const CCVector3* P = m_profile->getPoint(i);
-				double radius = P->x;
-				double height = P->y + profileDesc.heightShift;
-				baseRadius += radius;
-
-				if (i != 0)
-				{
-					if (height < minHeight)
-						minHeight = height;
-					else if (height > maxHeight)
-						maxHeight = height;
-				}
-				else
-				{
-					minHeight = maxHeight = height;
-				}
-			}
-			
-			//set default 'base radius'
-			if (m_profile->size() != 0)
-				baseRadius /= m_profile->size();
-			if (baseRadius == 0.0)
-				baseRadius = 1.0;
-			baseRadiusDoubleSpinBox->setValue(baseRadius);
-
-			//set default min and max height
-			hMinDoubleSpinBox->setValue(minHeight);
-			hMaxDoubleSpinBox->setValue(maxHeight);
-
-			//do the same thing for conical projection
-			double minLat_rad = 0.0, maxLat_rad = 0.0;
-
-			if (   m_cloud
-				&& DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	m_cloud,
-																			minLat_rad,
-																			maxLat_rad,
-																			cloudToSurface,
-																			static_cast<unsigned char>(profileDesc.revolDim)))
-			{
-				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad,m_angularUnits)); 
-				latMaxDoubleSpinBox->setValue(ConvertAngleFromRad(maxLat_rad,m_angularUnits));
-			}
+			updateMinAndMaxLimits();
 		}
 		else
 		{
@@ -353,6 +302,81 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 
 DistanceMapGenerationDlg::~DistanceMapGenerationDlg()
 {
+}
+
+void DistanceMapGenerationDlg::updateMinAndMaxLimits()
+{
+	if (m_cloud && m_profile)
+	{
+		DistanceMapGenerationTool::ProfileMetaData profileDesc;
+		if (DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc))
+		{
+			//compute mean 'radius'
+			//as well as min and max 'height'
+			double baseRadius = 0.0;
+			double minHeight = 0.0;
+			double maxHeight = 0.0;
+			for (unsigned i = 0; i<m_profile->size(); ++i)
+			{
+				const CCVector3* P = m_profile->getPoint(i);
+				double radius = P->x;
+				double height = P->y + profileDesc.heightShift;
+				baseRadius += radius;
+
+				if (i != 0)
+				{
+					if (height < minHeight)
+						minHeight = height;
+					else if (height > maxHeight)
+						maxHeight = height;
+				}
+				else
+				{
+					minHeight = maxHeight = height;
+				}
+			}
+
+			//set default 'base radius'
+			if (m_profile->size() != 0)
+				baseRadius /= m_profile->size();
+			if (baseRadius == 0.0)
+				baseRadius = 1.0;
+
+			baseRadiusDoubleSpinBox->blockSignals(true);
+			baseRadiusDoubleSpinBox->setValue(baseRadius);
+			baseRadiusDoubleSpinBox->blockSignals(false);
+
+			//set default min and max height
+			hMinDoubleSpinBox->blockSignals(true);
+			hMinDoubleSpinBox->setValue(minHeight);
+			hMinDoubleSpinBox->blockSignals(false);
+
+			hMaxDoubleSpinBox->blockSignals(true);
+			hMaxDoubleSpinBox->setValue(maxHeight);
+			hMaxDoubleSpinBox->blockSignals(false);
+
+			//do the same for the latitude
+
+			//compute transformation from the cloud to the surface (of revolution)
+			ccGLMatrix cloudToSurfaceOrigin = profileDesc.computeCloudToSurfaceOriginTrans();
+
+			double minLat_rad = 0.0, maxLat_rad = 0.0;
+			if (DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(m_cloud,
+				minLat_rad,
+				maxLat_rad,
+				cloudToSurfaceOrigin,
+				static_cast<unsigned char>(profileDesc.revolDim)))
+			{
+				latMinDoubleSpinBox->blockSignals(true);
+				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad, m_angularUnits));
+				latMinDoubleSpinBox->blockSignals(false);
+				
+				latMaxDoubleSpinBox->blockSignals(true);
+				latMaxDoubleSpinBox->setValue(ConvertAngleFromRad(maxLat_rad, m_angularUnits));
+				latMaxDoubleSpinBox->blockSignals(false);
+			}
+		}
+	}
 }
 
 void DistanceMapGenerationDlg::projectionModeChanged(int)
@@ -972,12 +996,22 @@ void DistanceMapGenerationDlg::updateProfileOrigin()
 		return;
 	}
 
+	DistanceMapGenerationTool::ProfileMetaData profileDesc;
+	DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc);
+
 	//update origin
 	CCVector3 origin(	static_cast<PointCoordinateType>(xOriginDoubleSpinBox->value()),
 						static_cast<PointCoordinateType>(yOriginDoubleSpinBox->value()),
 						static_cast<PointCoordinateType>(zOriginDoubleSpinBox->value()) );
+
+	//DGM: we must compensate for the change of shift along the revolution axis!
+	double dShift = origin.u[profileDesc.revolDim] - profileDesc.origin.u[profileDesc.revolDim];
+	profileDesc.heightShift -= dShift;
 	
 	DistanceMapGenerationTool::SetPoylineOrigin(m_profile, origin);
+	DistanceMapGenerationTool::SetPolylineHeightShift(m_profile, profileDesc.heightShift);
+
+	updateMinAndMaxLimits();
 }
 
 void DistanceMapGenerationDlg::updateGridSteps()
@@ -1069,11 +1103,12 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 		assert(false);
 		return QSharedPointer<DistanceMapGenerationTool::Map>(0);
 	}
+	
 	//compute transformation from cloud to the surface (of revolution)
-	ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
+	ccGLMatrix cloudToSurface = profileDesc.computeCloudToSurfaceOriginTrans();
 
 	//steps
-	double angStep_rad = getSpinboxAngularValue(xStepDoubleSpinBox,ANG_RAD);
+	double angStep_rad = getSpinboxAngularValue(xStepDoubleSpinBox, ANG_RAD);
 	//CW (clockwise) or CCW (counterclockwise)
 	bool ccw = ccwCheckBox->isChecked();
 
@@ -1157,9 +1192,9 @@ void DistanceMapGenerationDlg::exportMapAsMesh()
 		return;
 	}
 
-	//compute transformation from cloud to the surface (of revolution)
-	ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
-	ccMesh* mesh = DistanceMapGenerationTool::ConvertProfileToMesh(m_profile,cloudToSurface,m_map->counterclockwise,m_map->xSteps,mapImage);
+	//compute transformation from cloud to the profile (origin)
+	ccGLMatrix cloudToProfile = profileDesc.computeCloudToProfileOriginTrans();
+	ccMesh* mesh = DistanceMapGenerationTool::ConvertProfileToMesh(m_profile, cloudToProfile, m_map->counterclockwise, m_map->xSteps, mapImage);
 	if (mesh)
 	{
 		mesh->setDisplay_recursive(m_cloud->getDisplay());
@@ -1443,7 +1478,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 				return;
 			}
 			//compute transformation from cloud to the surface (of revolution)
-			ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
+			ccGLMatrix cloudToSurface = profileDesc.computeCloudToSurfaceOriginTrans();
 			//CW (clockwise) or CCW (counterclockwise)
 			bool ccw = ccwCheckBox->isChecked();
 

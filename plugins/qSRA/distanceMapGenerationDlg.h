@@ -163,6 +163,9 @@ protected:
 	//! Saves parameters to persistent settings
 	void saveToPersistentSettings();
 
+	//! Updates the min and max limits (fields)
+	void updateMinAndMaxLimits();
+
 	//! Application interface
 	ccMainAppInterface* m_app;
 

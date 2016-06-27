@@ -48,7 +48,7 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 				+ cloth.getParticle(col3, row3).pos.y * (1 - subdeltaX)*subdeltaZ
 				+ cloth.getParticle(col2, row2).pos.y * subdeltaX*subdeltaZ
 				+ cloth.getParticle(col1, row1).pos.y * subdeltaX*(1 - subdeltaZ);
-			float height_var = fxy - pc[i].y;
+			double height_var = fxy - pc[i].y;
 			if (std::fabs(height_var) < class_threshold)
 			{
 				groundIndexes.push_back(i);

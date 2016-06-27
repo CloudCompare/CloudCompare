@@ -12,12 +12,13 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 	try
 	{
 		//首先对每个lidar点找到在布料网格中对应的节点，并记录下来
+		//find the nearest cloth particle for each lidar point by Rounding operation
 		double tmp;
 		for (int i = 0; i < pc.size(); i++)
 		{
 			double pc_x = pc[i].x;
 			double pc_z = pc[i].z;
-			//将该坐标与布料的左上角坐标相减
+			//将该坐标与布料的左上角坐标相减 minus the top-left corner of the cloth
 			double deltaX = pc_x - cloth.origin_pos.x;
 			double deltaZ = pc_z - cloth.origin_pos.z;
 			int col = int(deltaX / cloth.step_x + 0.5);

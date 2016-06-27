@@ -20,6 +20,8 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 	{
 		//找到每个激光雷达点到布料直接的距离，用该距离阈值来对点云进行分类
 		//双线性插值
+		// for each lidar point, find the projection in the cloth grid, and the sub grid which contains it.
+		//use the four corner of the subgrid to do bilinear interpolation;
 		for (int i = 0; i < pc.size(); i++)
 		{
 			double pc_x = pc[i].x;
@@ -40,7 +42,7 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 			double subdeltaX = (deltaX - col0*cloth.step_x) / cloth.step_x;
 			double subdeltaZ = (deltaZ - row0*cloth.step_y) / cloth.step_y;
 			//cout << subdeltaX << " " << subdeltaZ << endl;
-			//双线性插值 binary interpolation
+			//双线性插值 bilinear interpolation;
 			//f(x,y)=f(0,0)(1-x)(1-y)+f(0,1)(1-x)y+f(1,1)xy+f(1,0)x(1-y)
 			double fxy = cloth.getParticle(col0, row0).pos.y * (1 - subdeltaX)*(1 - subdeltaZ)
 				+ cloth.getParticle(col3, row3).pos.y * (1 - subdeltaX)*subdeltaZ

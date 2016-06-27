@@ -26,7 +26,6 @@ have been added to the original source code, including
 //local
 #include "Vec3.h"
 #include "Particle.h"
-#include "Constraint.h"
 
 //system
 #include <vector>
@@ -54,7 +53,7 @@ private:
 	double time_step;
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
-	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth
+//	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth
 
 	//parameters of slope postpocessing
 	double smoothThreshold;

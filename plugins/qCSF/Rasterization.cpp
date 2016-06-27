@@ -1,9 +1,79 @@
 #include "Rasterization.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
+//Since all the particles in cloth are formed as a regular grid, 
+//for each lidar point, its nearest Cloth point can be simply found by Rounding operation
+//then record all the correspoinding lidar point for each cloth particle
+#if 1    
 
-//#ifdef WITH_CGAL
-#if 1 //CGAL is slow but more stable, especially when the point cloud is sparse (relatively to the rectangular raster grid!)
+bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
+{
+	try
+	{
+		//首先对每个lidar点找到在布料网格中对应的节点，并记录下来
+		double tmp;
+		for (int i = 0; i < pc.size(); i++)
+		{
+			double pc_x = pc[i].x;
+			double pc_z = pc[i].z;
+			//将该坐标与布料的左上角坐标相减
+			double deltaX = pc_x - cloth.origin_pos.x;
+			double deltaZ = pc_z - cloth.origin_pos.z;
+			int col = int(deltaX / cloth.step_x + 0.5);
+			int row = int(deltaZ / cloth.step_y + 0.5);
+			if (col >= 0 && row >= 0 )
+			{
+				Particle& pt = cloth.getParticle(col, row);
+				//Particle pt = cloth.getParticle(col, row); this give wrong results, since it made a copy
+				pt.correspondingLidarPointList.push_back(i);
+				double pc2particleDist = SQUARE_DIST(pc_x, pc_z, pt.pos.x, pt.pos.z);
+				if (pc2particleDist < pt.tmpDist)
+				{
+					pt.tmpDist = pc2particleDist;
+					pt.nearestPointHeight = pc[i].y;
+					pt.nearestPointIndex = i;
+					tmp = pc[i].y;
+				}
+			}
+		}
+		
 
-//CGAL
+		heightVal.resize(cloth.getSize());
+		//#pragma omp parallel for
+		for (int i = 0; i < cloth.getSize(); i++)
+		{
+			double nearestHeight = cloth.getParticleByIndex(i).nearestPointHeight;
+			
+			if (nearestHeight > MIN_INF)
+			{
+				heightVal[i] = nearestHeight;
+				tmp = nearestHeight;
+			}
+			else
+			{
+				heightVal[i] = tmp;
+			}
+		
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+
+	return true;
+}
+
+
+
+
+
+
+
+#else 
+//CGAL is slow but more stable, especially when the point cloud is sparse (relatively to the rectangular raster grid!)
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/point_generators_2.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
@@ -63,7 +133,8 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 	return true;
 }
 
-#else //we use CC_CORE_LIB --> potentially much faster but very slow when the the point cloud is sparse (relatively to the rectangular raster grid!)
+
+//we use CC_CORE_LIB --> potentially much faster but very slow when the the point cloud is sparse (relatively to the rectangular raster grid!)
 
 //CC_CORE_LIB
 #include <SimpleCloud.h>

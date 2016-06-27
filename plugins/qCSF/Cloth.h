@@ -66,13 +66,18 @@ private:
 	//movable particle index
 	std::vector<int> movableIndex;
 	std::vector< std::vector<int> > particle_edges;
+	
+	//record 
+	inline void addConstraint(Particle *p1, Particle *p2) 
+	{ /*constraints.push_back(Constraint(p1, p2));*/ 
+		p1->neighborsList.push_back(p2);  //record the neighbor for each particle
+		p2->neighborsList.push_back(p1);
+	}
+
+public:
 
 	inline Particle& getParticle(int x, int y) { return particles[y*num_particles_width + x]; }
 	inline const Particle& getParticle(int x, int y) const { return particles[y*num_particles_width + x]; }
-	
-	inline void addConstraint(Particle *p1, Particle *p2) { constraints.push_back(Constraint(p1, p2)); }
-
-public:
 	
 	inline Particle getParticleByIndex(int index) { return particles[index]; }
 	inline const Particle getParticleByIndex(int index) const { return particles[index]; }

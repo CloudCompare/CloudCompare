@@ -156,15 +156,26 @@ double Cloth::timeStep()
 	{
 		particles[i].timeStep();
 	}
+/*
+Instead of interating over all the constraints several times, we 
+compute the overall displacement of a particle accroding to the rigidness
+*/
 
-	for (int i = 0; i<constraint_iterations; i++) // iterate over all constraints several times
-	{
 #pragma omp parallel for
-		for (int j = 0; j < constraints.size(); j++)
-		{
-			constraints[j].satisfyConstraint();
-		}
+	for (int j = 0; j < particleCount; j++)
+	{
+		particles[j].satisfyConstraintSelf(constraint_iterations);
 	}
+
+
+//	for (int i = 0; i<constraint_iterations; i++) // iterate over all constraints several times
+//	{
+//#pragma omp parallel for
+//		for (int j = 0; j < constraints.size(); j++)
+//		{
+//			constraints[j].satisfyConstraint();
+//		}
+//	}
 
 	double maxDiff = 0;
 #pragma omp parallel for

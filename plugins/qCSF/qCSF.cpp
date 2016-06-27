@@ -178,19 +178,17 @@ void qCSF::doAction()
 
 	QElapsedTimer timer;
 	timer.start();
-
 	//instantiation a CSF class
 	CSF csf(csfPC);
 
 	// setup parameter
 	csf.params.k_nearest_points = 1;
 	csf.params.bSloopSmooth = csf_postprocessing;
-	csf.params.time_step = 0.75;
+	csf.params.time_step = 0.65;
 	csf.params.class_threshold = class_threshold;
 	csf.params.cloth_resolution = cloth_resolution;
 	csf.params.rigidness = csf_rigidness;
 	csf.params.iterations = MaxIteration;
-
 	//to do filtering
 	std::vector<int> groundIndexes, offGroundIndexes;
 	ccMesh* clothMesh = 0;

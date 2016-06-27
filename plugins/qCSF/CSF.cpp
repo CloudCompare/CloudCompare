@@ -100,9 +100,9 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 							bbMax.y + cloth_y_height,
 							bbMin.z - clothbuffer * params.cloth_resolution);
 	
-		int width_num = static_cast<int>(floor((bbMax.x - bbMin.x) / params.cloth_resolution)) + 2;
-		int height_num = static_cast<int>(floor((bbMax.z - bbMin.z) / params.cloth_resolution)) + 2;
-
+		int width_num = static_cast<int>(floor((bbMax.x - bbMin.x) / params.cloth_resolution)) + 2 * clothbuffer;
+		int height_num = static_cast<int>(floor((bbMax.z - bbMin.z) / params.cloth_resolution)) + 2 * clothbuffer;
+		
 		//Cloth object
 		Cloth cloth(origin_pos, 
 					width_num,
@@ -113,7 +113,6 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 					9999,
 					params.rigidness,
 					params.time_step);
-
 		if (app)
 		{
 			app->dispToConsole(QString("[CSF] Cloth creation: %1 ms").arg(timer.restart()));
@@ -123,6 +122,7 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		{
 			return false;
 		}
+		//app->dispToConsole("raster cloth", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	
 		if (app)
 		{
@@ -140,10 +140,11 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		QCoreApplication::processEvents();
 
 		bool wasCancelled = false;
+		cloth.addForce(Vec3(0, -gravity, 0) * time_step2);
 		for (int i = 0; i < params.iterations; i++)
 		{
 			//ÂË²¨Ö÷¹ý³Ì
-			cloth.addForce(Vec3(0, -gravity, 0) * time_step2);
+			//cloth.addForce(Vec3(0, -gravity, 0) * time_step2); //move this outside the main loop
 			double maxDiff = cloth.timeStep();
 			cloth.terrainCollision();
 

@@ -1,10 +1,19 @@
 #ifndef _PARTICLE_H_
 #define _PARTICLE_H_
-
+#include <vector>
 #include "Vec3.h"
 
 /* Some physics constants */
 #define DAMPING 0.01 // how much to damp the cloth simulation each frame
+#define MAX_INF 9999999999 
+#define MIN_INF -9999999999
+
+//we precompute the overall displacement of a particle accroding to the rigidness
+//const float singleMove1[15] = {0, 0.4, 0.64, 0.784, 0.8704, 0.92224, 0.95334, 0.97201, 0.9832, 0.98992, 0.99395, 0.99637, 0.99782, 0.99869, 0.99922 };
+const float singleMove1[15] = { 0, 0.3, 0.51, 0.657, 0.7599, 0.83193, 0.88235, 0.91765, 0.94235, 0.95965, 0.97175, 0.98023, 0.98616, 0.99031, 0.99322 };
+//当有两端移动时
+//const float doubleMove1[15] = {0, 0.4, 0.48, 0.496, 0.4992, 0.49984, 0.49997, 0.49999, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+const float doubleMove1[15] = { 0, 0.3, 0.42, 0.468, 0.4872, 0.4949, 0.498, 0.4992, 0.4997, 0.4999, 0.4999, 0.5, 0.5, 0.5, 0.5 };
 
 /* The particle class represents a particle that can move around in 3D space*/
 class Particle
@@ -24,6 +33,15 @@ public:
 	int c_pos;//position in the group of movable points
 	Vec3 pos; // the current position of the particle in 3D space
 	Vec3 old_pos; // the position of the particle in the previous time step, used as part of the verlet numerical integration scheme
+
+	//for constraint computation
+	std::vector<Particle *> neighborsList; //record all the neighbors in cloth grid
+
+	//for rasterlization
+	std::vector<int> correspondingLidarPointList;//每个布料节点对应的Lidar点的列表  the correspoinding lidar point list
+	size_t nearestPointIndex;//对应的lidar点最临近点的索引 index  nearest lidar point
+	double nearestPointHeight;//该点的y轴值  the height(y) of the nearest lidar point
+	double tmpDist;//临时变量，用于计算lidar点再水平面上距离布料点直接的距离  only for inner computation
 	
 public:
 
@@ -42,6 +60,9 @@ public:
 		, c_pos(0)
 		, pos(pos)
 		, old_pos(pos)
+		, nearestPointHeight(MIN_INF)
+		, tmpDist(MAX_INF)
+
 	{}
 
 	/* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
@@ -57,6 +78,9 @@ public:
 	inline void offsetPos(const Vec3 v) { if (movable) pos += v; }
 
 	inline void makeUnmovable() { movable = false; }
+
+	//do constraint
+	void satisfyConstraintSelf(int constraintTimes);
 
 	//inline void addToNormal(Vec3 normal) { accumulated_normal += normal.normalized(); }
 

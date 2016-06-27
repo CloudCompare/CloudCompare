@@ -38,7 +38,7 @@ private:
 	wl::PointCloud& point_cloud;
 
 public:
-
+ 
 	struct Parameters
 	{
 		//parameters

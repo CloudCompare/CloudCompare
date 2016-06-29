@@ -1,11 +1,98 @@
 #include "Rasterization.h"
 #include <iostream>
-#include <fstream>
+#include <queue>
 using namespace std;
 //Since all the particles in cloth are formed as a regular grid, 
 //for each lidar point, its nearest Cloth point can be simply found by Rounding operation
 //then record all the correspoinding lidar point for each cloth particle
-#if 1    
+#if 1   
+
+
+
+double Rasterization::findHeightValByScanline(Particle *p, Cloth &cloth)
+{
+	int xpos = p->pos_x;
+	int ypos = p->pos_y;
+	//横向向右扫描
+	for (int i = xpos + 1; i < cloth.num_particles_width; i++)
+	{
+		double crresHeight = cloth.getParticle(i, ypos).nearestPointHeight;
+		if (crresHeight > MIN_INF)
+			return crresHeight;
+	}
+	//横向向左扫描
+	for (int i = xpos - 1; i >= 0; i--)
+	{
+		double crresHeight = cloth.getParticle(i, ypos).nearestPointHeight;
+		if (crresHeight > MIN_INF)
+			return crresHeight;
+	}
+	//纵向向上扫描
+	for (int j = ypos - 1; j >= 0; j--)
+	{
+		double crresHeight = cloth.getParticle(xpos, j).nearestPointHeight;
+		if (crresHeight > MIN_INF)
+			return crresHeight;
+	}
+	//纵向向下扫描
+	for (int j = ypos + 1; j < cloth.num_particles_height; j++)
+	{
+		double crresHeight = cloth.getParticle(xpos, j).nearestPointHeight;
+		if (crresHeight > MIN_INF)
+			return crresHeight;
+	}
+
+	return findHeightValByNeighbor(p, cloth);
+
+
+}
+
+double Rasterization::findHeightValByNeighbor(Particle *p, Cloth &cloth)
+{
+	queue<Particle*> nqueue;
+	vector<Particle *> pbacklist;
+	int neiborsize = p->neighborsList.size();
+	for (int i = 0; i < neiborsize; i++)
+	{
+		p->isVisited = true;
+		nqueue.push(p->neighborsList[i]);
+	}
+
+	//iterate over the nqueue
+	while (!nqueue.empty())
+	{
+		Particle *pneighbor = nqueue.front();
+		nqueue.pop();
+		pbacklist.push_back(pneighbor);
+		if (pneighbor->nearestPointHeight > MIN_INF)
+		{
+			for (int i = 0; i < pbacklist.size(); i++)
+				pbacklist[i]->isVisited = false;
+			while (!nqueue.empty())
+			{
+				Particle *pp = nqueue.front();
+				pp->isVisited = false;
+				nqueue.pop();
+			}
+			return pneighbor->nearestPointHeight;
+		}
+		else
+		{
+			int nsize = pneighbor->neighborsList.size();
+			for (int i = 0; i < nsize; i++)
+			{
+				Particle *ptmp = pneighbor->neighborsList[i];
+				if (!ptmp->isVisited)
+				{
+					ptmp->isVisited = true;
+					nqueue.push(ptmp);
+				}
+			}
+
+		}
+	}
+	return MIN_INF;
+}
 
 bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
 {
@@ -13,7 +100,6 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 	{
 		//首先对每个lidar点找到在布料网格中对应的节点，并记录下来
 		//find the nearest cloth particle for each lidar point by Rounding operation
-		double tmp;
 		for (int i = 0; i < pc.size(); i++)
 		{
 			double pc_x = pc[i].x;
@@ -34,7 +120,6 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 					pt.tmpDist = pc2particleDist;
 					pt.nearestPointHeight = pc[i].y;
 					pt.nearestPointIndex = i;
-					tmp = pc[i].y;
 				}
 			}
 		}
@@ -44,16 +129,16 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 		//#pragma omp parallel for
 		for (int i = 0; i < cloth.getSize(); i++)
 		{
-			double nearestHeight = cloth.getParticleByIndex(i).nearestPointHeight;
+			Particle &pcur = cloth.getParticleByIndex(i);
+			double nearestHeight = pcur.nearestPointHeight;
 			
 			if (nearestHeight > MIN_INF)
 			{
 				heightVal[i] = nearestHeight;
-				tmp = nearestHeight;
 			}
 			else
 			{
-				heightVal[i] = tmp;
+				heightVal[i] = findHeightValByScanline(&pcur, cloth);
 			}
 		
 		}

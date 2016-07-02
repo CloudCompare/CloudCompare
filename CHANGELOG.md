@@ -46,6 +46,7 @@ v2.8.beta - XX/XX/2016
 	* qSRA (Surface or Revolution Analysis): the profile origin was not always properly take into account. The latitude angles were not always computed relatively to
 		the profile origin and changing the origin via the distance map dialog could be misleading.
 	* when clicking on the 'Apply all' button of the LAS/LAZ loading dialog, the global shift set for the first file could be ignored by the next ones
+	* the 3-points label vertex names (A,B,C) were not displayed by default
 
 v2.7.0 - 04/22/2016
 -------------------

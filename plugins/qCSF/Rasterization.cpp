@@ -51,8 +51,8 @@ double Rasterization::findHeightValByNeighbor(Particle *p, Cloth &cloth)
 {
 	queue<Particle*> nqueue;
 	vector<Particle *> pbacklist;
-	int neiborsize = p->neighborsList.size();
-	for (int i = 0; i < neiborsize; i++)
+	size_t neiborsize = p->neighborsList.size();
+	for (size_t i = 0; i < neiborsize; i++)
 	{
 		p->isVisited = true;
 		nqueue.push(p->neighborsList[i]);
@@ -78,8 +78,8 @@ double Rasterization::findHeightValByNeighbor(Particle *p, Cloth &cloth)
 		}
 		else
 		{
-			int nsize = pneighbor->neighborsList.size();
-			for (int i = 0; i < nsize; i++)
+			size_t nsize = pneighbor->neighborsList.size();
+			for (size_t i = 0; i < nsize; i++)
 			{
 				Particle *ptmp = pneighbor->neighborsList[i];
 				if (!ptmp->isVisited)

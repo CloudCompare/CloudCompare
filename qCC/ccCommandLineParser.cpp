@@ -592,9 +592,12 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	QString filename(arguments.takeFirst());
 	Print(QString("Opening file: '%1'").arg(filename));
 
-	ccHObject* db = FileIOFilter::LoadFromFile(filename,s_loadParameters,QString());
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* db = FileIOFilter::LoadFromFile(filename, s_loadParameters, result, QString());
 	if (!db)
+	{
 		return false/*Error(QString("Failed to open file '%1'").arg(filename))*/;
+	}
 
 	std::unordered_set<unsigned> verticesIDs;
 	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)

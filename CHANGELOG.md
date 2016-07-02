@@ -30,6 +30,14 @@ v2.8.beta - XX/XX/2016
 	* SHP files:
 		- when loading 2D points, the Z coordinate can now be exported from an associated DBF field
 
+	* File loading:
+		- when a multiple files are loaded, cancelling the loading process of one file will stop the whole loading procedure
+
+	* LAS/LAZ files:
+		- load dialog reorganized
+		- infos about the file are now displayed in a 'Info' tab (point count, bounding box)
+		- new 'Tiling' option to tile a (big) LAS/LAZ file in smaller ones (the cloud is not actually loaded in memory)
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
@@ -37,6 +45,7 @@ v2.8.beta - XX/XX/2016
 	* when using a DBF field as height for polylines (in SHP files), the height value could be read from the wrong field
 	* qSRA (Surface or Revolution Analysis): the profile origin was not always properly take into account. The latitude angles were not always computed relatively to
 		the profile origin and changing the origin via the distance map dialog could be misleading.
+	* when clicking on the 'Apply all' button of the LAS/LAZ loading dialog, the global shift set for the first file could be ignored by the next ones
 
 v2.7.0 - 04/22/2016
 -------------------

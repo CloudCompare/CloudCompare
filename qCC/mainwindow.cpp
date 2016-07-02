@@ -8992,7 +8992,8 @@ void MainWindow::addToDB(	const QStringList& filenames,
 
 	for (int i = 0; i < filenames.size(); ++i)
 	{
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, fileFilter);
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result, fileFilter);
 
 		if (newGroup)
 		{
@@ -9001,6 +9002,12 @@ void MainWindow::addToDB(	const QStringList& filenames,
 				newGroup->setDisplay_recursive(destWin);
 			}
 			addToDB(newGroup, true, true, false);
+		}
+
+		if (result == CC_FERR_CANCELED_BY_USER)
+		{
+			//stop importing the file if the user has cancelled the current process!
+			break;
 		}
 	}
 

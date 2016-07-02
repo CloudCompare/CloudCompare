@@ -25,6 +25,9 @@
 #include <string.h>
 #include <vector>
 
+//CCLib
+#include <CCGeom.h>
+
 enum LAS_FIELDS {	LAS_X					= 0,
 					LAS_Y					= 1,
 					LAS_Z					= 2,
@@ -94,6 +97,12 @@ public:
 	//! Clears the 'extra bytes' record
 	void clearEVLRs();
 
+	//! Sets the information about the file
+	void setInfos(	QString filename,
+					unsigned pointCount,
+					const CCVector3d& bbMin,
+					const CCVector3d& bbMax);
+
 	//! Adds an 'extra bytes' record entry
 	void addEVLR(QString description);
 
@@ -109,6 +118,7 @@ public:
 protected slots:
 
 	void onApplyAll();
+	void onBrowse();
 
 protected:
 

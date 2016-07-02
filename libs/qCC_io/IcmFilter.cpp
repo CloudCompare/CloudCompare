@@ -105,7 +105,8 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	//load the corresponding file (potentially containing several clouds)
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),parameters,filter);
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName), parameters, filter, result);
 	if (!entities)
 	{
 		fclose(fp);

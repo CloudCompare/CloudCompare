@@ -385,7 +385,7 @@ int main(int argc, char **argv)
 		{
 			result = app.exec();
 		}
-		catch(...)
+		catch (...)
 		{
 			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
 		}

@@ -1485,9 +1485,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			}
 		}
 	}
-	catch (const std::out_of_range& oor)
+	catch (const std::exception& e)
 	{
-		ccLog::Error(QString("Liblas exception: '%1'").arg(oor.what()));
+		ccLog::Error(QString("Liblas exception: '%1'").arg(e.what()));
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
 	catch (...)

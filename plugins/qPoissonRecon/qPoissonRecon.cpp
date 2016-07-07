@@ -302,7 +302,7 @@ void qPoissonRecon::doAction()
 			usleep(500 * 1000);
 #endif
 
-			pDlg.setValue(pDlg.value()+1);
+			pDlg.setValue(pDlg.value() + 1);
 			QApplication::processEvents();
 		}
 
@@ -339,7 +339,7 @@ void qPoissonRecon::doAction()
 		ccPointCloud* newPC = new ccPointCloud("vertices");
 		ccMesh* newMesh = new ccMesh(newPC);
 		newMesh->addChild(newPC);
-	
+
 		if (newPC->reserve(nr_vertices) && newMesh->reserve(nr_faces))
 		{
 			ccScalarField* densitySF = 0;
@@ -495,6 +495,10 @@ void qPoissonRecon::doAction()
 			newMesh->setVisible(true);
 			newMesh->computeNormals(true);
 			newMesh->showColors(newMesh->hasColors());
+
+			//copy Global Shift & Scale information
+			newPC->setGlobalShift(pc->getGlobalShift());
+			newPC->setGlobalScale(pc->getGlobalScale());
 
 			//output mesh
 			m_app->addToDB(newMesh);

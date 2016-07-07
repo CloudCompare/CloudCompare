@@ -4335,8 +4335,8 @@ void MainWindow::doConvertPolylinesToMesh()
 		ccLog::Error("Not enough segments!");
 		return;
 	}
-#define USE_CGAL_LIB
-#if defined(USE_CGAL_LIB)
+
+	//we assume we link with CGAL now (if not the call to Delaunay2dMesh::buildMesh will fail anyway)
 	std::vector<CCVector2> points2D;
 	std::vector<int> segments2D;
 	try
@@ -4386,7 +4386,7 @@ void MainWindow::doConvertPolylinesToMesh()
 
 	CCLib::Delaunay2dMesh* delaunayMesh = new CCLib::Delaunay2dMesh;
 	char errorStr[1024];
-	if (!delaunayMesh->buildMesh(points2D,segments2D,errorStr))
+	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
 		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
 		delete delaunayMesh;
@@ -4415,84 +4415,8 @@ void MainWindow::doConvertPolylinesToMesh()
 				vertices->addPoint(*P);
 			}
 		}
-		delaunayMesh->linkMeshWith(vertices,false);
+		delaunayMesh->linkMeshWith(vertices, false);
 	}
-
-#else
-	double totalLength = 0.0;
-	{
-		for (size_t i=0; i<polylines.size(); ++i)
-		{
-			ccPolyline* poly = polylines[i];
-			assert(poly);
-			if (poly)
-			{
-				//compute total length
-				totalLength += poly->computeLength();
-			}
-		}
-	}
-	//sample points on the polylines
-	double step = QInputDialog::getDouble(this,"Contour plot meshing","Sampling step",totalLength/1000.0,1.0e-6,1.0e6,6);
-	unsigned approxCount = static_cast<unsigned>(totalLength/step) + vertexCount;
-
-	ccPointCloud* vertices = new ccPointCloud("vertices");
-	if (!vertices->reserve(approxCount))
-	{
-		ccLog::Error("Not enough memory!");
-		delete vertices;
-		return;
-	}
-
-	//now let sample points on the polylines
-	for (size_t i=0; i<polylines.size(); ++i)
-	{
-		ccPolyline* poly = polylines[i];
-		if (poly)
-		{
-			bool closed = poly->isClosed();
-			unsigned vertCount = poly->size();
-			unsigned maxVertCount = closed ? vertCount : vertCount-1;
-			for (unsigned v=0; v<vertCount; ++v)
-			{
-				const CCVector3* A = poly->getPoint(v);
-				const CCVector3* B = poly->getPoint((v+1)%vertCount);
-
-				CCVector3 AB = *B-*A;
-				double l = AB.norm();
-				double s = 0.0;
-				while (s < l)
-				{
-					CCVector3 P = *A + AB * (s/l);
-					vertices->addPoint(P);
-					s += step;
-				}
-
-				//add the last point if the polyline is not closed!
-				if (!closed && v+1 == maxVertCount)
-					vertices->addPoint(*B);
-			}
-		}
-
-		if (vertices->size() < 3)
-		{
-			ccLog::Error("Not enough vertices (reduce the step size)!");
-			delete vertices;
-			return;
-		}
-	}
-
-	char errorStr[1024];
-	CCLib::GenericIndexedMesh* delaunayMesh = CCLib::PointProjectionTools::computeTriangulation(vertices,DELAUNAY_2D_AXIS_ALIGNED,0,dim,errorStr);
-	if (!delaunayMesh)
-	{
-		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
-		delete delaunayMesh;
-		delete vertices;
-		return;
-	}
-
-#endif
 
 #ifdef QT_DEBUG
 	//Test delaunay output
@@ -4506,7 +4430,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	}
 #endif
 	
-	ccMesh* mesh = new ccMesh(delaunayMesh,vertices);
+	ccMesh* mesh = new ccMesh(delaunayMesh, vertices);
 	if (mesh->size() != delaunayMesh->size())
 	{
 		//not enough memory (error will be issued later)
@@ -4525,12 +4449,22 @@ void MainWindow::doConvertPolylinesToMesh()
 		vertices->setEnabled(false);
 		addToDB(mesh);
 		if (mesh->computePerVertexNormals())
+		{
 			mesh->showNormals(true);
+		}
 		else
+		{
 			ccLog::Warning("[Contour plot to mesh] Failed to compute normals!");
+		}
 
 		if (mesh->getDisplay())
+		{
 			mesh->getDisplay()->redraw();
+		}
+
+		//global shift & scale (we copy it from the first polyline by default)
+		vertices->setGlobalShift(polylines.front()->getGlobalShift());
+		vertices->setGlobalScale(polylines.front()->getGlobalScale());
 	}
 	else
 	{
@@ -4679,7 +4613,9 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 			cloud->prepareDisplayForRefresh_recursive();
 			addToDB(mesh);
 			if (i == 0)
+			{
 				m_ccRoot->selectEntity(mesh); //auto-select first element
+			}
 		}
 		else
 		{
@@ -9049,11 +8985,7 @@ void MainWindow::closeAll()
 	if (QMessageBox::question(	this, "Close all", "Are you sure you want to remove all loaded entities?", QMessageBox::Yes, QMessageBox::No ) != QMessageBox::Yes)
 		return;
 
-	ccHObject* root = m_ccRoot->getRootEntity();
-	if (root)
-	{
-		m_ccRoot->unloadAll();
-	}
+	m_ccRoot->unloadAll();
 
 	redrawAll(false);
 }

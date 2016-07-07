@@ -38,6 +38,11 @@ v2.8.beta - XX/XX/2016
 		- infos about the file are now displayed in a 'Info' tab (point count, bounding box)
 		- new 'Tiling' option to tile a (big) LAS/LAZ file in smaller ones (the cloud is not actually loaded in memory)
 
+	* Global Shift & Scale:
+		- the PoissonRecon plugin now transfers the Global Shift & Scale information from the cloud to the resulting mesh
+		- the 'Tools > Projection > Contour plot (polylines) to mesh' tool transfers the Global Shift & Scale information
+			from the (first) polyline to the resulting mesh
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position

@@ -3348,9 +3348,17 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 	}
 
 	//auto-resize
-	if (sf->currentSize() < m_points->capacity())
+	if (sf->currentSize() < m_points->currentSize())
 	{
-		if (!sf->resize(m_points->capacity()))
+		if (!sf->resize(m_points->currentSize()))
+		{
+			ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
+			return -1;
+		}
+	}
+	if (sf->capacity() < m_points->capacity()) //yes, it happens ;)
+	{
+		if (!sf->reserve(m_points->capacity()))
 		{
 			ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 			return -1;

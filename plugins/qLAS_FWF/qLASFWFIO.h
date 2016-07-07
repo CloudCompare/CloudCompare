@@ -1,0 +1,42 @@
+//##########################################################################
+//#                                                                        #
+//#                       CLOUDCOMPARE PLUGIN: qEDL                        #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
+
+#ifndef Q_LAS_FWF_IO_PLUGIN_HEADER
+#define Q_LAS_FWF_IO_PLUGIN_HEADER
+
+//Qt
+#include <QObject>
+
+#include "../ccIOFilterPluginInterface.h"
+
+class qLASFWFIO : public QObject, public ccIOFilterPluginInterface
+{
+	Q_OBJECT
+	Q_INTERFACES(ccIOFilterPluginInterface)
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qLAS_FWF_IO")
+
+public:
+
+	//inherited from ccPluginInterface
+	virtual QString getName() const { return "LAS FWF I/O filter"; }
+	virtual QString getDescription() const { return "LAS FWF I/O filter"; }
+
+	//inherited from ccIOFilterPluginInterface
+	FileIOFilter::Shared getFilter();
+};
+
+#endif //Q_LAS_FWF_IO_PLUGIN_HEADER

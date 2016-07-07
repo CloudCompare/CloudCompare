@@ -43,6 +43,16 @@ v2.8.beta - XX/XX/2016
 		- the 'Tools > Projection > Contour plot (polylines) to mesh' tool transfers the Global Shift & Scale information
 			from the (first) polyline to the resulting mesh
 
+	* Rasterize tool:
+		- the rasterize tool now use the 'PixelIsArea' convention (i.e. the grid min corner coordinates correspond to the
+			first grid cell center). This allows one to apply the Rasterize tool on a regular grid without any
+			interference / sampling issue.
+		- the volume calculation tool has been updated consequently. Notably, results from the rasterize tool can be used
+			in the 2.5D Volume calculation tool without any sampling artefact
+		- Exported rasters (geotiff) are using the same convetion. They are also now properly oriented (they could be loaded
+			flipped in some GIS tools).
+		- ASCII matrix is now exported from top (highest Y coordinates) to bottom (lowest)
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
@@ -52,6 +62,10 @@ v2.8.beta - XX/XX/2016
 		the profile origin and changing the origin via the distance map dialog could be misleading.
 	* when clicking on the 'Apply all' button of the LAS/LAZ loading dialog, the global shift set for the first file could be ignored by the next ones
 	* the 3-points label vertex names (A,B,C) were not displayed by default
+	* Rasterize tool:
+		- the 'Hillshade' computation tool was considering the grid upside-down (hence the sun azimuth angle was inverted)
+		- contour lines generated with a projection direction other than Z were not displayed in the right orientation compared
+			to the grid raster (inside the Rasterize tool only)
 
 v2.7.0 - 04/22/2016
 -------------------

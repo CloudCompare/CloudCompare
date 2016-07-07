@@ -92,7 +92,7 @@ bool cc2Point5DimEditor::showGridBoxEditor()
 	{
 		unsigned char projDim = getProjectionDimension();
 		assert(projDim < 3);
-		m_bbEditorDlg->set2DMode(true,projDim);
+		m_bbEditorDlg->set2DMode(true, projDim);
 		if (m_bbEditorDlg->exec())
 		{
 			gridIsUpToDate(false);
@@ -108,7 +108,7 @@ void cc2Point5DimEditor::createBoundingBoxEditor(const ccBBox& gridBBox, QWidget
 	if (!m_bbEditorDlg)
 	{
 		m_bbEditorDlg = new ccBoundingBoxEditorDlg(parent);
-		m_bbEditorDlg->setBaseBBox(gridBBox,false);
+		m_bbEditorDlg->setBaseBBox(gridBBox, false);
 	}
 }
 
@@ -143,30 +143,47 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 	}
 }
 
-QString cc2Point5DimEditor::getGridSizeAsString() const
+bool cc2Point5DimEditor::getGridSize(unsigned& gridWidth, unsigned& gridHeight) const
 {
+	gridWidth = gridHeight = 0;
+
 	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z +1;
-	const unsigned char Y = X == 2 ? 0 : X +1;
+	const unsigned char X = Z == 2 ? 0 : Z + 1;
+	const unsigned char Y = X == 2 ? 0 : X + 1;
 
 	//cloud bounding-box --> grid size
 	ccBBox box = getCustomBBox();
 	if (!box.isValid())
 	{
-		return "invalid grid box";
+		return false;
 	}
 
 	double gridStep = getGridStep();
 	assert(gridStep != 0);
 
-	CCVector3d boxDiag(	static_cast<double>(box.maxCorner().x) - static_cast<double>(box.minCorner().x),
-						static_cast<double>(box.maxCorner().y) - static_cast<double>(box.minCorner().y),
-						static_cast<double>(box.maxCorner().z) - static_cast<double>(box.minCorner().z) );
+	CCVector3d boxDiag = CCVector3d::fromArray(box.maxCorner().u) - CCVector3d::fromArray(box.minCorner().u);
+	if (boxDiag.u[X] <= 0 || boxDiag.u[Y] <= 0)
+	{
+		ccLog::Error("Invalid cloud bounding box!");
+		return false;
+	}
 
-	unsigned gridWidth  = static_cast<unsigned>(ceil(boxDiag.u[X] / gridStep));
-	unsigned gridHeight = static_cast<unsigned>(ceil(boxDiag.u[Y] / gridStep));
+	//DGM: we now use the 'PixelIsArea' convention (the height value is computed at the grid cell center
+	gridWidth  = 1 + static_cast<unsigned>(boxDiag.u[X] / gridStep + 0.5);
+	gridHeight = 1 + static_cast<unsigned>(boxDiag.u[Y] / gridStep + 0.5);
+
+	return true;
+}
+
+QString cc2Point5DimEditor::getGridSizeAsString() const
+{
+	unsigned gridWidth = 0, gridHeight = 0;
+	if (!getGridSize(gridWidth, gridHeight))
+	{
+		return QObject::tr("invalid grid box");
+	}
 
 	return QString("%1 x %2").arg(gridWidth).arg(gridHeight);
 }
@@ -191,15 +208,15 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		double realGridHeight = m_grid.height * m_grid.gridStep;
 
 		static const int screnMargin = 20;
-		int screenWidth  = std::max(1,m_glWindow->width()  - 2*screnMargin);
-		int screenHeight = std::max(1,m_glWindow->height() - 2*screnMargin);
+		int screenWidth = std::max(1, m_glWindow->width() - 2 * screnMargin);
+		int screenHeight = std::max(1, m_glWindow->height() - 2 * screnMargin);
 
 		int pointSize = 1;
 		if (	static_cast<int>(m_grid.width)  < screenWidth
 			&&	static_cast<int>(m_grid.height) < screenHeight)
 		{
-			int vPointSize = static_cast<int>(ceil(static_cast<float>(screenWidth) /m_grid.width));
-			int hPointSize = static_cast<int>(ceil(static_cast<float>(screenHeight)/m_grid.height));
+			int vPointSize = static_cast<int>(ceil(static_cast<float>(screenWidth) / m_grid.width));
+			int hPointSize = static_cast<int>(ceil(static_cast<float>(screenHeight) / m_grid.height));
 			pointSize = std::min(vPointSize, hPointSize);
 
 			//if the grid is too small (i.e. necessary point size > 10)
@@ -211,7 +228,7 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 			}
 		}
 
-		params.pixelSize = static_cast<float>( std::max( realGridWidth/screenWidth, realGridHeight/screenHeight ) );
+		params.pixelSize = static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight));
 		params.zoom = 1.0f;
 
 		m_glWindow->setViewportParameters(params);
@@ -361,16 +378,10 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 		//project it inside the grid
 		CCVector3d relativePos = CCVector3d::fromArray(P->u) - minCorner;
-		int i = static_cast<int>(relativePos.u[X] / gridStep);
-		int j = static_cast<int>(relativePos.u[Y] / gridStep);
+		int i = static_cast<int>((relativePos.u[X] / gridStep + 0.5));
+		int j = static_cast<int>((relativePos.u[Y] / gridStep + 0.5));
 
-		//specific case: if we fall exactly on the max corner of the grid box
-		if (i == static_cast<int>(width) && relativePos.u[X] == gridMaxX)
-			--i;
-		if (j == static_cast<int>(height) && relativePos.u[Y] == gridMaxY)
-			--j;
-
-		//we skip points outside of the grid!
+		//we skip points that fall outside of the grid!
 		if (	i < 0 || i >= static_cast<int>(width)
 			||	j < 0 || j >= static_cast<int>(height) )
 		{

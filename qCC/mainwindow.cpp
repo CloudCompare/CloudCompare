@@ -107,6 +107,7 @@
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccPluginDlg.h"
+#include "ccWaveformDialog.h"
 
 //other
 #include "ccCropTool.h"
@@ -731,7 +732,6 @@ void MainWindow::connectActions()
 	connect(actionShowDepthBuffer,				SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
 	connect(actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
 	connect(actionComputePointsVisibility,		SIGNAL(triggered()),	this,		SLOT(doActionComputePointsVisibility()));
-	
 	//"Edit > Sensor" menu
 	connect(actionCreateGBLSensor,				SIGNAL(triggered()),	this,		SLOT(doActionCreateGBLSensor()));
 	connect(actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
@@ -759,6 +759,8 @@ void MainWindow::connectActions()
 	connect(actionSetSFAsCoord,					SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
 	connect(actionDeleteScalarField,			SIGNAL(triggered()),	this,		SLOT(doActionDeleteScalarField()));
 	connect(actionDeleteAllSF,					SIGNAL(triggered()),	this,		SLOT(doActionDeleteAllSF()));
+	//"Edit > Waveform" menu
+	connect(actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
 	//"Edit" menu
 	connect(actionClone,						SIGNAL(triggered()),	this,		SLOT(doActionClone()));
 	connect(actionMerge,						SIGNAL(triggered()),	this,		SLOT(doActionMerge()));
@@ -9748,6 +9750,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	actionShowWaveDialog->setEnabled(exactlyOneCloud);
 
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 	actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
@@ -10118,4 +10121,28 @@ void MainWindow::doActionGlobalShiftSeetings()
 		settings.setValue(ccPS::MaxAbsDiag(), maxAbsDiag);
 		settings.endGroup();
 	}
+}
+
+void MainWindow::doActionShowWaveDialog()
+{
+	size_t selNum = m_selectedEntities.size();
+	if (selNum == 0)
+		return;
+
+	ccHObject* entity = m_selectedEntities.size() == 1 ? m_selectedEntities[0] : 0;
+	if (!entity || !entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		ccConsole::Error("Select one point cloud!");
+		return;
+	}
+
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+	if (!cloud->hasFWF())
+	{
+		ccConsole::Error("Cloud has no associated waveform information");
+		return;
+	}
+
+	ccWaveDialog wDlg(cloud, this);
+	wDlg.exec();
 }

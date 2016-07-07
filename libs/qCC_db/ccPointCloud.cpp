@@ -89,13 +89,17 @@ ccPointCloud* ccPointCloud::From(CCLib::GenericCloud* cloud, const ccGenericPoin
 		{
 			//import points
 			cloud->placeIteratorAtBegining();
-			for (unsigned i=0; i<n; i++)
+			for (unsigned i = 0; i < n; i++)
+			{
 				pc->addPoint(*cloud->getNextPoint());
+			}
 		}
 	}
 
 	if (pc && sourceCloud)
+	{
 		pc->importParametersFrom(sourceCloud);
+	}
 
 	return pc;
 }
@@ -188,7 +192,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 		return 0;
 	}
 
-	ccPointCloud* result = new ccPointCloud(getName()+QString(".extract"));
+	ccPointCloud* result = new ccPointCloud(getName() + QString(".extract"));
 
 	if (!result->reserveThePointsTable(n))
 	{
@@ -199,8 +203,10 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 
 	//import points
 	{
-		for (unsigned i=0; i<n; i++)
+		for (unsigned i = 0; i < n; i++)
+		{
 			result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
+		}
 	}
 
 	//visibility
@@ -230,7 +236,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	{
 		if (result->reserveTheNormsTable())
 		{
-			for (unsigned i=0; i<n; i++)
+			for (unsigned i = 0; i<n; i++)
 				result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
 			result->showNormals(normalsShown());
 		}
@@ -239,6 +245,30 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy normals!");
 			if (warnings)
 				*warnings |= WRN_OUT_OF_MEM_FOR_NORMALS;
+		}
+	}
+
+	//waveform
+	if (hasFWF())
+	{
+		if (result->reserveTheFWFTable())
+		{
+			for (unsigned i = 0; i < n; i++)
+			{
+				const ccWaveform& w = m_fwfData[selection->getPointGlobalIndex(i)];
+				if (!result->fwfDescriptors().contains(w.descriptorID()))
+				{
+					//copy only the necessary descriptors
+					result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
+				}
+				result->fwfData().push_back(w);
+			}
+		}
+		else
+		{
+			ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
+			if (warnings)
+				*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
 		}
 	}
 
@@ -460,7 +490,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 		return *this;
 	}
 
-	return append(addedCloud,size());
+	return append(addedCloud, size());
 }
 
 const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore, bool ignoreChildren/*=false*/)
@@ -469,7 +499,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 	unsigned addedPoints = addedCloud->size();
 
-	if (!reserve(pointCountBefore+addedPoints))
+	if (!reserve(pointCountBefore + addedPoints))
 	{
 		ccLog::Error("[ccPointCloud::append] Not enough memory!");
 		return *this;
@@ -485,8 +515,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		deleteOctree();
 		unallocateVisibilityArray();
 
-		for (unsigned i=0; i<addedPoints; i++)
+		for (unsigned i = 0; i < addedPoints; i++)
+		{
 			addPoint(*addedCloud->getPoint(i));
+		}
 	}
 
 	//deprecate internal structures
@@ -502,8 +534,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		if (!addedCloud->hasColors())
 		{
 			//we set a white color to new points
-			for (unsigned i=0; i<addedPoints; i++)
+			for (unsigned i = 0; i < addedPoints; i++)
+			{
 				addRGBColor(ccColor::white.rgba);
+			}
 		}
 		else //otherwise
 		{
@@ -513,8 +547,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//we try to resrve a new array
 				if (reserveTheRGBTable())
 				{
-					for (unsigned i=0; i<pointCountBefore; i++)
+					for (unsigned i = 0; i < pointCountBefore; i++)
+					{
 						addRGBColor(ccColor::white.rgba);
+					}
 				}
 				else
 				{
@@ -525,8 +561,12 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 			//we import colors (if necessary)
 			if (hasColors() && m_rgbColors->currentSize() == pointCountBefore)
+			{
 				for (unsigned i = 0; i < addedPoints; i++)
+				{
 					addRGBColor(addedCloud->m_rgbColors->getValue(i));
+				}
+			}
 		}
 	}
 
@@ -540,8 +580,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		if (!addedCloud->hasNormals())
 		{
 			//we associate imported points with '0' normals
-			for (unsigned i=0; i<addedPoints; i++)
+			for (unsigned i = 0; i < addedPoints; i++)
+			{
 				addNormIndex(0);
+			}
 		}
 		else //otherwise
 		{
@@ -551,8 +593,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//we try to reserve a new array
 				if (reserveTheNormsTable())
 				{
-					for (unsigned i=0; i<pointCountBefore; i++)
+					for (unsigned i = 0; i < pointCountBefore; i++)
+					{
 						addNormIndex(0);
+					}
 				}
 				else
 				{
@@ -563,8 +607,54 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 			//we import normals (if necessary)
 			if (hasNormals() && m_normals->currentSize() == pointCountBefore)
-				for (unsigned i=0; i<addedPoints; i++)
+			{
+				for (unsigned i = 0; i < addedPoints; i++)
+				{
 					addNormIndex(addedCloud->m_normals->getValue(i));
+				}
+			}
+		}
+	}
+
+	//waveform
+	if (hasFWF() || addedCloud->hasFWF())
+	{
+		//if the added cloud hasn't any waveform
+		if (!addedCloud->hasFWF())
+		{
+			//we associate imported points with empty waveform
+			for (unsigned i = 0; i < addedPoints; i++)
+			{
+				m_fwfData.push_back(ccWaveform(0));
+			}
+		}
+		else //otherwise
+		{
+			//if this cloud hasn't any FWF
+			if (!hasFWF())
+			{
+				//we try to reserve a new array
+				if (reserveTheFWFTable())
+				{
+					for (unsigned i = 0; i < pointCountBefore; i++)
+					{
+						m_fwfData.push_back(ccWaveform(0));
+					}
+				}
+				else
+				{
+					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate waveforms!");
+				}
+			}
+
+			//we import normals (if necessary)
+			if (hasFWF() && m_fwfData.size() == pointCountBefore)
+			{
+				for (unsigned i = 0; i < addedPoints; i++)
+				{
+					m_fwfData.push_back(addedCloud->fwfData()[i]);
+				}
+			}
 		}
 	}
 
@@ -591,7 +681,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					if (sameSF->currentSize() == pointCountBefore)
 					{
 						double shift = sf->getGlobalShift() - sameSF->getGlobalShift();
-						for (unsigned i=0; i<addedPoints; i++)
+						for (unsigned i = 0; i < addedPoints; i++)
 						{
 							sameSF->addElement(static_cast<ScalarType>(shift + sf->getValue(i))); //FIXME: we could have accuracy issues here
 						}
@@ -607,11 +697,13 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					ccScalarField* newSF = new ccScalarField(sf->getName());
 					newSF->setGlobalShift(sf->getGlobalShift());
 					//we fill the begining with NaN (as there is no equivalent in the current cloud)
-					if (newSF->resize(pointCountBefore+addedPoints,true,NAN_VALUE))
+					if (newSF->resize(pointCountBefore + addedPoints, true, NAN_VALUE))
 					{
 						//we copy the new values
-						for (unsigned i=0; i<addedPoints; i++)
-							newSF->setValue(pointCountBefore+i,sf->getValue(i));
+						for (unsigned i = 0; i < addedPoints; i++)
+						{
+							newSF->setValue(pointCountBefore + i, sf->getValue(i));
+						}
 						newSF->computeMinAndMax();
 						//copy display parameters
 						newSF->importParametersFrom(sf);
@@ -642,8 +734,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					//we fill the end with NaN (as there is no equivalent in the added cloud)
 					ScalarType NaN = sf->NaN();
-					for (unsigned i=0; i<addedPoints; i++)
+					for (unsigned i = 0; i < addedPoints; i++)
+					{
 						sf->addElement(NaN);
+					}
 				}
 			}
 		}
@@ -737,7 +831,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	if (!ignoreChildren)
 	{
 		unsigned childrenCount = addedCloud->getChildrenNumber();
-		for (unsigned c=0; c<childrenCount; ++c)
+		for (unsigned c = 0; c < childrenCount; ++c)
 		{
 			ccHObject* child = addedCloud->getChild(c);
 			if (child->isA(CC_TYPES::MESH)) //mesh --> FIXME: what for the other types of MESH?
@@ -754,7 +848,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					//change mesh vertices
 					if (cloneMesh->getAssociatedCloud() == this)
+					{
 						cloneMesh->shiftTriangleIndexes(pointCountBefore);
+					}
 					addChild(cloneMesh);
 				}
 				else
@@ -767,25 +863,25 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//ccImage* image = static_cast<ccImage*>(child);
 
 				//DGM FIXME: take image ownership! (dirty)
-				addedCloud->transferChild(child,*this);
+				addedCloud->transferChild(child, *this);
 			}
 			else if (child->isA(CC_TYPES::LABEL_2D))
 			{
 				//clone label and update points if necessary
 				cc2DLabel* label = static_cast<cc2DLabel*>(child);
 				cc2DLabel* newLabel = new cc2DLabel(label->getName());
-				for (unsigned j=0; j<label->size(); ++j)
+				for (unsigned j = 0; j < label->size(); ++j)
 				{
 					const cc2DLabel::PickedPoint& P = label->getPoint(j);
 					if (P.cloud == addedCloud)
-						newLabel->addPoint(this,pointCountBefore+P.index);
+						newLabel->addPoint(this, pointCountBefore + P.index);
 					else
-						newLabel->addPoint(P.cloud,P.index);
+						newLabel->addPoint(P.cloud, P.index);
 				}
 				newLabel->displayPointLegend(label->isPointLegendDisplayed());
 				newLabel->setDisplayedIn2D(label->isDisplayedIn2D());
 				newLabel->setCollapsed(label->isCollapsed());
-				newLabel->setPosition(label->getPosition()[0],label->getPosition()[1]);
+				newLabel->setPosition(label->getPosition()[0], label->getPosition()[1]);
 				newLabel->setVisible(label->isVisible());
 				newLabel->setDisplay(getDisplay());
 				addChild(newLabel);
@@ -858,7 +954,7 @@ bool ccPointCloud::reserveTheRGBTable()
 	assert(m_points);
 	if (!m_points->isAllocated())
 	{
-		ccLog::Error("[ccPointCloud::reserveTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
+		ccLog::Warning("[ccPointCloud::reserveTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
 	}
 
@@ -888,7 +984,7 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 	assert(m_points);
 	if (!m_points->isAllocated())
 	{
-		ccLog::Error("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
+		ccLog::Warning("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
 	}
 
@@ -918,7 +1014,7 @@ bool ccPointCloud::reserveTheNormsTable()
 	assert(m_points);
 	if (!m_points->isAllocated())
 	{
-		ccLog::Error("[ccPointCloud::reserveTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
+		ccLog::Warning("[ccPointCloud::reserveTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
 	}
 
@@ -947,7 +1043,7 @@ bool ccPointCloud::resizeTheNormsTable()
 {
 	if (!m_points->isAllocated())
 	{
-		ccLog::Error("[ccPointCloud::resizeTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
+		ccLog::Warning("[ccPointCloud::resizeTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
 		return false;
 	}
 
@@ -972,6 +1068,51 @@ bool ccPointCloud::resizeTheNormsTable()
 	return m_normals && m_normals->currentSize() == m_points->currentSize();
 }
 
+bool ccPointCloud::reserveTheFWFTable()
+{
+	assert(m_points);
+	if (!m_points->isAllocated())
+	{
+		ccLog::Warning("[ccPointCloud::reserveTheFWFTable] Internal error: properties (re)allocation before points allocation is forbidden!");
+		return false;
+	}
+
+	try
+	{
+		m_fwfData.reserve(m_points->capacity());
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("[ccPointCloud::reserveTheFWFTable] Not enough memory!");
+		m_fwfData.clear();
+	}
+
+	//double check
+	return m_fwfData.capacity() >= m_points->capacity();
+}
+
+bool ccPointCloud::resizeTheFWFTable()
+{
+	if (!m_points->isAllocated())
+	{
+		ccLog::Warning("[ccPointCloud::resizeTheFWFTable] Internal error: properties (re)allocation before points allocation is forbidden!");
+		return false;
+	}
+
+	try
+	{
+		m_fwfData.resize(m_points->capacity());
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("[ccPointCloud::resizeTheFWFTable] Not enough memory!");
+		m_fwfData.clear();
+	}
+
+	//double check
+	return m_fwfData.capacity() >= m_points->capacity();
+}
+
 bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 {
 	//reserve works only to enlarge the cloud
@@ -981,7 +1122,8 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 	//call parent method first (for points + scalar fields)
 	if (	!ChunkedPointCloud::reserve(newNumberOfPoints)
 		||	(hasColors() && !reserveTheRGBTable())
-		||	(hasNormals() && !reserveTheNormsTable()) )
+		||	(hasNormals() && !reserveTheNormsTable())
+		||	(hasFWF() && !reserveTheFWFTable()))
 	{
 		ccLog::Error("[ccPointCloud::reserve] Not enough memory!");
 		return false;
@@ -992,7 +1134,8 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 	//double check
 	return	                   m_points->capacity()    >= newNumberOfPoints
 		&&	( !hasColors()  || m_rgbColors->capacity() >= newNumberOfPoints )
-		&&	( !hasNormals() || m_normals->capacity()   >= newNumberOfPoints );
+		&&	( !hasNormals() || m_normals->capacity()   >= newNumberOfPoints )
+		&&	( !hasFWF()     || m_fwfData.capacity()    >= newNumberOfPoints );
 }
 
 bool ccPointCloud::resize(unsigned newNumberOfPoints)
@@ -1010,13 +1153,9 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 
 	notifyGeometryUpdate(); //calls releaseVBOs()
 
-	if (hasColors() && !resizeTheRGBTable(false)) //colors
-	{
-		ccLog::Error("[ccPointCloud::resize] Not enough memory!");
-		return false;
-	}
-
-	if (hasNormals() && !resizeTheNormsTable()) //normals
+	if ((hasColors()  && !resizeTheRGBTable(false))
+	||	(hasNormals() && !resizeTheNormsTable())
+	||	(hasFWF()     && !resizeTheFWFTable()))
 	{
 		ccLog::Error("[ccPointCloud::resize] Not enough memory!");
 		return false;
@@ -1025,7 +1164,8 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 	//double check
 	return	                   m_points->currentSize()    == newNumberOfPoints
 		&&	( !hasColors()  || m_rgbColors->currentSize() == newNumberOfPoints )
-		&&	( !hasNormals() || m_normals->currentSize()   == newNumberOfPoints );
+		&&	( !hasNormals() || m_normals->currentSize()   == newNumberOfPoints )
+		&&	( !hasFWF()     || m_fwfData.size()           == newNumberOfPoints );
 }
 
 void ccPointCloud::showSFColorsScale(bool state)
@@ -1540,6 +1680,18 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 				continue;
 			}
 			grid->sensorPosition = transd * grid->sensorPosition;
+		}
+	}
+
+	//and the waveform!
+	if (hasFWF())
+	{
+		for (ccWaveform& w : m_fwfData)
+		{
+			if (w.descriptorID() != 0)
+			{
+				w.applyRigidTransformation(trans);
+			}
 		}
 	}
 
@@ -3500,6 +3652,49 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		}
 	}
 
+	//Waveform (dataVersion >= 44)
+	bool withFWF = hasFWF();
+	if (out.write((const char*)&withFWF, sizeof(bool)) < 0)
+	{
+		return WriteError();
+	}
+	if (withFWF)
+	{
+		//first save the descriptors
+		uint32_t descriptorCount = static_cast<uint32_t>(m_fwfDescriptors.size());
+		if (out.write((const char*)&descriptorCount, 4) < 0)
+		{
+			return WriteError();
+		}
+		for (auto it = m_fwfDescriptors.begin(); it != m_fwfDescriptors.end(); ++it)
+		{
+			//write the key (descriptor ID)
+			if (out.write((const char*)&it.key(), 1) < 0)
+			{
+				return WriteError();
+			}
+			//write the descriptor
+			if (!it.value().toFile(out))
+			{
+				return WriteError();
+			}
+		}
+
+		//then the waveform
+		uint32_t dataCount = static_cast<uint32_t>(m_fwfData.size());
+		if (out.write((const char*)&dataCount, 4) < 0)
+		{
+			return WriteError();
+		}
+		for (const ccWaveform& w : m_fwfData)
+		{
+			if (!w.toFile(out))
+			{
+				return WriteError();
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -3736,8 +3931,67 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 			addGrid(g);
 		}
-
 	}
+
+	//Waveform (dataVersion >= 44)
+	if (dataVersion >= 44)
+	{
+		bool withFWF = false;
+		if (in.read((char*)&withFWF, sizeof(bool)) < 0)
+		{
+			return ReadError();
+		}
+		if (withFWF)
+		{
+			//first read the descriptors
+			uint32_t descriptorCount = 0;
+			if (in.read((char*)&descriptorCount, 4) < 0)
+			{
+				return ReadError();
+			}
+			for (uint32_t i = 0; i < descriptorCount; ++i)
+			{
+				//read the descriptor ID
+				uint8_t id = 0;
+				if (in.read((char*)&id, 1) < 0)
+				{
+					return ReadError();
+				}
+				//read the descriptor
+				WaveformDescriptor d;
+				if (!d.fromFile(in, dataVersion, flags))
+				{
+					return ReadError();
+				}
+				//add the descriptor to the set
+				m_fwfDescriptors.insert(id, d);
+			}
+
+			//then the waveform
+			uint32_t dataCount = 0;
+			if (in.read((char*)&dataCount, 4) < 0)
+			{
+				return ReadError();
+			}
+			assert(dataCount >= size());
+			try
+			{
+				m_fwfData.resize(dataCount);
+			}
+			catch (const std::bad_alloc&)
+			{
+				return MemoryError();
+			}
+			for (uint32_t i = 0; i < dataCount; ++i)
+			{
+				if (!m_fwfData[i].fromFile(in, dataVersion, flags))
+				{
+					return ReadError();
+				}
+			}
+		}
+	}
+
 	//notifyGeometryUpdate(); //FIXME: we can't call it now as the dependent 'pointers' are not valid yet!
 
 	//We should update the VBOs (just in case)
@@ -4713,4 +4967,10 @@ void ccPointCloud::clearLOD()
 	{
 		m_lod->clear();
 	}
+}
+
+void ccPointCloud::clearFWFData()
+{
+	m_fwfData.clear();
+	m_fwfDescriptors.clear();
 }

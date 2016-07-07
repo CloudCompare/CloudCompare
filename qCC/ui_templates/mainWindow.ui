@@ -307,12 +307,19 @@
      <addaction name="actionToggleMaterials"/>
      <addaction name="actionToggleShowName"/>
     </widget>
+    <widget class="QMenu" name="menuWaveform">
+     <property name="title">
+      <string>Waveform</string>
+     </property>
+     <addaction name="actionShowWaveDialog"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
     <addaction name="menuMesh"/>
     <addaction name="menuSensors"/>
     <addaction name="menuScalarFields"/>
+    <addaction name="menuWaveform"/>
     <addaction name="separator"/>
     <addaction name="actionClone"/>
     <addaction name="actionMerge"/>
@@ -2882,6 +2889,11 @@
    <property name="toolTip">
     <string>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</string>
+   </property>
+  </action>
+  <action name="actionShowWaveDialog">
+   <property name="text">
+    <string>2D Waveform viewer</string>
    </property>
   </action>
  </widget>

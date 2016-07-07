@@ -10,6 +10,8 @@ v2.8.beta - XX/XX/2016
 		- automatic ground / non-ground classification of aerial LIDAR point clouds
 		- based on the article: "An Easy-to-Use Airborne LIDAR Data Filtering Method Based on Cloth Simulation", Qi Jianbo, Wan Peng, 2015
 
+	* Support for FWF (Full WaveForm) airborne lidar data
+
 - Enhancements:
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree

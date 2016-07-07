@@ -470,10 +470,12 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 	//scalar field
 	fillSFWithPointCloud(_obj);
 
-	//scan grid structure(s)
+	//scan grid structure(s), waveform, etc.
 	if (_obj->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* cloud = static_cast<ccPointCloud*>(_obj);
+		
+		//scan grid(s)
 		size_t gridCount = cloud->gridCount();
 		if (gridCount != 0)
 		{
@@ -488,6 +490,14 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 				ccPointCloud::Grid::Shared grid = cloud->grid(i);
 				appendRow( ITEM(QString("Scan #%1").arg(i+1)), ITEM(QString("%1 x %2 (%3 points)").arg(grid->w).arg(grid->h).arg(QLocale(QLocale::English).toString(grid->validCount))) );
 			}
+		}
+
+		//waveform
+		if (cloud->hasFWF())
+		{
+			addSeparator("Waveform");
+			appendRow(ITEM(QString("Waves")),       ITEM(QString::number(cloud->fwfData().size()))); //DGM: in fact some of them might be null/invalid!
+			appendRow(ITEM(QString("Descriptors")), ITEM(QString::number(cloud->fwfDescriptors().size())));
 		}
 	}
 }

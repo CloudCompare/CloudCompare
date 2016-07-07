@@ -54,8 +54,9 @@
 	v4.1 - 09/01/2015 - Scan grids added to point clouds
 	v4.2 - 10/07/2015 - Global shift added to the ccScalarField structure
 	v4.3 - 01/07/2016 - Additional intrinsic parameters of a camera sensor (optical center)
+	v4.4 - 07/07/2016 - Full WaveForm data added to point clouds
 **/
-const unsigned c_currentDBVersion = 43; //4.3
+const unsigned c_currentDBVersion = 44; //4.4
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

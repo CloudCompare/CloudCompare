@@ -233,8 +233,8 @@ int main(int argc, char **argv)
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	//load the plugins
-	tPluginInfoList	plugins;
-	QStringList	dirFilters;
+	tPluginInfoList plugins;
+	QStringList dirFilters;
 	QStringList pluginPaths;
 	{
 		QString appPath = QCoreApplication::applicationDirPath();
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 #ifdef Q_OS_MAC
 		// Add any app data paths
 		// Plugins in these directories take precendence over the included ones
-		QStringList	appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+		QStringList appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
 
 		for (const QString &appDataPath : appDataPaths)
 		{

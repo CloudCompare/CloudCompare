@@ -876,7 +876,7 @@ void ccRasterizeTool::generateRaster() const
 
 	//which (and how many) bands shall we create?
 	static bool heightBand = true; //height by default
-	static bool rgbBand = true;
+	static bool rgbBand = false; //not a good idea to mix RGB and height values!
 	static bool densityBand = false;
 	static bool visibleSFBand = false;
 	static bool allSFBands = false;
@@ -892,8 +892,39 @@ void ccRasterizeTool::generateRaster() const
 	reoDlg.exportAllSFCheckBox->setEnabled(hasScalarFields);
 	reoDlg.exportAllSFCheckBox->setChecked(allSFBands);
 
-	if (!reoDlg.exec())
-		return;
+	while (true)
+	{
+		if (!reoDlg.exec())
+		{
+			//cancelled by user
+			return;
+		}
+
+		//check the selection
+		if (	reoDlg.exportRGBCheckBox->isEnabled()
+			&&	reoDlg.exportRGBCheckBox->isChecked()
+			&& (	reoDlg.exportHeightsCheckBox->isChecked()
+				||	reoDlg.exportDensityCheckBox->isChecked()
+				||	reoDlg.exportActiveLayerCheckBox->isChecked()
+				||	reoDlg.exportAllSFCheckBox->isChecked())
+			)
+		{
+			if (QMessageBox::warning(	0,
+										"Mixed raster",
+										"Mixing colors and other layers will result in\na strange raster file with 64 bits color bands\n(some applications won't handle them properly)",
+										QMessageBox::Ignore,
+										QMessageBox::Retry) == QMessageBox::Ignore)
+			{
+				//the user ignored the warning
+				break;
+			}
+		}
+		else
+		{
+			//nothing to worry about :D
+			break;
+		}
+	}
 
 	//we ask the output filename AFTER displaying the export parameters ;)
 	QString outputFilename;
@@ -907,7 +938,9 @@ void ccRasterizeTool::generateRaster() const
 														"geotiff (*.tif)");
 
 		if (outputFilename.isNull())
+		{
 			return;
+		}
 
 		//save current export path to persistent settings
 		settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
@@ -922,10 +955,12 @@ void ccRasterizeTool::generateRaster() const
 	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillEmptyCellsComboBox);
 
 	int totalBands = 0;
-	
+	bool onlyRGBA = true;
+
 	if (heightBand)
 	{
 		++totalBands;
+		onlyRGBA = false;
 	}
 	
 	bool rgbaMode = false;
@@ -938,21 +973,32 @@ void ccRasterizeTool::generateRaster() const
 			++totalBands; //alpha
 		}
 	}
+	else
+	{
+		onlyRGBA = false;
+	}
 	
 	if (densityBand)
 	{
 		++totalBands;
+		onlyRGBA = false;
 	}
 	
 	if (allSFBands)
 	{
 		for (size_t i = 0; i < m_grid.scalarFields.size(); ++i)
+		{
 			if (!m_grid.scalarFields[i].empty())
+			{
 				++totalBands;
+				onlyRGBA = false;
+			}
+		}
 	}
 	else if (visibleSFBand && visibleSfIndex >= 0)
 	{
 		++totalBands;
+		onlyRGBA = false;
 	}
 	
 	if (totalBands == 0)
@@ -966,7 +1012,7 @@ void ccRasterizeTool::generateRaster() const
 											static_cast<int>(m_grid.width),
 											static_cast<int>(m_grid.height),
 											totalBands,
-											GDT_Float64, 
+											onlyRGBA ? GDT_Byte : GDT_Float64,
 											papszOptions);
 
 	if (!poDstDS)
@@ -1046,6 +1092,8 @@ void ccRasterizeTool::generateRaster() const
 		//export the R, G and B components
 		for (unsigned k = 0; k < 3; ++k)
 		{
+			rgbBands[k]->SetStatistics(0, 255, 128, 0); //warning: arbitrary average and std. dev. values
+
 			for (unsigned j = 0; j<m_grid.height; ++j)
 			{
 				const RasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j]; //the first row is the northest one (i.e. Ymax)
@@ -1068,6 +1116,7 @@ void ccRasterizeTool::generateRaster() const
 		{
 			GDALRasterBand* aBand = poDstDS->GetRasterBand(++currentBand);
 			aBand->SetColorInterpretation(GCI_AlphaBand);
+			aBand->SetStatistics(0, 255, 255, 0); //warning: arbitrary average and std. dev. values
 
 			for (unsigned j = 0; j<m_grid.height; ++j)
 			{

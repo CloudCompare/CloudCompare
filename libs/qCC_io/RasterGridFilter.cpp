@@ -101,19 +101,19 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 			CCVector3d Pshift(0,0,0);
 			//check for 'big' coordinates
 			{
-				if (HandleGlobalShift(origin,Pshift,parameters))
+				if (HandleGlobalShift(origin, Pshift, parameters))
 				{
 					pc->setGlobalShift(Pshift);
-					ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+					ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
 			//create blank raster 'grid'
 			{
 				double z = 0.0 /*+ Pshift.z*/;
-				for (int j=0; j<rasterY; ++j)
+				for (int j = 0; j < rasterY; ++j)
 				{
-					for (int i=0; i<rasterX; ++i)
+					for (int i = 0; i < rasterX; ++i)
 					{
 						double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + static_cast<double>(j) * adfGeoTransform[2] + Pshift.x;
 						double y = adfGeoTransform[3] + static_cast<double>(i) * adfGeoTransform[4] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
@@ -123,25 +123,47 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				}
 				QVariant xVar = QVariant::fromValue<int>(rasterX);
 				QVariant yVar = QVariant::fromValue<int>(rasterY);
-				pc->setMetaData("raster_width",xVar);
-				pc->setMetaData("raster_height",yVar);
+				pc->setMetaData("raster_width", xVar);
+				pc->setMetaData("raster_height", yVar);
 			}
 
 			//fetch raster bands
 			bool zRasterProcessed = false;
 			unsigned zInvalid = 0;
-			double zMinMax[2] = {0, 0};
+			double zMinMax[2] = { 0, 0 };
 
-			for (int i=1; i<=rasterCount; ++i)
+			//first check if the raster actually has 'color' bands
+			int colorBands = 0;
 			{
-				ccLog::Print( "Reading band #%i", i);
+				for (int i = 1; i <= rasterCount; ++i)
+				{
+					GDALRasterBand* poBand = poDataset->GetRasterBand(i);
+					GDALColorInterp colorInterp = poBand->GetColorInterpretation();
+
+					switch (colorInterp)
+					{
+					case GCI_RedBand:
+					case GCI_GreenBand:
+					case GCI_BlueBand:
+					case GCI_AlphaBand:
+						++colorBands;
+						break;
+					default:
+						break;
+					}
+				}
+			}
+
+			for (int i = 1; i <= rasterCount; ++i)
+			{
+				ccLog::Print( "[GDAL] Reading band #%i", i);
 				GDALRasterBand* poBand = poDataset->GetRasterBand(i);
 
 				GDALColorInterp colorInterp = poBand->GetColorInterpretation();
 
 				int nBlockXSize, nBlockYSize;
 				poBand->GetBlockSize( &nBlockXSize, &nBlockYSize );
-				ccLog::Print( "Block=%dx%d Type=%s, ColorInterp=%s", nBlockXSize, nBlockYSize, GDALGetDataTypeName(poBand->GetRasterDataType()), GDALGetColorInterpretationName(colorInterp) );
+				ccLog::Print( "[GDAL] Block=%dx%d, Type=%s, ColorInterp=%s", nBlockXSize, nBlockYSize, GDALGetDataTypeName(poBand->GetRasterDataType()), GDALGetColorInterpretationName(colorInterp) );
 
 				//fetching raster scan-line
 				int nXSize = poBand->GetXSize();
@@ -153,19 +175,24 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				double adfMinMax[2] = {0, 0};
 				adfMinMax[0] = poBand->GetMinimum( &bGotMin );
 				adfMinMax[1] = poBand->GetMaximum( &bGotMax );
-				if (!bGotMin || !bGotMax )
+				if (!bGotMin || !bGotMax)
+				{
 					//DGM FIXME: if the file is corrupted (e.g. ASCII ArcGrid with missing rows) this method will enter in a infinite loop!
 					GDALComputeRasterMinMax((GDALRasterBandH)poBand, TRUE, adfMinMax);
-				ccLog::Print( "Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1] );
+				}
+				ccLog::Print( "[GDAL] Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1] );
 
 				GDALColorTable* colTable = poBand->GetColorTable();
 				if( colTable != NULL )
-					printf( "Band has a color table with %d entries", colTable->GetColorEntryCount() );
+					printf( "[GDAL] Band has a color table with %d entries", colTable->GetColorEntryCount() );
 
 				if( poBand->GetOverviewCount() > 0 )
-					printf( "Band has %d overviews", poBand->GetOverviewCount() );
+					printf( "[GDAL] Band has %d overviews", poBand->GetOverviewCount() );
 
-				if (colorInterp == GCI_Undefined && !zRasterProcessed/*&& !colTable*/) //probably heights?
+				if (	colorInterp == GCI_Undefined //probably heights? DGM: no GDAL is lost if the bands are coded with 64 bits values :(
+					&&	!zRasterProcessed
+					&& (colorBands >= 3 || rasterCount < 4 || i > (rasterCount == 4 ? 3 : 4))
+					/*&& !colTable*/)
 				{
 					zRasterProcessed = true;
 					zMinMax[0] = adfMinMax[0];
@@ -173,11 +200,21 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 
 					double* scanline = (double*) CPLMalloc(sizeof(double)*nXSize);
 					//double* scanline = new double[nXSize];
-					memset(scanline,0,sizeof(double)*nXSize);
+					memset(scanline, 0, sizeof(double)*nXSize);
 
-					for (int j=0; j<nYSize; ++j)
+					for (int j = 0; j < nYSize; ++j)
 					{
-						if (poBand->RasterIO( GF_Read, /*xOffset=*/0, /*yOffset=*/j, /*xSize=*/nXSize, /*ySize=*/1, /*buffer=*/scanline, /*bufferSizeX=*/nXSize, /*bufferSizeY=*/1, /*bufferType=*/GDT_Float64, /*x_offset=*/0, /*y_offset=*/0 ) != CE_None)
+						if (poBand->RasterIO(	GF_Read,
+												/*xOffset=*/0,
+												/*yOffset=*/j,
+												/*xSize=*/nXSize,
+												/*ySize=*/1,
+												/*buffer=*/scanline,
+												/*bufferSizeX=*/nXSize,
+												/*bufferSizeY=*/1,
+												/*bufferType=*/GDT_Float64,
+												/*x_offset=*/0,
+												/*y_offset=*/0 ) != CE_None)
 						{
 							delete pc;
 							CPLFree(scanline);
@@ -185,7 +222,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 							return CC_FERR_READING;
 						}
 
-						for (int k=0; k<nXSize; ++k)
+						for (int k = 0; k < nXSize; ++k)
 						{
 							double z = static_cast<double>(scanline[k]) + Pshift[2];
 							unsigned pointIndex = static_cast<unsigned>(k + j * rasterX);
@@ -237,7 +274,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 						isScalar = true;
 						break;
 					}
-
 
 					if (isRGB || isPalette)
 					{
@@ -312,15 +348,14 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 								if (colIndexes)
 									CPLFree(colIndexes);
 								colIndexes = 0;
-
-								pc->showColors(true);
 							}
 						}
 					}
 					else if (isScalar)
 					{
-						ccScalarField* sf = new ccScalarField(GDALGetColorInterpretationName(colorInterp));
-						if (!sf->resize(pc->size(),true,NAN_VALUE))
+						QString sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); //SF names really need to be unique!
+						ccScalarField* sf = new ccScalarField(qPrintable(sfName));
+						if (!sf->resize(pc->size(), true, NAN_VALUE))
 						{
 							ccLog::Warning(QString("Failed to instantiate memory for storing '%1' as a scalar field!").arg(sf->getName()));
 							sf->release();
@@ -328,9 +363,9 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 						}
 						else
 						{
-							double* colValues = (double*) CPLMalloc(sizeof(double)*nXSize);
+							double* colValues = (double*)CPLMalloc(sizeof(double)*nXSize);
 							//double* scanline = new double[nXSize];
-							memset(colValues,0,sizeof(double)*nXSize);
+							memset(colValues, 0, sizeof(double)*nXSize);
 
 							for (int j=0; j<nYSize; ++j)
 							{
@@ -359,8 +394,9 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 							sf->computeMinAndMax();
 							pc->addScalarField(sf);
 							if (pc->getNumberOfScalarFields() == 1)
+							{
 								pc->setCurrentDisplayedScalarField(0);
-							pc->showSF(true);
+							}
 						}
 					}
 				}
@@ -412,6 +448,17 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 					}
 				}
 				container.addChild(pc);
+
+				//we give the priority to colors!
+				if (pc->hasColors())
+				{
+					pc->showColors(true);
+					pc->showSF(false);
+				}
+				else if (pc->hasScalarFields())
+				{
+					pc->showSF(true);
+				}
 			}
 
 			GDALClose(poDataset);

@@ -54,6 +54,9 @@ v2.8.beta - XX/XX/2016
 		- Exported rasters (geotiff) are using the same convetion. They are also now properly oriented (they could be loaded
 			flipped in some GIS tools).
 		- ASCII matrix is now exported from top (highest Y coordinates) to bottom (lowest)
+		- Mixing RGB bands and other layers (heights, scalar fields, etc.) in a geotiff is in fact a bad idea. It results in
+			64 bits color bands that are not properly handled by most of the other GIS tools. CC will now warn the user about
+			this fact.
 
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)

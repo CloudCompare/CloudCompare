@@ -4090,7 +4090,7 @@ CCLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned cha
 		const CCVector3* P = point(i);
 
 		CCVector2 P2D( P->u[X], P->u[Y] );
-		bool pointIsInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,poly);
+		bool pointIsInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, poly);
 		if (inside == pointIsInside)
 		{
 			ref->addPointIndex(i);

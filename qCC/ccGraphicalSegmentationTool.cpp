@@ -494,7 +494,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		m_polyVertices->addPoint(P);
 		m_polyVertices->addPoint(P);
 		m_segmentationPoly->clear();
-		if (!m_segmentationPoly->addPointIndex(0,2))
+		if (!m_segmentationPoly->addPointIndex(0, 2))
 		{
 			ccLog::Error("Out of memory!");
 			allowPolylineExport(false);
@@ -690,8 +690,8 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 			allowPolylineExport(false);
 		}
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
-		m_associatedWin->displayNewMessage("Segmentation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		m_associatedWin->displayNewMessage("Unpause to segment again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Segmentation [PAUSED]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Unpause to segment again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 	}
 	else
 	{
@@ -699,13 +699,13 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 		if (m_rectangularSelection)
 		{
-			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-			m_associatedWin->displayNewMessage("Left click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Left click: set opposite corners", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		}
 		else
 		{
-			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-			m_associatedWin->displayNewMessage("Left click: add contour points / Right click: close",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection)", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Left click: add contour points / Right click: close", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		}
 	}
 
@@ -724,7 +724,7 @@ void ccGraphicalSegmentationTool::doSetPolylineSelection()
 
 	selectionModelButton->setDefaultAction(actionSetPolylineSelection);
 
-	m_rectangularSelection=false;
+	m_rectangularSelection = false;
 	if (m_state != PAUSED)
 	{
 		pauseSegmentationMode(true);
@@ -816,8 +816,8 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			allowPolylineExport(false);
 
 			//duplicate polyline 'a minima' (only points and indexes + closed state)
-			if (	m_polyVertices->reserve(vertices->size())
-				&&	m_segmentationPoly->reserve(poly->size()))
+			if (	m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
+				&&	m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
 			{
 				for (unsigned i=0; i<vertices->size(); ++i)
 				{
@@ -827,25 +827,36 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 						CCVector3d Q2D;
 						camera.project(P, Q2D);
 
-						P.x = static_cast<PointCoordinateType>(Q2D.x-half_w);
-						P.y = static_cast<PointCoordinateType>(Q2D.y-half_h);
+						P.x = static_cast<PointCoordinateType>(Q2D.x - half_w);
+						P.y = static_cast<PointCoordinateType>(Q2D.y - half_h);
 						P.z = 0;
 					}
 					m_polyVertices->addPoint(P);
 				}
-				for (unsigned j=0; j<poly->size(); ++j)
+				for (unsigned j = 0; j < poly->size(); ++j)
 				{
 					m_segmentationPoly->addPointIndex(poly->getPointGlobalIndex(j));
 				}
-				
+
 				m_segmentationPoly->setClosed(poly->isClosed());
 				if (m_segmentationPoly->isClosed())
 				{
-					//stop
+					//stop (but we can't all pauseSegmentationMode as it would remove the current polyline)
 					m_state &= (~RUNNING);
 					allowPolylineExport(m_segmentationPoly->size() > 1);
 				}
-
+				else if (vertices->size())
+				{
+					//we make as if the segmentation was in progress
+					pauseSegmentationMode(false);
+					unsigned lastIndex = vertices->size() - 1;
+					m_polyVertices->addPoint(*m_polyVertices->getPoint(lastIndex));
+					m_segmentationPoly->addPointIndex(lastIndex + 1);
+					m_segmentationPoly->setClosed(true);
+					m_state |= (POLYLINE | RUNNING);
+				}
+				
+				m_rectangularSelection = false;
 				m_associatedWin->redraw(true, false);
 			}
 			else
@@ -902,7 +913,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 			ccPointCloud* verticesPC = dynamic_cast<ccPointCloud*>(vertices);
 			if (verticesPC)
 			{
-				for (unsigned i=0; i<vertices->size(); ++i)
+				for (unsigned i = 0; i < vertices->size(); ++i)
 				{
 					CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
 					CCVector3d Pd(half_w + Pscreen->x, half_h + Pscreen->y, 0/*Pscreen->z*/);
@@ -932,7 +943,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 		viewportObject->setDisplay(m_associatedWin);
 		poly->addChild(viewportObject);
 
-		mainWindow->addToDB(poly,false,false,false);
+		mainWindow->addToDB(poly, false, false, false);
 		ccLog::Print(QString("[Segmentation] Polyline exported (%1 vertices)").arg(poly->size()));
 	}
 }

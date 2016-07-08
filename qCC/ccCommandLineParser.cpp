@@ -2301,8 +2301,6 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 
 	//now read the vertices
 	{
-		unsigned char X = ((orthoDim + 1) % 3);
-		unsigned char Y = ((X + 1) % 3);
 		if (	!vertices.reserve(N)
 			||	!poly.addPointIndex(0, N))
 		{
@@ -2319,15 +2317,15 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 			CCVector3 P(0, 0, 0);
 
 			QString coordStr = arguments.takeFirst();
-			P.u[X] = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
+			P.x = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
 				return Error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
 			/*QString */coordStr = arguments.takeFirst();
-			P.u[Y] = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
+			P.y = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
 				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
 
-			vertices.addPoint(P);
+			vertices.addPoint(P); //the polyline must be defined in the XY plane!
 		}
 
 		poly.setClosed(true);

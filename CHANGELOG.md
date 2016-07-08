@@ -75,6 +75,7 @@ v2.8.beta - XX/XX/2016
 		- the 'Hillshade' computation tool was considering the grid upside-down (hence the sun azimuth angle was inverted)
 		- contour lines generated with a projection direction other than Z were not displayed in the right orientation compared
 			to the grid raster (inside the Rasterize tool only)
+	* Command line tool: the CROP2D option applied with an orientation other than Z was not performing the cut at the right position
 
 v2.7.0 - 04/22/2016
 -------------------

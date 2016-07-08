@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>500</height>
+    <width>380</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,6 +87,71 @@
        </item>
        <item>
         <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="classifCheckBox">
+           <property name="text">
+            <string>Classification</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QGroupBox" name="decomposeClassifGroupBox">
+           <property name="title">
+            <string>decompose</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QCheckBox" name="classifValueCheckBox">
+              <property name="text">
+               <string>Value</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="classifSyntheticCheckBox">
+              <property name="text">
+               <string>Synthetic flag</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="classifKeypointCheckBox">
+              <property name="text">
+               <string>Key-point</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="classifWithheldCheckBox">
+              <property name="text">
+               <string>Withheld</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
          <item row="1" column="0">
           <widget class="QCheckBox" name="timeCheckBox">
            <property name="text">
@@ -161,71 +226,6 @@
           <widget class="QCheckBox" name="userDataCheckBox">
            <property name="text">
             <string>User data</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QGroupBox" name="decomposeClassifGroupBox">
-           <property name="title">
-            <string>decompose</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <widget class="QCheckBox" name="classifValueCheckBox">
-              <property name="text">
-               <string>Value</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="classifSyntheticCheckBox">
-              <property name="text">
-               <string>Synthetic flag</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="classifKeypointCheckBox">
-              <property name="text">
-               <string>Key-point</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="classifWithheldCheckBox">
-              <property name="text">
-               <string>Withheld</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="classifCheckBox">
-           <property name="text">
-            <string>Classification</string>
            </property>
            <property name="checked">
             <bool>true</bool>

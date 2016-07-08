@@ -22,6 +22,8 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
+#include <ccMesh.h>
+#include <ccPlane.h>
 
 //GDAL
 #include <gdal_priv.h>
@@ -67,13 +69,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 			int rasterY = poDataset->GetRasterYSize();
 			ccLog::Print( "Size is %dx%dx%d", rasterX, rasterY, rasterCount );
 
-			ccPointCloud* pc = new ccPointCloud();
-			if (!pc->reserve(static_cast<unsigned>(rasterX * rasterY)))
-			{
-				delete pc;
-				return CC_FERR_NOT_ENOUGH_MEMORY;
-			}
-
 			if( poDataset->GetProjectionRef() != NULL )
 				ccLog::Print( "Projection is `%s'", poDataset->GetProjectionRef() );
 
@@ -97,41 +92,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				adfGeoTransform[1] = adfGeoTransform[5] = 1;
 			}
 
-			CCVector3d origin( adfGeoTransform[0], adfGeoTransform[3], 0.0 );
-			CCVector3d Pshift(0,0,0);
-			//check for 'big' coordinates
-			{
-				if (HandleGlobalShift(origin, Pshift, parameters))
-				{
-					pc->setGlobalShift(Pshift);
-					ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
-				}
-			}
-
-			//create blank raster 'grid'
-			{
-				double z = 0.0 /*+ Pshift.z*/;
-				for (int j = 0; j < rasterY; ++j)
-				{
-					for (int i = 0; i < rasterX; ++i)
-					{
-						double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + static_cast<double>(j) * adfGeoTransform[2] + Pshift.x;
-						double y = adfGeoTransform[3] + static_cast<double>(i) * adfGeoTransform[4] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
-						CCVector3 P(static_cast<PointCoordinateType>(x), static_cast<PointCoordinateType>(y), static_cast<PointCoordinateType>(z));
-						pc->addPoint(P);
-					}
-				}
-				QVariant xVar = QVariant::fromValue<int>(rasterX);
-				QVariant yVar = QVariant::fromValue<int>(rasterY);
-				pc->setMetaData("raster_width", xVar);
-				pc->setMetaData("raster_height", yVar);
-			}
-
-			//fetch raster bands
-			bool zRasterProcessed = false;
-			unsigned zInvalid = 0;
-			double zMinMax[2] = { 0, 0 };
-
 			//first check if the raster actually has 'color' bands
 			int colorBands = 0;
 			{
@@ -153,6 +113,103 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 					}
 				}
 			}
+
+			bool loadAsTexturedQuad = false;
+			if (colorBands >= 3)
+			{
+				loadAsTexturedQuad =
+					(QMessageBox::question(	parameters.parentWidget,
+											"Result type",
+											"Import raster as a cloud (yes) or a texture quad? (no)",
+											QMessageBox::Yes,
+											QMessageBox::No) == QMessageBox::No);
+			}
+
+			ccPointCloud* pc = new ccPointCloud();
+
+			CCVector3d origin(adfGeoTransform[0], adfGeoTransform[3], 0.0);
+			CCVector3d Pshift(0,0,0);
+			//check for 'big' coordinates
+			{
+				if (HandleGlobalShift(origin, Pshift, parameters))
+				{
+					if (pc)
+					{
+						pc->setGlobalShift(Pshift);
+					}
+					ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+				}
+			}
+
+			//create blank raster 'grid'
+			ccMesh* quad = 0;
+			QImage quadTexture;
+			if (loadAsTexturedQuad)
+			{
+				quad = new ccMesh(pc);
+				quad->addChild(pc);
+				pc->setName("vertices");
+				pc->setEnabled(false);
+
+				//reserve memory
+				quadTexture = QImage(rasterX, rasterY, QImage::Format_RGB32);
+				if (!pc->reserve(4) || !quad->reserve(2) || quadTexture.size() != QSize(rasterX, rasterY))
+				{
+					delete quad;
+					return CC_FERR_NOT_ENOUGH_MEMORY;
+				}
+
+				// B ------ C
+				// |        |
+				// A ------ D
+				CCVector3d B = origin + Pshift; //origin is 'top left'
+				CCVector3d C = B;
+				C.x += (rasterX - 1) * adfGeoTransform[1];
+				C.y += (rasterX - 1) * adfGeoTransform[4];
+				CCVector3d D = C;
+				D.x += (rasterY - 1) * adfGeoTransform[2];
+				D.y += (rasterY - 1) * adfGeoTransform[5];
+				CCVector3d A = B;
+				A.x += (rasterY - 1) * adfGeoTransform[2];
+				A.y += (rasterY - 1) * adfGeoTransform[5];
+
+				pc->addPoint(CCVector3::fromArray(A.u));
+				pc->addPoint(CCVector3::fromArray(B.u));
+				pc->addPoint(CCVector3::fromArray(C.u));
+				pc->addPoint(CCVector3::fromArray(D.u));
+
+				quad->addTriangle(0, 2, 1); //A C B
+				quad->addTriangle(0, 3, 2); //A D C
+			}
+			else
+			{
+				if (!pc->reserve(static_cast<unsigned>(rasterX * rasterY)))
+				{
+					delete pc;
+					return CC_FERR_NOT_ENOUGH_MEMORY;
+				}
+
+				double z = 0.0 /*+ Pshift.z*/;
+				for (int j = 0; j < rasterY; ++j)
+				{
+					for (int i = 0; i < rasterX; ++i)
+					{
+						double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + static_cast<double>(j) * adfGeoTransform[2] + Pshift.x;
+						double y = adfGeoTransform[3] + static_cast<double>(i) * adfGeoTransform[4] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
+						CCVector3 P(static_cast<PointCoordinateType>(x), static_cast<PointCoordinateType>(y), static_cast<PointCoordinateType>(z));
+						pc->addPoint(P);
+					}
+				}
+				QVariant xVar = QVariant::fromValue<int>(rasterX);
+				QVariant yVar = QVariant::fromValue<int>(rasterY);
+				pc->setMetaData("raster_width", xVar);
+				pc->setMetaData("raster_height", yVar);
+			}
+
+			//fetch raster bands
+			bool zRasterProcessed = false;
+			unsigned zInvalid = 0;
+			double zMinMax[2] = { 0, 0 };
 
 			for (int i = 1; i <= rasterCount; ++i)
 			{
@@ -191,7 +248,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 
 				if (	colorInterp == GCI_Undefined //probably heights? DGM: no GDAL is lost if the bands are coded with 64 bits values :(
 					&&	!zRasterProcessed
-					&& (colorBands >= 3 || rasterCount < 4 || i > (rasterCount == 4 ? 3 : 4))
+					&&	(colorBands >= 3 || rasterCount < 4 || i > (rasterCount == 4 ? 3 : 4))
+					&&	!loadAsTexturedQuad
 					/*&& !colTable*/)
 				{
 					zRasterProcessed = true;
@@ -216,6 +274,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 												/*x_offset=*/0,
 												/*y_offset=*/0 ) != CE_None)
 						{
+							assert(!quad);
 							delete pc;
 							CPLFree(scanline);
 							GDALClose(poDataset);
@@ -266,9 +325,16 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 						break;
 					case GCI_AlphaBand:
 						if (adfMinMax[0] != adfMinMax[1])
-							isScalar = true;
+						{
+							if (loadAsTexturedQuad)
+								isRGB = true;
+							else
+								isScalar = true; //we can't load the alpha band as a cloud color (transparency is not handled yet)
+						}
 						else
+						{
 							ccLog::Warning(QString("Alpha band ignored as it has a unique value (%1)").arg(adfMinMax[0]));
+						}
 						break;
 					default:
 						isScalar = true;
@@ -286,7 +352,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 						else
 						{
 							//instantiate memory for RBG colors if necessary
-							if (!pc->hasColors() && !pc->setRGBColor(ccColor::MAX,ccColor::MAX,ccColor::MAX))
+							if (!loadAsTexturedQuad && !pc->hasColors() && !pc->setRGBColor(ccColor::MAX, ccColor::MAX, ccColor::MAX))
 							{
 								ccLog::Warning(QString("Failed to instantiate memory for storing color band '%1'!").arg(GDALGetColorInterpretationName(colorInterp)));
 							}
@@ -296,50 +362,76 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 
 								int* colIndexes = (int*) CPLMalloc(sizeof(int)*nXSize);
 								//double* scanline = new double[nXSize];
-								memset(colIndexes,0,sizeof(int)*nXSize);
+								memset(colIndexes, 0, sizeof(int)*nXSize);
 
-								for (int j=0; j<nYSize; ++j)
+								for (int j = 0; j < nYSize; ++j)
 								{
 									if (poBand->RasterIO( GF_Read, /*xOffset=*/0, /*yOffset=*/j, /*xSize=*/nXSize, /*ySize=*/1, /*buffer=*/colIndexes, /*bufferSizeX=*/nXSize, /*bufferSizeY=*/1, /*bufferType=*/GDT_Int32, /*x_offset=*/0, /*y_offset=*/0 ) != CE_None)
 									{
 										CPLFree(colIndexes);
-										delete pc;
+										if (quad)
+											delete quad;
+										else
+											delete pc;
 										return CC_FERR_READING;
 									}
 
-									for (int k=0; k<nXSize; ++k)
+									for (int k = 0; k < nXSize; ++k)
 									{
 										unsigned pointIndex = static_cast<unsigned>(k + j * rasterX);
-										if (pointIndex <= pc->size())
+										if (loadAsTexturedQuad || pointIndex <= pc->size())
 										{
-											ColorCompType* C = const_cast<ColorCompType*>(pc->getPointColor(pointIndex));
+											ccColor::Rgba C;
+											if (loadAsTexturedQuad)
+											{
+												QColor origColor = quadTexture.pixelColor(k, j);
+												C = ccColor::Rgba(origColor.red(), origColor.green(), origColor.blue(), origColor.alpha());
+											}
+											else
+											{
+												const ColorCompType* origColor = pc->getPointColor(pointIndex);
+												C = ccColor::Rgba(origColor[0], origColor[1], origColor[2], ccColor::MAX);
+											}
 
-											switch(colorInterp)
+											switch (colorInterp)
 											{
 											case GCI_PaletteIndex:
 												assert(colTable);
 												{
 													GDALColorEntry col;
-													colTable->GetColorEntryAsRGB(colIndexes[k],&col);
-													C[0] = static_cast<ColorCompType>(col.c1 & ccColor::MAX);
-													C[1] = static_cast<ColorCompType>(col.c2 & ccColor::MAX);
-													C[2] = static_cast<ColorCompType>(col.c3 & ccColor::MAX);
+													colTable->GetColorEntryAsRGB(colIndexes[k], &col);
+													C.r = static_cast<ColorCompType>(col.c1 & ccColor::MAX);
+													C.g = static_cast<ColorCompType>(col.c2 & ccColor::MAX);
+													C.b = static_cast<ColorCompType>(col.c3 & ccColor::MAX);
 												}
 												break;
 
 											case GCI_RedBand:
-												C[0] = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.r = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
 												break;
 											case GCI_GreenBand:
-												C[1] = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.g = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
 												break;
 											case GCI_BlueBand:
-												C[2] = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.b = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												break;
+
+											case GCI_AlphaBand:
+												C.a = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
 												break;
 
 											default:
 												assert(false);
 												break;
+											}
+
+											if (loadAsTexturedQuad)
+											{
+												quadTexture.setPixelColor(k, j, qRgba(C.r, C.g, C.b, C.a));
+											}
+											else
+											{
+												pc->setPointColor(pointIndex, C.rgba);
 											}
 										}
 									}
@@ -351,7 +443,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 							}
 						}
 					}
-					else if (isScalar)
+					else if (isScalar && !loadAsTexturedQuad)
 					{
 						QString sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); //SF names really need to be unique!
 						ccScalarField* sf = new ccScalarField(qPrintable(sfName));
@@ -402,7 +494,12 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				}
 			}
 
-			if (pc)
+			if (quad)
+			{
+				ccPlane::SetQuadTexture(quad, quadTexture.mirrored());
+				container.addChild(quad);
+			}
+			else if (pc)
 			{
 				if (!zRasterProcessed)
 				{
@@ -411,7 +508,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 				else if (zInvalid != 0 && zInvalid < pc->size())
 				{
 					//shall we remove the points with invalid heights?
-					if (QMessageBox::question(0,"Remove NaN points?","This raster has pixels with invalid heights. Shall we remove them?",QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+					if (QMessageBox::question(0, "Remove NaN points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 					{
 						CCLib::ReferenceCloud validPoints(pc);
 						unsigned count = pc->size();

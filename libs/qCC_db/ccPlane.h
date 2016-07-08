@@ -68,6 +68,9 @@ public:
 	//! Sets an image as texture
 	bool setAsTexture(QImage image, QString imageFilename = QString());
 
+	//! Sets an image as texture for a quad mesh
+	static bool SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilename = QString());
+
 	//! Fits a plane primitive on a cloud
 	/** The cloud can be any CCLib::GenericIndexedCloudPersist-derived object,
 		i.e. even a ccPolyline object for instance.

@@ -58,6 +58,10 @@ v2.8.beta - XX/XX/2016
 			64 bits color bands that are not properly handled by most of the other GIS tools. CC will now warn the user about
 			this fact.
 
+	* Raster file import:
+		- New option to import the raster as a textured quad (mesh). Only available if the raster has at least R, G and B bands.
+		- CC is now able to properly load raster files with multiple undefined bands
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position

@@ -47,7 +47,7 @@
 //System
 #include <algorithm>
 #if defined(CC_WINDOWS)
-#include "Windows.h"
+#include "windows.h"
 #else
 #include <unistd.h>
 #endif

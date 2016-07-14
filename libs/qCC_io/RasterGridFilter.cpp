@@ -427,7 +427,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 
 											if (loadAsTexturedQuad)
 											{
-												quadTexture.setPixelColor(k, j, qRgba(C.r, C.g, C.b, C.a));
+												quadTexture.setPixel(k, j, qRgba(C.r, C.g, C.b, C.a));
 											}
 											else
 											{

@@ -86,11 +86,11 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 		}
 	}
 
-	QImage bufferImage(depthBuffer.width,depthBuffer.height,QImage::Format_RGB32);
+	QImage bufferImage(depthBuffer.width, depthBuffer.height, QImage::Format_RGB32);
 	{
 		ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
 		assert(colorScale);
-		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS-1)/(maxDist-minDist);
+		ScalarType coef = maxDist - minDist < ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS - 1) / (maxDist - minDist);
 
 		const ScalarType* _zBuff = &(depthBuffer.zBuff.front());
 		for (unsigned y=0; y<depthBuffer.height; ++y)
@@ -98,7 +98,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 			for (unsigned x=0; x<depthBuffer.width; ++x,++_zBuff)
 			{
 				const ccColor::Rgba& col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((std::min(maxDist,*_zBuff)-minDist)*coef)) : ccColor::black);
-				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col.r,col.g,col.b));
+				bufferImage.setPixel(x, depthBuffer.height - 1 - y, qRgb(col.r, col.g, col.b));
 			}
 		}
 	}
@@ -106,7 +106,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 	QDialog* dlg = new QDialog(parent);
 	dlg->setWindowTitle(QString("%0 depth buffer [%1 x %2]").arg(sensor->getParent()->getName()).arg(depthBuffer.width).arg(depthBuffer.height));
 
-	unsigned maxDBDim = std::max<unsigned>(depthBuffer.width,depthBuffer.height);
+	unsigned maxDBDim = std::max<unsigned>(depthBuffer.width, depthBuffer.height);
 	unsigned scale = 1;
 	while (maxDBDim > maxDim)
 	{

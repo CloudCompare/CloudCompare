@@ -1814,7 +1814,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 			}
 
 			//pure black pixels are treated as transparent ones!
-			orthoImage.setPixel(i,h-1-j,rgb != blackValue ? rgb : blackAlphaZero);
+			orthoImage.setPixel(i, h - 1 - j, rgb != blackValue ? rgb : blackAlphaZero);
 		}
 	}
 
@@ -1965,7 +1965,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 			}
 
 			//pure black pixels are treated as transparent ones!
-			orthoImage.setPixel(i,h-1-j,rgb != blackValue ? rgb : blackAlphaZero);
+			orthoImage.setPixel(i, h - 1 - j, rgb != blackValue ? rgb : blackAlphaZero);
 		}
 	}
 
@@ -2178,12 +2178,12 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 					QRgb rgb = image->data().pixel(x,y);
 					//pure black pixels are treated as transparent ones!
 					if (qRed(rgb) + qGreen(rgb) + qBlue(rgb) > 0)
-						orthoImage.setPixel(i,h-1-j,rgb);
+						orthoImage.setPixel(i, h - 1 - j, rgb);
 					else
-						orthoImage.setPixel(i,h-1-j,qRgba(qRed(rgb),qGreen(rgb),qBlue(rgb),0));
+						orthoImage.setPixel(i, h - 1 - j, qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), 0));
 				}
 				else
-					orthoImage.setPixel(i,h-1-j,qRgba(255,0,255,0));
+					orthoImage.setPixel(i, h - 1 - j, qRgba(255, 0, 255, 0));
 			}
 		}
 

@@ -294,7 +294,7 @@ public: //associated (scan) grid structure
 					for (unsigned i=0; i<w; ++i)
 					{
 						const ccColor::Rgb& col = colors[j*w + i];
-						image.setPixel(i, j, QColor(col.r, col.g, col.b).rgb());
+						image.setPixel(i, j, qRgb(col.r, col.g, col.b));
 					}
 				}
 				return image;

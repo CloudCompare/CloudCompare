@@ -209,7 +209,7 @@ public: //depth buffer management
 		This array corresponds roughly to what have been "seen" by the sensor during
 		acquisition (the 3D points are simply projected in the sensor frame).
 	**/
-	struct DepthBuffer
+	struct QCC_DB_LIB_API DepthBuffer
 	{
 		//! Z-Buffer grid
 		std::vector<PointCoordinateType> zBuff;

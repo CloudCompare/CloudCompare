@@ -78,7 +78,8 @@ public:
 	inline Particle& getParticle(int x, int y) { return particles[y*num_particles_width + x]; }
 	inline const Particle& getParticle(int x, int y) const { return particles[y*num_particles_width + x]; }
 	
-	inline Particle getParticleByIndex(int index) { return particles[index]; }
+	//inline Particle getParticleByIndex(int index) { return particles[index]; }
+	inline Particle& getParticleByIndex(int index) { return particles[index]; }  //zwm
 	inline const Particle getParticleByIndex(int index) const { return particles[index]; }
 
 	int num_particles_width; // number of particles in "width" direction

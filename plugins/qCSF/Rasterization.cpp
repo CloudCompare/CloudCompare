@@ -129,7 +129,8 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 		//#pragma omp parallel for
 		for (int i = 0; i < cloth.getSize(); i++)
 		{
-			Particle &pcur = cloth.getParticleByIndex(i);
+			//Particle &pcur = cloth.getParticleByIndex(i);
+			Particle& pcur = cloth.getParticleByIndex(i);      //zwm
 			double nearestHeight = pcur.nearestPointHeight;
 			
 			if (nearestHeight > MIN_INF)

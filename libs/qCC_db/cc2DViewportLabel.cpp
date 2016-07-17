@@ -60,7 +60,7 @@ bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!cc2DViewportObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	if (dataVersion<21)
+	if (dataVersion < 21)
 		return false;
 
 	//ROI (dataVersion>=21)

@@ -104,8 +104,11 @@ protected: //raster grid related stuff
 	**/
 	virtual bool showGridBoxEditor();
 
-	//! Returns grid size as a string
+	//! Returns the grid size as a string
 	virtual QString getGridSizeAsString() const;
+
+	//! Returns the grid size
+	virtual bool getGridSize(unsigned& width, unsigned& height) const;
 
 	//! Creates the bounding-box editor
 	void createBoundingBoxEditor(const ccBBox& gridBBox, QWidget* parent);
@@ -189,6 +192,9 @@ protected: //raster grid related stuff
 		void clear();
 
 		//! Fills the grid with a point cloud
+		/** Since version 2.8, we now use the "PixelIsArea" convention by default (as GDAL)
+			This means that the height is computed at the center of the grid cell.
+		**/
 		bool fillWith(	ccGenericPointCloud* cloud,
 						unsigned char projectionDimension,
 						cc2Point5DimEditor::ProjectionType projectionType,

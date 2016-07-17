@@ -532,7 +532,8 @@ void ccViewer::addToDB(QStringList filenames)
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i],parameters);
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
 
 		if (newEntities)
 		{
@@ -566,6 +567,12 @@ void ccViewer::addToDB(QStringList filenames)
 					}
 				}
 			}
+		}
+		
+		if (result == CC_FERR_CANCELED_BY_USER)
+		{
+			//stop importing the file if the user has cancelled the current process!
+			break;
 		}
 	}
 

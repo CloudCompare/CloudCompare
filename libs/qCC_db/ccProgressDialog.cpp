@@ -77,6 +77,7 @@ void ccProgressDialog::update(float percent)
 	if (value != m_currentValue)
 	{
 		m_currentValue = value;
+		setValue(value);
 
 		//every now and then we let the dialog (and more generally the GUI) re-display itself and process events!
 		bool refresh = (abs(m_lastValue - m_currentValue) >= m_refreshInterval);

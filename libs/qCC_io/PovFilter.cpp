@@ -278,7 +278,9 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				fclose(fp);
 				return CC_FERR_UNKNOWN_FILE;
 			}
-			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(subFileName),parameters,filter);
+
+			CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+			ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(subFileName), parameters, filter, result);
 			if (entities)
 			{
 				ccGLMatrix rot;
@@ -359,7 +361,14 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			}
 			else
 			{
-				ccLog::Print("[PovFilter::loadFile] File (%s) not found or empty!",subFileName);
+				if (result == CC_FERR_CANCELED_BY_USER)
+				{
+					break;
+				}
+				else
+				{
+					ccLog::Print("[PovFilter::loadFile] File (%s) not found or empty!", subFileName);
+				}
 			}
 		}
 	}

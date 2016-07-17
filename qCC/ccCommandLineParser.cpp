@@ -592,9 +592,12 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	QString filename(arguments.takeFirst());
 	Print(QString("Opening file: '%1'").arg(filename));
 
-	ccHObject* db = FileIOFilter::LoadFromFile(filename,s_loadParameters,QString());
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* db = FileIOFilter::LoadFromFile(filename, s_loadParameters, result, QString());
 	if (!db)
+	{
 		return false/*Error(QString("Failed to open file '%1'").arg(filename))*/;
+	}
 
 	std::unordered_set<unsigned> verticesIDs;
 	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
@@ -2298,31 +2301,31 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 
 	//now read the vertices
 	{
-		unsigned char X = ((orthoDim+1) % 3);
-		unsigned char Y = ((X+1) % 3);
 		if (	!vertices.reserve(N)
-			||	!poly.addPointIndex(0,N) )
+			||	!poly.addPointIndex(0, N))
 		{
 			return Error("Not enough memory!");
 		}
 
-		for (unsigned i=0; i<N; ++i)
+		for (unsigned i = 0; i < N; ++i)
 		{
 			if (arguments.size() < 2)
-				return Error(QString("Missing parameter(s): vertex #%1 data and following").arg(i+1));
+			{
+				return Error(QString("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
+			}
 
-			CCVector3 P(0,0,0);
+			CCVector3 P(0, 0, 0);
 
 			QString coordStr = arguments.takeFirst();
-			P.u[X] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
+			P.x = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
-				return Error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i+1));
+				return Error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
 			/*QString */coordStr = arguments.takeFirst();
-			P.u[Y] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
+			P.y = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
-				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i+1));
+				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
 
-			vertices.addPoint(P);
+			vertices.addPoint(P); //the polyline must be defined in the XY plane!
 		}
 
 		poly.setClosed(true);
@@ -2333,7 +2336,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 	while (!arguments.empty())
 	{
 		QString argument = arguments.front();
-		if (IsCommand(argument,COMMAND_CROP_OUTSIDE))
+		if (IsCommand(argument, COMMAND_CROP_OUTSIDE))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2348,7 +2351,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 	//now we can crop the loaded cloud(s)
 	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
-		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop2D(&poly,orthoDim,inside);
+		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop2D(&poly, orthoDim, inside);
 		if (ref)
 		{
 			if (ref->size() != 0)

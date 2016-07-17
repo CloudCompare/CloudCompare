@@ -1513,7 +1513,7 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//double zMax = qFromLittleEndian<double>(*reinterpret_cast<const double*>(_header));
 		_header += 8;
 
-		if (isnan(zMin))
+		if (std::isnan(zMin))
 		{
 			//for 2D entities, the zMin value might be NaN!!!
 			zMin = 0;

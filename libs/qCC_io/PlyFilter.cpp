@@ -1517,13 +1517,14 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 	}
 
-	ccProgressDialog pDlg(false, parameters.parentWidget);
+	ccProgressDialog* pDlg = 0;
 	if (parameters.alwaysDisplayLoadDialog)
 	{
-		pDlg.setInfo(QObject::tr("Loading in progress..."));
-		pDlg.setMethodTitle(QObject::tr("PLY file"));
-		pDlg.setRange(0, 0);
-		pDlg.show();
+		pDlg = new ccProgressDialog(false, parameters.parentWidget);
+		pDlg->setInfo(QObject::tr("Loading in progress..."));
+		pDlg->setMethodTitle(QObject::tr("PLY file"));
+		pDlg->setRange(0, 0);
+		pDlg->show();
 		QApplication::processEvents();
 	}
 
@@ -1539,6 +1540,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	ply_close(ply);
+
+	if (pDlg)
+	{
+		delete pDlg;
+		pDlg = 0;
+	}
 
 	if (success < 1)
 	{
@@ -1586,7 +1593,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	//we save parameters
 	parameters = s_loadParameters;
 
-	//we update scalar field(s)
+	//we update the scalar field(s)
 	{
 		for (unsigned i=0; i<cloud->getNumberOfScalarFields(); ++i)
 		{

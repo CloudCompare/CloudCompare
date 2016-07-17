@@ -362,6 +362,7 @@ protected slots:
 	void doActionSubdivideMesh();
 	void doActionComputeCPS();
 	void doActionDeleteAllSF();
+	void doActionShowWaveDialog();
 	void doActionKMeans();
 	void doActionFrontPropagation();
 	void doActionApplyScale();

@@ -935,7 +935,9 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	bool cloudHadNormals = cloud->hasNormals();
 	//compute per-vertex normals if necessary
 	if (!cloudHadNormals || updateNormals)
+	{
 		mesh->computeNormals(true);
+	}
 	mesh->showNormals(cloudHadNormals || !cloud->hasColors());
 	if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
 	{

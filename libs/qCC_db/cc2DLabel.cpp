@@ -721,11 +721,15 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
-	for (size_t i = 0; i < count; i++)
+	//don't do this in picking mode!
+	if (!pushName)
 	{
-		//project the point in 2D
-		const CCVector3* P3D = m_points[i].cloud->getPoint(m_points[i].index);
-		camera.project(*P3D, m_points[i].pos2D);
+		for (size_t i = 0; i < count; i++)
+		{
+			//project the point in 2D
+			const CCVector3* P3D = m_points[i].cloud->getPoint(m_points[i].index);
+			camera.project(*P3D, m_points[i].pos2D);
+		}
 	}
 
 	bool loop = false;
@@ -744,7 +748,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			ccGL::Vertex3v(glFunc, m_points[2].cloud->getPoint(m_points[2].index)->u);
 			glFunc->glEnd();
 
-			glFunc->glPopAttrib();
+			glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 			loop = true;
 		}
 	case 2:
@@ -771,7 +775,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			//	}
 			//}
 			//glFunc->glEnd();
-			//glFunc->glPopAttrib();
+			//glFunc->glPopAttrib(); //GL_LINE_BIT
 		}
 
 	case 1:
@@ -934,63 +938,81 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//hack: we display the label connecting 'segments' and the point(s) legend
 	//in 2D so that they always appear above the entities
 	{
-		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
-		glFunc->glDisable(GL_DEPTH_TEST);
-		
-		//contour segments (before the labels!)
-		if (count > 1)
+		//test if the label points are visible
+		size_t visibleCount = 0;
+		for (unsigned j = 0; j < count; ++j)
 		{
-			//segment width
-			const float c_sizeFactor = 4.0f;
-			glFunc->glPushAttrib(GL_LINE_BIT);
-			glFunc->glLineWidth(c_sizeFactor * context.renderZoom);
-
-			//we draw the segments
-			if (isSelected())
-				ccGL::Color3v(glFunc, ccColor::red.rgba);
-			else
-				ccGL::Color3v(glFunc, context.labelDefaultMarkerCol.rgb/*ccColor::green.rgba*/);
-
-			glFunc->glBegin(count == 2 ? GL_LINES : GL_LINE_LOOP);
-			for (unsigned j = 0; j < count; ++j)
+			if (m_points[j].pos2D.z >= 0.0 && m_points[j].pos2D.z <= 1.0)
 			{
-				glFunc->glVertex2d(m_points[j].pos2D.x - halfW, m_points[j].pos2D.y - halfH);
+				++visibleCount;
 			}
-			glFunc->glEnd();
-			glFunc->glPopAttrib();
 		}
 
-		//no need to display the point(s) legend in picking mode
-		if (m_dispPointsLegend && !pushName)
+		if (visibleCount)
 		{
-			QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
-			//font.setPointSize(font.pointSize() + 2);
-			font.setBold(true);
-			static const QChar ABC[3] = { 'A', 'B', 'C' };
+			glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
+			glFunc->glDisable(GL_DEPTH_TEST);
 
-			//draw the label 'legend(s)'
-			for (size_t j = 0; j < count; j++)
+			//contour segments (before the labels!)
+			if (count > 1)
 			{
-				const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
-				QString title;
-				if (count == 1)
-					title = getName(); //for single-point labels we prefer the name
-				else if (count == 3)
-					title = ABC[j]; //for triangle-labels, we only display "A","B","C"
+				//segment width
+				const float c_sizeFactor = 4.0f;
+				glFunc->glPushAttrib(GL_LINE_BIT);
+				glFunc->glLineWidth(c_sizeFactor * context.renderZoom);
+
+				//we draw the segments
+				if (isSelected())
+					ccGL::Color3v(glFunc, ccColor::red.rgba);
 				else
-					title = QString("P#%0").arg(m_points[j].index);
+					ccGL::Color3v(glFunc, context.labelDefaultMarkerCol.rgb/*ccColor::green.rgba*/);
 
-				context.display->displayText(title,
-					static_cast<int>(m_points[j].pos2D.x) + context.labelMarkerTextShift_pix,
-					static_cast<int>(m_points[j].pos2D.y) + context.labelMarkerTextShift_pix,
-					ccGenericGLDisplay::ALIGN_DEFAULT,
-					context.labelOpacity / 100.0f,
-					ccColor::white.rgba,
-					&font);
+				glFunc->glBegin(count == 2 ? GL_LINES : GL_LINE_LOOP);
+				for (unsigned j = 0; j < count; ++j)
+				{
+					glFunc->glVertex2d(m_points[j].pos2D.x - halfW, m_points[j].pos2D.y - halfH);
+				}
+				glFunc->glEnd();
+				glFunc->glPopAttrib(); //GL_LINE_BIT
 			}
-		}
 
-		glFunc->glPopAttrib();
+			//no need to display the point(s) legend in picking mode
+			if (m_dispPointsLegend && !pushName)
+			{
+				QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
+				//font.setPointSize(font.pointSize() + 2);
+				font.setBold(true);
+				static const QChar ABC[3] = { 'A', 'B', 'C' };
+
+				//draw the label 'legend(s)'
+				for (size_t j = 0; j < count; j++)
+				{
+					const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
+					QString title;
+					if (count == 1)
+						title = getName(); //for single-point labels we prefer the name
+					else if (count == 3)
+						title = ABC[j]; //for triangle-labels, we only display "A","B","C"
+					else
+						title = QString("P#%0").arg(m_points[j].index);
+
+					context.display->displayText(title,
+						static_cast<int>(m_points[j].pos2D.x) + context.labelMarkerTextShift_pix,
+						static_cast<int>(m_points[j].pos2D.y) + context.labelMarkerTextShift_pix,
+						ccGenericGLDisplay::ALIGN_DEFAULT,
+						context.labelOpacity / 100.0f,
+						ccColor::white.rgba,
+						&font);
+				}
+			}
+
+			glFunc->glPopAttrib(); //GL_DEPTH_BUFFER_BIT
+		}
+		else
+		{
+			//no need to draw anything (might be confusing)
+			return;
+		}
 	}
 	
 	if (!m_dispIn2D)
@@ -1332,7 +1354,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.bottom());
 		glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.top());
 		glFunc->glEnd();
-		glFunc->glPopAttrib();
+		glFunc->glPopAttrib(); //GL_LINE_BIT
 	}
 
 	//draw close button
@@ -1384,7 +1406,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		{
 #ifdef DRAW_CONTENT_AS_TAB
 			int xCol = xStartRel;
-			for (int c=0; c<tab.colCount; ++c)
+			for (int c = 0; c < tab.colCount; ++c)
 			{
 				int width = tab.colWidth[c] + 2*tabMarginX;
 				int height = rowHeight + 2*tabMarginY;
@@ -1457,7 +1479,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-	glFunc->glPopAttrib();
+	glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 
 	glFunc->glPopMatrix();
 

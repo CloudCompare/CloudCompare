@@ -526,7 +526,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	if (useAltKeypoints)
 	{
 		FileIOFilter::LoadParameters altKeypointsParams;
-		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename,altKeypointsParams);
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename, altKeypointsParams, result);
 		if (	!altKeypointsContainer
 			||	altKeypointsContainer->getChildrenNumber() != 1
 			||	(!altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::MESH)))

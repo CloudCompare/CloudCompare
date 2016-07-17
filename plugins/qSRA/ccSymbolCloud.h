@@ -109,6 +109,9 @@ protected:
 
 	//! Default label alignment flags
 	unsigned char m_labelAlignFlags;
+
+	//! Last 3D rendering parameters
+	ccGLCameraParameters m_lastCameraParams;
 };
 
 #endif //QSRA_SYMBOL_CLOUD_HEADER

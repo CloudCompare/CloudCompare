@@ -299,14 +299,14 @@ void ccVolumeCalcTool::saveSettings()
 {
 	QSettings settings;
 	settings.beginGroup(ccPS::VolumeCalculation());
-	settings.setValue("ProjectionType",heightProjectionComboBox->currentIndex());
-	settings.setValue("ProjectionDim",projDimComboBox->currentIndex());
-	settings.setValue("gFillStrategy",fillGroundEmptyCellsComboBox->currentIndex());
-	settings.setValue("cFillStrategy",fillCeilEmptyCellsComboBox->currentIndex());
-	settings.setValue("GridStep",gridStepDoubleSpinBox->value());
-	settings.setValue("gEmptyCellsHeight",groundEmptyValueDoubleSpinBox->value());
-	settings.setValue("cEmptyCellsHeight",ceilEmptyValueDoubleSpinBox->value());
-	settings.setValue("NumPrecision",precisionSpinBox->value());
+	settings.setValue("ProjectionType", heightProjectionComboBox->currentIndex());
+	settings.setValue("ProjectionDim", projDimComboBox->currentIndex());
+	settings.setValue("gFillStrategy", fillGroundEmptyCellsComboBox->currentIndex());
+	settings.setValue("cFillStrategy", fillCeilEmptyCellsComboBox->currentIndex());
+	settings.setValue("GridStep", gridStepDoubleSpinBox->value());
+	settings.setValue("gEmptyCellsHeight", groundEmptyValueDoubleSpinBox->value());
+	settings.setValue("cEmptyCellsHeight", ceilEmptyValueDoubleSpinBox->value());
+	settings.setValue("NumPrecision", precisionSpinBox->value());
 	settings.endGroup();
 }
 
@@ -421,15 +421,6 @@ bool ccVolumeCalcTool::updateGrid()
 		return false;
 	}
 
-	//per-cell Z computation
-	ProjectionType projectionType = getTypeOfProjection();
-
-	//vertical dimension
-	const unsigned char Z = getProjectionDimension();
-	assert(Z >= 0 && Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z +1;
-	const unsigned char Y = X == 2 ? 0 : X +1;
-
 	//cloud bounding-box --> grid size
 	ccBBox box = getCustomBBox();
 	if (!box.isValid())
@@ -437,21 +428,11 @@ bool ccVolumeCalcTool::updateGrid()
 		return false;
 	}
 
-	double gridStep = getGridStep();
-	assert(gridStep != 0);
-
-	CCVector3d boxDiag(	static_cast<double>(box.maxCorner().x) - static_cast<double>(box.minCorner().x),
-						static_cast<double>(box.maxCorner().y) - static_cast<double>(box.minCorner().y),
-						static_cast<double>(box.maxCorner().z) - static_cast<double>(box.minCorner().z) );
-
-	if (boxDiag.u[X] <= 0 || boxDiag.u[Y] <= 0)
+	unsigned gridWidth = 0, gridHeight = 0;
+	if (!getGridSize(gridWidth, gridHeight))
 	{
-		ccLog::Error("Invalid cloud bounding box!");
 		return false;
 	}
-
-	unsigned gridWidth  = static_cast<unsigned>(ceil(boxDiag.u[X] / gridStep));
-	unsigned gridHeight = static_cast<unsigned>(ceil(boxDiag.u[Y] / gridStep));
 
 	//grid size
 	unsigned gridTotalSize = gridWidth * gridHeight;
@@ -466,9 +447,12 @@ bool ccVolumeCalcTool::updateGrid()
 			return false;
 	}
 
-	CCVector3d minCorner = CCVector3d::fromArray(box.minCorner().u);
+	//grid step
+	double gridStep = getGridStep();
+	assert(gridStep != 0);
 
 	//memory allocation
+	CCVector3d minCorner = CCVector3d::fromArray(box.minCorner().u);
 	if (!m_grid.init(gridWidth, gridHeight, gridStep, minCorner))
 	{
 		//not enough memory
@@ -494,6 +478,12 @@ bool ccVolumeCalcTool::updateGrid()
 		assert(false);
 		return false;
 	}
+
+	//vertical dimension
+	const unsigned char Z = getProjectionDimension();
+	assert(Z >= 0 && Z <= 2);
+	//per-cell Z computation
+	ProjectionType projectionType = getTypeOfProjection();
 
 	ccProgressDialog pDlg(true, this);
 
@@ -640,7 +630,7 @@ bool ccVolumeCalcTool::updateGrid()
 					cell.nbPoints = 0;
 				}
 
-				cell.avgHeight = (groundHeight + ceilHeight)/2;
+				cell.avgHeight = (groundHeight + ceilHeight) / 2;
 				cell.stdDevHeight = 0;
 
 				if (!nProgress.oneStep())

@@ -71,6 +71,15 @@ public:
 	**/
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) { /*ignored by default*/ }
 
+	//! Shortcut to ccMainAppInterface::dispToConsole
+	inline virtual void dispToConsole(QString message, ccMainAppInterface::ConsoleMessageLevel level = ccMainAppInterface::STD_CONSOLE_MESSAGE)
+	{
+		if (m_app)
+		{
+			m_app->dispToConsole(message, level);
+		}
+	}
+
 protected:
 
 	//! Main application interface

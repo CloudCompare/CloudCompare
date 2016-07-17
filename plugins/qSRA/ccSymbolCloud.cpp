@@ -144,6 +144,13 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (glFunc == nullptr)
 		return;
 
+	if (MACRO_Draw3D(context))
+	{
+		//store the 3D camera parameters as we will need them for the 2D pass
+		//(and we need the real ones, especially if the rendering zoom is != 1)
+		context.display->getGLCameraParameters(m_lastCameraParams);
+	}
+
 	if (MACRO_Draw2D(context) && MACRO_Foreground(context))
 	{
 		//we get display parameters
@@ -174,16 +181,11 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glParams.showColors = false;
 		}
 		
-		if (!glParams.showColors)
-		{
-			glFunc->glColor3ubv(color);
-		}
-
 		unsigned numberOfPoints = size();
 
 		//viewport parameters (will be used to project 3D positions to 2D)
-		ccGLCameraParameters camera;
-		context.display->getGLCameraParameters(camera);
+		//ccGLCameraParameters camera;
+		//context.display->getGLCameraParameters(camera);
 
 		//only usefull when displaying labels!
 		QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
@@ -196,34 +198,35 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		double xpShift = 0.0;
 		if (m_labelAlignFlags & ccGenericGLDisplay::ALIGN_HLEFT)
-			xpShift = m_symbolSize/2.0;
+			xpShift = m_symbolSize / 2.0;
 		else if (m_labelAlignFlags & ccGenericGLDisplay::ALIGN_HRIGHT)
-			xpShift = -m_symbolSize/2.0;
+			xpShift = -m_symbolSize / 2.0;
 
 		double ypShift = 0.0;
 		if (m_labelAlignFlags & ccGenericGLDisplay::ALIGN_VTOP)
-			ypShift = m_symbolSize/2.0;
+			ypShift = m_symbolSize / 2.0;
 		else if (m_labelAlignFlags & ccGenericGLDisplay::ALIGN_VBOTTOM)
-			ypShift = -m_symbolSize/2.0;
+			ypShift = -m_symbolSize / 2.0;
 
 		//draw symbols + labels
 		{
-			for (unsigned i=0;i<numberOfPoints;i++)
+			for (unsigned i = 0; i < numberOfPoints; i++)
 			{
 				//symbol center
 				const CCVector3* P = getPoint(i);
 
 				//project it in 2D screen coordinates
 				CCVector3d Q2D;
-				camera.project(*P, Q2D);
+				m_lastCameraParams.project(*P, Q2D);
 
 				//apply point color (if any)
 				if (glParams.showColors)
 				{
 					color = getPointColor(i);
-					glFunc->glColor3ubv(color);
 				}
-			
+				//we must reset the color each time as the call to displayText may change the active color!
+				glFunc->glColor3ubv(color);
+
 				//draw associated symbol
 				if (m_showSymbols && m_symbolSize > 0.0)
 				{

@@ -181,7 +181,8 @@ public: //static methods
 	**/
 	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
 													LoadParameters& parameters,
-													Shared filter);
+													Shared filter,
+													CC_FILE_ERROR& result);
 
 	//! Loads one or more entities from a file with known type
 	/** Shortcut to the other version of FileIOFilter::LoadFromFile
@@ -192,6 +193,7 @@ public: //static methods
 	**/
 	QCC_IO_LIB_API static ccHObject* LoadFromFile(	const QString& filename,
 													LoadParameters& parameters,
+													CC_FILE_ERROR& result,
 													QString fileFilter = QString());
 
 	//! Saves an entity (or a group of) to a specific file thanks to a given filter

@@ -202,10 +202,13 @@ FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(QString ext)
 
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										LoadParameters& loadParameters,
-										Shared filter)
+										Shared filter,
+										CC_FILE_ERROR& result)
 {
 	if (!filter)
 	{
+		ccLog::Error(QString("[Load] Internal error (invalid input filter)").arg(filename));
+		result = CC_FERR_CONSOLE_ERROR;
 		assert(false);
 		return 0;
 	}
@@ -215,12 +218,13 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	if (!fi.exists())
 	{
 		ccLog::Error(QString("[Load] File '%1' doesn't exist!").arg(filename));
+		result = CC_FERR_CONSOLE_ERROR; 
 		return 0;
 	}
 
 	//load file
 	ccHObject* container = new ccHObject();
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	result = CC_FERR_NO_ERROR;
 	try
 	{
 		result = filter->loadFile(	filename,
@@ -241,7 +245,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	}
 	else
 	{
-		DisplayErrorMessage(result,"loading",fi.baseName());
+		DisplayErrorMessage(result, "loading", fi.baseName());
 	}
 
 	unsigned childCount = container->getChildrenNumber();
@@ -251,14 +255,14 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 		container->resetGLTransformationHistory_recursive();
 		//we set the main container name as the full filename (with path)
 		container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
-		for (unsigned i=0; i<childCount; ++i)
+		for (unsigned i = 0; i < childCount; ++i)
 		{
 			ccHObject* child = container->getChild(i);
 			QString newName = child->getName();
 			if (newName.startsWith("unnamed"))
 			{
 				//we automatically replace occurences of 'unnamed' in entities names by the base filename (no path, no extension)
-				newName.replace(QString("unnamed"),fi.baseName());
+				newName.replace(QString("unnamed"), fi.baseName());
 				child->setName(newName);
 			}
 		}
@@ -274,6 +278,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										LoadParameters& loadParameters,
+										CC_FILE_ERROR& result,
 										QString fileFilter/*=QString()*/)
 {
 	Shared filter(0);
@@ -281,10 +286,11 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	//if the right filter is specified by the caller
 	if (!fileFilter.isEmpty())
 	{
-		filter = GetFilter(fileFilter,true);
+		filter = GetFilter(fileFilter, true);
 		if (!filter)
 		{
-			ccLog::Error(QString("[Load] Internal error: no filter corresponds to filter '%1'").arg(fileFilter));
+			ccLog::Error(QString("[Load] Internal error: no I/O filter corresponds to filter '%1'").arg(fileFilter));
+			result = CC_FERR_CONSOLE_ERROR;
 			return 0;
 		}
 	}
@@ -295,6 +301,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 		if (extension.isEmpty())
 		{
 			ccLog::Error("[Load] Can't guess file format: no file extension");
+			result = CC_FERR_CONSOLE_ERROR;
 			return 0;
 		}
 
@@ -305,11 +312,12 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 		if (!filter)
 		{
 			ccLog::Error(QString("[Load] Can't guess file format: unhandled file extension '%1'").arg(extension));
+			result = CC_FERR_CONSOLE_ERROR;
 			return 0;
 		}
 	}
 
-	return LoadFromFile(filename, loadParameters, filter);
+	return LoadFromFile(filename, loadParameters, filter, result);
 }
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,

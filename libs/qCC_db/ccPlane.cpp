@@ -54,17 +54,20 @@ bool ccPlane::buildUp()
 	assert(verts);
 	assert(m_triNormals);
 
-	verts->addPoint(CCVector3(-m_xWidth/2,-m_yWidth/2, 0));
-	verts->addPoint(CCVector3(-m_xWidth/2, m_yWidth/2, 0));
-	verts->addPoint(CCVector3( m_xWidth/2, m_yWidth/2, 0));
-	verts->addPoint(CCVector3( m_xWidth/2,-m_yWidth/2, 0));
+	// B ------ C
+	// |        |
+	// A ------ D
+	verts->addPoint(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0));
+	verts->addPoint(CCVector3(-m_xWidth / 2,  m_yWidth / 2, 0));
+	verts->addPoint(CCVector3( m_xWidth / 2,  m_yWidth / 2, 0));
+	verts->addPoint(CCVector3( m_xWidth / 2, -m_yWidth / 2, 0));
 
-	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0,0,1).u));
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1)));
 
-	addTriangle(0,2,1);
-	addTriangleNormalIndexes(0,0,0);
-	addTriangle(0,3,2);
-	addTriangleNormalIndexes(0,0,0);
+	addTriangle(0, 2, 1); //A C B
+	addTriangleNormalIndexes(0, 0, 0);
+	addTriangle(0, 3, 2); //A D C
+	addTriangleNormalIndexes(0, 0, 0);
 
 	return true;
 }
@@ -151,7 +154,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	if (rms)
 	{
 		*rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSPlane);
-		plane->setMetaData(QString("RMS"),QVariant(*rms));
+		plane->setMetaData(QString("RMS"), QVariant(*rms));
 	}
 
 
@@ -178,8 +181,8 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_xWidth,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_yWidth,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_xWidth, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yWidth, 1);
 
 	return true;
 }
@@ -187,19 +190,31 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox( CCVector3(-m_xWidth/2,-m_yWidth/2, 0), CCVector3(m_xWidth/2,m_yWidth/2, 0) );
+	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0));
 }
 
 bool ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)
 {
+	return SetQuadTexture(this, image, imageFilename);
+}
+
+bool ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilename/*=QString()*/)
+{
+	if (	!quadMesh
+		||	quadMesh->size() > 2 //they may not be reserved yet?
+		||	!quadMesh->getAssociatedCloud()
+		||	quadMesh->getAssociatedCloud()->size() > 4) //they may not be reserved yet?
+	{
+		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid input quad");
+	}
 	if (image.isNull())
 	{
-		ccLog::Warning("[ccPlane::setAsTexture] Invalid texture image!");
+		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid texture image!");
 		return false;
 	}
 
 	//texture coordinates
-	TextureCoordsContainer* texCoords = getTexCoordinatesTable();
+	TextureCoordsContainer* texCoords = quadMesh->getTexCoordinatesTable();
 	if (!texCoords)
 	{
 		texCoords = new TextureCoordsContainer();
@@ -221,47 +236,49 @@ bool ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)
 		texCoords->addElement(TC);
 		texCoords->addElement(TD);
 
-		setTexCoordinatesTable(texCoords);
+		quadMesh->setTexCoordinatesTable(texCoords);
 	}
 
-	if (!hasPerTriangleTexCoordIndexes())
+	if (!quadMesh->hasPerTriangleTexCoordIndexes())
 	{
-		if (!reservePerTriangleTexCoordIndexes())
+		if (!quadMesh->reservePerTriangleTexCoordIndexes())
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			setTexCoordinatesTable(0);
-			removePerTriangleMtlIndexes();
+			quadMesh->setTexCoordinatesTable(0);
+			quadMesh->removePerTriangleMtlIndexes();
 			return false;
 		}
 		
 		//set default texture indexes
-		addTriangleTexCoordIndexes(0,2,1);
-		addTriangleTexCoordIndexes(0,3,2);
+		quadMesh->addTriangleTexCoordIndexes(0, 2, 1);
+		quadMesh->addTriangleTexCoordIndexes(0, 3, 2);
 	}
 	
-	if (!hasPerTriangleMtlIndexes())
+	if (!quadMesh->hasPerTriangleMtlIndexes())
 	{
-		if (!reservePerTriangleMtlIndexes())
+		if (!quadMesh->reservePerTriangleMtlIndexes())
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			setTexCoordinatesTable(0);
-			removePerTriangleTexCoordIndexes();
+			quadMesh->setTexCoordinatesTable(0);
+			quadMesh->removePerTriangleTexCoordIndexes();
 			return false;
 		}
 
 		//set default material indexes
-		addTriangleMtlIndex(0);
-		addTriangleMtlIndex(0);
+		quadMesh->addTriangleMtlIndex(0);
+		quadMesh->addTriangleMtlIndex(0);
 	}
 
 	//set material
-	if (!getMaterialSet())
-		setMaterialSet(new ccMaterialSet());
-	ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(getMaterialSet());
+	if (!quadMesh->getMaterialSet())
+	{
+		quadMesh->setMaterialSet(new ccMaterialSet());
+	}
+	ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(quadMesh->getMaterialSet());
 	assert(materialSet);
-	//remove old material (if any)
+	//remove old materials (if any)
 	materialSet->clear();
 	//add new material
 	{
@@ -270,7 +287,7 @@ bool ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)
 		materialSet->addMaterial(material);
 	}
 
-	showMaterials(true);
+	quadMesh->showMaterials(true);
 
 	return true;
 }

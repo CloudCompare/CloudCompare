@@ -8,13 +8,6 @@
 #define MAX_INF 9999999999 
 #define MIN_INF -9999999999
 
-//we precompute the overall displacement of a particle accroding to the rigidness
-//const float singleMove1[15] = {0, 0.4, 0.64, 0.784, 0.8704, 0.92224, 0.95334, 0.97201, 0.9832, 0.98992, 0.99395, 0.99637, 0.99782, 0.99869, 0.99922 };
-const float singleMove1[15] = { 0, 0.3, 0.51, 0.657, 0.7599, 0.83193, 0.88235, 0.91765, 0.94235, 0.95965, 0.97175, 0.98023, 0.98616, 0.99031, 0.99322 };
-//当有两端移动时
-//const float doubleMove1[15] = {0, 0.4, 0.48, 0.496, 0.4992, 0.49984, 0.49997, 0.49999, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
-const float doubleMove1[15] = { 0, 0.3, 0.42, 0.468, 0.4872, 0.4949, 0.498, 0.4992, 0.4997, 0.4999, 0.4999, 0.5, 0.5, 0.5, 0.5 };
-
 /* The particle class represents a particle that can move around in 3D space*/
 class Particle
 {

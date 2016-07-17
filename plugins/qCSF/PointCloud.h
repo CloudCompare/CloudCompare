@@ -38,7 +38,7 @@ namespace wl
 			}
 
 			bbMin = bbMax = at(0);
-			for (std::size_t i = 1; i < size(); i++)  //zwm
+			for (std::size_t i = 1; i < size(); i++)
 			{
 				const wl::Point& P = at(i);
 				for (int d = 0; d < 3; ++d)

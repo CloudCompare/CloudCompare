@@ -35,7 +35,7 @@
 #include <assert.h>
 #include <math.h>
 #ifdef CC_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 //3DxWare

@@ -39,7 +39,7 @@
 
 //System
 #if defined(CC_WINDOWS)
-#include "Windows.h"
+#include "windows.h"
 #else
 #include <time.h>
 #include <unistd.h>

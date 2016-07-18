@@ -46,7 +46,7 @@
 #include <assert.h>
 #include <string.h>
 #if defined(CC_WINDOWS)
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <time.h>
 #include <unistd.h>

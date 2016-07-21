@@ -1711,13 +1711,13 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				}
 
 				//Increment to use next texture, just before writing
-				s_oculus.textureSet->CurrentIndex = (s_oculus.textureSet->CurrentIndex + 1) % s_oculus.textureSet->TextureCount;
-
-				GLuint colorTexID = ((ovrGLTexture*)&s_oculus.textureSet->Textures[s_oculus.textureSet->CurrentIndex])->OGL.TexId;
+				int currentIndex = 0;
+				ovr_GetTextureSwapChainCurrentIndex(s_oculus.session, s_oculus.textureSwapChain, &currentIndex);
+				unsigned int colorTexID = 0;
+				ovr_GetTextureSwapChainBufferGL(s_oculus.session, s_oculus.textureSwapChain, currentIndex, &colorTexID);
 				s_oculus.fbo->attachColor(colorTexID);
 
-				assert(s_oculus.depthTextures.size() > s_oculus.textureSet->CurrentIndex);
-				GLuint depthTexID = s_oculus.depthTextures[s_oculus.textureSet->CurrentIndex];
+				GLuint depthTexID = s_oculus.depthTextures[currentIndex];
 				s_oculus.fbo->attachDepth(depthTexID);
 			}
 
@@ -2002,16 +2002,13 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 #ifdef CC_OCULUS_SUPPORT
 	if (oculusMode && s_oculus.session && renderingParams.passIndex == 1)
 	{
+		ovr_CommitTextureSwapChain(s_oculus.session, s_oculus.textureSwapChain);
+		
 		// Submit frame
 		ovrLayerHeader* layers = &s_oculus.layer.Header;
 		//glFunc->glEnable(GL_FRAMEBUFFER_SRGB);
 		ovrResult result = ovr_SubmitFrame(s_oculus.session, 0, nullptr, &layers, 1);
 		//glFunc->glDisable(GL_FRAMEBUFFER_SRGB);
-
-		if (result != ovrSuccess)
-		{
-			//DGM: what can we do?
-		}
 	}
 #endif //CC_OCULUS_SUPPORT
 
@@ -2146,7 +2143,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 			OVR::Matrix4f proj = ovrMatrix4f_Projection(s_oculus.layer.Fov[renderingParams.passIndex],
 														static_cast<float>(m_viewportParams.zNear),
 														static_cast<float>(m_viewportParams.zFar),
-														ovrProjection_RightHanded | ovrProjection_ClipRangeOpenGL);
+														ovrProjection_ClipRangeOpenGL);
 			projectionMat = FromOVRMat(proj);
 		}
 		else
@@ -6082,13 +6079,14 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 
 		//configure tracking
 		{
-			ovr_ConfigureTracking(	s_oculus.session,
-									/*requested = */ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position,
-									/*required  = */ovrTrackingCap_Orientation );
+			//No longer necessary
+			//ovr_ConfigureTracking(	s_oculus.session,
+			//						/*requested = */ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position,
+			//						/*required  = */ovrTrackingCap_Orientation );
 
 			//reset tracking
 			s_oculus.hasLastOVRPos = false;
-			ovr_RecenterPose(s_oculus.session);
+			ovr_RecenterTrackingOrigin(s_oculus.session);
 		}
 
 		displayNewMessage("Look into your headset", ccGLWindow::SCREEN_CENTER_MESSAGE, false, 3600);

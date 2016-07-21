@@ -39,7 +39,7 @@ struct OculusHMD
 	OculusHMD()
 		: session(0)
 		, fbo(0)
-		, textureSet(0)
+		, hasTextureSet(false)
 		, lastOVRPos(0, 0, 0)
 		, hasLastOVRPos(false)
 	{
@@ -65,8 +65,8 @@ struct OculusHMD
 			ovrHmdDesc hmdDesc    = ovr_GetHmdDesc(session);
 			eyeRenderDesc[0]      = ovr_GetRenderDesc(session, ovrEye_Left, hmdDesc.DefaultEyeFov[0]);
 			eyeRenderDesc[1]      = ovr_GetRenderDesc(session, ovrEye_Right, hmdDesc.DefaultEyeFov[1]);
-			hmdToEyeViewOffset[0] = eyeRenderDesc[0].HmdToEyeViewOffset;
-			hmdToEyeViewOffset[1] = eyeRenderDesc[1].HmdToEyeViewOffset;
+			hmdToEyeViewOffset[0] = eyeRenderDesc[0].HmdToEyeOffset;
+			hmdToEyeViewOffset[1] = eyeRenderDesc[1].HmdToEyeOffset;
 		}
 	}
 
@@ -89,21 +89,29 @@ struct OculusHMD
 			bufferSize.h = std::max(recommendedTex0Size.h, recommendedTex1Size.h);
 		}
 
-		if (	!textureSet
+		if (	!hasTextureSet
 			||	!fbo
 			||	textureSize.w != bufferSize.w
 			||	textureSize.h != bufferSize.h )
 		{
 			destroyTextureSet();
 
-			if (!ovr_CreateSwapTextureSetGL(session,
-				GL_SRGB8_ALPHA8,
-				bufferSize.w,
-				bufferSize.h,
-				&textureSet) == ovrSuccess)
+			ovrTextureSwapChainDesc desc = {};
+			desc.Type = ovrTexture_2D;
+			desc.ArraySize = 1;
+			desc.Format = OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
+			desc.Width = bufferSize.w;
+			desc.Height = bufferSize.h;
+			desc.MipLevels = 1;
+			desc.SampleCount = 1;
+			desc.StaticImage = ovrFalse;
+			if (!ovr_CreateTextureSwapChainGL(session,
+				&desc,
+				&textureSwapChain) == ovrSuccess)
 			{
 				return false;
 			}
+			hasTextureSet = true;
 
 			assert(!fbo);
 			fbo = new ccFrameBufferObject;
@@ -117,16 +125,17 @@ struct OculusHMD
 			}
 
 			QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
-			assert(textureSet->TextureCount <= 4);
 			//we create a depth texture for each color texture
 			assert(depthTextures.empty());
-			depthTextures.resize(textureSet->TextureCount, 0);
-			for (int i=0; i<textureSet->TextureCount; ++i)
+
+			int textureCount = 0;
+			ovr_GetTextureSwapChainLength(session, textureSwapChain, &textureCount);			depthTextures.resize(textureCount, 0);
+			for (int i = 0; i<textureCount; ++i)
 			{
 				//set the color texture
 				{
-					GLuint texID = ((ovrGLTexture*)&textureSet->Textures[i])->OGL.TexId;
-					glFunc->glBindTexture(GL_TEXTURE_2D, texID);
+					unsigned int texId;
+					ovr_GetTextureSwapChainBufferGL(session, textureSwapChain, 0, &texId);					glFunc->glBindTexture(GL_TEXTURE_2D, texId);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR/*GL_LINEAR_MIPMAP_LINEAR*/);
@@ -170,8 +179,8 @@ struct OculusHMD
 		// Initialize our single full screen Fov layer.
 		layer.Header.Type      = ovrLayerType_EyeFov;
 		layer.Header.Flags     = ovrLayerFlag_TextureOriginAtBottomLeft;
-		layer.ColorTexture[0]  = textureSet;
-		layer.ColorTexture[1]  = textureSet;
+		layer.ColorTexture[0]  = textureSwapChain;
+		layer.ColorTexture[1]  = textureSwapChain;
 		layer.Fov[0]           = eyeRenderDesc[0].Fov;
 		layer.Fov[1]           = eyeRenderDesc[1].Fov;
 		layer.Viewport[0].Pos.x = 0;
@@ -211,10 +220,10 @@ struct OculusHMD
 			fbo = 0;
 		}
 
-		if (textureSet)
+		if (hasTextureSet)
 		{
-			ovr_DestroySwapTextureSet(session, textureSet);
-			textureSet = 0;
+			ovr_DestroyTextureSwapChain(session, textureSwapChain);
+			hasTextureSet = false;
 		}
 
 		if (!depthTextures.empty())
@@ -241,7 +250,9 @@ struct OculusHMD
 	ccFrameBufferObject* fbo;
 
 	//! Color texture(s)
-	ovrSwapTextureSet* textureSet;
+	ovrTextureSwapChain textureSwapChain;
+	//! Whether color texture(s) are available
+	bool hasTextureSet;
 	//! Depth texture(s)
 	std::vector<GLuint> depthTextures;
 	//! Texture(s) size

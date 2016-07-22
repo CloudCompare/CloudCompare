@@ -1421,7 +1421,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				{
 					CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
 					assert(sf);
-					if (sf->reserve(numberOfScalars))
+					if (sf->resize(numberOfScalars))
 					{
 						ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, scalar_cb, sf, 1);
 					}

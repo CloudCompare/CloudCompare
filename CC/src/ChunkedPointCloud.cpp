@@ -202,10 +202,12 @@ bool ChunkedPointCloud::isScalarFieldEnabled() const
 {
 	ScalarField* currentInScalarFieldArray = getCurrentInScalarField();
 	if (!currentInScalarFieldArray)
+	{
 		return false;
+	}
 
 	unsigned sfValuesCount = currentInScalarFieldArray->currentSize();
-	return (sfValuesCount>0 && sfValuesCount >= m_points->currentSize());
+	return (sfValuesCount > 0 && sfValuesCount >= m_points->currentSize());
 }
 
 bool ChunkedPointCloud::enableScalarField()
@@ -225,7 +227,9 @@ bool ChunkedPointCloud::enableScalarField()
 			//if not, we create it
 			m_currentInScalarFieldIndex = addScalarField("Default");
 			if (m_currentInScalarFieldIndex < 0) //Something went wrong
+			{
 				return false;
+			}
 		}
 
 		currentInScalarField = getCurrentInScalarField();
@@ -234,7 +238,9 @@ bool ChunkedPointCloud::enableScalarField()
 
 	//if there's no output scalar field either, we set this new scalar field as output also
 	if (!getCurrentOutScalarField())
+	{
 		m_currentOutScalarFieldIndex = m_currentInScalarFieldIndex;
+	}
 
 	return currentInScalarField->resize(m_points->capacity());
 }

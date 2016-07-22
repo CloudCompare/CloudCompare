@@ -100,6 +100,11 @@ As all the files (executables, plugins and other DLLs) are copied in the `CMAKE_
 
 ## Additional optional CMake setup steps
 
+### [Optional] Setup for the qPoissonRecon plugin
+
+1. The version of the Poisson Surface Reconstruction library (M. Kazhdan et al.) used by the  is https://github.com/cloudcompare/PoissonRecon. It is declared as a submodule of CC's repository. You have to explicitly synchronize it (see https://git-scm.com/docs/git-submodule).
+2. Then simply check the INSTALL_QPOISSON_RECON_PLUGIN option in CMake
+
 ### [Optional] Setup for LibLAS support
 
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support, you'll need:

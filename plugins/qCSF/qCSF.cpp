@@ -15,9 +15,10 @@
 //#                                                                                     #
 //#                      contact us: 2009zwm@gmail.com; wpqjbzwm@126.com                #
 //#                                                                                     #
-//# A mex version for programming in Matlab is at File Exchange of Mathworks website:
-//# http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation
 //#######################################################################################
+
+// A mex version for programming in Matlab is at File Exchange of Mathworks website:
+// http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation
 
 #include "qCSF.h"
 

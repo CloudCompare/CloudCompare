@@ -211,7 +211,7 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 	, m_projectionMatrix(sensor.m_projectionMatrix)
 	, m_projectionMatrixIsValid(false)
 {
-	setIntrinsicParameters(m_intrinsicParams);
+	setIntrinsicParameters(sensor.m_intrinsicParams);
 
 	//distortion params
 	if (m_distortionParams)
@@ -223,7 +223,7 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 		{
 			//simply duplicate the struct
 			RadialDistortionParameters* clone = new RadialDistortionParameters;
-			*clone = *static_cast<const RadialDistortionParameters*>(m_distortionParams.data());
+			*clone = *static_cast<const RadialDistortionParameters*>(sensor.m_distortionParams.data());
 			clonedDistParams = LensDistortionParameters::Shared(clone);
 		}
 		break;
@@ -232,7 +232,7 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 		{
 			//simply duplicate the struct
 			ExtendedRadialDistortionParameters* clone = new ExtendedRadialDistortionParameters;
-			*clone = *static_cast<const ExtendedRadialDistortionParameters*>(m_distortionParams.data());
+			*clone = *static_cast<const ExtendedRadialDistortionParameters*>(sensor.m_distortionParams.data());
 			clonedDistParams = LensDistortionParameters::Shared(clone);
 		}
 		break;
@@ -241,7 +241,7 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 		{
 			//simply duplicate the struct
 			BrownDistortionParameters* clone = new BrownDistortionParameters;
-			*clone = *static_cast<const BrownDistortionParameters*>(m_distortionParams.data());
+			*clone = *static_cast<const BrownDistortionParameters*>(sensor.m_distortionParams.data());
 			clonedDistParams = LensDistortionParameters::Shared(clone);
 		}
 		break;
@@ -998,8 +998,8 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 	case EXTENDED_RADIAL_DISTORTION:
 		{
 			const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
-			const float& k1 = params->k1;
-			const float& k2 = params->k2;
+			float k1 = params->k1;
+			float k2 = params->k2;
 			if (k1 == 0 && k2 == 0)
 			{
 				ccLog::Warning("[ccCameraSensor::undistort] Invalid radial distortion coefficients!");
@@ -1011,8 +1011,12 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 				k3 = static_cast<ExtendedRadialDistortionParameters*>(m_distortionParams.data())->k3;
 			}
 
-			const int& width  = m_intrinsicParams.arrayWidth;
-			const int& height = m_intrinsicParams.arrayHeight;
+			int width = image.width();
+			int height = image.height();
+
+			float xScale = image.width() / static_cast<float>(m_intrinsicParams.arrayWidth);
+			float yScale = image.height() / static_cast<float>(m_intrinsicParams.arrayHeight);
+			float rScale = sqrt(xScale * xScale + yScale * yScale);
 
 			//try to reserve memory for new image
 			QImage newImage(QSize(width, height), image.format());
@@ -1023,20 +1027,29 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 			}
 			newImage.fill(0);
 
-			float vertFocal_pix = getVertFocal_pix();
-			float horizFocal_pix = getHorizFocal_pix();
+			float vertFocal_pix = getVertFocal_pix() * xScale;
+			float horizFocal_pix = getHorizFocal_pix() * yScale;
 			float vf2 = vertFocal_pix * vertFocal_pix;
 			float hf2 = horizFocal_pix * horizFocal_pix;
-			float cx = m_intrinsicParams.principal_point[0];
-			float cy = m_intrinsicParams.principal_point[1];
+			float cx = m_intrinsicParams.principal_point[0] * xScale;
+			float cy = m_intrinsicParams.principal_point[1] * yScale;
+			k1 *= rScale;
+			k2 *= rScale;
+			k3 *= rScale;
+
+			assert((image.depth() % 8) == 0);
+			int depth = image.depth() / 8;
+			int bytesPerLine = image.bytesPerLine();
+			const uchar* iImageBits = image.bits();
+			uchar* oImageBits = newImage.bits();
 
 			//image undistortion
 			{
-				for (int i=0; i<width; ++i)
+				for (int i = 0; i < width; ++i)
 				{
-					float x = static_cast<float>(i) - cx;
+					float x = static_cast<float>(i)-cx;
 					float x2 = x*x;
-					for (int j=0; j<height; ++j)
+					for (int j = 0; j < height; ++j)
 					{
 						float y = static_cast<float>(j) - cy;
 						float y2 = y*y;
@@ -1053,7 +1066,10 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 							&&	pixy >= 0
 							&&	pixy < height)
 						{
-							newImage.setPixel(i, j, image.pixel(pixx, pixy));
+							const uchar* iPixel = iImageBits + j * bytesPerLine + i * depth;
+							uchar* oPixel = oImageBits + pixy * bytesPerLine + pixx * depth;
+							memcpy(oPixel, iPixel, depth);
+							//newImage.setPixel(i, j, image.pixel(pixx, pixy));
 						}
 					}
 				}

@@ -1,0 +1,45 @@
+/**
+ * \page faq QuaZip FAQ
+ *
+ * <!--
+ *
+ * \ref faq-non-QIODevice "Q. Is there any way to use QuaZipFile in Qt where you are supposed to use normal (non-zipped) file, but not through QIODevice API?"
+ * \ref faq-zip64 "Q. Can QuaZIP handle files larger than 4GB? What about zip64 standard?"
+ *
+ * \ref faq-seekable "Q. Can QuaZIP write archives to a sequential QIODevice like QTcpSocket?"
+ *
+ * -->
+ *
+ * \anchor faq-non-QIODevice Q. Is there any way to use QuaZipFile in Qt
+ * where you are supposed to use normal (non-zipped) file, but not
+ * through QIODevice API?
+ *
+ * A. Usually not. For example, if you are passing file name to some
+ * database driver (like SQLite), Qt usually just passes this name down
+ * to the 3rd-party library, which is usually does not know anything
+ * about QIODevice and therefore there is no way to pass QuaZipFile as
+ * normal file. However, if we are talking about some place where you
+ * pass file name, and then indirectly use QFile to open it, then it is
+ * a good idea to make overloaded method, which accepts a QIODevice
+ * pointer. Then you would be able to pass QuaZipFile as well as many
+ * other nice things such as QBuffer or QProcess.
+ *
+ * \anchor faq-zip64 Q. Can QuaZIP handle files larger than 4GB? What
+ * about zip64 standard?
+ *
+ * A. Starting with version 0.6, QuaZIP uses Minizip 1.1 with zip64
+ * support which should handle large files perfectly. The zip64 support
+ * in Minizip looks like it's not 100% conforming to the standard, but
+ * 3rd party tools seem to have no problem with the resulting archives.
+ *
+ * \anchor faq-seekable Q. Can QuaZIP write archives to a sequential QIODevice like QTcpSocket?
+ *
+ * A. Not yet. It is not supported by vanilla Minizip (the back-end
+ * QuaZIP uses), although theoretically possible according to the ZIP
+ * standard. It would require some Minizip modifications that would
+ * allow it to detect non-seekable I/O and produce necessary output
+ * structures. QuaZIP already writes data descriptor which is necessary
+ * for non-seekable I/O. The only thing that is apparently left is to
+ * make Minizip fill local headers with correct values and forget about
+ * seeking after closing the file.
+ **/

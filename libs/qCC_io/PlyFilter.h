@@ -76,6 +76,9 @@ public:
 	virtual bool canLoadExtension(QString upperCaseExt) const override;
 	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 
+	//! Custom loading method
+	CC_FILE_ERROR loadFile(QString filename, QString textureFilename, ccHObject& container, LoadParameters& parameters);
+
 protected:
 
 	//! Internal method

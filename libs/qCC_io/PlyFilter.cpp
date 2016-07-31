@@ -736,6 +736,11 @@ static int texIndexes_cb(p_ply_argument argument)
 
 CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
+	return loadFile(filename, QString(), container, parameters);
+}
+
+CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename, ccHObject& container, LoadParameters& parameters)
+{
 	//reset statics!
 	s_triCount = 0;
 	s_unsupportedPolygonType = false;
@@ -769,7 +774,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	//storage mode: little/big endian
 	e_ply_storage_mode storage_mode;
-	get_plystorage_mode(ply,&storage_mode);
+	get_plystorage_mode(ply, &storage_mode);
 
 	/*****************/
 	/***  Texture  ***/
@@ -796,6 +801,16 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			{
 				textureFileNames << QString(lastComment).mid(12).trimmed();
 			}
+		}
+	}
+
+	//external texture filename?
+	if (!inputTextureFilename.isEmpty())
+	{
+		//add it to the set of textures (if it's not already there!)
+		if (!textureFileNames.contains(inputTextureFilename))
+		{
+			textureFileNames.push_back(inputTextureFilename);
 		}
 	}
 

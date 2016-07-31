@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quazip", "quazip\quazip.vcxproj", "{E4AC5F56-B711-4F0E-BC83-CDE8B6CD53AD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qztest", "qztest\qztest.vcxproj", "{7632B767-D089-4F15-8B1E-C4B3F9EBF592}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4AC5F56-B711-4F0E-BC83-CDE8B6CD53AD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E4AC5F56-B711-4F0E-BC83-CDE8B6CD53AD}.Debug|Win32.Build.0 = Debug|Win32
+		{E4AC5F56-B711-4F0E-BC83-CDE8B6CD53AD}.Release|Win32.ActiveCfg = Release|Win32
+		{E4AC5F56-B711-4F0E-BC83-CDE8B6CD53AD}.Release|Win32.Build.0 = Release|Win32
+		{7632B767-D089-4F15-8B1E-C4B3F9EBF592}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7632B767-D089-4F15-8B1E-C4B3F9EBF592}.Debug|Win32.Build.0 = Debug|Win32
+		{7632B767-D089-4F15-8B1E-C4B3F9EBF592}.Release|Win32.ActiveCfg = Release|Win32
+		{7632B767-D089-4F15-8B1E-C4B3F9EBF592}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

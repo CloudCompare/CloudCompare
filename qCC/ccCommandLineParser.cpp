@@ -1803,7 +1803,7 @@ bool ReadVector(const QXmlStreamAttributes& attributes, CCVector3& P, QString el
 	}
 
 	int count = 0;
-	for (int i=0; i<attributes.size(); ++i)
+	for (int i = 0; i < attributes.size(); ++i)
 	{
 		QString name = attributes[i].name().toString().toUpper();
 		QString value = attributes[i].value().toString();
@@ -1883,7 +1883,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 			if (stream.name() == s_xmlBoxThickness)
 			{
 				QXmlStreamAttributes attributes = stream.attributes();
-				if (!ReadVector(attributes,boxThickness,s_xmlBoxThickness))
+				if (!ReadVector(attributes, boxThickness, s_xmlBoxThickness))
 					return false;
 				stream.skipCurrentElement();
 				++mandatoryCount;
@@ -1891,7 +1891,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 			else if (stream.name() == s_xmlBoxCenter)
 			{
 				QXmlStreamAttributes attributes = stream.attributes();
-				if (!ReadVector(attributes,boxCenter,s_xmlBoxCenter))
+				if (!ReadVector(attributes, boxCenter, s_xmlBoxCenter))
 					return false;
 				stream.skipCurrentElement();
 				autoCenter = false;

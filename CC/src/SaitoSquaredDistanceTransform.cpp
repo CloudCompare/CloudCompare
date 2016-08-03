@@ -227,7 +227,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 		sq[i] = static_cast<GridElement>(i*i);
 	}
 
-	const GridElement maxDistance = std::numeric_limits<GridElement>::max() - static_cast<GridElement>(r*r - c*c - p*p) - 1;
+	const GridElement maxDistance = std::numeric_limits<GridElement>::max() - static_cast<GridElement>(r*r + c*c + p*p) - 1;
 
 	NormalizedProgress normProgress(progressCb, static_cast<unsigned>(p + r));
 	if (progressCb)

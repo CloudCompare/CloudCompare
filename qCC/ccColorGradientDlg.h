@@ -45,7 +45,7 @@ public:
 	void getColors(QColor& first, QColor& second) const;
 
 	//! Returns the frequency of the gradient ('Banding' mode)
-	int getBandingFrequency() const;
+	double getBandingFrequency() const;
 
 	//! Returns the ramp dimension
 	unsigned char getDimension() const;

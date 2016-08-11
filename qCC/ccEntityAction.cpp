@@ -240,7 +240,7 @@ namespace ccEntityAction
 		
 		Q_ASSERT(colorScale || ramp == ccColorGradientDlg::Banding);
 		
-		const int	frequency = dlg.getBandingFrequency();
+		const double frequency = dlg.getBandingFrequency();
 		
 		size_t selNum = selectedEntities.size();
 		for (size_t i=0; i<selNum; ++i)

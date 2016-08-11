@@ -30,7 +30,7 @@
 QColor s_firstColor(Qt::black);
 QColor s_secondColor(Qt::white);
 ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
-static int s_lastFreq = 5;
+static double s_lastFreq = 1.0;
 
 ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
@@ -92,7 +92,7 @@ void ccColorGradientDlg::getColors(QColor& first, QColor& second) const
 	second = s_secondColor;
 }
 
-int ccColorGradientDlg::getBandingFrequency() const
+double ccColorGradientDlg::getBandingFrequency() const
 {
 	assert(bandingRadioButton->isChecked());
 	//ugly hack: we use 's_lastFreq' here as the frequency is only requested

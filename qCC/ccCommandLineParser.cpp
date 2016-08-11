@@ -2420,10 +2420,10 @@ bool ccCommandLineParser::commandColorBanding(QStringList& arguments)
 
 	//frequency
 	bool ok = true;
-	int freq = 0;
+	double freq = 0;
 	{
 		QString countStr = arguments.takeFirst();
-		freq = countStr.toInt(&ok);
+		freq = countStr.toDouble(&ok);
 		if (!ok)
 			return Error(QString("Invalid parameter: frequency after \"-%1 DIM\" (in Hz, integer value)").arg(COMMAND_COLOR_BANDING));
 	}

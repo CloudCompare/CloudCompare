@@ -541,7 +541,7 @@ public: //other methods
 		\param freq banding frequency
 		\return success
 	**/
-	bool setRGBColorByBanding(unsigned char dim, int freq);
+	bool setRGBColorByBanding(unsigned char dim, double freq);
 
 	//! Sets RGB colors with current scalar field (values & parameters)
 	/** \return success

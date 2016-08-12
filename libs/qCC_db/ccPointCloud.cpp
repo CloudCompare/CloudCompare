@@ -1476,7 +1476,7 @@ bool ccPointCloud::colorize(float r, float g, float b)
 }
 
 //Contribution from Michael J Smith
-bool ccPointCloud::setRGBColorByBanding(unsigned char dim, int freq)
+bool ccPointCloud::setRGBColorByBanding(unsigned char dim, double freq)
 {
 	if (freq == 0 || dim > 2) //X=0, Y=1, Z=2
 	{
@@ -1492,24 +1492,17 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, int freq)
 	enableTempColor(false);
 	assert(m_rgbColors);
 
- 	double minHeight = getOwnBB().minCorner().u[dim];
-	double height = getOwnBB().getDiagVec().u[dim];
-	
-	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
-		height = 1.0;
-
-	/* Repeats per spacing of 1 */
-	double bands = freq * (2 * M_PI);
+	float bands = (2.0 * M_PI) / freq;
 
 	unsigned count = size();
 	for (unsigned i=0; i<count; i++)
 	{
 		const CCVector3* P = getPoint(i);
 
-		double z = bands * (P->u[dim] - minHeight) / height;
-		ccColor::Rgb C(	static_cast<ColorCompType>( ((sin(z + 0) + 1.0) / 2.0) * ccColor::MAX ),
-						static_cast<ColorCompType>( ((sin(z + 2) + 1.0) / 2.0) * ccColor::MAX ),
-						static_cast<ColorCompType>( ((sin(z + 4) + 1.0) / 2.0) * ccColor::MAX ) );
+		float z = bands * P->u[dim];
+		ccColor::Rgb C(	static_cast<ColorCompType>( ((sin(z + 0.0f) + 1.0f) / 2.0f) * ccColor::MAX ),
+						static_cast<ColorCompType>( ((sin(z + 2.0944f) + 1.0f) / 2.0f) * ccColor::MAX ),
+						static_cast<ColorCompType>( ((sin(z + 4.1888f) + 1.0f) / 2.0f) * ccColor::MAX ) );
 
 		m_rgbColors->setValue(i,C.rgb);
 	}

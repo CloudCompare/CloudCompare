@@ -72,7 +72,7 @@
 #include "ccAlignDlg.h" //Aurelien BEY
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
-#include "ccAskTwoDoubleValuesDlg.h"
+#include "ccFilterByValueDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccCameraParamEditDlg.h"
 #include "ccCamSensorProjectionDlg.h"
@@ -2998,16 +2998,19 @@ void MainWindow::doActionFilterByValue()
 		}
 	}
 
-	ccAskTwoDoubleValuesDlg dlg("Min", "Max", -1.0e9, 1.0e9, minVald, maxVald, 8, "Filter by scalar value", this);
+	ccFilterByValueDlg dlg(minVald, maxVald, -1.0e9, 1.0e9, this);
 	if (!dlg.exec())
 		return;
 
-	ScalarType minVal = (ScalarType)dlg.doubleSpinBox1->value();
-	ScalarType maxVal = (ScalarType)dlg.doubleSpinBox2->value();
+	ccFilterByValueDlg::Mode mode = dlg.mode();
+	assert(mode != ccFilterByValueDlg::CANCEL);
 
-	ccHObject* firstResult = 0;
+	ScalarType minVal = static_cast<ScalarType>(dlg.minDoubleSpinBox->value());
+	ScalarType maxVal = static_cast<ScalarType>(dlg.maxDoubleSpinBox->value());
+
+	ccHObject::Container results;
 	{
-		for (size_t i=0; i<toFilter.size(); ++i)
+		for (size_t i = 0; i < toFilter.size(); ++i)
 		{
 			ccHObject* ent = toFilter[i].first;
 			ccPointCloud* pc = toFilter[i].second;
@@ -3020,14 +3023,25 @@ void MainWindow::doActionFilterByValue()
 			pc->setCurrentOutScalarField(outSfIdx);
 			//pc->setCurrentScalarField(outSfIdx);
 
-			ccHObject* result = 0;
+			ccHObject* resultInside = 0;
+			ccHObject* resultOutside = 0;
 			if (ent->isKindOf(CC_TYPES::MESH))
 			{
-				pc->hidePointsByScalarValue(minVal,maxVal);
+				pc->hidePointsByScalarValue(minVal, maxVal);
 				if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-					result = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
 				else if (ent->isA(CC_TYPES::SUB_MESH))
-					result = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+					resultInside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+				
+				if (mode == ccFilterByValueDlg::SPLIT)
+				{
+					pc->invertVisibilityArray();
+					if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
+						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+					else if (ent->isA(CC_TYPES::SUB_MESH))
+						resultOutside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+				}
+
 				pc->unallocateVisibilityArray();
 			}
 			else if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -3037,28 +3051,44 @@ void MainWindow::doActionFilterByValue()
 				//pc->unallocateVisibilityArray();
 
 				//shortcut, as we know here that the point cloud is a "ccPointCloud"
-				result = pc->filterPointsByScalarValue(minVal,maxVal);
+				resultInside = pc->filterPointsByScalarValue(minVal, maxVal, false);
+
+				if (mode == ccFilterByValueDlg::SPLIT)
+				{
+					resultOutside = pc->filterPointsByScalarValue(minVal, maxVal, true);
+				}
 			}
 
-			if (result)
+			if (resultInside)
 			{
 				ent->setEnabled(false);
-				result->setDisplay(ent->getDisplay());
-				result->prepareDisplayForRefresh();
-				addToDB(result);
+				resultInside->setDisplay(ent->getDisplay());
+				resultInside->prepareDisplayForRefresh();
+				addToDB(resultInside);
 
-				if (!firstResult)
-					firstResult = result;
+				results.push_back(resultInside);
+			}
+			if (resultOutside)
+			{
+				ent->setEnabled(false);
+				resultOutside->setDisplay(ent->getDisplay());
+				resultOutside->prepareDisplayForRefresh();
+				resultOutside->setName(resultOutside->getName() + ".outside");
+				addToDB(resultOutside);
+
+				results.push_back(resultOutside);
 			}
 			//*/
 		}
 	}
 
-	if (firstResult)
+	if (!results.empty())
 	{
 		ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 		if (m_ccRoot)
-			m_ccRoot->selectEntity(firstResult);
+		{
+			m_ccRoot->selectEntities(results);
+		}
 	}
 
 	refreshAll();

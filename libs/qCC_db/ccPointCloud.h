@@ -574,11 +574,12 @@ public: //other methods
 
 	//! Filters out points whose scalar values falls into an interval
 	/** Threshold values should be expressed relatively to the current displayed scalar field.
-		\param minVal minimum value (below, points are excluded)
-		\param maxVal maximum value (above, points are excluded)
+		\param minVal minimum value
+		\param maxVal maximum value
+		\param outside whether to select the points inside or outside of the specified interval
 		\return resulting cloud (remaining points)
 	**/
-	ccPointCloud* filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal);
+	ccPointCloud* filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal, bool outside = false);
 
 	//! Hides points whose scalar values falls into an interval
 	/** Values are taken from the current OUTPUT scalar field.

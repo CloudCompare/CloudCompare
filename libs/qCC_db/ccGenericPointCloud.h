@@ -180,6 +180,9 @@ public:
 	**/
 	virtual bool resetVisibilityArray();
 
+	//! Inverts the visiblity array
+	virtual void invertVisibilityArray();
+
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
 

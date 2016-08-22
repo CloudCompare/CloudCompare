@@ -76,6 +76,21 @@ bool ccGenericPointCloud::resetVisibilityArray()
 	return true;
 }
 
+void ccGenericPointCloud::invertVisibilityArray()
+{
+	if (!m_pointsVisibility || m_pointsVisibility->currentSize() == 0)
+	{
+		assert(false);
+		return;
+	}
+
+	unsigned count = m_pointsVisibility->currentSize();
+	for (unsigned i = 0; i < count; ++i)
+	{
+		m_pointsVisibility->setValue(i, m_pointsVisibility->getValue(i) == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
+	}
+}
+
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
 	if (m_pointsVisibility)

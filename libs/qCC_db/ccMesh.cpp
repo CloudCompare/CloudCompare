@@ -2068,7 +2068,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	}
 
 	//we create a new mesh with the current selection
-	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this,rc,true,NULL,newVertices);
+	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this, rc, true, NULL, newVertices);
 
 	//don't use this anymore
 	delete rc;
@@ -2077,7 +2077,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	ccMesh* newMesh = NULL;
 	if (result)
 	{
-		newMesh = new ccMesh(result,newVertices);
+		newMesh = new ccMesh(result, newVertices);
 		if (!newMesh)
 		{
 			delete newVertices;
@@ -2086,7 +2086,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 		else
 		{
-			newMesh->setName(getName()+QString(".part"));
+			newMesh->setName(getName() + QString(".part"));
 
 			//shall we add any advanced features?
 			bool addFeatures = false;
@@ -2110,7 +2110,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newTriNormals->link();
 					try
 					{
-						newNormIndexes.resize(m_triNormals->currentSize(),-1);
+						newNormIndexes.resize(m_triNormals->currentSize(), -1);
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -2132,7 +2132,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newTriTexIndexes->link();
 					try
 					{
-						newTexIndexes.resize(m_texCoords->currentSize(),-1);
+						newTexIndexes.resize(m_texCoords->currentSize(), -1);
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -2154,7 +2154,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newMaterials->link();
 					try
 					{
-						newMatIndexes.resize(m_materials->size(),-1);
+						newMatIndexes.resize(m_materials->size(), -1);
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -2174,7 +2174,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 				unsigned triNum = m_triVertIndexes->currentSize();
 				m_triVertIndexes->placeIteratorAtBegining();
-				for (unsigned i=0; i<triNum; ++i)
+				for (unsigned i = 0; i < triNum; ++i)
 				{
 					const CCLib::VerticesIndexes* tsi = (CCLib::VerticesIndexes*)m_triVertIndexes->getCurrentValue();
 					m_triVertIndexes->forwardIterator();
@@ -2194,7 +2194,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 							//for each triangle of this mesh, try to determine if its normals are already in use
 							//(otherwise add them to the new container and increase its index)
-							for (unsigned j=0; j<3; ++j)
+							for (unsigned j = 0; j < 3; ++j)
 							{
 								if (triNormIndexes[j] >= 0 && newNormIndexes[triNormIndexes[j]] < 0)
 								{

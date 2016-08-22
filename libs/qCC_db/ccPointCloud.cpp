@@ -2985,12 +2985,12 @@ void ccPointCloud::addColorRampInfo(CC_DRAW_CONTEXT& context)
 	context.sfColorScaleToDisplay = static_cast<ccScalarField*>(getScalarField(sfIdx));
 }
 
-ccPointCloud* ccPointCloud::filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal)
+ccPointCloud* ccPointCloud::filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal, bool outside/*=false*/)
 {
 	if (!getCurrentOutScalarField())
 		return 0;
 
-	QSharedPointer<CCLib::ReferenceCloud> c(CCLib::ManualSegmentationTools::segment(this,minVal,maxVal));
+	QSharedPointer<CCLib::ReferenceCloud> c(CCLib::ManualSegmentationTools::segment(this, minVal, maxVal, outside));
 
 	return (c ? partialClone(c.data()) : 0);
 }
@@ -3012,11 +3012,13 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 
 	//we use the visibility table to tag the points to filter out
 	unsigned count = size();
-	for (unsigned i=0; i<count; ++i)
+	for (unsigned i = 0; i < count; ++i)
 	{
 		const ScalarType& val = sf->getValue(i);
 		if (val < minVal || val > maxVal || val != val) //handle NaN values!
-			m_pointsVisibility->setValue(i,POINT_HIDDEN);
+		{
+			m_pointsVisibility->setValue(i, POINT_HIDDEN);
+		}
 	}
 }
 
@@ -3084,10 +3086,12 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 			std::vector<int> newIndexMap(size(), -1);
 			{
 				unsigned newIndex = 0;
-				for (unsigned i=0; i<count; ++i)
+				for (unsigned i = 0; i < count; ++i)
 				{
 					if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
+					{
 						newIndexMap[i] = newIndex++;
+					}
 				}
 			}
 
@@ -3108,12 +3112,14 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 		//we remove all visible points
 		unsigned lastPoint = 0;
-		for (unsigned i=0; i<count; ++i)
+		for (unsigned i = 0; i < count; ++i)
 		{
 			if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
 			{
 				if (i != lastPoint)
-					swapPoints(lastPoint,i);
+				{
+					swapPoints(lastPoint, i);
+				}
 				++lastPoint;
 			}
 		}

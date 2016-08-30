@@ -1760,48 +1760,6 @@ void MainWindow::doActionDeleteAllSF()
 	updateUI();
 }
 
-void MainWindow::doActionMeasureMeshVolume()
-{
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-		if (ent->isKindOf(CC_TYPES::MESH))
-		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-			if (mesh)
-			{
-				//first check that the mesh is closed
-				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
-				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh,stats))
-				{
-					if (stats.edgesNotShared != 0)
-					{
-						ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (mesh '%1' has holes)").arg(ent->getName()));
-					}
-					else if (stats.edgesSharedByMore != 0)
-					{
-						ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (mesh '%1' has non-manifold edges)").arg(ent->getName()));
-					}
-				}
-				else
-				{
-					ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (not enough memory to check if mesh '%1' is closed)").arg(ent->getName()));
-				}
-				//then we compute the mesh volume
-				double V = CCLib::MeshSamplingTools::computeMeshVolume(mesh);
-				//we force the console to display itself
-				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Volume Measurer] Mesh '%1': V=%2 (cube units)").arg(ent->getName()).arg(V));
-			}
-			else
-			{
-				assert(false);
-			}
-		}
-	}
-}
-
 void MainWindow::doActionFlagMeshVertices()
 {
 	size_t selNum = m_selectedEntities.size();
@@ -1879,10 +1837,53 @@ void MainWindow::doActionFlagMeshVertices()
 	}
 }
 
+void MainWindow::doActionMeasureMeshVolume()
+{
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i = 0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+		if (ent->isKindOf(CC_TYPES::MESH))
+		{
+			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+			if (mesh)
+			{
+				//we compute the mesh volume
+				double V = CCLib::MeshSamplingTools::computeMeshVolume(mesh);
+				//we force the console to display itself
+				forceConsoleDisplay();
+				ccConsole::Print(QString("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(ent->getName()).arg(V));
+				
+				//check that the mesh is closed
+				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
+				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh, stats))
+				{
+					if (stats.edgesNotShared != 0)
+					{
+						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has holes)"));
+					}
+					else if (stats.edgesSharedByMore != 0)
+					{
+						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)"));
+					}
+				}
+				else
+				{
+					ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)"));
+				}
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+	}
+}
+
 void MainWindow::doActionMeasureMeshSurface()
 {
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::MESH))
@@ -1893,9 +1894,11 @@ void MainWindow::doActionMeasureMeshSurface()
 				double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
+				ccConsole::Print(QString("[Mesh Surface] Mesh '%1': S=%2 (square units)").arg(ent->getName()).arg(S));
 				if (mesh->size())
-					ccConsole::Print(QString("[Mesh Surface Measurer] Average triangle surface: %1 (square units)").arg(S/double(mesh->size())));
+				{
+					ccConsole::Print(QString("[Mesh Surface] Average triangle surface: %1 (square units)").arg(S / double(mesh->size())));
+				}
 			}
 			else
 			{

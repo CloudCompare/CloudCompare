@@ -30,10 +30,46 @@
 #include <QPair>
 #include <QFile>
 
-class QListWidget;
+#include <QListWidget>
+#include <QClipboard>
+#include <QKeyEvent>
+#include <QApplication>
+
 class QWidget;
 class MainWindow;
 class QTextStream;
+
+//! Custom QListWidget to allow for the copy of all selected elements when using CTRL+C
+class ccCustomQListWidget : public QListWidget
+{
+public:
+
+	ccCustomQListWidget(QWidget* parent = 0) : QListWidget(parent) {}
+
+protected:
+	
+	virtual void keyPressEvent(QKeyEvent *event) override
+	{
+		if (event->matches(QKeySequence::Copy))
+		{
+			int itemsCount = count();
+			QStringList strings;
+			for (int i = 0; i < itemsCount; ++i)
+			{
+				if (item(i)->isSelected())
+				{
+					strings << item(i)->text();
+				}
+			}
+
+			QApplication::clipboard()->setText(strings.join("\n"));
+		}
+		else
+		{
+			QListWidget::keyPressEvent(event);
+		}
+	}
+};
 
 //! Console
 class ccConsole : public QObject, public ccLog

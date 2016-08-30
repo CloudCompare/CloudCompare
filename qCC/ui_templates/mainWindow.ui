@@ -601,7 +601,7 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QListWidget" name="consoleWidget">
+      <widget class="ccCustomQListWidget" name="consoleWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
          <horstretch>0</horstretch>
@@ -2902,6 +2902,11 @@
    <class>ccCustomQTreeView</class>
    <extends>QTreeView</extends>
    <header location="global">ccDBRoot.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ccCustomQListWidget</class>
+   <extends>QListWidget</extends>
+   <header location="global">ccConsole.h</header>
   </customwidget>
  </customwidgets>
  <resources>

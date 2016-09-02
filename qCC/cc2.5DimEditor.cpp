@@ -170,7 +170,7 @@ bool cc2Point5DimEditor::getGridSize(unsigned& gridWidth, unsigned& gridHeight) 
 		return false;
 	}
 
-	//DGM: we now use the 'PixelIsArea' convention (the height value is computed at the grid cell center
+	//DGM: we now use the 'PixelIsArea' convention (the height value is computed at the grid cell center)
 	gridWidth  = 1 + static_cast<unsigned>(boxDiag.u[X] / gridStep + 0.5);
 	gridHeight = 1 + static_cast<unsigned>(boxDiag.u[Y] / gridStep + 0.5);
 
@@ -840,7 +840,8 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 														bool resampleInputCloudZ,
 														ccGenericPointCloud* inputCloud,
 														bool fillEmptyCells,
-														double emptyCellsHeight) const
+														double emptyCellsHeight,
+														bool exportToOriginalCS) const
 {
 	if (!m_grid.isValid())
 	{
@@ -1000,8 +1001,12 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 	}
 
 	//horizontal dimensions
-	const unsigned char X = Z == 2 ? 0 : Z +1;
-	const unsigned char Y = X == 2 ? 0 : X +1;
+	const unsigned char X = (Z == 2 ? 0 : Z +1);
+	const unsigned char Y = (X == 2 ? 0 : X +1);
+
+	const unsigned char outX = (exportToOriginalCS ? X : 0);
+	const unsigned char outY = (exportToOriginalCS ? Y : 1);
+	const unsigned char outZ = (exportToOriginalCS ? Z : 2);
 
 	//cloud bounding-box
 	ccBBox box = getCustomBBox();
@@ -1027,9 +1032,10 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 				//corresponding to this non-empty cell
 				if (!resampleInputCloudXY || aCell->nbPoints == 0)
 				{
-					CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
-									static_cast<PointCoordinateType>(Py),
-									static_cast<PointCoordinateType>(aCell->h) );
+					CCVector3 Pf;
+					Pf.u[outX] = static_cast<PointCoordinateType>(Px);
+					Pf.u[outY] = static_cast<PointCoordinateType>(Py);
+					Pf.u[outZ] = static_cast<PointCoordinateType>(aCell->h);
 
 					cloudGrid->addPoint(Pf);
 
@@ -1046,7 +1052,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 				//fill the associated SFs
 				assert(exportedSFs.size() == exportedFields.size());
 				assert(!inputCloud || nonEmptyCellIndex < inputCloud->size()); //we can't be here if we have a fully resampled cloud!
-				for (size_t i=0; i<exportedSFs.size(); ++i)
+				for (size_t i = 0; i < exportedSFs.size(); ++i)
 				{
 					CCLib::ScalarField* sf = exportedSFs[i];
 					if (!sf)
@@ -1099,9 +1105,11 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 				//even if we have resampled the original cloud, we must add the point
 				//corresponding to this empty cell
 				{
-					CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
-									static_cast<PointCoordinateType>(Py),
-									static_cast<PointCoordinateType>(emptyCellsHeight) );
+					CCVector3 Pf;
+					Pf.u[outX] = static_cast<PointCoordinateType>(Px);
+					Pf.u[outY] = static_cast<PointCoordinateType>(Py);
+					Pf.u[outZ] = static_cast<PointCoordinateType>(emptyCellsHeight);
+					
 					cloudGrid->addPoint(Pf);
 
 					if (interpolateColors)
@@ -1167,7 +1175,9 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 				//we try to create an equivalent SF on the output grid
 				int sfIdx = cloudGrid->addScalarField(formerSf->getName());
 				if (sfIdx < 0) //if we aren't lucky, the input cloud already had a SF with the same name
+				{
 					sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
+				}
 
 				if (sfIdx < 0)
 				{
@@ -1207,7 +1217,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 	else //the cloud has already been resampled
 	{
 		//we simply add NAN values at the end of the SFs
-		for (int k = 0; k<static_cast<int>(cloudGrid->getNumberOfScalarFields()); ++k)
+		for (int k = 0; k < static_cast<int>(cloudGrid->getNumberOfScalarFields()); ++k)
 		{
 			CCLib::ScalarField* sf = cloudGrid->getScalarField(k);
 			sf->resize(cloudGrid->size(), true, NAN_VALUE);

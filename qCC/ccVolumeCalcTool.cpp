@@ -75,6 +75,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	connect(groundComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(groundSourceChanged(int)));
 	connect(ceilComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(ceilSourceChanged(int)));
 	connect(clipboardPushButton,			SIGNAL(clicked()),					this,	SLOT(exportToClipboard()));
+	connect(exportGridPushButton,			SIGNAL(clicked()),					this,	SLOT(exportGridAsCloud()));
 	connect(precisionSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(setDisplayedNumberPrecision(int)));
 
 	if (m_cloud1 && !m_cloud2)
@@ -324,11 +325,54 @@ void ccVolumeCalcTool::gridIsUpToDate(bool state)
 	}
 	updatePushButton->setDisabled(state);
 	clipboardPushButton->setEnabled(state);
+	exportGridPushButton->setEnabled(state);
 	if (!state)
 	{
 		spareseWarningLabel->hide();
 		reportPlainTextEdit->setPlainText("Update the grid first");
 	}
+}
+
+ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) const
+{
+	ccPointCloud* rasterCloud = 0;
+	try
+	{
+		//we only compute the default 'height' layer
+		std::vector<ExportableFields> exportedFields;
+		exportedFields.push_back(PER_CELL_HEIGHT);
+		rasterCloud = cc2Point5DimEditor::convertGridToCloud(exportedFields,
+			false,
+			false,
+			false,
+			false,
+			0,
+			false,
+			std::numeric_limits<double>::quiet_NaN(),
+			exportToOriginalCS);
+
+		if (rasterCloud && rasterCloud->hasScalarFields())
+		{
+			rasterCloud->showSF(true);
+			rasterCloud->setCurrentDisplayedScalarField(0);
+			ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
+			assert(sf);
+			sf->setName("Relative height");
+			sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);
+			rasterCloud->showSFColorsScale(true);
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("Not enough memory!");
+		if (rasterCloud)
+		{
+			delete rasterCloud;
+			rasterCloud = 0;
+		}
+	}
+
+	return rasterCloud;
 }
 
 void ccVolumeCalcTool::updateGridAndDisplay()
@@ -344,37 +388,11 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 			m_rasterCloud = 0;
 		}
 
-		std::vector<ExportableFields> exportedFields;
-		try
-		{
-			//we only compute the default 'height' layer
-			exportedFields.push_back(PER_CELL_HEIGHT);
-			m_rasterCloud = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
-																	false,
-																	false,
-																	false,
-																	false,
-																	0,
-																	false,
-																	std::numeric_limits<double>::quiet_NaN());
-
-			if (m_rasterCloud && m_rasterCloud->hasScalarFields())
-			{
-				m_rasterCloud->showSF(true);
-				m_rasterCloud->setCurrentDisplayedScalarField(0);
-				m_rasterCloud->getScalarField(0)->setName("Relative height");
-				m_rasterCloud->showSFColorsScale(true);
-			}
-		}
-		catch (const std::bad_alloc&)
-		{
-			//see below
-		}
-
+		m_rasterCloud = convertGridToCloud(false);
 		if (m_rasterCloud)
 		{
 			m_glWindow->addToOwnDB(m_rasterCloud);
-			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false,m_glWindow);
+			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_glWindow);
 			update2DDisplayZoom(box);
 		}
 		else
@@ -574,9 +592,9 @@ bool ccVolumeCalcTool::updateGrid()
 
 		//at least one of the grid is based on a cloud
 		m_grid.nonEmptyCellCount = 0;
-		for (unsigned i=0; i<m_grid.height; ++i)
+		for (unsigned i = 0; i < m_grid.height; ++i)
 		{
-			for (unsigned j=0; j<m_grid.width; ++j)
+			for (unsigned j = 0; j < m_grid.width; ++j)
 			{
 				RasterCell& cell = m_grid.rows[i][j];
 
@@ -646,16 +664,16 @@ bool ccVolumeCalcTool::updateGrid()
 		{
 			size_t validNeighborsCount = 0;
 			size_t count = 0;
-			for (unsigned i=1; i<m_grid.height-1; ++i)
+			for (unsigned i = 1; i < m_grid.height - 1; ++i)
 			{
-				for (unsigned j=1; j<m_grid.width-1; ++j)
+				for (unsigned j = 1; j < m_grid.width - 1; ++j)
 				{
 					RasterCell& cell = m_grid.rows[i][j];
 					if (cell.h == cell.h)
 					{
-						for (unsigned k=i-1; k<=i+1; ++k)
+						for (unsigned k = i - 1; k <= i + 1; ++k)
 						{
-							for (unsigned l=j-1; l<=j+1; ++l)
+							for (unsigned l = j - 1; l <= j + 1; ++l)
 							{
 								if (k != i || l != j)
 								{
@@ -702,5 +720,44 @@ void ccVolumeCalcTool::exportToClipboard() const
 	if (clipboard)
 	{
 		clipboard->setText(reportPlainTextEdit->toPlainText());
+	}
+}
+
+void ccVolumeCalcTool::exportGridAsCloud() const
+{
+	if (!m_grid.isValid())
+	{
+		assert(false);
+	}
+
+	ccPointCloud* rasterCloud = convertGridToCloud(true);
+	if (!rasterCloud)
+	{
+		//error message should have already been issued
+		return;
+	}
+	
+	rasterCloud->setName("Height difference " + rasterCloud->getName());
+	ccGenericPointCloud* originCloud = (m_cloud1 ? m_cloud1 : m_cloud2);
+	assert(originCloud);
+	if (originCloud)
+	{
+		if (originCloud->getParent())
+		{
+			originCloud->getParent()->addChild(rasterCloud);
+		}
+		rasterCloud->setDisplay(originCloud->getDisplay());
+	}
+
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow)
+	{
+		mainWindow->addToDB(rasterCloud);
+		ccLog::Print(QString("[Volume] Cloud '%1' successfully exported").arg(rasterCloud->getName()));
+	}
+	else
+	{
+		assert(false);
+		delete rasterCloud;
 	}
 }

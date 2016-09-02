@@ -127,7 +127,8 @@ protected: //raster grid related stuff
 										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,
 										bool fillEmptyCells,
-										double emptyCellsHeight) const;
+										double emptyCellsHeight,
+										bool exportToOriginalCS) const;
 
 	//! Raster grid cell
 	struct RasterCell
@@ -210,6 +211,24 @@ protected: //raster grid related stuff
 		inline void setValid(bool state) { valid = state; }
 		//! Returns whether the grid is 'valid' or not
 		inline bool isValid() const { return valid; }
+
+		//! Computes the position of the cell that includes a given point
+		std::pair<int, int> computeCellPos(const CCVector3& P, unsigned char X, unsigned char Y) const
+		{
+			CCVector3d relativePos = CCVector3d::fromArray(P.u) - minCorner;
+			
+			//DGM: we use the 'PixelIsArea' convention
+			int i = static_cast<int>((relativePos.u[X] / gridStep + 0.5));
+			int j = static_cast<int>((relativePos.u[Y] / gridStep + 0.5));
+
+			return std::pair<int, int>(i, j);
+		}
+
+		//! Computes the position of the center of a given cell
+		CCVector2d computeCellCenter(int i, int j, unsigned char X, unsigned char Y) const
+		{
+			return CCVector2d(minCorner.u[X] + (i + 0.5) * gridStep, minCorner.u[Y] + (j + 0.5) * gridStep);
+		}
 
 		//! Row
 		typedef std::vector<RasterCell> Row;

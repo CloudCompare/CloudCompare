@@ -153,7 +153,8 @@ protected: //raster grid related stuff
 										bool interpolateSF,
 										bool interpolateColors,
 										bool copyHillshadeSF,
-										QString activeSFName) const;
+										QString activeSFName,
+										bool exportToOriginalCS) const;
 
 protected: //members
 

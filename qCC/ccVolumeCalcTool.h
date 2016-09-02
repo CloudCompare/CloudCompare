@@ -90,6 +90,9 @@ protected slots:
 	//! Exports info to clipboard
 	void exportToClipboard() const;
 
+	//! Exports the grid as a point cloud
+	void exportGridAsCloud() const;
+
 	//! Sets the displayed number precision
 	void setDisplayedNumberPrecision(int);
 
@@ -103,6 +106,9 @@ protected: //standard methods
 
 	//! Updates the grid
 	bool updateGrid();
+
+	//! Converts the grid to a point cloud
+	ccPointCloud* convertGridToCloud(bool exportToOriginalCS) const;
 
 	//! Report info
 	struct ReportInfo

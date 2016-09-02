@@ -45,6 +45,11 @@ v2.8.beta - XX/XX/2016
 		- the 'Tools > Projection > Contour plot (polylines) to mesh' tool transfers the Global Shift & Scale information
 			from the (first) polyline to the resulting mesh
 
+	* 2.5D Volume Calculation tool:
+		- new option to export the height difference grid as a cloud
+			(warning, the exported points height will actually be equal to the height difference)
+		- default color scale is now symmetrical if the height differences are not only positive or only negative
+
 	* Rasterize tool:
 		- the rasterize tool now use the 'PixelIsArea' convention (i.e. the grid min corner coordinates correspond to the
 			first grid cell center). This allows one to apply the Rasterize tool on a regular grid without any
@@ -57,6 +62,8 @@ v2.8.beta - XX/XX/2016
 		- Mixing RGB bands and other layers (heights, scalar fields, etc.) in a geotiff is in fact a bad idea. It results in
 			64 bits color bands that are not properly handled by most of the other GIS tools. CC will now warn the user about
 			this fact.
+		- Exported clouds and meshes are now properly exported in the same coordinate system as the input cloud
+			(it was not the case for clouds projected along X or Y)
 
 	* Raster file import:
 		- New option to import the raster as a textured quad (mesh). Only available if the raster has at least R, G and B bands.

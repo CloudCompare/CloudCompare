@@ -3695,8 +3695,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						m_rectPickingPoly->setDisplay(this);
 						m_rectPickingPoly->setVisible(true);
 						CCVector3 A(static_cast<PointCoordinateType>(m_lastMousePos.x() - width() / 2),
-							static_cast<PointCoordinateType>(height() / 2 - m_lastMousePos.y()),
-							0);
+									static_cast<PointCoordinateType>(height() / 2 - m_lastMousePos.y()),
+									0);
 						//we add 4 times the same point (just to fill the cloud!)
 						vertices->addPoint(A);
 						vertices->addPoint(A);

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>660</height>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -474,6 +474,20 @@ You should fill the empty cells...</string>
            </property>
            <property name="text">
             <string>Copy to clipboard</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="exportGridPushButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>Export the grid as a point cloud
+(warning, the points heights will be the difference of altitude!)</string>
+           </property>
+           <property name="text">
+            <string>Export grid as a cloud</string>
            </property>
           </widget>
          </item>

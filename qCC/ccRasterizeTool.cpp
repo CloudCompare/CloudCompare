@@ -486,7 +486,8 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 													bool interpolateSF,
 													bool interpolateColors,
 													bool copyHillshadeSF,
-													QString activeSFName) const
+													QString activeSFName,
+													bool exportToOriginalCS) const
 {
 	if (!m_cloud || !m_grid.isValid())
 		return 0;
@@ -508,7 +509,8 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ExportableF
 																		/*resampleInputCloudZ=*/getTypeOfProjection() != PROJ_AVERAGE_VALUE,
 																		/*inputCloud=*/m_cloud,
 																		/*fillEmptyCells=*/fillEmptyCellsStrategy != LEAVE_EMPTY,
-																		emptyCellsHeight);
+																		emptyCellsHeight,
+																		exportToOriginalCS);
 
 	//success?
 	if (cloudGrid)
@@ -600,7 +602,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 												/*interpolateSF=*/activeLayerIsSF,
 												/*interpolateColors=*/activeLayerIsRGB,
 												/*copyHillshadeSF=*/false,
-												activeLayerName);
+												activeLayerName,
+												false);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -741,16 +744,19 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	QString activeLayerName = activeLayerComboBox->currentText();
 	bool activeLayerIsSF = (activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
-	ccPointCloud* rasterCloud = convertGridToCloud(exportedFields,
+	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
 													/*interpolateSF=*/(getTypeOfSFInterpolation() != INVALID_PROJECTION_TYPE) || activeLayerIsSF,
 													/*interpolateColors=*/true,
 													/*copyHillshadeSF=*/true,
-													activeLayerName);
+													activeLayerName,
+													true);
 
 	if (rasterCloud && autoExport)
 	{
 		if (m_cloud->getParent())
+		{
 			m_cloud->getParent()->addChild(rasterCloud);
+		}
 		rasterCloud->setDisplay(m_cloud->getDisplay());
 		
 		if (m_cloud->isEnabled())
@@ -761,8 +767,15 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 
 		MainWindow* mainWindow = MainWindow::TheInstance();
 		if (mainWindow)
-			MainWindow::TheInstance()->addToDB(rasterCloud);
-		ccLog::Print(QString("[Rasterize] Cloud '%1' successfully exported").arg(rasterCloud->getName()));
+		{
+			mainWindow->addToDB(rasterCloud);
+			ccLog::Print(QString("[Rasterize] Cloud '%1' successfully exported").arg(rasterCloud->getName()));
+		}
+		else
+		{
+			assert(false);
+			delete rasterCloud;
+		}
 	}
 
 	return rasterCloud;

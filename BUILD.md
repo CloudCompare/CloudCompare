@@ -169,7 +169,7 @@ If you want to compile CloudCompare (and ccViewer) with GDAL (raster) files supp
 
 Then, the CloudCompare CMake project will request that you set the 2 following variables:
 1. `GDAL_INCLUDE_DIR`: GDAL include directory (pretty straightforward ;)
-2. `GFAL_LIBRARY`: the static library (e.g. `gdal_i.lib`)
+2. `GDAL_LIBRARY`: the static library (e.g. `gdal_i.lib`)
 
 ### [Optional] Setup for Cork + MPIR support (for qCork)
 

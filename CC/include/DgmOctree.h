@@ -1020,7 +1020,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return error code:
-			- '+0' = OK
+			- '>= 0' = number of components
 			- '-1' = no cells (input)
 			- '-2' = not enough memory
 			- '-3' = no CC found
@@ -1039,7 +1039,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return error code:
-			- '+0' = OK
+			- '>= 0' = number of components
 			- '-1' = no cells (input)
 			- '-2' = not enough memory
 			- '-3' = no CC found

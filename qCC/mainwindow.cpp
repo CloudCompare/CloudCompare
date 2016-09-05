@@ -4076,9 +4076,9 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		if (sortBysize) //still ok?
 		{
 			unsigned compCount = static_cast<unsigned>(components.size());
-			for (unsigned i=0; i<compCount; ++i)
+			for (unsigned i = 0; i < compCount; ++i)
 			{
-				sortedIndexes.push_back(ComponentIndexAndSize(i,components[i]->size()));
+				sortedIndexes.push_back(ComponentIndexAndSize(i, components[i]->size()));
 			}
 
 			SortAlgo(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
@@ -4201,9 +4201,11 @@ void MainWindow::doActionLabelConnectedComponents()
 	//we unselect all entities as we are going to automatically select the created components
 	//(otherwise the user won't percieve the change!)
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities();
+	}
 
-	for (size_t i=0; i<count; ++i)
+	for (size_t i = 0; i < count; ++i)
 	{
 		ccGenericPointCloud* cloud = clouds[i];
 
@@ -4226,7 +4228,9 @@ void MainWindow::doActionLabelConnectedComponents()
 			//we create/activate CCs label scalar field
 			int sfIdx = pc->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
 			if (sfIdx < 0)
+			{
 				sfIdx = pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+			}
 			if (sfIdx < 0)
 			{
 				ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
@@ -4236,15 +4240,39 @@ void MainWindow::doActionLabelConnectedComponents()
 
 			//we try to label all CCs
 			CCLib::ReferenceCloudContainer components;
-			if (CCLib::AutoSegmentationTools::labelConnectedComponents(	cloud,
-																		static_cast<unsigned char>(octreeLevel),
-																		false,
-																		&pDlg,
-																		theOctree.data()) >= 0)
+			int componentCount = CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,
+																						static_cast<unsigned char>(octreeLevel),
+																						false,
+																						&pDlg,
+																						theOctree.data());
+			
+			if (componentCount >= 0)
 			{
 				//if successfull, we extract each CC (stored in "components")
+
+				//safety test
+				if (componentCount > 500)
+				{
+					//too many components
+					if (QMessageBox::warning(this, "Many components", QString("Do you really expect up to %1 components?\n(this may take a lot of time to process and display)").arg(componentCount), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					{
+						//cancel
+						pc->deleteScalarField(sfIdx);
+						if (pc->getNumberOfScalarFields() != 0)
+						{
+							pc->setCurrentDisplayedScalarField(static_cast<int>(pc->getNumberOfScalarFields()) - 1);
+						}
+						else
+						{
+							pc->showSF(false);
+						}
+						pc->prepareDisplayForRefresh();
+						continue;
+					}
+				}
+				
 				pc->getCurrentInScalarField()->computeMinAndMax();
-				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud,components))
+				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
 				{
 					ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 				}

@@ -71,6 +71,9 @@ v2.8.beta - XX/XX/2016
 
 	* All the selected lines of the Console can now be copied at once (e.g. with CTRL+C on Windows)
 
+	* Connected Components Extraction:
+		- safeguard added if too many components are to be created (CC will ask the user to confirm the creation of more than 500 components)
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
@@ -85,6 +88,7 @@ v2.8.beta - XX/XX/2016
 		- contour lines generated with a projection direction other than Z were not displayed in the right orientation compared
 			to the grid raster (inside the Rasterize tool only)
 	* Command line tool: the CROP2D option applied with an orientation other than Z was not performing the cut at the right position
+	* Connected Components Extraction: the tool couldn't be properly used with an octree level > 10
 
 v2.7.0 - 04/22/2016
 -------------------

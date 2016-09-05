@@ -176,7 +176,7 @@ static ccCameraSensor* DecodeSensor(QXmlStreamReader& stream, int& sensorId)
 	{
 		//invalid sensor?!
 		assert(false);
-		return false;
+    return 0;
 	}
 	sensorId = sensorAttributes.value("id").toInt();
 

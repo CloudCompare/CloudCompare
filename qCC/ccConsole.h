@@ -112,6 +112,9 @@ public:
 	//! Returns whether to show Qt messages (qDebug / qWarning / etc.) in Console or not
 	static bool QtMessagesEnabled() { return s_showQtMessagesInConsole; }
 
+	//! Returns the parent widget (if any)
+	inline QWidget* parentWidget() { return m_parentWidget; }
+
 public slots:
 
 	//! Refreshes console (display all messages still in queue)

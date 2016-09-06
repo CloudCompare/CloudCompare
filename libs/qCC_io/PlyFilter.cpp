@@ -1533,13 +1533,13 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 	}
 
 	ccProgressDialog* pDlg = 0;
-	if (parameters.alwaysDisplayLoadDialog)
+	if (parameters.parentWidget)
 	{
 		pDlg = new ccProgressDialog(false, parameters.parentWidget);
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setMethodTitle(QObject::tr("PLY file"));
 		pDlg->setRange(0, 0);
-		pDlg->show();
+		pDlg->start();
 		QApplication::processEvents();
 	}
 

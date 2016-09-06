@@ -4094,7 +4094,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
 
 		//for each component
-		for (unsigned i=0; i<components.size(); ++i)
+		for (size_t i = 0; i < components.size(); ++i)
 		{
 			CCLib::ReferenceCloud* compIndexes = _sortedIndexes ? components[_sortedIndexes->at(i).index] : components[i];
 
@@ -4192,7 +4192,7 @@ void MainWindow::doActionLabelConnectedComponents()
 		return;
 
 	int octreeLevel = dlg.getOctreeLevel();
-	int minComponentSize = dlg.getMinPointsNb();
+	unsigned minComponentSize = static_cast<unsigned>(std::max(0, dlg.getMinPointsNb()));
 	bool randColors = dlg.randomColors();
 
 	ccProgressDialog pDlg(false, this);
@@ -4251,10 +4251,21 @@ void MainWindow::doActionLabelConnectedComponents()
 				//if successfull, we extract each CC (stored in "components")
 
 				//safety test
-				if (componentCount > 500)
+				int realComponentCount = 0;
+				{
+					for (size_t i = 0; i < components.size(); ++i)
+					{
+						if (components[i]->size() >= minComponentSize)
+						{
+							++realComponentCount;
+						}
+					}
+				}
+
+				if (realComponentCount > 500)
 				{
 					//too many components
-					if (QMessageBox::warning(this, "Many components", QString("Do you really expect up to %1 components?\n(this may take a lot of time to process and display)").arg(componentCount), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					if (QMessageBox::warning(this, "Many components", QString("Do you really expect up to %1 components?\n(this may take a lot of time to process and display)").arg(realComponentCount), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 					{
 						//cancel
 						pc->deleteScalarField(sfIdx);

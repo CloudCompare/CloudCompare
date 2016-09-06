@@ -312,7 +312,9 @@ static bool TagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell,
 		}
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -408,7 +410,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		{
 			ccProgressDialog pDlg(true, parameters.parentWidget);
 			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(vertices));
-			if (!octree->build(&pDlg))
+			if (!octree->build(parameters.parentWidget ? &pDlg : 0))
 			{
 				octree.clear();
 			}
@@ -419,7 +421,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					TagDuplicatedVertices,
 					additionalParameters,
 					false,
-					&pDlg,
+					parameters.parentWidget ? &pDlg : 0,
 					"Tag duplicated vertices");
 
 				octree.clear();
@@ -581,11 +583,14 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 	//progress dialog
 	ccProgressDialog pDlg(true, parameters.parentWidget);
-	pDlg.setMethodTitle(QObject::tr("(ASCII) STL file"));
-	pDlg.setInfo(QObject::tr("Loading in progress..."));
-	pDlg.setRange(0, 0);
-	pDlg.show();
-	QApplication::processEvents();
+	if (parameters.parentWidget)
+	{
+		pDlg.setMethodTitle(QObject::tr("(ASCII) STL file"));
+		pDlg.setInfo(QObject::tr("Loading in progress..."));
+		pDlg.setRange(0, 0);
+		pDlg.start();
+		QApplication::processEvents();
+	}
 
 	//current vertex shift
 	CCVector3d Pshift(0, 0, 0);
@@ -842,7 +847,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		}
 
 		//progress
-		if ((faceCount % 1024) == 0)
+		if (parameters.parentWidget && (faceCount % 1024) == 0)
 		{
 			if (pDlg.wasCanceled())
 				break;
@@ -855,7 +860,10 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		ccLog::Warning("[STL] Failed to read some 'normal' values!");
 	}
 
-	pDlg.close();
+	if (parameters.parentWidget)
+	{
+		pDlg.close();
+	}
 
 	return result;
 }
@@ -895,10 +903,13 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	//progress dialog
 	ccProgressDialog pDlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nProgress(&pDlg, faceCount);
-	pDlg.setMethodTitle(QObject::tr("Loading binary STL file"));
-	pDlg.setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
-	pDlg.start();
-	QApplication::processEvents();
+	if (parameters.parentWidget)
+	{
+		pDlg.setMethodTitle(QObject::tr("Loading binary STL file"));
+		pDlg.setInfo(QObject::tr("Loading %1 faces").arg(faceCount));
+		pDlg.start();
+		QApplication::processEvents();
+	}
 
 	//current vertex shift
 	CCVector3d Pshift(0, 0, 0);
@@ -995,11 +1006,16 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		}
 
 		//progress
-		if (!nProgress.oneStep())
+		if (parameters.parentWidget && !nProgress.oneStep())
+		{
 			break;
+		}
 	}
 
-	pDlg.stop();
+	if (parameters.parentWidget)
+	{
+		pDlg.stop();
+	}
 
 	return CC_FERR_NO_ERROR;
 }

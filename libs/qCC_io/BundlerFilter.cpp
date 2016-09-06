@@ -226,9 +226,12 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		//progress dialog
 		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 		CCLib::NormalizedProgress nprogress(&pdlg, camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
-		pdlg.setMethodTitle(QObject::tr("Open Bundler file"));
-		pdlg.setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
-		pdlg.start();
+		if (parameters.parentWidget)
+		{
+			pdlg.setMethodTitle(QObject::tr("Open Bundler file"));
+			pdlg.setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
+			pdlg.start();
+		}
 
 		//read cameras info (whatever the case!)
 		cameras.resize(camCount);
@@ -296,8 +299,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					return CC_FERR_MALFORMED_FILE;
 			}
 
-			if (!nprogress.oneStep()) //cancel requested?
+			if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested?
+			{
 				return CC_FERR_CANCELED_BY_USER;
+			}
 		}
 
 		//read points
@@ -491,7 +496,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					}
 				}
 
-				if (!nprogress.oneStep()) //cancel requested?
+				if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested?
 				{
 					delete keypointsCloud;
 					return CC_FERR_CANCELED_BY_USER;
@@ -518,8 +523,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				container.addChild(keypointsCloud);
 		}
 
-		pdlg.stop();
-		QApplication::processEvents();
+		if (parameters.parentWidget)
+		{
+			pdlg.stop();
+			QApplication::processEvents();
+		}
 	}
 
 	//use alternative cloud/mesh as keypoints

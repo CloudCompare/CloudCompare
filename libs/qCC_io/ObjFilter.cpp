@@ -92,9 +92,12 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	ccProgressDialog pdlg(true, parameters.parentWidget);
 	unsigned numberOfTriangles = mesh->size();
 	CCLib::NormalizedProgress nprogress(&pdlg, numberOfTriangles);
-	pdlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
-	pdlg.setInfo(QObject::tr("Triangles: %1").arg(numberOfTriangles));
-	pdlg.start();
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+		pdlg.setInfo(QObject::tr("Triangles: %1").arg(numberOfTriangles));
+		pdlg.start();
+	}
 	
 	QTextStream stream(&file);
 	stream.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 ? 8 : 12);
@@ -313,15 +316,21 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			stream << endl;
 
 			if (file.error() != QFile::NoError)
+			{
 				return CC_FERR_WRITING;
+			}
 
-			if (!nprogress.oneStep()) //cancel requested
+			if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested
+			{
 				return CC_FERR_CANCELED_BY_USER;
+			}
 		}
 
 		stream << "#" << triNum << " faces" << endl;
 		if (file.error() != QFile::NoError)
+		{
 			return CC_FERR_WRITING;
+		}
 
 		indexShift += triNum;
 	}

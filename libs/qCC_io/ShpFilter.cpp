@@ -1549,11 +1549,14 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	//progress bar
 	ccProgressDialog pdlg(true, parameters.parentWidget);
 	qint64 fileSize = file.size();
-	pdlg.setMaximum(static_cast<int>(fileSize));
-	pdlg.setMethodTitle(QObject::tr("Load SHP file"));
-	pdlg.setInfo(QObject::tr("File size: %1").arg(fileSize));
-	pdlg.start();
-	QApplication::processEvents();
+	if (parameters.parentWidget)
+	{
+		pdlg.setMaximum(static_cast<int>(fileSize));
+		pdlg.setMethodTitle(QObject::tr("Load SHP file"));
+		pdlg.setInfo(QObject::tr("File size: %1").arg(fileSize));
+		pdlg.start();
+		QApplication::processEvents();
+	}
 
 	//load shapes
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
@@ -1659,11 +1662,14 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			break;
 		}
 
-		pdlg.setValue(fileSize - (pos + fileLength));
-		if (pdlg.wasCanceled())
+		if (parameters.parentWidget)
 		{
-			error = CC_FERR_CANCELED_BY_USER;
-			break;
+			pdlg.setValue(fileSize - (pos + fileLength));
+			if (pdlg.wasCanceled())
+			{
+				error = CC_FERR_CANCELED_BY_USER;
+				break;
+			}
 		}
 	}
 

@@ -429,12 +429,12 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 		{
 			int currentSFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			//ui.menuSelectSF->clear();
-			for (unsigned i=0;i<sfCount;++i)
+			for (unsigned i = 0; i < sfCount; ++i)
 			{
 				QAction* action = ui.menuSelectSF->addAction(cloud->getScalarFieldName(i));
 				action->setData(i);
 				action->setCheckable(true);
-				if (currentSFIndex == (int)i)
+				if (currentSFIndex == static_cast<int>(i))
 					action->setChecked(true);
 				connect(action, SIGNAL(toggled(bool)), this, SLOT(changeCurrentScalarField(bool)));
 			}
@@ -485,8 +485,8 @@ void ccViewer::updateDisplay()
 void ccViewer::updateGLFrameGradient()
 {
 	//display parameters
-	static const ccColor::Rgbub s_black(0,0,0);
-	static const ccColor::Rgbub s_white(255,255,255);
+	static const ccColor::Rgbub s_black(0, 0, 0);
+	static const ccColor::Rgbub s_white(255, 255, 255);
 	bool stereoModeEnabled = m_glWindow->stereoModeIsEnabled();
 	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
 	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
@@ -530,7 +530,7 @@ void ccViewer::addToDB(QStringList filenames)
 	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 	parameters.parentWidget = this;
 
-	for (int i=0; i<filenames.size(); ++i)
+	for (int i = 0; i < filenames.size(); ++i)
 	{
 		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
@@ -541,7 +541,7 @@ void ccViewer::addToDB(QStringList filenames)
 
 			if (!scaleAlreadyDisplayed)
 			{
-				for (unsigned i=0; i<newEntities->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < newEntities->getChildrenNumber(); ++i)
 				{
 					ccHObject* ent = newEntities->getChild(i);
 					if (ent->isA(CC_TYPES::POINT_CLOUD))
@@ -617,7 +617,7 @@ void ccViewer::showDisplayParameters()
 
 	clmDlg.exec();
 
-	disconnect(&clmDlg,0,0,0);
+	disconnect(&clmDlg, 0, 0, 0);
 }
 
 void ccViewer::doActionEditCamera()
@@ -1022,7 +1022,7 @@ void ccViewer::changeCurrentScalarField(bool state)
 
 	//disable all other actions
 	const QObjectList& children = ui.menuSelectSF->children();
-	for (int i=0; i<children.size() ;++i)
+	for (int i = 0; i < children.size(); ++i)
 	{
 		QAction* act = static_cast<QAction*>(children[i]);
 		act->blockSignals(true);

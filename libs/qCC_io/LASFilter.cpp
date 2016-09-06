@@ -455,10 +455,13 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-	pdlg.setMethodTitle(QObject::tr("Save LAS file"));
-	pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
-	pdlg.start();
+	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Save LAS file"));
+		pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
+		pdlg.start();
+	}
 
 	assert(lasWriter.writer());
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(lasWriter.writer->GetHeader())));
@@ -565,7 +568,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			break;
 		}
 
-		if (!nprogress.oneStep())
+		if (parameters.parentWidget && !nprogress.oneStep())
 		{
 			break;
 		}
@@ -923,9 +926,12 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//progress dialog
 		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 		CCLib::NormalizedProgress nprogress(&pdlg, nbOfPoints);
-		pdlg.setMethodTitle(QObject::tr("Open LAS file"));
-		pdlg.setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
-		pdlg.start();
+		if (parameters.parentWidget)
+		{
+			pdlg.setMethodTitle(QObject::tr("Open LAS file"));
+			pdlg.setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
+			pdlg.start();
+		}
 
 		//number of points read from the begining of the current cloud part
 		unsigned pointsRead = 0;
@@ -950,7 +956,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			bool newPointAvailable = false;
 			try
 			{
-				newPointAvailable = (nprogress.oneStep() && reader.ReadNextPoint());
+				newPointAvailable = ((!parameters.parentWidget || nprogress.oneStep()) && reader.ReadNextPoint());
 			}
 			catch (...)
 			{

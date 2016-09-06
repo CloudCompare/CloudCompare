@@ -704,14 +704,14 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 		progressDlg.setAutoClose(false);
 		s_cancelRequestedByUser = false;
 
-		for (size_t i=0; i<scans.size(); ++i)
+		for (size_t i = 0; i < scans.size(); ++i)
 		{
 			ccPointCloud* cloud = scans[i];
 			QString scanGUID = GetNewGuid();
 
 			//create corresponding node
 			e57::StructureNode scanNode = e57::StructureNode(imf);
-			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, &progressDlg))
+			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, parameters.parentWidget ? &progressDlg : 0))
 			{
 				++s_absoluteScanIndex;
 				scansGUID.insert(cloud,scanGUID);

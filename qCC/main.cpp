@@ -107,7 +107,6 @@ int main(int argc, char **argv)
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-		format.setOption(QSurfaceFormat::StereoBuffers, true);
 		format.setStencilBufferSize(0);
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 		format.setStereo(true);

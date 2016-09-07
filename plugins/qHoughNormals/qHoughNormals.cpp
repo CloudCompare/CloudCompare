@@ -85,7 +85,7 @@ struct Parameters
 	int n_phi = 15;
 	int n_rot = 5;
 	bool ua = false;
-	float tol_angle_rad = 0.79;
+	float tol_angle_rad = 0.79f;
 	int k_density = 5;
 };
 static Parameters s_params;
@@ -121,7 +121,7 @@ void qHoughNormals::doAction()
 			pc.resize(pointCount, 3);
 			for (size_t i = 0; i < pointCount; ++i)
 			{
-				const CCVector3* P = cloud->getPoint(i);
+				const CCVector3* P = cloud->getPoint(static_cast<unsigned>(i));
 				pc.row(i) = Eigen::Vector3d(P->x, P->y, P->z);
 			}
 
@@ -151,7 +151,7 @@ void qHoughNormals::doAction()
 				CCVector3 N(static_cast<PointCoordinateType>(n.x()),
 							static_cast<PointCoordinateType>(n.y()),
 							static_cast<PointCoordinateType>(n.z()));
-				cloud->setPointNormal(i, N);
+				cloud->setPointNormal(static_cast<unsigned>(i), N);
 			}
 
 			cloud->showNormals(true);

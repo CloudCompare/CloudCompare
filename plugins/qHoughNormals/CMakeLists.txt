@@ -23,6 +23,6 @@ if (INSTALL_QHOUGH_NORMALS_PLUGIN)
 	include_directories( ${EIGEN_ROOT_DIR} )
 	include_directories( ${NANOFLANN_ROOT_DIR}/include )
     
-    target_link_libraries( ${PROJECT_NAME} PCV_LIB )
+    target_link_libraries( ${PROJECT_NAME} )
 	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
 endif()

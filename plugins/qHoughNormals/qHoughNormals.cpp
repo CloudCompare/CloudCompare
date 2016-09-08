@@ -16,23 +16,18 @@
 //##########################################################################
 
 #include "qHoughNormals.h"
+#include "qHoughNormalsDialog.h"
 
-//
+//Hough Normals library
 #include "normals_Hough/Normals.h"
 
 //qCC_db
 #include <ccPointCloud.h>
-//#include <ccHObjectCaster.h>
-//#include <ccGenericPointCloud.h>
-//#include <ccPointCloud.h>
-//#include <ccGenericMesh.h>
-//#include <ccProgressDialog.h>
-//#include <ccScalarField.h>
-//#include <ccColorScalesManager.h>
 
 //Qt
 #include <QtGui>
 #include <QMainWindow>
+#include <QProgressDialog>
 
 //system
 #include <assert.h>
@@ -78,17 +73,7 @@ void qHoughNormals::getActions(QActionGroup& group)
 }
 
 //persistent settings during a single session
-struct Parameters
-{
-	int K = 100;
-	int T = 1000;
-	int n_phi = 15;
-	int n_rot = 5;
-	bool ua = false;
-	float tol_angle_rad = 0.79f;
-	int k_density = 5;
-};
-static Parameters s_params;
+qHoughNormalsDialog::Parameters s_params;
 
 void qHoughNormals::doAction()
 {
@@ -102,6 +87,13 @@ void qHoughNormals::doAction()
 	if (selectedEntities.empty())
 	{
 		assert(false);
+		return;
+	}
+
+	qHoughNormalsDialog dlg(m_app->getMainWindow());
+	if (!dlg.exec())
+	{
+		//cancelled
 		return;
 	}
 
@@ -130,11 +122,28 @@ void qHoughNormals::doAction()
 			Eigen_Normal_Estimator ne(pc, normals);
 			ne.get_K() = s_params.K;
 			ne.get_T() = s_params.T;
-			ne.density_sensitive() = s_params.ua;
+			ne.density_sensitive() = s_params.use_density;
 			ne.get_n_phi() = s_params.n_phi;
 			ne.get_n_rot() = s_params.n_rot;
 			ne.get_tol_angle_rad() = s_params.tol_angle_rad;
 			ne.get_K_density() = s_params.k_density;
+
+			int maxProgress = ne.maxProgressCounter();
+			int stepProgress = std::max(1, maxProgress / 100);
+			QProgressDialog pDlg("Computing normals...", QString(), 0, maxProgress, m_app->getMainWindow());
+			pDlg.show();
+			QCoreApplication::processEvents();
+			
+			std::function<void(int)> progressLambda =
+				[&](int value)
+				{
+					if ((value % stepProgress) == 0)
+					{
+						QMetaObject::invokeMethod(&pDlg, "setValue", Qt::QueuedConnection, Q_ARG(int, value));
+						QCoreApplication::processEvents();
+					}
+				};
+			ne.setProgressCallback(progressLambda);
 
 			//Estimate
 			ne.estimate_normals();

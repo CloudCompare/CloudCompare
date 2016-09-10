@@ -113,12 +113,20 @@ ccPointCloud* sm2ccConverter::getCloud()
 	}
 
 	//The same for colors
-	if (ExistField(m_sm_cloud,"rgb"))
+	if (ExistField(m_sm_cloud, "rgb"))
 	{
 		addRGB(cloud);
-		
+
 		//remove the corresponding field
 		fields.remove("rgb");
+	}
+	//The same for colors
+	else if (ExistField(m_sm_cloud, "rgba"))
+	{
+		addRGB(cloud);
+
+		//remove the corresponding field
+		fields.remove("rgba");
 	}
 
 	//All the remaining fields will be stored as scalar fields

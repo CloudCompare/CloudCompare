@@ -122,7 +122,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		return CC_FERR_MALFORMED_FILE;
 	}
 	unsigned majorVer = 0, minorVer = 0;
-	sscanf(qPrintable(currentLine),"# Bundle file v%u.%u",&majorVer,&minorVer);
+	sscanf(qPrintable(currentLine), "# Bundle file v%u.%u", &majorVer, &minorVer);
 	if (majorVer != 0 || (minorVer != 3 && minorVer != 4))
 	{
 		ccLog::Error("Only version 0.3 and 0.4 of Bundler files are supported!");

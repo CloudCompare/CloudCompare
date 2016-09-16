@@ -72,7 +72,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
 
-		size_t pointCount = static_cast<size_t>(lasreader->npoints);
+		unsigned pointCount = static_cast<unsigned>(lasreader->npoints);
 		ccLog::Print(QString("[LASLib] " + QObject::tr("Reading %1 points").arg(pointCount)));
 
 		//progress dialog

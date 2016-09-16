@@ -112,28 +112,33 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 		//this is not a severe error (the process can go on)
 	}
 
+	if (CheckForSpecialChars(filename))
+	{
+		ccLog::Warning(QString("[DXF] Output filename contains special characters. It might be scrambled or rejected by the I/O filter..."));
+	}
+
 	//opening file
-	FILE* fp = fopen(qPrintable(filename),"wt");
+	FILE* fp = fopen(qPrintable(filename), "wt");
 	if (!fp)
 	{
 		ccLog::Error(QString("[DepthMap] Can't open file '%1' for writing!").arg(filename));
 		return CC_FERR_WRITING;
 	}
 
-	fprintf(fp,"// SENSOR DEPTH MAP\n");
-	fprintf(fp,"// Associated cloud: %s\n",qPrintable(cloud ? cloud->getName() : "none"));
-	fprintf(fp,"// Pitch  = %f [ %f : %f ]\n",
+	fprintf(fp, "// SENSOR DEPTH MAP\n");
+	fprintf(fp, "// Associated cloud: %s\n", qPrintable(cloud ? cloud->getName() : "none"));
+	fprintf(fp, "// Pitch  = %f [ %f : %f ]\n",
 		sensor->getPitchStep(),
 		sensor->getMinPitch(),
 		sensor->getMaxPitch());
-	fprintf(fp,"// Yaw   = %f [ %f : %f ]\n",
+	fprintf(fp, "// Yaw   = %f [ %f : %f ]\n",
 		sensor->getYawStep(),
 		sensor->getMinYaw(),
 		sensor->getMaxYaw());
-	fprintf(fp,"// Range  = %f\n",sensor->getSensorRange());
-	fprintf(fp,"// L      = %i\n",db.width);
-	fprintf(fp,"// H      = %i\n",db.height);
-	fprintf(fp,"/////////////////////////\n");
+	fprintf(fp, "// Range  = %f\n", sensor->getSensorRange());
+	fprintf(fp, "// L      = %i\n", db.width);
+	fprintf(fp, "// H      = %i\n", db.height);
+	fprintf(fp, "/////////////////////////\n");
 
 	//an array of projected normals (same size a depth map)
 	ccGBLSensor::NormalGrid* theNorms = NULL;
@@ -160,10 +165,10 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 				NormsTableType* decodedNorms = new NormsTableType;
 				if (decodedNorms->reserve(nbPoints))
 				{
-					for (unsigned i=0; i<nbPoints; ++i)
+					for (unsigned i = 0; i < nbPoints; ++i)
 						decodedNorms->addElement(pc->getPointNormal(i).u);
 
-					theNorms = sensor->projectNormals(pc,*decodedNorms);
+					theNorms = sensor->projectNormals(pc, *decodedNorms);
 					decodedNorms->clear();
 				}
 				else
@@ -177,17 +182,17 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 			//if possible, we create the array of projected colors
 			if (pc->hasColors())
 			{
-				GenericChunkedArray<3,ColorCompType>* rgbColors = new GenericChunkedArray<3,ColorCompType>();
+				GenericChunkedArray<3, ColorCompType>* rgbColors = new GenericChunkedArray<3, ColorCompType>();
 				rgbColors->reserve(nbPoints);
 
-				for (unsigned i=0; i<nbPoints; ++i)
+				for (unsigned i = 0; i < nbPoints; ++i)
 				{
 					//conversion from ColorCompType[3] to unsigned char[3]
 					const ColorCompType* col = pc->getPointColor(i);
 					rgbColors->addElement(col);
 				}
 
-				theColors = sensor->projectColors(pc,*rgbColors);
+				theColors = sensor->projectColors(pc, *rgbColors);
 				rgbColors->clear();
 				rgbColors->release();
 				rgbColors = 0;
@@ -200,18 +205,18 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 		theNorms->placeIteratorAtBegining();
 	if (theColors)
 		theColors->placeIteratorAtBegining();
-	for (unsigned k=0; k<db.height; ++k)
+	for (unsigned k = 0; k < db.height; ++k)
 	{
-		for (unsigned j=0; j<db.width; ++j, ++_zBuff)
+		for (unsigned j = 0; j < db.width; ++j, ++_zBuff)
 		{
 			//grid index and depth
-			fprintf(fp,"%u %u %.12f",j,k,*_zBuff);
+			fprintf(fp, "%u %u %.12f", j, k, *_zBuff);
 
 			//color
 			if (theColors)
 			{
 				const ColorCompType* C = theColors->getCurrentValue();
-				fprintf(fp," %i %i %i",C[0],C[1],C[2]);
+				fprintf(fp, " %i %i %i", C[0], C[1], C[2]);
 				theColors->forwardIterator();
 			}
 
@@ -219,11 +224,11 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(QString filename, ccGBLSensor* sens
 			if (theNorms)
 			{
 				const PointCoordinateType* N = theNorms->getCurrentValue();
-				fprintf(fp," %f %f %f",N[0],N[1],N[2]);
+				fprintf(fp, " %f %f %f", N[0], N[1], N[2]);
 				theNorms->forwardIterator();
 			}
 
-			fprintf(fp,"\n");
+			fprintf(fp, "\n");
 		}
 	}
 

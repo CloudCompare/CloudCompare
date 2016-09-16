@@ -499,11 +499,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container polylines;
-	root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
+	root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
 	if (root->isKindOf(CC_TYPES::POLY_LINE))
 		polylines.push_back(root);
 	ccHObject::Container meshes;
-	root->filterChildren(meshes,true,CC_TYPES::MESH);
+	root->filterChildren(meshes, true, CC_TYPES::MESH);
 	if (root->isKindOf(CC_TYPES::MESH))
 		meshes.push_back(root);
 
@@ -517,10 +517,10 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	CCVector3d bbMinCorner, bbMaxCorner;
 	{
 		bool firstEntity = true;
-		for (size_t i=0; i<polyCount; ++i)
+		for (size_t i = 0; i < polyCount; ++i)
 		{
 			CCVector3d minC, maxC;
-			if (polylines[i]->getGlobalBB(minC,maxC))
+			if (polylines[i]->getGlobalBB(minC, maxC))
 			{
 				//update global BB
 				if (firstEntity)
@@ -540,7 +540,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				}
 			}
 		}
-		for (size_t j=0; j<meshCount; ++j)
+		for (size_t j = 0; j < meshCount; ++j)
 		{
 			CCVector3d minC, maxC;
 			if (meshes[j]->getGlobalBB(minC, maxC))
@@ -569,6 +569,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 	double baseSize = std::max(diag.x,diag.y);
 	double lineWidth = baseSize / 40.0;
 	double pageMargin = baseSize / 20.0;
+
+	if (CheckForSpecialChars(filename))
+	{
+		ccLog::Warning(QString("[DXF] Output filename contains special characters. It might be scrambled or rejected by the third party library..."));
+	}
 
 	DL_Dxf dxf;
 	DL_WriterA* dw = dxf.out(qPrintable(filename), DL_VERSION_R12);
@@ -636,7 +641,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				"CONTINUOUS"));			// default line style
 
 			//polylines layers
-			for (unsigned i=0; i<polyCount; ++i)
+			for (unsigned i = 0; i < polyCount; ++i)
 			{
 				//default layer name
 				//TODO: would be better to use the polyline name!
@@ -654,7 +659,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 			}
 		
 			//mesh layers
-			for (unsigned j=0; j<meshCount; ++j)
+			for (unsigned j = 0; j < meshCount; ++j)
 			{
 				//default layer name
 				//TODO: would be better to use the mesh name!
@@ -675,7 +680,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 
 		//Writing Various Other Tables
 		//dxf.writeStyle(*dw); //DXFLIB V2.5
-		dxf.writeStyle(*dw,DL_StyleData("Standard",0,0.0,0.75,0.0,0,2.5,"txt","")); //DXFLIB V3.3
+		dxf.writeStyle(*dw, DL_StyleData("Standard", 0, 0.0, 0.75, 0.0, 0, 2.5, "txt", "")); //DXFLIB V3.3
 		dxf.writeView(*dw);
 		dxf.writeUcs(*dw);
 
@@ -721,7 +726,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 			dw->sectionEntities();
 
 			//write polylines
-			for (unsigned i=0; i<polyCount; ++i)
+			for (unsigned i = 0; i < polyCount; ++i)
 			{
 				const ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
 				unsigned vertexCount = poly->size();
@@ -729,7 +734,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				if (!poly->is2DMode())
 					flags |= 8; //3D polyline
 				dxf.writePolyline(	*dw,
-									DL_PolylineData(static_cast<int>(vertexCount),0,0,flags),
+									DL_PolylineData(static_cast<int>(vertexCount), 0, 0, flags),
 									DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER") ); //DGM: warning, toStdString doesn't preserve "local" characters
 
 				for (unsigned v=0; v<vertexCount; ++v)
@@ -744,7 +749,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 			}
 
 			//write meshes
-			for (unsigned j=0; j<meshCount; ++j)
+			for (unsigned j = 0; j < meshCount; ++j)
 			{
 				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[j]);
 				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
@@ -752,7 +757,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 				
 				unsigned triCount = mesh->size();
 				mesh->placeIteratorAtBegining();
-				for (unsigned f=0; f<triCount; ++f)
+				for (unsigned f = 0; f < triCount; ++f)
 				{
 					const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();
 					CCVector3d A = vertices->toGlobal3d(*tri->_getA());
@@ -779,7 +784,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename, SaveParam
 		dw->dxfEOF();
 		dw->close();
 	}
-	catch(...)
+	catch (...)
 	{
 		ccLog::Warning("[DXF] DxfLib has thrown an unknown exception!");
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
@@ -800,8 +805,14 @@ CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadPa
 #ifdef CC_DXF_SUPPORT
 	try
 	{
-		DxfImporter importer(&container,parameters);
-		if (DL_Dxf().in(qPrintable(filename), &importer))
+		DxfImporter importer(&container, parameters);
+
+		if (CheckForSpecialChars(filename))
+		{
+			ccLog::Warning("[DXF] Input file contains special characters. It might be rejected by the third party library...");
+		}
+
+		if (DL_Dxf().in(qPrintable(filename), &importer)) //DGM: warning, toStdString doesn't preserve "local" characters
 		{
 			importer.applyGlobalShift(); //apply the (potential) global shift to shared clouds
 			if (container.getChildrenNumber() != 0)

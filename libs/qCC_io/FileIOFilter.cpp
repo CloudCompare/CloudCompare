@@ -446,6 +446,11 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 		ccLog::Error(outputString);
 }
 
+bool FileIOFilter::CheckForSpecialChars(QString filename)
+{
+	return (filename.normalized(QString::NormalizationForm_D) != filename);
+}
+
 bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters, bool useInputCoordinatesShiftIfPossible/*=false*/)
 {
 	bool shiftAlreadyEnabled = (loadParameters.coordinatesShiftEnabled && *loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift);

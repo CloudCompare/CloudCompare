@@ -1571,14 +1571,28 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 	}
 
 	//we check mesh
-	if (mesh && mesh->size() == 0)
+	if (mesh)
 	{
-		if (s_unsupportedPolygonType)
-			ccLog::Error("Mesh is not triangular! (unsupported)");
+		if (mesh->size() == 0)
+		{
+			if (s_unsupportedPolygonType)
+			{
+				ccLog::Error("Mesh is not triangular! (unsupported)");
+			}
+			else
+			{
+				ccLog::Error("Mesh is empty!");
+			}
+			delete mesh;
+			mesh = 0;
+		}
 		else
-			ccLog::Error("Mesh is empty!");
-		delete mesh;
-		mesh = 0;
+		{
+			if (s_unsupportedPolygonType)
+			{
+				ccLog::Error("Some facets are not triangular! (unsupported)");
+			}
+		}
 	}
 
 	if (texCoords && (s_invalidTexCoordinates || s_texCoordCount != 3*mesh->size()))
@@ -1630,12 +1644,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename
 		if (s_triCount < numberOfFacets)
 		{
 			mesh->resize(s_triCount);
-			ccLog::Warning("[PLY] Missing vertex indexes!");
+			ccLog::Warning("[PLY] Some facets couldn't be loaded!");
 		}
 
 		//check that vertex indices start at 0
 		unsigned minVertIndex = numberOfPoints, maxVertIndex = 0;
-		for (unsigned i=0; i<s_triCount; ++i)
+		for (unsigned i = 0; i < s_triCount; ++i)
 		{
 			const CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 			if (tri->i1 < minVertIndex)

@@ -637,7 +637,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return CC_FERR_NO_SAVE;
 
 	//Write file to disk
-	e57::ImageFile imf(filename.toStdString(), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
+	e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
 	if (!imf.isOpen())
 		return CC_FERR_WRITING;
 
@@ -1432,7 +1432,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 			cloud->setGlobalShift(Tshift);
 			poseMat.setTranslation((T + Tshift).u);
 			poseMatWasShifted = true;
-			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)", guidStr.toStdString(), Tshift.x, Tshift.y, Tshift.z);
+			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)", qPrintable(guidStr), Tshift.x, Tshift.y, Tshift.z);
 		}
 
 		//cloud->setGLTransformation(poseMat); //TODO-> apply it at the end instead! Otherwise we will loose original coordinates!
@@ -1696,7 +1696,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 				if (FileIOFilter::HandleGlobalShift(Pd, Pshift, s_loadParameters))
 				{
 					cloud->setGlobalShift(Pshift);
-					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)", guidStr.toStdString(), Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)", qPrintable(guidStr), Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
@@ -2078,7 +2078,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 	s_loadParameters = parameters;
 
 	//Read file from disk
-	e57::ImageFile imf(filename.toStdString(), "r"); //DGM: warning, toStdString doesn't preserve "local" characters
+	e57::ImageFile imf(qPrintable(filename), "r"); //DGM: warning, toStdString doesn't preserve "local" characters
 	if (!imf.isOpen())
 		return CC_FERR_READING;
 

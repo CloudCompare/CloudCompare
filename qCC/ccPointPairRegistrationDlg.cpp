@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -543,7 +543,7 @@ static cc2DLabel* CreateLabel(ccPointCloud* cloud, unsigned pointIndex, QString 
 	label->setName(pointName);
 	label->setVisible(true);
 	label->setDisplayedIn2D(false);
-	label->setDisplayedIn3D(true);
+	label->displayPointLegend(true);
 	label->setDisplay(display);
 
 	return label;
@@ -823,7 +823,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 					scale = alignedCloud->getGlobalScale();
 					shiftEnabled = true;
 				}
-				if (ccGlobalShiftManager::Handle(Pin,0,ccGlobalShiftManager::DIALOG_IF_NECESSARY,shiftEnabled,Pshift,&scale))
+				if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::DIALOG_IF_NECESSARY, shiftEnabled, Pshift, &scale))
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);
@@ -1073,7 +1073,7 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 
 		if (filters != 0)
 		{
-			CCLib::RegistrationTools::FilterTransformation(trans,filters,trans);
+			CCLib::RegistrationTools::FilterTransformation(trans, filters, trans);
 		}
 	}
 
@@ -1121,8 +1121,8 @@ void ccPointPairRegistrationDlg::clearRMSColumns()
 
 void ccPointPairRegistrationDlg::resetTitle()
 {
-	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false);
-	m_associatedWin->displayNewMessage("[Point-pair registration]",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600);
+	m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false);
+	m_associatedWin->displayNewMessage("[Point-pair registration]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600);
 }
 
 void ccPointPairRegistrationDlg::updateAlignInfo()
@@ -1135,10 +1135,10 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 
 	if (	m_alignedPoints.size() == m_refPoints.size()
 		&&	m_refPoints.size() >= MIN_PAIRS_COUNT
-		&&	callHornRegistration(trans,rms,true) )
+		&&	callHornRegistration(trans, rms, true))
 	{
 		QString rmsString = QString("Achievable RMS: %1").arg(rms);
-		m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
+		m_associatedWin->displayNewMessage(rmsString, ccGLWindow::UPPER_CENTER_MESSAGE, true, 60 * 60);
 		resetToolButton->setEnabled(true);
 		validToolButton->setEnabled(true);
 	}
@@ -1160,13 +1160,13 @@ void ccPointPairRegistrationDlg::align()
 	resetTitle();
 	m_associatedWin->refresh(true);
 
-	if (callHornRegistration(trans,rms,true))
+	if (callHornRegistration(trans, rms, true))
 	{
 		if (rms >= 0)
 		{
 			QString rmsString = QString("Current RMS: %1").arg(rms);
-			ccLog::Print(QString("[PointPairRegistration] ")+rmsString);
-			m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true,60*60);
+			ccLog::Print(QString("[PointPairRegistration] ") + rmsString);
+			m_associatedWin->displayNewMessage(rmsString, ccGLWindow::UPPER_CENTER_MESSAGE, true, 60 * 60);
 		}
 		else
 		{
@@ -1189,7 +1189,7 @@ void ccPointPairRegistrationDlg::align()
 			ccLog::Print(QString("[PointPairRegistration] Scale: fixed (1.0)"));
 		}
 
-		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);
+		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType, float>(trans.R, trans.T);
 		//...virtually
 		m_aligned.entity->setGLTransformation(transMat);
 		m_alignedPoints.setGLTransformation(transMat);

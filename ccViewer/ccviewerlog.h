@@ -6,19 +6,19 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCVIEWER_LOG_H
-#define CCVIEWER_LOG_H
+#ifndef CCVIEWER_LOG_HEADER
+#define CCVIEWER_LOG_HEADER
 
 //Qt
 #include <QMessageBox>
@@ -36,14 +36,16 @@ public:
 
 protected:
 	//inherited from ccLog
-	virtual void displayMessage(const QString& message, int level)
+	virtual void logMessage(const QString& message, int level)
 	{
 		if (level & LOG_ERROR)
+		{
 			QMessageBox::warning(m_parentWindow, "Error", message);
+		}
 	}
 
 	//! Associated window
 	QMainWindow* m_parentWindow;
 };
 
-#endif // CCVIEWER_LOG_H
+#endif // CCVIEWER_LOG_HEADER

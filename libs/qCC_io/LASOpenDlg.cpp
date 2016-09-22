@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -19,6 +19,8 @@
 
 //Qt
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QFileInfo>
 
 //System
 #include <string.h>
@@ -34,12 +36,34 @@ LASOpenDlg::LASOpenDlg(QWidget* parent)
 	clearEVLRs();
 
 	connect(applyAllButton, SIGNAL(clicked()), this, SLOT(onApplyAll()));
+	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(onBrowse()));
+	connect(tileGroupBox, SIGNAL(toggled(bool)), applyAllButton, SLOT(setDisabled(bool)));
+
+	//can't use the 'Apply all' button if tiling mode is enabled
+	applyAllButton->setEnabled(!tileGroupBox->isChecked());
+
+	if (tileGroupBox->isChecked())
+	{
+		tabWidget->setCurrentIndex(2);
+	}
 }
 
 void LASOpenDlg::onApplyAll()
 {
 	m_autoSkip = true;
 	accept();
+}
+
+void LASOpenDlg::onBrowse()
+{
+	QString outputPath = QFileDialog::getExistingDirectory(this, "Output path", outputPathLineEdit->text());
+	if (outputPath.isEmpty())
+	{
+		//cancelled
+		return;
+	}
+
+	outputPathLineEdit->setText(outputPath);
 }
 
 bool FieldIsPresent(const std::vector<std::string>& dimensions, LAS_FIELDS field)
@@ -138,6 +162,24 @@ void LASOpenDlg::clearEVLRs()
 	evlrListWidget->clear();
 	extraFieldGroupBox->setEnabled(false);
 	extraFieldGroupBox->setChecked(false);
+}
+
+void LASOpenDlg::setInfos(	QString filename,
+							unsigned pointCount,
+							const CCVector3d& bbMin,
+							const CCVector3d& bbMax)
+{
+	//default output path (for tiling)
+	outputPathLineEdit->setText(QFileInfo(filename).absolutePath());
+
+	//number of points
+	pointCountLineEdit->setText(QLocale(QLocale::English).toString(pointCount));
+
+	//bounding-box
+	bbTextEdit->setText(QString("X = [%1 ; %2]\nY = [%3 ; %4]\nZ = [%5 ; %6]")
+								.arg(bbMin.x, 0, 'f').arg(bbMax.x, 0, 'f')
+								.arg(bbMin.y, 0, 'f').arg(bbMax.y, 0, 'f')
+								.arg(bbMin.z, 0, 'f').arg(bbMax.z, 0, 'f'));
 }
 
 void LASOpenDlg::addEVLR(QString description)

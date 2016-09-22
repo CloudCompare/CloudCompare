@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -96,6 +96,24 @@ QString ImageFileFilter::GetSaveFilename(QString dialogTitle, QString baseName, 
 															pngFilter.isEmpty() ? static_cast<QString*>(0) : &pngFilter);
 
 	return outputFilename;
+}
+
+QString ImageFileFilter::GetLoadFilename(QString dialogTitle, QString imageLoadPath, QWidget* parentWidget/*=0*/)
+{
+	//we grab the list of supported image file formats (for reading)
+	QList<QByteArray> formats = QImageReader::supportedImageFormats();
+	QStringList imageExts;
+	for (int i = 0; i < formats.size(); ++i)
+	{
+		imageExts.append(QString("*.%1").arg(formats[i].data()));
+	}
+	//we convert this list into a proper "filters" string
+	QString imageFilter = QString("Image (%1)").arg(imageExts.join(" "));
+
+	return QFileDialog::getOpenFileName(	parentWidget,
+											dialogTitle,
+											imageLoadPath,
+											imageFilter);
 }
 
 QStringList ImageFileFilter::getFileFilters(bool onImport) const

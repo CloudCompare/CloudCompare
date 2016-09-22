@@ -4,11 +4,12 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -76,7 +77,7 @@ public:
 	//! Computes some statistics on the edges connectivty of a mesh
 	/** This methods counts the number of edges shared by 1, 2 or more faces.
 		One ore more edges used only by 1 face each indicates the presence of
-		at least one hole. Edges used by more than two faces are non manifold.
+		at least one hole. Edges used by more than two faces are non-manifold.
 		\param[in] mesh triangular mesh
 		\param[out] stats output statistics
 		\return false if an error occurred (invalid input or not enough memory)

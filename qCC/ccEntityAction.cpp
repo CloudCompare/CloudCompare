@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: CloudCompare project                               #
@@ -138,12 +138,19 @@ namespace ccEntityAction
 										static_cast<ColorCompType>(colour.blue()) );
 				}
 				cloud->showColors(true);
+				cloud->showSF(false); //just in case
 				cloud->prepareDisplayForRefresh();
 				
 				if (ent != cloud)
+				{
 					ent->showColors(true);
+				}
 				else if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
+				{
 					cloud->getParent()->showColors(true);
+					cloud->getParent()->showSF(false); //just in case
+				}
+
 			}
 			else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
 			{
@@ -153,6 +160,7 @@ namespace ccEntityAction
 										static_cast<ColorCompType>(colour.blue()) );
 				prim->setColor(col);
 				ent->showColors(true);
+				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
 			}
 			else if (ent->isA(CC_TYPES::POLY_LINE))
@@ -163,6 +171,7 @@ namespace ccEntityAction
 									static_cast<ColorCompType>(colour.blue()) );
 				poly->setColor(col);
 				ent->showColors(true);
+				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
 			}
 			else if (ent->isA(CC_TYPES::FACET))
@@ -173,6 +182,7 @@ namespace ccEntityAction
 									static_cast<ColorCompType>(colour.blue()) );
 				facet->setColor(col);
 				ent->showColors(true);
+				ent->showSF(false); //just in case
 				ent->prepareDisplayForRefresh();
 			}
 			else
@@ -207,6 +217,7 @@ namespace ccEntityAction
 				{
 					pc->convertRGBToGreyScale();
 					pc->showColors(true);
+					pc->showSF(false); //just in case
 					pc->prepareDisplayForRefresh();
 				}
 			}
@@ -240,10 +251,10 @@ namespace ccEntityAction
 		
 		Q_ASSERT(colorScale || ramp == ccColorGradientDlg::Banding);
 		
-		const int	frequency = dlg.getBandingFrequency();
+		const double frequency = dlg.getBandingFrequency();
 		
 		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
 			
@@ -268,6 +279,7 @@ namespace ccEntityAction
 				if (success)
 				{
 					ent->showColors(true);
+					ent->showSF(false); //just in case
 					ent->prepareDisplayForRefresh();
 				}
 			}
@@ -370,6 +382,7 @@ namespace ccEntityAction
 		if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source, &pDlg, defaultLevel))
 		{
 			ent2->showColors(true);
+			ent2->showSF(false); //just in case
 		}
 		else
 		{
@@ -413,6 +426,7 @@ namespace ccEntityAction
 					if (mesh->convertMaterialsToVertexColors())
 					{
 						mesh->showColors(true);
+						mesh->showSF(false); //just in case
 						mesh->showMaterials(false);
 						mesh->prepareDisplayForRefresh_recursive();
 					}
@@ -691,7 +705,7 @@ namespace ccEntityAction
 					if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
 					{
 						ent->showColors(true);
-						ent->showSF(false);
+						ent->showSF(false); //just in case
 					}
 				}
 				
@@ -768,18 +782,18 @@ namespace ccEntityAction
 						if (step == 0)
 							step = static_cast<ScalarType>(1.0);
 						
-						for (unsigned i=0; i<pc->size(); ++i)
+						for (unsigned i = 0; i < pc->size(); ++i)
 						{
 							ScalarType val = sf->getValue(i);
 							unsigned colIndex = static_cast<unsigned>((val - minSF) / step);
 							if (colIndex == s_randomColorsNumber)
 								--colIndex;
 							
-							pc->setPointColor(i,randomColors->getValue(colIndex));
+							pc->setPointColor(i, randomColors->getValue(colIndex));
 						}
 						
 						pc->showColors(true);
-						pc->showSF(false);
+						pc->showSF(false); //just in case
 					}
 				}
 				

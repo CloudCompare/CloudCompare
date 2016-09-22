@@ -4,11 +4,12 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -1019,7 +1020,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return error code:
-			- '+0' = OK
+			- '>= 0' = number of components
 			- '-1' = no cells (input)
 			- '-2' = not enough memory
 			- '-3' = no CC found
@@ -1038,7 +1039,7 @@ public:	/***** CELLS POSITION HANDLING *****/
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return error code:
-			- '+0' = OK
+			- '>= 0' = number of components
 			- '-1' = no cells (input)
 			- '-2' = not enough memory
 			- '-3' = no CC found

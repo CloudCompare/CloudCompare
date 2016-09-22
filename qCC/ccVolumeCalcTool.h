@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -90,6 +90,9 @@ protected slots:
 	//! Exports info to clipboard
 	void exportToClipboard() const;
 
+	//! Exports the grid as a point cloud
+	void exportGridAsCloud() const;
+
 	//! Sets the displayed number precision
 	void setDisplayedNumberPrecision(int);
 
@@ -103,6 +106,9 @@ protected: //standard methods
 
 	//! Updates the grid
 	bool updateGrid();
+
+	//! Converts the grid to a point cloud
+	ccPointCloud* convertGridToCloud(bool exportToOriginalCS) const;
 
 	//! Report info
 	struct ReportInfo

@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -26,9 +26,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 									QWidget *parent/*=0*/ )
 	: QProgressDialog(parent)
 	, m_currentValue(0)
-	, m_lastValue(-1)
-	, m_timer(this)
-	, m_refreshInterval(5)
+	, m_lastRefreshValue(-1)
 {
 	setAutoClose(true);
 	setWindowModality(Qt::ApplicationModal);
@@ -45,60 +43,29 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	}
 	setCancelButton(cancelButton);
 
-	connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh())/*, Qt::DirectConnection*/); //can't use DirectConnection here!
-	connect(this, &ccProgressDialog::scheduleRepaint, this, [this](){ QProgressDialog::repaint(); }, Qt::QueuedConnection); //can't use DirectConnection here!
+	connect(this, SIGNAL(scheduleRefresh()), this, SLOT(refresh()), Qt::QueuedConnection); //can't use DirectConnection here!
 }
 
 void ccProgressDialog::refresh()
 {
-	if (m_mutex.tryLock())
+	int value = m_currentValue;
+	if (m_lastRefreshValue != value)
 	{
-		if (m_lastValue == m_currentValue)
-		{
-			m_mutex.unlock();
-		}
-		else
-		{
-			int value = m_lastValue = m_currentValue;
-			m_mutex.unlock();
-
-			setValue(value);
-			//repaint();
-		}
+		m_lastRefreshValue = value;
+		setValue(value); //See Qt doc: if the progress dialog is modal, setValue() calls QApplication::processEvents()
 	}
 }
 
-//Thread-safe!
 void ccProgressDialog::update(float percent)
 {
+	//thread-safe
 	int value = static_cast<int>(percent);
-
-	m_mutex.lock();
 	if (value != m_currentValue)
 	{
 		m_currentValue = value;
-
-		//every now and then we let the dialog (and more generally the GUI) re-display itself and process events!
-		bool refresh = (abs(m_lastValue - m_currentValue) >= m_refreshInterval);
-		m_mutex.unlock();
-
-		if (refresh)
-		{
-			emit scheduleRepaint();
-			QCoreApplication::processEvents();
-		}
+		emit scheduleRefresh();
+		QCoreApplication::processEvents(); //we let the main thread breath (so that the call to 'refresh' can be performed)
 	}
-	else
-	{
-		m_mutex.unlock();
-	}
-}
-
-void ccProgressDialog::setMinRefreshInterval(int i)
-{
-	m_mutex.lock();
-	m_refreshInterval = std::max(1, i);
-	m_mutex.unlock();
 }
 
 void ccProgressDialog::setMethodTitle(QString methodTitle)
@@ -118,12 +85,13 @@ void ccProgressDialog::setInfo(QString infoStr)
 
 void ccProgressDialog::start()
 {
+	m_lastRefreshValue = -1;
 	show();
-	m_timer.start(0);
+	QCoreApplication::processEvents();
 }
 
 void ccProgressDialog::stop()
 {
-	m_timer.stop();
 	hide();
+	QCoreApplication::processEvents();
 }

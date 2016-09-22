@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -57,7 +57,7 @@ struct edge
 
 void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCLib::NormalizedProgress* nprogress = 0)
 {
-	for (unsigned i=0; i<numberOfVertexes; ++i)
+	for (unsigned i = 0; i < numberOfVertexes; ++i)
 	{
 		if (theEdges[i])
 		{
@@ -72,7 +72,9 @@ void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCLib::Normali
 		}
 
 		if (nprogress)
+		{
 			nprogress->oneStep();
+		}
 	}
 	delete[] theEdges;
 	theEdges = 0;
@@ -130,9 +132,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 	const int coloursAdjustment = (hasColors ? 1 : 0);
 	CCLib::NormalizedProgress nprogress(&pdlg, ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
-	pdlg.setMethodTitle(QObject::tr("Save MA file"));
-	pdlg.setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
-	pdlg.start();
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Save MA file"));
+		pdlg.setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
+		pdlg.start();
+	}
 
 	//we extract the (short) filename from the whole path
 	QString baseFilename = QFileInfo(filename).fileName();
@@ -214,7 +219,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		return CC_FERR_WRITING;
 	}
 	{
-		for (unsigned i=0; i<numberOfVertexes; ++i)
+		for (unsigned i = 0; i < numberOfVertexes; ++i)
 		{
 			const CCVector3* P = theCloud->getPoint(i);
 			CCVector3d Pglobal = theCloud->toGlobal3d<PointCoordinateType>(*P);
@@ -227,7 +232,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				return CC_FERR_WRITING;
 			}
 
-			nprogress.oneStep();
+			if (parameters.parentWidget)
+			{
+				nprogress.oneStep();
+			}
 		}
 	}
 
@@ -296,7 +304,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				}
 			}
 
-			nprogress.oneStep();
+			if (parameters.parentWidget)
+			{
+				nprogress.oneStep();
+			}
 		}
 	}
 
@@ -326,7 +337,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				e = e->nextEdge;
 			}
 
-			nprogress.oneStep();
+			if (parameters.parentWidget)
+			{
+				nprogress.oneStep();
+			}
 		}
 	}
 
@@ -386,13 +400,16 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				return CC_FERR_WRITING;
 			}
 
-			nprogress.oneStep();
+			if (parameters.parentWidget)
+			{
+				nprogress.oneStep();
+			}
 		}
 	}
 
 	//free memory
 	{
-		ReleaseEdgeList(theEdges, numberOfVertexes, &nprogress);
+		ReleaseEdgeList(theEdges, numberOfVertexes, parameters.parentWidget ? &nprogress : 0);
 	}
 
 	//bonus track
@@ -451,7 +468,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 					}
 				}
 
-				nprogress.oneStep();
+				if (parameters.parentWidget)
+				{
+					nprogress.oneStep();
+				}
 			}
 		}
 
@@ -499,7 +519,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 					theFacesIndexes[i] = NULL;
 				}
 
-				nprogress.oneStep();
+				if (parameters.parentWidget)
+				{
+					nprogress.oneStep();
+				}
 			}
 		}
 		delete[] theFacesIndexes;

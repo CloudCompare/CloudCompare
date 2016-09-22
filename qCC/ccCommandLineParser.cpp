@@ -6,6 +6,7 @@
 #include <NormalDistribution.h>
 #include <StatisticalTestingTools.h>
 #include <Neighbourhood.h>
+#include <AutoSegmentationTools.h>
 
 //qCC_db
 #include <ccProgressDialog.h>
@@ -31,7 +32,6 @@
 #include "ccLibAlgorithms.h"
 #include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
-#include "ccPluginInfo.h"
 
 //Qt
 #include <QMessageBox>
@@ -125,6 +125,7 @@ static const char COMMAND_SOR_FILTER[]						= "SOR";
 static const char COMMAND_ORIENT_NORMALS[]					= "ORIENT_NORMS_MST";
 static const char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 static const char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
+static const char COMMAND_EXTRACT_CC[]						= "EXTRACT_CC";
 
 static const char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 static const char OPTION_ON[]								= "ON";
@@ -198,33 +199,6 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		}
 	}
 	assert(!arguments.empty());
-
-	//load I/O plugins
-	{
-		QStringList pluginPaths;
-		tPluginInfoList	plugins = ccPlugins::Find(pluginPaths, CC_IO_FILTER_PLUGIN);
-
-		// now iterate over plugins and process them
-		for (tPluginInfo &info : plugins)
-		{
-			const QString	fileName = info.first;
-			QObject			*pluginObject = info.second;
-
-			ccLog::Print(QString("Found plugin: %1").arg(fileName));
-
-			ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(pluginObject, CC_IO_FILTER_PLUGIN);
-			assert(ccPlugin);
-
-			//load plugin and register the corresponding I/O filter
-			ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(ccPlugin);
-			FileIOFilter::Shared filter = ioPlugin->getFilter(0);
-			if (filter)
-			{
-				FileIOFilter::Register(filter);
-				ccConsole::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
-			}
-		}
-	}
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
 	if (IsCommand(arguments.front(), COMMAND_SILENT_MODE))
@@ -439,7 +413,11 @@ ccCommandLineParser::EntityDesc::EntityDesc(QString _basename, QString _path, in
 {
 }
 
-QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QString()*/, QString* _outputFilename/*=0*/, bool forceIsCloud/*=false*/)
+QString ccCommandLineParser::Export(EntityDesc& entDesc,
+									QString suffix/*=QString()*/,
+									QString* _outputFilename/*=0*/,
+									bool forceIsCloud/*=false*/,
+									bool forceNoTimestamp/*=false*/)
 {
 	Print("[SAVING]");
 
@@ -478,7 +456,7 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 		baseName += QString("_") + suffix;
 
 	QString outputFilename = baseName;
-	if (s_addTimestamp)
+	if (s_addTimestamp && !forceNoTimestamp)
 		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
 	QString extension = isCloud ? s_CloudExportExt : s_MeshExportExt;
 	if (!extension.isEmpty())
@@ -512,6 +490,10 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	{
 		//no dialog by default for command line mode!
 		parameters.alwaysDisplaySaveDialog = false;
+		if (!s_silentMode && ccConsole::TheInstance())
+		{
+			parameters.parentWidget = ccConsole::TheInstance()->parentWidget();
+		}
 	}
 
 	CC_FILE_ERROR result = FileIOFilter::SaveToFile(entity,
@@ -552,28 +534,34 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 			arguments.pop_front();
 
 			if (arguments.empty())
+			{
 				return Error(QString("Missing parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
+			}
 
 			bool ok;
 			skipLines = arguments.takeFirst().toInt(&ok);
 			if (!ok)
+			{
 				return Error(QString("Invalid parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES));
-			
+			}
+
 			Print(QString("Will skip %1 lines").arg(skipLines));
 		}
-		else if (IsCommand(argument,COMMAND_OPEN_SHIFT_ON_LOAD))
+		else if (IsCommand(argument, COMMAND_OPEN_SHIFT_ON_LOAD))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
 			if (arguments.empty())
+			{
 				return Error(QString("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_KEYWORD_AUTO).arg(COMMAND_OPEN_SHIFT_ON_LOAD));
+			}
 
 			QString firstParam = arguments.takeFirst();
 
 			s_loadParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
 			s_loadParameters.m_coordinatesShiftEnabled = false;
-			s_loadParameters.m_coordinatesShift = CCVector3d(0,0,0);
+			s_loadParameters.m_coordinatesShift = CCVector3d(0, 0, 0);
 			
 			if (firstParam.toUpper() == COMMAND_KEYWORD_AUTO)
 			{
@@ -620,9 +608,12 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	QString filename(arguments.takeFirst());
 	Print(QString("Opening file: '%1'").arg(filename));
 
-	ccHObject* db = FileIOFilter::LoadFromFile(filename,s_loadParameters,QString());
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* db = FileIOFilter::LoadFromFile(filename, s_loadParameters, result, QString());
 	if (!db)
+	{
 		return false/*Error(QString("Failed to open file '%1'").arg(filename))*/;
+	}
 
 	std::unordered_set<unsigned> verticesIDs;
 	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
@@ -630,21 +621,23 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 		ccHObject::Container meshes;
 		size_t count = 0;
 		//first look for all REAL meshes (so as to no consider sub-meshes)
-		if (db->filterChildren(meshes,true,CC_TYPES::MESH,true) != 0)
+		if (db->filterChildren(meshes, true, CC_TYPES::MESH, true) != 0)
 		{
 			count += meshes.size();
-			for (size_t i=0; i<meshes.size(); ++i)
+			for (size_t i = 0; i < meshes.size(); ++i)
 			{
 				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
 				if (mesh->getParent())
+				{
 					mesh->getParent()->detachChild(mesh);
+				}
 
 				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 				if (vertices)
 				{
 					verticesIDs.insert(vertices->getUniqueID());
 					Print(QString("Found one mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
-					m_meshes.push_back(MeshDesc(mesh,filename,count == 1 ? -1 : static_cast<int>(i)));
+					m_meshes.push_back(MeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(i)));
 				}
 				else
 				{
@@ -657,11 +650,11 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 
 		//then look for the other meshes
 		meshes.clear();
-		if (db->filterChildren(meshes,true,CC_TYPES::MESH,false) != 0)
+		if (db->filterChildren(meshes, true, CC_TYPES::MESH, false) != 0)
 		{
 			size_t countBefore = count;
 			count += meshes.size();
-			for (size_t i=0; i<meshes.size(); ++i)
+			for (size_t i = 0; i < meshes.size(); ++i)
 			{
 				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
 				if (mesh->getParent())
@@ -672,7 +665,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 				{
 					verticesIDs.insert(vertices->getUniqueID());
 					Print(QString("Found one kind of mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
-					m_meshes.push_back(MeshDesc(mesh,filename,count == 1 ? -1 : static_cast<int>(countBefore+i)));
+					m_meshes.push_back(MeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(countBefore + i)));
 				}
 				else
 				{
@@ -689,11 +682,13 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 		ccHObject::Container clouds;
 		db->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
 		size_t count = clouds.size();
-		for (size_t i=0; i<count; ++i)
+		for (size_t i = 0; i < count; ++i)
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
 			if (pc->getParent())
+			{
 				pc->getParent()->detachChild(pc);
+			}
 
 			//if the cloud is a set of vertices, we ignore it!
 			if (verticesIDs.find(pc->getUniqueID()) != verticesIDs.end())
@@ -702,7 +697,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 				continue;
 			}
 			Print(QString("Found one cloud with %1 points").arg(pc->size()));
-			m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : static_cast<int>(i)));
+			m_clouds.push_back(CloudDesc(pc, filename, count == 1 ? -1 : static_cast<int>(i)));
 		}
 	}
 
@@ -716,32 +711,42 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 {
 	Print("[SUBSAMPLING]");
 	if (m_clouds.empty())
+	{
 		return Error(QString("No point cloud to resample (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SUBSAMPLE));
+	}
 
 	if (arguments.empty())
+	{
 		return Error(QString("Missing parameter: resampling method after \"-%1\"").arg(COMMAND_SUBSAMPLE));
+	}
 
 	QString method = arguments.takeFirst().toUpper();
 	Print(QString("\tMethod: ")+method);
 	if (method == "RANDOM")
 	{
 		if (arguments.empty())
+		{
 			return Error(QString("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
+		}
 
 		bool ok;
 		unsigned count = arguments.takeFirst().toUInt(&ok);
 		if (!ok)
+		{
 			return Error("Invalid number of points for random resampling!");
+		}
 		Print(QString("\tOutput points: %1").arg(count));
 
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (size_t i = 0; i < m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud, count, pDlg);
 			if (!refCloud)
+			{
 				return Error("Subsampling process failed!");
+			}
 			Print(QString("\tResult: %1 points").arg(refCloud->size()));
 
 			//save output
@@ -754,8 +759,8 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 				result->setName(m_clouds[i].pc->getName() + QString(".subsampled"));
 				if (s_autoSaveMode)
 				{
-					CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-					QString errorStr = Export(cloudDesc,"RANDOM_SUBSAMPLED");
+					CloudDesc cloudDesc(result, m_clouds[i].basename, m_clouds[i].path, m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc, "RANDOM_SUBSAMPLED");
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -778,23 +783,28 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 	else if (method == "SPATIAL")
 	{
 		if (arguments.empty())
+		{
 			return Error(QString("Missing parameter: spatial step after \"-%1 SPATIAL\"").arg(COMMAND_SUBSAMPLE));
-
+		}
 		bool ok;
 		double step = arguments.takeFirst().toDouble(&ok);
 		if (!ok || step <= 0)
+		{
 			return Error("Invalid step value for spatial resampling!");
+		}
 		Print(QString("\tSpatial step: %1").arg(step));
 
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (size_t i = 0; i < m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
-			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,static_cast<PointCoordinateType>(step),modParams,0,pDlg);
+			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud, static_cast<PointCoordinateType>(step), modParams, 0, pDlg);
 			if (!refCloud)
+			{
 				return Error("Subsampling process failed!");
+			}
 			Print(QString("\tResult: %1 points").arg(refCloud->size()));
 
 			//save output
@@ -807,8 +817,8 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 				result->setName(m_clouds[i].pc->getName() + QString(".subsampled"));
 				if (s_autoSaveMode)
 				{
-					CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-					QString errorStr = Export(cloudDesc,"SPATIAL_SUBSAMPLED");
+					CloudDesc cloudDesc(result, m_clouds[i].basename, m_clouds[i].path, m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc, "SPATIAL_SUBSAMPLED");
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -831,15 +841,19 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 	else if (method == "OCTREE")
 	{
 		if (arguments.empty())
+		{
 			return Error(QString("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+		}
 
 		bool ok = false;
 		int octreeLevel = arguments.takeFirst().toInt(&ok);
 		if (!ok || octreeLevel < 1 || octreeLevel > CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+		{
 			return Error("Invalid octree level!");
+		}
 		Print(QString("\tOctree level: %1").arg(octreeLevel));
 
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (size_t i = 0; i < m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
@@ -849,7 +863,9 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 																											CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																											pDlg);
 			if (!refCloud)
+			{
 				return Error("Subsampling process failed!");
+			}
 			Print(QString("\tResult: %1 points").arg(refCloud->size()));
 
 			//save output
@@ -862,8 +878,8 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 				result->setName(m_clouds[i].pc->getName() + QString(".subsampled"));
 				if (s_autoSaveMode)
 				{
-					CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
-					QString errorStr = Export(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
+					CloudDesc cloudDesc(result, m_clouds[i].basename, m_clouds[i].path, m_clouds[i].indexInFile);
+					QString errorStr = Export(cloudDesc, QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -886,6 +902,146 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 	else
 	{
 		return Error("Unknown method!");
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandExtractCC(QStringList& arguments, ccProgressDialog* pDlg/*=0*/)
+{
+	Print("[CONNECTED COMPONENTS EXTRACTION]");
+	if (m_clouds.empty())
+	{
+		return Error(QString("No point cloud loaded (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_EXTRACT_CC));
+	}
+
+	//octree level
+	if (arguments.empty())
+	{
+		return Error(QString("Missing parameter: octree level after \"-%1\"").arg(COMMAND_EXTRACT_CC));
+	}
+	bool ok;
+	unsigned char octreeLevel = std::min<unsigned char>(arguments.takeFirst().toUShort(&ok), CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	if (!ok)
+	{
+		return Error("Invalid octree level!");
+	}
+	Print(QString("\tOctree level: %1").arg(octreeLevel));
+
+	//min number of points
+	if (arguments.empty())
+	{
+		return Error(QString("Missing parameter: minimum number of points per component after \"-%1 [octree level]\"").arg(COMMAND_EXTRACT_CC));
+	}
+	unsigned minPointCount = arguments.takeFirst().toUInt(&ok);
+	if (!ok)
+	{
+		return Error("Invalid min. number of points!");
+	}
+	Print(QString("\tMin number of points per component: %1").arg(minPointCount));
+
+	try
+	{
+		std::vector< CloudDesc > inputClouds = m_clouds;
+		m_clouds.clear();
+		for (size_t i = 0; i < inputClouds.size(); ++i)
+		{
+			ccPointCloud* cloud = inputClouds[i].pc;
+			Print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
+
+			//we create/activate CCs label scalar field
+			int sfIdx = cloud->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+			if (sfIdx < 0)
+			{
+				sfIdx = cloud->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+			}
+			if (sfIdx < 0)
+			{
+				ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
+				continue;
+			}
+			cloud->setCurrentScalarField(sfIdx);
+
+			//try to label all CCs
+			int componentCount = CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,
+				static_cast<unsigned char>(octreeLevel),
+				false,
+				pDlg);
+
+			if (componentCount == 0)
+			{
+				ccConsole::Error("No component found!");
+				continue;
+			}
+
+			cloud->getCurrentInScalarField()->computeMinAndMax();
+			CCLib::ReferenceCloudContainer components;
+			bool success = CCLib::AutoSegmentationTools::extractConnectedComponents(cloud, components);
+			cloud->deleteScalarField(sfIdx);
+			sfIdx = -1;
+
+			if (!success)
+			{
+				ccConsole::Warning("An error occured (failed to finish the extraction)");
+				continue;
+			}
+
+			//we create "real" point clouds for all input components
+			int realIndex = 0;
+			for (size_t j = 0; j < components.size(); ++j)
+			{
+				CCLib::ReferenceCloud* compIndexes = components[j];
+
+				//if it has enough points
+				if (compIndexes->size() >= minPointCount)
+				{
+					//we create a new entity
+					ccPointCloud* compCloud = cloud->partialClone(compIndexes);
+					if (compCloud)
+					{
+						//'shift on load' information
+						compCloud->setGlobalShift(cloud->getGlobalShift());
+						compCloud->setGlobalScale(cloud->getGlobalScale());
+						compCloud->setName(QString(cloud->getName() + "_CC#%1").arg(j + 1));
+
+						CloudDesc cloudDesc(compCloud, inputClouds[i].basename + QString("_COMPONENT_%1").arg(++realIndex), inputClouds[i].path);
+						if (s_autoSaveMode)
+						{
+							QString errorStr = Export(cloudDesc, QString(), 0, false, true);
+							if (!errorStr.isEmpty())
+							{
+								Error(errorStr);
+							}
+						}
+						//add cloud to the current pool
+						m_clouds.push_back(cloudDesc);
+					}
+					else
+					{
+						Warning(QString("Failed to create component #%1! (not enough memory)").arg(j + 1));
+					}
+				}
+
+				delete compIndexes;
+				compIndexes = 0;
+			}
+
+			components.clear();
+
+			if (m_clouds.empty())
+			{
+				Error("No component was created! Check the minimum size...");
+			}
+			else
+			{
+				Print(QString("%1 component(s) were created").arg(m_clouds.size()));
+			}
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		Error("Not enough memory");
+		return false;
 	}
 
 	return true;
@@ -1828,7 +1984,7 @@ bool ReadVector(const QXmlStreamAttributes& attributes, CCVector3& P, QString el
 	}
 
 	int count = 0;
-	for (int i=0; i<attributes.size(); ++i)
+	for (int i = 0; i < attributes.size(); ++i)
 	{
 		QString name = attributes[i].name().toString().toUpper();
 		QString value = attributes[i].value().toString();
@@ -1908,7 +2064,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 			if (stream.name() == s_xmlBoxThickness)
 			{
 				QXmlStreamAttributes attributes = stream.attributes();
-				if (!ReadVector(attributes,boxThickness,s_xmlBoxThickness))
+				if (!ReadVector(attributes, boxThickness, s_xmlBoxThickness))
 					return false;
 				stream.skipCurrentElement();
 				++mandatoryCount;
@@ -1916,7 +2072,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 			else if (stream.name() == s_xmlBoxCenter)
 			{
 				QXmlStreamAttributes attributes = stream.attributes();
-				if (!ReadVector(attributes,boxCenter,s_xmlBoxCenter))
+				if (!ReadVector(attributes, boxCenter, s_xmlBoxCenter))
 					return false;
 				stream.skipCurrentElement();
 				autoCenter = false;
@@ -2326,31 +2482,31 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 
 	//now read the vertices
 	{
-		unsigned char X = ((orthoDim+1) % 3);
-		unsigned char Y = ((X+1) % 3);
 		if (	!vertices.reserve(N)
-			||	!poly.addPointIndex(0,N) )
+			||	!poly.addPointIndex(0, N))
 		{
 			return Error("Not enough memory!");
 		}
 
-		for (unsigned i=0; i<N; ++i)
+		for (unsigned i = 0; i < N; ++i)
 		{
 			if (arguments.size() < 2)
-				return Error(QString("Missing parameter(s): vertex #%1 data and following").arg(i+1));
+			{
+				return Error(QString("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
+			}
 
-			CCVector3 P(0,0,0);
+			CCVector3 P(0, 0, 0);
 
 			QString coordStr = arguments.takeFirst();
-			P.u[X] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
+			P.x = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
-				return Error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i+1));
+				return Error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
 			/*QString */coordStr = arguments.takeFirst();
-			P.u[Y] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
+			P.y = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
 			if (!ok)
-				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i+1));
+				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
 
-			vertices.addPoint(P);
+			vertices.addPoint(P); //the polyline must be defined in the XY plane!
 		}
 
 		poly.setClosed(true);
@@ -2361,7 +2517,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 	while (!arguments.empty())
 	{
 		QString argument = arguments.front();
-		if (IsCommand(argument,COMMAND_CROP_OUTSIDE))
+		if (IsCommand(argument, COMMAND_CROP_OUTSIDE))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -2376,7 +2532,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 	//now we can crop the loaded cloud(s)
 	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
-		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop2D(&poly,orthoDim,inside);
+		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop2D(&poly, orthoDim, inside);
 		if (ref)
 		{
 			if (ref->size() != 0)
@@ -2445,10 +2601,10 @@ bool ccCommandLineParser::commandColorBanding(QStringList& arguments)
 
 	//frequency
 	bool ok = true;
-	int freq = 0;
+	double freq = 0;
 	{
 		QString countStr = arguments.takeFirst();
-		freq = countStr.toInt(&ok);
+		freq = countStr.toDouble(&ok);
 		if (!ok)
 			return Error(QString("Invalid parameter: frequency after \"-%1 DIM\" (in Hz, integer value)").arg(COMMAND_COLOR_BANDING));
 	}
@@ -3860,6 +4016,7 @@ bool ccCommandLineParser::commandLogFile(QStringList& arguments)
 int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 {
 	ccProgressDialog progressDlg(false, parent);
+	progressDlg.setAutoClose(false);
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -3868,6 +4025,7 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 	while (success && !arguments.empty())
 	{
 		QString argument = arguments.takeFirst();
+		ccProgressDialog* pDlg = (s_silentMode ? &progressDlg : 0);
 
 		// "O" OPEN FILE
 		if (IsCommand(argument, COMMAND_OPEN))
@@ -3877,12 +4035,7 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		// "SS" SUBSAMPLING
 		else if (IsCommand(argument, COMMAND_SUBSAMPLE))
 		{
-			success = commandSubsample(arguments, &progressDlg);
-		}
-		// "CURV" CURVATURE
-		else if (IsCommand(argument, COMMAND_CURVATURE))
-		{
-			success = commandCurvature(arguments, parent);
+			success = commandSubsample(arguments, pDlg);
 		}
 		// "DENSITY"
 		else if (IsCommand(argument, COMMAND_DENSITY))
@@ -3927,7 +4080,7 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		//Mesh sampling
 		else if (IsCommand(argument, COMMAND_SAMPLE_MESH))
 		{
-			success = commandSampleMesh(arguments, &progressDlg);
+			success = commandSampleMesh(arguments, pDlg);
 		}
 		//Best fit plane
 		else if (IsCommand(argument, COMMAND_BEST_FIT_PLANE))
@@ -3952,7 +4105,7 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		//Perform statistical test
 		else if (IsCommand(argument, COMMAND_STAT_TEST))
 		{
-			success = commandStatTest(arguments, &progressDlg);
+			success = commandStatTest(arguments, pDlg);
 		}
 		//SF Arithmetic tool
 		else if (IsCommand(argument, COMMAND_SF_ARITHMETIC))
@@ -3997,11 +4150,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		// "SOR" FILTER
 		else if (IsCommand(argument, COMMAND_SOR_FILTER))
 		{
-			success = commandSORFilter(arguments, &progressDlg);
+			success = commandSORFilter(arguments, pDlg);
 		}
 		else if (IsCommand(argument, COMMAND_ORIENT_NORMALS))
 		{
-			success = commandOrientNormalsMST(arguments, &progressDlg);
+			success = commandOrientNormalsMST(arguments, pDlg);
 		}
 		//Change default cloud output format
 		else if (IsCommand(argument, COMMAND_CLOUD_EXPORT_FORMAT))
@@ -4092,6 +4245,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument, COMMAND_LOG_FILE))
 		{
 			success = commandLogFile(arguments);
+		}
+		// "EXTRACT_CC" CONNECTED COMPONENTS
+		else if (IsCommand(argument, COMMAND_EXTRACT_CC))
+		{
+			success = commandExtractCC(arguments, pDlg);
 		}
 		//silent mode (i.e. no console)
 		else if (IsCommand(argument, COMMAND_SILENT_MODE))

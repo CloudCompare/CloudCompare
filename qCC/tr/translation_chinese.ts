@@ -163,7 +163,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="258"/>
-        <source>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the prorgamm may take a long time to finish. Check this box to bound the number of candidates.</source>
+        <source>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the program may take a long time to finish. Check this box to bound the number of candidates.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1093,7 +1093,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="68"/>
-        <source>Check that option if you whish to extract contour(s) form each slice</source>
+        <source>Check that option if you wish to extract contour(s) form each slice</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1113,7 +1113,7 @@ Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = 
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="107"/>
-        <source>Multi-pass process where longer edges may be temporarilly created to obtain a better fit... or a worst one ;)</source>
+        <source>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1592,7 +1592,7 @@ to help you set the general parameters</source>
     <name>ContourExtractorDlg</name>
     <message>
         <location filename="../ui_templates/contourExtractorDlg.ui" line="14"/>
-        <source>Contour Extractor Visaul Debug</source>
+        <source>Contour Extractor Visual Debug</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2645,7 +2645,7 @@ to help you set the general parameters</source>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="60"/>
-        <source>Min. points per compoent</source>
+        <source>Min. points per component</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3263,7 +3263,7 @@ to help you set the general parameters</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1293"/>
         <location filename="../ui_templates/mainWindow.ui" line="1296"/>
-        <source>Add, substract, multiply or divide two scalar fields</source>
+        <source>Add, subtract, multiply or divide two scalar fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4109,7 +4109,7 @@ to help you set the general parameters</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2321"/>
-        <source>Set viewer-based perspectivefor current 3D View</source>
+        <source>Set viewer-based perspective for current 3D View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4260,7 +4260,7 @@ to help you set the general parameters</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2501"/>
-        <source>Remove all entiites currently loaded in the DB tree</source>
+        <source>Remove all entities currently loaded in the DB tree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4412,7 +4412,7 @@ to help you set the general parameters</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2672"/>
-        <source>Flag vertices by type: normal (0), border (1), non manifold (2)</source>
+        <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4880,7 +4880,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="83"/>
-        <source>Nieghbors</source>
+        <source>Neighbors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5966,7 +5966,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="134"/>
         <location filename="../ui_templates/registrationDlg.ui" line="137"/>
-        <source>By chosing this criterion, you can control the computation time.</source>
+        <source>By choosing this criterion, you can control the computation time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5986,7 +5986,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="176"/>
-        <source>By chosing this criterion, you can control the quality of the result.</source>
+        <source>By choosing this criterion, you can control the quality of the result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6508,13 +6508,13 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="148"/>
-        <source>Max output polyline edge length (the smaller, the closer to the points the countour will be).
+        <source>Max output polyline edge length (the smaller, the closer to the points the contour will be).
 Warning: if 0, generates the convex hull.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="165"/>
-        <source>Multi-pass process where longer edges may be temporarilly created to obtain a better fit... or a worst one ;)</source>
+        <source>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

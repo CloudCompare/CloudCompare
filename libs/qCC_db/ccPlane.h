@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -66,7 +66,10 @@ public:
 	CCVector3 getNormal() const { return m_transformation.getColumnAsVec3D(2); }
 
 	//! Sets an image as texture
-	bool setAsTexture(QImage image);
+	bool setAsTexture(QImage image, QString imageFilename = QString());
+
+	//! Sets an image as texture for a quad mesh
+	static bool SetQuadTexture(ccMesh* quadMesh, QImage image, QString imageFilename = QString());
 
 	//! Fits a plane primitive on a cloud
 	/** The cloud can be any CCLib::GenericIndexedCloudPersist-derived object,

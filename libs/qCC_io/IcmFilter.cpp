@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -105,7 +105,8 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	//load the corresponding file (potentially containing several clouds)
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),parameters,filter);
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName), parameters, filter, result);
 	if (!entities)
 	{
 		fclose(fp);

@@ -6,11 +6,11 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
@@ -48,6 +48,9 @@
 #include <ccHObject.h>
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
+
+//plugins
+#include <ccPluginInfo.h>
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -212,24 +215,29 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	//"static" plugins
-	foreach (QObject *plugin, QPluginLoader::staticInstances())
-		loadPlugin(plugin);
-
-	ccLog::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
-
 	QString	appPath = QCoreApplication::applicationDirPath();
-	QString	pluginsPath( appPath );
+	QStringList	filters;
 	
 #if defined(Q_OS_MAC)
+
+	filters << "*.dylib";
+
 	// plugins are in the bundle
 	appPath.remove( "MacOS" );
 	
-	pluginsPath += "Plugins/ccViewerPlugins";
+	appPath += "Plugins/ccViewerPlugins";
+
 #elif defined(Q_OS_WIN)
+
+	filters << "*.dll";
+
 	//plugins are in bin/plugins
-	pluginsPath += "/plugins";
+	appPath += "/plugins";
+
 #elif defined(Q_OS_LINUX)	
+
+	filters << "*.so";
+
 	// Plugins are relative to the bin directory where the executable is found
 	QDir  binDir( appPath );
 	
@@ -237,102 +245,59 @@ void ccViewer::loadPlugins()
 	{
 		binDir.cdUp();
 		
-		pluginsPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
+		appPath = (binDir.absolutePath() + "/lib/cloudcompare/plugins");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
-		pluginsPath = "/usr/lib/cloudcompare/plugins";
+		appPath = "/usr/lib/cloudcompare/plugins";
 	}
 	
 #else
 #warning Need to specify the plugin path for this OS.
 #endif
 
-	ccLog::Print(QString("Plugin lookup dir.: %1").arg(pluginsPath));
+	tPluginInfoList	plugins;
+	ccPlugins::LoadPlugins(plugins, QStringList(appPath), filters);
 
-	QStringList filters;
-#if defined(Q_OS_WIN)
-	filters << "*.dll";
-#elif defined(Q_OS_LINUX)
-	filters << "*.so";
-#elif defined(Q_OS_MAC)
-	filters << "*.dylib";
-#endif
-	QDir pluginsDir(pluginsPath);
-	pluginsDir.setNameFilters(filters);
-	foreach (QString filename, pluginsDir.entryList(filters))
+	for ( const tPluginInfo &plugin : plugins )
 	{
-		QPluginLoader loader(pluginsDir.absoluteFilePath(filename));
-		QObject* plugin = loader.instance();
-		if (plugin)
+		if (!plugin.object)
 		{
-			ccLog::Print(QString("Found new plugin! ('%1')").arg(filename));
-			if (!loadPlugin(plugin))
+			assert(false);
+			continue;
+		}
+		
+		assert(plugin.qObject);
+		plugin.qObject->setParent(this);
+
+		//is this a GL plugin?
+		if (plugin.object->getType() == CC_GL_FILTER_PLUGIN)
+		{
+			QString pluginName = plugin.object->getName();
+			if (pluginName.isEmpty())
 			{
-				ccLog::Warning("Unsupported or invalid plugin type");
+				ccLog::Warning("Plugin has an invalid (empty) name!");
+				continue;
 			}
+			ccLog::Print(QString("Plugin name: [%1] (GL filter)").arg(pluginName));
+
+			//(auto)create action
+			QAction* action = new QAction(pluginName, plugin.qObject);
+			action->setToolTip(plugin.object->getDescription());
+			action->setIcon(plugin.object->getIcon());
+			//connect default signal
+			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+
+			ui.menuPlugins->addAction(action);
+			ui.menuPlugins->setEnabled(true);
+			ui.menuPlugins->setVisible(true);
 		}
 		else
 		{
-			ccLog::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
+			//ignored
 		}
 	}
-}
-
-bool ccViewer::loadPlugin(QObject *plugin)
-{
-	//is this a GL plugin?
-	ccGLFilterPluginInterface* glPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
-	if (glPlugin)
-	{
-		plugin->setParent(this);
-
-		QString pluginName = glPlugin->getName();
-		if (pluginName.isEmpty())
-		{
-			ccLog::Warning("Plugin has an invalid (empty) name!");
-			return false;
-		}
-		ccLog::Print("Plugin name: [%s] (GL filter)",qPrintable(pluginName));
-
-		//(auto)create action
-		QAction* action = new QAction(pluginName, plugin);
-		action->setToolTip(glPlugin->getDescription());
-		action->setIcon(glPlugin->getIcon());
-		//connect default signal
-		connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
-
-		ui.menuPlugins->addAction(action);
-		ui.menuPlugins->setEnabled(true);
-		ui.menuPlugins->setVisible(true);
-		return true;
-	}
-
-	//is this an IO plugin?
-	ccIOFilterPluginInterface* ioPlugin = qobject_cast<ccIOFilterPluginInterface*>(plugin);
-	if (ioPlugin)
-	{
-		plugin->setParent(this);
-
-		QString pluginName = ioPlugin->getName();
-		if (pluginName.isEmpty())
-		{
-			ccLog::Warning("Plugin has an invalid (empty) name!");
-			return false;
-		}
-		ccLog::Print("Plugin name: [%s] (I/O filter)",qPrintable(pluginName));
-
-		FileIOFilter::Shared filter = ioPlugin->getFilter(0);
-		if (filter)
-		{
-			FileIOFilter::Register(filter);
-			ccLog::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
-		}
-	}
-
-	ccLog::Warning("Only 'GL filter' and 'I/O' plugins are supported for now!");
-	return false;
 }
 
 void ccViewer::doDisableGLFilter()
@@ -464,12 +429,12 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 		{
 			int currentSFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			//ui.menuSelectSF->clear();
-			for (unsigned i=0;i<sfCount;++i)
+			for (unsigned i = 0; i < sfCount; ++i)
 			{
 				QAction* action = ui.menuSelectSF->addAction(cloud->getScalarFieldName(i));
 				action->setData(i);
 				action->setCheckable(true);
-				if (currentSFIndex == (int)i)
+				if (currentSFIndex == static_cast<int>(i))
 					action->setChecked(true);
 				connect(action, SIGNAL(toggled(bool)), this, SLOT(changeCurrentScalarField(bool)));
 			}
@@ -520,8 +485,8 @@ void ccViewer::updateDisplay()
 void ccViewer::updateGLFrameGradient()
 {
 	//display parameters
-	static const ccColor::Rgbub s_black(0,0,0);
-	static const ccColor::Rgbub s_white(255,255,255);
+	static const ccColor::Rgbub s_black(0, 0, 0);
+	static const ccColor::Rgbub s_white(255, 255, 255);
 	bool stereoModeEnabled = m_glWindow->stereoModeIsEnabled();
 	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
 	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
@@ -565,9 +530,10 @@ void ccViewer::addToDB(QStringList filenames)
 	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 	parameters.parentWidget = this;
 
-	for (int i=0; i<filenames.size(); ++i)
+	for (int i = 0; i < filenames.size(); ++i)
 	{
-		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i],parameters);
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
 
 		if (newEntities)
 		{
@@ -575,7 +541,7 @@ void ccViewer::addToDB(QStringList filenames)
 
 			if (!scaleAlreadyDisplayed)
 			{
-				for (unsigned i=0; i<newEntities->getChildrenNumber(); ++i)
+				for (unsigned i = 0; i < newEntities->getChildrenNumber(); ++i)
 				{
 					ccHObject* ent = newEntities->getChild(i);
 					if (ent->isA(CC_TYPES::POINT_CLOUD))
@@ -601,6 +567,12 @@ void ccViewer::addToDB(QStringList filenames)
 					}
 				}
 			}
+		}
+		
+		if (result == CC_FERR_CANCELED_BY_USER)
+		{
+			//stop importing the file if the user has cancelled the current process!
+			break;
 		}
 	}
 
@@ -645,7 +617,7 @@ void ccViewer::showDisplayParameters()
 
 	clmDlg.exec();
 
-	disconnect(&clmDlg,0,0,0);
+	disconnect(&clmDlg, 0, 0, 0);
 }
 
 void ccViewer::doActionEditCamera()
@@ -1050,7 +1022,7 @@ void ccViewer::changeCurrentScalarField(bool state)
 
 	//disable all other actions
 	const QObjectList& children = ui.menuSelectSF->children();
-	for (int i=0; i<children.size() ;++i)
+	for (int i = 0; i < children.size(); ++i)
 	{
 		QAction* act = static_cast<QAction*>(children[i]);
 		act->blockSignals(true);

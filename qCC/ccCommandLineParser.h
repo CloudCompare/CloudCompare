@@ -60,6 +60,7 @@ protected:
 	bool commandSORFilter					(QStringList& arguments, ccProgressDialog* pDlg = 0);
 	bool commandOrientNormalsMST			(QStringList& arguments, ccProgressDialog* pDlg = 0);
 	bool commandDropGlobalShift				(QStringList& arguments);
+	bool commandExtractCC					(QStringList& arguments, ccProgressDialog* pDlg = 0);
 
 protected:
 
@@ -162,7 +163,11 @@ protected:
 	//! Exports a cloud or a mesh
 	/** \return error string (if any)
 	**/
-	static QString Export(EntityDesc& cloudDesc, QString suffix = QString(), QString* outputFilename = 0, bool forceIsCloud = false);
+	static QString Export(	EntityDesc& cloudDesc,
+							QString suffix = QString(),
+							QString* outputFilename = 0,
+							bool forceIsCloud = false,
+							bool forceNoTimestamp = false);
 
 	//! Reads out file format
 	static QString GetFileFormatFilter(QStringList& arguments, QString& defaultExt);

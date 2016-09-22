@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -86,11 +86,11 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 		}
 	}
 
-	QImage bufferImage(depthBuffer.width,depthBuffer.height,QImage::Format_RGB32);
+	QImage bufferImage(depthBuffer.width, depthBuffer.height, QImage::Format_RGB32);
 	{
 		ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
 		assert(colorScale);
-		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS-1)/(maxDist-minDist);
+		ScalarType coef = maxDist - minDist < ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS - 1) / (maxDist - minDist);
 
 		const ScalarType* _zBuff = &(depthBuffer.zBuff.front());
 		for (unsigned y=0; y<depthBuffer.height; ++y)
@@ -98,7 +98,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 			for (unsigned x=0; x<depthBuffer.width; ++x,++_zBuff)
 			{
 				const ccColor::Rgba& col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((std::min(maxDist,*_zBuff)-minDist)*coef)) : ccColor::black);
-				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col.r,col.g,col.b));
+				bufferImage.setPixel(x, depthBuffer.height - 1 - y, qRgb(col.r, col.g, col.b));
 			}
 		}
 	}
@@ -106,7 +106,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 	QDialog* dlg = new QDialog(parent);
 	dlg->setWindowTitle(QString("%0 depth buffer [%1 x %2]").arg(sensor->getParent()->getName()).arg(depthBuffer.width).arg(depthBuffer.height));
 
-	unsigned maxDBDim = std::max<unsigned>(depthBuffer.width,depthBuffer.height);
+	unsigned maxDBDim = std::max<unsigned>(depthBuffer.width, depthBuffer.height);
 	unsigned scale = 1;
 	while (maxDBDim > maxDim)
 	{
@@ -384,6 +384,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 
 	//display color ramp
 	{
+		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(renderZoom);
+
 		//(x,y): current display area coordinates (top-left corner)
 		int x = halfW-xShift-scaleWidth;
 		int y = halfH-yShift-scaleMaxHeight;
@@ -392,7 +395,6 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		{
 			int histoStart = x + scaleWidth + std::min(std::max(scaleWidth / 8, 3), static_cast<int>(15 * renderZoom));
 
-			glFunc->glLineWidth(renderZoom);
 			glFunc->glBegin(GL_LINES);
 			for (int j=0; j<scaleMaxHeight; ++j)
 			{
@@ -463,10 +465,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		}
 
 		//scale border
-		glFunc->glLineWidth(2.0f * renderZoom);
 		const ccColor::Rgbub& lineColor = textColor;
 		glFunc->glColor3ubv(lineColor.rgb);
-		glFunc->glPushAttrib(GL_LINE_BIT);
+		glFunc->glLineWidth(2.0f * renderZoom);
 		glFunc->glEnable(GL_LINE_SMOOTH);
 		glFunc->glBegin(GL_LINE_LOOP);
 		glFunc->glVertex2i(x,y);
@@ -474,6 +475,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		glFunc->glVertex2i(x+scaleWidth,y+scaleMaxHeight);
 		glFunc->glVertex2i(x,y+scaleMaxHeight);
 		glFunc->glEnd();
+
 		glFunc->glPopAttrib();
 	}
 

@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -110,12 +110,18 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget);
-	pdlg.setMethodTitle(QObject::tr("Loading PTX file"));
-	pdlg.setAutoClose(false);
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Loading PTX file"));
+		pdlg.setAutoClose(false);
+	}
 
 	//progress dialog (for normals computation)
 	ccProgressDialog normalsProgressDlg(true, parameters.parentWidget);
-	normalsProgressDlg.setAutoClose(false);
+	if (parameters.parentWidget)
+	{
+		normalsProgressDlg.setAutoClose(false);
+	}
 
 	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
 	{
@@ -258,8 +264,11 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		//read points
 		{
 			CCLib::NormalizedProgress nprogress(&pdlg, gridSize);
-			pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
-			pdlg.start();
+			if (parameters.parentWidget)
+			{
+				pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
+				pdlg.start();
+			}
 
 			bool firstPoint = true;
 			bool hasColors = false;
@@ -392,7 +401,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						}
 					}
 
-					if (!nprogress.oneStep())
+					if (parameters.parentWidget && !nprogress.oneStep())
 					{
 						result = CC_FERR_CANCELED_BY_USER;
 						break;
@@ -471,7 +480,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				//by default we don't compute normals without asking the user
 				if (parameters.autoComputeNormals)
 				{
-					cloud->computeNormalsWithGrids(LS, 2, true, &normalsProgressDlg);
+					cloud->computeNormalsWithGrids(LS, 2, true, parameters.parentWidget ? &normalsProgressDlg : 0);
 				}
 			}
 

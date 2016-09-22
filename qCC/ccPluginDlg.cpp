@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -77,21 +77,22 @@ void ccPluginDlg::addPluginInfo( const QStringList &paths, const tPluginInfoList
 {
 	label->setText(QString(	"Paths Searched:\n%1" ).arg(paths.join( "\n" )));
 	
-	for ( QObject *plugin : QPluginLoader::staticInstances() )
-	{
-		populateTreeWidget(plugin, QString("%1 (Static Plugin)")
-			.arg(plugin->metaObject()->className()));
-	}
-
 	for ( const tPluginInfo &info : pluginInfoList )
 	{
-		QFileInfo	fileInfo( info.first );
-		
-		populateTreeWidget( info.second, fileInfo.fileName(), fileInfo.filePath() );
+		if (info.filename.isEmpty())
+		{
+			//static plugins have no associated filename
+			populateTreeWidget(info.qObject, QString("%1 (Static Plugin)").arg(info.object->getName()));
+		}
+		else
+		{
+			QFileInfo fileInfo( info.filename );
+			populateTreeWidget( info.qObject, fileInfo.fileName(), fileInfo.filePath() );
+		}
 	}
 }
 
-void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &name, const QString &path)
+void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &name, const QString &path/*=QString()*/)
 {
 	QTreeWidgetItem *pluginItem = new QTreeWidgetItem(treeWidget);
 	pluginItem->setText(0, name);

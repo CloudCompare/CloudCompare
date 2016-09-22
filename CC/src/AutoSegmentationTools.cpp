@@ -4,11 +4,12 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -39,7 +40,9 @@ int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* 
 													DgmOctree* inputOctree/*=0*/)
 {
 	if (!theCloud)
+	{
 		return -1;
+	}
 
 	//compute octree if none was provided
 	DgmOctree* theOctree = inputOctree;
@@ -56,11 +59,13 @@ int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* 
 	//we use the default scalar field to store components labels
 	theCloud->enableScalarField();
 
-	int result = theOctree->extractCCs(level,sixConnexity,progressCb);
+	int result = theOctree->extractCCs(level, sixConnexity, progressCb);
 
 	//remove octree if it was not provided as input
-	if (!inputOctree)
+	if (theOctree && !inputOctree)
+	{
 		delete theOctree;
+	}
 
 	return result;
 }
@@ -69,11 +74,15 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 {
 	unsigned numberOfPoints = (theCloud ? theCloud->size() : 0);
 	if (numberOfPoints == 0)
+	{
 		return false;
+	}
 
 	//components should have already been labeled and labels should have been stored in the active scalar field!
 	if (!theCloud->isScalarFieldEnabled())
+	{
 		return false;
+	}
 
 	//empty the input vector if necessary
 	while (!cc.empty())
@@ -82,19 +91,21 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 		cc.pop_back();
 	}
 
-	for (unsigned i=0; i<numberOfPoints; ++i)
+	for (unsigned i = 0; i < numberOfPoints; ++i)
 	{
 		ScalarType slabel = theCloud->getPointScalarValue(i);
 		if (slabel >= 1) //labels start from 1! (this test rejects NaN values as well)
 		{
-			int ccLabel = static_cast<int>(theCloud->getPointScalarValue(i))-1; 
+			int ccLabel = static_cast<int>(theCloud->getPointScalarValue(i)) - 1;
 
 			//we fill the components vector with empty components until we reach the current label
 			//(they will be "used" later)
 			try
 			{
 				while (static_cast<size_t>(ccLabel) >= cc.size())
+				{
 					cc.push_back(new ReferenceCloud(theCloud));
+				}
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -122,17 +133,19 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 
 bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedCloudPersist* theCloud,
 																PointCoordinateType radius,
-                                                                ScalarType minSeedDist,
-                                                                unsigned char octreeLevel,
-                                                                ReferenceCloudContainer& theSegmentedLists,
-                                                                GenericProgressCallback* progressCb,
-                                                                DgmOctree* inputOctree,
-                                                                bool applyGaussianFilter,
-                                                                float alpha)
+																ScalarType minSeedDist,
+																unsigned char octreeLevel,
+																ReferenceCloudContainer& theSegmentedLists,
+																GenericProgressCallback* progressCb,
+																DgmOctree* inputOctree,
+																bool applyGaussianFilter,
+																float alpha)
 {
 	unsigned numberOfPoints = (theCloud ? theCloud->size() : 0);
 	if (numberOfPoints == 0)
-        return false;
+	{
+		return false;
+	}
 
 	//compute octree if none was provided
 	DgmOctree* theOctree = inputOctree;
@@ -147,7 +160,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 	}
 
 	//on calcule le gradient (va ecraser le champ des distances)
-	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,radius,true,true,progressCb,theOctree) < 0)
+	if (ScalarFieldTools::computeScalarFieldGradient(theCloud, radius, true, true, progressCb, theOctree) < 0)
 	{
 		if (!inputOctree)
 			delete theOctree;
@@ -175,7 +188,9 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 	if (result < 0)
 	{
 		if (!inputOctree)
-            delete theOctree;
+		{
+			delete theOctree;
+		}
 		delete fm;
 		return false;
 	}
@@ -230,11 +245,13 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 		}
 
 		//il n'y a plus de point avec des distances suffisamment grandes !
-		if (maxDist<minSeedDist)
-            break;
+		if (maxDist < minSeedDist)
+		{
+			break;
+		}
 
 		//on finit la recherche du max
-		for (unsigned i=begin;i<numberOfPoints;++i)
+		for (unsigned i = begin; i<numberOfPoints; ++i)
 		{
 			const CCVector3 *thePoint = theCloud->getPoint(i);
 			const ScalarType& theDistance = theDists->getValue(i);
@@ -252,9 +269,9 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 			Tuple3i cellPos;
 			theOctree->getTheCellPosWhichIncludesThePoint(&startPoint, cellPos, octreeLevel);
 			//clipping (important!)
-			cellPos.x = std::min(octreeLength,cellPos.x);
-			cellPos.y = std::min(octreeLength,cellPos.y);
-			cellPos.z = std::min(octreeLength,cellPos.z);
+			cellPos.x = std::min(octreeLength, cellPos.x);
+			cellPos.y = std::min(octreeLength, cellPos.y);
+			cellPos.z = std::min(octreeLength, cellPos.z);
 			fm->setSeedCell(cellPos);
 			++seedPoints;
 		}
@@ -280,7 +297,9 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 			}
 
 			if (progressCb)
-                progressCb->update(float(numberOfSegmentedLists % 100));
+			{
+				progressCb->update(static_cast<float>(numberOfSegmentedLists % 100));
+			}
 
 			fm->cleanLastPropagation();
 
@@ -288,23 +307,38 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 		}
 
 		if (maxDistIndex == begin)
-            ++begin;
+		{
+			++begin;
+		}
 	}
 
 	if (progressCb)
+	{
 		progressCb->stop();
+	}
 
-	for (unsigned i=0; i<numberOfPoints; ++i)
-		theCloud->setPointScalarValue(i,theDists->getValue(i));
+	for (unsigned i = 0; i < numberOfPoints; ++i)
+	{
+		theCloud->setPointScalarValue(i, theDists->getValue(i));
+	}
 
-	delete fm;
-	fm = 0;
+	if (fm)
+	{
+		delete fm;
+		fm = 0;
+	}
 
-	theDists->release();
-	theDists = 0;
-
-	if (!inputOctree)
+	if (theDists)
+	{
+		theDists->release();
+		theDists = 0;
+	}
+	
+	if (theOctree && !inputOctree)
+	{
 		delete theOctree;
+		theOctree = 0;
+	}
 
 	return true;
 }

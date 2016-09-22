@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -177,6 +177,9 @@ public:
 		\return the selected cloud (or null if the user cancelled the operation)
 	**/
 	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
+
+	//! Dispatches the (loaded) plugins in the UI
+	void dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths);
 	
 protected slots:
 
@@ -359,6 +362,7 @@ protected slots:
 	void doActionSubdivideMesh();
 	void doActionComputeCPS();
 	void doActionDeleteAllSF();
+	void doActionShowWaveDialog();
 	void doActionKMeans();
 	void doActionFrontPropagation();
 	void doActionApplyScale();
@@ -450,7 +454,7 @@ protected slots:
 	//! Setups 3D mouse (if any)
 	void setup3DMouse(bool);
 
-	//! Removes all entiites currently loaded in the DB tree
+	//! Removes all entities currently loaded in the DB tree
 	void closeAll();
 
 	//! Batch export some pieces of info from a set of selected clouds
@@ -491,9 +495,6 @@ protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 	virtual void moveEvent(QMoveEvent* event) override;
 	virtual void resizeEvent(QResizeEvent* event) override;
-
-	void loadPlugins();
-	bool dispatchPlugin(QObject* plugin);
 
 	//! Makes the window including an entity zoom on it (helper)
 	void zoomOn(ccHObject* object);

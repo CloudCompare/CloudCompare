@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#                    COPYRIGHT: CloudCompare project                     #
@@ -227,7 +227,7 @@ bool SaitoSquaredDistanceTransform::SDT_3D(Grid3D<GridElement>& grid, GenericPro
 		sq[i] = static_cast<GridElement>(i*i);
 	}
 
-	const GridElement maxDistance = std::numeric_limits<GridElement>::max() - static_cast<GridElement>(r*r - c*c - p*p) - 1;
+	const GridElement maxDistance = std::numeric_limits<GridElement>::max() - static_cast<GridElement>(r*r + c*c + p*p) - 1;
 
 	NormalizedProgress normProgress(progressCb, static_cast<unsigned>(p + r));
 	if (progressCb)

@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -226,9 +226,12 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		//progress dialog
 		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
 		CCLib::NormalizedProgress nprogress(&pdlg, camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
-		pdlg.setMethodTitle(QObject::tr("Open Bundler file"));
-		pdlg.setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
-		pdlg.start();
+		if (parameters.parentWidget)
+		{
+			pdlg.setMethodTitle(QObject::tr("Open Bundler file"));
+			pdlg.setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
+			pdlg.start();
+		}
 
 		//read cameras info (whatever the case!)
 		cameras.resize(camCount);
@@ -296,8 +299,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					return CC_FERR_MALFORMED_FILE;
 			}
 
-			if (!nprogress.oneStep()) //cancel requested?
+			if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested?
+			{
 				return CC_FERR_CANCELED_BY_USER;
+			}
 		}
 
 		//read points
@@ -491,7 +496,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					}
 				}
 
-				if (!nprogress.oneStep()) //cancel requested?
+				if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested?
 				{
 					delete keypointsCloud;
 					return CC_FERR_CANCELED_BY_USER;
@@ -518,15 +523,19 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				container.addChild(keypointsCloud);
 		}
 
-		pdlg.stop();
-		QApplication::processEvents();
+		if (parameters.parentWidget)
+		{
+			pdlg.stop();
+			QApplication::processEvents();
+		}
 	}
 
 	//use alternative cloud/mesh as keypoints
 	if (useAltKeypoints)
 	{
 		FileIOFilter::LoadParameters altKeypointsParams;
-		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename,altKeypointsParams);
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename, altKeypointsParams, result);
 		if (	!altKeypointsContainer
 			||	altKeypointsContainer->getChildrenNumber() != 1
 			||	(!altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::MESH)))

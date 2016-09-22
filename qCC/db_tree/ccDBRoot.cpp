@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -75,7 +75,7 @@ static bool CanDetachCloud(const ccHObject* obj)
 		return true;
 	}
 
-	//can't deleted the vertices of a mesh or the verties of a polyline
+	//can't delete the vertices of a mesh or the verties of a polyline
 	bool blocked = (	(parent->isKindOf(CC_TYPES::MESH) && (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == obj))
 						||	(parent->isKindOf(CC_TYPES::POLY_LINE) && (dynamic_cast<ccPointCloud*>(ccHObjectCaster::ToPolyline(parent)->getAssociatedCloud()) == obj)) );
 
@@ -1062,13 +1062,14 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
 		if (item->isA(CC_TYPES::HIERARCHY_OBJECT)								||
-				(item->isKindOf(CC_TYPES::POINT_CLOUD) && CanDetachCloud(item))		|| //vertices can't be displaced
-				(item->isKindOf(CC_TYPES::MESH) && !item->isA(CC_TYPES::SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
-				item->isKindOf(CC_TYPES::IMAGE)										||
-				item->isKindOf(CC_TYPES::LABEL_2D)									||
-				item->isKindOf(CC_TYPES::CAMERA_SENSOR)								||
-				item->isKindOf(CC_TYPES::PRIMITIVE)                                 ||
-				item->isKindOf(CC_TYPES::CUSTOM_H_OBJECT))
+			(item->isKindOf(CC_TYPES::POINT_CLOUD) && CanDetachCloud(item))		|| //vertices can't be displaced
+			(item->isKindOf(CC_TYPES::MESH) && !item->isA(CC_TYPES::SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
+			item->isKindOf(CC_TYPES::IMAGE)										||
+			item->isKindOf(CC_TYPES::LABEL_2D)									||
+			item->isKindOf(CC_TYPES::CAMERA_SENSOR)								||
+			item->isKindOf(CC_TYPES::PRIMITIVE)									||
+			item->isKindOf(CC_TYPES::FACET)										||
+			item->isKindOf(CC_TYPES::CUSTOM_H_OBJECT))
 
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);

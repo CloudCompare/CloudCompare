@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -191,9 +191,12 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
-	pdlg.setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
-	pdlg.setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
-	pdlg.start();
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
+		pdlg.setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
+		pdlg.start();
+	}
 
 	//output precision
 	const int s_coordPrecision = saveDialog->coordsPrecision();
@@ -337,7 +340,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 
 		stream << line << "\n";
 
-		if (!nprogress.oneStep())
+		if (parameters.parentWidget && !nprogress.oneStep())
 		{
 			result = CC_FERR_CANCELED_BY_USER;
 			break;
@@ -702,7 +705,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 	//we skip lines as defined on input
 	{
-		for (unsigned i=0; i<skipLines; ++i)
+		for (unsigned i = 0; i < skipLines; ++i)
 		{
 			stream.readLine();
 		}
@@ -711,9 +714,12 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	//progress indicator
 	ccProgressDialog pdlg(true, parameters.parentWidget);
 	CCLib::NormalizedProgress nprogress(&pdlg, approximateNumberOfLines);
-	pdlg.setMethodTitle(QObject::tr("Open ASCII file [%1]").arg(filename));
-	pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
-	pdlg.start();
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Open ASCII file [%1]").arg(filename));
+		pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
+		pdlg.start();
+	}
 
 	//buffers
 	ScalarType D = 0;
@@ -812,8 +818,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			}
 
 			//we update the progress info
-			nprogress.scale(approximateNumberOfLines,100,true);
-			pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
+			if (parameters.parentWidget)
+			{
+				nprogress.scale(approximateNumberOfLines, 100, true);
+				pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
+			}
 
 			nextLimit = cloudChunkPos+cloudChunkSize;
 		}
@@ -919,7 +928,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i expected)!",linesRead,nParts,maxPartIndex+1);
 		}
 
-		if (!nprogress.oneStep())
+		if (parameters.parentWidget && !nprogress.oneStep())
 		{
 			//cancel requested
 			result = CC_FERR_CANCELED_BY_USER;

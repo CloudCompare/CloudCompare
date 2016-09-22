@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -211,7 +211,7 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 	, m_projectionMatrix(sensor.m_projectionMatrix)
 	, m_projectionMatrixIsValid(false)
 {
-	setIntrinsicParameters(m_intrinsicParams);
+	setIntrinsicParameters(sensor.m_intrinsicParams);
 
 	//distortion params
 	if (m_distortionParams)
@@ -220,23 +220,32 @@ ccCameraSensor::ccCameraSensor(const ccCameraSensor& sensor)
 		switch (m_distortionParams->getModel())
 		{
 		case SIMPLE_RADIAL_DISTORTION:
-			{
-				//simply duplicate the struct
-				RadialDistortionParameters* clone = new RadialDistortionParameters;
-				*clone = *static_cast<const RadialDistortionParameters*>(m_distortionParams.data());
-				clonedDistParams = LensDistortionParameters::Shared(clone);
-			}
-			break;
+		{
+			//simply duplicate the struct
+			RadialDistortionParameters* clone = new RadialDistortionParameters;
+			*clone = *static_cast<const RadialDistortionParameters*>(sensor.m_distortionParams.data());
+			clonedDistParams = LensDistortionParameters::Shared(clone);
+		}
+		break;
+
+		case EXTENDED_RADIAL_DISTORTION:
+		{
+			//simply duplicate the struct
+			ExtendedRadialDistortionParameters* clone = new ExtendedRadialDistortionParameters;
+			*clone = *static_cast<const ExtendedRadialDistortionParameters*>(sensor.m_distortionParams.data());
+			clonedDistParams = LensDistortionParameters::Shared(clone);
+		}
+		break;
 
 		case BROWN_DISTORTION:
-			{
-				//simply duplicate the struct
-				BrownDistortionParameters* clone = new BrownDistortionParameters;
-				*clone = *static_cast<const BrownDistortionParameters*>(m_distortionParams.data());
-				clonedDistParams = LensDistortionParameters::Shared(clone);
-			}
-			break;
-		
+		{
+			//simply duplicate the struct
+			BrownDistortionParameters* clone = new BrownDistortionParameters;
+			*clone = *static_cast<const BrownDistortionParameters*>(sensor.m_distortionParams.data());
+			clonedDistParams = LensDistortionParameters::Shared(clone);
+		}
+		break;
+
 		default:
 			//unhandled type?!
 			assert(false);
@@ -259,7 +268,7 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 
 	//get current sensor position
 	ccIndexedTransformation sensorPos;
-	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
 		return ccBBox();
 	}
@@ -273,7 +282,7 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 		return ccBBox();
 	}
 
-	cloud.addPoint(CCVector3(0,0,0));
+	cloud.addPoint(CCVector3(0, 0, 0));
 	cloud.addPoint(CCVector3( upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
 	cloud.addPoint(CCVector3(-upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
 	cloud.addPoint(CCVector3(-upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
@@ -287,7 +296,7 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 		unsigned cornerCount = m_frustumInfos.frustumCorners->size();
 		if (cloud.reserve(cloud.size() + cornerCount))
 		{
-			for (unsigned i=0; i<cornerCount; ++i)
+			for (unsigned i = 0; i < cornerCount; ++i)
 				cloud.addPoint(*m_frustumInfos.frustumCorners->getPoint(i));
 		}
 	}
@@ -308,7 +317,7 @@ ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 	trans = sensorPos;
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
-	return ccBBox( -upperLeftPoint, CCVector3(upperLeftPoint.x,upperLeftPoint.x,0) );
+	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.x, 0));
 }
 
 void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)
@@ -444,6 +453,15 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 			}
 			break;
 
+		case EXTENDED_RADIAL_DISTORTION:
+		{
+			ExtendedRadialDistortionParameters* params = static_cast<ExtendedRadialDistortionParameters*>(m_distortionParams.data());
+			outStream << params->k1;
+			outStream << params->k2;
+			outStream << params->k3;
+		}
+		break;
+
 		case BROWN_DISTORTION:
 			{
 				BrownDistortionParameters* params = static_cast<BrownDistortionParameters*>(m_distortionParams.data());
@@ -546,6 +564,17 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		}
 		break;
 
+	case EXTENDED_RADIAL_DISTORTION:
+	{
+		ExtendedRadialDistortionParameters* distParams = new ExtendedRadialDistortionParameters;
+		inStream >> distParams->k1;
+		inStream >> distParams->k2;
+		inStream >> distParams->k3;
+
+		setDistortionParameters(LensDistortionParameters::Shared(distParams));
+	}
+	break;
+
 	case BROWN_DISTORTION:
 		{
 			BrownDistortionParameters* distParams = new BrownDistortionParameters;
@@ -582,10 +611,10 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (dataVersion < 38)
 	{
 		//frustum corners: no need to save/load them!
-		for (unsigned i=0; i<8; ++i)
+		for (unsigned i = 0; i < 8; ++i)
 		{
 			CCVector3 P;
-			ccSerializationHelper::CoordsFromDataStream(inStream,flags,P.u,3);
+			ccSerializationHelper::CoordsFromDataStream(inStream, flags, P.u, 3);
 		}
 	}
 
@@ -595,7 +624,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const
 {
 	ccIndexedTransformation trans;
-	
+
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
@@ -663,19 +692,28 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 #endif
 
 	//perspective division
-	CCVector2d p(localCoord.x/depth, localCoord.y/depth);
+	CCVector2d p(localCoord.x / depth, localCoord.y / depth);
 
 	//conversion to pixel coordinates
 	double factor = m_intrinsicParams.vertFocal_pix;
-	
-	//apply radial distortion (if any)
-	if (withLensError && m_distortionParams && m_distortionParams->getModel() == SIMPLE_RADIAL_DISTORTION)
-	{
-		const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
-		double norm2 = p.norm2();
-		double rp = 1.0 + norm2  * (params->k1 + norm2 * params->k2); //scaling factor to undo the radial distortion
 
-		factor *= rp;
+	//apply radial distortion (if any)
+	if (withLensError && m_distortionParams)
+	{
+		if (m_distortionParams->getModel() == SIMPLE_RADIAL_DISTORTION)
+		{
+			const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
+			double norm2 = p.norm2();
+			double rp = 1.0 + norm2  * (params->k1 + norm2 * params->k2); //scaling factor to undo the radial distortion
+			factor *= rp;
+		}
+		else if (m_distortionParams->getModel() == EXTENDED_RADIAL_DISTORTION)
+		{
+			const ExtendedRadialDistortionParameters* params = static_cast<ExtendedRadialDistortionParameters*>(m_distortionParams.data());
+			double norm2 = p.norm2();
+			double rp = 1.0 + norm2  * (params->k1 + norm2 * (params->k2 + norm2 * params->k3)); //scaling factor to undo the radial distortion
+			factor *= rp;
+		}
 	}
 	//*/
 
@@ -770,6 +808,7 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2& real, CCVect
 	switch (m_distortionParams->getModel())
 	{
 	case SIMPLE_RADIAL_DISTORTION:
+	case EXTENDED_RADIAL_DISTORTION:
 		{
 			//TODO: we need a pre-computed distortion map to do this!
 		}
@@ -839,6 +878,7 @@ bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float dept
 	switch (m_distortionParams->getModel())
 	{
 	case SIMPLE_RADIAL_DISTORTION:
+	case EXTENDED_RADIAL_DISTORTION:
 		{
 			//TODO
 			return false;
@@ -955,21 +995,31 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 	switch (m_distortionParams->getModel())
 	{
 	case SIMPLE_RADIAL_DISTORTION:
+	case EXTENDED_RADIAL_DISTORTION:
 		{
 			const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
-			const float& k1 = params->k1;
-			const float& k2 = params->k2;
+			float k1 = params->k1;
+			float k2 = params->k2;
 			if (k1 == 0 && k2 == 0)
 			{
 				ccLog::Warning("[ccCameraSensor::undistort] Invalid radial distortion coefficients!");
 				return QImage();
 			}
+			float k3 = 0;
+			if (m_distortionParams->getModel() == EXTENDED_RADIAL_DISTORTION)
+			{
+				k3 = static_cast<ExtendedRadialDistortionParameters*>(m_distortionParams.data())->k3;
+			}
 
-			const int& width  = m_intrinsicParams.arrayWidth;
-			const int& height = m_intrinsicParams.arrayHeight;
+			int width = image.width();
+			int height = image.height();
+
+			float xScale = image.width() / static_cast<float>(m_intrinsicParams.arrayWidth);
+			float yScale = image.height() / static_cast<float>(m_intrinsicParams.arrayHeight);
+			float rScale = sqrt(xScale * xScale + yScale * yScale);
 
 			//try to reserve memory for new image
-			QImage newImage(QSize(width,height),image.format());
+			QImage newImage(QSize(width, height), image.format());
 			if (newImage.isNull())
 			{
 				ccLog::Warning("[ccCameraSensor::undistort] Not enough memory!");
@@ -977,26 +1027,35 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 			}
 			newImage.fill(0);
 
-			float vertFocal_pix = getVertFocal_pix();
-			float horizFocal_pix = getHorizFocal_pix();
+			float vertFocal_pix = getVertFocal_pix() * xScale;
+			float horizFocal_pix = getHorizFocal_pix() * yScale;
 			float vf2 = vertFocal_pix * vertFocal_pix;
 			float hf2 = horizFocal_pix * horizFocal_pix;
-			float cx = m_intrinsicParams.principal_point[0];
-			float cy = m_intrinsicParams.principal_point[1];
+			float cx = m_intrinsicParams.principal_point[0] * xScale;
+			float cy = m_intrinsicParams.principal_point[1] * yScale;
+			k1 *= rScale;
+			k2 *= rScale;
+			k3 *= rScale;
+
+			assert((image.depth() % 8) == 0);
+			int depth = image.depth() / 8;
+			int bytesPerLine = image.bytesPerLine();
+			const uchar* iImageBits = image.bits();
+			uchar* oImageBits = newImage.bits();
 
 			//image undistortion
 			{
-				for (int i=0; i<width; ++i)
+				for (int i = 0; i < width; ++i)
 				{
-					float x = static_cast<float>(i) - cx;
+					float x = static_cast<float>(i)-cx;
 					float x2 = x*x;
-					for (int j=0; j<height; ++j)
+					for (int j = 0; j < height; ++j)
 					{
 						float y = static_cast<float>(j) - cy;
 						float y2 = y*y;
 
 						float p2 = x2/hf2 + y2/vf2; //p = pix/f
-						float rp = 1.0f + p2 * (k1 + p2*k2); //r(p) = 1.0 + k1 * ||p||^2 + k2 * ||p||^4
+						float rp = 1.0f + p2 * (k1 + p2 * (k2 + p2 * k3)); //r(p) = 1.0 + k1 * ||p||^2 + k2 * ||p||^4 + k3 * ||p||^6
 						float eqx = rp * x + cx;
 						float eqy = rp * y + cy;
 
@@ -1007,7 +1066,10 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 							&&	pixy >= 0
 							&&	pixy < height)
 						{
-							newImage.setPixel(i, j, image.pixel(pixx, pixy));
+							const uchar* iPixel = iImageBits + j * bytesPerLine + i * depth;
+							uchar* oPixel = oImageBits + pixy * bytesPerLine + pixx * depth;
+							memcpy(oPixel, iPixel, depth);
+							//newImage.setPixel(i, j, image.pixel(pixx, pixy));
 						}
 					}
 				}
@@ -1058,7 +1120,6 @@ ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace/*=true*/) const
 		return new ccImage(newImage, image->getName() + QString(".undistort"));
 	}
 }
-
 
 bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/)
 {
@@ -1814,7 +1875,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 			}
 
 			//pure black pixels are treated as transparent ones!
-			orthoImage.setPixel(i,h-1-j,rgb != blackValue ? rgb : blackAlphaZero);
+			orthoImage.setPixel(i, h - 1 - j, rgb != blackValue ? rgb : blackAlphaZero);
 		}
 	}
 
@@ -1965,7 +2026,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 			}
 
 			//pure black pixels are treated as transparent ones!
-			orthoImage.setPixel(i,h-1-j,rgb != blackValue ? rgb : blackAlphaZero);
+			orthoImage.setPixel(i, h - 1 - j, rgb != blackValue ? rgb : blackAlphaZero);
 		}
 	}
 
@@ -2178,12 +2239,12 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 					QRgb rgb = image->data().pixel(x,y);
 					//pure black pixels are treated as transparent ones!
 					if (qRed(rgb) + qGreen(rgb) + qBlue(rgb) > 0)
-						orthoImage.setPixel(i,h-1-j,rgb);
+						orthoImage.setPixel(i, h - 1 - j, rgb);
 					else
-						orthoImage.setPixel(i,h-1-j,qRgba(qRed(rgb),qGreen(rgb),qBlue(rgb),0));
+						orthoImage.setPixel(i, h - 1 - j, qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), 0));
 				}
 				else
-					orthoImage.setPixel(i,h-1-j,qRgba(255,0,255,0));
+					orthoImage.setPixel(i, h - 1 - j, qRgba(255, 0, 255, 0));
 			}
 		}
 

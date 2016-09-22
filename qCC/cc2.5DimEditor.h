@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -104,8 +104,11 @@ protected: //raster grid related stuff
 	**/
 	virtual bool showGridBoxEditor();
 
-	//! Returns grid size as a string
+	//! Returns the grid size as a string
 	virtual QString getGridSizeAsString() const;
+
+	//! Returns the grid size
+	virtual bool getGridSize(unsigned& width, unsigned& height) const;
 
 	//! Creates the bounding-box editor
 	void createBoundingBoxEditor(const ccBBox& gridBBox, QWidget* parent);
@@ -124,7 +127,8 @@ protected: //raster grid related stuff
 										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,
 										bool fillEmptyCells,
-										double emptyCellsHeight) const;
+										double emptyCellsHeight,
+										bool exportToOriginalCS) const;
 
 	//! Raster grid cell
 	struct RasterCell
@@ -189,6 +193,9 @@ protected: //raster grid related stuff
 		void clear();
 
 		//! Fills the grid with a point cloud
+		/** Since version 2.8, we now use the "PixelIsArea" convention by default (as GDAL)
+			This means that the height is computed at the center of the grid cell.
+		**/
 		bool fillWith(	ccGenericPointCloud* cloud,
 						unsigned char projectionDimension,
 						cc2Point5DimEditor::ProjectionType projectionType,
@@ -204,6 +211,24 @@ protected: //raster grid related stuff
 		inline void setValid(bool state) { valid = state; }
 		//! Returns whether the grid is 'valid' or not
 		inline bool isValid() const { return valid; }
+
+		//! Computes the position of the cell that includes a given point
+		std::pair<int, int> computeCellPos(const CCVector3& P, unsigned char X, unsigned char Y) const
+		{
+			CCVector3d relativePos = CCVector3d::fromArray(P.u) - minCorner;
+			
+			//DGM: we use the 'PixelIsArea' convention
+			int i = static_cast<int>((relativePos.u[X] / gridStep + 0.5));
+			int j = static_cast<int>((relativePos.u[Y] / gridStep + 0.5));
+
+			return std::pair<int, int>(i, j);
+		}
+
+		//! Computes the position of the center of a given cell
+		CCVector2d computeCellCenter(int i, int j, unsigned char X, unsigned char Y) const
+		{
+			return CCVector2d(minCorner.u[X] + (i + 0.5) * gridStep, minCorner.u[Y] + (j + 0.5) * gridStep);
+		}
 
 		//! Row
 		typedef std::vector<RasterCell> Row;

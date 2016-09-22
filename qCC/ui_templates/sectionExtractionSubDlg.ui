@@ -145,7 +145,7 @@
          <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
            <property name="toolTip">
-            <string>Max output polyline edge length (the smaller, the closer to the points the countour will be).
+            <string>Max output polyline edge length (the smaller, the closer to the points the contour will be).
 Warning: if 0, generates the convex hull.</string>
            </property>
            <property name="decimals">
@@ -162,7 +162,7 @@ Warning: if 0, generates the convex hull.</string>
       <item>
        <widget class="QCheckBox" name="multiPassCheckBox">
         <property name="toolTip">
-         <string>Multi-pass process where longer edges may be temporarilly created to obtain a better fit... or a worst one ;)</string>
+         <string>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</string>
         </property>
         <property name="text">
          <string>multi-pass</string>

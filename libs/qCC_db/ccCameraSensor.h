@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -66,8 +66,10 @@ public: //general
 
 	//! Supported distortion models
 	enum DistortionModel {	NO_DISTORTION_MODEL = 0,			/**< no distortion model **/
-							SIMPLE_RADIAL_DISTORTION = 1,		/**< simple radial distortion model (k1,k2) **/
-							BROWN_DISTORTION = 2 };				/**< Brown's distortion model (k1,k2,k3,etc.) **/
+							SIMPLE_RADIAL_DISTORTION = 1,		/**< simple radial distortion model (k1, k2) **/
+							BROWN_DISTORTION = 2,				/**< Brown's distortion model (k1, k2, k3, etc.) **/
+							EXTENDED_RADIAL_DISTORTION = 3		/**< extended radial distortion model (k1, k2, k3) **/
+	};
 
 	//! Lens distortion parameters (interface)
 	struct LensDistortionParameters
@@ -92,12 +94,28 @@ public: //general
 		RadialDistortionParameters() : k1(0), k2(0) {}
 		
 		//inherited from LensDistortionParameters
-		inline DistortionModel getModel() const { return SIMPLE_RADIAL_DISTORTION; }
+		inline virtual DistortionModel getModel() const override { return SIMPLE_RADIAL_DISTORTION; }
 
 		//! 1st radial distortion coefficient
 		float k1;
 		//! 2nd radial distortion coefficient
 		float k2;
+	};
+
+	//! Extended radial distortion model
+	struct QCC_DB_LIB_API ExtendedRadialDistortionParameters : RadialDistortionParameters
+	{
+		//! Shared pointer type
+		typedef QSharedPointer<RadialDistortionParameters> Shared;
+
+		//! Default initializer
+		ExtendedRadialDistortionParameters() : RadialDistortionParameters(), k3(0) {}
+
+		//inherited from LensDistortionParameters
+		inline virtual DistortionModel getModel() const override { return EXTENDED_RADIAL_DISTORTION; }
+
+		//! 3rd radial distortion coefficient
+		float k3;
 	};
 
 	//! Brown's distortion model + Linear Disparity
@@ -115,7 +133,7 @@ public: //general
 		BrownDistortionParameters();
 
 		//inherited from LensDistortionParameters
-		inline DistortionModel getModel() const { return BROWN_DISTORTION; }
+		inline virtual DistortionModel getModel() const override { return BROWN_DISTORTION; }
 
 		//! Helper: initializes a IntrinsicParameters structure with the default Kinect parameters
 		static void GetKinectDefaults(BrownDistortionParameters& params);

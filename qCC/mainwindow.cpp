@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -46,7 +46,6 @@
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
 #include <ccQuadric.h>
-#include <ccExternalFactory.h>
 #include <ccSphere.h>
 
 //qCC_io
@@ -73,7 +72,7 @@
 #include "ccAlignDlg.h" //Aurelien BEY
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
-#include "ccAskTwoDoubleValuesDlg.h"
+#include "ccFilterByValueDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccCameraParamEditDlg.h"
 #include "ccCamSensorProjectionDlg.h"
@@ -108,6 +107,7 @@
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccPluginDlg.h"
+#include "ccWaveformDialog.h"
 
 //other
 #include "ccCropTool.h"
@@ -235,8 +235,6 @@ MainWindow::MainWindow()
 
 	connectActions();
 
-	loadPlugins();
-
 #ifdef CC_3DXWARE_SUPPORT
 	enable3DMouse(true, true);
 #else
@@ -299,43 +297,125 @@ MainWindow::~MainWindow()
 	ccConsole::ReleaseInstance();
 }
 
-void MainWindow::loadPlugins()
+void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths)
 {
 	menuPlugins->setEnabled(false);
 	menuShadersAndFilters->setEnabled(false);
 	toolBarPluginTools->setVisible(false);
 	toolBarGLFilters->setVisible(false);
 	
-	ccConsole::Print(QString("Application path: ") + QCoreApplication::applicationDirPath());
+	m_pluginInfoList = plugins;
+	m_pluginPaths = pluginPaths;
 	
-	//"static" plugins
-	for (QObject *plugin : QPluginLoader::staticInstances())
+	for ( const tPluginInfo &plugin : plugins )
 	{
-		dispatchPlugin(plugin);
+		if (!plugin.object)
+		{
+			assert(false);
+			continue;
+		}
+
+		QString pluginName = plugin.object->getName();
+		if (pluginName.isEmpty())
+		{
+			ccLog::Warning(QString("[Plugin] Plugin '%1' has an invalid (empty) name!").arg(plugin.filename));
+			continue;
+		}
+
+		CC_PLUGIN_TYPE type = plugin.object->getType();
+		switch (type)
+		{
+
+		case CC_STD_PLUGIN: //standard plugin
+		{
+			plugin.qObject->setParent(this);
+			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.object);
+			stdPlugin->setMainAppInterface(this);
+
+			QMenu* destMenu = 0;
+			QToolBar* destToolBar = 0;
+
+			QActionGroup actions(this);
+			stdPlugin->getActions(actions);
+			if (actions.actions().size() > 1) //more than one action? We create it's own menu and toolbar
+			{
+				destMenu = (menuPlugins ? menuPlugins->addMenu(pluginName) : 0);
+				if (destMenu)
+					destMenu->setIcon(stdPlugin->getIcon());
+				destToolBar = addToolBar(pluginName + QString(" toolbar"));
+
+				if (destToolBar)
+				{
+					m_stdPluginsToolbars.push_back(destToolBar);
+					//not sure why but it seems that we must specifically set the object name.
+					//if not the QSettings thing will complain about a not-setted name
+					//when saving settings of qCC mainwindow
+					destToolBar->setObjectName(pluginName);
+				}
+			}
+			else //default destination
+			{
+				destMenu = menuPlugins;
+				destToolBar = toolBarPluginTools;
+			}
+
+			//add actions
+			foreach (QAction* action, actions.actions())
+			{
+				//add to menu (if any)
+				if (destMenu)
+				{
+					destMenu->addAction(action);
+					destMenu->setEnabled(true);
+				}
+				//add to toolbar
+				if (destToolBar)
+				{
+					destToolBar->addAction(action);
+					destToolBar->setVisible(true);
+					destToolBar->setEnabled(true);
+				}
+			}
+
+			//add to std. plugins list
+			m_stdPlugins.push_back(stdPlugin);
+		}
+		break;
+
+		case CC_GL_FILTER_PLUGIN: //GL filter
+		{
+			//(auto)create action
+			plugin.qObject->setParent(this);
+			QAction* action = new QAction(pluginName, plugin.qObject);
+			action->setToolTip(plugin.object->getDescription());
+			action->setIcon(plugin.object->getIcon());
+			//connect default signal
+			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+
+			menuShadersAndFilters->addAction(action);
+			menuShadersAndFilters->setEnabled(true);
+			toolBarGLFilters->addAction(action);
+			toolBarGLFilters->setVisible(true);
+			toolBarGLFilters->setEnabled(true);
+
+			//add to GL filter (actions) list
+			m_glFilterActions.addAction(action);
+		}
+		break;
+
+		case CC_IO_FILTER_PLUGIN: //I/O filter
+		{
+			//not handled by the MainWindow instance
+			continue;
+		}
+		break;
+
+		default:
+			assert(false);
+			continue;
+		}
 	}
 
-	tPluginInfoList	plugins = ccPlugins::Find(m_pluginPaths);
-	
-	// now iterate over plugins and process them
-	for ( tPluginInfo &info : plugins )
-	{
-		const QString	fileName = info.first;
-		QObject			*pluginObject = info.second;
-		
-		ccConsole::Print(QString("Found plugin: %1").arg( fileName ));
-		
-		if (dispatchPlugin(pluginObject))
-		{
-			m_pluginInfoList += info;
-		}
-		else
-		{
-			delete pluginObject;
-			pluginObject = nullptr;
-			ccConsole::Warning("\tUnsupported or invalid plugin type");
-		}		
-	}
-	
 	if (menuPlugins)
 	{
 		menuPlugins->setEnabled(!m_stdPlugins.empty());
@@ -363,130 +443,6 @@ void MainWindow::loadPlugins()
 		//actionDisplayGLFiltersTools->setChecked(false);
 	}
 }
-bool MainWindow::dispatchPlugin(QObject *plugin)
-{
-	ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(plugin);
-	if (!ccPlugin)
-		return false;
-	plugin->setParent(this);
-
-	QString pluginName = ccPlugin->getName();
-	if (pluginName.isEmpty())
-	{
-		ccLog::Warning("\tplugin has an invalid (empty) name!");
-		return false;
-	}
-	ccConsole::Print(QString("\tname: \"%1\"").arg(pluginName));
-
-	CC_PLUGIN_TYPE type = ccPlugin->getType();
-
-	switch(type)
-	{
-
-	case CC_STD_PLUGIN: //standard plugin
-		{
-			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
-			stdPlugin->setMainAppInterface(this);
-
-			QMenu* destMenu = 0;
-			QToolBar* destToolBar = 0;
-
-			QActionGroup actions(this);
-			stdPlugin->getActions(actions);
-			if (actions.actions().size() > 1) //more than one action? We create it's own menu and toolbar
-			{
-				destMenu = (menuPlugins ? menuPlugins->addMenu(pluginName) : 0);
-				if (destMenu)
-					destMenu->setIcon(stdPlugin->getIcon());
-				destToolBar = addToolBar(pluginName+QString(" toolbar"));
-
-				if (destToolBar)
-				{
-					m_stdPluginsToolbars.push_back(destToolBar);
-					//not sure why but it seems that we must specifically set the object name.
-					//if not the QSettings thing will complain about a not-setted name
-					//when saving settings of qCC mainwindow
-					destToolBar->setObjectName(pluginName);
-				}
-			}
-			else //default destination
-			{
-				destMenu = menuPlugins;
-				destToolBar = toolBarPluginTools;
-			}
-
-			//add actions
-			foreach(QAction* action,actions.actions())
-			{
-				//add to menu (if any)
-				if (destMenu)
-				{
-					destMenu->addAction(action);
-					destMenu->setEnabled(true);
-				}
-				//add to toolbar
-				if (destToolBar)
-				{
-					destToolBar->addAction(action);
-					destToolBar->setVisible(true);
-					destToolBar->setEnabled(true);
-				}
-			}
-
-			//add to std. plugins list
-			m_stdPlugins.push_back(stdPlugin);
-
-			// see if this plugin can give back an additional factory for objects
-			ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
-			if (factory) // if it is valid add to the plugin_factories
-			{
-				assert(ccExternalFactory::Container::GetUniqueInstance());
-				ccExternalFactory::Container::GetUniqueInstance()->addFactory(factory);
-			}
-		}
-		break;
-
-	case CC_GL_FILTER_PLUGIN: //GL filter
-		{
-			//(auto)create action
-			QAction* action = new QAction(pluginName,plugin);
-			action->setToolTip(ccPlugin->getDescription());
-			action->setIcon(ccPlugin->getIcon());
-			//connect default signal
-			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
-
-			menuShadersAndFilters->addAction(action);
-			menuShadersAndFilters->setEnabled(true);
-			toolBarGLFilters->addAction(action);
-			toolBarGLFilters->setVisible(true);
-			toolBarGLFilters->setEnabled(true);
-
-			//add to GL filter (actions) list
-			m_glFilterActions.addAction(action);
-
-		}
-		break;
-
-	case CC_IO_FILTER_PLUGIN: //I/O filter
-		{
-			ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(ccPlugin);
-			FileIOFilter::Shared filter = ioPlugin->getFilter(this);
-			if (filter)
-			{
-				FileIOFilter::Register(filter);
-				ccConsole::Print(QString("\tfile extension: %1").arg(filter->getDefaultExtension().toUpper()));
-			}
-		}
-		break;
-
-	default:
-		assert(false);
-		ccLog::Warning("\tunhandled plugin type!");
-		return false;
-	}
-
-	return true;
-}
 
 void MainWindow::doActionShowAboutPluginsDialog()
 {
@@ -509,7 +465,7 @@ void MainWindow::doEnableGLFilter()
 	}
 
 	QAction *action = qobject_cast<QAction*>(sender());
-	ccPluginInterface* ccPlugin = ccPlugins::GetValidPlugin(action ? action->parent() : 0);
+	ccPluginInterface* ccPlugin = ccPlugins::ToValidPlugin(action ? action->parent() : 0);
 	if (!ccPlugin)
 		return;
 
@@ -776,7 +732,6 @@ void MainWindow::connectActions()
 	connect(actionShowDepthBuffer,				SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
 	connect(actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
 	connect(actionComputePointsVisibility,		SIGNAL(triggered()),	this,		SLOT(doActionComputePointsVisibility()));
-	
 	//"Edit > Sensor" menu
 	connect(actionCreateGBLSensor,				SIGNAL(triggered()),	this,		SLOT(doActionCreateGBLSensor()));
 	connect(actionCreateCameraSensor,			SIGNAL(triggered()),	this,		SLOT(doActionCreateCameraSensor()));
@@ -804,6 +759,8 @@ void MainWindow::connectActions()
 	connect(actionSetSFAsCoord,					SIGNAL(triggered()),	this,		SLOT(doActionSetSFAsCoord()));
 	connect(actionDeleteScalarField,			SIGNAL(triggered()),	this,		SLOT(doActionDeleteScalarField()));
 	connect(actionDeleteAllSF,					SIGNAL(triggered()),	this,		SLOT(doActionDeleteAllSF()));
+	//"Edit > Waveform" menu
+	connect(actionShowWaveDialog,				SIGNAL(triggered()),	this,		SLOT(doActionShowWaveDialog()));
 	//"Edit" menu
 	connect(actionClone,						SIGNAL(triggered()),	this,		SLOT(doActionClone()));
 	connect(actionMerge,						SIGNAL(triggered()),	this,		SLOT(doActionMerge()));
@@ -1803,48 +1760,6 @@ void MainWindow::doActionDeleteAllSF()
 	updateUI();
 }
 
-void MainWindow::doActionMeasureMeshVolume()
-{
-	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
-	{
-		ccHObject* ent = m_selectedEntities[i];
-		if (ent->isKindOf(CC_TYPES::MESH))
-		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-			if (mesh)
-			{
-				//first check that the mesh is closed
-				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
-				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh,stats))
-				{
-					if (stats.edgesNotShared != 0)
-					{
-						ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (mesh '%1' has holes)").arg(ent->getName()));
-					}
-					else if (stats.edgesSharedByMore != 0)
-					{
-						ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (mesh '%1' has non-manifold edges)").arg(ent->getName()));
-					}
-				}
-				else
-				{
-					ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (not enough memory to check if mesh '%1' is closed)").arg(ent->getName()));
-				}
-				//then we compute the mesh volume
-				double V = CCLib::MeshSamplingTools::computeMeshVolume(mesh);
-				//we force the console to display itself
-				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Volume Measurer] Mesh '%1': V=%2 (cube units)").arg(ent->getName()).arg(V));
-			}
-			else
-			{
-				assert(false);
-			}
-		}
-	}
-}
-
 void MainWindow::doActionFlagMeshVertices()
 {
 	size_t selNum = m_selectedEntities.size();
@@ -1922,10 +1837,53 @@ void MainWindow::doActionFlagMeshVertices()
 	}
 }
 
+void MainWindow::doActionMeasureMeshVolume()
+{
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i = 0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+		if (ent->isKindOf(CC_TYPES::MESH))
+		{
+			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+			if (mesh)
+			{
+				//we compute the mesh volume
+				double V = CCLib::MeshSamplingTools::computeMeshVolume(mesh);
+				//we force the console to display itself
+				forceConsoleDisplay();
+				ccConsole::Print(QString("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(ent->getName()).arg(V));
+				
+				//check that the mesh is closed
+				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
+				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh, stats))
+				{
+					if (stats.edgesNotShared != 0)
+					{
+						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has holes)"));
+					}
+					else if (stats.edgesSharedByMore != 0)
+					{
+						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)"));
+					}
+				}
+				else
+				{
+					ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)"));
+				}
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+	}
+}
+
 void MainWindow::doActionMeasureMeshSurface()
 {
 	size_t selNum = m_selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 		if (ent->isKindOf(CC_TYPES::MESH))
@@ -1936,9 +1894,11 @@ void MainWindow::doActionMeasureMeshSurface()
 				double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
+				ccConsole::Print(QString("[Mesh Surface] Mesh '%1': S=%2 (square units)").arg(ent->getName()).arg(S));
 				if (mesh->size())
-					ccConsole::Print(QString("[Mesh Surface Measurer] Average triangle surface: %1 (square units)").arg(S/double(mesh->size())));
+				{
+					ccConsole::Print(QString("[Mesh Surface] Average triangle surface: %1 (square units)").arg(S / double(mesh->size())));
+				}
 			}
 			else
 			{
@@ -2637,7 +2597,7 @@ void MainWindow::doActionExportDepthBuffer()
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
 
-	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,DepthMapFileFilter::GetFileFilter());
+	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, DepthMapFileFilter::GetFileFilter());
 	if (filename.isEmpty())
 	{
 		//process cancelled by user
@@ -3041,16 +3001,19 @@ void MainWindow::doActionFilterByValue()
 		}
 	}
 
-	ccAskTwoDoubleValuesDlg dlg("Min", "Max", -1.0e9, 1.0e9, minVald, maxVald, 8, "Filter by scalar value", this);
+	ccFilterByValueDlg dlg(minVald, maxVald, -1.0e9, 1.0e9, this);
 	if (!dlg.exec())
 		return;
 
-	ScalarType minVal = (ScalarType)dlg.doubleSpinBox1->value();
-	ScalarType maxVal = (ScalarType)dlg.doubleSpinBox2->value();
+	ccFilterByValueDlg::Mode mode = dlg.mode();
+	assert(mode != ccFilterByValueDlg::CANCEL);
 
-	ccHObject* firstResult = 0;
+	ScalarType minVal = static_cast<ScalarType>(dlg.minDoubleSpinBox->value());
+	ScalarType maxVal = static_cast<ScalarType>(dlg.maxDoubleSpinBox->value());
+
+	ccHObject::Container results;
 	{
-		for (size_t i=0; i<toFilter.size(); ++i)
+		for (size_t i = 0; i < toFilter.size(); ++i)
 		{
 			ccHObject* ent = toFilter[i].first;
 			ccPointCloud* pc = toFilter[i].second;
@@ -3063,14 +3026,25 @@ void MainWindow::doActionFilterByValue()
 			pc->setCurrentOutScalarField(outSfIdx);
 			//pc->setCurrentScalarField(outSfIdx);
 
-			ccHObject* result = 0;
+			ccHObject* resultInside = 0;
+			ccHObject* resultOutside = 0;
 			if (ent->isKindOf(CC_TYPES::MESH))
 			{
-				pc->hidePointsByScalarValue(minVal,maxVal);
+				pc->hidePointsByScalarValue(minVal, maxVal);
 				if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-					result = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
 				else if (ent->isA(CC_TYPES::SUB_MESH))
-					result = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+					resultInside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+				
+				if (mode == ccFilterByValueDlg::SPLIT)
+				{
+					pc->invertVisibilityArray();
+					if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
+						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+					else if (ent->isA(CC_TYPES::SUB_MESH))
+						resultOutside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+				}
+
 				pc->unallocateVisibilityArray();
 			}
 			else if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -3080,28 +3054,44 @@ void MainWindow::doActionFilterByValue()
 				//pc->unallocateVisibilityArray();
 
 				//shortcut, as we know here that the point cloud is a "ccPointCloud"
-				result = pc->filterPointsByScalarValue(minVal,maxVal);
+				resultInside = pc->filterPointsByScalarValue(minVal, maxVal, false);
+
+				if (mode == ccFilterByValueDlg::SPLIT)
+				{
+					resultOutside = pc->filterPointsByScalarValue(minVal, maxVal, true);
+				}
 			}
 
-			if (result)
+			if (resultInside)
 			{
 				ent->setEnabled(false);
-				result->setDisplay(ent->getDisplay());
-				result->prepareDisplayForRefresh();
-				addToDB(result);
+				resultInside->setDisplay(ent->getDisplay());
+				resultInside->prepareDisplayForRefresh();
+				addToDB(resultInside);
 
-				if (!firstResult)
-					firstResult = result;
+				results.push_back(resultInside);
+			}
+			if (resultOutside)
+			{
+				ent->setEnabled(false);
+				resultOutside->setDisplay(ent->getDisplay());
+				resultOutside->prepareDisplayForRefresh();
+				resultOutside->setName(resultOutside->getName() + ".outside");
+				addToDB(resultOutside);
+
+				results.push_back(resultOutside);
 			}
 			//*/
 		}
 	}
 
-	if (firstResult)
+	if (!results.empty())
 	{
 		ccConsole::Warning("Previously selected entities (sources) have been hidden!");
 		if (m_ccRoot)
-			m_ccRoot->selectEntity(firstResult);
+		{
+			m_ccRoot->selectEntities(results);
+		}
 	}
 
 	refreshAll();
@@ -4086,9 +4076,9 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		if (sortBysize) //still ok?
 		{
 			unsigned compCount = static_cast<unsigned>(components.size());
-			for (unsigned i=0; i<compCount; ++i)
+			for (unsigned i = 0; i < compCount; ++i)
 			{
-				sortedIndexes.push_back(ComponentIndexAndSize(i,components[i]->size()));
+				sortedIndexes.push_back(ComponentIndexAndSize(i, components[i]->size()));
 			}
 
 			SortAlgo(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
@@ -4104,7 +4094,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
 
 		//for each component
-		for (unsigned i=0; i<components.size(); ++i)
+		for (size_t i = 0; i < components.size(); ++i)
 		{
 			CCLib::ReferenceCloud* compIndexes = _sortedIndexes ? components[_sortedIndexes->at(i).index] : components[i];
 
@@ -4202,7 +4192,7 @@ void MainWindow::doActionLabelConnectedComponents()
 		return;
 
 	int octreeLevel = dlg.getOctreeLevel();
-	int minComponentSize = dlg.getMinPointsNb();
+	unsigned minComponentSize = static_cast<unsigned>(std::max(0, dlg.getMinPointsNb()));
 	bool randColors = dlg.randomColors();
 
 	ccProgressDialog pDlg(false, this);
@@ -4211,9 +4201,11 @@ void MainWindow::doActionLabelConnectedComponents()
 	//we unselect all entities as we are going to automatically select the created components
 	//(otherwise the user won't percieve the change!)
 	if (m_ccRoot)
+	{
 		m_ccRoot->unselectAllEntities();
+	}
 
-	for (size_t i=0; i<count; ++i)
+	for (size_t i = 0; i < count; ++i)
 	{
 		ccGenericPointCloud* cloud = clouds[i];
 
@@ -4236,7 +4228,9 @@ void MainWindow::doActionLabelConnectedComponents()
 			//we create/activate CCs label scalar field
 			int sfIdx = pc->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
 			if (sfIdx < 0)
+			{
 				sfIdx = pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+			}
 			if (sfIdx < 0)
 			{
 				ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
@@ -4246,15 +4240,50 @@ void MainWindow::doActionLabelConnectedComponents()
 
 			//we try to label all CCs
 			CCLib::ReferenceCloudContainer components;
-			if (CCLib::AutoSegmentationTools::labelConnectedComponents(	cloud,
-																		static_cast<unsigned char>(octreeLevel),
-																		false,
-																		&pDlg,
-																		theOctree.data()) >= 0)
+			int componentCount = CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,
+																						static_cast<unsigned char>(octreeLevel),
+																						false,
+																						&pDlg,
+																						theOctree.data());
+			
+			if (componentCount >= 0)
 			{
 				//if successfull, we extract each CC (stored in "components")
+
+				//safety test
+				int realComponentCount = 0;
+				{
+					for (size_t i = 0; i < components.size(); ++i)
+					{
+						if (components[i]->size() >= minComponentSize)
+						{
+							++realComponentCount;
+						}
+					}
+				}
+
+				if (realComponentCount > 500)
+				{
+					//too many components
+					if (QMessageBox::warning(this, "Many components", QString("Do you really expect up to %1 components?\n(this may take a lot of time to process and display)").arg(realComponentCount), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					{
+						//cancel
+						pc->deleteScalarField(sfIdx);
+						if (pc->getNumberOfScalarFields() != 0)
+						{
+							pc->setCurrentDisplayedScalarField(static_cast<int>(pc->getNumberOfScalarFields()) - 1);
+						}
+						else
+						{
+							pc->showSF(false);
+						}
+						pc->prepareDisplayForRefresh();
+						continue;
+					}
+				}
+				
 				pc->getCurrentInScalarField()->computeMinAndMax();
-				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud,components))
+				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
 				{
 					ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 				}
@@ -4380,8 +4409,8 @@ void MainWindow::doConvertPolylinesToMesh()
 		ccLog::Error("Not enough segments!");
 		return;
 	}
-#define USE_CGAL_LIB
-#if defined(USE_CGAL_LIB)
+
+	//we assume we link with CGAL now (if not the call to Delaunay2dMesh::buildMesh will fail anyway)
 	std::vector<CCVector2> points2D;
 	std::vector<int> segments2D;
 	try
@@ -4431,7 +4460,7 @@ void MainWindow::doConvertPolylinesToMesh()
 
 	CCLib::Delaunay2dMesh* delaunayMesh = new CCLib::Delaunay2dMesh;
 	char errorStr[1024];
-	if (!delaunayMesh->buildMesh(points2D,segments2D,errorStr))
+	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
 		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
 		delete delaunayMesh;
@@ -4460,84 +4489,8 @@ void MainWindow::doConvertPolylinesToMesh()
 				vertices->addPoint(*P);
 			}
 		}
-		delaunayMesh->linkMeshWith(vertices,false);
+		delaunayMesh->linkMeshWith(vertices, false);
 	}
-
-#else
-	double totalLength = 0.0;
-	{
-		for (size_t i=0; i<polylines.size(); ++i)
-		{
-			ccPolyline* poly = polylines[i];
-			assert(poly);
-			if (poly)
-			{
-				//compute total length
-				totalLength += poly->computeLength();
-			}
-		}
-	}
-	//sample points on the polylines
-	double step = QInputDialog::getDouble(this,"Contour plot meshing","Sampling step",totalLength/1000.0,1.0e-6,1.0e6,6);
-	unsigned approxCount = static_cast<unsigned>(totalLength/step) + vertexCount;
-
-	ccPointCloud* vertices = new ccPointCloud("vertices");
-	if (!vertices->reserve(approxCount))
-	{
-		ccLog::Error("Not enough memory!");
-		delete vertices;
-		return;
-	}
-
-	//now let sample points on the polylines
-	for (size_t i=0; i<polylines.size(); ++i)
-	{
-		ccPolyline* poly = polylines[i];
-		if (poly)
-		{
-			bool closed = poly->isClosed();
-			unsigned vertCount = poly->size();
-			unsigned maxVertCount = closed ? vertCount : vertCount-1;
-			for (unsigned v=0; v<vertCount; ++v)
-			{
-				const CCVector3* A = poly->getPoint(v);
-				const CCVector3* B = poly->getPoint((v+1)%vertCount);
-
-				CCVector3 AB = *B-*A;
-				double l = AB.norm();
-				double s = 0.0;
-				while (s < l)
-				{
-					CCVector3 P = *A + AB * (s/l);
-					vertices->addPoint(P);
-					s += step;
-				}
-
-				//add the last point if the polyline is not closed!
-				if (!closed && v+1 == maxVertCount)
-					vertices->addPoint(*B);
-			}
-		}
-
-		if (vertices->size() < 3)
-		{
-			ccLog::Error("Not enough vertices (reduce the step size)!");
-			delete vertices;
-			return;
-		}
-	}
-
-	char errorStr[1024];
-	CCLib::GenericIndexedMesh* delaunayMesh = CCLib::PointProjectionTools::computeTriangulation(vertices,DELAUNAY_2D_AXIS_ALIGNED,0,dim,errorStr);
-	if (!delaunayMesh)
-	{
-		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
-		delete delaunayMesh;
-		delete vertices;
-		return;
-	}
-
-#endif
 
 #ifdef QT_DEBUG
 	//Test delaunay output
@@ -4551,7 +4504,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	}
 #endif
 	
-	ccMesh* mesh = new ccMesh(delaunayMesh,vertices);
+	ccMesh* mesh = new ccMesh(delaunayMesh, vertices);
 	if (mesh->size() != delaunayMesh->size())
 	{
 		//not enough memory (error will be issued later)
@@ -4570,12 +4523,22 @@ void MainWindow::doConvertPolylinesToMesh()
 		vertices->setEnabled(false);
 		addToDB(mesh);
 		if (mesh->computePerVertexNormals())
+		{
 			mesh->showNormals(true);
+		}
 		else
+		{
 			ccLog::Warning("[Contour plot to mesh] Failed to compute normals!");
+		}
 
 		if (mesh->getDisplay())
+		{
 			mesh->getDisplay()->redraw();
+		}
+
+		//global shift & scale (we copy it from the first polyline by default)
+		vertices->setGlobalShift(polylines.front()->getGlobalShift());
+		vertices->setGlobalScale(polylines.front()->getGlobalScale());
 	}
 	else
 	{
@@ -4724,7 +4687,9 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 			cloud->prepareDisplayForRefresh_recursive();
 			addToDB(mesh);
 			if (i == 0)
+			{
 				m_ccRoot->selectEntity(mesh); //auto-select first element
+			}
 		}
 		else
 		{
@@ -9019,7 +8984,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
 							ccGLWindow* destWin/*=0*/)
 {
-	//to handle same 'shift on load' for multiple files
+	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
 	bool loadCoordinatesTransEnabled = false;
 	
@@ -9033,17 +8998,26 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	}
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
-	CCVector3d addCoordinatesShift(0,0,0);
+	CCVector3d addCoordinatesShift(0, 0, 0);
 
-	for (int i=0; i<filenames.size(); ++i)
+	for (int i = 0; i < filenames.size(); ++i)
 	{
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, fileFilter);
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result, fileFilter);
 
 		if (newGroup)
 		{
 			if (destWin)
+			{
 				newGroup->setDisplay_recursive(destWin);
-			addToDB(newGroup,true,true,false);
+			}
+			addToDB(newGroup, true, true, false);
+		}
+
+		if (result == CC_FERR_CANCELED_BY_USER)
+		{
+			//stop importing the file if the user has cancelled the current process!
+			break;
 		}
 	}
 
@@ -9085,11 +9059,7 @@ void MainWindow::closeAll()
 	if (QMessageBox::question(	this, "Close all", "Are you sure you want to remove all loaded entities?", QMessageBox::Yes, QMessageBox::No ) != QMessageBox::Yes)
 		return;
 
-	ccHObject* root = m_ccRoot->getRootEntity();
-	if (root)
-	{
-		m_ccRoot->unloadAll();
-	}
+	m_ccRoot->unloadAll();
 
 	redrawAll(false);
 }
@@ -9136,9 +9106,9 @@ void MainWindow::doActionLoadFile()
 																currentPath,
 																fileFilters.join(s_fileFilterSeparator),
 																&currentOpenDlgFilter
-#ifdef QT_DEBUG
-																,QFileDialog::DontUseNativeDialog
-#endif
+//#ifdef QT_DEBUG
+																, QFileDialog::DontUseNativeDialog
+//#endif
 															);
 	if (selectedFiles.isEmpty())
 		return;
@@ -9400,8 +9370,10 @@ void MainWindow::doActionSaveFile()
 	if (hasOther)
 	{
 		ccConsole::Warning("[I/O] The following selected entites won't be saved:");
-		for (unsigned i=0; i<other.getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < other.getChildrenNumber(); ++i)
+		{
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
+		}
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -9449,6 +9421,11 @@ void MainWindow::doActionSaveFile()
 											selectedFilename,
 											parameters,
 											selectedFilter);
+
+		if (result == CC_FERR_NO_ERROR && m_ccRoot)
+		{
+			m_ccRoot->unselectAllEntities();
+		}
 	}
 
 	//update default filters
@@ -9845,6 +9822,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	actionShowWaveDialog->setEnabled(exactlyOneCloud);
 
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 	actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
@@ -9882,7 +9860,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	//standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
+	{
 		plugin->onNewSelection(m_selectedEntities);
+	}
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
@@ -10213,4 +10193,28 @@ void MainWindow::doActionGlobalShiftSeetings()
 		settings.setValue(ccPS::MaxAbsDiag(), maxAbsDiag);
 		settings.endGroup();
 	}
+}
+
+void MainWindow::doActionShowWaveDialog()
+{
+	size_t selNum = m_selectedEntities.size();
+	if (selNum == 0)
+		return;
+
+	ccHObject* entity = m_selectedEntities.size() == 1 ? m_selectedEntities[0] : 0;
+	if (!entity || !entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		ccConsole::Error("Select one point cloud!");
+		return;
+	}
+
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
+	if (!cloud->hasFWF())
+	{
+		ccConsole::Error("Cloud has no associated waveform information");
+		return;
+	}
+
+	ccWaveDialog wDlg(cloud, this);
+	wDlg.exec();
 }

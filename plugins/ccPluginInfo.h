@@ -25,10 +25,9 @@
 
 //qCC_db
 #include <ccLog.h>
+#include <ccExternalFactory.h>
 
 //Qt
-#include <QPair>
-#include <QVector>
 #include <QString>
 #include <QPluginLoader>
 #include <QCoreApplication>
@@ -37,20 +36,38 @@
 #include <QStandardPaths>
 #endif
 
+//system
+#include <vector>
+#include <set>
+
 class QObject;
 
 //! This type is used to communicate information between the main window and the plugin dialog
 //! It is a pair - first is path to the plugin, second is an object pointer to the plugin
-typedef QPair<QString, QObject*>    tPluginInfo;
+struct tPluginInfo
+{
+	tPluginInfo(QString f, ccPluginInterface* o, QObject* q)
+		: filename(f)
+		, object(o)
+		, qObject(q)
+	{}
+
+	//! Path to the plugin
+	QString filename;
+	//! Pointer to the plugin
+	ccPluginInterface* object;
+	//! Pointer to the QObject
+	QObject* qObject;
+};
 
 //! Simply a list of \see tPluginInfo
-typedef QVector<tPluginInfo>        tPluginInfoList;
+typedef std::vector<tPluginInfo> tPluginInfoList;
 
 class ccPlugins
 {
 public:
 
-	static ccPluginInterface* GetValidPlugin(QObject* plugin, int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
+	static ccPluginInterface* ToValidPlugin(QObject* plugin, int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
 	{
 		if (plugin)
 		{
@@ -79,70 +96,84 @@ public:
 			}
 		}
 
-		return 0;
+		return nullptr;
 	}
 
-	static const tPluginInfoList Find(QStringList& pluginPaths, int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
+	static void LoadPlugins(tPluginInfoList& plugins,
+							const QStringList& pluginPaths,
+							const QStringList& dirFilters,
+							int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
 	{
-		pluginPaths.clear();
-
-		QStringList	dirFilters;
-		QString		appPath = QCoreApplication::applicationDirPath();
-
-#if defined(Q_OS_MAC)
-		dirFilters << "*.dylib";
-
-		// plugins are in the bundle
-		appPath.remove("MacOS");
-
-		pluginPaths += (appPath + "Plugins/ccPlugins");
-#if defined(CC_MAC_DEV_PATHS)
-		// used for development only - this is the path where the plugins are built
-		// this avoids having to install into the application bundle when developing
-		pluginPaths += (appPath + "../../../ccPlugins");
-#endif
-#elif defined(Q_OS_WIN)
-		dirFilters << "*.dll";
-
-		//plugins are in bin/plugins
-		pluginPaths << (appPath + "/plugins");
-#elif defined(Q_OS_LINUX)
-		dirFilters << "*.so";
-
-		// Plugins are relative to the bin directory where the executable is found
-		QDir  binDir(appPath);
-
-		if (binDir.dirName() == "bin")
+		//"static" plugins
+		for (QObject* plugin : QPluginLoader::staticInstances())
 		{
-			binDir.cdUp();
-
-			pluginPaths << (binDir.absolutePath() + "/lib/cloudcompare/plugins");
+			ccPluginInterface* ccPlugin = ToValidPlugin(plugin, filter);
+			if (ccPlugin == nullptr)
+			{
+				continue;
+			}
+			//generate a fake filename
+			plugins.push_back(tPluginInfo(QString(), ccPlugin, plugin)); //static plugins have no associated filename
 		}
-		else
+
+		//"dynamic" plugins
+		ccPlugins::Find(plugins, pluginPaths, dirFilters);
+	
+		//now iterate over plugins and automatically register what we can
+		for ( tPluginInfo &plugin : plugins )
 		{
-			// Choose a reasonable default to look in
-			pluginPaths << "/usr/lib/cloudcompare/plugins";
+			if (!plugin.object)
+			{
+				assert(false);
+				continue;
+			}
+			
+			switch (plugin.object->getType())
+			{
+			case CC_STD_PLUGIN:
+			{
+				ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin.object);
+
+				//see if this plugin provides an additional factory for objects
+				ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
+				if (factory)
+				{
+					//if it's valid, add it to the factories set
+					assert(ccExternalFactory::Container::GetUniqueInstance());
+					ccExternalFactory::Container::GetUniqueInstance()->addFactory(factory);
+				}
+			}
+			break;
+
+			case CC_IO_FILTER_PLUGIN: //I/O filter
+			{
+				ccIOFilterPluginInterface* ioPlugin = static_cast<ccIOFilterPluginInterface*>(plugin.object);
+				FileIOFilter::Shared filter = ioPlugin->getFilter();
+				if (filter)
+				{
+					FileIOFilter::Register(filter);
+					ccLog::Print(QString("[Plugin][%1] New file extension(s) registered: %2").arg(ioPlugin->getName()).arg(filter->getDefaultExtension().toUpper()));
+				}
+			}
+			break;
+
+			default:
+				//nothing to do at this point
+				break;
+			}
 		}
-#else
-		#warning Need to specify the plugin path for this OS.
-#endif
+	}
 
-#ifdef Q_OS_MAC
-		// Add any app data paths
-		// Plugins in these directories take precendence over the included ones
-		QStringList	appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
-
-		for (const QString &appDataPath : appDataPaths)
-		{
-			pluginPaths << (appDataPath + "/plugins");
-		}
-#endif
-
-		ccLog::Print(QString("Plugin lookup dirs: %1").arg(pluginPaths.join(", ")));
+	static void Find(	tPluginInfoList& plugins,
+						const QStringList& pluginPaths,
+						const QStringList& dirFilters,
+						int filter = CC_STD_PLUGIN | CC_GL_FILTER_PLUGIN | CC_IO_FILTER_PLUGIN)
+	{
+		ccLog::Print(QString("[Plugins] Plugin lookup dirs: %1").arg(pluginPaths.join(", ")));
 
 		// maps plugin name (from inside the plugin) to its path & pointer
 		//	This allows us to create a unique list (overridden by path)
-		QMap<QString, tPluginInfo> pluginMap;
+		std::set<QString> alreadyLoadedFiles;
 
 		for (const QString &path : pluginPaths)
 		{
@@ -152,32 +183,35 @@ public:
 			for (const QString &filename : pluginsDir.entryList())
 			{
 				const QString pluginPath = pluginsDir.absoluteFilePath(filename);
-				QPluginLoader loader(pluginPath);
 
-				QObject	*plugin = loader.instance();
+				//if we have already encountered this file, we can skip it
+				if (alreadyLoadedFiles.find(pluginPath) != alreadyLoadedFiles.end())
+				{
+					continue;
+				}
+
+				QPluginLoader loader(pluginPath);
+				QObject* plugin = loader.instance();
 
 				if (plugin == nullptr)
 				{
-					ccLog::Warning(QString("[Plugin] %1").arg(loader.errorString()));
+					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin\t(%2)").arg(filename).arg(loader.errorString()));
 					continue;
 				}
 
-				ccPluginInterface* ccPlugin = GetValidPlugin(plugin, filter);
-
+				ccPluginInterface* ccPlugin = ToValidPlugin(plugin, filter);
 				if (ccPlugin == nullptr)
 				{
+					delete plugin;
+					ccLog::Warning(QString("[Plugin] File '%1' doesn't seem to be a valid plugin or it is not supported by this version").arg(filename));
 					continue;
 				}
 
-				QString name = ccPlugin->getName();
-
-				pluginMap.insert(name, tPluginInfo(pluginPath, plugin));
+				ccLog::Print(QString("Found plugin: %1 (%2)").arg(ccPlugin->getName()).arg(filename));
+				plugins.push_back(tPluginInfo(pluginPath, ccPlugin, plugin));
 			}
 		}
-
-		return pluginMap.values().toVector();
 	}
-
 };
 
 #endif //CC_PLUGIN_INFO

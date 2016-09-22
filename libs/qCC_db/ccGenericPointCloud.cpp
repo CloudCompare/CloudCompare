@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -74,6 +74,21 @@ bool ccGenericPointCloud::resetVisibilityArray()
 	m_pointsVisibility->fill(POINT_VISIBLE); //by default, all points are visible
 
 	return true;
+}
+
+void ccGenericPointCloud::invertVisibilityArray()
+{
+	if (!m_pointsVisibility || m_pointsVisibility->currentSize() == 0)
+	{
+		assert(false);
+		return;
+	}
+
+	unsigned count = m_pointsVisibility->currentSize();
+	for (unsigned i = 0; i < count; ++i)
+	{
+		m_pointsVisibility->setValue(i, m_pointsVisibility->getValue(i) == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
+	}
 }
 
 void ccGenericPointCloud::unallocateVisibilityArray()

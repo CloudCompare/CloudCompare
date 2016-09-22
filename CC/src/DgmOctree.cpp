@@ -4,11 +4,12 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -2763,6 +2764,38 @@ int DgmOctree::extractCCs(unsigned char level, bool sixConnexity, GenericProgres
 	return extractCCs(cellCodes, level, sixConnexity, progressCb);
 }
 
+struct IndexAndCodeExt
+{
+#ifdef OCTREE_CODES_64_BITS
+	typedef unsigned long long IndexType;
+#else
+	typedef unsigned IndexType;
+#endif
+	
+	//! index
+	IndexType theIndex;
+
+	//! cell code
+	DgmOctree::CellCode theCode;
+
+	//! Default constructor
+	IndexAndCodeExt()
+		: theIndex(0)
+		, theCode(0)
+	{}
+
+	//! Compares two IndexAndCodeExt instances based on their index
+	/** \param a first IndexAndCode structure
+		\param b second IndexAndCode structure
+		\return whether the index of 'a' is smaller than the index of 'b'
+	**/
+	static bool indexComp(const IndexAndCodeExt& a, const IndexAndCodeExt& b) throw()
+	{
+		return a.theIndex < b.theIndex;
+	}
+
+};
+
 int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char level, bool sixConnexity, GenericProgressCallback* progressCb) const
 {
 	size_t numberOfCells = cellCodes.size();
@@ -2770,7 +2803,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		return -1;
 
 	//filled octree cells
-	std::vector<IndexAndCode> ccCells;
+	std::vector<IndexAndCodeExt> ccCells;
 	try
 	{
 		ccCells.resize(numberOfCells);
@@ -2781,24 +2814,24 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		return -2;
 	}
 
-    //we compute the position of each cell (grid coordinates)
-    Tuple3i indexMin, indexMax;
+	//we compute the position of each cell (grid coordinates)
+	Tuple3i indexMin, indexMax;
 	{
 		//binary shift for cell code truncation
 		unsigned char bitDec = GET_BIT_SHIFT(level);
 
-		for (size_t i=0; i<numberOfCells; i++)
+		for (size_t i = 0; i < numberOfCells; i++)
 		{
 			ccCells[i].theCode = (cellCodes[i] >> bitDec);
 
 			Tuple3i cellPos;
-			getCellPos(ccCells[i].theCode,level,cellPos,true);
+			getCellPos(ccCells[i].theCode, level, cellPos, true);
 
 			//we look for the actual min and max dimensions of the input cells set
 			//(which may not be the whole set of octree cells!)
 			if (i != 0)
 			{
-				for (unsigned char k=0; k<3; k++)
+				for (unsigned char k = 0; k < 3; k++)
 				{
 					if (cellPos.u[k] < indexMin.u[k])
 						indexMin.u[k] = cellPos.u[k];
@@ -2814,9 +2847,9 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 			}
 
 			//Warning: the cells will have to be sorted inside a slice afterwards!
-			ccCells[i].theIndex = (	static_cast<unsigned>(cellPos.x)				)
-								+ (	static_cast<unsigned>(cellPos.y) << level		)
-								+ (	static_cast<unsigned>(cellPos.z) << (2*level)	);
+			ccCells[i].theIndex = (static_cast<IndexAndCodeExt::IndexType>(cellPos.x))
+								+ (static_cast<IndexAndCodeExt::IndexType>(cellPos.y) << level)
+								+ (static_cast<IndexAndCodeExt::IndexType>(cellPos.z) << (2 * level));
 		}
 	}
 
@@ -2824,7 +2857,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	Tuple3i gridSize = indexMax - indexMin + Tuple3i(1, 1, 1);
 
 	//we sort the cells
-	SortAlgo(ccCells.begin(), ccCells.end(), IndexAndCode::indexComp); //ascending index code order
+	SortAlgo(ccCells.begin(), ccCells.end(), IndexAndCodeExt::indexComp); //ascending index code order
 
 	const int& di = gridSize.x;
 	const int& dj = gridSize.y;
@@ -2867,8 +2900,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	std::vector<int> neighboursVal, neighboursMin;
 	try
 	{
-		neighboursVal.reserve(neighborsInCurrentSlice+neighborsInPrecedingSlice);
-		neighboursMin.reserve(neighborsInCurrentSlice+neighborsInPrecedingSlice);
+		neighboursVal.reserve(neighborsInCurrentSlice + neighborsInPrecedingSlice);
+		neighboursMin.reserve(neighborsInCurrentSlice + neighborsInPrecedingSlice);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -2876,20 +2909,20 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		return -2;
 	}
 
-    //temporary virtual 'slices'
-    int sliceSize = (di+2)*(dj+2); //add a margin to avoid "boundary effects"
+	//temporary virtual 'slices'
+	int sliceSize = (di + 2) * (dj + 2); //add a margin to avoid "boundary effects"
 	std::vector<int> slice;
 	std::vector<int> oldSlice;
-    //equivalence table between 'on the fly' labels
+	//equivalence table between 'on the fly' labels
 	std::vector<int> equivalentLabels;
-    std::vector<int> cellIndexToLabel;
+	std::vector<int> cellIndexToLabel;
 
 	try
 	{
 		slice.resize(sliceSize);
-		oldSlice.resize(sliceSize,0); //previous slice is empty by default
-		equivalentLabels.resize(numberOfCells+2,0);
-		cellIndexToLabel.resize(numberOfCells,0);
+		oldSlice.resize(sliceSize, 0); //previous slice is empty by default
+		equivalentLabels.resize(numberOfCells + 2, 0);
+		cellIndexToLabel.resize(numberOfCells, 0);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -2897,9 +2930,9 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		return -2;
 	}
 
-    //progress notification
-    if (progressCb)
-    {
+	//progress notification
+	if (progressCb)
+	{
 		if (progressCb->textCanBeEdited())
 		{
 			progressCb->setMethodTitle("Components Labeling");
@@ -2907,39 +2940,39 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 			sprintf(buffer, "Box: [%i*%i*%i]", gridSize.x, gridSize.y, gridSize.z);
 			progressCb->setInfo(buffer);
 		}
-        progressCb->update(0);
-        progressCb->start();
-    }
+		progressCb->update(0);
+		progressCb->start();
+	}
 
-    //current label
-    size_t currentLabel = 1;
+	//current label
+	size_t currentLabel = 1;
 
-    //process each slice
+	//process each slice
 	{
 		unsigned counter = 0;
-		const unsigned gridCoordMask = (1 << level)-1;
-		std::vector<IndexAndCode>::const_iterator _ccCells = ccCells.begin();
-		NormalizedProgress nprogress(progressCb,step);
+		const IndexAndCodeExt::IndexType gridCoordMask = (static_cast<IndexAndCodeExt::IndexType>(1) << level) - 1;
+		std::vector<IndexAndCodeExt>::const_iterator _ccCells = ccCells.begin();
+		NormalizedProgress nprogress(progressCb, step);
 
-		for (int k = indexMin.z; k < indexMin.z+step; k++)
+		for (int k = indexMin.z; k < indexMin.z + step; k++)
 		{
 			//initialize the 'current' slice
-			std::fill(slice.begin(),slice.end(),0);
+			std::fill(slice.begin(), slice.end(), 0);
 
 			//for each cell of the slice
-			while (counter<numberOfCells && static_cast<int>(_ccCells->theIndex >> (level<<1)) == k)
+			while (counter < numberOfCells && static_cast<int>(_ccCells->theIndex >> (level << 1)) == k)
 			{
 				int iind = static_cast<int>(_ccCells->theIndex & gridCoordMask);
 				int jind = static_cast<int>((_ccCells->theIndex >> level) & gridCoordMask);
-				int cellIndex = (iind-indexMin.x+1) + (jind-indexMin.y+1)*(di+2);
+				int cellIndex = (iind - indexMin.x + 1) + (jind - indexMin.y + 1)*(di + 2);
 				++_ccCells;
 
 				//we look if the cell has neighbors inside the slice
 				int* _slice = &(slice[cellIndex]);
 				{
-					for (unsigned char n=0; n<neighborsInCurrentSlice; n++)
+					for (unsigned char n = 0; n < neighborsInCurrentSlice; n++)
 					{
-						assert(cellIndex+currentSliceNeighborsShifts[n] < sliceSize);
+						assert(cellIndex + currentSliceNeighborsShifts[n] < sliceSize);
 						const int& neighborLabel = _slice[currentSliceNeighborsShifts[n]];
 						if (neighborLabel > 1)
 							neighboursVal.push_back(neighborLabel);
@@ -2949,9 +2982,9 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 				//and in the previous slice
 				const int* _oldSlice = &(oldSlice[cellIndex]);
 				{
-					for (unsigned char n=0; n<neighborsInPrecedingSlice; n++)
+					for (unsigned char n = 0; n < neighborsInPrecedingSlice; n++)
 					{
-						assert(cellIndex+precedingSliceNeighborsShifts[n] < sliceSize);
+						assert(cellIndex + precedingSliceNeighborsShifts[n] < sliceSize);
 						const int& neighborLabel = _oldSlice[precedingSliceNeighborsShifts[n]];
 						if (neighborLabel > 1)
 							neighboursVal.push_back(neighborLabel);
@@ -2983,7 +3016,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 						neighboursMin.clear();
 						//we get the smallest equivalent label for each neighbor's branch
 						{
-							for (size_t n=0; n<p; n++)
+							for (size_t n = 0; n < p; n++)
 							{
 								// ... we start from its C.C. index
 								int label = neighboursVal[n];
@@ -3014,7 +3047,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 						//for all other branches
 						lastLabel = smallestLabel;
 						{
-							for (size_t n=1; n<neighboursMin.size(); n++)
+							for (size_t n = 1; n < neighboursMin.size(); n++)
 							{
 								int label = neighboursMin[n];
 								assert(label < static_cast<int>(numberOfCells)+2);
@@ -3039,31 +3072,31 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 			if (counter == numberOfCells)
 				break;
 
-			std::swap(slice,oldSlice);
+			std::swap(slice, oldSlice);
 
 			nprogress.oneStep();
 		}
 	}
 
-    //release some memory
-    slice.clear();
-    oldSlice.clear();
+	//release some memory
+	slice.clear();
+	oldSlice.clear();
 
-    if (progressCb)
+	if (progressCb)
 	{
 		progressCb->stop();
 	}
 
-    if (currentLabel < 2)
-    {
-		//No component found
-        return -3;
-    }
-
-    //path compression (http://en.wikipedia.org/wiki/Union_find)
-    assert(currentLabel < numberOfCells+2);
+	if (currentLabel < 2)
 	{
-		for (size_t i=2; i<=currentLabel; i++)
+		//No component found
+		return -3;
+	}
+
+	//path compression (http://en.wikipedia.org/wiki/Union_find)
+	assert(currentLabel < numberOfCells + 2);
+	{
+		for (size_t i = 2; i <= currentLabel; i++)
 		{
 			int label = equivalentLabels[i];
 			assert(label < static_cast<int>(numberOfCells)+2);
@@ -3076,9 +3109,9 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		}
 	}
 
-    //update leaves
+	//update leaves
 	{
-		for (size_t i=0; i<numberOfCells; i++)
+		for (size_t i = 0; i < numberOfCells; i++)
 		{
 			int label = cellIndexToLabel[i];
 			assert(label < static_cast<int>(numberOfCells)+2);
@@ -3087,26 +3120,26 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		}
 	}
 
-    //hack: we use "equivalentLabels" to count how many components will have to be created
+	//hack: we use "equivalentLabels" to count how many components will have to be created
 	int numberOfComponents = 0;
 	{
-		std::fill(equivalentLabels.begin(),equivalentLabels.end(),0);
+		std::fill(equivalentLabels.begin(), equivalentLabels.end(), 0);
 
-		for (size_t i=0; i<numberOfCells; i++)
+		for (size_t i = 0; i < numberOfCells; i++)
 		{
 			assert(cellIndexToLabel[i] > 1 && cellIndexToLabel[i] < static_cast<int>(numberOfCells)+2);
 			equivalentLabels[cellIndexToLabel[i]] = 1;
 		}
 
 		//we create (following) indexes for each components
-		for (size_t i=2; i<numberOfCells+2; i++)
+		for (size_t i = 2; i < numberOfCells + 2; i++)
 			if (equivalentLabels[i] == 1)
 				equivalentLabels[i] = ++numberOfComponents; //labels start at '1'
 	}
-    assert(equivalentLabels[0] == 0);
-    assert(equivalentLabels[1] == 0);
+	assert(equivalentLabels[0] == 0);
+	assert(equivalentLabels[1] == 0);
 
-    //we flag each component's points with its label
+	//we flag each component's points with its label
 	{
 		if (progressCb)
 		{
@@ -3123,16 +3156,16 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		NormalizedProgress nprogress(progressCb, static_cast<unsigned>(numberOfCells));
 
 		ReferenceCloud Y(m_theAssociatedCloud);
-		for (size_t i=0; i<numberOfCells; i++)
+		for (size_t i = 0; i < numberOfCells; i++)
 		{
 			assert(cellIndexToLabel[i] < static_cast<int>(numberOfCells)+2);
 
 			const int& label = equivalentLabels[cellIndexToLabel[i]];
 			assert(label > 0);
-			getPointsInCell(ccCells[i].theCode,level,&Y,true);
+			getPointsInCell(ccCells[i].theCode, level, &Y, true);
 			Y.placeIteratorAtBegining();
 			ScalarType d = static_cast<ScalarType>(label);
-			for (unsigned j=0; j<Y.size(); ++j)
+			for (unsigned j = 0; j < Y.size(); ++j)
 			{
 				Y.setCurrentPointScalarValue(d);
 				Y.forwardIterator();
@@ -3147,7 +3180,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 		}
 	}
 
-    return 0;
+	return numberOfComponents;
 }
 
 /*** Octree-based cloud traversal mechanism ***/
@@ -3212,7 +3245,9 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 {
 	//skip cell if process is aborted/has failed
 	if (!s_cellFunc_MT_success)
+	{
 		return;
+	}
 
 	const DgmOctree::cellsContainer& pointsAndCodes = s_octree_MT->pointsAndTheirCellCodes();
 
@@ -3224,7 +3259,9 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 	if (cell.points->reserve(desc.i2 - desc.i1 + 1))
 	{
 		for (unsigned i = desc.i1; i <= desc.i2; ++i)
+		{
 			cell.points->addPointIndex(pointsAndCodes[i].theIndex);
+		}
 
 		s_cellFunc_MT_success &= (*s_func_MT)(cell, s_userParams_MT, s_normProgressCb_MT);
 	}

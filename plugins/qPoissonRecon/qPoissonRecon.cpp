@@ -4,14 +4,14 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Daniel Girardeau-Montaut                      #
+//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
 //#                                                                        #
 //##########################################################################
 
@@ -39,7 +39,7 @@
 
 //System
 #if defined(CC_WINDOWS)
-#include "Windows.h"
+#include "windows.h"
 #else
 #include <time.h>
 #include <unistd.h>
@@ -302,7 +302,7 @@ void qPoissonRecon::doAction()
 			usleep(500 * 1000);
 #endif
 
-			pDlg.setValue(pDlg.value()+1);
+			pDlg.setValue(pDlg.value() + 1);
 			QApplication::processEvents();
 		}
 
@@ -339,7 +339,7 @@ void qPoissonRecon::doAction()
 		ccPointCloud* newPC = new ccPointCloud("vertices");
 		ccMesh* newMesh = new ccMesh(newPC);
 		newMesh->addChild(newPC);
-	
+
 		if (newPC->reserve(nr_vertices) && newMesh->reserve(nr_faces))
 		{
 			ccScalarField* densitySF = 0;
@@ -495,6 +495,10 @@ void qPoissonRecon::doAction()
 			newMesh->setVisible(true);
 			newMesh->computeNormals(true);
 			newMesh->showColors(newMesh->hasColors());
+
+			//copy Global Shift & Scale information
+			newPC->setGlobalShift(pc->getGlobalShift());
+			newPC->setGlobalScale(pc->getGlobalScale());
 
 			//output mesh
 			m_app->addToDB(newMesh);

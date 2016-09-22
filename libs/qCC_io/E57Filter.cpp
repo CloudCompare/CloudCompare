@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -704,14 +704,14 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 		progressDlg.setAutoClose(false);
 		s_cancelRequestedByUser = false;
 
-		for (size_t i=0; i<scans.size(); ++i)
+		for (size_t i = 0; i < scans.size(); ++i)
 		{
 			ccPointCloud* cloud = scans[i];
 			QString scanGUID = GetNewGuid();
 
 			//create corresponding node
 			e57::StructureNode scanNode = e57::StructureNode(imf);
-			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, &progressDlg))
+			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, parameters.parentWidget ? &progressDlg : 0))
 			{
 				++s_absoluteScanIndex;
 				scansGUID.insert(cloud,scanGUID);

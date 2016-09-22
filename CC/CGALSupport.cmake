@@ -9,7 +9,7 @@ if (CGAL_FOUND)
 		message(SEND_ERROR "CC Lib requires at least CGAL 4.3")
 	endif()
 
-  	# We need to get ride of CGAL CXX flags
+  	# We need to get rid of CGAL CXX flags
   	set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS ON CACHE INTERNAL "override CGAL flags" FORCE)
 
 	include( ${CGAL_USE_FILE} )

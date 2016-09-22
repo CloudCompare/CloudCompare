@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -185,7 +185,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		//standard combos
 		{
 			context->standardCombosProperties.resize(m_standardCombos.size());
-			std::fill(context->standardCombosProperties.begin(),context->standardCombosProperties.end(),QString());
+			std::fill(context->standardCombosProperties.begin(), context->standardCombosProperties.end(), QString());
 			for (size_t i=0; i<m_standardCombos.size(); ++i)
 			{
 				if (m_standardCombos[i] && m_standardCombos[i]->currentIndex() > 0) //currentIndex == 0 means 'NONE'!!!
@@ -198,7 +198,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		//list combos
 		{
 			context->listCombosProperties.resize(m_listCombos.size());
-			std::fill(context->listCombosProperties.begin(),context->listCombosProperties.end(),QString());
+			std::fill(context->listCombosProperties.begin(), context->listCombosProperties.end(), QString());
 			for (size_t i=0; i<m_listCombos.size(); ++i)
 			{
 				if (m_listCombos[i] && m_listCombos[i]->currentIndex() > 0)
@@ -211,7 +211,7 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		//single combos
 		{
 			context->singleCombosProperties.resize(m_singleCombos.size());
-			std::fill(context->singleCombosProperties.begin(),context->singleCombosProperties.end(),QString());
+			std::fill(context->singleCombosProperties.begin(), context->singleCombosProperties.end(), QString());
 			for (size_t i=0; i<m_singleCombos.size(); ++i)
 			{
 				if (m_singleCombos[i] && m_singleCombos[i]->currentIndex() > 0)
@@ -416,19 +416,19 @@ bool PlyOpenDlg::isValid(bool displayErrors/*=true*/) const
 	int p = m_listPropsText.size();
 	int q = m_singlePropsText.size();
 
-	assert(n+p+q >= 2);
-	std::vector<int> assignedIndexCount(n+p+q,0);
+	assert(n + p + q >= 2);
+	std::vector<int> assignedIndexCount(n + p + q, 0);
 
-	for (size_t i=0; i<m_standardCombos.size(); ++i)
+	for (size_t i = 0; i < m_standardCombos.size(); ++i)
 		++assignedIndexCount[m_standardCombos[i]->currentIndex()];
-	for (size_t j=0; j<m_listCombos.size(); ++j)
-		++assignedIndexCount[m_listCombos[j]->currentIndex() > 0 ? n+m_listCombos[j]->currentIndex() : 0];
-	for (size_t k=0; k<m_singleCombos.size(); ++k)
-		++assignedIndexCount[m_singleCombos[k]->currentIndex() > 0 ? n+p+m_singleCombos[k]->currentIndex() : 0];
-	for (size_t l=0; l<m_sfCombos.size(); ++l)
+	for (size_t j = 0; j < m_listCombos.size(); ++j)
+		++assignedIndexCount[m_listCombos[j]->currentIndex() > 0 ? n + m_listCombos[j]->currentIndex() : 0];
+	for (size_t k = 0; k < m_singleCombos.size(); ++k)
+		++assignedIndexCount[m_singleCombos[k]->currentIndex() > 0 ? n + p + m_singleCombos[k]->currentIndex() : 0];
+	for (size_t l = 0; l < m_sfCombos.size(); ++l)
 		++assignedIndexCount[m_sfCombos[l]->currentIndex()];
 
-	for (int i=1; i<n+p+q; ++i)
+	for (int i = 1; i < n + p + q; ++i)
 	{
 		if (assignedIndexCount[i] > 1)
 		{

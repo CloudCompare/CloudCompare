@@ -57,7 +57,7 @@
         <string>Minimum number of points per component</string>
        </property>
        <property name="text">
-        <string>Min. points per compoent</string>
+        <string>Min. points per component</string>
        </property>
       </widget>
      </item>

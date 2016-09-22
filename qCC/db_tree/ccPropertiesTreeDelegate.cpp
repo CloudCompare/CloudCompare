@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -470,10 +470,12 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 	//scalar field
 	fillSFWithPointCloud(_obj);
 
-	//scan grid structure(s)
+	//scan grid structure(s), waveform, etc.
 	if (_obj->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* cloud = static_cast<ccPointCloud*>(_obj);
+		
+		//scan grid(s)
 		size_t gridCount = cloud->gridCount();
 		if (gridCount != 0)
 		{
@@ -488,6 +490,14 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 				ccPointCloud::Grid::Shared grid = cloud->grid(i);
 				appendRow( ITEM(QString("Scan #%1").arg(i+1)), ITEM(QString("%1 x %2 (%3 points)").arg(grid->w).arg(grid->h).arg(QLocale(QLocale::English).toString(grid->validCount))) );
 			}
+		}
+
+		//waveform
+		if (cloud->hasFWF())
+		{
+			addSeparator("Waveform");
+			appendRow(ITEM(QString("Waves")),       ITEM(QString::number(cloud->fwfData().size()))); //DGM: in fact some of them might be null/invalid!
+			appendRow(ITEM(QString("Descriptors")), ITEM(QString::number(cloud->fwfDescriptors().size())));
 		}
 	}
 }
@@ -744,13 +754,13 @@ void ccPropertiesTreeDelegate::fillWithLabel(cc2DLabel* _obj)
 
 	//Body
 	QStringList body = _obj->getLabelContent(ccGui::Parameters().displayedNumPrecision);
-	appendRow( ITEM("Body"), ITEM(body.join("\n")) );
+	appendRow(ITEM("Body"), ITEM(body.join("\n")));
 
 	//Show label in 2D
-	appendRow( ITEM("Show 2D label"), CHECKABLE_ITEM(_obj->isDisplayedIn2D(),OBJECT_LABEL_DISP_2D) );
+	appendRow(ITEM("Show 2D label"), CHECKABLE_ITEM(_obj->isDisplayedIn2D(), OBJECT_LABEL_DISP_2D));
 
 	//Show label in 3D
-	appendRow( ITEM("Show 3D legend(s)"), CHECKABLE_ITEM(_obj->isDisplayedIn3D(),OBJECT_LABEL_DISP_3D) );
+	appendRow(ITEM("Show legend(s)"), CHECKABLE_ITEM(_obj->isPointLegendDisplayed(), OBJECT_LABEL_POINT_LEGEND));
 }
 
 void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
@@ -1716,11 +1726,11 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		redraw = true;
 		break;
-	case OBJECT_LABEL_DISP_3D:
+	case OBJECT_LABEL_POINT_LEGEND:
 		{
 			cc2DLabel* label = ccHObjectCaster::To2DLabel(m_currentObject);
 			assert(label);
-			label->setDisplayedIn3D(item->checkState() == Qt::Checked);
+			label->displayPointLegend(item->checkState() == Qt::Checked);
 		}
 		redraw = true;
 		break;

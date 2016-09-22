@@ -4,11 +4,12 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 of the License.  #
+//#  published by the Free Software Foundation; version 2 or later of the  #
+//#  License.                                                              #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -49,16 +50,15 @@ public:
 	**/
 	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, const Polyline* poly, bool keepInside, const float* viewMat=0);
 
-	//! Extracts the points which associated scalar value fall inside a specified interval
-	/** All the points with an associated scalar value comprised between minDist and maxDist
-		will be extracted.
-		Warning: be sure to activate an OUTPUT scalar field on the input cloud
-		\param aCloud the cloud to segment
+	//! Selects the points which associated scalar value fall inside or outside a specified interval
+	/** \warning: be sure to activate an OUTPUT scalar field on the input cloud
+		\param cloud the cloud to segment
 		\param minDist the lower boundary
 		\param maxDist the upper boundary
+		\param outside whether to select the points inside or outside
 		\return a new cloud structure containing the extracted points (references to - no duplication)
 	**/
-	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, ScalarType minDist, ScalarType maxDist);
+	static ReferenceCloud* segment(GenericIndexedCloudPersist* cloud, ScalarType minDist, ScalarType maxDist, bool outside = false);
 
 
 	//! Tests if a point is inside a polygon (2D)

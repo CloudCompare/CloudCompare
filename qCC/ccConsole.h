@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -30,15 +30,50 @@
 #include <QPair>
 #include <QFile>
 
-class QListWidget;
+#include <QListWidget>
+#include <QClipboard>
+#include <QKeyEvent>
+#include <QApplication>
+
 class QWidget;
 class MainWindow;
 class QTextStream;
 
+//! Custom QListWidget to allow for the copy of all selected elements when using CTRL+C
+class ccCustomQListWidget : public QListWidget
+{
+public:
+
+	ccCustomQListWidget(QWidget* parent = 0) : QListWidget(parent) {}
+
+protected:
+	
+	virtual void keyPressEvent(QKeyEvent *event) override
+	{
+		if (event->matches(QKeySequence::Copy))
+		{
+			int itemsCount = count();
+			QStringList strings;
+			for (int i = 0; i < itemsCount; ++i)
+			{
+				if (item(i)->isSelected())
+				{
+					strings << item(i)->text();
+				}
+			}
+
+			QApplication::clipboard()->setText(strings.join("\n"));
+		}
+		else
+		{
+			QListWidget::keyPressEvent(event);
+		}
+	}
+};
+
 //! Console
 class ccConsole : public QObject, public ccLog
 {
-
 	Q_OBJECT
 
 public:
@@ -77,6 +112,9 @@ public:
 	//! Returns whether to show Qt messages (qDebug / qWarning / etc.) in Console or not
 	static bool QtMessagesEnabled() { return s_showQtMessagesInConsole; }
 
+	//! Returns the parent widget (if any)
+	inline QWidget* parentWidget() { return m_parentWidget; }
+
 public slots:
 
 	//! Refreshes console (display all messages still in queue)
@@ -90,7 +128,7 @@ protected:
 	ccConsole();
 
 	//inherited from ccLog
-	virtual void displayMessage(const QString& message, int level);
+	virtual void logMessage(const QString& message, int level);
 
 	//! Associated text display widget
 	QListWidget* m_textDisplay;

@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -35,20 +35,6 @@
 //Qt
 #include <QDoubleValidator>
 #include <QMdiSubWindow>
-
-double SliderPosToZNearCoef(int i, int iMax)
-{
-	assert(i >= 0 && i <= iMax);
-	return pow(10,-static_cast<double>((iMax-i)*3)/iMax); //between 10^-3 and 1
-}
-
-int ZNearCoefToSliderPos(double coef, int iMax)
-{
-	assert(coef >= 0 && coef <= 1.0);
-	int i = static_cast<int>(-(static_cast<double>(iMax)/3) * log10(coef));
-	assert(i >= 0 && i <= iMax);
-	return iMax-i;
-}
 
 ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -194,7 +180,7 @@ void ccCameraParamEditDlg::zNearSliderMoved(int i)
 	if (!m_associatedWin)
 		return;
 
-	double zNearCoef = SliderPosToZNearCoef(i, zNearHorizontalSlider->maximum());
+	double zNearCoef = ccViewportParameters::IncrementToZNearCoef(i, zNearHorizontalSlider->maximum() + 1);
 	m_associatedWin->setZNearCoef(zNearCoef);
 	m_associatedWin->redraw();
 }
@@ -352,6 +338,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 		connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),					this,	SLOT(updateViewMode()));
 		connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),						this,	SLOT(hide()));
 		connect(m_associatedWin,	SIGNAL(fovChanged(float)),							this,	SLOT(updateWinFov(float)));
+		connect(m_associatedWin,	SIGNAL(zNearCoefChanged(float)),					this,	SLOT(updateZNearCoef(float)));
 
 		PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 		buttonsFrame->setEnabled(it != pushedMatrices.end());
@@ -446,9 +433,7 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 	updateWinFov(win->getFov());
 
 	//update zNearCoef
-	zNearHorizontalSlider->blockSignals(true);
-	zNearHorizontalSlider->setValue(ZNearCoefToSliderPos(params.zNearCoef, zNearHorizontalSlider->maximum()));
-	zNearHorizontalSlider->blockSignals(false);
+	updateZNearCoef(params.zNearCoef);
 }
 
 void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
@@ -488,6 +473,16 @@ void ccCameraParamEditDlg::updateWinFov(float fov_deg)
 	fovDoubleSpinBox->blockSignals(true);
 	fovDoubleSpinBox->setValue(fov_deg);
 	fovDoubleSpinBox->blockSignals(false);
+}
+
+void ccCameraParamEditDlg::updateZNearCoef(float zNearCoef)
+{
+	if (!m_associatedWin)
+		return;
+
+	zNearHorizontalSlider->blockSignals(true);
+	zNearHorizontalSlider->setValue(ccViewportParameters::ZNearCoefToIncrement(zNearCoef, zNearHorizontalSlider->maximum() + 1));
+	zNearHorizontalSlider->blockSignals(false);
 }
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()

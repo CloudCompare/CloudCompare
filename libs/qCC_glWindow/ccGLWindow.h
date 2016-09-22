@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -682,6 +682,9 @@ signals:
 	//! Signal emitted when the f.o.v. changes
 	void fovChanged(float);
 
+	//! Signal emitted when the zNear coef changes
+	void zNearCoefChanged(float);
+
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3d&);
 
@@ -1138,7 +1141,7 @@ protected: //members
 		//! Message
 		QString message;
 		//! Message end time (sec)
-		int messageValidity_sec;
+		qint64 messageValidity_sec;
 		//! Message position on screen
 		MessagePosition position;
 		//! Message type

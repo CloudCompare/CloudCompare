@@ -4,9 +4,91 @@ CloudCompare versions history
 v2.8.beta - XX/XX/2016
 ----------------------
 
+- New features:
+
+	* New plugin: qCSF (Cloth Simulation Filtering)
+		- automatic ground / non-ground classification of aerial LIDAR point clouds
+		- based on the article: "An Easy-to-Use Airborne LIDAR Data Filtering Method Based on Cloth Simulation", Qi Jianbo, Wan Peng, 2015
+
+	* Support for FWF (Full WaveForm) airborne lidar data
+
 - Enhancements:
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree
+
+	* Facets
+		- meta-data (normals, dip/direction, etc.) is now updated when the facet is rotated / transformed
+		- the 3D representation of the normal vector now depends on the facet size and not on its min. bounding-box size
+
+	* New shortcus 'a la Meshlab':
+		- CC now supports the 'CTRL + mouse wheel' shortcut to change the point size
+		- CC now supports the 'ALT + mouse wheel' shortcut to change the zNear value (perspective mode)
+		- CC now supports the 'SHIFT + mouse wheel' shortcut to change the field of view (perspective mode)
+
+	* 2D labels:
+		- most of the 2D labels parts (segment, point legend, etc.) are now displayed in 2D
+			(this way they always appear above the entities and be always visible).
+
+	* SHP files:
+		- when loading 2D points, the Z coordinate can now be exported from an associated DBF field
+
+	* File loading:
+		- when a multiple files are loaded, cancelling the loading process of one file will stop the whole loading procedure
+
+	* LAS/LAZ files:
+		- load dialog reorganized
+		- infos about the file are now displayed in a 'Info' tab (point count, bounding box)
+		- new 'Tiling' option to tile a (big) LAS/LAZ file in smaller ones (the cloud is not actually loaded in memory)
+
+	* Global Shift & Scale:
+		- the PoissonRecon plugin now transfers the Global Shift & Scale information from the cloud to the resulting mesh
+		- the 'Tools > Projection > Contour plot (polylines) to mesh' tool transfers the Global Shift & Scale information
+			from the (first) polyline to the resulting mesh
+
+	* 2.5D Volume Calculation tool:
+		- new option to export the height difference grid as a cloud
+			(warning, the exported points height will actually be equal to the height difference)
+		- default color scale is now symmetrical if the height differences are not only positive or only negative
+
+	* Rasterize tool:
+		- the rasterize tool now use the 'PixelIsArea' convention (i.e. the grid min corner coordinates correspond to the
+			first grid cell center). This allows one to apply the Rasterize tool on a regular grid without any
+			interference / sampling issue.
+		- the volume calculation tool has been updated consequently. Notably, results from the rasterize tool can be used
+			in the 2.5D Volume calculation tool without any sampling artefact
+		- Exported rasters (geotiff) are using the same convetion. They are also now properly oriented (they could be loaded
+			flipped in some GIS tools).
+		- ASCII matrix is now exported from top (highest Y coordinates) to bottom (lowest)
+		- Mixing RGB bands and other layers (heights, scalar fields, etc.) in a geotiff is in fact a bad idea. It results in
+			64 bits color bands that are not properly handled by most of the other GIS tools. CC will now warn the user about
+			this fact.
+		- Exported clouds and meshes are now properly exported in the same coordinate system as the input cloud
+			(it was not the case for clouds projected along X or Y)
+
+	* Raster file import:
+		- New option to import the raster as a textured quad (mesh). Only available if the raster has at least R, G and B bands.
+		- CC is now able to properly load raster files with multiple undefined bands
+
+	* All the selected lines of the Console can now be copied at once (e.g. with CTRL+C on Windows)
+
+	* Connected Components Extraction:
+		- safeguard added if too many components are to be created (CC will ask the user to confirm the creation of more than 500 components)
+
+- Bug fixes:
+	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
+	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
+	* the fields named 'intensity', 'grey', 'gray' or 'col***i' in PLY files are now automatically loaded as scalar fields (instead of 'intensity', i.e. grey level RGB)
+	* when using a DBF field as height for polylines (in SHP files), the height value could be read from the wrong field
+	* qSRA (Surface or Revolution Analysis): the profile origin was not always properly take into account. The latitude angles were not always computed relatively to
+		the profile origin and changing the origin via the distance map dialog could be misleading.
+	* when clicking on the 'Apply all' button of the LAS/LAZ loading dialog, the global shift set for the first file could be ignored by the next ones
+	* the 3-points label vertex names (A,B,C) were not displayed by default
+	* Rasterize tool:
+		- the 'Hillshade' computation tool was considering the grid upside-down (hence the sun azimuth angle was inverted)
+		- contour lines generated with a projection direction other than Z were not displayed in the right orientation compared
+			to the grid raster (inside the Rasterize tool only)
+	* Command line tool: the CROP2D option applied with an orientation other than Z was not performing the cut at the right position
+	* Connected Components Extraction: the tool couldn't be properly used with an octree level > 10
 
 v2.7.0 - 04/22/2016
 -------------------
@@ -285,7 +367,7 @@ v2.6.2 10/08/2015
 		- the user can now change the displayed 'layer' (either the height or one of the input cloud SFs)
 		- the input cloud SFs can now be properly interpolated in empty cells
 		- the contour lines are now computed on the active layer
-		- the user can set the default width for the countour lines
+		- the user can set the default width for the contour lines
 		- the contour lines can be colored (according to the layer associated scalar field settings)
 	* SOR filter:
 		- the PCL Statistical Outlier filter (for noise cleaning) has been integrated in CloudCompare

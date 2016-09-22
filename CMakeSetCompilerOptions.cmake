@@ -29,11 +29,11 @@ elseif( MSVC )
     endif()
 
     #disable SECURE_SCL (see http://channel9.msdn.com/shows/Going+Deep/STL-Iterator-Debugging-and-Secure-SCL/)
-    list( APPEND CCMAKE_CXX_FLAGS_RELEASE _SECURE_SCL=0 ) # disable checked iterators
+	set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D _SECURE_SCL=0" ) # disable checked iterators
 
     #use VLD for mem leak checking
     OPTION( OPTION_USE_VISUAL_LEAK_DETECTOR "Check to activate compilation (in debug) with Visual Leak Detector" OFF )
     if( ${OPTION_USE_VISUAL_LEAK_DETECTOR} )
-       list( APPEND CCMAKE_CXX_FLAGS_DEBUG USE_VLD )
+		set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D USE_VLD" )
     endif()
 endif()

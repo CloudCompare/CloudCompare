@@ -50,7 +50,7 @@ if( ${OPTION_USE_LIBE57} )
 	if( LIBE57_INSTALL_DIR )
 
 	#libE57
-		if (WIN32)
+		if (WIN32 AND NOT MINGW)
 			set(LIBE57_LIB_DEBUG "E57RefImpl-d.lib")
 			set(LIBE57_LIB_RELEASE "E57RefImpl.lib")
 		else()

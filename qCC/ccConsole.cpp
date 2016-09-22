@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -50,7 +50,8 @@ ccConsole* ccConsole::TheInstance()
 {
 	if (!s_console.instance)
 	{
-		s_console.instance = new ccConsole();
+		assert(false); //Init should have already be called!
+		s_console.instance = new ccConsole;
 		ccLog::RegisterInstance(s_console.instance);
 	}
 
@@ -64,8 +65,8 @@ void ccConsole::ReleaseInstance()
 		//DGM: just in case some messages are still in the queue
 		s_console.instance->refresh();
 	}
-	s_console.release();
 	ccLog::RegisterInstance(0);
+	s_console.release();
 }
 
 ccConsole::ccConsole()
@@ -139,12 +140,17 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 						QWidget* parentWidget/*=0*/,
 						MainWindow* parentWindow/*=0*/)
 {
-	ccConsole* console = TheInstance();
-	assert(console);
-
-	console->m_textDisplay = textDisplay;
-	console->m_parentWidget = parentWidget;
-	console->m_parentWindow = parentWindow;
+	//should be called only once!
+	if (s_console.instance)
+	{
+		assert(false);
+		return;
+	}
+	
+	s_console.instance = new ccConsole;
+	s_console.instance->m_textDisplay = textDisplay;
+	s_console.instance->m_parentWidget = parentWidget;
+	s_console.instance->m_parentWindow = parentWindow;
 
 	//auto-start
 	if (textDisplay)
@@ -158,8 +164,10 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 		//install : set the callback for Qt messages
 		qInstallMessageHandler(myMessageOutput);
 
-		console->setAutoRefresh(true);
+		s_console.instance->setAutoRefresh(true);
 	}
+
+	ccLog::RegisterInstance(s_console.instance);
 }
 
 void ccConsole::setAutoRefresh(bool state)
@@ -245,12 +253,14 @@ void ccConsole::refresh()
 	m_mutex.unlock();
 }
 
-void ccConsole::displayMessage(const QString& message, int level)
+void ccConsole::logMessage(const QString& message, int level)
 {
 #ifndef QT_DEBUG
 	//skip debug messages in release mode
 	if (level & LOG_DEBUG)
+	{
 		return;
+	}
 #endif
 
 	QString formatedMessage = QString("[") + QTime::currentTime().toString() + QString("] ") + message;

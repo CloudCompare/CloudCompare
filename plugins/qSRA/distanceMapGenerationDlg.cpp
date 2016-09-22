@@ -4,11 +4,11 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#                           COPYRIGHT: EDF                               #
@@ -162,58 +162,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 				zOriginDoubleSpinBox->setValue(profileDesc.origin.z);
 			}
 
-			//compute transformation from cloud to the surface (of revolution)
-			ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
-
-			//compute mean 'radius'
-			//as well as min and max 'height'
-			double baseRadius = 0.0;
-			double minHeight = 0.0;
-			double maxHeight = 0.0;
-			for (unsigned i=0; i<m_profile->size(); ++i)
-			{
-				const CCVector3* P = m_profile->getPoint(i);
-				double radius = P->x;
-				double height = P->y + profileDesc.heightShift;
-				baseRadius += radius;
-
-				if (i != 0)
-				{
-					if (height < minHeight)
-						minHeight = height;
-					else if (height > maxHeight)
-						maxHeight = height;
-				}
-				else
-				{
-					minHeight = maxHeight = height;
-				}
-			}
-			
-			//set default 'base radius'
-			if (m_profile->size() != 0)
-				baseRadius /= m_profile->size();
-			if (baseRadius == 0.0)
-				baseRadius = 1.0;
-			baseRadiusDoubleSpinBox->setValue(baseRadius);
-
-			//set default min and max height
-			hMinDoubleSpinBox->setValue(minHeight);
-			hMaxDoubleSpinBox->setValue(maxHeight);
-
-			//do the same thing for conical projection
-			double minLat_rad = 0.0, maxLat_rad = 0.0;
-
-			if (   m_cloud
-				&& DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	m_cloud,
-																			minLat_rad,
-																			maxLat_rad,
-																			cloudToSurface,
-																			static_cast<unsigned char>(profileDesc.revolDim)))
-			{
-				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad,m_angularUnits)); 
-				latMaxDoubleSpinBox->setValue(ConvertAngleFromRad(maxLat_rad,m_angularUnits));
-			}
+			updateMinAndMaxLimits();
 		}
 		else
 		{
@@ -353,6 +302,81 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 
 DistanceMapGenerationDlg::~DistanceMapGenerationDlg()
 {
+}
+
+void DistanceMapGenerationDlg::updateMinAndMaxLimits()
+{
+	if (m_cloud && m_profile)
+	{
+		DistanceMapGenerationTool::ProfileMetaData profileDesc;
+		if (DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc))
+		{
+			//compute mean 'radius'
+			//as well as min and max 'height'
+			double baseRadius = 0.0;
+			double minHeight = 0.0;
+			double maxHeight = 0.0;
+			for (unsigned i = 0; i<m_profile->size(); ++i)
+			{
+				const CCVector3* P = m_profile->getPoint(i);
+				double radius = P->x;
+				double height = P->y + profileDesc.heightShift;
+				baseRadius += radius;
+
+				if (i != 0)
+				{
+					if (height < minHeight)
+						minHeight = height;
+					else if (height > maxHeight)
+						maxHeight = height;
+				}
+				else
+				{
+					minHeight = maxHeight = height;
+				}
+			}
+
+			//set default 'base radius'
+			if (m_profile->size() != 0)
+				baseRadius /= m_profile->size();
+			if (baseRadius == 0.0)
+				baseRadius = 1.0;
+
+			baseRadiusDoubleSpinBox->blockSignals(true);
+			baseRadiusDoubleSpinBox->setValue(baseRadius);
+			baseRadiusDoubleSpinBox->blockSignals(false);
+
+			//set default min and max height
+			hMinDoubleSpinBox->blockSignals(true);
+			hMinDoubleSpinBox->setValue(minHeight);
+			hMinDoubleSpinBox->blockSignals(false);
+
+			hMaxDoubleSpinBox->blockSignals(true);
+			hMaxDoubleSpinBox->setValue(maxHeight);
+			hMaxDoubleSpinBox->blockSignals(false);
+
+			//do the same for the latitude
+
+			//compute transformation from the cloud to the surface (of revolution)
+			ccGLMatrix cloudToSurfaceOrigin = profileDesc.computeCloudToSurfaceOriginTrans();
+
+			double minLat_rad = 0.0, maxLat_rad = 0.0;
+			if (DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(m_cloud,
+				minLat_rad,
+				maxLat_rad,
+				cloudToSurfaceOrigin,
+				static_cast<unsigned char>(profileDesc.revolDim)))
+			{
+				latMinDoubleSpinBox->blockSignals(true);
+				latMinDoubleSpinBox->setValue(ConvertAngleFromRad(minLat_rad, m_angularUnits));
+				latMinDoubleSpinBox->blockSignals(false);
+				
+				latMaxDoubleSpinBox->blockSignals(true);
+				latMaxDoubleSpinBox->setValue(ConvertAngleFromRad(maxLat_rad, m_angularUnits));
+				latMaxDoubleSpinBox->blockSignals(false);
+			}
+		}
+	}
 }
 
 void DistanceMapGenerationDlg::projectionModeChanged(int)
@@ -556,18 +580,23 @@ void DistanceMapGenerationDlg::clearView()
 
 	//remove existing sf
 	m_window->setAssociatedScalarField(0);
+	
 	//remove existing map (or maps?)
 	ccHObject::Container maps;
-	m_window->getOwnDB()->filterChildren(maps,false,CC_TYPES::MESH);
-	for (size_t i=0; i<maps.size(); ++i)
+	m_window->getOwnDB()->filterChildren(maps, false, CC_TYPES::MESH);
+	for (size_t i = 0; i < maps.size(); ++i)
+	{
 		m_window->removeFromOwnDB(maps[i]);
+	}
 
 	//remove any polylines
 	{
 		ccHObject::Container polylines;
-		m_window->getOwnDB()->filterChildren(polylines,false,CC_TYPES::POLY_LINE);
-		for (size_t i=0; i<polylines.size(); ++i)
+		m_window->getOwnDB()->filterChildren(polylines, false, CC_TYPES::POLY_LINE);
+		for (size_t i = 0; i < polylines.size(); ++i)
+		{
 			m_window->removeFromOwnDB(polylines[i]);
+		}
 	}
 	m_xLabels->setVisible(false);
 	m_yLabels->setVisible(false);
@@ -575,14 +604,25 @@ void DistanceMapGenerationDlg::clearView()
 
 void DistanceMapGenerationDlg::update()
 {
-	if (m_map && getProjectionMode() == PROJ_CONICAL)
+	if (m_map)
 	{
-		//we must check that the projection parameter have not changed!
-		//Otherwise the symbols will be misplaced...
-		double yMin, yMax, yStep;
-		getGridYValues(yMin, yMax, yStep, ANG_RAD);
-		if (m_map->yMin != yMin || m_map->yMax != yMax || m_map->conicalSpanRatio != conicSpanRatioDoubleSpinBox->value())
+		if (getProjectionMode() == PROJ_CONICAL)
 		{
+			//we must check that the projection parameter have not changed!
+			//Otherwise the symbols will be misplaced...
+			double yMin, yMax, yStep;
+			getGridYValues(yMin, yMax, yStep, ANG_RAD);
+			if (	!m_map->conical
+				||	m_map->yMin != yMin
+				||	m_map->yMax != yMax
+				||	m_map->conicalSpanRatio != conicSpanRatioDoubleSpinBox->value())
+			{
+				clearOverlaySymbols();
+			}
+		}
+		else if (m_map->conical)
+		{
+			//we can't keep the symbols when switching the projection mode
 			clearOverlaySymbols();
 		}
 	}
@@ -612,8 +652,8 @@ void DistanceMapGenerationDlg::update()
 			double dx = static_cast<double>(m_map->xSteps) * m_map->xStep;
 			double dy = static_cast<double>(m_map->ySteps) * m_map->yStep;
 			ccGLMatrix transMat;
-			transMat.setTranslation(CCVector3(	static_cast<PointCoordinateType>(dx/2.0+m_map->xMin),
-												static_cast<PointCoordinateType>(dy/2+m_map->yMin),
+			transMat.setTranslation(CCVector3(	static_cast<PointCoordinateType>(dx / 2 + m_map->xMin),
+												static_cast<PointCoordinateType>(dy / 2 + m_map->yMin),
 												0));
 			ccPlane* mapPlane = new ccPlane(	static_cast<PointCoordinateType>(dx),
 												static_cast<PointCoordinateType>(dy),
@@ -626,7 +666,7 @@ void DistanceMapGenerationDlg::update()
 			//no choice, we create a mesh
 			bool ccw = ccwCheckBox->isChecked();
 			m_map->conicalSpanRatio = conicSpanRatioDoubleSpinBox->value();
-			mapMesh = DistanceMapGenerationTool::ConvertConicalMapToMesh(m_map,ccw);
+			mapMesh = DistanceMapGenerationTool::ConvertConicalMapToMesh(m_map, ccw);
 		}
 
 		if (mapMesh)
@@ -972,12 +1012,26 @@ void DistanceMapGenerationDlg::updateProfileOrigin()
 		return;
 	}
 
+	DistanceMapGenerationTool::ProfileMetaData profileDesc;
+	DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc);
+
 	//update origin
 	CCVector3 origin(	static_cast<PointCoordinateType>(xOriginDoubleSpinBox->value()),
 						static_cast<PointCoordinateType>(yOriginDoubleSpinBox->value()),
 						static_cast<PointCoordinateType>(zOriginDoubleSpinBox->value()) );
+
+	//DGM: we must compensate for the change of shift along the revolution axis!
+	double dShift = origin.u[profileDesc.revolDim] - profileDesc.origin.u[profileDesc.revolDim];
+	profileDesc.heightShift -= dShift;
 	
 	DistanceMapGenerationTool::SetPoylineOrigin(m_profile, origin);
+	DistanceMapGenerationTool::SetPolylineHeightShift(m_profile, profileDesc.heightShift);
+
+	if (dShift != 0)
+	{
+		clearOverlaySymbols(); //symbols placement depend on the origin position along the revolution axis
+	}
+	updateMinAndMaxLimits();
 }
 
 void DistanceMapGenerationDlg::updateGridSteps()
@@ -1069,11 +1123,12 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 		assert(false);
 		return QSharedPointer<DistanceMapGenerationTool::Map>(0);
 	}
+	
 	//compute transformation from cloud to the surface (of revolution)
-	ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
+	ccGLMatrix cloudToSurface = profileDesc.computeCloudToSurfaceOriginTrans();
 
 	//steps
-	double angStep_rad = getSpinboxAngularValue(xStepDoubleSpinBox,ANG_RAD);
+	double angStep_rad = getSpinboxAngularValue(xStepDoubleSpinBox, ANG_RAD);
 	//CW (clockwise) or CCW (counterclockwise)
 	bool ccw = ccwCheckBox->isChecked();
 
@@ -1157,9 +1212,9 @@ void DistanceMapGenerationDlg::exportMapAsMesh()
 		return;
 	}
 
-	//compute transformation from cloud to the surface (of revolution)
-	ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
-	ccMesh* mesh = DistanceMapGenerationTool::ConvertProfileToMesh(m_profile,cloudToSurface,m_map->counterclockwise,m_map->xSteps,mapImage);
+	//compute transformation from cloud to the profile (origin)
+	ccGLMatrix cloudToProfile = profileDesc.computeCloudToProfileOriginTrans();
+	ccMesh* mesh = DistanceMapGenerationTool::ConvertProfileToMesh(m_profile, cloudToProfile, m_map->counterclockwise, m_map->xSteps, mapImage);
 	if (mesh)
 	{
 		mesh->setDisplay_recursive(m_cloud->getDisplay());
@@ -1215,7 +1270,7 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 	if (!m_window)
 		return;
 
-	ccRenderToFileDlg rtfDlg(m_window->width(),m_window->height(),m_app->getMainWindow());
+	ccRenderToFileDlg rtfDlg(m_window->width(), m_window->height(), m_app->getMainWindow());
 	rtfDlg.dontScaleFeaturesCheckBox->setChecked(false);
 	rtfDlg.dontScaleFeaturesCheckBox->setVisible(false);
 	rtfDlg.renderOverlayItemsCheckBox->setChecked(false);
@@ -1224,7 +1279,7 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 	if (rtfDlg.exec())
 	{
 		QApplication::processEvents();
-		m_window->renderToFile(rtfDlg.getFilename(),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
+		m_window->renderToFile(rtfDlg.getFilename(), rtfDlg.getZoom(), rtfDlg.dontScalePoints(), rtfDlg.renderOverlayItems());
 	}
 }
 
@@ -1263,8 +1318,8 @@ void DistanceMapGenerationDlg::exportProfilesAsDXF()
 		QString vertProfileBaseTitle = dpeDlg.vertTitleLineEdit->text();
 		for (int i=0; i<angularStepCount; ++i)
 		{
-			double angle_rad = static_cast<double>(i)*2.0*M_PI/static_cast<double>(angularStepCount);
-			double angle_cur = ConvertAngleFromRad(angle_rad,m_angularUnits);
+			double angle_rad = static_cast<double>(i) * 2.0 * M_PI / angularStepCount;
+			double angle_cur = ConvertAngleFromRad(angle_rad, m_angularUnits);
 			params.profileTitles << QString("%1 - %2 %3").arg(vertProfileBaseTitle).arg(angle_cur).arg(getAngularUnitString());
 		}
 
@@ -1332,19 +1387,27 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 	if (!m_map)
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("Generate a valid map first!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("Generate a valid map first!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	//profile parameters
+	DistanceMapGenerationTool::ProfileMetaData profileDesc;
+	if (!DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc))
+	{
+		assert(false);
 		return;
 	}
 
 	//persistent settings (default import path)
 	QSettings settings;
 	settings.beginGroup("qSRA");
-	QString path = settings.value("importPath",QApplication::applicationDirPath()).toString();
+	QString path = settings.value("importPath", QApplication::applicationDirPath()).toString();
 
 	QString filter("Symbols (*.txt)");
 
 	//open file loading dialog
-	QString filename = QFileDialog::getOpenFileName(0,"Select symbols file",path,filter);
+	QString filename = QFileDialog::getOpenFileName(0, "Select symbols file", path, filter);
 	if (filename.isEmpty())
 		return;
 
@@ -1352,12 +1415,12 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 	if (!fileInfo.exists()) //?!
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("Failed to find symbol file '%1'?!").arg(filename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("Failed to find symbol file '%1'?!").arg(filename), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	//save current impoort path to persistent settings
-	settings.setValue("importPath",fileInfo.absolutePath());
+	settings.setValue("importPath", fileInfo.absolutePath());
 
 	ccSymbolCloud* symbolCloud = 0;
 	//try to load the file (as a "symbol" point cloud)
@@ -1367,7 +1430,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		if (!file.open(QFile::ReadOnly))
 		{
 			if (m_app)
-				m_app->dispToConsole(QString("Failed to open symbol file '%1'!").arg(filename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				m_app->dispToConsole(QString("Failed to open symbol file '%1'!").arg(filename), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 
@@ -1378,10 +1441,10 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		bool error = false;
 		while (!currentLine.isNull())
 		{
-			QStringList tokens = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+			QStringList tokens = currentLine.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 			if (tokens.size() == 4)
 			{
-				bool okX,okY,okZ;
+				bool okX, okY, okZ;
 				CCVector3 P(static_cast<PointCoordinateType>(tokens[1].toDouble(&okX)),
 							static_cast<PointCoordinateType>(tokens[2].toDouble(&okY)),
 							static_cast<PointCoordinateType>(tokens[3].toDouble(&okZ)));
@@ -1395,14 +1458,17 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 				QString label = tokens[0];
 				if (symbolCloud->size() == symbolCloud->capacity())
 				{
-					if (!symbolCloud->reserveThePointsTable(symbolCloud->size()+64) || !symbolCloud->reserveLabelArray(symbolCloud->size()+64))
+					if (!symbolCloud->reserveThePointsTable(symbolCloud->size() + 64) || !symbolCloud->reserveLabelArray(symbolCloud->size() + 64))
 					{
 						if (m_app)
-							m_app->dispToConsole(QString("Not enough memory!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+							m_app->dispToConsole(QString("Not enough memory!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 						error = true;
 						break;
 					}
 				}
+
+				//DGM: warning, for historical reasons height values are expressed relative to the profile origin!
+				P.u[profileDesc.revolDim] += profileDesc.origin.u[profileDesc.revolDim];
 
 				symbolCloud->addPoint(P);
 				symbolCloud->addLabel(label);
@@ -1435,15 +1501,8 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		//unroll the symbol cloud the same way as the input cloud
 		if (m_window)
 		{
-			//profile parameters
-			DistanceMapGenerationTool::ProfileMetaData profileDesc;
-			if (!DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc))
-			{
-				assert(false);
-				return;
-			}
 			//compute transformation from cloud to the surface (of revolution)
-			ccGLMatrix cloudToSurface = profileDesc.computeProfileToSurfaceTrans();
+			ccGLMatrix cloudToSurface = profileDesc.computeCloudToSurfaceOriginTrans();
 			//CW (clockwise) or CCW (counterclockwise)
 			bool ccw = ccwCheckBox->isChecked();
 
@@ -1451,7 +1510,6 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 			{
 				DistanceMapGenerationTool::ConvertCloudToCylindrical(	symbolCloud,
 																		cloudToSurface,
-																		profileDesc.heightShift,
 																		profileDesc.revolDim,
 																		ccw);
 			}
@@ -1460,11 +1518,11 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 				double conicalSpanRatio = conicSpanRatioDoubleSpinBox->value();
 				DistanceMapGenerationTool::ConvertCloudToConical(	symbolCloud,
 																	cloudToSurface,
-																	profileDesc.heightShift,
 																	profileDesc.revolDim,
 																	m_map->yMin,
 																	m_map->yMax,
-																	conicalSpanRatio,ccw);
+																	conicalSpanRatio,
+																	ccw);
 			}
 		}
 		symbolCloud->setSymbolSize(static_cast<double>(symbolSizeSpinBox->value()));
@@ -1474,8 +1532,8 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		ccColor::Rgb rgb(	static_cast<ColorCompType>(m_symbolColor.red()),
 							static_cast<ColorCompType>(m_symbolColor.green()),
 							static_cast<ColorCompType>(m_symbolColor.blue()) );
-		symbolCloud->setTempColor(rgb,true);
-		m_window->addToOwnDB(symbolCloud,false);
+		symbolCloud->setTempColor(rgb, true);
+		m_window->addToOwnDB(symbolCloud, false);
 		m_window->redraw();
 
 		clearLabelsPushButton->setEnabled(true);

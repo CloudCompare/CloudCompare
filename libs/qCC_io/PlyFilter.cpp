@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -39,7 +39,7 @@
 #include <string.h>
 #include <assert.h>
 #if defined(CC_WINDOWS)
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <time.h>
 #include <unistd.h>
@@ -661,7 +661,7 @@ static int face_cb(p_ply_argument argument)
 
 	if (value_index == 2)
 	{
-		mesh->addTriangle(s_tri[0],s_tri[1],s_tri[2]);
+		mesh->addTriangle(s_tri[0], s_tri[1], s_tri[2]);
 		++s_triCount;
 
 		if ((s_triCount % PROCESS_EVENTS_FREQ) == 0)
@@ -697,7 +697,7 @@ static int texCoords_cb(p_ply_argument argument)
 
 	if (((value_index+1) % 2) == 0)
 	{
-		texCoords->addElement(s_texCoord+value_index-1);
+		texCoords->addElement(s_texCoord + value_index - 1);
 		++s_texCoordCount;
 
 		if ((s_texCoordCount % PROCESS_EVENTS_FREQ) == 0)
@@ -736,6 +736,11 @@ static int texIndexes_cb(p_ply_argument argument)
 
 CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
+	return loadFile(filename, QString(), container, parameters);
+}
+
+CC_FILE_ERROR PlyFilter::loadFile(QString filename, QString inputTextureFilename, ccHObject& container, LoadParameters& parameters)
+{
 	//reset statics!
 	s_triCount = 0;
 	s_unsupportedPolygonType = false;
@@ -769,7 +774,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	//storage mode: little/big endian
 	e_ply_storage_mode storage_mode;
-	get_plystorage_mode(ply,&storage_mode);
+	get_plystorage_mode(ply, &storage_mode);
 
 	/*****************/
 	/***  Texture  ***/
@@ -789,13 +794,23 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		const char* lastComment = NULL;
 		while ((lastComment = ply_get_next_comment(ply, lastComment)))
 		{
-			ccLog::Print("[PLY][Comment] %s",lastComment);
+			ccLog::Print("[PLY][Comment] %s", lastComment);
 
 			//specific case: TextureFile 'filename.ext'
 			if (QString(lastComment).toUpper().startsWith("TEXTUREFILE "))
 			{
 				textureFileNames << QString(lastComment).mid(12).trimmed();
 			}
+		}
+	}
+
+	//external texture filename?
+	if (!inputTextureFilename.isEmpty())
+	{
+		//add it to the set of textures (if it's not already there!)
+		if (!textureFileNames.contains(inputTextureFilename))
+		{
+			textureFileNames.push_back(inputTextureFilename);
 		}
 	}
 
@@ -827,7 +842,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 			if (lastElement.elementInstances == 0)
 			{
-				ccLog::Warning("[PLY] Element '%s' was ignored as it has 0 instance!",lastElement.elementName);
+				ccLog::Warning("[PLY] Element '%s' was ignored as it has 0 instance!", lastElement.elementName);
 				continue;
 			}
 
@@ -972,7 +987,8 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			else if (bIndex == 0 && (propName.contains("BLUE") || (elementName.contains("COL") && propName.endsWith("B"))))
 				bIndex = i;
 			else if (iIndex == 0 && (propName.contains("INTENSITY") || propName.contains("GRAY") || propName.contains("GREY") || (elementName.contains("COL") && propName.endsWith("I"))))
-				iIndex = i;
+				//iIndex = i; //DGM: we don't load the intensities as RGB colors anymore!
+				sfPropIndexes.push_back(i);
 			else if (elementName.contains("VERT") || elementName.contains("POINT"))
 			{
 				if (propName.contains("SCAL"))
@@ -993,7 +1009,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	QStringList listPropsText;
 	{
 		listPropsText << QString("None");
-		for (int i=0; i<static_cast<int>(listProperties.size()); ++i)
+		for (int i = 0; i < static_cast<int>(listProperties.size()); ++i)
 		{
 			plyProperty& pp = listProperties[i];
 			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
@@ -1017,7 +1033,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	QStringList singlePropsText;
 	{
 		singlePropsText << QString("None");
-		for (int i=0; i<static_cast<int>(singleProperties.size()); ++i)
+		for (int i = 0; i < static_cast<int>(singleProperties.size()); ++i)
 		{
 			plyProperty& pp = singleProperties[i];
 			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
@@ -1061,21 +1077,21 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		//we count all assigned properties
 		int assignedStdProperties = 0;
 		{
-			for (unsigned i=0; i<nStdProp; ++i)
+			for (unsigned i = 0; i < nStdProp; ++i)
 				if (stdPropIndexes[i] > 0)
 					++assignedStdProperties;
 		}
 
 		int assignedListProperties = 0;
 		{
-			for (unsigned i=0; i<nListProp; ++i)
+			for (unsigned i = 0; i < nListProp; ++i)
 				if (listPropIndexes[i] > 0)
 					++assignedListProperties;
 		}
 
 		int assignedSingleProperties = 0;
 		{
-			for (unsigned i=0; i<nSingleProp; ++i)
+			for (unsigned i = 0; i < nSingleProp; ++i)
 				if (singlePropIndexes[i] > 0)
 					++assignedSingleProperties;
 		}
@@ -1420,7 +1436,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				{
 					CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
 					assert(sf);
-					if (sf->reserve(numberOfScalars))
+					if (sf->resize(numberOfScalars))
 					{
 						ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, scalar_cb, sf, 1);
 					}
@@ -1516,13 +1532,14 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 	}
 
-	ccProgressDialog pDlg(false, parameters.parentWidget);
-	if (parameters.alwaysDisplayLoadDialog)
+	ccProgressDialog* pDlg = 0;
+	if (parameters.parentWidget)
 	{
-		pDlg.setInfo(QObject::tr("Loading in progress..."));
-		pDlg.setMethodTitle(QObject::tr("PLY file"));
-		pDlg.setRange(0, 0);
-		pDlg.show();
+		pDlg = new ccProgressDialog(false, parameters.parentWidget);
+		pDlg->setInfo(QObject::tr("Loading in progress..."));
+		pDlg->setMethodTitle(QObject::tr("PLY file"));
+		pDlg->setRange(0, 0);
+		pDlg->start();
 		QApplication::processEvents();
 	}
 
@@ -1538,6 +1555,12 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 
 	ply_close(ply);
+
+	if (pDlg)
+	{
+		delete pDlg;
+		pDlg = 0;
+	}
 
 	if (success < 1)
 	{
@@ -1585,7 +1608,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	//we save parameters
 	parameters = s_loadParameters;
 
-	//we update scalar field(s)
+	//we update the scalar field(s)
 	{
 		for (unsigned i=0; i<cloud->getNumberOfScalarFields(); ++i)
 		{

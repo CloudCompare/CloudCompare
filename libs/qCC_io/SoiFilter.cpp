@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -82,12 +82,15 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	//Progress dialog
 	ccProgressDialog pdlg(false, parameters.parentWidget); //cancel is not supported
 	CCLib::NormalizedProgress nprogress(&pdlg, nbPointsTotal);
-	pdlg.setMethodTitle(QObject::tr("Open SOI file"));
-	pdlg.setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
-	pdlg.start();
+	if (parameters.parentWidget)
+	{
+		pdlg.setMethodTitle(QObject::tr("Open SOI file"));
+		pdlg.setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
+		pdlg.start();
+	}
 
 	//Scan by scan
-	for (unsigned k=0; k<nbScansTotal; k++)
+	for (unsigned k = 0; k < nbScansTotal; k++)
 	{
 		char* eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
 
@@ -129,7 +132,7 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		loadedCloud->showColors(true);
 
 		//we can read points now
-		for (unsigned i=0; i<nbOfPoints; i++)
+		for (unsigned i = 0; i < nbOfPoints; i++)
 		{
 			float P[3];
 			int c = 0;
@@ -138,7 +141,10 @@ CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			loadedCloud->addPoint(CCVector3::fromArray(P));
 			loadedCloud->addGreyColor(static_cast<ColorCompType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
 
-			nprogress.oneStep();
+			if (parameters.parentWidget)
+			{
+				nprogress.oneStep();
+			}
 		}
 
 		container.addChild(loadedCloud);

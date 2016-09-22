@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -935,7 +935,9 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	bool cloudHadNormals = cloud->hasNormals();
 	//compute per-vertex normals if necessary
 	if (!cloudHadNormals || updateNormals)
+	{
 		mesh->computeNormals(true);
+	}
 	mesh->showNormals(cloudHadNormals || !cloud->hasColors());
 	if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
 	{
@@ -2066,7 +2068,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	}
 
 	//we create a new mesh with the current selection
-	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this,rc,true,NULL,newVertices);
+	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this, rc, true, NULL, newVertices);
 
 	//don't use this anymore
 	delete rc;
@@ -2075,7 +2077,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	ccMesh* newMesh = NULL;
 	if (result)
 	{
-		newMesh = new ccMesh(result,newVertices);
+		newMesh = new ccMesh(result, newVertices);
 		if (!newMesh)
 		{
 			delete newVertices;
@@ -2084,7 +2086,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 		else
 		{
-			newMesh->setName(getName()+QString(".part"));
+			newMesh->setName(getName() + QString(".part"));
 
 			//shall we add any advanced features?
 			bool addFeatures = false;
@@ -2108,7 +2110,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newTriNormals->link();
 					try
 					{
-						newNormIndexes.resize(m_triNormals->currentSize(),-1);
+						newNormIndexes.resize(m_triNormals->currentSize(), -1);
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -2130,7 +2132,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newTriTexIndexes->link();
 					try
 					{
-						newTexIndexes.resize(m_texCoords->currentSize(),-1);
+						newTexIndexes.resize(m_texCoords->currentSize(), -1);
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -2152,7 +2154,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					newMaterials->link();
 					try
 					{
-						newMatIndexes.resize(m_materials->size(),-1);
+						newMatIndexes.resize(m_materials->size(), -1);
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -2172,7 +2174,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 				unsigned triNum = m_triVertIndexes->currentSize();
 				m_triVertIndexes->placeIteratorAtBegining();
-				for (unsigned i=0; i<triNum; ++i)
+				for (unsigned i = 0; i < triNum; ++i)
 				{
 					const CCLib::VerticesIndexes* tsi = (CCLib::VerticesIndexes*)m_triVertIndexes->getCurrentValue();
 					m_triVertIndexes->forwardIterator();
@@ -2192,7 +2194,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 							//for each triangle of this mesh, try to determine if its normals are already in use
 							//(otherwise add them to the new container and increase its index)
-							for (unsigned j=0; j<3; ++j)
+							for (unsigned j = 0; j < 3; ++j)
 							{
 								if (triNormIndexes[j] >= 0 && newNormIndexes[triNormIndexes[j]] < 0)
 								{

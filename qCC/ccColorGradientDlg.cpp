@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -30,7 +30,7 @@
 QColor s_firstColor(Qt::black);
 QColor s_secondColor(Qt::white);
 ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
-static int s_lastFreq = 5;
+static double s_lastFreq = 1.0;
 
 ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
@@ -92,7 +92,7 @@ void ccColorGradientDlg::getColors(QColor& first, QColor& second) const
 	second = s_secondColor;
 }
 
-int ccColorGradientDlg::getBandingFrequency() const
+double ccColorGradientDlg::getBandingFrequency() const
 {
 	assert(bandingRadioButton->isChecked());
 	//ugly hack: we use 's_lastFreq' here as the frequency is only requested

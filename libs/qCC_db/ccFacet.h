@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -112,7 +112,7 @@ protected:
 	bool createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
 										const PointCoordinateType* planeEquation = 0);
 
-	//! Facet 
+	//! Facet
 	ccMesh* m_polygonMesh;
 	//! Facet contour
 	ccPolyline* m_contourPolyline;
@@ -121,9 +121,9 @@ protected:
 	//! Origin points
 	ccPointCloud* m_originPoints;
 
-	//! Plane equation
+	//! Plane equation - as usual in CC plane equation is ax + by + cz = d
 	PointCoordinateType m_planeEquation[4];
-	
+
 	//! Facet centroid
 	CCVector3 m_center;
 
@@ -142,6 +142,9 @@ protected:
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const override;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+
+	// ccHObject interface
+	virtual void applyGLTransformation(const ccGLMatrix &trans) override;
 };
 
 #endif //CC_FACET_PRIMITIVE_HEADER

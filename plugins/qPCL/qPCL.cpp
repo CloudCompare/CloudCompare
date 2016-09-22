@@ -4,11 +4,11 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#                        COPYRIGHT: Luca Penasa                          #
@@ -24,12 +24,9 @@
 #include <BaseFilter.h>
 
 //FILTERS
-//#include <LoadPCD.h>
-//#include <SavePCD.h>
 #include <ExtractSIFT.h>
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
-//#include <StatisticalOutliersRemover.h>
 
 qPCL::~qPCL()
 {
@@ -99,7 +96,6 @@ int qPCL::addFilter(BaseFilter* filter)
 	return 1;
 }
 
-
 void qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	for (size_t i=0; i<m_filters.size(); ++i)
@@ -110,7 +106,3 @@ QIcon qPCL::getIcon() const
 {
 	return QIcon(QString::fromUtf8(":/toolbar/pcl.png"));
 }
-
-#ifndef CC_QT5
-Q_EXPORT_PLUGIN2(qPCL,qPCL);
-#endif

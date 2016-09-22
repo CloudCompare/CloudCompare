@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -23,7 +23,7 @@
 
 //Qt
 #include <QProgressDialog>
-#include <QMutex>
+#include <QAtomicInt>
 #include <QTimer>
 
 //CCLib
@@ -70,38 +70,26 @@ public:
 	//! setInfo with a QString as argument
 	virtual void setInfo(QString infoStr);
 
-	//! Sets base 'refresh' interval (in percents - strictly positive)
-	void setMinRefreshInterval(int i);
+protected slots:
 
-public slots:
-
-	//! Refreshes widget
+	//! Refreshes the progress
 	/** Should only be called in the main Qt thread!
-		--> Job automatically done by 'm_timer'
+		This slot is automatically called by 'update' (in Qt::QueuedConnection mode).
 	**/
 	void refresh();
 
 signals:
 
-	//! Schedules a repaint
-	void scheduleRepaint();
+	//! Schedules a call to refresh
+	void scheduleRefresh();
 
 protected:
 
 	//! Current progress value (percent)
-	int m_currentValue;
+	QAtomicInt m_currentValue;
 
 	//! Last displayed progress value (percent)
-	int m_lastValue;
-
-	//! Mutex for concurrent access
-	QMutex m_mutex;
-
-	//! Timer for automatic update
-	QTimer m_timer;
-
-	//! Minimum refresh interval (in percents)
-	int m_refreshInterval;
+	QAtomicInt m_lastRefreshValue;
 };
 
 #endif //CC_PROGRESS_DIALOG_HEADER

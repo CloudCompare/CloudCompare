@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -250,7 +250,7 @@ void AsciiOpenDlg::updateTable()
 
 	//we skip first lines (if needed)
 	{
-		for (unsigned i=0; i<m_skippedLines; ++i)
+		for (unsigned i = 0; i < m_skippedLines; ++i)
 		{
 			QString currentLine = stream.readLine();
 			//we keep track of the first line
@@ -263,6 +263,7 @@ void AsciiOpenDlg::updateTable()
 	if (m_columnsCount < 3)
 	{
 		m_ui->tableWidget->clear();
+		m_columnsValidty.clear();
 		m_columnsCount = 0;
 	}
 	m_ui->tableWidget->setRowCount(DISPLAYED_LINES + 1);	//+1 for first line shifting
@@ -380,9 +381,13 @@ void AsciiOpenDlg::updateTable()
 		m_headerLine = m_headerLine.trimmed();
 		int n = 0;
 		while (n < m_headerLine.size() && m_headerLine.at(n) == '/')
+		{
 			++n;
+		}
 		if (n != 0)
-			m_headerLine.remove(0,n);
+		{
+			m_headerLine.remove(0, n);
+		}
 		m_ui->headerLabel->setText(QString("Header: ") + m_headerLine);
 		m_ui->headerLabel->setVisible(true);
 	}
@@ -393,7 +398,9 @@ void AsciiOpenDlg::updateTable()
 
 	m_ui->commentLinesSkippedLabel->setVisible(commentLines != 0);
 	if (commentLines)
+	{
 		m_ui->commentLinesSkippedLabel->setText(QString("+ %1 comment line(s) skipped").arg(commentLines));
+	}
 
 	if (lineCount == 0 || columnsCount == 0)
 	{
@@ -410,7 +417,9 @@ void AsciiOpenDlg::updateTable()
 	QStringList propsText;
 	{
 		for (unsigned i = 0; i < ASCII_OPEN_DLG_TYPES_NUMBER; i++)
+		{
 			propsText << QString(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+		}
 	}
 
 	//remove unnecessary columns

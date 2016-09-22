@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -292,14 +292,15 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		//if we have computed a concave hull, we must remove triangles falling outside!
 		bool removePointsOutsideHull = (m_maxEdgeLength > 0);
 
-		if (!hullPointsVector.empty())
+		if (!hullPointsVector.empty() && CCLib::Delaunay2dMesh::Available())
 		{
+			//compute the facet surface
 			CCLib::Delaunay2dMesh dm;
 			char errorStr[1024];
-			if (dm.buildMesh(hullPointsVector,0,errorStr))
+			if (dm.buildMesh(hullPointsVector, 0, errorStr))
 			{
 				if (removePointsOutsideHull)
-					dm.removeOuterTriangles(hullPointsVector,hullPointsVector);
+					dm.removeOuterTriangles(hullPointsVector, hullPointsVector);
 				unsigned triCount = dm.size();
 				assert(triCount != 0);
 
@@ -307,7 +308,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 				if (m_polygonMesh->reserve(triCount))
 				{
 					//import faces
-					for (unsigned i=0; i<triCount; ++i)
+					for (unsigned i = 0; i < triCount; ++i)
 					{
 						const CCLib::VerticesIndexes* tsi = dm.getTriangleVertIndexes(i);
 						m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
@@ -323,8 +324,8 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 						CCVector3 N(m_planeEquation);
 						normsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
 						m_polygonMesh->setTriNormsTable(normsTable);
-						for (unsigned i=0; i<triCount; ++i)
-							m_polygonMesh->addTriangleNormalIndexes(0,0,0); //all triangles will have the same normal!
+						for (unsigned i = 0; i < triCount; ++i)
+							m_polygonMesh->addTriangleNormalIndexes(0, 0, 0); //all triangles will have the same normal!
 						m_polygonMesh->showNormals(true);
 						m_polygonMesh->setLocked(true);
 						m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
@@ -349,7 +350,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			}
 			else
 			{
-				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create polygon mesh (Triangle lib. said '%1'").arg(errorStr));
+				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create the polygon mesh (third party lib. said '%1'").arg(errorStr));
 			}
 		}
 	}
@@ -415,7 +416,16 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		markerContext.display = 0;
 
 		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
-		PointCoordinateType scale = m_contourPolyline->getOwnBB().getMinBoxDim();
+
+		PointCoordinateType scale = 0;
+		if (m_surface > 0) //the surface might be 0 if Delaunay 2.5D triangulation is not supported
+		{
+			scale = sqrt(m_surface);
+		}
+		else
+		{
+			scale = sqrt(m_contourPolyline->computeLength());
+		}
 
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
@@ -568,6 +578,21 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return WriteError();
 
 	return true;
+}
+
+void ccFacet::applyGLTransformation(const ccGLMatrix &trans)
+{
+	ccHObject::applyGLTransformation(trans);
+
+	// move/rotate the center to its new location
+	trans.apply(m_center);
+
+	// apply the rotation to the normal of the plane equation
+	trans.applyRotation(m_planeEquation);
+
+	// compute new d-parameter from the updated values
+	CCVector3 n(m_planeEquation);
+	m_planeEquation[3] = n.dot(m_center);
 }
 
 void ccFacet::invertNormal()

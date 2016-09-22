@@ -4,11 +4,11 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#                           COPYRIGHT: EDF                               #
@@ -52,19 +52,20 @@ public:
 	{
 		ProfileMetaData()
 			: revolDim(2)
-			, origin(0,0,0)
+			, origin(0, 0, 0)
 			, heightShift(0)
 			, hasAxis(false)
-			, axis(0,0,1)
+			, axis(0, 0, 1)
 		{}
 
-		ccGLMatrix computeProfileToSurfaceTrans() const;
+		ccGLMatrix computeCloudToSurfaceOriginTrans() const;
+		ccGLMatrix computeCloudToProfileOriginTrans() const;
 
-		int revolDim;
-		CCVector3 origin;
-		PointCoordinateType heightShift;
-		bool hasAxis;
-		CCVector3 axis;
+		int revolDim;						//!< revolution axis (X=0, Y=1, Z=2)
+		CCVector3 origin;					//!< origin of the surface of revolution
+		PointCoordinateType heightShift;	//!< virtual shift of the profile coordinates along the revolution axis and relative to the origin
+		bool hasAxis;						//!< whether a custom revolution axis has been defined or not
+		CCVector3 axis;						//!< custom revolution axis
 	};
 
 	//! Returns the whole set of meta-data associated to a given polyline/profile
@@ -150,6 +151,7 @@ public:
 			, yMin(0.0)
 			, yMax(0.0)
 			, yStep(1.0)
+			, conical(false)
 			, minVal(0.0)
 			, maxVal(0.0)
 			, counterclockwise(false)
@@ -165,6 +167,9 @@ public:
 		double yMin;
 		double yMax;
 		double yStep;
+
+		//conical (true) or cylindrical (false) projection
+		bool conical;
 
 		//min and max values
 		double minVal;
@@ -206,7 +211,7 @@ public:
 											double yStep,
 											double yMin,
 											double yMax,
-											bool spherical,
+											bool conical,
 											bool counterclockwise,
 											FillStrategyType fillStrategy,
 											EmptyCellFillOption emptyCellfillOption,
@@ -228,7 +233,6 @@ public:
 	//! Converts a point cloud coordinates to "cylindrical" ones (in place)
 	static bool ConvertCloudToCylindrical(	ccPointCloud* cloud,
 											const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
-											double heightShift,
 											unsigned char revolutionAxisDim,
 											bool counterclockwise = false);
 
@@ -237,7 +241,6 @@ public:
 	**/
 	static bool ConvertCloudToConical(	ccPointCloud* cloud,
 										const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
-										double heightShift,
 										unsigned char revolutionAxisDim,
 										double latMin_rad,
 										double latMax_rad,
@@ -257,7 +260,7 @@ public:
 	static bool ComputeMinAndMaxLatitude_rad(	ccPointCloud* cloud,
 												double& minLat_rad,
 												double& maxLat_rad,
-												const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+												const ccGLMatrix& cloudToSurfaceOrigin, //e.g. translation to the revolution origin
 												unsigned char revolutionAxisDim);
 
 	//! Saves a map as a CSV matrix
@@ -282,7 +285,7 @@ public:
 
 	//! Converts profile to a (textured) mesh
 	static ccMesh* ConvertProfileToMesh(ccPolyline* profile,
-										const ccGLMatrix& cloudToSurface, //e.g. translation to the revolution origin
+										const ccGLMatrix& cloudToProfile, //e.g. translation to the profile origin
 										bool counterclockwise,
 										unsigned angularSteps = 36,
 										QImage mapTexture = QImage());

@@ -1,14 +1,14 @@
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
@@ -33,7 +33,7 @@
 #endif
 
 //qCC_db
-#include <ccTimer.h>
+#include <ccLog.h>
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 #include <ccMaterial.h>
@@ -47,6 +47,9 @@
 #include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
 #include "ccPersistentSettings.h"
+
+//plugins
+#include <ccPluginInfo.h>
 
 #ifdef USE_VLD
 //VLD
@@ -104,7 +107,6 @@ int main(int argc, char **argv)
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-		format.setOption(QSurfaceFormat::StereoBuffers, true);
 		format.setStencilBufferSize(0);
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 		format.setStereo(true);
@@ -158,11 +160,10 @@ int main(int argc, char **argv)
 		QDir::setCurrent( appDir.absolutePath() );
 	}
 #endif
-	
-	//splash screen
-	QSplashScreen* splash = 0;
-	QTime splashStartTime;
 
+	//store the log message until a valid logging instance is registered
+	ccLog::EnableMessageBackup(true);
+	
 	//restore some global parameters
 	{
 		QSettings settings;
@@ -176,31 +177,39 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
-	
+
 	//Command line mode?
 	bool commandLine = (argc > 1 && argv[1][0] == '-');
 	
-	//specific case: translation file selection
+	//specific commands
 	int lastArgumentIndex = 1;
 	QTranslator translator;
-	if (commandLine && QString(argv[1]).toUpper() == "-LANG")
+	if (commandLine)
 	{
-		QString langFilename = QString(argv[2]);
-		
-		//Load translation file
-		if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
+		//translation file selection
+		if (QString(argv[lastArgumentIndex]).toUpper() == "-LANG")
 		{
-			qApp->installTranslator(&translator);
+			QString langFilename = QString(argv[2]);
+
+			//Load translation file
+			if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
+			{
+				qApp->installTranslator(&translator);
+			}
+			else
+			{
+				QMessageBox::warning(0, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
+			}
+			commandLine = false;
+			lastArgumentIndex += 2;
 		}
-		else
-		{
-			QMessageBox::warning(0, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
-		}
-		commandLine = false;
-		lastArgumentIndex = 3;
 	}
 
-	//command line mode
+	//splash screen
+	QSplashScreen* splash = 0;
+	QTime splashStartTime;
+
+	//standard mode
 	if (!commandLine)
 	{
 		if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
@@ -218,13 +227,72 @@ int main(int argc, char **argv)
 	}
 
 	//global structures initialization
-	ccTimer::Init();
 	FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
+	//load the plugins
+	tPluginInfoList plugins;
+	QStringList dirFilters;
+	QStringList pluginPaths;
+	{
+		QString appPath = QCoreApplication::applicationDirPath();
+
+#if defined(Q_OS_MAC)
+		dirFilters << "*.dylib";
+
+		// plugins are in the bundle
+		appPath.remove("MacOS");
+
+		pluginPaths += (appPath + "Plugins/ccPlugins");
+#if defined(CC_MAC_DEV_PATHS)
+		// used for development only - this is the path where the plugins are built
+		// this avoids having to install into the application bundle when developing
+		pluginPaths += (appPath + "../../../ccPlugins");
+#endif
+#elif defined(Q_OS_WIN)
+		dirFilters << "*.dll";
+
+		//plugins are in bin/plugins
+		pluginPaths << (appPath + "/plugins");
+#elif defined(Q_OS_LINUX)
+		dirFilters << "*.so";
+
+		// Plugins are relative to the bin directory where the executable is found
+		QDir  binDir(appPath);
+
+		if (binDir.dirName() == "bin")
+		{
+			binDir.cdUp();
+
+			pluginPaths << (binDir.absolutePath() + "/lib/cloudcompare/plugins");
+		}
+		else
+		{
+			// Choose a reasonable default to look in
+			pluginPaths << "/usr/lib/cloudcompare/plugins";
+		}
+#else
+		#warning Need to specify the plugin path for this OS.
+#endif
+
+#ifdef Q_OS_MAC
+		// Add any app data paths
+		// Plugins in these directories take precendence over the included ones
+		QStringList appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+
+		for (const QString &appDataPath : appDataPaths)
+		{
+			pluginPaths << (appDataPath + "/plugins");
+		}
+#endif
+	}
+
+	ccPlugins::LoadPlugins(plugins, pluginPaths, dirFilters);
+	
 	int result = 0;
 
+	//command line mode
 	if (commandLine)
 	{
 		//command line processing (no GUI)
@@ -239,6 +307,7 @@ int main(int argc, char **argv)
 			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
 			return EXIT_FAILURE;
 		}
+		mainWindow->dispatchPlugins(plugins, pluginPaths);
 		mainWindow->show();
 		QApplication::processEvents();
 
@@ -249,7 +318,6 @@ int main(int argc, char **argv)
 				.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
 		}
 
-
 		if (argc > lastArgumentIndex)
 		{
 			if (splash)
@@ -257,8 +325,40 @@ int main(int argc, char **argv)
 
 			//any additional argument is assumed to be a filename --> we try to load it/them
 			QStringList filenames;
-			for (int i = lastArgumentIndex; i<argc; ++i)
-				filenames << QString(argv[i]);
+			for (int i = lastArgumentIndex; i < argc; ++i)
+			{
+				QString arg(argv[i]);
+				//special command: auto start a plugin
+				if (arg.startsWith(":start-plugin:"))
+				{
+					QString pluginName = arg.mid(14);
+					QString pluginNameUpper = pluginName.toUpper();
+					//look for this plugin
+					bool found = false;
+					for (const tPluginInfo &plugin : plugins)
+					{
+						if (plugin.object->getName().replace(' ', '_').toUpper() == pluginNameUpper)
+						{
+							found = true;
+							bool success = plugin.object->start();
+							if (!success)
+							{
+								ccLog::Error(QString("Failed to start the plugin '%1'").arg(plugin.object->getName()));
+							}
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						ccLog::Error(QString("Couldn't find the plugin '%1'").arg(pluginName.replace('_', ' ')));
+					}
+				}
+				else
+				{
+					filenames << arg;
+				}
+			}
 
 			mainWindow->addToDB(filenames);
 		}
@@ -284,10 +384,23 @@ int main(int argc, char **argv)
 		{
 			result = app.exec();
 		}
-		catch(...)
+		catch (...)
 		{
 			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
 		}
+
+		//release the plugins
+		for (tPluginInfo &plugin : plugins)
+		{
+			plugin.object->stop(); //just in case
+			if (!plugin.qObject->parent())
+			{
+				delete plugin.object;
+				plugin.object = 0;
+				plugin.qObject = 0;
+			}
+		}
+
 	}
 
 	//release global structures

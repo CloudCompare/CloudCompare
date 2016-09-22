@@ -313,8 +313,8 @@
             <string notr="true">color:red;</string>
            </property>
            <property name="text">
-            <string>Warning: the original points height will be
-replaced bythe cells average height!</string>
+            <string>Warning: the original point's height will be
+replaced by the cell's average height!</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

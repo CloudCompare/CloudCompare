@@ -1,3 +1,9 @@
+cloudcompare (2.8.0~git20160922-0xenial1) UNRELEASED; urgency=medium
+  * Add experimental Photoscan filter 
+  * Add QCSF plugin
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 22 Sep 2016 15:28:00 +0100
+
 cloudcompare (2.8.0beta-0xenial1) UNRELEASED; urgency=medium
 
   * Remove all patch (Fixed upstream)

@@ -44,6 +44,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(labelBkgColorButton,             SIGNAL(clicked()),         this, SLOT(changeLabelBackgroundColor()));
 	connect(labelMarkerColorButton,          SIGNAL(clicked()),         this, SLOT(changeLabelMarkerColor()));
 	connect(enableGradientCheckBox,          SIGNAL(clicked()),         this, SLOT(changeBackgroundGradient()));
+	connect(doubleSidedCheckBox,             SIGNAL(clicked()),         this, SLOT(changeDoubleSidedLight()));
 	connect(pointsColorButton,               SIGNAL(clicked()),         this, SLOT(changePointsColor()));
 	connect(textColorButton,                 SIGNAL(clicked()),         this, SLOT(changeTextColor()));
 	connect(decimateMeshBox,                 SIGNAL(clicked()),         this, SLOT(changeMeshDecimation()));
@@ -129,6 +130,7 @@ void ccDisplayOptionsDlg::refresh()
 	textDefaultCol.setRgb(tdc.r,tdc.g,tdc.b);
 	ccQtHelpers::SetButtonColor(textColorButton,textDefaultCol);
 
+	doubleSidedCheckBox->setChecked(parameters.lightDoubleSided);
 	enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
 	decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
 	maxMeshSizeDoubleSpinBox->setValue(static_cast<double>(parameters.minLoDMeshSize)/1000000.0);
@@ -352,6 +354,11 @@ void ccDisplayOptionsDlg::changeLabelMarkerColor()
 												static_cast<unsigned char>(labelMarkerCol.blue()));
 
 	update();
+}
+
+void ccDisplayOptionsDlg::changeDoubleSidedLight()
+{
+	parameters.lightDoubleSided = doubleSidedCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeBackgroundGradient()

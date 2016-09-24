@@ -58,6 +58,7 @@ protected slots:
 	void changeBackgroundColor();
 	void changeLabelBackgroundColor();
 	void changeLabelMarkerColor();
+	void changeDoubleSidedLight();
 	void changeBackgroundGradient();
 	void changeMeshDecimation();
 	void changeMaxMeshSize(double);

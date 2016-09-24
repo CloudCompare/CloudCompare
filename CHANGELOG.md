@@ -77,6 +77,10 @@ v2.8.beta - XX/XX/2016
 	* CC should now warn the user when he/she tries to save a file with a filename containing special characters while the third party
 		library in charge of the export doesn't support them (see the warning Console message)
 
+	* Display options
+		- menu entry changed from 'Display parameters' to 'Display options' for the sake of consistency
+		- new option: 'double sided' (light) to control whether triangles should be lit from the back or not
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position

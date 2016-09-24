@@ -4359,7 +4359,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 	glFunc->glFlush();
 
-	// returning to normal rendering mode
+	//back to the standard rendering mode
 	int hits = glFunc->glRenderMode(GL_RENDER);
 
 	logGLError("ccGLWindow::startPicking.render");
@@ -4770,7 +4770,7 @@ void ccGLWindow::glEnableSunLight()
 	glFunc->glLightfv(GL_LIGHT0, GL_AMBIENT, getDisplayParameters().lightAmbientColor.rgba);
 	glFunc->glLightfv(GL_LIGHT0, GL_SPECULAR, getDisplayParameters().lightSpecularColor.rgba);
 	glFunc->glLightfv(GL_LIGHT0, GL_POSITION, m_sunLightPos);
-	glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, getDisplayParameters().lightDoubleSided ? GL_TRUE : GL_FALSE);
 	glFunc->glEnable(GL_LIGHT0);
 }
 

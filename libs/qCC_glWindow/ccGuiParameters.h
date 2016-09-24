@@ -45,6 +45,8 @@ public:
 		ccColor::Rgbaf lightAmbientColor;
 		//! Light specular color (RGBA)
 		ccColor::Rgbaf lightSpecularColor;
+		//! Double sided light
+		bool lightDoubleSided;
 
 		//! Default mesh diffuse color (front)
 		ccColor::Rgbaf meshFrontDiff;

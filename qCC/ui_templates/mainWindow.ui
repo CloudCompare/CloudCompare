@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -862,16 +862,10 @@
      <normaloff>:/CC/images/ccSettings.png</normaloff>:/CC/images/ccSettings.png</iconset>
    </property>
    <property name="text">
-    <string>Display settings</string>
-   </property>
-   <property name="iconText">
-    <string>Set Lights &amp;&amp; Materials</string>
+    <string>Display options</string>
    </property>
    <property name="toolTip">
-    <string>Change lighting and default materials parameters</string>
-   </property>
-   <property name="statusTip">
-    <string>Change lighting and default materials parameters</string>
+    <string>Set various display options</string>
    </property>
   </action>
   <action name="actionHelp">

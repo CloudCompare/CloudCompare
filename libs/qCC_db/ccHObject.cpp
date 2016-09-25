@@ -315,7 +315,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		assert(false);
 		return false;
 	}
-	if (std::find(m_children.begin(),m_children.end(),child) != m_children.end())
+	if (std::find(m_children.begin(), m_children.end(), child) != m_children.end())
 	{
 		ccLog::ErrorDebug("[ccHObject::addChild] Object is already a child!");
 		return false;
@@ -333,7 +333,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		if (insertIndex < 0 || static_cast<size_t>(insertIndex) >= m_children.size())
 			m_children.push_back(child);
 		else
-			m_children.insert(m_children.begin()+insertIndex,child);
+			m_children.insert(m_children.begin() + insertIndex, child);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -342,11 +342,11 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	}
 
 	//we want to be notified whenever this child is deleted!
-	child->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
+	child->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
 
 	if (dependencyFlags != 0)
 	{
-		addDependency(child,dependencyFlags);
+		addDependency(child, dependencyFlags);
 	}
 
 	//the strongest link: between a parent and a child ;)

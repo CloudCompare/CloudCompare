@@ -13,6 +13,10 @@ v2.8.beta - XX/XX/2016
 	* Support for FWF (Full WaveForm) airborne lidar data
 
 - Enhancements:
+
+	* Cross-section tool
+		- the tool now supports multiple clouds and/or meshes
+
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree
 

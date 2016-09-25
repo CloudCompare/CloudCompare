@@ -6547,28 +6547,42 @@ void MainWindow::activateClippingBoxMode()
 {
 	size_t selNum = m_selectedEntities.size();
 	if (selNum == 0)
+	{
 		return;
-
+	}
+	
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
+	{
 		return;
+	}
 
 	if (!m_clipTool)
+	{
 		m_clipTool = new ccClippingBoxTool(this);
+		connect(m_clipTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateClippingBoxMode(bool)));
+	}
 	m_clipTool->linkWith(win);
 
-	ccHObject* entity = m_selectedEntities[0];
-	if (!m_clipTool->setAssociatedEntity(entity))
+	ccHObject::Container selectedEntities = m_selectedEntities;
+	for (ccHObject* entity : selectedEntities)
 	{
+		if (m_clipTool->addAssociatedEntity(entity))
+		{
+			//automatically deselect the entity (to avoid seeing its bounding box ;)
+			m_ccRoot->unselectEntity(entity);
+		}
+	}
+
+	if (m_clipTool->getNumberOfAssociatedEntity() == 0)
+	{
+		m_clipTool->close();
 		return;
 	}
 
 	if (m_clipTool->start())
 	{
-		//automatically deselect the entity (to avoid seeing its bounding box ;)
-		m_ccRoot->unselectEntity(entity);
-		connect(m_clipTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateClippingBoxMode(bool)));
-		registerMDIDialog(m_clipTool,Qt::TopRightCorner);
+		registerMDIDialog(m_clipTool, Qt::TopRightCorner);
 		freezeUI(true);
 		updateMDIDialogsPlacement();
 		//deactivate all other GL windows
@@ -7294,8 +7308,8 @@ void MainWindow::doPickRotationCenter()
 
 void MainWindow::toggleSelectedEntitiesActivation()
 {	
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::ACTIVE) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::ACTIVE) )
 	{
 		return;
 	}
@@ -7306,8 +7320,8 @@ void MainWindow::toggleSelectedEntitiesActivation()
 
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::VISIBLE) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::VISIBLE) )
 	{
 		return;
 	}
@@ -7318,8 +7332,8 @@ void MainWindow::toggleSelectedEntitiesVisibility()
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::COLOR) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::COLOR) )
 	{
 		return;
 	}
@@ -7330,8 +7344,8 @@ void MainWindow::toggleSelectedEntitiesColors()
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::NORMALS) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::NORMALS) )
 	{
 		return;
 	}
@@ -7342,8 +7356,8 @@ void MainWindow::toggleSelectedEntitiesNormals()
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::SCALAR_FIELD) )
 	{
 		return;
 	}
@@ -7354,8 +7368,8 @@ void MainWindow::toggleSelectedEntitiesSF()
 
 void MainWindow::toggleSelectedEntitiesMaterials()
 {
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::MATERIAL) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::MATERIAL) )
 	{
 		return;
 	}
@@ -7366,8 +7380,8 @@ void MainWindow::toggleSelectedEntitiesMaterials()
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	if ( !ccEntityAction::toggleProperty(m_selectedEntities,
-													 ccEntityAction::TOGGLE_PROPERTY::NAME) )
+	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
+											ccEntityAction::TOGGLE_PROPERTY::NAME) )
 	{
 		return;
 	}
@@ -9830,7 +9844,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
-	actionCrossSection->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	actionCrossSection->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionExtractSections->setEnabled(atLeastOneCloud);
 	actionRasterize->setEnabled(exactlyOneCloud);
 	actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); //one or two clouds!

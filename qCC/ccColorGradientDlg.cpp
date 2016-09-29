@@ -94,7 +94,6 @@ void ccColorGradientDlg::getColors(QColor& first, QColor& second) const
 
 double ccColorGradientDlg::getBandingFrequency() const
 {
-	assert(bandingRadioButton->isChecked());
 	//ugly hack: we use 's_lastFreq' here as the frequency is only requested
 	//when the dialog is accepted
 	s_lastFreq = bandingFreqSpinBox->value();

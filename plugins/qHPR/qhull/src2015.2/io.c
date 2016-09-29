@@ -3508,7 +3508,6 @@ void qh_printvnorm(FILE *fp, vertexT *vertex, vertexT *vertexA, setT *centers, b
   pointT *normal;
   realT offset;
   int k;
-  QHULL_UNUSED(unbounded);
 
   normal= qh_detvnorm(vertex, vertexA, centers, &offset);
   qh_fprintf(fp, 9271, "%d %d %d ",
@@ -3535,7 +3534,6 @@ void qh_printvnorm(FILE *fp, vertexT *vertex, vertexT *vertexA, setT *centers, b
 */
 void qh_printvridge(FILE *fp, vertexT *vertex, vertexT *vertexA, setT *centers, boolT unbounded) {
   facetT *facet, **facetp;
-  QHULL_UNUSED(unbounded);
 
   qh_fprintf(fp, 9275, "%d %d %d", qh_setsize(centers)+2,
        qh_pointid(vertex->point), qh_pointid(vertexA->point));

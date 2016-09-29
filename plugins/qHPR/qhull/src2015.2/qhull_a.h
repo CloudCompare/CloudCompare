@@ -62,13 +62,6 @@
 #pragma warning( disable : 4706)  /* assignment within conditional function */
 #pragma warning( disable : 4996)  /* function was declared deprecated(strcpy, localtime, etc.) */
 #endif
-#if defined(__INTEL_COMPILER) && !defined(QHULL_OS_WIN)
-template <typename T>
-inline void qhullUnused(T &x) { (void)x; }
-#  define QHULL_UNUSED(x) qhullUnused(x);
-#else
-#  define QHULL_UNUSED(x) (void)x;
-#endif
 
 /* ======= -macros- =========== */
 

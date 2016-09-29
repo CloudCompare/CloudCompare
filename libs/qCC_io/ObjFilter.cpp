@@ -491,7 +491,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
 
 			//skip comments & empty lines
-			if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
+			if (tokens.empty() || tokens.front().startsWith('/', Qt::CaseInsensitive) || tokens.front().startsWith('#', Qt::CaseInsensitive))
 			{
 				currentLine = stream.readLine();
 				continue;
@@ -503,7 +503,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				//reserve more memory if necessary
 				if (vertices->size() == vertices->capacity())
 				{
-					if (!vertices->reserve(vertices->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
+					if (!vertices->reserve(vertices->capacity() + MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 						error = true;
@@ -524,10 +524,10 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				//first point: check for 'big' coordinates
 				if (pointsRead == 0)
 				{
-					if (HandleGlobalShift(Pd,Pshift,parameters))
+					if (HandleGlobalShift(Pd, Pshift, parameters))
 					{
 						vertices->setGlobalShift(Pshift);
-						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
 
@@ -621,16 +621,16 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				facesRead = 0;
 				//get the group name
 				QString groupName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
-				for (int i=2; i<tokens.size(); ++i) //multiple parts?
-					groupName.append(QString(" ")+tokens[i]);
+				for (int i = 2; i < tokens.size(); ++i) //multiple parts?
+					groupName.append(QString(" ") + tokens[i]);
 				//push previous group descriptor (if none was pushed)
 				if (groups.empty() && totalFacesRead > 0)
-					groups.push_back(std::pair<unsigned,QString>(0,"default"));
+					groups.push_back(std::pair<unsigned, QString>(0, "default"));
 				//push new group descriptor
 				if (!groups.empty() && groups.back().first == totalFacesRead)
 					groups.back().second = groupName; //simply replace the group name if the previous group was empty!
 				else
-					groups.push_back(std::pair<unsigned,QString>(totalFacesRead,groupName));
+					groups.push_back(std::pair<unsigned, QString>(totalFacesRead, groupName));
 				polyCount = 0; //restart polyline count at 0!
 			}
 			/*** new face ***/

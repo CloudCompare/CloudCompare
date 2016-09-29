@@ -244,6 +244,21 @@ void qPoissonRecon::doAction()
 	prpDlg.samplesPerNodeSpinBox->setValue(s_params.samplesPerNode);
 	prpDlg.densityCheckBox->setChecked(s_params.density);
 	prpDlg.importColorsCheckBox->setChecked(true);
+	switch (s_params.boundary)
+	{
+	case PoissonReconLib::Parameters::FREE:
+		prpDlg.boundaryComboBox->setCurrentIndex(0);
+		break;
+	case PoissonReconLib::Parameters::DIRICHLET:
+		prpDlg.boundaryComboBox->setCurrentIndex(1);
+		break;
+	case PoissonReconLib::Parameters::NEUMANN:
+		prpDlg.boundaryComboBox->setCurrentIndex(2);
+		break;
+	default:
+		assert(false);
+		break;
+	}
 
 	if (!prpDlg.exec())
 		return;
@@ -254,6 +269,21 @@ void qPoissonRecon::doAction()
 	s_params.fullDepth = prpDlg.fullDepthSpinBox->value();
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
 	s_params.density = prpDlg.densityCheckBox->isChecked();
+	switch (prpDlg.boundaryComboBox->currentIndex())
+	{
+	case 0:
+		s_params.boundary = PoissonReconLib::Parameters::FREE;
+		break;
+	case 1:
+		s_params.boundary = PoissonReconLib::Parameters::DIRICHLET;
+		break;
+	case 2:
+		s_params.boundary = PoissonReconLib::Parameters::NEUMANN;
+		break;
+	default:
+		assert(false);
+		break;
+	}
 	bool withColors = pc->hasColors() && prpDlg.importColorsCheckBox->isChecked();
 
 	/*** RECONSTRUCTION PROCESS ***/

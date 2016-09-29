@@ -14,6 +14,10 @@ v2.8.beta - XX/XX/2016
 
 - Enhancements:
 
+	* Poisson Reconstruction plugin:
+		- based on the latest version of PoissonRecon by Misha (V8.0)
+		- the user can now choose the boundary conditions (free / Dirichlet / Neumann)
+
 	* Cross-section tool
 		- the tool now supports multiple clouds and/or meshes
 

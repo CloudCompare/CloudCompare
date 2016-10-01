@@ -105,6 +105,7 @@ v2.8.beta - XX/XX/2016
 	* Command line tool: the CROP2D option applied with an orientation other than Z was not performing the cut at the right position
 	* Connected Components Extraction: the tool couldn't be properly used with an octree level > 10
 	* CC failed to save E57 files with multiple clouds with normals
+	* ccViewer was transforming input arguments to upper case, hence preventing files to be opened this way on Linux
 
 v2.7.0 - 04/22/2016
 -------------------

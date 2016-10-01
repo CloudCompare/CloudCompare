@@ -186,10 +186,11 @@ int main(int argc, char *argv[])
 		int i = 1;
 		while ( i < argc)
 		{
-			QString argument = QString(argv[i++]).toUpper();
+			QString argument = QString(argv[i++]);
+			QString upperArgument = argument.toUpper();
 
 			//Argument '-WIN X Y W H' (to set window size and position)
-			if (argument.toUpper() == "-WIN")
+			if (upperArgument == "-WIN")
 			{
 				bool ok = true;
 				if (i+3 < argc)
@@ -214,7 +215,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
-			else if (argument == "-TOP")
+			else if (upperArgument == "-TOP")
 			{
 				w.setWindowFlags(w.windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
 				w.show();
@@ -226,7 +227,9 @@ int main(int argc, char *argv[])
 		}
 
 		if (!filenames.empty())
+		{
 			w.addToDB(filenames);
+		}
 	}
 
 #ifdef Q_OS_MAC

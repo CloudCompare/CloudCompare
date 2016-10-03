@@ -30,7 +30,7 @@
 QColor s_firstColor(Qt::black);
 QColor s_secondColor(Qt::white);
 ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
-static double s_lastFreq = 1.0;
+static double s_lastFreq = 5.0;
 
 ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)

@@ -133,7 +133,7 @@
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Frequency</string>
+            <string>Period</string>
            </property>
           </widget>
          </item>
@@ -152,17 +152,17 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="bandingFreqSpinBox">
-           <property name="minimum">
-            <number>0.001</number>
-           </property>
-           <property name="maximum">
-            <number>1000000000.0</number>
-           </property>
-           <property name="value">
-            <number>5</number>
-           </property>
            <property name="decimals">
             <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>10000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>5.000000000000000</double>
            </property>
           </widget>
          </item>

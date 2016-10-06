@@ -123,6 +123,9 @@ public:
 							bool checkDimensions = false,
 							bool autoRedraw = true) override;
 
+	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos);
+	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg);
+	virtual void updateOverlayDialogsPlacement();
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
 	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
@@ -582,18 +585,10 @@ protected:
 		{}
 	};
 
-	//! Replaces an MDI dialog at its right position
-	void placeMDIDialog(ccMDIDialogs& mdiDlg);
+	//! Repositions an MDI dialog at its right position
+	void repositionOverlayDialog(ccMDIDialogs& mdiDlg);
 
-	//! Registers a MDI area overlay dialog
-	void registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos);
-	//! Unregisters a MDI area overlay dialog
-	void unregisterMDIDialog(ccOverlayDialog* dlg);
-
-	//! Automatically updates all registered MDI dialogs placement
-	void updateMDIDialogsPlacement();
-
-	//! Registered MDI area overlay dialogs
+	//! Registered MDI area 'overlay' dialogs
 	std::vector<ccMDIDialogs> m_mdiDialogs;
 
 	/*** dialogs ***/

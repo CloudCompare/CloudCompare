@@ -282,11 +282,13 @@ MainWindow::~MainWindow()
 	//release all 'overlay' dialogs
 	while (!m_mdiDialogs.empty())
 	{
-		m_mdiDialogs.back().dialog->disconnect();
-		m_mdiDialogs.back().dialog->stop(false);
-		m_mdiDialogs.back().dialog->setParent(0);
-		delete m_mdiDialogs.back().dialog;
+		ccMDIDialogs mdiDialog = m_mdiDialogs.back();
 		m_mdiDialogs.pop_back();
+
+		mdiDialog.dialog->disconnect();
+		mdiDialog.dialog->stop(false);
+		mdiDialog.dialog->setParent(0);
+		delete mdiDialog.dialog;
 	}
 	//m_mdiDialogs.clear();
 	m_mdiArea->closeAllSubWindows();
@@ -5774,84 +5776,83 @@ void MainWindow::moveEvent(QMoveEvent* event)
 {
 	QMainWindow::moveEvent(event);
 
-	updateMDIDialogsPlacement();
+	updateOverlayDialogsPlacement();
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
 	QMainWindow::resizeEvent(event);
 
-	updateMDIDialogsPlacement();
+	updateOverlayDialogsPlacement();
 }
 
-void MainWindow::registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos)
+void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 {
 	//check for existence
-	for (size_t i=0; i<m_mdiDialogs.size(); ++i)
+	for (ccMDIDialogs& mdi : m_mdiDialogs)
 	{
-		if (m_mdiDialogs[i].dialog == dlg)
+		if (mdi.dialog == dlg)
 		{
-			//we only update position in this case
-			m_mdiDialogs[i].position = pos;
-			return;
+			//we only update its position in this case
+			mdi.position = pos;
 		}
 	}
 
 	//otherwise we add it to DB
-	m_mdiDialogs.push_back(ccMDIDialogs(dlg,pos));
+	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
+	repositionOverlayDialog(m_mdiDialogs.back());
 }
 
-void MainWindow::unregisterMDIDialog(ccOverlayDialog* dlg)
+void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dialog)
 {
-	if (dlg)
+	for (std::vector<ccMDIDialogs>::iterator it = m_mdiDialogs.begin(); it != m_mdiDialogs.end(); ++it)
 	{
-		std::vector<ccMDIDialogs>::iterator it = m_mdiDialogs.begin();
-		while (it != m_mdiDialogs.end())
-			if (it->dialog == dlg)
-				break;
-		if (it != m_mdiDialogs.end())
+		if (it->dialog == dialog)
+		{
 			m_mdiDialogs.erase(it);
-		dlg->disconnect();
-		dlg->stop(false);
-		dlg->deleteLater();
+			break;
+		}
 	}
 }
 
-void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
+void MainWindow::updateOverlayDialogsPlacement()
+{
+	for (ccMDIDialogs& mdiDlg : m_mdiDialogs)
+	{
+		repositionOverlayDialog(mdiDlg);
+	}
+}
+
+void MainWindow::repositionOverlayDialog(ccMDIDialogs& mdiDlg)
 {
 	if (!mdiDlg.dialog || !mdiDlg.dialog->isVisible() || !m_mdiArea)
 		return;
 
 	int dx = 0, dy = 0;
+	static const int margin = 5;
 	switch (mdiDlg.position)
 	{
 	case Qt::TopLeftCorner:
-		dx = 5;
-		dy = 5;
+		dx = margin;
+		dy = margin;
 		break;
 	case Qt::TopRightCorner:
-		dx = std::max(5, m_mdiArea->width() - mdiDlg.dialog->width() - 5);
-		dy = 5;
+		dx = std::max(margin, m_mdiArea->width() - mdiDlg.dialog->width() - margin);
+		dy = margin;
 		break;
 	case Qt::BottomLeftCorner:
-		dx = 5;
-		dy = std::max(5, m_mdiArea->height() - mdiDlg.dialog->height() - 5);
+		dx = margin;
+		dy = std::max(margin, m_mdiArea->height() - mdiDlg.dialog->height() - margin);
 		break;
 	case Qt::BottomRightCorner:
-		dx = std::max(5, m_mdiArea->width() - mdiDlg.dialog->width() - 5);
-		dy = std::max(5, m_mdiArea->height() - mdiDlg.dialog->height() - 5);
+		dx = std::max(margin, m_mdiArea->width() - mdiDlg.dialog->width() - margin);
+		dy = std::max(margin, m_mdiArea->height() - mdiDlg.dialog->height() - margin);
 		break;
 	}
 
 	//show();
-	mdiDlg.dialog->move(m_mdiArea->mapToGlobal(QPoint(dx,dy)));
+	mdiDlg.dialog->move(m_mdiArea->mapToGlobal(QPoint(dx, dy)));
 	mdiDlg.dialog->raise();
-}
-
-void MainWindow::updateMDIDialogsPlacement()
-{
-	for (size_t i=0; i<m_mdiDialogs.size(); ++i)
-		placeMDIDialog(m_mdiDialogs[i]);
 }
 
 void MainWindow::toggleVisualDebugTraces()
@@ -5968,7 +5969,7 @@ void MainWindow::activateRegisterPointPairTool()
 	{
 		m_pprDlg = new ccPointPairRegistrationDlg(this);
 		connect(m_pprDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivateRegisterPointPairTool(bool)));
-		registerMDIDialog(m_pprDlg,Qt::TopRightCorner);
+		registerOverlayDialog(m_pprDlg, Qt::TopRightCorner);
 	}
 
 	ccGLWindow* win = new3DView();
@@ -5986,7 +5987,7 @@ void MainWindow::activateRegisterPointPairTool()
 	if (!m_pprDlg->start())
 		deactivateRegisterPointPairTool(false);
 	else
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::deactivateRegisterPointPairTool(bool state)
@@ -5999,7 +6000,7 @@ void MainWindow::deactivateRegisterPointPairTool(bool state)
 
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 	if (!subWindowList.isEmpty())
-		subWindowList[0]->showMaximized();
+		subWindowList.first()->showMaximized();
 
 	freezeUI(false);
 
@@ -6021,25 +6022,31 @@ void MainWindow::activateSectionExtractionMode()
 		m_seTool = new ccSectionExtractionTool(this);
 		connect(m_seTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSectionExtractionMode(bool)));
 
-		registerMDIDialog(m_seTool, Qt::TopRightCorner);
+		registerOverlayDialog(m_seTool, Qt::TopRightCorner);
 	}
 
 	//add clouds
-	unsigned validCount = 0;
 	ccGLWindow* firstDisplay = 0;
-	for (size_t i=0; i<selNum; ++i)
-		if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
-			if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(m_selectedEntities[i])))
-			{
-				if (!firstDisplay && m_selectedEntities[i]->getDisplay())
-					firstDisplay = static_cast<ccGLWindow*>(m_selectedEntities[i]->getDisplay());
-				++validCount;
-			}
-
-	if (validCount == 0)
 	{
-		ccConsole::Error("No cloud in selection!");
-		return;
+		unsigned validCount = 0;
+		for (size_t i = 0; i < selNum; ++i)
+		{
+			if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				if (m_seTool->addCloud(static_cast<ccGenericPointCloud*>(m_selectedEntities[i])))
+				{
+					if (!firstDisplay && m_selectedEntities[i]->getDisplay())
+						firstDisplay = static_cast<ccGLWindow*>(m_selectedEntities[i]->getDisplay());
+					++validCount;
+				}
+			}
+		}
+
+		if (validCount == 0)
+		{
+			ccConsole::Error("No cloud in selection!");
+			return;
+		}
 	}
 
 	//deselect all entities
@@ -6071,7 +6078,7 @@ void MainWindow::activateSectionExtractionMode()
 	if (!m_seTool->start())
 		deactivateSectionExtractionMode(false);
 	else
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::deactivateSectionExtractionMode(bool state)
@@ -6111,7 +6118,7 @@ void MainWindow::activateSegmentationMode()
 		m_gsTool = new ccGraphicalSegmentationTool(this);
 		connect(m_gsTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSegmentationMode(bool)));
 
-		registerMDIDialog(m_gsTool,Qt::TopRightCorner);
+		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
 	}
 
 	m_gsTool->linkWith(win);
@@ -6134,7 +6141,7 @@ void MainWindow::activateSegmentationMode()
 	if (!m_gsTool->start())
 		deactivateSegmentationMode(false);
 	else
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::deactivateSegmentationMode(bool state)
@@ -6388,48 +6395,52 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 	ccGLWindow* win = getActiveGLWindow();
 	if (win)
-        win->redraw();
+	{
+		win->redraw();
+	}
 }
 
 void MainWindow::activateTracePolylineMode()
 {
-    ccGLWindow* win = getActiveGLWindow();
-    if (!win)
-        return;
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
 
-    if (!m_tplTool)
-    {
-        m_tplTool = new ccTracePolylineTool(this);
-        connect(m_tplTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTracePolylineMode(bool)));
-        registerMDIDialog(m_tplTool,Qt::TopRightCorner);
-    }
+	if (!m_tplTool)
+	{
+		m_tplTool = new ccTracePolylineTool(this);
+		connect(m_tplTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTracePolylineMode(bool)));
+		registerOverlayDialog(m_tplTool, Qt::TopRightCorner);
+	}
 
-    m_tplTool->linkWith(win);
+	m_tplTool->linkWith(win);
 
-    freezeUI(true);
-    toolBarView->setDisabled(false);
+	freezeUI(true);
+	toolBarView->setDisabled(false);
 
-    //we disable all other windows
-    disableAllBut(win);
+	//we disable all other windows
+	disableAllBut(win);
 
-    if (!m_tplTool->start())
-        deactivateTracePolylineMode(false);
-    else
-        updateMDIDialogsPlacement();
+	if (!m_tplTool->start())
+		deactivateTracePolylineMode(false);
+	else
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::deactivateTracePolylineMode(bool)
 {
-    //we enable all GL windows
-    enableAll();
+	//we enable all GL windows
+	enableAll();
 
-    freezeUI(false);
+	freezeUI(false);
 
-    updateUI();
+	updateUI();
 
-    ccGLWindow* win = getActiveGLWindow();
-    if (win)
-        win->redraw();
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->redraw();
+	}
 }
 
 void MainWindow::activatePointListPickingMode()
@@ -6463,7 +6474,7 @@ void MainWindow::activatePointListPickingMode()
 		m_plpDlg = new ccPointListPickingDlg(this);
 		connect(m_plpDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivatePointListPickingMode(bool)));
 
-		registerMDIDialog(m_plpDlg,Qt::TopRightCorner);
+		registerOverlayDialog(m_plpDlg, Qt::TopRightCorner);
 	}
 
 	//DGM: we must update marker size spin box value (as it may have changed by the user with the "display dialog")
@@ -6480,7 +6491,7 @@ void MainWindow::activatePointListPickingMode()
 	if (!m_plpDlg->start())
 		deactivatePointListPickingMode(false);
 	else
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::deactivatePointListPickingMode(bool state)
@@ -6514,7 +6525,7 @@ void MainWindow::activatePointPickingMode()
 		connect(m_ppDlg, SIGNAL(processFinished(bool)),	this, SLOT(deactivatePointPickingMode(bool)));
 		connect(m_ppDlg, SIGNAL(newLabel(ccHObject*)),	this, SLOT(handleNewLabel(ccHObject*)));
 
-		registerMDIDialog(m_ppDlg,Qt::TopRightCorner);
+		registerOverlayDialog(m_ppDlg, Qt::TopRightCorner);
 	}
 
 	m_ppDlg->linkWith(win);
@@ -6527,7 +6538,7 @@ void MainWindow::activatePointPickingMode()
 	if (!m_ppDlg->start())
 		deactivatePointPickingMode(false);
 	else
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 }
 
 void MainWindow::deactivatePointPickingMode(bool state)
@@ -6582,9 +6593,9 @@ void MainWindow::activateClippingBoxMode()
 
 	if (m_clipTool->start())
 	{
-		registerMDIDialog(m_clipTool, Qt::TopRightCorner);
+		registerOverlayDialog(m_clipTool, Qt::TopRightCorner);
 		freezeUI(true);
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 		//deactivate all other GL windows
 		disableAllBut(win);
 	}
@@ -6641,9 +6652,9 @@ void MainWindow::activateTranslateRotateMode()
 	if (m_transTool->start())
 	{
 		connect(m_transTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTranslateRotateMode(bool)));
-		registerMDIDialog(m_transTool,Qt::TopRightCorner);
+		registerOverlayDialog(m_transTool, Qt::TopRightCorner);
 		freezeUI(true);
-		updateMDIDialogsPlacement();
+		updateOverlayDialogsPlacement();
 		//deactivate all other GL windows
 		disableAllBut(win);
 	}
@@ -6789,13 +6800,13 @@ void MainWindow::doActionEditCamera()
 		
 		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
 
-		registerMDIDialog(m_cpeDlg,Qt::BottomLeftCorner);
+		registerOverlayDialog(m_cpeDlg, Qt::BottomLeftCorner);
 	}
 
 	m_cpeDlg->linkWith(qWin);
 	m_cpeDlg->start();
 
-	updateMDIDialogsPlacement();
+	updateOverlayDialogsPlacement();
 }
 
 void MainWindow::doActionAdjustZoom()
@@ -7100,7 +7111,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 				cancelPreviousPickingOperation(true);
 			}
 
-			for (unsigned i=0; i<s_levelMarkersCloud->size(); ++i)
+			for (unsigned i = 0; i < s_levelMarkersCloud->size(); ++i)
 			{
 				const CCVector3* P = s_levelMarkersCloud->getPoint(i);
 				if ((pickedPoint - *P).norm() < 1.0e-6)
@@ -7128,8 +7139,8 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 				const CCVector3* A = s_levelMarkersCloud->getPoint(0);
 				const CCVector3* B = s_levelMarkersCloud->getPoint(1);
 				const CCVector3* C = s_levelMarkersCloud->getPoint(2);
-				CCVector3 X = *B-*A;
-				CCVector3 Y = *C-*A;
+				CCVector3 X = *B - *A;
+				CCVector3 Y = *C - *A;
 				CCVector3 Z = X.cross(Y);
 				//we choose 'Z' so that it points 'upward' relatively to the camera (assuming the user will be looking from the top)
 				CCVector3d viewDir = s_pickingWindow->getCurrentViewDir();
@@ -7150,7 +7161,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 				mat[3] = 0  ; mat[7] = 0  ; mat[11] = 0  ; mat[15] = 1;
 
 				CCVector3d T = -CCVector3d::fromArray(A->u);
-				trans/*.inverse()*/.apply(T);
+				trans.apply(T);
 				T += CCVector3d::fromArray(A->u);
 				trans.setTranslation(T);
 
@@ -7158,7 +7169,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 				applyTransformation(trans);
 
 				//clear message
-				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
 				s_pickingWindow->setView(CC_TOP_VIEW);
 			}
 			else
@@ -7774,7 +7785,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 		s_polygonMaxEdgeLength = maxEdgeLength;
 	}
 
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 		ccShiftedObject* shifted = 0;
@@ -7799,7 +7810,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 		if (cloud)
 		{
 			double rms = 0.0;
-			CCVector3 C,N;
+			CCVector3 C, N;
 
 			ccHObject* plane = 0;
 			if (fitFacet)
@@ -7842,21 +7853,21 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			if (plane)
 			{
 				ccConsole::Print(QString("[Orientation] Entity '%1'").arg(ent->getName()));
-				ccConsole::Print("\t- plane fitting RMS: %f",rms);
+				ccConsole::Print("\t- plane fitting RMS: %f", rms);
 
 				//We always consider the normal with a positive 'Z' by default!
 				if (N.z < 0.0)
 					N *= -1.0;
-				ccConsole::Print("\t- normal: (%f,%f,%f)",N.x,N.y,N.z);
+				ccConsole::Print("\t- normal: (%f,%f,%f)", N.x, N.y, N.z);
 
 				//we compute strike & dip by the way
 				PointCoordinateType dip = 0, dipDir = 0;
-				ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
-				QString dipAndDipDirStr = ccNormalVectors::ConvertDipAndDipDirToString(dip,dipDir);
+				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
+				QString dipAndDipDirStr = ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir);
 				ccConsole::Print(QString("\t- %1").arg(dipAndDipDirStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z
-				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,PC_ONE));
+				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, PC_ONE));
 				CCVector3 Gt = C;
 				makeZPosMatrix.applyRotation(Gt);
 				makeZPosMatrix.setTranslation(C-Gt);

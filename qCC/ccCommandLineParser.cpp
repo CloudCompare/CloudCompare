@@ -4037,6 +4037,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandSubsample(arguments, pDlg);
 		}
+		// "CURVATURE"
+		else if (IsCommand(argument, COMMAND_CURVATURE))
+		{
+			success = commandCurvature(arguments, parent);
+		}
 		// "DENSITY"
 		else if (IsCommand(argument, COMMAND_DENSITY))
 		{

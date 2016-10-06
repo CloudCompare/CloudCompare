@@ -460,7 +460,9 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			//we apply the transformation
 			ccGLMatrix cloudTrans(cloudTransD.data());
 			cloud->applyGLTransformation_recursive(&cloudTrans);
-			
+			//this transformation is of no interest for the user
+			cloud->resetGLTransformationHistory_recursive();
+
 			if (sensor)
 			{
 				ccGLMatrix sensorTrans(sensorTransD.data());

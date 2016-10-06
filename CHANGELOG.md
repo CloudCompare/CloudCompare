@@ -89,6 +89,9 @@ v2.8.beta - XX/XX/2016
 		- menu entry changed from 'Display parameters' to 'Display options' for the sake of consistency
 		- new option: 'double sided' (light) to control whether triangles should be lit from the back or not
 
+	* Other
+		- Transformation history is now saved in BIN files
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
@@ -108,6 +111,8 @@ v2.8.beta - XX/XX/2016
 	* Connected Components Extraction: the tool couldn't be properly used with an octree level > 10
 	* CC failed to save E57 files with multiple clouds with normals
 	* ccViewer was transforming input arguments to upper case, hence preventing files to be opened this way on Linux
+	* Documentation: contrarily to what was written in the wiki, the Level tool does not use the first picked point as origin for the new coordinate system!
+		It only rotates the cloud about this point.
 
 v2.7.0 - 04/22/2016
 -------------------

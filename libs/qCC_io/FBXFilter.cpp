@@ -1350,6 +1350,8 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 									//invYZ.data()[15] =  1.0;
 									//mat = invYZ * mat;
 									mesh->applyGLTransformation_recursive(&mat);
+									//this transformation is of no interest for the user
+									mesh->resetGLTransformationHistory_recursive();
 
 									if (mesh->getName().isEmpty())
 										mesh->setName(nodeName);

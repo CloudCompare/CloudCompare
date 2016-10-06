@@ -517,6 +517,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				keypointsCloud->applyGLTransformation_recursive(&orthoOptMatrix);
 				ccLog::Print("[Bundler] Keypoints cloud has been transformed with input matrix!");
+				//this transformation is of no interest for the user
+				keypointsCloud->resetGLTransformationHistory_recursive();
 			}
 
 			if (importKeypoints)
@@ -764,6 +766,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				sensor->applyGLTransformation_recursive(&orthoOptMatrix);
 				//ccLog::Print("[Bundler] Camera cloud has been transformed with input matrix!");
+				//this transformation is of no interest for the user
+				sensor->resetGLTransformationHistory_recursive();
 			}
 		}
 		//the image is a child of the sensor!

@@ -280,6 +280,8 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(QString filename,
 			ccGLMatrix trans;
 			trans.setTranslation(T);
 			cloud->applyGLTransformation_recursive(&trans);
+			//this transformation is of no interest for the user
+			cloud->resetGLTransformationHistory_recursive();
 		}
 		ccLog::Print(QString("[CSVMatrixFilter] Number of rows: %1").arg(rowCount));
 		cloud->setVisible(true);

@@ -887,16 +887,16 @@ bool ccHObject::toFile(QFile& out) const
 	if (!toFile_MeOnly(out))
 		return false;
 
-	//(serializable) child count (dataVersion>=20)
+	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
-	for (unsigned i=0;i<m_children.size();++i)
+	for (unsigned i = 0; i < m_children.size(); ++i)
 		if (m_children[i]->isSerializable())
 			++serializableCount;
-	if (out.write((const char*)&serializableCount,sizeof(uint32_t)) < 0)
+	if (out.write((const char*)&serializableCount, sizeof(uint32_t)) < 0)
 		return WriteError();
 
 	//write serializable children (if any)
-	for (unsigned i=0;i<m_children.size();++i)
+	for (unsigned i = 0; i < m_children.size(); ++i)
 	{
 		if (m_children[i]->isSerializable())
 		{
@@ -905,9 +905,12 @@ bool ccHObject::toFile(QFile& out) const
 		}
 	}
 
-	//write current selection behavior (dataVersion>=23)
-	if (out.write((const char*)&m_selectionBehavior,sizeof(SelectionBehavior)) < 0)
+	//write current selection behavior (dataVersion >= 23)
+	if (out.write((const char*)&m_selectionBehavior, sizeof(SelectionBehavior)) < 0)
 		return WriteError();
+
+	//write transformation history (dataVersion >= 45)
+	m_glTransHistory.toFile(out);
 
 	return true;
 }
@@ -923,7 +926,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		return ReadError();
 
 	//read serializable children (if any)
-	for (uint32_t i=0; i<serializableCount; ++i)
+	for (uint32_t i = 0; i < serializableCount; ++i)
 	{
 		//read children class ID
 		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
@@ -993,6 +996,15 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	else
 	{
 		m_selectionBehavior = SELECTION_AA_BBOX;
+	}
+
+	//read transformation history (dataVersion >= 45)
+	if (dataVersion >= 45)
+	{
+		if (!m_glTransHistory.fromFile(in, dataVersion, flags))
+		{
+			return false;
+		}
 	}
 
 	return true;

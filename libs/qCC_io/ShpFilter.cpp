@@ -1769,6 +1769,8 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 									if (poly)
 									{
 										poly->applyGLTransformation_recursive(&trans);
+										//this transformation is of no interest for the user
+										poly->resetGLTransformationHistory_recursive();
 										//add the 'const altitude' meta-data as well
 										poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(z));
 									}

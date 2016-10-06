@@ -1818,6 +1818,8 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, ccProgressDialog* progres
 	{
 		ccGLMatrix poseMatf = ccGLMatrix(poseMat.data());
 		cloud->applyGLTransformation_recursive(&poseMatf);
+		//this transformation is of no interest for the user
+		cloud->resetGLTransformationHistory_recursive();
 	}
 
 	return cloud;

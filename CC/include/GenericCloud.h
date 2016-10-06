@@ -32,77 +32,80 @@ class CC_CORE_LIB_API GenericCloud
 
 public:
 
-		//! Default destructor
-		virtual ~GenericCloud() {}
+	//! Default constructor
+	GenericCloud() {}
 
-		//! Generic function applied to a point (used by foreach)
-		typedef void genericPointAction(const CCVector3&, ScalarType&);
+	//! Default destructor
+	virtual ~GenericCloud() {}
 
-		//! Returns the number of points
-		/**	Virtual method to request the cloud size
-			\return the cloud size
-		**/
-		virtual unsigned size() const = 0;
+	//! Generic function applied to a point (used by foreach)
+	typedef void genericPointAction(const CCVector3&, ScalarType&);
 
-		//! Fast iteration mechanism
-		/**	Virtual method to apply a function to the whole cloud
-			\param action the function to apply (see GenericCloud::genericPointAction)
-		**/
-		virtual void forEach(genericPointAction& action) = 0;
+	//! Returns the number of points
+	/**	Virtual method to request the cloud size
+		\return the cloud size
+	**/
+	virtual unsigned size() const = 0;
 
-		//! Returns the cloud bounding box
-		/**	Virtual method to request the cloud bounding box limits
-			\param bbMin lower bounding-box limits (Xmin,Ymin,Zmin)
-			\param bbMax higher bounding-box limits (Xmax,Ymax,Zmax)
-		**/
-		virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) = 0;
+	//! Fast iteration mechanism
+	/**	Virtual method to apply a function to the whole cloud
+		\param action the function to apply (see GenericCloud::genericPointAction)
+	**/
+	virtual void forEach(genericPointAction& action) = 0;
 
-		//! Returns a given point visibility state (relatively to a sensor for instance)
-		/**	Generic method to request a point visibility (should be overloaded if this functionality is required).
-			The point visibility is such as defined in Daniel Girardeau-Montaut's PhD manuscript (see Chapter 2, 
-			section 2-3-3). In this case, a ground based laser sensor model should be used to determine it.
-			This method is called before performing any point-to-cloud comparison. If the result is not
-			POINT_VISIBLE, then the comparison won't be performed and the scalar field value associated
-			to this point will be this visibility value.
-			\param P the 3D point to test
-			\return visibility (default: POINT_VISIBLE)
-		**/
-		virtual inline unsigned char testVisibility(const CCVector3& P) const { return POINT_VISIBLE; }
+	//! Returns the cloud bounding box
+	/**	Virtual method to request the cloud bounding box limits
+		\param bbMin lower bounding-box limits (Xmin,Ymin,Zmin)
+		\param bbMax higher bounding-box limits (Xmax,Ymax,Zmax)
+	**/
+	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) = 0;
 
-		//! Sets the cloud iterator at the begining
-		/**	Virtual method to handle the cloud global iterator
-		**/
-		virtual void placeIteratorAtBegining() = 0;
+	//! Returns a given point visibility state (relatively to a sensor for instance)
+	/**	Generic method to request a point visibility (should be overloaded if this functionality is required).
+		The point visibility is such as defined in Daniel Girardeau-Montaut's PhD manuscript (see Chapter 2, 
+		section 2-3-3). In this case, a ground based laser sensor model should be used to determine it.
+		This method is called before performing any point-to-cloud comparison. If the result is not
+		POINT_VISIBLE, then the comparison won't be performed and the scalar field value associated
+		to this point will be this visibility value.
+		\param P the 3D point to test
+		\return visibility (default: POINT_VISIBLE)
+	**/
+	virtual inline unsigned char testVisibility(const CCVector3& P) const { return POINT_VISIBLE; }
 
-		//! Returns the next point (relatively to the global iterator position)
-		/**	Virtual method to handle the cloud global iterator.
-			Global iterator position should be increased by one each time
-			this method is called.
-			Warning:
-			- the returned object may not be persistent!
-			- THIS METHOD MAY NOT BE COMPATIBLE WITH PARALLEL STRATEGIES
-			(see the DgmOctree::executeFunctionForAllCellsAtLevel_MT and
-			DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT methods).
-			\return pointer on next point (or 0 if no more)
-		**/
-		virtual const CCVector3* getNextPoint() = 0;
+	//! Sets the cloud iterator at the begining
+	/**	Virtual method to handle the cloud global iterator
+	**/
+	virtual void placeIteratorAtBegining() = 0;
 
-		//!	Enables the scalar field associated to the cloud
-		/** If the scalar field structure is not yet initialized/allocated,
-			this method gives the signal for its creation. Otherwise, if possible
-			the structure size should be pre-reserved with the same number of
-			elements as the point cloud.
-		**/
-		virtual bool enableScalarField() = 0;
+	//! Returns the next point (relatively to the global iterator position)
+	/**	Virtual method to handle the cloud global iterator.
+		Global iterator position should be increased by one each time
+		this method is called.
+		Warning:
+		- the returned object may not be persistent!
+		- THIS METHOD MAY NOT BE COMPATIBLE WITH PARALLEL STRATEGIES
+		(see the DgmOctree::executeFunctionForAllCellsAtLevel_MT and
+		DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT methods).
+		\return pointer on next point (or 0 if no more)
+	**/
+	virtual const CCVector3* getNextPoint() = 0;
 
-		//! Returns true if the scalar field is enabled, false otherwise
-		virtual bool isScalarFieldEnabled() const = 0;
+	//!	Enables the scalar field associated to the cloud
+	/** If the scalar field structure is not yet initialized/allocated,
+		this method gives the signal for its creation. Otherwise, if possible
+		the structure size should be pre-reserved with the same number of
+		elements as the point cloud.
+	**/
+	virtual bool enableScalarField() = 0;
 
-		//! Sets the ith point associated scalar value
-		virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) = 0;
+	//! Returns true if the scalar field is enabled, false otherwise
+	virtual bool isScalarFieldEnabled() const = 0;
 
-		//! Returns the ith point associated scalar value
-		virtual ScalarType getPointScalarValue(unsigned pointIndex) const = 0;
+	//! Sets the ith point associated scalar value
+	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) = 0;
+
+	//! Returns the ith point associated scalar value
+	virtual ScalarType getPointScalarValue(unsigned pointIndex) const = 0;
 };
 
 }

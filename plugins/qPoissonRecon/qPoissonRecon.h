@@ -20,7 +20,7 @@
 
 #include "../ccStdPluginInterface.h"
 
-//! Wrapper to the "Poisson Surface Reconstruction (Version 3)" algorithm
+//! Wrapper to the "Poisson Surface Reconstruction (Version 9)" algorithm
 /** "Poisson Surface Reconstruction", M. Kazhdan, M. Bolitho, and H. Hoppe
 	Symposium on Geometry Processing (June 2006), pages 61--70
 	http://www.cs.jhu.edu/~misha/Code/PoissonRecon/
@@ -38,7 +38,7 @@ public:
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const override { return "Poisson Surface Reconstruction"; }
-	virtual QString getDescription() const override { return "Poisson Surface Reconstruction (Kazhdan et al.)"; }
+	virtual QString getDescription() const override { return "Poisson Surface Reconstruction V9.0 (Kazhdan et al.)"; }
 	virtual QIcon getIcon() const override;
 
 	//inherited from ccStdPluginInterface

@@ -66,9 +66,10 @@ public:
 		//normal
 		assert(m_cloud->hasNormals());
 		const CCVector3& N = m_cloud->getPointNormal(m_index);
-		out.n[0] = static_cast<Real>(N.x);
-		out.n[1] = static_cast<Real>(N.y);
-		out.n[2] = static_cast<Real>(N.z);
+		//DGM: strangely, this new version of PoissonRecon seems to require inverted normals
+		out.n[0] = -static_cast<Real>(N.x);
+		out.n[1] = -static_cast<Real>(N.y);
+		out.n[2] = -static_cast<Real>(N.z);
 
 		//auto-forward
 		++m_index;
@@ -518,8 +519,8 @@ void qPoissonRecon::doAction()
 								it->idx += nic;
 
 						newMesh->addTriangle(	triangleIndexes[0].idx,
-												triangleIndexes[2].idx,
-												triangleIndexes[1].idx );
+												triangleIndexes[1].idx,
+												triangleIndexes[2].idx );
 					}
 					else
 					{
@@ -546,7 +547,7 @@ void qPoissonRecon::doAction()
 		{
 			delete newMesh;
 			newMesh = 0;
-			m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 
 		//currently selected entities parameters may have changed!
@@ -556,7 +557,7 @@ void qPoissonRecon::doAction()
 	}
 	else
 	{
-		m_app->dispToConsole("Reconstruction failed!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Reconstruction failed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 
 	s_cloud = 0;

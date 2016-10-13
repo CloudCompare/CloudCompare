@@ -1162,7 +1162,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	//if the transformation is partly converted to global shift/scale
 	bool updateGlobalShiftAndScale = false;
 	double scaleChange = 1.0;
-	CCVector3d shiftChange(0,0,0);
+	CCVector3d shiftChange(0, 0, 0);
 	ccGLMatrixd transMat = mat;
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
@@ -1181,7 +1181,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 	size_t selNum = selectedEntities.size();
 	bool firstCloud = true;
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
 
@@ -1190,12 +1190,12 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 		{
 			//specific test for locked vertices
 			bool lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (cloud)
 			{
 				if (lockedVertices)
 				{
-					ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+					ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 					continue;
 				}
 

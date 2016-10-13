@@ -48,7 +48,8 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
 	onMatrixTextChange(); //provoke the update of the other forms
 	tabWidget->setCurrentIndex(s_currentFormIndex);
 
-	connect(buttonBox,				SIGNAL(accepted()),				this,	SLOT(checkMatrixValidityAndAccept()));
+	connect(buttonBox,				SIGNAL(accepted()),							this,	SLOT(checkMatrixValidityAndAccept()));
+	connect(buttonBox,				SIGNAL(clicked(QAbstractButton*)),			this,	SLOT(buttonClicked(QAbstractButton*)));
 
 	connect(matrixTextEdit,			SIGNAL(textChanged()),			this,	SLOT(onMatrixTextChange()));
 	connect(fromFileToolButton,		SIGNAL(clicked()),				this,	SLOT(loadFromASCIIFile()));
@@ -86,7 +87,7 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	bool valid = false;
 	ccGLMatrix mat = ccGLMatrix::FromString(text,valid);
 	if (valid)
-		updateAll(mat,false,true,true); //no need to update the current form
+		updateAll(mat, false, true, true); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::onRotAngleValueChanged(double)
@@ -105,7 +106,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	ccGLMatrix mat;
 	mat.initFromParameters(alpha,axis,t);
 
-	updateAll(mat,true,false,true); //no need to update the current form
+	updateAll(mat, true, false, true); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::onEulerValueChanged(double)
@@ -123,7 +124,7 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	ccGLMatrix mat;
 	mat.initFromParameters(phi,theta,psi,t);
 
-	updateAll(mat,true,true,false); //no need to update the current form
+	updateAll(mat, true, true, false); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=true*/, bool axisAngleForm/*=true*/, bool eulerForm/*=true*/)
@@ -206,7 +207,9 @@ ccGLMatrixd ccApplyTransformationDlg::getTransformation() const
 	assert(valid);
 	//eventually invert it if necessary
 	if (inverseCheckBox->isChecked())
+	{
 		mat.invert();
+	}
 
 	return mat;
 }
@@ -269,4 +272,13 @@ void ccApplyTransformationDlg::loadFromClipboard()
 		else
 			ccLog::Warning("[ccApplyTransformationDlg] Clipboard is empty");
 	}
+}
+
+void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
+{
+	if (buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
+	{
+		updateAll(ccGLMatrix(), true, true, true);
+	}
+	inverseCheckBox->setChecked(false);
 }

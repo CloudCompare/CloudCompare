@@ -53,6 +53,9 @@ protected slots:
 	void loadFromASCIIFile();
 	//! Loads matrix from clipboard ("paste")
 	void loadFromClipboard();
+	
+	//! Signal called when a button is clicked
+	void buttonClicked(QAbstractButton*);
 
 protected:
 

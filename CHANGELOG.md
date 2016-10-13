@@ -91,6 +91,7 @@ v2.8.beta - XX/XX/2016
 
 	* Other
 		- Transformation history is now saved in BIN files
+		- new 'Reset' button on the 'Apply Transformation' tool dialog
 
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)

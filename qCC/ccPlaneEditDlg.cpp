@@ -18,7 +18,7 @@
 #include "ccPlaneEditDlg.h"
 
 //local
-#include "mainWindow.h"
+#include "mainwindow.h"
 
 //qCC_db
 #include <ccPlane.h>

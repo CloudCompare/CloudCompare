@@ -343,6 +343,9 @@ protected slots:
 	// For leveling
 	void doLevel();
 	
+	void doActionCreatePlane();
+	void doActionEditPlane();
+
 	void doActionDeleteScalarField();
 	void doActionSmoothMeshSF();
 	void doActionEnhanceMeshSF();

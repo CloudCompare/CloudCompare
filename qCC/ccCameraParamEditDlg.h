@@ -20,15 +20,19 @@
 
 //Local
 #include "ccOverlayDialog.h"
-#include "ccGLWindow.h"
-
 #include <ui_cameraParamDlg.h>
+
+//qCC_db
+#include <ccGLMatrix.h>
+//qCC_gl
+#include <ccGLUtils.h>
 
 //system
 #include <map>
 
 class QMdiSubWindow;
 class ccGLWindow;
+class ccHObject;
 
 //! Dialog to interactively edit the camera pose parameters
 class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg
@@ -125,4 +129,4 @@ protected:
 	PushedMatricesMapType pushedMatrices;
 };
 
-#endif
+#endif //CC_CAMERA_PARAM_EDIT_DLG_HEADER

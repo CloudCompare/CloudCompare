@@ -108,6 +108,7 @@
 #include "ccVolumeCalcTool.h"
 #include "ccPluginDlg.h"
 #include "ccWaveformDialog.h"
+#include "ccPlaneEditDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -730,6 +731,9 @@ void MainWindow::connectActions()
 	//"Edit > Mesh > Scalar Field" menu
 	connect(actionSmoothMeshSF,					SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
 	connect(actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
+	//"Edit > Plane" menu
+	connect(actionCreatePlane,					SIGNAL(triggered()),	this,		SLOT(doActionCreatePlane()));
+	connect(actionEditPlane,					SIGNAL(triggered()),	this,		SLOT(doActionEditPlane()));
 	//"Edit > Sensor > Ground-Based lidar" menu
 	connect(actionShowDepthBuffer,				SIGNAL(triggered()),	this,		SLOT(doActionShowDepthBuffer()));
 	connect(actionExportDepthBuffer,			SIGNAL(triggered()),	this,		SLOT(doActionExportDepthBuffer()));
@@ -9812,7 +9816,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
-
+	
 	actionOrientNormalsMST->setEnabled(atLeastOneCloud && atLeastOneNormal);
 	actionOrientNormalsFM->setEnabled(atLeastOneCloud && atLeastOneNormal);
 	actionClearNormals->setEnabled(atLeastOneNormal);
@@ -9851,6 +9855,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 	actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
+
+	//actionCreatePlane->setEnabled(true);
+	actionEditPlane->setEnabled(selInfo.planeCount == 1);
 
 	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
@@ -10242,4 +10249,32 @@ void MainWindow::doActionShowWaveDialog()
 
 	ccWaveDialog wDlg(cloud, this);
 	wDlg.exec();
+}
+
+void MainWindow::doActionCreatePlane()
+{
+	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(this);
+	peDlg->linkWith(getActiveGLWindow());
+	peDlg->show();
+}
+
+void MainWindow::doActionEditPlane()
+{
+	if (m_selectedEntities.empty())
+	{
+		assert(false);
+		return;
+	}
+
+	ccPlane* plane = ccHObjectCaster::ToPlane(m_selectedEntities.front());
+	if (!plane)
+	{
+		assert(false);
+		return;
+	}
+
+	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(this);
+	peDlg->linkWith(getActiveGLWindow());
+	peDlg->initWithPlane(plane);
+	peDlg->show();
 }

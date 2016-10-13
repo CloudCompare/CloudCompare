@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -313,10 +313,18 @@
      </property>
      <addaction name="actionShowWaveDialog"/>
     </widget>
+    <widget class="QMenu" name="menuPlane">
+     <property name="title">
+      <string>Plane</string>
+     </property>
+     <addaction name="actionCreatePlane"/>
+     <addaction name="actionEditPlane"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
     <addaction name="menuMesh"/>
+    <addaction name="menuPlane"/>
     <addaction name="menuSensors"/>
     <addaction name="menuScalarFields"/>
     <addaction name="menuWaveform"/>
@@ -540,7 +548,8 @@
    </property>
    <property name="windowIcon">
     <iconset>
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff/>
+    </iconset>
    </property>
    <property name="toolTip">
     <string>Viewing tools</string>
@@ -755,6 +764,9 @@
        <property name="expandsOnDoubleClick">
         <bool>false</bool>
        </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
       </widget>
      </item>
     </layout>
@@ -2888,6 +2900,22 @@
   <action name="actionShowWaveDialog">
    <property name="text">
     <string>2D Waveform viewer</string>
+   </property>
+  </action>
+  <action name="actionCreatePlane">
+   <property name="text">
+    <string>Create</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a plane</string>
+   </property>
+  </action>
+  <action name="actionEditPlane">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the plane parameters</string>
    </property>
   </action>
  </widget>

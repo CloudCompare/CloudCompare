@@ -74,7 +74,20 @@ bool ccPlane::buildUp()
 
 ccGenericPrimitive* ccPlane::clone() const
 {
-	return finishCloneJob(new ccPlane(m_xWidth,m_yWidth,&m_transformation,getName()));
+	return finishCloneJob(new ccPlane(m_xWidth, m_yWidth, &m_transformation, getName()));
+}
+
+void ccPlane::drawMeOnly(CC_DRAW_CONTEXT& context)
+{
+	//call parent method
+	ccGenericPrimitive::drawMeOnly(context);
+
+	//show normal vector
+	if (MACRO_Draw3D(context) && normalVectorIsShown())
+	{
+		PointCoordinateType scale = sqrt(m_xWidth * m_yWidth) / 2; //DGM: highly empirical ;)
+		glDrawNormal(context, m_transformation.getTranslationAsVec3D(), scale);
+	}
 }
 
 void ccPlane::getEquation(CCVector3& N, PointCoordinateType& constVal) const

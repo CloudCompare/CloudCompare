@@ -12,6 +12,10 @@ v2.8.beta - XX/XX/2016
 
 	* Support for FWF (Full WaveForm) airborne lidar data
 
+	* New 'Geological' plane creation / edition methods:
+		- Edit > Plane > Create: lets the user create a plane with specific dip / dip direction, center (can be picked on a cloud or a mesh), width and height
+		- Edit > Plane > Edit: edit the above parameters on an existing plane entity
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:
@@ -92,6 +96,8 @@ v2.8.beta - XX/XX/2016
 	* Other
 		- Transformation history is now saved in BIN files
 		- new 'Reset' button on the 'Apply Transformation' tool dialog
+		- The normal of a plane entity can now be visualized as a 3D arrow (just as the Facet entities)
+		- Dip and dip direction are now displayed in the properties of Facets and Planes
 
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)

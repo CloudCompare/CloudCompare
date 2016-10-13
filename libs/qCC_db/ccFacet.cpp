@@ -17,9 +17,6 @@
 
 #include "ccFacet.h"
 
-//qCC_db
-#include "ccCylinder.h"
-
 //CCLib
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
@@ -42,7 +39,6 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 	, m_rms(0.0)
 	, m_surface(0.0)
 	, m_maxEdgeLength(maxEdgeLength)
-	, m_showNormalVector(false)
 {
 	m_planeEquation[0] = 0;
 	m_planeEquation[1] = 0;
@@ -154,8 +150,8 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	}
 
 	//create facet structure
-	ccFacet* facet = new ccFacet(maxEdgeLength,"facet");
-	if (!facet->createInternalRepresentation(cloud,planeEquation))
+	ccFacet* facet = new ccFacet(maxEdgeLength, "facet");
+	if (!facet->createInternalRepresentation(cloud, planeEquation))
 	{
 		delete facet;
 		return 0;
@@ -164,7 +160,7 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
 	if (pc)
 	{
-		facet->setName(pc->getName()+QString(".facet"));
+		facet->setName(pc->getName() + QString(".facet"));
 		if (transferOwnership)
 		{
 			pc->setName(DEFAULT_ORIGIN_POINTS_NAME);
@@ -375,48 +371,14 @@ void ccFacet::setColor(const ccColor::Rgb& rgb)
 	showColors(true);
 }
 
-//unit point marker
-static QSharedPointer<ccCylinder> c_unitNormalSymbol(0);
-static QSharedPointer<ccCone> c_unitNormalHeadSymbol(0);
-
 void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!MACRO_Draw3D(context))
 		return;
 
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
-		return;
-
-	if (m_showNormalVector && m_contourPolyline)
+	//show normal vector
+	if (normalVectorIsShown() && m_contourPolyline)
 	{
-		if (!c_unitNormalSymbol)
-		{
-			c_unitNormalSymbol = QSharedPointer<ccCylinder>(new ccCylinder(0.02f, 0.9f, 0, "UnitNormal", 12));
-			c_unitNormalSymbol->showColors(true);
-			c_unitNormalSymbol->setVisible(true);
-			c_unitNormalSymbol->setEnabled(true);
-			c_unitNormalSymbol->setTempColor(ccColor::green);
-		}
-		if (!c_unitNormalHeadSymbol)
-		{
-			c_unitNormalHeadSymbol = QSharedPointer<ccCone>(new ccCone(0.05f, 0.0f, 0.1f, 0, 0, 0, "UnitNormalHead", 12));
-			c_unitNormalHeadSymbol->showColors(true);
-			c_unitNormalHeadSymbol->setVisible(true);
-			c_unitNormalHeadSymbol->setEnabled(true);
-			c_unitNormalHeadSymbol->setTempColor(ccColor::green);
-		}
-
-		//build-up point maker own 'context'
-		CC_DRAW_CONTEXT markerContext = context;
-		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		markerContext.display = 0;
-
-		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
-
 		PointCoordinateType scale = 0;
 		if (m_surface > 0) //the surface might be 0 if Delaunay 2.5D triangulation is not supported
 		{
@@ -426,18 +388,7 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			scale = sqrt(m_contourPolyline->computeLength());
 		}
-
-		glFunc->glMatrixMode(GL_MODELVIEW);
-		glFunc->glPushMatrix();
-		ccGL::Translate(glFunc, m_center.x, m_center.y, m_center.z);
-		ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, PC_ONE), getNormal());
-		glFunc->glMultMatrixf(mat.data());
-		ccGL::Scale(glFunc, scale, scale, scale);
-		glFunc->glTranslatef(0, 0, 0.45f);
-		c_unitNormalSymbol->draw(markerContext);
-		glFunc->glTranslatef(0, 0, 0.45f);
-		c_unitNormalHeadSymbol->draw(markerContext);
-		glFunc->glPopMatrix();
+		glDrawNormal(context, m_center, scale, &m_contourPolyline->getColor());
 	}
 }
 

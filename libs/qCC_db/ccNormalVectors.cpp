@@ -833,7 +833,7 @@ QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip_deg
 	int iDipDir = static_cast<int>(dipDir_deg);
 	int iDip = static_cast<int>(dip_deg);
 
-	return QString("Dip direction: %1 deg. - Dip angle: %2 deg.").arg(iDipDir, 3, 10, QChar('0')).arg(iDip, 3, 10, QChar('0'));
+	return QString("Dip: %1 deg. - Dip direction: %2 deg.").arg(iDip, 3, 10, QChar('0')).arg(iDipDir, 3, 10, QChar('0'));
 }
 
 void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike_deg, double& dip_deg)
@@ -877,6 +877,29 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 
 	dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CC_RAD_TO_DEG);
 	dip_deg = static_cast<PointCoordinateType>(dip_rad * CC_RAD_TO_DEG);
+}
+
+CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg, bool upward/*=true*/)
+{
+	double Nz = cos(dip_deg * CC_DEG_TO_RAD);
+	double Nxy = sqrt(1.0 - Nz * Nz);
+	double dipDir_rad = dipDir_deg * CC_DEG_TO_RAD;
+	CCVector3 N(	static_cast<PointCoordinateType>(Nxy * sin(dipDir_rad)),
+					static_cast<PointCoordinateType>(Nxy * cos(dipDir_rad)),
+					static_cast<PointCoordinateType>(Nz) );
+
+#ifdef _DEBUG
+	//internal consistency test
+	PointCoordinateType dip2, dipDir2;
+	ConvertNormalToDipAndDipDir(N, dip2, dipDir2);
+	assert(fabs(dip2 - dip_deg) < 1.0e-3 && fabs(dipDir2 - dipDir_deg) < 1.0e-3);
+#endif
+
+	if (upward)
+	{
+		N = -N;
+	}
+	return N;
 }
 
 void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, float& H, float& S, float& V)

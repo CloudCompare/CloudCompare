@@ -1889,7 +1889,7 @@ void ccDBRoot::enableBubbleViewMode()
 	if (selCount == 0)
 		return;
 
-	for (int i=0; i<selCount; ++i)
+	for (int i = 0; i < selCount; ++i)
 	{
 		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 		if (item &&item->isA(CC_TYPES::GBL_SENSOR))
@@ -1925,7 +1925,8 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
-			for (int i=0; i<selCount; ++i)
+			bool hasExactlyOnePlane = false;
+			for (int i = 0; i < selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 				if (!item)
@@ -1960,6 +1961,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						else if (item->isA(CC_TYPES::PLANE) || item->isA(CC_TYPES::FACET))
 						{
 							hasExactlyOnePlanarEntity = true;
+							hasExactlyOnePlane = item->isKindOf(CC_TYPES::PLANE);
 						}
 						else if (item->isA(CC_TYPES::GBL_SENSOR))
 						{
@@ -1974,6 +1976,10 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_alignCameraWithEntity);
 				menu.addAction(m_alignCameraWithEntityReverse);
 				menu.addSeparator();
+			}
+			if (hasExactlyOnePlane)
+			{
+				menu.addAction(MainWindow::TheInstance()->actionEditPlane);
 			}
 			if (hasExacltyOneGBLSenor)
 			{

@@ -9671,7 +9671,7 @@ void MainWindow::redrawAll(bool only2D/*=false*/)
 void MainWindow::refreshAll(bool only2D/*=false*/)
 {
 	QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
-	for (int i=0; i<windows.size(); ++i)
+	for (int i = 0; i < windows.size(); ++i)
 		GLWindowFromWidget(windows.at(i)->widget())->refresh(only2D);
 }
 
@@ -9679,10 +9679,16 @@ void MainWindow::updateUI()
 {
 	updateUIWithSelection();
 	updateMenus();
-	if (m_ccRoot)
-		m_ccRoot->updatePropertiesView();
+	updatePropertiesView();
 }
 
+void MainWindow::updatePropertiesView()
+{
+	if (m_ccRoot)
+	{
+		m_ccRoot->updatePropertiesView();
+	}
+}
 void MainWindow::updateUIWithSelection()
 {
 	dbTreeSelectionInfo selInfo;
@@ -9690,7 +9696,7 @@ void MainWindow::updateUIWithSelection()
 	m_selectedEntities.clear();
 
 	if (m_ccRoot)
-		m_ccRoot->getSelectedEntities(m_selectedEntities,CC_TYPES::OBJECT,&selInfo);
+		m_ccRoot->getSelectedEntities(m_selectedEntities, CC_TYPES::OBJECT, &selInfo);
 	//expandDBTreeWithSelection(m_selectedEntities);
 
 	enableUIItems(selInfo);

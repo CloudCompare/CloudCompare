@@ -85,13 +85,16 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 	if (m_associatedPlane)
 	{
 		updatePlane(m_associatedPlane);
+		if (MainWindow::TheInstance())
+			MainWindow::TheInstance()->updatePropertiesView();
 		m_associatedPlane->redrawDisplay();
 	}
 	else //creation
 	{
 		ccPlane* plane = new ccPlane();
 		updatePlane(plane);
-		MainWindow::TheInstance()->addToDB(plane);
+		if (MainWindow::TheInstance())
+			MainWindow::TheInstance()->addToDB(plane);
 	}
 
 	accept();

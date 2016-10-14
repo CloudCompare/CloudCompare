@@ -183,6 +183,9 @@ public:
 
 	//! Dispatches the (loaded) plugins in the UI
 	void dispatchPlugins(const tPluginInfoList& plugins, const QStringList& pluginPaths);
+
+	//! Updates the 'Properties' view
+	void updatePropertiesView();
 	
 protected slots:
 

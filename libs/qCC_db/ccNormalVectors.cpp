@@ -895,7 +895,7 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 	assert(fabs(dip2 - dip_deg) < 1.0e-3 && fabs(dipDir2 - dipDir_deg) < 1.0e-3);
 #endif
 
-	if (upward)
+	if (!upward)
 	{
 		N = -N;
 	}

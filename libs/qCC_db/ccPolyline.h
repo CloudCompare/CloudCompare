@@ -135,6 +135,9 @@ public:
 	//! Shows an arrow in place of a given vertex
 	void showArrow(bool state, unsigned vertIndex, PointCoordinateType length);
 
+	//! Returns the number of segments
+	unsigned segmentCount() const;
+
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)

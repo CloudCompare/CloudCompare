@@ -26,6 +26,7 @@
 #include "ccGenericMesh.h"
 
 class ccProgressDialog;
+class ccPolyline;
 
 //! Triangular mesh
 class QCC_DB_LIB_API ccMesh : public ccGenericMesh
@@ -74,6 +75,9 @@ public:
 								bool updateNormals = false,
 								PointCoordinateType maxEdgeLength = 0,
 								unsigned char dim = 2);
+
+	//! Creates a Delaunay 2.5D mesh from two polylines
+	static ccMesh* TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2);
 
 	//! Merges another mesh into this one
 	/** \param mesh mesh to be merged in this one

@@ -555,3 +555,13 @@ unsigned ccPolyline::getUniqueIDForDisplay() const
 	else
 		return getUniqueID();
 }
+
+unsigned ccPolyline::segmentCount() const
+{
+	unsigned count = size();
+	if (count && !isClosed())
+	{
+		--count;
+	}
+	return count;
+}

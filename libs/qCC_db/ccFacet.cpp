@@ -198,12 +198,12 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			return false;
 		}
 	}
-	memcpy(m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
+	memcpy(m_planeEquation, planeEquation, sizeof(PointCoordinateType) * 4);
 
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
-	CCVector3 X,Y; //local base
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,0,&m_center,&X,&Y))
+	CCVector3 X, Y; //local base
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, 0, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
@@ -214,8 +214,10 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	
 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
 	{
-		for (unsigned i=0; i<ptsCount; ++i)
+		for (unsigned i = 0; i < ptsCount; ++i)
+		{
 			points2D[i].index = i;
+		}
 	}
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
@@ -223,7 +225,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
 		if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
 																hullPoints,
-																m_maxEdgeLength*m_maxEdgeLength) )
+																m_maxEdgeLength*m_maxEdgeLength))
 		{
 			ccLog::Error("[ccFacet::createInternalRepresentation] Failed to compute the convex hull of the input points!");
 		}
@@ -243,7 +245,9 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			
 			//projection on the LS plane (in 3D)
 			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			{
 				m_contourVertices->addPoint(m_center + X*(*it)->x + Y*(*it)->y);
+			}
 			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
 			m_contourVertices->setLocked(true);
 			m_contourVertices->setEnabled(false);
@@ -255,7 +259,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			m_contourPolyline = new ccPolyline(m_contourVertices);
 			if (m_contourPolyline->reserve(hullPtsCount))
 			{
-				m_contourPolyline->addPointIndex(0,hullPtsCount);
+				m_contourPolyline->addPointIndex(0, hullPtsCount);
 				m_contourPolyline->setClosed(true);
 				m_contourPolyline->setVisible(true);
 				m_contourPolyline->setLocked(true);
@@ -278,9 +282,11 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		{
 			hullPointsVector.reserve(hullPoints.size());
 			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			{
 				hullPointsVector.push_back(**it);
+			}
 		}
-		catch(...)
+		catch (...)
 		{
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour mesh!");
 		}

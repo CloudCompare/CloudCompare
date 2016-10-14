@@ -19,6 +19,9 @@ v2.8.beta - XX/XX/2016
 	* New Polyline export format:
 		- 2D height profile (curvilinear abscissa + Z coordinate)
 
+	* New tool: Edit > Mesh > Create surface between two polylines
+		- Creates a surface patch between two polylines
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:

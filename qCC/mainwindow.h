@@ -395,6 +395,7 @@ protected slots:
 	void doActionRasterize();
 	void doCompute2HalfDimVolume();
 	void doConvertPolylinesToMesh();
+	void doMeshTwoPolylines();
 	void doActionExportCoordToSF();
 	void doComputeBestFitBB();
 	void doActionCrop();

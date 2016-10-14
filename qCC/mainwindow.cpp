@@ -774,7 +774,7 @@ void MainWindow::connectActions()
 	connect(actionApplyScale,					SIGNAL(triggered()),	this,		SLOT(doActionApplyScale()));
 	connect(actionTranslateRotate,				SIGNAL(triggered()),	this,		SLOT(activateTranslateRotateMode()));
 	connect(actionSegment,						SIGNAL(triggered()),	this,		SLOT(activateSegmentationMode()));
-    connect(actionTracePolyline,                SIGNAL(triggered()),	this,		SLOT(activateTracePolylineMode()));
+    connect(actionTracePolyline,				SIGNAL(triggered()),	this,		SLOT(activateTracePolylineMode()));
 
 	connect(actionCrop,							SIGNAL(triggered()),	this,		SLOT(doActionCrop()));
 	connect(actionEditGlobalShiftAndScale,		SIGNAL(triggered()),	this,		SLOT(doActionEditGlobalShiftAndScale()));
@@ -791,6 +791,7 @@ void MainWindow::connectActions()
 	connect(actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
 	connect(actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
 	connect(actionConvertPolylinesToMesh,		SIGNAL(triggered()),	this,		SLOT(doConvertPolylinesToMesh()));
+	connect(actionMeshTwoPolylines,				SIGNAL(triggered()),	this,		SLOT(doMeshTwoPolylines()));
 	connect(actionExportCoordToSF,				SIGNAL(triggered()),	this,		SLOT(doActionExportCoordToSF()));
 	//"Tools > Registration" menu
 	connect(actionRegister,						SIGNAL(triggered()),	this,		SLOT(doActionRegister()));
@@ -4333,6 +4334,46 @@ void MainWindow::doActionExportCoordToSF()
 	updateUI();
 }
 
+void MainWindow::doMeshTwoPolylines()
+{
+	size_t selNum = m_selectedEntities.size();
+	if (selNum != 2)
+		return;
+
+	ccPolyline* p1 = ccHObjectCaster::ToPolyline(m_selectedEntities[0]);
+	ccPolyline* p2 = ccHObjectCaster::ToPolyline(m_selectedEntities[1]);
+	if (!p1 || !p2)
+	{
+		ccConsole::Error("Select 2 and only 2 polylines");
+		return;
+	}
+
+	//create a single point cloud (to compute the best fitting plane)
+	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2);
+	if (mesh)
+	{
+		addToDB(mesh);
+		if (mesh->computePerVertexNormals())
+		{
+			mesh->showNormals(true);
+		}
+		else
+		{
+			ccLog::Warning("[Mesh two polylines] Failed to compute normals!");
+		}
+
+		if (mesh->getDisplay())
+		{
+			mesh->getDisplay()->redraw();
+		}
+	}
+	else
+	{
+		ccLog::Error("Failed to create mesh (see Console)");
+		forceConsoleDisplay();
+	}
+}
+
 void MainWindow::doConvertPolylinesToMesh()
 {
 	size_t selNum = m_selectedEntities.size();
@@ -4345,7 +4386,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		if (selNum == 1 && m_selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			ccHObject* obj = m_selectedEntities.back();
-			for (unsigned i=0; i<obj->getChildrenNumber(); ++i)
+			for (unsigned i = 0; i < obj->getChildrenNumber(); ++i)
 			{
 				if (obj->getChild(i)->isA(CC_TYPES::POLY_LINE))
 					polylines.push_back(static_cast<ccPolyline*>(obj->getChild(i)));
@@ -4353,7 +4394,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 		else
 		{
-			for (size_t i=0; i<selNum; ++i)
+			for (size_t i = 0; i < selNum; ++i)
 			{
 				if (m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
 					polylines.push_back(static_cast<ccPolyline*>(m_selectedEntities[i]));
@@ -4372,7 +4413,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		return;
 	}
 
-	ccPickOneElementDlg poeDlg("Projection dimension","Contour plot to mesh",this);
+	ccPickOneElementDlg poeDlg("Projection dimension", "Contour plot to mesh", this);
 	poeDlg.addElement("X");
 	poeDlg.addElement("Y");
 	poeDlg.addElement("Z");
@@ -4391,20 +4432,14 @@ void MainWindow::doConvertPolylinesToMesh()
 	unsigned segmentCount = 0;
 	unsigned vertexCount = 0;
 	{
-		for (size_t i=0; i<polylines.size(); ++i)
+		for (size_t i = 0; i < polylines.size(); ++i)
 		{
 			ccPolyline* poly = polylines[i];
-			assert(poly);
 			if (poly)
 			{
 				//count the total number of vertices and segments
-				unsigned vertCount = poly->size();
-				unsigned maxVertCount = poly->isClosed() ? vertCount : vertCount-1;
-				if (vertCount != 0)
-				{
-					vertexCount += vertCount;
-					segmentCount += maxVertCount;
-				}
+				vertexCount += poly->size();
+				segmentCount += poly->segmentCount();
 			}
 		}
 	}
@@ -4433,7 +4468,7 @@ void MainWindow::doConvertPolylinesToMesh()
 
 	//fill arrays
 	{
-		for (size_t i=0; i<polylines.size(); ++i)
+		for (size_t i = 0; i < polylines.size(); ++i)
 		{
 			ccPolyline* poly = polylines[i];
 			if (poly)
@@ -4441,16 +4476,16 @@ void MainWindow::doConvertPolylinesToMesh()
 				unsigned vertCount = poly->size();
 				int vertIndex0 = static_cast<int>(points2D.size());
 				bool closed = poly->isClosed();
-				for (unsigned v=0; v<vertCount; ++v)
+				for (unsigned v = 0; v < vertCount; ++v)
 				{
 					const CCVector3* P = poly->getPoint(v);
 					int vertIndex = static_cast<int>(points2D.size());
-					points2D.push_back(CCVector2(P->u[X],P->u[Y]));
-					
-					if (v+1 < vertCount)
+					points2D.push_back(CCVector2(P->u[X], P->u[Y]));
+
+					if (v + 1 < vertCount)
 					{
 						segments2D.push_back(vertIndex);
-						segments2D.push_back(vertIndex+1);
+						segments2D.push_back(vertIndex + 1);
 					}
 					else if (closed)
 					{
@@ -4461,14 +4496,14 @@ void MainWindow::doConvertPolylinesToMesh()
 			}
 		}
 		assert(points2D.size() == vertexCount);
-		assert(segments2D.size() == segmentCount*2);
+		assert(segments2D.size() == segmentCount * 2);
 	}
 
 	CCLib::Delaunay2dMesh* delaunayMesh = new CCLib::Delaunay2dMesh;
 	char errorStr[1024];
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
-		ccLog::Error(QString("Triangle lib error: %1").arg(errorStr));
+		ccLog::Error(QString("Thrid party library error: %1").arg(errorStr));
 		delete delaunayMesh;
 		return;
 	}
@@ -4485,11 +4520,11 @@ void MainWindow::doConvertPolylinesToMesh()
 
 	//fill vertices cloud
 	{
-		for (size_t i=0; i<polylines.size(); ++i)
+		for (size_t i = 0; i < polylines.size(); ++i)
 		{
 			ccPolyline* poly = polylines[i];
 			unsigned vertCount = poly->size();
-			for (unsigned v=0; v<vertCount; ++v)
+			for (unsigned v = 0; v < vertCount; ++v)
 			{
 				const CCVector3* P = poly->getPoint(v);
 				vertices->addPoint(*P);
@@ -4641,7 +4676,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	ccHObject::Container clouds;
 	bool hadNormals = false;
 	{
-		for (size_t i=0; i<m_selectedEntities.size(); ++i)
+		for (size_t i = 0; i < m_selectedEntities.size(); ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -4673,7 +4708,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	QApplication::processEvents();
 
 	bool errors = false;
-	for (size_t i=0; i<clouds.size(); ++i)
+	for (size_t i = 0; i < clouds.size(); ++i)
 	{
 		ccHObject* ent = clouds[i];
 		assert(ent->isKindOf(CC_TYPES::POINT_CLOUD));
@@ -9841,6 +9876,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool exactlyOneCameraSensor = (selInfo.cameraSensorCount == 1);
 
 	actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
+	actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
 	actionModifySensor->setEnabled(exactlyOneSensor);
 	actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
 	actionComputeScatteringAngles->setEnabled(exactlyOneSensor);

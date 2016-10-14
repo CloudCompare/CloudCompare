@@ -240,6 +240,7 @@
      </widget>
      <addaction name="actionComputeMeshAA"/>
      <addaction name="actionComputeMeshLS"/>
+     <addaction name="actionMeshTwoPolylines"/>
      <addaction name="separator"/>
      <addaction name="actionConvertTextureToColor"/>
      <addaction name="actionSamplePoints"/>
@@ -394,6 +395,7 @@
      <addaction name="actionRasterize"/>
      <addaction name="actionConvertPolylinesToMesh"/>
      <addaction name="actionExportCoordToSF"/>
+     <addaction name="actionCreate_surface_between_two_polylines"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
      <property name="title">
@@ -548,8 +550,7 @@
    </property>
    <property name="windowIcon">
     <iconset>
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="toolTip">
     <string>Viewing tools</string>
@@ -2916,6 +2917,16 @@
    </property>
    <property name="toolTip">
     <string>Edit the plane parameters</string>
+   </property>
+  </action>
+  <action name="actionCreate_surface_between_two_polylines">
+   <property name="text">
+    <string>Create surface between two polylines</string>
+   </property>
+  </action>
+  <action name="actionMeshTwoPolylines">
+   <property name="text">
+    <string>Surface between 2 polylines</string>
    </property>
   </action>
  </widget>

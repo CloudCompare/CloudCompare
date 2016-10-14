@@ -67,6 +67,17 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="fromDipDipDirToolButton">
+           <property name="toolTip">
+            <string>Inits the matrix from dip/dip direction values
+--&gt; assuming an initial position of (0,0)</string>
+           </property>
+           <property name="text">
+            <string>dip / dip direction</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="helpToolButton">
            <property name="text">
             <string>help</string>

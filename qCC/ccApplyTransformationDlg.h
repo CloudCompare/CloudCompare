@@ -53,7 +53,9 @@ protected slots:
 	void loadFromASCIIFile();
 	//! Loads matrix from clipboard ("paste")
 	void loadFromClipboard();
-	
+	//! Inits matrix from dip / dip direction values
+	void initFromDipAndDipDir();
+
 	//! Signal called when a button is clicked
 	void buttonClicked(QAbstractButton*);
 

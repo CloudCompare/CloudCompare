@@ -93,9 +93,12 @@ v2.8.beta - XX/XX/2016
 		- menu entry changed from 'Display parameters' to 'Display options' for the sake of consistency
 		- new option: 'double sided' (light) to control whether triangles should be lit from the back or not
 
+	* Apply Transformation tool
+		- new 'Reset' button
+		- new 'From dip / dip direction' to init the transformation as a rotation matrix passing from (0, 0) to the specified (dip, dip dir.) orientation
+
 	* Other
 		- Transformation history is now saved in BIN files
-		- new 'Reset' button on the 'Apply Transformation' tool dialog
 		- The normal of a plane entity can now be visualized as a 3D arrow (just as the Facet entities)
 		- Dip and dip direction are now displayed in the properties of Facets and Planes
 

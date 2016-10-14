@@ -186,7 +186,7 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	PointCoordinateType width  = static_cast<PointCoordinateType>(wDoubleSpinBox->value());
 	PointCoordinateType height = static_cast<PointCoordinateType>(hDoubleSpinBox->value());
 	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipDir);
-	CCVector3 Cd = { static_cast<PointCoordinateType>(cxAxisDoubleSpinBox->value()),
+	CCVector3 Cd = {	static_cast<PointCoordinateType>(cxAxisDoubleSpinBox->value()),
 						static_cast<PointCoordinateType>(cyAxisDoubleSpinBox->value()),
 						static_cast<PointCoordinateType>(czAxisDoubleSpinBox->value()) };
 	

@@ -19,6 +19,10 @@
 
 //Local
 #include "ccPersistentSettings.h"
+#include "ccAskTwoDoubleValuesDlg.h"
+
+//qCC_db
+#include <ccNormalVectors.h>
 
 //Qt
 #include <QMessageBox>
@@ -53,7 +57,8 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
 
 	connect(matrixTextEdit,			SIGNAL(textChanged()),			this,	SLOT(onMatrixTextChange()));
 	connect(fromFileToolButton,		SIGNAL(clicked()),				this,	SLOT(loadFromASCIIFile()));
-	connect(fromClipboardToolButton,SIGNAL(clicked()),				this,	SLOT(loadFromClipboard()));
+	connect(fromClipboardToolButton, SIGNAL(clicked()),				this,	SLOT(loadFromClipboard()));
+	connect(fromDipDipDirToolButton, SIGNAL(clicked()),				this,	SLOT(initFromDipAndDipDir()));
 
 	connect(rxAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
 	connect(ryAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
@@ -257,7 +262,7 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 	}
 
 	//save last loading location
-	settings.setValue(ccPS::CurrentPath(),QFileInfo(inputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(inputFilename).absolutePath());
 	settings.endGroup();
 }
 
@@ -272,6 +277,29 @@ void ccApplyTransformationDlg::loadFromClipboard()
 		else
 			ccLog::Warning("[ccApplyTransformationDlg] Clipboard is empty");
 	}
+}
+
+void ccApplyTransformationDlg::initFromDipAndDipDir()
+{
+	static double s_dip_deg = 0.0;
+	static double s_dipDir_deg = 0.0;
+	ccAskTwoDoubleValuesDlg atdvDlg("Dip", "Dip dir.", 0, 360, s_dip_deg, s_dipDir_deg, 1, "From dip / dip dir.", this);
+	atdvDlg.doubleSpinBox1->setMaximum(90.0); //Dip can only go up to 90 degrees ;)
+
+	if (!atdvDlg.exec())
+	{
+		return;
+	}
+
+	s_dip_deg = atdvDlg.doubleSpinBox1->value();
+	s_dipDir_deg = atdvDlg.doubleSpinBox2->value();
+
+	//resulting normal vector
+	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(static_cast<PointCoordinateType>(s_dip_deg), static_cast<PointCoordinateType>(s_dipDir_deg));
+	//corresponding rotation (assuming we start from (0, 0, 1))
+
+	ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), Nd);
+	updateAll(trans, true, true, true);
 }
 
 void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)

@@ -49,6 +49,7 @@
 #include "MascaretFilter.h"
 #include "SinusxFilter.h"
 #include "SalomeHydroFilter.h"
+#include "HeightProfileFilter.h"
 
 //Qt
 #include <QFileInfo>
@@ -113,6 +114,7 @@ void FileIOFilter::InitInternalFilters()
 	Register(Shared(new MascaretFilter()));
 	Register(Shared(new SinusxFilter()));
 	Register(Shared(new SalomeHydroFilter()));
+	Register(Shared(new HeightProfileFilter()));
 }
 
 void FileIOFilter::Register(Shared filter)

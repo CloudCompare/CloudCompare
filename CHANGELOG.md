@@ -16,6 +16,9 @@ v2.8.beta - XX/XX/2016
 		- Edit > Plane > Create: lets the user create a plane with specific dip / dip direction, center (can be picked on a cloud or a mesh), width and height
 		- Edit > Plane > Edit: edit the above parameters on an existing plane entity
 
+	* New Polyline export format:
+		- 2D height profile (curvilinear abscissa + Z coordinate)
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:

@@ -890,7 +890,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	return cloneMesh;
 }
 
-ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2)
+ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector3* projectionDir/*=0*/)
 {
 	if (!p1 || p1->size() == 0 || !p2 || p2->size() == 0)
 	{
@@ -916,17 +916,29 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2)
 	assert(vertices->size() != 0);
 
 	CCLib::Neighbourhood N(vertices);
-	if (!N.getLSPlane())
-	{
-		ccLog::Warning("[ccMesh::TriangulateTwoPolylines] Failed to fit a plane through both polylines");
-		delete vertices;
-		return 0;
-	}
 
 	//get plane coordinate system
 	CCVector3 O = *N.getGravityCenter();
-	CCVector3 X = *N.getLSPlaneX();
-	CCVector3 Y = *N.getLSPlaneY();
+	CCVector3 X(1, 0, 0), Y(0, 1, 0);
+	if (projectionDir)
+	{
+		//use the input projection dir.
+		X = projectionDir->orthogonal();
+		Y = projectionDir->cross(X);
+	}
+	else
+	{
+		//use the best fit plane (normal)
+		if (!N.getLSPlane())
+		{
+			ccLog::Warning("[ccMesh::TriangulateTwoPolylines] Failed to fit a plane through both polylines");
+			delete vertices;
+			return 0;
+		}
+
+		X = *N.getLSPlaneX();
+		Y = *N.getLSPlaneY();
+	}
 
 	std::vector<CCVector2> points2D;
 	std::vector<int> segments2D;

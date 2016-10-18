@@ -4348,8 +4348,19 @@ void MainWindow::doMeshTwoPolylines()
 		return;
 	}
 
-	//create a single point cloud (to compute the best fitting plane)
-	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2);
+	//Ask the user how the 2D projection should be computed
+	bool useViewingDir = false;
+	CCVector3 viewingDir(0, 0, 0);
+	if (p1->getDisplay())
+	{
+		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
+		if (useViewingDir)
+		{
+			viewingDir = -CCVector3::fromArray(static_cast<ccGLWindow*>(p1->getDisplay())->getCurrentViewDir().u);
+		}
+	}
+
+	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2, useViewingDir ? &viewingDir : 0);
 	if (mesh)
 	{
 		addToDB(mesh);
@@ -4537,7 +4548,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	//Test delaunay output
 	{
 		unsigned vertCount = vertices->size();
-		for (unsigned i=0; i<delaunayMesh->size(); ++i)
+		for (unsigned i = 0; i < delaunayMesh->size(); ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = delaunayMesh->getTriangleVertIndexes(i);
 			assert(tsi->i1 < vertCount && tsi->i2 < vertCount && tsi->i3 < vertCount);

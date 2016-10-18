@@ -77,7 +77,7 @@ public:
 								unsigned char dim = 2);
 
 	//! Creates a Delaunay 2.5D mesh from two polylines
-	static ccMesh* TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2);
+	static ccMesh* TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector3* projectionDir = 0);
 
 	//! Merges another mesh into this one
 	/** \param mesh mesh to be merged in this one

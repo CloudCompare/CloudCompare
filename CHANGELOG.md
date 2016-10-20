@@ -107,6 +107,7 @@ v2.8.beta - XX/XX/2016
 		- Transformation history is now saved in BIN files
 		- The normal of a plane entity can now be visualized as a 3D arrow (just as the Facet entities)
 		- Dip and dip direction are now displayed in the properties of Facets and Planes
+		- M3C2 sources are now publicly released! (GPL license)
 
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)

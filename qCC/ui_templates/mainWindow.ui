@@ -319,6 +319,7 @@
       <string>Plane</string>
      </property>
      <addaction name="actionCreatePlane"/>
+     <addaction name="actionFitPlaneProxy"/>
      <addaction name="actionEditPlane"/>
     </widget>
     <addaction name="menuColors"/>
@@ -1969,7 +1970,7 @@
     <string>Plane</string>
    </property>
    <property name="toolTip">
-    <string>Compute plane orientation (normal, srtike, dip)</string>
+    <string>Fit a plane on a set of point</string>
    </property>
   </action>
   <action name="actionRenameSF">
@@ -2929,6 +2930,14 @@
     <string>Surface between 2 polylines</string>
    </property>
   </action>
+  <action name="actionFitPlaneProxy">
+   <property name="text">
+    <string>Fit</string>
+   </property>
+   <property name="toolTip">
+    <string>Fit a plane on a set of point</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3055,6 +3064,22 @@
     <hint type="destinationlabel">
      <x>957</x>
      <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFitPlaneProxy</sender>
+   <signal>triggered()</signal>
+   <receiver>actionFitPlane</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

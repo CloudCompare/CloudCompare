@@ -62,12 +62,11 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_areaRight(0)
 	, m_arrowLeft(0)
 	, m_arrowRight(0)
-	, m_lastMouseClick(0,0)
+	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Histogram");
 	setFocusPolicy(Qt::StrongFocus);
 
-	//setMinimumHeight(100);
 	setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
 	setAutoAddPlottableToLegend(false);
@@ -243,7 +242,7 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 	//(try to) create new array
 	try
 	{
-		m_histoValues.resize(binCount,0);
+		m_histoValues.resize(binCount, 0);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -255,16 +254,16 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 	if (range > 0.0)
 	{
 		unsigned count = m_associatedSF->currentSize();
-		double step = range/static_cast<double>(binCount);
-		for (unsigned i=0; i<count; ++i)
+		double step = range / static_cast<double>(binCount);
+		for (unsigned i = 0; i < count; ++i)
 		{
 			double val = static_cast<double>(m_associatedSF->getValue(i));
 
 			//we ignore values outside of [m_minVal,m_maxVal] (works fro NaN values as well)
 			if (/*ccScalarField::ValidValue(val) &&*/val >= m_minVal && val <= m_maxVal)
 			{
-				size_t bin = static_cast<size_t>( floor((val-m_minVal) / step) );
-				++m_histoValues[std::min(bin,binCount-1)];
+				size_t bin = static_cast<size_t>(floor((val - m_minVal) / step));
+				++m_histoValues[std::min(bin, binCount - 1)];
 			}
 		}
 	}
@@ -279,9 +278,11 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 unsigned ccHistogramWindow::getMaxHistoVal()
 {
 	unsigned m_maxHistoVal = 0;
-	
-	for (size_t i=0; i<m_histoValues.size(); ++i)
-		m_maxHistoVal = std::max(m_maxHistoVal,m_histoValues[i]);
+
+	for (size_t i = 0; i < m_histoValues.size(); ++i)
+	{
+		m_maxHistoVal = std::max(m_maxHistoVal, m_histoValues[i]);
+	}
 
 	return m_maxHistoVal;
 }
@@ -327,7 +328,7 @@ void ccHistogramWindow::refreshBars()
 		QVector<double> valueData(histoSize);
 		QVector<QColor> colors(histoSize);
 
-		for (int i=0; i<histoSize; ++i)
+		for (int i = 0; i < histoSize; ++i)
 		{
 			//we take the 'normalized' value at the middle of the class
 			double normVal = (static_cast<double>(i)+0.5) / histoSize;
@@ -335,10 +336,10 @@ void ccHistogramWindow::refreshBars()
 			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
 			valueData[i] = m_histoValues[i];
 
-			const ColorCompType* col= m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
+			const ColorCompType* col = m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
 			if (!col) //hidden values may have no associated color!
 				col = ccColor::lightGrey.rgba;
-			colors[i] = QColor(col[0],col[1],col[2]);
+			colors[i] = QColor(col[0], col[1], col[2]);
 		}
 
 		m_histogram->setData(keyData, valueData, colors);
@@ -358,8 +359,8 @@ void ccHistogramWindow::refresh()
 	{
 		double minSat = m_associatedSF->saturationRange().min();
 		double maxSat = m_associatedSF->saturationRange().max();
-		minVal = std::min(minVal,minSat);
-		maxVal = std::max(maxVal,maxSat);
+		minVal = std::min(minVal, minSat);
+		maxVal = std::max(maxVal, maxSat);
 	}
 	xAxis->setRange(minVal, maxVal);
 	yAxis->setRange(0, m_maxHistoVal);
@@ -386,13 +387,13 @@ void ccHistogramWindow::refresh()
 	}
 
 	//clear previous display
-	m_histogram		= 0;
-	m_vertBar		= 0;
-	m_overlayCurve	= 0;
-	m_areaLeft		= 0;
-	m_areaRight		= 0;
-	m_arrowLeft		= 0;
-	m_arrowRight	= 0;
+	m_histogram = 0;
+	m_vertBar = 0;
+	m_overlayCurve = 0;
+	m_areaLeft = 0;
+	m_areaRight = 0;
+	m_arrowLeft = 0;
+	m_arrowRight = 0;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -417,10 +418,10 @@ void ccHistogramWindow::refresh()
 		QVector<double> valueData(histoSize);
 
 		HISTOGRAM_COLOR_SCHEME colorScheme = m_colorScheme;
-		switch(colorScheme)
+		switch (colorScheme)
 		{
 		case USE_SOLID_COLOR:
-			m_histogram->setBrush(QBrush(m_solidColor,Qt::SolidPattern));
+			m_histogram->setBrush(QBrush(m_solidColor, Qt::SolidPattern));
 			m_histogram->setPen(QPen(m_solidColor));
 			break;
 		case USE_CUSTOM_COLOR_SCALE:
@@ -451,7 +452,7 @@ void ccHistogramWindow::refresh()
 			colors.resize(histoSize);
 		}
 
-		for (int i=0; i<histoSize; ++i)
+		for (int i = 0; i < histoSize; ++i)
 		{
 			//we take the 'normalized' value at the middle of the class
 			double normVal = (static_cast<double>(i)+0.5) / histoSize;
@@ -481,7 +482,7 @@ void ccHistogramWindow::refresh()
 				}
 				if (!col) //hidden values may have no associated color!
 					col = ccColor::lightGrey.rgba;
-				colors[i] = QColor(col[0],col[1],col[2]);
+				colors[i] = QColor(col[0], col[1], col[2]);
 			}
 		}
 
@@ -496,9 +497,9 @@ void ccHistogramWindow::refresh()
 	if (curveSize > 1)
 	{
 		QVector<double> x(curveSize), y(curveSize);
-		
-		double step = (m_maxVal - m_minVal) / (curveSize-1);
-		for (int i=0; i<curveSize; ++i)
+
+		double step = (m_maxVal - m_minVal) / (curveSize - 1);
+		for (int i = 0; i < curveSize; ++i)
 		{
 			x[i] = m_minVal + (static_cast<double>(i)/*+0.5*/) * step;
 			y[i] = m_curveValues[i];
@@ -511,49 +512,49 @@ void ccHistogramWindow::refresh()
 
 		//set pen color
 		const ccColor::Rgba& col = ccColor::darkGrey;
-		QPen pen(QColor(col.r,col.g,col.b));
+		QPen pen(QColor(col.r, col.g, col.b));
 		m_overlayCurve->setPen(pen);
 
 		//set width
-		updateOverlayCurveWidth(rect().width(),rect().height());
+		updateOverlayCurveWidth(rect().width(), rect().height());
 	}
-	
+
 	//sf interaction mode
 	if (m_sfInteractionMode && m_associatedSF)
 	{
 		const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
 
-		m_areaLeft = new QCPHiddenArea(true,xAxis, yAxis);
-		m_areaLeft->setRange(dispRange.min(),dispRange.max());
+		m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
+		m_areaLeft->setRange(dispRange.min(), dispRange.max());
 		m_areaLeft->setCurrentVal(dispRange.start());
 		addPlottable(m_areaLeft);
 
-		m_areaRight = new QCPHiddenArea(false,xAxis, yAxis);
-		m_areaRight->setRange(dispRange.min(),dispRange.max());
+		m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
+		m_areaRight->setRange(dispRange.min(), dispRange.max());
 		m_areaRight->setCurrentVal(dispRange.stop());
 		addPlottable(m_areaRight);
 
 		const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
 
 		m_arrowLeft = new QCPArrow(xAxis, yAxis);
-		m_arrowLeft->setRange(satRange.min(),satRange.max());
+		m_arrowLeft->setRange(satRange.min(), satRange.max());
 		m_arrowLeft->setCurrentVal(satRange.start());
 		if (colorScale)
 		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0,m_associatedSF->getColorRampSteps());
+			const ColorCompType* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
 			if (col)
-				m_arrowLeft->setColor(col[0],col[1],col[2]);
+				m_arrowLeft->setColor(col[0], col[1], col[2]);
 		}
 		addPlottable(m_arrowLeft);
 
 		m_arrowRight = new QCPArrow(xAxis, yAxis);
-		m_arrowRight->setRange(satRange.min(),satRange.max());
+		m_arrowRight->setRange(satRange.min(), satRange.max());
 		m_arrowRight->setCurrentVal(satRange.stop());
 		if (colorScale)
 		{
-			const ColorCompType* col = colorScale->getColorByRelativePos(1.0,m_associatedSF->getColorRampSteps());
+			const ColorCompType* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
 			if (col)
-				m_arrowRight->setColor(col[0],col[1],col[2]);
+				m_arrowRight->setColor(col[0], col[1], col[2]);
 		}
 		addPlottable(m_arrowRight);
 	}
@@ -561,7 +562,7 @@ void ccHistogramWindow::refresh()
 	{
 		m_vertBar = new QCPBarsWithText(xAxis, yAxis);
 		addPlottable(m_vertBar);
-		
+
 		// now we can modify properties of vertBar
 		m_vertBar->setName("VertLine");
 		m_vertBar->setWidth(0/*(m_maxVal - m_minVal) / histoSize*/);
@@ -572,19 +573,19 @@ void ccHistogramWindow::refresh()
 		QVector<double> valueData(1);
 
 		//horizontal position
-		keyData[0] = m_minVal + (m_maxVal-m_minVal) * m_verticalIndicatorPositionPercent;
+		keyData[0] = m_minVal + (m_maxVal - m_minVal) * m_verticalIndicatorPositionPercent;
 		valueData[0] = m_maxHistoVal;
 
-		m_vertBar->setData(keyData,valueData);
+		m_vertBar->setData(keyData, valueData);
 
 		//precision (same as color scale)
 		int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
 		unsigned bin = static_cast<unsigned>(m_verticalIndicatorPositionPercent * m_histoValues.size());
 		QString valueStr = QString("bin %0").arg(bin);
 		m_vertBar->setText(valueStr);
-		valueStr = QString("< %0 %").arg(100.0*static_cast<double>(partialSum)/static_cast<double>(totalSum),0,'f',3);
+		valueStr = QString("< %0 %").arg(100.0*static_cast<double>(partialSum) / static_cast<double>(totalSum), 0, 'f', 3);
 		m_vertBar->appendText(valueStr);
-		valueStr = QString("val = %0").arg(m_minVal+(m_maxVal-m_minVal)*m_verticalIndicatorPositionPercent,0,'f',precision);
+		valueStr = QString("val = %0").arg(m_minVal + (m_maxVal - m_minVal)*m_verticalIndicatorPositionPercent, 0, 'f', precision);
 		m_vertBar->appendText(valueStr);
 		m_vertBar->setTextAlignment(m_verticalIndicatorPositionPercent > 0.5);
 	}
@@ -680,7 +681,7 @@ void ccHistogramWindow::updateOverlayCurveWidth(int w, int h)
 {
 	if (m_overlayCurve)
 	{
-		int penWidth  = std::max(w,h)/200;
+		int penWidth = std::max(w, h) / 200;
 		if (m_overlayCurve->pen().width() != penWidth)
 		{
 			QPen pen = m_overlayCurve->pen();
@@ -695,7 +696,7 @@ void ccHistogramWindow::resizeEvent(QResizeEvent * event)
 	QCustomPlot::resizeEvent(event);
 
 	updateOverlayCurveWidth(event->size().width(), event->size().height());
-	
+
 	refresh();
 }
 
@@ -714,7 +715,7 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 			{
 				if (m_selectedItem == NONE)
 					m_selectedItem = RIGHT_AREA;
-				else 
+				else
 					m_selectedItem = BOTH_AREAS;
 			}
 		}
@@ -723,12 +724,12 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 		if (m_selectedItem == NONE)
 		{
 			if (m_arrowLeft && m_arrowLeft->isSelectable(m_lastMouseClick))
-			m_selectedItem = LEFT_ARROW;
+				m_selectedItem = LEFT_ARROW;
 			if (m_arrowRight && m_arrowRight->isSelectable(m_lastMouseClick))
 			{
 				if (m_selectedItem == NONE)
 					m_selectedItem = RIGHT_ARROW;
-				else 
+				else
 					m_selectedItem = BOTH_ARROWS;
 			}
 		}
@@ -749,10 +750,10 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 			if (m_histogram)
 			{
 				QRect rect = m_histogram->rect();
-				mousePos.setX(std::min(rect.x()+rect.width(),std::max(rect.x(),mousePos.x())));
+				mousePos.setX(std::min(rect.x() + rect.width(), std::max(rect.x(), mousePos.x())));
 			}
 
-			switch(m_selectedItem)
+			switch (m_selectedItem)
 			{
 			case NONE:
 				//nothing to do
@@ -762,7 +763,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 				{
 					double newValue = m_areaLeft->pixelToKey(mousePos.x());
 					if (m_areaRight)
-						newValue = std::min(newValue,m_areaRight->currentVal());
+						newValue = std::min(newValue, m_areaRight->currentVal());
 					setMinDispValue(newValue);
 				}
 				break;
@@ -771,38 +772,38 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 				{
 					double newValue = m_areaRight->pixelToKey(mousePos.x());
 					if (m_areaLeft)
-						newValue = std::max(newValue,m_areaLeft->currentVal());
+						newValue = std::max(newValue, m_areaLeft->currentVal());
 					setMaxDispValue(newValue);
 				}
 				break;
 			case BOTH_AREAS:
+			{
+				int dx = m_lastMouseClick.x() - mousePos.x();
+				if (dx < -2)
 				{
-					int dx = m_lastMouseClick.x() - mousePos.x();
-					if (dx < -2)
-					{
-						//going to the right
-						m_selectedItem = RIGHT_AREA;
-						//call the same method again
-						mouseMoveEvent(event);
-						return;
-					}
-					else if (dx > 2)
-					{
-						//going to the left
-						m_selectedItem = LEFT_AREA;
-						//call the same method again
-						mouseMoveEvent(event);
-						return;
-					}
-					//else: nothing we can do right now!
+					//going to the right
+					m_selectedItem = RIGHT_AREA;
+					//call the same method again
+					mouseMoveEvent(event);
+					return;
 				}
-				break;
+				else if (dx > 2)
+				{
+					//going to the left
+					m_selectedItem = LEFT_AREA;
+					//call the same method again
+					mouseMoveEvent(event);
+					return;
+				}
+				//else: nothing we can do right now!
+			}
+			break;
 			case LEFT_ARROW:
 				if (m_arrowLeft)
 				{
 					double newValue = m_arrowLeft->pixelToKey(mousePos.x());
 					if (m_arrowRight)
-						newValue = std::min(newValue,m_arrowRight->currentVal());
+						newValue = std::min(newValue, m_arrowRight->currentVal());
 					setMinSatValue(newValue);
 				}
 				break;
@@ -811,32 +812,32 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 				{
 					double newValue = m_arrowRight->pixelToKey(mousePos.x());
 					if (m_arrowLeft)
-						newValue = std::max(newValue,m_arrowLeft->currentVal());
+						newValue = std::max(newValue, m_arrowLeft->currentVal());
 					setMaxSatValue(newValue);
 				}
 				break;
 			case BOTH_ARROWS:
+			{
+				int dx = m_lastMouseClick.x() - mousePos.x();
+				if (dx < -2)
 				{
-					int dx = m_lastMouseClick.x() - mousePos.x();
-					if (dx < -2)
-					{
-						//going to the right
-						m_selectedItem = RIGHT_ARROW;
-						//call the same method again
-						mouseMoveEvent(event);
-						return;
-					}
-					else if (dx > 2)
-					{
-						//going to the left
-						m_selectedItem = LEFT_ARROW;
-						//call the same method again
-						mouseMoveEvent(event);
-						return;
-					}
-					//else: nothing we can do right now!
+					//going to the right
+					m_selectedItem = RIGHT_ARROW;
+					//call the same method again
+					mouseMoveEvent(event);
+					return;
 				}
-				break;
+				else if (dx > 2)
+				{
+					//going to the left
+					m_selectedItem = LEFT_ARROW;
+					//call the same method again
+					mouseMoveEvent(event);
+					return;
+				}
+				//else: nothing we can do right now!
+			}
+			break;
 			default:
 				assert(false);
 				break;
@@ -847,7 +848,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 			if (m_histogram && !m_histoValues.empty())
 			{
 				QRect roi = m_histogram->rect();
-				if (roi.contains(event->pos(),false))
+				if (roi.contains(event->pos(), false))
 				{
 					m_drawVerticalIndicator = true;
 
@@ -877,13 +878,13 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 	{
 		if (m_histoValues.size() > 4)
 		{
-			setNumberOfClasses(std::max<size_t>(4,m_histoValues.size()-4));
+			setNumberOfClasses(std::max<size_t>(4, m_histoValues.size() - 4));
 			refresh();
 		}
 	}
 	else //if (e->delta() > 0)
 	{
-		setNumberOfClasses(m_histoValues.size()+4);
+		setNumberOfClasses(m_histoValues.size() + 4);
 		refresh();
 	}
 
@@ -898,13 +899,13 @@ ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
 	m_gui->setupUi(this);
 	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->histoFrame);
 	hboxLayout->addWidget(m_win);
-	hboxLayout->setContentsMargins(0,0,0,0);
+	hboxLayout->setContentsMargins(0, 0, 0, 0);
 	m_gui->histoFrame->setLayout(hboxLayout);
 
-	connect(m_gui->exportCSVToolButton,   SIGNAL(clicked()), this, SLOT(onExportToCSV()));
+	connect(m_gui->exportCSVToolButton, SIGNAL(clicked()), this, SLOT(onExportToCSV()));
 	connect(m_gui->exportImageToolButton, SIGNAL(clicked()), this, SLOT(onExportToImage()));
 
-	resize(400,275);
+	resize(400, 275);
 }
 
 ccHistogramWindowDlg::~ccHistogramWindowDlg()
@@ -934,7 +935,7 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 	QTextStream stream(&file);
 	stream.setRealNumberPrecision(12);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
-	
+
 	//header
 	stream << "Class; Value; Class start; Class end;" << endl;
 
@@ -943,10 +944,10 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 		const std::vector<unsigned>& histoValues = m_win->histoValues();
 		int histoSize = static_cast<int>(histoValues.size());
 		double step = (m_win->maxVal() - m_win->minVal()) / histoSize;
-		for (int i=0; i<histoSize; ++i)
+		for (int i = 0; i < histoSize; ++i)
 		{
 			double minVal = m_win->minVal() + i*step;
-			stream << i+1;				//class index
+			stream << i + 1;				//class index
 			stream << s_csvSep;
 			stream << histoValues[i];	//class value
 			stream << s_csvSep;
@@ -961,7 +962,7 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 	file.close();
 
 	ccLog::Print(QString("[Histogram] File '%1' saved").arg(filename));
-	
+
 	return true;
 }
 
@@ -976,7 +977,7 @@ void ccHistogramWindowDlg::onExportToCSV()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), QApplication::applicationDirPath()).toString();
 
 	currentPath += QString("/") + m_win->windowTitle() + ".csv";
 
@@ -989,7 +990,7 @@ void ccHistogramWindowDlg::onExportToCSV()
 	}
 
 	//save last saving location
-	settings.setValue(ccPS::CurrentPath(),QFileInfo(filename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(filename).absolutePath());
 	settings.endGroup();
 
 	//save file
@@ -1009,10 +1010,10 @@ void ccHistogramWindowDlg::onExportToImage()
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), QApplication::applicationDirPath()).toString();
 
-	QString outputFilename = ImageFileFilter::GetSaveFilename(	"Select output file",
-																m_win->windowTitle(),
-																currentPath,
-																this);
+	QString outputFilename = ImageFileFilter::GetSaveFilename("Select output file",
+		m_win->windowTitle(),
+		currentPath,
+		this);
 
 	if (outputFilename.isEmpty())
 	{

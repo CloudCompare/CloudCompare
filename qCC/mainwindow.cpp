@@ -8292,7 +8292,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 
 					result = CCLib::ICPRegistrationTools::Register(A, 0, B, params, registerTrans, finalRMS, finalPointCount);
 
-					if (result == CCLib::ICPRegistrationTools::ICP_ERROR)
+					if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
 					{
 						delete B;
 						if (bestB)

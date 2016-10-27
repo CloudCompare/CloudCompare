@@ -674,11 +674,11 @@ struct TilingStruct
 		h = height;
 
 		//File extension
-		QString ext = (header.Compressed() ? ".laz" : ".las");
+		QString ext = (header.Compressed() ? "laz" : "las");
 		
-		for (unsigned i=0; i<width; ++i)
+		for (unsigned i = 0; i < width; ++i)
 		{
-			for (unsigned j=0; j<height; ++j)
+			for (unsigned j = 0; j < height; ++j)
 			{
 				unsigned ii = index(i, j);
 				QString filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), ext);

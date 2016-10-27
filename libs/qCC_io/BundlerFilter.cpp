@@ -1111,6 +1111,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		if (f.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
 			QTextStream stream(&f);
+			stream.setRealNumberNotation(QTextStream::FixedNotation);
 			stream.setRealNumberPrecision(12);
 			stream << "PixelSize" << ' ' << OR_pixelSize << endl;
 			stream << "Global3DBBox" << ' ' << OR_globalCorners[0] << ' ' << OR_globalCorners[1] << ' ' << OR_globalCorners[2] << ' ' << OR_globalCorners[3] << endl;

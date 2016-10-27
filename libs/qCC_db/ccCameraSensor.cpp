@@ -2165,6 +2165,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		if (f.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
 			QTextStream stream(&f);
+			stream.setRealNumberNotation(QTextStream::FixedNotation);
 			stream.setRealNumberPrecision(6);
 			stream << "PixelSize" << ' ' << pixelSize << endl;
 			stream << "Global3DBBox" << ' ' << globalCorners[0] << ' ' << globalCorners[1] << ' ' << globalCorners[2] << ' ' << globalCorners[3] << endl;
@@ -2269,6 +2270,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 				double xShiftGlobal = (minC[0]-globalCorners[0])/pixelSize;
 				double yShiftGlobal = (minC[1]-globalCorners[1])/pixelSize;
 				QTextStream stream(&f);
+				stream.setRealNumberNotation(QTextStream::FixedNotation);
 				stream.setRealNumberPrecision(6);
 				stream << "Image" << ' ' << exportFilename  << ' ';
 				stream << "Local3DBBox" << ' ' << minC[0] << ' ' << minC[1] << ' ' << maxC[0] << ' ' << maxC[1] << ' ';

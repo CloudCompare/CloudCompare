@@ -64,7 +64,8 @@ CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, QString filenam
 	}
 
 	QTextStream outFile(&file);
-	outFile.setRealNumberPrecision(8);
+	outFile.setRealNumberNotation(QTextStream::FixedNotation);
+	outFile.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !poly->isShifted() ? 8 : 12);
 	outFile << "Curvilinear abscissa; Z" << endl;
 
 	//curvilinear abscissa

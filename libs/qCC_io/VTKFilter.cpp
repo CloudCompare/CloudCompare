@@ -92,7 +92,8 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return CC_FERR_WRITING;
 
 	QTextStream outFile(&file);
-	outFile.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 ? 8 : 12);
+	outFile.setRealNumberNotation(QTextStream::FixedNotation);
+	outFile.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !vertices->isShifted() ? 8 : 12);
 
 	//write header
 	outFile << "# vtk DataFile Version 3.0" << endl;

@@ -5010,7 +5010,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				const CCVector3* G = Yk.getGravityCenter();
 				if (!G)
 				{
-					ccConsole::Warning(QString("Failed to get gravity center of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(QString("Failed to get the center of gravity of cloud '%1'!").arg(cloud->getName()));
 					continue;
 				}
 
@@ -5059,7 +5059,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 																	+	e*Pc.x*Pc.y + f*Pc.y*Pc.z + g*Pc.x*Pc.z
 																	+	l*Pc.x + m*Pc.y + n*Pc.z + d);
 
-							sf->setValue(count++,dist);
+							sf->addElement(dist);
 							//fprintf(fp,"%f %f %f %f\n",Pc.x,Pc.y,Pc.z,dist);
 						}
 					}

@@ -130,6 +130,8 @@ v2.8.beta - XX/XX/2016
 	* ccViewer was transforming input arguments to upper case, hence preventing files to be opened this way on Linux
 	* Documentation: contrarily to what was written in the wiki, the Level tool does not use the first picked point as origin for the new coordinate system!
 		It only rotates the cloud about this point.
+	* The new plane fitting algorithm (Least Squares fit) was giving strange results in some particular cases. Rolling back to the previous algorithm.
+	* The sandbox tool 'Distance map to best fit 3D quadric' was broken
 
 v2.7.0 - 04/22/2016
 -------------------

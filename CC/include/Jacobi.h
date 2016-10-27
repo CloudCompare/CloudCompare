@@ -21,6 +21,7 @@
 //Local
 #include "SquareMatrix.h"
 
+#define ROTATE(a,i,j,k,l) { Scalar g = a[i][j]; h = a[k][l]; a[i][j] = g-s*(h+g*tau); a[k][l] = h+s*(g-h*tau); }
 
 //! Jacobi eigen vectors/values decomposition
 template <typename Scalar> class Jacobi
@@ -36,13 +37,15 @@ public:
 		Note: this code is inspired from John Burkardt's 'jacobi_eigenvalue' code
 		See https://people.sc.fsu.edu/~jburkardt/cpp_src/jacobi_eigenvalue/jacobi_eigenvalue.cpp
 
+		\warning DGM: this method gives strange results in some particular cases!!!
+
 		\param[in] matrix input square matrix
 		\param[out] eigenVectors eigenvectors (as a square matrix)
 		\param[out] eigenValues eigenvalues
 		\param[in] maxIterationCount max number of iteration (optional)
 		\return success
 		**/
-	static bool ComputeEigenValuesAndVectors(const SquareMatrix& matrix, SquareMatrix& eigenVectors, EigenValues& eigenValues, unsigned maxIterationCount = 50)
+	static bool ComputeEigenValuesAndVectors2(const SquareMatrix& matrix, SquareMatrix& eigenVectors, EigenValues& eigenValues, unsigned maxIterationCount = 50)
 	{
 		if (!matrix.isValid())
 		{
@@ -196,6 +199,154 @@ public:
 		}
 
 		return true;
+	}
+
+	//! Computes eigen vectors (and values) with the Jacobian method
+	/** See the Numerical Recipes.
+	**/
+	static bool ComputeEigenValuesAndVectors(const SquareMatrix& matrix, SquareMatrix& eigenVectors, EigenValues& eigenValues, unsigned maxIterationCount = 50)
+	{
+		if (!matrix.isValid())
+		{
+			return false;
+		}
+
+		unsigned n = matrix.size();
+		unsigned matrixSquareSize = n * n;
+
+		//output eigen vectors matrix
+		eigenVectors = SquareMatrix(n);
+		if (!eigenVectors.isValid())
+		{
+			return false;
+		}
+		eigenVectors.toIdentity();
+
+		std::vector<Scalar> b, z;
+		try
+		{
+			eigenValues.resize(n);
+			b.resize(n);
+			z.resize(n);
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			return false;
+		}
+		Scalar* d = &eigenValues.front();
+
+		//init
+		{
+			for (unsigned ip = 0; ip < n; ip++)
+			{
+				b[ip] = d[ip] = matrix.m_values[ip][ip]; //Initialize b and d to the diagonal of a.
+				z[ip] = 0; //This vector will accumulate terms of the form tapq as in equation (11.1.14)
+			}
+		}
+
+		for (unsigned i = 1; i <= maxIterationCount; i++)
+		{
+			//Sum off-diagonal elements
+			Scalar sm = 0;
+			{
+				for (unsigned ip = 0; ip < n - 1; ip++)
+				{
+					for (unsigned iq = ip + 1; iq < n; iq++)
+						sm += fabs(matrix.m_values[ip][iq]);
+				}
+			}
+
+			if (sm == 0) //The normal return, which relies on quadratic convergence to machine underflow.
+			{
+				//we only need the absolute values of eigenvalues
+				for (unsigned ip = 0; ip < n; ip++)
+					d[ip] = fabs(d[ip]);
+
+				return true;
+			}
+
+			Scalar tresh = 0;
+			if (i < 4)
+			{
+				tresh = sm / static_cast<Scalar>(5 * matrixSquareSize); //...on the first three sweeps.
+			}
+
+			for (unsigned ip = 0; ip < n - 1; ip++)
+			{
+				for (unsigned iq = ip + 1; iq < n; iq++)
+				{
+					Scalar g = fabs(matrix.m_values[ip][iq]) * 100;
+					//After four sweeps, skip the rotation if the off-diagonal element is small.
+					if (i > 4
+						&& static_cast<float>(fabs(d[ip]) + g) == static_cast<float>(fabs(d[ip]))
+						&& static_cast<float>(fabs(d[iq]) + g) == static_cast<float>(fabs(d[iq])))
+					{
+						matrix.m_values[ip][iq] = 0;
+					}
+					else if (fabs(matrix.m_values[ip][iq]) > tresh)
+					{
+						Scalar h = d[iq] - d[ip];
+						Scalar t = 0;
+						if (static_cast<float>(fabs(h) + g) == static_cast<float>(fabs(h)))
+						{
+							t = matrix.m_values[ip][iq] / h;
+						}
+						else
+						{
+							Scalar theta = h / (2 * matrix.m_values[ip][iq]); //Equation (11.1.10).
+							t = 1 / (fabs(theta) + sqrt(1 + theta*theta));
+							if (theta < 0)
+								t = -t;
+						}
+
+						Scalar c = 1 / sqrt(t*t + 1);
+						Scalar s = t*c;
+						Scalar tau = s / (1 + c);
+						h = t * matrix.m_values[ip][iq];
+						z[ip] -= h;
+						z[iq] += h;
+						d[ip] -= h;
+						d[iq] += h;
+						matrix.m_values[ip][iq] = 0;
+
+						//Case of rotations 1 <= j < p
+						{
+							for (unsigned j = 0; j + 1 <= ip; j++)
+								ROTATE(matrix.m_values, j, ip, j, iq)
+						}
+						//Case of rotations p < j < q
+						{
+							for (unsigned j = ip + 1; j + 1 <= iq; j++)
+								ROTATE(matrix.m_values, ip, j, j, iq)
+						}
+						//Case of rotations q < j <= n
+						{
+							for (unsigned j = iq + 1; j < n; j++)
+								ROTATE(matrix.m_values, ip, j, iq, j)
+						}
+						//Last case
+						{
+							for (unsigned j = 0; j < n; j++)
+								ROTATE(eigenVectors.m_values, j, ip, j, iq)
+						}
+					}
+				}
+			}
+
+			//update b, d and z
+			{
+				for (unsigned ip = 0; ip < n; ip++)
+				{
+					b[ip] += z[ip];
+					d[ip] = b[ip];
+					z[ip] = 0;
+				}
+			}
+		}
+
+		//Too many iterations!
+		return false;
 	}
 
 	//! Sorts the eigenvectors in the decreasing order of their associated eigenvalues

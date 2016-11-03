@@ -26,7 +26,6 @@
 //Local
 #include "ccGenericPointCloud.h"
 
-
 //! Compressed normal vectors handler
 class QCC_DB_LIB_API ccNormalVectors
 {
@@ -121,7 +120,7 @@ public:
 		\param[out] strike_deg strike value (in degrees)
 		\param[out] dip_deg dip value (in degrees)
 	**/
-	static void ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike_deg, double& dip_deg);
+	static void ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoordinateType& strike_deg, PointCoordinateType& dip_deg);
 
 	//! Converts a normal vector to geological 'dip direction & dip' parameters
 	/** See http://en.wikipedia.org/wiki/Strike_and_dip
@@ -208,7 +207,7 @@ protected:
 	ccNormalVectors();
 
 	//! Inits internal structures
-	bool init(unsigned char quantizeLevel);
+	bool init();
 
 	//! Compressed normal vectors
 	std::vector<CCVector3> m_theNormalVectors;

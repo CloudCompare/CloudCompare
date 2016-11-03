@@ -103,6 +103,12 @@ v2.8.beta - XX/XX/2016
 		- new 'Reset' button
 		- new 'From dip / dip direction' to init the transformation as a rotation matrix passing from (0, 0) to the specified (dip, dip dir.) orientation
 
+	* Normals computation
+		- glitch fix: when computing normals with the 'LS plane' model, only 3 neighbors are requested instead of 12
+		- CC now handles properly the (0, 0, 0) normal resulting from an insufficient number of neighbors
+		- Dip / Dip direction computation takes the (0, 0, 0) normal and outputs NAN values for these normals
+			--> this way it is possible to filter out the points with bad normals with 'Edit > SF > Filter by value' and using the full (valid) range
+
 	* Other
 		- Transformation history is now saved in BIN files
 		- The normal of a plane entity can now be visualized as a 3D arrow (just as the Facet entities)
@@ -132,6 +138,8 @@ v2.8.beta - XX/XX/2016
 		It only rotates the cloud about this point.
 	* The new plane fitting algorithm (Least Squares fit) was giving strange results in some particular cases. Rolling back to the previous algorithm.
 	* The sandbox tool 'Distance map to best fit 3D quadric' was broken
+	* When computing normals whith the Least Squares best fitting plane, CC was requiring at least 12 points in the neighborhood, when only 3 are theoretically
+		sufficient.
 
 v2.7.0 - 04/22/2016
 -------------------

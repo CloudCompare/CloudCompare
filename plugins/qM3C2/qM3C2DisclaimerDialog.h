@@ -24,7 +24,7 @@
 #include <ccMainAppInterface.h>
 
 //Qt
-#include <QMainwindow>
+#include <QMainWindow>
 
 //! Dialog for displaying the M3C2/UEB disclaimer
 class DisclaimerDialog : public QDialog, public Ui::DisclaimerDialog

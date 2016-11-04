@@ -226,7 +226,8 @@ bool Delaunay2dMesh::buildMesh(	const std::vector<CCVector2>& points2D,
 }
 
 bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertices2D,
-											const std::vector<CCVector2>& polygon2D)
+											const std::vector<CCVector2>& polygon2D,
+											bool removeOutside/*=true*/)
 {
 	if (!m_triIndexes || m_numberOfTriangles == 0)
 		return false;
@@ -240,7 +241,7 @@ bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertice
 	//test each triangle center
 	{
 		const int* _triIndexes = m_triIndexes;
-		for (unsigned i=0; i<m_numberOfTriangles; ++i,_triIndexes+=3)
+		for (unsigned i = 0; i < m_numberOfTriangles; ++i, _triIndexes += 3)
 		{
 			//compute the triangle's barycenter
 			const CCVector2& A = vertices2D[_triIndexes[0]];
@@ -249,11 +250,12 @@ bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertice
 			CCVector2 G = (A + B + C) / 3.0;
 
 			//if G is inside the 'polygon'
-			if (CCLib::ManualSegmentationTools::isPointInsidePoly(G,polygon2D))
+			bool isInside = CCLib::ManualSegmentationTools::isPointInsidePoly(G, polygon2D);
+			if ((removeOutside && isInside) || (!removeOutside && !isInside))
 			{
 				//we keep the corresponding triangle
 				if (lastValidIndex != i)
-					memcpy(m_triIndexes+3*lastValidIndex,_triIndexes,3*sizeof(int));
+					memcpy(m_triIndexes + 3 * lastValidIndex, _triIndexes, 3 * sizeof(int));
 				++lastValidIndex;
 			}
 		}
@@ -264,7 +266,7 @@ bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertice
 	if (m_numberOfTriangles)
 	{
 		//shouldn't fail as m_numberOfTriangles is smaller!
-		m_triIndexes = static_cast<int*>(realloc(m_triIndexes,sizeof(int)*3*m_numberOfTriangles));
+		m_triIndexes = static_cast<int*>(realloc(m_triIndexes, sizeof(int) * 3 * m_numberOfTriangles));
 	}
 	else
 	{
@@ -275,7 +277,7 @@ bool Delaunay2dMesh::removeOuterTriangles(	const std::vector<CCVector2>& vertice
 
 	//update iterators
 	m_globalIterator = m_triIndexes;
-	m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
+	m_globalIteratorEnd = m_triIndexes + 3 * m_numberOfTriangles;
 
 	return true;
 }

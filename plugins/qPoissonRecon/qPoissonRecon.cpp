@@ -66,9 +66,10 @@ public:
 		//normal
 		assert(m_cloud->hasNormals());
 		const CCVector3& N = m_cloud->getPointNormal(m_index);
-		out.n[0] = static_cast<Real>(N.x);
-		out.n[1] = static_cast<Real>(N.y);
-		out.n[2] = static_cast<Real>(N.z);
+		//DGM: strangely, this new version of PoissonRecon seems to require inverted normals
+		out.n[0] = -static_cast<Real>(N.x);
+		out.n[1] = -static_cast<Real>(N.y);
+		out.n[2] = -static_cast<Real>(N.z);
 
 		//auto-forward
 		++m_index;
@@ -82,12 +83,12 @@ protected:
 };
 
 //Dedicated 'OrientedPointStream' for the ccPointCloud structure (with colors)
-template <class Real> class ccColoredPointStream : public OrientedPointStreamWithData<Real , Point3D< unsigned char > >
+template <class Real> class ccColoredPointStream : public OrientedPointStreamWithData<Real , Point3D< Real > >
 {
 public:
 	explicit ccColoredPointStream( ccPointCloud* cloud ) : m_cloud(cloud), m_index(0) { assert(cloud && cloud->hasColors()); }
 	virtual void reset( void ) { m_index = 0; }
-	virtual bool nextPoint( OrientedPoint3D< Real >& out, Point3D< unsigned char >& d )
+	virtual bool nextPoint( OrientedPoint3D< Real >& out, Point3D< Real >& d )
 	{
 		if (!m_cloud || m_index == m_cloud->size())
 		{
@@ -109,9 +110,9 @@ public:
 		//color
 		assert(m_cloud->hasColors());
 		const ColorCompType* rgb = m_cloud->getPointColor(m_index);
-		d[0] = rgb[0];
-		d[1] = rgb[1];
-		d[2] = rgb[2];
+		d[0] = static_cast<Real>(rgb[0]);
+		d[1] = static_cast<Real>(rgb[1]);
+		d[2] = static_cast<Real>(rgb[2]);
 
 		//auto-forward
 		++m_index;
@@ -173,6 +174,7 @@ static PoissonReconLib::Parameters s_params;
 static ccPointCloud* s_cloud = 0;
 static PoissonMesh* s_mesh = 0;
 static ColoredPoissonMesh* s_coloredMesh = 0;
+static XForm4x4< PointCoordinateType > s_iXForm;
 
 bool doReconstruct()
 {
@@ -183,7 +185,7 @@ bool doReconstruct()
 	}
 
 	ccPointStream<PointCoordinateType> pointStream(s_cloud);
-	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_mesh);
+	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_mesh, s_iXForm);
 }
 
 bool doReconstructWithColors()
@@ -195,7 +197,7 @@ bool doReconstructWithColors()
 	}
 
 	ccColoredPointStream<PointCoordinateType> pointStream(s_cloud);
-	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_coloredMesh);
+	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_coloredMesh, s_iXForm);
 }
 
 void qPoissonRecon::doAction()
@@ -243,6 +245,21 @@ void qPoissonRecon::doAction()
 	prpDlg.samplesPerNodeSpinBox->setValue(s_params.samplesPerNode);
 	prpDlg.densityCheckBox->setChecked(s_params.density);
 	prpDlg.importColorsCheckBox->setChecked(true);
+	switch (s_params.boundary)
+	{
+	case PoissonReconLib::Parameters::FREE:
+		prpDlg.boundaryComboBox->setCurrentIndex(0);
+		break;
+	case PoissonReconLib::Parameters::DIRICHLET:
+		prpDlg.boundaryComboBox->setCurrentIndex(1);
+		break;
+	case PoissonReconLib::Parameters::NEUMANN:
+		prpDlg.boundaryComboBox->setCurrentIndex(2);
+		break;
+	default:
+		assert(false);
+		break;
+	}
 
 	if (!prpDlg.exec())
 		return;
@@ -253,6 +270,21 @@ void qPoissonRecon::doAction()
 	s_params.fullDepth = prpDlg.fullDepthSpinBox->value();
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
 	s_params.density = prpDlg.densityCheckBox->isChecked();
+	switch (prpDlg.boundaryComboBox->currentIndex())
+	{
+	case 0:
+		s_params.boundary = PoissonReconLib::Parameters::FREE;
+		break;
+	case 1:
+		s_params.boundary = PoissonReconLib::Parameters::DIRICHLET;
+		break;
+	case 2:
+		s_params.boundary = PoissonReconLib::Parameters::NEUMANN;
+		break;
+	default:
+		assert(false);
+		break;
+	}
 	bool withColors = pc->hasColors() && prpDlg.importColorsCheckBox->isChecked();
 
 	/*** RECONSTRUCTION PROCESS ***/
@@ -364,9 +396,9 @@ void qPoissonRecon::doAction()
 				}
 				//add 'in core' points
 				{
-					for (unsigned i=0; i<nic; i++)
+					for (unsigned i = 0; i < nic; i++)
 					{
-						ColoredVertex& p = s_coloredMesh->inCorePoints[i];
+						ColoredVertex p = s_iXForm * s_coloredMesh->inCorePoints[i];
 						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
 										static_cast<PointCoordinateType>(p.point.coords[1]),
 										static_cast<PointCoordinateType>(p.point.coords[2]) );
@@ -374,7 +406,10 @@ void qPoissonRecon::doAction()
 
 						if (importColors)
 						{
-							newPC->addRGBColor(p.color);
+							ColorCompType C[3] = {	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
+													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
+													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) };
+							newPC->addRGBColor(C);
 						}
 
 						if (densitySF)
@@ -386,10 +421,11 @@ void qPoissonRecon::doAction()
 				}
 				//add 'out of core' points
 				{
-					for (unsigned i=0; i<noc; i++)
+					for (unsigned i = 0; i < noc; i++)
 					{
 						ColoredVertex p;
 						s_coloredMesh->nextOutOfCorePoint(p);
+						p = s_iXForm * p;
 						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
 										static_cast<PointCoordinateType>(p.point.coords[1]),
 										static_cast<PointCoordinateType>(p.point.coords[2]) );
@@ -397,7 +433,10 @@ void qPoissonRecon::doAction()
 
 						if (importColors)
 						{
-							newPC->addRGBColor(p.color);
+							ColorCompType C[3] = {	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
+													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
+													static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) };
+							newPC->addRGBColor(C);
 						}
 
 						if (densitySF)
@@ -414,9 +453,9 @@ void qPoissonRecon::doAction()
 			{
 				//add 'in core' points
 				{
-					for (unsigned i=0; i<nic; i++)
+					for (unsigned i = 0; i < nic; i++)
 					{
-						Vertex& p = s_mesh->inCorePoints[i];
+						Vertex p = s_iXForm * s_mesh->inCorePoints[i];
 						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
 										static_cast<PointCoordinateType>(p.point.coords[1]),
 										static_cast<PointCoordinateType>(p.point.coords[2]) );
@@ -431,10 +470,11 @@ void qPoissonRecon::doAction()
 				}
 				//add 'out of core' points
 				{
-					for (unsigned i=0; i<noc; i++)
+					for (unsigned i = 0; i < noc; i++)
 					{
 						Vertex p;
 						s_mesh->nextOutOfCorePoint(p);
+						p = s_iXForm * p;
 						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
 										static_cast<PointCoordinateType>(p.point.coords[1]),
 										static_cast<PointCoordinateType>(p.point.coords[2]) );
@@ -464,7 +504,7 @@ void qPoissonRecon::doAction()
 
 			//add faces
 			{
-				for (unsigned i=0; i<nr_faces; i++)
+				for (unsigned i = 0; i < nr_faces; i++)
 				{
 					std::vector<CoredVertexIndex> triangleIndexes;
 					if (s_mesh)
@@ -507,7 +547,7 @@ void qPoissonRecon::doAction()
 		{
 			delete newMesh;
 			newMesh = 0;
-			m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 
 		//currently selected entities parameters may have changed!
@@ -517,7 +557,7 @@ void qPoissonRecon::doAction()
 	}
 	else
 	{
-		m_app->dispToConsole("Reconstruction failed!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Reconstruction failed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 
 	s_cloud = 0;

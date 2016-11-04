@@ -42,6 +42,7 @@ class ccSensor;
 class ccIndexedTransformationBuffer;
 class ccShiftedObject;
 class CCShareable;
+class ccPlanarEntityInterface;
 
 class QStandardItemModel;
 class QStandardItem;
@@ -92,7 +93,7 @@ public:
 							OBJECT_NAME_IN_3D						,
 							OBJECT_FACET_CONTOUR					,
 							OBJECT_FACET_MESH						,
-							OBJECT_FACET_NORMAL_VECTOR				,
+							OBJECT_PLANE_NORMAL_VECTOR				,
 							OBJECT_SENSOR_INDEX						,
 							OBJECT_SHOW_TRANS_BUFFER_PATH			,
 							OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS		,
@@ -165,6 +166,7 @@ protected:
 	void fillSFWithPointCloud(ccGenericPointCloud*);
 	void fillWithMesh(ccGenericMesh*);
 	void fillWithFacet(ccFacet*);
+	void fillWithPlanarEntity(ccPlanarEntityInterface*);
 	void fillWithSensor(ccSensor*);
 	void fillWithTransBuffer(ccIndexedTransformationBuffer*);
 	void fillWithPolyline(ccPolyline*);

@@ -32,14 +32,19 @@ public:
 	**/
 	static const unsigned char QUANTIZE_LEVEL = 9; //2097152 normals * 12 bytes = 24 Mb of memory
 
+	//! Last valid normal code
+	static const unsigned MAX_VALID_NORM_CODE = (1 << (QUANTIZE_LEVEL * 2 + 3)) - 1;
+	//! Null normal code
+	static const unsigned NULL_NORM_CODE = MAX_VALID_NORM_CODE + 1;
+
 	//! Compression algorithm
-	static unsigned Compress(const PointCoordinateType N[3], unsigned char level = QUANTIZE_LEVEL);
+	static unsigned Compress(const PointCoordinateType N[3]);
 
 	//! Decompression algorithm
 	static void Decompress(unsigned index, PointCoordinateType N[3], unsigned char level = QUANTIZE_LEVEL);
 
 	//! Inverts a (compressed) normal
-	inline static void InvertNormal(CompressedNormType &code) { code ^= (static_cast<CompressedNormType>(7) << 2*QUANTIZE_LEVEL); } //See 'Decompress' for a better understanding
+	static void InvertNormal(CompressedNormType &code);
 
 };
 

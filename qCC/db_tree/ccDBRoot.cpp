@@ -157,15 +157,14 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	assert(propertiesTreeWidget);
 	m_propertiesTreeWidget = propertiesTreeWidget;
 	m_propertiesModel = new QStandardItemModel(0, 2, parent);
-	//already done in ui file!
-	//m_propertiesTreeWidget->header()->hide();
-	//m_propertiesTreeWidget->setSelectionMode(QAbstractItemView::NoSelection);
-	//m_propertiesTreeWidget->setAllColumnsShowFocus(true);
 	m_ccPropDelegate = new ccPropertiesTreeDelegate(m_propertiesModel, m_propertiesTreeWidget);
 	m_propertiesTreeWidget->setItemDelegate(m_ccPropDelegate);
 	m_propertiesTreeWidget->setModel(m_propertiesModel);
+	//already done in ui file!
+	//m_propertiesTreeWidget->setSelectionMode(QAbstractItemView::NoSelection);
+	//m_propertiesTreeWidget->setAllColumnsShowFocus(true);
+	//m_propertiesTreeWidget->header()->setStretchLastSection(true);
 	m_propertiesTreeWidget->header()->setSectionResizeMode(QHeaderView::Interactive);
-	m_propertiesTreeWidget->header()->setStretchLastSection(true);
 	m_propertiesTreeWidget->setEnabled(false);
 
 	//Properties tree signals/slots connection
@@ -694,7 +693,7 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
 	//first unselect
 	QModelIndexList deselectedItems = deselected.indexes();
 	{
-		for (int i=0;i<deselectedItems.count();++i)
+		for (int i = 0; i < deselectedItems.count(); ++i)
 		{
 			ccHObject* element = static_cast<ccHObject*>(deselectedItems.at(i).internalPointer());
 			assert(element);
@@ -840,7 +839,7 @@ void ccDBRoot::selectEntities(const ccHObject::Container& entities, bool increme
 	//count the number of lables
 	size_t labelCount = 0;
 	{
-		for (size_t i=0; i<entities.size(); ++i)
+		for (size_t i = 0; i < entities.size(); ++i)
 		{
 			ccHObject* ent = entities[i];
 			if (!ent)
@@ -866,7 +865,7 @@ void ccDBRoot::selectEntities(const ccHObject::Container& entities, bool increme
 				keepLabels = static_cast<ccHObject*>(formerSelectedIndexes[0].internalPointer())->isA(CC_TYPES::LABEL_2D); //yes if previously selected entities were already labels
 		}
 
-		for (size_t i=0; i<entities.size(); ++i)
+		for (size_t i = 0; i < entities.size(); ++i)
 		{
 			ccHObject* ent = entities[i];
 			if (ent)
@@ -898,6 +897,7 @@ void ccDBRoot::showPropertiesView(ccHObject* obj)
 
 	m_propertiesTreeWidget->setEnabled(true);
 	m_propertiesTreeWidget->setColumnWidth(0, c_propViewLeftColumnWidth);
+	//m_propertiesTreeWidget->setColumnWidth(1, m_propertiesTreeWidget->width() - c_propViewLeftColumnWidth);
 }
 
 void ccDBRoot::hidePropertiesView()
@@ -911,13 +911,15 @@ void ccDBRoot::reflectObjectPropChange(ccHObject* obj)
 {
 	assert(m_ccPropDelegate);
 	assert(m_propertiesTreeWidget);
-	if (!m_propertiesTreeWidget->isEnabled() || m_ccPropDelegate->getCurrentObject()!=obj)
+	if (!m_propertiesTreeWidget->isEnabled() || m_ccPropDelegate->getCurrentObject() != obj)
+	{
 		showPropertiesView(obj);
+	}
 }
 
 void ccDBRoot::updatePropertiesView()
 {
-	assert(m_propertiesTreeWidget);
+	assert(m_dbTreeWidget);
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	if (selectedIndexes.size() == 1)
@@ -961,7 +963,7 @@ int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
 		return selCount;
 
 	int realCount = 0;
-	for (int i=0; i<selCount; ++i)
+	for (int i = 0; i < selCount; ++i)
 	{
 		ccHObject* object = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 		if (object && object->isKindOf(filter))
@@ -983,7 +985,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 	try
 	{
 		int selCount = selectedIndexes.size();
-		for (int i=0; i<selCount; ++i)
+		for (int i = 0; i < selCount; ++i)
 		{
 			ccHObject* object = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 			if (object && object->isKindOf(filter))
@@ -1000,7 +1002,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 		info->reset();
 		info->selCount = selectedIndexes.size();
 
-		for (size_t i=0; i<info->selCount; ++i)
+		for (size_t i = 0; i < info->selCount; ++i)
 		{
 			ccHObject* obj = selectedEntities[i];
 
@@ -1009,22 +1011,27 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 			info->normalsCount += obj->hasNormals() ? 1 : 0;
 
 			if (obj->isA(CC_TYPES::HIERARCHY_OBJECT))
+			{
 				info->groupCount++;
-
-			if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
+			}
+			else if(obj->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
 				info->octreeCount += cloud->getOctree() != NULL ? 1 : 0;
 			}
-
-			if (obj->isKindOf(CC_TYPES::MESH))
+			else if (obj->isKindOf(CC_TYPES::MESH))
+			{
 				info->meshCount++;
 
-			if (obj->isKindOf(CC_TYPES::POLY_LINE))
+				if (obj->isKindOf(CC_TYPES::PLANE))
+					info->planeCount++;
+			}
+			else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+			{
 				info->polylineCount++;
-
-			if (obj->isKindOf(CC_TYPES::SENSOR))
+			}
+			else if(obj->isKindOf(CC_TYPES::SENSOR))
 			{
 				info->sensorCount++;
 				if (obj->isKindOf(CC_TYPES::GBL_SENSOR))
@@ -1032,9 +1039,10 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 				if (obj->isKindOf(CC_TYPES::CAMERA_SENSOR))
 					info->cameraSensorCount++;
 			}
-
-			if (obj->isKindOf(CC_TYPES::POINT_KDTREE))
+			else if (obj->isKindOf(CC_TYPES::POINT_KDTREE))
+			{
 				info->kdTreeCount++;
+			}
 		}
 	}
 
@@ -1881,7 +1889,7 @@ void ccDBRoot::enableBubbleViewMode()
 	if (selCount == 0)
 		return;
 
-	for (int i=0; i<selCount; ++i)
+	for (int i = 0; i < selCount; ++i)
 	{
 		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 		if (item &&item->isA(CC_TYPES::GBL_SENSOR))
@@ -1917,7 +1925,8 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool hasExactlyOnePlanarEntity = false;
 			bool leafObject = false;
 			bool hasExacltyOneGBLSenor = false;
-			for (int i=0; i<selCount; ++i)
+			bool hasExactlyOnePlane = false;
+			for (int i = 0; i < selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 				if (!item)
@@ -1952,6 +1961,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						else if (item->isA(CC_TYPES::PLANE) || item->isA(CC_TYPES::FACET))
 						{
 							hasExactlyOnePlanarEntity = true;
+							hasExactlyOnePlane = item->isKindOf(CC_TYPES::PLANE);
 						}
 						else if (item->isA(CC_TYPES::GBL_SENSOR))
 						{
@@ -1966,6 +1976,10 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_alignCameraWithEntity);
 				menu.addAction(m_alignCameraWithEntityReverse);
 				menu.addSeparator();
+			}
+			if (hasExactlyOnePlane)
+			{
+				menu.addAction(MainWindow::TheInstance()->actionEditPlane);
 			}
 			if (hasExacltyOneGBLSenor)
 			{

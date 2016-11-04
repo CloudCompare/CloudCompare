@@ -12,7 +12,25 @@ v2.8.beta - XX/XX/2016
 
 	* Support for FWF (Full WaveForm) airborne lidar data
 
+	* New 'Geological' plane creation / edition methods:
+		- Edit > Plane > Create: lets the user create a plane with specific dip / dip direction, center (can be picked on a cloud or a mesh), width and height
+		- Edit > Plane > Edit: edit the above parameters on an existing plane entity
+
+	* New Polyline export format:
+		- 2D height profile (curvilinear abscissa + Z coordinate)
+
+	* New tool: Edit > Mesh > Create surface between two polylines
+		- Creates a surface patch between two polylines
+
 - Enhancements:
+
+	* Poisson Reconstruction plugin:
+		- based on the latest version of PoissonRecon by Misha (V9.0)
+		- the user can now choose the boundary conditions (free / Dirichlet / Neumann)
+
+	* Cross-section tool
+		- the tool now supports multiple clouds and/or meshes
+
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree
 
@@ -74,6 +92,29 @@ v2.8.beta - XX/XX/2016
 	* Connected Components Extraction:
 		- safeguard added if too many components are to be created (CC will ask the user to confirm the creation of more than 500 components)
 
+	* CC should now warn the user when he/she tries to save a file with a filename containing special characters while the third party
+		library in charge of the export doesn't support them (see the warning Console message)
+
+	* Display options
+		- menu entry changed from 'Display parameters' to 'Display options' for the sake of consistency
+		- new option: 'double sided' (light) to control whether triangles should be lit from the back or not
+
+	* Apply Transformation tool
+		- new 'Reset' button
+		- new 'From dip / dip direction' to init the transformation as a rotation matrix passing from (0, 0) to the specified (dip, dip dir.) orientation
+
+	* Normals computation
+		- glitch fix: when computing normals with the 'LS plane' model, only 3 neighbors are requested instead of 12
+		- CC now handles properly the (0, 0, 0) normal resulting from an insufficient number of neighbors
+		- Dip / Dip direction computation takes the (0, 0, 0) normal and outputs NAN values for these normals
+			--> this way it is possible to filter out the points with bad normals with 'Edit > SF > Filter by value' and using the full (valid) range
+
+	* Other
+		- Transformation history is now saved in BIN files
+		- The normal of a plane entity can now be visualized as a 3D arrow (just as the Facet entities)
+		- Dip and dip direction are now displayed in the properties of Facets and Planes
+		- M3C2 sources are now publicly released! (GPL license)
+
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
 	* the 2D labels marker size (in 3D) was too dependent on the perspective camera position
@@ -87,8 +128,18 @@ v2.8.beta - XX/XX/2016
 		- the 'Hillshade' computation tool was considering the grid upside-down (hence the sun azimuth angle was inverted)
 		- contour lines generated with a projection direction other than Z were not displayed in the right orientation compared
 			to the grid raster (inside the Rasterize tool only)
-	* Command line tool: the CROP2D option applied with an orientation other than Z was not performing the cut at the right position
+	* Command line tool:
+		- the CROP2D option applied with an orientation other than Z was not performing the cut at the right position
+		- the CURV option was no longer accessible
 	* Connected Components Extraction: the tool couldn't be properly used with an octree level > 10
+	* CC failed to save E57 files with multiple clouds with normals
+	* ccViewer was transforming input arguments to upper case, hence preventing files to be opened this way on Linux
+	* Documentation: contrarily to what was written in the wiki, the Level tool does not use the first picked point as origin for the new coordinate system!
+		It only rotates the cloud about this point.
+	* The new plane fitting algorithm (Least Squares fit) was giving strange results in some particular cases. Rolling back to the previous algorithm.
+	* The sandbox tool 'Distance map to best fit 3D quadric' was broken
+	* When computing normals whith the Least Squares best fitting plane, CC was requiring at least 12 points in the neighborhood, when only 3 are theoretically
+		sufficient.
 
 v2.7.0 - 04/22/2016
 -------------------

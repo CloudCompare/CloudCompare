@@ -240,6 +240,7 @@
      </widget>
      <addaction name="actionComputeMeshAA"/>
      <addaction name="actionComputeMeshLS"/>
+     <addaction name="actionMeshTwoPolylines"/>
      <addaction name="separator"/>
      <addaction name="actionConvertTextureToColor"/>
      <addaction name="actionSamplePoints"/>
@@ -313,10 +314,19 @@
      </property>
      <addaction name="actionShowWaveDialog"/>
     </widget>
+    <widget class="QMenu" name="menuPlane">
+     <property name="title">
+      <string>Plane</string>
+     </property>
+     <addaction name="actionCreatePlane"/>
+     <addaction name="actionFitPlaneProxy"/>
+     <addaction name="actionEditPlane"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
     <addaction name="menuMesh"/>
+    <addaction name="menuPlane"/>
     <addaction name="menuSensors"/>
     <addaction name="menuScalarFields"/>
     <addaction name="menuWaveform"/>
@@ -386,6 +396,7 @@
      <addaction name="actionRasterize"/>
      <addaction name="actionConvertPolylinesToMesh"/>
      <addaction name="actionExportCoordToSF"/>
+     <addaction name="actionCreate_surface_between_two_polylines"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
      <property name="title">
@@ -755,6 +766,9 @@
        <property name="expandsOnDoubleClick">
         <bool>false</bool>
        </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
       </widget>
      </item>
     </layout>
@@ -862,16 +876,10 @@
      <normaloff>:/CC/images/ccSettings.png</normaloff>:/CC/images/ccSettings.png</iconset>
    </property>
    <property name="text">
-    <string>Display settings</string>
-   </property>
-   <property name="iconText">
-    <string>Set Lights &amp;&amp; Materials</string>
+    <string>Display options</string>
    </property>
    <property name="toolTip">
-    <string>Change lighting and default materials parameters</string>
-   </property>
-   <property name="statusTip">
-    <string>Change lighting and default materials parameters</string>
+    <string>Set various display options</string>
    </property>
   </action>
   <action name="actionHelp">
@@ -1962,7 +1970,7 @@
     <string>Plane</string>
    </property>
    <property name="toolTip">
-    <string>Compute plane orientation (normal, srtike, dip)</string>
+    <string>Fit a plane on a set of point</string>
    </property>
   </action>
   <action name="actionRenameSF">
@@ -2896,6 +2904,40 @@
     <string>2D Waveform viewer</string>
    </property>
   </action>
+  <action name="actionCreatePlane">
+   <property name="text">
+    <string>Create</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a plane</string>
+   </property>
+  </action>
+  <action name="actionEditPlane">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the plane parameters</string>
+   </property>
+  </action>
+  <action name="actionCreate_surface_between_two_polylines">
+   <property name="text">
+    <string>Create surface between two polylines</string>
+   </property>
+  </action>
+  <action name="actionMeshTwoPolylines">
+   <property name="text">
+    <string>Surface between 2 polylines</string>
+   </property>
+  </action>
+  <action name="actionFitPlaneProxy">
+   <property name="text">
+    <string>Fit</string>
+   </property>
+   <property name="toolTip">
+    <string>Fit a plane on a set of point</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3022,6 +3064,22 @@
     <hint type="destinationlabel">
      <x>957</x>
      <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFitPlaneProxy</sender>
+   <signal>triggered()</signal>
+   <receiver>actionFitPlane</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

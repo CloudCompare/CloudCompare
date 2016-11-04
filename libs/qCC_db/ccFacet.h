@@ -22,12 +22,12 @@
 #include "ccMesh.h"
 #include "ccPolyline.h"
 #include "ccPointCloud.h"
-
+#include "ccPlanarEntityInterface.h"
 
 //! Facet
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh
 **/
-class QCC_DB_LIB_API ccFacet : public ccHObject
+class QCC_DB_LIB_API ccFacet : public ccHObject, public ccPlanarEntityInterface
 {
 public:
 
@@ -64,17 +64,18 @@ public:
 	**/
 	void setColor(const ccColor::Rgb& rgb);
 
+	//inherited from ccPlanarEntityInterface
+	inline CCVector3 getNormal() const override { return CCVector3(m_planeEquation); }
+
 	//! Returns associated RMS
 	inline double getRMS() const { return m_rms; }
 	//! Returns associated surface
 	inline double getSurface() const { return m_surface; }
 	//! Returns plane equation
 	inline const PointCoordinateType* getPlaneEquation() const { return m_planeEquation; }
-	//! Returns normal
-	inline CCVector3 getNormal() const { return CCVector3(m_planeEquation); }
-	//! Inverts normal
+	//! Inverts the facet normal
 	void invertNormal();
-	//! Returns center
+	//! Returns the facet center
 	inline const CCVector3& getCenter() const { return m_center; }
 
 	//! Returns polygon mesh (if any)
@@ -94,11 +95,6 @@ public:
 	inline void setContourVertices(ccPointCloud* cloud) { m_contourVertices = cloud; }
 	//! Sets origin points
 	inline void setOriginPoints(ccPointCloud* cloud) { m_originPoints = cloud; }
-
-	//! Show normal vector
-	inline void showNormalVector(bool state) { m_showNormalVector = state; }
-	//! Whether normal vector is shown or not
-	inline bool normalVectorIsShown() const { return m_showNormalVector; }
 
 	//! Clones this facet
 	ccFacet* clone() const;
@@ -135,9 +131,6 @@ protected:
 
 	//! Max length
 	PointCoordinateType m_maxEdgeLength;
-
-	//! Whether the facet normal vector should be displayed or not
-	bool m_showNormalVector;
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const override;

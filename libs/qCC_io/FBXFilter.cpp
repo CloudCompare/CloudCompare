@@ -61,7 +61,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 	if (!mesh)
 		return 0;
 
-	FbxNode* lNode = FbxNode::Create(pScene,qPrintable(mesh->getName()));
+	FbxNode* lNode = FbxNode::Create(pScene, qPrintable(mesh->getName()));
 	FbxMesh* lMesh = FbxMesh::Create(pScene, qPrintable(mesh->getName()));
 	lNode->SetNodeAttribute(lMesh);
 
@@ -615,8 +615,13 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			}
 		}
 
+		if (CheckForSpecialChars(filename))
+		{
+			ccLog::Warning(QString("[FBX] Output filename contains special characters. It might be rejected by the third party library..."));
+		}
+
 		// Save the scene.
-		bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename),fileFormat);
+		bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename), fileFormat);
 
 		// Destroy all objects created by the FBX SDK.
 		if( lSdkManager )
@@ -1270,20 +1275,25 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		// True is the default, but here we’ll set some to true explicitly, and others to false.
 		//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,	true);
 		//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,	true);
-	
+
 		// Create an importer using the SDK manager.
-		FbxImporter* lImporter = FbxImporter::Create(lSdkManager,"");
+		FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
+
+		if (CheckForSpecialChars(filename))
+		{
+			ccLog::Warning(QString("[FBX] Input filename contains special characters. It might be rejected by the third party library..."));
+		}
 
 		// Use the first argument as the filename for the importer.
 		if (!lImporter->Initialize(qPrintable(filename), -1, lSdkManager->GetIOSettings()))
-		{ 
+		{
 			ccLog::Warning(QString("[FBX] Error: %1").arg(lImporter->GetStatus().GetErrorString()));
-			result = CC_FERR_READING;
+			result = CC_FERR_CONSOLE_ERROR;
 		}
 		else
 		{
 			// Create a new scene so that it can be populated by the imported file.
-			FbxScene* lScene = FbxScene::Create(lSdkManager,"myScene");
+			FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
 
 			// Import the contents of the file into the scene.
 			if (lImporter->Import(lScene))
@@ -1305,7 +1315,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(lNode->GetNodeAttributeCount()));
 #endif
 					// scan the node's attributes.
-					for(int i=0; i<lNode->GetNodeAttributeCount(); i++)
+					for (int i = 0; i < lNode->GetNodeAttributeCount(); i++)
 					{
 						FbxNodeAttribute* pAttribute = lNode->GetNodeAttributeByIndex(i);
 						FbxNodeAttribute::EType type = pAttribute->GetAttributeType();
@@ -1324,7 +1334,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 									FbxAMatrix& transform = lNode->EvaluateGlobalTransform();
 									ccGLMatrix mat;
 									float* data = mat.data();
-									for (int c=0; c<4; ++c, data++)
+									for (int c = 0; c < 4; ++c, data++)
 									{
 										FbxVector4 C = transform.GetColumn(c);
 										data[0]  = static_cast<float>(C[0]);
@@ -1340,6 +1350,8 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 									//invYZ.data()[15] =  1.0;
 									//mat = invYZ * mat;
 									mesh->applyGLTransformation_recursive(&mat);
+									//this transformation is of no interest for the user
+									mesh->resetGLTransformationHistory_recursive();
 
 									if (mesh->getName().isEmpty())
 										mesh->setName(nodeName);
@@ -1375,7 +1387,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					}
 
 					// Recursively add the children.
-					for(int j=0; j<lNode->GetChildCount(); j++)
+					for (int j = 0; j < lNode->GetChildCount(); j++)
 					{
 						nodes.push_back(lNode->GetChild(j));
 					}

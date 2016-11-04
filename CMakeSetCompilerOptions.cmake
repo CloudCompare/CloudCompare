@@ -21,7 +21,7 @@ if( UNIX OR MINGW )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG} ${FPIC_FLAG}")
     set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FPIC_FLAG}")
 elseif( MSVC )
-    add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D__STDC_LIMIT_MACROS)
 
     OPTION( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" OFF )
     if( ${OPTION_MP_BUILD} )

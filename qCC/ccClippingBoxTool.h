@@ -51,10 +51,14 @@ public:
 	//! Returns box
 	const ccClipBox* box() const { return m_clipBox; }
 
-	//! Sets the 'clipped' entity
+	//! Adds an entity
 	/** \return success, if the entitiy is eligible for clipping
 	**/
-	bool setAssociatedEntity(ccHObject* anObject);
+	bool addAssociatedEntity(ccHObject* anObject);
+
+	//! Returns the current number of associated entities
+	unsigned getNumberOfAssociatedEntity() const;
+
 
 protected slots:
 

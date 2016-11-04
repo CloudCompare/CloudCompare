@@ -19,6 +19,10 @@
 
 //Local
 #include "ccPersistentSettings.h"
+#include "ccAskTwoDoubleValuesDlg.h"
+
+//qCC_db
+#include <ccNormalVectors.h>
 
 //Qt
 #include <QMessageBox>
@@ -48,11 +52,13 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
 	onMatrixTextChange(); //provoke the update of the other forms
 	tabWidget->setCurrentIndex(s_currentFormIndex);
 
-	connect(buttonBox,				SIGNAL(accepted()),				this,	SLOT(checkMatrixValidityAndAccept()));
+	connect(buttonBox,				SIGNAL(accepted()),							this,	SLOT(checkMatrixValidityAndAccept()));
+	connect(buttonBox,				SIGNAL(clicked(QAbstractButton*)),			this,	SLOT(buttonClicked(QAbstractButton*)));
 
 	connect(matrixTextEdit,			SIGNAL(textChanged()),			this,	SLOT(onMatrixTextChange()));
 	connect(fromFileToolButton,		SIGNAL(clicked()),				this,	SLOT(loadFromASCIIFile()));
-	connect(fromClipboardToolButton,SIGNAL(clicked()),				this,	SLOT(loadFromClipboard()));
+	connect(fromClipboardToolButton, SIGNAL(clicked()),				this,	SLOT(loadFromClipboard()));
+	connect(fromDipDipDirToolButton, SIGNAL(clicked()),				this,	SLOT(initFromDipAndDipDir()));
 
 	connect(rxAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
 	connect(ryAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
@@ -86,7 +92,7 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	bool valid = false;
 	ccGLMatrix mat = ccGLMatrix::FromString(text,valid);
 	if (valid)
-		updateAll(mat,false,true,true); //no need to update the current form
+		updateAll(mat, false, true, true); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::onRotAngleValueChanged(double)
@@ -105,7 +111,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	ccGLMatrix mat;
 	mat.initFromParameters(alpha,axis,t);
 
-	updateAll(mat,true,false,true); //no need to update the current form
+	updateAll(mat, true, false, true); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::onEulerValueChanged(double)
@@ -123,7 +129,7 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	ccGLMatrix mat;
 	mat.initFromParameters(phi,theta,psi,t);
 
-	updateAll(mat,true,true,false); //no need to update the current form
+	updateAll(mat, true, true, false); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=true*/, bool axisAngleForm/*=true*/, bool eulerForm/*=true*/)
@@ -206,7 +212,9 @@ ccGLMatrixd ccApplyTransformationDlg::getTransformation() const
 	assert(valid);
 	//eventually invert it if necessary
 	if (inverseCheckBox->isChecked())
+	{
 		mat.invert();
+	}
 
 	return mat;
 }
@@ -254,7 +262,7 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 	}
 
 	//save last loading location
-	settings.setValue(ccPS::CurrentPath(),QFileInfo(inputFilename).absolutePath());
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(inputFilename).absolutePath());
 	settings.endGroup();
 }
 
@@ -269,4 +277,36 @@ void ccApplyTransformationDlg::loadFromClipboard()
 		else
 			ccLog::Warning("[ccApplyTransformationDlg] Clipboard is empty");
 	}
+}
+
+void ccApplyTransformationDlg::initFromDipAndDipDir()
+{
+	static double s_dip_deg = 0.0;
+	static double s_dipDir_deg = 0.0;
+	ccAskTwoDoubleValuesDlg atdvDlg("Dip", "Dip dir.", 0, 360, s_dip_deg, s_dipDir_deg, 1, "From dip / dip dir.", this);
+	atdvDlg.doubleSpinBox1->setMaximum(90.0); //Dip can only go up to 90 degrees ;)
+
+	if (!atdvDlg.exec())
+	{
+		return;
+	}
+
+	s_dip_deg = atdvDlg.doubleSpinBox1->value();
+	s_dipDir_deg = atdvDlg.doubleSpinBox2->value();
+
+	//resulting normal vector
+	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(static_cast<PointCoordinateType>(s_dip_deg), static_cast<PointCoordinateType>(s_dipDir_deg));
+	//corresponding rotation (assuming we start from (0, 0, 1))
+
+	ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), Nd);
+	updateAll(trans, true, true, true);
+}
+
+void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
+{
+	if (buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
+	{
+		updateAll(ccGLMatrix(), true, true, true);
+	}
+	inverseCheckBox->setChecked(false);
 }

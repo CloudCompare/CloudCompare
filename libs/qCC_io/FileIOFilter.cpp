@@ -49,6 +49,7 @@
 #include "MascaretFilter.h"
 #include "SinusxFilter.h"
 #include "SalomeHydroFilter.h"
+#include "HeightProfileFilter.h"
 
 //Qt
 #include <QFileInfo>
@@ -113,6 +114,7 @@ void FileIOFilter::InitInternalFilters()
 	Register(Shared(new MascaretFilter()));
 	Register(Shared(new SinusxFilter()));
 	Register(Shared(new SalomeHydroFilter()));
+	Register(Shared(new HeightProfileFilter()));
 }
 
 void FileIOFilter::Register(Shared filter)
@@ -251,8 +253,6 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	unsigned childCount = container->getChildrenNumber();
 	if (childCount != 0)
 	{
-		//all transformation that could have happened before this point are of no interest for the user ;)
-		container->resetGLTransformationHistory_recursive();
 		//we set the main container name as the full filename (with path)
 		container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
 		for (unsigned i = 0; i < childCount; ++i)
@@ -444,6 +444,11 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 		ccLog::Warning(outputString);
 	else
 		ccLog::Error(outputString);
+}
+
+bool FileIOFilter::CheckForSpecialChars(QString filename)
+{
+	return (filename.normalized(QString::NormalizationForm_D) != filename);
 }
 
 bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters, bool useInputCoordinatesShiftIfPossible/*=false*/)

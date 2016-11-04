@@ -27,6 +27,7 @@
 
 //qCC_gl
 #include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //CCLib
 #include <CCConst.h>

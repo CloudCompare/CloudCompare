@@ -77,6 +77,7 @@ void ccGui::ParamStruct::reset()
 	labelMarkerCol		= ccColor::defaultLabelMarkerColor;
 	bbDefaultCol		= ccColor::yellow;
 
+	lightDoubleSided			= true;
 	drawBackgroundGradient		= true;
 	decimateMeshOnMove			= true;
 	minLoDMeshSize				= 2500000;
@@ -122,6 +123,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	labelMarkerCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("labelMarkerColor",		QByteArray::fromRawData((const char*)ccColor::defaultLabelMarkerColor.rgb,	c_ubColorArraySize)).toByteArray().data()));
 	bbDefaultCol		= ccColor::Rgbaub(reinterpret_cast<unsigned char*>(settings.value("bbDefaultColor",			QByteArray::fromRawData((const char*)ccColor::yellow.rgba,					c_ubColorArraySize)).toByteArray().data()));
 
+	lightDoubleSided			=                                      settings.value("lightDoubleSided",        true ).toBool();
 	drawBackgroundGradient		=                                      settings.value("backgroundGradient",      true ).toBool();
 	decimateMeshOnMove			=                                      settings.value("meshDecimation",          true ).toBool();
 	minLoDMeshSize				=                                      settings.value("minLoDMeshSize",       2500000 ).toUInt();
@@ -161,6 +163,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("labelBackgroundColor",     QByteArray::fromRawData((const char*)labelBackgroundCol.rgb,  c_ubColorArraySize));
 	settings.setValue("labelMarkerColor",         QByteArray::fromRawData((const char*)labelMarkerCol.rgb,      c_ubColorArraySize));
 	settings.setValue("bbDefaultColor",           QByteArray::fromRawData((const char*)bbDefaultCol.rgb,        c_ubColorArraySize));
+	settings.setValue("lightDoubleSided",         lightDoubleSided);
 	settings.setValue("backgroundGradient",       drawBackgroundGradient);
 	settings.setValue("meshDecimation",           decimateMeshOnMove);
 	settings.setValue("minLoDMeshSize",	          minLoDMeshSize);

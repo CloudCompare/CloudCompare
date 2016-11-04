@@ -57,6 +57,7 @@ bool ccIndexedTransformation::toAsciiFile(QString filename, int precision/*=12*/
 		return false;
 
 	QTextStream stream(&fp);
+	stream.setRealNumberNotation(QTextStream::FixedNotation);
 	stream.setRealNumberPrecision(precision);
 
 	//save transformation first (so that it can be loaded as a ccGLMatrix!)

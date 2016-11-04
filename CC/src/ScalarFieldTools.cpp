@@ -54,13 +54,15 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 													DgmOctree* theCloudOctree/*=0*/)
 {
 	if (!theCloud)
-        return -1;
+	{
+		return -1;
+	}
 
 	DgmOctree* theOctree = theCloudOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return -2;
@@ -81,7 +83,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 	ScalarField* theGradientNorms = new ScalarField("gradient norms");
 	ScalarField* _theGradientNorms = 0;
 
-	//mode champ scalaire "IN" et "OUT" identique
+	//if the IN and OUT scalar fields are the same
 	if (sameInAndOutScalarField)
 	{
 		if (!theGradientNorms->reserve(theCloud->size())) //not enough memory
@@ -93,10 +95,9 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 		}
 		_theGradientNorms = theGradientNorms;
 	}
-	else
-	//mode champs scalaires "IN" et "OUT" dfferents (par defaut)
+	else //different IN and OUT scalar fields (default)
 	{
-		//on initialise les distances (IN - en ecriture) pour recevoir les normes du gradient
+		//we init the OUT scalar field
 		if (!theCloud->enableScalarField())
 		{
 			if (!theCloudOctree)
@@ -106,7 +107,7 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 		}
 	}
 
-	//structure contenant les parametres additionnels
+	//additionnal parameters
 	void* additionalParameters[3] = {	static_cast<void*>(&euclideanDistances),
 										static_cast<void*>(&radius),
 										static_cast<void*>(_theGradientNorms)
@@ -126,12 +127,14 @@ int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* th
 	}
 
 	if (!theCloudOctree)
-        delete theOctree;
+	{
+		delete theOctree;
+	}
 
 	theGradientNorms->release();
-	theGradientNorms=0;
+	theGradientNorms = 0;
 
-    return result;
+	return result;
 }
 
 bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& cell,
@@ -149,9 +152,9 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 	//spherical neighborhood extraction structure
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
-	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
-	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
+	nNSS.prepare(radius, cell.parentOctree->getCellSize(nNSS.level));
+	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 
 	//we already know the points inside the current cell
 	{
@@ -164,7 +167,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 			return false;
 		}
 		DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-		for (unsigned j=0; j<n; ++j,++it)
+		for (unsigned j = 0; j < n; ++j, ++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(j);
 			it->pointIndex = cell.points->getPointGlobalIndex(j);
@@ -174,43 +177,43 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 
 	const GenericIndexedCloudPersist* cloud = cell.points->getAssociatedCloud();
 
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i = 0; i < n; ++i)
 	{
 		ScalarType gN = NAN_VALUE;
-		ScalarType d1 = cell.points->getPointScalarValue(i);
+		ScalarType v1 = cell.points->getPointScalarValue(i);
 
-        if (ScalarField::ValidValue(d1))
+		if (ScalarField::ValidValue(v1))
 		{
-			 cell.points->getPoint(i,nNSS.queryPoint);
+			cell.points->getPoint(i, nNSS.queryPoint);
 
 			//we extract the point's neighbors
 			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
-			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,true);
+			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, true);
 
-            //if more than one neighbour (the query point itself)
+			//if more than one neighbour (the query point itself)
 			if (k > 1)
 			{
-				CCVector3d sum(0,0,0);
+				CCVector3d sum(0, 0, 0);
 				unsigned counter = 0;
 
 				//j = 1 because the first point is the query point itself --> contribution = 0
-				for (unsigned j=1; j<k; ++j)
+				for (unsigned j = 1; j < k; ++j)
 				{
-					ScalarType d2 = cloud->getPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex);
-					if (ScalarField::ValidValue(d2))
+					ScalarType v2 = cloud->getPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex);
+					if (ScalarField::ValidValue(v2))
 					{
-						CCVector3 u = *nNSS.pointsInNeighbourhood[j].point - nNSS.queryPoint;
-						double norm2 = u.norm2d();
+						CCVector3 deltaPos = *nNSS.pointsInNeighbourhood[j].point - nNSS.queryPoint;
+						double norm2 = deltaPos.norm2d();
 
 						if (norm2 > ZERO_TOLERANCE)
 						{
-                            double dd = d2 - d1;
-							if (!euclideanDistances || dd*dd < 1.01 * norm2)
+							double deltaValue = v2 - v1;
+							if (!euclideanDistances || deltaValue*deltaValue < 1.01 * norm2)
 							{
-								dd /= norm2;
-								sum.x += u.x * dd; //warning: and here 'dd'=dd/norm2 ;)
-								sum.y += u.y * dd;
-								sum.z += u.z * dd;
+								deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
+								sum.x += deltaPos.x * deltaValue; //warning: here 'deltaValue'= deltaValue / squaredNorm(deltaPos) ;)
+								sum.y += deltaPos.y * deltaValue;
+								sum.z += deltaPos.z * deltaValue;
 								++counter;
 							}
 						}
@@ -218,19 +221,27 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 				}
 
 				if (counter != 0)
-					gN = static_cast<ScalarType>(sum.norm()/counter);
+				{
+					gN = static_cast<ScalarType>(sum.norm() / counter);
+				}
 			}
 		}
 
 		if (theGradientNorms)
+		{
 			//if "IN" and "OUT" SFs are the same
-			theGradientNorms->setValue(cell.points->getPointGlobalIndex(i),gN);
+			theGradientNorms->setValue(cell.points->getPointGlobalIndex(i), gN);
+		}
 		else
+		{
 			//if "IN" and "OUT" SFs are different
-			cell.points->setPointScalarValue(i,gN);
+			cell.points->setPointScalarValue(i, gN);
+		}
 
 		if (nProgress && !nProgress->oneStep())
+		{
 			return false;
+		}
 	}
 
 	return true;

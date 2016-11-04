@@ -122,7 +122,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		return CC_FERR_MALFORMED_FILE;
 	}
 	unsigned majorVer = 0, minorVer = 0;
-	sscanf(qPrintable(currentLine),"# Bundle file v%u.%u",&majorVer,&minorVer);
+	sscanf(qPrintable(currentLine), "# Bundle file v%u.%u", &majorVer, &minorVer);
 	if (majorVer != 0 || (minorVer != 3 && minorVer != 4))
 	{
 		ccLog::Error("Only version 0.3 and 0.4 of Bundler files are supported!");
@@ -517,6 +517,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				keypointsCloud->applyGLTransformation_recursive(&orthoOptMatrix);
 				ccLog::Print("[Bundler] Keypoints cloud has been transformed with input matrix!");
+				//this transformation is of no interest for the user
+				keypointsCloud->resetGLTransformationHistory_recursive();
 			}
 
 			if (importKeypoints)
@@ -764,6 +766,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				sensor->applyGLTransformation_recursive(&orthoOptMatrix);
 				//ccLog::Print("[Bundler] Camera cloud has been transformed with input matrix!");
+				//this transformation is of no interest for the user
+				sensor->resetGLTransformationHistory_recursive();
 			}
 		}
 		//the image is a child of the sensor!
@@ -1107,6 +1111,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		if (f.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
 			QTextStream stream(&f);
+			stream.setRealNumberNotation(QTextStream::FixedNotation);
 			stream.setRealNumberPrecision(12);
 			stream << "PixelSize" << ' ' << OR_pixelSize << endl;
 			stream << "Global3DBBox" << ' ' << OR_globalCorners[0] << ' ' << OR_globalCorners[1] << ' ' << OR_globalCorners[2] << ' ' << OR_globalCorners[3] << endl;

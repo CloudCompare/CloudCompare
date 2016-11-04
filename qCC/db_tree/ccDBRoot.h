@@ -46,6 +46,7 @@ struct dbTreeSelectionInfo
 	size_t cloudCount;
 	size_t groupCount;
 	size_t polylineCount;
+	size_t planeCount;
 	size_t meshCount;
 	size_t imageCount;
 	size_t sensorCount;
@@ -55,7 +56,7 @@ struct dbTreeSelectionInfo
 
 	void reset()
 	{
-		memset(this,0,sizeof(dbTreeSelectionInfo));
+		memset(this, 0, sizeof(dbTreeSelectionInfo));
 	}
 };
 

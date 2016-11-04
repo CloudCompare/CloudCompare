@@ -49,6 +49,7 @@ class ccDish;
 class ccExtru;
 class ccTorus;
 class ccShiftedObject;
+class ccPlanarEntityInterface;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 class QCC_DB_LIB_API ccHObjectCaster
@@ -86,6 +87,9 @@ public:
 
 	//! Converts current object to ccFacet (if possible)
 	static ccFacet* ToFacet(ccHObject* obj);
+
+	//! Converts current object to ccPlanarEntityInterface (if possible)
+	static ccPlanarEntityInterface* ToPlanarEntity(ccHObject* obj);
 
 	//! Converts current object to ccGenericPrimitive (if possible)
 	static ccGenericPrimitive* ToPrimitive(ccHObject* obj);

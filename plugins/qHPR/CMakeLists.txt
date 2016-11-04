@@ -8,7 +8,7 @@ if (INSTALL_QHPR_PLUGIN)
     
     include( ../CMakePluginTpl.cmake )
     
-    add_subdirectory (qhull/src2012.1)
+    add_subdirectory (qhull/src2015.2)
     
     target_link_libraries( ${PROJECT_NAME} qhull )
     include_directories( ${QHULL_LIB_INCLUDE_DIR} )

@@ -315,7 +315,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		assert(false);
 		return false;
 	}
-	if (std::find(m_children.begin(),m_children.end(),child) != m_children.end())
+	if (std::find(m_children.begin(), m_children.end(), child) != m_children.end())
 	{
 		ccLog::ErrorDebug("[ccHObject::addChild] Object is already a child!");
 		return false;
@@ -333,7 +333,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		if (insertIndex < 0 || static_cast<size_t>(insertIndex) >= m_children.size())
 			m_children.push_back(child);
 		else
-			m_children.insert(m_children.begin()+insertIndex,child);
+			m_children.insert(m_children.begin() + insertIndex, child);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -342,11 +342,11 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	}
 
 	//we want to be notified whenever this child is deleted!
-	child->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
+	child->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
 
 	if (dependencyFlags != 0)
 	{
-		addDependency(child,dependencyFlags);
+		addDependency(child, dependencyFlags);
 	}
 
 	//the strongest link: between a parent and a child ;)
@@ -887,16 +887,16 @@ bool ccHObject::toFile(QFile& out) const
 	if (!toFile_MeOnly(out))
 		return false;
 
-	//(serializable) child count (dataVersion>=20)
+	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
-	for (unsigned i=0;i<m_children.size();++i)
+	for (unsigned i = 0; i < m_children.size(); ++i)
 		if (m_children[i]->isSerializable())
 			++serializableCount;
-	if (out.write((const char*)&serializableCount,sizeof(uint32_t)) < 0)
+	if (out.write((const char*)&serializableCount, sizeof(uint32_t)) < 0)
 		return WriteError();
 
 	//write serializable children (if any)
-	for (unsigned i=0;i<m_children.size();++i)
+	for (unsigned i = 0; i < m_children.size(); ++i)
 	{
 		if (m_children[i]->isSerializable())
 		{
@@ -905,9 +905,12 @@ bool ccHObject::toFile(QFile& out) const
 		}
 	}
 
-	//write current selection behavior (dataVersion>=23)
-	if (out.write((const char*)&m_selectionBehavior,sizeof(SelectionBehavior)) < 0)
+	//write current selection behavior (dataVersion >= 23)
+	if (out.write((const char*)&m_selectionBehavior, sizeof(SelectionBehavior)) < 0)
 		return WriteError();
+
+	//write transformation history (dataVersion >= 45)
+	m_glTransHistory.toFile(out);
 
 	return true;
 }
@@ -923,7 +926,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		return ReadError();
 
 	//read serializable children (if any)
-	for (uint32_t i=0; i<serializableCount; ++i)
+	for (uint32_t i = 0; i < serializableCount; ++i)
 	{
 		//read children class ID
 		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
@@ -993,6 +996,15 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	else
 	{
 		m_selectionBehavior = SELECTION_AA_BBOX;
+	}
+
+	//read transformation history (dataVersion >= 45)
+	if (dataVersion >= 45)
+	{
+		if (!m_glTransHistory.fromFile(in, dataVersion, flags))
+		{
+			return false;
+		}
 	}
 
 	return true;

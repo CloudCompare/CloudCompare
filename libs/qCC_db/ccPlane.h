@@ -20,12 +20,12 @@
 
 //Local
 #include "ccGenericPrimitive.h"
-
+#include "ccPlanarEntityInterface.h"
 
 //! Plane (primitive)
 /** 3D plane primitive
 **/
-class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
+class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive, public ccPlanarEntityInterface
 {
 public:
 
@@ -62,8 +62,17 @@ public:
 	//! Returns 'Y' width
 	PointCoordinateType getYWidth() const { return m_yWidth; }
 
-	//! Returns normal
-	CCVector3 getNormal() const { return m_transformation.getColumnAsVec3D(2); }
+	//! Returns the center
+	CCVector3 getCenter() const { return m_transformation.getTranslationAsVec3D(); }
+
+	//! Sets 'X' width
+	void setXWidth(PointCoordinateType w, bool autoUpdate = true) { m_xWidth = w; if (autoUpdate) updateRepresentation(); }
+
+	//! Sets 'Y' width
+	void setYWidth(PointCoordinateType h, bool autoUpdate = true) { m_yWidth = h; if (autoUpdate) updateRepresentation(); }
+
+	//inherited from ccPlanarEntityInterface
+	CCVector3 getNormal() const override { return m_transformation.getColumnAsVec3D(2); }
 
 	//! Sets an image as texture
 	bool setAsTexture(QImage image, QString imageFilename = QString());
@@ -88,6 +97,9 @@ public:
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
 
 protected:
+
+	//inherited from ccDrawable
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const override;

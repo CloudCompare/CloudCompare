@@ -131,6 +131,7 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, QString filename, Sa
 		return CC_FERR_WRITING;
 
 	QTextStream outFile(&file);
+	outFile.setRealNumberNotation(QTextStream::FixedNotation);
 	outFile.setRealNumberPrecision(12);
 
 	//ask some parameters

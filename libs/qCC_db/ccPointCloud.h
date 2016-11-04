@@ -34,7 +34,6 @@
 //Qt
 #include <QGLBuffer>
 
-class ccPointCloud;
 class ccScalarField;
 class ccPolyline;
 class QGLBuffer;

@@ -580,7 +580,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 												PointCoordinateType maxSquareEdgeLength/*=0*/)
 {
 	//first compute the Convex hull
-	if (!extractConvexHull2D(points,hullPoints))
+	if (!extractConvexHull2D(points, hullPoints))
 		return false;
 
 	//do we really need to compute the concave hull?
@@ -592,9 +592,9 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	std::vector<HullPointFlags> pointFlags;
 	try
 	{
-		pointFlags.resize(pointCount,POINT_NOT_USED);
+		pointFlags.resize(pointCount, POINT_NOT_USED);
 	}
-	catch(...)
+	catch (...)
 	{
 		//not enough memory
 		return false;
@@ -604,15 +604,15 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	PointCoordinateType minSquareEdgeLength = 0;
 	{
 		CCVector2 minP,maxP;
-		for (size_t i=0; i<pointCount; ++i)
+		for (size_t i = 0; i < pointCount; ++i)
 		{
 			const IndexedCCVector2& P = points[i];
 			if (i)
 			{
-				minP.x = std::min(P.x,minP.x);
-				minP.y = std::min(P.y,minP.y);
-				maxP.x = std::max(P.x,maxP.x);
-				maxP.y = std::max(P.y,maxP.y);
+				minP.x = std::min(P.x, minP.x);
+				minP.y = std::min(P.y, minP.y);
+				maxP.x = std::max(P.x, maxP.x);
+				maxP.y = std::max(P.y, maxP.y);
 			}
 			else
 			{
@@ -620,7 +620,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 			}
 		}
 		minSquareEdgeLength = (maxP-minP).norm2() / static_cast<PointCoordinateType>(1.0e7); //10^-7 of the max bounding rectangle side
-		minSquareEdgeLength = std::min(minSquareEdgeLength, maxSquareEdgeLength/10);
+		minSquareEdgeLength = std::min(minSquareEdgeLength, maxSquareEdgeLength / 10);
 
 		//we remove very small edges
 		for (std::list<IndexedCCVector2*>::iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
@@ -685,7 +685,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 
 						if (minSquareDist >= 0)
 						{
-							Edge e(itA,nearestPointIndex,minSquareDist);
+							Edge e(itA, nearestPointIndex, minSquareDist);
 							edges.insert(e);
 						}
 					}

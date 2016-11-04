@@ -84,6 +84,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return CC_FERR_WRITING;
 
 	QTextStream stream(&fp);
+	stream.setRealNumberNotation(QTextStream::FixedNotation);
 	stream.setRealNumberPrecision(12); //TODO: ask the user?
 
 	//header: "OFF"

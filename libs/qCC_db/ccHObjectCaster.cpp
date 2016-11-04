@@ -140,6 +140,22 @@ ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)
 	return obj && obj->isA(CC_TYPES::FACET) ? static_cast<ccFacet*>(obj) : 0;
 }
 
+ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)
+{
+	if (obj)
+	{
+		if (obj->isA(CC_TYPES::FACET))
+		{
+			return static_cast<ccFacet*>(obj);
+		}
+		else if (obj->isA(CC_TYPES::PLANE))
+		{
+			return static_cast<ccPlane*>(obj);
+		}
+	}
+	return 0;
+}
+
 ccGenericPrimitive* ccHObjectCaster::ToPrimitive(ccHObject* obj)
 {
 	return obj && obj->isKindOf(CC_TYPES::PRIMITIVE) ? static_cast<ccGenericPrimitive*>(obj) : 0;

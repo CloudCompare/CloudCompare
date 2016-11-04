@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qM3C2Plugin">
+    <file>Logo_cnrs_eub_eec.png</file>
+    <file>iconM3C2.png</file>
+    <file>iconSwap.png</file>
+    <file>iconLoad.png</file>
+    <file>iconSave.png</file>
+  </qresource>
+</RCC>

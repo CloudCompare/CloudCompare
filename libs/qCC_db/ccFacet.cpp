@@ -17,9 +17,6 @@
 
 #include "ccFacet.h"
 
-//qCC_db
-#include "ccCylinder.h"
-
 //CCLib
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
@@ -42,7 +39,6 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 	, m_rms(0.0)
 	, m_surface(0.0)
 	, m_maxEdgeLength(maxEdgeLength)
-	, m_showNormalVector(false)
 {
 	m_planeEquation[0] = 0;
 	m_planeEquation[1] = 0;
@@ -154,8 +150,8 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	}
 
 	//create facet structure
-	ccFacet* facet = new ccFacet(maxEdgeLength,"facet");
-	if (!facet->createInternalRepresentation(cloud,planeEquation))
+	ccFacet* facet = new ccFacet(maxEdgeLength, "facet");
+	if (!facet->createInternalRepresentation(cloud, planeEquation))
 	{
 		delete facet;
 		return 0;
@@ -164,7 +160,7 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
 	if (pc)
 	{
-		facet->setName(pc->getName()+QString(".facet"));
+		facet->setName(pc->getName() + QString(".facet"));
 		if (transferOwnership)
 		{
 			pc->setName(DEFAULT_ORIGIN_POINTS_NAME);
@@ -202,12 +198,12 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			return false;
 		}
 	}
-	memcpy(m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
+	memcpy(m_planeEquation, planeEquation, sizeof(PointCoordinateType) * 4);
 
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
-	CCVector3 X,Y; //local base
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,0,&m_center,&X,&Y))
+	CCVector3 X, Y; //local base
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, 0, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
@@ -218,8 +214,10 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	
 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
 	{
-		for (unsigned i=0; i<ptsCount; ++i)
+		for (unsigned i = 0; i < ptsCount; ++i)
+		{
 			points2D[i].index = i;
+		}
 	}
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
@@ -227,7 +225,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
 		if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
 																hullPoints,
-																m_maxEdgeLength*m_maxEdgeLength) )
+																m_maxEdgeLength*m_maxEdgeLength))
 		{
 			ccLog::Error("[ccFacet::createInternalRepresentation] Failed to compute the convex hull of the input points!");
 		}
@@ -247,7 +245,9 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			
 			//projection on the LS plane (in 3D)
 			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			{
 				m_contourVertices->addPoint(m_center + X*(*it)->x + Y*(*it)->y);
+			}
 			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
 			m_contourVertices->setLocked(true);
 			m_contourVertices->setEnabled(false);
@@ -259,7 +259,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			m_contourPolyline = new ccPolyline(m_contourVertices);
 			if (m_contourPolyline->reserve(hullPtsCount))
 			{
-				m_contourPolyline->addPointIndex(0,hullPtsCount);
+				m_contourPolyline->addPointIndex(0, hullPtsCount);
 				m_contourPolyline->setClosed(true);
 				m_contourPolyline->setVisible(true);
 				m_contourPolyline->setLocked(true);
@@ -282,9 +282,11 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		{
 			hullPointsVector.reserve(hullPoints.size());
 			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			{
 				hullPointsVector.push_back(**it);
+			}
 		}
-		catch(...)
+		catch (...)
 		{
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour mesh!");
 		}
@@ -375,48 +377,14 @@ void ccFacet::setColor(const ccColor::Rgb& rgb)
 	showColors(true);
 }
 
-//unit point marker
-static QSharedPointer<ccCylinder> c_unitNormalSymbol(0);
-static QSharedPointer<ccCone> c_unitNormalHeadSymbol(0);
-
 void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!MACRO_Draw3D(context))
 		return;
 
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
-		return;
-
-	if (m_showNormalVector && m_contourPolyline)
+	//show normal vector
+	if (normalVectorIsShown() && m_contourPolyline)
 	{
-		if (!c_unitNormalSymbol)
-		{
-			c_unitNormalSymbol = QSharedPointer<ccCylinder>(new ccCylinder(0.02f, 0.9f, 0, "UnitNormal", 12));
-			c_unitNormalSymbol->showColors(true);
-			c_unitNormalSymbol->setVisible(true);
-			c_unitNormalSymbol->setEnabled(true);
-			c_unitNormalSymbol->setTempColor(ccColor::green);
-		}
-		if (!c_unitNormalHeadSymbol)
-		{
-			c_unitNormalHeadSymbol = QSharedPointer<ccCone>(new ccCone(0.05f, 0.0f, 0.1f, 0, 0, 0, "UnitNormalHead", 12));
-			c_unitNormalHeadSymbol->showColors(true);
-			c_unitNormalHeadSymbol->setVisible(true);
-			c_unitNormalHeadSymbol->setEnabled(true);
-			c_unitNormalHeadSymbol->setTempColor(ccColor::green);
-		}
-
-		//build-up point maker own 'context'
-		CC_DRAW_CONTEXT markerContext = context;
-		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		markerContext.display = 0;
-
-		c_unitNormalSymbol->setTempColor(m_contourPolyline->getColor());
-
 		PointCoordinateType scale = 0;
 		if (m_surface > 0) //the surface might be 0 if Delaunay 2.5D triangulation is not supported
 		{
@@ -426,18 +394,7 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			scale = sqrt(m_contourPolyline->computeLength());
 		}
-
-		glFunc->glMatrixMode(GL_MODELVIEW);
-		glFunc->glPushMatrix();
-		ccGL::Translate(glFunc, m_center.x, m_center.y, m_center.z);
-		ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, PC_ONE), getNormal());
-		glFunc->glMultMatrixf(mat.data());
-		ccGL::Scale(glFunc, scale, scale, scale);
-		glFunc->glTranslatef(0, 0, 0.45f);
-		c_unitNormalSymbol->draw(markerContext);
-		glFunc->glTranslatef(0, 0, 0.45f);
-		c_unitNormalHeadSymbol->draw(markerContext);
-		glFunc->glPopMatrix();
+		glDrawNormal(context, m_center, scale, &m_contourPolyline->getColor());
 	}
 }
 

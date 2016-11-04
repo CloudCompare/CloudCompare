@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>M3C2Dialog</class>
+ <widget class="QDialog" name="M3C2Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>567</width>
+    <height>372</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>M3C2 distance</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>iconM3C2.png</normaloff>iconM3C2.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_7">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="showCloud1CheckBox">
+         <property name="text">
+          <string>Cloud #1</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="cloud1LineEdit"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="showCloud2CheckBox">
+         <property name="text">
+          <string>Cloud #2</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="cloud2LineEdit"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QToolButton" name="swapCloudsToolButton">
+       <property name="icon">
+        <iconset resource="qM3C2.qrc">
+         <normaloff>:/CC/plugin/qM3C2Plugin/iconSwap.png</normaloff>:/CC/plugin/qM3C2Plugin/iconSwap.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="mainParams">
+      <attribute name="title">
+       <string>Main parameters</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QGroupBox" name="mainGroupBox">
+         <property name="title">
+          <string>Scales</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Normals</string>
+            </property>
+            <property name="buddy">
+             <cstring>mainGroupBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QCheckBox" name="useCloud1NormalsCheckBox">
+            <property name="text">
+             <string>use cloud #1 normals</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Projection</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="cylDiameterDoubleSpinBox">
+            <property name="prefix">
+             <string>diameter = </string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>0.000001000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="normalScaleDoubleSpinBox">
+            <property name="prefix">
+             <string>diameter = </string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>0.000001000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QDoubleSpinBox" name="cylHalfHeightDoubleSpinBox">
+            <property name="prefix">
+             <string>max depth = </string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>0.000001000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="corePointsGroupBox">
+         <property name="title">
+          <string>Core points</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="cpUseCloud1RadioButton">
+            <property name="text">
+             <string>use cloud #1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="cpUseOtherCloudRadioButton">
+            <property name="text">
+             <string>use other cloud</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cpOtherCloudComboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Alternative core points cloud</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="cpSubsampleRadioButton">
+            <property name="text">
+             <string>subsample cloud #1</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="cpSubsamplingDoubleSpinBox">
+            <property name="toolTip">
+             <string>Min. distance between points</string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="rmsFrame">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="rmsCheckBox">
+            <property name="text">
+             <string>Registration error</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="rmsDoubleSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Registration error (RMS - to be input by the user)</string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="guessParamsPushButton">
+            <property name="toolTip">
+             <string>Tries to guess some parameters automatically</string>
+            </property>
+            <property name="text">
+             <string>Guess params</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="normals">
+      <attribute name="title">
+       <string>Normals</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QFrame" name="normParamsFrame">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="normCalcModeGroupBox">
+            <property name="title">
+             <string>Calculation mode</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QRadioButton" name="normDefaultRadioButton">
+                 <property name="toolTip">
+                  <string>Default fixed scale calculation</string>
+                 </property>
+                 <property name="text">
+                  <string>Default</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="normMultiScaleRadioButton">
+                 <property name="toolTip">
+                  <string>Automatically use the scale at which the cloud is the more 'flat'</string>
+                 </property>
+                 <property name="text">
+                  <string>Multi-scale</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="normVertRadioButton">
+                 <property name="toolTip">
+                  <string>Make the resulting normals purely Vertical</string>
+                 </property>
+                 <property name="text">
+                  <string>Vertical</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="normHorizRadioButton">
+                 <property name="toolTip">
+                  <string>Make the resulting normals purely Horizontal</string>
+                 </property>
+                 <property name="text">
+                  <string>Horizontal</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QFrame" name="normMultiScaleFrame">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <widget class="QDoubleSpinBox" name="minScaleDoubleSpinBox">
+                  <property name="toolTip">
+                   <string>Mininum scale</string>
+                  </property>
+                  <property name="prefix">
+                   <string>Min = </string>
+                  </property>
+                  <property name="decimals">
+                   <number>6</number>
+                  </property>
+                  <property name="minimum">
+                   <double>0.000001000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>1000000000.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="stepScaleDoubleSpinBox">
+                  <property name="toolTip">
+                   <string>Step</string>
+                  </property>
+                  <property name="prefix">
+                   <string>Step = </string>
+                  </property>
+                  <property name="decimals">
+                   <number>6</number>
+                  </property>
+                  <property name="minimum">
+                   <double>0.000001000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>1000000000.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="maxScaleDoubleSpinBox">
+                  <property name="toolTip">
+                   <string>Max scale</string>
+                  </property>
+                  <property name="prefix">
+                   <string>Max = </string>
+                  </property>
+                  <property name="decimals">
+                   <number>6</number>
+                  </property>
+                  <property name="minimum">
+                   <double>0.000001000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>1000000000.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="normUseCorePointsCheckBox">
+               <property name="toolTip">
+                <string>Use core points for normal calculation (instead of cloud #1)</string>
+               </property>
+               <property name="text">
+                <string>Use core points for normal calculation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="normOriGroupBox">
+            <property name="title">
+             <string>Orientation</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="0">
+              <widget class="QRadioButton" name="normOriPreferredRadioButton">
+               <property name="text">
+                <string>Preferred orientation</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="normOriPreferredComboBox">
+               <property name="currentIndex">
+                <number>4</number>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QComboBox::AdjustToContents</enum>
+               </property>
+               <item>
+                <property name="text">
+                 <string>+X</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>-X</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>+Y</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>-Y</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>+Z</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>-Z</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>+Barycenter</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>- Barycenter</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>+ (0,0,0)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>- (0,0,0)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QRadioButton" name="normOriUseCloudRadioButton">
+               <property name="toolTip">
+                <string>Sensor(s) position(s) as a cloud (one point per position)</string>
+               </property>
+               <property name="text">
+                <string>Use sensor position(s)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="normOriCloudComboBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Alternative core points cloud</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="advanced">
+      <attribute name="title">
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QCheckBox" name="useSinglePass4DepthCheckBox">
+         <property name="toolTip">
+          <string>Slower but it guarantees that all the cylinder will be explored</string>
+         </property>
+         <property name="text">
+          <string>Do not use multiple pass for depth</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="positiveSearchOnlyCheckBox">
+         <property name="toolTip">
+          <string>Search the points only in the 'positive' side of the cylinder (relatively to the point normal)</string>
+         </property>
+         <property name="text">
+          <string>Only search points in the positive half-space (relatively to the normal)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="useMedianCheckBox">
+         <property name="text">
+          <string>Use median and interquatile range (instead of mean and std. dev.)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QCheckBox" name="useMinPoints4StatCheckBox">
+           <property name="text">
+            <string>Specify minimum number of points for statistics computation</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="minPoints4StatSpinBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>1000000000</number>
+           </property>
+           <property name="value">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Max thread count</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="maxThreadCountSpinBox">
+            <property name="suffix">
+             <string> / 8</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>177</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="output">
+      <attribute name="title">
+       <string>Output</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Project core points on</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="projDestComboBox">
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <property name="maxVisibleItems">
+            <number>3</number>
+           </property>
+           <property name="maxCount">
+            <number>3</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>Cloud #1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cloud #2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Keep original positions</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="useOriginalCloudCheckBox">
+           <property name="text">
+            <string>use original cloud</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="exportStdDevInfoCheckBox">
+         <property name="toolTip">
+          <string>Adds two scalar fields (std_cloud#1 and std_cloud#2)</string>
+         </property>
+         <property name="text">
+          <string>Export standard deviation information</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="exportDensityAtProjScaleCheckBox">
+         <property name="toolTip">
+          <string>Adds one scalar field (point count per core point)</string>
+         </property>
+         <property name="text">
+          <string>Export point density at projection scale</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>177</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QToolButton" name="loadParamsToolButton">
+       <property name="toolTip">
+        <string>Load parameters from file</string>
+       </property>
+       <property name="icon">
+        <iconset resource="qM3C2.qrc">
+         <normaloff>:/CC/plugin/qM3C2Plugin/iconLoad.png</normaloff>:/CC/plugin/qM3C2Plugin/iconLoad.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="saveParamsToolButton">
+       <property name="toolTip">
+        <string>Save parameters to file</string>
+       </property>
+       <property name="icon">
+        <iconset resource="qM3C2.qrc">
+         <normaloff>:/CC/plugin/qM3C2Plugin/iconSave.png</normaloff>:/CC/plugin/qM3C2Plugin/iconSave.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>showCloud1CheckBox</tabstop>
+  <tabstop>cloud1LineEdit</tabstop>
+  <tabstop>showCloud2CheckBox</tabstop>
+  <tabstop>cloud2LineEdit</tabstop>
+  <tabstop>swapCloudsToolButton</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>normalScaleDoubleSpinBox</tabstop>
+  <tabstop>useCloud1NormalsCheckBox</tabstop>
+  <tabstop>cylDiameterDoubleSpinBox</tabstop>
+  <tabstop>cylHalfHeightDoubleSpinBox</tabstop>
+  <tabstop>cpUseCloud1RadioButton</tabstop>
+  <tabstop>cpSubsampleRadioButton</tabstop>
+  <tabstop>cpSubsamplingDoubleSpinBox</tabstop>
+  <tabstop>cpUseOtherCloudRadioButton</tabstop>
+  <tabstop>cpOtherCloudComboBox</tabstop>
+  <tabstop>rmsCheckBox</tabstop>
+  <tabstop>rmsDoubleSpinBox</tabstop>
+  <tabstop>normDefaultRadioButton</tabstop>
+  <tabstop>normMultiScaleRadioButton</tabstop>
+  <tabstop>normVertRadioButton</tabstop>
+  <tabstop>normHorizRadioButton</tabstop>
+  <tabstop>minScaleDoubleSpinBox</tabstop>
+  <tabstop>stepScaleDoubleSpinBox</tabstop>
+  <tabstop>maxScaleDoubleSpinBox</tabstop>
+  <tabstop>normUseCorePointsCheckBox</tabstop>
+  <tabstop>normOriPreferredRadioButton</tabstop>
+  <tabstop>normOriPreferredComboBox</tabstop>
+  <tabstop>normOriUseCloudRadioButton</tabstop>
+  <tabstop>normOriCloudComboBox</tabstop>
+  <tabstop>useSinglePass4DepthCheckBox</tabstop>
+  <tabstop>useMedianCheckBox</tabstop>
+  <tabstop>useMinPoints4StatCheckBox</tabstop>
+  <tabstop>minPoints4StatSpinBox</tabstop>
+  <tabstop>projDestComboBox</tabstop>
+  <tabstop>exportStdDevInfoCheckBox</tabstop>
+  <tabstop>exportDensityAtProjScaleCheckBox</tabstop>
+  <tabstop>loadParamsToolButton</tabstop>
+  <tabstop>saveParamsToolButton</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="qM3C2.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>M3C2Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>358</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>M3C2Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>384</x>
+     <y>358</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cpUseOtherCloudRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cpOtherCloudComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>269</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>272</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cpSubsampleRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cpSubsamplingDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>147</x>
+     <y>243</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>246</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normMultiScaleRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>normMultiScaleFrame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>136</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>326</x>
+     <y>181</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normOriUseCloudRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>normOriCloudComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>125</x>
+     <y>288</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>347</x>
+     <y>289</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normOriPreferredRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>normOriPreferredComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>261</x>
+     <y>259</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useCloud1NormalsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>normalScaleDoubleSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>136</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>247</x>
+     <y>138</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useCloud1NormalsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>normParamsFrame</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>136</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>284</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useMinPoints4StatCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>minPoints4StatSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>259</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>162</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rmsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rmsDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>306</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

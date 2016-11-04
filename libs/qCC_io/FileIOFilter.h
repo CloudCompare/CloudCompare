@@ -243,6 +243,9 @@ public: //static methods
 									const QString& action,
 									const QString& filename);
 
+	//! Returns whether special characters are present in the input string
+	QCC_IO_LIB_API static bool CheckForSpecialChars(QString filename);
+
 public: //global filters registration mechanism
 
 	//! Init internal filters (should be called once)

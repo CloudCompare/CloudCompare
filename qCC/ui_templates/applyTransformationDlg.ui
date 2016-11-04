@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
+    <width>516</width>
     <height>370</height>
    </rect>
   </property>
@@ -63,6 +63,17 @@
            </property>
            <property name="text">
             <string>clipboard</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="fromDipDipDirToolButton">
+           <property name="toolTip">
+            <string>Inits the matrix from dip/dip direction values
+--&gt; assuming an initial position of (0,0)</string>
+           </property>
+           <property name="text">
+            <string>dip / dip direction</string>
            </property>
           </widget>
          </item>
@@ -523,7 +534,7 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::Reset</set>
      </property>
     </widget>
    </item>

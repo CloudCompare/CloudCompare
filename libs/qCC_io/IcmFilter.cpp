@@ -46,10 +46,17 @@ bool IcmFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
+	if (CheckForSpecialChars(filename))
+	{
+		ccLog::Warning(QString("[ICM] Input filename contains special characters. It might be rejected by the I/O filter..."));
+	}
+
 	//ouverture du fichier
 	FILE *fp = fopen(qPrintable(filename), "rt");
 	if (!fp)
+	{
 		return CC_FERR_READING;
+	}
 
 	//buffer
 	char line[MAX_ASCII_FILE_LINE_LENGTH];
@@ -146,6 +153,12 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 
 	//ouverture du fichier
 	QString completeImageDescFilename = QString("%0/%1").arg(path).arg(imageDescFilename);
+
+	if (CheckForSpecialChars(completeImageDescFilename))
+	{
+		ccLog::Warning(QString("[FBX] File '%1' contains special characters. It might be rejected by the I/O filter...").arg(completeImageDescFilename));
+	}
+
 	FILE* fp = fopen(qPrintable(completeImageDescFilename), "rt");
 	if (fp == NULL)
 	{

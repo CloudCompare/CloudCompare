@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>420</height>
+    <width>493</width>
+    <height>461</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,15 +27,15 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>432</width>
-        <height>263</height>
+        <width>471</width>
+        <height>278</height>
        </rect>
       </property>
       <attribute name="label">
@@ -125,6 +125,19 @@
                 </widget>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="doubleSidedCheckBox">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether to use a double-sided light model or not&lt;/p&gt;&lt;p&gt;(if disabled, triangles will appear black when looked from behind)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>double-sided</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="verticalSpacer_5">
@@ -361,8 +374,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>432</width>
-        <height>263</height>
+        <width>433</width>
+        <height>107</height>
        </rect>
       </property>
       <attribute name="label">
@@ -446,8 +459,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>432</width>
-        <height>263</height>
+        <width>336</width>
+        <height>111</height>
        </rect>
       </property>
       <attribute name="label">
@@ -589,8 +602,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>432</width>
-        <height>263</height>
+        <width>431</width>
+        <height>262</height>
        </rect>
       </property>
       <attribute name="label">

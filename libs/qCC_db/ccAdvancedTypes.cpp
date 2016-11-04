@@ -24,8 +24,8 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 		//in previous versions (< 41) the normals were compressed on 15 bytes (2*6+3) as unsigned short
 		static const unsigned OLD_QUANTIZE_LEVEL = 6;
 
-		ccChunkedArray<1,unsigned short>* oldNormals = new ccChunkedArray<1,unsigned short>();
-		if (!ccSerializationHelper::GenericArrayFromFile(*oldNormals,in,dataVersion))
+		ccChunkedArray<1, unsigned short>* oldNormals = new ccChunkedArray<1, unsigned short>();
+		if (!ccSerializationHelper::GenericArrayFromFile(*oldNormals, in, dataVersion))
 		{
 			oldNormals->release();
 			return false;
@@ -35,7 +35,7 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 		if (resize(oldNormals->currentSize()))
 		{
 			//convert old normals to new ones
-			for (unsigned i=0; i<oldNormals->currentSize(); ++i)
+			for (unsigned i = 0; i < oldNormals->currentSize(); ++i)
 			{
 				CCVector3 N;
 				//decompress (with the old parameters)
@@ -57,6 +57,6 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 	}
 	else
 	{
-		return ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion);
+		return ccSerializationHelper::GenericArrayFromFile(*this, in, dataVersion);
 	}
 }

@@ -27,18 +27,39 @@
 class QMainWindow;
 class ccGLWindow;
 class ccColorScalesManager;
+class ccOverlayDialog;
 
 //! Main application interface (for plugins)
 class ccMainAppInterface
 {
 public:
-	virtual ~ccMainAppInterface() {}
-
+	
 	//! Returns main window
 	virtual QMainWindow* getMainWindow() = 0;
 
 	//! Returns active GL sub-window (if any)
 	virtual ccGLWindow* getActiveGLWindow() = 0;
+
+	//! Registers a MDI area 'overlay' dialog
+	/** Overlay dialogs are displayed in the central MDI area, above the 3D views.
+	The position (pos) is defined relatively to the MDI area (as one of its 4 corners).
+	And it is automatically updated when the main window is moved or resized.
+	Registered dialogs are automatically released when CloudCompare stops.
+
+	Notes:
+	- it may be necessary to call 'updateOverlayDialogsPlacement' after calling this method
+	- it's a good idea to freeez the UI when the tool starts to avoid other overlay dialogs
+	to appear (don't forget to unfreeze the UI afterwards)
+	**/
+	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) = 0;
+
+	//! Unregisters a MDI area 'overlay' dialog
+	/** \warning Original overlay dialog object will be deleted (see QObject::deleteLater)
+	**/
+	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) = 0;
+
+	//! Forces the update of all registered MDI 'overlay' dialogs
+	virtual void updateOverlayDialogsPlacement() = 0;
 
 	//! Returns the unique ID generator
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() = 0;

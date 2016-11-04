@@ -32,6 +32,7 @@ override_dh_auto_configure:
 		-DINSTALL_QFACETS_PLUGIN=ON \
 		-DOPTION_USE_SHAPE_LIB=ON \
 		-DINSTALL_QPCV_PLUGIN=ON \
+                -DINSTALL_QM3C2_PLUGIN=ON \
 		-DLIBLAS_INCLUDE_DIR="/usr/include" \
 		-DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so" 
 

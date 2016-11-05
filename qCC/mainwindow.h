@@ -63,6 +63,7 @@ class ccDrawableObject;
 class ccOverlayDialog;
 class QMdiSubWindow;
 class Mouse3DInput;
+class GamepadInput;
 
 //! Main window
 class MainWindow : public QMainWindow, public ccMainAppInterface, public Ui::MainWindow
@@ -462,7 +463,15 @@ protected slots:
 	void on3DMouseReleased();
 
 	//! Setups 3D mouse (if any)
-	void setup3DMouse(bool);
+	void setup3DMouse(bool state) { enable3DMouse(state, false); }
+
+	//Gamepad
+	void onGamepadInput();
+	void increasePointSize();
+	void decreasePointSize();
+
+	//! Setups gamepad (if any)
+	void setupGamepad(bool state) { enableGamepad(state, false); }
 
 	//! Removes all entities currently loaded in the DB tree
 	void closeAll();
@@ -536,14 +545,23 @@ protected:
 	//! Expands DB tree for selected items
 	void expandDBTreeWithSelection(ccHObject::Container& selection);
 
-	//! Releases any connected 3D mouse (if any)
-	void release3DMouse();
-
 	//! Trys to enable (or disable) a 3D mouse device
 	/** \param state whether to enable or disable the device
 		\param silent whether to issue an error message in case of failure
 	**/
 	void enable3DMouse(bool state, bool silent);
+
+	//! Releases any connected 3D mouse
+	void release3DMouse();
+
+	//! Trys to enable (or disable) a gamepad device
+	/** \param state whether to enable or disable the device
+		\param silent whether to issue an error message in case of failure
+	**/
+	void enableGamepad(bool state, bool silent);
+
+	//! Releases any connected gamepad
+	void releaseGamepad();
 
 	//! Updates the view mode pop-menu based for a given window (or an absence of!)
 	virtual void updateViewModePopUpMenu(ccGLWindow* win);
@@ -565,6 +583,9 @@ protected:
 
 	//! 3D mouse handler
 	Mouse3DInput* m_3dMouseInput;
+
+	//! Gamepad handler
+	GamepadInput* m_gamepadInput;
 
 	//! View mode pop-up menu button
 	QToolButton* m_viewModePopupButton;

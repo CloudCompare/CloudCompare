@@ -121,6 +121,11 @@
 #include "devices/3dConnexion/Mouse3DInput.h"
 #endif
 
+//Gamepads
+#ifdef CC_GAMEPADS_SUPPORT
+#include "devices/gamepad/GamepadInput.h"
+#endif
+
 //Qt UI files
 #include <ui_distanceMapDlg.h>
 #include <ui_globalShiftSettingsDlg.h>
@@ -137,11 +142,11 @@ static const QString s_allFilesFilter("All (*.*)");
 //default file filter separator
 static const QString s_fileFilterSeparator(";;");
 
-
 MainWindow::MainWindow()
 	: m_ccRoot(0)
 	, m_uiFrozen(false)
 	, m_3dMouseInput(0)
+	, m_gamepadInput(0)
 	, m_viewModePopupButton(0)
 	, m_pivotVisibilityPopupButton(0)
 	, m_cpeDlg(0)
@@ -242,6 +247,13 @@ MainWindow::MainWindow()
 	actionEnable3DMouse->setEnabled(false);
 #endif
 
+#ifdef CC_GAMEPADS_SUPPORT
+	enableGamepad(true, true);
+	//QMetaObject::invokeMethod(this, "setupGamepad", Qt::QueuedConnection, Q_ARG(bool, true));
+#else
+	actionEnableGamepad->setEnabled(false);
+#endif
+
 	new3DView();
 
 	freezeUI(false);
@@ -254,6 +266,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+	releaseGamepad();
 	release3DMouse();
 	cancelPreviousPickingOperation(false); //just in case
 
@@ -494,23 +507,103 @@ void MainWindow::doEnableGLFilter()
 	}
 }
 
-void MainWindow::release3DMouse()
+void MainWindow::enableGamepad(bool state, bool silent)
 {
-#ifdef CC_3DXWARE_SUPPORT
-	if (m_3dMouseInput)
+#ifdef CC_GAMEPADS_SUPPORT
+	if (state)
 	{
-		m_3dMouseInput->disconnectDriver(); //disconnect from the driver
-		m_3dMouseInput->disconnect(this); //disconnect from Qt ;)
-		
-		delete m_3dMouseInput;
-		m_3dMouseInput = 0;
+		if (!m_gamepadInput)
+		{
+			m_gamepadInput = new GamepadInput(this);
+			QObject::connect(m_gamepadInput, SIGNAL(updated()), this, SLOT(onGamepadInput()), Qt::DirectConnection);
+			QObject::connect(m_gamepadInput, SIGNAL(buttonL1Changed(bool)), this, SLOT(decreasePointSize()));
+			QObject::connect(m_gamepadInput, SIGNAL(buttonR1Changed(bool)), this, SLOT(increasePointSize()));
+			QObject::connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {if (state) setGlobalZoom(); });
+			QObject::connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state) {if (state) toggleActiveWindowViewerBasedPerspective(); });
+			QObject::connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state) {if (state) toggleActiveWindowCenteredPerspective(); });
+			QCoreApplication::processEvents();
+		}
+
+		if (m_gamepadInput->isConnected())
+		{
+			m_gamepadInput->start();
+		}
+		else
+		{
+			m_gamepadInput->stop(); //just in case
+
+			if (!silent)
+			{
+				ccLog::Error("[Gamepad] No device detected");
+			}
+			else
+			{
+				ccLog::Warning("[Gamepad] No device detected");
+			}
+			state = false;
+		}
 	}
+	else
+	{
+		ccLog::Warning("[Gamepad] Device has been disabled");
+	}
+#else
+	state = false;
+#endif
+
+	actionEnableGamepad->blockSignals(true);
+	actionEnableGamepad->setChecked(state);
+	actionEnableGamepad->blockSignals(false);
+}
+
+void MainWindow::onGamepadInput()
+{
+#ifdef CC_GAMEPADS_SUPPORT
+
+	//active window?
+	ccGLWindow* win = getActiveGLWindow();
+	if (win && m_gamepadInput)
+	{
+		m_gamepadInput->update(win);
+	}
+
 #endif
 }
 
-void MainWindow::setup3DMouse(bool state)
+void MainWindow::increasePointSize()
 {
-	enable3DMouse(state,false);
+	//active window?
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->setPointSize(win->getViewportParameters().defaultPointSize + 1);
+		win->redraw();
+	}
+}
+
+void MainWindow::decreasePointSize()
+{
+	//active window?
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->setPointSize(win->getViewportParameters().defaultPointSize - 1);
+		win->redraw();
+	}
+}
+
+void MainWindow::releaseGamepad()
+{
+#ifdef CC_GAMEPADS_SUPPORT
+	if (m_gamepadInput)
+	{
+		m_gamepadInput->stop();
+		m_gamepadInput->disconnect(this); //disconnect from Qt ;)
+
+		delete m_gamepadInput;
+		m_gamepadInput = 0;
+	}
+#endif
 }
 
 void MainWindow::enable3DMouse(bool state, bool silent)
@@ -554,6 +647,20 @@ void MainWindow::enable3DMouse(bool state, bool silent)
 	actionEnable3DMouse->blockSignals(true);
 	actionEnable3DMouse->setChecked(state);
 	actionEnable3DMouse->blockSignals(false);
+}
+
+void MainWindow::release3DMouse()
+{
+#ifdef CC_3DXWARE_SUPPORT
+	if (m_3dMouseInput)
+	{
+		m_3dMouseInput->disconnectDriver(); //disconnect from the driver
+		m_3dMouseInput->disconnect(this); //disconnect from Qt ;)
+
+		delete m_3dMouseInput;
+		m_3dMouseInput = 0;
+	}
+#endif
 }
 
 void MainWindow::on3DMouseKeyUp(int)
@@ -653,9 +760,8 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 {
 #ifdef CC_3DXWARE_SUPPORT
 
-	ccGLWindow* win = getActiveGLWindow();
-
 	//active window?
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		Mouse3DInput::Apply(vec, win);
@@ -695,6 +801,7 @@ void MainWindow::connectActions()
 	connect(actionGlobalShiftSettings,			SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
 	connect(actionPrimitiveFactory,				SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
 	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
+	connect(actionEnableGamepad,				SIGNAL(toggled(bool)),	this,		SLOT(setupGamepad(bool)));
 	connect(actionCloseAll,						SIGNAL(triggered()),	this,		SLOT(closeAll()));
 	connect(actionQuit,							SIGNAL(triggered()),	this,		SLOT(close()));
 

@@ -6,6 +6,8 @@ include( contrib/LiblasSupport.cmake )
 include( contrib/E57Support.cmake )
 # 3DXWARE (3dConnexion devices) support
 include( contrib/3DXSupport.cmake )
+# Gamepads support
+include( contrib/GamepadSupport.cmake )
 # PDMS support
 OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
 # DXF support

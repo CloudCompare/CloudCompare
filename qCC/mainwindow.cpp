@@ -248,8 +248,9 @@ MainWindow::MainWindow()
 #endif
 
 #ifdef CC_GAMEPADS_SUPPORT
-	enableGamepad(true, true);
-	//QMetaObject::invokeMethod(this, "setupGamepad", Qt::QueuedConnection, Q_ARG(bool, true));
+	//DGM: the first call never works at startup time...
+	//enableGamepad(true, true);
+	QMetaObject::invokeMethod(this, "setupGamepad", Qt::QueuedConnection, Q_ARG(bool, true));
 #else
 	actionEnableGamepad->setEnabled(false);
 #endif
@@ -5860,8 +5861,8 @@ void MainWindow::showEvent(QShowEvent* event)
 
 	if ( m_FirstShow )
 	{
-		QSettings	settings;
-		QVariant		geometry = settings.value(ccPS::MainWinGeom());
+		QSettings settings;
+		QVariant  geometry = settings.value(ccPS::MainWinGeom());
 		
 		if ( geometry.isValid() )
 		{

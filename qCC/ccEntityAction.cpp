@@ -1600,14 +1600,14 @@ namespace ccEntityAction
 		unsigned errorCount = 0;
 		
 		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
 			bool lockedVertices = false;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 				continue;
 			}
 			
@@ -1629,7 +1629,8 @@ namespace ccEntityAction
 								ccCloud->showColors(true);
 							}
 						}
-							break;
+						break;
+						
 						case NORMAL_CONVERSION_DEST::DIP_DIR_SFS:
 						{
 							//get/create 'dip' scalar field
@@ -1664,9 +1665,10 @@ namespace ccEntityAction
 							if (success)
 							{
 								//apply default 360 degrees color scale!
-								ccColorScale::Shared scale = ccColorScalesManager::GetDefaultScale(ccColorScalesManager::HSV_360_DEG);
-								dipSF->setColorScale(scale);
-								dipDirSF->setColorScale(scale);
+								ccColorScale::Shared dipScale = ccColorScalesManager::GetDefaultScale(ccColorScalesManager::DIP_BRYW);
+								ccColorScale::Shared dipDirScale = ccColorScalesManager::GetDefaultScale(ccColorScalesManager::DIP_DIR_REPEAT);
+								dipSF->setColorScale(dipScale);
+								dipDirSF->setColorScale(dipDirScale);
 								ccCloud->setCurrentDisplayedScalarField(dipDirSFIndex); //dip dir. seems more interesting by default
 								ccCloud->showSF(true);
 							}
@@ -1676,7 +1678,8 @@ namespace ccEntityAction
 								ccCloud->deleteScalarField(dipDirSFIndex);
 							}
 						}
-							break;
+						break;
+						
 						default:
 							Q_ASSERT(false);
 							ccLog::Warning("[ccEntityAction::convertNormalsTo] Internal error: unhandled destination!");

@@ -33,6 +33,8 @@ v2.8.beta - XX/XX/2016
 		- L2/R2: roll left/right
 		- start: zoom and center on the visible entities
 
+	* New default color scales for dip / dip direction display (thanks to T. Dewez)
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:

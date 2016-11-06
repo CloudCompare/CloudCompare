@@ -1086,8 +1086,8 @@ void MainWindow::doActionInvertNormals()
 
 void MainWindow::doActionConvertNormalsToDipDir()
 {
-	if ( !ccEntityAction::convertNormalsTo(m_selectedEntities,
-														ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS) )
+	if ( !ccEntityAction::convertNormalsTo(	m_selectedEntities,
+											ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS) )
 	{
 		return;
 	}
@@ -1098,8 +1098,8 @@ void MainWindow::doActionConvertNormalsToDipDir()
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-	if ( !ccEntityAction::convertNormalsTo(m_selectedEntities,
-														ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS) )
+	if ( !ccEntityAction::convertNormalsTo(	m_selectedEntities,
+											ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS) )
 	{
 		return;
 	}

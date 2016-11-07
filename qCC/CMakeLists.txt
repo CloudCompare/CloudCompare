@@ -29,6 +29,14 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
 
+# Gamepad support (requires Qt 5.7+)
+if ( ${OPTION_SUPPORT_GAMEPADS} )
+	file( GLOB gamepad_header_list devices/gamepad/*.h )
+	file( GLOB gamepad_source_list devices/gamepad/*.cpp )
+	list( APPEND header_list ${gamepad_header_list} )
+	list( APPEND source_list ${gamepad_source_list} )
+endif()	
+
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
 
@@ -75,6 +83,10 @@ endif()
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()
+# Gamepad support (requires Qt 5.7+)
+if ( ${OPTION_SUPPORT_GAMEPADS} )
+	target_link_GAMEPADS( ${PROJECT_NAME} )
+endif()
 
 # Add custom preprocessor definitions
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)
@@ -105,7 +117,7 @@ set( auxFiles  ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md bin_other/license
 
 if( WIN32 )
 	# Export Qt dlls
-	install_Qt_Dlls( ${CLOUDCOMPARE_DEST_FOLDER} )
+	install_Qt_Dlls( ${CLOUDCOMPARE_DEST_FOLDER} ${OPTION_SUPPORT_GAMEPADS} )
 	install_Qt_ImageFormats( ${CLOUDCOMPARE_DEST_FOLDER} )
 	install_Qt5_plugins( ${CLOUDCOMPARE_DEST_FOLDER} )
 

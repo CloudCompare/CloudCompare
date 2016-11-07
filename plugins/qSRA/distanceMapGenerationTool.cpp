@@ -691,16 +691,16 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 				//fill 2D vector with non-empty cell indexes
 				{
 					const MapCell* cell = &grid->at(0);
-					for (unsigned j=0; j<grid->ySteps; ++j)
-						for (unsigned i=0; i<grid->xSteps; ++i, ++cell)
+					for (unsigned j = 0; j < grid->ySteps; ++j)
+						for (unsigned i = 0; i < grid->xSteps; ++i, ++cell)
 							if (cell->count)
-								the2DPoints.push_back(CCVector2(static_cast<PointCoordinateType>(i),static_cast<PointCoordinateType>(j)));
+								the2DPoints.push_back(CCVector2(static_cast<PointCoordinateType>(i), static_cast<PointCoordinateType>(j)));
 				}
 
 				//mesh the '2D' points
 				CCLib::Delaunay2dMesh* dm = new CCLib::Delaunay2dMesh();
 				char errorStr[1024];
-				if (!dm->buildMesh(the2DPoints,0,errorStr))
+				if (!dm->buildMesh(the2DPoints, 0, errorStr))
 				{
 					if (app)
 						app->dispToConsole(QString("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. said '%1'").arg(errorStr),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -711,14 +711,14 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 					MapCell* cells = &grid->at(0);
 					//now we are going to 'project' all triangles on the grid
 					dm->placeIteratorAtBegining();
-					for (unsigned k=0; k<triNum; ++k)
+					for (unsigned k = 0; k < triNum; ++k)
 					{
 						const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
 						//get the triangle bounding box (in grid coordinates)
 						int P[3][2];
 						int xMin = 0, yMin = 0, xMax = 0, yMax = 0;
 						{
-							for (unsigned j=0; j<3; ++j)
+							for (unsigned j = 0; j < 3; ++j)
 							{
 								const CCVector2& P2D = the2DPoints[tsi->i[j]];
 								P[j][0] = static_cast<int>(P2D.x);
@@ -737,11 +737,11 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 							const double& valC = cells[P[2][0] + P[2][1] * grid->xSteps].value;
 							int det = (P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]);
 
-							for (int j=yMin; j<=yMax; ++j)
+							for (int j = yMin; j <= yMax; ++j)
 							{
 								MapCell* cell = cells + static_cast<unsigned>(j)*grid->xSteps;
 
-								for (int i=xMin; i<=xMax; ++i)
+								for (int i = xMin; i <= xMax; ++i)
 								{
 									//if the cell is empty
 									if (!cell[i].count)
@@ -749,10 +749,10 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 										//we test if it's included or not in the current triangle
 										//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
 										bool inside = false;
-										for (int ti=0; ti<3; ++ti)
+										for (int ti = 0; ti < 3; ++ti)
 										{
 											const int* P1 = P[ti];
-											const int* P2 = P[(ti+1)%3];
+											const int* P2 = P[(ti + 1) % 3];
 											if ((P2[1] <= j &&j < P1[1]) || (P1[1] <= j && j < P2[1]))
 											{
 												int t = (i - P2[0])*(P1[1] - P2[1]) - (P1[0] - P2[0])*(j - P2[1]);
@@ -790,7 +790,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		const MapCell* cell = &grid->at(0);
 		grid->minVal = grid->maxVal = cell->value;
 		++cell;
-		for (unsigned i=1; i<cellCount; ++i, ++cell)
+		for (unsigned i = 1; i < cellCount; ++i, ++cell)
 		{
 			if (cell->value < grid->minVal)
 				grid->minVal = cell->value;

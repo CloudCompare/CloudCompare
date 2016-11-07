@@ -22,10 +22,23 @@ v2.8.beta - XX/XX/2016
 	* New tool: Edit > Mesh > Create surface between two polylines
 		- Creates a surface patch between two polylines
 
+	* Gamepad support (XBox, etc.)
+		- Enable it with the 'File > Gamepad > Enable' menu entry
+		- A: toggle viewer-based perspective mode
+		- B: toggle object-based perspective mode
+		- left stick: move body (viewer-based mode) or move object [left/right and forward/backward]
+		- right stick: rotate head (viewer-based mode) or rotate object
+		- cross: move body (viewer-based mode) or move object [left/right and up/down]
+		- L1/R1: change point size
+		- L2/R2: roll left/right
+		- start: zoom and center on the visible entities
+
+	* New default color scales for dip / dip direction display (thanks to T. Dewez)
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:
-		- based on the latest version of PoissonRecon by Misha (V9.0)
+		- based on the latest version of PoissonRecon by Misha (V9.1)
 		- the user can now choose the boundary conditions (free / Dirichlet / Neumann)
 
 	* Cross-section tool

@@ -11,14 +11,19 @@ endif()
 
 if( WIN32 )
 	# Export Qt Dlls to specified destinations
-	function( install_Qt_Dlls ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
-		if( ${ARGC} EQUAL 1 )
+	function( install_Qt_Dlls ) # 2 arguments: ARGV0 = base destination / ARGV1 = whether to add the QGamepad DLL or not
+		if( ${ARGC} GREATER 0 )
 			
 			#All Qt Dlls (release mode)
 			set(QT_RELEASE_DLLS)
 			
 			#standard DLLs (Qt 5)
 			set( QT_RELEASE_DLLS_BASE_NAME Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent Qt5PrintSupport )
+			if( ${ARGC} GREATER 1 )
+				if ( ${ARGV1} )
+					list( APPEND QT_RELEASE_DLLS_BASE_NAME Qt5Gamepad )
+				endif()
+			endif()
 			#ICU DLLs
 			file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
 	
@@ -30,6 +35,7 @@ if( WIN32 )
 	
 			#generate full path of release Dlls
 			foreach( element ${QT_RELEASE_DLLS_BASE_NAME} )
+				#message(${element})
 				list( APPEND QT_RELEASE_DLLS ${QT_BINARY_DIR}/${element}.dll)
 			endforeach()
 	
@@ -54,6 +60,11 @@ if( WIN32 )
 				
 				#standard DLLs
 				set( QT_DEBUG_DLLS_BASE_NAME Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd )
+				if( ${ARGC} GREATER 1 )
+					if ( ${ARGV1} )
+						list( APPEND QT_DEBUG_DLLS_BASE_NAME Qt5Gamepadd )
+					endif()
+				endif()
 				#ICU DLLs
 				file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
 	

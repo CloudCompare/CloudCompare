@@ -75,6 +75,8 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(ABS_NORM_GREY));
 		addScale(Create(HSV_360_DEG));
 		addScale(Create(VERTEX_QUALITY));
+		addScale(Create(DIP_BRYW));
+		addScale(Create(DIP_DIR_REPEAT));
 	}
 }
 
@@ -92,33 +94,33 @@ void ccColorScalesManager::fromPersistentSettings()
 	ccLog::Print(QString("[ccColorScalesManager] Found %1 custom scale(s) in persistent settings").arg(scales.size()));
 
 	//read each scale
-	for (int j=0; j<scales.size(); ++j)
+	for (int j = 0; j < scales.size(); ++j)
 	{
 		settings.beginGroup(scales[j]);
 
-		QString name = settings.value(c_csm_scaleName,"unknown").toString();
-		bool relative = settings.value(c_csm_relative,true).toBool();
+		QString name = settings.value(c_csm_scaleName, "unknown").toString();
+		bool relative = settings.value(c_csm_relative, true).toBool();
 
-		ccColorScale::Shared scale(new ccColorScale(name,scales[j]));
+		ccColorScale::Shared scale(new ccColorScale(name, scales[j]));
 		if (!relative)
 		{
-			double minVal = settings.value(c_csm_minVal,0.0).toDouble();
-			double maxVal = settings.value(c_csm_maxVal,1.0).toDouble();
-			scale->setAbsolute(minVal,maxVal);
+			double minVal = settings.value(c_csm_minVal, 0.0).toDouble();
+			double maxVal = settings.value(c_csm_maxVal, 1.0).toDouble();
+			scale->setAbsolute(minVal, maxVal);
 		}
-		
+
 		try
 		{
 			//steps
 			{
 				int size = settings.beginReadArray(c_csm_stepsList);
-				for (int i=0; i<size;++i)
+				for (int i = 0; i < size; ++i)
 				{
 					settings.setArrayIndex(i);
 					double relativePos = settings.value(c_csm_stepRelativePos, 0.0).toDouble();
 					QRgb rgb = static_cast<QRgb>(settings.value(c_csm_stepColor, 0).toInt());
 					QColor color = QColor::fromRgb(rgb);
-					scale->insert(ccColorScaleElement(relativePos,color),false);
+					scale->insert(ccColorScaleElement(relativePos, color), false);
 				}
 				settings.endArray();
 			}
@@ -126,7 +128,7 @@ void ccColorScalesManager::fromPersistentSettings()
 			//custom labels
 			{
 				int size = settings.beginReadArray(c_csm_customLabels);
-				for (int i=0; i<size;++i)
+				for (int i = 0; i < size; ++i)
 				{
 					settings.setArrayIndex(i);
 					double label = settings.value(c_csm_customLabelValue, 0.0).toDouble();
@@ -168,39 +170,39 @@ void ccColorScalesManager::toPersistentSettings() const
 		{
 			settings.beginGroup((*it)->getUuid());
 
-			settings.setValue(c_csm_scaleName,(*it)->getName());
-			settings.setValue(c_csm_relative,(*it)->isRelative());
+			settings.setValue(c_csm_scaleName, (*it)->getName());
+			settings.setValue(c_csm_relative, (*it)->isRelative());
 			if (!(*it)->isRelative())
 			{
-				double minVal,maxVal;
-				(*it)->getAbsoluteBoundaries(minVal,maxVal);
-				settings.setValue(c_csm_minVal,minVal);
-				settings.setValue(c_csm_maxVal,maxVal);
+				double minVal, maxVal;
+				(*it)->getAbsoluteBoundaries(minVal, maxVal);
+				settings.setValue(c_csm_minVal, minVal);
+				settings.setValue(c_csm_maxVal, maxVal);
 			}
 
 			settings.beginWriteArray(c_csm_stepsList);
 			{
-				for (int i=0; i<(*it)->stepCount();++i)
+				for (int i = 0; i < (*it)->stepCount(); ++i)
 				{
-					 settings.setArrayIndex(i);
-					 settings.setValue(c_csm_stepRelativePos, (*it)->step(i).getRelativePos());
-					 int rgb = static_cast<int>((*it)->step(i).getColor().rgb());
-					 settings.setValue(c_csm_stepColor, rgb);
+					settings.setArrayIndex(i);
+					settings.setValue(c_csm_stepRelativePos, (*it)->step(i).getRelativePos());
+					int rgb = static_cast<int>((*it)->step(i).getColor().rgb());
+					settings.setValue(c_csm_stepColor, rgb);
 				}
 			}
 			settings.endArray();
 
 			settings.beginWriteArray(c_csm_customLabels);
 			{
-				int i=0;
-				for (ccColorScale::LabelSet::const_iterator itL=(*it)->customLabels().begin(); itL!=(*it)->customLabels().end(); ++itL, ++i)
+				int i = 0;
+				for (ccColorScale::LabelSet::const_iterator itL = (*it)->customLabels().begin(); itL != (*it)->customLabels().end(); ++itL, ++i)
 				{
-					 settings.setArrayIndex(i);
-					 settings.setValue(c_csm_customLabelValue, *itL);
+					settings.setArrayIndex(i);
+					settings.setValue(c_csm_customLabelValue, *itL);
 				}
 			}
 			settings.endArray();
-			
+
 
 			settings.endGroup();
 		}
@@ -211,7 +213,7 @@ void ccColorScalesManager::toPersistentSettings() const
 
 ccColorScale::Shared ccColorScalesManager::getScale(QString UUID) const
 {
-	return m_scales.value(UUID,ccColorScale::Shared(0));
+	return m_scales.value(UUID, ccColorScale::Shared(0));
 }
 
 void ccColorScalesManager::addScale(ccColorScale::Shared scale)
@@ -271,6 +273,12 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	case VERTEX_QUALITY:
 		name = "Vertex types default colors";
 		break;
+	case DIP_BRYW:
+		name = "Dip [0-90]";
+		break;
+	case DIP_DIR_REPEAT:
+		name = "Dip direction (repeat) [0-360]";
+		break;
 	default:
 		ccLog::Error(QString("Unhandled pre-defined scale (%1)").arg(scaleType));
 		return ccColorScale::Shared(0);
@@ -281,50 +289,93 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	switch (scaleType)
 	{
 	case BGYR:
-		scale->insert(ccColorScaleElement(0.0,Qt::blue),false);
-		scale->insert(ccColorScaleElement(1.0/3.0,Qt::green),false);
-		scale->insert(ccColorScaleElement(2.0/3.0,Qt::yellow),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::red),false);
+		scale->insert(ccColorScaleElement(      0.0, Qt::blue  ), false);
+		scale->insert(ccColorScaleElement(1.0 / 3.0, Qt::green ), false);
+		scale->insert(ccColorScaleElement(2.0 / 3.0, Qt::yellow), false);
+		scale->insert(ccColorScaleElement(      1.0, Qt::red   ), false);
 		break;
 	case GREY:
-		scale->insert(ccColorScaleElement(0.0,Qt::black),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::white),false);
+		scale->insert(ccColorScaleElement(0.0, Qt::black), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::white), false);
 		break;
 	case BWR:
-		scale->insert(ccColorScaleElement(0.0,Qt::blue),false);
-		scale->insert(ccColorScaleElement(0.5,Qt::white),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::red),false);
+		scale->insert(ccColorScaleElement(0.0, Qt::blue ), false);
+		scale->insert(ccColorScaleElement(0.5, Qt::white), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::red  ), false);
 		break;
 	case RY:
-		scale->insert(ccColorScaleElement(0.0,Qt::red),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::yellow),false);
+		scale->insert(ccColorScaleElement(0.0, Qt::red   ), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::yellow), false);
 		break;
 	case RW:
-		scale->insert(ccColorScaleElement(0.0,Qt::red),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::white),false);
+		scale->insert(ccColorScaleElement(0.0, Qt::red  ), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::white), false);
 		break;
 	case ABS_NORM_GREY:
-		scale->insert(ccColorScaleElement(0.0,Qt::black),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::white),false);
-		scale->setAbsolute(0.0,1.0);
+		scale->insert(ccColorScaleElement(0.0, Qt::black), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::white), false);
+		scale->setAbsolute(0.0, 1.0);
+		scale->customLabels().insert(0);
+		scale->customLabels().insert(0.5);
+		scale->customLabels().insert(1.0);
 		break;
 	case HSV_360_DEG:
-		scale->insert(ccColorScaleElement(  0.0/360.0,Qt::red),false);
-		scale->insert(ccColorScaleElement( 60.0/360.0,Qt::yellow),false);
-		scale->insert(ccColorScaleElement(120.0/360.0,Qt::green),false);
-		scale->insert(ccColorScaleElement(180.0/360.0,Qt::cyan),false);
-		scale->insert(ccColorScaleElement(240.0/360.0,Qt::blue),false);
-		scale->insert(ccColorScaleElement(300.0/360.0,Qt::magenta),false);
-		scale->insert(ccColorScaleElement(360.0/360.0,Qt::red),false);
-		scale->setAbsolute(0.0,360.0);
+		scale->insert(ccColorScaleElement(  0.0/360.0, Qt::red    ), false);
+		scale->insert(ccColorScaleElement( 60.0/360.0, Qt::yellow ), false);
+		scale->insert(ccColorScaleElement(120.0/360.0, Qt::green  ), false);
+		scale->insert(ccColorScaleElement(180.0/360.0, Qt::cyan   ), false);
+		scale->insert(ccColorScaleElement(240.0/360.0, Qt::blue   ), false);
+		scale->insert(ccColorScaleElement(300.0/360.0, Qt::magenta), false);
+		scale->insert(ccColorScaleElement(360.0/360.0, Qt::red    ), false);
+		scale->setAbsolute(0.0, 360.0);
+		scale->customLabels().insert(0);
+		scale->customLabels().insert(60);
+		scale->customLabels().insert(120);
+		scale->customLabels().insert(180);
+		scale->customLabels().insert(240);
+		scale->customLabels().insert(300);
 		break;
 	case VERTEX_QUALITY:
-		scale->insert(ccColorScaleElement(0.0,Qt::blue),false);
-		scale->insert(ccColorScaleElement(0.5,Qt::green),false);
-		scale->insert(ccColorScaleElement(1.0,Qt::red),false);
+		scale->insert(ccColorScaleElement(0.0, Qt::blue), false);
+		scale->insert(ccColorScaleElement(0.5, Qt::green), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::red), false);
 		assert(		CCLib::MeshSamplingTools::VERTEX_NORMAL < CCLib::MeshSamplingTools::VERTEX_BORDER
 				&&	CCLib::MeshSamplingTools::VERTEX_BORDER < CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD );
-		scale->setAbsolute(CCLib::MeshSamplingTools::VERTEX_NORMAL,CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD);
+		scale->setAbsolute(CCLib::MeshSamplingTools::VERTEX_NORMAL, CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD);
+		scale->customLabels().insert(0);
+		scale->customLabels().insert(0.5);
+		scale->customLabels().insert(1.0);
+		break;
+	case DIP_BRYW:
+		scale->insert(ccColorScaleElement(0.00, qRgb(129,   0,   0)), false);
+		scale->insert(ccColorScaleElement(0.33, qRgb(255,  68,   0)), false);
+		scale->insert(ccColorScaleElement(0.66, qRgb(255, 255,   0)), false);
+		scale->insert(ccColorScaleElement(1.00, qRgb(255, 255, 255)), false);
+		scale->setAbsolute(0, 90.0);
+		scale->customLabels().insert(0);
+		scale->customLabels().insert(30);
+		scale->customLabels().insert(60);
+		scale->customLabels().insert(90);
+		break;
+	case DIP_DIR_REPEAT:
+		scale->insert(ccColorScaleElement(  0.0/360.0, qRgb(255,   0,   0)), false);
+		scale->insert(ccColorScaleElement( 30.0/360.0, qRgb(255, 255,   0)), false);
+		scale->insert(ccColorScaleElement( 60.0/360.0, qRgb(  0, 255,   0)), false);
+		scale->insert(ccColorScaleElement( 90.0/360.0, qRgb(  0, 255, 255)), false);
+		scale->insert(ccColorScaleElement(120.0/360.0, qRgb(  0,   0, 255)), false);
+		scale->insert(ccColorScaleElement(150.0/360.0, qRgb(255,   0, 255)), false);
+		scale->insert(ccColorScaleElement(180.0/360.0, qRgb(255,   0,   0)), false);
+		scale->insert(ccColorScaleElement(210.0/360.0, qRgb(255, 255,   0)), false);
+		scale->insert(ccColorScaleElement(240.0/360.0, qRgb(  0, 255,   0)), false);
+		scale->insert(ccColorScaleElement(270.0/360.0, qRgb(  0, 255, 255)), false);
+		scale->insert(ccColorScaleElement(300.0/360.0, qRgb(  0,   0, 255)), false);
+		scale->insert(ccColorScaleElement(330.0/360.0, qRgb(255,   0, 255)), false);
+		scale->insert(ccColorScaleElement(360.0/360.0, qRgb(255,   0,   0)), false);
+		scale->setAbsolute(0, 360.0);
+		scale->customLabels().insert(0);
+		scale->customLabels().insert(90);
+		scale->customLabels().insert(180);
+		scale->customLabels().insert(270);
 		break;
 	default:
 		assert(false);

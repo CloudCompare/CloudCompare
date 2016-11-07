@@ -34,6 +34,14 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
 
+# Gamepad support (requires Qt 5.7+)
+if ( ${OPTION_SUPPORT_GAMEPADS} )
+	file( GLOB gamepad_header_list ../qCC/devices/gamepad/*.h )
+	file( GLOB gamepad_source_list ../qCC/devices/gamepad/*.cpp )
+	list( APPEND header_list ${gamepad_header_list} )
+	list( APPEND source_list ${gamepad_source_list} )
+endif()	
+
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
@@ -74,6 +82,10 @@ endif()
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()
+# Gamepad support (requires Qt 5.7+)
+if ( ${OPTION_SUPPORT_GAMEPADS} )
+	target_link_GAMEPADS( ${PROJECT_NAME} )
+endif()
 
 # Add custom preprocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_VIEWER )
@@ -102,7 +114,7 @@ set( auxFiles bin_other/license.txt )
 
 if( WIN32 )
 	# Export Qt dlls
-	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} )
+	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} ${OPTION_SUPPORT_GAMEPADS} )
 	install_Qt5_plugins( ${CCVIEWER_DEST_FOLDER} )
 
 	# Additional auxiliary file(s)

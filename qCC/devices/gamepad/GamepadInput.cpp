@@ -1,5 +1,8 @@
 #include "GamepadInput.h"
 
+//Qt
+#include <QGamepadManager>
+
 //qCC_gl
 #include <ccGLWindow.h>
 

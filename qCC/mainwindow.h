@@ -470,6 +470,12 @@ protected slots:
 	void increasePointSize();
 	void decreasePointSize();
 
+	//! Trys to enable (or disable) a gamepad device
+	/** \param state whether to enable or disable the device
+	\param silent whether to issue an error message in case of failure
+	**/
+	void enableGamepad(bool state, bool silent);
+
 	//! Setups gamepad (if any)
 	void setupGamepad(bool state) { enableGamepad(state, false); }
 
@@ -553,12 +559,6 @@ protected:
 
 	//! Releases any connected 3D mouse
 	void release3DMouse();
-
-	//! Trys to enable (or disable) a gamepad device
-	/** \param state whether to enable or disable the device
-		\param silent whether to issue an error message in case of failure
-	**/
-	void enableGamepad(bool state, bool silent);
 
 	//! Releases any connected gamepad
 	void releaseGamepad();

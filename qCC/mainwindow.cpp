@@ -193,7 +193,7 @@ MainWindow::MainWindow()
 			m_viewModePopupButton->setPopupMode(QToolButton::InstantPopup);
 			m_viewModePopupButton->setToolTip("Set current view mode");
 			m_viewModePopupButton->setStatusTip(m_viewModePopupButton->toolTip());
-			toolBarView->insertWidget(actionZoomAndCenter,m_viewModePopupButton);
+			toolBarView->insertWidget(actionZoomAndCenter, m_viewModePopupButton);
 			m_viewModePopupButton->setEnabled(false);
 		}
 
@@ -250,7 +250,7 @@ MainWindow::MainWindow()
 #ifdef CC_GAMEPADS_SUPPORT
 	//DGM: the first call never works at startup time...
 	//enableGamepad(true, true);
-	QMetaObject::invokeMethod(this, "setupGamepad", Qt::QueuedConnection, Q_ARG(bool, true));
+	QMetaObject::invokeMethod(this, "enableGamepad", Qt::QueuedConnection, Q_ARG(bool, true), Q_ARG(bool, true));
 #else
 	actionEnableGamepad->setEnabled(false);
 #endif
@@ -508,40 +508,82 @@ void MainWindow::doEnableGLFilter()
 	}
 }
 
+void ShowError(QString message, bool asWarning)
+{
+	if (!asWarning)
+	{
+		ccLog::Error(message);
+	}
+	else
+	{
+		ccLog::Warning(message);
+	}
+}
+
 void MainWindow::enableGamepad(bool state, bool silent)
 {
 #ifdef CC_GAMEPADS_SUPPORT
 	if (state)
 	{
-		if (!m_gamepadInput)
+		for (int step = 0; step < 1; ++step) //fake loop for easy break
 		{
-			m_gamepadInput = new GamepadInput(this);
-			QObject::connect(m_gamepadInput, SIGNAL(updated()), this, SLOT(onGamepadInput()), Qt::DirectConnection);
-			QObject::connect(m_gamepadInput, SIGNAL(buttonL1Changed(bool)), this, SLOT(decreasePointSize()));
-			QObject::connect(m_gamepadInput, SIGNAL(buttonR1Changed(bool)), this, SLOT(increasePointSize()));
-			QObject::connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {if (state) setGlobalZoom(); });
-			QObject::connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state) {if (state) toggleActiveWindowViewerBasedPerspective(); });
-			QObject::connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state) {if (state) toggleActiveWindowCenteredPerspective(); });
-			QCoreApplication::processEvents();
-		}
-
-		if (m_gamepadInput->isConnected())
-		{
-			m_gamepadInput->start();
-		}
-		else
-		{
-			m_gamepadInput->stop(); //just in case
-
-			if (!silent)
+			QGamepadManager* manager = QGamepadManager::instance();
+			if (!manager)
 			{
-				ccLog::Error("[Gamepad] No device detected");
+				ShowError("[Gamepad] Manager is not accessible?!", silent);
+				state = false;
+				break;
+			}
+			QList<int> gamepads = manager->connectedGamepads();
+			if (gamepads.empty() == 0)
+			{
+				ShowError("[Gamepad] No device registered", silent);
+				state = false;
+				break;
+			}
+
+			int gamepadID = gamepads[0];
+			if (!silent && gamepads.size() > 1)
+			{
+				//ask the user for the right gamepad
+				ccPickOneElementDlg poeDlg("Gamepad", "Detected Gamepads", this);
+				for (int id : gamepads)
+				{
+					poeDlg.addElement(QString("%1 (%2)").arg(QGamepad(id).name()).arg(manager->isGamepadConnected(id) ? "ON" : "OFF"));
+				}
+				if (!poeDlg.exec())
+				{
+					return;
+				}
+				gamepadID = gamepads[poeDlg.getSelectedIndex()];
+			}
+
+			if (!m_gamepadInput)
+			{
+				m_gamepadInput = new GamepadInput(this);
+				QObject::connect(m_gamepadInput, SIGNAL(updated()), this, SLOT(onGamepadInput()), Qt::DirectConnection);
+				QObject::connect(m_gamepadInput, SIGNAL(buttonL1Changed(bool)), this, SLOT(decreasePointSize()));
+				QObject::connect(m_gamepadInput, SIGNAL(buttonR1Changed(bool)), this, SLOT(increasePointSize()));
+				QObject::connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {if (state) setGlobalZoom(); });
+				QObject::connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state) {if (state) toggleActiveWindowViewerBasedPerspective(); });
+				QObject::connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state) {if (state) toggleActiveWindowCenteredPerspective(); });
 			}
 			else
 			{
-				ccLog::Warning("[Gamepad] No device detected");
+				m_gamepadInput->stop(); //just in case
 			}
-			state = false;
+			m_gamepadInput->setDeviceId(gamepadID);
+
+			if (m_gamepadInput->isConnected())
+			{
+				m_gamepadInput->start();
+			}
+			else
+			{
+				ShowError(QString("[Gamepad] Device %1 is not connected").arg(QGamepad(gamepadID).name()), silent);
+				state = false;
+				break;
+			}
 		}
 	}
 	else

@@ -1,3 +1,8 @@
+cloudcompare (2.8.0~git2016110i7-0xenial1) UNRELEASED; urgency=medium
+  * Add qM3C2 plugin
+
+ -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 07 Nov 2016 13:40:00 +0100
+
 cloudcompare (2.8.0~git20160922-0xenial1) UNRELEASED; urgency=medium
   * Add experimental Photoscan filter 
   * Add QCSF plugin

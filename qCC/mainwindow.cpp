@@ -534,29 +534,30 @@ void MainWindow::enableGamepad(bool state, bool silent)
 				state = false;
 				break;
 			}
-			QList<int> gamepads = manager->connectedGamepads();
-			if (gamepads.empty() == 0)
-			{
-				ShowError("[Gamepad] No device registered", silent);
-				state = false;
-				break;
-			}
-
-			int gamepadID = gamepads[0];
-			if (!silent && gamepads.size() > 1)
-			{
-				//ask the user for the right gamepad
-				ccPickOneElementDlg poeDlg("Gamepad", "Detected Gamepads", this);
-				for (int id : gamepads)
-				{
-					poeDlg.addElement(QString("%1 (%2)").arg(QGamepad(id).name()).arg(manager->isGamepadConnected(id) ? "ON" : "OFF"));
-				}
-				if (!poeDlg.exec())
-				{
-					return;
-				}
-				gamepadID = gamepads[poeDlg.getSelectedIndex()];
-			}
+			
+			int gamepadID = 0;
+			//QList<int> gamepads = manager->connectedGamepads();
+			//if (gamepads.empty() == 0)
+			//{
+			//	ShowError("[Gamepad] No device registered", silent);
+			//	state = false;
+			//	break;
+			//}
+			//gamepadID = gamepads[0];
+			//if (!silent && gamepads.size() > 1)
+			//{
+			//	//ask the user for the right gamepad
+			//	ccPickOneElementDlg poeDlg("Gamepad", "Detected Gamepads", this);
+			//	for (int id : gamepads)
+			//	{
+			//		poeDlg.addElement(QString("%1 (%2)").arg(QGamepad(id).name()).arg(manager->isGamepadConnected(id) ? "ON" : "OFF"));
+			//	}
+			//	if (!poeDlg.exec())
+			//	{
+			//		return;
+			//	}
+			//	gamepadID = gamepads[poeDlg.getSelectedIndex()];
+			//}
 
 			if (!m_gamepadInput)
 			{
@@ -567,6 +568,8 @@ void MainWindow::enableGamepad(bool state, bool silent)
 				QObject::connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {if (state) setGlobalZoom(); });
 				QObject::connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state) {if (state) toggleActiveWindowViewerBasedPerspective(); });
 				QObject::connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state) {if (state) toggleActiveWindowCenteredPerspective(); });
+				QObject::connect(manager, &QGamepadManager::connectedGamepadsChanged, this, []() { ccLog::Print("Gamepad connected"); });
+
 			}
 			else
 			{

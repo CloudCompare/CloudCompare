@@ -307,6 +307,6 @@ void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
 	if (buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
 	{
 		updateAll(ccGLMatrix(), true, true, true);
+		inverseCheckBox->setChecked(false);
 	}
-	inverseCheckBox->setChecked(false);
 }

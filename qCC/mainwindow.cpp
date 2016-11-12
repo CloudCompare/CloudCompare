@@ -575,15 +575,19 @@ void MainWindow::enableGamepad(bool state, bool silent)
 			{
 				m_gamepadInput->stop(); //just in case
 			}
-			m_gamepadInput->setDeviceId(gamepadID);
 
-			if (m_gamepadInput->isConnected())
+			for (gamepadID = 0; gamepadID < 4; ++gamepadID)
 			{
-				m_gamepadInput->start();
+				m_gamepadInput->setDeviceId(gamepadID);
+				if (m_gamepadInput->isConnected())
+				{
+					m_gamepadInput->start();
+					break;
+				}
 			}
-			else
+			if (gamepadID == 4)
 			{
-				ShowError(QString("[Gamepad] Device %1 is not connected").arg(QGamepad(gamepadID).name()), silent);
+				ShowError("[Gamepad] No device connected", silent);
 				state = false;
 				break;
 			}

@@ -29,8 +29,7 @@
 //system
 #include <vector>
 
-//Shapelib
-#include <shapefil.h>
+class GenericDBFField;
 
 //! ESRI Shapefile file filter (output only)
 /** See http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
@@ -55,93 +54,8 @@ public:
 	//! Default constructor
 	ShpFilter() : FileIOFilter(), m_closedPolylinesAsPolygons(false) {}
 
-	//! Generic shapefile 'field'
-	/** Fields contain one value per record (i.e. primitive)
-	**/
-	class GenericField
-	{
-	public:
-
-		//! Default constructor
-		GenericField(QString name) : m_name(name) {}
-
-		//! Returns field name
-		const QString& name() const { return m_name; }
-
-		//! Returns whehter the field is 3D or not
-		virtual bool is3D() const  { return false; }
-
-		//to be reimplemented by siblings
-		virtual DBFFieldType type() const = 0;
-		virtual int width() const = 0;
-		virtual int decimal() const = 0;
-		virtual bool save(DBFHandle handle, int fieldIndex) const { return false; } //1D version
-		virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const { return false; } //3D version
-
-	protected:
-
-		//! Field name
-		QString m_name;
-	};
-
-	//! Int-valued shapefile field
-	class QCC_IO_LIB_API IntegerField : public GenericField
-	{
-	public:
-
-		//! Default constructor
-		IntegerField(QString name) : GenericField(name) {}
-		
-		//inherited from GenericField
-		virtual DBFFieldType type() const { return FTInteger; }
-		virtual int width() const { return 6; }
-		virtual int decimal() const { return 0; }
-		virtual bool save(DBFHandle handle, int fieldIndex) const;
-
-		//! Field values
-		std::vector<int> values;
-	};
-
-	//! Double-valued shapefile field
-	class QCC_IO_LIB_API DoubleField : public GenericField
-	{
-	public:
-
-		//! Default constructor
-		DoubleField(QString name) : GenericField(name) {}
-		
-		//inherited from GenericField
-		virtual DBFFieldType type() const { return FTDouble; }
-		virtual int width() const { return 8; }
-		virtual int decimal() const { return 8; }
-		virtual bool save(DBFHandle handle, int fieldIndex) const;
-
-		//! Field values
-		std::vector<double> values;
-	};
-
-	//! Double-valued 3D shapefile field
-	class QCC_IO_LIB_API DoubleField3D : public GenericField
-	{
-	public:
-
-		//! Default constructor
-		DoubleField3D(QString name) : GenericField(name) {}
-		virtual ~DoubleField3D() {}
-		
-		//inherited from GenericField
-		virtual bool is3D() const  { return true; }
-		virtual DBFFieldType type() const { return FTDouble; }
-		virtual int width() const { return 8; }
-		virtual int decimal() const { return 8; }
-		virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const;
-
-		//! Field values
-		std::vector<CCVector3d> values;
-	};
-
 	//! Special method to save multiple entities with attributes
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericField*>& fields, QString filename, SaveParameters& parameters);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, QString filename, SaveParameters& parameters);
 
 	//! Sets whether to consider closed polylines as polygons or not
 	void treatClosedPolylinesAsPolygons(bool state) { m_closedPolylinesAsPolygons = state; }
@@ -152,7 +66,6 @@ protected:
 
 	//! Whether to consider closed polylines as polygons or not
 	bool m_closedPolylinesAsPolygons;
-
 };
 
 #endif //CC_SHP_SUPPORT

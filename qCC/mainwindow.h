@@ -124,9 +124,9 @@ public:
 							bool checkDimensions = false,
 							bool autoRedraw = true) override;
 
-	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos);
-	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg);
-	virtual void updateOverlayDialogsPlacement();
+	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
+	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
+	virtual void updateOverlayDialogsPlacement() override;
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
 	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;

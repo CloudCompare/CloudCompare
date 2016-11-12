@@ -30,8 +30,8 @@ public:
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const override { return true; }
-	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	virtual bool toFile(QFile& out) const override;
+	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	uint32_t numberOfSamples;	//!< Number of samples
 	uint32_t samplingRate_ps;	//!< Sampling rate in pico seconds
@@ -88,8 +88,8 @@ public:
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const override { return true; }
-	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	virtual bool toFile(QFile& out) const override;
+	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 protected: //methods
 
@@ -99,7 +99,7 @@ protected: //methods
 protected: //members
 
 	//! Data buffer size (in bytes)
-	/** \waning Not necessarily equals to the number of samples!
+	/** \warning Not necessarily equal to the number of samples!
 	**/
 	uint32_t m_byteCount;
 

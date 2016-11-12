@@ -22,11 +22,11 @@ public:
 		\param fps frame rate
 	**/
 	QVideoEncoder(	QString filename,
-					unsigned width,
-					unsigned height,
+					int width,
+					int height,
 					unsigned bitrate,
-					unsigned gop = 12,
-					unsigned fps = 25);
+					int gop = 12,
+					int fps = 25);
 	
 	virtual ~QVideoEncoder();
 
@@ -50,11 +50,11 @@ protected:
 
 	//stream descriptor
 	QString m_filename;
-	unsigned m_width;
-	unsigned m_height;
+	int m_width;
+	int m_height;
 	unsigned m_bitrate;
-	unsigned m_gop;
-	unsigned m_fps;
+	int m_gop;
+	int m_fps;
 	bool m_isOpen;
 
 	//! FFmpeg variables

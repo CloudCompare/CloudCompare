@@ -28,7 +28,7 @@ function( target_link_3DXWARE ) # 1 argument: ARGV0 = project name
 			
 				if ( CMAKE_CONFIGURATION_TYPES )
 				
-					target_link_libraries( ${ARGV0} debug ${3DXWARE_LIB_DIR}/siappD.lib ${3DXWARE_LIB_DIR}/spwmathD.lib )
+					target_link_libraries( ${ARGV0} debug ${3DXWARE_LIB_DIR}/siapp.lib ${3DXWARE_LIB_DIR}/spwmathD.lib )
 
 					#Anytime we use COMPILE_DEFINITIONS_XXX we must define this policy!
 					#(and setting it outside of the function/file doesn't seem to work...)

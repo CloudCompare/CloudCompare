@@ -908,7 +908,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			ccGLMatrix invLocalTrans = localTrans.inverse();
 			PointCoordinateType* preferredOrientation = (preferredDim != -1 ? invLocalTrans.getColumn(preferredDim) : 0);
 
-			assert(cloudSliceCount < outputSlices.count());
+			assert(cloudSliceCount < outputSlices.size());
 
 			//process all the slices originating from point clouds
 			for (size_t i = 0; i < cloudSliceCount; ++i)

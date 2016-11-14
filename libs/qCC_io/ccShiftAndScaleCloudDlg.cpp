@@ -458,17 +458,9 @@ int ccShiftAndScaleCloudDlg::addShiftInfo(const ShiftInfo& info)
 	return static_cast<int>(m_defaultInfos.size())-1;
 }
 
-void ccShiftAndScaleCloudDlg::SetLastInfo(CCVector3d shift,double scale)
+void ccShiftAndScaleCloudDlg::SetLastInfo(const CCVector3d& shift, double scale)
 {
-    try
-    {
-        s_lastInfo.valid = true;
-        s_lastInfo.shift = shift;
-        s_lastInfo.scale = scale;
-    }
-    catch (const std::bad_alloc&)
-    {
-        //not enough memory
-        return;
-    }
+	s_lastInfo.valid = true;
+	s_lastInfo.shift = shift;
+	s_lastInfo.scale = scale;
 }

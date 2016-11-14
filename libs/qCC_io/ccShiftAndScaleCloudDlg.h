@@ -112,7 +112,7 @@ public:
 	bool addFileInfo();
 
     //! Sets the last shift and scale information
-    static void SetLastInfo(CCVector3d shift,double scale);
+    static void SetLastInfo(const CCVector3d& shift, double scale);
 
 protected slots:
 

@@ -4,5 +4,9 @@ if( APPLE )
    install( CODE "execute_process( COMMAND \"${MACDEPLOYQT}\" \"${CLOUDCOMPARE_MAC_BASE_DIR}\" -verbose=1 )" COMPONENT Runtime )
    
    # install icons
-   install( FILES ../images/icon/cc_icon.icns DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )
+   install( FILES ../images/icon/cc_icon.icns DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )   
+   
+   # remove any dev-machine specific lib paths
+   install( CODE "execute_process( COMMAND \"${CMAKE_SOURCE_DIR}/mac_scripts/fix_libs.sh\"
+       \"${CLOUDCOMPARE_MAC_FRAMEWORK_DIR}\" )" COMPONENT Runtime )
 endif( APPLE )

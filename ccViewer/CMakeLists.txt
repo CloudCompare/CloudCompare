@@ -131,7 +131,7 @@ endif()
 # Put together our App bundle on Mac OS X
 if( APPLE )
    set_target_properties( ${PROJECT_NAME} PROPERTIES
-       INSTALL_RPATH "@loader_path/../Frameworks"
+       INSTALL_RPATH "@executable_path/../Frameworks"
        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
 
    set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns )

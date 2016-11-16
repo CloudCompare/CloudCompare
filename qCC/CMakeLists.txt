@@ -140,7 +140,7 @@ endif()
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )
     set_target_properties( ${PROJECT_NAME} PROPERTIES
-        INSTALL_RPATH "@loader_path/../Frameworks"
+        INSTALL_RPATH "@executable_path/../Frameworks"
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
 
     set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 

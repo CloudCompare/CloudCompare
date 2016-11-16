@@ -2,14 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(PUSH)
 
-# set up rpaths before we do anything
-if (APPLE)
-	# see: https://cmake.org/Wiki/CMake_RPATH_handling
-	set( CMAKE_SKIP_BUILD_RPATH  FALSE )
-	set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE ) 
-	set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
-endif()
-
 include ( CMakePolicies.cmake )
 
 project( CloudCompareProjects )

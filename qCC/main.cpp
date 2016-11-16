@@ -244,7 +244,7 @@ int main(int argc, char **argv)
 		// plugins are in the bundle
 		appPath.remove("MacOS");
 
-		pluginPaths += (appPath + "Plugins/ccPlugins");
+		pluginPaths += (appPath + "PlugIns/ccPlugins");
 #if defined(CC_MAC_DEV_PATHS)
 		// used for development only - this is the path where the plugins are built
 		// this avoids having to install into the application bundle when developing

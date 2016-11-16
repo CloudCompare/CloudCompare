@@ -153,6 +153,7 @@ v2.8.beta - XX/XX/2016
 	* The sandbox tool 'Distance map to best fit 3D quadric' was broken
 	* When computing normals whith the Least Squares best fitting plane, CC was requiring at least 12 points in the neighborhood, when only 3 are theoretically
 		sufficient.
+	* [macOS] Fix plugins on case-sensitive file systems
 
 v2.7.0 - 04/22/2016
 -------------------

@@ -19,6 +19,7 @@
 
 //Qt
 #include <QApplication>
+#include <QDir>
 #include <QSplashScreen>
 #include <QPixmap>
 #include <QMessageBox>
@@ -147,19 +148,19 @@ int main(int argc, char **argv)
 	VLDEnable();
 #endif
 
-#ifdef Q_OS_MAC	
-	// This makes sure that our "working directory" is not within the application bundle
-	QDir  appDir = QCoreApplication::applicationDirPath();
+	QDir  workingDir = QCoreApplication::applicationDirPath();
 	
-	if ( appDir.dirName() == "MacOS" )
+#ifdef Q_OS_MAC	
+	// This makes sure that our "working directory" is not within the application bundle	
+	if ( workingDir.dirName() == "MacOS" )
 	{
-		appDir.cdUp();
-		appDir.cdUp();
-		appDir.cdUp();
-		
-		QDir::setCurrent( appDir.absolutePath() );
+		workingDir.cdUp();
+		workingDir.cdUp();
+		workingDir.cdUp();		
 	}
 #endif
+
+	QDir::setCurrent( workingDir.absolutePath() );
 
 	//store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);

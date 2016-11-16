@@ -19,9 +19,9 @@
 
 //Qt
 #include <QApplication>
+#include <QDir>
 #include <QGLFormat>
 #ifdef Q_OS_MAC
-#include <QDir>
 #include <QFileOpenEvent>
 #endif
 

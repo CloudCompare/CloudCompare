@@ -24,6 +24,7 @@
 #include "ui_dipDirTransformationDlg.h"
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccNormalVectors.h>
 
 //Qt
@@ -255,7 +256,7 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString inputFilename = QFileDialog::getOpenFileName(this, "Select input file", currentPath, "*.txt");
 	if (inputFilename.isEmpty())

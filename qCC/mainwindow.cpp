@@ -45,6 +45,7 @@
 #include <cc2DViewportObject.h>
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
+#include <ccFileUtils.h>
 #include <ccQuadric.h>
 #include <ccSphere.h>
 
@@ -2767,7 +2768,7 @@ void MainWindow::doActionExportDepthBuffer()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, DepthMapFileFilter::GetFileFilter());
 	if (filename.isEmpty())
@@ -8528,7 +8529,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		//persistent settings
 		QSettings settings;
 		settings.beginGroup(ccPS::SaveFile());
-		QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+		QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 		QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 		if (outputFilename.isEmpty())
@@ -8600,7 +8601,7 @@ void MainWindow::doActionExportCloudsInfo()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (outputFilename.isEmpty())
@@ -9309,7 +9310,7 @@ void MainWindow::doActionLoadFile()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 	QString currentOpenDlgFilter = settings.value(ccPS::SelectedInputFilter(),BinFilter::GetFileFilter()).toString();
 
 	// Add all available file I/O filters (with import capabilities)
@@ -9568,7 +9569,7 @@ void MainWindow::doActionSaveFile()
 		selectedFilter = settings.value(ccPS::SelectedOutputFilterPoly(), selectedFilter).toString();
 	
 	//default output path (+ filename)
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 	QString fullPathName = currentPath;
 	if (selNum == 1)
 	{

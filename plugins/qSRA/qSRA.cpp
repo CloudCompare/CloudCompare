@@ -32,6 +32,7 @@
 #include <QMainWindow>
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
@@ -154,7 +155,7 @@ void qSRA::loadProfile() const
 	//persistent settings (default import path)
 	QSettings settings;
 	settings.beginGroup("qSRA");
-	QString path = settings.value("importPath",QApplication::applicationDirPath()).toString();
+	QString path = settings.value("importPath", ccFileUtils::defaultDocPath()).toString();
 
 	ProfileImportDlg piDlg(m_app->getMainWindow());
 	piDlg.setDefaultFilename(path);

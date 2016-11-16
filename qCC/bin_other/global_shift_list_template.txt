@@ -6,7 +6,7 @@
 // loading a file with big coordinates).
 //
 // All values are separated by a semicolon character (;):
-//    name; shift(X); shif(Y); shif(Z); scale;
+//    name; shift(X); shift(Y); shift(Z); scale;
 //
 // Example:
 //

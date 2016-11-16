@@ -35,6 +35,7 @@
 #include <QMessageBox>
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccHObjectCaster.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
@@ -683,7 +684,7 @@ void qFacets::exportFacets()
 	//persistent settings (default export path)
 	QSettings settings;
 	settings.beginGroup("qFacets");
-	QString facetsSavePath = settings.value("exportPath", QApplication::applicationDirPath()).toString();
+	QString facetsSavePath = settings.value("exportPath", ccFileUtils::defaultDocPath()).toString();
 	fDlg.destinationPathLineEdit->setText(facetsSavePath + QString("/facets.shp"));
 
 	if (!fDlg.exec())
@@ -1041,7 +1042,7 @@ void qFacets::exportFacetsInfo()
 	//persistent settings (default export path)
 	QSettings settings;
 	settings.beginGroup("qFacets");
-	QString facetsSavePath = settings.value("exportPath", QApplication::applicationDirPath()).toString();
+	QString facetsSavePath = settings.value("exportPath", ccFileUtils::defaultDocPath()).toString();
 	fDlg.destinationPathLineEdit->setText(facetsSavePath + QString("/facets.csv"));
 
 	if (!fDlg.exec())

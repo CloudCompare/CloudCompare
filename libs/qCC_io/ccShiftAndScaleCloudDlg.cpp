@@ -25,8 +25,10 @@
 #include "ccGlobalShiftManager.h"
 
 //Qt
-#include <QPushButton>
+#include <QDebug>
+#include <QDir>
 #include <QFile>
+#include <QPushButton>
 #include <QTextStream>
 #include <QStringList>
 
@@ -151,9 +153,9 @@ void ccShiftAndScaleCloudDlg::displayMoreInfo()
 }
 
 bool ccShiftAndScaleCloudDlg::addFileInfo()
-{
+{	
 	//try to load the 'global_shift_list.txt" file
-	return loadInfoFromFile(QApplication::applicationDirPath() + QString("/")+ s_defaultGlobalShiftListFilename);
+	return loadInfoFromFile(QDir::currentPath() + QString("/")+ s_defaultGlobalShiftListFilename);
 }
 
 bool ccShiftAndScaleCloudDlg::loadInfoFromFile(QString filename)

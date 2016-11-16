@@ -1413,12 +1413,12 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
 
 							//add "original" entry
-							int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
+							int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original", globalShift, globalScale));
 							//sasDlg.setCurrentProfile(index);
 							//add "suggested" entry
 							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-							index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
+							index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested", suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
 							ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
@@ -1432,7 +1432,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 								//get the relative modification to existing global shift/scale info
 								assert(cloud->getGlobalScale() != 0);
 								scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
-								shiftChange =  (sasDlg.getShift() - cloud->getGlobalShift());
+								shiftChange = (sasDlg.getShift() - cloud->getGlobalShift());
 
 								updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
 
@@ -1440,7 +1440,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 								if (updateGlobalShiftAndScale)
 								{
 									transMat.scale(scaleChange);
-									transMat.setTranslation(transMat.getTranslationAsVec3D()+shiftChange*scaleChange);
+									transMat.setTranslation(transMat.getTranslationAsVec3D() + shiftChange*scaleChange);
 								}
 							}
 							else if (sasDlg.cancelled())
@@ -1516,7 +1516,7 @@ void MainWindow::doActionApplyScale()
 	{
 		bool testBigCoordinates = true;
 		//size_t processNum = 0;
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
 			bool lockedVertices;
@@ -1536,12 +1536,12 @@ void MainWindow::doActionApplyScale()
 			}
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 				//++processNum;
 				continue;
 			}
 
-			CCVector3 C(0,0,0);
+			CCVector3 C(0, 0, 0);
 			if (keepInPlace)
 				C = cloud->getOwnBB().getCenter();
 
@@ -1605,12 +1605,12 @@ void MainWindow::doActionApplyScale()
 
 	//now do the real scaling work
 	{
-		for (size_t i=0; i<candidates.size(); ++i)
+		for (size_t i = 0; i < candidates.size(); ++i)
 		{
 			ccHObject* ent = candidates[i].first;
 			ccGenericPointCloud* cloud = candidates[i].second;
 
-			CCVector3 C(0,0,0);
+			CCVector3 C(0, 0, 0);
 			if (keepInPlace)
 			{
 				C = cloud->getOwnBB().getCenter();

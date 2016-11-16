@@ -43,7 +43,7 @@
 //System
 #include <string.h>
 #include <assert.h>
-#include <math.h> //for modf
+#include <cmath> //for std::modf
 
 static CCVector3 s_blankNorm(0,0,0);
 
@@ -3274,10 +3274,10 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 			{
 				//get the texture coordinates between 0 and 1
 				float temp;
-				float tx = modf(Tx[0], &temp);
+				float tx = std::modf(Tx[0], &temp);
 				if (tx < 0)
 					tx = 1.0f + tx;
-				float ty = modf(Tx[1], &temp);
+				float ty = std::modf(Tx[1], &temp);
 				if (ty < 0)
 					ty = 1.0f + ty;
 
@@ -3374,28 +3374,28 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	//if (x < 0 || x > 1.0 || y < 0 || y > 1.0)
 	if (x > 1.0)
 	{
-		double xFrac,xInt;
-		xFrac = modf(x,&xInt);
+		double xFrac, xInt;
+		xFrac = std::modf(x, &xInt);
 		x = xFrac;
 	}
 	else if (x < 0.0)
 	{
-		double xFrac,xInt;
-		xFrac = modf(x,&xInt);
+		double xFrac, xInt;
+		xFrac = std::modf(x, &xInt);
 		x = 1.0 + xFrac;
 	}
 
 	//same thing for y
 	if (y > 1.0)
 	{
-		double yFrac,yInt;
-		yFrac = modf(y,&yInt);
+		double yFrac, yInt;
+		yFrac = std::modf(y, &yInt);
 		y = yFrac;
 	}
 	else if (y < 0.0)
 	{
-		double yFrac,yInt;
-		yFrac = modf(y,&yInt);
+		double yFrac, yInt;
+		yFrac = std::modf(y, &yInt);
 		y = 1.0 + yFrac;
 	}
 

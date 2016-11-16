@@ -9346,9 +9346,11 @@ void MainWindow::doActionLoadFile()
 																currentPath,
 																fileFilters.join(s_fileFilterSeparator),
 																&currentOpenDlgFilter
+#ifdef Q_OS_WIN
 //#ifdef QT_DEBUG
 																, QFileDialog::DontUseNativeDialog
 //#endif
+#endif
 															);
 	if (selectedFiles.isEmpty())
 		return;

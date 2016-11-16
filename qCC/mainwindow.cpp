@@ -245,7 +245,10 @@ MainWindow::MainWindow()
 	enable3DMouse(true, true);
 #else
 	delete actionEnable3DMouse;
+	actionEnable3DMouse = nullptr;
+	
 	delete menu3DMouse;
+	menu3DMouse = nullptr;
 #endif
 
 #ifdef CC_GAMEPADS_SUPPORT
@@ -254,7 +257,10 @@ MainWindow::MainWindow()
 	QMetaObject::invokeMethod(this, "enableGamepad", Qt::QueuedConnection, Q_ARG(bool, true), Q_ARG(bool, true));
 #else
 	delete actionEnableGamepad;
+	actionEnableGamepad = nullptr;
+	
 	delete menuGamepad;
+	menuGamepad = nullptr;
 #endif
 
 	new3DView();

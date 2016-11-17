@@ -19,9 +19,9 @@
 
 //Qt
 #include <QApplication>
+#include <QDir>
 #include <QGLFormat>
 #ifdef Q_OS_MAC
-#include <QDir>
 #include <QFileOpenEvent>
 #endif
 
@@ -137,19 +137,19 @@ int main(int argc, char *argv[])
 	VLDEnable();
 #endif
 	
+	QDir  workingDir = QCoreApplication::applicationDirPath();
+	
 #ifdef Q_OS_MAC	
 	// This makes sure that our "working directory" is not within the application bundle
-	QDir  appDir = QCoreApplication::applicationDirPath();
-	
-	if ( appDir.dirName() == "MacOS" )
+	if ( workingDir.dirName() == "MacOS" )
 	{
-		appDir.cdUp();
-		appDir.cdUp();
-		appDir.cdUp();
-		
-		QDir::setCurrent( appDir.absolutePath() );
+		workingDir.cdUp();
+		workingDir.cdUp();
+		workingDir.cdUp();
 	}
 #endif
+	
+	QDir::setCurrent( workingDir.absolutePath() );
 	
 	if (!QGLFormat::hasOpenGL())
 	{

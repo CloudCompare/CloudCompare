@@ -24,6 +24,7 @@
 #include "ccIsolines.h"
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
@@ -944,7 +945,7 @@ void ccRasterizeTool::generateRaster() const
 	{
 		QSettings settings;
 		settings.beginGroup(ccPS::HeightGridGeneration());
-		QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
+		QString imageSavePath = settings.value("savePathImage", ccFileUtils::defaultDocPath()).toString();
 		outputFilename = QFileDialog::getSaveFileName(	const_cast<ccRasterizeTool*>(this),
 														"Save height grid raster",
 														imageSavePath + QString("/raster.tif"),
@@ -1882,7 +1883,7 @@ void ccRasterizeTool::generateImage() const
 		{
 			QSettings settings;
 			settings.beginGroup(ccPS::HeightGridGeneration());
-			QString imageSavePath = settings.value("savePathImage", QApplication::applicationDirPath()).toString();
+			QString imageSavePath = settings.value("savePathImage", ccFileUtils::defaultDocPath()).toString();
 
 			QString outputFilename = ImageFileFilter::GetSaveFilename(	"Save raster image",
 																		"raster_image",
@@ -1919,7 +1920,7 @@ void ccRasterizeTool::generateASCIIMatrix() const
 
 	QSettings settings;
 	settings.beginGroup(ccPS::HeightGridGeneration());
-	QString asciiGridSavePath = settings.value("savePathASCIIGrid", QApplication::applicationDirPath()).toString();
+	QString asciiGridSavePath = settings.value("savePathASCIIGrid", ccFileUtils::defaultDocPath()).toString();
 
 	//open file saving dialog
 	QString filter("ASCII file (*.txt)");

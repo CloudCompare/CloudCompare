@@ -396,7 +396,7 @@ ccCommandLineParser::EntityDesc::EntityDesc(QString filename, int _indexInFile/*
 	if (filename.isNull())
 	{
 		basename = "unknown";
-		path = QApplication::applicationDirPath();
+		path = QDir::currentPath();
 	}
 	else
 	{
@@ -2245,7 +2245,7 @@ bool ccCommandLineParser::commandCrossSection(QStringList& arguments, QDialog* p
 					if (fromFiles)
 					{
 						assert(false);
-						outputDir = QDir(QCoreApplication::applicationDirPath());
+						outputDir = QDir::current();
 					}
 					else
 					{

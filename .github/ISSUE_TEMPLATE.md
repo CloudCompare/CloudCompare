@@ -13,8 +13,8 @@
 <!--- or ideas how to implement the addition or change -->
 
 ## Steps to Reproduce (for bugs)
-<!--- Provide a link to a live example, or an unambiguous set of steps to -->
-<!--- reproduce this bug. Include code to reproduce, if relevant -->
+<!--- Provide an unambiguous set of steps to reproduce this bug. -->
+<!--- Include images if relevant -->
 
 ## Context
 <!--- How has this issue affected you? What are you trying to accomplish? -->

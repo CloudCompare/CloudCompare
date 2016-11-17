@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/pledgielogo.png</file>
     <file>images/gamepad.png</file>
     <file>images/restore.png</file>
     <file>images/square.png</file>

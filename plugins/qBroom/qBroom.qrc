@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qBroom">
+    <file>cea_logo_small.jpg</file>
+    <file>cea_logo.jpg</file>
+    <file>btn_donateCC_LG.gif</file>
+    <file>qBroom.png</file>
+    <file>warning.png</file>
+  </qresource>
+</RCC>

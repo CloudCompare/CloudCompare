@@ -2290,17 +2290,6 @@ struct DisplayDesc : LODLevelDesc
 	LODIndexSet* indexMap;
 };
 
-struct LODBasedRenderingParams
-{
-	ccScalarField* activeSF;
-	const ccNormalVectors* compressedNormals;
-	PointCoordinateType* _points;
-	PointCoordinateType* _normals;
-	ColorCompType* _rgb;
-	GLsizei bufferCount;
-	QOpenGLFunctions_2_1* glFunc;
-};
-
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!m_points->isAllocated())

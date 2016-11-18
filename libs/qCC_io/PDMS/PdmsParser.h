@@ -81,7 +81,7 @@ protected:
 	FILE* m_file;
 
 public:
-	PdmsFileSession(std::string filename);
+	PdmsFileSession(const std::string &filename);
 	virtual ~PdmsFileSession() {closeSession();}
 	virtual bool initializeSession();
 	virtual void closeSession(bool destroyLoadedObject=false);

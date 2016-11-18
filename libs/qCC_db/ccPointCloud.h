@@ -70,7 +70,7 @@ public:
 		added to this cloud, at least partially).
 		\param name cloud name (optional)
 	**/
-	ccPointCloud(QString name = QString()) throw();
+	ccPointCloud(QString name = QString()) noexcept;
 
 	//! Default destructor
 	virtual ~ccPointCloud();
@@ -728,11 +728,11 @@ protected: // VBO
 		vboSet()
 			: hasColors(false)
 			, colorIsSF(false)
-			, sourceSF(0)
+			, sourceSF(nullptr)
 			, hasNormals(false)
 			, totalMemSizeBytes(0)
-			, state(NEW)
 			, updateFlags(0)
+			, state(NEW)
 		{}
 
 		std::vector<VBO*> vbos;

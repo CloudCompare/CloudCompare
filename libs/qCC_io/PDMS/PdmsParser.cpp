@@ -272,12 +272,12 @@ void PdmsLexer::pushIntoDictionnary(const char *str, Token token, int minSize)
 		dictionnary[std::string(str).substr(0, minSize)] = token;
 }
 
-PdmsFileSession::PdmsFileSession(std::string filename)
-	: m_filename(filename)
-	, m_currentLine(-1)
-	, m_eol(false)
-	, m_eof(false)
-	, m_file(0)
+PdmsFileSession::PdmsFileSession(const std::string &filename)
+    : m_filename(filename)
+    , m_currentLine(-1)
+    , m_eol(false)
+    , m_eof(false)
+    , m_file(0)
 {}
 
 bool PdmsFileSession::initializeSession()

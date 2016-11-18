@@ -558,6 +558,7 @@ public:
 		: m_lod(lod)
 		, m_frustum(frustum)
 		, m_maxLevel(maxLevel)
+		, m_hasClipPlanes(false)
 	{}
 
 	void setClipPlanes(const ccClipPlaneSet& clipPlanes)

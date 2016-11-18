@@ -2258,16 +2258,16 @@ struct DisplayDesc : LODLevelDesc
 	DisplayDesc()
 		: LODLevelDesc()
 		, endIndex(0)
-		, indexMap(0)
 		, decimStep(1)
+		, indexMap(nullptr)
 	{}
 
 	//! Constructor from a start index and a count value
 	DisplayDesc(unsigned startIndex, unsigned count)
 		: LODLevelDesc(startIndex, count)
 		, endIndex(startIndex+count)
-		, indexMap(0)
 		, decimStep(1)
+		, indexMap(nullptr)
 	{}
 
 	//! Set operator
@@ -2281,12 +2281,12 @@ struct DisplayDesc : LODLevelDesc
 	
 	//! Last index (excluded)
 	unsigned endIndex;
+	
+	//! Decimation step (for non-octree based LoD)
+	unsigned decimStep;
 
 	//! Map of indexes (to invert the natural order)
 	LODIndexSet* indexMap;
-
-	//! Decimation step (for non-octree based LoD)
-	unsigned decimStep;
 };
 
 struct LODBasedRenderingParams

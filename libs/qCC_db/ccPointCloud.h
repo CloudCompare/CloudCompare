@@ -70,7 +70,7 @@ public:
 		added to this cloud, at least partially).
 		\param name cloud name (optional)
 	**/
-	ccPointCloud(QString name = QString()) noexcept;
+	ccPointCloud(QString name = QString()) throw();
 
 	//! Default destructor
 	virtual ~ccPointCloud();

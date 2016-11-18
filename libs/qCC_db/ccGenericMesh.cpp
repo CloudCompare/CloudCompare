@@ -113,23 +113,23 @@ void ccGenericMesh::EnableGLStippleMask(const QOpenGLContext* context, bool stat
 }
 
 //Vertex buffer
-PointCoordinateType s_xyzBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 PointCoordinateType* ccGenericMesh::GetVertexBuffer()
 {
+	static PointCoordinateType s_xyzBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 	return s_xyzBuffer;
 }
 
 //Normals buffer
-PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 PointCoordinateType* ccGenericMesh::GetNormalsBuffer()
 {
+	static PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 	return s_normBuffer;
 }
 
 //Colors buffer
-ColorCompType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 ColorCompType* ccGenericMesh::GetColorsBuffer()
 {
+	static ColorCompType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 	return s_rgbBuffer;
 }
 

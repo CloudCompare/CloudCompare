@@ -2578,7 +2578,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps != 0);
 
-					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
+					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < static_cast<GLint>(steps))
 					{
 						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
 						colorRampShader = 0;
@@ -3162,7 +3162,7 @@ void ccPointCloud::deleteScalarField(int index)
 
 	//current SF should still be up-to-date!
 	if (m_currentInScalarFieldIndex < 0 && getNumberOfScalarFields() > 0)
-		setCurrentInScalarField((int)getNumberOfScalarFields()-1);
+		setCurrentInScalarField(static_cast<int>(getNumberOfScalarFields()-1));
 
 	setCurrentDisplayedScalarField(m_currentInScalarFieldIndex);
 	showSF(m_currentInScalarFieldIndex >= 0);

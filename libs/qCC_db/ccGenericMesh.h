@@ -183,11 +183,11 @@ public:
 	void importParametersFrom(const ccGenericMesh* mesh);
 
 	//! Brute force triangle picking
-	bool trianglePicking(	const CCVector2d& clickPos,
-							const ccGLCameraParameters& camera,
-							int& nearestTriIndex,
-							double& nearestSquareDist,
-							CCVector3d& nearestPoint);
+	virtual bool trianglePicking(	const CCVector2d& clickPos,
+									const ccGLCameraParameters& camera,
+									int& nearestTriIndex,
+									double& nearestSquareDist,
+									CCVector3d& nearestPoint);
 
 protected:
 

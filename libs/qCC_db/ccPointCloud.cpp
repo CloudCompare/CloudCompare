@@ -431,12 +431,11 @@ void ccPointCloud::clear()
 
 void ccPointCloud::unalloactePoints()
 {
-	clearLOD();
 	showSFColorsScale(false); //SFs will be destroyed
 	ChunkedPointCloud::clear();
 	ccGenericPointCloud::clear();
 
-	notifyGeometryUpdate(); //calls releaseVBOs()
+	notifyGeometryUpdate(); //calls releaseVBOs() & clearLOD()
 }
 
 void ccPointCloud::notifyGeometryUpdate()

@@ -20,7 +20,7 @@
 
 #ifndef SortAlgo
 
-	#if (_MSC_VER >= 1800)
+	#if defined(_MSC_VER) && (_MSC_VER >= 1800)
 
 		//Parallel Patterns Library (for parallel sort)
 		#include <ppl.h>

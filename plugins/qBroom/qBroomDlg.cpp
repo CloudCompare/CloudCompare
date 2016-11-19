@@ -512,11 +512,15 @@ void qBroomDlg::onSelectionModeChanged(int mode)
 	m_selectionMode = static_cast<SelectionModes>(selectionModeComboBox->currentIndex());
 	m_selectionBox->setEnabled(m_selectionMode != INSIDE);
 	cleanHeightDoubleSpinBox->setEnabled(m_selectionMode != INSIDE);
-	if (m_selectionMode != formerMode && m_glWindow)
+	if (m_selectionMode != formerMode)
 	{
-		updateBroomBox();
-		updateSelectionBox();
-		m_glWindow->redraw();
+		removeSelectedPointsCheckBox->setChecked(mode != 0); //mode '0' is inside (--> we'll probably want to keep these points)
+		if (m_glWindow)
+		{
+			updateBroomBox();
+			updateSelectionBox();
+			m_glWindow->redraw();
+		}
 	}
 }
 
@@ -1954,6 +1958,9 @@ ccPointCloud* qBroomDlg::createSegmentedCloud(ccPointCloud* cloud, bool removeSe
 
 void qBroomDlg::apply()
 {
+	//save persistent settings
+	savePersistentSettings();
+
 	ccViewportParameters formerViewport = m_glWindow->getViewportParameters();
 	m_cloud.restore();
 	
@@ -1994,16 +2001,19 @@ void qBroomDlg::closeEvent(QCloseEvent* e)
 	e->accept();
 }
 
+void qBroomDlg::savePersistentSettings()
+{
+	QSettings settings;
+	settings.beginGroup("qBroom");
+	settings.setValue("selectionMode", selectionModeComboBox->currentIndex());
+	settings.setValue("stickToTheFloor", stickCheckBox->isChecked());
+	settings.setValue("animatedAutomation", animateAutomationCheckBox->isChecked());
+}
+
 void qBroomDlg::validate()
 {
 	//save persistent settings
-	{
-		QSettings settings;
-		settings.beginGroup("qBroom");
-		settings.setValue("selectionMode", selectionModeComboBox->currentIndex());
-		settings.setValue("stickToTheFloor", stickCheckBox->isChecked());
-		settings.setValue("animatedAutomation", animateAutomationCheckBox->isChecked());
-	}
+	savePersistentSettings();
 
 	//we don't want the cloud to be managed by the dialog anymore
 	ccPointCloud* cloud = m_cloud.ref;

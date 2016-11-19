@@ -168,6 +168,9 @@ protected: //methods
 	//! Updates the automation area preview polyline
 	void updateAutomationAreaPolyline(int x, int y);
 
+	//! Saves persistent settings
+	void savePersistentSettings();
+
 protected: //members
 
 	//! Cloud original state backup structure

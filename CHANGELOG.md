@@ -6,6 +6,12 @@ v2.8.beta - XX/XX/2016
 
 - New features:
 
+	* New plugin: qBroom (Virtual Broom)
+		- smart and interactive selection of points on a surface (globally flat, e.g. like a road ;)
+		- selection of the points inside the 'broom', above, below or both
+		- option to invert the selection
+		- automation mode
+
 	* New plugin: qCSF (Cloth Simulation Filtering)
 		- automatic ground / non-ground classification of aerial LIDAR point clouds
 		- based on the article: "An Easy-to-Use Airborne LIDAR Data Filtering Method Based on Cloth Simulation", Qi Jianbo, Wan Peng, 2015

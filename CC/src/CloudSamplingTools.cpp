@@ -499,14 +499,14 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 	//output
 	ReferenceCloud* filteredCloud = 0;
 
-	for (unsigned step=0; step<1; ++step) //fake loop for easy break
+	for (unsigned step = 0; step < 1; ++step) //fake loop for easy break
 	{
 		unsigned pointCount = inputCloud->size();
 
 		std::vector<PointCoordinateType> meanDistances;
 		try
 		{
-			meanDistances.resize(pointCount,0);
+			meanDistances.resize(pointCount, 0);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -538,10 +538,10 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 			//deduce the average distance and std. dev.
 			double sumDist = 0;
 			double sumSquareDist = 0;
-			for (unsigned i=0; i<pointCount; ++i)
+			for (unsigned i = 0; i < pointCount; ++i)
 			{
 				sumDist += meanDistances[i];
-				sumSquareDist += meanDistances[i]*meanDistances[i];
+				sumSquareDist += meanDistances[i] * meanDistances[i];
 			}
 			avgDist = sumDist / pointCount;
 			stdDev = sqrt(fabs(sumSquareDist / pointCount - avgDist*avgDist));
@@ -561,7 +561,7 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 				break;
 			}
 
-			for (unsigned i=0; i<pointCount; ++i)
+			for (unsigned i = 0; i < pointCount; ++i)
 			{
 				if (meanDistances[i] <= maxDist)
 				{
@@ -855,28 +855,28 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 												NormalizedProgress* nProgress/*=0*/)
 {
 	int knn											= *static_cast<int*>(additionalParameters[0]);
-	std::vector<PointCoordinateType>& meanDistances	= *static_cast<std::vector<PointCoordinateType>*>(additionalParameters[1]);
+	std::vector<PointCoordinateType>& meanDistances = *static_cast<std::vector<PointCoordinateType>*>(additionalParameters[1]);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.minNumberOfNeighbors = knn; //DGM: I woud have put knn+1 (as the point itself will be ignored) but in this case we won't get the same result as PCL!
-	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
+	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 
 	unsigned n = cell.points->size(); //number of points in the current cell
 
 	//for each point in the cell
-	for (unsigned i=0; i<n; ++i)
+	for (unsigned i = 0; i < n; ++i)
 	{
-		cell.points->getPoint(i,nNSS.queryPoint);
+		cell.points->getPoint(i, nNSS.queryPoint);
 		const unsigned globalIndex = cell.points->getPointGlobalIndex(i);
 
 		//look for the k nearest neighbors
 		unsigned neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		double sumDist = 0;
 		unsigned count = 0;
-		for (unsigned j=0; j<neighborCount; ++j)
+		for (int j = 0; j < knn; ++j)
 		{
 			if (nNSS.pointsInNeighbourhood[j].pointIndex != globalIndex)
 			{
@@ -884,7 +884,7 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 				++count;
 			}
 		}
-		
+
 		if (count)
 		{
 			meanDistances[globalIndex] = static_cast<PointCoordinateType>(sumDist / count);

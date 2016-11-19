@@ -5527,7 +5527,7 @@ void MainWindow::doActionSORFilter()
 	size_t selNum = m_selectedEntities.size();
 	bool firstCloud = true;
 	
-	for (size_t i=0; i<selNum; ++i)
+	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
 
@@ -5536,7 +5536,7 @@ void MainWindow::doActionSORFilter()
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 		if (cloud && lockedVertices)
 		{
-			ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
 			continue;
 		}
 

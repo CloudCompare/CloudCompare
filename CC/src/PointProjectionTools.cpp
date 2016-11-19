@@ -116,7 +116,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* cloud, unsig
 	unsigned char dim1 = (dim>0 ? dim-1 : 2);
 	unsigned char dim2 = (dim<2 ? dim+1 : 0);
 
-	float tan_alpha = tan(alpha*static_cast<float>(CC_DEG_TO_RAD));
+	float tan_alpha = tanf(alpha*static_cast<float>(CC_DEG_TO_RAD));
 	//float cos_alpha = cos(alpha*CC_DEG_TO_RAD);
 	//float sin_alpha = sin(alpha*CC_DEG_TO_RAD);
 	float q = 1.0f/(1.0f+tan_alpha*tan_alpha);

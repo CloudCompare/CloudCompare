@@ -1450,7 +1450,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 	//Find all pairs which are d1-appart and d2-appart
 	std::vector<IndexPair> pairs1, pairs2;
 	{
-		unsigned count = (unsigned)cloud->size();
+		unsigned count = static_cast<unsigned>(cloud->size());
 		std::vector<unsigned> pointsIndexes;
 		try
 		{
@@ -1502,7 +1502,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 	{
 		SimpleCloud tmpCloud1,tmpCloud2;
 		{
-			unsigned count = (unsigned)pairs1.size();
+			unsigned count = static_cast<unsigned>(pairs1.size());
 			if (!tmpCloud1.reserve(count*2)) //not enough memory
 				return -2;
 			for(unsigned i=0; i<count; i++)
@@ -1518,7 +1518,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 		}
 	
 		{
-			unsigned count = (unsigned)pairs2.size();
+			unsigned count = static_cast<unsigned>(pairs2.size());
 			if (!tmpCloud2.reserve(count*2)) //not enough memory
 				return -3;
 			for(unsigned i=0; i<count; i++)
@@ -1540,7 +1540,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 
 		//Find matching (up to delta) intermediate points in tmpCloud1 and tmpCloud2
 		{
-			unsigned count = (unsigned)tmpCloud2.size();
+			unsigned count = static_cast<unsigned>(tmpCloud2.size());
 			match.reserve(count);
 			if (match.capacity() < count)	//not enough memory
 				return -5;

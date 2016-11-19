@@ -33,9 +33,6 @@ class CC_CORE_LIB_API GenericIndexedCloud : virtual public GenericCloud
 
 public:
 
-	//! Default constructor
-	GenericIndexedCloud() : GenericCloud() {}
-
 	//! Default destructor
 	virtual ~GenericIndexedCloud() {}
 

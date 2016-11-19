@@ -154,8 +154,8 @@ bool WeibullDistribution::setParameters(ScalarType _a, ScalarType _b, ScalarType
 	if (a > 0.0 && b >= 0.0)
 	{
 		//moyenne et ecart type
-		mu = (ScalarType)(gamma_cc(1.0+1.0/a) * b);
-		sigma2 =(ScalarType)(gamma_cc(1.0+2.0/a) * (b*b) - (mu*mu));
+		mu = static_cast<ScalarType>(gamma_cc(1.0+1.0/a) * b);
+		sigma2 = static_cast<ScalarType>(gamma_cc(1.0+2.0/a) * (b*b) - (mu*mu));
 
 		setValid(true);
 	}

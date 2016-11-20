@@ -52,16 +52,6 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menu3DMouse">
-     <property name="title">
-      <string>3D mouse</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/im3DxLogo.png</normaloff>:/CC/images/im3DxLogo.png</iconset>
-     </property>
-     <addaction name="actionEnable3DMouse"/>
-    </widget>
     <widget class="QMenu" name="menuGamepad">
      <property name="title">
       <string>Gamepad</string>
@@ -78,7 +68,6 @@
     <addaction name="separator"/>
     <addaction name="actionPrimitiveFactory"/>
     <addaction name="separator"/>
-    <addaction name="menu3DMouse"/>
     <addaction name="menuGamepad"/>
     <addaction name="separator"/>
     <addaction name="actionCloseAll"/>
@@ -2255,14 +2244,6 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
-  <action name="actionEnable3DMouse">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Enable</string>
    </property>
   </action>
   <action name="actionSetOrthoView">

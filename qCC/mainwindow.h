@@ -236,6 +236,8 @@ protected slots:
 	virtual void setBackView() override;
 	virtual void setLeftView() override;
 	virtual void setRightView() override;
+	virtual void setIsoView1() override;
+	virtual void setIsoView2() override;
 	virtual void toggleActiveWindowStereoVision(bool);
 	virtual void toggleActiveWindowCenteredPerspective() override;
 	virtual void toggleActiveWindowCustomLight() override;
@@ -243,8 +245,6 @@ protected slots:
 	virtual void toggleActiveWindowViewerBasedPerspective() override;
 	virtual void zoomOnSelectedEntities() override;
 
-	void setIsoView1();
-	void setIsoView2();
 	void toggleRotationAboutVertAxis();
 	void doActionEnableBubbleViewMode();
 	void setGlobalZoom();

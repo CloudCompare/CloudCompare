@@ -793,7 +793,11 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
 	appendRow(ITEM("Name"), ITEM(_obj->getName().isEmpty() ? "undefined" : _obj->getName()));
 
 	//"Apply Viewport" button
-	appendRow(ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_LABEL_VIEWPORT), true);
+	appendRow(ITEM("Apply viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_LABEL_VIEWPORT), true);
+
+	//"Update Viewport" button
+	appendRow(ITEM("Update viewport"), PERSISTENT_EDITOR(OBJECT_UPDATE_LABEL_VIEWPORT), true);
+	
 }
 
 void ccPropertiesTreeDelegate::fillWithTransBuffer(ccIndexedTransformationBuffer* _obj)
@@ -1248,6 +1252,15 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	{
 		QPushButton* button = new QPushButton("Apply", parent);
 		connect(button, SIGNAL(clicked()), this, SLOT(applyLabelViewport()));
+
+		button->setMinimumHeight(30);
+		outputWidget = button;
+	}
+	break;
+	case OBJECT_UPDATE_LABEL_VIEWPORT:
+	{
+		QPushButton* button = new QPushButton("Update", parent);
+		connect(button, SIGNAL(clicked()), this, SLOT(updateLabelViewport()));
 
 		button->setMinimumHeight(30);
 		outputWidget = button;
@@ -2124,6 +2137,22 @@ void ccPropertiesTreeDelegate::applyLabelViewport()
 
 	win->setViewportParameters(viewport->getParameters());
 	win->redraw();
+}
+
+void ccPropertiesTreeDelegate::updateLabelViewport()
+{
+	if (!m_currentObject)
+		return;
+
+	cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(m_currentObject);
+	assert(viewport);
+
+	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	if (!win)
+		return;
+
+	viewport->setParameters(win->getViewportParameters());
+	ccLog::Print(QString("Viewport '%1' has been updated").arg(viewport->getName()));
 }
 
 void ccPropertiesTreeDelegate::sensorUncertaintyChanged()

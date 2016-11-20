@@ -82,6 +82,7 @@ public:
 							OBJECT_COLOR_RAMP_STEPS					,
 							OBJECT_MATERIALS						,
 							OBJECT_APPLY_LABEL_VIEWPORT				,
+							OBJECT_UPDATE_LABEL_VIEWPORT			,
 							OBJECT_LABEL_DISP_2D					,
 							OBJECT_LABEL_POINT_LEGEND				,
 							OBJECT_PRIMITIVE_PRECISION				,
@@ -145,6 +146,7 @@ protected slots:
 	void applyImageViewport();
 	void applySensorViewport();
 	void applyLabelViewport();
+	void updateLabelViewport();
 	void updateDisplay();
 	void objectDisplayChanged(const QString &);
 	void colorSourceChanged(const QString &);

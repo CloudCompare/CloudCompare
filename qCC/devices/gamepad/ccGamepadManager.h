@@ -1,5 +1,5 @@
-#ifndef CC3DMOUSEMANAGER_H
-#define CC3DMOUSEMANAGER_H
+#ifndef CCGAMEPADMANAGER_H
+#define CCGAMEPADMANAGER_H
 
 //##########################################################################
 //#                                                                        #
@@ -22,39 +22,38 @@
 
 class QAction;
 class QMenu;
+class QString;
 
 class ccMainAppInterface;
-class Mouse3DInput;
+class GamepadInput;
 
 
-class cc3DMouseManager : public QObject
+class ccGamepadManager : public QObject
 {
 	Q_OBJECT
-
+	
 public:
-	cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent );
-	~cc3DMouseManager();
-
-	//! Gets the menu associated with the 3D mouse
+	ccGamepadManager( ccMainAppInterface *appInterface, QObject *parent );
+	~ccGamepadManager();
+	
+	//! Gets the menu associated with gamepads
 	QMenu	*menu() { return mMenu; }
-
+	
 private:
 	void enableDevice(bool state, bool silent);
 	void releaseDevice();
 
+	void showMessage(QString message, bool asWarning);
 	void setupMenu();
-
-	void on3DMouseKeyUp(int key);
-	void on3DMouseKeyDown(int key);
-	void on3DMouseMove(std::vector<float> &vec);
-	void on3DMouseReleased();
-
-
-	ccMainAppInterface *mAppInterface;
-
-	Mouse3DInput *m3dMouseInput;
-
-	QMenu *mMenu;
+	
+	void onGamepadInput();
+	
+	
+	ccMainAppInterface	*mAppInterface;
+	
+	GamepadInput	*mGamepadInput;
+	
+	QMenu	*mMenu;
 	QAction *mActionEnable;
 };
 

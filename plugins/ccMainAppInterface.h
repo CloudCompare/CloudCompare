@@ -168,6 +168,10 @@ public:
 	virtual void toggleActiveWindowSunLight() = 0;
 	virtual void toggleActiveWindowViewerBasedPerspective() = 0;
 	virtual void zoomOnSelectedEntities() = 0;
+	virtual void setGlobalZoom() = 0;
+
+	virtual void increasePointSize() = 0;
+	virtual void decreasePointSize() = 0;
 };
 
 #endif //CC_MAIN_APP_INTERFACE_HEADER

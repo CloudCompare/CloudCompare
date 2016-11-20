@@ -119,7 +119,7 @@
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
-#include "devices/3dConnexion/Mouse3DInput.h"
+#include "cc3DMouseManager.h"
 #endif
 
 //Gamepads
@@ -146,7 +146,7 @@ static const QString s_fileFilterSeparator(";;");
 MainWindow::MainWindow()
 	: m_ccRoot(0)
 	, m_uiFrozen(false)
-	, m_3dMouseInput(0)
+	, m_3DMouseManager(nullptr)
 	, m_gamepadInput(0)
 	, m_viewModePopupButton(0)
 	, m_pivotVisibilityPopupButton(0)
@@ -245,13 +245,8 @@ MainWindow::MainWindow()
 	connectActions();
 
 #ifdef CC_3DXWARE_SUPPORT
-	enable3DMouse(true, true);
-#else
-	delete actionEnable3DMouse;
-	actionEnable3DMouse = nullptr;
-	
-	delete menu3DMouse;
-	menu3DMouse = nullptr;
+	m_3DMouseManager = new cc3DMouseManager( this, this );
+	menuFile->insertMenu(actionEnableGamepad, m_3DMouseManager->menu());
 #endif
 
 #ifdef CC_GAMEPADS_SUPPORT
@@ -279,7 +274,10 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
 	releaseGamepad();
-	release3DMouse();
+#ifdef CC_3DXWARE_SUPPORT
+	delete m_3DMouseManager;
+	m_3DMouseManager = nullptr;
+#endif
 	cancelPreviousPickingOperation(false); //just in case
 
 	assert(m_ccRoot && m_mdiArea && m_windowMapper);
@@ -519,6 +517,7 @@ void MainWindow::doEnableGLFilter()
 	}
 }
 
+#ifdef CC_GAMEPADS_SUPPORT
 void ShowError(QString message, bool asWarning)
 {
 	if (!asWarning)
@@ -530,6 +529,7 @@ void ShowError(QString message, bool asWarning)
 		ccLog::Warning(message);
 	}
 }
+#endif
 
 void MainWindow::enableGamepad(bool state, bool silent)
 {
@@ -667,182 +667,6 @@ void MainWindow::releaseGamepad()
 #endif
 }
 
-void MainWindow::enable3DMouse(bool state, bool silent)
-{
-#ifdef CC_3DXWARE_SUPPORT
-	if (m_3dMouseInput)
-	{
-		release3DMouse();
-	}
-
-	if (state)
-	{
-		m_3dMouseInput = new Mouse3DInput(this);
-		if (m_3dMouseInput->connect(this,"CloudCompare"))
-		{
-			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)),	this,	SLOT(on3DMouseMove(std::vector<float>&)));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigReleased()),						this,	SLOT(on3DMouseReleased()));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)),			this,	SLOT(on3DMouseKeyDown(int)));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyUp(int)),			this,	SLOT(on3DMouseKeyUp(int)));
-		}
-		else
-		{
-			delete m_3dMouseInput;
-			m_3dMouseInput = 0;
-			
-			if (!silent)
-			{
-				ccLog::Error("[3D Mouse] No device found"); //warning message has already been issued by Mouse3DInput::connect
-			}
-			state = false;
-		}
-	}
-	else
-	{
-		ccLog::Warning("[3D Mouse] Device has been disabled");
-	}
-#else
-	state = false;
-#endif
-
-	actionEnable3DMouse->blockSignals(true);
-	actionEnable3DMouse->setChecked(state);
-	actionEnable3DMouse->blockSignals(false);
-}
-
-void MainWindow::release3DMouse()
-{
-#ifdef CC_3DXWARE_SUPPORT
-	if (m_3dMouseInput)
-	{
-		m_3dMouseInput->disconnectDriver(); //disconnect from the driver
-		m_3dMouseInput->disconnect(this); //disconnect from Qt ;)
-
-		delete m_3dMouseInput;
-		m_3dMouseInput = 0;
-	}
-#endif
-}
-
-void MainWindow::on3DMouseKeyUp(int)
-{
-	//nothing right now
-}
-
-// ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
-void MainWindow::on3DMouseKeyDown(int key)
-{
-#ifdef CC_3DXWARE_SUPPORT
-
-	switch(key)
-	{
-	case Mouse3DInput::V3DK_MENU:
-		//should be handled by the driver now!
-		break;
-	case Mouse3DInput::V3DK_FIT:
-		{
-			if (m_selectedEntities.empty())
-				setGlobalZoom();
-			else
-				zoomOnSelectedEntities();
-		}
-		break;
-	case Mouse3DInput::V3DK_TOP:
-		setTopView();
-		break;
-	case Mouse3DInput::V3DK_LEFT:
-		setLeftView();
-		break;
-	case Mouse3DInput::V3DK_RIGHT:
-		setRightView();
-		break;
-	case Mouse3DInput::V3DK_FRONT:
-		setFrontView();
-		break;
-	case Mouse3DInput::V3DK_BOTTOM:
-		setBottomView();
-		break;
-	case Mouse3DInput::V3DK_BACK:
-		setBackView();
-		break;
-	case Mouse3DInput::V3DK_ROTATE:
-		//should be handled by the driver now!
-		break;
-	case Mouse3DInput::V3DK_PANZOOM:
-		//should be handled by the driver now!
-		break;
-	case Mouse3DInput::V3DK_ISO1:
-		setIsoView1();
-		break;
-	case Mouse3DInput::V3DK_ISO2:
-		setIsoView2();
-		break;
-	case Mouse3DInput::V3DK_PLUS:
-		//should be handled by the driver now!
-		break;
-	case Mouse3DInput::V3DK_MINUS:
-		//should be handled by the driver now!
-		break;
-	case Mouse3DInput::V3DK_DOMINANT:
-		//should be handled by the driver now!
-		break;
-	case Mouse3DInput::V3DK_CW:
-	case Mouse3DInput::V3DK_CCW:
-		{
-			ccGLWindow* activeWin = getActiveGLWindow();
-			if (activeWin)
-			{
-				CCVector3d axis(0,0,-1);
-				CCVector3d trans(0,0,0);
-				ccGLMatrixd mat;
-				double angle = M_PI/2;
-				if (key == Mouse3DInput::V3DK_CCW)
-					angle = -angle;
-				mat.initFromParameters(angle,axis,trans);
-				activeWin->rotateBaseViewMat(mat);
-				activeWin->redraw();
-			}
-		}
-		break;
-	case Mouse3DInput::V3DK_ESC:
-	case Mouse3DInput::V3DK_ALT:
-	case Mouse3DInput::V3DK_SHIFT:
-	case Mouse3DInput::V3DK_CTRL:
-	default:
-		ccLog::Warning("[3D mouse] This button is not handled (yet)");
-		//TODO
-		break;
-	}
-
-#endif
-}
-
-void MainWindow::on3DMouseMove(std::vector<float>& vec)
-{
-#ifdef CC_3DXWARE_SUPPORT
-
-	//active window?
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-	{
-		Mouse3DInput::Apply(vec, win);
-	}
-
-#endif
-}
-
-void MainWindow::on3DMouseReleased()
-{
-	//active window?
-	ccGLWindow* win = getActiveGLWindow();
-	if (win && win->getPivotVisibility() == ccGLWindow::PIVOT_SHOW_ON_MOVE)
-	{
-		//we have to hide the pivot symbol!
-		win->showPivotSymbol(false);
-		win->redraw();
-	}
-}
-
 void MainWindow::connectActions()
 {
 	assert(m_ccRoot);
@@ -861,7 +685,6 @@ void MainWindow::connectActions()
 	connect(actionSave,							SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
 	connect(actionGlobalShiftSettings,			SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
 	connect(actionPrimitiveFactory,				SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
-	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
 	connect(actionEnableGamepad,				SIGNAL(toggled(bool)),	this,		SLOT(setupGamepad(bool)));
 	connect(actionCloseAll,						SIGNAL(triggered()),	this,		SLOT(closeAll()));
 	connect(actionQuit,							SIGNAL(triggered()),	this,		SLOT(close()));

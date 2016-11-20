@@ -62,7 +62,7 @@ class ccPrimitiveFactoryDlg;
 class ccDrawableObject;
 class ccOverlayDialog;
 class QMdiSubWindow;
-class Mouse3DInput;
+class cc3DMouseManager;
 class GamepadInput;
 
 //! Main window
@@ -236,6 +236,8 @@ protected slots:
 	virtual void setBackView() override;
 	virtual void setLeftView() override;
 	virtual void setRightView() override;
+	virtual void setIsoView1() override;
+	virtual void setIsoView2() override;
 	virtual void toggleActiveWindowStereoVision(bool);
 	virtual void toggleActiveWindowCenteredPerspective() override;
 	virtual void toggleActiveWindowCustomLight() override;
@@ -243,8 +245,6 @@ protected slots:
 	virtual void toggleActiveWindowViewerBasedPerspective() override;
 	virtual void zoomOnSelectedEntities() override;
 
-	void setIsoView1();
-	void setIsoView2();
 	void toggleRotationAboutVertAxis();
 	void doActionEnableBubbleViewMode();
 	void setGlobalZoom();
@@ -456,15 +456,6 @@ protected slots:
 	void doActionShowActiveSFPrevious();
 	void doActionShowActiveSFNext();
 
-	//3D mouse
-	void on3DMouseMove(std::vector<float>&);
-	void on3DMouseKeyUp(int);
-	void on3DMouseKeyDown(int);
-	void on3DMouseReleased();
-
-	//! Setups 3D mouse (if any)
-	void setup3DMouse(bool state) { enable3DMouse(state, false); }
-
 	//Gamepad
 	void onGamepadInput();
 	void increasePointSize();
@@ -551,15 +542,6 @@ protected:
 	//! Expands DB tree for selected items
 	void expandDBTreeWithSelection(ccHObject::Container& selection);
 
-	//! Trys to enable (or disable) a 3D mouse device
-	/** \param state whether to enable or disable the device
-		\param silent whether to issue an error message in case of failure
-	**/
-	void enable3DMouse(bool state, bool silent);
-
-	//! Releases any connected 3D mouse
-	void release3DMouse();
-
 	//! Releases any connected gamepad
 	void releaseGamepad();
 
@@ -581,8 +563,8 @@ protected:
 	//! UI frozen state (see freezeUI)
 	bool m_uiFrozen;
 
-	//! 3D mouse handler
-	Mouse3DInput* m_3dMouseInput;
+	//! 3D mouse
+	cc3DMouseManager* m_3DMouseManager;
 
 	//! Gamepad handler
 	GamepadInput* m_gamepadInput;

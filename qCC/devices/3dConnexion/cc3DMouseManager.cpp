@@ -110,9 +110,7 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 		{
 			if (mAppInterface->getSelectedEntities().empty())
 			{
-				ccGLWindow* win = mAppInterface->getActiveGLWindow();
-				if (win)
-					win->zoomGlobal();
+				mAppInterface->setGlobalZoom();
 			}
 			else
 			{

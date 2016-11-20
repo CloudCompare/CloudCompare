@@ -6047,9 +6047,7 @@ void MainWindow::deactivateRegisterPointPairTool(bool state)
 
 	updateUI();
 
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->zoomGlobal();
+	setGlobalZoom();
 }
 
 void MainWindow::activateSectionExtractionMode()
@@ -6889,13 +6887,6 @@ void MainWindow::doActionSaveViewportAsCamera()
 	addToDB(viewportObject);
 }
 
-void MainWindow::setGlobalZoom()
-{
-	ccGLWindow* win = getActiveGLWindow();
-	if (win)
-		win->zoomGlobal();
-}
-
 void MainWindow::zoomOnSelectedEntities()
 {
 	ccGLWindow* win = 0;
@@ -6938,6 +6929,13 @@ void MainWindow::zoomOnSelectedEntities()
 	}
 
 	refreshAll();
+}
+
+void MainWindow::setGlobalZoom()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+		win->zoomGlobal();
 }
 
 void MainWindow::setPivotAlwaysOn()

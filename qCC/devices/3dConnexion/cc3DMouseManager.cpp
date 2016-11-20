@@ -28,27 +28,27 @@
 
 
 cc3DMouseManager::cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent ) :
-	QObject( parent ),
-	mAppInterface( appInterface ),
-	m3dMouseInput( nullptr )
+    QObject( parent ),
+    mAppInterface( appInterface ),
+    m3dMouseInput( nullptr )
 {
-	setupMenu();
-	
-	enable3DMouse(true, true);	
+    setupMenu();
+
+    enableDevice(true, true);
 }
 
 cc3DMouseManager::~cc3DMouseManager()
 {
-	release3DMouse();	
+    releaseDevice();
 }
 
-void cc3DMouseManager::enable3DMouse(bool state, bool silent)
+void cc3DMouseManager::enableDevice(bool state, bool silent)
 {
 	if (m3dMouseInput)
 	{
-		release3DMouse();
+		releaseDevice();
 	}
-	
+
 	if (state)
 	{
 		m3dMouseInput = new Mouse3DInput(this);
@@ -63,7 +63,7 @@ void cc3DMouseManager::enable3DMouse(bool state, bool silent)
 		{
 			delete m3dMouseInput;
 			m3dMouseInput = nullptr;
-			
+
 			if (!silent)
 			{
 				ccLog::Error("[3D Mouse] No device found"); //warning message has already been issued by Mouse3DInput::connect
@@ -75,20 +75,20 @@ void cc3DMouseManager::enable3DMouse(bool state, bool silent)
 	{
 		ccLog::Warning("[3D Mouse] Device has been disabled");
 	}
-	
-	mActionEnable3DMouse->blockSignals(true);
-	mActionEnable3DMouse->setChecked(state);
-	mActionEnable3DMouse->blockSignals(false);
+
+	mActionEnable->blockSignals(true);
+	mActionEnable->setChecked(state);
+	mActionEnable->blockSignals(false);
 }
 
-void cc3DMouseManager::release3DMouse()
+void cc3DMouseManager::releaseDevice()
 {
 	if (m3dMouseInput == nullptr)
 		return;
-	
+
 	m3dMouseInput->disconnectDriver(); //disconnect from the driver
 	m3dMouseInput->disconnect(this); //disconnect from Qt ;)
-	
+
 	delete m3dMouseInput;
 	m3dMouseInput = nullptr;
 }
@@ -193,7 +193,7 @@ void cc3DMouseManager::on3DMouseMove(std::vector<float>& vec)
 	ccGLWindow* win = mAppInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;
-	
+
 	Mouse3DInput::Apply(vec, win);
 }
 
@@ -213,15 +213,15 @@ void cc3DMouseManager::on3DMouseReleased()
 
 void cc3DMouseManager::setupMenu()
 {
-	mMenu3DMouse = new QMenu( "3D Mouse" );
-	mMenu3DMouse->setIcon( QIcon(":/CC/images/im3DxLogo.png") );
-	
-	mActionEnable3DMouse = new QAction( tr( "Enable" ), this );
-	mActionEnable3DMouse->setCheckable( true );
-	
-	connect( mActionEnable3DMouse, &QAction::toggled, [this](bool state) {
-		enable3DMouse(state, false);
+	mMenu = new QMenu( "3D Mouse" );
+	mMenu->setIcon( QIcon(":/CC/images/im3DxLogo.png") );
+
+	mActionEnable = new QAction( tr( "Enable" ), this );
+	mActionEnable->setCheckable( true );
+
+	connect( mActionEnable, &QAction::toggled, [this](bool state) {
+		enableDevice(state, false);
 	});
-	
-	mMenu3DMouse->addAction( mActionEnable3DMouse );
+
+	mMenu->addAction( mActionEnable );
 }

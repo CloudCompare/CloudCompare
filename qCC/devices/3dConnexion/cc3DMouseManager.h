@@ -30,38 +30,32 @@ class Mouse3DInput;
 class cc3DMouseManager : public QObject
 {
 	Q_OBJECT
-	
+
 public:
 	cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent );
 	~cc3DMouseManager();
-	
+
 	//! Gets the menu associated with the 3D mouse
-	QMenu	*menu() { return mMenu3DMouse; }
-	
-	//! Tries to enable (or disable) a 3D mouse device
-	/** \param state whether to enable or disable the device
-	 *	\param silent whether to issue an error message in case of failure
-	**/
-	void enable3DMouse(bool state, bool silent);
-	
-	//! Releases any connected 3D mouse
-	void release3DMouse();
-	
+	QMenu	*menu() { return mMenu; }
+
 private:
+	void enableDevice(bool state, bool silent);
+	void releaseDevice();
+
 	void setupMenu();
-	
+
 	void on3DMouseKeyUp(int key);
 	void on3DMouseKeyDown(int key);
 	void on3DMouseMove(std::vector<float> &vec);
 	void on3DMouseReleased();
-	
-	
-	ccMainAppInterface	*mAppInterface;
-	
-	Mouse3DInput	*m3dMouseInput;
-	
-	QMenu	*mMenu3DMouse;
-	QAction *mActionEnable3DMouse;
+
+
+	ccMainAppInterface *mAppInterface;
+
+	Mouse3DInput *m3dMouseInput;
+
+	QMenu *mMenu;
+	QAction *mActionEnable;
 };
 
 #endif

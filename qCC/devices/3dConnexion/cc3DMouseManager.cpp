@@ -29,7 +29,7 @@
 
 cc3DMouseManager::cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent ) :
     QObject( parent ),
-    mAppInterface( appInterface ),
+    m_appInterface( appInterface ),
     m3dMouseInput( nullptr )
 {
     setupMenu();
@@ -52,7 +52,7 @@ void cc3DMouseManager::enableDevice(bool state, bool silent)
 	if (state)
 	{
 		m3dMouseInput = new Mouse3DInput(this);
-		if (m3dMouseInput->connect(mAppInterface->getMainWindow(),"CloudCompare"))
+		if (m3dMouseInput->connect(m_appInterface->getMainWindow(),"CloudCompare"))
 		{
 			connect(m3dMouseInput, &Mouse3DInput::sigMove3d, this, &cc3DMouseManager::on3DMouseMove);
 			connect(m3dMouseInput, &Mouse3DInput::sigReleased, this, &cc3DMouseManager::on3DMouseReleased);
@@ -76,9 +76,9 @@ void cc3DMouseManager::enableDevice(bool state, bool silent)
 		ccLog::Warning("[3D Mouse] Device has been disabled");
 	}
 
-	mActionEnable->blockSignals(true);
-	mActionEnable->setChecked(state);
-	mActionEnable->blockSignals(false);
+	m_actionEnable->blockSignals(true);
+	m_actionEnable->setChecked(state);
+	m_actionEnable->blockSignals(false);
 }
 
 void cc3DMouseManager::releaseDevice()
@@ -108,33 +108,33 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 			break;
 		case Mouse3DInput::V3DK_FIT:
 		{
-			if (mAppInterface->getSelectedEntities().empty())
+			if (m_appInterface->getSelectedEntities().empty())
 			{
-				mAppInterface->setGlobalZoom();
+				m_appInterface->setGlobalZoom();
 			}
 			else
 			{
-				mAppInterface->zoomOnSelectedEntities();
+				m_appInterface->zoomOnSelectedEntities();
 			}
 		}
 			break;
 		case Mouse3DInput::V3DK_TOP:
-			mAppInterface->setTopView();
+			m_appInterface->setTopView();
 			break;
 		case Mouse3DInput::V3DK_LEFT:
-			mAppInterface->setLeftView();
+			m_appInterface->setLeftView();
 			break;
 		case Mouse3DInput::V3DK_RIGHT:
-			mAppInterface->setRightView();
+			m_appInterface->setRightView();
 			break;
 		case Mouse3DInput::V3DK_FRONT:
-			mAppInterface->setFrontView();
+			m_appInterface->setFrontView();
 			break;
 		case Mouse3DInput::V3DK_BOTTOM:
-			mAppInterface->setBottomView();
+			m_appInterface->setBottomView();
 			break;
 		case Mouse3DInput::V3DK_BACK:
-			mAppInterface->setBackView();
+			m_appInterface->setBackView();
 			break;
 		case Mouse3DInput::V3DK_ROTATE:
 			//should be handled by the driver now!
@@ -143,10 +143,10 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 			//should be handled by the driver now!
 			break;
 		case Mouse3DInput::V3DK_ISO1:
-			mAppInterface->setIsoView1();
+			m_appInterface->setIsoView1();
 			break;
 		case Mouse3DInput::V3DK_ISO2:
-			mAppInterface->setIsoView2();
+			m_appInterface->setIsoView2();
 			break;
 		case Mouse3DInput::V3DK_PLUS:
 			//should be handled by the driver now!
@@ -160,7 +160,7 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 		case Mouse3DInput::V3DK_CW:
 		case Mouse3DInput::V3DK_CCW:
 		{
-			ccGLWindow* activeWin = mAppInterface->getActiveGLWindow();
+			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
 			if (activeWin != nullptr)
 			{
 				CCVector3d axis(0,0,-1);
@@ -190,7 +190,7 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 
 void cc3DMouseManager::on3DMouseMove(std::vector<float>& vec)
 {
-	ccGLWindow* win = mAppInterface->getActiveGLWindow();
+	ccGLWindow* win = m_appInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;
 
@@ -199,7 +199,7 @@ void cc3DMouseManager::on3DMouseMove(std::vector<float>& vec)
 
 void cc3DMouseManager::on3DMouseReleased()
 {
-	ccGLWindow* win = mAppInterface->getActiveGLWindow();
+	ccGLWindow* win = m_appInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;
 
@@ -213,15 +213,15 @@ void cc3DMouseManager::on3DMouseReleased()
 
 void cc3DMouseManager::setupMenu()
 {
-	mMenu = new QMenu( "3D Mouse" );
-	mMenu->setIcon( QIcon(":/CC/images/im3DxLogo.png") );
+	m_menu = new QMenu( "3D Mouse" );
+	m_menu->setIcon( QIcon(":/CC/images/im3DxLogo.png") );
 
-	mActionEnable = new QAction( tr( "Enable" ), this );
-	mActionEnable->setCheckable( true );
+	m_actionEnable = new QAction( tr( "Enable" ), this );
+	m_actionEnable->setCheckable( true );
 
-	connect( mActionEnable, &QAction::toggled, [this](bool state) {
+	connect( m_actionEnable, &QAction::toggled, [this](bool state) {
 		enableDevice(state, false);
 	});
 
-	mMenu->addAction( mActionEnable );
+	m_menu->addAction( m_actionEnable );
 }

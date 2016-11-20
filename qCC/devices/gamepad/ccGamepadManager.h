@@ -18,6 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
+//Qt
 #include <QObject>
 
 class QAction;
@@ -27,7 +28,7 @@ class QString;
 class ccMainAppInterface;
 class GamepadInput;
 
-
+//! Gamepad manager
 class ccGamepadManager : public QObject
 {
 	Q_OBJECT
@@ -36,25 +37,25 @@ public:
 	ccGamepadManager( ccMainAppInterface *appInterface, QObject *parent );
 	~ccGamepadManager();
 	
-	//! Gets the menu associated with gamepads
-	QMenu	*menu() { return mMenu; }
+	//! Returns the menu associated with gamepads
+	QMenu* menu() { return m_menu; }
 	
-private:
-	void enableDevice(bool state, bool silent);
+protected: //methods
+	void enableDevice(bool state, bool silent, int deviceID = -1);
 	void releaseDevice();
 
 	void showMessage(QString message, bool asWarning);
 	void setupMenu();
+	void setupGamepadInput();
 	
 	void onGamepadInput();
 	
-	
-	ccMainAppInterface	*mAppInterface;
-	
-	GamepadInput	*mGamepadInput;
-	
-	QMenu	*mMenu;
-	QAction *mActionEnable;
+protected: //members
+
+	ccMainAppInterface* m_appInterface;
+	GamepadInput* m_gamepadInput;
+	QMenu* m_menu;
+	QAction* m_actionEnable;
 };
 
-#endif
+#endif //CCGAMEPADMANAGER_H

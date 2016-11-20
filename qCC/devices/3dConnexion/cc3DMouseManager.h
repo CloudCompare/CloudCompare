@@ -36,7 +36,7 @@ public:
 	~cc3DMouseManager();
 
 	//! Gets the menu associated with the 3D mouse
-	QMenu	*menu() { return mMenu; }
+	QMenu	*menu() { return m_menu; }
 
 private:
 	void enableDevice(bool state, bool silent);
@@ -50,12 +50,12 @@ private:
 	void on3DMouseReleased();
 
 
-	ccMainAppInterface *mAppInterface;
+	ccMainAppInterface *m_appInterface;
 
 	Mouse3DInput *m3dMouseInput;
 
-	QMenu *mMenu;
-	QAction *mActionEnable;
+	QMenu *m_menu;
+	QAction *m_actionEnable;
 };
 
 #endif

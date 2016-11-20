@@ -124,7 +124,7 @@
 
 //Gamepads
 #ifdef CC_GAMEPADS_SUPPORT
-#include "devices/gamepad/GamepadInput.h"
+#include "devices/gamepad/ccGamepadManager.h"
 #endif
 
 //Qt UI files
@@ -147,7 +147,7 @@ MainWindow::MainWindow()
 	: m_ccRoot(0)
 	, m_uiFrozen(false)
 	, m_3DMouseManager(nullptr)
-	, m_gamepadInput(0)
+	, m_gamepadManager(nullptr)
 	, m_viewModePopupButton(0)
 	, m_pivotVisibilityPopupButton(0)
 	, m_cpeDlg(0)
@@ -243,25 +243,10 @@ MainWindow::MainWindow()
 	connect(actionToggleMaterials,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesMaterials()));	//'M': toggles selected items materials/textures visibility
 
 	connectActions();
-
-#ifdef CC_3DXWARE_SUPPORT
-	m_3DMouseManager = new cc3DMouseManager( this, this );
-	menuFile->insertMenu(actionEnableGamepad, m_3DMouseManager->menu());
-#endif
-
-#ifdef CC_GAMEPADS_SUPPORT
-	//DGM: the first call never works at startup time...
-	//enableGamepad(true, true);
-	QMetaObject::invokeMethod(this, "enableGamepad", Qt::QueuedConnection, Q_ARG(bool, true), Q_ARG(bool, true));
-#else
-	delete actionEnableGamepad;
-	actionEnableGamepad = nullptr;
 	
-	delete menuGamepad;
-	menuGamepad = nullptr;
-#endif
-
 	new3DView();
+
+	setupInputDevices();
 
 	freezeUI(false);
 
@@ -273,11 +258,8 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-	releaseGamepad();
-#ifdef CC_3DXWARE_SUPPORT
-	delete m_3DMouseManager;
-	m_3DMouseManager = nullptr;
-#endif
+	destroyInputDevices();
+	
 	cancelPreviousPickingOperation(false); //just in case
 
 	assert(m_ccRoot && m_mdiArea && m_windowMapper);
@@ -517,120 +499,6 @@ void MainWindow::doEnableGLFilter()
 	}
 }
 
-#ifdef CC_GAMEPADS_SUPPORT
-void ShowError(QString message, bool asWarning)
-{
-	if (!asWarning)
-	{
-		ccLog::Error(message);
-	}
-	else
-	{
-		ccLog::Warning(message);
-	}
-}
-#endif
-
-void MainWindow::enableGamepad(bool state, bool silent)
-{
-#ifdef CC_GAMEPADS_SUPPORT
-	if (state)
-	{
-		for (int step = 0; step < 1; ++step) //fake loop for easy break
-		{
-			QGamepadManager* manager = QGamepadManager::instance();
-			if (!manager)
-			{
-				ShowError("[Gamepad] Manager is not accessible?!", silent);
-				state = false;
-				break;
-			}
-			
-			int gamepadID = 0;
-			//QList<int> gamepads = manager->connectedGamepads();
-			//if (gamepads.empty() == 0)
-			//{
-			//	ShowError("[Gamepad] No device registered", silent);
-			//	state = false;
-			//	break;
-			//}
-			//gamepadID = gamepads[0];
-			//if (!silent && gamepads.size() > 1)
-			//{
-			//	//ask the user for the right gamepad
-			//	ccPickOneElementDlg poeDlg("Gamepad", "Detected Gamepads", this);
-			//	for (int id : gamepads)
-			//	{
-			//		poeDlg.addElement(QString("%1 (%2)").arg(QGamepad(id).name()).arg(manager->isGamepadConnected(id) ? "ON" : "OFF"));
-			//	}
-			//	if (!poeDlg.exec())
-			//	{
-			//		return;
-			//	}
-			//	gamepadID = gamepads[poeDlg.getSelectedIndex()];
-			//}
-
-			if (!m_gamepadInput)
-			{
-				m_gamepadInput = new GamepadInput(this);
-				QObject::connect(m_gamepadInput, SIGNAL(updated()), this, SLOT(onGamepadInput()), Qt::DirectConnection);
-				QObject::connect(m_gamepadInput, SIGNAL(buttonL1Changed(bool)), this, SLOT(decreasePointSize()));
-				QObject::connect(m_gamepadInput, SIGNAL(buttonR1Changed(bool)), this, SLOT(increasePointSize()));
-				QObject::connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {if (state) setGlobalZoom(); });
-				QObject::connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state) {if (state) toggleActiveWindowViewerBasedPerspective(); });
-				QObject::connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state) {if (state) toggleActiveWindowCenteredPerspective(); });
-				QObject::connect(manager, &QGamepadManager::connectedGamepadsChanged, this, []() { ccLog::Print("Gamepad connected"); });
-
-			}
-			else
-			{
-				m_gamepadInput->stop(); //just in case
-			}
-
-			for (gamepadID = 0; gamepadID < 4; ++gamepadID)
-			{
-				m_gamepadInput->setDeviceId(gamepadID);
-				if (m_gamepadInput->isConnected())
-				{
-					m_gamepadInput->start();
-					break;
-				}
-			}
-			if (gamepadID == 4)
-			{
-				ShowError("[Gamepad] No device connected", silent);
-				state = false;
-				break;
-			}
-		}
-	}
-	else
-	{
-		ccLog::Warning("[Gamepad] Device has been disabled");
-	}
-#else
-	state = false;
-#endif
-
-	actionEnableGamepad->blockSignals(true);
-	actionEnableGamepad->setChecked(state);
-	actionEnableGamepad->blockSignals(false);
-}
-
-void MainWindow::onGamepadInput()
-{
-#ifdef CC_GAMEPADS_SUPPORT
-
-	//active window?
-	ccGLWindow* win = getActiveGLWindow();
-	if (win && m_gamepadInput)
-	{
-		m_gamepadInput->update(win);
-	}
-
-#endif
-}
-
 void MainWindow::increasePointSize()
 {
 	//active window?
@@ -653,17 +521,33 @@ void MainWindow::decreasePointSize()
 	}
 }
 
-void MainWindow::releaseGamepad()
+void MainWindow::setupInputDevices()
+{
+#ifdef CC_3DXWARE_SUPPORT
+	m_3DMouseManager = new cc3DMouseManager( this, this );
+	menuFile->insertMenu(actionCloseAll, m_3DMouseManager->menu());
+#endif
+
+#ifdef CC_GAMEPADS_SUPPORT
+	m_gamepadManager = new ccGamepadManager( this, this );
+	menuFile->insertMenu(actionCloseAll, m_gamepadManager->menu());
+#endif
+	
+#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPADS_SUPPORT)
+	menuFile->insertSeparator(actionCloseAll);
+#endif	
+}
+
+void MainWindow::destroyInputDevices()
 {
 #ifdef CC_GAMEPADS_SUPPORT
-	if (m_gamepadInput)
-	{
-		m_gamepadInput->stop();
-		m_gamepadInput->disconnect(this); //disconnect from Qt ;)
-
-		delete m_gamepadInput;
-		m_gamepadInput = 0;
-	}
+	delete m_gamepadManager;
+	m_gamepadManager = nullptr;
+#endif
+	
+#ifdef CC_3DXWARE_SUPPORT
+	delete m_3DMouseManager;
+	m_3DMouseManager = nullptr;
 #endif
 }
 
@@ -685,7 +569,6 @@ void MainWindow::connectActions()
 	connect(actionSave,							SIGNAL(triggered()),	this,		SLOT(doActionSaveFile()));
 	connect(actionGlobalShiftSettings,			SIGNAL(triggered()),	this,		SLOT(doActionGlobalShiftSeetings()));
 	connect(actionPrimitiveFactory,				SIGNAL(triggered()),	this,		SLOT(doShowPrimitiveFactory()));
-	connect(actionEnableGamepad,				SIGNAL(toggled(bool)),	this,		SLOT(setupGamepad(bool)));
 	connect(actionCloseAll,						SIGNAL(triggered()),	this,		SLOT(closeAll()));
 	connect(actionQuit,							SIGNAL(triggered()),	this,		SLOT(close()));
 

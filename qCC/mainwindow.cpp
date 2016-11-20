@@ -119,7 +119,7 @@
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
-#include "cc3DMouseManager.h"
+#include "devices/3dConnexion/cc3DMouseManager.h"
 #endif
 
 //Gamepads

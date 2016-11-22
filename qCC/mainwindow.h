@@ -64,6 +64,7 @@ class ccOverlayDialog;
 class QMdiSubWindow;
 class cc3DMouseManager;
 class ccGamepadManager;
+class ccRecentFiles;
 
 //! Main window
 class MainWindow : public QMainWindow, public ccMainAppInterface, public Ui::MainWindow
@@ -555,6 +556,9 @@ protected:
 	//! UI frozen state (see freezeUI)
 	bool m_uiFrozen;
 
+	//! Recent files menu
+	ccRecentFiles* m_recentFiles;
+	
 	//! 3D mouse
 	cc3DMouseManager* m_3DMouseManager;
 

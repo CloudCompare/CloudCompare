@@ -162,6 +162,7 @@ v2.8.beta - XX/XX/2016
 		sufficient.
 	* [macOS] Fix plugins on case-sensitive file systems
 	* The SOR filter was broken (it was potentially using much more points than the number specified by the user, and it was changing over the cloud!)
+	* [macOS] Fix problem with the main window jumping around and resizing when dragging toolbars
 
 v2.7.0 - 04/22/2016
 -------------------

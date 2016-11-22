@@ -172,8 +172,6 @@ MainWindow::MainWindow()
 	
 	actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
-	
-	setAnimated( false );
 #endif
 	
 	//Console

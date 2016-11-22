@@ -16,12 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="baseSize">
-   <size>
-    <width>800</width>
-    <height>600</height>
-   </size>
-  </property>
   <property name="focusPolicy">
    <enum>Qt::ClickFocus</enum>
   </property>

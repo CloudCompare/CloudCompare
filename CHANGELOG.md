@@ -6,15 +6,21 @@ v2.8.beta - XX/XX/2016
 
 - New features:
 
-	* New plugin: qBroom (Virtual Broom)
+	* New plugin: qBroom (Virtual Broom) [Windows, macOS]
 		- smart and interactive selection of points on a surface (globally flat, e.g. like a road ;)
 		- selection of the points inside the 'broom', above, below or both
 		- option to invert the selection
 		- automation mode
 
-	* New plugin: qCSF (Cloth Simulation Filtering)
+	* New plugin: qCSF (Cloth Simulation Filtering) [Windows, macOS]
 		- automatic ground / non-ground classification of aerial LIDAR point clouds
 		- based on the article: "An Easy-to-Use Airborne LIDAR Data Filtering Method Based on Cloth Simulation", Qi Jianbo, Wan Peng, 2015
+
+	* New plugin: qHoughNormals (Normal Estimation in Unstructured Point Clouds) [Windows, macOS, Linux]
+		- based on "Deep Learning for Robust Normal Estimation in Unstructured Point Clouds" by Alexandre Boulch and Renaud Marlet, Symposium of Geometry Processing 2016, Computer Graphics Forum
+
+	* New plugin: qM3C2 (Multiscale Model to Model Cloud Comparison) [Windows, macOS, Linux]
+		- based on "Accurate 3D comparison of complex topography with terrestrial laser scanner: application to the Rangitikei canyon (N-Z)", Lague, D., Brodu, N. and Leroux, J., 2013, ISPRS Journal of Photogrammmetry and Remote Sensing
 
 	* Support for FWF (Full WaveForm) airborne lidar data
 
@@ -28,7 +34,7 @@ v2.8.beta - XX/XX/2016
 	* New tool: Edit > Mesh > Create surface between two polylines
 		- Creates a surface patch between two polylines
 
-	* Gamepad support (XBox, etc.) (Windows only)
+	* Gamepad support (XBox, etc.) [Windows only]
 		- Enable it with the 'File > Gamepad > Enable' menu entry
 		- A: toggle viewer-based perspective mode
 		- B: toggle object-based perspective mode
@@ -133,7 +139,9 @@ v2.8.beta - XX/XX/2016
 		- The normal of a plane entity can now be visualized as a 3D arrow (just as the Facet entities)
 		- Dip and dip direction are now displayed in the properties of Facets and Planes
 		- M3C2 sources are now publicly released! (GPL license)
-		- new option to update an existing viewport object (with the current camera parameters)
+		- New option to update an existing viewport object (with the current camera parameters)
+		- [macOS] Now looks for the global_shift.txt file beside the .app instead of inside the application bundle
+		- [macOS] Hides the 3D mouse and Gamepad menus since they are not yet supported on macOS
 
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)
@@ -160,9 +168,10 @@ v2.8.beta - XX/XX/2016
 	* The sandbox tool 'Distance map to best fit 3D quadric' was broken
 	* When computing normals with the Least Squares best fitting plane, CC required at least 12 points in the neighborhood, when only 3 are theoretically
 		sufficient.
-	* [macOS] Fix plugins on case-sensitive file systems
 	* The SOR filter was broken (it was potentially using much more points than the number specified by the user, and it was changing over the cloud!)
+	* [macOS] Fix plugins on case-sensitive file systems
 	* [macOS] Fix problem with the main window jumping around and resizing when dragging toolbars
+	* [macOS] Fixes the layout of the 2.5D Volume Calculation dialog
 
 v2.7.0 - 04/22/2016
 -------------------

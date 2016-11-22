@@ -47,6 +47,8 @@ v2.8.beta - XX/XX/2016
 
 	* New default color scales for dip / dip direction display (thanks to T. Dewez)
 
+	* Adds an "Open Recent" item to the File menu to quickly access the last 10 files that you've worked with.
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:

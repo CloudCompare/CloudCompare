@@ -114,6 +114,7 @@
 //other
 #include "ccCropTool.h"
 #include "ccPersistentSettings.h"
+#include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"
 #include "ccUtils.h"
 
@@ -146,6 +147,7 @@ static const QString s_fileFilterSeparator(";;");
 MainWindow::MainWindow()
 	: m_ccRoot(0)
 	, m_uiFrozen(false)
+	, m_recentFiles(new ccRecentFiles(this))
 	, m_3DMouseManager(nullptr)
 	, m_gamepadManager(nullptr)
 	, m_viewModePopupButton(0)
@@ -173,6 +175,8 @@ MainWindow::MainWindow()
 	actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
+	
+	menuFile->insertMenu(actionSave, m_recentFiles->menu());
 	
 	//Console
 	ccConsole::Init(consoleWidget, this, this);
@@ -8957,6 +8961,8 @@ void MainWindow::addToDB(	const QStringList& filenames,
 				newGroup->setDisplay_recursive(destWin);
 			}
 			addToDB(newGroup, true, true, false);
+
+			m_recentFiles->addFilePath( filenames[i] );
 		}
 
 		if (result == CC_FERR_CANCELED_BY_USER)

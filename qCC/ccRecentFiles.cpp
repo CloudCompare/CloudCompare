@@ -23,7 +23,7 @@
 #include <QStringList>
 
 #include "ccRecentFiles.h"
-#include "MainWindow.h"
+#include "mainwindow.h"
 
 
 QString ccRecentFiles::s_settingKey( "RecentFiles" );

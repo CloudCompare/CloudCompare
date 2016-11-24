@@ -43,7 +43,7 @@
 //System
 #include <string.h>
 #include <assert.h>
-#include <math.h> //for modf
+#include <cmath> //for std::modf
 
 static CCVector3 s_blankNorm(0,0,0);
 
@@ -3272,21 +3272,27 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 			const float* Tx = (txInd[vertIndex] >= 0 ? m_texCoords->getValue(txInd[vertIndex]) : 0);
 			if (Tx)
 			{
-				if (Tx[0] >= 0 && Tx[0] <= 1.0f && Tx[1] >= 0 && Tx[1] <= 1.0f)
-				{
-					//get color from texture image
-					const QImage texture = material->getTexture();
-					int xPix = std::min(static_cast<int>(floor(Tx[0]*texture.width())),texture.width()-1);
-					int yPix = std::min(static_cast<int>(floor(Tx[1]*texture.height())),texture.height()-1);
+				//get the texture coordinates between 0 and 1
+				float temp;
+				float tx = std::modf(Tx[0], &temp);
+				if (tx < 0)
+					tx = 1.0f + tx;
+				float ty = std::modf(Tx[1], &temp);
+				if (ty < 0)
+					ty = 1.0f + ty;
 
-					QRgb pixel = texture.pixel(xPix,yPix);
+				//get color from texture image
+				const QImage texture = material->getTexture();
+				int xPix = std::min(static_cast<int>(floor(tx * texture.width())), texture.width() - 1);
+				int yPix = std::min(static_cast<int>(floor(ty * texture.height())), texture.height() - 1);
 
-					rgb.r = static_cast<ColorCompType>(qRed(pixel));
-					rgb.g = static_cast<ColorCompType>(qGreen(pixel));
-					rgb.b = static_cast<ColorCompType>(qBlue(pixel));
+				QRgb pixel = texture.pixel(xPix, yPix);
 
-					foundMaterial = true;
-				}
+				rgb.r = static_cast<ColorCompType>(qRed(pixel));
+				rgb.g = static_cast<ColorCompType>(qGreen(pixel));
+				rgb.b = static_cast<ColorCompType>(qBlue(pixel));
+
+				foundMaterial = true;
 			}
 		}
 		else
@@ -3368,28 +3374,28 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	//if (x < 0 || x > 1.0 || y < 0 || y > 1.0)
 	if (x > 1.0)
 	{
-		double xFrac,xInt;
-		xFrac = modf(x,&xInt);
+		double xFrac, xInt;
+		xFrac = std::modf(x, &xInt);
 		x = xFrac;
 	}
 	else if (x < 0.0)
 	{
-		double xFrac,xInt;
-		xFrac = modf(x,&xInt);
+		double xFrac, xInt;
+		xFrac = std::modf(x, &xInt);
 		x = 1.0 + xFrac;
 	}
 
 	//same thing for y
 	if (y > 1.0)
 	{
-		double yFrac,yInt;
-		yFrac = modf(y,&yInt);
+		double yFrac, yInt;
+		yFrac = std::modf(y, &yInt);
 		y = yFrac;
 	}
 	else if (y < 0.0)
 	{
-		double yFrac,yInt;
-		yFrac = modf(y,&yInt);
+		double yFrac, yInt;
+		yFrac = std::modf(y, &yInt);
 		y = 1.0 + yFrac;
 	}
 
@@ -3831,16 +3837,16 @@ bool ccMesh::convertMaterialsToVertexColors()
 	unsigned faceCount = size();
 
 	placeIteratorAtBegining();
-	for (unsigned i=0; i<faceCount; ++i)
+	for (unsigned i = 0; i < faceCount; ++i)
 	{
 		const CCLib::VerticesIndexes* tsi = getNextTriangleVertIndexes();
-		for (unsigned char j=0; j<3; ++j)
+		for (unsigned char j = 0; j < 3; ++j)
 		{
 			ccColor::Rgb C;
-			if (getVertexColorFromMaterial(i,j,C,true))
+			if (getVertexColorFromMaterial(i, j, C, true))
 			{
 				//FIXME: could we be smarter? (we process each point several times! And we assume the color is always the same...)
-				cloud->setPointColor(tsi->i[j],C.rgb);
+				cloud->setPointColor(tsi->i[j], C.rgb);
 			}
 		}
 	}

@@ -138,12 +138,12 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			ScalarType V = cloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
 			{
-				int bin = (int)floor((V-minV)*(ScalarType)numberOfClasses/dV);
+				int bin = static_cast<int>(floor((V-minV)*(ScalarType)numberOfClasses/dV));
 				if (bin < 0)
 				{
 					histoBefore++;
 				}
-				else if (bin >= (int)numberOfClasses)
+				else if (bin >= static_cast<int>(numberOfClasses))
 				{
 					if (V > maxV)
 						histoAfter++;
@@ -170,7 +170,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		{
 			try
 			{
-				classes.push_back(Chi2Class(1.0e-6,(int)histoBefore));
+				classes.push_back(Chi2Class(1.0e-6,static_cast<int>(histoBefore)));
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -206,7 +206,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		{
 			try
 			{
-				classes.push_back(Chi2Class(1.0e-6,(int)histoAfter));
+				classes.push_back(Chi2Class(1.0e-6,static_cast<int>(histoAfter)));
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -265,7 +265,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			double npi = it->pi * numberOfValidValues;
 			if (npi != 0.0)
 			{
-				double temp = (double)it->n - npi;
+				double temp = static_cast<double>(it->n) - npi;
 				D2 += temp*(temp/npi);
 				if (D2 >= CHI2_MAX)
 				{
@@ -284,7 +284,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	if (!histoValues)
         delete[] histo;
 
-	finalNumberOfClasses = (unsigned)classes.size();
+	finalNumberOfClasses = static_cast<unsigned>(classes.size());
 
 	return D2;
 }
@@ -327,7 +327,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 
 	unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(numberOfNeighbours);
 
-	unsigned numberOfChi2Classes = (unsigned)ceil(sqrt((double)numberOfNeighbours));
+	unsigned numberOfChi2Classes = static_cast<unsigned>(ceil(sqrt(static_cast<double>(numberOfNeighbours))));
 
 	//Chi2 hisogram values
 	unsigned* histoValues = new unsigned[numberOfChi2Classes];
@@ -345,9 +345,9 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		const NormalDistribution* nDist = static_cast<const NormalDistribution*>(distrib);
 		ScalarType mu=0, sigma2=0;
 		nDist->getParameters(mu, sigma2);
-		customHistoMin = mu - (ScalarType)3.0 * sqrt(sigma2);
+		customHistoMin = mu - static_cast<ScalarType>(3.0) * sqrt(sigma2);
 		histoMin = &customHistoMin;
-		customHistoMax = mu + (ScalarType)3.0 * sqrt(sigma2);
+		customHistoMax = mu + static_cast<ScalarType>(3.0) * sqrt(sigma2);
 		histoMax = &customHistoMax;
 	}
 	else if (strcmp(distrib->getName(),"Weibull")==0)
@@ -460,11 +460,11 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 
 			unsigned finalNumberOfChi2Classes=0;
 			//VERSION "SYMPA" (test grossier)
-			double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,histoMin,histoMax,histoValues);
+			double Chi2Dist = static_cast<ScalarType>(computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,histoMin,histoMax,histoValues));
 			//VERSION "SEVERE" (test ultra-precis)
 			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,false,histoMin,histoMax,histoValues);
 
-			D = (Chi2Dist >= 0.0 ? (ScalarType)sqrt(Chi2Dist) : NAN_VALUE);
+			D = (Chi2Dist >= 0.0 ? static_cast<ScalarType>(sqrt(Chi2Dist)) : NAN_VALUE);
 		}
 
 		//We assume that "IN" and "OUT" scalar fields are different!

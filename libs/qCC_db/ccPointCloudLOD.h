@@ -268,7 +268,7 @@ public:
 	typedef std::function<void(const ccPointCloudLOD::Node&)> RenderFunc;
 
 	PointCloudLODRenderer(	ccPointCloudLOD& lod,
-							RenderFunc func,
+							RenderFunc &func,
 							const Frustum& frustum,
 							unsigned char maxLevel)
 		: m_func(func)

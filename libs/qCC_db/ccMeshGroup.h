@@ -55,6 +55,7 @@ public:
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override { return false; }
 	virtual NormsIndexesTableType* getTriNormsTable() const override { return 0; }
 	virtual unsigned capacity() const override { return 0; }
+	virtual bool trianglePicking(const CCVector2d& clickPos, const ccGLCameraParameters& camera, int& nearestTriIndex, double& nearestSquareDist, CCVector3d& nearestPoint) override { return false; }
 
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const override { return true; }

@@ -97,7 +97,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	//save vertices
 	{
-		for (unsigned i=0; i<vertCount; ++i)
+		for (unsigned i = 0; i < vertCount; ++i)
 		{
 			const CCVector3* P = vertices->getPoint(i);
 			CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
@@ -107,7 +107,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	//save triangles
 	{
-		for (unsigned i=0; i<triCount; ++i)
+		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << endl;

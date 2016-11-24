@@ -431,7 +431,7 @@ void ccPointCloud::clear()
 
 void ccPointCloud::unalloactePoints()
 {
-	clearLOD();
+	clearLOD();	// we have to clear the LOD structure before clearing the colors / SFs, so we can't leave it to notifyGeometryUpdate()
 	showSFColorsScale(false); //SFs will be destroyed
 	ChunkedPointCloud::clear();
 	ccGenericPointCloud::clear();
@@ -2259,16 +2259,16 @@ struct DisplayDesc : LODLevelDesc
 	DisplayDesc()
 		: LODLevelDesc()
 		, endIndex(0)
-		, indexMap(0)
 		, decimStep(1)
+		, indexMap(nullptr)
 	{}
 
 	//! Constructor from a start index and a count value
 	DisplayDesc(unsigned startIndex, unsigned count)
 		: LODLevelDesc(startIndex, count)
 		, endIndex(startIndex+count)
-		, indexMap(0)
 		, decimStep(1)
+		, indexMap(nullptr)
 	{}
 
 	//! Set operator
@@ -2282,23 +2282,12 @@ struct DisplayDesc : LODLevelDesc
 	
 	//! Last index (excluded)
 	unsigned endIndex;
+	
+	//! Decimation step (for non-octree based LoD)
+	unsigned decimStep;
 
 	//! Map of indexes (to invert the natural order)
 	LODIndexSet* indexMap;
-
-	//! Decimation step (for non-octree based LoD)
-	unsigned decimStep;
-};
-
-struct LODBasedRenderingParams
-{
-	ccScalarField* activeSF;
-	const ccNormalVectors* compressedNormals;
-	PointCoordinateType* _points;
-	PointCoordinateType* _normals;
-	ColorCompType* _rgb;
-	GLsizei bufferCount;
-	QOpenGLFunctions_2_1* glFunc;
 };
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -2579,7 +2568,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps != 0);
 
-					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
+					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < static_cast<GLint>(steps))
 					{
 						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
 						colorRampShader = 0;
@@ -3163,7 +3152,7 @@ void ccPointCloud::deleteScalarField(int index)
 
 	//current SF should still be up-to-date!
 	if (m_currentInScalarFieldIndex < 0 && getNumberOfScalarFields() > 0)
-		setCurrentInScalarField((int)getNumberOfScalarFields()-1);
+		setCurrentInScalarField(static_cast<int>(getNumberOfScalarFields()-1));
 
 	setCurrentDisplayedScalarField(m_currentInScalarFieldIndex);
 	showSF(m_currentInScalarFieldIndex >= 0);

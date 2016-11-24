@@ -45,7 +45,7 @@ public:
 	static const uint8_t LEAF_TYPE = 1;
 
 	//! Tree base node
-	struct BaseNode
+	class BaseNode
 	{
 	public:
 		explicit BaseNode(uint8_t nodeType) : parent(0), type(nodeType) {}
@@ -66,7 +66,7 @@ public:
 	};
 
 	//! Tree node
-	struct Node : public BaseNode
+	class Node : public BaseNode
 	{
 	public:
 
@@ -94,7 +94,7 @@ public:
 	};
 
 	//! Tree leaf
-	struct Leaf : public BaseNode
+	class Leaf : public BaseNode
 	{
 	public:
 

@@ -24,6 +24,8 @@
 
 //qCC_db
 #include <ccColorScalesManager.h>
+#include <ccFileUtils.h>
+
 //qCC_io
 #include <ImageFileFilter.h>
 
@@ -977,7 +979,7 @@ void ccHistogramWindowDlg::onExportToCSV()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(), QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	currentPath += QString("/") + m_win->windowTitle() + ".csv";
 
@@ -1008,7 +1010,7 @@ void ccHistogramWindowDlg::onExportToImage()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(), QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString outputFilename = ImageFileFilter::GetSaveFilename("Select output file",
 		m_win->windowTitle(),

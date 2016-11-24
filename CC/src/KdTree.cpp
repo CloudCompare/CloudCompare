@@ -150,7 +150,7 @@ KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* fath
     cell->cuttingDim = dim;
     updateOutsideBoundingBox(cell);
     if (progressCb)
-        progressCb->update((float)m_cellCount*100.0f/(float)(m_indexes.size()*2-1));
+        progressCb->update(m_cellCount*100.0f/(m_indexes.size()*2.0f-1.0f));
 
     //If there is only one point to insert, build a leaf
     if (first == last)

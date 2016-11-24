@@ -23,6 +23,9 @@
 //qCC_gl
 #include <ccGuiParameters.h>
 
+// qCC_db
+#include "ccFileUtils.h"
+
 //Qt
 #include <QFileDialog>
 #include <QSettings>
@@ -106,7 +109,7 @@ void MatrixDisplayDlg::exportToASCII()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile()); //use the same folder as the load one
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.mat.txt");
 	if (outputFilename.isEmpty())

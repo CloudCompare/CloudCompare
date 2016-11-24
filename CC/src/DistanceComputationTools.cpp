@@ -1720,7 +1720,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		DgmOctree::cellsContainer cellsDescs;
 		octree->getCellCodesAndIndexes(params.octreeLevel,cellsDescs,true);
 
-		unsigned numberOfCells = (unsigned)cellsDescs.size();
+		unsigned numberOfCells = static_cast<unsigned>(cellsDescs.size());
 
 		//Progress callback
 		NormalizedProgress nProgress(progressCb,numberOfCells);

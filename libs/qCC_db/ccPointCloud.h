@@ -728,11 +728,11 @@ protected: // VBO
 		vboSet()
 			: hasColors(false)
 			, colorIsSF(false)
-			, sourceSF(0)
+			, sourceSF(nullptr)
 			, hasNormals(false)
 			, totalMemSizeBytes(0)
-			, state(NEW)
 			, updateFlags(0)
+			, state(NEW)
 		{}
 
 		std::vector<VBO*> vbos;

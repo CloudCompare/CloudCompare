@@ -113,23 +113,23 @@ void ccGenericMesh::EnableGLStippleMask(const QOpenGLContext* context, bool stat
 }
 
 //Vertex buffer
-PointCoordinateType s_xyzBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 PointCoordinateType* ccGenericMesh::GetVertexBuffer()
 {
+	static PointCoordinateType s_xyzBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 	return s_xyzBuffer;
 }
 
 //Normals buffer
-PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 PointCoordinateType* ccGenericMesh::GetNormalsBuffer()
 {
+	static PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 	return s_normBuffer;
 }
 
 //Colors buffer
-ColorCompType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 ColorCompType* ccGenericMesh::GetColorsBuffer()
 {
+	static ColorCompType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3*3];
 	return s_rgbBuffer;
 }
 
@@ -911,7 +911,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 
 	//back project the clicked point in 3D
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
-	CCVector3d X(0,0,0);
+	CCVector3d X(0, 0, 0);
 	if (!camera.unproject(clickPosd, X))
 	{
 		return false;
@@ -922,12 +922,16 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 	nearestPoint = CCVector3d(0, 0, 0);
 
 	ccGenericPointCloud* vertices = getAssociatedCloud();
-	assert(vertices);
+	if (!vertices)
+	{
+		assert(false);
+		return false;
+	}
 
 #if defined(_OPENMP)
 	#pragma omp parallel for
 #endif
-	for (int i=0; i<static_cast<int>(size()); ++i)
+	for (int i = 0; i < static_cast<int>(size()); ++i)
 	{
 		CCLib::VerticesIndexes* tsi = getTriangleVertIndexes(i);
 		const CCVector3* A3D = vertices->getPoint(tsi->i1);

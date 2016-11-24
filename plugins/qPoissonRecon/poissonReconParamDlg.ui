@@ -177,6 +177,9 @@ a smoother, noise-reduced, reconstruction.</string>
          <property name="toolTip">
           <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
          </property>
+         <property name="maximum">
+          <double>999.990000000000009</double>
+         </property>
          <property name="value">
           <double>4.000000000000000</double>
          </property>

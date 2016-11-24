@@ -21,6 +21,7 @@
 #include "../ccMainAppInterface.h"
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 
 //Qt
@@ -430,7 +431,7 @@ void qM3C2Dialog::loadParamsFromFile()
 	QString filename;
 	{
 		QSettings settings("qM3C2");
-		QString currentPath = settings.value("currentPath", QApplication::applicationDirPath()).toString();
+		QString currentPath = settings.value("currentPath", ccFileUtils::defaultDocPath()).toString();
 
 		filename = QFileDialog::getOpenFileName(this, "Load M3C2 parameters", currentPath, "*.txt");
 		if (filename.isEmpty())
@@ -461,7 +462,7 @@ void qM3C2Dialog::saveParamsToFile()
 	QString filename;
 	{
 		QSettings settings("qM3C2");
-		QString currentPath = settings.value("currentPath", QApplication::applicationDirPath()).toString();
+		QString currentPath = settings.value("currentPath", ccFileUtils::defaultDocPath()).toString();
 
 		filename = QFileDialog::getSaveFileName(this, "Save M3C2 parameters", currentPath + QString("/m3c2_params.txt"), "*.txt");
 		if (filename.isEmpty())

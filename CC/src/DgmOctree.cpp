@@ -39,7 +39,7 @@
 //#define ADAPTATIVE_BINARY_SEARCH
 
 #ifdef USE_QT
-#ifndef QT_DEBUG
+#ifndef _DEBUG
 //enables multi-threading handling
 #define ENABLE_MT_OCTREE
 #endif

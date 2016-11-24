@@ -99,7 +99,7 @@ public:
 	//! Invalid cell code
 	/** \warning Never pass a 'constant initializer' by reference
 	**/
-	static const CellCode INVALID_CELL_CODE = (~(CellCode)0);
+	static const CellCode INVALID_CELL_CODE = (~static_cast<CellCode>(0));
 
 	//! Octree cell codes container
 	typedef std::vector<CellCode> cellCodesContainer;

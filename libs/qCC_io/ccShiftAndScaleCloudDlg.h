@@ -111,6 +111,9 @@ public:
 	//! Adds information from default file (if any)
 	bool addFileInfo();
 
+    //! Sets the last shift and scale information
+    static void SetLastInfo(const CCVector3d& shift, double scale);
+
 protected slots:
 
 	//! Slot called when the 'loadComboBox' index changes

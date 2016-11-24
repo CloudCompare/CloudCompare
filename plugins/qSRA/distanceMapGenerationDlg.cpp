@@ -35,6 +35,7 @@
 #include <ccRenderToFileDlg.h>
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 #include <ccPlane.h>
 #include <ccScalarField.h>
@@ -1241,7 +1242,7 @@ void DistanceMapGenerationDlg::exportMapAsGrid()
 	//persistent settings (default export path)
 	QSettings settings;
 	settings.beginGroup("qSRA");
-	QString path = settings.value("exportPath",QApplication::applicationDirPath()).toString();
+	QString path = settings.value("exportPath", ccFileUtils::defaultDocPath()).toString();
 
 	QString filter("Grid file (*.csv)");
 
@@ -1402,7 +1403,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 	//persistent settings (default import path)
 	QSettings settings;
 	settings.beginGroup("qSRA");
-	QString path = settings.value("importPath", QApplication::applicationDirPath()).toString();
+	QString path = settings.value("importPath", ccFileUtils::defaultDocPath()).toString();
 
 	QString filter("Symbols (*.txt)");
 

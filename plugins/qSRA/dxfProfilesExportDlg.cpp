@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccFileUtils.h"
+
 #include "dxfProfilesExportDlg.h"
 
 //Qt
@@ -43,8 +45,8 @@ void DxfProfilesExportDlg::initFromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("DxfProfilesExportDialog");
 
-	const QString	defaultVertProfile( QApplication::applicationDirPath() + "/vert_profiles.dxf" );
-	const QString	defaultHorizProfile( QApplication::applicationDirPath() + "/horiz_profiles.dxf" );
+	const QString	defaultVertProfile( ccFileUtils::defaultDocPath() + "/vert_profiles.dxf" );
+	const QString	defaultHorizProfile( ccFileUtils::defaultDocPath() + "/horiz_profiles.dxf" );
 	
 	//read parameters
 	bool vertEnabled		= settings.value("vertExportGroup",	true).toBool();

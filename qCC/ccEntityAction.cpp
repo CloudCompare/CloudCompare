@@ -396,7 +396,7 @@ namespace ccEntityAction
 	
 	bool	convertTextureToColor(ccHObject::Container selectedEntities, QWidget *parent)
 	{	
-		for (size_t i=0; i<selectedEntities.size(); ++i)
+		for (size_t i = 0; i < selectedEntities.size(); ++i)
 		{
 			ccHObject* ent = selectedEntities[i];
 			if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
@@ -411,11 +411,12 @@ namespace ccEntityAction
 				}
 				else
 				{
-					if (QMessageBox::warning( parent,
-											  "Mesh already has colors",
-											  QString("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
-											  QMessageBox::Yes | QMessageBox::No,
-											  QMessageBox::No ) != QMessageBox::Yes)
+					if (	mesh->hasColors()
+						&&	QMessageBox::warning(	parent,
+													"Mesh already has colors",
+													QString("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
+													QMessageBox::Yes | QMessageBox::No,
+													QMessageBox::No) != QMessageBox::Yes)
 					{
 						continue;
 					}

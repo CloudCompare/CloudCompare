@@ -34,6 +34,10 @@ Example: `ccConsole` saved in `ccConsole.h` and `ccConsole.cpp`
 - Images (icons) should all be saved in the `images` directory (or one of its subdirectories).
 - GUI templates (mainly `.ui` Qt files) should be saved in the `ui_templates` directory 
 
+### Tabs and indentation
+
+- Indentation is expected to be made in `Tabs` only, each of size `4`.
+
 ### Summary
 Element | Example
 ------- | -------
@@ -54,7 +58,7 @@ Const (`#define`) | `MY_CONSTANT`
 For avoiding incompatible syntax with Unix environments, the following rules must be respected:
 ¬	use only "/" for include paths.
 
-Example: `include "../db/ccPointCloud.h"
+Example: `include "../db/ccPointCloud.h"`
 
 ## File headers
 

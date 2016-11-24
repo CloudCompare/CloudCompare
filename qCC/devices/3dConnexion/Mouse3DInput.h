@@ -25,7 +25,7 @@
 #include <ccGLMatrix.h>
 
 //Qt
-#include <QWidget>
+#include <QObject>
 
 //system
 #include <vector>
@@ -40,7 +40,7 @@ class Mouse3DInput : public QObject
 public:
 
 	//! Default constructor
-	explicit Mouse3DInput(QWidget* widget);
+	explicit Mouse3DInput(QObject* parent);
 	//! Destructor
 	virtual ~Mouse3DInput();
 

@@ -25,6 +25,7 @@
 
 //qCC_db
 #include <ccColorScalesManager.h>
+#include <ccFileUtils.h>
 #include <ccScalarField.h>
 #include <ccPointCloud.h>
 
@@ -792,7 +793,7 @@ void ccColorScaleEditorDialog::exportCurrentScale()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	//ask for a filename
 	QString filename = QFileDialog::getSaveFileName(this,"Select output file",currentPath,"*.xml");
@@ -818,7 +819,7 @@ void ccColorScaleEditorDialog::importScale()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	//ask for a filename
 	QString filename = QFileDialog::getOpenFileName(this,"Select color scale file",currentPath,"*.xml");

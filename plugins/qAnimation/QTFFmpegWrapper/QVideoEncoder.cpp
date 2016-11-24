@@ -38,7 +38,7 @@ struct FFmpegStuffEnc
 	{}
 };
 
-QVideoEncoder::QVideoEncoder(QString filename, unsigned width, unsigned height, unsigned bitrate, unsigned gop, unsigned fps)
+QVideoEncoder::QVideoEncoder(QString filename, int width, int height, unsigned bitrate, int gop, int fps)
 	: m_filename(filename)
 	, m_width(width)
 	, m_height(height)
@@ -265,7 +265,8 @@ bool QVideoEncoder::close()
 	// delayed frames?
 	while (true)
 	{
-		AVPacket pkt = { 0 };
+		AVPacket pkt;
+		memset( &pkt, 0, sizeof( AVPacket ) );		
 		av_init_packet(&pkt);
 
 		int got_packet = 0;
@@ -319,7 +320,8 @@ bool QVideoEncoder::encodeImage(const QImage &image, int frameIndex, QString* er
 		return false;
 	}
 
-	AVPacket pkt = { 0 };
+	AVPacket pkt;
+	memset( &pkt, 0, sizeof( AVPacket ) );
 	av_init_packet(&pkt);
 
 	// encode the image
@@ -406,7 +408,7 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 		return false;
 	}
 
-	uint8_t *srcSlice[3] = { (uint8_t*)image.bits(), 0, 0 };
+	const uint8_t *srcSlice[3] = { static_cast<const uint8_t*>(image.constBits()), 0, 0 };
 	int srcStride[3] = { image.bytesPerLine(), 0, 0 };
 
 	sws_scale(	m_ff->swsContext,
@@ -419,4 +421,3 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 
 	return true;
 }
-

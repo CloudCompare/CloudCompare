@@ -33,7 +33,7 @@ class ccOverlayDialog;
 class ccMainAppInterface
 {
 public:
-	
+
 	//! Returns main window
 	virtual QMainWindow* getMainWindow() = 0;
 
@@ -72,10 +72,10 @@ public:
 		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
 	**/
 	virtual void addToDB(	ccHObject* obj,
-							bool updateZoom = false,
-							bool autoExpandDBTree = true,
-							bool checkDimensions = false,
-							bool autoRedraw = true) = 0;
+		                    bool updateZoom = false,
+		                    bool autoExpandDBTree = true,
+		                    bool checkDimensions = false,
+		                    bool autoRedraw = true) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
@@ -148,23 +148,30 @@ public:
 
 	//! Spawns an histogram dialog
 	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
-										double minVal,
-										double maxVal,
-										QString title,
-										QString xAxisLabel) = 0;
+	                                    double minVal,
+	                                    double maxVal,
+	                                    QString title,
+	                                    QString xAxisLabel) = 0;
 
-	//other usefull methods
+	//other useful methods
 	virtual void setFrontView() = 0;
 	virtual void setBottomView() = 0;
 	virtual void setTopView() = 0;
 	virtual void setBackView() = 0;
 	virtual void setLeftView() = 0;
 	virtual void setRightView() = 0;
+	virtual void setIsoView1() = 0;
+	virtual void setIsoView2() = 0;
+
 	virtual void toggleActiveWindowCenteredPerspective() = 0;
 	virtual void toggleActiveWindowCustomLight() = 0;
 	virtual void toggleActiveWindowSunLight() = 0;
 	virtual void toggleActiveWindowViewerBasedPerspective() = 0;
 	virtual void zoomOnSelectedEntities() = 0;
+	virtual void setGlobalZoom() = 0;
+
+	virtual void increasePointSize() = 0;
+	virtual void decreasePointSize() = 0;
 };
 
 #endif //CC_MAIN_APP_INTERFACE_HEADER

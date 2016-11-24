@@ -20,8 +20,11 @@
 //Local
 #include "ccPersistentSettings.h"
 #include "ccAskTwoDoubleValuesDlg.h"
+#include "mainwindow.h"
+#include "ui_dipDirTransformationDlg.h"
 
 //qCC_db
+#include <ccFileUtils.h>
 #include <ccNormalVectors.h>
 
 //Qt
@@ -37,6 +40,14 @@
 static QString s_lastMatrix("1.00000000 0.00000000 0.00000000 0.00000000\n0.00000000 1.00000000 0.00000000 0.00000000\n0.00000000 0.00000000 1.00000000 0.00000000\n0.00000000 0.00000000 0.00000000 1.00000000");
 static bool s_inverseMatrix = false;
 static int s_currentFormIndex = 0;
+
+//! Dialog to define a dip / dip dir. transformation
+class DipDirTransformationDialog : public QDialog, public Ui::DipDirTransformationDialog
+{
+public:
+
+	DipDirTransformationDialog(QWidget* parent = 0) : QDialog(parent) { setupUi(this); }
+};
 
 ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
@@ -245,7 +256,7 @@ void ccApplyTransformationDlg::loadFromASCIIFile()
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::LoadFile());
-	QString currentPath = settings.value(ccPS::CurrentPath(),QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString inputFilename = QFileDialog::getOpenFileName(this, "Select input file", currentPath, "*.txt");
 	if (inputFilename.isEmpty())
@@ -283,22 +294,47 @@ void ccApplyTransformationDlg::initFromDipAndDipDir()
 {
 	static double s_dip_deg = 0.0;
 	static double s_dipDir_deg = 0.0;
-	ccAskTwoDoubleValuesDlg atdvDlg("Dip", "Dip dir.", 0, 360, s_dip_deg, s_dipDir_deg, 1, "From dip / dip dir.", this);
-	atdvDlg.doubleSpinBox1->setMaximum(90.0); //Dip can only go up to 90 degrees ;)
+	static bool s_rotateAboutCenter = false;
+	DipDirTransformationDialog dddDlg(this);
+	dddDlg.dipDoubleSpinBox->setValue(s_dip_deg);
+	dddDlg.dipDirDoubleSpinBox->setValue(s_dipDir_deg);
+	dddDlg.rotateAboutCenterCheckBox->setChecked(s_rotateAboutCenter);
 
-	if (!atdvDlg.exec())
+	if (!dddDlg.exec())
 	{
 		return;
 	}
 
-	s_dip_deg = atdvDlg.doubleSpinBox1->value();
-	s_dipDir_deg = atdvDlg.doubleSpinBox2->value();
+	s_dip_deg = dddDlg.dipDoubleSpinBox->value();
+	s_dipDir_deg = dddDlg.dipDirDoubleSpinBox->value();
+	s_rotateAboutCenter = dddDlg.rotateAboutCenterCheckBox->isChecked();
 
 	//resulting normal vector
 	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(static_cast<PointCoordinateType>(s_dip_deg), static_cast<PointCoordinateType>(s_dipDir_deg));
 	//corresponding rotation (assuming we start from (0, 0, 1))
 
 	ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), Nd);
+
+	if (s_rotateAboutCenter && MainWindow::TheInstance())
+	{
+		const ccHObject::Container& selectedEntities = MainWindow::TheInstance()->getSelectedEntities();
+		ccBBox box;
+		for (ccHObject* obj : selectedEntities)
+		{
+			box += obj->getBB_recursive();
+		}
+
+		if (box.isValid())
+		{
+			CCVector3 C = box.getCenter();
+			ccGLMatrix shiftToCenter;
+			shiftToCenter.setTranslation(-C);
+			ccGLMatrix backToOrigin;
+			backToOrigin.setTranslation(C);
+			trans = backToOrigin * trans * shiftToCenter;
+		}
+	}
+
 	updateAll(trans, true, true, true);
 }
 
@@ -307,6 +343,6 @@ void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
 	if (buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
 	{
 		updateAll(ccGLMatrix(), true, true, true);
+		inverseCheckBox->setChecked(false);
 	}
-	inverseCheckBox->setChecked(false);
 }

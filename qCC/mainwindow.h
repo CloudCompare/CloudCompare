@@ -62,8 +62,9 @@ class ccPrimitiveFactoryDlg;
 class ccDrawableObject;
 class ccOverlayDialog;
 class QMdiSubWindow;
-class Mouse3DInput;
-class GamepadInput;
+class cc3DMouseManager;
+class ccGamepadManager;
+class ccRecentFiles;
 
 //! Main window
 class MainWindow : public QMainWindow, public ccMainAppInterface, public Ui::MainWindow
@@ -124,9 +125,9 @@ public:
 							bool checkDimensions = false,
 							bool autoRedraw = true) override;
 
-	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos);
-	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg);
-	virtual void updateOverlayDialogsPlacement();
+	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
+	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
+	virtual void updateOverlayDialogsPlacement() override;
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
 	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
@@ -236,18 +237,22 @@ protected slots:
 	virtual void setBackView() override;
 	virtual void setLeftView() override;
 	virtual void setRightView() override;
+	virtual void setIsoView1() override;
+	virtual void setIsoView2() override;
+	
 	virtual void toggleActiveWindowStereoVision(bool);
 	virtual void toggleActiveWindowCenteredPerspective() override;
 	virtual void toggleActiveWindowCustomLight() override;
 	virtual void toggleActiveWindowSunLight() override;
 	virtual void toggleActiveWindowViewerBasedPerspective() override;
 	virtual void zoomOnSelectedEntities() override;
+	virtual void setGlobalZoom() override;
+	
+	virtual void increasePointSize() override;
+	virtual void decreasePointSize() override;
 
-	void setIsoView1();
-	void setIsoView2();
 	void toggleRotationAboutVertAxis();
 	void doActionEnableBubbleViewMode();
-	void setGlobalZoom();
 	void setPivotAlwaysOn();
 	void setPivotRotationOnly();
 	void setPivotOff();
@@ -456,23 +461,6 @@ protected slots:
 	void doActionShowActiveSFPrevious();
 	void doActionShowActiveSFNext();
 
-	//3D mouse
-	void on3DMouseMove(std::vector<float>&);
-	void on3DMouseKeyUp(int);
-	void on3DMouseKeyDown(int);
-	void on3DMouseReleased();
-
-	//! Setups 3D mouse (if any)
-	void setup3DMouse(bool state) { enable3DMouse(state, false); }
-
-	//Gamepad
-	void onGamepadInput();
-	void increasePointSize();
-	void decreasePointSize();
-
-	//! Setups gamepad (if any)
-	void setupGamepad(bool state) { enableGamepad(state, false); }
-
 	//! Removes all entities currently loaded in the DB tree
 	void closeAll();
 
@@ -536,6 +524,11 @@ protected:
 	**/
 	void doComputePlaneOrientation(bool fitFacet);
 
+	//! Sets up any input devices (3D mouse, gamepad) and adds their menus
+	void setupInputDevices();
+	//! Stops input and destroys any input device handling
+	void destroyInputDevices();
+
 	//! Connects all QT actions to slots
 	void connectActions();
 
@@ -544,24 +537,6 @@ protected:
 
 	//! Expands DB tree for selected items
 	void expandDBTreeWithSelection(ccHObject::Container& selection);
-
-	//! Trys to enable (or disable) a 3D mouse device
-	/** \param state whether to enable or disable the device
-		\param silent whether to issue an error message in case of failure
-	**/
-	void enable3DMouse(bool state, bool silent);
-
-	//! Releases any connected 3D mouse
-	void release3DMouse();
-
-	//! Trys to enable (or disable) a gamepad device
-	/** \param state whether to enable or disable the device
-		\param silent whether to issue an error message in case of failure
-	**/
-	void enableGamepad(bool state, bool silent);
-
-	//! Releases any connected gamepad
-	void releaseGamepad();
 
 	//! Updates the view mode pop-menu based for a given window (or an absence of!)
 	virtual void updateViewModePopUpMenu(ccGLWindow* win);
@@ -581,11 +556,14 @@ protected:
 	//! UI frozen state (see freezeUI)
 	bool m_uiFrozen;
 
-	//! 3D mouse handler
-	Mouse3DInput* m_3dMouseInput;
+	//! Recent files menu
+	ccRecentFiles* m_recentFiles;
+	
+	//! 3D mouse
+	cc3DMouseManager* m_3DMouseManager;
 
 	//! Gamepad handler
-	GamepadInput* m_gamepadInput;
+	ccGamepadManager* m_gamepadManager;
 
 	//! View mode pop-up menu button
 	QToolButton* m_viewModePopupButton;

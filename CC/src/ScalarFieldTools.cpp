@@ -207,7 +207,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 
 						if (norm2 > ZERO_TOLERANCE)
 						{
-							double deltaValue = v2 - v1;
+							double deltaValue = static_cast<double>(v2 - v1);
 							if (!euclideanDistances || deltaValue*deltaValue < 1.01 * norm2)
 							{
 								deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
@@ -320,8 +320,8 @@ bool ScalarFieldTools::computeCellGaussianFilter(	const DgmOctree::octreeCell& c
 													NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	PointCoordinateType sigma	= *((PointCoordinateType*)additionalParameters[0]);
-    PointCoordinateType sigmaSF	= *((PointCoordinateType*)additionalParameters[1]);
+	PointCoordinateType sigma	= *(static_cast<PointCoordinateType*>(additionalParameters[0]));
+    PointCoordinateType sigmaSF	= *(static_cast<PointCoordinateType*>(additionalParameters[1]));
 
     //we use only the squared value of sigma
 	PointCoordinateType sigma2 = 2*sigma*sigma;
@@ -420,12 +420,12 @@ bool ScalarFieldTools::computeCellGaussianFilter(	const DgmOctree::octreeCell& c
                 //scalar value must be valid
 				if (ScalarField::ValidValue(val))
                 {
-                    meanValue += (double)val * weight;
+                    meanValue += static_cast<double>(val) * weight;
                     wSum += weight;
                 }
             }
 
-            cell.points->setPointScalarValue(i,wSum > 0.0 ? (ScalarType)(meanValue / wSum) : NAN_VALUE);
+            cell.points->setPointScalarValue(i,wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : NAN_VALUE);
 
 			if (nProgress && !nProgress->oneStep())
 				return false;

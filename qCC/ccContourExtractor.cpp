@@ -675,7 +675,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		preferredPlaneEq[1] = preferredNormDim[1];
 		preferredPlaneEq[2] = preferredNormDim[2];
 		CCVector3::vnormalize(preferredPlaneEq);
-		preferredPlaneEq[3] = CCVector3::vdot(G->u,preferredPlaneEq);
+		preferredPlaneEq[3] = CCVector3::vdot(G->u, preferredPlaneEq);
 		planeEq = preferredPlaneEq;
 
 		if (preferredUpDir != 0)
@@ -687,7 +687,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		}
 	}
 
-	if (!Yk.projectPointsOn2DPlane<Vertex2D>(points2D,planeEq,&O,&X,&Y,useOXYasBase))
+	if (!Yk.projectPointsOn2DPlane<Vertex2D>(points2D, planeEq, &O, &X, &Y, useOXYasBase))
 	{
 		ccLog::Warning("[ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
 		return 0;
@@ -695,7 +695,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 
 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
 	{
-		for (unsigned i=0; i<ptsCount; ++i)
+		for (unsigned i = 0; i < ptsCount; ++i)
 			points2D[i].index = i;
 	}
 
@@ -717,7 +717,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	{
 		try
 		{
-			originalPointIndexes->resize(hullPoints.size(),0);
+			originalPointIndexes->resize(hullPoints.size(), 0);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -755,7 +755,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	ccPolyline* contourPolyline = new ccPolyline(contourVertices);
 	if (contourPolyline->reserve(hullPtsCount))
 	{
-		contourPolyline->addPointIndex(0,hullPtsCount);
+		contourPolyline->addPointIndex(0, hullPtsCount);
 		contourPolyline->setClosed(contourType == FULL);
 		contourPolyline->setVisible(true);
 		contourPolyline->setName("contour");
@@ -782,7 +782,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	parts.clear();
 
 	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points,allowMultiPass,maxEdgeLength,preferredDim,0,FULL,0,enableVisualDebugMode);
+	ccPolyline* basePoly = ExtractFlatContour(points, allowMultiPass, maxEdgeLength, preferredDim, 0, FULL, 0, enableVisualDebugMode);
 	if (!basePoly)
 	{
 		return false;
@@ -794,7 +794,7 @@ bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* p
 	}
 
 	//and split it if necessary
-	bool success = basePoly->split(maxEdgeLength,parts);
+	bool success = basePoly->split(maxEdgeLength, parts);
 
 	delete basePoly;
 	basePoly = 0;

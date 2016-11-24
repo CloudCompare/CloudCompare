@@ -69,9 +69,9 @@ public:
 	}
 };
 
-Mouse3DInput::Mouse3DInput(QWidget* widget)
-	: QObject(widget)
-	, m_siHandle(SI_NO_HANDLE)
+Mouse3DInput::Mouse3DInput(QObject* parent)
+    : QObject(parent)
+    , m_siHandle(SI_NO_HANDLE)
 {
 	//register current instance
 	assert(s_mouseInputInstance == 0);
@@ -109,7 +109,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	SiOpenWinInit(&oData, (HWND)mainWidget->winId() );
 	//3DxWare device handle
 	m_siHandle = SiOpen(qPrintable(appName), SI_ANY_DEVICE, SI_NO_MASK, SI_EVENT, &oData);
-	
+
 	if (m_siHandle == SI_NO_HANDLE)
 	{
 		/* Get and display initialization error */
@@ -172,11 +172,11 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 			const SiSpwData& eventData = siEvent.u.spwData;
 
 			if (	eventData.mData[SI_TX] != 0
-				||	eventData.mData[SI_TY] != 0
-				||	eventData.mData[SI_TZ] != 0
-				||	eventData.mData[SI_RX] != 0
-				||	eventData.mData[SI_RY] != 0
-				||	eventData.mData[SI_RZ] != 0 )
+			    ||	eventData.mData[SI_TY] != 0
+			    ||	eventData.mData[SI_TZ] != 0
+			    ||	eventData.mData[SI_RX] != 0
+			    ||	eventData.mData[SI_RY] != 0
+			    ||	eventData.mData[SI_RZ] != 0 )
 			{
 				std::vector<float> axes(6);
 				double ds = eventData.period * c_3dmouseAngularVelocity; //period is in ms
@@ -273,7 +273,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 	std::vector<float> vec = motionData;
 
 	//view parameters
-	bool objectMode = true; 
+	bool objectMode = true;
 	bool perspectiveView = win->getPerspectiveState(objectMode); //note: viewer based perspective IS 'camera mode'
 	bool bubbleViewMode = win->bubbleViewModeEnabled();
 
@@ -295,8 +295,8 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 
 		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
 		if (	fabs(X) > ZERO_TOLERANCE
-			||	fabs(Y) > ZERO_TOLERANCE
-			||	fabs(Z) > ZERO_TOLERANCE )
+		    ||	fabs(Y) > ZERO_TOLERANCE
+		    ||	fabs(Z) > ZERO_TOLERANCE )
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 
@@ -323,8 +323,8 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 
 	//rotation
 	if (	fabs(vec[3]) > ZERO_TOLERANCE
-		||	fabs(vec[4]) > ZERO_TOLERANCE
-		||	fabs(vec[5]) > ZERO_TOLERANCE)
+	    ||	fabs(vec[4]) > ZERO_TOLERANCE
+	    ||	fabs(vec[5]) > ZERO_TOLERANCE)
 	{
 		//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
 

@@ -16,12 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="baseSize">
-   <size>
-    <width>800</width>
-    <height>600</height>
-   </size>
-  </property>
   <property name="focusPolicy">
    <enum>Qt::ClickFocus</enum>
   </property>
@@ -52,34 +46,11 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menu3DMouse">
-     <property name="title">
-      <string>3D mouse</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/im3DxLogo.png</normaloff>:/CC/images/im3DxLogo.png</iconset>
-     </property>
-     <addaction name="actionEnable3DMouse"/>
-    </widget>
-    <widget class="QMenu" name="menuGamepad">
-     <property name="title">
-      <string>Gamepad</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icones.qrc">
-       <normaloff>:/CC/images/gamepad.png</normaloff>:/CC/images/gamepad.png</iconset>
-     </property>
-     <addaction name="actionEnableGamepad"/>
-    </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionGlobalShiftSettings"/>
     <addaction name="separator"/>
     <addaction name="actionPrimitiveFactory"/>
-    <addaction name="separator"/>
-    <addaction name="menu3DMouse"/>
-    <addaction name="menuGamepad"/>
     <addaction name="separator"/>
     <addaction name="actionCloseAll"/>
     <addaction name="actionQuit"/>
@@ -2257,14 +2228,6 @@
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionEnable3DMouse">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Enable</string>
-   </property>
-  </action>
   <action name="actionSetOrthoView">
    <property name="icon">
     <iconset resource="../icones.qrc">
@@ -2948,14 +2911,6 @@
    </property>
    <property name="toolTip">
     <string>Fit a plane on a set of point</string>
-   </property>
-  </action>
-  <action name="actionEnableGamepad">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Enable</string>
    </property>
   </action>
  </widget>

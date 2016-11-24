@@ -19,6 +19,8 @@
 #ifndef AUTO_SEGMENTATION_TOOLS_HEADER
 #define AUTO_SEGMENTATION_TOOLS_HEADER
 
+#include <vector>
+
 //Local
 #include "CCToolbox.h"
 #include "CCTypes.h"

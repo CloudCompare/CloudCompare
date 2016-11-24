@@ -25,8 +25,10 @@
 #include "ccGlobalShiftManager.h"
 
 //Qt
-#include <QPushButton>
+#include <QDebug>
+#include <QDir>
 #include <QFile>
+#include <QPushButton>
 #include <QTextStream>
 #include <QStringList>
 
@@ -151,9 +153,9 @@ void ccShiftAndScaleCloudDlg::displayMoreInfo()
 }
 
 bool ccShiftAndScaleCloudDlg::addFileInfo()
-{
+{	
 	//try to load the 'global_shift_list.txt" file
-	return loadInfoFromFile(QApplication::applicationDirPath() + QString("/")+ s_defaultGlobalShiftListFilename);
+	return loadInfoFromFile(QDir::currentPath() + QString("/")+ s_defaultGlobalShiftListFilename);
 }
 
 bool ccShiftAndScaleCloudDlg::loadInfoFromFile(QString filename)
@@ -456,4 +458,11 @@ int ccShiftAndScaleCloudDlg::addShiftInfo(const ShiftInfo& info)
 	m_ui->loadComboBox->setEnabled(m_defaultInfos.size() >= 2);
 
 	return static_cast<int>(m_defaultInfos.size())-1;
+}
+
+void ccShiftAndScaleCloudDlg::SetLastInfo(const CCVector3d& shift, double scale)
+{
+	s_lastInfo.valid = true;
+	s_lastInfo.shift = shift;
+	s_lastInfo.scale = scale;
 }

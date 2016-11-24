@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccFileUtils.h"
+
 #include "CSVMatrixOpenDialog.h"
 
 //Qt
@@ -33,7 +35,7 @@ CSVMatrixOpenDialog::CSVMatrixOpenDialog(QWidget* parent/*=0*/)
 	//persistent settings
 	QSettings settings;
 	settings.beginGroup("LoadFile");
-	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	QString currentPath = settings.value("currentPath",ccFileUtils::defaultDocPath()).toString();
 
 	textureFilenameLineEdit->setText(currentPath);
 }

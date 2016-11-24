@@ -138,18 +138,18 @@ public:
 	void unloadAll();
 
 	//inherited from QAbstractItemModel
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const;
-	virtual QModelIndex index(ccHObject* object);
-	virtual QModelIndex parent(const QModelIndex &index) const;
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
-	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-	virtual Qt::DropActions supportedDropActions() const;
-	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
-	virtual QMap<int,QVariant> itemData(const QModelIndex& index) const;
-	virtual Qt::DropActions supportedDragActions() const { return Qt::MoveAction; }
+	virtual QVariant data(const QModelIndex &index, int role) const override;
+	virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const override;
+	QModelIndex index(ccHObject* object);
+	virtual QModelIndex parent(const QModelIndex &index) const override;
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+	virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+	virtual Qt::DropActions supportedDropActions() const override;
+	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+	virtual QMap<int,QVariant> itemData(const QModelIndex& index) const override;
+	virtual Qt::DropActions supportedDragActions() const override { return Qt::MoveAction; }
 
 public slots:
 	void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);

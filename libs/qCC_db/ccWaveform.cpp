@@ -14,10 +14,10 @@ WaveformDescriptor::WaveformDescriptor()
 bool WaveformDescriptor::operator != (const WaveformDescriptor& d) const
 {
 	return	d.bitsPerSample != bitsPerSample
-		|| d.digitizerGain != d.digitizerGain
-		|| d.digitizerOffset != d.digitizerOffset
-		|| d.numberOfSamples != d.numberOfSamples
-		|| d.samplingRate_ps != d.samplingRate_ps;
+		|| d.digitizerGain != digitizerGain
+		|| d.digitizerOffset != digitizerOffset
+		|| d.numberOfSamples != numberOfSamples
+		|| d.samplingRate_ps != samplingRate_ps;
 }
 
 bool WaveformDescriptor::toFile(QFile& out) const

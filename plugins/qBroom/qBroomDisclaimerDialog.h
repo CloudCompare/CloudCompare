@@ -24,7 +24,7 @@
 #include <ccMainAppInterface.h>
 
 //Qt
-#include <QMainwindow>
+#include <QMainWindow>
 #include <QDialog>
 
 //! Dialog for displaying the M3C2/UEB disclaimer

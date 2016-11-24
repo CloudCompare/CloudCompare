@@ -13,7 +13,7 @@ install:
     - sudo add-apt-repository --yes ppa:george-edison55/cmake-3.x
     - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
     - sudo apt-get update -qq
-    - sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev libvxl1-dev
+    - sudo apt-get install -qy cmake qt55base libgdal1-dev libfreenect-dev libvxl1-dev libeigen3-dev
     # CC submodules
     - git submodule init && git submodule update
 
@@ -37,6 +37,9 @@ before_script:
       -DINSTALL_QCSF_PLUGIN=ON
       -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON
       -DINSTALL_QM3C2_PLUGIN=ON
+      -DINSTALL_QBROOM_PLUGIN=true
+      -DINSTALL_QHOUGH_NORMALS_PLUGIN=true 
+      -DEIGEN_ROOT_DIR=/usr/include/eigen3
       -DINSTALL_QPCV_PLUGIN=ON ..
 
       # -DOPTION_USE_GDAL=ON
@@ -50,5 +53,5 @@ before_script:
       # - could not use CGAL from Ubuntu (< 4.3)
 
 script:
-    # We use only 4 core because gcc and clang can be memory hungry
+    # We use only 2 core because gcc and clang can be memory hungry
     - make -j2

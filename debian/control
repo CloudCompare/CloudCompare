@@ -5,7 +5,7 @@ Maintainer: Romain Janvier <romain.janvier@univ-orleans.fr>
 Build-Depends: debhelper (>= 9.0.0), cmake, qtbase5-dev, libqt5opengl5-dev, libfreenect-dev, 
  libcgal-dev, libcgal-qt5-dev, liblas-dev (>= 1.7.0), liblas-c-dev (>= 1.7.0), libboost-thread-dev, 
  libboost-program-options-dev, libvxl1-dev, libavutil-dev, libavcodec-dev, 
- libavformat-dev, libswscale-dev
+ libavformat-dev, libswscale-dev, libeigen3-dev
 Standards-Version: 3.9.4
 Homepage:http://www.danielgm.net/cc/
 Vcs-Git: git://github.com/archeos/cloudcompare-archeos.git

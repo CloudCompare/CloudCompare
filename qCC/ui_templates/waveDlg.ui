@@ -27,6 +27,20 @@
       <widget class="QSpinBox" name="pointIndexSpinBox"/>
      </item>
      <item>
+      <widget class="QToolButton" name="pointPickingToolButton">
+       <property name="toolTip">
+        <string>Pick a 3D point (click again to cancel)</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -43,6 +57,27 @@
       <widget class="QCheckBox" name="logScaleCheckBox">
        <property name="text">
         <string>log scale</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="fixedAmplitudeCheckBox">
+       <property name="text">
+        <string>fixed amplitude</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="saveWaveToolButton">
+       <property name="toolTip">
+        <string>Export wave as CSV file</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/images/smallCSVFile.png</normaloff>:/CC/images/smallCSVFile.png</iconset>
        </property>
       </widget>
      </item>
@@ -70,7 +105,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

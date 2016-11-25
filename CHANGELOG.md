@@ -23,6 +23,9 @@ v2.8.beta - XX/XX/2016
 		- based on "Accurate 3D comparison of complex topography with terrestrial laser scanner: application to the Rangitikei canyon (N-Z)", Lague, D., Brodu, N. and Leroux, J., 2013, ISPRS Journal of Photogrammmetry and Remote Sensing
 
 	* Support for FWF (Full WaveForm) airborne lidar data
+		- use the 'LAS 1.3 or 1.4 (*.las *.laz)' filter to open LAS files with full waveform data
+		- new 'Edit > Waveform > 2D Waveform viewer' to visualize waveforms associated to each point (as 2D curve)
+		- option to export the waveform as a CSV file
 
 	* New 'Geological' plane creation / edition methods:
 		- Edit > Plane > Create: lets the user create a plane with specific dip / dip direction, center (can be picked on a cloud or a mesh), width and height

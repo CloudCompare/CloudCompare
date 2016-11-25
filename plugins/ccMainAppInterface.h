@@ -28,6 +28,7 @@ class QMainWindow;
 class ccGLWindow;
 class ccColorScalesManager;
 class ccOverlayDialog;
+class ccPickingHub;
 
 //! Main application interface (for plugins)
 class ccMainAppInterface
@@ -72,10 +73,10 @@ public:
 		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
 	**/
 	virtual void addToDB(	ccHObject* obj,
-		                    bool updateZoom = false,
-		                    bool autoExpandDBTree = true,
-		                    bool checkDimensions = false,
-		                    bool autoRedraw = true) = 0;
+							bool updateZoom = false,
+							bool autoExpandDBTree = true,
+							bool checkDimensions = false,
+							bool autoRedraw = true) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
@@ -148,10 +149,13 @@ public:
 
 	//! Spawns an histogram dialog
 	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
-	                                    double minVal,
-	                                    double maxVal,
-	                                    QString title,
-	                                    QString xAxisLabel) = 0;
+										double minVal,
+										double maxVal,
+										QString title,
+										QString xAxisLabel) = 0;
+
+	//! Returns the picking hub (if any)
+	virtual ccPickingHub* pickingHub() { return nullptr; }
 
 	//other useful methods
 	virtual void setFrontView() = 0;

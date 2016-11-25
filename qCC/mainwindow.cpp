@@ -110,6 +110,7 @@
 #include "ccPluginDlg.h"
 #include "ccWaveformDialog.h"
 #include "ccPlaneEditDlg.h"
+#include "ccPickingHub.h"
 
 //other
 #include "ccCropTool.h"
@@ -152,6 +153,8 @@ MainWindow::MainWindow()
 	, m_gamepadManager(nullptr)
 	, m_viewModePopupButton(0)
 	, m_pivotVisibilityPopupButton(0)
+	, m_FirstShow(true)
+	, m_pickingHub(nullptr)
 	, m_cpeDlg(0)
 	, m_gsTool(0)
 	, m_tplTool(0)
@@ -164,7 +167,6 @@ MainWindow::MainWindow()
 	, m_pprDlg(0)
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
-	, m_FirstShow(true)
 {	
 	setupUi(this);
 
@@ -221,15 +223,25 @@ MainWindow::MainWindow()
 
 	//tabifyDockWidget(DockableDBTree,DockableProperties);
 
-	//db-tree link
-	m_ccRoot = new ccDBRoot(dbTreeView, propertiesTreeView, this);
-	connect(m_ccRoot, SIGNAL(selectionChanged()), this, SLOT(updateUIWithSelection()));
+	//db-tree
+	{
+		m_ccRoot = new ccDBRoot(dbTreeView, propertiesTreeView, this);
+		connect(m_ccRoot, SIGNAL(selectionChanged()), this, SLOT(updateUIWithSelection()));
+	}
 
 	//MDI Area
-	m_mdiArea = new QMdiArea(this);
-	setCentralWidget(m_mdiArea);
-	connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
-	connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(on3DViewActivated(QMdiSubWindow*)));
+	{
+		m_mdiArea = new QMdiArea(this);
+		setCentralWidget(m_mdiArea);
+		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
+		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(on3DViewActivated(QMdiSubWindow*)));
+	}
+
+	//picking hub
+	{
+		m_pickingHub = new ccPickingHub(this, this);
+		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_pickingHub, SLOT(onActiveWindowChanged(QMdiSubWindow*)));
+	}
 
 	//Window Mapper
 	m_windowMapper = new QSignalMapper(this);
@@ -5583,6 +5595,12 @@ ccGLWindow* MainWindow::new3DView()
 	connect(view3D,	SIGNAL(newLabel(ccHObject*)),						this,		SLOT(handleNewLabel(ccHObject*)));
 	connect(view3D,	SIGNAL(exclusiveFullScreenToggled(bool)),			this,		SLOT(onExclusiveFullScreenToggled(bool)));
 
+	if (m_pickingHub)
+	{
+		//we must notify the picking hub as well if the window is destroyed
+		connect(view3D, SIGNAL(destroyed(QObject*)), m_pickingHub, SLOT(prepareWindowDeletion(QObject*)));
+	}
+
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
 	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
 	m_ccRoot->updatePropertiesView();
@@ -10178,8 +10196,10 @@ void MainWindow::doActionShowWaveDialog()
 		return;
 	}
 
-	ccWaveDialog wDlg(cloud, this);
-	wDlg.exec();
+	ccWaveDialog* wDlg = new ccWaveDialog(cloud, m_pickingHub, this);
+	wDlg->setAttribute(Qt::WA_DeleteOnClose);
+	wDlg->setModal(false);
+	wDlg->show();
 }
 
 void MainWindow::doActionCreatePlane()

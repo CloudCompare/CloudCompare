@@ -140,6 +140,7 @@ public:
 	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues,
 												 double minVal, double maxVal,
 												 QString title, QString xAxisLabel) override;
+	virtual ccPickingHub* pickingHub() { return m_pickingHub; }
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
@@ -571,6 +572,12 @@ protected:
 	//! Pivot visibility pop-up menu button
 	QToolButton* m_pivotVisibilityPopupButton;
 
+	//! Flag: first time the window is made visible
+	bool m_FirstShow;
+
+	//! Point picking hub
+	ccPickingHub* m_pickingHub;
+
 	/******************************/
 	/***        MDI AREA        ***/
 	/******************************/
@@ -603,8 +610,8 @@ protected:
 	ccCameraParamEditDlg* m_cpeDlg;
 	//! Graphical segmentation dialog
 	ccGraphicalSegmentationTool* m_gsTool;
-    //! Polyline tracing tool
-    ccTracePolylineTool * m_tplTool;
+	//! Polyline tracing tool
+	ccTracePolylineTool * m_tplTool;
 	//! Section extraction dialog
 	ccSectionExtractionTool* m_seTool;
 	//! Graphical transformation dialog
@@ -628,8 +635,6 @@ protected:
 	QList<ccStdPluginInterface*> m_stdPlugins;
 	QList<QToolBar*> m_stdPluginsToolbars;
 	QActionGroup m_glFilterActions;
-
-	bool	m_FirstShow;
 };
 
 #endif

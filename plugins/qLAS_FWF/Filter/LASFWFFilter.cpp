@@ -166,6 +166,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 							point.quantizer->get_y(point.Y),
 							point.quantizer->get_z(point.Z));
 
+			//Waveform
 			if (hasFWF && point.have_wavepacket)
 			{
 				if (fwfReader->read_waveform(&point))

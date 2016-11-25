@@ -74,6 +74,12 @@ public:
 	//! Returns the (real) value of a given sample (in volts)
 	double getSample(uint32_t i, const WaveformDescriptor& descriptor) const;
 
+	//! Returns the range of (real) samples
+	double getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor) const;
+
+	//! Expotrs (real) samples to an ASCII file
+	bool toASCII(QString filename, const WaveformDescriptor& descriptor) const;
+
 	//! Returns the sample position in 3D
 	CCVector3 getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;
 

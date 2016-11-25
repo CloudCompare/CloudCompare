@@ -53,6 +53,7 @@
 
 //system
 #include <assert.h>
+#include <queue>
 
 ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
@@ -141,16 +142,14 @@ ccPointCloud* ccPointCloud::From(const CCLib::GenericIndexedCloud* cloud, const 
 
 void UpdateGridIndexes(const std::vector<int>& newIndexMap, std::vector<ccPointCloud::Grid::Shared>& grids)
 {
-	for (size_t i=0; i<grids.size(); ++i)
+	for (ccPointCloud::Grid::Shared& scanGrid : grids)
 	{
-		ccPointCloud::Grid::Shared& scanGrid = grids[i];
-
-		unsigned cellCount = scanGrid->w*scanGrid->h;
+		unsigned cellCount = scanGrid->w * scanGrid->h;
 		scanGrid->validCount = 0;
 		scanGrid->minValidIndex = -1;
 		scanGrid->maxValidIndex = -1;
 		int* _gridIndex = &(scanGrid->indexes[0]);
-		for (size_t j=0; j<cellCount; ++j, ++_gridIndex)
+		for (size_t j = 0; j < cellCount; ++j, ++_gridIndex)
 		{
 			if (*_gridIndex >= 0)
 			{
@@ -177,7 +176,9 @@ void UpdateGridIndexes(const std::vector<int>& newIndexMap, std::vector<ccPointC
 ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection, int* warnings/*=0*/) const
 {
 	if (warnings)
+	{
 		*warnings = 0;
+	}
 
 	if (!selection || selection->getAssociatedCloud() != static_cast<const GenericIndexedCloud*>(this))
 	{
@@ -219,8 +220,10 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	{
 		if (result->reserveTheRGBTable())
 		{
-			for (unsigned i=0; i<n; i++)
+			for (unsigned i = 0; i < n; i++)
+			{
 				result->addRGBColor(getPointColor(selection->getPointGlobalIndex(i)));
+			}
 			result->showColors(colorsShown());
 		}
 		else
@@ -236,8 +239,10 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	{
 		if (result->reserveTheNormsTable())
 		{
-			for (unsigned i = 0; i<n; i++)
+			for (unsigned i = 0; i < n; i++)
+			{
 				result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
+			}
 			result->showNormals(normalsShown());
 		}
 		else
@@ -253,15 +258,25 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	{
 		if (result->reserveTheFWFTable())
 		{
-			for (unsigned i = 0; i < n; i++)
+			try
 			{
-				const ccWaveform& w = m_fwfData[selection->getPointGlobalIndex(i)];
-				if (!result->fwfDescriptors().contains(w.descriptorID()))
+				for (unsigned i = 0; i < n; i++)
 				{
-					//copy only the necessary descriptors
-					result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
+					const ccWaveform& w = m_fwfData[selection->getPointGlobalIndex(i)];
+					if (!result->fwfDescriptors().contains(w.descriptorID()))
+					{
+						//copy only the necessary descriptors
+						result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
+					}
+					result->fwfData().push_back(w);
 				}
-				result->fwfData().push_back(w);
+			}
+			catch (const std::bad_alloc&)
+			{
+				ccLog::Warning("[ccPointCloud::partialClone] Not enough memory to copy waveform signals!");
+				result->clearFWFData();
+				if (warnings)
+					*warnings |= WRN_OUT_OF_MEM_FOR_FWF;
 			}
 		}
 		else
@@ -631,6 +646,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		else //otherwise
 		{
 			//if this cloud hasn't any FWF
+			bool success = true;
 			if (!hasFWF())
 			{
 				//we try to reserve a new array
@@ -643,16 +659,86 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 				else
 				{
+					success = false;
 					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate waveforms!");
 				}
 			}
 
-			//we import normals (if necessary)
-			if (hasFWF() && m_fwfData.size() == pointCountBefore)
+			if (success)
 			{
-				for (unsigned i = 0; i < addedPoints; i++)
+				assert(hasFWF());
+
+				//map from old to new keys
+				QMap<uint8_t, uint8_t> keyMap;
+
+				//first: copy the wave descriptors
+				try
 				{
-					m_fwfData.push_back(addedCloud->fwfData()[i]);
+					size_t newKeyCount = addedCloud->m_fwfDescriptors.size();
+					assert(newKeyCount < 256);
+					
+					if (!m_fwfDescriptors.empty())
+					{
+						//we'll have to determine the free descriptor IDs (not used in the destination cloud) before merging
+						std::queue<uint8_t> freeDescKeys;
+						for (uint8_t k = 0; k < 255; ++k)
+						{
+							if (!m_fwfDescriptors.contains(k))
+							{
+								freeDescKeys.push(k);
+								if (freeDescKeys.size() == newKeyCount)
+								{
+									//we can stop here
+									break;
+								}
+							}
+						}
+
+						for (auto it = addedCloud->m_fwfDescriptors.begin(); it != addedCloud->m_fwfDescriptors.begin(); ++it)
+						{
+							if (freeDescKeys.empty())
+							{
+								ccLog::Warning("[ccPointCloud::fusion] Not enough free FWF descriptor ID on destination cloud: some FWF data won't be imported!");
+								break;
+							}
+							uint8_t newKey = freeDescKeys.front();
+							freeDescKeys.pop();
+							keyMap.insert(it.key(), newKey);
+							m_fwfDescriptors.insert(newKey, it.value()); //replace old key by new key!
+						}
+					}
+					else
+					{
+						for (auto it = addedCloud->m_fwfDescriptors.begin(); it != addedCloud->m_fwfDescriptors.begin(); ++it)
+						{
+							keyMap.insert(it.key(), it.key()); //same key, no conversion
+							m_fwfDescriptors.insert(it.key(), it.value());
+						}
+					}
+				}
+				catch (const std::bad_alloc&)
+				{
+					success = false;
+					clearFWFData();
+					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to copy waveform descriptors!");
+				}
+
+				//and now import waveforms
+				if (success && m_fwfData.size() == pointCountBefore)
+				{
+					for (unsigned i = 0; i < addedPoints; i++)
+					{
+						const ccWaveform& w = addedCloud->fwfData()[i];
+						if (keyMap.contains(w.descriptorID())) //the waveform can be imported :)
+						{
+							m_fwfData.push_back(w);
+							m_fwfData.back().setDescriptorID(keyMap[w.descriptorID()]);
+						}
+						else //the waveform is associated to a descriptor that couldn't be imported :(
+						{
+							m_fwfData.push_back(ccWaveform(0));
+						}
+					}
 				}
 			}
 		}
@@ -666,7 +752,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		std::vector<bool> sfUpdated(sfCount, false);
 
 		//first we merge the new SF with the existing one
-		for (unsigned k=0; k<newSFCount; ++k)
+		for (unsigned k = 0; k < newSFCount; ++k)
 		{
 			const ccScalarField* sf = static_cast<ccScalarField*>(addedCloud->getScalarField(static_cast<int>(k)));
 			if (sf)

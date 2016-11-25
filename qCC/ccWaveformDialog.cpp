@@ -21,6 +21,8 @@
 #include "ccQCustomPlot.h"
 #include "ccPersistentSettings.h"
 #include "ccGuiParameters.h"
+#include "ccPickingHub.h"
+#include "ccFileUtils.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -45,7 +47,7 @@ ccWaveWidget::ccWaveWidget(QWidget* parent/*=0*/)
 	, m_vertBar(0)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
-	, m_lastMouseClick(0,0)
+	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Waveform");
 	setFocusPolicy(Qt::StrongFocus);
@@ -115,7 +117,7 @@ void ccWaveWidget::setAxisLabels(const QString& xLabel, const QString& yLabel)
 	}
 }
 
-void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale)
+void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue/*=0.0*/)
 {
 	clearInternal();
 
@@ -176,6 +178,11 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale)
 		}
 	}
 
+	if (maxValue != 0)
+	{
+		m_maxA = maxValue;
+	}
+
 	m_dt = d.samplingRate_ps;
 
 	refresh();
@@ -210,8 +217,8 @@ void ccWaveWidget::refresh()
 	}
 
 	//clear previous display
-	m_vertBar	= 0;
-	m_curve		= 0;
+	m_vertBar = 0;
+	m_curve = 0;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -337,27 +344,67 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent *event)
 //	e->ignore();
 //}
 
-ccWaveDialog::ccWaveDialog(ccPointCloud* cloud, QWidget* parent/*=0*/)
+ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
+							ccPickingHub* pickingHub,
+							QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, m_cloud(cloud)
 	, m_widget(new ccWaveWidget(this))
+	, m_pickingHub(pickingHub)
 	, m_gui(new Ui_WaveDialog)
+	, m_waveMax(0)
 {
 	m_gui->setupUi(this);
 	
 	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->waveFrame);
 	hboxLayout->addWidget(m_widget);
-	hboxLayout->setContentsMargins(0,0,0,0);
+	hboxLayout->setContentsMargins(0, 0, 0, 0);
 	m_gui->waveFrame->setLayout(hboxLayout);
 
 	if (cloud && cloud->size())
 	{
 		m_gui->pointIndexSpinBox->setMaximum(static_cast<int>(cloud->size()));
-		m_gui->pointIndexSpinBox->setSuffix(QString(" / %1").arg(cloud->size()-1));
+		m_gui->pointIndexSpinBox->setSuffix(QString(" / %1").arg(cloud->size() - 1));
+
+		//init m_waveMax
+		if (cloud->size() == cloud->fwfData().size())
+		{
+			for (const ccWaveform& w : cloud->fwfData())
+			{
+				uint8_t descriptorID = w.descriptorID();
+				if (descriptorID == 0 || !cloud->fwfDescriptors().contains(descriptorID))
+				{
+					//no valid descriptor
+					continue;
+				}
+
+				const WaveformDescriptor& d = cloud->fwfDescriptors()[descriptorID];
+				if (d.numberOfSamples != 0)
+				{
+					double minVal, maxVal;
+					w.getRange(minVal, maxVal, d);
+
+					if (maxVal > m_waveMax)
+					{
+						m_waveMax = maxVal;
+					}
+				}
+			}
+			ccLog::Print(QString("[ccWaveDialog] Cloud '%1': max FWF amplitude = %2").arg(cloud->getName()).arg(m_waveMax));
+		}
+		else
+		{
+			ccLog::Warning("[ccWaveDialog] Input cloud has no FWF data");
+		}
 	}
 
 	connect(m_gui->pointIndexSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPointIndexChanged(int)));
-	connect(m_gui->logScaleCheckBox, SIGNAL(toggled(bool)), this, SLOT(onLogScaleToggled(bool)));
+	connect(m_gui->logScaleCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateCurrentWaveform()));
+	connect(m_gui->fixedAmplitudeCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateCurrentWaveform()));
+	connect(m_gui->pointPickingToolButton, SIGNAL(toggled(bool)), SLOT(onPointPickingButtonToggled(bool)));
+	connect(this, &QDialog::finished, [&]() { m_gui->pointPickingToolButton->setChecked(false); }); //auto disable picking mode when the dialog is closed
+	connect(m_gui->saveWaveToolButton, SIGNAL(clicked()), SLOT(onExportWaveAsCSV()));
+
 
 	//force update
 	onPointIndexChanged(0);
@@ -373,16 +420,108 @@ ccWaveDialog::~ccWaveDialog()
 
 void ccWaveDialog::onPointIndexChanged(int index)
 {
+	if (!m_widget)
+	{
+		assert(false);
+		return;
+	}
 	if (index < 0 || !m_cloud)
 	{
 		assert(false);
 		return;
 	}
 
-	m_widget->init(m_cloud, static_cast<unsigned>(index), m_gui->logScaleCheckBox->isChecked());
+	m_widget->init(m_cloud, static_cast<unsigned>(index), m_gui->logScaleCheckBox->isChecked(), m_gui->fixedAmplitudeCheckBox->isChecked() ? m_waveMax : 0.0);
 }
 
-void ccWaveDialog::onLogScaleToggled(bool)
+void ccWaveDialog::onItemPicked(const PickedItem& pi)
+{
+	if (pi.entity == m_cloud)
+	{
+		onPointIndexChanged(static_cast<int>(pi.itemIndex));
+	}
+}
+
+void ccWaveDialog::updateCurrentWaveform()
 {
 	onPointIndexChanged(m_gui->pointIndexSpinBox->value());
+}
+
+void ccWaveDialog::onPointPickingButtonToggled(bool state)
+{
+	if (!m_pickingHub)
+	{
+		assert(false);
+		return;
+	}
+
+	if (state)
+	{
+		if (!m_pickingHub->addListener(this))
+		{
+			ccLog::Error("Another tool is currently using the point picking mechanism.\nYou'll have to close it first.");
+			m_gui->pointPickingToolButton->blockSignals(true);
+			m_gui->pointPickingToolButton->setChecked(false);
+			m_gui->pointPickingToolButton->blockSignals(false);
+			return;
+		}
+	}
+	else
+	{
+		m_pickingHub->removeListener(this);
+	}
+}
+
+void ccWaveDialog::onExportWaveAsCSV()
+{
+	if (!m_cloud)
+	{
+		assert(false);
+		return;
+	}
+
+	int pointIndex = m_gui->pointIndexSpinBox->value();
+	if (pointIndex >= static_cast<int>(m_cloud->fwfData().size()))
+	{
+		assert(false);
+		return;
+	}
+	
+	const ccWaveform& w = m_cloud->fwfData()[pointIndex];
+	uint8_t descriptorID = w.descriptorID();
+	if (descriptorID == 0 || !m_cloud->fwfDescriptors().contains(descriptorID))
+	{
+		//no valid descriptor
+		assert(false);
+		return;
+	}
+
+	const WaveformDescriptor& d = m_cloud->fwfDescriptors()[descriptorID];
+	if (d.numberOfSamples == 0)
+	{
+		//nothing to do
+		return;
+	}
+
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+	currentPath += QString("/") + QString("waveform_%1.csv").arg(pointIndex);
+
+	//ask for a filename
+	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+	if (filename.isEmpty())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	//save last saving location
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(filename).absolutePath());
+	settings.endGroup();
+
+	//save file
+	w.toASCII(filename, d);
 }

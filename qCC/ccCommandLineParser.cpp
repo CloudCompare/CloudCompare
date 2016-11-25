@@ -297,23 +297,23 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	//all-at-once: all clouds in a single file
 	if (allAtOnce)
 	{
-		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_CloudExportFormat,false);
+		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_CloudExportFormat, false);
 		bool multiple = false;
 		if (filter)
 		{
 			bool exclusive = true;
-			filter->canSave(CC_TYPES::POINT_CLOUD,multiple,exclusive);
+			filter->canSave(CC_TYPES::POINT_CLOUD, multiple, exclusive);
 		}
 		
 		if (multiple)
 		{
 			ccHObject tempContainer("Clouds");
 			{
-				for (size_t i=0; i<m_clouds.size(); ++i)
-					tempContainer.addChild(m_clouds[i].getEntity(),ccHObject::DP_NONE);
+				for (size_t i = 0; i < m_clouds.size(); ++i)
+					tempContainer.addChild(m_clouds[i].getEntity(), ccHObject::DP_NONE);
 			}
 			//save output
-			GroupDesc desc(&tempContainer,"AllClouds",m_clouds.front().path);
+			GroupDesc desc(&tempContainer, "AllClouds", m_clouds.front().path);
 			QString errorStr = Export(desc,suffix,0,true);
 			if (!errorStr.isEmpty())
 				return Error(errorStr);
@@ -329,10 +329,10 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 
 	//standard way: one file per cloud
 	{
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (size_t i = 0; i < m_clouds.size(); ++i)
 		{
 			//save output
-			QString errorStr = Export(m_clouds[i],suffix);
+			QString errorStr = Export(m_clouds[i], suffix);
 			if (!errorStr.isEmpty())
 				return Error(errorStr);
 		}
@@ -1537,7 +1537,7 @@ bool ccCommandLineParser::commandMergeClouds(QStringList& arguments)
 
 	//merge clouds
 	{
-		for (size_t i=1; i<m_clouds.size(); ++i)
+		for (size_t i = 1; i < m_clouds.size(); ++i)
 		{
 			unsigned beforePts = m_clouds.front().pc->size();
 			unsigned newPts = m_clouds[i].pc->size();
@@ -3947,7 +3947,7 @@ bool ccCommandLineParser::commandSaveClouds(QStringList& arguments)
 		}
 	}
 
-	return saveClouds(QString(),allAtOnce);
+	return saveClouds(QString(), allAtOnce);
 }
 
 bool ccCommandLineParser::commandSaveMeshes(QStringList& arguments)
@@ -3971,7 +3971,7 @@ bool ccCommandLineParser::commandSaveMeshes(QStringList& arguments)
 		}
 	}
 
-	return saveMeshes(QString(),allAtOnce);
+	return saveMeshes(QString(), allAtOnce);
 }
 
 bool ccCommandLineParser::commandAutoSave(QStringList& arguments)

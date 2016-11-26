@@ -174,6 +174,7 @@ v2.8.beta - XX/XX/2016
 	* When computing normals with the Least Squares best fitting plane, CC required at least 12 points in the neighborhood, when only 3 are theoretically
 		sufficient.
 	* The SOR filter was broken (it was potentially using much more points than the number specified by the user, and it was changing over the cloud!)
+	* Fixed a problem when creating a new 3D view with the view not updating until the window was resized or refreshed.
 	* [macOS] Fix plugins on case-sensitive file systems
 	* [macOS] Fix problem with the main window jumping around and resizing when dragging toolbars
 	* [macOS] Fixes the layout of the 2.5D Volume Calculation dialog

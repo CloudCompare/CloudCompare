@@ -5598,7 +5598,7 @@ ccGLWindow* MainWindow::new3DView()
 	if (m_pickingHub)
 	{
 		//we must notify the picking hub as well if the window is destroyed
-		connect(view3D, SIGNAL(destroyed(QObject*)), m_pickingHub, SLOT(prepareWindowDeletion(QObject*)));
+		connect(view3D, SIGNAL(destroyed(QObject*)), m_pickingHub, SLOT(onActiveWindowDeleted(QObject*)));
 	}
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());

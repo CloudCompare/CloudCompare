@@ -140,7 +140,7 @@ public:
 	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues,
 												 double minVal, double maxVal,
 												 QString title, QString xAxisLabel) override;
-	virtual ccPickingHub* pickingHub() { return m_pickingHub; }
+	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();

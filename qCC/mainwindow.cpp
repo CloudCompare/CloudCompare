@@ -5569,13 +5569,12 @@ ccGLWindow* MainWindow::new3DView()
 
 	bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
-	QWidget* viewWidget = 0;
-	ccGLWindow* view3D = 0;
+	QWidget* viewWidget = nullptr;
+	ccGLWindow* view3D = nullptr;
 	CreateGLWindow(view3D, viewWidget, stereoMode, false);
 	assert(viewWidget && view3D);
 
 	viewWidget->setMinimumSize(400, 300);
-	viewWidget->resize(500, 400);
 
 	m_mdiArea->addSubWindow(viewWidget);
 
@@ -5608,6 +5607,7 @@ ccGLWindow* MainWindow::new3DView()
 	QMainWindow::statusBar()->showMessage(QString("New 3D View"), 2000);
 
 	viewWidget->showMaximized();
+	viewWidget->update();
 
 	return view3D;
 }

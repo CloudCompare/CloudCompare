@@ -933,7 +933,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			pdlg.start();
 		}
 
-		//number of points read from the begining of the current cloud part
+		//number of points read from the beginning of the current cloud part
 		unsigned pointsRead = 0;
 		CCVector3d Pshift(0,0,0);
 

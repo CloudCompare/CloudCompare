@@ -81,7 +81,7 @@ public:
 
 	//! Projects a 3D point in the quadric coordinate system
 	/** \param P input 3D point
-		\param[out] Q position of the input point in the quadric coordinate sytem
+		\param[out] Q position of the input point in the quadric coordinate system
 		\return elevation of the input point (in the coordinate system quadric)
 	**/
 	PointCoordinateType projectOnQuadric(const CCVector3& P, CCVector3& Q) const;

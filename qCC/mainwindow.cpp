@@ -167,19 +167,19 @@ MainWindow::MainWindow()
 	, m_pprDlg(0)
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
-{	
+{
 	setupUi(this);
 
 #ifdef Q_OS_MAC
 	actionAbout->setMenuRole( QAction::AboutRole );
 	actionAboutPlugins->setMenuRole( QAction::NoRole );
-	
+
 	actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
-	
+
 	menuFile->insertMenu(actionSave, m_recentFiles->menu());
-	
+
 	//Console
 	ccConsole::Init(consoleWidget, this, this);
 	actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
@@ -257,7 +257,7 @@ MainWindow::MainWindow()
 	connect(actionToggleMaterials,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesMaterials()));	//'M': toggles selected items materials/textures visibility
 
 	connectActions();
-	
+
 	new3DView();
 
 	setupInputDevices();
@@ -273,7 +273,7 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
 	destroyInputDevices();
-	
+
 	cancelPreviousPickingOperation(false); //just in case
 
 	assert(m_ccRoot && m_mdiArea && m_windowMapper);
@@ -325,10 +325,10 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 	menuShadersAndFilters->setEnabled(false);
 	toolBarPluginTools->setVisible(false);
 	toolBarGLFilters->setVisible(false);
-	
+
 	m_pluginInfoList = plugins;
 	m_pluginPaths = pluginPaths;
-	
+
 	for ( const tPluginInfo &plugin : plugins )
 	{
 		if (!plugin.object)
@@ -546,10 +546,10 @@ void MainWindow::setupInputDevices()
 	m_gamepadManager = new ccGamepadManager( this, this );
 	menuFile->insertMenu(actionCloseAll, m_gamepadManager->menu());
 #endif
-	
+
 #if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPADS_SUPPORT)
 	menuFile->insertSeparator(actionCloseAll);
-#endif	
+#endif
 }
 
 void MainWindow::destroyInputDevices()
@@ -558,7 +558,7 @@ void MainWindow::destroyInputDevices()
 	delete m_gamepadManager;
 	m_gamepadManager = nullptr;
 #endif
-	
+
 #ifdef CC_3DXWARE_SUPPORT
 	delete m_3DMouseManager;
 	m_3DMouseManager = nullptr;
@@ -674,7 +674,7 @@ void MainWindow::connectActions()
 	//"Tools > Clean" menu
 	connect(actionSORFilter,					SIGNAL(triggered()),	this,		SLOT(doActionSORFilter()));
 	connect(actionNoiseFilter,					SIGNAL(triggered()),	this,		SLOT(doActionFilterNoise()));
-	
+
 	//"Tools > Projection" menu
 	connect(actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
 	connect(actionRasterize,					SIGNAL(triggered()),	this,		SLOT(doActionRasterize()));
@@ -1118,7 +1118,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							//existing shift information
 							CCVector3d globalShift = cloud->getGlobalShift();
 							double globalScale = cloud->getGlobalScale();
-			
+
 							//we compute the transformation matrix in the global coordinate space
 							ccGLMatrixd globalTransMat = transMat;
 							globalTransMat.scale(1.0/globalScale);
@@ -1202,7 +1202,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	//reselect previously selected entities!
 	if (m_ccRoot)
 		m_ccRoot->selectEntities(selectedEntities);
-	
+
 	ccLog::Print("[ApplyTransformation] Applied transformation matrix:");
 	ccLog::Print(transMat.toString(12,' ')); //full precision
 	ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
@@ -1342,7 +1342,7 @@ void MainWindow::doActionApplyScale()
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
-			
+
 			cloud->scale(	static_cast<PointCoordinateType>(sX),
 							static_cast<PointCoordinateType>(sY),
 							static_cast<PointCoordinateType>(sZ),
@@ -1611,7 +1611,7 @@ void MainWindow::doActionClearColor()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -1624,7 +1624,7 @@ void MainWindow::doActionClearNormals()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -1637,7 +1637,7 @@ void MainWindow::doActionDeleteScalarField()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -1650,7 +1650,7 @@ void MainWindow::doActionDeleteAllSF()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -1718,7 +1718,7 @@ void MainWindow::doActionFlagMeshVertices()
 
 	refreshAll();
 	updateUI();
-	
+
 	if (success)
 	{
 		//display reminder
@@ -1748,7 +1748,7 @@ void MainWindow::doActionMeasureMeshVolume()
 				//we force the console to display itself
 				forceConsoleDisplay();
 				ccConsole::Print(QString("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(ent->getName()).arg(V));
-				
+
 				//check that the mesh is closed
 				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
 				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh, stats))
@@ -2155,7 +2155,7 @@ void MainWindow::doActionModifySensor()
 
 		ccGBLSensorProjectionDlg spDlg(this);
 		spDlg.initWithGBLSensor(gbl);
-		
+
 		if (!spDlg.exec())
 			return;
 
@@ -2190,7 +2190,7 @@ void MainWindow::doActionModifySensor()
 
 		ccCamSensorProjectionDlg spDlg(this);
 		spDlg.initWithCamSensor(cam);
-		
+
 		if (!spDlg.exec())
 			return;
 
@@ -2574,7 +2574,7 @@ void MainWindow::doActionComputePointsVisibility()
 				//we can stop then...
 				return;
 			}
-		
+
 			int errorCode;
 			if (sensor->computeDepthBuffer(static_cast<ccPointCloud*>(defaultCloud),errorCode))
 			{
@@ -2634,7 +2634,7 @@ void MainWindow::doActionComputePointsVisibility()
 				break;
 			}
 		}
-		
+
 		if (sf)
 		{
 			sf->computeMinAndMax();
@@ -2657,7 +2657,7 @@ void MainWindow::doActionConvertTextureToColor()
 {
 	if ( !ccEntityAction::convertTextureToColor(m_selectedEntities, this) )
 		return;
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -2668,7 +2668,7 @@ void MainWindow::doActionSamplePoints()
 	static double s_ptsSamplingDensity = 10.0;
 	static bool s_ptsSampleNormals = true;
 	static bool s_useDensity = false;
-	
+
 	ccPtsSamplingDlg dlg(this);
 	//restore last parameters
 	dlg.setPointsNumber(s_ptsSamplingCount);
@@ -2930,7 +2930,7 @@ void MainWindow::doActionFilterByValue()
 					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
 				else if (ent->isA(CC_TYPES::SUB_MESH))
 					resultInside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
-				
+
 				if (mode == ccFilterByValueDlg::SPLIT)
 				{
 					pc->invertVisibilityArray();
@@ -3107,7 +3107,7 @@ void MainWindow::doActionAddIdField()
 {
 	if ( !ccEntityAction::sfAddIdField(m_selectedEntities) )
 		return;
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -3131,7 +3131,7 @@ void MainWindow::doActionSFBilateralFilter()
 }
 
 void MainWindow::doActionSmoothMeshSF()
-{	
+{
 	if ( !ccEntityAction::processMeshSF(m_selectedEntities, ccMesh::SMOOTH_MESH_SF, this) )
 		return;
 
@@ -3486,7 +3486,7 @@ void MainWindow::doActionMerge()
 				}
 			}
 		}
-		
+
 		baseMesh->setDisplay_recursive(meshes.front()->getDisplay());
 		baseMesh->setVisible(true);
 		addToDB(baseMesh);
@@ -3571,7 +3571,7 @@ void MainWindow::doActionRegister()
 	{
 		QString rmsString = QString("Final RMS: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
 		ccLog::Print(QString("[Register] ") + rmsString);
-		
+
 		QStringList summary;
 		summary << rmsString;
 		summary << "----------------";
@@ -3870,10 +3870,10 @@ void MainWindow::doActionSubsample()
 
 			int warnings = 0;
 			ccPointCloud *newPointCloud = cloud->partialClone(sampledCloud,&warnings);
-			
+
 			delete sampledCloud;
 			sampledCloud = 0;
-			
+
 			if (newPointCloud)
 			{
 				newPointCloud->setName(cloud->getName() + QString(".subsampled"));
@@ -4140,10 +4140,10 @@ void MainWindow::doActionLabelConnectedComponents()
 																						false,
 																						&pDlg,
 																						theOctree.data());
-			
+
 			if (componentCount >= 0)
 			{
-				//if successfull, we extract each CC (stored in "components")
+				//if successful, we extract each CC (stored in "components")
 
 				//safety test
 				int realComponentCount = 0;
@@ -4176,7 +4176,7 @@ void MainWindow::doActionLabelConnectedComponents()
 						continue;
 					}
 				}
-				
+
 				pc->getCurrentInScalarField()->computeMinAndMax();
 				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
 				{
@@ -4342,7 +4342,7 @@ void MainWindow::doConvertPolylinesToMesh()
 			}
 		}
 	}
-	
+
 	if (segmentCount < 2)
 	{
 		//not enough points/segments
@@ -4443,7 +4443,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 	}
 #endif
-	
+
 	ccMesh* mesh = new ccMesh(delaunayMesh, vertices);
 	if (mesh->size() != delaunayMesh->size())
 	{
@@ -4685,7 +4685,7 @@ void MainWindow::doActionFitQuadric()
 					{
 						const PointCoordinateType* eq = quadric->getEquationCoefs();
 						const Tuple3ub& dims = quadric->getEquationDims();
-					
+
 						const unsigned char dX = dims.x;
 						const unsigned char dY = dims.y;
 						const unsigned char dZ = dims.z;
@@ -5061,7 +5061,7 @@ void MainWindow::doActionOrientNormalsMST()
 {
 	if ( !ccEntityAction::orientNormalsMST(m_selectedEntities, this) )
 		return;
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -5215,7 +5215,7 @@ void MainWindow::doActionMatchScales()
 													s_msFinalOverlap,
 													msDlg.getSelectedIndex(),
 													this);
-	
+
 	//reselect previously selected entities!
 	if (m_ccRoot)
 		m_ccRoot->selectEntities(selectedEntities);
@@ -5230,7 +5230,7 @@ static double s_sorFilterNSigma = 1.0;
 void MainWindow::doActionSORFilter()
 {
 	ccSORFilterDlg sorDlg(this);
-	
+
 	//set semi-persistent/dynamic parameters
 	sorDlg.knnSpinBox->setValue(s_sorFilterKnn);
 	sorDlg.nSigmaDoubleSpinBox->setValue(s_sorFilterNSigma);
@@ -5246,7 +5246,7 @@ void MainWindow::doActionSORFilter()
 
 	size_t selNum = m_selectedEntities.size();
 	bool firstCloud = true;
-	
+
 	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
@@ -5297,7 +5297,7 @@ void MainWindow::doActionSORFilter()
 					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
-			
+
 			delete selection;
 			selection = 0;
 		}
@@ -5323,7 +5323,7 @@ void MainWindow::doActionFilterNoise()
 	PointCoordinateType kernelRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
 
 	ccNoiseFilterDlg noiseDlg(this);
-	
+
 	//set semi-persistent/dynamic parameters
 	noiseDlg.radiusDoubleSpinBox->setValue(kernelRadius);
 	noiseDlg.knnSpinBox->setValue(s_noiseFilterKnn);
@@ -5356,7 +5356,7 @@ void MainWindow::doActionFilterNoise()
 
 	size_t selNum = m_selectedEntities.size();
 	bool firstCloud = true;
-	
+
 	for (size_t i=0; i<selNum; ++i)
 	{
 		ccHObject* ent = m_selectedEntities[i];
@@ -5412,7 +5412,7 @@ void MainWindow::doActionFilterNoise()
 					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
-			
+
 			delete selection;
 			selection = 0;
 		}
@@ -5630,7 +5630,7 @@ void MainWindow::doActionResetGUIElementsPos()
 {
 	// show the user it will be maximized
 	showMaximized();
-	
+
 	QSettings settings;
 	settings.remove(ccPS::MainWinGeom());
 	settings.remove(ccPS::MainWinState());
@@ -5642,32 +5642,32 @@ void MainWindow::doActionResetGUIElementsPos()
 }
 
 void MainWindow::showEvent(QShowEvent* event)
-{	
+{
 	QMainWindow::showEvent( event );
 
 	if ( m_FirstShow )
 	{
 		QSettings settings;
 		QVariant  geometry = settings.value(ccPS::MainWinGeom());
-		
+
 		if ( geometry.isValid() )
 		{
 			restoreGeometry(geometry.toByteArray());
 			restoreState(settings.value(ccPS::MainWinState()).toByteArray());
 		}
-		
+
 		m_FirstShow = false;
-		
+
 		if ( !geometry.isValid() )
 		{
 			showMaximized();
 		}
-		
+
 		if ( isFullScreen() )
-		{			
+		{
 			actionFullScreen->setChecked( true );
 		}
-	
+
 #ifdef Q_OS_MAC
 		if ( isFullScreen() )
 		{
@@ -5815,7 +5815,7 @@ void MainWindow::toggleFullScreen(bool state)
 		showFullScreen();
 	else
 		showNormal();
-	
+
 #ifdef Q_OS_MAC
 	if ( state )
 	{
@@ -5850,7 +5850,7 @@ void MainWindow::freezeUI(bool state)
 	toolBarPluginTools->setDisabled(state);
 	//toolBarGLFilters->setDisabled(state);
 	//toolBarView->setDisabled(state);
-	
+
 	//freeze plugin toolbars
 	{
 		for (int i=0; i<m_stdPluginsToolbars.size(); ++i)
@@ -5892,7 +5892,7 @@ void MainWindow::activateRegisterPointPairTool()
 		ccConsole::Error("Select point clouds or meshes only!");
 		return;
 	}
-	
+
 	//if we have 2 entities, we must ask the user which one is the 'aligned' one and which one is the 'reference' one
 	if (reference)
 	{
@@ -6114,7 +6114,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				if (cloud)
 				{
 					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
-					
+
 					//specific case: labels (do this before temporarily removing 'entity' from DB!)
 					ccHObject::Container labels;
 					if (m_ccRoot)
@@ -6294,7 +6294,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					//ccConsole::Error("An error occurred! (not enough memory?)");
 					putObjectBackIntoDBTree(entity,objContext);
 				}
-				
+
 				if (deleteOriginalEntity)
 				{
 					p = segmentedEntities.erase(p);
@@ -6503,7 +6503,7 @@ void MainWindow::activateClippingBoxMode()
 	{
 		return;
 	}
-	
+
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
@@ -6739,7 +6739,7 @@ void MainWindow::doActionEditCamera()
 	{
 		m_cpeDlg = new ccCameraParamEditDlg(qWin);
 		//m_cpeDlg->makeFrameless(); //does not work on linux
-		
+
 		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
 
 		registerOverlayDialog(m_cpeDlg, Qt::BottomLeftCorner);
@@ -6973,7 +6973,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 		m_pprDlg->pause(true);
 
 	connect(win, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&)));
-	
+
 	s_pickingWindow = win;
 	s_previousPickingMode = win->getPickingMode();
 	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
@@ -7020,7 +7020,7 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 	freezeUI(false);
 
 	disconnect(s_pickingWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&)));
-	
+
 	//restore previous picking mode
 	s_pickingWindow->setPickingMode(s_previousPickingMode);
 	s_pickingWindow = 0;
@@ -7034,7 +7034,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 
 	if (!entity)
 		return;
-	
+
 	CCVector3 pickedPoint = P;
 	switch(s_previousPickingOperation)
 	{
@@ -7094,7 +7094,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 				X.normalize();
 				Y.normalize();
 				Z.normalize();
-			
+
 				ccGLMatrixd trans;
 				double* mat = trans.data();
 				mat[0] = X.x; mat[4] = X.y; mat[8]  = X.z; mat[12] = 0;
@@ -7124,7 +7124,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 		assert(s_levelMarkersCloud && s_levelMarkersCloud->size() != 0);
 		pickedPoint = *s_levelMarkersCloud->getPoint(0);
 		//break;
-	
+
 	case PICKING_ROTATION_CENTER:
 		{
 			CCVector3d newPivot = CCVector3d::fromArray(pickedPoint.u);
@@ -7166,7 +7166,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 			//s_pickingWindow->redraw(); //already called by 'cancelPreviousPickingOperation' (see below)
 		}
 		break;
-	
+
 	default:
 		assert(false);
 		break;
@@ -7260,13 +7260,13 @@ void MainWindow::doPickRotationCenter()
 }
 
 void MainWindow::toggleSelectedEntitiesActivation()
-{	
+{
 	if ( !ccEntityAction::toggleProperty(	m_selectedEntities,
 											ccEntityAction::TOGGLE_PROPERTY::ACTIVE) )
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7278,7 +7278,7 @@ void MainWindow::toggleSelectedEntitiesVisibility()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7290,7 +7290,7 @@ void MainWindow::toggleSelectedEntitiesColors()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7302,7 +7302,7 @@ void MainWindow::toggleSelectedEntitiesNormals()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7314,7 +7314,7 @@ void MainWindow::toggleSelectedEntitiesSF()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7326,7 +7326,7 @@ void MainWindow::toggleSelectedEntitiesMaterials()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7338,7 +7338,7 @@ void MainWindow::toggleSelectedEntities3DName()
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7537,7 +7537,7 @@ void MainWindow::doActionClone()
 			clone->setGLTransformationHistory(selectedEntities[i]->getGLTransformationHistory());
 			//copy display
 			clone->setDisplay(selectedEntities[i]->getDisplay());
-			
+
 			addToDB(clone);
 			lastClone = clone;
 		}
@@ -7641,7 +7641,7 @@ void MainWindow::doActionScalarFieldArithmetic()
 {
 	if ( !ccEntityAction::sfArithmetic(m_selectedEntities, this) )
 		return;
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7695,7 +7695,7 @@ void MainWindow::doActionFitSphere()
 		sphere->prepareDisplayForRefresh();
 		addToDB(sphere,false,false,false);
 	}
-	
+
 	refreshAll();
 }
 
@@ -8149,7 +8149,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				ccGLMatrix transBToZero;
 				transBToZero.toIdentity();
 				transBToZero.setTranslation(-clouds[j]->getOwnBB().getCenter());
-				
+
 				ccGLMatrix transFromZeroToA;
 				transFromZeroToA.toIdentity();
 				transFromZeroToA.setTranslation(A->getOwnBB().getCenter());
@@ -8288,7 +8288,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				}
 				stream << endl;
 			}
-			
+
 			ccLog::Print("[doActionComputeBestICPRmsMatrix] Job done");
 		}
 		else
@@ -8638,7 +8638,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 bool MainWindow::checkStereoMode(ccGLWindow* win)
 {
 	assert(win);
-		
+
 	if (win && win->getViewportParameters().perspectiveView && win->stereoModeIsEnabled())
 	{
 		ccGLWindow::StereoParams params = win->getStereoParams();
@@ -8648,7 +8648,7 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 			win->toggleExclusiveFullScreen(false);
 		}
 		win->disableStereoMode();
-		
+
 		if (QMessageBox::question(	this,
 									"Stereo mode",
 									"Stereo-mode only works in perspective mode. Do you want to disable it?",
@@ -8722,9 +8722,9 @@ void MainWindow::toggleRotationAboutVertAxis()
 	{
 		bool wasLocked = win->isVerticalRotationLocked();
 		bool isLocked = !wasLocked;
-		
+
 		win->lockVerticalRotation(isLocked);
-		
+
 		actionLockRotationVertAxis->blockSignals(true);
 		actionLockRotationVertAxis->setChecked(isLocked);
 		actionLockRotationVertAxis->blockSignals(false);
@@ -8954,7 +8954,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
 	bool loadCoordinatesTransEnabled = false;
-	
+
 	FileIOFilter::LoadParameters parameters;
 	{
 		parameters.alwaysDisplayLoadDialog = true;
@@ -9295,7 +9295,7 @@ void MainWindow::doActionSaveFile()
 		selectedFilter = settings.value(ccPS::SelectedOutputFilterImage(), selectedFilter).toString();
 	else if (hasPolylines)
 		selectedFilter = settings.value(ccPS::SelectedOutputFilterPoly(), selectedFilter).toString();
-	
+
 	//default output path (+ filename)
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 	QString fullPathName = currentPath;
@@ -9320,7 +9320,7 @@ void MainWindow::doActionSaveFile()
 			ccLog::Warning("[I/O] First entity's name would make an invalid filename! Can't use it...");
 			defaultFileName = "project";
 		}
-		
+
 		fullPathName += QString("/") + defaultFileName;
 	}
 
@@ -9353,7 +9353,7 @@ void MainWindow::doActionSaveFile()
 		parameters.alwaysDisplaySaveDialog = true;
 		parameters.parentWidget = this;
 	}
-	
+
 	//specific case: BIN format
 	if (selectedFilter == BinFilter::GetFileFilter())
 	{
@@ -9764,7 +9764,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
 	//actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
-	
+
 	actionOrientNormalsMST->setEnabled(atLeastOneCloud && atLeastOneNormal);
 	actionOrientNormalsFM->setEnabled(atLeastOneCloud && atLeastOneNormal);
 	actionClearNormals->setEnabled(atLeastOneNormal);

@@ -83,7 +83,7 @@ public: //general
 		//! Returns distortion model type
 		virtual DistortionModel getModel() const = 0;
 	};
-	
+
 	//! Simple radial distortion model
 	struct QCC_DB_LIB_API RadialDistortionParameters : LensDistortionParameters
 	{
@@ -92,7 +92,7 @@ public: //general
 
 		//! Default initializer
 		RadialDistortionParameters() : k1(0), k2(0) {}
-		
+
 		//inherited from LensDistortionParameters
 		inline virtual DistortionModel getModel() const override { return SIMPLE_RADIAL_DISTORTION; }
 
@@ -120,7 +120,7 @@ public: //general
 
 	//! Brown's distortion model + Linear Disparity
 	/**	To know how to use K & P parameters, please read:
-		"Decentering Distortion of Lenses", Duane C. Brown 
+		"Decentering Distortion of Lenses", Duane C. Brown
 		To know how to use the linearDisparityParams parameter (kinect attribute), please read:
 		"Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications", K. Khoshelham and S.O. Elberink
 	**/
@@ -209,12 +209,12 @@ public: //getters and setters
 
 	//! Returns intrinsic parameters
 	const IntrinsicParameters& getIntrinsicParameters() const { return m_intrinsicParams; }
-	//! Sets intrinsic parameters 
+	//! Sets intrinsic parameters
 	void setIntrinsicParameters(const IntrinsicParameters& params);
 
 	//! Returns uncertainty parameters
 	const LensDistortionParameters::Shared& getDistortionParameters() const { return m_distortionParams; }
-	//! Sets uncertainty parameters 
+	//! Sets uncertainty parameters
 	void setDistortionParameters(LensDistortionParameters::Shared params) { m_distortionParams = params; }
 
 	//! Returns the camera projection matrix
@@ -222,7 +222,7 @@ public: //getters and setters
 		\return whether the matrix could be computed or not (probably due to wrong parameters)
 	**/
 	bool getProjectionMatrix(ccGLMatrix& matrix);
-	
+
 public: //frustum display
 
 	//! Returns whether the frustum should be displayed or not
@@ -250,12 +250,12 @@ public: //coordinate systems conversion methods
 		\param localCoord corresponding local coordinates of the 3D point (output)
 	**/
 	bool fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, CCVector3& localCoord) const;
-	
+
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
 	/** \param localCoord local coordinates of the 3D point (input)
 		\param imageCoord image coordinates of the projected point on the image (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param withLensError to take lens distortion into account
-		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
+		\return if operation has succeeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/
 	bool fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2& imageCoord, bool withLensError = true) const;
 
@@ -264,7 +264,7 @@ public: //coordinate systems conversion methods
 		\param localCoord local coordinates of the corresponding 3D point (output)
 		\param depth depth of the output pixel relatively to the camera center
 		\param withLensCorrection if we want to correct the initial pixel coordinates with the lens correction formula
-		\return if operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
+		\return if operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
 	bool fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3& localCoord, PointCoordinateType depth, bool withLensCorrection = true) const;
 
@@ -272,16 +272,16 @@ public: //coordinate systems conversion methods
 	/** \param globalCoord global coordinates of the 3D point
 		\param imageCoord to get back the image coordinates of the projected 3D point --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param withLensError to take lens distortion into account
-		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
-	**/ 
+		\return if operation has succeeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
+	**/
 	bool fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector2& imageCoord, bool withLensError = true) const;
-	
+
 	//! Computes the global coordinates of a 3D points from its 3D coordinates (pixel position in the image)
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param globalCoord global coordinates of the corresponding 3D point (output)
 		\param z0 altitude of the output pixel
 		\param withLensCorrection if we want to correct the initial pixel coordinates with the lens correction formula
-		\return if operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
+		\return if operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
 	bool fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3& globalCoord, PointCoordinateType z0, bool withLensCorrection = true) const;
 
@@ -421,18 +421,18 @@ public: //misc
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
 		\param pixel coordinates of the pixel where the 3D points is projected --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param depth depth from sensor center to 3D point (must be positive)
-		\param sigma uncertainty vector (along X, Y and Z) 
-		\return operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries, or when the depth of the 3D point is negative)
+		\param sigma uncertainty vector (along X, Y and Z)
+		\return operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries, or when the depth of the 3D point is negative)
 	**/
 	bool computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const;
-	
+
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
 		\param points the points we want to compute the uncertainty
 		\param accuracy to get back the uncertainty
 		//TODO lensDistortion if we want to take the lens distortion into consideration
 		\return success
-	**/ 
+	**/
 	bool computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensDistortion*/);
 
 	//! Undistorts an image based on the sensor distortion parameters
@@ -449,19 +449,19 @@ public: //misc
 		\return undistorted image (maybe the same as the input image if inplace is true, or even a null pointer if an error occurred)
 	**/
 	ccImage* undistort(ccImage* image, bool inplace = true) const;
-	
+
 	//! Tests if a 3D point is in the field of view of the camera.
 	/** \param globalCoord global coordinates of the 3D point
 		//TODO withLensCorrection if we want to take the lens distortion into consideration
-		\return if operation has succeded
-	**/ 
+		\return if operation has succeeded
+	**/
 	bool isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/);
 
 	//! Compute the coefficients of the 6 planes frustum in the global coordinates system (normal vector are headed the frustum inside), the edges direction vectors and the frustum center
 	/** \param planeCoefficients coefficients of the six planes
 		\param edges direction vectors of the frustum edges (there are 12 edges but some of them are colinear)
 		\param ptsFrustum the 8 frustum corners in the global coordinates system
-		\param center center of the the frustum circumscribed sphere 
+		\param center center of the the frustum circumscribed sphere
 		\return success
 	**/
 	bool computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 ptsFrustum[8], CCVector3 edges[6], CCVector3& center);
@@ -479,7 +479,7 @@ public: //helpers
 
 	//! Helper: deduces camera f.o.v. (in radians) from focal (in mm)
 	static float ComputeFovRadFromFocalMm(float focal_mm, float ccdSize_mm);
-	
+
 protected:
 
 	//! Used internally for display
@@ -501,7 +501,7 @@ protected:
 	//! Camera intrinsic parameters
 	IntrinsicParameters m_intrinsicParams;
 
-	//! Lens distortion parameters 
+	//! Lens distortion parameters
 	LensDistortionParameters::Shared m_distortionParams;
 
 	//! Frustum information structure
@@ -553,16 +553,16 @@ public:
 		return CELL_OUTSIDE_FRUSTUM;
 	}
 
-	//! Compute intersection betwen the octree and a frustum and send back the indices of 3D points inside the frustum or in cells interescting it. 
-	/** Every cells of each level of the octree will be classified as INSIDE, OUTSIDE or INTERSECTING the frustum. 
-		Their truncated code are then stored in m_cellsInFrustum (for cells INSIDE) or m_cellsIntersectFrustum (for 
+	//! Compute intersection between the octree and a frustum and send back the indices of 3D points inside the frustum or in cells interescting it.
+	/** Every cells of each level of the octree will be classified as INSIDE, OUTSIDE or INTERSECTING the frustum.
+		Their truncated code are then stored in m_cellsInFrustum (for cells INSIDE) or m_cellsIntersectFrustum (for
 		cells INTERSECTING).
 		\param pointsToTest contains the indice and 3D position (global coordinates system) of every 3D points stored in an INTERSECTING cell
 		\param inCameraFrustum contains the indice of every 3D points stored in an INSIDE cell
 		\param planesCoefficients coefficients (a, b, c and d) of the six frustum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param ptsFrustum 3D coordinates of the eight corners of the frustum (global coordinates sytem)
-		\param edges 3D coordinates (global coordinates sytem) of the six director vector of the frustum edges
-		\param center 3D coordinates of the frustum center (global coordinates sytem) ; this is the center of the circumscribed sphere
+		\param ptsFrustum 3D coordinates of the eight corners of the frustum (global coordinates system)
+		\param edges 3D coordinates (global coordinates system) of the six director vector of the frustum edges
+		\param center 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
 	void computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3> >& pointsToTest,
 												std::vector<unsigned>& inCameraFrustumrustum,
@@ -570,15 +570,15 @@ public:
 												const CCVector3 ptsFrustum[8],
 												const CCVector3 edges[6],
 												const CCVector3& center);
-	
-	//! Compute intersection betwen the octree and the height children cells of a parent cell. 
+
+	//! Compute intersection between the octree and the height children cells of a parent cell.
 	/** \param level current level
 		\param parentTruncatedCode truncated code of the parent cell (at level-1)
 		\param parentResult contains in which class the parent cell has been classified (OUTSIDE, INTERSECTING, INSIDE)
 		\param planesCoefficients coefficients (a, b, c and d) of the six frustum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param ptsFrustum 3D coordinates of the eight corners of the frustum (global coordinates sytem)
-		\param edges 3D coordinates (global coordinates sytem) of the six director vector of the frustum edges
-		\param center 3D coordinates of the frustum center (global coordinates sytem) ; this is the center of the circumscribed sphere
+		\param ptsFrustum 3D coordinates of the eight corners of the frustum (global coordinates system)
+		\param edges 3D coordinates (global coordinates system) of the six director vector of the frustum edges
+		\param center 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
 	void computeFrustumIntersectionByLevel(	unsigned char level,
 											CCLib::DgmOctree::CellCode parentTruncatedCode,
@@ -587,16 +587,16 @@ public:
 											const CCVector3 ptsFrustum[8],
 											const CCVector3 edges[6],
 											const CCVector3& center);
-	
+
 	//! Separating Axis Test
-	/** See "Detecting intersection of a rectangular solid and a convex polyhedron" of Ned Greene 
+	/** See "Detecting intersection of a rectangular solid and a convex polyhedron" of Ned Greene
 		See	"OBBTree: A Hierarchical Structure for Rapid Interference Detection" of S. Gottschalk, M. C. Lin and D. Manocha
 		\param bbMin minimum coordinates of the cell
 		\param bbMax maximum coordinates of the cell
 		\param planesCoefficients coefficients (a, b, c and d) of the six frustum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param frustumCorners 3D coordinates of the eight corners of the frustum (global coordinates sytem)
-		\param frustumEdges 3D coordinates (global coordinates sytem) of the six director vector of the frustum edges
-		\param frustumCenter 3D coordinates of the frustum center (global coordinates sytem) ; this is the center of the circumscribed sphere
+		\param frustumCorners 3D coordinates of the eight corners of the frustum (global coordinates system)
+		\param frustumEdges 3D coordinates (global coordinates system) of the six director vector of the frustum edges
+		\param frustumCenter 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
 	OctreeCellVisibility separatingAxisTest(const CCVector3& bbMin,
 											const CCVector3& bbMax,

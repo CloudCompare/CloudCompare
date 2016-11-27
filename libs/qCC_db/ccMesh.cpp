@@ -993,7 +993,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	char errorStr[1024];
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
-		ccLog::Warning(QString("Thrid party library error: %1").arg(errorStr));
+		ccLog::Warning(QString("Third party library error: %1").arg(errorStr));
 		delete delaunayMesh;
 		delete vertices;
 		return 0;

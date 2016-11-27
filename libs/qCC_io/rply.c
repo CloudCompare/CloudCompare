@@ -93,7 +93,7 @@ static const char *const ply_type_list[] = {
  * value: value of property
  * pdata/idata: user data defined with ply_set_cb
  *
- * Returns handle to PLY file if succesful, NULL otherwise.
+ * Returns handle to PLY file if successful, NULL otherwise.
  * ---------------------------------------------------------------------- */
 typedef struct t_ply_argument_ {
     p_ply_element element;

@@ -59,7 +59,7 @@ bool BinFilter::canLoadExtension(QString upperCaseExt) const
 
 bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
-	//we list the entities that CANT be saved as BIN file (easier ;)
+	//we list the entities that CAN'T be saved as BIN file (easier ;)
 	switch (type)
 	{
 	//these entities can't be serialized

@@ -79,7 +79,7 @@ struct AsciiOpenContext
 		ui->spinBoxSkipLines->setValue(skipLines);
 		ui->spinBoxSkipLines->blockSignals(false);
 	}
-	
+
 	AsciiOpenDlg::Sequence sequence;
 	QChar separator;
 	bool extractSFNameFrom1stLine;
@@ -149,7 +149,7 @@ void AsciiOpenDlg::autoFindBestSeparator()
 	for (QChar sep : separators)
 	{
 		m_ui->lineEditSeparator->setText(sep); //this calls 'updateTable'
-		
+
 		//...until we find one that gives us at least 3 valid colums
 		size_t validColumnCount = 0;
 		for (ColumnType type : m_columnType)
@@ -240,7 +240,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 
 	m_headerLine.clear(); //to force re-assignation of columns!
 	m_columnType.clear();
-	
+
 	updateTable();
 }
 
@@ -309,7 +309,7 @@ void AsciiOpenDlg::updateTable()
 			{
 				unsigned partsCount = std::min(MAX_COLUMNS, static_cast<unsigned>(parts.size()));
 				bool columnCountHasIncreased = (partsCount > columnsCount);
-				
+
 				//do we need to add one or several new columns?
 				if (columnCountHasIncreased)
 				{
@@ -682,7 +682,7 @@ void AsciiOpenDlg::updateTable()
 					continue;
 				}
 				assert(valueIsNumber[i]);
-				
+
 				//first time? let's try to assign each column a type
 				if (m_columnType[i] == UNKNOWN && columnsCount > 1)
 				{
@@ -833,13 +833,13 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 {
 	//two requirements:
 	//- at least 2 coordinates must be defined
-	//- appart from SFs, only one column assignment per property
+	//- apart from SFs, only one column assignment per property
 	std::vector<unsigned> counters(ASCII_OPEN_DLG_TYPES_NUMBER,0);
 	{
 		for (size_t i=0; i<sequence.size(); i++)
 			++counters[sequence[i].type];
 	}
-	
+
 	//check for doublons
 	{
 		for (size_t i=1; i<ASCII_OPEN_DLG_Scalar; i++)
@@ -1126,7 +1126,7 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 				}
 			}
 		}
-		else if (index< ASCII_OPEN_DLG_Scalar) //check that the other combo as the same index (appart from SF)
+		else if (index< ASCII_OPEN_DLG_Scalar) //check that the other combo as the same index (apart from SF)
 		{
 			if (combo->currentIndex() == index)
 			{

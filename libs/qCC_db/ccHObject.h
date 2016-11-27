@@ -221,7 +221,7 @@ public: //bounding-box
 
 	//! Returns the bounding-box of this entity and it's children WHEN DISPLAYED
 	/** Children's GL transformation is taken into account (if enabled).
-		\param relative whether the bounding-box is relative (i.e. in the entity's local coordinate sytem) or absolute (in which case the parent's GL transformation will be taken into account)
+		\param relative whether the bounding-box is relative (i.e. in the entity's local coordinate system) or absolute (in which case the parent's GL transformation will be taken into account)
 		\param display if not null, this method will return the bounding-box of this entity (and its children) in the specified 3D view (i.e. potentially not visible)
 		\return bounding-box
 	**/

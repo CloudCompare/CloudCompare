@@ -70,7 +70,7 @@ public:
 	**/
 	virtual void logMessage(const QString& message, int level) = 0;
 
-	//! Prints out a formated message in console
+	//! Prints out a formatted message in console
 	/** Works just like the 'printf' command.
 		\return always return 'true'
 	**/
@@ -88,7 +88,7 @@ public:
 	//! QString version of ccLog::PrintDebug
 	inline static bool PrintDebug(const QString& message) { LogMessage(message, LOG_STANDARD | LOG_DEBUG); return true; }
 
-	//! Prints out a formated warning message in console
+	//! Prints out a formatted warning message in console
 	/** Works just like the 'printf' command.
 		\return always return 'false'
 	**/
@@ -106,7 +106,7 @@ public:
 	//! QString version of ccLog::WarningDebug
 	inline static bool WarningDebug(const QString& message) { LogMessage(message, LOG_WARNING | LOG_DEBUG); return false; }
 
-	//! Display an error dialog with formated message
+	//! Display an error dialog with formatted message
 	/** Works just like the 'printf' command.
 		\return always return 'false'
 	**/

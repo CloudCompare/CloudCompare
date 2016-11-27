@@ -140,7 +140,7 @@ bool ccObject::toFile(QFile& out) const
 		return WriteError();
 
 	//unique ID (dataVersion>=20)
-	//DGM: this ID will be usefull to recreate dynamic links between entities!
+	//DGM: this ID will be useful to recreate dynamic links between entities!
 	uint32_t uniqueID = (uint32_t)m_uniqueID;
 	if (out.write((const char*)&uniqueID,4) < 0)
 		return WriteError();
@@ -245,7 +245,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 	//	return ReadError();
 
 	//unique ID (dataVersion>=20)
-	//DGM: this ID will be usefull to recreate dynamic links between entities!
+	//DGM: this ID will be useful to recreate dynamic links between entities!
 	uint32_t uniqueID = 0;
 	if (in.read((char*)&uniqueID,4) < 0)
 		return ReadError();

@@ -782,7 +782,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					ccScalarField* newSF = new ccScalarField(sf->getName());
 					newSF->setGlobalShift(sf->getGlobalShift());
-					//we fill the begining with NaN (as there is no equivalent in the current cloud)
+					//we fill the beginning with NaN (as there is no equivalent in the current cloud)
 					if (newSF->resize(pointCountBefore + addedPoints, true, NAN_VALUE))
 					{
 						//we copy the new values
@@ -1566,7 +1566,7 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, double freq)
 {
 	if (freq == 0 || dim > 2) //X=0, Y=1, Z=2
 	{
-		ccLog::Warning("[ccPointCloud::setRGBColorByBanding] Invalid paramter!");
+		ccLog::Warning("[ccPointCloud::setRGBColorByBanding] Invalid parameter!");
 		return false;
 	}
 
@@ -1603,7 +1603,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 {
 	if (!colorScale || heightDim > 2) //X=0, Y=1, Z=2
 	{
-		ccLog::Error("[ccPointCloud::setRGBColorByHeight] Invalid paramter!");
+		ccLog::Error("[ccPointCloud::setRGBColorByHeight] Invalid parameter!");
 		return false;
 	}
 

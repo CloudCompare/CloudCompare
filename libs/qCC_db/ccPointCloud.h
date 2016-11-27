@@ -113,7 +113,7 @@ public: //clone, copy, etc.
 	//! Creates a new point cloud object from a ReferenceCloud (selection)
 	/** "Reference clouds" are a set of indexes referring to a real point cloud.
 		See CClib documentation for more information about ReferenceClouds.
-		Warning: the ReferenceCloud structure must refer to this cloud. 
+		Warning: the ReferenceCloud structure must refer to this cloud.
 		\param selection a ReferenceCloud structure (pointing to source)
 		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
 	**/
@@ -256,7 +256,7 @@ public: //associated (scan) grid structure
 	{
 		//! Shared type
 		typedef QSharedPointer<Grid> Shared;
-		
+
 		//! Default constructor
 		Grid()
 			: w(0)
@@ -303,7 +303,7 @@ public: //associated (scan) grid structure
 				return QImage();
 			}
 		}
-		
+
 		//! Grid width
 		unsigned w;
 		//! Grid height
@@ -546,7 +546,7 @@ public: //other methods
 	/** \return success
 	**/
 	bool setRGBColorWithCurrentScalarField(bool mixWithExistingColor = false);
-	
+
 	//! Set a unique color for the whole cloud (shortcut)
 	/** Color array is automatically allocated if necessary.
 		\param r red component
@@ -589,7 +589,7 @@ public: //other methods
 
 	//! Unrolls the cloud and its normals on a cylinder
 	/** This method is redundant with the "developCloudOnCylinder" method of CCLib,
-		appart that it can also handle the cloud normals.
+		apart that it can also handle the cloud normals.
 		\param radius unrolling cylinder radius
 		\param center a point belonging to the cylinder axis (automatically computed if not specified)
 		\param dim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
@@ -602,7 +602,7 @@ public: //other methods
 
 	//! Unrolls the cloud and its normals on a cone
 	/** This method is redundant with the "developCloudOnCone" method of CCLib,
-		appart that it can also handle the cloud normals.
+		apart that it can also handle the cloud normals.
 		\param baseRadius unrolling cone base radius
 		\param alpha_deg cone angle (between 0 and 180 degrees)
 		\param apex cone apex
@@ -724,7 +724,7 @@ protected: // VBO
 			UPDATE_NORMALS = 4,
 			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
 		};
-		
+
 		vboSet()
 			: hasColors(false)
 			, colorIsSF(false)

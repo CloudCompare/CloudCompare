@@ -575,7 +575,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 			}
 		}
 
-		//A scalar fiels must have a color scale!
+		//A scalar field must have a color scale!
 		if (!m_colorScale)
 			m_colorScale = ccColorScalesManager::GetDefaultScale();
 

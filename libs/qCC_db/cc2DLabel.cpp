@@ -706,7 +706,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
 	{
-		//not particularily fast
+		//not particularly fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
 		glFunc->glPushName(getUniqueIDForDisplay());

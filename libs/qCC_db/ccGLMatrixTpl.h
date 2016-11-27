@@ -648,13 +648,13 @@ public:
 	inline const T* data() const { return m_mat; }
 
 	//! Retruns a pointer to internal translation
-	/** Translation corresponds to the begining of the
+	/** Translation corresponds to the beginning of the
 		third column of the matrix.
 	**/
 	inline T* getTranslation() { return m_mat+12; }
 
 	//! Retruns a const pointer to internal translation
-	/** Translation corresponds to the begining of the
+	/** Translation corresponds to the beginning of the
 		third column of the matrix.
 	**/
 	inline const T* getTranslation() const { return m_mat+12; }

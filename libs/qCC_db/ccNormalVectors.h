@@ -166,7 +166,7 @@ public:
 	//! Converts a normal vector to RGB color space
 	/** Uses 'ConvertNormalToHSV' then converts HSV to RGB.
 		\param[in] N normal (should be normalized!)
-		\return RGB value (components betwen 0 and MAX_COLOR_COMP)
+		\return RGB value (components between 0 and MAX_COLOR_COMP)
 	**/
 	static ccColor::Rgb ConvertNormalToRGB(const CCVector3& N);
 

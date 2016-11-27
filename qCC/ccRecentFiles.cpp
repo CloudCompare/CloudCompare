@@ -38,7 +38,7 @@ ccRecentFiles::ccRecentFiles( QWidget *parent ) :
 	
 	connect( m_actionClearMenu, &QAction::triggered, [this]() {
 		m_settings.remove( s_settingKey );
-
+		
 		updateMenu();		
 	});
 	
@@ -62,7 +62,7 @@ void ccRecentFiles::addFilePath( const QString &filePath )
 	{
 		list = list.mid( 0, 10 );
 	}
-
+	
 	m_settings.setValue( s_settingKey, list );
 	
 	updateMenu();
@@ -114,13 +114,19 @@ QStringList ccRecentFiles::listRecent()
 {	
 	QStringList list = m_settings.value( s_settingKey ).toStringList();
 	
-	for ( const QString &filePath : list )
-	{		
+	QStringList::iterator iter = list.begin();
+	
+	while ( iter != list.end() )
+	{
+		const QString filePath = *iter;
+		
 		if ( !QFile::exists( filePath ) )
 		{
-			list.removeAll( filePath );
+			iter = list.erase( iter );
 			continue;
 		}
+		
+		++iter;
 	}
 	
 	return list;

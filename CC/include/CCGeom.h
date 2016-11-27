@@ -318,7 +318,7 @@ public:
 	inline Vector2Tpl& operator /= (Type v) {x/=v; y/=v; return *this;}
 	//! Addition operator
 	inline Vector2Tpl operator + (const Vector2Tpl& v) const {return Vector2Tpl(x+v.x, y+v.y);}
-	//! Substraction operator
+	//! Subtraction operator
 	inline Vector2Tpl operator - (const Vector2Tpl& v) const {return Vector2Tpl(x-v.x, y-v.y);}
 	//! Multiplication operator
 	inline Vector2Tpl operator * (Type s) const {return Vector2Tpl(x*s, y*s);}

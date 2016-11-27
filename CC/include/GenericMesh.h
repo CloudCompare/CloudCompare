@@ -58,7 +58,7 @@ public:
 	**/
 	virtual void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) = 0;
 
-	//! Places the mesh iterator at the begining
+	//! Places the mesh iterator at the beginning
 	/**	Virtual method to handle the mesh global iterator
 	**/
 	virtual void placeIteratorAtBegining() = 0;

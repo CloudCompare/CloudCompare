@@ -69,18 +69,18 @@ public: //distance to clouds or meshes
 		**/
 		CC_LOCAL_MODEL_TYPES localModel;
 
-		//! Whether to use a fixed number of neighbors or a (sphere) radius for nearest neighbours seach
+		//! Whether to use a fixed number of neighbors or a (sphere) radius for nearest neighbours search
 		/** For local models only (i.e. ignored if localModel = NO_MODEL).
 		**/
 		bool useSphericalSearchForLocalModel;
 
-		//! Number of neighbours for nearest neighbours seach (local model)
+		//! Number of neighbours for nearest neighbours search (local model)
 		/** For local models only (i.e. ignored if localModel = NO_MODEL).
 			Ignored if useSphericalSearchForLocalModel is true.
 		**/
 		unsigned kNNForLocalModel;
 
-		//! Radius for nearest neighbours seach (local model)
+		//! Radius for nearest neighbours search (local model)
 		/** For local models only (i.e. ignored if localModel = NO_MODEL).
 			Ignored if useSphericalSearchForLocalModel is true.
 		**/
@@ -130,7 +130,7 @@ public: //distance to clouds or meshes
 		Daniel Girardeau-Montaut's PhD manuscript (Chapter 2, section 2.3). It is the standard way to compare
 		directly two dense (and globally close) point clouds.
 		\warning The current scalar field of the compared cloud should be enabled. By default it will be reset to
-		NAN_VALUE but one can avoid this by definining the Cloud2CloudDistanceComputationParams::resetFormerDistances
+		NAN_VALUE but one can avoid this by defining the Cloud2CloudDistanceComputationParams::resetFormerDistances
 		parameters to false. But even in this case, only values above Cloud2CloudDistanceComputationParams::maxSearchDist
 		will remain untouched.
 		\warning Max search distance (Cloud2CloudDistanceComputationParams::maxSearchDist > 0) is not compatible with the

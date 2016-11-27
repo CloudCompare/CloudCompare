@@ -45,8 +45,8 @@ public:
 	WeibullDistribution(ScalarType _a, ScalarType _b, ScalarType _valueShift = 0);
 
 	//! Returns the distribution parameters
-	/** \param _a a field to transmit the Weibull a paramter
-		\param _b a field to transmit the Weibull b paramter
+	/** \param _a a field to transmit the Weibull a parameter
+		\param _b a field to transmit the Weibull b parameter
 		return the parameters validity
 	**/
 	bool getParameters(ScalarType &_a, ScalarType &_b) const;

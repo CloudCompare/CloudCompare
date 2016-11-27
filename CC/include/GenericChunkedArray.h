@@ -402,7 +402,7 @@ public:
 
 	//***** data access *****//
 
-	//! Places global iterator at the begining of the array
+	//! Places global iterator at the beginning of the array
 	inline void placeIteratorAtBegining() { m_iterator = 0; }
 
 	//! Forwards global iterator (one position)
@@ -485,12 +485,12 @@ public:
 	//! Const version of GenericChunkedArray::getMax
 	inline const ElementType* getMax() const { return m_maxVal; }
 
-	//! Sets the value of the minimum (independantly of what is stored in the array)
+	//! Sets the value of the minimum (independently of what is stored in the array)
 	/** \param m the "minimum" element
 	**/
 	inline void setMin(const ElementType* m) { memcpy(m_minVal,m,N*sizeof(ElementType)); }
 
-	//! Sets the value of the maximum (independantly of what is stored in the array)
+	//! Sets the value of the maximum (independently of what is stored in the array)
 	/** \param M the "maximum" element
 	**/
 	inline void setMax(const ElementType* M) { memcpy(m_maxVal,M,N*sizeof(ElementType)); }
@@ -581,7 +581,7 @@ public:
 #endif
 	}
 
-	//! Returns the begining of a given chunk (pointer)
+	//! Returns the beginning of a given chunk (pointer)
 	inline ElementType* chunkStartPtr(unsigned index)
 	{
 		assert(index < chunksCount());
@@ -592,7 +592,7 @@ public:
 #endif
 	}
 
-	//! Returns the begining of a given chunk (pointer)
+	//! Returns the beginning of a given chunk (pointer)
 	inline const ElementType* chunkStartPtr(unsigned index) const
 	{
 		assert(index < chunksCount());
@@ -1009,7 +1009,7 @@ public:
 
 	//***** data access *****//
 
-	//! Places global iterator at the begining of the array
+	//! Places global iterator at the beginning of the array
 	inline void placeIteratorAtBegining() { m_iterator = 0; }
 
 	//! Forwards global iterator (one position)
@@ -1096,12 +1096,12 @@ public:
 	//! Const version of GenericChunkedArray::getMax
 	inline const ElementType getMax() const { return m_maxVal; }
 
-	//! Sets the value of the minimum (independantly of what is stored in the array)
+	//! Sets the value of the minimum (independently of what is stored in the array)
 	/** \param m the "minimum" element
 	**/
 	inline void setMin(const ElementType& m) { m_minVal = m; }
 
-	//! Sets the value of the maximum (independantly of what is stored in the array)
+	//! Sets the value of the maximum (independently of what is stored in the array)
 	/** \param M the "maximum" element
 	**/
 	inline void setMax(const ElementType& M) { m_maxVal = M; }
@@ -1180,7 +1180,7 @@ public:
 #endif
 	}
 
-	//! Returns the begining of a given chunk (pointer)
+	//! Returns the beginning of a given chunk (pointer)
 	inline ElementType* chunkStartPtr(unsigned index)
 	{
 		assert(index < chunksCount());
@@ -1191,7 +1191,7 @@ public:
 #endif
 	}
 
-	//! Returns the begining of a given chunk (pointer)
+	//! Returns the beginning of a given chunk (pointer)
 	inline const ElementType* chunkStartPtr(unsigned index) const
 	{
 		assert(index < chunksCount());

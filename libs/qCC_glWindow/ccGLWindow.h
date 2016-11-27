@@ -467,7 +467,7 @@ public:
 	CCVector3d getCurrentUpDir() const;
 
 	//! Returns current parameters for this display (const version)
-	/** Warning: may return overriden parameters!
+	/** Warning: may return overridden parameters!
 	**/
 	const ccGui::ParamStruct& getDisplayParameters() const;
 
@@ -596,7 +596,7 @@ public slots:
 	//inherited from ccGenericGLDisplay
 	virtual void redraw(bool only2D = false, bool resetLOD = true) override;
 
-	//called when recieving mouse wheel is rotated
+	//called when receiving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
 
 	//! Tests frame rate
@@ -1237,7 +1237,7 @@ protected: //members
 	//! Rectangular picking polyline
 	ccPolyline* m_rectPickingPoly;
 
-	//! Overriden display parameter 
+	//! Overridden display parameter 
 	ccGui::ParamStruct m_overridenDisplayParameters;
 
 	//! Whether display parameters are overidden for this window

@@ -48,7 +48,9 @@ v2.8.beta - XX/XX/2016
 		- L2/R2: roll left/right
 		- start: zoom and center on the visible entities
 
-	* New default color scales for dip / dip direction display (thanks to T. Dewez)
+	* New color scales:
+		- two colorscales for dip and dip direction display (thanks to T. Dewez)
+		- matplotlib's veridis colormap (perceptually-uniform)
 
 	* Adds an "Open Recent" item to the File menu to quickly access the last 10 files that you've worked with.
 

@@ -150,13 +150,13 @@ int main(int argc, char **argv)
 
 	QDir  workingDir = QCoreApplication::applicationDirPath();
 	
-#ifdef Q_OS_MAC	
+#ifdef Q_OS_MAC
 	// This makes sure that our "working directory" is not within the application bundle	
 	if ( workingDir.dirName() == "MacOS" )
 	{
 		workingDir.cdUp();
 		workingDir.cdUp();
-		workingDir.cdUp();		
+		workingDir.cdUp();
 	}
 #endif
 

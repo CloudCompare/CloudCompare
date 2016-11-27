@@ -64,7 +64,7 @@ v2.8.beta - XX/XX/2016
 	* DB Tree (select children by type and/or by name)
 		- regular expressions can now be used to select entities in the DB tree
 
-	* Facets
+	* Facets plugin
 		- meta-data (normals, dip/direction, etc.) is now updated when the facet is rotated / transformed
 		- the 3D representation of the normal vector now depends on the facet size and not on its min. bounding-box size
 
@@ -148,6 +148,7 @@ v2.8.beta - XX/XX/2016
 		- New option to update an existing viewport object (with the current camera parameters)
 		- [macOS] Now looks for the global_shift.txt file beside the .app instead of inside the application bundle
 		- [macOS] Hides the 3D mouse and Gamepad menus since they are not yet supported on macOS
+		- I/O plugins (Faro, DP, Riegl, etc) are now loaded even when using CC in command line mode
 
 - Bug fixes:
 	* the custom light was broken (enabled and displayed in the 2D screen coordinates space instead of the 3D world!)

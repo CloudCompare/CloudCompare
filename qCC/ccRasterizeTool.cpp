@@ -650,6 +650,12 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		return false;
 	}
 
+	//clear volume info
+	{
+		volumeLabel->setText("0");
+		filledCellsPercentageLabel->setText("0");
+	}
+
 	unsigned gridWidth = 0, gridHeight = 0;
 	if (!getGridSize(gridWidth, gridHeight))
 	{
@@ -705,6 +711,32 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 							&pDlg))
 	{
 		return false;
+	}
+
+	//update volume estimate
+	{
+		double hSum = 0;
+		unsigned filledCellCount = 0;
+		for (unsigned j = 0; j < m_grid.height; ++j)
+		{
+			const RasterGrid::Row& row = m_grid.rows[j];
+			for (unsigned i = 0; i < m_grid.width; ++i)
+			{
+				if (std::isfinite(row[i].h))
+				{
+					hSum += row[i].h;
+					++filledCellCount;
+				}
+			}
+		}
+
+		if (filledCellCount)
+		{
+			double cellArea = m_grid.gridStep * m_grid.gridStep;
+			volumeLabel->setText(QString::number(hSum * cellArea));
+			filledCellsPercentageLabel->setText(QString::number(static_cast<double>(100 * filledCellCount) / (m_grid.width * m_grid.height), 'f', 2) + " %");
+		}
+
 	}
 
 	ccLog::Print(QString("[Rasterize] Current raster grid:\n\tSize: %1 x %2\n\tHeight values: [%3 ; %4]").arg(m_grid.width).arg(m_grid.height).arg(m_grid.minHeight).arg(m_grid.maxHeight));

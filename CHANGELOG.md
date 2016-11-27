@@ -104,14 +104,15 @@ v2.8.beta - XX/XX/2016
 			interference / sampling issues.
 		- as a result, the volume calculation tool has been updated. Notably, results from the rasterize tool can be used
 			in the 2.5D Volume calculation tool without any sampling artefact
-		- Exported rasters (geotiff) are using the same convention. They are also now properly oriented (they could be loaded
+		- exported rasters (geotiff) are using the same convention. They are also now properly oriented (they could be loaded
 			flipped in some GIS tools).
 		- ASCII matrix is now exported from top (highest Y coordinates) to bottom (lowest)
-		- Mixing RGB bands and other layers (heights, scalar fields, etc.) in a geotiff is in fact a bad idea. It results in
+		- mixing RGB bands and other layers (heights, scalar fields, etc.) in a geotiff is in fact a bad idea. It results in
 			64 bits color bands that are not properly handled by most of the other GIS tools. CC will now warn the user about
 			this.
-		- Exported clouds and meshes are now properly exported in the same coordinate system as the input cloud
+		- exported clouds and meshes are now properly exported in the same coordinate system as the input cloud
 			(it was not the case for clouds projected along X or Y)
+		- a coarse estimation of the grid volume (relative to Z = 0) is now available in the 'volume' tab
 
 	* Raster file import:
 		- New option to import the raster as a textured quad (mesh). Only available if the raster has at least R, G and B bands.

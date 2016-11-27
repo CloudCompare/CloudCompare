@@ -1205,7 +1205,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 						const RasterGrid::Row& row = m_grid.rows[j];
 						for (unsigned i = 0; i < m_grid.width; ++i, ++_sfGrid)
 						{
-							if (isfinite(row[i].h)) //valid cell (could have been interpolated)
+							if (std::isfinite(row[i].h)) //valid cell (could have been interpolated)
 							{
 								ScalarType s = static_cast<ScalarType>(*_sfGrid);
 								sf->setValue(n++, s);

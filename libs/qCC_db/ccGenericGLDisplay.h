@@ -43,9 +43,9 @@ public:
 	ccViewportParameters(const ccViewportParameters& params);
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	virtual bool isSerializable() const override { return true; }
+	virtual bool toFile(QFile& out) const override;
+	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Current pixel size (in 'current unit'/pixel)
 	/** This scale is valid eveywhere in ortho. mode 

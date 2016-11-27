@@ -510,6 +510,31 @@
     <layout class="QVBoxLayout">
      <item>
       <widget class="ccCustomQTreeView" name="dbTreeView">
+       <property name="styleSheet">
+        <string notr="true">QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/CC/images/QTreeView/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/CC/images/QTreeView/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+        image: url(:/CC/images/QTreeView/branch-open.png);
+}</string>
+       </property>
        <property name="dragEnabled">
         <bool>true</bool>
        </property>
@@ -534,7 +559,8 @@
    </property>
    <property name="windowIcon">
     <iconset>
-     <normaloff>.</normaloff>.</iconset>
+     <normaloff/>
+    </iconset>
    </property>
    <property name="toolTip">
     <string>Viewing tools</string>

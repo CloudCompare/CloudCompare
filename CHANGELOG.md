@@ -101,6 +101,7 @@ v2.8.beta - XX/XX/2016
 		- default color scale is now symmetrical if the height differences are not only positive or only negative
 
 	* Rasterize tool:
+		- the 'interpolate' option for empty cells now also interpolates the scalar fields and RGB color layers
 		- the rasterize tool now uses the 'PixelIsArea' convention (i.e. the grid min corner coordinates correspond to the
 			first grid cell center). This allows one to apply the Rasterize tool on a regular grid without any
 			interference / sampling issues.

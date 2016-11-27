@@ -478,16 +478,16 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			assert(pc);
 
 			//absolute position of the cell (e.g. in the 2D SF grid(s))
-			int pos = j * static_cast<int>(width) + i;
+			int pos = j * static_cast<int>(width)+i;
 			assert(pos < static_cast<int>(gridTotalSize));
-			
-			for (size_t k=0; k<scalarFields.size(); ++k)
+
+			for (size_t k = 0; k < scalarFields.size(); ++k)
 			{
 				assert(!scalarFields[k].empty());
 
 				CCLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
 				assert(sf && pos < static_cast<int>(sf->currentSize()));
-				
+
 				ScalarType sfValue = sf->getValue(n);
 
 				if (ccScalarField::ValidValue(sfValue))
@@ -536,7 +536,7 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//update SF grids for 'average' cases
 	if (sfInterpolation == PROJ_AVERAGE_VALUE)
 	{
-		for (size_t k=0; k<scalarFields.size(); ++k)
+		for (size_t k = 0; k < scalarFields.size(); ++k)
 		{
 			assert(!scalarFields[k].empty());
 
@@ -561,10 +561,10 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 	//update the main grid (average height and std.dev. computation + current 'height' value)
 	{
-		for (unsigned j=0; j<height; ++j)
+		for (unsigned j = 0; j < height; ++j)
 		{
 			Row& row = rows[j];
-			for (unsigned i=0; i<width; ++i)
+			for (unsigned i = 0; i < width; ++i)
 			{
 				RasterCell& cell = row[i];
 				if (cell.nbPoints > 1)
@@ -667,7 +667,7 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					int P[3][2];
 					int xMin = 0, yMin = 0, xMax = 0, yMax = 0;
 					{
-						for (unsigned j=0; j<3; ++j)
+						for (unsigned j = 0; j < 3; ++j)
 						{
 							const CCVector2& P2D = the2DPoints[tsi->i[j]];
 							P[j][0] = static_cast<int>(P2D.x);
@@ -721,6 +721,15 @@ bool cc2Point5DimEditor::RasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 										row[i].h = l1 * valA + l2 * valB + l3 * valC;
 										assert(std::isfinite(row[i].h));
+
+										//interpolate color as well!
+										if (hasColors)
+										{
+											const CCVector3d& colA = rows[P[0][1]][P[0][0]].color;
+											const CCVector3d& colB = rows[P[1][1]][P[1][0]].color;
+											const CCVector3d& colC = rows[P[2][1]][P[2][0]].color;
+											row[i].color = l1 * colA + l2 * colB + l3 * colC;
+										}
 
 										//interpolate the SFs as well!
 										for (size_t sfIndex = 0; sfIndex < scalarFields.size(); ++sfIndex)
@@ -1026,7 +1035,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 		
 		for (unsigned i = 0; i < m_grid.width; ++i, ++aCell)
 		{
-			if (std::isfinite(aCell->h)) //valid cell
+			if (std::isfinite(aCell->h)) //valid cell (could have been interpolated)
 			{
 				//if we haven't resampled the original cloud, we must add the point
 				//corresponding to this non-empty cell
@@ -1119,7 +1128,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 				}
 
 				assert(exportedSFs.size() == exportedFields.size());
-				for (size_t i=0; i<exportedSFs.size(); ++i)
+				for (size_t i = 0; i < exportedSFs.size(); ++i)
 				{
 					if (!exportedSFs[i])
 					{
@@ -1196,7 +1205,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<Exportab
 						const RasterGrid::Row& row = m_grid.rows[j];
 						for (unsigned i = 0; i < m_grid.width; ++i, ++_sfGrid)
 						{
-							if (row[i].nbPoints)
+							if (isfinite(row[i].h)) //valid cell (could have been interpolated)
 							{
 								ScalarType s = static_cast<ScalarType>(*_sfGrid);
 								sf->setValue(n++, s);

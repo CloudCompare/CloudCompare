@@ -982,7 +982,7 @@ bool ccCommandLineParser::commandExtractCC(QStringList& arguments, ccProgressDia
 
 			if (!success)
 			{
-				ccConsole::Warning("An error occured (failed to finish the extraction)");
+				ccConsole::Warning("An error occurred (failed to finish the extraction)");
 				continue;
 			}
 
@@ -2946,7 +2946,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	if (!compDlg.computeDistances())
 	{
 		compDlg.cancelAndExit();
-		return Error("An error occured during distances computation!");
+		return Error("An error occurred during distances computation!");
 	}
 
 	compDlg.applyAndExit();

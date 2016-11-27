@@ -784,7 +784,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
 			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
 
-			//look for an asociated viewport
+			//look for an associated viewport
 			ccHObject::Container viewports;
 			if (poly->filterChildren(viewports, false, CC_TYPES::VIEWPORT_2D_OBJECT, true) == 1)
 			{

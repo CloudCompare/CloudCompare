@@ -1292,7 +1292,7 @@ void ccRasterizeTool::generateRaster() const
 	/* Once we're done, close properly the dataset */
 	GDALClose( (GDALDatasetH) poDstDS );
 
-	ccLog::Print(QString("[Rasterize] Raster '%1' succesfully saved").arg(outputFilename));
+	ccLog::Print(QString("[Rasterize] Raster '%1' successfully saved").arg(outputFilename));
 
 #else
 	assert(false);
@@ -1726,7 +1726,7 @@ void ccRasterizeTool::exportContourLines()
 	group->setDisplay_recursive(m_cloud->getDisplay());
 	mainWindow->addToDB(group);
 
-	ccLog::Print(QString("Contour lines have been succesfully exported to DB (group name: %1)").arg(group->getName()));
+	ccLog::Print(QString("Contour lines have been successfully exported to DB (group name: %1)").arg(group->getName()));
 }
 
 cc2Point5DimEditor::EmptyCellFillOption ccRasterizeTool::getFillEmptyCellsStrategyExt(	double& emptyCellsHeight,
@@ -1898,7 +1898,7 @@ void ccRasterizeTool::generateImage() const
 
 				if (bitmap8.save(outputFilename))
 				{
-					ccLog::Print(QString("[Rasterize] Image '%1' succesfully saved").arg(outputFilename));
+					ccLog::Print(QString("[Rasterize] Image '%1' successfully saved").arg(outputFilename));
 				}
 				else
 				{
@@ -1957,6 +1957,6 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	//save current export path to persistent settings
 	settings.setValue("savePathASCIIGrid", QFileInfo(outputFilename).absolutePath());
 
-	ccLog::Print(QString("[Rasterize] Raster matrix '%1' succesfully saved").arg(outputFilename));
+	ccLog::Print(QString("[Rasterize] Raster matrix '%1' successfully saved").arg(outputFilename));
 }
 

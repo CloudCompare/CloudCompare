@@ -25,7 +25,7 @@ class ccStatisticalTestDlg : public QDialog, public Ui::StatisticalTestDialog
 {
 public:
 
-	//! Default construtor (for distributions with up to 3 parameters)
+	//! Default constructor (for distributions with up to 3 parameters)
 	ccStatisticalTestDlg(	QString param1Label,
 							QString param2Label,
 							QString param3Label = QString(),

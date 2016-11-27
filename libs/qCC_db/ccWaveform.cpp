@@ -214,7 +214,7 @@ bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor)
 	}
 
 	file.close();
-	ccLog::Print(QString("[ccWaveform::toASCII] File '%1' has been saved succesfully").arg(filename));
+	ccLog::Print(QString("[ccWaveform::toASCII] File '%1' has been saved successfully").arg(filename));
 
 	return true;
 }

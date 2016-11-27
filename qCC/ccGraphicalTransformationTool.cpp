@@ -119,14 +119,14 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 		return false;
 	}
 
-	//we can't tranform locked entities
+	//we can't transform locked entities
 	if (entity->isLocked())
 	{
 		ccLog::Warning(QString("[Graphical Transformation Tool] Can't transform entity '%1' cause it's locked!").arg(entity->getName()));
 		return false;
 	}
 
-	//we can't tranform child meshes
+	//we can't transform child meshes
 	if (entity->isA(CC_TYPES::MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_TYPES::MESH))
 	{
 		ccLog::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
@@ -304,7 +304,7 @@ void ccGraphicalTransformationTool::apply()
 	{
 		//convert matrix back and forth so as to be sure to get a 'true' rotation matrix
 		//DGM: we use Euler angles, as the axis/angle method (formerly used) is not robust
-		//enough! Shifts could be percieved by the user.
+		//enough! Shifts could be perceived by the user.
 		double phi_rad,theta_rad,psi_rad;
 		CCVector3d t3D;
 		finalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
@@ -346,7 +346,7 @@ void ccGraphicalTransformationTool::apply()
 		toTransform->prepareDisplayForRefresh_recursive();
 		MainWindow::TheInstance()->putObjectBackIntoDBTree(toTransform,objContext);
 
-		//specif case: if the object is a mesh vertices set, we may have to update the mesh normals!
+		//special case: if the object is a mesh vertices set, we may have to update the mesh normals!
 		if (toTransform->isA(CC_TYPES::POINT_CLOUD) && toTransform->getParent() && toTransform->getParent()->isKindOf(CC_TYPES::MESH))
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(toTransform->getParent());

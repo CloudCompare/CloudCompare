@@ -810,7 +810,7 @@ void ccColorScaleEditorDialog::exportCurrentScale()
 	//try to save the file
 	if (m_colorScale->saveAsXML(filename))
 	{
-		ccLog::Print(QString("[ColorScale] Scale '%1' sucessfully exported in '%2'").arg(m_colorScale->getName()).arg(filename));
+		ccLog::Print(QString("[ColorScale] Scale '%1' successfully exported in '%2'").arg(m_colorScale->getName()).arg(filename));
 	}
 }
 

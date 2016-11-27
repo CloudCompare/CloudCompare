@@ -1170,7 +1170,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 					mntCloud->showColors(true);
 					container.addChild(mntCloud);
-					ccLog::Warning("[Bundler] DTM vertices sucessfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
+					ccLog::Warning("[Bundler] DTM vertices successfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
 
 					if (!parameters.alwaysDisplayLoadDialog)
 					{

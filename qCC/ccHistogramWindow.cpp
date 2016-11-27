@@ -1031,7 +1031,7 @@ void ccHistogramWindowDlg::onExportToImage()
 	QPixmap image = m_win->grab();
 	if (image.save(outputFilename))
 	{
-		ccLog::Print(QString("[Histogram] Image '%1' succesfully saved").arg(outputFilename));
+		ccLog::Print(QString("[Histogram] Image '%1' successfully saved").arg(outputFilename));
 	}
 	else
 	{

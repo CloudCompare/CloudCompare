@@ -1119,7 +1119,7 @@ void qFacets::exportFacetsInfo()
 
 	outFile.close();
 
-	m_app->dispToConsole(QString("[qFacets] File '%1' succesfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole(QString("[qFacets] File '%1' successfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
 QIcon qFacets::getIcon() const

@@ -2305,7 +2305,7 @@ void MainWindow::doActionProjectUncertainty()
 			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
 		if (sfIdx < 0)
 		{
-			ccLog::Error("An error occured! (see console)");
+			ccLog::Error("An error occurred! (see console)");
 			return;
 		}
 
@@ -2334,7 +2334,7 @@ void MainWindow::doActionProjectUncertainty()
 			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
 		if (sfIdx < 0)
 		{
-			ccLog::Error("An error occured! (see console)");
+			ccLog::Error("An error occurred! (see console)");
 			return;
 		}
 
@@ -4094,7 +4094,7 @@ void MainWindow::doActionLabelConnectedComponents()
 	pDlg.setAutoClose(false);
 
 	//we unselect all entities as we are going to automatically select the created components
-	//(otherwise the user won't percieve the change!)
+	//(otherwise the user won't perceive the change!)
 	if (m_ccRoot)
 	{
 		m_ccRoot->unselectAllEntities();
@@ -4402,7 +4402,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	char errorStr[1024];
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
-		ccLog::Error(QString("Thrid party library error: %1").arg(errorStr));
+		ccLog::Error(QString("Third party library error: %1").arg(errorStr));
 		delete delaunayMesh;
 		return;
 	}

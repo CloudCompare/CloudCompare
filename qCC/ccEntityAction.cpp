@@ -196,17 +196,13 @@ namespace ccEntityAction
 	
 	bool	rgbToGreyScale(const ccHObject::Container &selectedEntities)
 	{
-		size_t selNum = selectedEntities.size();
-		
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
-			
 			bool lockedVertices = false;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			
@@ -253,16 +249,13 @@ namespace ccEntityAction
 		
 		const double frequency = dlg.getBandingFrequency();
 		
-		size_t selNum = selectedEntities.size();
-		for (size_t i = 0; i < selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
-			
 			bool lockedVertices = false;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			
@@ -394,11 +387,10 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	convertTextureToColor(ccHObject::Container selectedEntities, QWidget *parent)
+	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget *parent)
 	{	
-		for (size_t i = 0; i < selectedEntities.size(); ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
 			if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
 			{
 				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
@@ -441,14 +433,94 @@ namespace ccEntityAction
 		
 		return true;
 	}
-	
+
+	bool	enhanceRGBWithIntensities(const ccHObject::Container& selectedEntities, QWidget *parent)
+	{
+		QString defaultSFName("Intensity");
+
+		for (ccHObject* ent : selectedEntities)
+		{
+			bool lockedVertices = false;
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
+			if (!pc || lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
+				continue;
+			}
+
+			if (!pc->hasColors())
+			{
+				ccLog::Warning(QString("[enhanceRGBWithIntensities] Entity '%1' has no RGB color!").arg(ent->getName()));
+				continue;
+			}
+			if (!pc->hasScalarFields())
+			{
+				ccLog::Warning(QString("[enhanceRGBWithIntensities] Entity '%1' has no scalar field!").arg(ent->getName()));
+				continue;
+			}
+
+			int sfIdx = -1;
+			if (pc->getNumberOfScalarFields() > 1)
+			{
+				//does the previously selected SF works?
+				if (!defaultSFName.isEmpty())
+				{
+					//if it's valid, we'll keep this SF!
+					sfIdx = pc->getScalarFieldIndexByName(qPrintable(defaultSFName));
+				}
+				if (sfIdx < 0)
+				{
+					//let the user choose the right scalar field
+					ccPickOneElementDlg poeDlg("Intensity scalar field", "Choose scalar field", parent);
+					for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
+					{
+						CCLib::ScalarField* sf = pc->getScalarField(i);
+						assert(sf);
+						QString sfName(sf->getName());
+						poeDlg.addElement(sfName);
+						if (sfIdx < 0 && sfName.contains("intensity", Qt::CaseInsensitive))
+						{
+							sfIdx = static_cast<int>(i);
+						}
+					}
+
+					poeDlg.setDefaultIndex(std::max(0, sfIdx));
+					if (!poeDlg.exec())
+					{
+						//process cancelled by the user
+						return false;
+					}
+					sfIdx = poeDlg.getSelectedIndex();
+					defaultSFName = pc->getScalarField(sfIdx)->getName();
+				}
+			}
+			else
+			{
+				sfIdx = 0;
+			}
+			assert(sfIdx >= 0);
+
+			if (pc->enhanceRGBWithIntensitySF(sfIdx))
+			{
+				ent->prepareDisplayForRefresh();
+				ent->showColors(true);
+				ent->showSF(false);
+			}
+			else
+			{
+				ccLog::Warning(QString("[enhanceRGBWithIntensities] Failed to apply the process on entity '%1'!").arg(ent->getName()));
+			}
+		}
+
+		return true;
+	}
+
 	//////////
 	// Scalar Fields
 	
 	bool sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
-		size_t selNum = selectedEntities.size();
-		if (selNum == 0)
+		if (selectedEntities.empty())
 			return false;
 		
 		double sigma = ccLibAlgorithms::GetDefaultCloudKernelSize(selectedEntities);
@@ -473,14 +545,13 @@ namespace ccEntityAction
 		ccProgressDialog pDlg(true, parent);
 		pDlg.setAutoClose(false);
 
-		for (size_t i = 0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
 			bool lockedVertices = false;
-			ccHObject* ent = selectedEntities[i];
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (!pc || lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			
@@ -553,8 +624,7 @@ namespace ccEntityAction
 	
 	bool	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
-		size_t selNum = selectedEntities.size();
-		if (selNum == 0)
+		if (selectedEntities.empty())
 			return false;
 		
 		double sigma = ccLibAlgorithms::GetDefaultCloudKernelSize(selectedEntities);
@@ -594,14 +664,13 @@ namespace ccEntityAction
 		ccProgressDialog pDlg(true, parent);
 		pDlg.setAutoClose(false);
 
-		for (size_t i = 0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
 			bool lockedVertices = false;
-			ccHObject* ent = selectedEntities[i];
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (!pc || lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			
@@ -684,17 +753,15 @@ namespace ccEntityAction
 		else if (answer == QMessageBox::Cancel)
 			return false;
 		
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
 			ccGenericPointCloud* cloud = nullptr;
-			ccHObject* ent = selectedEntities[i];
 			
 			bool lockedVertices = false;
 			cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			if (cloud != nullptr) //TODO
@@ -749,17 +816,15 @@ namespace ccEntityAction
 		}
 		
 		//apply random colors
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
 			ccGenericPointCloud* cloud = nullptr;
-			ccHObject* ent = selectedEntities[i];
 			
 			bool lockedVertices = false;
-			cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+			cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			if (cloud != nullptr) //TODO
@@ -807,10 +872,9 @@ namespace ccEntityAction
 	
 	bool sfRename(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
 			if (cloud != nullptr) //TODO
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -841,10 +905,9 @@ namespace ccEntityAction
 	
 	bool	sfAddIdField(const ccHObject::Container &selectedEntities)
 	{
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
 			if (cloud != nullptr) //TODO
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -891,10 +954,9 @@ namespace ccEntityAction
 			return false;
 		
 		//for each selected cloud (or vertices set)
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(selectedEntities[i]);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -906,7 +968,7 @@ namespace ccEntityAction
 					bool hasDefaultValueForNaN = false;
 					ScalarType defaultValueForNaN = sf->getMin();
 					
-					for (unsigned i=0; i<ptsCount; ++i)
+					for (unsigned i = 0; i < ptsCount; ++i)
 					{
 						ScalarType s = sf->getValue(i);
 						
@@ -967,10 +1029,8 @@ namespace ccEntityAction
 		const QString defaultSFName[3] = {"Coord. X", "Coord. Y", "Coord. Z"};
 		
 		//for each selected cloud (or vertices set)
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* entity : selectedEntities)
 		{
-			ccHObject* entity = selectedEntities[i];
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entity);
 			if (pc == nullptr)
 			{
@@ -981,7 +1041,7 @@ namespace ccEntityAction
 			unsigned ptsCount = pc->size();
 			
 			//test each dimension
-			for (unsigned d=0; d<3; ++d)
+			for (unsigned d = 0; d < 3; ++d)
 			{
 				if (!exportDim[d])
 					continue;
@@ -992,15 +1052,14 @@ namespace ccEntityAction
 				if (sfIndex < 0)
 				{
 					ccLog::Error("Not enough memory!");
-					i = selNum;
-					break;
+					return true; //true because we want the UI to be updated anyway
 				}
 				
 				CCLib::ScalarField* sf = pc->getScalarField(sfIndex);
 				Q_ASSERT(sf && sf->currentSize() == ptsCount);
 				if (sf != nullptr)
 				{
-					for (unsigned k=0; k<ptsCount; ++k)
+					for (unsigned k = 0; k < ptsCount; ++k)
 					{
 						ScalarType s = static_cast<ScalarType>(pc->getPoint(k)->u[d]);
 						sf->setValue(k,s);
@@ -1056,9 +1115,8 @@ namespace ccEntityAction
 		//candidates
 		std::unordered_set<ccPointCloud*> clouds;
 		
-		for (size_t i=0; i<selectedEntities.size(); ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
 			if (cloud && ent->hasColors()) //only for clouds (or vertices)
 				clouds.insert( cloud );
@@ -1088,18 +1146,18 @@ namespace ccEntityAction
 			
 			//try to instantiate memory for each field
 			unsigned count = cloud->size();
-			for (size_t i=0; i<fields.size(); ++i)
+			for (ccScalarField*& sf : fields)
 			{
-				if (fields[i] && !fields[i]->reserve(count))
+				if (sf && !sf->reserve(count))
 				{
-					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(fields[i]->getName()).arg(cloud->getName()));
-					fields[i]->release();
-					fields[i] = nullptr;
+					ccLog::Warning(QString("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName()).arg(cloud->getName()));
+					sf->release();
+					sf = nullptr;
 				}
 			}
 			
 			//export points
-			for (unsigned j=0; j<cloud->size(); ++j)
+			for (unsigned j = 0; j < cloud->size(); ++j)
 			{
 				const ColorCompType* rgb = cloud->getPointColor(j);
 				
@@ -1115,17 +1173,17 @@ namespace ccEntityAction
 			
 			QString fieldsStr;
 			
-			for (size_t i=0; i<fields.size(); ++i)
+			for (ccScalarField*& sf : fields)
 			{
-				if (fields[i] == nullptr)
+				if (sf == nullptr)
 					continue;
 				
-				fields[i]->computeMinAndMax();
+				sf->computeMinAndMax();
 				
-				int sfIdx = cloud->getScalarFieldIndexByName(fields[i]->getName());
+				int sfIdx = cloud->getScalarFieldIndexByName(sf->getName());
 				if (sfIdx >= 0)
 					cloud->deleteScalarField(sfIdx);
-				sfIdx = cloud->addScalarField(fields[i]);
+				sfIdx = cloud->addScalarField(sf);
 				Q_ASSERT(sfIdx >= 0);
 				
 				if (sfIdx >= 0)
@@ -1143,13 +1201,13 @@ namespace ccEntityAction
 					
 					if (!fieldsStr.isEmpty())
 						fieldsStr.append(", ");
-					fieldsStr.append(fields[i]->getName());
+					fieldsStr.append(sf->getName());
 				}
 				else
 				{
-					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(fields[i]->getName()).arg(cloud->getName()));
-					fields[i]->release();
-					fields[i] = nullptr;
+					ccConsole::Warning(QString("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName()).arg(cloud->getName()));
+					sf->release();
+					sf = nullptr;
 				}
 			}
 			
@@ -1162,10 +1220,8 @@ namespace ccEntityAction
 	
 	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent)
 	{
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
 			if (ent->isKindOf(CC_TYPES::MESH) || ent->isKindOf(CC_TYPES::PRIMITIVE)) //TODO
 			{
 				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
@@ -1440,15 +1496,13 @@ namespace ccEntityAction
 	
 	bool	invertNormals(const ccHObject::Container &selectedEntities)
 	{
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
 			bool lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			
@@ -1477,12 +1531,12 @@ namespace ccEntityAction
 		
 		bool ok = false;
 		const int s_defaultLevel = 6;
-		int value = QInputDialog::getInt(parent,
-													"Orient normals (FM)", "Octree level",
-													s_defaultLevel,
-													1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
-													1,
-													&ok);
+		int value = QInputDialog::getInt(	parent,
+											"Orient normals (FM)", "Octree level",
+											s_defaultLevel,
+											1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
+											1,
+											&ok);
 		if (!ok)
 			return false;
 		
@@ -1494,10 +1548,8 @@ namespace ccEntityAction
 		pDlg.setAutoClose(false);
 
 		size_t errors = 0;
-		for (size_t i=0; i<selectedEntities.size(); i++)
+		for (ccHObject* entity : selectedEntities)
 		{
-			ccHObject* entity = selectedEntities[i];
-			
 			if (!entity->isA(CC_TYPES::POINT_CLOUD))
 				continue;
 			
@@ -1542,12 +1594,12 @@ namespace ccEntityAction
 		
 		bool ok = false;
 		static unsigned s_defaultKNN = 6;
-		unsigned kNN = static_cast<unsigned>(QInputDialog::getInt(parent,
-																					 "Neighborhood size", "Neighbors",
-																					 s_defaultKNN ,
-																					 1, 1000,
-																					 1,
-																					 &ok));
+		unsigned kNN = static_cast<unsigned>(QInputDialog::getInt(	parent,
+																	"Neighborhood size", "Neighbors",
+																	s_defaultKNN ,
+																	1, 1000,
+																	1,
+																	&ok));
 		if (!ok)
 			return false;
 		
@@ -1557,10 +1609,8 @@ namespace ccEntityAction
 		pDlg.setAutoClose(false);
 		
 		size_t errors = 0;
-		for (size_t i=0; i<selectedEntities.size(); i++)
+		for (ccHObject* entity : selectedEntities)
 		{
-			ccHObject* entity = selectedEntities[i];
-			
 			if (!entity->isA(CC_TYPES::POINT_CLOUD))
 				continue;
 			
@@ -1717,18 +1767,15 @@ namespace ccEntityAction
 	{
 		ccBBox bbox;
 		std::unordered_set<ccGenericPointCloud*> clouds;
-		size_t selNum = selectedEntities.size();
 		PointCoordinateType maxBoxSize = -1;
-		for (size_t i = 0; i < selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
-
 			//specific test for locked vertices
 			bool lockedVertices = false;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (cloud && lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			clouds.insert(cloud);
@@ -1844,11 +1891,8 @@ namespace ccEntityAction
 	
 	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget *parent)
 	{	
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccHObject* ent = selectedEntities[i];
-			
 			//specific case: clear normals on a mesh
 			if (property == CLEAR_PROPERTY::NORMALS && ( ent->isA(CC_TYPES::MESH) /*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/ )) //TODO
 			{
@@ -1893,7 +1937,7 @@ namespace ccEntityAction
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 			if (lockedVertices)
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
 				continue;
 			}
 			
@@ -2044,10 +2088,9 @@ namespace ccEntityAction
 		ccProgressDialog pDlg(true, parent);
 		pDlg.setAutoClose(false);
 		
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent);
 			if (pc == nullptr)
 			{
 				// TODO handle error?
@@ -2152,10 +2195,9 @@ namespace ccEntityAction
 		}
 		Q_ASSERT(distrib != nullptr);
 		
-		size_t selNum = selectedEntities.size();
-		for (size_t i=0; i<selNum; ++i)
+		for (ccHObject* ent : selectedEntities)
 		{
-			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent);
 			if (pc == nullptr)
 			{
 				// TODO report error?

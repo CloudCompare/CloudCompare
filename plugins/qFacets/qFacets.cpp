@@ -754,9 +754,9 @@ void qFacets::exportFacets()
 	{
 		if (useCustomOrientation)
 		{
-			Z = CCVector3(static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble()),
-				static_cast<PointCoordinateType>(fDlg.nYLineEdit->text().toDouble()),
-				static_cast<PointCoordinateType>(fDlg.nZLineEdit->text().toDouble()));
+			Z = CCVector3(	static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble()),
+							static_cast<PointCoordinateType>(fDlg.nYLineEdit->text().toDouble()),
+							static_cast<PointCoordinateType>(fDlg.nZLineEdit->text().toDouble()));
 			Z.normalize();
 		}
 		else if (useGlobalOrientation)

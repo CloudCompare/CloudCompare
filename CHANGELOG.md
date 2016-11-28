@@ -37,6 +37,9 @@ v2.8.beta - XX/XX/2016
 	* New tool: Edit > Mesh > Create surface between two polylines
 		- Creates a surface patch between two polylines
 
+	* New tool: Edit > Color > Enhance with intensities
+		- Enhances the RGB colors thanks to the intensity scalar field (RGB-IHS method)
+
 	* Gamepad support (XBox, etc.) [Windows only]
 		- Enable it with the 'File > Gamepad > Enable' menu entry
 		- A: toggle viewer-based perspective mode

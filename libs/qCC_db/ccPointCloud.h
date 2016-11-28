@@ -36,6 +36,7 @@
 
 class ccScalarField;
 class ccPolyline;
+class ccMesh;
 class QGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
@@ -288,9 +289,9 @@ public: //associated (scan) grid structure
 			if (colors.size() == w*h)
 			{
 				QImage image(w, h, QImage::Format_ARGB32);
-				for (unsigned j=0; j<h; ++j)
+				for (unsigned j = 0; j < h; ++j)
 				{
-					for (unsigned i=0; i<w; ++i)
+					for (unsigned i = 0; i < w; ++i)
 					{
 						const ccColor::Rgb& col = colors[j*w + i];
 						image.setPixel(i, j, qRgb(col.r, col.g, col.b));
@@ -335,6 +336,11 @@ public: //associated (scan) grid structure
 	inline bool addGrid(Grid::Shared grid) { try{ m_grids.push_back(grid); } catch (const std::bad_alloc&) { return false; } return true; }
 	//! Remove all associated grids
 	inline void removeGrids() { m_grids.clear(); }
+
+	//! Meshes a scan grid
+	/** \warning The mesh vertices will be this cloud instance!
+	**/
+	ccMesh* triangulateGrid(const Grid& grid) const;
 
 public: //normals computation/orientation
 
@@ -648,6 +654,9 @@ public: //other methods
 		\return the resulting point cloud
 	**/
 	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);
+
+	//! Enhances the RGB colors with the current scalar field (assuming it's intensities)
+	bool enhanceRGBWithIntensitySF(int sfIdx);
 
 protected:
 

@@ -594,6 +594,7 @@ void MainWindow::connectActions()
 	connect(actionRGBToGreyScale,				SIGNAL(triggered()),	this,		SLOT(doActionRGBToGreyScale()));
 	connect(actionClearColor,					SIGNAL(triggered()),	this,		SLOT(doActionClearColor()));
 	connect(actionInterpolateColors,			SIGNAL(triggered()),	this,		SLOT(doActionInterpolateColors()));
+	connect(actionEnhanceRGBWithIntensities,	SIGNAL(triggered()),	this,		SLOT(doActionEnhanceRGBWithIntensities()));
 
 	//"Edit > Normals" menu
 	connect(actionComputeNormals,				SIGNAL(triggered()),	this,		SLOT(doActionComputeNormals()));
@@ -855,6 +856,15 @@ void MainWindow::doActionInterpolateColors()
 	refreshAll();
 	updateUI();
 }
+
+void MainWindow::doActionEnhanceRGBWithIntensities()
+{
+	if (!ccEntityAction::enhanceRGBWithIntensities(m_selectedEntities, this))
+		return;
+
+	refreshAll();
+}
+
 
 void MainWindow::doActionInvertNormals()
 {
@@ -9716,6 +9726,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+
 	actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
 	actionComputeMeshAA->setEnabled(atLeastOneCloud);
 	actionComputeMeshLS->setEnabled(atLeastOneCloud);
@@ -9772,6 +9783,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionConvertNormalToHSV->setEnabled(atLeastOneNormal);
 	actionConvertNormalToDipDir->setEnabled(atLeastOneNormal);
 	actionClearColor->setEnabled(atLeastOneColor);
+	actionRGBToGreyScale->setEnabled(atLeastOneColor);
+	actionEnhanceRGBWithIntensities->setEnabled(atLeastOneColor);
 
 	// == 1
 	bool exactlyOneEntity = (selInfo.selCount == 1);

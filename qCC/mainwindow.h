@@ -302,6 +302,7 @@ protected slots:
 	void doActionSetColorGradient();
 	void doActionInterpolateColors();
 	void doActionChangeColorLevels();
+	void doActionEnhanceRGBWithIntensities();
 
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();

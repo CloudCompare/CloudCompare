@@ -5108,7 +5108,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
 	if (!mesh->reserve(grid.h * grid.w * 2))
 	{
 		ccLog::Warning("[ccPointCloud::triangulateGrid] Not enough memory");
-		return false;
+		return 0;
 	}
 	
 	const int* _indexGrid = &(grid.indexes[0]);

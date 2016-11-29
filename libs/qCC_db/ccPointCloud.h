@@ -340,7 +340,7 @@ public: //associated (scan) grid structure
 	//! Meshes a scan grid
 	/** \warning The mesh vertices will be this cloud instance!
 	**/
-	ccMesh* triangulateGrid(const Grid& grid) const;
+	ccMesh* triangulateGrid(const Grid& grid, double minTriangleAngle_deg = 0.0) const;
 
 public: //normals computation/orientation
 

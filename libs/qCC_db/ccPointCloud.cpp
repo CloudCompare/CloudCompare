@@ -480,7 +480,7 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignore
 	if (!destCloud)
 		result->setDisplay(getDisplay());
 
-	result->append(this,0,ignoreChildren); //there was (virtually) no point before
+	result->append(this, 0, ignoreChildren); //there was (virtually) no point before
 
 	result->showColors(colorsShown());
 	result->showSF(sfShown());
@@ -5098,7 +5098,7 @@ bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx)
 	return true;
 }
 
-ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
+ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_deg/*=0.0*/) const
 {
 	//the code below has been kindly provided by Romain Janvier
 	CCVector3 sensorOrigin = CCVector3::fromArray((grid.sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).u);
@@ -5110,17 +5110,14 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
 		ccLog::Warning("[ccPointCloud::triangulateGrid] Not enough memory");
 		return 0;
 	}
+
+	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CC_DEG_TO_RAD));
+	double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
 	
-	const int* _indexGrid = &(grid.indexes[0]);
-	for (int j = 0; j < static_cast<int>(grid.h); ++j)
+	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{
-		for (int i = 0; i < static_cast<int>(grid.w); ++i, ++_indexGrid)
+		for (int i = 0; i < static_cast<int>(grid.w) - 1; ++i)
 		{
-			if (*_indexGrid < 0)
-			{
-				continue;
-			}
-			
 			const int& v0 = grid.indexes[j * grid.w + i];
 			const int& v1 = grid.indexes[j * grid.w + (i + 1)];
 			const int& v2 = grid.indexes[(j + 1) * grid.w + i];
@@ -5153,14 +5150,14 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
 				{ v1, v2, v3 }
 			};
 
-			int tri[2] = { 0, 0 };
+			int tri[2] = { -1, -1 };
 
 			switch (mask)
 			{
-			case 7: tri[0] = 1; break;
-			case 11: tri[0] = 2; break;
-			case 13: tri[0] = 3; break;
-			case 14: tri[0] = 4; break;
+			case 7 : tri[0] = 0; break;
+			case 11: tri[0] = 1; break;
+			case 13: tri[0] = 2; break;
+			case 14: tri[0] = 3; break;
 			case 15:
 			{
 				/* Choose the triangulation with smaller diagonal. */
@@ -5172,11 +5169,11 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
 				float ddiff2 = std::abs(d1 - d2);
 				if (ddiff1 < ddiff2)
 				{
-					tri[0] = 2; tri[1] = 3;
+					tri[0] = 1; tri[1] = 2;
 				}
 				else
 				{
-					tri[0] = 1; tri[1] = 4;
+					tri[0] = 0; tri[1] = 3;
 				}
 				break;
 			}
@@ -5186,16 +5183,44 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
 			for (int trCount = 0; trCount < 2; ++trCount)
 			{
 				int idx = tri[trCount];
-				if (idx == 0)
+				if (idx < 0)
 				{
 					continue;
 				}
-				else
+				const Tuple3i& t = tris[idx];
+
+				//now check the triangle angles
+				if (minTriangleAngle_deg > 0)
 				{
-					--idx;
+					const CCVector3* A = getPoint(t.u[0]);
+					const CCVector3* B = getPoint(t.u[1]);
+					const CCVector3* C = getPoint(t.u[2]);
+
+					CCVector3 uAB = (*B - *A); uAB.normalize();
+					CCVector3 uBC = (*C - *B); uBC.normalize();
+					CCVector3 uCA = (*A - *C); uCA.normalize();
+
+					PointCoordinateType cosA = -uCA.dot(uAB);
+					if (cosA > minAngleCos)
+					//if (acos(cosA) < minTriangleAngle_rad)
+					{
+						continue;
+					}
+					PointCoordinateType cosB = -uAB.dot(uBC);
+					if (cosB > minAngleCos)
+					//if (acos(cosB) < minTriangleAngle_rad)
+					{
+						continue;
+					}
+					PointCoordinateType cosC = -uBC.dot(uCA);
+					if (cosC > minAngleCos)
+					//if (acos(cosC) < minTriangleAngle_rad)
+					{
+						continue;
+					}
 				}
 
-				mesh->addTriangle(tris[idx].x, tris[idx].y, tris[idx].z);
+				mesh->addTriangle(t.u[0], t.u[1], t.u[2]);
 			}
 		}
 	}
@@ -5208,6 +5233,10 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid) const
 	else
 	{
 		mesh->shrinkToFit();
+		mesh->showColors(colorsShown());
+		mesh->showSF(sfShown());
+		mesh->showNormals(normalsShown());
+		//mesh->setEnabled(isEnabled());
 	}
 
 	return mesh;

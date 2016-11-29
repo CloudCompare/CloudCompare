@@ -225,6 +225,7 @@
      <addaction name="actionComputeMeshAA"/>
      <addaction name="actionComputeMeshLS"/>
      <addaction name="actionMeshTwoPolylines"/>
+     <addaction name="actionMeshScanGrids"/>
      <addaction name="separator"/>
      <addaction name="actionConvertTextureToColor"/>
      <addaction name="actionSamplePoints"/>
@@ -2943,6 +2944,14 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionEnhanceRGBWithIntensities">
    <property name="text">
     <string>Enhance with intensities</string>
+   </property>
+  </action>
+  <action name="actionMeshScanGrids">
+   <property name="text">
+    <string>Mesh scan grids</string>
+   </property>
+   <property name="toolTip">
+    <string>Mesh scan grids (structured point clouds)</string>
    </property>
   </action>
  </widget>

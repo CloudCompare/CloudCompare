@@ -37,6 +37,9 @@ v2.8.beta - XX/XX/2016
 	* New tool: Edit > Mesh > Create surface between two polylines
 		- Creates a surface patch between two polylines
 
+	* New tool: Edit > Mesh > Mesh scan grids
+		- Creates a surface from a cloud with one or several scan grids (one mesh per grid)
+
 	* New tool: Edit > Color > Enhance with intensities
 		- Enhances the RGB colors thanks to the intensity scalar field (RGB-IHS method)
 

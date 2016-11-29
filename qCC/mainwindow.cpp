@@ -610,6 +610,7 @@ void MainWindow::connectActions()
 	//"Edit > Mesh" menu
 	connect(actionComputeMeshAA,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshAA()));
 	connect(actionComputeMeshLS,				SIGNAL(triggered()),	this,		SLOT(doActionComputeMeshLS()));
+	connect(actionMeshScanGrids,				SIGNAL(triggered()),	this,		SLOT(doActionMeshScanGrids()));
 	connect(actionConvertTextureToColor,		SIGNAL(triggered()),	this,		SLOT(doActionConvertTextureToColor()));
 	connect(actionSamplePoints,					SIGNAL(triggered()),	this,		SLOT(doActionSamplePoints()));
 	connect(actionSmoothMeshLaplacian,			SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshLaplacian()));
@@ -4562,6 +4563,54 @@ void MainWindow::doActionRasterize()
 	rasterizeTool.exec();
 }
 
+void MainWindow::doActionMeshScanGrids()
+{
+	//ask the user for the min angle (inside triangles)
+	static double s_meshMinTriangleAngle_deg = 1.0;
+	{
+		bool ok = true;
+		double minAngle_deg = QInputDialog::getDouble(this, "Triangulate", "Min triangle angle (in degrees)", s_meshMinTriangleAngle_deg, 0, 90.0, 3, &ok);
+		if (!ok)
+			return;
+		s_meshMinTriangleAngle_deg = minAngle_deg;
+	}
+
+	//look for clouds with scan grids
+	for (ccHObject* ent : m_selectedEntities)
+	{
+		if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
+		{
+			continue;
+		}
+
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+		assert(cloud);
+
+		for (size_t i = 0; i < cloud->gridCount(); ++i)
+		{
+			ccPointCloud::Grid::Shared grid = cloud->grid(i);
+			if (!grid)
+			{
+				assert(false);
+				continue;
+			}
+
+			ccMesh* gridMesh = cloud->triangulateGrid(*grid, s_meshMinTriangleAngle_deg);
+			if (gridMesh)
+			{
+				cloud->addChild(gridMesh);
+				cloud->setVisible(false); //hide the cloud
+				gridMesh->setDisplay(cloud->getDisplay());
+				addToDB(gridMesh, false, true, false, false);
+				gridMesh->prepareDisplayForRefresh();
+			}
+		}
+	}
+
+	refreshAll();
+	updateUI();
+}
+
 void MainWindow::doActionComputeMeshAA()
 {
 	doActionComputeMesh(DELAUNAY_2D_AXIS_ALIGNED);
@@ -4572,14 +4621,17 @@ void MainWindow::doActionComputeMeshLS()
 	doActionComputeMesh(DELAUNAY_2D_BEST_LS_PLANE);
 }
 
-static double s_meshMaxEdgeLength = 0;
 void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 {
-	bool ok = true;
-	double maxEdgeLength = QInputDialog::getDouble(this, "Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
-	if (!ok)
-		return;
-	s_meshMaxEdgeLength = maxEdgeLength;
+	//ask the user for the max edge length
+	static double s_meshMaxEdgeLength = 0;
+	{
+		bool ok = true;
+		double maxEdgeLength = QInputDialog::getDouble(this, "Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
+		if (!ok)
+			return;
+		s_meshMaxEdgeLength = maxEdgeLength;
+	}
 
 	//select candidates
 	ccHObject::Container clouds;
@@ -4627,7 +4679,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 		ccMesh* mesh = ccMesh::Triangulate(	cloud,
 											type,
 											updateNormals,
-											static_cast<PointCoordinateType>(maxEdgeLength),
+											static_cast<PointCoordinateType>(s_meshMaxEdgeLength),
 											2 //XY plane by default
 											);
 		if (mesh)
@@ -8851,7 +8903,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 		PointCoordinateType diag = bBox.getDiagNorm();
 
 		CCVector3d P = CCVector3d::fromArray(center.u);
-		CCVector3d Pshift(0,0,0);
+		CCVector3d Pshift(0, 0, 0);
 		double scale = 1.0;
 		//here we must test that coordinates are not too big whatever the case because OpenGL
 		//really doesn't like big ones (even if we work with GLdoubles :( ).
@@ -9730,6 +9782,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
 	actionComputeMeshAA->setEnabled(atLeastOneCloud);
 	actionComputeMeshLS->setEnabled(atLeastOneCloud);
+	actionMeshScanGrids->setEnabled(atLeastOneCloud);
 	//actionComputeQuadric3D->setEnabled(atLeastOneCloud);
 	actionComputeBestFitBB->setEnabled(atLeastOneEntity);
 	actionComputeDensity->setEnabled(atLeastOneCloud);

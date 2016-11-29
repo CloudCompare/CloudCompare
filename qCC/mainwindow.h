@@ -370,6 +370,7 @@ protected slots:
 	void doActionResampleWithOctree();
 	void doActionComputeMeshAA();
 	void doActionComputeMeshLS();
+	void doActionMeshScanGrids();
 	void doActionComputeDistanceMap();
 	void doActionComputeDistToBestFitQuadric3D();
 	void doActionMeasureMeshSurface();
@@ -433,9 +434,9 @@ protected slots:
 	void activateSegmentationMode();
 	void deactivateSegmentationMode(bool);
 
-    //Polyline tracing
-    void activateTracePolylineMode();
-    void deactivateTracePolylineMode(bool);
+	//Polyline tracing
+	void activateTracePolylineMode();
+	void deactivateTracePolylineMode(bool);
 
 	//Section extraction
 	void activateSectionExtractionMode();

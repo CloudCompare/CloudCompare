@@ -250,9 +250,10 @@ void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 
 	if (autoExpand)
 	{
-		QModelIndex childIndex = index(object);
-		if (childIndex.isValid())
-			m_dbTreeWidget->expand(childIndex);
+		//expand the parent (just in case)
+		m_dbTreeWidget->expand(index(parentObject));
+		//and the child
+		m_dbTreeWidget->expand(index(object));
 	}
 	else //if (parentObject)
 	{

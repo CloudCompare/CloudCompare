@@ -57,7 +57,6 @@ Various:
 [*] Drop the old (deprecated) OpenGL based picking for entities and lablels (http://www.danielgm.net/cc/forum/viewtopic.php?t=2009)
 [*] Add support for Gocad pointset files (= ASCII file with a specific header and decoration)
 [*] LAS files: export non standard (scalar) fields as extended fields
-[*] Mesh structured scans thanks to the grid information (http://www.cloudcompare.org/forum/viewtopic.php?t=1233)
 [*] Read PTS files as multiple clouds (http://www.cloudcompare.org/forum/viewtopic.php?t=2004)
 [*] Generate side-by-side OpenGL views for Sony or Epson AR glasses (http://www.cloudcompare.org/forum/viewtopic.php?t=2011)
 [*] Add GeoJSON format support for vector data... and a lot of other ideas (http://www.danielgm.net/cc/forum/viewtopic.php?t=1845)

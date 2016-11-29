@@ -511,9 +511,9 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	const CCVector3* P3 = info.cloud3->getPointPersistentPtr(info.point3Index);
 
 	//area
-	CCVector3 P1P2 = *P2-*P1;
-	CCVector3 P1P3 = *P3-*P1;
-	CCVector3 P2P3 = *P3-*P2;
+	CCVector3 P1P2 = *P2 - *P1;
+	CCVector3 P1P3 = *P3 - *P1;
+	CCVector3 P2P3 = *P3 - *P2;
 	CCVector3 N = P1P2.cross(P1P3); //N = ABxAC
 	info.area = N.norm()/2;
 
@@ -527,9 +527,9 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.edges.u[2] = P1P3.norm2d();  //edge 3-1
 
 	//angle
-	info.angles.u[0] = GetAngle_deg(P1P2,P1P3);   //angleAtP1
-	info.angles.u[1] = GetAngle_deg(P2P3,-P1P2);  //angleAtP2
-	info.angles.u[2] = GetAngle_deg(-P1P3,-P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
+	info.angles.u[0] = GetAngle_deg( P1P2,  P1P3);   //angleAtP1
+	info.angles.u[1] = GetAngle_deg( P2P3, -P1P2);  //angleAtP2
+	info.angles.u[2] = GetAngle_deg(-P1P3, -P2P3); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
 QStringList cc2DLabel::getLabelContent(int precision)

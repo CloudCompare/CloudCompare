@@ -1323,10 +1323,10 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	//apply transformation
 	if (!m_clouds.empty())
 	{
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (const CloudDesc& desc : m_clouds)
 		{
-			m_clouds[i].pc->applyGLTransformation_recursive(&mat);
-			m_clouds[i].pc->setName(m_clouds[i].pc->getName()+".transformed");
+			desc.pc->applyGLTransformation_recursive(&mat);
+			desc.pc->setName(desc.pc->getName() + ".transformed");
 		}
 		//save output
 		if (s_autoSaveMode && !saveClouds("TRANSFORMED"))
@@ -1334,10 +1334,10 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	}
 	if (!m_meshes.empty())
 	{
-		for (size_t i=0; i<m_meshes.size(); ++i)
+		for (const MeshDesc& desc : m_meshes)
 		{
-			m_meshes[i].mesh->applyGLTransformation_recursive(&mat);
-			m_meshes[i].mesh->setName(m_meshes[i].mesh->getName()+".transformed");
+			desc.mesh->applyGLTransformation_recursive(&mat);
+			desc.mesh->setName(desc.mesh->getName() + ".transformed");
 		}
 		//save output
 		if (s_autoSaveMode && !saveMeshes("TRANSFORMED"))

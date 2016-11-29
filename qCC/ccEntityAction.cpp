@@ -438,6 +438,21 @@ namespace ccEntityAction
 	{
 		QString defaultSFName("Intensity");
 
+		bool useCustomIntensityRange = false;
+		static double s_minI = 0.0, s_maxI = 1.0;
+		if (QMessageBox::question(parent, "Intensity range", "Do you want to define the theoretical intensity range (yes)\nor use the actual one (no)?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+		{
+			ccAskTwoDoubleValuesDlg atdvDlg("Min", "Max", -1000000.0, 1000000.0, s_minI, s_maxI, 3, "Theroetical intensity", parent);
+			if (!atdvDlg.exec())
+			{
+				//process cancelled by the user
+				return false;
+			}
+			s_minI = atdvDlg.doubleSpinBox1->value();
+			s_maxI = atdvDlg.doubleSpinBox2->value();
+			useCustomIntensityRange = true;
+		}
+
 		for (ccHObject* ent : selectedEntities)
 		{
 			bool lockedVertices = false;
@@ -500,7 +515,7 @@ namespace ccEntityAction
 			}
 			assert(sfIdx >= 0);
 
-			if (pc->enhanceRGBWithIntensitySF(sfIdx))
+			if (pc->enhanceRGBWithIntensitySF(sfIdx, useCustomIntensityRange, s_minI, s_maxI))
 			{
 				ent->prepareDisplayForRefresh();
 				ent->showColors(true);

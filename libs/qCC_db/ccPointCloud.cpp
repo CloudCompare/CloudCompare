@@ -5045,7 +5045,7 @@ void ccPointCloud::clearFWFData()
 	m_fwfDescriptors.clear();
 }
 
-bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx)
+bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange/*=false*/, double minI/*=0.0*/, double maxI/*=1.0*/)
 {
 	CCLib::ScalarField* sf = getScalarField(sfIdx);
 	if (!sf || !hasColors())
@@ -5056,40 +5056,37 @@ bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx)
 	}
 
 	//apply Broovey transform to each point (color)
-	ScalarType intMin = sf->getMin();
-	ScalarType intMax = sf->getMax();
+	if (!useCustomIntensityRange)
+	{
+		minI = sf->getMin();
+		maxI = sf->getMax();
+	}
 
-	ScalarType intRange = intMax - intMin;
-	if (intRange < 1.0e-6f)
+	double intRange = maxI - minI;
+	if (intRange < 1.0e-6)
 	{
 		ccLog::Warning("[ccPointCloud::enhanceRGBWithIntensitySF] Intensity range is too small");
 		return false;
 	}
-	ScalarType intScale = 255.0f / intRange;
 
 	for (unsigned i = 0; i < size(); ++i)
 	{
 		ColorCompType* col = m_rgbColors->getValue(i);
 
-		//R,G,B = (R,G,B) / composite
-		ScalarType composite = ((static_cast<ScalarType>(col[0]) + col[1]) + col[2]) / 3;
-		if (composite == 0)
+		//current intensity (x3)
+		int I = static_cast<int>(col[0]) + static_cast<int>(col[1]) + static_cast<int>(col[2]);
+		if (I == 0)
 		{
 			continue; //black remains black!
 		}
-		ScalarType R = col[0] / composite;
-		ScalarType G = col[1] / composite;
-		ScalarType B = col[2] / composite;
-	
-		//R,G,B = (R,G,B) * intensitiy255
-		ScalarType intensity255 = (sf->getValue(i) - intMin) * intScale;
-		R *= intensity255;
-		G *= intensity255;
-		B *= intensity255;
+		//new intensity
+		double newI = 255 * ((sf->getValue(i) - minI) / intRange); //in [0 ; 1]
+		//scale factor
+		double scale = (3 * newI) / I;
 
-		col[0] = static_cast<ColorCompType>(std::max<ScalarType>(std::min<ScalarType>(R, 255), 0));
-		col[1] = static_cast<ColorCompType>(std::max<ScalarType>(std::min<ScalarType>(G, 255), 0));
-		col[2] = static_cast<ColorCompType>(std::max<ScalarType>(std::min<ScalarType>(B, 255), 0));
+		col[0] = static_cast<ColorCompType>(std::max<ScalarType>(std::min<ScalarType>(scale * col[0], 255), 0));
+		col[1] = static_cast<ColorCompType>(std::max<ScalarType>(std::min<ScalarType>(scale * col[1], 255), 0));
+		col[2] = static_cast<ColorCompType>(std::max<ScalarType>(std::min<ScalarType>(scale * col[2], 255), 0));
 	}
 
 	//We must update the VBOs

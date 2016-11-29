@@ -656,7 +656,7 @@ public: //other methods
 	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);
 
 	//! Enhances the RGB colors with the current scalar field (assuming it's intensities)
-	bool enhanceRGBWithIntensitySF(int sfIdx);
+	bool enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange = false, double minI = 0.0, double maxI = 1.0);
 
 protected:
 

@@ -1355,23 +1355,18 @@ bool ccCommandLineParser::commandDropGlobalShift(QStringList& arguments)
 		return Error(QString("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
 
 	//process clouds
-	if (!m_clouds.empty())
+	for (const CloudDesc& desc : m_clouds)
 	{
-		for (size_t i=0; i<m_clouds.size(); ++i)
-		{
-			m_clouds[i].pc->setGlobalShift(0, 0, 0);
-		}
+		desc.pc->setGlobalShift(0, 0, 0);
 	}
-	if (!m_meshes.empty())
+
+	for (const MeshDesc& desc : m_meshes)
 	{
-		for (size_t i=0; i<m_meshes.size(); ++i)
+		bool isLocked = false;
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
+		if (shifted && !isLocked)
 		{
-			bool isLocked = false;
-			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(m_meshes[i].mesh, &isLocked);
-			if (shifted && !isLocked)
-			{
-				shifted->setGlobalShift(0, 0, 0);
-			}
+			shifted->setGlobalShift(0, 0, 0);
 		}
 	}
 

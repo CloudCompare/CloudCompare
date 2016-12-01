@@ -381,6 +381,7 @@ void qM3C2Plugin::doAction()
 		||	!m_selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select two point clouds!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
 	}
 
 	ccPointCloud* cloud1 = ccHObjectCaster::ToPointCloud(m_selectedEntities[0]);

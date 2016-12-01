@@ -401,6 +401,9 @@ void MainWindow::dispatchPlugins(const tPluginInfoList& plugins, const QStringLi
 
 			//add to std. plugins list
 			m_stdPlugins.push_back(stdPlugin);
+
+			//last but not least: update the current plugin state
+			stdPlugin->onNewSelection(m_selectedEntities);
 		}
 		break;
 

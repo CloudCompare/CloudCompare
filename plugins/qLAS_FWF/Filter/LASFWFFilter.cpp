@@ -354,10 +354,10 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 				LASField& returnNumber = loadedFields[LAS_RETURN_NUMBER];
 				if (!returnNumber.ignore)
 				{
-					if (!returnNumber.data && point.return_number != 0)
+					if (!returnNumber.data && point.return_number > 1)
 					{
 						//prepare the field if necessary (the first time we encounter a value <> 0)
-						if (!PrepareLASField(returnNumber.data, LAS_RETURN_NUMBER, pointCount, cloud->size(), 0))
+						if (!PrepareLASField(returnNumber.data, LAS_RETURN_NUMBER, pointCount, cloud->size(), 1))
 						{
 							returnNumber.ignore = true;
 						}

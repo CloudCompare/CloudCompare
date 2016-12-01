@@ -392,6 +392,9 @@ public: //waveform (e.g. from airborne scanners)
 	//! Resizes the FWF table
 	bool resizeTheFWFTable();
 
+	//! Computes the maximum amplitude of all associated waveforms
+	bool computeFWFAmplitude(double& minVal, double& maxVal) const;
+
 	//! Clears all associated FWF data
 	void clearFWFData();
 

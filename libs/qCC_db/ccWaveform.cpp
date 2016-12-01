@@ -244,8 +244,8 @@ double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescri
 
 CCVector3 ccWaveform::getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const
 {
-	float dist = m_echoTime_ps - i * descriptor.samplingRate_ps;
-	return P0 + CCVector3::fromArray(m_beamDir.u) * dist;
+	float delta_ps = m_echoTime_ps - i * descriptor.samplingRate_ps;
+	return P0 + CCVector3::fromArray(m_beamDir.u) * delta_ps;
 }
 
 void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)

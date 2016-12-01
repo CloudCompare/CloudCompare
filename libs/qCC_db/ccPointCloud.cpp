@@ -5045,6 +5045,55 @@ void ccPointCloud::clearFWFData()
 	m_fwfDescriptors.clear();
 }
 
+bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal) const
+{
+	minVal = maxVal = 0;
+	
+	if (size() != m_fwfData.size())
+	{
+		return false;
+	}
+
+	//for all waveforms
+	bool firstTest = true;
+	for (const ccWaveform& w : m_fwfData)
+	{
+		uint8_t descriptorID = w.descriptorID();
+		if (descriptorID == 0 || !m_fwfDescriptors.contains(descriptorID))
+		{
+			//no valid descriptor
+			continue;
+		}
+
+		const WaveformDescriptor& d = m_fwfDescriptors[descriptorID];
+		if (d.numberOfSamples != 0)
+		{
+			double wMinVal, wMaxVal;
+			w.getRange(wMinVal, wMaxVal, d);
+
+			if (firstTest)
+			{
+				minVal = wMinVal;
+				maxVal = wMaxVal;
+				firstTest = false;
+			}
+			else
+			{
+				if (wMaxVal > maxVal)
+				{
+					maxVal = wMaxVal;
+				}
+				if (wMinVal < minVal)
+				{
+					minVal = wMinVal;
+				}
+			}
+		}
+	}
+
+	return !firstTest;
+}
+
 bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange/*=false*/, double minI/*=0.0*/, double maxI/*=1.0*/)
 {
 	CCLib::ScalarField* sf = getScalarField(sfIdx);

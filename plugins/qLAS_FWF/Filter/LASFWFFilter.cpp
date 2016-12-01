@@ -23,6 +23,10 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 #include <ccWaveform.h>
+#include <ccColorScalesManager.h>
+
+//qCC_io
+#include <LASFields.h>
 
 //Qt
 #include <QCoreApplication>
@@ -54,6 +58,41 @@ bool LASFWFFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) 
 //{
 //	return CC_FERR_NO_ERROR;
 //}
+
+bool PrepareLASField(ccScalarField*& field, LAS_FIELDS type, unsigned totalCount, unsigned currentCount, ScalarType defaultValue = 0)
+{
+	if (field)
+	{
+		assert(false);
+		return true;
+	}
+
+	//try to reserve the memory to store the field values
+	field = new ccScalarField(LAS_FIELD_NAMES[type]);
+	if (!field->reserve(totalCount))
+	{
+		ccLog::Warning(QString("[LAS] Not enough memory to load a field: '%1'").arg(LAS_FIELD_NAMES[type]));
+		field->release();
+		field = 0;
+		return false;
+	}
+
+	//fill the previous points values (if any)
+	for (unsigned i = 0; i < currentCount; ++i)
+	{
+		//set the previous values!
+		field->addElement(defaultValue);
+	}
+
+	return true;
+}
+
+struct LASField
+{
+	LASField() : data(0), ignore(false) {}
+	ccScalarField* data;
+	bool ignore;
+};
 
 CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
@@ -107,9 +146,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 		bool hasColorsAboveZero = false;
 		int colorBitDec = 0;
 
-		bool ignoreIntensities = false;
-		ccScalarField* intensities = 0;
-		bool hasIntensitiesAboveZero = false;
+		QMap<LAS_FIELDS, LASField> loadedFields;
 
 		bool hasFWF = (lasreader->header.vlr_wave_packet_descr != 0);
 		//QFile fwfFile;
@@ -202,6 +239,8 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 					ccWaveform& w = cloud->fwfData()[pointIndex];
 					w.setDescriptorID(packetIndex);
 					w.setData(fwfReader->samples, byteCount);
+					w.setBeamDir(CCVector3f::fromArray(fwfReader->XYZt));
+					w.setEchoTime_ps(fwfReader->location);
 				}
 			}
 
@@ -215,7 +254,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 				{
 					useLasShift = true;
 					Pshift = lasShift;
-					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG
+					if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
 						&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
 					{
 						parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
@@ -234,73 +273,99 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 			//color
 			if (!ignoreColors)
 			{
-				U16 mergedColorComp = point.rgb[0] | point.rgb[1] | point.rgb[2];
-				hasColorsAboveZero |= (mergedColorComp != 0);
-				if (hasColorsAboveZero)
+				if (!hasColors)
 				{
-					if (!hasColors)
+					U16 mergedColorComp = point.rgb[0] | point.rgb[1] | point.rgb[2];
+					if (mergedColorComp != 0)
 					{
 						hasColors = cloud->reserveTheRGBTable();
 						if (!hasColors)
 						{
 							//not enough memory!
+							ccLog::Warning("[LAS] Not enough memory to load RGB colors!");
 							ignoreColors = true;
 						}
+						else
+						{
+							for (unsigned i = 0; i < cloud->size(); ++i)
+							{
+								//set all previous colors!
+								cloud->addRGBColor(ccColor::black.rgba);
+							}
+						}
 					}
-
-					if (!ignoreColors)
+				}
+					
+				if (hasColors)
+				{
+					if (colorBitDec == 0)
 					{
-						if (colorBitDec == 0 && mergedColorComp > 255)
+						U16 mergedColorComp = point.rgb[0] | point.rgb[1] | point.rgb[2];
+						if (mergedColorComp > 255)
 						{
 							//by default we assume the colors are coded on 8 bits...
 							//...while they are theoretically coded on 16 bits (but some
 							//software wrongly export LAS files with colors on 8 bits).
 							//As soon as we detect a value higher than 255, we shift to 16 bits mode!
 							colorBitDec = 8;
-							for (size_t i = 0; i < cloud->size(); ++i)
+							for (unsigned i = 0; i < cloud->size(); ++i)
 							{
 								//reset all previous colors!
-								cloud->addRGBColor(ccColor::black.rgba);
+								cloud->setPointColor(i, ccColor::black.rgba);
 							}
 						}
-
-						ccColor::Rgb color(	static_cast<unsigned char>((point.rgb[0] >> colorBitDec) & 255),
-											static_cast<unsigned char>((point.rgb[1] >> colorBitDec) & 255),
-											static_cast<unsigned char>((point.rgb[2] >> colorBitDec) & 255));
-
-						cloud->addRGBColor(color.rgb);
 					}
+
+					ccColor::Rgb color(	static_cast<unsigned char>((point.rgb[0] >> colorBitDec) & 255),
+										static_cast<unsigned char>((point.rgb[1] >> colorBitDec) & 255),
+										static_cast<unsigned char>((point.rgb[2] >> colorBitDec) & 255));
+
+					cloud->addRGBColor(color.rgb);
 				}
 			}
 
 			//intensity
-			if (!ignoreIntensities)
 			{
-				hasIntensitiesAboveZero |= (point.intensity != 0);
-				if (hasIntensitiesAboveZero)
+				LASField& intensity = loadedFields[LAS_INTENSITY];
+				if (!intensity.ignore)
 				{
-					if (!intensities)
+					if (!intensity.data && point.intensity != 0)
 					{
-						intensities = new ccScalarField("Intensity");
-						if (!intensities->reserve(pointCount))
+						//prepare the field if necessary (the first time we encounter a value <> 0)
+						if (!PrepareLASField(intensity.data, LAS_INTENSITY, pointCount, cloud->size(), 0))
 						{
-							intensities->release();
-							intensities = 0;
-							ignoreIntensities = true;
+							intensity.ignore = true;
 						}
 						else
 						{
-							for (size_t i = 0; i < cloud->size(); ++i)
-							{
-								//set the previous values!
-								intensities->addElement(0);
-							}
+							//set default grey color scale
+							intensity.data->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
 						}
 					}
 
-					if (intensities)
+					if (intensity.data)
 					{
-						intensities->addElement(static_cast<ScalarType>(point.intensity));
+						intensity.data->addElement(static_cast<ScalarType>(point.intensity));
+					}
+				}
+			}
+			//return number
+			{
+				LASField& returnNumber = loadedFields[LAS_RETURN_NUMBER];
+				if (!returnNumber.ignore)
+				{
+					if (!returnNumber.data && point.return_number != 0)
+					{
+						//prepare the field if necessary (the first time we encounter a value <> 0)
+						if (!PrepareLASField(returnNumber.data, LAS_RETURN_NUMBER, pointCount, cloud->size(), 0))
+						{
+							returnNumber.ignore = true;
+						}
+					}
+
+					if (returnNumber.data)
+					{
+						returnNumber.data->addElement(static_cast<ScalarType>(point.return_number));
 					}
 				}
 			}
@@ -327,42 +392,42 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 		if (cloud->size() == 0)
 		{
 			ccLog::Warning("LASLib", QObject::tr("No valid point in file"));
+
+			//release scalar fields (if any)
+			for (LASField& field : loadedFields)
+			{
+				if (field.data)
+				{
+					field.data->release();
+				}
+			}
+
+			//release the cloud
 			delete cloud;
 			cloud = 0;
-			if (intensities)
-			{
-				intensities->release();
-			}
 		}
 		else
 		{
-			if (intensities)
+			//associate the cloud with the various fields
+			for (LASField& field : loadedFields)
 			{
-				if (hasIntensitiesAboveZero)
+				if (field.data)
 				{
-					intensities->computeMinAndMax();
-					int sfIdx = cloud->addScalarField(intensities);
-					cloud->setCurrentDisplayedScalarField(sfIdx);
+					field.data->computeMinAndMax();
+					int sfIdx = cloud->addScalarField(field.data);
+					if (sfIdx == 0)
+					{
+						//enable the first one by default
+						cloud->setCurrentDisplayedScalarField(sfIdx);
+					}
 					cloud->showSF(true);
-				}
-				else
-				{
-					intensities->release();
-					intensities = 0;
+					field.data = 0; //just in case
 				}
 			}
 
 			if (hasColors)
 			{
-				if (hasColorsAboveZero)
-				{
-					cloud->showColors(true);
-				}
-				else
-				{
-					cloud->unallocateColors();
-					hasColors = false;
-				}
+				cloud->showColors(true);
 			}
 
 			container.addChild(cloud);

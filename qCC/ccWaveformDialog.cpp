@@ -367,34 +367,14 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 		m_gui->pointIndexSpinBox->setSuffix(QString(" / %1").arg(cloud->size() - 1));
 
 		//init m_waveMax
-		if (cloud->size() == cloud->fwfData().size())
+		double waveMin = 0;
+		if (cloud->computeFWFAmplitude(waveMin, m_waveMax))
 		{
-			for (const ccWaveform& w : cloud->fwfData())
-			{
-				uint8_t descriptorID = w.descriptorID();
-				if (descriptorID == 0 || !cloud->fwfDescriptors().contains(descriptorID))
-				{
-					//no valid descriptor
-					continue;
-				}
-
-				const WaveformDescriptor& d = cloud->fwfDescriptors()[descriptorID];
-				if (d.numberOfSamples != 0)
-				{
-					double minVal, maxVal;
-					w.getRange(minVal, maxVal, d);
-
-					if (maxVal > m_waveMax)
-					{
-						m_waveMax = maxVal;
-					}
-				}
-			}
 			ccLog::Print(QString("[ccWaveDialog] Cloud '%1': max FWF amplitude = %2").arg(cloud->getName()).arg(m_waveMax));
 		}
 		else
 		{
-			ccLog::Warning("[ccWaveDialog] Input cloud has no FWF data");
+			ccLog::Warning("[ccWaveDialog] Input cloud has no valid FWF data");
 		}
 	}
 

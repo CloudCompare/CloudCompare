@@ -160,8 +160,6 @@ int main(int argc, char **argv)
 	}
 #endif
 
-	QDir::setCurrent( workingDir.absolutePath() );
-
 	//store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);
 	
@@ -379,6 +377,9 @@ int main(int argc, char **argv)
 			delete splash;
 			splash = 0;
 		}
+
+		//change the default path to the application one (do this AFTER processing the command line)
+		QDir::setCurrent(workingDir.absolutePath());
 
 		//let's rock!
 		try

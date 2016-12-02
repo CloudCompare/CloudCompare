@@ -50,6 +50,7 @@
 //Qt
 #include <QElapsedTimer>
 #include <QSharedPointer>
+#include <QCoreApplication>
 
 //system
 #include <assert.h>
@@ -4594,7 +4595,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 	//neighborhood 'half-width' (total width = 1 + 2*kernelWidth) 
 	//max number of neighbours: (1+2*nw)^2
 	CCLib::ReferenceCloud knn(this);
-	if (!knn.reserve((1+2*kernelWidth)*(1+2*kernelWidth)))
+	if (!knn.reserve((1 + 2 * kernelWidth)*(1 + 2 * kernelWidth)))
 	{
 		ccLog::Warning("[computeNormalsWithGrids] Not enough memory");
 		return false;
@@ -4604,7 +4605,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 	std::vector<double> distances;
 	try
 	{
-		distances.resize((2*kernelWidth+1)*(2*kernelWidth+1));
+		distances.resize((2 * kernelWidth + 1)*(2 * kernelWidth + 1));
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -4631,8 +4632,9 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 	{
 		pDlg->setWindowTitle(QObject::tr("Normals computation"));
 		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
-		pDlg->setRange(0,static_cast<int>(pointCount));
+		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
+		QCoreApplication::processEvents();
 	}
 
 	//for each grid cell
@@ -4661,9 +4663,9 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 #endif
 
 		const int* _indexGrid = &(scanGrid->indexes[0]);
-		for (int j=0; j<static_cast<int>(scanGrid->h); ++j)
+		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
 		{
-			for (int i=0; i<static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
+			for (int i = 0; i < static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
 			{
 				if (*_indexGrid >= 0)
 				{
@@ -4676,11 +4678,11 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 					knn.addPointIndex(pointIndex); //the central point itself
 
 					//look for neighbors
-					int vmin = std::max(0,j-kernelWidth);
-					int vmax = std::min<int>(scanGrid->h-1,j+kernelWidth);
+					int vmin = std::max(0, j - kernelWidth);
+					int vmax = std::min<int>(scanGrid->h - 1, j + kernelWidth);
 
-					int umin = std::max(0,i-kernelWidth);
-					int umax = std::min<int>(scanGrid->w-1,i+kernelWidth);
+					int umin = std::max(0, i - kernelWidth);
+					int umax = std::min<int>(scanGrid->w - 1, i + kernelWidth);
 
 #ifdef TEST_LOCAL
 					++validIndex;
@@ -4694,9 +4696,9 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 					double sumDist = 0;
 					double sumDist2 = 0;
 					unsigned neighborIndex = 1;
-					for (int v=vmin; v<=vmax; ++v)
+					for (int v = vmin; v <= vmax; ++v)
 					{
-						for (int u=umin; u<=umax; ++u)
+						for (int u = umin; u <= umax; ++u)
 						{
 							int indexN = scanGrid->indexes[v*scanGrid->w + u];
 							if (indexN >= 0 && (u != i || v != j))
@@ -4729,7 +4731,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 						//update knn
 						{
 							unsigned newIndex = 1;
-							for (unsigned k=1; k<=neighborCount; ++k)
+							for (unsigned k = 1; k <= neighborCount; ++k)
 							{
 								if (distances[k] <= maxDist)
 								{
@@ -4738,7 +4740,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 									++newIndex;
 								}
 							}
-							if (newIndex+1 < knn.size())
+							if (newIndex + 1 < knn.size())
 							{
 								int toto = 1;
 							}
@@ -4748,7 +4750,7 @@ bool ccPointCloud::computeNormalsWithGrids(	CC_LOCAL_MODEL_TYPES localModel,
 
 					if (knn.size() >= 3)
 					{
-						CCVector3 N(0,0,0);
+						CCVector3 N(0, 0, 0);
 						bool normalIsValid = false;
 
 						switch (localModel)
@@ -4837,8 +4839,9 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 	{
 		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
 		pDlg->setLabelText(QObject::tr("Points: ") + QString::number(pointCount));
-		pDlg->setRange(0,static_cast<int>(pointCount));
+		pDlg->setRange(0, static_cast<int>(pointCount));
 		pDlg->show();
+		QCoreApplication::processEvents();
 	}
 
 	//for each grid cell
@@ -5045,7 +5048,7 @@ void ccPointCloud::clearFWFData()
 	m_fwfDescriptors.clear();
 }
 
-bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal) const
+bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg/*=0*/) const
 {
 	minVal = maxVal = 0;
 	
@@ -5054,10 +5057,25 @@ bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal) const
 		return false;
 	}
 
+	//progress dialog
+	CCLib::NormalizedProgress nProgress(pDlg, static_cast<unsigned>(m_fwfData.size()));
+	if (pDlg)
+	{
+		pDlg->setWindowTitle(QObject::tr("FWF amplitude"));
+		pDlg->setLabelText(QObject::tr("Determining min and max FWF values\nPoints: ") + QString::number(m_fwfData.size()));
+		pDlg->show();
+		QCoreApplication::processEvents();
+	}
+
 	//for all waveforms
 	bool firstTest = true;
 	for (const ccWaveform& w : m_fwfData)
 	{
+		if (pDlg && !nProgress.oneStep())
+		{
+			return false;
+		}
+		
 		uint8_t descriptorID = w.descriptorID();
 		if (descriptorID == 0 || !m_fwfDescriptors.contains(descriptorID))
 		{

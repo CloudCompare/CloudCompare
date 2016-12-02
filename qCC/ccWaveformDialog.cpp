@@ -26,6 +26,7 @@
 
 //qCC_db
 #include <ccPointCloud.h>
+#include <ccProgressDialog.h>
 
 //Qt
 #include <QCloseEvent>
@@ -368,7 +369,8 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 
 		//init m_waveMax
 		double waveMin = 0;
-		if (cloud->computeFWFAmplitude(waveMin, m_waveMax))
+		ccProgressDialog pDlg(parent);
+		if (cloud->computeFWFAmplitude(waveMin, m_waveMax, &pDlg))
 		{
 			ccLog::Print(QString("[ccWaveDialog] Cloud '%1': max FWF amplitude = %2").arg(cloud->getName()).arg(m_waveMax));
 		}

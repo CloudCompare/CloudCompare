@@ -6,4 +6,12 @@
     <file>qBroom.png</file>
     <file>warning.png</file>
   </qresource>
+  <qresource prefix="icons">
+    <file>icons/ccViewXneg.png</file>
+    <file>icons/ccViewXpos.png</file>
+    <file>icons/ccViewYneg.png</file>
+    <file>icons/ccViewYpos.png</file>
+    <file>icons/ccViewZneg.png</file>
+    <file>icons/ccViewZpos.png</file>
+  </qresource>
 </RCC>

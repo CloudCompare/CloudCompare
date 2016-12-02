@@ -5632,11 +5632,9 @@ ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
 
-	bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
-
 	QWidget* viewWidget = nullptr;
 	ccGLWindow* view3D = nullptr;
-	CreateGLWindow(view3D, viewWidget, stereoMode, false);
+	createGLWindow(view3D, viewWidget);
 	assert(viewWidget && view3D);
 
 	viewWidget->setMinimumSize(400, 300);
@@ -10163,6 +10161,23 @@ ccHObject* MainWindow::dbRootObject()
 ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()
 {
 	return ccObject::GetUniqueIDGenerator();
+}
+
+void MainWindow::createGLWindow(ccGLWindow*& window, QWidget*& widget) const
+{
+	bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
+
+	CreateGLWindow(window, widget, stereoMode);
+	assert(window && widget);
+}
+
+void MainWindow::destroyGLWindow(ccGLWindow* view3D) const
+{
+	if (view3D)
+	{
+		view3D->setParent(0);
+		delete view3D;
+	}
 }
 
 MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj)

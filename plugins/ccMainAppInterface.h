@@ -25,6 +25,7 @@
 #include <ccHObject.h>
 
 class QMainWindow;
+class QWidget;
 class ccGLWindow;
 class ccColorScalesManager;
 class ccOverlayDialog;
@@ -40,6 +41,15 @@ public:
 
 	//! Returns active GL sub-window (if any)
 	virtual ccGLWindow* getActiveGLWindow() = 0;
+
+	//! Creates a new instance of GL window (with its encapsulating widget)
+	/** \warning This instance must be destroyed by the application as well (see destroyGLWindow)
+		Note that the encapsulating widget is the window instance itself if 'stereo' mode is disabled
+	**/
+	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const = 0;
+
+	//! Destroys an instance of GL window created by createGLWindow
+	virtual void destroyGLWindow(ccGLWindow*) const = 0;
 
 	//! Registers a MDI area 'overlay' dialog
 	/** Overlay dialogs are displayed in the central MDI area, above the 3D views.

@@ -151,6 +151,9 @@ struct ccGLDrawContext
 	//! Stereo pass index
 	unsigned stereoPassIndex;
 
+	//! Whether to draw rounded points (instead of sqaures)
+	bool drawRoundedPoints;
+
 	//Default constructor
 	ccGLDrawContext()
 		: drawingFlags(0)
@@ -185,6 +188,7 @@ struct ccGLDrawContext
 		, sourceBlend(GL_SRC_ALPHA)
 		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
 		, stereoPassIndex(0)
+		, drawRoundedPoints(false)
 	{}
    
 	template<class TYPE>

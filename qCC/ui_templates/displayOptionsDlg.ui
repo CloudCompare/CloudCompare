@@ -27,15 +27,15 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>471</width>
-        <height>278</height>
+        <width>475</width>
+        <height>304</height>
        </rect>
       </property>
       <attribute name="label">
@@ -54,16 +54,7 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
@@ -374,8 +365,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>433</width>
-        <height>107</height>
+        <width>475</width>
+        <height>304</height>
        </rect>
       </property>
       <attribute name="label">
@@ -459,8 +450,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>336</width>
-        <height>111</height>
+        <width>475</width>
+        <height>304</height>
        </rect>
       </property>
       <attribute name="label">
@@ -476,16 +467,7 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="0" column="0">
@@ -602,8 +584,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>431</width>
-        <height>262</height>
+        <width>475</width>
+        <height>304</height>
        </rect>
       </property>
       <attribute name="label">
@@ -853,6 +835,13 @@
           </spacer>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="drawRoundedPointsCheckBox">
+         <property name="text">
+          <string>Draw rounded points (slower)</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="useVBOCheckBox">

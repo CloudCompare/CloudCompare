@@ -79,6 +79,7 @@ void ccGui::ParamStruct::reset()
 
 	lightDoubleSided			= true;
 	drawBackgroundGradient		= true;
+	drawRoundedPoints			= false;
 	decimateMeshOnMove			= true;
 	minLoDMeshSize				= 2500000;
 	decimateCloudOnMove			= true;
@@ -125,6 +126,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 
 	lightDoubleSided			=                                      settings.value("lightDoubleSided",        true ).toBool();
 	drawBackgroundGradient		=                                      settings.value("backgroundGradient",      true ).toBool();
+	drawRoundedPoints			=                                      settings.value("drawRoundedPoints",       false).toBool();
 	decimateMeshOnMove			=                                      settings.value("meshDecimation",          true ).toBool();
 	minLoDMeshSize				=                                      settings.value("minLoDMeshSize",       2500000 ).toUInt();
 	decimateCloudOnMove			=                                      settings.value("cloudDecimation",         true ).toBool();
@@ -165,6 +167,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("bbDefaultColor",           QByteArray::fromRawData((const char*)bbDefaultCol.rgb,        c_ubColorArraySize));
 	settings.setValue("lightDoubleSided",         lightDoubleSided);
 	settings.setValue("backgroundGradient",       drawBackgroundGradient);
+	settings.setValue("drawRoundedPoints",        drawRoundedPoints);
 	settings.setValue("meshDecimation",           decimateMeshOnMove);
 	settings.setValue("minLoDMeshSize",	          minLoDMeshSize);
 	settings.setValue("cloudDecimation",          decimateCloudOnMove);

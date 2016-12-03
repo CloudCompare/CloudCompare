@@ -43,17 +43,20 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(bkgColorButton,                  SIGNAL(clicked()),         this, SLOT(changeBackgroundColor()));
 	connect(labelBkgColorButton,             SIGNAL(clicked()),         this, SLOT(changeLabelBackgroundColor()));
 	connect(labelMarkerColorButton,          SIGNAL(clicked()),         this, SLOT(changeLabelMarkerColor()));
-	connect(enableGradientCheckBox,          SIGNAL(clicked()),         this, SLOT(changeBackgroundGradient()));
-	connect(doubleSidedCheckBox,             SIGNAL(clicked()),         this, SLOT(changeDoubleSidedLight()));
 	connect(pointsColorButton,               SIGNAL(clicked()),         this, SLOT(changePointsColor()));
 	connect(textColorButton,                 SIGNAL(clicked()),         this, SLOT(changeTextColor()));
-	connect(decimateMeshBox,                 SIGNAL(clicked()),         this, SLOT(changeMeshDecimation()));
-	connect(decimateCloudBox,                SIGNAL(clicked()),         this, SLOT(changeCloudDecimation()));
-	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
-	connect(showCrossCheckBox,               SIGNAL(clicked()),         this, SLOT(changeCrossDisplayed()));
 
-	connect(colorScaleShowHistogramCheckBox, SIGNAL(clicked()),         this, SLOT(changeColorScaleShowHistogram()));
-	connect(useColorScaleShaderCheckBox,     SIGNAL(clicked()),         this, SLOT(changeColorScaleUseShader()));
+	connect(doubleSidedCheckBox,             &QCheckBox::clicked, [&]() { parameters.lightDoubleSided = doubleSidedCheckBox->isChecked(); });
+	connect(enableGradientCheckBox,          &QCheckBox::clicked, [&]() { parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked(); });
+	connect(showCrossCheckBox,               &QCheckBox::clicked, [&]() { parameters.displayCross = showCrossCheckBox->isChecked(); });
+	connect(colorScaleShowHistogramCheckBox, &QCheckBox::clicked, [&]() { parameters.colorScaleShowHistogram = colorScaleShowHistogramCheckBox->isChecked(); });
+	connect(useColorScaleShaderCheckBox,     &QCheckBox::clicked, [&]() { parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked(); });
+	connect(decimateMeshBox,                 &QCheckBox::clicked, [&]() { parameters.decimateMeshOnMove = decimateMeshBox->isChecked(); });
+	connect(decimateCloudBox,                &QCheckBox::clicked, [&]() { parameters.decimateCloudOnMove = decimateCloudBox->isChecked(); });
+	connect(drawRoundedPointsCheckBox,       &QCheckBox::clicked, [&]() { parameters.drawRoundedPoints = drawRoundedPointsCheckBox->isChecked(); });
+
+	connect(useVBOCheckBox,                  SIGNAL(clicked()),         this, SLOT(changeVBOUsage()));
+
 	connect(colorRampWidthSpinBox,           SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleRampWidth(int)));
 
 	connect(defaultFontSizeSpinBox,          SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
@@ -135,6 +138,7 @@ void ccDisplayOptionsDlg::refresh()
 	decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
 	maxMeshSizeDoubleSpinBox->setValue(static_cast<double>(parameters.minLoDMeshSize)/1000000.0);
 	decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
+	drawRoundedPointsCheckBox->setChecked(parameters.drawRoundedPoints);
 	maxCloudSizeDoubleSpinBox->setValue(static_cast<double>(parameters.minLoDCloudSize)/1000000.0);
 	useVBOCheckBox->setChecked(parameters.useVBOs);
 	showCrossCheckBox->setChecked(parameters.displayCross);
@@ -356,29 +360,9 @@ void ccDisplayOptionsDlg::changeLabelMarkerColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeDoubleSidedLight()
-{
-	parameters.lightDoubleSided = doubleSidedCheckBox->isChecked();
-}
-
-void ccDisplayOptionsDlg::changeBackgroundGradient()
-{
-	parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked();
-}
-
-void ccDisplayOptionsDlg::changeMeshDecimation()
-{
-	parameters.decimateMeshOnMove = decimateMeshBox->isChecked();
-}
-
 void ccDisplayOptionsDlg::changeMaxMeshSize(double val)
 {
 	parameters.minLoDMeshSize = static_cast<unsigned>(val * 1000000);
-}
-
-void ccDisplayOptionsDlg::changeCloudDecimation()
-{
-	parameters.decimateCloudOnMove = decimateCloudBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeMaxCloudSize(double val)
@@ -391,21 +375,6 @@ void ccDisplayOptionsDlg::changeVBOUsage()
 	parameters.useVBOs = useVBOCheckBox->isChecked();
 	if (parameters.useVBOs && maxCloudSizeDoubleSpinBox->value() < s_defaultMaxVBOCloudSizeM)
 		maxCloudSizeDoubleSpinBox->setValue(s_defaultMaxVBOCloudSizeM);
-}
-
-void ccDisplayOptionsDlg::changeCrossDisplayed()
-{
-	parameters.displayCross = showCrossCheckBox->isChecked();
-}
-
-void ccDisplayOptionsDlg::changeColorScaleShowHistogram()
-{
-	parameters.colorScaleShowHistogram = colorScaleShowHistogramCheckBox->isChecked();
-}
-
-void ccDisplayOptionsDlg::changeColorScaleUseShader()
-{
-	parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeColorScaleRampWidth(int val)

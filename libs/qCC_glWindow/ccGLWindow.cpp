@@ -3321,6 +3321,9 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 
 	//display acceleration
 	CONTEXT.useVBOs = guiParams.useVBOs;
+
+	//other options
+	CONTEXT.drawRoundedPoints = guiParams.drawRoundedPoints;
 }
 
 CCVector3d ccGLWindow::getCurrentViewDir() const

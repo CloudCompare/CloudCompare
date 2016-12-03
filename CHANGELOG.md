@@ -60,6 +60,9 @@ v2.8.beta - XX/XX/2016
 
 	* Adds an "Open Recent" item to the File menu to quickly access the last 10 files that you've worked with.
 
+	* New 'display' option to draw round points instead of square ones (when the point size > 1).
+		Warning, the display may be slower then.
+
 - Enhancements:
 
 	* Poisson Reconstruction plugin:

@@ -135,7 +135,7 @@ public:
 	virtual ccHObject* dbRootObject() override;
 	inline virtual QMainWindow* getMainWindow() override { return this; }
 	inline virtual const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
-	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const;
+	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
 	virtual void destroyGLWindow(ccGLWindow*) const override;
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
 	virtual ccColorScalesManager* getColorScalesManager() override;

@@ -65,6 +65,9 @@ v2.8.beta - XX/XX/2016
 
 - Enhancements:
 
+	* Animation plugin
+		- new 'Export frames' button to generate individual frames instead of an animation
+
 	* Poisson Reconstruction plugin:
 		- based on the latest version of PoissonRecon by Misha (V9.1)
 		- the user can now choose the boundary conditions (free / Dirichlet / Neumann)

@@ -54,7 +54,8 @@ protected slots:
 	void onBrowseButtonClicked();
 
 	void preview();
-	void render();
+	void renderAnimation() { render(false); }
+	void renderFrames() { render(true); }
 	void onAccept();
 
 	void onItemChanged(QListWidgetItem*);
@@ -73,6 +74,8 @@ protected: //methods
 	void updateTotalDuration();
 
 	bool getNextSegment(size_t& vp1, size_t& vp2) const;
+
+	void render(bool asSeparateFrames);
 
 protected: //members
 

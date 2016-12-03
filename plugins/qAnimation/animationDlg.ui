@@ -170,16 +170,7 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
+         <property name="margin">
           <number>0</number>
          </property>
          <item>
@@ -330,6 +321,9 @@ Super resolution is only applied on the output video (it's not visible in Previe
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="previewButton">
+          <property name="toolTip">
+           <string>Preview the animation</string>
+          </property>
           <property name="text">
            <string>Preview</string>
           </property>
@@ -337,8 +331,21 @@ Super resolution is only applied on the output video (it's not visible in Previe
         </item>
         <item>
          <widget class="QPushButton" name="renderButton">
+          <property name="toolTip">
+           <string>Creates the animation file</string>
+          </property>
           <property name="text">
            <string>Render</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exportFramesPushButton">
+          <property name="toolTip">
+           <string>Export frames as individual images</string>
+          </property>
+          <property name="text">
+           <string>Export frames</string>
           </property>
          </widget>
         </item>

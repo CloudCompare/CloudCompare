@@ -80,6 +80,8 @@ struct ccGLDrawContext
 	int glW;
 	//! GL screen height
 	int glH;
+	//! Device pixel ratio (general 1, 2 on HD displays)
+	float devicePixelRatio;
 	//! Corresponding GL window
 	ccGenericGLDisplay* display;
 
@@ -159,6 +161,7 @@ struct ccGLDrawContext
 		: drawingFlags(0)
 		, glW(0)
 		, glH(0)
+		, devicePixelRatio(1.0f)
 		, display(0)
 		, qGLContext(nullptr)
 		, renderZoom(1.0f)

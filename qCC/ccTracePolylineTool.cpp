@@ -52,8 +52,8 @@ ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* displa
 {
 	if (display)
 	{
-		display->getGLCameraParameters(params);
-		clickPos = CCVector2d(x, params.viewport[3]-1 - y);
+		QPointF pos2D = display->toCornerGLCoordinates(x, y);
+		clickPos = CCVector2d(pos2D.x(), pos2D.y());
 	}
 }
 
@@ -91,7 +91,7 @@ ccTracePolylineTool::ccTracePolylineTool(QWidget* parent)
 	m_polyTip->setTempColor(ccColor::green);
 	m_polyTip->set2DMode(true);
 	m_polyTip->reserve(2);
-	m_polyTip->addPointIndex(0,2);
+	m_polyTip->addPointIndex(0, 2);
 	m_polyTip->setWidth(widthSpinBox->value());
 	m_polyTip->addChild(m_polyTipVertices);
 
@@ -245,7 +245,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 {
 	assert(m_polyTip);
-	assert(!m_poly3D);
+	assert(!m_poly3D || !win);
 
 	ccGLWindow* oldWin = m_associatedWin;
 
@@ -366,8 +366,9 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 
 	//we replace the last point by the new one
 	{
-		CCVector3 P2D(	static_cast<PointCoordinateType>(x - m_associatedWin->width() / 2),
-						static_cast<PointCoordinateType>(m_associatedWin->height() / 2 - y),
+		QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+		CCVector3 P2D(	static_cast<PointCoordinateType>(pos2D.x()),
+						static_cast<PointCoordinateType>(pos2D.y()),
 						0);
 
 		CCVector3* lastP = const_cast<CCVector3*>(m_polyTipVertices->getPointPersistentPtr(1));
@@ -377,7 +378,7 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 	//just in case (e.g. if the view has been rotated or zoomed)
 	//we also update the first vertex position!
 	{
-		const CCVector3* P3D = m_poly3DVertices->getPoint(m_poly3DVertices->size()-1);
+		const CCVector3* P3D = m_poly3DVertices->getPoint(m_poly3DVertices->size() - 1);
 
 		ccGLCameraParameters camera;
 		m_associatedWin->getGLCameraParameters(camera);
@@ -386,8 +387,8 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 		camera.project(*P3D, A2D);
 
 		CCVector3* firstP = const_cast<CCVector3*>(m_polyTipVertices->getPointPersistentPtr(0));
-		*firstP = CCVector3(static_cast<PointCoordinateType>(A2D.x - m_associatedWin->width() / 2),
-							static_cast<PointCoordinateType>(A2D.y - m_associatedWin->height() / 2),
+		*firstP = CCVector3(static_cast<PointCoordinateType>(A2D.x - camera.viewport[2] / 2), //we convert A2D to centered coordinates (no need to apply high DPI scale or anything!)
+							static_cast<PointCoordinateType>(A2D.y - camera.viewport[3] / 2),
 							0);
 
 	}
@@ -430,8 +431,8 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 	}
 
 	//try to add one more point
-	if (	!m_poly3DVertices->reserve(m_poly3DVertices->size()+1)
-		||	!m_poly3D->reserve(m_poly3DVertices->size()+1) )
+	if (	!m_poly3DVertices->reserve(m_poly3DVertices->size() + 1)
+		||	!m_poly3D->reserve(m_poly3DVertices->size() + 1))
 	{
 		ccLog::Error("Not enough memory");
 		return;
@@ -439,7 +440,7 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 
 	try
 	{
-		m_segmentParams.reserve(m_segmentParams.size()+1);
+		m_segmentParams.reserve(m_segmentParams.size() + 1);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -448,13 +449,14 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 	}
 
 	m_poly3DVertices->addPoint(P);
-	m_poly3D->addPointIndex(m_poly3DVertices->size()-1);
+	m_poly3D->addPointIndex(m_poly3DVertices->size() - 1);
 	m_segmentParams.push_back(SegmentGLParams(m_associatedWin, x, y));
 
 	//we replace the first point of the tip by this new point
 	{
-		CCVector3 P2D(	static_cast<PointCoordinateType>(x - m_associatedWin->width() / 2),
-						static_cast<PointCoordinateType>(m_associatedWin->height() / 2 - y),
+		QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+		CCVector3 P2D(	static_cast<PointCoordinateType>(pos2D.x()),
+						static_cast<PointCoordinateType>(pos2D.y()),
 						0);
 
 		CCVector3* firstTipPoint = const_cast<CCVector3*>(m_polyTipVertices->getPointPersistentPtr(0));

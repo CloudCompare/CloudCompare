@@ -406,8 +406,9 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	unsigned vertCount = m_polyVertices->size();
 
 	//new point (expressed relatively to the screen center)
-	CCVector3 P(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
-				static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
+	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
+				static_cast<PointCoordinateType>(pos2D.y()),
 				0);
 
 	if (m_state & RECTANGLE)
@@ -469,8 +470,9 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		return;
 
 	//new point
-	CCVector3 P(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
-				static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
+	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
+				static_cast<PointCoordinateType>(pos2D.y()),
 				0);
 
 	//CTRL key pressed at the same time?
@@ -647,7 +649,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-		for (int i=0; i<static_cast<int>(cloudSize); ++i)
+		for (int i = 0; i < static_cast<int>(cloudSize); ++i)
 		{
 			if (visibilityArray->getValue(i) == POINT_VISIBLE)
 			{
@@ -819,7 +821,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			if (	m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
 				&&	m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
 			{
-				for (unsigned i=0; i<vertices->size(); ++i)
+				for (unsigned i = 0; i < vertices->size(); ++i)
 				{
 					CCVector3 P = *vertices->getPoint(i);
 					if (mode3D)

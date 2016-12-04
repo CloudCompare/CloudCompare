@@ -208,8 +208,8 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		double realGridHeight = m_grid.height * m_grid.gridStep;
 
 		static const int screnMargin = 20;
-		int screenWidth = std::max(1, m_glWindow->width() - 2 * screnMargin);
-		int screenHeight = std::max(1, m_glWindow->height() - 2 * screnMargin);
+		int screenWidth = std::max(1, m_glWindow->glWidth() - 2 * screnMargin);
+		int screenHeight = std::max(1, m_glWindow->glHeight() - 2 * screnMargin);
 
 		int pointSize = 1;
 		if (	static_cast<int>(m_grid.width)  < screenWidth

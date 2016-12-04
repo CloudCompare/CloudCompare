@@ -29,7 +29,7 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
 
 	if (win)
 	{
-		windowLabel->setText(QString("%1 [%2 x %3]").arg(win->windowTitle()).arg(win->width()).arg(win->height()));
+		windowLabel->setText(QString("%1 [%2 x %3]").arg(win->windowTitle()).arg(win->glWidth()).arg(win->glHeight()));
 		
 		const ccViewportParameters& params = win->getViewportParameters();
 		assert(!params.perspectiveView);

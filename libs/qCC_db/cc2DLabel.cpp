@@ -171,8 +171,8 @@ bool cc2DLabel::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 {
 	assert(screenHeight > 0 && screenWidth > 0);
 	
-	m_screenPos[0] += static_cast<float>(dx)/screenWidth;
-	m_screenPos[1] += static_cast<float>(dy)/screenHeight;
+	m_screenPos[0] += static_cast<float>(dx) / screenWidth;
+	m_screenPos[1] += static_cast<float>(dy) / screenHeight;
 
 	return true;
 }
@@ -653,7 +653,7 @@ bool cc2DLabel::acceptClick(int x, int y, Qt::MouseButton button)
 {
 	if (button == Qt::RightButton)
 	{
-		if (m_labelROI.contains(x-m_lastScreenPos[0],y-m_lastScreenPos[1]))
+		if (m_labelROI.contains(x - m_lastScreenPos[0], y - m_lastScreenPos[1]))
 		{
 			//toggle collapse state
 			m_showFullBody = !m_showFullBody;
@@ -1062,7 +1062,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//int buttonSize    = static_cast<int>(c_buttonSize * context.renderZoom);
 		{
 			//base box dimension
-			dx = std::max(dx,titleFontMetrics.width(title));
+			dx = std::max(dx, titleFontMetrics.width(title));
 			dy += margin;		//top vertical margin
 			dy += titleHeight;	//title
 
@@ -1135,9 +1135,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 							PointCoordinateType dXY = sqrt(info.diff.x*info.diff.x + info.diff.y*info.diff.y);
 							PointCoordinateType dXZ = sqrt(info.diff.x*info.diff.x + info.diff.z*info.diff.z);
 							PointCoordinateType dZY = sqrt(info.diff.z*info.diff.z + info.diff.y*info.diff.y);
-							tab.colContent[c] << MathSymbolDelta + QString("XY"); tab.colContent[c+1] << QString::number(dXY,'f',precision);
-							tab.colContent[c] << MathSymbolDelta + QString("XZ"); tab.colContent[c+1] << QString::number(dXZ,'f',precision);
-							tab.colContent[c] << MathSymbolDelta + QString("ZY"); tab.colContent[c+1] << QString::number(dZY,'f',precision);
+							tab.colContent[c] << MathSymbolDelta + QString("XY"); tab.colContent[c + 1] << QString::number(dXY, 'f', precision);
+							tab.colContent[c] << MathSymbolDelta + QString("XZ"); tab.colContent[c + 1] << QString::number(dXZ, 'f', precision);
+							tab.colContent[c] << MathSymbolDelta + QString("ZY"); tab.colContent[c + 1] << QString::number(dZY, 'f', precision);
 						}
 					}
 					else if (count == 3)
@@ -1149,30 +1149,30 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//next block: indexes
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "index.A"; tab.colContent[c+1] << QString::number(info.point1Index);
-							tab.colContent[c] << "index.B"; tab.colContent[c+1] << QString::number(info.point2Index);
-							tab.colContent[c] << "index.C"; tab.colContent[c+1] << QString::number(info.point3Index);
+							tab.colContent[c] << "index.A"; tab.colContent[c + 1] << QString::number(info.point1Index);
+							tab.colContent[c] << "index.B"; tab.colContent[c + 1] << QString::number(info.point2Index);
+							tab.colContent[c] << "index.C"; tab.colContent[c + 1] << QString::number(info.point3Index);
 						}
 						//next block: edges length
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "AB"; tab.colContent[c+1] << QString::number(info.edges.u[0],'f',precision);
-							tab.colContent[c] << "BC"; tab.colContent[c+1] << QString::number(info.edges.u[1],'f',precision);
-							tab.colContent[c] << "CA"; tab.colContent[c+1] << QString::number(info.edges.u[2],'f',precision);
+							tab.colContent[c] << "AB"; tab.colContent[c + 1] << QString::number(info.edges.u[0], 'f', precision);
+							tab.colContent[c] << "BC"; tab.colContent[c + 1] << QString::number(info.edges.u[1], 'f', precision);
+							tab.colContent[c] << "CA"; tab.colContent[c + 1] << QString::number(info.edges.u[2], 'f', precision);
 						}
 						//next block: angles
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "angle.A"; tab.colContent[c+1] << QString::number(info.angles.u[0],'f',precision);
-							tab.colContent[c] << "angle.B"; tab.colContent[c+1] << QString::number(info.angles.u[1],'f',precision);
-							tab.colContent[c] << "angle.C"; tab.colContent[c+1] << QString::number(info.angles.u[2],'f',precision);
+							tab.colContent[c] << "angle.A"; tab.colContent[c + 1] << QString::number(info.angles.u[0], 'f', precision);
+							tab.colContent[c] << "angle.B"; tab.colContent[c + 1] << QString::number(info.angles.u[1], 'f', precision);
+							tab.colContent[c] << "angle.C"; tab.colContent[c + 1] << QString::number(info.angles.u[2], 'f', precision);
 						}
 						//next block: normal
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "Nx"; tab.colContent[c+1] << QString::number(info.normal.x,'f',precision);
-							tab.colContent[c] << "Ny"; tab.colContent[c+1] << QString::number(info.normal.y,'f',precision);
-							tab.colContent[c] << "Nz"; tab.colContent[c+1] << QString::number(info.normal.z,'f',precision);
+							tab.colContent[c] << "Nx"; tab.colContent[c + 1] << QString::number(info.normal.x, 'f', precision);
+							tab.colContent[c] << "Ny"; tab.colContent[c + 1] << QString::number(info.normal.y, 'f', precision);
+							tab.colContent[c] << "Nz"; tab.colContent[c + 1] << QString::number(info.normal.z, 'f', precision);
 						}
 					}
 				}

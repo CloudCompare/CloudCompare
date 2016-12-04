@@ -88,7 +88,7 @@ void ccContourExtractorDlg::zoomOn(const ccBBox& box)
 	if (!m_glWindow)
 		return;
 
-	float pixSize = std::max(box.getDiagVec().x / std::max(20,m_glWindow->width()-20), box.getDiagVec().y / std::max(20,m_glWindow->height()-20));
+	float pixSize = std::max(box.getDiagVec().x / std::max(20, m_glWindow->glWidth() - 20), box.getDiagVec().y / std::max(20, m_glWindow->glHeight() - 20));
 	m_glWindow->setPixelSize(pixSize);
 	m_glWindow->setCameraPos(CCVector3d::fromArray(box.getCenter().u));
 }

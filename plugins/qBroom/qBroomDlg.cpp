@@ -624,8 +624,9 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 	CCVector3 P3D;
 	{
 		CCVector3d M03D, M13D;
-		camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 0), M03D);
-		camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 1), M13D);
+		QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
+		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
+		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
  		if (!Intersection(broomTrans, CCVector3::fromArray(M03D.u), CCVector3::fromArray(M13D.u), P3D))
 		{
 			return;
@@ -1272,8 +1273,9 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 		{
 			ccGLMatrix broomTrans = m_boxes->getGLTransformation();
 			CCVector3d M03D, M13D;
-			camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 0), M03D);
-			camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 1), M13D);
+			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
+			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
+			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
 			if (!Intersection(broomTrans, CCVector3::fromArray(M03D.u), CCVector3::fromArray(M13D.u), P3D))
 			{
 				ccLog::Warning("Failed to project the clicked point on the bromm plane");
@@ -1310,7 +1312,8 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 			int nearestTriIndex = -1;
 			double nearestSquareDist = 0;
 			CCVector3d P;
-			m_broomSelected = m_broomBox->trianglePicking(	CCVector2d(x, m_glWindow->height()-1 - y),
+			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
+			m_broomSelected = m_broomBox->trianglePicking(	CCVector2d(pos2D.x(), pos2D.y()),
 															camera,
 															nearestTriIndex,
 															nearestSquareDist,
@@ -1324,8 +1327,9 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 			if (stickCheckBox->isChecked())
 			{
 				//compute click direction in 3D
-				CCVector3d A2D(m_lastMousePos.x(), m_glWindow->height()-1 - m_lastMousePos.y(), 0);
-				CCVector3d B2D(A2D.x, A2D.y, 1);
+				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
+				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
+				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
 				CCVector3d A3D, B3D;
 				if (	camera.unproject(A2D, A3D)
 					&&	camera.unproject(B2D, B3D) )
@@ -1411,8 +1415,9 @@ void qBroomDlg::onMouseMoved(int x, int y, Qt::MouseButtons button)
 				m_glWindow->getGLCameraParameters(camera);
 
 				//compute click direction in 3D
-				CCVector3d A2D(m_lastMousePos.x(), m_glWindow->height()-1 - m_lastMousePos.y(), 0);
-				CCVector3d B2D(A2D.x, A2D.y, 1);
+				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
+				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
+				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
 				CCVector3d A3D, B3D;
 
 				bool hasMousePos3D = false;

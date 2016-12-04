@@ -709,9 +709,10 @@ void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons butt
 	if (vertCount < 2)
 		return;
 	
-	CCVector3 P = CCVector3(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
-							static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
-							0);
+	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
+				static_cast<PointCoordinateType>(pos2D.y()),
+				0);
 
 	//we replace last point by the current one
 	CCVector3* lastP = const_cast<CCVector3*>(m_editedPolyVertices->getPointPersistentPtr(vertCount-1));
@@ -755,9 +756,10 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 	unsigned vertCount = m_editedPolyVertices->size();
 
 	//clicked point (2D)
-	CCVector3 P = CCVector3(static_cast<PointCoordinateType>(x - m_associatedWin->width()/2),
-							static_cast<PointCoordinateType>(m_associatedWin->height()/2 - y),
-							0);
+	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
+				static_cast<PointCoordinateType>(pos2D.y()),
+				0);
 
 	//start new polyline?
 	if (((m_state & RUNNING) == 0) || vertCount == 0)

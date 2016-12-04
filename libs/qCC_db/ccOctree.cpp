@@ -507,7 +507,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	}
 	
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0.0);
-	CCVector3d X(0,0,0);
+	CCVector3d X(0, 0, 0);
 	if (!camera.unproject(clickPosd, X))
 	{
 		return false;

@@ -405,7 +405,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 		return false;
 
 	//convert mouse position to vector (screen-centered)
-	CCVector3d currentOrientation = PointToVector(x,y,screenWidth,screenHeight);
+	CCVector3d currentOrientation = PointToVector(x, y, screenWidth, screenHeight);
 
 	ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastOrientation,currentOrientation);
 
@@ -534,7 +534,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 
 		//look for the most parallel dimension
 		double maxDot = m_viewMatrix.getColumnAsVec3D(0).dot(RxU);
-		for (int i=1; i<3; ++i)
+		for (int i = 1; i < 3; ++i)
 		{
 			double dot = m_viewMatrix.getColumnAsVec3D(i).dot(RxU);
 			if (fabs(dot) > fabs(maxDot))

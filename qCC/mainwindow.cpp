@@ -6822,7 +6822,7 @@ void MainWindow::doActionRenderToFile()
 	if (!win)
 		return;
 
-	ccRenderToFileDlg rtfDlg(win->width(), win->height(), this);
+	ccRenderToFileDlg rtfDlg(win->glWidth(), win->glHeight(), this);
 
 	if (rtfDlg.exec())
 	{

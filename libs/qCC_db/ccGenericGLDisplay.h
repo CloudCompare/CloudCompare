@@ -235,6 +235,11 @@ public:
 	//! Returns the current OpenGL camera parameters
 	virtual void getGLCameraParameters(ccGLCameraParameters& params) = 0;
 
+	//! Converts 2D screen coordinates to 'centered' 2D OpenGL context coordinates
+	virtual QPointF toCenteredGLCoordinates(int x, int y) const = 0;
+	//! Converts 2D screen coordinates to 'corner-based' 2D OpenGL context coordinates
+	virtual QPointF toCornerGLCoordinates(int x, int y) const = 0;
+
 	//! Returns viewport parameters (zoom, etc.)
 	virtual const ccViewportParameters& getViewportParameters() const = 0;
 

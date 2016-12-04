@@ -131,7 +131,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 		return false;
 	}
 	
-	for (size_t i=0; i<viewports.size(); ++i)
+	for (size_t i = 0; i < viewports.size(); ++i)
 	{
 		cc2DViewportObject* vp = viewports[i];
 
@@ -170,7 +170,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 void qAnimationDlg::onAccept()
 {
 	assert(stepSelectionList->count() >= m_videoSteps.size());
-	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	for (size_t i = 0; i < m_videoSteps.size(); ++i)
 	{
 		cc2DViewportObject* vp = m_videoSteps[i].viewport;
 
@@ -500,7 +500,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 	if (!asSeparateFrames)
 	{
 		//get original viewport size
-		originalViewSize = m_view3d->size();
+		originalViewSize = m_view3d->qtSize();
 
 		//hack: as the encoder requires that the video dimensions are multiples of 8, we resize the window a little bit...
 		{
@@ -519,7 +519,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 
 		int bitrate = bitrateSpinBox->value() * 1024;
 		int gop = fps;
-		encoder.reset(new QVideoEncoder(outputFilename, m_view3d->width(), m_view3d->height(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value())));
+		encoder.reset(new QVideoEncoder(outputFilename, m_view3d->glWidth(), m_view3d->glHeight(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value())));
 		QString errorString;
 		if (!encoder->open(&errorString))
 		{

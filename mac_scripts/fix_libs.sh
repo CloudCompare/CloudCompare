@@ -32,7 +32,10 @@ if [ -f "${FRAMEWORK_DIR}/libavcodec.57.dylib" ]; then
   install_name_tool -change "${FFMPEG_DIR}/libavcodec.57.dylib" "@executable_path/../Frameworks/libavcodec.57.dylib" "${FRAMEWORK_DIR}/libavformat.57.dylib"
   install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libavformat.57.dylib"
   install_name_tool -change "${FFMPEG_DIR}/libswresample.2.dylib" "@executable_path/../Frameworks/libswresample.2.dylib" "${FRAMEWORK_DIR}/libavformat.57.dylib"
-
+  
   echo "  fixing: ${FRAMEWORK_DIR}/libswresample.2.dylib"
   install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libswresample.2.dylib"
+  
+  echo "  fixing: ${FRAMEWORK_DIR}/libswscale.4.dylib"
+  install_name_tool -change "${FFMPEG_DIR}/libavutil.55.dylib" "@executable_path/../Frameworks/libavutil.55.dylib" "${FRAMEWORK_DIR}/libswscale.4.dylib"
 fi

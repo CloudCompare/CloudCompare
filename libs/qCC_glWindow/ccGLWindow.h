@@ -51,6 +51,7 @@ class ccGlFilter;
 class ccFrameBufferObject;
 class ccInteractor;
 class ccPolyline;
+struct HotZone;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 class QOpenGLPaintDevice;
@@ -1333,6 +1334,9 @@ protected: //members
 	bool m_autoRefresh;
 	//! Auto-refresh timer
 	QTimer m_autoRefreshTimer;
+
+	//! Hot zone
+	HotZone* m_hotZone;
 
 private:
 

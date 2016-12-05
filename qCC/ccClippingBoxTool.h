@@ -59,7 +59,7 @@ public:
 	const ccClipBox* box() const { return m_clipBox; }
 
 	//! Adds an entity
-	/** \return success, if the entitiy is eligible for clipping
+	/** \return success, if the entity is eligible for clipping
 	**/
 	bool addAssociatedEntity(ccHObject* anObject);
 

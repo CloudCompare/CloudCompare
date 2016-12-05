@@ -650,7 +650,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				//read the face elements (singleton, pair or triplet)
 				std::vector<facetElement> currentFace;
 				{
-					for (int i=1; i<tokens.size(); ++i)
+					for (int i = 1; i < tokens.size(); ++i)
 					{
 						QStringList vertexTokens = tokens[i].split('/');
 						if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
@@ -663,13 +663,13 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						{
 							//new vertex
 							facetElement fe; //(0,0,0) by default
-							
+
 							fe.vIndex = vertexTokens[0].toInt();
 							if (vertexTokens.size() > 1 && !vertexTokens[1].isEmpty())
 								fe.tcIndex = vertexTokens[1].toInt();
 							if (vertexTokens.size() > 2 && !vertexTokens[2].isEmpty())
 								fe.nIndex = vertexTokens[2].toInt();
-						
+
 							currentFace.push_back(fe);
 						}
 					}
@@ -700,7 +700,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							error = true;
 							break;
 						}
-						for (unsigned int i=0; i<totalFacesRead; ++i)
+						for (unsigned int i = 0; i < totalFacesRead; ++i)
 							baseMesh->addTriangleTexCoordIndexes(-1, -1, -1);
 
 						hasTexCoords = true;
@@ -716,14 +716,14 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							error = true;
 							break;
 						}
-						for (unsigned int i=0; i<totalFacesRead; ++i)
+						for (unsigned int i = 0; i < totalFacesRead; ++i)
 							baseMesh->addTriangleNormalIndexes(-1, -1, -1);
 						normalsPerFacet = true;
 					}
 				}
 
 				//we process all vertices accordingly
-				for (std::vector<facetElement>::iterator it = currentFace.begin() ; it!=currentFace.end(); ++it)
+				for (std::vector<facetElement>::iterator it = currentFace.begin(); it != currentFace.end(); ++it)
 				{
 					facetElement& vertex = *it;
 
@@ -776,7 +776,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							error = true;
 							break;
 						}
-						for (unsigned int i=0; i<totalFacesRead; ++i)
+						for (unsigned int i = 0; i < totalFacesRead; ++i)
 							baseMesh->addTriangleMtlIndex(-1);
 
 						hasMaterial = true;
@@ -788,9 +788,9 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 				//Now, let's tesselate the whole polygon
 				//FIXME: yeah, we do very ulgy tesselation here!
-				std::vector<facetElement>::const_iterator B = A+1;
-				std::vector<facetElement>::const_iterator C = B+1;
-				for ( ; C != currentFace.end(); ++B,++C)
+				std::vector<facetElement>::const_iterator B = A + 1;
+				std::vector<facetElement>::const_iterator C = B + 1;
+				for (; C != currentFace.end(); ++B, ++C)
 				{
 					//need more space?
 					if (baseMesh->size() == baseMesh->capacity())
@@ -831,7 +831,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 				//read the face elements (singleton, pair or triplet)
 				ccPolyline* polyline = new ccPolyline(vertices);
-				if (!polyline->reserve(static_cast<unsigned>(tokens.size()-1)))
+				if (!polyline->reserve(static_cast<unsigned>(tokens.size() - 1)))
 				{
 					//not enough memory
 					objWarnings[NOT_ENOUGH_MEMORY] = true;
@@ -841,7 +841,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					continue;
 				}
 
-				for (int i=1; i<tokens.size(); ++i)
+				for (int i = 1; i < tokens.size(); ++i)
 				{
 					//get next polyline's vertex index
 					QStringList vertexTokens = tokens[i].split('/');
@@ -854,7 +854,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					else
 					{
 						int index = vertexTokens[0].toInt(); //we ignore normal index (if any!)
-						if (!UpdatePointIndex(index,pointsRead))
+						if (!UpdatePointIndex(index, pointsRead))
 						{
 							objWarnings[INVALID_INDEX] = true;
 							error = true;
@@ -871,9 +871,9 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					polyline = 0;
 					break;
 				}
-			
+
 				polyline->setVisible(true);
-				QString name = groups.empty() ? QString("Line") : groups.back().second+QString(".line");
+				QString name = groups.empty() ? QString("Line") : groups.back().second + QString(".line");
 				polyline->setName(QString("%1 %2").arg(name).arg(++polyCount));
 				vertices->addChild(polyline);
 
@@ -904,7 +904,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
 					//QString mtlFilename = tokens[1];
 					QString mtlFilename = currentLine.mid(7).trimmed();
-					ccLog::Print(QString("[OBJ] Material file: ")+mtlFilename);
+					ccLog::Print(QString("[OBJ] Material file: ") + mtlFilename);
 					QString mtlPath = QFileInfo(filename).canonicalPath();
 					//we try to load it
 					if (!materials)
@@ -915,26 +915,26 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 					size_t oldSize = materials->size();
 					QStringList errors;
-					if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
+					if (ccMaterialSet::ParseMTL(mtlPath, mtlFilename, *materials, errors))
 					{
-						ccLog::Print("[OBJ] %i materials loaded",materials->size()-oldSize);
+						ccLog::Print("[OBJ] %i materials loaded", materials->size() - oldSize);
 						materialsLoadFailed = false;
 					}
 					else
 					{
-						ccLog::Error(QString("[OBJ] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
+						ccLog::Error(QString("[OBJ] Failed to load material file! (should be in '%1')").arg(mtlPath + '/' + QString(mtlFilename)));
 						materialsLoadFailed = true;
 					}
 
 					if (!errors.empty())
 					{
-						for (int i=0; i<errors.size(); ++i)
-							ccLog::Warning(QString("[OBJ::Load::MTL parser] ")+errors[i]);
+						for (int i = 0; i < errors.size(); ++i)
+							ccLog::Warning(QString("[OBJ::Load::MTL parser] ") + errors[i]);
 					}
 					if (materials->empty())
 					{
 						materials->release();
-						materials=0;
+						materials = 0;
 						materialsLoadFailed = true;
 					}
 				}
@@ -1063,11 +1063,11 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			ccLog::Print("[OBJ] 1 mesh loaded - %i group(s)", groups.size());
 			if (groups.size() > 1)
 			{
-				for (size_t i=0; i<groups.size(); ++i)
+				for (size_t i = 0; i < groups.size(); ++i)
 				{
 					const QString& groupName = groups[i].second;
 					unsigned startIndex = groups[i].first;
-					unsigned endIndex = (i+1 == groups.size() ? baseMesh->size() : groups[i+1].first);
+					unsigned endIndex = (i + 1 == groups.size() ? baseMesh->size() : groups[i + 1].first);
 
 					if (startIndex == endIndex)
 					{
@@ -1077,7 +1077,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					ccSubMesh* subTri = new ccSubMesh(baseMesh);
 					if (subTri->reserve(endIndex-startIndex))
 					{
-						subTri->addTriangleIndex(startIndex,endIndex);
+						subTri->addTriangleIndex(startIndex, endIndex);
 						subTri->setName(groupName);
 						subTri->showMaterials(baseMesh->materialsShown());
 						subTri->showNormals(baseMesh->normalsShown());

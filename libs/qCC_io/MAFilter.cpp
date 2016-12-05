@@ -498,7 +498,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 					if (fprintf(fp,"\tsetAttr -s %i \".vclr[%u].vfcl\";\n",nf,i) < 0)
 					{
 						fclose(fp);
-						delete[] theFacesIndexes; //DGM: we are missing soem faces here, aren't we?
+						delete[] theFacesIndexes; //DGM: we are missing some faces here, aren't we?
 						return CC_FERR_WRITING;
 					}
 
@@ -508,7 +508,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 						if (fprintf(fp,"\tsetAttr \".vclr[%u].vfcl[%i].frgb\" -type \"float3\" %f %f %f;\n",i,f->faceIndex,col.r,col.g,col.b) < 0)
 						{
 							fclose(fp);
-							delete[] theFacesIndexes; //DGM: we are missing soem faces here, aren't we?
+							delete[] theFacesIndexes; //DGM: we are missing some faces here, aren't we?
 							return CC_FERR_WRITING;
 						}
 

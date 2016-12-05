@@ -560,7 +560,7 @@ coordinate system (on disk)</string>
              <item row="0" column="4">
               <widget class="QComboBox" name="loadComboBox">
                <property name="toolTip">
-                <string>You can add default items to this list by placing a text file named &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; next to the application executable file. On each line you should define 5 items seperated by semicolon characters: name ; ShiftX ; ShiftY ; ShiftZ ; scale</string>
+                <string>You can add default items to this list by placing a text file named &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; next to the application executable file. On each line you should define 5 items separated by semicolon characters: name ; ShiftX ; ShiftY ; ShiftZ ; scale</string>
                </property>
                <property name="currentIndex">
                 <number>-1</number>

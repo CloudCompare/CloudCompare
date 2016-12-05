@@ -2,6 +2,8 @@
 
 //Qt
 #include <QDataStream>
+#include <QFile>
+#include <QTextStream>
 
 WaveformDescriptor::WaveformDescriptor()
 	: numberOfSamples(0)
@@ -185,10 +187,65 @@ double ccWaveform::getSample(uint32_t i, const WaveformDescriptor& descriptor) c
 	return descriptor.digitizerGain * raw + descriptor.digitizerOffset;
 }
 
+bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor) const
+{
+	if (descriptor.numberOfSamples == 0)
+	{
+		assert(false);
+		return false;
+	}
+
+	QFile file(filename);
+	if (!file.open(QFile::Text | QFile::WriteOnly))
+	{
+		ccLog::Warning(QString("[ccWaveform::toASCII] Failed to open file '%1' for writing").arg(filename));
+		return false;
+	}
+	QTextStream stream(&file);
+	stream.setRealNumberPrecision(6);
+	stream.setRealNumberNotation(QTextStream::FixedNotation);
+	stream << "//time(ps);intensity" << endl;
+
+	for (uint32_t i = 1; i < descriptor.numberOfSamples; ++i)
+	{
+		double c = getSample(i, descriptor);
+
+		stream << i * descriptor.samplingRate_ps << ";" << c << endl;
+	}
+
+	file.close();
+	ccLog::Print(QString("[ccWaveform::toASCII] File '%1' has been saved successfully").arg(filename));
+
+	return true;
+}
+
+double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor) const
+{
+	if (descriptor.numberOfSamples == 0)
+	{
+		assert(false);
+		minVal = maxVal = std::numeric_limits<double>::quiet_NaN();
+		return 0.0;
+	}
+	else
+	{
+		minVal = maxVal = getSample(0, descriptor);
+	}
+
+	for (uint32_t i = 1; i < descriptor.numberOfSamples; ++i)
+	{
+		double c = getSample(i, descriptor);
+		maxVal = std::max(maxVal, c);
+		minVal = std::min(minVal, c);
+	}
+
+	return maxVal - minVal;
+}
+
 CCVector3 ccWaveform::getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const
 {
-	float dist = m_echoTime_ps - i * descriptor.samplingRate_ps;
-	return P0 + CCVector3::fromArray(m_beamDir.u) * dist;
+	float delta_ps = m_echoTime_ps - i * descriptor.samplingRate_ps;
+	return P0 + CCVector3::fromArray(m_beamDir.u) * delta_ps;
 }
 
 void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)

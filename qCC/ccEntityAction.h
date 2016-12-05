@@ -32,7 +32,8 @@ namespace ccEntityAction
 	bool	setColorGradient(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget *parent);
-	bool	convertTextureToColor(ccHObject::Container selectedEntities, QWidget *parent);
+	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget *parent);
+	bool	enhanceRGBWithIntensities(const ccHObject::Container &selectedEntities, QWidget *parent);
 	
 	// Scalar Fields
 	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget *parent);

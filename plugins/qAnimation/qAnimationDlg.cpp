@@ -108,7 +108,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 
 	connect ( browseButton,				SIGNAL( clicked() ),				this, SLOT( onBrowseButtonClicked() ) );
 	connect ( previewButton,			SIGNAL( clicked() ),				this, SLOT( preview() ) );
-	connect ( renderButton,				SIGNAL( clicked() ),				this, SLOT( render() ) );
+	connect ( renderButton,				SIGNAL( clicked() ),				this, SLOT( renderAnimation() ) );
+	connect ( exportFramesPushButton,	SIGNAL( clicked() ),				this, SLOT( renderFrames() ) );
 	connect ( buttonBox,				SIGNAL( accepted() ),				this, SLOT( onAccept() ) );
 }
 
@@ -130,7 +131,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 		return false;
 	}
 	
-	for (size_t i=0; i<viewports.size(); ++i)
+	for (size_t i = 0; i < viewports.size(); ++i)
 	{
 		cc2DViewportObject* vp = viewports[i];
 
@@ -169,7 +170,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 void qAnimationDlg::onAccept()
 {
 	assert(stepSelectionList->count() >= m_videoSteps.size());
-	for ( size_t i=0; i<m_videoSteps.size(); ++i )
+	for (size_t i = 0; i < m_videoSteps.size(); ++i)
 	{
 		cc2DViewportObject* vp = m_videoSteps[i].viewport;
 
@@ -463,7 +464,7 @@ void qAnimationDlg::preview()
 	setEnabled(true);
 }
 
-void qAnimationDlg::render()
+void qAnimationDlg::render(bool asSeparateFrames)
 {
 	if (!m_view3d)
 	{
@@ -494,32 +495,43 @@ void qAnimationDlg::render()
 	QApplication::processEvents();
 
 #ifdef QFFMPEG_SUPPORT
-	//get original viewport size
-	QSize originalViewSize = m_view3d->size();
-
-	//hack: as the encoder requires that the video dimensions are multiples of 8, we resize the window a little bit...
+	QScopedPointer<QVideoEncoder> encoder(0);
+	QSize originalViewSize;
+	if (!asSeparateFrames)
 	{
-		//find the nearest multiples of 8
-		QSize customSize = originalViewSize;
-		if (originalViewSize.width() % 8 || originalViewSize.height() % 8)
+		//get original viewport size
+		originalViewSize = m_view3d->qtSize();
+
+		//hack: as the encoder requires that the video dimensions are multiples of 8, we resize the window a little bit...
 		{
-			if (originalViewSize.width() % 8)
-				customSize.setWidth((originalViewSize.width() / 8 + 1) * 8);
-			if (originalViewSize.height() % 8)
-				customSize.setHeight((originalViewSize.height() / 8 + 1) * 8);
-			m_view3d->resize(customSize);
-			QApplication::processEvents();
+			//find the nearest multiples of 8
+			QSize customSize = originalViewSize;
+			if (originalViewSize.width() % 8 || originalViewSize.height() % 8)
+			{
+				if (originalViewSize.width() % 8)
+					customSize.setWidth((originalViewSize.width() / 8 + 1) * 8);
+				if (originalViewSize.height() % 8)
+					customSize.setHeight((originalViewSize.height() / 8 + 1) * 8);
+				m_view3d->resize(customSize);
+				QApplication::processEvents();
+			}
+		}
+
+		int bitrate = bitrateSpinBox->value() * 1024;
+		int gop = fps;
+		encoder.reset(new QVideoEncoder(outputFilename, m_view3d->glWidth(), m_view3d->glHeight(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value())));
+		QString errorString;
+		if (!encoder->open(&errorString))
+		{
+			QMessageBox::critical(this, "Error", QString("Failed to open file for output: %1").arg(errorString));
+			setEnabled(true);
+			return;
 		}
 	}
-
-	int bitrate = bitrateSpinBox->value() * 1024;
-	int gop = fps;
-	QVideoEncoder encoder(outputFilename, m_view3d->width(), m_view3d->height(), bitrate, gop, static_cast<unsigned>(fpsSpinBox->value()));
-	QString errorString;
-	if (!encoder.open(&errorString))
+#else
+	if (!asSeparateFrames)
 	{
-		QMessageBox::critical(this, "Error", QString("Failed to open file for output: %1").arg(errorString));
-		setEnabled(true);
+		QMessageBox::critical(this, "Error", QString("Animation mode is not supported (no FFMPEG support)"));
 		return;
 	}
 #endif
@@ -559,23 +571,29 @@ void qAnimationDlg::render()
 				image = image.scaled(image.width()/superRes, image.height()/superRes, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 			}
 
+			if (asSeparateFrames)
+			{
+				QString filename = QString("frame_%1.png").arg(frameIndex, 6, 10, QChar('0'));
+				QString fullPath = QDir(outputFilename).filePath(filename);
+				if (!image.save(fullPath))
+				{
+					QMessageBox::critical(this, "Error", QString("Failed to save frame #%1").arg(frameIndex + 1));
+					success = false;
+					break;
+				}
+			}
+			else
+			{
 #ifdef QFFMPEG_SUPPORT
-			if (!encoder.encodeImage(image, frameIndex, &errorString))
-			{
-				QMessageBox::critical(this, "Error", QString("Failed to encode frame #%1: %2").arg(frameIndex+1).arg(errorString));
-				success = false;
-				break;
-			}
-#else
-			QString filename = QString("frame_%1.png").arg(frameIndex, 6, 10, QChar('0'));
-			QString fullPath = QDir(outputFilename).filePath(filename);
-			if (!image.save(fullPath))
-			{
-				QMessageBox::critical(this, "Error", QString("Failed to save frame #%1").arg(frameIndex+1));
-				success = false;
-				break;
-			}
+				QString errorString;
+				if (!encoder->encodeImage(image, frameIndex, &errorString))
+				{
+					QMessageBox::critical(this, "Error", QString("Failed to encode frame #%1: %2").arg(frameIndex + 1).arg(errorString));
+					success = false;
+					break;
+				}
 #endif
+			}
 			++frameIndex;
 			progressDialog.setValue(frameIndex);
 			QApplication::processEvents();
@@ -603,13 +621,16 @@ void qAnimationDlg::render()
 	m_view3d->setLODEnabled(lodWasEnabled);
 
 #ifdef QFFMPEG_SUPPORT
-	encoder.close();
+	if (encoder)
+	{
+		encoder->close();
 
-	//hack: restore original size
-	m_view3d->resize(originalViewSize);
-	QApplication::processEvents();
+		//hack: restore original size
+		m_view3d->resize(originalViewSize);
+		QApplication::processEvents();
+	}
 #endif
-	
+
 	progressDialog.hide();
 	QApplication::processEvents();
 

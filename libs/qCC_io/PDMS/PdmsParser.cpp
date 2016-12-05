@@ -385,7 +385,7 @@ void PdmsFileSession::skipComment()
 	case PDMS_COMMENT_BLOCK:
 		{
 		//comment block opening symbol has been met. Search for comment block ending symbol
-		//don't forget that some other comments could be embeded in this comment
+		//don't forget that some other comments could be embedded in this comment
 		bool commentSymb = false;
 		int commentBlockLevel = 1;
 		int n = 0;
@@ -420,7 +420,7 @@ void PdmsFileSession::skipComment()
 		//But we still store the whole path
 		char* ptr2 = &(tokenBuffer[18]);
 		while((*ptr2)==' ') {ptr2++;}
-		//Copy the meta group name at the begining of tokenbuffer
+		//Copy the meta group name at the beginning of tokenbuffer
 		tokenBuffer[0] = '/';
 		char* ptr1 = &(tokenBuffer[1]);
 		while((*ptr2) && (*ptr2)!=' ')

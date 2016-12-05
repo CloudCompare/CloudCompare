@@ -75,7 +75,7 @@ public:  //drawing and drawing options
 	//! Selects/unselects entity
 	inline virtual void setSelected(bool state) { m_selected = state; }
 
-	//! Returns main OpenGL paramters for this entity
+	//! Returns main OpenGL parameters for this entity
 	/** These parameters are deduced from the visiblity states
 		of its different features (points, normals, etc.).
 		\param params a glDrawParams structure
@@ -138,7 +138,7 @@ public: //Name display in 3D
 
 public: //Temporary color
 
-	//! Returns whether colors are currently overriden by a temporary (unique) color
+	//! Returns whether colors are currently overridden by a temporary (unique) color
 	/** See ccDrawableObject::setTempColor.
 	**/
 	inline virtual bool isColorOverriden() const { return m_colorIsOverriden; }
@@ -203,7 +203,7 @@ public: //Transformation matrix management (for display only)
 	//! Returns whether a GL transformation is enabled or not
 	inline virtual bool isGLTransEnabled() const { return m_glTransEnabled; }
 
-	//! Retuns associated GL transformation
+	//! Returns associated GL transformation
 	/** See ccDrawableObject::setGLTransformation.
 	**/
 	inline virtual const ccGLMatrix& getGLTransformation() const { return m_glTrans; }

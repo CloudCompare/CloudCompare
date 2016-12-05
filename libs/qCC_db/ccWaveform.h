@@ -74,6 +74,12 @@ public:
 	//! Returns the (real) value of a given sample (in volts)
 	double getSample(uint32_t i, const WaveformDescriptor& descriptor) const;
 
+	//! Returns the range of (real) samples
+	double getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor) const;
+
+	//! Expotrs (real) samples to an ASCII file
+	bool toASCII(QString filename, const WaveformDescriptor& descriptor) const;
+
 	//! Returns the sample position in 3D
 	CCVector3 getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;
 
@@ -82,6 +88,18 @@ public:
 
 	//! Gives access to the internal data
 	inline const uint8_t* data() const { return m_data; }
+
+	//! Sets the beam direction
+	void setBeamDir(const CCVector3f& dir) { m_beamDir = dir; }
+
+	//! Returns the beam direction
+	const CCVector3f& beamDir() const { return m_beamDir; }
+
+	//! Set the echo time (in picoseconds)
+	void setEchoTime_ps(float time_ps) { m_echoTime_ps = time_ps; }
+
+	//! Returns the echo time (in picoseconds)
+	float echoTime_ps() const { return m_echoTime_ps; }
 
 	//! Applies a rigid transformation (on the beam direction)
 	void applyRigidTransformation(const ccGLMatrix& trans);

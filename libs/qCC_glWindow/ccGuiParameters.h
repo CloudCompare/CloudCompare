@@ -113,6 +113,9 @@ public:
 		//! Octree computation (for picking) behavior
 		ComputeOctreeForPicking autoComputeOctree;
 
+		//! Whether to draw rounded points (slower) or not
+		bool drawRoundedPoints;
+
 		//! Default constructor
 		ParamStruct();
 

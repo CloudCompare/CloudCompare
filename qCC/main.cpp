@@ -25,6 +25,7 @@
 #include <QMessageBox>
 #include <QLocale>
 #include <QTime>
+#include <QTimer>
 #include <QTranslator>
 #include <QSettings>
 #include <QGLFormat>
@@ -150,17 +151,15 @@ int main(int argc, char **argv)
 
 	QDir  workingDir = QCoreApplication::applicationDirPath();
 	
-#ifdef Q_OS_MAC	
+#ifdef Q_OS_MAC
 	// This makes sure that our "working directory" is not within the application bundle	
 	if ( workingDir.dirName() == "MacOS" )
 	{
 		workingDir.cdUp();
 		workingDir.cdUp();
-		workingDir.cdUp();		
+		workingDir.cdUp();
 	}
 #endif
-
-	QDir::setCurrent( workingDir.absolutePath() );
 
 	//store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);
@@ -207,8 +206,8 @@ int main(int argc, char **argv)
 	}
 
 	//splash screen
-	QSplashScreen* splash = 0;
-	QTime splashStartTime;
+	QScopedPointer<QSplashScreen> splash(0);
+	QTimer splashTimer;
 
 	//standard mode
 	if (!commandLine)
@@ -220,9 +219,8 @@ int main(int argc, char **argv)
 		}
 
 		//splash screen
-		splashStartTime.start();
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
+		splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
 		splash->show();
 		QApplication::processEvents();
 	}
@@ -322,7 +320,9 @@ int main(int argc, char **argv)
 		if (argc > lastArgumentIndex)
 		{
 			if (splash)
+			{
 				splash->close();
+			}
 
 			//any additional argument is assumed to be a filename --> we try to load it/them
 			QStringList filenames;
@@ -363,22 +363,16 @@ int main(int argc, char **argv)
 
 			mainWindow->addToDB(filenames);
 		}
-		
-		if (splash)
+		else if (splash)
 		{
-			//we want the splash screen to be visible a minimum amount of time (1000 ms.)
-			while (splashStartTime.elapsed() < 1000)
-			{
-				splash->raise();
-				QApplication::processEvents(); //to let the system breath!
-			}
-
-			splash->close();
-			QApplication::processEvents();
-
-			delete splash;
-			splash = 0;
+			//count-down to hide the timer (only effective once the application will have actually started!)
+			QObject::connect(&splashTimer, &QTimer::timeout, [&]() { if (splash) splash->close(); QCoreApplication::processEvents(); splash.reset(); });
+			splashTimer.setInterval(1000);
+			splashTimer.start();
 		}
+
+		//change the default path to the application one (do this AFTER processing the command line)
+		QDir::setCurrent(workingDir.absolutePath());
 
 		//let's rock!
 		try
@@ -401,7 +395,6 @@ int main(int argc, char **argv)
 				plugin.qObject = 0;
 			}
 		}
-
 	}
 
 	//release global structures

@@ -183,7 +183,7 @@ protected:
 	bool m_validBB;
 
 	//! Associated cloud
-	/** The cloud from which references are refering to.
+	/** The cloud from which references are referring to.
 		WARNING: do not use the inner iterator as it
 		is used to 'implement' the ReferenceCloud one.
 	**/

@@ -100,7 +100,7 @@ protected:
 
 #endif
 
-static void CreateGLWindow(ccGLWindow* &window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
+static void CreateGLWindow(ccGLWindow*& window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
 {
 	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);

@@ -72,7 +72,7 @@ public:
 	**/
 	virtual inline unsigned char testVisibility(const CCVector3& P) const { return POINT_VISIBLE; }
 
-	//! Sets the cloud iterator at the begining
+	//! Sets the cloud iterator at the beginning
 	/**	Virtual method to handle the cloud global iterator
 	**/
 	virtual void placeIteratorAtBegining() = 0;

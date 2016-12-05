@@ -58,16 +58,9 @@ protected slots:
 	void changeBackgroundColor();
 	void changeLabelBackgroundColor();
 	void changeLabelMarkerColor();
-	void changeDoubleSidedLight();
-	void changeBackgroundGradient();
-	void changeMeshDecimation();
 	void changeMaxMeshSize(double);
-	void changeCloudDecimation();
 	void changeMaxCloudSize(double);
 	void changeVBOUsage();
-	void changeCrossDisplayed();
-	void changeColorScaleShowHistogram();
-	void changeColorScaleUseShader();
 	void changeColorScaleRampWidth(int);
 
 	void changeDefaultFontSize(int);

@@ -36,6 +36,7 @@
 
 class ccScalarField;
 class ccPolyline;
+class ccMesh;
 class QGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
@@ -113,7 +114,7 @@ public: //clone, copy, etc.
 	//! Creates a new point cloud object from a ReferenceCloud (selection)
 	/** "Reference clouds" are a set of indexes referring to a real point cloud.
 		See CClib documentation for more information about ReferenceClouds.
-		Warning: the ReferenceCloud structure must refer to this cloud. 
+		Warning: the ReferenceCloud structure must refer to this cloud.
 		\param selection a ReferenceCloud structure (pointing to source)
 		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
 	**/
@@ -256,7 +257,7 @@ public: //associated (scan) grid structure
 	{
 		//! Shared type
 		typedef QSharedPointer<Grid> Shared;
-		
+
 		//! Default constructor
 		Grid()
 			: w(0)
@@ -288,9 +289,9 @@ public: //associated (scan) grid structure
 			if (colors.size() == w*h)
 			{
 				QImage image(w, h, QImage::Format_ARGB32);
-				for (unsigned j=0; j<h; ++j)
+				for (unsigned j = 0; j < h; ++j)
 				{
-					for (unsigned i=0; i<w; ++i)
+					for (unsigned i = 0; i < w; ++i)
 					{
 						const ccColor::Rgb& col = colors[j*w + i];
 						image.setPixel(i, j, qRgb(col.r, col.g, col.b));
@@ -303,7 +304,7 @@ public: //associated (scan) grid structure
 				return QImage();
 			}
 		}
-		
+
 		//! Grid width
 		unsigned w;
 		//! Grid height
@@ -335,6 +336,11 @@ public: //associated (scan) grid structure
 	inline bool addGrid(Grid::Shared grid) { try{ m_grids.push_back(grid); } catch (const std::bad_alloc&) { return false; } return true; }
 	//! Remove all associated grids
 	inline void removeGrids() { m_grids.clear(); }
+
+	//! Meshes a scan grid
+	/** \warning The mesh vertices will be this cloud instance!
+	**/
+	ccMesh* triangulateGrid(const Grid& grid, double minTriangleAngle_deg = 0.0) const;
 
 public: //normals computation/orientation
 
@@ -385,6 +391,9 @@ public: //waveform (e.g. from airborne scanners)
 	bool reserveTheFWFTable();
 	//! Resizes the FWF table
 	bool resizeTheFWFTable();
+
+	//! Computes the maximum amplitude of all associated waveforms
+	bool computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg = 0) const;
 
 	//! Clears all associated FWF data
 	void clearFWFData();
@@ -546,7 +555,7 @@ public: //other methods
 	/** \return success
 	**/
 	bool setRGBColorWithCurrentScalarField(bool mixWithExistingColor = false);
-	
+
 	//! Set a unique color for the whole cloud (shortcut)
 	/** Color array is automatically allocated if necessary.
 		\param r red component
@@ -589,7 +598,7 @@ public: //other methods
 
 	//! Unrolls the cloud and its normals on a cylinder
 	/** This method is redundant with the "developCloudOnCylinder" method of CCLib,
-		appart that it can also handle the cloud normals.
+		apart that it can also handle the cloud normals.
 		\param radius unrolling cylinder radius
 		\param center a point belonging to the cylinder axis (automatically computed if not specified)
 		\param dim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
@@ -602,7 +611,7 @@ public: //other methods
 
 	//! Unrolls the cloud and its normals on a cone
 	/** This method is redundant with the "developCloudOnCone" method of CCLib,
-		appart that it can also handle the cloud normals.
+		apart that it can also handle the cloud normals.
 		\param baseRadius unrolling cone base radius
 		\param alpha_deg cone angle (between 0 and 180 degrees)
 		\param apex cone apex
@@ -648,6 +657,9 @@ public: //other methods
 		\return the resulting point cloud
 	**/
 	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);
+
+	//! Enhances the RGB colors with the current scalar field (assuming it's intensities)
+	bool enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange = false, double minI = 0.0, double maxI = 1.0);
 
 protected:
 
@@ -724,7 +736,7 @@ protected: // VBO
 			UPDATE_NORMALS = 4,
 			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
 		};
-		
+
 		vboSet()
 			: hasColors(false)
 			, colorIsSF(false)

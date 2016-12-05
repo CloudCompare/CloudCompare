@@ -776,7 +776,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (pushName)
 	{
-		//not particulary fast
+		//not particularly fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
 		glFunc->glPushName(getUniqueIDForDisplay());

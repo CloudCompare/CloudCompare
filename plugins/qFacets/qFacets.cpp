@@ -754,9 +754,9 @@ void qFacets::exportFacets()
 	{
 		if (useCustomOrientation)
 		{
-			Z = CCVector3(static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble()),
-				static_cast<PointCoordinateType>(fDlg.nYLineEdit->text().toDouble()),
-				static_cast<PointCoordinateType>(fDlg.nZLineEdit->text().toDouble()));
+			Z = CCVector3(	static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble()),
+							static_cast<PointCoordinateType>(fDlg.nYLineEdit->text().toDouble()),
+							static_cast<PointCoordinateType>(fDlg.nZLineEdit->text().toDouble()));
 			Z.normalize();
 		}
 		else if (useGlobalOrientation)
@@ -1119,7 +1119,7 @@ void qFacets::exportFacetsInfo()
 
 	outFile.close();
 
-	m_app->dispToConsole(QString("[qFacets] File '%1' succesfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole(QString("[qFacets] File '%1' successfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
 QIcon qFacets::getIcon() const

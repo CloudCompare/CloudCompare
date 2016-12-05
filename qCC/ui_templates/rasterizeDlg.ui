@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
+    <width>999</width>
     <height>760</height>
    </rect>
   </property>
@@ -853,6 +853,41 @@ replaced by the cell's average height!</string>
            <widget class="QPushButton" name="generateHillshadePushButton">
             <property name="text">
              <string>Generate</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="volumeTab">
+         <attribute name="title">
+          <string>Volume</string>
+         </attribute>
+         <layout class="QFormLayout" name="formLayout_6">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Volume</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="volumeLabel">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Non empty cells</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="filledCellsPercentageLabel">
+            <property name="text">
+             <string>0%</string>
             </property>
            </widget>
           </item>

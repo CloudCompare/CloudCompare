@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/QTreeView/branch-closed.png</file>
+    <file>images/QTreeView/branch-end.png</file>
+    <file>images/QTreeView/branch-more.png</file>
+    <file>images/QTreeView/branch-open.png</file>
+    <file>images/QTreeView/vline.png</file>
     <file>images/pledgielogo.png</file>
     <file>images/gamepad.png</file>
     <file>images/restore.png</file>

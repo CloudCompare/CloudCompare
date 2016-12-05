@@ -212,7 +212,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	const ccViewportParameters& params = context.display->getViewportParameters();
 	int dPix = static_cast<int>(ceil(params.zoom * m_radius/params.pixelSize));
 
-	int bkgBorder = QFontMetrics(context.display->getTextDisplayFont()).height()/4+4;
+	int bkgBorder = QFontMetrics(context.display->getTextDisplayFont()).height() / 4 + 4;
 	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
 	context.display->displayText(	getName(),
 									static_cast<int>(Q2D.x) + dPix + bkgBorder,

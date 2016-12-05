@@ -76,7 +76,7 @@ bool ccDish::buildUp()
 	double sectionAngleStep_rad = (endAngle_rad-startAngle_rad)/sectionSteps;
 
 	//vertices
-	unsigned vertCount = steps*sectionSteps+1; //+1 for noth pole
+	unsigned vertCount = steps*sectionSteps+1; //+1 for north pole
 	//faces
 	unsigned faceCount = steps*((sectionSteps-1)*2+1);
 

@@ -32,7 +32,7 @@
  *** Globals ***
  ***************/
 
-//buffer for formated string generation
+//buffer for formatted string generation
 static const size_t s_bufferMaxSize = 4096;
 static char s_buffer[s_bufferMaxSize];
 

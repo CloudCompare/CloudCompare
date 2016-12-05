@@ -43,9 +43,9 @@ public:
 	ccViewportParameters(const ccViewportParameters& params);
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	virtual bool isSerializable() const override { return true; }
+	virtual bool toFile(QFile& out) const override;
+	virtual bool fromFile(QFile& in, short dataVersion, int flags) override;
 
 	//! Current pixel size (in 'current unit'/pixel)
 	/** This scale is valid eveywhere in ortho. mode 
@@ -234,6 +234,11 @@ public:
 
 	//! Returns the current OpenGL camera parameters
 	virtual void getGLCameraParameters(ccGLCameraParameters& params) = 0;
+
+	//! Converts 2D screen coordinates to 'centered' 2D OpenGL context coordinates
+	virtual QPointF toCenteredGLCoordinates(int x, int y) const = 0;
+	//! Converts 2D screen coordinates to 'corner-based' 2D OpenGL context coordinates
+	virtual QPointF toCornerGLCoordinates(int x, int y) const = 0;
 
 	//! Returns viewport parameters (zoom, etc.)
 	virtual const ccViewportParameters& getViewportParameters() const = 0;

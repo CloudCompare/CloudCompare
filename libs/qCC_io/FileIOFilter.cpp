@@ -261,7 +261,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 			QString newName = child->getName();
 			if (newName.startsWith("unnamed"))
 			{
-				//we automatically replace occurences of 'unnamed' in entities names by the base filename (no path, no extension)
+				//we automatically replace occurrences of 'unnamed' in entities names by the base filename (no path, no extension)
 				newName.replace(QString("unnamed"), fi.baseName());
 				child->setName(newName);
 			}

@@ -304,8 +304,8 @@ protected:
         \param modelTree KD-tree containing the model point cloud
         \param dataCloud data point cloud
         \param dataToModel transformation that, applied to data points, register model and data clouds
-        \param delta tolerance above which data points are not counted (if a point is less than delta-appart from de model cloud, then it is counted)
-        \return the number of data points which are distance-appart from the model cloud
+        \param delta tolerance above which data points are not counted (if a point is less than delta-apart from the model cloud, then it is counted)
+        \return the number of data points which are distance-apart from the model cloud
     **/
     static unsigned ComputeRegistrationScore(	KDTree *modelTree,
 												GenericIndexedCloud *dataCloud,

@@ -70,7 +70,7 @@ namespace CCLib
 
 		//! Ovelap test between a 3D box and a triangle
 		/** \param boxcenter the box center
-		\param boxhalfsize the box half dimenions
+		\param boxhalfsize the box half dimensions
 		\param triverts the 3 triangle vertices
 		\return true if the input box and triangle overlap, false otherwise
 		**/
@@ -80,7 +80,7 @@ namespace CCLib
 
 		//! Ovelap test between a 3D box and a triangle (double version)
 		/** \param boxcenter the box center
-			\param boxhalfsize the box half dimenions
+			\param boxhalfsize the box half dimensions
 			\param triverts the 3 triangle vertices
 			\return true if the input box and triangle overlap, false otherwise
 		**/

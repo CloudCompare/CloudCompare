@@ -217,7 +217,7 @@ public:
 			m_faces->addChild(vertices);
 			m_faces->setVisible(true);
 			vertices->setEnabled(false);
-			vertices->setLocked(true);
+			//vertices->setLocked(true);  //DGM: no need to lock it as it is only used by one mesh!
 			vertices->setGlobalShift(m_globalShift);
 			
 			m_root->addChild(m_faces);

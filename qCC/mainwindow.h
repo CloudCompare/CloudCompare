@@ -135,11 +135,14 @@ public:
 	virtual ccHObject* dbRootObject() override;
 	inline virtual QMainWindow* getMainWindow() override { return this; }
 	inline virtual const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
+	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
+	virtual void destroyGLWindow(ccGLWindow*) const override;
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
 	virtual ccColorScalesManager* getColorScalesManager() override;
 	virtual void spawnHistogramDialog(const std::vector<unsigned>& histoValues,
 												 double minVal, double maxVal,
 												 QString title, QString xAxisLabel) override;
+	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
@@ -301,6 +304,7 @@ protected slots:
 	void doActionSetColorGradient();
 	void doActionInterpolateColors();
 	void doActionChangeColorLevels();
+	void doActionEnhanceRGBWithIntensities();
 
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();
@@ -368,6 +372,7 @@ protected slots:
 	void doActionResampleWithOctree();
 	void doActionComputeMeshAA();
 	void doActionComputeMeshLS();
+	void doActionMeshScanGrids();
 	void doActionComputeDistanceMap();
 	void doActionComputeDistToBestFitQuadric3D();
 	void doActionMeasureMeshSurface();
@@ -431,9 +436,9 @@ protected slots:
 	void activateSegmentationMode();
 	void deactivateSegmentationMode(bool);
 
-    //Polyline tracing
-    void activateTracePolylineMode();
-    void deactivateTracePolylineMode(bool);
+	//Polyline tracing
+	void activateTracePolylineMode();
+	void deactivateTracePolylineMode(bool);
 
 	//Section extraction
 	void activateSectionExtractionMode();
@@ -472,6 +477,9 @@ protected slots:
 
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
+
+	//! Show high DPI (Retina) screen warning
+	void showHighDPIScreenWarning();
 
 protected:
 
@@ -571,6 +579,12 @@ protected:
 	//! Pivot visibility pop-up menu button
 	QToolButton* m_pivotVisibilityPopupButton;
 
+	//! Flag: first time the window is made visible
+	bool m_FirstShow;
+
+	//! Point picking hub
+	ccPickingHub* m_pickingHub;
+
 	/******************************/
 	/***        MDI AREA        ***/
 	/******************************/
@@ -603,8 +617,8 @@ protected:
 	ccCameraParamEditDlg* m_cpeDlg;
 	//! Graphical segmentation dialog
 	ccGraphicalSegmentationTool* m_gsTool;
-    //! Polyline tracing tool
-    ccTracePolylineTool * m_tplTool;
+	//! Polyline tracing tool
+	ccTracePolylineTool * m_tplTool;
 	//! Section extraction dialog
 	ccSectionExtractionTool* m_seTool;
 	//! Graphical transformation dialog
@@ -628,8 +642,6 @@ protected:
 	QList<ccStdPluginInterface*> m_stdPlugins;
 	QList<QToolBar*> m_stdPluginsToolbars;
 	QActionGroup m_glFilterActions;
-
-	bool	m_FirstShow;
 };
 
 #endif

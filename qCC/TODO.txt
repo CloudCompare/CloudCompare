@@ -24,13 +24,13 @@ Big ones:
 [*] Undo mechanism
 [*] Command line mode could be extended
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
-	- use plugins through the command line
+	- use plugins through the command line (M3C2, etc. - see https://github.com/cloudcompare/trunk/issues/403)
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
 	- option to apply the inverse transformation
 	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
 	- rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
-	- Clean filter
+	- clean filter
 	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 	- set the output file name (http://www.danielgm.net/cc/forum/viewtopic.php?t=1089)
@@ -40,13 +40,13 @@ Big ones:
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 [*] Update qKinect with the Kinect for Windows SDK (1.8)
-[*] Finish the Oculus Rift plugin
 [*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 qAnimation plugin:
 
 [*] It would be great to specify the resolution.  I saw your comment and it just seems to make sense as this way you are not guessing.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
+[*] Generate side-by-side stereo animations (for Google cardboard, etc.) with the qAnimation plugin
 
 qFacets plugin:
 [*] Option to export 3D polygons (facets) in SHP files
@@ -54,7 +54,18 @@ qFacets plugin:
 
 Various:
 
-[*] To be able to load a (geotiff) raster
+[*] Drop the old (deprecated) OpenGL based picking for entities and lablels (http://www.danielgm.net/cc/forum/viewtopic.php?t=2009)
+[*] Add support for Gocad pointset files (= ASCII file with a specific header and decoration)
+[*] LAS files: export non standard (scalar) fields as extended fields
+[*] Read PTS files as multiple clouds (http://www.cloudcompare.org/forum/viewtopic.php?t=2004)
+[*] Generate side-by-side OpenGL views for Sony or Epson AR glasses (http://www.cloudcompare.org/forum/viewtopic.php?t=2011)
+[*] Add GeoJSON format support for vector data... and a lot of other ideas (http://www.danielgm.net/cc/forum/viewtopic.php?t=1845)
+[*] Rasterize: export other fields than the height field (SFs, colors, etc.) when exporting the grid to an image or a matrix file (http://www.cloudcompare.org/forum/viewtopic.php?t=1800)
+[*] Export grid structure in E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1134)
+[*] Auto-save function (http://www.danielgm.net/cc/forum/viewtopic.php?t=1292)
+[*] Spherical projection of 360 degrees images to color a point cloud (http://www.danielgm.net/cc/forum/viewtopic.php?t=1268&p=4709#p4709)
+[*] Load georeferenced images (ecw+ers, jpg+jgw) (http://www.cloudcompare.org/forum/viewtopic.php?t=1244)
+[*] Add a check box to turn on and off gradient colors in the Color Scale Editor
 [*] Interpolate SFs over two clouds (http://www.danielgm.net/cc/forum/viewtopic.php?t=1725)
 [*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp
@@ -94,6 +105,14 @@ Various:
 [*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
 [*] Overlay grid (for 3D views - http://www.cloudcompare.org/forum/viewtopic.php?t=926) 
 
+From Dimitri L.
+[*] Access to the Rasterize tool through the command line (with XML parameter file)
+[*] Advanced maths on scalar fields (http://www.danielgm.net/cc/forum/viewtopic.php?t=1277)
+[*] Interactive modification of scalar vlaues (http://www.cloudcompare.org/forum/viewtopic.php?t=1331)
+[*] Being able to apply various methods based on a sub-sampled cloud
+[*] Vector fields (http://www.cloudcompare.org/forum/viewtopic.php?t=201)
+[*] Histogram enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=1160)
+
 From 'kachilca' (http://www.cloudcompare.org/forum/viewtopic.php?t=1399)
 [*] Normal map support and generation
 [*] Mesh decimation (with curvature priority)
@@ -110,11 +129,6 @@ From Andrew B.
 [*] 'minimise bounding box' or various automated ways to make objects 'stand up' the way they are supposed to or be rigid-transformed on the basis of perceived axial symmetry
 [*] An automatic 'scale to unit size' in cases where compare different sized things is of interest, but size can be discarded or treated separately
 [*] Automation of the above tasks via the command line
-
-From Dimitri L.
-[*] Being able to apply various methods based on a sub-sampled cloud
-[*] Vector fields (http://www.cloudcompare.org/forum/viewtopic.php?t=201)
-[*] Histogram enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=1160)
 
 From Thomas D.
 [*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)

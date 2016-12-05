@@ -18,6 +18,9 @@
 #ifndef CC_WAVEFORM_DIALOG_HEADER
 #define CC_WAVEFORM_DIALOG_HEADER
 
+//Local
+#include "ccPickingListener.h"
+
 //Qt
 #include <QDialog>
 #include <QFont>
@@ -31,6 +34,7 @@ class QCPGraph;
 class QCPArrow;
 class Ui_WaveDialog;
 class ccPointCloud;
+class ccPickingHub;
 
 //! Waveform widget
 class ccWaveWidget : public QCustomPlot
@@ -51,7 +55,7 @@ public:
 	void setAxisLabels(const QString& xLabel, const QString& yLabel);
 
 	//! Computes the wave (curve) from a given point waveform
-	void init(ccPointCloud* cloud, unsigned pointIndex, bool logScale);
+	void init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue = 0.0);
 
 	//! Clears the display
 	void clear();
@@ -97,25 +101,30 @@ protected: //attributes
 };
 
 //! Waveform dialog
-class ccWaveDialog : public QDialog
+class ccWaveDialog : public QDialog, public ccPickingListener
 {
 	Q_OBJECT
 
 public:
 	//! Default constructor
-	explicit ccWaveDialog(ccPointCloud* cloud, QWidget* parent = 0);
+	explicit ccWaveDialog(ccPointCloud* cloud, ccPickingHub* pickingHub, QWidget* parent = 0);
 	//! Destructor
 	virtual ~ccWaveDialog();
 
 	//! Returns the encapsulated widget
 	inline ccWaveWidget* waveWidget() { return m_widget; }
 
+	//inherited from ccPickingListener
+	virtual void onItemPicked(const PickedItem& pi);
+
 protected slots:
 
 	void onPointIndexChanged(int);
-	void onLogScaleToggled(bool);
+	void updateCurrentWaveform();
+	void onPointPickingButtonToggled(bool);
+	void onExportWaveAsCSV();
 
-protected:
+protected: //members
 
 	//! Associated point cloud
 	ccPointCloud* m_cloud;
@@ -123,8 +132,15 @@ protected:
 	//! Wave widget
 	ccWaveWidget* m_widget;
 
+	//! Picking hub
+	ccPickingHub* m_pickingHub;
+
 	//! GUI
 	Ui_WaveDialog* m_gui;
+
+	//! Maximum wave amplitude (for all points)
+	double m_waveMax;
+
 };
 
 #endif //CC_WAVEFORM_DIALOG_HEADER

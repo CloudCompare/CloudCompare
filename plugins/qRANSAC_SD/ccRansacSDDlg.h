@@ -32,7 +32,7 @@ public:
 
 protected slots:
 
-	//! Saves (temporarily) the dialog paramters on acceptation
+	//! Saves (temporarily) the dialog parameters on acceptation
 	void saveSettings();
 
 };

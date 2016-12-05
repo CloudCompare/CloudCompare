@@ -146,7 +146,7 @@ protected:
 	//! Tries to load ShiftInfo data from a (text) file
 	/** Data is stored in m_defaultInfos.
 		\param filename filename
-		\return sucess
+		\return success
 	**/
 	bool loadInfoFromFile(QString filename);
 

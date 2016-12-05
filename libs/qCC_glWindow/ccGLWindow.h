@@ -174,6 +174,8 @@ public:
 	virtual QFont getTextDisplayFont() const override; //takes rendering zoom into account!
 	virtual QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
+	virtual QPointF toCenteredGLCoordinates(int x, int y) const override;
+	virtual QPointF toCornerGLCoordinates(int x, int y) const override;
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	inline virtual QWidget* asWidget() override { return m_parentWidget; }
@@ -467,7 +469,7 @@ public:
 	CCVector3d getCurrentUpDir() const;
 
 	//! Returns current parameters for this display (const version)
-	/** Warning: may return overriden parameters!
+	/** Warning: may return overridden parameters!
 	**/
 	const ccGui::ParamStruct& getDisplayParameters() const;
 
@@ -524,6 +526,20 @@ public:
 
 	//! Returns unique ID
 	inline int getUniqueID() const { return m_uniqueID; }
+
+	//! Returns the widget width (in pixels)
+	int qtWidth() const { return ccGLWindow::width(); }
+	//! Returns the widget height (in pixels)
+	int qtHeight() const { return ccGLWindow::height(); }
+	//! Returns the widget size (in pixels)
+	QSize qtSize() const { return ccGLWindowParent::size(); }
+
+	//! Returns the OpenGL context width
+	int glWidth() const { return m_glViewport.width(); }
+	//! Returns the OpenGL context height
+	int glHeight() const { return m_glViewport.height(); }
+	//! Returns the OpenGL context size
+	QSize glSize() const { return m_glViewport.size(); }
 
 public: //LOD
 
@@ -596,7 +612,7 @@ public slots:
 	//inherited from ccGenericGLDisplay
 	virtual void redraw(bool only2D = false, bool resetLOD = true) override;
 
-	//called when recieving mouse wheel is rotated
+	//called when receiving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
 
 	//! Tests frame rate
@@ -836,6 +852,12 @@ protected: //rendering
 	void drawForeground(CC_DRAW_CONTEXT& context, RenderingParams& params);
 
 protected: //other methods
+
+	//these methods are now protected to prevent issues with Retina or other high DPI displays
+	//(see glWidth(), glHeight(), qtWidth(), qtHeight(), qtSize(), glSize()
+	int width() const { return ccGLWindowParent::width(); }
+	int height() const { return ccGLWindowParent::height(); }
+	QSize size() const { return ccGLWindowParent::size(); }
 
 	//! Returns the current (OpenGL) view matrix
 	/** Warning: may be different from the 'view' matrix returned by getBaseViewMat.
@@ -1237,7 +1259,7 @@ protected: //members
 	//! Rectangular picking polyline
 	ccPolyline* m_rectPickingPoly;
 
-	//! Overriden display parameter 
+	//! Overridden display parameter 
 	ccGui::ParamStruct m_overridenDisplayParameters;
 
 	//! Whether display parameters are overidden for this window

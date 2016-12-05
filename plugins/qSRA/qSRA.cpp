@@ -233,7 +233,7 @@ void qSRA::loadProfile() const
 
 	m_app->addToDB(polyline,true,false,true);
 
-	m_app->dispToConsole(QString("[qSRA] File '%1' succesfully loaded").arg(filename),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole(QString("[qSRA] File '%1' successfully loaded").arg(filename),ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
 //helper

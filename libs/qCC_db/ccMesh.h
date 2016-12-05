@@ -352,7 +352,7 @@ public:
 	bool processScalarField(MESH_SCALAR_FIELD_PROCESS process);
 
 	//! Subdivides mesh (so as to ensure that all triangles are falls below 'maxArea')
-	/** \return subdivided mesh (if successfull)
+	/** \return subdivided mesh (if successful)
 	**/
 	ccMesh* subdivide(PointCoordinateType maxArea) const;
 

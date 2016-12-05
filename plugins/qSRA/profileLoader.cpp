@@ -167,7 +167,7 @@ ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppIn
 				else
 				{
 					if (app)
-						app->dispToConsole(QString("Not enough points in profile?!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+						app->dispToConsole(QString("Not enough points in profile?!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 					
 					error = true;
 					break;

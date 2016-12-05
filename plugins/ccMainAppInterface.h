@@ -25,9 +25,11 @@
 #include <ccHObject.h>
 
 class QMainWindow;
+class QWidget;
 class ccGLWindow;
 class ccColorScalesManager;
 class ccOverlayDialog;
+class ccPickingHub;
 
 //! Main application interface (for plugins)
 class ccMainAppInterface
@@ -39,6 +41,15 @@ public:
 
 	//! Returns active GL sub-window (if any)
 	virtual ccGLWindow* getActiveGLWindow() = 0;
+
+	//! Creates a new instance of GL window (with its encapsulating widget)
+	/** \warning This instance must be destroyed by the application as well (see destroyGLWindow)
+		Note that the encapsulating widget is the window instance itself if 'stereo' mode is disabled
+	**/
+	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const = 0;
+
+	//! Destroys an instance of GL window created by createGLWindow
+	virtual void destroyGLWindow(ccGLWindow*) const = 0;
 
 	//! Registers a MDI area 'overlay' dialog
 	/** Overlay dialogs are displayed in the central MDI area, above the 3D views.
@@ -72,10 +83,10 @@ public:
 		\param autoRedraw whether to redraw the 3D view automatically or not (warning: if 'updateZoom' is true, the 3D view will always be redrawn)
 	**/
 	virtual void addToDB(	ccHObject* obj,
-		                    bool updateZoom = false,
-		                    bool autoExpandDBTree = true,
-		                    bool checkDimensions = false,
-		                    bool autoRedraw = true) = 0;
+							bool updateZoom = false,
+							bool autoExpandDBTree = true,
+							bool checkDimensions = false,
+							bool autoRedraw = true) = 0;
 
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
@@ -148,10 +159,13 @@ public:
 
 	//! Spawns an histogram dialog
 	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
-	                                    double minVal,
-	                                    double maxVal,
-	                                    QString title,
-	                                    QString xAxisLabel) = 0;
+										double minVal,
+										double maxVal,
+										QString title,
+										QString xAxisLabel) = 0;
+
+	//! Returns the picking hub (if any)
+	virtual ccPickingHub* pickingHub() { return nullptr; }
 
 	//other useful methods
 	virtual void setFrontView() = 0;

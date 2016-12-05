@@ -250,9 +250,10 @@ void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 
 	if (autoExpand)
 	{
-		QModelIndex childIndex = index(object);
-		if (childIndex.isValid())
-			m_dbTreeWidget->expand(childIndex);
+		//expand the parent (just in case)
+		m_dbTreeWidget->expand(index(parentObject));
+		//and the child
+		m_dbTreeWidget->expand(index(object));
 	}
 	else //if (parentObject)
 	{
@@ -1085,7 +1086,7 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 		else if (item->isKindOf(CC_TYPES::POLY_LINE))
 		{
 			const ccPolyline* poly = static_cast<const ccPolyline*>(item);
-			//we can only displace a polyline if it is not dependant on it's father!
+			//we can only displace a polyline if it is not dependent on it's father!
 			const ccHObject* polyVertices = dynamic_cast<const ccHObject*>(poly->getAssociatedCloud());
 			if (polyVertices != poly->getParent())
 			{

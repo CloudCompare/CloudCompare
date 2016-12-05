@@ -104,7 +104,7 @@ public:
 	//! Returns the front arrival time at a given cell
 	/** This method should only be called after the propagation
 		succeeded. The coordinates of the cell can be absolute
-		(i.e. exressed relatively to the octree borders) or relative
+		(i.e. expressed relatively to the octree borders) or relative
 		(i.e. expressed relatively to the Fast Marching grid).
 		\param pos the cell position (3 integer coordinates)
 		\param absoluteCoordinates whether the cell coordinates are absolute or relative

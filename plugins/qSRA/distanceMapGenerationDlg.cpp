@@ -516,7 +516,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			ccViewportParameters params = m_window->getViewportParameters();
 			params.zoom = 1.0f;
 
-			int screenWidth = m_window->width();
+			int screenWidth = m_window->glWidth();
 			int scaleWidth = 0;
 			int labelsWidth = 0;
 			if (sfDisplayed)
@@ -543,20 +543,20 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			}
 
 			//available room for the map
-			int mapWidth = std::max(1,screenWidth-scaleWidth-labelsWidth);
+			int mapWidth = std::max(1, screenWidth - scaleWidth - labelsWidth);
 
 			//we zoom so that the map takes all the room left
-			float mapPart = static_cast<float>(mapWidth)/static_cast<float>(screenWidth);
+			float mapPart = static_cast<float>(mapWidth) / static_cast<float>(screenWidth);
 			params.zoom *= mapPart;
 
 			//we must also center the camera on the right position so that the map
 			//appears inbetween the scale and the color ramp
-			float mapStart = static_cast<float>(labelsWidth)/static_cast<float>(screenWidth);
+			float mapStart = static_cast<float>(labelsWidth) / static_cast<float>(screenWidth);
 			centerPos = (0.5f - mapStart) / mapPart;
 
 			//update pixel size accordingly
-			float screenHeight = static_cast<float>(m_window->height()) * params.orthoAspectRatio;
-			params.pixelSize = static_cast<float>(std::max(box.getDiagVec().x/static_cast<PointCoordinateType>(mapWidth), box.getDiagVec().y/static_cast<PointCoordinateType>(screenHeight)));
+			float screenHeight = m_window->glHeight() * params.orthoAspectRatio;
+			params.pixelSize = static_cast<float>(std::max(box.getDiagVec().x / mapWidth, box.getDiagVec().y / screenHeight));
 			m_window->setViewportParameters(params);
 		}
 
@@ -1271,7 +1271,7 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 	if (!m_window)
 		return;
 
-	ccRenderToFileDlg rtfDlg(m_window->width(), m_window->height(), m_app->getMainWindow());
+	ccRenderToFileDlg rtfDlg(m_window->glWidth(), m_window->glHeight(), m_app->getMainWindow());
 	rtfDlg.dontScaleFeaturesCheckBox->setChecked(false);
 	rtfDlg.dontScaleFeaturesCheckBox->setVisible(false);
 	rtfDlg.renderOverlayItemsCheckBox->setChecked(false);

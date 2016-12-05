@@ -297,23 +297,23 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	//all-at-once: all clouds in a single file
 	if (allAtOnce)
 	{
-		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_CloudExportFormat,false);
+		FileIOFilter::Shared filter = FileIOFilter::GetFilter(s_CloudExportFormat, false);
 		bool multiple = false;
 		if (filter)
 		{
 			bool exclusive = true;
-			filter->canSave(CC_TYPES::POINT_CLOUD,multiple,exclusive);
+			filter->canSave(CC_TYPES::POINT_CLOUD, multiple, exclusive);
 		}
 		
 		if (multiple)
 		{
 			ccHObject tempContainer("Clouds");
 			{
-				for (size_t i=0; i<m_clouds.size(); ++i)
-					tempContainer.addChild(m_clouds[i].getEntity(),ccHObject::DP_NONE);
+				for (size_t i = 0; i < m_clouds.size(); ++i)
+					tempContainer.addChild(m_clouds[i].getEntity(), ccHObject::DP_NONE);
 			}
 			//save output
-			GroupDesc desc(&tempContainer,"AllClouds",m_clouds.front().path);
+			GroupDesc desc(&tempContainer, "AllClouds", m_clouds.front().path);
 			QString errorStr = Export(desc,suffix,0,true);
 			if (!errorStr.isEmpty())
 				return Error(errorStr);
@@ -329,10 +329,10 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 
 	//standard way: one file per cloud
 	{
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (size_t i = 0; i < m_clouds.size(); ++i)
 		{
 			//save output
-			QString errorStr = Export(m_clouds[i],suffix);
+			QString errorStr = Export(m_clouds[i], suffix);
 			if (!errorStr.isEmpty())
 				return Error(errorStr);
 		}
@@ -982,7 +982,7 @@ bool ccCommandLineParser::commandExtractCC(QStringList& arguments, ccProgressDia
 
 			if (!success)
 			{
-				ccConsole::Warning("An error occured (failed to finish the extraction)");
+				ccConsole::Warning("An error occurred (failed to finish the extraction)");
 				continue;
 			}
 
@@ -1323,10 +1323,10 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	//apply transformation
 	if (!m_clouds.empty())
 	{
-		for (size_t i=0; i<m_clouds.size(); ++i)
+		for (const CloudDesc& desc : m_clouds)
 		{
-			m_clouds[i].pc->applyGLTransformation_recursive(&mat);
-			m_clouds[i].pc->setName(m_clouds[i].pc->getName()+".transformed");
+			desc.pc->applyGLTransformation_recursive(&mat);
+			desc.pc->setName(desc.pc->getName() + ".transformed");
 		}
 		//save output
 		if (s_autoSaveMode && !saveClouds("TRANSFORMED"))
@@ -1334,10 +1334,10 @@ bool ccCommandLineParser::commandApplyTransformation(QStringList& arguments)
 	}
 	if (!m_meshes.empty())
 	{
-		for (size_t i=0; i<m_meshes.size(); ++i)
+		for (const MeshDesc& desc : m_meshes)
 		{
-			m_meshes[i].mesh->applyGLTransformation_recursive(&mat);
-			m_meshes[i].mesh->setName(m_meshes[i].mesh->getName()+".transformed");
+			desc.mesh->applyGLTransformation_recursive(&mat);
+			desc.mesh->setName(desc.mesh->getName() + ".transformed");
 		}
 		//save output
 		if (s_autoSaveMode && !saveMeshes("TRANSFORMED"))
@@ -1355,23 +1355,18 @@ bool ccCommandLineParser::commandDropGlobalShift(QStringList& arguments)
 		return Error(QString("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
 
 	//process clouds
-	if (!m_clouds.empty())
+	for (const CloudDesc& desc : m_clouds)
 	{
-		for (size_t i=0; i<m_clouds.size(); ++i)
-		{
-			m_clouds[i].pc->setGlobalShift(0, 0, 0);
-		}
+		desc.pc->setGlobalShift(0, 0, 0);
 	}
-	if (!m_meshes.empty())
+
+	for (const MeshDesc& desc : m_meshes)
 	{
-		for (size_t i=0; i<m_meshes.size(); ++i)
+		bool isLocked = false;
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
+		if (shifted && !isLocked)
 		{
-			bool isLocked = false;
-			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(m_meshes[i].mesh, &isLocked);
-			if (shifted && !isLocked)
-			{
-				shifted->setGlobalShift(0, 0, 0);
-			}
+			shifted->setGlobalShift(0, 0, 0);
 		}
 	}
 
@@ -1537,7 +1532,7 @@ bool ccCommandLineParser::commandMergeClouds(QStringList& arguments)
 
 	//merge clouds
 	{
-		for (size_t i=1; i<m_clouds.size(); ++i)
+		for (size_t i = 1; i < m_clouds.size(); ++i)
 		{
 			unsigned beforePts = m_clouds.front().pc->size();
 			unsigned newPts = m_clouds[i].pc->size();
@@ -2946,7 +2941,7 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	if (!compDlg.computeDistances())
 	{
 		compDlg.cancelAndExit();
-		return Error("An error occured during distances computation!");
+		return Error("An error occurred during distances computation!");
 	}
 
 	compDlg.applyAndExit();
@@ -3947,7 +3942,7 @@ bool ccCommandLineParser::commandSaveClouds(QStringList& arguments)
 		}
 	}
 
-	return saveClouds(QString(),allAtOnce);
+	return saveClouds(QString(), allAtOnce);
 }
 
 bool ccCommandLineParser::commandSaveMeshes(QStringList& arguments)
@@ -3971,7 +3966,7 @@ bool ccCommandLineParser::commandSaveMeshes(QStringList& arguments)
 		}
 	}
 
-	return saveMeshes(QString(),allAtOnce);
+	return saveMeshes(QString(), allAtOnce);
 }
 
 bool ccCommandLineParser::commandAutoSave(QStringList& arguments)

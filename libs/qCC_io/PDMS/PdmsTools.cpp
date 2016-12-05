@@ -137,7 +137,7 @@ PointCoordinateType DistanceValue::getValueInWorkingUnit() const
 		return value / static_cast<PointCoordinateType>(1000);
 	if (unit == PDMS_METRE && workingUnit == PDMS_MILLIMETRE)
 		return value * static_cast<PointCoordinateType>(1000);
-	
+
 	return value;
 }
 
@@ -151,7 +151,7 @@ Reference& Reference::operator=(const Reference &ref)
 	command = ref.command;
 	token = ref.token;
 	strcpy(refname, ref.refname);
-	
+
 	return *this;
 }
 
@@ -162,7 +162,7 @@ bool Reference::handle(Token t)
 	//Todo : handle other references than grouping elements or design element
 	if (!PdmsToken::isElement(t))
 		return false;
-	
+
 	token = t;
 	return true;
 }
@@ -172,7 +172,7 @@ bool Reference::handle(const char* str)
 	if (isSet())
 		return false;
 	strcpy(refname, str);
-	
+
 	return true;
 }
 
@@ -242,7 +242,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 			return false;
 		result = item->getRoot()->scan(refname);
 	}
-	//Request for an element (hierachical or design element only)
+	//Request for an element (hierarchical or design element only)
 	else if (isTokenReference())
 	{
 		if (PdmsToken::isGroupElement(token))
@@ -256,7 +256,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 		}
 		else if (PdmsToken::isDesignElement(token))
 		{
-			//Go up in the hierarchy untill we meet the requested type
+			//Go up in the hierarchy until we meet the requested type
 			result = item;
 			while (result && result->getType()!=token)
 				result = result->owner;
@@ -286,19 +286,19 @@ bool Coordinates::handle(Token t)
 	if (current >= 3)
 		return false;
 
-	//Check that current activ comand cannot handle this token (if it cannot, check that it is valid before continuing)
+	//Check that current active command cannot handle this token (if it cannot, check that it is valid before continuing)
 	if (current >= 0)
 	{
 		if (coords[current].handle(t))
 			return true;
-		if (!coords[current].isValid()) 
+		if (!coords[current].isValid())
 			return false;
 	}
-	
+
 	//Handle coordinates commands
 	if (!PdmsToken::isCoordinate(t))
 		return false;
-	
+
 	if (++current >= 3)
 		return false;
 
@@ -313,11 +313,11 @@ bool Coordinates::handle(PointCoordinateType numvalue)
 {
 	if (current < 0 || current >= 3)
 		return false;
-	
+
 	//Only coordinates can handle numerical values
 	if (!PdmsToken::isCoordinate(coords[current].command))
 		return false;
-	
+
 	return coords[current].handle(numvalue);
 }
 
@@ -461,19 +461,19 @@ bool Position::execute(PdmsObjects::GenericItem* &item) const
 		if (!ref.execute(refpos))
 			return false;
 	}
-	
+
 	//Get position point
 	CCVector3 p;
 	position.getVector(p);
 	item->setPosition(p);
 	item->positionReference = refpos;
-	
+
 	return true;
 }
 
 bool Orientation::handle(Token t)
 {
-	//Check that current activ comand cannot handle this token (if it cannot, check that it is valid before continuing)
+	//Check that current active command cannot handle this token (if it cannot, check that it is valid before continuing)
 	if (current)
 	{
 		if (current->handle(t))
@@ -560,7 +560,7 @@ bool Orientation::getAxes(CCVector3 &x, CCVector3 &y, CCVector3 &z) const
 	{
 		if (!orientation[i].isValid())
 			return false;
-		
+
 		switch(orientation[i].command)
 		{
 		case PDMS_X:
@@ -568,37 +568,37 @@ bool Orientation::getAxes(CCVector3 &x, CCVector3 &y, CCVector3 &z) const
 			if (!axisFromCoords(orientation[i],x))
 				return false;
 			break;
-		
+
 		case PDMS_WEST:
 			if (!axisFromCoords(orientation[i],x))
 				return false;
 			x *= -1.;
 			break;
-		
+
 		case PDMS_Y:
 		case PDMS_NORTH:
 			if (!axisFromCoords(orientation[i],y))
 				return false;
 			break;
-		
+
 		case PDMS_SOUTH:
 			if (!axisFromCoords(orientation[i],y))
 				return false;
 			y *= -1.;
 			break;
-		
+
 		case PDMS_Z:
 		case PDMS_UP:
 			if (!axisFromCoords(orientation[i],z))
 				return false;
 			break;
-		
+
 		case PDMS_DOWN:
 			if (!axisFromCoords(orientation[i],z))
 				return false;
 			z *= -1.;
 			break;
-		
+
 		default:
 			return false;
 		}
@@ -649,12 +649,12 @@ bool Orientation::execute(PdmsObjects::GenericItem* &item) const
 		}
 		item->orientationReferences[i] = refori;
 	}
-	
+
 	//Get position point
 	CCVector3 x, y, z;
 	if (!getAxes(x, y, z))
 		return false;
-	
+
 	item->setOrientation(x, y, z);
 	return true;
 }
@@ -663,9 +663,9 @@ bool Name::execute(PdmsObjects::GenericItem* &item) const
 {
 	if (!item)
 		return false;
-	
+
 	strcpy(item->name, name);
-	
+
 	return true;
 }
 
@@ -740,7 +740,7 @@ const char* ElementCreation::GetDefaultElementName(Token token)
 		return "Loop";
 	case PDMS_VERTEX:
 		return "Vertex";
-		
+
 	default:
 		break;
 	}
@@ -762,7 +762,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 	case PDMS_SUBSTRUCTURE:
 		try { newElement = new GroupElement(elementType); } catch(std::exception &nex) {memalert(nex,1); return false;}
 		break;
-	
+
 	//PDMS elements
 	case PDMS_SCYLINDER:
 		try { newElement = new SCylinder; } catch(std::exception &nex) {memalert(nex,1); return false;}
@@ -834,7 +834,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 		}
 		item = mitem;
 	}
-	
+
 	//Then we can (try to) push the new element in the hierarchy
 	if (item && !item->push(newElement))
 	{
@@ -842,7 +842,7 @@ bool ElementCreation::execute(PdmsObjects::GenericItem* &item) const
 		PdmsObjects::Stack::Detroy(newElement);
 		return false;
 	}
-	
+
 	newElement->creator = newElement->owner;
 	if (path.size())
 		strcpy(newElement->name, path.back().c_str());
@@ -921,7 +921,7 @@ bool ElementCreation::splitPath(const char *str)
 	//At the end, we have to create an entry for the last word
 	if (i != 0)
 		path.push_back(std::string(str, i));
-	
+
 	return (path.size() != 0);
 }
 
@@ -1135,7 +1135,7 @@ bool GenericItem::convertCoordinateSystem()
 			GenericItem *ref = orientationReferences[k];
 			if (!ref->isCoordinateSystemUpToDate && ref->owner == this)
 				return false;
-			
+
 			CCVector3 axis[3];
 			{
 				for (unsigned j=0; j<3; j++)
@@ -1148,11 +1148,11 @@ bool GenericItem::convertCoordinateSystem()
 			}
 		}
 	}
-	
+
 	if (!completeOrientation())
 		return false;
 	isCoordinateSystemUpToDate = true;
-	
+
 	return true;
 }
 
@@ -1170,7 +1170,7 @@ bool GenericItem::scan(Token t, std::vector<GenericItem *> &array)
 		}
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -1209,11 +1209,11 @@ bool DesignElement::push(GenericItem *i)
 			return true;
 		}
 	}
-	
+
 	//In most cases, design elements do not handle nested elements
 	if (owner)
 		return owner->push(i);
-	
+
 	return false;
 }
 
@@ -1276,7 +1276,7 @@ bool GroupElement::push(GenericItem *i)
 			if (group->owner)
 				group->owner->remove(group);
 			group->owner = this;
-			
+
 			try
 			{
 				subhierarchy.push_back(group);
@@ -1354,7 +1354,7 @@ bool GroupElement::convertCoordinateSystem()
 
 GenericItem* GroupElement::scan(const char* str)
 {
-	//scan all elements contained in this group, begining with this one, while none matches the requested name
+	//scan all elements contained in this group, beginning with this one, while none matches the requested name
 	GenericItem *item=GenericItem::scan(str);
 	for (std::list<DesignElement*>::iterator eit = elements.begin(); eit != elements.end() && !item; ++eit)
 		item = (*eit)->scan(str);
@@ -1483,9 +1483,9 @@ std::pair<int, int> SCylinder::write(std::ostream &output, int nbtabs) const
 
 	for (i=0; i<nbtabs; i++)
 		output << "\t";
-	
+
 	output << "END" << std::endl;
-	
+
 	return std::pair<int,int>(0,1);
 }
 
@@ -1705,11 +1705,11 @@ PointCoordinateType Cone::surface() const
 		r1=dbottom;
 		r2=dtop;
 	}
-	
+
 	PointCoordinateType h1 = (r1*height)/(r2-r1);
 	PointCoordinateType a1 = static_cast<PointCoordinateType>(M_PI)*r1*sqrt(PDMS_SQR(r1)+PDMS_SQR(h1));
 	PointCoordinateType a2 = static_cast<PointCoordinateType>(M_PI)*r2*sqrt(PDMS_SQR(r2)+PDMS_SQR(h1+height));
-	
+
 	return a2-a1;
 }
 
@@ -1860,10 +1860,10 @@ bool Extrusion::push(GenericItem *l)
 		if (l->owner)
 			l->owner->remove(l);
 		l->owner = this;
-		
+
 		return true;
 	}
-	
+
 	return DesignElement::push(l);
 }
 

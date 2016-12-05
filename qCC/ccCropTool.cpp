@@ -61,6 +61,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		//crop
 		ccPointCloud* croppedEnt = cloud->partialClone(selection);
 		delete selection;
+		selection = 0;
 
 		return croppedEnt;
 	}
@@ -163,7 +164,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 							if (origVertices->hasColors() || origVertices->hasScalarFields())
 							{
 								//we use flags to avoid processing the same vertex multiple times
-								std::vector<bool> vertProcessed(croppedVertices->size(),false);
+								std::vector<bool> vertProcessed(croppedVertices->size(), false);
 
 								//colors
 								bool importColors = false;
@@ -183,7 +184,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									unsigned sfCount = origVertices_pc ? origVertices_pc->getNumberOfScalarFields() : 1;
 									
 									//now try to import each SF
-									for (unsigned i=0; i<sfCount; ++i)
+									for (unsigned i = 0; i < sfCount; ++i)
 									{
 										int sfIdx = croppedVertices->addScalarField(origVertices_pc ? origVertices_pc->getScalarField(i)->getName() : "Scalar field");
 										if (sfIdx >= 0)
@@ -219,7 +220,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 								if (importColors || importSFs)
 								{
 									//for each new triangle
-									for (unsigned i=0; i<croppedMesh->size(); ++i)
+									for (unsigned i = 0; i < croppedMesh->size(); ++i)
 									{
 										//get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
@@ -229,7 +230,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										const CCLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 										//we now have to test the 3 vertices of the new triangle
-										for (unsigned j=0; j<3; ++j)
+										for (unsigned j = 0; j < 3; ++j)
 										{
 											unsigned vertIndex = tsic->i[j];
 											
@@ -257,9 +258,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
 												//import SFs
-												for (unsigned s=0; s<static_cast<unsigned>(importedSFs.size()); ++s)
+												for (unsigned s = 0; s < static_cast<unsigned>(importedSFs.size()); ++s)
 												{
-													CCVector3d scalarValues(0,0,0);
+													CCVector3d scalarValues(0, 0, 0);
 													if (origVertices_pc)
 													{
 														const CCLib::ScalarField* sf = origVertices_pc->getScalarField(s);
@@ -285,7 +286,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										}
 									}
 
-									for (size_t s=0; s<importedSFs.size(); ++s)
+									for (size_t s = 0; s < importedSFs.size(); ++s)
 									{
 										importedSFs[s]->computeMinAndMax();
 									}
@@ -308,7 +309,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									std::vector<int> materialUsed(origMaterialSet->size(),-1);
 									
 									//per-triangle materials
-									for (unsigned i=0; i<croppedMesh->size(); ++i)
+									for (unsigned i = 0; i < croppedMesh->size(); ++i)
 									{
 										//get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
@@ -323,7 +324,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										size_t materialUsedCount = 0;
 										{
-											for (size_t i=0; i<materialUsed.size(); ++i)
+											for (size_t i = 0; i < materialUsed.size(); ++i)
 												if (materialUsed[i] == 1)
 													++materialUsedCount;
 										}
@@ -339,20 +340,20 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 											ccMaterialSet* matSet = new ccMaterialSet(origMaterialSet->getName());
 											{
 												matSet->reserve(materialUsedCount);
-												for (size_t i=0; i<materialUsed.size(); ++i)
+												for (size_t i = 0; i < materialUsed.size(); ++i)
 												{
 													if (materialUsed[i] >= 0)
 													{
 														matSet->push_back(ccMaterial::Shared(new ccMaterial(*origMaterialSet->at(i))));
 														//update index
-														materialUsed[i] = static_cast<int>(matSet->size())-1;
+														materialUsed[i] = static_cast<int>(matSet->size()) - 1;
 													}
 												}
 											}
 											croppedMesh->setMaterialSet(matSet);
 											
 											//and update the materials indexes!
-											for (unsigned i=0; i<croppedMesh->size(); ++i)
+											for (unsigned i = 0; i < croppedMesh->size(); ++i)
 											{
 												int mtlIndex = croppedMesh->getTriangleMtlIndex(i);
 												if (mtlIndex >= 0)
@@ -379,28 +380,28 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										&&	texCoords->reserve(croppedMesh->size()*3))
 									{
 										//for each new triangle
-										for (unsigned i=0; i<croppedMesh->size(); ++i)
+										for (unsigned i = 0; i < croppedMesh->size(); ++i)
 										{
 											//get the origin triangle
 											unsigned origTriIndex = origTriIndexes[i];
 											float* tx1 = 0;
 											float* tx2 = 0;
 											float* tx3 = 0;
-											mesh->getTriangleTexCoordinates(origTriIndex,tx1,tx2,tx3);
+											mesh->getTriangleTexCoordinates(origTriIndex, tx1, tx2, tx3);
 
 											//get the new triangle
 											const CCLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 											//for each vertex of the new triangle
-											int texIndexes[3] = {-1,-1,-1};
-											for (unsigned j=0; j<3; ++j)
+											int texIndexes[3] = { -1, -1, -1 };
+											for (unsigned j = 0; j < 3; ++j)
 											{
 												unsigned vertIndex = tsic->i[j];
 												const CCVector3* Vcj = croppedVertices->getPoint(vertIndex);
 
 												//intepolation weights
 												CCVector3d w;
-												mesh->computeInterpolationWeights(origTriIndex,*Vcj,w);
+												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
 												if (	(tx1 || w.u[0] < ZERO_TOLERANCE)
 													&&	(tx2 || w.u[1] < ZERO_TOLERANCE)
@@ -454,6 +455,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			params.outsideMesh = 0;
 		}
 
+		if (croppedMesh)
+		{
+			croppedMesh->setDisplay_recursive(entity->getDisplay());
+		}
 		return croppedMesh;
 	}
 

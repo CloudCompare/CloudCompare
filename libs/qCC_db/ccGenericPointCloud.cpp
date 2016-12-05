@@ -439,7 +439,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	{
 		//back project the clicked point in 3D
 		CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
-		CCVector3d X(0,0,0);
+		CCVector3d X(0, 0, 0);
 		if (!camera.unproject(clickPosd, X))
 		{
 			return false;

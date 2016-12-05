@@ -59,7 +59,7 @@ ccNormalComputationDlg::ccNormalComputationDlg(SelectionMode selectionMode, QWid
 
 		case MIXED:
 			{
-				//both computation methods can be choosed
+				//both computation methods can be chosen
 				useScanGridRadioButton->setAutoExclusive(false);
 				useOctreeRadioButton->setAutoExclusive(false);
 				useOctreeRadioButton->setChecked(true);

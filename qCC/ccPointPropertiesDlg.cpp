@@ -283,14 +283,16 @@ void ccPointPropertiesDlg::processPickedPoint(ccPointCloud* cloud, unsigned poin
 	m_label->setVisible(true);
 	m_label->displayPointLegend(m_label->size() == 3); //we need to display 'A', 'B' and 'C' for 3-points labels
 	if (m_label->size() == 1 && m_associatedWin)
-		m_label->setPosition(static_cast<float>(x + 20) / m_associatedWin->width(), static_cast<float>(y + 20) / m_associatedWin->height());
+	{
+		m_label->setPosition(static_cast<float>(x + 20) / m_associatedWin->glWidth(), static_cast<float>(y + 20) / m_associatedWin->glHeight());
+	}
 
 	//output info to Console
 	QStringList body = m_label->getLabelContent(ccGui::Parameters().displayedNumPrecision);
 	ccLog::Print(QString("[Picked] ") + m_label->getName());
-	for (int i = 0; i < body.size(); ++i)
+	for (QString& row : body)
 	{
-		ccLog::Print(QString("[Picked]\t- ") + body[i]);
+		ccLog::Print(QString("[Picked]\t- ") + row);
 	}
 
 	if (m_associatedWin)
@@ -311,13 +313,13 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 		assert(false);
 		return;
 	}
-	x = x - m_associatedWin->width() / 2;
-	y = m_associatedWin->height() / 2 - y;
+
+	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 
 	if (m_rect2DLabel->isSelected()) //already closed? we start a new label
 	{
-		float roi[4] = {static_cast<float>(x),
-						static_cast<float>(y),
+		float roi[4] = {static_cast<float>(pos2D.x()),
+						static_cast<float>(pos2D.y()),
 						0,0};
 
 		if (m_associatedWin)
@@ -333,8 +335,8 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 	{
 		float roi[4] = {m_rect2DLabel->roi()[0],
 						m_rect2DLabel->roi()[1],
-						static_cast<float>(x),
-						static_cast<float>(y) };
+						static_cast<float>(pos2D.x()),
+						static_cast<float>(pos2D.y()) };
 		m_rect2DLabel->setRoi(roi);
 		m_rect2DLabel->setVisible(true);	//=valid
 		m_rect2DLabel->setSelected(true);	//=closed
@@ -364,10 +366,12 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 		return;
 	}
 
-	float roi[4] = {m_rect2DLabel->roi()[0],
-					m_rect2DLabel->roi()[1],
-					static_cast<float>(x - m_associatedWin->width()/2),
-					static_cast<float>(m_associatedWin->height()/2 - y) };
+	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+
+	float roi[4] = {	m_rect2DLabel->roi()[0],
+						m_rect2DLabel->roi()[1],
+						static_cast<float>(pos2D.x()),
+						static_cast<float>(pos2D.y()) };
 	m_rect2DLabel->setRoi(roi);
 	m_rect2DLabel->setVisible(true);
 

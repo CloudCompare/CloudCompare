@@ -201,8 +201,11 @@ protected:
 	double m_averageLineSize;
 	QString m_filename;
 	QString m_headerLine;
+
+	enum ColumnType { TEXT = 0, UNKNOWN = 1, IGNORED = 2, VALID = 3 };
+	
 	//! Identifies columns with numbers only [mandatory]
-	std::vector<bool> m_columnsValidty;
+	std::vector<ColumnType> m_columnType;
 
 	unsigned m_columnsCount;
 };

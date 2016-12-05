@@ -139,17 +139,17 @@ public:
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const = 0;
 
 	//! Returns color corresponding to a given point
-	/** WARNING: color array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	/** WARNING: color array must be enabled! (see ccDrawableObject::hasColors)
 	**/
 	virtual const ColorCompType* getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
-	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
 	**/
 	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const = 0;
 
 	//! Returns normal corresponding to a given point
-	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
 	**/
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const = 0;
 
@@ -186,6 +186,7 @@ public:
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
 
+
 	/***************************************************
 					Other methods
 	***************************************************/
@@ -220,11 +221,11 @@ public:
 	//! Multiplies all coordinates by constant factors (one per dimension)
 	/** WARNING: attached octree may be deleted.
 		\param fx multiplication factor along the X dimension
-        \param fy multiplication factor along the Y dimension
-        \param fz multiplication factor along the Z dimension
+		\param fy multiplication factor along the Y dimension
+		\param fz multiplication factor along the Z dimension
 		\param center scaling center (0,0,0) by default
-    **/
-	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) = 0;
+	**/
+	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0, 0, 0)) = 0;
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const override { return true; }

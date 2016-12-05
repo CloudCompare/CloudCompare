@@ -4,7 +4,7 @@
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
+//#  the Free Software Foundation; version 2 or later of the License.      #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
@@ -117,7 +117,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 	//create 3D view
 	{
 		QWidget* glWidget = 0;
-		CreateGLWindow(m_glWindow, glWidget, false, true);
+		m_app->createGLWindow(m_glWindow, glWidget);
 		assert(m_glWindow && glWidget);
 
 		m_glWindow->setPerspectiveState(false, true);
@@ -167,9 +167,35 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 		connect(cancelPushButton,   SIGNAL(clicked()), this, SLOT(cancel()));
 		connect(applyPushButton,    SIGNAL(clicked()), this, SLOT(apply()));
 		connect(validatePushButton, SIGNAL(clicked()), this, SLOT(validate()));
+
+		//view buttons
+		connect(topViewToolButton,    &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_TOP_VIEW  ); });
+		connect(frontViewToolButton,  &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_FRONT_VIEW); });
+		connect(leftViewToolButton,   &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_LEFT_VIEW ); });
+		connect(backViewToolButton,   &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_BACK_VIEW ); });
+		connect(rightViewToolButton,  &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_RIGHT_VIEW); });
+		connect(bottomViewToolButton, &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_TOP_VIEW  ); });
 	}
 
 	freezeUI(true);
+}
+
+qBroomDlg::~qBroomDlg()
+{
+	if (m_glWindow)
+	{
+		m_glWindow->getOwnDB()->removeAllChildren();
+		if (m_app)
+		{
+			m_app->destroyGLWindow(m_glWindow);
+			m_glWindow = 0;
+		}
+	}
+	if (m_boxes)
+	{
+		delete m_boxes;
+		m_boxes = 0;
+	}
 }
 
 cc2DLabel* qBroomDlg::Picking::addLabel(ccGenericPointCloud* cloud, unsigned pointIndex)
@@ -233,19 +259,6 @@ void qBroomDlg::Picking::clear()
 	labels.clear();
 }
 
-qBroomDlg::~qBroomDlg()
-{
-	if (m_glWindow)
-	{
-		m_glWindow->getOwnDB()->removeAllChildren();
-	}
-	if (m_boxes)
-	{
-		delete m_boxes;
-		m_boxes = 0;
-	}
-}
-
 void qBroomDlg::freezeUI(bool state)
 {
 	broomDimGroupBox->setDisabled(state);
@@ -289,7 +302,7 @@ bool qBroomDlg::CloudBackup::backupColors()
 		}
 
 		//copy the existing colors
-		for (unsigned i=0; i<ref->size(); ++i)
+		for (unsigned i = 0; i < ref->size(); ++i)
 		{
 			colors->setValue(i, ref->getPointColor(i));
 		}
@@ -479,6 +492,10 @@ bool qBroomDlg::setCloud(ccPointCloud* cloud, bool ownCloud/*=false*/, bool auto
 			ccViewportParameters viewport = m_cloud.originDisplay->getViewportParameters();
 			m_glWindow->setViewportParameters(viewport);
 
+			//by the way, update some parameters of the 3D view (in case they have changed since last call)
+			//const ccGui::ParamStruct& displayParams = ccGui::Parameters();
+			//m_glWindow->setDisplayParameters(displayParams);
+
 			//import GL filter so as to get the same rendering aspect!
 			ccGlFilter* filter = static_cast<ccGLWindow*>(m_cloud.originDisplay)->getGlFilter();
 			if (filter)
@@ -607,8 +624,9 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 	CCVector3 P3D;
 	{
 		CCVector3d M03D, M13D;
-		camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 0), M03D);
-		camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 1), M13D);
+		QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
+		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
+		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
  		if (!Intersection(broomTrans, CCVector3::fromArray(M03D.u), CCVector3::fromArray(M13D.u), P3D))
 		{
 			return;
@@ -1255,8 +1273,9 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 		{
 			ccGLMatrix broomTrans = m_boxes->getGLTransformation();
 			CCVector3d M03D, M13D;
-			camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 0), M03D);
-			camera.unproject(CCVector3(x, m_glWindow->height()-1 - y, 1), M13D);
+			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
+			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
+			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
 			if (!Intersection(broomTrans, CCVector3::fromArray(M03D.u), CCVector3::fromArray(M13D.u), P3D))
 			{
 				ccLog::Warning("Failed to project the clicked point on the bromm plane");
@@ -1293,7 +1312,8 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 			int nearestTriIndex = -1;
 			double nearestSquareDist = 0;
 			CCVector3d P;
-			m_broomSelected = m_broomBox->trianglePicking(	CCVector2d(x, m_glWindow->height()-1 - y),
+			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
+			m_broomSelected = m_broomBox->trianglePicking(	CCVector2d(pos2D.x(), pos2D.y()),
 															camera,
 															nearestTriIndex,
 															nearestSquareDist,
@@ -1307,8 +1327,9 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 			if (stickCheckBox->isChecked())
 			{
 				//compute click direction in 3D
-				CCVector3d A2D(m_lastMousePos.x(), m_glWindow->height()-1 - m_lastMousePos.y(), 0);
-				CCVector3d B2D(A2D.x, A2D.y, 1);
+				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
+				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
+				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
 				CCVector3d A3D, B3D;
 				if (	camera.unproject(A2D, A3D)
 					&&	camera.unproject(B2D, B3D) )
@@ -1394,8 +1415,9 @@ void qBroomDlg::onMouseMoved(int x, int y, Qt::MouseButtons button)
 				m_glWindow->getGLCameraParameters(camera);
 
 				//compute click direction in 3D
-				CCVector3d A2D(m_lastMousePos.x(), m_glWindow->height()-1 - m_lastMousePos.y(), 0);
-				CCVector3d B2D(A2D.x, A2D.y, 1);
+				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
+				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
+				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
 				CCVector3d A3D, B3D;
 
 				bool hasMousePos3D = false;

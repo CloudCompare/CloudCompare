@@ -80,7 +80,7 @@ public:
 	//! Sets the accceleration exageration factor
 	/** In order to detect the front arrival time jumps (see
 		FastMarchingForPropagation::setDetectionThreshold), it
-		is possible to exagerate the result of the acceleration
+		is possible to exaggerate the result of the acceleration
 		computation with this factor.
 		\param value the acceleration exageration factor
 	**/

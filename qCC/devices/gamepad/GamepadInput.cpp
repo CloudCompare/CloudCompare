@@ -53,7 +53,7 @@ void GamepadInput::update(ccGLWindow* win)
 		//translation
 		if (m_hasPanning)
 		{
-			float scale = static_cast<float>(std::min(win->width(), win->height()) * viewParams.pixelSize);
+			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 			scale /= win->computePerspectiveZoom();
 
 			float tanFOV = tan(static_cast<float>(viewParams.fov * CC_DEG_TO_RAD)/*/2*/);
@@ -68,7 +68,7 @@ void GamepadInput::update(ccGLWindow* win)
 		}
 		else if (m_hasTranslation)
 		{
-			float scale = static_cast<float>(std::min(win->width(), win->height()) * viewParams.pixelSize);
+			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 			scale /= win->computePerspectiveZoom();
 
 			float tanFOV = tan(static_cast<float>(viewParams.fov * CC_DEG_TO_RAD)/*/2*/);
@@ -87,7 +87,7 @@ void GamepadInput::update(ccGLWindow* win)
 		//panning
 		if (m_hasPanning)
 		{
-			float scale = static_cast<float>(std::min(win->width(), win->height()) * viewParams.pixelSize);
+			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 			scale /= win->getViewportParameters().zoom;
 			win->moveCamera(-m_panning.x*scale, -m_panning.y*scale, 0);
 		}
@@ -97,7 +97,7 @@ void GamepadInput::update(ccGLWindow* win)
 		{
 			if (m_translation.x != 0 && !m_hasPanning)
 			{
-				float scale = static_cast<float>(std::min(win->width(), win->height()) * viewParams.pixelSize);
+				float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 				scale /= win->getViewportParameters().zoom;
 				win->moveCamera(-m_translation.x*scale, 0, 0);
 			}

@@ -41,7 +41,7 @@ public:
 	{
 		// set the normal vector
 		normal = CCVector3f(a, b, c);
-		//compute the lenght of the vector
+		//compute the length of the vector
 		float l = normal.norm();
 		if (l != 0)
 		{

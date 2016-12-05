@@ -50,7 +50,7 @@ public:
 	//! before checking the name for matches
 	bool getTypeIsUsed() const;
 
-	//! if the name must be considerd as regex
+	//! if the name must be considered as regex
 	bool getNameIsRegex() const;
 
 	//! if performing name-match (regex or not)

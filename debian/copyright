@@ -66,7 +66,7 @@ License: BSD
 
 Files: qCC/plugins/qBroom/*
 Copyright: 2016 Wesley Grimes (Collision Engineering Associates)
-License: GPL-2.0
+License: GPL-2.0+
 
 Files: qCC/plugins/qEDL/*
 Copyright: EDF R&D / TELECOM ParisTech (ENST-TSI)
@@ -106,8 +106,9 @@ License: MIT
  Symposium of Geometry Processing 2016, Computer Graphics Forum
 
 Files: qCC/plugins/qHoughNormals/nanoflann
-Copyright: 2008-2009 Marius Muja (mariusm@cs.ubc.ca) and David G. Lowe (lowe@cs.ubc.ca). 2011 Jose L. Blanco (joseluisblancoc@gmail.com)
-License: BSD 
+Copyright: 2008-2009 Marius Muja (mariusm@cs.ubc.ca) and David G. Lowe (lowe@cs.ubc.ca). 
+ 2011 Jose L. Blanco (joseluisblancoc@gmail.com)
+License: BSD
 
 Files: qCC/plugins/qFacets/*
 Copyright: BRGM
@@ -178,7 +179,11 @@ Files: qCC/plugins/qLAS_FWF/*
 Copyright: CNRS / OSUR
 License: GPL-2.0+
 
-fILES: qCC/plugins/qPCL/*
+Files: qCC/plugins/qM3C2/*
+Copyright: UNIVERSITE EUROPEENNE DE BRETAGNE
+License: GPL-2.0+
+
+Files: qCC/plugins/qPCL/*
 Copyright: Luca Penasa
 License: GPL-2.0+
 

@@ -4746,7 +4746,15 @@ int FontSizeModifier(int fontSize, float zoomFactor)
 
 int ccGLWindow::getFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * devicePixelRatio();
+	const int defaultFontSize = static_cast<int>(getDisplayParameters().defaultFontSize);
+	
+	int	pointSize = (m_captureMode.enabled ? FontSizeModifier(defaultFontSize, m_captureMode.zoomFactor) : defaultFontSize) * devicePixelRatio();
+
+#ifdef Q_OS_MAC
+	pointSize *= 1.25;
+#endif
+	
+	return pointSize;
 }
 
 void ccGLWindow::setFontPointSize(int pixelSize)
@@ -4766,7 +4774,15 @@ QFont ccGLWindow::getTextDisplayFont() const
 
 int ccGLWindow::getLabelFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * devicePixelRatio();
+	const int labelFontSize = static_cast<int>(getDisplayParameters().labelFontSize);
+	
+	int	pointSize = (m_captureMode.enabled ? FontSizeModifier(labelFontSize, m_captureMode.zoomFactor) : labelFontSize) * devicePixelRatio();
+
+#ifdef Q_OS_MAC
+	pointSize *= 1.25;
+#endif
+	
+	return pointSize;
 }
 
 QFont ccGLWindow::getLabelDisplayFont() const

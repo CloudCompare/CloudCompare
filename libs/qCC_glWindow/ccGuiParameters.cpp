@@ -94,8 +94,14 @@ void ccGui::ParamStruct::reset()
 	colorScaleShaderSupported	= false;
 	colorScaleRampWidth			= 50;
 
+#ifdef Q_OS_MAC
+	defaultFontSize				= 12;
+	labelFontSize				= 10;
+#else
 	defaultFontSize				= 10;
 	labelFontSize				= 8;
+#endif
+	
 	displayedNumPrecision		= 6;
 	labelOpacity				= 75;
 

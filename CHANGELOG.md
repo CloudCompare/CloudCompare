@@ -163,6 +163,7 @@ v2.8.beta - XX/XX/2016
 		- New option to update an existing viewport object (with the current camera parameters)
 		- [macOS] Now looks for the global_shift.txt file beside the .app instead of inside the application bundle
 		- [macOS] Hides the 3D mouse and Gamepad menus since they are not yet supported on macOS
+		- [macOS] Increases the default font sizes for the 3D viewer (these may be set in the Display Options)
 		- I/O plugins (Faro, DP, Riegl, etc) are now loaded even when using CC in command line mode
 
 - Bug fixes:

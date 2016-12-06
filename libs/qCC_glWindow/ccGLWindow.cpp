@@ -126,53 +126,107 @@ template<class QOpenGLFunctions> inline static void glColor4ubv_safe(QOpenGLFunc
 						rgb[3] / 255.0f);
 }
 
-void ccGLWindow::removeFBOSafe(ccFrameBufferObject* &fbo)
+//! Precomputed stuff for the 'hot zone'
+struct HotZone
 {
-	//we "disconnect" the current FBO to avoid wrong display/errors
-	//if QT tries to redraw window during object destruction
-	if (fbo)
+	//display font
+	QFont font;
+	//text height
+	int textHeight;
+	//text shift
+	int yTextBottomLineShift;
+	//default color
+	unsigned char color[3];
+
+	//bubble-view label rect.
+	QString bbv_label;
+	//bubble-view label rect.
+	QRect bbv_labelRect;
+	//bubble-view row width
+	int bbv_totalWidth;
+
+	//fullscreen label rect.
+	QString fs_label;
+	//fullscreen label rect.
+	QRect fs_labelRect;
+	//fullscreen row width
+	int fs_totalWidth;
+
+	//point size label
+	QString psi_label;
+	//point size label rect.
+	QRect psi_labelRect;
+	//point size row width
+	int psi_totalWidth;
+
+	int margin;
+	int iconSize;
+	QPoint topCorner;
+
+	explicit HotZone(ccGLWindow* win)
+		: textHeight(0)
+		, yTextBottomLineShift(0)
+		, bbv_label("bubble-view mode")
+		, fs_label("fullscreen mode")
+		, psi_label("default point size")
+		, margin(16)
+		, iconSize(16)
+		, topCorner(0, 0)
 	{
-		ccFrameBufferObject* _fbo = fbo;
-		fbo = 0;
-		delete _fbo;
+		//default color ("greenish")
+		color[0] = 133;
+		color[1] = 193;
+		color[2] = 39;
+
+		if (win)
+		{
+			font = win->font();
+			int retinaScale = win->devicePixelRatio();
+			font.setPointSize(12 * retinaScale);
+			margin *= retinaScale;
+			iconSize *= retinaScale;
+			font.setBold(true);
+		}
+
+		QFontMetrics metrics(font);
+		bbv_labelRect = metrics.boundingRect(bbv_label);
+		fs_labelRect = metrics.boundingRect(fs_label);
+		psi_labelRect = metrics.boundingRect(psi_label);
+
+		psi_totalWidth = /*margin() + */psi_labelRect.width() + margin + iconSize + margin + iconSize/* + margin*/;
+		bbv_totalWidth = /*margin() + */bbv_labelRect.width() + margin + iconSize/* + margin*/;
+		fs_totalWidth  = /*margin() + */fs_labelRect.width()  + margin + iconSize/* + margin*/;
+
+		textHeight = std::max(psi_labelRect.height(), bbv_labelRect.height());
+		textHeight = std::max(fs_labelRect.height(), textHeight);
+		textHeight = (3 * textHeight) / 4; // --> factor: to recenter the baseline a little
+		yTextBottomLineShift = (iconSize / 2) + (textHeight / 2);
 	}
-}
 
-bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
-{
-	//correction for HD screens
-	const int retinaScale = devicePixelRatio();
-	w *= retinaScale;
-	h *= retinaScale;
-
-	if (fbo && fbo->width() == w && fbo->height() == h)
+	QRect rect(bool clickableItemsVisible, bool bubbleViewModeEnabled, bool fullScreenEnabled) const
 	{
-		//nothing to do
-		return true;
+		//total hot zone area size (without margin)
+		int totalWidth = 0;
+		if (clickableItemsVisible)
+			totalWidth = psi_totalWidth;
+		if (bubbleViewModeEnabled)
+			totalWidth = std::max(totalWidth, bbv_totalWidth);
+		if (fullScreenEnabled)
+			totalWidth = std::max(totalWidth, fs_totalWidth);
+
+		QPoint minAreaCorner(0         , std::min(0, yTextBottomLineShift - textHeight));
+		QPoint maxAreaCorner(totalWidth, std::max(iconSize, yTextBottomLineShift));
+		int rowCount = clickableItemsVisible ? 1 : 0;
+		rowCount += bubbleViewModeEnabled ? 1 : 0;
+		rowCount += fullScreenEnabled ? 1 : 0;
+		maxAreaCorner.setY(maxAreaCorner.y() + (iconSize + margin) * (rowCount - 1));
+
+		QRect areaRect(	minAreaCorner - QPoint(margin, margin) / 2,
+						maxAreaCorner + QPoint(margin, margin) / 2);
+
+		return areaRect;
 	}
-
-	//we "disconnect" the current FBO to avoid wrong display/errors
-	//if QT tries to redraw window during initialization
-	ccFrameBufferObject* _fbo = fbo;
-	fbo = 0;
-
-	if (!_fbo)
-	{
-		_fbo = new ccFrameBufferObject();
-	}
-
-	if (	!_fbo->init(w, h)
-		||	!_fbo->initColor()
-		||	!_fbo->initDepth())
-	{
-		delete _fbo;
-		_fbo = 0;
-		return false;
-	}
-
-	fbo = _fbo;
-	return true;
-}
+};
 
 ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 						ccGLWindowParent* parent/*=0*/,
@@ -246,6 +300,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_pickRadius(DefaultPickRadius)
 	, m_glExtFuncSupported(false)
 	, m_autoRefresh(false)
+	, m_hotZone(0)
 {
 	//start internal timer
 	m_timer.start();
@@ -404,6 +459,9 @@ ccGLWindow::~ccGLWindow()
 	if (m_device)
 		delete m_device;
 #endif
+
+	if (m_hotZone)
+		delete m_hotZone;
 }
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
@@ -1017,6 +1075,10 @@ void ccGLWindow::resizeGL(int w, int h)
 
 	setLODEnabled(true, true);
 	m_currentLODState.level = 0;
+	if (m_hotZone)
+	{
+		m_hotZone->topCorner = QPoint(0, 0);
+	}
 
 	displayNewMessage(	QString("New size = %1 * %2 (px)").arg(m_glViewport.width()).arg(m_glViewport.height()),
 						ccGLWindow::LOWER_LEFT_MESSAGE,
@@ -1110,74 +1172,21 @@ void ccGLWindow::stopFrameRateTest()
 	redraw();
 }
 
-//! Precomputed stuff for the 'hot zone'
-struct HotZone
-{
-	//display font
-	QFont font;
-	//text height
-	int textHeight;
-	//text shift
-	int yTextBottomLineShift;
-	//default color
-	unsigned char color[3];
-
-	//bubble-view label rect.
-	QString bbv_label;
-	//bubble-view label rect.
-	QRect bbv_labelRect;
-
-	//fullscreen label rect.
-	QString fs_label;
-	//fullscreen label rect.
-	QRect fs_labelRect;
-
-	//point size label
-	QString psi_label;
-	//point size label rect.
-	QRect psi_labelRect;
-
-	//! Default margin
-	static inline int margin() { return 16; }
-	//! Default icon size
-	static inline int iconSize() { return 16; }
-
-	explicit HotZone(ccGLWindow* win)
-		: textHeight(0)
-		, yTextBottomLineShift(0)
-		, bbv_label("bubble-view mode")
-		, fs_label("fullscreen mode")
-		, psi_label("default point size")
-	{
-		//default color ("greenish")
-		color[0] = 133;
-		color[1] = 193;
-		color[2] = 39;
-
-		if (win)
-		{
-			font = win->font();
-		}
-		font.setPointSize(12);
-		font.setBold(true);
-
-		QFontMetrics metrics(font);
-		bbv_labelRect = metrics.boundingRect(bbv_label);
-		fs_labelRect = metrics.boundingRect(fs_label);
-		psi_labelRect = metrics.boundingRect(psi_label);
-
-		textHeight = std::max(psi_labelRect.height(), bbv_labelRect.height());
-		textHeight = std::max(fs_labelRect.height(), textHeight);
-		textHeight = (3 * textHeight) / 4; // --> factor: to recenter the baseline a little
-		yTextBottomLineShift = (iconSize() / 2) + (textHeight / 2);
-	}
-};
-QSharedPointer<HotZone> s_hotZone(0);
-
 void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 {
-	if (	!m_clickableItemsVisible
-		&&	!m_bubbleViewModeEnabled)
+	//we init the necessary parameters the first time we need them
+	if (!m_hotZone)
+	{
+		m_hotZone = new HotZone(this);
+	}
+	//remember the last position of the 'top corner'
+	m_hotZone->topCorner = QPoint(xStart0, yStart) + QPoint(m_hotZone->margin, m_hotZone->margin);
+
+	bool fullScreenEnabled = exclusiveFullScreen();
+
+	if (!m_clickableItemsVisible
+		&&	!m_bubbleViewModeEnabled
+		&&	!fullScreenEnabled)
 	{
 		//nothing to do
 		return;
@@ -1186,9 +1195,6 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	//we init the necessary parameters the first time we need them
-	if (!s_hotZone)
-		s_hotZone = QSharedPointer<HotZone>(new HotZone(this));
 	//"exit" icon
 	static const QImage c_exitIcon = QImage(":/CC/images/ccExit.png").mirrored();
 
@@ -1198,133 +1204,108 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 	glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
 	glFunc->glEnable(GL_BLEND);
 
-	bool fullScreenEnabled = exclusiveFullScreen();
-
 	//draw semi-transparent background
 	{
-		//total hot zone area size (without margin)
-		int psi_totalWidth = 0;
-		if (m_clickableItemsVisible)
-			psi_totalWidth = /*HotZone::margin() + */s_hotZone->psi_labelRect.width() + HotZone::margin() + HotZone::iconSize() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
-		int bbv_totalWidth = 0;
-		if (m_bubbleViewModeEnabled)
-			bbv_totalWidth = /*HotZone::margin() + */s_hotZone->bbv_labelRect.width() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
-		int fs_totalWidth = 0;
-		if (fullScreenEnabled)
-			fs_totalWidth = /*HotZone::margin() + */s_hotZone->fs_labelRect.width() + HotZone::margin() + HotZone::iconSize()/* + HotZone::margin()*/;
-
-		int totalWidth = std::max(psi_totalWidth, bbv_totalWidth);
-		totalWidth = std::max(fs_totalWidth, totalWidth);
-
-		QPoint minAreaCorner(xStart0 + HotZone::margin(), yStart + HotZone::margin() + std::min(0, s_hotZone->yTextBottomLineShift - s_hotZone->textHeight));
-		QPoint maxAreaCorner(xStart0 + HotZone::margin() + totalWidth, yStart + HotZone::margin() + std::max(HotZone::iconSize(), s_hotZone->yTextBottomLineShift));
-		if (m_clickableItemsVisible && m_bubbleViewModeEnabled)
-		{
-			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
-		}
-		if (m_clickableItemsVisible && fullScreenEnabled)
-		{
-			maxAreaCorner.setY(maxAreaCorner.y() + HotZone::iconSize() + HotZone::margin());
-		}
-
-		QRect areaRect(minAreaCorner - QPoint(HotZone::margin(), HotZone::margin()) / 2,
-			maxAreaCorner + QPoint(HotZone::margin(), HotZone::margin()) / 2);
+		QRect areaRect = m_hotZone->rect(m_clickableItemsVisible, m_bubbleViewModeEnabled, fullScreenEnabled);
+		areaRect.translate(m_hotZone->topCorner);
 
 		//draw rectangle
 		glFunc->glColor4ub(ccColor::darkGrey.r, ccColor::darkGrey.g, ccColor::darkGrey.b, 210);
 		glFunc->glBegin(GL_QUADS);
-		glFunc->glVertex2i(-halfW + (areaRect.x()), halfH - (areaRect.y()));
-		glFunc->glVertex2i(-halfW + (areaRect.x() + areaRect.width()), halfH - (areaRect.y()));
-		glFunc->glVertex2i(-halfW + (areaRect.x() + areaRect.width()), halfH - (areaRect.y() + areaRect.height()));
-		glFunc->glVertex2i(-halfW + (areaRect.x()), halfH - (areaRect.y() + areaRect.height()));
+		int x0 = -halfW + areaRect.x();
+		int y0 =  halfH - areaRect.y();
+		glFunc->glVertex2i(x0                   , y0);
+		glFunc->glVertex2i(x0 + areaRect.width(), y0);
+		glFunc->glVertex2i(x0 + areaRect.width(), y0 - areaRect.height());
+		glFunc->glVertex2i(x0                   , y0 - areaRect.height());
 		glFunc->glEnd();
+	}
+
+	yStart = m_hotZone->topCorner.y();
+
+	if (fullScreenEnabled)
+	{
+		int xStart = m_hotZone->topCorner.x();
+
+		//label
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->fs_label, m_hotZone->font);
+
+		//icon
+		xStart += m_hotZone->fs_labelRect.width() + m_hotZone->margin;
+
+		//"full-screen" icon
+		{
+			ccGLUtils::DisplayTexture2DPosition(c_exitIcon, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_FULLSCREEN_MODE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+			xStart += m_hotZone->iconSize;
+		}
+
+		yStart += m_hotZone->iconSize;
+		yStart += m_hotZone->margin;
+	}
+
+	if (m_bubbleViewModeEnabled)
+	{
+		int xStart = m_hotZone->topCorner.x();
+
+		//label
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->bbv_label, m_hotZone->font);
+
+		//icon
+		xStart += m_hotZone->bbv_labelRect.width() + m_hotZone->margin;
+
+		//"exit" icon
+		{
+			ccGLUtils::DisplayTexture2DPosition(c_exitIcon, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+			xStart += m_hotZone->iconSize;
+		}
+
+		yStart += m_hotZone->iconSize;
+		yStart += m_hotZone->margin;
 	}
 
 	if (m_clickableItemsVisible)
 	{
-		yStart += HotZone::margin();
-		int xStart = xStart0 + HotZone::margin();
+		int xStart = m_hotZone->topCorner.x();
 
 		//label
-		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
-		renderText(xStart, yStart + s_hotZone->yTextBottomLineShift, s_hotZone->psi_label, s_hotZone->font);
+		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
+		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->psi_label, m_hotZone->font);
 
 		//icons
-		xStart += s_hotZone->psi_labelRect.width() + HotZone::margin();
+		xStart += m_hotZone->psi_labelRect.width() + m_hotZone->margin;
 
 		//"minus" icon
 		{
 			static const QImage c_psi_minusPix = QImage(":/CC/images/ccMinus.png").mirrored();
-			ccGLUtils::DisplayTexture2DPosition(c_psi_minusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
-			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
-			xStart += HotZone::iconSize();
+			ccGLUtils::DisplayTexture2DPosition(c_psi_minusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::DECREASE_POINT_SIZE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+			xStart += m_hotZone->iconSize;
 		}
 
 		//separator
 		{
-			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
+			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
 			glFunc->glBegin(GL_POINTS);
-			glFunc->glVertex2i(-halfW + xStart + HotZone::margin() / 2, halfH - (yStart + HotZone::iconSize() / 2));
+			glFunc->glVertex2i(-halfW + xStart + m_hotZone->margin / 2, halfH - (yStart + m_hotZone->iconSize / 2));
 			glFunc->glEnd();
-			xStart += HotZone::margin();
+			xStart += m_hotZone->margin;
 		}
 
 		//"plus" icon
 		{
 			static const QImage c_psi_plusPix = QImage(":/CC/images/ccPlus.png").mirrored();
-			ccGLUtils::DisplayTexture2DPosition(c_psi_plusPix, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
-			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
-			xStart += HotZone::iconSize();
+			ccGLUtils::DisplayTexture2DPosition(c_psi_plusPix, -halfW + xStart, halfH - (yStart + m_hotZone->iconSize), m_hotZone->iconSize, m_hotZone->iconSize);
+			m_clickableItems.push_back(ClickableItem(ClickableItem::INCREASE_POINT_SIZE, QRect(xStart, yStart, m_hotZone->iconSize, m_hotZone->iconSize)));
+			xStart += m_hotZone->iconSize;
 		}
 
-		yStart += HotZone::iconSize();
+		yStart += m_hotZone->iconSize;
+		yStart += m_hotZone->margin;
 	}
-
-	if (m_bubbleViewModeEnabled)
-	{
-		yStart += HotZone::margin();
-		int xStart = xStart0 + HotZone::margin();
-
-		//label
-		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
-		renderText(xStart, yStart + s_hotZone->yTextBottomLineShift, s_hotZone->bbv_label, s_hotZone->font);
-
-		//icon
-		xStart += s_hotZone->bbv_labelRect.width() + HotZone::margin();
-
-		//"exit" icon
-		{
-			ccGLUtils::DisplayTexture2DPosition(c_exitIcon, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
-			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_BUBBLE_VIEW_MODE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
-			xStart += HotZone::iconSize();
-		}
-
-		yStart += HotZone::iconSize();
-	}
-
-	if (fullScreenEnabled)
-	{
-		yStart += HotZone::margin();
-		int xStart = xStart0 + HotZone::margin();
-
-		//label
-		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, s_hotZone->color);
-		renderText(xStart, yStart + s_hotZone->yTextBottomLineShift, s_hotZone->fs_label, s_hotZone->font);
-
-		//icon
-		xStart += s_hotZone->fs_labelRect.width() + HotZone::margin();
-
-		//"full-screen" icon
-		{
-			ccGLUtils::DisplayTexture2DPosition(c_exitIcon, -halfW + xStart, halfH - (yStart + HotZone::iconSize()), HotZone::iconSize(), HotZone::iconSize());
-			m_clickableItems.push_back(ClickableItem(ClickableItem::LEAVE_FULLSCREEN_MODE, QRect(xStart, yStart, HotZone::iconSize(), HotZone::iconSize())));
-			xStart += HotZone::iconSize();
-		}
-
-		yStart += HotZone::iconSize();
-	}
-
-	yStart += HotZone::margin();
 
 	glFunc->glPopAttrib();
 }
@@ -2396,7 +2377,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 					case SCREEN_CENTER_MESSAGE:
 					{
 						QFont newFont(m_font); //no need to take zoom into account!
-						newFont.setPointSize(12);
+						newFont.setPointSize(12 * devicePixelRatio());
 						QRect rect = QFontMetrics(newFont).boundingRect(it->message);
 						//only one message supported in the screen center (for the moment ;)
 						renderText((m_glViewport.width() - rect.width()) / 2, (m_glViewport.height() - rect.height()) / 2, it->message, newFont);
@@ -3572,8 +3553,17 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	{
 		if (m_interactionFlags & INTERACT_CLICKABLE_ITEMS)
 		{
+			//what would be the size of the 'hot zone' if it was displayed with all options
+			if (!m_hotZone)
+			{
+				m_hotZone = new HotZone(this);
+			}
+			QRect areaRect = m_hotZone->rect(true, m_bubbleViewModeEnabled, exclusiveFullScreen());
+
 			const int retinaScale = devicePixelRatio();
-			bool inZone = (x * retinaScale < CC_HOT_ZONE_TRIGGER_WIDTH && y * retinaScale < CC_HOT_ZONE_TRIGGER_HEIGHT);
+			bool inZone = (	x * retinaScale * 3 < m_hotZone->topCorner.x() + areaRect.width()  * 4   //25% margin
+						&&	y * retinaScale * 2 < m_hotZone->topCorner.y() + areaRect.height() * 4); //50% margin
+
 			if (inZone != m_clickableItemsVisible)
 			{
 				m_clickableItemsVisible = inZone;
@@ -4756,7 +4746,7 @@ int FontSizeModifier(int fontSize, float zoomFactor)
 
 int ccGLWindow::getFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize);
+	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * devicePixelRatio();
 }
 
 void ccGLWindow::setFontPointSize(int pixelSize)
@@ -4776,7 +4766,7 @@ QFont ccGLWindow::getTextDisplayFont() const
 
 int ccGLWindow::getLabelFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize);
+	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * devicePixelRatio();
 }
 
 QFont ccGLWindow::getLabelDisplayFont() const
@@ -6449,10 +6439,58 @@ void ccGLWindow::toggleAutoRefresh(bool state, int period_ms/*=0*/)
 
 QPointF ccGLWindow::toCenteredGLCoordinates(int x, int y) const
 {
-	return QPointF(x - width() / 2, height() / 2 - y) * devicePixelRatioF();
+	return QPointF(x - width() / 2, height() / 2 - y) * devicePixelRatio();
 }
 
 QPointF ccGLWindow::toCornerGLCoordinates(int x, int y) const
 {
-	return QPointF(x, height() - 1 - y) * devicePixelRatioF();
+	return QPointF(x, height() - 1 - y) * devicePixelRatio();
+}
+
+void ccGLWindow::removeFBOSafe(ccFrameBufferObject* &fbo)
+{
+	//we "disconnect" the current FBO to avoid wrong display/errors
+	//if QT tries to redraw window during object destruction
+	if (fbo)
+	{
+		ccFrameBufferObject* _fbo = fbo;
+		fbo = 0;
+		delete _fbo;
+	}
+}
+
+bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
+{
+	//correction for HD screens
+	const int retinaScale = devicePixelRatio();
+	w *= retinaScale;
+	h *= retinaScale;
+
+	if (fbo && fbo->width() == w && fbo->height() == h)
+	{
+		//nothing to do
+		return true;
+	}
+
+	//we "disconnect" the current FBO to avoid wrong display/errors
+	//if QT tries to redraw window during initialization
+	ccFrameBufferObject* _fbo = fbo;
+	fbo = 0;
+
+	if (!_fbo)
+	{
+		_fbo = new ccFrameBufferObject();
+	}
+
+	if (!_fbo->init(w, h)
+		|| !_fbo->initColor()
+		|| !_fbo->initDepth())
+	{
+		delete _fbo;
+		_fbo = 0;
+		return false;
+	}
+
+	fbo = _fbo;
+	return true;
 }

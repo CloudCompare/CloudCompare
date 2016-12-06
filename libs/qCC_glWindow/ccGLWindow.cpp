@@ -6439,12 +6439,12 @@ void ccGLWindow::toggleAutoRefresh(bool state, int period_ms/*=0*/)
 
 QPointF ccGLWindow::toCenteredGLCoordinates(int x, int y) const
 {
-	return QPointF(x - width() / 2, height() / 2 - y) * devicePixelRatioF();
+	return QPointF(x - width() / 2, height() / 2 - y) * devicePixelRatio();
 }
 
 QPointF ccGLWindow::toCornerGLCoordinates(int x, int y) const
 {
-	return QPointF(x, height() - 1 - y) * devicePixelRatioF();
+	return QPointF(x, height() - 1 - y) * devicePixelRatio();
 }
 
 void ccGLWindow::removeFBOSafe(ccFrameBufferObject* &fbo)

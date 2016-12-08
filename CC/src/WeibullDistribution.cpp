@@ -253,7 +253,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 {
 	unsigned n = cloud->size();
 
-	//a & n sould be strictly positive!
+	//a & n should be strictly positive!
 	if (r <= 0 || n == 0)
 		return static_cast<ScalarType>(1.0); //a positive value means that computeG failed
 

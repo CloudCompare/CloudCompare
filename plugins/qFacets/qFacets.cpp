@@ -977,7 +977,7 @@ void qFacets::classifyFacetsByAngle()
 		return;
 
 	s_classifAngleStep = classifParamsDlg.angleStepDoubleSpinBox->value();
-	s_stereogramAngleStep = s_classifAngleStep; //we automatically copy it to the stereogram's equivalent paramter
+	s_stereogramAngleStep = s_classifAngleStep; //we automatically copy it to the stereogram's equivalent parameter
 	s_classifMaxDist = classifParamsDlg.maxDistDoubleSpinBox->value();
 
 	ccHObject* group = selectedEntities.back();

@@ -3769,7 +3769,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 						}
 						else
 						{
-							//as this cell and the next one have differnt parents,
+							//as this cell and the next one have different parents,
 							//the next cell is the first sub-cell!
 							firstSubCell = true;
 						}
@@ -3971,7 +3971,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 						}
 						else
 						{
-							//as this cell and the next one have differnt parents,
+							//as this cell and the next one have different parents,
 							//the next cell is the first sub-cell!
 							firstSubCell = true;
 						}

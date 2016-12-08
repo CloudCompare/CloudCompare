@@ -1,5 +1,7 @@
-cloudcompare (2.7.0+1+4f623ec-0sid1) UNRELEASED; urgency=medium
+cloudcompare (2.7.0+1+4f623ec-0) UNRELEASED; urgency=medium
+  
   * RAS
+ 
  -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 1 May 2016 21:52:00 +0100
 
 cloudcompare (2.7.0-0xenial1) xenial; urgency=medium

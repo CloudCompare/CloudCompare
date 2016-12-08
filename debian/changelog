@@ -1,20 +1,5 @@
-cloudcompare (2.8.0~git20161107-0xenial1) UNRELEASED; urgency=medium
-  * Add qM3C2 plugin
-
- -- Romain Janvier <romain.janvier@univ-orleans.fr>  Mon, 07 Nov 2016 13:40:00 +0100
-
-cloudcompare (2.8.0~git20160922-0xenial1) UNRELEASED; urgency=medium
-  * Add experimental Photoscan filter 
-  * Add QCSF plugin
-
- -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 22 Sep 2016 15:28:00 +0100
-
-cloudcompare (2.8.0beta-0xenial1) UNRELEASED; urgency=medium
-
-  * Remove all patch (Fixed upstream)
-  * Format is now 3.0 (native)
-  * Remove qKinect	
-
+cloudcompare (2.8.0-1-4f623ec) UNRELEASED; urgency=medium
+  * RAS
  -- Romain Janvier <romain.janvier@univ-orleans.fr>  Sun, 1 May 2016 21:52:00 +0100
 
 cloudcompare (2.7.0-0xenial1) xenial; urgency=medium

@@ -126,7 +126,8 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 	{
 		uint32_t v = *reinterpret_cast<uint32_t*>(m_data + 3 * i);
 		//'hide' the 4th byte
-		v &= (static_cast<uint32_t>(1 << 24) - 1);
+		static const uint32_t Byte4Mask = 0x0FFF;
+		v &= Byte4Mask;
 		return v;
 	}
 
@@ -187,6 +188,25 @@ double ccWaveform::getSample(uint32_t i, const WaveformDescriptor& descriptor) c
 	return descriptor.digitizerGain * raw + descriptor.digitizerOffset;
 }
 
+bool ccWaveform::decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor) const
+{
+	try
+	{
+		values.resize(descriptor.numberOfSamples);
+		for (uint32_t i = 0; i < descriptor.numberOfSamples; ++i)
+		{
+			values[i] = getSample(i, descriptor);
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+
+	return true;
+}
+
 bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor) const
 {
 	if (descriptor.numberOfSamples == 0)
@@ -195,22 +215,33 @@ bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor)
 		return false;
 	}
 
+	std::vector<double> values;
+	if (!decodeSamples(values, descriptor))
+	{
+		ccLog::Warning(QString("[ccWaveform::toASCII] Not enough memory"));
+		return false;
+	}
+
+	return ToASCII(filename, values, descriptor.samplingRate_ps);
+}
+
+bool ccWaveform::ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps)
+{
 	QFile file(filename);
 	if (!file.open(QFile::Text | QFile::WriteOnly))
 	{
 		ccLog::Warning(QString("[ccWaveform::toASCII] Failed to open file '%1' for writing").arg(filename));
 		return false;
 	}
+
 	QTextStream stream(&file);
 	stream.setRealNumberPrecision(6);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
 	stream << "//time(ps);intensity" << endl;
 
-	for (uint32_t i = 1; i < descriptor.numberOfSamples; ++i)
+	for (uint32_t i = 0; i < values.size(); ++i)
 	{
-		double c = getSample(i, descriptor);
-
-		stream << i * descriptor.samplingRate_ps << ";" << c << endl;
+		stream << i * samplingRate_ps << ";" << values[i] << endl;
 	}
 
 	file.close();

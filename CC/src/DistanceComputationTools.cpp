@@ -507,7 +507,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const
 
 	assert(params && params->localModel != NO_MODEL);
 
-	//structure for the nearest neighbor seach
+	//structure for the nearest neighbor search
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
@@ -1800,7 +1800,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	}
 	if (params.CPSet)
 	{
-		//Closest Point Set determination is incompatible with distance map approximation and max seach distance
+		//Closest Point Set determination is incompatible with distance map approximation and max search distance
 		params.useDistanceMap = false;
 		params.maxSearchDist = 0;
 	}

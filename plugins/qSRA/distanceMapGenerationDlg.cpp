@@ -550,7 +550,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			params.zoom *= mapPart;
 
 			//we must also center the camera on the right position so that the map
-			//appears inbetween the scale and the color ramp
+			//appears in between the scale and the color ramp
 			float mapStart = static_cast<float>(labelsWidth) / static_cast<float>(screenWidth);
 			centerPos = (0.5f - mapStart) / mapPart;
 

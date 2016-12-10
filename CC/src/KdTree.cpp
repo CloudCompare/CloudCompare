@@ -534,7 +534,7 @@ void KDTree::distanceScanTree(
     {
         if ((cell->leSon!=0) && (cell->gSon!=0))
         {
-            //This case shall allways happen (the other case is for leaves that contain more than one point - bucket KDtree)
+            //This case shall always happen (the other case is for leaves that contain more than one point - bucket KDtree)
             if (cell->nbPoints == 1)
             {
                 localArray.push_back(m_indexes[cell->startingPointIndex]);

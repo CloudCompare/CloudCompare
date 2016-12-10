@@ -5747,7 +5747,7 @@ void MainWindow::showEvent(QShowEvent* event)
 		{
 			//we always show a warning in the console
 			ccLog::Warning("High pixel density screen detected: point picking and label display won't work properly!");
-			//but the first time we aslo show an annoying warning popup ;)
+			//but the first time we also show an annoying warning popup ;)
 			QMetaObject::invokeMethod(this, "showHighDPIScreenWarning", Qt::QueuedConnection);
 		}
 	}

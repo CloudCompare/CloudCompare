@@ -187,7 +187,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//ccGLCameraParameters camera;
 		//context.display->getGLCameraParameters(camera);
 
-		//only usefull when displaying labels!
+		//only useful when displaying labels!
 		QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
 		font.setPointSize(static_cast<int>(m_fontSize * context.renderZoom));
 		//font.setBold(true);

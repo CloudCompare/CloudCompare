@@ -77,8 +77,14 @@ public:
 	//! Returns the range of (real) samples
 	double getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor) const;
 
-	//! Expotrs (real) samples to an ASCII file
+	//! Decodes the samples and store them in a vector
+	bool decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor) const;
+
+	//! Exports (real) samples to an ASCII file
 	bool toASCII(QString filename, const WaveformDescriptor& descriptor) const;
+
+	//! Helper: exports a series of values as an ASCII file
+	static bool ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps);
 
 	//! Returns the sample position in 3D
 	CCVector3 getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;

@@ -412,7 +412,7 @@ bool qSRA::doComputeRadialDists(ccPointCloud* cloud, ccPolyline* polyline) const
 	else
 	{
 		if (m_app)
-			m_app->dispToConsole("An error ocurred while computing radial distances!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			m_app->dispToConsole("An error occurred while computing radial distances!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 }

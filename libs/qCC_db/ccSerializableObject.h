@@ -146,7 +146,7 @@ public:
 		\param out output file (must be already opened)
 		\return success
 	**/
-	template <int N, class ElementType> static bool GenericArrayToFile(const GenericChunkedArray<N,ElementType>& chunkArray, QFile& out) 
+	template <int N, class ElementType> static bool GenericArrayToFile(const GenericChunkedArray<N, ElementType>& chunkArray, QFile& out)
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
@@ -154,20 +154,31 @@ public:
 			return ccSerializableObject::MemoryError();
 
 		//component count (dataVersion>=20)
-		::uint8_t componentCount = static_cast< ::uint8_t >(N);
-		if (out.write((const char*)&componentCount,1) < 0)
+		::uint8_t componentCount = static_cast<::uint8_t>(N);
+		if (out.write((const char*)&componentCount, 1) < 0)
 			return ccSerializableObject::WriteError();
 
 		//element count = array size (dataVersion>=20)
-		::uint32_t elementCount = static_cast< ::uint32_t >(chunkArray.currentSize());
-		if (out.write((const char*)&elementCount,4) < 0)
+		::uint32_t elementCount = static_cast<::uint32_t>(chunkArray.currentSize());
+		if (out.write((const char*)&elementCount, 4) < 0)
 			return ccSerializableObject::WriteError();
 
 		//array data (dataVersion>=20)
 		{
 #ifdef CC_ENV_64
-			if (out.write((const char*)chunkArray.data(),sizeof(ElementType)*N*chunkArray.currentSize()) < 0)
-				return ccSerializableObject::WriteError();
+			//DGM: do it by chunks, in case it's too big to be processed by the system
+			const char* _data = (const char*)chunkArray.data();
+			qint64 byteCount = static_cast<qint64>(elementCount);
+			byteCount *= N * sizeof(ElementType);
+			while (byteCount != 0)
+			{
+				static const qint64 s_maxByteSaveCount = (1 << 26); //64 Mb each time
+				qint64 saveCount = std::min(byteCount, s_maxByteSaveCount);
+				if (out.write(_data, saveCount) < 0)
+					return ccSerializableObject::WriteError();
+				_data += saveCount;
+				byteCount -= saveCount;
+			}
 #else
 			//--> we write each chunk as a block (faster)
 			while (elementCount != 0)

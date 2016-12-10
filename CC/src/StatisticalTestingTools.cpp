@@ -374,7 +374,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 																numberOfNeighbours*3,
 																true,
 																progressCb,
-																"Statistical Test") != 0) //sucess
+																"Statistical Test") != 0) //success
 	{
 		if (!progressCb || !progressCb->isCancelRequested())
 		{

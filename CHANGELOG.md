@@ -196,6 +196,7 @@ v2.8.beta - XX/XX/2016
 	* [macOS] Fix plugins on case-sensitive file systems
 	* [macOS] Fix problem with the main window jumping around and resizing when dragging toolbars
 	* [macOS] Fixes the layout of the 2.5D Volume Calculation dialog
+	* Global shift & scale information could be lost when cloning entities or merging them with other non-shifted entities
 
 v2.7.0 - 04/22/2016
 -------------------

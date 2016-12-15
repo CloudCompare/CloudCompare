@@ -55,76 +55,43 @@ bool WaveformDescriptor::fromFile(QFile& in, short dataVersion, int flags)
 
 ccWaveform::ccWaveform(uint8_t descriptorID/*=0*/)
 	: m_byteCount(0)
-	, m_data(0)
+	, m_dataOffset(0)
 	, m_beamDir(0, 0, 0)
 	, m_echoTime_ps(0)
 	, m_descriptorID(descriptorID)
 {
 }
 	
-ccWaveform::ccWaveform(const ccWaveform& w)
-	: m_byteCount(0)
-	, m_beamDir(w.m_beamDir)
-	, m_echoTime_ps(w.m_echoTime_ps)
-	, m_data(0)
-	, m_descriptorID(w.m_descriptorID)
+ccWaveform::~ccWaveform()
 {
-	//try to reserve some memory
-	if (reserve_bytes(w.m_byteCount))
-	{
-		//copy the data if successful
-		for (uint32_t i = 0; i < m_byteCount; ++i)
-		{
-			m_data[i] = w.m_data[i];
-		}
-	}
 }
 
-bool ccWaveform::setData(const uint8_t* data, uint32_t byteCount)
+void ccWaveform::setDataDescription(uint64_t dataOffset, uint32_t byteCount)
 {
-	if (!reserve_bytes(byteCount))
-	{
-		//not enough memory
-		return false;
-	}
-
-	for (uint32_t i = 0; i < byteCount; ++i)
-	{
-		m_data[i] = data[i];
-	}
-
-	return true;
+	m_dataOffset = dataOffset;
+	m_byteCount = byteCount;
 }
 
-void ccWaveform::clear()
+uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
 {
-	if (m_data)
-	{
-		delete[] m_data;
-		m_data = 0;
-	}
-	m_byteCount = 0;
-}
-
-uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descriptor) const
-{
-	if (!m_data)
+	if (!dataStorage)
 	{
 		assert(false);
 		return 0;
 	}
 	
+	const uint8_t* _data = data(dataStorage);
 	switch (descriptor.bitsPerSample)
 	{
 	case 8:
-		return m_data[i];
+		return _data[i];
 
 	case 16:
-		return reinterpret_cast<uint16_t*>(m_data)[i];
+		return reinterpret_cast<const uint16_t*>(_data)[i];
 
 	case 24:
 	{
-		uint32_t v = *reinterpret_cast<uint32_t*>(m_data + 3 * i);
+		uint32_t v = *reinterpret_cast<const uint32_t*>(_data + 3 * i);
 		//'hide' the 4th byte
 		static const uint32_t Byte4Mask = 0x0FFF;
 		v &= Byte4Mask;
@@ -132,7 +99,7 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 	}
 
 	case 32:
-		return reinterpret_cast<uint32_t*>(m_data)[i];
+		return reinterpret_cast<const uint32_t*>(_data)[i];
 
 	default: //other 'strange' bps values ;)
 	{
@@ -148,7 +115,7 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 		}
 
 		//last byte (may be the first one!)
-		uint32_t value = m_data[lastByteIndex];
+		uint32_t value = _data[lastByteIndex];
 		{
 			//number of bits used in the current byte
 			uint32_t r = ((lastByteIndex + 1) % 8);
@@ -164,7 +131,7 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 		{
 			--lastByteIndex;
 			value <<= 8;
-			value |= m_data[lastByteIndex];
+			value |= _data[lastByteIndex];
 		}
 
 		//remove the first unused bits (if any)
@@ -179,23 +146,27 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 		return value;
 	}
 	}
+
+	//we should never arrive here
+	assert(false);
+	return 0;
 }
 
-double ccWaveform::getSample(uint32_t i, const WaveformDescriptor& descriptor) const
+double ccWaveform::getSample(uint32_t i, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
 {
-	uint32_t raw = getRawSample(i, descriptor);
+	uint32_t raw = getRawSample(i, descriptor, dataStorage);
 
 	return descriptor.digitizerGain * raw + descriptor.digitizerOffset;
 }
 
-bool ccWaveform::decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor) const
+bool ccWaveform::decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
 {
 	try
 	{
 		values.resize(descriptor.numberOfSamples);
 		for (uint32_t i = 0; i < descriptor.numberOfSamples; ++i)
 		{
-			values[i] = getSample(i, descriptor);
+			values[i] = getSample(i, descriptor, dataStorage);
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -207,7 +178,7 @@ bool ccWaveform::decodeSamples(std::vector<double>& values, const WaveformDescri
 	return true;
 }
 
-bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor) const
+bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
 {
 	if (descriptor.numberOfSamples == 0)
 	{
@@ -216,7 +187,7 @@ bool ccWaveform::toASCII(QString filename, const WaveformDescriptor& descriptor)
 	}
 
 	std::vector<double> values;
-	if (!decodeSamples(values, descriptor))
+	if (!decodeSamples(values, descriptor, dataStorage))
 	{
 		ccLog::Warning(QString("[ccWaveform::toASCII] Not enough memory"));
 		return false;
@@ -250,7 +221,7 @@ bool ccWaveform::ToASCII(QString filename, std::vector<double>& values, uint32_t
 	return true;
 }
 
-double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor) const
+double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
 {
 	if (descriptor.numberOfSamples == 0)
 	{
@@ -260,12 +231,12 @@ double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescri
 	}
 	else
 	{
-		minVal = maxVal = getSample(0, descriptor);
+		minVal = maxVal = getSample(0, descriptor, dataStorage);
 	}
 
 	for (uint32_t i = 1; i < descriptor.numberOfSamples; ++i)
 	{
-		double c = getSample(i, descriptor);
+		double c = getSample(i, descriptor, dataStorage);
 		maxVal = std::max(maxVal, c);
 		minVal = std::min(minVal, c);
 	}
@@ -287,18 +258,6 @@ void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)
 	m_beamDir = CCVector3f::fromArray(u.u);
 }
 
-bool ccWaveform::reserve_bytes(uint32_t byteCount)
-{
-	m_data = (uint8_t*)realloc(m_data, byteCount);
-	if (!m_data)
-	{
-		m_byteCount = 0;
-		return false;
-	}
-	m_byteCount = byteCount;
-	return true;
-}
-
 bool ccWaveform::toFile(QFile& out) const
 {
 	QDataStream outStream(&out);
@@ -308,11 +267,11 @@ bool ccWaveform::toFile(QFile& out) const
 	if (m_descriptorID != 0) //no need to save invalid waveforms
 	{
 		outStream << m_byteCount;
+		outStream << m_dataOffset;
 		outStream << m_beamDir.x;
 		outStream << m_beamDir.y;
 		outStream << m_beamDir.z;
 		outStream << m_echoTime_ps;
-		outStream << QByteArray::fromRawData((const char*)m_data, static_cast<int>(m_byteCount));
 	}
 
 	return true;
@@ -330,17 +289,11 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags)
 	if (m_descriptorID != 0)
 	{
 		inStream >> m_byteCount;
+		inStream >> m_dataOffset;
 		inStream >> m_beamDir.x;
 		inStream >> m_beamDir.y;
 		inStream >> m_beamDir.z;
 		inStream >> m_echoTime_ps;
-
-		QByteArray a;
-		inStream >> a;
-		if (a.size())
-		{
-			setData((const uint8_t*)a.data(), static_cast<uint32_t>(a.size()));
-		}
 	}
 
 	return true;

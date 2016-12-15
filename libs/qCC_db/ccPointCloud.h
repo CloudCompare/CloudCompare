@@ -372,20 +372,32 @@ public: //normals computation/orientation
 public: //waveform (e.g. from airborne scanners)
 
 	//! Returns whether the cloud has associated Full WaveForm data
-	inline bool hasFWF() const { return (size() && m_fwfData.size() >= size()); }
+	bool hasFWF() const;
+
+	//! Returns a proxy on a given waveform
+	ccWaveformProxy waveformProxy(unsigned index) const;
 
 	//! Waveform descriptors set
 	typedef QMap<uint8_t, WaveformDescriptor> FWFDescriptorSet;
 
-	//! Gives access to the FWF descritpros
+	//! Waveform data container
+	typedef std::vector<uint8_t> FWFDataContainer;
+	typedef QSharedPointer<const FWFDataContainer> SharedFWFDataContainer;
+
+	//! Gives access to the FWF descriptors
 	FWFDescriptorSet& fwfDescriptors() { return m_fwfDescriptors; }
-	//! Gives access to the FWF descritpros (const version)
+	//! Gives access to the FWF descriptors (const version)
 	const FWFDescriptorSet& fwfDescriptors() const { return m_fwfDescriptors; }
 
 	//! Gives access to the associated FWF data
-	std::vector<ccWaveform>& fwfData() { return m_fwfData; }
+	std::vector<ccWaveform>& waveforms() { return m_fwfWaveforms; }
 	//! Gives access to the associated FWF data (const version)
-	const std::vector<ccWaveform>& fwfData() const { return m_fwfData; }
+	const std::vector<ccWaveform>& waveforms() const { return m_fwfWaveforms; }
+
+	//! Gives access to the associated FWF data container
+	SharedFWFDataContainer& fwfData() { return m_fwfData; }
+	//! Gives access to the associated FWF data container (const version)
+	const SharedFWFDataContainer& fwfData() const { return m_fwfData; }
 
 	//! Reserves the FWF table
 	bool reserveTheFWFTable();
@@ -785,11 +797,14 @@ protected: //Level of Detail (LOD)
 
 protected: //waveform (e.g. from airborne scanners)
 
-	//! Waveform descriptors
+	//! General waveform descriptors
 	FWFDescriptorSet m_fwfDescriptors;
 
-	//! Waveform storage
-	std::vector<ccWaveform> m_fwfData;
+	//! Per-point waveform accessors
+	std::vector<ccWaveform> m_fwfWaveforms;
+
+	//! Waveforms raw data storage
+	SharedFWFDataContainer m_fwfData;
 
 };
 

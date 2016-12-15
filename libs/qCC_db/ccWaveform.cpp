@@ -267,7 +267,7 @@ bool ccWaveform::toFile(QFile& out) const
 	if (m_descriptorID != 0) //no need to save invalid waveforms
 	{
 		outStream << m_byteCount;
-		outStream << m_dataOffset;
+		outStream << static_cast<quint64>(m_dataOffset); //see comment below (in 'fromFile')
 		outStream << m_beamDir.x;
 		outStream << m_beamDir.y;
 		outStream << m_beamDir.z;
@@ -289,7 +289,13 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags)
 	if (m_descriptorID != 0)
 	{
 		inStream >> m_byteCount;
-		inStream >> m_dataOffset;
+
+		//for compilation on gcc/clang, we need to be 'more explicit'...
+		//(apparently uint64_t is not 'evidently' casted to quint64?!)
+		quint64 dataOffset;
+		inStream >> dataOffset;
+		m_dataOffset = static_cast<uint64_t>(m_dataOffset);
+
 		inStream >> m_beamDir.x;
 		inStream >> m_beamDir.y;
 		inStream >> m_beamDir.z;

@@ -294,7 +294,7 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags)
 		//(apparently uint64_t is not 'evidently' casted to quint64?!)
 		quint64 dataOffset;
 		inStream >> dataOffset;
-		m_dataOffset = static_cast<uint64_t>(m_dataOffset);
+		m_dataOffset = static_cast<uint64_t>(dataOffset);
 
 		inStream >> m_beamDir.x;
 		inStream >> m_beamDir.y;

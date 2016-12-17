@@ -63,6 +63,10 @@ v2.8.beta - XX/XX/2016
 	* New 'display' option to draw round points instead of square ones (when the point size > 1).
 		Warning, the display may be slower then.
 
+	* New formats supported:
+		- Photoscan PSZ
+		- [Windows] Riegl RDBX
+
 - Enhancements:
 
 	* Animation plugin

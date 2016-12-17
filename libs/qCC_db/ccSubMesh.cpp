@@ -329,7 +329,7 @@ void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float*
 {
 	if (m_associatedMesh && triIndex < size())
 	{
-		m_associatedMesh->getTriangleTexCoordinates(getTriGlobalIndex(triIndex),tx1,tx2,tx3);
+		m_associatedMesh->getTriangleTexCoordinates(getTriGlobalIndex(triIndex), tx1, tx2, tx3);
 	}
 	else
 	{
@@ -348,7 +348,7 @@ void ccSubMesh::getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1
 {
 	if (m_associatedMesh && triangleIndex < size())
 	{
-		m_associatedMesh->getTriangleTexCoordinatesIndexes(getTriGlobalIndex(triangleIndex),i1,i2,i3);
+		m_associatedMesh->getTriangleTexCoordinatesIndexes(getTriGlobalIndex(triangleIndex), i1, i2, i3);
 	}
 	else
 	{
@@ -360,7 +360,7 @@ void ccSubMesh::getTriangleNormalIndexes(unsigned triIndex, int& i1, int& i2, in
 {
 	if (m_associatedMesh && triIndex < size())
 	{
-		m_associatedMesh->getTriangleNormalIndexes(getTriGlobalIndex(triIndex),i1,i2,i3);
+		m_associatedMesh->getTriangleNormalIndexes(getTriGlobalIndex(triIndex), i1, i2, i3);
 	}
 	else
 	{
@@ -370,7 +370,7 @@ void ccSubMesh::getTriangleNormalIndexes(unsigned triIndex, int& i1, int& i2, in
 
 bool ccSubMesh::getTriangleNormals(unsigned triIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const
 {
-	return (m_associatedMesh && triIndex < size() ? m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triIndex),Na,Nb,Nc) : false);
+	return (m_associatedMesh && triIndex < size() ? m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triIndex), Na, Nb, Nc) : false);
 }
 
 NormsIndexesTableType* ccSubMesh::getTriNormsTable() const
@@ -387,7 +387,7 @@ void ccSubMesh::clear(bool releaseMemory)
 bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
 {
 	if (m_triIndexes->capacity() == m_triIndexes->currentSize())
-		if (!m_triIndexes->reserve(m_triIndexes->capacity() + std::min<unsigned>(std::max<unsigned>(1,m_triIndexes->capacity()/2),1024))) //not enough space --> +50% (or 1024)
+		if (!m_triIndexes->reserve(m_triIndexes->capacity() + std::min<unsigned>(std::max<unsigned>(1, m_triIndexes->capacity() / 2), 1024))) //not enough space --> +50% (or 1024)
 			return false;
 
 	m_triIndexes->addElement(globalIndex);
@@ -410,8 +410,8 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 	if (size()<pos+range && !m_triIndexes->resize(pos+range))
 		return false;
 	
-	for (unsigned i=0; i<range; ++i,++firstIndex)
-		m_triIndexes->setValue(pos++,firstIndex);
+	for (unsigned i = 0; i < range; ++i, ++firstIndex)
+		m_triIndexes->setValue(pos++, firstIndex);
 
 	m_bBox.setValidity(false);
 
@@ -421,7 +421,7 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 void ccSubMesh::setTriangleIndex(unsigned localIndex, unsigned globalIndex)
 {
 	assert(localIndex < size());
-	m_triIndexes->setValue(localIndex,globalIndex);
+	m_triIndexes->setValue(localIndex, globalIndex);
 	m_bBox.setValidity(false);
 }
 
@@ -444,7 +444,7 @@ void ccSubMesh::refreshBB()
 {
 	m_bBox.clear();
 	
-	for (unsigned i=0; i<size(); ++i)
+	for (unsigned i = 0; i < size(); ++i)
 	{
 		CCLib::GenericTriangle* tri = _getTriangle(i);
 		m_bBox.add(*tri->_getA());
@@ -487,7 +487,7 @@ bool ccSubMesh::toFile_MeOnly(QFile& out) const
 	//so instead we save it's unique ID (dataVersion>=29)
 	//WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t meshUniqueID = (m_associatedMesh ? (uint32_t)m_associatedMesh->getUniqueID() : 0);
-	if (out.write((const char*)&meshUniqueID,4) < 0)
+	if (out.write((const char*)&meshUniqueID, 4) < 0)
 		return WriteError();
 
 	//references (dataVersion>=29)
@@ -512,7 +512,7 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;
 
 	//references (dataVersion>=29)
-	if (!ccSerializationHelper::GenericArrayFromFile(*m_triIndexes,in,dataVersion))
+	if (!ccSerializationHelper::GenericArrayFromFile(*m_triIndexes, in, dataVersion))
 		return ReadError();
 
 	return true;

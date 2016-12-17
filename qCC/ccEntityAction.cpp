@@ -1289,7 +1289,7 @@ namespace ccEntityAction
 		PointCoordinateType defaultRadius = 0;
 		try
 		{
-			for (size_t i=0; i<selectedEntities.size(); ++i)
+			for (size_t i = 0; i < selectedEntities.size(); ++i)
 			{
 				ccHObject	*entity = selectedEntities[i];
 				if (entity->isA(CC_TYPES::POINT_CLOUD))
@@ -1481,7 +1481,7 @@ namespace ccEntityAction
 			
 			bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
 			
-			for (size_t i=0; i<meshes.size(); i++)
+			for (size_t i = 0; i < meshes.size(); i++)
 			{
 				ccMesh* mesh = meshes[i];
 				Q_ASSERT(mesh != nullptr);

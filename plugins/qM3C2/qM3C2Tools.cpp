@@ -754,7 +754,9 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 
 				if (validLSPlanes > 0.99 * static_cast<double>(probingCount)) //almost all neighbourhood must be large enough to fit a plane!
 				{
-					if (bestMeanRoughness < 0 || meanRoughness < bestMeanRoughness)
+					if (	bestMeanRoughness < 0
+						|| (meanRoughness < bestMeanRoughness && (!hasBestProjLevel || scale < 2.1 * params.projScale)) //DGM: don't increase the normal scale more than 2 times the projection scale (if possible)
+						)
 					{
 						bestMeanRoughness = meanRoughness;
 						params.normScale = scale;

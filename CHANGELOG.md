@@ -1,7 +1,7 @@
 CloudCompare versions history
 =============================
 
-v2.8.beta - XX/XX/2016
+v2.8.beta - 12/18/2016
 ----------------------
 
 - New features:

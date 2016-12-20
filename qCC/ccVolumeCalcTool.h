@@ -44,9 +44,9 @@ public:
 	~ccVolumeCalcTool();
 
 	//Inherited from cc2Point5DimEditor
-	virtual double getGridStep() const;
-	virtual unsigned char getProjectionDimension() const;
-	virtual ProjectionType getTypeOfProjection() const;
+	virtual double getGridStep() const override;
+	virtual unsigned char getProjectionDimension() const override;
+	virtual ccRasterGrid::ProjectionType getTypeOfProjection() const override;
 
 protected slots:
 

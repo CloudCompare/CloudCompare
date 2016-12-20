@@ -26,7 +26,6 @@
 //Qt
 #include <QString>
 
-
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccPolyline;
@@ -113,26 +112,26 @@ protected slots:
 protected: //standard methods
 
 	//Inherited from cc2Point5DimEditor
-	virtual double getGridStep() const;
-	virtual unsigned char getProjectionDimension() const;
-	virtual ProjectionType getTypeOfProjection() const;
+	virtual double getGridStep() const override;
+	virtual unsigned char getProjectionDimension() const override;
+	virtual ccRasterGrid::ProjectionType getTypeOfProjection() const override;
 
 	//! Returns user defined height for empty cells
 	double getCustomHeightForEmptyCells() const;
 
 	//! Returns strategy for empty cell filling (extended version)
-	EmptyCellFillOption getFillEmptyCellsStrategyExt(	double& emptyCellsHeight,
-														double& minHeight,
-														double& maxHeight) const;
+	ccRasterGrid::EmptyCellFillOption getFillEmptyCellsStrategyExt(	double& emptyCellsHeight,
+																	double& minHeight,
+																	double& maxHeight) const;
 
 	//! Returns whether a given field count should be exported as SF (only if a cloud is generated!)
-	bool exportAsSF(ExportableFields field) const;
+	bool exportAsSF(ccRasterGrid::ExportableFields field) const;
 
 	//! Returns whether the output cloud should use the original cloud or the grid as 'support'
 	bool resampleOriginalCloud() const;
 
 	//! Returns type of SF interpolation
-	ProjectionType getTypeOfSFInterpolation() const;
+	ccRasterGrid::ProjectionType getTypeOfSFInterpolation() const;
 
 	//Inherited from cc2Point5DimEditor
 	virtual void gridIsUpToDate(bool state);
@@ -149,7 +148,7 @@ protected: //standard methods
 protected: //raster grid related stuff
 
 	//! Converts the grid to a cloud with scalar field(s)
-	ccPointCloud* convertGridToCloud(	const std::vector<ExportableFields>& exportedFields,
+	ccPointCloud* convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
 										bool interpolateSF,
 										bool interpolateColors,
 										bool copyHillshadeSF,

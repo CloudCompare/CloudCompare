@@ -227,19 +227,19 @@ void ccVolumeCalcTool::projectionDirChanged(int dir)
 
 void ccVolumeCalcTool::groundFillEmptyCellStrategyChanged(int)
 {
-	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox);
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox);
 
 	groundEmptyValueDoubleSpinBox->setEnabled(	groundComboBox->currentIndex() == 0
-											||	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT);
+											||	fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT);
 	gridIsUpToDate(false);
 }
 
 void ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged(int)
 {
-	EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox);
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox);
 
 	ceilEmptyValueDoubleSpinBox->setEnabled(	ceilComboBox->currentIndex() == 0
-											||	fillEmptyCellsStrategy == FILL_CUSTOM_HEIGHT);
+											||	fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT);
 	gridIsUpToDate(false);
 }
 
@@ -248,22 +248,22 @@ void ccVolumeCalcTool::gridOptionChanged()
 	gridIsUpToDate(false);
 }
 
-ccVolumeCalcTool::ProjectionType ccVolumeCalcTool::getTypeOfProjection() const
+ccRasterGrid::ProjectionType ccVolumeCalcTool::getTypeOfProjection() const
 {
 	switch (heightProjectionComboBox->currentIndex())
 	{
 	case 0:
-		return PROJ_MINIMUM_VALUE;
+		return ccRasterGrid::PROJ_MINIMUM_VALUE;
 	case 1:
-		return PROJ_AVERAGE_VALUE;
+		return ccRasterGrid::PROJ_AVERAGE_VALUE;
 	case 2:
-		return PROJ_MAXIMUM_VALUE;
+		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
 	}
 
-	return INVALID_PROJECTION_TYPE;
+	return ccRasterGrid::INVALID_PROJECTION_TYPE;
 }
 
 void ccVolumeCalcTool::loadSettings()
@@ -339,17 +339,17 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 	try
 	{
 		//we only compute the default 'height' layer
-		std::vector<ExportableFields> exportedFields;
-		exportedFields.push_back(PER_CELL_HEIGHT);
-		rasterCloud = cc2Point5DimEditor::convertGridToCloud(exportedFields,
-			false,
-			false,
-			false,
-			false,
-			0,
-			false,
-			std::numeric_limits<double>::quiet_NaN(),
-			exportToOriginalCS);
+		std::vector<ccRasterGrid::ExportableFields> exportedFields;
+		exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+		rasterCloud = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
+																false,
+																false,
+																false,
+																false,
+																0,
+																false,
+																std::numeric_limits<double>::quiet_NaN(),
+																exportToOriginalCS);
 
 		if (rasterCloud && rasterCloud->hasScalarFields())
 		{
@@ -501,11 +501,11 @@ bool ccVolumeCalcTool::updateGrid()
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
 	//per-cell Z computation
-	ProjectionType projectionType = getTypeOfProjection();
+	ccRasterGrid::ProjectionType projectionType = getTypeOfProjection();
 
 	ccProgressDialog pDlg(true, this);
 
-	RasterGrid groundRaster;
+	ccRasterGrid groundRaster;
 	if (groundCloud)
 	{
 		if (!groundRaster.init(gridWidth, gridHeight, gridStep, minCorner))
@@ -518,11 +518,11 @@ bool ccVolumeCalcTool::updateGrid()
 		if (groundRaster.fillWith(	groundCloud,
 									Z,
 									projectionType,
-									getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox) == INTERPOLATE,
-									INVALID_PROJECTION_TYPE,
+									getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE,
+									ccRasterGrid::INVALID_PROJECTION_TYPE,
 									&pDlg))
 		{
-			groundRaster.fillEmptyGridCells(getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox), groundEmptyValueDoubleSpinBox->value());
+			groundRaster.fillEmptyCells(getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox), groundEmptyValueDoubleSpinBox->value());
 			ccLog::Print(QString("[Volume] Ground raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(m_grid.width).arg(m_grid.height).arg(m_grid.minHeight).arg(m_grid.maxHeight));
 		}
 		else
@@ -550,7 +550,7 @@ bool ccVolumeCalcTool::updateGrid()
 		return false;
 	}
 
-	RasterGrid ceilRaster;
+	ccRasterGrid ceilRaster;
 	if (ceilCloud)
 	{
 		if (!ceilRaster.init(gridWidth, gridHeight, gridStep, minCorner))
@@ -563,11 +563,11 @@ bool ccVolumeCalcTool::updateGrid()
 		if (ceilRaster.fillWith(ceilCloud,
 								Z,
 								projectionType,
-								getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox) == INTERPOLATE,
-								INVALID_PROJECTION_TYPE,
+								getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE,
+								ccRasterGrid::INVALID_PROJECTION_TYPE,
 								&pDlg))
 		{
-			ceilRaster.fillEmptyGridCells(getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox), ceilEmptyValueDoubleSpinBox->value());
+			ceilRaster.fillEmptyCells(getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox), ceilEmptyValueDoubleSpinBox->value());
 			ccLog::Print(QString("[Volume] Ceil raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(m_grid.width).arg(m_grid.height).arg(m_grid.minHeight).arg(m_grid.maxHeight));
 		}
 		else
@@ -596,7 +596,7 @@ bool ccVolumeCalcTool::updateGrid()
 		{
 			for (unsigned j = 0; j < m_grid.width; ++j)
 			{
-				RasterCell& cell = m_grid.rows[i][j];
+				ccRasterCell& cell = m_grid.rows[i][j];
 
 				bool validGround = true;
 				cell.minHeight = groundHeight;
@@ -668,7 +668,7 @@ bool ccVolumeCalcTool::updateGrid()
 			{
 				for (unsigned j = 1; j < m_grid.width - 1; ++j)
 				{
-					RasterCell& cell = m_grid.rows[i][j];
+					ccRasterCell& cell = m_grid.rows[i][j];
 					if (cell.h == cell.h)
 					{
 						for (unsigned k = i - 1; k <= i + 1; ++k)
@@ -677,7 +677,7 @@ bool ccVolumeCalcTool::updateGrid()
 							{
 								if (k != i || l != j)
 								{
-									RasterCell& otherCell = m_grid.rows[k][l];
+									ccRasterCell& otherCell = m_grid.rows[k][l];
 									if (std::isfinite(otherCell.h))
 									{
 										++validNeighborsCount;

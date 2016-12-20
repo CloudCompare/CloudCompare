@@ -38,7 +38,6 @@
 #define CC_CURVATURE_NORM_CHANGE_RATE_FIELD_NAME "Normal change rate"
 #define CC_GRADIENT_NORMS_FIELD_NAME "Gradient norms"
 #define CC_GEODESIC_DISTANCES_FIELD_NAME "Geodesic distances"
-#define CC_HEIGHT_GRID_FIELD_NAME "Height grid values"
 #define CC_DEFAULT_RAD_SCATTERING_ANGLES_SF_NAME "Scattering angles (rad)"
 #define CC_DEFAULT_DEG_SCATTERING_ANGLES_SF_NAME "Scattering angles (deg)"
 #define CC_DEFAULT_RANGES_SF_NAME "Ranges"

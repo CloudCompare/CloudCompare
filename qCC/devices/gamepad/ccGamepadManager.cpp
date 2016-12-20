@@ -41,6 +41,11 @@ ccGamepadManager::ccGamepadManager( ccMainAppInterface *appInterface, QObject *p
 ccGamepadManager::~ccGamepadManager()
 {
 	releaseDevice();
+
+	if (m_menu)
+	{
+		delete m_menu;
+	}
 }
 
 void ccGamepadManager::showMessage(QString message, bool asWarning)

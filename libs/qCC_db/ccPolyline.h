@@ -24,7 +24,6 @@
 //Local
 #include "ccShiftedObject.h"
 
-
 class ccPointCloud;
 
 //! Colored polyline

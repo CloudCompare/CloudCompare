@@ -21,7 +21,6 @@
 //Local
 #include "ccGenericPrimitive.h"
 
-
 //! Quadric (primitive)
 /** 2D1/2 quadric primitive
 **/

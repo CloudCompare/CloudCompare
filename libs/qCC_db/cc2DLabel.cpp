@@ -811,7 +811,6 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 					{
 						//in perspective view, the actual scale depends on the distance to the camera!
-						const double* M = camera.modelViewMat.data();
 						double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
 						double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 						scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
@@ -987,7 +986,6 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				//draw the label 'legend(s)'
 				for (size_t j = 0; j < count; j++)
 				{
-					const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
 					QString title;
 					if (count == 1)
 						title = getName(); //for single-point labels we prefer the name
@@ -996,13 +994,13 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					else
 						title = QString("P#%0").arg(m_points[j].index);
 
-					context.display->displayText(title,
-						static_cast<int>(m_points[j].pos2D.x) + context.labelMarkerTextShift_pix,
-						static_cast<int>(m_points[j].pos2D.y) + context.labelMarkerTextShift_pix,
-						ccGenericGLDisplay::ALIGN_DEFAULT,
-						context.labelOpacity / 100.0f,
-						ccColor::white.rgba,
-						&font);
+					context.display->displayText(	title,
+													static_cast<int>(m_points[j].pos2D.x) + context.labelMarkerTextShift_pix,
+													static_cast<int>(m_points[j].pos2D.y) + context.labelMarkerTextShift_pix,
+													ccGenericGLDisplay::ALIGN_DEFAULT,
+													context.labelOpacity / 100.0f,
+													ccColor::white.rgba,
+													&font);
 				}
 			}
 

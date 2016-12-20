@@ -873,7 +873,7 @@ bool CloudSamplingTools::applySORFilterAtLevel(	const DgmOctree::octreeCell& cel
 		const unsigned globalIndex = cell.points->getPointGlobalIndex(i);
 
 		//look for the k nearest neighbors
-		unsigned neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
+		cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		double sumDist = 0;
 		unsigned count = 0;
 		for (int j = 0; j < knn; ++j)

@@ -31,8 +31,9 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	setAutoClose(true);
 	setWindowModality(Qt::ApplicationModal);
 
+	resize(400, 200);
 	setRange(0, 100);
-	setMinimumDuration(0);
+	setMinimumWidth(400);
 
 	QPushButton* cancelButton = 0;
 	if (showCancelButton)

@@ -64,9 +64,9 @@
 struct VerInfo
 {
 	VerInfo()
-		: number(1.36)
+		: number(1.37)
 	{
-		title = QString::number(number,'f',2)/* + ".beta"*/;
+		title = QString::number(number,'f',2) + ".alpha";
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 		title += " Stereo";
 #endif

@@ -245,9 +245,9 @@ double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescri
 	return maxVal - minVal;
 }
 
-CCVector3 ccWaveform::getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const
+CCVector3 ccWaveform::getSamplePos(float index, const CCVector3& P0, const WaveformDescriptor& descriptor) const
 {
-	float delta_ps = m_echoTime_ps - i * descriptor.samplingRate_ps;
+	float delta_ps = m_echoTime_ps - index * descriptor.samplingRate_ps;
 	return P0 + CCVector3::fromArray(m_beamDir.u) * delta_ps;
 }
 

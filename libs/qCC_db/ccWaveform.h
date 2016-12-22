@@ -83,7 +83,7 @@ public:
 	static bool ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps);
 
 	//! Returns the sample position in 3D
-	CCVector3 getSamplePos(uint32_t i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;
+	CCVector3 getSamplePos(float i, const CCVector3& P0, const WaveformDescriptor& descriptor) const;
 
 	//! Returns the number of allocated bytes
 	inline uint32_t byteCount() const { return m_byteCount; }
@@ -199,7 +199,7 @@ public:
 	inline bool toASCII(QString filename) const { return m_w.toASCII(filename, m_d, m_storage); }
 
 	//! Returns the sample position in 3D
-	inline CCVector3 getSamplePos(uint32_t i, const CCVector3& P0) const { return m_w.getSamplePos(i, P0, m_d); }
+	inline CCVector3 getSamplePos(float i, const CCVector3& P0) const { return m_w.getSamplePos(i, P0, m_d); }
 
 	//! Returns the number of allocated bytes
 	inline uint32_t byteCount() const { return m_w.byteCount(); }

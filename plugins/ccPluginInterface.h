@@ -26,7 +26,7 @@
 #include <QString>
 #include <QIcon>
 
-//Qt versop,
+//Qt version
 #include <qglobal.h>
 #ifndef CC_QT5
 	#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
@@ -35,6 +35,7 @@
 #endif
 
 class ccExternalFactory;
+class ccCommandLineInterface;
 
 //! Plugin type
 enum  CC_PLUGIN_TYPE {	CC_STD_PLUGIN               = 1,
@@ -86,8 +87,15 @@ public:
 		ccCustomHObject or ccCustomLeafObject interfaces.
 	**/
 	virtual ccExternalFactory* getCustomObjectsFactory() const { return 0; }
+
+	//! Optional: registers commands (for the command line mode)
+	/** Does nothing by default.
+		\warning: don't use keywords that are already used by the main application or other plugins!
+			(use a unique prefix for all commands if possible)
+	**/
+	virtual void registerCommands(ccCommandLineInterface* cmd) {}
 };
 
-Q_DECLARE_INTERFACE(ccPluginInterface,"edf.rd.CloudCompare.ccPluginInterface/2.0")
+Q_DECLARE_INTERFACE(ccPluginInterface, "edf.rd.CloudCompare.ccPluginInterface/3.0")
 
 #endif //CC_PLUGIN_INTERFACE_HEADER

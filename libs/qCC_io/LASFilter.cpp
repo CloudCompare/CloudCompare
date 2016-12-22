@@ -286,36 +286,38 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			//official LAS fields
 			std::vector<LasField> lasFields;
 			{
-				lasFields.push_back(LasField(LAS_CLASSIFICATION,0,0,255)); //unsigned char: between 0 and 255
-				lasFields.push_back(LasField(LAS_CLASSIF_VALUE,0,0,31)); //5 bits: between 0 and 31
-				lasFields.push_back(LasField(LAS_CLASSIF_SYNTHETIC,0,0,1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_CLASSIF_KEYPOINT,0,0,1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_CLASSIF_WITHHELD,0,0,1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_INTENSITY,0,0,65535)); //16 bits: between 0 and 65536
-				lasFields.push_back(LasField(LAS_TIME,0,0,-1.0)); //8 bytes (double)
-				lasFields.push_back(LasField(LAS_RETURN_NUMBER,1,1,7)); //3 bits: between 1 and 7
-				lasFields.push_back(LasField(LAS_NUMBER_OF_RETURNS,1,1,7)); //3 bits: between 1 and 7
-				lasFields.push_back(LasField(LAS_SCAN_DIRECTION,0,0,1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_FLIGHT_LINE_EDGE,0,0,1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_SCAN_ANGLE_RANK,0,-90,90)); //signed char: between -90 and +90
-				lasFields.push_back(LasField(LAS_USER_DATA,0,0,255)); //unsigned char: between 0 and 255
-				lasFields.push_back(LasField(LAS_POINT_SOURCE_ID,0,0,65535)); //16 bits: between 0 and 65536
+				lasFields.push_back(LasField(LAS_CLASSIFICATION, 0, 0, 255)); //unsigned char: between 0 and 255
+				lasFields.push_back(LasField(LAS_CLASSIF_VALUE, 0, 0, 31)); //5 bits: between 0 and 31
+				lasFields.push_back(LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_INTENSITY, 0, 0, 65535)); //16 bits: between 0 and 65536
+				lasFields.push_back(LasField(LAS_TIME, 0, 0, -1.0)); //8 bytes (double)
+				lasFields.push_back(LasField(LAS_RETURN_NUMBER, 1, 1, 7)); //3 bits: between 1 and 7
+				lasFields.push_back(LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7)); //3 bits: between 1 and 7
+				lasFields.push_back(LasField(LAS_SCAN_DIRECTION, 0, 0, 1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90)); //signed char: between -90 and +90
+				lasFields.push_back(LasField(LAS_USER_DATA, 0, 0, 255)); //unsigned char: between 0 and 255
+				lasFields.push_back(LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535)); //16 bits: between 0 and 65536
 			}
 
 			//we are going to check now the existing cloud SFs
-			for (unsigned i=0; i<pc->getNumberOfScalarFields(); ++i)
+			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 			{
 				ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(i));
 				//find an equivalent in official LAS fields
 				QString sfName = QString(sf->getName()).toUpper();
 				bool outBounds = false;
-				for (size_t j=0; j<lasFields.size(); ++j)
+				for (size_t j = 0; j < lasFields.size(); ++j)
 				{
 					//if the name matches
 					if (sfName == lasFields[j].getName().toUpper())
 					{
 						//check bounds
-						if (sf->getMin() < lasFields[j].minValue || (lasFields[j].maxValue != -1.0 && sf->getMax() > lasFields[j].maxValue)) //outbounds?
+						double sfMin = sf->getGlobalShift() + sf->getMax();
+						double sfMax = sf->getGlobalShift() + sf->getMax();
+						if (sfMin < lasFields[j].minValue || (lasFields[j].maxValue != -1.0 && sfMax > lasFields[j].maxValue)) //outbounds?
 						{
 							ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(sf->getName()).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
 							outBounds = true;
@@ -455,7 +457,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	//progress dialog
 	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
+	CCLib::NormalizedProgress nProgress(&pdlg, numberOfPoints);
 	if (parameters.parentWidget)
 	{
 		pdlg.setMethodTitle(QObject::tr("Save LAS file"));
@@ -470,7 +472,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0; i<numberOfPoints; i++)
+	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		const CCVector3* P = theCloud->getPoint(i);
 		{
@@ -568,7 +570,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			break;
 		}
 
-		if (parameters.parentWidget && !nprogress.oneStep())
+		if (parameters.parentWidget && !nProgress.oneStep())
 		{
 			break;
 		}
@@ -866,9 +868,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if (extraDimension)
 		{
 			assert(!evlrs.empty());
-			for (size_t i=0; i<evlrs.size(); ++i)
+			for (const EVLR& evlr : evlrs)
 			{
-				s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(evlrs[i].getName()).arg(evlrs[i].getDescription()));
+				s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(evlr.getName()).arg(evlr.getDescription()));
 			}
 		}
 
@@ -925,7 +927,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//progress dialog
 		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-		CCLib::NormalizedProgress nprogress(&pdlg, nbOfPoints);
+		CCLib::NormalizedProgress nProgress(&pdlg, nbOfPoints);
 		if (parameters.parentWidget)
 		{
 			pdlg.setMethodTitle(QObject::tr("Open LAS file"));
@@ -935,13 +937,13 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		//number of points read from the beginning of the current cloud part
 		unsigned pointsRead = 0;
-		CCVector3d Pshift(0,0,0);
+		CCVector3d Pshift(0, 0, 0);
 
 		//by default we read colors as triplets of 8 bits integers but we might dynamically change this
 		//if we encounter values using 16 bits (16 bits is the standard!)
 		unsigned char colorCompBitShift = 0;
 		bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
-		ColorCompType rgb[3] = {0,0,0};
+		ColorCompType rgb[3] = { 0, 0, 0 };
 
 		ccPointCloud* loadedCloud = 0;
 		std::vector< LasField::Shared > fieldsToLoad;
@@ -956,7 +958,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			bool newPointAvailable = false;
 			try
 			{
-				newPointAvailable = ((!parameters.parentWidget || nprogress.oneStep()) && reader.ReadNextPoint());
+				newPointAvailable = ((!parameters.parentWidget || nProgress.oneStep()) && reader.ReadNextPoint());
 			}
 			catch (...)
 			{
@@ -1011,7 +1013,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 								{
 									int cMin = static_cast<int>(field->sf->getMin());
 									int cMax = static_cast<int>(field->sf->getMax());
-									field->sf->setColorRampSteps(std::min<int>(cMax-cMin+1,256));
+									field->sf->setColorRampSteps(std::min<int>(cMax - cMin + 1, 256));
 									//classifSF->setMinSaturation(cMin);
 								}
 								else if (field->type == LAS_INTENSITY)
@@ -1050,7 +1052,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							{
 								container.getChild(0)->setName(chunkName + QString(" #1"));
 							}
-							chunkName += QString(" #%1").arg(n+1);
+							chunkName += QString(" #%1").arg(n + 1);
 						}
 						loadedCloud->setName(chunkName);
 
@@ -1089,33 +1091,33 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 				//DGM: from now on, we only enable scalar fields when we detect a valid value!
 				if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION,0,0,255))); //unsigned char: between 0 and 255
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
 				if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE,0,0,31))); //5 bits: between 0 and 31
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
 				if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC,0,0,1))); //1 bit: 0 or 1
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
 				if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT,0,0,1))); //1 bit: 0 or 1
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
 				if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD,0,0,1))); //1 bit: 0 or 1
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
 				if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY,0,0,65535))); //16 bits: between 0 and 65536
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
 				if (s_lasOpenDlg->doLoad(LAS_TIME))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME,0,0,-1.0))); //8 bytes (double) --> we use global shift!
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
 				if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER,1,1,7))); //3 bits: between 1 and 7
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
 				if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS,1,1,7))); //3 bits: between 1 and 7
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
 				if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION,0,0,1))); //1 bit: 0 or 1
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
 				if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE,0,0,1))); //1 bit: 0 or 1
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
 				if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK,0,-90,90))); //signed char: between -90 and +90
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
 				if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA,0,0,255))); //unsigned char: between 0 and 255
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
 				if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
-					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID,0,0,65535))); //16 bits: between 0 and 65536
+					fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
 
 				//Extra fields
 				if (s_lasOpenDlg->doLoad(LAS_EXTRA))
@@ -1230,7 +1232,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
 				{
 					loadedCloud->setGlobalShift(Pshift);
-					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 
 				//restore previous parameters

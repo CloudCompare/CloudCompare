@@ -4,10 +4,11 @@ CloudCompare versions history
 v2.9.alpha - 12/XX/XXXX
 ----------------------
 
-- Bug fix:
+- Bug fixes:
 
 	* LAS I/O filter: if the points of a LAS file were not saved in increasing GPS time order,
 		the corresponding 'Time' scalar field could be rejected later at export time
+	* A visible 2D label with the 'show 2D label' option disabled could break the picking process
 
 v2.8 - 12/18/2016
 ----------------------

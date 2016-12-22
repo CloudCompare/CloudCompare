@@ -1009,6 +1009,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		else
 		{
 			//no need to draw anything (might be confusing)
+			if (pushName)
+			{
+				glFunc->glPopName();
+			}
 			return;
 		}
 	}
@@ -1016,6 +1020,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	if (!m_dispIn2D)
 	{
 		//nothing to do
+		if (pushName)
+		{
+			glFunc->glPopName();
+		}
 		return;
 	}
 
@@ -1177,6 +1185,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				catch (const std::bad_alloc&)
 				{
 					//not enough memory
+					assert(!pushName);
 					return;
 				}
 

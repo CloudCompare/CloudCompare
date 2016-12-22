@@ -4150,7 +4150,7 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	if (!entity)
 	{
 		assert(false);
-		return error("[ExportEntity] Internal error: invalid input entity!");
+		return "[ExportEntity] Internal error: invalid input entity!";
 	}
 
 	//get its name

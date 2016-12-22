@@ -109,6 +109,11 @@ public:
 	//! Applies a rigid transformation (on the beam direction)
 	void applyRigidTransformation(const ccGLMatrix& trans);
 
+	//! Returns the return index
+	uint8_t returnIndex() const { return m_returnIndex; }
+	//! Sets the return index
+	void setReturnIndex(uint8_t index) { m_returnIndex = index; }
+
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const override { return true; }
 	virtual bool toFile(QFile& out) const override;
@@ -144,6 +149,9 @@ protected: //members
 	/** \warning A value of zero indicates that there is no associated waveform data.
 	**/
 	uint8_t m_descriptorID;
+
+	//! Return index
+	uint8_t m_returnIndex;
 };
 
 //! Waveform proxy

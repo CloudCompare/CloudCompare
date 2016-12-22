@@ -287,6 +287,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 					w.setDataDescription(point.wavepacket.getOffset(), point.wavepacket.getSize());
 					w.setBeamDir(CCVector3f::fromArray(fwfReader->XYZt));
 					w.setEchoTime_ps(fwfReader->location);
+					w.setReturnIndex(point.return_number);
 				}
 			}
 
@@ -309,7 +310,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 				if (HandleGlobalShift(P, Pshift, parameters, useLasShift))
 				{
 					cloud->setGlobalShift(Pshift);
-					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 
 				//restore previous parameters

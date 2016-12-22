@@ -57,8 +57,9 @@
 	v4.4 - 07/07/2016 - Full WaveForm data added to point clouds
 	v4.5 - 10/06/2016 - Transformation history is now saved
 	v4.6 - 11/03/2016 - Null normal vector code added
+	v4.7 - 12/22/2016 - Return index added to ccWaveform
 **/
-const unsigned c_currentDBVersion = 46; //4.6
+const unsigned c_currentDBVersion = 47; //4.7
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

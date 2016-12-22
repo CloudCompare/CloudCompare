@@ -59,6 +59,7 @@ ccWaveform::ccWaveform(uint8_t descriptorID/*=0*/)
 	, m_beamDir(0, 0, 0)
 	, m_echoTime_ps(0)
 	, m_descriptorID(descriptorID)
+	, m_returnIndex(1)
 {
 }
 	
@@ -262,7 +263,7 @@ bool ccWaveform::toFile(QFile& out) const
 {
 	QDataStream outStream(&out);
 
-	//dataVersion >= 44
+	//dataVersion >= 46
 	outStream << m_descriptorID;
 	if (m_descriptorID != 0) //no need to save invalid waveforms
 	{
@@ -272,6 +273,8 @@ bool ccWaveform::toFile(QFile& out) const
 		outStream << m_beamDir.y;
 		outStream << m_beamDir.z;
 		outStream << m_echoTime_ps;
+		//dataVersion >= 47
+		outStream << m_returnIndex;
 	}
 
 	return true;
@@ -281,10 +284,10 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags)
 {
 	QDataStream inStream(&in);
 
-	if (dataVersion < 44)
+	if (dataVersion < 46)
 		return false;
 
-	//dataVersion >= 44
+	//dataVersion >= 46
 	inStream >> m_descriptorID;
 	if (m_descriptorID != 0)
 	{
@@ -300,6 +303,16 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags)
 		inStream >> m_beamDir.y;
 		inStream >> m_beamDir.z;
 		inStream >> m_echoTime_ps;
+
+		if (dataVersion > 46)
+		{
+			//dataVersion >= 47
+			inStream >> m_returnIndex;
+		}
+		else
+		{
+			m_returnIndex = 1;
+		}
 	}
 
 	return true;

@@ -351,7 +351,7 @@ CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							if (HandleGlobalShift(Pd,Pshift,parameters))
 							{
 								vertices->setGlobalShift(Pshift);
-								ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+								ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
 							}
 						}
 

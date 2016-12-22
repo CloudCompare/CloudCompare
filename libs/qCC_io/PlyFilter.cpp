@@ -492,7 +492,7 @@ static int vertex_cb(p_ply_argument argument)
 			if (FileIOFilter::HandleGlobalShift(s_Point,s_Pshift,s_loadParameters))
 			{
 				cloud->setGlobalShift(s_Pshift);
-				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f,%.2f,%.2f)",s_Pshift.x,s_Pshift.y,s_Pshift.z);
+				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f ; %.2f ; %.2f)",s_Pshift.x,s_Pshift.y,s_Pshift.z);
 			}
 		}
 

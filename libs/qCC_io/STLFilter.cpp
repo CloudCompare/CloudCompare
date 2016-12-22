@@ -729,7 +729,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				if (HandleGlobalShift(Pd, Pshift, parameters))
 				{
 					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
@@ -939,7 +939,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				if (HandleGlobalShift(Pd, Pshift, parameters))
 				{
 					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 

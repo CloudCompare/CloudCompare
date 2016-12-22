@@ -198,7 +198,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(QString filename, ccHObject& container
 					if (HandleGlobalShift(P,Pshift,parameters))
 					{
 						currentVertices->setGlobalShift(Pshift);
-						ccLog::Warning("[Salome Hydro] Polylines will be recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+						ccLog::Warning("[Salome Hydro] Polylines will be recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
 					}
 					firstPoint = false;
 				}

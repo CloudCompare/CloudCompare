@@ -528,7 +528,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					if (HandleGlobalShift(Pd, Pshift, parameters))
 					{
 						vertices->setGlobalShift(Pshift);
-						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
 

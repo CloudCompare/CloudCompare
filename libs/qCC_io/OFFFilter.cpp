@@ -220,7 +220,7 @@ CC_FILE_ERROR OFFFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				if (HandleGlobalShift(Pd,Pshift,parameters))
 				{
 					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[OFF] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+					ccLog::Warning("[OFF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
 				}
 			}
 

@@ -412,7 +412,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(QString filename, ccHObject& container, Loa
 											currentPoly->setGlobalShift(Pshift);
 										else
 											currentVertices->setGlobalShift(Pshift);
-										ccLog::Warning("[SinusX::loadFile] Polyline has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+										ccLog::Warning("[SinusX::loadFile] Polyline has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
 									}
 								}
 

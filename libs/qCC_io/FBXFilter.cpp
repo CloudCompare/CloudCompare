@@ -1180,7 +1180,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				if (FileIOFilter::HandleGlobalShift(P,Pshift,parameters))
 				{
 					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)",Pshift.x,Pshift.y,Pshift.z);
 				}
 			}
 

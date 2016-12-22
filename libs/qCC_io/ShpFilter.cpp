@@ -1477,7 +1477,7 @@ CC_FILE_ERROR ShpFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		CCVector3d Pmin(xMin, yMin, zMin);
 		if (HandleGlobalShift(Pmin, Pshift, parameters))
 		{
-			ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f,%.2f,%.2f)", Pshift.x, Pshift.y, Pshift.z);
+			ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 		}
 
 		//M bounaries (M = measures)

@@ -80,7 +80,7 @@ public:
 		{
 			if (FileIOFilter::HandleGlobalShift(P,m_globalShift,m_loadParameters))
 			{
-				ccLog::Warning("[DXF] All points/vertices will been recentered! Translation: (%.2f,%.2f,%.2f)",m_globalShift.x,m_globalShift.y,m_globalShift.z);
+				ccLog::Warning("[DXF] All points/vertices will been recentered! Translation: (%.2f ; %.2f ; %.2f)",m_globalShift.x,m_globalShift.y,m_globalShift.z);
 			}
 			m_firstPoint = false;
 		}

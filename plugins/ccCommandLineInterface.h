@@ -154,6 +154,12 @@ public: //commands
 		QString m_keyword;
 	};
 
+	//! Test whether a command line token is a valid command keyword or not
+	static bool IsCommand(const QString& token, const char* command)
+	{
+		return token.startsWith("-") && token.mid(1).toUpper() == QString(command);
+	}
+
 public: //virtual methods
 
 	//! Registers a new command

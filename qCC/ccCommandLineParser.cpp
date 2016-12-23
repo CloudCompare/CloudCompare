@@ -46,6 +46,7 @@
 #include <unordered_set>
 
 //commands
+static const char COMMAND_HELP[]							= "HELP";
 static const char COMMAND_SILENT_MODE[]						= "SILENT";
 static const char COMMAND_OPEN[]							= "O";				//+file name
 static const char COMMAND_OPEN_SKIP_LINES[]					= "SKIP";			//+number of lines to skip
@@ -134,25 +135,6 @@ static const char OPTION_ON[]								= "ON";
 static const char OPTION_OFF[]								= "OFF";
 static const char OPTION_LAST[]								= "LAST";
 
-//Default file loading parameters
-struct CommandLineLoadParameters : public FileIOFilter::LoadParameters
-{
-	CommandLineLoadParameters()
-		: FileIOFilter::LoadParameters()
-		, m_coordinatesShiftEnabled(false)
-		, m_coordinatesShift(0, 0, 0)
-	{
-		shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-		alwaysDisplayLoadDialog = false;
-		coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
-		coordinatesShift = &m_coordinatesShift;
-	}
-
-	bool m_coordinatesShiftEnabled;
-	CCVector3d m_coordinatesShift;
-};
-static CommandLineLoadParameters s_loadParameters;
-
 bool IsCommand(const QString& token, const char* command)
 {
 	return token.startsWith("-") && token.mid(1).toUpper() == QString(command);
@@ -204,14 +186,15 @@ struct CommandLoad : public ccCommandLineInterface::Command
 
 				QString firstParam = cmd.arguments().takeFirst();
 
-				s_loadParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-				s_loadParameters.m_coordinatesShiftEnabled = false;
-				s_loadParameters.m_coordinatesShift = CCVector3d(0, 0, 0);
+				ccCommandLineInterface::CLLoadParameters& loadParams = cmd.fileLoadingParams();
+				loadParams.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+				loadParams.m_coordinatesShiftEnabled = false;
+				loadParams.m_coordinatesShift = CCVector3d(0, 0, 0);
 
 				if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO)
 				{
 					//let CC handles the global shift automatically
-					s_loadParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+					loadParams.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 				}
 				else if (cmd.arguments().size() < 2)
 				{
@@ -232,8 +215,9 @@ struct CommandLoad : public ccCommandLineInterface::Command
 						return cmd.error(QString("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 
 					//set the user defined shift vector as default shift information
-					s_loadParameters.m_coordinatesShiftEnabled = true;
-					s_loadParameters.m_coordinatesShift = shiftOnLoadVec;
+					ccCommandLineInterface::CLLoadParameters& loadParams = cmd.fileLoadingParams();
+					loadParams.m_coordinatesShiftEnabled = true;
+					loadParams.m_coordinatesShift = shiftOnLoadVec;
 				}
 			}
 			else
@@ -251,105 +235,7 @@ struct CommandLoad : public ccCommandLineInterface::Command
 
 		//open specified file
 		QString filename(cmd.arguments().takeFirst());
-		cmd.print(QString("Opening file: '%1'").arg(filename));
-
-		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-		ccHObject* db = FileIOFilter::LoadFromFile(filename, s_loadParameters, result, QString());
-		if (!db)
-		{
-			return false/*cmd.error(QString("Failed to open file '%1'").arg(filename))*/;
-		}
-
-		std::unordered_set<unsigned> verticesIDs;
-		//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
-		{
-			ccHObject::Container meshes;
-			size_t count = 0;
-			//first look for all REAL meshes (so as to no consider sub-meshes)
-			if (db->filterChildren(meshes, true, CC_TYPES::MESH, true) != 0)
-			{
-				count += meshes.size();
-				for (size_t i = 0; i < meshes.size(); ++i)
-				{
-					ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
-					if (mesh->getParent())
-					{
-						mesh->getParent()->detachChild(mesh);
-					}
-
-					ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-					if (vertices)
-					{
-						verticesIDs.insert(vertices->getUniqueID());
-						cmd.print(QString("Found one mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
-						cmd.meshes().push_back(CLMeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(i)));
-					}
-					else
-					{
-						delete mesh;
-						mesh = 0;
-						assert(false);
-					}
-				}
-			}
-
-			//then look for the other meshes
-			meshes.clear();
-			if (db->filterChildren(meshes, true, CC_TYPES::MESH, false) != 0)
-			{
-				size_t countBefore = count;
-				count += meshes.size();
-				for (size_t i = 0; i < meshes.size(); ++i)
-				{
-					ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
-					if (mesh->getParent())
-						mesh->getParent()->detachChild(mesh);
-
-					ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-					if (vertices)
-					{
-						verticesIDs.insert(vertices->getUniqueID());
-						cmd.print(QString("Found one kind of mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
-						cmd.meshes().push_back(CLMeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(countBefore + i)));
-					}
-					else
-					{
-						delete mesh;
-						mesh = 0;
-						assert(false);
-					}
-				}
-			}
-		}
-
-		//now look for the remaining clouds inside loaded DB
-		{
-			ccHObject::Container clouds;
-			db->filterChildren(clouds, false, CC_TYPES::POINT_CLOUD);
-			size_t count = clouds.size();
-			for (size_t i = 0; i < count; ++i)
-			{
-				ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
-				if (pc->getParent())
-				{
-					pc->getParent()->detachChild(pc);
-				}
-
-				//if the cloud is a set of vertices, we ignore it!
-				if (verticesIDs.find(pc->getUniqueID()) != verticesIDs.end())
-				{
-					cmd.orphans().addChild(pc);
-					continue;
-				}
-				cmd.print(QString("Found one cloud with %1 points").arg(pc->size()));
-				cmd.clouds().push_back(CLCloudDesc(pc, filename, count == 1 ? -1 : static_cast<int>(i)));
-			}
-		}
-
-		delete db;
-		db = 0;
-
-		return true;
+		return cmd.importFile(filename);
 	}
 };
 
@@ -2510,7 +2396,7 @@ struct CommandBundler : public ccCommandLineInterface::Command
 
 struct CommandDist : public ccCommandLineInterface::Command
 {
-	CommandDist(bool cloud2meshDist, QString name, QString keword)
+	CommandDist(bool cloud2meshDist, QString name, QString keyword)
 		: ccCommandLineInterface::Command(name, keyword)
 		, m_cloud2meshDist(cloud2meshDist)
 	{}
@@ -3772,7 +3658,7 @@ struct CommandForceNormalsComputation : public ccCommandLineInterface::Command
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
 		//simply change the default filter behavior
-		s_loadParameters.autoComputeNormals = true;
+		cmd.fileLoadingParams().autoComputeNormals = true;
 
 		return true;
 	}
@@ -3985,7 +3871,7 @@ bool ccCommandLineParser::error(const QString& message) const
 	return false;
 }
 
-int ccCommandLineParser::Parse(int nargs, char** args)
+int ccCommandLineParser::Parse(int nargs, char** args, tPluginInfoList* plugins/*=0*/)
 {
 	if (!args || nargs < 2)
 	{
@@ -3993,28 +3879,25 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		return EXIT_SUCCESS;
 	}
 
-	//reset default behavior(s)
-	s_loadParameters.autoComputeNormals = false;
-
 	//load arguments
-	ccCommandLineParser parser;
+	QScopedPointer<ccCommandLineParser> parser(new ccCommandLineParser);
 	{
 		for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
 		{
-			parser.arguments().push_back(QString(args[i]));
+			parser->arguments().push_back(QString(args[i]));
 		}
 	}
-	assert(!parser.arguments().empty());
+	assert(!parser->arguments().empty());
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
-	if (IsCommand(parser.arguments().front(), COMMAND_SILENT_MODE))
+	if (IsCommand(parser->arguments().front(), COMMAND_SILENT_MODE))
 	{
-		parser.arguments().pop_front();
-		parser.toggleSilentMode(true);
+		parser->arguments().pop_front();
+		parser->toggleSilentMode(true);
 	}
 
 	QScopedPointer<QDialog> consoleDlg(0);
-	if (!parser.silentMode())
+	if (!parser->silentMode())
 	{
 		//show console
 		consoleDlg.reset(new QDialog);
@@ -4022,19 +3905,37 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		commandLineDlg.setupUi(consoleDlg.data());
 		consoleDlg->show();
 		ccConsole::Init(commandLineDlg.consoleWidget, consoleDlg.data());
-		s_loadParameters.parentWidget = consoleDlg.data();
+		parser->fileLoadingParams().parentWidget = consoleDlg.data();
+	}
+
+	//load the plugins commands
+	if (plugins)
+	{
+		for (tPluginInfo pluginInfo : *plugins)
+		{
+			if (!pluginInfo.object)
+			{
+				assert(false);
+				continue;
+			}
+			ccPluginInterface* plugin = static_cast<ccPluginInterface*>(pluginInfo.object);
+			plugin->registerCommands(parser.data());
+		}
 	}
 
 	//parse input
-	int result = parser.start(consoleDlg.data());
+	int result = parser->start(consoleDlg.data());
 
-	if (!parser.silentMode())
+	if (!parser->silentMode())
 	{
 		if (result == EXIT_SUCCESS)
 			QMessageBox::information(consoleDlg.data(), "Processed finished", "Job done");
 		else
 			QMessageBox::warning(consoleDlg.data(), "Processed finished", "An error occurred! Check console");
 	}
+
+	//release the parser before the console (as its dialogs may be chidren of the console)
+	parser.reset();
 
 	ccConsole::ReleaseInstance();
 
@@ -4043,12 +3944,13 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 
 ccCommandLineParser::ccCommandLineParser()
 	: ccCommandLineInterface()
-	, m_progressDialog(0)
-	, m_parentWidget(0)
 	, m_cloudExportFormat(BinFilter::GetFileFilter())
 	, m_cloudExportExt(BinFilter::GetDefaultExtension())
 	, m_meshExportFormat(BinFilter::GetFileFilter())
 	, m_meshExportExt(BinFilter::GetDefaultExtension())
+	, m_orphans("orphans")
+	, m_progressDialog(0)
+	, m_parentWidget(0)
 {
 	registerCommand(Command::Shared(new CommandLoad));
 	registerCommand(Command::Shared(new CommandSubsample));
@@ -4111,9 +4013,6 @@ ccCommandLineParser::~ccCommandLineParser()
 	if (m_progressDialog)
 	{
 		m_progressDialog->close();
-		m_progressDialog->setParent(0);
-		delete m_progressDialog;
-		m_progressDialog = 0;
 	}
 }
 
@@ -4125,14 +4024,14 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 		return false;
 	}
 
-	if (m_commands.contains(command->keyword))
+	if (m_commands.contains(command->m_keyword))
 	{
 		assert(false);
-		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->keyword).arg(m_commands[command->keyword]->name));
+		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword).arg(m_commands[command->m_keyword]->m_name));
 		return false;
 	}
 
-	m_commands.insert(command->keyword, command);
+	m_commands.insert(command->m_keyword, command);
 
 	return true;
 }
@@ -4265,6 +4164,118 @@ void ccCommandLineParser::removeMeshes(bool onlyLast/*=false*/)
 	}
 }
 
+bool ccCommandLineParser::importFile(QString filename, FileIOFilter::Shared filter)
+{
+	print(QString("Opening file: '%1'").arg(filename));
+
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* db = 0;
+	if (filter)
+	{
+		db = FileIOFilter::LoadFromFile(filename, m_loadingParameters, filter, result);
+	}
+	else
+	{
+		db = FileIOFilter::LoadFromFile(filename, m_loadingParameters, result, QString());
+	}
+
+	if (!db)
+	{
+		return false/*cmd.error(QString("Failed to open file '%1'").arg(filename))*/; //Error message already issued
+	}
+
+	std::unordered_set<unsigned> verticesIDs;
+	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
+	{
+		ccHObject::Container meshes;
+		size_t count = 0;
+		//first look for all REAL meshes (so as to no consider sub-meshes)
+		if (db->filterChildren(meshes, true, CC_TYPES::MESH, true) != 0)
+		{
+			count += meshes.size();
+			for (size_t i = 0; i < meshes.size(); ++i)
+			{
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
+				if (mesh->getParent())
+				{
+					mesh->getParent()->detachChild(mesh);
+				}
+
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				if (vertices)
+				{
+					verticesIDs.insert(vertices->getUniqueID());
+					print(QString("Found one mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
+					m_meshes.push_back(CLMeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(i)));
+				}
+				else
+				{
+					delete mesh;
+					mesh = 0;
+					assert(false);
+				}
+			}
+		}
+
+		//then look for the other meshes
+		meshes.clear();
+		if (db->filterChildren(meshes, true, CC_TYPES::MESH, false) != 0)
+		{
+			size_t countBefore = count;
+			count += meshes.size();
+			for (size_t i = 0; i < meshes.size(); ++i)
+			{
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[i]);
+				if (mesh->getParent())
+					mesh->getParent()->detachChild(mesh);
+
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				if (vertices)
+				{
+					verticesIDs.insert(vertices->getUniqueID());
+					print(QString("Found one kind of mesh with %1 faces and %2 vertices: '%3'").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()).arg(mesh->getName()));
+					m_meshes.push_back(CLMeshDesc(mesh, filename, count == 1 ? -1 : static_cast<int>(countBefore + i)));
+				}
+				else
+				{
+					delete mesh;
+					mesh = 0;
+					assert(false);
+				}
+			}
+		}
+	}
+
+	//now look for the remaining clouds inside loaded DB
+	{
+		ccHObject::Container clouds;
+		db->filterChildren(clouds, false, CC_TYPES::POINT_CLOUD);
+		size_t count = clouds.size();
+		for (size_t i = 0; i < count; ++i)
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
+			if (pc->getParent())
+			{
+				pc->getParent()->detachChild(pc);
+			}
+
+			//if the cloud is a set of vertices, we ignore it!
+			if (verticesIDs.find(pc->getUniqueID()) != verticesIDs.end())
+			{
+				m_orphans.addChild(pc);
+				continue;
+			}
+			print(QString("Found one cloud with %1 points").arg(pc->size()));
+			m_clouds.push_back(CLCloudDesc(pc, filename, count == 1 ? -1 : static_cast<int>(i)));
+		}
+	}
+
+	delete db;
+	db = 0;
+
+	return true;
+}
+
 bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnce/*=false*/)
 {
 	//all-at-once: all clouds in a single file
@@ -4378,6 +4389,7 @@ int ccCommandLineParser::start(QDialog* parent/*=0*/)
 	if (!m_silentMode)
 	{
 		m_progressDialog = new ccProgressDialog(false, parent);
+		m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
 		m_progressDialog->setAutoClose(false);
 	}
 
@@ -4389,20 +4401,37 @@ int ccCommandLineParser::start(QDialog* parent/*=0*/)
 	{
 		QString argument = m_arguments.takeFirst();
 
-		if (m_commands.contains(argument))
+		if (!argument.startsWith("-"))
 		{
-			assert(m_commands[argument]);
-			success = m_commands[argument]->process(*this);
+			error(QString("Command expected (commands start with '-'). Found '%1'").arg(argument));
+			success = false;
+			break;
+		}
+		QString keyword = argument.mid(1).toUpper();
+
+		if (m_commands.contains(keyword))
+		{
+			assert(m_commands[keyword]);
+			success = m_commands[keyword]->process(*this);
 		}
 		//silent mode (i.e. no console)
-		else if (IsCommand(argument, COMMAND_SILENT_MODE))
+		else if (keyword == COMMAND_SILENT_MODE)
 		{
 			warning(QString("Misplaced command: '%1' (must be first)").arg(COMMAND_SILENT_MODE));
+		}
+		else if (keyword == COMMAND_HELP)
+		{
+			print("Available commands:");
+			for (auto it = m_commands.constBegin(); it != m_commands.constEnd(); ++it)
+			{
+				print(QString("-%1: %2").arg(it.key().toUpper()).arg(it.value()->m_name));
+			}
 		}
 		else
 		{
 			error(QString("Unknown or misplaced command: '%1'").arg(argument));
 			success = false;
+			break;
 		}
 	}
 

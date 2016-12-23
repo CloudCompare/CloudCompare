@@ -5,6 +5,9 @@
 #include <ccGenericMesh.h>
 #include <ccPointCloud.h>
 
+//qCC_io
+#include <FileIOFilter.h>
+
 //Qt
 #include <QString>
 #include <QStringList>
@@ -122,8 +125,7 @@ public: //constructor
 
 	//! Default constructor
 	ccCommandLineInterface()
-		: m_orphans("orphans")
-		, m_silentMode(false)
+		: m_silentMode(false)
 		, m_autoSaveMode(true)
 		, m_addTimestamp(true)
 		, m_precision(12)
@@ -138,18 +140,18 @@ public: //commands
 		typedef QSharedPointer<Command> Shared;
 
 		//! Default constructor
-		Command(QString _name, QString _keyword)
-			: name(_name)
-			, keyword(_keyword)
+		Command(QString name, QString keyword)
+			: m_name(name)
+			, m_keyword(keyword)
 		{}
 
 		//! Main process
 		virtual bool process(ccCommandLineInterface& cmd) = 0;
 
 		//! Command name
-		QString name;
+		QString m_name;
 		//! Command keyword
-		QString keyword;
+		QString m_keyword;
 	};
 
 public: //virtual methods
@@ -198,6 +200,37 @@ public: //virtual methods
 	//! Returns a (widget) parent (if any is available)
 	virtual QDialog* widgetParent() { return 0; }
 
+public: //file I/O
+
+	//Extended file loading parameters
+	struct CLLoadParameters : public FileIOFilter::LoadParameters
+	{
+		CLLoadParameters()
+			: FileIOFilter::LoadParameters()
+			, m_coordinatesShiftEnabled(false)
+			, m_coordinatesShift(0, 0, 0)
+		{
+			shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+			alwaysDisplayLoadDialog = false;
+			autoComputeNormals = false;
+			coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
+			coordinatesShift = &m_coordinatesShift;
+		}
+
+		bool m_coordinatesShiftEnabled;
+		CCVector3d m_coordinatesShift;
+	};
+
+	//! File loading parameters
+	virtual CLLoadParameters& fileLoadingParams() { return m_loadingParameters; }
+
+	//! Loads a file with a specific filter
+	/** Automatically dispatches the entities between the clouds and meshes sets.
+	**/
+	virtual bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(0)) = 0;
+
+public: //logging
+
 	//logging
 	virtual void print(const QString& message) const = 0;
 	virtual void warning(const QString& message) const = 0;
@@ -214,11 +247,6 @@ public: //access to data
 	virtual std::vector< CLMeshDesc >& meshes() { return m_meshes; }
 	//! Currently opened meshes and their filename (const version)
 	virtual const std::vector< CLMeshDesc >& meshes() const { return m_meshes; }
-
-	//! Returns the list of orhpan entities (neither clouds nor meshes)
-	virtual ccHObject& orphans() { return m_orphans; }
-	//! Returns the list of orhpan entities (neither clouds nor meshes) (const version)
-	virtual const ccHObject& orphans() const { return m_orphans; }
 
 	//! Toggles silent mode
 	/** Must be called BEFORE calling start.
@@ -250,9 +278,6 @@ protected: //members
 	//! Currently opened meshes and their filename
 	std::vector< CLMeshDesc > m_meshes;
 
-	//! Oprhan entities
-	ccHObject m_orphans;
-
 	//! Silent mode
 	bool m_silentMode;
 
@@ -264,6 +289,9 @@ protected: //members
 
 	//! Default numerical precision for ASCII output
 	int m_precision;
+
+	//! File loading parameters
+	CLLoadParameters m_loadingParameters;
 
 };
 

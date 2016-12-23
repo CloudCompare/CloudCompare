@@ -32,11 +32,12 @@ class qLASFWFIO : public QObject, public ccIOFilterPluginInterface
 public:
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "LAS FWF I/O filter"; }
-	virtual QString getDescription() const { return "LAS FWF I/O filter"; }
+	virtual QString getName() const override { return "LAS FWF I/O filter"; }
+	virtual QString getDescription() const override { return "LAS FWF I/O filter"; }
+	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
 	//inherited from ccIOFilterPluginInterface
-	FileIOFilter::Shared getFilter();
+	FileIOFilter::Shared getFilter() override;
 };
 
 #endif //Q_LAS_FWF_IO_PLUGIN_HEADER

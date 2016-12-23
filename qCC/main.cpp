@@ -295,7 +295,7 @@ int main(int argc, char **argv)
 	if (commandLine)
 	{
 		//command line processing (no GUI)
-		result = ccCommandLineParser::Parse(argc, argv);
+		result = ccCommandLineParser::Parse(argc, argv, &plugins);
 	}
 	else
 	{

@@ -4,6 +4,9 @@
 //interface
 #include "../plugins/ccCommandLineInterface.h"
 
+//Local
+#include "ccPluginInfo.h"
+
 class ccProgressDialog;
 class QDialog;
 
@@ -13,7 +16,10 @@ class ccCommandLineParser : public ccCommandLineInterface
 public:
 
 	//! Parses the input command
-	static int Parse(int nargs, char** args);
+	static int Parse(int nargs, char** args, tPluginInfoList* plugins = 0);
+
+	//! Destructor
+	virtual ~ccCommandLineParser();
 
 	//inherited from ccCommandLineInterface
 	virtual QString exportEntity(	CLEntityDesc& entityDesc,
@@ -33,6 +39,7 @@ public:
 	virtual bool error(const QString& message) const override; //must always return false!
 	virtual bool saveClouds(QString suffix = QString(), bool allAtOnce = false) override;
 	virtual bool saveMeshes(QString suffix = QString(), bool allAtOnce = false) override;
+	virtual bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(0)) override;
 
 protected: //other methods
 
@@ -40,11 +47,6 @@ protected: //other methods
 	/** Shouldn't be called by user.
 	**/
 	ccCommandLineParser();
-
-	//! Destructor
-	/** Shouldn't be called by user.
-	**/
-	virtual ~ccCommandLineParser();
 
 	//! Parses the command line
 	int start(QDialog* parent = 0);
@@ -70,6 +72,9 @@ private: //members
 
 	//! Registered commands
 	QMap< QString, Command::Shared > m_commands;
+
+	//! Oprhan entities
+	ccHObject m_orphans;
 
 	//! Shared progress dialog
 	ccProgressDialog* m_progressDialog;

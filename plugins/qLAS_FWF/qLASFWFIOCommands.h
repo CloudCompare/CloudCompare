@@ -15,27 +15,41 @@
 //#                                                                        #
 //##########################################################################
 
-#include "qLASFWFIO.h"
+#ifndef LAS_FWF_IO_PLUGIN_COMMANDS_HEADER
+#define LAS_FWF_IO_PLUGIN_COMMANDS_HEADER
 
-//local
+#include "../ccCommandLineInterface.h"
+
+//Local
 #include "Filter/LASFWFFilter.h"
-#include "qLASFWFIOCommands.h"
 
-//Qt
-#include <QtPlugin>
+static const char COMMAND_LOAD_FWF[] = "FWF_O";
 
-FileIOFilter::Shared qLASFWFIO::getFilter()
+struct CommandLoadLASFWF : public ccCommandLineInterface::Command
 {
-	return FileIOFilter::Shared(new LASFWFFilter);
-}
+	CommandLoadLASFWF() : ccCommandLineInterface::Command("Load FWF", COMMAND_LOAD_FWF) {}
 
-void qLASFWFIO::registerCommands(ccCommandLineInterface* cmd)
-{
-	if (!cmd)
+	virtual bool process(ccCommandLineInterface& cmd) override
 	{
-		assert(false);
-		return;
-	}
+		cmd.print("[LOADING LAS]");
+		if (cmd.arguments().empty())
+		{
+			return cmd.error(QString("Missing parameter: filename after \"-%1\"").arg(COMMAND_LOAD_FWF));
+		}
 
-	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandLoadLASFWF));
-}
+		//open specified file
+		QString filename(cmd.arguments().takeFirst());
+		cmd.print(QString("Opening file: '%1'").arg(filename));
+
+		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+		FileIOFilter::Shared filter = FileIOFilter::GetFilter(LASFWFFilter::GetFileFilter(), true);
+		if (!filter)
+		{
+			return cmd.error("Internal error: failed to load the LAS FWF I/O filter");
+		}
+
+		return cmd.importFile(filename, filter);
+	}
+};
+
+#endif //LAS_FWF_IO_PLUGIN_COMMANDS_HEADER

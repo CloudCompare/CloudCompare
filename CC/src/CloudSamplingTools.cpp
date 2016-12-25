@@ -179,11 +179,11 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctreeAtLevel(GenericIndex
 										reinterpret_cast<void*>(&subsamplingMethod) };
 
 	if (octree->executeFunctionForAllCellsAtLevel(	octreeLevel,
-														&subsampleCellAtLevel,
-														additionalParameters,
-														false, //the process is so simple that MT is slower!
-														progressCb,
-														"Cloud Subsampling") == 0)
+													&subsampleCellAtLevel,
+													additionalParameters,
+													false, //the process is so simple that MT is slower!
+													progressCb,
+													"Cloud Subsampling") == 0)
 	{
 		//something went wrong
 		delete cloud;

@@ -32,7 +32,6 @@ public:
 	virtual QStringList& arguments() override { return m_arguments; }
 	virtual const QStringList& arguments() const override { return m_arguments; }
 	virtual bool registerCommand(Command::Shared command) override;
-	virtual ccProgressDialog* progressDialog() override { return m_progressDialog; }
 	virtual QDialog* widgetParent() override { return m_parentWidget; }
 	virtual void print(const QString& message) const override;
 	virtual void warning(const QString& message) const override;

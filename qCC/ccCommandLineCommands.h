@@ -596,15 +596,22 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 			}
 			cmd.print(QString("\tOctree level: %1").arg(octreeLevel));
 
+			QScopedPointer<ccProgressDialog> progressDialog(0);
+			if (!cmd.silentMode())
+			{
+				progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+				progressDialog->setAutoClose(false);
+			}
+
 			for (size_t i = 0; i < cmd.clouds().size(); ++i)
 			{
 				ccPointCloud* cloud = cmd.clouds()[i].pc;
 				cmd.print(QString("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
-				CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,
-					static_cast<unsigned char>(octreeLevel),
-					CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-					cmd.progressDialog());
+				CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
+																												static_cast<unsigned char>(octreeLevel),
+																												CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																												progressDialog.data());
 				if (!refCloud)
 				{
 					return cmd.error("Subsampling process failed!");
@@ -640,6 +647,12 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 				{
 					return cmd.error("Not enough memory!");
 				}
+			}
+
+			if (progressDialog)
+			{
+				progressDialog->close();
+				QCoreApplication::processEvents();
 			}
 		}
 		else
@@ -690,6 +703,13 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 
 		try
 		{
+			QScopedPointer<ccProgressDialog> progressDialog(0);
+			if (!cmd.silentMode())
+			{
+				progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+				progressDialog->setAutoClose(false);
+			}
+
 			std::vector< CLCloudDesc > inputClouds = cmd.clouds();
 			cmd.clouds().clear();
 			for (size_t i = 0; i < inputClouds.size(); ++i)
@@ -712,9 +732,9 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 
 				//try to label all CCs
 				int componentCount = CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,
-					static_cast<unsigned char>(octreeLevel),
-					false,
-					cmd.progressDialog());
+																							static_cast<unsigned char>(octreeLevel),
+																							false,
+																							progressDialog.data());
 
 				if (componentCount == 0)
 				{
@@ -784,6 +804,12 @@ struct CommandExtractCCs : public ccCommandLineInterface::Command
 				{
 					cmd.print(QString("%1 component(s) were created").arg(cmd.clouds().size()));
 				}
+			}
+
+			if (progressDialog)
+			{
+				progressDialog->close();
+				QCoreApplication::processEvents();
 			}
 		}
 		catch (const std::bad_alloc&)
@@ -1629,13 +1655,20 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 		if (cmd.clouds().empty())
 			return cmd.error(QString("No cloud available. Be sure to open one first!"));
 
+		QScopedPointer<ccProgressDialog> progressDialog(0);
+		if (!cmd.silentMode())
+		{
+			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+			progressDialog->setAutoClose(false);
+		}
+
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			ccPointCloud* cloud = cmd.clouds()[i].pc;
 			assert(cloud);
 
 			//computation
-			if (cloud->orientNormalsWithMST(knn, cmd.progressDialog()))
+			if (cloud->orientNormalsWithMST(knn, progressDialog.data()))
 			{
 				cmd.clouds()[i].basename += QString("_NORMS_REORIENTED");
 				if (cmd.autoSaveMode())
@@ -1649,6 +1682,12 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 			{
 				return cmd.error(QString("Failed to orient the normals of cloud '%1'!").arg(cloud->getName()));
 			}
+		}
+
+		if (progressDialog)
+		{
+			progressDialog->close();
+			QCoreApplication::processEvents();
 		}
 
 		return true;
@@ -1682,6 +1721,13 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 		if (cmd.clouds().empty())
 			return cmd.error(QString("No cloud available. Be sure to open one first!"));
 
+		QScopedPointer<ccProgressDialog> progressDialog(0);
+		if (!cmd.silentMode())
+		{
+			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+			progressDialog->setAutoClose(false);
+		}
+		
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			ccPointCloud* cloud = cmd.clouds()[i].pc;
@@ -1689,10 +1735,10 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 
 			//computation
 			CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
-				knn,
-				nSigma,
-				0,
-				cmd.progressDialog());
+																					knn,
+																					nSigma,
+																					0,
+																					progressDialog.data());
 
 			if (selection)
 			{
@@ -1732,6 +1778,12 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 			}
 		}
 
+		if (progressDialog)
+		{
+			progressDialog->close();
+			QCoreApplication::processEvents();
+		}
+
 		return true;
 	}
 };
@@ -1768,10 +1820,16 @@ struct CommandSampleMesh : public ccCommandLineInterface::Command
 		if (cmd.meshes().empty())
 			return cmd.error(QString("No mesh available. Be sure to open one first!"));
 
+		QScopedPointer<ccProgressDialog> progressDialog(0);
+		if (!cmd.silentMode())
+		{
+			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+			progressDialog->setAutoClose(false);
+		}
+
 		for (size_t i = 0; i < cmd.meshes().size(); ++i)
 		{
-
-			ccPointCloud* cloud = cmd.meshes()[i].mesh->samplePoints(useDensity, parameter, true, true, true, cmd.progressDialog());
+			ccPointCloud* cloud = cmd.meshes()[i].mesh->samplePoints(useDensity, parameter, true, true, true, progressDialog.data());
 
 			if (!cloud)
 			{
@@ -1789,6 +1847,12 @@ struct CommandSampleMesh : public ccCommandLineInterface::Command
 				if (!errorStr.isEmpty())
 					return cmd.error(errorStr);
 			}
+		}
+
+		if (progressDialog)
+		{
+			progressDialog->close();
+			QCoreApplication::processEvents();
 		}
 
 		return true;
@@ -2548,6 +2612,13 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 		if (cmd.clouds().empty())
 			return cmd.error(QString("No cloud available. Be sure to open one first!"));
 
+		QScopedPointer<ccProgressDialog> progressDialog(0);
+		if (!cmd.silentMode())
+		{
+			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+			progressDialog->setAutoClose(false);
+		}
+
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			ccPointCloud* pc = cmd.clouds()[i].pc;
@@ -2574,7 +2645,7 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 				ccOctree::Shared theOctree = pc->getOctree();
 				if (!theOctree)
 				{
-					theOctree = pc->computeOctree(cmd.progressDialog());
+					theOctree = pc->computeOctree(progressDialog.data());
 					if (!theOctree)
 					{
 						if (distrib)
@@ -2584,7 +2655,7 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 					}
 				}
 
-				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, kNN, pValue, cmd.progressDialog(), theOctree.data());
+				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, kNN, pValue, progressDialog.data(), theOctree.data());
 
 				cmd.print(QString("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
 
@@ -2610,6 +2681,12 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 						return cmd.error(errorStr);
 				}
 			}
+		}
+
+		if (progressDialog)
+		{
+			progressDialog->close();
+			QCoreApplication::processEvents();
 		}
 
 		return true;

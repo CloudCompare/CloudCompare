@@ -115,16 +115,17 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 		ccLog::Print(QString("[LASLib] " + QObject::tr("Reading %1 points").arg(pointCount)));
 
 		//progress dialog
-		ccProgressDialog progressDialog(parameters.parentWidget);
+		QScopedPointer<ccProgressDialog> progressDialog(0);
 		if (parameters.parentWidget)
 		{
-			progressDialog.setWindowTitle(QObject::tr("Import LAS file"));
-			progressDialog.setLabelText(QObject::tr("Points: %1").arg(pointCount));
-			progressDialog.setRange(0, 0/*static_cast<int>(pointCount)*/); //DGM FIXME: the progress doesn't update! Is it because it's in a separate DLL/plugin?
-			progressDialog.show();
+			progressDialog.reset(new ccProgressDialog(parameters.parentWidget));
+			progressDialog->setWindowTitle(QObject::tr("Import LAS file"));
+			progressDialog->setLabelText(QObject::tr("Points: %1").arg(pointCount));
+			progressDialog->setRange(0, 0/*static_cast<int>(pointCount)*/); //DGM FIXME: the progress doesn't update! Is it because it's in a separate DLL/plugin?
+			progressDialog->show();
 			QCoreApplication::processEvents();
 		}
-		CCLib::NormalizedProgress nProgress(&progressDialog, pointCount);
+		CCLib::NormalizedProgress nProgress(progressDialog.data(), pointCount);
 
 		//number of points read from the beginning of the current cloud part
 		unsigned pointsRead = 0;
@@ -419,7 +420,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 
 			cloud->addPoint(CCVector3::fromArray((P + Pshift).u));
 
-			if (parameters.parentWidget && !nProgress.oneStep())
+			if (progressDialog && !nProgress.oneStep())
 			{
 				result = CC_FERR_CANCELED_BY_USER;
 				break;

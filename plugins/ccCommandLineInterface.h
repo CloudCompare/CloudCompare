@@ -235,6 +235,20 @@ public: //file I/O
 	**/
 	virtual bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(0)) = 0;
 
+	//! Returns the current cloud(s) export format
+	virtual QString cloudExportFormat() const = 0;
+	//! Returns the current cloud(s) export extension (warning: can be anything)
+	virtual QString cloudExportExt() const = 0;
+	//! Returns the current mesh(es) export format
+	virtual QString meshExportFormat() const = 0;
+	//! Returs the current mesh(es) export extension (warning: can be anything)
+	virtual QString meshExportExt() const = 0;
+
+	//! Sets the current cloud(s) export format and extension
+	virtual void setCloudExportFormat(QString format, QString ext) = 0;
+	//! Sets the current mesh(es) export format and extension
+	virtual void setMeshExportFormat(QString format, QString ext) = 0;
+
 public: //logging
 
 	//logging

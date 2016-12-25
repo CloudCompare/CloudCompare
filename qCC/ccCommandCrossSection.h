@@ -173,17 +173,19 @@ struct CommandCrossSection : public ccCommandLineInterface::Command
 		}
 
 		//safety checks
-		if (boxThickness.x < ZERO_TOLERANCE
-			|| boxThickness.y < ZERO_TOLERANCE
-			|| boxThickness.z < ZERO_TOLERANCE)
+		if (	boxThickness.x < ZERO_TOLERANCE
+			||	boxThickness.y < ZERO_TOLERANCE
+			||	boxThickness.z < ZERO_TOLERANCE
+			)
 		{
 			return cmd.error(QString("Invalid box thickness"));
 		}
 
 		CCVector3 repeatStep = boxThickness + CCVector3(repeatGap, repeatGap, repeatGap);
-		if ((repeatDim[0] && repeatStep.x < ZERO_TOLERANCE)
-			|| (repeatDim[1] && repeatStep.y < ZERO_TOLERANCE)
-			|| (repeatDim[2] && repeatStep.z < ZERO_TOLERANCE))
+		if (	(repeatDim[0] && repeatStep.x < ZERO_TOLERANCE)
+			||	(repeatDim[1] && repeatStep.y < ZERO_TOLERANCE)
+			||	(repeatDim[2] && repeatStep.z < ZERO_TOLERANCE)
+			)
 		{
 			return cmd.error(QString("Repeat gap can't be equal or smaller than 'minus' box width"));
 		}

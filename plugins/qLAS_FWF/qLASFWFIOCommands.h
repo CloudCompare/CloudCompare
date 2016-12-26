@@ -23,7 +23,10 @@
 //Local
 #include "Filter/LASFWFFilter.h"
 
-static const char COMMAND_LOAD_FWF[] = "FWF_O";
+static const char COMMAND_LOAD_FWF[]		= "FWF_O";
+static const char COMMAND_SAVE_CLOUDS_FWF[]	= "FWF_SAVE_CLOUDS";
+static const char OPTION_ALL_AT_ONCE[]		= "ALL_AT_ONCE";
+static const char OPTION_COMPRESSED[]		= "COMPRESSED";
 
 struct CommandLoadLASFWF : public ccCommandLineInterface::Command
 {
@@ -49,6 +52,54 @@ struct CommandLoadLASFWF : public ccCommandLineInterface::Command
 		}
 
 		return cmd.importFile(filename, filter);
+	}
+};
+
+struct CommandSaveLASFWF : public ccCommandLineInterface::Command
+{
+	CommandSaveLASFWF() : ccCommandLineInterface::Command("Save clouds with FWF", COMMAND_SAVE_CLOUDS_FWF) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		bool allAtOnce = false;
+		QString ext = "las";
+
+		//look for additional parameters
+		while (!cmd.arguments().empty())
+		{
+			QString argument = cmd.arguments().front();
+
+			if (argument.toUpper() == OPTION_ALL_AT_ONCE)
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+				allAtOnce = true;
+			}
+			else if (argument.toUpper() == OPTION_COMPRESSED)
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+				ext = "laz";
+			}
+			else
+			{
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+			}
+		}
+
+		//backup the existing cloud export format first
+		QString previousCloudExportFormat = cmd.cloudExportFormat();
+		QString previousCloudExportExt = cmd.cloudExportExt();
+
+		//force the export format to LAS FWF
+		cmd.setCloudExportFormat(LASFWFFilter::GetFileFilter(), ext);
+
+		bool success = cmd.saveClouds(QString(), allAtOnce);
+
+		//restore the previous file output format
+		cmd.setCloudExportFormat(previousCloudExportFormat, previousCloudExportExt);
+
+		return success;
 	}
 };
 

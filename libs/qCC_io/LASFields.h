@@ -18,6 +18,22 @@
 #ifndef CC_LAS_FIELDS_HEADER
 #define CC_LAS_FIELDS_HEADER
 
+//Local
+#include "qCC_io.h"
+
+//Qt
+#include <QSharedPointer>
+
+//System
+#include <vector>
+
+class ccScalarField;
+class ccPointCloud;
+
+static const char LAS_SCALE_X_META_DATA[] = "LAS.scale.x";
+static const char LAS_SCALE_Y_META_DATA[] = "LAS.scale.y";
+static const char LAS_SCALE_Z_META_DATA[] = "LAS.scale.z";
+
 enum LAS_FIELDS {
 	LAS_X = 0,
 	LAS_Y = 1,
@@ -66,6 +82,29 @@ const char LAS_FIELD_NAMES[][28] = {"X",
 									"[Classif] Synthetic flag",
 									"[Classif] Key-point flag",
 									"[Classif] Withheld flag",
+};
+
+//! LAS field descriptor
+struct QCC_IO_LIB_API LasField
+{
+	//! Shared type
+	typedef QSharedPointer<LasField> Shared;
+
+	//! Default constructor
+	LasField(LAS_FIELDS fieldType = LAS_INVALID, double defaultVal = 0, double min = 0.0, double max = -1.0);
+
+	//! Returns official field name
+	virtual inline QString getName() const { return type < LAS_INVALID ? QString(LAS_FIELD_NAMES[type]) : QString(); }
+
+	//! Returns the (compliant) LAS fields in a point cloud
+	static bool GetLASFields(ccPointCloud* cloud, std::vector<LasField>& fieldsToSave);
+
+	LAS_FIELDS type;
+	ccScalarField* sf;
+	double firstValue;
+	double minValue;
+	double maxValue;
+	double defaultValue;
 };
 
 #endif //CC_LAS_FIELDS_HEADER

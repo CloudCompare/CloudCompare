@@ -31,14 +31,14 @@ public:
 	static inline QString GetDefaultExtension() { return "las"; }
 
 	//inherited from FileIOFilter
-	virtual bool importSupported() const { return true; }
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
-	//virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
-	virtual QStringList getFileFilters(bool onImport) const { return QStringList(GetFileFilter()); }
-	virtual QString getDefaultExtension() const { return GetDefaultExtension(); }
-	virtual bool canLoadExtension(QString upperCaseExt) const;
-	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const;
-
+	virtual bool importSupported() const override { return true; }
+	virtual bool exportSupported() const override { return true; }
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters) override;
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, SaveParameters& parameters) override;
+	virtual QStringList getFileFilters(bool onImport) const override { return QStringList(GetFileFilter()); }
+	virtual QString getDefaultExtension() const override { return GetDefaultExtension(); }
+	virtual bool canLoadExtension(QString upperCaseExt) const override;
+	virtual bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 };
 
 #endif //CC_LAS_FWF_FILTER_HEADER

@@ -1,8 +1,20 @@
 CloudCompare versions history
 =============================
 
-v2.9.alpha - 12/XX/XXXX
+v2.9.alpha - XX/XX/XXXX
 ----------------------
+
+- enhancements:
+
+	* Plugins can now be called in command line mode
+		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
+
+	* [Windows] qLAS_FWF:
+		- the plugin (based on LASlib) can now load most of the standard LAS fields
+		- the plugin can now save files (with or without waveforms)
+		- the plugin can now be called in command line mode:
+			-FWF_O: open a LAS 1.3+ file
+			-FWF_SAVE_CLOUDS: save cloud(s) to LAS 1.3+ file(s) (options are 'ALL_AT_ONCE' and 'COMPRESSED' to save LAZ files instead of LAS)
 
 - Bug fixes:
 

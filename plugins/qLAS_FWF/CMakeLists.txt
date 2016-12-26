@@ -14,6 +14,9 @@ if (WIN32)
 		set( CC_PLUGIN_CUSTOM_HEADER_LIST Filter/LASFWFFilter.h )
 		set( CC_PLUGIN_CUSTOM_SOURCE_LIST Filter/LASFWFFilter.cpp )
 			
+		#we need the saveLASFileDlg.ui file
+		set( CC_PLUGIN_CUSTOM_UI_LIST ${QCC_IO_LIB_SOURCE_DIR}/ui_templates/saveLASFileDlg.ui )
+
 		set( CC_IS_IO_PLUGIN 1 )
 
 		include( ../CMakePluginTpl.cmake )

@@ -299,7 +299,7 @@ struct CommandChangeCloudOutputFormat : public CommandChangeOutputFormat
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -339,7 +339,7 @@ struct CommandChangeMeshOutputFormat : public CommandChangeOutputFormat
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -1535,7 +1535,7 @@ struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -2243,7 +2243,7 @@ struct CommandBundler : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -2422,7 +2422,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -3136,7 +3136,7 @@ struct CommandICP : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -3341,7 +3341,7 @@ struct CommandSaveClouds : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 
@@ -3370,7 +3370,7 @@ struct CommandSaveMeshes : public ccCommandLineInterface::Command
 			}
 			else
 			{
-				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+				break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 			}
 		}
 

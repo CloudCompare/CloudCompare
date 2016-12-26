@@ -51,10 +51,6 @@
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
 
-static const char LAS_SCALE_X_META_DATA[] = "LAS.scale.x";
-static const char LAS_SCALE_Y_META_DATA[] = "LAS.scale.y";
-static const char LAS_SCALE_Z_META_DATA[] = "LAS.scale.z";
-
 //! LAS Save dialog
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
 {
@@ -83,33 +79,6 @@ bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	}
 	return false;
 }
-
-//! LAS field descriptor
-struct LasField
-{
-	//! Shared type
-	typedef QSharedPointer<LasField> Shared;
-
-	//! Default constructor
-	LasField(LAS_FIELDS fieldType = LAS_INVALID, double defaultVal = 0, double min = 0.0, double max = -1.0)
-		: type(fieldType)
-		, sf(0)
-		, firstValue(0.0)
-		, minValue(min)
-		, maxValue(max)
-		, defaultValue(defaultVal)
-	{}
-
-	//! Returns official field name
-	virtual inline QString getName() const	{ return type < LAS_INVALID ? QString(LAS_FIELD_NAMES[type]) : QString(); }
-
-	LAS_FIELDS type;
-	ccScalarField* sf;
-	double firstValue;
-	double minValue;
-	double maxValue;
-	double defaultValue;
-};
 
 //! Custom ("Extra bytes") field
 struct ExtraLasField : LasField
@@ -280,65 +249,9 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
-
-		//Match cloud SFs with official LAS fields
-		{
-			//official LAS fields
-			std::vector<LasField> lasFields;
-			{
-				lasFields.push_back(LasField(LAS_CLASSIFICATION, 0, 0, 255)); //unsigned char: between 0 and 255
-				lasFields.push_back(LasField(LAS_CLASSIF_VALUE, 0, 0, 31)); //5 bits: between 0 and 31
-				lasFields.push_back(LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_INTENSITY, 0, 0, 65535)); //16 bits: between 0 and 65536
-				lasFields.push_back(LasField(LAS_TIME, 0, 0, -1.0)); //8 bytes (double)
-				lasFields.push_back(LasField(LAS_RETURN_NUMBER, 1, 1, 7)); //3 bits: between 1 and 7
-				lasFields.push_back(LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7)); //3 bits: between 1 and 7
-				lasFields.push_back(LasField(LAS_SCAN_DIRECTION, 0, 0, 1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1)); //1 bit: 0 or 1
-				lasFields.push_back(LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90)); //signed char: between -90 and +90
-				lasFields.push_back(LasField(LAS_USER_DATA, 0, 0, 255)); //unsigned char: between 0 and 255
-				lasFields.push_back(LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535)); //16 bits: between 0 and 65536
-			}
-
-			//we are going to check now the existing cloud SFs
-			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
-			{
-				ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(i));
-				//find an equivalent in official LAS fields
-				QString sfName = QString(sf->getName()).toUpper();
-				bool outBounds = false;
-				for (size_t j = 0; j < lasFields.size(); ++j)
-				{
-					//if the name matches
-					if (sfName == lasFields[j].getName().toUpper())
-					{
-						//check bounds
-						double sfMin = sf->getGlobalShift() + sf->getMax();
-						double sfMax = sf->getGlobalShift() + sf->getMax();
-						if (sfMin < lasFields[j].minValue || (lasFields[j].maxValue != -1.0 && sfMax > lasFields[j].maxValue)) //outbounds?
-						{
-							ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(sf->getName()).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
-							outBounds = true;
-						}
-						else
-						{
-							//we add the SF to the list of saved fields
-							fieldsToSave.push_back(lasFields[j]);
-							fieldsToSave.back().sf = sf;
-						}
-						break;
-					}
-				}
-				
-				//no correspondance was found?
-				if (!outBounds && (fieldsToSave.empty() || fieldsToSave.back().sf != sf))
-				{
-					ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but it doesn't match with any of the official LAS fields... we will ignore it!").arg(sf->getName()));
-				}
-			}
-		}
+		
+		//match cloud SFs with official LAS fields
+		LasField::GetLASFields(pc, fieldsToSave);
 	}
 
 	LASWriter lasWriter;
@@ -354,77 +267,79 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 		//header.SetDataFormatId(liblas::ePointFormat3);
 		CCVector3d bbMin, bbMax;
-		if (theCloud->getGlobalBB(bbMin, bbMax))
+		if (!theCloud->getGlobalBB(bbMin, bbMax))
 		{
-			header.SetMin(	bbMin.x, bbMin.y, bbMin.z );
-			header.SetMax(	bbMax.x, bbMax.y, bbMax.z );
-			CCVector3d diag = bbMax - bbMin;
+			return CC_FERR_NO_SAVE;
+		}
+		
+		header.SetMin(bbMin.x, bbMin.y, bbMin.z);
+		header.SetMax(bbMax.x, bbMax.y, bbMax.z);
+		CCVector3d diag = bbMax - bbMin;
 
-			//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
-			//int_value = (double_value-offset)/scale
-			header.SetOffset(bbMin.x, bbMin.y, bbMin.z);
-			
-			//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
-			bool hasScaleMetaData = false;
-			CCVector3d lasScale(0, 0, 0);
-			lasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
+		//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
+		//int_value = (double_value-offset)/scale
+		header.SetOffset(bbMin.x, bbMin.y, bbMin.z);
+
+		//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
+		bool hasScaleMetaData = false;
+		CCVector3d lasScale(0, 0, 0);
+		lasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
+		if (hasScaleMetaData)
+		{
+			lasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
 			if (hasScaleMetaData)
 			{
-				lasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
-				if (hasScaleMetaData)
-				{
-					lasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
-				}
+				lasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
 			}
+		}
 
-			//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
-			CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, ZERO_TOLERANCE),
-									1.0e-9 * std::max<double>(diag.y, ZERO_TOLERANCE),
-									1.0e-9 * std::max<double>(diag.z, ZERO_TOLERANCE));
+		//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+		CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, ZERO_TOLERANCE),
+								1.0e-9 * std::max<double>(diag.y, ZERO_TOLERANCE),
+								1.0e-9 * std::max<double>(diag.z, ZERO_TOLERANCE));
 
-			if (parameters.alwaysDisplaySaveDialog)
+		if (parameters.alwaysDisplaySaveDialog)
+		{
+			if (!s_saveDlg)
+				s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(0));
+			s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
+
+			if (hasScaleMetaData)
 			{
-				if (!s_saveDlg)
-					s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(0));
-				s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
-
-				if (hasScaleMetaData)
-				{
-					s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z));
-				}
-				else
-				{
-					s_saveDlg->origAccuracyLabel->setText("none");
-					if (s_saveDlg->origRadioButton->isChecked())
-						s_saveDlg->bestRadioButton->setChecked(true);
-					s_saveDlg->origRadioButton->setEnabled(false);
-				}
-
-				s_saveDlg->exec();
-
-				if (s_saveDlg->bestRadioButton->isChecked())
-				{
-					lasScale = optimalScale;
-				}
-				else if (s_saveDlg->customRadioButton->isChecked())
-				{
-					double s = s_saveDlg->customScaleDoubleSpinBox->value();
-					lasScale = CCVector3d(s, s, s);
-				}
-				//else
-				//{
-				//	lasScale = lasScale;
-				//}
+				s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z));
 			}
-			else if (!hasScaleMetaData)
+			else
+			{
+				s_saveDlg->origAccuracyLabel->setText("none");
+				if (s_saveDlg->origRadioButton->isChecked())
+					s_saveDlg->bestRadioButton->setChecked(true);
+				s_saveDlg->origRadioButton->setEnabled(false);
+			}
+
+			s_saveDlg->exec();
+
+			if (s_saveDlg->bestRadioButton->isChecked())
 			{
 				lasScale = optimalScale;
 			}
-
-			header.SetScale(lasScale.x,
-							lasScale.y,
-							lasScale.z);
+			else if (s_saveDlg->customRadioButton->isChecked())
+			{
+				double s = s_saveDlg->customScaleDoubleSpinBox->value();
+				lasScale = CCVector3d(s, s, s);
+			}
+			//else
+			//{
+			//	lasScale = lasScale;
+			//}
 		}
+		else if (!hasScaleMetaData)
+		{
+			lasScale = optimalScale;
+		}
+
+		header.SetScale(lasScale.x,
+						lasScale.y,
+						lasScale.z);
 		header.SetPointRecordsCount(numberOfPoints);
 
 		//DGM FIXME: doesn't seem to do anything;)
@@ -483,7 +398,12 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		if (hasColor)
 		{
 			const ColorCompType* rgb = theCloud->getPointColor(i);
-			point.SetColor(liblas::Color(rgb[0] << 8, rgb[1] << 8, rgb[2] << 8)); //DGM: LAS colors are stored on 16 bits!
+			//DGM: LAS colors are stored on 16 bits!
+			point.SetColor(liblas::Color(	static_cast<uint32_t>(rgb[0]) << 8,
+											static_cast<uint32_t>(rgb[1]) << 8,
+											static_cast<uint32_t>(rgb[2]) << 8
+										)
+							);
 		}
 
 		//additional fields
@@ -1318,11 +1238,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				double value = 0.0;
 				switch (field->type)
 				{
-				case LAS_X:
-				case LAS_Y:
-				case LAS_Z:
-					assert(false);
-					break;
 				case LAS_INTENSITY:
 					value = static_cast<double>(p.GetIntensity());
 					break;
@@ -1397,11 +1312,6 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						value = extraField->offset + extraField->scale * value;
 					}
 					break;
-				case LAS_RED:
-				case LAS_GREEN:
-				case LAS_BLUE:
-					assert(false);
-					break;
 				case LAS_TIME:
 					value = p.GetTime();
 					if (field->sf)
@@ -1422,10 +1332,10 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				case LAS_CLASSIF_WITHHELD:
 					value = static_cast<double>(p.GetClassification().GetClass() & 128); //bit #8
 					break;
-				case LAS_INVALID:
 				default:
+					//ignored
 					assert(false);
-					break;
+					continue;
 				}
 
 				if (field->sf)

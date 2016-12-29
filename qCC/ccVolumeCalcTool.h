@@ -63,7 +63,7 @@ protected slots:
 	void sfProjectionTypeChanged(int);
 
 	//Inherited from cc2Point5DimEditor
-	virtual bool showGridBoxEditor();
+	virtual bool showGridBoxEditor() override;
 
 	//! Called when the (ground) empty cell filling strategy changes
 	void groundFillEmptyCellStrategyChanged(int);
@@ -99,7 +99,7 @@ protected slots:
 protected: //standard methods
 
 	//Inherited from cc2Point5DimEditor
-	virtual void gridIsUpToDate(bool state);
+	virtual void gridIsUpToDate(bool state) override;
 
 	//! Load persistent settings
 	void loadSettings();

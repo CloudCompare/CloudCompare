@@ -500,7 +500,7 @@ public:
 		the algorithm will look for the element which have the smallest
 		(or biggest) component of all (without any consideration for the order
 		of the values).
-	**/
+	**/	
 	virtual void computeMinAndMax()
 	{
 		//no points?
@@ -511,25 +511,74 @@ public:
 			memset(m_maxVal,0,sizeof(ElementType)*N);
 			return;
 		}
-
+		
 		//we set the first element as min and max boundaries
 		memcpy(m_minVal,getValue(0),sizeof(ElementType)*N);
 		memcpy(m_maxVal,m_minVal,sizeof(ElementType)*N);
-
+		
+		unsigned int	count = m_count-1;
+		
+		// do we have an odd number of (remaining) elements to check?
+		bool odd = count & 1;
+		if ( odd )
+		{
+			count--;
+		}
+		
 		//we update boundaries with all other values
-		for (unsigned i=1; i<m_count; ++i)
+		for (unsigned i=1; i<count; i+=2)
 		{
 			const ElementType* val = getValue(i);
+			const ElementType* val2 = getValue(i+1);
+			
 			for (unsigned j=0; j<N; ++j)
 			{
-				if (val[j] < m_minVal[j])
-					m_minVal[j] = val[j];
-				else if (val[j] > m_maxVal[j])
-					m_maxVal[j] = val[j];
+				ElementType maximum;
+				ElementType	minimum;
+				
+				if (val[j] > val2[j])
+				{
+					minimum = val2[j];
+					maximum = val[j];
+				}
+				else
+				{
+					minimum = val[j];
+					maximum = val2[j];
+				}
+				
+				if (maximum > m_maxVal[j])
+				{
+					m_maxVal[j] = maximum;
+				}
+				
+				if (minimum < m_minVal[j])
+				{
+					m_minVal[j] = minimum;
+				}
 			}
 		}
+		
+		// if we have an extra element, check it
+		if (odd)
+		{
+			const ElementType* val = getValue(m_count-1);
+			
+			for (unsigned j=0; j<N; ++j)
+			{
+				if (val[j] > m_maxVal[j])
+				{
+					m_maxVal[j] = val[j];
+				}
+				
+				if (val[j] < m_minVal[j])
+				{
+					m_minVal[j] = val[j];
+				}
+			}
+		}	
 	}
-
+	
 	//! Swaps two elements
 	/** \param firstElementIndex first element index
 		\param secondElementIndex second element index

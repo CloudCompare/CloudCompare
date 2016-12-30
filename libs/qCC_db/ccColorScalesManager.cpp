@@ -508,44 +508,38 @@ void ccColorScalesManager::removeScale(QString UUID)
 
 ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 {
-	QString name;
-	switch (scaleType)
+	const QString name = [scaleType] () {
+		switch (scaleType)
+		{
+			case BGYR:
+				return QStringLiteral("Blue>Green>Yellow>Red");
+			case GREY:
+				return QStringLiteral("Grey");
+			case BWR:
+				return QStringLiteral("Blue>White>Red");
+			case RY:
+				return QStringLiteral("Red>Yellow");
+			case RW:
+				return QStringLiteral("Red>White");
+			case ABS_NORM_GREY:
+				return QStringLiteral("Intensity [0-1]");
+			case HSV_360_DEG:
+				return QStringLiteral("HSV angle [0-360]");
+			case VERTEX_QUALITY:
+				return QStringLiteral("Vertex types default colors");
+			case DIP_BRYW:
+				return QStringLiteral("Dip [0-90]");
+			case DIP_DIR_REPEAT:
+				return QStringLiteral("Dip direction (repeat) [0-360]");
+			case VIRIDIS:
+				return QStringLiteral("Viridis");
+		}
+		return QString();
+	}();
+	
+	if ( name.isNull() )
 	{
-	case BGYR:
-		name = "Blue>Green>Yellow>Red";
-		break;
-	case GREY:
-		name = "Grey";
-		break;
-	case BWR:
-		name = "Blue>White>Red";
-		break;
-	case RY:
-		name = "Red>Yellow";
-		break;
-	case RW:
-		name = "Red>White";
-		break;
-	case ABS_NORM_GREY:
-		name = "Intensity [0-1]";
-		break;
-	case HSV_360_DEG:
-		name = "HSV angle [0-360]";
-		break;
-	case VERTEX_QUALITY:
-		name = "Vertex types default colors";
-		break;
-	case DIP_BRYW:
-		name = "Dip [0-90]";
-		break;
-	case DIP_DIR_REPEAT:
-		name = "Dip direction (repeat) [0-360]";
-		break;
-	case VIRIDIS:
-		name = "Viridis";
-		break;
-	default:
-		ccLog::Error(QString("Unhandled pre-defined scale (%1)").arg(scaleType));
+		ccLog::Error(QStringLiteral("Unhandled pre-defined scale (%1)").arg(scaleType));
 		return ccColorScale::Shared(0);
 	}
 

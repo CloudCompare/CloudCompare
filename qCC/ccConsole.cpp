@@ -263,7 +263,7 @@ void ccConsole::logMessage(const QString& message, int level)
 	}
 #endif
 
-	QString formatedMessage = QString("[") + QTime::currentTime().toString() + QString("] ") + message;
+	QString formatedMessage = QStringLiteral("[") + QTime::currentTime().toString() + QStringLiteral("] ") + message;
 
 	if (m_textDisplay || m_logStream)
 	{

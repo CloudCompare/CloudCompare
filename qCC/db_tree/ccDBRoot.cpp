@@ -452,12 +452,12 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 	{
 		QString baseName(item->getName());
 		if (baseName.isEmpty())
-			baseName = QString("no name");
+			baseName = QStringLiteral("no name");
 		//specific case
 		if (item->isA(CC_TYPES::LABEL_2D))
-			baseName = QString("2D label: ")+baseName;
+			baseName = QStringLiteral("2D label: ")+baseName;
 		else if (item->isA(CC_TYPES::VIEWPORT_2D_LABEL))
-			baseName = QString("2D area label: ")+baseName;
+			baseName = QStringLiteral("2D area label: ")+baseName;
 
 		return QVariant(baseName);
 	}
@@ -477,14 +477,14 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		{
 		case CC_TYPES::HIERARCHY_OBJECT:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbHObjectSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbHObjectSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbHObjectSymbol.png"));
 		case CC_TYPES::POINT_CLOUD:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbCloudSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbCloudSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbCloudSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbCloudSymbol.png"));
 			//all primitives
 		case CC_TYPES::PLANE:
 		case CC_TYPES::SPHERE:
@@ -497,56 +497,56 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 		case CC_TYPES::FACET:
 		case CC_TYPES::QUADRIC:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbMiscGeomSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbMiscGeomSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbMiscGeomSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbMiscGeomSymbol.png"));
 		case CC_TYPES::MESH:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbMeshSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbMeshSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbMeshSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbMeshSymbol.png"));
 		case CC_TYPES::MESH_GROUP:
 		case CC_TYPES::SUB_MESH:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbSubMeshSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbSubMeshSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbSubMeshSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbSubMeshSymbol.png"));
 		case CC_TYPES::POLY_LINE:
-			return QIcon(QString::fromUtf8(":/CC/images/dbPolylineSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbPolylineSymbol.png"));
 		case CC_TYPES::POINT_OCTREE:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbOctreeSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbOctreeSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbOctreeSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbOctreeSymbol.png"));
 		case CC_TYPES::CALIBRATED_IMAGE:
-			return QIcon(QString::fromUtf8(":/CC/images/dbCalibratedImageSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbCalibratedImageSymbol.png"));
 		case CC_TYPES::IMAGE:
-			return QIcon(QString::fromUtf8(":/CC/images/dbImageSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbImageSymbol.png"));
 		case CC_TYPES::SENSOR:
 		case CC_TYPES::GBL_SENSOR:
-			return QIcon(QString::fromUtf8(":/CC/images/dbGBLSensorSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbGBLSensorSymbol.png"));
 		case CC_TYPES::CAMERA_SENSOR:
-			return QIcon(QString::fromUtf8(":/CC/images/dbCamSensorSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbCamSensorSymbol.png"));
 		case CC_TYPES::MATERIAL_SET:
-			return QIcon(QString::fromUtf8(":/CC/images/dbMaterialSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbMaterialSymbol.png"));
 		case CC_TYPES::NORMALS_ARRAY:
 		case CC_TYPES::NORMAL_INDEXES_ARRAY:
 		case CC_TYPES::RGB_COLOR_ARRAY:
 		case CC_TYPES::TEX_COORDS_ARRAY:
 		case CC_TYPES::TRANS_BUFFER:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbContainerSymbolLocked.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbContainerSymbolLocked.png"));
 			else
-				return QIcon(QString::fromUtf8(":/CC/images/dbContainerSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbContainerSymbol.png"));
 		case CC_TYPES::LABEL_2D:
-			return QIcon(QString::fromUtf8(":/CC/images/dbLabelSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbLabelSymbol.png"));
 		case CC_TYPES::VIEWPORT_2D_OBJECT:
-			return QIcon(QString::fromUtf8(":/CC/images/dbViewportSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbViewportSymbol.png"));
 		case CC_TYPES::VIEWPORT_2D_LABEL:
-			return QIcon(QString::fromUtf8(":/CC/images/dbAreaLabelSymbol.png"));
+			return QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png"));
 		default:
 			if (locked)
-				return QIcon(QString::fromUtf8(":/CC/images/dbLockSymbol.png"));
+				return QIcon(QStringLiteral(":/CC/images/dbLockSymbol.png"));
 			else
 				return QVariant();
 		}

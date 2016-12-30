@@ -2284,7 +2284,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	delete rc;
 	rc = 0;
 
-	ccMesh* newMesh = NULL;
+	ccMesh* newMesh = nullptr;
 	if (result)
 	{
 		newMesh = new ccMesh(result, newVertices);
@@ -2554,7 +2554,10 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		if (!indexMap->reserve(triNum))
 		{
 			ccLog::Error("Not enough memory! Sub-meshes will be lost...");
-			newMesh->setVisible(true); //force parent mesh visibility in this case!
+			if (newMesh)
+			{
+				newMesh->setVisible(true); //force parent mesh visibility in this case!
+			}
 
 			for (size_t i=0; i<subMeshes.size(); ++i)
 				removeChild(subMeshes[i]);
@@ -2597,7 +2600,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					subMesh = 0;
 				}
 
-				if (subMesh2)
+				if (subMesh2 && newMesh)
 				{
 					subMesh2->setAssociatedMesh(newMesh);
 					newMesh->addChild(subMesh2);

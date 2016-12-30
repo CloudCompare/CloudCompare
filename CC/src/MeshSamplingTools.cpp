@@ -369,7 +369,10 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(	GenericMesh* mesh,
 				{
 					delete sampledCloud;
 					sampledCloud = 0;
-					triIndices->clear();
+					if (triIndices)
+					{
+						triIndices->clear();
+					}
 					break;
 				}
 			}

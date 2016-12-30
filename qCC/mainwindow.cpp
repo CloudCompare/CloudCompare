@@ -4060,9 +4060,9 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		{
 			ccGroup->setDisplay(cloud->getDisplay());
 			addToDB(ccGroup);
-		}
 
-		ccConsole::Print(QString("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
+			ccConsole::Print(QString("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
+		}
 
 		cloud->prepareDisplayForRefresh();
 
@@ -5332,7 +5332,7 @@ void MainWindow::doActionSORFilter()
 																				0,
 																				&pDlg);
 
-		if (selection)
+		if (selection && cloud)
 		{
 			if (selection->size() == cloud->size())
 			{
@@ -5447,7 +5447,7 @@ void MainWindow::doActionFilterNoise()
 																					0,
 																					&pDlg);
 
-		if (selection)
+		if (selection && cloud)
 		{
 			if (selection->size() == cloud->size())
 			{

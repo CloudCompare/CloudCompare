@@ -293,7 +293,7 @@ namespace ccEntityAction
 		ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(selectedEntities[0], &lockedVertices);
 		if (!pointCloud || lockedVertices)
 		{
-			if (lockedVertices)
+			if (lockedVertices && pointCloud)
 				ccUtils::DisplayLockedVerticesWarning(pointCloud->getName(), true);
 			return false;
 		}

@@ -65,7 +65,8 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (!mesh || mesh->size() == 0)
 	{
-		ccLog::Warning(QString("[STL] No facet in mesh '%1'!").arg(mesh->getName()));
+		ccLog::Warning(QString("[STL] No facet in mesh '%1'!")
+					   .arg(mesh ? mesh->getName() : QStringLiteral("unnamed")));
 		return CC_FERR_NO_ERROR;
 	}
 

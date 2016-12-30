@@ -126,26 +126,26 @@ void FileIOFilter::Register(Shared filter)
 	}
 
 	//filters are uniquely recognized by their 'file filter' string
-	QStringList fileFilters = filter->getFileFilters(true);
-	QString filterName = filter->getDefaultExtension().toUpper();
+	const QStringList fileFilters = filter->getFileFilters(true);
+	const QString filterName = filter->getDefaultExtension().toUpper();
 	for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
 	{
 		bool error = false;
 		if (*it == filter)
 		{
-			ccLog::Warning(QString("[FileIOFilter::Register] I/O filter '%1' is already registered").arg(filterName));
+			ccLog::Warning(QStringLiteral("[FileIOFilter::Register] I/O filter '%1' is already registered").arg(filterName));
 			error = true;
 		}
 		else
 		{
 			//we are going to compare the file filters as they should remain unique!
-			QStringList otherFilters = (*it)->getFileFilters(true);
+			const QStringList otherFilters = (*it)->getFileFilters(true);
 			for (int i=0; i<fileFilters.size(); ++i)
 			{
 				if (otherFilters.contains(fileFilters[i]))
 				{
-					QString otherFilterName = (*it)->getDefaultExtension().toUpper();;
-					ccLog::Warning(QString("[FileIOFilter::Register] Internal error: file filter '%1' of filter '%2' is already handled by another filter ('%3')!").arg(fileFilters[i]).arg(filterName).arg(otherFilterName));
+					const QString otherFilterName = (*it)->getDefaultExtension().toUpper();;
+					ccLog::Warning(QStringLiteral("[FileIOFilter::Register] Internal error: file filter '%1' of filter '%2' is already handled by another filter ('%3')!").arg(fileFilters[i]).arg(filterName).arg(otherFilterName));
 					error = true;
 					break;
 				}

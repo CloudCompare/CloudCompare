@@ -141,10 +141,10 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 	for (unsigned char k = 0; k < level; ++k)
 	{
 		l_shift -= 2;
-		unsigned sector = ((index >> l_shift) & 3);
+		const unsigned sector = ((index >> l_shift) & 3);
 		if (flip)
 		{
-			PointCoordinateType tmp = box[sector];
+			const PointCoordinateType tmp = box[sector];
 			box[0] = (box[0] + box[3]) / 2;
 			box[1] = (box[1] + box[4]) / 2;
 			box[2] = (box[2] + box[5]) / 2;
@@ -160,7 +160,7 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 		}
 		else
 		{
-			PointCoordinateType tmp = (sector != 3 ? box[3 + sector] : 0);
+			const PointCoordinateType tmp = (sector != 3 ? box[3 + sector] : 0);
 			
 			box[3] = (box[0] + box[3]) / 2;
 			box[4] = (box[1] + box[4]) / 2;
@@ -179,7 +179,7 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 	}
 
 	//get the sector
-	unsigned sector = index >> (level + level);
+	const unsigned sector = index >> (level + level);
 
 	n[0] = ((sector & 4) != 0 ? -(box[3] + box[0]) : box[3] + box[0]);
 	n[1] = ((sector & 2) != 0 ? -(box[4] + box[1]) : box[4] + box[1]);

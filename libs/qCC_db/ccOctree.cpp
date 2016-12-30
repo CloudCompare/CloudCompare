@@ -540,7 +540,6 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	}
 
 	CCVector3 margin(0, 0, 0);
-	double maxSqRadius = 0;
 	double maxFOV_rad = 0;
 	if (camera.perspective)
 	{
@@ -550,7 +549,6 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	{
 		double maxRadius = pickWidth_pix * camera.pixelSize / 2;
 		margin = CCVector3(1, 1, 1) * static_cast<PointCoordinateType>(maxRadius);
-		maxSqRadius = maxRadius*maxRadius;
 	}
 
 	//first test with the total bounding box

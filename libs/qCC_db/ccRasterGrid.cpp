@@ -231,10 +231,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//we always handle the colors (if any)
 	hasColors = cloud->hasColors();
 
-	//grid boundaries
-	double gridMaxX = gridStep * width;
-	double gridMaxY = gridStep * height;
-
 	for (unsigned n = 0; n<pointCount; ++n)
 	{
 		//for each point
@@ -412,7 +408,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				{
 					if (row[i].nbPoints > 1)
 					{
-						ScalarType s = static_cast<ScalarType>(*_gridSF);
 						if (std::isfinite(*_gridSF)) //valid SF value
 						{
 							*_gridSF /= row[i].nbPoints;

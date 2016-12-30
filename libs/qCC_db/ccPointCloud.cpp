@@ -5306,7 +5306,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CC_DEG_TO_RAD));
-	double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
+//	double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
 	
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{

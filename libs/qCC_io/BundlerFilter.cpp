@@ -654,10 +654,6 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				ccLog::Warning(QString("[Bundler] Failed to generate DTM! (%1)").arg(errorStr));
 			}
 		}
-		else
-		{
-			dummyMesh = baseDTMMesh;
-		}
 
 		if (dummyMesh)
 		{

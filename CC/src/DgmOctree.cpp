@@ -350,7 +350,10 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		{
 			m_thePointsAndTheirCellCodes.clear();
 			m_numberOfProjectedPoints = 0;
-			progressCb->stop();
+			if (progressCb)
+			{
+				progressCb->stop();
+			}
 			return 0;
 		}
 	}

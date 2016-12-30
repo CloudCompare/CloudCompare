@@ -106,7 +106,8 @@ CC_FILE_ERROR SinusxFilter::saveToFile(ccHObject* entity, QString filename, Save
 		if (vertCount < 2)
 		{
 			//invalid size
-			ccLog::Warning(QString("[Sinusx] Polyline '%1' does not have enough vertices").arg(poly->getName()));
+			ccLog::Warning(QString("[Sinusx] Polyline '%1' does not have enough vertices")
+						   .arg(poly ? poly->getName() : QStringLiteral("unnamed")));
 			continue;
 		}
 

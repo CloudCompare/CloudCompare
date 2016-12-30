@@ -1160,7 +1160,8 @@ void ccSectionExtractionTool::generateOrthoSections()
 	}
 
 	poly->showArrow(false,0,0);
-	m_associatedWin->redraw();
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 }
 
 ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, QString defaultName)

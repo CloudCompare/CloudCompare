@@ -838,7 +838,7 @@ void DistanceMapGenerationDlg::spawnColorScaleEditor()
 	if (cseDlg.exec())
 	{
 		colorScale = cseDlg.getActiveScale();
-		if (colorScale)
+		if (colorScale && m_colorScaleSelector)
 		{
 			m_colorScaleSelector->init(); //in fact it's a 're-init'
 			m_colorScaleSelector->setSelectedScale(colorScale->getUuid());

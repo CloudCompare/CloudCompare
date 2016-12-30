@@ -89,7 +89,8 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, QString filename,
 		if (vertCount < 2)
 		{
 			//invalid size
-			ccLog::Warning(QString("[Salome Hydro] Polyline '%1' does not have enough vertices").arg(poly->getName()));
+			ccLog::Warning(QString("[Salome Hydro] Polyline '%1' does not have enough vertices")
+						   .arg(poly ? poly->getName() : QStringLiteral("unnamed")));
 			continue;
 		}
 		

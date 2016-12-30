@@ -1491,6 +1491,9 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 
 		if (error)
 		{
+			delete symbolCloud;
+			symbolCloud = nullptr;
+			
 			if (m_app)
 				m_app->dispToConsole(QString("An error occurred while loading the file! Result may be incomplete"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;

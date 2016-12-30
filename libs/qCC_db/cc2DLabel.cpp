@@ -732,7 +732,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-	bool loop = false;
+//	bool loop = false;
 	switch (count)
 	{
 	case 3:
@@ -749,7 +749,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			glFunc->glEnd();
 
 			glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
-			loop = true;
+//			loop = true;
 		}
 	case 2:
 		{

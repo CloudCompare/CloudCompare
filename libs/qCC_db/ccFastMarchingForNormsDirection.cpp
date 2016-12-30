@@ -388,7 +388,9 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 	assert(octree);
 
 	//temporary SF
+#ifndef QT_DEBUG
 	bool sfWasDisplayed = cloud->sfShown();
+#endif
 	int oldSfIdx = cloud->getCurrentDisplayedScalarFieldIndex();
 	int sfIdx = cloud->getScalarFieldIndexByName("FM_Propagation");
 	if (sfIdx < 0)

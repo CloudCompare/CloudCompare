@@ -629,7 +629,6 @@ public:
 		case Frustum::INTERSECT:
 			//we have to test the children
 			{
-				bool hasChildren = false;
 				if (node.level < m_maxLevel && node.childCount)
 				{
 					for (int i = 0; i < 8; ++i)
@@ -638,7 +637,6 @@ public:
 						{
 							ccPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
 							visibleCount += flag(childNode);
-							hasChildren = true;
 						}
 					}
 

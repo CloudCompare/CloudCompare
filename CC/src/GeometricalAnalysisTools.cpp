@@ -869,7 +869,7 @@ bool GeometricalAnalysisTools::refineSphereLS(	GenericIndexedCloudPersist* cloud
 				continue;
 
 			meanNorm += norm;
-			derivatives = Di/norm;
+			derivatives += Di/norm;
 			++realCount;
 		}
 

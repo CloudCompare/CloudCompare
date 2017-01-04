@@ -694,8 +694,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 		//QFile fwfFile;
 		//bool hasFWFFile = false;
 		LASwaveform13reader* fwfReader = 0;
-		if (hasFWF)
-		for (int fakeIteration = 0; fakeIteration < 1; ++fakeIteration)
+		for (int fakeIteration = 0; hasFWF && fakeIteration < 1; ++fakeIteration)
 		{
 			try
 			{
@@ -732,7 +731,12 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 					break;
 				}
 				//seek for the waveform EVLR
-				fwfDataSource.seek(lasreader->header.start_of_waveform_data_packet_record);
+				if (!fwfDataSource.seek(lasreader->header.start_of_waveform_data_packet_record))
+				{
+					ccLog::Warning(QString("Failed to find the associated waveform data packets header"));
+					hasFWF = false;
+					break;
+				}
 				QByteArray evlrHeader = fwfDataSource.read(60);
 				if (evlrHeader.size() < 60)
 				{
@@ -742,7 +746,20 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 				}
 
 				//get the number of bytes
+				unsigned short reserved = *reinterpret_cast<const unsigned short*>(evlrHeader.constData() + 0);
+				//char userID[16];
+				//memcpy(userID, evlrHeader.constData() + 2, 16);
+				unsigned short recordID = *reinterpret_cast<const unsigned short*>(evlrHeader.constData() + 18);
+				assert(recordID == 65535);
 				fwfDataCount = *reinterpret_cast<const uint64_t*>(evlrHeader.constData() + 20); //see LAS 1.4 EVLR header specifications
+				if (fwfDataCount == 0)
+				{
+					ccLog::Warning(QString("Invalid waveform data packet size (0). We'll load all the remaining part of the file!"));
+					fwfDataCount = fwfDataSource.size() - fwfDataSource.pos();
+				}
+				//char description[32];
+				//memcpy(description, evlrHeader.constData() + 28, 32);
+				fwfDataOffset = 60;
 			}
 			else
 			{

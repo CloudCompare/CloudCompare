@@ -561,7 +561,15 @@ void ccTracePolylineTool::exportLine()
 	}
 
 	m_poly3D->enableTempColor(false);
-	MainWindow::TheInstance()->db()->addElement(m_poly3D, true);
+	m_poly3D->setDisplay(m_associatedWin); //just in case
+	if (MainWindow::TheInstance())
+	{
+		MainWindow::TheInstance()->addToDB(m_poly3D);
+	}
+	else
+	{
+		assert(false);
+	}
 
 	m_poly3D = 0;
 	m_segmentParams.clear();

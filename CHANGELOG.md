@@ -4,6 +4,10 @@ CloudCompare versions history
 v2.9.alpha - XX/XX/XXXX
 ----------------------
 
+- New features:
+
+	* New shortcut: P (pick rotation center)
+
 - enhancements:
 
 	* Plugins can now be called in command line mode

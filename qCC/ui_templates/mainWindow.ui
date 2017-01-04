@@ -2105,6 +2105,12 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Pick rotation center</string>
    </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionComputeDistancesFromSensor">
    <property name="text">

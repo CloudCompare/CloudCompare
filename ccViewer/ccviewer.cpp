@@ -64,7 +64,7 @@
 struct VerInfo
 {
 	VerInfo()
-		: number(1.36)
+		: number(1.361)
 	{
 		title = QString::number(number,'f',2)/* + ".beta"*/;
 #ifdef CC_GL_WINDOW_USE_QWINDOW

@@ -21,7 +21,7 @@ install_name_tool -change "@loader_path/libboost_system-mt.dylib" "@executable_p
 ## Again, these paths need to be modified if you are shipping the version of CC you are installing...
 
 if [ -f "${FRAMEWORK_DIR}/libavcodec.57.dylib" ]; then
-  FFMPEG_VERSION="3.2.1"
+  FFMPEG_VERSION=`ffmpeg -version | head -n1 | sed "s/^.*version \([0-9.]*\) Copyright.*/\1/"`
   FFMPEG_DIR="${PATH_PREFIX}/Cellar/ffmpeg/${FFMPEG_VERSION}/lib"
 
   echo "  fixing: ${FRAMEWORK_DIR}/libavcodec.57.dylib"

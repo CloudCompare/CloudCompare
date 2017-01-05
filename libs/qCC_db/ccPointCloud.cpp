@@ -66,6 +66,7 @@ ccPointCloud::ccPointCloud(QString name) throw()
 	, m_currentDisplayedScalarFieldIndex(-1)
 	, m_visibilityCheckEnabled(false)
 	, m_lod(0)
+	, m_fwfData(0)
 {
 	showSF(false);
 }
@@ -263,14 +264,16 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 			{
 				for (unsigned i = 0; i < n; i++)
 				{
-					const ccWaveform& w = m_fwfData[selection->getPointGlobalIndex(i)];
+					const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
 					if (!result->fwfDescriptors().contains(w.descriptorID()))
 					{
 						//copy only the necessary descriptors
 						result->fwfDescriptors().insert(w.descriptorID(), m_fwfDescriptors[w.descriptorID()]);
 					}
-					result->fwfData().push_back(w);
+					result->waveforms().push_back(w);
 				}
+				//we will use the same FWF data container
+				result->fwfData() = fwfData();
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -292,7 +295,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	unsigned sfCount = getNumberOfScalarFields();
 	if (sfCount != 0)
 	{
-		for (unsigned k=0; k<sfCount; ++k)
+		for (unsigned k = 0; k < sfCount; ++k)
 		{
 			const ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(k));
 			assert(sf);
@@ -309,8 +312,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 						currentScalarField->setGlobalShift(sf->getGlobalShift());
 
 						//we copy data to new SF
-						for (unsigned i=0; i<n; i++)
-							currentScalarField->setValue(i,sf->getValue(selection->getPointGlobalIndex(i)));
+						for (unsigned i = 0; i < n; i++)
+							currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
 
 						currentScalarField->computeMinAndMax();
 						//copy display parameters
@@ -640,13 +643,14 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			//we associate imported points with empty waveform
 			for (unsigned i = 0; i < addedPoints; i++)
 			{
-				m_fwfData.push_back(ccWaveform(0));
+				m_fwfWaveforms.push_back(ccWaveform(0));
 			}
 		}
 		else //otherwise
 		{
 			//if this cloud hasn't any FWF
 			bool success = true;
+			uint64_t fwfDataOffset = 0;
 			if (!hasFWF())
 			{
 				//we try to reserve a new array
@@ -654,8 +658,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					for (unsigned i = 0; i < pointCountBefore; i++)
 					{
-						m_fwfData.push_back(ccWaveform(0));
+						m_fwfWaveforms.push_back(ccWaveform(0));
 					}
+					//we will simply use the other cloud FWF data container
+					fwfData() = addedCloud->fwfData();
 				}
 				else
 				{
@@ -663,30 +669,55 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate waveforms!");
 				}
 			}
+			else if (fwfData() != addedCloud->fwfData())
+			{
+				//we need to merge the two FWF data containers!
+				assert(!fwfData()->empty() && !addedCloud->fwfData()->empty());
+				FWFDataContainer* mergedContainer = new FWFDataContainer;
+				try
+				{
+					mergedContainer->reserve(fwfData()->size() + addedCloud->fwfData()->size());
+					mergedContainer->insert(mergedContainer->end(), fwfData()->begin(), fwfData()->end());
+					mergedContainer->insert(mergedContainer->end(), addedCloud->fwfData()->begin(), addedCloud->fwfData()->end());
+					fwfData() = SharedFWFDataContainer(mergedContainer);
+					fwfDataOffset = addedCloud->fwfData()->size();
+				}
+				catch (const std::bad_alloc&)
+				{
+					success = false;
+					delete mergedContainer;
+					mergedContainer = 0;
+					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to merge waveform containers!");
+				}
+			}
 
 			if (success)
 			{
-				assert(hasFWF());
+				//assert(hasFWF()); //DGM: new waveforms are not pushed yet, so there might not be any in the cloud at the moment!
+				size_t lostWaveformCount = 0;
 
-				//map from old to new keys
-				QMap<uint8_t, uint8_t> keyMap;
+				//map from old descritpor IDs to new ones
+				QMap<uint8_t, uint8_t> descriptorIDMap;
 
 				//first: copy the wave descriptors
 				try
 				{
 					size_t newKeyCount = addedCloud->m_fwfDescriptors.size();
-					assert(newKeyCount < 256);
+					assert(newKeyCount < 256); //IDs should range from 1 to 255
 					
 					if (!m_fwfDescriptors.empty())
 					{
-						//we'll have to determine the free descriptor IDs (not used in the destination cloud) before merging
-						std::queue<uint8_t> freeDescKeys;
+						assert(m_fwfDescriptors.size() < 256); //IDs should range from 1 to 255
+						
+						//we'll have to find free descriptor IDs (not used in the destination cloud) before merging
+						std::queue<uint8_t> freeDescriptorIDs;
 						for (uint8_t k = 0; k < 255; ++k)
 						{
 							if (!m_fwfDescriptors.contains(k))
 							{
-								freeDescKeys.push(k);
-								if (freeDescKeys.size() == newKeyCount)
+								freeDescriptorIDs.push(k);
+								//if we have found enough free descriptor IDs
+								if (freeDescriptorIDs.size() == newKeyCount)
 								{
 									//we can stop here
 									break;
@@ -694,25 +725,25 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 							}
 						}
 
-						for (auto it = addedCloud->m_fwfDescriptors.begin(); it != addedCloud->m_fwfDescriptors.begin(); ++it)
+						for (auto it = addedCloud->m_fwfDescriptors.begin(); it != addedCloud->m_fwfDescriptors.end(); ++it)
 						{
-							if (freeDescKeys.empty())
+							if (freeDescriptorIDs.empty())
 							{
-								ccLog::Warning("[ccPointCloud::fusion] Not enough free FWF descriptor ID on destination cloud: some FWF data won't be imported!");
+								ccLog::Warning("[ccPointCloud::fusion] Not enough free FWF descriptor IDs on destination cloud: some waveforms won't be imported!");
 								break;
 							}
-							uint8_t newKey = freeDescKeys.front();
-							freeDescKeys.pop();
-							keyMap.insert(it.key(), newKey);
-							m_fwfDescriptors.insert(newKey, it.value()); //replace old key by new key!
+							uint8_t newKey = freeDescriptorIDs.front();
+							freeDescriptorIDs.pop();
+							descriptorIDMap.insert(it.key(), newKey); //remember the ID transposition
+							m_fwfDescriptors.insert(newKey, it.value()); //insert the descriptor at its new position (ID)
 						}
 					}
 					else
 					{
-						for (auto it = addedCloud->m_fwfDescriptors.begin(); it != addedCloud->m_fwfDescriptors.begin(); ++it)
+						for (auto it = addedCloud->m_fwfDescriptors.begin(); it != addedCloud->m_fwfDescriptors.end(); ++it)
 						{
-							keyMap.insert(it.key(), it.key()); //same key, no conversion
-							m_fwfDescriptors.insert(it.key(), it.value());
+							descriptorIDMap.insert(it.key(), it.key());    //same descriptor ID, no conversion
+							m_fwfDescriptors.insert(it.key(), it.value()); //insert the descriptor at the same position (ID)
 						}
 					}
 				}
@@ -724,21 +755,31 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 
 				//and now import waveforms
-				if (success && m_fwfData.size() == pointCountBefore)
+				if (success && m_fwfWaveforms.size() == pointCountBefore)
 				{
 					for (unsigned i = 0; i < addedPoints; i++)
 					{
-						const ccWaveform& w = addedCloud->fwfData()[i];
-						if (keyMap.contains(w.descriptorID())) //the waveform can be imported :)
+						ccWaveform w = addedCloud->waveforms()[i];
+						if (descriptorIDMap.contains(w.descriptorID())) //the waveform can be imported :)
 						{
-							m_fwfData.push_back(w);
-							m_fwfData.back().setDescriptorID(keyMap[w.descriptorID()]);
+							//update the byte offset
+							w.setDataDescription(w.dataOffset() + fwfDataOffset, w.byteCount());
+							//and the (potentially new) descriptor ID
+							w.setDescriptorID(descriptorIDMap[w.descriptorID()]);
+
+							m_fwfWaveforms.push_back(w);
 						}
 						else //the waveform is associated to a descriptor that couldn't be imported :(
 						{
-							m_fwfData.push_back(ccWaveform(0));
+							m_fwfWaveforms.push_back(ccWaveform(0));
+							++lostWaveformCount;
 						}
 					}
+				}
+
+				if (lostWaveformCount)
+				{
+					ccLog::Warning(QString("[ccPointCloud::fusion] %1 waveform(s) were lost in the fusion process").arg(lostWaveformCount));
 				}
 			}
 		}
@@ -910,7 +951,20 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	//has the cloud been recentered/rescaled?
 	{
 		if (addedCloud->isShifted())
-			ccLog::Warning(QString("[ccPointCloud::fusion] Global shift/scale information for cloud '%1' will be lost!").arg(addedCloud->getName()));
+		{
+			if (!isShifted())
+			{
+				//we can keep the global shift information of the merged cloud
+				setGlobalShift(addedCloud->getGlobalShift());
+				setGlobalScale(addedCloud->getGlobalScale());
+			}
+			else if (	getGlobalScale() != addedCloud->getGlobalScale()
+					||	(getGlobalShift() - addedCloud->getGlobalShift()).norm2d() > 1.0e-6)
+			{
+				//the clouds have different shift & scale information!
+				ccLog::Warning(QString("[ccPointCloud::fusion] Global shift/scale information conflict: shift/scale of cloud '%1' will be ignored!").arg(addedCloud->getName()));
+			}
+		}
 	}
 
 	//children (not yet reserved)
@@ -1165,16 +1219,52 @@ bool ccPointCloud::reserveTheFWFTable()
 
 	try
 	{
-		m_fwfData.reserve(m_points->capacity());
+		m_fwfWaveforms.reserve(m_points->capacity());
 	}
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::reserveTheFWFTable] Not enough memory!");
-		m_fwfData.clear();
+		m_fwfWaveforms.clear();
 	}
 
 	//double check
-	return m_fwfData.capacity() >= m_points->capacity();
+	return m_fwfWaveforms.capacity() >= m_points->capacity();
+}
+
+bool ccPointCloud::hasFWF() const
+{
+	return		m_fwfData
+			&&	!m_fwfData->empty()
+			&&	m_fwfWaveforms.size() >= size()
+			&&	size() != 0;
+}
+
+ccWaveformProxy ccPointCloud::waveformProxy(unsigned index) const
+{
+	static const ccWaveform invalidW;
+	static const WaveformDescriptor invalidD;
+
+	if (index < m_fwfWaveforms.size())
+	{
+		const ccWaveform& w = m_fwfWaveforms[index];
+		//check data consistency
+		if (m_fwfData && w.dataOffset() + w.byteCount() <= m_fwfData->size())
+		{
+			if (m_fwfDescriptors.contains(w.descriptorID()))
+			{
+				WaveformDescriptor& d = const_cast<ccPointCloud*>(this)->m_fwfDescriptors[w.descriptorID()]; //DGM: we really want the reference to the element, not a copy as QMap returns in the const case :(
+				return ccWaveformProxy(w, d, &(m_fwfData->front()));
+			}
+			else
+			{
+				return ccWaveformProxy(w, invalidD, 0);
+			}
+		}
+	}
+
+	//if we are here, then something is wrong
+	assert(false);
+	return ccWaveformProxy(invalidW, invalidD, 0);
 }
 
 bool ccPointCloud::resizeTheFWFTable()
@@ -1187,16 +1277,16 @@ bool ccPointCloud::resizeTheFWFTable()
 
 	try
 	{
-		m_fwfData.resize(m_points->capacity());
+		m_fwfWaveforms.resize(m_points->capacity());
 	}
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("[ccPointCloud::resizeTheFWFTable] Not enough memory!");
-		m_fwfData.clear();
+		m_fwfWaveforms.clear();
 	}
 
 	//double check
-	return m_fwfData.capacity() >= m_points->capacity();
+	return m_fwfWaveforms.capacity() >= m_points->capacity();
 }
 
 bool ccPointCloud::reserve(unsigned newNumberOfPoints)
@@ -1218,10 +1308,10 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 	//ccLog::Warning(QString("[ccPointCloud::reserve] Cloud is %1 and its capacity is '%2'").arg(m_points->isAllocated() ? "allocated" : "not allocated").arg(m_points->capacity()));
 
 	//double check
-	return	                   m_points->capacity()    >= newNumberOfPoints
-		&&	( !hasColors()  || m_rgbColors->capacity() >= newNumberOfPoints )
-		&&	( !hasNormals() || m_normals->capacity()   >= newNumberOfPoints )
-		&&	( !hasFWF()     || m_fwfData.capacity()    >= newNumberOfPoints );
+	return	                   m_points->capacity()      >= newNumberOfPoints
+		&&	( !hasColors()  || m_rgbColors->capacity()   >= newNumberOfPoints )
+		&&	( !hasNormals() || m_normals->capacity()     >= newNumberOfPoints )
+		&&	( !hasFWF()     || m_fwfWaveforms.capacity() >= newNumberOfPoints );
 }
 
 bool ccPointCloud::resize(unsigned newNumberOfPoints)
@@ -1251,7 +1341,7 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 	return	                   m_points->currentSize()    == newNumberOfPoints
 		&&	( !hasColors()  || m_rgbColors->currentSize() == newNumberOfPoints )
 		&&	( !hasNormals() || m_normals->currentSize()   == newNumberOfPoints )
-		&&	( !hasFWF()     || m_fwfData.size()           == newNumberOfPoints );
+		&&	( !hasFWF()     || m_fwfWaveforms.size()      == newNumberOfPoints );
 }
 
 void ccPointCloud::showSFColorsScale(bool state)
@@ -1762,14 +1852,11 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	}
 
 	//and the waveform!
-	if (hasFWF())
+	for (ccWaveform& w : m_fwfWaveforms)
 	{
-		for (ccWaveform& w : m_fwfData)
+		if (w.descriptorID() != 0)
 		{
-			if (w.descriptorID() != 0)
-			{
-				w.applyRigidTransformation(trans);
-			}
+			w.applyRigidTransformation(trans);
 		}
 	}
 
@@ -3735,7 +3822,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		}
 	}
 
-	//Waveform (dataVersion >= 44)
+	//Waveforms (dataVersion >= 44)
 	bool withFWF = hasFWF();
 	if (out.write((const char*)&withFWF, sizeof(bool)) < 0)
 	{
@@ -3763,18 +3850,29 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 			}
 		}
 
-		//then the waveform
-		uint32_t dataCount = static_cast<uint32_t>(m_fwfData.size());
-		if (out.write((const char*)&dataCount, 4) < 0)
+		//then the waveforms
+		uint32_t waveformCount = static_cast<uint32_t>(m_fwfWaveforms.size());
+		if (out.write((const char*)&waveformCount, 4) < 0)
 		{
 			return WriteError();
 		}
-		for (const ccWaveform& w : m_fwfData)
+		for (const ccWaveform& w : m_fwfWaveforms)
 		{
 			if (!w.toFile(out))
 			{
 				return WriteError();
 			}
+		}
+
+		//eventually save the data
+		uint64_t dataSize = static_cast<uint64_t>(m_fwfData ? m_fwfData->size(): 0);
+		if (out.write((const char*)&dataSize, 8) < 0)
+		{
+			return WriteError();
+		}
+		if (m_fwfData && out.write((const char*)&m_fwfData->front(), dataSize) < 0)
+		{
+			return WriteError();
 		}
 	}
 
@@ -4016,7 +4114,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		}
 	}
 
-	//Waveform (dataVersion >= 44)
+	//Waveforms (dataVersion >= 44)
 	if (dataVersion >= 44)
 	{
 		bool withFWF = false;
@@ -4050,24 +4148,49 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 				m_fwfDescriptors.insert(id, d);
 			}
 
-			//then the waveform
-			uint32_t dataCount = 0;
-			if (in.read((char*)&dataCount, 4) < 0)
+			//then the waveforms
+			uint32_t waveformCount = 0;
+			if (in.read((char*)&waveformCount, 4) < 0)
 			{
 				return ReadError();
 			}
-			assert(dataCount >= size());
+			assert(waveformCount >= size());
 			try
 			{
-				m_fwfData.resize(dataCount);
+				m_fwfWaveforms.resize(waveformCount);
 			}
 			catch (const std::bad_alloc&)
 			{
 				return MemoryError();
 			}
-			for (uint32_t i = 0; i < dataCount; ++i)
+			for (uint32_t i = 0; i < waveformCount; ++i)
 			{
-				if (!m_fwfData[i].fromFile(in, dataVersion, flags))
+				if (!m_fwfWaveforms[i].fromFile(in, dataVersion, flags))
+				{
+					return ReadError();
+				}
+			}
+
+			//eventually save the data
+			uint64_t dataSize = 0;
+			if (in.read((char*)&dataSize, 8) < 0)
+			{
+				return ReadError();
+			}
+			if (dataSize != 0)
+			{
+				FWFDataContainer* container = new FWFDataContainer;
+				try
+				{
+					container->resize(dataSize);
+				}
+				catch (const std::bad_alloc&)
+				{
+					return MemoryError();
+				}
+				m_fwfData = SharedFWFDataContainer(container);
+
+				if (in.read((char*)&m_fwfData->front(), dataSize) < 0)
 				{
 					return ReadError();
 				}
@@ -5056,7 +5179,7 @@ void ccPointCloud::clearLOD()
 
 void ccPointCloud::clearFWFData()
 {
-	m_fwfData.clear();
+	m_fwfWaveforms.clear();
 	m_fwfDescriptors.clear();
 }
 
@@ -5064,59 +5187,54 @@ bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgres
 {
 	minVal = maxVal = 0;
 	
-	if (size() != m_fwfData.size())
+	if (size() != m_fwfWaveforms.size())
 	{
 		return false;
 	}
 
 	//progress dialog
-	CCLib::NormalizedProgress nProgress(pDlg, static_cast<unsigned>(m_fwfData.size()));
+	CCLib::NormalizedProgress nProgress(pDlg, static_cast<unsigned>(m_fwfWaveforms.size()));
 	if (pDlg)
 	{
 		pDlg->setWindowTitle(QObject::tr("FWF amplitude"));
-		pDlg->setLabelText(QObject::tr("Determining min and max FWF values\nPoints: ") + QString::number(m_fwfData.size()));
+		pDlg->setLabelText(QObject::tr("Determining min and max FWF values\nPoints: ") + QString::number(m_fwfWaveforms.size()));
 		pDlg->show();
 		QCoreApplication::processEvents();
 	}
 
 	//for all waveforms
 	bool firstTest = true;
-	for (const ccWaveform& w : m_fwfData)
+	for (unsigned i = 0; i < size(); ++i)
 	{
 		if (pDlg && !nProgress.oneStep())
 		{
 			return false;
 		}
-		
-		uint8_t descriptorID = w.descriptorID();
-		if (descriptorID == 0 || !m_fwfDescriptors.contains(descriptorID))
+
+		ccWaveformProxy proxy = waveformProxy(i);
+		if (!proxy.isValid())
 		{
-			//no valid descriptor
 			continue;
 		}
 
-		const WaveformDescriptor& d = m_fwfDescriptors[descriptorID];
-		if (d.numberOfSamples != 0)
-		{
-			double wMinVal, wMaxVal;
-			w.getRange(wMinVal, wMaxVal, d);
+		double wMinVal, wMaxVal;
+		proxy.getRange(wMinVal, wMaxVal);
 
-			if (firstTest)
+		if (firstTest)
+		{
+			minVal = wMinVal;
+			maxVal = wMaxVal;
+			firstTest = false;
+		}
+		else
+		{
+			if (wMaxVal > maxVal)
+			{
+				maxVal = wMaxVal;
+			}
+			if (wMinVal < minVal)
 			{
 				minVal = wMinVal;
-				maxVal = wMaxVal;
-				firstTest = false;
-			}
-			else
-			{
-				if (wMaxVal > maxVal)
-				{
-					maxVal = wMaxVal;
-				}
-				if (wMinVal < minVal)
-				{
-					minVal = wMinVal;
-				}
 			}
 		}
 	}

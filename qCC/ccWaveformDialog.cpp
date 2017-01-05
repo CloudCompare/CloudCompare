@@ -118,6 +118,8 @@ void ccWaveWidget::setAxisLabels(const QString& xLabel, const QString& yLabel)
 	}
 }
 
+static double AbsLog(double c) { return (c >= 0 ? log(1.0 + c) : -log(1.0 - c)); }
+
 void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue/*=0.0*/)
 {
 	clearInternal();
@@ -127,23 +129,21 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 		return;
 	}
 
-	const ccWaveform& w = cloud->fwfData()[pointIndex];
-	uint8_t descriptorID = w.descriptorID();
-	if (descriptorID == 0 || !cloud->fwfDescriptors().contains(descriptorID))
+	const ccWaveformProxy& w = cloud->waveformProxy(pointIndex);
+	if (!w.isValid())
 	{
 		//no valid descriptor
 		return;
 	}
 
-	const WaveformDescriptor& d = cloud->fwfDescriptors()[descriptorID];
-	if (d.numberOfSamples == 0)
+	if (w.numberOfSamples() == 0)
 	{
 		return;
 	}
 
 	try
 	{
-		m_curveValues.resize(d.numberOfSamples, 0);
+		m_curveValues.resize(w.numberOfSamples(), 0);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -152,19 +152,12 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 		return;
 	}
 
-	for (uint32_t i = 0; i < d.numberOfSamples; ++i)
+	for (uint32_t i = 0; i < w.numberOfSamples(); ++i)
 	{
-		double c = w.getSample(i, d);
+		double c = w.getSample(i);
 		if (logScale)
 		{
-			if (c >= 0)
-			{
-				c = log(1.0 + c);
-			}
-			else // c < 0
-			{
-				c = -log(1.0 - c);
-			}
+			c = AbsLog(c);
 		}
 		m_curveValues[i] = c;
 
@@ -181,12 +174,10 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 
 	if (maxValue != 0)
 	{
-		m_maxA = maxValue;
+		m_maxA = logScale ? AbsLog(maxValue) : maxValue;
 	}
 
-	m_dt = d.samplingRate_ps;
-
-	refresh();
+	m_dt = w.descriptor().samplingRate_ps;
 };
 
 void ccWaveWidget::refresh()
@@ -223,13 +214,9 @@ void ccWaveWidget::refresh()
 	this->clearGraphs();
 	this->clearPlottables();
 
-	if (m_curveValues.empty())
-	{
-		return;
-	}
-
 	//wave curve
 	int curveSize = static_cast<int>(m_curveValues.size());
+	if (curveSize != 0)
 	{
 		QVector<double> x(curveSize), y(curveSize);
 		
@@ -414,6 +401,7 @@ void ccWaveDialog::onPointIndexChanged(int index)
 	}
 
 	m_widget->init(m_cloud, static_cast<unsigned>(index), m_gui->logScaleCheckBox->isChecked(), m_gui->fixedAmplitudeCheckBox->isChecked() ? m_waveMax : 0.0);
+	m_widget->refresh();
 }
 
 void ccWaveDialog::onItemPicked(const PickedItem& pi)
@@ -463,23 +451,19 @@ void ccWaveDialog::onExportWaveAsCSV()
 	}
 
 	int pointIndex = m_gui->pointIndexSpinBox->value();
-	if (pointIndex >= static_cast<int>(m_cloud->fwfData().size()))
+	if (pointIndex >= static_cast<int>(m_cloud->waveforms().size()))
 	{
 		assert(false);
 		return;
 	}
 	
-	const ccWaveform& w = m_cloud->fwfData()[pointIndex];
-	uint8_t descriptorID = w.descriptorID();
-	if (descriptorID == 0 || !m_cloud->fwfDescriptors().contains(descriptorID))
+	const ccWaveformProxy& w = m_cloud->waveformProxy(pointIndex);
+	if (!w.isValid())
 	{
 		//no valid descriptor
-		assert(false);
 		return;
 	}
-
-	const WaveformDescriptor& d = m_cloud->fwfDescriptors()[descriptorID];
-	if (d.numberOfSamples == 0)
+	if (w.numberOfSamples() == 0)
 	{
 		//nothing to do
 		return;
@@ -505,5 +489,5 @@ void ccWaveDialog::onExportWaveAsCSV()
 	settings.endGroup();
 
 	//save file
-	w.toASCII(filename, d);
+	w.toASCII(filename);
 }

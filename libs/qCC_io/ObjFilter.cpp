@@ -145,7 +145,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		//per-vertices normals
 		else //if (withVertNormals)
 		{
-			for (unsigned i=0; i<nbPoints; ++i)
+			for (unsigned i = 0; i < nbPoints; ++i)
 			{
 				const CCVector3& normalVec = vertices->getPointNormal(i);
 				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << endl;
@@ -280,7 +280,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				int n3 = static_cast<int>(i3);
 				if (withTriNormals)
 				{
-					st->getTriangleNormalIndexes(i,n1,n2,n3);
+					st->getTriangleNormalIndexes(i, n1, n2, n3);
 					if (n1 >= 0) ++n1;
 					if (n2 >= 0) ++n2;
 					if (n3 >= 0) ++n3;

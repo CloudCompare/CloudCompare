@@ -199,7 +199,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	}
 
 	//we check each normal orientation
-	for (unsigned i=0; i<theNormsCodes.currentSize(); i++)
+	for (unsigned i = 0; i < theNormsCodes.currentSize(); i++)
 	{
 		const CompressedNormType& code = theNormsCodes.getValue(i);
 		CCVector3 N = GetNormal(code);
@@ -225,7 +225,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 		{
 			//inverse normal and re-compress it
 			N *= -1;
-			theNormsCodes.setValue(i,ccNormalVectors::GetNormIndex(N.u));
+			theNormsCodes.setValue(i, ccNormalVectors::GetNormIndex(N.u));
 		}
 	}
 
@@ -287,7 +287,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 		static const int s_minPop = 6;
 		static const double s_minAboveMinRatio = 0.97;
 
-		const unsigned sampleCount = std::min<unsigned>(200,cloud->size()/10);
+		const unsigned sampleCount = std::min<unsigned>(200, cloud->size() / 10);
 
 		double aimedPop = s_aimedPop;
 		PointCoordinateType radius = bestRadius;
@@ -297,10 +297,10 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 
 		std::random_device rd;   // non-deterministic generator
 		std::mt19937 gen(rd());  // to seed mersenne twister.
-		std::uniform_int_distribution<unsigned> dist(0, cloud->size()-1);
+		std::uniform_int_distribution<unsigned> dist(0, cloud->size() - 1);
 
 		//we may have to do this several times
-		for (size_t attempt=0; attempt<10; ++attempt)
+		for (size_t attempt = 0; attempt < 10; ++attempt)
 		{
 			int totalCount = 0;
 			int totalSquareCount = 0;
@@ -310,7 +310,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 
 			unsigned char octreeLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
 
-			for (size_t i=0; i<sampleCount; ++i)
+			for (size_t i = 0; i < sampleCount; ++i)
 			{
 				unsigned randomIndex = dist(gen);
 				assert(randomIndex < cloud->size());

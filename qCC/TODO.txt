@@ -54,6 +54,7 @@ qFacets plugin:
 
 Various:
 
+[*] Add a shortcut to take a 'snapshot' of the current view (automatic filename and export dir?)
 [*] Drop the old (deprecated) OpenGL based picking for entities and lablels (http://www.danielgm.net/cc/forum/viewtopic.php?t=2009)
 [*] Add support for Gocad pointset files (= ASCII file with a specific header and decoration)
 [*] LAS files: export non standard (scalar) fields as extended fields

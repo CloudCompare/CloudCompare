@@ -153,39 +153,92 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 		//bool hasFWFFile = false;
 		LASwaveform13reader* fwfReader = 0;
 		if (hasFWF)
+		for (int fakeIteration = 0; fakeIteration < 1; ++fakeIteration)
 		{
 			try
 			{
-				cloud->fwfData().resize(pointCount);
+				cloud->waveforms().resize(pointCount);
 			}
 			catch (const std::bad_alloc&)
 			{
 				ccLog::Warning(QString("Not enough memory to import the waveform data"));
 				hasFWF = false;
+				break;
 			}
-
-			//check if the waveforms are stored in the same file or on the disk
-			//if (hasFWF && lasreader->header.global_encoding & 4)
-			//{
-			//	QString wdpFilename = filename;
-			//	wdpFilename.replace(QFileInfo(filename).suffix(), "wdp");
-			//	fwfFile.setFileName(wdpFilename);
-			//	if (fwfFile.open(QFile::ReadOnly))
-			//	{
-			//		hasFWFFile = true;
-			//	}
-			//	else
-			//	{
-			//		hasFWF = false;
-			//		ccLog::Warning(QString("Failed to open the associated waveform data packets file (%1)").arg(wdpFilename));
-			//	}
-			//}
 
 			fwfReader = lasreadopener.open_waveform13(&(lasreader->header));
 			if (!fwfReader)
 			{
 				ccLog::Warning(QString("Failed to open/read the associated waveform data packets"));
 				hasFWF = false;
+				break;
+			}
+
+			//determine the total size of the FWF data
+			QFile fwfDataSource;
+			uint64_t fwfDataCount = 0;
+			if (lasreader->header.start_of_waveform_data_packet_record != 0)
+			{
+				//the FWF data is internal
+				assert(lasreader->header.global_encoding & 2);
+				//open the same file
+				fwfDataSource.setFileName(filename);
+				if (!fwfDataSource.open(QFile::ReadOnly))
+				{
+					ccLog::Warning(QString("Failed to read the associated waveform data packets"));
+					hasFWF = false;
+					break;
+				}
+				//seek for the waveform EVLR
+				fwfDataSource.seek(lasreader->header.start_of_waveform_data_packet_record);
+				QByteArray evlrHeader = fwfDataSource.read(60);
+				if (evlrHeader.size() < 60)
+				{
+					ccLog::Warning(QString("Failed to read the associated waveform data packets"));
+					hasFWF = false;
+					break;
+				}
+
+				//get the number of bytes
+				fwfDataCount = *reinterpret_cast<const uint64_t*>(evlrHeader.constData() + 20); //see LAS 1.4 EVLR header specifications
+			}
+			else
+			{
+				QString wdpFilename = filename;
+				wdpFilename.replace(QFileInfo(filename).suffix(), "wdp");
+				fwfDataSource.setFileName(wdpFilename);
+				if (!fwfDataSource.open(QFile::ReadOnly))
+				{
+					ccLog::Warning(QString("Failed to read the associated waveform data packets file (looking for '%1')").arg(wdpFilename));
+					hasFWF = false;
+					break;
+				}
+
+				//the number of bytes is simply the file size
+				fwfDataCount = fwfDataSource.size();
+			}
+
+			//load the FWF data
+			if (fwfDataSource.isOpen() && fwfDataCount != 0)
+			{
+				ccPointCloud::FWFDataContainer* container = new ccPointCloud::FWFDataContainer;
+				try
+				{
+					container->resize(fwfDataCount);
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Warning(QString("Not enough memory to import the waveform data"));
+					cloud->waveforms().clear();
+					delete container;
+					hasFWF = false;
+					break;
+				}
+
+				fwfDataSource.read((char*)(&(container->front())), fwfDataCount);
+				fwfDataSource.close();
+
+				cloud->fwfData() = ccPointCloud::SharedFWFDataContainer(container);
 			}
 		}
 
@@ -229,16 +282,9 @@ CC_FILE_ERROR LASFWFFilter::loadFile(QString filename, ccHObject& container, Loa
 						descriptors.insert(packetIndex, wfd);
 					}
 
-					uint32_t bitCount = (fwfReader->nsamples * fwfReader->nbits);
-					uint32_t byteCount = (bitCount >> 3); // = /8
-					if (bitCount > (byteCount << 3))
-					{
-						++byteCount;
-					}
-
-					ccWaveform& w = cloud->fwfData()[pointIndex];
+					ccWaveform& w = cloud->waveforms()[pointIndex];
 					w.setDescriptorID(packetIndex);
-					w.setData(fwfReader->samples, byteCount);
+					w.setDataDescription(point.wavepacket.getOffset(), point.wavepacket.getSize());
 					w.setBeamDir(CCVector3f::fromArray(fwfReader->XYZt));
 					w.setEchoTime_ps(fwfReader->location);
 				}

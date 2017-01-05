@@ -41,6 +41,8 @@ public:
 };
 
 //! Waveform
+/** \warning Waveforms do not own their data!
+**/
 class QCC_DB_LIB_API ccWaveform : public ccSerializableObject
 {
 public:
@@ -48,11 +50,8 @@ public:
 	//! Default constructor
 	ccWaveform(uint8_t descriptorID = 0);
 	
-	//! Copy constructor
-	ccWaveform(const ccWaveform& w);
-
 	//! Destructor
-	virtual ~ccWaveform() { clear(); }
+	virtual ~ccWaveform();
 
 	//! Returns the associated descriptor (ID)
 	/** \warning A value of zero indicates that there is no associated waveform data.
@@ -62,26 +61,23 @@ public:
 	//! Sets the associated descriptor (ID)
 	inline void setDescriptorID(uint8_t id) { m_descriptorID = id; }
 
-	//! Sets the (samples) data
-	bool setData(const uint8_t* data, uint32_t byteCount);
-
-	//! Clears the structure
-	void clear();
+	//! Describes the waveform data
+	void setDataDescription(uint64_t dataOffset, uint32_t byteCount);
 
 	//! Returns the (raw) value of a given sample
-	uint32_t getRawSample(uint32_t i, const WaveformDescriptor& descriptor) const;
+	uint32_t getRawSample(uint32_t i, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Returns the (real) value of a given sample (in volts)
-	double getSample(uint32_t i, const WaveformDescriptor& descriptor) const;
+	double getSample(uint32_t i, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Returns the range of (real) samples
-	double getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor) const;
+	double getRange(double& minVal, double& maxVal, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Decodes the samples and store them in a vector
-	bool decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor) const;
+	bool decodeSamples(std::vector<double>& values, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Exports (real) samples to an ASCII file
-	bool toASCII(QString filename, const WaveformDescriptor& descriptor) const;
+	bool toASCII(QString filename, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const;
 
 	//! Helper: exports a series of values as an ASCII file
 	static bool ToASCII(QString filename, std::vector<double>& values, uint32_t samplingRate_ps);
@@ -92,20 +88,23 @@ public:
 	//! Returns the number of allocated bytes
 	inline uint32_t byteCount() const { return m_byteCount; }
 
+	//! Returns the byte offset to waveform data
+	inline uint64_t dataOffset() const { return m_dataOffset; }
+
 	//! Gives access to the internal data
-	inline const uint8_t* data() const { return m_data; }
+	inline const uint8_t* data(const uint8_t* dataStorage) const { return dataStorage + m_dataOffset; }
 
 	//! Sets the beam direction
-	void setBeamDir(const CCVector3f& dir) { m_beamDir = dir; }
+	inline void setBeamDir(const CCVector3f& dir) { m_beamDir = dir; }
 
 	//! Returns the beam direction
-	const CCVector3f& beamDir() const { return m_beamDir; }
+	inline const CCVector3f& beamDir() const { return m_beamDir; }
 
 	//! Set the echo time (in picoseconds)
-	void setEchoTime_ps(float time_ps) { m_echoTime_ps = time_ps; }
+	inline void setEchoTime_ps(float time_ps) { m_echoTime_ps = time_ps; }
 
 	//! Returns the echo time (in picoseconds)
-	float echoTime_ps() const { return m_echoTime_ps; }
+	inline float echoTime_ps() const { return m_echoTime_ps; }
 
 	//! Applies a rigid transformation (on the beam direction)
 	void applyRigidTransformation(const ccGLMatrix& trans);
@@ -117,18 +116,15 @@ public:
 
 protected: //methods
 
-	//! Reserves the memory to store the sample values
-	bool reserve_bytes(uint32_t byteCount);
-
 protected: //members
 
-	//! Data buffer size (in bytes)
+	//! Waveform packet size in bytes
 	/** \warning Not necessarily equal to the number of samples!
 	**/
 	uint32_t m_byteCount;
 
-	//! Samples data
-	uint8_t* m_data;
+	//! Byte offset to waveform data
+	uint64_t m_dataOffset;
 
 	//! Laser beam direction
 	/** Parametric line equation for extrapolating points along the associated waveform:
@@ -138,16 +134,93 @@ protected: //members
 	**/
 	CCVector3f m_beamDir;
 
-	//! Echo time (in picoseconds)
+	//! Return Point location (in picoseconds)
 	/** The offset in picoseconds from the first digitized value to the location
 		within the waveform packet that the associated return pulse was detected.
 	**/
 	float m_echoTime_ps;
 
-	//! Associated descriptor ID
+	//! Wave Packet descriptor index
 	/** \warning A value of zero indicates that there is no associated waveform data.
 	**/
 	uint8_t m_descriptorID;
+};
+
+//! Waveform proxy
+/** For easier access to the waveform data
+**/
+class QCC_DB_LIB_API ccWaveformProxy
+{
+public:
+
+	//! Default constructor
+	ccWaveformProxy(const ccWaveform& w, const WaveformDescriptor& d, const uint8_t* storage)
+		: m_w(w)
+		, m_d(d)
+		, m_storage(storage)
+	{}
+
+	//! Copy constructor
+	ccWaveformProxy(const ccWaveformProxy& p)
+		: m_w(p.m_w)
+		, m_d(p.m_d)
+		, m_storage(p.m_storage)
+	{}
+
+	//! Returns whether the waveform (proxy) is valid or not
+	inline bool isValid() const { return m_storage && m_w.descriptorID() != 0 && m_d.numberOfSamples != 0; }
+
+	//! Returns the associated descriptor (ID)
+	/** \warning A value of zero indicates that there is no associated waveform data.
+	**/
+	inline uint8_t descriptorID() const { return m_w.descriptorID(); }
+
+	//! Returns the (raw) value of a given sample
+	inline uint32_t getRawSample(uint32_t i) const { return m_w.getRawSample(i, m_d, m_storage); }
+
+	//! Returns the (real) value of a given sample (in volts)
+	inline double getSample(uint32_t i) const { return m_w.getSample(i, m_d, m_storage); }
+
+	//! Returns the range of (real) samples
+	inline double getRange(double& minVal, double& maxVal) const { return m_w.getRange(minVal, maxVal, m_d, m_storage); }
+
+	//! Decodes the samples and store them in a vector
+	inline bool decodeSamples(std::vector<double>& values) const { return m_w.decodeSamples(values, m_d, m_storage); }
+
+	//! Exports (real) samples to an ASCII file
+	inline bool toASCII(QString filename) const { return m_w.toASCII(filename, m_d, m_storage); }
+
+	//! Returns the sample position in 3D
+	inline CCVector3 getSamplePos(uint32_t i, const CCVector3& P0) const { return m_w.getSamplePos(i, P0, m_d); }
+
+	//! Returns the number of allocated bytes
+	inline uint32_t byteCount() const { return m_w.byteCount(); }
+
+	//! Gives access to the internal data
+	inline const uint8_t* data() const { return m_w.data(m_storage); }
+
+	//! Returns the beam direction
+	inline const CCVector3f& beamDir() const { return m_w.beamDir(); }
+
+	//! Returns the echo time (in picoseconds)
+	inline float echoTime_ps() const { return m_w.echoTime_ps(); }
+
+	//! Returns the number of samples
+	inline uint32_t numberOfSamples() const { return m_d.numberOfSamples; }
+
+	//! Returns the descriptor
+	inline const WaveformDescriptor& descriptor() const { return m_d; }
+	//! Returns the waveform
+	inline const ccWaveform& waveform() const { return m_w; }
+
+protected: //members
+
+	//! Associated ccWaveform instance
+	const ccWaveform& m_w;
+	//! Associated descriptor
+	const WaveformDescriptor& m_d;
+	//! Associated storage data
+	const uint8_t* m_storage;
 };
 
 #endif //CC_WAVEFORM_HEADER

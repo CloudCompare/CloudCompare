@@ -1,7 +1,7 @@
 CloudCompare versions history
 =============================
 
-v2.8.beta - XX/XX/2016
+v2.8.beta - 12/18/2016
 ----------------------
 
 - New features:
@@ -62,6 +62,10 @@ v2.8.beta - XX/XX/2016
 
 	* New 'display' option to draw round points instead of square ones (when the point size > 1).
 		Warning, the display may be slower then.
+
+	* New formats supported:
+		- Photoscan PSZ
+		- [Windows] Riegl RDBX
 
 - Enhancements:
 
@@ -196,6 +200,7 @@ v2.8.beta - XX/XX/2016
 	* [macOS] Fix plugins on case-sensitive file systems
 	* [macOS] Fix problem with the main window jumping around and resizing when dragging toolbars
 	* [macOS] Fixes the layout of the 2.5D Volume Calculation dialog
+	* Global shift & scale information could be lost when cloning entities or merging them with other non-shifted entities
 
 v2.7.0 - 04/22/2016
 -------------------

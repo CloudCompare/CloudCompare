@@ -498,8 +498,11 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 		if (cloud->hasFWF())
 		{
 			addSeparator("Waveform");
-			appendRow(ITEM(QString("Waves")), ITEM(QString::number(cloud->fwfData().size()))); //DGM: in fact some of them might be null/invalid!
+			appendRow(ITEM(QString("Waves")), ITEM(QString::number(cloud->waveforms().size()))); //DGM: in fact some of them might be null/invalid!
 			appendRow(ITEM(QString("Descriptors")), ITEM(QString::number(cloud->fwfDescriptors().size())));
+
+			double dataSize_mb = (cloud->fwfData() ? cloud->fwfData()->size() : 0) / static_cast<double>(1 << 20);
+			appendRow(ITEM(QString("Data size")), ITEM(QString("%1 Mb").arg(dataSize_mb, 0, 'f', 2)));
 		}
 	}
 }

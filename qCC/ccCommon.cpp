@@ -23,7 +23,7 @@
 #include <CCPlatform.h>
 
 #define CC_VER_NUM "2"
-#define CC_SUB_VER "8.beta" //2016-XX-XX
+#define CC_SUB_VER "8" //2016-12-17
 
 //! Returns current version as a string
 QString ccCommon::GetCCVersion(bool full/*=true*/)
@@ -34,11 +34,11 @@ QString ccCommon::GetCCVersion(bool full/*=true*/)
 #endif
 
 #if defined(CC_ENV_64)
-	QString arch = "64 bits";
+	QString arch = "64-bit";
 #elif defined(CC_ENV_32)
-	QString arch = "32 bits";
+	QString arch = "32-bit";
 #else
-	QString arch = "?? bits";
+	QString arch = "??-bit";
 #endif
 
 	if (full)
@@ -46,7 +46,7 @@ QString ccCommon::GetCCVersion(bool full/*=true*/)
 #if defined(CC_WINDOWS)
 		QString platform = "Windows";
 #elif defined(CC_MAC_OS)
-		QString platform = "Mac OS";
+		QString platform = "macOS";
 #elif defined(CC_LINUX)
 		QString platform = "Linux";
 #else

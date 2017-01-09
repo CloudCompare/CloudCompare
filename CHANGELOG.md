@@ -26,6 +26,7 @@ v2.9.alpha - XX/XX/XXXX
 		the corresponding 'Time' scalar field could be rejected later at export time
 	* A visible 2D label with the 'show 2D label' option disabled could break the picking process
 	* The sphere fitting algorithm was not always finding the optimal sphere
+	* Rasterize tool: scalar fields were vertically mirrored when exported to a geotiff raster
 
 v2.8 - 12/18/2016
 ----------------------

@@ -1281,7 +1281,7 @@ void ccRasterizeTool::generateRaster() const
 			assert(!m_grid.scalarFields[k].empty());
 			if (allSFBands || (visibleSFBand && visibleSfIndex == static_cast<int>(k)))
 			{
-				const double* _sfGrid = &(m_grid.scalarFields[k].front());
+				const double* sfGrid = &(m_grid.scalarFields[k].front());
 				GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
 
 				double sfNanValue = std::numeric_limits<ccRasterGrid::SF::value_type>::quiet_NaN();
@@ -1292,9 +1292,10 @@ void ccRasterizeTool::generateRaster() const
 				for (unsigned j = 0; j < m_grid.height; ++j)
 				{
 					const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
-					for (unsigned i = 0; i < m_grid.width; ++i, ++_sfGrid)
+					const double* sfRow = sfGrid + (m_grid.height - 1 - j) * m_grid.width;
+					for (unsigned i = 0; i < m_grid.width; ++i)
 					{
-						scanline[i] = row[i].nbPoints ? *_sfGrid : sfNanValue;
+						scanline[i] = row[i].nbPoints ? sfRow[i] : sfNanValue;
 					}
 
 					if (poBand->RasterIO(	GF_Write,

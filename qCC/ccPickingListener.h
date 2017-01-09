@@ -26,7 +26,7 @@
 
 class ccHObject;
 
-//! Pointr/triangle picking listener interface
+//! Point/triangle picking listener interface
 class ccPickingListener
 {
 public:

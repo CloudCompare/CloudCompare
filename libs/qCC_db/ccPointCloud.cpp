@@ -1869,12 +1869,12 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::translate(const CCVector3& T)
 {
-	if (fabs(T.x)+fabs(T.y)+fabs(T.z) < ZERO_TOLERANCE)
+	if (fabs(T.x) + fabs(T.y) + fabs(T.z) < ZERO_TOLERANCE)
 		return;
 
 	unsigned count = size();
 	{
-		for (unsigned i=0; i<count; i++)
+		for (unsigned i = 0; i < count; i++)
 			*point(i) += T;
 	}
 

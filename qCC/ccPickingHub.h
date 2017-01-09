@@ -36,7 +36,7 @@
 class QMdiSubWindow;
 class ccHObject;
 
-//! Point /triangle picking hub
+//! Point/triangle picking hub
 class ccPickingHub : public QObject
 {
 	Q_OBJECT

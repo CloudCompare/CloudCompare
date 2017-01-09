@@ -71,10 +71,15 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	}
 
 	//ask for output format
-	QMessageBox msgBox(QMessageBox::Question, "Choose output format", "Save in BINARY or ASCII format?");
-	QPushButton *binaryButton = msgBox.addButton("BINARY", QMessageBox::AcceptRole);
-	msgBox.addButton("ASCII", QMessageBox::AcceptRole);
-	msgBox.exec();
+	bool binaryMode = true;
+	if (parameters.alwaysDisplaySaveDialog)
+	{
+		QMessageBox msgBox(QMessageBox::Question, "Choose output format", "Save in BINARY or ASCII format?");
+		QPushButton *binaryButton = msgBox.addButton("BINARY", QMessageBox::AcceptRole);
+		msgBox.addButton("ASCII", QMessageBox::AcceptRole);
+		msgBox.exec();
+		binaryMode = (msgBox.clickedButton() == binaryButton);
+	}
 
 	//try to open file for saving
 	FILE* theFile = fopen(qPrintable(filename), "wb");
@@ -82,7 +87,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 		return CC_FERR_WRITING;
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	if (msgBox.clickedButton() == binaryButton)
+	if (binaryMode)
 	{
 		result = saveToBINFile(mesh, theFile);
 	}

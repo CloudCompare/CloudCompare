@@ -539,6 +539,8 @@ void qAnimationDlg::render(bool asSeparateFrames)
 	bool lodWasEnabled = m_view3d->isLODEnabled();
 	m_view3d->setLODEnabled(false);
 
+	QDir outputDir( QFileInfo(outputFilename).absolutePath() );
+
 	int frameIndex = 0;
 	bool success = true;
 	size_t vp1 = 0, vp2 = 0;
@@ -574,7 +576,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 			if (asSeparateFrames)
 			{
 				QString filename = QString("frame_%1.png").arg(frameIndex, 6, 10, QChar('0'));
-				QString fullPath = QDir(outputFilename).filePath(filename);
+				QString fullPath = outputDir.filePath(filename);
 				if (!image.save(fullPath))
 				{
 					QMessageBox::critical(this, "Error", QString("Failed to save frame #%1").arg(frameIndex + 1));

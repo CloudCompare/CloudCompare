@@ -31,6 +31,7 @@ v2.9.alpha - XX/XX/XXXX
 	* The sphere fitting algorithm was not always finding the optimal sphere
 	* Rasterize tool: scalar fields were vertically mirrored when exported to a geotiff raster
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)
+	* qAnimation plugin: the export to separate frames was broken
 
 v2.8 - 12/18/2016
 ----------------------

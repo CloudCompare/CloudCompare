@@ -270,6 +270,9 @@ public: //display
 	//! Returns whether the object is actually displayed (visible) or not
 	virtual bool isDisplayed() const;
 
+	//! Returns whether the object is actually displayed (visible) in a given display or not
+	virtual bool isDisplayedIn(ccGenericGLDisplay* display) const;
+
 	//! Returns whether the object and all its ancestors are enabled
 	virtual bool isBranchEnabled() const;
 

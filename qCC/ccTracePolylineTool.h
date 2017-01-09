@@ -19,7 +19,8 @@
 #define CC_TRACE_POLY_LINE_TOOL_HEADER
 
 //Local
-#include <ccOverlayDialog.h>
+#include "ccOverlayDialog.h"
+#include "ccPickingListener.h"
 
 //qCC_db
 #include <ccHObject.h>
@@ -34,39 +35,43 @@
 class ccPolyline;
 class ccPointCloud;
 class ccGLWindow;
+class ccPickingHub;
 
 //! Graphical Polyline Tracing tool
-class ccTracePolylineTool : public ccOverlayDialog, public Ui::TracePolyLineDlg
+class ccTracePolylineTool : public ccOverlayDialog, public ccPickingListener, public Ui::TracePolyLineDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    //! Default constructor
-    explicit ccTracePolylineTool(QWidget* parent);
-    //! Destructor
-    virtual ~ccTracePolylineTool();
+	//! Default constructor
+	explicit ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent);
+	//! Destructor
+	virtual ~ccTracePolylineTool();
 
-    //inherited from ccOverlayDialog
-    virtual bool linkWith(ccGLWindow* win) override;
-    virtual bool start() override;
-    virtual void stop(bool accepted) override;
+	//inherited from ccOverlayDialog
+	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool start() override;
+	virtual void stop(bool accepted) override;
 
 protected slots:
 
-    void apply();
-    void cancel();
-    void resetLine();
+	void apply();
+	void cancel();
+	void resetLine();
 	void exportLine();
 
-	void handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
-    //void addPointToPolyline(int x, int y);
-    void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
-    void updatePolyLineTip(int x, int y, Qt::MouseButtons buttons);
+	//void handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
+	//void addPointToPolyline(int x, int y);
+	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void updatePolyLineTip(int x, int y, Qt::MouseButtons buttons);
 
 	void onWidthSizeChanged(int);
 
-    //! To capture overridden shortcuts (pause button, etc.)
-    void onShortcutTriggered(int);
+	//! To capture overridden shortcuts (pause button, etc.)
+	void onShortcutTriggered(int);
+
+	//! Inherited from ccPickingListener
+	virtual void onItemPicked(const PickedItem& pi);
 
 protected:
 
@@ -74,7 +79,7 @@ protected:
 	struct SegmentGLParams
 	{
 		SegmentGLParams() {}
-		SegmentGLParams(ccGenericGLDisplay* display, int x , int y);
+		SegmentGLParams(ccGenericGLDisplay* display, int x, int y);
 		ccGLCameraParameters params;
 		CCVector2d clickPos;
 	};
@@ -82,21 +87,24 @@ protected:
 	//! Oversamples the active 3D polyline
 	ccPolyline* polylineOverSampling(unsigned steps) const;
 
-    //! 2D polyline (for the currently edited part)
-    ccPolyline* m_polyTip;
-    //! 2D polyline vertices
-    ccPointCloud* m_polyTipVertices;
+	//! 2D polyline (for the currently edited part)
+	ccPolyline* m_polyTip;
+	//! 2D polyline vertices
+	ccPointCloud* m_polyTipVertices;
 
-    //! 3D polyline
-    ccPolyline* m_poly3D;
-    //! 3D polyline vertices
-    ccPointCloud* m_poly3DVertices;
-	
+	//! 3D polyline
+	ccPolyline* m_poly3D;
+	//! 3D polyline vertices
+	ccPointCloud* m_poly3DVertices;
+
 	//! Viewport parameters use to draw each segment of the polyline
 	std::vector<SegmentGLParams> m_segmentParams;
 
-    //! Current process state
-    bool m_done;
+	//! Current process state
+	bool m_done;
+
+	//! Picking hub
+	ccPickingHub* m_pickingHub;
 
 };
 

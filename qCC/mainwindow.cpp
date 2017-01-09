@@ -6014,7 +6014,7 @@ void MainWindow::activateRegisterPointPairTool()
 
 	if (!m_pprDlg)
 	{
-		m_pprDlg = new ccPointPairRegistrationDlg(this);
+		m_pprDlg = new ccPointPairRegistrationDlg(m_pickingHub, this);
 		connect(m_pprDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivateRegisterPointPairTool(bool)));
 		registerOverlayDialog(m_pprDlg, Qt::TopRightCorner);
 	}
@@ -6449,11 +6449,13 @@ void MainWindow::activateTracePolylineMode()
 {
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
+	{
 		return;
+	}
 
 	if (!m_tplTool)
 	{
-		m_tplTool = new ccTracePolylineTool(this);
+		m_tplTool = new ccTracePolylineTool(m_pickingHub, this);
 		connect(m_tplTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTracePolylineMode(bool)));
 		registerOverlayDialog(m_tplTool, Qt::TopRightCorner);
 	}
@@ -6516,7 +6518,7 @@ void MainWindow::activatePointListPickingMode()
 
 	if (!m_plpDlg)
 	{
-		m_plpDlg = new ccPointListPickingDlg(this);
+		m_plpDlg = new ccPointListPickingDlg(m_pickingHub, this);
 		connect(m_plpDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivatePointListPickingMode(bool)));
 
 		registerOverlayDialog(m_plpDlg, Qt::TopRightCorner);
@@ -6566,7 +6568,7 @@ void MainWindow::activatePointPickingMode()
 
 	if (!m_ppDlg)
 	{
-		m_ppDlg = new ccPointPropertiesDlg(this);
+		m_ppDlg = new ccPointPropertiesDlg(m_pickingHub, this);
 		connect(m_ppDlg, SIGNAL(processFinished(bool)),	this, SLOT(deactivatePointPickingMode(bool)));
 		connect(m_ppDlg, SIGNAL(newLabel(ccHObject*)),	this, SLOT(handleNewLabel(ccHObject*)));
 
@@ -6840,7 +6842,7 @@ void MainWindow::doActionEditCamera()
 
 	if (!m_cpeDlg)
 	{
-		m_cpeDlg = new ccCameraParamEditDlg(qWin);
+		m_cpeDlg = new ccCameraParamEditDlg(qWin, m_pickingHub);
 		//m_cpeDlg->makeFrameless(); //does not work on linux
 
 		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
@@ -7051,14 +7053,12 @@ void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 	}
 }
 
-//globals for point picking operations
 enum PickingOperation {	NO_PICKING_OPERATION,
 						PICKING_ROTATION_CENTER,
 						PICKING_LEVEL_POINTS,
 };
 static ccGLWindow* s_pickingWindow = 0;
-static ccGLWindow::PICKING_MODE s_previousPickingMode = ccGLWindow::NO_PICKING;
-static PickingOperation s_previousPickingOperation = NO_PICKING_OPERATION;
+static PickingOperation s_currentPickingOperation = NO_PICKING_OPERATION;
 static std::vector<cc2DLabel*> s_levelLabels;
 static ccPointCloud* s_levelMarkersCloud = 0;
 static ccHObject* s_levelEntity = 0;
@@ -7071,15 +7071,18 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 		return;
 	}
 
-	//specific case: we prevent the 'point-pair based alignment' tool to process the picked point!
-	if (m_pprDlg)
-		m_pprDlg->pause(true);
+	assert(m_pickingHub);
+	if (!m_pickingHub->addListener(this))
+	{
+		ccLog::Error("Can't start the picking mechanism (another tool is already using it)");
+		return;
+	}
 
-	connect(win, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&)));
+	//specific case: we prevent the 'point-pair based alignment' tool to process the picked point!
+	//if (m_pprDlg)
+	//	m_pprDlg->pause(true);
 
 	s_pickingWindow = win;
-	s_previousPickingMode = win->getPickingMode();
-	win->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING); //points or triangles
 	win->displayNewMessage(message, ccGLWindow::LOWER_LEFT_MESSAGE, true, 24 * 3600);
 	win->redraw(true, false);
 
@@ -7091,7 +7094,7 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 	if (!s_pickingWindow)
 		return;
 
-	switch(s_previousPickingOperation)
+	switch(s_currentPickingOperation)
 	{
 	case PICKING_ROTATION_CENTER:
 		//nothing to do
@@ -7111,8 +7114,8 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 
 	if (aborted)
 	{
-		s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
-		s_pickingWindow->displayNewMessage("Picking operation aborted",ccGLWindow::LOWER_LEFT_MESSAGE);
+		s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
+		s_pickingWindow->displayNewMessage("Picking operation aborted", ccGLWindow::LOWER_LEFT_MESSAGE);
 	}
 	s_pickingWindow->redraw(false);
 
@@ -7122,24 +7125,32 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 
 	freezeUI(false);
 
-	disconnect(s_pickingWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&)));
+	m_pickingHub->removeListener(this);
 
-	//restore previous picking mode
-	s_pickingWindow->setPickingMode(s_previousPickingMode);
 	s_pickingWindow = 0;
-	s_previousPickingOperation = NO_PICKING_OPERATION;
+	s_currentPickingOperation = NO_PICKING_OPERATION;
 }
 
-void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P)
+void MainWindow::onItemPicked(const PickedItem& pi)
 {
-	if (!s_pickingWindow)
+	if (!s_pickingWindow || !m_pickingHub)
+	{
 		return;
+	}
 
-	if (!entity)
+	if (!pi.entity)
+	{
 		return;
+	}
 
-	CCVector3 pickedPoint = P;
-	switch(s_previousPickingOperation)
+	if (m_pickingHub->activeWindow() != s_pickingWindow)
+	{
+		ccLog::Warning("The point picked was picked in the wrong window");
+		return;
+	}
+
+	CCVector3 pickedPoint = pi.P3D;
+	switch(s_currentPickingOperation)
 	{
 	case PICKING_LEVEL_POINTS:
 		{
@@ -7170,7 +7181,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 			s_levelMarkersCloud->addPoint(pickedPoint);
 			unsigned markerCount = s_levelMarkersCloud->size();
 			cc2DLabel* label = new cc2DLabel();
-			label->addPoint(s_levelMarkersCloud, markerCount-1);
+			label->addPoint(s_levelMarkersCloud, markerCount - 1);
 			label->setName(QString("P#%1").arg(markerCount));
 			label->setDisplayedIn2D(false);
 			label->setDisplay(s_pickingWindow);
@@ -7249,7 +7260,7 @@ void MainWindow::processPickedPoint(ccHObject* entity, unsigned itemIndex, int x
 				if (!params.perspectiveView || params.objectCenteredView)
 				{
 					//apply current GL transformation (if any)
-					entity->getGLTransformation().apply(newPivot);
+					pi.entity->getGLTransformation().apply(newPivot);
 					//compute the equivalent camera center
 					CCVector3d dP = params.pivotPoint - newPivot;
 					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
@@ -7283,7 +7294,7 @@ void MainWindow::doLevel()
 	//picking operation already in progress
 	if (s_pickingWindow)
 	{
-		if (s_previousPickingOperation == PICKING_LEVEL_POINTS)
+		if (s_currentPickingOperation == PICKING_LEVEL_POINTS)
 		{
 			cancelPreviousPickingOperation(true);
 		}
@@ -7322,7 +7333,7 @@ void MainWindow::doLevel()
 
 	s_levelEntity = m_selectedEntities[0];
 	s_levelLabels.clear();
-	s_previousPickingOperation = PICKING_LEVEL_POINTS;
+	s_currentPickingOperation = PICKING_LEVEL_POINTS;
 
 	enablePickingOperation(win,"Pick three points on the floor plane (click on icon/menu entry again to cancel)");
 }
@@ -7332,7 +7343,7 @@ void MainWindow::doPickRotationCenter()
 	//picking operation already in progress
 	if (s_pickingWindow)
 	{
-		if (s_previousPickingOperation == PICKING_ROTATION_CENTER)
+		if (s_currentPickingOperation == PICKING_ROTATION_CENTER)
 		{
 			cancelPreviousPickingOperation(true);
 		}
@@ -7358,7 +7369,7 @@ void MainWindow::doPickRotationCenter()
 		return;
 	}
 
-	s_previousPickingOperation = PICKING_ROTATION_CENTER;
+	s_currentPickingOperation = PICKING_ROTATION_CENTER;
 	enablePickingOperation(win,"Pick a point to be used as rotation center (click on icon again to cancel)");
 }
 
@@ -10328,8 +10339,7 @@ void MainWindow::doActionShowWaveDialog()
 
 void MainWindow::doActionCreatePlane()
 {
-	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(this);
-	peDlg->linkWith(getActiveGLWindow());
+	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(m_pickingHub, this);
 	peDlg->show();
 }
 
@@ -10348,8 +10358,7 @@ void MainWindow::doActionEditPlane()
 		return;
 	}
 
-	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(this);
-	peDlg->linkWith(getActiveGLWindow());
+	ccPlaneEditDlg* peDlg = new ccPlaneEditDlg(m_pickingHub, this);
 	peDlg->initWithPlane(plane);
 	peDlg->show();
 }

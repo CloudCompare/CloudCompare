@@ -53,9 +53,13 @@ public:
 	/** \param listener listener to be registered
 		\param exclusive prevents new listeners from registering
 		\param autoStartPicking automatically enables the picking mode on the active window (if any)
+		\param mode sets the picking mode (warning: may be rejected if another listener is currently registered with another mode)
 		\return success
 	***/
-	bool addListener(ccPickingListener* listener, bool exclusive = false, bool autoStartPicking = true);
+	bool addListener(	ccPickingListener* listener,
+						bool exclusive = false,
+						bool autoStartPicking = true,
+						ccGLWindow::PICKING_MODE mode = ccGLWindow::POINT_OR_TRIANGLE_PICKING);
 
 	//! Removes a listener
 	/** \param listener listener to be removed
@@ -72,6 +76,12 @@ public:
 	
 	//! Manual start / stop of the picking mode on the active window
 	void togglePickingMode(bool state);
+
+	//! Returns the currently active window
+	ccGLWindow* activeWindow() const { return m_activeGLWindow; }
+
+	//! Returns whether the picking mechanism is currently locked (i.e. an exclusive listener is registered)
+	bool isLocked() const { return m_exclusive && !m_listeners.empty(); }
 
 public slots:
 

@@ -32,7 +32,7 @@ class ccOverlayDialog : public QDialog
 public:
 
 	//! Default constructor
-	explicit ccOverlayDialog(QWidget* parent = 0);
+	explicit ccOverlayDialog(QWidget* parent = 0, Qt::WindowFlags flags = Qt::FramelessWindowHint | Qt::Tool);
 
 	//! Destructor
 	virtual ~ccOverlayDialog();

@@ -37,8 +37,8 @@
 //System
 #include <assert.h>
 
-ccPointPropertiesDlg::ccPointPropertiesDlg(QWidget* parent)
-	: ccPointPickingGenericInterface(parent)
+ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* parent)
+	: ccPointPickingGenericInterface(pickingHub, parent)
 	, Ui::PointPropertiesDlg()
 	, m_pickingMode(POINT_INFO)
 {

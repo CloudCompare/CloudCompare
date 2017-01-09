@@ -4502,7 +4502,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 			bool ignoreSubmeshes = false;
 
 			//we look for point cloud displayed in this window
-			if (ent->isVisible() && ent->isEnabled() && ent->getDisplay() == this)
+			if (ent->isDisplayedIn(this))
 			{
 				if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
 				{

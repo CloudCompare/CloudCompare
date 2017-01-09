@@ -20,6 +20,7 @@
 //Local
 #include "mainwindow.h"
 #include "ccAskThreeDoubleValuesDlg.h"
+#include "ccPickingHub.h"
 
 //qCC_gl
 #include <ccGLWindow.h>
@@ -55,14 +56,17 @@ static const int DEL_BUTTON_COL_INDEX	= 4;
 //minimum number of pairs to let the user click on the align button
 static const unsigned MIN_PAIRS_COUNT = 3;
 
-ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
+ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
 	, m_aligned(0)
 	, m_alignedPoints("aligned points")
 	, m_reference(0)
 	, m_refPoints("reference points")
 	, m_paused(false)
+	, m_pickingHub(pickingHub)
 {
+	assert(m_pickingHub);
+
 	setupUi(this);
 
 	//restore from persistent settings
@@ -139,18 +143,18 @@ void ccPointPairRegistrationDlg::clear()
 	validToolButton->setEnabled(false);
 
 	while (alignedPointsTableWidget->rowCount() != 0)
-		alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount()-1);
+		alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount() - 1);
 	while (refPointsTableWidget->rowCount() != 0)
-		refPointsTableWidget->removeRow(refPointsTableWidget->rowCount()-1);
+		refPointsTableWidget->removeRow(refPointsTableWidget->rowCount() - 1);
 
 	m_alignedPoints.removeAllChildren();
 	m_alignedPoints.clear();
-	m_alignedPoints.setGlobalShift(0,0,0);
+	m_alignedPoints.setGlobalShift(0, 0, 0);
 	m_alignedPoints.setGlobalScale(1.0);
 	m_aligned.entity = 0;
 	m_refPoints.removeAllChildren();
 	m_refPoints.clear();
-	m_refPoints.setGlobalShift(0,0,0);
+	m_refPoints.setGlobalShift(0, 0, 0);
 	m_refPoints.setGlobalScale(1.0);
 	m_reference.entity = 0;
 }
@@ -170,8 +174,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		oldWin->removeFromOwnDB(&m_refPoints);
 		m_refPoints.setDisplay(0);
 
-		oldWin->lockPickingMode(false);
-		oldWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_pickingHub->removeListener(this);
 	}
 
 	if (!ccOverlayDialog::linkWith(win))
@@ -191,10 +194,12 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
-		m_associatedWin->lockPickingMode(true);
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
-
+		if (!m_pickingHub->addListener(this, true))
+		{
+			ccLog::Error("Picking mechanism is already in use! Close the other tool first, and then restart this one.");
+			return false;
+		}
+		
 		m_associatedWin->addToOwnDB(&m_alignedPoints);
 		m_associatedWin->addToOwnDB(&m_refPoints);
 
@@ -487,7 +492,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 	return success;
 }
 
-void ccPointPairRegistrationDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P)
+void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 {
 	if (!m_associatedWin)
 		return;
@@ -496,16 +501,16 @@ void ccPointPairRegistrationDlg::processPickedItem(ccHObject* entity, unsigned i
 	if (m_paused)
 		return;
 
-	if (!entity)
+	if (!pi.entity)
 		return;
 
-	CCVector3d pin = CCVector3d::fromArray(P.u);
+	CCVector3d pin = CCVector3d::fromArray(pi.P3D.u);
 
-	if (entity == m_aligned.entity)
+	if (pi.entity == m_aligned.entity)
 	{
 		addAlignedPoint(pin, m_aligned.entity, true); //picked points are always shifted by default
 	}
-	else if (entity == m_reference.entity)
+	else if (pi.entity == m_reference.entity)
 	{
 		addReferencePoint(pin, m_reference.entity, true); //picked points are always shifted by default
 	}

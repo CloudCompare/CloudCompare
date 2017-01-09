@@ -20,6 +20,7 @@
 
 //Local
 #include "ccOverlayDialog.h"
+#include "ccPickingListener.h"
 #include <ui_cameraParamDlg.h>
 
 //qCC_db
@@ -33,16 +34,17 @@
 class QMdiSubWindow;
 class ccGLWindow;
 class ccHObject;
+class ccPickingHub;
 
 //! Dialog to interactively edit the camera pose parameters
-class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg
+class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg, public ccPickingListener
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit ccCameraParamEditDlg(QWidget* parent);
+	explicit ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub);
 
 	//! Destructor
 	virtual ~ccCameraParamEditDlg();
@@ -56,6 +58,9 @@ public:
 	//inherited from ccOverlayDialog
 	virtual bool start();
 	virtual bool linkWith(ccGLWindow* win);
+
+	//inherited from ccPickingListener
+	virtual void onItemPicked(const PickedItem& pi);
 
 public slots:
 
@@ -98,7 +103,7 @@ public slots:
 	void cameraCenterChanged();
 	void fovChanged(double);
 
-	void pickPointAsPivot();
+	void pickPointAsPivot(bool);
 	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&);
 
 protected slots:
@@ -127,6 +132,9 @@ protected:
 
 	//! Pushed camera matrices (per window)
 	PushedMatricesMapType pushedMatrices;
+
+	//! Picking hub
+	ccPickingHub* m_pickingHub;
 };
 
 #endif //CC_CAMERA_PARAM_EDIT_DLG_HEADER

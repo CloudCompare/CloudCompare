@@ -51,8 +51,8 @@ static bool s_showGlobalCoordsCheckBoxChecked = false;
 static const char s_pickedPointContainerName[] = "Picked points list";
 static const char s_defaultLabelBaseName[] = "Point #";
 
-ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
-	: ccPointPickingGenericInterface(parent)
+ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent)
+	: ccPointPickingGenericInterface(pickingHub, parent)
 	, Ui::PointListPickingDlg()
 	, m_associatedCloud(0)
 	, m_lastPreviousID(0)

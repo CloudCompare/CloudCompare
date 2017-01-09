@@ -19,6 +19,7 @@
 
 //Local
 #include "ccPointCloud.h"
+#include "ccPickingHub.h"
 
 //qCC_db
 #include <ccGLUtils.h>
@@ -37,9 +38,10 @@
 #include <QDoubleValidator>
 #include <QMdiSubWindow>
 
-ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
-	: ccOverlayDialog(parent)
+ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub)
+	: ccOverlayDialog(parent, pickingHub ? Qt::FramelessWindowHint | Qt::Tool : Qt::Tool) //pickingHub = CloudCompare / otherwise = ccViewer
 	, Ui::CameraParamDlg()
+	, m_pickingHub(pickingHub)
 {
 	setupUi(this);
 
@@ -75,7 +77,7 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
 	connect(pushMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(pushCurrentMatrix()));
 	connect(revertMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(revertToPushedMatrix()));
 
-	connect(pivotPickingToolButton,	SIGNAL(clicked()),				this,	SLOT(pickPointAsPivot()));
+	connect(pivotPickingToolButton,	SIGNAL(toggled(bool)),			this,	SLOT(pickPointAsPivot(bool)));
 }
 
 ccCameraParamEditDlg::~ccCameraParamEditDlg()
@@ -84,7 +86,7 @@ ccCameraParamEditDlg::~ccCameraParamEditDlg()
 
 void ccCameraParamEditDlg::makeFrameless()
 {
-	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
+	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 }
 
 void ccCameraParamEditDlg::iThetaValueChanged(int val)
@@ -214,17 +216,67 @@ void ccCameraParamEditDlg::revertToPushedMatrix()
 	m_associatedWin->redraw();
 }
 
-void ccCameraParamEditDlg::pickPointAsPivot()
+void ccCameraParamEditDlg::pickPointAsPivot(bool state)
 {
-	if (m_associatedWin)
+	if (m_pickingHub)
 	{
-		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		if (state)
+		{
+			if (!m_pickingHub->addListener(this, true))
+			{
+				ccLog::Error("Can't start the picking process (another tool is using it)");
+				state = false;
+			}
+		}
+		else
+		{
+			m_pickingHub->removeListener(this);
+		}
 	}
+	else if (m_associatedWin)
+	{
+		if (state)
+		{
+			m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
+			connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		}
+		else
+		{
+			m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+			disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		}
+	}
+
+	pivotPickingToolButton->blockSignals(true);
+	pivotPickingToolButton->setChecked(state);
+	pivotPickingToolButton->blockSignals(false);
 }
 
-void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P)
+void ccCameraParamEditDlg::onItemPicked(const PickedItem& pi)
 {
+	//with picking hub (CloudCompare)
+	if (!m_associatedWin || !m_pickingHub)
+	{
+		assert(false);
+		return;
+	}
+
+	if (m_associatedWin != m_pickingHub->activeWindow())
+	{
+		assert(false);
+		ccLog::Warning("Point has been picked in the wrong window");
+		return;
+	}
+
+	m_associatedWin->setPivotPoint(CCVector3d::fromArray(pi.P3D.u));
+	m_associatedWin->redraw();
+
+	pickPointAsPivot(false);
+}
+
+void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned, int, int, const CCVector3& P)
+{
+	//without picking hub (ccViewer)
 	if (!m_associatedWin)
 	{
 		assert(false);
@@ -239,8 +291,7 @@ void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned itemInd
 	m_associatedWin->setPivotPoint(CCVector3d::fromArray(P.u));
 	m_associatedWin->redraw();
 
-	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-	disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+	pickPointAsPivot(false);
 }
 
 void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
@@ -322,6 +373,12 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 	if (!ccOverlayDialog::linkWith(win))
 	{
 		return false;
+	}
+
+	if (oldWin != m_associatedWin && pivotPickingToolButton->isChecked())
+	{
+		//automatically disable picking mode when changing th
+		pickPointAsPivot(false);
 	}
 
 	if (oldWin)

@@ -21,6 +21,7 @@
 //Local
 #include "ccOverlayDialog.h"
 #include "ccCommon.h"
+#include "ccPickingListener.h"
 
 //CCLib
 #include <CCGeom.h>
@@ -31,17 +32,16 @@
 class ccGLWindow;
 class ccPointCloud;
 class ccHObject;
+class ccPickingHub;
 
 /** Generic interface for any dialog/graphical interactor that relies on point picking.
 **/
-class ccPointPickingGenericInterface : public ccOverlayDialog
+class ccPointPickingGenericInterface : public ccOverlayDialog, public ccPickingListener
 {
-	Q_OBJECT
-
 public:
 
 	//! Default constructor
-	explicit ccPointPickingGenericInterface(QWidget* parent = 0) : ccOverlayDialog(parent) {}
+	explicit ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent = 0);
 	//! Destructor
 	virtual ~ccPointPickingGenericInterface() {}
 
@@ -50,10 +50,8 @@ public:
 	virtual bool start();
 	virtual void stop(bool state);
 
-protected slots:
-
-	//! Slot to handle directly a picked point (OpenGL based picking)
-	virtual void handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3&);
+	//! Inherited from ccPickingListener
+	virtual void onItemPicked(const PickedItem& pi);
 
 protected:
 
@@ -65,6 +63,8 @@ protected:
 	**/
 	virtual void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y) = 0;
 
+	//! Picking hub
+	ccPickingHub* m_pickingHub;
 };
 
 #endif

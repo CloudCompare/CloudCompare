@@ -291,12 +291,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 	/*if (entity->isLocked())
 		ccLog::Warning(QString("Can't use entity [%1] cause it's locked!").arg(entity->getName()));
 	else */
-	if (entity->getDisplay() != m_associatedWin)
-	{
-		ccLog::Warning(QString("[Graphical Segmentation Tool] Can't use entity [%1] cause it's not displayed in the active 3D view!").arg(entity->getName()));
-		return false;
-	}
-	if (!entity->isVisible() || !entity->isBranchEnabled())
+	if (!entity->isDisplayedIn(m_associatedWin))
 	{
 		ccLog::Warning(QString("[Graphical Segmentation Tool] Entity [%1] is not visible in the active 3D view!").arg(entity->getName()));
 	}

@@ -40,7 +40,7 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface, public Ui::
 public:
 
 	//! Default constructor
-	explicit ccPointListPickingDlg(QWidget* parent);
+	explicit ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent);
 
 	//! Associates dialog with cloud
 	void linkWithCloud(ccPointCloud* cloud);

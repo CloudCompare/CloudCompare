@@ -554,7 +554,12 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 
 bool ccHObject::isDisplayed() const
 {
-	return isVisible() && (getDisplay() != 0) && isBranchEnabled();
+	return (getDisplay() != 0) && isVisible() && isBranchEnabled();
+}
+
+bool ccHObject::isDisplayedIn(ccGenericGLDisplay* display) const
+{
+	return (getDisplay() == display) && isVisible() && isBranchEnabled();
 }
 
 bool ccHObject::isBranchEnabled() const

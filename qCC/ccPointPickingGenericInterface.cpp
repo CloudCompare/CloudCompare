@@ -21,10 +21,18 @@
 #include "ccGLWindow.h"
 #include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
+#include "ccPickingHub.h"
 
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
+
+ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent/*=0*/)
+	: ccOverlayDialog(parent)
+	, m_pickingHub(pickingHub)
+{
+	assert(m_pickingHub);
+}
 
 bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 {
@@ -34,6 +42,12 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 		return false;
 	}
 	ccGLWindow* oldWin = m_associatedWin;
+
+	//just in case
+	if (m_pickingHub)
+	{
+		m_pickingHub->removeListener(this);
+	}
 
 	if (!ccOverlayDialog::linkWith(win))
 	{
@@ -45,25 +59,25 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 	{
 		oldWin->disconnect(this);
 	}
-	//then we can connect the new window 'point picked' signal
-	if (m_associatedWin)
-	{
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
-	}
 
 	return true;
 }
 
 bool ccPointPickingGenericInterface::start()
 {
-	if (!m_associatedWin)
+	if (!m_pickingHub)
 	{
 		ccLog::Error("[Point picking] No associated display!");
 		return false;
 	}
 
 	//activate "point picking mode" in associated GL window
-	m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
+	if (!m_pickingHub->addListener(this, true, true, ccGLWindow::POINT_PICKING))
+	{
+		ccLog::Error("Picking mechanism already in use. Close the tool using it first.");
+		return false;
+	}
+
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
 	m_associatedWin->redraw(true, false);
@@ -75,10 +89,11 @@ bool ccPointPickingGenericInterface::start()
 
 void ccPointPickingGenericInterface::stop(bool state)
 {
-	if (m_associatedWin)
+	if (m_pickingHub)
 	{
 		//deactivate "point picking mode" in all GL windows
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_pickingHub->removeListener(this);
+
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->redraw(true, false);
 	}
@@ -86,25 +101,25 @@ void ccPointPickingGenericInterface::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
-void ccPointPickingGenericInterface::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P)
+void ccPointPickingGenericInterface::onItemPicked(const PickedItem& pi)
 {
-	if (!m_processing || !entity)
+	if (!m_processing || !pi.entity)
 		return;
 
 	ccPointCloud* cloud = 0;
 
-	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (pi.entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		cloud = static_cast<ccPointCloud*>(entity);
+		cloud = static_cast<ccPointCloud*>(pi.entity);
 		if (!cloud)
 		{
 			assert(false);
 			ccLog::Warning("[Item picking] Picked point is not in pickable entities DB?!");
 			return;
 		}
-		processPickedPoint(cloud, itemIdx, x, y);
+		processPickedPoint(cloud, pi.itemIndex, pi.clickPoint.x(), pi.clickPoint.y());
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
+	else if (pi.entity->isKindOf(CC_TYPES::MESH))
 	{
 		//NOT HANDLED: 'POINT_PICKING' mode only for now
 		assert(false);

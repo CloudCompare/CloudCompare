@@ -18,6 +18,9 @@
 #ifndef CC_MAIN_WINDOW_HEADER
 #define CC_MAIN_WINDOW_HEADER
 
+//Local
+#include "ccPickingListener.h"
+
 //qCC_plugins
 #include <ccMainAppInterface.h>
 #include <ccPluginInfo.h>
@@ -67,7 +70,7 @@ class ccGamepadManager;
 class ccRecentFiles;
 
 //! Main window
-class MainWindow : public QMainWindow, public ccMainAppInterface, public Ui::MainWindow
+class MainWindow : public QMainWindow, public ccMainAppInterface, public ccPickingListener, public Ui::MainWindow
 {
 	Q_OBJECT
 
@@ -143,6 +146,9 @@ public:
 												 double minVal, double maxVal,
 												 QString title, QString xAxisLabel) override;
 	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
+
+	//! Inherited from ccPickingListener
+	virtual void onItemPicked(const PickedItem& pi);
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
@@ -349,7 +355,6 @@ protected slots:
 	// Picking opeations
 	void enablePickingOperation(ccGLWindow* win, QString message);
 	void cancelPreviousPickingOperation(bool aborted);
-	void processPickedPoint(ccHObject*, unsigned, int, int, const CCVector3&);
 
 	// For rotation center picking
 	void doPickRotationCenter();

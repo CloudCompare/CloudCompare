@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>321</width>
-    <height>373</height>
+    <height>382</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -462,6 +462,9 @@
            <property name="icon">
             <iconset resource="../icones.qrc">
              <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

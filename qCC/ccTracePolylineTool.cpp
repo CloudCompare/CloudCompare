@@ -20,6 +20,7 @@
 //Local
 #include "mainwindow.h"
 #include "ccEntityPickerDlg.h"
+#include "ccPickingHub.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -52,12 +53,13 @@ ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* displa
 {
 	if (display)
 	{
+		display->getGLCameraParameters(params);
 		QPointF pos2D = display->toCornerGLCoordinates(x, y);
 		clickPos = CCVector2d(pos2D.x(), pos2D.y());
 	}
 }
 
-ccTracePolylineTool::ccTracePolylineTool(QWidget* parent)
+ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::TracePolyLineDlg()
 	, m_polyTip(0)
@@ -65,7 +67,10 @@ ccTracePolylineTool::ccTracePolylineTool(QWidget* parent)
 	, m_poly3D(0)
 	, m_poly3DVertices(0)
 	, m_done(false)
+	, m_pickingHub(pickingHub)
 {
+	assert(pickingHub);
+
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
@@ -145,9 +150,14 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		return 0;
 	}
 
-	//DGM FIXME: we are now able to do this over meshes as well!
 	ccHObject::Container clouds;
 	if (m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin) == 0)
+	{
+		//no cloud is currently displayed?!
+		return 0;
+	}
+	ccHObject::Container meshes;
+	if (m_associatedWin->getSceneDB()->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin) == 0)
 	{
 		//no cloud is currently displayed?!
 		return 0;
@@ -191,13 +201,18 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		{
 			CCVector2d vj = m_segmentParams[i].clickPos + v * j;
 
-			const CCVector3* nearestPoint = 0;
+			CCVector3 nearestPoint;
 			double nearestElementSquareDist = -1.0;
 
 			//for each cloud
 			for (size_t c = 0; c < clouds.size(); ++c)
 			{
 				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[c]);
+				if (!cloud->isDisplayedIn(m_associatedWin))
+				{
+					continue;
+				}
+				
 				int nearestPointIndex = -1;
 				double nearestSquareDist = 0;
 				if (cloud->pointPicking(vj,
@@ -208,17 +223,44 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 										snapSizeSpinBox->value(),
 										true))
 				{
-					if (!nearestPoint || nearestSquareDist < nearestElementSquareDist)
+					if (nearestElementSquareDist < 0 || nearestSquareDist < nearestElementSquareDist)
 					{
 						nearestElementSquareDist = nearestSquareDist;
-						nearestPoint = cloud->getPoint(nearestPointIndex);
+						nearestPoint = *cloud->getPoint(nearestPointIndex);
 					}
 				}
 			}
 
-			if (nearestPoint)
+			//for each mesh
+			for (size_t m = 0; m < meshes.size(); ++m)
 			{
-				newVertices->addPoint(*nearestPoint);
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[m]);
+				if (!mesh->isDisplayedIn(m_associatedWin))
+				{
+					continue;
+				}
+
+				int nearestTriIndex = -1;
+				double nearestSquareDist = 0;
+				CCVector3d _nearestPoint;
+
+				if (mesh->trianglePicking(	vj,
+											m_segmentParams[i2].params,
+											nearestTriIndex,
+											nearestSquareDist,
+											_nearestPoint))
+				{
+					if (nearestElementSquareDist < 0 || nearestSquareDist < nearestElementSquareDist)
+					{
+						nearestElementSquareDist = nearestSquareDist;
+						nearestPoint = CCVector3::fromArray(_nearestPoint.u);
+					}
+				}
+			}
+
+			if (nearestElementSquareDist >= 0)
+			{
+				newVertices->addPoint(nearestPoint);
 			}
 
 			if (pDlg.wasCanceled())
@@ -265,7 +307,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		//connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
 		//connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
 		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
 		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
@@ -289,6 +331,10 @@ bool ccTracePolylineTool::start()
 
 	m_associatedWin->setUnclosable(true);
 	m_associatedWin->addToOwnDB(m_polyTip);
+	if (m_pickingHub)
+	{
+		m_pickingHub->removeListener(this);
+	}
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA() | ccGLWindow::INTERACT_SIG_RB_CLICKED | ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
 	m_associatedWin->setCursor(Qt::CrossCursor);
@@ -310,6 +356,11 @@ void ccTracePolylineTool::stop(bool accepted)
 {
 	assert(m_polyTip);
 
+	if (m_pickingHub)
+	{
+		m_pickingHub->removeListener(this);
+	}
+
 	if (m_associatedWin)
 	{
 		m_associatedWin->displayNewMessage("Polyline tracing [OFF]",
@@ -320,7 +371,6 @@ void ccTracePolylineTool::stop(bool accepted)
 
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->removeFromOwnDB(m_polyTip);
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->setCursor(Qt::ArrowCursor);
 	}
@@ -398,7 +448,8 @@ void ccTracePolylineTool::updatePolyLineTip(int x, int y, Qt::MouseButtons butto
 	m_associatedWin->redraw(true, false);
 }
 
-void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P)
+
+void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 {
 	if (!m_associatedWin)
 	{
@@ -406,7 +457,7 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 		return;
 	}
 
-	if (!entity)
+	if (!pi.entity)
 	{
 		//means that the mouse has been clicked but no point was found!
 		return;
@@ -448,13 +499,13 @@ void ccTracePolylineTool::handlePickedItem(ccHObject* entity, unsigned itemIdx, 
 		return;
 	}
 
-	m_poly3DVertices->addPoint(P);
+	m_poly3DVertices->addPoint(pi.P3D);
 	m_poly3D->addPointIndex(m_poly3DVertices->size() - 1);
-	m_segmentParams.push_back(SegmentGLParams(m_associatedWin, x, y));
+	m_segmentParams.push_back(SegmentGLParams(m_associatedWin, pi.clickPoint.x(), pi.clickPoint.y()));
 
 	//we replace the first point of the tip by this new point
 	{
-		QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+		QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(pi.clickPoint.x(), pi.clickPoint.y());
 		CCVector3 P2D(	static_cast<PointCoordinateType>(pos2D.x()),
 						static_cast<PointCoordinateType>(pos2D.y()),
 						0);
@@ -491,6 +542,10 @@ void ccTracePolylineTool::closePolyLine(int, int)
 		validButton->setEnabled(true);
 		saveToolButton->setEnabled(true);
 		resetToolButton->setEnabled(true);
+		if (m_pickingHub)
+		{
+			m_pickingHub->removeListener(this);
+		}
 		m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING); //no more picking
 		m_done = true;
 
@@ -523,12 +578,17 @@ void ccTracePolylineTool::resetLine()
 		m_poly3DVertices = 0;
 	}
 
+	//enable picking
+	if (m_pickingHub && !m_pickingHub->addListener(this, true/*, true, ccGLWindow::POINT_PICKING*/))
+	{
+		ccLog::Error("The picking mechanism is already in use. Close the tool using it first.");
+	}
+
 	if (m_associatedWin)
 	{
-		//enable picking
-		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
 		m_associatedWin->redraw(false, false);
 	}
+	
 	validButton->setEnabled(false);
 	saveToolButton->setEnabled(false);
 	resetToolButton->setEnabled(false);

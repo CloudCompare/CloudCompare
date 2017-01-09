@@ -624,7 +624,7 @@ void ccViewer::doActionEditCamera()
 {
 	if (!s_cpeDlg)
 	{
-		s_cpeDlg = new ccCameraParamEditDlg(0);
+		s_cpeDlg = new ccCameraParamEditDlg(this, 0);
 		s_cpeDlg->linkWith(m_glWindow);
 	}
 	s_cpeDlg->show();
@@ -639,7 +639,6 @@ void ccViewer::reflectPerspectiveState()
 	ui.actionSetCenteredPerspectiveView->setChecked(perspectiveEnabled && objectCentered);
 	ui.actionSetViewerPerspectiveView->setChecked(perspectiveEnabled && !objectCentered);
 }
-
 
 bool ccViewer::checkStereoMode()
 {

@@ -19,6 +19,7 @@
 
 //local
 #include "mainwindow.h"
+#include "ccPickingHub.h"
 
 //qCC_db
 #include <ccPlane.h>
@@ -38,12 +39,15 @@ static double s_height = 10.0;
 static bool s_upward = true;
 static CCVector3d s_center(0, 0, 0);
 
-ccPlaneEditDlg::ccPlaneEditDlg(QWidget* parent)
+ccPlaneEditDlg::ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent)
 	: QDialog(parent)
 	, Ui::PlaneEditDlg()
-	, m_associatedWin(0)
+	, m_pickingWin(0)
 	, m_associatedPlane(0)
+	, m_pickingHub(pickingHub)
 {
+	assert(pickingHub);
+
 	setModal(false);
 	setupUi(this);
 
@@ -60,10 +64,16 @@ ccPlaneEditDlg::ccPlaneEditDlg(QWidget* parent)
 	connect(pickCenterToolButton, SIGNAL(toggled(bool)), this, SLOT(pickPointAsCenter(bool)));
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(deleteLater()));
+	//auto disable picking mode on quit
+	connect(this, &QDialog::finished, [&]()
+	{
+		if (pickCenterToolButton->isChecked()) pickCenterToolButton->setChecked(false); }
+	);
 }
 
 ccPlaneEditDlg::~ccPlaneEditDlg()
 {
+	assert(!pickCenterToolButton->isChecked());
 }
 
 void ccPlaneEditDlg::saveParamsAndAccept()
@@ -93,6 +103,10 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 	{
 		ccPlane* plane = new ccPlane();
 		updatePlane(plane);
+		if (m_pickingWin)
+		{
+			plane->setDisplay(m_pickingWin);
+		}
 		if (MainWindow::TheInstance())
 			MainWindow::TheInstance()->addToDB(plane);
 	}
@@ -104,50 +118,42 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 
 void ccPlaneEditDlg::pickPointAsCenter(bool state)
 {
-	if (!m_associatedWin)
+	if (!m_pickingHub)
 	{
 		return;
 	}
 	if (state)
 	{
-		m_associatedWin->setPickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING);
-		connect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		if (!m_pickingHub->addListener(this, true))
+		{
+			ccLog::Error("Can't start the picking process (another tool is using it)");
+			state = false;
+		}
 	}
 	else
 	{
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-		disconnect(m_associatedWin, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		m_pickingHub->removeListener(this);
 	}
+
+	pickCenterToolButton->blockSignals(true);
+	pickCenterToolButton->setChecked(state);
+	pickCenterToolButton->blockSignals(false);
 }
 
-void ccPlaneEditDlg::processPickedItem(ccHObject* entity, unsigned itemIndex, int x, int y, const CCVector3& P)
+void ccPlaneEditDlg::onItemPicked(const PickedItem& pi)
 {
-	if (!m_associatedWin)
-	{
-		assert(false);
-		return;
-	}
-	
-	if (!entity)
+	if (!pi.entity)
 	{
 		return;
 	}
 
-	cxAxisDoubleSpinBox->setValue(P.x);
-	cyAxisDoubleSpinBox->setValue(P.y);
-	czAxisDoubleSpinBox->setValue(P.z);
+	m_pickingWin = m_pickingHub->activeWindow();
+
+	cxAxisDoubleSpinBox->setValue(pi.P3D.x);
+	cyAxisDoubleSpinBox->setValue(pi.P3D.y);
+	czAxisDoubleSpinBox->setValue(pi.P3D.z);
 
 	pickCenterToolButton->setChecked(false);
-}
-
-void ccPlaneEditDlg::linkWith(ccGLWindow* win)
-{
-	//just in case
-	if (pickCenterToolButton->isChecked())
-	{
-		pickCenterToolButton->setChecked(false);
-	}
-	m_associatedWin = win;
 }
 
 void ccPlaneEditDlg::initWithPlane(ccPlane* plane)

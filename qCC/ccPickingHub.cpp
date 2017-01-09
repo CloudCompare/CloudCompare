@@ -46,6 +46,13 @@ void ccPickingHub::togglePickingMode(bool state)
 
 void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 {
+	ccGLWindow* glWindow = (mdiSubWindow ? GLWindowFromWidget(mdiSubWindow->widget()) : 0);
+	if (m_activeGLWindow == glWindow)
+	{
+		//nothing to do
+		return;
+	}
+
 	if (m_activeGLWindow)
 	{
 		//take care of the previously linked window
@@ -54,11 +61,10 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 		m_activeGLWindow = 0;
 	}
 
-	ccGLWindow* glWindow = (mdiSubWindow ? GLWindowFromWidget(mdiSubWindow->widget()) : 0);
 	if (glWindow)
 	{
 		//link this new window
-		connect(glWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)));
+		connect(glWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&)), this, SLOT(processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&)), Qt::UniqueConnection);
 		connect(glWindow, SIGNAL(destroyed(QObject*)), this, SLOT(onActiveWindowDeleted(QObject*)));
 		m_activeGLWindow = glWindow;
 
@@ -89,7 +95,10 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 		item.P3D = P3D;
 	}
 
-	for (ccPickingListener* l : m_listeners)
+	//copy the list of listeners, in case the user call 'removeListener' in 'onItemPicked'
+	std::set< ccPickingListener* > listeners = m_listeners;
+
+	for (ccPickingListener* l : listeners)
 	{
 		if (l)
 		{
@@ -98,7 +107,10 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 	}
 }
 
-bool ccPickingHub::addListener(ccPickingListener* listener, bool exclusive/*=false*/, bool autoStartPicking/*=true*/)
+bool ccPickingHub::addListener(	ccPickingListener* listener,
+								bool exclusive/*=false*/,
+								bool autoStartPicking/*=true*/,
+								ccGLWindow::PICKING_MODE mode/*=ccGLWindow::POINT_OR_TRIANGLE_PICKING*/)
 {
 	if (!listener)
 	{
@@ -111,13 +123,28 @@ bool ccPickingHub::addListener(ccPickingListener* listener, bool exclusive/*=fal
 	{
 		if (m_exclusive) //a previous listener is exclusive
 		{
-			ccLog::Warning("[ccPickingHub::addListener] Exclusive listener already registered: stop the other tool relying on point picking first");
-			return false;
+			assert(m_listeners.size() == 1);
+			if (m_listeners.find(listener) == m_listeners.end())
+			{
+				ccLog::Warning("[ccPickingHub::addListener] Exclusive listener already registered: stop the other tool relying on point picking first");
+				return false;
+			}
 		}
 		else if (exclusive) //this new listener is exclusive
 		{
-			ccLog::Warning("[ccPickingHub::addListener] New exclusive listener registered, but some listeners are already registered");
-			return false;
+			if (m_listeners.size() > 1 || m_listeners.find(listener) == m_listeners.end())
+			{
+				ccLog::Warning("[ccPickingHub::addListener] Attempt to register an exclusive listener while other listeners are already registered");
+				return false;
+			}
+		}
+		else if (mode != m_pickingMode)
+		{
+			if (m_listeners.size() > 1 || m_listeners.find(listener) == m_listeners.end())
+			{
+				ccLog::Warning("[ccPickingHub::addListener] Other listners are already registered with a different picking mode");
+				return false;
+			}
 		}
 	}
 	
@@ -133,6 +160,7 @@ bool ccPickingHub::addListener(ccPickingListener* listener, bool exclusive/*=fal
 	}
 
 	m_exclusive = exclusive;
+	m_pickingMode = mode;
 
 	if (autoStartPicking)
 	{

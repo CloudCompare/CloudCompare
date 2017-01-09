@@ -20,6 +20,9 @@ v2.9.alpha - XX/XX/XXXX
 			-FWF_O: open a LAS 1.3+ file
 			-FWF_SAVE_CLOUDS: save cloud(s) to LAS 1.3+ file(s) (options are 'ALL_AT_ONCE' and 'COMPRESSED' to save LAZ files instead of LAS)
 
+	* Trace polyline tool
+		- the tool now works on meshes
+
 - Bug fixes:
 
 	* LAS I/O filter: if the points of a LAS file were not saved in increasing GPS time order,

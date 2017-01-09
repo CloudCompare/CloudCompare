@@ -11,6 +11,7 @@ v2.8.1 - 01/XX/2017
 	* A visible 2D label with the 'show 2D label' option disabled could break the picking process
 	* The sphere fitting algorithm was not always finding the optimal sphere
 	* [macOS] Fix the packaging of the qAnimation plugin so it can find the correct libraries
+	* Rasterize tool: scalar fields were vertically mirrored when exported to a geotiff raster
 
 v2.8 - 12/18/2016
 ----------------------

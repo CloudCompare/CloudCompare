@@ -46,7 +46,7 @@ v2.8 - 12/18/2016
 
 	* New plugin: qCSF (Cloth Simulation Filtering) [Windows, macOS]
 		- automatic ground / non-ground classification of aerial LIDAR point clouds
-		- based on the article: "An Easy-to-Use Airborne LIDAR Data Filtering Method Based on Cloth Simulation", Qi Jianbo, Wan Peng, 2015
+		- based on the article: "An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation", W. Zhang, J. Qi, P. Wan, H. Wang, D. Xie, X. Wang, G. Yan. Remote Sensing. 2016; 8(6):501.
 
 	* New plugin: qHoughNormals (Normal Estimation in Unstructured Point Clouds) [Windows, macOS, Linux]
 		- based on "Deep Learning for Robust Normal Estimation in Unstructured Point Clouds" by Alexandre Boulch and Renaud Marlet, Symposium of Geometry Processing 2016, Computer Graphics Forum

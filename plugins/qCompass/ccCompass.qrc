@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qDummyPlugin" >
+    <file>icon.png</file>
+  </qresource>
+</RCC>

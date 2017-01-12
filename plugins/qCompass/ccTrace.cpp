@@ -144,17 +144,21 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	if (!m_cloud) return std::deque<int>(); //error -> no cloud
 
 	//retreive and store start & end rgb
-	const ColorCompType* s = m_cloud->getPointColor(start);
-	const ColorCompType* e = m_cloud->getPointColor(end);
-	m_start_rgb[0] = s[0]; m_start_rgb[1] = s[1]; m_start_rgb[2] = s[2];
-	m_end_rgb[0] = e[0]; m_end_rgb[1] = e[1]; m_end_rgb[2] = e[2];
+	if (m_cloud->hasColors())
+	{
+		const ColorCompType* s = m_cloud->getPointColor(start);
+		const ColorCompType* e = m_cloud->getPointColor(end);
+		m_start_rgb[0] = s[0]; m_start_rgb[1] = s[1]; m_start_rgb[2] = s[2];
+		m_end_rgb[0] = e[0]; m_end_rgb[1] = e[1]; m_end_rgb[2] = e[2];
+	}
+	else
+	{	//no colour... set to 0 just in case something tries to use these vars
+		m_start_rgb[0] = 0; m_start_rgb[1] = 0; m_start_rgb[2] = 0;
+		m_end_rgb[0] = 0; m_end_rgb[1] = 0; m_end_rgb[2] = 0;
+	}
 
-	//calculate distance between start & end nodes - used to optimise algorithm to stop searching paths leading away from the target
-	//const CCVector3* strt_v = cloud->getPoint(start);
+	//get location of target node - used to optimise algorithm to stop searching paths leading away from the target
 	const CCVector3* end_v = m_cloud->getPoint(end);
-	//float dist2 = (strt_v->x - end_v->x)*(strt_v->x - end_v->x) +
-	//			  (strt_v->y - end_v->y)*(strt_v->y - end_v->y) +
-	//			  (strt_v->z - end_v->z)*(strt_v->z - end_v->z) + search_r; //+search_r is a fudge to allow a small inital search away from the start node 
 
 	//code essentialy taken from wikipedia page for Djikstra: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 	std::unordered_map<int, int> closedSet; //visited nodes (key=nodeID, value=prevNodeID)
@@ -275,22 +279,31 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 int ccTrace::getSegmentCost(int p1, int p2, float search_r)
 {
 	int cost=1; //n.b. default value is 1 so that if no cost functions are used, the function doesn't crash (and returns the unweighted shortest path)
-	if (COST_MODE & MODE::RGB)
-		cost += getSegmentCostRGB(p1, p2);
-	if (COST_MODE & MODE::DARK)
-		cost += getSegmentCostDark(p1, p2);
-	if (COST_MODE & MODE::LIGHT)
-		cost += getSegmentCostLight(p1, p2);
+	if (m_cloud->hasColors()) //check cloud has colour data
+	{
+		if (COST_MODE & MODE::RGB)
+			cost += getSegmentCostRGB(p1, p2);
+		if (COST_MODE & MODE::DARK)
+			cost += getSegmentCostDark(p1, p2);
+		if (COST_MODE & MODE::LIGHT)
+			cost += getSegmentCostLight(p1, p2);
+		if (COST_MODE & MODE::GRADIENT)
+			cost += getSegmentCostGrad(p1, p2, search_r);
+	}
+	if (m_cloud->hasDisplayedScalarField()) //check cloud has scalar field data
+	{
+		if (COST_MODE & MODE::SCALAR)
+			cost += getSegmentCostScalar(p1, p2);
+		if (COST_MODE & MODE::INV_SCALAR)
+			cost += getSegmentCostScalarInv(p1, p2);
+	}
+
+	//these cost functions can be used regardless
 	if (COST_MODE & MODE::CURVE)
 		cost += getSegmentCostCurve(p1, p2);
-	if (COST_MODE & MODE::GRADIENT)
-		cost += getSegmentCostGrad(p1, p2, search_r);
 	if (COST_MODE & MODE::DISTANCE)
 		cost += getSegmentCostDist(p1, p2);
-	if (COST_MODE & MODE::SCALAR)
-		cost += getSegmentCostScalar(p1, p2);
-	if (COST_MODE & MODE::INV_SCALAR)
-		cost += getSegmentCostScalarInv(p1, p2);
+
 	return cost;
 }
 

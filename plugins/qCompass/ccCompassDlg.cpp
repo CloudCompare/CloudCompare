@@ -69,7 +69,6 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	p.setColor(backgroundRole(), QColor(240, 240, 240, 200));
 	setPalette(p);
 	setAutoFillBackground(true);
-
 }
 
 int ccCompassDlg::getCostMode()
@@ -92,7 +91,8 @@ int ccCompassDlg::getCostMode()
 	if (m_scalar_inv->isChecked())
 		out = out | ccTrace::MODE::INV_SCALAR;
 
-	if (out == 0) return ccTrace::MODE::DISTANCE; //default to distance if everything has been unchecked
+	if (out == 0) 
+		return ccTrace::MODE::DISTANCE; //default to distance if everything has been unchecked
 
 	return out;
 }

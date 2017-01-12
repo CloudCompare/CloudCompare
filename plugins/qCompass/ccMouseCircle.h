@@ -4,7 +4,6 @@
 /**
 This is a custom 2DViewportLabel which takes up the entire viewport but is entirely transparent,
 except for a circle with radius r around the mouse. 
-
 */
 #include "../ccStdPluginInterface.h"
 #include <ccGLWindow.h>
@@ -28,9 +27,7 @@ public:
 	//get the circle radius in world coordinates
 	float getRadiusWorld();
 
-
 protected:
-
 	//draws a circle of radius r around the mouse
 	void draw(CC_DRAW_CONTEXT& context);
 

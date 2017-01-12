@@ -10,12 +10,11 @@
 
 class ccCompassInfo : public QDialog
 {
-	
+
 public:
 	explicit ccCompassInfo(QWidget *parent = 0) :
 		QDialog(parent)
 	{
-
 		setFixedWidth(800);
 		setFixedHeight(600);
 
@@ -46,13 +45,14 @@ public:
 			"<p>The plane tool is used to measure the orientations of fully exposed planar structures, such as joint or bedding surfaces. "
 			"When it is activated, a red circle is shown in the 3D window. On picking a point in the virtual outcrop model (<i>left-click</i>), "
 			"a plane is fitted to all points sitting within the circle (using least squares), giving an orientation estimate. The circle radius "
-			"can be changed with <i>alt-scroll weel</i>.</p>"
+			"can be changed with <i>alt-scroll weel</i>. Note that for this to work correctly, Cloud Compare needs to be using orthographic projection "
+			"(<i>Display->Toggle Centered Perspective</i>).</p>"
 			"<h2>Trace Tool: Digitise and measure traces and contacts</h2>"
 			"<p>The trace tool allows rapid computer-assisted digitisation of fracture traces and lithological contacts. It uses a least-cost path algorithm "
 			"to 'follow' fracture traces and contacts between user defined start and end points. To use, select the tool and then <i>left click</i> "
 			"the start and end of a fracture you would like to digitise/measure. The tool will then try to find a fracture trace that links these points. "
 			"Generally this works remarkably well, though if the desired result is not achieved, intermediate 'waypoints' can be added (also using <i>left click</i>) "
-			"to modify the trace. To finish a segment click <i>'Accept'</i> (green tick) or the <i>return</i> key.</p>"
+			"to modify the trace. To finish a segment click <i>'Accept'</i> (green tick).</p>"
 			"<p>The results of this tool depend on the cost function used by the least-cost path algorithm. A variety of these have been "
 			"implemented, and can be activated by clicking the <i>algorithm</i> dropdown (calculator icon). Note that cost functions can be used simultaneously. "
 			"The different cost functions that have been implemented are: <ul>"
@@ -72,19 +72,19 @@ public:
 			"quickly digitised as multiple segments). Asking the tool to find long traces may result in system crashes.</p>"
 			"<p>A plane is fitted to each trace (using least squares) when it is finalized (<i>green tick</i>), though note that this plane is rejected if "
 			"points on the trace are approximately co-linear. Furthermore, if the point cloud being interpreted has previously calculated "
-			"point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace.</p>"
-
+			"point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace. "
+			"Plane fitting can be enabled/disabled in the <i>algorithm</i> menu (calculator icon).</p>"
 			"<h2>Lineation Tool: Measure lineations</h2>"
 			"<p>This tool measures the trend and plunge of a (straight) line between two points. <i>Left-click</i> selects points (as above). </p>"
 			"<h2>Exporting data</h2>"
-			"<p> Interpretation generated using this tool is represented internally by CC as planes and polygons, and so can be natively stored in CC's .bin files. "
+			"<p> Interpretation generated using this tool is represented internally by Cloud Compare as planes and polygons, and so can be natively stored in CC's .bin files. "
 			"For ease of use, a <i>save</i> tool has also been included. This tool exports plane and trace data to .csv files, from which data can be easily imported "
 			"into other software packages for further analysis. Polylines created by the <i>Trace</i> and <i>Lineation</i> tools can also be exported as shapefiles through the normal "
 			" <i>Save</i> dialog in Cloud Compare.</p>"
 			"<h2>Further Reading and Citation</h2>"
 			"<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication also contains a more detailed "
 			"description of the methods employed by this plugin.</p>"
-			"<p><i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S. & Cruden, S., 2017,'ccCompass: A computer-assisted approach to structural interpretation of point clouds', Journal TBA </i></p>"
+			"<p><i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S. & Cruden, S., 2017, 'ccCompass: A computer-assisted approach to structural interpretation of point clouds', Journal TBA </i></p>"
 			"<p></p><p></p>"
 			"</body>"
 			"</html>");

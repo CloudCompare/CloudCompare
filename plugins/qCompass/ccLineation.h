@@ -18,25 +18,29 @@ class ccLineation : public ccPolyline
 public:
 	ccLineation(ccPointCloud* associatedCloud)
 		: ccPolyline(associatedCloud)
-	{ /*ctor */ }
+	{ }
 
 	virtual ~ccLineation() {}
 
 	//inherited from ccHObject
 	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
 
+	//get the direction of this lineation (not normalized) 
 	CCVector3 getDirection()
 	{
 		if (size() != 2)
+		{
 			return CCVector3();
-		else
+		} else
 		{
 			const CCVector3 start = *getPoint(0);
 			const CCVector3 end = *getPoint(1);
 			return end - start;
 		}
 	}
+
 	ccColor::Rgba colour = ccColor::green;
+
 protected:
 	float m_relMarkerScale = 5.0;
 
@@ -152,11 +156,6 @@ protected:
 				glFunc->glTranslatef(0, 0, 0.45f);
 				c_headMarker->draw(markerContext);
 				glFunc->glPopMatrix();
-
-				//glFunc->glBegin(GL_LINE_STRIP);
-				//ccGL::Vertex3(glFunc, start.x, start.y, start.z);
-				//ccGL::Vertex3(glFunc, end.x, end.y, end.z);
-				//glFunc->glEnd();
 			}
 		}
 	}

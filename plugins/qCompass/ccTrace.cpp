@@ -565,12 +565,9 @@ float ccTrace::calculateOptimumSearchRadius()
 		//int rn = rand() * rand(); //need to make bigger than rand max...
 		r = (rand()*rand()) % npoints; //random(ish) number between 0 and n
 
-		//trace.push_back(r);
-
 		//find nearest neighbour for point
 		nCloud->clear(false);
 		int n = oct->findPointNeighbourhood(m_cloud->getPoint(r), nCloud, 2, level, d);
-		//trace.push_back(nCloud->getPointGlobalIndex(1));
 
 		if (d != -1) //if a point was found
 		{
@@ -584,6 +581,7 @@ float ccTrace::calculateOptimumSearchRadius()
 	//return a number slightly larger than the average distance
 	return d*1.5;
 }
+
 static QSharedPointer<ccSphere> c_unitPointMarker(0);
 void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 {

@@ -22,7 +22,7 @@ if (INSTALL_QCC_COMPASS_PLUGIN)
 	set(CloudCompare_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../qCC)
 	
 	#include the whole CC directory (easier)
-    include_directories( ${CloudCompare_SOURCE_DIR} )
+	include_directories( ${CloudCompare_SOURCE_DIR} )
 	
 	#we need ccOverlay classes
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccOverlayDialog*.h )

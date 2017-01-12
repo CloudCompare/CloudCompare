@@ -60,13 +60,11 @@ class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingL
 		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass")
 
 public:
-
 	//! Default constructor
 	explicit ccCompass(QObject* parent = 0);
 
 	//deconstructor
 	~ccCompass();
-
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const override { return "Compass"; }
@@ -80,8 +78,7 @@ public:
 
 	virtual void getActions(QActionGroup& group) override;
 
-	protected slots:
-
+protected slots:
 	/*** ADD YOUR CUSTOM ACTIONS' SLOTS HERE ***/
 	void doAction();
 
@@ -111,6 +108,7 @@ public:
 	void recurseNormals(ccHObject* object, bool checked);
 	void changeType();
 	void showHelp();
+
 protected:
 	//used while exporting plane data
 	int writePlanes(ccHObject* object, QTextStream* out, QString parentName="");
@@ -140,7 +138,7 @@ protected:
 	ccMouseCircle* m_mouseCircle;
 
 	//ccCompass toolbar gui
-    ccCompassDlg* m_dlg;
+	ccCompassDlg* m_dlg;
 	
 	enum MODE
 	{

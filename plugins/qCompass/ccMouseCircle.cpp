@@ -4,8 +4,8 @@
 
 ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) : cc2DViewportObject(name.isEmpty() ? "label" : name)
 {
-	this->setVisible(true);
-	this->setEnabled(false);
+	setVisible(true);
+	setEnabled(false);
 
 	//setup unit circle
 	float heading;
@@ -95,8 +95,8 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	glFunc->glColor3ubv(ccColor::red.rgba);
 
 	//get height & width
-	int halfW = context.glW / 2.0f;
-	int halfH = context.glH / 2.0f;
+	int halfW = (int) (context.glW / 2.0f);
+	int halfH = (int) (context.glH / 2.0f);
 	
 	//get mouse position
 	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());

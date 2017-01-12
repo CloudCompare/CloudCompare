@@ -37,7 +37,6 @@ class ccCompassDlg : public ccOverlayDialog, public Ui::compassDlg
 	Q_OBJECT
 
 public:
-
 	//! Default constructor
 	explicit ccCompassDlg(QWidget* parent = 0);
 
@@ -45,12 +44,14 @@ public:
 	Returns a flag describing the currently selected ccTrace::COST_MODE (used to build the cost function for optimisation)
 	*/
 	int getCostMode();
-
+	/*
+	Returns true if the m_plane_fit action is checked -> used to check if the user expects us to fit a plane to finished traces.
+	*/
 	bool planeFitMode();
 
 	QMenu *m_cost_algorithm_menu;
 
-//private:
+private:
 	QAction *m_dark;
 	QAction *m_light;
 	QAction *m_rgb;

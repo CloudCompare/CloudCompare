@@ -339,12 +339,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				pPlane->prepareDisplayForRefresh_recursive(); //not sure what this does, but it looks like fun
 				//add plane to TOC
 				m_app->addToDB(pPlane, false, false, false, false);
-				//write answer
-				m_app->dispToConsole(QString("[ccCompass] Sampled %d points in radius %f. Fitted plane %s").arg(QString(n), QString("%.3f").arg(r), QString::fromStdString(dipAndDipDirStr.toStdString())), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-			} else
-			{
-				m_app->dispToConsole(QString("[ccCompass] Sampled %d points in radius %.3f. Could not fit a plane.").arg(n, r), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-			}
+			} 
 		} else if (m_pickingMode == MODE::TRACE_MODE) //TRACE PICKING MODE
 		{
 			if (m_trace)
@@ -368,7 +363,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				m_trace_id = m_trace->getUniqueID();
 				category_group->addChild(m_trace);
 				m_app->addToDB(m_trace, false, false, false, false);
-				m_app->dispToConsole(QString("[ccCompass] Added trace waypoint."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				//m_app->dispToConsole(QString("[ccCompass] Added trace waypoint."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 			}
 
 			//update cost function
@@ -376,15 +371,13 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 
 			//add point
 			int index = m_trace->insertWaypoint(itemIdx);
-			m_app->dispToConsole(QString("[ccCompass] Added point to active trace."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+			//m_app->dispToConsole(QString("[ccCompass] Added point to active trace."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 			//optimise points
 			if (m_trace->waypoint_count() >= 2) {
-				m_app->dispToConsole(QString("[ccCompass] Optimising path..."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-				if (m_trace->optimizePath(100000000))
-					m_app->dispToConsole(QString("[ccCompass] Success :)"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-				else
-					m_app->dispToConsole(QString("[ccCompass] Fail :("), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				//m_app->dispToConsole(QString("[ccCompass] Optimising path..."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				if (!m_trace->optimizePath())
+					m_app->dispToConsole(QString("[ccCompass] Failed to optimize trace path... please try again."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 			}
 		}
 		else if (m_pickingMode == MODE::LINEATION_MODE)
@@ -399,7 +392,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				m_lineation->prepareDisplayForRefresh_recursive();
 				category_group->addChild(m_lineation);
 				m_app->addToDB(m_lineation, false, false, false, false);
-				m_app->dispToConsole(QString("[ccCompass] Measuring new lineation."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				//m_app->dispToConsole(QString("[ccCompass] Measuring new lineation."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 			}
 
 			//add point

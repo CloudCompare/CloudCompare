@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QBoxLayout>
-#include <QTextedit>
+#include <QTextEdit>
 #include <QFile>
 #include <QTextStream>
 

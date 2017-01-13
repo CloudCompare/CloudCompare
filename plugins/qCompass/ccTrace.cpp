@@ -64,6 +64,7 @@ int ccTrace::insertWaypoint(int pointId)
 		if (sp.norm2() < ep.norm2())
 		{
 			m_waypoints.insert(m_waypoints.begin(), pointId);
+			m_previous = 0;
 			return 0;
 		}
 	}

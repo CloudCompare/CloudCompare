@@ -71,8 +71,8 @@ int ccTrace::insertWaypoint(int pointId)
 
 	//add point to end of the trace
 	m_waypoints.push_back(pointId);
-	m_previous = m_waypoints.size() - 1;
-	return m_waypoints.size() - 1;
+	m_previous = static_cast<int>(m_waypoints.size()) - 1;
+	return m_previous;
 }
 
 //test if the query point is within a circle bound by segStart & segEnd
@@ -151,7 +151,10 @@ int ccTrace::COST_MODE = ccTrace::MODE::DARK; //set default cost mode
 std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int maxIterations, int offset)
 {
 	//check handle to point cloud
-	if (!m_cloud) return std::deque<int>(); //error -> no cloud
+	if (!m_cloud)
+	{
+		return std::deque<int>(); //error -> no cloud
+	}
 
 	//retreive and store start & end rgb
 	if (m_cloud->hasColors())
@@ -234,23 +237,23 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 
 		//calculate distance from current nodes parent to end -> avoid going backwards (in euclidean space) [essentially stops fracture turning > 90 degrees)
 		const CCVector3* cur = m_cloud->getPoint(closedSet[current]);
-		cur_d2 = (cur->x - end_v->x)*(cur->x - end_v->x) +
-			(cur->y - end_v->y)*(cur->y - end_v->y) +
-			(cur->z - end_v->z)*(cur->z - end_v->z);
+		cur_d2 =	(cur->x - end_v->x)*(cur->x - end_v->x) +
+					(cur->y - end_v->y)*(cur->y - end_v->y) +
+					(cur->z - end_v->z)*(cur->z - end_v->z);
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
 		int n = oct->getPointsInSphericalNeighbourhood(*m_cloud->getPoint(current), PointCoordinateType(search_r), m_neighbours, level);
 
 		//loop through neighbours
-		for (int i = 0; i < m_neighbours.size(); i++) //N.B. i = [pointID,cost]
+		for (size_t i = 0; i < m_neighbours.size(); i++) //N.B. i = [pointID,cost]
 		{
 			m_p = m_neighbours[i];
 
 			//calculate (squared) distance from this neighbour to the end
-			next_d2 = (m_p.point->x - end_v->x)*(m_p.point->x - end_v->x) +
-				(m_p.point->y - end_v->y)*(m_p.point->y - end_v->y) +
-				(m_p.point->z - end_v->z)*(m_p.point->z - end_v->z);
+			next_d2 =	(m_p.point->x - end_v->x)*(m_p.point->x - end_v->x) +
+						(m_p.point->y - end_v->y)*(m_p.point->y - end_v->y) +
+						(m_p.point->z - end_v->z)*(m_p.point->z - end_v->z);
 
 			if (next_d2 >= cur_d2) //Bigger than the original distance? If so then bail.
 				continue;
@@ -287,6 +290,9 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 			}
 		}
 	}
+
+	assert(false);
+	return std::deque<int>(); //shouldn't come here?
 }
 
 int ccTrace::getSegmentCost(int p1, int p2, float search_r)
@@ -380,7 +386,7 @@ int ccTrace::getSegmentCostCurve(int p1, int p2)
 		m_neighbours.push_back(m_p); //add center point onto end of neighbourhood
 
 		//compute curvature
-		CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, m_neighbours.size());
+		CCLib::DgmOctreeReferenceCloud nCloud(&m_neighbours, static_cast<unsigned>(m_neighbours.size()));
 		CCLib::Neighbourhood Z(&nCloud);
 		float c = Z.computeCurvature(0, CCLib::Neighbourhood::CC_CURVATURE_TYPE::MEAN_CURV);
 		
@@ -531,13 +537,13 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	{
 		//calculate average normal of points on trace
 		CCVector3 n_avg;
-		for (int i = 0; i < size(); i++)
+		for (unsigned i = 0; i < size(); i++)
 		{
 			//get normal vector
 			CCVector3 n = ccNormalVectors::GetNormal(m_cloud->getPointNormalIndex(this->getPointGlobalIndex(i)));
 			n_avg += n;
 		}
-		n_avg *= (1.0f / size()); //turn sum into average
+		n_avg *= (PC_ONE / size()); //turn sum into average
 
 
 		//compare to plane normal

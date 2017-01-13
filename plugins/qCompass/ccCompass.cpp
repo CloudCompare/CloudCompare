@@ -255,7 +255,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		//SETUP DATA STRUCTURE/FIND RELEVANT NODE TO ADD DATA TO
 		//add measurements group if necessary
 		ccHObject* measurement_group = nullptr;
-		for (int i = 0; i < cloud->getChildrenNumber(); i++) //check if a "measurements" group exists
+		for (unsigned i = 0; i < cloud->getChildrenNumber(); i++) //check if a "measurements" group exists
 		{
 			if (cloud->getChild(i)->getName() == "measurements")
 			{
@@ -271,7 +271,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		}
 		//add category group if necessary
 		ccHObject* category_group = nullptr;
-		for (int i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
+		for (unsigned i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
 		{
 			if (measurement_group->getChild(i)->getName() == m_category)
 			{
@@ -568,7 +568,7 @@ void ccCompass::onSave()
 		stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
 
 		//write data (n.b. we use a loop here rather than calling writePlanes(...) on dbRoot to avoid including dbRoot in the object name
-		for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 		{
 			ccHObject* o = m_app->dbRootObject()->getChild(i);
 			planes += writePlanes(o, &stream);
@@ -598,7 +598,7 @@ void ccCompass::onSave()
 		stream << "name,trace_id,point_id,start_x,start_y,start_z,end_x,end_y,end_z" << endl;
 
 		//write data
-		for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 		{
 			ccHObject* o = m_app->dbRootObject()->getChild(i);
 			traces += writeTraces(o, &stream);
@@ -627,7 +627,7 @@ void ccCompass::onSave()
 		stream << "name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge" << endl;
 
 		//write data
-		for (int i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
+		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 		{
 			ccHObject* o = m_app->dbRootObject()->getChild(i);
 			lineations += writeLineations(o, &stream);
@@ -675,7 +675,7 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 	}
 
 	//write all children
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
 		n += writePlanes(o, out, name);
@@ -708,7 +708,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 		CCVector3 start, end;
 		int tID = object->getUniqueID();
 		if (p->size() >= 2)
-			for (int i = 1; i < p->size(); i++)
+			for (unsigned i = 1; i < p->size(); i++)
 			{
 				p->getPoint(i - 1, start);
 				p->getPoint(i, end);
@@ -728,7 +728,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 	}
 
 	//write all children
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
 		n += writeTraces(o, out, name);
@@ -763,10 +763,10 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 	}
 
 	//write all children
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
-		n+=writeLineations(o, out, name);
+		n += writeLineations(o, out, name);
 	}
 	return n;
 }
@@ -895,7 +895,7 @@ void ccCompass::recurseStipple(ccHObject* object,bool checked)
 	}
 
 	//recurse
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
 		recurseStipple(o, checked);
@@ -919,7 +919,7 @@ void ccCompass::recurseLabels(ccHObject* object, bool checked)
 	}
 
 	//recurse
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
 		recurseLabels(o, checked);
@@ -944,7 +944,7 @@ void ccCompass::recurseNormals(ccHObject* object, bool checked)
 	}
 
 	//recurse
-	for (int i = 0; i < object->getChildrenNumber(); i++)
+	for (unsigned i = 0; i < object->getChildrenNumber(); i++)
 	{
 		ccHObject* o = object->getChild(i);
 		recurseNormals(o, checked);

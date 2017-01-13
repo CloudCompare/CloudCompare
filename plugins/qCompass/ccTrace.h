@@ -79,7 +79,7 @@ public:
 		}
 	}
 
-	int waypoint_count() { return m_waypoints.size(); }
+	size_t waypoint_count() const { return m_waypoints.size(); }
 
 	/*
 	Calculates the most "structure-like" path between each waypoint using the A* least cost path algorithm. Can be expensive...

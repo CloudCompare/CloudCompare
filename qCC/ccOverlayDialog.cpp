@@ -68,7 +68,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 			}
 		}
 		m_associatedWin->disconnect(this);
-		m_associatedWin = 0;
+		m_associatedWin = nullptr;
 	}
 
 	m_associatedWin = win;

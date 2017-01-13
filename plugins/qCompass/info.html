@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>About ccCompass</h1>
+
+<p>ccCompass is a structural geology toolbox for the interpretation and analysis of virtual outcrop models. It can be used 
+to digitise and measure both exposed surfaces and intersection traces of fractures, bedding, cleavages or other foliations and lineations. 
+The plugin comprises three tools, one for measuring surfaces, one for traces and one for lineations. These roughly correspond to the functionality 
+of a good field geologist (armed with a trusty compass and notebook), but require less beer and sunscreen. They are described in detail below.</p>
+
+<h2>Plane Tool: Measure surface orientations</h2>
+<p>The plane tool is used to measure the orientations of fully exposed planar structures, such as joint or bedding surfaces. 
+When it is activated, a red circle is shown in the 3D window. On picking a point in the virtual outcrop model (<i>left-click</i>), 
+a plane is fitted to all points sitting within the circle (using least squares), giving an orientation estimate. The circle radius 
+can be changed with <i>alt-scroll weel</i>. Note that for this to work correctly, Cloud Compare needs to be using orthographic projection 
+(<i>Display->Toggle Centered Perspective</i>).</p>
+
+<h2>Trace Tool: Digitise and measure traces and contacts</h2>
+<p>The trace tool allows rapid computer-assisted digitisation of fracture traces and lithological contacts. It uses a least-cost path algorithm 
+to 'follow' fracture traces and contacts between user defined start and end points. To use, select the tool and then <i>left click</i> 
+the start and end of a fracture you would like to digitise/measure. The tool will then try to find a fracture trace that links these points. 
+Generally this works remarkably well, though if the desired result is not achieved, intermediate 'waypoints' can be added (also using <i>left click</i>) 
+to modify the trace. To finish a segment click <i>'Accept'</i> (green tick).</p>
+
+<p>The results of this tool depend on the cost function used by the least-cost path algorithm. A variety of these have been 
+implemented, and can be activated by clicking the <i>algorithm</i> dropdown (calculator icon). Note that cost functions can be used simultaneously. 
+The different cost functions that have been implemented are: <ul>
+<li>Darkness [default] - traces follow dark points in the cloud. This is good for fracture traces defined by shadow.</li>
+<li>Lightness - traces follow light points in the cloud. This is good for light-coloured structures such as veins.</li>
+<li>RGB - traces avoid colour contrasts, following points with a similar colour to the start and end points.</li>
+<li>Curvature - traces follow points on ridges and valleys. This can be good for fracture traces with high relief but can be slow and sensitive to noise. 
+For better performance, use the <i>Curvature</i> and <i>Gaussian Filter</i> tools to create a scalar field which highlights areas of high curvature, then use 
+the <i>Inverse Scalar Field</i> cost function.</li>
+<li>Gradient - traces follow colour boundaries such as lithological contacts. Note that this can be slow and is very sensitive to noise. 
+For better performance, use the <i>Gradient</i> tool and <i>Inverse Scalar Field</i> cost function as described above.</li>
+<li>Distance - traces take the shortest path. I'm not sure what this is good for.</li>
+<li>Scalar Field - traces follow low values in the active (displayed) scalar field. Use this to implement custom cost functions. </li>
+<li>Inverse Scalar Field - traces follow high values in the active (displayed) scalar field. Use this to implement custom cost functions. </li>
+</ul></p>
+
+<p>When using this tool it is important to note that its <b>performance (i.e. speed) scales with trace length</b>. 
+Hence, it can be used with large point clouds if trace lengths are kept small (though long traces can be 
+quickly digitised as multiple segments). Asking the tool to find long traces may result in system crashes.</p>
+
+<p>A plane is fitted to each trace (using least squares) when it is finalized (<i>green tick</i>), though note that this plane is rejected if 
+points on the trace are approximately co-linear. Furthermore, if the point cloud being interpreted has previously calculated 
+point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace. 
+Plane fitting can be enabled/disabled in the <i>algorithm</i> menu (calculator icon).</p>
+
+<h2>Lineation Tool: Measure lineations</h2>
+<p>This tool measures the trend and plunge of a (straight) line between two points. <i>Left-click</i> selects points (as above). </p>
+
+<h2>Exporting data</h2>
+<p> Interpretation generated using this tool is represented internally by Cloud Compare as planes and polygons, and so can be natively stored in CC's .bin files. 
+For ease of use, a <i>save</i> tool has also been included. This tool exports plane and trace data to .csv files, from which data can be easily imported 
+into other software packages for further analysis. Polylines created by the <i>Trace</i> and <i>Lineation</i> tools can also be exported as shapefiles through the normal 
+
+<h2>Further Reading and Citation</h2>
+<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication also contains a more detailed 
+description of the methods employed by this plugin.</p>
+<p>
+<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S. &amp; Cruden, S., 2017, 'ccCompass: A computer-assisted approach to structural interpretation of point clouds', Journal TBA </i>
+</p>
+<p></p><p></p>
+</body>
+</html>

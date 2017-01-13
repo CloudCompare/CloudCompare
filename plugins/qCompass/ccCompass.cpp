@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: ccCompass                   #
+//#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,35 +11,20 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                             COPYRIGHT: XXX                             #
+//#                     COPYRIGHT: Sam Thiele  2017                        #
 //#                                                                        #
 //##########################################################################
 
 #include "ccCompass.h"
 
-
 //Qt
 #include <QtGui>
+#include <QFileInfo>
 
 ccCompass::ccCompass(QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_action(0)
 {
-	//bind GUI events
-	m_dlg = new ccCompassDlg();
-
-	ccCompassDlg::connect(m_dlg->closeButton, SIGNAL(clicked()), this, SLOT(onClose()));
-	ccCompassDlg::connect(m_dlg->acceptButton, SIGNAL(clicked()), this, SLOT(onAccept()));
-	ccCompassDlg::connect(m_dlg->saveButton, SIGNAL(clicked()), this, SLOT(onSave()));
-	ccCompassDlg::connect(m_dlg->undoButton, SIGNAL(clicked()), this, SLOT(onUndo()));
-	ccCompassDlg::connect(m_dlg->lineationModeButton, SIGNAL(clicked()), this, SLOT(setLineationMode()));
-	ccCompassDlg::connect(m_dlg->planeModeButton, SIGNAL(clicked()), this, SLOT(setPlaneMode()));
-	ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTraceMode()));
-	ccCompassDlg::connect(m_dlg->showNameToggle, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
-	ccCompassDlg::connect(m_dlg->showStippledToggle, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
-	ccCompassDlg::connect(m_dlg->showNormalsToggle, SIGNAL(toggled(bool)), this, SLOT(toggleNormals(bool)));
-	ccCompassDlg::connect(m_dlg->categoryBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(changeType()));
-	ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 }
 
 //deconstructor
@@ -47,9 +32,11 @@ ccCompass::~ccCompass()
 {
 	if (m_mouseCircle)
 	{
+		assert(false);
+		m_mouseCircle->ownerIsDead();
 		delete m_mouseCircle;
+		m_mouseCircle = nullptr;
 	}
-	m_mouseCircle = nullptr;
 }
 
 //Generally we ignore new selections... except when trace mode is activated, when the selected object is set as the active trace (if it is a trace)
@@ -57,7 +44,7 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_pickingMode == MODE::TRACE_MODE)
 	{
-		for (int i = 0; i < selectedEntities.size(); i++)
+		for (size_t i = 0; i < selectedEntities.size(); i++)
 		{
 			if (isTrace(selectedEntities[i]))
 			{
@@ -127,6 +114,24 @@ void ccCompass::doAction()
 	}
 
 	//bind gui
+	if (!m_dlg)
+	{
+		//bind GUI events
+		m_dlg = new ccCompassDlg(m_app->getMainWindow());
+
+		ccCompassDlg::connect(m_dlg->closeButton, SIGNAL(clicked()), this, SLOT(onClose()));
+		ccCompassDlg::connect(m_dlg->acceptButton, SIGNAL(clicked()), this, SLOT(onAccept()));
+		ccCompassDlg::connect(m_dlg->saveButton, SIGNAL(clicked()), this, SLOT(onSave()));
+		ccCompassDlg::connect(m_dlg->undoButton, SIGNAL(clicked()), this, SLOT(onUndo()));
+		ccCompassDlg::connect(m_dlg->lineationModeButton, SIGNAL(clicked()), this, SLOT(setLineationMode()));
+		ccCompassDlg::connect(m_dlg->planeModeButton, SIGNAL(clicked()), this, SLOT(setPlaneMode()));
+		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTraceMode()));
+		ccCompassDlg::connect(m_dlg->showNameToggle, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
+		ccCompassDlg::connect(m_dlg->showStippledToggle, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
+		ccCompassDlg::connect(m_dlg->showNormalsToggle, SIGNAL(toggled(bool)), this, SLOT(toggleNormals(bool)));
+		ccCompassDlg::connect(m_dlg->categoryBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(changeType()));
+		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
+	}
 	m_dlg->linkWith(m_window);
 
 	//begin measuring
@@ -144,14 +149,25 @@ bool ccCompass::startMeasuring()
 		return false;
 	}
 
-	//setup mouse circle
-	m_mouseCircle = new ccMouseCircle(m_window);
-	m_window->addToOwnDB(m_mouseCircle, true);
+	//activate "point picking mode"
+	if (!m_app->pickingHub())  //no valid picking hub
+	{
+		m_app->dispToConsole("[ccCompass] Could not retrieve valid picking hub. Measurement aborted.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return false;
+	}
 
-	//start GUI
-	m_dlg->setParent(m_app->getMainWindow()->parentWidget());
-	m_dlg->start();
-	m_app->registerOverlayDialog(m_dlg, Qt::TopRightCorner);
+	if (!m_app->pickingHub()->addListener(this, true, true))
+	{
+		m_app->dispToConsole("Another tool is already using the picking mechanism. Stop it first", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return false;
+	}
+
+	//setup mouse circle
+	if (m_mouseCircle)
+	{
+		delete m_mouseCircle;
+	}
+	m_mouseCircle = new ccMouseCircle(m_window);
 
 	//mode specific GUI setup
 	switch (m_pickingMode)
@@ -181,42 +197,56 @@ bool ccCompass::startMeasuring()
 	//setup listener for mouse events
 	m_window->installEventFilter(this);
 
-	//activate "point picking mode"
-	m_pickingHub = m_app->pickingHub();
-	if (!m_pickingHub)  //no valid picking hub
-	{
-		m_app->dispToConsole("[ccCompass] Could not retrieve valid picking hub. Measurement aborted.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return false;
-	}
-
-	m_pickingHub->addListener(this, true, true);
-
 	//refresh and return
 	m_window->redraw(true, false);
+
+	//start GUI
+	//m_dlg->setParent(m_app->getMainWindow()->parentWidget());
+	m_app->registerOverlayDialog(m_dlg, Qt::TopRightCorner);
+	m_dlg->start();
+
+	//safety: auto stop if the window is deleted
+	connect(m_window, &QObject::destroyed, [&]() { m_window = 0; if (m_mouseCircle) m_mouseCircle->ownerIsDead(); stopMeasuring(); });
+
 	return true;
 }
 
 //Exits measuring
 bool ccCompass::stopMeasuring()
 {
-	//stop picking
-	if (m_pickingHub)
-		m_pickingHub->removeListener(this);
-
 	//remove click listener
-	m_window->removeEventFilter(this);
+	if (m_window)
+	{
+		m_window->removeEventFilter(this);
+	}
+
+	if (m_mouseCircle)
+	{
+		delete m_mouseCircle;
+		m_mouseCircle = nullptr;
+	}
+
+	//stop picking
+	if (m_app->pickingHub())
+	{
+		m_app->pickingHub()->removeListener(this);
+	}
 
 	//remove overlay GUI
-	delete ccCompass::m_mouseCircle;
-	m_mouseCircle = nullptr;
-
-	m_dlg->stop(true);
-	m_app->unregisterOverlayDialog(m_dlg);
+	if (m_dlg)
+	{
+		m_dlg->stop(true);
+		m_app->unregisterOverlayDialog(m_dlg);
+	}
 
 	//forget last measurement
 	if (m_trace)
 	{
-		m_app->removeFromDB(m_trace); //delete trace object
+		if (m_app->dbRootObject()->find(m_trace_id))
+		{
+			m_app->removeFromDB(m_trace); //delete trace object
+		}
+		m_trace = nullptr;
 	}
 	if (m_lineation)
 	{
@@ -224,14 +254,22 @@ bool ccCompass::stopMeasuring()
 		{
 			m_app->removeFromDB(m_lineation); //remove incomplete lineation
 		}
+		m_lineation = nullptr;
 	}
-	m_trace = nullptr;
-	m_lineation = nullptr;
 
 	//redraw
-	m_window->redraw(true, false);
+	if (m_window)
+	{
+		m_window->redraw(true, false);
+	}
 
 	return true;
+}
+
+//This function is called when a point is picked (through the picking hub)
+void ccCompass::onItemPicked(const ccPickingListener::PickedItem& pi)
+{
+	pointPicked(pi.entity, pi.itemIndex, pi.clickPoint.x(), pi.clickPoint.y(), pi.P3D); //map straight to pointPicked function
 }
 
 //Process point picks
@@ -349,14 +387,11 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			} 
 		} else if (m_pickingMode == MODE::TRACE_MODE) //TRACE PICKING MODE
 		{
-			if (m_trace)
+			//check that m_trace hasn't been deleted...
+			if (m_trace && !m_app->dbRootObject()->find(m_trace_id))
 			{
-				//check that m_trace hasn't been deleted...
-				if (!m_app->dbRootObject()->find(m_trace_id))
-				{
-					//item has been deleted...
-					m_trace = nullptr;
-				}
+				//item has been deleted...
+				m_trace = nullptr;
 			}
 
 			if (!m_trace)
@@ -381,7 +416,8 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			//m_app->dispToConsole(QString("[ccCompass] Added point to active trace."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 			//optimise points
-			if (m_trace->waypoint_count() >= 2) {
+			if (m_trace->waypoint_count() >= 2)
+			{
 				//m_app->dispToConsole(QString("[ccCompass] Optimising path..."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 				if (!m_trace->optimizePath())
 					m_app->dispToConsole(QString("[ccCompass] Failed to optimize trace path... please try again."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -464,19 +500,14 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		m_window->redraw();
 	}
 }
-//This function is called when a point is picked (through the picking hub)
-void ccCompass::onItemPicked(const ccPickingListener::PickedItem& pi)
-{
-	pointPicked(pi.entity, pi.itemIndex, pi.clickPoint.x(), pi.clickPoint.y(), pi.P3D); //map straight to pointPicked function
-}
 
 bool ccCompass::eventFilter(QObject* obj, QEvent* event)
 {
-	m_dlg->raise(); //keep gui on top - otherwise it gets hidden when the user clicks on the 3D-window (even though it's added to the MDI form?). [This is a bit of a hack...]
+	//m_dlg->raise(); //keep gui on top - otherwise it gets hidden when the user clicks on the 3D-window (even though it's added to the MDI form?). [This is a bit of a hack...]
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent *>(event);
-				if (mouseEvent->buttons() == Qt::RightButton)
+		if (mouseEvent->buttons() == Qt::RightButton)
 		{
 			stopMeasuring();
 			return true;
@@ -505,15 +536,12 @@ void ccCompass::onAccept()
 	//finish current trace
 	if (m_trace)
 	{
-		if (m_trace)
+		//check that m_trace hasn't been deleted...
+		if (!m_app->dbRootObject()->find(m_trace_id))
 		{
-			//check that m_trace hasn't been deleted...
-			if (!m_app->dbRootObject()->find(m_trace_id))
-			{
-				//item has been deleted...
-				m_trace = nullptr;
-				return;
-			}
+			//item has been deleted...
+			m_trace = nullptr;
+			return;
 		}
 
 		m_trace->finalizePath();
@@ -549,18 +577,30 @@ void ccCompass::onSave()
 {
 	//get output file path
 	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt)"));
+	if (filename.isEmpty())
+	{
+		//process cancelled by the user
+		return;
+	}
 	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
 	int traces = 0;
 	int lineations = 0;
 
 	//build filenames
-	QString plane_fn = filename, trace_fn = filename, lineation_fn = filename;
-	plane_fn.insert(plane_fn.lastIndexOf("\."), "_planes");
-	trace_fn.insert(trace_fn.lastIndexOf("\."), "_traces");
-	lineation_fn.insert(lineation_fn.lastIndexOf("\."), "_lineations");
+	QFileInfo fi(filename);
+	QString baseName = fi.absolutePath() + "/" + fi.completeBaseName();
+	QString ext = fi.suffix();
+	if (!ext.isEmpty())
+	{
+		ext.prepend('.');
+	}
+	QString plane_fn = baseName + "_planes" + ext;
+	QString trace_fn = baseName + "_traces" + ext;
+	QString lineation_fn = baseName + "_lineations" + ext;
 
 	QFile file(plane_fn);
-	if (file.open(QIODevice::WriteOnly)) {
+	if (file.open(QIODevice::WriteOnly))
+	{
 		//create text stream
 		QTextStream stream(&file);
 
@@ -578,19 +618,25 @@ void ccCompass::onSave()
 		stream.flush();
 		file.close();
 
-		m_app->dispToConsole("[ccCompass] Successfully exported plane data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		if (planes)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported plane data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			//delete if nothing written
+			file.remove();
+		}
 	}
 	else
 	{
 		m_app->dispToConsole("[ccCompass] Could not write plane data...", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 	}
 
-	if (planes == 0) //delete if nothing written
-		file.remove();
-
 	//write trace data
 	QFile t_file(trace_fn);
-	if (t_file.open(QIODevice::WriteOnly)) {
+	if (t_file.open(QIODevice::WriteOnly))
+	{
 		//create text stream
 		QTextStream stream(&t_file);
 
@@ -608,18 +654,25 @@ void ccCompass::onSave()
 		stream.flush();
 		t_file.close();
 
-		m_app->dispToConsole("[ccCompass] Successfully exported trace data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-	} else
+		if (traces)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported trace data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			//delete if nothing written
+			t_file.remove();
+		}
+	}
+	else
 	{
 		m_app->dispToConsole("[ccCompass] Could not write trace data...", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 	}
 
-	if (traces == 0) //delete if nothing written
-		t_file.remove();
-
 	//write lineation data
 	QFile l_file(lineation_fn);
-	if (l_file.open(QIODevice::WriteOnly)) {
+	if (l_file.open(QIODevice::WriteOnly))
+	{
 		//create text stream
 		QTextStream stream(&l_file);
 
@@ -637,15 +690,20 @@ void ccCompass::onSave()
 		stream.flush();
 		l_file.close();
 
-		m_app->dispToConsole("[ccCompass] Successfully exported lineation data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		if (lineations)
+		{
+			m_app->dispToConsole("[ccCompass] Successfully exported lineation data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			//delete if nothing written
+			l_file.remove();
+		}
 	}
 	else
 	{
 		m_app->dispToConsole("[ccCompass] Could not write lineation data...", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 	}
-
-	if (lineations == 0) //delete if nothing written
-		l_file.remove();
 }
 
 //write plane data
@@ -653,12 +711,13 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 {
 	//get object name
 	QString name;
-	if (parentName.isEmpty()) {
+	if (parentName.isEmpty())
+	{
 		name = QString("%1").arg(object->getName());
 	}
 	else
 	{
-		name = QString("%1.%2").arg(parentName,object->getName());
+		name = QString("%1.%2").arg(parentName, object->getName());
 	}
 
 	//is object a plane made by ccCompass?
@@ -689,7 +748,8 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 {
 	//get object name
 	QString name;
-	if (parentName.isEmpty()) {
+	if (parentName.isEmpty())
+	{
 		name = QString("%1").arg(object->getName());
 	}
 	else
@@ -708,6 +768,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 		CCVector3 start, end;
 		int tID = object->getUniqueID();
 		if (p->size() >= 2)
+		{
 			for (unsigned i = 1; i < p->size(); i++)
 			{
 				p->getPoint(i - 1, start);
@@ -724,6 +785,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 				*out << end.y << ",";
 				*out << end.z << endl;
 			}
+		}
 		n++;
 	}
 
@@ -742,7 +804,8 @@ int ccCompass::writeLineations(ccHObject* object, QTextStream* out, QString pare
 {
 	//get object name
 	QString name;
-	if (parentName.isEmpty()) {
+	if (parentName.isEmpty())
+	{
 		name = QString("%1").arg(object->getName());
 	}
 	else
@@ -780,43 +843,53 @@ bool ccCompass::madeByMe(ccHObject* object)
 //returns true if object is a fitPlane
 bool ccCompass::isFitPlane(ccHObject* object)
 {
-	if (!object->isKindOf(CC_TYPES::PLANE)) //ensure object is a plane
-		return false;
-	else									//ensure plane has the correct metadata
-		return object->hasMetaData("Cx") && object->hasMetaData("Cy") && object->hasMetaData("Cz") &&
-			object->hasMetaData("Nx") && object->hasMetaData("Ny") && object->hasMetaData("Nz") &&
-			object->hasMetaData("Strike") && object->hasMetaData("Dip") &&
-			object->hasMetaData("RMS") && object->hasMetaData("Radius");
+	return object->isKindOf(CC_TYPES::PLANE) //ensure object is a plane
+		&& object->hasMetaData("Cx") //ensure plane has the correct metadata
+		&& object->hasMetaData("Cy")
+		&& object->hasMetaData("Cz")
+		&& object->hasMetaData("Nx")
+		&& object->hasMetaData("Ny")
+		&& object->hasMetaData("Nz")
+		&& object->hasMetaData("Strike")
+		&& object->hasMetaData("Dip")
+		&& object->hasMetaData("RMS")
+		&& object->hasMetaData("Radius");
 }
 
 //returns true if object is a lineation
 bool ccCompass::isLineation(ccHObject* object)
 {
-	if (!object->isKindOf(CC_TYPES::POLY_LINE)) //lineations are polylines
-		return false;
-	else										//ensure polyline has correct metadata for lineation
-		return object->hasMetaData("Sx") && object->hasMetaData("Sy") && object->hasMetaData("Sz") &&
-		object->hasMetaData("Ex") && object->hasMetaData("Ey") && object->hasMetaData("Ez") &&
-		object->hasMetaData("Trend") && object->hasMetaData("Plunge");
+	return object->isKindOf(CC_TYPES::POLY_LINE) //lineations are polylines
+		&& object->hasMetaData("Sx") //ensure polyline has correct metadata for lineation
+		&& object->hasMetaData("Sy")
+		&& object->hasMetaData("Sz")
+		&& object->hasMetaData("Ex")
+		&& object->hasMetaData("Ey")
+		&& object->hasMetaData("Ez")
+		&& object->hasMetaData("Trend")
+		&& object->hasMetaData("Plunge");
 }
 
 //returns true if object is a trace
 bool ccCompass::isTrace(ccHObject* object)
 {
-	if (!object->isKindOf(CC_TYPES::POLY_LINE)) //lineations are polylines
-		return false;
-	else										//ensure polyline has correct metadata for trace
-		return object->hasMetaData("search_r") && object->hasMetaData("cost_function");
+	return object->isKindOf(CC_TYPES::POLY_LINE) //traces are polylines
+		&& object->hasMetaData("search_r") //ensure polyline has correct metadata for trace
+		&& object->hasMetaData("cost_function");
 }
 
 //undo last plane
 void ccCompass::onUndo()
 {
-	if (m_pickingMode == MODE::TRACE_MODE)
-		if (m_trace) {
-			m_trace->undoLast();
-			m_trace->optimizePath();
+	if (m_trace && m_pickingMode == MODE::TRACE_MODE)
+	{
+		if (!m_app->dbRootObject()->find(m_trace_id))
+		{
+			m_trace = 0;
 		}
+		m_trace->undoLast();
+		m_trace->optimizePath();
+	}
 	m_window->redraw();
 }
 
@@ -826,14 +899,14 @@ void ccCompass::cleanupBeforeToolChange()
 	if (m_trace) //cleanup after trace mode
 	{
 		onAccept(); //finish last trace
+		m_trace = nullptr;
 	}
 	if (m_lineation) //cleanup after lineation mode
 	{
 		if (m_app->dbRootObject()->find(m_lineation_id) != nullptr && m_lineation->size() < 2) //not a complete lineation
 			m_app->removeFromDB(m_lineation); //delete
+		m_lineation = nullptr;
 	}
-	m_trace = nullptr;
-	m_lineation = nullptr;
 
 	//uncheck/disable gui components (the relevant ones will be activated later)
 	m_dlg->lineationModeButton->setChecked(false);

@@ -1,3 +1,20 @@
+//##########################################################################
+//#                                                                        #
+//#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#                     COPYRIGHT: Sam Thiele  2017                        #
+//#                                                                        #
+//##########################################################################
+
 #include "ccTrace.h"
 
 ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
@@ -424,7 +441,7 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 
 			//vector from p1 to m_p
 			CCVector3 deltaPos = *n.point - p;
-			double norm2 = deltaPos.norm2d();\
+			double norm2 = deltaPos.norm2d();
 
 			//colour
 			const ColorCompType* c = m_cloud->getPointColor(n.pointIndex);

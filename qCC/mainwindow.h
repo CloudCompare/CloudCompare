@@ -131,6 +131,7 @@ public:
 	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) override;
 	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) override;
 	virtual void updateOverlayDialogsPlacement() override;
+	void updateOverlayDialogPlacement(ccOverlayDialog* dlg);
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 	virtual void setSelectedInDB(ccHObject* obj, bool selected) override;
 	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;

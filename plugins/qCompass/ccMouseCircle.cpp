@@ -1,3 +1,20 @@
+//##########################################################################
+//#                                                                        #
+//#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#                     COPYRIGHT: Sam Thiele  2017                        #
+//#                                                                        #
+//##########################################################################
+
 #include "ccMouseCircle.h"
 
 #include <math.h>
@@ -20,6 +37,7 @@ ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name)
 	assert(owner); //check valid pointer
 	ccMouseCircle::m_owner = owner;
 	m_owner->installEventFilter(this);
+	m_owner->addToOwnDB(this, true);
 }
 
 ccMouseCircle::~ccMouseCircle()
@@ -28,6 +46,7 @@ ccMouseCircle::~ccMouseCircle()
 	if (m_owner)
 	{
 		m_owner->removeEventFilter(this);
+		m_owner->removeFromOwnDB(this);
 	}
 }
 
@@ -142,7 +161,7 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 		if (wheelEvent->modifiers().testFlag(Qt::ControlModifier))
 		{
 			//adjust radius
-			ccMouseCircle::RADIUS -= ccMouseCircle::RADIUS_STEP*(wheelEvent->delta()/100.0);
+			ccMouseCircle::RADIUS -= ccMouseCircle::RADIUS_STEP*(wheelEvent->delta() / 100.0);
 
 			//avoid really small radius
 			if (ccMouseCircle::RADIUS < ccMouseCircle::RADIUS_STEP)

@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: ccCompass                   #
+//#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                             COPYRIGHT: Sam Thiele  2017                #
+//#                     COPYRIGHT: Sam Thiele  2017                        #
 //#                                                                        #
 //##########################################################################
 
@@ -39,6 +39,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QInputDialog>
+#include <QVariant>
 
 //this plugin
 #include "ccMouseCircle.h"
@@ -49,14 +50,12 @@
 
 //other
 #include <math.h>
-#include <qvariant.h>
 #include <vector>
 
-class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener /*, public ccCompassDlg*/
+class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener
 {
 	Q_OBJECT
 		Q_INTERFACES(ccStdPluginInterface)
-		//replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
 		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass")
 
 public:
@@ -70,16 +69,17 @@ public:
 	virtual QString getName() const override { return "Compass"; }
 	virtual QString getDescription() const override { return "A virtual 'compass' for measuring outcrop orientations"; }
 	virtual QIcon getIcon() const override;
+	virtual void stop() override { stopMeasuring(); m_dlg = nullptr; ccStdPluginInterface::stop(); }
 
 	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	virtual void getActions(QActionGroup& group) override;
+
 	//sets the specified object to be the current trace - provided it is a ccTrace object. If not, ccTrace becomes null.
 	void pickupTrace(ccHObject* o);
 
-	virtual void getActions(QActionGroup& group) override;
-
 protected slots:
-	/*** ADD YOUR CUSTOM ACTIONS' SLOTS HERE ***/
+
 	void doAction();
 
 	bool startMeasuring(); //start picking mode
@@ -87,10 +87,9 @@ protected slots:
 
 	//picked point callbacks
 	void pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, const CCVector3& P);
-	virtual void onItemPicked(const ccPickingListener::PickedItem& pi); //inherited from ccPickingListener
-
-	//event to get mouse-move updates & trigger repaint of overlay circle
-	bool eventFilter(QObject* obj, QEvent* event);
+	
+	//inherited from ccPickingListener
+	virtual void onItemPicked(const ccPickingListener::PickedItem& pi) override;
 
 	//GUI actions
 	void onClose();
@@ -110,10 +109,14 @@ protected slots:
 	void showHelp();
 
 protected:
+
+	//event to get mouse-move updates & trigger repaint of overlay circle
+	virtual bool eventFilter(QObject* obj, QEvent* event) override;
+
 	//used while exporting plane data
-	int writePlanes(ccHObject* object, QTextStream* out, QString parentName="");
-	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = "");
-	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = "");
+	int writePlanes(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeTraces(ccHObject* object, QTextStream* out, QString parentName = QString());
+	int writeLineations(ccHObject* object, QTextStream* out, QString parentName = QString());
 
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
 	bool madeByMe(ccHObject* object);
@@ -129,9 +132,6 @@ protected:
 
 	//Action to start ccCompass
 	QAction* m_action = nullptr;
-
-	//! Picking hub
-	ccPickingHub* m_pickingHub = nullptr;
 
 	//link to application windows
 	ccGLWindow* m_window = nullptr;

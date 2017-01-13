@@ -5847,7 +5847,24 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 
 	//otherwise we add it to DB
 	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
+
+	//automatically update the dialog placement when its shown
+	connect(dlg, &ccOverlayDialog::shown, [&]() { updateOverlayDialogPlacement(dlg); });
+
 	repositionOverlayDialog(m_mdiDialogs.back());
+}
+
+void MainWindow::updateOverlayDialogPlacement(ccOverlayDialog* dlg)
+{
+	//check for existence
+	for (ccMDIDialogs& mdi : m_mdiDialogs)
+	{
+		if (mdi.dialog == dlg)
+		{
+			repositionOverlayDialog(mdi);
+			break;
+		}
+	}
 }
 
 void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dialog)

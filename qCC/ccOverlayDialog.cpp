@@ -56,13 +56,13 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 	{
 		return true;
 	}
-		
+
 	if (m_associatedWin)
 	{
 		//we automatically detach the former dialog
 		{
 			QWidgetList topWidgets = QApplication::topLevelWidgets();
-			foreach(QWidget* widget,topWidgets)
+			foreach(QWidget* widget, topWidgets)
 			{
 				widget->removeEventFilter(this);
 			}
@@ -75,7 +75,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 	if (m_associatedWin)
 	{
 		QWidgetList topWidgets = QApplication::topLevelWidgets();
-		foreach(QWidget* widget,topWidgets)
+		foreach(QWidget* widget, topWidgets)
 		{
 			widget->installEventFilter(this);
 		}
@@ -148,6 +148,11 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 	}
 	else
 	{
+		if (e->type() == QEvent::Show)
+		{
+			emit shown();
+		}
+		
 		// standard event processing
 		return QObject::eventFilter(obj, e);
 	}

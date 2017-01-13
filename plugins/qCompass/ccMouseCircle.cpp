@@ -2,16 +2,16 @@
 
 #include <math.h>
 
-ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) : cc2DViewportObject(name.isEmpty() ? "label" : name)
+ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) 
+	: cc2DViewportObject(name.isEmpty() ? "label" : name)
 {
 	setVisible(true);
 	setEnabled(false);
 
 	//setup unit circle
-	float heading;
 	for (int n = 0; n < ccMouseCircle::RESOLUTION; n++)
 	{
-		heading = n * (2 * M_PI / (float) ccMouseCircle::RESOLUTION); //heading in radians
+		float heading = n * (2 * M_PI / (float) ccMouseCircle::RESOLUTION); //heading in radians
 		ccMouseCircle::UNIT_CIRCLE[n][0] = cos(heading);
 		ccMouseCircle::UNIT_CIRCLE[n][1] = sin(heading);
 	}
@@ -66,7 +66,8 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	glFunc->glPushAttrib(GL_LINE_BIT);
 
 	float relativeZoom = 1.0f;
-	float dx = 0, dy = 0;
+	float dx = 0.0f;
+	float dy = 0.0f;
 	if (!m_params.perspectiveView) //ortho mode
 	{
 		//Screen pan & pivot compensation
@@ -95,8 +96,8 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	glFunc->glColor3ubv(ccColor::red.rgba);
 
 	//get height & width
-	int halfW = (int) (context.glW / 2.0f);
-	int halfH = (int) (context.glH / 2.0f);
+	int halfW = static_cast<int>(context.glW / 2.0f);
+	int halfH = static_cast<int>(context.glH / 2.0f);
 	
 	//get mouse position
 	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());
@@ -145,8 +146,9 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 
 			//avoid really small radius
 			if (ccMouseCircle::RADIUS < ccMouseCircle::RADIUS_STEP)
+			{
 				ccMouseCircle::RADIUS = ccMouseCircle::RADIUS_STEP;
-
+			}
 			//repaint
 			m_owner->redraw(true, false);
 		}

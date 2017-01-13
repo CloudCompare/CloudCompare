@@ -27,7 +27,7 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	categoryBox->addItems(QStringList() << "S0 (Bedding)" << "S1" << "S2" << "L1" << "L2" << "Custom..."); //default items
 
 	//setup "algorithm" dropdown
-	m_cost_algorithm_menu = new QMenu();
+	m_cost_algorithm_menu = new QMenu(this);
 	m_dark = new QAction("Darkness", this); m_dark->setCheckable(true); m_dark->setChecked(true);
 	m_light = new QAction("Lightness", this); m_light->setCheckable(true);
 	m_rgb = new QAction("RGB Similarity", this); m_rgb->setCheckable(true);

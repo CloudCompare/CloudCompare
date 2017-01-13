@@ -49,7 +49,7 @@ ccCompass::~ccCompass()
 	{
 		delete m_mouseCircle;
 	}
-	m_mouseCircle = 0;
+	m_mouseCircle = nullptr;
 }
 
 //Generally we ignore new selections... except when trace mode is activated, when the selected object is set as the active trace (if it is a trace)
@@ -105,7 +105,7 @@ void ccCompass::getActions(QActionGroup& group)
 	}
 	group.addAction(m_action);
 
-	m_app->dispToConsole("[ccCompass] ccCompas plugin initialized succesfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole("[ccCompass] ccCompass plugin initialized succesfully.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 }
 
@@ -204,18 +204,29 @@ bool ccCompass::stopMeasuring()
 		m_pickingHub->removeListener(this);
 
 	//remove click listener
-		m_window->removeEventFilter(this);
+	m_window->removeEventFilter(this);
 
 	//remove overlay GUI
 	delete ccCompass::m_mouseCircle;
-	m_mouseCircle = 0;
+	m_mouseCircle = nullptr;
 
 	m_dlg->stop(true);
 	m_app->unregisterOverlayDialog(m_dlg);
 
 	//forget last measurement
-	m_trace = 0; //n.b. we don't finalize this one, as this is akin to "cancelling".
-	m_lineation = 0;
+	if (m_trace)
+	{
+		m_app->removeFromDB(m_trace); //delete trace object
+	}
+	if (m_lineation)
+	{
+		if (m_app->dbRootObject()->find(m_lineation_id) && m_lineation->size() < 2) //if lineation is incomplete and it exists in the database still
+		{
+			m_app->removeFromDB(m_lineation); //remove incomplete lineation
+		}
+	}
+	m_trace = nullptr;
+	m_lineation = nullptr;
 
 	//redraw
 	m_window->redraw(true, false);
@@ -235,10 +246,6 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		//get point cloud
 		ccPointCloud* cloud = static_cast<ccPointCloud*>(entity); //cast to point cloud
 
-		//expand cloud by removing & re-adding it (hack)
-		m_app->removeFromDB(cloud, false);
-		m_app->addToDB(cloud, false, true, false, false);
-
 		if (!cloud)
 		{
 			ccLog::Warning("[Item picking] Shit's fucked (Picked point is not in pickable entities DB?)!");
@@ -247,7 +254,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 
 		//SETUP DATA STRUCTURE/FIND RELEVANT NODE TO ADD DATA TO
 		//add measurements group if necessary
-		ccHObject* measurement_group = 0;
+		ccHObject* measurement_group = nullptr;
 		for (int i = 0; i < cloud->getChildrenNumber(); i++) //check if a "measurements" group exists
 		{
 			if (cloud->getChild(i)->getName() == "measurements")
@@ -263,7 +270,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			m_app->addToDB(measurement_group, false, true, false, false);
 		}
 		//add category group if necessary
-		ccHObject* category_group = 0;
+		ccHObject* category_group = nullptr;
 		for (int i = 0; i < measurement_group->getChildrenNumber(); i++) //check if a category group exists
 		{
 			if (measurement_group->getChild(i)->getName() == m_category)
@@ -348,7 +355,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				if (!m_app->dbRootObject()->find(m_trace_id))
 				{
 					//item has been deleted...
-					m_trace = 0;
+					m_trace = nullptr;
 				}
 			}
 
@@ -386,6 +393,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			{
 				//no active trace -> make a new one
 				m_lineation = new ccLineation(cloud);
+				m_lineation_id = m_lineation->getUniqueID();
 				m_lineation->setDisplay(m_window);
 				m_lineation->setVisible(true);
 				m_lineation->setName("Lineation");
@@ -447,7 +455,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				m_lineation->showNameIn3D(m_drawName);
 
 				//start new one
-				m_lineation = 0;
+				m_lineation = nullptr;
 			}
 
 		}
@@ -482,7 +490,7 @@ QIcon ccCompass::getIcon() const
 	//open ccCompass.qrc (text file), update the "prefix" and the
 	//icon(s) filename(s). Then save it with the right name (yourPlugin.qrc).
 	//(eventually, remove the original qDummyPlugin.qrc file!)
-	return QIcon(":/CC/plugin/qDummyPlugin/icon.png");
+	return QIcon(":/CC/plugin/qCompass/icon.png");
 }
 
 //exit this tool
@@ -503,7 +511,7 @@ void ccCompass::onAccept()
 			if (!m_app->dbRootObject()->find(m_trace_id))
 			{
 				//item has been deleted...
-				m_trace = 0;
+				m_trace = nullptr;
 				return;
 			}
 		}
@@ -532,7 +540,7 @@ void ccCompass::onAccept()
 			}
 		}
 	}
-	m_trace = 0;
+	m_trace = nullptr;
 	m_window->redraw();
 }
 
@@ -541,7 +549,9 @@ void ccCompass::onSave()
 {
 	//get output file path
 	QString filename = QFileDialog::getSaveFileName(m_dlg, tr("Output file"), "", tr("CSV files (*.csv *.txt)"));
-	int planes = 0, traces = 0, lineations = 0; //keept track of how many objects are being written (used to delete empty files)
+	int planes = 0; //keep track of how many objects are being written (used to delete empty files)
+	int traces = 0;
+	int lineations = 0;
 
 	//build filenames
 	QString plane_fn = filename, trace_fn = filename, lineation_fn = filename;
@@ -810,50 +820,58 @@ void ccCompass::onUndo()
 	m_window->redraw();
 }
 
-//activate lineation mode
-void ccCompass::setLineationMode()
+//called to cleanup pointers etc. before changing the active tool
+void ccCompass::cleanupBeforeToolChange()
 {
-	if (m_trace) //cleanup after trace mode if necessary
+	if (m_trace) //cleanup after trace mode
+	{
 		onAccept(); //finish last trace
-		m_trace = 0;
-	m_pickingMode = ccCompass::MODE::LINEATION_MODE;
-	m_dlg->lineationModeButton->setChecked(true);
+	}
+	if (m_lineation) //cleanup after lineation mode
+	{
+		if (m_app->dbRootObject()->find(m_lineation_id) != nullptr && m_lineation->size() < 2) //not a complete lineation
+			m_app->removeFromDB(m_lineation); //delete
+	}
+	m_trace = nullptr;
+	m_lineation = nullptr;
+
+	//uncheck/disable gui components (the relevant ones will be activated later)
+	m_dlg->lineationModeButton->setChecked(false);
 	m_dlg->planeModeButton->setChecked(false);
 	m_dlg->traceModeButton->setChecked(false);
 	m_dlg->undoButton->setEnabled(false);
 	m_dlg->acceptButton->setEnabled(false);
-	m_mouseCircle->setVisible(false);
-	m_window->redraw(true, false);
 	m_dlg->algorithmButton->setEnabled(false);
+	m_mouseCircle->setVisible(false);
+}
+
+//activate lineation mode
+void ccCompass::setLineationMode()
+{
+	cleanupBeforeToolChange();
+	m_pickingMode = ccCompass::MODE::LINEATION_MODE;
+	m_dlg->lineationModeButton->setChecked(true);
+	m_window->redraw(true, false);
 }
 
 //activate plane mode
 void ccCompass::setPlaneMode()
 {
-	if (m_trace) //cleanup after trace mode if necessary
-		onAccept(); //finish last trace
-		m_trace = 0;
+	cleanupBeforeToolChange();
 	m_pickingMode = ccCompass::MODE::PLANE_MODE;
-	m_dlg->lineationModeButton->setChecked(false);
 	m_dlg->planeModeButton->setChecked(true);
-	m_dlg->traceModeButton->setChecked(false);
-	m_dlg->undoButton->setEnabled(false);
-	m_dlg->acceptButton->setEnabled(false);
 	m_mouseCircle->setVisible(true);
 	m_window->redraw(true, false);
-	m_dlg->algorithmButton->setEnabled(false); //disable. IDEA: Could add functionality here to allow RANSAC or Least Squares plane fitting.
 }
 
 //activate trace mode
 void ccCompass::setTraceMode()
 {
+	cleanupBeforeToolChange();
 	m_pickingMode = ccCompass::MODE::TRACE_MODE;
-	m_dlg->lineationModeButton->setChecked(false);
-	m_dlg->planeModeButton->setChecked(false);
 	m_dlg->traceModeButton->setChecked(true);
 	m_dlg->undoButton->setEnabled(true);
 	m_dlg->acceptButton->setEnabled(true);
-	m_mouseCircle->setVisible(false);
 	m_dlg->algorithmButton->setMenu(m_dlg->m_cost_algorithm_menu); //add algorithm menu
 	m_dlg->algorithmButton->setEnabled(true); //add algorithm menu
 	m_window->redraw(true, false);

@@ -46,7 +46,7 @@ public:
 	@Args
 	 *pointIndex* = the index of the point (in the cloud associated with this object) that is the new waypoint
 	*/
-	void pushWaypoint(int pointId) { m_waypoints.push_back(pointId); }//addPointIndex(id);}
+	void pushWaypoint(int pointId) { m_waypoints.push_back(pointId); }
 
 	/*
 	Deletes the specified waypoint.
@@ -72,9 +72,11 @@ public:
 	void undoLast()
 	{
 		if (m_previous != -1)
+		{
 			m_waypoints.erase(m_waypoints.begin() + m_previous);
 			m_trace.clear(); //need to recalculate whole trace
-		m_previous = -1;
+			m_previous = -1;
+		}
 	}
 
 	int waypoint_count() { return m_waypoints.size(); }

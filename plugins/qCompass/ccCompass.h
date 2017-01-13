@@ -124,21 +124,24 @@ protected:
 	//returns true if object is a trace created by ccCompass (has the associated data)
 	bool isTrace(ccHObject* object);
 
+	//cleans up pointers etc before changing tools
+	void cleanupBeforeToolChange();
+
 	//Action to start ccCompass
-	QAction* m_action;
+	QAction* m_action = nullptr;
 
 	//! Picking hub
-	ccPickingHub* m_pickingHub;
+	ccPickingHub* m_pickingHub = nullptr;
 
 	//link to application windows
-	ccGLWindow* m_window;
-	QMainWindow* m_main_window;
+	ccGLWindow* m_window = nullptr;
+	QMainWindow* m_main_window = nullptr;
 
 	//2D-circle for selection during plane-mode
-	ccMouseCircle* m_mouseCircle;
+	ccMouseCircle* m_mouseCircle = nullptr;
 
 	//ccCompass toolbar gui
-	ccCompassDlg* m_dlg;
+	ccCompassDlg* m_dlg = nullptr;
 	
 	enum MODE
 	{
@@ -149,9 +152,10 @@ protected:
 	MODE m_pickingMode = MODE::PLANE_MODE;
 
 	//active trace for trace mode
-	ccTrace* m_trace=0;
+	ccTrace* m_trace = nullptr;
 	int m_trace_id=-1; //used to check if m_trace has been deleted
-	ccLineation* m_lineation = 0;
+	ccLineation* m_lineation = nullptr;
+	int m_lineation_id = -1; //used to check if m_lineation has been deleted
 
 	//name of structure currently being digitized
 	QString m_category = "Bedding";

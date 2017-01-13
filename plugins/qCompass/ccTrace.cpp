@@ -166,7 +166,10 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	std::unordered_map<int, int> dist; //<node, cost estimate from start to end via this node>
 
 	//declare variables used in the loop
-	int current = 0, cost = 0, smallest_cost=999999, iter_count = 0;
+	int current = 0;
+	int cost = 0;
+	int smallest_cost = 999999;
+	int iter_count = 0;
 	float cur_d2, next_d2;
 
 	//setup octree & values for nearest neighbour searches

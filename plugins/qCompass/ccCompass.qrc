@@ -1,5 +1,6 @@
 <RCC>
-  <qresource prefix="/CC/plugin/qDummyPlugin" >
+  <qresource prefix="/CC/plugin/qCompass" >
     <file>icon.png</file>
+    <file>info.html</file>
   </qresource>
 </RCC>

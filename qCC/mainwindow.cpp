@@ -5842,6 +5842,8 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 		{
 			//we only update its position in this case
 			mdi.position = pos;
+			repositionOverlayDialog(mdi);
+			return;
 		}
 	}
 

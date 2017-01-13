@@ -8,9 +8,9 @@ except for a circle with radius r around the mouse.
 #include "../ccStdPluginInterface.h"
 #include <ccGLWindow.h>
 #include <cc2DViewportObject.h>
-#include <qpoint.h>
-#include <qobject.h>
 #include <qevent.h>
+#include <QPoint>
+#include <QObject>
 
 class ccMouseCircle : public cc2DViewportObject, public QObject
 {

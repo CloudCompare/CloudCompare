@@ -21,7 +21,7 @@
 //Qt
 #include <QDialog>
 #include <QList>
-#include <qaction.h>
+#include <QAction>
 
 //CC
 #include <ccGLWindow.h>

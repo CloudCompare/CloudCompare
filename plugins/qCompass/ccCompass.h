@@ -35,10 +35,10 @@
 #include <ccGLWindow.h>
 
 //qt
-#include <qfiledialog.h>
+#include <QFileDialog>
 #include <QFile>
 #include <QTextStream>
-#include <qinputdialog.h>
+#include <QInputDialog>
 
 //this plugin
 #include "ccMouseCircle.h"

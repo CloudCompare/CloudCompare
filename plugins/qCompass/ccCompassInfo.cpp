@@ -21,7 +21,6 @@ ccCompassInfo::ccCompassInfo(QWidget *parent)
 	setLayout(lt);
 
 	//load text
-	//QIcon(":/CC/plugin/qCompass/icon.png");
 	QFile file(":/CC/plugin/qCompass/info.html");
 	if (file.open(QIODevice::ReadOnly))
 	{

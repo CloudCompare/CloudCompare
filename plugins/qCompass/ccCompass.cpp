@@ -726,7 +726,7 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 	{
 		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS
 		*out << name << ",";
-		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("Strike").toFloat() + 90;
+		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("Strike").toFloat() + 90 << ",";
 		*out << object->getMetaData("Cx").toString() << "," << object->getMetaData("Cy").toString() << "," << object->getMetaData("Cz").toString() << ",";
 		*out << object->getMetaData("Nx").toString() << "," << object->getMetaData("Ny").toString() << "," << object->getMetaData("Nz").toString() << ",";
 		*out << object->getMetaData("Radius").toString() << "," << object->getMetaData("RMS").toString() << endl;

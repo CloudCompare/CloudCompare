@@ -38,7 +38,8 @@ int ccTrace::insertWaypoint(int pointId)
 	if (m_waypoints.size() >= 2)
 	{
 		//get location of point to add
-		const CCVector3* Q = m_cloud->getPoint(pointId);
+		//const CCVector3* Q = m_cloud->getPoint(pointId);
+		CCVector3 Q = *m_cloud->getPoint(pointId);
 		CCVector3 start, end;
 		//check if point is "inside" any segments
 		for (int i = 1; i < m_waypoints.size(); i++)
@@ -48,7 +49,7 @@ int ccTrace::insertWaypoint(int pointId)
 			m_cloud->getPoint(m_waypoints[i], end);
 
 			//are we are "inside" this segment
-			if (inCircle(&start, &end, Q))
+			if (inCircle(&start, &end, &Q))
 			{
 				//insert waypoint
 				m_waypoints.insert(m_waypoints.begin() + i, pointId);
@@ -56,10 +57,18 @@ int ccTrace::insertWaypoint(int pointId)
 				return i;
 			}
 		}
+
+		//check if the point is closer to the start than the end -> i.e. the point should be 'pre-pended'
+		CCVector3 sp = Q - start;
+		CCVector3 ep = Q - end;
+		if (sp.norm2() < ep.norm2())
+		{
+			m_waypoints.insert(m_waypoints.begin(), pointId);
+			return 0;
+		}
 	}
 
-	//point is not inside another segment... add to end
-	//IDEA: check if start or end is closest, and then add at the start/end?
+	//add point to end of the trace
 	m_waypoints.push_back(pointId);
 	m_previous = m_waypoints.size() - 1;
 	return m_waypoints.size() - 1;
@@ -625,7 +634,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		//set draw colour
-		c_unitPointMarker->setTempColor(m_waypoint_colour); //todo: abstract as variable
+		c_unitPointMarker->setTempColor(m_waypoint_colour);
 		
 		//draw key-points
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
@@ -651,7 +660,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//set draw colour
-		c_unitPointMarker->setTempColor(m_trace_colour); //todo: abstract as variable
+		c_unitPointMarker->setTempColor(m_trace_colour);
 
 		//draw trace points
 		for (std::deque<int> seg : m_trace)

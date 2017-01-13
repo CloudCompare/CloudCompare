@@ -113,14 +113,14 @@ public:
 	inline unsigned dim() const { return N; }
 
 	//! Returns memory (in bytes) currently used by this structure
-	inline unsigned memory() const
+	inline size_t memory() const
 	{
 		return sizeof(GenericChunkedArray) 
 #ifndef CC_ENV_64
-				+ static_cast<unsigned>(m_theChunks.capacity())*sizeof(ElementType*)
-				+ static_cast<unsigned>(m_perChunkCount.capacity())*sizeof(unsigned)
+				+ m_theChunks.capacity()     * sizeof(ElementType*)
+				+ m_perChunkCount.capacity() * sizeof(unsigned)
 #endif
-				+ N*capacity()*sizeof(ElementType);
+				+ static_cast<size_t>(N) * static_cast<size_t>(capacity()) * sizeof(ElementType);
 	}
 
 	//! Clears the array
@@ -144,8 +144,8 @@ public:
 		}
 
 		m_count = 0;
-		memset(m_minVal,0,sizeof(ElementType)*N);
-		memset(m_maxVal,0,sizeof(ElementType)*N);
+		memset(m_minVal, 0, sizeof(ElementType)*N);
+		memset(m_maxVal, 0, sizeof(ElementType)*N);
 		placeIteratorAtBegining();
 	}
 
@@ -167,8 +167,8 @@ public:
 			ElementType zero = 0;
 			std::fill(m_data.begin(), m_data.end(), zero);
 #else
-			for (size_t i=0; i<m_theChunks.size(); ++i)
-				memset(m_theChunks[i],0,m_perChunkCount[i]*sizeof(ElementType)*N);
+			for (size_t i = 0; i < m_theChunks.size(); ++i)
+				memset(m_theChunks[i], 0, m_perChunkCount[i]*sizeof(ElementType)*N);
 #endif
 		}
 		else
@@ -182,7 +182,7 @@ public:
 #endif
 			const ElementType* _cSrc = _cDest;
 			//we copy only the first element to init recurrence
-			memcpy(_cDest,fillValue,N*sizeof(ElementType));
+			memcpy(_cDest, fillValue, N*sizeof(ElementType));
 			_cDest += N;
 
 #ifdef CC_ENV_64
@@ -196,10 +196,10 @@ public:
 			//recurrence
 			while (elemFilled < elemToFill)
 			{
-				unsigned cs = elemToFill-elemFilled;
+				unsigned cs = elemToFill - elemFilled;
 				if (copySize < cs)
 					cs = copySize;
-				memcpy(_cDest,_cSrc,cs*sizeof(ElementType)*N);
+				memcpy(_cDest, _cSrc, cs*sizeof(ElementType)*N);
 				_cDest += cs*static_cast<unsigned>(N);
 				elemFilled += cs;
 				copySize <<= 1;
@@ -207,7 +207,7 @@ public:
 
 #ifndef CC_ENV_64
 			//then we simply have to copy the first chunk to the other ones
-			for (size_t i=1; i<m_theChunks.size(); ++i)
+			for (size_t i = 1; i < m_theChunks.size(); ++i)
 				memcpy(m_theChunks[i],_cSrc,m_perChunkCount[i]*sizeof(ElementType)*N);
 #endif
 		}
@@ -308,8 +308,8 @@ public:
 			if (initNewElements)
 			{
 				//m_capacity should be up-to-date after a call to 'reserve'
-				for (unsigned i=m_count; i<m_capacity; ++i)
-					setValue(i,valueForNewElements);
+				for (unsigned i = m_count; i < m_capacity; ++i)
+					setValue(i, valueForNewElements);
 			}
 		}
 		else //last case: we have to reduce the array size
@@ -507,16 +507,16 @@ public:
 		if (m_count == 0)
 		{
 			//all boundaries to zero
-			memset(m_minVal,0,sizeof(ElementType)*N);
-			memset(m_maxVal,0,sizeof(ElementType)*N);
+			memset(m_minVal, 0, sizeof(ElementType)*N);
+			memset(m_maxVal, 0, sizeof(ElementType)*N);
 			return;
 		}
 		
 		//we set the first element as min and max boundaries
-		memcpy(m_minVal,getValue(0),sizeof(ElementType)*N);
-		memcpy(m_maxVal,m_minVal,sizeof(ElementType)*N);
+		memcpy(m_minVal, getValue(0), sizeof(ElementType)*N);
+		memcpy(m_maxVal, m_minVal, sizeof(ElementType)*N);
 		
-		unsigned int	count = m_count-1;
+		unsigned int count = m_count - 1;
 		
 		// do we have an odd number of (remaining) elements to check?
 		bool odd = count & 1;
@@ -526,16 +526,16 @@ public:
 		}
 		
 		//we update boundaries with all other values
-		for (unsigned i=1; i<count; i+=2)
+		for (unsigned i = 1; i < count; i += 2)
 		{
 			const ElementType* val = getValue(i);
-			const ElementType* val2 = getValue(i+1);
-			
-			for (unsigned j=0; j<N; ++j)
+			const ElementType* val2 = getValue(i + 1);
+
+			for (unsigned j = 0; j < N; ++j)
 			{
 				ElementType maximum;
 				ElementType	minimum;
-				
+
 				if (val[j] > val2[j])
 				{
 					minimum = val2[j];
@@ -562,15 +562,15 @@ public:
 		// if we have an extra element, check it
 		if (odd)
 		{
-			const ElementType* val = getValue(m_count-1);
-			
-			for (unsigned j=0; j<N; ++j)
+			const ElementType* val = getValue(m_count - 1);
+
+			for (unsigned j = 0; j < N; ++j)
 			{
 				if (val[j] > m_maxVal[j])
 				{
 					m_maxVal[j] = val[j];
 				}
-				
+
 				if (val[j] < m_minVal[j])
 				{
 					m_minVal[j] = val[j];
@@ -594,9 +594,9 @@ public:
 		//{
 		//
 			ElementType tempVal[N];
-			memcpy(tempVal,v1,N*sizeof(ElementType));
-			memcpy(v1,v2,N*sizeof(ElementType));
-			memcpy(v2,tempVal,N*sizeof(ElementType));
+			memcpy(tempVal, v1, N*sizeof(ElementType));
+			memcpy(v1, v2, N*sizeof(ElementType));
+			memcpy(v2, tempVal, N*sizeof(ElementType));
 		//}
 	}
 
@@ -657,7 +657,7 @@ public:
 		\param dest destination array (will be resized if necessary)
 		\return success
 	**/
-	bool copy(GenericChunkedArray<N,ElementType>& dest) const
+	bool copy(GenericChunkedArray<N, ElementType>& dest) const
 	{
 		unsigned count = currentSize();
 		if (!dest.resize(count))
@@ -724,7 +724,7 @@ protected:
 };
 
 //! Specialization of GenericChunkedArray for the case where N=1 (speed up)
-template <class ElementType> class GenericChunkedArray<1,ElementType> : public CCShareable
+template <class ElementType> class GenericChunkedArray<1, ElementType> : public CCShareable
 {
 public:
 
@@ -785,14 +785,14 @@ public:
 	inline unsigned dim() const {return 1;}
 
 	//! Returns memory (in bytes) currently used by this structure
-	inline unsigned memory() const
+	inline size_t memory() const
 	{
 		return sizeof(GenericChunkedArray) 
 #ifndef CC_ENV_64
-				+ static_cast<unsigned>(m_theChunks.capacity())*sizeof(ElementType*)
-				+ static_cast<unsigned>(m_perChunkCount.capacity())*sizeof(unsigned)
+				+ m_theChunks.capacity()     * sizeof(ElementType*)
+				+ m_perChunkCount.capacity() * sizeof(unsigned)
 #endif
-				+ capacity()*sizeof(ElementType);
+				+ static_cast<size_t>(capacity()) * sizeof(ElementType);
 	}
 	//! Clears the array
 	/** \param releaseMemory whether memory should be released or not (for quicker "refill")
@@ -959,13 +959,18 @@ public:
 		else if (count > m_capacity)
 		{
 			if (!reserve(count))
+			{
 				return false;
+			}
+			
 			//eventually we can fill it with a custom value
 			if (initNewElements)
 			{
 				//m_capacity should be up-to-date after a call to 'reserve'
-				for (unsigned i=m_count; i<m_capacity; ++i)
-					setValue(i,valueForNewElements);
+				for (unsigned i = m_count; i < m_capacity; ++i)
+				{
+					setValue(i, valueForNewElements);
+				}
 			}
 		}
 		else //last case: we have to reduce the array size
@@ -1052,7 +1057,7 @@ public:
 
 	//! Direct access operator
 	/** \param index an element index
-		\return pointer to the ith element.
+		\return value of the ith element.
 	**/
 	inline ElementType& operator[] (unsigned index) { return getValue(index); }
 
@@ -1088,7 +1093,7 @@ public:
 	inline void addElement(const ElementType& newElement)
 	{
 		assert(m_count < m_capacity);
-		setValue(m_count++,newElement);
+		setValue(m_count++, newElement);
 	}
 
 	//! Returns the ith value stored in the array
@@ -1172,10 +1177,10 @@ public:
 		}
 
 		//we set the first element as min and max boundaries
-		m_minVal = m_minVal = getValue(0);
+		m_minVal = m_maxVal = getValue(0);
 
 		//we update boundaries with all other values
-		for (unsigned i=1; i<m_capacity; ++i)
+		for (unsigned i = 1; i < m_capacity; ++i)
 		{
 			const ElementType& val = getValue(i);
 			if (val < m_minVal)
@@ -1256,7 +1261,7 @@ public:
 		\param dest destination array (will be resized if necessary)
 		\return success
 	**/
-	bool copy(GenericChunkedArray<1,ElementType>& dest) const
+	bool copy(GenericChunkedArray<1, ElementType>& dest) const
 	{
 		unsigned count = currentSize();
 		if (!dest.resize(count))

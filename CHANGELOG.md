@@ -10,6 +10,12 @@ v2.9.alpha - XX/XX/XXXX
 
 - enhancements:
 
+	* 'Unroll' tool:
+		- new cone 'unroll' mode (the true 'unroll' mode - the other one has been renamed 'Straightened cone' ;)
+		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)
+		- dialog parameters are now saved in persistent settings
+
+
 	* Plugins can now be called in command line mode
 		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
 

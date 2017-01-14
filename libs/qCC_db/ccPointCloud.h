@@ -612,29 +612,35 @@ public: //other methods
 	/** This method is redundant with the "developCloudOnCylinder" method of CCLib,
 		apart that it can also handle the cloud normals.
 		\param radius unrolling cylinder radius
+		\param coneAxisDim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
 		\param center a point belonging to the cylinder axis (automatically computed if not specified)
-		\param dim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
-		\param progressCb the client application can get some notification of the process progress through this callback mechanism
-	**/
-	void unrollOnCylinder(	PointCoordinateType radius,
-							CCVector3* center = 0,
-							unsigned char dim = 2,
-							CCLib::GenericProgressCallback* progressCb = NULL);
+		\param exportDeviationSF to export the deviation fro the ideal cone as a scalar field
+		\param progressCb for progress notification
+		\return the unrolled point cloud
+		**/
+	ccPointCloud* unrollOnCylinder(	PointCoordinateType radius,
+									unsigned char coneAxisDim,
+									CCVector3* center = 0,
+									bool exportDeviationSF = false,
+									CCLib::GenericProgressCallback* progressCb = NULL) const;
 
-	//! Unrolls the cloud and its normals on a cone
-	/** This method is redundant with the "developCloudOnCone" method of CCLib,
-		apart that it can also handle the cloud normals.
-		\param baseRadius unrolling cone base radius
-		\param alpha_deg cone angle (between 0 and 180 degrees)
-		\param apex cone apex
-		\param dim dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
-		\param progressCb the client application can get some notification of the process progress through this callback mechanism
+	//! Unrolls the cloud (and its normals) on a cone
+	/** \param coneAngle_deg cone apex angle (between 0 and 180 degrees)
+		\param coneApex cone apex 3D position
+		\param coneAxisDim dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
+		\param developStraightenedCone if true, this method will unroll a straightened version of the cone (as a cylinder)
+		\param baseRadius unrolling straightened cone base radius (necessary if developStraightenedCone is true)
+		\param exportDeviationSF to export the deviation fro the ideal cone as a scalar field
+		\param progressCb for progress notification
+		\return the unrolled point cloud
 	**/
-	void unrollOnCone(	PointCoordinateType baseRadius,
-						double alpha_deg,
-						const CCVector3& apex,
-						unsigned char dim = 2,
-						CCLib::GenericProgressCallback* progressCb = NULL);
+	ccPointCloud* unrollOnCone(	double coneAngle_deg,
+								const CCVector3& coneApex,
+								unsigned char coneAxisDim,
+								bool developStraightenedCone,
+								PointCoordinateType baseRadius,
+								bool exportDeviationSF = false,
+								CCLib::GenericProgressCallback* progressCb = NULL) const;
 
 	//! Adds associated SF color ramp info to current GL context
 	void addColorRampInfo(CC_DRAW_CONTEXT& context);

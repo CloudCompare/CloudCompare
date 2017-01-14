@@ -5503,10 +5503,10 @@ void MainWindow::doActionUnroll()
 
 	//if selected entity is a mesh, the method will be applied to its vertices
 	bool lockedVertices;
-	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0],&lockedVertices);
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0], &lockedVertices);
 	if (lockedVertices)
 	{
-		ccUtils::DisplayLockedVerticesWarning(m_selectedEntities[0]->getName(),true);
+		ccUtils::DisplayLockedVerticesWarning(m_selectedEntities[0]->getName(), true);
 		return;
 	}
 
@@ -5519,35 +5519,58 @@ void MainWindow::doActionUnroll()
 	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
 	ccUnrollDlg unrollDlg(this);
+	unrollDlg.fromPersistentSettings();
 	if (!unrollDlg.exec())
 		return;
+	unrollDlg.toPersistentSettings();
 
-	int mode = unrollDlg.getType();
+	ccUnrollDlg::Type mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	double angle = unrollDlg.getAngle();
+	double angle_deg = unrollDlg.getAngle();
 	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
+	bool exportDeviationSF = unrollDlg.exportDeviationSF();
 	CCVector3* pCenter = 0;
 	CCVector3 center;
-	if (mode == 1 || !unrollDlg.isAxisPositionAuto())
+	if (mode != ccUnrollDlg::CYLINDER || !unrollDlg.isAxisPositionAuto())
 	{
+		//we need the axis center point
 		center = unrollDlg.getAxisPosition();
 		pCenter = &center;
 	}
 
-	//We apply unrolling method
+	//let's rock unroll ;)
 	ccProgressDialog pDlg(true, this);
 
-	if (mode == 0)
-		pc->unrollOnCylinder(radius, pCenter, dim, (CCLib::GenericProgressCallback*)&pDlg);
-	else if (mode == 1)
-		pc->unrollOnCone(radius, angle, center, dim, (CCLib::GenericProgressCallback*)&pDlg);
-	else
+	ccPointCloud* output = 0;
+	switch (mode)
+	{
+	case ccUnrollDlg::CYLINDER:
+		output = pc->unrollOnCylinder(radius, dim, pCenter, exportDeviationSF, &pDlg);
+		break;
+	case ccUnrollDlg::CONE:
+		output = pc->unrollOnCone(angle_deg, center, dim, false, 0, exportDeviationSF, &pDlg);
+		break;
+	case ccUnrollDlg::STRAIGHTENED_CONE:
+		output = pc->unrollOnCone(angle_deg, center, dim, true, radius, exportDeviationSF, &pDlg);
+		break;
+	default:
 		assert(false);
+		break;
+	}
 
-	ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
-	if (win)
-		win->updateConstellationCenterAndZoom();
-	updateUI();
+	if (output)
+	{
+		pc->setEnabled(false);
+		ccConsole::Warning("[Unroll] Original cloud has been automatically hidden");
+
+		if (pc->getParent())
+		{
+			pc->getParent()->addChild(output);
+		}
+		addToDB(output, true, true, false, true);
+
+		updateUI();
+	}
 }
 
 ccGLWindow* MainWindow::getActiveGLWindow()

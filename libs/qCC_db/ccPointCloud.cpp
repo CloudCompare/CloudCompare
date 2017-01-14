@@ -3485,14 +3485,22 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 	return true;
 }
 
-void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
-									CCVector3* center,
-									unsigned char dim/*=2*/,
-									CCLib::GenericProgressCallback* progressCb/*=NULL*/)
+ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
+												unsigned char coneAxisDim,
+												CCVector3* center,
+												bool exportDeviationSF/*=false*/,
+												CCLib::GenericProgressCallback* progressCb/*=NULL*/) const
 {
-	assert(dim <= 2);
-	unsigned char dim1 = (dim<2 ? dim+1 : 0);
-	unsigned char dim2 = (dim1<2 ? dim1+1 : 0);
+	if (coneAxisDim > 2)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	Tuple3ub dim;
+	dim.z = coneAxisDim;
+	dim.x = (dim.z < 2 ? dim.z + 1 : 0);
+	dim.y = (dim.x < 2 ? dim.x + 1 : 0);
 
 	unsigned numberOfPoints = size();
 
@@ -3508,73 +3516,157 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		progressCb->start();
 	}
 
+	ccPointCloud* clone = const_cast<ccPointCloud*>(this)->cloneThis(0, true);
+	if (!clone)
+	{
+		return 0;
+	}
+
 	//compute cylinder center (if none was provided)
 	CCVector3 C;
 	if (!center)
 	{
-		C = getOwnBB().getCenter();
+		C = const_cast<ccPointCloud*>(this)->getOwnBB().getCenter();
 		center = &C;
 	}
 
-	for (unsigned i=0; i<numberOfPoints; i++)
+	CCLib::ScalarField* deviationSF = 0;
+	if (exportDeviationSF)
 	{
-		CCVector3 *Q = point(i);
+		static const char s_deviationSFName[] = "Deviation";
+		int sfIdx = clone->getScalarFieldIndexByName(s_deviationSFName);
+		if (sfIdx < 0)
+		{
+			sfIdx = clone->addScalarField(s_deviationSFName);
+			if (sfIdx < 0)
+			{
+				ccLog::Warning("[unrollOnCylinder] Not enough memory to init the deviation scalar field");
+			}
+		}
+		if (sfIdx >= 0)
+		{
+			deviationSF = clone->getScalarField(sfIdx);
+		}
+		clone->setCurrentDisplayedScalarField(sfIdx);
+		clone->showSF(true);
+	}
 
-		PointCoordinateType P0 = Q->u[dim1] - center->u[dim1];
-		PointCoordinateType P1 = Q->u[dim2] - center->u[dim2];
-		PointCoordinateType P2 = Q->u[dim]  - center->u[dim];
+	for (unsigned i = 0; i < numberOfPoints; i++)
+	{
+		const CCVector3* Pin = getPoint(i);
+		
+		CCVector3 CP = *Pin - *center;
 
-		PointCoordinateType u = sqrt(P0 * P0 + P1 * P1);
-		PointCoordinateType lon = atan2(P0,P1);
+		PointCoordinateType u = sqrt(CP.u[dim.x] * CP.u[dim.x] + CP.u[dim.y] * CP.u[dim.y]);
+		PointCoordinateType lon = atan2(CP.u[dim.x], CP.u[dim.y]);
 
 		//we project the point
-		Q->u[dim1] = lon*radius;
-		Q->u[dim2] = u-radius;
-		Q->u[dim]  = P2;
+		CCVector3 Pout;
+		Pout.u[dim.x] = lon*radius;
+		Pout.u[dim.y] = u - radius;
+		Pout.u[dim.z] = Pin->u[dim.z];
+
+		//replace the point in the destination cloud
+		*clone->point(i) = Pout;
+
+		if (deviationSF)
+		{
+			deviationSF->setValue(i, Pout.u[dim.y]);
+		}
 
 		// and its normal if necessary
-		if (hasNormals())
+		if (clone->hasNormals())
 		{
-			const CCVector3& N = ccNormalVectors::GetNormal(m_normals->getValue(i));
+			const CCVector3& N = clone->getPointNormal(i);
 
-			PointCoordinateType px = P0+N.u[dim1];
-			PointCoordinateType py = P1+N.u[dim2];
-			PointCoordinateType nlon = atan2(px,py);
-			PointCoordinateType nu = sqrt(px*px+py*py);
+			PointCoordinateType px = CP.u[dim.x] + N.u[dim.x];
+			PointCoordinateType py = CP.u[dim.y] + N.u[dim.y];
+			PointCoordinateType nlon = atan2(px, py);
+			PointCoordinateType nu = sqrt(px*px + py*py);
 
-			CCVector3 n2;
-			n2.u[dim1] = (nlon-lon)*radius;
-			n2.u[dim2] = nu - u;
-			n2.u[dim]  = N.u[dim];
-
-			n2.normalize();
-			setPointNormal(i,n2);
+			CCVector3 N2;
+			N2.u[dim.x] = (nlon - lon)*radius;
+			N2.u[dim.y] = nu - u;
+			N2.u[dim.z] = N.u[dim.z];
+			N2.normalize();
+			clone->setPointNormal(i, N2);
 		}
 
 		//process canceled by user?
 		if (progressCb && !nprogress.oneStep())
 		{
+			delete clone;
+			clone = nullptr;
 			break;
 		}
 	}
-
-	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
 
 	if (progressCb)
 	{
 		progressCb->stop();
 	}
+
+	if (clone)
+	{
+		if (deviationSF)
+		{
+			deviationSF->computeMinAndMax();
+		}
+
+		clone->refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
+	}
+
+	return clone;
 }
 
-void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
-								double alpha_deg,
-								const CCVector3& apex,
-								unsigned char dim/*=2*/,
-								CCLib::GenericProgressCallback* progressCb/*=NULL*/)
+static void ProjectOnCone(	const CCVector3& P,
+							const CCVector3& coneApex,
+							PointCoordinateType alpha_rad,
+							const Tuple3ub& dim,
+							PointCoordinateType& s,
+							PointCoordinateType& delta,
+							PointCoordinateType& phi_rad)
 {
-	assert(dim < 3);
-	unsigned char dim1 = (dim<2 ? dim+1 : 0);
-	unsigned char dim2 = (dim1<2 ? dim1+1 : 0);
+	CCVector3 AP = P - coneApex;
+	//3D distance to the apex
+	PointCoordinateType normAP = AP.norm();
+	//2D distance to the apex (XY plane)
+	PointCoordinateType u = sqrt(AP.u[dim.x] * AP.u[dim.x] + AP.u[dim.y] * AP.u[dim.y]);
+
+	//angle between +Z and AP
+	PointCoordinateType beta_rad = atan2(u, -AP.u[dim.z]);
+	//angular deviation
+	PointCoordinateType gamma_rad = beta_rad - alpha_rad; //if gamma_rad > 0, the point is outside the cone
+
+	//projection on the cone
+	{
+		//longitude (0 = +X = east)
+		phi_rad = atan2(AP.u[dim.y], AP.u[dim.x]);
+		//curvilinear distance from the Apex
+		s = normAP * cos(gamma_rad);
+		//(normal) deviation
+		delta = normAP * sin(gamma_rad);
+	}
+}
+
+ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
+											const CCVector3& coneApex,
+											unsigned char coneAxisDim,
+											bool developStraightenedCone,
+											PointCoordinateType baseRadius,
+											bool exportDeviationSF/*=false*/,
+											CCLib::GenericProgressCallback* progressCb/*=NULL*/) const
+{
+	if (coneAxisDim > 2)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	Tuple3ub dim;
+	dim.z = coneAxisDim;
+	dim.x = (dim.z < 2 ? dim.z + 1 : 0);
+	dim.y = (dim.x < 2 ? dim.x + 1 : 0);
 
 	unsigned numberOfPoints = size();
 
@@ -3590,56 +3682,207 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 		progressCb->start();
 	}
 
-	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>( tan(alpha_deg*CC_DEG_TO_RAD) );
-	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>( cos(alpha_deg*CC_DEG_TO_RAD) );
-	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_deg*CC_DEG_TO_RAD) );
-
-	for (unsigned i=0; i<numberOfPoints; i++)
+	ccPointCloud* clone = const_cast<ccPointCloud*>(this)->cloneThis(0, true);
+	if (!clone)
 	{
-		CCVector3 *P = point(i);
-		PointCoordinateType P0 = P->u[dim1] - apex.u[dim1];
-		PointCoordinateType P1 = P->u[dim2] - apex.u[dim2];
-		PointCoordinateType P2 = P->u[dim]  - apex.u[dim];
+		return 0;
+	}
 
-		PointCoordinateType u = sqrt(P0 * P0 + P1 * P1);
-		PointCoordinateType lon = atan2(P0,P1);
+	PointCoordinateType alpha_rad = coneAngle_deg * CC_DEG_TO_RAD;
+	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>( cos(alpha_rad) );
+	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_rad) );
 
-		//projection on the cone
-		PointCoordinateType radialDist = (u+P2*tan_alpha);
-		PointCoordinateType orthoDist = radialDist * cos_alpha;
-		PointCoordinateType z2 = P2 - orthoDist*sin_alpha;//(P2+u*tan_alpha)*q;
+	CCLib::ScalarField* deviationSF = 0;
+	if (exportDeviationSF)
+	{
+		static const char s_deviationSFName[] = "Deviation";
+		int sfIdx = clone->getScalarFieldIndexByName(s_deviationSFName);
+		if (sfIdx < 0)
+		{
+			sfIdx = clone->addScalarField(s_deviationSFName);
+			if (sfIdx < 0)
+			{
+				ccLog::Warning("[unrollOnCone] Not enough memory to init the deviation scalar field");
+			}
+		}
+		if (sfIdx >= 0)
+		{
+			deviationSF = clone->getScalarField(sfIdx);
+		}
+		clone->setCurrentDisplayedScalarField(sfIdx);
+		clone->showSF(true);
+	}
 
-		//we project point
-		P->u[dim1] = lon*baseRadius;
-		P->u[dim2] = orthoDist;
-		P->u[dim] = z2/cos_alpha + apex.u[dim];
+	for (unsigned i = 0; i < numberOfPoints; i++)
+	{
+		const CCVector3* Pin = getPoint(i);
+
+		PointCoordinateType s, delta, phi_rad;
+		ProjectOnCone(*Pin, coneApex, alpha_rad, dim, s, delta, phi_rad);
+
+		if (deviationSF)
+		{
+			deviationSF->setValue(i, delta);
+		}
+
+		CCVector3 Pout;
+		if (developStraightenedCone)
+		{
+			//we simply develop the cone as a cylinder
+			Pout.u[dim.x] = (baseRadius + delta) * cos(phi_rad);
+			Pout.u[dim.y] = (baseRadius + delta) * sin(phi_rad);
+			Pout.u[dim.z] = coneApex.u[dim.z] - s;
+		}
+		else
+		{
+			//unrolling
+			PointCoordinateType rho = s * sin_alpha;
+			PointCoordinateType theta_rad = phi_rad * sin_alpha;
+
+			//project the point
+			Pout.u[dim.y] = -s * cos(theta_rad);
+			Pout.u[dim.x] =  s * sin(theta_rad);
+			Pout.u[dim.z] = delta;
+		}
+
+		//replace the point in the destination cloud
+		*clone->point(i) = Pout;
 
 		//and its normal if necessary
-		if (hasNormals())
+		if (clone->hasNormals())
 		{
-			const CCVector3& N = ccNormalVectors::GetNormal(m_normals->getValue(i));
+			const CCVector3& N = clone->getPointNormal(i);
 
-			PointCoordinateType dX = cos(lon)*N.u[dim1]-sin(lon)*N.u[dim2];
-			PointCoordinateType dZ = sin(lon)*N.u[dim1]+cos(lon)*N.u[dim2];
+			PointCoordinateType s2, delta2, phi2_rad;
+			ProjectOnCone(*Pin + N, coneApex, alpha_rad, dim, s2, delta2, phi2_rad);
 
-			CCVector3 n2;
-			n2.u[dim1] = dX;
-			n2.u[dim2] = cos_alpha*dZ-sin_alpha*N.u[dim];
-			n2.u[dim]  = sin_alpha*dZ+cos_alpha*N.u[dim];
-			n2.normalize();
+			CCVector3 P2out;
+			if (developStraightenedCone)
+			{
+				//we simply develop the cone as a cylinder
+				P2out.u[dim.x] = (baseRadius + delta2) * cos(phi2_rad);
+				P2out.u[dim.y] = (baseRadius + delta2) * sin(phi2_rad);
+				P2out.u[dim.z] = coneApex.u[dim.z] - s2;
+			}
+			else
+			{
+				//unrolling
+				PointCoordinateType rho2 = s2 * sin_alpha;
+				PointCoordinateType theta2_rad = phi2_rad * sin_alpha;
 
-			setPointNormal(i,n2);
+				//project the point
+				P2out.u[dim.y] = -s2 * cos(theta2_rad);
+				P2out.u[dim.x] =  s2 * sin(theta2_rad);
+				P2out.u[dim.z] = delta2;
+			}
+
+			CCVector3 N2 = P2out - Pout;
+			N2.normalize();
+
+			clone->setPointNormal(i, N2);
 		}
 
 		//process canceled by user?
 		if (progressCb && !nprogress.oneStep())
 		{
+			delete clone;
+			clone = nullptr;
 			break;
 		}
 	}
 
-	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
+	if (progressCb)
+	{
+		progressCb->stop();
+	}
+
+	if (clone)
+	{
+		if (deviationSF)
+		{
+			deviationSF->computeMinAndMax();
+		}
+
+		clone->refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
+	}
+
+	return clone;
 }
+
+//void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
+//	double alpha_deg,
+//	const CCVector3& apex,
+//	unsigned char Z/*=2*/,
+//	CCLib::GenericProgressCallback* progressCb/*=NULL*/)
+//{
+//	assert(Z < 3);
+//	unsigned char X = (Z < 2 ? Z + 1 : 0);
+//	unsigned char Y = (X < 2 ? X + 1 : 0);
+//
+//	unsigned numberOfPoints = size();
+//
+//	CCLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
+//	if (progressCb)
+//	{
+//		if (progressCb->textCanBeEdited())
+//		{
+//			progressCb->setMethodTitle("Unroll (cone)");
+//			progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
+//		}
+//		progressCb->update(0);
+//		progressCb->start();
+//	}
+//
+//	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>(tan(alpha_deg*CC_DEG_TO_RAD));
+//	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>(cos(alpha_deg*CC_DEG_TO_RAD));
+//	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>(sin(alpha_deg*CC_DEG_TO_RAD));
+//
+//	for (unsigned i = 0; i < numberOfPoints; i++)
+//	{
+//		CCVector3* P = point(i);
+//		PointCoordinateType P0 = P->u[X] - apex.u[X];
+//		PointCoordinateType P1 = P->u[Y] - apex.u[Y];
+//		PointCoordinateType P2 = P->u[Z] - apex.u[Z];
+//
+//		PointCoordinateType u = sqrt(P0 * P0 + P1 * P1);
+//		PointCoordinateType lon = atan2(P0, P1);
+//
+//		//projection on the cone
+//		PointCoordinateType radialDist = (u + P2*tan_alpha);
+//		PointCoordinateType orthoDist = radialDist * cos_alpha;
+//		PointCoordinateType z2 = P2 - orthoDist*sin_alpha; //(P2 + u * tan_alpha) * q;
+//
+//		//we project point
+//		P->u[X] = lon*baseRadius;
+//		P->u[Y] = orthoDist;
+//		P->u[Z] = z2 / cos_alpha + apex.u[Z];
+//
+//		//and its normal if necessary
+//		if (hasNormals())
+//		{
+//			const CCVector3& N = ccNormalVectors::GetNormal(m_normals->getValue(i));
+//
+//			PointCoordinateType dX = cos(lon)*N.u[X] - sin(lon)*N.u[Y];
+//			PointCoordinateType dZ = sin(lon)*N.u[X] + cos(lon)*N.u[Y];
+//
+//			CCVector3 n2;
+//			n2.u[X] = dX;
+//			n2.u[Y] = cos_alpha*dZ - sin_alpha*N.u[Z];
+//			n2.u[Z] = sin_alpha*dZ + cos_alpha*N.u[Z];
+//			n2.normalize();
+//
+//			setPointNormal(i, n2);
+//		}
+//
+//		//process canceled by user?
+//		if (progressCb && !nprogress.oneStep())
+//		{
+//			break;
+//		}
+//	}
+//
+//	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
+//}
 
 int ccPointCloud::addScalarField(const char* uniqueName)
 {

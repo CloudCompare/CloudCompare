@@ -3613,6 +3613,7 @@ ccPointCloud* ccPointCloud::unrollOnCylinder(	PointCoordinateType radius,
 			deviationSF->computeMinAndMax();
 		}
 
+		clone->setName(getName() + ".unrolled");
 		clone->refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
 	}
 
@@ -3803,6 +3804,7 @@ ccPointCloud* ccPointCloud::unrollOnCone(	double coneAngle_deg,
 			deviationSF->computeMinAndMax();
 		}
 
+		clone->setName(getName() + ".unrolled");
 		clone->refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
 	}
 

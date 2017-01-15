@@ -440,7 +440,7 @@ protected:
 	/** First parameter: other object
 		Second parameter: dependency flags (see DEPENDENCY_FLAGS)
 	**/
-	std::map<ccHObject*,int> m_dependencies;
+	std::map<ccHObject*, int> m_dependencies;
 
 	//! Cumulative GL transformation
 	/** History of all the applied transformations since the creation of the object
@@ -463,11 +463,11 @@ protected:
 inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, int dependencyFlags = ccHObject::DP_NONE)
 {
 	size_t count = origin.size();
-	for (size_t i=0; i<count; ++i)
+	for (size_t i = 0; i < count; ++i)
 	{
 		//we don't take objects that are siblings of others
 		bool isSiblingOfAnotherOne = false;
-		for (size_t j=0; j<count; ++j)
+		for (size_t j = 0; j < count; ++j)
 		{
 			if (i != j && origin[j]->isAncestorOf(origin[i]))
 			{

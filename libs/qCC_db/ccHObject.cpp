@@ -72,7 +72,7 @@ ccHObject::~ccHObject()
 	m_isDeleting = true;
 
 	//process dependencies
-	for (std::map<ccHObject*,int>::const_iterator it=m_dependencies.begin(); it!=m_dependencies.end(); ++it)
+	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)
 	{
 		assert(it->first);
 		//notify deletion to other object?
@@ -104,7 +104,7 @@ void ccHObject::notifyGeometryUpdate()
 		m_currentDisplay->invalidateViewport();
 
 	//process dependencies
-	for (std::map<ccHObject*,int>::const_iterator it=m_dependencies.begin(); it!=m_dependencies.end(); ++it)
+	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)
 	{
 		assert(it->first);
 		//notify deletion to other object?
@@ -261,12 +261,12 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 	//whenever we add a dependency, we must be sure to be notified
 	//by the other object when its deleted! Otherwise we'll keep
 	//bad pointers in the dependency list...
-	otherObject->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE);
+	otherObject->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
 
 int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject)
 {
-	std::map<ccHObject*,int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
+	std::map<ccHObject*, int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 
 	return (it != m_dependencies.end() ? it->second : 0);
 }
@@ -275,7 +275,7 @@ void ccHObject::removeDependencyWith(ccHObject* otherObject)
 {
 	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 	if (!otherObject->m_isDeleting)
-		otherObject->removeDependencyFlag(this,DP_NOTIFY_OTHER_ON_DELETE);
+		otherObject->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
 
 void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS flag)
@@ -304,7 +304,7 @@ void ccHObject::onDeletionOf(const ccHObject* obj)
 	if (pos >= 0)
 	{
 		//we can't swap children as we want to keep the order!
-		m_children.erase(m_children.begin()+pos);
+		m_children.erase(m_children.begin() + pos);
 	}
 }
 

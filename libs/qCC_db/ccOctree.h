@@ -27,6 +27,7 @@
 #include <ReferenceCloud.h>
 
 //Qt
+#include <QObject>
 #include <QSharedPointer>
 
 //system
@@ -39,8 +40,10 @@ class ccCameraSensor;
 //! Octree structure
 /** Extends the CCLib::DgmOctree class.
 **/
-class QCC_DB_LIB_API ccOctree : public CCLib::DgmOctree
+class QCC_DB_LIB_API ccOctree : public QObject, public CCLib::DgmOctree
 {
+	Q_OBJECT
+
 public: //GENERAL METHODS
 
 	//! Shared pointer
@@ -118,6 +121,11 @@ public: //HELPERS
 	//! Computes the average normal of a set of points
 	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
 										ccGenericPointCloud* sourceCloud);
+
+signals:
+
+	//! Signal sent when the octree organization is modified (cleared, etc.)
+	void updated();
 
 protected: ////RENDERING
 

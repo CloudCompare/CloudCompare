@@ -288,9 +288,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 			addSeparator("Display transformation");
 			appendWideRow(PERSISTENT_EDITOR(OBJECT_GLTRANS_MATRIX_EDITOR));
 		}
-
-		fillWithMetaData(m_currentObject);
 	}
+
+	//meta-data
+	fillWithMetaData(m_currentObject);
 
 	//go back to original position
 	if (scrollPos > 0)

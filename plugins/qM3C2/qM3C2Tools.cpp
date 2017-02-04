@@ -114,7 +114,7 @@ void ComputeCorePointNormal(unsigned index)
 			//we determine the plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
 			CCLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
-			if (Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues))
+			if (Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
 			{
 				/*** code and comments below are from the original 'm3c2' code (N. Brodu) ***/
 

@@ -1071,7 +1071,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		//we compute its eigenvalues and eigenvectors
 		CCLib::SquareMatrixd eigVectors;
 		std::vector<double> eigValues;
-		if (!Jacobi<double>::ComputeEigenValuesAndVectors(QSigma, eigVectors, eigValues))
+		if (!Jacobi<double>::ComputeEigenValuesAndVectors(QSigma, eigVectors, eigValues, false))
 		{
 			//failure
 			return false;

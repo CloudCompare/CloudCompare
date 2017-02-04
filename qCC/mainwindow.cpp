@@ -1576,7 +1576,7 @@ void MainWindow::doComputeBestFitBB()
 			{
 				CCLib::SquareMatrixd eigVectors;
 				std::vector<double> eigValues;
-				if (Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues))
+				if (Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues, true))
 				{
 					Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
 
@@ -3392,7 +3392,7 @@ void MainWindow::doActionMerge()
 		ccPointCloud* firstCloud = 0;
 		ccHObjectContext firstCloudContext;
 
-		for (size_t i=0; i<clouds.size(); ++i)
+		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* pc = clouds[i];
 			if (!firstCloud)
@@ -3463,9 +3463,14 @@ void MainWindow::doActionMerge()
 		baseMesh->setName("Merged mesh");
 		baseMesh->addChild(baseVertices);
 		baseVertices->setEnabled(false);
-		for (size_t i=0; i<meshes.size(); ++i)
+		for (size_t i = 0; i < meshes.size(); ++i)
 		{
 			ccMesh* mesh = meshes[i];
+
+			//if (mesh->isA(CC_TYPES::PRIMITIVE))
+			//{
+			//	mesh = mesh->ccMesh::cloneMesh(); //we want a clone of the mesh part, not the primitive!
+			//}
 
 			unsigned sizeBefore = baseMesh->size();
 			if (!baseMesh->merge(mesh))

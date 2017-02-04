@@ -204,7 +204,11 @@ public:
 	//! Computes eigen vectors (and values) with the Jacobian method
 	/** See the Numerical Recipes.
 	**/
-	static bool ComputeEigenValuesAndVectors(const SquareMatrix& matrix, SquareMatrix& eigenVectors, EigenValues& eigenValues, unsigned maxIterationCount = 50)
+	static bool ComputeEigenValuesAndVectors(	const SquareMatrix& matrix,
+												SquareMatrix& eigenVectors,
+												EigenValues& eigenValues,
+												bool absoluteValues = true,
+												unsigned maxIterationCount = 50)
 	{
 		if (!matrix.isValid())
 		{
@@ -259,9 +263,12 @@ public:
 
 			if (sm == 0) //The normal return, which relies on quadratic convergence to machine underflow.
 			{
-				//we only need the absolute values of eigenvalues
-				for (unsigned ip = 0; ip < n; ip++)
-					d[ip] = fabs(d[ip]);
+				if (absoluteValues)
+				{
+					//we only need the absolute values of eigenvalues
+					for (unsigned ip = 0; ip < n; ip++)
+						d[ip] = fabs(d[ip]);
+				}
 
 				return true;
 			}

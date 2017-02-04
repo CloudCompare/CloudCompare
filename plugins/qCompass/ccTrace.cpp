@@ -504,7 +504,7 @@ ccPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	//calculate eigenvalues of neighbourhood
 	CCLib::SquareMatrixd cov = Z.computeCovarianceMatrix();
 	CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
-	if (Jacobi<double>::ComputeEigenValuesAndVectors(cov, eigVectors, eigValues))
+	if (Jacobi<double>::ComputeEigenValuesAndVectors(cov, eigVectors, eigValues, true))
 	{
 		//sort eigenvalues into decending order
 		std::sort(eigValues.rbegin(), eigValues.rend());

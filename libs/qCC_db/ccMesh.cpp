@@ -1166,8 +1166,10 @@ bool ccMesh::merge(const ccMesh* mesh)
 		ccLog::Warning("[ccMesh::merge] Internal error: invalid input!");
 		return false;
 	}
-	if (	!mesh->getAssociatedCloud() || !mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)
-		||	!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
+	if (	!mesh->getAssociatedCloud()
+		||	!mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)
+		||	!m_associatedCloud
+		||	!m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		assert(false);
 		ccLog::Warning("[ccMesh::merge] Requires meshes with standard vertices!");
@@ -1231,10 +1233,10 @@ bool ccMesh::merge(const ccMesh* mesh)
 				break;
 			}
 
-			for (unsigned i=0; i<triAdded; ++i)
+			for (unsigned i = 0; i < triAdded; ++i)
 			{
 				const CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
-				addTriangle(vertIndexShift+tsi->i1, vertIndexShift+tsi->i2, vertIndexShift+tsi->i3);
+				addTriangle(vertIndexShift + tsi->i1, vertIndexShift + tsi->i2, vertIndexShift + tsi->i3);
 			}
 		}
 
@@ -1263,7 +1265,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 					}
 					//copy the values
 					{
-						for (unsigned i=0; i<mesh->m_triNormals->currentSize(); ++i)
+						for (unsigned i = 0; i < mesh->m_triNormals->currentSize(); ++i)
 							m_triNormals->addElement(mesh->m_triNormals->getValue(i));
 					}
 					triIndexShift = triNormalsCountBefore;
@@ -1273,7 +1275,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_triNormalIndexes->capacity() >= triNumBefore + triAdded);
 				//copy the values
 				{
-					for (unsigned i=0; i<mesh->m_triNormalIndexes->currentSize(); ++i)
+					for (unsigned i = 0; i < mesh->m_triNormalIndexes->currentSize(); ++i)
 					{
 						const int* indexes = mesh->m_triNormalIndexes->getValue(i);
 						int newIndexes[3] = {	indexes[0] < 0 ? -1 : indexes[0] + static_cast<int>(triIndexShift),
@@ -1290,7 +1292,7 @@ bool ccMesh::merge(const ccMesh* mesh)
 				//fill the indexes table with default values
 				{
 					int defaultElement[3] = {-1,-1,-1};
-					for (unsigned i=0; i<mesh->m_triNormalIndexes->currentSize(); ++i)
+					for (unsigned i = 0; i < mesh->m_triNormalIndexes->currentSize(); ++i)
 						m_triNormalIndexes->addElement(defaultElement);
 				}
 			}

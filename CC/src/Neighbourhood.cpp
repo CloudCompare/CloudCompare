@@ -279,7 +279,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 		//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
 		CCLib::SquareMatrixd eigVectors;
 		std::vector<double> eigValues;
-		if (!Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues))
+		if (!Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues, true))
 		{
 			//failed to compute the eigen values!
 			return false;
@@ -671,7 +671,7 @@ bool Neighbourhood::compute3DQuadric(double quadricEquation[10])
 #else
 	CCLib::SquareMatrixd eigVectors;
 	std::vector<double> eigValues;
-	if (!Jacobi<double>::ComputeEigenValuesAndVectors(D, eigVectors, eigValues))
+	if (!Jacobi<double>::ComputeEigenValuesAndVectors(D, eigVectors, eigValues, true))
 	{
 		//failure
 		return false;
@@ -933,7 +933,7 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 #else
 			CCLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
-			if (!Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues))
+			if (!Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues, true))
 			{
 				//failure
 				return NAN_VALUE;
@@ -944,14 +944,14 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 			e.y = eigValues[1];
 			e.z = eigValues[2];
 #endif
-			double sum = fabs(e.x + e.y + e.z);
+			double sum = e.x + e.y + e.z; //we work with absolute values
 			if (sum < ZERO_TOLERANCE)
 			{
 				return NAN_VALUE;
 			}
 
 			double eMin = std::min(std::min(e.x, e.y), e.z);
-			return static_cast<ScalarType>(fabs(eMin) / sum);
+			return static_cast<ScalarType>(eMin / sum);
 		}
 		break;
 

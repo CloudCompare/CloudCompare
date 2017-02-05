@@ -48,11 +48,12 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 		{
 			if (isTrace(selectedEntities[i]))
 			{
-				if (m_trace)
+				if (m_trace && m_trace != selectedEntities[i]) //we've selected a new trace
 					onAccept(); //accept current trace
 
 				//activate newly selected trace
 				pickupTrace(selectedEntities[i]);
+
 				//done
 				return;
 			}
@@ -68,12 +69,8 @@ void ccCompass::pickupTrace(ccHObject* obj)
 		//change color
 		m_trace->setTraceColor(ccColor::yellow);
 		m_trace->setWaypointColor(ccColor::green);
-
-		//remove any fit planes
-		m_trace->removeAllChildren();
 	}
 }
-
 
 //Submit the action to launch ccCompass to CC
 void ccCompass::getActions(QActionGroup& group)
@@ -324,6 +321,9 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			m_app->addToDB(category_group, false, true, false, false);
 		}
 
+		//ensure category_group and measurement_group are enabled (avoids confusion if it is turned off...)
+		measurement_group->setEnabled(true);
+		category_group->setEnabled(true);
 
 		if (m_pickingMode == MODE::PLANE_MODE) //DIRECT PLANE FITTING MODE
 		{
@@ -356,7 +356,6 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				//calculate dip/dip direction
 				float strike, dip;
 				ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
-				//QString dipAndDipDirStr = ccNormalVectors::ConvertStrikeAndDipToString(s, d);
 				QString dipAndDipDirStr = QString("%1/%2").arg((int) strike, 3, 10, QChar('0')).arg((int) dip, 2, 10, QChar('0'));
 
 				//calculate centroid
@@ -378,12 +377,17 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				pPlane->enableStippling(m_drawStippled);
 				pPlane->showNameIn3D(m_drawName);
 				pPlane->showNormalVector(m_drawNormals);
+
 				//add plane to scene graph
 				category_group->addChild(pPlane);
 				pPlane->setDisplay(m_window);
 				pPlane->prepareDisplayForRefresh_recursive(); //not sure what this does, but it looks like fun
+
 				//add plane to TOC
 				m_app->addToDB(pPlane, false, false, false, false);
+
+				//report orientation to console for convenience
+				m_app->dispToConsole(QString("[ccCompass] Surface orientation estimate = " + dipAndDipDirStr), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 			} 
 		} else if (m_pickingMode == MODE::TRACE_MODE) //TRACE PICKING MODE
 		{
@@ -405,7 +409,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				m_trace_id = m_trace->getUniqueID();
 				category_group->addChild(m_trace);
 				m_app->addToDB(m_trace, false, false, false, false);
-				//m_app->dispToConsole(QString("[ccCompass] Added trace waypoint."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				m_app->setSelectedInDB(m_trace, true);
 			}
 
 			//update cost function
@@ -413,12 +417,20 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 
 			//add point
 			int index = m_trace->insertWaypoint(itemIdx);
-			//m_app->dispToConsole(QString("[ccCompass] Added point to active trace."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 			//optimise points
 			if (m_trace->waypoint_count() >= 2)
 			{
-				//m_app->dispToConsole(QString("[ccCompass] Optimising path..."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				//check if m_trace has previously fitted planes before optimizing (and delete them if so)
+				for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+				{
+					ccHObject* child = m_trace->getChild(idx);
+					if (isFitPlane(child)) //we've found a best-fit-plane -> remove this as it will no longer be valid.
+					{
+						m_app->removeFromDB(child); //n.b. removeFromDB also deletes the child
+					}
+				}
+
 				if (!m_trace->optimizePath())
 					m_app->dispToConsole(QString("[ccCompass] Failed to optimize trace path... please try again."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 			}
@@ -436,7 +448,6 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				m_lineation->prepareDisplayForRefresh_recursive();
 				category_group->addChild(m_lineation);
 				m_app->addToDB(m_lineation, false, false, false, false);
-				//m_app->dispToConsole(QString("[ccCompass] Measuring new lineation."), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 			}
 
 			//add point
@@ -490,6 +501,9 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				m_lineation->setName(trendAndPlungeStr);
 				m_lineation->showNameIn3D(m_drawName);
 
+				//report orientation to console for convenience
+				m_app->dispToConsole(QString("[ccCompass] Lineation = " + trendAndPlungeStr), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
 				//start new one
 				m_lineation = nullptr;
 			}
@@ -497,6 +511,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		}
 
 		//redraw
+		m_app->updateUI();
 		m_window->redraw();
 	}
 }
@@ -551,22 +566,43 @@ void ccCompass::onAccept()
 		//fit plane
 		if (m_dlg->planeFitMode())
 		{
-			ccPlane* p = m_trace->fitPlane();
-			if (p)
+
+			//check if a fit-plane already exists (and bail if it does)
+			bool calculateFitPlane = true;
+			for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
 			{
-				p ->setVisible(true);
-				p->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
-				p->showNormals(true);
-				p->enableStippling(m_drawStippled);
-				p->showNameIn3D(m_drawName);
-				p->showNormalVector(m_drawNormals);
-				m_trace->addChild(p);
+				ccHObject* child = m_trace->getChild(idx);
+				if (isFitPlane(child)) //we've found a best-fit-plane -> remove this as it will no longer be valid.
+				{
+					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate already exists ( " + child->getName() + ")"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+					calculateFitPlane = false;
+					break;
+				}
 			}
-			else
+			//plane has not (yet) been calculated - go ahead and do some magic
+			if (calculateFitPlane)
 			{
-				m_app->dispToConsole(QString("[ccCompass] Not enough topography to fit plane to trace!"), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				ccPlane* p = m_trace->fitPlane();
+				if (p)
+				{
+					p->setVisible(true);
+					p->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
+					p->showNormals(true);
+					p->enableStippling(m_drawStippled);
+					p->showNameIn3D(m_drawName);
+					p->showNormalVector(m_drawNormals);
+					m_trace->addChild(p);
+
+					//report orientation to console for convenience
+					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate = " + p->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				}
+				else
+				{
+					m_app->dispToConsole(QString("[ccCompass] Not enough topography to fit plane to trace!"), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				}
 			}
 		}
+		m_app->setSelectedInDB(m_trace, false); //deselect this trace
 	}
 	m_trace = nullptr;
 	m_window->redraw();

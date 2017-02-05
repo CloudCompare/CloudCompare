@@ -283,7 +283,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 
 		if (!cloud)
 		{
-			ccLog::Warning("[Item picking] Shit's fucked (Picked point is not in pickable entities DB?)!");
+			ccLog::Warning("[Item picking] Shit's fubar (Picked point is not in pickable entities DB?)!");
 			return;
 		}
 
@@ -572,7 +572,7 @@ void ccCompass::onAccept()
 			for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
 			{
 				ccHObject* child = m_trace->getChild(idx);
-				if (isFitPlane(child)) //we've found a best-fit-plane -> remove this as it will no longer be valid.
+				if (isFitPlane(child)) //we've found a best-fit-plane
 				{
 					m_app->dispToConsole(QString("[ccCompass] Trace orientation estimate already exists ( " + child->getName() + ")"), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 					calculateFitPlane = false;
@@ -598,7 +598,7 @@ void ccCompass::onAccept()
 				}
 				else
 				{
-					m_app->dispToConsole(QString("[ccCompass] Not enough topography to fit plane to trace!"), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					m_app->dispToConsole(QString("[ccCompass] Not enough topography to fit plane to trace."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				}
 			}
 		}

@@ -86,6 +86,12 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	p.setColor(backgroundRole(), QColor(240, 240, 240, 200));
 	setPalette(p);
 	setAutoFillBackground(true);
+
+	//add shortcuts
+	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
+	addOverridenShortcut(Qt::Key_Space); //space key also hits the "apply" button (easier for some)
+	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
 }
 
 int ccCompassDlg::getCostMode()
@@ -117,4 +123,23 @@ int ccCompassDlg::getCostMode()
 bool ccCompassDlg::planeFitMode()
 {
 	return m_plane_fit->isChecked();
+}
+
+void ccCompassDlg::onShortcutTriggered(int key)
+{
+	switch (key)
+	{
+	case Qt::Key_Return:
+		acceptButton->click();
+		return;
+	case Qt::Key_Space:
+		acceptButton->click();
+		return;
+	case Qt::Key_Escape:
+		closeButton->click();
+		return;
+	default:
+		//nothing to do
+		break;
+	}
 }

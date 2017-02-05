@@ -51,6 +51,10 @@ public:
 
 	QMenu *m_cost_algorithm_menu;
 
+protected slots:
+	//! To capture overridden shortcuts (pause button, etc.)
+	void onShortcutTriggered(int);
+
 private:
 	QAction *m_dark;
 	QAction *m_light;

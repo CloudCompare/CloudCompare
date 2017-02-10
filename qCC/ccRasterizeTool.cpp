@@ -116,7 +116,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent/*=0
 		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-			for (unsigned i=0; i<pc->getNumberOfScalarFields(); ++i)
+			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 			{
 				activeLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
 			}
@@ -823,12 +823,12 @@ void ccRasterizeTool::generateMesh() const
 		CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
 																								DELAUNAY_2D_AXIS_ALIGNED,
 																								0,
-																								2,
+																								getProjectionDimension(),
 																								errorStr);
 		ccMesh* rasterMesh = 0;
 		if (baseMesh)
 		{
-			rasterMesh = new ccMesh(baseMesh,rasterCloud);
+			rasterMesh = new ccMesh(baseMesh, rasterCloud);
 			delete baseMesh;
 			baseMesh = 0;
 		}

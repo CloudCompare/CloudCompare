@@ -29,6 +29,9 @@ v2.9.alpha - XX/XX/XXXX
 	* Trace polyline tool
 		- the tool now works on meshes
 
+	* Command line mode
+		- 2.5D Volume Calculation tool (-VOLUME ...)
+
 - Bug fixes:
 
 	* LAS I/O filter: if the points of a LAS file were not saved in increasing GPS time order,

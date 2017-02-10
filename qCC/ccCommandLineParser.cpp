@@ -185,7 +185,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandClearMeshes));
 	registerCommand(Command::Shared(new CommandPopMeshes));
 	registerCommand(Command::Shared(new CommandSetNoTimestamp));
-	//registerCommand(Command::Shared(new XXX));
+	registerCommand(Command::Shared(new CommandVolume25D));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));

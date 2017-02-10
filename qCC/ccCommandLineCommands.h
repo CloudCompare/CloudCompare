@@ -100,7 +100,7 @@ static const char COMMAND_SF_OP[]							= "SF_OP";
 static const char COMMAND_VOLUME[]							= "VOLUME";
 static const char COMMAND_VOLUME_VERT_DIR[]					= "VERT_DIR";
 static const char COMMAND_VOLUME_GRID_STEP[]				= "GRID_STEP";
-static const char COMMAND_VOLUME_REF_IS_FIRST[]				= "REF_IS_FIRST";
+static const char COMMAND_VOLUME_GROUND_IS_FIRST[]			= "GROUND_IS_FIRST";
 static const char COMMAND_VOLUME_OUTPUT_MESH[]				= "OUTPUT_MESH";
 static const char COMMAND_VOLUME_CONST_HEIGHT[]				= "CONST_HEIGHT";
 static const char COMMAND_ICP[]								= "ICP";
@@ -406,7 +406,7 @@ struct CommandLoad : public ccCommandLineInterface::Command
 
 				if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO)
 				{
-					//let CC handles the global shift automatically
+					//let CC handle the global shift automatically
 					loadParams.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 				}
 				else if (cmd.arguments().size() < 2)
@@ -3004,7 +3004,7 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 		cmd.print("[2.5D VOLUME]");
 
 		//look for local options
-		bool referenceIsFirst = false;
+		bool groundIsFirst = false;
 		double gridStep = 0;
 		double constHeight = std::numeric_limits<double>::quiet_NaN();
 		bool outputMesh = false;
@@ -3013,12 +3013,12 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 		while (!cmd.arguments().empty())
 		{
 			QString argument = cmd.arguments().front();
-			if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_REF_IS_FIRST))
+			if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_GROUND_IS_FIRST))
 			{
 				//local option confirmed, we can move on
 				cmd.arguments().pop_front();
 
-				referenceIsFirst = true;
+				groundIsFirst = true;
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_OUTPUT_MESH))
 			{
@@ -3035,7 +3035,9 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 				bool ok;
 				gridStep = cmd.arguments().takeFirst().toDouble(&ok);
 				if (!ok || gridStep <= 0)
+				{
 					return cmd.error(QString("Invalid grid step value! (after %1)").arg(COMMAND_VOLUME_GRID_STEP));
+				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_CONST_HEIGHT))
 			{
@@ -3045,7 +3047,9 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 				bool ok;
 				constHeight = cmd.arguments().takeFirst().toDouble(&ok);
 				if (!ok)
+				{
 					return cmd.error(QString("Invalid const. height value! (after %1)").arg(COMMAND_VOLUME_CONST_HEIGHT));
+				}
 			}
 			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_VERT_DIR))
 			{
@@ -3055,8 +3059,15 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 				bool ok;
 				vertDir = cmd.arguments().takeFirst().toInt(&ok);
 				if (!ok || vertDir < 0 || vertDir > 2)
+				{
 					return cmd.error(QString("Invalid vert. direction! (after %1)").arg(COMMAND_VOLUME_VERT_DIR));
+				}
 			}
+		}
+
+		if (gridStep == 0)
+		{
+			return cmd.error(QString("Grid step value not defined (use %1)").arg(COMMAND_VOLUME_GRID_STEP));
 		}
 
 		//we'll get the first two clouds
@@ -3079,9 +3090,9 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 				return cmd.error(QString("Not enough loaded entities (%1 found, %2 expected)").arg(index).arg(expectedCount));
 			}
 
-			if (index == 2 && referenceIsFirst)
+			if (index == 2 && groundIsFirst)
 			{
-				//put them in the right order (data first, model next)
+				//put them in the right order (ground then ceil)
 				std::swap(clouds[0], clouds[1]);
 			}
 

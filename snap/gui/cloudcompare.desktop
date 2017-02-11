@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=CloudCompare
+Comment=3D point cloud and mesh processing software
+Exec=cloudcompare.CloudCompare
+Terminal=false
+Categories=Graphics;
+Icon=${SNAP}/meta/gui/cloudcompare.png
+

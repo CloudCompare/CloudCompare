@@ -1,0 +1,44 @@
+name: cloudcompare
+version: '2.8.0-0'
+summary: 3D point cloud and mesh processing software
+description: |
+  CloudCompare is a 3D point cloud (and triangular mesh) processing software.
+  Originally designed to perform comparison between two dense 3D points clouds
+  or between a point cloud and a triangular mesh, it has been extended to a
+  more generic point cloud processing software, including many advanced
+  algorithms (registration, resampling, color/normal/scalar fields handling,
+  statistics computation, sensor management, interactive or automatic
+  segmentation, display enhancement, etc.).
+
+icon: snap/gui/cloudcompare.png
+
+grade: stable
+confinement: strict
+
+apps:
+  ccViewer:
+    command: launch ccViewer
+    plugs: [home, x11, mir, opengl, unity7]
+  CloudCompare:
+    command: launch CloudCompare
+    plugs: [home, x11, mir, opengl, unity7]
+
+parts:
+  cloudcompare:
+    after: [desktop-qt5]
+    plugin: cmake
+    source: https://github.com/CloudCompare/CloudCompare.git
+    source-tag: v2.8.0
+    build-packages:
+      - qt5-default
+    prepare: |
+      sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
+  launcher:
+    plugin: dump
+    source: snap
+    organize:
+      launch: bin/launch
+    prime:
+      - bin/*
+
+

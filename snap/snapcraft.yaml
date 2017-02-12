@@ -79,7 +79,8 @@ parts:
         -DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so" \
         -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL \
         ..
-      make -j8
+      export NPROCS=$(grep -c ^processor /proc/cpuinfo)
+      make -j${NPROCS}
     install: |
       cd build
       make install

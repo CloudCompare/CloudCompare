@@ -16,6 +16,8 @@
 //##########################################################################
 
 #include "ccTrace.h"
+#include <queue>
+#include <bitset>
 
 ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 {
@@ -191,12 +193,15 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	const CCVector3* end_v = m_cloud->getPoint(end);
 
 	//code essentialy taken from wikipedia page for Djikstra: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-	std::unordered_map<int, int> closedSet; //visited nodes (key=nodeID, value=prevNodeID)
-	std::unordered_map<int, int> openSet; //nodes we are currently exploring (key=nodeID, value=prevNodeID)
-	std::unordered_map<int, int> dist; //<node, cost estimate from start to end via this node>
+	std::vector<bool> visited; //an array of bits to check if node has been visited
+	std::priority_queue<Node> openQueue; //priority queue that stores nodes that haven't yet been explored/opened
+	std::unordered_map<int, int> closedSet; //visited nodes (key=nodeID, value=prevNodeID). N.B. this is only used for reconstructing the path
+
+	//set size of visited such that there is one bit per point in the cloud
+	visited.resize(m_cloud->size(), false); //n.b. for 400 million points, this will still only be ~50Mb =)
 
 	//declare variables used in the loop
-	int current = 0;
+	int current_idx = 0;
 	int cost = 0;
 	int smallest_cost = 999999;
 	int iter_count = 0;
@@ -210,42 +215,40 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	}
 	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(search_r);
 
-	openSet[start] = start; //open start node
-	dist[start] = 0; //start-start distance = 0
-	while (openSet.size() > 0) //while unvisited nodes exist
+	//add start node to open set
+	Node start_node(start, 0);
+	openQueue.push(start_node);
+
+	//mark start node as visited
+	visited[start] = true;
+
+	while (openQueue.size() > 0) //while unvisited nodes exist
 	{
 		//check if we excede max iterations
 		if (iter_count > maxIterations)
 			return std::deque<int>(); //bail
 		iter_count++;
 
-		//get node from openSet with smallest cost
-		smallest_cost = 999999;
-		for (const auto &myPair : openSet)
-		{
-			cost = dist[myPair.first];
-			if (cost < smallest_cost)
-			{
-				smallest_cost = cost;
-				current = myPair.first;
-			}
-		}
+		//get lowest cost node for expansion
+		Node current = openQueue.top();
+		current_idx = current.index;
 
-		closedSet[current] = openSet[current]; //add current to closedSet
-		openSet.erase(current); //remove current from openSet
-				
-		if (current == end) //we've found it!
+		//remove node from open set
+		openQueue.pop(); //remove node from open set (queue)
+
+		if (current_idx == end) //we've found it!
 		{
 			std::deque<int> path;
 			path.push_back(end); //add end node
 
 			//traverse backwards to reconstruct path
-			current = closedSet[current]; //move back one
-			while (current != start)
+			current_idx = closedSet[current_idx]; //move back one
+			while (current_idx != start)
 			{
-				path.push_front(current);
-				current = closedSet[current];
+				path.push_front(current_idx);
+				current_idx = closedSet[current_idx];
 			}
+
 			path.push_front(start);
 
 			//return
@@ -253,19 +256,22 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 		}
 
 		//calculate distance from current nodes parent to end -> avoid going backwards (in euclidean space) [essentially stops fracture turning > 90 degrees)
-		const CCVector3* cur = m_cloud->getPoint(closedSet[current]);
+		const CCVector3* cur = m_cloud->getPoint(current_idx);
 		cur_d2 =	(cur->x - end_v->x)*(cur->x - end_v->x) +
 					(cur->y - end_v->y)*(cur->y - end_v->y) +
 					(cur->z - end_v->z)*(cur->z - end_v->z);
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
-		int n = oct->getPointsInSphericalNeighbourhood(*m_cloud->getPoint(current), PointCoordinateType(search_r), m_neighbours, level);
+		int n = oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(search_r), m_neighbours, level);
 
 		//loop through neighbours
-		for (size_t i = 0; i < m_neighbours.size(); i++) //N.B. i = [pointID,cost]
+		for (size_t i = 0; i < m_neighbours.size(); i++)
 		{
 			m_p = m_neighbours[i];
+
+			if (visited[m_p.pointIndex]) //Has this node been visited before? If so then bail.
+				continue;
 
 			//calculate (squared) distance from this neighbour to the end
 			next_d2 =	(m_p.point->x - end_v->x)*(m_p.point->x - end_v->x) +
@@ -275,36 +281,25 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 			if (next_d2 >= cur_d2) //Bigger than the original distance? If so then bail.
 				continue;
 
-			if (closedSet.count(m_p.pointIndex) == 1) //Is point in closed set? If so, bail.
-				continue;
-
 			//calculate cost to this neighbour
-			cost = getSegmentCost(current, m_p.pointIndex, search_r);
+			cost = getSegmentCost(current_idx, m_p.pointIndex, search_r);
 
 			#ifdef DEBUG_PATH
 			m_cloud->setPointScalarValue(m_p.pointIndex, static_cast<ScalarType>(cost)); //STORE VISITED NODES (AND COST) FOR DEBUG VISUALISATIONS
 			#endif
 
 			//transform into cost from start node
-			cost += dist[current];
+			cost += current.total_cost;
 
-			//have we visited this node before?
-			if (dist.count(m_p.pointIndex) == 1)
-			{
-				//is this cost better?
-				if (cost < dist[m_p.pointIndex])
-				{
+			//store node details in the open queue
+			Node n(m_p.pointIndex, cost);
+			openQueue.push(n);
 
-					dist[m_p.pointIndex] = cost; //update cost with better value
-					closedSet[m_p.pointIndex] = current; //store this as the best path to this node
-				}
-				else
-					continue; //skip
-			} else //this is the first time we've looked at this node
-			{
-				openSet[m_p.pointIndex] = current; //add to open set - we can move here next
-				dist[m_p.pointIndex] = cost; //store cost
-			}
+			//store node & previous node for (eventually) reconstructing the path
+			closedSet[m_p.pointIndex] = current_idx;
+
+			//mark node as visited
+			visited[m_p.pointIndex] = true;
 		}
 	}
 
@@ -382,11 +377,6 @@ int ccTrace::getSegmentCostDark(int p1, int p2)
 
 	//return "taxi-cab" length
 	return (p2_rgb[0] + p2_rgb[1] + p2_rgb[2]); //note: this will naturally give a maximum of 765 (=255 + 255 + 255)
-
-	//return length
-	//return sqrt((p2_rgb[0] * p2_rgb[0]) +
-	//	(p2_rgb[1] * p2_rgb[1]) +
-	//	(p2_rgb[2] * p2_rgb[2]))*2; //*2 makes it add to 884 for, which is a prereq for cost function mixing
 }
 
 int ccTrace::getSegmentCostLight(int p1, int p2)

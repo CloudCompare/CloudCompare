@@ -201,6 +201,31 @@ protected:
 	ccColor::Rgba m_trace_colour = ccColor::yellow;
 
 private:
+
+	//structure for storing point index & path costs (from the path start) in sorted lists
+	class Node
+	{
+	public:
+
+		Node(int node_index=-1, int node_total_cost=0)
+		{
+			index = node_index;
+			total_cost = node_total_cost;
+		}
+
+		int index;
+		int total_cost;
+
+		bool operator<(Node const& t1) const
+		{
+			//n.b. the priority queue puts "higher" priorities at the front of the queue.
+			//in this case, lower total_cost = "higher priority"
+			//hence we compare total_cost with the > operator
+			//i.e. this is less important than t1 if this.total_cost > t1.total_cost 
+			return total_cost > t1.total_cost; //compare based on cost
+		}
+	};
+
 	//random vars that we keep to optimise speed
 	int m_start_rgb[3];
 	int m_end_rgb[3]; //[r,g,b] values for start and end nodes

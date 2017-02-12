@@ -1,0 +1,99 @@
+name: cloudcompare
+version: '2.8.0-1'
+summary: 3D point cloud and mesh processing software
+description: |
+  CloudCompare is a 3D point cloud (and triangular mesh) processing software.
+  Originally designed to perform comparison between two dense 3D points clouds
+  or between a point cloud and a triangular mesh, it has been extended to a
+  more generic point cloud processing software, including many advanced
+  algorithms (registration, resampling, color/normal/scalar fields handling,
+  statistics computation, sensor management, interactive or automatic
+  segmentation, display enhancement, etc.).
+
+icon: snap/gui/cloudcompare.png
+
+grade: stable
+confinement: strict
+
+apps:
+  ccViewer:
+    command: launch ccViewer
+    plugs: [home, x11, mir, opengl, unity7]
+  CloudCompare:
+    command: launch CloudCompare
+    plugs: [home, x11, mir, opengl, unity7]
+
+parts:
+  cloudcompare:
+    after: [desktop-qt5,eigen]
+    plugin: cmake
+    source: https://github.com/CloudCompare/CloudCompare.git
+    source-tag: v2.8.0
+    build-packages:
+      - libavcodec-dev
+      - libavformat-dev
+      - libavutil-dev
+      - libboost-thread-dev
+      - libboost-program-options-dev
+      - libcgal-dev
+      - libcgal-qt5-dev
+      - liblas-c-dev
+      - liblas-dev
+      - libswscale-dev
+      - libvxl1-dev
+      - qt5-default
+    prepare: |
+      sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
+    build: |
+      export DEBARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+      mkdir build
+      cd build
+      cmake \
+        -DINSTALL_QBLUR_PLUGIN=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON \
+        -DINSTALL_QHPR_PLUGIN=ON \
+        -DINSTALL_QPOISSON_RECON_PLUGIN=ON \
+        -DPOISSON_RECON_WITH_OPEN_MP=ON \
+        -DINSTALL_QEDL_PLUGIN=ON \
+        -DINSTALL_QSRA_PLUGIN=ON \
+        -DOPTION_USE_GDAL=ON \
+        -DOPTION_USE_DXF_LIB=ON \
+        -DINSTALL_QSSAO_PLUGIN=ON \
+        -DOPTION_USE_LIBLAS=ON \
+        -DINSTALL_QGMMREG_PLUGIN=ON \
+        -DINSTALL_QANIMATION_PLUGIN=ON \
+        -DINSTALL_QCSF_PLUGIN=ON \
+        -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON \
+        -DWITH_FFMPEG_SUPPORT=ON \
+        -DFFMPEG_INCLUDE_DIR="/usr/include/${DEBARCH}" \
+        -DFFMPEG_LIBRARY_DIR="/usr/lib/${DEBARCH}" \
+        -DINSTALL_QFACETS_PLUGIN=ON \
+        -DOPTION_USE_SHAPE_LIB=ON \
+        -DINSTALL_QPCV_PLUGIN=ON \
+        -DINSTALL_QM3C2_PLUGIN=ON \
+        -DINSTALL_QBROOM_PLUGIN=true \
+        -DINSTALL_QHOUGH_NORMALS_PLUGIN=true \
+        -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3 \
+        -DLIBLAS_INCLUDE_DIR="/usr/include" \
+        -DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so" \
+        -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL \
+        ..
+      export NPROCS=$(grep -c ^processor /proc/cpuinfo)
+      make -j${NPROCS}
+    install: |
+      cd build
+      make install
+  eigen:
+    plugin: cmake
+    source: http://bitbucket.org/eigen/eigen/get/3.2.10.tar.bz2
+    prime: [ -* ]
+  launcher:
+    plugin: dump
+    source: snap
+    organize:
+      launch: bin/launch
+    prime:
+      - bin/*
+
+

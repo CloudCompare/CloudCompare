@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=CloudCompare Viewer
+Comment=3D point cloud and mesh processing software
+Exec=cloudcompare.ccViewer
+Terminal=false
+Categories=Graphics;
+Icon=${SNAP}/meta/gui/ccViewer.png
+

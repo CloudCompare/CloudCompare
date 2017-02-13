@@ -41,11 +41,13 @@ parts:
       - liblas-dev
       - libswscale-dev
       - libvxl1-dev
+      - libqt5opengl5-dev
       - qt5-default
     prepare: |
       sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
     build: |
-      export DEBARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+      export DEBARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+      export NPROCS=$(grep -c ^processor /proc/cpuinfo)
       mkdir build
       cd build
       cmake \
@@ -79,7 +81,6 @@ parts:
         -DLIBLAS_RELEASE_LIBRARY_FILE="/usr/lib/liblas.so" \
         -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL \
         ..
-      export NPROCS=$(grep -c ^processor /proc/cpuinfo)
       make -j${NPROCS}
     install: |
       cd build

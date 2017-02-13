@@ -201,6 +201,38 @@ protected:
 	ccColor::Rgba m_trace_colour = ccColor::yellow;
 
 private:
+
+	//class for storing point index & path costs (from the path start) in sorted lists
+	class Node
+	{
+	public:
+
+		void set(int node_index, int node_total_cost, Node* prev_node)
+		{
+			index = node_index;
+			total_cost = node_total_cost;
+			previous = prev_node;
+		}
+
+		int index=-1;
+		int total_cost=0;
+		Node* previous=nullptr;
+	};
+
+	//class for comparing Node pointers in priority_queue
+	class Compare
+	{
+	public:
+		bool operator() (Node* t1, Node* t2)
+		{
+			//n.b. the priority queue puts "higher" priorities at the front of the queue.
+			//in this case, lower total_cost = "higher priority"
+			//hence we compare total_cost with the > operator
+			//i.e. t1 is less important than t2 if this.total_cost > t1.total_cost 
+			return t1->total_cost > t2->total_cost; //compare based on cost
+		}
+	};
+
 	//random vars that we keep to optimise speed
 	int m_start_rgb[3];
 	int m_end_rgb[3]; //[r,g,b] values for start and end nodes

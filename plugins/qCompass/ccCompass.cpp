@@ -432,7 +432,11 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				}
 
 				if (!m_trace->optimizePath())
+				{
 					m_app->dispToConsole(QString("[ccCompass] Failed to optimize trace path... please try again."), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					m_app->removeFromDB(m_trace);
+					m_trace = nullptr; //kill trace
+				}
 			}
 		}
 		else if (m_pickingMode == MODE::LINEATION_MODE)

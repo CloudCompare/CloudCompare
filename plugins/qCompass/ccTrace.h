@@ -207,16 +207,16 @@ private:
 	{
 	public:
 
-		Node(int node_index, int node_total_cost, Node* prev_node)
+		void set(int node_index, int node_total_cost, Node* prev_node)
 		{
 			index = node_index;
 			total_cost = node_total_cost;
 			previous = prev_node;
 		}
 
-		int index;
-		int total_cost;
-		Node* previous;
+		int index=-1;
+		int total_cost=0;
+		Node* previous=nullptr;
 	};
 
 	//class for comparing Node pointers in priority_queue

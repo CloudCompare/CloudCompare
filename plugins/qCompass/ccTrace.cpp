@@ -195,7 +195,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	//code essentialy taken from wikipedia page for Djikstra: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 	std::vector<bool> visited; //an array of bits to check if node has been visited
 	std::priority_queue<Node*,std::vector<Node*>,Compare> openQueue; //priority queue that stores nodes that haven't yet been explored/opened
-	std::vector<Node*> nodes; //list of visited nodes. Used to re-construct shortest path.
+	std::vector<Node*> nodes; //list of visited nodes. Used to cleanup memory after re-constructing shortest path.
 
 	//set size of visited such that there is one bit per point in the cloud
 	visited.resize(m_cloud->size(), false); //n.b. for 400 million points, this will still only be ~50Mb =)
@@ -208,6 +208,12 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	int iter_count = 0;
 	float cur_d2, next_d2;
 
+	//setup buffer for storing nodes
+	int bufferSize = 500000; //500k node buffer (~1.5-2Mb). This should be enough for most small-medium size traces. More buffers will be created for bigger ones.
+	Node* node_buffer = new Node[bufferSize]; 
+	nodes.push_back(node_buffer); //store buffer in nodes list (for cleanup)
+	int nodeCount = 1; //start node will be added shortly
+
 	//setup octree & values for nearest neighbour searches
 	ccOctree::Shared oct = m_cloud->getOctree();
 	if (!oct)
@@ -216,10 +222,9 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	}
 	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(search_r);
 
-	//add start node to open set
-	Node* start_node = new Node(start, 0, nullptr);
-	openQueue.push(start_node);
-	nodes.push_back(start_node);
+	//initialize start node on node_buffer and add to openQueue
+	node_buffer[0].set(start, 0, nullptr);
+	openQueue.push(&node_buffer[0]);
 
 	//mark start node as visited
 	visited[start] = true;
@@ -228,7 +233,17 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	{
 		//check if we excede max iterations
 		if (iter_count > maxIterations)
+		{
+			//cleanup buffers
+			for (Node* n : nodes)
+			{
+				delete[] n;
+			}
+
+			//bail
 			return std::deque<int>(); //bail
+		}
+
 		iter_count++;
 
 		//get lowest cost node for expansion
@@ -252,10 +267,10 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 
 			path.push_front(start);
 
-			//delete nodes
+			//cleanup node buffers
 			for (Node* n : nodes)
 			{
-				delete n;
+				delete[] n;
 			}
 
 			//return
@@ -298,12 +313,23 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 			//transform into cost from start node
 			cost += current->total_cost;
 
-			//store node details in the open queue
-			Node* n = new Node(m_p.pointIndex, cost, current);
-			openQueue.push(n);
+			//check that the node buffer isn't full
+			if (nodeCount == bufferSize)
+			{
+				//buffer is full - create a new one
+				node_buffer = new Node[bufferSize];
+				nodes.push_back(node_buffer);
+				nodeCount = 0;
+			}
 
-			//store node & previous node for (eventually) reconstructing the path
-			nodes.push_back(n);
+			//initialize node on node buffer
+			node_buffer[nodeCount].set(m_p.pointIndex, cost, current);
+
+			//push node to open set
+			openQueue.push(&node_buffer[nodeCount]);
+
+			//we now have one more node
+			nodeCount++;
 
 			//mark node as visited
 			visited[m_p.pointIndex] = true;

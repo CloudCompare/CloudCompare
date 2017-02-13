@@ -194,13 +194,14 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 
 	//code essentialy taken from wikipedia page for Djikstra: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 	std::vector<bool> visited; //an array of bits to check if node has been visited
-	std::priority_queue<Node> openQueue; //priority queue that stores nodes that haven't yet been explored/opened
-	std::unordered_map<int, int> closedSet; //visited nodes (key=nodeID, value=prevNodeID). N.B. this is only used for reconstructing the path
+	std::priority_queue<Node*,std::vector<Node*>,Compare> openQueue; //priority queue that stores nodes that haven't yet been explored/opened
+	std::vector<Node*> nodes; //list of visited nodes. Used to re-construct shortest path.
 
 	//set size of visited such that there is one bit per point in the cloud
 	visited.resize(m_cloud->size(), false); //n.b. for 400 million points, this will still only be ~50Mb =)
 
 	//declare variables used in the loop
+	Node* current = nullptr;
 	int current_idx = 0;
 	int cost = 0;
 	int smallest_cost = 999999;
@@ -216,8 +217,9 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(search_r);
 
 	//add start node to open set
-	Node start_node(start, 0);
+	Node* start_node = new Node(start, 0, nullptr);
 	openQueue.push(start_node);
+	nodes.push_back(start_node);
 
 	//mark start node as visited
 	visited[start] = true;
@@ -230,8 +232,8 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 		iter_count++;
 
 		//get lowest cost node for expansion
-		Node current = openQueue.top();
-		current_idx = current.index;
+		current = openQueue.top();
+		current_idx = current->index;
 
 		//remove node from open set
 		openQueue.pop(); //remove node from open set (queue)
@@ -242,14 +244,19 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 			path.push_back(end); //add end node
 
 			//traverse backwards to reconstruct path
-			current_idx = closedSet[current_idx]; //move back one
-			while (current_idx != start)
+			while (current->index != start)
 			{
-				path.push_front(current_idx);
-				current_idx = closedSet[current_idx];
+				current = current->previous;
+				path.push_front(current->index);
 			}
 
 			path.push_front(start);
+
+			//delete nodes
+			for (Node* n : nodes)
+			{
+				delete n;
+			}
 
 			//return
 			return path;
@@ -289,14 +296,14 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, float search_r, int
 			#endif
 
 			//transform into cost from start node
-			cost += current.total_cost;
+			cost += current->total_cost;
 
 			//store node details in the open queue
-			Node n(m_p.pointIndex, cost);
+			Node* n = new Node(m_p.pointIndex, cost, current);
 			openQueue.push(n);
 
 			//store node & previous node for (eventually) reconstructing the path
-			closedSet[m_p.pointIndex] = current_idx;
+			nodes.push_back(n);
 
 			//mark node as visited
 			visited[m_p.pointIndex] = true;

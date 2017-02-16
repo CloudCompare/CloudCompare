@@ -98,7 +98,7 @@ void ccColorScale::remove(int index, bool autoUpdate/*=true*/)
 
 void ccColorScale::sort()
 {
-	qSort(m_steps.begin(), m_steps.end(), ccColorScaleElement::IsSmaller);
+	std::sort(m_steps.begin(), m_steps.end(), ccColorScaleElement::IsSmaller);
 }
 
 void ccColorScale::update()

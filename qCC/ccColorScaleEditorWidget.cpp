@@ -91,7 +91,7 @@ void ColorScaleElementSliders::addSlider(ColorScaleElementSlider* slider)
 
 void ColorScaleElementSliders::sort()
 {
-	qSort(begin(), end(), ColorScaleElementSlider::IsSmaller);
+	std::sort(begin(), end(), ColorScaleElementSlider::IsSmaller);
 }
 
 void ColorScaleElementSliders::clear()

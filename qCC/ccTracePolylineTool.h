@@ -71,7 +71,7 @@ protected slots:
 	void onShortcutTriggered(int);
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	virtual void onItemPicked(const PickedItem& pi) override;
 
 protected:
 

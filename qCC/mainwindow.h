@@ -149,7 +149,7 @@ public:
 	virtual ccPickingHub* pickingHub() override { return m_pickingHub; }
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	virtual void onItemPicked(const PickedItem& pi) override;
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();

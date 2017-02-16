@@ -40,7 +40,7 @@ public:
 	qAnimation(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const override { return "qAnimationPlugin"; }
+	virtual QString getName() const override { return "Animation"; }
 	virtual QString getDescription() const override { return "Animation plugin, used to build a movie from a series of views."; }
 	virtual QIcon getIcon() const override;
 

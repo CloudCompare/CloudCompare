@@ -1,3 +1,40 @@
+#### Version 1.3.2 released on 22.12.15 ####
+
+  Bugfixes [Backported from 2.0.0 branch]:
+    - Fixed possible crash when having a QCPGraph with scatters only and a non-transparent main/fill brush of the graph
+    - Fixed QCPItemPixmap not updating internally cached scaled pixmap if new pixmap set with same scaled dimensions
+    - When using log axis scale and zooming out as far as possible (~1e-280..1e280), axis doesn't end up in (via mouse) unrecoverable range with strange axis ticks anymore
+    - Axis tick label algorithm for beautifully typeset powers now checks whether "e" in tick label is actually part of a number before converting the exponent to superscript
+    - Fixed QCustomPlot::moveLayer performing incorrect move and possible crash in certain situations
+    - Fixed possible crash on QCustomPlot destruction due to wrong QObject-hierarchy. Only occurs if a QCPAxisRect is removed from the normal QCustomPlot destruction hierarchy by taking it out of its layout
+    - Fixed possible freeze when data values become infinity after coord-to-pixel transformation (e.g. maximally zoomed out log axis), and line style is not solid (e.g. dashed) or phFastPolylines is disabled
+    
+  Other [Backported from 2.0.0 branch]:
+    - A few documentation fixes/improvements
+    - Qt5.5 compatibility (If you use PDF export, test your outputs, as output dimensions might change when switching Qt versions -- QCP does not try to emulate previous Qt version behaviour here)
+    - QCP now includes <QtPrintSupport/QtPrintSupport> instead of just <QtPrintSupport> because some users had problems with the latter. Please report if you now experience issues due to the new include.
+
+#### Version 1.3.1 released on 25.04.15 ####
+
+  Bugfixes:
+    - Fixed bug that prevented automatic axis rescaling when some graphs/curves had only NaN data points
+    - Improved QCPItemBracket selection boundaries, especially bsCurly and bsCalligraphic
+    - Fixed bug of axis rect and colorscale background shifted downward by one logical pixel (visible in scaled png and pdf export)
+    - Replot upon mouse release is now only performed if a selection change has actually happened (improves responsivity on particularly complex plots)
+    - Fixed bug that allowed scatter-only graphs to be selected by clicking the non-existent line between scatters
+    - Fixed crash when trying to select a scatter-only QCPGraph whose only points in the visible key range are at identical key coordinates and vertically off-screen, with adaptive sampling enabled
+    - Fixed pdf export of QCPColorMap with enabled interpolation (didn't appear interpolated in pdf)
+    - Reduced QCPColorMap jitter of internal cell boundaries for small sized maps when viewed with high zoom, by applying oversampling factors dependant on map size
+    - Fixed bug of QCPColorMap::fill() not causing the buffered internal image map to be updated, and thus the change didn't become visible immediately
+    - Axis labels with size set in pixels (setPixelSize) instead of points now correctly calculate the exponent's font size if beautifully typeset powers are enabled
+    - Fixed QCPColorMap appearing at the wrong position for logarithmic axes and color map spanning larger ranges
+    
+  Other:
+    - Pdf export used to embed entire QCPColorMaps, potentially leading to large files. Now only the visible portion of the map is embedded in the pdf
+    - Many documentation fixes and extensions, style modernization
+    - Reduced documentation file size (and thus full package size) by automatically reducing image palettes during package build
+    - Fixed MSVC warning message (at warning level 4) due to temporary QLists in some foreach statements
+
 #### Version 1.3.0 released on 27.12.14 ####
 
   Added features:

@@ -36,6 +36,9 @@ v2.9.alpha - XX/XX/XXXX
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)
 			on the altitudes layer
 
+	* Edit > SF > Compute Stat. params
+		- the RMS of the active SF is now automatically computed and displayed in the Console
+
 - Bug fixes:
 
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)

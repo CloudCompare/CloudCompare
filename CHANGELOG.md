@@ -32,11 +32,16 @@ v2.9.alpha - XX/XX/XXXX
 	* Command line mode
 		- 2.5D Volume Calculation tool (-VOLUME ...)
 
+	* Rasterize tool
+		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)
+			on the altitudes layer
+
 - Bug fixes:
 
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)
 	* when computing distances, the octree could be modified but the LOD structure was not updated
 		(resulting in potentially heavy display artifacts)
+	* glitch fix: the 'SF > Gradient' tool was mistakenly renaming the input scalar field ('.gradient' appended)
 
 v2.8.1 - 16/02/2017
 ----------------------

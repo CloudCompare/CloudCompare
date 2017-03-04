@@ -8020,7 +8020,7 @@ void MainWindow::doComputeDensity()
 
 void MainWindow::doComputeCurvature()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE,m_selectedEntities,this))
+	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_CURVATURE, m_selectedEntities, this))
 		return;
 	refreshAll();
 	updateUI();
@@ -8028,7 +8028,7 @@ void MainWindow::doComputeCurvature()
 
 void MainWindow::doActionSFGradient()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT,m_selectedEntities,this))
+	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_SF_GRADIENT, m_selectedEntities, this))
 		return;
 	refreshAll();
 	updateUI();
@@ -8036,7 +8036,7 @@ void MainWindow::doActionSFGradient()
 
 void MainWindow::doComputeRoughness()
 {
-	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS,m_selectedEntities,this))
+	if (!ccLibAlgorithms::ApplyCCLibAlgorithm(ccLibAlgorithms::CCLIB_ALGO_ROUGHNESS, m_selectedEntities, this))
 		return;
 	refreshAll();
 	updateUI();

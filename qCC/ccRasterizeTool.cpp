@@ -249,12 +249,14 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 		interpolateSFCheckBox->setEnabled(false);
 		generateImagePushButton->setEnabled(false);
 		generateASCIIPushButton->setEnabled(false);
+		projectContoursOnAltCheckBox->setEnabled(true);
 	}
 	else
 	{
 		generateImagePushButton->setEnabled(true);
 		interpolateSFCheckBox->setEnabled(true);
 		generateASCIIPushButton->setEnabled(true);
+		projectContoursOnAltCheckBox->setEnabled(false);
 	}
 
 	if (m_rasterCloud)
@@ -388,6 +390,7 @@ void ccRasterizeTool::loadSettings()
 	bool generateAbgHeightSF	= settings.value("generateAvgHeightSF",   generateAvgHeightSFcheckBox->isChecked()).toBool();
 	bool generateStdDevHeightSF	= settings.value("generateStdDevHeightSF",generateStdDevHeightSFcheckBox->isChecked()).toBool();
 	bool generateHeightRangeSF	= settings.value("generateHeightRangeSF", generateHeightRangeSFcheckBox->isChecked()).toBool();
+	bool projectContoursOnAlt	= settings.value("projectContoursOnAlt",  projectContoursOnAltCheckBox->isChecked()).toBool();
 	
 	settings.endGroup();
 
@@ -408,6 +411,7 @@ void ccRasterizeTool::loadSettings()
 	generateAvgHeightSFcheckBox->setChecked(generateAbgHeightSF);
 	generateStdDevHeightSFcheckBox->setChecked(generateStdDevHeightSF);
 	generateHeightRangeSFcheckBox->setChecked(generateHeightRangeSF);
+	projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
 }
 
 bool ccRasterizeTool::canClose()
@@ -463,6 +467,7 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("generateAvgHeightSF", generateAvgHeightSFcheckBox->isChecked());
 	settings.setValue("generateStdDevHeightSF", generateStdDevHeightSFcheckBox->isChecked());
 	settings.setValue("generateHeightRangeSF", generateHeightRangeSFcheckBox->isChecked());
+	settings.setValue("projectContoursOnAlt", projectContoursOnAltCheckBox->isChecked());
 	settings.endGroup();
 }
 
@@ -1486,12 +1491,25 @@ void ccRasterizeTool::generateContours()
 		return;
 	}
 
-	if (activeLayerComboBox->currentData().toInt() == LAYER_RGB)
+	bool projectContourOnAltitudes = false;
+	switch (activeLayerComboBox->currentData().toInt())
+	{
+	case LAYER_HEIGHT:
+	{
+		//nothing to do
+		break;
+	}
+	case LAYER_RGB:
 	{
 		ccLog::Error("Can't generate contours from RGB colors");
 		return;
 	}
-
+	default:
+	{
+		projectContourOnAltitudes = projectContoursOnAltCheckBox->isChecked();
+		break;
+	}
+	}
 	ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
 	if (!activeLayer)
 	{
@@ -1507,7 +1525,7 @@ void ccRasterizeTool::generateContours()
 	}
 	double step = contourStepDoubleSpinBox->value();
 	assert(step > 0);
-	unsigned levelCount = 1 + static_cast<unsigned>(floor((activeLayer->getMax()-startValue)/step));
+	unsigned levelCount = 1 + static_cast<unsigned>(floor((activeLayer->getMax() - startValue) / step));
 
 	removeContourLines();
 	bool ignoreBorders = ignoreContourBordersCheckBox->isChecked();
@@ -1540,7 +1558,7 @@ void ccRasterizeTool::generateContours()
 		double emptyCellsValue = activeLayer->getMin()-1.0;
 
 		unsigned layerIndex = 0;
-		for (unsigned j=0; j<m_grid.height; ++j)
+		for (unsigned j = 0; j < m_grid.height; ++j)
 		{
 			ccRasterGrid::Row& cellRow = m_grid.rows[j];
 			double* row = &(grid[(j + margin)*xDim + margin]);
@@ -1575,8 +1593,8 @@ void ccRasterizeTool::generateContours()
 		//vertical dimension
 		const unsigned char Z = getProjectionDimension();
 		assert(Z >= 0 && Z <= 2);
-		const unsigned char X = Z == 2 ? 0 : Z +1;
-		const unsigned char Y = X == 2 ? 0 : X +1;
+		const unsigned char X = (Z == 2 ? 0 : Z + 1);
+		const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 		int minVertexCount = minVertexCountSpinBox->value();
 		assert(minVertexCount >= 3);
@@ -1587,7 +1605,7 @@ void ccRasterizeTool::generateContours()
 		pDlg.start();
 		pDlg.show();
 		QApplication::processEvents();
-		CCLib::NormalizedProgress nProgress(&pDlg,levelCount);
+		CCLib::NormalizedProgress nProgress(&pDlg, levelCount);
 
 		int lineWidth = contourWidthSpinBox->value();
 		bool colorize = colorizeContoursCheckBox->isChecked();
@@ -1603,74 +1621,99 @@ void ccRasterizeTool::generateContours()
 
 			//convert them to poylines
 			int realCount = 0;
-			for (int i=0; i<lineCount; ++i)
+			for (int i = 0; i < lineCount; ++i)
 			{
 				int vertCount = iso.getContourLength(i);
 				if (vertCount >= minVertexCount)
 				{
-					ccPointCloud* vertices = new ccPointCloud("vertices");
-					ccPolyline* poly = new ccPolyline(vertices);
-					poly->addChild(vertices);
-					bool isClosed = iso.isContourClosed(i);
-					if (poly->reserve(vertCount) && vertices->reserve(vertCount))
+					int startVi = 0; //we may have to split the polyline in multiple chunks
+					while (startVi < vertCount)
 					{
-						unsigned localIndex = 0;
-						for (int vi=0; vi<vertCount; ++vi)
+						ccPointCloud* vertices = new ccPointCloud("vertices");
+						ccPolyline* poly = new ccPolyline(vertices);
+						poly->addChild(vertices);
+						bool isClosed = (startVi == 0 ? iso.isContourClosed(i) : false);
+						if (poly->reserve(vertCount - startVi) && vertices->reserve(vertCount - startVi))
 						{
-							double x = iso.getContourX(i,vi) - margin + 0.5;
-							double y = iso.getContourY(i,vi) - margin + 0.5;
-
-							CCVector3 P;
-							//DGM: we will only do the dimension mapping at export time
-							//(otherwise the contour lines appear in the wrong orientation compared to the grid/raster which
-							// is in the XY plane by default!)
-							/*P.u[X] = */P.x = static_cast<PointCoordinateType>(x * m_grid.gridStep + box.minCorner().u[X]);
-							/*P.u[Y] = */P.y = static_cast<PointCoordinateType>(y * m_grid.gridStep + box.minCorner().u[Y]);
-							/*P.u[Z] = */P.z = static_cast<PointCoordinateType>(v);
-
-							vertices->addPoint(P);
-							assert(localIndex < vertices->size());
-							poly->addPointIndex(localIndex++);
-						}
-
-						assert(poly);
-						if (poly->size() > 1)
-						{
-							poly->setName(QString("Contour line value = %1 (#%2)").arg(v).arg(++realCount));
-							poly->setGlobalScale(m_cloud->getGlobalScale());
-							poly->setGlobalShift(m_cloud->getGlobalShift());
-							poly->setWidth(lineWidth);
-							poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
-							poly->setColor(ccColor::darkGrey);
-							if (colorize)
+							unsigned localIndex = 0;
+							for (int vi = startVi; vi < vertCount; ++vi)
 							{
-								const ColorCompType* col = activeLayer->getColor(v);
-								if (col)
-									poly->setColor(ccColor::Rgb(col));
-							}
-							poly->showColors(true);
-							vertices->setEnabled(false);
-							//add the 'const altitude' meta-data as well
-							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(),QVariant(v));
-						
-							if (m_glWindow)
-								m_glWindow->addToOwnDB(poly);
+								++startVi;
+								
+								double x = iso.getContourX(i, vi) - margin;
+								double y = iso.getContourY(i, vi) - margin;
 
-							m_contourLines.push_back(poly);
+								CCVector3 P;
+								//DGM: we will only do the dimension mapping at export time
+								//(otherwise the contour lines appear in the wrong orientation compared to the grid/raster which
+								// is in the XY plane by default!)
+								/*P.u[X] = */P.x = static_cast<PointCoordinateType>((x + 0.5) * m_grid.gridStep + box.minCorner().u[X]);
+								/*P.u[Y] = */P.y = static_cast<PointCoordinateType>((y + 0.5) * m_grid.gridStep + box.minCorner().u[Y]);
+								if (projectContourOnAltitudes)
+								{
+									int xi = std::min(std::max(static_cast<int>(x), 0), static_cast<int>(m_grid.width) - 1);
+									int yi = std::min(std::max(static_cast<int>(y), 0), static_cast<int>(m_grid.height) - 1);
+									double h = m_grid.rows[y][x].h;
+									if (std::isfinite(h))
+									{
+										/*P.u[Z] = */P.z = static_cast<PointCoordinateType>(h);
+									}
+									else
+									{
+										//DGM: we stop the current polyline
+										isClosed = false;
+										break;
+									}
+								}
+								else
+								{
+									/*P.u[Z] = */P.z = static_cast<PointCoordinateType>(v);
+								}
+
+								vertices->addPoint(P);
+								assert(localIndex < vertices->size());
+								poly->addPointIndex(localIndex++);
+							}
+
+							assert(poly);
+							if (poly->size() > 1)
+							{
+								poly->setName(QString("Contour line value = %1 (#%2)").arg(v).arg(++realCount));
+								poly->setGlobalScale(m_cloud->getGlobalScale());
+								poly->setGlobalShift(m_cloud->getGlobalShift());
+								poly->setWidth(lineWidth);
+								poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
+								poly->setColor(ccColor::darkGrey);
+								if (colorize)
+								{
+									const ColorCompType* col = activeLayer->getColor(v);
+									if (col)
+										poly->setColor(ccColor::Rgb(col));
+								}
+								poly->showColors(true);
+								vertices->setEnabled(false);
+								//add the 'const altitude' meta-data as well
+								poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(v));
+
+								if (m_glWindow)
+									m_glWindow->addToOwnDB(poly);
+
+								m_contourLines.push_back(poly);
+							}
+							else
+							{
+								delete poly;
+								poly = 0;
+							}
 						}
 						else
 						{
 							delete poly;
 							poly = 0;
+							ccLog::Error("Not enough memory!");
+							memoryError = true; //early stop
+							break;
 						}
-					}
-					else
-					{
-						delete poly;
-						poly = 0;
-						ccLog::Error("Not enough memory!");
-						memoryError = true; //early stop
-						break;
 					}
 				}
 			}
@@ -1712,7 +1755,7 @@ void ccRasterizeTool::generateContours()
 void ccRasterizeTool::exportContourLines()
 {
 	MainWindow* mainWindow = MainWindow::TheInstance();
-	if (!mainWindow || !m_cloud)
+	if (!mainWindow || !m_cloud || m_contourLines.empty())
 	{
 		assert(false);
 		return;
@@ -1723,11 +1766,11 @@ void ccRasterizeTool::exportContourLines()
 	//vertical dimension
 	const unsigned char Z = getProjectionDimension();
 	assert(Z >= 0 && Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z + 1;
-	const unsigned char Y = X == 2 ? 0 : X + 1;
+	const unsigned char X = (Z == 2 ? 0 : Z + 1);
+	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(contourStepDoubleSpinBox->value()));
-	for (size_t i=0; i<m_contourLines.size(); ++i)
+	for (size_t i = 0; i < m_contourLines.size(); ++i)
 	{
 		ccPolyline* poly = m_contourLines[i];
 
@@ -1755,6 +1798,7 @@ void ccRasterizeTool::exportContourLines()
 			m_glWindow->removeFromOwnDB(poly);
 	}
 	m_contourLines.clear();
+	exportContoursPushButton->setEnabled(false);
 
 	group->setDisplay_recursive(m_cloud->getDisplay());
 	mainWindow->addToDB(group);

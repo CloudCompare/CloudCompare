@@ -39,6 +39,10 @@ v2.9.alpha - XX/XX/XXXX
 	* Edit > SF > Compute Stat. params
 		- the RMS of the active SF is now automatically computed and displayed in the Console
 
+	* LAS I/O filter
+		- the 'Spatial Reference System' of LAS files is now stored as meta-data and restored
+			when exporting the cloud as a LAS/LAZ file.
+
 - Bug fixes:
 
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)

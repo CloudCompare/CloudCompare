@@ -37,6 +37,7 @@
 #include <liblas/reader.hpp>
 #include <liblas/writer.hpp>
 #include <liblas/factory.hpp>	// liblas::ReaderFactory
+Q_DECLARE_METATYPE(liblas::SpatialReference)
 
 //Qt
 #include <QFileInfo>
@@ -50,6 +51,8 @@
 #include <string.h>
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
+
+static const char s_LAS_SRS_Key[] = "LAS.spatialReference";
 
 //! LAS Save dialog
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
@@ -341,6 +344,13 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 						lasScale.y,
 						lasScale.z);
 		header.SetPointRecordsCount(numberOfPoints);
+
+		if (theCloud->hasMetaData(s_LAS_SRS_Key))
+		{
+			//restore the SRS if possible
+			liblas::SpatialReference srs = theCloud->getMetaData(s_LAS_SRS_Key).value<liblas::SpatialReference>();
+			header.SetSRS(srs);
+		}
 
 		//DGM FIXME: doesn't seem to do anything;)
 		//if (!hasColor) //we must remove the colors dimensions!
@@ -710,6 +720,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 		const liblas::Schema& schema = header.GetSchema();
 
+		//save the 'Spatial Reference' as meta-data
+		//QVariant<liblas::SpatialReference> 
+
 		CCVector3d lasScale =  CCVector3d(header.GetScaleX(),  header.GetScaleY(),  header.GetScaleZ());
 		CCVector3d lasShift = -CCVector3d(header.GetOffsetX(), header.GetOffsetY(), header.GetOffsetZ());
 
@@ -732,18 +745,18 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					//look for the corresponding EVLRs
 					const std::vector<liblas::VariableRecord>& vlrs = header.GetVLRs();
 					{
-						for (size_t i=0; i<vlrs.size(); ++i)
+						for (size_t i = 0; i < vlrs.size(); ++i)
 						{
 							const liblas::VariableRecord& vlr = vlrs[i];
 							if (vlr.GetUserId(false) == "LASF_Spec" && vlr.GetRecordId() == 4)
 							{
 								//EXTRA BYTES record length is 192
 								static unsigned EB_RECORD_SIZE = 192;
-								
+
 								assert((vlr.GetData().size() % EB_RECORD_SIZE) == 0);
 								size_t count = vlr.GetData().size() / EB_RECORD_SIZE;
 								const uint8_t* vlrData = &(vlr.GetData()[0]);
-								for (size_t j=0; j<count; ++j)
+								for (size_t j = 0; j < count; ++j)
 								{
 									const EVLR* evlr = reinterpret_cast<const EVLR*>(vlrData + j*EB_RECORD_SIZE);
 									evlrs.push_back(*evlr);
@@ -1008,6 +1021,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					return CC_FERR_NOT_ENOUGH_MEMORY;
 				}
 				loadedCloud->setGlobalShift(Pshift);
+
+				//save the Spatial reference as meta-data
+				loadedCloud->setMetaData(s_LAS_SRS_Key, QVariant::fromValue(header.GetSRS()));
 
 				//DGM: from now on, we only enable scalar fields when we detect a valid value!
 				if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))

@@ -301,6 +301,8 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_glExtFuncSupported(false)
 	, m_autoRefresh(false)
 	, m_hotZone(0)
+	, m_showCursorCoordinates(false)
+	, m_autoPickPivotAtCenter(true)
 {
 	//start internal timer
 	m_timer.start();
@@ -1469,6 +1471,11 @@ void ccGLWindow::paintGL()
 
 	m_shouldBeRefreshed = false;
 
+	if (m_autoPickPivotAtCenter && !m_mouseMoved && m_autoPivotCandidate.norm2d() != 0)
+	{
+		setPivotPoint(m_autoPivotCandidate, true, false);
+	}
+
 	if (renderingParams.nextLODState.inProgress)
 	{
 		//if the LOD display process is not finished
@@ -2024,16 +2031,6 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 
 	setStandardOrthoCenter();
 
-	//specific case: we display the cross BEFORE the camera projection (i.e. in orthographic mode)
-	if (	renderingParams.draw3DCross
-		&&	m_currentLODState.level == 0
-		&&	!m_captureMode.enabled
-		&&	!m_viewportParams.perspectiveView
-		&&	(!renderingParams.useFBO || !m_activeGLFilter))
-	{
-		drawCross();
-	}
-
 	/****************************************/
 	/****    PASS: 3D/FOREGROUND/LIGHT   ****/
 	/****************************************/
@@ -2189,16 +2186,28 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	if (m_globalDBRoot)
 	{
 		m_globalDBRoot->draw(CONTEXT);
-		if (m_globalDBRoot->getChildrenNumber())
-		{
-			//draw pivot
-			drawPivot();
-		}
 	}
 
 	if (m_winDBRoot)
 	{
 		m_winDBRoot->draw(CONTEXT);
+	}
+
+	//do this before drawing the pivot!
+	if (	m_autoPickPivotAtCenter
+		&&	(!m_stereoModeEnabled || renderingParams.passIndex == 0))
+	{
+		CCVector3d P;
+		if (getClick3DPos(m_glViewport.width() / 2, m_glViewport.height() / 2, P))
+		{
+			m_autoPivotCandidate = P;
+		}
+	}
+
+	if (m_globalDBRoot && m_globalDBRoot->getChildrenNumber())
+	{
+		//draw pivot
+		drawPivot();
 	}
 
 	//for connected items
@@ -2255,6 +2264,17 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	if (m_sunLightEnabled)
 	{
 		glDisableSunLight();
+	}
+
+	//we display the cross at the end (and in orthographic mode)
+	if (renderingParams.draw3DCross
+		&&	m_currentLODState.level == 0
+		&& !m_captureMode.enabled
+		&&	!m_viewportParams.perspectiveView
+		&& (!renderingParams.useFBO || !m_activeGLFilter))
+	{
+		setStandardOrthoCenter();
+		drawCross();
 	}
 
 	logGLError("ccGLWindow::draw3D");
@@ -2744,11 +2764,36 @@ void ccGLWindow::moveCamera(float dx, float dy, float dz)
 	setCameraPos(m_viewportParams.cameraCenter + V);
 }
 
-void ccGLWindow::setPivotPoint(const CCVector3d& P)
+void ccGLWindow::setPivotPoint(	const CCVector3d& P,
+								bool autoUpdateCameraPos/*=false*/,
+								bool verbose/*=false*/)
 {
+	if (autoUpdateCameraPos && 
+		(!m_viewportParams.perspectiveView || m_viewportParams.objectCenteredView))
+	{
+		//compute the equivalent camera center
+		CCVector3d dP = m_viewportParams.pivotPoint - P;
+		CCVector3d MdP = dP; m_viewportParams.viewMat.applyRotation(MdP);
+		CCVector3d newCameraPos = m_viewportParams.cameraCenter + MdP - dP;
+		setCameraPos(newCameraPos);
+	}
+
 	m_viewportParams.pivotPoint = P;
 	emit pivotPointChanged(m_viewportParams.pivotPoint);
 
+	if (verbose)
+	{
+		const unsigned& precision = getDisplayParameters().displayedNumPrecision;
+		displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
+		displayNewMessage(QString("Point (%1 ; %2 ; %3) set as rotation center")
+			.arg(P.x, 0, 'f', precision)
+			.arg(P.y, 0, 'f', precision)
+			.arg(P.z, 0, 'f', precision),
+			ccGLWindow::LOWER_LEFT_MESSAGE, true);
+		redraw(true, false);
+	}
+
+	m_autoPivotCandidate = CCVector3d(0, 0, 0);
 	invalidateViewport();
 	invalidateVisualization();
 }
@@ -3537,6 +3582,18 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 	}
 }
 
+void ccGLWindow::mouseDoubleClickEvent(QMouseEvent *event)
+{
+	const int x = event->x();
+	const int y = event->y();
+
+	CCVector3d P;
+	if (getClick3DPos(x, y, P))
+	{
+		setPivotPoint(P, true, true);
+	}
+}
+
 void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	const int x = event->x();
@@ -3571,6 +3628,20 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 			event->accept();
 		}
+		
+		//display the 3D coordinates of the pixel below the mouse cursor (if possible)
+		if (m_showCursorCoordinates)
+		{
+			CCVector3d P;
+			QString message = QString("2D (%1 ; %2)").arg(x).arg(y);
+			if (getClick3DPos(x, y, P))
+			{
+				message += QString(" --> 3D (%1 ; %2 ; %3)").arg(P.x).arg(P.y).arg(P.z);
+			}
+			this->displayNewMessage(message, LOWER_LEFT_MESSAGE, false, 2, SCREEN_SIZE_MESSAGE);
+			redraw(true, false);
+		}
+
 		//don't need to process any further
 		return;
 	}
@@ -4599,6 +4670,11 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					ignoreSubmeshes = true;
 
 					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+					if (mesh->isShownAsWire())
+					{
+						//skip meshes that are displayed in wireframe mode
+						continue;
+					}
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0;
@@ -6493,4 +6569,84 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 
 	fbo = _fbo;
 	return true;
+}
+
+GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
+{
+	makeCurrent();
+
+	ccQOpenGLFunctions* glFunc = functions();
+	assert(glFunc);
+
+	GLfloat z[9];
+	int kernel[2] = { 1, 1 };
+
+	if (extendToNeighbors)
+	{
+		if (x > 0 && x + 1 < m_glViewport.width())
+		{
+			kernel[0] = 3;
+			--x;
+		}
+		if (y > 0 && y + 1 < m_glViewport.height())
+		{
+			kernel[1] = 3;
+			--y;
+		}
+	}
+
+	ccFrameBufferObject* formerFBO = m_activeFbo;
+	if (m_fbo && m_activeFbo != m_fbo)
+	{
+		bindFBO(m_fbo);
+	}
+	glFunc->glReadPixels(x, y, kernel[0], kernel[1], GL_DEPTH_COMPONENT, GL_FLOAT, z);
+	if (m_activeFbo != formerFBO)
+	{
+		bindFBO(formerFBO);
+	}
+
+	logGLError("getGLDepth");
+
+	//by default, we take the center value (= pixel(x,y))
+	int kernelSize = kernel[0] * kernel[1];
+	GLfloat minZ = z[(kernelSize + 1) / 2 - 1];
+
+	//if the depth is not defined...
+	if (minZ == 1.0f && extendToNeighbors)
+	{
+		//...extend the search to the neighbors
+		for (int i = 0; i < kernelSize; ++i)
+		{
+			minZ = std::min(minZ, z[i]);
+		}
+	}
+
+	//test: read depth texture
+	//if (m_fbo)
+	//{
+	//	GLfloat* windowDepth = new GLfloat[m_fbo->width() * m_fbo->height()];
+	//	glFunc->glBindTexture(GL_TEXTURE_2D, m_fbo->getDepthTexture());
+	//	glFunc->glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, windowDepth);
+	//	minZ = windowDepth[x + y * m_fbo->width()];
+	//	delete[] windowDepth;
+	//}
+
+	return minZ;
+}
+
+bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D)
+{
+	ccGLCameraParameters camera;
+	getGLCameraParameters(camera);
+
+	y = m_glViewport.height() - 1 - y;
+	GLfloat glDepth = getGLDepth(x, y);
+	if (glDepth == 1.0f)
+	{
+		return false;
+	}
+	
+	CCVector3d P2D(x, y, glDepth);
+	return camera.unproject(P2D, P3D);
 }

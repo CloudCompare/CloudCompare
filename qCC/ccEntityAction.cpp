@@ -1029,19 +1029,23 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
-		
+
 		if (!ectsDlg.exec())
+		{
 			return false;
-		
-		bool exportDim[3] = { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
-		
-		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+		}
+
+		bool exportDims[3] = {	ectsDlg.exportX(),
+								ectsDlg.exportY(),
+								ectsDlg.exportZ() };
+
+		if (!exportDims[0] && !exportDims[1] && !exportDims[2]) //nothing to do?!
+		{
 			return false;
-		
-		const QString defaultSFName[3] = {"Coord. X", "Coord. Y", "Coord. Z"};
+		}
 		
 		//for each selected cloud (or vertices set)
 		for (ccHObject* entity : selectedEntities)
@@ -1052,39 +1056,14 @@ namespace ccEntityAction
 				// TODO do something with error?
 				continue;
 			}
-			
-			unsigned ptsCount = pc->size();
-			
-			//test each dimension
-			for (unsigned d = 0; d < 3; ++d)
+
+			if (!pc->exportCoordToSF(exportDims))
 			{
-				if (!exportDim[d])
-					continue;
-				
-				int sfIndex = pc->getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
-				if (sfIndex < 0)
-					sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]));
-				if (sfIndex < 0)
-				{
-					ccLog::Error("Not enough memory!");
-					return true; //true because we want the UI to be updated anyway
-				}
-				
-				CCLib::ScalarField* sf = pc->getScalarField(sfIndex);
-				Q_ASSERT(sf && sf->currentSize() == ptsCount);
-				if (sf != nullptr)
-				{
-					for (unsigned k = 0; k < ptsCount; ++k)
-					{
-						ScalarType s = static_cast<ScalarType>(pc->getPoint(k)->u[d]);
-						sf->setValue(k,s);
-					}
-					sf->computeMinAndMax();
-					pc->setCurrentDisplayedScalarField(sfIndex);
-					entity->showSF(true);
-					entity->prepareDisplayForRefresh_recursive();
-				}
+				ccLog::Error("The process failed!");
+				return true; //true because we want the UI to be updated anyway
 			}
+
+			entity->prepareDisplayForRefresh_recursive();
 		}
 		
 		return true;

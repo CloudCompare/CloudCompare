@@ -15,6 +15,15 @@ v2.9.alpha - XX/XX/XXXX
 		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)
 		- dialog parameters are now saved in persistent settings
 
+	* 3D view pivot management:
+		- new option to position the pivot point automatically on the point currently at the screen center (dynamic update)
+			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
+		- double clicking on the 3D view will also reposition the pivot point on the point under the cursor
+		
+	* New option: 'Display > Show cursor coordinates'
+		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed
+		- the 2D position (in pixels) is always displayed
+		- the 3D position of the point below the cursor is displayed if possible
 
 	* Plugins can now be called in command line mode
 		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
@@ -30,7 +39,8 @@ v2.9.alpha - XX/XX/XXXX
 		- the tool now works on meshes
 
 	* Command line mode
-		- 2.5D Volume Calculation tool (-VOLUME ...)
+		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
+		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
 
 	* Rasterize tool
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)

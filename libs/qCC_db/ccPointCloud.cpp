@@ -5680,3 +5680,56 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 
 	return mesh;
 };
+
+bool ccPointCloud::exportCoordToSF(bool exportDims[3])
+{
+	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
+	{
+		//nothing to do?!
+		assert(false);
+		return true;
+	}
+
+	const QString defaultSFName[3] = { "Coord. X", "Coord. Y", "Coord. Z" };
+
+	unsigned ptsCount = size();
+
+	//test each dimension
+	for (unsigned d = 0; d < 3; ++d)
+	{
+		if (!exportDims[d])
+		{
+			continue;
+		}
+
+		int sfIndex = getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
+		if (sfIndex < 0)
+		{
+			sfIndex = addScalarField(qPrintable(defaultSFName[d]));
+		}
+		if (sfIndex < 0)
+		{
+			ccLog::Warning("[ccPointCloud::exportCoordToSF] Not enough memory!");
+			return false;
+		}
+
+		CCLib::ScalarField* sf = getScalarField(sfIndex);
+		if (!sf)
+		{
+			assert(false);
+			return false;
+		}
+
+		for (unsigned k = 0; k < ptsCount; ++k)
+		{
+			ScalarType s = static_cast<ScalarType>(getPoint(k)->u[d]);
+			sf->setValue(k, s);
+		}
+		sf->computeMinAndMax();
+
+		setCurrentDisplayedScalarField(sfIndex);
+		showSF(true);
+	}
+
+	return true;
+}

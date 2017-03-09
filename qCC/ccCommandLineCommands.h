@@ -97,6 +97,7 @@ static const char COMMAND_DELAUNAY_BF[]						= "BEST_FIT";
 static const char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 static const char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 static const char COMMAND_SF_OP[]							= "SF_OP";
+static const char COMMAND_COORD_TO_SF[]						= "COORD_TO_SF";
 static const char COMMAND_VOLUME[]							= "VOLUME";
 static const char COMMAND_VOLUME_VERT_DIR[]					= "VERT_DIR";
 static const char COMMAND_VOLUME_GRID_STEP[]				= "GRID_STEP";
@@ -1673,6 +1674,11 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 			ccPointCloud* cloud = cmd.clouds()[i].pc;
 			assert(cloud);
 
+			if (!cloud->hasNormals())
+			{
+				continue;
+			}
+
 			//computation
 			if (cloud->orientNormalsWithMST(knn, progressDialog.data()))
 			{
@@ -1961,6 +1967,57 @@ struct CommandCrop : public ccCommandLineInterface::Command
 	}
 
 	return true;
+	}
+};
+
+struct CommandCoordToSF : public ccCommandLineInterface::Command
+{
+	CommandCoordToSF() : ccCommandLineInterface::Command("Crop", COMMAND_COORD_TO_SF) {}
+
+	virtual bool process(ccCommandLineInterface& cmd) override
+	{
+		cmd.print("[COORD TO SF]");
+
+		if (cmd.arguments().size() < 1)
+			return cmd.error(QString("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
+		if (cmd.clouds().empty())
+			return cmd.error(QString("No point cloud available. Be sure to open or generate one first!"));
+
+		//dimension
+		bool exportDims[3] = { false, false, false };
+		QString dimStr = cmd.arguments().takeFirst().toUpper();
+		{
+			if (dimStr == "X")
+				exportDims[0] = true;
+			else if (dimStr == "Y")
+				exportDims[1] = true;
+			else if (dimStr == "Z")
+				exportDims[2] = true;
+			else
+				return cmd.error(QString("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
+		}
+
+		//now we can export the corresponding coordinate
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			ccPointCloud* pc = cmd.clouds()[i].pc;
+			if (pc->exportCoordToSF(exportDims))
+			{
+				cmd.clouds()[i].basename += QString("_%1_TO_SF").arg(dimStr);
+				if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
+					if (!errorStr.isEmpty())
+						return cmd.error(errorStr);
+				}
+			}
+			else
+			{
+				return cmd.error(QString("Failed to export coord. %1 to SF on cloud '%2'!").arg(dimStr).arg(cmd.clouds()[i].pc->getName()));
+			}
+		}
+
+		return true;
 	}
 };
 

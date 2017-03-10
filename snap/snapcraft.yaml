@@ -30,6 +30,7 @@ parts:
     source: https://github.com/CloudCompare/CloudCompare.git
     source-branch: master
     build-packages:
+      - build-essential
       - libavcodec-dev
       - libavformat-dev
       - libavutil-dev

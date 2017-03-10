@@ -25,6 +25,7 @@ before_script:
   ..
 script:
 - make -j2
+- cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_553dcb22e689_key -iv $encrypted_553dcb22e689_iv
   -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d

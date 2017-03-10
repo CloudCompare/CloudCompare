@@ -25,6 +25,7 @@ before_script:
   ..
 script:
 - make -j2
+- cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_553dcb22e689_key -iv $encrypted_553dcb22e689_iv
   -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
@@ -35,9 +36,7 @@ deploy:
     branch: master
     condition: "$CC = gcc"
   provider: script
-  script:
-  - cd ..
-  - docker run -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt update -qq && apt
+  script: docker run -v $(pwd):$(pwd) -t ubuntu:xenial sh -c "apt update -qq && apt
     install snapcraft -y && cd $(pwd) && snapcraft && snapcraft push *.snap --release
     edge"
   skip_cleanup: true

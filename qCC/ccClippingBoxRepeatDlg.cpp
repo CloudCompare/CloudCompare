@@ -30,18 +30,18 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 
 	if (!singleContourMode)
 	{
-		connect( xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
-		connect( yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
-		connect( zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+		connect(xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+		connect(yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+		connect(zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
 	}
 	else
 	{
 		//single contour extraction mode!
 		repeatDimGroupBox->setTitle("Flat dimension");
 
-		connect( xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimXChecked(bool)));
-		connect( yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimYChecked(bool)));
-		connect( zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimZChecked(bool)));
+		connect(xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimXChecked(bool)));
+		connect(yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimYChecked(bool)));
+		connect(zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimZChecked(bool)));
 		setFlatDim(0);
 
 		extractContoursGroupBox->setChecked(true);
@@ -61,8 +61,10 @@ void ccClippingBoxRepeatDlg::setRepeatDim(unsigned char dim)
 							yRepeatCheckBox,
 							zRepeatCheckBox };
 
-	for (unsigned char d=0; d<3; ++d)
-		boxes[d]->setChecked(d == dim );
+	for (unsigned char d = 0; d < 3; ++d)
+	{
+		boxes[d]->setChecked(d == dim);
+	}
 }
 
 void ccClippingBoxRepeatDlg::onDimXChecked(bool state) { assert(state); setFlatDim(0); }
@@ -76,7 +78,7 @@ void ccClippingBoxRepeatDlg::setFlatDim(unsigned char dim)
 							yRepeatCheckBox,
 							zRepeatCheckBox };
 
-	for (unsigned char d=0; d<3; ++d)
+	for (unsigned char d = 0; d < 3; ++d)
 	{
 		boxes[d]->blockSignals(true);
 		//disable the current dimension

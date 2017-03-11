@@ -1945,28 +1945,28 @@ struct CommandCrop : public ccCommandLineInterface::Command
 		}
 
 		//crop meshes
-	{
-		for (size_t i = 0; i < cmd.meshes().size(); ++i)
 		{
-			ccHObject* croppedMesh = ccCropTool::Crop(cmd.meshes()[i].mesh, cropBox, inside);
-			if (croppedMesh)
+			for (size_t i = 0; i < cmd.meshes().size(); ++i)
 			{
-				delete cmd.meshes()[i].mesh;
-				assert(croppedMesh->isA(CC_TYPES::MESH));
-				cmd.meshes()[i].mesh = static_cast<ccMesh*>(croppedMesh);
-				cmd.meshes()[i].basename += "_CROPPED";
-				if (cmd.autoSaveMode())
+				ccHObject* croppedMesh = ccCropTool::Crop(cmd.meshes()[i].mesh, cropBox, inside);
+				if (croppedMesh)
 				{
-					QString errorStr = cmd.exportEntity(cmd.meshes()[i]);
-					if (!errorStr.isEmpty())
-						return cmd.error(errorStr);
+					delete cmd.meshes()[i].mesh;
+					assert(croppedMesh->isA(CC_TYPES::MESH));
+					cmd.meshes()[i].mesh = static_cast<ccMesh*>(croppedMesh);
+					cmd.meshes()[i].basename += "_CROPPED";
+					if (cmd.autoSaveMode())
+					{
+						QString errorStr = cmd.exportEntity(cmd.meshes()[i]);
+						if (!errorStr.isEmpty())
+							return cmd.error(errorStr);
+					}
 				}
+				//otherwise an error message has already been issued
 			}
-			//otherwise an error message has already been issued
 		}
-	}
 
-	return true;
+		return true;
 	}
 };
 

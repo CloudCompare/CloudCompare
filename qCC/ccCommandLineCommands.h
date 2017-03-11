@@ -2572,7 +2572,7 @@ struct CommandDist : public ccCommandLineInterface::Command
 
 struct CommandC2MDist : public CommandDist
 {
-	CommandC2MDist() : CommandDist(false, "C2M distance", COMMAND_C2M_DIST) {}
+	CommandC2MDist() : CommandDist(true, "C2M distance", COMMAND_C2M_DIST) {}
 };
 
 struct CommandC2CDist : public CommandDist

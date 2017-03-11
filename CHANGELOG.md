@@ -8,13 +8,6 @@ v2.9.alpha - XX/XX/XXXX
 
 	* New shortcut: P (pick rotation center)
 
-- enhancements:
-
-	* 'Unroll' tool:
-		- new cone 'unroll' mode (the true 'unroll' mode - the other one has been renamed 'Straightened cone' ;)
-		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)
-		- dialog parameters are now saved in persistent settings
-
 	* 3D view pivot management:
 		- new option to position the pivot point automatically on the point currently at the screen center (dynamic update)
 			(now the default behavior, can be toggled thanks to the dedicated icon in the 'Viewing tools' toolbar or the 'Shift + P' shortcut)
@@ -24,6 +17,13 @@ v2.9.alpha - XX/XX/XXXX
 		- if activated, the position of the mouse cursor relatively to the 3D view is constantly displayed
 		- the 2D position (in pixels) is always displayed
 		- the 3D position of the point below the cursor is displayed if possible
+
+- enhancements:
+
+	* 'Unroll' tool:
+		- new cone 'unroll' mode (the true 'unroll' mode - the other one has been renamed 'Straightened cone' ;)
+		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)
+		- dialog parameters are now saved in persistent settings
 
 	* Plugins can now be called in command line mode
 		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
@@ -59,6 +59,7 @@ v2.9.alpha - XX/XX/XXXX
 	* when computing distances, the octree could be modified but the LOD structure was not updated
 		(resulting in potentially heavy display artifacts)
 	* glitch fix: the 'SF > Gradient' tool was mistakenly renaming the input scalar field ('.gradient' appended)
+	* glitch fix: the picking process was ignoring the fact that meshes could be displayed in wireframe mode (they are now ignored in this case)
 
 v2.8.1 - 16/02/2017
 ----------------------

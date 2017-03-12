@@ -53,6 +53,9 @@ v2.9.alpha - XX/XX/XXXX
 		- the 'Spatial Reference System' of LAS files is now stored as meta-data and restored
 			when exporting the cloud as a LAS/LAZ file.
 
+	* Oculus support
+		- CC now displays in the current 3D view the mirror image of what is displayed in the headset
+
 - Bug fixes:
 
 	* STL files are now output by default in BINARY mode in command line mode (no more annoying dialog)

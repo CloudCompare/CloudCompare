@@ -1463,7 +1463,10 @@ void ccGLWindow::paintGL()
 	}
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
-	if (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS)
+	if (	!m_stereoModeEnabled
+		||	m_stereoParams.glassType != StereoParams::OCULUS
+		||	s_oculus.mirror.texture
+		)
 	{
 		m_context->swapBuffers(this);
 	}
@@ -1471,7 +1474,7 @@ void ccGLWindow::paintGL()
 
 	m_shouldBeRefreshed = false;
 
-	if (m_autoPickPivotAtCenter && !m_mouseMoved && m_autoPivotCandidate.norm2d() != 0)
+	if (!m_stereoModeEnabled && m_autoPickPivotAtCenter && !m_mouseMoved && m_autoPivotCandidate.norm2d() != 0)
 	{
 		setPivotPoint(m_autoPivotCandidate, true, false);
 	}
@@ -1999,6 +2002,36 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		//glFunc->glEnable(GL_FRAMEBUFFER_SRGB);
 		ovrResult result = ovr_SubmitFrame(s_oculus.session, 0, nullptr, &layers, 1);
 		//glFunc->glDisable(GL_FRAMEBUFFER_SRGB);
+
+		if (s_oculus.mirror.texture)
+		{
+			bindFBO(0);
+
+			assert(m_glExtFuncSupported);
+			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, s_oculus.mirror.fbo);
+			m_glExtFunc.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			//compute the size of the destination texture
+			int ow = s_oculus.mirror.size.width();
+			int oh = s_oculus.mirror.size.height();
+			int sx = 0;
+			int sy = 0;
+			int sw = width();
+			int sh = height();
+
+			GLfloat cw = static_cast<GLfloat>(sw) / ow;
+			GLfloat ch = static_cast<GLfloat>(sh) / oh;
+			GLfloat zoomFactor = std::min(cw, ch);
+			int sw2 = static_cast<int>(ow * zoomFactor);
+			int sh2 = static_cast<int>(oh * zoomFactor);
+			sx += (sw - sw2) / 2;
+			sy += (sh - sh2) / 2;
+			sw = sw2;
+			sh = sh2;
+
+			m_glExtFunc.glBlitFramebuffer(0, oh, ow, 0, sx, sy, sx + sw, sy + sh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		}
+
 	}
 #endif //CC_OCULUS_SUPPORT
 
@@ -6154,6 +6187,11 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 			return false;
 		}
 
+		if (m_glExtFuncSupported)
+		{
+			s_oculus.initMirrorTexture(width(), height(), m_glExtFunc);
+		}
+
 		//configure tracking
 		{
 			//No longer necessary
@@ -6253,6 +6291,11 @@ void ccGLWindow::disableStereoMode()
 #ifdef CC_OCULUS_SUPPORT
 			if (s_oculus.session)
 			{
+				if (m_glExtFuncSupported)
+				{
+					s_oculus.releaseMirrorTexture(m_glExtFunc);
+				}
+
 				s_oculus.stop(false);
 			}
 #endif

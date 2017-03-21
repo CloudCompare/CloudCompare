@@ -18,10 +18,10 @@ confinement: strict
 apps:
   ccViewer:
     command: launch ccViewer
-    plugs: [home, x11, mir, opengl, unity7]
+    plugs: [home, x11, mir, opengl, unity7, removable-media]
   CloudCompare:
     command: launch CloudCompare
-    plugs: [home, x11, mir, opengl, unity7]
+    plugs: [home, x11, mir, opengl, unity7, removable-media]
 
 parts:
   cloudcompare:

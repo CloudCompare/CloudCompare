@@ -747,7 +747,7 @@ protected: // VBO
 	//! VBO set
 	struct vboSet
 	{
-		//! States of th VBO(s)
+		//! States of the VBO(s)
 		enum STATES { NEW, INITIALIZED, FAILED };
 
 		//! Update flags

@@ -45,6 +45,7 @@ v2.9.alpha - XX/XX/XXXX
 	* Rasterize tool
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)
 			on the altitudes layer
+		- the grid step bounds have been widened (between 1E-5 and 1E+5)
 
 	* Edit > SF > Compute Stat. params
 		- the RMS of the active SF is now automatically computed and displayed in the Console

@@ -29,16 +29,7 @@
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>0</number>
       </property>
       <item>
@@ -126,10 +117,10 @@
               <number>6</number>
              </property>
              <property name="minimum">
-              <double>0.001000000000000</double>
+              <double>0.000010000000000</double>
              </property>
              <property name="maximum">
-              <double>1000.000000000000000</double>
+              <double>100000.000000000000000</double>
              </property>
              <property name="singleStep">
               <double>0.001000000000000</double>
@@ -259,16 +250,7 @@
          <item>
           <widget class="QFrame" name="interpolateSFFrame">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
+            <property name="margin">
              <number>0</number>
             </property>
             <item>
@@ -479,16 +461,7 @@ replaced by the cell's average height!</string>
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QFormLayout" name="formLayout_4">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
+             <property name="margin">
               <number>0</number>
              </property>
              <item row="0" column="0">

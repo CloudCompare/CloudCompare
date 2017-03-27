@@ -64,8 +64,9 @@ v2.9.alpha - XX/XX/XXXX
 		(resulting in potentially heavy display artifacts)
 	* glitch fix: the 'SF > Gradient' tool was mistakenly renaming the input scalar field ('.gradient' appended)
 	* glitch fix: the picking process was ignoring the fact that meshes could be displayed in wireframe mode (they are now ignored in this case)
-	* Command line 'CROSS_SECTION' option: the repetition of the cuts (<RepeatDim> option) could be incomplete in some cases (some chunks were missing)
+	* command line 'CROSS_SECTION' option: the repetition of the cuts (<RepeatDim> option) could be incomplete in some cases (some chunks were missing)
 	* raster loading: rasters loaded as clouds were shifted of half a pixel
+	* the 'Edit > Sensors > Camera > Create' function was broken (input parameters were ignored)
 
 v2.8.1 - 16/02/2017
 ----------------------

@@ -2119,12 +2119,13 @@ void MainWindow::doActionCreateCameraSensor()
 	}
 
 	ccCamSensorProjectionDlg spDlg(this);
-	spDlg.updateCamSensor(sensor);
+	//spDlg.initWithCamSensor(sensor); //DGM: we'd better leave the default parameters of the dialog!
 	if (!spDlg.exec())
 	{
 		delete sensor;
 		return;
 	}
+	spDlg.updateCamSensor(sensor);
 
 	ccGLWindow* win = 0;
 	if (ent)

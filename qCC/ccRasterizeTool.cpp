@@ -899,24 +899,6 @@ void ccRasterizeTool::generateRaster() const
 		return;
 	}
 
-	GDALAllRegister();
-	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
-
-	const char *pszFormat = "GTiff";
-	GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
-	if (!poDriver)
-	{
-		ccLog::Error("[GDAL] Driver %s is not supported", pszFormat);
-		return;
-	}
-
-	char** papszMetadata = poDriver->GetMetadata();
-	if( !CSLFetchBoolean( papszMetadata, GDAL_DCAP_CREATE, FALSE ) )
-	{
-		ccLog::Error("[GDAL] Driver %s doesn't support Create() method", pszFormat);
-		return;
-	}
-
 	bool hasScalarFields = !m_grid.scalarFields.empty();
 	int visibleSfIndex = -1;
 	if (activeLayerComboBox->currentData().toInt() == LAYER_SF && m_cloud->isA(CC_TYPES::POINT_CLOUD))
@@ -926,22 +908,20 @@ void ccRasterizeTool::generateRaster() const
 	}
 
 	//which (and how many) bands shall we create?
-	static bool heightBand = true; //height by default
-	static bool rgbBand = false; //not a good idea to mix RGB and height values!
-	static bool densityBand = false;
-	static bool visibleSFBand = false;
-	static bool allSFBands = false;
+	ExportBands exportBands;
+	exportBands.height = true; //height by default
+	exportBands.rgb = false; //not a good idea to mix RGB and height values!
 
 	RasterExportOptionsDlg reoDlg;
 	reoDlg.dimensionsLabel->setText(QString("%1 x %2").arg(m_grid.width).arg(m_grid.height));
 	reoDlg.exportRGBCheckBox->setEnabled(m_grid.hasColors);
-	reoDlg.exportRGBCheckBox->setChecked(rgbBand);
-	reoDlg.exportHeightsCheckBox->setChecked(heightBand);
-	reoDlg.exportDensityCheckBox->setChecked(densityBand);
-	reoDlg.exportActiveLayerCheckBox->setChecked(visibleSFBand);
+	reoDlg.exportRGBCheckBox->setChecked(exportBands.rgb);
+	reoDlg.exportHeightsCheckBox->setChecked(exportBands.height);
+	reoDlg.exportDensityCheckBox->setChecked(exportBands.density);
+	reoDlg.exportActiveLayerCheckBox->setChecked(exportBands.visibleSF);
 	reoDlg.exportActiveLayerCheckBox->setEnabled(visibleSfIndex >= 0);
 	reoDlg.exportAllSFCheckBox->setEnabled(hasScalarFields);
-	reoDlg.exportAllSFCheckBox->setChecked(allSFBands);
+	reoDlg.exportAllSFCheckBox->setChecked(exportBands.allSFs);
 
 	while (true)
 	{
@@ -997,28 +977,90 @@ void ccRasterizeTool::generateRaster() const
 		settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
 	}
 
-	heightBand    = reoDlg.exportHeightsCheckBox->isChecked();
-	rgbBand       = reoDlg.exportRGBCheckBox->isChecked();
-	densityBand   = reoDlg.exportDensityCheckBox->isChecked();
-	allSFBands    = reoDlg.exportAllSFCheckBox->isChecked();
-	visibleSFBand = reoDlg.exportActiveLayerCheckBox->isChecked();
+	exportBands.height    = reoDlg.exportHeightsCheckBox->isChecked();
+	exportBands.rgb       = reoDlg.exportRGBCheckBox->isChecked();
+	exportBands.density   = reoDlg.exportDensityCheckBox->isChecked();
+	exportBands.allSFs    = reoDlg.exportAllSFCheckBox->isChecked();
+	exportBands.visibleSF = reoDlg.exportActiveLayerCheckBox->isChecked();
 
-	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillEmptyCellsComboBox);
+	ExportGeoTiff
+	(
+		outputFilename,
+		exportBands,
+		getFillEmptyCellsStrategy(fillEmptyCellsComboBox),
+		m_grid,
+		getCustomBBox(),
+		getProjectionDimension(),
+		getCustomHeightForEmptyCells(),
+		m_cloud,
+		visibleSfIndex
+	);
+
+#else
+
+	assert(false);
+	ccLog::Error("[Rasterize] GDAL not supported by this version! Can't generate a raster...");
+
+#endif
+}
+		
+bool ccRasterizeTool::ExportGeoTiff(QString outputFilename,
+									const ExportBands& exportBands,
+									ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy,
+									const ccRasterGrid& grid,
+									const ccBBox& gridBBox,
+									unsigned char Z,
+									double customHeightForEmptyCells/*=std::numeric_limits<double>::quiet_NaN()*/,
+									ccGenericPointCloud* originCloud/*=0*/,
+									int visibleSfIndex/*=-1*/)
+{
+#ifdef CC_GDAL_SUPPORT
+
+	if (exportBands.visibleSF && visibleSfIndex <= 0)
+	{
+		assert(false);
+		return false;
+	}
+
+	//vertical dimension
+	assert(Z >= 0 && Z <= 2);
+	const unsigned char X = Z == 2 ? 0 : Z + 1;
+	const unsigned char Y = X == 2 ? 0 : X + 1;
+
+	//global shift
+	assert(gridBBox.isValid());
+	double shiftX = gridBBox.minCorner().u[X];
+	double shiftY = gridBBox.maxCorner().u[Y];
+
+	double stepX = grid.gridStep;
+	double stepY = grid.gridStep;
+	if (originCloud)
+	{
+		const CCVector3d& shift = originCloud->getGlobalShift();
+		shiftX -= shift.u[X];
+		shiftY -= shift.u[Y];
+
+		double scale = originCloud->getGlobalScale();
+		assert(scale != 0);
+		stepX /= scale;
+		stepY /= scale;
+	}
+
 
 	int totalBands = 0;
 	bool onlyRGBA = true;
 
-	if (heightBand)
+	if (exportBands.height)
 	{
 		++totalBands;
 		onlyRGBA = false;
 	}
 	
 	bool rgbaMode = false;
-	if (rgbBand)
+	if (exportBands.rgb)
 	{
 		totalBands += 3; //one per component
-		if (fillEmptyCellsStrategy == ccRasterGrid::LEAVE_EMPTY && m_grid.validCellCount < m_grid.height * m_grid.width)
+		if (fillEmptyCellsStrategy == ccRasterGrid::LEAVE_EMPTY && grid.validCellCount < grid.height * grid.width)
 		{
 			rgbaMode = true;
 			++totalBands; //alpha
@@ -1029,24 +1071,24 @@ void ccRasterizeTool::generateRaster() const
 		onlyRGBA = false;
 	}
 	
-	if (densityBand)
+	if (exportBands.density)
 	{
 		++totalBands;
 		onlyRGBA = false;
 	}
 	
-	if (allSFBands)
+	if (exportBands.allSFs)
 	{
-		for (size_t i = 0; i < m_grid.scalarFields.size(); ++i)
+		for (size_t i = 0; i < grid.scalarFields.size(); ++i)
 		{
-			if (!m_grid.scalarFields[i].empty())
+			if (!grid.scalarFields[i].empty())
 			{
 				++totalBands;
 				onlyRGBA = false;
 			}
 		}
 	}
-	else if (visibleSFBand && visibleSfIndex >= 0)
+	else if (exportBands.visibleSF && visibleSfIndex >= 0)
 	{
 		++totalBands;
 		onlyRGBA = false;
@@ -1055,13 +1097,31 @@ void ccRasterizeTool::generateRaster() const
 	if (totalBands == 0)
 	{
 		ccLog::Error("Can't output a raster with no band! (check export parameters)");
-		return;
+		return false;
+	}
+
+	GDALAllRegister();
+	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
+
+	const char *pszFormat = "GTiff";
+	GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
+	if (!poDriver)
+	{
+		ccLog::Error("[GDAL] Driver %s is not supported", pszFormat);
+		return false;
+	}
+
+	char** papszMetadata = poDriver->GetMetadata();
+	if (!CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
+	{
+		ccLog::Error("[GDAL] Driver %s doesn't support Create() method", pszFormat);
+		return false;
 	}
 
 	char **papszOptions = NULL;
 	GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
-											static_cast<int>(m_grid.width),
-											static_cast<int>(m_grid.height),
+											static_cast<int>(grid.width),
+											static_cast<int>(grid.height),
 											totalBands,
 											onlyRGBA ? GDT_Byte : GDT_Float64,
 											papszOptions);
@@ -1069,33 +1129,7 @@ void ccRasterizeTool::generateRaster() const
 	if (!poDstDS)
 	{
 		ccLog::Error("[GDAL] Failed to create output raster (not enough memory?)");
-		return;
-	}
-
-	ccBBox box = getCustomBBox();
-	assert(box.isValid());
-
-	//vertical dimension
-	const unsigned char Z = getProjectionDimension();
-	assert(Z >= 0 && Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z +1;
-	const unsigned char Y = X == 2 ? 0 : X +1;
-
-	double shiftX = box.minCorner().u[X];
-	double shiftY = box.maxCorner().u[Y];
-
-	double stepX = m_grid.gridStep;
-	double stepY = m_grid.gridStep;
-	if (m_cloud)
-	{
-		const CCVector3d& shift = m_cloud->getGlobalShift();
-		shiftX -= shift.u[X];
-		shiftY -= shift.u[Y];
-
-		double scale = m_cloud->getGlobalScale();
-		assert(scale != 0);
-		stepX /= scale;
-		stepY /= scale;
+		return false;
 	}
 
 	poDstDS->SetMetadataItem("AREA_OR_POINT", "AREA");
@@ -1121,7 +1155,7 @@ void ccRasterizeTool::generateRaster() const
 	int currentBand = 0;
 
 	//exort RGB band?
-	if (rgbBand)
+	if (exportBands.rgb)
 	{
 		GDALRasterBand* rgbBands[3] = { poDstDS->GetRasterBand(++currentBand),
 										poDstDS->GetRasterBand(++currentBand),
@@ -1130,12 +1164,12 @@ void ccRasterizeTool::generateRaster() const
 		rgbBands[1]->SetColorInterpretation(GCI_GreenBand);
 		rgbBands[2]->SetColorInterpretation(GCI_BlueBand);
 
-		unsigned char* cLine = (unsigned char*)CPLMalloc(sizeof(unsigned char)*m_grid.width);
+		unsigned char* cLine = (unsigned char*)CPLMalloc(sizeof(unsigned char)*grid.width);
 		if (!cLine)
 		{
 			ccLog::Error("[GDAL] Not enough memory");
 			GDALClose((GDALDatasetH)poDstDS);
-			return;
+			return false;
 		}
 
 		bool error = false;
@@ -1145,15 +1179,15 @@ void ccRasterizeTool::generateRaster() const
 		{
 			rgbBands[k]->SetStatistics(0, 255, 128, 0); //warning: arbitrary average and std. dev. values
 
-			for (unsigned j = 0; j<m_grid.height; ++j)
+			for (unsigned j = 0; j<grid.height; ++j)
 			{
-				const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j]; //the first row is the northest one (i.e. Ymax)
-				for (unsigned i = 0; i<m_grid.width; ++i)
+				const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j]; //the first row is the northest one (i.e. Ymax)
+				for (unsigned i = 0; i<grid.width; ++i)
 				{
 					cLine[i] = (std::isfinite(row[i].h) ? static_cast<unsigned char>(std::max(0.0, std::min(255.0, row[i].color.u[k]))) : 0);
 				}
 
-				if (rgbBands[k]->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, cLine, static_cast<int>(m_grid.width), 1, GDT_Byte, 0, 0) != CE_None)
+				if (rgbBands[k]->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, cLine, static_cast<int>(grid.width), 1, GDT_Byte, 0, 0) != CE_None)
 				{
 					error = true;
 					k = 3; //early stop
@@ -1169,15 +1203,15 @@ void ccRasterizeTool::generateRaster() const
 			aBand->SetColorInterpretation(GCI_AlphaBand);
 			aBand->SetStatistics(0, 255, 255, 0); //warning: arbitrary average and std. dev. values
 
-			for (unsigned j = 0; j<m_grid.height; ++j)
+			for (unsigned j = 0; j<grid.height; ++j)
 			{
-				const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
-				for (unsigned i = 0; i<m_grid.width; ++i)
+				const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
+				for (unsigned i = 0; i<grid.width; ++i)
 				{
 					cLine[i] = (std::isfinite(row[i].h) ? 255 : 0);
 				}
 
-				if (aBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, cLine, static_cast<int>(m_grid.width), 1, GDT_Byte, 0, 0) != CE_None)
+				if (aBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, cLine, static_cast<int>(grid.width), 1, GDT_Byte, 0, 0) != CE_None)
 				{
 					error = true;
 					break;
@@ -1191,20 +1225,20 @@ void ccRasterizeTool::generateRaster() const
 		{
 			ccLog::Error("[GDAL] An error occurred while writing the color bands!");
 			GDALClose((GDALDatasetH)poDstDS);
-			return;
+			return false;
 		}
 	}
 
-	double* scanline = (double*)CPLMalloc(sizeof(double)*m_grid.width);
+	double* scanline = (double*)CPLMalloc(sizeof(double)*grid.width);
 	if (!scanline)
 	{
 		ccLog::Error("[GDAL] Not enough memory");
 		GDALClose((GDALDatasetH)poDstDS);
-		return;
+		return false;
 	}
 
 	//exort height band?
-	if (heightBand)
+	if (exportBands.height)
 	{
 		GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
 		assert(poBand);
@@ -1214,79 +1248,79 @@ void ccRasterizeTool::generateRaster() const
 		switch (fillEmptyCellsStrategy)
 		{
 		case ccRasterGrid::LEAVE_EMPTY:
-			emptyCellHeight = m_grid.minHeight - 1.0;
+			emptyCellHeight = grid.minHeight - 1.0;
 			poBand->SetNoDataValue(emptyCellHeight); //should be transparent!
 			break;
 		case ccRasterGrid::FILL_MINIMUM_HEIGHT:
-			emptyCellHeight = m_grid.minHeight;
+			emptyCellHeight = grid.minHeight;
 			break;
 		case ccRasterGrid::FILL_MAXIMUM_HEIGHT:
-			emptyCellHeight = m_grid.maxHeight;
+			emptyCellHeight = grid.maxHeight;
 			break;
 		case ccRasterGrid::FILL_CUSTOM_HEIGHT:
 		case ccRasterGrid::INTERPOLATE:
-			emptyCellHeight = getCustomHeightForEmptyCells();
+			emptyCellHeight = customHeightForEmptyCells;
 			break;
 		case ccRasterGrid::FILL_AVERAGE_HEIGHT:
-			emptyCellHeight = m_grid.meanHeight;
+			emptyCellHeight = grid.meanHeight;
 			break;
 		default:
 			assert(false);
 		}
 
-		for (unsigned j = 0; j < m_grid.height; ++j)
+		for (unsigned j = 0; j < grid.height; ++j)
 		{
-			const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
-			for (unsigned i = 0; i<m_grid.width; ++i)
+			const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
+			for (unsigned i = 0; i<grid.width; ++i)
 			{
 				scanline[i] = std::isfinite(row[i].h) ? row[i].h : emptyCellHeight;
 			}
 
-			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0) != CE_None)
+			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, scanline, static_cast<int>(grid.width), 1, GDT_Float64, 0, 0) != CE_None)
 			{
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
 					CPLFree(scanline);
 				GDALClose((GDALDatasetH)poDstDS);
-				return;
+				return false;
 			}
 		}
 	}
 
 	//export density band
-	if (densityBand)
+	if (exportBands.density)
 	{
 		GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
 		assert(poBand);
 		poBand->SetColorInterpretation(GCI_Undefined);
-		for (unsigned j = 0; j < m_grid.height; ++j)
+		for (unsigned j = 0; j < grid.height; ++j)
 		{
-			const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
-			for (unsigned i = 0; i < m_grid.width; ++i)
+			const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
+			for (unsigned i = 0; i < grid.width; ++i)
 			{
 				scanline[i] = row[i].nbPoints;
 			}
 
-			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(m_grid.width), 1, scanline, static_cast<int>(m_grid.width), 1, GDT_Float64, 0, 0) != CE_None)
+			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, scanline, static_cast<int>(grid.width), 1, GDT_Float64, 0, 0) != CE_None)
 			{
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
 					CPLFree(scanline);
 				GDALClose( (GDALDatasetH) poDstDS );
-				return;
+				return false;
 			}
 		}
 	}
 
 	//export SF bands
-	if (allSFBands || (visibleSFBand && visibleSfIndex >= 0))
+	if (exportBands.allSFs || (exportBands.visibleSF && visibleSfIndex >= 0))
 	{
-		for (size_t k = 0; k < m_grid.scalarFields.size(); ++k)
+		for (size_t k = 0; k < grid.scalarFields.size(); ++k)
 		{
-			assert(!m_grid.scalarFields[k].empty());
-			if (allSFBands || (visibleSFBand && visibleSfIndex == static_cast<int>(k)))
+			assert(!grid.scalarFields[k].empty());
+			if (exportBands.allSFs || (exportBands.visibleSF && visibleSfIndex == static_cast<int>(k)))
 			{
-				const double* sfGrid = &(m_grid.scalarFields[k].front());
+				const double* sfGrid = &(grid.scalarFields[k].front());
 				GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
 
 				double sfNanValue = std::numeric_limits<ccRasterGrid::SF::value_type>::quiet_NaN();
@@ -1294,11 +1328,11 @@ void ccRasterizeTool::generateRaster() const
 				assert(poBand);
 				poBand->SetColorInterpretation(GCI_Undefined);
 
-				for (unsigned j = 0; j < m_grid.height; ++j)
+				for (unsigned j = 0; j < grid.height; ++j)
 				{
-					const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
-					const double* sfRow = sfGrid + (m_grid.height - 1 - j) * m_grid.width;
-					for (unsigned i = 0; i < m_grid.width; ++i)
+					const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
+					const double* sfRow = sfGrid + (grid.height - 1 - j) * grid.width;
+					for (unsigned i = 0; i < grid.width; ++i)
 					{
 						scanline[i] = row[i].nbPoints ? sfRow[i] : sfNanValue;
 					}
@@ -1306,16 +1340,16 @@ void ccRasterizeTool::generateRaster() const
 					if (poBand->RasterIO(	GF_Write,
 											0,
 											static_cast<int>(j),
-											static_cast<int>(m_grid.width),
+											static_cast<int>(grid.width),
 											1,
 											scanline,
-											static_cast<int>(m_grid.width),
+											static_cast<int>(grid.width),
 											1,
 											GDT_Float64, 0, 0 ) != CE_None)
 					{
 						//the corresponding SF should exist on the input cloud
 						ccLog::Error(QString("[GDAL] An error occurred while writing a scalar field band!"));
-						k = m_grid.scalarFields.size(); //quick stop
+						k = grid.scalarFields.size(); //quick stop
 						break;
 					}
 				}
@@ -1331,10 +1365,12 @@ void ccRasterizeTool::generateRaster() const
 	GDALClose( (GDALDatasetH) poDstDS );
 
 	ccLog::Print(QString("[Rasterize] Raster '%1' successfully saved").arg(outputFilename));
+	return true;
 
 #else
 	assert(false);
 	ccLog::Error("[Rasterize] GDAL not supported by this version! Can't generate a raster...");
+	return false;
 #endif
 }
 

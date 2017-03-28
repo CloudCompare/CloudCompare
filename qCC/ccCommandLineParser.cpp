@@ -3,6 +3,7 @@
 //Local
 #include "ccCommandLineCommands.h"
 #include "ccCommandCrossSection.h"
+#include "ccCommandRaster.h"
 
 //qCC_db
 #include <ccProgressDialog.h>
@@ -187,6 +188,7 @@ ccCommandLineParser::ccCommandLineParser()
 	registerCommand(Command::Shared(new CommandPopMeshes));
 	registerCommand(Command::Shared(new CommandSetNoTimestamp));
 	registerCommand(Command::Shared(new CommandVolume25D));
+	registerCommand(Command::Shared(new CommandRasterize));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
 	//registerCommand(Command::Shared(new XXX));
@@ -225,9 +227,74 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	return true;
 }
 
+QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
+												QString suffix/*=QString()*/,
+												QString* entityName/*=0*/,
+												QString* baseOutputFilename/*=0*/,
+												bool isCloud/*=false*/,
+												bool forceNoTimestamp/*=false*/) const
+{
+	//fetch the real entity
+	const ccHObject* entity = entityDesc.getEntity();
+	if (!entity)
+	{
+		assert(false);
+		warning("[ExportEntity] Internal error: invalid input entity!");
+		return QString();
+	}
+
+	//get its name
+	QString entName = entity->getName();
+	if (entName.isEmpty())
+	{
+		entName = entityDesc.basename;
+	}
+
+	//sub-item?
+	if (entityDesc.indexInFile >= 0)
+	{
+		if (suffix.isEmpty())
+			suffix = QString("%1").arg(entityDesc.indexInFile);
+		else
+			suffix.prepend(QString("%1_").arg(entityDesc.indexInFile));
+	}
+
+	if (!suffix.isEmpty())
+		entName += QString("_") + suffix;
+
+	if (entityName)
+	{
+		*entityName = entName;
+	}
+
+	QString baseName = entityDesc.basename;
+	if (!suffix.isEmpty())
+		baseName += QString("_") + suffix;
+
+	QString outputFilename = baseName;
+	if (m_addTimestamp && !forceNoTimestamp)
+		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
+	QString extension = isCloud ? m_cloudExportExt : m_meshExportExt;
+	if (!extension.isEmpty())
+		outputFilename += QString(".%1").arg(extension);
+
+	if (baseOutputFilename)
+	{
+		*baseOutputFilename = outputFilename;
+	}
+
+	if (!entityDesc.path.isEmpty())
+	{
+		outputFilename.prepend(QString("%1/").arg(entityDesc.path));
+	}
+
+	return outputFilename;
+
+}
+
 QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 											QString suffix/*=QString()*/,
-											QString* _outputFilename/*=0*/,
+											QString* baseOutputFilename/*=0*/,
 											bool forceIsCloud/*=false*/,
 											bool forceNoTimestamp/*=false*/)
 {
@@ -241,44 +308,18 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 		return "[ExportEntity] Internal error: invalid input entity!";
 	}
 
-	//get its name
-	QString entName = entity->getName();
-	if (entName.isEmpty())
-		entName = entityDesc.basename;
-
-	//sub-item?
-	if (entityDesc.indexInFile >= 0)
-	{
-		if (suffix.isEmpty())
-			suffix = QString("%1").arg(entityDesc.indexInFile);
-		else
-			suffix.prepend(QString("%1_").arg(entityDesc.indexInFile));
-	}
-
 	//specific case: clouds
 	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD);
 	isCloud |= forceIsCloud;
 
-	if (!suffix.isEmpty())
-		entName += QString("_") + suffix;
-	entity->setName(entName);
+	QString entityName;
+	QString outputFilename = getExportFilename(entityDesc, suffix, &entityName, baseOutputFilename, isCloud, forceNoTimestamp);
+	if (outputFilename.isEmpty())
+	{
+		return QString();
+	}
 
-	QString baseName = entityDesc.basename;
-	if (!suffix.isEmpty())
-		baseName += QString("_") + suffix;
-
-	QString outputFilename = baseName;
-	if (m_addTimestamp && !forceNoTimestamp)
-		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
-	QString extension = isCloud ? m_cloudExportExt : m_meshExportExt;
-	if (!extension.isEmpty())
-		outputFilename += QString(".%1").arg(extension);
-
-	if (_outputFilename)
-		*_outputFilename = outputFilename;
-
-	if (!entityDesc.path.isEmpty())
-		outputFilename.prepend(QString("%1/").arg(entityDesc.path));
+	entity->setName(entityName);
 
 	bool tempDependencyCreated = false;
 	ccGenericMesh* mesh = 0;

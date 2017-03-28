@@ -39,6 +39,19 @@ v2.9.alpha - XX/XX/XXXX
 		- the tool now works on meshes
 
 	* Command line mode
+		- the Rasterize tool is now accessible via the command line:
+			'-RASTERIZE -GRID_STEP {value}'
+			* additional options are:
+				-VERT_DIR {0=X/1=Y/2=Z} - default is Z
+				-EMPTY_FILL {MIN_H/MAX_H/CUSTOM_H} - default is 'leave cells empty'
+				-CUSTOM_HEIGHT {value} - to define the custom height filling value if the 'CUSTOM_H' stragety is used (see above)
+				-PROJ {MIN/AVG/MAX} - default is AVG (average)
+				-SF_PROJ {MIN/AVG/MAX} - default is AVG (average)
+				-OUTPUT_CLOUD - to output the result as a cloud (default if no other output format is defined)
+				-OUTPUT_MESH - to output the result as a mesh
+				-OUTPUT_RASTER_Z - to output the result as a geotiff raster (altitudes + all SFs by default, no RGB)
+				-OUTPUT_RASTER_RGB - to output the result as a geotiff raster (RGB)
+
 		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
 		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
 
@@ -56,6 +69,9 @@ v2.9.alpha - XX/XX/XXXX
 
 	* Oculus support
 		- CC now displays in the current 3D view the mirror image of what is displayed in the headset
+
+	* Other
+		- color scales are now listed in alphabetical order
 
 - Bug fixes:
 

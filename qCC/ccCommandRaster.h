@@ -203,7 +203,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 			return cmd.error(QString("Grid step value not defined (use %1)").arg(COMMAND_GRID_STEP));
 		}
 
-		if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT && isnan(customHeight))
+		if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT && std::isnan(customHeight))
 		{
 			cmd.error("[Rasterize] The filling stragety is set to 'fill with custom height' but not custom height was defined...");
 			emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;

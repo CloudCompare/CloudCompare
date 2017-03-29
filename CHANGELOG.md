@@ -43,7 +43,7 @@ v2.9.alpha - XX/XX/XXXX
 			'-RASTERIZE -GRID_STEP {value}'
 			* additional options are:
 				-VERT_DIR {0=X/1=Y/2=Z} - default is Z
-				-EMPTY_FILL {MIN_H/MAX_H/CUSTOM_H} - default is 'leave cells empty'
+				-EMPTY_FILL {MIN_H/MAX_H/CUSTOM_H/INTERP} - default is 'leave cells empty'
 				-CUSTOM_HEIGHT {value} - to define the custom height filling value if the 'CUSTOM_H' stragety is used (see above)
 				-PROJ {MIN/AVG/MAX} - default is AVG (average)
 				-SF_PROJ {MIN/AVG/MAX} - default is AVG (average)

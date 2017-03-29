@@ -23,10 +23,9 @@ public:
 
 	//inherited from ccCommandLineInterface
 	virtual QString getExportFilename(	const CLEntityDesc& entityDesc,
+										QString extension = QString(),
 										QString suffix = QString(),
-										QString* entityName = 0,
 										QString* baseOutputFilename = 0,
-										bool isCloud = false,
 										bool forceNoTimestamp = false) const override;
 	virtual QString exportEntity(	CLEntityDesc& entityDesc,
 									QString suffix = QString(),

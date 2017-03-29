@@ -228,10 +228,9 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 }
 
 QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
+												QString extension/*=QString()*/,
 												QString suffix/*=QString()*/,
-												QString* entityName/*=0*/,
 												QString* baseOutputFilename/*=0*/,
-												bool isCloud/*=false*/,
 												bool forceNoTimestamp/*=false*/) const
 {
 	//fetch the real entity
@@ -243,13 +242,6 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 		return QString();
 	}
 
-	//get its name
-	QString entName = entity->getName();
-	if (entName.isEmpty())
-	{
-		entName = entityDesc.basename;
-	}
-
 	//sub-item?
 	if (entityDesc.indexInFile >= 0)
 	{
@@ -259,24 +251,22 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 			suffix.prepend(QString("%1_").arg(entityDesc.indexInFile));
 	}
 
-	if (!suffix.isEmpty())
-		entName += QString("_") + suffix;
-
-	if (entityName)
-	{
-		*entityName = entName;
-	}
-
 	QString baseName = entityDesc.basename;
 	if (!suffix.isEmpty())
+	{
 		baseName += QString("_") + suffix;
+	}
 
 	QString outputFilename = baseName;
 	if (m_addTimestamp && !forceNoTimestamp)
+	{
 		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
-	QString extension = isCloud ? m_cloudExportExt : m_meshExportExt;
+	}
+
 	if (!extension.isEmpty())
+	{
 		outputFilename += QString(".%1").arg(extension);
+	}
 
 	if (baseOutputFilename)
 	{
@@ -311,15 +301,29 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	//specific case: clouds
 	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD);
 	isCloud |= forceIsCloud;
+	QString extension = isCloud ? m_cloudExportExt : m_meshExportExt;
 
-	QString entityName;
-	QString outputFilename = getExportFilename(entityDesc, suffix, &entityName, baseOutputFilename, isCloud, forceNoTimestamp);
+	QString outputFilename = getExportFilename(entityDesc, extension, suffix, baseOutputFilename, forceNoTimestamp);
 	if (outputFilename.isEmpty())
 	{
 		return QString();
 	}
 
-	entity->setName(entityName);
+	//update the entity name as well
+	{
+		QString entName = entity->getName();
+		if (entName.isEmpty())
+		{
+			entName = entityDesc.basename;
+		}
+
+		if (!suffix.isEmpty())
+		{
+			entName += QString("_") + suffix;
+		}
+
+		entity->setName(entName);
+	}
 
 	bool tempDependencyCreated = false;
 	ccGenericMesh* mesh = 0;
@@ -348,8 +352,11 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 		}
 	}
 
+#ifdef _DEBUG
+	print("Output filename: " + outputFilename);
+#endif
 	CC_FILE_ERROR result = FileIOFilter::SaveToFile(entity,
-													qPrintable(outputFilename),
+													outputFilename,
 													parameters,
 													isCloud ? m_cloudExportFormat : m_meshExportFormat);
 

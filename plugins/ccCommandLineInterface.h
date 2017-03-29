@@ -173,10 +173,9 @@ public: //virtual methods
 
 	//! Returns the name of a to-be-exported entity
 	virtual QString getExportFilename(	const CLEntityDesc& entityDesc,
+										QString extension = QString(),
 										QString suffix = QString(),
-										QString* entityName = 0,
 										QString* baseOutputFilename = 0,
-										bool isCloud = false,
 										bool forceNoTimestamp = false) const = 0;
 
 	//! Exports a cloud or a mesh

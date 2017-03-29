@@ -268,13 +268,57 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 			//generate the result entity (cloud by default)
 			if (outputCloud || outputMesh)
 			{
-				ccPointCloud* rasterCloud = ccVolumeCalcTool::ConvertGridToCloud(grid, gridBBox, vertDir, true);
+				std::vector<ccRasterGrid::ExportableFields> exportedFields;
+				try
+				{
+					//we always compute the default 'height' layer
+					exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+				}
+				catch (const std::bad_alloc&)
+				{
+					return cmd.error("Not enough memory");
+				}
+
+				ccPointCloud* rasterCloud = grid.convertToCloud
+					(
+					exportedFields,
+					true,
+					true,
+					false,
+					false,
+					cloudDesc.pc,
+					vertDir,
+					gridBBox,
+					emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT,
+					customHeight,
+					true
+					);
+
 				if (!rasterCloud)
 				{
 					return cmd.error("Failed to output the raster grid as a cloud");
 				}
 
-				ccMesh* rasterMesh = 0;
+				rasterCloud->showColors(cloudDesc.pc->hasColors());
+				if (rasterCloud->hasScalarFields())
+				{
+					rasterCloud->showSF(!cloudDesc.pc->hasColors());
+					rasterCloud->setCurrentDisplayedScalarField(0);
+				}
+
+				if (outputCloud)
+				{
+					CLCloudDesc exportDesc;
+					exportDesc.pc = rasterCloud;
+					exportDesc.basename = cloudDesc.basename;
+					exportDesc.path = cloudDesc.path;
+					QString errorStr = cmd.exportEntity(exportDesc, "RASTER");
+					if (!errorStr.isEmpty())
+					{
+						cmd.warning(errorStr);
+					}
+				}
+
 				if (outputMesh)
 				{
 					char errorStr[1024];
@@ -286,15 +330,13 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 						vertDir,
 						errorStr
 						);
+
 					if (baseMesh)
 					{
-						rasterMesh = new ccMesh(baseMesh, rasterCloud);
+						ccMesh* rasterMesh = new ccMesh(baseMesh, rasterCloud);
 						delete baseMesh;
 						baseMesh = 0;
-					}
 
-					if (rasterMesh)
-					{
 						rasterCloud->setEnabled(false);
 						rasterCloud->setVisible(true);
 						rasterMesh->addChild(rasterCloud);
@@ -302,63 +344,65 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 						rasterCloud->setName("vertices");
 						rasterMesh->showSF(rasterCloud->sfShown());
 						rasterMesh->showColors(rasterCloud->colorsShown());
+						rasterCloud = 0; //to avoid deleting it later
 
 						cmd.print(QString("[Rasterize] Mesh '%1' successfully generated").arg(rasterMesh->getName()));
+
+						CLMeshDesc meshDesc;
+						meshDesc.mesh = rasterMesh;
+						meshDesc.basename = cloudDesc.basename;
+						meshDesc.path = cloudDesc.path;
+						QString errorStr = cmd.exportEntity(meshDesc, "RASTER_MESH");
+						if (!errorStr.isEmpty())
+						{
+							cmd.warning(errorStr);
+						}
+
+						delete rasterMesh;
+						rasterMesh = 0;
 					}
 					else
 					{
-						delete rasterCloud;
-						return cmd.error(QString("[Rasterize] Failed to create output mesh ('%1')").arg(errorStr));
+						cmd.warning(QString("[Rasterize] Failed to create output mesh ('%1')").arg(errorStr));
 					}
 				}
 
 				if (rasterCloud)
 				{
-					if (outputCloud)
-					{
-						CLCloudDesc cloudDesc;
-						cloudDesc.pc = rasterCloud;
-						cloudDesc.basename = cloudDesc.basename;
-						cloudDesc.path = cloudDesc.path;
-						QString outputFilename;
-						QString errorStr = cmd.exportEntity(cloudDesc, "RASTER", &outputFilename);
-						if (!errorStr.isEmpty())
-						{
-							cmd.warning(errorStr);
-						}
-					}
 					delete rasterCloud;
 					rasterCloud = 0;
 				}
-
-				if (rasterMesh)
-				{
-					assert(outputMesh);
-					CLMeshDesc meshDesc;
-					meshDesc.mesh = rasterMesh;
-					meshDesc.basename = cloudDesc.basename;
-					meshDesc.path = cloudDesc.path;
-					QString outputFilename;
-					QString errorStr = cmd.exportEntity(meshDesc, "RASTER", &outputFilename);
-					delete rasterMesh;
-					rasterMesh = 0;
-					if (!errorStr.isEmpty())
-						cmd.warning(errorStr);
-				}
 			}
 
-			if (outputRasterZ || outputRasterRGB)
+			if (outputRasterZ)
 			{
 				ccRasterizeTool::ExportBands bands;
 				{
-					bands.height = outputRasterZ;
-					bands.rgb = outputRasterRGB; //not a good idea to mix RGB and height values!
-					bands.allSFs = outputRasterZ;
+					bands.height = true;
+					bands.rgb = false; //not a good idea to mix RGB and height values!
+					bands.allSFs = true;
 				}
-				QString exportFilename = cmd.getExportFilename(cloudDesc, "RASTER", 0, 0, false, cmd.addTimestamp());
+				QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_Z", 0, !cmd.addTimestamp());
 				if (exportFilename.isEmpty())
 				{
-					exportFilename = "raster.geotiff";
+					exportFilename = "rasterZ.tif";
+				}
+
+				ccRasterizeTool::ExportGeoTiff(exportFilename, bands, emptyCellFillStrategy, grid, gridBBox, vertDir, customHeight, cloudDesc.pc);
+			}
+
+			if (outputRasterRGB)
+			{
+				ccRasterizeTool::ExportBands bands;
+				{
+					bands.rgb = true;
+					bands.height = false; //not a good idea to mix RGB and height values!
+					bands.allSFs = false;
+				}
+				QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_RGB", 0, !cmd.addTimestamp());
+				if (exportFilename.isEmpty())
+				{
+					exportFilename = "rasterRGB.tif";
 				}
 
 				ccRasterizeTool::ExportGeoTiff(exportFilename, bands, emptyCellFillStrategy, grid, gridBBox, vertDir, customHeight, cloudDesc.pc);

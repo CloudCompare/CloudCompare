@@ -34,6 +34,7 @@ static const char COMMAND_RASTER_SF_PROJ_TYPE[]				= "SF_PROJ";
 static const char COMMAND_RASTER_PROJ_MIN[]					= "MIN";
 static const char COMMAND_RASTER_PROJ_MAX[]					= "MAX";
 static const char COMMAND_RASTER_PROJ_AVG[]					= "AVG";
+static const char COMMAND_RASTER_RESAMPLE[]					= "RESAMPLE";
 
 //2.5D Volume calculation specific commands
 static const char COMMAND_VOLUME[] = "VOLUME";
@@ -102,6 +103,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 		bool outputRasterZ = false;
 		bool outputRasterRGB = false;
 		bool outputMesh = false;
+		bool resample = false;
 		double customHeight = std::numeric_limits<double>::quiet_NaN();
 		int vertDir = 2;
 		ccRasterGrid::ProjectionType projectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
@@ -196,6 +198,13 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 				sfProjectionType = GetProjectionType(cmd.arguments().takeFirst().toUpper(), cmd);
 			}
+			else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_RESAMPLE))
+			{
+				//local option confirmed, we can move on
+				cmd.arguments().pop_front();
+
+				resample = true;
+			}
 		}
 
 		if (gridStep == 0)
@@ -205,7 +214,7 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 
 		if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT && std::isnan(customHeight))
 		{
-			cmd.error("[Rasterize] The filling stragety is set to 'fill with custom height' but not custom height was defined...");
+			cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but not custom height was defined...");
 			emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
 		}
 
@@ -213,6 +222,11 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 		{
 			//if no export target is specified, we chose the cloud by default
 			outputCloud = true;
+		}
+
+		if (resample && !outputCloud && !outputMesh)
+		{
+			cmd.warning("[Rasterize] The 'resample' option is set while the raster won't be exported as a cloud nor as a mesh");
 		}
 
 		//we'll get the first two clouds
@@ -279,13 +293,12 @@ struct CommandRasterize : public ccCommandLineInterface::Command
 					return cmd.error("Not enough memory");
 				}
 
-				ccPointCloud* rasterCloud = grid.convertToCloud
-					(
+				ccPointCloud* rasterCloud = grid.convertToCloud(
 					exportedFields,
 					true,
 					true,
-					false,
-					false,
+					resample,
+					resample,
 					cloudDesc.pc,
 					vertDir,
 					gridBBox,
@@ -533,7 +546,8 @@ struct CommandVolume25D : public ccCommandLineInterface::Command
 
 		ccRasterGrid grid;
 		ccVolumeCalcTool::ReportInfo reportInfo;
-		if (ccVolumeCalcTool::ComputeVolume(grid,
+		if (ccVolumeCalcTool::ComputeVolume(
+			grid,
 			ground ? ground->pc : 0,
 			ceil ? ceil->pc : 0,
 			gridBBox,

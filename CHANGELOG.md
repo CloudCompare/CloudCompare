@@ -51,6 +51,7 @@ v2.9.alpha - XX/XX/XXXX
 				-OUTPUT_MESH - to output the result as a mesh
 				-OUTPUT_RASTER_Z - to output the result as a geotiff raster (altitudes + all SFs by default, no RGB)
 				-OUTPUT_RASTER_RGB - to output the result as a geotiff raster (RGB)
+				-RESAMPLE - to resample the input cloud instead of generating a regular cloud (or mesh)
 
 		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
 		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})

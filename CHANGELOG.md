@@ -20,6 +20,10 @@ v2.9.alpha - XX/XX/XXXX
 
 - enhancements:
 
+	* qAnimation plugin:
+		- new output option 'zoom' (alternative to the existing 'super resolution' option)
+		- the plugin doesn't spam the Console at each frame if the 'super resolution' option is > 1 ;)
+
 	* 'Unroll' tool:
 		- new cone 'unroll' mode (the true 'unroll' mode - the other one has been renamed 'Straightened cone' ;)
 		- option to export the deviation scalar-field (deviation to the theoretical cylinder / cone)
@@ -27,6 +31,7 @@ v2.9.alpha - XX/XX/XXXX
 
 	* Plugins can now be called in command line mode
 		(the 'ccPluginInterface::registerCommands' method must be reimplemented)
+		(someone still needs to do the job for each plugin ;)
 
 	* [Windows] qLAS_FWF:
 		- the plugin (based on LASlib) can now load most of the standard LAS fields

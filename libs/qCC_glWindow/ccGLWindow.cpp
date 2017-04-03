@@ -4820,20 +4820,27 @@ void ccGLWindow::displayNewMessage(	const QString& message,
 	//ccLog::Print(QString("[displayNewMessage] New message valid until %1 s.").arg(mess.messageValidity_sec));
 }
 
-void ccGLWindow::setPointSize(float size)
+void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 {
 	float newSize = std::max<float>(std::min<float>(size, MAX_POINT_SIZE), MIN_POINT_SIZE);
-	ccLog::Print(QString("New point size: %1").arg(newSize));
+	if (!silent)
+	{
+		ccLog::Print(QString("New point size: %1").arg(newSize));
+	}
+	
 	if (m_viewportParams.defaultPointSize != newSize)
 	{
 		m_viewportParams.defaultPointSize = newSize;
 		m_updateFBO = true;
 	
-		displayNewMessage(	QString("New default point size: %1").arg(newSize),
-							ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
-							false,
-							2,
-							SCREEN_SIZE_MESSAGE);
+		if (!silent)
+		{
+			displayNewMessage(	QString("New default point size: %1").arg(newSize),
+								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+								false,
+								2,
+								SCREEN_SIZE_MESSAGE);
+		}
 	}
 }
 
@@ -5626,7 +5633,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	if (!dontScaleFeatures)
 	{
 		//we update point size (for point clouds)
-		setPointSize(_defaultPointSize * zoomFactor);
+		setPointSize(_defaultPointSize * zoomFactor, true);
 		//we update line width (for bounding-boxes, etc.)
 		setLineWidth(_defaultLineWidth * zoomFactor);
 		//we update font size (for text display)
@@ -5821,7 +5828,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	}
 
 	//we restore viewport parameters
-	setPointSize(_defaultPointSize);
+	setPointSize(_defaultPointSize, true);
 	setLineWidth(_defaultLineWidth);
 	m_captureMode.enabled = false;
 	m_captureMode.zoomFactor = 1.0f;

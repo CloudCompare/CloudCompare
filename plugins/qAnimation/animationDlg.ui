@@ -222,7 +222,7 @@
          <item>
           <widget class="QSpinBox" name="bitrateSpinBox">
            <property name="toolTip">
-            <string>Bitrate (in kbits / s)
+            <string>Bitrate (in kbit/s)
 The higher the better the quality (but the bigger the file)</string>
            </property>
            <property name="suffix">
@@ -259,18 +259,34 @@ The higher the better the quality (but the bigger the file)</string>
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Super resolution</string>
+          <widget class="QComboBox" name="renderingModeComboBox">
+           <property name="toolTip">
+            <string>- Super resolution: render the frame at a higher resolution (2, 3 or 4 times larger)
+and then shrink it back down to size (this makes some noisy pixels drop off and
+reduce the flicker that is often present in animations). Super resolution is only
+applied on the output video (= not visible in Preview mode)
+- Zoom: render the frame and the animation at a higher resolution (2, 3 or 4 times
+larger). You may have to increase the points size beforehand.</string>
            </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>super resolution</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>zoom</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
           <widget class="QSpinBox" name="superResolutionSpinBox">
            <property name="toolTip">
-            <string>Render the frame out at a higher resolution (2, 3 or 4 times larger) and then shrink it back down to size.
-(this makes some noisy pixels drop off and reduce the flicker that is often present in animations)
-Super resolution is only applied on the output video (it's not visible in Preview mode)</string>
+            <string>See combo-box tooltip</string>
            </property>
            <property name="minimum">
             <number>1</number>

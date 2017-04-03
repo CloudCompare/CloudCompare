@@ -377,7 +377,7 @@ public:
 	//! Sets point size
 	/** \param size point size (between MIN_POINT_SIZE and MAX_POINT_SIZE)
 	**/
-	virtual void setPointSize(float size);
+	virtual void setPointSize(float size, bool silent = false);
 
 	//! Sets line width
 	/** \param width lines width (typically between 1 and 10)

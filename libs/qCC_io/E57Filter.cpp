@@ -696,8 +696,12 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 		s_absoluteScanIndex = 0;
 
 		//progress dialog
-		ccProgressDialog progressDlg(true, parameters.parentWidget);
-		progressDlg.setAutoClose(false);
+		QScopedPointer<ccProgressDialog> progressDlg(0);
+		if (parameters.parentWidget)
+		{
+			progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+			progressDlg->setAutoClose(false);
+		}
 		s_cancelRequestedByUser = false;
 
 		//Extension for normals
@@ -717,10 +721,10 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 
 			//create corresponding node
 			e57::StructureNode scanNode = e57::StructureNode(imf);
-			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, parameters.parentWidget ? &progressDlg : 0))
+			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, progressDlg.data()))
 			{
 				++s_absoluteScanIndex;
-				scansGUID.insert(cloud,scanGUID);
+				scansGUID.insert(cloud, scanGUID);
 			}
 			else
 			{
@@ -749,11 +753,14 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename, SavePar
 				if (imageCount != 0)
 				{
 					//progress bar
-					CCLib::NormalizedProgress nprogress(&progressDlg, imageCount);
-					progressDlg.setMethodTitle(QObject::tr("Write E57 file"));
-					progressDlg.setInfo(QObject::tr("Cloud #%1 - Images: %2").arg(i).arg(imageCount));
-					progressDlg.start();
-					QApplication::processEvents();
+					CCLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+					if (progressDlg)
+					{
+						progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
+						progressDlg->setInfo(QObject::tr("Cloud #%1 - Images: %2").arg(i).arg(imageCount));
+						progressDlg->start();
+						QApplication::processEvents();
+					}
 
 					for (unsigned j = 0; j < imageCount; ++j)
 					{
@@ -2143,29 +2150,33 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 			unsigned scanCount = static_cast<unsigned>(data3D.childCount());
 
 			//global progress bar
-			ccProgressDialog progressDlg(true, parameters.parentWidget);
-			progressDlg.setAutoClose(false);
+			QScopedPointer<ccProgressDialog> progressDlg(0);
+			if (parameters.parentWidget)
+			{
+				progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+				progressDlg->setAutoClose(false);
+			}
 
 			bool showGlobalProgress = (scanCount > 10);
-			CCLib::NormalizedProgress nprogress(&progressDlg, showGlobalProgress ? scanCount : 100);
-			if (showGlobalProgress)
+			if (progressDlg && showGlobalProgress)
 			{
 				//Too many scans, will display a global progress bar
-				progressDlg.setMethodTitle(QObject::tr("Read E57 file"));
-				progressDlg.setInfo(QObject::tr("Scans: %1").arg(scanCount));
-				progressDlg.start();
+				progressDlg->setMethodTitle(QObject::tr("Read E57 file"));
+				progressDlg->setInfo(QObject::tr("Scans: %1").arg(scanCount));
+				progressDlg->start();
 				QApplication::processEvents();
 			}
-			
+			CCLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
+
 			//static states
 			s_absoluteScanIndex = 0;
 			s_cancelRequestedByUser = false;
 			s_minIntensity = s_maxIntensity = 0;
-			for (unsigned i=0; i<scanCount; ++i)
+			for (unsigned i = 0; i < scanCount; ++i)
 			{
 				e57::Node scanNode = data3D.get(i);
 				QString scanGUID;
-				ccHObject* scan = LoadScan(scanNode, scanGUID, showGlobalProgress ? 0 : &progressDlg);
+				ccHObject* scan = LoadScan(scanNode, scanGUID, showGlobalProgress ? 0 : progressDlg.data());
 				if (scan)
 				{
 					if (scan->getName().isEmpty())
@@ -2182,20 +2193,25 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 
 					//we also add the scan to the GUID/object map
 					if (!scanGUID.isEmpty())
-						scans.insert(scanGUID,scan);
+					{
+						scans.insert(scanGUID, scan);
+					}
 				}
-				if ((showGlobalProgress && !nprogress.oneStep()) || s_cancelRequestedByUser)
+				if ((showGlobalProgress && progressDlg && !nprogress.oneStep()) || s_cancelRequestedByUser)
 				{
 					break;
 				}
 				++s_absoluteScanIndex;
 			}
 
-			progressDlg.stop();
-			QApplication::processEvents();
+			if (progressDlg)
+			{
+				progressDlg->stop();
+				QApplication::processEvents();
+			}
 
 			//set global max intensity (saturation) for proper display
-			for (unsigned i=0; i<container.getChildrenNumber(); ++i)
+			for (unsigned i = 0; i < container.getChildrenNumber(); ++i)
 			{
 				if (container.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 				{
@@ -2224,14 +2240,18 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 			if (imageCount)
 			{
 				//progress bar
-				ccProgressDialog progressDlg(true, parameters.parentWidget);
-				CCLib::NormalizedProgress nprogress(&progressDlg,imageCount);
-				progressDlg.setMethodTitle(QObject::tr("Read E57 file"));
-				progressDlg.setInfo(QObject::tr("Images: %1").arg(imageCount));
-				progressDlg.start();
-				QApplication::processEvents();
+				QScopedPointer<ccProgressDialog> progressDlg(0);
+				if (parameters.parentWidget)
+				{
+					progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+					progressDlg->setMethodTitle(QObject::tr("Read E57 file"));
+					progressDlg->setInfo(QObject::tr("Images: %1").arg(imageCount));
+					progressDlg->start();
+					QApplication::processEvents();
+				}
+				CCLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
 
-				for (unsigned i=0; i<imageCount; ++i)
+				for (unsigned i = 0; i < imageCount; ++i)
 				{
 					e57::Node imageNode = images2D.get(i);
 					QString associatedData3DGuid;
@@ -2265,7 +2285,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 							container.addChild(image);
 					}
 
-					if (!nprogress.oneStep())
+					if (progressDlg && !nprogress.oneStep())
 					{
 						s_cancelRequestedByUser = true;
 						break;

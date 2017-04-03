@@ -57,9 +57,9 @@ v2.9.alpha - XX/XX/XXXX
 				-OUTPUT_RASTER_Z - to output the result as a geotiff raster (altitudes + all SFs by default, no RGB)
 				-OUTPUT_RASTER_RGB - to output the result as a geotiff raster (RGB)
 				-RESAMPLE - to resample the input cloud instead of generating a regular cloud (or mesh)
-
 		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
 		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
+		- the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
 
 	* Rasterize tool
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)

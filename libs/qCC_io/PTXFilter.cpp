@@ -109,18 +109,20 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 	ScalarType maxIntensity = 0;
 
 	//progress dialog
-	ccProgressDialog pdlg(true, parameters.parentWidget);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Loading PTX file"));
-		pdlg.setAutoClose(false);
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Loading PTX file"));
+		pDlg->setAutoClose(false);
 	}
 
 	//progress dialog (for normals computation)
-	ccProgressDialog normalsProgressDlg(true, parameters.parentWidget);
+	QScopedPointer<ccProgressDialog> normalsProgressDlg(0);
 	if (parameters.parentWidget)
 	{
-		normalsProgressDlg.setAutoClose(false);
+		normalsProgressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		normalsProgressDlg->setAutoClose(false);
 	}
 
 	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
@@ -263,11 +265,11 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 		//read points
 		{
-			CCLib::NormalizedProgress nprogress(&pdlg, gridSize);
-			if (parameters.parentWidget)
+			CCLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
+			if (pDlg)
 			{
-				pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
-				pdlg.start();
+				pDlg->setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
+				pDlg->start();
 			}
 
 			bool firstPoint = true;
@@ -482,7 +484,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				//by default we don't compute normals without asking the user
 				if (parameters.autoComputeNormals)
 				{
-					cloud->computeNormalsWithGrids(LS, 2, true, parameters.parentWidget ? &normalsProgressDlg : 0);
+					cloud->computeNormalsWithGrids(LS, 2, true, normalsProgressDlg.data());
 				}
 			}
 

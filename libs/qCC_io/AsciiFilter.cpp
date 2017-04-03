@@ -189,14 +189,15 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	bool writeSF = (theScalarFields.size() != 0);
 
 	//progress dialog
-	ccProgressDialog pdlg(true, parameters.parentWidget);
-	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
-		pdlg.setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
+		pDlg->setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	//output precision
 	const int s_coordPrecision = saveDialog->coordsPrecision();
@@ -340,7 +341,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 
 		stream << line << "\n";
 
-		if (parameters.parentWidget && !nprogress.oneStep())
+		if (pDlg && !nprogress.oneStep())
 		{
 			result = CC_FERR_CANCELED_BY_USER;
 			break;
@@ -375,7 +376,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	if (!parameters.alwaysDisplayLoadDialog)
 	{
 		//we must check that the automatically guessed sequence is ok
-		forceDialogDisplay = !openDialog->safeSequence();
+		forceDialogDisplay = true/*!openDialog->safeSequence()*/;
 	}
 	if (openDialog->restorePreviousContext())
 	{
@@ -712,20 +713,21 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	}
 
 	//progress indicator
-	ccProgressDialog pdlg(true, parameters.parentWidget);
-	CCLib::NormalizedProgress nprogress(&pdlg, approximateNumberOfLines);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Open ASCII file [%1]").arg(filename));
-		pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Open ASCII file [%1]").arg(filename));
+		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
 
 	//buffers
 	ScalarType D = 0;
-	CCVector3d P(0,0,0);
-	CCVector3d Pshift(0,0,0);
-	CCVector3 N(0,0,0);
+	CCVector3d P(0, 0, 0);
+	CCVector3d Pshift(0, 0, 0);
+	CCVector3 N(0, 0, 0);
 	ccColor::Rgb col;
 
 	//other useful variables
@@ -818,10 +820,10 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			}
 
 			//we update the progress info
-			if (parameters.parentWidget)
+			if (pDlg)
 			{
 				nprogress.scale(approximateNumberOfLines, 100, true);
-				pdlg.setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
+				pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 			}
 
 			nextLimit = cloudChunkPos+cloudChunkSize;
@@ -928,7 +930,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i expected)!",linesRead,nParts,maxPartIndex+1);
 		}
 
-		if (parameters.parentWidget && !nprogress.oneStep())
+		if (pDlg && !nprogress.oneStep())
 		{
 			//cancel requested
 			result = CC_FERR_CANCELED_BY_USER;
@@ -949,9 +951,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		//add cloud to output
 		if (!cloudDesc.scalarFields.empty())
 		{
-			for (size_t j=0; j<cloudDesc.scalarFields.size(); ++j)
+			for (size_t j = 0; j < cloudDesc.scalarFields.size(); ++j)
 			{
-				cloudDesc.scalarFields[j]->resize(cloudDesc.cloud->size(),true,NAN_VALUE);
+				cloudDesc.scalarFields[j]->resize(cloudDesc.cloud->size(), true, NAN_VALUE);
 				cloudDesc.scalarFields[j]->computeMinAndMax();
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);

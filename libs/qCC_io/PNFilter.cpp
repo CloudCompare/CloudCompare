@@ -81,14 +81,15 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 						static_cast<float>(s_defaultNorm.z) };
 
 	//progress dialog
-	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
-	if (parameters.parentWidget)
+	QScopedPointer<ccProgressDialog> pDlg(0);
+	if (pDlg)
 	{
-		pdlg.setMethodTitle(QObject::tr("Save PN file"));
-		pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		pDlg->setMethodTitle(QObject::tr("Save PN file"));
+		pDlg->setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -122,7 +123,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 			break;
 		}
 
-		if (parameters.parentWidget && !nprogress.oneStep())
+		if (pDlg && !nprogress.oneStep())
 		{
 			result = CC_FERR_CANCELED_BY_USER;
 			break;
@@ -152,14 +153,15 @@ CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, LoadPar
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
-	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress nprogress(&pdlg, numberOfPoints);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Open PN file"));
-		pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		pDlg->setMethodTitle(QObject::tr("Open PN file"));
+		pDlg->setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	ccPointCloud* loadedCloud = 0;
 	//if the file is too big, it will be chuncked in multiple parts
@@ -222,7 +224,7 @@ CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, LoadPar
 
 		++pointsRead;
 
-		if (parameters.parentWidget && !nprogress.oneStep())
+		if (pDlg && !nprogress.oneStep())
 		{
 			result = CC_FERR_CANCELED_BY_USER;
 			break;

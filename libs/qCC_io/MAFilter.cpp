@@ -129,15 +129,16 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		return CC_FERR_WRITING;
 
 	//progress dialog
-	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	const int coloursAdjustment = (hasColors ? 1 : 0);
-	CCLib::NormalizedProgress nprogress(&pdlg, ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Save MA file"));
-		pdlg.setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		pDlg->setMethodTitle(QObject::tr("Save MA file"));
+		pDlg->setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nprogress(pDlg.data(), ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
 
 	//we extract the (short) filename from the whole path
 	QString baseFilename = QFileInfo(filename).fileName();
@@ -223,7 +224,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 		{
 			const CCVector3* P = theCloud->getPoint(i);
 			CCVector3d Pglobal = theCloud->toGlobal3d<PointCoordinateType>(*P);
-			if (fprintf(fp,(i+1==numberOfVertexes ? "\t\t%f %f %f;\n" : "\t\t%f %f %f\n"),
+			if (fprintf(fp, (i + 1 == numberOfVertexes ? "\t\t%f %f %f;\n" : "\t\t%f %f %f\n"),
 							Pglobal.x,
 							Pglobal.y,
 							Pglobal.z) < 0)
@@ -232,7 +233,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				return CC_FERR_WRITING;
 			}
 
-			if (parameters.parentWidget)
+			if (pDlg)
 			{
 				nprogress.oneStep();
 			}
@@ -242,14 +243,14 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 	//save "edges"
 	edge** theEdges = new edge*[numberOfVertexes];
 	memset(theEdges,0,sizeof(edge*)*numberOfVertexes);
-	unsigned ind[3],a,b;
+	unsigned ind[3], a, b;
 	int lastEdgeIndexPushed = -1;
 
 	int hard = 0; //Maya edges cab be "hard" or "soft" ...
 	{
 
 		theMesh->placeIteratorAtBegining();
-		for (unsigned i=0; i<numberOfTriangles; ++i)
+		for (unsigned i = 0; i < numberOfTriangles; ++i)
 		{
 			const CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 
@@ -280,7 +281,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 					edge* newEdge = new edge;
 					newEdge->nextEdge = NULL;
 					newEdge->theOtherPoint = b;
-					newEdge->positif = (a==ind[k]);
+					newEdge->positif = (a == ind[k]);
 					//newEdge->edgeIndex = ++lastEdgeIndexPushed; //don't write the edge right now
 					newEdge->edgeIndex = 0;
 					++lastEdgeIndexPushed;
@@ -304,7 +305,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				}
 			}
 
-			if (parameters.parentWidget)
+			if (pDlg)
 			{
 				nprogress.oneStep();
 			}
@@ -337,7 +338,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				e = e->nextEdge;
 			}
 
-			if (parameters.parentWidget)
+			if (pDlg)
 			{
 				nprogress.oneStep();
 			}
@@ -400,7 +401,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 				return CC_FERR_WRITING;
 			}
 
-			if (parameters.parentWidget)
+			if (pDlg)
 			{
 				nprogress.oneStep();
 			}
@@ -409,7 +410,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 
 	//free memory
 	{
-		ReleaseEdgeList(theEdges, numberOfVertexes, parameters.parentWidget ? &nprogress : 0);
+		ReleaseEdgeList(theEdges, numberOfVertexes, pDlg ? &nprogress : 0);
 	}
 
 	//bonus track
@@ -468,7 +469,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 					}
 				}
 
-				if (parameters.parentWidget)
+				if (pDlg)
 				{
 					nprogress.oneStep();
 				}
@@ -477,7 +478,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 
 		//for each vertex
 		{
-			for (unsigned i=0; i<numberOfVertexes; ++i)
+			for (unsigned i = 0; i < numberOfVertexes; ++i)
 			{
 				const ColorCompType* c = pc->getPointColor(i);
 				ccColor::Rgbf col(	static_cast<float>(c[0])/ccColor::MAX,
@@ -519,7 +520,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename, SavePara
 					theFacesIndexes[i] = NULL;
 				}
 
-				if (parameters.parentWidget)
+				if (pDlg)
 				{
 					nprogress.oneStep();
 				}

@@ -381,14 +381,15 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	}
 
 	//progress dialog
-	ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-	CCLib::NormalizedProgress nProgress(&pdlg, numberOfPoints);
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Save LAS file"));
-		pdlg.setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		pDlg->setMethodTitle(QObject::tr("Save LAS file"));
+		pDlg->setInfo(QObject::tr("Points: %1").arg(numberOfPoints));
+		pDlg->start();
 	}
+	CCLib::NormalizedProgress nProgress(pDlg.data(), numberOfPoints);
 
 	assert(lasWriter.writer());
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(lasWriter.writer->GetHeader())));
@@ -500,7 +501,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 			break;
 		}
 
-		if (parameters.parentWidget && !nProgress.oneStep())
+		if (pDlg && !nProgress.oneStep())
 		{
 			break;
 		}
@@ -859,14 +860,15 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
 
 		//progress dialog
-		ccProgressDialog pdlg(true, parameters.parentWidget); //cancel available
-		CCLib::NormalizedProgress nProgress(&pdlg, nbOfPoints);
+		QScopedPointer<ccProgressDialog> pDlg(0);
 		if (parameters.parentWidget)
 		{
-			pdlg.setMethodTitle(QObject::tr("Open LAS file"));
-			pdlg.setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
-			pdlg.start();
+			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+			pDlg->setMethodTitle(QObject::tr("Open LAS file"));
+			pDlg->setInfo(QObject::tr("Points: %1").arg(nbOfPoints));
+			pDlg->start();
 		}
+		CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 
 		//number of points read from the beginning of the current cloud part
 		unsigned pointsRead = 0;
@@ -891,7 +893,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			bool newPointAvailable = false;
 			try
 			{
-				newPointAvailable = ((!parameters.parentWidget || nProgress.oneStep()) && reader.ReadNextPoint());
+				newPointAvailable = ((!pDlg || nProgress.oneStep()) && reader.ReadNextPoint());
 			}
 			catch (...)
 			{

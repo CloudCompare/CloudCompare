@@ -88,17 +88,19 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 	if (!file.open(QFile::Text | QFile::WriteOnly))
 		return CC_FERR_WRITING;
 
-	//progress
-	ccProgressDialog pdlg(true, parameters.parentWidget);
 	unsigned numberOfTriangles = mesh->size();
-	CCLib::NormalizedProgress nprogress(&pdlg, numberOfTriangles);
+
+	//progress
+	QScopedPointer<ccProgressDialog> pDlg(0);
 	if (parameters.parentWidget)
 	{
-		pdlg.setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
-		pdlg.setInfo(QObject::tr("Triangles: %1").arg(numberOfTriangles));
-		pdlg.start();
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+		pDlg->setInfo(QObject::tr("Triangles: %1").arg(numberOfTriangles));
+		pDlg->start();
 	}
-	
+	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfTriangles);
+
 	QTextStream stream(&file);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
 	stream.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !vertices->isShifted() ? 8 : 12);
@@ -321,7 +323,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename, SavePar
 				return CC_FERR_WRITING;
 			}
 
-			if (parameters.parentWidget && !nprogress.oneStep()) //cancel requested
+			if (pDlg && !nprogress.oneStep()) //cancel requested
 			{
 				return CC_FERR_CANCELED_BY_USER;
 			}
@@ -453,12 +455,16 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	int maxTriNormIndex = -1;
 
 	//progress dialog
-	ccProgressDialog pDlg(true, parameters.parentWidget);
-	pDlg.setMethodTitle(QObject::tr("OBJ file"));
-	pDlg.setInfo(QObject::tr("Loading in progress..."));
-	pDlg.setRange(0, static_cast<int>(file.size()));
-	pDlg.show();
-	QApplication::processEvents();
+	QScopedPointer<ccProgressDialog> pDlg(0);
+	if (parameters.parentWidget)
+	{
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg->setMethodTitle(QObject::tr("OBJ file"));
+		pDlg->setInfo(QObject::tr("Loading in progress..."));
+		pDlg->setRange(0, static_cast<int>(file.size()));
+		pDlg->show();
+		QApplication::processEvents();
+	}
 
 	//common warnings that can appear multiple time (we avoid to send too many messages to the console!)
 	enum OBJ_WARNINGS {	INVALID_NORMALS		= 0,
@@ -477,15 +483,16 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		QString currentLine = stream.readLine();
 		while (!currentLine.isNull())
 		{
-			if ((++lineCount % 2048) == 0)
+			++lineCount;
+			if (pDlg && ((lineCount % 2048) == 0))
 			{
-				if (pDlg.wasCanceled())
+				if (pDlg->wasCanceled())
 				{
 					error = true;
 					objWarnings[CANCELLED_BY_USER] = true;
 					break;
 				}
-				pDlg.setValue(static_cast<int>(file.pos()));
+				pDlg->setValue(static_cast<int>(file.pos()));
 				QApplication::processEvents();
 			}
 
@@ -1159,7 +1166,10 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		materials = 0;
 	}
 
-	pDlg.close();
+	if (pDlg)
+	{
+		pDlg->close();
+	}
 
 	//potential warnings
 	if (objWarnings[INVALID_NORMALS])

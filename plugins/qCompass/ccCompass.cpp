@@ -422,7 +422,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			if (m_trace->waypoint_count() >= 2)
 			{
 				//check if m_trace has previously fitted planes before optimizing (and delete them if so)
-				for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+				for (unsigned idx = 0; idx < m_trace->getChildrenNumber(); idx++)
 				{
 					ccHObject* child = m_trace->getChild(idx);
 					if (isFitPlane(child)) //we've found a best-fit-plane -> remove this as it will no longer be valid.
@@ -573,7 +573,7 @@ void ccCompass::onAccept()
 
 			//check if a fit-plane already exists (and bail if it does)
 			bool calculateFitPlane = true;
-			for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+			for (unsigned idx = 0; idx < m_trace->getChildrenNumber(); idx++)
 			{
 				ccHObject* child = m_trace->getChild(idx);
 				if (isFitPlane(child)) //we've found a best-fit-plane

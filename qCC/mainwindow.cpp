@@ -8172,7 +8172,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 
 	//look for clouds
 	{
-		for (size_t i=0; i<selNum; ++i)
+		for (size_t i = 0; i < selNum; ++i)
 		{
 			ccHObject* ent = m_selectedEntities[i];
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);

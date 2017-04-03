@@ -61,6 +61,8 @@ protected slots:
 	inline void exportToASCII_xyz() { return exportToASCII(PLP_ASCII_EXPORT_XYZ); }
 	//! Exports list to an 'ixyz' ASCII file
 	inline void exportToASCII_ixyz() { return exportToASCII(PLP_ASCII_EXPORT_IXYZ); }
+	//! Exports list to an 'gxyz' ASCII file
+	inline void exportToASCII_gxyz() { return exportToASCII(PLP_ASCII_EXPORT_GXYZ); }
 	//! Exports list to an 'lxyz' ASCII file
 	inline void exportToASCII_lxyz() { return exportToASCII(PLP_ASCII_EXPORT_LXYZ); }
 
@@ -84,6 +86,7 @@ protected:
 	**/
 	enum ExportFormat {	PLP_ASCII_EXPORT_XYZ,
 						PLP_ASCII_EXPORT_IXYZ,
+						PLP_ASCII_EXPORT_GXYZ,
 						PLP_ASCII_EXPORT_LXYZ
 	};
 

@@ -76,6 +76,9 @@ v2.9.alpha - XX/XX/XXXX
 	* Oculus support
 		- CC now displays in the current 3D view the mirror image of what is displayed in the headset
 
+	* Point List Picking tool
+		- the list can now be exported as a 'global index, x, y, z' text file
+
 	* Other
 		- color scales are now listed in alphabetical order
 

@@ -183,7 +183,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename, SaveP
 	if (cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
-		for (unsigned i=0; i<ccCloud->getNumberOfScalarFields(); ++i)
+		for (unsigned i = 0; i < ccCloud->getNumberOfScalarFields(); ++i)
 			theScalarFields.push_back(static_cast<ccScalarField*>(ccCloud->getScalarField(i)));
 	}
 	bool writeSF = (theScalarFields.size() != 0);
@@ -373,11 +373,15 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 
 	bool forceDialogDisplay = parameters.alwaysDisplayLoadDialog;
 	//if we should try to avoid displaying the dialog
-	if (!parameters.alwaysDisplayLoadDialog)
-	{
-		//we must check that the automatically guessed sequence is ok
-		forceDialogDisplay = true/*!openDialog->safeSequence()*/;
-	}
+	//DGM: actually, we respect the wish of the caller by default ;)
+	//if (!forceDialogDisplay)
+	//{
+	//	//we must check that the automatically guessed sequence is ok
+	//	if (!openDialog->safeSequence())
+	//	{
+	//		forceDialogDisplay = true;
+	//	}
+	//}
 	if (openDialog->restorePreviousContext())
 	{
 		//if we can/should use the previous sequence ('Apply all')
@@ -386,7 +390,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 
 	QString dummyStr;
 	if (	forceDialogDisplay
-		||	!AsciiOpenDlg::CheckOpenSequence(openDialog->getOpenSequence(),dummyStr) )
+		|| !AsciiOpenDlg::CheckOpenSequence(openDialog->getOpenSequence(), dummyStr))
 	{
 		//show the dialog
 		if (!openDialog->exec())

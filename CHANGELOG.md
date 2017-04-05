@@ -60,6 +60,7 @@ v2.9.alpha - XX/XX/XXXX
 		- 2.5D Volume Calculation tool (-VOLUME -GRID_STEP {...} etc. - see the wiki for more details)
 		- Export coord. to SF (-COORD_TO_SF {X, Y or Z})
 		- the progress bar shouldn't appear anymore when loading / saving a file with 'SILENT' mode enabled
+		- the ASCII loading dialog shouldn't appear anymore in 'SILENT' mode (only if CC really can't guess anything)
 
 	* Rasterize tool
 		- new option to re-project contour lines computed on a scalar field (i.e. a layer other than the altitudes)

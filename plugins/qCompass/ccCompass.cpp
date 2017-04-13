@@ -353,10 +353,11 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				//We always consider the normal with a positive 'Z' by default!
 				if (N.z < 0.0)
 					N *= -1.0;
-				//calculate dip/dip direction
-				float strike, dip;
+				//calculate strike/dip/dip direction
+				float strike, dip, dipdir;
+				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
 				ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
-				QString dipAndDipDirStr = QString("%1/%2").arg((int) strike, 3, 10, QChar('0')).arg((int) dip, 2, 10, QChar('0'));
+				QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
 
 				//calculate centroid
 				CCVector3 C = *Z.getGravityCenter();
@@ -364,7 +365,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 				QVariantMap* map = new QVariantMap();
 				map->insert("Cx", C.x); map->insert("Cy", C.y); map->insert("Cz", C.z);
 				map->insert("Nx", N.x); map->insert("Ny", N.y); map->insert("Nz", N.z);
-				map->insert("Strike", strike); map->insert("Dip", dip);
+				map->insert("Strike", strike); map->insert("Dip", dip); map->insert("DipDir", dipdir);
 				map->insert("RMS", rms);
 				map->insert("Radius", m_mouseCircle->getRadiusWorld());
 				pPlane->setMetaData(*map, true);
@@ -422,7 +423,7 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 			if (m_trace->waypoint_count() >= 2)
 			{
 				//check if m_trace has previously fitted planes before optimizing (and delete them if so)
-				for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+				for (unsigned idx = 0; idx < m_trace->getChildrenNumber(); idx++)
 				{
 					ccHObject* child = m_trace->getChild(idx);
 					if (isFitPlane(child)) //we've found a best-fit-plane -> remove this as it will no longer be valid.
@@ -573,7 +574,7 @@ void ccCompass::onAccept()
 
 			//check if a fit-plane already exists (and bail if it does)
 			bool calculateFitPlane = true;
-			for (int idx = 0; idx < m_trace->getChildrenNumber(); idx++)
+			for (unsigned idx = 0; idx < m_trace->getChildrenNumber(); idx++)
 			{
 				ccHObject* child = m_trace->getChild(idx);
 				if (isFitPlane(child)) //we've found a best-fit-plane
@@ -638,111 +639,73 @@ void ccCompass::onSave()
 	QString trace_fn = baseName + "_traces" + ext;
 	QString lineation_fn = baseName + "_lineations" + ext;
 
-	QFile file(plane_fn);
-	if (file.open(QIODevice::WriteOnly))
+	//create files
+	QFile plane_file(plane_fn);
+	QFile trace_file(trace_fn);
+	QFile lineation_file(lineation_fn);
+
+	//open files
+	if (plane_file.open(QIODevice::WriteOnly) && trace_file.open(QIODevice::WriteOnly) && lineation_file.open(QIODevice::WriteOnly))
 	{
-		//create text stream
-		QTextStream stream(&file);
+		//create text streams for each file
+		QTextStream plane_stream(&plane_file);
+		QTextStream trace_stream(&trace_file);
+		QTextStream lineation_stream(&lineation_file);
 
-		//write header
-		stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
+		//write headers
+		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS" << endl;
+		trace_stream << "name,trace_id,point_id,start_x,start_y,start_z,end_x,end_y,end_z" << endl;
+		lineation_stream << "name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge" << endl;
 
-		//write data (n.b. we use a loop here rather than calling writePlanes(...) on dbRoot to avoid including dbRoot in the object name
+		//write data for all objects in the db tree (n.b. we loop through the dbRoots children rathern than just passing db_root so the naming is correct)
 		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
 		{
 			ccHObject* o = m_app->dbRootObject()->getChild(i);
-			planes += writePlanes(o, &stream);
+			planes += writePlanes(o, &plane_stream);
+			traces += writeTraces(o, &trace_stream);
+			lineations += writeLineations(o, &lineation_stream);
 		}
 
 		//cleanup
-		stream.flush();
-		file.close();
+		plane_stream.flush();
+		plane_file.close();
+		trace_stream.flush();
+		trace_file.close();
+		lineation_stream.flush();
+		lineation_file.close();
 
+		//ensure data has been written (and if not, delete the file)
 		if (planes)
 		{
 			m_app->dispToConsole("[ccCompass] Successfully exported plane data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 		}
 		else
 		{
-			//delete if nothing written
-			file.remove();
+			m_app->dispToConsole("[ccCompass] No plane data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			plane_file.remove();
 		}
-	}
-	else
-	{
-		m_app->dispToConsole("[ccCompass] Could not write plane data...", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-	}
-
-	//write trace data
-	QFile t_file(trace_fn);
-	if (t_file.open(QIODevice::WriteOnly))
-	{
-		//create text stream
-		QTextStream stream(&t_file);
-
-		//write header
-		stream << "name,trace_id,point_id,start_x,start_y,start_z,end_x,end_y,end_z" << endl;
-
-		//write data
-		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
-		{
-			ccHObject* o = m_app->dbRootObject()->getChild(i);
-			traces += writeTraces(o, &stream);
-		}
-
-		//cleanup
-		stream.flush();
-		t_file.close();
-
 		if (traces)
 		{
 			m_app->dispToConsole("[ccCompass] Successfully exported trace data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 		}
 		else
 		{
-			//delete if nothing written
-			t_file.remove();
+			m_app->dispToConsole("[ccCompass] No trace data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			trace_file.remove();
 		}
-	}
-	else
-	{
-		m_app->dispToConsole("[ccCompass] Could not write trace data...", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-	}
-
-	//write lineation data
-	QFile l_file(lineation_fn);
-	if (l_file.open(QIODevice::WriteOnly))
-	{
-		//create text stream
-		QTextStream stream(&l_file);
-
-		//write header
-		stream << "name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge" << endl;
-
-		//write data
-		for (unsigned i = 0; i < m_app->dbRootObject()->getChildrenNumber(); i++)
-		{
-			ccHObject* o = m_app->dbRootObject()->getChild(i);
-			lineations += writeLineations(o, &stream);
-		}
-
-		//cleanup
-		stream.flush();
-		l_file.close();
-
 		if (lineations)
 		{
 			m_app->dispToConsole("[ccCompass] Successfully exported lineation data.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 		}
 		else
 		{
-			//delete if nothing written
-			l_file.remove();
+			m_app->dispToConsole("[ccCompass] No lineation data found.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			lineation_file.remove();
 		}
 	}
 	else
 	{
-		m_app->dispToConsole("[ccCompass] Could not write lineation data...", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		m_app->dispToConsole("[ccCompass] Could not open output files... ensure CC has write access to this location.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 }
 
@@ -766,10 +729,35 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 	{
 		//Write object as Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Radius,RMS
 		*out << name << ",";
-		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("Strike").toFloat() + 90 << ",";
+		*out << object->getMetaData("Strike").toString() << "," << object->getMetaData("Dip").toString() << "," << object->getMetaData("DipDir").toString() << ",";
 		*out << object->getMetaData("Cx").toString() << "," << object->getMetaData("Cy").toString() << "," << object->getMetaData("Cz").toString() << ",";
 		*out << object->getMetaData("Nx").toString() << "," << object->getMetaData("Ny").toString() << "," << object->getMetaData("Nz").toString() << ",";
 		*out << object->getMetaData("Radius").toString() << "," << object->getMetaData("RMS").toString() << endl;
+		n++;
+	}
+	else if (object->isKindOf(CC_TYPES::PLANE)) //not one of our planes, but a plane anyway (so we'll export it)
+	{
+		//calculate plane orientation
+		//get plane normal vector
+		ccPlane* P = static_cast<ccPlane*>(object);
+		CCVector3 N(P->getNormal());
+		CCVector3 L = P->getTransformation().getTranslationAsVec3D();
+
+		//We always consider the normal with a positive 'Z' by default!
+		if (N.z < 0.0)
+			N *= -1.0;
+
+		//calculate strike/dip/dip direction
+		float strike, dip, dipdir;
+		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
+		ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
+
+		//export
+		*out << name << ",";
+		*out << strike << "," << dip << "," << dipdir << ","; //write orientation
+		*out << L.x << "," << L.y << "," << L.z << ","; //write location
+		*out << N.x << "," << N.y << "," << N.z << ","; //write normal
+		*out << "NA" << "," << "UNK" << endl; //the "radius" and "RMS" are unknown
 		n++;
 	}
 
@@ -779,7 +767,6 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, QString parentNa
 		ccHObject* o = object->getChild(i);
 		n += writePlanes(o, out, name);
 	}
-
 	return n;
 }
 
@@ -800,7 +787,7 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 	//is object a polyline
 	int tID = object->getUniqueID();
 	int n = 0;
-	if (isTrace(object)) //ensure this is a ccTrace
+	if (object->isKindOf(CC_TYPES::POLY_LINE)) //ensure this is a polyline
 	{
 		ccPolyline* p = static_cast<ccPolyline*>(object);
 
@@ -835,7 +822,6 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, QString parentNa
 		ccHObject* o = object->getChild(i);
 		n += writeTraces(o, out, name);
 	}
-
 	return n;
 }
 
@@ -892,6 +878,7 @@ bool ccCompass::isFitPlane(ccHObject* object)
 		&& object->hasMetaData("Nz")
 		&& object->hasMetaData("Strike")
 		&& object->hasMetaData("Dip")
+		&& object->hasMetaData("DipDir")
 		&& object->hasMetaData("RMS")
 		&& object->hasMetaData("Radius");
 }

@@ -11,7 +11,7 @@ of a good field geologist (armed with a trusty compass and notebook), but requir
 <h2>Plane Tool: Measure surface orientations</h2>
 <p>The plane tool is used to measure the orientations of fully exposed planar structures, such as joint or bedding surfaces. 
 When it is activated, a red circle is shown in the 3D window. On picking a point in the virtual outcrop model (<i>left-click</i>), 
-a plane is fitted to all points sitting within the circle (using least squares), giving an orientation estimate (strike/dip). The circle radius 
+a plane is fitted to all points sitting within the circle (using least squares), giving an orientation estimate (dip/dip direction). The circle radius 
 can be changed with <i>ctrl-scroll weel</i>. Note that for this to work correctly, Cloud Compare needs to be using orthographic projection 
 (<i>Display->Toggle Centered Perspective</i>).</p>
 
@@ -46,7 +46,7 @@ quickly digitised as multiple segments). Asking the tool to find long traces may
 <p>A plane is fitted to each trace (using least squares) when it is finalized (<i>green tick</i>), though note that this plane is rejected if 
 points on the trace are approximately co-linear. Furthermore, if the point cloud being interpreted has previously calculated 
 point normals, best-fit planes are also rejected if they fall within 10 degrees of the average surface orientation along the trace. 
-Plane fitting can be enabled/disabled in the <i>algorithm</i> menu (settings icon). Plane orientations are expressed using the strike/dip RHR convention.</p>
+Plane fitting can be enabled/disabled in the <i>algorithm</i> menu (settings icon). Plane orientations are expressed using the dip/dip direction convention.</p>
 
 <h2>Lineation Tool: Measure lineations</h2>
 <p>This tool measures the trend and plunge of a (straight) line between two points. <i>Left-click</i> selects points (as above). </p>
